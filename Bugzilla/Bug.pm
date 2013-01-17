@@ -1462,8 +1462,13 @@ sub _check_component {
     $name || ThrowUserError("require_component");
     my $product = blessed($invocant) ? $invocant->product_obj 
                                      : $params->{product};
-    my $obj = Bugzilla::Component->check({ product => $product, name => $name });
-    return $obj;
+    my $old_comp = blessed($invocant) ? $invocant->component
+                                      : $params->{component};
+    my $object = Bugzilla::Component->check({ product => $product, name => $name });
+    if ($object->name ne $old_comp && !$object->is_active) {
+        ThrowUserError('value_inactive', { class => ref($object), value => $name });
+    }
+    return $object;
 }
 
 sub _check_creation_ts {
@@ -1905,10 +1910,15 @@ sub _check_target_milestone {
     my ($invocant, $target, undef, $params) = @_;
     my $product = blessed($invocant) ? $invocant->product_obj 
                                      : $params->{product};
+    my $old_target = blessed($invocant) ? $invocant->target_milestone
+                                        : $params->{target_milestone};
     $target = trim($target);
     $target = $product->default_milestone if !defined $target;
     my $object = Bugzilla::Milestone->check(
         { product => $product, name => $target });
+    if ($object->name ne $old_target && !$object->is_active) {
+        ThrowUserError('value_inactive', { class => ref($object),  value => $target });
+    }
     return $object->name;
 }
 
@@ -1931,8 +1941,12 @@ sub _check_version {
     $version = trim($version);
     my $product = blessed($invocant) ? $invocant->product_obj 
                                      : $params->{product};
-    my $object = 
-        Bugzilla::Version->check({ product => $product, name => $version });
+    my $old_vers = blessed($invocant) ? $invocant->version
+                                      : $params->{version};
+    my $object = Bugzilla::Version->check({ product => $product, name => $version });
+    if ($object->name ne $old_vers && !$object->is_active) {
+        ThrowUserError('value_inactive', { class => ref($object), value => $version });
+    }
     return $object->name;
 }
 
@@ -2467,9 +2481,9 @@ sub _set_product {
                 milestone => $milestone_ok ? $self->target_milestone
                                            : $product->default_milestone
             };
-            $vars{components} = [map { $_->name } @{$product->components}];
-            $vars{milestones} = [map { $_->name } @{$product->milestones}];
-            $vars{versions}   = [map { $_->name } @{$product->versions}];
+            $vars{components} = [map { $_->name } grep($_->is_active, @{$product->components})];
+            $vars{milestones} = [map { $_->name } grep($_->is_active, @{$product->milestones})];
+            $vars{versions}   = [map { $_->name } grep($_->is_active, @{$product->versions})];
         }
 
         if (!$verified) {

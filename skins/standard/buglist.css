@@ -114,3 +114,18 @@ td.bz_total {
 .bz_short_desc_column a, .bz_short_short_desc_column a {
     color: inherit;
 }
+
+/* The "filtering" table is specific to request.cgi.
+ * Same for the "requests" class used for tables. */
+
+#filtering #requester, #filtering #requestee {
+    min-width: 8em;
+}
+
+#filtering th {
+    text-align: right;
+}
+
+table.requests th {
+    text-align: left;
+}

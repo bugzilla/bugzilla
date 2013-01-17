@@ -11,10 +11,6 @@
 
 [% PROCESS global/header.html.tmpl
   title="Request Queue"
-  style = "
-    table.requests th { text-align: left; }
-    table#filtering th { text-align: right; }
-  "
   onload="var f = document.request_form; selectProduct(f.product, f.component, null, null, 'Any');"
   javascript_urls=["js/productform.js", "js/field.js"]
   style_urls = ['skins/standard/buglist.css']

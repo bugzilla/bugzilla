@@ -1916,7 +1916,7 @@ sub _check_target_milestone {
     $target = $product->default_milestone if !defined $target;
     my $object = Bugzilla::Milestone->check(
         { product => $product, name => $target });
-    if ($object->name ne $old_target && !$object->is_active) {
+    if ($old_target && $object->name ne $old_target && !$object->is_active) {
         ThrowUserError('value_inactive', { class => ref($object),  value => $target });
     }
     return $object->name;

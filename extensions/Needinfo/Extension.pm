@@ -107,6 +107,15 @@ sub bug_start_of_update {
                 $needinfo_flag->{requestee} = $needinfo_from;
             }
 
+            # Find out if the requestee has already been used and skip if so
+            my $requestee_found;
+            foreach my $flag (@{ $type->{flags} }) {
+                next if $flag->requestee->login ne $needinfo_flag->{requestee};
+                $requestee_found = 1;
+                last;
+            }
+            next if $requestee_found;
+
             if ($needinfo) {
                 push(@new_flags, $needinfo_flag);
                 last;

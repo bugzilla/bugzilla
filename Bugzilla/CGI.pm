@@ -353,7 +353,7 @@ sub param {
 sub _fix_utf8 {
     my $input = shift;
     # The is_utf8 is here in case CGI gets smart about utf8 someday.
-    utf8::decode($input) if defined $input && !utf8::is_utf8($input);
+    utf8::decode($input) if defined $input && !ref $input && !utf8::is_utf8($input);
     return $input;
 }
 

@@ -57,15 +57,15 @@ sub bug_start_of_update {
     my $cgi    = Bugzilla->cgi;
     my $params = Bugzilla->input_params;
 
+    # do a match if applicable
+    Bugzilla::User::match_field({
+        'needinfo_from' => { 'type' => 'single' }
+    });
+
     # Set needinfo_done param to true so as to not loop back here
     return if $params->{needinfo_done};
     $params->{needinfo_done} = 1;
     Bugzilla->input_params($params);
-
-    # do a match if applicable
-    Bugzilla::User::match_field({ 
-        'needinfo_from' => { 'type' => 'single' }
-    });
 
     my $needinfo      = delete $params->{needinfo};
     my $needinfo_from = delete $params->{needinfo_from};

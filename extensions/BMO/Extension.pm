@@ -1019,6 +1019,10 @@ sub buglist_columns {
         name => '(SELECT COUNT(*) FROM cc WHERE cc.bug_id = bugs.bug_id)',
         title => 'CC Count',
     };
+    $columns->{'dupe_count'} = {
+        name => '(SELECT COUNT(*) FROM duplicates WHERE duplicates.dupe_of = bugs.bug_id)',
+        title => 'Duplicate Count',
+    };
 }
 
 sub query_database {

@@ -23,6 +23,10 @@
     text-align: left;
 }
 
+#report th.right {
+    text-align: right;
+}
+
 #report th.sorted {
     text-decoration: underline;
 }
@@ -41,7 +45,7 @@
     color: #000000;
 }
 
-#report tr:hover {
+#report.hover tr:hover {
     background-color: #ccccff;
 }
 
@@ -55,4 +59,8 @@
 
 .disabled {
     color: #888888;
+}
+
+.hoverrow tr:hover {
+    background-color: #ccccff;
 }

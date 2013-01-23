@@ -62,7 +62,8 @@ use Bugzilla::Extension::BMO::Reports qw(user_activity_report
                                          group_admins_report
                                          email_queue_report
                                          release_tracking_report
-                                         group_membership_report);
+                                         group_membership_report
+                                         group_members_report);
 
 our $VERSION = '0.1';
 
@@ -179,6 +180,9 @@ sub page_before_template {
     }
     elsif ($page eq 'group_membership.html' or $page eq 'group_membership.txt') {
         group_membership_report($page, $vars);
+    }
+    elsif ($page eq 'group_members.html' or $page eq 'group_members.json') {
+        group_members_report($vars);
     }
     elsif ($page eq 'email_queue.html') {
         email_queue_report($vars);

@@ -1,0 +1,97 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% INCLUDE global/header.html.tmpl
+  title = "Group Members Report"
+  style_urls = [ "extensions/BMO/web/styles/reports.css" ]
+%]
+
+<form method="GET" action="page.cgi">
+  <input type="hidden" name="id" value="group_members.html">
+
+  <table id="parameters">
+  <tr>
+    <th>Group</th>
+    <td>
+      <select name="group">
+        [% FOREACH group_name = groups %]
+          <option value="[% group_name FILTER html %]"
+                  [% "selected" IF group_name == group %]>
+            [% group_name FILTER html %]</option>
+        [% END %]
+      </select>
+      <input type="checkbox" name="include_disabled" id="include_disabled"
+             value="1" [% "checked" IF include_disabled %]>
+      <label for="include_disabled">
+        Include disabled users
+      </label>
+      <input type="submit" value="Generate">
+    </td>
+  </tr>
+  </table>
+</form>
+
+[% IF group != '' %]
+
+  <p>
+    Members of the <b>[% group FILTER html %]</b> group:
+  </p>
+
+  [% IF types.size > 0 %]
+    <table border="0" cellspacing="0" id="report" class="nohover" width="100%">
+      <tr id="report-header">
+        <th>Type</th>
+        <th>Count</th>
+        <th>Members</th>
+        <th class="right">Last Seen (days ago)</th>
+      </tr>
+
+      [% FOREACH type = types %]
+        [% count = loop.count() %]
+        <tr class="report_item [% count % 2 == 1 ? "report_row_odd" : "report_row_even" %]">
+          <td valign="top">
+            [% "via&nbsp;" UNLESS type.name == 'direct' %]
+            [% type.name FILTER html %]
+          </td>
+          <td valign="top" align="right">
+            [% type.members.size FILTER html %]
+          </td>
+          <td valign="top" width="100%" colspan="2">
+            <table cellspacing="0" class="hoverrow">
+              [% FOREACH member = type.members %]
+                <tr>
+                  <td width="100%">
+                    <a href="editusers.cgi?action=edit&amp;userid=[% member.id FILTER none %]"
+                      target="_blank">
+                      <span [% 'class="bz_inactive"' UNLESS member.is_enabled %]>
+                        [% member.name FILTER html %] &lt;[% member.email FILTER email FILTER html %]&gt;
+                      </span>
+                    </a>
+                  </td>
+                  <td align="right" nowrap>
+                    [% member.lastseen FILTER html %]
+                  </td>
+                </tr>
+              [% END %]
+            </table>
+          </td>
+        </tr>
+      [% END %]
+    </table>
+
+    <a href="page.cgi?id=group_members.json&amp;group=[% group FILTER uri %]
+       [% IF include_disabled %]&amp;include_disabled=1[% END %]">JSON</a>
+  [% ELSE %]
+    <p>
+      <i>This group is empty.</i>
+    </p>
+  [% END %]
+
+[% END %]
+
+[% INCLUDE global/footer.html.tmpl %]

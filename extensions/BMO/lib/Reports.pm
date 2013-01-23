@@ -13,6 +13,7 @@ use Bugzilla::Extension::BMO::Data qw($cf_disabled_flags);
 use Bugzilla::Constants;
 use Bugzilla::Error;
 use Bugzilla::Field;
+use Bugzilla::Group;
 use Bugzilla::User;
 use Bugzilla::Util qw(trim detaint_natural trick_taint correct_urlbase);
 
@@ -28,7 +29,8 @@ our @EXPORT_OK = qw(user_activity_report
                     group_admins_report
                     email_queue_report
                     release_tracking_report
-                    group_membership_report);
+                    group_membership_report
+                    group_members_report);
 
 sub user_activity_report {
     my ($vars) = @_;
@@ -559,9 +561,9 @@ sub group_admins_report {
     my $dbh = Bugzilla->dbh;
     my $user = Bugzilla->user;
 
-    $user->in_group('editusers')
-        || ThrowUserError('auth_failure', { group  => 'editusers', 
-                                            action => 'run', 
+    ($user->in_group('editusers') || $user->in_group('infrasec'))
+        || ThrowUserError('auth_failure', { group  => 'editusers',
+                                            action => 'run',
                                             object => 'group_admins' });
 
     my $query = "
@@ -598,8 +600,8 @@ sub group_membership_report {
     my $cgi = Bugzilla->cgi;
 
     ($user->in_group('editusers') || $user->in_group('infrasec'))
-        || ThrowUserError('auth_failure', { group  => 'editusers', 
-                                            action => 'run', 
+        || ThrowUserError('auth_failure', { group  => 'editusers',
+                                            action => 'run',
                                             object => 'group_admins' });
 
     my $who = $cgi->param('who');
@@ -691,6 +693,92 @@ sub group_membership_report {
 
     $vars->{'who'} = $who;
     $vars->{'users'} = \@users;
+}
+
+sub group_members_report {
+    my ($vars) = @_;
+    my $dbh = Bugzilla->dbh;
+    my $user = Bugzilla->user;
+    my $cgi = Bugzilla->cgi;
+
+    ($user->in_group('editusers') || $user->in_group('infrasec'))
+        || ThrowUserError('auth_failure', { group  => 'editusers',
+                                            action => 'run',
+                                            object => 'group_admins' });
+
+    my $include_disabled = $cgi->param('include_disabled') ? 1 : 0;
+    $vars->{'include_disabled'} = $include_disabled;
+
+    # don't allow all groups, to avoid putting pain on the servers
+    my @group_names =
+        sort
+        grep { !/^(?:bz_.+|canconfirm|editbugs|everyone)$/ }
+        map { lc($_->name) }
+        Bugzilla::Group->get_all;
+    unshift(@group_names, '');
+    $vars->{'groups'} = \@group_names;
+
+    # load selected group
+    my $group = lc(trim($cgi->param('group') // ''));
+    $group = '' unless grep { $_ eq $group } @group_names;
+    return if $group eq '';
+    my $group_obj = Bugzilla::Group->new({ name => $group });
+    $vars->{'group'} = $group;
+
+    # direct members
+    my @types = (
+        {
+            name    => 'direct',
+            members => _filter_userlist($group_obj->members_direct, $include_disabled),
+        },
+    );
+
+    # indirect members, by group
+    foreach my $member_group (sort @{ $group_obj->grant_direct(GROUP_MEMBERSHIP) }) {
+        push @types, {
+            name    => $member_group->name,
+            members => _filter_userlist($member_group->members_direct, $include_disabled),
+        },
+    }
+
+    # make it easy for the template to detect an empty group
+    my $has_members = 0;
+    foreach my $type (@types) {
+        $has_members += scalar(@{ $type->{members} });
+        last if $has_members;
+    }
+    @types = () unless $has_members;
+
+    if (@types) {
+        # add last-login
+        my $user_ids = join(',', map { map { $_->id } @{ $_->{members} } } @types);
+        my $tokens = $dbh->selectall_hashref("
+            SELECT profiles.userid,
+                (SELECT DATEDIFF(curdate(), logincookies.lastused) lastseen
+                   FROM logincookies
+                  WHERE logincookies.userid = profiles.userid
+                  ORDER BY lastused DESC
+                  LIMIT 1) lastseen
+            FROM profiles
+            WHERE userid IN ($user_ids)",
+            'userid');
+        foreach my $type (@types) {
+            foreach my $member (@{ $type->{members} }) {
+                $member->{lastseen} = 
+                    defined $tokens->{$member->id}->{lastseen}
+                    ? $tokens->{$member->id}->{lastseen}
+                    : '>' . MAX_LOGINCOOKIE_AGE;
+            }
+        }
+    }
+
+    $vars->{'types'} = \@types;
+}
+
+sub _filter_userlist {
+    my ($list, $include_disabled) = @_;
+    $list = [ grep { $_->is_enabled } @$list ] unless $include_disabled;
+    return [ sort { lc($a->identity) cmp lc($b->identity) } @$list ];
 }
 
 sub email_queue_report {

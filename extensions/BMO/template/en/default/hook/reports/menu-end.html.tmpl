@@ -24,18 +24,21 @@
       <a href="[% urlbase FILTER none %]page.cgi?id=release_tracking_report.html">Release Tracking Report</a>
     </strong> - For triaging release-train flag information.
   </li>
-  [% IF user.in_group('editusers') %]
+  [% IF user.in_group('editusers') || user.in_group('infrasec') %]
     <li>
       <strong>
         <a href="[% urlbase FILTER none %]page.cgi?id=group_admins.html">Group Admins</a>
-      </strong> - Group Admins Report
+      </strong> - Lists the administrators of each group.
     </li>
-  [% END %]
-  [% IF user.in_group('editusers') || user.in_group('infrasec') %]
     <li>
       <strong>
         <a href="[% urlbase FILTER none %]page.cgi?id=group_membership.html">Group Membership Report</a>
       </strong> - Lists the groups a user is a member of.
+    </li>
+    <li>
+      <strong>
+        <a href="[% urlbase FILTER none %]page.cgi?id=group_members.html">Group Members Report</a>
+      </strong> - Lists the users of groups.
     </li>
   [% END %]
   [% IF user.in_group('admin') || user.in_group('infra') %]

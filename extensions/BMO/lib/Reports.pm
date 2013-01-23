@@ -719,7 +719,7 @@ sub group_members_report {
     $vars->{'groups'} = \@group_names;
 
     # load selected group
-    my $group = lc(trim($cgi->param('group') // ''));
+    my $group = lc(trim($cgi->param('group') || ''));
     $group = '' unless grep { $_ eq $group } @group_names;
     return if $group eq '';
     my $group_obj = Bugzilla::Group->new({ name => $group });

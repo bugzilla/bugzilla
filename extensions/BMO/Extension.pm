@@ -28,6 +28,7 @@ use base qw(Bugzilla::Extension);
 use Bugzilla::Field;
 use Bugzilla::Constants;
 use Bugzilla::Status;
+use Bugzilla::Product;
 use Bugzilla::User;
 use Bugzilla::User::Setting;
 use Bugzilla::Util qw(html_quote trick_taint trim datetime_from detaint_natural);
@@ -123,18 +124,24 @@ sub template_before_process {
 
         $vars->{'columns_sortkey'} = \%columns_sortkey;
     }
-    elsif ($file =~ /^bug\/create\/create[\.-]/) {
+    elsif ($file =~ /^bug\/create\/create[\.-](.*)/) {
+        my $format = $1;
         if (!$vars->{'cloned_bug_id'}) {
             # Allow status whiteboard values to be bookmarked
             $vars->{'status_whiteboard'} = 
                                Bugzilla->cgi->param('status_whiteboard') || "";
         }
-       
+
         # Purpose: for pretty product chooser
         $vars->{'format'} = Bugzilla->cgi->param('format');
 
         # Data needed for "this is a security bug" checkbox
         $vars->{'sec_groups'} = \%product_sec_groups;
+
+        if ($format eq 'doc.html.tmpl') {
+            my $versions = Bugzilla::Product->new({ name => 'Core' })->versions;
+            $vars->{'versions'} = [ reverse @$versions ];
+        }
     }
 
 

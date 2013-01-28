@@ -1,0 +1,155 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% PROCESS global/variables.none.tmpl %]
+
+[% inline_style = BLOCK %]
+#doc_form th {
+  text-align: right;
+}
+
+#short_desc, #details {
+  width: 100%;
+}
+[% END %]
+
+[% inline_javascript = BLOCK %]
+function validateAndSubmit() {
+  var alert_text = '';
+  if (!isFilledOut('type')) alert_text += 'Please select the "Request Type".\n';
+  if (!isFilledOut('short_desc')) alert_text += 'Please enter a "Summary".\n';
+  if (!isFilledOut('gecko')) alert_text += 'Please select the "Gecko Version".\n';
+  if (!isFilledOut('details')) alert_text += 'Please enter some "Details".\n';
+  if (alert_text != '') {
+    alert(alert_text);
+    return false;
+  }
+  return true;
+}
+[% END %]
+
+[% PROCESS global/header.html.tmpl
+   title = "Developer Documentation Request"
+   style = inline_style
+   javascript = inline_javascript
+   javascript_urls = [ 'extensions/BMO/web/js/form_validate.js',
+                       'js/field.js', 'js/util.js' ]
+%]
+
+<h1>Developer Documentation Request</h1>
+
+<p>
+  Use this form to request <b>new documentation</b> or <b>corrections</b> to existing documentation.<br>
+  All fields except for the <i>Development [% terms.Bug %]</i> are mandatory.
+</p>
+
+<form method="post" action="post_bug.cgi" enctype="multipart/form-data"
+      onSubmit="return validateAndSubmit();">
+  <input type="hidden" name="format" value="doc">
+  <input type="hidden" name="product" value="Developer Documentation">
+  <input type="hidden" name="rep_platform" value="All">
+  <input type="hidden" name="op_sys" value="Other">
+  <input type="hidden" name="version" value="unspecified">
+  <input type="hidden" name="bug_severity" id="bug_severity" value="normal">
+  <input type="hidden" name="token" value="[% token FILTER html %]">
+
+<table id="doc_form">
+
+<tr>
+  <th>Request Type</th>
+  <td>
+    <select name="type" id="type">
+      <option value="">Please select..</option>
+      <option value="New Documentation">New Documentation</option>
+      <option value="Correction">Correction</option>
+    </select>
+  </td>
+</tr>
+
+<tr>
+  <th>Topic</th>
+  <td>
+    <select name="component" id="component">
+      [% FOREACH component = product.components %]
+        <option value="[% component.name FILTER html %]"
+                [% " selected" IF component.name == "General" %]>
+          [% component.name FILTER html %]
+        </option>
+      [% END %]
+    </select>
+  </td>
+</tr>
+
+<tr>
+  <th>Summary</th>
+  <td>
+    Please provide a brief summary of what documentation you're requesting, or
+    what problem you're reporting in existing documentation:<br>
+    <input type="text" name="short_desc" id="short_desc">
+  </td>
+</tr>
+
+<tr>
+  <th>Gecko Version</th>
+  <td>
+    <select name="gecko" id="gecko">
+      [% FOREACH version = versions %]
+        <option value="[% version.name FILTER html %]"
+                [% " selected" IF version.name == "unspecified" %]>
+          [% version.name FILTER html %]
+        </option>
+      [% END %]
+    </select>
+  </td>
+</tr>
+
+<tr>
+  <th>Details</th>
+  <td>
+    <textarea id="details" name="details" cols="50" rows="10"></textarea>
+  </td>
+</tr>
+
+<tr>
+  <th>Development [% terms.Bug %]</th>
+  <td>
+    <input type="text" id="blocked" name="blocked" size="10">
+    <i>Optional</i> &mdash; Corresponding development [% terms.bug %].
+  </td>
+</tr>
+
+<tr>
+  <th>Urgency</th>
+  <td>
+    <select name="priority" id="priority">
+      <option value="P1">Immediately</option>
+      <option value="P2">Before Release</option>
+      <option value="P3">Before Aurora</option>
+      <option value="P4">Before Beta</option>
+      <option value="P5" selected>No Rush</option>
+    </select>
+    <br>
+    Due to the volume of requests, the documentation team can't commit to
+    meeting specific deadlines for given documentation requests, but we will do
+    our best.
+  </td>
+</tr>
+
+<tr>
+  <td>&nbsp;</td>
+</tr>
+
+<tr>
+  <td>&nbsp;</td>
+  <td><input type="submit" id="commit" value="Submit Request"></td>
+</tr>
+
+</table>
+</form>
+
+[% PROCESS global/footer.html.tmpl %]

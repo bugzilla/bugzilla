@@ -42,6 +42,8 @@ RewriteRule ^form[\.:]reps[\.:]budget$ enter_bug.cgi?product=Mozilla+Reps&format
 RewriteRule ^form[\.:]reps[\.:]swag$ enter_bug.cgi?product=Mozilla+Reps&format=remo-swag
 RewriteRule ^form[\.:]reps[\.:]payment$ page.cgi?id=remo-form-payment.html
 RewriteRule ^form[\.:]employee[\.\-:]incident$ enter_bug.cgi?product=mozilla.org&format=employee-incident
-RewriteRule ^form[\.:]brownbag$ enter_bug.cgi?product=Air\ Mozilla&format=brownbag
+RewriteRule ^form[\.:]brownbag$ enter_bug.cgi?product=Air+Mozilla&format=brownbag
 RewriteRule ^form[\.:]finance$ enter_bug.cgi?product=Finance&format=finance
 RewriteRule ^form[\.:]privacy[\.\-:]data$ enter_bug.cgi?product=Privacy&format=privacy-data
+RewriteRule ^form[\.:]moz[\.\-:]project[\.\-:]review$ enter_bug.cgi?product=mozilla.org&format=moz-project-review
+RewriteRule ^form[\.:]docs?$ enter_bug.cgi?product=Developer+Documentation&format=doc

@@ -82,7 +82,8 @@ sub post_bug_after_creation {
     }
 
     my ($sec_review_bug, $legal_bug, $finance_bug, $privacy_vendor_bug,
-        $data_safety_bug, $privacy_tech_bug, $privacy_policy_bug);
+        $data_safety_bug, $privacy_tech_bug, $privacy_policy_bug,
+        @dep_bug_comment);
 
     eval {
         if ($do_sec_review) {
@@ -99,6 +100,7 @@ sub post_bug_after_creation {
                 blocked      => $bug->bug_id,
             };
             $sec_review_bug = _file_child_bug($bug, $vars, 'sec-review', $bug_data);
+            push(@dep_bug_comment, "Bug " . $sec_review_bug->id . " - " . $sec_review_bug->short_desc);
         }
 
         if ($do_legal) {
@@ -132,7 +134,7 @@ sub post_bug_after_creation {
                 cc           => $params->{'legal_cc'},
             };
             $legal_bug = _file_child_bug($bug, $vars, 'legal', $bug_data);
-
+            push(@dep_bug_comment, "Bug " . $legal_bug->id . " - " . $legal_bug->short_desc);
         }
 
         if ($do_finance) {
@@ -149,6 +151,7 @@ sub post_bug_after_creation {
                 blocked      => $bug->bug_id,
             };
             $finance_bug = _file_child_bug($bug, $vars, 'finance', $bug_data);
+            push(@dep_bug_comment, "Bug " . $finance_bug->id . " - " . $finance_bug->short_desc);
         }
 
         if ($do_data_safety) {
@@ -165,6 +168,7 @@ sub post_bug_after_creation {
                 blocked      => $bug->bug_id,
             };
             $data_safety_bug = _file_child_bug($bug, $vars, 'data-safety', $bug_data);
+            push(@dep_bug_comment, "Bug " . $data_safety_bug->id . " - " . $data_safety_bug->short_desc);
         }
 
         if ($do_privacy_tech) {
@@ -182,6 +186,7 @@ sub post_bug_after_creation {
                 blocked      => $bug->bug_id,
             };
             $privacy_tech_bug = _file_child_bug($bug, $vars, 'privacy-tech', $bug_data);
+            push(@dep_bug_comment, "Bug " . $privacy_tech_bug->id . " - " . $privacy_tech_bug->short_desc);
         }
 
         if ($do_privacy_policy) {
@@ -198,6 +203,7 @@ sub post_bug_after_creation {
                 blocked      => $bug->bug_id,
             };
             $privacy_policy_bug = _file_child_bug($bug, $vars, 'privacy-policy', $bug_data);
+            push(@dep_bug_comment, "Bug " . $privacy_policy_bug->id . " - " . $privacy_policy_bug->short_desc);
         }
 
         if ($do_privacy_vendor) {
@@ -214,6 +220,7 @@ sub post_bug_after_creation {
                 blocked      => $bug->bug_id,
             };
             $privacy_vendor_bug = _file_child_bug($bug, $vars, 'privacy-vendor', $bug_data);
+            push(@dep_bug_comment, "Bug " . $privacy_vendor_bug->id . " - " . $privacy_vendor_bug->short_desc);
         }
     };
 
@@ -232,6 +239,11 @@ sub post_bug_after_creation {
         warn "Failed to create additional moz-project-review bugs: $error" if $error;
         $vars->{message} = 'moz_project_review_creation_failed';
         $vars->{message_error} = $error;
+    }
+
+    if (scalar @dep_bug_comment) {
+        $bug->add_comment(join("\n", @dep_bug_comment));
+        $bug->update();
     }
 }
 

@@ -19,6 +19,9 @@ use strict;
 
 package Bugzilla::Attachment::PatchReader;
 
+use IPC::Open3;
+use Symbol 'gensym';
+
 use Bugzilla::Error;
 use Bugzilla::Attachment;
 use Bugzilla::Util;
@@ -109,8 +112,22 @@ sub process_interdiff {
     # Send through interdiff, send output directly to template.
     # Must hack path so that interdiff will work.
     $ENV{'PATH'} = $lc->{diffpath};
-    open my $interdiff_fh, "$lc->{interdiffbin} $old_filename $new_filename|";
-    binmode $interdiff_fh;
+
+    my ($interdiff_stdout, $interdiff_stderr);
+    $interdiff_stderr = gensym;
+    my $pid = open3(gensym, $interdiff_stdout, $interdiff_stderr,
+                    $lc->{interdiffbin}, $old_filename, $new_filename);
+    binmode $interdiff_stdout;
+
+    # Check for errors
+    {
+        local $/ = undef;
+        if (defined(my $error = <$interdiff_stderr>)) {
+            warn($error);
+            $warning = 'interdiff3';
+        }
+    }
+
     my ($reader, $last_reader) = setup_patch_readers("", $context);
 
     if ($format eq 'raw') {
@@ -123,7 +140,7 @@ sub process_interdiff {
     }
     else {
         # In case the HTML page is displayed with the UTF-8 encoding.
-        binmode $interdiff_fh, ':utf8' if Bugzilla->params->{'utf8'};
+        binmode $interdiff_stdout, ':utf8' if Bugzilla->params->{'utf8'};
 
         $vars->{'warning'} = $warning if $warning;
         $vars->{'bugid'} = $new_attachment->bug_id;
@@ -134,9 +151,9 @@ sub process_interdiff {
 
         setup_template_patch_reader($last_reader, $format, $context, $vars);
     }
-    $reader->iterate_fh($interdiff_fh, 'interdiff #' . $old_attachment->id .
+    $reader->iterate_fh($interdiff_stdout, 'interdiff #' . $old_attachment->id .
                         ' #' . $new_attachment->id);
-    close $interdiff_fh;
+    waitpid($pid, 0);
     $ENV{'PATH'} = '';
 
     # Delete temporary files.

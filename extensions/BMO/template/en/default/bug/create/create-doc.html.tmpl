@@ -45,7 +45,10 @@ function validateAndSubmit() {
 
 <p>
   Use this form to request <b>new documentation</b> or <b>corrections</b> to existing documentation.<br>
-  All fields except for the <i>Development [% terms.Bug %]</i> are mandatory.
+</p>
+
+<p>
+  [ <span class="required_star">*</span> <span class="required_explanation">Required Fields</span> ]
 </p>
 
 <form method="post" action="post_bug.cgi" enctype="multipart/form-data"
@@ -61,7 +64,7 @@ function validateAndSubmit() {
 <table id="doc_form">
 
 <tr>
-  <th>Request Type</th>
+  <th class="required">Request Type</th>
   <td>
     <select name="type" id="type">
       <option value="">Please select..</option>
@@ -72,7 +75,7 @@ function validateAndSubmit() {
 </tr>
 
 <tr>
-  <th>Topic</th>
+  <th class="required">Topic</th>
   <td>
     <select name="component" id="component">
       [% FOREACH component = product.components %]
@@ -86,7 +89,7 @@ function validateAndSubmit() {
 </tr>
 
 <tr>
-  <th>Summary</th>
+  <th class="required">Summary</th>
   <td>
     Please provide a brief summary of what documentation you're requesting, or
     what problem you're reporting in existing documentation:<br>
@@ -95,7 +98,22 @@ function validateAndSubmit() {
 </tr>
 
 <tr>
-  <th>Gecko Version</th>
+  <th>Technical Contact</th>
+  <td>
+    [% INCLUDE global/userselect.html.tmpl
+       id       => "cc"
+       name     => "cc"
+       value    => ""
+       size     => 60
+       classes  => ["bz_userfield"]
+       multiple => 5
+     %]
+    <i>Optional</i>
+  </td>
+</tr>
+
+<tr>
+  <th class="required">Gecko Version</th>
   <td>
     <select name="gecko" id="gecko">
       [% FOREACH version = versions %]
@@ -109,7 +127,7 @@ function validateAndSubmit() {
 </tr>
 
 <tr>
-  <th>Details</th>
+  <th class="required">Details</th>
   <td>
     <textarea id="details" name="details" cols="50" rows="10"></textarea>
   </td>
@@ -124,7 +142,7 @@ function validateAndSubmit() {
 </tr>
 
 <tr>
-  <th>Urgency</th>
+  <th class="required">Urgency</th>
   <td>
     <select name="priority" id="priority">
       <option value="P1">Immediately</option>

@@ -30,7 +30,7 @@ my $token = $cgi->param('token');
 if ($action eq "show") {
     # Read in the entire quip list
     my $quipsref = $dbh->selectall_arrayref(
-                       "SELECT quipid, userid, quip, approved FROM quips");
+                       "SELECT quipid, userid, quip, approved FROM quips ORDER BY quipid");
 
     my $quips;
     my @quipids;

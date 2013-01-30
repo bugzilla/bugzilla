@@ -590,18 +590,20 @@
     [% INCLUDE dependencies 
          field = bug_fields.blocked deps = bug.blocks_obj %]
   </tr>
-  
-  <tr>
-    <th>&nbsp;</th>
-  
-    <td colspan="2" align="left" id="show_dependency_tree_or_graph">
-      Show dependency <a href="showdependencytree.cgi?id=[% bug.bug_id %]&amp;hide_resolved=1">tree</a>
-  
-      [% IF Param('webdotbase') %]
-        /&nbsp;<a href="showdependencygraph.cgi?id=[% bug.bug_id %]">graph</a>
-      [% END %]
-    </td>
-  </tr>
+
+  [% IF bug.dependson.size || bug.blocked.size %]
+    <tr>
+      <th>&nbsp;</th>
+
+      <td colspan="2" align="left" id="show_dependency_tree_or_graph">
+        Show dependency <a href="showdependencytree.cgi?id=[% bug.bug_id %]&amp;hide_resolved=1">tree</a>
+
+        [% IF Param('webdotbase') %]
+          /&nbsp;<a href="showdependencygraph.cgi?id=[% bug.bug_id %]">graph</a>
+        [% END %]
+      </td>
+    </tr>
+  [% END %]
 [% END %]
 
 

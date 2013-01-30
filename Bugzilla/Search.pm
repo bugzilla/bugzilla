@@ -484,6 +484,14 @@ use constant COLUMN_JOINS => {
             to    => 'id',
         },
     },
+    blocked => {
+        table => 'dependencies', 
+        to => 'dependson', 
+    }, 
+    dependson => {
+        table => 'dependencies', 
+        to => 'blocked', 
+    },
     'longdescs.count' => {
         table => 'longdescs',
         join  => 'INNER',
@@ -551,6 +559,9 @@ sub COLUMNS {
             . $dbh->sql_string_concat('map_flagtypes.name', 'map_flags.status')),
 
         'keywords' => $dbh->sql_group_concat('DISTINCT map_keyworddefs.name'),
+
+        blocked => $dbh->sql_group_concat('DISTINCT map_blocked.blocked'),
+        dependson => $dbh->sql_group_concat('DISTINCT map_dependson.dependson'),
         
         'longdescs.count' => 'COUNT(DISTINCT map_longdescs_count.comment_id)',
     );
@@ -646,7 +657,9 @@ sub REPORT_COLUMNS {
 # is here because it *always* goes into the GROUP BY as the first item,
 # so it should be skipped when determining extra GROUP BY columns.
 use constant GROUP_BY_SKIP => qw(
+    blocked
     bug_id
+    dependson
     flagtypes.name
     keywords
     longdescs.count

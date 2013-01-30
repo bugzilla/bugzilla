@@ -209,9 +209,9 @@ use constant DEFAULT_FIELDS => (
      buglist => 1},
     {name => 'cc',           desc => 'CC',         in_new_bugmail => 1},
     {name => 'dependson',    desc => 'Depends on', in_new_bugmail => 1,
-     is_numeric => 1},
+     is_numeric => 1, buglist => 1},
     {name => 'blocked',      desc => 'Blocks',     in_new_bugmail => 1,
-     is_numeric => 1},
+     is_numeric => 1, buglist => 1},
 
     {name => 'attachments.description', desc => 'Attachment description'},
     {name => 'attachments.filename',    desc => 'Attachment filename'},

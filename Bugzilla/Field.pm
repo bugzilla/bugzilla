@@ -1047,7 +1047,7 @@ sub create {
         $class->check_required_create_fields(@_);
         my $field_values      = $class->run_create_validators($params);
         my $visibility_values = delete $field_values->{visibility_values};
-        my $field             = $class->insert_create_data($field_values);
+        $field                = $class->insert_create_data($field_values);
 
         $field->set_visibility_values($visibility_values);
         $field->_update_visibility_values();

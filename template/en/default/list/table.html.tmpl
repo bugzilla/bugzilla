@@ -231,6 +231,10 @@
         <a href="show_bug.cgi?id=[% bug.bug_id FILTER html %]">
           [%- bug.$column.truncate(col_abbrev.maxlength, col_abbrev.ellipsis) FILTER html -%]
         </a>
+      [% ELSIF bug_fields.$column.type == constants.FIELD_TYPE_BUG_ID %]
+        <a href="show_bug.cgi?id=[% bug.$column FILTER html %]">
+          [%- bug.$column.truncate(col_abbrev.maxlength, col_abbrev.ellipsis) FILTER html -%]
+        </a>
       [% ELSE %]
         [%- display_value(column, bug.$column).truncate(col_abbrev.maxlength, col_abbrev.ellipsis) FILTER html -%]
       [% END %]

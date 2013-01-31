@@ -142,6 +142,12 @@ MPR.validateAndSubmit = function () {
             alert_text += "Please include additional description for the out of budget line item\n";
     }
 
+    if (Dom.get('vendor_cost').value == '<= $25,000'
+        && Dom.get('po_needed').value == '') 
+    {
+        alert_text += "Please select whether a PO is needed or not\n";
+    }
+
     if (alert_text) {
         alert(alert_text);
         return false;

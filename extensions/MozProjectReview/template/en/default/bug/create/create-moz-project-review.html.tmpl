@@ -300,11 +300,25 @@
           <div class="field_description">What is the anticipated cost of the vendor relationship?
             (Entire Contract Cost, not monthly cost)</div>
           <select name="vendor_cost" id="vendor_cost"
-                  onchange="MPR.toggleVisibleById(this,'> $25,000','finance_questions');">
+                  onchange="MPR.toggleVisibleById(this,'> $25,000','finance_questions');
+                            MPR.toggleVisibleById(this,'<= $25,000','po_needed_row');
+                            if (Dom.get('po_needed').value == 'Yes') Dom.removeClass('finance_questions','bz_default_hidden');">
             <option value="">Select One</option>
             <option value="N/A">N/A</option>
-            <option value="&lt= $25,000">&lt;= $25,000</option>
-            <option value="&gt $25,000">&gt; $25,000</option>
+            <option value="&lt;= $25,000">&lt;= $25,000</option>
+            <option value="&gt; $25,000">&gt; $25,000</option>
+          </select>
+        </span>
+      </div>
+
+      <div id="po_needed_row" class="field_row bz_default_hidden">
+        <span class="field_label required">PO Needed?:</span>
+        <span class="field_data">
+          <select name="po_needed" id="po_needed"
+                  onchange="MPR.toggleVisibleById(this,'Yes','finance_questions');">
+            <option value="">Select One</option>
+            <option value="Yes">Yes</option>
+            <option value="No">No</option>
           </select>
         </span>
       </div>
@@ -591,7 +605,7 @@
     </div>
 
     <div id="finance_purchase_urgency_row" class="field_row">
-      <span class="field_label required">When do the items need to be ordered by?:</span>
+      <span class="field_label required">When do the items need<br>to be ordered by?:</span>
       <span class="field_data">
         <select name="finance_purchase_urgency" id="finance_purchase_urgency">
           <option value="within 24 hours">within 24 hours</option>

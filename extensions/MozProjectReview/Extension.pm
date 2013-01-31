@@ -77,7 +77,10 @@ sub post_bug_after_creation {
         $do_privacy_vendor = 1;
     }
 
-    if ($params->{vendor_cost} eq '> $25,000') {
+    if ($params->{vendor_cost} eq '> $25,000' 
+        || ($params->{vendor_cost} eq '<= $25,000'
+            && $params->{po_needed} eq 'Yes')) 
+    {
         $do_finance = 1;
     }
 

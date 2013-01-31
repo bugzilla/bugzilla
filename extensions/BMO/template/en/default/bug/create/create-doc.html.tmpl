@@ -39,15 +39,13 @@ function validateAndSubmit() {
    javascript = inline_javascript
    javascript_urls = [ 'extensions/BMO/web/js/form_validate.js',
                        'js/field.js', 'js/util.js' ]
+   yui = [ 'autocomplete' ]
 %]
 
 <h1>Developer Documentation Request</h1>
 
 <p>
   Use this form to request <b>new documentation</b> or <b>corrections</b> to existing documentation.<br>
-</p>
-
-<p>
   [ <span class="required_star">*</span> <span class="required_explanation">Required Fields</span> ]
 </p>
 
@@ -108,7 +106,6 @@ function validateAndSubmit() {
        classes  => ["bz_userfield"]
        multiple => 5
      %]
-    <i>Optional</i>
   </td>
 </tr>
 
@@ -137,7 +134,7 @@ function validateAndSubmit() {
   <th>Development [% terms.Bug %]</th>
   <td>
     <input type="text" id="blocked" name="blocked" size="10">
-    <i>Optional</i> &mdash; Corresponding development [% terms.bug %].
+    <i>Corresponding development [% terms.bug %].</i>
   </td>
 </tr>
 

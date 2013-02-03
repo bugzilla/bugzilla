@@ -12,6 +12,7 @@ use strict;
 use parent qw(Bugzilla::Extension);
 
 use constant MORE_SUB_CLASSES => qw(
+    Bugzilla::Extension::MoreBugUrl::BitBucket
     Bugzilla::Extension::MoreBugUrl::ReviewBoard
     Bugzilla::Extension::MoreBugUrl::Rietveld
     Bugzilla::Extension::MoreBugUrl::RT

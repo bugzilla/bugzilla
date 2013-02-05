@@ -9,6 +9,10 @@ body[class*=bz_group_] #bugzilla-body {
     background-color: inherit;
 }
 
+body.bz_group_infrasec {
+    background-color: #ffcc99;
+}
+
 body.bz_group_webtools-security, 
 body.bz_group_websites-security, 
 body.bz_group_bugzilla-security {

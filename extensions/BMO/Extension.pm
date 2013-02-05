@@ -509,78 +509,61 @@ sub bug_check_can_change_field {
     }
 }
 
-# Purpose: link up various Mozilla-specific strings.
-sub _link_uuid {
-    my $args = shift;    
-    my $match = html_quote($args->{matches}->[0]);
-    
-    return qq{<a href="https://crash-stats.mozilla.com/report/index/$match">bp-$match</a>};
-}
-
-sub _link_cve {
-    my $args = shift;
-    my $match = html_quote($args->{matches}->[0]);
-    
-    return qq{<a href="http://cve.mitre.org/cgi-bin/cvename.cgi?name=$match">$match</a>};
-}
-
-sub _link_svn {
-    my $args = shift;
-    my $match = html_quote($args->{matches}->[0]);
-    
-    return qq{<a href="http://viewvc.svn.mozilla.org/vc?view=rev&amp;revision=$match">r$match</a>};
-}
-
-sub _link_hg {
-    my $args = shift;
-    my $text = html_quote($args->{matches}->[0]);
-    my $repo = html_quote($args->{matches}->[1]);
-    my $id   = html_quote($args->{matches}->[2]);
-    
-    return qq{<a href="https://hg.mozilla.org/$repo/rev/$id">$text</a>};
-}
-
-sub _link_bzr {
-    my $args = shift;
-    my $preamble = html_quote($args->{matches}->[0]);
-    my $url = html_quote($args->{matches}->[1]);
-    my $text = html_quote($args->{matches}->[2]);
-    my $id = html_quote($args->{matches}->[3]);
-
-    $url =~ s/\s+$//;
-    $url =~ s/\/$//;
-
-    return qq{$preamble<a href="http://$url/revision/$id">$text</a>};
-}
-
+# link up various Mozilla-specific strings
 sub bug_format_comment {
     my ($self, $args) = @_;
     my $regexes = $args->{'regexes'};
 
+    # link UUIDs to crash-stats
     # Only match if not already in an URL using the negative lookbehind (?<!\/)
     push (@$regexes, {
         match => qr/(?<!\/)\b(?:UUID\s+|bp\-)([a-f0-9]{8}\-[a-f0-9]{4}\-[a-f0-9]{4}\-
                                        [a-f0-9]{4}\-[a-f0-9]{12})\b/x,
-        replace => \&_link_uuid
+        replace => sub {
+            my $args = shift;
+            my $match = html_quote($args->{matches}->[0]);
+            return qq{<a href="https://crash-stats.mozilla.com/report/index/$match">bp-$match</a>};
+        }
     });
 
+    # link to CVE/CAN security releases
     push (@$regexes, {
         match => qr/(?<!\/|=)\b((?:CVE|CAN)-\d{4}-\d{4})\b/,
-        replace => \&_link_cve
+        replace => sub {
+            my $args = shift;
+            my $match = html_quote($args->{matches}->[0]);
+            return qq{<a href="http://cve.mitre.org/cgi-bin/cvename.cgi?name=$match">$match</a>};
+        }
     });
-  
+
+    # link to svn.m.o
     push (@$regexes, {
         match => qr/\br(\d{4,})\b/,
-        replace => \&_link_svn
+        replace => sub {
+            my $args = shift;
+            my $match = html_quote($args->{matches}->[0]);
+            return qq{<a href="http://viewvc.svn.mozilla.org/vc?view=rev&amp;revision=$match">r$match</a>};
+        }
     });
 
+    # link bzr commit messages
     push (@$regexes, {
         match => qr/\b(Committing\sto:\sbzr\+ssh:\/\/
-                    (?:[^\@]+\@)?(bzr\.mozilla\.org[^\n]+)\n.*?\nCommitted\s)
+                    (?:[^\@]+\@)?(bzr\.mozilla\.org[^\n]+)\n.*?\bCommitted\s)
                     (revision\s(\d+))/sx,
-        replace => \&_link_bzr
+        replace => sub {
+            my $args = shift;
+            my $preamble = html_quote($args->{matches}->[0]);
+            my $url = html_quote($args->{matches}->[1]);
+            my $text = html_quote($args->{matches}->[2]);
+            my $id = html_quote($args->{matches}->[3]);
+            $url =~ s/\s+$//;
+            $url =~ s/\/$//;
+            return qq{$preamble<a href="http://$url/revision/$id">$text</a>};
+        }
     });
 
+    # link to hg.m.o
     # Note: for grouping in this regexp, always use non-capturing parentheses.
     my $hgrepos = join('|', qw!(?:releases/)?comm-[\w.]+ 
                                (?:releases/)?mozilla-[\w.]+
@@ -591,7 +574,14 @@ sub bug_format_comment {
 
     push (@$regexes, {
         match => qr/\b(($hgrepos)\s+changeset:?\s+(?:\d+:)?([0-9a-fA-F]{12}))\b/,
-        replace => \&_link_hg
+        replace => sub {
+            my $args = shift;
+            my $text = html_quote($args->{matches}->[0]);
+            my $repo = html_quote($args->{matches}->[1]);
+            my $id   = html_quote($args->{matches}->[2]);
+            $repo = 'integration/mozilla-inbound' if $repo eq 'mozilla-inbound';
+            return qq{<a href="https://hg.mozilla.org/$repo/rev/$id">$text</a>};
+        }
     });
 }
 

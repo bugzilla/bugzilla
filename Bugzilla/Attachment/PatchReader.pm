@@ -122,7 +122,8 @@ sub process_interdiff {
     # Check for errors
     {
         local $/ = undef;
-        if (defined(my $error = <$interdiff_stderr>)) {
+        my $error = <$interdiff_stderr>;
+        if ($error) {
             warn($error);
             $warning = 'interdiff3';
         }

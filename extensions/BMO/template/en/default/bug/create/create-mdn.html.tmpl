@@ -1,0 +1,261 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% PROCESS global/variables.none.tmpl %]
+
+[% inline_style = BLOCK %]
+strong.required:before {
+  content: "* ";
+  color: red;
+}
+#yui-history-iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 1px;
+  height: 1px;
+  visibility: hidden;
+}
+[% END %]
+[% inline_javascript = BLOCK %]
+  var Dom = YAHOO.util.Dom;
+  var Event = YAHOO.util.Event;
+  var History = YAHOO.util.History;
+  var mdn = {
+    _initial_state: 'initial',
+    _current_state: 'initial',
+    _current_type:  'Bug',
+    _required_fields: {
+      'Bug': {
+        'bug_actions': 'Please enter some text for "What did you do?"',
+        'bug_actual_results': 'Please enter some text for "What happened?"',
+        'bug_expected_results': 'Please enter some text for "What should have happened?"',
+      },
+      'Feature': {
+        'feature_problem_solving': 'Please enter some text for "What problems would this solve?"',
+        'feature_audience': 'Please enter some text for "Who would use this?"',
+        'feature_interface': 'Please enter some text for "What would users see?"',
+        'feature_process': 'Please enter some text for "What would users do? What would happen as a result?"',
+      },
+      'Change': {
+        'change_feature': 'Please enter some text for "What feature should be changed? Please provide the URL of the feature if possible"',
+        'change_problem_solving': 'Please enter some text for "What problems would this solve?"',
+        'change_audience': 'Please enter some text for "Who would use this?"',
+        'change_interface': 'Please enter some text for "What would users see?"',
+        'change_process': 'Please enter some text for "What would users do? What would happen as a result?"',
+      }
+    },
+    setState: function(state, request_type, no_set_history) {
+      if (state == 'detail') {
+        request_type = request_type || this._getRadioValueByClass('request_type');
+        request_type = request_type.toLowerCase();
+        if (request_type == 'bug') { 
+          Dom.get('detail_header').innerHTML = '<h2>Bug Report</h2>';
+          Dom.get('secure_type').innerHTML = 'report';
+        }
+        if (request_type == 'feature') {
+          Dom.get('detail_header').innerHTML = '<h2>Feature Request</h2>';
+          Dom.get('secure_type').innerHTML = 'request';
+        }
+        if (request_type == 'change') {
+          Dom.get('detail_header').innerHTML = '<h2>Change Request</h2>';
+          Dom.get('secure_type').innerHTML = 'request';
+        }
+        Dom.addClass('detail_' + this._current_type, 'bz_default_hidden');
+        Dom.removeClass('detail_' + request_type, 'bz_default_hidden');
+        this._current_type = request_type;
+      }
+      Dom.addClass(this._current_state + '_form', 'bz_default_hidden');
+      Dom.removeClass(state + '_form', 'bz_default_hidden');
+      this._current_state = state;
+      if (History && !no_set_history) {
+        History.navigate('h', state + 
+                         (request_type ? '|' + request_type : ''));
+      }
+      return true;
+    },    
+    validateAndSubmit: function() {
+      var request_type = this._getRadioValueByClass('request_type');
+      var alert_text = '';
+      if (!isFilledOut('short_desc')) alert_text += 'Please enter a "Summary".\n';
+      for (require_type in this._required_fields) {
+        if (require_type == request_type) {
+          for (field in this._required_fields[require_type]) {
+            if (!isFilledOut(field)) 
+              alert_text += this._required_fields[require_type][field] + "\n";
+          }
+        }
+      }
+      if (alert_text != '') {
+        alert(alert_text);
+        return false;
+      }
+      var whiteboard = Dom.get('status_whiteboard');
+      whiteboard.value = "[specification][type:" + request_type.toLowerCase() + "]";
+      return true;
+    }, 
+    _getRadioValueByClass: function(class_name) {
+      var elements = Dom.getElementsByClassName(class_name);
+      for (var i = 0,  l = elements.length; i < l; i++) {
+        if (elements[i].checked) return elements[i].value;   
+      }      
+    },
+    init: function() {
+      var bookmarked_state = History.getBookmarkedState('h');
+      this._initial_state = bookmarked_state || 'initial';
+      try {
+        History.register('h', this._initial_state, mdn.onStateChange);
+        History.initialize('yui-history-field', 'yui-history-iframe');
+        History.onReady(function () {
+          mdn.onStateChange(History.getCurrentState('h'), true);
+        });
+      }
+      catch(e) {
+        console.log('error initializing history: ' + e);
+        History = false;
+      }
+    },
+    onStateChange: function(state, no_set_history) {
+      var state_data = state.split('|');
+      mdn.setState(state_data[0], state_data[1], no_set_history);
+    }
+  };
+  Event.on('show_detail', 'click', function() { mdn.setState('detail'); });
+[% END %]
+
+[% PROCESS global/header.html.tmpl
+   title = "Mozilla Developer Network Feedback"
+   style = inline_style
+   javascript = inline_javascript
+   yui = [ 'history' ]
+   javascript_urls = [ 'extensions/BMO/web/js/form_validate.js' ]
+%]
+
+<iframe id="yui-history-iframe" src="extensions/BMO/web/yui-history-iframe.txt"></iframe>
+<input id="yui-history-field" type="hidden">
+
+<h1>Mozilla Developer Network Feedback</h1>
+
+<form method="post" action="post_bug.cgi" enctype="multipart/form-data"
+      onSubmit="return mdn.validateAndSubmit();">
+  <input type="hidden" name="format" value="mdn">
+  <input type="hidden" name="product" value="Mozilla Developer Network">
+  <input type="hidden" name="component" value="General">
+  <input type="hidden" name="rep_platform" value="All">
+  <input type="hidden" name="op_sys" value="Other">
+  <input type="hidden" name="version" value="unspecified">
+  <input type="hidden" name="bug_severity" id="bug_severity" value="normal">
+  <input type="hidden" name="token" value="[% token FILTER html %]">
+  <input type="hidden" name="status_whiteboard" id="status_whiteboard" value="">
+
+  <div id="initial_form">
+    <p>
+      <input type="radio" name="request_type" class="request_type" 
+             id="request_type_bug" value="Bug" checked="checked">
+        <label for="request_type_bug">Report a [% terms.bug %]</label><br>
+      <input type="radio" name="request_type" class="request_type" 
+             id="request_type_feature" value="Feature">
+        <label for="request_type_feature">Request a new feature</label><br>
+      <input type="radio" name="request_type" class="request_type" 
+             id="request_type_change" value="Change">
+        <label for="request_type_change">Request a change to an existing feature</label><br>
+      <br>
+      <input id="show_detail" type="button" value="Next">
+    </p>
+  </div>
+
+  <div id="detail_form" class="bz_default_hidden">
+    <p id="detail_header"></p>
+
+    <p id="detail_summary">
+      <strong class="required">Summary</strong><br>
+      <input type="text" name="short_desc" id="short_desc" size="60">
+    </p>
+
+    <div id="detail_bug" class="bz_default_hidden">
+      <p>
+        <strong class="required">What did you do?</strong><br>
+        <textarea name="bug_actions" id="bug_actions" rows="5" cols="60">
+1.&nbsp;
+2.&nbsp;
+3.&nbsp;</textarea>
+      </p>
+      <p>
+        <strong class="required">What happened?</strong><br>
+        <textarea name="bug_actual_results" id="bug_actual_results" rows="5" cols="60"></textarea>
+      </p>
+      <p>
+        <strong class="required">What should have happened?</strong><br>
+        <textarea name="bug_expected_results" id="bug_expected_results" rows="5" cols="60"></textarea>
+      </p>
+    </div>
+
+    <div id="detail_feature" class="bz_default_hidden">
+      <p>
+        <strong class="required">What problems would this solve?</strong><br>
+        <textarea name="feature_problem_solving" id="feature_problem_solving" rows="5" cols="60"></textarea>
+      </p>
+      <p>
+        <strong class="required">Who would use this?</strong><br>
+        <textarea name="feature_audience" id="feature_audience" rows="5" cols="60"></textarea>
+      </p>
+      <p>
+        <strong class="required">What would users see?</strong><br>
+        <textarea name="feature_interface" id="feature_interface" rows="5" cols="60"></textarea>
+      </p>
+      <p>
+        <strong class="required">What would users do? What would happen as a result?</strong><br>
+        <textarea name="feature_process" id="feature_process" rows="5" cols="60"></textarea>
+      </p>
+    </div>
+
+    <div id="detail_change" class="bz_default_hidden">
+      <p>
+        <strong class="required">What feature should be changed? Please provide the URL of the feature if possible.</strong><br>
+        <textarea name="change_feature" id="change_feature" rows="5" cols="60"></textarea>
+      </p>
+      <p>
+        <strong class="required">What problems would this solve?</strong><br>
+        <textarea name="change_problem_solving" id="change_problem_solving" rows="5" cols="60"></textarea>
+      </p>
+      <p>
+        <strong class="required">Who would use this?</strong><br>
+        <textarea name="change_audience" id="change_audience" rows="5" cols="60"></textarea>
+      </p>
+      <p>
+        <strong class="required">What would users see?</strong><br>
+        <textarea name="change_interface" id="change_interface" rows="5" cols="60"></textarea>
+      </p>
+      <p>
+        <strong class="required">What would users do? What would happen as a result?</strong><br>
+        <textarea name="change_process" id="change_process" rows="5" cols="60"></textarea>
+      </p>
+    </div>
+ 
+    <p id="detail_description">
+      <strong>Is there anything else we should know?</strong><br>
+      <textarea name="description" id="description" rows="5" cols="60"></textarea>
+    </p>
+
+    <p id="detail_secure">
+      [% sec_group = sec_groups.${product.name} || sec_groups._default %]
+      <input type="checkbox" name="groups" id="groups" value="[% sec_group FILTER html %]">
+      <label for="groups"><strong>This <span id="secure_type">report</span> is about a problem 
+        that is putting users at risk. It should be kept hidden from the public until it is 
+        resolved.</strong></label>
+    </p>
+
+    <input type="submit" id="commit" value="Submit"></td>
+  </div>
+</form>
+
+<script>
+  mdn.init();
+</script>
+
+[% PROCESS global/footer.html.tmpl %]

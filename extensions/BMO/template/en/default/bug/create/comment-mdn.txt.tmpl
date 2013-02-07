@@ -1,0 +1,66 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% USE Bugzilla %]
+[% cgi = Bugzilla.cgi +%]
+
+[% IF cgi.param('request_type') == 'Bug' %]
+What did you do?
+================
+[%+ cgi.param('bug_actions') %]
+
+What happened?
+==============
+[%+ cgi.param('bug_actual_results') %]
+
+What should have happened?
+==========================
+[%+ cgi.param('bug_expected_results') %]
+
+[% ELSIF cgi.param('request_type') == 'Feature' %]
+What problems would this solve?
+===============================
+[%+ cgi.param('feature_problem_solving') %]
+
+Who would use this?
+===================
+[%+ cgi.param('feature_audience') %]
+
+What would users see?
+=====================
+[%+ cgi.param('feature_interface') %]
+
+What would users do? What would happen as a result?
+===================================================
+[%+ cgi.param('feature_process') %]
+
+[% ELSIF cgi.param('request_type') == 'Change' %]
+What feature should be changed? Please provide the URL of the feature if possible.
+==================================================================================
+[%+ cgi.param('change_feature') %]
+
+What problems would this solve?
+===============================
+[%+ cgi.param('change_problem_solving') %]
+
+Who would use this?
+===================
+[%+ cgi.param('change_audience') %]
+
+What would users see?
+=====================
+[%+ cgi.param('change_interface') %]
+
+What would users do? What would happen as a result?
+===================================================
+[%+ cgi.param('change_process') %]
+
+[% END %]
+Is there anything else we should know?
+======================================
+[%+ cgi.param("description") %]

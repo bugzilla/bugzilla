@@ -40,7 +40,7 @@ use Bugzilla::Util;
 use Scalar::Util qw(blessed);
 use Date::Parse;
 use DateTime;
-use Encode qw(find_encoding);
+use Encode qw(find_encoding decode_utf8);
 use Sys::Syslog qw(:DEFAULT setlogsock);
 
 use Bugzilla::Extension::BMO::Constants;
@@ -845,6 +845,8 @@ sub mailer_before_send {
     my ($self, $args) = @_;
     my $email = $args->{email};
 
+    _log_sent_email($email);
+
     # Add X-Bugzilla-Tracking header
     if ($email->header('X-Bugzilla-ID')) {
         my $bug_id = $email->header('X-Bugzilla-ID');
@@ -920,6 +922,40 @@ sub mailer_before_send {
             }
         }       
     }
+}
+
+# Log a summary of bugmail sent to the syslog, for auditing and monitoring
+sub _log_sent_email {
+    my $email = shift;
+
+    my $recipient = $email->header('to');
+    return unless $recipient;
+
+    my $subject = $email->header('Subject');
+
+    my $bug_id = $email->header('X-Bugzilla-ID');
+    if (!$bug_id && $subject =~ /[\[\(]Bug (\d+)/i) {
+        $bug_id = $1;
+    }
+    $bug_id = $bug_id ? "bug-$bug_id" : '-';
+
+    my $message_type;
+    my $type = $email->header('X-Bugzilla-Type');
+    my $reason = $email->header('X-Bugzilla-Reason');
+    if ($type eq 'whine' || $type eq 'request' || $type eq 'admin') {
+        $message_type = $type;
+    } elsif ($reason && $reason ne 'None') {
+        $message_type = $reason;
+    } else {
+        $message_type = $email->header('X-Bugzilla-Watch-Reason');
+    }
+    $message_type ||= '?';
+
+    $subject =~ s/[\[\(]Bug \d+[\]\)]\s*//;
+
+    openlog('apache', 'cons,pid', 'local4');
+    syslog('notice', decode_utf8("[bugmail] $recipient ($message_type) $bug_id $subject"));
+    closelog();
 }
 
 sub post_bug_after_creation {

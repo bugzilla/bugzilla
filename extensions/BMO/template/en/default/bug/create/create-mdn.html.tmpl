@@ -55,7 +55,7 @@ strong.required:before {
         request_type = request_type || this._getRadioValueByClass('request_type');
         request_type = request_type.toLowerCase();
         if (request_type == 'bug') { 
-          Dom.get('detail_header').innerHTML = '<h2>Bug Report</h2>';
+          Dom.get('detail_header').innerHTML = '<h2>[% terms.Bug %] Report</h2>';
           Dom.get('secure_type').innerHTML = 'report';
         }
         if (request_type == 'feature') {

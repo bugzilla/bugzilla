@@ -723,9 +723,11 @@ YAHOO.bugzilla.userAutocomplete = {
     },
     debug_helper : function ( ){
         /* used to help debug any errors that might happen */
+        /*
         if( typeof(console) !== 'undefined' && console != null && arguments.length > 0 ){
             console.log("debug helper info:", arguments);
         }
+        */
         return true;
     },    
     init_ds : function(){

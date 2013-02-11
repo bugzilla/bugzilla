@@ -179,12 +179,6 @@ TUI_hide_default('expert_fields');
 [% IF user.in_group("mozilla-confidential") %]
 
 [% USE Bugzilla %]
-[% SET select_fields = {} %]
-[% FOREACH field = Bugzilla.get_fields(
-  { type => constants.FIELD_TYPE_SINGLE_SELECT, custom => 0 })
-%]
-  [% select_fields.${field.name} = field %]
-[% END %]
 
 <form name="Create" id="Create" method="post" action="post_bug.cgi"
       enctype="multipart/form-data">

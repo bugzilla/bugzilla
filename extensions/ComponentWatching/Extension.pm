@@ -66,11 +66,11 @@ sub install_update_db {
         'watch_user',
         {
             TYPE => 'INT3',
-            #REFERENCES => {
-            #    TABLE  => 'profiles',
-            #    COLUMN => 'userid',
-            #    DELETE => 'SET NULL',
-            #}
+            REFERENCES => {
+                TABLE  => 'profiles',
+                COLUMN => 'userid',
+                DELETE => 'SET NULL',
+            }
         }
     );
 }
@@ -158,7 +158,6 @@ sub object_end_of_update {
 
 sub _check_watch_user {
     my ($self, $value, $field) = @_;
-    return 0;
     $value = trim($value || '');
     if ($value eq '') {
         ThrowUserError('component_watch_missing_watch_user');

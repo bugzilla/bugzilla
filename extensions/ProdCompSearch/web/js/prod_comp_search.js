@@ -3,8 +3,7 @@
  * You can obtain one at http://mozilla.org/MPL/2.0/.
  *
  * This Source Code Form is "Incompatible With Secondary Licenses", as
- * defined by the Mozilla Public License, v. 2.0. 
- */
+ * defined by the Mozilla Public License, v. 2.0. */
 
 // Product and component search to file a new bug
 
@@ -19,15 +18,14 @@ YUI({
 }).use("node", "json-stringify", "autocomplete", "escape",
        "datasource-io", "datasource-jsonschema", "array-extras", function (Y) {
     var counter = 0,
-        current_query = null,
         dataSource = null,
         autoComplete = null;
 
     var resultListFormat = function(query, results) {
         return Y.Array.map(results, function (result) {
             var data = result.raw;
-            return Y.Escape.html(data.product) + " :: " +
-                   Y.Escape.html(data.component);
+            result.text = data.product + ' :: ' + data.component;
+            return Y.Escape.html(result.text);
         });
     };
 
@@ -60,6 +58,7 @@ YUI({
     var input = Y.one('#prod_comp_search');
 
     input.plug(Y.Plugin.AutoComplete, {
+        activateFirstItem: false,
         enableCache: true,
         source: dataSource,
         minQueryLength: 3,
@@ -71,14 +70,13 @@ YUI({
         requestTemplate: requestTemplate,
         on: {
             query: function(e) {
-                current_query = e.inputValue;
                 Y.one("#prod_comp_throbber").removeClass('bz_default_hidden');
             },
             results: function(e) {
                 Y.one("#prod_comp_throbber").addClass('bz_default_hidden');
+                input.ac.set('activateFirstItem', e.results.length == 1);
             },
             select: function(e) {
-                input.value = current_query;
                 var data = e.result.raw;
                 var url = "enter_bug.cgi?product=" + encodeURIComponent(data.product) +
                           "&component=" +  encodeURIComponent(data.component);

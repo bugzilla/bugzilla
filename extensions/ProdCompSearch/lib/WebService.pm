@@ -1,3 +1,10 @@
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
+#
+# This Source Code Form is "Incompatible With Secondary Licenses", as
+# defined by the Mozilla Public License, v. 2.0.
+
 package Bugzilla::Extension::ProdCompSearch::WebService;
 
 use strict;
@@ -17,13 +24,13 @@ sub prod_comp_search {
     $search || ThrowCodeError('param_required',
         { function => 'Bug.prod_comp_search', param => 'search' });
 
-    my $limit = detaint_natural($params->{'limit'}) 
-                ? $dbh->sql_limit($params->{'limit'}) 
+    my $limit = detaint_natural($params->{'limit'})
+                ? $dbh->sql_limit($params->{'limit'})
                 : '';
 
     # We do this in the DB directly as we want it to be fast and
     # not have the overhead of loading full product objects
- 
+
     # All products which the user has "Entry" access to.
     my $enterable_ids = $dbh->selectcol_arrayref(
            'SELECT products.id FROM products
@@ -55,7 +62,7 @@ sub prod_comp_search {
         if ($word ne "") {
             my $sql_word = $dbh->quote($word);
             trick_taint($sql_word);
-            # XXX CONCAT_WS is MySQL specific
+            # note: CONCAT_WS is MySQL specific
             my $field = "CONCAT_WS(' ', products.name, components.name, components.description)";
             push(@list, $dbh->sql_iposition($sql_word, $field) . " > 0");
         }
@@ -64,11 +71,11 @@ sub prod_comp_search {
     my $products = $dbh->selectall_arrayref("
         SELECT products.name AS product,
                components.name AS component
-          FROM products 
+          FROM products
                INNER JOIN components ON products.id = components.product_id
          WHERE (" . join(" AND ", @list) . ")
                AND products.id IN (" . join(",", @$enterable_ids) . ")
-      ORDER BY products.name $limit", 
+      ORDER BY products.name $limit",
         { Slice => {} });
 
     # To help mozilla staff file bmo administration bugs into the right
@@ -90,5 +97,3 @@ sub prod_comp_search {
 }
 
 1;
-
-

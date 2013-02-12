@@ -35,6 +35,22 @@ MPR.required_fields = {
     },
     "legal_questions": {
         "legal_priority": "Please select a priority for the legal questions section"
+    },
+    "legal_sow_questions": {
+        "legal_sow_vendor_name": "Please enter a value for SOW legal vendor name",
+        "legal_sow_vendor_address": "Please enter a value for SOW vendor address",
+        "legal_sow_vendor_email": "Please enter a value for SOW vendor email for notices",
+        "legal_sow_vendor_mozcontact": "Please enter a value for SOW Mozilla contact",
+        "legal_sow_vendor_contact": "Please enter a value for SOW vendor contact and email address",
+        "legal_sow_vendor_services": "Please enter a value for SOW vendor services description",
+        "legal_sow_vendor_deliverables": "Please enter a value for SOW vendor deliverables description",
+        "legal_sow_start_date": "Please enter a value for SOW vendor start date",
+        "legal_sow_end_date": "Please enter a value for SOW vendor end date",
+        "legal_sow_vendor_payment": "Please enter a value for SOW vendor payment amount",
+        "legal_sow_vendor_payment_basis": "Please enter a value for SOW vendor payment basis",
+        "legal_sow_vendor_payment_schedule": "Please enter a value for SOW vendor payment schedule",
+        "legal_sow_vendor_total_max": "Please enter a value for SOW vendor maximum total to be paid",
+        "legal_sow_vendor_product_line": "Please enter a value for SOW vendor product line",
     }
 };
 
@@ -55,6 +71,12 @@ MPR.toggleSpecialSections = function () {
         Dom.addClass('privacy_policy_project_questions', 'bz_default_hidden');
         Dom.addClass('data_safety_questions', 'bz_default_hidden');
         Dom.addClass('sec_review_questions', 'bz_default_hidden');
+    }
+
+    if (Dom.get('separate_party').value == 'Yes' 
+        && Dom.get('relationship_type').value == 'Vendor/Services')
+    {
+        Dom.removeClass('legal_sow_section', 'bz_default_hidden');
     }
 
     if (data_access_select.value == 'Yes' || mozilla_data_select.value == 'Yes') {
@@ -160,7 +182,7 @@ YAHOO.util.Event.onDOMReady(function() {
     MPR.toggleSpecialSections();
     MPR.toggleVisibleById('new_or_change', 'Existing', 'mozilla_project_row');
     MPR.toggleVisibleById('separate_party', 'Yes', 'initial_separate_party_questions');
-    MPR.toggleVisibleById('relationship_type', 'Vendor/Services', 'legal_sow_details_row');
+    MPR.toggleVisibleById('relationship_type', 'Vendor/Services', 'legal_sow_section');
     MPR.toggleVisibleById('vendor_cost', '> $25,000', 'finance_questions');
     MPR.toggleVisibleById('privacy_policy_project', 'Yes', 'privacy_policy_project_link_row');
     MPR.toggleVisibleById('privacy_policy_user_data', 'Yes', 'privacy_policy_project_user_data_bug_row');

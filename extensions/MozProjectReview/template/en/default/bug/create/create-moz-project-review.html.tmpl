@@ -255,7 +255,7 @@
         <span class="field_data">
           <div class="field_description">What type of relationship?</div>
           <select name="relationship_type" id="relationship_type"
-                  onchange="MPR.toggleVisibleById(this, 'Vendor/Services', 'legal_sow_details_row');
+                  onchange="MPR.toggleVisibleById(this, 'Vendor/Services', 'legal_sow_questions');
                             MPR.toggleVisibleById(this, 'Vendor/Services', 'legal_vendor_services_where_row');
                             MPR.toggleVisibleById(this, 'Hardware Purchase', 'finance_questions');
                             if (this.value == 'Hardware Purchase') Dom.addClass('legal_questions', 'bz_default_hidden');
@@ -518,14 +518,170 @@
       </span>
     </div>
 
-    <div id="legal_sow_details_row" class="class_row bz_default_hidden">
-      <span class="field_label">SOW Details:</span>
-      <span class="field_data">
-        <div class="field_description">If applicable</div>
-        <textarea name="legal_sow_details" id="legal_sow_details" rows="10" cols="80"></textarea>
-      </span>
-    </div>
+    <div id="legal_sow_questions" class="bz_default_hidden">
+      <div class=field_row">
+        <span class="field_label">SOW Details:</span>
+        <span class="field_data">
+          Please provide the following information for the SOW
+         </span>
+      </div>
 
+      <div id="legal_sow_vendor_name_row" class="field_row">
+        <span class="field_label required">Legal Vendor Name:</span>
+        <span class="field_data">
+          <input type="text" name="legal_sow_vendor_name" id="legal_sow_vendor_name" size="60">
+        </span>
+      </div>
+
+      <div id="legal_sow_vendor_address_row" class="field_row">
+        <span class="field_label required">Vendor Address:</span>
+        <span class="field_data">
+          <textarea name="legal_sow_vendor_address" id="legal_sow_vendor_address" rows="10" cols="80"></textarea>
+        </span>
+      </div>
+
+      <div id="legal_sow_vendor_email_row" class="field_row">
+        <span class="field_label required">Vendor Email for Notices:</span>
+        <span class="field_data">
+          <input type="text" name="legal_sow_vendor_email" id="legal_sow_vendor_email" size="60">
+        </span>
+      </div>
+
+      <div id="legal_sow_vendor_mozcontact_row" class="field_row">
+        <span class="field_label required">Main Mozilla Contact:</span>
+        <span class="field_data">
+          [% INCLUDE global/userselect.html.tmpl
+             id       => "legal_sow_vendor_mozcontact"
+             name     => "legal_sow_vendor_mozcontact"
+             value    => ""
+             size     => 60
+             classes  => ["bz_userfield"]
+             multiple => 5
+          %]
+        </span>
+      </div>
+
+      <div id="legal_sow_vendor_contact_row" class="field_row">
+        <span class="field_label required">Main Vendor Contact and Email:</span>
+        <span class="field_data">
+          <input type="text" name="legal_sow_vendor_contact" id="legal_sow_vendor_contact" size="60">
+        </span>
+      </div>
+
+      <div id="legal_sow_vendor_services_row" class="field_row">
+        <span class="field_label required">Vendor Services to be Provided:</span>
+        <span class="field_data">
+          <textarea name="legal_sow_vendor_services" id="legal_sow_vendor_services" rows="10" cols="80"></textarea>
+        </span>
+      </div>
+
+      <div id="legal_sow_vendor_deliverables_row" class="field_row">
+        <span class="field_label required">Description of Deliverables:</span>
+        <span class="field_data">
+          <textarea name="legal_sow_vendor_deliverables" id="legal_sow_vendor_deliverables" rows="10" cols="80"></textarea>
+        </span>
+      </div>
+
+      <div id="legal_sow_start_date_row" class="field_row">
+        <span class="field_label required">Start Date:</span>
+        <span class="field_data">
+          <input name="legal_sow_start_date" size="20" id="legal_sow_start_date" value=""
+                 onchange="updateCalendarFromField(this)">
+          <button type="button" class="calendar_button"
+                  id="button_calendar_legal_sow_start_date"
+                  onclick="showCalendar('legal_sow_start_date')">
+            <span>Calendar</span>
+          </button>
+          <div id="con_calendar_legal_sow_start_date"></div>
+          <script type="text/javascript">
+            createCalendar('legal_sow_start_date')
+          </script>
+        </span>
+      </div>
+
+      <div id="legal_sow_end_date_row" class="field_row">
+        <span class="field_label required">End Date:</span>
+        <span class="field_data">
+          <input name="legal_sow_end_date" size="20" id="legal_sow_end_date" value=""
+                 onchange="updateCalendarFromField(this)">
+          <button type="button" class="calendar_button"
+                  id="button_calendar_legal_sow_end_date"
+                  onclick="showCalendar('legal_sow_end_date')">
+            <span>Calendar</span>
+          </button>
+          <div id="con_calendar_legal_sow_end_date"></div>
+          <script type="text/javascript">
+            createCalendar('legal_sow_end_date')
+          </script>
+        </span>
+      </div>
+      
+      <div id="legal_sow_vendor_payment_row" class="field_row">
+        <span class="field_label required">Rate of Pay:</span>
+        <span class="field_data">
+          <div class="field_description">Include currency</div>
+          <input type="text" name="legal_sow_vendor_payment" id="legal_sow_vendor_payment" size="60">
+        </span>
+      </div>
+
+      <div id="legal_sow_vendor_payment_basis_row" class="field_row">
+        <span class="field_label required">Basis for Payment:</span>
+        <span class="field_data">
+          <div class="field_description">hourly, flat fee, per deliverable, etc.</div>
+          <input type="text" name="legal_sow_vendor_payment_basis" id="legal_sow_vendor_payment_basis" size="60">
+        </span>
+      </div>
+
+      <div id="legal_sow_vendor_hours_row" class="field_row">
+        <span class="field_label">Average/Max Hours:</span>
+        <span class="field_data">
+          <div class="field_description">If hourly, either average or maximum hours per week/month</div>
+          <input type="text" name="legal_sow_vendor_hours" id="legal_sow_vendor_hours" size="60">
+        </span>
+      </div>
+
+      <div id="legal_sow_vendor_payment_schedule_row" class="field_row">
+        <span class="field_label required">Payment Schedule:</span>
+        <span class="field_data">
+          <div class="field_description">"When will we make payments? E.g. every 30 days; half due up front, 
+            half on completion; following acceptance of each deliverable, etc.</div>
+          <input type="text" name="legal_sow_vendor_payment_schedule" id="legal_sow_vendor_payment_schedule" size="60">
+        </span>
+      </div>
+
+      <div id="legal_sow_vendor_total_max_row" class="field_row">
+        <span class="field_label required">Total Not to Exceed Amount:</span>
+        <span class="field_data">
+          <input type="text" name="legal_sow_vendor_total_max" id="legal_sow_vendor_total_max" size="60">
+        </span>
+      </div>
+
+      <div id="legal_sow_vendor_special_terms_row" class="field_row">
+        <span class="field_label">Any Special Terms:</span>
+        <span class="field_data">
+          <textarea name="legal_sow_vendor_special_terms" id="legal_sow_vendor_special_terms" rows="10" cols="80"></textarea>
+        </span>
+      </div>
+
+      <div id="legal_sow_vendor_product_line_row" class="field_row">
+        <span class="field_label required">Product Line:</span>
+        <span class="field_data">
+          <select id="legal_sow_vendor_product_line" name="legal_sow_vendor_product_line">
+            <option value="">Select One</option>
+            <option value="Firefox OS">Firefox OS</option>
+            <option value="Firefox Desktop">Firefox Desktop</option>
+            <option value="Firefox Mobile">Firefox Mobile</option>
+            <option value="Firefox Platform">Firefox Platform</option>
+            <option value="Marketplace/Apps">Marketplace/Apps</option>
+            <option value="Lab/Research">Lab/Research</option>
+            <option value="Services">Services</option>
+            <option value="Product Support">Product Support</option>
+            <option value="Corp Support">Corp Support</option>
+          </select>
+        </span>
+      </div>
+    </div>
+    
     <div id="legal_vendor_services_where_row" class="field_row bz_default_hidden">
       <span class="field_label required">Vendor Services Location:</span>
       <span class="field_data">

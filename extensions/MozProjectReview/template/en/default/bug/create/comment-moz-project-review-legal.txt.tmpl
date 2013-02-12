@@ -17,7 +17,6 @@ Priority: [% cgi.param('legal_priority') %]
 Other Party: [% cgi.param('legal_other_party') %]
 Business Objective: [% cgi.param('legal_business_objective') %]
 URL: [% cgi.param('legal_url') %]
-SOW Details: [% cgi.param('legal_sow_details') %]
 [% IF cgi.param('legal_vendor_services_where') %]
 Vendor Services from Where: 
 [% IF cgi.param('legal_vendor_services_where') == 'A single country' %]
@@ -28,3 +27,26 @@ Vendor Services from Where:
 [% END %]
 Description:
 [%+ cgi.param('legal_description') %]
+[% IF cgi.param('separate_party') == 'Yes' && cgi.param('relationship_type') == 'Vendor/Services' %]
+SOW Details:
+Legal Vendor Name: [% cgi.param('legal_sow_vendor_name') %] 
+Vendor Address:
+[%+ cgi.param('legal_sow_vendor_address') %] 
+Vendor Email for Notices: [% cgi.param('legal_sow_vendor_email') %] 
+Mozilla Contact: [% cgi.param('legal_sow_vendor_mozcontact') %] 
+Vendor Contact and Email Address: [% cgi.param('legal_sow_vendor_contact') %] 
+Description of Services:
+[%+ cgi.param('legal_sow_vendor_services') %] 
+Description of Deliverables:
+[%+ cgi.param('legal_sow_vendor_deliverables') %] 
+Start Date: [% cgi.param('legal_sow_start_date') %] 
+End Date: [% cgi.param('legal_sow_end_date') %] 
+Rate of Pay: [% cgi.param('legal_sow_vendor_payment') %] 
+Basis for Payment: [% cgi.param('legal_sow_vendor_payment_basis') %] 
+Average/Maximum Hours: [% cgi.param('legal_sow_vendor_hours') %] 
+Payment Schedule: [% cgi.param('legal_sow_vendor_payment_schedule') %] 
+Total Not to Exceed Amount: [% cgi.param('legal_sow_vendor_total_max') %] 
+Special Terms:
+[%+ cgi.param('legal_sow_vendor_special_terms') %] 
+Product Line: [% cgi.param('legal_sow_vendor_product_line') %] 
+[% END %]

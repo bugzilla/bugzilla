@@ -45,15 +45,14 @@ You'll need to provide a password when you export - pick a strong one, and then 
 Then, you need to convert it to a .pem file. If you have OpenSSL installed, one way is as follows:</p>
 
 <p>
-<code>openssl pkcs12 -in certificate.p12 -out certificate.pem -nodes</code></p>
+<code>openssl pkcs12 -in certificate.p12 -out certificate.pem -nodes -nokeys</code></p>
 
 <p>
-Open the .pem file in a text editor. You can recognise the public key because it starts "BEGIN CERTIFICATE" and ends "END CERTIFICATE" and 
-has an appropriate friendly name (e.g. "StartCom Free Certificate Member's StartCom Ltd. ID"). It is <b>not</b> the section beginning 
-"BEGIN RSA PRIVATE KEY", and it is not any of the intermediate certificates or root certificates.</p>
+Open the .pem file in a text editor. You can recognise the public key because
+it starts "BEGIN CERTIFICATE" and ends "END CERTIFICATE" and 
+has an appropriate friendly name (e.g. "StartCom Free Certificate Member's StartCom Ltd. ID").</p>
 
-<p>
-<b>Note: the .pem file has your private key in plaintext. Delete it once you have copied the public key out of it!</b></p>
+<p>Paste the contents of the certificate into the SecureMail text field in [% terms.Bugzilla %].</p>
 
 <h2>PGP</h2>
 

@@ -45,6 +45,11 @@
     margin-top: 0px;
 }
 
+/* put the width on the TD rather than the PRE to stop the col resizing
+   when comments are hidden */
+.bz_comment {
+    width: 55em;
+}
 .bz_comment_text {
     width: auto;
 }
@@ -53,12 +58,23 @@
     float: right;
 }
 
+/* style all field labels the same */
+
+.field_label, .field_label a {
+    color: #000;
+    font-weight: bold;
+}
+
 .field_label a {
     cursor: help;
 }
 
 .edit_form table td:first-child {
     width: 0px;
+}
+
+#bz_show_bug_column_1, #bz_show_bug_column_2 {
+    width: 50%;
 }
 
 /* fix flag table's vertical alignment */

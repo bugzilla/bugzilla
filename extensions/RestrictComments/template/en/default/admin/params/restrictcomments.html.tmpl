@@ -1,0 +1,23 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[%
+  title = "Restrict Comments"
+  desc = "Edit Restrict Comments Configuration"
+%]
+
+[% param_descs =
+{
+  restrict_comments_group => "Users must be a member of this group to " _
+                             "comment on bug with restricted commenting " _
+                             "enabled."
+
+  restrict_comments_enable_group => "Members of this group can toggle " _
+                                    "'restrict comments' on bugs."
+}
+%]

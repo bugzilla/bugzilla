@@ -1,0 +1,21 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+
+[% RETURN UNLESS user.in_group(Param('restrict_comments_enable_group')) %]
+
+<div>
+  <input type="checkbox" name="restrict_comments" id="restrict_comments"
+         [% " checked" IF bug.restrict_comments %]>
+  <label for="restrict_comments">
+    Restrict commenting on this [% terms.bug %] to users in the
+    <b>[% Param('restrict_comments_group') FILTER html %]</b> group.
+  </label>
+  (<a href="page.cgi?id=restrict_comments_guidelines.html"
+      target="_blank">guidelines</a>)
+</div>

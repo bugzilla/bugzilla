@@ -312,6 +312,12 @@ sub set_flag {
         ThrowCodeError('flag_unexpected_object', { 'caller' => ref $obj });
     }
 
+    # Make sure the user can change flags
+    my $privs;
+    $bug->check_can_change_field('flagtypes.name', 0, 1, \$privs)
+        || ThrowUserError('illegal_change', 
+                          { field => 'flagtypes.name', privs => $privs });
+
     # Update (or delete) an existing flag.
     if ($params->{id}) {
         my $flag = $class->check({ id => $params->{id} });

@@ -170,18 +170,20 @@
               [<a class="bz_wrap_link" href="#"
                   onclick="return toggleCommentWrap(this, [% count %])">wrap</a>]
             [% END %]
-            [<a class="bz_reply_link" href="#add_comment"
-              [% IF user.settings.quote_replies.value != 'off' %]
-                onclick="replyToComment('[% count %]', '[% comment.id %]', '[% comment.author.name || comment.author.nick FILTER html FILTER js %]'); return false;"
-              [% END %]
-            >reply</a>]
+            [% IF bug.check_can_change_field('longdesc', 1, 0) %]
+              [<a class="bz_reply_link" href="#add_comment"
+                [% IF user.settings.quote_replies.value != 'off' %]
+                  onclick="replyToComment('[% count %]', '[% comment.id %]', '[% comment.author.name || comment.author.nick FILTER html FILTER js %]'); return false;"
+                [% END %]
+              >reply</a>]
+            [% END %]
             <script type="text/javascript"><!--
               addCollapseLink([% count %], 'Toggle comment display'); // -->
             </script>
           </span>
         [% END %]
 
-        [% IF mode == "edit" && user.is_insider %]
+        [% IF mode == "edit" && user.is_insider && bug.check_can_change_field('longdesc', 0, 1) %]
           <div class="bz_private_checkbox">
             <input type="hidden" value="1"
                    name="defined_isprivate_[% comment.id %]">

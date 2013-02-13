@@ -1,0 +1,62 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% USE Bugzilla %]
+
+[% PROCESS global/header.html.tmpl
+   title = "Restrict Comments - Guidelines"
+%]
+
+<h3>Restricting Comments</h3>
+
+<p>
+  Some [% terms.bug %] reports are inundated with comments that make it
+  difficult for developers to conduct technical discussions. Restricting
+  comments provides the ability for users in the
+  [%+ Param('restrict_comments_enable_group') FILTER html %] group to prevent
+  users who are not in the [% Param('restrict_comments_group') FILTER html %]
+  from making additional comments.
+</p>
+
+<h3>Guidelines</h3>
+
+<ul>
+  <li>
+    Restrictions may be applied to [% terms.bugs %] which are subject to high
+    volumes of off topic comments, or [% terms.bugs %] which contain high volumes
+    of violations of [% terms.Bugzilla %]
+    <a href="page.cgi?id=etiquette.html">etiquette guidelines</a>.
+  </li>
+  <li>
+    Restrictions should not be used as a preemptive measure against comments
+    which have not yet occurred.
+  </li>
+  <li>
+    Restrictions should not be used to privilege
+    [%+ Param('restrict_comments_group') FILTER html %] users over other users
+    in valid disputes/discussions.
+  </li>
+</ul>
+
+<h3>Impact</h3>
+
+<ul>
+  <li>
+    Users who are not in the [% Param('restrict_comments_group') FILTER html %]
+    group will not be able to comment on the [% terms.bug %], nor will they be
+    able to change the value of any field.
+  </li>
+  <li>
+    All users will still be able to CC themselves to the [% terms.bug %].
+  </li>
+  <li>
+    All users will still be able to vote for the [% terms.bug %].
+  </li>
+</ul>
+
+[% PROCESS global/footer.html.tmpl %]

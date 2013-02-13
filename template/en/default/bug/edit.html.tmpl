@@ -903,7 +903,7 @@
                                            flag_types = bug.flag_types
                                            any_flags_requesteeble = bug.any_flags_requesteeble %]
         [% END %]
-        [% IF show_more_flags %]
+        [% IF show_more_flags && bug.check_can_change_field('flagtypes.name', 0, 1) %]
           <span id="bz_flags_more_container" class="bz_default_hidden">
             [% IF !bug_flags_set %]<em>None yet set</em>[% END %]
             (<a href="#" id="bz_flags_more_action">[% IF !bug_flags_set %]set[% ELSE %]more[% END %] flags</a>)
@@ -1090,7 +1090,7 @@
       <label for="comment" accesskey="c"><b>Additional 
         <u>C</u>omments</b></label>:
 
-      [% IF user.is_insider %]
+      [% IF user.is_insider && bug.check_can_change_field('longdesc', 0, 1) %]
         <input type="checkbox" name="comment_is_private" value="1"
                id="newcommentprivacy"
                onClick="updateCommentTagControl(this, 'comment')">
@@ -1102,14 +1102,23 @@
 
       <!-- This table keeps the submit button aligned with the box. -->
       <table><tr><td>
-        [% INCLUDE global/textarea.html.tmpl
-                   name      = 'comment'
-                   id        = 'comment'
-                   minrows   = 10
-                   maxrows   = 25
-                   cols      = constants.COMMENT_COLS
-        %]
-        [% Hook.process("after_comment_textarea", 'bug/edit.html.tmpl') %]
+        [% IF bug.check_can_change_field('longdesc', 0, 1) %]
+          [% INCLUDE global/textarea.html.tmpl
+                     name      = 'comment'
+                     id        = 'comment'
+                     minrows   = 10
+                     maxrows   = 25
+                     cols      = constants.COMMENT_COLS
+          %]
+          [% Hook.process("after_comment_textarea", 'bug/edit.html.tmpl') %]
+        [% ELSE %]
+          <div id="comment">
+            <fieldset>
+              <legend>Note</legend>
+              You are unable to make an additional comment on this [% terms.bug %].
+            </fieldset>
+          </div>
+        [% END %]
         <br>
         [% PROCESS commit_button id=""%]
 

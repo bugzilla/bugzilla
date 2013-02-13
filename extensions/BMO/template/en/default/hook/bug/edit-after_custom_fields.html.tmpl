@@ -41,29 +41,36 @@
       <label>Project Flags:</label>
     </td>
     <td>
-      <table id="project-flags">
-      [% FOREACH field = project_flags %]
-        [% NEXT IF NOT user.id AND field.value == "---" %]
-        <tr id="row_[% field.name FILTER js %]">
-          <td>&nbsp;</td>
-          <td>
-            <label for="[% field.name FILTER html %]">
-              [% field_descs.${field.name} FILTER html %]:
-            </label>
-          </td>
-          <td>
-            [% PROCESS bug/field.html.tmpl value = bug.${field.name}
-                                           editable = user.id
-                                           no_tds = 1 %]
-            [% IF user.id %]
-              <span id="ro_[% field.name FILTER html %]" class="bz_hidden">
-                [% bug.${field.name} FILTER html %]
-              </span>
-            [% END %]
-          </td>
-        </tr>
+      [% IF bug.check_can_change_field('flagtypes.name', 0, 1) %]
+        <table id="project-flags">
+        [% FOREACH field = project_flags %]
+          [% NEXT IF NOT user.id AND field.value == "---" %]
+          <tr id="row_[% field.name FILTER js %]">
+            <td>&nbsp;</td>
+            <td>
+              <label for="[% field.name FILTER html %]">
+                [% field_descs.${field.name} FILTER html %]:
+              </label>
+            </td>
+            <td>
+              [% PROCESS bug/field.html.tmpl value = bug.${field.name}
+                                            editable = user.id
+                                            no_tds = 1 %]
+              [% IF user.id %]
+                <span id="ro_[% field.name FILTER html %]" class="bz_hidden">
+                  [% bug.${field.name} FILTER html %]
+                </span>
+              [% END %]
+            </td>
+          </tr>
+        [% END %]
+        </table>
+      [% ELSE %]
+        [% FOREACH field = project_flags %]
+          [% NEXT IF bug.${field.name} == "---" %]
+          [% field_descs.${field.name} FILTER html %]: [% bug.${field.name} FILTER html %]<br>
+        [% END %]
       [% END %]
-      </table>
     </td>
   </tr>
 [% END %]
@@ -74,34 +81,41 @@
       <label>Tracking Flags:</label>
     </td>
     <td>
-      [% IF user.id %]
-        <span id="edit_tracking_fields_action">
-          (<a onclick="bmo_show_tracking_flags()" href="javascript:void(0)">edit</a>)
-        </span>
+      [% IF bug.check_can_change_field('flagtypes.name', 0, 1) %]
+        [% IF user.id %]
+          <span id="edit_tracking_fields_action">
+            (<a onclick="bmo_show_tracking_flags()" href="javascript:void(0)">edit</a>)
+          </span>
+        [% END %]
+        <table id="custom-flags">
+        [% FOREACH field = tracking_flags %]
+          [% NEXT IF NOT user.id AND field.value == "---" %]
+          <tr id="row_[% field.name FILTER js %]">
+            <td>&nbsp;</td>
+            <td>
+              <label for="[% field.name FILTER html %]">
+                [% field_descs.${field.name} FILTER html %]:
+              </label>
+            </td>
+            <td>
+              [% PROCESS bug/field.html.tmpl value = bug.${field.name}
+                                            editable = user.id
+                                            no_tds = 1 %]
+              [% IF user.id %]
+                <span id="ro_[% field.name FILTER html %]" class="bz_hidden">
+                  [% bug.${field.name} FILTER html %]
+                </span>
+              [% END %]
+            </td>
+          </tr>
+        [% END %]
+        </table>
+      [% ELSE %]
+        [% FOREACH field = tracking_flags %]
+          [% NEXT IF bug.${field.name} == "---" %]
+          [% field_descs.${field.name} FILTER html %]: [% bug.${field.name} FILTER html %]<br>
+        [% END %]
       [% END %]
-      <table id="custom-flags">
-      [% FOREACH field = tracking_flags %]
-        [% NEXT IF NOT user.id AND field.value == "---" %]
-        <tr id="row_[% field.name FILTER js %]">
-          <td>&nbsp;</td>
-          <td>
-            <label for="[% field.name FILTER html %]">
-              [% field_descs.${field.name} FILTER html %]:
-            </label>
-          </td>
-          <td>
-            [% PROCESS bug/field.html.tmpl value = bug.${field.name}
-                                           editable = user.id
-                                           no_tds = 1 %]
-            [% IF user.id %]
-              <span id="ro_[% field.name FILTER html %]" class="bz_hidden">
-                [% bug.${field.name} FILTER html %]
-              </span>
-            [% END %]
-          </td>
-        </tr>
-      [% END %]
-      </table>
     </td>
   </tr>
   <script type="text/javascript">

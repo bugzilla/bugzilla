@@ -92,7 +92,7 @@ sub post_bug_after_creation {
 
     if ($do_sec_review) {
         my $bug_data = {
-            short_desc   => 'Security Review for ' . $bug->short_desc,
+            short_desc   => 'Security Review: ' . $bug->short_desc,
             product      => 'mozilla.org',
             component    => 'Security Assurance: Review Request',
             bug_severity => 'normal',
@@ -126,8 +126,12 @@ sub post_bug_after_creation {
                          : $params->{relationship_type};
         }
 
+        my $legal_summary = "Legal Review: ";
+        $legal_summary .= $params->{legal_other_party} . " - " if $params->{legal_other_party};
+        $legal_summary .= $bug->short_desc;
+
         my $bug_data = {
-            short_desc   => 'Complete Legal Review for ' . $bug->short_desc,
+            short_desc   => $legal_summary,
             product      => 'Legal',
             component    => $component,
             bug_severity => 'normal',
@@ -146,7 +150,7 @@ sub post_bug_after_creation {
 
     if ($do_finance) {
         my $bug_data = {
-            short_desc   => 'Complete Finance Review for ' . $bug->short_desc,
+            short_desc   => 'Finance Review: ' . $bug->short_desc,
             product      => 'Finance',
             component    => 'Purchase Request Form',
             bug_severity => 'normal',
@@ -164,7 +168,7 @@ sub post_bug_after_creation {
 
     if ($do_data_safety) {
         my $bug_data = {
-            short_desc   => 'Data Safety Review for ' . $bug->short_desc,
+            short_desc   => 'Data Safety Review: ' . $bug->short_desc,
             product      => 'Data Safety',
             component    => 'General',
             bug_severity => 'normal',
@@ -183,7 +187,7 @@ sub post_bug_after_creation {
 
     if ($do_privacy_tech) {
         my $bug_data = {
-            short_desc   => 'Complete Privacy-Technical Review for ' . $bug->short_desc,
+            short_desc   => 'Privacy-Technical Review: ' . $bug->short_desc,
             product      => 'mozilla.org',
             component    => 'Security Assurance: Review Request',
             bug_severity => 'normal',
@@ -202,7 +206,7 @@ sub post_bug_after_creation {
 
     if ($do_privacy_policy) {
         my $bug_data = {
-            short_desc   => 'Complete Privacy-Policy Review for ' . $bug->short_desc,
+            short_desc   => 'Privacy-Policy Review: ' . $bug->short_desc,
             product      => 'Privacy',
             component    => 'Privacy Review',
             bug_severity => 'normal',
@@ -220,7 +224,7 @@ sub post_bug_after_creation {
 
     if ($do_privacy_vendor) {
         my $bug_data = {
-            short_desc   => 'Complete Privacy / Vendor Review for ' . $bug->short_desc,
+            short_desc   => 'Privacy / Vendor Review: ' . $bug->short_desc,
             product      => 'Privacy',
             component    => 'Vendor Review',
             bug_severity => 'normal',

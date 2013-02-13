@@ -69,7 +69,7 @@
     cursor: help;
 }
 
-.edit_form table td:first-child {
+.edit_form table th:first-child {
     width: 0px;
 }
 

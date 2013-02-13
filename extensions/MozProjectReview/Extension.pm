@@ -62,7 +62,9 @@ sub post_bug_after_creation {
         $do_legal = 1;
     }
 
-    if ($params->{separate_party} eq 'Yes') {
+    if ($params->{separate_party} eq 'Yes'
+        && $params->{relationship_type} ne 'Hardware Purchase') 
+    {
         $do_legal = 1;
     }
 

@@ -208,7 +208,7 @@ sub post_bug_after_creation {
         my $bug_data = {
             short_desc   => 'Privacy-Policy Review: ' . $bug->short_desc,
             product      => 'Privacy',
-            component    => 'Privacy Review',
+            component    => 'Product Review',
             bug_severity => 'normal',
             priority     => '--',
             groups       => [ 'mozilla-corporation-confidential' ],

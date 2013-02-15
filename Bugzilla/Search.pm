@@ -293,10 +293,10 @@ use constant OPERATOR_FIELD_OVERRIDE => {
     keywords         => MULTI_SELECT_OVERRIDE,
     'flagtypes.name' => MULTI_SELECT_OVERRIDE,
     longdesc => {
-        %{ MULTI_SELECT_OVERRIDE() },
         changedby     => \&_long_desc_changedby,
         changedbefore => \&_long_desc_changedbefore_after,
         changedafter  => \&_long_desc_changedbefore_after,
+        _non_changed  => \&_long_desc_nonchanged,
     },
     'longdescs.count' => {
         changedby     => \&_long_desc_changedby,
@@ -2357,6 +2357,43 @@ sub _long_desc_changedbefore_after {
     if (!$self->_user->is_insider) {
         $args->{term} .= " AND $table.isprivate = 0";
     }
+}
+
+sub _long_desc_nonchanged {
+    my ($self, $args) = @_;
+    my ($chart_id, $operator, $value, $joins, $bugs_table) =
+        @$args{qw(chart_id operator value joins bugs_table)};
+    my $dbh = Bugzilla->dbh;
+
+    my $table = "longdescs_$chart_id";
+    my $join_args = {
+        chart_id   => $chart_id,
+        sequence   => $chart_id,
+        field      => 'longdesc',
+        full_field => "$table.thetext",
+        operator   => $operator,
+        value      => $value,
+        all_values => $value,
+        quoted     => $dbh->quote($value),
+        joins      => [],
+        bugs_table => $bugs_table,
+    };
+    $self->_do_operator_function($join_args);
+
+    # If the user is not part of the insiders group, they cannot see
+    # private comments
+    if (!$self->_user->is_insider) {
+        $join_args->{term} .= " AND $table.isprivate = 0";
+    }
+
+    my $join = {
+        table => 'longdescs',
+        as    => $table,
+        extra => [ $join_args->{term} ],
+    };
+    push(@$joins, $join);
+
+    $args->{term} =  "$table.comment_id IS NOT NULL";
 }
 
 sub _content_matches {

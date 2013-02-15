@@ -38,6 +38,7 @@ our $initscript = "bugzilla-queue";
 sub gd_preconfig {
     my $self = shift;
 
+    $self->{_run_command} = 'subprocess_worker';
     my $pidfile = $self->{gd_args}{pidfile};
     if (!$pidfile) {
         $pidfile = bz_locations()->{datadir} . '/' . $self->{gd_progname} 
@@ -136,6 +137,7 @@ sub gd_can_install {
             print $config_fh <<END;
 #!/bin/sh
 BUGZILLA="$directory"
+# This user must have write access to Bugzilla's data/ directory.
 USER=$owner
 END
             close($config_fh);
@@ -183,21 +185,25 @@ sub gd_setup_signals {
     $SIG{TERM} = sub { $self->gd_quit_event(); }
 }
 
-sub gd_other_cmd {
-    my ($self) = shift;
-    if ($ARGV[0] eq "once") {
-        $self->_do_work("work_once");
+sub gd_quit_event {
+    Bugzilla->job_queue->kill_worker();
+    exit(1);
+}
 
-        exit(0);
+sub gd_other_cmd {
+    my ($self, $do, $locked) = @_;
+    if ($do eq "once") {
+        $self->{_run_command} = 'work_once';
+    } elsif ($do eq "onepass") {
+        $self->{_run_command} = 'work_until_done';
+    } else {
+        $self->SUPER::gd_other_cmd($do, $locked);
     }
-    
-    $self->SUPER::gd_other_cmd();
 }
 
 sub gd_run {
     my $self = shift;
-
-    $self->_do_work("work");
+    $self->_do_work($self->{_run_command});
 }
 
 sub _do_work {
@@ -205,11 +211,11 @@ sub _do_work {
 
     my $jq = Bugzilla->job_queue();
     $jq->set_verbose($self->{debug});
+    $jq->set_pidfile($self->{gd_pidfile});
     foreach my $module (values %{ Bugzilla::JobQueue->job_map() }) {
         eval "use $module";
         $jq->can_do($module);
     }
-
     $jq->$fn;
 }
 
@@ -241,6 +247,8 @@ to run the Bugzilla job queue.
 =item gd_run
 
 =item gd_can_install
+
+=item gd_quit_event
 
 =item gd_other_cmd
 

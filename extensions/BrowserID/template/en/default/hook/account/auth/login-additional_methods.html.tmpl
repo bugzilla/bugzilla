@@ -1,7 +1,0 @@
-[% IF Param('user_info_class').split(',').contains('BrowserID')
-      && Param('browserid_includejs_url') %]
-<p>
-Or, log in with BrowserID: 
-<img src="extensions/BrowserID/web/sign_in_orange.png" onclick="browserid_sign_in()">
-</p>
-[% END %]

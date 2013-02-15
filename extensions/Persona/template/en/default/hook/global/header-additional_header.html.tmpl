@@ -7,8 +7,8 @@
   #%]
 
 [% RETURN IF user.login
-             || !Param('browserid_includejs_url')
-             || !Param('user_info_class').split(',').contains('BrowserID') %]
+             || !Param('persona_includejs_url')
+             || !Param('user_info_class').split(',').contains('Persona') %]
 
 [% USE Bugzilla %]
 [% cgi = Bugzilla.cgi %]
@@ -20,7 +20,7 @@
 
 [% login_target = urlbase _ login_target %]
 
-<script src="[% Param('browserid_includejs_url') %]" type="text/javascript"></script>
+<script src="[% Param('persona_includejs_url') %]" type="text/javascript"></script>
 
 <script type="text/javascript">
 function createHidden(name, value, form) {
@@ -31,11 +31,11 @@ function createHidden(name, value, form) {
   form.appendChild(field);
 }
 
-function browserid_sign_in() {
-  navigator.id.get(function(assertion) {
-    if (assertion) {
-      // This code will be invoked once the user has successfully
-      // selected an email address they control to sign in with.
+function persona_sign_in() {
+  navigator.id.request({ siteName: '[% terms.BugzillaTitle FILTER js %]' });
+  navigator.id.watch({
+    loggedInUser: [% IF user.id %]'[% user.login FILTER js %]'[% ELSE %]null[% END %],
+    onlogin: function(assertion) {
       var form = document.createElement('form');
       form.action = '[% login_target FILTER js %]';
       form.method = 'POST';
@@ -43,10 +43,10 @@ function browserid_sign_in() {
 
       createHidden('token', '[% issue_hash_token(['login']) FILTER js %]', form);
       createHidden('Bugzilla_remember', 'on', form);
-      createHidden('browserid_assertion', assertion, form);
+      createHidden('persona_assertion', assertion, form);
 
       [% FOREACH field = cgi.param() %]
-        [% NEXT IF field.search("^(Bugzilla_(login|password|restrictlogin)|token|browserid_assertion)$") %]
+        [% NEXT IF field.search("^(Bugzilla_(login|password|restrictlogin)|token|persona_assertion)$") %]
         [% FOREACH mvalue = cgi.param(field).slice(0) %]
           createHidden('[% field FILTER js %]', '[% mvalue FILTER html_linebreak FILTER js %]', form);
         [% END %]
@@ -54,6 +54,10 @@ function browserid_sign_in() {
 
       document.body.appendChild(form);
       form.submit();
+      return true;
+    },
+    onlogout: function () {
+      document.location = '[% urlbase FILTER none %]index.cgi?logout=1';
       return true;
     }
   });

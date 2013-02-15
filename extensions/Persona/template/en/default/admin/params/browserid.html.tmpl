@@ -1,0 +1,22 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[%
+  title = "Persona"
+  desc = "Configure Persona Authentication"
+%]
+
+[% param_descs = {
+  persona_verify_url => "This is the URL for the Persona authority that the " _
+                        "user will be verified against. " _
+                        "Example: <kbd>https://verifier.login.persona.org/verify</kbd>.",
+  persona_includejs_url => "This is the URL needed by Persona to load the necessary " _
+                           "javascript library for authentication. " _
+                           "Example: <kbd>https://persona.org/include.js</kbd>."
+ }
+%]

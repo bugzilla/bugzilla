@@ -1,25 +1,11 @@
-# -*- Mode: perl; indent-tabs-mode: nil -*-
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
 #
-# The contents of this file are subject to the Mozilla Public
-# License Version 1.1 (the "License"); you may not use this file
-# except in compliance with the License. You may obtain a copy of
-# the License at http://www.mozilla.org/MPL/
-#
-# Software distributed under the License is distributed on an "AS
-# IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
-# implied. See the License for the specific language governing
-# rights and limitations under the License.
-#
-# The Original Code is the BrowserID Bugzilla Extension.
-#
-# The Initial Developer of the Original Code is the Mozilla Foundation.
-# Portions created by the Initial Developer are Copyright (C) 2011 the
-# Initial Developer. All Rights Reserved.
-#
-# Contributor(s):
-#   Gervase Markham <gerv@gerv.net>
+# This Source Code Form is "Incompatible With Secondary Licenses", as
+# defined by the Mozilla Public License, v. 2.0.
 
-package Bugzilla::Extension::BrowserID::Login;
+package Bugzilla::Extension::Persona::Login;
 use strict;
 use base qw(Bugzilla::Auth::Login);
 
@@ -40,28 +26,28 @@ sub get_login_info {
 
     my $cgi = Bugzilla->cgi;
 
-    my $assertion = $cgi->param("browserid_assertion");
+    my $assertion = $cgi->param("persona_assertion");
     # Avoid the assertion being copied into any 'echoes' of the current URL
     # in the page.
-    $cgi->delete('browserid_assertion');
-    
-    if (!$assertion || !Bugzilla->params->{browserid_verify_url}) {
+    $cgi->delete('persona_assertion');
+
+    if (!$assertion || !Bugzilla->params->{persona_verify_url}) {
         return { failure => AUTH_NODATA };
     }
-    
+
     my $token = $cgi->param("token");
     $cgi->delete('token');
     check_hash_token($token, ['login']);
         
     my $urlbase = new URI(correct_urlbase());
     my $audience = $urlbase->scheme . "://" . $urlbase->host_port;
-    
+
     my $ua = new LWP::UserAgent();
-    
-    my $info = { 'status' => 'browserid-server-broken' };
+
+    my $info = { 'status' => 'persona-server-broken' };
     eval {
-        my $response = $ua->post(Bugzilla->params->{browserid_verify_url},
-                                 [assertion => $assertion, 
+        my $response = $ua->post(Bugzilla->params->{persona_verify_url},
+                                 [assertion => $assertion,
                                   audience  => $audience]);
 
         $info = decode_json($response->content());
@@ -76,13 +62,13 @@ sub get_login_info {
         };
 
         my $result = 
-                    Bugzilla::Auth::Verify->create_or_update_user($login_data);
+            Bugzilla::Auth::Verify->create_or_update_user($login_data);
         return $result if $result->{'failure'};
         
         my $user = $result->{'user'};
-        
+
         # You can restrict people in a particular group from logging in using
-        # BrowserID by making that group a member of a group called
+        # Persona by making that group a member of a group called
         # "no-browser-id".
         #
         # If you have your "createemailregexp" set up in such a way that a
@@ -93,9 +79,9 @@ sub get_login_info {
         if ($user->in_group('no-browser-id')) {
             # We use a custom error here, for greater clarity, rather than
             # returning a failure code.
-            ThrowUserError('browserid_account_too_powerful');
+            ThrowUserError('persona_account_too_powerful');
         }
-    
+
         $login_data->{'user'} = $user;
         $login_data->{'user_id'} = $user->id;
         

@@ -6,26 +6,26 @@
   # defined by the Mozilla Public License, v. 2.0.
   #%]
 
-[% IF Param('user_info_class').split(',').contains('BrowserID') %]
+[% IF Param('user_info_class').split(',').contains('Persona') %]
 <script type="text/javascript">
-function browserid_create_account() {
+function persona_create_account() {
     navigator.id.getVerifiedEmail(function(assertion) {
         if (assertion) {
             // This code will be invoked once the user has successfully
             // selected an email address they control to sign in with.
-            document.getElementById('browserid_assertion').value = assertion;
-            document.getElementById('browserid_form').submit();
+            document.getElementById('persona_assertion').value = assertion;
+            document.getElementById('persona_form').submit();
             return true;
         }
     });
 }
 </script>
 
-Or, use your BrowserID account:
-<img src="extensions/BrowserID/web/sign_in_orange.png" onclick="browserid_create_account()">
+Or, use your Persona account:
+<img src="extensions/Persona/web/images/sign_in.png" onclick="persona_create_account()">
 
-<form id="browserid_form" method="POST" action="index.cgi">
+<form id="persona_form" method="POST" action="index.cgi">
   <input type="hidden" name="token" value="[% issue_hash_token(['login']) FILTER html %]">
-  <input type="hidden" name="browserid_assertion" id="browserid_assertion" value="">
+  <input type="hidden" name="persona_assertion" id="persona_assertion" value="">
 </form>
 [% END %]

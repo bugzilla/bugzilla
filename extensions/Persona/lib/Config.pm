@@ -4,7 +4,8 @@
 #
 # This Source Code Form is "Incompatible With Secondary Licenses", as
 # defined by the Mozilla Public License, v. 2.0.
-package Bugzilla::Extension::BrowserID::Config;
+
+package Bugzilla::Extension::Persona::Config;
 
 use strict;
 use warnings;
@@ -18,12 +19,12 @@ sub get_param_list {
 
     my @param_list = (
         {
-            name    => 'browserid_verify_url',
+            name    => 'persona_verify_url',
             type    => 't',
             default => 'https://verifier.login.persona.org/verify',
         },
         {
-            name    => 'browserid_includejs_url',
+            name    => 'persona_includejs_url',
             type    => 't',
             default => 'https://login.persona.org/include.js',
         }

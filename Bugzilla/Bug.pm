@@ -4085,8 +4085,8 @@ sub check_can_change_field {
         return 1;
     }
 
-    # Allow anyone to change comments.
-    if ($field =~ /^longdesc/) {
+    # Allow anyone to change comments, or set flags
+    if ($field =~ /^longdesc/ || $field eq 'flagtypes.name') {
         return 1;
     }
 

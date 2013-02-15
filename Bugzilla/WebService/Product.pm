@@ -212,12 +212,12 @@ sub _product_to_hash {
     }
     if (filter_wants($params, 'versions')) {
         $field_data->{versions} = [map {
-            $self->_version_to_hash($_)
+            $self->_version_to_hash($_, $params)
         } @{$product->versions}];
     }
     if (filter_wants($params, 'milestones')) {
         $field_data->{milestones} = [map {
-            $self->_milestone_to_hash($_)
+            $self->_milestone_to_hash($_, $params)
         } @{$product->milestones}];
     }
     return filter($params, $field_data);
@@ -241,23 +241,26 @@ sub _component_to_hash {
             0,
         is_active =>
             $self->type('boolean', $component->is_active),
-        flag_types => {
+    };
+
+    if (filter_wants($params, 'flag_types', 'components')) {
+        $field_data->{flag_types} = {
             bug =>
                 [map {
-                    $self->_flag_type_to_hash($_, $params)
+                    $self->_flag_type_to_hash($_)
                 } @{$component->flag_types->{'bug'}}],
             attachment =>
                 [map {
-                    $self->_flag_type_to_hash($_, $params)
+                    $self->_flag_type_to_hash($_)
                 } @{$component->flag_types->{'attachment'}}],
-        }
-    };
-    return filter($params, $field_data, 'component');
+        };
+    }
+    return filter($params, $field_data, 'components');
 }
 
 sub _flag_type_to_hash {
-    my ($self, $flag_type, $params) = @_;
-    my $field_data = {
+    my ($self, $flag_type) = @_;
+    return {
         id =>
             $self->type('int', $flag_type->id),
         name =>
@@ -281,12 +284,11 @@ sub _flag_type_to_hash {
         request_group =>
             $self->type('int', $flag_type->request_group_id),
     };
-    return filter($params, $field_data, 'flag_type');
 }
 
 sub _version_to_hash {
-    my ($self, $version) = @_;
-    return {
+    my ($self, $version, $params) = @_;
+    my $field_data = {
         id =>
             $self->type('int', $version->id),
         name =>
@@ -296,11 +298,12 @@ sub _version_to_hash {
         is_active =>
             $self->type('boolean', $version->is_active),
     };
+    return filter($params, $field_data, 'versions');
 }
 
 sub _milestone_to_hash {
-    my ($self, $milestone) = @_;
-    return {
+    my ($self, $milestone, $params) = @_;
+    my $field_data = {
         id =>
             $self->type('int', $milestone->id),
         name =>
@@ -310,6 +313,7 @@ sub _milestone_to_hash {
         is_active =>
             $self->type('boolean', $milestone->is_active),
     };
+    return filter($params, $field_data, 'milestones');
 }
 
 1;
@@ -416,6 +420,8 @@ B<Note>: Can also be called as "get_products" for compatibilty with Bugzilla 3.0
 In addition to the parameters below, this method also accepts the
 standard L<include_fields|Bugzilla::WebService/include_fields> and
 L<exclude_fields|Bugzilla::WebService/exclude_fields> arguments.
+
+This RPC call supports sub field restrictions.
 
 =over
 

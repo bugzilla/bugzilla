@@ -104,10 +104,19 @@ sub process_interdiff {
     # Must hack path so that interdiff will work.
     $ENV{'PATH'} = $lc->{diffpath};
 
-    my ($interdiff_stdout, $interdiff_stderr);
-    $interdiff_stderr = gensym;
-    my $pid = open3(gensym, $interdiff_stdout, $interdiff_stderr,
-                    $lc->{interdiffbin}, $old_filename, $new_filename);
+    my ($pid, $interdiff_stdout, $interdiff_stderr);
+    if ($ENV{MOD_PERL}) {
+        require Apache2::RequestUtil;
+        require Apache2::SubProcess;
+        my $request = Apache2::RequestUtil->request;
+        (undef, $interdiff_stdout, $interdiff_stderr) = $request->spawn_proc_prog(
+            $lc->{interdiffbin}, [$old_filename, $new_filename]
+        );
+    } else {
+        $interdiff_stderr = gensym;
+        my $pid = open3(gensym, $interdiff_stdout, $interdiff_stderr,
+                        $lc->{interdiffbin}, $old_filename, $new_filename);
+    }
     binmode $interdiff_stdout;
 
     # Check for errors
@@ -145,7 +154,7 @@ sub process_interdiff {
     }
     $reader->iterate_fh($interdiff_stdout, 'interdiff #' . $old_attachment->id .
                         ' #' . $new_attachment->id);
-    waitpid($pid, 0);
+    waitpid($pid, 0) if $pid;
     $ENV{'PATH'} = '';
 
     # Delete temporary files.

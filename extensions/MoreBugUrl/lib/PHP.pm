@@ -20,8 +20,8 @@ sub should_handle {
 
     # PHP Bug URLs have only one form:
     #   https://bugs.php.net/bug.php?id=1234
-    return ($uri->authority =~ /^bugs.php.net$/i
-            and $uri->path =~ m|/bug.php$|
+    return (lc($uri->authority) eq 'bugs.php.net'
+            and $uri->path =~ m|/bug\.php$|
             and $uri->query_param('id') =~ /^\d+$/) ? 1 : 0;
 }
 

@@ -21,7 +21,7 @@ sub should_handle {
 
     # Google Code URLs only have one form:
     #   http(s)://code.google.com/p/PROJECT_NAME/issues/detail?id=1234
-    return ($uri->authority =~ /^code.google.com$/i
+    return (lc($uri->authority) eq 'code.google.com'
             and $uri->path =~ m|^/p/[^/]+/issues/detail$|
             and $uri->query_param('id') =~ /^\d+$/) ? 1 : 0;
 }

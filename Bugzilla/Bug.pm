@@ -1446,8 +1446,7 @@ sub _check_component {
     $name || ThrowUserError("require_component");
     my $product = blessed($invocant) ? $invocant->product_obj 
                                      : $params->{product};
-    my $old_comp = blessed($invocant) ? $invocant->component
-                                      : $params->{component};
+    my $old_comp = blessed($invocant) ? $invocant->component : '';
     my $object = Bugzilla::Component->check({ product => $product, name => $name });
     if ($object->name ne $old_comp && !$object->is_active) {
         ThrowUserError('value_inactive', { class => ref($object), value => $name });
@@ -1910,8 +1909,7 @@ sub _check_target_milestone {
     my ($invocant, $target, undef, $params) = @_;
     my $product = blessed($invocant) ? $invocant->product_obj 
                                      : $params->{product};
-    my $old_target = blessed($invocant) ? $invocant->target_milestone
-                                        : $params->{target_milestone};
+    my $old_target = blessed($invocant) ? $invocant->target_milestone : '';
     $target = trim($target);
     $target = $product->default_milestone if !defined $target;
     my $object = Bugzilla::Milestone->check(
@@ -1941,8 +1939,7 @@ sub _check_version {
     $version = trim($version);
     my $product = blessed($invocant) ? $invocant->product_obj 
                                      : $params->{product};
-    my $old_vers = blessed($invocant) ? $invocant->version
-                                      : $params->{version};
+    my $old_vers = blessed($invocant) ? $invocant->version : '';
     my $object = Bugzilla::Version->check({ product => $product, name => $version });
     if ($object->name ne $old_vers && !$object->is_active) {
         ThrowUserError('value_inactive', { class => ref($object), value => $version });

@@ -18,7 +18,7 @@ sub should_handle {
 
     # GetSatisfaction URLs only have one form:
     #   http(s)://getsatisfaction.com/PROJECT_NAME/topics/TOPIC_NAME
-    return ($uri->authority =~ /^getsatisfaction.com$/i
+    return (lc($uri->authority) eq 'getsatisfaction.com'
             and $uri->path =~ m|^/[^/]+/topics/[^/]+$|) ? 1 : 0;
 }
 

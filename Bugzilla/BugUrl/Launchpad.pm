@@ -20,7 +20,7 @@ sub should_handle {
     #   https://bugs.launchpad.net/ubuntu/+bug/1234
     #   https://launchpad.net/bugs/1234
     # All variations end with either "/bugs/1234" or "/+bug/1234"
-    return ($uri->authority =~ /launchpad.net$/
+    return ($uri->authority =~ /launchpad\.net$/
             and $uri->path =~ m|bugs?/\d+$|) ? 1 : 0;
 }
 

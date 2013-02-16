@@ -19,7 +19,7 @@ sub should_handle {
     # RT URLs can look like various things:
     #   http://example.com/rt/Ticket/Display.html?id=1234
     #   https://example.com/Public/Bug/Display.html?id=1234
-    return ($uri->path =~ m|/Display.html$|
+    return ($uri->path =~ m|/Display\.html$|
             and $uri->query_param('id') =~ /^\d+$/) ? 1 : 0;
 }
 

@@ -18,7 +18,7 @@ sub should_handle {
 
     # SourceForge tracker URLs have only one form:
     #  http://sourceforge.net/tracker/?func=detail&aid=111&group_id=111&atid=111
-    return ($uri->authority =~ /^sourceforge.net$/i
+    return (lc($uri->authority) eq 'sourceforge.net'
             and $uri->path =~ m|/tracker/|
             and $uri->query_param('func') eq 'detail'
             and $uri->query_param('aid')

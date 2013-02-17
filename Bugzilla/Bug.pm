@@ -3650,9 +3650,13 @@ sub bug_alias_to_id {
 # Subroutines
 #####################################################################
 
-# Represents which fields from the bugs table are handled by process_bug.cgi.
+# Returns a list of currently active and editable bug fields,
+# including multi-select fields.
 sub editable_bug_fields {
     my @fields = Bugzilla->dbh->bz_table_columns('bugs');
+    # Add multi-select fields
+    push(@fields, map { $_->name } @{Bugzilla->fields({obsolete => 0,
+                                                       type => FIELD_TYPE_MULTI_SELECT})});
     # Obsolete custom fields are not editable.
     my @obsolete_fields = @{ Bugzilla->fields({obsolete => 1, custom => 1}) };
     @obsolete_fields = map { $_->name } @obsolete_fields;
@@ -3660,7 +3664,7 @@ sub editable_bug_fields {
                         "lastdiffed", @obsolete_fields) 
     {
         my $location = firstidx { $_ eq $remove } @fields;
-        # Custom multi-select fields are not stored in the bugs table.
+        # Ensure field exists before attempting to remove it.
         splice(@fields, $location, 1) if ($location > -1);
     }
     # Sorted because the old @::log_columns variable, which this replaces,

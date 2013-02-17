@@ -29,19 +29,24 @@
 %]
 
 [% columns = [
-     { 
+     {
        name => "name"
        heading => "Edit product..."
        contentlink => 'editproducts.cgi?action=edit&amp;product=%%name%%'
      },
-     { 
+     {
        name => "description"
        heading => "Description"
        allow_html_content => 1
      },
-     { 
+     {
        name => "is_active"
        heading => "Open For New $terms.Bugs"
+       yesno_field => 1
+     },
+     {
+       name => "allows_unconfirmed"
+       heading => "Allow UNCONFIRMED $terms.Bugs"
        yesno_field => 1
      },
 ] %]

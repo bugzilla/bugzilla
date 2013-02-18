@@ -638,8 +638,8 @@ use constant ABSTRACT_SCHEMA => {
                                             DELETE => 'CASCADE'}},
         ],
         INDEXES => [
-            flaginclusions_type_id_idx =>
-                [qw(type_id product_id component_id)],
+            flaginclusions_type_id_idx => { FIELDS => [qw(type_id product_id component_id)],
+                                            TYPE   => 'UNIQUE' },
         ],
     },
 
@@ -659,8 +659,8 @@ use constant ABSTRACT_SCHEMA => {
                                             DELETE => 'CASCADE'}},
         ],
         INDEXES => [
-            flagexclusions_type_id_idx =>
-                [qw(type_id product_id component_id)],
+            flagexclusions_type_id_idx => { FIELDS => [qw(type_id product_id component_id)],
+                                            TYPE   => 'UNIQUE' },
         ],
     },
 

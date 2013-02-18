@@ -13,12 +13,14 @@
   # be overridden by the calling templates.
   #%]
 
+[% filtered_alias = bug.alias FILTER html %]
 [% filtered_desc = bug.short_desc FILTER html %]
-[% subheader = filtered_desc %]
 [% filtered_timestamp = bug.delta_ts FILTER time %]
+
+[% subheader = filtered_desc %]
 [% title = "$terms.Bug $bug.bug_id &ndash; " %]
 [% IF bug.alias != '' %]
-  [% title = title _ "($bug.alias) " %]
+  [% title = title _ "($filtered_alias) " %]
 [% END %]
 [% title = title _ filtered_desc %]
 [% yui = ['autocomplete', 'calendar'] %]

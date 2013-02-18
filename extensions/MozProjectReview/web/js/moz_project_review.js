@@ -34,7 +34,8 @@ MPR.required_fields = {
         "finance_purchase_cost": "Please enter a value for total cost in the finance questions section"
     },
     "legal_questions": {
-        "legal_priority": "Please select a priority for the legal questions section"
+        "legal_priority": "Please select a priority for the legal questions section",
+        "legal_help_from_legal": "Please describe the help needed from the Legal department",
     },
     "legal_sow_questions": {
         "legal_sow_vendor_name": "Please enter a value for SOW legal vendor name",

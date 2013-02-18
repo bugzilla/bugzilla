@@ -56,34 +56,31 @@ sub post_bug_after_creation {
 
     if ($params->{new_or_change} eq 'New') {
         $do_legal = 1;
-        $do_privacy_policy = 1;
-    }
-    elsif ($params->{new_or_change} eq 'Existing') {
-        $do_legal = 1;
     }
 
-    if ($params->{separate_party} eq 'Yes'
-        && $params->{relationship_type} ne 'Hardware Purchase') 
-    {
-        $do_legal = 1;
-    }
+    if ($params->{separate_party} eq 'Yes') {
+        if ($params->{relationship_type} ne 'Hardware Purchase') {
+            $do_legal = 1;
+        }
 
-    if ($params->{data_access} eq 'Yes') {
-        $do_privacy_policy = 1;
-        $do_sec_review = 1;
-    }
+        if ($params->{data_access} eq 'Yes') {
+            $do_privacy_policy = 1;
+            $do_legal = 1;
+            $do_sec_review = 1;
+        }
 
-    if ($params->{data_access} eq 'Yes'
-        && $params->{'privacy_policy_vendor_user_data'} eq 'Yes') 
-    {
-        $do_privacy_vendor = 1;
-    }
+        if ($params->{data_access} eq 'Yes'
+            && $params->{'privacy_policy_vendor_user_data'} eq 'Yes') 
+        {
+            $do_privacy_vendor = 1;
+        }
 
-    if ($params->{vendor_cost} eq '> $25,000' 
-        || ($params->{vendor_cost} eq '<= $25,000'
-            && $params->{po_needed} eq 'Yes')) 
-    {
-        $do_finance = 1;
+        if ($params->{vendor_cost} eq '> $25,000' 
+            || ($params->{vendor_cost} eq '<= $25,000'
+                && $params->{po_needed} eq 'Yes')) 
+        {
+            $do_finance = 1;
+        }
     }
 
     my ($sec_review_bug, $legal_bug, $finance_bug, $privacy_vendor_bug,

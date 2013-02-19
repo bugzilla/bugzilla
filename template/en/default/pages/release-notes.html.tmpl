@@ -81,7 +81,7 @@
 <h3 id="v44_req_modules">Required Perl Modules</h3>
 
 [% INCLUDE req_table reqs = REQUIRED_MODULES
-                     updated = ['TimeDate', 'DBI', 'Email-Send'] %]
+                     updated = ['TimeDate', 'DBI', 'Email-Send', 'List-MoreUtils'] %]
 
 <h3 id="v44_req_optional_mod">Optional Perl Modules</h3>
 
@@ -116,6 +116,8 @@
 <h2 id="v44_feat">New Features and Improvements</h2>
 
 <ul>
+  <li><a href="#v44_feat_search">Allow Multiple Search Criteria to Match one Field</a></li>
+  <li><a href="#v44_feat_search_perf">Improved Performance for Searches</a></li>
   <li><a href="#v44_feat_bug_tags">Overhaul of the Tagging System</a></li>
   <li><a href="#v44_feat_mimetype_autodetect">Auto-Detection of the Attachment MIME Type</a></li>
   <li><a href="#v44_feat_saved_reports">Saving Tabular and Graphical Reports</a></li>
@@ -124,6 +126,43 @@
   <li><a href="#v44_feat_apache_config">New Apache Configuration</a></li>
   <li><a href="#v44_feat_other">Other Enhancements and Changes</a></li>
 </ul>
+
+<h3 id="v44_feat_search">Allow Multiple Search Criteria to Match one Field</h3>
+
+<p>
+  In the "Advanced Search" page, it is now possible to build queries using
+  multiple custom search criteria against the same field. In [% terms.Bugzilla %]
+  4.2 and older, queries of the form
+  <br><br>
+  <kbd>"Status changed to VERIFIED" AND "Status changed by foo@bar.com"</kbd>
+  <br><br>
+  were returning all [% terms.bugs %] which had their status changed to VERIFIED
+  by some user and which were edited by foo@bar.com once, but both actions could
+  be independent. In [% terms.Bugzilla %] 4.4, you can now decide if both
+  criteria must match the exact same action or not, i.e. if you want
+  [%+ terms.bugs %] whose status has been set to VERIFIED by foo@bar.com himself.
+  In the same way, queries of the form
+  <br><br>
+  <kbd>"Flags changed to approval+" AND "Flags changed by foo@bar.com"</kbd>
+  <br><br>
+  can now return [% terms.bugs %] for which the approval flag has been set to
+  "+" by foo@bar.com himself. In previous versions, both actions were treated
+  independently and [% terms.bugs %] for which foo@bar.com set the approval flag
+  to "?" and which is then set to "+" by someone else were also returned.
+</p>
+<p>
+  This new feature gives you the ability to build more accurate queries and to
+  get more relevant results.
+</p>
+
+<h3 id="v44_feat_search_perf">Improved Performance for Searches</h3>
+
+<p>
+  The search system got a performance boost which in some cases decreases the
+  time spent to run queries from several minutes to a few seconds only.
+  The more complex your queries are, and the more visible the performance win
+  should be.
+</p>
 
 <h3 id="v44_feat_bug_tags">Overhaul of the Tagging System</h3>
 
@@ -266,6 +305,8 @@
     are no longer resolved to their [% terms.bug %] ID, meaning that it is no
     longer possible to connect an alias with its ID unless you can see the
     [%+ terms.bug %].</li>
+  <li><strong>Searches:</strong> Custom multi-select fields are now available
+    in the "Search By Change History" section of the query page.</li>
   <li><strong>Searches:</strong> The <em>changed by</em> operator in boolean
     charts now accepts pronouns.</li>
   <li><strong>Searches:</strong> The requester and requestee fields in boolean
@@ -283,6 +324,9 @@
     notifications when the product or component of [% terms.abug %] changes.</li>
   <li><strong>Email Notifications:</strong> All [% terms.bug %]mails now have
     a <em>X-Bugzilla-Flags</em> email header, listing currently set flags.</li>
+  <li><strong>Email Notifications:</strong> All [% terms.bug %]mails now have
+    a <em>X-Bugzilla-Version</em> email header with the current product
+    version.</li>
   <li><strong>Whining:</strong> The sort order of the saved search is used to
     sort [% terms.bugs %] in the emails.</li>
   <li><strong>User Accounts:</strong> To confirm an email address change, the
@@ -297,6 +341,9 @@
     <em>X-Priority</em> email headers to increase or decrease the initial
     priority of the [% terms.bug %], unless the priority is already explicitly
     set in the email itself.</li>
+  <li><strong>Skins:</strong> [% terms.Bugzilla %] no longer fetches all skins
+    available when viewing a page. It only loads the skin selected by the user
+    in his preferences, which results in less requests to the server.</li>
 </ul>
 
 <h4>Enhancements for Administrators and Developers</h4>
@@ -330,6 +377,9 @@
   <li><strong>Administration:</strong> Target milestones can now be 64 characters
     long, for consistency with versions (previously was limited to 20 characters
     only).</li>
+  <li><strong>Administration:</strong> The result code returned by
+    <kbd>contrib/bugzilla-queue.rhel</kbd> when it's not running is now 2
+    instead of 0.</li>
   <li><strong>Database:</strong> Support for Oracle has been greatly improved.</li>
   <li><strong>Security:</strong> For improved security, the
     "X-Content-Type-Options:&nbsp;nosniff" and "X-XSS-Protection:&nbsp;block"
@@ -347,6 +397,8 @@
     <kbd>B[%%]ugzilla.parameters</kbd>, <kbd>B[%%]ugzilla.last_audit_time</kbd>,
     <kbd>Classification.get</kbd>, <kbd>Group.update</kbd>,
     <kbd>Product.update</kbd>, <kbd>User.update</kbd>.</li>
+  <li><kbd>B[%%]ug.add_attachment</kbd> now only returns the ID of the newly
+    created attachments instead of all the attachment data.</li>
   <li><kbd>B[%%]ug.attachments</kbd> now also returns the <kbd>size</kbd> field
     containing the size of the attachment.</li>
   <li><kbd>B[%%]ug.attachments</kbd> and <kbd>B[%%]ug.get</kbd> now return
@@ -436,6 +488,9 @@
     tables and columns are joined in queries. In combination with the
     <kbd>buglist_columns</kbd> hook, this permits to customize the list of
     columns to display in buglists.</li>
+  <li>There is a new code hook <kbd>bug_start_of_update</kbd> which is called
+    after <kbd>object_end_of_update</kbd> but before <kbd>bug_end_of_update</kbd>
+    for a better control on how to update [% terms.bugs %].</li>
   <li>There is a new code hook <kbd>bug_url_sub_classes</kbd> to support
     additional URLs in the See Also field.</li>
   <li>There is a new code hook <kbd>error_catch</kbd> to catch errors thrown
@@ -446,6 +501,15 @@
   <li>It is now illegal to have a product with no components and no versions.
     Trying to delete the last component or version of a product is now
     rejected.</li>
+  <li>Trying to set the component, target milestone or version of [% terms.abug %]
+    to a disabled value is no longer accepted. The change will be rejected.</li>
+  <li>The comment box now checks the returned value of check_can_change_field()
+    to determine if it should be displayed or not. This means its visibility
+    can now be controlled by the <kbd>bug_check_can_change_field</kbd> hook.</li>
+  <li>Flags now checks the returned value of check_can_change_field() to
+    determine if they should appear as editable or not. This means their
+    visibility can now be controlled by the <kbd>bug_check_can_change_field</kbd>
+    hook.</li>
   <li>Quips can no longer exceed 512 characters. Existing quips longer than
     that are automatically truncated when upgrading.</li>
   <li>The static <kbd>bugzilla.dtd</kbd> file has been replaced by a dynamic
@@ -467,8 +531,8 @@
   <li>It is now legal to call <kbd>B[%%]ugzilla::Version->check({ id => $id })</kbd>
     and <kbd>B[%%]ugzilla::Milestone->check({ id => $id })</kbd> to validate
     and get an object using its ID.</li>
-  <li>Rows in the <kbd>dependencies</kbd> DB table are now enforced to be
-    unique.</li>
+  <li>Rows in the <kbd>dependencies</kbd>, <kbd>flaginclusions</kbd> and
+    <kbd>flagexclusions</kbd> DB tables are now enforced to be unique.</li>
   <li>The <kbd>b[%%]ugs_activity</kbd> and <kbd>profiles_activity</kbd> DB
     tables now have an auto-incremented primary key named <kbd>id</kbd>.</li>
   <li>A custom <kbd>B[%%]ugzilla.pm</kbd> module has been added into

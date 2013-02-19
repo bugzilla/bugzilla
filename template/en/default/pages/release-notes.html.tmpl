@@ -53,6 +53,39 @@
 
 <h2 id="v42_point">Updates in this 4.2.x Release</h2>
 
+<h3>4.2.5</h3>
+
+<p>This release fixes one security issue. See the
+  <a href="http://www.bugzilla.org/security/3.6.12/">Security Advisory</a>
+  for details.</p>
+
+<p>In addition, the following important fixes/changes have been made in this
+  release:</p>
+
+<ul>
+  <li>Queries involving commenters were slow to return results. These queries
+    have been optimized for better performance.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=818007">[% terms.Bug %] 818007</a>)</li>
+  <li>It is no longer possible to create a new [% terms.bug %] using a disabled
+    component, target milestone or version. These inactive values are also no
+    longer accessible when moving [% terms.abug %] into another product.
+    ([% terms.Bugs %] <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=752946">752946</a>
+    and <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=840824">840824</a>)</li>
+  <li>It was possible to create a new [% terms.bug %] with no description
+    despite the status workflow required one for new [% terms.bugs %].
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=818890">[% terms.Bug %] 818890</a>)</li>
+  <li>Custom multi-select fields are now available in the "Search By Change
+    History" section of the "Advanced Search" page.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=839950">[% terms.Bug %] 839950</a>)</li>
+  <li>A custom select field could have its list of values truncated if one
+    or more of its values were disabled and the visibility of the values were
+    controlled by another field.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=806809">[% terms.Bug %] 806809</a>)</li>
+  <li>Warnings thrown by Return::Value 1.666002 about this deprecated module
+    and which are polluting the web server error log are now disabled.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=826678">[% terms.Bug %] 826678</a>)</li>
+</ul>
+
 <h3>4.2.4</h3>
 
 <p>This release fixes several security issues. See the

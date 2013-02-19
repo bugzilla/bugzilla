@@ -434,8 +434,8 @@ use constant MAX_LOGIN_ATTEMPTS => 5;
 use constant LOGIN_LOCKOUT_INTERVAL => 30;
 
 # The maximum number of seconds the Strict-Transport-Security header
-# will remain valid. BMO uses one month.
-use constant MAX_STS_AGE => 2629744;
+# will remain valid. BMO uses one year.
+use constant MAX_STS_AGE => 31536000;
 
 # Protocols which are considered as safe.
 use constant SAFE_PROTOCOLS => ('afs', 'cid', 'ftp', 'gopher', 'http', 'https',

@@ -226,7 +226,13 @@ $vars->{'width'} = $width if $width;
 $vars->{'height'} = $height if $height;
 
 $vars->{'query'} = $query;
-$vars->{'debug'} = $cgi->param('debug');
+
+if ($cgi->param('debug')
+    && Bugzilla->params->{debug_group}
+    && Bugzilla->user->in_group(Bugzilla->params->{debug_group})
+) {
+    $vars->{'debug'} = 1;
+}
 
 if ($action eq "wrap") {
     # So which template are we using? If action is "wrap", we will be using

@@ -72,6 +72,22 @@
 
 <h2 id="v40_point">Updates in this 4.0.x Release</h2>
 
+<h3>4.0.10</h3>
+
+<p>This release fixes two security issues. See the
+  <a href="http://www.bugzilla.org/security/3.6.12/">Security Advisory</a>
+  for details.</p>
+
+<p>In addition, the following [% terms.bugs %] have been fixed in this release:</p>
+
+<ul>
+  <li>Warnings thrown by Return::Value 1.666002 about this deprecated module
+    and which are polluting the web server error log are now disabled.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=826678">[% terms.Bug %] 826678</a>)</li>
+  <li>[% terms.Bugzilla %] now works correctly with Perl 5.16.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=771100">[% terms.Bug %] 771100</a>)</li>
+</ul>
+
 <h3>4.0.9</h3>
 
 <p>This release fixes several security issues. See the

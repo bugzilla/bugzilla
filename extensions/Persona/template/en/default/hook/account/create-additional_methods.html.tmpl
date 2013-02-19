@@ -22,7 +22,8 @@ function persona_create_account() {
 </script>
 
 Or, use your Persona account:
-<img src="extensions/Persona/web/images/sign_in.png" onclick="persona_create_account()">
+<img src="extensions/Persona/web/images/sign_in.png" onclick="persona_create_account()"
+     width="95" height="25" align="absmiddle">
 
 <form id="persona_form" method="POST" action="index.cgi">
   <input type="hidden" name="token" value="[% issue_hash_token(['login']) FILTER html %]">

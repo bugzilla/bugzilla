@@ -721,7 +721,10 @@ $::SIG{PIPE} = 'DEFAULT';
 my ($data, $extra_data) = $search->data;
 $vars->{'search_description'} = $search->search_description;
 
-if ($cgi->param('debug')) {
+if ($cgi->param('debug')
+    && Bugzilla->params->{debug_group}
+    && $user->in_group(Bugzilla->params->{debug_group})
+) {
     $vars->{'debug'} = 1;
     $vars->{'queries'} = $extra_data;
     my $query_time = 0;

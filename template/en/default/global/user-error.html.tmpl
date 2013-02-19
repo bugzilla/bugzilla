@@ -741,7 +741,10 @@
     [% title = "Format Not Found" %]
     The requested format <em>[% format FILTER html %]</em> does not exist with
     a content type of <em>[% ctype FILTER html %]</em>.
-    
+    [% IF invalid %]
+      Both parameters must contain letters and hyphens only.
+    [% END %]
+
   [% ELSIF error == "flag_type_sortkey_invalid" %]
     [% title = "Flag Type Sort Key Invalid" %]
     The sort key <em>[% sortkey FILTER html %]</em> must be an integer

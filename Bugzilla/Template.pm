@@ -98,9 +98,12 @@ sub get_format {
     $ctype ||= 'html';
     $format ||= '';
 
-    # Security - allow letters and a hyphen only
-    $ctype =~ s/[^a-zA-Z\-]//g;
-    $format =~ s/[^a-zA-Z\-]//g;
+    # ctype and format can have letters and a hyphen only.
+    if ($ctype =~ /[^a-zA-Z\-]/ || $format =~ /[^a-zA-Z\-]/) {
+        ThrowUserError('format_not_found', {'format' => $format,
+                                            'ctype'  => $ctype,
+                                            'invalid' => 1});
+    }
     trick_taint($ctype);
     trick_taint($format);
 
@@ -126,6 +129,7 @@ sub get_format {
     return
     {
         'template'    => $template,
+        'format'      => $format,
         'extension'   => $ctype,
         'ctype'       => Bugzilla::Constants::contenttypes->{$ctype}
     };

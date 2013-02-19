@@ -35,7 +35,7 @@
 <!ENTITY bz-ver "4.0.10">
 <!ENTITY bz-nextver "4.2">
 <!ENTITY bz-date "2013-02-19">
-<!ENTITY current-year "2012">
+<!ENTITY current-year "2013">
 
 <!ENTITY landfillbase "http://landfill.bugzilla.org/bugzilla-4.0-branch/">
 <!ENTITY bz "http://www.bugzilla.org/">

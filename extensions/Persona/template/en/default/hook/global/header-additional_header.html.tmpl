@@ -32,9 +32,8 @@ function createHidden(name, value, form) {
 }
 
 function persona_sign_in() {
-  navigator.id.request({ siteName: '[% terms.BugzillaTitle FILTER js %]' });
   navigator.id.watch({
-    loggedInUser: [% IF user.id %]'[% user.login FILTER js %]'[% ELSE %]null[% END %],
+    loggedInUser: null,
     onlogin: function(assertion) {
       var form = document.createElement('form');
       form.action = '[% login_target FILTER js %]';
@@ -61,5 +60,6 @@ function persona_sign_in() {
       return true;
     }
   });
+  navigator.id.request({ siteName: '[% terms.BugzillaTitle FILTER js %]' });
 }
 </script>

@@ -1,222 +1,751 @@
-[%# 1.0@bugzilla.org %]
-[%# The contents of this file are subject to the Mozilla Public
-  # License Version 1.1 (the "License"); you may not use this file
-  # except in compliance with the License. You may obtain a copy of
-  # the License at http://www.mozilla.org/MPL/
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
   #
-  # Software distributed under the License is distributed on an "AS
-  # IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
-  # implied. See the License for the specific language governing
-  # rights and limitations under the License.
-  #
-  # The Original Code is the Bugzilla Bug Tracking System.
-  #
-  # The Initial Developer of the Original Code is Mozilla Corporation.
-  # Portions created by Mozilla are Copyright (C) 2008 Mozilla
-  # Corporation. All Rights Reserved.
-  #
-  # Contributor(s): Reed Loden <reed@mozilla.com>
-  #                 David Tran <dtran@mozilla.com>
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
   #%]
 
 [% PROCESS global/variables.none.tmpl %]
 
-[% PROCESS global/header.html.tmpl
-   title = "Swag Request Form"
-   javascript_urls = [ 'extensions/BMO/web/js/swag.js', 
-                       'extensions/BMO/web/js/form_validate.js',
-                       'js/field.js' ]
-   yui = [ 'autocomplete' ]
+[%
+items = [
+  { id => '',         name => 'splendidest gear',                },
+  { id => '#157454S', name => 'very splendid package, men, s'    },
+  { id => '#157454M', name => 'very splendid package, men, m'    },
+  { id => '#157454L', name => 'very splendid package, men, l'    },
+  { id => '#157454X', name => 'very splendid package, men, xl'   },
+  { id => '#157452S', name => 'very splendid package, women, s'  },
+  { id => '#157452M', name => 'very splendid package, women, m'  },
+  { id => '#157452L', name => 'very splendid package, women, l'  },
+  { id => '#157452X', name => 'very splendid package, women, xl' },
+  { id => '#157451S', name => 'most splendid package, s'         },
+  { id => '#157451M', name => 'most splendid package, m '        },
+  { id => '#157451L', name => 'most splendid package, l'         },
+  { id => '#157451X', name => 'most splendid package, xl'        },
+  { id => '#155415S', name => 'sweatshirt, s'                    },
+  { id => '#155415M', name => 'sweatshirt, m'                    },
+  { id => '#155415L', name => 'sweatshirt, l'                    },
+  { id => '#155415X', name => 'sweatshirt, xl'                   },
+  { id => '#1554152', name => 'sweatshirt, 2x'                   },
+  { id => '#155749',  name => 'rickshaw messenger bag'           },
+  { id => '#155752',  name => 'moleskine notebook (black)'       },
+  { id => '',         name => 'splendider gear',                 },
+  { id => '#155341S', name => 'unisex t, poppy, s'               },
+  { id => '#155341M', name => 'unisex t, poppy, m'               },
+  { id => '#155341L', name => 'unisex t, poppy, l'               },
+  { id => '#155341X', name => 'unisex t, poppy, xl'              },
+  { id => '#1553412', name => 'unisex t, poppy, 2x'              },
+  { id => '#155344S', name => 'ladies t, poppy, s'               },
+  { id => '#155344M', name => 'ladies t, poppy, m'               },
+  { id => '#155344L', name => 'ladies t, poppy, l'               },
+  { id => '#155342S', name => 'unisex t, navy, s'                },
+  { id => '#155342M', name => 'unisex t, navy, m'                },
+  { id => '#155342L', name => 'unisex t, navy, l'                },
+  { id => '#155342X', name => 'unisex t, navy, xl'               },
+  { id => '#1553422', name => 'unisex t, navy, 2x'               },
+  { id => '#1553423', name => 'unisex t, navy, 3x'               },
+  { id => '#155413S', name => 'ladies t, navy, s'                },
+  { id => '#155413M', name => 'ladies t, navy, m'                },
+  { id => '#155413L', name => 'ladies t, navy, l'                },
+  { id => '#155413X', name => 'ladies t, navy, xl'               },
+  { id => '#155343M', name => 'unisex t, lapis, m'               },
+  { id => '#155343L', name => 'unisex t, lapis, l'               },
+  { id => '#155343X', name => 'unisex t, lapis, xl'              },
+  { id => '#155414S', name => 'ladies t, lapis, s'               },
+  { id => '#155414M', name => 'ladies t, lapis, m'               },
+  { id => '#155414L', name => 'ladies t, lapis, l'               },
+  { id => '#155339',  name => 'black cap w/tote'                 },
+  { id => '#155340',  name => 'beanie'                           },
+  { id => '#155751',  name => 'drawstring tote'                  },
+  { id => '#155758',  name => 'glossy finish ceramic mug'        },
+  { id => '',         name => 'splendid gear',                   },
+  { id => '#155755',  name => 'vertical laminated badge'         },
+  { id => '#155754',  name => 'lanyard w/bulldog clip'           },
+  { id => '#155756',  name => 'silicone wristband'               },
+  { id => '#155753',  name => '3" round stickers (single)'       },
+  { id => '#155757',  name => 'mozilla tattoos (pkg 50)'         },
+]
 %]
 
-<div style='text-align: center; width: 98%; font-size: 2em; font-weight: bold; margin: 10px;'>Swag Request Form</div>
+[%
+mozspaces = [
+  {
+    name     => 'Mountain View',
+    address1 => 'Mozilla',
+    address2 => '650 Castro St., Suite 300',
+    city     => 'Mountain View',
+    state    => 'CA',
+    country  => 'USA',
+    postcode => '94041-2072',
+  },
+  {
+    name     => 'San Francisco',
+    address1 => 'Mozilla',
+    address2 => '2 Harrison Street, 7th Floor',
+    city     => 'San Francisco',
+    state    => 'CA',
+    country  => 'USA',
+    postcode => '94105',
+  },
+  {
+    name     => 'Toronto',
+    address1 => 'Mozilla Canada',
+    address2 => '366 Adelaide Street W, Suite 500',
+    city     => 'Toronto',
+    state    => 'Ontario',
+    country  => 'Canada',
+    postcode => 'M5V 1R9',
+  },
+  {
+    name     => 'Vancouver',
+    address1 => 'Mozilla Canada',
+    address2 => '163 West Hastings Street, Suite 209',
+    city     => 'Vancouver',
+    state    => 'BC',
+    country  => 'Canada',
+    postcode => 'V6B 1H5',
+  },
+  {
+    name     => 'London',
+    address1 => 'Mozilla London',
+    address2 => '101 St. Martin\'s Lane, 3rd Floor',
+    city     => 'London',
+    state    => 'Greater London',
+    country  => 'UK',
+    postcode => 'WC2N 4AZ',
+  },
+  {
+    name     => 'Paris',
+    address1 => 'Mozilla',
+    address2 => '28 Boulevard Poissonnière',
+    city     => 'Paris',
+    state    => 'Paris',
+    country  => 'France',
+    postcode => '75009',
+  },
+  {
+    name     => 'Berlin',
+    address1 => 'MZ Denmark ApS - Germany',
+    address2 => 'Rungestrasse 22 - 24',
+    city     => 'Berlin',
+    state    => 'Germany',
+    country  => 'Germany',
+    postcode => '10179',
+  },
+]
+%]
 
-<p><strong>Swag Request:</strong> Please use this form to file a request for swag. </p>
+[% inline_style = BLOCK %]
+#gear_form th {
+  text-align: right;
+  font-weight: normal;
+}
 
-<ol>
-  <li>You first need submit a <a href="/enter_bug.cgi?product=Marketing&amp;format=mktgevent">Event Request Form</a>. You'll be asked for the [% terms.bug %] number below.</li>
-  <li>Complete and submit request below.</li>
-  <li>Your request will be reviewed by the appropriate person in the Engagement team.</li>
-  <li>Your swag request will be reviewed and if approved shipped to you from
-      one of our two fulfillment houses. <i>Please note that swag is expensive and
-      products change over time - we are happy to send you a small quantity of swag
-      to use at your event!</i></li>
-</ol>
- 
-<p>These requests will only be visible to the person who submitted the request,
-any persons designated in the CC line, and authorized members of the Mozilla
-Engagement team.</p>
+#gear_form .heading {
+  text-align: left;
+  font-weight: bold;
+  border-top: 2px dotted #969696;
+}
 
-<script language="javascript" type="text/javascript">
-function trySubmit() {
+.mandatory {
+  color: red;
+}
+[% END %]
 
-  var firstname = document.getElementById('firstname').value;
-  var lastname = document.getElementById('lastname').value;
-  var requester = firstname + ' ' + lastname;
-  var shortdesc = 'Swag Request - ' + requester;
-  document.getElementById('short_desc').value = shortdesc;
+[% inline_javascript = BLOCK %]
+var Dom = YAHOO.util.Dom;
+var needed = {
+[% FOREACH item = items %]
+  [% NEXT UNLESS item.id %]
+  '[% item.id FILTER js %]': 0[% ',' UNLESS loop.last %]
+[% END %]
+};
 
-  // the following fields we don't let the user mess with because they're
-  // calculated, but they need to be submitted, and disabled fields don't submit
-  document.getElementById('Totalswag').disabled = false;
-  document.getElementById('mens_total').disabled = false;
-  document.getElementById('womens_total').disabled = false;
-  
-  return true;
+var gear = [
+[% FOREACH item = items %]
+  { id: '[% item.id FILTER js %]', name: '[% item.name FILTER js %]' }
+  [% ',' UNLESS loop.last %]
+[% END %]
+];
+
+var mozspaces = {
+[% FOREACH space = mozspaces %]
+  '[% space.name FILTER js %]': {
+    [% FOREACH key = space.keys.sort %]
+      '[% key FILTER js %]': '[% space.$key FILTER js %]'[% ',' UNLESS loop.last %]
+    [% END %]
+  }[% ',' UNLESS loop.last %]
+[% END %]
+};
+
+[%# implemented this way to allow for dynamic updating of mandatory fields #%]
+var fields = [
+  { id: 'firstname',       mandatory: true  },
+  { id: 'lastname',        mandatory: true  },
+  { id: 'email',           mandatory: true  },
+  { id: 'mozspace',        mandatory: false },
+  { id: 'teamcode',        mandatory: true  },
+  { id: 'purpose',         mandatory: true  },
+  { id: 'purpose_other',   mandatory: false },
+  { id: 'date_required',   mandatory: false },
+  { id: 'items',           mandatory: true  },
+  { id: 'shiptofirstname', mandatory: true  },
+  { id: 'shiptolastname',  mandatory: true  },
+  { id: 'shiptoemail',     mandatory: true  },
+  { id: 'shiptoaddress1',  mandatory: true  },
+  { id: 'shiptoaddress2',  mandatory: false },
+  { id: 'shiptocity',      mandatory: true  },
+  { id: 'shiptostate',     mandatory: true  },
+  { id: 'shiptocountry',   mandatory: true  },
+  { id: 'shiptopostcode',  mandatory: true  },
+  { id: 'shiptophone',     mandatory: true  },
+  { id: 'shiptoidrut',     mandatory: false },
+  { id: 'comment',         mandatory: false }
+];
+
+function initFields() {
+  [%# find fields in the form, and update the fields array #%]
+  var rows = Dom.get('gear_form').getElementsByTagName('TR');
+  for (var i = 0, l = rows.length; i < l; i++) {
+    var row = rows[i];
+    var field = firstChild(row, 'INPUT') || firstChild(row, 'SELECT') || firstChild(row, 'TEXTAREA');
+    if (!field || field.type == 'submit') continue;
+    var id = field.id;
+    var label = firstChild(row, 'TH');
+    for (var j = 0, m = fields.length; j < m; j++) {
+      if (fields[j].id == id) {
+        fields[j].field = field;
+        fields[j].label = label;
+        fields[j].caption = label.textContent;
+        break;
+      }
+    }
+  }
+  createCalendar('date_required');
+}
+
+function tagMandatoryFields() {
+  [%# add or remove the "* mandatory" marker from fields #%]
+  for (var i = 0, l = fields.length; i < l; i++) {
+    var f = fields[i];
+    if (!f.label) continue;
+    var caption = f.caption;
+    if (f.mandatory)
+      caption = caption + '&nbsp;<span class="mandatory">*</span>';
+    f.label.innerHTML = caption;
+  }
 }
 
 function validateAndSubmit() {
-
   var alert_text = '';
-  if(!isFilledOut('firstname')) alert_text += "Please enter your first name\n";
-  if(!isFilledOut('lastname')) alert_text += "Please enter your last name\n";
-  if(!isFilledOut('dependson')) alert_text += "Please enter the [% terms.bug %] number for your Event Request Form\n";
-  if(!isValidEmail(document.getElementById('email').value)) alert_text += "Please enter a valid email address\n";
-  
-  //Everything required is filled out..try to submit the form!
-  if(alert_text == '') {
-    return trySubmit();
+  for(var i = 0, l = fields.length; i < l; i++) {
+    var f = fields[i];
+    if (f.mandatory && !isFilledOut(f.id))
+      if (f.field.nodeName == 'SELECT') {
+        alert_text += 'Please select the ' + f.caption + ".\n";
+      } else {
+        alert_text += 'Please enter the ' + f.caption + ".\n";
+      }
+  }
+  if (isFilledOut('email') && !isValidEmail(Dom.get('email').value))
+    alert_text += "Please enter a valid Email Address.\n";
+  if (isFilledOut('shiptoemail') && !isValidEmail(Dom.get('shiptoemail').value))
+    alert_text += "Please enter a valid Shipping Email Address.\n";
+
+  if (alert_text != '') {
+    alert(alert_text);
+    return false;
   }
 
-  //alert text, stay here on the pagee
-  alert(alert_text);
+  Dom.get('short_desc').value = 'Mozilla Gear - ' + Dom.get('firstname').value + ' ' + Dom.get('lastname').value;
+  return true;
+}
+
+function onPurposeChange() {
+  var value = Dom.get('purpose').value;
+  var other = Dom.get('purpose_other');
+
+  if (value == 'Event') {
+    getField('purpose_other').mandatory = true;
+    other.placeholder = 'link to wiki'
+    Dom.removeClass('purpose_other_row', 'bz_default_hidden');
+    Dom.addClass('recognition_row', 'bz_default_hidden');
+
+  } else if (value == 'Gear Space Stock') {
+    getField('purpose_other').mandatory = true;
+    other.placeholder = 'indicate space'
+    Dom.removeClass('purpose_other_row', 'bz_default_hidden');
+    Dom.addClass('recognition_row', 'bz_default_hidden');
+
+  } else if (value == 'Other') {
+    getField('purpose_other').mandatory = true;
+    other.placeholder = 'more information';
+    Dom.removeClass('purpose_other_row', 'bz_default_hidden');
+    Dom.addClass('recognition_row', 'bz_default_hidden');
+
+  } else if (value == 'Mozillian Recognition') {
+    getField('purpose_other').mandatory = false;
+    Dom.addClass('purpose_other_row', 'bz_default_hidden');
+    Dom.removeClass('recognition_row', 'bz_default_hidden');
+    onRecognitionChange();
+
+  } else {
+    getField('purpose_other').mandatory = false;
+    Dom.addClass('purpose_other_row', 'bz_default_hidden');
+    Dom.addClass('recognition_row', 'bz_default_hidden');
+  }
+
+  onRecognitionChange();
+}
+
+function onRecognitionChange() {
+  var mandatory = Dom.get('purpose').value != 'Mozillian Recognition'
+                  || !Dom.get('recognition_shipping').checked;
+  getField('shiptoaddress1').mandatory = mandatory;
+  getField('shiptocity').mandatory = mandatory;
+  getField('shiptostate').mandatory = mandatory;
+  getField('shiptocountry').mandatory = mandatory;
+  getField('shiptopostcode').mandatory = mandatory;
+  getField('shiptophone').mandatory = mandatory && !Dom.get('shipto_mozspace').checked;
+  tagMandatoryFields();
+}
+
+function onMozSpaceChange() {
+  if (Dom.get('mozspace').value) {
+    Dom.removeClass('shipto_mozspace_container', 'bz_default_hidden');
+  } else {
+    Dom.addClass('shipto_mozspace_container', 'bz_default_hidden');
+  }
+  onShipToMozSpaceClick();
+}
+
+function onShipToMozSpaceClick() {
+  var address1 = address2 = city = state = country = postcode = '';
+  if (Dom.get('shipto_mozspace').checked) {
+    var space = Dom.get('mozspace').value;
+    address1 = mozspaces[space].address1;
+    address2 = mozspaces[space].address2;
+    city = mozspaces[space].city;
+    state = mozspaces[space].state;
+    country = mozspaces[space].country;
+    postcode = mozspaces[space].postcode;
+  }
+  Dom.get('shiptoaddress1').value = address1;
+  Dom.get('shiptoaddress2').value = address2;
+  Dom.get('shiptocity').value = city;
+  Dom.get('shiptostate').value = state;
+  Dom.get('shiptocountry').value = country;
+  Dom.get('shiptopostcode').value = postcode;
+  Dom.get('shiptophone').value = '';
+  Dom.get('shiptoidrut').value = '';
+  onRecognitionChange();
+}
+
+function firstChild(parent, name) {
+  var a = parent.getElementsByTagName(name);
+  return a.length == 0 ? false : a[0];
+}
+
+function getField(id) {
+  for(var i = 0, l = fields.length; i < l; i++) {
+    if (fields[i].id == id)
+      return fields[i];
+  }
   return false;
 }
 
-</script>
+function addGear() {
+  var quantity = parseInt(Dom.get('quantity').value, 10);
+  var id = Dom.get('add_gear').value;
+  if (!quantity || !id) return;
+  needed[id] += quantity;
+  showGear();
+}
+
+function removeGear(id) {
+  if (!id) return;
+  needed[id] = 0;
+  showGear();
+}
+
+function showGear() {
+  var html = '<table border="0" cellpadding="2" cellspacing="0">';
+  var text = '';
+  var count = 0;
+  for (var i = 0, l = gear.length; i < l; i++) {
+    var item = gear[i];
+    var id = item.id;
+    if (!id) continue;
+    if (!needed[id]) continue;
+    count += needed[id];
+    html += '<tr>' +
+            '<td>' + needed[id] + ' x&nbsp;</td>' +
+            '<td>' + YAHOO.lang.escapeHTML(item.name) + '</td>' +
+            '<td><button onclick="removeGear(\'' + id + '\');return false">Remove</button></td>' +
+            '</tr>';
+    text += needed[id] + ' x ' + id + ' ' + item.name + "\n";
+  }
+  if (!count)
+    html += '<tr><td><i>No gear selected.</i></td></tr>';
+  html += '</table>';
+  Dom.get('gear_container').innerHTML = html;
+  Dom.get('items').value = text;
+}
+
+[% END %]
+
+[% PROCESS global/header.html.tmpl
+   title = "Mozilla Gear"
+   style = inline_style
+   javascript = inline_javascript
+   javascript_urls = [ 'extensions/BMO/web/js/form_validate.js',
+                       'js/field.js', 'js/util.js' ]
+   yui = [ 'autocomplete', 'calendar' ]
+%]
+
+<h1>Mozilla Gear</h1>
+
+<p>
+  Want gear? Here's what to do:
+</p>
+<ul>
+  <li>
+    Follow the steps below and click Submit Request.
+  </li>
+  <li>
+    Requests are reviewed every Monday.  If approved, we'll let you know. Then
+    your order will either be filled from your Mozilla space for pick-up or
+    sent to our gear partner, Staples, for processing and shipment. If it can't
+    be approved, we'll email you with details (or possibly ask for more
+    information).
+  </li>
+</ul>
+
+<p>
+  Check <a href="https://wiki.mozilla.org/GearStore" target="_blank">the gear
+  wiki</a> for more information about gear, including approved uses and the
+  list of available gear.
+</p>
+
+<p>
+  Gear requests for Rep-driven events and campaigns should continue to be
+  submitted through <a href="https://wiki.mozilla.org/ReMo/Tools_and_Resources"
+  target="_blank">their existing process</a>.
+</p>
 
 <form method="post" action="post_bug.cgi" id="swagRequestForm" enctype="multipart/form-data"
       onSubmit="return validateAndSubmit();">
+  <input type="hidden" name="format" value="swag">
+  <input type="hidden" name="product" value="Marketing">
+  <input type="hidden" name="component" value="Swag Requests">
+  <input type="hidden" name="rep_platform" value="All">
+  <input type="hidden" name="op_sys" value="Other">
+  <input type="hidden" name="priority" value="--">
+  <input type="hidden" name="version" value="unspecified">
+  <input type="hidden" name="bug_severity" id="bug_severity" value="normal">
+  <input type="hidden" name="short_desc" id="short_desc" value="">
+  <input type="hidden" name="groups" value="mozilla-engagement">
+  <input type="hidden" name="token" value="[% token FILTER html %]">
 
-        <input type="hidden" name="format" value="swag">
-        <input type="hidden" name="product" value="Marketing">
-        <input type="hidden" name="component" value="Swag Requests">
-        <input type="hidden" name="rep_platform" value="All">
-        <input type="hidden" name="op_sys" value="Other">
-        <input type="hidden" name="priority" value="--">
-        <input type="hidden" name="version" value="unspecified">
-        <input type="hidden" name="bug_severity" id="bug_severity" value="normal">
-        <input type="hidden" name="short_desc" id="short_desc" value="">
-        <input type="hidden" name="groups" value="mozilla-corporation-confidential">
-        <input type="hidden" name="token" value="[% token FILTER html %]">
-
-<table>
+<table id="gear_form">
 
 <tr>
-  <td align="right"><strong>First Name: <span style="color: red;">*</span></strong></td>
-  <td align="left">
-    <input type="text" name="firstname" id="firstname" value="" size="20" maxlength="20" />
-  </td>
+  <td>&nbsp;</td>
 </tr>
 <tr>
-  <td align="right"><strong>Last Name: <span style="color: red;">*</span></strong></td>
-  <td align="left">
-    <input type="text" name="lastname" id="lastname" value="" size="20" maxlength="20"/>
-  </td>
+  <th class="heading" colspan="2">Tell Us What You Want</th>
 </tr>
 
 <tr>
-  <td align="right"><strong>Email Address: <span style="color: red;">*</span></strong></td>
+  <th>Purpose of Gear</th>
   <td>
-    <input type="text" name="email" id="email" value="" size="50" maxlength="50"/>
+    <select name="purpose" id="purpose" onchange="onPurposeChange()">
+      <option value="">Please select..</option>
+      <option value="Campaign">Campaign</option>
+      <option value="Event">Event</option>
+      <option value="Gear Space Stock">Gear Space Stock</option>
+      <option value="Mozillian Recognition">Mozillian Recognition</option>
+      <option value="Onboarding">Onboarding</option>
+      <option value="Press">Press</option>
+      <option value="Recruiting">Recruiting</option>
+      <option value="VIP">VIP</option>
+      <option value="Other">Other</option>
+    </select>
   </td>
 </tr>
 
-<tr>
-  <td align="right"><strong>CC:</strong></td>
-  <td colspan="3">
-    [% INCLUDE global/userselect.html.tmpl
-       id => "cc"
-       name => "cc"
-       value => cc
-       size => 50
-       multiple => 5
-    %]
-  </td>
-</tr>
-
-<tr>
-  <td><!-- spacer -->&nbsp;</td>
-</tr>
-
-<tr>
-  <td><!-- spacer -->&nbsp;</td>
-</tr>
-
-<tr>
-  <td align="right"><strong>[% terms.Bug %] number assigned to previously- &nbsp;&nbsp;<br>submitted <a href="/enter_bug.cgi?product=Marketing&amp;format=mktgevent">Event Request Form</a>: <span style="color: red;">*</span></strong></td>
-  <td colspan="3"><input name="dependson" id="dependson"></td>
-</tr>
-
-<tr>
-  <td align="right"><strong>Specific swag needed?</strong></td>
+<tr id="purpose_other_row" class="bz_default_hidden">
+  <th>Purpose Text</th>
   <td>
-    <textarea id="additional" name="additional" rows="5" cols="50"></textarea>
+    <input name="purpose_other" id="purpose_other" size="50">
   </td>
 </tr>
 
-<tr>
-  <td align="right"><br><br><strong>Ship to:</strong></td>
-  <td colspan="3"></td>
-</tr>
-<tr>
-  <td align="right"><strong>First name:</strong></td>
-  <td colspan="3"><input name="shiptofirstname" id="shiptofirstname"></td>
-</tr>
-<tr>
-  <td align="right"><strong>Last name:</strong></td>
-  <td colspan="3"><input name="shiptolastname" id="shiptolastname"></td>
-</tr>
-<tr>
-  <td align="right"><strong>Address</strong></td>
-  <td colspan="3"><input name="shiptoaddress" id="shiptoaddress" size="60"></td>
-</tr>
-<tr>
-  <td align="right"><strong>Address 2</strong></td>
-  <td colspan="3"><input name="shiptoaddress2" id="shiptoaddress2" size="60"></td>
-</tr>
-<tr>
-  <td align="right"><strong>City</strong></td>
-  <td colspan="3"><input name="shiptocity" id="shiptocity"></td>
-</tr>
-<tr>
-  <td align="right"><strong>State</strong></td>
-  <td colspan="3"><input name="shiptostate" id="shiptostate"></td>
-</tr>
-<tr>
-  <td align="right"><strong>Country</strong></td>
-  <td colspan="3"><input name="shiptocountry" id="shiptocountry"></td>
-</tr>
-<tr>
-  <td align="right"><strong>Postal Code</strong></td>
-  <td colspan="3"><input name="shiptopcode" id="shiptopcode"></td>
-</tr>
-<tr>
-  <td align="right"><strong>Telephone</strong></td>
-  <td colspan="3"><input name="shiptophone" id="shiptophone"></td>
-</tr>
-<tr>
-  <td align="right"><strong>Personal ID/RUT</strong><br><small>(if your country requires this)</small></td>
-  <td colspan="3"><input name="shiptoidrut" id="shiptoidrut"></td>
-</tr>
-
-<tr><td colspan="4"><br><br></td></tr>
-
-<tr>
-  <td align="right"><label for="comment"><strong>Any additional comments?</strong></label></td>
+<tr id="recognition_row" class="bz_default_hidden">
+  <th>&nbsp;</th>
   <td>
-    <textarea id="comment" name="comment" rows="5" cols="50"></textarea>
+    <input type="checkbox" name="recognition_shipping" id="recognition_shipping" value="Yes"
+            onclick="onRecognitionChange()">
+    <label for="recognition_shipping">
+      This [% terms.bug %] needs recipient shipping information
+    </label><br>
+    <input type="checkbox" name="recognition_sizing" id="recognition_sizing" value="Yes">
+    <label for="recognition_sizing">
+      This [% terms.bug %] needs recipient size information
+    </label><br>
   </td>
 </tr>
 
-  </table>
-  <br>
-  <input type="submit" id="commit" value="Submit Request">
+<tr>
+  <th>Date Required</th>
+  <td>
+    <input name="date_required" id="date_required" size="25"
+           onchange="updateCalendarFromField(this)">
+    <button type="button" class="calendar_button" id="button_calendar_date_required"
+            onclick="showCalendar('date_required')"><span>cal</span></button>
+    <div id="con_calendar_date_required"></div>
+  </td>
+</tr>
+
+<tr>
+  <th>Gear Needed</th>
+  <td>
+    <input type="hidden" name="items" id="items" value="">
+    <a href="https://wiki.mozilla.org/GearStore/Gearavailable" target="_blank">
+    View the current inventory</a>, then add your selection(s):<br>
+
+    <input type="text" size="2" id="quantity" value="1"
+           onblur="this.value = parseInt(this.value, 10) ? Math.floor(parseInt(this.value, 10)) : 1">
+    <select id="add_gear">
+      <option value="">Please select..</option>
+      [% first_group = 1 %]
+      [% FOREACH item = items %]
+        [% IF item.id == "" %]
+          [% "</optgroup>" UNLESS first_group %]
+          [% first_group = 0 %]
+          <optgroup label="[% item.name FILTER html %]">
+        [% ELSE %]
+          <option value="[% item.id FILTER html %]">[% item.name FILTER html %]</option>
+        [% END %]
+      [% END %]
+      [% "</optgroup>" UNLESS first_group %]
+    </select>
+    <button onclick="addGear();return false">Add</button>
+    <br>
+
+    <div id="gear_container"></div>
+  </td>
+</tr>
+
+<tr>
+  <td>&nbsp;</td>
+</tr>
+<tr>
+  <th class="heading" colspan="2">Tell Us About You</th>
+</tr>
+
+<tr>
+  <th>First Name</th>
+  <td><input name="firsrname" id="firstname" size="50" maxlength="30"></td>
+</tr>
+
+<tr>
+  <th>Last Name</th>
+  <td><input name="lastname" id="lastname" size="50" maxlength="30"></td>
+</tr>
+
+<tr>
+  <th>Email Address</th>
+  <td><input name="email" id="email" size="50" maxlength="50"></td>
+</tr>
+
+<tr>
+  <th>My Mozilla Space</th>
+  <td>
+    <select name="mozspace" id="mozspace" onchange="onMozSpaceChange()">
+      <option value="">Please select..</option>
+      [% FOREACH space = mozspaces %]
+        <option value="[% space.name FILTER html %]">[% space.name FILTER html %]</option>
+      [% END %]
+    </select>
+    <i>(if applicable)</i>
+    <div id="shipto_mozspace_container" class="bz_default_hidden">
+      <input type="checkbox" id="shipto_mozspace" onclick="onShipToMozSpaceClick()">
+      <label for="shipto_mozspace">Ship to this address</label>
+    </div>
+</tr>
+
+<tr>
+  <th>Team + Department Code</th>
+  <td>
+    <select name="teamcode" id="teamcode">
+      <option value="">Please select..</option>
+      <option value="Applications (350)">Applications (350)</option>
+      <option value="Business Affairs (110)">Business Affairs (110)</option>
+      <option value="Engagement Brand Management (240)">Engagement Brand Management (240)</option>
+      <option value="Engagement Contributor (230)">Engagement Contributor (230)</option>
+      <option value="Engagement General (200)">Engagement General (200)</option>
+      <option value="Engagement PR (220)">Engagement PR (220)</option>
+      <option value="Engagement Product Mktg (210)">Engagement Product Mktg (210)</option>
+      <option value="Engagement Product Strategy (250)">Engagement Product Strategy (250)</option>
+      <option value="Engagement User (232)">Engagement User (232)</option>
+      <option value="Engagement Websites &amp; Developer (235)">Engagement Websites &amp; Developer (235)</option>
+      <option value="Engr B2G (720)">Engr B2G (720)</option>
+      <option value="Engr Development Tools &amp; Auto (769)">Engr Development Tools &amp; Auto (769)</option>
+      <option value="Engr Firefox (770)">Engr Firefox (770)</option>
+      <option value="Engr Firefox Dev Tools (775)">Engr Firefox Dev Tools (775)</option>
+      <option value="Engr General Admin (700)">Engr General Admin (700)</option>
+      <option value="Engr Jetpack (780)">Engr Jetpack (780)</option>
+      <option value="Engr Localization - L10N (740)">Engr Localization - L10N (740)</option>
+      <option value="Engr Ops Build &amp; Release (440)">Engr Ops Build &amp; Release (440)</option>
+      <option value="Engr Ops Network &amp; IT (410)">Engr Ops Network &amp; IT (410)</option>
+      <option value="Engr Ops Stats &amp; Metrics (420)">Engr Ops Stats &amp; Metrics (420)</option>
+      <option value="Engr Ops Support/SUMO (450)">Engr Ops Support/SUMO (450)</option>
+      <option value="Engr Ops Weave &amp; Services (460)">Engr Ops Weave &amp; Services (460)</option>
+      <option value="Engr Ops Web Dev (430)">Engr Ops Web Dev (430)</option>
+      <option value="Engr Platform Content (810)">Engr Platform Content (810)</option>
+      <option value="Engr Platform General (800)">Engr Platform General (800)</option>
+      <option value="Engr Platform Graphics (820)">Engr Platform Graphics (820)</option>
+      <option value="Engr Platform Integration (880)">Engr Platform Integration (880)</option>
+      <option value="Engr Platform JS (830)">Engr Platform JS (830)</option>
+      <option value="Engr Platform Layout (840)">Engr Platform Layout (840)</option>
+      <option value="Engr Platform Network (855)">Engr Platform Network (855)</option>
+      <option value="Engr Platform Performance (870)">Engr Platform Performance (870)</option>
+      <option value="Engr Platform Stability Plugins (850)">Engr Platform Stability Plugins (850)</option>
+      <option value="Engr Project Mgmt (710)">Engr Project Mgmt (710)</option>
+      <option value="Engr QA Automation (760)">Engr QA Automation (760)</option>
+      <option value="Engr QA Browser Technologies (767)">Engr QA Browser Technologies (767)</option>
+      <option value="Engr QA Firefox Desktop (755)">Engr QA Firefox Desktop (755)</option>
+      <option value="Engr QA Services (750)">Engr QA Services (750)</option>
+      <option value="Engr QA Web (765)">Engr QA Web (765)</option>
+      <option value="Engr Research (860)">Engr Research (860)</option>
+      <option value="Engr Security (730)">Engr Security (730)</option>
+      <option value="Facility (150)">Facility (150)</option>
+      <option value="Finance (120)">Finance (120)</option>
+      <option value="G&amp;A (100)">G&amp;A (100)</option>
+      <option value="Innovations (300)">Innovations (300)</option>
+      <option value="Mobile (600)">Mobile (600)</option>
+      <option value="Mobile UI (610)">Mobile UI (610)</option>
+      <option value="Pancake (530)">Pancake (530)</option>
+      <option value="People (140)">People (140)</option>
+      <option value="People Ops (130)">People Ops (130)</option>
+      <option value="Product Add-Ons (550)">Product Add-Ons (550)</option>
+      <option value="Product UX (510)">Product UX (510)</option>
+      <option value="Products General (500)">Products General (500)</option>
+      <option value="Products User Research (520)">Products User Research (520)</option>
+      <option value="Security Assurance (470)">Security Assurance (470)</option>
+      <option value="Thunderbird (320)">Thunderbird (320)</option>
+    </select>
+  </td>
+</tr>
+
+<tr>
+  <td>&nbsp;</td>
+</tr>
+<tr>
+  <th class="heading" colspan="2">Tell Us Where To Send It</th>
+</tr>
+
+<tr>
+  <td colspan="2">
+    Please be aware that shipping can cost as much as, if not more than, your
+    item. And, items shipped internationally incur customs fees that can be
+    100%+ the cost of the package. When possible, requests will be filled from
+    gear at your Mozilla space.
+  </td>
+</tr>
+
+<tr>
+  <th>First Name</th>
+  <td><input name="shiptofirstname" id="shiptofirstname" size="50" maxlength="50"></td>
+</tr>
+<tr>
+  <th>Last Name</th>
+  <td><input name="shiptolastname" id="shiptolastname" size="50" maxlength="50"></td>
+</tr>
+<tr>
+  <th>Email Address</th>
+  <td><input name="shiptoemail" id="shiptoemail" size="50" maxlength="50"></td>
+</tr>
+<tr>
+  <th>Address</th>
+  <td><input name="shiptoaddress1" id="shiptoaddress1" size="50" maxlength="50"></td>
+</tr>
+<tr>
+  <th>Address 2</th>
+  <td><input name="shiptoaddress2" id="shiptoaddress2" size="50" maxlength="50"></td>
+</tr>
+<tr>
+  <th>City</th>
+  <td><input name="shiptocity" id="shiptocity" size="50" maxlength="50"></td>
+</tr>
+<tr>
+  <th>State</th>
+  <td><input name="shiptostate" id="shiptostate" size="50" maxlength="50"></td>
+</tr>
+<tr>
+  <th>Country</th>
+  <td><input name="shiptocountry" id="shiptocountry" size="50" maxlength="50"></td>
+</tr>
+<tr>
+  <th>Postal Code</th>
+  <td><input name="shiptopostcode" id="shiptopostcode" size="50" maxlength="50"></td>
+</tr>
+<tr>
+  <th>Recipient Telephone</th>
+  <td>
+    <input name="shiptophone" id="shiptophone" size="50" maxlength="50">
+    <i>(include country code if outside of the US)</i>
+  </td>
+</tr>
+<tr>
+  <th>Personal ID/RUT</th>
+  <td>
+    <input name="shiptoidrut" id="shiptoidrut" size="50" maxlength="50">
+    <i>(if your country requires this)</i>
+  </td>
+</tr>
+
+<tr>
+  <td>&nbsp;</td>
+</tr>
+<tr>
+  <th class="heading" colspan="2">Tell Us Anything Else</th>
+</tr>
+
+<tr>
+  <th>Additional Comments</th>
+  <td><textarea id="comment" name="comment" rows="5" cols="50"></textarea></td>
+</tr>
+
+<tr>
+  <td>&nbsp;</td>
+</tr>
+
+<tr>
+  <td>&nbsp;</td>
+  <td><input type="submit" id="commit" value="Submit Request"></td>
+</tr>
+
+</table>
+</form>
 
 <p>
-  <strong><span style="color: red;">*</span></strong> - Required field<br />
-  Thanks for contacting us.
-   You will be notified by email of any progress made in resolving your request.
+  <span class="mandatory">*</span> Required Field
 </p>
+
+<p>
+  Requests will only be visible to the person who submitted it, authorized
+  members of the Mozilla Engagement team, and our Staples Customer Service rep.
+  We do this to help protect the personal identifying information in this [% terms.bugs %].
+</p>
+
+<script>
+  initFields();
+  onPurposeChange();
+  tagMandatoryFields();
+  showGear();
+</script>
 
 [% PROCESS global/footer.html.tmpl %]

@@ -166,6 +166,9 @@ sub MessageToMTA {
     Bugzilla::Hook::process('mailer_before_send', 
                             { email => $email, mailer_args => \@args });
 
+    # Allow for extensions to to drop the bugmail by clearing the 'to' header
+    return if $email->header('to') eq '';
+
     $email->walk_parts(sub {
         my ($part) = @_;
         return if $part->parts > 1; # Top-level

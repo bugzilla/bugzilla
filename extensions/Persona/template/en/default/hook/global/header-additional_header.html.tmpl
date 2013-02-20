@@ -58,7 +58,9 @@ function persona_onlogin(assertion) {
 }
 
 navigator.id.watch({
-  loggedInUser: [% IF user.id %]'[% user.login FILTER js %]'[% ELSE %]null[% END %],
+  [%# we can't set loggedInUser to user.login as this causes cgi authenticated
+      sessions to be logged out by persona %]
+  loggedInUser: null,
   onlogin: persona_onlogin,
   onlogout: function () {
     document.location = '[% urlbase FILTER none %]index.cgi?logout=1';

@@ -6,23 +6,15 @@
   # defined by the Mozilla Public License, v. 2.0.
   #%]
 
-[% RETURN IF user.login
-             || !Param('persona_includejs_url')
-             || !Param('user_info_class').split(',').contains('Persona') %]
+[% RETURN UNLESS Param('persona_includejs_url')
+                 && Param('user_info_class').split(',').contains('Persona') %]
 
 [% USE Bugzilla %]
 [% cgi = Bugzilla.cgi %]
 
-[% login_target = cgi.url("-relative" => 1, "-query" => 1) %]
-[% IF !login_target OR login_target.match("^token.cgi") %]
-  [% login_target = "index.cgi" %]
-[% END %]
-
-[% login_target = urlbase _ login_target %]
-
 <script src="[% Param('persona_includejs_url') %]" type="text/javascript"></script>
-
 <script type="text/javascript">
+
 function createHidden(name, value, form) {
   var field = document.createElement('input');
   field.type = 'hidden';
@@ -31,35 +23,50 @@ function createHidden(name, value, form) {
   form.appendChild(field);
 }
 
-function persona_sign_in() {
-  navigator.id.watch({
-    loggedInUser: null,
-    onlogin: function(assertion) {
-      var form = document.createElement('form');
-      form.action = '[% login_target FILTER js %]';
-      form.method = 'POST';
-      form.style.display = 'none';
+[% login_target = cgi.url("-relative" => 1, "-query" => 1) %]
+[% IF !login_target OR login_target.match("^token.cgi") %]
+  [% login_target = "index.cgi" %]
+[% END %]
+[% login_target = urlbase _ login_target %]
 
-      createHidden('token', '[% issue_hash_token(['login']) FILTER js %]', form);
-      createHidden('Bugzilla_remember', 'on', form);
-      createHidden('persona_assertion', assertion, form);
+[%# we only want to honour explicit login requests %]
+var persona_ignore_login = true;
 
-      [% FOREACH field = cgi.param() %]
-        [% NEXT IF field.search("^(Bugzilla_(login|password|restrictlogin)|token|persona_assertion)$") %]
-        [% FOREACH mvalue = cgi.param(field).slice(0) %]
-          createHidden('[% field FILTER js %]', '[% mvalue FILTER html_linebreak FILTER js %]', form);
-        [% END %]
+function persona_onlogin(assertion) {
+  if (persona_ignore_login)
+    return;
+  [% IF !user.id %]
+    var form = document.createElement('form');
+    form.action = '[% login_target FILTER js %]';
+    form.method = 'POST';
+    form.style.display = 'none';
+
+    createHidden('token', '[% issue_hash_token(['login']) FILTER js %]', form);
+    createHidden('Bugzilla_remember', 'on', form);
+    createHidden('persona_assertion', assertion, form);
+
+    [% FOREACH field = cgi.param() %]
+      [% NEXT IF field.search("^(Bugzilla_(login|password|restrictlogin)|token|persona_assertion)$") %]
+      [% FOREACH mvalue = cgi.param(field).slice(0) %]
+        createHidden('[% field FILTER js %]', '[% mvalue FILTER html_linebreak FILTER js %]', form);
       [% END %]
+    [% END %]
 
-      document.body.appendChild(form);
-      form.submit();
-      return true;
-    },
-    onlogout: function () {
-      document.location = '[% urlbase FILTER none %]index.cgi?logout=1';
-      return true;
-    }
-  });
+    document.body.appendChild(form);
+    form.submit();
+  [% END %]
+}
+
+navigator.id.watch({
+  loggedInUser: [% IF user.id %]'[% user.login FILTER js %]'[% ELSE %]null[% END %],
+  onlogin: persona_onlogin,
+  onlogout: function () {
+    document.location = '[% urlbase FILTER none %]index.cgi?logout=1';
+  }
+});
+
+function persona_sign_in() {
+  persona_ignore_login = false;
   navigator.id.request({ siteName: '[% terms.BugzillaTitle FILTER js %]' });
 }
 </script>

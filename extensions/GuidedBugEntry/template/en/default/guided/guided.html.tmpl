@@ -12,10 +12,9 @@
                'extensions/GuidedBugEntry/web/js/guided.js',
                'extensions/ProdCompSearch/web/js/prod_comp_search.js',
                'js/field.js', 'js/TUI.js', 'js/bug.js' ] %]
-[% js_urls.push('extensions/BMO/web/js/prod_comp_search.js') IF BMO %]
 
 [% yui_modules = [ 'history', 'datatable', 'container' ] %]
-[% yui_modules.push('autocomplete') IF BMO %]
+[% yui_modules.push('autocomplete') %]
 
 [% PROCESS global/header.html.tmpl
    title = "Enter A Bug"
@@ -113,25 +112,23 @@ dupes.setLabels(
 %]
 </table>
 
-[% IF BMO %]
-  <h3>
-    Or search for a Product:
-  </h3>
+<h3>
+  Or search for a Product:
+</h3>
 
-  <script>
-    [% IF format %]
-      ProdCompsearch.format = '[% format FILTER js %]';
-    [% END %]
-    [% IF cloned_bug_id %]
-      ProdCompSearch.cloned_bug_id = '[% cloned_bug_id FILTER js %]';
-    [% END %]
-  </script>
-  <div id="prod_comp_search_main">
-    [% PROCESS prodcompsearch/form.html.tmpl
-       input_label = "Type to find product and component by name or description:"
-    %]
-  </div>
-[% END %]
+<script>
+  [% IF format %]
+    ProdCompsearch.format = '[% format FILTER js %]';
+  [% END %]
+  [% IF cloned_bug_id %]
+    ProdCompSearch.cloned_bug_id = '[% cloned_bug_id FILTER js %]';
+  [% END %]
+</script>
+<div id="prod_comp_search_main">
+  [% PROCESS prodcompsearch/form.html.tmpl
+      input_label = "Type to find product and component by name or description:"
+  %]
+</div>
 
 </div>
 [% END %]
@@ -271,7 +268,7 @@ dupes.setLabels(
     <td width="100%">
       &bull; <a href="http://input.mozilla.org/feedback/">Provide other feedback about Firefox</a><br>
       &bull; <a href="http://input.mozilla.org/feedback/#sad">Report an issue with a web site that I use</a><br>
-      &bull; <a href="enter_bug.cgi?format=guided&product=Core">Report an issue with Firefox on a site that I've developed</a><br>
+      &bull; <a href="enter_bug.cgi?format=guided&amp;product=Core">Report an issue with Firefox on a site that I've developed</a><br>
     </td>
   </tr>
 </table>

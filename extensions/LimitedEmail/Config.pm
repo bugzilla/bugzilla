@@ -19,6 +19,4 @@ use constant FILTERS => [
     qr/^reed\@reedloden\.com$/i,
 ];
 
-use constant MAIL_LOG => 'data/mail.log';
-
 __PACKAGE__->NAME;

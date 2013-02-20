@@ -14,6 +14,7 @@ our $VERSION = '2';
 use FileHandle;
 use Date::Format;
 use Encode qw(encode_utf8);
+use Bugzilla::Constants qw(bz_locations);
 
 sub mailer_before_send {
     my ($self, $args) = @_;
@@ -27,7 +28,8 @@ sub mailer_before_send {
         $header->header_set(to => '');
     }
 
-    my $fh = FileHandle->new('>>' . Bugzilla::Extension::LimitedEmail::MAIL_LOG);
+    my $log_filename = bz_locations->{'datadir'} . '/mail.log';
+    my $fh = FileHandle->new(">>$log_filename");
     if ($fh) {
         print $fh encode_utf8(sprintf(
             "[%s] %s%s %s : %s\n",

@@ -427,7 +427,8 @@ our %product_sec_groups = (
 # Automatically CC users to bugs filed into configured groups and products
 our %group_auto_cc = (
     'partner-confidential' => {
-        '_default' => ['mbest@mozilla.com'],
+        'Marketing' => ['jbalaco@mozilla.com'],
+        '_default'  => ['mbest@mozilla.com'],
     },
 );
 

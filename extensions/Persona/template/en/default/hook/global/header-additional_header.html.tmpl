@@ -9,6 +9,11 @@
 [% RETURN UNLESS Param('persona_includejs_url')
                  && Param('user_info_class').split(',').contains('Persona') %]
 
+[%# for now don't inject persona javascript on authenticated users.
+  # we've seen sessions being logged out unexpectedly
+  # we should only inject this code for users who used persona to authenicate %]
+[% RETURN IF user.id %]
+
 [% USE Bugzilla %]
 [% cgi = Bugzilla.cgi %]
 

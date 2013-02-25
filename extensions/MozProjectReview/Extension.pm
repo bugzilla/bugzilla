@@ -267,15 +267,16 @@ sub _file_child_bug {
         $template->process($full_template, $template_vars, \$comment)
             || ThrowTemplateError($template->error());
         $bug_data->{comment} = $comment;
-        $new_bug = Bugzilla::Bug->create($bug_data);
-        $parent_bug->set_all({ dependson => { add => [ $new_bug->bug_id ] }});
-        Bugzilla::BugMail::Send($new_bug->id, { changer => Bugzilla->user });
+        if ($new_bug = Bugzilla::Bug->create($bug_data)) {
+            $parent_bug->set_all({ dependson => { add => [ $new_bug->bug_id ] }});
+            Bugzilla::BugMail::Send($new_bug->id, { changer => Bugzilla->user });
+        }
     };
-    if ($@) {
+    if ($@ || !$new_bug) {
         push(@$dep_comment, "Error creating $template_suffix review bug");
-        push(@$dep_errors, "$template_suffix : $@");
+        push(@$dep_errors, "$template_suffix : $@") if $@;
     }
-    if ($new_bug) {
+    else {
         push(@$dep_comment, "Bug " . $new_bug->id . " - " . $new_bug->short_desc);
     }
 }

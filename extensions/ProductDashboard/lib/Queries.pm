@@ -91,7 +91,7 @@ sub bug_link_closed {
 sub by_version {
     my ($product, $bug_status) = @_;
     my $dbh = Bugzilla->dbh;
-    my $extra;
+    my $extra = '';
 
     $extra = "AND bugs.bug_status IN (" . join(',', quoted_open_states()) . ")" if $bug_status eq 'open';
     $extra = "AND bugs.bug_status IN (" . join(',', quoted_closed_states()) . ")" if $bug_status eq 'closed';
@@ -109,7 +109,7 @@ sub by_version {
 sub by_milestone {
     my ($product, $bug_status) = @_;
     my $dbh = Bugzilla->dbh;
-    my $extra;
+    my $extra = '';
 
     $extra = "AND bugs.bug_status IN (" . join(',', quoted_open_states()) . ")" if $bug_status eq 'open';
     $extra = "AND bugs.bug_status IN (" . join(',', quoted_closed_states()) . ")" if $bug_status eq 'closed';
@@ -127,7 +127,7 @@ sub by_milestone {
 sub by_priority {
     my ($product, $bug_status) = @_;
     my $dbh = Bugzilla->dbh;
-    my $extra;
+    my $extra = '';
 
     $extra = "AND bugs.bug_status IN (" . join(',', quoted_open_states()) . ")" if $bug_status eq 'open';
     $extra = "AND bugs.bug_status IN (" . join(',', quoted_closed_states()) . ")" if $bug_status eq 'closed';
@@ -145,7 +145,25 @@ sub by_priority {
 sub by_severity {
     my ($product, $bug_status) = @_;
     my $dbh = Bugzilla->dbh;
-    my $extra;
+    my $extra = '';
+
+    $extra = "AND bugs.bug_status IN (" . join(',', quoted_open_states()) . ")" if $bug_status eq 'open';
+    $extra = "AND bugs.bug_status IN (" . join(',', quoted_closed_states()) . ")" if $bug_status eq 'closed';
+
+    return $dbh->selectall_arrayref("SELECT priority, COUNT(bug_id),
+                                            ROUND(((COUNT(bugs.bug_id) / ( SELECT COUNT(*) FROM bugs WHERE bugs.product_id = ? $extra)) * 100))
+                                       FROM bugs 
+                                      WHERE product_id = ?
+                                            $extra
+                                      GROUP BY priority
+                                      ORDER BY COUNT(bug_id) DESC",
+                                    undef, $product->id, $product->id);
+}
+
+sub by_severity {
+    my ($product, $bug_status) = @_;
+    my $dbh = Bugzilla->dbh;
+    y $extra;
 
     $extra = "AND bugs.bug_status IN (" . join(',', quoted_open_states()) . ")" if $bug_status eq 'open';
     $extra = "AND bugs.bug_status IN (" . join(',', quoted_closed_states()) . ")" if $bug_status eq 'closed';
@@ -163,7 +181,7 @@ sub by_severity {
 sub by_component {
     my ($product, $bug_status) = @_;
     my $dbh = Bugzilla->dbh;
-    my $extra;
+    my $extra = '';
 
     $extra = "AND bugs.bug_status IN (" . join(',', quoted_open_states()) . ")" if $bug_status eq 'open';
     $extra = "AND bugs.bug_status IN (" . join(',', quoted_closed_states()) . ")" if $bug_status eq 'closed';
@@ -181,7 +199,6 @@ sub by_component {
 sub by_value_summary {
     my ($product, $type, $value, $bug_status) = @_;
     my $dbh = Bugzilla->dbh;
-    my $extra;
 
     my $query = "SELECT bugs.bug_id AS id, 
                         bugs.bug_status AS status,
@@ -233,7 +250,7 @@ sub by_value_summary {
 sub by_assignee {
     my ($product, $bug_status, $limit) = @_;
     my $dbh = Bugzilla->dbh;
-    my $extra;
+    my $extra = '';
 
     $limit = ($limit && detaint_natural($limit)) ? $dbh->sql_limit($limit) : "";
 
@@ -257,7 +274,7 @@ sub by_assignee {
 sub by_status {
     my ($product, $bug_status) = @_;
     my $dbh = Bugzilla->dbh;
-    my $extra;
+    my $extra = '';
 
     $extra = "AND bugs.bug_status IN (" . join(',', quoted_open_states()) . ")" if $bug_status eq 'open';
     $extra = "AND bugs.bug_status IN (" . join(',', quoted_closed_states()) . ")" if $bug_status eq 'closed';
@@ -286,7 +303,7 @@ sub total_bug_milestone {
 sub bug_milestone_by_status {
     my ($product, $milestone, $bug_status) = @_;
     my $dbh = Bugzilla->dbh;
-    my $extra;
+    my $extra = '';
 
     $extra = "AND bugs.bug_status IN (" . join(',', quoted_open_states()) . ")" if $bug_status eq 'open';
     $extra = "AND bugs.bug_status IN (" . join(',', quoted_closed_states()) . ")" if $bug_status eq 'closed';
@@ -306,7 +323,7 @@ sub by_duplicate {
     my $dbh = Bugzilla->dbh;
     $limit = ($limit && detaint_natural($limit)) ? $dbh->sql_limit($limit) : "";
 
-    my $extra;
+    my $extra = '';
     $extra = "AND bugs.bug_status IN (" . join(',', quoted_open_states()) . ")" if $bug_status eq 'open';
     $extra = "AND bugs.bug_status IN (" . join(',', quoted_closed_states()) . ")" if $bug_status eq 'closed';
 
@@ -336,7 +353,7 @@ sub by_popularity {
     my $dbh = Bugzilla->dbh;
     $limit = ($limit && detaint_natural($limit)) ? $dbh->sql_limit($limit) : ""; 
 
-    my $extra;
+    my $extra = '';
     $extra = "AND bugs.bug_status IN (" . join(',', quoted_open_states()) . ")" if $bug_status eq 'open';
     $extra = "AND bugs.bug_status IN (" . join(',', quoted_closed_states()) . ")" if $bug_status eq 'closed';
 

@@ -163,7 +163,7 @@ sub by_severity {
 sub by_severity {
     my ($product, $bug_status) = @_;
     my $dbh = Bugzilla->dbh;
-    y $extra;
+    my $extra = '';
 
     $extra = "AND bugs.bug_status IN (" . join(',', quoted_open_states()) . ")" if $bug_status eq 'open';
     $extra = "AND bugs.bug_status IN (" . join(',', quoted_closed_states()) . ")" if $bug_status eq 'closed';

@@ -150,24 +150,6 @@ sub by_severity {
     $extra = "AND bugs.bug_status IN (" . join(',', quoted_open_states()) . ")" if $bug_status eq 'open';
     $extra = "AND bugs.bug_status IN (" . join(',', quoted_closed_states()) . ")" if $bug_status eq 'closed';
 
-    return $dbh->selectall_arrayref("SELECT priority, COUNT(bug_id),
-                                            ROUND(((COUNT(bugs.bug_id) / ( SELECT COUNT(*) FROM bugs WHERE bugs.product_id = ? $extra)) * 100))
-                                       FROM bugs 
-                                      WHERE product_id = ?
-                                            $extra
-                                      GROUP BY priority
-                                      ORDER BY COUNT(bug_id) DESC",
-                                    undef, $product->id, $product->id);
-}
-
-sub by_severity {
-    my ($product, $bug_status) = @_;
-    my $dbh = Bugzilla->dbh;
-    my $extra = '';
-
-    $extra = "AND bugs.bug_status IN (" . join(',', quoted_open_states()) . ")" if $bug_status eq 'open';
-    $extra = "AND bugs.bug_status IN (" . join(',', quoted_closed_states()) . ")" if $bug_status eq 'closed';
-
     return $dbh->selectall_arrayref("SELECT bug_severity, COUNT(bug_id),
                                             ROUND(((COUNT(bugs.bug_id) / ( SELECT COUNT(*) FROM bugs WHERE bugs.product_id = ? $extra)) * 100))
                                        FROM bugs 

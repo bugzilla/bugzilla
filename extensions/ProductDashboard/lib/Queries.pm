@@ -31,7 +31,6 @@ use base qw(Exporter);
 
 use Bugzilla::CGI;
 use Bugzilla::User;
-use Bugzilla::Search;
 use Bugzilla::Util;
 use Bugzilla::Component;
 use Bugzilla::Version;

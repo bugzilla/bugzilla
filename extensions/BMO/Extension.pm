@@ -847,6 +847,11 @@ sub mailer_before_send {
 
     _log_sent_email($email);
 
+    # see bug 844724
+    if ($email->header('to') && $email->header('to') eq 'sync-1@bugzilla.tld') {
+        $email->header_set('to', 'mei.kong@tcl.com');
+    }
+
     # Add X-Bugzilla-Tracking header
     if ($email->header('X-Bugzilla-ID')) {
         my $bug_id = $email->header('X-Bugzilla-ID');

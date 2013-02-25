@@ -294,7 +294,9 @@ sub Send {
             # happen after the bugmail_recipients hook.
             if ($user->email_enabled && $dep_ok &&
                 ($user->login !~ /bugs$/) &&
-                ($user->login !~ /\.tld$/))
+                # sync-1@bugzilla.tld here is a temporary hack, see bug 844724
+                ($user->login eq 'sync-1@bugzilla.tld' || $user->login !~ /\.tld$/))
+
             {
                 # OK, OK, if we must. Email the user.
 

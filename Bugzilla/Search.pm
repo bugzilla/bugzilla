@@ -183,6 +183,8 @@ use constant OPERATORS => {
     changedfrom    => \&_changedfrom_changedto,
     changedto      => \&_changedfrom_changedto,
     changedby      => \&_changedby,
+    isempty        => \&_isempty,
+    isnotempty     => \&_isnotempty,
 };
 
 # Some operators are really just standard SQL operators, and are
@@ -222,6 +224,12 @@ use constant NON_NUMERIC_OPERATORS => qw(
     changedto
     regexp
     notregexp
+);
+
+# These operators ignore the entered value
+use constant NO_VALUE_OPERATORS => qw(
+    isempty
+    isnotempty
 );
 
 use constant MULTI_SELECT_OVERRIDE => {
@@ -1597,6 +1605,8 @@ sub _boolean_charts {
                 my $field = $params->{"field$identifier"};
                 my $operator = $params->{"type$identifier"};
                 my $value = $params->{"value$identifier"};
+                # no-value operators ignore the value, however a value needs to be set
+                $value = ' ' if grep { $_ eq $operator } NO_VALUE_OPERATORS;
                 $or_clause->add($field, $operator, $value);
             }
             $and_clause->add($or_clause);
@@ -1639,6 +1649,8 @@ sub _custom_search {
         
         my $operator = $params->{"o$id"};
         my $value = $params->{"v$id"};
+        # no-value operators ignore the value, however a value needs to be set
+        $value = ' ' if grep { $_ eq $operator } NO_VALUE_OPERATORS;
         my $condition = condition($field, $operator, $value);
         $condition->negate($params->{"n$id"});
         $current_clause->add($condition);
@@ -2945,6 +2957,18 @@ sub _changed_security_check {
 
         $args->{term} .= " AND COALESCE(attach_${field_id}_$chart_id.isprivate, 0) = 0";
     }
+}
+
+sub _isempty {
+    my ($self, $args, $join) = @_;
+    my $full_field = $args->{full_field};
+    $args->{term} = "$full_field IS NULL OR $full_field = ''";
+}
+
+sub _isnotempty {
+    my ($self, $args, $join) = @_;
+    my $full_field = $args->{full_field};
+    $args->{term} = "$full_field IS NOT NULL AND $full_field != ''";
 }
 
 ######################

@@ -504,7 +504,8 @@ sub CollectSeriesData {
                                               'fields' => ["bug_id"],
                                               'allow_unlimited' => 1,
                                               'user'   => $user);
-            $data = $search->data;
+            my $sql = $search->sql;
+            $data = $shadow_dbh->selectall_arrayref($sql);
         };
 
         if (!$@) {

@@ -796,6 +796,9 @@ sub search_operator_field_override {
     my @comments = $cgi->param('comments');
     my $exclude_comments = scalar(@comments) && !grep { $_ eq '1' } @comments;
 
+    use Data::Dumper;
+    print STDERR Dumper \@comments;
+
     if ($cgi->param('query_format')
         && $cgi->param('query_format') eq 'specific'
         && $exclude_comments

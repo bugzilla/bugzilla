@@ -145,10 +145,13 @@ sub query_bugs {
                                        params => scalar $params->Vars,
                                        order  => [ QUERY_ORDER ]);
 
-    my $data = $search->data;
+    my $query = $search->sql();
+    my $sth = $dbh->prepare($query);
+    $sth->execute();
+    my $rows = $sth->fetchall_arrayref();
 
     my @bugs;
-    foreach my $row (@$data) {
+    foreach my $row (@$rows) {
         my $bug = {};
         foreach my $column (SELECT_COLUMNS) {
             $bug->{$column} = shift @$row;

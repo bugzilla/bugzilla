@@ -453,7 +453,7 @@ sub run_queries {
             'user'   => $args->{'recipient'}, # the search runs as the recipient
         );
         # If a query fails for whatever reason, it shouldn't kill the script.
-        my $data = eval { $search->data };
+        my $sqlquery = eval { $search->sql };
         if ($@) {
             print STDERR get_text('whine_query_failed', { query_name => $thisquery->{'name'},
                                                           author => $args->{'author'},
@@ -461,12 +461,15 @@ sub run_queries {
             next;
         }
 
-        foreach my $row (@$data) {
+        $sth = $dbh->prepare($sqlquery);
+        $sth->execute;
+
+        while (my @row = $sth->fetchrow_array) {
             my $bug = {};
             for my $field (@searchfields) {
                 my $fieldname = $field;
                 $fieldname =~ s/^bugs\.//;  # No need for bugs.whatever
-                $bug->{$fieldname} = shift @$row;
+                $bug->{$fieldname} = shift @row;
             }
 
             if ($thisquery->{'onemailperbug'}) {

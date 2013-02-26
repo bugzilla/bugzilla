@@ -1,23 +1,9 @@
-# -*- Mode: perl; indent-tabs-mode: nil -*-
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
 #
-# The contents of this file are subject to the Mozilla Public
-# License Version 1.1 (the "License"); you may not use this file
-# except in compliance with the License. You may obtain a copy of
-# the License at http://www.mozilla.org/MPL/
-#
-# Software distributed under the License is distributed on an "AS
-# IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
-# implied. See the License for the specific language governing
-# rights and limitations under the License.
-#
-# The Original Code is the TagNewUsers Extension.
-#
-# The Initial Developer of the Original Code is the Mozilla Foundation
-# Portions created by the Initial Developers are Copyright (C) 2011 the
-# Initial Developer. All Rights Reserved.
-#
-# Contributor(s):
-#   Byron Jones <bjones@mozilla.com>
+# This Source Code Form is "Incompatible With Secondary Licenses", as
+# defined by the Mozilla Public License, v. 2.0.
 
 package Bugzilla::Extension::TagNewUsers;
 use strict;
@@ -33,6 +19,12 @@ use constant PROFILE_AGE => 60;
 
 # users with fewer comments than COMMENT_COUNT will be tagged as new
 use constant COMMENT_COUNT => 25;
+
+# users to always treat as not-new
+# note: users in this list won't have their comment_count field updated
+use constant NEVER_NEW => (
+    'tbplbot@gmail.com',    # the TinderBoxPushLog robot is very frequent commenter
+);
 
 our $VERSION = '1';
 
@@ -66,7 +58,7 @@ sub install_update_db {
         my $ra = $dbh->selectall_arrayref("
             SELECT p.userid, a.profiles_when
               FROM profiles p
-                   LEFT JOIN profiles_activity a ON a.userid=p.userid 
+                   LEFT JOIN profiles_activity a ON a.userid=p.userid
                         AND a.fieldid=$creation_date_fieldid
         ");
         my ($now) = Bugzilla->dbh->selectrow_array("SELECT NOW()");
@@ -77,21 +69,21 @@ sub install_update_db {
             my ($user_id, $when) = @$ra_row;
             if (!$when) {
                 ($when) = $dbh->selectrow_array(
-                    "SELECT bug_when FROM bugs_activity WHERE who=? ORDER BY bug_when " . 
+                    "SELECT bug_when FROM bugs_activity WHERE who=? ORDER BY bug_when " .
                         $dbh->sql_limit(1),
                     undef, $user_id
                 );
             }
             if (!$when) {
                 ($when) = $dbh->selectrow_array(
-                    "SELECT bug_when FROM longdescs WHERE who=? ORDER BY bug_when " . 
+                    "SELECT bug_when FROM longdescs WHERE who=? ORDER BY bug_when " .
                         $dbh->sql_limit(1),
                     undef, $user_id
                 );
             }
             if (!$when) {
                 ($when) = $dbh->selectrow_array(
-                    "SELECT creation_ts FROM bugs WHERE reporter=? ORDER BY creation_ts " . 
+                    "SELECT creation_ts FROM bugs WHERE reporter=? ORDER BY creation_ts " .
                         $dbh->sql_limit(1),
                     undef, $user_id
                 );
@@ -165,6 +157,9 @@ sub _update_comment_count {
     my $self = shift;
     my $dbh = Bugzilla->dbh;
 
+    my $login = $self->login;
+    return if grep { $_ eq $login } NEVER_NEW;
+
     my $id = $self->id;
     my ($count) = $dbh->selectrow_array(
         "SELECT COUNT(*) FROM longdescs WHERE who=?",
@@ -212,6 +207,9 @@ sub template_before_process {
 sub _user_is_new {
     my ($self, $user) = (shift, shift);
 
+    my $login = $user->login;
+    return 0 if grep { $_ eq $login} NEVER_NEW;
+
     # if the user can confirm bugs, they are no longer new
     return 0 if $user->in_group('canconfirm');
 
@@ -219,7 +217,7 @@ sub _user_is_new {
     my $age = sprintf("%.0f", (time() - str2time($user->{creation_ts})) / 86400);
     $user->{creation_age} = $age;
 
-    return 
+    return
         ($user->{comment_count} <= COMMENT_COUNT)
         || ($user->{creation_age} <= PROFILE_AGE);
 }
@@ -232,14 +230,14 @@ sub mailer_before_send {
     my $changer_login = $email->header('X-Bugzilla-Who');
     my $changed_fields = $email->header('X-Bugzilla-Changed-Fields');
 
-    if ($bug_id 
-        && $changer_login 
-        && $changed_fields =~ /attachments.created/) 
+    if ($bug_id
+        && $changer_login
+        && $changed_fields =~ /attachments.created/)
     {
         my $changer = Bugzilla::User->new({ name => $changer_login });
         if ($changer
-            && $changer->first_patch_bug_id 
-            && $changer->first_patch_bug_id == $bug_id) 
+            && $changer->first_patch_bug_id
+            && $changer->first_patch_bug_id == $bug_id)
         {
             $email->header_set('X-Bugzilla-FirstPatch' => $bug_id);
         }
@@ -250,14 +248,14 @@ sub webservice_user_get {
     my ($self, $args) = @_;
     my ($webservice, $params, $users) = @$args{qw(webservice params users)};
 
-    foreach my $user (@$users) { 
+    foreach my $user (@$users) {
         # Most of the time the hash values are XMLRPC::Data objects
         my $email = blessed $user->{'email'} ? $user->{'email'}->value : $user->{'email'};
         if ($email) {
             my $user_obj = Bugzilla::User->new({ name => $email });
-            $user->{'is_new'} 
+            $user->{'is_new'}
                 = $webservice->type('boolean', $self->_user_is_new($user_obj) ? 1 : 0);
-        } 
+        }
     }
 }
 

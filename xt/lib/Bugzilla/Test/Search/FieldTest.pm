@@ -544,13 +544,13 @@ sub do_tests {
     my $sql;
     TODO: {
         local $TODO = $search_broken if $search_broken;
-        lives_ok { $sql = $search->sql } "$name: generate SQL";
+        lives_ok { $sql = $search->_sql } "$name: generate SQL";
     }
     
     my $results;
     SKIP: {
         skip "Can't run SQL without any SQL", 1 if !defined $sql;
-        $results = $self->_test_sql($sql);
+        $results = $self->_test_sql($search);
     }
 
     $self->_test_content($results, $sql);
@@ -567,12 +567,11 @@ sub _test_search_object_creation {
 }
 
 sub _test_sql {
-    my ($self, $sql) = @_;
-    my $dbh = Bugzilla->dbh;
+    my ($self, $search) = @_;
     my $name = $self->name;
     my $results;
-    lives_ok { $results = $dbh->selectall_arrayref($sql) } "$name: Run SQL Query"
-        or diag($sql);
+    lives_ok { $results = $search->data } "$name: Run SQL Query"
+        or diag($search->_sql);
     return $results;
 }
 

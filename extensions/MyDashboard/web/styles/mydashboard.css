@@ -5,8 +5,17 @@
  * This Source Code Form is "Incompatible With Secondary Licenses", as
  * defined by the Mozilla Public License, v. 2.0. */
 
+#mydashboard {
+    min-width: 950px;
+}
+
 #mydashboard .yui3-skin-sam .yui3-datatable-table {
     width: 100%;
+}
+
+.yui3-datatable-col-changeddate,
+.yui3-datatable-col-created {
+    white-space: nowrap;
 }
 
 .query_heading {

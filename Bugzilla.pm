@@ -26,6 +26,7 @@ package Bugzilla;
 
 use strict;
 
+
 # We want any compile errors to get to the browser, if possible.
 BEGIN {
     # This makes sure we're in a CGI.

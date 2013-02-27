@@ -35,6 +35,8 @@ BEGIN {
     }
 }
 
+# FIXME to remove later
+
 use Bugzilla::Config;
 use Bugzilla::Constants;
 use Bugzilla::Auth;

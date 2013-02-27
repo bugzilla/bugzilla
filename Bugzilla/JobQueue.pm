@@ -106,7 +106,7 @@ sub insert {
 sub subprocess_worker {
     my $self = shift;
 
-    my $command = "$0 -d -p '" . $self->{_worker_pidfile} . "' onepass";
+    my $command = "$0 -p '" . $self->{_worker_pidfile} . "' onepass";
 
     while (1) {
         my $time = (time);

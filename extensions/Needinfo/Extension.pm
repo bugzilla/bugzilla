@@ -125,8 +125,7 @@ sub bug_start_of_update {
         }
     }
 
-    # Clear the flag if bug is being closed or if additional
-    # information was given as requested
+    # Clear the flag if additional information was given as requested
     my @flags;
     foreach my $flag (@{ $bug->flags }) {
         next if $flag->type->name ne 'needinfo';
@@ -137,13 +136,6 @@ sub bug_start_of_update {
 
         # Clear if current user has selected override
         $clear_needinfo = 1 if grep($_ == $flag->id, @needinfo_overrides);
-
-        # Clear if bug is being closed
-        if (($bug->bug_status ne $old_bug->bug_status)
-            && !$old_bug->status->is_open)
-        {
-            $clear_needinfo = 1;
-        }
 
         # Clear if comment provided by the proper requestee
         if ($bug->{added_comments}

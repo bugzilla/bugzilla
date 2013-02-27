@@ -8,7 +8,6 @@
 
 [% needinfo_flagtype   = "" %]
 [% needinfo_flags      = [] %]
-[% can_create_needinfo = 0  %]
 
 [% FOREACH type = bug.flag_types %]
   [% IF type.name == 'needinfo' %]
@@ -22,19 +21,6 @@
   [% END %]
 [% END %]
 
-[% IF user.in_group('canconfirm') %]
-  [% IF bug.status.is_open %]
-    [% can_create_needinfo = 1 %]
-  [% ELSE %]
-    [% FOREACH field = Bugzilla.active_custom_fields(product=>bug.product_obj, component=>bug.component_obj, type=>2) %]
-      [% IF field.description.match('^status-firefox') && bug.${field.name} == 'affected' %]
-        [% can_create_needinfo = 1 %]
-        [% LAST %]
-      [% END %]
-    [% END %]
-  [% END %]
-[% END %]
-
 [% IF needinfo_flagtype %]
   <div id="needinfo_container">
     [% IF needinfo_flags.size > 0 %]
@@ -43,56 +29,69 @@
         var summary_container = document.getElementById('static_bug_status');
         summary_container.appendChild(document.createTextNode('[NEEDINFO]'));
       </script>
-
-      [% FOREACH flag = needinfo_flags %]
+    [% END %]
+    <table>
+    [% FOREACH flag = needinfo_flags %]
+      <tr>
         [% IF !flag.requestee || flag.requestee.id == user.id %]
-          Adding a comment will automatically clear needinfo the request for
-          <em>[% IF !flag.requestee %]anyone[% ELSE %][% flag.requestee.login FILTER html %][% END %]</em>.
+          <td align="center"><span style="color:red;font-weight:bold;">*</span></td>
+          <td>
+            Adding a comment will automatically clear needinfo the request for
+            <em>[% IF !flag.requestee %]anyone[% ELSE %][% flag.requestee.login FILTER html %][% END %]</em>.
+          </td>
         [% ELSE %]
-          <input type="checkbox" id="needinfo_override_[% flag.id FILTER html %]"
-                 name="needinfo_override_[% flag.id FILTER html %]" value="1">
-          <label for="needinfo_override_[% flag.id FILTER html %]">
-            I am providing the requested information for <em>[% flag.requestee.login FILTER html %]</em>
-            (will clear the needinfo request).
-          </label>
+          <td align="center">
+            <input type="checkbox" id="needinfo_override_[% flag.id FILTER html %]"
+                   name="needinfo_override_[% flag.id FILTER html %]" value="1">
+          </td>
+          <td>
+            <label for="needinfo_override_[% flag.id FILTER html %]">
+              I am providing the requested information for <em>[% flag.requestee.login FILTER html %]</em>
+              (clears the needinfo request).
+            </label>
+          </td>
         [% END %]
-        <br>
-      [% END %]
+      </tr>
     [% END %]
-
-    [% IF can_create_needinfo && (needinfo_flags.size == 0 || needinfo_flagtype.is_multiplicable) %]
-      <script>
-        function needinfoRole (select) {
-          YAHOO.util.Dom.get('needinfo').checked = true;
-          if (select.value == 'other') {
-            YAHOO.util.Dom.removeClass('needinfo_from_container', 'bz_default_hidden');
-            YAHOO.util.Dom.get('needinfo_from').focus();
+    [% IF user.in_group('canconfirm') && (needinfo_flags.size == 0 || needinfo_flagtype.is_multiplicable) %]
+      <tr>
+        <td align="center">
+          <script>
+            function needinfoRole (select) {
+              YAHOO.util.Dom.get('needinfo').checked = true;
+            if (select.value == 'other') {
+              YAHOO.util.Dom.removeClass('needinfo_from_container', 'bz_default_hidden');
+              YAHOO.util.Dom.get('needinfo_from').focus();
+            }
+            else {
+              YAHOO.util.Dom.addClass('needinfo_from_container', 'bz_default_hidden');
+            }
           }
-          else {
-            YAHOO.util.Dom.addClass('needinfo_from_container', 'bz_default_hidden');
-          }
-        }
-      </script>
-      <input type="checkbox" name="needinfo" value="1" id="needinfo">
-      <label for="needinfo">Need additional information from</label>
-      <select name="needinfo_role" id="needinfo_role" onchange="needinfoRole(this);">
-        <option value="">anyone</option>
-        <option value="reporter">reporter</option>
-        <option value="assigned_to">assignee</option>
-        [% IF Param('useqacontact') && bug.qa_contact.login != "" %]
-          <option value="qa_contact">qa contact</option>
-        [% END %]
-        <option value="other">other</option>
-      </select>
-      <span id="needinfo_from_container" class="bz_default_hidden">
-        [%+ INCLUDE global/userselect.html.tmpl
-                    id       => "needinfo_from"
-                    name     => "needinfo_from"
-                    size     => 30
-                    value    => ""
-        %]
-      </span>
-      <br>
+          </script>
+          <input type="checkbox" name="needinfo" value="1" id="needinfo">
+        </td>
+        <td>
+          <label for="needinfo">Need more information from</label>
+          <select name="needinfo_role" id="needinfo_role" onchange="needinfoRole(this);">
+            <option value="">anyone</option>
+            <option value="reporter">reporter</option>
+            <option value="assigned_to">assignee</option>
+            [% IF Param('useqacontact') && bug.qa_contact.login != "" %]
+              <option value="qa_contact">qa contact</option>
+            [% END %]
+            <option value="other">other</option>
+          </select>
+          <span id="needinfo_from_container" class="bz_default_hidden">
+            [%+ INCLUDE global/userselect.html.tmpl
+                        id       => "needinfo_from"
+                        name     => "needinfo_from"
+                        size     => 30
+                        value    => ""
+            %]
+          </span>
+        </td> 
+      </tr>
     [% END %]
+    </table>
   </div>
 [% END %]

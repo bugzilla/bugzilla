@@ -187,6 +187,7 @@ sub query_flags {
              flagtypes.name AS type,
              flags.status AS status,
              flags.bug_id AS bug_id, 
+             bugs.bug_status AS bug_status,
              bugs.short_desc AS bug_summary,
              flags.attach_id AS attach_id, 
              attachments.description AS attach_summary,

@@ -10,8 +10,8 @@
 YUI({
     base: 'js/yui3/',
     combine: false
-}).use("node", "datatable", "datatable-sort", "json-stringify",
-          "datatable-datasource", "datasource-io", "datasource-jsonschema", function (Y) {
+}).use("node", "datatable", "datatable-sort", "json-stringify", "escape",
+       "datatable-datasource", "datasource-io", "datasource-jsonschema", function (Y) {
     // Common
     var counter = 0;
     var dataSource = {
@@ -65,15 +65,20 @@ YUI({
         });
     };
 
+    var bugLinkFormatter = function (o) {
+        return '<a href="show_bug.cgi?id=' + encodeURIComponent(o.value) + 
+               ' target="_blank" ' + 'title="' + Y.Escape.html(o.data.bug_status) + ' - ' + 
+               Y.Escape.html(o.data.bug_summary) + '">' + o.value + '</a>';
+    };
+
     // Requestee
     dataSource.requestee = new Y.DataSource.IO({ source: 'jsonrpc.cgi' });
     dataTable.requestee = new Y.DataTable({
         columns: [
-            { key:"requester", label:"Requester", sortable:true },
-            { key:"type", label:"Flag", sortable:true },
-            { key:"bug_id", label:"Bug", sortable:true,
-              formatter: '<a href="show_bug.cgi?id={value}" target="_blank">{value}</a>', allowHTML: true },
-            { key:"created", label:"Created", sortable:true }
+            { key: "requester", label: "Requester", sortable: true },
+            { key: "type", label: "Flag", sortable: true },
+            { key: "bug_id", label: "Bug", sortable: true, formatter: bugLinkFormatter, allowHTML: true },
+            { key: "created", label: "Created", sortable: true }
         ],
         strings: {
             emptyMessage: 'No flag data found.',
@@ -90,7 +95,7 @@ YUI({
     dataSource.requestee.plug(Y.Plugin.DataSourceJSONSchema, {
         schema: {
             resultListLocator: "result.result.requestee",
-            resultFields: ["requester", "type", "bug_id", "created"]
+            resultFields: ["requester", "type", "bug_id", "bug_status", "bug_summary", "created"]
         }
     });
 
@@ -106,8 +111,7 @@ YUI({
         columns: [
             { key:"requestee", label:"Requestee", sortable:true },
             { key:"type", label:"Flag", sortable:true },
-            { key:"bug_id", label:"Bug", sortable:true,
-              formatter: '<a href="show_bug.cgi?id={value}" target="_blank">{value}</a>', allowHTML: true },
+            { key:"bug_id", label:"Bug", sortable:true, formatter: bugLinkFormatter, allowHTML: true },
             { key:"created", label:"Created", sortable:true }
         ],
         strings: {
@@ -125,7 +129,7 @@ YUI({
     dataSource.requester.plug(Y.Plugin.DataSourceJSONSchema, {
         schema: {
             resultListLocator: "result.result.requester",
-            resultFields: ["requestee", "type", "bug_id", "created"]
+            resultFields: ["requestee", "type", "bug_id", "bug_status", "bug_summary", "created"]
         }
     });
 

@@ -150,25 +150,8 @@ hr {
     display: none;
 }
 
-#find_top {
-    display: none !important;
-}
-
-#header .form a, #header .form a:visited {
-    background: rgba(0, 0, 0, 0.3);
-    border-radius: 10px;
-    color: #e5e3dc;
-    display: inline-block;
-    font-weight: bold;
-    margin-left: 5px;
-    text-align: center;
-    width: 20px;
-    height: 20px;
-}
-
-#header .form a:hover {
-    background: #0095dd;
-    text-decoration: none;
+#header .form a {
+    margin: 0;
 }
 
 .links .dropdown {

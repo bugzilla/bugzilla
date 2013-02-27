@@ -60,10 +60,13 @@
 
   [% IF debug %]
     <div class="bz_query_debug">
-      <p>[% query FILTER html %]</p>
-      <p>Execution time: [% query_time FILTER html %] seconds</p>
-      [% IF query_explain.defined %]
-        <pre>[% query_explain FILTER html %]</pre>
+      <p>Total execution time: [% query_time FILTER html %] seconds</p>
+      [% FOREACH query = queries %]
+        <p>[% query.sql FILTER html %]</p>
+        <p>Execution time: [% query.time FILTER html %] seconds</p>
+        [% IF query.explain %]
+          <pre>[% query.explain FILTER html %]</pre>
+        [% END %]
       [% END %]
     </div>
   [% END %]

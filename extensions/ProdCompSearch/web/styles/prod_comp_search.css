@@ -14,3 +14,7 @@
 #prod_comp_search_form .yui3-aclist-input {
     width: 360px;
 }
+
+#prod_comp_no_components {
+    color: red;
+}

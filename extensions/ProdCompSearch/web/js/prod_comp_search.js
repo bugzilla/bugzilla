@@ -73,13 +73,13 @@ YUI({
         on: {
             query: function(e) {
                 Y.one("#prod_comp_throbber").removeClass('bz_default_hidden');
-                Y.one("#prod_comp_no_data").addClass('bz_default_hidden');
+                Y.one("#prod_comp_no_components").addClass('bz_default_hidden');
             },
             results: function(e) {
                 Y.one("#prod_comp_throbber").addClass('bz_default_hidden');
                 input.ac.set('activateFirstItem', e.results.length == 1);
                 if (e.results.length == 0) {
-                    Y.one("#prod_comp_no_data").removeClass('bz_default_hidden');
+                    Y.one("#prod_comp_no_components").removeClass('bz_default_hidden');
                 }
             },
             select: function(e) {

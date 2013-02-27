@@ -8,9 +8,12 @@
 
 <div id="prod_comp_search_form" class="yui3-skin-sam">
   <div id="prod_comp_search_header">
-    [% input_label FILTER none %]
+    [% input_label FILTER none %]&nbsp;
     <img id="prod_comp_throbber" src="extensions/ProdCompSearch/web/images/throbber.gif"
          class="bz_default_hidden" width="16" height="11">
+    <span id="prod_comp_no_data" class="bz_default_hidden" style="color:red;">
+      No data found</span>
   </div>
-  <input id="prod_comp_search" type="text" size="50">
+  <input id="prod_comp_search" type="text" size="50"
+         placeholder="Search by product and component keywords">
 </div>

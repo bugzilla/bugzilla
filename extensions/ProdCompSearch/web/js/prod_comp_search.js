@@ -8,6 +8,8 @@
 // Product and component search to file a new bug
 
 var ProdCompSearch = {
+    script_name: 'enter_bug.cgi',
+    script_choices: ['enter_bug.cgi', 'describecomponents.cgi'],
     format: null,
     cloned_bug_id: null
 };
@@ -15,7 +17,7 @@ var ProdCompSearch = {
 YUI({
     base: 'js/yui3/',
     combine: false
-}).use("node", "json-stringify", "autocomplete", "escape",
+}).use("node", "json-stringify", "autocomplete", "escape", "array",
        "datasource-io", "datasource-jsonschema", "array-extras", function (Y) {
     var counter = 0,
         dataSource = null,
@@ -71,19 +73,30 @@ YUI({
         on: {
             query: function(e) {
                 Y.one("#prod_comp_throbber").removeClass('bz_default_hidden');
+                Y.one("#prod_comp_no_data").addClass('bz_default_hidden');
             },
             results: function(e) {
                 Y.one("#prod_comp_throbber").addClass('bz_default_hidden');
                 input.ac.set('activateFirstItem', e.results.length == 1);
+                if (e.results.length == 0) {
+                    Y.one("#prod_comp_no_data").removeClass('bz_default_hidden');
+                }
             },
             select: function(e) {
+                // Only redirect if the script_name is a valid choice
+                if (Y.Array.indexOf(ProdCompSearch.script_choices, ProdCompSearch.script_name) == -1)
+                    return;
+
                 var data = e.result.raw;
-                var url = "enter_bug.cgi?product=" + encodeURIComponent(data.product) +
+                var url = ProdCompSearch.script_name + 
+                          "?product=" + encodeURIComponent(data.product) +
                           "&component=" +  encodeURIComponent(data.component);
-                if (ProdCompSearch.format)
-                    url += "&format=" + encodeURIComponent(ProdCompSearch.format);
-                if (ProdCompSearch.cloned_bug_id)
-                    url += "&cloned_bug_id=" + encodeURIComponent(ProdCompSearch.cloned_bug_id);
+                if (ProdCompSearch.script_name == 'enter_bug.cgi') {
+                    if (ProdCompSearch.format)
+                        url += "&format=" + encodeURIComponent(ProdCompSearch.format);
+                    if (ProdCompSearch.cloned_bug_id)
+                        url += "&cloned_bug_id=" + encodeURIComponent(ProdCompSearch.cloned_bug_id);
+                }
                 window.location.href = url;
             }
         },

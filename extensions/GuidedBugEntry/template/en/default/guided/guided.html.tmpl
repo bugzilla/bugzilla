@@ -117,16 +117,12 @@ dupes.setLabels(
 </h3>
 
 <script>
-  [% IF format %]
-    ProdCompSearch.format = '[% format FILTER js %]';
-  [% END %]
-  [% IF cloned_bug_id %]
-    ProdCompSearch.cloned_bug_id = '[% cloned_bug_id FILTER js %]';
-  [% END %]
+  ProdCompSearch.format = 'guided';
+  ProdCompSearch.script_name = 'enter_bug.cgi';
 </script>
 <div id="prod_comp_search_main">
   [% PROCESS prodcompsearch/form.html.tmpl
-      input_label = "Type to find product and component by name or description:"
+      input_label = "Find product:"
   %]
 </div>
 

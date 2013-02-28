@@ -34,3 +34,8 @@ th.sorted_5 {
 .bz_short_desc_column a:hover, .bz_short_short_desc_column a:hover {
     text-decoration: underline;
 }
+
+#request_form #filtering th {
+    padding-left: 0.5em;
+}
+

@@ -157,10 +157,22 @@ to some group are shown by default.
           } %]
         [% PROCESS "global/select-menu.html.tmpl" name="group" options=groups default=cgi.param('group') %]
       </td>
+    </tr>
+    <tr>
+      <th></th>
+      <td>
+        <label><input type="radio" name="do_union" value="0" 
+            [% 'checked="checked"' IF !cgi.param('do_union') %]>AND *</label>
+        <label><input type="radio" name="do_union" value="1" 
+            [% 'checked="checked"' IF cgi.param('do_union') %]>OR *</label>
+      </td>
+      <td colspan="3"></td>
       <td><input type="submit" id="filter" value="Filter"></td>
     </tr>
   </table>
 
+  <p>(* The logical conjunction/disjunction between the requester 
+          and the requestee)</p>
 </form>
 
 [% column_headers = {

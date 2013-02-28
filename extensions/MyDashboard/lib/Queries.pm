@@ -13,12 +13,12 @@ use Bugzilla;
 use Bugzilla::Bug;
 use Bugzilla::CGI;
 use Bugzilla::Search;
-use Bugzilla::Util qw(format_time);
+use Bugzilla::Util qw(format_time datetime_from);
 
 use Bugzilla::Extension::MyDashboard::Util qw(open_states quoted_open_states);
 use Bugzilla::Extension::MyDashboard::TimeAgo qw(time_ago);
 
-use Data::Dumper;
+use DateTime;
 
 use base qw(Exporter);
 our @EXPORT = qw(
@@ -129,8 +129,9 @@ sub QUERY_DEFS {
 }
 
 sub query_bugs {
-    my $qdef = shift;
-    my $dbh  = Bugzilla->dbh;
+    my $qdef     = shift;
+    my $dbh      = Bugzilla->dbh;
+    my $date_now = DateTime->now;
 
     ## HACK to remove POST
     delete $ENV{REQUEST_METHOD};
@@ -140,7 +141,6 @@ sub query_bugs {
     my $search = new Bugzilla::Search( fields => [ SELECT_COLUMNS ],
                                        params => scalar $params->Vars,
                                        order  => [ QUERY_ORDER ]);
-
     my $data = $search->data;
 
     my @bugs;
@@ -150,8 +150,8 @@ sub query_bugs {
             $bug->{$column} = shift @$row;
             if ($column eq 'changeddate') {
                 $bug->{$column} = format_time($bug->{$column}, '%Y-%m-%d %H:%M');
-            #   my $date_then = datetime_from($bug->{$column});
-            #   $bug->{'updated'} = time_ago($date_then, $date_now);
+                my $date_then = datetime_from($bug->{$column});
+                $bug->{'changeddate_fancy'} = time_ago($date_then, $date_now);
             }
         }
         push(@bugs, $bug);
@@ -161,9 +161,10 @@ sub query_bugs {
 }
 
 sub query_flags {
-    my $type = shift;
-    my $user = Bugzilla->user;
-    my $dbh  = Bugzilla->dbh;
+    my $type     = shift;
+    my $user     = Bugzilla->user;
+    my $dbh      = Bugzilla->dbh;
+    my $date_now = DateTime->now;
 
     ($type ne 'requestee' || $type ne 'requester')
         || ThrowCodeError('param_required', { param => 'type' });
@@ -222,21 +223,28 @@ sub query_flags {
     # Order the records (within each group).
     my $group_order_by = " GROUP BY flags.bug_id ORDER BY flags.creation_date, flagtypes.name";
 
+    my $flags = [];
     if ($type eq 'requestee') {
-        return $dbh->selectall_arrayref($query .
-                                        " AND requestees.login_name = ? " .
-                                        $group_order_by,
-                                        { Slice => {} }, $user->login);
+        $flags = $dbh->selectall_arrayref($query .
+                                          " AND requestees.login_name = ? " .
+                                          $group_order_by,
+                                          { Slice => {} }, $user->login);
     }
 
     if ($type eq 'requester') {
-        return $dbh->selectall_arrayref($query .
-                                        " AND requesters.login_name = ? " .
-                                        $group_order_by,
-                                        { Slice => {} }, $user->login);
+        $flags = $dbh->selectall_arrayref($query .
+                                          " AND requesters.login_name = ? " .
+                                          $group_order_by,
+                                          { Slice => {} }, $user->login);
     }
 
-    return undef;
+    # Add the fancy date
+    foreach my $flag (@$flags) {
+        my $date_then = datetime_from($flag->{'created'});
+        $flag->{'created_fancy'} = time_ago($date_then, $date_now);
+    }
+
+    return $flags;
 }
 
 1;

@@ -71,14 +71,21 @@ YUI({
                Y.Escape.html(o.data.bug_summary) + '">' + o.value + '</a>';
     };
 
+    var createdFormatter = function (o) {
+        return '<span title="' + Y.Escape.html(o.value) + '">' +
+               Y.Escape.html(o.data.created_fancy) + '</span>';
+    };
+
     // Requestee
     dataSource.requestee = new Y.DataSource.IO({ source: 'jsonrpc.cgi' });
     dataTable.requestee = new Y.DataTable({
         columns: [
             { key: "requester", label: "Requester", sortable: true },
             { key: "type", label: "Flag", sortable: true },
-            { key: "bug_id", label: "Bug", sortable: true, formatter: bugLinkFormatter, allowHTML: true },
-            { key: "created", label: "Created", sortable: true }
+            { key: "bug_id", label: "Bug", sortable: true, 
+              formatter: bugLinkFormatter, allowHTML: true },
+            { key: "created", label: "Created", sortable: true, 
+              formatter: createdFormatter, allowHTML: true }
         ],
         strings: {
             emptyMessage: 'No flag data found.',
@@ -95,7 +102,8 @@ YUI({
     dataSource.requestee.plug(Y.Plugin.DataSourceJSONSchema, {
         schema: {
             resultListLocator: "result.result.requestee",
-            resultFields: ["requester", "type", "bug_id", "bug_status", "bug_summary", "created"]
+            resultFields: ["requester", "type", "bug_id", "bug_status",
+                           "bug_summary", "created", "created_fancy"]
         }
     });
 
@@ -111,8 +119,10 @@ YUI({
         columns: [
             { key:"requestee", label:"Requestee", sortable:true },
             { key:"type", label:"Flag", sortable:true },
-            { key:"bug_id", label:"Bug", sortable:true, formatter: bugLinkFormatter, allowHTML: true },
-            { key:"created", label:"Created", sortable:true }
+            { key:"bug_id", label:"Bug", sortable:true,
+              formatter: bugLinkFormatter, allowHTML: true },
+            { key: "created", label: "Created", sortable: true,
+              formatter: createdFormatter, allowHTML: true }
         ],
         strings: {
             emptyMessage: 'No flag data found.',
@@ -129,7 +139,8 @@ YUI({
     dataSource.requester.plug(Y.Plugin.DataSourceJSONSchema, {
         schema: {
             resultListLocator: "result.result.requester",
-            resultFields: ["requestee", "type", "bug_id", "bug_status", "bug_summary", "created"]
+            resultFields: ["requestee", "type", "bug_id", "bug_status",
+                           "bug_summary", "created", "created_fancy"]
         }
     });
 

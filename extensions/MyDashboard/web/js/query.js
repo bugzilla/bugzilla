@@ -19,7 +19,7 @@ YUI({
     }
 }).use("node", "datatable", "datatable-sort", "datatable-message", "json-stringify",
        "datatable-datasource", "datasource-io", "datasource-jsonschema", "cookie",
-       "gallery-datatable-row-expansion-bmo", "handlebars", function (Y) {
+       "gallery-datatable-row-expansion-bmo", "handlebars", "escape", function (Y) {
     var counter = 0,
         dataSource = null,
         dataTable = null, 
@@ -86,13 +86,18 @@ YUI({
         });
     };
 
+    var updatedFormatter = function (o) {
+        return '<span title="' + Y.Escape.html(o.value) + '">' +
+               Y.Escape.html(o.data.changeddate_fancy) + '</span>';
+    };
+
     dataSource = new Y.DataSource.IO({ source: 'jsonrpc.cgi' });
 
     dataSource.plug(Y.Plugin.DataSourceJSONSchema, {
         schema: {
             resultListLocator: "result.result.bugs",
-            resultFields: ["bug_id", "changeddate", "bug_status", 
-                           "short_desc", "last_changes"],
+            resultFields: ["bug_id", "changeddate", "changeddate_fancy",
+                           "bug_status", "short_desc", "last_changes"],
             metaFields: {
                 description: "result.result.description",
                 heading:     "result.result.heading",
@@ -103,13 +108,14 @@ YUI({
 
     dataTable = new Y.DataTable({
         columns: [
-            { key: Y.Plugin.DataTableRowExpansion.column_key, label: ' ' },
-            { key: "bug_id", label: "Bug", sortable: true,
-              formatter: '<a href="show_bug.cgi?id={value}" target="_blank">{value}</a>', allowHTML: true },
-            { key: "changeddate", label: "Updated", sortable: true },
-            { key: "bug_status", label: "Status", sortable: true },
-            { key: "short_desc", label: "Summary", sortable: true },
+            { key: Y.Plugin.DataTableRowExpansion.column_key, label: ' ', sortable: false },
+            { key: "bug_id", label: "Bug", allowHTML: true,
+              formatter: '<a href="show_bug.cgi?id={value}" target="_blank">{value}</a>' },
+            { key: "changeddate", label: "Updated", formatter: updatedFormatter, allowHTML: true },
+            { key: "bug_status", label: "Status" },
+            { key: "short_desc", label: "Summary" },
         ],
+        sortable: true
     });
 
     var last_changes_source = Y.one('#last-changes-template').getHTML(),

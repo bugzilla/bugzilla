@@ -36,11 +36,7 @@ use constant QUERY_ORDER => ("changeddate desc", "bug_id");
 # Share with buglist.cgi?
 use constant SELECT_COLUMNS => qw(
     bug_id
-    product
     bug_status
-    bug_severity
-    version
-    component
     short_desc
     changeddate
 );

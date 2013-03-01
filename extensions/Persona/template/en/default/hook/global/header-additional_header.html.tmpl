@@ -68,7 +68,9 @@ navigator.id.watch({
   loggedInUser: null,
   onlogin: persona_onlogin,
   onlogout: function () {
-    document.location = '[% urlbase FILTER none %]index.cgi?logout=1';
+    [%# this should be redirecting to index.cgi?logout=1 however there's a
+        persona bug which causes this to break chrome and safari logins.
+        https://github.com/mozilla/browserid/issues/2423 %]
   }
 });
 

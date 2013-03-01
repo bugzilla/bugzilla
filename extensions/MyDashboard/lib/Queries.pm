@@ -72,7 +72,7 @@ sub QUERY_DEFS {
             heading     => "In Progress Reported by You",
             description => 'You reported the bug, the developer accepted the bug and is hopefully working on it.',
             params      => {
-                'bug_status'     => [ map { $_->name } grep($_->name ne 'NEW' && $_->name ne 'MODIFIED', open_states()) ],
+                'bug_status'     => [ map { $_->name } grep($_->name ne 'UNCONFIRMED' && $_->name ne 'NEW', open_states()) ],
                 'emailreporter1' => 1,
                 'emailtype1'     => 'exact',
                 'email1'         => $user->login

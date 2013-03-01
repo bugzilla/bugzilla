@@ -61,7 +61,7 @@ sub QUERY_DEFS {
             heading     => 'New Reported by You',
             description => 'You reported the bug but nobody has accepted it yet.',
             params      => {
-                'bug_status'     => ['NEW'],
+                'bug_status'     => ['UNCONFIRMED', 'NEW'],
                 'emailreporter1' => 1,
                 'emailtype1'     => 'exact',
                 'email1'         => $user->login

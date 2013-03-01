@@ -66,8 +66,8 @@ YUI({
     };
 
     var bugLinkFormatter = function (o) {
-        return '<a href="show_bug.cgi?id=' + encodeURIComponent(o.value) + 
-               ' target="_blank" ' + 'title="' + Y.Escape.html(o.data.bug_status) + ' - ' + 
+        return '<a href="show_bug.cgi?id=' + encodeURIComponent(o.value) +
+               '" target="_blank" ' + 'title="' + Y.Escape.html(o.data.bug_status) + ' - ' + 
                Y.Escape.html(o.data.bug_summary) + '">' + o.value + '</a>';
     };
 

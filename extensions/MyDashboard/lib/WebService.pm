@@ -13,7 +13,7 @@ use base qw(Bugzilla::WebService Bugzilla::WebService::Bug);
 
 use Bugzilla::Constants;
 use Bugzilla::Error;
-use Bugzilla::Util qw(detaint_natural trick_taint);
+use Bugzilla::Util qw(detaint_natural trick_taint template_var);
 use Bugzilla::WebService::Util qw(validate);
 
 use Bugzilla::Extension::MyDashboard::Queries qw(QUERY_DEFS query_bugs query_flags);
@@ -109,11 +109,16 @@ sub run_bug_query {
         foreach my $b (@$bugs) {
             my $last_changes = {};
             my $activity = $self->history({ ids => [ $b->{bug_id} ], 
-                                           start_time => $b->{changeddate} });
+                                            start_time => $b->{changeddate} });
             if (@{$activity->{bugs}[0]{history}}) {
-                $last_changes->{activity} = $activity->{bugs}[0]{history}[0]{changes};
-                $last_changes->{email} = $activity->{bugs}[0]{history}[0]{who};
-                $last_changes->{when} = $activity->{bugs}[0]{history}[0]{when};
+                my $change_set = $activity->{bugs}[0]{history}[0];
+                $last_changes->{activity} = $change_set->{changes};
+                foreach my $change (@{ $last_changes->{activity} }) {
+                    $change->{field_desc}
+                        = template_var('field_descs')->{$change->{field_name}} || $change->{field_name};   
+                }
+                $last_changes->{email} = $change_set->{who};
+                $last_changes->{when} = $self->datetime_format_inbound($change_set->{when});
             }
             my $last_comment_id = $dbh->selectrow_array("
                 SELECT comment_id FROM longdescs 
@@ -121,9 +126,11 @@ sub run_bug_query {
                 undef, $b->{bug_id}, $b->{changeddate});
             if ($last_comment_id) {
                 my $comments = $self->comments({ comment_ids => [ $last_comment_id ] });
-                $last_changes->{comment} = $comments->{comments}{$last_comment_id}{text};
-                $last_changes->{email} = $comments->{comments}{$last_comment_id}{creator} if !$last_changes->{email};
-                $last_changes->{when} = $comments->{comments}{$last_comment_id}{creation_time} if !$last_changes->{when};
+                my $comment = $comments->{comments}{$last_comment_id};
+                $last_changes->{comment} = $comment->{text};
+                $last_changes->{email} = $comment->{creator} if !$last_changes->{email};
+                $last_changes->{when}
+                    = $self->datetime_format_inbound($comment->{creation_time}) if !$last_changes->{when};
             }
             $b->{last_changes} = $last_changes;
         }

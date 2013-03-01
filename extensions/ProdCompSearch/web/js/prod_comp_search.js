@@ -17,8 +17,8 @@ var ProdCompSearch = {
 YUI({
     base: 'js/yui3/',
     combine: false
-}).use("node", "json-stringify", "autocomplete", "escape", "array",
-       "datasource-io", "datasource-jsonschema", "array-extras", function (Y) {
+}).use("node", "json-stringify", "autocomplete", "escape",
+       "datasource-io", "datasource-jsonschema", function (Y) {
     var counter = 0,
         dataSource = null,
         autoComplete = null;

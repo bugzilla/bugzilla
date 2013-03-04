@@ -45,26 +45,8 @@ use Sys::Syslog qw(:DEFAULT setlogsock);
 
 use Bugzilla::Extension::BMO::Constants;
 use Bugzilla::Extension::BMO::FakeBug;
-use Bugzilla::Extension::BMO::Data qw($cf_visible_in_products
-                                      $cf_flags
-                                      $cf_project_flags
-                                      $cf_disabled_flags
-                                      %group_change_notification
-                                      $blocking_trusted_setters
-                                      $blocking_trusted_requesters
-                                      $status_trusted_wanters
-                                      $status_trusted_setters
-                                      $other_setters
-                                      %always_fileable_group
-                                      %group_auto_cc
-                                      %product_sec_groups);
-use Bugzilla::Extension::BMO::Reports qw(user_activity_report
-                                         triage_reports
-                                         group_admins_report
-                                         email_queue_report
-                                         release_tracking_report
-                                         group_membership_report
-                                         group_members_report);
+use Bugzilla::Extension::BMO::Data;
+use Bugzilla::Extension::BMO::Reports;
 
 our $VERSION = '0.1';
 
@@ -1064,6 +1046,37 @@ sub buglist_columns {
         name => '(SELECT COUNT(*) FROM duplicates WHERE duplicates.dupe_of = bugs.bug_id)',
         title => 'Duplicate Count',
     };
+}
+
+sub enter_bug_start {
+    my ($self, $args) = @_;
+    # if configured with create_bug_formats, force users into a custom bug
+    # format (can be overridden with a __standard__ format)
+    my $cgi = Bugzilla->cgi;
+    if ($cgi->param('format') && $cgi->param('format') eq '__standard__') {
+        $cgi->delete('format');
+    } elsif (my $format = forced_format($cgi->param('product'))) {
+        $cgi->param('format', $format);
+    }
+}
+
+sub forced_format {
+    # note: this is also called from the guided bug entry extension
+    my ($product) = @_;
+    return undef unless defined $product;
+
+    # check for a forced-format entry
+    my $forced = $create_bug_formats{blessed($product) ? $product->name : $product}
+        || return;
+
+    # should this user be included?
+    my $user = Bugzilla->user;
+    my $include = ref($forced->{include}) ? $forced->{include} : [ $forced->{include} ];
+    foreach my $inc (@$include) {
+        return $forced->{format} if $user->in_group($inc);
+    }
+
+    return undef;
 }
 
 sub query_database {

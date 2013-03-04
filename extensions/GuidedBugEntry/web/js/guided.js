@@ -17,9 +17,11 @@ var guided = {
   detectedOpSys: '',
   currentUser: '',
   openStates: [],
+  updateStep: true,
 
   setStep: function(newStep, noSetHistory) {
     // initialise new step
+    this.updateStep = true;
     switch(newStep) {
       case 'product':
         product.onShow();
@@ -37,6 +39,9 @@ var guided = {
         guided.setStep('product');
         return;
     }
+
+    if (!this.updateStep)
+        return;
 
     // change visibility of _step div
     if (this._currentStep)
@@ -586,6 +591,16 @@ var bugForm = {
   },
 
   onShow: function() {
+    // check for a forced format
+    var productName = product.getName();
+    if (products[productName] && products[productName].format) {
+        Dom.addClass('advanced', 'hidden');
+        document.location.href = 'enter_bug.cgi?format=' + encodeURIComponent(products[productName].format) +
+                                 '&product=' + encodeURIComponent(productName) +
+                                 '&short_desc=' + encodeURIComponent(dupes.getSummary());
+        guided.updateStep = false;
+        return;
+    }
     Dom.removeClass('advanced', 'hidden');
     // default the summary to the dupes query
     Dom.get('short_desc').value = dupes.getSummary();

@@ -26,18 +26,19 @@ use strict;
 use base qw(Exporter);
 use Tie::IxHash;
 
-our @EXPORT_OK = qw($cf_visible_in_products
-                    $cf_flags $cf_project_flags
-                    $cf_disabled_flags
-                    %group_change_notification
-                    $blocking_trusted_setters
-                    $blocking_trusted_requesters
-                    $status_trusted_wanters
-                    $status_trusted_setters
-                    $other_setters
-                    %always_fileable_group
-                    %group_auto_cc
-                    %product_sec_groups);
+our @EXPORT = qw( $cf_visible_in_products
+                  $cf_flags $cf_project_flags
+                  $cf_disabled_flags
+                  %group_change_notification
+                  $blocking_trusted_setters
+                  $blocking_trusted_requesters
+                  $status_trusted_wanters
+                  $status_trusted_setters
+                  $other_setters
+                  %always_fileable_group
+                  %group_auto_cc
+                  %product_sec_groups
+                  %create_bug_formats );
 
 # Which custom fields are visible in which products and components.
 #
@@ -434,5 +435,18 @@ our %group_auto_cc = (
 
 # Default security groups for products should always been fileable
 map { $always_fileable_group{$_} = 1 } values %product_sec_groups;
+
+# Force create-bug template by product
+# Users in 'include' group will be fored into using the form.
+our %create_bug_formats = (
+    'Mozilla Developer Network' => {
+        'format'  => 'mdn',
+        'include' => 'everyone',
+    },
+    'Legal' => {
+        'format'  => 'legal',
+        'include' => 'everyone',
+    },
+);
 
 1;

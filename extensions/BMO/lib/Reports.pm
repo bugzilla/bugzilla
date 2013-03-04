@@ -24,13 +24,13 @@ use List::MoreUtils qw(uniq);
 
 use base qw(Exporter);
 
-our @EXPORT_OK = qw(user_activity_report
-                    triage_reports
-                    group_admins_report
-                    email_queue_report
-                    release_tracking_report
-                    group_membership_report
-                    group_members_report);
+our @EXPORT = qw( user_activity_report
+                  triage_reports
+                  group_admins_report
+                  email_queue_report
+                  release_tracking_report
+                  group_membership_report
+                  group_members_report );
 
 sub user_activity_report {
     my ($vars) = @_;

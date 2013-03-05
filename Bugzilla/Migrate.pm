@@ -827,7 +827,7 @@ sub _insert_comments {
         $self->_do_table_insert('longdescs', \%copy);
         $self->debug("  Inserted comment from " . $who->login, 2);
     }
-    $bug->_sync_fulltext();
+    $bug->_sync_fulltext( update_comments => 1 );
 }
 
 sub _insert_history {

@@ -371,6 +371,7 @@ our %always_fileable_group = (
     'mozilla-confidential'              => 1,
     'mozilla-corporation-confidential'  => 1,
     'mozilla-foundation-confidential'   => 1,
+    'mozilla-engagement'                => 1,
     'mozilla-messaging-confidential'    => 1,
     'partner-confidential'              => 1,
     'payments-confidential'             => 1,

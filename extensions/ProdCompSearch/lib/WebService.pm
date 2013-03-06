@@ -22,7 +22,7 @@ sub prod_comp_search {
 
     my $search = $params->{'search'};
     $search || ThrowCodeError('param_required',
-        { function => 'Bug.prod_comp_search', param => 'search' });
+        { function => 'PCS.prod_comp_search', param => 'search' });
 
     my $limit = detaint_natural($params->{'limit'})
                 ? $dbh->sql_limit($params->{'limit'})

@@ -24,7 +24,7 @@ YUI({
         autoComplete = null;
 
     var resultListFormat = function(query, results) {
-        return Y.Array.map(results, function (result) {
+        return Y.Array.map(results, function(result) {
             var data = result.raw;
             result.text = data.product + ' :: ' + data.component;
             return Y.Escape.html(result.text);
@@ -35,7 +35,7 @@ YUI({
         counter = counter + 1;
         var json_object = {
             version: "1.1",
-            method : "MyDashboard.prod_comp_search",
+            method : "PCS.prod_comp_search",
             id : counter,
             params : { search: query }
         };
@@ -99,7 +99,7 @@ YUI({
                 }
                 window.location.href = url;
             }
-        },
+        }
     });
 
     input.on('focus', function (e) {

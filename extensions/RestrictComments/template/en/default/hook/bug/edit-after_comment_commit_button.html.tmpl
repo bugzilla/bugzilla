@@ -9,13 +9,18 @@
 
 [% RETURN UNLESS user.in_group(Param('restrict_comments_enable_group')) %]
 
-<div>
-  <input type="checkbox" name="restrict_comments" id="restrict_comments"
-         [% " checked" IF bug.restrict_comments %]>
-  <label for="restrict_comments">
-    Restrict commenting on this [% terms.bug %] to users in the
-    <b>[% Param('restrict_comments_group') FILTER html %]</b> group.
-  </label>
-  (<a href="page.cgi?id=restrict_comments_guidelines.html"
-      target="_blank">guidelines</a>)
-</div>
+[%# using a table to match alignment of the needinfo checkboxes %]
+<table>
+<tr>
+  <td>
+    <input type="checkbox" name="restrict_comments" id="restrict_comments"
+          [% " checked" IF bug.restrict_comments %]>
+    <label for="restrict_comments">
+      Restrict commenting on this [% terms.bug %] to users in the
+      <b>[% Param('restrict_comments_group') FILTER html %]</b> group.
+    </label>
+    (<a href="page.cgi?id=restrict_comments_guidelines.html"
+        target="_blank">guidelines</a>)
+  </td>
+</tr>
+</table>

@@ -238,8 +238,9 @@ sub query_flags {
                                           { Slice => {} }, $user->login);
     }
 
-    # Add the fancy date
+    # Format the created date specific to the user's timezone and add the fancy version
     foreach my $flag (@$flags) {
+        $flag->{'created'} = format_time($flag->{'created'}, '%Y-%m-%d %H:%M');
         my $date_then = datetime_from($flag->{'created'});
         $flag->{'created_fancy'} = time_ago($date_then, $date_now);
     }

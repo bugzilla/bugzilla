@@ -84,9 +84,8 @@ sub time_ago {
         croak('Invalid second parameter provided to DateTime::Duration::Fuzzy::time_ago; it must be a DateTime object if provided')
     }
 
-    # Use clones in UTC for safe date calculation
-    my $now_clone = $now->clone->set_time_zone('UTC');
-    my $time_clone = $time->clone->set_time_zone('UTC');
+    my $now_clone = $now->clone->set_time_zone(Bugzilla->user->timezone);
+    my $time_clone = $time->clone->set_time_zone(Bugzilla->user->timezone);
     my $dur = $now_clone->subtract_datetime_absolute( $time_clone )->in_units('seconds');
 
     foreach my $range ( @ranges ) {

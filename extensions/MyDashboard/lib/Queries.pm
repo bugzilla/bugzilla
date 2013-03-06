@@ -185,8 +185,8 @@ sub query_flags {
              bugs.short_desc AS bug_summary,
              flags.attach_id AS attach_id, 
              attachments.description AS attach_summary,
-             requesters.realname AS requester, 
-             requestees.realname AS requestee,
+             requesters.login_name AS requester, 
+             requestees.login_name AS requestee,
              " . $dbh->sql_date_format('flags.creation_date', '%Y-%m-%d %H:%i') . " AS created
         FROM flags 
              LEFT JOIN attachments

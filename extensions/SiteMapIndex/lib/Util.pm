@@ -44,7 +44,7 @@ sub too_young_date {
 
 sub bug_is_ok_to_index {
     my ($bug) = @_;
-    return 1 unless blessed($bug) && $bug->isa('Bugzilla::Bug');
+    return 1 unless blessed($bug) && $bug->isa('Bugzilla::Bug') && !$bug->{error};
     my $creation_ts = datetime_from($bug->creation_ts);
     return ($creation_ts && $creation_ts lt too_young_date()) ? 1 : 0;
 }

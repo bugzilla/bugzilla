@@ -51,7 +51,7 @@
         name: "[% col.0 FILTER js %]",    
         count: [% col.1 || 0 FILTER js %],
         percentage: [% col.2 || 0 FILTER js %], 
-        link: '<a href="[% bug_link_all FILTER js %]&amp;priority=[% col.0 FILTER uri FILTER js %]">Link</a>'
+        link: '<a href="[% bug_link FILTER js %]&amp;priority=[% col.0 FILTER uri FILTER js %]">Link</a>'
       }, 
     [% END %]
   ];
@@ -63,7 +63,7 @@
         name: "[% col.0 FILTER js %]",    
         count: [% col.1 || 0 FILTER js %],
         percentage: [% col.2 || 0 FILTER js %], 
-        link: '<a href="[% bug_link_all FILTER js %]&amp;bug_severity=[% col.0 FILTER uri FILTER js %]">Link</a>'
+        link: '<a href="[% bug_link FILTER js %]&amp;bug_severity=[% col.0 FILTER uri FILTER js %]">Link</a>'
       }, 
     [% END %]
   ];

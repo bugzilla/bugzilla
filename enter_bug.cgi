@@ -177,9 +177,6 @@ if ($product_name eq '') {
 # to enter a bug against this product.
 $product = $user->can_enter_product($product || $product_name, THROW_ERROR);
 
-# Preloading certain attributes such as components/versions/milestones/flags
-Bugzilla::Product::preload([ $product ], 1, { is_active => 1 });
-
 ##############################################################################
 # Useful Subroutines
 ##############################################################################

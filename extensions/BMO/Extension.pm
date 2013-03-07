@@ -748,11 +748,11 @@ sub field_end_of_create {
     push @message, '';
     push @message, "The custom field '$name' has been added to the BMO database.";
     push @message, '';
-    push @message, 'Please run the following on tp-bugs01-master01:';
-    push @message, "  GRANT SELECT ON `bugs`.`$name` TO 'metrics'\@'10.8.70.20_';";
-    push @message, "  GRANT SELECT ($name) ON `bugs`.`bugs` TO 'metrics'\@'10.8.70.20_';";
-    push @message, "  GRANT SELECT ON `bugs`.`$name` TO 'metrics'\@'10.8.70.21_';";
-    push @message, "  GRANT SELECT ($name) ON `bugs`.`bugs` TO 'metrics'\@'10.8.70.21_';";
+    push @message, 'Please run the following on bugzilla1.db.scl3.mozilla.com:';
+    push @message, "  GRANT SELECT ON `bugs`.`$name` TO 'metrics'\@'10.22.70.20_';";
+    push @message, "  GRANT SELECT ($name) ON `bugs`.`bugs` TO 'metrics'\@'10.22.70.20_';";
+    push @message, "  GRANT SELECT ON `bugs`.`$name` TO 'metrics'\@'10.22.70.20_';";
+    push @message, "  GRANT SELECT ($name) ON `bugs`.`bugs` TO 'metrics'\@'10.22.70.20_';";
     push @message, '';
     MessageToMTA(join("\n", @message));
 }

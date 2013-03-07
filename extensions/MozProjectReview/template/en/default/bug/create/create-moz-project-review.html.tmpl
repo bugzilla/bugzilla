@@ -110,8 +110,7 @@
       <span class="field_label required">Key Initiative:</span>
       <span class="field_data">
         <div class="field_description">Which key initiative does this support?</div>
-        <select name="key_initiative" id="key_initiative"
-                onchange="MPR.toggleVisibleById(this,'Other','key_initiative_other_row');">
+        <select name="key_initiative" id="key_initiative">
           <option value="">Select One</option>
           <option value="Firefox Desktop">Firefox Desktop</option>
           <option value="Firefox Mobile">Firefox Mobile</option>
@@ -173,11 +172,10 @@
     <div id="mozilla_data_row" class="field_row">
       <span class="field_label required">Mozilla Data:</span>
       <span class="field_data">
-        <div class="field_description">Does this product/service/project access, interact with, or store Mozilla 
+        <div class="field_description">Does this product/service/project access, interact with, or store Mozilla
           (customer, contributor, user, employee) data? Example of such data includes
           email addresses, first and last name, addresses, phone numbers, credit card data.)</div>
-        <select name="mozilla_data" id="mozilla_data"
-                onchange="MPR.toggleSpecialSections();">
+        <select name="mozilla_data" id="mozilla_data">
           <option value="">Select One</option>
           <option value="Yes">Yes</option>
           <option value="No">No</option>
@@ -188,10 +186,9 @@
     <div id="new_or_change_row" class="field_row">
       <span class="field_label required">New or Change:</span>
       <span class="field_data">
-        <div class="field_description">Is this a NEW product, service, project, feature, or functionality, 
+        <div class="field_description">Is this a NEW product, service, project, feature, or functionality,
           a change to an EXISTING one, or neither?</div>
-        <select name="new_or_change" id="new_or_change" 
-                onchange="MPR.toggleVisibleById(this,'Existing','mozilla_project_row');">
+      <select name="new_or_change" id="new_or_change">
           <option value="">Select One</option>
           <option value="New">New</option>
           <option value="Existing">Existing</option>
@@ -233,17 +230,7 @@
           source licenses, renewals, additional services or goods, and any other
           agreements.
         </div>
-        <select name="separate_party" id="separate_party"
-                onchange="MPR.toggleVisibleById(this,'Yes','initial_separate_party_questions');
-                          if (this.value == 'No') {
-                            Dom.addClass('finance_questions','bz_default_hidden');
-                            if (Dom.get('mozilla_data').value != 'Yes')
-                                Dom.addClass('legal_questions', 'bz_default_hidden');
-                          }
-                          else {
-                            Dom.removeClass('legal_questions', 'bz_default_hidden');
-                            MPR.toggleVisibleById('relationship_type','Hardware Purchase','finance_questions');
-                          }">
+        <select name="separate_party" id="separate_party">
           <option value="">Select One</option>
           <option value="Yes">Yes</option>
           <option value="No">No</option>
@@ -256,14 +243,7 @@
         <span class="field_label required">Type of Relationship:</span>
         <span class="field_data">
           <div class="field_description">What type of relationship?</div>
-          <select name="relationship_type" id="relationship_type"
-                  onchange="MPR.toggleVisibleById(this, 'Vendor/Services', 'legal_sow_questions');
-                            MPR.toggleVisibleById(this, 'Vendor/Services', 'legal_vendor_services_where_row');
-                            MPR.toggleVisibleById(this, 'Hardware Purchase', 'finance_questions');
-                            if (this.value == 'Hardware Purchase' && Dom.get('mozilla_data').value != 'Yes')
-                              Dom.addClass('legal_questions', 'bz_default_hidden');
-                            else if (Dom.get('separate_party').value == 'Yes')
-                              Dom.removeClass('legal_questions', 'bz_default_hidden');">
+          <select name="relationship_type" id="relationship_type">
             <option value="">Select One</option>
             <option value="Vendor/Services">Vendor/Services</option>
             <option value="Distribution/Bundling">Distribution/Bundling</option>
@@ -280,8 +260,7 @@
         <span class="field_data">
           <div class="field_description">Will the other party have access to Mozilla (customer, contributor, user,
             employee) data? (If this is for an NDA, choose no)</div>
-          <select name="data_access" id="data_access"
-                  onchange="MPR.toggleSpecialSections();">
+          <select name="data_access" id="data_access">
             <option value="">Select One</option>
             <option value="Yes">Yes</option>
             <option value="No">No</option>
@@ -302,10 +281,7 @@
         <span class="field_data">
           <div class="field_description">What is the anticipated cost of the vendor relationship?
             (Entire Contract Cost, not monthly cost)</div>
-          <select name="vendor_cost" id="vendor_cost"
-                  onchange="MPR.toggleVisibleById(this,'> $25,000','finance_questions');
-                            MPR.toggleVisibleById(this,'<= $25,000','po_needed_row');
-                            if (Dom.get('po_needed').value == 'Yes') Dom.removeClass('finance_questions','bz_default_hidden');">
+          <select name="vendor_cost" id="vendor_cost">
             <option value="">Select One</option>
             <option value="N/A">N/A</option>
             <option value="&lt;= $25,000">&lt;= $25,000</option>
@@ -317,8 +293,7 @@
       <div id="po_needed_row" class="field_row bz_default_hidden">
         <span class="field_label required">PO Needed?:</span>
         <span class="field_data">
-          <select name="po_needed" id="po_needed"
-                  onchange="MPR.toggleVisibleById(this,'Yes','finance_questions');">
+            <select name="po_needed" id="po_needed">
             <option value="">Select One</option>
             <option value="Yes">Yes</option>
             <option value="No">No</option>
@@ -389,8 +364,7 @@
       <span class="field_label">Privacy Policy:</span>
       <span class="field_data">
         <div class="field_description">Do you currently have a privacy policy for your project / site / product?</div>
-        <select name="privacy_policy_project" id="privacy_policy_project"
-                onchange="MPR.toggleVisibleById(this,'Yes','privacy_policy_project_link_row');">
+        <select name="privacy_policy_project" id="privacy_policy_project">
           <option value="">Select One</option>
           <option value="Yes">Yes</option>
           <option value="No">No</option>
@@ -410,8 +384,7 @@
       <span class="field_label">User Data:</span>
       <span class="field_data">
         <div class="field_description">Does your product/service/project collect, use or maintain any user data?</div>
-        <select name="privacy_policy_user_data" id="privacy_policy_user_data"
-                onchange="MPR.toggleVisibleById(this,'Yes','privacy_policy_project_user_data_bug_row');">
+        <select name="privacy_policy_user_data" id="privacy_policy_user_data">
           <option value="">Select One</option>
           <option value="Yes">Yes</option>
           <option value="No">No</option>
@@ -444,8 +417,7 @@
       <span class="field_label">Privacy Policy:</span>
       <span class="field_data">
         <div class="field_description">Will the vendor have access to Mozilla (customer, contributor, user, employee) data?</div>
-        <select name="privacy_policy_vendor_user_data" id="privacy_policy_vendor_user_data"
-                onchange="MPR.toggleVisibleById(this,'Yes','privacy_policy_vendor_extra');">
+        <select name="privacy_policy_vendor_user_data" id="privacy_policy_vendor_user_data">
           <option value="">Select One</option>
           <option value="Yes">Yes</option>
           <option value="No">No</option>
@@ -720,8 +692,7 @@
     <div id="finance_purchase_inbudget_row" class="field_row">
       <span class="field_label required">Is this line item in budget?:</span>
       <span class="field_data">
-        <select name="finance_purchase_inbudget" id="finance_purchase_inbudget"
-                onchange="MPR.toggleVisibleById(this, 'No', 'finance_purchase_notinbudget_why_row');">
+        <select name="finance_purchase_inbudget" id="finance_purchase_inbudget">
           <option value="">Select One</option>
           <option value="Yes">Yes</option>
           <option value="No">No</option>
@@ -792,8 +763,7 @@
       <span class="field_label">User Data:</span>
       <span class="field_data">
         <div class="field_description">Does your project collect data from users?</div>
-        <select name="data_safety_user_data" id="data_safety_user_data"
-            onchange="MPR.toggleVisibleById(this,'Yes','data_safety_extra_questions');">
+        <select name="data_safety_user_data" id="data_safety_user_data">
           <option value="">Select One</option>
           <option value="Yes">Yes</option>
           <option value="No">No</option>
@@ -856,8 +826,7 @@
         <span class="field_label">Data Retention:</span>
         <span class="field_data">
           <div class="field_description">Will your project / team members need to retain user data?</div>
-          <select name="data_safety_retention" id="data_safety_retention"
-                  onchange="MPR.toggleVisibleById(this,'Yes','data_safety_retention_length_row');">
+          <select name="data_safety_retention" id="data_safety_retention">
             <option value="">Select One</option>
             <option value="Yes">Yes</option>
             <option value="No">No</option>
@@ -877,8 +846,7 @@
         <span class="field_label">Separate Party:</span>
         <span class="field_data">
           <div class="field_description">Will any user data be shared or accessed by third party partners, customers or providers?</div>
-          <select name="data_safety_separate_party" id="data_safety_separate_party"
-                  onchange="MPR.toggleVisibleById(this,'Yes','data_safety_separate_party_data_row');">
+          <select name="data_safety_separate_party" id="data_safety_separate_party">
             <option value="">Select One</option>
             <option value="Yes">Yes</option>
             <option value="No">No</option>
@@ -916,9 +884,7 @@
         <span class="field_label">Community Visibility and Input:</span>
         <span class="field_data">
           <div class="field_description">Has your proposal been shared publicly, including requirements for Mozilla to collect and host user data?</div>
-          <select name="data_safety_community_visibility" id="data_safety_community_visibility"
-                  onchange="MPR.toggleVisibleById(this,'Yes','data_safety_communication_channels_row');
-                            MPR.toggleVisibleById(this,'No','data_safety_communication_plan_row');">
+          <select name="data_safety_community_visibility" id="data_safety_community_visibility">
             <option value="">Select One</option>
             <option value="Yes">Yes</option>
             <option value="No">No</option>

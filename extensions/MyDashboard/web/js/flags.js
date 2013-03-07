@@ -76,6 +76,12 @@ YUI({
                Y.Escape.html(o.data.created_fancy) + '</span>';
     };
 
+    var requesteeFormatter = function (o) {
+        return o.value
+            ? Y.Escape.html(o.value)
+            : '<i>anyone</i>';
+    };
+
     // Requestee
     dataSource.requestee = new Y.DataSource.IO({ source: 'jsonrpc.cgi' });
     dataTable.requestee = new Y.DataTable({
@@ -117,7 +123,8 @@ YUI({
     dataSource.requester = new Y.DataSource.IO({ source: 'jsonrpc.cgi' });
     dataTable.requester = new Y.DataTable({
         columns: [
-            { key:"requestee", label:"Requestee", sortable:true },
+            { key:"requestee", label:"Requestee", sortable:true,
+              formatter: requesteeFormatter, allowHTML: true },
             { key:"type", label:"Flag", sortable:true },
             { key:"bug_id", label:"Bug", sortable:true,
               formatter: bugLinkFormatter, allowHTML: true },

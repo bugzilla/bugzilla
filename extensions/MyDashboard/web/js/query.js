@@ -49,6 +49,7 @@ YUI({
         var callback = {
             success: function(e) {
                 if (e.response) {
+                    Y.one('#query_count_refresh').removeClass('bz_default_hidden');
                     Y.one("#query_container .query_description").setHTML(e.response.meta.description);
                     Y.one("#query_container .query_heading").setHTML(e.response.meta.heading);
                     Y.one("#query_bugs_found").setHTML(
@@ -71,6 +72,8 @@ YUI({
         };
 
         var stringified = Y.JSON.stringify(json_object);
+
+        Y.one('#query_count_refresh').addClass('bz_default_hidden');
 
         dataTable.set('data', []);
         dataTable.render("#query_table");

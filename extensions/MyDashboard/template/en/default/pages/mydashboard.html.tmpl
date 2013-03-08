@@ -92,8 +92,10 @@
       <div id="query_container">
         <div class="query_heading"></div>
         <div class="query_description"></div>
-        <span class="items_found" id="query_bugs_found">0 [% terms.bugs %] found</span>
-        | <a class="refresh" href="javascript:void(0);" id="query_refresh">Refresh</a>
+        <span id="query_count_refresh" class="bz_default_hidden">
+          <span class="items_found" id="query_bugs_found">0 [% terms.bugs %] found</span>
+          | <a class="refresh" href="javascript:void(0);" id="query_refresh">Refresh</a>
+        </span>
         <div id="query_pagination_top"></div>
         <div id="query_table"></div>
       </div>
@@ -110,8 +112,10 @@
         <div class="query_heading">
           Flags Requested of You
         </div>
-        <span class="items_found" id="requestee_flags_found">0 flags found</span>
-        | <a class="refresh" href="javascript:void(0);" id="requestee_refresh">Refresh</a>
+        <span id="requestee_count_refresh" class="bz_default_hidden">
+          <span class="items_found" id="requestee_flags_found">0 flags found</span>
+          | <a class="refresh" href="javascript:void(0);" id="requestee_refresh">Refresh</a>
+        </span>
         <div id="requestee_table"></div>
       </div>
 
@@ -119,8 +123,10 @@
         <div class="query_heading">
           Flags You Have Requested
         </div>
-        <span class="items_found" id="requester_flags_found">0 flags found</span>
-        | <a class="refresh" href="javascript:void(0);" id="requester_refresh">Refresh</a>
+        <span id="requester_count_refresh" class="bz_default_hidden">
+          <span class="items_found" id="requester_flags_found">0 flags found</span>
+          | <a class="refresh" href="javascript:void(0);" id="requester_refresh">Refresh</a>
+        </span>
         <div id="requester_table"></div>
       </div>
     </div>

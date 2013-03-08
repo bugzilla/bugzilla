@@ -31,6 +31,7 @@ YUI({
         var callback = {
             success: function(e) {
                 if (e.response) {
+                    Y.one('#' + type + '_count_refresh').removeClass('bz_default_hidden');
                     Y.one("#" + type + "_flags_found").setHTML(
                         e.response.results.length + ' flags found');
                     dataTable[type].set('data', e.response.results);
@@ -51,6 +52,8 @@ YUI({
 
         var stringified = Y.JSON.stringify(json_object);
 
+        Y.one('#' + type + '_count_refresh').addClass('bz_default_hidden');
+                
         dataTable[type].set('data', []);
         dataTable[type].render("#" + type + "_table");
         dataTable[type].showMessage('loadingMessage');

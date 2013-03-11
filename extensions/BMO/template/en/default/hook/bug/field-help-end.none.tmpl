@@ -18,26 +18,8 @@
   #   Dave Lawrence <dkl@mozilla.com>
   #%]
 
+[% USE Bugzilla %]
 [% IF Bugzilla.request_cache.bmo_fields_page %]
-  [% filtered_severity_blocker     = display_value("bug_severity", "blocker") FILTER html %]
-  [% filtered_severity_critical    = display_value("bug_severity", "critical") FILTER html %]
-  [% filtered_severity_major       = display_value("bug_severity", "major") FILTER html %]
-  [% filtered_severity_normal      = display_value("bug_severity", "normal") FILTER html %]
-  [% filtered_severity_minor       = display_value("bug_severity", "minor") FILTER html %]
-  [% filtered_severity_trivial     = display_value("bug_severity", "trivial") FILTER html %]
-  [% filtered_severity_enhancement = display_value("bug_severity", "enhancement") FILTER html %]
-  
-  [% filtered_platform_all    = display_value("rep_platform", "All") FILTER html %]
-  [% filtered_platform_x86_64 = display_value("rep_platform", "x86_64") FILTER html %]
-  [% filtered_platform_arm    = display_value("rep_platform", "ARM") FILTER html %]
-  
-  [% filtered_opsys_all     = display_value("op_sys", "All") FILTER html %]
-  [% filtered_opsys_windows = display_value("op_sys", "Windows 7") FILTER html %]
-  [% filtered_opsys_mac     = display_value("op_sys", "Mac OS X") FILTER html %]
-  [% filtered_opsys_linux   = display_value("op_sys", "Linux") FILTER html %]
-  
-  [% filtered_status_new = display_value("bug_status", "NEW") FILTER html %]
-  
   [% 
     vars.help_html.priority =
       "This field describes the importance and order in which $terms.abug
@@ -49,33 +31,33 @@
       "This field describes the impact of ${terms.abug}.
        <table>
         <tr>
-          <th>$filtered_severity_blocker</th>
+          <th>blocker</th>
           <td>Blocks development and/or testing work</td>
         </tr>
         <tr>
-          <th>$filtered_severity_critical</th>
+          <th>critical</th>
           <td>crashes, loss of data, severe memory leak</td>
         </tr>
         <tr>
-          <th>$filtered_severity_major</th>
+          <th>major</th>
           <td>major loss of function</td>
         </tr>
         <tr>
-          <th>$filtered_severity_normal</th>
+          <th>normal</th>
           <td>regular issue, some loss of functionality under specific circumstances</td>
         </tr>
         <tr>
-          <th>$filtered_severity_minor</th>
+          <th>minor</th>
           <td>minor loss of function, or other problem where easy
           workaround is present</td>
         </tr>
         <tr>
-          <th>$filtered_severity_trivial</th>
+          <th>trivial</th>
           <td>cosmetic problem like misspelled words or misaligned
           text</td>
         </tr>
         <tr>
-          <th>$filtered_severity_enhancement</th>
+          <th>enhancement</th>
           <td>Request for enhancement</td>
       </table>"
   
@@ -83,24 +65,24 @@
       "This is the hardware platform against which the $terms.bug was reported. 
        Legal platforms include:
        <ul>
-         <li>$filtered_platform_all (happens on all platforms; cross-platform ${terms.bug})</li>
-         <li>$filtered_platform_x86_64</li>
-         <li>$filtered_platform_arm</li>
+         <li>All (happens on all platforms; cross-platform ${terms.bug})</li>
+         <li>x86_64</li>
+         <li>ARM</li>
        </ul>
        <b>Note:</b> When searching, selecting the option
-       <em>$filtered_platform_all</em> does not
+       <em>All</em> does not
        select $terms.bugs assigned against any platform. It merely selects 
        $terms.bugs that are marked as occurring on all platforms, i.e. are 
-       designated <em>$filtered_platform_all</em>.",
+       designated <em>All</em>.",
   
     vars.help_html.op_sys =
       "This is the operating system against which the $terms.bug was
        reported. Legal operating systems include:
        <ul>
-         <li>$filtered_opsys_all (happens on all operating systems; cross-platform ${terms.bug})</li>
-         <li>$filtered_opsys_windows</li>
-         <li>$filtered_opsys_mac</li>
-         <li>$filtered_opsys_linux</li>
+         <li>All (happens on all operating systems; cross-platform ${terms.bug})</li>
+         <li>Windows 7</li>
+         <li>Mac OS X</li>
+         <li>Linux</li>
        </ul>
        Sometimes the operating system implies the platform, but not
        always. For example, Linux can run on x86_64, ARM, and others.",
@@ -108,7 +90,7 @@
     vars.help_html.assigned_to =
       "This is the person in charge of resolving the ${terms.bug}. Every time
        this field changes, the status changes to 
-       <b>$filtered_status_new</b> to make it
+       <b>NEW</b> to make it
        easy to see which new $terms.bugs have appeared on a person's list.</p>",
   %]
 [% END %]

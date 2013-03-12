@@ -123,7 +123,7 @@
     <input id="forgot_button[% qs_suffix %]" value="Reset Password" 
            type="submit">
     <input type="hidden" name="a" value="reqpw">
-    <input type="hidden" id="token" name="token" value="[% issue_hash_token(['reqpw']) FILTER html %]">
+    <input type="hidden" id="token[% qs_suffix FILTER html %]" name="token" value="[% issue_hash_token(['reqpw']) FILTER html %]">
     <a href="#" onclick="return hide_forgot_form('[% qs_suffix %]')">[x]</a>
   </form>
 </li>

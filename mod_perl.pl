@@ -62,7 +62,7 @@ use Apache2::SizeLimit;
 # a CGI if it is taking up more than 1600MB of RAM all by itself,
 # not counting RAM it is sharing with the other httpd processes.
 if (Bugzilla->params->{'urlbase'} eq 'https://bugzilla.mozilla.org/') {
-    Apache2::SizeLimit->set_max_unshared_size(1_600_000);
+    Apache2::SizeLimit->set_max_unshared_size(1_000_000);
 } else {
     Apache2::SizeLimit->set_max_unshared_size(600_000);
 }

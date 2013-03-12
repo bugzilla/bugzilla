@@ -36,3 +36,14 @@
     font-family: monospace;
 }
 
+#prod_desc_container,
+#comp_desc_container {
+    overflow: auto;
+    color: green;
+    padding: 2px;
+}
+
+#toggle_prod_desc,
+#toggle_comp_desc {
+    white-space: nowrap;
+}

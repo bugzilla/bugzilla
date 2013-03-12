@@ -1,0 +1,54 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License,  v. 2.0. If a copy of the MPL was not distributed with this
+  # file,  You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses",  as
+  # defined by the Mozilla Public License,  v. 2.0.
+  #%]
+
+[%# Display product and component descriptions after their respective fields %]
+<script type="text/javascript">
+  YUI({
+    base: 'js/yui3/',
+    combine: false
+  }).use('node', 'event', function(Y) {
+    // Display product description if user requests it
+    Y.on('contentready', function() {
+      var field_container = Y.one('#field_container_product');
+      field_container.appendChild('<span id="toggle_prod_desc">' +
+                                  '&nbsp;(<a href="javascript:void(0);" id="toggle_prod_desc_link">show info</a>)' +
+                                  '</span>');
+      field_container.appendChild('<div class="bz_default_hidden" id="prod_desc_container">' +
+                                  '[% bug.product_obj.description FILTER html_light FILTER js %]</div>');
+      Y.on('click', function() {
+        if (Y.one('#prod_desc_container').hasClass('bz_default_hidden')) {
+          Y.one('#toggle_prod_desc_link').set('innerHTML', 'hide info');
+          Y.one('#prod_desc_container').removeClass('bz_default_hidden');
+        }
+        else {
+          Y.one('#toggle_prod_desc_link').set('innerHTML', 'show info');
+          Y.one('#prod_desc_container').addClass('bz_default_hidden');
+        }
+      }, '#toggle_prod_desc_link');
+    }, '#field_container_product');
+    // Display component description if user requests it
+    Y.on('contentready', function() {
+      var field_container = Y.one('#field_container_component');
+      field_container.appendChild('<span id="toggle_comp_desc">' +
+                                  '&nbsp;(<a href="javascript:void(0);" id="toggle_comp_desc_link">show info</a>)' +
+                                  '</span>');
+      field_container.appendChild('<div class="bz_default_hidden" id="comp_desc_container">' +
+                                  '[% bug.component_obj.description FILTER html_light FILTER js %]</div>');
+      Y.on('click', function() {
+        if (Y.one('#comp_desc_container').hasClass('bz_default_hidden')) {
+          Y.one('#toggle_comp_desc_link').set('innerHTML', 'hide info');
+          Y.one('#comp_desc_container').removeClass('bz_default_hidden');
+        }
+        else {
+          Y.one('#toggle_comp_desc_link').set('innerHTML', 'show info');
+          Y.one('#comp_desc_container').addClass('bz_default_hidden');
+        }
+      }, '#toggle_comp_desc_link');
+    }, '#field_container_component');
+  });
+</script>

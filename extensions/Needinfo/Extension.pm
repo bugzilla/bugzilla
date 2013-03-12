@@ -112,9 +112,13 @@ sub bug_start_of_update {
             # Find out if the requestee has already been used and skip if so
             my $requestee_found;
             foreach my $flag (@{ $type->{flags} }) {
-                next if $flag->requestee->login ne $needinfo_flag->{requestee};
-                $requestee_found = 1;
-                last;
+                if ((!$flag->requestee && !exists $needinfo_flag->{requestee})
+                    || ($flag->requestee && exists $needinfo_flag->{requestee}
+                        && $flag->requestee->login eq $needinfo_flag->{requestee}))
+                {
+                    $requestee_found = 1;
+                    last;
+                }
             }
             next if $requestee_found;
 

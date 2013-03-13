@@ -1672,7 +1672,7 @@ sub _boolean_charts {
                 my $operator = $params->{"type$identifier"};
                 my $value = $params->{"value$identifier"};
                 # no-value operators ignore the value, however a value needs to be set
-                $value = ' ' if grep { $_ eq $operator } NO_VALUE_OPERATORS;
+                $value = ' ' if $operator && grep { $_ eq $operator } NO_VALUE_OPERATORS;
                 $or_clause->add($field, $operator, $value);
             }
             $and_clause->add($or_clause);
@@ -1716,7 +1716,7 @@ sub _custom_search {
         my $operator = $params->{"o$id"};
         my $value = $params->{"v$id"};
         # no-value operators ignore the value, however a value needs to be set
-        $value = ' ' if grep { $_ eq $operator } NO_VALUE_OPERATORS;
+        $value = ' ' if $operator && grep { $_ eq $operator } NO_VALUE_OPERATORS;
         my $condition = condition($field, $operator, $value);
         $condition->negate($params->{"n$id"});
         $current_clause->add($condition);
@@ -3028,13 +3028,22 @@ sub _changed_security_check {
 sub _isempty {
     my ($self, $args, $join) = @_;
     my $full_field = $args->{full_field};
-    $args->{term} = "$full_field IS NULL OR $full_field = ''";
+    $args->{term} = "$full_field IS NULL OR $full_field = " . $self->_empty_value($args->{field});
 }
 
 sub _isnotempty {
     my ($self, $args, $join) = @_;
     my $full_field = $args->{full_field};
-    $args->{term} = "$full_field IS NOT NULL AND $full_field != ''";
+    $args->{term} = "$full_field IS NOT NULL AND $full_field != " . $self->_empty_value($args->{field});
+}
+
+sub _empty_value {
+    my ($self, $field) = @_;
+    return "''" unless $field =~ /^cf_/;
+    my $field_obj = $self->_chart_fields->{$field};
+    return "0" if $field_obj->type == FIELD_TYPE_BUG_ID;
+    return Bugzilla->dbh->quote(EMPTY_DATETIME) if $field_obj->type == FIELD_TYPE_DATETIME;
+    return "''";
 }
 
 ######################

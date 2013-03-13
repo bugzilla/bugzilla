@@ -25,6 +25,10 @@
 </IfModule>
 
 AddType image/x-icon .ico
+ErrorDocument 401 /errors/401.html
+ErrorDocument 403 /errors/403.html
+ErrorDocument 404 /errors/404.html
+ErrorDocument 500 /errors/500.html
 
 Redirect permanent /queryhelp.cgi https://bugzilla.mozilla.org/query.cgi?format=advanced&help=1
 Redirect permanent /bug_status.html https://bugzilla.mozilla.org/page.cgi?id=fields.html

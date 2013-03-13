@@ -160,7 +160,7 @@
        [% IF Param('use_see_also') %]
          <span id="container_showhide_[% field.name FILTER html %]"
                class="bz_default_hidden">
-           <a href="#" id="showhide_[% field.name FILTER html %]">(add)</a>
+           (<a href="#" id="showhide_[% field.name FILTER html %]">add</a>)
          </span>
          <div id="container_[% field.name FILTER html %]">
            <label for="[% field.name FILTER html %]">

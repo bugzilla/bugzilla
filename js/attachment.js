@@ -40,13 +40,12 @@ function updateCommentPrivacy(checkbox) {
     }
 }
 
-function setContentTypeDisabledState(form)
-{
+function setContentTypeDisabledState(form) {
     var isdisabled = false;
     if (form.ispatch.checked)
         isdisabled = true;
 
-    for (var i=0 ; i<form.contenttypemethod.length ; i++)
+    for (var i = 0; i < form.contenttypemethod.length; i++)
         form.contenttypemethod[i].disabled = isdisabled;
 
     form.contenttypeselection.disabled = isdisabled;
@@ -55,9 +54,8 @@ function setContentTypeDisabledState(form)
 
 function TextFieldHandler() {
     var field_text = document.getElementById("attach_text");
-    var greyfields = new Array("data", "ispatch", "autodetect",
-                               "list", "manual", "contenttypeselection",
-                               "contenttypeentry");
+    var greyfields = new Array("data", "autodetect", "list", "manual",
+                               "contenttypeselection", "contenttypeentry");
     var i, thisfield;
     if (field_text.value.match(/^\s*$/)) {
         for (i = 0; i < greyfields.length; i++) {

@@ -97,6 +97,9 @@ YUI({
                     if (ProdCompSearch.cloned_bug_id)
                         url += "&cloned_bug_id=" + encodeURIComponent(ProdCompSearch.cloned_bug_id);
                 }
+                if (ProdCompSearch.script_name == 'describecomponents.cgi') {
+                    url += "#" + encodeURIComponent(data.component);
+                }
                 window.location.href = url;
             }
         }

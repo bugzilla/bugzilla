@@ -42,6 +42,9 @@ function validateAndSubmit() {
    yui = [ 'autocomplete', 'datatable', 'button' ]
 %]
 
+[% USE Bugzilla %]
+[% cgi = Bugzilla.cgi %]
+
 <h1>Developer Documentation Request</h1>
 
 <p>
@@ -67,7 +70,7 @@ function validateAndSubmit() {
     <select name="type" id="type">
       <option value="">Please select..</option>
       <option value="New Documentation">New Documentation</option>
-      <option value="Correction">Correction</option>
+      <option value="Correction" [% "selected" IF cgi.param('bug_file_loc') %]>Correction</option>
     </select>
   </td>
 </tr>
@@ -91,7 +94,7 @@ function validateAndSubmit() {
   <td>
     Please provide a brief summary of what documentation you're requesting, or
     what problem you're reporting in existing documentation:<br>
-    <input type="text" name="short_desc" id="short_desc">
+    <input type="text" name="short_desc" id="short_desc" size="60">
   </td>
 </tr>
 
@@ -129,6 +132,14 @@ function validateAndSubmit() {
     </td>
   </tr>
 [% END %]
+
+<tr>
+  <th>Page to Update</th>
+  <td>
+    <input type="text" name="bug_file_loc" id="short_desc" size="60"
+           value="[% bug_file_loc FILTER html %]">
+  </td>
+</tr>
 
 <tr>
   <th>Technical Contact</th>

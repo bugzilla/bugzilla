@@ -29,19 +29,19 @@ use IO::Scalar;
 our $VERSION = '0.02';
 ################################################################################
 # This extension uses magic to guess MIME types for data where the browser has
-# told us it's application/octet-stream (probably because there's no file 
+# told us it's application/octet-stream (probably because there's no file
 # extension, or it's a text type with a non-.txt file extension).
 ################################################################################
 sub attachment_process_data {
     my ($self, $args) = @_;
     my $attributes = $args->{'attributes'};
     my $params = Bugzilla->input_params;
-    
+
     # If we have autodetected application/octet-stream from the Content-Type
     # header, let's have a better go using a sniffer.
     if ($params->{'contenttypemethod'} &&
         $params->{'contenttypemethod'} eq 'autodetect' &&
-        $attributes->{'mimetype'} eq 'application/octet-stream') 
+        $attributes->{'mimetype'} eq 'application/octet-stream')
     {
         # data attribute can be either scalar data or filehandle
         # bugzilla.org/docs/3.6/en/html/api/Bugzilla/Attachment.html#create
@@ -62,10 +62,11 @@ sub attachment_process_data {
                 if (!$fh->isa('IO::File')) {
                     bless $fh, 'IO::File';
                 }
-            }            
+            }
         }
-        
+
         my $mimetype = mimetype($fh);
+        $fh->seek(0, 0);
         if ($mimetype) {
             $attributes->{'mimetype'} = $mimetype;
         }

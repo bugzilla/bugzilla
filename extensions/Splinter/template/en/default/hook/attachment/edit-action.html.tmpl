@@ -20,12 +20,6 @@
   #%]
 
 [% IF attachment.ispatch %]
-&#x0020; |
-  [% IF Param("splinter_base").search('\?') %]
-    <a href="[% urlbase FILTER none %][% Param("splinter_base") FILTER html %]&amp;bug=[% attachment.bug_id FILTER uri %]&amp;attachment=[% attachment.id FILTER uri%]">
-      Splinter Review</a>
-  [% ELSE %]
-    <a href="[% urlbase FILTER none %][% Param("splinter_base") FILTER html %]?bug=[% attachment.bug_id FILTER uri %]&amp;attachment=[% attachment.id FILTER uri %]">
-      Splinter Review</a>
-  [% END %]
+  &#x0020; |
+  <a href="[% Bugzilla.splinter_review_url(attachment.bug_id, attachment.id) FILTER none %]">Review</a>
 [% END %]

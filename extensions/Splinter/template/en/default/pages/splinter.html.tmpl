@@ -44,10 +44,10 @@
 [% can_edit = 0 %]
 
 <script type="text/javascript">
-  Splinter.configBase = '[% urlbase FILTER none %][% Param('splinter_base') FILTER js %]';
-  Splinter.configBugUrl = '[% urlbase FILTER none %]';
+  Splinter.configBase = '[% Bugzilla.splinter_review_base FILTER js %]';
+  Splinter.configBugUrl = '[% urlbase FILTER js %]';
   Splinter.configHaveExtension = true;
-  Splinter.configHelp = '[% urlbase FILTER none %]page.cgi?id=splinter/help.html';
+  Splinter.configHelp = '[% urlbase FILTER js %]page.cgi?id=splinter/help.html';
   Splinter.configNote = '';
 
   Splinter.configAttachmentStatuses = [
@@ -114,7 +114,7 @@
 <![endif]-->
 
 <div id="helpful-links">
-  <a id="allReviewsLink" href="[% urlbase FILTER none %][% Param('splinter_base') FILTER js %]">
+  <a id="allReviewsLink" href="[% Bugzilla.splinter_review_base FILTER none %]">
     [reviews]</a>
   <a id='helpLink' target='splinterHelp' 
      href="[% urlbase FILTER none %]page.cgi?id=splinter/help.html">

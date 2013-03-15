@@ -18,6 +18,16 @@ use Bugzilla::Extension::Splinter::Util;
 
 our $VERSION = '0.1';
 
+BEGIN {
+    *Bugzilla::splinter_review_base = \&get_review_base;
+    *Bugzilla::splinter_review_url = \&_get_review_url;
+}
+
+sub _get_review_url {
+    my ($class, $bug_id, $attach_id) = @_;
+    return get_review_url(Bugzilla::Bug->check({ id => $bug_id, cache => 1 }), $attach_id);
+}
+
 sub page_before_template {
     my ($self, $args) = @_;
     my ($vars, $page) = @$args{qw(vars page_id)};

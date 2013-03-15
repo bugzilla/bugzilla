@@ -1,6 +1,7 @@
+[% USE Bugzilla %]
 [% IF flag && flag.status == '?' && flag.type.name == 'review' && attachment && attachment.ispatch %]
 
-Splinter Review
-[%+ urlbase FILTER none %][% Param('splinter_base') %]&bug=[% bug.bug_id FILTER uri %]&attachment=[% attachment.id FILTER uri %]
+Review
+[%+ Bugzilla.splinter_review_url(request.bug_id, request.attach_id) FILTER none %]
 [%- END %]
 

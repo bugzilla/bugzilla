@@ -29,10 +29,11 @@ use Bugzilla::Util;
 use base qw(Exporter);
 
 @Bugzilla::Extension::Splinter::Util::EXPORT = qw(
-    attachment_is_visible 
+    attachment_is_visible
     attachment_id_is_patch
-    get_review_url 
-    get_review_link 
+    get_review_base
+    get_review_url
+    get_review_link
     add_review_links_to_email
 );
 
@@ -80,23 +81,20 @@ sub attachment_id_is_patch {
     return ($attachment && $attachment->ispatch);
 }
 
-sub get_review_url {
-    my ($bug, $attach_id, $absolute) = @_;
+sub get_review_base {
     my $base = Bugzilla->params->{'splinter_base'};
+    $base =~ s!/$!!;
+    my $urlbase = correct_urlbase();
+    $urlbase =~ s!/$!! if $base =~ "^/";
+    $base = $urlbase . $base;
+    return $base;
+}
+
+sub get_review_url {
+    my ($bug, $attach_id) = @_;
+    my $base = get_review_base();
     my $bug_id = $bug->id;
-
-    if (defined $absolute && $absolute) {
-        my $urlbase = correct_urlbase();
-        $urlbase =~ s!/$!! if $base =~ "^/";
-        $base = $urlbase . $base;
-    }
-
-    if ($base =~ /\?/) {
-        return "$base&bug=$bug_id&attachment=$attach_id";
-    } 
-    else {
-        return "$base?bug=$bug_id&attachment=$attach_id";
-    }
+    return $base . ($base =~ /\?/ ? '&' : '?') . "bug=$bug_id&attachment=$attach_id";
 }
 
 sub get_review_link {

@@ -32,7 +32,7 @@
                    "the following lines to the .htaccess for Bugzilla: " _
                    "<pre>" _
                    "RewriteEngine On\n" _
-                   "RewriteRule ^review(\?(.*))? page.cgi?id=splinter.html&amp;&#x0024;2 [L]" _
+                   "RewriteRule ^review(.*) page.cgi?id=splinter.html\$1 [QSA]" _
                    "</pre>"
  }
 %]

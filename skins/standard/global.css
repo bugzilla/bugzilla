@@ -354,6 +354,11 @@ table#flags td {
     text-align: left;
 }
 
+table#email_prefs th,
+table#shared_search_prefs th,
+table#saved_search_prefs th {
+    text-align: center;
+}
 .flag_select {
     min-width: 3em;
 }

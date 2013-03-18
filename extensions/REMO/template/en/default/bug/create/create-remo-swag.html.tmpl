@@ -1,22 +1,9 @@
-[%# 1.0@bugzilla.org %]
-[%# The contents of this file are subject to the Mozilla Public
-  # License Version 1.1 (the "License"); you may not use this file
-  # except in compliance with the License. You may obtain a copy of
-  # the License at http://www.mozilla.org/MPL/
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
   #
-  # Software distributed under the License is distributed on an "AS
-  # IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
-  # implied. See the License for the specific language governing
-  # rights and limitations under the License.
-  #
-  # The Original Code is the Bugzilla Bug Tracking System.
-  #
-  # The Initial Developer of the Original Code is Mozilla Corporation.
-  # Portions created by Mozilla are Copyright (C) 2008 Mozilla
-  # Corporation. All Rights Reserved.
-  #
-  # Contributor(s): Reed Loden <reed@mozilla.com>
-  #                 David Tran <dtran@mozilla.com>
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
   #%]
 
 [% PROCESS global/variables.none.tmpl %]
@@ -25,13 +12,17 @@
    title = "Mozilla Reps Swag Request Form"
    javascript_urls = [ 'extensions/REMO/web/js/swag.js',
                        'extensions/REMO/web/js/form_validate.js',
-                       'js/field.js', 
+                       'js/field.js',
                        'js/util.js' ]
-   style_urls = [ "extensions/REMO/web/styles/moz_reps.css" ] 
+   style_urls = [ "extensions/REMO/web/styles/moz_reps.css" ]
    yui = [ 'calendar' ]
 %]
 
-[% IF user.in_group("mozilla-reps") %]
+[% IF !user.in_group("mozilla-reps") %]
+  <p>Sorry, you do not have access to this page.</p>
+  [% RETURN %]
+[% END %]
+
 
 <p>These requests will only be visible to the person who submitted the request,
 any persons designated in the CC line, and authorized members of the Mozilla Rep team.</p>
@@ -59,7 +50,7 @@ function validateAndSubmit() {
   if(!isFilledOut('shiptocountry')) alert_text += "Please enter the ship to country\n";
   if(!isFilledOut('shiptopcode')) alert_text += "Please enter the ship to postal code\n";
   if(!isFilledOut('shiptophone')) alert_text += "Please enter the ship to contact number\n";
- 
+
   //Everything required is filled out..try to submit the form!
   if(alert_text == '') {
     return trySubmit();
@@ -107,7 +98,7 @@ function validateAndSubmit() {
 
 <tr class="odd">
   <td>
-    <strong>Mozilla Reps Profile Page: 
+    <strong>Mozilla Reps Profile Page:
       <span style="color: red;" title="Required">*</span></strong>
   </td>
   <td>
@@ -153,11 +144,11 @@ function validateAndSubmit() {
 <tr class="odd">
   <td><strong>Ship Before:</strong>
   <td>
-    [% INCLUDE bug/field.html.tmpl 
+    [% INCLUDE bug/field.html.tmpl
        bug      = default,
-       field    = bug_fields.cf_due_date 
-       value    = default.cf_due_date, 
-       editable = 1, 
+       field    = bug_fields.cf_due_date
+       value    = default.cf_due_date,
+       editable = 1,
        no_tds   = 1
     %]
   </td>
@@ -286,10 +277,10 @@ function validateAndSubmit() {
 </table>
 
 <p>
-  Quantities of different swag items requested that will actually be shipped 
-  depend on stock availability and number of attendees. Mozilla cannot guarantee 
-  that all items requested will be in stock at the time of shipment and you will 
-  be notified in case an item cannot be shipped. Please request swag at least 1 
+  Quantities of different swag items requested that will actually be shipped
+  depend on stock availability and number of attendees. Mozilla cannot guarantee
+  that all items requested will be in stock at the time of shipment and you will
+  be notified in case an item cannot be shipped. Please request swag at least 1
   month before desired delivery date.
 </p>
 
@@ -298,9 +289,5 @@ function validateAndSubmit() {
   Thanks for contacting us.
    You will be notified by email of any progress made in resolving your request.
 </p>
-
-[% ELSE %]
-  <p>Sorry, you do not have access to this page.</p>
-[% END %]
 
 [% PROCESS global/footer.html.tmpl %]

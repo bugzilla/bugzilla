@@ -12,7 +12,7 @@
 #
 # The Original Code is the REMO Bugzilla Extension.
 #
-# The Initial Developer of the Original Code is Mozilla Foundation 
+# The Initial Developer of the Original Code is Mozilla Foundation
 # Portions created by the Initial Developer are Copyright (C) 2011 the
 # Initial Developer. All Rights Reserved.
 #
@@ -60,8 +60,8 @@ sub _remo_form_payment {
         my $token = trim($input->{'token'});
         if ($token) {
             my ($creator_id, $date, $old_attach_id) = Bugzilla::Token::GetTokenData($token);
-            if (!$creator_id 
-                || $creator_id != $user->id 
+            if (!$creator_id
+                || $creator_id != $user->id
                 || $old_attach_id !~ "^remo_form_payment:")
             {
                 # The token is invalid.
@@ -70,28 +70,28 @@ sub _remo_form_payment {
 
             $old_attach_id =~ s/^remo_form_payment://;
             if ($old_attach_id) {
-                ThrowUserError('remo_payment_cancel_dupe', 
+                ThrowUserError('remo_payment_cancel_dupe',
                                { bugid => $bug_id, attachid => $old_attach_id });
             }
         }
 
         # Make sure the user can attach to this bug
         if (!$bug->user->{'canedit'}) {
-            ThrowUserError("remo_payment_bug_edit_denied", 
+            ThrowUserError("remo_payment_bug_edit_denied",
                            { bug_id => $bug->id });
         }
 
         # Make sure the bug is under the correct product/component
-        if ($bug->product ne 'Mozilla Reps' 
-            || $bug->component ne 'Budget Requests') 
+        if ($bug->product ne 'Mozilla Reps'
+            || $bug->component ne 'Budget Requests')
         {
-            ThrowUserError('remo_payment_invalid_product');    
+            ThrowUserError('remo_payment_invalid_product');
         }
 
         my ($timestamp) = $dbh->selectrow_array("SELECT NOW()");
 
         $dbh->bz_start_transaction;
-    
+
         # Create the comment to be added based on the form fields from rep-payment-form
         my $comment;
         $template->process("pages/comment-remo-form-payment.txt.tmpl", $vars, \$comment)
@@ -107,23 +107,21 @@ sub _remo_form_payment {
         if (defined $cgi->upload('expenseform')) {
             # Determine content-type
             my $content_type = $cgi->uploadInfo($cgi->param('expenseform'))->{'Content-Type'};
- 
+
             $attachment = Bugzilla::Attachment->create(
-                { bug           => $bug, 
-                  creation_ts   => $timestamp, 
-                  data          => $cgi->upload('expenseform'), 
-                  description   => 'Expense Form', 
-                  filename      => scalar $cgi->upload('expenseform'), 
-                  ispatch       => 0, 
-                  isprivate     => 0, 
-                  isurl         => 0, 
-                  mimetype      => $content_type, 
-                  store_in_file => 0, 
+                { bug           => $bug,
+                  creation_ts   => $timestamp,
+                  data          => $cgi->upload('expenseform'),
+                  description   => 'Expense Form',
+                  filename      => scalar $cgi->upload('expenseform'),
+                  ispatch       => 0,
+                  isprivate     => 0,
+                  mimetype      => $content_type,
             });
 
             # Insert comment for attachment
-            $bug->add_comment('', { isprivate  => 0, 
-                                    type       => CMT_ATTACHMENT_CREATED, 
+            $bug->add_comment('', { isprivate  => 0,
+                                    type       => CMT_ATTACHMENT_CREATED,
                                     extra_data => $attachment->id });
         }
 
@@ -133,21 +131,19 @@ sub _remo_form_payment {
             my $content_type = $cgi->uploadInfo($cgi->param("receipts"))->{'Content-Type'};
 
             $attachment = Bugzilla::Attachment->create(
-                { bug           => $bug, 
-                  creation_ts   => $timestamp, 
-                  data          => $cgi->upload('receipts'), 
-                  description   => "Receipts", 
-                  filename      => scalar $cgi->upload("receipts"), 
-                  ispatch       => 0, 
-                  isprivate     => 0, 
-                  isurl         => 0, 
-                  mimetype      => $content_type, 
-                  store_in_file => 0, 
+                { bug           => $bug,
+                  creation_ts   => $timestamp,
+                  data          => $cgi->upload('receipts'),
+                  description   => "Receipts",
+                  filename      => scalar $cgi->upload("receipts"),
+                  ispatch       => 0,
+                  isprivate     => 0,
+                  mimetype      => $content_type,
             });
 
             # Insert comment for attachment
-            $bug->add_comment('', { isprivate  => 0, 
-                                    type       => CMT_ATTACHMENT_CREATED, 
+            $bug->add_comment('', { isprivate  => 0,
+                                    type       => CMT_ATTACHMENT_CREATED,
                                     extra_data => $attachment->id });
         }
 
@@ -160,20 +156,20 @@ sub _remo_form_payment {
         }
 
         $dbh->bz_commit_transaction;
-    
+
         # Define the variables and functions that will be passed to the UI template.
         $vars->{'attachment'} = $attachment;
         $vars->{'bugs'} = [ new Bugzilla::Bug($bug_id) ];
         $vars->{'header_done'} = 1;
         $vars->{'contenttypemethod'} = 'autodetect';
- 
+
         my $recipients = { 'changer' => $user };
         $vars->{'sent_bugmail'} = Bugzilla::BugMail::Send($bug_id, $recipients);
-        
+
         print $cgi->header();
         # Generate and return the UI (HTML page) from the appropriate template.
         $template->process("attachment/created.html.tmpl", $vars)
-            || ThrowTemplateError($template->error()); 
+            || ThrowTemplateError($template->error());
         exit;
     }
     else {
@@ -188,13 +184,13 @@ sub post_bug_after_creation {
     my $template = Bugzilla->template;
 
     if (Bugzilla->input_params->{format}
-        && Bugzilla->input_params->{format} eq 'remo-swag') 
+        && Bugzilla->input_params->{format} eq 'remo-swag')
     {
         # If the attachment cannot be successfully added to the bug,
         # we notify the user, but we don't interrupt the bug creation process.
         my $error_mode_cache = Bugzilla->error_mode;
         Bugzilla->error_mode(ERROR_MODE_DIE);
-        
+
         my $attachment;
         eval {
             my $xml;
@@ -202,30 +198,31 @@ sub post_bug_after_creation {
                 || ThrowTemplateError($template->error());
 
             $attachment = Bugzilla::Attachment->create(
-                { bug           => $bug, 
-                  creation_ts   => $bug->creation_ts, 
+                { bug           => $bug,
+                  creation_ts   => $bug->creation_ts,
                   data          => $xml,
-                  description   => 'Remo Swag Request (XML)', 
+                  description   => 'Remo Swag Request (XML)',
                   filename      => 'remo-swag.xml',
-                  ispatch       => 0, 
-                  isprivate     => 0, 
-                  isurl         => 0, 
+                  ispatch       => 0,
+                  isprivate     => 0,
                   mimetype      => 'text/xml',
-                  store_in_file => 0, 
             });
         };
+        if ($@) {
+            warn "$@";
+        }
 
         if ($attachment) {
             # Insert comment for attachment
-            $bug->add_comment('', { isprivate  => 0, 
-                                    type       => CMT_ATTACHMENT_CREATED, 
+            $bug->add_comment('', { isprivate  => 0,
+                                    type       => CMT_ATTACHMENT_CREATED,
                                     extra_data => $attachment->id });
             $bug->update($bug->creation_ts);
         }
         else {
             $vars->{'message'} = 'attachment_creation_failed';
         }
-       
+
         Bugzilla->error_mode($error_mode_cache);
     }
 }

@@ -38,21 +38,36 @@ sub get_login_info {
     my $token = $cgi->param("token");
     $cgi->delete('token');
     check_hash_token($token, ['login']);
-        
+
     my $urlbase = new URI(correct_urlbase());
     my $audience = $urlbase->scheme . "://" . $urlbase->host_port;
 
-    my $ua = new LWP::UserAgent();
+    my $ua = new LWP::UserAgent( timeout => 10 );
 
-    my $info = { 'status' => 'persona-server-broken' };
+    my $response = $ua->post(Bugzilla->params->{persona_verify_url},
+                             [ assertion => $assertion,
+                               audience  => $audience ]);
+    if ($response->is_error) {
+        return { failure    => AUTH_ERROR,
+                 user_error => 'persona_server_fail',
+                 details    => { reason => $response->message }};
+    }
+
+    my $info;
     eval {
-        my $response = $ua->post(Bugzilla->params->{persona_verify_url},
-                                 [assertion => $assertion,
-                                  audience  => $audience]);
-
-        $info = decode_json($response->content());
+        $info = decode_json($response->decoded_content());
     };
-    
+    if ($@) {
+        return { failure    => AUTH_ERROR,
+                 user_error => 'persona_server_fail',
+                 details    => { reason => 'Received a malformed response.' }};
+    }
+    if ($info->{'status'} eq 'failure') {
+        return { failure    => AUTH_ERROR,
+                 user_error => 'persona_server_fail',
+                 details    => { reason => $info->{reason} }};
+    }
+
     if ($info->{'status'} eq "okay" &&
         $info->{'audience'} eq $audience &&
         ($info->{'expires'} / 1000) > time())
@@ -61,10 +76,9 @@ sub get_login_info {
             'username' => $info->{'email'}
         };
 
-        my $result = 
-            Bugzilla::Auth::Verify->create_or_update_user($login_data);
+        my $result = Bugzilla::Auth::Verify->create_or_update_user($login_data);
         return $result if $result->{'failure'};
-        
+
         my $user = $result->{'user'};
 
         # You can restrict people in a particular group from logging in using
@@ -74,17 +88,16 @@ sub get_login_info {
         # If you have your "createemailregexp" set up in such a way that a
         # newly-created account is a member of "no-browser-id", this code will
         # create an account for them and then fail their login. Which isn't
-        # great, but they can still use normal-Bugzilla-login password 
+        # great, but they can still use normal-Bugzilla-login password
         # recovery.
         if ($user->in_group('no-browser-id')) {
-            # We use a custom error here, for greater clarity, rather than
-            # returning a failure code.
-            ThrowUserError('persona_account_too_powerful');
+            return { failure    => AUTH_ERROR,
+                     user_error => 'persona_account_too_powerful' };
         }
 
         $login_data->{'user'} = $user;
         $login_data->{'user_id'} = $user->id;
-        
+
         return $login_data;
     }
     else {
@@ -103,8 +116,7 @@ sub fail_nodata {
     }
 
     print $cgi->header();
-    $template->process("account/auth/login.html.tmpl",
-                       { 'target' => $cgi->url(-relative=>1) }) 
+    $template->process("account/auth/login.html.tmpl", { 'target' => $cgi->url(-relative=>1) })
         || ThrowTemplateError($template->error());
     exit;
 }

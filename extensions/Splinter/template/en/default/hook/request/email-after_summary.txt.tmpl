@@ -2,6 +2,6 @@
 [% IF flag && flag.status == '?' && flag.type.name == 'review' && attachment && attachment.ispatch %]
 
 Review
-[%+ Bugzilla.splinter_review_url(request.bug_id, request.attach_id) FILTER none %]
+[%+ Bugzilla.splinter_review_url(bug.bug_id, attachment.id) FILTER none %]
 [%- END %]
 

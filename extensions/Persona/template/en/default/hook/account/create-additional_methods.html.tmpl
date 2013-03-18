@@ -7,20 +7,6 @@
   #%]
 
 [% IF Param('user_info_class').split(',').contains('Persona') %]
-<script type="text/javascript">
-function persona_create_account() {
-    navigator.id.getVerifiedEmail(function(assertion) {
-        if (assertion) {
-            // This code will be invoked once the user has successfully
-            // selected an email address they control to sign in with.
-            document.getElementById('persona_assertion').value = assertion;
-            document.getElementById('persona_form').submit();
-            return true;
-        }
-    });
-}
-</script>
-
 Or, use your Persona account:
 <img src="extensions/Persona/web/images/sign_in.png" onclick="persona_create_account()"
      width="95" height="25" align="absmiddle">

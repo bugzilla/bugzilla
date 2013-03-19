@@ -546,6 +546,7 @@ sub _check_content_type {
         }
 
         my $mimetype = mimetype($fh);
+        $fh->seek(0, 0);
         $content_type = $mimetype if $mimetype;
     }
 

@@ -81,6 +81,14 @@
     text-align: right;
 }
 
+.exit_text, .exit_text_last {
+    width: 100%;
+}
+
+.exit_text {
+    border-bottom: 1px dotted silver;
+}
+
 #prod_comp_search_main {
     width: 400px;
 }

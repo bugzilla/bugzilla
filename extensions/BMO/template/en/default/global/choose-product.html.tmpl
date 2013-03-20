@@ -29,7 +29,7 @@
 
 [% PROCESS global/variables.none.tmpl %]
 
-[% style_urls = [ "extensions/BMO/web/styles/choose_product.css" ] %] 
+[% style_urls = [ "extensions/BMO/web/styles/choose_product.css" ] %]
 
 [% IF target == "enter_bug.cgi" %]
   [% title = "Enter $terms.Bug" %]
@@ -68,7 +68,7 @@
   ProdCompSearch.script_name = '[% target FILTER js %]';
 </script>
 <div id="prod_comp_search_main">
-  [% PROCESS prodcompsearch/form.html.tmpl 
+  [% PROCESS prodcompsearch/form.html.tmpl
      input_label = "Find product:"
   %]
 </div>
@@ -90,32 +90,37 @@
    icon="firefox.png"
 %]
 [% INCLUDE easyproduct
-   name="Thunderbird"
-   icon="thunderbird.png"
-%]
-[% INCLUDE easyproduct
-   name="Calendar"
-   icon="sunbird.png"
-%]
-[% INCLUDE easyproduct
-   name="Camino"
-   icon="camino.png"
-%]
-[% INCLUDE easyproduct
-   name="SeaMonkey"
-   icon="seamonkey.png"
+   name="Boot2Gecko"
+   icon="firefox.png"
+   caption="Firefox OS"
 %]
 [% INCLUDE easyproduct
    name="Firefox for Android"
    icon="firefox.png"
 %]
 [% INCLUDE easyproduct
-   name="Mozilla Localizations"
+   name="Firefox for Metro"
+   icon="firefox.png"
+%]
+[% INCLUDE easyproduct
+   name="Toolkit"
    icon="dino.png"
 %]
 [% INCLUDE easyproduct
-   name="Mozilla Labs"
-   icon="labs.png"
+   name="Marketplace"
+   icon="marketplace.png"
+%]
+[% INCLUDE easyproduct
+   name="Thunderbird"
+   icon="thunderbird.png"
+%]
+[% INCLUDE easyproduct
+   name="SeaMonkey"
+   icon="seamonkey.png"
+%]
+[% INCLUDE easyproduct
+   name="Mozilla Localizations"
+   icon="dino.png"
 %]
 [% INCLUDE easyproduct
    name="Mozilla Services"
@@ -182,12 +187,19 @@
 
 <br>
 [% IF target == "enter_bug.cgi" AND user.settings.product_chooser.value != 'full_product_chooser' %]
-<p>You can choose to get this screen by default when you click "New [% terms.Bug %]" 
+<p>You can choose to get this screen by default when you click "New [% terms.Bug %]"
 by changing your <a href="userprefs.cgi?tab=settings">preferences</a>.</p>
 [% END %]
 [% END %]
 <br>
 
+</div>
+
+<div id="guided">
+  <a id="guided_img" href="enter_bug.cgi?format=guided"><img
+   src="extensions/BMO/web/images/guided.png" width="16" height="16" border="0" align="absmiddle"></a>
+  <a id="guided_link" href="enter_bug.cgi?format=guided"
+   >Switch to the [% terms.Bugzilla %] Helper</a>
 </div>
 
 [% PROCESS global/footer.html.tmpl %]
@@ -208,7 +220,7 @@ by changing your <a href="userprefs.cgi?tab=settings">preferences</a>.</p>
           <td><h2 align="left" style="margin-bottom: 0px"><a href="[% target FILTER uri %]?product=[% p.name FILTER uri %]
                   [%- IF cloned_bug_id %]&amp;cloned_bug_id=[% cloned_bug_id FILTER uri %][% END -%]
                   [%- IF format %]&amp;format=[% format FILTER uri %][% END %]">
-              [% p.name FILTER html FILTER no_break %]</a>:</h2>
+              [% caption || name FILTER html FILTER no_break %]</a>:</h2>
               [% IF p.description %]
                 <p style="margin-top: 0px;">[% p.description FILTER html_light %]</p>
               [% END %]

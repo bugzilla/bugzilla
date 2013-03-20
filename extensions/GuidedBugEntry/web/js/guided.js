@@ -306,7 +306,7 @@ var dupes = {
     };
     // DataSource can't understand a JSON-RPC error response, so
     // we have to modify the result data if we get one.
-    dataSource.doBeforeParseData = 
+    dataSource.doBeforeParseData =
       function(oRequest, oFullResponse, oCallback) {
         if (oFullResponse.error) {
           oFullResponse.result = {};
@@ -316,17 +316,17 @@ var dupes = {
         }
         return oFullResponse;
       };
-    dataSource.subscribe('dataErrorEvent', 
+    dataSource.subscribe('dataErrorEvent',
       function() {
         dupes._currentSearchQuery = '';
       }
     );
 
     this._dataTable = new YAHOO.widget.DataTable(
-      'dupes_list', 
-      this._dataTableColumns, 
-      dataSource, 
-      { 
+      'dupes_list',
+      this._dataTableColumns,
+      dataSource,
+      {
         initialLoad: false,
         MSG_EMPTY: 'No similar issues found.',
         MSG_ERROR: 'An error occurred while searching for similar issues,' +
@@ -517,7 +517,7 @@ var dupes = {
 
       dupes._dataTable.showTableMessage(
         'Searching for similar issues...&nbsp;&nbsp;&nbsp;' +
-        '<img src="extensions/GuidedBugEntry/web/images/throbber.gif"' + 
+        '<img src="extensions/GuidedBugEntry/web/images/throbber.gif"' +
         ' width="16" height="11">',
         YAHOO.widget.DataTable.CLASS_LOADING
       );
@@ -535,12 +535,12 @@ var dupes = {
       };
 
       dupes._dataTable.getDataSource().sendRequest(
-        YAHOO.lang.JSON.stringify(json_object), 
+        YAHOO.lang.JSON.stringify(json_object),
         {
           success: dupes._onDupeResults,
           failure: dupes._onDupeResults,
           scope: dupes._dataTable,
-          argument: dupes._dataTable.getState() 
+          argument: dupes._dataTable.getState()
         }
       );
 
@@ -856,12 +856,12 @@ var bugForm = {
   },
 
   validate: function() {
-    
+
     // check mandatory fields
 
     var missing = bugForm._mandatoryMissing();
     if (missing.length) {
-      var message = 'The following field' + 
+      var message = 'The following field' +
         (missing.length == 1 ? ' is' : 's are') + ' required:\n\n';
       for (var i = 0, n = missing.length; i < n; i++ ) {
         var id = missing[i];
@@ -888,9 +888,9 @@ var bugForm = {
       if (!el.id)
         el.id = help_id + '_parent';
       el.panel = new YAHOO.widget.Panel(
-        help_id, 
-        { 
-          width: "320px", 
+        help_id,
+        {
+          width: "320px",
           visible: false,
           close: false,
           context: [el.id, 'tl', 'tr', null, [5, 0]]

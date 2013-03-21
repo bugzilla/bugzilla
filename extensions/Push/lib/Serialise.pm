@@ -131,6 +131,11 @@ sub _integer {
     return $value + 0;
 }
 
+sub _array {
+    my ($value) = @_;
+    return defined($value) ? $value : [];
+}
+
 sub _custom_field {
     my ($field, $value) = @_;
     $field = Bugzilla::Field->new({ name => $field }) unless blessed $field;
@@ -142,8 +147,7 @@ sub _custom_field {
         return _select($value);
 
     } elsif ($field->type == FIELD_TYPE_MULTI_SELECT) {
-        # XXX
-        die "not implemented";
+        return _array($value);
 
     } else {
         return _string($value);

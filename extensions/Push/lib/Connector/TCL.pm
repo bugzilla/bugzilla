@@ -17,6 +17,7 @@ use Bugzilla::Extension::Push::Constants;
 use Bugzilla::Extension::Push::Serialise;
 use Bugzilla::Extension::Push::Util;
 use Bugzilla::User;
+use Bugzilla::Attachment;
 
 use Digest::MD5 qw(md5_hex);
 
@@ -120,6 +121,12 @@ sub should_send {
         return 1 if $change->{field} eq 'bug_status' || $change->{field} eq 'resolution';
     }
 
+    # send attachments
+    if ($data->{event}->{routing_key} =~ /^attachment\./) {
+        return 0 if $data->{attachment}->{is_private};
+        return 1;
+    }
+
     # and nothing else
     return 0;
 }
@@ -142,6 +149,7 @@ sub send {
     my $bug_data = $self->_get_bug_data($data);
 
     # build payload
+    my $attachment;
     my %xml = (
         Mozilla_ID => $bug_data->{id},
         When       => $data->{event}->{time},
@@ -151,6 +159,20 @@ sub send {
     );
     if ($data->{event}->{routing_key} eq 'comment.create') {
         $xml{Comment} = $data->{comment}->{body};
+    } elsif ($data->{event}->{routing_key} =~ /^attachment\.(\w+)/) {
+        my $is_update = $1 eq 'modify';
+        if (!$is_update) {
+            $attachment = Bugzilla::Attachment->new($data->{attachment}->{id});
+        }
+        $xml{Attach} = {
+            Attach_ID   => $data->{attachment}->{id},
+            Filename    => $data->{attachment}->{file_name},
+            Description => $data->{attachment}->{description},
+            ContentType => $data->{attachment}->{content_type},
+            IsPatch     => $data->{attachment}->{is_patch} ? 'true' : 'false',
+            IsObsolete  => $data->{attachment}->{is_obsolete} ? 'true' : 'false',
+            IsUpdate    => $is_update ? 'true' : 'false',
+        };
     }
 
     # convert to xml
@@ -185,6 +207,9 @@ sub send {
     _write_file("$local_dir/$filename.sync", $xml);
     _write_file("$local_dir/$filename.sync.check", $md5);
     _write_file("$local_dir/$filename.done", '');
+    if ($attachment) {
+        _write_file("$local_dir/$filename.sync.attach", $attachment->data);
+    }
 
     my $remote_dir = $self->config->{sftp_remote_path} eq ''
         ? ''
@@ -209,6 +234,12 @@ sub send {
     $sftp->put("$local_dir/$filename.sync.check", "$remote_dir$filename.sync.check")
         or return (PUSH_RESULT_ERROR, "Failed to upload $local_dir/$filename.sync.check");
 
+    if ($attachment) {
+        $logger->debug("Uploading $local_dir/$filename.sync.attach");
+        $sftp->put("$local_dir/$filename.sync.attach", "$remote_dir$filename.sync.attach")
+            or return (PUSH_RESULT_ERROR, "Failed to upload $local_dir/$filename.sync.attach");
+    }
+
     $logger->debug("Uploading $local_dir/$filename.done");
     $sftp->put("$local_dir/$filename.done", "$remote_dir$filename.done")
         or return (PUSH_RESULT_ERROR, "Failed to upload $local_dir/$filename.done");
@@ -232,6 +263,7 @@ sub _get_bug_data {
 sub _write_file {
     my ($filename, $content) = @_;
     open(my $fh, ">$filename") or die "Failed to write to $filename: $!\n";
+    binmode($fh);
     print $fh $content;
     close($fh) or die "Failed to write to $filename: $!\n";
 }

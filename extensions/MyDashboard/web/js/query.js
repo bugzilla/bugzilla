@@ -54,7 +54,7 @@ YUI({
                     Y.one("#query_container .query_heading").setHTML(e.response.meta.heading);
                     Y.one("#query_bugs_found").setHTML(
                         '<a href="buglist.cgi?' + e.response.meta.buffer +
-                        '">' + e.response.results.length + ' bugs found</a>');
+                        '" target="_blank">' + e.response.results.length + ' bugs found</a>');
                     dataTable.set('data', e.response.results);
                 }
             },

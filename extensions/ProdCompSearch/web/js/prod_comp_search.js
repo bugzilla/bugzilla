@@ -11,7 +11,8 @@ var ProdCompSearch = {
     script_name: 'enter_bug.cgi',
     script_choices: ['enter_bug.cgi', 'describecomponents.cgi'],
     format: null,
-    cloned_bug_id: null
+    cloned_bug_id: null,
+    new_tab: null
 };
 
 YUI({
@@ -100,7 +101,19 @@ YUI({
                 if (ProdCompSearch.script_name == 'describecomponents.cgi') {
                     url += "#" + encodeURIComponent(data.component);
                 }
-                window.location.href = url;
+                if (ProdCompSearch.new_tab) {
+                    window.open(url, '_blank');
+                }
+                else {
+                    window.location.href = url;
+                }
+            }
+        },
+        after: {
+            select: function(e) {
+                if (ProdCompSearch.new_tab) {
+                    input.set('value','');
+                }
             }
         }
     });

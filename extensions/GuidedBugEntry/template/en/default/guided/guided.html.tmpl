@@ -116,14 +116,11 @@ dupes.setLabels(
   Or search for a Product:
 </h3>
 
-<script>
-  ProdCompSearch.format = 'guided';
-  ProdCompSearch.script_name = 'enter_bug.cgi';
-</script>
 <div id="prod_comp_search_main">
   [% PROCESS prodcompsearch/form.html.tmpl
-      input_label = "Find product:"
-  %]
+     input_label = "Find product:"
+     format      = "guided"
+     script_name = "enter_bug.cgi" %]
 </div>
 
 </div>

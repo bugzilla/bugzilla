@@ -13,7 +13,7 @@ use warnings;
 use Bugzilla;
 use Bugzilla::Error;
 use Bugzilla::Extension::Push::Util;
-use Bugzilla::Util qw(trim detaint_natural);
+use Bugzilla::Util qw(trim detaint_natural trick_taint);
 
 use base qw(Exporter);
 our @EXPORT = qw(
@@ -67,6 +67,7 @@ sub _update_config_from_form {
     # update
     foreach my $option ($config->options) {
         my $option_name = $option->{name};
+        trick_taint($values->{$option_name});
         $config->{$option_name} = $values->{$option_name};
     }
     $config->update();

@@ -161,11 +161,19 @@ sub delete_sensitive_user_data {
     $dbh->do("DELETE FROM tokens");
     $dbh->do("DELETE FROM logincookies");
     $dbh->do("DELETE FROM login_failure");
+    $dbh->do("DELETE FROM audit_log");
+    # queued bugmail
     $dbh->do("DELETE FROM ts_error");
     $dbh->do("DELETE FROM ts_exitstatus");
     $dbh->do("DELETE FROM ts_funcmap");
     $dbh->do("DELETE FROM ts_job");
     $dbh->do("DELETE FROM ts_note");
+    # push extension messages
+    $dbh->do("DELETE FROM push");
+    $dbh->do("DELETE FROM push_backlog");
+    $dbh->do("DELETE FROM push_backoff");
+    $dbh->do("DELETE FROM push_log");
+    $dbh->do("DELETE FROM push_options");
 }
 
 sub delete_attachment_data {

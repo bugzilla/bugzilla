@@ -161,7 +161,7 @@ sub query_bugs {
 }
 
 sub query_flags {
-    my $type     = shift;
+    my ($type, $include_resolved) = @_;
     my $user     = Bugzilla->user;
     my $dbh      = Bugzilla->dbh;
     my $date_now = DateTime->now;
@@ -174,20 +174,20 @@ sub query_flags {
         $attach_join_clause .= " AND attachments.isprivate < 1";
     }
 
-    my $query = 
+    my $query =
     # Select columns describing each flag, the bug/attachment on which
     # it has been set, who set it, and of whom they are requesting it.
-    " SELECT flags.id AS id, 
+    " SELECT flags.id AS id,
              flagtypes.name AS type,
              flags.status AS status,
-             flags.bug_id AS bug_id, 
+             flags.bug_id AS bug_id,
              bugs.bug_status AS bug_status,
              bugs.short_desc AS bug_summary,
-             flags.attach_id AS attach_id, 
+             flags.attach_id AS attach_id,
              attachments.description AS attach_summary,
-             requesters.login_name AS requester, 
+             requesters.login_name AS requester,
              requestees.login_name AS requestee,
-             " . $dbh->sql_date_format('flags.creation_date', '%Y-%m-%d %H:%i') . " AS created
+             " . $dbh->sql_date_format('flags.modification_date', '%Y-%m-%d %H:%i') . " AS updated
         FROM flags 
              LEFT JOIN attachments
                   ON ($attach_join_clause)
@@ -206,8 +206,12 @@ sub query_flags {
                   AND ccmap.bug_id = bugs.bug_id ";
 
     # Limit query to pending requests and open bugs only
-    $query .= " WHERE bugs.bug_status IN (" . join(',', quoted_open_states()) . ")
-                      AND flags.status = '?' ";
+    $query .= " WHERE flags.status = '?' ";
+
+    # Limit to open bugs only unless want to include resolved
+    if (!$include_resolved) {
+        $query .= " AND bugs.bug_status IN (" . join(',', quoted_open_states()) . ") ";
+    }
 
     # Weed out bug the user does not have access to
     $query .= " AND ((bgmap.group_id IS NULL)
@@ -221,7 +225,7 @@ sub query_flags {
     $query .= ") ";
 
     # Order the records (within each group).
-    my $group_order_by = " GROUP BY flags.bug_id ORDER BY flags.creation_date, flagtypes.name";
+    my $group_order_by = " GROUP BY flags.bug_id ORDER BY flags.modification_date, flagtypes.name";
 
     my $flags = [];
     if ($type eq 'requestee') {
@@ -238,11 +242,11 @@ sub query_flags {
                                           { Slice => {} }, $user->login);
     }
 
-    # Format the created date specific to the user's timezone and add the fancy version
+    # Format the updated date specific to the user's timezone and add the fancy version
     foreach my $flag (@$flags) {
-        $flag->{'created'} = format_time($flag->{'created'}, '%Y-%m-%d %H:%M');
-        my $date_then = datetime_from($flag->{'created'});
-        $flag->{'created_fancy'} = time_ago($date_then, $date_now);
+        $flag->{'updated'} = format_time($flag->{'updated'}, '%Y-%m-%d %H:%M');
+        my $date_then = datetime_from($flag->{'updated'});
+        $flag->{'updated_fancy'} = time_ago($date_then, $date_now);
     }
 
     return $flags;

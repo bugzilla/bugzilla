@@ -82,13 +82,13 @@ sub run_flag_query {
     my ($self, $params) =@_;
     my $user = Bugzilla->login(LOGIN_REQUIRED);
 
-    defined $params->{type}
-        || ThrowCodeError('param_required',
-                         { function => 'MyDashboard.run_flag_query',
-                           param    => 'type' });
-
     my $type = $params->{type};
-    my $results = query_flags($type);
+    $type || ThrowCodeError('param_required',
+                            { function => 'MyDashboard.run_flag_query',
+                              param    => 'type' });
+
+    my $include_resolved = $params->{include_resolved} || 0;
+    my $results = query_flags($type, $include_resolved);
 
     return { result => { $type => $results }};
 }

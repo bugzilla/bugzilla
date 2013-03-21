@@ -26,6 +26,8 @@ YUI({
     var updateFlagTable = function (type) {
         if (!type) return;
 
+        var include_resolved = Y.one('#' + type + '_resolved').get('checked') ? 1 : 0;
+
         counter = counter + 1;
 
         var callback = {
@@ -47,13 +49,13 @@ YUI({
             version: "1.1",
             method:  "MyDashboard.run_flag_query",
             id:      counter,
-            params:  { type : type }
+            params:  { type : type, include_resolved: include_resolved }
         };
 
         var stringified = Y.JSON.stringify(json_object);
 
         Y.one('#' + type + '_count_refresh').addClass('bz_default_hidden');
-                
+
         dataTable[type].set('data', []);
         dataTable[type].render("#" + type + "_table");
         dataTable[type].showMessage('loadingMessage');
@@ -69,14 +71,19 @@ YUI({
     };
 
     var bugLinkFormatter = function (o) {
+        var bug_closed = "";
+        if (o.data.bug_status == 'RESOLVED' || o.data.bug_status == 'VERIFIED') {
+            bug_closed = "bz_closed";
+        }
         return '<a href="show_bug.cgi?id=' + encodeURIComponent(o.value) +
-               '" target="_blank" ' + 'title="' + Y.Escape.html(o.data.bug_status) + ' - ' + 
-               Y.Escape.html(o.data.bug_summary) + '">' + o.value + '</a>';
+               '" target="_blank" ' + 'title="' + Y.Escape.html(o.data.bug_status) + ' - ' +
+               Y.Escape.html(o.data.bug_summary) + '" class="' + Y.Escape.html(bug_closed) +
+               '">' + o.value + '</a>';
     };
 
-    var createdFormatter = function (o) {
+    var updatedFormatter = function (o) {
         return '<span title="' + Y.Escape.html(o.value) + '">' +
-               Y.Escape.html(o.data.created_fancy) + '</span>';
+               Y.Escape.html(o.data.updated_fancy) + '</span>';
     };
 
     var requesteeFormatter = function (o) {
@@ -91,10 +98,10 @@ YUI({
         columns: [
             { key: "requester", label: "Requester", sortable: true },
             { key: "type", label: "Flag", sortable: true },
-            { key: "bug_id", label: "Bug", sortable: true, 
+            { key: "bug_id", label: "Bug", sortable: true,
               formatter: bugLinkFormatter, allowHTML: true },
-            { key: "created", label: "Created", sortable: true, 
-              formatter: createdFormatter, allowHTML: true }
+            { key: "updated", label: "Updated", sortable: true,
+              formatter: updatedFormatter, allowHTML: true }
         ],
         strings: {
             emptyMessage: 'No flag data found.',
@@ -112,13 +119,16 @@ YUI({
         schema: {
             resultListLocator: "result.result.requestee",
             resultFields: ["requester", "type", "bug_id", "bug_status",
-                           "bug_summary", "created", "created_fancy"]
+                           "bug_summary", "updated", "updated_fancy"]
         }
     });
 
     dataTable.requestee.render("#requestee_table");
 
     Y.one('#requestee_refresh').on('click', function(e) {
+        updateFlagTable('requestee');
+    });
+    Y.one('#requestee_resolved').on('change', function(e) {
         updateFlagTable('requestee');
     });
 
@@ -131,8 +141,8 @@ YUI({
             { key:"type", label:"Flag", sortable:true },
             { key:"bug_id", label:"Bug", sortable:true,
               formatter: bugLinkFormatter, allowHTML: true },
-            { key: "created", label: "Created", sortable: true,
-              formatter: createdFormatter, allowHTML: true }
+            { key: "updated", label: "Updated", sortable: true,
+              formatter: updatedFormatter, allowHTML: true }
         ],
         strings: {
             emptyMessage: 'No flag data found.',
@@ -150,11 +160,14 @@ YUI({
         schema: {
             resultListLocator: "result.result.requester",
             resultFields: ["requestee", "type", "bug_id", "bug_status",
-                           "bug_summary", "created", "created_fancy"]
+                           "bug_summary", "updated", "updated_fancy"]
         }
     });
 
     Y.one('#requester_refresh').on('click', function(e) {
+        updateFlagTable('requester');
+    });
+    Y.one('#requester_resolved').on('change', function(e) {
         updateFlagTable('requester');
     });
 });

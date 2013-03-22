@@ -84,14 +84,12 @@ sub time_ago {
         croak('Invalid second parameter provided to DateTime::Duration::Fuzzy::time_ago; it must be a DateTime object if provided')
     }
 
-    my $now_clone = $now->clone->set_time_zone(Bugzilla->user->timezone);
-    my $time_clone = $time->clone->set_time_zone(Bugzilla->user->timezone);
-    my $dur = $now_clone->subtract_datetime_absolute( $time_clone )->in_units('seconds');
+    my $dur = $now->subtract_datetime_absolute($time)->in_units('seconds');
 
     foreach my $range ( @ranges ) {
         if ( $dur <= $range->[0] ) {
             if ( $range->[2] ) {
-                return $range->[2]->( $time_clone, $now_clone )
+                return $range->[2]->($time, $now)
             }
             return $range->[1]
         }

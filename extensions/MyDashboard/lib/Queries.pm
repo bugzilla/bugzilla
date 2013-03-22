@@ -131,7 +131,8 @@ sub QUERY_DEFS {
 sub query_bugs {
     my $qdef     = shift;
     my $dbh      = Bugzilla->dbh;
-    my $date_now = DateTime->now;
+    my $user     = Bugzilla->user;
+    my $date_now = DateTime->now(time_zone => $user->timezone);
 
     ## HACK to remove POST
     delete $ENV{REQUEST_METHOD};
@@ -149,7 +150,7 @@ sub query_bugs {
         foreach my $column (SELECT_COLUMNS) {
             $bug->{$column} = shift @$row;
             if ($column eq 'changeddate') {
-                $bug->{$column} = format_time($bug->{$column}, '%Y-%m-%d %H:%M');
+                $bug->{$column} = format_time($bug->{$column});
                 my $date_then = datetime_from($bug->{$column});
                 $bug->{'changeddate_fancy'} = time_ago($date_then, $date_now);
             }
@@ -164,7 +165,7 @@ sub query_flags {
     my ($type, $include_resolved) = @_;
     my $user     = Bugzilla->user;
     my $dbh      = Bugzilla->dbh;
-    my $date_now = DateTime->now;
+    my $date_now = DateTime->now(time_zone => $user->timezone);
 
     ($type ne 'requestee' || $type ne 'requester')
         || ThrowCodeError('param_required', { param => 'type' });
@@ -244,7 +245,7 @@ sub query_flags {
 
     # Format the updated date specific to the user's timezone and add the fancy version
     foreach my $flag (@$flags) {
-        $flag->{'updated'} = format_time($flag->{'updated'}, '%Y-%m-%d %H:%M');
+        $flag->{'updated'} = format_time($flag->{'updated'});
         my $date_then = datetime_from($flag->{'updated'});
         $flag->{'updated_fancy'} = time_ago($date_then, $date_now);
     }

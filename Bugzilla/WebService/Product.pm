@@ -153,20 +153,20 @@ sub _product_to_hash {
     }
     if (filter_wants($params, 'versions')) {
         $field_data->{versions} = [map {
-            $self->_version_to_hash($_)
+            $self->_version_to_hash($_, $params)
         } @{$product->versions}];
     }
     if (filter_wants($params, 'milestones')) {
         $field_data->{milestones} = [map {
-            $self->_milestone_to_hash($_)
+            $self->_milestone_to_hash($_, $params)
         } @{$product->milestones}];
     }
     return filter($params, $field_data);
 }
 
 sub _component_to_hash {
-    my ($self, $component) = @_;
-    return {
+    my ($self, $component, $params) = @_;
+    my $field_data = {
         id =>
             $self->type('int', $component->id),
         name =>
@@ -182,11 +182,12 @@ sub _component_to_hash {
         is_active =>
             $self->type('boolean', $component->is_active),
     };
+    return filter($params, $field_data, 'components');
 }
 
 sub _version_to_hash {
-    my ($self, $version) = @_;
-    return {
+    my ($self, $version, $params) = @_;
+    my $field_data = {
         id =>
             $self->type('int', $version->id),
         name =>
@@ -196,11 +197,12 @@ sub _version_to_hash {
         is_active =>
             $self->type('boolean', $version->is_active),
     };
+    return filter($params, $field_data, 'versions');
 }
 
 sub _milestone_to_hash {
-    my ($self, $milestone) = @_;
-    return {
+    my ($self, $milestone, $params) = @_;
+    my $field_data = {
         id =>
             $self->type('int', $milestone->id),
         name =>
@@ -210,6 +212,7 @@ sub _milestone_to_hash {
         is_active =>
             $self->type('boolean', $milestone->is_active),
     };
+    return filter($params, $field_data, 'milestones');
 }
 
 1;
@@ -314,6 +317,8 @@ Note: Can also be called as "get_products" for compatibilty with Bugzilla 3.0 AP
 In addition to the parameters below, this method also accepts the
 standard L<include_fields|Bugzilla::WebService/include_fields> and
 L<exclude_fields|Bugzilla::WebService/exclude_fields> arguments.
+
+This RPC call supports sub field restrictions.
 
 =over
 

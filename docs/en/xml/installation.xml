@@ -1588,21 +1588,6 @@ AddType application/rdf+xml .rdf</screen>
 C:\perl&gt; <command>ppm install &lt;module name&gt;</command>
         </programlisting>
 
-        <para>
-          If you are using Perl 5.10.1, the best source for the Windows PPM modules
-          needed for Bugzilla is probably the theory58S website, which you can add
-          to your list of repositories as follows:
-        </para>
-
-        <programlisting>
-<command>ppm repo add theory58S http://cpan.uwinnipeg.ca/PPMPackages/10xx/</command>
-        </programlisting>
-
-        <para>
-          If you are using Perl 5.12 or newer, you no longer need to add
-          this repository. All modules you need are already available from
-	  the ActiveState repository.
-        </para>
         <note>
           <para>
             The PPM repository stores modules in 'packages' that may have

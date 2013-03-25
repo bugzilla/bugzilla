@@ -54,10 +54,8 @@
     <note>
       <para>
         Running Bugzilla on Windows requires the use of ActiveState
-        Perl &min-perl-ver; or higher. Many modules already exist in the core
-        distribution of ActiveState Perl. Additional modules can be downloaded
-        from <ulink url="http://cpan.uwinnipeg.ca/PPMPackages/10xx/" />
-        if you use Perl 5.10.1.
+        Perl &min-perl-ver; or higher. Most modules already exist in the core
+        distribution of ActiveState Perl.
       </para>
     </note>
 

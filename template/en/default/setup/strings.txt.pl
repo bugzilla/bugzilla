@@ -373,15 +373,6 @@ as well), you should install patchutils from:
 
     http://cyberelk.net/tim/software/patchutils/
 END
-    ppm_repo_add => <<EOT,
-***********************************************************************
-* Note For Windows Users                                              *
-***********************************************************************
-* In order to install the modules listed below, you first have to run * 
-* the following command as an Administrator:                          *
-*                                                                     *
-*   ppm repo add theory58S ##theory_url##
-EOT
     template_precompile   => "Precompiling templates...",
     template_removal_failed => <<END,
 WARNING: The directory '##template_cache##' could not be removed.

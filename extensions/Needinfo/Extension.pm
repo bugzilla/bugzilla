@@ -57,8 +57,7 @@ sub bug_start_of_update {
     my $cgi    = Bugzilla->cgi;
     my $params = Bugzilla->input_params;
 
-    my $needinfo = delete $params->{needinfo};
-    if ($user->in_group('canconfirm') && $needinfo) {
+    if ($user->in_group('canconfirm') && $params->{needinfo}) {
         # do a match if applicable
         Bugzilla::User::match_field({
             'needinfo_from' => { 'type' => 'single' }
@@ -70,6 +69,7 @@ sub bug_start_of_update {
     $params->{needinfo_done} = 1;
     Bugzilla->input_params($params);
 
+    my $needinfo      = delete $params->{needinfo};
     my $needinfo_from = delete $params->{needinfo_from};
     my $needinfo_role = delete $params->{needinfo_role};
     my $is_private    = $params->{'comment_is_private'};

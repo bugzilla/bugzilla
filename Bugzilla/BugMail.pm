@@ -114,12 +114,15 @@ sub Send {
     }
 
     if ($params->{dep_only}) {
+        my $fields = Bugzilla->fields({ by_name => 1 });
         push(@diffs, { field_name => 'bug_status',
+                       field_desc => $fields->{bug_status}->description,
                        old => $params->{changes}->{bug_status}->[0],
                        new => $params->{changes}->{bug_status}->[1],
                        login_name => $changer->login,
                        blocker => $params->{blocker} },
                      { field_name => 'resolution',
+                       field_desc => $fields->{resolution}->description,
                        old => $params->{changes}->{resolution}->[0],
                        new => $params->{changes}->{resolution}->[1],
                        login_name => $changer->login,

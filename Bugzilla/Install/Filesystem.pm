@@ -159,6 +159,7 @@ sub FILESYSTEM {
         'runtests.pl'     => { perms => OWNER_EXECUTE },
         'jobqueue.pl'     => { perms => OWNER_EXECUTE },
         'migrate.pl'      => { perms => OWNER_EXECUTE },
+        'arecibo.pl'      => { perms => OWNER_EXECUTE },
         'install-module.pl' => { perms => OWNER_EXECUTE },
 
         'Bugzilla.pm'   => { perms => CGI_READ },

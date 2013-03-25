@@ -20,9 +20,10 @@ our @EXPORT = qw(
 use Apache2::Log;
 use Apache2::SubProcess;
 use Carp;
+use Data::Dumper;
 use Email::Date::Format qw(email_gmdate);
+use File::Temp;
 use LWP::UserAgent;
-use POSIX qw(setsid nice);
 use Sys::Hostname;
 
 use Bugzilla::Constants;
@@ -205,27 +206,17 @@ sub arecibo_handle_error {
         username   => $username,
     ];
 
-    # fork then post
-    local $SIG{CHLD} = 'IGNORE';
-    my $pid = fork();
-    if (defined($pid) && $pid == 0) {
-        # detach
-        chdir('/');
-        open(STDIN, '</dev/null');
-        open(STDOUT, '>/dev/null');
-        open(STDERR, '>/dev/null');
-        setsid();
-        nice(19);
-
-        # post to arecibo (ignore any errors)
-        my $agent = LWP::UserAgent->new(
-            agent   => 'bugzilla.mozilla.org',
-            timeout => 10, # seconds
-        );
-        $agent->post($arecibo_server, $data);
-
-        CORE::exit(0);
+    my $fh = File::Temp->new( UNLINK => 0 );
+    if (!$fh) {
+        warn "Failed to create temp file: $!\n";
+        return;
     }
+    print $fh Dumper($data);
+    close($fh) or die $!;
+    my $filename = $fh->filename;
+
+    my $command = bz_locations()->{'cgi_path'} . "/arecibo.pl '$filename' &";
+    system($command);
     return 1;
 }
 

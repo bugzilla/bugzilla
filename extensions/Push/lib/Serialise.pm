@@ -128,7 +128,7 @@ sub _time {
 
 sub _integer {
     my ($value) = @_;
-    return $value + 0;
+    return defined($value) ? $value + 0 : undef;
 }
 
 sub _array {

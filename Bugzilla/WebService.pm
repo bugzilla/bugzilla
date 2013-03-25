@@ -282,6 +282,13 @@ the returned hashes.
 If you specify all the fields, then this function will return empty
 hashes.
 
+Some RPC calls support specifying sub fields. If an RPC call states that
+it support sub field restrictions, you can restrict what information is
+returned within the first field. For example, if you call Products.get
+with an include_fields of components.name, then only the component name
+would be returned (and nothing else). You can include the main field,
+and exclude a sub field.
+
 Invalid field names are ignored.
 
 Specifying fields here overrides C<include_fields>, so if you specify a

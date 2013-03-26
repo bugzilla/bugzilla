@@ -57,6 +57,7 @@ X-Bugzilla-Type: request
 [%- IF flag.requestee %]
 X-Bugzilla-Flag-Requestee: [% flag.requestee.email %]
 [% END %]
+[%+ INCLUDE "email/header-common.txt.tmpl" %]
 [%+ threadingmarker %]
 
 [%+ USE wrap -%]

@@ -21,10 +21,13 @@ use lib $Bin;
 use lib "$Bin/lib";
 
 use Bugzilla;
+use Bugzilla::Constants;
 use File::Slurp;
 use POSIX qw(setsid nice);
 use Safe;
+use Fcntl qw(:flock);
 
+Bugzilla->usage_mode(USAGE_MODE_CMDLINE);
 nice(19);
 
 # detach
@@ -47,9 +50,16 @@ my $cpt = new Safe;
 $cpt->reval($dump) || exit(1);
 my $data = ${$cpt->varglob('VAR1')};
 
+# ensure we send warnings one at a time per webhead
+flock(DATA, LOCK_EX);
+
 # and post to arecibo
 my $agent = LWP::UserAgent->new(
     agent   => 'bugzilla.mozilla.org',
     timeout => 10, # seconds
 );
 $agent->post($arecibo_server, $data);
+
+__DATA__
+this exists so the flock() code works.
+do not remove this data section.

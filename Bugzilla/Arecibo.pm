@@ -97,7 +97,7 @@ sub arecibo_should_notify {
 sub arecibo_handle_error {
     my $class = shift;
     my @message = split(/\n/, shift);
-    my $id = shift || arecibo_generate_id();
+    my $id = arecibo_generate_id();
 
     my $is_error = $class eq 'error';
     if ($class ne 'error' && $class ne 'warning') {
@@ -256,7 +256,7 @@ sub _arecibo_die_handler {
     }
 
     return if _in_eval();
-    
+
     # mod_perl overrides exit to call die with this string
     exit if $message =~ /\bModPerl::Util::exit\b/;
 
@@ -274,36 +274,11 @@ sub _arecibo_die_handler {
         $in_cgi_carp_die ||
         ($nested_error && $nested_error !~ /\bModPerl::Util::exit\b/)
     ) {
-        my $uid = arecibo_generate_id();
-        my $notified = arecibo_handle_error('error', $message, $uid);
+        arecibo_handle_error('error', $message);
 
-        # if we aren't dying from a web page, let perl deal with it.  this
-        # does the right thing with respect to returning web service errors
-        if (Bugzilla->error_mode != ERROR_MODE_WEBPAGE) {
-            CORE::die($message);
-        }
-
-        # right now it's hard to determine if we've already returned a
-        # content-type header, it's better to return two than none
-        print "Content-type: text/html\n\n";
-
-        my $maintainer = html_quote(Bugzilla->params->{'maintainer'});
-        $message =~ s/ at \S+ line \d+\.\s*$//;
-        $message = html_quote($message);
-        $uid = html_quote($uid);
-        $nested_error = html_quote($nested_error);
-        print qq(
-            <h1>Bugzilla has suffered an internal error</h1>
-            <pre>$message</pre>
-            <hr>
-            <pre>$nested_error</pre>
-        );
-        if ($notified) {
-            print qq(
-                The <a href="mailto:$maintainer">Bugzilla maintainers</a> have
-                been notified of this error [#$uid].
-            );
-        };
+        # and call the normal error management
+        # (ISE for web pages, error response for web services, etc)
+        CORE::die($message);
     }
     exit;
 }

@@ -262,7 +262,7 @@
     Flags cannot be set for objects of type [% caller FILTER html %].
     They can only be set for [% terms.bugs %] and attachments.
 
-  [% ELSIF error == "flag_requestee_disabled" %]
+  [% ELSIF error == "flag_type_requestee_disabled" %]
     [% title = "Flag not Requestable from Specific Person" %]
     You can't ask a specific person for
     <em>[% type.name FILTER html %]</em>.

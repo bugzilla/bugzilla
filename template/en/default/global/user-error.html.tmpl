@@ -621,6 +621,11 @@
     <br>Alternately, if your attachment is an image, you could convert
     it to a compressible format like JPG or PNG and try again.
 
+  [% ELSIF error == "flag_requestee_disabled" %]
+    [% title = "Flag Requestee Disabled" %]
+    You can't ask <em>[% requestee.identity FILTER html %]</em> because that
+    account is disabled.
+
   [% ELSIF error == "flag_requestee_needs_privs" %]
     [% title = "Flag Requestee Needs Privileges" %]
     [% requestee.identity FILTER html %] does not have permission to set the

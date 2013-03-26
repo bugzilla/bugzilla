@@ -107,6 +107,7 @@ sub exists {
 
 sub by_name {
     my ($self, $name) = @_;
+    $self->_load();
     return unless exists $self->{objects}->{$name};
     return $self->{objects}->{$name};
 }

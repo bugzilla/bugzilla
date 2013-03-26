@@ -76,7 +76,7 @@ sub inc {
 
     my $attempts = $self->attempts + 1;
     my $seconds = $attempts <= 4 ? 5 ** $attempts : 15 * 60;
-    my ($date) = $dbh->selectrow_array("SELECT NOW() + " . $dbh->sql_interval($seconds, 'SECOND'));
+    my ($date) = $dbh->selectrow_array("SELECT " . $dbh->sql_date_math('NOW()', '+', $seconds, 'SECOND'));
 
     $self->{next_attempt_ts} = $date;
     $self->{attempts} = $attempts;

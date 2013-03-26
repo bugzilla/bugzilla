@@ -20,6 +20,7 @@ use Bugzilla::User;
 use Bugzilla::Attachment;
 
 use Digest::MD5 qw(md5_hex);
+use Encode qw(encode_utf8);
 
 sub options {
     return (
@@ -182,6 +183,7 @@ sub send {
         RootName => 'sync',
         XMLDecl => 1,
     );
+    $xml = encode_utf8($xml);
 
     # generate md5
     my $md5 = md5_hex($xml);

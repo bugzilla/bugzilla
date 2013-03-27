@@ -52,6 +52,7 @@ use Bugzilla::Constants;
 use Bugzilla::Error;
 use Bugzilla::Util;
 use Bugzilla::Group;
+use Bugzilla::Hook;
 
 use base qw(Bugzilla::Object);
 
@@ -133,6 +134,8 @@ sub create {
                               exclusions => $exclusions });
     $flagtype->update();
 
+    Bugzilla::Hook::process('flagtype_end_of_create', { type => $flagtype });
+
     $dbh->bz_commit_transaction();
     return $flagtype;
 }
@@ -200,6 +203,9 @@ sub update {
         $dbh->do('UPDATE flags SET requestee_id = NULL WHERE type_id = ?',
                   undef, $self->id);
     }
+
+    Bugzilla::Hook::process('flagtype_end_of_update',
+        { type => $self, changed => $changes });
 
     $dbh->bz_commit_transaction();
     return $changes;

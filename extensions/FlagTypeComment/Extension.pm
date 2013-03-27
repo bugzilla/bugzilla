@@ -147,16 +147,17 @@ sub _set_ftc_states {
 
 sub flagtype_end_of_create {
     my ($self, $args) = @_;
-    _set_flagtypes($args->{id});
+    _set_flagtypes($args->{type});
 }
 
 sub flagtype_end_of_update {
     my ($self, $args) = @_;
-    _set_flagtypes($args->{id});
+    _set_flagtypes($args->{type});
 }
 
 sub _set_flagtypes {
-    my $flagtype_id = shift;
+    my $flag_type = shift;
+    my $flagtype_id = $flag_type->id;
     my $input = Bugzilla->input_params;
     my $dbh = Bugzilla->dbh;
 

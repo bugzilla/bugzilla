@@ -17,7 +17,7 @@
 [% USE Bugzilla %]
 [% cgi = Bugzilla.cgi %]
 
-<script src="[% Param('persona_includejs_url') %]" type="text/javascript"></script>
+<script defer src="[% Param('persona_includejs_url') %]" type="text/javascript"></script>
 <script type="text/javascript">
 
 function createHidden(name, value, form) {
@@ -62,17 +62,20 @@ function persona_onlogin(assertion) {
   [% END %]
 }
 
-navigator.id.watch({
-  [%# we can't set loggedInUser to user.login as this causes cgi authenticated
-      sessions to be logged out by persona %]
-  loggedInUser: null,
-  onlogin: persona_onlogin,
-  onlogout: function () {
-    [%# this should be redirecting to index.cgi?logout=1 however there's a
-        persona bug which causes this to break chrome and safari logins.
-        https://github.com/mozilla/browserid/issues/2423 %]
-  }
-});
+YAHOO.util.Event.on(window, 'load', persona_init);
+function persona_init() {
+  navigator.id.watch({
+    [%# we can't set loggedInUser to user.login as this causes cgi authenticated
+        sessions to be logged out by persona %]
+    loggedInUser: null,
+    onlogin: persona_onlogin,
+    onlogout: function () {
+      [%# this should be redirecting to index.cgi?logout=1 however there's a
+          persona bug which causes this to break chrome and safari logins.
+          https://github.com/mozilla/browserid/issues/2423 %]
+    }
+  });
+}
 
 function persona_sign_in() {
   persona_ignore_login = false;

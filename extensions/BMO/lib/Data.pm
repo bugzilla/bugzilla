@@ -384,6 +384,7 @@ our %always_fileable_group = (
 # Mapping of products to their security bits
 our %product_sec_groups = (
     "addons.mozilla.org"           => 'client-services-security',
+    "Android Background Services"  => 'mozilla-services-security',
     "AUS"                          => 'client-services-security',
     "Bugzilla"                     => 'bugzilla-security',
     "bugzilla.mozilla.org"         => 'bugzilla-security',

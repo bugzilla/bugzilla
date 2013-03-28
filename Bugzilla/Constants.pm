@@ -167,6 +167,7 @@ use Memoize;
     MAX_POSSIBLE_DUPLICATES
     MAX_ATTACH_FILENAME_LENGTH
     MAX_QUIP_LENGTH
+    MAX_WEBDOT_BUGS
 
     PASSWORD_DIGEST_ALGORITHM
     PASSWORD_SALT_LENGTH
@@ -569,6 +570,9 @@ use constant MAX_ATTACH_FILENAME_LENGTH => 255;
 
 # Maximum length of a quip.
 use constant MAX_QUIP_LENGTH => 512;
+
+# Maximum number of bugs to display in a dependency graph
+use constant MAX_WEBDOT_BUGS => 2000;
 
 # This is the name of the algorithm used to hash passwords before storing
 # them in the database. This can be any string that is valid to pass to

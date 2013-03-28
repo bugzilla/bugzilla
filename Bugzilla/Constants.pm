@@ -182,6 +182,7 @@ use Memoize;
     MAX_FREETEXT_LENGTH
     MAX_BUG_URL_LENGTH
     MAX_POSSIBLE_DUPLICATES
+    MAX_WEBDOT_BUGS
 
     PASSWORD_DIGEST_ALGORITHM
     PASSWORD_SALT_LENGTH
@@ -565,6 +566,9 @@ use constant MAX_BUG_URL_LENGTH => 255;
 # The largest number of possible duplicates that Bug::possible_duplicates
 # will return.
 use constant MAX_POSSIBLE_DUPLICATES => 25;
+
+# Maximum number of bugs to display in a dependency graph
+use constant MAX_WEBDOT_BUGS => 2000;
 
 # This is the name of the algorithm used to hash passwords before storing
 # them in the database. This can be any string that is valid to pass to

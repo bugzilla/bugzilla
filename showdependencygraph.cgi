@@ -44,7 +44,7 @@ my $vars = {};
 # performance.
 my $dbh = Bugzilla->switch_to_shadow_db();
 
-local our (%seen, %edgesdone, %bugtitles);
+our (%seen, %edgesdone, %bugtitles, $bug_count);
 
 # CreateImagemap: This sub grabs a local filename as a parameter, reads the 
 # dot-generated image map datafile residing in that file and turns it into
@@ -91,6 +91,7 @@ sub AddLink {
     if (!exists $edgesdone{$key}) {
         $edgesdone{$key} = 1;
         print $fh "$dependson -> $blocked\n";
+        $bug_count++;
         $seen{$blocked} = 1;
         $seen{$dependson} = 1;
     }
@@ -123,10 +124,10 @@ chmod Bugzilla::Install::Filesystem::CGI_WRITE, $filename
 my $urlbase = Bugzilla->params->{'urlbase'};
 
 print $fh "digraph G {";
-print $fh qq{
+print $fh qq(
 graph [URL="${urlbase}query.cgi", rankdir=$rankdir]
 node [URL="${urlbase}show_bug.cgi?id=\\N", style=filled, color=lightgrey]
-};
+);
 
 my %baselist;
 
@@ -235,6 +236,11 @@ foreach my $k (keys(%seen)) {
 
 print $fh "}\n";
 close $fh;
+
+if ($bug_count > MAX_WEBDOT_BUGS) {
+    unlink($filename);
+    ThrowUserError("webdot_too_large");
+}
 
 my $webdotbase = Bugzilla->params->{'webdotbase'};
 

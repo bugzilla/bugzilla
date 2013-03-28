@@ -44,7 +44,8 @@ my $vars = {};
 # performance.
 my $dbh = Bugzilla->switch_to_shadow_db();
 
-our (%seen, %edgesdone, %bugtitles, $bug_count);
+our (%seen, %edgesdone, %bugtitles);
+our $bug_count = 0;
 
 # CreateImagemap: This sub grabs a local filename as a parameter, reads the 
 # dot-generated image map datafile residing in that file and turns it into

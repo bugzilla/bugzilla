@@ -6,6 +6,10 @@
  * defined by the Mozilla Public License, v. 2.0. 
  */
 
+if (typeof(MyDashboard) == 'undefined') {
+    var MyDashboard = {};
+}
+
 // Main query code
 YUI({
     base: 'js/yui3/',

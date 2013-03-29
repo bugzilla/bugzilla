@@ -185,7 +185,7 @@ sub query_flags {
              bugs.bug_status AS bug_status,
              bugs.short_desc AS bug_summary,
              flags.attach_id AS attach_id,
-             attachments.description AS attach_summary,
+             attachments.ispatch AS is_patch,
              requesters.login_name AS requester,
              requestees.login_name AS requestee,
              " . $dbh->sql_date_format('flags.modification_date', '%Y-%m-%d %H:%i') . " AS updated

@@ -6,6 +6,12 @@
  * defined by the Mozilla Public License, v. 2.0. 
  */
 
+if (typeof(MyDashboard) == 'undefined') {
+    var MyDashboard = {};
+}
+
+MyDashboard.splinter_base = 'page.cgi?id=splinter.html';
+
 // Flag tables
 YUI({
     base: 'js/yui3/',
@@ -92,12 +98,26 @@ YUI({
             : '<i>anyone</i>';
     };
 
+    var flagNameFormatter = function (o) {
+        if (o.data.attach_id && o.data.is_patch) {
+            return '<a href="' + MyDashboard.splinter_base +
+                   '&bug=' + encodeURIComponent(o.data.bug_id) +
+                   '&attachment=' + encodeURIComponent(o.data.attach_id) +
+                   '" title="Click flag name to go to patch review page">' +
+                   Y.Escape.html(o.value) + '</a>';
+        }
+        else {
+            return Y.Escape.html(o.value);
+        }
+    };
+
     // Requestee
     dataSource.requestee = new Y.DataSource.IO({ source: 'jsonrpc.cgi' });
     dataTable.requestee = new Y.DataTable({
         columns: [
             { key: "requester", label: "Requester", sortable: true },
-            { key: "type", label: "Flag", sortable: true },
+            { key: "type", label: "Flag", sortable: true,
+              formatter: flagNameFormatter, allowHTML: true },
             { key: "bug_id", label: "Bug", sortable: true,
               formatter: bugLinkFormatter, allowHTML: true },
             { key: "updated", label: "Updated", sortable: true,
@@ -118,8 +138,8 @@ YUI({
     dataSource.requestee.plug(Y.Plugin.DataSourceJSONSchema, {
         schema: {
             resultListLocator: "result.result.requestee",
-            resultFields: ["requester", "type", "bug_id", "bug_status",
-                           "bug_summary", "updated", "updated_fancy"]
+            resultFields: ["requester", "type", "attach_id", "is_patch", "bug_id",
+                           "bug_status", "bug_summary", "updated", "updated_fancy"]
         }
     });
 
@@ -138,7 +158,8 @@ YUI({
         columns: [
             { key:"requestee", label:"Requestee", sortable:true,
               formatter: requesteeFormatter, allowHTML: true },
-            { key:"type", label:"Flag", sortable:true },
+            { key:"type", label:"Flag", sortable:true,
+              formatter: flagNameFormatter, allowHTML: true },
             { key:"bug_id", label:"Bug", sortable:true,
               formatter: bugLinkFormatter, allowHTML: true },
             { key: "updated", label: "Updated", sortable: true,
@@ -159,8 +180,8 @@ YUI({
     dataSource.requester.plug(Y.Plugin.DataSourceJSONSchema, {
         schema: {
             resultListLocator: "result.result.requester",
-            resultFields: ["requestee", "type", "bug_id", "bug_status",
-                           "bug_summary", "updated", "updated_fancy"]
+            resultFields: ["requestee", "type", "attach_id", "is_patch", "bug_id",
+                           "bug_status", "bug_summary", "updated", "updated_fancy"]
         }
     });
 

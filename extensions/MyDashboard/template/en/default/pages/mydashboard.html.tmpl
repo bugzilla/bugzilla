@@ -67,6 +67,12 @@
   </div>
 </script>
 
+<script type="text/javascript">
+  [% IF Param('splinter_base') %]
+    MyDashboard.splinter_base = '[% Param('splinter_base') FILTER js %]';
+  [% END %]
+</script>
+
 <div id="mydashboard">
   <div class="yui3-skin-sam">
     <div id="left">

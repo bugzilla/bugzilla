@@ -751,8 +751,8 @@ sub field_end_of_create {
     push @message, 'Please run the following on bugzilla1.db.scl3.mozilla.com:';
     push @message, "  GRANT SELECT ON `bugs`.`$name` TO 'metrics'\@'10.22.70.20_';";
     push @message, "  GRANT SELECT ($name) ON `bugs`.`bugs` TO 'metrics'\@'10.22.70.20_';";
-    push @message, "  GRANT SELECT ON `bugs`.`$name` TO 'metrics'\@'10.22.70.20_';";
-    push @message, "  GRANT SELECT ($name) ON `bugs`.`bugs` TO 'metrics'\@'10.22.70.20_';";
+    push @message, "  GRANT SELECT ON `bugs`.`$name` TO 'metrics'\@'10.22.70.21_';";
+    push @message, "  GRANT SELECT ($name) ON `bugs`.`bugs` TO 'metrics'\@'10.22.70.21_';";
     push @message, '';
     MessageToMTA(join("\n", @message));
 }

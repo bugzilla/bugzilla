@@ -291,6 +291,8 @@ our $cf_disabled_flags = [
     'cf_status_seamonkey214',
     'cf_tracking_esr10',
     'cf_status_esr10',
+    'cf_tracking_thunderbird_esr10',
+    'cf_status_thunderbird_esr10',
     'cf_blocking_kilimanjaro',
     'cf_tracking_firefox18',
     'cf_status_firefox18',

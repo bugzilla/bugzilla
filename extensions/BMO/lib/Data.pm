@@ -400,6 +400,7 @@ our %product_sec_groups = (
     "Developer Documentation"      => 'websites-security',
     "Finance"                      => 'finance',
     "Input"                        => 'websites-security',
+    "Internet Public Policy"       => 'mozilla-corporation-confidential',
     "L20n"                         => 'l20n-security',
     "Legal"                        => 'legal',
     "Marketing"                    => 'marketing-private',

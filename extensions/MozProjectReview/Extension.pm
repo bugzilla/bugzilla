@@ -14,6 +14,7 @@ use Bugzilla::User;
 use Bugzilla::Group;
 use Bugzilla::Error;
 use Bugzilla::Constants;
+use Bugzilla::FlagType;
 
 our $VERSION = '0.01';
 
@@ -101,15 +102,30 @@ sub post_bug_after_creation {
             component    => 'Security Assurance: Review Request',
             bug_severity => 'normal',
             groups       => [ 'mozilla-corporation-confidential' ],
-            keywords     => 'sec-review-needed',
             op_sys       => 'All',
             rep_platform => 'All',
             version      => 'other',
             blocked      => $bug->bug_id,
         };
-        _file_child_bug({ parent_bug => $bug, template_vars => $vars,
-                          template_suffix => 'sec-review', bug_data => $bug_data,
-                          dep_comment => \@dep_bug_comment, dep_errors => \@dep_bug_errors });
+        my $new_bug = _file_child_bug({ parent_bug => $bug, template_vars => $vars,
+                                        template_suffix => 'sec-review', bug_data => $bug_data,
+                                        dep_comment => \@dep_bug_comment, dep_errors => \@dep_bug_errors });
+        # For sec-review bugs, we need to set the sec-review?
+        # flag as well so we do that now.
+        if ($new_bug) {
+            my $flagtypes = Bugzilla::FlagType::match({ product_id   => $new_bug->product_obj->id,
+                                                        component_id => $new_bug->component_obj->id,
+                                                        name         => 'sec-review' });
+            if (scalar @$flagtypes) {
+                my $sec_review_flag = $flagtypes->[0];
+                my $new_flags = [{
+                    type_id => $sec_review_flag->id,
+                    status  => '?'
+                }];
+                $new_bug->set_flags([], $new_flags);
+                $new_bug->update();
+            }
+        }
     }
 
     if ($do_legal) {
@@ -283,6 +299,7 @@ sub _file_child_bug {
     else {
         push(@$dep_comment, "Bug " . $new_bug->id . " - " . $new_bug->short_desc);
     }
+    return $new_bug;
 }
 
 __PACKAGE__->NAME;

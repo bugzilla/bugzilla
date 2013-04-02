@@ -399,6 +399,7 @@ our %product_sec_groups = (
     "Community Tools"              => 'websites-security',
     "Developer Documentation"      => 'websites-security',
     "Finance"                      => 'finance',
+    "Firefox Health Report"        => 'mozilla-services-security',
     "Input"                        => 'websites-security',
     "Internet Public Policy"       => 'mozilla-corporation-confidential',
     "L20n"                         => 'l20n-security',

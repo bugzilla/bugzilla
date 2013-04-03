@@ -47,18 +47,8 @@ var products = {
       ' <b>Firefox Help</b></a> instead of creating a bug.'
   },
 
-  "Fennec": {
-    related: [ "Firefox for Android", "Core", "Toolkit" ],
-    detectPlatform: true,
-    support:
-      'If you are new to Firefox or Bugzilla, please consider checking ' +
-      '<a href="http://support.mozilla.com/">' +
-      '<img src="extensions/GuidedBugEntry/web/images/sumo.png" width="16" height="16" align="absmiddle">' +
-      ' <b>Firefox Help</b></a> instead of creating a bug.'
-  },
-
   "Firefox for Android": {
-    related: [ "Fennec", "Core", "Toolkit" ],
+    related: [ "Core", "Toolkit" ],
     detectPlatform: true,
     support:
       'If you are new to Firefox or Bugzilla, please consider checking ' +

@@ -87,8 +87,8 @@ sub run_flag_query {
                             { function => 'MyDashboard.run_flag_query',
                               param    => 'type' });
 
-    my $include_resolved = $params->{include_resolved} || 0;
-    my $results = query_flags($type, $include_resolved);
+    my $include_closed = $params->{include_closed} || 0;
+    my $results = query_flags($type, $include_closed);
 
     return { result => { $type => $results }};
 }

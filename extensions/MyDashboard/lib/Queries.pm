@@ -13,6 +13,8 @@ use Bugzilla;
 use Bugzilla::Bug;
 use Bugzilla::CGI;
 use Bugzilla::Search;
+use Bugzilla::Flag;
+use Bugzilla::Status qw(is_open_state);
 use Bugzilla::Util qw(format_time datetime_from);
 
 use Bugzilla::Extension::MyDashboard::Util qw(open_states quoted_open_states);
@@ -162,7 +164,7 @@ sub query_bugs {
 }
 
 sub query_flags {
-    my ($type, $include_resolved) = @_;
+    my ($type, $include_closed) = @_;
     my $user     = Bugzilla->user;
     my $dbh      = Bugzilla->dbh;
     my $date_now = DateTime->now(time_zone => $user->timezone);
@@ -170,87 +172,88 @@ sub query_flags {
     ($type ne 'requestee' || $type ne 'requester')
         || ThrowCodeError('param_required', { param => 'type' });
 
-    my $attach_join_clause = "flags.attach_id = attachments.attach_id";
-    if (Bugzilla->params->{insidergroup} && !$user->in_group(Bugzilla->params->{insidergroup})) {
-        $attach_join_clause .= " AND attachments.isprivate < 1";
-    }
+    my $match_params = { status => '?' };
 
-    my $query =
-    # Select columns describing each flag, the bug/attachment on which
-    # it has been set, who set it, and of whom they are requesting it.
-    " SELECT flags.id AS id,
-             flagtypes.name AS type,
-             flags.status AS status,
-             flags.bug_id AS bug_id,
-             bugs.bug_status AS bug_status,
-             bugs.short_desc AS bug_summary,
-             flags.attach_id AS attach_id,
-             attachments.ispatch AS is_patch,
-             requesters.login_name AS requester,
-             requestees.login_name AS requestee,
-             " . $dbh->sql_date_format('flags.modification_date', '%Y-%m-%d %H:%i') . " AS updated
-        FROM flags 
-             LEFT JOIN attachments
-                  ON ($attach_join_clause)
-             INNER JOIN flagtypes
-                  ON flags.type_id = flagtypes.id
-             INNER JOIN bugs
-                  ON flags.bug_id = bugs.bug_id
-             LEFT JOIN profiles AS requesters
-                  ON flags.setter_id = requesters.userid
-             LEFT JOIN profiles AS requestees
-                  ON flags.requestee_id  = requestees.userid
-             LEFT JOIN bug_group_map AS bgmap
-                  ON bgmap.bug_id = bugs.bug_id
-             LEFT JOIN cc AS ccmap
-                  ON ccmap.who = " . $user->id . "
-                  AND ccmap.bug_id = bugs.bug_id ";
-
-    # Limit query to pending requests and open bugs only
-    $query .= " WHERE flags.status = '?' ";
-
-    # Limit to open bugs only unless want to include resolved
-    if (!$include_resolved) {
-        $query .= " AND bugs.bug_status IN (" . join(',', quoted_open_states()) . ") ";
-    }
-
-    # Weed out bug the user does not have access to
-    $query .= " AND ((bgmap.group_id IS NULL)
-                     OR bgmap.group_id IN (" . $user->groups_as_string . ")
-                     OR (ccmap.who IS NOT NULL AND cclist_accessible = 1) 
-                     OR (bugs.reporter = " . $user->id . " AND bugs.reporter_accessible = 1)
-                     OR (bugs.assigned_to = " . $user->id .") ";
-    if (Bugzilla->params->{useqacontact}) {
-        $query .= " OR (bugs.qa_contact = " . $user->id . ") ";
-    }
-    $query .= ") ";
-
-    # Order the records (within each group).
-    my $group_order_by = " GROUP BY flags.bug_id ORDER BY flags.modification_date, flagtypes.name";
-
-    my $flags = [];
     if ($type eq 'requestee') {
-        $flags = $dbh->selectall_arrayref($query .
-                                          " AND requestees.login_name = ? " .
-                                          $group_order_by,
-                                          { Slice => {} }, $user->login);
+        $match_params->{'requestee_id'} = $user->id;
+    }
+    else {
+        $match_params->{'setter_id'} = $user->id;
     }
 
-    if ($type eq 'requester') {
-        $flags = $dbh->selectall_arrayref($query .
-                                          " AND requesters.login_name = ? " .
-                                          $group_order_by,
-                                          { Slice => {} }, $user->login);
+    my $matched = Bugzilla::Flag->match($match_params);
+
+    return [] if !@$matched;
+
+    my @unfiltered_flags;
+    my %all_bugs; # Use hash to filter out duplicates
+    foreach my $flag (@$matched) {
+        next if ($flag->attach_id && $flag->attachment->isprivate && !$user->is_insider);
+
+        my $data = {
+            id          => $flag->id,
+            type        => $flag->type->name,
+            status      => $flag->status,
+            attach_id   => $flag->attach_id,
+            is_patch    => $flag->attach_id ? $flag->attachment->ispatch : 0,
+            bug_id      => $flag->bug_id,
+            requester   => $flag->setter->login,
+            requestee   => $flag->requestee ? $flag->requestee->login : '',
+            updated     => $flag->modification_date,
+        };
+        push(@unfiltered_flags, $data);
+
+        # Record bug id for later retrieval of status/summary
+        $all_bugs{$flag->{'bug_id'}}++;
     }
 
-    # Format the updated date specific to the user's timezone and add the fancy version
-    foreach my $flag (@$flags) {
+    # Filter the bug list based on permission to see the bug
+    my %visible_bugs = map { $_ => 1 } @{ $user->visible_bugs([ keys %all_bugs ]) };
+
+    return [] if !scalar keys %visible_bugs;
+
+    # Get all bug statuses and summaries in one query instead of loading
+    # many separate bug objects
+    my $bug_rows = $dbh->selectall_arrayref("SELECT bug_id, bug_status, short_desc
+                                               FROM bugs
+                                              WHERE " . $dbh->sql_in('bug_id', [ keys %visible_bugs ]),
+                                            { Slice => {} });
+    foreach my $row (@$bug_rows) {
+        $visible_bugs{$row->{'bug_id'}} = {
+            bug_status => $row->{'bug_status'},
+            short_desc => $row->{'short_desc'}
+        };
+    }
+
+    # Now drop out any flags for bugs the user cannot see
+    # or if the user did not want to see closed bugs
+    my @filtered_flags;
+    foreach my $flag (@unfiltered_flags) {
+        # Skip this flag if the bug is not visible to the user
+        next if !$visible_bugs{$flag->{'bug_id'}};
+
+        # Skip closed unless user requested closed bugs
+        next if (!$include_closed
+                 && !is_open_state($visible_bugs{$flag->{'bug_id'}}->{'bug_status'}));
+
+        # Include bug status and summary with each flag
+        $flag->{'bug_status'}  = $visible_bugs{$flag->{'bug_id'}}->{'bug_status'};
+        $flag->{'bug_summary'} = $visible_bugs{$flag->{'bug_id'}}->{'short_desc'};
+
+        # Format the updated date specific to the user's timezone
+        # and add the fancy human readable version
         $flag->{'updated'} = format_time($flag->{'updated'});
         my $date_then = datetime_from($flag->{'updated'});
+        $flag->{'updated_epoch'} = $date_then->epoch;
         $flag->{'updated_fancy'} = time_ago($date_then, $date_now);
+
+        push(@filtered_flags, $flag);
     }
 
-    return $flags;
+    return [] if !@filtered_flags;
+
+    # Sort by most recently updated
+    return [ sort { $b->{'updated_epoch'} <=> $a->{'updated_epoch'} } @filtered_flags ];
 }
 
 1;

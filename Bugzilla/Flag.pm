@@ -229,7 +229,7 @@ sub bug {
     my $self = shift;
 
     require Bugzilla::Bug;
-    $self->{'bug'} ||= new Bugzilla::Bug($self->bug_id);
+    $self->{'bug'} ||= new Bugzilla::Bug({ id => $self->bug_id, cache => 1 });
     return $self->{'bug'};
 }
 

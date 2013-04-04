@@ -34,14 +34,14 @@ use Getopt::Long;
 
 my $dbh = Bugzilla->dbh;
 
-# This SQL is designed to sanitize a copy of a Bugzilla database so that it 
+# This SQL is designed to sanitize a copy of a Bugzilla database so that it
 # doesn't contain any information that can't be viewed from a web browser by
-# a user who is not logged in.                                              
+# a user who is not logged in.
 
 # Last validated against Bugzilla version 4.0
 
 my ($dry_run, $from_cron, $keep_attachments, $keep_groups,
-    $keep_passwords, $keep_insider, $trace) = (0, 0, 0, '', 0, 0, 0);
+    $keep_passwords, $keep_insider, $trace, $enable_email) = (0, 0, 0, '', 0, 0, 0, 0);
 my $keep_groups_sql = '';
 
 GetOptions(
@@ -52,6 +52,7 @@ GetOptions(
     "keep-insider" => \$keep_insider,
     "keep-groups:s" => \$keep_groups,
     "trace" => \$trace,
+    "enable-email" => \$enable_email,
 ) or exit;
 
 if ($keep_groups ne '') {
@@ -82,6 +83,7 @@ eval {
     delete_security_groups();
     delete_sensitive_user_data();
     delete_attachment_data() unless $keep_attachments;
+    disable_email_delivery() unless $enable_email;
     print "All done!\n";
     $dbh->bz_rollback_transaction() if $dry_run;
 };
@@ -182,3 +184,12 @@ sub delete_attachment_data {
     $dbh->do("UPDATE attach_data SET thedata = ''");
 }
 
+sub disable_email_delivery {
+    # turn off email delivery for all users.
+    print "Turning off email delivery...\n";
+    $dbh->do("UPDATE profiles SET disable_mail = 1");
+
+    # Also clear out the default flag cc as well since they do not
+    # have to be in the profiles table
+    $dbh->do("UPDATE flagtypes SET cc_list = NULL");
+}

@@ -6,12 +6,6 @@
  * defined by the Mozilla Public License, v. 2.0. 
  */
 
-if (typeof(MyDashboard) == 'undefined') {
-    var MyDashboard = {};
-}
-
-MyDashboard.splinter_base = 'page.cgi?id=splinter.html';
-
 // Flag tables
 YUI({
     base: 'js/yui3/',
@@ -99,11 +93,12 @@ YUI({
     };
 
     var flagNameFormatter = function (o) {
-        if (o.data.attach_id && o.data.is_patch) {
+        if (o.data.attach_id && o.data.is_patch && MyDashboard.splinter_base) {
             return '<a href="' + MyDashboard.splinter_base +
-                   '&bug=' + encodeURIComponent(o.data.bug_id) +
+                   (MyDashboard.splinter_base.indexOf('?') == -1 ? '?' : '&') +
+                   'bug=' + encodeURIComponent(o.data.bug_id) +
                    '&attachment=' + encodeURIComponent(o.data.attach_id) +
-                   '" title="Click flag name to go to patch review page">' +
+                   '" title="Review this patch">' +
                    Y.Escape.html(o.value) + '</a>';
         }
         else {

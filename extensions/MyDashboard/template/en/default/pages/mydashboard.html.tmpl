@@ -69,7 +69,7 @@
 
 <script type="text/javascript">
   [% IF Param('splinter_base') %]
-    MyDashboard.splinter_base = '[% Param('splinter_base') FILTER js %]';
+    MyDashboard.splinter_base = '[% Bugzilla.splinter_review_base FILTER js %]';
   [% END %]
 </script>
 

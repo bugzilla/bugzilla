@@ -331,7 +331,7 @@ sub SaveEmail {
     map { $ignored_bugs{$_} = 1 } @add_ignored;
 
     # Remove any bug ids the user no longer wants to ignore
-    foreach my $key (grep(/^remove_ignored_bug_/, $cgi->params)) {
+    foreach my $key (grep(/^remove_ignored_bug_/, $cgi->param)) {
         my ($bug_id) = $key =~ /(\d+)$/;
         delete $ignored_bugs{$bug_id};
     }

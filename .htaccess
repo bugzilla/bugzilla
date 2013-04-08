@@ -54,3 +54,4 @@ RewriteRule ^form[\.:]moz[\.\-:]project[\.\-:]review$ enter_bug.cgi?product=mozi
 RewriteRule ^form[\.:]docs?$ enter_bug.cgi?product=Developer+Documentation&format=doc [QSA]
 RewriteRule ^form[\.:]mdn?$ enter_bug.cgi?product=Mozilla+Developer+Network&format=mdn
 RewriteRule ^form[\.:](swag|gear)$ enter_bug.cgi?product=mozilla.org&format=swag
+RewriteRule ^form[\.:]ipp$ enter_bug.cgi?product=Internet+Public+Policy&format=ipp

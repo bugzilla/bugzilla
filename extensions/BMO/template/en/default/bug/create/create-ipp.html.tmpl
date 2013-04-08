@@ -1,0 +1,163 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% PROCESS global/variables.none.tmpl %]
+
+[% inline_style = BLOCK %]
+#ipp_form th {
+  text-align: right;
+}
+
+#ipp_form input[type="text"], #ipp_form textarea {
+  width: 100%;
+}
+
+#ipp_form textarea {
+  font-family: inherit;
+  font-size: inherit;
+}
+[% END %]
+
+[% inline_javascript = BLOCK %]
+function validateAndSubmit() {
+  var alert_text = '';
+  if (!isFilledOut('component')) alert_text += 'Please select the "Area".\n';
+  if (!isFilledOut('short_desc')) alert_text += 'Please enter a "Summary".\n';
+  if (!isFilledOut('region')) alert_text += 'Please enter the "Region/Country".\n';
+  if (!isFilledOut('desc')) alert_text += 'Please provide a "Description".\n';
+  if (!isFilledOut('relevance')) alert_text += 'Please provide some "Relevance".\n';
+  if (!isFilledOut('goal')) alert_text += 'Please enter the "Goal".\n';
+  if (!isFilledOut('when')) alert_text += 'Please enter data for the "When" field.\n';
+  if (alert_text != '') {
+    alert(alert_text);
+    return false;
+  }
+  return true;
+}
+[% END %]
+
+[% PROCESS global/header.html.tmpl
+   title = "Internet Public Policy Issue"
+   style = inline_style
+   javascript = inline_javascript
+   javascript_urls = [ 'extensions/BMO/web/js/form_validate.js',
+                       'js/field.js', 'js/util.js', 'js/bug.js' ]
+%]
+
+[% USE Bugzilla %]
+[% cgi = Bugzilla.cgi %]
+
+<h1>Internet Public Policy Issue</h1>
+
+<form method="post" action="post_bug.cgi" enctype="multipart/form-data"
+      onSubmit="return validateAndSubmit();">
+  <input type="hidden" name="format" value="ipp">
+  <input type="hidden" name="product" value="Internet Public Policy">
+  <input type="hidden" name="rep_platform" value="All">
+  <input type="hidden" name="op_sys" value="Other">
+  <input type="hidden" name="version" value="unspecified">
+  <input type="hidden" name="bug_severity" id="bug_severity" value="normal">
+  <input type="hidden" name="token" value="[% token FILTER html %]">
+
+<table id="ipp_form">
+
+<tr>
+  <th class="required">Area</th>
+  <td>
+    <select name="component" id="component">
+      <option value="">Please select..</option>
+      [% FOREACH component = product.components %]
+        <option value="[% component.name FILTER html %]">
+          [% component.name FILTER html %]
+        </option>
+      [% END %]
+    </select>
+  </td>
+</tr>
+
+<tr>
+  <th class="required">Summary</th>
+  <td>
+    <input type="text" name="short_desc" id="short_desc" size="60"
+      placeholder="(Describe issue in one sentence)">
+  </td>
+</tr>
+
+<tr>
+  <th class="required">Region/Country</th>
+  <td>
+    <input type="text" name="region" id="region" size="60">
+  </td>
+</tr>
+
+<tr>
+  <th class="required">Description</th>
+  <td>
+    <textarea id="desc" name="desc" cols="50" rows="5"
+      placeholder="(Explain the legislative or policy activity which is happening)"></textarea>
+  </td>
+</tr>
+
+<tr>
+  <th class="required">Relevance</th>
+  <td>
+    <textarea id="relevance" name="relevance" cols="50" rows="5"
+      placeholder="(Why should Mozilla care? What’s the impact on the open internet?)"></textarea>
+  </td>
+</tr>
+
+<tr>
+  <th class="required">Goal</th>
+  <td>
+    <input type="text" name="goal" id="goal" size="60"
+      placeholder="(What would success look like for Mozilla?)">
+  </td>
+</tr>
+
+<tr>
+  <th class="required">When</th>
+  <td>
+    <input type="text" name="when" id="when" size="60"
+      placeholder="(Describe the timeline or due date)">
+  </td>
+</tr>
+
+<tr>
+  <th class="required">Urgency</th>
+  <td>
+    <select name="priority" id="priority">
+      <option value="P1">Urgent</option>
+      <option value="P3">Needs Attention Soon</option>
+      <option value="P5" selected>When You Get To It</option>
+    </select>
+  </td>
+</tr>
+
+<tr>
+  <th>Additional Information</th>
+  <td>
+    <textarea id="additional" name="additional" cols="50" rows="5"
+      placeholder="(Please supply links to relevant articles/websites/organizations)"></textarea>
+  </td>
+</tr>
+
+<tr>
+  <td>&nbsp;</td>
+</tr>
+
+<tr>
+  <td>&nbsp;</td>
+  <td><input type="submit" id="commit" value="Submit Issue"></td>
+</tr>
+
+</table>
+</form>
+
+[ <span class="required_star">*</span> <span class="required_explanation">Required Field</span> ]
+
+[% PROCESS global/footer.html.tmpl %]

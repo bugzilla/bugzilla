@@ -45,7 +45,10 @@
 function SetCheckboxes(setting) {
   for (var count = 0; count < document.userprefsform.elements.length; count++) {
     var theinput = document.userprefsform.elements[count];
-    if (theinput.type == "checkbox" && !theinput.disabled) {
+    if (theinput.type == "checkbox"
+        && !theinput.disabled
+        && !theinput.name.match("remove_ignored_bug"))
+    {
       if (theinput.name.match("neg")) {
         theinput.checked = !setting;
       }
@@ -285,6 +288,40 @@ You are currently not watching any users.
   [% END %]
 </p>
 
-<hr>
+<b>Ignore [% terms.Bugs %]</b>
 
-<br>
+<p>
+  You can specify a list of [% terms.bugs %] from which you never want to get
+  any email notification of any kind by adding their ID(s) as a comma-separated
+  list. Removing [% terms.abug %] by selecting it from the current ignored list 
+  will re-enable email notifications for the [% terms.bug %].
+</p>
+[% IF user.bugs_ignored.size %]
+  <p>
+    You are currently ignoring:
+    <table>
+    [% FOREACH bug = user.bugs_ignored %]
+      <tr>
+        <td>
+          <input type="checkbox" name="remove_ignored_bug_[% bug.id FILTER html %]" value="1">
+        </td>
+        <td><a href="[% urlbase FILTER html %]show_bug.cgi?id=[% bug.id FILTER uri %]">
+          [% bug.id FILTER html %]</a>
+        </td>
+        <td>[% bug.status FILTER html %]</td>
+        <td>
+          [% IF user.can_see_bug(bug.id) %]
+            - [% bug.summary FILTER html %]
+          [% ELSE %]
+            (private)
+          [% END %]
+        </td>
+      </tr>
+    [% END %]
+    </table>
+  </p>
+[% END %]
+
+<p>Add [% terms.bugs %]:<br>
+  <input type="text" id="add_ignored_bugs" 
+         name="add_ignored_bugs" size="60"></p>

@@ -945,6 +945,23 @@ use constant ABSTRACT_SCHEMA => {
         ],
     },
 
+    email_bug_ignore => {
+        FIELDS => [
+            user_id => {TYPE => 'INT3', NOTNULL => 1,
+                        REFERENCES => {TABLE  => 'profiles',
+                                       COLUMN => 'userid',
+                                       DELETE => 'CASCADE'}},
+            bug_id  => {TYPE => 'INT3', NOTNULL => 1,
+                        REFERENCES => {TABLE  => 'bugs',
+                                       COLUMN => 'bug_id',
+                                       DELETE => 'CASCADE'}},
+        ],
+        INDEXES => [
+            email_bug_ignore_user_id_idx => {FIELDS => [qw(user_id bug_id)],
+                                             TYPE   => 'UNIQUE'},
+        ],
+    },
+
     watch => {
         FIELDS => [
             watcher => {TYPE => 'INT3', NOTNULL => 1,

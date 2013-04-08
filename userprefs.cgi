@@ -318,6 +318,47 @@ sub SaveEmail {
 
         $dbh->bz_commit_transaction();
     }
+
+    ###########################################################################
+    # Ignore Bugs
+    ###########################################################################
+    my %ignored_bugs = map { $_->{'id'} => 1 } @{$user->bugs_ignored};
+
+    # Validate the new bugs to ignore by checking that they exist and also
+    # if the user gave an alias
+    my @add_ignored = split(/[\s,]+/, $cgi->param('add_ignored_bugs'));
+    @add_ignored = map { Bugzilla::Bug->check($_)->id } @add_ignored;
+    map { $ignored_bugs{$_} = 1 } @add_ignored;
+
+    # Remove any bug ids the user no longer wants to ignore
+    foreach my $key (grep(/^remove_ignored_bug_/, $cgi->params)) {
+        my ($bug_id) = $key =~ /(\d+)$/;
+        delete $ignored_bugs{$bug_id};
+    }
+
+    # Update the database with any changes made
+    my ($removed, $added) = diff_arrays([ map { $_->{'id'} } @{$user->bugs_ignored} ],
+                                        [ keys %ignored_bugs ]);
+
+    if (scalar @$removed || scalar @$added) {
+        $dbh->bz_start_transaction();
+
+        if (scalar @$removed) {
+            $dbh->do('DELETE FROM email_bug_ignore WHERE user_id = ? AND ' . 
+                     $dbh->sql_in('bug_id', $removed),
+                     undef, $user->id);
+        }
+        if (scalar @$added) {
+            my $sth = $dbh->prepare('INSERT INTO email_bug_ignore
+                                     (user_id, bug_id) VALUES (?, ?)');
+            $sth->execute($user->id, $_) foreach @$added;
+        }
+
+        # Reset the cache of ignored bugs if the list changed.
+        delete $user->{bugs_ignored};
+
+        $dbh->bz_commit_transaction();
+    }
 }
 
 
@@ -325,9 +366,9 @@ sub DoPermissions {
     my $dbh = Bugzilla->dbh;
     my $user = Bugzilla->user;
     my (@has_bits, @set_bits);
-    
+
     my $groups = $dbh->selectall_arrayref(
-               "SELECT DISTINCT name, description FROM groups WHERE id IN (" . 
+               "SELECT DISTINCT name, description FROM groups WHERE id IN (" .
                $user->groups_as_string . ") ORDER BY name");
     foreach my $group (@$groups) {
         my ($nam, $desc) = @$group;

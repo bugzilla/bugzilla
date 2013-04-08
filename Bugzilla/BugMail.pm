@@ -212,6 +212,13 @@ sub Send {
         # Deleted users must be excluded.
         next unless $user;
 
+        # If email notifications are disabled for this account, or the bug
+        # is ignored, there is no need to do additional checks.
+        if ($user->email_disabled || $user->is_bug_ignored($id)) {
+            push(@excluded, $user->login);
+            next;
+        }
+
         if ($user->can_see_bug($id)) {
             # Go through each role the user has and see if they want mail in
             # that role.
@@ -228,7 +235,7 @@ sub Send {
                 }
             }
         }
-        
+
         if (scalar(%rels_which_want)) {
             # So the user exists, can see the bug, and wants mail in at least
             # one role. But do we want to send it to them?
@@ -241,9 +248,8 @@ sub Send {
                 $dep_ok = $user->can_see_bug($params->{blocker}->id) ? 1 : 0;
             }
 
-            # Make sure the user isn't in the nomail list, and the dep check passed.
-            if ($user->email_enabled && $dep_ok) {
-                # OK, OK, if we must. Email the user.
+            # Email the user if the dep check passed.
+            if ($dep_ok) {
                 $sent_mail = sendMail(
                     { to       => $user, 
                       bug      => $bug,

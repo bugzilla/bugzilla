@@ -92,19 +92,21 @@
         <table cellpadding="3" cellspacing="1">
         [%# *** Reported and modified dates *** %]
          [% PROCESS section_dates %]
-         
+
          [% PROCESS section_cclist %]
-         
+
+         [% PROCESS section_bug_ignored %]
+
          [% PROCESS section_spacer %]
 
          [% PROCESS section_see_also %] 
-         
+
          [% PROCESS section_customfields %]
-         
+
          [% PROCESS section_spacer %]
-         
+
          [% Hook.process("after_custom_fields") %]
-                
+
          [% PROCESS section_flags %]
 
         </table>
@@ -816,6 +818,26 @@
         [% END %]
       </td>
     </tr>
+[% END %]
+
+[%############################################################################%]
+[%# Block for Bug Ignored                                                    #%]
+[%############################################################################%]
+[% BLOCK section_bug_ignored %]
+  [% IF user.id %]
+    <tr>
+      <th class="field_label">
+        <label for="bug_ignored" title="Ignore all email for this [% terms.bug %]">
+          Ignore [% terms.Bug %] Mail:
+        </label>
+      </th>
+      <td>
+        <input type="hidden" name="defined_bug_ignored" value="1">
+        <input type="checkbox" name="bug_ignored" id="bug_ignored" value="1"
+               [% ' checked="checked"' IF user.is_bug_ignored(bug.id) %]>
+      </td>
+    </tr>
+  [% END %]
 [% END %]
 
 [%############################################################################%]

@@ -212,9 +212,9 @@ my @set_fields = qw(op_sys rep_platform priority bug_severity
                     bug_file_loc status_whiteboard short_desc
                     deadline remaining_time estimated_time
                     work_time set_default_assignee set_default_qa_contact
-                    cclist_accessible reporter_accessible 
+                    cclist_accessible reporter_accessible
                     product confirm_product_change
-                    bug_status resolution dup_id);
+                    bug_status resolution dup_id bug_ignored);
 push(@set_fields, 'assigned_to') if !$cgi->param('set_default_assignee');
 push(@set_fields, 'qa_contact')  if !$cgi->param('set_default_qa_contact');
 my %field_translation = (

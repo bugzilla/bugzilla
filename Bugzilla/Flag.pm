@@ -997,6 +997,9 @@ sub notify {
     }
 
     foreach my $to (keys %recipients) {
+        # Skip sending if user is ignoring the bug.
+        next if ($recipients{$to} && $recipients{$to}->is_bug_ignored($bug->id));
+
         # Add threadingmarker to allow flag notification emails to be the
         # threaded similar to normal bug change emails.
         my $thread_user_id = $recipients{$to} ? $recipients{$to}->id : 0;

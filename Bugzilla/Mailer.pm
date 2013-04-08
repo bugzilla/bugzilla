@@ -136,8 +136,6 @@ sub MessageToMTA {
     Bugzilla::Hook::process('mailer_before_send', 
                             { email => $email, mailer_args => \@args });
 
-    return if $email->header('to') eq '';
-
     $email->walk_parts(sub {
         my ($part) = @_;
         return if $part->parts > 1; # Top-level

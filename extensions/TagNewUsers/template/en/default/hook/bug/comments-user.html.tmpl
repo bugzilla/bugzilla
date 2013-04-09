@@ -6,10 +6,9 @@
   # defined by the Mozilla Public License, v. 2.0.
   #%]
 
+[% RETURN UNLESS user.in_group('canconfirm') %]
 [% IF comment.author.is_new %]
-<span
-  class="new_user"
-  title="
+<span class="new_user" title="
 [%- comment.author.comment_count FILTER html %] comment[% "s" IF comment.author.comment_count != 1 -%]
 , created [%
 IF comment.author.creation_age == 0 %]today[%

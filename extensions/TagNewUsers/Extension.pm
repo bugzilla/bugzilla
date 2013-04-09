@@ -20,12 +20,6 @@ use constant PROFILE_AGE => 60;
 # users with fewer comments than COMMENT_COUNT will be tagged as new
 use constant COMMENT_COUNT => 25;
 
-# users to always treat as not-new
-# note: users in this list won't have their comment_count field updated
-use constant NEVER_NEW => (
-    'tbplbot@gmail.com',    # the TinderBoxPushLog robot is very frequent commenter
-);
-
 our $VERSION = '1';
 
 #
@@ -118,11 +112,6 @@ sub install_update_db {
 # objects
 #
 
-BEGIN {
-    *Bugzilla::User::update_comment_count = \&_update_comment_count;
-    *Bugzilla::User::first_patch_bug_id = \&_first_patch_bug_id;
-}
-
 sub object_columns {
     my ($self, $args) = @_;
     my ($class, $columns) = @$args{qw(class columns)};
@@ -145,20 +134,22 @@ sub object_before_create {
     }
 }
 
-sub bug_end_of_create {
-    Bugzilla->user->update_comment_count();
-}
+#
+# Bugzilla::User methods
+#
 
-sub bug_end_of_update {
-    Bugzilla->user->update_comment_count();
+BEGIN {
+    *Bugzilla::User::update_comment_count = \&_update_comment_count;
+    *Bugzilla::User::first_patch_bug_id = \&_first_patch_bug_id;
+    *Bugzilla::User::is_new = \&_is_new;
 }
 
 sub _update_comment_count {
     my $self = shift;
     my $dbh = Bugzilla->dbh;
 
-    my $login = $self->login;
-    return if grep { $_ eq $login } NEVER_NEW;
+    # no need to update this counter for users which are no longer new
+    return unless $self->is_new;
 
     my $id = $self->id;
     my ($count) = $dbh->selectrow_array(
@@ -184,9 +175,32 @@ sub _first_patch_bug_id {
     $self->{first_patch_bug_id} = $bug_id;
 }
 
+sub _is_new {
+    my ($self) = @_;
+
+    if (!exists $self->{is_new}) {
+        if ($self->in_group('canconfirm')) {
+            $self->{is_new} = 0;
+        } else {
+            $self->{is_new} = ($self->{comment_count} <= COMMENT_COUNT)
+                              || ($self->{creation_age} <= PROFILE_AGE);
+        }
+    }
+
+    return $self->{is_new};
+}
+
 #
+# hooks
 #
-#
+
+sub bug_end_of_create {
+    Bugzilla->user->update_comment_count();
+}
+
+sub bug_end_of_update {
+    Bugzilla->user->update_comment_count();
+}
 
 sub template_before_process {
     my ($self, $args) = @_;
@@ -198,28 +212,12 @@ sub template_before_process {
 
         # calculate if each user that has commented on the bug is new
         foreach my $comment (@{$vars->{bug}{comments}}) {
+            # store the age in days, for the 'new to bugzilla' tooltip
             my $user = $comment->author;
-            $user->{is_new} = $self->_user_is_new($user);
+            my $age = sprintf("%.0f", (time() - str2time($user->{creation_ts})) / 86400);
+            $user->{creation_age} = $age;
         }
     }
-}
-
-sub _user_is_new {
-    my ($self, $user) = (shift, shift);
-
-    my $login = $user->login;
-    return 0 if grep { $_ eq $login} NEVER_NEW;
-
-    # if the user can confirm bugs, they are no longer new
-    return 0 if $user->in_group('canconfirm');
-
-    # store the age in days, for the 'new to bugzilla' tooltip
-    my $age = sprintf("%.0f", (time() - str2time($user->{creation_ts})) / 86400);
-    $user->{creation_age} = $age;
-
-    return
-        ($user->{comment_count} <= COMMENT_COUNT)
-        || ($user->{creation_age} <= PROFILE_AGE);
 }
 
 sub mailer_before_send {
@@ -253,8 +251,7 @@ sub webservice_user_get {
         my $email = blessed $user->{'email'} ? $user->{'email'}->value : $user->{'email'};
         if ($email) {
             my $user_obj = Bugzilla::User->new({ name => $email });
-            $user->{'is_new'}
-                = $webservice->type('boolean', $self->_user_is_new($user_obj) ? 1 : 0);
+            $user->{'is_new'} = $webservice->type('boolean', $user_obj->is_new ? 1 : 0);
         }
     }
 }

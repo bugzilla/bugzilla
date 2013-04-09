@@ -6,6 +6,4 @@
   # defined by the Mozilla Public License, v. 2.0.
   #%]
 
-<link
- href="[% 'extensions/TagNewUsers/web/style.css' FILTER mtime FILTER html %]"
- rel="stylesheet" type="text/css" >
+[% style_urls.push('extensions/TagNewUsers/web/style.css') IF user.in_group('canconfirm') %]

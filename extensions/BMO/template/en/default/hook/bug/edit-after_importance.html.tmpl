@@ -8,47 +8,70 @@
 
 [%# Display product and component descriptions after their respective fields %]
 <script type="text/javascript">
-  YUI({
-    base: 'js/yui3/',
-    combine: false
-  }).use('node', 'event', function(Y) {
+  var Event = YAHOO.util.Event;
+  var Dom = YAHOO.util.Dom;
+  Event.onDOMReady(function() {
     // Display product description if user requests it
-    Y.on('contentready', function() {
-      var field_container = Y.one('#field_container_product');
-      field_container.appendChild('<span id="toggle_prod_desc">' +
-                                  '&nbsp;(<a href="javascript:void(0);" id="toggle_prod_desc_link">show info</a>)' +
-                                  '</span>');
-      field_container.appendChild('<div class="bz_default_hidden" id="prod_desc_container">' +
-                                  '[% bug.product_obj.description FILTER html_light FILTER js %]</div>');
-      Y.on('click', function() {
-        if (Y.one('#prod_desc_container').hasClass('bz_default_hidden')) {
-          Y.one('#toggle_prod_desc_link').set('innerHTML', 'hide info');
-          Y.one('#prod_desc_container').removeClass('bz_default_hidden');
+    var prod_desc = '[% bug.product_obj.description FILTER html_light FILTER js %]';
+    if (prod_desc) {
+      var field_container = Dom.get('field_container_product');
+      var toggle_container = document.createElement('span');
+      Dom.setAttribute(toggle_container, 'id', 'toggle_prod_desc');
+      toggle_container.appendChild(document.createTextNode(' ('));
+      var toggle_link = document.createElement('a');
+      Dom.setAttribute(toggle_link, 'id', 'toggle_prod_desc_link');
+      Dom.setAttribute(toggle_link, 'href', 'javascript:void(0);')
+      toggle_link.appendChild(document.createTextNode('show info'));
+      toggle_container.appendChild(toggle_link);
+      toggle_container.appendChild(document.createTextNode(')'));
+      field_container.appendChild(toggle_container);
+      var desc_container = document.createElement('div');
+      Dom.setAttribute(desc_container, 'id', 'prod_desc_container');
+      Dom.addClass(desc_container, 'bz_default_hidden');
+      desc_container.innerHTML = prod_desc;
+      field_container.appendChild(desc_container);
+      Event.addListener(toggle_link, 'click', function () {
+        if (Dom.hasClass('prod_desc_container', 'bz_default_hidden')) {
+          Dom.get('toggle_prod_desc_link').innerHTML  = 'hide info';
+          Dom.removeClass('prod_desc_container', 'bz_default_hidden');
         }
         else {
-          Y.one('#toggle_prod_desc_link').set('innerHTML', 'show info');
-          Y.one('#prod_desc_container').addClass('bz_default_hidden');
+          Dom.get('toggle_prod_desc_link').innerHTML = 'show info';
+          Dom.addClass('prod_desc_container', 'bz_default_hidden');
         }
-      }, '#toggle_prod_desc_link');
-    }, '#field_container_product');
+      });
+    }
+
     // Display component description if user requests it
-    Y.on('contentready', function() {
-      var field_container = Y.one('#field_container_component');
-      field_container.appendChild('<span id="toggle_comp_desc">' +
-                                  '&nbsp;(<a href="javascript:void(0);" id="toggle_comp_desc_link">show info</a>)' +
-                                  '</span>');
-      field_container.appendChild('<div class="bz_default_hidden" id="comp_desc_container">' +
-                                  '[% bug.component_obj.description FILTER html_light FILTER js %]</div>');
-      Y.on('click', function() {
-        if (Y.one('#comp_desc_container').hasClass('bz_default_hidden')) {
-          Y.one('#toggle_comp_desc_link').set('innerHTML', 'hide info');
-          Y.one('#comp_desc_container').removeClass('bz_default_hidden');
+    var comp_desc = '[% bug.component_obj.description FILTER html_light FILTER js %]';
+    if (comp_desc) {
+      var field_container = Dom.get('field_container_component');
+      var toggle_container = document.createElement('span');
+      Dom.setAttribute(toggle_container, 'id', 'toggle_comp_desc');
+      toggle_container.appendChild(document.createTextNode(' ('));
+      var toggle_link = document.createElement('a');
+      Dom.setAttribute(toggle_link, 'id', 'toggle_comp_desc_link');
+      Dom.setAttribute(toggle_link, 'href', 'javascript:void(0);')
+      toggle_link.appendChild(document.createTextNode('show info'));
+      toggle_container.appendChild(toggle_link);
+      toggle_container.appendChild(document.createTextNode(')'));
+      field_container.appendChild(toggle_container);
+      var desc_container = document.createElement('div');
+      Dom.setAttribute(desc_container, 'id', 'comp_desc_container');
+      Dom.addClass(desc_container, 'bz_default_hidden');
+      desc_container.innerHTML = comp_desc;
+      field_container.appendChild(desc_container);
+      Event.addListener(toggle_link, 'click', function () {
+        console.log('clicked');
+        if (Dom.hasClass('comp_desc_container', 'bz_default_hidden')) {
+          Dom.get('toggle_comp_desc_link').innerHTML  = 'hide info';
+          Dom.removeClass('comp_desc_container', 'bz_default_hidden');
         }
         else {
-          Y.one('#toggle_comp_desc_link').set('innerHTML', 'show info');
-          Y.one('#comp_desc_container').addClass('bz_default_hidden');
+          Dom.get('toggle_comp_desc_link').innerHTML = 'show info';
+          Dom.addClass('comp_desc_container', 'bz_default_hidden');
         }
-      }, '#toggle_comp_desc_link');
-    }, '#field_container_component');
+      });
+    }
   });
 </script>

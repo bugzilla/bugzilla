@@ -39,7 +39,9 @@
   [% h2 = "Which product would you like to have described?" %]
 [% END %]
 
-[% javascript_urls = [ "extensions/ProdCompSearch/web/js/prod_comp_search.js" ] %]
+[% javascript_urls = [ "js/yui3/yui/yui-min.js",
+                       "extensions/ProdCompSearch/web/js/prod_comp_search.js" ]
+%]
 [% onload = "document.getElementById('prod_comp_search').focus();" %]
 [% style_urls.push("extensions/ProdCompSearch/web/styles/prod_comp_search.css") %]
 

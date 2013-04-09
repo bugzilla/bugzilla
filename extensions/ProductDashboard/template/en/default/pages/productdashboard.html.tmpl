@@ -8,7 +8,10 @@
 
 [% PROCESS global/variables.none.tmpl %]
 
-[% javascript_urls = [ "js/util.js", "js/field.js" ] %]
+[% javascript_urls = [ "js/yui3/yui/yui-min.js",
+                       "js/util.js",
+                       "js/field.js" ]
+%]
 
 [% IF current_tab_name == 'summary' %]
   [% javascript_urls.push("extensions/ProductDashboard/web/js/summary.js") %]

@@ -707,8 +707,7 @@ YAHOO.bugzilla.userAutocomplete = {
           id : YAHOO.bugzilla.userAutocomplete.counter,
           params : [ { 
             match : [ decodeURIComponent(enteredText) ],
-            include_fields : [ "name", "real_name" ], 
-            include_disabled : 1
+            include_fields : [ "name", "real_name" ]
           } ]
       };
       var stringified =  YAHOO.lang.JSON.stringify(json_object);

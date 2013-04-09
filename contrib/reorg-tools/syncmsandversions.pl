@@ -73,35 +73,49 @@ if (!$tgtprodid) {
     exit(1);
 }
 
-#$dbh->bz_start_transaction();
+$dbh->bz_start_transaction();
 
-$dbh->do("INSERT INTO milestones(value, sortkey, product_id) 
-    SELECT m1.value, m1.sortkey, ? FROM milestones m1 
-        LEFT JOIN milestones m2 ON m1.value = m2.value AND 
-                                   m2.product_id = ? 
-        WHERE m1.product_id = ? AND m2.value IS NULL",
-        undef,
-        $tgtprodid, $tgtprodid, $srcprodid);
+$dbh->do("
+    INSERT INTO milestones(value, sortkey, isactive, product_id)
+        SELECT m1.value, m1.sortkey, m1.isactive, ?
+          FROM milestones m1
+               LEFT JOIN milestones m2 ON m1.value = m2.value
+                                          AND m2.product_id = ?
+         WHERE m1.product_id = ?
+               AND m2.value IS NULL
+    ",
+    undef,
+    $tgtprodid, $tgtprodid, $srcprodid);
 
-$dbh->do("INSERT INTO versions(value, product_id) 
-    SELECT v1.value, ? FROM versions v1 
-        LEFT JOIN versions v2 ON v1.value = v2.value AND 
-                                 v2.product_id = ? 
-        WHERE v1.product_id = ? AND v2.value IS NULL",
-        undef,
-        $tgtprodid, $tgtprodid, $srcprodid);
+$dbh->do("
+    INSERT INTO versions(value, isactive, product_id)
+        SELECT v1.value, v1.isactive, ?
+          FROM versions v1
+               LEFT JOIN versions v2 ON v1.value = v2.value
+                                     AND v2.product_id = ?
+         WHERE v1.product_id = ?
+               AND v2.value IS NULL
+    ",
+    undef,
+    $tgtprodid, $tgtprodid, $srcprodid);
 
-$dbh->do("INSERT INTO group_control_map (group_id, product_id, entry, membercontrol, othercontrol, canedit, editcomponents, editbugs, canconfirm)
-     SELECT g1.group_id, ?, g1.entry, g1.membercontrol, g1.othercontrol, g1.canedit, g1.editcomponents, g1.editbugs, g1.canconfirm
-     FROM group_control_map g1
-     LEFT JOIN group_control_map g2 ON g1.product_id = ? AND
-                                       g2.product_id = ? AND
-                                       g1.group_id = g2.group_id
-     WHERE g1.product_id = ? AND g2.group_id IS NULL",
-     undef,
-     $tgtprodid, $srcprodid, $tgtprodid, $srcprodid);
+$dbh->do("
+    INSERT INTO group_control_map (group_id, product_id, entry, membercontrol,
+                                   othercontrol, canedit, editcomponents,
+                                   editbugs, canconfirm)
+        SELECT g1.group_id, ?, g1.entry, g1.membercontrol, g1.othercontrol,
+               g1.canedit, g1.editcomponents, g1.editbugs, g1.canconfirm
+          FROM group_control_map g1
+               LEFT JOIN group_control_map g2 ON g1.product_id = ?
+                                                 AND g2.product_id = ?
+                                                 AND g1.group_id = g2.group_id
+         WHERE g1.product_id = ?
+               AND g2.group_id IS NULL
+    ",
+    undef,
+    $tgtprodid, $srcprodid, $tgtprodid, $srcprodid);
 
-#$dbh->bz_commit_transaction();
+$dbh->bz_commit_transaction();
 
 exit(0);
 

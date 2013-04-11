@@ -139,10 +139,16 @@ sub object_before_create {
 #
 
 BEGIN {
+    *Bugzilla::User::comment_count = \&_comment_count;
+    *Bugzilla::User::creation_ts = \&_creation_ts;
     *Bugzilla::User::update_comment_count = \&_update_comment_count;
     *Bugzilla::User::first_patch_bug_id = \&_first_patch_bug_id;
     *Bugzilla::User::is_new = \&_is_new;
+    *Bugzilla::User::creation_age = \&_creation_age;
 }
+
+sub _comment_count { return $_[0]->{comment_count} }
+sub _creation_ts { return $_[0]->{creation_ts} }
 
 sub _update_comment_count {
     my $self = shift;
@@ -182,12 +188,23 @@ sub _is_new {
         if ($self->in_group('canconfirm')) {
             $self->{is_new} = 0;
         } else {
-            $self->{is_new} = ($self->{comment_count} <= COMMENT_COUNT)
-                              || ($self->{creation_age} <= PROFILE_AGE);
+            $self->{is_new} = ($self->comment_count <= COMMENT_COUNT)
+                              || ($self->creation_age <= PROFILE_AGE);
         }
     }
 
     return $self->{is_new};
+}
+
+sub _creation_age {
+    my ($self) = @_;
+
+    if (!exists $self->{creation_age}) {
+        my $age = sprintf("%.0f", (time() - str2time($self->creation_ts)) / 86400);
+        $self->{creation_age} = $age;
+    }
+
+    return $self->{creation_age};
 }
 
 #
@@ -200,24 +217,6 @@ sub bug_end_of_create {
 
 sub bug_end_of_update {
     Bugzilla->user->update_comment_count();
-}
-
-sub template_before_process {
-    my ($self, $args) = @_;
-    my ($vars, $file) = @$args{qw(vars file)};
-    if ($file eq 'bug/comments.html.tmpl') {
-
-        # only users in canconfirm will see the new-to-bugzilla tag
-        return unless Bugzilla->user->in_group('canconfirm');
-
-        # calculate if each user that has commented on the bug is new
-        foreach my $comment (@{$vars->{bug}{comments}}) {
-            # store the age in days, for the 'new to bugzilla' tooltip
-            my $user = $comment->author;
-            my $age = sprintf("%.0f", (time() - str2time($user->{creation_ts})) / 86400);
-            $user->{creation_age} = $age;
-        }
-    }
 }
 
 sub mailer_before_send {

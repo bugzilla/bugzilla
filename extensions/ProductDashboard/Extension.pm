@@ -108,8 +108,16 @@ sub _page_dashboard {
     $vars->{'total_closed_bugs'} = total_closed_bugs($product);
     $vars->{'severities'}        = get_legal_field_values('bug_severity');
 
-    $vars->{'open_bugs_percentage'}   = int($vars->{'total_open_bugs'} / $vars->{'total_bugs'} * 100);
-    $vars->{'closed_bugs_percentage'} = int($vars->{'total_closed_bugs'} / $vars->{'total_bugs'} * 100);
+    if ($vars->{'total_bugs'}) {
+        $vars->{'open_bugs_percentage'}
+            = int($vars->{'total_open_bugs'} / $vars->{'total_bugs'} * 100);
+        $vars->{'closed_bugs_percentage'}
+            = int($vars->{'total_closed_bugs'} / $vars->{'total_bugs'} * 100);
+    }
+    else {
+        $vars->{'open_bugs_percentage'}   = 0;
+        $vars->{'closed_bugs_percentage'} = 0;
+    }
 
     if ($current_tab_name eq 'summary') {
         $vars->{'by_priority'} = by_priority($product, $bug_status);
@@ -142,14 +150,14 @@ sub _page_dashboard {
             $vars->{'summary'} = by_value_summary($product, 'component', $input->{'component'}, $bug_status);
             $vars->{'summary'}{'type'} = 'component';
             $vars->{'summary'}{'value'} = $input->{'component'};
-        } 
+        }
         elsif ($input->{'version'}) {
-            $vars->{'summary'} = by_value_summary($product, 'version', $input->{'version'}, $bug_status); 
+            $vars->{'summary'} = by_value_summary($product, 'version', $input->{'version'}, $bug_status);
             $vars->{'summary'}{'type'} = 'version';
             $vars->{'summary'}{'value'} = $input->{'version'};
-        } 
+        }
         elsif ($input->{'target_milestone'} && Bugzilla->params->{'usetargetmilestone'}) {
-            $vars->{'summary'} = by_value_summary($product, 'target_milestone', $input->{'target_milestone'}, $bug_status); 
+            $vars->{'summary'} = by_value_summary($product, 'target_milestone', $input->{'target_milestone'}, $bug_status);
             $vars->{'summary'}{'type'} = 'target_milestone';
             $vars->{'summary'}{'value'} = $input->{'target_milestone'};
         }
@@ -180,7 +188,7 @@ sub _page_dashboard {
             $milestone_stats{'link_total'} = bug_milestone_link_total($product, $milestone);
             $milestone_stats{'link_open'} = bug_milestone_link_open($product, $milestone);
             $milestone_stats{'link_closed'} = bug_milestone_link_closed($product, $milestone);
-            $milestone_stats{'percentage'} = $milestone_stats{'total_bugs'} 
+            $milestone_stats{'percentage'} = $milestone_stats{'total_bugs'}
                                              ? int(($milestone_stats{'closed_bugs'} / $milestone_stats{'total_bugs'}) * 100)
                                              : 0;
             push (@{$vars->{'by_roadmap'}}, \%milestone_stats);

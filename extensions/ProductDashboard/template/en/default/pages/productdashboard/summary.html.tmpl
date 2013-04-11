@@ -11,36 +11,36 @@
 
   // global counts
   PD.summary.bug_counts = [
-    { 
+    {
       name: "Total [% terms.Bugs %]",
       count: [% total_bugs || 0 FILTER js %],
-      percentage: 100, 
-      link: '<a href="[% bug_link_all FILTER js %]">Link</a>', 
-    }, 
+      percentage: [% total_bugs ? "100" : "0" %],
+      link: '<a href="[% bug_link_all FILTER js %]">Link</a>',
+    },
     {
       name: "Open [% terms.Bugs %]",
       count: [% total_open_bugs || 0 FILTER js %],
       percentage: [% open_bugs_percentage FILTER js %],
-      link: '<a href="[% bug_link_open FILTER js %]">Link</a>', 
+      link: '<a href="[% bug_link_open FILTER js %]">Link</a>',
     },
     {
-      name: "Closed [% terms.Bugs %]", 
+      name: "Closed [% terms.Bugs %]",
       count: [% total_closed_bugs || 0 FILTER js %],
       percentage: [% closed_bugs_percentage FILTER js %],
       link: '<a href="[% bug_link_closed FILTER js %]">Link</a>',
     }
   ];
-  
+
   // Status counts
   PD.summary.status_counts = [
     [% FOREACH col = by_status %]
       [% NEXT IF col.0 == 'CLOSED' %]
       {
-        name: "[% col.0 FILTER js %]",    
+        name: "[% col.0 FILTER js %]",
         count: [% col.1 || 0 FILTER js %],
-        percentage: [% col.2 || 0 FILTER js %], 
+        percentage: [% col.2 || 0 FILTER js %],
         link: '<a href="[% bug_link_all FILTER js %]&amp;bug_status=[% col.0 FILTER uri FILTER js %]">Link</a>'
-      }, 
+      },
     [% END %]
   ];
 
@@ -48,11 +48,11 @@
   PD.summary.priority_counts = [
     [% FOREACH col = by_priority %]
       {
-        name: "[% col.0 FILTER js %]",    
+        name: "[% col.0 FILTER js %]",
         count: [% col.1 || 0 FILTER js %],
-        percentage: [% col.2 || 0 FILTER js %], 
+        percentage: [% col.2 || 0 FILTER js %],
         link: '<a href="[% bug_link FILTER js %]&amp;priority=[% col.0 FILTER uri FILTER js %]">Link</a>'
-      }, 
+      },
     [% END %]
   ];
 
@@ -60,11 +60,11 @@
   PD.summary.severity_counts = [
     [% FOREACH col = by_severity %]
       {
-        name: "[% col.0 FILTER js %]",    
+        name: "[% col.0 FILTER js %]",
         count: [% col.1 || 0 FILTER js %],
-        percentage: [% col.2 || 0 FILTER js %], 
+        percentage: [% col.2 || 0 FILTER js %],
         link: '<a href="[% bug_link FILTER js %]&amp;bug_severity=[% col.0 FILTER uri FILTER js %]">Link</a>'
-      }, 
+      },
     [% END %]
   ];
 

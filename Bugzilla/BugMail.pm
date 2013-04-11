@@ -263,6 +263,13 @@ sub Send {
         # Deleted users must be excluded.
         next unless $user;
 
+        # If email notifications are disabled for this account, or the bug
+        # is ignored, there is no need to do additional checks.
+        if ($user->email_disabled || $user->is_bug_ignored($id)) {
+            push(@excluded, $user->login);
+            next;
+        }
+
         if ($user->can_see_bug($id)) {
             # Go through each role the user has and see if they want mail in
             # that role.
@@ -279,7 +286,7 @@ sub Send {
                 }
             }
         }
-        
+
         if (scalar(%rels_which_want)) {
             # So the user exists, can see the bug, and wants mail in at least
             # one role. But do we want to send it to them?
@@ -301,8 +308,6 @@ sub Send {
                 ($user->login eq 'sync-1@bugzilla.tld' || $user->login !~ /\.tld$/))
 
             {
-                # OK, OK, if we must. Email the user.
-
                 # Don't show summaries for bugs the user can't access, and
                 # provide a hook for extensions such as SecureMail to filter
                 # this list.

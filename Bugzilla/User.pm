@@ -432,6 +432,31 @@ sub tags {
     return $self->{tags};
 }
 
+sub bugs_ignored {
+    my ($self) = @_;
+    my $dbh = Bugzilla->dbh;
+    if (!defined $self->{'bugs_ignored'}) {
+        $self->{'bugs_ignored'} = $dbh->selectall_arrayref(
+            'SELECT bugs.bug_id AS id,
+                    bugs.bug_status AS status,
+                    bugs.short_desc AS summary
+               FROM bugs
+                    INNER JOIN email_bug_ignore
+                    ON bugs.bug_id = email_bug_ignore.bug_id
+              WHERE user_id = ?',
+            { Slice => {} }, $self->id);
+        # Go ahead and load these into the visible bugs cache
+        # to speed up can_see_bug checks later
+        $self->visible_bugs([ map { $_->{'id'} } @{ $self->{'bugs_ignored'} } ]);
+    }
+    return $self->{'bugs_ignored'};
+}
+
+sub is_bug_ignored {
+    my ($self, $bug_id) = @_;
+    return (grep {$_->{'id'} == $bug_id} @{$self->bugs_ignored}) ? 1 : 0;
+}
+
 ##########################
 # Saved Recent Bug Lists #
 ##########################
@@ -2210,6 +2235,34 @@ groups.
 
 Returns a hashref with tag IDs as key, and a hashref with tag 'id',
 'name' and 'bug_count' as value.
+
+=item C<bugs_ignored>
+
+Returns an array of hashrefs containing information about bugs currently
+being ignored by the user.
+
+Each hashref contains the following information:
+
+=over
+
+=item C<id>
+
+C<int> The id of the bug.
+
+=item C<status>
+
+C<string> The current status of the bug.
+
+=item C<summary>
+
+C<string> The current summary of the bug.
+
+=back
+
+=item C<is_bug_ignored>
+
+Returns true if the user does not want email notifications for the
+specified bug ID, else returns false.
 
 =back
 

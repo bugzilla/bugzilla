@@ -786,8 +786,9 @@ sub run_create_validators {
 
 sub update {
     my $self = shift;
+    my $dbh  = Bugzilla->dbh;
+    my $user = Bugzilla->user;
 
-    my $dbh = Bugzilla->dbh;
     # XXX This is just a temporary hack until all updating happens
     # inside this function.
     my $delta_ts = shift || $dbh->selectrow_array('SELECT LOCALTIMESTAMP(0)');
@@ -878,7 +879,7 @@ sub update {
             
             # Add an activity entry for the other bug.
             LogActivityEntry($removed_id, $other, $self->id, '',
-                             Bugzilla->user->id, $delta_ts);
+                             $user->id, $delta_ts);
             # Update delta_ts on the other bug so that we trigger mid-airs.
             $dbh->do('UPDATE bugs SET delta_ts = ? WHERE bug_id = ?',
                      undef, $delta_ts, $removed_id);
@@ -889,7 +890,7 @@ sub update {
             
             # Add an activity entry for the other bug.
             LogActivityEntry($added_id, $other, '', $self->id,
-                             Bugzilla->user->id, $delta_ts);
+                             $user->id, $delta_ts);
             # Update delta_ts on the other bug so that we trigger mid-airs.
             $dbh->do('UPDATE bugs SET delta_ts = ? WHERE bug_id = ?',
                      undef, $delta_ts, $added_id);
@@ -937,7 +938,7 @@ sub update {
         $comment = Bugzilla::Comment->insert_create_data($comment);
         if ($comment->work_time) {
             LogActivityEntry($self->id, "work_time", "", $comment->work_time,
-                Bugzilla->user->id, $delta_ts);
+                             $user->id, $delta_ts);
         }
     }
 
@@ -948,7 +949,7 @@ sub update {
         my ($from, $to) 
             = $comment->is_private ? (0, 1) : (1, 0);
         LogActivityEntry($self->id, "longdescs.isprivate", $from, $to, 
-                         Bugzilla->user->id, $delta_ts, $comment->id);
+                         $user->id, $delta_ts, $comment->id);
     }
 
     # Insert the values into the multiselect value tables
@@ -993,8 +994,8 @@ sub update {
         my $change = $changes->{$field};
         my $from = defined $change->[0] ? $change->[0] : '';
         my $to   = defined $change->[1] ? $change->[1] : '';
-        LogActivityEntry($self->id, $field, $from, $to, Bugzilla->user->id,
-                         $delta_ts);
+        LogActivityEntry($self->id, $field, $from, $to,
+                         $user->id, $delta_ts);
     }
 
     # Check if we have to update the duplicates table and the other bug.
@@ -1008,7 +1009,7 @@ sub update {
                 $update_dup->update();
             }
         }
-        
+
         $changes->{'dup_id'} = [$old_dup || undef, $cur_dup || undef];
     }
 
@@ -1023,6 +1024,25 @@ sub update {
         $dbh->do('UPDATE bugs SET delta_ts = ? WHERE bug_id = ?',
                  undef, ($delta_ts, $self->id));
         $self->{delta_ts} = $delta_ts;
+    }
+
+    # Update bug ignore data if user wants to ignore mail for this bug
+    if (exists $self->{'bug_ignored'}) {
+        my $bug_ignored_changed;
+        if ($self->{'bug_ignored'} && !$user->is_bug_ignored($self->id)) {
+            $dbh->do('INSERT INTO email_bug_ignore
+                      (user_id, bug_id) VALUES (?, ?)',
+                     undef, $user->id, $self->id);
+            $bug_ignored_changed = 1;
+
+        }
+        elsif (!$self->{'bug_ignored'} && $user->is_bug_ignored($self->id)) {
+            $dbh->do('DELETE FROM email_bug_ignore
+                      WHERE user_id = ? AND bug_id = ?',
+                     undef, $user->id, $self->id);
+            $bug_ignored_changed = 1;
+        }
+        delete $user->{bugs_ignored} if $bug_ignored_changed;
     }
 
     $dbh->bz_commit_transaction();
@@ -1042,7 +1062,7 @@ sub update {
 
     # Also flush the visible_bugs cache for this bug as the user's
     # relationship with this bug may have changed.
-    delete Bugzilla->user->{_visible_bugs_cache}->{$self->id};
+    delete $user->{_visible_bugs_cache}->{$self->id};
 
     return $changes;
 }
@@ -2313,7 +2333,7 @@ sub set_all {
     # we have to check that the current assignee, qa, and CCs are still
     # valid if we've switched products, under strict_isolation. We can only
     # do that here, because if they *did* change the assignee, qa, or CC,
-    # then we don't want to check the original ones, only the new ones. 
+    # then we don't want to check the original ones, only the new ones.
     $self->_check_strict_isolation() if $product_changed;
 }
 
@@ -2343,6 +2363,7 @@ sub reset_assigned_to {
     my $comp = $self->component_obj;
     $self->set_assigned_to($comp->default_assignee);
 }
+sub set_bug_ignored       { $_[0]->set('bug_ignored',       $_[1]); }
 sub set_cclist_accessible { $_[0]->set('cclist_accessible', $_[1]); }
 sub set_comment_is_private {
     my ($self, $comment_id, $isprivate) = @_;

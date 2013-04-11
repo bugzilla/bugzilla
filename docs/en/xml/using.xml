@@ -1409,6 +1409,15 @@
         their <quote>Field/recipient specific options</quote> setting.
       </para>
 
+      <para>
+        The <quote>Ignore Bugs</quote> section lets you specify a
+        comma-separated list of bugs from which you never want to get any
+        email notification of any kind. Removing a bug from this list will
+        re-enable email notification for this bug. This is especially useful
+        e.g. if you are the reporter of a very noisy bug which you are not
+        interested in anymore or if you are watching someone who is in such
+        a noisy bug.
+      </para>
     </section>
 
     <section id="savedsearches" xreflabel="Saved Searches">

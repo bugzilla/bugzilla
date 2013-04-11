@@ -246,13 +246,6 @@ if (($cgi->param('query_format') || $cgi->param('format') || "")
     $vars->{'category'} = Bugzilla::Chart::getVisibleSeries();
 }
 
-if ($cgi->param('format') && $cgi->param('format') =~ /^report-(table|graph)$/) {
-    # Get legal custom fields for tabular and graphical reports.
-    my @custom_fields_for_reports =
-      grep { $_->type == FIELD_TYPE_SINGLE_SELECT } Bugzilla->active_custom_fields;
-    $vars->{'custom_fields'} = \@custom_fields_for_reports;
-}
-
 $vars->{'known_name'} = $cgi->param('known_name');
 $vars->{'columnlist'} = $cgi->param('columnlist');
 

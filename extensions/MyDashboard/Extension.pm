@@ -61,7 +61,7 @@ sub _in_mydashboard {
     return $self->{'in_mydashboard'} if exists $self->{'in_mydashboard'};
     $self->{'in_mydashboard'} = $dbh->selectrow_array("
         SELECT 1 FROM mydashboard WHERE namedquery_id = ? AND user_id = ?",
-        undef, $self->id, $self->user->id);
+        undef, $self->id, Bugzilla->user->id);
     return $self->{'in_mydashboard'};
 }
 
@@ -100,18 +100,18 @@ sub user_preferences {
     my $params = Bugzilla->input_params;
 
     if ($save) {
-        my $sth_insert_fp = $dbh->prepare('INSERT INTO mydashboard 
+        my $sth_insert_fp = $dbh->prepare('INSERT INTO mydashboard
                                            (namedquery_id, user_id)
                                            VALUES (?, ?)');
         my $sth_delete_fp = $dbh->prepare('DELETE FROM mydashboard
                                            WHERE namedquery_id = ?
                                            AND user_id = ?');
-        foreach my $q (@{$user->queries}, @{$user->queries_available}) {
+        foreach my $q (@{$user->queries}) {
             if (defined $params->{'in_mydashboard_' . $q->id}) {
-                $sth_insert_fp->execute($q->id, $q->user->id) if !$q->in_mydashboard;
+                $sth_insert_fp->execute($q->id, $user->id) if !$q->in_mydashboard;
             }
             else {
-                $sth_delete_fp->execute($q->id, $q->user->id) if $q->in_mydashboard;
+                $sth_delete_fp->execute($q->id, $user->id) if $q->in_mydashboard;
             }
         }
     }

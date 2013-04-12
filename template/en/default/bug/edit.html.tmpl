@@ -835,6 +835,7 @@
         <input type="hidden" name="defined_bug_ignored" value="1">
         <input type="checkbox" name="bug_ignored" id="bug_ignored" value="1"
                [% ' checked="checked"' IF user.is_bug_ignored(bug.id) %]>
+        (never email me about this [% terms.bug %])
       </td>
     </tr>
   [% END %]

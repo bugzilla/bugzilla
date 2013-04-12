@@ -21,6 +21,15 @@ strong.required:before {
   height: 1px;
   visibility: hidden;
 }
+#advanced {
+  margin-top: 50px;
+}
+#advanced img {
+  vertical-align: middle;
+}
+#advanced a {
+  cursor: pointer;
+}
 [% END %]
 [% inline_javascript = BLOCK %]
   var Dom = YAHOO.util.Dom;
@@ -253,6 +262,13 @@ strong.required:before {
     <input type="submit" id="commit" value="Submit"></td>
   </div>
 </form>
+
+<div id="advanced">
+  <a id="advanced_img" href="enter_bug.cgi?format=__default__">
+    <img src="extensions/BMO/web/images/advanced.png" width="16" height="16" border="0"></a>
+  <a id="advanced_link" href="enter_bug.cgi?format=__default__&product=Mozilla+Developer+Network">
+    Switch to the advanced bug entry form</a>
+</div>
 
 <script>
   mdn.init();

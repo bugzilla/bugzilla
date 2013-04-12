@@ -13,7 +13,7 @@ body, td, th, input {
     font-family: "Open Sans", "Helvetica Neue", Arial, Helvetica, sans-serif;
 }
 
-a, a:visited, #header a, #header a:visited, #footer a, #footer a:visited {
+a, #header a, #header a:visited, #footer a, #footer a:visited {
     color: #0095dd;
 }
 

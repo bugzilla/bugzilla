@@ -730,6 +730,17 @@ sub run_create_validators {
     my $class  = shift;
     my $params = $class->SUPER::run_create_validators(@_);
 
+    # Add classification for checking mandatory fields which depend on it
+    $params->{classification} = $params->{product}->classification->name;
+
+    my @mandatory_fields = @{ Bugzilla->fields({ is_mandatory => 1,
+                                                 enter_bug    => 1,
+                                                 obsolete     => 0 }) };
+    foreach my $field (@mandatory_fields) {
+        $class->_check_field_is_mandatory($params->{$field->name}, $field,
+                                          $params);
+    }
+
     my $product = delete $params->{product};
     $params->{product_id} = $product->id;
     my $component = delete $params->{component};
@@ -754,17 +765,10 @@ sub run_create_validators {
     delete $params->{resolution};
     delete $params->{lastdiffed};
     delete $params->{bug_id};
+    delete $params->{classification};
 
     Bugzilla::Hook::process('bug_end_of_create_validators',
                             { params => $params });
-
-    my @mandatory_fields = @{ Bugzilla->fields({ is_mandatory => 1,
-                                                 enter_bug    => 1,
-                                                 obsolete     => 0 }) };
-    foreach my $field (@mandatory_fields) {
-        $class->_check_field_is_mandatory($params->{$field->name}, $field,
-                                          $params);
-    }
 
     return $params;
 }

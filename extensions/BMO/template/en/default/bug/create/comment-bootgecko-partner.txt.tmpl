@@ -1,0 +1,23 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% USE Bugzilla %]
+[% cgi = Bugzilla.cgi %]
+
+What are the steps to reproduce?:
+[%+ cgi.param('steps_to_reproduce') %]
+
+What was the actual behavior?: 
+[%+ cgi.param('actual_behavior') %]
+
+What was the expected behavior?:
+[%+ cgi.param('expected_behavior') %]
+
+What build were you using?: [% cgi.param('build') %]
+
+What are the requirements?: [% cgi.param('requirements') %]

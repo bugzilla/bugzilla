@@ -1,0 +1,240 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% PROCESS global/variables.none.tmpl %]
+
+[% inline_js = BLOCK %]
+  var compdesc = new Array();
+  compdesc[""] = 'Please select a component from the list above.';
+  [% FOREACH comp = product.components %]
+    compdesc['[% comp.name FILTER js %]'] = '[% comp.description FILTER js %]';
+  [% END %]
+  function showCompDesc(component) {
+    var value = component.value;
+    document.getElementById('comp_description').innerHTML = compdesc[value];
+  }
+  function onSubmit() {
+    var alert_text = '';
+    var status_whiteboard = '';
+
+    if (!isFilledOut('component'))
+      alert_text += "Please select a value for component.\n";
+    if (!isFilledOut('short_desc'))
+      alert_text += "Please enter a value for the summary.\n";
+    if (!isFilledOut('steps_to_reproduce'))
+      alert_text += "Please enter the steps to reproduce.\n";
+    if (!isFilledOut('actual_behavior'))
+      alert_text += "Please enter the actual behavior.\n";
+    if (!isFilledOut('expected_behavior'))
+      alert_text += "Please enter the expected behavior.\n";
+    if (!isFilledOut('build'))
+      alert_text += "Please enter a value for the build.\n";
+    if (!isFilledOut('requirements'))
+      alert_text += "Please enter a value for the requirements.\n";
+
+    var device_values = new Array();
+    var device_select = document.getElementById("b2g_device");
+    for (var i = 0, l = device_select.options.length; i < l; i++) {
+      if (device_select.options[i].selected)
+        device_values.push(device_select.options[i].value);
+    }
+
+    if (device_values.length == 0)
+      alert_text += "Please select one or more devices.\n";
+
+    if (alert_text != '') {
+      alert(alert_text);
+      return false;
+    }
+
+    for (var i = 0, l = device_values.length; i < l; i++)
+      status_whiteboard += '[device:' + device_values[i] + '] ';
+
+    if (document.getElementById('third_party_app').checked)
+      status_whiteboard += '[apps watch list]';
+
+    document.getElementById('status_whiteboard').value = status_whiteboard;
+
+    return true;
+  }
+[% END %]
+
+[% PROCESS global/header.html.tmpl
+   title = "Boot2Gecko Partner $terms.Bug Submission"
+   style_urls = [ 'skins/standard/enter_bug.css' ]
+   javascript = inline_js
+   javascript_urls = [ 'extensions/BMO/web/js/form_validate.js',
+                       'js/attachment.js', 'js/field.js', 'js/util.js' ]
+   onload = "showCompDesc(document.getElementById('component'));"
+%]
+
+<h2>Boot2Gecko Partner [% terms.Bug %] Submission</h2>
+
+<p>All fields are mandatory</p>
+
+<form method="post" action="post_bug.cgi" id="bug_form" class="enter_bug_form"
+      enctype="multipart/form-data" onsubmit="return onSubmit();">
+<input type="hidden" name="format" value="bootgecko-partner">
+<input type="hidden" name="product" value="Boot2Gecko">
+<input type="hidden" name="rep_platform" value="ARM">
+<input type="hidden" name="op_sys" value="Gonk (Firefox OS)">
+<input type="hidden" name="priority" value="--">
+<input type="hidden" name="version" value="unspecified">
+<input type="hidden" name="bug_severity" id="bug_severity" value="normal">
+<input type="hidden" name="comment" id="comment" value="">
+<input type="hidden" name="keywords" id="keywords" value="unagi">
+<input type="hidden" name="status_whiteboard" id="status_whiteboard" value="">
+<input type="hidden" name="token" value="[% token FILTER html %]">
+
+<table>
+
+<tr>
+  <th>
+    <label for="short_desc">Summary:</label>
+  </th>
+  <td>
+    <input name="short_desc" id="short_desc" size="60"
+           value="[% short_desc FILTER html %]">
+  </td>
+</tr>
+
+<tr>
+  <th>
+    <label for="component">Component:</label>
+  </th>
+  <td>
+    <select name="component" id="component" onchange="showCompDesc(this);">
+      <option value="">Select One</option>
+      [%- FOREACH c = product.components %]
+        [% NEXT IF NOT c.is_active %]
+        <option value="[% c.name FILTER html %]"
+                id="v[% c.id FILTER html %]_component"
+          [% IF c.name == default.component_ %]
+                selected="selected"
+          [% END %]>
+          [% c.name FILTER html -%]
+        </option>
+      [%- END %]
+    </select
+  </td>
+</tr>
+
+<tr>
+  <td></td>
+  <td id="comp_description" align="left" style="color: green; padding-left: 1em"></td>
+</tr>
+
+<tr>
+  <th>
+    <label for="b2g_device">B2G Device:</label>
+  </th>
+  <td>
+    <select name="b2g_device" id="b2g_device"
+            size="5" multiple="multiple">
+      <option name="Otoro">Otoro</option>
+      <option name="Unagi">Unagi</option>
+      <option name="Inari">Inari</option>
+      <option name="Ikura">Ikura</option>
+      <option name="Hamachi">Hamachi</option>
+      <option name="Buri">Buri</option>
+      <option name="Toro">Toro</option>
+      <option name="Leo">Leo</option>
+      <option name="Twist">Twist</option>
+      <option name="Zero">Zero</option>
+      <option name="Tara">Tara</option>
+    </select>
+  </td>
+</tr>
+
+<tr>
+  <th>
+    <label for="other_party">What are the steps to reproduce?:</label>
+  </th>
+  <td>
+    <textarea id="steps_to_reproduce" name="steps_to_reproduce" rows="5" cols="60">1.
+2.
+3.</textarea>
+  </td>
+<tr>
+
+<tr>
+  <th>
+    <label for="actual_behavior">What was the actual behavior?:</label>
+  </th>
+  <td>
+    <textarea id="actual_behavior" name="actual_behavior" rows="5" cols="60"></textarea>
+  </td>
+<tr>
+
+<tr>
+  <th>
+    <label for="expected_behavior">What was the expected behavior?:</label>
+  </th>
+  <td>
+    <textarea name="expected_behavior" id="expected_behavior" rows="5" cols="60"></textarea>
+  </td>
+</tr>
+
+<tr>
+  <th>
+    <label for="build">What build were you using?:</label>
+  </th>
+  <td>
+    <input type="text" name="build" id="build" value="" size="60">
+  </td>
+</tr>
+
+<tr>
+  <th>
+    <label for="requirements">What are the requirements?:</label>
+  </th>
+  <td>
+    <input type="text" name="requirements" id="requirements" value="" size="60">
+  </td>
+</tr>
+
+<tr>
+  <th>
+    <label for="requirements">Third party app content?:</label>
+  </th>
+  <td>
+    <input type="checkbox" name="third_party_app" id="third_party_app">
+  </td>
+</tr>
+
+<tr>
+  <th>Security:</th>
+  <td>
+    [% sec_group = sec_groups.${product.name} || sec_groups._default %]
+    <input type="checkbox" name="groups"
+           value="[% sec_group FILTER html %]" id="group_[% sec_group FILTER html %]"
+      [% FOREACH g = group %]
+        [% IF g.name == name %]
+          [% ' checked="checked"' IF g.checked %]
+          [% LAST %]
+        [% END %]
+      [% END %]
+    >
+    <label for="group_[% sec_group FILTER html %]">
+      Many users could be harmed by this security problem: 
+      it should be kept hidden from the public until it is resolved.
+    </label>
+  </td>
+</tr>
+
+<tr>
+  <td>&nbsp;</td>
+  <td>
+    <input type="submit" id="commit" value="Submit Request">
+  </td>
+</tr>
+</table>
+
+</form>
+
+[% PROCESS global/footer.html.tmpl %]

@@ -290,14 +290,12 @@ use constant OPERATOR_FIELD_OVERRIDE => {
     },
     dependson        => MULTI_SELECT_OVERRIDE,
     keywords         => MULTI_SELECT_OVERRIDE,
-    'flagtypes.name' => {
-        _non_changed => \&_flagtypes_nonchanged,
-    },
+    'flagtypes.name' => MULTI_SELECT_OVERRIDE,
     longdesc => {
+        %{ MULTI_SELECT_OVERRIDE() },
         changedby     => \&_long_desc_changedby,
         changedbefore => \&_long_desc_changedbefore_after,
         changedafter  => \&_long_desc_changedbefore_after,
-        _non_changed  => \&_long_desc_nonchanged,
     },
     'longdescs.count' => {
         changedby     => \&_long_desc_changedby,
@@ -692,16 +690,8 @@ sub sql {
     my ($self) = @_;
     return $self->{sql} if $self->{sql};
     my $dbh = Bugzilla->dbh;
-
+    
     my ($joins, $clause) = $self->_charts_to_conditions();
-
-    if (!$clause->as_string
-        && !Bugzilla->params->{'search_allow_no_criteria'}
-        && !$self->{allow_unlimited})
-    {
-        ThrowUserError('buglist_parameters_required');
-    }
-
     my $select = join(', ', $self->_sql_select);
     my $from = $self->_sql_from($joins);
     my $where = $self->_sql_where($clause);
@@ -1201,7 +1191,14 @@ sub _sql_where {
     # SQL a bit more readable for debugging.
     my $where = join("\n   AND ", $self->_standard_where);
     my $clause_sql = $main_clause->as_string;
-    $where .= "\n   AND " . $clause_sql if $clause_sql;
+    if ($clause_sql) {
+        $where .= "\n   AND " . $clause_sql;
+    }
+    elsif (!Bugzilla->params->{'search_allow_no_criteria'}
+           && !$self->{allow_unlimited})
+    {
+        ThrowUserError('buglist_parameters_required');
+    }
     return $where;
 }
 
@@ -1864,13 +1861,8 @@ sub _quote_unless_numeric {
 }
 
 sub build_subselect {
-    # Execute subselects immediately to avoid dependent subqueries, which are
-    # large performance hits on MySql
-    my $q = "SELECT DISTINCT $inner FROM $table WHERE $cond";
-    my $dbh = Bugzilla->dbh;
-    my $list = $dbh->selectcol_arrayref($q);
-    return $negate ? "1=1" : "1=2" unless @$list;
-    return $dbh->sql_in($outer, $list, $negate);
+    my ($outer, $inner, $table, $cond) = @_;
+    return "$outer IN (SELECT $inner FROM $table WHERE $cond)";
 }
 
 # Used by anyexact to get the list of input values. This allows us to
@@ -2335,51 +2327,14 @@ sub _long_desc_changedbefore_after {
     }
 }
 
-sub _long_desc_nonchanged {
-    my ($self, $args) = @_;
-    my ($chart_id, $operator, $value, $joins, $bugs_table) =
-        @$args{qw(chart_id operator value joins bugs_table)};
-    my $dbh = Bugzilla->dbh;
-
-    my $table = "longdescs_$chart_id";
-    my $join_args = {
-        chart_id   => $chart_id,
-        sequence   => $chart_id,
-        field      => 'longdesc',
-        full_field => "$table.thetext",
-        operator   => $operator,
-        value      => $value,
-        all_values => $value,
-        quoted     => $dbh->quote($value),
-        joins      => [],
-        bugs_table => $bugs_table,
-    };
-    $self->_do_operator_function($join_args);
-
-    # If the user is not part of the insiders group, they cannot see
-    # private comments
-    if (!$self->_user->is_insider) {
-        $join_args->{term} .= " AND $table.isprivate = 0";
-    }
-
-    my $join = {
-        table => 'longdescs',
-        as    => $table,
-        extra => [ $join_args->{term} ],
-    };
-    push(@$joins, $join);
-
-    $args->{term} =  "$table.comment_id IS NOT NULL";
-}
-
 sub _content_matches {
     my ($self, $args) = @_;
     my ($chart_id, $joins, $fields, $operator, $value) =
         @$args{qw(chart_id joins fields operator value)};
     my $dbh = Bugzilla->dbh;
-
+    
     # "content" is an alias for columns containing text for which we
-    # can search a full-text index and retrieve results by relevance,
+    # can search a full-text index and retrieve results by relevance, 
     # currently just bug comments (and summaries to some degree).
     # There's only one way to search a full-text index, so we only
     # accept the "matches" operator, which is specific to full-text
@@ -2625,63 +2580,6 @@ sub _multiselect_multiple {
     else {
         $args->{term} = join("\n        AND ", @terms);
     }
-}
-
-sub _flagtypes_nonchanged {
-    my ($self, $args) = @_;
-    my ($chart_id, $operator, $value, $joins, $bugs_table) =
-        @$args{qw(chart_id operator value joins bugs_table)};
-    my $dbh = Bugzilla->dbh;
-    my $join;
-
-    # join to the attachments table
-    my $attach_table = "attachments_$chart_id";
-    $join = {
-        table => 'attachments',
-        as    => $attach_table,
-        from  => "$bugs_table.bug_id",
-        to    => "bug_id",
-        extra => [ ($self->_user->is_insider ? '' : "$attach_table.isprivate = 0") ],
-    };
-    push(@$joins, $join);
-
-    # join to the flags table
-    my $flags_table = "flags_$chart_id";
-    $join = {
-        table => 'flags',
-        as    => $flags_table,
-        from  => "$bugs_table.bug_id",
-        to    => "bug_id",
-        extra => [ "($flags_table.attach_id = $attach_table.attach_id " .
-                " OR $flags_table.attach_id IS NULL)" ],
-    };
-    push(@$joins, $join);
-
-    # join to the flagtypes table
-    my $flagtypes_table = "flagtypes_$chart_id";
-    $join = {
-        table => 'flagtypes',
-        as    => $flagtypes_table,
-        from  => "$flags_table.type_id",
-        to    => "id",
-    };
-    push(@$joins, $join);
-
-    # join to the profiles table for the requestee
-    my $flag_profile_table = "flag_profiles_$chart_id";
-    $join = {
-        table => 'profiles',
-        as    => $flag_profile_table,
-        from  => "$flags_table.requestee_id",
-        to    => "userid",
-    };
-    push(@$joins, $join);
-
-    $args->{full_field} = $dbh->sql_string_concat("$flagtypes_table.name",
-                                                  "$flags_table.status",
-                                                  "COALESCE($flag_profile_table.login_name, '')");
-
-    $self->_do_operator_function($args);
 }
 
 sub _multiselect_nonchanged {

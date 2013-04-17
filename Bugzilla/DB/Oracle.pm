@@ -531,7 +531,9 @@ sub bz_setup_database {
               . " RETURN NUMBER IS BEGIN RETURN LENGTH(COLUMN_NAME); END;");
     
     # Create types for group_concat
-    $self->do("DROP TYPE T_GROUP_CONCAT");
+    my $type_exists = $self->selectrow_array("SELECT 1 FROM user_types
+                                              WHERE type_name = 'T_GROUP_CONCAT'");
+    $self->do("DROP TYPE T_GROUP_CONCAT") if $type_exists;
     $self->do("CREATE OR REPLACE TYPE T_CLOB_DELIM AS OBJECT "
           . "( p_CONTENT CLOB, p_DELIMITER VARCHAR2(256)"
           . ", MAP MEMBER FUNCTION T_CLOB_DELIM_ToVarchar return VARCHAR2"

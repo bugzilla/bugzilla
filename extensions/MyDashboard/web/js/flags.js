@@ -98,7 +98,7 @@ YUI({
                    (MyDashboard.splinter_base.indexOf('?') == -1 ? '?' : '&') +
                    'bug=' + encodeURIComponent(o.data.bug_id) +
                    '&attachment=' + encodeURIComponent(o.data.attach_id) +
-                   '" title="Review this patch">' +
+                   '" target="_blank" title="Review this patch">' +
                    Y.Escape.html(o.value) + '</a>';
         }
         else {

@@ -18,7 +18,6 @@ var MPR = {
             "key_initiative": "Please select a value for key initiative in the initial questions section",
             "project_status": "Please select a value for project status in the initial questions section",
             "mozilla_data": "Please select a value for mozilla data in the initial questions section",
-            "new_or_change": "Please select a value for new or change to existing project in the initial questions section",
             "separate_party": "Please select a value for separate party in the initial questions section"
         },
         "finance_questions": {
@@ -58,8 +57,6 @@ var MPR = {
         'key_initiative',
         'project_status',
         'mozilla_data',
-        'new_or_change',
-        'mozilla_project',
         'separate_party',
         'relationship_type',
         'data_access',
@@ -74,11 +71,7 @@ var MPR = {
         'legal_sow_vendor_product_line',
         'legal_vendor_services_where',
         'finance_purchase_inbudget',
-        'finance_purchase_urgency',
-        'data_safety_user_data',
-        'data_safety_retention',
-        'data_safety_separate_party',
-        'data_safety_community_visibility'
+        'finance_purchase_urgency'
     ],
 
     init: function () {
@@ -106,34 +99,18 @@ var MPR = {
             sec_review_questions: false,
             privacy_policy_project_questions: false,
             privacy_policy_vendor_questions: false,
-            data_safety_questions: false,
-            data_safety_extra_questions: false,
-            mozilla_project_row: false,
             privacy_policy_project_link_row: false,
             privacy_policy_project_user_data_bug_row: false,
-            privacy_policy_vendor_extra: false,
-            data_safety_extra_questions: false,
-            data_safety_retention_length_row: false,
-            data_safety_separate_party_data_row: false,
-            data_safety_communication_channels_row: false,
-            data_safety_communication_plan_row: false,
+            privacy_policy_vendor_extra: false
         };
 
         if (Dom.get('key_initiative').value == 'Other') {
             page_sections.key_initiative_other_row = true;
         }
 
-        if (Dom.get('new_or_change').value == 'Existing') {
-            page_sections.mozilla_project_row = true;
-        }
-
-        if (Dom.get('new_or_change').value == 'New')
-            page_sections.legal_questions = true;
-
         if (Dom.get('mozilla_data').value == 'Yes') {
             page_sections.legal_questions = true;
             page_sections.privacy_policy_project_questions = true;
-            page_sections.data_safety_questions = true;
             page_sections.sec_review_questions = true;
         }
 
@@ -194,26 +171,6 @@ var MPR = {
 
         if (Dom.get('privacy_policy_vendor_user_data').value == 'Yes') {
             page_sections.privacy_policy_vendor_extra = true;
-        }
-
-        if (Dom.get('data_safety_user_data').value == 'Yes') {
-            page_sections.data_safety_extra_questions = true;
-        }
-
-        if (Dom.get('data_safety_retention').value == 'Yes') {
-            page_sections.data_safety_retention_length_row = true;
-        }
-
-        if (Dom.get('data_safety_separate_party').value == 'Yes') {
-            page_sections.data_safety_separate_party_data_row = true;
-        }
-
-        if (Dom.get('data_safety_community_visibility').value == 'Yes') {
-            page_sections.data_safety_communication_channels_row = true;
-        }
-
-        if (Dom.get('data_safety_community_visibility').value == 'No') {
-            page_sections.data_safety_communication_plan_row = true;
         }
 
         // Toggle the individual page_sections

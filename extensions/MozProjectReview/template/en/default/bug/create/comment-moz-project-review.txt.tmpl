@@ -17,15 +17,12 @@ Description:
 [%+ cgi.param('description') %]
 Additional Information:
 [%+ cgi.param('additional') %]
-Urgency: [% cgi.param('urgency') %]
 Key Initiative: [% cgi.param('key_initiative') == 'Other'
                    ? cgi.param('key_initiative_other')
                    : cgi.param('key_initiative') %]
 Release Date: [% cgi.param('release_date') %]
 Project Status: [% cgi.param('project_status') %]
 Mozilla Data: [% cgi.param('mozilla_data') %]
-New or Change: [% cgi.param('new_or_change') %]
-Mozilla Project: [% cgi.param('mozilla_project') %]
 Mozilla Related: [% cgi.param('mozilla_related') %]
 Separate Party: [% cgi.param('separate_party') %]
 [% IF cgi.param('separate_party') == 'Yes' %]

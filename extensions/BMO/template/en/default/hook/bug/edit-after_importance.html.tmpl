@@ -62,7 +62,6 @@
       desc_container.innerHTML = comp_desc;
       field_container.appendChild(desc_container);
       Event.addListener(toggle_link, 'click', function () {
-        console.log('clicked');
         if (Dom.hasClass('comp_desc_container', 'bz_default_hidden')) {
           Dom.get('toggle_comp_desc_link').innerHTML  = 'hide info';
           Dom.removeClass('comp_desc_container', 'bz_default_hidden');

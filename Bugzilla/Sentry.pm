@@ -5,66 +5,34 @@
 # This Source Code Form is "Incompatible With Secondary Licenses", as
 # defined by the Mozilla Public License, v. 2.0.
 
-package Bugzilla::Arecibo;
+package Bugzilla::Sentry;
 
 use strict;
 use warnings;
 
 use base qw(Exporter);
 our @EXPORT = qw(
-    arecibo_handle_error
-    arecibo_generate_id
-    arecibo_should_notify
+    sentry_handle_error
+    sentry_should_notify
 );
 
 use Apache2::Log;
 use Apache2::SubProcess;
 use Carp;
 use Data::Dumper;
-use Email::Date::Format qw(email_gmdate);
+use DateTime;
 use File::Temp;
 use LWP::UserAgent;
 use Sys::Hostname;
+use URI;
 
 use Bugzilla::Constants;
+use Bugzilla::RNG qw(irand);
 use Bugzilla::Util;
 use Bugzilla::WebService::Constants;
 
 use constant CONFIG => {
-    # 'types' maps from the error message to types and priorities
-    types => [
-        {
-            type  => 'the_schwartz',
-            boost => -10,
-            match => [
-                qr/TheSchwartz\.pm/,
-            ],
-        },
-        {
-            type  => 'database_error',
-            boost => -10,
-            match => [
-                qr/DBD::mysql/,
-                qr/Can't connect to the database/,
-            ],
-        },
-        {
-            type  => 'patch_reader',
-            boost => +5,
-            match => [
-                qr#/PatchReader/#,
-            ],
-        },
-        {
-            type  => 'uninitialized_warning',
-            boost => 0,
-            match => [
-                qr/Use of uninitialized value/,
-            ],
-        },
-    ],
-
-    # 'codes' lists the code-errors which are sent to arecibo
+    # 'codes' lists the code-errors which are sent to sentry
     codes => [qw(
         bug_error
         chart_datafile_corrupt
@@ -78,32 +46,58 @@ use constant CONFIG => {
         token_generation_error
     )],
 
-    # any error messages matching these regex's will not be sent to arecibo
+    # any error messages matching these regex's will not be sent to sentry
     ignore => [
         qr/Software caused connection abort/,
         qr/Could not check out .*\/cvsroot/,
     ],
+
+    # (ab)use the logger to classify error/warning types
+    logger => [
+        {
+            match => [
+                qr/DBD::mysql/,
+                qr/Can't connect to the database/,
+            ],
+            logger => 'database_error',
+        },
+        {
+            match  => [ qr#/PatchReader/# ],
+            logger => 'patchreader',
+        },
+        {
+            match  => [ qr/Use of uninitialized value/ ],
+            logger => 'uninitialized_warning',
+        },
+    ],
 };
 
-sub arecibo_generate_id {
-    return sprintf("%s.%s", (time), $$);
+sub sentry_generate_id {
+    return sprintf('%04x%04x%04x%04x%04x%04x%04x%04x',
+        irand(0xffff), irand(0xffff),
+        irand(0xffff),
+        irand(0x0fff) | 0x4000,
+        irand(0x3fff) | 0x8000,
+        irand(0xffff), irand(0xffff), irand(0xffff)
+    );
 }
 
-sub arecibo_should_notify {
+sub sentry_should_notify {
     my $code_error = shift;
-    return grep { $_ eq $code_error } @{CONFIG->{codes}};
+    return grep { $_ eq $code_error } @{ CONFIG->{codes} };
 }
 
-sub arecibo_handle_error {
-    my $class = shift;
+sub sentry_handle_error {
+    my $level = shift;
     my @message = split(/\n/, shift);
-    my $id = arecibo_generate_id();
+    my $id = sentry_generate_id();
 
-    my $is_error = $class eq 'error';
-    if ($class ne 'error' && $class ne 'warning') {
+    my $is_error = $level eq 'error';
+    if ($level ne 'error' && $level ne 'warning') {
         # it's a code-error
-        return 0 unless arecibo_should_notify($class);
+        return 0 unless sentry_should_notify($level);
         $is_error = 1;
+        $level = 'error';
     }
 
     # build traceback
@@ -115,9 +109,9 @@ sub arecibo_handle_error {
         #local $Carp::MaxArgNums = 0;
         local $Carp::MaxArgNums = -1;
         local $Carp::CarpInternal{'CGI::Carp'} = 1;
-        local $Carp::CarpInternal{'Bugzilla::Error'}   = 1;
-        local $Carp::CarpInternal{'Bugzilla::Arecibo'} = 1;
-        $traceback = Carp::longmess();
+        local $Carp::CarpInternal{'Bugzilla::Error'} = 1;
+        local $Carp::CarpInternal{'Bugzilla::Sentry'} = 1;
+        $traceback = trim(Carp::longmess());
     }
 
     # strip timestamp
@@ -126,85 +120,91 @@ sub arecibo_handle_error {
     }
     my $message = join(" ", map { trim($_) } grep { $_ ne '' } @message);
 
-    # don't send to arecibo unless configured
-    my $arecibo_server = Bugzilla->params->{arecibo_server} || '';
-    my $send_to_arecibo = $arecibo_server ne '';
+    # determine logger
+    my $logger;
+    foreach my $config (@{ CONFIG->{logger} }) {
+        foreach my $re (@{ $config->{match} }) {
+            if ($message =~ $re) {
+                $logger = $config->{logger};
+                last;
+            }
+        }
+        last if $logger;
+    }
+    $logger ||= $level;
+
+    # don't send to sentry unless configured
+    my $send_to_sentry = Bugzilla->params->{sentry_uri} ? 1 : 0;
 
     # web service filtering
-    if ($send_to_arecibo
+    if ($send_to_sentry
         && (Bugzilla->error_mode == ERROR_MODE_DIE_SOAP_FAULT || Bugzilla->error_mode == ERROR_MODE_JSON_RPC))
     {
         my ($code) = $message =~ /^(-?\d+): /;
         if ($code
             && !($code == ERROR_UNKNOWN_FATAL || $code == ERROR_UNKNOWN_TRANSIENT))
         {
-            $send_to_arecibo = 0;
+            $send_to_sentry = 0;
         }
     }
 
     # message content filtering
-    if ($send_to_arecibo) {
-        foreach my $re (@{CONFIG->{ignore}}) {
+    if ($send_to_sentry) {
+        foreach my $re (@{ CONFIG->{ignore} }) {
             if ($message =~ $re) {
-                $send_to_arecibo = 0;
+                $send_to_sentry = 0;
                 last;
             }
         }
     }
+
+    # for now, don't send patchreader errors to sentry
+    $send_to_sentry = 0
+        if $logger eq 'patchreader';
 
     # log to apache's error_log
-    if ($send_to_arecibo) {
-        $message .= " [#$id]";
+    if ($send_to_sentry) {
+        _write_to_error_log("$message [#$id]", $is_error);
     } else {
         $traceback =~ s/\n/ /g;
-        $message .= " $traceback";
+        _write_to_error_log("$message $traceback", $is_error);
     }
-    _write_to_error_log($message, $is_error);
 
-    return 0 unless $send_to_arecibo;
+    return 0 unless $send_to_sentry;
 
-    # set the error type and priority from the message content
-    $message = join("\n", grep { $_ ne '' } @message);
-    my $type = '';
-    my $priority = $class eq 'error' ? 3 : 10;
-    foreach my $rh_type (@{CONFIG->{types}}) {
-        foreach my $re (@{$rh_type->{match}}) {
-            if ($message =~ $re) {
-                $type = $rh_type->{type};
-                $priority += $rh_type->{boost};
-                last;
-            }
+    my $user_data = undef;
+    eval {
+        my $user = Bugzilla->user;
+        if ($user->id) {
+            $user_data = {
+                id   => $user->login,
+                name => $user->name,
+            };
         }
-        last if $type ne '';
-    }
-    $type ||= $class;
-    $priority = 1 if $priority < 1;
-    $priority = 10 if $priority > 10;
+    };
 
-    my $username = '';
-    eval { $username = Bugzilla->user->login };
+    my $uri = URI->new(Bugzilla->cgi->self_url);
+    $uri->query(undef);
 
-    my $request = '';
-    foreach my $name (sort { lc($a) cmp lc($b) } keys %ENV) {
-        $request .= "$name=$ENV{$name}\n";
-    }
-    chomp($request);
-
-    my $data = [
-        ip         => remote_ip(),
-        msg        => $message,
-        priority   => $priority,
-        server     => hostname(),
-        request    => $request,
-        status     => '500',
-        timestamp  => email_gmdate(),
-        traceback  => $traceback,
-        type       => $type,
-        uid        => $id,
-        url        => Bugzilla->cgi->self_url,
-        user_agent => $ENV{HTTP_USER_AGENT},
-        username   => $username,
-    ];
+    my $data = {
+        event_id    => $id,
+        message     => $message,
+        timestamp   => DateTime->now->iso8601(),
+        level       => $level,
+        platform    => 'Other',
+        logger      => $logger,
+        server_name => hostname(),
+        'sentry.interfaces.User' => $user_data,
+        'sentry.interfaces.Http' => {
+            url             => $uri->as_string,
+            method          => $ENV{REQUEST_METHOD},
+            query_string    => $ENV{QUERY_STRING},
+            env             => \%ENV,
+        },
+        extra       => {
+            stacktrace      => $traceback,
+        },
+    };
 
     my $fh = File::Temp->new( UNLINK => 0 );
     if (!$fh) {
@@ -215,7 +215,7 @@ sub arecibo_handle_error {
     close($fh) or die $!;
     my $filename = $fh->filename;
 
-    my $command = bz_locations()->{'cgi_path'} . "/arecibo.pl '$filename' &";
+    my $command = bz_locations()->{'cgi_path'} . "/sentry.pl '$filename' &";
     system($command);
     return 1;
 }
@@ -244,14 +244,14 @@ sub _in_eval {
     return $in_eval;
 }
 
-sub _arecibo_die_handler {
+sub _sentry_die_handler {
     my $message = shift;
     $message =~ s/^undef error - //;
 
     # avoid recursion, and check for CGI::Carp::die failures
     my $in_cgi_carp_die = 0;
     for (my $stack = 1; my $sub = (caller($stack))[3]; $stack++) {
-        return if $sub =~ /:_arecibo_die_handler$/;
+        return if $sub =~ /:_sentry_die_handler$/;
         $in_cgi_carp_die = 1 if $sub =~ /CGI::Carp::die$/;
     }
 
@@ -274,7 +274,7 @@ sub _arecibo_die_handler {
         $in_cgi_carp_die ||
         ($nested_error && $nested_error !~ /\bModPerl::Util::exit\b/)
     ) {
-        arecibo_handle_error('error', $message);
+        sentry_handle_error('error', $message);
 
         # and call the normal error management
         # (ISE for web pages, error response for web services, etc)
@@ -283,18 +283,18 @@ sub _arecibo_die_handler {
     exit;
 }
 
-sub install_arecibo_handler {
+sub install_sentry_handler {
     require CGI::Carp;
-    CGI::Carp::set_die_handler(\&_arecibo_die_handler);
+    CGI::Carp::set_die_handler(\&_sentry_die_handler);
     $main::SIG{__WARN__} = sub {
         return if _in_eval();
-        arecibo_handle_error('warning', shift);
+        sentry_handle_error('warning', shift);
     };
 }
 
 BEGIN {
     if ($ENV{SCRIPT_NAME} || $ENV{MOD_PERL}) {
-        install_arecibo_handler();
+        install_sentry_handler();
     }
 }
 

@@ -71,7 +71,7 @@ use constant get_param_list => (
   },
 
   {
-   name => 'arecibo_server',
+   name => 'sentry_uri',
    type => 't',
    default => '',
   },

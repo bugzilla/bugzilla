@@ -28,7 +28,7 @@ use base qw(Exporter);
 
 @Bugzilla::Error::EXPORT = qw(ThrowCodeError ThrowTemplateError ThrowUserError ThrowErrorPage);
 
-use Bugzilla::Arecibo;
+use Bugzilla::Sentry;
 use Bugzilla::Constants;
 use Bugzilla::WebService::Constants;
 use Bugzilla::Util;
@@ -110,9 +110,8 @@ sub _throw_error {
                                              message => \$message });
 
     if (Bugzilla->error_mode == ERROR_MODE_WEBPAGE) {
-        if (arecibo_should_notify($vars->{error})) {
+        if (sentry_should_notify($vars->{error})) {
             $vars->{maintainers_notified} = 1;
-            $vars->{uid} = arecibo_generate_id();
             $vars->{processed} = {};
         } else {
             $vars->{maintainers_notified} = 0;
@@ -123,8 +122,7 @@ sub _throw_error {
           || ThrowTemplateError($template->error());
 
         if ($vars->{maintainers_notified}) {
-            arecibo_handle_error(
-                $vars->{error}, $vars->{processed}->{error_message}, $vars->{uid});
+            sentry_handle_error($vars->{error}, $vars->{processed}->{error_message});
         }
     }
     elsif (Bugzilla->error_mode == ERROR_MODE_TEST) {
@@ -206,8 +204,7 @@ sub ThrowTemplateError {
     $vars->{'template_error_msg'} = $template_err;
     $vars->{'error'} = "template_error";
 
-    $vars->{'uid'} = arecibo_generate_id();
-    arecibo_handle_error('error', $template_err, $vars->{'uid'});
+    sentry_handle_error('error', $template_err);
     $vars->{'template_error_msg'} =~ s/ at \S+ line \d+\.\s*$//;
 
     my $template = Bugzilla->template;
@@ -218,7 +215,6 @@ sub ThrowTemplateError {
         my $maintainer = html_quote(Bugzilla->params->{'maintainer'});
         my $error = html_quote($vars->{'template_error_msg'});
         my $error2 = html_quote($template->error());
-        my $uid = html_quote($vars->{'uid'});
         print <<END;
         <tt>
           <p>
@@ -232,7 +228,7 @@ sub ThrowTemplateError {
           -->
           <p>
             The <a href="mailto:$maintainer">Bugzilla maintainers</a> have
-            been notified of this error [#$uid].
+            been notified of this error.
           </p>
         </tt>
 END

@@ -14,25 +14,31 @@ use Bugzilla::User;
 use Bugzilla::Group;
 use Bugzilla::Error;
 use Bugzilla::Constants;
-use Bugzilla::FlagType;
 
 our $VERSION = '0.01';
 
+our %tracker_cc = (
+    'legal'                   => ['liz@mozilla.com'],
+    'sec-review'              => ['curtisk@mozilla.com'],
+    'finance'                 => ['waoieong@mozilla.com', 'mcristobal@mozilla.com'],
+    'privacy-vendor'          => ['smartin@mozilla.com'],
+    'privacy-project'         => ['ahua@mozilla.com'],
+    'privacy-tech'            => ['ahua@mozilla.com'],
+    'policy-business-partner' => ['smartin@mozilla.com']
+);
+
 sub post_bug_after_creation {
     my ($self, $args) = @_;
-    my $vars   = $args->{vars};
-    my $bug    = $vars->{bug};
-
-    my $user     = Bugzilla->user;
-    my $params   = Bugzilla->input_params;
-    my $template = Bugzilla->template;
+    my $vars      = $args->{'vars'};
+    my $bug       = $vars->{'bug'};
+    my $timestamp = $args->{'timestamp'};
+    my $user      = Bugzilla->user;
+    my $params    = Bugzilla->input_params;
+    my $template  = Bugzilla->template;
 
     return if !($params->{format}
                 && $params->{format} eq 'moz-project-review'
                 && $bug->component eq 'Project Review');
-
-    my $error_mode_cache = Bugzilla->error_mode;
-    Bugzilla->error_mode(ERROR_MODE_DIE);
 
     # do a match if applicable
     Bugzilla::User::match_field({
@@ -40,99 +46,73 @@ sub post_bug_after_creation {
     });
 
     my ($do_sec_review, $do_legal, $do_finance, $do_privacy_vendor,
-        $do_data_safety, $do_privacy_tech, $do_privacy_policy);
+        $do_privacy_tech, $do_privacy_policy);
 
-    # Logic section which dictates which bugs are created. This should be 
-    # similar to the logic used in extensions/MozProjectReview/web/js/moz_project_review.js
-
-    if ($params->{new_or_change} eq 'New') {
-        $do_legal = 1;
-    }
-
-    if ($params->{mozilla_data} eq 'Yes') {
+    if ($params->{'mozilla_data'} eq 'Yes') {
         $do_legal = 1;
         $do_privacy_policy = 1;
         $do_privacy_tech = 1;
         $do_sec_review = 1;
     }
 
-    if ($params->{mozilla_data} eq 'Yes'
-        && $params->{data_safety_user_data} eq 'Yes')
-    {
-        $do_data_safety = 1;
-    }
-
-    if ($params->{separate_party} eq 'Yes') {
-        if ($params->{relationship_type} ne 'Hardware Purchase') {
+    if ($params->{'separate_party'} eq 'Yes') {
+        if ($params->{'relationship_type'} ne 'Hardware Purchase') {
             $do_legal = 1;
         }
 
-        if ($params->{relationship_type} eq 'Hardware Purchase') {
-            $do_finance = 1;
-        }
-
-        if ($params->{data_access} eq 'Yes') {
+        if ($params->{'data_access'} eq 'Yes') {
             $do_privacy_policy = 1;
             $do_legal = 1;
             $do_sec_review = 1;
         }
 
-        if ($params->{data_access} eq 'Yes'
-            && $params->{'privacy_policy_vendor_user_data'} eq 'Yes') 
+        if ($params->{'data_access'} eq 'Yes'
+            && $params->{'privacy_policy_vendor_user_data'} eq 'Yes')
         {
             $do_privacy_vendor = 1;
         }
 
-        if ($params->{vendor_cost} eq '> $25,000' 
-            || ($params->{vendor_cost} eq '<= $25,000'
-                && $params->{po_needed} eq 'Yes')) 
+        if ($params->{'vendor_cost'} eq '> $25,000' 
+            || ($params->{'vendor_cost'} eq '<= $25,000'
+                && $params->{'po_needed'} eq 'Yes')) 
         {
             $do_finance = 1;
         }
     }
 
     my ($sec_review_bug, $legal_bug, $finance_bug, $privacy_vendor_bug,
-        $data_safety_bug, $privacy_tech_bug, $privacy_policy_bug, $error, 
-        @dep_bug_comment, @dep_bug_errors);
+        $privacy_tech_bug, $privacy_policy_bug, $error, @dep_comment,
+        @dep_errors, @send_mail);
+
+    # Common parameters always passed to _file_child_bug
+    # bug_data and template_suffix will be different for each bug
+    my $child_params = {
+        parent_bug    => $bug,
+        template_vars => $vars,
+        dep_comment   => \@dep_comment,
+        dep_errors    => \@dep_errors,
+        send_mail     => \@send_mail,
+    };
 
     if ($do_sec_review) {
-        my $bug_data = {
+        $child_params->{'bug_data'} = {
             short_desc   => 'Security Review: ' . $bug->short_desc,
             product      => 'mozilla.org',
             component    => 'Security Assurance: Review Request',
             bug_severity => 'normal',
             groups       => [ 'mozilla-corporation-confidential' ],
+            keywords     => 'sec-review-needed',
             op_sys       => 'All',
             rep_platform => 'All',
             version      => 'other',
             blocked      => $bug->bug_id,
         };
-        my $new_bug = _file_child_bug({ parent_bug => $bug, template_vars => $vars,
-                                        template_suffix => 'sec-review', bug_data => $bug_data,
-                                        dep_comment => \@dep_bug_comment, dep_errors => \@dep_bug_errors });
-        # For sec-review bugs, we need to set the sec-review?
-        # flag as well so we do that now.
-        if ($new_bug) {
-            my $flagtypes = Bugzilla::FlagType::match({ product_id   => $new_bug->product_obj->id,
-                                                        component_id => $new_bug->component_obj->id,
-                                                        name         => 'sec-review' });
-            if (scalar @$flagtypes) {
-                my $sec_review_flag = $flagtypes->[0];
-                my $new_flags = [{
-                    type_id => $sec_review_flag->id,
-                    status  => '?'
-                }];
-                $new_bug->set_flags([], $new_flags);
-                $new_bug->update();
-            }
-        }
+        $child_params->{'template_suffix'} = 'sec-review';
+        _file_child_bug($child_params);
     }
 
     if ($do_legal) {
         my $component = 'General';
-        if ($params->{new_or_change} eq 'Existing') {
-            $component = $params->{mozilla_project};
-        }
 
         if ($params->{separate_party} eq 'Yes'
             && $params->{relationship_type})
@@ -147,7 +127,7 @@ sub post_bug_after_creation {
         $legal_summary .= $params->{legal_other_party} . " - " if $params->{legal_other_party};
         $legal_summary .= $bug->short_desc;
 
-        my $bug_data = {
+        $child_params->{'bug_data'} = {
             short_desc   => $legal_summary,
             product      => 'Legal',
             component    => $component,
@@ -160,13 +140,12 @@ sub post_bug_after_creation {
             blocked      => $bug->bug_id,
             cc           => $params->{'legal_cc'},
         };
-        _file_child_bug({ parent_bug => $bug, template_vars => $vars,
-                          template_suffix => 'legal', bug_data => $bug_data,
-                          dep_comment => \@dep_bug_comment, dep_errors => \@dep_bug_errors });
+        $child_params->{'template_suffix'} = 'legal';
+        _file_child_bug($child_params);
     }
 
     if ($do_finance) {
-        my $bug_data = {
+        $child_params->{'bug_data'} = {
             short_desc   => 'Finance Review: ' . $bug->short_desc,
             product      => 'Finance',
             component    => 'Purchase Request Form',
@@ -178,32 +157,12 @@ sub post_bug_after_creation {
             version      => 'unspecified',
             blocked      => $bug->bug_id,
         };
-        _file_child_bug({ parent_bug => $bug, template_vars => $vars,
-                          template_suffix => 'finance', bug_data => $bug_data,
-                          dep_comment => \@dep_bug_comment, dep_errors => \@dep_bug_errors });
-    }
-
-    if ($do_data_safety) {
-        my $bug_data = {
-            short_desc   => 'Data Safety Review: ' . $bug->short_desc,
-            product      => 'Data Safety',
-            component    => 'General',
-            bug_severity => 'normal',
-            priority     => '--',
-            groups       => [ 'mozilla-corporation-confidential' ],
-            op_sys       => 'All',
-            rep_platform => 'All',
-            version      => 'unspecified',
-            blocked      => $bug->bug_id,
-        };
-
-        _file_child_bug({ parent_bug => $bug, template_vars => $vars,
-                          template_suffix => 'data-safety', bug_data => $bug_data,
-                          dep_comment => \@dep_bug_comment, dep_errors => \@dep_bug_errors });
+        $child_params->{'template_suffix'} = 'finance';
+        _file_child_bug($child_params);
     }
 
     if ($do_privacy_tech) {
-        my $bug_data = {
+        $child_params->{'bug_data'} = {
             short_desc   => 'Privacy-Technical Review: ' . $bug->short_desc,
             product      => 'mozilla.org',
             component    => 'Security Assurance: Review Request',
@@ -216,13 +175,12 @@ sub post_bug_after_creation {
             version      => 'other',
             blocked      => $bug->bug_id,
         };
-        _file_child_bug({ parent_bug => $bug, template_vars => $vars,
-                          template_suffix => 'privacy-tech', bug_data => $bug_data,
-                          dep_comment => \@dep_bug_comment, dep_errors => \@dep_bug_errors });
+        $child_params->{'template_suffix'} = 'privacy-tech';
+        _file_child_bug($child_params);
     }
 
     if ($do_privacy_policy) {
-        my $bug_data = {
+        $child_params->{'bug_data'} = {
             short_desc   => 'Privacy-Policy Review: ' . $bug->short_desc,
             product      => 'Privacy',
             component    => 'Product Review',
@@ -234,13 +192,12 @@ sub post_bug_after_creation {
             version      => 'unspecified',
             blocked      => $bug->bug_id,
         };
-        _file_child_bug({ parent_bug => $bug, template_vars => $vars,
-                          template_suffix => 'privacy-policy', bug_data => $bug_data,
-                          dep_comment => \@dep_bug_comment, dep_errors => \@dep_bug_errors });
+        $child_params->{'template_suffix'} = 'privacy-policy';
+        _file_child_bug($child_params);
     }
 
     if ($do_privacy_vendor) {
-        my $bug_data = {
+        $child_params->{'bug_data'} = {
             short_desc   => 'Privacy / Vendor Review: ' . $bug->short_desc,
             product      => 'Privacy',
             component    => 'Vendor Review',
@@ -252,54 +209,72 @@ sub post_bug_after_creation {
             version      => 'unspecified',
             blocked      => $bug->bug_id,
         };
-        _file_child_bug({ parent_bug => $bug, template_vars => $vars,
-                          template_suffix => 'privacy-vendor', bug_data => $bug_data,
-                          dep_comment => \@dep_bug_comment, dep_errors => \@dep_bug_errors });
+        $child_params->{'template_suffix'} = 'privacy-vendor';
+        _file_child_bug($child_params);
     }
 
-    Bugzilla->error_mode($error_mode_cache);
-
-    if (scalar @dep_bug_errors) {
+    if (scalar @dep_errors) {
         warn "[Bug " . $bug->id . "] Failed to create additional moz-project-review bugs:\n" .
-             join("\n", @dep_bug_errors);
-        $vars->{message} = 'moz_project_review_creation_failed';
+             join("\n", @dep_errors);
+        $vars->{'message'} = 'moz_project_review_creation_failed';
     }
 
-    if (scalar @dep_bug_comment) {
-        my $comment = join("\n", @dep_bug_comment);
-        if (scalar @dep_bug_errors) {
+    if (scalar @dep_comment) {
+        my $comment = join("\n", @dep_comment);
+        if (scalar @dep_errors) {
             $comment .= "\n\nSome erors occurred creating dependent bugs and have been recorded";
         }
         $bug->add_comment($comment);
-        $bug->update();
+        $bug->update($bug->creation_ts);
+    }
+
+    foreach my $bug_id (@send_mail) {
+        Bugzilla::BugMail::Send($bug_id, { changer => Bugzilla->user });
     }
 }
 
 sub _file_child_bug {
     my ($params) = @_;
-    my ($parent_bug, $template_vars, $template_suffix, $bug_data, $dep_comment, $dep_errors)
-        = @$params{qw(parent_bug template_vars template_suffix bug_data dep_comment dep_errors)};
-    my $template = Bugzilla->template;
+    my ($parent_bug, $template_vars, $template_suffix, $bug_data, $dep_comment, $dep_errors, $send_mail)
+        = @$params{qw(parent_bug template_vars template_suffix bug_data dep_comment dep_errors send_mail)};
+
+    my $old_error_mode = Bugzilla->error_mode;
+    Bugzilla->error_mode(ERROR_MODE_DIE);
+
     my $new_bug;
     eval {
         my $comment;
         my $full_template = "bug/create/comment-moz-project-review-$template_suffix.txt.tmpl";
-        $template->process($full_template, $template_vars, \$comment)
-            || ThrowTemplateError($template->error());
-        $bug_data->{comment} = $comment;
+        Bugzilla->template->process($full_template, $template_vars, \$comment)
+            || ThrowTemplateError(Bugzilla->template->error());
+        $bug_data->{'comment'} = $comment;
         if ($new_bug = Bugzilla::Bug->create($bug_data)) {
-            $parent_bug->set_all({ dependson => { add => [ $new_bug->bug_id ] }});
-            Bugzilla::BugMail::Send($new_bug->id, { changer => Bugzilla->user });
+            my $set_all = {
+                dependson => { add => [ $new_bug->bug_id ] }
+            };
+            if (exists $tracker_cc{$template_suffix}) {
+                $set_all->{'cc'} = { add => $tracker_cc{$template_suffix} };
+            }
+            $parent_bug->set_all($set_all);
+            $parent_bug->update($parent_bug->creation_ts);
         }
     };
-    if ($@ || !$new_bug) {
+
+    if ($@ || !($new_bug && $new_bug->{'bug_id'})) {
         push(@$dep_comment, "Error creating $template_suffix review bug");
         push(@$dep_errors, "$template_suffix : $@") if $@;
+        # Since we performed Bugzilla::Bug::create in an eval block, we
+        # need to manually rollback the commit as this is not done
+        # in Bugzilla::Error automatically for eval'ed code.
+        Bugzilla->dbh->bz_rollback_transaction();
     }
     else {
+        push(@$send_mail, $new_bug->id);
         push(@$dep_comment, "Bug " . $new_bug->id . " - " . $new_bug->short_desc);
     }
-    return $new_bug;
+
+    undef $@;
+    Bugzilla->error_mode($old_error_mode);
 }
 
 __PACKAGE__->NAME;

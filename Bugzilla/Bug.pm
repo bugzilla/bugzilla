@@ -3845,7 +3845,7 @@ sub GetBugActivity {
                $datepart
                $attachpart
                $suppwhere
-      ORDER BY bugs_activity.bug_when";
+      ORDER BY bugs_activity.bug_when, bugs_activity.id";
 
     my $list = $dbh->selectall_arrayref($query, undef, @args);
 
@@ -3941,13 +3941,11 @@ sub _join_activity_entries {
     # We need to insert characters as these were removed by old
     # LogActivityEntry code.
 
-    if ($current_change eq '') {
-        return $new_change;
-    }
+    return $new_change if $current_change eq '';
 
     # Buglists and see_also need the comma restored
     if ($field eq 'dependson' || $field eq 'blocked' || $field eq 'see_also') {
-        if (substr($new_change, 0, 1) eq ',') {
+        if (substr($new_change, 0, 1) eq ',' || substr($new_change, 0, 1) eq ' ') {
             return $current_change . $new_change;
         } else {
             return $current_change . ', ' . $new_change;

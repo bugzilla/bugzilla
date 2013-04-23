@@ -82,11 +82,13 @@
             <option value="other">other</option>
           </select>
           <span id="needinfo_from_container" class="bz_default_hidden">
-            [%+ INCLUDE global/userselect.html.tmpl
-                        id       => "needinfo_from"
-                        name     => "needinfo_from"
-                        size     => 30
-                        value    => ""
+            [% INCLUDE global/userselect.html.tmpl
+               id          => "needinfo_from"
+               name        => "needinfo_from"
+               value       => ""
+               size        => 30
+               multiple    => 5
+               field_title => "Enter one or more comma separated users to request more information from"
             %]
           </span>
         </td> 

@@ -60,7 +60,7 @@ sub bug_start_of_update {
     if ($user->in_group('canconfirm') && $params->{needinfo}) {
         # do a match if applicable
         Bugzilla::User::match_field({
-            'needinfo_from' => { 'type' => 'single' }
+            'needinfo_from' => { 'type' => 'multi' }
         });
     }
 
@@ -88,43 +88,52 @@ sub bug_start_of_update {
     if ($user->in_group('canconfirm') && $needinfo) {
         foreach my $type (@{ $bug->flag_types }) {
             next if $type->name ne 'needinfo';
+            my %requestees;
 
-            my $needinfo_flag = { type_id => $type->id, status => '?' };
-
+            # Allow anyone to be the requestee
+            if (!$needinfo_role) {
+                $requestees{'anyone'} = 1;
+            }
             # Use assigned_to as requestee
-            if ($needinfo_role eq 'assigned_to') {
-                $needinfo_flag->{requestee} = $bug->assigned_to->login;
+            elsif ($needinfo_role eq 'assigned_to') {
+                $requestees{$bug->assigned_to->login} = 1;
             }
             # Use reporter as requestee
             elsif ( $needinfo_role eq 'reporter') {
-                $needinfo_flag->{requestee} = $bug->reporter->login;
+                $requestees{$bug->reporter->login} = 1;
             }
             # Use qa_contact as requestee
             elsif ($needinfo_role eq 'qa_contact') {
-                $needinfo_flag->{requestee} = $bug->qa_contact->login;
+                $requestees{$bug->qa_contact->login} = 1;
             }
             # Use user specified requestee
             elsif ($needinfo_role eq 'other' && $needinfo_from) {
-                Bugzilla::User->check($needinfo_from);
-                $needinfo_flag->{requestee} = $needinfo_from;
+                my @needinfo_from_list = ref $needinfo_from
+                                         ? @$needinfo_from :
+                                         ($needinfo_from);
+                foreach my $requestee (@needinfo_from_list) {
+                    my $requestee_obj = Bugzilla::User->check($requestee);
+                    $requestees{$requestee_obj->login} = 1;
+                }
             }
 
             # Find out if the requestee has already been used and skip if so
             my $requestee_found;
             foreach my $flag (@{ $type->{flags} }) {
-                if ((!$flag->requestee && !exists $needinfo_flag->{requestee})
-                    || ($flag->requestee && exists $needinfo_flag->{requestee}
-                        && $flag->requestee->login eq $needinfo_flag->{requestee}))
-                {
-                    $requestee_found = 1;
-                    last;
+                if (!$flag->requestee && $requestees{'anyone'}) {
+                    delete $requestees{'anyone'};
+                }
+                if ($flag->requestee && $requestees{$flag->requestee->login}) {
+                    delete $requestees{$flag->requestee->login};
                 }
             }
-            next if $requestee_found;
 
-            if ($needinfo) {
+            foreach my $requestee (keys %requestees) {
+                my $needinfo_flag = { type_id => $type->id, status => '?' };
+                if ($requestee ne 'anyone') {
+                    $needinfo_flag->{requestee} = $requestee;
+                }
                 push(@new_flags, $needinfo_flag);
-                last;
             }
         }
     }

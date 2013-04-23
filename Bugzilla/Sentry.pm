@@ -62,7 +62,7 @@ use constant CONFIG => {
             logger => 'database_error',
         },
         {
-            match  => [ qr#/PatchReader/# ],
+            match  => [ qr/PatchReader/ ],
             logger => 'patchreader',
         },
         {

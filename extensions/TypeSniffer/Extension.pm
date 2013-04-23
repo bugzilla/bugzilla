@@ -26,7 +26,13 @@ use base qw(Bugzilla::Extension);
 use File::MimeInfo::Magic;
 use IO::Scalar;
 
-our $VERSION = '0.02';
+our $VERSION = '1';
+
+# These extensions override/supplement File::MimeInfo::Magic's detection.
+our %EXTENSION_OVERRIDES = (
+    '.lang' => 'text/plain',
+);
+
 ################################################################################
 # This extension uses magic to guess MIME types for data where the browser has
 # told us it's application/octet-stream (probably because there's no file
@@ -43,6 +49,24 @@ sub attachment_process_data {
         $params->{'contenttypemethod'} eq 'autodetect' &&
         $attributes->{'mimetype'} eq 'application/octet-stream')
     {
+        my $filename = $attributes->{'filename'} . '';
+
+        # Check for an override first
+        if ($filename =~ /^.+(\..+$)/) {
+            my $ext = lc($1);
+            if (exists $EXTENSION_OVERRIDES{$ext}) {
+                $attributes->{'mimetype'} = $EXTENSION_OVERRIDES{$ext};
+                return;
+            }
+        }
+
+        # Then try file extension detection
+        my $mimetype = mimetype($filename);
+        if ($mimetype) {
+            $attributes->{'mimetype'} = $mimetype;
+            return;
+        }
+
         # data attribute can be either scalar data or filehandle
         # bugzilla.org/docs/3.6/en/html/api/Bugzilla/Attachment.html#create
         my $fh = $attributes->{'data'};
@@ -65,7 +89,7 @@ sub attachment_process_data {
             }
         }
 
-        my $mimetype = mimetype($fh);
+        $mimetype = mimetype($fh);
         $fh->seek(0, 0);
         if ($mimetype) {
             $attributes->{'mimetype'} = $mimetype;

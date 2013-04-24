@@ -15,6 +15,6 @@
     width: 360px;
 }
 
-#prod_comp_no_components {
+#prod_comp_no_components, #prod_comp_error {
     color: red;
 }

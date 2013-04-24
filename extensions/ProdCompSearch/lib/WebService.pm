@@ -13,14 +13,14 @@ use warnings;
 use base qw(Bugzilla::WebService);
 
 use Bugzilla::Error;
-use Bugzilla::Util qw(detaint_natural trick_taint);
+use Bugzilla::Util qw(detaint_natural trick_taint trim);
 
 sub prod_comp_search {
     my ($self, $params) = @_;
     my $user = Bugzilla->user;
     my $dbh = Bugzilla->switch_to_shadow_db();
 
-    my $search = $params->{'search'};
+    my $search = trim($params->{'search'} || '');
     $search || ThrowCodeError('param_required',
         { function => 'PCS.prod_comp_search', param => 'search' });
 
@@ -57,16 +57,33 @@ sub prod_comp_search {
 
     return { products => [] } if !scalar @$enterable_ids;
 
-    my @list;
-    foreach my $word (split(/[\s,]+/, $search)) {
-        if ($word ne "") {
-            my $sql_word = $dbh->quote($word);
-            trick_taint($sql_word);
-            # note: CONCAT_WS is MySQL specific
-            my $field = "CONCAT_WS(' ', products.name, products.description,
-                                   components.name, components.description)";
-            push(@list, $dbh->sql_iposition($sql_word, $field) . " > 0");
-        }
+    trick_taint($search);
+    my @terms;
+    my @order;
+
+    if ($search =~ /^(.*?)::(.*)$/) {
+        my ($product, $component) = (trim($1), trim($2));
+        push @terms, _build_terms($product, 1, 0);
+        push @terms, _build_terms($component, 0, 1);
+        push @order, "products.name != " . $dbh->quote($product) if $product ne '';
+        push @order, "components.name != " . $dbh->quote($component) if $component ne '';
+        push @order, "products.name";
+        push @order, "components.name";
+    } else {
+        push @terms, _build_terms($search, 1, 1);
+        push @order, "products.name != " . $dbh->quote($search);
+        push @order, "components.name != " . $dbh->quote($search);
+        push @order, "products.name";
+        push @order, "components.name";
+    }
+    return { products => [] } if !scalar @terms;
+
+    # To help mozilla staff file bmo administration bugs into the right
+    # component, sort bmo first when searching for 'bugzilla'
+    if ($search =~ /bugzilla/i && $search !~ /^bugzilla\s*::/i
+        && ($user->in_group('mozilla-corporation') || $user->in_group('mozilla-foundation')))
+    {
+        unshift @order, "products.name != 'bugzilla.mozilla.org'";
     }
 
     my $products = $dbh->selectall_arrayref("
@@ -74,27 +91,30 @@ sub prod_comp_search {
                components.name AS component
           FROM products
                INNER JOIN components ON products.id = components.product_id
-         WHERE (" . join(" AND ", @list) . ")
+         WHERE (" . join(" AND ", @terms) . ")
                AND products.id IN (" . join(",", @$enterable_ids) . ")
-      ORDER BY products.name $limit",
+      ORDER BY " . join(", ", @order) . " $limit",
         { Slice => {} });
 
-    # To help mozilla staff file bmo administration bugs into the right
-    # component, sort bmo in front of bugzilla.
-    if ($user->in_group('mozilla-corporation') || $user->in_group('mozilla-foundation')) {
-        $products = [
-            sort {
-                return 1 if $a->{product} eq 'Bugzilla'
-                            && $b->{product} eq 'bugzilla.mozilla.org';
-                return -1 if $b->{product} eq 'Bugzilla'
-                             && $a->{product} eq 'bugzilla.mozilla.org';
-                return lc($a->{product}) cmp lc($b->{product})
-                       || lc($a->{component}) cmp lc($b->{component});
-            } @$products
-        ];
-    }
-
     return { products => $products };
+}
+
+sub _build_terms {
+    my ($query, $product, $component) = @_;
+    my $dbh = Bugzilla->dbh();
+
+    my @fields;
+    push @fields, 'products.name', 'products.description' if $product;
+    push @fields, 'components.name', 'components.description' if $component;
+    # note: CONCAT_WS is MySQL specific
+    my $field = "CONCAT_WS(' ', ". join(',', @fields) . ")";
+
+    my @terms;
+    foreach my $word (split(/[\s,]+/, $query)) {
+        push(@terms, $dbh->sql_iposition($dbh->quote($word), $field) . " > 0")
+            if $word ne '';
+    }
+    return @terms;
 }
 
 1;

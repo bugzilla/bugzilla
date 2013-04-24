@@ -48,13 +48,23 @@ YUI({
         ioConfig: {
             method: "POST",
             headers: { 'Content-Type': 'application/json' }
+        },
+        on: {
+            error: function(e) {
+                if (console.error && e.response.meta.error) {
+                    console.error(e.response.meta.error.message);
+                }
+                Y.one("#prod_comp_throbber").addClass('bz_default_hidden');
+                Y.one("#prod_comp_error").removeClass('bz_default_hidden');
+            }
         }
     });
 
     dataSource.plug(Y.Plugin.DataSourceJSONSchema, {
         schema: {
             resultListLocator : "result.products",
-            resultFields : [ "product", "component" ]
+            resultFields : [ "product", "component" ],
+            metaFields : { error : 'error' }
         }
     });
 
@@ -75,6 +85,7 @@ YUI({
             query: function(e) {
                 Y.one("#prod_comp_throbber").removeClass('bz_default_hidden');
                 Y.one("#prod_comp_no_components").addClass('bz_default_hidden');
+                Y.one("#prod_comp_error").addClass('bz_default_hidden');
             },
             results: function(e) {
                 Y.one("#prod_comp_throbber").addClass('bz_default_hidden');

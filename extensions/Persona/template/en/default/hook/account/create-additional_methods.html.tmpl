@@ -6,13 +6,8 @@
   # defined by the Mozilla Public License, v. 2.0.
   #%]
 
-[% IF Param('user_info_class').split(',').contains('Persona') %]
-Or, use your Persona account:
-<img src="extensions/Persona/web/images/sign_in.png" onclick="persona_create_account()"
-     width="95" height="25" align="absmiddle">
+[% RETURN UNLESS Param('user_info_class').split(',').contains('Persona') %]
 
-<form id="persona_form" method="POST" action="index.cgi">
-  <input type="hidden" name="token" value="[% issue_hash_token(['login']) FILTER html %]">
-  <input type="hidden" name="persona_assertion" id="persona_assertion" value="">
-</form>
-[% END %]
+Or, use your Persona account:
+<img src="extensions/Persona/web/images/sign_in.png" onclick="persona_sign_in()"
+     width="95" height="25" align="absmiddle">

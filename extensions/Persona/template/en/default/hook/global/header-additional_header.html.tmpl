@@ -29,7 +29,9 @@ function createHidden(name, value, form) {
 }
 
 [% login_target = cgi.url("-relative" => 1, "-query" => 1) %]
-[% IF !login_target OR login_target.match("^token.cgi") %]
+[% IF !login_target
+      OR login_target.match("^token\.cgi")
+      OR login_target.match("^createaccount\.cgi") %]
   [% login_target = "index.cgi" %]
 [% END %]
 [% login_target = urlbase _ login_target %]

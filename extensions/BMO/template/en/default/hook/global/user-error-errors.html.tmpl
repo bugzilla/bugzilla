@@ -33,4 +33,8 @@
 [% ELSIF error == "invalid_object" %]
     Invalid [% object FILTER html %]: "[% value FILTER html %]"
 
+[% ELSIF error == "report_too_many_bugs" %]
+  [% title = "Too Many Bugs" %]
+  Too many [% terms.bugs %] matched your selection criteria.
+
 [% END %]

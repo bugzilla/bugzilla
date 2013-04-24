@@ -46,7 +46,6 @@ use Sys::Syslog qw(:DEFAULT setlogsock);
 use Bugzilla::Extension::BMO::Constants;
 use Bugzilla::Extension::BMO::FakeBug;
 use Bugzilla::Extension::BMO::Data;
-use Bugzilla::Extension::BMO::Reports;
 
 our $VERSION = '0.1';
 
@@ -146,15 +145,32 @@ sub page_before_template {
     my $vars = $args->{'vars'};
 
     if ($page eq 'user_activity.html') {
-        user_activity_report($vars);
+        require Bugzilla::Extension::BMO::Reports::UserActivity;
+        Bugzilla::Extension::BMO::Reports::UserActivity::report($vars);
 
     } elsif ($page eq 'triage_reports.html') {
-        triage_reports($vars);
-
-    } elsif ($page eq 'upgrade-3.6.html') {
-        $vars->{'bzr_history'} = sub { 
-            return `cd /data/www/bugzilla.mozilla.org; /usr/bin/bzr log -n0 -rlast:10..`;
-        };
+        require Bugzilla::Extension::BMO::Reports::Triage;
+        Bugzilla::Extension::BMO::Reports::Triage::report($vars);
+    }
+    elsif ($page eq 'group_admins.html') {
+        require Bugzilla::Extension::BMO::Reports::Groups;
+        Bugzilla::Extension::BMO::Reports::Groups::admins_report($vars);
+    }
+    elsif ($page eq 'group_membership.html' or $page eq 'group_membership.txt') {
+        require Bugzilla::Extension::BMO::Reports::Groups;
+        Bugzilla::Extension::BMO::Reports::Groups::membership_report($page, $vars);
+    }
+    elsif ($page eq 'group_members.html' or $page eq 'group_members.json') {
+        require Bugzilla::Extension::BMO::Reports::Groups;
+        Bugzilla::Extension::BMO::Reports::Groups::members_report($vars);
+    }
+    elsif ($page eq 'email_queue.html') {
+        require Bugzilla::Extension::BMO::Reports::EmailQueue;
+        Bugzilla::Extension::BMO::Reports::EmailQueue::report($vars);
+    }
+    elsif ($page eq 'release_tracking_report.html') {
+        require Bugzilla::Extension::BMO::Reports::ReleaseTracking;
+        Bugzilla::Extension::BMO::Reports::ReleaseTracking::report($vars);
     }
     elsif ($page eq 'fields.html') {
         # Recently global/field-descs.none.tmpl and bug/field-help.none.tmpl 
@@ -163,21 +179,6 @@ sub page_before_template {
         # it is called from pages/fields.html.tmpl. So we set a value in request_cache
         # that our hook template can see. 
         Bugzilla->request_cache->{'bmo_fields_page'} = 1;
-    }
-    elsif ($page eq 'group_admins.html') {
-        group_admins_report($vars);
-    }
-    elsif ($page eq 'group_membership.html' or $page eq 'group_membership.txt') {
-        group_membership_report($page, $vars);
-    }
-    elsif ($page eq 'group_members.html' or $page eq 'group_members.json') {
-        group_members_report($vars);
-    }
-    elsif ($page eq 'email_queue.html') {
-        email_queue_report($vars);
-    }
-    elsif ($page eq 'release_tracking_report.html') {
-        release_tracking_report($vars);
     }
     elsif ($page eq 'query_database.html') {
         query_database($vars);

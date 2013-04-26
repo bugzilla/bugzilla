@@ -29,6 +29,11 @@ use constant REQUIRED_MODULES => [
         package => 'Tie-IxHash',
         module  => 'Tie::IxHash',
         version => 0
+    },
+    {
+        package => 'Sys-Syslog',
+        module  => 'Sys::Syslog',
+        version => 0
     }
 ];
 

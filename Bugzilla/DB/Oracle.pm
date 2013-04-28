@@ -60,7 +60,7 @@ sub new {
     my $dsn = "dbi:Oracle:host=$host;sid=$dbname";
     $dsn .= ";port=$port" if $port;
     my $attrs = { FetchHashKeyName => 'NAME_lc',  
-                  LongReadLen => max(Bugzilla->params->{'maxattachmentsize'},
+                  LongReadLen => max(Bugzilla->params->{'maxattachmentsize'} || 0,
                                      MIN_LONG_READ_LEN) * 1024,
                 };
     my $self = $class->db_new({ dsn => $dsn, user => $user, 

@@ -482,6 +482,7 @@ sub _translate_field_name {
 
 sub _special_field_syntax {
     my ($word, $negate) = @_;
+    return unless defined($word);
     
     # P1-5 Syntax
     if ($word =~ m/^P(\d+)(?:-(\d+))?$/i) {
@@ -517,6 +518,7 @@ sub _special_field_syntax {
 
 sub _default_quicksearch_word {
     my ($word, $negate) = @_;
+    return unless defined($word);
     
     if (!grep { lc($word) eq $_ } PRODUCT_EXCEPTIONS and length($word) > 2) {
         addChart('product', 'substring', $word, $negate);

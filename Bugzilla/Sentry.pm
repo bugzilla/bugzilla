@@ -50,6 +50,7 @@ use constant CONFIG => {
     ignore => [
         qr/Software caused connection abort/,
         qr/Could not check out .*\/cvsroot/,
+        qr/Unicode character \S+ is illegal/,
     ],
 
     # (ab)use the logger to classify error/warning types

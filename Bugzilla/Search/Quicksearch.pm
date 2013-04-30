@@ -544,6 +544,8 @@ sub _default_quicksearch_word {
 
 sub _handle_urls {
     my ($word, $negate) = @_;
+    return unless defined($word);
+
     # URL field (for IP addrs, host.names,
     # scheme://urls)
     if ($word =~ m/[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+/

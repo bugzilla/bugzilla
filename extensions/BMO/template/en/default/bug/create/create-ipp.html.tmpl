@@ -21,6 +21,19 @@
   font-family: inherit;
   font-size: inherit;
 }
+
+#standard_link {
+  margin-top: 2em;
+}
+
+#standard_link img {
+  vertical-align: middle;
+}
+
+#standard_link a {
+  cursor: pointer;
+}
+
 [% END %]
 
 [% inline_javascript = BLOCK %]
@@ -159,5 +172,12 @@ function validateAndSubmit() {
 </form>
 
 [ <span class="required_star">*</span> <span class="required_explanation">Required Field</span> ]
+
+<div id="standard_link">
+  <a href="enter_bug.cgi?format=__standard__&product=[% product.name FILTER uri %]">
+    <img src="extensions/BMO/web/images/advanced.png" width="16" height="16" border="0"></a>
+  <a href="enter_bug.cgi?format=__standard__&product=[% product.name FILTER uri %]">
+    Switch to the standard [% terms.bug %] entry form</a>
+</div>
 
 [% PROCESS global/footer.html.tmpl %]

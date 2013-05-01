@@ -1063,8 +1063,12 @@ sub forced_format {
     my ($product) = @_;
     return undef unless defined $product;
 
+    # always work on the correct product name
+    $product = Bugzilla::Product->new({ name => $product, cache => 1 })
+        unless blessed($product);
+
     # check for a forced-format entry
-    my $forced = $create_bug_formats{blessed($product) ? $product->name : $product}
+    my $forced = $create_bug_formats{$product->name}
         || return;
 
     # should this user be included?

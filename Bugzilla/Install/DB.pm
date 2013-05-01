@@ -696,6 +696,9 @@ sub update_table_definitions {
     # 2013-02-04 dkl@mozilla.com - Bug 824346
     _fix_flagclusions_indexes();
 
+    # 2012-04-15 Frank@Frank-Becker.de - Bug 740536
+    $dbh->bz_add_index('audit_log', 'audit_log_class_idx', ['class', 'at_time']);
+
     ################################################################
     # New --TABLE-- changes should go *** A B O V E *** this point #
     ################################################################

@@ -14,6 +14,7 @@ use Bugzilla::Error;
 use Bugzilla::Status;
 use Bugzilla::Util 'url_quote';
 use Bugzilla::UserAgent;
+use Bugzilla::Extension::BMO::Data;
 
 our $VERSION = '1';
 
@@ -92,9 +93,6 @@ sub _init_vars {
 
     $vars->{'platform'} = detect_platform();
     $vars->{'op_sys'} = detect_op_sys();
-
-    eval 'use Bugzilla::Extension::BMO::Data';
-    $vars->{'BMO'} = $@ ? 0 : 1;
 }
 
 sub page_before_template {
@@ -104,13 +102,17 @@ sub page_before_template {
 
     return unless $page eq 'guided_products.js';
 
-    # import product -> security group mappings from the BMO ext
+    # import data from the BMO ext
 
-    our %product_sec_groups;
-    eval q#use Bugzilla::Extension::BMO::Data '%product_sec_groups'#;
-    return if $@;
+    $vars->{'product_sec_groups'} = \%product_sec_groups;
 
-    $vars->{'products'} = \%product_sec_groups;
+    my %bug_formats;
+    foreach my $product (keys %create_bug_formats) {
+        if (my $format = Bugzilla::Extension::BMO::forced_format($product)) {
+            $bug_formats{$product} = $format;
+        }
+    }
+    $vars->{'create_bug_formats'} = \%bug_formats;
 }
 
 __PACKAGE__->NAME;

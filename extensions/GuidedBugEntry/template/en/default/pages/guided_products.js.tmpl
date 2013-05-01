@@ -8,16 +8,16 @@
 
 [%# this file allows us to pull in data defined in the BMO ext %]
 
-[% IF formats %]
-  [% FOREACH product = formats %]
+[% IF create_bug_formats %]
+  [% FOREACH product = create_bug_formats %]
     if (!products['[% product.key FILTER js %]']) [% ~%]
       products['[% product.key FILTER js %]'] = {};
     products['[% product.key FILTER js %]'].format = '[% product.value FILTER js %]';
   [% END %]
 [% END %]
 
-[% IF products %]
-  [% FOREACH product = products %]
+[% IF product_sec_groups %]
+  [% FOREACH product = product_sec_groups %]
     if (!products['[% product.key FILTER js %]']) [% ~%]
       products['[% product.key FILTER js %]'] = {};
     products['[% product.key FILTER js %]'].secgroup = '[% product.value FILTER js %]';

@@ -71,7 +71,7 @@
       YAHOO.bugzilla.keywordAutocomplete.init('[% field.name FILTER js %]',
                                               'keyword_autocomplete');
     </script>
-  [% CASE constants.FIELD_TYPE_DATETIME %]
+  [% CASE [constants.FIELD_TYPE_DATETIME, constants.FIELD_TYPE_DATE] %]
     [% INCLUDE "bug/field-label.html.tmpl"
       field = field
       tag_name = "span"

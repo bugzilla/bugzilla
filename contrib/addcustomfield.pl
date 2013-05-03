@@ -31,6 +31,7 @@ my %types = (
   'multi_select' => FIELD_TYPE_MULTI_SELECT,
   'textarea' => FIELD_TYPE_TEXTAREA,
   'datetime' => FIELD_TYPE_DATETIME,
+  'date' => FIELD_TYPE_DATE,
   'bug_id' => FIELD_TYPE_BUG_ID,
   'bug_urls' => FIELD_TYPE_BUG_URLS,
   'keywords' => FIELD_TYPE_KEYWORDS,

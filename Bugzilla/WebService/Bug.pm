@@ -963,7 +963,9 @@ sub _bug_to_hash {
         if ($field->type == FIELD_TYPE_BUG_ID) {
             $item{$name} = $self->type('int', $bug->$name);
         }
-        elsif ($field->type == FIELD_TYPE_DATETIME) {
+        elsif ($field->type == FIELD_TYPE_DATETIME
+               || $field->type == FIELD_TYPE_DATE)
+        {
             $item{$name} = $self->type('dateTime', $bug->$name);
         }
         elsif ($field->type == FIELD_TYPE_MULTI_SELECT) {

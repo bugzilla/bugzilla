@@ -134,6 +134,7 @@ use Time::HiRes qw(gettimeofday tv_interval);
 
 # When doing searches, NULL datetimes are treated as this date.
 use constant EMPTY_DATETIME => '1970-01-01 00:00:00';
+use constant EMPTY_DATE     => '1970-01-01';
 
 # This is the regex for real numbers from Regexp::Common, modified to be
 # more readable.
@@ -344,6 +345,7 @@ use constant OPERATOR_FIELD_OVERRIDE => {
     FIELD_TYPE_FREETEXT, { _non_changed => \&_nullable },
     FIELD_TYPE_BUG_ID,   { _non_changed => \&_nullable_int },
     FIELD_TYPE_DATETIME, { _non_changed => \&_nullable_datetime },
+    FIELD_TYPE_DATE,     { _non_changed => \&_nullable_date },
     FIELD_TYPE_TEXTAREA, { _non_changed => \&_nullable },
     FIELD_TYPE_MULTI_SELECT, MULTI_SELECT_OVERRIDE,
     FIELD_TYPE_BUG_URLS,     MULTI_SELECT_OVERRIDE,    
@@ -2642,6 +2644,13 @@ sub _nullable_datetime {
     my ($self, $args) = @_;
     my $field = $args->{full_field};
     my $empty = Bugzilla->dbh->quote(EMPTY_DATETIME);
+    $args->{full_field} = "COALESCE($field, $empty)";
+}
+
+sub _nullable_date {
+    my ($self, $args) = @_;
+    my $field = $args->{full_field};
+    my $empty = Bugzilla->dbh->quote(EMPTY_DATE);
     $args->{full_field} = "COALESCE($field, $empty)";
 }
 

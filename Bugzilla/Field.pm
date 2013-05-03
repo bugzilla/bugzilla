@@ -161,6 +161,7 @@ use constant SQL_DEFINITIONS => {
     FIELD_TYPE_TEXTAREA,      { TYPE => 'MEDIUMTEXT', 
                                 NOTNULL => 1, DEFAULT => "''"},
     FIELD_TYPE_DATETIME,      { TYPE => 'DATETIME'   },
+    FIELD_TYPE_DATE,          { TYPE => 'DATE'       },
     FIELD_TYPE_BUG_ID,        { TYPE => 'INT3'       },
 };
 
@@ -349,9 +350,7 @@ sub _check_sortkey {
 sub _check_type {
     my ($invocant, $type, undef, $params) = @_;
     my $saved_type = $type;
-    # The constant here should be updated every time a new,
-    # higher field type is added.
-    (detaint_natural($type) && $type <= FIELD_TYPE_KEYWORDS)
+    (detaint_natural($type) && $type < FIELD_TYPE_HIGHEST_PLUS_ONE)
       || ThrowCodeError('invalid_customfield_type', { type => $saved_type });
 
     my $custom = blessed($invocant) ? $invocant->custom : $params->{custom};
@@ -943,7 +942,10 @@ sub remove_from_db {
         }
         else {
             $bugs_query = "SELECT COUNT(*) FROM bugs WHERE $name IS NOT NULL";
-            if ($self->type != FIELD_TYPE_BUG_ID && $self->type != FIELD_TYPE_DATETIME) {
+            if ($self->type != FIELD_TYPE_BUG_ID
+                && $self->type != FIELD_TYPE_DATE
+                && $self->type != FIELD_TYPE_DATETIME)
+            {
                 $bugs_query .= " AND $name != ''";
             }
             # Ignore the default single select value

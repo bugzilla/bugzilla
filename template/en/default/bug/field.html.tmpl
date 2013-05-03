@@ -57,8 +57,9 @@
                value="[% value FILTER html %]" size="40"
                maxlength="[% constants.MAX_FREETEXT_LENGTH FILTER none %]"
                [% ' aria-required="true"' IF field.is_mandatory %]>
-    [% CASE constants.FIELD_TYPE_DATETIME %]
-      <input name="[% field.name FILTER html %]" size="20"
+    [% CASE [constants.FIELD_TYPE_DATETIME, constants.FIELD_TYPE_DATE] %]
+      [% size = (field.type == constants.FIELD_TYPE_DATE) ? 10 : 20 %]
+      <input name="[% field.name FILTER html %]" size="[% size FILTER none %]"
              id="[% field.name FILTER html %]"
              value="[% value FILTER html %]"
              [% ' aria-required="true"' IF field.is_mandatory %]

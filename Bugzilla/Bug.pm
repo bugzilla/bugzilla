@@ -166,6 +166,9 @@ sub VALIDATORS {
         elsif ($field->type == FIELD_TYPE_DATETIME) {
             $validator = \&_check_datetime_field;
         }
+        elsif ($field->type == FIELD_TYPE_DATE) {
+            $validator = \&_check_date_field;
+        }
         elsif ($field->type == FIELD_TYPE_FREETEXT) {
             $validator = \&_check_freetext_field;
         }
@@ -248,7 +251,8 @@ use constant NUMERIC_COLUMNS => qw(
 );
 
 sub DATE_COLUMNS {
-    my @fields = @{ Bugzilla->fields({ type => FIELD_TYPE_DATETIME }) };
+    my @fields = (@{ Bugzilla->fields({ type => FIELD_TYPE_DATETIME }) },
+                  @{ Bugzilla->fields({ type => FIELD_TYPE_DATE     }) });
     return map { $_->name } @fields;
 }
 
@@ -2057,8 +2061,12 @@ sub _check_field_is_mandatory {
     }
 }
 
+sub _check_date_field {
+    my ($invocant, $date) = @_;
+    return $invocant->_check_datetime_field($date, undef, {date_only => 1});
+}
 sub _check_datetime_field {
-    my ($invocant, $date_time) = @_;
+    my ($invocant, $date_time, $field, $params) = @_;
 
     # Empty datetimes are empty strings or strings only containing
     # 0's, whitespace, and punctuation.
@@ -2070,6 +2078,10 @@ sub _check_datetime_field {
     my ($date, $time) = split(' ', $date_time);
     if ($date && !validate_date($date)) {
         ThrowUserError('illegal_date', { date   => $date,
+                                         format => 'YYYY-MM-DD' });
+    }
+    if ($time && $params->{date_only}) {
+        ThrowUserError('illegal_date', { date   => $date_time,
                                          format => 'YYYY-MM-DD' });
     }
     if ($time && !validate_time($time)) {

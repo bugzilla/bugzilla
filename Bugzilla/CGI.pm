@@ -438,7 +438,9 @@ sub redirect_search_url {
 
     $self->clean_search_url();
 
-    if ($user->id) {
+    # Make sure we still have params still after cleaning otherwise we 
+    # do not want to store a list_id for an empty search.
+    if ($user->id && $self->param) {
         # Insert a placeholder Bugzilla::Search::Recent, so that we know what
         # the id of the resulting search will be. This is then pulled out
         # of the Referer header when viewing show_bug.cgi to know what

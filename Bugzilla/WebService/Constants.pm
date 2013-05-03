@@ -161,6 +161,9 @@ use constant WS_ERROR_CODE => {
     # Classification errors are 900-1000
     auth_classification_not_enabled => 900,
 
+    # Search errors are 1000-1100
+    buglist_parameters_required => 1000,
+
     # Errors thrown by the WebService itself. The ones that are negative 
     # conform to http://xmlrpc-epi.sourceforge.net/specs/rfc.fault_codes.php
     xmlrpc_invalid_value => -32600,

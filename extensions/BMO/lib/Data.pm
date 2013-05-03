@@ -402,6 +402,7 @@ our %product_sec_groups = (
     "bugzilla.mozilla.org"         => 'bugzilla-security',
     "Community Tools"              => 'websites-security',
     "Developer Documentation"      => 'websites-security',
+    "Developer Ecosystem"          => 'client-services-security',
     "Finance"                      => 'finance',
     "Firefox Health Report"        => 'mozilla-services-security',
     "Input"                        => 'websites-security',

@@ -290,6 +290,7 @@
         && attachment.datasize > 0 %]
     | <a href="attachment.cgi?id=[% attachment.id %]&amp;action=delete">Delete</a>
   [% END %]
+  [% Hook.process('action') %]
 </div>
 
 <div id="attachment_list">

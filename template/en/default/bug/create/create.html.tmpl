@@ -766,7 +766,14 @@ TUI_hide_default('attachment_text_field');
 [% END %]
 
 <tbody class="expert_fields">
-  [% IF product.groups_available.size %]
+  [%# BMO - exclude the default security from from the groups_available %]
+  [%# list, as it will be added by the BMO extension %]
+  [% groups_available = [] %]
+  [% FOREACH group (product.groups_available) %]
+    [% NEXT IF group.name == product.default_security_group %]
+    [% groups_available.push(group) %]
+  [% END %]
+  [% IF groups_available.size %]
   <tr>
     <th>&nbsp;</th>
     <td colspan="3">
@@ -782,7 +789,7 @@ TUI_hide_default('attachment_text_field');
 
       <!-- Checkboxes -->
       <input type="hidden" name="defined_groups" value="1">
-      [% FOREACH group = product.groups_available %]
+      [% FOREACH group = groups_available %]
         <input type="checkbox" id="group_[% group.id FILTER html %]"
                name="groups" value="[% group.name FILTER html %]"
                [% ' checked="checked"' IF default.groups.contains(group.name)

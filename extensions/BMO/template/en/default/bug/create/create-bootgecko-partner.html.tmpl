@@ -210,9 +210,8 @@
 <tr>
   <th>Security:</th>
   <td>
-    [% sec_group = sec_groups.${product.name} || sec_groups._default %]
-    <input type="checkbox" name="groups"
-           value="[% sec_group FILTER html %]" id="group_[% sec_group FILTER html %]"
+    <input type="checkbox" name="groups" id="default_security_group"
+           value="[% product.default_security_group FILTER html %]"
       [% FOREACH g = group %]
         [% IF g.name == name %]
           [% ' checked="checked"' IF g.checked %]
@@ -220,8 +219,8 @@
         [% END %]
       [% END %]
     >
-    <label for="group_[% sec_group FILTER html %]">
-      Many users could be harmed by this security problem: 
+    <label for="default_security_group">
+      Many users could be harmed by this security problem:
       it should be kept hidden from the public until it is resolved.
     </label>
   </td>

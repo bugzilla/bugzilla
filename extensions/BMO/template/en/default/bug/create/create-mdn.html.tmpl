@@ -252,11 +252,13 @@ strong.required:before {
     </p>
 
     <p id="detail_secure">
-      [% sec_group = sec_groups.${product.name} || sec_groups._default %]
-      <input type="checkbox" name="groups" id="groups" value="[% sec_group FILTER html %]">
-      <label for="groups"><strong>This <span id="secure_type">report</span> is about a problem 
-        that is putting users at risk. It should be kept hidden from the public until it is 
-        resolved.</strong></label>
+      <input type="checkbox" name="groups" id="groups"
+             value="[% product.default_security_group FILTER html %]">
+      <label for="groups">
+        <strong>This <span id="secure_type">report</span> is about a problem
+        that is putting users at risk. It should be kept hidden from the public
+        until it is resolved.</strong>
+      </label>
     </p>
 
     <input type="submit" id="commit" value="Submit"></td>

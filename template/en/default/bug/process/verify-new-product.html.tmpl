@@ -120,9 +120,9 @@
   
   [% IF old_groups.size %]
     <p>These groups are not legal for the '[% product.name FILTER html %]'
-    product or you are not allowed to restrict [% terms.bugs %] to these groups.
-    [%+ terms.Bugs %] will no longer be restricted to these groups and may become
-    public if no other group applies:<br>
+    product or you are not allowed to restrict [% terms.bugs %] to these groups.<br>
+    <b>[%+ terms.Bugs %] will no longer be restricted to these groups and may become
+    public if no other group applies:</b><br>
     [% FOREACH group = old_groups %]
       <input type="checkbox" id="group_[% group.id FILTER html %]"
              name="groups" disabled="disabled" value="[% group.name FILTER html %]">
@@ -149,6 +149,9 @@
       [% optional_groups.push(group) %]
     [% END %]
   [% END %]
+
+  [%# BMO - check the default product sec-group to avoid accidental removal of all groups %]
+  [% CALL Bugzilla.check_default_product_security_group(product, old_groups, optional_groups) %]
 
   [% IF optional_groups.size %]
     <p>These groups are optional. You can decide to restrict [% terms.bugs %] to

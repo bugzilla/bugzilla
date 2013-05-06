@@ -1,9 +1,8 @@
   <tr>
     <th>Security:</th>
     <td colspan="3">
-      [% sec_group = sec_groups.${product.name} || sec_groups._default %]
       [% PROCESS group_checkbox
-                 name = sec_group
+                 name = product.default_security_group
                  desc = "Many users could be harmed by this security problem: " _
                         "it should be kept hidden from the public until it is resolved."
       %]

@@ -1699,14 +1699,6 @@ sub _check_groups {
                                      : $params->{product};
     my %add_groups;
 
-    # BMO: Allow extension to add groups before the
-    # real checks are done.
-    Bugzilla::Hook::process('bug_check_groups', {
-        product     => $product,
-        group_names => $group_names, 
-        add_groups  => \%add_groups 
-    });
-
     # In email or WebServices, when the "groups" item actually 
     # isn't specified, then just add the default groups.
     if (!defined $group_names) {
@@ -1725,12 +1717,9 @@ sub _check_groups {
         foreach my $name (@$group_names) {
             my $group = Bugzilla::Group->check_no_disclose({ %args, name => $name });
 
-            # BMO: Do not check group_is_settable if the group is 
-            # already added, such as from the extension hook. group_is_settable
-            # will reject any group the user is not currently in.
-            if (!$add_groups{$group->id} 
-                && !$product->group_is_settable($group)) 
-            {
+            # BMO : allow bugs to be always placed into some groups
+            if (!$product->group_always_settable($group)
+                && !$product->group_is_settable($group)) {
                 ThrowUserError('group_restriction_not_allowed', { %args, name => $name });
             }
             $add_groups{$group->id} = $group;

@@ -1049,6 +1049,7 @@ sub forced_format {
     # always work on the correct product name
     $product = Bugzilla::Product->new({ name => $product, cache => 1 })
         unless blessed($product);
+    return undef unless $product;
 
     # check for a forced-format entry
     my $forced = $create_bug_formats{$product->name}

@@ -426,7 +426,6 @@ our %product_sec_groups = (
     "Popcorn"                      => 'websites-security',
     "Privacy"                      => 'privacy',
     "quality.mozilla.org"          => 'websites-security',
-    "Skywriter"                    => 'websites-security',
     "Socorro"                      => 'client-services-security',
     "Snippets"                     => 'websites-security',
     "support.mozilla.org"          => 'websites-security',

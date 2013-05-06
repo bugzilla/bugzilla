@@ -30,6 +30,7 @@ use base qw(Exporter);
 );
 
 use Bugzilla::CGI;
+use Bugzilla::Error;
 use Bugzilla::User;
 use Bugzilla::Util;
 use Bugzilla::Component;

@@ -436,7 +436,6 @@ our %product_sec_groups = (
     "Testopia"                     => 'bugzilla-security',
     "Web Apps"                     => 'client-services-security',
     "Webmaker"                     => 'websites-security',
-    "Thimble"                      => 'websites-security',
     "Websites"                     => 'websites-security',
     "Webtools"                     => 'webtools-security',
     "www.mozilla.org"              => 'websites-security',

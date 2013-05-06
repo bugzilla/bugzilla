@@ -568,7 +568,7 @@ TUI_hide_default('expert_fields');
   [%# exclude the default security from from the groups_available %]
   [%# list, as it will be added by the BMO extension %]
   [% groups_available = [] %]
-  [% FOREACH group (product.groups_available) %]
+  [% FOREACH group = product.groups_available %]
     [% NEXT IF group.name == product.default_security_group %]
     [% groups_available.push(group) %]
   [% END %]

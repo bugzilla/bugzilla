@@ -240,3 +240,7 @@ div#update_container {
 .no_javascript .bz_hide, .no_javascript .bz_edit {
     display: none;
 }
+
+#description {
+    resize: vertical;
+}

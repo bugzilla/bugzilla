@@ -41,6 +41,13 @@
       </strong> - Lists the users of groups.
     </li>
   [% END %]
+  [% IF user.in_group('admin') || user.in_group('infrasec') %]
+    <li>
+      <strong>
+        <a href="[% urlbase FILTER none %]page.cgi?id=product_security_report.html">Product Security Report</a>
+      </strong> - Show each product's default security group and visibility.
+    </li>
+  [% END %]
   [% IF user.in_group('admin') || user.in_group('infra') %]
     <li>
       <strong>

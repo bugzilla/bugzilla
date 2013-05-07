@@ -1,0 +1,60 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% INCLUDE global/header.html.tmpl
+  title = "Product Security Report"
+  style_urls = [ "extensions/BMO/web/styles/reports.css" ]
+%]
+
+<table border="0" cellspacing="0" id="report" class="nohover" width="100%">
+  <tr id="report-header">
+    <th>Product</th>
+    <th>Default Security Group</th>
+    <th>Default Group Visibility</th>
+    <th>Mozilla-Confidential</th>
+  </tr>
+
+  [% count = 0 %]
+  [% FOREACH product = products %]
+    [% count = count + 1 %]
+    <tr class="report_item [% count % 2 == 1 ? "report_row_odd" : "report_row_even" %]">
+      <td>
+        <a href="editproducts.cgi?action=editgroupcontrols&product=[% product.name FILTER uri %]" target="_blank">
+          [% product.name FILTER html %]
+        </a>
+      </td>
+      [% IF product.group_problem %]
+        <td class="problem">
+          <span title="[% product.group_problem FILTER html %]">
+            [% product.default_security_group FILTER html %]
+          </span>
+        </td>
+      [% ELSE %]
+        <td>
+          [% product.default_security_group FILTER html %]
+        </td>
+      [% END %]
+      [% IF product.visibility_problem %]
+        <td class="problem">
+          <span title="[% product.visibility_problem FILTER html %]">
+            [% product.group_visibility FILTER html %]
+          </span>
+        </td>
+      [% ELSE %]
+        <td>
+          [% product.group_visibility FILTER html %]
+        </td>
+      [% END %]
+      <td>
+        [% product.moco ? 'Yes' : 'No' FILTER none %]
+      </td>
+    </tr>
+  [% END %]
+</table>
+
+[% INCLUDE global/footer.html.tmpl %]

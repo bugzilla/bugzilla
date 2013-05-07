@@ -174,8 +174,12 @@ sub page_before_template {
         require Bugzilla::Extension::BMO::Reports::ReleaseTracking;
         Bugzilla::Extension::BMO::Reports::ReleaseTracking::report($vars);
     }
+    elsif ($page eq 'product_security_report.html') {
+        require Bugzilla::Extension::BMO::Reports::ProductSecurity;
+        Bugzilla::Extension::BMO::Reports::ProductSecurity::report($vars);
+    }
     elsif ($page eq 'fields.html') {
-        # Recently global/field-descs.none.tmpl and bug/field-help.none.tmpl 
+        # Recently global/field-descs.none.tmpl and bug/field-help.none.tmpl
         # were changed for better performance and are now only loaded once.
         # I have not found an easy way to allow our hook template to check if
         # it is called from pages/fields.html.tmpl. So we set a value in request_cache

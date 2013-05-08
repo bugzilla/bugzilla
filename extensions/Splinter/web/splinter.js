@@ -2020,7 +2020,13 @@ Splinter.addPatchFile = function (file) {
             var hunkHeader = Splinter.EL("tr", "hunk-header");
             tbody.appendChild(hunkHeader);
             hunkHeader.appendChild(Splinter.EL("td")); // line number column
-            var hunkCell = Splinter.EL("td", "hunk-cell", hunk.functionLine ? hunk.functionLine : "\u00a0");
+            var hunkCell = Splinter.EL(
+                "td",
+                "hunk-cell",
+                "Lines " + hunk.oldStart + '-' +
+                    Math.max(hunk.oldStart + hunk.oldCount - 1, hunk.newStart + hunk.newCount - 1) +
+                    "\u00a0\u00a0" + hunk.functionLine
+            );
             hunkCell.colSpan = file.status == Splinter.Patch.CHANGED ? 4 : 1;
             hunkHeader.appendChild(hunkCell);
         }

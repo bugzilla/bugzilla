@@ -36,6 +36,34 @@ sub install_update_db {
                             { TYPE => 'INT3' });
         _migrate_first_approved_ids();
     }
+    if (!$dbh->bz_column_info('profiles', 'first_patch_reviewed_id')) {
+        $dbh->bz_add_column('profiles', 'first_patch_reviewed_id', { TYPE => 'INT3' });
+        _populate_first_reviewed_ids();
+     }
+}
+sub _populate_first_reviewed_ids {
+    my $dbh = Bugzilla->dbh;
+
+    my $sth = $dbh->prepare('UPDATE profiles SET first_patch_reviewed_id = ? WHERE userid = ?');
+    my $ra = $dbh->selectall_arrayref("SELECT attachments.submitter_id,
+                                              attachments.attach_id
+                                         FROM attachments
+                                              INNER JOIN flags ON attachments.attach_id = flags.attach_id
+                                              INNER JOIN flagtypes ON flags.type_id = flagtypes.id
+                                        WHERE flagtypes.name LIKE 'review%' AND flags.status = '+'
+                                     ORDER BY flags.modification_date");
+    my $count = 1;
+    my $total = scalar @$ra;
+    my %user_seen;
+    foreach my $ra_row (@$ra) {
+        my ($user_id, $attach_id) = @$ra_row;
+        indicate_progress({ current => $count++, total => $total, every => 25 });
+        next if $user_seen{$user_id};
+        $sth->execute($attach_id, $user_id);
+        $user_seen{$user_id} = 1;
+    }
+
+    print "done\n";
 }
 
 sub _migrate_first_approved_ids {

@@ -222,7 +222,7 @@ sub post_bug_after_creation {
     if (scalar @dep_comment) {
         my $comment = join("\n", @dep_comment);
         if (scalar @dep_errors) {
-            $comment .= "\n\nSome erors occurred creating dependent bugs and have been recorded";
+            $comment .= "\n\nSome errors occurred creating dependent bugs and have been recorded";
         }
         $bug->add_comment($comment);
         $bug->update($bug->creation_ts);

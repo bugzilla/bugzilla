@@ -232,11 +232,21 @@ Splinter.Patch = {
     NEW_NONEWLINE : 1 << 3,
     OLD_NONEWLINE : 1 << 4,
 
-    FILE_START_RE : /^(?:(?:Index|index|===|RCS|diff).*\n)*\-\-\-[ \t]*(\S+).*\n\+\+\+[ \t]*(\S+).*\n(?=@@)/mg,
+    FILE_START_RE : new RegExp(
+        '^(?:' +                                    // start of optional header
+        '(?:Index|index|===|RCS|diff)[^\\n]*\\n' +  // header
+        '(?:(?:copy|rename) from [^\\n]+\\n)?' +    // git copy/rename from
+        '(?:(?:copy|rename) to [^\\n]+\\n)?' +      // git copy/rename to
+        ')*' +                                      // end of optional header
+        '\\-\\-\\-[ \\t]*(\\S+).*\\n' +             // --- line
+        '\\+\\+\\+[ \\t]*(\\S+).*\\n' +             // +++ line
+        '(?=@@)',                                   // @@ line
+        'mg'
+    ),
     HUNK_START_RE : /^@@[ \t]+-(\d+),(\d+)[ \t]+\+(\d+),(\d+)[ \t]+@@(.*)\n/mg,
     HUNK_RE       : /((?:[ +\\-].*(?:\n|$))*)/mg,
 
-    GIT_FILE_RE   : /^diff --git a\/(\S+).*\n(?:(new|deleted) file mode \d+\n)?(?:index.*\n)?GIT binary patch\n(delta )?/mg,
+    GIT_BINARY_RE : /^diff --git a\/(\S+).*\n(?:(new|deleted) file mode \d+\n)?(?:index.*\n)?GIT binary patch\n(delta )?/mg,
 
     _cleanIntro : function(intro) {
         var m;
@@ -389,14 +399,15 @@ Splinter.Patch.Hunk.prototype = {
     }
 };
 
-Splinter.Patch.File = function(filename, status, hunks) {
-    this._init(filename, status, hunks);
+Splinter.Patch.File = function(filename, status, extra, hunks) {
+    this._init(filename, status, extra, hunks);
 };
 
 Splinter.Patch.File.prototype = {
-    _init : function(filename, status, hunks) {
+    _init : function(filename, status, extra, hunks) {
         this.filename = filename;
         this.status = status;
+        this.extra = extra;
         this.hunks = hunks;
         this.fileReviewed = false;
 
@@ -474,7 +485,7 @@ Splinter.Patch.Patch.prototype = {
         this.files = [];
 
         var m = Splinter.Patch.FILE_START_RE.exec(text);
-        var bm = Splinter.Patch.GIT_FILE_RE.exec(text);
+        var bm = Splinter.Patch.GIT_BINARY_RE.exec(text);
         if (m == null && bm == null)
             throw "Not a patch";
         this.intro = m == null ? '' : Splinter.Patch._cleanIntro(text.substring(0, m.index));
@@ -491,18 +502,19 @@ Splinter.Patch.Patch.prototype = {
                 // delta
                 this.intro += 'Modified Binary File: ' + bm[1] + "\n";
             }
-            bm = Splinter.Patch.GIT_FILE_RE.exec(text);
+            bm = Splinter.Patch.GIT_BINARY_RE.exec(text);
         }
 
         while (m != null) {
-            // git and hg show a diff between a/foo/bar.c and b/foo/bar.c
-            // or between a/foo/bar.c and /dev/null for removals and the
-            // reverse for additions.
+            // git shows a diff between a/foo/bar.c and b/foo/bar.c or between
+            // a/foo/bar.c and /dev/null for removals and the reverse for
+            // additions.
             var filename;
             var status = undefined;
+            var extra = undefined;
 
             if (/^a\//.test(m[1]) && /^b\//.test(m[2])) {
-                filename = m[1].substring(2);
+                filename = m[2].substring(2);
                 status = Splinter.Patch.CHANGED;
             } else if (/^a\//.test(m[1]) && /^\/dev\/null/.test(m[2])) {
                 filename = m[1].substring(2);
@@ -510,7 +522,7 @@ Splinter.Patch.Patch.prototype = {
             } else if (/^\/dev\/null/.test(m[1]) && /^b\//.test(m[2])) {
                 filename = m[2].substring(2);
                 status = Splinter.Patch.ADDED;
-            // Handle non-git and non-hg cases as well
+            // Handle non-git cases as well
             } else if (!/^\/dev\/null/.test(m[1]) && /^\/dev\/null/.test(m[2])) {
                 filename = m[1];
                 status = Splinter.Patch.REMOVED;
@@ -519,6 +531,25 @@ Splinter.Patch.Patch.prototype = {
                 status = Splinter.Patch.ADDED;
             } else {
                 filename = m[1];
+            }
+
+            // look for rename/copy
+            if (/^diff /.test(m[0])) {
+                // possibly git
+                var lines = m[0].split(/\n/);
+                for (var i = 0, il = lines.length; i < il && !extra; i++) {
+                    var line = lines[i];
+                    if (line != '' && !/^(?:diff|---|\+\+\+) /.test(line)) {
+                        if (/^copy from /.test(line))
+                            extra = 'copied from ' + m[1].substring(2);
+                        if (/^rename from /.test(line))
+                            extra = 'renamed from ' + m[1].substring(2);
+                    }
+                }
+            } else if (/^=== renamed /.test(m[0])) {
+                // bzr
+                filename = m[2];
+                extra = 'renamed from ' + m[1];
             }
 
             var hunks = [];
@@ -547,9 +578,10 @@ Splinter.Patch.Patch.prototype = {
             }
 
             if (status === undefined) {
-                // For non-Hg/Git we use assume patch was generated non-zero context
-                // and just look at the patch to detect added/removed. Bzr actually
-                // says added/removed in the diff, but SVN/CVS don't
+                // For non-Git we use assume patch was generated non-zero
+                // context and just look at the patch to detect added/removed.
+                // Bzr actually says added/removed in the diff, but SVN/CVS
+                // don't
                 if (hunks.length == 1 && hunks[0].oldCount == 0) {
                     status = Splinter.Patch.ADDED;
                 } else if (hunks.length == 1 && hunks[0].newCount == 0) {
@@ -559,7 +591,7 @@ Splinter.Patch.Patch.prototype = {
                 }
             }   
 
-            this.files.push(new Splinter.Patch.File(filename, status, hunks));
+            this.files.push(new Splinter.Patch.File(filename, status, extra, hunks));
 
             Splinter.Patch.FILE_START_RE.lastIndex = pos;
             m = Splinter.Patch.FILE_START_RE.exec(text);
@@ -1961,6 +1993,20 @@ Splinter.addPatchFile = function (file) {
     fileReviewedLabel.appendChild(document.createTextNode(' Reviewed'));
     fileReviewedLabel.appendTo(fileReviewed);
 
+    if (file.extra) {
+        var extraContainer = new Element(document.createElement('div'));
+        Dom.addClass(extraContainer, 'file-extra-container');
+        var extraMargin = new Element(document.createElement('span'));
+        Dom.addClass(extraMargin, 'file-label-collapse');
+        extraMargin.appendChild(document.createTextNode('\u00a0\u00a0\u00a0'));
+        extraMargin.appendTo(extraContainer);
+        var extraLabel = new Element(document.createElement('span'));
+        Dom.addClass(extraLabel, 'file-label-extra');
+        extraLabel.appendChild(document.createTextNode(file.extra));
+        extraLabel.appendTo(extraContainer);
+        extraContainer.appendTo(fileLabel);
+    }
+
     var lastHunk = file.hunks[file.hunks.length - 1];
     var lastLine = Math.max(lastHunk.oldStart + lastHunk.oldCount - 1,
                             lastHunk.newStart + lastHunk.newCount - 1);
@@ -2145,11 +2191,13 @@ Splinter.toggleCollapsed = function (filename, display) {
         var file = Splinter.thePatch.files[i];
         if (!filename || filename == file.filename) {
             var fileTableContainer = file.div.getElementsByClassName('file-table-container')[0];
+            var fileExtraContainer = file.div.getElementsByClassName('file-extra-container')[0];
             var fileCollapseLink = file.div.getElementsByClassName('file-label-collapse')[0];
             if (!display) {
                 display = Dom.getStyle(fileTableContainer, 'display') == 'block' ? 'none' : 'block';
             }
             Dom.setStyle(fileTableContainer, 'display', display);
+            Dom.setStyle(fileExtraContainer, 'display', display);
             fileCollapseLink.innerHTML = display == 'block' ? '[-]' : '[+]';
         }
     }

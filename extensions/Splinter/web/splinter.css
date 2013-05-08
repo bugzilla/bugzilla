@@ -235,6 +235,11 @@ div.review-patch-comment-text {
     font-weight: bold;
 }
 
+.file-label-extra {
+    font-size: 90%;
+    font-style: italic;
+}
+
 .hunk-header td {
     background: #ddccbb;
     font-family: "DejaVu Sans Mono", monospace;

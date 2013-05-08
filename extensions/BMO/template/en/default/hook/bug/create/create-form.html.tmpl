@@ -1,11 +1,19 @@
   <tr>
     <th>Security:</th>
     <td colspan="3">
-      [% PROCESS group_checkbox
-                 name = product.default_security_group
-                 desc = "Many users could be harmed by this security problem: " _
-                        "it should be kept hidden from the public until it is resolved."
-      %]
+      [% IF user.in_group(product.default_security_group) %]
+        [% PROCESS group_checkbox
+                  name = product.default_security_group
+                  desc = "Restrict access to this " _ terms.bug _ " to members of " _
+                         "the \"" _ product.default_security_group_obj.description _ "\" group."
+        %]
+      [% ELSE %]
+        [% PROCESS group_checkbox
+                  name = product.default_security_group
+                  desc = "Many users could be harmed by this security problem: " _
+                          "it should be kept hidden from the public until it is resolved."
+        %]
+      [% END %]
       [% IF user.in_group('partner-confidential-visible') %]
         [% PROCESS group_checkbox
                    name = 'partner-confidential'

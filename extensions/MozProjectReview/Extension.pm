@@ -101,7 +101,6 @@ sub post_bug_after_creation {
             component    => 'Security Assurance: Review Request',
             bug_severity => 'normal',
             groups       => [ 'mozilla-corporation-confidential' ],
-            keywords     => 'sec-review-needed',
             op_sys       => 'All',
             rep_platform => 'All',
             version      => 'other',

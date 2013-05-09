@@ -247,7 +247,8 @@ $default{'product'} = $product->name;
 
 if ($cloned_bug_id) {
 
-    $default{'component_'}       = $cloned_bug->component;
+    # BMO: allow form value component to override the cloned bug component
+    $default{'component_'}       = formvalue('component') || $cloned_bug->component;
     $default{'priority'}         = $cloned_bug->priority;
     $default{'bug_severity'}     = $cloned_bug->bug_severity;
     $default{'rep_platform'}     = $cloned_bug->rep_platform;

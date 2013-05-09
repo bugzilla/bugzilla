@@ -14,23 +14,18 @@ use base qw(Exporter);
 our @EXPORT = qw(
     EMAIL_FROM
     ENABLED_PRODUCTS
-    FLAG_REGEXES 
 );
 
 use constant EMAIL_FROM => 'bugzilla-daemon@mozilla.org';
 
 use constant ENABLED_PRODUCTS => (
     "Core",
-    "Firefox for Android", 
     "Firefox",
-    "Testing", 
-    "Toolkit", 
-    "Mozilla Services", 
-    "TestProduct", 
-);
-
-use constant FLAG_REGEXES => (
-    qr/^approval/
+    "Firefox for Android",
+    "Firefox for Metro",
+    "Mozilla Services",
+    "Testing",
+    "Toolkit",
 );
 
 1;

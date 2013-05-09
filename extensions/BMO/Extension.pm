@@ -924,7 +924,7 @@ sub _log_sent_email {
     } else {
         $message_type = $email->header('X-Bugzilla-Watch-Reason');
     }
-    $message_type ||= '?';
+    $message_type ||= $type || '?';
 
     $subject =~ s/[\[\(]Bug \d+[\]\)]\s*//;
 

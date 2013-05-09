@@ -580,7 +580,13 @@ var bugForm = {
   _mandatoryFields: [],
 
   onInit: function() {
-    Dom.get('user_agent').value = navigator.userAgent;
+    var user_agent = navigator.userAgent;
+    if (YAHOO.env.ua.gecko > 0) {
+        user_agent += navigator.userAgent.search('Gecko/20100101') != -1
+            ? ' (Beta/Release)'
+            : ' (Nightly/Aurora)';
+    }
+    Dom.get('user_agent').value = user_agent;
     if (navigator.buildID && navigator.buildID != navigator.userAgent) {
       Dom.get('build_id').value = navigator.buildID;
     }

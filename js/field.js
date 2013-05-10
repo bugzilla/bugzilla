@@ -219,14 +219,14 @@ function setupEditLink(id) {
 }
 
 /* Hide input/select fields and show the text with (edit) next to it */
-function hideEditableField( container, input, action, field_id, original_value, new_value ) {
+function hideEditableField( container, input, action, field_id, original_value, new_value, hide_input ) {
     YAHOO.util.Dom.removeClass(container, 'bz_default_hidden');
     YAHOO.util.Dom.addClass(input, 'bz_default_hidden');
     YAHOO.util.Event.addListener(action, 'click', showEditableField,
                                  new Array(container, input, field_id, new_value));
     if(field_id != ""){
         YAHOO.util.Event.addListener(window, 'load', checkForChangedFieldValues,
-                        new Array(container, input, field_id, original_value));
+                        new Array(container, input, field_id, original_value, hide_input ));
     }
 }
 
@@ -276,7 +276,7 @@ function showEditableField (e, ContainerInputArray) {
         }
         // focus on the first field, this makes it easier to edit
         inputs[0].focus();
-        if ( type == "input" ) {
+        if ( type == "input" || type == "textarea" ) {
             inputs[0].select();
         }
     }
@@ -300,8 +300,11 @@ function checkForChangedFieldValues(e, ContainerInputArray ) {
     var el = document.getElementById(ContainerInputArray[2]);
     var unhide = false;
     if ( el ) {
-        if ( el.value != ContainerInputArray[3] ||
-            ( el.value == "" && el.id != "alias" && el.id != "qa_contact" ) ) {
+        if ( !ContainerInputArray[4]
+             && (el.value != ContainerInputArray[3]
+                 || (el.value == "" && el.id != "alias" && el.id != "qa_contact")) )
+        {
+
             unhide = true;
         }
         else {
@@ -310,7 +313,7 @@ function checkForChangedFieldValues(e, ContainerInputArray ) {
             if ( set_default ) {
                 if(set_default.checked){
                     unhide = true;
-                }              
+                }
             }
         }
     }

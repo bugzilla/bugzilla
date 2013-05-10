@@ -181,9 +181,28 @@
         </script>
 
      [% CASE constants.FIELD_TYPE_TEXTAREA %]
-       [% INCLUDE global/textarea.html.tmpl
-           id = field.name name = field.name minrows = 4 maxrows = 8
-           cols = 60 defaultcontent = value mandatory = field.is_mandatory %]
+       <div id="[% field.name FILTER html %]_edit_container" class="bz_default_hidden">
+         <div>
+             (<a href="#" id="[% field.name FILTER html %]_edit_action">edit</a>)
+         </div>
+         [% IF value %]
+           <pre class="field_textarea_readonly">[% value FILTER html %]</pre>
+         [% END %]
+       </div>
+       <div id="[% field.name FILTER html %]_input">
+         [% INCLUDE global/textarea.html.tmpl
+            id = field.name name = field.name minrows = 4 maxrows = 8
+            cols = 60 defaultcontent = value mandatory = field.is_mandatory %]
+       </div>
+       <script type="text/javascript">
+         hideEditableField('[% field.name FILTER js %]_edit_container',
+                           '[% field.name FILTER js %]_input',
+                           '[% field.name FILTER js %]_edit_action',
+                           '[% field.name FILTER js %]',
+                           '[% value FILTER js %]',
+                           '',
+                           true);
+       </script>
      [% CASE constants.FIELD_TYPE_BUG_URLS %]
        [% '<ul class="bug_urls">' IF value.size %]
        [% FOREACH bug_url = value %]

@@ -520,8 +520,23 @@ input.required, select.required, span.required_explanation {
     list-style-type: none;
 }
 
+.field_textarea_readonly {
+    margin: 2px;
+    padding: 4px;
+    overflow: auto;
+    float: left;
+    max-width: 30em;
+    max-height: 7em;
+    border: 1px solid #CCC;
+}
+
+.field_textarea_readonly pre {
+    font-family: monospace;
+    white-space: pre-wrap;
+}
+
 /* custom styles for inline instances of autocomplete input fields */
-.yui-skin-sam .yui-ac-input { position:static !important; 
+.yui-skin-sam .yui-ac-input { position:static !important;
                               vertical-align:middle !important; }
 .yui-skin-sam .yui-ac-container { left:0px !important; }
 .yui-skin-sam .yui-ac { display: inline-block; }

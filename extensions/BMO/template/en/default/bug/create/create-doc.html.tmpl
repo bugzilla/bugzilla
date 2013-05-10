@@ -19,6 +19,25 @@
 [% END %]
 
 [% inline_javascript = BLOCK %]
+var whiteboard_map = {
+  'Accessibility':    'c=Accessibility u=webdev p=0',
+  'Add-ons':          'c=Addons u=mozdev p=0',
+  'API':              'c=API u=webdev p=0',
+  'Apps':             'c=Apps u=appdev p=0',
+  'CSS':              'c=CSS u=webdev p=0',
+  'Developer Tools':  'c=DevTools u=webdev p=0',
+  'DOM':              'c=DOM u=webdev p=0',
+  'Firefox OS':       'c=FirefoxOS u=mozdev p=0',
+  'General':          'c=General u=webdev p=0',
+  'HTML':             'c=HTML u=webdev p=0',
+  'JavaScript':       'c=JavaScript u=webdev p=0',
+  'Localization':     'c=Localization u=webdev p=0',
+  'MathML':           'c=MathML u=webdev p=0',
+  'Mozilla Platform': 'c=Platform u=mozdev p=0',
+  'Protocols':        'c=Protocols u=webdev p=0',
+  'Security':         'c=Security u=webdev p=0',
+  'SVG':              'c=SVG u=webdev p=0',
+};
 function validateAndSubmit() {
   var alert_text = '';
   if (!isFilledOut('type')) alert_text += 'Please select the "Request Type".\n';
@@ -28,6 +47,10 @@ function validateAndSubmit() {
   if (alert_text != '') {
     alert(alert_text);
     return false;
+  }
+  var component = YAHOO.util.Dom.get('component').value;
+  if (whiteboard_map[component]) {
+    YAHOO.util.Dom.get('status_whiteboard').value = whiteboard_map[component];
   }
   return true;
 }
@@ -60,6 +83,7 @@ function validateAndSubmit() {
   <input type="hidden" name="op_sys" value="Other">
   <input type="hidden" name="version" value="unspecified">
   <input type="hidden" name="bug_severity" id="bug_severity" value="normal">
+  <input type="hidden" name="status_whiteboard" id="status_whiteboard" value="">
   <input type="hidden" name="token" value="[% token FILTER html %]">
 
 <table id="doc_form">

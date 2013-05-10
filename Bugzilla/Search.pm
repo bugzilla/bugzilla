@@ -1817,6 +1817,7 @@ sub _handle_chart {
         joins        => [],
         bugs_table   => 'bugs',
         table_suffix => '',
+        condition    => $condition,
     );
     $clause->update_search_args(\%search_args);
 
@@ -2725,59 +2726,50 @@ sub _multiselect_multiple {
 
 sub _flagtypes_nonchanged {
     my ($self, $args) = @_;
-    my ($chart_id, $operator, $value, $joins, $bugs_table) =
-        @$args{qw(chart_id operator value joins bugs_table)};
+    my ($chart_id, $operator, $value, $joins, $bugs_table, $condition) =
+        @$args{qw(chart_id operator value joins bugs_table condition)};
     my $dbh = Bugzilla->dbh;
-    my $join;
 
-    # join to the attachments table
-    my $attach_table = "attachments_$chart_id";
-    $join = {
-        table => 'attachments',
-        as    => $attach_table,
-        from  => "$bugs_table.bug_id",
-        to    => "bug_id",
-        extra => [ ($self->_user->is_insider ? '' : "$attach_table.isprivate = 0") ],
+    # For 'not' operators, we need to negate the whole term.
+    # If you search for "Flags" (does not contain) "approval+" we actually want
+    # to return *bugs* that don't contain an approval+ flag.  Without rewriting
+    # the negation we'll search for *flags* which don't contain approval+.
+    if ($operator =~ s/^not//) {
+        $args->{operator} = $operator;
+        $condition->operator($operator);
+        $condition->negate(1);
+    }
+
+    my $subselect_args = {
+        chart_id   => $chart_id,
+        sequence   => $chart_id,
+        field      => 'flagtypes.name',
+        full_field =>  $dbh->sql_string_concat("flagtypes_$chart_id.name", "flags_$chart_id.status"),
+        operator   => $operator,
+        value      => $value,
+        all_values => $value,
+        quoted     => $dbh->quote($value),
+        joins      => [],
+        bugs_table => "bugs_$chart_id",
     };
-    push(@$joins, $join);
+    $self->_do_operator_function($subselect_args);
+    my $subselect_term = $subselect_args->{term};
 
-    # join to the flags table
-    my $flags_table = "flags_$chart_id";
-    $join = {
-        table => 'flags',
-        as    => $flags_table,
-        from  => "$bugs_table.bug_id",
-        to    => "bug_id",
-        extra => [ "($flags_table.attach_id = $attach_table.attach_id " .
-                " OR $flags_table.attach_id IS NULL)" ],
-    };
-    push(@$joins, $join);
-
-    # join to the flagtypes table
-    my $flagtypes_table = "flagtypes_$chart_id";
-    $join = {
-        table => 'flagtypes',
-        as    => $flagtypes_table,
-        from  => "$flags_table.type_id",
-        to    => "id",
-    };
-    push(@$joins, $join);
-
-    # join to the profiles table for the requestee
-    my $flag_profile_table = "flag_profiles_$chart_id";
-    $join = {
-        table => 'profiles',
-        as    => $flag_profile_table,
-        from  => "$flags_table.requestee_id",
-        to    => "userid",
-    };
-    push(@$joins, $join);
-
-    $args->{full_field} = $dbh->sql_string_concat("$flagtypes_table.name",
-                                                  "$flags_table.status",
-                                                  "COALESCE($flag_profile_table.login_name, '')");
-
-    $self->_do_operator_function($args);
+    # don't call build_subselect as this must run as a true sub-select
+    $args->{term} = "EXISTS (
+        SELECT 1
+          FROM $bugs_table bugs_$chart_id
+          LEFT JOIN attachments AS attachments_$chart_id
+                    ON bugs_$chart_id.bug_id = attachments_$chart_id.bug_id
+          LEFT JOIN flags AS flags_$chart_id
+                    ON bugs_$chart_id.bug_id = flags_$chart_id.bug_id
+                       AND (flags_$chart_id.attach_id = attachments_$chart_id.attach_id
+                            OR flags_$chart_id.attach_id IS NULL)
+          LEFT JOIN flagtypes AS flagtypes_$chart_id
+                    ON flags_$chart_id.type_id = flagtypes_$chart_id.id
+     WHERE bugs_$chart_id.bug_id = $bugs_table.bug_id
+           AND $subselect_term
+    )";
 }
 
 sub _multiselect_nonchanged {

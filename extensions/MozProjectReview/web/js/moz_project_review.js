@@ -14,7 +14,6 @@ var MPR = {
         "initial_questions": {
             "short_desc": "Please enter a value for project or feature name in the initial questions section",
             "cc": "Please enter a value for points of contact in the initial questions section",
-            "urgency": "Please enter a value for urgency in the initial questions section",
             "key_initiative": "Please select a value for key initiative in the initial questions section",
             "project_status": "Please select a value for project status in the initial questions section",
             "mozilla_data": "Please select a value for mozilla data in the initial questions section",
@@ -53,7 +52,6 @@ var MPR = {
     },
 
     select_inputs: [
-        'urgency',
         'key_initiative',
         'project_status',
         'mozilla_data',
@@ -82,6 +80,15 @@ var MPR = {
         MPR.updateSections();
     },
 
+    fieldValue: function (id) {
+        var field = Dom.get(id);
+        if (!field) return '';
+        if (field.type == 'text') {
+            return field.value;
+        }
+        return field.options[field.selectedIndex].value;
+    },
+
     updateSections: function () {
         // Sections that will be hidden/shown based on the input values
         // Start out as all false except for initial questions which is always visible
@@ -104,72 +111,72 @@ var MPR = {
             privacy_policy_vendor_extra: false
         };
 
-        if (Dom.get('key_initiative').value == 'Other') {
+        if (MPR.fieldValue('key_initiative') == 'Other') {
             page_sections.key_initiative_other_row = true;
         }
 
-        if (Dom.get('mozilla_data').value == 'Yes') {
+        if (MPR.fieldValue('mozilla_data') == 'Yes') {
             page_sections.legal_questions = true;
             page_sections.privacy_policy_project_questions = true;
             page_sections.sec_review_questions = true;
         }
 
-        if (Dom.get('separate_party').value == 'Yes') {
+        if (MPR.fieldValue('separate_party') == 'Yes') {
             page_sections.initial_separate_party_questions = true;
 
-            if (Dom.get('relationship_type').value
-                && Dom.get('relationship_type').value != 'Hardware Purchase') 
+            if (MPR.fieldValue('relationship_type')
+                && MPR.fieldValue('relationship_type') != 'Hardware Purchase')
             {
                 page_sections.legal_questions = true;
             }
 
-            if (Dom.get('relationship_type').value == 'Vendor/Services'
-                || Dom.get('relationship_type').value == 'Distribution/Bundling')
+            if (MPR.fieldValue('relationship_type') == 'Vendor/Services'
+                || MPR.fieldValue('relationship_type') == 'Distribution/Bundling')
             {
                 page_sections.legal_sow_questions = true;
                 page_sections.legal_vendor_services_where_row = true;
             }
 
-            if (Dom.get('relationship_type').value == 'Hardware Purchase') {
+            if (MPR.fieldValue('relationship_type') == 'Hardware Purchase') {
                 page_sections.finance_questions = true;
             }
 
-            if (Dom.get('data_access').value == 'Yes') {
+            if (MPR.fieldValue('data_access') == 'Yes') {
                 page_sections.legal_questions = true;
                 page_sections.sec_review_questions = true;
                 page_sections.privacy_policy_vendor_questions = true;
             }
 
-            if (Dom.get('vendor_cost').value == '<= $25,000') {
+            if (MPR.fieldValue('vendor_cost') == '<= $25,000') {
                 page_sections.po_needed_row = true;
             }
 
-            if (Dom.get('po_needed').value == 'Yes') {
+            if (MPR.fieldValue('po_needed') == 'Yes') {
                 page_sections.finance_questions = true;
             }
 
-            if (Dom.get('vendor_cost').value == '> $25,000') {
+            if (MPR.fieldValue('vendor_cost') == '> $25,000') {
                 page_sections.finance_questions = true;
             }
         }
 
-        if (Dom.get('legal_vendor_services_where').value == 'A single country') {
+        if (MPR.fieldValue('legal_vendor_services_where') == 'A single country') {
             page_sections.legal_vendor_single_country = true;
         }
 
-        if (Dom.get('finance_purchase_inbudget').value == 'No') {
+        if (MPR.fieldValue('finance_purchase_inbudget') == 'No') {
             page_sections.finance_purchase_notinbudget_why_row = true;
         }
 
-        if (Dom.get('privacy_policy_project').value == 'Yes') {
+        if (MPR.fieldValue('privacy_policy_project') == 'Yes') {
             page_sections.privacy_policy_project_link_row = true;
         }
 
-        if (Dom.get('privacy_policy_user_data').value == 'Yes') {
+        if (MPR.fieldValue('privacy_policy_user_data') == 'Yes') {
             page_sections.privacy_policy_project_user_data_bug_row = true;
         }
 
-        if (Dom.get('privacy_policy_vendor_user_data').value == 'Yes') {
+        if (MPR.fieldValue('privacy_policy_vendor_user_data') == 'Yes') {
             page_sections.privacy_policy_vendor_extra = true;
         }
 
@@ -203,26 +210,26 @@ var MPR = {
         }
  
         // Special case checks
-        if (Dom.get('relationship_type').value == 'Vendor/Services'
-            && Dom.get('legal_vendor_services_where').value == '')
+        if (MPR.fieldValue('relationship_type') == 'Vendor/Services'
+            && MPR.fieldValue('legal_vendor_services_where') == '')
         {
             alert_text += "Please select a value for vendor services where\n";
         }
 
-        if (Dom.get('relationship_type').value == 'Vendor/Services'
-            && Dom.get('legal_vendor_services_where').value == 'A single country'
-            && Dom.get('legal_vendor_single_country').value == '')
+        if (MPR.fieldValue('relationship_type') == 'Vendor/Services'
+            && MPR.fieldValue('legal_vendor_services_where') == 'A single country'
+            && MPR.fieldValue('legal_vendor_single_country') == '')
         {
             alert_text += "Please select a value for vendor services where single country\n";
         }
 
-        if (Dom.get('key_initiative').value == 'Other') {
+        if (MPR.fieldValue('key_initiative') == 'Other') {
             if (!MPR.isFilledOut('key_initiative_other')) {
                 alert_text += "Please enter a value for key initiative in the initial questions section\n";
             }
         }
 
-        if (Dom.get('separate_party').value == 'Yes') {
+        if (MPR.fieldValue('separate_party') == 'Yes') {
             if (!MPR.isFilledOut('relationship_type')) {
                 alert_text += "Please select a value for type of relationship\n";
             }
@@ -234,14 +241,14 @@ var MPR = {
             }
         }
 
-        if (Dom.get('finance_purchase_inbudget').value == 'No') {
+        if (MPR.fieldValue('finance_purchase_inbudget') == 'No') {
             if (!MPR.isFilledOut('finance_purchase_notinbudget_why')) {
                 alert_text += "Please include additional description for the out of budget line item\n";
             }
         }
 
-        if (Dom.get('vendor_cost').value == '<= $25,000'
-            && Dom.get('po_needed').value == '')
+        if (MPR.fieldValue('vendor_cost') == '<= $25,000'
+            && MPR.fieldValue('po_needed') == '')
         {
             alert_text += "Please select whether a PO is needed or not\n";
         }
@@ -256,9 +263,11 @@ var MPR = {
 
     //Takes a DOM element id and makes sure that it is filled out
     isFilledOut: function (elem_id)  {
-        var str = Dom.get(elem_id).value;
+        var str = MPR.fieldValue(elem_id);
         return str.length > 0 ? true : false;
     }
 };
 
-Event.onDOMReady(MPR.init());
+Event.onDOMReady(function () {
+    MPR.init();
+});

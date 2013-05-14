@@ -83,7 +83,9 @@ var MPR = {
     fieldValue: function (id) {
         var field = Dom.get(id);
         if (!field) return '';
-        if (field.type == 'text') {
+        if (field.type == 'text' 
+            || field.type == 'textarea')
+        {
             return field.value;
         }
         return field.options[field.selectedIndex].value;

@@ -50,6 +50,10 @@ var MPR = {
             "legal_sow_vendor_payment_schedule": "Please enter a value for SOW vendor payment schedule",
             "legal_sow_vendor_total_max": "Please enter a value for SOW vendor maximum total to be paid",
             "legal_sow_vendor_product_line": "Please enter a value for SOW vendor product line"
+        },
+        "privacy_policy_project_questions": {
+            "privacy_policy_project_assistance": "Please enter a value for any assistance needed in the privacy policy project questions section",
+            "privacy_policy_project_link": "Please enter a value for project link in the privacy policy project questions section"
         }
     },
 
@@ -63,8 +67,6 @@ var MPR = {
         'vendor_cost',
         'po_needed',
         'sec_affects_products',
-        'privacy_policy_project',
-        'privacy_policy_user_data',
         'privacy_policy_vendor_user_data',
         'privacy_policy_vendor_questionnaire',
         'legal_priority',
@@ -108,8 +110,6 @@ var MPR = {
             sec_review_questions: false,
             privacy_policy_project_questions: false,
             privacy_policy_vendor_questions: false,
-            privacy_policy_project_link_row: false,
-            privacy_policy_project_user_data_bug_row: false,
             privacy_policy_vendor_extra: false
         };
 
@@ -164,14 +164,6 @@ var MPR = {
 
         if (MPR.fieldValue('legal_vendor_services_where') == 'A single country') {
             page_sections.legal_vendor_single_country = true;
-        }
-
-        if (MPR.fieldValue('privacy_policy_project') == 'Yes') {
-            page_sections.privacy_policy_project_link_row = true;
-        }
-
-        if (MPR.fieldValue('privacy_policy_user_data') == 'Yes') {
-            page_sections.privacy_policy_project_user_data_bug_row = true;
         }
 
         if (MPR.fieldValue('privacy_policy_vendor_user_data') == 'Yes') {

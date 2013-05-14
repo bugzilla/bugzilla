@@ -30,7 +30,8 @@ var MPR = {
             "finance_purchase_cost": "Please enter a value for total cost in the finance questions section"
         },
         "legal_questions": {
-            "legal_priority": "Please select a priority for the legal questions section",
+            "legal_priority": "Please select a value for priority in the legal questions section",
+            "legal_timeframe": "Please select a value for timeframe in the legal questions section",
             "legal_help_from_legal": "Please describe the help needed from the Legal department"
         },
         "legal_sow_questions": {

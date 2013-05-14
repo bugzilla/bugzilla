@@ -68,7 +68,6 @@ var MPR = {
         'legal_priority',
         'legal_sow_vendor_product_line',
         'legal_vendor_services_where',
-        'finance_purchase_inbudget',
         'finance_purchase_urgency'
     ],
 
@@ -99,7 +98,6 @@ var MPR = {
             key_initiative_other_row: false,
             initial_separate_party_questions: false,
             finance_questions: false,
-            finance_purchase_notinbudget_why_row: false,
             po_needed_row: false,
             legal_questions: false,
             legal_sow_questions: false,
@@ -164,10 +162,6 @@ var MPR = {
 
         if (MPR.fieldValue('legal_vendor_services_where') == 'A single country') {
             page_sections.legal_vendor_single_country = true;
-        }
-
-        if (MPR.fieldValue('finance_purchase_inbudget') == 'No') {
-            page_sections.finance_purchase_notinbudget_why_row = true;
         }
 
         if (MPR.fieldValue('privacy_policy_project') == 'Yes') {
@@ -240,12 +234,6 @@ var MPR = {
             }
             if (!MPR.isFilledOut('vendor_cost')) {
                 alert_text += "Please select a value for vendor cost\n";
-            }
-        }
-
-        if (MPR.fieldValue('finance_purchase_inbudget') == 'No') {
-            if (!MPR.isFilledOut('finance_purchase_notinbudget_why')) {
-                alert_text += "Please include additional description for the out of budget line item\n";
             }
         }
 

@@ -301,7 +301,9 @@ use constant OPERATOR_FIELD_OVERRIDE => {
     },
     dependson        => MULTI_SELECT_OVERRIDE,
     keywords         => MULTI_SELECT_OVERRIDE,
-    'flagtypes.name' => MULTI_SELECT_OVERRIDE,
+    'flagtypes.name' => {
+        _non_changed => \&_flagtypes_nonchanged,
+    },
     longdesc => {
         changedby     => \&_long_desc_changedby,
         changedbefore => \&_long_desc_changedbefore_after,
@@ -780,6 +782,14 @@ sub _sql {
     my $dbh = Bugzilla->dbh;
     
     my ($joins, $clause) = $self->_charts_to_conditions();
+
+    if (!$clause->as_string
+        && !Bugzilla->params->{'search_allow_no_criteria'}
+        && !$self->{allow_unlimited})
+    {
+        ThrowUserError('buglist_parameters_required');
+    }
+
     my $select = join(', ', $self->_sql_select);
     my $from = $self->_sql_from($joins);
     my $where = $self->_sql_where($clause);
@@ -1281,14 +1291,7 @@ sub _sql_where {
     # SQL a bit more readable for debugging.
     my $where = join("\n   AND ", $self->_standard_where);
     my $clause_sql = $main_clause->as_string;
-    if ($clause_sql) {
-        $where .= "\n   AND " . $clause_sql;
-    }
-    elsif (!Bugzilla->params->{'search_allow_no_criteria'}
-           && !$self->{allow_unlimited})
-    {
-        ThrowUserError('buglist_parameters_required');
-    }
+    $where .= "\n   AND " . $clause_sql if $clause_sql;
     return $where;
 }
 
@@ -1788,6 +1791,7 @@ sub _handle_chart {
         joins        => [],
         bugs_table   => 'bugs',
         table_suffix => '',
+        condition    => $condition,
     );
     $clause->update_search_args(\%search_args);
 
@@ -2736,6 +2740,54 @@ sub _multiselect_multiple {
     else {
         $args->{term} = join("\n        AND ", @terms);
     }
+}
+
+sub _flagtypes_nonchanged {
+    my ($self, $args) = @_;
+    my ($chart_id, $operator, $value, $joins, $bugs_table, $condition) =
+        @$args{qw(chart_id operator value joins bugs_table condition)};
+    my $dbh = Bugzilla->dbh;
+
+    # For 'not' operators, we need to negate the whole term.
+    # If you search for "Flags" (does not contain) "approval+" we actually want
+    # to return *bugs* that don't contain an approval+ flag.  Without rewriting
+    # the negation we'll search for *flags* which don't contain approval+.
+    if ($operator =~ s/^not//) {
+        $args->{operator} = $operator;
+        $condition->operator($operator);
+        $condition->negate(1);
+    }
+
+    my $subselect_args = {
+        chart_id   => $chart_id,
+        sequence   => $chart_id,
+        field      => 'flagtypes.name',
+        full_field =>  $dbh->sql_string_concat("flagtypes_$chart_id.name", "flags_$chart_id.status"),
+        operator   => $operator,
+        value      => $value,
+        all_values => $value,
+        quoted     => $dbh->quote($value),
+        joins      => [],
+        bugs_table => "bugs_$chart_id",
+    };
+    $self->_do_operator_function($subselect_args);
+    my $subselect_term = $subselect_args->{term};
+
+    # don't call build_subselect as this must run as a true sub-select
+    $args->{term} = "EXISTS (
+        SELECT 1
+          FROM $bugs_table bugs_$chart_id
+          LEFT JOIN attachments AS attachments_$chart_id
+                    ON bugs_$chart_id.bug_id = attachments_$chart_id.bug_id
+          LEFT JOIN flags AS flags_$chart_id
+                    ON bugs_$chart_id.bug_id = flags_$chart_id.bug_id
+                       AND (flags_$chart_id.attach_id = attachments_$chart_id.attach_id
+                            OR flags_$chart_id.attach_id IS NULL)
+          LEFT JOIN flagtypes AS flagtypes_$chart_id
+                    ON flags_$chart_id.type_id = flagtypes_$chart_id.id
+     WHERE bugs_$chart_id.bug_id = $bugs_table.bug_id
+           AND $subselect_term
+    )";
 }
 
 sub _multiselect_nonchanged {

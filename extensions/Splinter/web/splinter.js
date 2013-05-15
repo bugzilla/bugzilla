@@ -243,7 +243,8 @@ Splinter.Patch = {
         '(?=@@)',                                   // @@ line
         'mg'
     ),
-    HUNK_START_RE : /^@@[ \t]+-(\d+),(\d+)[ \t]+\+(\d+),(\d+)[ \t]+@@(.*)\n/mg,
+    HUNK_START1_RE: /^@@[ \t]+-(\d+),(\d+)[ \t]+\+(\d+),(\d+)[ \t]+@@(.*)\n/mg,
+    HUNK_START2_RE: /^@@[ \t]+-(\d+),(\d+)[ \t]+\+(\d+)[ \t]+@@(.*)\n/mg,
     HUNK_RE       : /((?:(?!---)[ +\\-].*(?:\n|$))*)/mg,
 
     GIT_BINARY_RE : /^diff --git a\/(\S+).*\n(?:(new|deleted) file mode \d+\n)?(?:index.*\n)?GIT binary patch\n(delta )?/mg,
@@ -555,8 +556,18 @@ Splinter.Patch.Patch.prototype = {
             var hunks = [];
             var pos = Splinter.Patch.FILE_START_RE.lastIndex;
             while (true) {
-                Splinter.Patch.HUNK_START_RE.lastIndex = pos;
-                var m2 = Splinter.Patch.HUNK_START_RE.exec(text);
+                var re = Splinter.Patch.HUNK_START1_RE;
+                re.lastIndex = pos;
+                var newCountIndex = 4;
+                var extraIndex = 5;
+                var m2 = re.exec(text);
+                if (m2 == null || m2.index != pos) {
+                    re = Splinter.Patch.HUNK_START2_RE;
+                    re.lastIndex = pos;
+                    newCountIndex = 0;
+                    extraIndex = 4;
+                    m2 = re.exec(text);
+                }
                 if (m2 == null || m2.index != pos) {
                     break;
                 }
@@ -564,17 +575,17 @@ Splinter.Patch.Patch.prototype = {
                 var oldStart = parseInt(m2[1], 10);
                 var oldCount = parseInt(m2[2], 10);
                 var newStart = parseInt(m2[3], 10);
-                var newCount = parseInt(m2[4], 10);
-   
-                pos = Splinter.Patch.HUNK_START_RE.lastIndex;
+                var newCount = newCountIndex == 0 ? 1 : parseInt(m2[4], 10);
+
+                pos = re.lastIndex;
                 Splinter.Patch.HUNK_RE.lastIndex = pos;
                 var m3 = Splinter.Patch.HUNK_RE.exec(text);
                 if (m3 == null || m3.index != pos) {
                     break;
                 }
-                
+
                 pos = Splinter.Patch.HUNK_RE.lastIndex;
-                hunks.push(new Splinter.Patch.Hunk(oldStart, oldCount, newStart, newCount, m2[5], m3[1]));
+                hunks.push(new Splinter.Patch.Hunk(oldStart, oldCount, newStart, newCount, m2[extraIndex], m3[1]));
             }
 
             if (status === undefined) {
@@ -2006,6 +2017,9 @@ Splinter.addPatchFile = function (file) {
         extraLabel.appendTo(extraContainer);
         extraContainer.appendTo(fileLabel);
     }
+
+    if (file.hunks.length == 0)
+        return;
 
     var lastHunk = file.hunks[file.hunks.length - 1];
     var lastLine = Math.max(lastHunk.oldStart + lastHunk.oldCount - 1,

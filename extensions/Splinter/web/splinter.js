@@ -681,7 +681,7 @@ Splinter.Review.Comment.prototype = {
         var hunk = this.getHunk();
         var line = hunk.lines[this.location - hunk.location];
         for (i = 0; i < line.reviewComments.length; i++) {
-            var comment = line.reviewComments[0];
+            var comment = line.reviewComments[i];
             if (comment === this) {
                 return null;
             }

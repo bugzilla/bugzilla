@@ -2620,9 +2620,13 @@ Splinter.init = function () {
         Dom.get("attachCreator").appendChild(document.createTextNode(Splinter.Bug._formatWho(Splinter.theAttachment.whoName, 
                                                                                              Splinter.theAttachment.whoEmail)));
         Dom.get("attachDate").innerHTML = Splinter.Utils.formatDate(Splinter.theAttachment.date);
-        if (Splinter.theAttachment.isObsolete) {
-            Dom.get("attachObsolete").innerHTML = 'OBSOLETE';
-        }
+        var warnings = [];
+        if (Splinter.theAttachment.isObsolete)
+            warnings.push('OBSOLETE');
+        if (Splinter.theAttachment.isCRLF)
+            warnings.push('WINDOWS PATCH');
+        if (warnings.length > 0)
+            Dom.get("attachWarning").innerHTML = warnings.join(', ');
         Dom.setStyle('attachInfo', 'display', 'block');
 
         Dom.setStyle('quickHelpShow', 'display', 'block');

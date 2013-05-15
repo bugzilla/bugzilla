@@ -34,7 +34,7 @@ textarea:focus {
     margin-bottom: 1em;
 }
 
-#attachObsolete {
+#attachWarning {
     font-weight: bold;
     color: #c00000;
 }

@@ -99,6 +99,7 @@
       attachment.isPatch = [% attachment.ispatch ? 1 : 0 %];
       attachment.isObsolete = [% attachment.isobsolete ? 1 : 0 %];
       attachment.isPrivate = [% attachment.isprivate ? 1 : 0 %];
+      attachment.isCRLF = [% attach_is_crlf FILTER none %];
       theBug.attachments.push(attachment);
     [% END %]
 
@@ -129,7 +130,7 @@
 </div>
 
 <div id="attachInfo" style="display:none;">
-  <span id="attachObsolete"></span>
+  <span id="attachWarning"></span>
   <b>Attachment <a id="attachLink"><span id="attachId"></span></a>:</b>
   <span id="attachDesc"></span> -
   <span id="attachCreator"></span> -

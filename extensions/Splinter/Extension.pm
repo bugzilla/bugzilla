@@ -76,6 +76,7 @@ sub page_before_template {
 
             $vars->{'attach_id'} = $attachment->id;
             $vars->{'attach_data'} = $attachment->data;
+            $vars->{'attach_is_crlf'} = $attachment->{data} =~ /\012\015/ ? 1 : 0;
         }
 
         my $field_object = new Bugzilla::Field({ name => 'attachments.status' });

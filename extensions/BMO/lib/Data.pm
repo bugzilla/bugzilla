@@ -104,6 +104,7 @@ tie(%$cf_visible_in_products, "Tie::IxHash",
     qr/^cf_blocking_|cf_tracking_|cf_status/ => {
         "Add-on SDK"            => [],
         "addons.mozilla.org"    => [],
+        "Android Background Services" => [],
         "AUS"                   => [],
         "Boot2Gecko"            => [],
         "Core"                  => [],

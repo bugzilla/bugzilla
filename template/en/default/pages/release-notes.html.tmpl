@@ -28,7 +28,7 @@
 
 <h2 id="v44_introduction">Introduction</h2>
 
-<p>Welcome to [% terms.Bugzilla %] 4.4! It has been almost a year since we
+<p>Welcome to [% terms.Bugzilla %] 4.4! It has been over a year since we
   released [% terms.Bugzilla %] 4.2 on February 2012, and this new major
   release comes with several new features and improvements. This release
   contains major improvements to WebServices, which were our main target in
@@ -380,6 +380,7 @@
   <li><strong>Administration:</strong> The result code returned by
     <kbd>contrib/bugzilla-queue.rhel</kbd> when it's not running is now 2
     instead of 0.</li>
+  <li><strong>Database:</strong> Support for MySQL 5.6 has been added.</li>
   <li><strong>Database:</strong> Support for Oracle has been greatly improved.</li>
   <li><strong>Security:</strong> For improved security, the
     "X-Content-Type-Options:&nbsp;nosniff" and "X-XSS-Protection:&nbsp;block"
@@ -426,6 +427,9 @@
   <li>Field names returned in the <kbd>field_name</kbd> field of the
     <kbd>B[%%]ug.history</kbd> method have changed to be consistent with other
     methods.</li>
+  <li>The <kbd>B[%%]ug.search</kbd> method was returning all visible [% terms.bugs %]
+    when called with no arguments, ignoring the <kbd>max_search_results</kbd>
+    and <kbd>search_allow_no_criteria</kbd> parameters. This has been fixed.</li>
   <li><kbd>Product.get</kbd> now also returns the <kbd>flag_types</kbd> field
     containing all the relevant data for attachment and [% terms.bug %] flag types.</li>
   <li><kbd>Product.get</kbd> now throws an error if neither <kbd>ids</kbd> nor

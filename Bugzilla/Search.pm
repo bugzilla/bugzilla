@@ -290,12 +290,14 @@ use constant OPERATOR_FIELD_OVERRIDE => {
     },
     dependson        => MULTI_SELECT_OVERRIDE,
     keywords         => MULTI_SELECT_OVERRIDE,
-    'flagtypes.name' => MULTI_SELECT_OVERRIDE,
+    'flagtypes.name' => {
+        _non_changed => \&_flagtypes_nonchanged,
+    },
     longdesc => {
-        %{ MULTI_SELECT_OVERRIDE() },
         changedby     => \&_long_desc_changedby,
         changedbefore => \&_long_desc_changedbefore_after,
         changedafter  => \&_long_desc_changedbefore_after,
+        _non_changed  => \&_long_desc_nonchanged,
     },
     'longdescs.count' => {
         changedby     => \&_long_desc_changedby,
@@ -690,8 +692,16 @@ sub sql {
     my ($self) = @_;
     return $self->{sql} if $self->{sql};
     my $dbh = Bugzilla->dbh;
-    
+
     my ($joins, $clause) = $self->_charts_to_conditions();
+
+    if (!$clause->as_string
+        && !Bugzilla->params->{'search_allow_no_criteria'}
+        && !$self->{allow_unlimited})
+    {
+        ThrowUserError('buglist_parameters_required');
+    }
+
     my $select = join(', ', $self->_sql_select);
     my $from = $self->_sql_from($joins);
     my $where = $self->_sql_where($clause);
@@ -1191,14 +1201,7 @@ sub _sql_where {
     # SQL a bit more readable for debugging.
     my $where = join("\n   AND ", $self->_standard_where);
     my $clause_sql = $main_clause->as_string;
-    if ($clause_sql) {
-        $where .= "\n   AND " . $clause_sql;
-    }
-    elsif (!Bugzilla->params->{'search_allow_no_criteria'}
-           && !$self->{allow_unlimited})
-    {
-        ThrowUserError('buglist_parameters_required');
-    }
+    $where .= "\n   AND " . $clause_sql if $clause_sql;
     return $where;
 }
 
@@ -1689,6 +1692,7 @@ sub _handle_chart {
         value      => $string_value,
         all_values => $value,
         joins      => [],
+        condition  => $condition,
     );
     $search_args{quoted} = $self->_quote_unless_numeric(\%search_args);
     # This should add a "term" selement to %search_args.
@@ -1861,8 +1865,14 @@ sub _quote_unless_numeric {
 }
 
 sub build_subselect {
-    my ($outer, $inner, $table, $cond) = @_;
-    return "$outer IN (SELECT $inner FROM $table WHERE $cond)";
+    my ($outer, $inner, $table, $cond, $negate) = @_;
+    # Execute subselects immediately to avoid dependent subqueries, which are
+    # large performance hits on MySql
+    my $q = "SELECT DISTINCT $inner FROM $table WHERE $cond";
+    my $dbh = Bugzilla->dbh;
+    my $list = $dbh->selectcol_arrayref($q);
+    return $negate ? "1=1" : "1=2" unless @$list;
+    return $dbh->sql_in($outer, $list, $negate);
 }
 
 # Used by anyexact to get the list of input values. This allows us to
@@ -2327,14 +2337,50 @@ sub _long_desc_changedbefore_after {
     }
 }
 
+sub _long_desc_nonchanged {
+    my ($self, $args) = @_;
+    my ($chart_id, $operator, $value, $joins) =
+        @$args{qw(chart_id operator value joins)};
+    my $dbh = Bugzilla->dbh;
+
+    my $table = "longdescs_$chart_id";
+    my $join_args = {
+        chart_id   => $chart_id,
+        sequence   => $chart_id,
+        field      => 'longdesc',
+        full_field => "$table.thetext",
+        operator   => $operator,
+        value      => $value,
+        all_values => $value,
+        quoted     => $dbh->quote($value),
+        joins      => [],
+    };
+    $self->_do_operator_function($join_args);
+
+    # If the user is not part of the insiders group, they cannot see
+    # private comments
+    if (!$self->_user->is_insider) {
+        $join_args->{term} .= " AND $table.isprivate = 0";
+    }
+
+    my $join = {
+        table => 'longdescs',
+        as    => $table,
+        extra => [ $join_args->{term} ],
+    };
+    push(@$joins, $join);
+
+    $args->{term} =  "$table.comment_id IS NOT NULL";
+}
+
 sub _content_matches {
     my ($self, $args) = @_;
     my ($chart_id, $joins, $fields, $operator, $value) =
         @$args{qw(chart_id joins fields operator value)};
     my $dbh = Bugzilla->dbh;
-    
+
     # "content" is an alias for columns containing text for which we
-    # can search a full-text index and retrieve results by relevance, 
+    # can search a full-text index and retrieve results by relevance,
     # currently just bug comments (and summaries to some degree).
     # There's only one way to search a full-text index, so we only
     # accept the "matches" operator, which is specific to full-text
@@ -2582,6 +2628,53 @@ sub _multiselect_multiple {
     }
 }
 
+sub _flagtypes_nonchanged {
+    my ($self, $args) = @_;
+    my ($chart_id, $operator, $value, $joins, $condition) =
+        @$args{qw(chart_id operator value joins condition)};
+    my $dbh = Bugzilla->dbh;
+
+    # For 'not' operators, we need to negate the whole term.
+    # If you search for "Flags" (does not contain) "approval+" we actually want
+    # to return *bugs* that don't contain an approval+ flag.  Without rewriting
+    # the negation we'll search for *flags* which don't contain approval+.
+    if ($operator =~ s/^not//) {
+        $args->{operator} = $operator;
+        $condition->operator($operator);
+        $condition->negate(1);
+    }
+
+    my $subselect_args = {
+        chart_id   => $chart_id,
+        sequence   => $chart_id,
+        field      => 'flagtypes.name',
+        full_field =>  $dbh->sql_string_concat("flagtypes_$chart_id.name", "flags_$chart_id.status"),
+        operator   => $operator,
+        value      => $value,
+        all_values => $value,
+        quoted     => $dbh->quote($value),
+        joins      => [],
+    };
+    $self->_do_operator_function($subselect_args);
+    my $subselect_term = $subselect_args->{term};
+
+    # don't call build_subselect as this must run as a true sub-select
+    $args->{term} = "EXISTS (
+        SELECT 1
+          FROM bugs bugs_$chart_id
+          LEFT JOIN attachments AS attachments_$chart_id
+                    ON bugs_$chart_id.bug_id = attachments_$chart_id.bug_id
+          LEFT JOIN flags AS flags_$chart_id
+                    ON bugs_$chart_id.bug_id = flags_$chart_id.bug_id
+                       AND (flags_$chart_id.attach_id = attachments_$chart_id.attach_id
+                            OR flags_$chart_id.attach_id IS NULL)
+          LEFT JOIN flagtypes AS flagtypes_$chart_id
+                    ON flags_$chart_id.type_id = flagtypes_$chart_id.id
+     WHERE bugs_$chart_id.bug_id = bugs.bug_id
+           AND $subselect_term
+    )";
+}
+
 sub _multiselect_nonchanged {
     my ($self, $args) = @_;
     my ($chart_id, $joins, $field, $operator) =
@@ -2659,8 +2752,7 @@ sub _multiselect_term {
     my $term = $args->{term};
     $term .= $args->{_extra_where} || '';
     my $select = $args->{_select_field} || 'bug_id';
-    my $not_sql = $not ? "NOT " : '';
-    return "bugs.bug_id ${not_sql}IN (SELECT $select FROM $table WHERE $term)";
+    return build_subselect("bugs.bug_id", $select, $table, $term, $not);
 }
 
 ###############################

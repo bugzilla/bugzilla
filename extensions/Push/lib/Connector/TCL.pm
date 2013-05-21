@@ -119,7 +119,9 @@ sub should_send {
 
     # send status and resolution updates
     foreach my $change (@{ $data->{event}->{changes} }) {
-        return 1 if $change->{field} eq 'bug_status' || $change->{field} eq 'resolution';
+        return 1 if $change->{field} eq 'bug_status'
+            || $change->{field} eq 'resolution'
+            || $change->{field} eq 'cf_blocking_b2g';
     }
 
     # send attachments
@@ -152,11 +154,12 @@ sub send {
     # build payload
     my $attachment;
     my %xml = (
-        Mozilla_ID => $bug_data->{id},
-        When       => $data->{event}->{time},
-        Who        => $data->{event}->{user}->{login},
-        Status     => $bug_data->{status}->{name},
-        Resolution => $bug_data->{resolution},
+        Mozilla_ID   => $bug_data->{id},
+        When         => $data->{event}->{time},
+        Who          => $data->{event}->{user}->{login},
+        Status       => $bug_data->{status}->{name},
+        Resolution   => $bug_data->{resolution},
+        Blocking_B2G => $bug_data->{cf_blocking_b2g},
     );
     if ($data->{event}->{routing_key} eq 'comment.create') {
         $xml{Comment} = $data->{comment}->{body};

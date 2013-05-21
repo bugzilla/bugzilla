@@ -235,6 +235,7 @@
 
   <body onload="[% onload %]"
         class="[% urlbase.replace('^https?://','').replace('/$','').replace('[-~@:/.]+','-') FILTER css_class_quote %]
+               skin-[% user.settings.skin.value FILTER css_class_quote %]
                [% FOREACH class = bodyclasses %]
                  [% ' ' %][% class FILTER css_class_quote %]
                [% END %] yui-skin-sam">
@@ -244,6 +245,92 @@
   #%]
 
 <div id="header">
+
+[% IF user.settings.skin.value == 'Mozilla' %]
+
+  <div class="wrapper">
+    <table border="0" cellspacing="0" cellpadding="0" id="titles">
+    <tr>
+      <td id="title">
+        <a href="./" title="Home">[% terms.BugzillaTitle %]</a>
+      </td>
+      <td id="information"></td>
+      <td id="languages">
+        [% IF Bugzilla.languages.size > 1 %]
+          <ul class="links">
+            [% FOREACH lang = Bugzilla.languages.sort %]
+              <li>[% IF NOT loop.first %]<span class="separator"> | </span>[% END %]
+                [% IF lang == current_language %]
+                  <span class="lang_current">[% lang FILTER html FILTER upper %]</span>
+                [% ELSE %]
+                  <a href="#" onclick="set_language('[% lang FILTER none %]');">
+                    [%- lang FILTER html FILTER upper %]</a>
+                [% END %]
+              </li>
+            [% END %]
+          </ul>
+        [% END %]
+        </td> 
+      <td id="login">
+        [% IF user.id %]
+          <ul class="links">
+            <li class="dropdown">
+              <span class="anchor">[% user.login FILTER html %]</span>
+              <ul>
+                [% IF user.showmybugslink %]
+                  [% filtered_username = user.login FILTER uri %]
+                  <li><a href="[% Param('mybugstemplate').replace('%userid%', filtered_username) %]">My [% terms.Bugs %]</a></li>
+                [% END %]
+                <li><a href="userprefs.cgi">Preferences</a></li>
+                <li><a href="request.cgi?requester=[% user.login FILTER uri %]&amp;requestee=[% user.login FILTER uri %]&amp;do_union=1&amp;group=type&amp;action=queue">My Requests</a></li>
+                [% IF user.in_group('tweakparams') || user.in_group('editusers') || user.can_bless
+                      || (Param('useclassification') && user.in_group('editclassifications'))
+                      || user.in_group('editcomponents') || user.in_group('admin') || user.in_group('creategroups')
+                      || user.in_group('editkeywords') || user.in_group('bz_canusewhines')
+                      || user.get_products_by_permission("editcomponents").size %]
+                  <li><a href="admin.cgi">Administration</a></li>
+                [% END %]
+                [% IF user.authorizer.can_logout %]
+                  <li><a href="index.cgi?logout=1">Log&nbsp;out</a></li>
+                [% END %]
+                [% IF sudoer %]
+                  <li>
+                    <a href="relogin.cgi?action=end-sudo">End sudo session impersonating [% user.login FILTER html %]</a>
+                  </li>
+                [% END %]
+              </ul>
+            </li>
+          </ul>
+        [% ELSE %]
+          <ul class="login-links">
+            [% IF Param('createemailregexp')
+                  && user.authorizer.user_can_create_account %]
+              <li id="new_account_container_top"><a href="createaccount.cgi">New&nbsp;Account</a></li>
+            [% END %]
+
+            [%# Only display one login form when we're on a LOGIN_REQUIRED page. That
+              # way, we're guaranteed that the user will use the form that has 
+              # hidden_fields in it (the center form) instead of this one. Also, it's
+              # less confusing to have one form (as opposed to  three) when you're 
+              # required to log in.
+              #%]
+            [% IF user.authorizer.can_login && !Bugzilla.page_requires_login %]
+              [% PROCESS "account/auth/login-small.html.tmpl" %]
+            [% END %]
+          </ul>
+        [% END %]
+      </td>
+      <td id="tab">
+        <a href="http://mozilla.org/"><img src="https://addons.cdn.mozilla.net/media/img/zamboni/mozilla-tab.png?b=4953ddb"></a>
+      </td>
+    </tr>
+    </table>
+
+    [% PROCESS "global/common-links.html.tmpl" qs_suffix = "_top" %]
+
+  </div>
+
+[% ELSE %]
 
 [% INCLUDE global/banner.html.tmpl %]
 
@@ -287,6 +374,9 @@
 </td></tr></table>
 
 [% PROCESS "global/common-links.html.tmpl" qs_suffix = "_top" %]
+
+[% END %]
+
 </div> [%# header %]
 
 <div id="bugzilla-body">

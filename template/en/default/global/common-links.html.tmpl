@@ -39,10 +39,12 @@
     <input class="btn" type="submit" value="Search" 
            id="find[% qs_suffix FILTER html %]">
     [%-# Work around FF bug: keep this on one line %]</form>
-  <a href="page.cgi?id=quicksearch.html" title="Quicksearch Help">[?]</a></li>
+    [<a href="page.cgi?id=quicksearch.html" title="Quicksearch Help">help</a>]
+  </li>
 
   <li><span class="separator">| </span><a href="report.cgi">Reports</a></li>
 
+  [% IF user.settings.skin.value != 'Mozilla' %]
   <li>
     [% IF Param('shutdownhtml') || Bugzilla.has_flags %]
       <span class="separator">| </span>
@@ -54,9 +56,11 @@
       [% END %]
     [% END %]
   [%-# Work around FF bug: keep this on one line %]</li>
+  [% END %]
 
   [% Hook.process('action-links') %]
 
+  [% IF user.settings.skin.value != 'Mozilla' %]
   [% IF user.login %]
     <li><span class="separator">| </span><a href="userprefs.cgi">Preferences</a></li>
     [% IF user.in_group('tweakparams') || user.in_group('editusers') || user.can_bless
@@ -105,6 +109,7 @@
     [% IF user.authorizer.can_login && !Bugzilla.page_requires_login %]
       [% PROCESS "account/auth/login-small.html.tmpl" %]
     [% END %]
+  [% END %]
   [% END %]
 </ul>
 

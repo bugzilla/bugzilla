@@ -780,7 +780,7 @@ sub _sql {
     my ($self) = @_;
     return $self->{sql} if $self->{sql};
     my $dbh = Bugzilla->dbh;
-    
+
     my ($joins, $clause) = $self->_charts_to_conditions();
 
     if (!$clause->as_string
@@ -2485,9 +2485,9 @@ sub _content_matches {
     my ($chart_id, $joins, $fields, $operator, $value) =
         @$args{qw(chart_id joins fields operator value)};
     my $dbh = Bugzilla->dbh;
-    
+
     # "content" is an alias for columns containing text for which we
-    # can search a full-text index and retrieve results by relevance, 
+    # can search a full-text index and retrieve results by relevance,
     # currently just bug comments (and summaries to some degree).
     # There's only one way to search a full-text index, so we only
     # accept the "matches" operator, which is specific to full-text

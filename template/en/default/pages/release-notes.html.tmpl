@@ -53,6 +53,31 @@
 
 <h2 id="v42_point">Updates in this 4.2.x Release</h2>
 
+<h3>4.2.6</h3>
+
+<p>The following important fixes/changes have been made in this release:</p>
+
+<ul>
+  <li>MySQL 5.6 is now supported.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=852560">[% terms.Bug %] 852560</a>)</li>
+  <li>A regression introduced in [% terms.Bugzilla %] 4.2.4 made Oracle crash
+    when installing [% terms.Bugzilla %] for the first time.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=858911">[% terms.Bug %] 858911</a>)</li>
+  <li>If a custom field depends on a product, component or classification,
+    the "mandatory" bit was ignored on [% terms.bug %] creation.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=782210">[% terms.Bug %] 782210</a>)</li>
+  <li>Queries involving flags were broken in several ways. These queries
+    have been fixed.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=828344">[% terms.Bug %] 828344</a>)</li>
+  <li>Tabular reports involving the empty resolution did not link [% terms.bug %]
+    counts correctly.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=212471">[% terms.Bug %] 212471</a>)</li>
+  <li>The <kbd>B[%%]ug.search</kbd> WebService method was returning all visible
+    [%+ terms.bugs %] when called with no arguments, ignoring the
+    <kbd>max_search_results</kbd> and <kbd>search_allow_no_criteria</kbd> parameters.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=859118">[% terms.Bug %] 859118</a>)</li>
+</ul>
+
 <h3>4.2.5</h3>
 
 <p>This release fixes one security issue. See the

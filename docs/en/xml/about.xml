@@ -73,10 +73,8 @@
   <section id="newversions">
     <title>New Versions</title>
     <para>
-      This is the &bz-ver; version of The Bugzilla Guide. It is so named 
-      to match the current version of Bugzilla. 
-      <!-- BZ-DEVEL --> This version of the guide, like its associated Bugzilla version, is a
-      development version.<!-- /BZ-DEVEL --> 
+      This is the &bz-ver; version of The Bugzilla Guide. It is so named
+      to match the current version of Bugzilla.
     </para>
     <para>
       The latest version of this guide can always be found at <ulink

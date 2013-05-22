@@ -39,7 +39,6 @@
 
   <bookinfo>
     <title>The Bugzilla Guide - &bz-ver; 
-    <!-- BZ-DEVEL -->Development <!-- /BZ-DEVEL -->
     Release</title>
 
     <authorgroup>

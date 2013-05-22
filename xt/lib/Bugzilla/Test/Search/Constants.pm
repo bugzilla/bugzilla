@@ -245,6 +245,15 @@ use constant KNOWN_BROKEN => {
     'allwords-<1>' => {
         ALLWORDS_BROKEN,
     },
+    'anywords-<1>' => {
+        'flagtypes.name' => { contains => [1,2,3,4,5] },
+    },
+    'anywords-<1> <2>' => {
+        'flagtypes.name' => { contains => [3,4,5] },
+    },
+    'anywordssubstr-<1> <2>' => {
+        'flagtypes.name' => { contains => [3,4,5] },
+    },
 
     # setters.login_name and requestees.login name aren't tracked individually
     # in bugs_activity, so can't be searched using this method.
@@ -383,11 +392,17 @@ use constant BROKEN_NOT => {
     anyexact => {
         'flagtypes.name' => { contains => [1, 2, 5] },
     },
-    anywords => {
-        'flagtypes.name' => { contains => [1, 2, 5] },
+    'anywords-<1>' => {
+        'flagtypes.name' => { contains => [1, 2, 3, 4, 5] },
+    },
+    'anywords-<1> <2>' => {
+        'flagtypes.name' => { contains => [3, 4, 5] },
     },
     anywordssubstr => {
         'flagtypes.name' => { contains => [5] },
+    },
+    'anywordssubstr-<1> <2>' => {
+        'flagtypes.name' => { contains => [3,4,5] },
     },
     casesubstring => {
         'flagtypes.name' => { contains => [5] },
@@ -443,6 +458,12 @@ use constant BROKEN_NOT => {
     },
     notsubstring => {
         longdesc         => { contains => [1] },
+    },
+    'nowords-<1>' => {
+        'flagtypes.name' => { contains => [5] },
+    },
+    'nowordssubstr-<1>' => {
+        'flagtypes.name' => { contains => [5] },
     },
     lessthan => {
         'flagtypes.name' => { contains => [5] },

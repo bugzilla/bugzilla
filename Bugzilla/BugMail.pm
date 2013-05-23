@@ -43,7 +43,6 @@ use Bugzilla::Bug;
 use Bugzilla::Comment;
 use Bugzilla::Mailer;
 use Bugzilla::Hook;
-use Bugzilla::Instrument;
 
 use Date::Parse;
 use Date::Format;
@@ -75,16 +74,6 @@ sub relationships {
 sub Send {
     my ($id, $forced, $params) = @_;
     $params ||= {};
-
-    my $instrument;
-    my $current_login = Bugzilla->user->login;
-    if ($current_login eq 'ehsan@mozilla.com'
-        || $current_login eq 'glob@mozilla.com'
-        || $current_login eq 'dkl@mozilla.com')
-    {
-        $instrument = Bugzilla::Instrument->new('bugmail');
-        $instrument->begin("bug $id user $current_login");
-    }
 
     my $dbh = Bugzilla->dbh;
     my $bug = new Bugzilla::Bug($id);
@@ -166,7 +155,6 @@ sub Send {
     ###########################################################################
     # Start of email filtering code
     ###########################################################################
-    $instrument && $instrument->begin('email filtering');
     
     # A user_id => roles hash to keep track of people.
     my %recipients;
@@ -225,9 +213,7 @@ sub Send {
     Bugzilla::Hook::process('bugmail_recipients',
                             { bug => $bug, recipients => \%recipients,
                               users => \%user_cache, diffs => \@diffs });
-    $instrument && $instrument->end();
 
-    $instrument && $instrument->begin('watchers');
     if (scalar keys %recipients) {
         # Find all those user-watching anyone on the current list, who is not
         # on it already themselves.
@@ -254,7 +240,6 @@ sub Send {
         next unless $watcher_id;
         $recipients{$watcher_id}->{+REL_GLOBAL_WATCHER} = BIT_DIRECT;
     }
-    $instrument && $instrument->end();
 
     # We now have a complete set of all the users, and their relationships to
     # the bug in question. However, we are not necessarily going to mail them
@@ -342,7 +327,6 @@ sub Send {
                                         { updated_bug     => $bug,
                                           referenced_bugs => $referenced_bugs });
 
-                $instrument && $instrument->begin("sending to " . $user->login);
                 $sent_mail = sendMail(
                     { to       => $user, 
                       bug      => $bug,
@@ -354,9 +338,7 @@ sub Send {
                       diffs    => \@diffs,
                       rels_which_want => \%rels_which_want,
                       referenced_bugs => $referenced_bugs,
-                      instrument      => $instrument,
                     });
-                $instrument && $instrument->end();
             }
         }
 
@@ -377,7 +359,6 @@ sub Send {
         $bug->{lastdiffed} = $end;
     }
 
-    $instrument && $instrument->end();
     return {'sent' => \@sent, 'excluded' => \@excluded};
 }
 
@@ -393,7 +374,6 @@ sub sendMail {
     my @diffs = @{ $params->{diffs} };
     my $relRef      = $params->{rels_which_want};
     my $referenced_bugs = $params->{referenced_bugs};
-    my $instrument = $params->{instrument};
 
     # Only display changes the user is allowed see.
     my @display_diffs;
@@ -458,14 +438,9 @@ sub sendMail {
         new_comments => \@send_comments,
         threadingmarker => build_thread_marker($bug->id, $user->id, !$bug->lastdiffed),
         referenced_bugs => $referenced_bugs,
-        instrument => $instrument,
     };
-    $instrument && $instrument->begin('generating bugmail');
     my $msg =  _generate_bugmail($user, $vars);
-    $instrument && $instrument->end();
-    $instrument && $instrument->begin('sending to mta');
     MessageToMTA($msg);
-    $instrument && $instrument->end();
 
     return 1;
 }
@@ -474,17 +449,12 @@ sub _generate_bugmail {
     my ($user, $vars) = @_;
     my $template = Bugzilla->template_inner($user->setting('lang'));
     my ($msg_text, $msg_html, $msg_header);
-    my $instrument = $vars->{instrument};
 
-    $instrument && $instrument->begin('header');
     $template->process("email/bugmail-header.txt.tmpl", $vars, \$msg_header)
         || ThrowTemplateError($template->error());
-    $instrument && $instrument->end();
 
-    $instrument && $instrument->begin('text body');
     $template->process("email/bugmail.txt.tmpl", $vars, \$msg_text)
         || ThrowTemplateError($template->error());
-    $instrument && $instrument->end();
 
     my @parts = (
         Email::MIME->create(
@@ -495,7 +465,6 @@ sub _generate_bugmail {
         )
     );
     if ($user->setting('email_format') eq 'html') {
-        $instrument && $instrument->begin('html body');
         $template->process("email/bugmail.html.tmpl", $vars, \$msg_html)
             || ThrowTemplateError($template->error());
         push @parts, Email::MIME->create(
@@ -504,10 +473,8 @@ sub _generate_bugmail {
             },
             body => $msg_html,
         );
-        $instrument && $instrument->end();
     }
 
-    $instrument && $instrument->begin('email object');
     # TT trims the trailing newline, and threadingmarker may be ignored.
     my $email = new Email::MIME("$msg_header\n");
 
@@ -520,7 +487,6 @@ sub _generate_bugmail {
         $email->content_type_set('multipart/alternative');
     }
     $email->parts_set(\@parts);
-    $instrument && $instrument->end();
     return $email;
 }
 

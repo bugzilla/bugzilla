@@ -37,6 +37,7 @@ Redirect permanent /etiquette.html https://bugzilla.mozilla.org/page.cgi?id=etiq
 Redirect permanent /duplicates.html https://bugzilla.mozilla.org/duplicates.cgi
 
 RewriteEngine On
+RewriteBase /stable/
 RewriteRule ^review(.*) page.cgi?id=splinter.html$1 [QSA]
 RewriteRule ^favicon\.ico$ extensions/BMO/web/images/favicon.ico
 RewriteRule ^form[\.:](itrequest|mozlist|poweredby|presentation|trademark|recoverykey)$ enter_bug.cgi?product=mozilla.org&format=$1
@@ -47,7 +48,7 @@ RewriteRule ^form[\.:]reps[\.:]budget$ enter_bug.cgi?product=Mozilla+Reps&format
 RewriteRule ^form[\.:]reps[\.:]swag$ enter_bug.cgi?product=Mozilla+Reps&format=remo-swag
 RewriteRule ^form[\.:]reps[\.:]payment$ page.cgi?id=remo-form-payment.html
 RewriteRule ^form[\.:]employee[\.\-:]incident$ enter_bug.cgi?product=mozilla.org&format=employee-incident
-RewriteRule ^form[\.:]brownbag$ enter_bug.cgi?product=Air+Mozilla&format=brownbag
+RewriteRule ^form[\.:]brownbag$ https://air.mozilla.org/requests
 RewriteRule ^form[\.:]finance$ enter_bug.cgi?product=Finance&format=finance
 RewriteRule ^form[\.:]privacy[\.\-:]data$ enter_bug.cgi?product=Privacy&format=privacy-data
 RewriteRule ^form[\.:]moz[\.\-:]project[\.\-:]review$ enter_bug.cgi?product=mozilla.org&format=moz-project-review

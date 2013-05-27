@@ -243,8 +243,10 @@ Splinter.Patch = {
         '(?=@@)',                                   // @@ line
         'mg'
     ),
-    HUNK_START1_RE: /^@@[ \t]+-(\d+),(\d+)[ \t]+\+(\d+),(\d+)[ \t]+@@(.*)\n/mg,
-    HUNK_START2_RE: /^@@[ \t]+-(\d+),(\d+)[ \t]+\+(\d+)[ \t]+@@(.*)\n/mg,
+    HUNK_START1_RE: /^@@[ \t]+-(\d+),(\d+)[ \t]+\+(\d+),(\d+)[ \t]+@@(.*)\n/mg, // -l,s +l,s
+    HUNK_START2_RE: /^@@[ \t]+-(\d+),(\d+)[ \t]+\+(\d+)[ \t]+@@(.*)\n/mg,       // -l,s +l
+    HUNK_START3_RE: /^@@[ \t]+-(\d+)[ \t]+\+(\d+),(\d+)[ \t]+@@(.*)\n/mg,       // -l +l,s
+    HUNK_START4_RE: /^@@[ \t]+-(\d+)[ \t]+\+(\d+)[ \t]+@@(.*)\n/mg,             // -l +l
     HUNK_RE       : /((?:(?!---)[ +\\-].*(?:\n|$))*)/mg,
 
     GIT_BINARY_RE : /^diff --git a\/(\S+).*\n(?:(new|deleted) file mode \d+\n)?(?:index.*\n)?GIT binary patch\n(delta )?/mg,
@@ -556,26 +558,69 @@ Splinter.Patch.Patch.prototype = {
             var hunks = [];
             var pos = Splinter.Patch.FILE_START_RE.lastIndex;
             while (true) {
+                var found = false;
+                var oldStart, oldCount, newStart, newCount, extra;
+
+                // -l,s +l,s
                 var re = Splinter.Patch.HUNK_START1_RE;
                 re.lastIndex = pos;
-                var newCountIndex = 4;
-                var extraIndex = 5;
                 var m2 = re.exec(text);
-                if (m2 == null || m2.index != pos) {
-                    re = Splinter.Patch.HUNK_START2_RE;
-                    re.lastIndex = pos;
-                    newCountIndex = 0;
-                    extraIndex = 4;
-                    m2 = re.exec(text);
-                }
-                if (m2 == null || m2.index != pos) {
-                    break;
+                if (m2 != null && m2.index == pos) {
+                    oldStart = parseInt(m2[1], 10);
+                    oldCount = parseInt(m2[2], 10);
+                    newStart = parseInt(m2[3], 10);
+                    newCount = parseInt(m2[4], 10);
+                    extra    = m2[5];
+                    found    = true;
                 }
 
-                var oldStart = parseInt(m2[1], 10);
-                var oldCount = parseInt(m2[2], 10);
-                var newStart = parseInt(m2[3], 10);
-                var newCount = newCountIndex == 0 ? 1 : parseInt(m2[4], 10);
+                if (!found) {
+                    // -l,s +l
+                    re = Splinter.Patch.HUNK_START2_RE;
+                    re.lastIndex = pos;
+                    m2 = re.exec(text);
+                    if (m2 != null && m2.index == pos) {
+                        oldStart = parseInt(m2[1], 10);
+                        oldCount = parseInt(m2[2], 10);
+                        newStart = parseInt(m2[3], 10);
+                        newCount = 1;
+                        extra    = m2[4];
+                        found    = true;
+                    }
+                }
+
+                if (!found) {
+                    // -l +l,s
+                    re = Splinter.Patch.HUNK_START3_RE;
+                    re.lastIndex = pos;
+                    m2 = re.exec(text);
+                    if (m2 != null && m2.index == pos) {
+                        oldStart = parseInt(m2[1], 10);
+                        oldCount = 1;
+                        newStart = parseInt(m2[2], 10);
+                        newCount = parseInt(m2[3], 10);
+                        extra    = m2[4];
+                        found    = true;
+                    }
+                }
+
+                if (!found) {
+                    // -l +l
+                    re = Splinter.Patch.HUNK_START4_RE;
+                    re.lastIndex = pos;
+                    m2 = re.exec(text);
+                    if (m2 != null && m2.index == pos) {
+                        oldStart = parseInt(m2[1], 10);
+                        oldCount = 1;
+                        newStart = parseInt(m2[2], 10);
+                        newCount = 1;
+                        extra    = m2[3];
+                        found    = true;
+                    }
+                }
+
+                if (!found)
+                    break;
 
                 pos = re.lastIndex;
                 Splinter.Patch.HUNK_RE.lastIndex = pos;
@@ -585,7 +630,7 @@ Splinter.Patch.Patch.prototype = {
                 }
 
                 pos = Splinter.Patch.HUNK_RE.lastIndex;
-                hunks.push(new Splinter.Patch.Hunk(oldStart, oldCount, newStart, newCount, m2[extraIndex], m3[1]));
+                hunks.push(new Splinter.Patch.Hunk(oldStart, oldCount, newStart, newCount, extra, m3[1]));
             }
 
             if (status === undefined) {

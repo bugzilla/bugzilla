@@ -33,8 +33,7 @@ sub page_before_template {
     my ($vars, $page) = @$args{qw(vars page_id)};
 
     if ($page eq 'splinter.html') {
-        # Login is required for performing a review
-        my $user = Bugzilla->login(LOGIN_REQUIRED);
+        my $user = Bugzilla->user;
 
         # We can either provide just a bug id to see a list
         # of prior reviews by the user, or just an attachment
@@ -54,7 +53,8 @@ sub page_before_template {
 
             # Check to see if the user can see the bug this attachment is connected to.
             Bugzilla::Bug->check($attachment->bug_id);
-            if ($attachment->isprivate && $user->id != $attachment->attacher->id
+            if ($attachment->isprivate
+                && $user->id != $attachment->attacher->id
                 && !$user->is_insider)
             {
                 ThrowUserError('auth_failure', {action => 'access',

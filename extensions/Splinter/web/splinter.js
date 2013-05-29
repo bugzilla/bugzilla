@@ -1388,6 +1388,10 @@ Splinter.discardReview = function () {
 };
 
 Splinter.haveDraft = function () {
+    if (Splinter.readOnly) {
+        return false;
+    }
+
     if (Splinter.theAttachment.status && Dom.get('attachmentStatus').value != Splinter.theAttachment.status) {
         return true;
     }
@@ -1966,7 +1970,7 @@ Splinter.appendPatchHunk = function (file, hunk, tableType, includeComments, cli
             }
         }
 
-        if (clickable) {
+        if (!Splinter.readOnly && clickable) {
             Splinter.domCache.data(tr).patchFile = file;
             Splinter.domCache.data(tr).patchLocation = loc;
             Event.addListener(tr, 'dblclick', Splinter.onRowDblClick);
@@ -2026,28 +2030,30 @@ Splinter.addPatchFile = function (file) {
     fileLabelStatus.appendChild(document.createTextNode(statusString));
     fileLabelStatus.appendTo(fileLabel);
 
-    var fileReviewed = new Element(document.createElement('span'));
-    Dom.addClass(fileReviewed, 'file-review');
-    Dom.setAttribute(fileReviewed, 'title', 'Indicates that a review has been completed for this file. ' +
-                                            'This is for personal tracking purposes only and has no effect ' +
-                                            'on the published review.');
-    fileReviewed.appendTo(fileLabel);
+    if (!Splinter.readOnly) {
+        var fileReviewed = new Element(document.createElement('span'));
+        Dom.addClass(fileReviewed, 'file-review');
+        Dom.setAttribute(fileReviewed, 'title', 'Indicates that a review has been completed for this file. ' +
+                                                'This is for personal tracking purposes only and has no effect ' +
+                                                'on the published review.');
+        fileReviewed.appendTo(fileLabel);
 
-    var fileReviewedInput = new Element(document.createElement('input'));
-    Dom.setAttribute(fileReviewedInput, 'type', 'checkbox');
-    Dom.setAttribute(fileReviewedInput, 'id', 'file-review-checkbox-' + encodeURIComponent(file.filename));
-    Dom.setAttribute(fileReviewedInput, 'onchange', "Splinter.toggleFileReviewed('" +
-                                                    encodeURIComponent(file.filename) + "');");
-    if (file.fileReviewed) {
-        Dom.setAttribute(fileReviewedInput, 'checked', 'true');
+        var fileReviewedInput = new Element(document.createElement('input'));
+        Dom.setAttribute(fileReviewedInput, 'type', 'checkbox');
+        Dom.setAttribute(fileReviewedInput, 'id', 'file-review-checkbox-' + encodeURIComponent(file.filename));
+        Dom.setAttribute(fileReviewedInput, 'onchange', "Splinter.toggleFileReviewed('" +
+                                                        encodeURIComponent(file.filename) + "');");
+        if (file.fileReviewed) {
+            Dom.setAttribute(fileReviewedInput, 'checked', 'true');
+        }
+        fileReviewedInput.appendTo(fileReviewed);
+
+        var fileReviewedLabel = new Element(document.createElement('label'));
+        Dom.addClass(fileReviewedLabel, 'file-review-label')
+        Dom.setAttribute(fileReviewedLabel, 'for', 'file-review-checkbox-' + encodeURIComponent(file.filename));
+        fileReviewedLabel.appendChild(document.createTextNode(' Reviewed'));
+        fileReviewedLabel.appendTo(fileReviewed);
     }
-    fileReviewedInput.appendTo(fileReviewed);
-
-    var fileReviewedLabel = new Element(document.createElement('label'));
-    Dom.addClass(fileReviewedLabel, 'file-review-label')
-    Dom.setAttribute(fileReviewedLabel, 'for', 'file-review-checkbox-' + encodeURIComponent(file.filename));
-    fileReviewedLabel.appendChild(document.createTextNode(' Reviewed'));
-    fileReviewedLabel.appendTo(fileReviewed);
 
     if (file.extra) {
         var extraContainer = new Element(document.createElement('div'));
@@ -2230,7 +2236,8 @@ Splinter.showOverview = function () {
     Dom.getElementsByClassName('file', 'div', '', function (node) { 
         Dom.setStyle(node, 'display', 'none');
     });
-    Splinter.updateMyPatchComments();
+    if (!Splinter.readOnly)
+        Splinter.updateMyPatchComments();
 };
 
 Splinter.showAllFiles = function () {
@@ -2437,27 +2444,31 @@ Splinter.start = function () {
         Dom.setStyle('emptyCommentNotice', 'display', 'none');
     }
 
-    var myComment = Dom.get('myComment');
-    myComment.value = Splinter.theReview.intro ? Splinter.theReview.intro : "";
-    Event.addListener(myComment, 'focus', function () {
-        Dom.setStyle('emptyCommentNotice', 'display', 'none');
-    });
-    Event.addListener(myComment, 'blur', function () {
-        if (myComment.value == '') {
-            Dom.setStyle('emptyCommentNotice', 'display', 'block');
-        }
-    });
-    Event.addListener(myComment, 'keydown', function () {
-        Splinter.queueSaveDraft();
+    if (!Splinter.readOnly) {
+        var myComment = Dom.get('myComment');
+        myComment.value = Splinter.theReview.intro ? Splinter.theReview.intro : "";
+        Event.addListener(myComment, 'focus', function () {
+            Dom.setStyle('emptyCommentNotice', 'display', 'none');
+        });
+        Event.addListener(myComment, 'blur', function () {
+            if (myComment.value == '') {
+                Dom.setStyle('emptyCommentNotice', 'display', 'block');
+            }
+        });
+        Event.addListener(myComment, 'keydown', function () {
+            Splinter.queueSaveDraft();
+            Splinter.queueUpdateHaveDraft();
+        });
+
+        Splinter.updateMyPatchComments();
+
         Splinter.queueUpdateHaveDraft();
-    });
 
-    Splinter.updateMyPatchComments();
-
-    Splinter.queueUpdateHaveDraft();
-
-    Event.addListener("publishButton", "click", Splinter.publishReview);
-    Event.addListener("cancelButton", "click", Splinter.discardReview);
+        Event.addListener("publishButton", "click", Splinter.publishReview);
+        Event.addListener("cancelButton", "click", Splinter.discardReview);
+    } else {
+        Dom.setStyle('haveDraftNotice', 'display', 'none');
+    }
 };
 
 Splinter.newPageUrl = function (newBugId, newAttachmentId) {

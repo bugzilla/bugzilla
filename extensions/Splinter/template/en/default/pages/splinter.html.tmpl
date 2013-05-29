@@ -49,6 +49,7 @@
   Splinter.configHaveExtension = true;
   Splinter.configHelp = '[% urlbase FILTER js %]page.cgi?id=splinter/help.html';
   Splinter.configNote = '';
+  Splinter.readOnly = [% user.id FILTER none %] == 0;
 
   Splinter.configAttachmentStatuses = [
   [% FOREACH status = attachment_statuses %]
@@ -115,8 +116,10 @@
 <![endif]-->
 
 <div id="helpful-links">
-  <a id="allReviewsLink" href="[% Bugzilla.splinter_review_base FILTER none %]">
-    [reviews]</a>
+  [% IF user.id %]
+    <a id="allReviewsLink" href="[% Bugzilla.splinter_review_base FILTER none %]">
+      [reviews]</a>
+  [% END %]
   <a id='helpLink' target='splinterHelp' 
      href="[% urlbase FILTER none %]page.cgi?id=splinter/help.html">
     [help]</a>
@@ -193,61 +196,67 @@
       (Restored from draft; last edited <span id="restoredLastModified"></span>)
     </span>
   </div>
-  <div>
-    <div id="myCommentFrame">
-      <textarea id="myComment"></textarea>
-      <div id="emptyCommentNotice">&lt;Overall Comment&gt;</div>
-    </div>
-    <div id="myPatchComments"></div>
-    <form id="publish" method="post" action="attachment.cgi" onsubmit="normalizeComments();">
-      <input type="hidden" id="publish_token" name="token" value="">
-      <input type="hidden" id="publish_action" name="action" value="update">
-      <input type="hidden" id="publish_review" name="comment" value="">
-      <input type="hidden" id="publish_attach_id" name="id" value="">
-      <input type="hidden" id="publish_attach_desc" name="description" value="">
-      <input type="hidden" id="publish_attach_filename" name="filename" value="">
-      <input type="hidden" id="publish_attach_contenttype" name="contenttypeentry" value="">
-      <input type="hidden" id="publish_attach_ispatch" name="ispatch" value="">
-      <input type="hidden" id="publish_attach_isobsolete" name="isobsolete" value="">
-      <input type="hidden" id="publish_attach_isprivate" name="isprivate" value="">
-      <div id="attachment_flags">
-        [% any_flags_requesteeble = 0 %]
-        [% FOREACH flag_type = flag_types %]
-          [% NEXT UNLESS flag_type.is_active %]
-          [% SET any_flags_requesteeble = 1 IF flag_type.is_requestable && flag_type.is_requesteeble %]
-        [% END %]
-        [% IF flag_types.size > 0 %]
-          [% PROCESS "flag/list.html.tmpl" bug_id = bug_id
-                                           attach_id = attach_d
-                                           flag_types = flag_types
-                                           read_only_flags = !can_edit
-                                           any_flags_requesteeble = any_flags_requesteeble
-           %]
-        [% END %]
-        <script>
+  [% IF user.id %]
+    <div>
+      <div id="myCommentFrame">
+        <textarea id="myComment"></textarea>
+        <div id="emptyCommentNotice">&lt;Overall Comment&gt;</div>
+      </div>
+      <div id="myPatchComments"></div>
+      <form id="publish" method="post" action="attachment.cgi" onsubmit="normalizeComments();">
+        <input type="hidden" id="publish_token" name="token" value="">
+        <input type="hidden" id="publish_action" name="action" value="update">
+        <input type="hidden" id="publish_review" name="comment" value="">
+        <input type="hidden" id="publish_attach_id" name="id" value="">
+        <input type="hidden" id="publish_attach_desc" name="description" value="">
+        <input type="hidden" id="publish_attach_filename" name="filename" value="">
+        <input type="hidden" id="publish_attach_contenttype" name="contenttypeentry" value="">
+        <input type="hidden" id="publish_attach_ispatch" name="ispatch" value="">
+        <input type="hidden" id="publish_attach_isobsolete" name="isobsolete" value="">
+        <input type="hidden" id="publish_attach_isprivate" name="isprivate" value="">
+        <div id="attachment_flags">
+          [% any_flags_requesteeble = 0 %]
           [% FOREACH flag_type = flag_types %]
             [% NEXT UNLESS flag_type.is_active %]
-            Event.addListener('flag_type-[% flag_type.id FILTER js %]', 'change', 
-                              function() { Splinter.flagChanged = 1;        
-                                           Splinter.queueUpdateHaveDraft(); });
-            [% FOREACH flag = flag_type.flags %]
-              Event.addListener('flag-[% flag.id FILTER js %]', 'change', 
+            [% SET any_flags_requesteeble = 1 IF flag_type.is_requestable && flag_type.is_requesteeble %]
+          [% END %]
+          [% IF flag_types.size > 0 %]
+            [% PROCESS "flag/list.html.tmpl" bug_id = bug_id
+                                             attach_id = attach_d
+                                             flag_types = flag_types
+                                             read_only_flags = !can_edit
+                                             any_flags_requesteeble = any_flags_requesteeble
+            %]
+          [% END %]
+          <script>
+            [% FOREACH flag_type = flag_types %]
+              [% NEXT UNLESS flag_type.is_active %]
+              Event.addListener('flag_type-[% flag_type.id FILTER js %]', 'change',
                                 function() { Splinter.flagChanged = 1;
                                              Splinter.queueUpdateHaveDraft(); });
+              [% FOREACH flag = flag_type.flags %]
+                Event.addListener('flag-[% flag.id FILTER js %]', 'change',
+                                  function() { Splinter.flagChanged = 1;
+                                               Splinter.queueUpdateHaveDraft(); });
+              [% END %]
             [% END %]
-          [% END %]
-        </script>
+          </script>
+        </div>
+      </form>
+      <div id="buttonBox">
+        <span id="attachmentStatusSpan">Patch Status:
+          <select id="attachmentStatus"> </select>
+        </span>
+        <input id="publishButton" type="button" value="Publish" />
+        <input id="cancelButton" type="button" value="Cancel" />
       </div>
-    </form>
-    <div id="buttonBox">
-      <span id="attachmentStatusSpan">Patch Status:
-        <select id="attachmentStatus"> </select>
-      </span>
-      <input id="publishButton" type="button" value="Publish" />
-      <input id="cancelButton" type="button" value="Cancel" />
+      <div class="clear"></div>
     </div>
-    <div class="clear"></div>
-  </div>
+  [% ELSE %]
+    <div>
+      You must be logged in to review patches.
+    </div>
+  [% END %]
   <div id="oldReviews" style="display: none;">
     <div class="review-title">
       Previous Reviews

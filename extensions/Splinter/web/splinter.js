@@ -559,7 +559,7 @@ Splinter.Patch.Patch.prototype = {
             var pos = Splinter.Patch.FILE_START_RE.lastIndex;
             while (true) {
                 var found = false;
-                var oldStart, oldCount, newStart, newCount, extra;
+                var oldStart, oldCount, newStart, newCount, context;
 
                 // -l,s +l,s
                 var re = Splinter.Patch.HUNK_START1_RE;
@@ -570,7 +570,7 @@ Splinter.Patch.Patch.prototype = {
                     oldCount = parseInt(m2[2], 10);
                     newStart = parseInt(m2[3], 10);
                     newCount = parseInt(m2[4], 10);
-                    extra    = m2[5];
+                    context  = m2[5];
                     found    = true;
                 }
 
@@ -584,7 +584,7 @@ Splinter.Patch.Patch.prototype = {
                         oldCount = parseInt(m2[2], 10);
                         newStart = parseInt(m2[3], 10);
                         newCount = 1;
-                        extra    = m2[4];
+                        context  = m2[4];
                         found    = true;
                     }
                 }
@@ -599,7 +599,7 @@ Splinter.Patch.Patch.prototype = {
                         oldCount = 1;
                         newStart = parseInt(m2[2], 10);
                         newCount = parseInt(m2[3], 10);
-                        extra    = m2[4];
+                        context  = m2[4];
                         found    = true;
                     }
                 }
@@ -614,7 +614,7 @@ Splinter.Patch.Patch.prototype = {
                         oldCount = 1;
                         newStart = parseInt(m2[2], 10);
                         newCount = 1;
-                        extra    = m2[3];
+                        context  = m2[3];
                         found    = true;
                     }
                 }
@@ -630,7 +630,7 @@ Splinter.Patch.Patch.prototype = {
                 }
 
                 pos = Splinter.Patch.HUNK_RE.lastIndex;
-                hunks.push(new Splinter.Patch.Hunk(oldStart, oldCount, newStart, newCount, extra, m3[1]));
+                hunks.push(new Splinter.Patch.Hunk(oldStart, oldCount, newStart, newCount, context, m3[1]));
             }
 
             if (status === undefined) {

@@ -34,10 +34,15 @@
     [% FOREACH flag = needinfo_flags %]
       <tr>
         [% IF !flag.requestee || flag.requestee.id == user.id %]
-          <td align="center"><span style="color:red;font-weight:bold;">*</span></td>
+          <td align="center">
+            <input type="checkbox" id="needinfo_override_[% flag.id FILTER html %]"
+                   name="needinfo_override_[% flag.id FILTER html %]" value="1" checked>
+          </td>
           <td>
-            Adding a comment will automatically clear needinfo the request for
-            <em>[% IF !flag.requestee %]anyone[% ELSE %][% flag.requestee.login FILTER html %][% END %]</em>.
+            <label for="needinfo_override_[% flag.id FILTER html %]">
+              Clear the needinfo request for
+              <em>[% IF !flag.requestee %]anyone[% ELSE %][% flag.requestee.login FILTER html %][% END %]</em>.
+            </label>
           </td>
         [% ELSE %]
           <td align="center">

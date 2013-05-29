@@ -57,41 +57,56 @@
       <tr>
         <td align="center">
           <script>
-            function needinfoRole (select) {
+            function needinfo_visibility() {
+              if (YAHOO.util.Dom.get('needinfo_role').value == 'other') {
+                YAHOO.util.Dom.removeClass('needinfo_from_container', 'bz_default_hidden');
+              } else {
+                YAHOO.util.Dom.addClass('needinfo_from_container', 'bz_default_hidden');
+              }
+            }
+            function needinfo_focus() {
+              if (YAHOO.util.Dom.get('needinfo').checked
+                  && YAHOO.util.Dom.get('needinfo_role').value == 'other')
+              {
+                YAHOO.util.Dom.get('needinfo_from').focus();
+                YAHOO.util.Dom.get('needinfo_from').select();
+              }
+            }
+            function needinfo_role_changed() {
               YAHOO.util.Dom.get('needinfo').checked = true;
-            if (select.value == 'other') {
-              YAHOO.util.Dom.removeClass('needinfo_from_container', 'bz_default_hidden');
-              YAHOO.util.Dom.get('needinfo_from').focus();
+              needinfo_visibility();
+              needinfo_focus();
             }
-            else {
-              YAHOO.util.Dom.addClass('needinfo_from_container', 'bz_default_hidden');
+            function needinfo_other_changed() {
+              YAHOO.util.Dom.get('needinfo').checked = YAHOO.util.Dom.get('needinfo_from').value != '';
             }
-          }
+            YAHOO.util.Event.onDOMReady(needinfo_visibility);
           </script>
-          <input type="checkbox" name="needinfo" value="1" id="needinfo">
+          <input type="checkbox" name="needinfo" value="1" id="needinfo" onchange="needinfo_focus()">
         </td>
         <td>
           <label for="needinfo">Need more information from</label>
-          <select name="needinfo_role" id="needinfo_role" onchange="needinfoRole(this);">
-            <option value="">anyone</option>
+          <select name="needinfo_role" id="needinfo_role" onchange="needinfo_role_changed()">
+            <option value="other">other</option>
             <option value="reporter">reporter</option>
             <option value="assigned_to">assignee</option>
             [% IF Param('useqacontact') && bug.qa_contact.login != "" %]
               <option value="qa_contact">qa contact</option>
             [% END %]
-            <option value="other">other</option>
+            <option value="">anyone</option>
           </select>
-          <span id="needinfo_from_container" class="bz_default_hidden">
+          <span id="needinfo_from_container">
             [% INCLUDE global/userselect.html.tmpl
                id          => "needinfo_from"
                name        => "needinfo_from"
                value       => ""
                size        => 30
                multiple    => 5
+               onchange    => "needinfo_other_changed()"
                field_title => "Enter one or more comma separated users to request more information from"
             %]
           </span>
-        </td> 
+        </td>
       </tr>
     [% END %]
     </table>

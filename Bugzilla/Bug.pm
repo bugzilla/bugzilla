@@ -3308,21 +3308,15 @@ sub component_obj {
 
 sub classification_id {
     my ($self) = @_;
-    return $self->{classification_id} if exists $self->{classification_id};
     return 0 if $self->{error};
-    ($self->{classification_id}) = Bugzilla->dbh->selectrow_array(
-        'SELECT classification_id FROM products WHERE id = ?',
-        undef, $self->{product_id});
+    $self->{classification_id} //= $self->product_obj->classification_id;
     return $self->{classification_id};
 }
 
 sub classification {
     my ($self) = @_;
-    return $self->{classification} if exists $self->{classification};
     return '' if $self->{error};
-    ($self->{classification}) = Bugzilla->dbh->selectrow_array(
-        'SELECT name FROM classifications WHERE id = ?',
-        undef, $self->classification_id);
+    $self->{classification} //= $self->product_obj->classification->name;
     return $self->{classification};
 }
 

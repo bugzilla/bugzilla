@@ -106,6 +106,9 @@ sub Send {
     # Skip empty comments.
     @$comments = grep { $_->type || $_->body =~ /\S/ } @$comments;
 
+    # If no changes have been made, there is no need to process further.
+    return {'sent' => []} unless scalar(@diffs) || scalar(@$comments);
+
     ###########################################################################
     # Start of email filtering code
     ###########################################################################
@@ -197,7 +200,6 @@ sub Send {
     # the bug in question. However, we are not necessarily going to mail them
     # all - there are preferences, permissions checks and all sorts to do yet.
     my @sent;
-    my @excluded;
 
     # The email client will display the Date: header in the desired timezone,
     # so we can always use UTC here.
@@ -206,18 +208,13 @@ sub Send {
 
     foreach my $user_id (keys %recipients) {
         my %rels_which_want;
-        my $sent_mail = 0;
-        $user_cache{$user_id} ||= new Bugzilla::User($user_id);
-        my $user = $user_cache{$user_id};
+        my $user = $user_cache{$user_id} ||= new Bugzilla::User($user_id);
         # Deleted users must be excluded.
         next unless $user;
 
         # If email notifications are disabled for this account, or the bug
         # is ignored, there is no need to do additional checks.
-        if ($user->email_disabled || $user->is_bug_ignored($id)) {
-            push(@excluded, $user->login);
-            next;
-        }
+        next if ($user->email_disabled || $user->is_bug_ignored($id));
 
         if ($user->can_see_bug($id)) {
             # Go through each role the user has and see if they want mail in
@@ -250,7 +247,7 @@ sub Send {
 
             # Email the user if the dep check passed.
             if ($dep_ok) {
-                $sent_mail = sendMail(
+                my $sent_mail = sendMail(
                     { to       => $user, 
                       bug      => $bug,
                       comments => $comments,
@@ -261,15 +258,9 @@ sub Send {
                       diffs    => \@diffs,
                       rels_which_want => \%rels_which_want,
                     });
+                push(@sent, $user->login) if $sent_mail;
             }
         }
-
-        if ($sent_mail) {
-            push(@sent, $user->login); 
-        } 
-        else {
-            push(@excluded, $user->login); 
-        } 
     }
 
     # When sending bugmail about a blocker being reopened or resolved,
@@ -281,7 +272,7 @@ sub Send {
         $bug->{lastdiffed} = $end;
     }
 
-    return {'sent' => \@sent, 'excluded' => \@excluded};
+    return {'sent' => \@sent};
 }
 
 sub sendMail {

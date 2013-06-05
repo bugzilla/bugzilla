@@ -6,8 +6,8 @@
 # This Source Code Form is "Incompatible With Secondary Licenses", as
 # defined by the Mozilla Public License, v. 2.0.
 
+use 5.10.1;
 use strict;
-
 use lib qw(. lib);
 
 use Bugzilla;
@@ -25,28 +25,21 @@ my $list = $dbh->selectcol_arrayref(
      ' ORDER BY bug_id');
 
 if (scalar(@$list) > 0) {
-    print "OK, now attempting to send unsent mail\n";
-    print scalar(@$list) . " bugs found with possibly unsent mail.\n\n";
+    say "OK, now attempting to send unsent mail";
+    say scalar(@$list) . " bugs found with possibly unsent mail.\n";
     foreach my $bugid (@$list) {
         my $start_time = time;
-        print "Sending mail for bug $bugid...\n";
+        say "Sending mail for bug $bugid...";
         my $outputref = Bugzilla::BugMail::Send($bugid);
         if ($ARGV[0] && $ARGV[0] eq "--report") {
-          print "Mail sent to:\n";
-          foreach (sort @{$outputref->{sent}}) {
-              print $_ . "\n";
-          }
-          
-          print "Excluded:\n";
-          foreach (sort @{$outputref->{excluded}}) {
-              print $_ . "\n";
-          }
+          say "Mail sent to:";
+          say $_ foreach (sort @{$outputref->{sent}});
         }
         else {
-            my ($sent, $excluded) = (scalar(@{$outputref->{sent}}),scalar(@{$outputref->{excluded}}));
-            print "$sent mails sent, $excluded people excluded.\n";
-            print "Took " . (time - $start_time) . " seconds.\n\n";
-        }    
+            my $sent = scalar @{$outputref->{sent}};
+            say "$sent mails sent.";
+            say "Took " . (time - $start_time) . " seconds.\n";
+        }
     }
-    print "Unsent mail has been sent.\n";
+    say "Unsent mail has been sent.";
 }

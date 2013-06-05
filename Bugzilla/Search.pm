@@ -2682,7 +2682,7 @@ sub _owner_idle_time_greater_less {
             "$ld_table.who IS NULL AND $act_table.who IS NULL";
     } else {
          $args->{term} =
-            "$ld_table.who IS NOT NULL OR $act_table.who IS NOT NULL";
+            "($ld_table.who IS NOT NULL OR $act_table.who IS NOT NULL)";
     }
 }
 
@@ -2926,14 +2926,14 @@ sub _anywordsubstr {
     my ($self, $args) = @_;
 
     my @terms = $self->_substring_terms($args);
-    $args->{term} = join("\n\tOR ", @terms);
+    $args->{term} = '(' . join("\n\tOR ", @terms) . ')';
 }
 
 sub _allwordssubstr {
     my ($self, $args) = @_;
 
     my @terms = $self->_substring_terms($args);
-    $args->{term} = join("\n\tAND ", @terms);
+    $args->{term} = '(' . join("\n\tAND ", @terms) . ')';
 }
 
 sub _nowordssubstr {
@@ -2945,19 +2945,19 @@ sub _nowordssubstr {
 
 sub _anywords {
     my ($self, $args) = @_;
-    
+
     my @terms = $self->_word_terms($args);
     # Because _word_terms uses AND, we need to parenthesize its terms
     # if there are more than one.
     @terms = map("($_)", @terms) if scalar(@terms) > 1;
-    $args->{term} = join("\n\tOR ", @terms);
+    $args->{term} = '(' . join("\n\tOR ", @terms) . ')';
 }
 
 sub _allwords {
     my ($self, $args) = @_;
-    
+
     my @terms = $self->_word_terms($args);
-    $args->{term} = join("\n\tAND ", @terms);
+    $args->{term} = '(' . join("\n\tAND ", @terms) . ')';
 }
 
 sub _nowords {

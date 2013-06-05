@@ -3,13 +3,13 @@
  * You can obtain one at http://mozilla.org/MPL/2.0/.
  *
  * This Source Code Form is "Incompatible With Secondary Licenses", as
- * defined by the Mozilla Public License, v. 2.0. 
+ * defined by the Mozilla Public License, v. 2.0.
  */
 
 YUI({
-    base: 'js/yui3/', 
+    base: 'js/yui3/',
     combine: false
-}).use("datatable", "datatable-sort", function(Y) {
+}).use("datatable", "datatable-sort", "escape", function(Y) {
     if (typeof PD.updated_recently != 'undefined') {
         var columns = [
             { key:"id", label:"ID", sortable:true, allowHTML: true,
@@ -37,16 +37,21 @@ YUI({
     }
 
     if (typeof PD.component_counts != 'undefined') {
-        var summary_url = '<a href="page.cgi?id=productdashboard.html&amp;product=' + 
-                          encodeURIComponent(PD.product_name) + '&bug_status=' + 
+        var summary_url = '<a href="page.cgi?id=productdashboard.html&amp;product=' +
+                          encodeURIComponent(PD.product_name) + '&bug_status=' +
                           encodeURIComponent(PD.bug_status) + '&tab=components';
- 
+
         var columns = [
-            { key:"name", label:"Name", sortable:true, allowHTML: true, 
-              formatter: summary_url + '&component={value}">{value}</a>' },
+            { key:"name", label:"Name", sortable:true, allowHTML: true,
+              formatter: function (o) {
+                  return summary_url + '&component=' +
+                         encodeURIComponent(o.value) + '">' +
+                         Y.Escape.html(o.value) + '</a>'
+              }
+            },
             { key:"count", label:"Count", sortable:true },
             { key:"percentage", label:"Percentage", sortable:false, allowHTML: true,
-              formatter: '<div class="percentage"><div class="bar" style="width:{value}%"></div><div class="percent">{value}%</div></div>' }, 
+              formatter: '<div class="percentage"><div class="bar" style="width:{value}%"></div><div class="percent">{value}%</div></div>' },
             { key:"link", label:"Link", sortable:false, allowHTML: true }
         ];
 
@@ -55,8 +60,13 @@ YUI({
             data: PD.component_counts
         });
         componentsDataTable.render("#component_counts");
-       
-        columns[0].formatter = summary_url + '&version={value}">{value}</a>'; 
+
+        columns[0].formatter = function (o) {
+            return summary_url + '&version=' +
+                   encodeURIComponent(o.value) + '">' +
+                   Y.Escape.html(o.value) + '</a>';
+        };
+
         var versionsDataTable = new Y.DataTable({
             columns: columns,
             data: PD.version_counts
@@ -64,7 +74,12 @@ YUI({
         versionsDataTable.render('#version_counts');
 
         if (typeof PD.milestone_counts != 'undefined') {
-            columns[0].formatter = summary_url + '&target_milestone={value}">{value}</a>';   
+            columns[0].formatter = function (o) {
+                return summary_url + '&target_milestone=' +
+                       encodeURIComponent(o.value) + '">' +
+                       Y.Escape.html(o.value) + '</a>';
+            };
+
             var milestonesDataTable = new Y.DataTable({
                 columns: columns,
                 data: PD.milestone_counts

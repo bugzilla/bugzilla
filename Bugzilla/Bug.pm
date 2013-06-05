@@ -3910,7 +3910,7 @@ sub get_activity {
             $change{'added'} = $added;
 
             if ($comment_id) {
-		$operation->{comment_id} = $change{'comment'} = Bugzilla::Comment->new($comment_id);
+                $operation->{comment_id} = $change{'comment'} = Bugzilla::Comment->new($comment_id);
             }
 
             push (@$changes, \%change);

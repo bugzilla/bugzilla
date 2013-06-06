@@ -416,6 +416,7 @@ our %product_sec_groups = (
     "Firefox Health Report"        => 'mozilla-services-security',
     "Input"                        => 'websites-security',
     "Internet Public Policy"       => 'mozilla-corporation-confidential',
+    "Infrastructure & Operations"  => 'mozilla-corporation-confidential',
     "L20n"                         => 'l20n-security',
     "Legal"                        => 'legal',
     "Marketing"                    => 'marketing-private',

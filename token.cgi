@@ -124,17 +124,18 @@ sub requestChangePassword {
       or ThrowUserError("login_needed_for_password_change");
 
     check_email_syntax($login_name);
-    my $user = Bugzilla::User->check($login_name);
+    my $user = new Bugzilla::User({ name => $login_name });
 
     # Make sure the user account is active.
-    if (!$user->is_enabled) {
+    if ($user && !$user->is_enabled) {
         ThrowUserError('account_disabled',
                        {disabled_reason => get_text('account_disabled', {account => $login_name})});
     }
 
-    Bugzilla::Token::IssuePasswordToken($user);
+    Bugzilla::Token::IssuePasswordToken($user) if $user;
 
     $vars->{'message'} = "password_change_request";
+    $vars->{'login_name'} = $login_name;
 
     print $cgi->header();
     $template->process("global/message.html.tmpl", $vars)

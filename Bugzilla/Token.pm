@@ -122,13 +122,15 @@ sub IssuePasswordToken {
 
     ThrowUserError('too_soon_for_new_token', {'type' => 'password'}) if $too_soon;
 
-    my ($token, $token_ts) = _create_token($user->id, 'password', remote_ip());
+    my $ip_addr = remote_ip();
+    my ($token, $token_ts) = _create_token($user->id, 'password', $ip_addr);
 
     # Mail the user the token along with instructions for using it.
     my $template = Bugzilla->template_inner($user->setting('lang'));
     my $vars = {};
 
     $vars->{'token'} = $token;
+    $vars->{'ip_addr'} = $ip_addr;
     $vars->{'emailaddress'} = $user->email;
     $vars->{'expiration_ts'} = ctime($token_ts + MAX_TOKEN_AGE * 86400);
     # The user is not logged in (else he wouldn't request a new password).

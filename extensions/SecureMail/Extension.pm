@@ -273,7 +273,10 @@ sub mailer_before_send {
             }
             # If the insider group has securemail enabled..
             my $insider_group = Bugzilla::Group->new({ name => Bugzilla->params->{'insidergroup'} });
-            if ($insider_group->secure_mail && $make_secure == SECURE_NONE) {
+            if ($insider_group
+                && $insider_group->secure_mail
+                && $make_secure == SECURE_NONE)
+            {
                 my $comment_is_private = Bugzilla->dbh->selectcol_arrayref(
                     "SELECT isprivate FROM longdescs WHERE bug_id=? ORDER BY bug_when",
                     undef, $bug_id);

@@ -3906,6 +3906,7 @@ sub GetBugActivity {
             if ($operation->{'who'} && $who eq $operation->{'who'}
                 && $when eq $operation->{'when'}
                 && $fieldname eq $operation->{'fieldname'}
+                && ($comment_id || 0) == ($operation->{'comment_id'} || 0)
                 && ($attachid || 0) == ($operation->{'attachid'} || 0))
             {
                 my $old_change = pop @$changes;
@@ -3922,7 +3923,7 @@ sub GetBugActivity {
             $change{'added'} = $added;
 
             if ($comment_id) {
-                $change{'comment'} = Bugzilla::Comment->new($comment_id);
+                $operation->{comment_id} = $change{'comment'} = Bugzilla::Comment->new($comment_id);
             }
 
             push (@$changes, \%change);

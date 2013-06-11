@@ -28,11 +28,13 @@
   </div>
 [% END %]
 
-<p>
-  If you want to change your e-mail address <b>[% user.email FILTER html %]</b>
-  to which [% terms.Bugzilla %] sends notifications, click the "Account
-  Information" tab above.
-</p>
+[% IF user.authorizer.can_change_email && Param('allowemailchange') %]
+  <p>
+    If you want to change your e-mail address
+    <b>[% user.email FILTER html %]</b> to which [% terms.Bugzilla %] sends
+    notifications, click the "Account Information" tab above.
+  </p>
+[% END %]
 
 <p>
   If you don't like getting a notification for "trivial"

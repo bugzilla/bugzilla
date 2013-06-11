@@ -45,7 +45,7 @@ function toggleBugmailRecipients(bug_id, show) {
     YAHOO.util.Dom.removeClass('bugmail_summary_' + bug_id + '_short', 'bz_default_hidden');
   }
   YAHOO.util.Cookie.set('show_bugmail_recipients', (show ? 1 : 0), {
-    expires: new Date("Janurary 12, 2025")
+    expires: new Date("January 12, 2025")
   });
   return false;
 }

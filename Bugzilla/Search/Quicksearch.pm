@@ -363,19 +363,6 @@ sub _handle_special_first_chars {
 sub _handle_field_names {
     my ($or_operand, $negate, $unknownFields, $ambiguous_fields) = @_;
 
-    # Flag and requestee shortcut
-    if ($or_operand =~ /^(?:flag:)?([^\?]+\?)([^\?]*)$/) {
-        my ($flagtype, $requestee) = ($1, $2);
-        addChart('flagtypes.name', 'substring', $flagtype, $negate);
-        if ($requestee) {
-            # AND
-            $chart++;
-            $and = $or = 0;
-            addChart('requestees.login_name', 'substring', $requestee, $negate);
-        }
-        return 1;
-    }
-
     # Generic field1,field2,field3:value1,value2 notation.
     # We have to correctly ignore commas and colons in quotes.
     my @field_values = parse_line(':', 1, $or_operand);
@@ -406,13 +393,46 @@ sub _handle_field_names {
                         $value = $2;
                         $value =~ s/\\(["'])/$1/g;
                     }
+                    # If a requestee is set, we need to handle it separately.
+                    if ($translated eq 'flagtypes.name' && $value =~ /^([^\?]+\?)([^\?]+)$/) {
+                        _handle_flags($1, $2, $negate);
+                        next;
+                    }
                     addChart($translated, $operator, $value, $negate);
                 }
             }
         }
         return 1;
     }
+
+    # Do not look inside quoted strings.
+    return 0 if ($or_operand =~ /^(["']).*\1$/);
+
+    # Flag and requestee shortcut.
+    if ($or_operand =~ /^([^\?]+\?)([^\?]*)$/) {
+        _handle_flags($1, $2, $negate);
+        return 1;
+    }
+
     return 0;
+}
+
+sub _handle_flags {
+    my ($flag, $requestee, $negate) = @_;
+
+    addChart('flagtypes.name', 'substring', $flag, $negate);
+    if ($requestee) {
+        # FIXME - Every time a requestee is involved and you use OR somewhere
+        # in your quick search, the logic will be wrong because boolean charts
+        # are unable to run queries of the form (a AND b) OR c. In our case:
+        # (flag name is foo AND requestee is bar) OR (any other criteria).
+        # But this has never been possible, so this is not a regression. If one
+        # needs to run such queries, he must use the Custom Search section of
+        # the Advanced Search page.
+        $chart++;
+        $and = $or = 0;
+        addChart('requestees.login_name', 'substring', $requestee, $negate);
+    }
 }
 
 sub _translate_field_name {

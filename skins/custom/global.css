@@ -65,3 +65,9 @@ a.controller {
     background-repeat: no-repeat;
     padding-left: 18px;
 }
+
+#privacy-policy {
+    font-size: x-small;
+    width: 100%;
+    text-align: right;
+}

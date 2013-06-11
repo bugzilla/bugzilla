@@ -6,7 +6,6 @@ body {
     background-image: url(noise.png), -webkit-linear-gradient(#d7d3c8, #f6f4ec 400px);
     background-image: url(noise.png), linear-gradient(#d7d3c8, #f6f4ec 400px);
     color: #404040;
-    min-width: 990px;
 }
 
 body, td, th, input {
@@ -108,7 +107,7 @@ hr {
     border-radius: 0;
     color: #404040;
     position: relative;
-     margin-top: -15px; 
+    margin-top: -15px;
     width: 50%;
 }
 
@@ -177,7 +176,7 @@ hr {
     border: 1px solid rgba(0, 0, 0, 0.2);
     border-radius: 0 0 5px 5px;
     box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
-    display: none; 
+    display: none;
     padding: 4px;
     position: absolute;
     right: -1px;
@@ -291,7 +290,7 @@ table.edit_form hr {
 
 .field_label a, .field_label b {
     color: #000;
-    font-weight: normal; 
+    font-weight: normal;
 }
 
 .field_value .text_input {
@@ -503,20 +502,12 @@ table.edit_form hr {
     border-top: 1px solid rgba(0, 0, 0, 0.1);
     border-radius: 0;
     color: #bbb;
-    margin-left: -15px;
-    padding: 20px;
+    width: auto;
+    margin-bottom: 1em;
 }
 
-#footer #useful-links {
-    background: url(footer-mozilla.png) no-repeat;
-    min-height: 24px;
-}
-
-#footer > * {
-    margin-right: auto;
-    margin-left: auto;
-    padding: 0 0 0 200px !important;
-    width: 80%;
+#privacy-policy {
+    margin-bottom: 1em;
 }
 
 #commit, #commit_top {
@@ -586,19 +577,19 @@ table.edit_form hr {
     body {
         min-width: 768px;
     }
-  
+
     #header .wrapper, #bugzilla-body {
         -moz-box-sizing: border-box;
         -webkit-box-sizing: border-box;
         box-sizing: border-box;
-        width: 768px;
+        min-width: 768px;
     }
 
     #footer > * {
         -moz-box-sizing: border-box;
         -webkit-box-sizing: border-box;
         box-sizing: border-box;
-        width: 448px;
+        min-width: 768px;
     }
 }
 
@@ -611,7 +602,7 @@ table.edit_form hr {
         display: block;
         width: 100% !important;
     }
-    
+
     .bz_column_spacer {
         width: auto;
         height: 20px;
@@ -625,7 +616,7 @@ table.edit_form hr {
     body {
         min-width: 480px;
     }
-  
+
     #header .wrapper, #bugzilla-body, #attachment_table,
     .bz_comment, #add_comment > table, #comment {
         -moz-box-sizing: border-box;
@@ -647,7 +638,7 @@ table.edit_form hr {
     body {
         min-width: 100%;
     }
-  
+
     #header .wrapper, #bugzilla-body, #attachment_table,
     .bz_comment, #add_comment > table, #comment {
         -moz-box-sizing: border-box;

@@ -255,23 +255,7 @@
         <a href="./" title="Home">[% terms.BugzillaTitle %]</a>
       </td>
       <td id="information"></td>
-      <td id="languages">
-        [% IF Bugzilla.languages.size > 1 %]
-          <ul class="links">
-            [% FOREACH lang = Bugzilla.languages.sort %]
-              <li>[% IF NOT loop.first %]<span class="separator"> | </span>[% END %]
-                [% IF lang == current_language %]
-                  <span class="lang_current">[% lang FILTER html FILTER upper %]</span>
-                [% ELSE %]
-                  <a href="#" onclick="set_language('[% lang FILTER none %]');">
-                    [%- lang FILTER html FILTER upper %]</a>
-                [% END %]
-              </li>
-            [% END %]
-          </ul>
-        [% END %]
-        </td> 
-      <td id="login">
+      <td id="moz_login">
         [% IF user.id %]
           <ul class="links">
             <li class="dropdown">
@@ -305,7 +289,7 @@
           <ul class="login-links">
             [% IF Param('createemailregexp')
                   && user.authorizer.user_can_create_account %]
-              <li id="new_account_container_top"><a href="createaccount.cgi">New&nbsp;Account</a></li>
+              <li id="moz_new_account_container_top"><a href="createaccount.cgi">New&nbsp;Account</a></li>
             [% END %]
 
             [%# Only display one login form when we're on a LOGIN_REQUIRED page. That
@@ -320,7 +304,7 @@
           </ul>
         [% END %]
       </td>
-      <td id="tab">
+      <td id="moz_tab">
         <a href="http://mozilla.org/"><img src="https://addons.cdn.mozilla.net/media/img/zamboni/mozilla-tab.png?b=4953ddb"></a>
       </td>
     </tr>

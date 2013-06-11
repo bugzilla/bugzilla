@@ -82,21 +82,21 @@ hr {
     padding: 0 1em 0 1em;
 }
 
-#titles #information {
+#information {
     text-align: left;
     padding-left: 2em;
 }
 
-#titles #title {
+#title {
     width: 150px;
     font-size: 120%;
 }
 
-#titles #tab {
+#moz_tab {
     width: 100px;
 }
 
-#titles #login {
+#moz_login {
     text-align: right;
     padding-right: 2em;
     color: #404040;

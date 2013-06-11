@@ -38,7 +38,8 @@ our @EXPORT = qw( $cf_visible_in_products
                   @always_fileable_groups
                   %group_auto_cc
                   %product_sec_groups
-                  %create_bug_formats );
+                  %create_bug_formats
+                  @default_named_queries );
 
 # Which custom fields are visible in which products and components.
 #
@@ -472,6 +473,14 @@ our %create_bug_formats = (
     'Internet Public Policy' => {
         'format'  => 'ipp',
         'include' => 'everyone',
+    },
+);
+
+# List of named queries which will be added to new users' footer
+our @default_named_queries = (
+    {
+        name  => 'Bugs Filed Today',
+        query => 'query_format=advanced&chfieldto=Now&chfield=[Bug creation]&chfieldfrom=-24h&order=bug_id',
     },
 );
 

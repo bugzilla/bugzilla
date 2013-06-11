@@ -631,6 +631,55 @@ sub object_end_of_create_validators {
     }
 }
 
+sub object_end_of_create {
+    my ($self, $args) = @_;
+    if ($args->{class} eq 'Bugzilla::User') {
+        # Add default searches to new user's footer
+        my $dbh = Bugzilla->dbh;
+        my $user = $args->{object};
+
+        my $sharer = Bugzilla::User->new({ name => 'nobody@mozilla.org' })
+            or return;
+        my $group = Bugzilla::Group->new({ name => 'everyone' })
+            or return;
+
+        foreach my $definition (@default_named_queries) {
+            my ($namedquery_id) = _get_named_query($sharer->id, $group->id, $definition);
+            $dbh->do(
+                "INSERT INTO namedqueries_link_in_footer(namedquery_id,user_id) VALUES (?,?)",
+                undef,
+                $namedquery_id, $user->id
+            );
+        }
+    }
+}
+
+sub _get_named_query {
+    my ($sharer_id, $group_id, $definition) = @_;
+    my $dbh = Bugzilla->dbh;
+    # find existing namedquery
+    my ($namedquery_id) = $dbh->selectrow_array(
+        "SELECT id FROM namedqueries WHERE userid=? AND name=?",
+        undef,
+        $sharer_id, $definition->{name}
+    );
+    return $namedquery_id if $namedquery_id;
+    # create namedquery
+    $dbh->do(
+        "INSERT INTO namedqueries(userid,name,query) VALUES (?,?,?)",
+        undef,
+        $sharer_id, $definition->{name}, $definition->{query}
+    );
+    $namedquery_id = $dbh->bz_last_key();
+    # and share it
+    $dbh->do(
+        "INSERT INTO namedquery_group_map(namedquery_id,group_id) VALUES (?,?)",
+        undef,
+        $namedquery_id, $group_id,
+    );
+    return $namedquery_id;
+}
+
 # Automatically CC users to bugs based on group & product
 sub bug_end_of_create {
     my ($self, $args) = @_;

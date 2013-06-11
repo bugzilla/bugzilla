@@ -24,66 +24,59 @@
   # sent_bugmail: The results of Bugzilla::BugMail::Send().
   #%]
 
+[% USE CGI %]
 [% PROCESS global/variables.none.tmpl %]
 
 [%# hide the recipient list by default from new users %]
 [% show_recipients =
      user.settings.post_bug_submit_action.value == 'nothing'
-     || user.in_group('canconfirm')
+     || CGI.cookie('show_bugmail_recipients')
      || !user.can_see_bug(mailing_bugid)
 %]
+[% recipient_count = sent_bugmail.sent.size %]
+
+<script>
+function toggleBugmailRecipients(bug_id, show) {
+  if (show) {
+    YAHOO.util.Dom.removeClass('bugmail_summary_' + bug_id, 'bz_default_hidden');
+    YAHOO.util.Dom.addClass('bugmail_summary_' + bug_id + '_short', 'bz_default_hidden');
+  } else {
+    YAHOO.util.Dom.addClass('bugmail_summary_' + bug_id, 'bz_default_hidden');
+    YAHOO.util.Dom.removeClass('bugmail_summary_' + bug_id + '_short', 'bz_default_hidden');
+  }
+  YAHOO.util.Cookie.set('show_bugmail_recipients', (show ? 1 : 0), {
+    expires: new Date("Janurary 12, 2025")
+  });
+  return false;
+}
+</script>
 
 <dl id="bugmail_summary_[% mailing_bugid FILTER none %]"
-    [%~ ' class="bz_default_hidden"' UNLESS show_recipients %]>
-[% PROCESS emails
-   description = "Email sent to"
-   names = sent_bugmail.sent
-%]
-
-[% PROCESS emails
-   description = "Excluding"
-   names = sent_bugmail.excluded
-%]
-</dl>
-
-[% IF !show_recipients %]
-  [% recipient_count = sent_bugmail.sent.size %]
-  <div id="bugmail_summary_placeholder_[% mailing_bugid FILTER none %]"
-       [%~ ' class="bz_default_hidden"' IF show_recipients %]>
-    [% IF recipient_count > 0 %]
-      Email sent to [% recipient_count FILTER html %]
-      recipient[% 's' UNLESS recipient_count == 1 %].
-    [% ELSE %]
-      No emails were sent.
-    [% END %]
-    (<a href="#" onclick="
-        YAHOO.util.Dom.removeClass(
-          'bugmail_summary_[% mailing_bugid FILTER none %]',
-          'bz_default_hidden');
-        YAHOO.util.Dom.addClass(
-          'bugmail_summary_placeholder_[% mailing_bugid FILTER none %]',
-          'bz_default_hidden');
-        return false;">show</a>)
-  </div>
-[% END %]
-
-[%############################################################################%]
-[%# Block for a set of email addresses                                       #%]
-[%############################################################################%]
-
-[% BLOCK emails %]
-  <dt>[% description FILTER html %]:</dt>
+    class="[% show_recipients ? "" : "bz_default_hidden" %]">
+  <dt>Email sent to:</dt>
   <dd>
   [% IF user.can_see_bug(mailing_bugid) %]
-    [% IF names.size > 0 %]
-      [%+ FOREACH name = names %]
+    [% IF sent_bugmail.sent.size > 0 %]
+      [%+ FOREACH name = sent_bugmail.sent %]
         <code>[% name FILTER html %]</code>[% ", " UNLESS loop.last() %]
       [% END %]
     [% ELSE %]
       no one
     [% END %]
+    (<a href="#" onclick="return toggleBugmailRecipients([% mailing_bugid FILTER none %], false)">hide</a>)
   [% ELSE %]
     (list of e-mails not available)
   [% END %]
   </dd>
-[% END %]
+</dl>
+
+<div id="bugmail_summary_[% mailing_bugid FILTER none %]_short"
+     class="[% show_recipients ? "bz_default_hidden" : "" %]">
+  [% IF recipient_count > 0 %]
+    Email sent to [% recipient_count FILTER html %] recipient[% 's' UNLESS recipient_count == 1 %].
+    (<a href="#" onclick="return toggleBugmailRecipients([% mailing_bugid FILTER none %], true)">show</a>)
+  [% ELSE %]
+    No emails were sent.
+  [% END %]
+</div>
+

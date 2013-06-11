@@ -1,4 +1,4 @@
-#!/usr/bin/perl -w
+#!/usr/bin/perl -wT
 #
 #                    sendbugmail.pl
 #
@@ -12,6 +12,8 @@
 # 
 # Usage: perl -T contrib/sendbugmail.pl bug_id user_email
 
+use 5.10.1;
+use strict;
 use lib qw(. lib);
 
 use Bugzilla;
@@ -22,7 +24,7 @@ use Bugzilla::User;
 my $dbh = Bugzilla->dbh;
 
 sub usage {
-    print STDERR "Usage: $0 bug_id user_email\n";
+    say STDERR "Usage: $0 bug_id user_email";
     exit;
 }
 
@@ -36,7 +38,7 @@ my $changer = $ARGV[1];
 
 # Validate the bug number.
 if (!($bugnum =~ /^(\d+)$/)) {
-  print STDERR "Bug number \"$bugnum\" not numeric.\n";
+  say STDERR "Bug number \"$bugnum\" not numeric.";
   usage();
 }
 
@@ -46,19 +48,19 @@ my ($id) = $dbh->selectrow_array("SELECT bug_id FROM bugs WHERE bug_id = ?",
                                  undef, $bugnum);
 
 if (!$id) {
-  print STDERR "Bug number $bugnum does not exist.\n";
+  say STDERR "Bug number $bugnum does not exist.";
   usage();
 }
 
 # Validate the changer address.
 my $match = Bugzilla->params->{'emailregexp'};
 if ($changer !~ /$match/) {
-    print STDERR "Changer \"$changer\" doesn't match email regular expression.\n";
+    say STDERR "Changer \"$changer\" doesn't match email regular expression.";
     usage();
 }
 my $changer_user = new Bugzilla::User({ name => $changer });
 unless ($changer_user) {
-    print STDERR "\"$changer\" is not a valid user.\n";
+    say STDERR "\"$changer\" is not a valid user.";
     usage();
 }
 
@@ -67,26 +69,15 @@ my $outputref = Bugzilla::BugMail::Send($bugnum, {'changer' => $changer_user });
 
 # Report the results.
 my $sent = scalar(@{$outputref->{sent}});
-my $excluded = scalar(@{$outputref->{excluded}});
 
 if ($sent) {
-    print "email sent to $sent recipients:\n";
+    say "email sent to $sent recipients:";
 } else {
-    print "No email sent.\n";
+    say "No email sent.";
 }
 
 foreach my $sent (@{$outputref->{sent}}) {
-  print "  $sent\n";
-}
-
-if ($excluded) {
-    print "$excluded recipients excluded:\n";
-} else {
-    print "No recipients excluded.\n";
-}
-
-foreach my $excluded (@{$outputref->{excluded}}) {
-  print "  $excluded\n";
+  say "  $sent";
 }
 
 # This document is copyright (C) 2004 Perforce Software, Inc.  All rights

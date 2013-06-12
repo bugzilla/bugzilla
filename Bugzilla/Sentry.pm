@@ -52,6 +52,7 @@ use constant CONFIG => {
         qr/Could not check out .*\/cvsroot/,
         qr/Unicode character \S+ is illegal/,
         qr/Lost connection to MySQL server during query/,
+        qr/Call me again when you have some data to chart/,
     ],
 
     # (ab)use the logger to classify error/warning types

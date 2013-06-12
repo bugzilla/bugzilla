@@ -421,6 +421,7 @@ sub _page_user {
     # If a bug_id is given, and we're editing, we'll add it to the votes list.
     
     my $bug_id = $input->{bug_id};
+    $bug_id = $bug_id->[0] if ref($bug_id) eq 'ARRAY';
     my $bug = Bugzilla::Bug->check($bug_id) if $bug_id;
     my $who_id = $input->{user_id} || $user->id;
 

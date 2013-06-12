@@ -490,14 +490,16 @@ elsif (($cmdtype eq "doit") && defined $cgi->param('remtype')) {
               or ThrowUserError('no_tag_to_edit', {action => $action});
 
             my @buglist;
-            # Validate all bug IDs before editing tags in any of them.
-            foreach my $bug_id (split(/[\s,]+/, $cgi->param('bug_ids'))) {
-                next unless $bug_id;
-                push(@buglist, Bugzilla::Bug->check($bug_id));
-            }
+            if ($cgi->param('bug_ids')) {
+                # Validate all bug IDs before editing tags in any of them.
+                foreach my $bug_id (split(/[\s,]+/, $cgi->param('bug_ids'))) {
+                    next unless $bug_id;
+                    push(@buglist, Bugzilla::Bug->check($bug_id));
+                }
 
-            foreach my $bug (@buglist) {
-                $bug->$method($query_name);
+                foreach my $bug (@buglist) {
+                    $bug->$method($query_name);
+                }
             }
 
             $vars->{'message'} = 'tag_updated';

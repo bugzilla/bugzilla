@@ -221,7 +221,8 @@ sub _handle_login_result {
             # For IPv6 we'll need to use inet_pton which requires Perl 5.12.
             my $n = inet_aton($address);
             if ($n) {
-                $address = gethostbyaddr($n, AF_INET) . " ($address)"
+                my $host = gethostbyaddr($n, AF_INET);
+                $address = "$host ($address)" if $host;
             }
             my $vars = {
                 locked_user => $user,

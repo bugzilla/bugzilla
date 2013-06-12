@@ -214,6 +214,7 @@ sub quicksearch {
         foreach my $qsword (@qswords) {
             my @or_operand = parse_line('\|', 1, $qsword);
             foreach my $term (@or_operand) {
+                next unless defined $term;
                 my $negate = substr($term, 0, 1) eq '-';
                 if ($negate) {
                     $term = substr($term, 1);
@@ -344,6 +345,7 @@ sub _handle_status_and_resolution {
 
 sub _handle_special_first_chars {
     my ($qsword, $negate) = @_;
+    return if $qsword eq '';
 
     my $firstChar = substr($qsword, 0, 1);
     my $baseWord = substr($qsword, 1);
@@ -415,6 +417,7 @@ sub _handle_field_names {
                     $bug_status_set = 1;
                 }
                 foreach my $value (@values) {
+                    next unless defined $value;
                     my $operator = FIELD_OPERATOR->{$translated} || 'substring';
                     # If the string was quoted to protect some special
                     # characters such as commas and colons, we need

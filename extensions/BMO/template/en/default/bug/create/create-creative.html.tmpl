@@ -1,0 +1,219 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% PROCESS global/variables.none.tmpl %]
+
+[% inline_style = BLOCK %]
+#creative_form {
+  padding: 10px;
+}
+#creative_form .required:after {
+  content: " *";
+  color: red;
+}
+#creative_form .field_label {
+  font-weight: bold;
+}
+#creative_form .field_desc {
+  padding-bottom: 3px;
+}
+#creative_form .field_desc,
+#creative_form .head_desc {
+  width: 600px;
+  word-wrap: normal;
+}
+#creative_form .head_desc {
+  padding-top: 5px;
+  padding-bottom: 12px;
+}
+#creative_form .form_section {
+  margin-bottom: 10px;
+}
+#creative_form textarea {
+  font-family: inherit;
+  font-size: inherit;
+}
+#creative_form em {
+  font-size: 1em;
+}
+.yui-calcontainer {
+  z-index: 2;
+}
+[% END %]
+
+[% inline_javascript = BLOCK %]
+function validateAndSubmit() {
+  var alert_text = '';
+  if (!isFilledOut('overview')) alert_text += 'Please enter a value for Project Overview.\n';
+  if (!isFilledOut('short_desc')) alert_text += 'Please enter a value for Request Title.\n';
+  if (!isFilledOut('specs')) alert_text += 'Please enter a value for Creative Specs.\n';
+  if (!isFilledOut('goal')) alert_text += 'Please select a value for Mozilla Goal.\n';
+  if (YAHOO.util.Dom.get('goal').value == 'Other') {
+    if (!isFilledOut('goal_other')) alert_text += 'Please select a value for Mozilla Goal Other.\n';
+  }
+  if (alert_text != '') {
+    alert(alert_text);
+    return false;
+  }
+  return true;
+}
+function toggleGoalOther() {
+  var goal_select = YAHOO.util.Dom.get('goal');
+  if (goal_select.options[goal_select.selectedIndex].value == 'Other') {
+    YAHOO.util.Dom.removeClass('goal_other','bz_default_hidden');
+  }
+  else {
+    YAHOO.util.Dom.addClass('goal_other','bz_default_hidden');
+  }
+}
+[% END %]
+
+[% PROCESS global/header.html.tmpl
+   title = "Creative Initiation Form"
+   style = inline_style
+   javascript = inline_javascript
+   javascript_urls = [ 'extensions/BMO/web/js/form_validate.js',
+                       'js/field.js', 'js/util.js' ]
+   yui = [ "autocomplete", "calendar" ]
+%]
+
+[% USE Bugzilla %]
+[% cgi = Bugzilla.cgi %]
+
+<form id="creative_form" method="post" action="post_bug.cgi" enctype="multipart/form-data"
+      onSubmit="return validateAndSubmit();">
+  <input type="hidden" name="format" value="creative">
+  <input type="hidden" name="product" value="Marketing">
+  <input type="hidden" name="component" value="Design">
+  <input type="hidden" name="rep_platform" value="All">
+  <input type="hidden" name="op_sys" value="Other">
+  <input type="hidden" name="version" value="unspecified">
+  <input type="hidden" name="bug_severity" id="bug_severity" value="normal">
+  <input type="hidden" name="token" value="[% token FILTER html %]">
+
+<img title="Creative Initiation Form" src="extensions/BMO/web/images/creative.png">
+
+<div class="head_desc">
+  Have a new project or campaign that requires copy, design, video or other awesomeness
+  from your friendly neighborhood Brand Team? Please use this form to tell us about it
+  and we'll get back to you with next steps as soon as possible.
+</div>
+
+<div class="form_section">
+  <label for="short_desc" class="field_label required">Project / Request Title</label>
+  <div class="field_desc">
+    Describe your project or request in a few words or a short phrase.
+  </div>
+  <input type="text" name="short_desc" id="short_desc" size="80">
+</div>
+
+<div class="form_section">
+  <label for="overview" class="field_label required">Project Overview</label>
+  <div class="field_desc">
+    Briefly describe the background, goals and objectives for this project.
+  </div>
+  <textarea id="overview" name="overview" cols="80" rows="5"></textarea>
+</div>
+
+<div class="form_section">
+  <label for="specs" class="field_label required">Creative Specs and Deliverables</label>
+  <div class="field_desc">
+    What is the final deliverable (e.g. copy, snippet graphic, email template, website design, video, etc.)
+    and what format should it be delivered in? (e.g. PSD file, 403x403 transparent PNG/JPG, etc.) Be as
+    specific as you can. We like details.
+  </div>
+  <textarea id="specs" name="specs" cols="80" rows="5"></textarea>
+</div>
+
+<div class="form_section">
+  <label for="cf_due_date" class="field_label">Launch Date</label>
+  <div class="field_desc">
+    When will your project go forth into the world?
+  </div>
+  <input name="cf_due_date" size="20" id="cf_due_date" value=""
+         onchange="updateCalendarFromField(this)">
+  <button type="button" class="calendar_button"
+          id="button_calendar_cf_due_date"
+          onclick="showCalendar('cf_due_date')">
+    <span>Calendar</span>
+  </button>
+  <div id="con_calendar_cf_due_date"></div>
+  <script type="text/javascript">
+    createCalendar('cf_due_date')
+  </script>
+</div>
+
+<div class="form_section">
+  <label for="creative_due_date" class="field_label">Creative Due Date</label>
+  <div class="field_desc">
+    Working backwards from your launch/go-live date, when do you need final assets?
+  </div>
+  <input name="creative_due_date" size="20" id="creative_due_date" value=""
+         onchange="updateCalendarFromField(this)">
+  <button type="button" class="calendar_button"
+          id="button_calendar_creative_due_date"
+          onclick="showCalendar('creative_due_date')">
+    <span>Calendar</span>
+  </button>
+  <div id="con_calendar_creative_due_date"></div>
+  <script type="text/javascript">
+    createCalendar('creative_due_date')
+  </script>
+</div>
+
+<div class="form_section">
+  <label for="goal" class="field_label required">Mozilla Goal</label>
+  <div class="field_desc">
+    Which high-level Mozilla goal does this project support?
+  </div>
+  <select id="goal" name="goal"
+          onchange="toggleGoalOther();">
+    <option value="">Please select..</option>
+    <option value="Firefox Deskop">Firefox Desktop</option>
+    <option value="Firefox OS">Firefox OS</option>
+    <option value="Firefox Android">Firefox Android</option>
+    <option value="Firefox Marketplace">Firefox Marketplace</option>
+    <option value="Corporate Support">Corporate Support</option>
+    <option value="All">All</option>
+    <option value="Other">Other</option>
+  </select>
+  <br>
+  <input type="text" name="goal_other" id="goal_other" size="40"
+         class="bz_default_hidden" value="">
+</div>
+
+<div class="form_section">
+  <label for="cc" class="field_label">Points of Contact</label>
+  <div class="field_desc">
+    Who should be kept in the loop and informed of updates (and CC'd on the bug)?
+  </div>
+  [% INCLUDE global/userselect.html.tmpl
+     id       => "cc"
+     name     => "cc"
+     value    => ""
+     size     => 80
+     classes  => ["bz_userfield"]
+     multiple => 5
+  %]
+</div>
+
+<div class="head_desc">
+  Thanks! Once you hit submit, your request will go off into the vortex of creative magic.
+  (Actually, it goes to Bugzilla, but that doesn't sound as cool.) We'll be in touch soon
+  with next steps and to let you know if we need any additional info.
+</div>
+
+<input type="submit" id="commit" value="Submit">
+
+<p>
+  [ <span class="required_star">*</span> <span class="required_explanation">Required Field</span> ]
+</p>
+
+</form>
+
+[% PROCESS global/footer.html.tmpl %]

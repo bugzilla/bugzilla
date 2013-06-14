@@ -36,9 +36,9 @@
 [% BLOCK group_checkbox %]
   <input type="checkbox" name="groups"
          value="[% name FILTER none %]" id="group_[% name FILTER html %]"
-    [% FOREACH g = group %]
-      [% IF g.name == name %]
-        [% ' checked="checked"' IF g.checked %]
+    [% FOREACH group = product.groups_available %]
+      [% IF group.name == name %]
+        [% ' checked="checked"' IF default.groups.contains(group.name) OR group.is_default %]
         [% LAST %]
       [% END %]
     [% END %]

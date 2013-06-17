@@ -1,16 +1,17 @@
 User-agent: Browsershots
-Disallow:
+Disallow: /
 
 User-agent: *
 Disallow: /
-Allow: /*index.cgi
-Allow: /*page.cgi
-Allow: /*show_bug.cgi
-Allow: /*describecomponents.cgi
-Allow: /*describekeywords.cgi
-Allow: /*data/SiteMapIndex/sitemap*.xml.gz
-Disallow: /*show_bug.cgi*ctype=*
-Disallow: /*show_bug.cgi*format=multiple*
-Disallow: /*page.cgi*id=voting*
-Disallow: /*page.cgi*id=productdashboard*
+Allow: /$
+Allow: /index.cgi
+Allow: /page.cgi
+Allow: /show_bug.cgi
+Allow: /describecomponents.cgi
+Allow: /describekeywords.cgi
+Allow: /data/SiteMapIndex/sitemap*.xml.gz
+Disallow: /show_bug.cgi*ctype=*
+Disallow: /show_bug.cgi*format=multiple*
+Disallow: /page.cgi*id=voting*
+Disallow: /page.cgi*id=productdashboard*
 Sitemap: http://bugzilla.mozilla.org/page.cgi?id=sitemap/sitemap.xml

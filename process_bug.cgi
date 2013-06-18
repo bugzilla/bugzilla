@@ -61,6 +61,9 @@ use Bugzilla::Token;
 
 use List::MoreUtils qw(firstidx);
 use Storable qw(dclone);
+use Time::HiRes qw(time);
+use Encode qw(encode_utf8);
+use Sys::Syslog qw(:DEFAULT);
 
 my $user = Bugzilla->login(LOGIN_REQUIRED);
 
@@ -68,6 +71,8 @@ my $cgi = Bugzilla->cgi;
 my $dbh = Bugzilla->dbh;
 my $template = Bugzilla->template;
 my $vars = {};
+
+my $timings = { start_time => time() };
 
 ######################################################################
 # Subroutines
@@ -204,6 +209,8 @@ if ($cgi->param('id')) {
 else {
     check_token_data($token, 'buglist_mass_change', 'query.cgi');
 }
+
+$timings->{validation_time} = time();
 
 ######################################################################
 # End Data/Security Validation
@@ -392,11 +399,14 @@ if (defined $cgi->param('id')) {
     $first_bug->set_flags($flags, $new_flags);
 }
 
+$timings->{update_time} = time();
+
 ##############################
 # Do Actual Database Updates #
 ##############################
 foreach my $bug (@bug_objects) {
     my $changes = $bug->update();
+    $timings->{db_time} = time();
 
     if ($changes->{'bug_status'}) {
         my $new_status = $changes->{'bug_status'}->[1];
@@ -408,7 +418,8 @@ foreach my $bug (@bug_objects) {
         }
     }
 
-    $bug->send_changes($changes, $vars);
+    $timings->{recipients} = $bug->send_changes($changes, $vars);
+    $timings->{bugmail_time} = time();
 }
 
 # Delete the session token used for the mass-change.
@@ -434,6 +445,8 @@ elsif ($action eq 'next_bug' or $action eq 'same_bug') {
         }
         $template->process("bug/show.html.tmpl", $vars)
           || ThrowTemplateError($template->error());
+        $timings->{template_time} = time();
+        _log_timings();
         exit;
     }
 } elsif ($action ne 'nothing') {
@@ -446,6 +459,25 @@ unless (Bugzilla->usage_mode == USAGE_MODE_EMAIL) {
         || ThrowTemplateError($template->error());
     $template->process("global/footer.html.tmpl", $vars)
         || ThrowTemplateError($template->error());
+    $timings->{template_time} = time();
+    _log_timings();
+}
+
+sub _log_timings {
+    return unless scalar(@bug_objects) == 1;
+    my $entry = sprintf "bug-%s user-%s %.6f %.6f %.6f %.6f %.6f %.6f %s\n",
+        $bug_objects[0]->id,
+        $user->id,
+        time() - $timings->{start_time},
+        $timings->{validation_time} - $timings->{start_time},
+        $timings->{update_time} - $timings->{validation_time},
+        $timings->{db_time} - $timings->{update_time},
+        $timings->{bugmail_time} - $timings->{db_time},
+        $timings->{template_time} - $timings->{bugmail_time},
+        $timings->{recipients};
+    openlog('apache', 'cons,pid', 'local4');
+    syslog('notice', encode_utf8("[timing] $entry"));
+    closelog();
 }
 
 1;

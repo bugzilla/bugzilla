@@ -467,11 +467,11 @@ unless (Bugzilla->usage_mode == USAGE_MODE_EMAIL) {
 
 sub _log_timings {
     return unless scalar(@bug_objects) == 1;
-    $timings->{end_time} = clock_gettime(CLOCK_MONOTONIC);
+    return unless scalar(keys %$timings) == 8;
     my $entry = sprintf "process_bug bug-%s user-%s %.6f %.6f %.6f %.6f %.6f %.6f %.6f %s\n",
         $bug_objects[0]->id,
         $user->id,
-        $timings->{end_time} - $timings->{start_time},
+        $timings->{template_time} - $timings->{start_time},
         $timings->{load_bug} - $timings->{start_time},
         $timings->{mid_air} - $timings->{load_bug},
         $timings->{update_time} - $timings->{mid_air},

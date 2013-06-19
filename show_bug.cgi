@@ -69,7 +69,6 @@ Bugzilla->switch_to_shadow_db unless $user->id;
 if ($single) {
     my $id = $cgi->param('id');
     push @bugs, Bugzilla::Bug->check({ id => $id, cache => 1 });
-    $timings->{load_bug_time} = clock_gettime(CLOCK_MONOTONIC);
     if (defined $cgi->param('mark')) {
         foreach my $range (split ',', $cgi->param('mark')) {
             if ($range =~ /^(\d+)-(\d+)$/) {
@@ -97,6 +96,7 @@ if ($single) {
         }
     }
 }
+$timings->{load_bug_time} = clock_gettime(CLOCK_MONOTONIC);
 
 Bugzilla::Bug->preload(\@bugs);
 $timings->{preload_time} = clock_gettime(CLOCK_MONOTONIC);
@@ -143,11 +143,11 @@ _log_timings();
 
 sub _log_timings {
     return unless scalar(@bugs) == 1;
-    $timings->{end_time} = clock_gettime(CLOCK_MONOTONIC);
+    return unless scalar(keys %$timings) == 5;
     my $entry = sprintf "show_bug bug-%s user-%s %.6f %.6f %.6f %.6f %.6f",
         $bugs[0]->id,
         $user->id,
-        $timings->{end_time} - $timings->{start_time},
+        $timings->{template_time} - $timings->{start_time},
         $timings->{login_time} - $timings->{start_time},
         $timings->{load_bug_time} - $timings->{login_time},
         $timings->{preload_time} - $timings->{load_bug_time},

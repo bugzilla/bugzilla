@@ -85,7 +85,7 @@ use constant SHUTDOWNHTML_RETRY_AFTER => 3600;
 # Global Code
 #####################################################################
 
-# $::SIG{__DIE__} = i_am_cgi() ? \&CGI::Carp::confess : \&Carp::confess;
+$::SIG{__DIE__} = i_am_cgi() ? \&CGI::Carp::confess : \&Carp::confess;
 
 # Note that this is a raw subroutine, not a method, so $class isn't available.
 sub init_page {

@@ -37,6 +37,7 @@ Redirect permanent /etiquette.html https://bugzilla.mozilla.org/page.cgi?id=etiq
 Redirect permanent /duplicates.html https://bugzilla.mozilla.org/duplicates.cgi
 
 RewriteEngine On
+RewriteBase /884177/
 RewriteRule ^review(.*) page.cgi?id=splinter.html$1 [QSA]
 RewriteRule ^favicon\.ico$ extensions/BMO/web/images/favicon.ico
 RewriteRule ^form[\.:](itrequest|mozlist|poweredby|presentation|trademark|recoverykey)$ enter_bug.cgi?product=mozilla.org&format=$1

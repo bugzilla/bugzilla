@@ -3104,6 +3104,7 @@ sub _empty_value {
     my $field_obj = $self->_chart_fields->{$field};
     return "0" if $field_obj->type == FIELD_TYPE_BUG_ID;
     return Bugzilla->dbh->quote(EMPTY_DATETIME) if $field_obj->type == FIELD_TYPE_DATETIME;
+    return Bugzilla->dbh->quote(EMPTY_DATE) if $field_obj->type == FIELD_TYPE_DATE;
     return "''";
 }
 

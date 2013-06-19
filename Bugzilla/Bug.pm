@@ -512,6 +512,13 @@ sub preload {
     # If we don't do this, can_see_bug will do one call per bug in
     # the dependency lists, during get_bug_link in Bugzilla::Template.
     $user->visible_bugs(\@all_dep_ids);
+
+    # We preload comments here in order to allow us to compare the time it
+    # takes to load comments from the database with the template rendering
+    # time.
+    foreach my $bug (@$bugs) {
+        $bug->comments();
+    }
 }
 
 sub possible_duplicates {
@@ -3436,6 +3443,8 @@ sub comments {
         }
         Bugzilla::Comment->preload($self->{'comments'});
     }
+    return unless defined wantarray;
+
     my @comments = @{ $self->{'comments'} };
 
     my $order = $params->{order} 

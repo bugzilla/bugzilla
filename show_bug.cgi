@@ -31,11 +31,18 @@ use Bugzilla::User;
 use Bugzilla::Keyword;
 use Bugzilla::Bug;
 
+use Time::HiRes qw(clock_gettime CLOCK_MONOTONIC);
+use Encode qw(encode_utf8);
+use Sys::Syslog qw(:DEFAULT);
+
+my $timings = { start_time => clock_gettime(CLOCK_MONOTONIC) };
+
 my $cgi = Bugzilla->cgi;
 my $template = Bugzilla->template;
 my $vars = {};
 
 my $user = Bugzilla->login();
+$timings->{login_time} = clock_gettime(CLOCK_MONOTONIC);
 
 my $format = $template->get_format("bug/show", scalar $cgi->param('format'),
                                    scalar $cgi->param('ctype'));
@@ -62,6 +69,7 @@ Bugzilla->switch_to_shadow_db unless $user->id;
 if ($single) {
     my $id = $cgi->param('id');
     push @bugs, Bugzilla::Bug->check({ id => $id, cache => 1 });
+    $timings->{load_bug_time} = clock_gettime(CLOCK_MONOTONIC);
     if (defined $cgi->param('mark')) {
         foreach my $range (split ',', $cgi->param('mark')) {
             if ($range =~ /^(\d+)-(\d+)$/) {
@@ -91,6 +99,7 @@ if ($single) {
 }
 
 Bugzilla::Bug->preload(\@bugs);
+$timings->{preload_time} = clock_gettime(CLOCK_MONOTONIC);
 
 $vars->{'bugs'} = \@bugs;
 $vars->{'marks'} = \%marks;
@@ -128,3 +137,22 @@ print $cgi->header($format->{'ctype'});
 
 $template->process($format->{'template'}, $vars)
   || ThrowTemplateError($template->error());
+$timings->{template_time} = clock_gettime(CLOCK_MONOTONIC);
+
+_log_timings();
+
+sub _log_timings {
+    return unless scalar(@bugs) == 1;
+    $timings->{end_time} = clock_gettime(CLOCK_MONOTONIC);
+    my $entry = sprintf "show_bug bug-%s user-%s %.6f %.6f %.6f %.6f %.6f",
+        $bugs[0]->id,
+        $user->id,
+        $timings->{end_time} - $timings->{start_time},
+        $timings->{login_time} - $timings->{start_time},
+        $timings->{load_bug_time} - $timings->{login_time},
+        $timings->{preload_time} - $timings->{load_bug_time},
+        $timings->{template_time} - $timings->{preload_time},
+    openlog('apache', 'cons,pid', 'local4');
+    syslog('notice', encode_utf8("[timing] $entry"));
+    closelog();
+}

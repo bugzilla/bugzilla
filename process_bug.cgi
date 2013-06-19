@@ -61,7 +61,7 @@ use Bugzilla::Token;
 
 use List::MoreUtils qw(firstidx);
 use Storable qw(dclone);
-use Time::HiRes qw(time);
+use Time::HiRes qw(clock_gettime CLOCK_MONOTONIC);
 use Encode qw(encode_utf8);
 use Sys::Syslog qw(:DEFAULT);
 
@@ -72,7 +72,7 @@ my $dbh = Bugzilla->dbh;
 my $template = Bugzilla->template;
 my $vars = {};
 
-my $timings = { start_time => time() };
+my $timings = { start_time => clock_gettime(CLOCK_MONOTONIC) };
 
 ######################################################################
 # Subroutines
@@ -147,6 +147,8 @@ Bugzilla::User::match_field({
 
 print $cgi->header() unless Bugzilla->usage_mode == USAGE_MODE_EMAIL;
 
+$timings->{load_bug} = clock_gettime(CLOCK_MONOTONIC);
+
 # Check for a mid-air collision. Currently this only works when updating
 # an individual bug.
 if (defined $cgi->param('delta_ts'))
@@ -210,7 +212,7 @@ else {
     check_token_data($token, 'buglist_mass_change', 'query.cgi');
 }
 
-$timings->{validation_time} = time();
+$timings->{mid_air} = clock_gettime(CLOCK_MONOTONIC);
 
 ######################################################################
 # End Data/Security Validation
@@ -399,14 +401,14 @@ if (defined $cgi->param('id')) {
     $first_bug->set_flags($flags, $new_flags);
 }
 
-$timings->{update_time} = time();
+$timings->{update_time} = clock_gettime(CLOCK_MONOTONIC);
 
 ##############################
 # Do Actual Database Updates #
 ##############################
 foreach my $bug (@bug_objects) {
     my $changes = $bug->update();
-    $timings->{db_time} = time();
+    $timings->{db_time} = clock_gettime(CLOCK_MONOTONIC);
 
     if ($changes->{'bug_status'}) {
         my $new_status = $changes->{'bug_status'}->[1];
@@ -419,7 +421,7 @@ foreach my $bug (@bug_objects) {
     }
 
     $timings->{recipients} = $bug->send_changes($changes, $vars);
-    $timings->{bugmail_time} = time();
+    $timings->{bugmail_time} = clock_gettime(CLOCK_MONOTONIC);
 }
 
 # Delete the session token used for the mass-change.
@@ -445,7 +447,7 @@ elsif ($action eq 'next_bug' or $action eq 'same_bug') {
         }
         $template->process("bug/show.html.tmpl", $vars)
           || ThrowTemplateError($template->error());
-        $timings->{template_time} = time();
+        $timings->{template_time} = clock_gettime(CLOCK_MONOTONIC);
         _log_timings();
         exit;
     }
@@ -459,18 +461,20 @@ unless (Bugzilla->usage_mode == USAGE_MODE_EMAIL) {
         || ThrowTemplateError($template->error());
     $template->process("global/footer.html.tmpl", $vars)
         || ThrowTemplateError($template->error());
-    $timings->{template_time} = time();
+    $timings->{template_time} = clock_gettime(CLOCK_MONOTONIC);
     _log_timings();
 }
 
 sub _log_timings {
     return unless scalar(@bug_objects) == 1;
-    my $entry = sprintf "bug-%s user-%s %.6f %.6f %.6f %.6f %.6f %.6f %s\n",
+    $timings->{end_time} = clock_gettime(CLOCK_MONOTONIC);
+    my $entry = sprintf "process_bug bug-%s user-%s %.6f %.6f %.6f %.6f %.6f %.6f %.6f %s\n",
         $bug_objects[0]->id,
         $user->id,
-        time() - $timings->{start_time},
-        $timings->{validation_time} - $timings->{start_time},
-        $timings->{update_time} - $timings->{validation_time},
+        $timings->{end_time} - $timings->{start_time},
+        $timings->{load_bug} - $timings->{start_time},
+        $timings->{mid_air} - $timings->{load_bug},
+        $timings->{update_time} - $timings->{mid_air},
         $timings->{db_time} - $timings->{update_time},
         $timings->{bugmail_time} - $timings->{db_time},
         $timings->{template_time} - $timings->{bugmail_time},

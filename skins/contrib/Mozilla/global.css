@@ -561,8 +561,38 @@ table.edit_form hr {
     font-weight: normal;
 }
 
+/* tabs */
+
+table.tabs {
+    border-collapse: separate;
+    border-spacing: 1em 0;
+}
+
+.tabs td {
+    background: rgba(255,255,255,0.5);
+    padding: 1em;
+    text-align: center;
+    border-style: none;
+    font-size: 12px;
+    text-transform: uppercase;
+}
+
+.tabs td.selected {
+    background: white;
+    font-weight: 700;
+}
+
 .tabs td.spacer {
     background: transparent;
+}
+
+.tabs a {
+    color: #333;
+}
+
+.tabbody {
+    background: white;
+    padding: 1em 2em;
 }
 
 /* Smaller than standard 990 (devices and browsers) */

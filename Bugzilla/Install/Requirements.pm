@@ -677,13 +677,7 @@ sub have_vers {
     # the module isn't loaded.
     my $vnum = $module->VERSION || -1;
 
-    # CGI's versioning scheme went 2.75, 2.751, 2.752, 2.753, 2.76
-    # That breaks the standard version tests, so we need to manually correct
-    # the version
-    if ($module eq 'CGI' && $vnum =~ /(2\.7\d)(\d+)/) {
-        $vnum = $1 . "." . $2;
-    }
-    # CPAN did a similar thing, where it has versions like 1.9304.
+    # Fix CPAN versions like 1.9304.
     if ($module eq 'CPAN' and $vnum =~ /^(\d\.\d{2})\d{2}$/) {
         $vnum = $1;
     }

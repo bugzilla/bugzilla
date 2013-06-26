@@ -1384,7 +1384,7 @@ sub _bz_real_schema {
     return $self->{private_real_schema} if exists $self->{private_real_schema};
 
     my ($data, $version) = $self->selectrow_array(
-        "SELECT schema_data, version FROM bz_schema");
+        "SELECT SQL_CACHE schema_data, version FROM bz_schema");
 
     (die "_bz_real_schema tried to read the bz_schema table but it's empty!")
         if !$data;

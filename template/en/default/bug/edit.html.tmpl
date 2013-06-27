@@ -271,10 +271,7 @@
     [%############%]    
     <tr>
       [% INCLUDE "bug/field-label.html.tmpl"
-        field = bug_fields.
-        rep_platform editable = 1
-        accesskey = "h"
-      %]
+           field = bug_fields.rep_platform, editable = 1, accesskey = "h" %]
       <td class="field_value">
        [% INCLUDE bug/field.html.tmpl
             bug = bug, field = bug_fields.rep_platform,

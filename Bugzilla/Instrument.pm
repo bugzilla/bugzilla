@@ -10,66 +10,59 @@ package Bugzilla::Instrument;
 use strict;
 use warnings;
 
-use Bugzilla::Constants;
-use FileHandle;
-use Sys::Hostname;
-use Time::HiRes qw(time);
+use Time::HiRes qw(clock_gettime CLOCK_MONOTONIC);
+use Encode qw(encode_utf8);
+use Sys::Syslog qw(:DEFAULT);
 
 sub new {
-    my ($class, $name) = @_;
-    my $self = {
-        name    => $name,
-        times   => [],
-        fh      => FileHandle->new('>>' . _filename($name)),
-    };
-    return bless($self, $class);
+    my ($class, $label) = @_;
+    my $self = bless({ times => [], labels => [], values => [] }, $class);
+    $self->label($label);
+    $self->time('start_time');
+    return $self;
 }
 
-sub DESTROY {
-    my ($self) = @_;
-    $self->{fh}->print("\n");
-    $self->{fh}->close();
+sub time {
+    my ($self, $name) = @_;
+    # for now $name isn't used
+    push @{ $self->{times} }, clock_gettime(CLOCK_MONOTONIC);
 }
 
-sub begin {
-    my ($self, $label) = @_;
-    my $now = (time);
-    push @{ $self->{times} }, { time => $now, label => $label };
-    $self->_log($now, undef, $label);
+sub label {
+    my ($self, $value) = @_;
+    push @{ $self->{labels} }, $value;
 }
 
-sub end {
-    my ($self, $label) = @_;
-    my $now = (time);
-    my $timer = pop @{ $self->{times} };
-    my $start = $timer ? $timer->{time} : undef;
-    $label ||= $timer->{label} if $timer;
-    $self->_log($now, $start, $label);
+sub value {
+    my ($self, $name, $value) = @_;
+    # for now $name isn't used
+    push @{ $self->{values} }, $value;
 }
 
-sub _log {
-    my ($self, $now, $then, $label) = @_;
-    $label ||= '';
-    my $level = scalar(@{ $self->{times} });
-    if ($then) {
-        $label = ('<' x ($level + 1)) . ' ' . $label;
-        $self->{fh}->printf("[%.5f] %-60s (+%.4f)\n", $now, $label, $now - $then);
-    } else {
-        $label = ('>' x $level) . ' ' . $label;
-        $self->{fh}->printf("[%.5f] %s\n", $now, $label);
+sub log {
+    my $self = shift;
+
+    my @times = @{ $self->{times} };
+    return unless scalar(@times) >= 2;
+    my @labels = @{ $self->{labels} };
+    my @values = @{ $self->{values} };
+
+    # calculate diffs
+    my @diffs = ($times[$#times] - $times[0]);
+    while (1) {
+        my $start = shift(@times);
+        last unless scalar(@times);
+        push @diffs, $times[0] - $start;
     }
-}
 
-our ($_path, $_host);
-sub _filename {
-    my ($name) = @_;
-    if (!$_path) {
-        $_path = bz_locations()->{datadir} . "/timings";
-        mkdir($_path) unless -d $_path;
-        $_host = hostname();
-        $_host =~ s/^([^\.]+)\..+/$1/;
-    }
-    return "$_path/$name-$_host-$$.log";
+    # build syslog string
+    my $format = '[timing]' . (' %s' x scalar(@labels)) . (' %.6f' x scalar(@diffs)) . (' %s' x scalar(@values));
+    my $entry = sprintf($format, @labels, @diffs, @values);
+
+    # and log
+    openlog('apache', 'cons,pid', 'local4');
+    syslog('notice', encode_utf8($entry));
+    closelog();
 }
 
 1;

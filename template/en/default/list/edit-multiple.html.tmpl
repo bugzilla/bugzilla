@@ -214,6 +214,7 @@
       <td colspan="3">
         [% INCLUDE bug/field.html.tmpl
            field = bug_fields.keywords, editable = 1, value = keywords
+           possible_values = all_keywords
            no_tds = 1
         %]
         <select name="keywordaction">

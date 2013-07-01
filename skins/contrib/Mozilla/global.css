@@ -8,7 +8,7 @@ body {
     color: #404040;
 }
 
-body, td, th, input {
+body, td, th, input, select, textarea, option, optgroup, .text_input {
     font-family: "Open Sans", "Helvetica Neue", Arial, Helvetica, sans-serif;
 }
 
@@ -20,17 +20,28 @@ a:hover, #header a:hover, #footer a:hover {
     color: #00539f;
 }
 
-textarea, input[type=text], .text_input {
+select[multiple], textarea, input[type=text], .text_input, .yui-ac-input, input {
     -moz-box-sizing: border-box;
     -webkit-box-sizing: border-box;
     box-sizing: border-box;
-    border: 1px solid #ccc;
-    border-radius: 3px;
-    box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.1);
-    background: -moz-linear-gradient(#fafafa, #fff);
-    background: -webkit-linear-gradient(#fafafa, #fff);
-    background: linear-gradient(#fafafa, #fff);
+    border: 1px solid #b2b2b2;
+    border-radius: .25em;
+    box-shadow: inset 0 1px rgba(0, 0, 0, 0.1);
+    background: white;
     padding: 5px;
+    font-size: 1em;
+    color: #404040;
+}
+
+select[multiple]:focus, textarea:focus, input[type=text]:focus, .text-input:focus, -yui-ac-input:focus, input:focus {
+    border-color: #42a4e0;
+    -webkit-box-shadow: 0 0 0 2px rgba(73,173,227,0.4);
+    -moz-box-shadow: 0 0 0 2px rgba(73,173,227,0.4);
+    box-shadow: 0 0 0 2px rgba(73,173,227,0.4);
+}
+
+select, select[multiple] {
+    font-size: 12px;
 }
 
 hr {
@@ -143,6 +154,7 @@ hr {
     background: url(search.png) 5px center no-repeat, linear-gradient(#fafafa, #fff);
     padding-left: 26px;
     width: 200px;
+    height: 30px;
 }
 
 #footer .links .quicksearch_form {
@@ -156,7 +168,7 @@ hr {
 .links .dropdown {
     background: rgba(0, 0, 0, 0.05);
     border: 1px solid rgba(0, 0, 0, 0.1);
-    border-radius: 3px;
+    border-radius: .25em;
     display: inline-block;
     padding: 4px 8px;
     position: relative;
@@ -174,7 +186,7 @@ hr {
 .links .dropdown ul {
     background: #fafafa;
     border: 1px solid rgba(0, 0, 0, 0.2);
-    border-radius: 0 0 5px 5px;
+    border-radius: 0 0 .25em .25em;
     box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
     display: none;
     padding: 4px;
@@ -286,10 +298,11 @@ table.edit_form hr {
 .field_label {
     font-weight: normal !important;
     padding-right: 20px;
+    vertical-align: middle;
 }
 
 .field_label a, .field_label b {
-    color: #000;
+    color: #404040;
     font-weight: normal;
 }
 
@@ -506,37 +519,64 @@ table.edit_form hr {
     margin-bottom: 1em;
 }
 
-#commit, #commit_top {
-    -moz-transition: all 0.25s linear 0s;
-    -webkit-transition: all 0.25s linear 0s;
-    transition: all 0.25s linear 0s;
-    background-color: rgb(101, 147, 36);
-    background-image: -moz-linear-gradient(rgb(129, 188, 46), rgb(101, 147, 36));
-    background-repeat: repeat-x;
-    border-radius: 0.25em 0.25em 0.25em 0.25em;
+button, input[type=submit], #commit, #commit_top {
+    background-image: -moz-linear-gradient(#43a6e2,#277ac1);
+    background-image: -webkit-linear-gradient(#43a6e2,#277ac1);
+    background-image: linear-gradient(#43a6e2,#277ac1);
+    -moz-transition: all linear 0.25s;
+    -webkit-transition: all linear 0.25s;
+    transition: all linear 0.25s;
+    border-radius: .25em;
     border: 0px none;
-    box-shadow: 0px 2px 0px 0px rgba(0, 0, 0, 0.1), 0px -2px 0px 0px rgba(0, 0, 0, 0.2) inset;
+    box-shadow: 0 1px 0 0 rgba(0,0,0,0.2),inset 0 -1px 0 0 rgba(0,0,0,0.3);
     color: rgb(255, 255, 255);
     cursor: pointer;
     display: inline-block;
     font-size: 14px;
-    height: 48px;
-    line-height: 48px;
-    padding: 0px 24px;
+    font-weight: 700;
     text-align: center;
     text-decoration: none;
     text-shadow: 0px 1px 0px rgba(0, 0, 0, 0.25);
 }
 
-#commit:hover, #commit_top:hover {
-    -moz-transition: all 0.25s linear 0s;
-    -webkit-transition: all 0.25s linear 0s;
-    transition: all 0.25s linear 0s;
-    box-shadow: 0px 2px 0px 0px rgba(0, 0, 0, 0.1), 0px -2px 0px 0px rgba(0, 0, 0, 0.2) inset, 0px 12px 24px 2px rgb(131, 200, 34) inset;
-    color: rgb(255, 255, 255);
-    text-decoration: none;
+button, input[type=submit], #header .btn, #header input[type=submit] {
+    height: 2.175em;
+    line-height: 0.9;
+    padding: 4px 10px 6px;
+    font-size: 14px
 }
 
+button:hover, input[type=submit]:hover, #commit:hover, #commit_top:hover {
+    -webkit-box-shadow: 0 1px 0 0 rgba(0,0,0,0.2),inset 0 -1px 0 0 rgba(0,0,0,0.3),inset 0 12px 24px 2px #38a9ed;
+    -moz-box-shadow: 0 1px 0 0 rgba(0,0,0,0.2),inset 0 -1px 0 0 rgba(0,0,0,0.3),inset 0 12px 24px 2px #38a9ed;
+    box-shadow: 0 1px 0 0 rgba(0,0,0,0.2),inset 0 -1px 0 0 rgba(0,0,0,0.3),inset 0 12px 24px 2px #38a9ed;
+    -moz-transition: all linear 0.25s;
+    -webkit-transition: all linear 0.25s;
+    transition: all linear 0.25s;
+}
+
+button:active, input[type=submit]:active, #commit:active, #commit_top:active {
+    -webkit-box-shadow: inset 0 2px 0 0 rgba(0,0,0,0.2),inset 0 12px 24px 6px rgba(0,0,0,0.2),inset 0 0 2px 2px rgba(0,0,0,0.2);
+    -moz-box-shadow: inset 0 2px 0 0 rgba(0,0,0,0.2),inset 0 12px 24px 6px rgba(0,0,0,0.2),inset 0 0 2px 2px rgba(0,0,0,0.2);
+    box-shadow: inset 0 2px 0 0 rgba(0,0,0,0.2),inset 0 12px 24px 6px rgba(0,0,0,0.2),inset 0 0 2px 2px rgba(0,0,0,0.2);
+    -moz-transition: all linear 0.25s;
+    -webkit-transition: all linear 0.25s;
+    transition: all linear 0.25s;
+}
+
+button[disabled], input[type=submit][disabled], button[disabled]:hover, input[type=submit][disabled]:hover, button[disabled]:active, input[type=submit][disabled]:active {
+    background-image: -moz-linear-gradient(#bfc7cd,#9ca3aa);
+    background-image: -webkit-linear-gradient(#bfc7cd,#9ca3aa);
+    background-image: linear-gradient(#bfc7cd,#9ca3aa);
+    box-shadow: 0 1px 0 0 rgba(0,0,0,0.2),inset 0 -1px 0 0 rgba(0,0,0,0.3);
+    cursor: pointer;
+}
+
+#commit, #commit_top {
+    height: 48px;
+    line-height: 48px;
+    padding: 0px 24px;
+}
 .related_actions {
     line-height: 19px;
     padding: 5px 10px;

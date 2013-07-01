@@ -65,8 +65,10 @@
             function needinfo_visibility() {
               if (YAHOO.util.Dom.get('needinfo_role').value == 'other') {
                 YAHOO.util.Dom.removeClass('needinfo_from_container', 'bz_default_hidden');
+                YAHOO.util.Dom.get('needinfo_from').disabled = false;
               } else {
                 YAHOO.util.Dom.addClass('needinfo_from_container', 'bz_default_hidden');
+                YAHOO.util.Dom.get('needinfo_from').disabled = true;
               }
             }
             function needinfo_focus() {

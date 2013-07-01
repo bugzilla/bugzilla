@@ -334,10 +334,6 @@ table.edit_form hr {
     width: 100%;
 }
 
-#bz_big_form_parts br {
-    display: none;
-}
-
 #attachment_table {
     background: #fff;
     border: none;

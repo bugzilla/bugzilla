@@ -38,40 +38,13 @@
 
 
 <script type="text/javascript">
-<!--
-function onLoadActions() {
-  quicksearchHelpText('quicksearch_main', 'show');
-  if( window.external.AddSearchProvider ){
-    YAHOO.util.Dom.removeClass('quicksearch_plugin', 'bz_default_hidden');
-  }
-  document.getElementById('quicksearch_top').focus();
-}
-var quicksearch_message = "Enter [% terms.abug %] # or some search terms";
-
 function checkQuicksearch( form ) {
-  if (form.quicksearch.value == '' || form.quicksearch.value == quicksearch_message ) { 
+  if (form.quicksearch.value == '') {
     alert('Please enter one or more search terms first.');
-    return false; 
+    return false;
   }
-  return true;         
+  return true;
 }
-
-function quicksearchHelpText(el_id, action){
-  var el = document.getElementById(el_id);
-  if ( action == "show") {
-    if( el.value == "" ) {
-      el.value = quicksearch_message
-      YAHOO.util.Dom.addClass(el, "quicksearch_help_text");
-    }
-  } else {
-    if( el.value == quicksearch_message ) {
-      el.value = "";
-      YAHOO.util.Dom.removeClass(el, "quicksearch_help_text");
-    }
-  }
-}
-YAHOO.util.Event.onDOMReady(onLoadActions);
-//-->
 </script>
 
 [% IF release %]
@@ -144,10 +117,8 @@ YAHOO.util.Event.onDOMReady(onLoadActions);
               onsubmit="return checkQuicksearch(this);">
           <div>
             <input id="quicksearch_main" type="text" name="quicksearch"
-              title="Quick Search" 
-              onfocus="quicksearchHelpText(this.id, 'hide');"
-              onblur="quicksearchHelpText(this.id, 'show');"
-            >
+              placeholder="Enter [% terms.abug %] number or some search terms"
+              title="Quick Search">
             <input id="find" type="submit" value="Quick Search">
             <ul class="additional_links" id="quicksearch_links">
               <li>

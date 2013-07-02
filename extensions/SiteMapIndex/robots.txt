@@ -1,10 +1,10 @@
 User-agent: *
 Disallow: /*.cgi
-Disallow: /*show_bug.cgi*ctype=*
-Allow: /
-Allow: /*index.cgi
-Allow: /*page.cgi
-Allow: /*show_bug.cgi
-Allow: /*describecomponents.cgi
-Allow: /*data/SiteMapIndex/sitemap*.xml.gz
+Disallow: /show_bug.cgi*ctype=*
+Allow: /$
+Allow: /index.cgi
+Allow: /page.cgi
+Allow: /show_bug.cgi
+Allow: /describecomponents.cgi
+Allow: /data/SiteMapIndex/sitemap*.xml.gz
 Sitemap: SITEMAP_URL

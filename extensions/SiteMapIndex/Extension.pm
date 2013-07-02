@@ -134,7 +134,7 @@ sub _fix_robots_txt {
     { local $/; $current_contents = <$current_fh> }
     $current_fh->close();
 
-    return if $current_contents =~ m{^Allow: \/\*show_bug\.cgi}ms;
+    return if $current_contents =~ /^Sitemap:/m;
     my $backup_name = "$cgi_path/robots.txt.old";
     print get_text('sitemap_fixing_robots', { current => $robots_file,
                                               backup  => $backup_name }), "\n";

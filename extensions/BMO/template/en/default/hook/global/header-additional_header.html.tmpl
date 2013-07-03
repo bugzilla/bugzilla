@@ -56,6 +56,9 @@
 [% IF urlbase == 'https://bugzilla.mozilla.org/' %]
   <script type="text/javascript">
     var _gaq = _gaq || [];
+    [% IF bug.defined && bug.groups_in.size %] 
+      _gaq.push(["_set", "title", "[%+ bug.id FILTER none %] – (private bug)"]);
+    [% END %]
     _gaq.push(['_setAccount', 'UA-36116321-3']);
     _gaq.push(['_trackPageview']);
     (function() {

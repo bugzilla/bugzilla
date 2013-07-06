@@ -25,6 +25,8 @@ use Bugzilla::Whine::Schedule;
 use Bugzilla::Whine::Query;
 use Bugzilla::Whine;
 
+use DateTime;
+
 # require the user to have logged in
 my $user = Bugzilla->login(LOGIN_REQUIRED);
 

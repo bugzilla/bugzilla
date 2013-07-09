@@ -8,7 +8,7 @@ body {
     color: #404040;
 }
 
-body, td, th, input, select, textarea, option, optgroup, .text_input {
+body, td, th, input, select, option, optgroup, .text_input {
     font-family: "Open Sans", "Helvetica Neue", Arial, Helvetica, sans-serif;
 }
 
@@ -29,9 +29,13 @@ select[multiple], textarea, input[type=text], .text_input, .yui-ac-input, input 
     box-shadow: inset 0 1px rgba(0, 0, 0, 0.1);
     background: white;
     padding: 5px;
-    font-size: 1em;
     color: #404040;
 }
+
+select[multiple], input[type=text], .text_input, .yui-ac-input, input {
+    font-size: 1em;
+}
+
 
 select[multiple]:focus, textarea:focus, input[type=text]:focus, .text-input:focus, -yui-ac-input:focus, input:focus {
     border-color: #42a4e0;

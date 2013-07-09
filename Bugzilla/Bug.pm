@@ -3942,8 +3942,8 @@ sub get_activity {
                 && ($attachid || 0) == ($operation->{'attachid'} || 0))
             {
                 my $old_change = pop @$changes;
-                $removed = _join_activity_entries($fieldname, $old_change->{'removed'}, $removed);
-                $added = _join_activity_entries($fieldname, $old_change->{'added'}, $added);
+                $removed = join_activity_entries($fieldname, $old_change->{'removed'}, $removed);
+                $added = join_activity_entries($fieldname, $old_change->{'added'}, $added);
             }
             $operation->{'who'} = $who;
             $operation->{'when'} = $when;
@@ -3966,35 +3966,6 @@ sub get_activity {
     }
 
     return(\@operations, $incomplete_data);
-}
-
-sub _join_activity_entries {
-    my ($field, $current_change, $new_change) = @_;
-    # We need to insert characters as these were removed by old
-    # LogActivityEntry code.
-
-    return $new_change if $current_change eq '';
-
-    # Buglists and see_also need the comma restored
-    if ($field eq 'dependson' || $field eq 'blocked' || $field eq 'see_also') {
-        if (substr($new_change, 0, 1) eq ',' || substr($new_change, 0, 1) eq ' ') {
-            return $current_change . $new_change;
-        } else {
-            return $current_change . ', ' . $new_change;
-        }
-    }
-
-    # Assume bug_file_loc contain a single url, don't insert a delimiter
-    if ($field eq 'bug_file_loc') {
-        return $current_change . $new_change;
-    }
-
-    # All other fields get a space
-    if (substr($new_change, 0, 1) eq ' ') {
-        return $current_change . $new_change;
-    } else {
-        return $current_change . ' ' . $new_change;
-    }
 }
 
 # Update the bugs_activity table to reflect changes made in bugs.

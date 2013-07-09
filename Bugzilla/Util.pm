@@ -22,7 +22,8 @@ use parent qw(Exporter);
                              is_7bit_clean bz_crypt generate_random_password
                              validate_email_syntax check_email_syntax clean_text
                              get_text template_var disable_utf8
-                             detect_encoding email_filter);
+                             detect_encoding email_filter
+                             join_activity_entries);
 
 use Bugzilla::Constants;
 use Bugzilla::RNG qw(irand);
@@ -462,6 +463,35 @@ sub find_wrap_point {
         }
     }
     return $wrappoint;
+}
+
+sub join_activity_entries {
+    my ($field, $current_change, $new_change) = @_;
+    # We need to insert characters as these were removed by old
+    # LogActivityEntry code.
+
+    return $new_change if $current_change eq '';
+
+    # Buglists and see_also need the comma restored
+    if ($field eq 'dependson' || $field eq 'blocked' || $field eq 'see_also') {
+        if (substr($new_change, 0, 1) eq ',' || substr($new_change, 0, 1) eq ' ') {
+            return $current_change . $new_change;
+        } else {
+            return $current_change . ', ' . $new_change;
+        }
+    }
+
+    # Assume bug_file_loc contain a single url, don't insert a delimiter
+    if ($field eq 'bug_file_loc') {
+        return $current_change . $new_change;
+    }
+
+    # All other fields get a space
+    if (substr($new_change, 0, 1) eq ' ') {
+        return $current_change . $new_change;
+    } else {
+        return $current_change . ' ' . $new_change;
+    }
 }
 
 sub wrap_hard {
@@ -1011,6 +1041,12 @@ database.
 Search for a comma, a whitespace or a hyphen to split $string, within the first
 $maxpos characters. If none of them is found, just split $string at $maxpos.
 The search starts at $maxpos and goes back to the beginning of the string.
+
+=item C<join_activity_entries($field, $current_change, $new_change)>
+
+Joins two strings together so they appear as one. The field name is specified
+as the method of joining the two strings depends on this. Returns the
+combined string.
 
 =item C<is_7bit_clean($str)>
 

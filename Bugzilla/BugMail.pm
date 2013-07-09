@@ -418,7 +418,8 @@ sub _get_diffs {
                 ON fielddefs.id = bugs_activity.fieldid
              WHERE bugs_activity.bug_id = ?
                    $when_restriction
-          ORDER BY bugs_activity.bug_when", {Slice=>{}}, @args);
+          ORDER BY bugs_activity.bug_when, bugs_activity.id",
+        {Slice=>{}}, @args);
 
     foreach my $diff (@$diffs) {
         $user_cache->{$diff->{who}} ||= new Bugzilla::User($diff->{who}); 
@@ -435,7 +436,25 @@ sub _get_diffs {
          }
     }
 
-    return @$diffs;
+    my @changes = ();
+    foreach my $diff (@$diffs) {
+        # If this is the same field as the previous item, then concatenate
+        # the data into the same change.
+        if (scalar(@changes)
+            && $diff->{field_name}        eq $changes[-1]->{field_name}
+            && $diff->{bug_when}          eq $changes[-1]->{bug_when}
+            && $diff->{who}               eq $changes[-1]->{who}
+            && ($diff->{attach_id} // 0)  == ($changes[-1]->{attach_id} // 0)
+            && ($diff->{comment_id} // 0) == ($changes[-1]->{comment_id} // 0)
+        ) {
+            my $old_change = pop @changes;
+            $diff->{old} = join_activity_entries($diff->{field_name}, $old_change->{old}, $diff->{old});
+            $diff->{new} = join_activity_entries($diff->{field_name}, $old_change->{new}, $diff->{new});
+        }
+        push @changes, $diff;
+    }
+
+    return @changes;
 }
 
 sub _get_new_bugmail_fields {

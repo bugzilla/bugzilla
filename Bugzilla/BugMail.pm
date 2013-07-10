@@ -210,7 +210,7 @@ sub Send {
 
     # Make sure %user_cache has every user in it so far referenced
     foreach my $user_id (keys %recipients) {
-        $user_cache{$user_id} ||= new Bugzilla::User($user_id);
+        $user_cache{$user_id} ||= new Bugzilla::User({ id => $user_id, cache => 1 });
     }
     
     Bugzilla::Hook::process('bugmail_recipients',
@@ -259,7 +259,7 @@ sub Send {
 
     foreach my $user_id (keys %recipients) {
         my %rels_which_want;
-        my $user = $user_cache{$user_id} ||= new Bugzilla::User($user_id);
+        my $user = $user_cache{$user_id} ||= new Bugzilla::User({ id => $user_id, cache => 1 });
         # Deleted users must be excluded.
         next unless $user;
 
@@ -505,7 +505,7 @@ sub _get_diffs {
     my $referenced_bugs = [];
 
     foreach my $diff (@$diffs) {
-        $user_cache->{$diff->{who}} ||= new Bugzilla::User($diff->{who});
+        $user_cache->{$diff->{who}} ||= new Bugzilla::User({ id => $diff->{who}, cache => 1 });
         $diff->{who} = $user_cache->{$diff->{who}};
         if ($diff->{attach_id}) {
             $diff->{isprivate} = $dbh->selectrow_array(

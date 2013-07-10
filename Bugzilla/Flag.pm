@@ -203,15 +203,16 @@ sub type {
 sub setter {
     my $self = shift;
 
-    $self->{'setter'} ||= new Bugzilla::User($self->{'setter_id'});
-    return $self->{'setter'};
+    return $self->{'setter' }
+        ||= new Bugzilla::User({ id => $self->{'setter_id'}, cache => 1 });
 }
 
 sub requestee {
     my $self = shift;
 
     if (!defined $self->{'requestee'} && $self->{'requestee_id'}) {
-        $self->{'requestee'} = new Bugzilla::User($self->{'requestee_id'});
+        $self->{'requestee'}
+            = new Bugzilla::User({ id => $self->{'requestee_id'}, cache => 1 });
     }
     return $self->{'requestee'};
 }
@@ -221,16 +222,16 @@ sub attachment {
     return undef unless $self->attach_id;
 
     require Bugzilla::Attachment;
-    $self->{'attachment'} ||= new Bugzilla::Attachment($self->attach_id);
-    return $self->{'attachment'};
+    return $self->{'attachment'}
+        ||= new Bugzilla::Attachment({ id => $self->attach_id, cache => 1 });
 }
 
 sub bug {
     my $self = shift;
 
     require Bugzilla::Bug;
-    $self->{'bug'} ||= new Bugzilla::Bug({ id => $self->bug_id, cache => 1 });
-    return $self->{'bug'};
+    return $self->{'bug'}
+        ||= new Bugzilla::Bug({ id => $self->bug_id, cache => 1 });
 }
 
 ################################
@@ -1000,7 +1001,7 @@ sub notify {
 
     my %recipients;
     foreach my $cc (split(/[, ]+/, $cc_list)) {
-        my $ccuser = new Bugzilla::User({ name => $cc });
+        my $ccuser = new Bugzilla::User({ name => $cc, cache => 1 });
         next if (scalar(@bug_in_groups) && (!$ccuser || !$ccuser->can_see_bug($bug->bug_id)));
         next if $attachment_is_private && (!$ccuser || !$ccuser->is_insider);
         # Prevent duplicated entries due to case sensitivity.

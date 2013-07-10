@@ -468,7 +468,8 @@ sub grant_list {
     my @custusers;
     my @allusers = @{Bugzilla->user->get_userlist};
     foreach my $user (@allusers) {
-        my $user_obj = new Bugzilla::User({name => $user->{login}});
+        my $user_obj
+            = new Bugzilla::User({ name => $user->{login}, cache => 1 });
         push(@custusers, $user) if $user_obj->can_set_flag($self);
     }
     return \@custusers;

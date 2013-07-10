@@ -352,20 +352,18 @@ sub bug_ids {
 
 sub default_assignee {
     my $self = shift;
-
-    if (!defined $self->{'default_assignee'}) {
-        $self->{'default_assignee'} =
-            new Bugzilla::User($self->{'initialowner'});
-    }
-    return $self->{'default_assignee'};
+    return $self->{'default_assignee'}
+        ||= new Bugzilla::User({ id => $self->{'initialowner'}, cache => 1 });
 }
 
 sub default_qa_contact {
     my $self = shift;
 
     if (!defined $self->{'default_qa_contact'}) {
-        $self->{'default_qa_contact'} =
-            new Bugzilla::User($self->{'initialqacontact'});
+        my $params = $self->{'initialqacontact'}
+                     ? { id => $self->{'initialqacontact'}, cache => 1 }
+                     : $self->{'initialqacontact'};
+        $self->{'default_qa_contact'} = new Bugzilla::User($params);
     }
     return $self->{'default_qa_contact'};
 }

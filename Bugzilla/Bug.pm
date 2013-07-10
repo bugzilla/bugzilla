@@ -3251,8 +3251,8 @@ sub assigned_to {
     my ($self) = @_;
     return $self->{'assigned_to_obj'} if exists $self->{'assigned_to_obj'};
     $self->{'assigned_to'} = 0 if $self->{'error'};
-    $self->{'assigned_to_obj'} ||= new Bugzilla::User($self->{'assigned_to'});
-    return $self->{'assigned_to_obj'};
+    return $self->{'assigned_to_obj'}
+        = new Bugzilla::User({ id => $self->{'assigned_to'}, cache => 1 });
 }
 
 sub blocked {
@@ -3512,7 +3512,8 @@ sub qa_contact {
     return undef if $self->{'error'};
 
     if (Bugzilla->params->{'useqacontact'} && $self->{'qa_contact'}) {
-        $self->{'qa_contact_obj'} = new Bugzilla::User($self->{'qa_contact'});
+        $self->{'qa_contact_obj'}
+            = new Bugzilla::User({ id => $self->{'qa_contact'}, cache => 1 });
     } else {
         # XXX - This is somewhat inconsistent with the assignee/reporter 
         # methods, which will return an empty User if they get a 0. 
@@ -3526,8 +3527,8 @@ sub reporter {
     my ($self) = @_;
     return $self->{'reporter'} if exists $self->{'reporter'};
     $self->{'reporter_id'} = 0 if $self->{'error'};
-    $self->{'reporter'} = new Bugzilla::User($self->{'reporter_id'});
-    return $self->{'reporter'};
+    return $self->{'reporter'}
+        = new Bugzilla::User({ id => $self->{'reporter_id'}, cache => 1 });
 }
 
 sub see_also {

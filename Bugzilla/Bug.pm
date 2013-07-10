@@ -2878,19 +2878,25 @@ sub add_group {
     return if $self->in_group($group);
 
 
-    # Make sure that bugs in this product can actually be restricted
-    # to this group by the current user.
-    $self->product_obj->group_is_settable($group)
-         || ThrowUserError('group_restriction_not_allowed', $args);
+    # BMO : allow bugs to be always placed into some groups by the bug's
+    # reporter
+    if ($self->{reporter_id} != Bugzilla->user->id
+        || !$self->product_obj->group_always_settable($group))
+    {
+        # Make sure that bugs in this product can actually be restricted
+        # to this group by the current user.
+        $self->product_obj->group_is_settable($group)
+            || ThrowUserError('group_restriction_not_allowed', $args);
 
-    # OtherControl people can add groups only during a product change,
-    # and only when the group is not NA for them.
-    if (!Bugzilla->user->in_group($group->name)) {
-        my $controls = $self->product_obj->group_controls->{$group->id};
-        if (!$self->{_old_product_name}
-            || $controls->{othercontrol} == CONTROLMAPNA)
-        {
-            ThrowUserError('group_restriction_not_allowed', $args);
+        # OtherControl people can add groups only during a product change,
+        # and only when the group is not NA for them.
+        if (!Bugzilla->user->in_group($group->name)) {
+            my $controls = $self->product_obj->group_controls->{$group->id};
+            if (!$self->{_old_product_name}
+                || $controls->{othercontrol} == CONTROLMAPNA)
+            {
+                ThrowUserError('group_restriction_not_allowed', $args);
+            }
         }
     }
 
@@ -3659,6 +3665,49 @@ sub groups {
                              "ingroup" => $ingroup,
                              "mandatory" => $ismandatory,
                              "description" => $description });
+        }
+    }
+
+    # BMO: if required, hack in groups exposed by -visible membership
+    # (eg mozilla-corporation-confidential-visible), so reporters can add the
+    # bug to a group on show_bug.
+    # if the bug is already in the group, the user will not be able to remove
+    # it unless they are a true group member.
+    my $user = Bugzilla->user;
+    if ($self->{'reporter_id'} == $user->id) {
+        foreach my $group (@{ $user->groups }) {
+            # map from -visible group to the real one
+            my $group_name = $group->name;
+            next unless $group_name =~ s/-visible$//;
+            next if $user->in_group($group_name);
+            $group = Bugzilla::Group->new({ name => $group_name, cache => 1 });
+
+            # only show the group if it's visible to normal members
+            my ($member_control) = $dbh->selectrow_array(
+                "SELECT membercontrol
+                FROM groups
+                        LEFT JOIN group_control_map
+                                ON group_control_map.group_id = groups.id
+                                AND group_control_map.product_id = ?
+                WHERE groups.id = ?",
+                undef,
+                $self->{product_id}, $group->id
+            );
+
+            if (
+                $member_control
+                && $member_control == CONTROLMAPSHOWN
+                && !grep { $_->{bit} == $group->id } @groups)
+            {
+                push(@groups, {
+                    bit         => $group->id,
+                    name        => $group->name,
+                    ison        => 0,
+                    ingroup     => 1,
+                    mandatory   => 0,
+                    description => $group->description,
+                });
+            }
         }
     }
 

@@ -13,33 +13,11 @@
 <html>
 <head>
   <base href="[% urlbase FILTER html %]">
-  <style>
-    body {
-      font-family: sans-serif;
-      color: #444444;
-    }
-    hr {
-      border: 1px dashed #969696;
-    }
-    .diffs .head td {
-      border-bottom: 1px solid #969696;
-    }
-    .diffs .c1, .diffs .c2 {
-      border-right: 1px solid #969696;
-    }
-    .new .c1 {
-      border-right: 1px solid #969696;
-    }
-    #noreply, #reason, #tracking, #bug_details {
-      font-size: 90%;
-      color: #666666;
-    }
-  </style>
 </head>
-<body>
+<body style="font-family: sans-serif">
 
   [% IF !to_user.in_group('editbugs') %]
-    <div id="noreply">
+    <div id="noreply" style="font-size: 90%; color: #666666">
       Do not reply to this email. You can add comments to this [% terms.bug %] at
       [%# using the bug_link filter here causes a weird template error %]
       <a href="[% urlbase FILTER html %]show_bug.cgi?id=[% bug.id FILTER none %]">
@@ -67,7 +45,7 @@
               at [% comment.creation_ts FILTER time(undef, to_user.timezone) %]
             </b>
           [% END %]
-          <pre>[% comment.body_full({ wrap => 1 }) FILTER quoteUrls(bug, comment) %]</pre>
+          <pre style="font-size: 120%">[% comment.body_full({ wrap => 1 }) FILTER quoteUrls(bug, comment) %]</pre>
         </div>
       [% END %]
     </div>
@@ -76,7 +54,7 @@
 
   [% IF referenced_bugs.size %]
     <div id="referenced">
-      <hr>
+      <hr style="border: 1px dashed #969696">
       <b>Referenced [% terms.Bugs %]:</b>
       <ul>
         [% FOREACH ref = referenced_bugs %]
@@ -90,8 +68,8 @@
     <br>
   [% END %]
 
-  <div id="bug_details">
-    <hr>
+  <div id="bug_details" style="font-size: 90%; color: #666666">
+    <hr style="border: 1px dashed #969696">
     Product/Component: [% bug.product FILTER html %] :: [% bug.component FILTER html %]
   </div>
 
@@ -103,8 +81,8 @@
   [% tracking_flags.push(field) %]
 [% END %]
 [% IF tracking_flags.size %]
-  <div id="tracking">
-    <hr>
+  <div id="tracking" style="font-size: 90%; color: #666666">
+    <hr style="border: 1px dashed #969696">
     <b>Tracking Flags:</b>
     <ul>
       [% FOREACH field = tracking_flags %]
@@ -114,8 +92,8 @@
   </div>
 [% END %]
 
-  <div id="reason">
-    <hr>
+  <div id="reason" style="font-size: 90%; color: #666666">
+    <hr style="border: 1px dashed #969696">
     <b>You are receiving this mail because:</b>
     <ul>
       [% FOREACH reason = reasons %]
@@ -140,7 +118,7 @@
     [% FOREACH change = diffs %]
       [% PROCESS "email/bugmail-common.txt.tmpl" %]
       <tr>
-        <td class="c1" nowrap><b>[% field_label FILTER html %]</b></td>
+        <td class="c1" style="border-right: 1px solid #969696" nowrap><b>[% field_label FILTER html %]</b></td>
         <td class="c2">
           [% IF change.field_name == "bug_id" %]
             [% new_value FILTER bug_link(bug, full_url => 1) FILTER none %]
@@ -190,15 +168,15 @@
         [% SET in_table = 1 %]
       [% END %]
       <tr class="head">
-        <td class="c1"><b>What</b></td>
-        <td class="c2"><b>Removed</b></td>
-        <td class="c3"><b>Added</b></td>
+        <td class="c1" style="border-bottom: 1px solid #969696; border-right: 1px solid #969696"><b>What</b></td>
+        <td class="c2" style="border-bottom: 1px solid #969696; border-right: 1px solid #969696"><b>Removed</b></td>
+        <td class="c3" style="border-bottom: 1px solid #969696"><b>Added</b></td>
       </tr>
     [% END %]
 
     <tr>
-      <td class="c1" nowrap>[% field_label FILTER html %]</td>
-      <td class="c2">
+      <td class="c1" style="border-right: 1px solid #969696" nowrap>[% field_label FILTER html %]</td>
+      <td class="c2" style="border-right: 1px solid #969696">
         [% IF old_value %]
           [% old_value FILTER html %]
         [% ELSE %]

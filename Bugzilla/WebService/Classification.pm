@@ -86,13 +86,17 @@ Bugzilla::Webservice::Classification - The Classification API
 
 =head1 DESCRIPTION
 
-This part of the Bugzilla API allows you to deal with the available Classifications. 
+This part of the Bugzilla API allows you to deal with the available Classifications.
 You will be able to get information about them as well as manipulate them.
 
 =head1 METHODS
 
 See L<Bugzilla::WebService> for a description of how parameters are passed,
 and what B<STABLE>, B<UNSTABLE>, and B<EXPERIMENTAL> mean.
+
+Although the data input and output is the same for JSONRPC, XMLRPC and REST,
+the directions for how to access the data via REST is noted in each method
+where applicable.
 
 =head1 Classification Retrieval
 
@@ -106,13 +110,21 @@ B<EXPERIMENTAL>
 
 Returns a hash containing information about a set of classifications.
 
+=item B<REST>
+
+To return information on a single classification:
+
+GET /classification/<classification_id_or_name>
+
+The returned data format will be the same as below.
+
 =item B<Params>
 
 In addition to the parameters below, this method also accepts the
 standard L<include_fields|Bugzilla::WebService/include_fields> and
 L<exclude_fields|Bugzilla::WebService/exclude_fields> arguments.
 
-You could get classifications info by supplying their names and/or ids. 
+You could get classifications info by supplying their names and/or ids.
 So, this method accepts the following parameters:
 
 =over
@@ -127,10 +139,10 @@ An array of classification names.
 
 =back
 
-=item B<Returns>    
+=item B<Returns>
 
 A hash with the key C<classifications> and an array of hashes as the corresponding value.
-Each element of the array represents a classification that the user is authorized to see 
+Each element of the array represents a classification that the user is authorized to see
 and has the following keys:
 
 =over
@@ -189,6 +201,8 @@ Classification is not enabled on this installation.
 =over
 
 =item Added in Bugzilla B<4.4>.
+
+=item REST API call added in Bugzilla B<5.0>.
 
 =back
 

@@ -1073,6 +1073,13 @@
     For security reasons, you must use HTTP POST to call the
     '[% method FILTER html %]' method.
 
+  [% ELSIF error == "rest_invalid_resource" %]
+    A REST API resource was not found for '[% method FILTER html +%] [%+ path FILTER html %]'.
+
+  [% ELSIF error == "rest_get_products_invalid_type" %]
+    The type '[% type FILTER html %]' is invalid for 'GET /product'. Valid choices
+    are 'accessible' (default if type value is undefined), 'selectable', and 'enterable'.
+
   [% ELSIF error == "keyword_already_exists" %]
     [% title = "Keyword Already Exists" %]
     A keyword with the name [% name FILTER html %] already exists.

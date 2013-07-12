@@ -1075,6 +1075,10 @@ or get information about bugs that have already been filed.
 See L<Bugzilla::WebService> for a description of how parameters are passed,
 and what B<STABLE>, B<UNSTABLE>, and B<EXPERIMENTAL> mean.
 
+Although the data input and output is the same for JSONRPC, XMLRPC and REST,
+the directions for how to access the data via REST is noted in each method
+where applicable.
+
 =head1 Utility Functions
 
 =head2 fields
@@ -1088,11 +1092,26 @@ B<UNSTABLE>
 Get information about valid bug fields, including the lists of legal values
 for each field.
 
+=item B<REST>
+
+You have several options for retreiving information about fields. The first
+part is the request method and the rest is the related path needed.
+
+To get information about all fields:
+
+GET /field/bug
+
+To get information related to a single field:
+
+GET /field/bug/<id_or_name>
+
+The returned data format is the same as below.
+
 =item B<Params>
 
 You can pass either field ids or field names.
 
-B<Note>: If neither C<ids> nor C<names> is specified, then all 
+B<Note>: If neither C<ids> nor C<names> is specified, then all
 non-obsolete fields will be returned.
 
 In addition to the parameters below, this method also accepts the
@@ -1288,6 +1307,8 @@ You specified an invalid field name or id.
 
 =item C<is_active> return key for C<values> was added in Bugzilla B<4.4>.
 
+=item REST API call added in Bugzilla B<5.0>
+
 =back
 
 =back
@@ -1302,6 +1323,18 @@ B<DEPRECATED> - Use L</fields> instead.
 =item B<Description>
 
 Tells you what values are allowed for a particular field.
+
+=item B<REST>
+
+To get information on the values for a field based on field name:
+
+GET /field/bug/<field_name>/values
+
+To get information based on field name and a specific product:
+
+GET /field/bug/<field_name>/<product_id>/values
+
+The returned data format is the same as below.
 
 =item B<Params>
 
@@ -1335,6 +1368,14 @@ You specified a field that doesn't exist or isn't a drop-down field.
 
 =back
 
+=item B<History>
+
+=over
+
+=item REST API call added in Bugzilla B<5.0>.
+
+=back
+
 =back
 
 =head1 Bug Information
@@ -1352,6 +1393,18 @@ and/or attachment ids.
 
 B<Note>: Private attachments will only be returned if you are in the 
 insidergroup or if you are the submitter of the attachment.
+
+=item B<REST>
+
+To get all current attachments for a bug:
+
+GET /bug/<bug_id>/attachment
+
+To get a specific attachment based on attachment ID:
+
+GET /bug/attachment/<attachment_id>
+
+The returned data format is the same as below.
 
 =item B<Params>
 
@@ -1550,6 +1603,8 @@ C<summary>.
 
 =item The C<flags> array was added in Bugzilla B<4.4>.
 
+=item REST API call added in Bugzilla B<5.0>.
+
 =back
 
 =back
@@ -1565,6 +1620,18 @@ B<STABLE>
 
 This allows you to get data about comments, given a list of bugs 
 and/or comment ids.
+
+=item B<REST>
+
+To get all comments for a particular bug using the bug ID or alias:
+
+GET /bug/<id_or_alias>/comment
+
+To get a specific comment based on the comment ID:
+
+GET /bug/comment/<comment_id>
+
+The returned data format is the same as below.
 
 =item B<Params>
 
@@ -1711,6 +1778,8 @@ C<creator>.
 
 =item C<creation_time> was added in Bugzilla B<4.4>.
 
+=item REST API call added in Bugzilla B<5.0>.
+
 =back
 
 =back
@@ -1727,6 +1796,14 @@ B<STABLE>
 Gets information about particular bugs in the database.
 
 Note: Can also be called as "get_bugs" for compatibilty with Bugzilla 3.0 API.
+
+=item B<REST>
+
+To get information about a particular bug using its ID or alias:
+
+GET /bug/<id_or_alias>
+
+The returned data format is the same as below.
 
 =item B<Params>
 
@@ -2060,6 +2137,8 @@ You do not have access to the bug_id you specified.
 =item The following properties were added to this method's return values
 in Bugzilla B<3.4>:
 
+=item REST API call added in Bugzilla B<5.0>
+
 =over
 
 =item For C<bugs>
@@ -2116,6 +2195,14 @@ B<EXPERIMENTAL>
 =item B<Description>
 
 Gets the history of changes for particular bugs in the database.
+
+=item B<REST>
+
+To get the history for a specific bug ID:
+
+GET /bug/<bug_id>/history
+
+The returned data format will be the same as below.
 
 =item B<Params>
 
@@ -2208,6 +2295,8 @@ The same as L</get>.
 consistent with other methods. Since Bugzilla B<4.4>, they now match
 names used by L<Bug.update|/"update"> for consistency.
 
+=item REST API call added Bugzilla B<5.0>.
+
 =back
 
 =back
@@ -2222,6 +2311,14 @@ B<UNSTABLE>
 =item B<Description>
 
 Allows you to search for bugs based on particular criteria.
+
+=item <REST>
+
+To search for bugs:
+
+GET /bug
+
+The URL parameters and the returned data format are the same as below.
 
 =item B<Params>
 
@@ -2408,6 +2505,8 @@ in Bugzilla B<4.0>.
 C<limit> is set equal to zero. Otherwise maximum results returned are limited
 by system configuration.
 
+=item REST API call added in Bugzilla B<5.0>.
+
 =back
 
 =back
@@ -2434,10 +2533,19 @@ The WebService interface may allow you to set things other than those listed
 here, but realize that anything undocumented is B<UNSTABLE> and will very
 likely change in the future.
 
+=item B<REST>
+
+To create a new bug in Bugzilla:
+
+POST /bug
+
+The params to include in the POST body as well as the returned data format,
+are the same as below.
+
 =item B<Params>
 
 Some params must be set, or an error will be thrown. These params are
-marked B<Required>. 
+marked B<Required>.
 
 Some parameters can have defaults set in Bugzilla, by the administrator.
 If these parameters have defaults set, you can omit them. These parameters
@@ -2598,6 +2706,8 @@ loop errors had a generic code of C<32000>.
 =item The ability to file new bugs with a C<resolution> was added in
 Bugzilla B<4.4>.
 
+=item REST API call added in Bugzilla B<5.0>.
+
 =back
 
 =back
@@ -2612,6 +2722,16 @@ B<STABLE>
 =item B<Description>
 
 This allows you to add an attachment to a bug in Bugzilla.
+
+=item B<REST>
+
+To create attachment on a current bug:
+
+POST /bug/<bug_id>/attachment
+
+The params to include in the POST body, as well as the returned
+data format are the same as below. The C<ids> param will be
+overridden as it it pulled from the URL path.
 
 =item B<Params>
 
@@ -2710,6 +2830,8 @@ You set the "data" field to an empty string.
 
 =item The return value has changed in Bugzilla B<4.4>.
 
+=item REST API call added in Bugzilla B<5.0>.
+
 =back
 
 =back
@@ -2724,6 +2846,15 @@ B<STABLE>
 =item B<Description>
 
 This allows you to add a comment to a bug in Bugzilla.
+
+=item B<REST>
+
+To create a comment on a current bug:
+
+POST /bug/<bug_id>/comment
+
+The params to include in the POST body as well as the returned data format,
+are the same as below.
 
 =item B<Params>
 
@@ -2800,6 +2931,8 @@ purposes if you wish.
 =item Before Bugzilla B<3.6>, error 54 and error 114 had a generic error
 code of 32000.
 
+=item REST API call added in Bugzilla B<5.0>.
+
 =back
 
 =back
@@ -2815,6 +2948,16 @@ B<UNSTABLE>
 
 Allows you to update the fields of a bug. Automatically sends emails
 out about the changes.
+
+=item B<REST>
+
+To update the fields of a current bug:
+
+PUT /bug/<bug_id>
+
+The params to include in the PUT body as well as the returned data format,
+are the same as below. The C<ids> param will be overridden as it is
+pulled from the URL path.
 
 =item B<Params>
 
@@ -3259,6 +3402,8 @@ rules don't allow that change.
 =over
 
 =item Added in Bugzilla B<4.0>.
+
+=item REST API call added Bugzilla B<5.0>.
 
 =back
 

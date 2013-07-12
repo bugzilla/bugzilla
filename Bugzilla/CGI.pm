@@ -56,7 +56,7 @@ sub new {
     # the rendering of pages.
     my $script = basename($0);
     if (my $path_info = $self->path_info) {
-        my @whitelist;
+        my @whitelist = ("rest.cgi");
         Bugzilla::Hook::process('path_info_whitelist', { whitelist => \@whitelist });
         if (!grep($_ eq $script, @whitelist)) {
             # IIS includes the full path to the script in PATH_INFO,

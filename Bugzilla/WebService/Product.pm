@@ -336,6 +336,10 @@ get information about them.
 See L<Bugzilla::WebService> for a description of how parameters are passed,
 and what B<STABLE>, B<UNSTABLE>, and B<EXPERIMENTAL> mean.
 
+Although the data input and output is the same for JSONRPC, XMLRPC and REST,
+the directions for how to access the data via REST is noted in each method
+where applicable.
+
 =head1 List Products
 
 =head2 get_selectable_products
@@ -348,14 +352,28 @@ B<EXPERIMENTAL>
 
 Returns a list of the ids of the products the user can search on.
 
+=item B<REST>
+
+GET /product?type=selectable
+
+the returned data format is same as below.
+
 =item B<Params> (none)
 
-=item B<Returns>    
+=item B<Returns>
 
 A hash containing one item, C<ids>, that contains an array of product
 ids.
 
 =item B<Errors> (none)
+
+=item B<History>
+
+=over
+
+=item REST API call added in Bugzilla B<5.0>.
+
+=back
 
 =back
 
@@ -370,6 +388,12 @@ B<EXPERIMENTAL>
 Returns a list of the ids of the products the user can enter bugs
 against.
 
+=item B<REST>
+
+GET /product?type=enterable
+
+the returned data format is same as below.
+
 =item B<Params> (none)
 
 =item B<Returns>
@@ -378,6 +402,14 @@ A hash containing one item, C<ids>, that contains an array of product
 ids.
 
 =item B<Errors> (none)
+
+=item B<History>
+
+=over
+
+=item REST API call added in Bugzilla B<5.0>.
+
+=back
 
 =back
 
@@ -392,6 +424,12 @@ B<UNSTABLE>
 Returns a list of the ids of the products the user can search or enter
 bugs against.
 
+=item B<REST>
+
+GET /product?type=accessible
+
+the returned data format is same as below.
+
 =item B<Params> (none)
 
 =item B<Returns>
@@ -400,6 +438,14 @@ A hash containing one item, C<ids>, that contains an array of product
 ids.
 
 =item B<Errors> (none)
+
+=item B<History>
+
+=over
+
+=item REST API call added in Bugzilla B<5.0>.
+
+=back
 
 =back
 
@@ -416,6 +462,12 @@ Returns a list of information about the products passed to it.
 B<Note>: You must at least specify one of C<ids> or C<names>.
 
 B<Note>: Can also be called as "get_products" for compatibilty with Bugzilla 3.0 API.
+
+=item B<REST>
+
+GET /product/<product_id_or_name>
+
+the returned data format is same as below.
 
 =item B<Params>
 
@@ -612,6 +664,8 @@ been removed.
 =item In Bugzilla B<4.4>, C<flag_types> was added to the fields returned
 by C<get>.
 
+=item REST API call added in Bugzilla B<5.0>.
+
 =back
 
 =back
@@ -628,9 +682,16 @@ B<EXPERIMENTAL>
 
 This allows you to create a new product in Bugzilla.
 
-=item B<Params> 
+=item B<REST>
 
-Some params must be set, or an error will be thrown. These params are 
+POST /product
+
+The params to include in the POST body as well as the returned data format,
+are the same as below.
+
+=item B<Params>
+
+Some params must be set, or an error will be thrown. These params are
 marked B<Required>.
 
 =over
@@ -709,6 +770,14 @@ You must specify a version for this product.
 
 =back
 
+=item B<History>
+
+=over
+
+=item REST API call added in Bugzilla B<5.0>.
+
+=back
+
 =back
 
 =head2 update
@@ -720,6 +789,14 @@ B<EXPERIMENTAL>
 =item B<Description>
 
 This allows you to update a product in Bugzilla.
+
+=item B<REST>
+
+PUT /product/<product_id_or_name>
+
+The params to include in the PUT body as well as the returned data format,
+are the same as below. The C<ids> and C<names> params will be overridden as
+it is pulled from the URL path.
 
 =item B<Params>
 
@@ -858,6 +935,8 @@ You must define a default milestone.
 =over
 
 =item Added in Bugzilla B<4.4>.
+
+=item REST API call added in Bugzilla B<5.0>.
 
 =back
 

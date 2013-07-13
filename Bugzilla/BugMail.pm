@@ -444,8 +444,8 @@ sub _get_diffs {
             && $diff->{field_name}        eq $changes[-1]->{field_name}
             && $diff->{bug_when}          eq $changes[-1]->{bug_when}
             && $diff->{who}               eq $changes[-1]->{who}
-            && ($diff->{attach_id} // 0)  == ($changes[-1]->{attach_id} // 0)
-            && ($diff->{comment_id} // 0) == ($changes[-1]->{comment_id} // 0)
+            && ($diff->{attach_id} || 0)  == ($changes[-1]->{attach_id} || 0)
+            && ($diff->{comment_id} || 0) == ($changes[-1]->{comment_id} || 0)
         ) {
             my $old_change = pop @changes;
             $diff->{old} = join_activity_entries($diff->{field_name}, $old_change->{old}, $diff->{old});

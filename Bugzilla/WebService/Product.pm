@@ -48,19 +48,19 @@ BEGIN { *get_products = \&get }
 # Get the ids of the products the user can search
 sub get_selectable_products {
     Bugzilla->switch_to_shadow_db();
-    return {ids => [map {$_->id} @{Bugzilla->user->get_selectable_products}]}; 
+    return {ids => [map {$_->id} @{Bugzilla->user->get_selectable_products}]};
 }
 
 # Get the ids of the products the user can enter bugs against
 sub get_enterable_products {
     Bugzilla->switch_to_shadow_db();
-    return {ids => [map {$_->id} @{Bugzilla->user->get_enterable_products}]}; 
+    return {ids => [map {$_->id} @{Bugzilla->user->get_enterable_products}]};
 }
 
 # Get the union of the products the user can search and enter bugs against.
 sub get_accessible_products {
     Bugzilla->switch_to_shadow_db();
-    return {ids => [map {$_->id} @{Bugzilla->user->get_accessible_products}]}; 
+    return {ids => [map {$_->id} @{Bugzilla->user->get_accessible_products}]};
 }
 
 # Get a list of actual products, based on list of ids or names
@@ -69,7 +69,7 @@ sub get {
 
     Bugzilla->switch_to_shadow_db();
 
-    # Only products that are in the users accessible products, 
+    # Only products that are in the users accessible products,
     # can be allowed to be returned
     my $accessible_products = Bugzilla->user->get_accessible_products;
 
@@ -78,8 +78,8 @@ sub get {
     if (defined $params->{ids}) {
         # Create a hash with the ids the user wants
         my %ids = map { $_ => 1 } @{$params->{ids}};
-        
-        # Return the intersection of this, by grepping the ids from 
+
+        # Return the intersection of this, by grepping the ids from
         # accessible products.
         push(@requested_accessible,
             grep { $ids{$_->id} } @$accessible_products);
@@ -88,8 +88,8 @@ sub get {
     if (defined $params->{names}) {
         # Create a hash with the names the user wants
         my %names = map { lc($_) => 1 } @{$params->{names}};
-        
-        # Return the intersection of this, by grepping the names from 
+
+        # Return the intersection of this, by grepping the names from
         # accessible products, union'ed with products found by ID to
         # avoid duplicates
         foreach my $product (grep { $names{lc $_->name} }
@@ -110,7 +110,7 @@ sub create {
     my ($self, $params) = @_;
 
     Bugzilla->login(LOGIN_REQUIRED);
-    Bugzilla->user->in_group('editcomponents') 
+    Bugzilla->user->in_group('editcomponents')
         || ThrowUserError("auth_failure", { group  => "editcomponents",
                                             action => "add",
                                             object => "products"});
@@ -233,6 +233,10 @@ get information about them.
 See L<Bugzilla::WebService> for a description of how parameters are passed,
 and what B<STABLE>, B<UNSTABLE>, and B<EXPERIMENTAL> mean.
 
+Although the data input and output is the same for JSONRPC, XMLRPC and REST,
+the directions for how to access the data via REST is noted in each method
+where applicable.
+
 =head1 List Products
 
 =head2 get_selectable_products
@@ -245,14 +249,28 @@ B<EXPERIMENTAL>
 
 Returns a list of the ids of the products the user can search on.
 
+=item B<REST>
+
+GET /product?type=selectable
+
+the returned data format is same as below.
+
 =item B<Params> (none)
 
-=item B<Returns>    
+=item B<Returns>
 
 A hash containing one item, C<ids>, that contains an array of product
 ids.
 
 =item B<Errors> (none)
+
+=item B<History>
+
+=over
+
+=item REST API call added in Bugzilla B<5.0>.
+
+=back
 
 =back
 
@@ -267,6 +285,12 @@ B<EXPERIMENTAL>
 Returns a list of the ids of the products the user can enter bugs
 against.
 
+=item B<REST>
+
+GET /product?type=enterable
+
+the returned data format is same as below.
+
 =item B<Params> (none)
 
 =item B<Returns>
@@ -275,6 +299,14 @@ A hash containing one item, C<ids>, that contains an array of product
 ids.
 
 =item B<Errors> (none)
+
+=item B<History>
+
+=over
+
+=item REST API call added in Bugzilla B<5.0>.
+
+=back
 
 =back
 
@@ -289,6 +321,12 @@ B<UNSTABLE>
 Returns a list of the ids of the products the user can search or enter
 bugs against.
 
+=item B<REST>
+
+GET /product?type=accessible
+
+the returned data format is same as below.
+
 =item B<Params> (none)
 
 =item B<Returns>
@@ -297,6 +335,14 @@ A hash containing one item, C<ids>, that contains an array of product
 ids.
 
 =item B<Errors> (none)
+
+=item B<History>
+
+=over
+
+=item REST API call added in Bugzilla B<5.0>.
+
+=back
 
 =back
 
@@ -311,6 +357,12 @@ B<EXPERIMENTAL>
 Returns a list of information about the products passed to it.
 
 Note: Can also be called as "get_products" for compatibilty with Bugzilla 3.0 API.
+
+=item B<REST>
+
+GET /product/<product_id_or_name>
+
+the returned data format is same as below.
 
 =item B<Params>
 
@@ -332,7 +384,7 @@ An array of product names
 
 =back
 
-=item B<Returns> 
+=item B<Returns>
 
 A hash containing one item, C<products>, that is an array of
 hashes. Each hash describes a product, and has the following items:
@@ -442,6 +494,8 @@ C<milestones>, C<default_milestone> and C<has_unconfirmed> were added to
 the fields returned by C<get> as a replacement for C<internals>, which has
 been removed.
 
+=item REST API call added in Bugzilla B<5.0>.
+
 =back
 
 =back
@@ -458,9 +512,16 @@ B<EXPERIMENTAL>
 
 This allows you to create a new product in Bugzilla.
 
-=item B<Params> 
+=item B<REST>
 
-Some params must be set, or an error will be thrown. These params are 
+POST /product
+
+The params to include in the POST body as well as the returned data format,
+are the same as below.
+
+=item B<Params>
+
+Some params must be set, or an error will be thrown. These params are
 marked B<Required>.
 
 =over
@@ -474,11 +535,11 @@ within Bugzilla.
 
 B<Required> C<string> A description for this product. Allows some simple HTML.
 
-=item C<version> 
+=item C<version>
 
 B<Required> C<string> The default version for this product.
 
-=item C<has_unconfirmed> 
+=item C<has_unconfirmed>
 
 C<boolean> Allow the UNCONFIRMED status to be set on bugs in this product.
 Default: true.
@@ -487,11 +548,11 @@ Default: true.
 
 C<string> The name of the Classification which contains this product.
 
-=item C<default_milestone> 
+=item C<default_milestone>
 
 C<string> The default milestone for this product. Default: '---'.
 
-=item C<is_open> 
+=item C<is_open>
 
 C<boolean> True if the product is currently allowing bugs to be entered
 into it. Default: true.
@@ -503,7 +564,7 @@ new product. Default: true.
 
 =back
 
-=item B<Returns>    
+=item B<Returns>
 
 A hash with one element, id. This is the id of the newly-filed product.
 
@@ -536,6 +597,14 @@ You must specify a description for this product.
 =item 704 (Product must have version)
 
 You must specify a version for this product.
+
+=back
+
+=item B<History>
+
+=over
+
+=item REST API call added in Bugzilla B<5.0>.
 
 =back
 

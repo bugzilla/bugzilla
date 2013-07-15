@@ -61,6 +61,10 @@ get information about them.
 See L<Bugzilla::WebService> for a description of how parameters are passed,
 and what B<STABLE>, B<UNSTABLE>, and B<EXPERIMENTAL> mean.
 
+Although the data input and output is the same for JSONRPC, XMLRPC and REST,
+the directions for how to access the data via REST is noted in each method
+where applicable.
+
 =head1 Group Creation
 
 =head2 create
@@ -73,9 +77,16 @@ B<UNSTABLE>
 
 This allows you to create a new group in Bugzilla.
 
-=item B<Params> 
+=item B<REST>
 
-Some params must be set, or an error will be thrown. These params are 
+POST /group
+
+The params to include in the POST body as well as the returned data format,
+are the same as below.
+
+=item B<Params>
+
+Some params must be set, or an error will be thrown. These params are
 marked B<Required>.
 
 =over
@@ -96,7 +107,7 @@ name of the group.
 C<string> A regular expression. Any user whose Bugzilla username matches
 this regular expression will automatically be granted membership in this group.
 
-=item C<is_active> 
+=item C<is_active>
 
 C<boolean> C<True> if new group can be used for bugs, C<False> if this
 is a group that will only contain users and no bugs will be restricted
@@ -110,7 +121,7 @@ if they are in this group.
 
 =back
 
-=item B<Returns>    
+=item B<Returns>
 
 A hash with one element, C<id>. This is the id of the newly-created group.
 
@@ -136,6 +147,14 @@ You specified an invalid regular expression in the C<user_regexp> field.
 
 =back
 
-=back 
+=item B<History>
+
+=over
+
+=item REST API call added in Bugzilla B<5.0>.
+
+=back
+
+=back
 
 =cut

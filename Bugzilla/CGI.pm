@@ -78,7 +78,7 @@ sub new {
     # the rendering of pages.
     my $script = basename($0);
     if ($self->path_info) {
-        my @whitelist;
+        my @whitelist = ("rest.cgi");
         Bugzilla::Hook::process('path_info_whitelist', { whitelist => \@whitelist });
         if (!grep($_ eq $script, @whitelist)) {
             print $self->redirect($self->url(-path => 0, -query => 1));

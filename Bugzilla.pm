@@ -474,6 +474,9 @@ sub usage_mode {
         elsif ($newval == USAGE_MODE_TEST) {
             $class->error_mode(ERROR_MODE_TEST);
         }
+        elsif ($newval == USAGE_MODE_REST) {
+            $class->error_mode(ERROR_MODE_REST);
+        }
         else {
             ThrowCodeError('usage_mode_invalid',
                            {'invalid_usage_mode', $newval});

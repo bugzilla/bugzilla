@@ -125,7 +125,7 @@ sub create {
 # $call = $rpc->call( 'User.get', { ids => [1,2,3], 
 #         names => ['testusera@redhat.com', 'testuserb@redhat.com'] });
 sub get {
-    my ($self, $params) = validate(@_, 'names', 'ids');
+    my ($self, $params) = validate(@_, 'names', 'ids', 'match', 'group_ids', 'groups');
 
     Bugzilla->switch_to_shadow_db();
 
@@ -320,6 +320,10 @@ log in/out using an existing account.
 See L<Bugzilla::WebService> for a description of how parameters are passed,
 and what B<STABLE>, B<UNSTABLE>, and B<EXPERIMENTAL> mean.
 
+Although the data input and output is the same for JSONRPC, XMLRPC and REST,
+the directions for how to access the data via REST is noted in each method
+where applicable.
+
 =head1 Logging In and Out
 
 =head2 login
@@ -338,7 +342,7 @@ etc. This method logs in an user.
 
 =over
 
-=item C<login> (string) - The user's login name. 
+=item C<login> (string) - The user's login name.
 
 =item C<password> (string) - The user's password.
 
@@ -462,6 +466,13 @@ actually receive an email. This function does not check that.
 You must be logged in and have the C<editusers> privilege in order to
 call this function.
 
+=item B<REST>
+
+POST /user
+
+The params to include in the POST body as well as the returned data format,
+are the same as below.
+
 =item B<Params>
 
 =over
@@ -505,6 +516,8 @@ password is under three characters.)
 
 =item Error 503 (Password Too Long) removed in Bugzilla B<3.6>.
 
+=item REST API call added in Bugzilla B<5.0>.
+
 =back
 
 =back
@@ -520,6 +533,18 @@ B<STABLE>
 =item B<Description>
 
 Gets information about user accounts in Bugzilla.
+
+=item B<REST>
+
+To get information about a single user:
+
+GET /user/<user_id_or_name>
+
+To search for users by name, group using URL params same as below:
+
+GET /user
+
+The returned data format is the same as below.
 
 =item B<Params>
 
@@ -581,6 +606,14 @@ from the returned results unless their full username is identical to the
 match string. Setting C<include_disabled> to C<true> will include disabled
 users in the returned results even if their username doesn't fully match
 the input string.
+
+=item B<History>
+
+=over
+
+=item REST API call added in Bugzilla B<5.0>.
+
+=back
 
 =back
 
@@ -726,5 +759,7 @@ for C<match> has changed to only returning enabled accounts.
 illegal to pass a group name you don't belong to.
 
 =back
+
+=item REST API call added in Bugzilla B<5.0>.
 
 =back

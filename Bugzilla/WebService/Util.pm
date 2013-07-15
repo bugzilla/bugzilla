@@ -32,6 +32,7 @@ our @EXPORT_OK = qw(
     filter_wants
     taint_data
     validate
+    params_to_objects
 );
 
 sub filter ($$;$) {
@@ -119,6 +120,22 @@ sub validate  {
     return ($self, $params);
 }
 
+sub params_to_objects {
+    my ($params, $class) = @_;
+    my (@objects, @objects_by_ids);
+
+    @objects = map { $class->check($_) }
+        @{ $params->{names} } if $params->{names};
+
+    @objects_by_ids = map { $class->check({ id => $_ }) }
+        @{ $params->{ids} } if $params->{ids};
+
+    push(@objects, @objects_by_ids);
+    my %seen;
+    @objects = grep { !$seen{$_->id}++ } @objects;
+    return \@objects;
+}
+
 __END__
 
 =head1 NAME
@@ -165,3 +182,19 @@ This helps in the validation of parameters passed into the WebService
 methods. Currently it converts listed parameters into an array reference
 if the client only passed a single scalar value. It modifies the parameters
 hash in place so other parameters should be unaltered.
+
+=head2 params_to_objects
+
+Creates objects of the type passed in as the second parameter, using the
+parameters passed to a WebService method (the first parameter to this function).
+Helps make life simpler for WebService methods that internally create objects
+via both "ids" and "names" fields. Also de-duplicates objects that were loaded
+by both "ids" and "names". Returns an arrayref of objects.
+
+=head1 B<Methods in need of POD>
+
+=over
+
+=item taint_data
+
+=back

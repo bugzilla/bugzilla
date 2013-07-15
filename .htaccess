@@ -57,3 +57,4 @@ RewriteRule ^form[\.:](swag|gear)$ enter_bug.cgi?product=mozilla.org&format=swag
 RewriteRule ^form[\.:]b2g[\.:]partner enter_bug.cgi?product=Boot2Gecko&format=bootgecko-partner [QSA]
 RewriteRule ^form[\.:]ipp$ enter_bug.cgi?product=Internet+Public+Policy&format=ipp
 RewriteRule ^form[\.:]creative$ enter_bug.cgi?product=Marketing&format=creative
+RewriteRule ^rest/(.*)$ rest.cgi/$1 [NE]

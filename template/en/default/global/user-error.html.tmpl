@@ -472,6 +472,15 @@
     The first letter of your extension's name must be a capital letter.
     (You specified '[% name FILTER html %]'.)
 
+  [% ELSIF error == "feature_disabled" %]
+    The [% install_string("feature_$feature") FILTER html %] feature is not
+    available in this [% terms.Bugzilla %].
+    [% IF user.in_group('admin') %]
+      If you would like to enable this feature, please run
+      <kbd>checksetup.pl</kbd> to see how to install the necessary
+      requirements for this feature.
+    [% END %]
+
   [% ELSIF error == "field_already_exists" %]
     [% title = "Field Already Exists" %]
     The field '[% field.name FILTER html %]'     
@@ -1044,6 +1053,13 @@
   [% ELSIF error == "json_rpc_post_only" %]
     For security reasons, you must use HTTP POST to call the
     '[% method FILTER html %]' method.
+
+  [% ELSIF error == "rest_invalid_resource" %]
+    A REST API resource was not found for '[% method FILTER html +%] [%+ path FILTER html %]'.
+
+  [% ELSIF error == "rest_get_products_invalid_type" %]
+    The type '[% type FILTER html %]' is invalid for 'GET /product'. Valid choices
+    are 'accessible' (default if type value is undefined), 'selectable', and 'enterable'.
 
   [% ELSIF error == "keyword_already_exists" %]
     [% title = "Keyword Already Exists" %]

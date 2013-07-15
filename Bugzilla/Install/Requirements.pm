@@ -285,7 +285,7 @@ sub OPTIONAL_MODULES {
         package => 'JSON-RPC',
         module  => 'JSON::RPC',
         version => 0,
-        feature => ['jsonrpc'],
+        feature => ['jsonrpc', 'rest'],
     },
     {
         package => 'JSON-XS',
@@ -298,7 +298,7 @@ sub OPTIONAL_MODULES {
         package => 'Test-Taint',
         module  => 'Test::Taint',
         version => 0,
-        feature => ['jsonrpc', 'xmlrpc'],
+        feature => ['jsonrpc', 'xmlrpc', 'rest'],
     },
     {
         # We need the 'utf8_mode' method of HTML::Parser, for HTML::Scrubber.
@@ -382,6 +382,7 @@ use constant FEATURE_FILES => (
     jsonrpc       => ['Bugzilla/WebService/Server/JSONRPC.pm', 'jsonrpc.cgi'],
     xmlrpc        => ['Bugzilla/WebService/Server/XMLRPC.pm', 'xmlrpc.cgi',
                       'Bugzilla/WebService.pm', 'Bugzilla/WebService/*.pm'],
+    rest          => ['Bugzilla/WebService/Server/REST.pm', 'rest.cgi'],
     moving        => ['importxml.pl'],
     auth_ldap     => ['Bugzilla/Auth/Verify/LDAP.pm'],
     auth_radius   => ['Bugzilla/Auth/Verify/RADIUS.pm'],

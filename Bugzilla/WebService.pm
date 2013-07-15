@@ -52,14 +52,19 @@ This is the standard API for external programs that want to interact
 with Bugzilla. It provides various methods in various modules.
 
 You can interact with this API via
-L<XML-RPC|Bugzilla::WebService::Server::XMLRPC> or
-L<JSON-RPC|Bugzilla::WebService::Server::JSONRPC>.
+L<XML-RPC|Bugzilla::WebService::Server::XMLRPC>,
+L<JSON-RPC|Bugzilla::WebService::Server::JSONRPC> or
+L<REST|Bugzilla::WebService::Server::REST>.
 
 =head1 CALLING METHODS
 
-Methods are grouped into "packages", like C<Bug> for 
+Methods are grouped into "packages", like C<Bug> for
 L<Bugzilla::WebService::Bug>. So, for example,
 L<Bugzilla::WebService::Bug/get>, is called as C<Bug.get>.
+
+For REST, the "package" is more determined by the path
+used to access the resource. See each relevant method
+for specific details on how to access via REST.
 
 =head1 PARAMETERS
 
@@ -142,7 +147,7 @@ There are various ways to log in:
 
 =item C<User.login>
 
-You can use L<Bugzilla::WebService::User/login> to log in as a Bugzilla 
+You can use L<Bugzilla::WebService::User/login> to log in as a Bugzilla
 user. This issues standard HTTP cookies that you must then use in future
 calls, so your client must be capable of receiving and transmitting
 cookies.
@@ -172,12 +177,16 @@ not expire.
 =back
 
 The C<Bugzilla_restrictlogin> and C<Bugzilla_rememberlogin> options
-are only used when you have also specified C<Bugzilla_login> and 
+are only used when you have also specified C<Bugzilla_login> and
 C<Bugzilla_password>.
 
 Note that Bugzilla will return HTTP cookies along with the method
 response when you use these arguments (just like the C<User.login> method
 above).
+
+For REST, you may also use the C<username> and C<password> variable
+names instead of C<Bugzilla_login> and C<Bugzilla_password> as a
+convenience.
 
 =back
 
@@ -273,6 +282,9 @@ would return something like:
 
   { users => [{ id => 1, name => 'user@domain.com' }] }
 
+Note for REST, C<include_fields> may instead be a comma delimited string
+for GET type requests.
+
 =item C<exclude_fields>
 
 C<array> An array of strings, representing the (case-sensitive) names of
@@ -301,6 +313,9 @@ Example:
 would return something like:
 
   { users => [{ id => 1, real_name => 'John Smith' }] }
+
+Note for REST, C<exclude_fields> may instead be a comma delimited string
+for GET type requests.
 
 =back
 

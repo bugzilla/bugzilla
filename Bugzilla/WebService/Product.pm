@@ -839,10 +839,6 @@ You specified the name of a product that already exists.
 
 You must specify a description for this product.
 
-=item 704 (Product must have version)
-
-You must specify a version for this product.
-
 =item 705 (Product must define a default milestone)
 
 You must define a default milestone.

@@ -144,6 +144,10 @@ tie(%$cf_visible_in_products, "Tie::IxHash",
             "Server Operations: RelEng",
             "Server Operations: Security",
         ],
+        "Infrastructure & Operations" => [
+            "RelOps",
+            "RelOps: Puppet"
+        ],
     },
     qw/^cf_office$/ => {
         "mozilla.org"           => ["Server Operations: Desktop Issues"],

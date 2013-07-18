@@ -226,6 +226,14 @@ hr {
     width: 99%;
 }
 
+#bugzilla-body div.bz_comment:before {
+    display:block;
+    content: " ";
+    margin-top: -95px;
+    height:95px;
+    visibility: hidden;
+}
+
 /* Home */
 
 #page-index {

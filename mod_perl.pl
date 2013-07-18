@@ -139,7 +139,13 @@ sub handler : method {
     use warnings;
 
     Bugzilla::init_page();
-    return $class->SUPER::handler(@_);
+    my $result = $class->SUPER::handler(@_);
+
+    # When returning data from the REST api, tell Apache not to append its
+    # error html documents to the response.
+    return substr($0, -9) eq '/rest.cgi'
+        ? Apache2::Const::OK
+        : $result;
 }
 
 

@@ -1,0 +1,19 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% IF changes.reviewers.defined %]
+  <p>
+    Updated suggested reviewers from '[% changes.reviewers.0 FILTER html %]' to
+    '[% product.reviewers FILTER html %]'.
+  </p>
+[% END %]
+[% IF changes.reviewer_required.defined %]
+  <p>
+    [% changes.reviewer_required.1 ? "Enabled" : "Disabled" %] 'review required'.
+  </p>
+[% END %]

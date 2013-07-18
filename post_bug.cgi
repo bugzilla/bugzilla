@@ -201,6 +201,7 @@ if (defined($cgi->upload('data')) || $cgi->param('attach_text')) {
 
     if ($attachment) {
         # Set attachment flags.
+        Bugzilla::Hook::process('post_bug_attachment_flags', { bug => $bug });
         my ($flags, $new_flags) = Bugzilla::Flag->extract_flags_from_cgi(
                                       $bug, $attachment, $vars, SKIP_REQUESTEE_ON_ERROR);
         $attachment->set_flags($flags, $new_flags);

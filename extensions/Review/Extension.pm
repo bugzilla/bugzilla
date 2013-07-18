@@ -13,6 +13,253 @@ use base qw(Bugzilla::Extension);
 our $VERSION = '1';
 
 use Bugzilla;
+use Bugzilla::Constants;
+use Bugzilla::Error;
+use Bugzilla::User;
+use Bugzilla::Util qw(clean_text);
+
+#
+# monkey-patched methods
+#
+
+BEGIN {
+    *Bugzilla::Product::reviewers         = \&_product_reviewers;
+    *Bugzilla::Product::reviewers_objs    = \&_product_reviewers_objs;
+    *Bugzilla::Product::reviewer_required = \&_product_reviewer_required;
+    *Bugzilla::Component::reviewers       = \&_component_reviewers;
+    *Bugzilla::Component::reviewers_objs  = \&_component_reviewers_objs;
+    *Bugzilla::Bug::mentor                = \&_bug_mentor;
+}
+
+#
+# reviewers
+#
+
+sub _product_reviewers         { _reviewers($_[0],      'product')   }
+sub _product_reviewers_objs    { _reviewers_objs($_[0], 'product')   }
+sub _component_reviewers       { _reviewers($_[0],      'component') }
+sub _component_reviewers_objs  { _reviewers_objs($_[0], 'component') }
+
+sub _reviewers {
+    my ($object, $type) = @_;
+    return join(', ', map { $_->login } @{ _reviewers_objs($object, $type) });
+}
+
+sub _reviewers_objs {
+    my ($object, $type) = @_;
+    if (!$object->{reviewers}) {
+        my $dbh = Bugzilla->dbh;
+        my $user_ids = $dbh->selectcol_arrayref(
+            "SELECT user_id FROM ${type}_reviewers WHERE ${type}_id = ? ORDER BY sortkey",
+            undef,
+            $object->id,
+        );
+        # new_from_list always sorts according to the object's definition,
+        # so we have to reorder the list
+        my $users = Bugzilla::User->new_from_list($user_ids);
+        my %user_map = map { $_->id => $_ } @$users;
+        my @reviewers = map { $user_map{$_} } @$user_ids;
+        $object->{reviewers} = \@reviewers;
+    }
+    return $object->{reviewers};
+}
+
+sub _bug_mentor {
+    my ($self) = @_;
+    # extract the mentor from the status_whiteboard
+    # when the mentor gets its own field, this will be easier
+    if (!exists $self->{mentor}) {
+        my $mentor;
+        if ($self->status_whiteboard =~ /\[mentor=([^\]]+)\]/) {
+            my $mentor_string = $1;
+            if ($mentor_string =~ /\@/) {
+                # assume it's a full username if it contains an @
+                $mentor = Bugzilla::User->new({ name => $mentor_string });
+            } else {
+                # otherwise assume it's a : prefixed nick.  only works if a
+                # single user matches.
+                my $matches = Bugzilla::User::match("*:$mentor_string*", 2);
+                if ($matches && scalar(@$matches) == 1) {
+                    $mentor = $matches->[0];
+                }
+            }
+        }
+        $self->{mentor} = $mentor;
+    }
+    return $self->{mentor};
+}
+
+#
+# reviewer-required
+#
+
+sub _product_reviewer_required { $_[0]->{reviewer_required} }
+
+sub object_columns {
+    my ($self, $args) = @_;
+    my ($class, $columns) = @$args{qw(class columns)};
+    if ($class->isa('Bugzilla::Product')) {
+        push @$columns, 'reviewer_required';
+    }
+}
+
+sub object_update_columns {
+    my ($self, $args) = @_;
+    my ($object, $columns) = @$args{qw(object columns)};
+    if ($object->isa('Bugzilla::Product')) {
+        push @$columns, 'reviewer_required';
+    }
+}
+
+#
+# create/update
+#
+
+sub object_before_create {
+    my ($self, $args) = @_;
+    my ($class, $params) = @$args{qw(class params)};
+    return unless $class->isa('Bugzilla::Product');
+
+    $params->{reviewer_required} = Bugzilla->cgi->param('reviewer_required') ? 1 : 0;
+}
+
+sub object_end_of_set_all {
+    my ($self, $args) = @_;
+    my ($object, $params) = @$args{qw(object params)};
+    return unless $object->isa('Bugzilla::Product');
+
+    $object->set('reviewer_required', Bugzilla->cgi->param('reviewer_required') ? 1 : 0);
+}
+
+sub object_end_of_create {
+    my ($self, $args) = @_;
+    my ($object, $params) = @$args{qw(object params)};
+    return unless $object->isa('Bugzilla::Product') || $object->isa('Bugzilla::Component');;
+
+    my ($new, $new_users) = _new_reviewers_from_input();
+    _update_reviewers($object, [], $new_users);
+}
+
+sub object_end_of_update {
+    my ($self, $args) = @_;
+    my ($object, $old_object, $changes) = @$args{qw(object old_object changes)};
+    return unless $object->isa('Bugzilla::Product') || $object->isa('Bugzilla::Component');;
+
+    my ($new, $new_users) = _new_reviewers_from_input();
+    my $old = $old_object->reviewers;
+    if ($old ne $new) {
+        _update_reviewers($object, $old_object->reviewers_objs, $new_users);
+        $changes->{reviewers} = [ $old ? $old : undef, $new ? $new : undef ];
+    }
+}
+
+sub _new_reviewers_from_input {
+    if (!Bugzilla->input_params->{reviewers}) {
+        return (undef, []);
+    }
+    Bugzilla::User::match_field({ 'reviewers' => {'type' => 'multi'} });
+    my $new = Bugzilla->input_params->{reviewers};
+    $new = [ $new ] unless ref($new);
+    my $new_users = [];
+    foreach my $login (@$new) {
+        push @$new_users, Bugzilla::User->check($login);
+    }
+    $new = join(', ', @$new);
+    return ($new, $new_users);
+}
+
+sub _update_reviewers {
+    my ($object, $old_users, $new_users) = @_;
+    my $dbh = Bugzilla->dbh;
+    my $type = $object->isa('Bugzilla::Product') ? 'product' : 'component';
+
+    # remove deleted users
+    foreach my $old_user (@$old_users) {
+        if (!grep { $_->id == $old_user->id } @$new_users) {
+            $dbh->do(
+                "DELETE FROM ${type}_reviewers WHERE ${type}_id=? AND user_id=?",
+                undef,
+                $object->id, $old_user->id,
+            );
+        }
+    }
+    # add new users
+    foreach my $new_user (@$new_users) {
+        if (!grep { $_->id == $new_user->id } @$old_users) {
+            $dbh->do(
+                "INSERT INTO ${type}_reviewers(${type}_id,user_id) VALUES (?,?)",
+                undef,
+                $object->id, $new_user->id,
+            );
+        }
+    }
+    # and update the sortkey for all users
+    for (my $i = 0; $i < scalar(@$new_users); $i++) {
+        $dbh->do(
+            "UPDATE ${type}_reviewers SET sortkey=? WHERE ${type}_id=? AND user_id=?",
+            undef,
+            ($i + 1) * 10, $object->id, $new_users->[$i]->id,
+        );
+    }
+}
+
+# bugzilla's handling of requestee matching when creating bugs is "if it's
+# wrong, or matches too many, default to empty", which breaks mandatory
+# reviewer requirements.  instead we just throw an error.
+sub post_bug_attachment_flags {
+    my ($self, $args) = @_;
+    my $bug = $args->{bug};
+    my $cgi = Bugzilla->cgi;
+
+    # extract the set flag-types
+    my @flagtype_ids = map { /^flag_type-(\d+)$/ ? $1 : () } $cgi->param();
+    @flagtype_ids = grep { $cgi->param("flag_type-$_") ne 'X' } @flagtype_ids;
+    return unless scalar(@flagtype_ids);
+
+    # find valid review flagtypes
+    my $flag_types = Bugzilla::FlagType::match({
+        product_id   => $bug->product_id,
+        component_id => $bug->component_id,
+        is_active    => 1
+    });
+    foreach my $flag_type (@$flag_types) {
+        next unless $flag_type->name eq 'review'
+                    && $flag_type->target_type eq 'attachment';
+        my $type_id = $flag_type->id;
+        next unless scalar(grep { $_ == $type_id } @flagtype_ids);
+
+        my $reviewers = clean_text($cgi->param("requestee_type-$type_id") || '');
+        if ($reviewers eq '' && $bug->product_obj->reviewer_required) {
+            ThrowUserError('reviewer_required');
+        }
+
+        foreach my $reviewer (split(/[,;]+/, $reviewers)) {
+            # search on the reviewer
+            my $users = Bugzilla::User::match($reviewer, 2, 1);
+
+            # no matches
+            if (scalar(@$users) == 0) {
+                ThrowUserError('user_match_failed', { name => $reviewer });
+            }
+
+            # more than one match, throw error
+            if (scalar(@$users) > 1) {
+                ThrowUserError('user_match_too_many', { fields => [ 'review' ] });
+            }
+        }
+    }
+}
+
+sub flag_end_of_update {
+    my ($self, $args) = @_;
+    my ($attachment, $changes) = @$args{qw(object changes)};
+    if (exists $changes->{'flag.review'}
+        && $changes->{'flag.review'}->[1] eq '?'
+        && $attachment->bug->product_obj->reviewer_required)
+    {
+        ThrowUserError('reviewer_required');
+    }
+}
 
 #
 # installation

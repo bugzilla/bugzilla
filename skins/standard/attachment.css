@@ -30,7 +30,9 @@ table.attachment_entry td {
 }
 
 table#flags th,
-table#flags td {
+table#flags td,
+table#attachment_flags th,
+table#attachment_flags td {
     text-align: left;
     vertical-align: baseline;
     font-size: small;

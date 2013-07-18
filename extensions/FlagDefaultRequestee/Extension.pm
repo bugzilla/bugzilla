@@ -10,6 +10,7 @@ package Bugzilla::Extension::FlagDefaultRequestee;
 use strict;
 use base qw(Bugzilla::Extension);
 
+use Bugzilla::Error;
 use Bugzilla::FlagType;
 use Bugzilla::User;
 
@@ -94,29 +95,32 @@ sub template_before_process {
 
 sub flagtype_end_of_create {
     my ($self, $args) = @_;
-    _set_default_requestee($args->{id});
+    _set_default_requestee($args->{type});
 }
 
 sub flagtype_end_of_update {
     my ($self, $args) = @_;
-    _set_default_requestee($args->{id});
+    _set_default_requestee($args->{type});
 }
 
 sub _set_default_requestee {
-    my $type_id = shift;
-    my $input   = Bugzilla->input_params;
-    my $dbh     = Bugzilla->dbh;
+    my $type  = shift;
+    my $input = Bugzilla->input_params;
+    my $dbh   = Bugzilla->dbh;
 
     my $requestee_login = $input->{'default_requestee'};
 
     my $requestee_id = undef;
     if ($requestee_login) {
+        if ($type->name eq 'review') {
+            ThrowUserError("flag_default_requestee_review");
+        }
         my $requestee = Bugzilla::User->check($requestee_login);
         $requestee_id = $requestee->id;
     }
 
     $dbh->do("UPDATE flagtypes SET default_requestee = ? WHERE id = ?",
-             undef, $requestee_id, $type_id);
+             undef, $requestee_id, $type->id);
 }
 
 ##################

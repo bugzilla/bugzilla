@@ -172,6 +172,7 @@
                          classes  => ["requestee"]
                          custom_userlist => grant_list
               %]
+              [% Hook.process("requestee", "flag/list.html.tmpl") %]
             </span>
           [% END %]
         </td>

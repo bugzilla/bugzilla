@@ -1,0 +1,17 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% RETURN UNLESS type.name == 'review' %]
+
+<span id="[% fid FILTER none %]_suggestions" class="bz_default_hidden">
+  &nbsp;&nbsp;(<a href="#" id="[% fid FILTER none %]_suggestions_link">suggested reviewers</a>)
+</span>
+
+<script>
+  REVIEW.init_review_flag('[% fid FILTER none %]', '[% flag_name FILTER none %]');
+</script>

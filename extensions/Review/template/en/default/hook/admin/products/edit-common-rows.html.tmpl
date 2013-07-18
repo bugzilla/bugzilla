@@ -1,0 +1,28 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+<tr>
+  <th align="right">Reviewer required:</th>
+  <td>
+    <input type="checkbox" name="reviewer_required" value="1"
+      [% "checked" IF product.reviewer_required %]>
+  </td>
+</tr>
+<tr>
+  <th align="right">Suggested Reviewers:</th>
+  <td>
+    [% INCLUDE global/userselect.html.tmpl
+       id => "reviewers"
+       name => "reviewers"
+       value => product.reviewers
+       size => 64
+       emptyok => 1
+       title => "One or more email address (comma delimited)"
+    %]
+  </td>
+</tr>

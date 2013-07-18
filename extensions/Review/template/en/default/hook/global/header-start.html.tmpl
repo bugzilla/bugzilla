@@ -1,0 +1,81 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% RETURN UNLESS template.name == 'attachment/edit.html.tmpl'
+      || template.name == 'attachment/create.html.tmpl'
+      || template.name == 'attachment/diff-header.html.tmpl'
+      || template.name == 'bug/create/create.html.tmpl' %]
+
+[% style_urls.push('extensions/Review/web/style/review.css') %]
+[% javascript_urls.push('extensions/Review/web/js/review.js') %]
+
+[% IF bug %]
+  [%# create attachment %]
+  [% mentor = bug.mentor %]
+  [% product_obj = bug.product_obj %]
+  [% component_obj = bug.component_obj %]
+[% ELSIF attachment.bug %]
+  [%# edit attachment %]
+  [% mentor = attachment.bug.mentor %]
+  [% product_obj = attachment.bug.product_obj %]
+  [% component_obj = attachment.bug.component_obj %]
+[% ELSE %]
+  [%# create bug %]
+  [% mentor = '' %]
+  [% product_obj = product %]
+  [% component_obj = 0 %]
+[% END %]
+
+[% review_js = BLOCK %]
+  review_suggestions = {
+    [% IF mentor %]
+      _mentor: [% PROCESS reviewer u = mentor %],
+    [% END %]
+
+    [% IF product_obj.reviewers %]
+      _product: [
+        [% FOREACH u = product_obj.reviewers_objs %]
+          [% PROCESS reviewer %][% "," UNLESS loop.last %]
+        [% END %]
+      ],
+    [% END %]
+
+    [% IF component_obj %]
+      [%# single component (create/edit attachment) %]
+      '[% component_obj.name FILTER js %]': [
+        [% FOREACH u = component_obj.reviewers_objs %]
+          [% PROCESS reviewer %][% "," UNLESS loop.last %]
+        [% END %]
+      ],
+    [% ELSE %]
+      [%# all components (create bug) %]
+      [% FOREACH c = product_obj.components %]
+        [% NEXT UNLESS c.reviewers %]
+        '[% c.name FILTER js %]': [
+          [% FOREACH u = c.reviewers_objs %]
+            [% PROCESS reviewer %][% "," UNLESS loop.last %]
+          [% END %]
+        ],
+      [% END %]
+    [% END %]
+
+    [%# to keep IE happy, no trailing commas %]
+    _end: 1
+  };
+
+  [% IF component_obj %]
+    static_component = '[% component_obj.name FILTER js %]';
+  [% ELSE %]
+    static_component = false;
+  [% END %]
+[% END %]
+[% javascript = javascript _ review_js %]
+
+[% BLOCK reviewer %]
+  { login: '[% u.login FILTER js%]', identity: '[% u.identity FILTER js %]' }
+[% END %]

@@ -29,6 +29,5 @@ Options -Indexes
 
 <IfModule mod_rewrite.c>
   RewriteEngine On
-RewriteBase /866927/
   RewriteRule ^rest/(.*)$ rest.cgi/$1 [NE]
 </IfModule>

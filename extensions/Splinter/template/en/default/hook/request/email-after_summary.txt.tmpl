@@ -1,5 +1,7 @@
 [% USE Bugzilla %]
-[% IF flag && flag.status == '?' && flag.type.name == 'review' && attachment && attachment.ispatch %]
+[% IF flag && flag.status == '?'
+      && (flag.type.name == 'review' || flag.type.name == 'feedback')
+      && attachment && attachment.ispatch %]
 
 Review
 [%+ Bugzilla.splinter_review_url(bug.bug_id, attachment.id) FILTER none %]

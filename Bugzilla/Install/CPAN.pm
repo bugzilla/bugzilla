@@ -24,7 +24,6 @@ use Config;
 use CPAN;
 use Cwd qw(abs_path);
 use File::Path qw(rmtree);
-use List::Util qw(shuffle);
 
 # These are required for install-module.pl to be able to install
 # all modules properly.
@@ -86,12 +85,7 @@ use constant CPAN_DEFAULTS => {
     unzip => bin_loc('unzip'),
     wget => bin_loc('wget'),
 
-    urllist => [shuffle qw(
-        http://cpan.pair.com/
-        http://mirror.hiwaay.net/CPAN/
-        ftp://ftp.dc.aleron.net/pub/CPAN/
-        http://mirrors.kernel.org/cpan/
-        http://mirrors2.kernel.org/cpan/)],
+    urllist => ['http://www.cpan.org/'],
 };
 
 sub check_cpan_requirements {

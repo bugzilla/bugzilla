@@ -122,6 +122,7 @@ package Bugzilla::ModPerl::ResponseHandler;
 use strict;
 use base qw(ModPerl::Registry);
 use Bugzilla;
+use Bugzilla::Constants qw(USAGE_MODE_REST);
 
 sub handler : method {
     my $class = shift;
@@ -143,7 +144,7 @@ sub handler : method {
 
     # When returning data from the REST api, tell Apache not to append its
     # error html documents to the response.
-    return substr($0, -9) eq '/rest.cgi'
+    return Bugzilla->usage_mode == USAGE_MODE_REST
         ? Apache2::Const::OK
         : $result;
 }

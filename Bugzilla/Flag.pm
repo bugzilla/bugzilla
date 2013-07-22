@@ -668,8 +668,13 @@ sub _check_requestee {
         # is specifically requestable. For existing flags, if the requestee
         # was set before the flag became specifically unrequestable, the
         # user can either remove him or leave him alone.
-        ThrowUserError('flag_requestee_disabled', { type => $self->type })
+        ThrowUserError('flag_type_requestee_disabled', { type => $self->type })
           if !$self->type->is_requesteeble;
+
+        # You can't ask a disabled account, as they don't have the ability to
+        # set the flag.
+        ThrowUserError('flag_requestee_disabled', { requestee => $requestee })
+          if !$requestee->is_enabled;
 
         # Make sure the requestee can see the bug.
         # Note that can_see_bug() will query the DB, so if the bug

@@ -50,64 +50,93 @@ BEGIN { *get_products = \&get }
 # Get the ids of the products the user can search
 sub get_selectable_products {
     Bugzilla->switch_to_shadow_db();
-    return {ids => [map {$_->id} @{Bugzilla->user->get_selectable_products}]}; 
+    return {ids => [map {$_->id} @{Bugzilla->user->get_selectable_products}]};
 }
 
 # Get the ids of the products the user can enter bugs against
 sub get_enterable_products {
     Bugzilla->switch_to_shadow_db();
-    return {ids => [map {$_->id} @{Bugzilla->user->get_enterable_products}]}; 
+    return {ids => [map {$_->id} @{Bugzilla->user->get_enterable_products}]};
 }
 
 # Get the union of the products the user can search and enter bugs against.
 sub get_accessible_products {
     Bugzilla->switch_to_shadow_db();
-    return {ids => [map {$_->id} @{Bugzilla->user->get_accessible_products}]}; 
+    return {ids => [map {$_->id} @{Bugzilla->user->get_accessible_products}]};
 }
 
 # Get a list of actual products, based on list of ids or names
 sub get {
-    my ($self, $params) = validate(@_, 'ids', 'names');
+    my ($self, $params) = validate(@_, 'ids', 'names', 'type');
+    my $user = Bugzilla->user;
 
-    defined $params->{ids} || defined $params->{names}
+    defined $params->{ids} || defined $params->{names} || defined $params->{type}
         || ThrowCodeError("params_required", { function => "Product.get",
-                                               params => ['ids', 'names'] });
+                                               params => ['ids', 'names', 'type'] });
     Bugzilla->switch_to_shadow_db();
 
-    # Only products that are in the users accessible products, 
-    # can be allowed to be returned
-    my $accessible_products = Bugzilla->user->get_accessible_products;
+    my $products = [];
+    if (defined $params->{type}) {
+        my %product_hash;
+        my $found = 0;
+        foreach my $type (@{ $params->{type} }) {
+            my $result = [];
+            if ($type eq 'accessible') {
+                $result = $user->get_accessible_products();
+            }
+            elsif ($type eq 'enterable') {
+                $result = $user->get_enterable_products();
+            }
+            elsif ($type eq 'selectable') {
+                $result = $user->get_selectable_products();
+            }
+            else {
+                ThrowUserError('get_products_invalid_type',
+                               { type => $type });
+            }
+            map { $product_hash{$_->id} = $_ } @$result;
+        }
+        $products = [ values %product_hash ];
+    }
+    else {
+        $products = $user->get_accessible_products;
+    }
 
-    my @requested_accessible;
+    my @requested_products;
 
     if (defined $params->{ids}) {
         # Create a hash with the ids the user wants
         my %ids = map { $_ => 1 } @{$params->{ids}};
-        
-        # Return the intersection of this, by grepping the ids from 
-        # accessible products.
-        push(@requested_accessible,
-            grep { $ids{$_->id} } @$accessible_products);
+
+        # Return the intersection of this, by grepping the ids from $products.
+        push(@requested_products,
+            grep { $ids{$_->id} } @$products);
     }
 
     if (defined $params->{names}) {
         # Create a hash with the names the user wants
         my %names = map { lc($_) => 1 } @{$params->{names}};
-        
-        # Return the intersection of this, by grepping the names from 
-        # accessible products, union'ed with products found by ID to
+
+        # Return the intersection of this, by grepping the names
+        # from $products, union'ed with products found by ID to
         # avoid duplicates
         foreach my $product (grep { $names{lc $_->name} }
-                                  @$accessible_products) {
+                                  @$products) {
             next if grep { $_->id == $product->id }
-                         @requested_accessible;
-            push @requested_accessible, $product;
+                         @requested_products;
+            push @requested_products, $product;
         }
+    }
+
+    # If we just requested a specific type of products without
+    # specifying ids or names, then return the entire list.
+    if (!defined $params->{ids} && !defined $params->{names}) {
+        @requested_products = @$products;
     }
 
     # Now create a result entry for each.
     my @products = map { $self->_product_to_hash($params, $_) }
-                       @requested_accessible;
+                       @requested_products;
     return { products => \@products };
 }
 
@@ -115,7 +144,7 @@ sub create {
     my ($self, $params) = @_;
 
     Bugzilla->login(LOGIN_REQUIRED);
-    Bugzilla->user->in_group('editcomponents') 
+    Bugzilla->user->in_group('editcomponents')
         || ThrowUserError("auth_failure", { group  => "editcomponents",
                                             action => "add",
                                             object => "products"});
@@ -151,7 +180,7 @@ sub update {
                                             object => "products" });
 
     defined($params->{names}) || defined($params->{ids})
-        || ThrowCodeError('params_required', 
+        || ThrowCodeError('params_required',
                { function => 'Product.update', params => ['ids', 'names'] });
 
     my $product_objects = params_to_objects($params, 'Bugzilla::Product');
@@ -170,10 +199,10 @@ sub update {
     my %changes;
     foreach my $product (@$product_objects) {
         my $returned_changes = $product->update();
-        $changes{$product->id} = translate($returned_changes, MAPPED_RETURNS);    
+        $changes{$product->id} = translate($returned_changes, MAPPED_RETURNS);
     }
     $dbh->bz_commit_transaction();
-            
+
     my @result;
     foreach my $product (@$product_objects) {
         my %hash = (
@@ -185,7 +214,7 @@ sub update {
             my $change = $changes{$product->id}->{$field};
             $hash{changes}{$field} = {
                 removed => $self->type('string', $change->[0]),
-                added   => $self->type('string', $change->[1]) 
+                added   => $self->type('string', $change->[1])
             };
         }
 
@@ -354,7 +383,7 @@ Returns a list of the ids of the products the user can search on.
 
 =item B<REST>
 
-GET /product?type=selectable
+GET /product_selectable
 
 the returned data format is same as below.
 
@@ -390,7 +419,7 @@ against.
 
 =item B<REST>
 
-GET /product?type=enterable
+GET /product_enterable
 
 the returned data format is same as below.
 
@@ -426,7 +455,7 @@ bugs against.
 
 =item B<REST>
 
-GET /product?type=accessible
+GET /product_accessible
 
 the returned data format is same as below.
 
@@ -465,7 +494,19 @@ B<Note>: Can also be called as "get_products" for compatibilty with Bugzilla 3.0
 
 =item B<REST>
 
+To return information about a specific groups of products such as
+C<accessible>, C<selectable>, or C<enterable>:
+
+GET /product?type=accessible
+
+To return information about a specific product by C<id> or C<name>:
+
 GET /product/<product_id_or_name>
+
+You can also return information about more than one specific product
+by using the following in your query string:
+
+GET /product?ids=1&ids=2&ids=3 or GET /product?names=ProductOne&names=Product2
 
 the returned data format is same as below.
 
@@ -487,9 +528,15 @@ An array of product ids
 
 An array of product names
 
+=item C<type>
+
+The group of products to return. Valid values are: C<accessible> (default),
+C<selectable>, and C<enterable>. C<type> can be a single value or an array
+of values if more than one group is needed with duplicates removed.
+
 =back
 
-=item B<Returns> 
+=item B<Returns>
 
 A hash containing one item, C<products>, that is an array of
 hashes. Each hash describes a product, and has the following items:
@@ -569,7 +616,7 @@ components are not enabled for new bugs.
 
 =item C<flag_types>
 
-A hash containing the two items C<bug> and C<attachment> that each contains an 
+A hash containing the two items C<bug> and C<attachment> that each contains an
 array of hashes, where each hash describes a flagtype, and has the
 following items:
 
@@ -623,8 +670,8 @@ flagtype.
 
 =item C<request_group>
 
-C<int> the group id that is allowed to request the flag if the flag 
-is of the type requestable. If the item is not included all users 
+C<int> the group id that is allowed to request the flag if the flag
+is of the type requestable. If the item is not included all users
 are allowed request this flagtype.
 
 =back
@@ -705,11 +752,11 @@ within Bugzilla.
 
 B<Required> C<string> A description for this product. Allows some simple HTML.
 
-=item C<version> 
+=item C<version>
 
 B<Required> C<string> The default version for this product.
 
-=item C<has_unconfirmed> 
+=item C<has_unconfirmed>
 
 C<boolean> Allow the UNCONFIRMED status to be set on bugs in this product.
 Default: true.
@@ -718,11 +765,11 @@ Default: true.
 
 C<string> The name of the Classification which contains this product.
 
-=item C<default_milestone> 
+=item C<default_milestone>
 
 C<string> The default milestone for this product. Default '---'.
 
-=item C<is_open> 
+=item C<is_open>
 
 C<boolean> True if the product is currently allowing bugs to be entered
 into it. Default: true.
@@ -734,7 +781,7 @@ new product. Default: true.
 
 =back
 
-=item B<Returns>    
+=item B<Returns>
 
 A hash with one element, id. This is the id of the newly-filed product.
 
@@ -878,7 +925,7 @@ Note that booleans will be represented with the strings '1' and '0'.
 
 Here's an example of what a return value might look like:
 
- { 
+ {
    products => [
      {
        id => 123,

@@ -21,17 +21,24 @@ BEGIN {
 
 sub _rest_resources {
     my $rest_resources = [
+        qr{^/product_accessible$}, {
+            GET => {
+                method => 'get_accessible_products'
+            }
+        },
+        qr{^/product_enterable$}, {
+            GET => {
+                method => 'get_enterable_products'
+            }
+        },
+        qr{^/product_selectable$}, {
+            GET => {
+                method => 'get_selectable_products'
+            }
+        },
         qr{^/product$}, {
             GET  => {
-                method => sub {
-                    my $type = Bugzilla->input_params->{type};
-                    return 'get_accessible_products'
-                        if !defined $type || $type eq 'accessible';
-                    return 'get_enterable_products' if $type eq 'enterable';
-                    return 'get_selectable_products' if $type eq 'selectable';
-                    ThrowUserError('rest_get_products_invalid_type',
-                                   { type => $type });
-                },
+                method => 'get'
             },
             POST => {
                 method => 'create',

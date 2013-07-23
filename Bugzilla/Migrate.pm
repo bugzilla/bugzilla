@@ -153,6 +153,7 @@ sub do_migration {
     }    
     $dbh->bz_start_transaction();
 
+    $self->before_read();
     # Read Other Database
     my $users    = $self->users;
     my $products = $self->products;
@@ -544,6 +545,7 @@ sub write_config {
 sub after_insert  {}
 sub before_insert {}
 sub after_read    {}
+sub before_read   {}
 
 #############
 # Inserters #
@@ -1146,6 +1148,11 @@ An array (not an arrayref). If there are fields that are not translated
 and yet shouldn't be added to the initial description of the bug when
 translating bugs, then they should be listed here. See L</translate_bug> for
 more detail.
+
+=head2 before_read
+
+This is called before any data is read from the "other bug-tracker".
+The default implementation does nothing.
 
 =head2 after_read
 

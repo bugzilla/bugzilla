@@ -78,7 +78,6 @@ sub get {
     my $products = [];
     if (defined $params->{type}) {
         my %product_hash;
-        my $found = 0;
         foreach my $type (@{ $params->{type} }) {
             my $result = [];
             if ($type eq 'accessible') {

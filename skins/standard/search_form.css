@@ -34,10 +34,6 @@
   width: 8em;
 }
 
-#bug_id_container input {
-  width: 9em;
-}
-
 #bug_id_type{
   width: inherit;
 }

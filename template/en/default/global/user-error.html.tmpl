@@ -1057,9 +1057,9 @@
   [% ELSIF error == "rest_invalid_resource" %]
     A REST API resource was not found for '[% method FILTER html +%] [%+ path FILTER html %]'.
 
-  [% ELSIF error == "rest_get_products_invalid_type" %]
-    The type '[% type FILTER html %]' is invalid for 'GET /product'. Valid choices
-    are 'accessible' (default if type value is undefined), 'selectable', and 'enterable'.
+  [% ELSIF error == "get_products_invalid_type" %]
+    The product type '[% type FILTER html %]' is invalid. Valid choices
+    are 'accessible', 'selectable', and 'enterable'.
 
   [% ELSIF error == "keyword_already_exists" %]
     [% title = "Keyword Already Exists" %]

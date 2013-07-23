@@ -65,15 +65,42 @@ sub get_accessible_products {
 
 # Get a list of actual products, based on list of ids or names
 sub get {
-    my ($self, $params) = validate(@_, 'ids', 'names');
+    my ($self, $params) = validate(@_, 'ids', 'names', 'type');
+    my $user = Bugzilla->user;
+
+    defined $params->{ids} || defined $params->{names} || defined $params->{type}
+        || ThrowCodeError("params_required", { function => "Product.get",
+                                               params => ['ids', 'names', 'type'] });
 
     Bugzilla->switch_to_shadow_db();
 
-    # Only products that are in the users accessible products,
-    # can be allowed to be returned
-    my $accessible_products = Bugzilla->user->get_accessible_products;
+    my $products = [];
+    if (defined $params->{type}) {
+        my %product_hash;
+        foreach my $type (@{ $params->{type} }) {
+            my $result = [];
+            if ($type eq 'accessible') {
+                $result = $user->get_accessible_products();
+            }
+            elsif ($type eq 'enterable') {
+                $result = $user->get_enterable_products();
+            }
+            elsif ($type eq 'selectable') {
+                $result = $user->get_selectable_products();
+            }
+            else {
+                ThrowUserError('get_products_invalid_type',
+                               { type => $type });
+            }
+            map { $product_hash{$_->id} = $_ } @$result;
+        }
+        $products = [ values %product_hash ];
+    }
+    else {
+        $products = $user->get_accessible_products;
+    }
 
-    my @requested_accessible;
+    my @requested_products;
 
     if (defined $params->{ids}) {
         # Create a hash with the ids the user wants
@@ -81,8 +108,8 @@ sub get {
 
         # Return the intersection of this, by grepping the ids from
         # accessible products.
-        push(@requested_accessible,
-            grep { $ids{$_->id} } @$accessible_products);
+        push(@requested_products,
+            grep { $ids{$_->id} } @$products);
     }
 
     if (defined $params->{names}) {
@@ -93,16 +120,22 @@ sub get {
         # accessible products, union'ed with products found by ID to
         # avoid duplicates
         foreach my $product (grep { $names{lc $_->name} }
-                                  @$accessible_products) {
+                                  @$products) {
             next if grep { $_->id == $product->id }
-                         @requested_accessible;
-            push @requested_accessible, $product;
+                         @requested_products;
+            push @requested_products, $product;
         }
+    }
+
+    # If we just requested a specific type of products without
+    # specifying ids or names, then return the entire list.
+    if (!defined $params->{ids} && !defined $params->{names}) {
+        @requested_products = @$products;
     }
 
     # Now create a result entry for each.
     my @products = map { $self->_product_to_hash($params, $_) }
-                       @requested_accessible;
+                       @requested_products;
     return { products => \@products };
 }
 
@@ -251,7 +284,7 @@ Returns a list of the ids of the products the user can search on.
 
 =item B<REST>
 
-GET /product?type=selectable
+GET /product_selectable
 
 the returned data format is same as below.
 
@@ -287,7 +320,7 @@ against.
 
 =item B<REST>
 
-GET /product?type=enterable
+GET /product_enterable
 
 the returned data format is same as below.
 
@@ -323,7 +356,7 @@ bugs against.
 
 =item B<REST>
 
-GET /product?type=accessible
+GET /product_accessible
 
 the returned data format is same as below.
 
@@ -360,7 +393,19 @@ Note: Can also be called as "get_products" for compatibilty with Bugzilla 3.0 AP
 
 =item B<REST>
 
+To return information about a specific groups of products such as
+C<accessible>, C<selectable>, or C<enterable>:
+
+GET /product?type=accessible
+
+To return information about a specific product by C<id> or C<name>:
+
 GET /product/<product_id_or_name>
+
+You can also return information about more than one specific product
+by using the following in your query string:
+
+GET /product?ids=1&ids=2&ids=3 or GET /product?names=ProductOne&names=Product2
 
 the returned data format is same as below.
 
@@ -381,6 +426,12 @@ An array of product ids
 =item C<names>
 
 An array of product names
+
+=item C<type>
+
+The group of products to return. Valid values are: C<accessible> (default),
+C<selectable>, and C<enterable>. C<type> can be a single value or an array
+of values if more than one group is needed with duplicates removed.
 
 =back
 

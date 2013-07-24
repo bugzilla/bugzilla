@@ -232,12 +232,7 @@ sub feature {
 
     my $success = 1;
     foreach my $module (@{ $feature_map->{$feature} }) {
-        # We can't use a string eval and "use" here (it kills Template-Toolkit,
-        # see https://rt.cpan.org/Public/Bug/Display.html?id=47929), so we have
-        # to do a block eval.
-        $module =~ s{::}{/}g;
-        $module .= ".pm";
-        eval { require $module; 1; } or $success = 0;
+        eval "require $module" or $success = 0;
     }
     $cache->{feature}->{$feature} = $success;
     return $success;

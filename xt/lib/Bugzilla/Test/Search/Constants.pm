@@ -947,6 +947,9 @@ use constant TESTS => {
           },
         },
     ],
+    # XXX these need tests developed
+    isempty => [],
+    isnotempty => [],
 };
 
 # Fields that do not behave as we expect, for InjectionTest.
@@ -995,6 +998,8 @@ use constant INJECTION_BROKEN_OPERATOR => {
     changedafter  => { search => 1, field_ok => ['creation_ts'] },
     changedbefore => { search => 1, field_ok => ['creation_ts'] },
     changedby     => { search => 1 },
+    isempty       => { search => 1 },
+    isnotempty    => { search => 1 },
 };
 
 # Tests run by Bugzilla::Test::Search::InjectionTest.

@@ -116,13 +116,13 @@ YUI({
     dataTable = new Y.DataTable({
         columns: [
             { key: Y.Plugin.DataTableRowExpansion.column_key, label: ' ', sortable: false },
-            { key: "bug_id", label: "Bug", allowHTML: true,
+            { key: "bug_id", label: "Bug", allowHTML: true, sortable: true,
               formatter: '<a href="show_bug.cgi?id={value}" target="_blank">{value}</a>' },
-            { key: "changeddate", label: "Updated", formatter: updatedFormatter, allowHTML: true },
-            { key: "bug_status", label: "Status" },
-            { key: "short_desc", label: "Summary" },
+            { key: "changeddate", label: "Updated", formatter: updatedFormatter,
+              allowHTML: true, sortable: true },
+            { key: "bug_status", label: "Status", sortable: true },
+            { key: "short_desc", label: "Summary", sortable: true },
         ],
-        sortable: true
     });
 
     var last_changes_source = Y.one('#last-changes-template').getHTML(),

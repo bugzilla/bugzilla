@@ -27,7 +27,12 @@ sub get_param_list {
             name    => 'persona_includejs_url',
             type    => 't',
             default => 'https://login.persona.org/include.js',
-        }
+        },
+        {
+            name    => 'persona_proxy_url',
+            type    => 't',
+            default => '',
+        },
     );
 
     return @param_list;

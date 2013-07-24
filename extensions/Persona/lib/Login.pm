@@ -43,6 +43,9 @@ sub get_login_info {
     my $audience = $urlbase->scheme . "://" . $urlbase->host_port;
 
     my $ua = new LWP::UserAgent( timeout => 10 );
+    if (Bugzilla->params->{persona_proxy_url}) {
+        $ua->proxy('https', Bugzilla->params->{persona_proxy_url});
+    }
 
     my $response = $ua->post(Bugzilla->params->{persona_verify_url},
                              [ assertion => $assertion,

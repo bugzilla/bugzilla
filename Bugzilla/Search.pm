@@ -160,6 +160,8 @@ use constant OPERATORS => {
     changedfrom    => \&_changedfrom_changedto,
     changedto      => \&_changedfrom_changedto,
     changedby      => \&_changedby,
+    isempty        => \&_isempty,
+    isnotempty     => \&_isnotempty,
 };
 
 # Some operators are really just standard SQL operators, and are
@@ -186,6 +188,8 @@ use constant OPERATOR_REVERSE => {
     lessthaneq     => 'greaterthan',
     greaterthan    => 'lessthaneq',
     greaterthaneq  => 'lessthan',
+    isempty        => 'isnotempty',
+    isnotempty     => 'isempty',
     # The following don't currently have reversals:
     # casesubstring, anyexact, allwords, allwordssubstr
 };
@@ -199,6 +203,12 @@ use constant NON_NUMERIC_OPERATORS => qw(
     changedto
     regexp
     notregexp
+);
+
+# These operators ignore the entered value
+use constant NO_VALUE_OPERATORS => qw(
+    isempty
+    isnotempty
 );
 
 use constant MULTI_SELECT_OVERRIDE => {
@@ -1713,6 +1723,8 @@ sub _boolean_charts {
                 my $field = $params->{"field$identifier"};
                 my $operator = $params->{"type$identifier"};
                 my $value = $params->{"value$identifier"};
+                # no-value operators ignore the value, however a value needs to be set
+                $value = ' ' if $operator && grep { $_ eq $operator } NO_VALUE_OPERATORS;
                 $or_clause->add($field, $operator, $value);
             }
             $and_clause->add($or_clause);
@@ -1759,6 +1771,8 @@ sub _custom_search {
         
         my $operator = $params->{"o$id"};
         my $value = $params->{"v$id"};
+        # no-value operators ignore the value, however a value needs to be set
+        $value = ' ' if $operator && grep { $_ eq $operator } NO_VALUE_OPERATORS;
         my $condition = condition($field, $operator, $value);
         $condition->negate($params->{"n$id"});
         $current_clause->add($condition);
@@ -2365,7 +2379,7 @@ sub _user_nonchanged {
         # For negative operators, the system we're using here
         # only works properly if we reverse the operator and check IS NULL
         # in the WHERE.
-        my $is_negative = $operator =~ /^no/ ? 1 : 0;
+        my $is_negative = $operator =~ /^(?:no|isempty)/ ? 1 : 0;
         if ($is_negative) {
             $args->{operator} = $self->_reverse_operator($operator);
         }
@@ -2447,6 +2461,11 @@ sub _long_desc_nonchanged {
     my ($self, $args) = @_;
     my ($chart_id, $operator, $value, $joins, $bugs_table) =
         @$args{qw(chart_id operator value joins bugs_table)};
+
+    if ($operator =~ /^is(not)?empty$/) {
+        $args->{term} = $self->_multiselect_isempty($args, $operator eq 'isnotempty');
+        return;
+    }
     my $dbh = Bugzilla->dbh;
 
     my $table = "longdescs_$chart_id";
@@ -2746,6 +2765,12 @@ sub _flagtypes_nonchanged {
     my ($self, $args) = @_;
     my ($chart_id, $operator, $value, $joins, $bugs_table, $condition) =
         @$args{qw(chart_id operator value joins bugs_table condition)};
+
+    if ($operator =~ /^is(not)?empty$/) {
+        $args->{term} = $self->_multiselect_isempty($args, $operator eq 'isnotempty');
+        return;
+    }
+
     my $dbh = Bugzilla->dbh;
 
     # For 'not' operators, we need to negate the whole term.
@@ -2862,12 +2887,126 @@ sub _multiselect_table {
 
 sub _multiselect_term {
     my ($self, $args, $not) = @_;
+    my ($operator) = $args->{operator};
+    # 'empty' operators require special handling
+    return $self->_multiselect_isempty($args, $not)
+        if $operator =~ /^is(not)?empty$/;
     my $table = $self->_multiselect_table($args);
     $self->_do_operator_function($args);
     my $term = $args->{term};
     $term .= $args->{_extra_where} || '';
     my $select = $args->{_select_field} || 'bug_id';
     return build_subselect("$args->{bugs_table}.bug_id", $select, $table, $term, $not);
+}
+
+# We can't use the normal operator_functions to build isempty queries which
+# join to different tables.
+sub _multiselect_isempty {
+    my ($self, $args, $not) = @_;
+    my ($field, $operator, $joins, $chart_id) = @$args{qw(field operator joins chart_id)};
+    my $dbh = Bugzilla->dbh;
+    $operator = $self->_reverseoperator($operator) if $not;
+    $not = $operator eq 'isnotempty' ? 'NOT' : '';
+
+    if ($field eq 'keywords') {
+        push @$joins, {
+            table => 'keywords',
+            as    => "keywords_$chart_id",
+            from  => 'bug_id',
+            to    => 'bug_id',
+        };
+        return "keywords_$chart_id.bug_id IS $not NULL";
+    }
+    elsif ($field eq 'bug_group') {
+        push @$joins, {
+            table => 'bug_group_map',
+            as    => "bug_group_map_$chart_id",
+            from  => 'bug_id',
+            to    => 'bug_id',
+        };
+        return "bug_group_map_$chart_id.bug_id IS $not NULL";
+    }
+    elsif ($field eq 'flagtypes.name') {
+        push @$joins, {
+            table => 'flags',
+            as    => "flags_$chart_id",
+            from  => 'bug_id',
+            to    => 'bug_id',
+        };
+        return "flags_$chart_id.bug_id IS $not NULL";
+    }
+    elsif ($field eq 'blocked' or $field eq 'dependson') {
+        my $to = $field eq 'blocked' ? 'dependson' : 'blocked';
+        push @$joins, {
+            table => 'dependencies',
+            as    => "dependencies_$chart_id",
+            from  => 'bug_id',
+            to    => $to,
+        };
+        return "dependencies_$chart_id.$to IS $not NULL";
+    }
+    elsif ($field eq 'longdesc') {
+        my @extra = ( "longdescs_$chart_id.type != " . CMT_HAS_DUPE );
+        push @extra, "longdescs_$chart_id.isprivate = 0"
+            unless $self->_user->is_insider;
+        push @$joins, {
+            table => 'longdescs',
+            as    => "longdescs_$chart_id",
+            from  => 'bug_id',
+            to    => 'bug_id',
+            extra => \@extra,
+        };
+        return $not
+            ? "longdescs_$chart_id.thetext != ''"
+            : "longdescs_$chart_id.thetext = ''";
+    }
+    elsif ($field eq 'longdescs.isprivate') {
+        ThrowUserError('search_field_operator_invalid', { field  => $field,
+                                                          operator => $operator });
+    }
+    elsif ($field =~ /^attachments\.(.+)/) {
+        my $sub_field = $1;
+        if ($sub_field eq 'description' || $sub_field eq 'filename' || $sub_field eq 'mimetype') {
+            # can't be null/empty
+            return $not ? '1=1' : '1=2';
+        } else {
+            # all other fields which get here are boolean
+            ThrowUserError('search_field_operator_invalid', { field => $field,
+                                                              operator => $operator });
+        }
+    }
+    elsif ($field eq 'attach_data.thedata') {
+        push @$joins, {
+            table => 'attachments',
+            as    => "attachments_$chart_id",
+            from  => 'bug_id',
+            to    => 'bug_id',
+            extra => [ $self->_user->is_insider ? '' : "attachments_$chart_id.isprivate = 0" ],
+        };
+        push @$joins, {
+            table => 'attach_data',
+            as    => "attach_data_$chart_id",
+            from  => "attachments_$chart_id.attach_id",
+            to    => 'id',
+        };
+        return "attach_data_$chart_id.thedata IS $not NULL";
+    }
+    elsif ($field eq 'tag') {
+        push @$joins, {
+            table => 'bug_tag',
+            as    => "bug_tag_$chart_id",
+            from  => 'bug_id',
+            to    => 'bug_id',
+        };
+        push @$joins, {
+            table => 'tag',
+            as    => "tag_$chart_id",
+            from  => "bug_tag_$chart_id.tag_id",
+            to    => 'id',
+            extra => [ "tag_$chart_id.user_id = " . ($self->_sharer_id || $self->_user->id) ],
+        };
+        return "tag_$chart_id.id IS $not NULL";
+    }
 }
 
 ###############################
@@ -3084,6 +3223,27 @@ sub _changed_security_check {
 
         $args->{term} .= " AND COALESCE(attach_${field_id}_$chart_id.isprivate, 0) = 0";
     }
+}
+
+sub _isempty {
+    my ($self, $args) = @_;
+    my $full_field = $args->{full_field};
+    $args->{term} = "$full_field IS NULL OR $full_field = " . $self->_empty_value($args->{field});
+}
+
+sub _isnotempty {
+    my ($self, $args) = @_;
+    my $full_field = $args->{full_field};
+    $args->{term} = "$full_field IS NOT NULL AND $full_field != " . $self->_empty_value($args->{field});
+}
+
+sub _empty_value {
+    my ($self, $field) = @_;
+    my $field_obj = $self->_chart_fields->{$field};
+    return "0" if $field_obj->type == FIELD_TYPE_BUG_ID;
+    return Bugzilla->dbh->quote(EMPTY_DATETIME) if $field_obj->type == FIELD_TYPE_DATETIME;
+    return Bugzilla->dbh->quote(EMPTY_DATE) if $field_obj->type == FIELD_TYPE_DATE;
+    return "''";
 }
 
 ######################

@@ -355,18 +355,29 @@ use constant OPERATOR_FIELD_OVERRIDE => {
 
 # These are fields where special action is taken depending on the
 # *value* passed in to the chart, sometimes.
-use constant SPECIAL_PARSING => {
-    # Pronoun Fields (Ones that can accept %user%, etc.)
-    assigned_to => \&_contact_pronoun,
-    cc          => \&_cc_pronoun,
-    commenter   => \&_commenter_pronoun,
-    qa_contact  => \&_contact_pronoun,
-    reporter    => \&_contact_pronoun,
-    
-    # Date Fields that accept the 1d, 1w, 1m, 1y, etc. format.
-    creation_ts => \&_timestamp_translate,
-    deadline    => \&_timestamp_translate,
-    delta_ts    => \&_timestamp_translate,
+# This is a sub because custom fields are dynamic
+sub SPECIAL_PARSING {
+    my $map = {
+        # Pronoun Fields (Ones that can accept %user%, etc.)
+        assigned_to => \&_contact_pronoun,
+        cc          => \&_cc_pronoun,
+        commenter   => \&_commenter_pronoun,
+        qa_contact  => \&_contact_pronoun,
+        reporter    => \&_contact_pronoun,
+
+        # Date Fields that accept the 1d, 1w, 1m, 1y, etc. format.
+        creation_ts => \&_datetime_translate,
+        deadline    => \&_date_translate,
+        delta_ts    => \&_datetime_translate,
+    };
+    foreach my $field (Bugzilla->active_custom_fields) {
+        if ($field->type == FIELD_TYPE_DATETIME) {
+            $map->{$field->name} = \&_datetime_translate;
+        } elsif ($field->type == FIELD_TYPE_DATE) {
+            $map->{$field->name} = \&_date_translate;
+        }
+    }
+    return $map;
 };
 
 # Information about fields that represent "users", used by _user_nonchanged.
@@ -2057,20 +2068,27 @@ sub _word_terms {
 #####################################
 
 sub _timestamp_translate {
-    my ($self, $args) = @_;
+    my ($self, $ignore_time, $args) = @_;
     my $value = $args->{value};
     my $dbh = Bugzilla->dbh;
 
     return if $value !~ /^(?:[\+\-]?\d+[hdwmy]s?|now)$/i;
 
-    # By default, the time is appended to the date, which we don't want
-    # for deadlines.
     $value = SqlifyDate($value);
-    if ($args->{field} eq 'deadline') {
+    # By default, the time is appended to the date, which we don't always want.
+    if ($ignore_time) {
         ($value) = split(/\s/, $value);
     }
     $args->{value} = $value;
     $args->{quoted} = $dbh->quote($value);
+}
+
+sub _datetime_translate {
+    return shift->_timestamp_translate(0, @_);
+}
+
+sub _date_translate {
+    return shift->_timestamp_translate(1, @_);
 }
 
 sub SqlifyDate {

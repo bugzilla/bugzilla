@@ -286,7 +286,7 @@ sub active_custom_fields {
         $field_hash{$flag->name} = $flag;
     }
 
-    @$$fields = values %field_hash;
+    @$$fields = sort { $a->sortkey <=> $b->sortkey } values %field_hash;
 }
 
 sub buglist_columns {

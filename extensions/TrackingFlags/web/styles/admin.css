@@ -1,0 +1,107 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this file,
+ * You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * This Source Code Form is "Incompatible With Secondary Licenses", as
+ * defined by the Mozilla Public License, v. 2.0. */
+
+/* list */
+
+.list {
+    border: 1px solid #888888;
+}
+
+.list td, .list th {
+    padding: 3px 10px 3px 3px;
+    border: 1px solid #888888;
+}
+
+.list .odd_row {
+    background-color: #ffffff;
+    color: #000000;
+}
+
+.list .even_row {
+    background-color: #eeeeee;
+    color: #000000;
+}
+
+.list tr:hover {
+    background-color: #ccddee;
+}
+
+
+.list th {
+    text-align: left;
+    background: #dddddd;
+}
+
+.list .disabled {
+    color: #888888;
+    text-decoration: line-through;
+}
+
+#new_flag {
+    margin: 1em 0em;
+}
+
+/* edit */
+
+.edit {
+    margin-bottom: 2em;
+}
+
+.edit .header {
+    background: #dddddd;
+}
+
+.edit .help {
+    font-style: italic;
+}
+
+.edit td, .edit th {
+    padding: 1px 5px;
+}
+
+.edit th {
+    text-align: left;
+}
+
+#edit_mode {
+    margin: 1em 0em;
+}
+
+#flag_name {
+    width: 20em;
+}
+
+#flag_desc {
+    width: 20em;
+}
+
+#flag_sort {
+    width: 10em;
+}
+
+.option_value {
+    width: 10em;
+}
+
+.hidden {
+    display: none;
+}
+
+.txt_icon {
+    font-family: monospace;
+}
+
+.admin_error {
+    border: 1px solid red;
+    box-shadow: 0px 0px 4px #ff0000;
+    -webkit-box-shadow: 0px 0px 4px #ff0000;
+    -moz-box-shadow: 0px 0px 4px #ff0000;
+}
+
+.admin_error_text {
+    color: #cc0000;
+}

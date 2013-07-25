@@ -1,0 +1,38 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+<input type="hidden" id="[% field.name FILTER html %]_dirty">
+<select id="[% field.name FILTER html %]"
+        name="[% field.name FILTER html %]">
+  [% IF allow_dont_change %]
+    <option value="[% dontchange FILTER html %]"
+      [% ' selected="selected"' IF value == dontchange %]>
+      [% dontchange FILTER html %]
+    </option>
+  [% END %]
+  [% FOREACH legal_value = field.values %]
+    [% IF legal_value.name != value %]
+      [% NEXT IF !field.can_set_value(legal_value.name) %]
+      [% NEXT IF !legal_value.is_active %]
+    [% END %]
+    <option value="[% legal_value.name FILTER html %]"
+            id="v[% legal_value.id FILTER html %] [%- field.name FILTER html %]"
+            [% IF legal_value.name == value %]
+              selected="selected"
+            [% END %]>
+      [%- display_value(field.name, legal_value.name) FILTER html ~%]
+    </option>
+  [% END %]
+</select>
+<script type="text/javascript">
+<!--
+  initHidingOptionsForIE('[% field.name FILTER js %]');
+  [%+ INCLUDE "bug/field-events.js.tmpl"
+      field = field, product = bug.product_obj %]
+//-->
+</script>

@@ -1,0 +1,63 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% IF tracking_flags.size %]
+  [% tracking_flag_names = [] %]
+  [% FOREACH flag = tracking_flags %]
+    [% tracking_flag_names.push(flag.name) %]
+  [% END %]
+
+  <script type="text/javascript">
+    [% js_filtered_names = [] %]
+    [% FOREACH flag = tracking_flag_names %]
+      [% js_filtered = flag FILTER js %]
+      [% js_filtered_names.push(js_filtered) %]
+    [% END %]
+    var tracking_flag_names = ['[% js_filtered_names.join("','") FILTER none %]'];
+    var tracking_flags = new Array([% product.components.size %]);
+
+    [% count = 0 %]
+    [% FOREACH c = product.components %]
+      [% NEXT IF NOT c.is_active %]
+      [% tracking_flag_list = [] %]
+      [% FOREACH flag = tracking_flags %]
+        [% FOREACH v = flag.visibility %]
+          [% IF v.product_id == product.id
+                && (!v.component_id.defined || v.component_id == c.id) %]
+            [% tracking_flag_list.push(flag.name) %]
+          [% END %]
+        [% END %]
+      [% END %]
+      [% js_filtered_flags = [] %]
+      [% FOREACH flag = tracking_flag_list %]
+        [% js_filtered = flag FILTER js %]
+        [% js_filtered_flags.push(js_filtered) %]
+      [% END %]
+      tracking_flags[[% count %]] = ['[% js_filtered_flags.join("','") FILTER none %]'];
+      [% count = count + 1 %]
+    [% END %]
+
+    function update_tracking_flags () {
+      var component = document.getElementById('component');
+      // First, we disable all flags.
+      for (var i = 0; i < tracking_flag_names.length; i++) {
+        var flagField = document.getElementById(tracking_flag_names[i]);
+        flagField.disabled = true;
+      }
+      // Now enable flags available for the selected component.
+      var index = component.selectedIndex;
+      for (var i = 0; i < tracking_flags[index].length; i++) {
+        var flagField = document.getElementById(tracking_flags[index][i]);
+        flagField.disabled = false;
+      }
+    }
+
+    YAHOO.util.Event.onDOMReady(update_tracking_flags);
+    YAHOO.util.Event.addListener("component", "change", update_tracking_flags);
+  </script>
+[% END %]

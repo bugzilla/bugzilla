@@ -1,0 +1,26 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% IF error == "tracking_flags_invalid_product" %]
+  [% title = "Invalid Product" %]
+  The product named '[% product FILTER html %]' does not exist.
+
+[% ELSIF error == "tracking_flags_invalid_component" %]
+  [% title = "Invalid Component" %]
+  The component named '[% component FILTER html %]' does not exist.
+
+[% ELSIF error == "tracking_flags_invalid_item_id" %]
+  [% title = "Invalid " _ item _ " ID" %]
+  Invalid [% item FILTER html %] ID ([% id FILTER html %]).
+
+[% ELSIF error == "tracking_flags_invalid_param" %]
+  [% title = "Invalid Parameter Provided" %]
+  An invalid parameter '[% value FILTER html %]'
+  for '[% name FILTER html %]' was provided.
+
+[% END %]

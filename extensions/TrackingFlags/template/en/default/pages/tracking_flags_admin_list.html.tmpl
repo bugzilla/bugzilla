@@ -1,0 +1,56 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% PROCESS global/header.html.tmpl
+  title = "Release Tracking Flags"
+  style_urls = [ 'extensions/TrackingFlags/web/styles/admin.css' ]
+%]
+
+<table class="list" cellspacing="0">
+
+<tr>
+  <th>Name</th>
+  <th>Description</th>
+  <th>Type</th>
+  <th>Sort Key</th>
+  <th>Active</th>
+  <th>&nbsp;</th>
+</tr>
+
+[% FOREACH flag = flags %]
+  <tr class="[% loop.count % 2 == 1 ? "odd_row" : "even_row" %]">
+    <td [% 'class="disabled"' UNLESS flag.is_active %]>
+      <a href="page.cgi?id=tracking_flags_admin_edit.html&amp;mode=edit&amp;flag_id=[% flag.flag_id FILTER uri %]">
+        [% flag.name FILTER html %]
+      </a>
+    </td>
+    <td [% 'class="disabled"' UNLESS flag.is_active %]>
+      [% flag.description FILTER html %]
+    </td>
+    <td [% 'class="disabled"' UNLESS flag.is_active %]>
+      [% flag.flag_type FILTER html %]
+    </td>
+    <td [% 'class="disabled"' UNLESS flag.is_active %]>
+      [% flag.sortkey FILTER html %]
+    </td>
+    <td>
+      [% flag.is_active ? "Yes" : "No" %]
+    </td>
+    <td>
+        <a href="page.cgi?id=tracking_flags_admin_edit.html&amp;mode=copy&amp;copy_from=[% flag.flag_id FILTER uri %]">Copy</a>
+    </td>
+  </tr>
+[% END %]
+
+</table>
+
+<div id="new_flag">
+<a href="page.cgi?id=tracking_flags_admin_edit.html">Add Flag</a>
+</div>
+
+[% INCLUDE global/footer.html.tmpl %]

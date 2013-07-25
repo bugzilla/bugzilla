@@ -1,0 +1,57 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% FOREACH flag = flag_list %]
+  [% SET bug_id = bug.defined ? bug.id : 0 %]
+  [% SET flag_bug_value = flag.bug_flag(bug_id).value %]
+  [% NEXT IF !new_bug && (!user.id && flag_bug_value == '---') %]
+  <tr id="row_[% flag.name FILTER html %]">
+    <td [% IF new_bug %]class="field_label"[% END %]>
+      <label for="[% flag.name FILTER html %]">
+      [% IF new_bug %]
+        <a
+        [% IF help_html.${flag.name}.defined %]
+          title="[% help_html.${flag.name} FILTER txt FILTER collapse FILTER html %]"
+          class="field_help_link"
+        [% END %]
+          href="page.cgi?id=fields.html#[% flag.name FILTER uri %]">
+      [% END %]
+      [% flag.description FILTER html %]
+      [% IF new_bug %]
+        </a>
+      [% END %]:</label>
+    </td>
+    <td>
+      [% IF user.id %]
+        <input type="hidden" id="[% flag.name FILTER html %]_dirty">
+        <select id="[% flag.name FILTER html %]"
+                name="[% flag.name FILTER html %]">
+          [% FOREACH value = flag.values %]
+            [% IF new_bug || value.name != flag_bug_value  %]
+              [% NEXT IF !value.is_active || !flag.can_set_value(value.name) %]
+            [% END %]
+            <option value="[% value.name FILTER html %]"
+                    id="v[% value.id FILTER html %]_[% flag.name FILTER html %]"
+                    [% " selected" IF !new_bug && flag_bug_value == value.name %]>
+              [% value.name FILTER html %]</option>
+          [% END %]
+        </select>
+        <script type="text/javascript">
+          initHidingOptionsForIE('[% flag.name FILTER js %]');
+        </script>
+        [% IF !new_bug && user.id %]
+          <span id="ro_[% flag.name FILTER html %]" class="bz_default_hidden">
+            [%  flag_bug_value FILTER html %]
+          </span>
+        [% END %]
+      [% ELSE %]
+        [% flag_bug_value FILTER html %]
+      [% END %]
+    </td>
+  </tr>
+[% END %]

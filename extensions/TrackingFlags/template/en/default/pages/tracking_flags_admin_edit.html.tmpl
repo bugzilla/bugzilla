@@ -1,0 +1,194 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% js_data = BLOCK %]
+var useclassification = false;
+var first_load = true;
+var last_sel = [];
+var cpts = new Array();
+[% n = 1 %]
+[% FOREACH p = user.get_selectable_products %]
+  cpts['[% n FILTER js %]'] = [
+    [%- FOREACH c = p.components %]'[% c.name FILTER js %]'[% ", " UNLESS loop.last %] [%- END -%] ];
+  [% n = n+1 %]
+[% END %]
+var selected_components = [
+  [%- FOREACH c = input.component %]'[% c FILTER js %]'
+  [%- ',' UNLESS loop.last %] [%- END ~%] ];
+[% END %]
+
+[% PROCESS global/header.html.tmpl
+  title = "Release Tracking Flags"
+  javascript = js_data
+  javascript_urls = [ 'extensions/TrackingFlags/web/js/admin.js', 'js/productform.js' ]
+  style_urls = [ 'extensions/TrackingFlags/web/styles/admin.css' ]
+%]
+
+[% IF mode == 'deleted' %]
+
+  <p>The tracking flag [% flag_name FILTER html %] has been deleted.</p>
+  <hr>
+  <p>Return to the <a href="page.cgi?id=tracking_flags_admin_list.html">list of Tracking Flags</a>.</p>
+
+  [% RETURN %]
+
+[% END %]
+
+<script>
+  var groups = [% groups || '[]' FILTER none %];
+  var flag_values = [% values || '[]' FILTER none %];
+  var flag_visibility = [% visibility || '[]' FILTER none %];
+</script>
+
+<div id="edit_mode">
+  [% IF mode == 'edit' %]
+    Editing <b>[% flag.name FILTER html %]</b>.
+  [% ELSE %]
+    New flag
+  [% END %]
+</div>
+
+<form method="POST" action="page.cgi" onsubmit="return on_submit()">
+<input type="hidden" name="id" value="tracking_flags_admin_edit.html">
+<input type="hidden" name="mode" value="[% mode FILTER html %]">
+<input type="hidden" name="flag_id" value="[% mode == 'edit' ? flag.flag_id : 0 FILTER html %]">
+<input type="hidden" name="values" id="values" value="">
+<input type="hidden" name="visibility" id="visibility" value="">
+<input type="hidden" name="save" value="1">
+
+[%# name/desc/etc %]
+
+<table class="edit" cellspacing="0">
+
+<tr class="header">
+  <th colspan="3">Flag</th>
+</tr>
+
+<tr>
+  <th>Name</th>
+  <td><input name="flag_name" id="flag_name" value="[% flag.name FILTER html %]"></td>
+  <td class="help">database field name</td>
+</tr>
+
+<tr>
+  <th>Description</th>
+  <td><input name="flag_desc" id="flag_desc" value="[% flag.description FILTER html %]"></td>
+  <td class="help">visible name</td>
+</tr>
+
+<tr>
+  <th>Type</th>
+  <td>
+    <select name="flag_type" id="flag_type">
+      <option value=""></option>
+      [% FOREACH type = tracking_flag_types %]
+        <option value="[% type.name FILTER html %]"
+                [% 'selected="selected"' IF flag.flag_type == type.name %]>
+          [% type.name FILTER html %]</option>
+      [% END %]
+    </select>
+  </td>
+  <td class="help">flag type used for grouping</td>
+</tr>
+
+<tr>
+  <th>Sort Key</th>
+  <td>
+    <input name="flag_sort" id="flag_sort" value="[% flag.sortkey FILTER html %]">
+    [
+      <a class="txt_icon" href="#" onclick="inc_field('flag_sort', 5);return false">+5</a>
+      | <a class="txt_icon" href="#" onclick="inc_field('flag_sort', -5);return false">-5</a>
+    ]
+  </td>
+</tr>
+
+<tr>
+  <th>Active</th>
+  <td><input type="checkbox" name="flag_active" id="flag_active" value="1" [% "checked" IF flag.is_active %]></td>
+</tr>
+
+</table>
+
+[%# values %]
+
+<table id="flag_values" class="edit" cellspacing="0">
+
+<tr class="header">
+  <th colspan="4">Values</th>
+</tr>
+
+<tr>
+  <th>Value</th>
+  <th>Setter</th>
+  <th>Active</th>
+</tr>
+
+<tr>
+  <td colspan="4">
+    [ <a href="#" onclick="add_value();return false">New Value</a> ]
+  </td>
+</tr>
+
+</table>
+
+[%# visibility %]
+
+<table id="flag_visibility" class="edit" cellspacing="0">
+
+<tr class="header">
+  <th colspan="3">Visibility</th>
+</tr>
+
+<tr>
+  <th>Product</th>
+  <th>Component</th>
+</tr>
+
+<tr id="flag_visibility_add">
+  <td>
+    <select id="product" onChange="selectProduct(Dom.get('product'), Dom.get('component'), null, null, '-- Any --')">
+      <option value=""></option>
+      [% FOREACH p = user.get_selectable_products %]
+        <option value="[% p.name FILTER html %]"
+          [% " selected" IF input.product == p.name %]>
+          [% p.name FILTER html %]
+        </option>
+      [% END %]
+    </select>
+  </td>
+  <td>
+    <select id="component">
+    </select>
+  </td>
+  <td>
+    [ <a href="#" onclick="add_visibility();return false">Add</a> ]
+  <td>
+</tr>
+
+</table>
+
+
+[%# submit %]
+
+<div>
+  <input type="submit" name="submit" id="submit" value="[% mode == 'edit' ? 'Save Changes' : 'Add' %]">
+  [% IF can_delete %]
+    <input type="hidden" name="delete" id="delete" value="">
+    <input type="submit" value="Delete"
+          onclick="return delete_confirm('[% flag.name FILTER js FILTER html %]')">
+  [% END %]
+</div>
+
+</form>
+
+<hr>
+<p>
+Return to the <a href="page.cgi?id=tracking_flags_admin_list.html">list of Tracking Flags</a>.
+</p>
+
+[% INCLUDE global/footer.html.tmpl %]

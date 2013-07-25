@@ -1,0 +1,57 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% IF error == "tracking_flags_change_denied" %]
+  [% title = "Tracking Flag Modification Denied" %]
+  You tried to update the status of the tracking flag '[% flag.name FILTER html %]'
+  [% IF value %] to '[% value.name FILTER html %]'[% END %].
+  Only a user with the required permissions may make this change.
+
+[% ELSIF error == "tracking_flags_missing_mandatory" %]
+  [% IF fields.size == 1 %]
+    [% title = "Missing mandatory field" %]
+    The field "[% fields.first FILTER html %]" is mandatory, and must be provided.
+  [% ELSE %]
+    [% title = "Missing mandatory fields" %]
+    The following fields are mandatory, and must be provided:
+    [%+ fields.join(', ') FILTER html %]
+  [% END %]
+
+[% ELSIF error == "tracking_flags_cf_prefix" %]
+  [% title = "Invalid flag name" %]
+  The flag name must start with 'cf_'.
+
+[% ELSIF error == "tracking_flags_duplicate_field" %]
+  [% title = "Duplicate field" %]
+  A tracking flag field named "[% name FILTER html %]" already exists.
+
+[% ELSIF error == "tracking_flags_missing_values" %]
+  [% title = "Missing values" %]
+  You must provide at least one value.
+
+[% ELSIF error == "tracking_flags_missing_value" %]
+  [% title = "Missing value" %]
+  You must provied the value for all values.
+
+[% ELSIF error == "tracking_flags_duplicate_value" %]
+  [% title = "Duplicate value" %]
+  The value "[% value FILTER html %]" has been provided more than once.
+
+[% ELSIF error == "tracking_flags_missing_visibility" %]
+  [% title = "Missing visibility" %]
+  You must provide at least one product for visibility.
+
+[% ELSIF error == "tracking_flags_duplicate_visibility" %]
+  [% title = "Duplicate visibility" %]
+  The visibility '[% name FILTER html %]' has been provided more than once.
+
+[% ELSIF error == "tracking_flags_invalid_flag_type" %]
+  [% title = "Invalid flag type" %]
+  The flag type '[% type FILTER html %]' is invalid.
+
+[% END %]

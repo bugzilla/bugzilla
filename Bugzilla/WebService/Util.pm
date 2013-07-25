@@ -38,28 +38,38 @@ sub filter ($$;$) {
 
 sub filter_wants ($$;$) {
     my ($params, $field, $prefix) = @_;
+
+    # Since this is operation is resource intensive, we will cache the results
+    # This assumes that $params->{*_fields} doesn't change between calls
+    my $cache = Bugzilla->request_cache->{filter_wants} ||= {};
+    $field = "${prefix}.${field}" if $prefix;
+
+    if (exists $cache->{$field}) {
+        return $cache->{$field};
+    }
+
     my %include = map { $_ => 1 } @{ $params->{'include_fields'} || [] };
     my %exclude = map { $_ => 1 } @{ $params->{'exclude_fields'} || [] };
 
-    $field = "${prefix}.${field}" if $prefix;
-
+    my $wants = 1;
     if (defined $params->{exclude_fields} && $exclude{$field}) {
-        return 0;
+        $wants = 0;
     }
-    if (defined $params->{include_fields} && !$include{$field}) {
+    elsif (defined $params->{include_fields} && !$include{$field}) {
         if ($prefix) {
             # Include the field if the parent is include (and this one is not excluded)
-            return 0 if !$include{$prefix};
+            $wants = 0 if !$include{$prefix};
         }
         else {
             # We want to include this if one of the sub keys is included
             my $key = $field . '.';
             my $len = length($key);
-            return 0 if ! grep { substr($_, 0, $len) eq $key  } keys %include;
+            $wants = 0 if ! grep { substr($_, 0, $len) eq $key  } keys %include;
         }
     }
 
-    return 1;
+    $cache->{$field} = $wants;
+    return $wants;
 }
 
 sub taint_data {

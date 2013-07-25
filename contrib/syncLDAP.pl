@@ -240,22 +240,15 @@ if($readonly == 0) {
    
    print "Phase 2: updating existing users... " unless $quiet;
 
-   my $sth_update_login = $dbh->prepare(
-       'UPDATE profiles
-           SET login_name = ? 
-         WHERE ' . $dbh->sql_istrcmp('login_name', '?'));
-   my $sth_update_realname = $dbh->prepare(
-       'UPDATE profiles
-           SET realname = ? 
-         WHERE ' . $dbh->sql_istrcmp('login_name', '?'));
-
    if($noupdate == 0) {
       while( my ($key, $value) = each(%update_users) ) {
+        my $user = Bugzilla::User->check($key);
         if(defined $value->{'new_login_name'}) {
-          $sth_update_login->execute($value->{'new_login_name'}, $key);
+          $user->set_login($value->{'new_login_name'});
         } else {
-          $sth_update_realname->execute($value->{'realname'}, $key);
+          $user->set_name($value->{'realname'});
         }
+        $user->update();
       }
       print "done!\n" unless $quiet;
    }

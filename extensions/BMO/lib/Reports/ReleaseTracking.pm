@@ -9,6 +9,7 @@ package Bugzilla::Extension::BMO::Reports::ReleaseTracking;
 use strict;
 use warnings;
 
+use Bugzilla::Constants;
 use Bugzilla::Error;
 use Bugzilla::Extension::BMO::Util;
 use Bugzilla::Field;
@@ -121,7 +122,7 @@ sub report {
     my @unlink_products;
     foreach my $product (@usable_products) {
         my @fields =
-            grep { is_active_status_field($_->name) }
+            grep { is_active_status_field($_) }
             Bugzilla->active_custom_fields({ product => $product });
         my @field_ids = map { $_->id } @fields;
         if (!scalar @fields) {
@@ -244,6 +245,11 @@ sub report {
             $query .= "INNER JOIN bugs_activity a ON a.bug_id = b.bug_id ";
         }
 
+        if (grep($_ == FIELD_TYPE_EXTENSION, map { $_->{type} } @{ $q->{fields} })) {
+            $query .= "LEFT JOIN tracking_flags_bugs AS tfb ON tfb.bug_id = b.bug_id " .
+                      "LEFT JOIN tracking_flags AS tf ON tfb.tracking_flag_id = tf.id ";
+        }
+
         $query .= "WHERE ";
 
         if ($q->{start_date}) {
@@ -273,11 +279,15 @@ sub report {
         if (scalar @{$q->{fields}}) {
             my @fields;
             foreach my $field (@{$q->{fields}}) {
-                push @fields,
-                    "(" .
-                    ($field->{value} eq '+' ? '' : '!') .
-                    "(b.".$field->{name}." IN ('fixed','verified'))" .
-                    ") ";
+                my $field_sql = "(" . ($field->{value} eq '+' ? '' : '!') . "(";
+                if ($field->{type} == FIELD_TYPE_EXTENSION) {
+                    $field_sql .= "tf.name = " . $dbh->quote($field->{name}) . " AND tfb.value";
+                }
+                else {
+                    $field_sql .= "b." . $field->{name};
+                }
+                $field_sql .= " IN ('fixed','verified')))";
+                push(@fields, $field_sql);
             }
             my $join = uc $q->{join};
             push @where, '(' . join(" $join ", @fields) . ')';
@@ -383,7 +393,8 @@ sub _parse_query {
         my ($id, $value) = ($1, $2);
         my $field_obj = Bugzilla::Field->new($id)
             or ThrowUserError('report_invalid_parameter', { name => 'field_id' });
-        push @fields, { id => $id, value => $value, name => $field_obj->name };
+        push @fields, { id => $id, value => $value,
+                        name => $field_obj->name, type => $field_obj->type };
     }
     $query->{fields} = \@fields;
 

@@ -962,6 +962,7 @@
 [%# *** Custom Fields *** %]
   [% USE Bugzilla %]
   [% FOREACH field = Bugzilla.active_custom_fields(product=>bug.product_obj,component=>bug.component_obj,type=>1) %]
+    [% NEXT IF field.type == constants.FIELD_TYPE_EXTENSION %]
     [% NEXT IF NOT user.id AND field.value == "---" %]
     [% Hook.process('custom_field', 'bug/edit.html.tmpl') %]
     [% NEXT IF field.hidden %]

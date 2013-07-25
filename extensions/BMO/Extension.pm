@@ -889,6 +889,7 @@ sub mailer_before_send {
 
         my @set_values = ();
         foreach my $field (@fields) {
+            next if $field->type == FIELD_TYPE_EXTENSION;
             my $field_name = $field->name;
             next if cf_flag_disabled($field_name, $bug);
             next if !$bug->$field_name || $bug->$field_name eq '---';

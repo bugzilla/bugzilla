@@ -23,38 +23,6 @@
  * ***** END LICENSE BLOCK *****
  */
 
-// --- custom flags
-var Dom = YAHOO.util.Dom;
-
-function bmo_hide_tracking_flags() {
-  for (var field in bmo_custom_flags) {
-    var el = Dom.get(field);
-    var value = el ? el.value : bmo_custom_flags[field];
-    if (el && (value != bmo_custom_flags[field])) {
-      bmo_show_tracking_flags();
-      return;
-    }
-    if (value == '---') {
-      Dom.addClass('row_' + field, 'bz_hidden');
-    } else {
-      Dom.addClass(field, 'bz_hidden');
-      Dom.removeClass('ro_' + field, 'bz_hidden');
-    }
-  }
-}
-
-function bmo_show_tracking_flags() {
-  Dom.addClass('edit_tracking_fields_action', 'bz_hidden');
-  for (var field in bmo_custom_flags) {
-    if (Dom.get(field).value == '---') {
-      Dom.removeClass('row_' + field, 'bz_hidden');
-    } else {
-      Dom.removeClass(field, 'bz_hidden');
-      Dom.addClass('ro_' + field, 'bz_hidden');
-    }
-  }
-}
-
 function init_clone_bug_menu(el, bug_id, product, component) {
   var diff_url = 'enter_bug.cgi?cloned_bug_id=' + bug_id;
   var cur_url = diff_url +

@@ -61,6 +61,9 @@ sub new {
     my $class    = ref($invocant) || $invocant;
     my $object   = $class->_init(@_);
     bless($object, $class) if $object;
+
+    Bugzilla::Hook::process('object_end_of_new', { object => $object });
+
     return $object;
 }
 

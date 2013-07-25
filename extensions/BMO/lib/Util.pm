@@ -9,6 +9,7 @@ package Bugzilla::Extension::BMO::Util;
 use strict;
 use warnings;
 
+use Bugzilla::Constants;
 use Bugzilla::Error;
 use Bugzilla::Extension::BMO::Data qw($cf_disabled_flags);
 use Date::Parse;
@@ -74,10 +75,20 @@ sub parse_date {
 }
 
 sub is_active_status_field {
-    my ($field_name) = @_;
-    if ($field_name =~ /^cf_status/) {
-        return !grep { $field_name eq $_ } @$cf_disabled_flags
+    my ($field) = @_;
+    if ($field->type != FIELD_TYPE_EXTENSION
+        && $field->name =~ /^cf_status/)
+    {
+        return !grep { $field->name eq $_ } @$cf_disabled_flags
     }
+
+    if ($field->type == FIELD_TYPE_EXTENSION
+        && $field->can('flag_type')
+        && $field->flag_type eq 'status')
+    {
+        return 1;
+    }
+
     return 0;
 }
 

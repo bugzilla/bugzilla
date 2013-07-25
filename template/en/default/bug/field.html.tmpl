@@ -246,6 +246,8 @@
          YAHOO.bugzilla.keywordAutocomplete.init('[% field.name FILTER js %]', 
                                                  'keyword_autocomplete');
        </script>
+     [% CASE constants.FIELD_TYPE_EXTENSION %]
+       [% Hook.process('editable') %]
   [% END %]
 [% ELSE %]
   [% SWITCH field.type %]
@@ -269,6 +271,8 @@
           </li>
         [% END %]
       [% '</ul>' IF value.size %]
+    [% CASE constants.FIELD_TYPE_EXTENSION %]
+      [% Hook.process('non_editable') %]
     [% CASE %]
       [% value.join(', ') FILTER html %]
   [% END %]

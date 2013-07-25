@@ -129,6 +129,8 @@ use Memoize;
     FIELD_TYPE_BUG_ID
     FIELD_TYPE_BUG_URLS
     FIELD_TYPE_KEYWORDS
+    FIELD_TYPE_EXTENSION
+
     FIELD_TYPE_HIGHEST_PLUS_ONE
     
     EMPTY_DATETIME_REGEX
@@ -397,7 +399,8 @@ use constant SENDMAIL_PATH => '/usr/lib:/usr/sbin:/usr/ucblib';
 # only storage but also logic.  For example, we might add a "user" field type
 # whose values are stored in an integer column in the database but for which
 # we do more than we would do for a standard integer type (f.e. we might
-# display a user picker).
+# display a user picker). Fields of type FIELD_TYPE_EXTENSION should generally
+# be ignored by the core code and is used primary by extensions.
 
 use constant FIELD_TYPE_UNKNOWN   => 0;
 use constant FIELD_TYPE_FREETEXT  => 1;
@@ -409,9 +412,11 @@ use constant FIELD_TYPE_BUG_ID  => 6;
 use constant FIELD_TYPE_BUG_URLS => 7;
 use constant FIELD_TYPE_KEYWORDS => 8;
 use constant FIELD_TYPE_DATE => 9;
+use constant FIELD_TYPE_EXTENSION => 99;
+
 # Add new field types above this line, and change the below value in the
 # obvious fashion
-use constant FIELD_TYPE_HIGHEST_PLUS_ONE => 10;
+use constant FIELD_TYPE_HIGHEST_PLUS_ONE => 100;
 
 use constant EMPTY_DATETIME_REGEX => qr/^[0\-:\sA-Za-z]+$/; 
 

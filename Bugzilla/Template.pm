@@ -824,7 +824,6 @@ sub create {
                         or Bugzilla->usage_mode == USAGE_MODE_XMLRPC
                         or Bugzilla->usage_mode == USAGE_MODE_REST)
                 {
-                    print STDERR "var: $var";
                     $var = wrap_comment($var, 72);
                 }
                 $var =~ s/\&nbsp;/ /g;

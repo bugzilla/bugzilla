@@ -18,6 +18,8 @@ use Bugzilla::Error;
 use Bugzilla::User;
 use Bugzilla::Util qw(clean_text);
 
+use constant UNAVAILABLE_RE => qr/\b(?:unavailable|pto)\b/i;
+
 #
 # monkey-patched methods
 #
@@ -58,7 +60,9 @@ sub _reviewers_objs {
         # so we have to reorder the list
         my $users = Bugzilla::User->new_from_list($user_ids);
         my %user_map = map { $_->id => $_ } @$users;
-        my @reviewers = map { $user_map{$_} } @$user_ids;
+        my @reviewers =
+            grep { $_->name !~ UNAVAILABLE_RE }
+            map { $user_map{$_} } @$user_ids;
         $object->{reviewers} = \@reviewers;
     }
     return $object->{reviewers};

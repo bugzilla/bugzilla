@@ -20,7 +20,7 @@ a:hover, #header a:hover, #footer a:hover {
     color: #00539f;
 }
 
-select[multiple], textarea, input[type=text], .text_input, .yui-ac-input, input {
+select[multiple], textarea, input[type=text], .text_input, .yui-ac-input {
     -moz-box-sizing: border-box;
     -webkit-box-sizing: border-box;
     box-sizing: border-box;
@@ -28,8 +28,9 @@ select[multiple], textarea, input[type=text], .text_input, .yui-ac-input, input 
     border-radius: .25em;
     box-shadow: inset 0 1px rgba(0, 0, 0, 0.1);
     background: white;
-    padding: 5px;
+    padding: 6px 5px 7px;
     color: #404040;
+    vertical-align: top;
 }
 
 select[multiple], input[type=text], .text_input, .yui-ac-input, input {
@@ -156,9 +157,8 @@ hr {
     background: url(search.png) 5px center no-repeat, -moz-linear-gradient(#fafafa, #fff);
     background: url(search.png) 5px center no-repeat, -webkit-linear-gradient(#fafafa, #fff);
     background: url(search.png) 5px center no-repeat, linear-gradient(#fafafa, #fff);
-    padding-left: 26px;
+    padding: .4em 1em .45em 26px;
     width: 200px;
-    height: 30px;
 }
 
 #footer .links .quicksearch_form {
@@ -224,14 +224,6 @@ hr {
     margin: 80px auto 15px;
     padding: 0;
     width: 99%;
-}
-
-#bugzilla-body div.bz_comment:before {
-    display:block;
-    content: " ";
-    margin-top: -95px;
-    height:95px;
-    visibility: hidden;
 }
 
 /* Home */
@@ -310,7 +302,7 @@ table.edit_form hr {
 .field_label {
     font-weight: normal !important;
     padding-right: 20px;
-    vertical-align: middle;
+    vertical-align: baseline;
 }
 
 .field_label a, .field_label b {
@@ -531,7 +523,7 @@ table.edit_form hr {
     margin-bottom: 1em;
 }
 
-button, input[type=submit], #commit, #commit_top {
+button, input[type=submit], input[type=button], #commit, #commit_top, #header .btn, #header input[type=submit] {
     background-image: -moz-linear-gradient(#43a6e2,#277ac1);
     background-image: -webkit-linear-gradient(#43a6e2,#277ac1);
     background-image: linear-gradient(#43a6e2,#277ac1);
@@ -544,21 +536,15 @@ button, input[type=submit], #commit, #commit_top {
     color: rgb(255, 255, 255);
     cursor: pointer;
     display: inline-block;
-    font-size: 14px;
-    font-weight: 700;
+    font-size: 12px;
+    font-weight: 600;
     text-align: center;
     text-decoration: none;
     text-shadow: 0px 1px 0px rgba(0, 0, 0, 0.25);
+    padding: .425em 1em .5em;
 }
 
-button, input[type=submit], #header .btn, #header input[type=submit] {
-    height: 2.175em;
-    line-height: 0.9;
-    padding: 4px 10px 6px;
-    font-size: 14px
-}
-
-button:hover, input[type=submit]:hover, #commit:hover, #commit_top:hover {
+button:hover, input[type=submit]:hover, input[type=button]:hover, #commit:hover, #commit_top:hover, #header .btn:hover, #header input[type=submit]:hover {
     -webkit-box-shadow: 0 1px 0 0 rgba(0,0,0,0.2),inset 0 -1px 0 0 rgba(0,0,0,0.3),inset 0 12px 24px 2px #38a9ed;
     -moz-box-shadow: 0 1px 0 0 rgba(0,0,0,0.2),inset 0 -1px 0 0 rgba(0,0,0,0.3),inset 0 12px 24px 2px #38a9ed;
     box-shadow: 0 1px 0 0 rgba(0,0,0,0.2),inset 0 -1px 0 0 rgba(0,0,0,0.3),inset 0 12px 24px 2px #38a9ed;
@@ -567,7 +553,7 @@ button:hover, input[type=submit]:hover, #commit:hover, #commit_top:hover {
     transition: all linear 0.25s;
 }
 
-button:active, input[type=submit]:active, #commit:active, #commit_top:active {
+button:active, input[type=submit]:active, input[type=button]:active, #commit:active, #commit_top:active, #header .btn:active, #header input[type=submit]:active  {
     -webkit-box-shadow: inset 0 2px 0 0 rgba(0,0,0,0.2),inset 0 12px 24px 6px rgba(0,0,0,0.2),inset 0 0 2px 2px rgba(0,0,0,0.2);
     -moz-box-shadow: inset 0 2px 0 0 rgba(0,0,0,0.2),inset 0 12px 24px 6px rgba(0,0,0,0.2),inset 0 0 2px 2px rgba(0,0,0,0.2);
     box-shadow: inset 0 2px 0 0 rgba(0,0,0,0.2),inset 0 12px 24px 6px rgba(0,0,0,0.2),inset 0 0 2px 2px rgba(0,0,0,0.2);
@@ -576,7 +562,7 @@ button:active, input[type=submit]:active, #commit:active, #commit_top:active {
     transition: all linear 0.25s;
 }
 
-button[disabled], input[type=submit][disabled], button[disabled]:hover, input[type=submit][disabled]:hover, button[disabled]:active, input[type=submit][disabled]:active {
+button[disabled], input[type=submit][disabled], input[type=button][disabled], button[disabled]:hover, input[type=submit][disabled]:hover, input[type=button][disabled]:hover, button[disabled]:active, input[type=submit][disabled]:active, input[type=button][disabled]:active {
     background-image: -moz-linear-gradient(#bfc7cd,#9ca3aa);
     background-image: -webkit-linear-gradient(#bfc7cd,#9ca3aa);
     background-image: linear-gradient(#bfc7cd,#9ca3aa);
@@ -584,11 +570,6 @@ button[disabled], input[type=submit][disabled], button[disabled]:hover, input[ty
     cursor: pointer;
 }
 
-#commit, #commit_top {
-    height: 48px;
-    line-height: 48px;
-    padding: 0px 24px;
-}
 .related_actions {
     line-height: 19px;
     padding: 5px 10px;

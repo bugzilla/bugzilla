@@ -154,7 +154,7 @@ sub bug_start_of_update {
         if ($bug->{added_comments}
             && (!$flag->requestee || $flag->requestee->login eq Bugzilla->user->login)
             && (!$is_private || $flag->setter->is_insider)
-            && grep($_ == $flag->id, @needinfo_overrides))
+            && (scalar @needinfo_overrides && grep($_ == $flag->id, @needinfo_overrides)))
         {
             $clear_needinfo = 1;
         }

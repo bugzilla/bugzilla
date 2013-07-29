@@ -24,6 +24,10 @@
 </IfModule>
 </IfModule>
 
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/javascript application/json application/javascript
+</IfModule>
+
 AddType image/x-icon .ico
 ErrorDocument 401 /errors/401.html
 ErrorDocument 403 /errors/403.html

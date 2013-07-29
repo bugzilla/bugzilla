@@ -211,7 +211,7 @@ package Bugzilla::XMLRPC::Serializer;
 use 5.10.1;
 use strict;
 
-use Scalar::Util qw(blessed);
+use Scalar::Util qw(blessed reftype);
 # We can't use "use parent" because XMLRPC::Serializer doesn't return
 # a true value.
 use XMLRPC::Lite;
@@ -245,8 +245,8 @@ sub envelope {
     my $self = shift;
     my ($type, $method, $data) = @_;
     # If the type isn't a successful response we don't want to change the values.
-    if ($type eq 'response'){
-        $data = _strip_undefs($data);
+    if ($type eq 'response') {
+        _strip_undefs($data);
     }
     return $self->SUPER::envelope($type, $method, $data);
 }
@@ -257,7 +257,9 @@ sub envelope {
 # so it cannot be recursed like the other hash type objects.
 sub _strip_undefs {
     my ($initial) = @_;
-    if (ref $initial eq "HASH" || (blessed $initial && $initial->isa("HASH"))) {
+    my $type = reftype($initial) or return;
+
+    if ($type eq "HASH") {
         while (my ($key, $value) = each(%$initial)) {
             if ( !defined $value
                  || (blessed $value && $value->isa('XMLRPC::Data') && !defined $value->value) )
@@ -266,11 +268,11 @@ sub _strip_undefs {
                 delete $initial->{$key};
             }
             else {
-                $initial->{$key} = _strip_undefs($value);
+                _strip_undefs($value);
             }
         }
     }
-    if (ref $initial eq "ARRAY" || (blessed $initial && $initial->isa("ARRAY"))) {
+    elsif ($type eq "ARRAY") {
         for (my $count = 0; $count < scalar @{$initial}; $count++) {
             my $value = $initial->[$count];
             if ( !defined $value
@@ -281,11 +283,10 @@ sub _strip_undefs {
                 $count--;
             }
             else {
-                $initial->[$count] = _strip_undefs($value);
+                _strip_undefs($value);
             }
         }
     }
-    return $initial;
 }
 
 sub BEGIN {

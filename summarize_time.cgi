@@ -254,7 +254,7 @@ $user->is_timetracker
 
 my @ids = split(",", $cgi->param('id') || '');
 @ids = map { Bugzilla::Bug->check($_)->id } @ids;
-scalar(@ids) || ThrowUserError('no_bugs_chosen', {action => 'view'});
+scalar(@ids) || ThrowUserError('no_bugs_chosen', {action => 'summarize'});
 
 my $group_by = $cgi->param('group_by') || "number";
 my $monthly = $cgi->param('monthly');

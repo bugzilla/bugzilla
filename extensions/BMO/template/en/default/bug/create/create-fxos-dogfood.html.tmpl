@@ -1,0 +1,180 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% PROCESS global/variables.none.tmpl %]
+
+[% phones = [
+  'ZTE Open',
+  'Alcatel One Touch',
+  'LG',
+] %]
+
+[% inline_css = BLOCK %]
+  #dogfood {
+    margin: 0 5em 0 2em;
+  }
+  #dogfood th {
+    text-align: left;
+    padding-top: 1em;
+  }
+[% END %]
+
+[% inline_js = BLOCK %]
+  function onSubmit() {
+    var alert_text = '';
+
+    var phone = false;
+    [% FOREACH phone = phones %]
+      if (document.getElementById('phone-cb-[% phone FILTER js %]').checked)
+        phone = true;
+    [% END %]
+    if (document.getElementById('phone-cb-other').checked && isFilledOut('phone-other'))
+      phone = true;
+    if (!phone)
+      alert_text += "Please select the type of phone you have.\n";
+
+    if (!isFilledOut('fxos-version'))
+      alert_text += "Please provide the version of Firefox OS you are running.\n";
+
+    if (!isFilledOut('short_desc'))
+      alert_text += "Please enter a value for the summary.\n";
+
+    if (!isFilledOut('details'))
+      alert_text += "Please describe your issue in more detail.\n";
+
+    if (alert_text != '') {
+      alert(alert_text);
+      return false;
+    }
+    return true;
+  }
+[% END %]
+
+[% PROCESS global/header.html.tmpl
+   title = "Firefox OS Dogfooding $terms.Bug Submission"
+   style = inline_css
+   style_urls = [ 'skins/standard/enter_bug.css' ]
+   javascript = inline_js
+   javascript_urls = [ 'extensions/BMO/web/js/form_validate.js', 'js/field.js', 'js/util.js' ]
+%]
+
+<h2>Firefox OS Dogfooding [% terms.Bug %] Submission</h2>
+
+<div id="public_place">
+  As [% terms.Bugzilla %] is a public place, don't include any private or
+  personally identifying content.
+</div>
+
+<form method="post" action="post_bug.cgi" id="bug_form" class="enter_bug_form"
+      enctype="multipart/form-data" onsubmit="return onSubmit();">
+<input type="hidden" name="format" value="fxos-dogfood">
+<input type="hidden" name="created-format" value="fxos-dogfood">
+<input type="hidden" name="product" value="Boot2Gecko">
+<input type="hidden" name="component" value="DogfoodTriage">
+<input type="hidden" name="rep_platform" value="ARM">
+<input type="hidden" name="op_sys" value="Gonk (Firefox OS)">
+<input type="hidden" name="priority" value="--">
+<input type="hidden" name="version" value="unspecified">
+<input type="hidden" name="bug_severity" id="bug_severity" value="normal">
+<input type="hidden" name="comment" id="comment" value="">
+<input type="hidden" name="status_whiteboard" id="status_whiteboard" value="[dogfood]">
+<input type="hidden" name="token" value="[% token FILTER html %]">
+
+<table id="dogfood">
+
+<tr>
+  <th>
+    What phone do you have?
+  </th>
+</tr>
+<tr>
+  <td>
+    [% FOREACH phone = phones %]
+      <input type="radio" name="phone" id="phone-cb-[% phone FILTER html %]"
+             value="[% phone FILTER html %]">
+      <label for="phone-cb-[% phone FILTER html %]">[% phone FILTER html %]</label><br>
+    [% END %]
+    <input type="radio" name="phone" id="phone-cb-other" value="Other">
+    <input type="text" name="phone_other" id="phone-other" placeholder="Other" size="20"
+           onfocus="document.getElementById('phone-cb-other').checked = true">
+  </td>
+</tr>
+
+<tr>
+  <th>
+    What version of Firefox OS are you running?
+  </th>
+</tr>
+<tr>
+  <td>
+    <i>
+      Please check settings &gt; device information &gt; more information > OS version<br>
+    </i>
+    <input type="text" name="fxos_version" id="fxos-version" size="20">
+  </td>
+</tr>
+
+<tr>
+  <th>
+    Please summarize your issue in one sentence:
+  </th>
+</tr>
+<tr>
+  <td>
+    <input type="text" name="short_desc" id="short_desc" size="60">
+  </td>
+</tr>
+
+<tr>
+  <th>
+    Please describe your issue in more detail. If you have steps to
+    reproduce the problem, please include them here:
+  </th>
+</tr>
+<tr>
+  <td>
+    <textarea id="details" name="details" rows="5" cols="60"></textarea>
+  </td>
+</tr>
+
+<tr>
+  <th>
+    If your issue is associated with a specific app, which one
+  </th>
+</tr>
+<tr>
+  <td>
+    <input type="text" name="app" id="app" size="60">
+  </td>
+</tr>
+
+<tr>
+  <th>Security:</th>
+</tr>
+<tr>
+  <td>
+    <input type="checkbox" name="groups" id="default_security_group"
+           value="[% product.default_security_group FILTER html %]">
+    <label for="default_security_group">
+      Many users could be harmed by this security problem:
+      it should be kept hidden from the public until it is resolved.
+    </label>
+  </td>
+</tr>
+
+<tr>
+  <td>
+    <input type="submit" id="commit" value="Submit Request">
+  </td>
+</tr>
+
+</table>
+
+</form>
+
+[% PROCESS global/footer.html.tmpl %]

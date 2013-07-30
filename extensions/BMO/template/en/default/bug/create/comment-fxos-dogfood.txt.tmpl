@@ -9,15 +9,16 @@
 [% USE Bugzilla %]
 [% cgi = Bugzilla.cgi %]
 
-What are the steps to reproduce?:
-[%+ cgi.param('steps_to_reproduce') %]
+Phone:
+[%+ cgi.param('phone') == 'Other' ? cgi.param('phone_other') : cgi.param('phone') %]
 
-What was the actual behavior?: 
-[%+ cgi.param('actual_behavior') %]
+Firefox OS Version:
+[%+ cgi.param('fxos_version') %]
 
-What was the expected behavior?:
-[%+ cgi.param('expected_behavior') %]
+Issue Details:
+[%+ cgi.param('details') %]
 
-What build were you using?: [% cgi.param('build') %]
-
-What are the requirements?: [% cgi.param('requirements') %]
+[% IF cgi.param('app') %]
+Associated App:
+[%+ cgi.param('app') %]
+[% END %]

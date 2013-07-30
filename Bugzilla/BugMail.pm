@@ -257,6 +257,7 @@ sub Send {
                                   $watching{$user_id} : undef,
                       diffs    => \@diffs,
                       rels_which_want => \%rels_which_want,
+                      dep_only => $params->{dep_only}
                     });
                 push(@sent, $user->login) if $sent_mail;
             }
@@ -277,7 +278,7 @@ sub Send {
 
 sub sendMail {
     my $params = shift;
-    
+
     my $user   = $params->{to};
     my $bug    = $params->{bug};
     my @send_comments = @{ $params->{comments} };
@@ -286,13 +287,14 @@ sub sendMail {
     my $watchingRef = $params->{watchers};
     my @diffs = @{ $params->{diffs} };
     my $relRef      = $params->{rels_which_want};
+    my $dep_only = $params->{dep_only};
 
     # Only display changes the user is allowed see.
     my @display_diffs;
 
     foreach my $diff (@diffs) {
         my $add_diff = 0;
-        
+
         if (grep { $_ eq $diff->{field_name} } TIMETRACKING_FIELDS) {
             $add_diff = 1 if $user->is_timetracker;
         }
@@ -325,12 +327,16 @@ sub sendMail {
     push @watchingrel, map { user_id_to_login($_) } @$watchingRef;
 
     my @changedfields = uniq map { $_->{field_name} } @display_diffs;
-    
+
     # Add attachments.created to changedfields if one or more
     # comments contain information about a new attachment
     if (grep($_->type == CMT_ATTACHMENT_CREATED, @send_comments)) {
         push(@changedfields, 'attachments.created');
     }
+
+    my $bugmailtype = "changed";
+    $bugmailtype = "new" if !$bug->lastdiffed;
+    $bugmailtype = "dep_changed" if $dep_only;
 
     my $vars = {
         date => $date,
@@ -342,9 +348,10 @@ sub sendMail {
         reasonswatchheader => join(" ", @watchingrel),
         changer => $changer,
         diffs => \@display_diffs,
-        changedfields => \@changedfields, 
+        changedfields => \@changedfields,
         new_comments => \@send_comments,
         threadingmarker => build_thread_marker($bug->id, $user->id, !$bug->lastdiffed),
+        bugmailtype => $bugmailtype
     };
     my $msg =  _generate_bugmail($user, $vars);
     MessageToMTA($msg);

@@ -332,6 +332,7 @@ sub Send {
                       diffs    => \@diffs,
                       rels_which_want => \%rels_which_want,
                       referenced_bugs => $referenced_bugs,
+                      dep_only        => $params->{dep_only}
                     });
                 push(@sent, $user->login) if $sent_mail;
             }
@@ -352,7 +353,7 @@ sub Send {
 
 sub sendMail {
     my $params = shift;
-    
+
     my $user   = $params->{to};
     my $bug    = $params->{bug};
     my @send_comments = @{ $params->{comments} };
@@ -362,6 +363,7 @@ sub sendMail {
     my @diffs = @{ $params->{diffs} };
     my $relRef      = $params->{rels_which_want};
     my $referenced_bugs = $params->{referenced_bugs};
+    my $dep_only = $params->{dep_only};
 
     # Only display changes the user is allowed see.
     my @display_diffs;
@@ -411,6 +413,10 @@ sub sendMail {
         push(@changedfieldnames, 'attachment.created');
     }
 
+    my $bugmailtype = "changed";
+    $bugmailtype = "new" if !$bug->lastdiffed;
+    $bugmailtype = "dep_changed" if $dep_only;
+
     my $vars = {
         date => $date,
         to_user => $user,
@@ -426,6 +432,7 @@ sub sendMail {
         new_comments => \@send_comments,
         threadingmarker => build_thread_marker($bug->id, $user->id, !$bug->lastdiffed),
         referenced_bugs => $referenced_bugs,
+        bugmailtype => $bugmailtype
     };
     my $msg =  _generate_bugmail($user, $vars);
     MessageToMTA($msg);

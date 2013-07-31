@@ -303,8 +303,7 @@ sub setup_template_patch_reader {
                             && Bugzilla->params->{'cvsroot_get'} && !$vars->{'newid'};
 
     # Print everything out.
-    print $cgi->header(-type => 'text/html',
-                       -expires => '+3M');
+    print $cgi->header(-type => 'text/html');
 
     $last_reader->sends_data_to(new Bugzilla::PatchReader::DiffPrinter::template($template,
                                 "attachment/diff-header.$format.tmpl",

@@ -23,6 +23,7 @@ use Date::Parse;
 use Date::Format;
 use Scalar::Util qw(blessed);
 use List::MoreUtils qw(uniq);
+use Storable qw(dclone);
 
 use constant BIT_DIRECT    => 1;
 use constant BIT_WATCHING  => 2;
@@ -339,31 +340,76 @@ sub sendMail {
     $bugmailtype = "dep_changed" if $dep_only;
 
     my $vars = {
-        date => $date,
-        to_user => $user,
-        bug => $bug,
-        reasons => \@reasons,
-        reasons_watch => \@reasons_watch,
-        reasonsheader => join(" ", @headerrel),
+        date               => $date,
+        to_user            => $user,
+        bug                => $bug,
+        reasons            => \@reasons,
+        reasons_watch      => \@reasons_watch,
+        reasonsheader      => join(" ", @headerrel),
         reasonswatchheader => join(" ", @watchingrel),
-        changer => $changer,
-        diffs => \@display_diffs,
-        changedfields => \@changedfields,
-        new_comments => \@send_comments,
-        threadingmarker => build_thread_marker($bug->id, $user->id, !$bug->lastdiffed),
-        bugmailtype => $bugmailtype
+        changer            => $changer,
+        diffs              => \@display_diffs,
+        changedfields      => \@changedfields,
+        new_comments       => \@send_comments,
+        threadingmarker    => build_thread_marker($bug->id, $user->id, !$bug->lastdiffed),
+        bugmailtype        => $bugmailtype,
     };
-    my $msg =  _generate_bugmail($user, $vars);
-    MessageToMTA($msg);
+    if (Bugzilla->params->{'use_mailer_queue'}) {
+        enqueue($vars);
+    } else {
+        MessageToMTA(_generate_bugmail($vars));
+    }
 
     return 1;
 }
 
+sub enqueue {
+    my ($vars) = @_;
+    # we need to flatten all objects to a hash before pushing to the job queue.
+    # the hashes need to be inflated in the dequeue method.
+    $vars->{bug}          = _flatten_object($vars->{bug});
+    $vars->{to_user}      = $vars->{to_user}->flatten_to_hash;
+    $vars->{changer}      = _flatten_object($vars->{changer});
+    $vars->{new_comments} = [ map { _flatten_object($_) } @{ $vars->{new_comments} } ];
+    foreach my $diff (@{ $vars->{diffs} }) {
+        $diff->{who} = _flatten_object($diff->{who});
+    }
+    Bugzilla->job_queue->insert('bug_mail', { vars => $vars });
+}
+
+sub dequeue {
+    my ($payload) = @_;
+    # clone the payload so we can modify it without impacting TheSchwartz's
+    # ability to process the job when we've finished
+    my $vars = dclone($payload);
+    # inflate objects
+    $vars->{bug}          = Bugzilla::Bug->new_from_hash($vars->{bug});
+    $vars->{to_user}      = Bugzilla::User->new_from_hash($vars->{to_user});
+    $vars->{changer}      = Bugzilla::User->new_from_hash($vars->{changer});
+    $vars->{new_comments} = [ map { Bugzilla::Comment->new_from_hash($_) } @{ $vars->{new_comments} } ];
+    foreach my $diff (@{ $vars->{diffs} }) {
+        $diff->{who} = Bugzilla::User->new_from_hash($diff->{who});
+    }
+    # generate bugmail and send
+    MessageToMTA(_generate_bugmail($vars), 1);
+}
+
+sub _flatten_object {
+    my ($object) = @_;
+    # nothing to do if it's already flattened
+    return $object unless blessed($object);
+    # the same objects are used for each recipient, so cache the flattened hash
+    my $cache = Bugzilla->request_cache->{bugmail_flat_objects} ||= {};
+    my $key = blessed($object) . '-' . $object->id;
+    return $cache->{$key} ||= $object->flatten_to_hash;
+}
+
 sub _generate_bugmail {
-    my ($user, $vars) = @_;
+    my ($vars) = @_;
+    my $user = $vars->{to_user};
     my $template = Bugzilla->template_inner($user->setting('lang'));
     my ($msg_text, $msg_html, $msg_header);
-  
+
     $template->process("email/bugmail-header.txt.tmpl", $vars, \$msg_header)
         || ThrowTemplateError($template->error());
     $template->process("email/bugmail.txt.tmpl", $vars, \$msg_text)
@@ -506,6 +552,27 @@ sub _get_new_bugmail_fields {
 }
 
 1;
+
+=head1 NAME
+
+BugMail - Routines to generate email notifications when a bug is created or
+modified.
+
+=head1 METHODS
+
+=over 4
+
+=item C<enqueue>
+
+Serialises the variables required to generate bugmail and pushes the result to
+the job-queue for processing by TheSchwartz.
+
+=item C<dequeue>
+
+When given serialised variables from the job-queue, recreates the objects from
+the flattened hashes, generates the bugmail, and sends it.
+
+=back
 
 =head1 B<Methods in need of POD>
 

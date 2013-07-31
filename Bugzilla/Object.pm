@@ -113,7 +113,10 @@ sub _init {
             "SELECT $columns FROM $table WHERE $condition", undef, @values);
     }
 
-    $class->_cache_set($param, $object) if $object;
+    if ($object) {
+        $class->_serialisation_keys($object);
+        $class->_cache_set($param, $object);
+    }
     return $object;
 }
 
@@ -142,6 +145,15 @@ sub cache_key {
     } else {
         return;
     }
+}
+
+# To support serialisation, we need to capture the keys in an object's default
+# hashref.
+sub _serialisation_keys {
+    my ($class, $object) = @_;
+    my $cache = Bugzilla->request_cache->{serialisation_keys} ||= {};
+    $cache->{$class} = [ keys %$object ] if $object;
+    return @{ $cache->{$class} };
 }
 
 sub check {
@@ -197,6 +209,14 @@ sub new_from_list {
     # with this one. However, match() still needs to have the right $invocant
     # in order to do $class->DB_TABLE and so on.
     return match($invocant, { $id_field => \@detainted_ids });
+}
+
+sub new_from_hash {
+    my $invocant = shift;
+    my $class = ref($invocant) || $invocant;
+    my $object = shift;
+    bless($object, $class);
+    return $object;
 }
 
 # Note: Future extensions to this could be:
@@ -297,7 +317,8 @@ sub _do_list_select {
     my @untainted = @{ $values || [] };
     trick_taint($_) foreach @untainted;
     my $objects = $dbh->selectall_arrayref($sql, {Slice=>{}}, @untainted);
-    bless ($_, $class) foreach @$objects;
+    $class->_serialisation_keys($objects->[0]) if @$objects;
+    bless($_, $class) foreach @$objects;
     return $objects
 }
 
@@ -472,6 +493,13 @@ sub audit_log {
         my ($from, $to) = @{ $changes->{$field} };
         $sth->execute($user_id, $class, $self->id, $field, $from, $to);
     }
+}
+
+sub flatten_to_hash {
+    my $self = shift;
+    my $class = blessed($self);
+    my %hash = map { $_ => $self->{$_} } $class->_serialisation_keys;
+    return \%hash;
 }
 
 ###############################
@@ -1040,6 +1068,13 @@ template.
 
  Returns:     A reference to an array of objects.
 
+=item C<new_from_hash($hashref)>
+
+  Description: Create an object from the given hash.
+
+  Params:      $hashref - A reference to a hash which was created by
+                          flatten_to_hash.
+
 =item C<match>
 
 =over
@@ -1276,6 +1311,17 @@ that should be passed to the C<set_> function that is called.
 
 
 =back
+
+=head2 Simple Methods
+
+=over
+
+=item C<flatten_to_hash>
+
+Returns a hashref suitable for serialisation and re-inflation with C<new_from_hash>.
+
+=back
+
 
 =head2 Simple Validators
 

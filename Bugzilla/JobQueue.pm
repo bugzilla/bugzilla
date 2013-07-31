@@ -22,6 +22,7 @@ use fields qw(_worker_pidfile);
 # If you add new types of jobs, you should add a mapping here.
 use constant JOB_MAP => {
     send_mail => 'Bugzilla::Job::Mailer',
+    bug_mail  => 'Bugzilla::Job::BugMail',
 };
 
 # Without a driver cache TheSchwartz opens a new database connection

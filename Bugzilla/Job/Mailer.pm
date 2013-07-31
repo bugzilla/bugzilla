@@ -43,13 +43,3 @@ sub work {
 }
 
 1;
-
-=head1 B<Methods in need of POD>
-
-=over
-
-=item retry_delay
-
-=item work
-
-=back

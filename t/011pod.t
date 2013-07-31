@@ -43,6 +43,7 @@ use constant MODULE_WHITELIST => qw(
     Bugzilla::Auth::Verify::
     Bugzilla::BugUrl::
     Bugzilla::Config::
+    Bugzilla::Job::
 );
 
 # Capture the TESTOUT from Test::More or Test::Builder for printing errors.

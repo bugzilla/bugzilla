@@ -13,6 +13,8 @@ var REVIEW = {
     target: false,
     fields: [],
     use_error_for: false,
+    ispatch_override: false,
+    description_override: false,
 
     init_review_flag: function(fid, flag_name) {
         var idx = this.fields.push({ 'fid': fid, 'flag_name': flag_name, 'component': '' }) - 1;
@@ -44,6 +46,8 @@ var REVIEW = {
 
     init_create_attachment: function() {
         Event.addListener('data', 'change', REVIEW.attachment_change);
+        Event.addListener('description', 'change', REVIEW.description_change);
+        Event.addListener('ispatch', 'change', REVIEW.ispatch_change);
     },
 
     component_change: function() {
@@ -55,14 +59,24 @@ var REVIEW = {
     attachment_change: function() {
         var filename = Dom.get('data').value.split('/').pop().split('\\').pop();
         var description = Dom.get('description');
-        if (description.value == '') {
+        if (description.value == '' || !REVIEW.description_override) {
             description.value = filename;
         }
-        Dom.get('ispatch').checked =
-            REVIEW.endsWith(filename, '.diff') || REVIEW.endsWith(filename, '.patch');
-        bz_fireEvent(Dom.get('ispatch'), 'change');
+        if (!REVIEW.ispatch_override) {
+            Dom.get('ispatch').checked =
+                REVIEW.endsWith(filename, '.diff') || REVIEW.endsWith(filename, '.patch');
+        }
+        setContentTypeDisabledState(this.form);
         description.select();
         description.focus();
+    },
+
+    description_change: function() {
+        REVIEW.description_override = true;
+    },
+
+    ispatch_change: function() {
+        REVIEW.ispatch_override = true;
     },
 
     flag_change: function(e, field_idx) {

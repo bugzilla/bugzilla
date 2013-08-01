@@ -47,6 +47,7 @@ use constant PLATFORMS_MAP => (
     # HP
     qr/\(.*9000.*\)/ => ["PA-RISC", "HP"],
     # ARM
+    qr/\(.*(?:iPad|iPhone).*\)/ => ["ARM"],
     qr/\(.*ARM.*\)/ => ["ARM", "PocketPC"],
     # PocketPC intentionally before PowerPC
     qr/\(.*Windows CE.*PPC.*\)/ => ["ARM", "PocketPC"],
@@ -117,6 +118,12 @@ use constant OS_MAP => (
     qr/\(.*Win(?:dows[ -]|)NT.*\)/ => ["Windows NT"],
     qr/\(.*Windows.*NT.*\)/ => ["Windows NT"],
     # OS X
+    qr/\(.*(?:iPad|iPhone).*OS 7.*\)/ => ["iOS 7"],
+    qr/\(.*(?:iPad|iPhone).*OS 6.*\)/ => ["iOS 6"],
+    qr/\(.*(?:iPad|iPhone).*OS 5.*\)/ => ["iOS 5"],
+    qr/\(.*(?:iPad|iPhone).*OS 4.*\)/ => ["iOS 4"],
+    qr/\(.*(?:iPad|iPhone).*OS 3.*\)/ => ["iOS 3"],
+    qr/\(.*(?:iPad|iPhone).*\)/ => ["iOS"],
     qr/\(.*Mac OS X (?:|Mach-O |\()10.8.*\)/ => ["Mac OS X 10.8"],
     qr/\(.*Mac OS X (?:|Mach-O |\()10.7.*\)/ => ["Mac OS X 10.7"],
     qr/\(.*Mac OS X (?:|Mach-O |\()10.6.*\)/ => ["Mac OS X 10.6"],

@@ -171,7 +171,7 @@ sub members_report {
     # don't allow all groups, to avoid putting pain on the servers
     my @group_names =
         sort
-        grep { !/^(?:bz_.+|canconfirm|editbugs|everyone)$/ }
+        grep { !/^(?:bz_.+|canconfirm|editbugs|editbugs-team|everyone)$/ }
         map { lc($_->name) }
         Bugzilla::Group->get_all;
     unshift(@group_names, '');

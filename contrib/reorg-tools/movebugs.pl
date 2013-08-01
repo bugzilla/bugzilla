@@ -10,6 +10,7 @@ use lib "$FindBin::Bin/../../lib";
 use Bugzilla;
 use Bugzilla::Constants;
 use Bugzilla::FlagType;
+use Bugzilla::Hook;
 use Bugzilla::Util;
 
 Bugzilla->usage_mode(USAGE_MODE_CMDLINE);
@@ -167,6 +168,8 @@ $dbh->do(
           SELECT bug_id, ?, delta_ts, ?, ?, ?  FROM bugs WHERE $where_sql",
     undef,
     $user_id, $component_field_id, $old_component, $new_component);
+
+Bugzilla::Hook::process('reorg_move_bugs', { bug_ids => $ra_ids } );
 
 $dbh->bz_commit_transaction();
 

@@ -35,6 +35,7 @@ use lib qw(. lib);
 
 use Bugzilla;
 use Bugzilla::Constants;
+use Bugzilla::Hook;
 use Bugzilla::Util;
 
 sub usage() {
@@ -152,6 +153,10 @@ getc();
 print "Moving '$component' from '$oldproduct' to '$newproduct'...\n\n";
 $dbh->bz_start_transaction() if $doit;
 
+my $ra_ids = $dbh->selectcol_arrayref(
+    "SELECT bug_id FROM bugs WHERE product_id=? AND component_id=?",
+    undef, $oldprodid, $compid);
+
 # Bugs table
 $dbh->do("UPDATE bugs SET product_id = ? WHERE component_id = ?", 
          undef,
@@ -187,7 +192,5 @@ $dbh->do("INSERT INTO bugs_activity(bug_id, who, bug_when, fieldid, removed,
          undef,
          ($userid, $fieldid, $oldproduct, $newproduct, $compid));
 
+Bugzilla::Hook::process('reorg_move_bugs', { bug_ids => $ra_ids } ) if $doit;
 $dbh->bz_commit_transaction() if $doit;
-
-exit(0);
-

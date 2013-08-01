@@ -1,0 +1,181 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% PROCESS global/variables.none.tmpl %]
+
+[% inline_styles = BLOCK %]
+  #login_autocomplete {
+    float: left;
+  }
+
+  #user_profile_table th {
+    text-align: right;
+    padding-right: 1em;
+    vertical-align: middle;
+  }
+
+  #user_profile_table .numeric {
+    text-align: right;
+  }
+
+  #user_profile_table .product_span {
+    white-space: nowrap;
+  }
+
+  #what {
+    margin-top: 2em;
+  }
+
+  #updated {
+    font-style: italic;
+    font-size: x-small;
+  }
+[% END %]
+
+[% PROCESS global/header.html.tmpl
+   title = "User Profile: " _ target.identity
+   style = inline_styles
+   yui = [ 'autocomplete' ]
+   javascript_urls = [ "js/field.js" ]
+%]
+
+<table id="user_profile_table">
+
+<tr>
+  <th>Email</th>
+  <td colspan="2">
+    <form action="user_profile">
+      [% INCLUDE global/userselect.html.tmpl
+        id => "login"
+        name => "login"
+        value => target.email
+        size => 40
+        emptyok => 0
+      %]
+      &nbsp;&nbsp;<input type="submit" value="Show">
+    </form>
+  </td>
+</tr>
+
+<tr>
+  <th>Name</th>
+  <td colspan="2">[% target.name FILTER html %]</td>
+</tr>
+
+<tr>
+  <td>&nbsp;</td>
+  <td>&nbsp;</td>
+  <td width="100%">&nbsp;</td>
+</tr>
+
+<tr>
+  <th>Last activity</th>
+  <td colspan="2">
+    <a href="page.cgi?id=user_activity.html&amp;action=run&amp;who=[% target.login FILTER uri %]&amp;from=-4w">
+      [% target.last_activity_ts FILTER time %]
+    </a>
+  </td>
+</tr>
+<tr>
+  <th>[% terms.Bugs %] filed</th>
+  <td class="numeric">
+    <a href="buglist.cgi?query_format=advanced&amp;emailtype1=exact&amp;emailreporter1=1&amp;email1=[% target.login FILTER uri %]"
+       target="_blank">
+      [% stats.bugs_filed || 0 FILTER html %]
+    </a>
+  </td>
+</tr>
+<tr>
+  <th>Comments made</th>
+  <td class="numeric">[% stats.comments || 0 FILTER html %]</td>
+</tr>
+<tr>
+  <th>Assigned to</th>
+  <td class="numeric">
+    <a href="buglist.cgi?query_format=advanced&amp;emailtype1=exact&amp;emailassigned_to1=1&amp;email1=[% target.login FILTER uri %]"
+       target="_blank">
+      [% stats.assigned || 0 FILTER html %]
+    </a>
+  </td>
+</tr>
+<tr>
+  <th>Commented on</th>
+  <td class="numeric">
+    <a href="buglist.cgi?query_format=advanced&amp;emailtype1=exact&amp;emaillongdesc1=1&amp;email1=[% target.login FILTER uri %]"
+       target="_blank">
+      [% stats.commented_on || 0 FILTER html %]
+    </a>
+  </td>
+</tr>
+<tr>
+  <th>QA-Contact</th>
+  <td class="numeric">
+    <a href="buglist.cgi?query_format=advanced&amp;emailtype1=exact&amp;emailqa_contact1=1&amp;email1=[% target.login FILTER uri %]"
+       target="_blank">
+      [% stats.qa_contact || 0 FILTER html %]
+    </a>
+  </td>
+</tr>
+<tr>
+  <th>Patches submitted</th>
+  <td class="numeric">[% stats.patches || 0 FILTER html %]</td>
+</tr>
+<tr>
+  <th>Patches reviewed</th>
+  <td class="numeric">[% stats.reviews || 0 FILTER html %]</td>
+</tr>
+<tr>
+  <th>[% terms.Bugs %] poked</th>
+  <td class="numeric">[% stats.touched || 0 FILTER html %]</td>
+</tr>
+
+<tr>
+  <td>&nbsp;</td>
+</tr>
+
+<tr>
+  <th>Statuses changed</td>
+  <td colspan="2">
+    RESOLVED ([% statuses.item('RESOLVED') || 0 FILTER html %]),
+    FIXED ([% statuses.item('RESOLVED/FIXED') || 0 FILTER html %]),
+    VERIFIED ([% statuses.item('VERIFIED') || 0 FILTER html %]),
+    INVALID ([% statuses.item('RESOLVED/INVALID') || 0 FILTER html %])
+  </td>
+</tr>
+
+<tr>
+  <th>Activity by product</td>
+  <td colspan="2">
+    [% FOREACH p = products %]
+      <span class="product_span">
+        [% IF p.product.id %]
+          <a href="describecomponents.cgi?product=[% p.product.name FILTER uri %]"
+            target="_blank">
+        [% END %]
+        [% p.product.name FILTER html %] ([% p.count || 0 FILTER html %])
+        [% "</a>" IF p.product.id %]
+        [% "," UNLESS loop.last ~%]
+      </span>
+    [%+ END %]
+  </td>
+</tr>
+
+</table>
+
+<div id="what">
+  <a href="https://wiki.mozilla.org/BMO/User_profile_fields" target="_blank">
+    What do these fields mean?
+  </a>
+</div>
+
+<div id="updated">
+  This information is updated daily
+</div>
+
+[% PROCESS global/footer.html.tmpl %]
+

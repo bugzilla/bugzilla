@@ -159,7 +159,7 @@ sub object_end_of_update {
 
 sub _new_reviewers_from_input {
     if (!Bugzilla->input_params->{reviewers}) {
-        return (undef, []);
+        return ('', []);
     }
     Bugzilla::User::match_field({ 'reviewers' => {'type' => 'multi'} });
     my $new = Bugzilla->input_params->{reviewers};
@@ -263,6 +263,50 @@ sub flag_end_of_update {
     {
         ThrowUserError('reviewer_required');
     }
+}
+
+#
+# web service / reports
+#
+
+sub webservice {
+    my ($self,  $args) = @_;
+    my $dispatch = $args->{dispatch};
+    $dispatch->{Review} = "Bugzilla::Extension::Review::WebService";
+}
+
+sub page_before_template {
+    my ($self, $args) = @_;
+    return unless $args->{page_id} eq 'review_suggestions.html';
+    my $user = Bugzilla->login(LOGIN_REQUIRED);
+    my $products = [];
+    my @products = sort { lc($a->name) cmp lc($b->name) }
+                   @{ Bugzilla->user->get_accessible_products };
+    foreach my $product_obj (@products) {
+        my $has_reviewers = 0;
+        my $product = {
+            name       => $product_obj->name,
+            components => [],
+            reviewers  => $product_obj->reviewers_objs,
+        };
+        $has_reviewers = scalar @{ $product->{reviewers} };
+
+        foreach my $component_obj (@{ $product_obj->components }) {
+            my $component = {
+                name       => $component_obj->name,
+                reviewers  => $component_obj->reviewers_objs,
+            };
+            if (@{ $component->{reviewers} }) {
+                push @{ $product->{components} }, $component;
+                $has_reviewers = 1;
+            }
+        }
+
+        if ($has_reviewers) {
+            push @$products, $product;
+        }
+    }
+    $args->{vars}->{products} = $products;
 }
 
 #

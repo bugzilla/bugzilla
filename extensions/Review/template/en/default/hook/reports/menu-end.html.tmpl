@@ -6,13 +6,11 @@
   # defined by the Mozilla Public License, v. 2.0.
   #%]
 
-[% IF error == "reviewer_required" %]
-  [% title = "Reviewer Required" %]
-  You must provide a reviewer for review requests.
+<ul>
+  <li>
+    <strong>
+      <a href="[% urlbase FILTER none %]page.cgi?id=review_suggestions.html">Suggested Reviers</a>
+    </strong> - All suggestions for the "review" flag.
+  </li>
+</ul>
 
-[% ELSIF error == "reviewer_suggestions_param_required" %]
-  [% title = "Parameter Required" %]
-  You must provide either a bug_id, or a product (and optionally a
-  component).
-
-[% END %]

@@ -32,7 +32,11 @@
 }
 
 #report-header {
-  background: #cccccc;
+    background-color: #cccccc;
+}
+
+.report_subheader {
+    background-color: #dddddd;
 }
 
 .report_row_odd {

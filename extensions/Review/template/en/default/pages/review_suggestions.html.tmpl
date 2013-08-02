@@ -1,0 +1,76 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% INCLUDE global/header.html.tmpl
+  title = "Suggested Reviewers Report"
+  style_urls = [ "extensions/BMO/web/styles/reports.css",
+                 "extensions/Review/web/styles/reports.css" ]
+%]
+
+Products:
+<ul>
+  [% FOREACH product = products %]
+    <li>
+      <a href="#[% product.name FILTER uri %]">
+        [% product.name FILTER html %]
+      </a>
+    </li>
+  [% END %]
+</ul>
+
+<a href="enter_bug.cgi?product=bugzilla.mozilla.org&amp;component=Administration&amp;format=__default__">Request a change</a>
+
+<table id="report" class="hover" cellspacing="0">
+
+<tr id="report-header">
+  <th>Product/Component</th>
+  <th>Suggested Reviewers</th>
+</tr>
+
+[% FOREACH product = products %]
+  <tr class="report_subheader">
+    <td class="product_name">
+      <a name="[% product.name FILTER html %]">
+        [% product.name FILTER html %]
+      </a>
+    </td>
+    <td>
+    </td>
+  </tr>
+  [% row_class = "report_row_even" %]
+  [% FOREACH component = product.components %]
+    <tr class="[% row_class FILTER none %]">
+      <td class="component_name">[% component.name FILTER html %]</td>
+      <td class="reviewers">
+        [% FOREACH reviewer = component.reviewers %]
+          <span title="[% reviewer.name FILTER html %]">
+          [% reviewer.email FILTER html %]</span>
+          [% ", " UNLESS loop.last %]
+        [% END %]
+      </td>
+    </tr>
+    [% row_class = row_class == "report_row_even" ? "report_row_odd" : "report_row_even" %]
+  [% END %]
+  [% IF product.reviewers.size %]
+    <tr class="[% row_class FILTER none %]">
+      <td class="other_components">All [% product.components.size ? "other" : "" %] components</td>
+      <td class="reviewers">
+        [% FOREACH reviewer = product.reviewers %]
+          <span title="[% reviewer.name FILTER html %]">
+          [% reviewer.email FILTER html %]</span>
+          [% ", " UNLESS loop.last %]
+        [% END %]
+      </td>
+    </tr>
+    [% row_class = row_class == "report_row_even" ? "report_row_odd" : "report_row_even" %]
+  [% END %]
+[% END %]
+
+</table>
+
+[% INCLUDE global/footer.html.tmpl %]

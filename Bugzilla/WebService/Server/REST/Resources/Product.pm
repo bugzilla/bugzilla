@@ -78,5 +78,5 @@ Bugzilla::Webservice::Server::REST::Resources::Product - The Product REST API
 This part of the Bugzilla REST API allows you to list the available Products and
 get information about them.
 
-See L<Bugzilla::WebService::Bug> for more details on how to use this part of
+See L<Bugzilla::WebService::Product> for more details on how to use this part of
 the REST API.

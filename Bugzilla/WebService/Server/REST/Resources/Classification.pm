@@ -45,5 +45,5 @@ Bugzilla::Webservice::Server::REST::Resources::Classification - The Classificati
 This part of the Bugzilla REST API allows you to deal with the available Classifications.
 You will be able to get information about them as well as manipulate them.
 
-See L<Bugzilla::WebService::Bug> for more details on how to use this part
+See L<Bugzilla::WebService::Classification> for more details on how to use this part
 of the REST API.

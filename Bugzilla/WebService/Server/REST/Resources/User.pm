@@ -61,5 +61,5 @@ Bugzilla::Webservice::Server::REST::Resources::User - The User Account REST API
 This part of the Bugzilla REST API allows you to get User information as well
 as create User Accounts.
 
-See L<Bugzilla::WebService::Bug> for more details on how to use this part of
+See L<Bugzilla::WebService::User> for more details on how to use this part of
 the REST API.

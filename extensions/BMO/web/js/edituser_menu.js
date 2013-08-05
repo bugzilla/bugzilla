@@ -26,6 +26,8 @@ function show_usermenu(event, id, email, show_edit) {
   } else {
     usermenu_widget.removeItem(3);
   }
+  // hide user-profile menu for now
+  usermenu_widget.removeItem(0);
   usermenu_widget.cfg.setProperty('xy', YAHOO.util.Event.getXY(event));
   usermenu_widget.show();
   return false;

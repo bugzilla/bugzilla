@@ -18,7 +18,7 @@
 [% filtered_timestamp = bug.delta_ts FILTER time %]
 
 [% subheader = filtered_desc %]
-[% title = "$terms.Bug $bug.bug_id &ndash; " %]
+[% title = "$bug.bug_id &ndash; " %]
 [% IF bug.alias != '' %]
   [% title = title _ "($filtered_alias) " %]
 [% END %]
@@ -28,7 +28,7 @@
 [% IF bug.defined %]
   [% header = "$terms.Bug&nbsp;$bug.bug_id" %]
   [% header_addl_info = "Last modified: $filtered_timestamp" %]
-  [% unfiltered_title = "$terms.Bug $bug.bug_id – " %]
+  [% unfiltered_title = "$bug.bug_id – " %]
   [% IF bug.alias != '' %]
     [% unfiltered_title = unfiltered_title _ "($bug.alias) " %]
   [% END %]

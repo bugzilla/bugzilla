@@ -58,7 +58,7 @@
         [% END %]
       </tr>
     [% END %]
-    [% IF user.in_group('canconfirm') && (needinfo_flags.size == 0 || needinfo_flagtype.is_multiplicable) %]
+    [% IF needinfo_flags.size == 0 || needinfo_flagtype.is_multiplicable %]
       <tr>
         <td align="center">
           <script>

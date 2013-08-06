@@ -29,7 +29,15 @@
 [%- IF Bugzilla.cgi.param("data") %] enctype="multipart/form-data"[% END %]>
   <table>
     <tr>
-      <th><label for="Bugzilla_login">Login:</label></th>
+      <th>
+        <label for="Bugzilla_login">
+          [% IF Param('emailsuffix') %]
+            Login:
+          [% ELSE %]
+            Your Email Address:
+          [% END %]
+        </label>
+      </th>
       <td>
         <input size="35" id="Bugzilla_login" name="Bugzilla_login">
         [% Param('emailsuffix') FILTER html %]

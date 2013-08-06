@@ -595,17 +595,17 @@ TUI_hide_default('attachment_text_field');
 </tbody>
 
 <tbody class="expert_fields">
+  [% IF use_keywords %]
+    <tr>
+      [% INCLUDE bug/field.html.tmpl
+        bug = default, field = bug_fields.keywords, editable = 1,
+        value = keywords, possible_values = all_keywords,
+        desc_url = "describekeywords.cgi", value_span = 2
+      %]
+    </tr>
+  [% END %]
+  
   [% IF user.in_group('editbugs', product.id) %]
-    [% IF use_keywords %]
-      <tr>
-        [% INCLUDE bug/field.html.tmpl
-           bug = default, field = bug_fields.keywords, editable = 1,
-           value = keywords, possible_values = all_keywords,
-           desc_url = "describekeywords.cgi", value_span = 2
-        %]
-      </tr>
-    [% END %]
-
     <tr>
       [% INCLUDE "bug/field-label.html.tmpl"
         field = bug_fields.dependson editable = 1

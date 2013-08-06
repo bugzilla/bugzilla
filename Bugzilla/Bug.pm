@@ -1713,13 +1713,7 @@ sub _check_keywords {
         $keywords_in = trim($keywords_in);
         $keyword_array = [split(/[\s,]+/, $keywords_in)];
     }
-    
-    # On creation, only editbugs users can set keywords.
-    if (!ref $invocant) {
-        my $product = $params->{product};
-        return [] if !Bugzilla->user->in_group('editbugs', $product->id);
-    }
-    
+ 
     my %keywords;
     foreach my $keyword (@$keyword_array) {
         next unless $keyword;

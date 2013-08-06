@@ -59,7 +59,13 @@
   <table>
     <tr>
       <td align="right">
-        <b>Email address:</b>
+        <b>
+          [% IF Param('emailsuffix') %]
+            Login:
+          [% ELSE %]
+            Email address:
+          [% END %]
+        </b>
       </td>
       <td>
         <input size="35" id="login" name="login">

@@ -2116,7 +2116,7 @@ sub validate_password {
     my $complexity_level = Bugzilla->params->{password_complexity};
     if ($complexity_level eq 'letters_numbers_specialchars') {
         ThrowUserError('password_not_complex')
-          if ($password !~ /\w/ || $password !~ /\d/ || $password !~ /[[:punct:]]/);
+          if ($password !~ /[[:alpha:]]/ || $password !~ /\d/ || $password !~ /[[:punct:]]/);
     } elsif ($complexity_level eq 'letters_numbers') {
         ThrowUserError('password_not_complex')
           if ($password !~ /[[:lower:]]/ || $password !~ /[[:upper:]]/ || $password !~ /\d/);

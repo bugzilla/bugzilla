@@ -218,6 +218,11 @@ if (defined($cgi->upload('data')) || $cgi->param('attach_text')) {
     }
 }
 
+# Set bug_ignored from the hidden field
+if (scalar $cgi->param('bug_ignored')) {
+    $bug->set_bug_ignored(1);
+}
+
 # Set bug flags.
 my ($flags, $new_flags) = Bugzilla::Flag->extract_flags_from_cgi($bug, undef, $vars,
                                                              SKIP_REQUESTEE_ON_ERROR);

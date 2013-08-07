@@ -313,6 +313,7 @@ else {
     $vars->{'blocked'}        = formvalue('blocked');
     $vars->{'deadline'}       = formvalue('deadline');
     $vars->{'estimated_time'} = formvalue('estimated_time');
+    $vars->{'bug_ignored'}    = formvalue('bug_ignored');
 
     $vars->{'cc'}             = join(', ', $cgi->param('cc'));
 

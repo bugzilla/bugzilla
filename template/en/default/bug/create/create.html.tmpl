@@ -199,6 +199,7 @@ TUI_hide_default('attachment_text_field');
       onsubmit="return validateEnterBug(this)">
 <input type="hidden" name="product" value="[% product.name FILTER html %]">
 <input type="hidden" name="token" value="[% token FILTER html %]">
+<input type="hidden" name="bug_ignored" value="[% bug_ignored ? "1" : "0" %]">
 
 <table>
 <tbody>

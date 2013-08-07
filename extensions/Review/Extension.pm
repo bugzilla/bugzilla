@@ -31,6 +31,7 @@ BEGIN {
     *Bugzilla::Component::reviewers       = \&_component_reviewers;
     *Bugzilla::Component::reviewers_objs  = \&_component_reviewers_objs;
     *Bugzilla::Bug::mentor                = \&_bug_mentor;
+    *Bugzilla::User::review_count         = \&_user_review_count;
 }
 
 #
@@ -91,6 +92,22 @@ sub _bug_mentor {
         $self->{mentor} = $mentor;
     }
     return $self->{mentor};
+}
+
+sub _user_review_count {
+    my ($self) = @_;
+    if (!exists $self->{review_count}) {
+        ($self->{review_count}) = Bugzilla->dbh->selectrow_array(
+            "SELECT COUNT(*)
+            FROM flags
+                    INNER JOIN flagtypes ON flagtypes.id = flags.type_id
+            WHERE flags.requestee_id = ?
+                    AND flagtypes.name = ?",
+            undef,
+            $self->id, 'review',
+        );
+    }
+    return $self->{review_count};
 }
 
 #

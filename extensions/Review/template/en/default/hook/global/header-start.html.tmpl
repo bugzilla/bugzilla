@@ -77,5 +77,5 @@
 [% javascript = javascript _ review_js %]
 
 [% BLOCK reviewer %]
-  { login: '[% u.login FILTER js%]', identity: '[% u.identity FILTER js %]' }
+  { login: '[% u.login FILTER js%]', identity: '[% u.identity FILTER js %]', review_count: [% u.review_count FILTER js %] }
 [% END %]

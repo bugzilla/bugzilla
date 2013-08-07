@@ -129,8 +129,14 @@ var REVIEW = {
 
     add_menu_item: function(field_idx, user, is_mentor) {
         var menu = REVIEW.fields[field_idx].menu;
+        var queue = '';
+        if (user.review_count == 0) {
+            queue = 'empty queue';
+        } else {
+            queue = user.review_count + ' review' + (user.review_count == 1 ? '' : 's') + ' in queue';
+        }
         var item = menu.addItem(
-            { text: user.identity, url: '#' + user.login }
+            { text: user.identity + ' (' + queue + ')', url: '#' + user.login }
         );
         if (is_mentor)
             item.cfg.setProperty('classname', 'mentor');

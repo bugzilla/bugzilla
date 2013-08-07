@@ -52,6 +52,7 @@ sub suggestions {
             id    => $self->type('int', $reviewer->id),
             email => $self->type('email', $reviewer->login),
             name  => $self->type('string', $reviewer->name),
+            review_count => $self->type('int', $reviewer->review_count),
         };
     }
     return \@result;

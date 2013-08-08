@@ -87,6 +87,8 @@ sub SETTINGS {
     requestee_cc       => { options => ['on', 'off'], default => 'on' },
     # 2012-04-30 glob@mozilla.com -- Bug 663747
     bugmail_new_prefix => { options => ['on', 'off'], default => 'on' },
+    # 2013-07-26 joshi_sunil@in.com -- Bug 669535
+    possible_duplicates => { options => ['on', 'off'], default => 'on' },
     }
 };
 

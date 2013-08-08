@@ -105,7 +105,7 @@
         [% FOREACH current_value = legal_values %]
           [% SET v = current_value.name OR '---' -%]
           [% SET display = display_value(field.name, current_value.name) %]
-          <option [% IF v != display %]value="[% v FILTER html %]"[% END ~%]
+          <option value="[% v FILTER html %]"
             id="v[% current_value.id FILTER html %]_[% field.name FILTER html %]"
             [% ' selected="selected"' IF value.contains( v ) %]>
             [%~ display FILTER html ~%]

@@ -3,7 +3,7 @@
  * You can obtain one at http://mozilla.org/MPL/2.0/.
  *
  * This Source Code Form is "Incompatible With Secondary Licenses", as
- * defined by the Mozilla Public License, v. 2.0. 
+ * defined by the Mozilla Public License, v. 2.0.
  */
 
 // Flag tables
@@ -11,7 +11,7 @@ YUI({
     base: 'js/yui3/',
     combine: false
 }).use("node", "datatable", "datatable-sort", "json-stringify", "escape",
-       "datatable-datasource", "datasource-io", "datasource-jsonschema", function (Y) {
+       "datatable-datasource", "datasource-io", "datasource-jsonschema", function(Y) {
     // Common
     var counter = 0;
     var dataSource = {
@@ -23,7 +23,7 @@ YUI({
         requester: null
     };
 
-    var updateFlagTable = function (type) {
+    var updateFlagTable = function(type) {
         if (!type) return;
 
         var include_closed = Y.one('#' + type + '_closed').get('checked') ? 1 : 0;
@@ -70,7 +70,18 @@ YUI({
         });
     };
 
-    var bugLinkFormatter = function (o) {
+    var loadBugList = function(type) {
+        if (!type) return;
+        var data = dataTable[type].data;
+        var ids = [];
+        for (var i = 0, l = data.size(); i < l; i++) {
+            ids.push(data.item(i).get('bug_id'));
+        }
+        var url = 'buglist.cgi?bug_id=' + ids.join('%2C');
+        window.open(url, '_blank');
+    };
+
+    var bugLinkFormatter = function(o) {
         var bug_closed = "";
         if (o.data.bug_status == 'RESOLVED' || o.data.bug_status == 'VERIFIED') {
             bug_closed = "bz_closed";
@@ -81,18 +92,18 @@ YUI({
                '">' + o.value + '</a>';
     };
 
-    var updatedFormatter = function (o) {
+    var updatedFormatter = function(o) {
         return '<span title="' + Y.Escape.html(o.value) + '">' +
                Y.Escape.html(o.data.updated_fancy) + '</span>';
     };
 
-    var requesteeFormatter = function (o) {
+    var requesteeFormatter = function(o) {
         return o.value
             ? Y.Escape.html(o.value)
             : '<i>anyone</i>';
     };
 
-    var flagNameFormatter = function (o) {
+    var flagNameFormatter = function(o) {
         if (parseInt(o.data.attach_id)
             && parseInt(o.data.is_patch)
             && MyDashboard.splinter_base)
@@ -146,6 +157,9 @@ YUI({
     Y.one('#requestee_refresh').on('click', function(e) {
         updateFlagTable('requestee');
     });
+    Y.one('#requestee_buglist').on('click', function(e) {
+        loadBugList('requestee');
+    });
     Y.one('#requestee_closed').on('change', function(e) {
         updateFlagTable('requestee');
     });
@@ -185,6 +199,9 @@ YUI({
 
     Y.one('#requester_refresh').on('click', function(e) {
         updateFlagTable('requester');
+    });
+    Y.one('#requester_buglist').on('click', function(e) {
+        loadBugList('requester');
     });
     Y.one('#requester_closed').on('change', function(e) {
         updateFlagTable('requester');

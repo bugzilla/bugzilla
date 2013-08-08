@@ -3,7 +3,7 @@
  * You can obtain one at http://mozilla.org/MPL/2.0/.
  *
  * This Source Code Form is "Incompatible With Secondary Licenses", as
- * defined by the Mozilla Public License, v. 2.0. 
+ * defined by the Mozilla Public License, v. 2.0.
  */
 
 if (typeof(MyDashboard) == 'undefined') {
@@ -23,10 +23,10 @@ YUI({
     }
 }).use("node", "datatable", "datatable-sort", "datatable-message", "json-stringify",
        "datatable-datasource", "datasource-io", "datasource-jsonschema", "cookie",
-       "gallery-datatable-row-expansion-bmo", "handlebars", "escape", function (Y) {
+       "gallery-datatable-row-expansion-bmo", "handlebars", "escape", function(Y) {
     var counter = 0,
         dataSource = null,
-        dataTable = null, 
+        dataTable = null,
         default_query = "assignedbugs";
 
     // Grab last used query name from cookie or use default
@@ -93,7 +93,7 @@ YUI({
         });
     };
 
-    var updatedFormatter = function (o) {
+    var updatedFormatter = function(o) {
         return '<span title="' + Y.Escape.html(o.value) + '">' +
                Y.Escape.html(o.data.changeddate_fancy) + '</span>';
     };
@@ -163,5 +163,15 @@ YUI({
         var index = query_select.get('selectedIndex');
         var selected_value = query_select.get("options").item(index).getAttribute('value');
         updateQueryTable(selected_value);
+    });
+
+    Y.one('#query_buglist').on('click', function(e) {
+        var data = dataTable.data;
+        var ids = [];
+        for (var i = 0, l = data.size(); i < l; i++) {
+            ids.push(data.item(i).get('bug_id'));
+        }
+        var url = 'buglist.cgi?bug_id=' + ids.join('%2C');
+        window.open(url, '_blank');
     });
 });

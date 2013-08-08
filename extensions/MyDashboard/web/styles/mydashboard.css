@@ -47,7 +47,7 @@
     width: 40%;
 }
 
-.items_found, .refresh {
+.items_found, .refresh, .buglist {
     font-size: 80%;
 }
 
@@ -55,7 +55,7 @@
     text-align:center;
 }
 
-#query_list_container, 
+#query_list_container,
 #prod_comp_search_main {
     padding: 20px !important;
     height: 40px;

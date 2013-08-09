@@ -825,8 +825,7 @@ sub in_group_id {
 sub groups_with_icon {
     my $self = shift;
 
-    my @groups = grep { $_->icon_url } @{ $self->groups };
-    return \@groups;
+    return $self->{groups_with_icon} //= [grep { $_->icon_url } @{ $self->groups }];
 }
 
 sub get_products_by_permission {

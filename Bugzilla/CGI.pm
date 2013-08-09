@@ -236,11 +236,11 @@ sub check_etag {
         $possible_etag =~ s/^\"//g;
         $possible_etag =~ s/\"$//g;
         if ($possible_etag eq $valid_etag or $possible_etag eq '*') {
-            print $self->header(-ETag => $possible_etag,
-                                -status => '304 Not Modified');
-            exit;
+            return 1;
         }
     }
+
+    return 0;
 }
 
 # Have to add the cookies in.

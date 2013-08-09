@@ -75,12 +75,12 @@ sub response_header {
 
 sub response {
     my ($self, $response) = @_;
+    my $cgi = $self->cgi;
 
     # Implement JSONP.
     if (my $callback = $self->_bz_callback) {
         my $content = $response->content;
         $response->content("$callback($content)");
-
     }
 
     # Use $cgi->header properly instead of just printing text directly.
@@ -95,9 +95,18 @@ sub response {
             push(@header_args, "-$name", $value);
         }
     }
-    my $cgi = $self->cgi;
-    print $cgi->header(-status => $response->code, @header_args);
-    print $response->content;
+
+    # ETag support
+    my $etag = $self->bz_etag;
+    if ($etag && $cgi->check_etag($etag)) {
+        push(@header_args, "-ETag", $etag);
+        print $cgi->header(-status => '304 Not Modified', @header_args);
+    }
+    else {
+        push(@header_args, "-ETag", $etag) if $etag;
+        print $cgi->header(-status => $response->code, @header_args);
+        print $response->content;
+    }
 }
 
 # The JSON-RPC 1.1 GET specification is not so great--you can't specify
@@ -257,7 +266,17 @@ sub _handle {
     my $self = shift;
     my ($obj) = @_;
     $self->{_bz_request_id} = $obj->{id};
-    return $self->SUPER::_handle(@_);
+
+    my $result = $self->SUPER::_handle(@_);
+
+    # Set the ETag if not already set in the webservice methods.
+    my $etag = $self->bz_etag;
+    if (!$etag && ref $result) {
+        my $data = $self->json->decode($result)->{'result'};
+        $self->bz_etag($data);
+    }
+
+    return $result;
 }
 
 # Make all error messages returned by JSON::RPC go into the 100000

@@ -142,7 +142,11 @@ sub display_data {
     utf8::encode($digest_data) if utf8::is_utf8($digest_data);
     my $digest = md5_base64($digest_data);
 
-    $cgi->check_etag($digest);
+    if ($cgi->check_etag($digest)) {
+        print $cgi->header(-ETag   => $digest,
+                           -status => '304 Not Modified');
+        exit;
+    }
 
     print $cgi->header (-ETag => $digest,
                         -type => $format->{'ctype'});

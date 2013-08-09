@@ -128,7 +128,8 @@ var inline_history = {
 
           var itemHtml =  '<div class="ih_history_item ' + containerClass + '" '
                           + 'id="h' + i + '">'
-                          + item[3] + item[2]
+                          + item[3]
+                          + '<div class="ih_history_change">' + item[2] + '</div>'
                           + '</div>';
 
           if (ih_activity_sort_order == 'oldest_to_newest') {

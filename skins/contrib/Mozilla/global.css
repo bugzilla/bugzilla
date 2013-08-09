@@ -258,9 +258,9 @@ u {
 
 .bz_alias_short_desc_container {
     background: none;
-    font-size: 24px;
+    font-size: 20px;
     font-weight: normal;
-    line-height: 32px;
+    line-height: 30px;
     padding: 5px 0;
     text-shadow: 0 1px rgba(255, 255, 255, 0.2);
 }
@@ -274,7 +274,7 @@ u {
 }
 
 .last_comment_link {
-    font-size: 12px;
+    font-size: 18px;
 }
 
 .last_comment_link b {
@@ -300,14 +300,15 @@ table.edit_form hr {
 }
 
 .field_label {
-    font-weight: normal !important;
-    padding-right: 20px;
+    font-weight: bold !important;
+    padding-right: 10px;
     vertical-align: baseline;
+    white-space: nowrap;
 }
 
 .field_label a, .field_label b {
     color: #404040;
-    font-weight: normal;
+    font-weight: bold;
 }
 
 .field_value .text_input {
@@ -327,7 +328,7 @@ table.edit_form hr {
 #commit_top {
     position: absolute;
     bottom: 20px;
-    right: 20px;
+    right: 10px;
 }
 
 .cc_list_display {
@@ -374,7 +375,6 @@ table.edit_form hr {
     border: none;
     margin: 0 0 30px;
     padding: 0;
-    width: 674px;
 } */
 
 .bz_comment_table {
@@ -382,7 +382,8 @@ table.edit_form hr {
 }
 
 .bz_comment {
-    width: 70em;
+    width: 65em !important;
+    margin: 0 0 20px;
 }
 
 .bz_comment pre {
@@ -392,7 +393,10 @@ table.edit_form hr {
 .bz_first_comment_head, .bz_comment_head {
     font-weight: normal;
     line-height: 2;
-    padding-bottom: 5px;
+    padding-bottom: 2px;
+    padding-left: 0px;
+    margin-left: -5px;
+    white-space: nowrap;
     background-color: transparent;
 }
 
@@ -400,21 +404,24 @@ table.edit_form hr {
     -moz-transition: all 0.25s linear 0s;
     -webkit-transition: all 0.25s linear 0s;
     transition: all 0.25s linear 0s;
-    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
     transition: all 0.25s linear 0s;
-    background: #0095dd;
-    color: #fff;
+    color: #0095dd;
     font-weight: bold;
-    padding: 5px;
+    padding: 0px;
+    margin: 0px;
 }
 
 .bz_comment_user a:hover {
     -moz-transition: all 0.25s linear 0s;
     -webkit-transition: all 0.25s linear 0s;
     transition: all 0.25s linear 0s;
-    background: #00539f;
+    background: #555;
     border: none;
     text-decoration: none;
+}
+
+.bz_comment_actions {
+    margin: 0px 0px;
 }
 
 .new_user {
@@ -426,19 +433,26 @@ table.edit_form hr {
 }
 
 .ih_history .bz_comment_head {
-    padding-bottom: 10px;
+    padding-bottom: 3px;
 }
 
 .ih_history_item:not(.ih_hidden) ~ .ih_history_item:not(.ih_hidden) {
     margin-top: 10px;
 }
 
-.ih_history .bz_comment_user a {
-    background: #888;
-}
-
 .ih_history .bz_comment_user a:hover {
     background: #555;
+}
+
+.ih_history_change {
+    background: #eee;
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.2);
+    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
+    padding: 10px;
+    position: relative;
+    top: -1px;
+    z-index: 1;
 }
 
 .bz_comment_text {

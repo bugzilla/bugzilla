@@ -181,6 +181,11 @@
                                     field => field } %]
 [% END %]
 
+[%# This field is not a real one, but its label is visible in bugs. %]
+
+[% field_help_map.Importance = { help  => help_html.importance,
+                                 field => "importance" } %]
+
 [%# These are fields that don't need to be documented, either because
   # they have docs somewhere else in the UI, or they don't show up on bugs. 
   # %]

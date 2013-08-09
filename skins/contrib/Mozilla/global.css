@@ -370,12 +370,10 @@ table.edit_form hr {
     color: #404040;
 }
 
-/* .bz_comment {
-    background: transparent;
-    border: none;
-    margin: 0 0 30px;
-    padding: 0;
-} */
+/* background for diff views */
+.file_table, .file-table {
+    background: #ffffff;
+}
 
 .bz_comment_table {
     width: 90%;

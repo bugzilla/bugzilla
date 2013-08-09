@@ -350,6 +350,18 @@ sub get {
         push(@bugs, $self->_bug_to_hash($bug, $params));
     }
 
+    # Set the ETag before inserting the update tokens
+    # since the tokens will always be unique even if
+    # the data has not changed.
+    $self->bz_etag(\@bugs);
+
+    if (Bugzilla->user->id) {
+        foreach my $bug (@bugs) {
+            my $token = issue_hash_token([$bug->{'id'}, $bug->{'last_change_time'}]);
+            $bug->{'update_token'} = $self->type('string', $token);
+        }
+    }
+
     return { bugs => \@bugs, faults => \@faults };
 }
 
@@ -1006,11 +1018,6 @@ sub _bug_to_hash {
         # already does it for us.
         $item{'deadline'} = $self->type('string', $bug->deadline);
         $item{'actual_time'} = $self->type('double', $bug->actual_time);
-    }
-
-    if (Bugzilla->user->id) {
-        my $token = issue_hash_token([$bug->id, $bug->delta_ts]);
-        $item{'update_token'} = $self->type('string', $token);
     }
 
     # The "accessible" bits go here because they have long names and it

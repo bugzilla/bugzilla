@@ -44,14 +44,15 @@ use Digest::MD5 qw(md5_base64);
 my $user = Bugzilla->login(LOGIN_OPTIONAL);
 my $cgi  = Bugzilla->cgi;
 
+# Get data from the shadow DB as they don't change very often.
+Bugzilla->switch_to_shadow_db;
+
 # If the 'requirelogin' parameter is on and the user is not
 # authenticated, return empty fields.
 if (Bugzilla->params->{'requirelogin'} && !$user->id) {
     display_data();
+    exit;
 }
-
-# Get data from the shadow DB as they don't change very often.
-Bugzilla->switch_to_shadow_db;
 
 # Pass a bunch of Bugzilla configuration to the templates.
 my $vars = {};
@@ -136,31 +137,13 @@ sub display_data {
     utf8::encode($digest_data) if utf8::is_utf8($digest_data);
     my $digest = md5_base64($digest_data);
 
-    # ETag support.
-    my $if_none_match = $cgi->http('If-None-Match') || "";
-    my $found304;
-    my @if_none = split(/[\s,]+/, $if_none_match);
-    foreach my $if_none (@if_none) {
-        # remove quotes from begin and end of the string
-        $if_none =~ s/^\"//g;
-        $if_none =~ s/\"$//g;
-        if ($if_none eq $digest or $if_none eq '*') {
-            # leave the loop after the first match
-            $found304 = $if_none;
-            last;
-        }
-    }
- 
-   if ($found304) {
-        print $cgi->header(-type => 'text/html',
-                           -ETag => $found304,
+    if ($cgi->check_etag($digest)) {
+        print $cgi->header(-ETag   => $digest,
                            -status => '304 Not Modified');
+        exit;
     }
-    else {
-        # Return HTTP headers.
-        print $cgi->header (-ETag => $digest,
-                            -type => $format->{'ctype'});
-        print $output;
-    }
-    exit;
+
+    print $cgi->header (-ETag => $digest,
+                        -type => $format->{'ctype'});
+    print $output;
 }

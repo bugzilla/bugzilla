@@ -32,8 +32,8 @@ if ($ENV{MOD_PERL}) {
 use Bugzilla::WebService::Constants;
 use Bugzilla::Util;
 
-# Allow WebService methods to call XMLRPC::Lite's type method directly
 BEGIN {
+    # Allow WebService methods to call XMLRPC::Lite's type method directly
     *Bugzilla::WebService::type = sub {
         my ($self, $type, $value) = @_;
         if ($type eq 'dateTime') {
@@ -50,6 +50,11 @@ BEGIN {
         }
         return XMLRPC::Data->type($type)->value($value);
     };
+
+    # Add support for ETags into XMLRPC WebServices
+    *Bugzilla::WebService::bz_etag = sub {
+        return Bugzilla::WebService::Server->bz_etag($_[1]);
+    };
 }
 
 sub initialize {
@@ -63,21 +68,37 @@ sub initialize {
 
 sub make_response {
     my $self = shift;
+    my $cgi = Bugzilla->cgi;
 
     $self->SUPER::make_response(@_);
 
     # XMLRPC::Transport::HTTP::CGI doesn't know about Bugzilla carrying around
     # its cookies in Bugzilla::CGI, so we need to copy them over.
-    foreach my $cookie (@{Bugzilla->cgi->{'Bugzilla_cookie_list'}}) {
+    foreach my $cookie (@{$cgi->{'Bugzilla_cookie_list'}}) {
         $self->response->headers->push_header('Set-Cookie', $cookie);
     }
 
     # Copy across security related headers from Bugzilla::CGI
-    foreach my $header (split(/[\r\n]+/, Bugzilla->cgi->header)) {
+    foreach my $header (split(/[\r\n]+/, $cgi->header)) {
         my ($name, $value) = $header =~ /^([^:]+): (.*)/;
         if (!$self->response->headers->header($name)) {
            $self->response->headers->header($name => $value);
         }
+    }
+
+    # ETag support
+    my $etag = $self->bz_etag;
+    if (!$etag) {
+        my $data = $self->response->as_string;
+        $etag = $self->bz_etag($data);
+    }
+
+    if ($etag && $cgi->check_etag($etag)) {
+        $self->response->headers->push_header('ETag', $etag);
+        $self->response->headers->push_header('status', '304 Not Modified');
+    }
+    elsif ($etag) {
+        $self->response->headers->push_header('ETag', $etag);
     }
 }
 

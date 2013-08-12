@@ -190,7 +190,8 @@ sub get_all {
         my %tracking_flags_hash = map { $_->flag_id => $_ } @tracking_flags;
         $cache->{'tracking_flags'} = \%tracking_flags_hash;
     }
-    return values %{ $cache->{'tracking_flags'} };
+    return sort { $a->flag_type cmp $b->flag_type || $a->sortkey <=> $b->sortkey }
+           values %{ $cache->{'tracking_flags'} };
 }
 
 sub remove_from_db {

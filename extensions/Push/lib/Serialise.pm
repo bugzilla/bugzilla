@@ -206,14 +206,10 @@ sub _bug {
     };
 
     # add custom fields
-    my @custom_fields = Bugzilla->active_custom_fields;
+    my @custom_fields = Bugzilla->active_custom_fields(
+        { product => $bug->product_obj, component => $bug->component_obj });
     foreach my $field (@custom_fields) {
         my $name = $field->name;
-
-        # skip custom fields that are hidded from this product/component
-        next if Bugzilla::Extension::BMO::cf_hidden_in_product(
-            $name, $bug->product, $bug->component);
-
         $rh->{$name} = _custom_field($field, $bug->$name);
     }
 

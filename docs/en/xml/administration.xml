@@ -1056,7 +1056,7 @@
             <para>
             <emphasis>Login Name</emphasis>: 
             This is generally the user's full email address. However, if you
-            have are using the <quote>emailsuffix</quote> parameter, this may
+            are using the <quote>emailsuffix</quote> parameter, this may
             just be the user's login name. Note that users can now change their
             login names themselves (to any valid email address).
             </para>

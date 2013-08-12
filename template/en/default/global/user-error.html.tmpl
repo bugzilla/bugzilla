@@ -1358,21 +1358,21 @@
     [%+ constants.USER_PASSWORD_MIN_LENGTH FILTER html %] characters long.
 
   [% ELSIF error == "password_not_complex" %]
-     [% title = "Password Fails Requirements" %]
-     [% passregex = Param('password_complexity') %]
-     The password must contain at least one:
-     <ul>
-       [% IF passregex.search('letters') %]
-         <li>UPPERCASE letter</li>
-         <li>lowercase letter</li>
-       [% END %]
-       [% IF passregex.search('numbers') %]
-         <li>digit</li>
-       [% END %]
-       [% IF passregex.search('specialchars') %]
-         <li>special character</li>
-       [% END %]
-     </ul>
+    [% title = "Password Fails Requirements" %]
+    [% passregex = Param('password_complexity') %]
+    The password must contain at least one:
+    <ul>
+      [% IF passregex == 'letters_numbers_specialchars' %]
+        <li>letter</li>
+        <li>special character</li>
+      [% ELSIF passregex.search('letters') %]
+        <li>UPPERCASE letter</li>
+        <li>lowercase letter</li>
+      [% END %]
+      [% IF passregex.search('numbers') %]
+        <li>digit</li>
+      [% END %]
+    </ul>
 
   [% ELSIF error == "password_not_complex" %]
      [% title = "Password Fails Requirements" %]

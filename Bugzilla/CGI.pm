@@ -347,6 +347,10 @@ sub header {
         unshift(@_, '-x_frame_options' => 'SAMEORIGIN');
     }
 
+    if ($self->{'_content_disp'}) {
+        unshift(@_, '-content_disposition' => $self->{'_content_disp'});
+    }
+
     # Add X-XSS-Protection header to prevent simple XSS attacks
     # and enforce the blocking (rather than the rewriting) mode.
     unshift(@_, '-x_xss_protection' => '1; mode=block');
@@ -560,6 +564,22 @@ sub url_is_attachment_base {
     return ($self->self_url =~ $regex) ? 1 : 0;
 }
 
+sub set_dated_content_disp {
+    my ($self, $type, $prefix, $ext) = @_;
+
+    my @time = localtime(time());
+    my $date = sprintf "%04d-%02d-%02d", 1900+$time[5], $time[4]+1, $time[3];
+    my $filename = "$prefix-$date.$ext";
+
+    $filename =~ s/\s/_/g; # Remove whitespace to avoid HTTP header tampering
+    $filename =~ s/\\/_/g; # Remove backslashes as well
+    $filename =~ s/"/\\"/g; # escape quotes
+
+    my $disposition = "$type; filename=\"$filename\"";
+
+    $self->{'_content_disp'} = $disposition;
+}
+
 ##########################
 # Vars TIEHASH Interface #
 ##########################
@@ -666,6 +686,11 @@ instead of calling this directly.
 =item C<redirect_to_urlbase>
 
 Redirects from the current URL to one prefixed by the urlbase parameter.
+
+=item C<set_dated_content_disp>
+
+Sets an appropriate date-dependent value for the Content Disposition header
+for a downloadable resource.
 
 =back
 

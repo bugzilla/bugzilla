@@ -220,6 +220,8 @@ to some group are shown by default.
     </tr>
   [% END %]
   [% PROCESS display_buglist %]
+  <br><br>
+  <a href="request.cgi?[% urlquerypart FILTER html %]&amp;ctype=csv">(view entire list as CSV)</a>
 [% END %]
 
 [% PROCESS global/footer.html.tmpl %]

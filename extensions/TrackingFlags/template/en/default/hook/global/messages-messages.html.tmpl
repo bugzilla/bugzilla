@@ -6,10 +6,13 @@
   # defined by the Mozilla Public License, v. 2.0.
   #%]
 
-[% IF message_tag == 'tracking_flags_created' %]
-  The tracking flag has been created.
+[% IF message_tag == 'tracking_flag_created' %]
+  The tracking flag '[% flag.name FILTER html %]' has been created.
 
-[% ELSIF message_tag == 'tracking_flags_updated' %]
-  The tracking flag has been updated.
+[% ELSIF message_tag == 'tracking_flag_updated' %]
+  The tracking flag '[% flag.name FILTER html %]' has been updated.
+
+[% ELSIF message_tag == "tracking_flag_deleted" %]
+  The tracking flag '[% flag.name FILTER html %]' has been deleted.
 
 [% END %]

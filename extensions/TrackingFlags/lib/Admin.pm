@@ -55,8 +55,15 @@ sub admin_edit {
             || ThrowCodeError('tracking_flags_invalid_item_id', { item => 'flag', id => $vars->{flag_id} });
         $flag->remove_from_db();
 
-        $vars->{mode}      = 'deleted';
-        $vars->{flag_name} = $flag->name;
+        $vars->{message} = 'tracking_flag_deleted';
+        $vars->{flag}    = $flag;
+        $vars->{flags}   = [ Bugzilla::Extension::TrackingFlags::Flag->get_all() ];
+
+        print Bugzilla->cgi->header;
+        my $template = Bugzilla->template;
+        $template->process('pages/tracking_flags_admin_list.html.tmpl', $vars)
+            || ThrowTemplateError($template->error());
+        exit;
 
     } elsif ($input->{save}) {
         # save
@@ -68,12 +75,12 @@ sub admin_edit {
         $vars->{flag}       = $flag_obj;
         $vars->{values}     = _flag_values_to_json($values);
         $vars->{visibility} = _flag_visibility_to_json($visibilities);
-        $vars->{can_delete} = !$flag_obj->has_values;
+        $vars->{can_delete} = !$flag_obj->has_bug_values;
 
         if ($vars->{mode} eq 'new') {
-            $vars->{message} = 'tracking_flags_created';
+            $vars->{message} = 'tracking_flag_created';
         } else {
-            $vars->{message} = 'tracking_flags_updated';
+            $vars->{message} = 'tracking_flag_updated';
         }
 
     } else {
@@ -86,7 +93,7 @@ sub admin_edit {
             $vars->{flag}       = $flag;
             $vars->{values}     = _flag_values_to_json($flag->values);
             $vars->{visibility} = _flag_visibility_to_json($flag->visibility);
-            $vars->{can_delete} = !$flag->has_values;
+            $vars->{can_delete} = !$flag->has_bug_values;
 
         } elsif ($vars->{mode} eq 'copy') {
             # copy - load the source flag

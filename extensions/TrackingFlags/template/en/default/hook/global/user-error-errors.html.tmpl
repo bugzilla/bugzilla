@@ -54,4 +54,14 @@
   [% title = "Invalid flag type" %]
   The flag type '[% type FILTER html %]' is invalid.
 
+[% ELSIF error == "tracking_flag_has_activity" %]
+  [% title = "Tracking Flag Has Activity" %]
+  The tracking flag '[% flag.name FILTER html %]' cannot be deleted because
+  it has recorded activity.
+
+[% ELSIF error == "tracking_flag_has_contents" %]
+  [% title = "Tracking Flag Has Contents" %]
+  The tracking flag '[% flag.name FILTER html %]' cannot be deleted because
+  at least one [% terms.bug %] has a non empty value for this field.
+
 [% END %]

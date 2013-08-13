@@ -15,6 +15,7 @@ use warnings;
 use Bugzilla::Error;
 use Bugzilla::Constants;
 use Bugzilla::Util qw(detaint_natural trim);
+use Bugzilla::Config qw(SetParam write_params);
 
 use Bugzilla::Extension::TrackingFlags::Constants;
 use Bugzilla::Extension::TrackingFlags::Flag::Bug;
@@ -87,35 +88,46 @@ sub create {
     my $class = shift;
     my $params = shift;
     my $dbh = Bugzilla->dbh;
+    my $flag;
 
-    $dbh->bz_start_transaction();
+    # Disable bug updates temporarily to avoid conflicts.
+    SetParam('disable_bug_updates', 1);
+    write_params();
 
-    $params = $class->run_create_validators($params);
+    eval {
+        $dbh->bz_start_transaction();
 
-    # We have to create an entry for this new flag
-    # in the fielddefs table for use elsewhere. We cannot
-    # use Bugzilla::Field->create as it will create the
-    # additional tables needed by custom fields which we
-    # do not need. Also we do this so as not to add a
-    # another column to the bugs table.
-    # We will create the entry as a custom field with a
-    # type of FIELD_TYPE_EXTENSION so Bugzilla will skip
-    # these field types in certain parts of the core code.
-    $dbh->do("INSERT INTO fielddefs
-             (name, description, sortkey, type, custom, obsolete, buglist)
-              VALUES
-             (?, ?, ?, ?, ?, ?, ?)",
-             undef,
-             $params->{'name'},
-             $params->{'description'},
-             $params->{'sortkey'},
-             FIELD_TYPE_EXTENSION,
-             1, 0, 1);
-    $params->{'field_id'} = $dbh->bz_last_key;
+        $params = $class->run_create_validators($params);
 
-    my $flag = $class->SUPER::create($params);
+        # We have to create an entry for this new flag
+        # in the fielddefs table for use elsewhere. We cannot
+        # use Bugzilla::Field->create as it will create the
+        # additional tables needed by custom fields which we
+        # do not need. Also we do this so as not to add a
+        # another column to the bugs table.
+        # We will create the entry as a custom field with a
+        # type of FIELD_TYPE_EXTENSION so Bugzilla will skip
+        # these field types in certain parts of the core code.
+        $dbh->do("INSERT INTO fielddefs
+                 (name, description, sortkey, type, custom, obsolete, buglist)
+                 VALUES
+                 (?, ?, ?, ?, ?, ?, ?)",
+                 undef,
+                 $params->{'name'},
+                 $params->{'description'},
+                 $params->{'sortkey'},
+                 FIELD_TYPE_EXTENSION,
+                 1, 0, 1);
+        $params->{'field_id'} = $dbh->bz_last_key;
 
-   $dbh->bz_commit_transaction();
+        $flag = $class->SUPER::create($params);
+
+        $dbh->bz_commit_transaction();
+    };
+    my $error = "$@";
+    SetParam('disable_bug_updates',  0);
+    write_params();
+    die $error if $error;
 
     return $flag;
 }
@@ -197,16 +209,40 @@ sub get_all {
 sub remove_from_db {
     my $self = shift;
     my $dbh = Bugzilla->dbh;
-    $dbh->bz_start_transaction();
-    $dbh->do('DELETE FROM fielddefs WHERE name = ?', undef, $self->name);
-    $self->SUPER::remove_from_db(@_);
-    $dbh->bz_commit_transaction();
 
-    # Remove from request cache
-    my $cache = Bugzilla->request_cache;
-    if (exists $cache->{'tracking_flags'}) {
-        delete $cache->{'tracking_flags'}->{$self->flag_id};
+    # Check to see if bug activity table has records
+    my $has_activity = $dbh->selectrow_array("SELECT COUNT(*) FROM bugs_activity
+                                              WHERE fieldid = ?", undef, $self->id);
+    if ($has_activity) {
+        ThrowUserError('tracking_flag_has_activity', { flag => $self });
     }
+
+    # Check to see if tracking_flags_bugs table has records
+    if ($self->has_bug_values) {
+        ThrowUserError('tracking_flag_has_contents', { flag => $self });
+    }
+
+    # Disable bug updates temporarily to avoid conflicts.
+    SetParam('disable_bug_updates',  1);
+    write_params();
+
+    eval {
+        $dbh->bz_start_transaction();
+
+        $dbh->do('DELETE FROM fielddefs WHERE name = ?', undef, $self->name);
+
+        $dbh->bz_commit_transaction();
+
+        # Remove from request cache
+        my $cache = Bugzilla->request_cache;
+        if (exists $cache->{'tracking_flags'}) {
+            delete $cache->{'tracking_flags'}->{$self->flag_id};
+        }
+    };
+    my $error = "$@";
+    SetParam('disable_bug_updates', 0);
+    write_params();
+    die $error if $error;
 }
 
 sub preload_all_the_things {
@@ -355,17 +391,16 @@ sub bug_flag {
     return $self->{'bug_flag'} = Bugzilla::Extension::TrackingFlags::Flag::Bug->new($params);
 }
 
-sub has_values {
+sub has_bug_values {
     my ($self) = @_;
-    return $self->{'has_values'} if defined $self->{'has_values'};
+    return $self->{'has_bug_values'} if defined $self->{'has_bug_values'};
     my $dbh = Bugzilla->dbh;
-    $self->{'has_values'} = scalar $dbh->selectrow_array("
+    return $self->{'has_bug_values'} = scalar $dbh->selectrow_array("
         SELECT 1
           FROM tracking_flags_bugs
          WHERE tracking_flag_id = ? " .
                $dbh->sql_limit(1),
         undef, $self->flag_id);
-    return $self->{'has_values'};
 }
 
 ######################################

@@ -29,16 +29,6 @@ var selected_components = [
   style_urls = [ 'extensions/TrackingFlags/web/styles/admin.css' ]
 %]
 
-[% IF mode == 'deleted' %]
-
-  <p>The tracking flag [% flag_name FILTER html %] has been deleted.</p>
-  <hr>
-  <p>Return to the <a href="page.cgi?id=tracking_flags_admin_list.html">list of Tracking Flags</a>.</p>
-
-  [% RETURN %]
-
-[% END %]
-
 <script>
   var groups = [% groups || '[]' FILTER none %];
   var flag_values = [% values || '[]' FILTER none %];
@@ -56,7 +46,7 @@ var selected_components = [
 <form method="POST" action="page.cgi" onsubmit="return on_submit()">
 <input type="hidden" name="id" value="tracking_flags_admin_edit.html">
 <input type="hidden" name="mode" value="[% mode FILTER html %]">
-<input type="hidden" name="flag_id" value="[% mode == 'edit' ? flag.flag_id : 0 FILTER html %]">
+<input type="hidden" name="flag_id" value="[% flag ? flag.flag_id : 0 FILTER html %]">
 <input type="hidden" name="values" id="values" value="">
 <input type="hidden" name="visibility" id="visibility" value="">
 <input type="hidden" name="save" value="1">

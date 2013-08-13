@@ -101,7 +101,8 @@ sub db_schema_abstract_schema {
                 NOTNULL => 1,
                 REFERENCES => {
                     TABLE  => 'fielddefs',
-                    COLUMN => 'id'
+                    COLUMN => 'id',
+                    DELETE => 'CASCADE'
                 }
             },
             name => {
@@ -260,6 +261,15 @@ sub db_schema_abstract_schema {
             },
         ],
     };
+}
+
+sub install_update_db {
+    my $dbh = Bugzilla->dbh;
+    my $fk = $dbh->bz_fk_info('tracking_flags', 'field_id');
+    if ($fk and !defined $fk->{DELETE}) {
+        $fk->{DELETE} = 'CASCADE';
+        $dbh->bz_alter_fk('tracking_flags', 'field_id', $fk);
+    }
 }
 
 sub active_custom_fields {

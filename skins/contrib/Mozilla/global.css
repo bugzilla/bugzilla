@@ -586,6 +586,11 @@ button[disabled], input[type=submit][disabled], input[type=button][disabled], bu
     cursor: pointer;
 }
 
+.calendar_button, .calendar_button:hover {
+    box-shadow: none;
+    padding: 0;
+}
+
 .related_actions {
     line-height: 19px;
     padding: 5px 10px;

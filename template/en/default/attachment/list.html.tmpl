@@ -142,7 +142,7 @@ function toggle_display(link) {
           </td>
         [% END %]
 
-        <td valign="top">
+        <td class="bz_attach_actions" valign="top">
           <a href="attachment.cgi?id=[% attachment.id %]&amp;action=edit">Details</a>
           [% IF attachment.ispatch && feature_enabled('patch_viewer') %]
             | <a href="attachment.cgi?id=[% attachment.id %]&amp;action=diff">Diff</a>

@@ -370,13 +370,16 @@ table.edit_form hr {
     color: #404040;
 }
 
+#attachment_table .bz_attach_actions {
+    white-space: nowrap;
+}
+
 /* background for diff views */
 .file_table, .file-table {
     background: #ffffff;
 }
 
 .bz_comment_table {
-    width: 90%;
 }
 
 .bz_comment {
@@ -404,7 +407,6 @@ table.edit_form hr {
     transition: all 0.25s linear 0s;
     transition: all 0.25s linear 0s;
     color: #0095dd;
-    font-weight: bold;
     padding: 0px;
     margin: 0px;
 }
@@ -413,9 +415,13 @@ table.edit_form hr {
     -moz-transition: all 0.25s linear 0s;
     -webkit-transition: all 0.25s linear 0s;
     transition: all 0.25s linear 0s;
-    background: #555;
+    background: #fff;
     border: none;
     text-decoration: none;
+}
+
+.bz_comment_user .vcard {
+    font-weight: bold;
 }
 
 .bz_comment_actions {
@@ -435,11 +441,7 @@ table.edit_form hr {
 }
 
 .ih_history_item:not(.ih_hidden) ~ .ih_history_item:not(.ih_hidden) {
-    margin-top: 10px;
-}
-
-.ih_history .bz_comment_user a:hover {
-    background: #555;
+    margin-top: 20px;
 }
 
 .ih_history_change {
@@ -449,7 +451,6 @@ table.edit_form hr {
     box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
     padding: 10px;
     position: relative;
-    top: -1px;
     z-index: 1;
 }
 
@@ -457,7 +458,7 @@ table.edit_form hr {
     background: #fff;
     border-bottom: 1px solid rgba(0, 0, 0, 0.2);
     box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
-    margin: 10px 0 0;
+    margin: 1px 0 0 0;
     overflow: auto;
     padding: 10px;
     position: relative;
@@ -479,7 +480,7 @@ table.edit_form hr {
     left: 16px;
 }
 
-.bz_comment_text span.quote {
+.bz_comment_text span.quote, .bz_comment_text span.quote_wrapped {
     background: #eee !important;
     color: #444 !important;
     display: block !important;
@@ -487,7 +488,6 @@ table.edit_form hr {
     margin-bottom: -10px !important;
     overflow: auto;
     padding: 5px !important;
-    white-space: pre-wrap;
 }
 
 .ih_inlinehistory {
@@ -499,6 +499,10 @@ table.edit_form hr {
     position: relative;
     top: -1px;
     z-index: 1;
+}
+
+.bz_collapse_expand_comments li {
+    white-space: nowrap;
 }
 
 #add_comment {

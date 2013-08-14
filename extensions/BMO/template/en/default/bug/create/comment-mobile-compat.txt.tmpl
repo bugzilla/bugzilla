@@ -1,0 +1,33 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% USE Bugzilla %]
+[% cgi = Bugzilla.cgi +%]
+
+Site: [%+ cgi.param("bug_file_loc") %]
+[%+ cgi.param("short_desc") %]
+
+:: Steps To Reproduce
+
+[%+ cgi.param("desc") %]
+
+:: Expected Result
+
+[%+ cgi.param("expected_result") %]
+
+:: Actual Result
+
+[%+ cgi.param("actual_result") %]
+
+:: Additional Information
+
+Software Version: [% cgi.param("software_version") %]
+[% IF cgi.param("device") %]
+Device Information: [% cgi.param("device") %]
+[% END %]
+Reporter's User Agent: [% cgi.param("user_agent") %]

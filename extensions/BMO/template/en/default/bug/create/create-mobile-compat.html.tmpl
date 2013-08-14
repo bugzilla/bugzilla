@@ -1,0 +1,201 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% PROCESS global/variables.none.tmpl %]
+
+[% inline_style = BLOCK %]
+#bug_form th {
+  text-align: right;
+  vertical-align: middle;
+}
+
+#bug_form input[type="text"], #bug_form textarea {
+  width: 100%;
+}
+
+#bug_form textarea {
+  font-family: inherit;
+  font-size: inherit;
+}
+
+#standard_link {
+  margin-top: 2em;
+}
+
+#standard_link img {
+  vertical-align: middle;
+}
+
+#standard_link a {
+  cursor: pointer;
+}
+
+[% END %]
+
+[% inline_javascript = BLOCK %]
+function validateAndSubmit() {
+  var field_errors = {
+    'op_sys':           "Please tell us which product you are using.",
+    'software_version': "Please tell us which version of the product you are using.",
+    'bug_file_loc':     "Please give the URL of the broken page.",
+    'short_desc':       "Please enter a summary of the problem.",
+    'desc':             "Please tell us how to reproduce the problem.",
+    'expected_result':  "Please tell us what you expected to happen.",
+    'actual_result':    "Please tell us what actually happened.",
+  };
+
+  var alert_text = '';
+
+  for (key in field_errors) {
+    if (!isFilledOut(key)) {
+      alert_text += field_errors[key] + '\n';
+    }
+  }
+
+  if (alert_text != '') {
+    alert(alert_text);
+    return false;
+  }
+
+  return true;
+}
+[% END %]
+
+[% title = "Mobile Web Compatibility Problem" %]
+
+[% PROCESS global/header.html.tmpl
+   title = title
+   style = inline_style
+   javascript = inline_javascript
+   javascript_urls = [ 'extensions/BMO/web/js/form_validate.js']
+%]
+
+[% USE Bugzilla %]
+[% cgi = Bugzilla.cgi %]
+
+<h1>[% title FILTER none %]</h1>
+
+<form method="post" action="post_bug.cgi" enctype="multipart/form-data"
+      onSubmit="return validateAndSubmit();">
+  <input type="hidden" name="format"       value="mobile-compat">
+  <input type="hidden" name="product"      value="Tech Evangelism">
+  <input type="hidden" name="component"    value="Mobile">
+  <input type="hidden" name="version"      value="unspecified">
+  <input type="hidden" name="bug_status"   value="UNCONFIRMED">
+  <input type="hidden" name="rep_platform" value="Other">
+  <input type="hidden" name="bug_severity" value="normal">
+  <input type="hidden" name="status_whiteboard" value="[mobile-compat-form]">
+  <input type="hidden" name="user_agent"   value="[% cgi.user_agent() FILTER html %]">
+
+  <input type="hidden" name="token"        value="[% token FILTER html %]">
+
+[% IF NOT cgi.user_agent("Mobile") %]
+<p>If possible, it's best to file [% terms.bugs %] using your device's browser. Visit and bookmark &lt;<a href="https://bugzilla.mozilla.org/form.mobile.compat">https://bugzilla.mozilla.org/form.mobile.compat</a>&gt;.</p>
+[% END %]
+
+<table id="bug_form">
+
+<tr>
+  <th class="required">Product</th>
+  <td>
+    <select name="op_sys" id="op_sys">
+      <option value="">Please select...</option>
+      <option value="Gonk (Firefox OS)">Firefox OS</option>
+      <option value="Android">Firefox for Android</option>
+    </select>
+  </td>
+</tr>
+
+<tr>
+  <th class="required">Product Version</th>
+  <td>
+    <input type="text" name="software_version" id="software_version" size="60"
+      placeholder="Software version - see About box or Preferences">
+  </td>
+</tr>
+
+<tr>
+  <th class="required">Full Web Page Address</th>
+  <td>
+    <input type="text" name="bug_file_loc" id="bug_file_loc" size="60"
+      placeholder="e.g. http://www.example.com/page.html">
+  </td>
+</tr>
+
+<tr>
+  <td>&nbsp;</td>
+</tr>
+
+<tr>
+  <th class="required">Problem Summary</th>
+  <td>
+    <input type="text" name="short_desc" id="short_desc" size="60"
+      placeholder="Describe the specific problem with the page in one sentence">
+  </td>
+</tr>
+
+<tr>
+  <th class="required">Steps To Reproduce</th>
+  <td>
+    <textarea id="desc" name="desc" cols="50" rows="5">1.
+2.
+3.
+...</textarea>
+  </td>
+</tr>
+
+<tr>
+  <th class="required">Expected Result</th>
+  <td>
+    <input type="text" id="expected_result" name="expected_result" size="60"
+      placeholder="What were you expecting to happen?">
+  </td>
+</tr>
+
+<tr>
+  <th class="required">Actual Result</th>
+  <td>
+    <input type="text" name="actual_result" id="actual_result" size="60"
+      placeholder="What happened instead?">
+  </td>
+</tr>
+
+<tr>
+  <td>&nbsp;</td>
+</tr>
+
+<tr>
+  <th>Device Information</th>
+  <td>
+    <input type="text" name="device" id="device" size="60"
+      placeholder="Make and model">
+  </td>
+</tr>
+
+<tr>
+  <td>&nbsp;</td>
+</tr>
+
+<tr>
+  <td>&nbsp;</td>
+  <td><input type="submit" id="commit" value="Submit Issue"></td>
+</tr>
+
+</table>
+</form>
+
+[ <span class="required_star">*</span> <span class="required_explanation">Required Field</span> ]
+
+<div id="standard_link">
+  <a href="enter_bug.cgi?format=__standard__&amp;product=[% product.name FILTER uri %]">
+    <img src="extensions/BMO/web/images/advanced.png" width="16" height="16" border="0"></a>
+  <a href="enter_bug.cgi?format=__standard__&amp;product=[% product.name FILTER uri %]">
+    Switch to the standard [% terms.bug %] entry form</a>
+</div>
+
+[% PROCESS global/footer.html.tmpl %]

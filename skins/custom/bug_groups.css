@@ -24,6 +24,6 @@ body.bz_group_mozilla-services-security {
     background-color: #ffff80;
 }
 
-body.bz_group_core-security {
+body[class*=core-security] {
     background-color: #ffe0b0;
 }

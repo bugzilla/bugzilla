@@ -18,7 +18,7 @@ use Bugzilla::Error;
 use Bugzilla::User;
 use Bugzilla::Util qw(clean_text);
 
-use constant UNAVAILABLE_RE => qr/\b(?:unavailable|pto)\b/i;
+use constant UNAVAILABLE_RE => qr/\b(?:unavailable|pto|away)\b/i;
 
 #
 # monkey-patched methods

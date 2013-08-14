@@ -102,12 +102,17 @@
       [% END %]
     [% END %]
 
+    var user_image = '
+    [%~ who = operation.who %]
+    [% Hook.process('user-image', 'bug/comments.html.tmpl') FILTER js %]';
+
     var item = new Array(7);
     item[0] = '[% changer_login FILTER js %]';
     item[1] = '[% change_date FILTER js %]';
     item[2] = html;
     item[3] = '<div class="bz_comment_head">'
               + '<span class="bz_comment_user">'
+              + user_image
               + '[% user_cache.$changer_id FILTER js %]'
               + '</span>'
               + '<span class="bz_comment_time"> ' + item[1] + ' </span>'

@@ -203,6 +203,8 @@
         </span>
 
         <span class="bz_comment_user">
+          [% who = comment.author %]
+          [% Hook.process('user-image', 'bug/comments.html.tmpl') %]
           [%# No need to recreate the exact same template if we already have it. %]
           [% commenter_id = comment.author.id %]
           [% UNLESS user_cache.$commenter_id %]

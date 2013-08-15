@@ -21,7 +21,7 @@ use parent qw(Exporter);
                              format_time validate_date validate_time datetime_from
                              is_7bit_clean bz_crypt generate_random_password
                              validate_email_syntax check_email_syntax clean_text
-                             get_text template_var disable_utf8
+                             get_text template_var display_value disable_utf8
                              detect_encoding email_filter
                              join_activity_entries);
 

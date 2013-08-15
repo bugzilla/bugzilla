@@ -180,7 +180,7 @@ foreach my $k (@bug_ids) {
 
     # Resolution and summary are shown only if user can see the bug
     if (!$user->can_see_bug($k)) {
-        $resolution = $summary = '';
+        $summary = '';
     }
 
     $vars->{'short_desc'} = $summary if ($k eq $cgi->param('id'));
@@ -213,7 +213,9 @@ foreach my $k (@bug_ids) {
     # Push the bug tooltip texts into a global hash so that 
     # CreateImagemap sub (used with local dot installations) can
     # use them later on.
-    $bugtitles{$k} = trim("$stat $resolution");
+    my $stat_display       = display_value('bug_status', $stat);
+    my $resolution_display = display_value('resolution', $resolution);
+    $bugtitles{$k} = trim("$stat_display $resolution_display");
 
     # Show the bug summary in tooltips only if not shown on 
     # the graph and it is non-empty (the user can see the bug)

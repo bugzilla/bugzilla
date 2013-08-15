@@ -2,6 +2,7 @@
 
 body {
     background: #f6f4ec;
+    background-image: url(noise.png);
     background-image: url(noise.png), -moz-linear-gradient(#d7d3c8, #f6f4ec 400px);
     background-image: url(noise.png), -webkit-linear-gradient(#d7d3c8, #f6f4ec 400px);
     background-image: url(noise.png), linear-gradient(#d7d3c8, #f6f4ec 400px);
@@ -57,6 +58,7 @@ hr {
     -moz-box-sizing: border-box;
     -webkit-box-sizing: border-box;
     box-sizing: border-box;
+    background: #e5e3dc;
     background: -moz-linear-gradient(#e5e3dc, #ecebe5);
     background: -webkit-linear-gradient(#e5e3dc, #ecebe5);
     background: linear-gradient(#e5e3dc, #ecebe5);
@@ -154,6 +156,7 @@ hr {
     -moz-box-sizing: border-box;
     -webkit-box-sizing: border-box;
     box-sizing: border-box;
+    background: url(search.png) 5px center no-repeat, #fafafa;
     background: url(search.png) 5px center no-repeat, -moz-linear-gradient(#fafafa, #fff);
     background: url(search.png) 5px center no-repeat, -webkit-linear-gradient(#fafafa, #fff);
     background: url(search.png) 5px center no-repeat, linear-gradient(#fafafa, #fff);
@@ -540,6 +543,7 @@ table.edit_form hr {
 }
 
 button, input[type=submit], input[type=button], #commit, #commit_top, #header .btn, #header input[type=submit] {
+    background-color: #43a6e2;
     background-image: -moz-linear-gradient(#43a6e2,#277ac1);
     background-image: -webkit-linear-gradient(#43a6e2,#277ac1);
     background-image: linear-gradient(#43a6e2,#277ac1);
@@ -579,6 +583,7 @@ button:active, input[type=submit]:active, input[type=button]:active, #commit:act
 }
 
 button[disabled], input[type=submit][disabled], input[type=button][disabled], button[disabled]:hover, input[type=submit][disabled]:hover, input[type=button][disabled]:hover, button[disabled]:active, input[type=submit][disabled]:active, input[type=button][disabled]:active {
+    background-color: #bfc7cd;
     background-image: -moz-linear-gradient(#bfc7cd,#9ca3aa);
     background-image: -webkit-linear-gradient(#bfc7cd,#9ca3aa);
     background-image: linear-gradient(#bfc7cd,#9ca3aa);

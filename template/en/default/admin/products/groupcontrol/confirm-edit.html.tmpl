@@ -11,32 +11,41 @@
 [% END %]
 
 [% PROCESS global/header.html.tmpl title = title %]
+
 [% FOREACH group = mandatory_groups %]
-<P>
-group '[% group.name FILTER html %]' impacts [% group.count %] 
-[%+ terms.bugs %] for
-which the group is newly mandatory and will be added.
+  <p>
+    Group '[% group.name FILTER html %]' impacts 
+    [% IF group.count == 1 %]
+       one [%+ terms.bug %]
+    [% ELSE %]
+      [% group.count %] [%+ terms.bugs %]
+    [% END %]
+    for which this group is mandatory and will be added.
+  </p>
 [% END %]
 
 [% FOREACH group = na_groups %]
-<P>
-group '[% group.name FILTER html %]' impacts [% group.count %]&nbsp;
-[% terms.bugs %] for which the group is no longer applicable and will
-be removed.[% END %]
-<form action="editproducts.cgi" method="post" >
-
-  [% PROCESS "global/hidden-fields.html.tmpl" exclude="^Bugzilla_(login|password)$" %]
-
-  <br>
-     Click "Continue" to proceed with the change including the changes
-     indicated above.  If you do not want these changes, use "back" to
-     return to the previous page.
   <p>
-    <input type="hidden" name="confirmed" value="confirmed">
-    <input type="submit" id="update" value="Continue">
+    Group '[% group.name FILTER html %]' impacts 
+    [% IF group.count == 1 %]
+       one [%+ terms.bug %]
+    [% ELSE %]
+      [% group.count %] [%+ terms.bugs %]
+    [% END %]  
+    for which this group is no longer applicable and will be removed.
   </p>
+[% END %]
 
+<form action="editproducts.cgi" method="post" >
+  [% PROCESS "global/hidden-fields.html.tmpl" exclude="^Bugzilla_(login|password)$" %]
+  <p>
+    <br>
+    Click "Continue" to proceed with the change including the changes
+    indicated above.  If you do not want these changes, use "back" to
+    return to the previous page.
+  </p>
+  <input type="hidden" name="confirmed" value="confirmed">
+  <input type="submit" id="update" value="Continue">
 </form>
-
 
 [% PROCESS global/footer.html.tmpl %]

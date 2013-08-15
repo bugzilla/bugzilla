@@ -67,7 +67,7 @@ hr {
     border-top: 3px solid rgb(104, 104, 104);
     box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
     margin: -15px;
-    position: fixed;
+    position: absolute;
     width: 100%;
     z-index: 2;
     color: transparent;

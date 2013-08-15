@@ -50,7 +50,7 @@ sub QUERY_DEFS {
         {
             name        => 'assignedbugs',
             heading     => 'Assigned to You',
-            description => 'The bug has been assigned to you and it is not resolved or closed yet.',
+            description => 'The bug has been assigned to you, and it is not resolved or closed.',
             params      => {
                 'bug_status'        => ['__open__'],
                 'emailassigned_to1' => 1,
@@ -61,7 +61,7 @@ sub QUERY_DEFS {
         {
             name        => 'newbugs',
             heading     => 'New Reported by You',
-            description => 'You reported the bug but nobody has accepted it yet.',
+            description => 'You reported the bug; it\'s unconfirmed or new. No one has assigned themselves to fix it yet.',
             params      => {
                 'bug_status'     => ['UNCONFIRMED', 'NEW'],
                 'emailreporter1' => 1,
@@ -72,7 +72,7 @@ sub QUERY_DEFS {
         {
             name        => 'inprogressbugs',
             heading     => "In Progress Reported by You",
-            description => 'You reported the bug, the developer accepted the bug and is hopefully working on it.',
+            description => 'A developer accepted your bug and is working on it. (It has someone in the "Assigned to" field.)',
             params      => {
                 'bug_status'     => [ map { $_->name } grep($_->name ne 'UNCONFIRMED' && $_->name ne 'NEW', open_states()) ],
                 'emailreporter1' => 1,
@@ -97,7 +97,7 @@ sub QUERY_DEFS {
         push(@query_defs, {
             name        => 'qacontactbugs',
             heading     => 'You Are QA Contact',
-            description => 'You are the qa contact on this bug and it is not resolved or closed yet.',
+            description => 'You are the qa contact on this bug, and it is not resolved or closed.',
             params      => {
                 'bug_status'       => ['__open__'],
                 'emailqa_contact1' => 1,

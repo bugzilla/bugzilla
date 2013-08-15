@@ -17,7 +17,11 @@
 
 [% IF target == "enter_bug.cgi" %]
   [% title = "Enter $terms.Bug" %]
-  [% h2 = BLOCK %]First, you must pick a product on which to enter [% terms.abug %]: [% END %]
+  [% subheader = "Select Product" %]
+  [% h2 = BLOCK %]
+    [% IF Param('useclassification') %]Next[% ELSE %]First[% END %],
+    you must pick a product on which to enter [% terms.abug %]:
+  [% END %]
 [% ELSIF target == "describecomponents.cgi" %]
   [% title = "Browse" %]
   [% h2 = "Select a product category to browse:" %]

@@ -12,13 +12,14 @@
   #%]
 
 [% IF target == "enter_bug.cgi" %]
-  [% title = "Select Classification" %]
-  [% subheader = "Please select the classification." %]
+  [% title = "Enter $terms.Bug" %]
+  [% subheader = "Select Classification" %]
 [% END %]
 
 [% DEFAULT title = "Choose the classification" %]
 [% PROCESS global/header.html.tmpl %]
 
+<h2>First, you must pick a classification on which to enter [% terms.abug %]:</h2>
 <table>
   <tr>
     <th>

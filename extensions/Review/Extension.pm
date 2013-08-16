@@ -38,18 +38,18 @@ BEGIN {
 # reviewers
 #
 
-sub _product_reviewers         { _reviewers($_[0],      'product')   }
-sub _product_reviewers_objs    { _reviewers_objs($_[0], 'product')   }
-sub _component_reviewers       { _reviewers($_[0],      'component') }
-sub _component_reviewers_objs  { _reviewers_objs($_[0], 'component') }
+sub _product_reviewers         { _reviewers($_[0],      'product',   $_[1])   }
+sub _product_reviewers_objs    { _reviewers_objs($_[0], 'product',   $_[1])   }
+sub _component_reviewers       { _reviewers($_[0],      'component', $_[1]) }
+sub _component_reviewers_objs  { _reviewers_objs($_[0], 'component', $_[1]) }
 
 sub _reviewers {
-    my ($object, $type) = @_;
-    return join(', ', map { $_->login } @{ _reviewers_objs($object, $type) });
+    my ($object, $type, $include_disabled) = @_;
+    return join(', ', map { $_->login } @{ _reviewers_objs($object, $type, $include_disabled) });
 }
 
 sub _reviewers_objs {
-    my ($object, $type) = @_;
+    my ($object, $type, $include_disabled) = @_;
     if (!$object->{reviewers}) {
         my $dbh = Bugzilla->dbh;
         my $user_ids = $dbh->selectcol_arrayref(
@@ -61,9 +61,10 @@ sub _reviewers_objs {
         # so we have to reorder the list
         my $users = Bugzilla::User->new_from_list($user_ids);
         my %user_map = map { $_->id => $_ } @$users;
-        my @reviewers =
-            grep { $_->name !~ UNAVAILABLE_RE }
-            map { $user_map{$_} } @$user_ids;
+        my @reviewers = map { $user_map{$_} } @$user_ids;
+        if (!$include_disabled) {
+            @reviewers = grep { $_->name !~ UNAVAILABLE_RE } @reviewers;
+        }
         $object->{reviewers} = \@reviewers;
     }
     return $object->{reviewers};
@@ -169,7 +170,7 @@ sub object_end_of_update {
     my ($new, $new_users) = _new_reviewers_from_input();
     my $old = $old_object->reviewers;
     if ($old ne $new) {
-        _update_reviewers($object, $old_object->reviewers_objs, $new_users);
+        _update_reviewers($object, $old_object->reviewers_objs(1), $new_users);
         $changes->{reviewers} = [ $old ? $old : undef, $new ? $new : undef ];
     }
 }
@@ -304,14 +305,14 @@ sub page_before_template {
         my $product = {
             name       => $product_obj->name,
             components => [],
-            reviewers  => $product_obj->reviewers_objs,
+            reviewers  => $product_obj->reviewers_objs(1),
         };
         $has_reviewers = scalar @{ $product->{reviewers} };
 
         foreach my $component_obj (@{ $product_obj->components }) {
             my $component = {
                 name       => $component_obj->name,
-                reviewers  => $component_obj->reviewers_objs,
+                reviewers  => $component_obj->reviewers_objs(1),
             };
             if (@{ $component->{reviewers} }) {
                 push @{ $product->{components} }, $component;

@@ -12,11 +12,11 @@
     [% INCLUDE global/userselect.html.tmpl
        id => "reviewers"
        name => "reviewers"
-       value => comp.reviewers
+       value => comp.reviewers(1)
        size => 64
        emptyok => 1
        title => "One or more email address (comma delimited)"
-       placeholder => product.reviewers
+       placeholder => product.reviewers(1)
     %]
   </td>
 </tr>

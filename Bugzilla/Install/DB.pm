@@ -699,6 +699,9 @@ sub update_table_definitions {
     # 2012-04-15 Frank@Frank-Becker.de - Bug 740536
     $dbh->bz_add_index('audit_log', 'audit_log_class_idx', ['class', 'at_time']);
 
+    # 2013-08-16 glob@mozilla.com - Bug 905925
+    $dbh->bz_add_index('attachments', 'attachments_ispatch_idx', ['ispatch']);
+
     ################################################################
     # New --TABLE-- changes should go *** A B O V E *** this point #
     ################################################################

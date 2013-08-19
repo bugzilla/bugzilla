@@ -23,7 +23,7 @@ sub _user_gravatar {
     my ($self) = @_;
     if (!$self->{gravatar}) {
         (my $email = $self->email) =~ s/\+(.*?)\@/@/;
-        $self->{gravatar} = 'https://secure.gravatar.com/avatar/' . md5_hex($email) . "?size=32&d=mm";
+        $self->{gravatar} = 'https://secure.gravatar.com/avatar/' . md5_hex(lc($email)) . "?size=32&d=mm";
     }
     return $self->{gravatar};
 }

@@ -168,7 +168,7 @@ sub object_end_of_update {
     return unless $object->isa('Bugzilla::Product') || $object->isa('Bugzilla::Component');;
 
     my ($new, $new_users) = _new_reviewers_from_input();
-    my $old = $old_object->reviewers;
+    my $old = $old_object->reviewers(1);
     if ($old ne $new) {
         _update_reviewers($object, $old_object->reviewers_objs(1), $new_users);
         $changes->{reviewers} = [ $old ? $old : undef, $new ? $new : undef ];

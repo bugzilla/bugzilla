@@ -22,8 +22,12 @@ BEGIN {
 sub _user_gravatar {
     my ($self) = @_;
     if (!$self->{gravatar}) {
-        (my $email = $self->email) =~ s/\+(.*?)\@/@/;
-        $self->{gravatar} = 'https://secure.gravatar.com/avatar/' . md5_hex(lc($email)) . "?size=32&d=mm";
+        if ($self->setting('show_my_gravatar') eq 'On') {
+            (my $email = $self->email) =~ s/\+(.*?)\@/@/;
+            $self->{gravatar} = 'https://secure.gravatar.com/avatar/' . md5_hex(lc($email)) . '?size=32&d=mm';
+        } else {
+            $self->{gravatar} = 'extensions/Gravatar/web/default.jpg';
+        }
     }
     return $self->{gravatar};
 }
@@ -31,6 +35,7 @@ sub _user_gravatar {
 sub install_before_final_checks {
     my ($self, $args) = @_;
     add_setting('show_gravatars', ['On', 'Off'], 'Off');
+    add_setting('show_my_gravatar', ['On', 'Off'], 'On');
 }
 
 __PACKAGE__->NAME;

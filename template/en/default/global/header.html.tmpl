@@ -299,7 +299,7 @@
               # required to log in.
               #%]
             [% IF user.authorizer.can_login && !Bugzilla.page_requires_login %]
-              [% PROCESS "account/auth/login-small.html.tmpl" %]
+              [% PROCESS "account/auth/login-small.html.tmpl" qs_suffix = "_top" %]
             [% END %]
           </ul>
         [% END %]

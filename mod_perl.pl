@@ -135,9 +135,10 @@ sub handler : method {
     Bugzilla::init_page();
     my $result = $class->SUPER::handler(@_);
 
-    # When returning data from the REST api, tell Apache not to append its
-    # error html documents to the response.
-    return Bugzilla->usage_mode == USAGE_MODE_REST
+    # When returning data from the REST api we must only return 200 or 304,
+    # which tells Apache not to append its error html documents to the
+    # response.
+    return Bugzilla->usage_mode == USAGE_MODE_REST && $result != 304
            ? Apache2::Const::OK
            : $result;
 }

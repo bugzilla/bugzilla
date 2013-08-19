@@ -56,14 +56,14 @@
 [% END %]
 
 [% PROCESS global/header.html.tmpl
-   title = "Firefox OS Dogfooding $terms.Bug Submission"
+   title = "Firefox OS Beta Program $terms.Bug Submission"
    style = inline_css
    style_urls = [ 'skins/standard/enter_bug.css' ]
    javascript = inline_js
    javascript_urls = [ 'extensions/BMO/web/js/form_validate.js', 'js/field.js', 'js/util.js' ]
 %]
 
-<h2>Firefox OS Dogfooding [% terms.Bug %] Submission</h2>
+<h2>Firefox OS Beta Program [% terms.Bug %] Submission</h2>
 
 <div id="public_place">
   As [% terms.Bugzilla %] is a public place, don't include any private or
@@ -72,8 +72,8 @@
 
 <form method="post" action="post_bug.cgi" id="bug_form" class="enter_bug_form"
       enctype="multipart/form-data" onsubmit="return onSubmit();">
-<input type="hidden" name="format" value="fxos-dogfood">
-<input type="hidden" name="created-format" value="fxos-dogfood">
+<input type="hidden" name="format" value="fxos-betaprogram">
+<input type="hidden" name="created-format" value="fxos-betaprogram">
 <input type="hidden" name="product" value="Boot2Gecko">
 <input type="hidden" name="component" value="DogfoodTriage">
 <input type="hidden" name="rep_platform" value="ARM">

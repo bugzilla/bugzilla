@@ -59,7 +59,7 @@ RewriteRule ^form[\.:]moz[\.\-:]project[\.\-:]review$ enter_bug.cgi?product=mozi
 RewriteRule ^form[\.:]docs?$ enter_bug.cgi?product=Developer+Documentation&format=doc [QSA]
 RewriteRule ^form[\.:]mdn?$ enter_bug.cgi?product=Mozilla+Developer+Network&format=mdn
 RewriteRule ^form[\.:](swag|gear)$ enter_bug.cgi?product=mozilla.org&format=swag
-RewriteRule ^form[\.:](b2g|fxos)[\.:](partner|dogfood) enter_bug.cgi?product=Boot2Gecko&format=fxos-$2 [QSA]
+RewriteRule ^form[\.:](b2g|fxos)[\.:](partner|betaprogram) enter_bug.cgi?product=Boot2Gecko&format=fxos-$2 [QSA]
 RewriteRule ^form[\.:]ipp$ enter_bug.cgi?product=Internet+Public+Policy&format=ipp
 RewriteRule ^form[\.:]creative$ enter_bug.cgi?product=Marketing&format=creative
 RewriteRule ^form[\.:]mobile[\.:]compat$ enter_bug.cgi?product=Tech+Evangelism&format=mobile-compat

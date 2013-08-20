@@ -6,6 +6,7 @@ body {
     background-image: url(noise.png), -moz-linear-gradient(#d7d3c8, #f6f4ec 400px);
     background-image: url(noise.png), -webkit-linear-gradient(#d7d3c8, #f6f4ec 400px);
     background-image: url(noise.png), linear-gradient(#d7d3c8, #f6f4ec 400px);
+    background-repeat: repeat, repeat-x;
     color: #404040;
 }
 

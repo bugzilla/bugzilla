@@ -648,6 +648,12 @@ table.tabs {
     padding: 1em 2em;
 }
 
+/* splinter */
+
+#splinter-files .new-line, #splinter-files .old-line {
+    font-size: 90%;
+}
+
 /* Smaller than standard 990 (devices and browsers) */
 @media only screen and (max-width: 989px) {
     #header .links {

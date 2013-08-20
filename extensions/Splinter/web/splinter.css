@@ -220,7 +220,7 @@ div.review-patch-comment-text {
     white-space: pre-wrap;
 }
 
-#files {
+#splinter-files {
    position: relative;
    margin-top: 0.5em;
    margin-bottom: 0.5em;

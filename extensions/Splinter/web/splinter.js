@@ -1991,7 +1991,7 @@ Splinter.appendPatchHunk = function (file, hunk, tableType, includeComments, cli
 Splinter.addPatchFile = function (file) {
     var fileDiv = new Element(document.createElement('div'));
     Dom.addClass(fileDiv, 'file');
-    fileDiv.appendTo(Dom.get('files'));
+    fileDiv.appendTo(Dom.get('splinter-files'));
     file.div = fileDiv;
 
     var statusString;
@@ -2327,7 +2327,7 @@ Splinter.start = function () {
     Dom.setStyle('attachmentInfo', 'display', 'block');
     Dom.setStyle('navigationContainer', 'display', 'block');
     Dom.setStyle('overview', 'display', 'block');
-    Dom.setStyle('files', 'display', 'block');
+    Dom.setStyle('splinter-files', 'display', 'block');
     Dom.setStyle('attachmentStatusSpan', 'display', 'none');
 
     if (Splinter.thePatch.intro) {

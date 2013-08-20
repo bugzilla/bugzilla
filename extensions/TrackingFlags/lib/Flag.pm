@@ -186,10 +186,15 @@ sub match {
         $params->{'id'} = \@flag_ids;
     }
 
-    my $flags = $class->SUPER::match(@_);
+    # We need to return inactive flags if a value has been set
+    my $is_active_filter = delete $params->{is_active};
 
+    my $flags = $class->SUPER::match($params);
     preload_all_the_things($flags, { bug_id => $bug_id });
 
+    if ($is_active_filter) {
+        $flags = [ grep { $_->is_active || exists $_->{bug_flag} } @$flags ];
+    }
     return [ sort { $a->sortkey <=> $b->sortkey } @$flags ];
 }
 

@@ -247,7 +247,7 @@ Splinter.Patch = {
     HUNK_START2_RE: /^@@[ \t]+-(\d+),(\d+)[ \t]+\+(\d+)[ \t]+@@(.*)\n/mg,       // -l,s +l
     HUNK_START3_RE: /^@@[ \t]+-(\d+)[ \t]+\+(\d+),(\d+)[ \t]+@@(.*)\n/mg,       // -l +l,s
     HUNK_START4_RE: /^@@[ \t]+-(\d+)[ \t]+\+(\d+)[ \t]+@@(.*)\n/mg,             // -l +l
-    HUNK_RE       : /((?:(?!---)[ +\\-].*(?:\n|$))*)/mg,
+    HUNK_RE       : /((?:(?!---)[ +\\-].*(?:\n|$)|(?:\n|$))*)/mg,
 
     GIT_BINARY_RE : /^diff --git a\/(\S+).*\n(?:(new|deleted) file mode \d+\n)?(?:index.*\n)?GIT binary patch\n(delta )?/mg,
 

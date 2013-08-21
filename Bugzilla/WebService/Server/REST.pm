@@ -341,6 +341,14 @@ sub _retrieve_json_params {
                 ThrowUserError('json_rpc_invalid_params', { err_msg  => $@ });
             }
         }
+
+        # Allow parameters in the query string if request was not GET.
+        # Note: query string parameters will override any matching params
+        # also specified in the request body.
+        foreach my $param ($self->cgi->url_param()) {
+            $extra_params->{$param} = $self->cgi->url_param($param);
+        }
+
         %{$params} = (%{$params}, %{$extra_params}) if %{$extra_params};
     }
 
@@ -526,6 +534,9 @@ the API. Content-Type tells the API how to interpret your request, and Accept
 tells it how you want your data back. "Content-Type" must be "application/json".
 "Accept" can be either that, or "application/javascript" for JSONP - add a "callback"
 parameter to name your callback.
+
+Parameters may also be passed in as part of the query string  for non-GET requests
+and will override any matching parameters in the request body.
 
 =head1 AUTHENTICATION
 

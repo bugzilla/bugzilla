@@ -147,9 +147,13 @@ YUI({
     dataTable.plug(Y.Plugin.DataTableSort);
 
     dataTable.plug(Y.Plugin.DataTableDataSource, {
-        datasource: dataSource,
-        initialRequest: updateQueryTable(default_query),
+        datasource: dataSource
     });
+
+    // Initial load
+    Y.on("contentready", function (e) {
+        updateQueryTable(default_query);
+    }, "#query_table");
 
     Y.one('#query').on('change', function(e) {
         var index = e.target.get('selectedIndex');

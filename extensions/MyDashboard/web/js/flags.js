@@ -140,8 +140,7 @@ YUI({
     dataTable.requestee.plug(Y.Plugin.DataTableSort);
 
     dataTable.requestee.plug(Y.Plugin.DataTableDataSource, {
-        datasource: dataSource,
-        initialRequest: updateFlagTable("requestee"),
+        datasource: dataSource.requestee
     });
 
     dataSource.requestee.plug(Y.Plugin.DataSourceJSONSchema, {
@@ -185,8 +184,7 @@ YUI({
     dataTable.requester.plug(Y.Plugin.DataTableSort);
 
     dataTable.requester.plug(Y.Plugin.DataTableDataSource, {
-        datasource: dataSource,
-        initialRequest: updateFlagTable("requester"),
+        datasource: dataSource.requester
     });
 
     dataSource.requester.plug(Y.Plugin.DataSourceJSONSchema, {
@@ -196,6 +194,14 @@ YUI({
                            "bug_status", "bug_summary", "updated", "updated_fancy"]
         }
     });
+
+    // Initial load
+    Y.on("contentready", function (e) {
+        updateFlagTable("requestee");
+    }, "#requestee_table");
+    Y.on("contentready", function (e) {
+        updateFlagTable("requester");
+    }, "#requester_table");
 
     Y.one('#requester_refresh').on('click', function(e) {
         updateFlagTable('requester');

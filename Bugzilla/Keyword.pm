@@ -104,7 +104,7 @@ sub _check_name {
 
     # We only want to validate the non-existence of the name if
     # we're creating a new Keyword or actually renaming the keyword.
-    if (!ref($self) || $self->name ne $name) {
+    if (!ref($self) || lc($self->name) ne lc($name)) {
         my $keyword = new Bugzilla::Keyword({ name => $name });
         ThrowUserError("keyword_already_exists", { name => $name }) if $keyword;
     }

@@ -397,12 +397,18 @@ table.edit_form hr {
 
 .bz_first_comment_head, .bz_comment_head {
     font-weight: normal;
-    line-height: 2;
+    font-size; 15px;
+    line-height: 32px;
     padding-bottom: 2px;
     padding-left: 0px;
     margin-left: -5px;
     white-space: nowrap;
     background-color: transparent;
+}
+
+.bz_comment_head img, .bz_first_comment_head img {
+    margin-right: 0.25em;
+    vertical-align: middle;
 }
 
 .bz_comment_user a {

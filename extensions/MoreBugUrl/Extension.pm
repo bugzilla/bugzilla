@@ -18,6 +18,7 @@ use constant MORE_SUB_CLASSES => qw(
     Bugzilla::Extension::MoreBugUrl::RT
     Bugzilla::Extension::MoreBugUrl::GetSatisfaction
     Bugzilla::Extension::MoreBugUrl::PHP
+    Bugzilla::Extension::MoreBugUrl::Redmine
 );
 
 # We need to update bug_see_also table because both

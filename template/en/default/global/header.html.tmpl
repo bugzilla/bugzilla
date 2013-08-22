@@ -113,7 +113,6 @@
     [%# CSS cascade, parts 1 & 2: YUI & Standard Bugzilla stylesheet set (persistent).
       # Always present. %]
     <link href="[% 'skins/standard/global.css' FILTER mtime FILTER html %]"
-          rel="alternate stylesheet" 
           title="[% setting_descs.standard FILTER html %]">
     [% FOREACH style_url = css_sets.standard %]
       [% PROCESS format_css_link css_set_name = 'standard' %]

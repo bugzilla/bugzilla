@@ -550,7 +550,7 @@
           Sometimes, a query needs to compare a user-related field
           (such as ReportedBy) with a role-specific user (such as the
           user running the query or the user to whom each bug is assigned).
-          When the operator is either "equals" or "notequals", the value
+          When the operator is either "is equal to" or "is not equal to", the value
           can be "%reporter%", "%assignee%", "%qacontact%", or "%user%".
           The user pronoun
           refers to the user who is executing the query or, in the case
@@ -560,12 +560,12 @@
         </para>
         <para>
           Boolean charts also let you type a group name in any user-related
-          field if the operator is either "equals", "notequals" or "anyexact".
-          This will let you query for any member belonging (or not) to the
-          specified group. The group name must be entered following the
-          "%group.foo%" syntax, where "foo" is the group name.
-          So if you are looking for bugs reported by any user being in the
-          "editbugs" group, then you can type "%group.editbugs%".
+          field if the operator is either "is equal to", "is not equal to" or
+          "contains the string (exact case)". This will let you query for
+          any member belonging (or not) to the specified group. The group name
+          must be entered following the "%group.foo%" syntax, where "foo" is
+          the group name. So if you are looking for bugs reported by any user
+          being in the "editbugs" group, then you can type "%group.editbugs%".
         </para>
       </section>
       <section id="negation">
@@ -603,16 +603,16 @@
           negated. Negation permits queries such as
           <blockquote>
             <para>
-              NOT(("product" "equals" "update") OR 
-            ("component" "equals" "Documentation"))
+              NOT(("product" "is equal to" "update") OR 
+            ("component" "is equal to" "Documentation"))
             </para>
           </blockquote>
           to find bugs that are neither 
           in the update product or in the documentation component or
           <blockquote>
             <para>
-              NOT(("commenter" "equals" "%assignee%") OR 
-              ("component" "equals" "Documentation"))
+              NOT(("commenter" "is equal to" "%assignee%") OR 
+              ("component" "is equal to" "Documentation"))
             </para>
           </blockquote>
           to find non-documentation

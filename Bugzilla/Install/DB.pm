@@ -660,6 +660,9 @@ sub update_table_definitions {
     # 2011-10-11 miketosh - Bug 690173
     _on_delete_set_null_for_audit_log_userid();
 
+    # 2011-11-01 glob@mozilla.com - Bug 240437
+    $dbh->bz_add_column('profiles', 'last_seen_date', {TYPE => 'DATETIME'});
+
     # 2011-11-28 dkl@mozilla.com - Bug 685611
     _fix_notnull_defaults();
 

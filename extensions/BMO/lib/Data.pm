@@ -91,6 +91,7 @@ tie(%$cf_visible_in_products, "Tie::IxHash",
         "Tech Evangelism"             => [],
         "Testing"                     => ["General"],
         "Toolkit"                     => [],
+        "Tracking"                    => []
     },
     qr/^cf_tracking_thunderbird|cf_blocking_thunderbird|cf_status_thunderbird/ => {
         "support.mozillamessaging.com"  => [],

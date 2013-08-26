@@ -255,7 +255,7 @@
               wrap    = 'soft'
               classes = classNames
             %]
-            [% IF NOT attachment.bug.cc || NOT attachment.bug.cc.contains(user.login) %]
+            [% IF NOT attachment.bug.cc.contains(user.login) %]
               <input type="checkbox" id="addselfcc" name="addselfcc"
                 [%~ ' checked="checked"'
                     IF user.settings.state_addselfcc.value == 'always'

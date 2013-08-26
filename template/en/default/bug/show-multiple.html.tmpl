@@ -76,7 +76,7 @@
       [% rightcells.push('qa_contact') %]
     [% END %]
     [% rightcells.push('') %]
-    [% IF bug.cc %]
+    [% IF bug.cc.size %]
       [% rightcells.push('cc') %]
     [% END %]
     [% IF bug.keywords %]

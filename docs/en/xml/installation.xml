@@ -1736,20 +1736,20 @@ C:\perl&gt; <command>ppm install &lt;module name&gt;</command>
     </section>
 
     <section id="os-linux">
-      <title>Linux Distributions</title>
-            <para>Many Linux distributions include Bugzilla and its 
+      <title>Linux/BSD Distributions</title>
+            <para>Many Linux/BSD distributions include Bugzilla and its 
             dependencies in their native package management systems. 
-            Installing Bugzilla with root access on any Linux system 
+            Installing Bugzilla with root access on any Linux/BSD system 
             should be as simple as finding the Bugzilla package in the 
             package management application and installing it using the 
             normal command syntax. Several distributions also perform 
             the proper web server configuration automatically on installation.
             </para>
-            <para>Please consult the documentation of your Linux 
+            <para>Please consult the documentation of your Linux/BSD 
             distribution for instructions on how to install packages, 
             or for specific instructions on installing Bugzilla with 
             native package management tools. There is also a 
-            <ulink url="http://wiki.mozilla.org/Bugzilla:Linux_Distro_Installation">
+            <ulink url="https://wiki.mozilla.org/Bugzilla:Prerequisites">
             Bugzilla Wiki Page</ulink> for distro-specific installation
             notes.
             </para>

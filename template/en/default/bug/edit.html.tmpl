@@ -731,7 +731,7 @@
       </th>
       <td>
         [% IF user.id %]
-          [% IF NOT bug.cc || NOT bug.cc.contains(user.login) %]
+          [% IF NOT bug.cc.contains(user.login) %]
             <input type="checkbox" id="addselfcc" name="addselfcc"
               [% " checked=\"checked\""
                    IF user.settings.state_addselfcc.value == 'always'
@@ -741,7 +741,7 @@
             <br> 
           [% END %]
         [% END %]
-        [% bug.cc.size || 0  FILTER html %] 
+        [% bug.cc.size FILTER html %] 
         [% IF bug.cc.size == 1 %]
           user
         [% ELSE %]
@@ -772,7 +772,7 @@
                 %]
             </div>
           [% END %]
-          [% IF bug.cc %]
+          [% IF bug.cc.size %]
             <select id="cc" multiple="multiple" size="5"
               [% IF bug.user.canedit %]name="cc"[% END %]>
               [% FOREACH c = bug.cc %]

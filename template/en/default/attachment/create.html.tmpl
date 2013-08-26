@@ -92,7 +92,7 @@ TUI_hide_default('attachment_text_field');
           cols    = constants.COMMENT_COLS
           wrap    = 'soft'
         %]
-        [% IF NOT bug.cc || NOT bug.cc.contains(user.login) %]
+        [% IF NOT bug.cc.contains(user.login) %]
           <br>
           <input type="checkbox" id="addselfcc" name="addselfcc"
             [%~ ' checked="checked"'

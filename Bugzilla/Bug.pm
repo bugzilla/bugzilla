@@ -301,20 +301,10 @@ use constant EXTRA_REQUIRED_FIELDS => qw(creation_ts target_milestone cc qa_cont
 
 #####################################################################
 
-# This and "new" catch every single way of creating a bug, so that we
-# can call _create_cf_accessors.
-sub _do_list_select {
-    my $invocant = shift;
-    $invocant->_create_cf_accessors();
-    return $invocant->SUPER::_do_list_select(@_);
-}
-
 sub new {
     my $invocant = shift;
     my $class = ref($invocant) || $invocant;
     my $param = shift;
-
-    $class->_create_cf_accessors();
 
     # Remove leading "#" mark if we've just been passed an id.
     if (!ref $param && $param =~ /^#(\d+)$/) {
@@ -361,6 +351,10 @@ sub new {
     }
 
     return $self;
+}
+
+sub initialize {
+    $_[0]->_create_cf_accessors();
 }
 
 sub cache_key {
@@ -4315,6 +4309,16 @@ sub _multi_select_accessor {
 }
 
 1;
+
+=head1 B<Methods>
+
+=over
+
+=item C<initialize>
+
+Ensures the accessors for custom fields are always created.
+
+=back
 
 =head1 B<Methods in need of POD>
 

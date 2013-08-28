@@ -52,6 +52,14 @@ select, select[multiple] {
 }
 
 hr {
+    border: none;
+    height: 1px;
+    color: #ccc;
+    background-color: #ccc;
+    margin: 1em 0;
+}
+
+#changeform hr {
     display: none;
 }
 
@@ -179,6 +187,7 @@ hr {
     display: inline-block;
     padding: 4px 8px;
     position: relative;
+    cursor: default;
 }
 
 .links .dropdown .anchor {

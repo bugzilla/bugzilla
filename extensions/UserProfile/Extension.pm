@@ -32,20 +32,40 @@ BEGIN {
 }
 
 sub _user_last_activity_ts         { $_[0]->{last_activity_ts}               }
-sub _user_set_last_activity_ts     { $_[0]->set('last_activity_ts', $_[1])   }
 sub _user_last_statistics_ts       { $_[0]->{last_statistics_ts}             }
-sub _user_clear_last_statistics_ts { $_[0]->set('last_statistics_ts', undef) }
+
+sub _user_set_last_activity_ts     {
+    my ($self, $value) = @_;
+    $self->set('last_activity_ts', $_[1]);
+
+    # we update the database directly to avoid audit_log entries
+    Bugzilla->dbh->do(
+        "UPDATE profiles SET last_activity_ts = ? WHERE userid = ?",
+        undef,
+        $value, $self->id);
+}
+
+sub _user_clear_last_statistics_ts {
+    my ($self) = @_;
+    $self->set('last_statistics_ts', undef);
+
+    # we update the database directly to avoid audit_log entries
+    Bugzilla->dbh->do(
+        "UPDATE profiles SET last_statistics_ts = NULL WHERE userid = ?",
+        undef,
+        $self->id);
+}
 
 #
 # hooks
 #
 
-sub bug_end_of_create {
+sub bug_after_create {
     my ($self, $args) = @_;
     $self->_bug_touched($args);
 }
 
-sub bug_end_of_update {
+sub bug_after_update {
     my ($self, $args) = @_;
     $self->_bug_touched($args);
 }
@@ -95,20 +115,22 @@ sub _bug_touched {
         }
     }
 
+    my $dbh = Bugzilla->dbh;
+    $dbh->bz_start_transaction();
+
     # update user's last_activity_ts
     $user->set_last_activity_ts($args->{timestamp});
-    $user->update();
 
     # clear the last_statistics_ts for assignee/qa-contact to force a recount
     # at the next poll
     if ($assigned_to) {
         $assigned_to->clear_last_statistics_ts();
-        $assigned_to->update();
     }
     if ($qa_contact) {
         $qa_contact->clear_last_statistics_ts();
-        $qa_contact->update();
     }
+
+    $dbh->bz_commit_transaction();
 }
 
 sub object_end_of_create {

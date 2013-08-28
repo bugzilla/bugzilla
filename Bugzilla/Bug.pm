@@ -751,6 +751,9 @@ sub create {
     # sure we're inserting a good Bug ID.
     $bug->_sync_fulltext( new_bug => 1 );
 
+    # BMO - some work should happen outside of the transaction block
+    Bugzilla::Hook::process('bug_after_create', { bug => $bug, timestamp => $timestamp });
+
     return $bug;
 }
 
@@ -1080,6 +1083,10 @@ sub update {
     # Also flush the visible_bugs cache for this bug as the user's
     # relationship with this bug may have changed.
     delete $user->{_visible_bugs_cache}->{$self->id};
+
+    # BMO - some work should happen outside of the transaction block
+    Bugzilla::Hook::process('bug_after_update',
+        { bug => $self, timestamp => $delta_ts, changes => $changes, old_bug => $old_bug });
 
     return $changes;
 }

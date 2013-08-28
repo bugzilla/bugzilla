@@ -65,7 +65,7 @@ hr {
     background: linear-gradient(#e5e3dc, #ecebe5);
     border-radius: 0;
     border-bottom: 1px solid rgba(0, 0, 0, 0.2);
-    border-top: 3px solid rgb(104, 104, 104);
+    border-top: 2px solid rgb(255, 255, 255);
     box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
     margin: -15px;
     position: absolute;
@@ -82,7 +82,7 @@ hr {
 #header .wrapper {
     -moz-box-sizing: border-box;
     -webkit-box-sizing: border-box;
-    margin: 0px auto;
+    margin: -1px auto 0px;
     width: 99%;
 }
 
@@ -126,7 +126,6 @@ hr {
     border-radius: 0;
     color: #404040;
     position: relative;
-    margin-top: -15px;
     width: 50%;
 }
 

@@ -120,6 +120,7 @@ hr {
 
 #moz_tab {
     width: 100px;
+    vertical-align: top;
 }
 
 #moz_login {

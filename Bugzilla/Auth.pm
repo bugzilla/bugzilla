@@ -124,6 +124,15 @@ sub can_logout {
     return $getter->can_logout;
 }
 
+sub login_token {
+    my ($self) = @_;
+    my $getter = $self->{_info_getter}->{successful};
+    if ($getter && $getter->isa('Bugzilla::Auth::Login::Cookie')) {
+        return $getter->login_token;
+    }
+    return undef;
+}
+
 sub user_can_create_account {
     my ($self) = @_;
     my $verifier = $self->{_verifier}->{successful};
@@ -425,6 +434,14 @@ Description: Whether or not the current login system allows users to
 Params:      None
 Returns:     C<true> if users can change their own email address,
              C<false> otherwise.
+
+=item C<login_token>
+
+Description: If a login token was used instead of a cookie then this
+             will return the current login token data such as user id
+             and the token itself.
+Params:      None
+Returns:     A hash containing C<login_token> and C<user_id>.
 
 =back
 

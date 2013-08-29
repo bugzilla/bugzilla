@@ -16,7 +16,7 @@ use Bugzilla;
 use Bugzilla::Constants;
 use Bugzilla::Error;
 use Bugzilla::WebService::Constants;
-use Bugzilla::WebService::Util qw(taint_data);
+use Bugzilla::WebService::Util qw(taint_data fix_credentials);
 use Bugzilla::Util qw(correct_urlbase html_quote);
 
 # Load resource modules
@@ -69,7 +69,7 @@ sub handle {
 
     my $params = $self->_retrieve_json_params;
 
-    $self->_fix_credentials($params);
+    fix_credentials($params);
 
     # Fix includes/excludes for each call
     rest_include_exclude($params);
@@ -131,7 +131,7 @@ sub response {
 
     # If accessing through web browser, then display in readable format
     if ($self->content_type eq 'text/html') {
-        $result = $self->json->pretty->canonical->encode($result);
+        $result = $self->json->pretty->canonical->allow_nonref->encode($result);
 
         my $template = Bugzilla->template;
         $content = "";
@@ -162,8 +162,15 @@ sub handle_login {
     # explicitly gives that site their username and password. (This is
     # particularly important for JSONP, which would allow a remote site
     # to use private data without the user's knowledge, unless we had this
-    # protection in place.)
-    if (!grep($_ eq $self->request->method, ('POST', 'PUT'))) {
+    # protection in place.) We do allow this for GET /login as we need to
+    # for Bugzilla::Auth::Persist::Cookie to create a login cookie that we
+    # can also use for Bugzilla_token support. This is OK as it requires
+    # a login and password to be supplied and will fail if they are not
+    # valid for the user.
+    if (!grep($_ eq $self->request->method, ('POST', 'PUT'))
+        && !($self->bz_class_name eq 'Bugzilla::WebService::User'
+            && $self->bz_method_name eq 'login'))
+    {
         # XXX There's no particularly good way for us to get a parameter
         # to Bugzilla->login at this point, so we pass this information
         # around using request_cache, which is a bit of a hack. The
@@ -424,15 +431,6 @@ sub _find_resource {
     return $handler_found;
 }
 
-sub _fix_credentials {
-    my ($self, $params) = @_;
-    # Allow user to pass in &username=foo&password=bar
-    if (exists $params->{'username'} && exists $params->{'password'}) {
-        $params->{'Bugzilla_login'}    = delete $params->{'username'};
-        $params->{'Bugzilla_password'} = delete $params->{'password'};
-    }
-}
-
 sub _best_content_type {
     my ($self, @types) = @_;
     return ($self->_simple_content_negotiation(@types))[0] || '*/*';
@@ -545,14 +543,22 @@ if you have a Bugzilla account by providing your login credentials.
 
 =over
 
-=item Username and password
+=item Login name and password
 
 Pass in as query parameters of any request:
 
-username=fred@bedrock.com&password=ilovewilma
+login=fred@example.com&password=ilovecheese
 
 Remember to URL encode any special characters, which are often seen in passwords and to
 also enable SSL support.
+
+=item Login token
+
+By calling GET /login?login=fred@example.com&password=ilovecheese, you get back
+a C<token> value which can then be passed to each subsequent call as
+authentication. This is useful for third party clients that cannot use cookies
+and do not want to store a user's login and password in the client. You can also
+pass in "token" as a convenience.
 
 =back
 

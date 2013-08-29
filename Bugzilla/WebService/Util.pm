@@ -33,6 +33,7 @@ our @EXPORT_OK = qw(
     taint_data
     validate
     params_to_objects
+    fix_credentials
 );
 
 sub filter ($$;$) {
@@ -146,6 +147,22 @@ sub params_to_objects {
     return \@objects;
 }
 
+sub fix_credentials {
+    my ($params) = @_;
+    # Allow user to pass in login=foo&password=bar as a convenience
+    # even if not calling GET /login. We also do not delete them as
+    # GET /login requires "login" and "password".
+    if (exists $params->{'login'} && exists $params->{'password'}) {
+        $params->{'Bugzilla_login'}    = $params->{'login'};
+        $params->{'Bugzilla_password'} = $params->{'password'};
+    }
+    # Allow user to pass token=12345678 as a convenience which becomes
+    # "Bugzilla_token" which is what the auth code looks for.
+    if (exists $params->{'token'}) {
+        $params->{'Bugzilla_token'} = $params->{'token'};
+    }
+}
+
 __END__
 
 =head1 NAME
@@ -200,6 +217,12 @@ parameters passed to a WebService method (the first parameter to this function).
 Helps make life simpler for WebService methods that internally create objects
 via both "ids" and "names" fields. Also de-duplicates objects that were loaded
 by both "ids" and "names". Returns an arrayref of objects.
+
+=head2 fix_credentials
+
+Allows for certain parameters related to authentication such as Bugzilla_login,
+Bugzilla_password, and Bugzilla_token to have shorter named equivalents passed in.
+This function converts the shorter versions to their respective internal names.
 
 =head1 B<Methods in need of POD>
 

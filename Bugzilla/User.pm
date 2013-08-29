@@ -831,9 +831,7 @@ sub in_group_id {
 # besides the name of the commenter.
 sub groups_with_icon {
     my $self = shift;
-
-    my @groups = grep { $_->icon_url } @{ $self->direct_group_membership };
-    return \@groups;
+    return $self->{groups_with_icon} //= [grep { $_->icon_url } @{ $self->direct_group_membership }];
 }
 
 sub get_products_by_permission {

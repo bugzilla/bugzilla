@@ -711,6 +711,9 @@ sub update_table_definitions {
     # 2013-02-04 dkl@mozilla.com - Bug 824346
     _fix_flagclusions_indexes();
 
+    # 2013-08-26 sgreen@redhat.com - Bug 903895
+    _fix_components_primary_key();
+
     ################################################################
     # New --TABLE-- changes should go *** A B O V E *** this point #
     ################################################################
@@ -1429,9 +1432,9 @@ sub _use_ids_for_products_and_components {
         print "Updating the database to use component IDs.\n";
 
         $dbh->bz_add_column("components", "id",
-            {TYPE => 'SMALLSERIAL', NOTNULL => 1, PRIMARYKEY => 1});
+            {TYPE => 'MEDIUMSERIAL', NOTNULL => 1, PRIMARYKEY => 1});
         $dbh->bz_add_column("bugs", "component_id",
-                            {TYPE => 'INT2', NOTNULL => 1}, 0);
+                            {TYPE => 'INT3', NOTNULL => 1}, 0);
 
         my %components;
         $sth = $dbh->prepare("SELECT id, value, product_id FROM components");
@@ -3849,6 +3852,23 @@ sub _fix_flagclusions_indexes {
                 { FIELDS => [qw(type_id product_id component_id)],
                   TYPE   => 'UNIQUE' });
         }
+    }
+}
+
+sub _fix_components_primary_key {
+    my $dbh = Bugzilla->dbh;
+    if ($dbh->bz_column_info('components', 'id')->{TYPE} ne 'MEDIUMSERIAL') {
+        $dbh->bz_drop_related_fks('components', 'id');
+        $dbh->bz_alter_column("components", "id",
+                              {TYPE => 'MEDIUMSERIAL',  NOTNULL => 1,  PRIMARYKEY => 1});
+        $dbh->bz_alter_column("flaginclusions", "component_id",
+                              {TYPE => 'INT3'});
+        $dbh->bz_alter_column("flagexclusions", "component_id",
+                              {TYPE => 'INT3'});
+        $dbh->bz_alter_column("bugs", "component_id",
+                              {TYPE => 'INT3', NOTNULL => 1});
+        $dbh->bz_alter_column("component_cc", "component_id",
+                              {TYPE => 'INT3', NOTNULL => 1});
     }
 }
 

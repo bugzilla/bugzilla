@@ -71,7 +71,7 @@
   <tr bgcolor="#6666FF">
     [% FOREACH c = columns %]
       [%# Default to align left for headers %]
-      <th align="[% (c.align || 'left') FILTER html %]">
+      <th style="text-align:[% (c.align || 'left') FILTER html %];">
         [% c.heading FILTER html %]
       </th>
     [% END %]

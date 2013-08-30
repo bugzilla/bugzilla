@@ -573,3 +573,6 @@ input.required, select.required, span.required_explanation {
 form th {
     text-align: right;
 }
+th.left {
+    text-align: left;
+}

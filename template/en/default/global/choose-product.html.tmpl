@@ -37,7 +37,7 @@
 [% FOREACH c = classifications %]
   [% IF c.object %]
     <tr>
-      <th colspan="2" align="left">[% c.object.name FILTER html %]:
+      <th colspan="2" class="left">[% c.object.name FILTER html %]:
       [%+ c.object.description FILTER html_light %]</th>
     </tr>
   [% END %]

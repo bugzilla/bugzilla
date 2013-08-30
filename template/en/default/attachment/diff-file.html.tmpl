@@ -41,7 +41,7 @@ incremental_restore()
   [% section_num = section_num + 1 %]
   <tr><th colspan="4" class="section_head">
     <table id="[% file.filename FILTER html %]_sec[% section_num %]" cellpadding="0" cellspacing="0">
-    <tr><th width="95%" align="left">
+    <tr><th width="95%" class="left">
   [% IF file.is_add %]
     Added
   [% ELSIF file.is_remove %]

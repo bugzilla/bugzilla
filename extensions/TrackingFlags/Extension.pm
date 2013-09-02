@@ -59,7 +59,6 @@ sub template_before_process {
     {
         $vars->{'tracking_flags'} = Bugzilla::Extension::TrackingFlags::Flag->match({
             product   => $vars->{'product'}->name,
-            enter_bug => 1,
             is_active => 1,
         });
 

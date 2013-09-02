@@ -68,7 +68,7 @@ sub template_before_process {
         # note: bug/edit.html.tmpl doesn't support multiple bugs
         my $bug = exists $vars->{'bugs'} ? $vars->{'bugs'}[0] : $vars->{'bug'};
 
-        if ($bug) {
+        if ($bug && !$bug->{error}) {
             $vars->{'tracking_flags'} = Bugzilla::Extension::TrackingFlags::Flag->match({
                 product     => $bug->product,
                 component   => $bug->component,

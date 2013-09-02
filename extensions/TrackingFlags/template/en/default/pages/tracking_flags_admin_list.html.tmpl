@@ -9,9 +9,10 @@
 [% PROCESS global/header.html.tmpl
   title = "Release Tracking Flags"
   style_urls = [ 'extensions/TrackingFlags/web/styles/admin.css' ]
+  javascript_urls = [ 'extensions/TrackingFlags/web/js/admin.js' ]
 %]
 
-<table class="list" cellspacing="0">
+<table id="flag_list" class="list" cellspacing="0">
 
 <tr>
   <th>Name</th>
@@ -23,7 +24,9 @@
 </tr>
 
 [% FOREACH flag = flags %]
-  <tr class="[% loop.count % 2 == 1 ? "odd_row" : "even_row" %]">
+  <tr class="flag_row
+             [% loop.count % 2 == 1 ? " odd_row" : " even_row" %]
+             [% " is_disabled" UNLESS flag.is_active %]">
     <td [% 'class="disabled"' UNLESS flag.is_active %]>
       <a href="page.cgi?id=tracking_flags_admin_edit.html&amp;mode=edit&amp;flag_id=[% flag.flag_id FILTER uri %]">
         [% flag.name FILTER html %]
@@ -50,7 +53,9 @@
 </table>
 
 <div id="new_flag">
-<a href="page.cgi?id=tracking_flags_admin_edit.html">Add Flag</a>
+  <a href="page.cgi?id=tracking_flags_admin_edit.html">Add Flag</a> |
+  <input type="checkbox" onclick="filter_flag_list(this.checked)" id="filter">
+  <label for="filter">Show disabled flags</label>
 </div>
 
 [% INCLUDE global/footer.html.tmpl %]

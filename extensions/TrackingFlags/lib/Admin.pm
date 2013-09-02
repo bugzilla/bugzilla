@@ -110,6 +110,7 @@ sub admin_edit {
             }
             $flag->set_sortkey(_next_unique_sortkey($flag->sortkey));
             $flag->set_type($flag->flag_type);
+            $flag->set_enter_bug($flag->enter_bug);
             # always default new flags as active, even when copying an inactive one
             $flag->set_is_active(1);
 
@@ -122,6 +123,7 @@ sub admin_edit {
             $vars->{mode} = 'new';
             $vars->{flag} = {
                 sortkey    => 0,
+                enter_bug  => 1,
                 is_active  => 1,
             };
             $vars->{values} = _flag_values_to_json([
@@ -149,10 +151,12 @@ sub _load_from_input {
         description => trim($input->{flag_desc} || ''),
         sortkey     => $input->{flag_sort} || 0,
         type        => trim($input->{flag_type} || ''),
+        enter_bug   => $input->{flag_enter_bug} ? 1 : 0,
         is_active   => $input->{flag_active} ? 1 : 0,
     };
     detaint_natural($flag->{id});
     detaint_natural($flag->{sortkey});
+    detaint_natural($flag->{enter_bug});
     detaint_natural($flag->{is_active});
 
     # values
@@ -289,6 +293,7 @@ sub _update_db_flag {
         description => $flag->{description},
         sortkey     => $flag->{sortkey},
         type        => $flag->{type},
+        enter_bug   => $flag->{enter_bug},
         is_active   => $flag->{is_active},
     };
 

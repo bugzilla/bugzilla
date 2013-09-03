@@ -12,6 +12,7 @@
 use lib 't';
 use Support::Files;
 use Test::More tests => 17;
+use DateTime;
 
 BEGIN { 
     use_ok(Bugzilla);

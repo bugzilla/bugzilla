@@ -22,7 +22,7 @@ a:hover, #header a:hover, #footer a:hover {
     color: #00539f;
 }
 
-select[multiple], textarea, input[type=text], .text_input, .yui-ac-input {
+select[multiple], textarea, input[type=text], input:not([type]), .text_input, .yui-ac-input {
     -moz-box-sizing: border-box;
     -webkit-box-sizing: border-box;
     box-sizing: border-box;
@@ -30,17 +30,16 @@ select[multiple], textarea, input[type=text], .text_input, .yui-ac-input {
     border-radius: .25em;
     box-shadow: inset 0 1px rgba(0, 0, 0, 0.1);
     background: white;
-    padding: 6px 5px 7px;
+    padding: 4px 3px 5px;
     color: #404040;
     vertical-align: top;
 }
 
-select[multiple], input[type=text], .text_input, .yui-ac-input, input {
+select[multiple], .text_input, .yui-ac-input, input {
     font-size: 1em;
 }
 
-
-select[multiple]:focus, textarea:focus, input[type=text]:focus, .text-input:focus, -yui-ac-input:focus, input:focus {
+select[multiple]:focus, textarea:focus, .text-input:focus, -yui-ac-input:focus, input:focus {
     border-color: #42a4e0;
     -webkit-box-shadow: 0 0 0 2px rgba(73,173,227,0.4);
     -moz-box-shadow: 0 0 0 2px rgba(73,173,227,0.4);
@@ -667,6 +666,12 @@ table.tabs {
 
 #splinter-files .new-line, #splinter-files .old-line {
     font-size: 90%;
+}
+
+/* search */
+
+#summary_field.search_field_row input {
+    padding-bottom: 6px;
 }
 
 /* Smaller than standard 990 (devices and browsers) */

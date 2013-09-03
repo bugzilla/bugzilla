@@ -56,9 +56,13 @@
 [% END %]
 
 <p>
-  <input type="checkbox" name="enabled_only" value="1" id="enabled_only"
-         checked="checked">
-  <label for="enabled_only">Enabled user accounts only</label>
+  Restrict search to
+  <select name="is_enabled">
+      <option value="2">All</option>
+      <option value="1" selected>Enabled</option>
+      <option value="0">Disabled</option>
+  </select>
+  users.
 </p>
 
 [% Hook.process('end') %]

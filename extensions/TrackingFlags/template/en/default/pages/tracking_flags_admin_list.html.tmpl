@@ -20,6 +20,9 @@
   <th>Type</th>
   <th>Sort Key</th>
   <th>Active</th>
+  [% IF show_bug_counts %]
+    <th>[% terms.Bugs %]</th>
+  [% END %]
   <th>&nbsp;</th>
 </tr>
 
@@ -44,8 +47,13 @@
     <td>
       [% flag.is_active ? "Yes" : "No" %]
     </td>
+    [% IF show_bug_counts %]
+      <td>
+        [% flag.bug_count FILTER html %]
+      </td>
+    [% END %]
     <td>
-        <a href="page.cgi?id=tracking_flags_admin_edit.html&amp;mode=copy&amp;copy_from=[% flag.flag_id FILTER uri %]">Copy</a>
+      <a href="page.cgi?id=tracking_flags_admin_edit.html&amp;mode=copy&amp;copy_from=[% flag.flag_id FILTER uri %]">Copy</a>
     </td>
   </tr>
 [% END %]
@@ -54,6 +62,10 @@
 
 <div id="new_flag">
   <a href="page.cgi?id=tracking_flags_admin_edit.html">Add Flag</a> |
+  [% IF !show_bug_counts %]
+    <a href="page.cgi?id=tracking_flags_admin_list.html&amp;show_bug_counts=1">
+      Show [% terms.bug %] counts (slower)</a> |
+  [% END %]
   <input type="checkbox" onclick="filter_flag_list(this.checked)" id="filter">
   <label for="filter">Show disabled flags</label>
 </div>

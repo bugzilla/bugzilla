@@ -102,6 +102,13 @@ var selected_components = [
   <td><input type="checkbox" name="flag_active" id="flag_active" value="1" [% "checked" IF flag.is_active %]></td>
 </tr>
 
+[% IF mode == 'edit' %]
+  <tr>
+    <th>[% terms.Bug %] Count</th>
+    <td>[% flag.bug_count FILTER html %]</td>
+  </tr>
+[% END %]
+
 </table>
 
 [%# values %]

@@ -37,7 +37,7 @@ our @EXPORT = qw(
 
 sub admin_list {
     my ($vars) = @_;
-
+    $vars->{show_bug_counts} = Bugzilla->input_params->{show_bug_counts};
     $vars->{flags} = [ Bugzilla::Extension::TrackingFlags::Flag->get_all() ];
 }
 
@@ -75,7 +75,7 @@ sub admin_edit {
         $vars->{flag}       = $flag_obj;
         $vars->{values}     = _flag_values_to_json($values);
         $vars->{visibility} = _flag_visibility_to_json($visibilities);
-        $vars->{can_delete} = !$flag_obj->has_bug_values;
+        $vars->{can_delete} = !$flag_obj->bug_count;
 
         if ($vars->{mode} eq 'new') {
             $vars->{message} = 'tracking_flag_created';
@@ -93,7 +93,7 @@ sub admin_edit {
             $vars->{flag}       = $flag;
             $vars->{values}     = _flag_values_to_json($flag->values);
             $vars->{visibility} = _flag_visibility_to_json($flag->visibility);
-            $vars->{can_delete} = !$flag->has_bug_values;
+            $vars->{can_delete} = !$flag->bug_count;
 
         } elsif ($vars->{mode} eq 'copy') {
             # copy - load the source flag

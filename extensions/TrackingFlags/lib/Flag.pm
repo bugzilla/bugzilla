@@ -223,7 +223,7 @@ sub remove_from_db {
     }
 
     # Check to see if tracking_flags_bugs table has records
-    if ($self->has_bug_values) {
+    if ($self->bug_count) {
         ThrowUserError('tracking_flag_has_contents', { flag => $self });
     }
 
@@ -396,15 +396,14 @@ sub bug_flag {
     return $self->{'bug_flag'} = Bugzilla::Extension::TrackingFlags::Flag::Bug->new($params);
 }
 
-sub has_bug_values {
+sub bug_count {
     my ($self) = @_;
-    return $self->{'has_bug_values'} if defined $self->{'has_bug_values'};
+    return $self->{'bug_count'} if defined $self->{'bug_count'};
     my $dbh = Bugzilla->dbh;
-    return $self->{'has_bug_values'} = scalar $dbh->selectrow_array("
-        SELECT 1
+    return $self->{'bug_count'} = scalar $dbh->selectrow_array("
+        SELECT COUNT(bug_id)
           FROM tracking_flags_bugs
-         WHERE tracking_flag_id = ? " .
-               $dbh->sql_limit(1),
+         WHERE tracking_flag_id = ?",
         undef, $self->flag_id);
 }
 

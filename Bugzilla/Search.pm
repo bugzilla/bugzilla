@@ -3007,6 +3007,15 @@ sub _multiselect_isempty {
         };
         return "tag_$chart_id.id IS $not NULL";
     }
+    elsif ($self->_multi_select_fields->{$field}) {
+        push @$joins, {
+            table => "bug_$field",
+            as => "bug_${field}_$chart_id",
+            from  => 'bug_id',
+            to    => 'bug_id',
+        };
+        return "bug_${field}_$chart_id.bug_id IS $not NULL";
+    }
 }
 
 ###############################

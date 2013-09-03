@@ -787,3 +787,69 @@ sub fetch {
    return $row;
 }
 1;
+
+=head1 B<Methods in need of POD>
+
+=over
+
+=item adjust_statement
+
+=item bz_check_regexp
+
+=item bz_drop_table
+
+=item bz_explain
+
+=item bz_last_key
+
+=item bz_setup_database
+
+=item bz_table_columns_real
+
+=item bz_table_list_real
+
+=item do
+
+=item prepare
+
+=item prepare_cached
+
+=item quote_identifier
+
+=item selectall_arrayref
+
+=item selectall_hashref
+
+=item selectcol_arrayref
+
+=item selectrow_array
+
+=item selectrow_arrayref
+
+=item selectrow_hashref
+
+=item sql_date_format
+
+=item sql_date_math
+
+=item sql_from_days
+
+=item sql_fulltext_search
+
+=item sql_group_concat
+
+=item sql_in
+
+=item sql_limit
+
+=item sql_not_regexp
+
+=item sql_position
+
+=item sql_regexp
+
+=item sql_string_concat
+
+=item sql_to_days
+
+=back

@@ -697,13 +697,13 @@ sub get_attachments_by_bug {
 
         # Preload datasizes.
         my $sizes =
-          $dbh->selectall_hashref('SELECT attach_id, LENGTH(thedata) AS size
+          $dbh->selectall_hashref('SELECT attach_id, LENGTH(thedata) AS datasize
                                    FROM attachments LEFT JOIN attach_data ON attach_id = id
                                    WHERE bug_id = ?',
                                    'attach_id', undef, $bug_id);
 
         # Force the size of attachments not in the DB to be recalculated.
-        $_->{datasize} = $sizes->{$_->id}->{size} || undef foreach @$attachments;
+        $_->{datasize} = $sizes->{$_->id}->{datasize} || undef foreach @$attachments;
     }
     return $attachments;
 }

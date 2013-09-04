@@ -91,6 +91,10 @@
   text-align: right;
 }
 
+.field_label_sup {
+  font-weight: normal;
+}
+
 #summary_field.search_field_row {
   width: inherit;
 }

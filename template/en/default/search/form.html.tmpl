@@ -170,11 +170,13 @@ TUI_hide_default('information_query');
            value="[% default.bug_id.0 FILTER html %]" size="20">
            <div class="field_help">(comma-separated list)</div>
     </div>
-    should be 
-    <select name="bug_id_type" id="bug_id_type">
-      <option value="anyexact"[% " selected" IF default.bug_id_type.0 == "anyexact" %]>only included in</option>
-      <option value="nowords"[% " selected" IF default.bug_id_type.0 == "nowords" %]>excluded from</option>
-    </select> the results
+    <span class="field_label field_label_sup">
+      should be 
+      <select name="bug_id_type" id="bug_id_type">
+        <option value="anyexact"[% " selected" IF default.bug_id_type.0 == "anyexact" %]>only included in</option>
+        <option value="nowords"[% " selected" IF default.bug_id_type.0 == "nowords" %]>excluded from</option>
+      </select> the results
+    </span>
   </div>
 
   [% Hook.process('after_freetext_fields') %]

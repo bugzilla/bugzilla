@@ -239,6 +239,7 @@ if (defined $cgi->param('id')) {
     # Include both action = 'same_bug' and 'nothing'.
     else {
         $vars->{'bug'} = $first_bug;
+        $vars->{'bugids'} = $first_bug->id;
     }
 }
 else {

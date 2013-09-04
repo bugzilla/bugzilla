@@ -2875,11 +2875,6 @@ sub _multiselect_table {
         return "attachments INNER JOIN attach_data "
                . " ON attachments.attach_id = attach_data.id"
     }
-    elsif ($field eq 'flagtypes.name') {
-        $args->{full_field} = $dbh->sql_string_concat("flagtypes.name",
-                                                      "flags.status");
-        return "flags INNER JOIN flagtypes ON flags.type_id = flagtypes.id";
-    }
     my $table = "bug_$field";
     $args->{full_field} = "bug_$field.value";
     return $table;

@@ -30,22 +30,22 @@
 [% qorder = order FILTER uri IF order %]
 
 [% javascript =  BLOCK %]
-  [% new_url = cgi.self_url %]
   [% IF quicksearch %]
-    [% new_url = BLOCK ~%]
-      buglist.cgi?quicksearch=[% quicksearch FILTER uri %]
+    [% new_param = BLOCK ~%]
+      quicksearch=[% quicksearch FILTER uri %]
       [%~ IF cgi.param('list_id') ~%]
         &list_id=[% cgi.param('list_id') FILTER uri %]
       [%~ END %]
     [% END %]
   [% ELSIF cgi.param('token') != '' %]
-    [% new_url = 'buglist.cgi?'
-                 _ cgi.canonicalise_query('token', 'cmdtype', 'remtype') %]
+    [% new_param = cgi.canonicalise_query('token', 'cmdtype', 'remtype') %]
+  [% ELSE %]
+    [% new_param = cgi.canonicalise_query %]
   [% END %]
 
   if (history && history.replaceState) {
     history.replaceState(null, "[% unfiltered_title FILTER js %]",
-                         "[% new_url FILTER js %]");
+                         "buglist.cgi?[% new_param FILTER js %]");
     document.title = "[% unfiltered_title FILTER js %]";
   }
   [% javascript FILTER none %]

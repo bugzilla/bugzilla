@@ -38,6 +38,10 @@ use Bugzilla::Version;
 use Bugzilla::Milestone;
 use Bugzilla::Status;
 use Bugzilla::Token qw(issue_hash_token);
+use Bugzilla::Search;
+
+use List::Util qw(max);
+use List::MoreUtils qw(uniq);
 
 #############
 # Constants #
@@ -438,11 +442,13 @@ sub history {
 
 sub search {
     my ($self, $params) = @_;
+    my $user = Bugzilla->user;
+    my $dbh  = Bugzilla->dbh;
 
     Bugzilla->switch_to_shadow_db();
 
     if ( defined($params->{offset}) and !defined($params->{limit}) ) {
-        ThrowCodeError('param_required', 
+        ThrowCodeError('param_required',
                        { param => 'limit', function => 'Bug.search()' });
     }
 
@@ -458,60 +464,77 @@ sub search {
     }
 
     $params = Bugzilla::Bug::map_fields($params);
-    delete $params->{WHERE};
 
-    unless (Bugzilla->user->is_timetracker) {
-        delete $params->{$_} foreach qw(estimated_time remaining_time deadline);
-    }
+    my %options = ( fields => ['bug_id'] );
+
+    # Find the highest custom field id
+    my @field_ids = grep(/^f(\d+)$/, keys %$params);
+    my $last_field_id = @field_ids ? max @field_ids + 1 : 1;
 
     # Do special search types for certain fields.
-    if ( my $bug_when = delete $params->{delta_ts} ) {
-        $params->{WHERE}->{'delta_ts >= ?'} = $bug_when;
+    if (my $change_when = delete $params->{'delta_ts'}) {
+        $params->{"f${last_field_id}"} = 'delta_ts';
+        $params->{"o${last_field_id}"} = 'equals';
+        $params->{"v${last_field_id}"} = $change_when;
+        $last_field_id++;
     }
-    if (my $when = delete $params->{creation_ts}) {
-        $params->{WHERE}->{'creation_ts >= ?'} = $when;
-    }
-    if (my $summary = delete $params->{short_desc}) {
-        my @strings = ref $summary ? @$summary : ($summary);
-        my @likes = ("short_desc LIKE ?") x @strings;
-        my $clause = join(' OR ', @likes);
-        $params->{WHERE}->{"($clause)"} = [map { "\%$_\%" } @strings];
-    }
-    if (my $whiteboard = delete $params->{status_whiteboard}) {
-        my @strings = ref $whiteboard ? @$whiteboard : ($whiteboard);
-        my @likes = ("status_whiteboard LIKE ?") x @strings;
-        my $clause = join(' OR ', @likes);
-        $params->{WHERE}->{"($clause)"} = [map { "\%$_\%" } @strings];
+    if (my $creation_when = delete $params->{'creation_ts'}) {
+        $params->{"f${last_field_id}"} = 'creation_ts';
+        $params->{"o${last_field_id}"} = 'equals';
+        $params->{"v${last_field_id}"} = $creation_when;
+        $last_field_id++;
     }
 
+    # Some fields require a search type such as short desc, keywords, etc.
+    foreach my $param (qw(short_desc longdesc status_whiteboard bug_file_loc)) {
+        if (defined $params->{$param} && !defined $params->{$param . '_type'}) {
+            $params->{$param . '_type'} = 'allwordssubstr';
+        }
+    }
+    if (defined $params->{'keywords'} && !defined $params->{'keywords_type'}) {
+        $params->{'keywords_type'} = 'allwords';
+    }
+
+    # Backwards compatibility with old method regarding role search
+    $params->{'reporter'} = delete $params->{'creator'} if $params->{'creator'};
+    foreach my $role (qw(assigned_to reporter qa_contact longdesc cc)) {
+        next if !exists $params->{$role};
+        my $value = delete $params->{$role};
+        $params->{"f${last_field_id}"} = $role;
+        $params->{"o${last_field_id}"} = "anywordssubstr";
+        $params->{"v${last_field_id}"} = ref $value ? join(" ", @{$value}) : $value;
+        $last_field_id++;
+    }
+
+    my %match_params = %{ $params };
+    delete $params->{include_fields};
+    delete $params->{exclude_fields};
+
     # If no other parameters have been passed other than limit and offset
-    # and a WHERE parameter was not created earlier, then we throw error
-    # if system is configured to do so.
-    if (!$params->{WHERE}
-        && !grep(!/(limit|offset)/i, keys %$params)
+    # then we throw error if system is configured to do so.
+    if (!grep(!/^(limit|offset)$/i, keys %$params)
         && !Bugzilla->params->{search_allow_no_criteria})
     {
         ThrowUserError('buglist_parameters_required');
     }
 
-    # We want include_fields and exclude_fields to be passed to
-    # _bug_to_hash but not to Bugzilla::Bug->match so we copy the 
-    # params and delete those before passing to Bugzilla::Bug->match.
-    my %match_params = %{ $params };
-    delete $match_params{'include_fields'};
-    delete $match_params{'exclude_fields'};
+    $options{order_columns} = [ split(/\s*,\s*/, delete $params->{order}) ] if $params->{order};
+    $options{params} = $params;
 
-    my $count_only = delete $match_params{count_only};
+    my $search = new Bugzilla::Search(%options);
+    my ($data) = $search->data;
 
-    my $bugs = Bugzilla::Bug->match(\%match_params);
-    my $visible = Bugzilla->user->visible_bugs($bugs);
-    if ($count_only) {
-        return { bug_count => scalar @$visible };
+    if (!scalar @$data) {
+        return { bugs => [] };
     }
-    else {
-        my @hashes = map { $self->_bug_to_hash($_, $params) } @$visible;
-        return { bugs => \@hashes };
-    }
+
+    # Search.pm won't return bugs that the user shouldn't see so no filtering is needed.
+    my @bug_ids = map { $_->[0] } @$data;
+    my $bug_objects = Bugzilla::Bug->new_from_list(\@bug_ids);
+
+    my @bugs = map { $self->_bug_to_hash($_, \%match_params) } @$bug_objects;
+
+    return { bugs => \@bugs };
 }
 
 sub possible_duplicates {
@@ -2427,9 +2450,18 @@ the "Foo" or "Bar" products, you'd pass:
  product => ['Foo', 'Bar']
 
 Some Bugzillas may treat your arguments case-sensitively, depending
-on what database system they are using. Most commonly, though, Bugzilla is 
-not case-sensitive with the arguments passed (because MySQL is the 
+on what database system they are using. Most commonly, though, Bugzilla is
+not case-sensitive with the arguments passed (because MySQL is the
 most-common database to use with Bugzilla, and MySQL is not case sensitive).
+
+In addition to the fields listed below, you may also use criteria that
+is similar to what is used in the Advanced Search screen of the Bugzilla
+UI. This includes fields specified by C<Search by Change History> and
+C<Custom Search>. The easiest way to determine what the field names are and what
+format Bugzilla expects, is to first construct your query using the
+Advanced Search UI, execute it and use the query parameters in they URL
+as your key/value pairs for the WebService call. With REST, you can
+just reuse the query parameter portion in the REST call itself.
 
 =over
 
@@ -2600,6 +2632,9 @@ C<limit> is set equal to zero. Otherwise maximum results returned are limited
 by system configuration.
 
 =item REST API call added in Bugzilla B<5.0>.
+
+=item Updated to allow for full search capability similar to the Bugzilla UI 
+in Bugzilla B<5.0>.
 
 =back
 

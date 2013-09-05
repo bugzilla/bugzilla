@@ -178,6 +178,25 @@ sub reorg_move_bugs {
     print "Updated $count users.\n";
 }
 
+sub merge_users_before {
+    my ($self, $args) = @_;
+    my ($old_id, $new_id) = @$args{qw(old_id new_id)};
+    # when users are merged, we have to delete all the statistics for both users
+    # we'll recalcuate the stats after the merge
+    print "deleting user profile statistics for $old_id and $new_id\n";
+    my $dbh = Bugzilla->dbh;
+    foreach my $table (qw( profiles_statistics profiles_statistics_status profiles_statistics_products )) {
+        $dbh->do("DELETE FROM $table WHERE " . $dbh->sql_in('user_id', [ $old_id, $new_id ]));
+    }
+}
+
+sub merge_users_after {
+    my ($self, $args) = @_;
+    my $new_id = $args->{new_id};
+    print "generating user profile statistics $new_id\n";
+    update_statistics_by_user($new_id);
+}
+
 sub webservice_user_get {
     my ($self, $args) = @_;
     my ($service, $users) = @$args{qw(webservice users)};

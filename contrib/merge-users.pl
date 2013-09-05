@@ -50,6 +50,7 @@ use Bugzilla;
 use Bugzilla::Constants;
 use Bugzilla::Util;
 use Bugzilla::User;
+use Bugzilla::Hook;
 
 use Getopt::Long;
 use Pod::Usage;
@@ -156,6 +157,9 @@ foreach my $table (qw(logincookies tokens profiles)) {
 # Start the transaction
 $dbh->bz_start_transaction();
 
+# BMO - pre-work hook
+Bugzilla::Hook::process('merge_users_before', { old_id => $old_id, new_id => $new_id });
+
 # Delete old records from logincookies and tokens tables.
 $dbh->do('DELETE FROM logincookies WHERE userid = ?', undef, $old_id);
 $dbh->do('DELETE FROM tokens WHERE userid = ?', undef, $old_id);
@@ -233,6 +237,9 @@ $dbh->do('DELETE FROM profiles WHERE userid = ?', undef, $old_id);
 # them, some of them may no longer match the regexps.
 my $user = new Bugzilla::User($new_id);
 $user->derive_regexp_groups();
+
+# BMO - post-work hook
+Bugzilla::Hook::process('merge_users_after', { old_id => $old_id, new_id => $new_id });
 
 # Commit the transaction
 $dbh->bz_commit_transaction();

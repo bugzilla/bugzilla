@@ -75,7 +75,6 @@ sub admin_edit {
         $vars->{flag}       = $flag_obj;
         $vars->{values}     = _flag_values_to_json($values);
         $vars->{visibility} = _flag_visibility_to_json($visibilities);
-        $vars->{can_delete} = !$flag_obj->bug_count;
 
         if ($vars->{mode} eq 'new') {
             $vars->{message} = 'tracking_flag_created';

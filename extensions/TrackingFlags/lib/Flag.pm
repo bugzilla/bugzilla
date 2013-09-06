@@ -215,13 +215,6 @@ sub remove_from_db {
     my $self = shift;
     my $dbh = Bugzilla->dbh;
 
-    # Check to see if bug activity table has records
-    my $has_activity = $dbh->selectrow_array("SELECT COUNT(*) FROM bugs_activity
-                                              WHERE fieldid = ?", undef, $self->id);
-    if ($has_activity) {
-        ThrowUserError('tracking_flag_has_activity', { flag => $self });
-    }
-
     # Check to see if tracking_flags_bugs table has records
     if ($self->bug_count) {
         ThrowUserError('tracking_flag_has_contents', { flag => $self });
@@ -234,6 +227,7 @@ sub remove_from_db {
     eval {
         $dbh->bz_start_transaction();
 
+        $dbh->do('DELETE FROM bugs_activity WHERE fieldid = ?', undef, $self->id);
         $dbh->do('DELETE FROM fielddefs WHERE name = ?', undef, $self->name);
 
         $dbh->bz_commit_transaction();
@@ -405,6 +399,17 @@ sub bug_count {
           FROM tracking_flags_bugs
          WHERE tracking_flag_id = ?",
         undef, $self->flag_id);
+}
+
+sub activity_count {
+    my ($self) = @_;
+    return $self->{'activity_count'} if defined $self->{'activity_count'};
+    my $dbh = Bugzilla->dbh;
+    return $self->{'activity_count'} = scalar $dbh->selectrow_array("
+        SELECT COUNT(bug_id)
+          FROM bugs_activity
+         WHERE fieldid = ?",
+        undef, $self->id);
 }
 
 ######################################

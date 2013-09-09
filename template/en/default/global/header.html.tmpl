@@ -364,6 +364,14 @@
 
 <div id="bugzilla-body">
 
+[%# in most cases the "header" variable provides redundant information, however
+  # there are exceptions where not displaying this text is problematic. %]
+[% IF user.settings.skin.value == 'Mozilla'
+      && template.name.match('^attachment/')
+%]
+  <h2>[% header FILTER none %]</h2>
+[% END %]
+
 [% IF Param('announcehtml') %]
 [% Param('announcehtml') FILTER none %]
 [% END %]

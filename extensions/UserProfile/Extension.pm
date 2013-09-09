@@ -421,6 +421,25 @@ sub db_schema_abstract_schema {
             },
         ],
     };
+    $args->{'schema'}->{'profiles_statistics_recalc'} = {
+        FIELDS => [
+            user_id => {
+                TYPE    => 'INT3',
+                NOTNULL => 1,
+                REFERENCES => {
+                    TABLE  => 'profiles',
+                    COLUMN => 'userid',
+                    DELETE => 'CASCADE',
+                }
+            },
+        ],
+        INDEXES => [
+            profiles_statistics_recalc_idx => {
+                FIELDS => [ 'user_id' ],
+                TYPE => 'UNIQUE',
+            },
+        ],
+    };
 }
 
 sub install_update_db {

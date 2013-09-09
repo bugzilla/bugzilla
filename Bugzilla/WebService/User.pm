@@ -376,7 +376,9 @@ user that was logged in, and a C<token> which can be passed in
 the parameters as authentication in other calls. A set of http cookies
 is also sent with the response. These cookies *or* the token can be sent
 along with any future requests to the webservice, for the duration of the
-session.
+session. Note that cookies are not accepted for GET requests for JSONRPC
+and REST for security reasons. You may, however, use the token or valid
+login parameters for those requests.
 
 =item B<Errors>
 

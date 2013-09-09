@@ -274,12 +274,22 @@ sub post_bug_attachment_flags {
 
 sub flag_end_of_update {
     my ($self, $args) = @_;
-    my ($attachment, $changes) = @$args{qw(object changes)};
-    if (exists $changes->{'flag.review'}
-        && $changes->{'flag.review'}->[1] eq '?'
-        && $attachment->bug->product_obj->reviewer_required)
-    {
-        ThrowUserError('reviewer_required');
+    my ($object, $new_flags) = @$args{qw(object new_flags)};
+    my $bug = $object->isa('Bugzilla::Attachment') ? $object->bug : $object;
+    return unless $bug->product_obj->reviewer_required;
+
+    foreach my $orig_change (@$new_flags) {
+        my $change = $orig_change; # work on a copy
+        $change =~ s/^[^:]+://;
+        my $reviewer = '';
+        if ($change =~ s/\(([^\)]+)\)$//) {
+            $reviewer = $1;
+        }
+        my ($name, $value) = $change =~ /^(.+)(.)$/;
+
+        if ($name eq 'review' && $value eq '?' && $reviewer eq '') {
+            ThrowUserError('reviewer_required');
+        }
     }
 }
 

@@ -223,8 +223,6 @@ sub _morph_flag_updates {
 
     my @removed = _morph_flag_update($args->{'old_flags'});
     my @added = _morph_flag_update($args->{'new_flags'});
-    delete $args->{'old_flags'};
-    delete $args->{'new_flags'};
 
     my $changes = {};
     foreach my $ra (@removed, @added) {
@@ -251,7 +249,8 @@ sub _morph_flag_updates {
 sub _morph_flag_update {
     my ($values) = @_;
     my @result;
-    foreach my $change (@$values) {
+    foreach my $orig_change (@$values) {
+        my $change = $orig_change; # work on a copy
         $change =~ s/^[^:]+://;
         my $requestee = '';
         if ($change =~ s/\(([^\)]+)\)$//) {
@@ -371,6 +370,7 @@ sub flag_end_of_update {
     return unless $self->_enabled;
     _morph_flag_updates($args);
     $self->_object_modified($args);
+    delete $args->{changes};
 }
 
 # comments in bugzilla 4.0 doesn't aren't included in the bug_end_of_* hooks,

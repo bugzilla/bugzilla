@@ -424,7 +424,7 @@ sub type                   { return FIELD_TYPE_EXTENSION; }
 sub legal_values           { return $_[0]->values;        }
 sub custom                 { return 1;     }
 sub in_new_bugmail         { return 1;     }
-sub obsolete               { return 0;     }
+sub obsolete               { return $_[0]->is_active ? 1 : 0; }
 sub enter_bug              { return 1;     }
 sub buglist                { return 1;     }
 sub is_select              { return 1;     }

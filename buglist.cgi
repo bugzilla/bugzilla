@@ -110,7 +110,7 @@ my $serverpush =
     && exists $ENV{'HTTP_USER_AGENT'} 
       && $ENV{'HTTP_USER_AGENT'} =~ /(Mozilla.[3-9]|Opera)/
         && $ENV{'HTTP_USER_AGENT'} !~ /compatible/i
-          && $ENV{'HTTP_USER_AGENT'} !~ /(?:WebKit|Trident)/
+          && $ENV{'HTTP_USER_AGENT'} !~ /(?:WebKit|Trident|KHTML)/
             && !defined($cgi->param('serverpush'))
               || $cgi->param('serverpush');
 

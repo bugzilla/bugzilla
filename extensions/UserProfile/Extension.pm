@@ -119,18 +119,55 @@ sub _bug_touched {
     $dbh->bz_start_transaction();
 
     # update user's last_activity_ts
-    $user->set_last_activity_ts($args->{timestamp});
+    eval {
+        $user->set_last_activity_ts($args->{timestamp});
+        $self->_recalc_remove($user);
+    };
+    if ($@) {
+        warn $@;
+        $self->_recalc_insert($user);
+    }
 
     # clear the last_statistics_ts for assignee/qa-contact to force a recount
     # at the next poll
     if ($assigned_to) {
-        $assigned_to->clear_last_statistics_ts();
+        eval {
+            $assigned_to->clear_last_statistics_ts();
+            $self->_recalc_remove($assigned_to);
+        };
+        if ($@) {
+            warn $@;
+            $self->_recalc_insert($assigned_to);
+        }
     }
     if ($qa_contact) {
-        $qa_contact->clear_last_statistics_ts();
+        eval {
+            $qa_contact->clear_last_statistics_ts();
+            $self->_recalc_remove($qa_contact);
+        };
+        if ($@) {
+            warn $@;
+            $self->_recalc_insert($qa_contact);
+        }
     }
 
     $dbh->bz_commit_transaction();
+}
+
+sub _recalc_insert {
+    my ($self, $user) = @_;
+    Bugzilla->dbh->do(
+        "INSERT IGNORE INTO profiles_statistics_recalc SET user_id=?",
+        undef, $user->id
+    );
+}
+
+sub _recalc_remove {
+    my ($self, $user) = @_;
+    Bugzilla->dbh->do(
+        "DELETE FROM profiles_statistics_recalc WHERE user_id=?",
+        undef, $user->id
+    );
 }
 
 sub object_end_of_create {
@@ -153,8 +190,14 @@ sub _object_touched {
         # if an attachment is created or updated, that counts as user activity
         my $user = Bugzilla->user;
         my $timestamp = Bugzilla->dbh->selectrow_array('SELECT LOCALTIMESTAMP(0)');
-        $user->set_last_activity_ts($timestamp);
-        $user->update();
+        eval {
+            $user->set_last_activity_ts($timestamp);
+            $self->_recalc_remove($user);
+        };
+        if ($@) {
+            warn $@;
+            $self->_recalc_insert($user);
+        }
     }
     elsif ($object->isa('Bugzilla::Product') && exists $args->{changes}->{name}) {
         # if a product is renamed by an admin, rename in the
@@ -417,6 +460,25 @@ sub db_schema_abstract_schema {
         INDEXES => [
             profiles_statistics_products_idx => {
                 FIELDS => [ 'user_id', 'product' ],
+                TYPE => 'UNIQUE',
+            },
+        ],
+    };
+    $args->{'schema'}->{'profiles_statistics_recalc'} = {
+        FIELDS => [
+            user_id => {
+                TYPE    => 'INT3',
+                NOTNULL => 1,
+                REFERENCES => {
+                    TABLE  => 'profiles',
+                    COLUMN => 'userid',
+                    DELETE => 'CASCADE',
+                }
+            },
+        ],
+        INDEXES => [
+            profiles_statistics_recalc_idx => {
+                FIELDS => [ 'user_id' ],
                 TYPE => 'UNIQUE',
             },
         ],

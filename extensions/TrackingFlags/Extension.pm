@@ -59,6 +59,7 @@ sub template_before_process {
     {
         $vars->{'tracking_flags'} = Bugzilla::Extension::TrackingFlags::Flag->match({
             product   => $vars->{'product'}->name,
+            enter_bug => 1,
             is_active => 1,
         });
 
@@ -121,6 +122,11 @@ sub db_schema_abstract_schema {
                 TYPE    => 'INT2',
                 NOTNULL => 1,
                 DEFAULT => '0',
+            },
+            enter_bug => {
+                TYPE    => 'BOOLEAN',
+                NOTNULL => 1,
+                DEFAULT => 'TRUE',
             },
             is_active => {
                 TYPE    => 'BOOLEAN',

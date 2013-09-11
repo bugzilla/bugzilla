@@ -35,6 +35,7 @@ use constant DB_COLUMNS => qw(
     description
     type
     sortkey
+    enter_bug
     is_active
 );
 
@@ -45,6 +46,7 @@ use constant UPDATE_COLUMNS => qw(
     description
     type
     sortkey
+    enter_bug
     is_active
 );
 
@@ -53,8 +55,8 @@ use constant VALIDATORS => {
     description => \&_check_description,
     type        => \&_check_type,
     sortkey     => \&_check_sortkey,
+    enter_bug   => \&Bugzilla::Object::check_boolean,
     is_active   => \&Bugzilla::Object::check_boolean,
-
 };
 
 use constant UPDATE_VALIDATORS => {
@@ -62,6 +64,7 @@ use constant UPDATE_VALIDATORS => {
     description => \&_check_description,
     type        => \&_check_type,
     sortkey     => \&_check_sortkey,
+    enter_bug   => \&Bugzilla::Object::check_boolean,
     is_active   => \&Bugzilla::Object::check_boolean,
 };
 
@@ -332,6 +335,7 @@ sub set_name        { $_[0]->set('name', $_[1]);        }
 sub set_description { $_[0]->set('description', $_[1]); }
 sub set_type        { $_[0]->set('type', $_[1]);        }
 sub set_sortkey     { $_[0]->set('sortkey', $_[1]);     }
+sub set_enter_bug   { $_[0]->set('enter_bug', $_[1]);   }
 sub set_is_active   { $_[0]->set('is_active', $_[1]);   }
 
 ###############################
@@ -343,6 +347,7 @@ sub name        { return $_[0]->{'name'};        }
 sub description { return $_[0]->{'description'}; }
 sub flag_type   { return $_[0]->{'type'};        }
 sub sortkey     { return $_[0]->{'sortkey'};     }
+sub enter_bug   { return $_[0]->{'enter_bug'};   }
 sub is_active   { return $_[0]->{'is_active'};   }
 
 sub values {
@@ -425,7 +430,6 @@ sub legal_values           { return $_[0]->values;        }
 sub custom                 { return 1;     }
 sub in_new_bugmail         { return 1;     }
 sub obsolete               { return $_[0]->is_active ? 1 : 0; }
-sub enter_bug              { return 1;     }
 sub buglist                { return 1;     }
 sub is_select              { return 1;     }
 sub is_abnormal            { return 1;     }

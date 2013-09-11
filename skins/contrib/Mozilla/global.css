@@ -74,10 +74,7 @@ hr {
     border-bottom: 1px solid rgba(0, 0, 0, 0.2);
     border-top: 2px solid rgb(255, 255, 255);
     box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
-    margin: -15px;
-    position: absolute;
-    width: 100%;
-    z-index: 2;
+    margin: -15px -15px 0 -15px;
     color: transparent;
 }
 
@@ -233,7 +230,7 @@ hr {
     background: none;
     border: none;
     color: #404040;
-    margin: 80px auto 15px;
+    margin: 10px auto 15px;
     padding: 0;
     width: 99%;
 }

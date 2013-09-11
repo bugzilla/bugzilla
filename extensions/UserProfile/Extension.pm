@@ -91,7 +91,7 @@ sub _bug_touched {
             $assigned_to = $bug->assigned_to;
         }
         if (exists $args->{changes}->{qa_contact}
-            && $args->{changes}->{qa_contact}->[1] ne $user->login)
+            && ($args->{changes}->{qa_contact}->[1] || '') ne $user->login)
         {
             $qa_contact = $bug->qa_contact;
         }

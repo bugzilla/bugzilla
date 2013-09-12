@@ -900,10 +900,11 @@ sub update {
     }
 
     if (scalar(keys %$changes)) {
-      $dbh->do('UPDATE attachments SET modification_time = ? WHERE attach_id = ?',
-               undef, ($timestamp, $self->id));
-      $dbh->do('UPDATE bugs SET delta_ts = ? WHERE bug_id = ?',
-               undef, ($timestamp, $self->bug_id));
+        $dbh->do('UPDATE attachments SET modification_time = ? WHERE attach_id = ?',
+                 undef, ($timestamp, $self->id));
+        $dbh->do('UPDATE bugs SET delta_ts = ? WHERE bug_id = ?',
+                 undef, ($timestamp, $self->bug_id));
+        $self->{modification_time} = $timestamp;
     }
 
     return $changes;

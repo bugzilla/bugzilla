@@ -735,6 +735,87 @@ sub add_attachment {
     return { ids => \@created_ids };
 }
 
+sub update_attachment {
+    my ($self, $params) = validate(@_, 'ids');
+
+    my $user = Bugzilla->login(LOGIN_REQUIRED);
+    my $dbh = Bugzilla->dbh;
+
+    my $ids = delete $params->{ids};
+    defined $ids || ThrowCodeError('param_required', { param => 'ids' });
+
+    # Some fields cannot be sent to set_all
+    foreach my $key (qw(login password token)) {
+        delete $params->{$key};
+    }
+
+    # We can't update flags, and summary is really description
+    delete $params->{flags};
+    if (exists $params->{summary}) {
+        $params->{description} = delete $params->{summary};
+    }
+
+    # Get all the attachments, after verifying that they exist and are editable
+    my @attachments = ();
+    my %bugs = ();
+    foreach my $id (@$ids) {
+        my $attachment = Bugzilla::Attachment->new($id)
+          || ThrowUserError("invalid_attach_id", { attach_id => $id });
+        my $bug = $attachment->bug;
+        $attachment->_check_bug;
+        $attachment->validate_can_edit($bug->product_id)
+          || ThrowUserError("illegal_attachment_edit", { attach_id => $id });
+
+        push @attachments, $attachment;
+        $bugs{$bug->id} = $bug;
+    }
+
+    # Update the values
+    foreach my $attachment (@attachments) {
+        $attachment->set_all($params);
+    }
+
+    $dbh->bz_start_transaction();
+
+    # Do the actual update and get information to return to user
+    my @result;
+    foreach my $attachment (@attachments) {
+        my $changes = $attachment->update();
+
+        my %hash = (
+            id               => $self->type('int', $attachment->id),
+            last_change_time => $self->type('dateTime', $attachment->modification_time),
+            changes          => {},
+        );
+
+        foreach my $field (keys %$changes) {
+            my $change = $changes->{$field};
+            # Description is shown as summary to the user
+            $field = 'summary' if $field eq 'description';
+
+            # We normalize undef to an empty string, so that the API
+            # stays consistent for things like Deadline that can become
+            # empty.
+            $hash{changes}->{$field} = {
+                removed => $self->type('string', $change->[0] // ''),
+                added   => $self->type('string', $change->[1] // '')
+            };
+        }
+
+        push(@result, \%hash);
+    }
+
+    $dbh->bz_commit_transaction();
+
+    # Email users about the change
+    foreach my $bug (values %bugs) {
+        Bugzilla::BugMail::Send($bug->id, { 'changer' => $user });
+    }
+
+    # Return the information to the user
+    return { attachments => \@result };
+}
+
 sub add_comment {
     my ($self, $params) = @_;
 
@@ -2939,6 +3020,156 @@ You set the "data" field to an empty string.
 =item The return value has changed in Bugzilla B<4.4>.
 
 =item REST API call added in Bugzilla B<5.0>.
+
+=back
+
+=back
+
+
+=head2 update_attachment
+
+B<UNSTABLE>
+
+=over
+
+=item B<Description>
+
+This allows you to update attachment metadata in Bugzilla.
+
+=item B<REST>
+
+To update attachment metadata on a current attachment:
+
+PUT /bug/attachment/<attach_id>
+
+The params to include in the POST body, as well as the returned
+data format are the same as below. The C<ids> param will be
+overridden as it it pulled from the URL path.
+
+=item B<Params>
+
+=over
+
+=item C<ids>
+
+B<Required> C<array> An array of integers -- the ids of the attachments you
+want to update.
+
+=item C<file_name>
+
+C<string> The "file name" that will be displayed
+in the UI for this attachment.
+
+=item C<summary>
+
+C<string> A short string describing the
+attachment.
+
+=item C<content_type>
+
+C<string> The MIME type of the attachment, like
+C<text/plain> or C<image/png>.
+
+=item C<is_patch>
+
+C<boolean> True if Bugzilla should treat this attachment as a patch.
+If you specify this, you do not need to specify a C<content_type>.
+The C<content_type> of the attachment will be forced to C<text/plain>.
+
+=item C<is_private>
+
+C<boolean> True if the attachment should be private (restricted
+to the "insidergroup"), False if the attachment should be public.
+
+=item C<is_obsolete>
+
+C<boolean> True if the attachment is obsolete, False otherwise.
+
+=back
+
+=item B<Returns>
+
+A C<hash> with a single field, "attachment". This points to an array of hashes
+with the following fields:
+
+=over
+
+=item C<id>
+
+C<int> The id of the attachment that was updated.
+
+=item C<last_change_time>
+
+C<dateTime> The exact time that this update was done at, for this attachment.
+If no update was done (that is, no fields had their values changed and
+no comment was added) then this will instead be the last time the attachment
+was updated.
+
+=item C<changes>
+
+C<hash> The changes that were actually done on this bug. The keys are
+the names of the fields that were changed, and the values are a hash
+with two keys:
+
+=over
+
+=item C<added> (C<string>) The values that were added to this field.
+possibly a comma-and-space-separated list if multiple values were added.
+
+=item C<removed> (C<string>) The values that were removed from this
+field.
+
+=back
+
+=back
+
+Here's an example of what a return value might look like:
+
+ {
+   attachments => [
+     {
+       id    => 123,
+       last_change_time => '2010-01-01T12:34:56',
+       changes => {
+         summary => {
+           removed => 'Sample ptach',
+           added   => 'Sample patch'
+         },
+         is_obsolete => {
+           removed => '0',
+           added   => '1',
+         }
+       },
+     }
+   ]
+ }
+
+=item B<Errors>
+
+This method can throw all the same errors as L</get>, plus:
+
+=over
+
+=item 601 (Invalid MIME Type)
+
+You specified a C<content_type> argument that was blank, not a valid
+MIME type, or not a MIME type that Bugzilla accepts for attachments.
+
+=item 603 (File Name Not Specified)
+
+You did not specify a valid for the C<file_name> argument.
+
+=item 604 (Summary Required)
+
+You did not specify a value for the C<summary> argument.
+
+=back
+
+=item B<History>
+
+=over
+
+=item Added in Bugzilla B<5.0>.
 
 =back
 

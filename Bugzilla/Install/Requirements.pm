@@ -272,11 +272,21 @@ sub OPTIONAL_MODULES {
         version => 0,
         feature => ['auth_radius'],
     },
+    # XXX - Once we require XMLRPC::Lite 0.717 or higher, we can
+    # remove SOAP::Lite from the list.
     {
         package => 'SOAP-Lite',
         module  => 'SOAP::Lite',
         # Fixes various bugs, including 542931 and 552353 + stops
         # throwing warnings with Perl 5.12.
+        version => '0.712',
+        feature => ['xmlrpc'],
+    },
+    # Since SOAP::Lite 1.0, XMLRPC::Lite is no longer included
+    # and so it must be checked separately.
+    {
+        package => 'XMLRPC-Lite',
+        module  => 'XMLRPC::Lite',
         version => '0.712',
         feature => ['xmlrpc'],
     },

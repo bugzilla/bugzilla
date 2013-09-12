@@ -599,7 +599,8 @@ sub active_custom_fields {
     }
     if (!exists $class->request_cache->{$cache_id}) {
         my $fields = Bugzilla::Field->match({ custom => 1, obsolete => 0});
-        Bugzilla::Hook::process('active_custom_fields', 
+        @$fields = grep($_->type ne FIELD_TYPE_EXTENSION, @$fields);
+        Bugzilla::Hook::process('active_custom_fields',
                                 { fields => \$fields, params => $params });
         $class->request_cache->{$cache_id} = $fields;
     }

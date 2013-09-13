@@ -546,23 +546,4 @@ sub mailer_before_send {
     }
 }
 
-sub bug_check_can_change_field {
-    my ($self, $args) = @_;
-    my $field        = $args->{'field'};
-    my $old_value    = $args->{'old_value'};
-    my $new_value    = $args->{'new_value'};
-    my $priv_results = $args->{'priv_results'};
-
-    my $flag = Bugzilla::Extension::TrackingFlags::Flag->new(
-        { name => $field });
-    $flag || return;
-
-    # Used by show_bug to determine if field is visible so always allow
-    return if ($old_value == 0 && $new_value == 1);
-
-    if (defined $new_value && !$flag->can_set_value($new_value)) {
-        push (@$priv_results, PRIVILEGES_REQUIRED_EMPOWERED);
-    }
-}
-
 __PACKAGE__->NAME;

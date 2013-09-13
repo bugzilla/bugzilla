@@ -94,6 +94,17 @@ sub logout {
     Bugzilla->logout;
 }
 
+sub valid_login {
+    my ($self, $params) = @_;
+    defined $params->{login}
+        || ThrowCodeError('param_required', { param => 'login' });
+    Bugzilla->login();
+    if (Bugzilla->user->id && Bugzilla->user->login eq $params->{login}) {
+        return $self->type('boolean', 1);
+    }
+    return $self->type('boolean', 0);
+}
+
 #################
 # User Creation #
 #################
@@ -421,6 +432,50 @@ Log out the user. Does nothing if there is no user logged in.
 =item B<Returns> (nothing)
 
 =item B<Errors> (none)
+
+=back
+
+=head2 valid_login
+
+B<UNSTABLE>
+
+=over
+
+=item B<Description>
+
+This method will verify whether a client's cookies or current login
+token is still valid or have expired. A valid username must be provided
+as well that matches.
+
+=item B<Params>
+
+=over
+
+=item C<login>
+
+The login name that matches the provided cookies or token.
+
+=item C<token>
+
+(string) Persistent login token current being used for authentication (optional).
+Cookies passed by client will be used before the token if both provided.
+
+=back
+
+=item B<Returns>
+
+Returns true/false depending on if the current cookies or token are valid
+for the provided username.
+
+=item B<Errors> (none)
+
+=item B<History>
+
+=over
+
+=item Added in Bugzilla B<5.0>.
+
+=back
 
 =back
 

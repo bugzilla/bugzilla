@@ -1477,6 +1477,8 @@ sub _special_parse_chfield {
 
     @fields = map { $_ eq '[Bug creation]' ? 'creation_ts' : $_ } @fields;
 
+    return undef unless ($date_from ne '' || $date_to ne '' || $value_to ne '');
+
     my $clause = new Bugzilla::Search::Clause();
 
     # It is always safe and useful to push delta_ts into the charts
@@ -1498,44 +1500,21 @@ sub _special_parse_chfield {
         $clause->add('delta_ts', 'lessthaneq', $date_to);
     }
 
-    # Basically, we construct the chart like:
-    #
-    # (added_for_field1 = value OR added_for_field2 = value)
-    # AND (date_field1_changed >= date_from OR date_field2_changed >= date_from)
-    # AND (date_field1_changed <= date_to OR date_field2_changed <= date_to)
-    #
-    # Theoretically, all we *really* would need to do is look for the field id
-    # in the bugs_activity table, because we've already limited the search
-    # by delta_ts above, but there's no chart to do that, so we check the
-    # change date of the fields.
-    
-    if ($value_to ne '') {
-        my $value_clause = new Bugzilla::Search::Clause('OR');
-        foreach my $field (@fields) {
-            $value_clause->add($field, 'changedto', $value_to);
-        }
-        $clause->add($value_clause);
-    }
+    # chfieldto is supposed to be a relative date or a date of the form
+    # YYYY-MM-DD, i.e. without the time appended to it. We append the
+    # time ourselves so that the end date is correctly taken into account.
+    $date_to .= ' 23:59:59' if $date_to =~ /^\d{4}-\d{1,2}-\d{1,2}$/;
 
-    if ($date_from ne '') {
-        my $from_clause = new Bugzilla::Search::Clause('OR');
-        foreach my $field (@fields) {
-            $from_clause->add($field, 'changedafter', $date_from);
-        }
-        $clause->add($from_clause);
-    }
-    if ($date_to ne '') {
-        # chfieldto is supposed to be a relative date or a date of the form
-        # YYYY-MM-DD, i.e. without the time appended to it. We append the
-        # time ourselves so that the end date is correctly taken into account.
-        $date_to .= ' 23:59:59' if $date_to =~ /^\d{4}-\d{1,2}-\d{1,2}$/;
+    my $join_clause = new Bugzilla::Search::Clause('OR');
 
-        my $to_clause = new Bugzilla::Search::Clause('OR');
-        foreach my $field (@fields) {
-            $to_clause->add($field, 'changedbefore', $date_to);
-        }
-        $clause->add($to_clause);
+    foreach my $field (@fields) {
+        my $sub_clause = new Bugzilla::Search::ClauseGroup();
+        $sub_clause->add(condition($field, 'changedto', $value_to)) if $value_to ne '';
+        $sub_clause->add(condition($field, 'changedafter', $date_from)) if $date_from ne '';
+        $sub_clause->add(condition($field, 'changedbefore', $date_to)) if $date_to ne '';
+        $join_clause->add($sub_clause);
     }
+    $clause->add($join_clause);
 
     return @{$clause->children} ? $clause : undef;
 }

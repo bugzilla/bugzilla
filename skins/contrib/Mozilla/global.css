@@ -22,7 +22,7 @@ a:hover, #header a:hover, #footer a:hover {
     color: #00539f;
 }
 
-select[multiple], textarea, input[type=text], input:not([type]), .text_input, .yui-ac-input {
+select[multiple], textarea, input[type=text], input[type=password], input:not([type]), .text_input, .yui-ac-input {
     -moz-box-sizing: border-box;
     -webkit-box-sizing: border-box;
     box-sizing: border-box;

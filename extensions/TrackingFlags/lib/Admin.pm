@@ -81,6 +81,7 @@ sub admin_edit {
         } else {
             $vars->{message} = 'tracking_flag_updated';
         }
+        $vars->{mode} = 'edit';
 
     } else {
         # initial load
@@ -145,7 +146,7 @@ sub _load_from_input {
     # flag
 
     my $flag = {
-        id          => $input->{flag_id}   || 0,
+        id          => ($input->{mode} eq 'edit' ? $input->{flag_id} : 0),
         name        => trim($input->{flag_name} || ''),
         description => trim($input->{flag_desc} || ''),
         sortkey     => $input->{flag_sort} || 0,

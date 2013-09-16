@@ -180,7 +180,7 @@ var selected_components = [
 
 <div>
   <input type="submit" name="submit" id="submit" value="[% mode == 'edit' ? 'Save Changes' : 'Add' %]">
-  [% IF !flag.bug_count %]
+  [% IF mode == "edit" && !flag.bug_count %]
     <input type="hidden" name="delete" id="delete" value="">
     <input type="submit" value="Delete Flag [% IF flag.activity_count %] and Activity[% END  %]"
           onclick="return delete_confirm('[% flag.name FILTER js FILTER html %]')">

@@ -334,6 +334,18 @@ our $cf_disabled_flags = [
     'cf_status_thunderbird21',
     'cf_tracking_seamonkey218',
     'cf_status_seamonkey218',
+    'cf_tracking_firefox22',
+    'cf_status_firefox22',
+    'cf_tracking_thunderbird22',
+    'cf_status_thunderbird22',
+    'cf_tracking_seamonkey219',
+    'cf_status_seamonkey219',
+    'cf_tracking_firefox23',
+    'cf_status_firefox23',
+    'cf_tracking_thunderbird23',
+    'cf_status_thunderbird23',
+    'cf_tracking_seamonkey220',
+    'cf_status_seamonkey220',
 ];
 
 # Who to CC on particular bugmails when certain groups are added or removed.

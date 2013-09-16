@@ -2256,12 +2256,10 @@ You do not have access to the bug_id you specified.
 
 =over
 
-=item C<permissive> argument added to this method's params in Bugzilla B<3.4>. 
+=item C<permissive> argument added to this method's params in Bugzilla B<3.4>.
 
 =item The following properties were added to this method's return values
 in Bugzilla B<3.4>:
-
-=item REST API call added in Bugzilla B<5.0>
 
 =over
 
@@ -2305,6 +2303,8 @@ and all custom fields.
 
 =item The C<actual_time> item was added to the C<bugs> return value
 in Bugzilla B<4.4>.
+
+=item REST API call added in Bugzilla B<5.0>.
 
 =back
 

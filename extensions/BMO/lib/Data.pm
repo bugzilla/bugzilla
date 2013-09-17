@@ -138,6 +138,7 @@ tie(%$cf_visible_in_products, "Tie::IxHash",
         "Toolkit"               => [],
         "Websites"              => ["getpersonas.com"],
         "Webtools"              => [],
+        "www.mozilla.org"       => [],
     },
     qr/^cf_colo_site$/ => {
         "mozilla.org"           => [

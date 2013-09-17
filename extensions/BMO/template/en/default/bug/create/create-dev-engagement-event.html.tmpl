@@ -1,0 +1,533 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% PROCESS global/variables.none.tmpl %]
+
+[% inline_css = BLOCK %]
+  #bug_form {
+    max-width: 50em;
+  }
+
+  #bug_form th {
+    text-align: left;
+    padding-top: 0.5em;
+  }
+
+  #bug_form .section-head {
+    font-size: larger;
+    padding-top: 1em;
+  }
+
+  #bug_form th:not(.section-head), #bug_form td {
+    padding-left: 2em;
+  }
+
+  #bug_form .mandatory {
+    color: red;
+  }
+
+  #bug_form .blurb {
+    font-style: italic;
+  }
+
+  #bug_form .wide {
+    width: 40em;
+  }
+
+  #bug_form input[disabled] {
+    background: transparent;
+  }
+[% END %]
+
+[% inline_js = BLOCK %]
+// <script>
+  function onRequestOtherChange() {
+    var cb = document.getElementById('request-other');
+    var input = document.getElementById('request-other-text');
+    input.disabled = !cb.checked;
+    if (cb.checked)
+      input.focus();
+  }
+
+  function onRequestSponsorshipChange() {
+    var cb = document.getElementById('request-sponsorship');
+    if (cb.checked) {
+      YAHOO.util.Dom.removeClass('sponsorship-suggestion-fields', 'bz_default_hidden');
+    }
+    else {
+      YAHOO.util.Dom.addClass('sponsorship-suggestion-fields', 'bz_default_hidden');
+    }
+  }
+
+  function onProductOtherChange() {
+    var cb = document.getElementById('product-other');
+    var input = document.getElementById('product-other-text');
+    input.disabled = !cb.checked;
+    if (cb.checked)
+      input.focus();
+  }
+
+  function onSubmit() {
+    if (document.getElementById('request-other').checked
+        && !isFilledOut('request-other-text')
+    ) {
+      document.getElementById('request-other').checked = false;
+      onRequestOtherChange();
+    }
+
+    var alert_text = '';
+
+    if (!isFilledOut('name'))
+      alert_text += "Please enter your name.\n";
+    if (!isFilledOut('email'))
+      alert_text += "Please enter your email address.\n";
+    if (!isFilledOut('role'))
+      alert_text += "Please enter your role.\n";
+
+    if (!isFilledOut('event'))
+      alert_text += "Please enter the event name.\n";
+    if (!isFilledOut('start_date'))
+      alert_text += "Please enter the event start date.\n";
+    if (!isFilledOut('end_date'))
+      alert_text += "Please enter the event end date.\n";
+    if (!isFilledOut('attendees'))
+      alert_text += "Please enter number of expected attendees.\n";
+    if (!isFilledOut('audience'))
+      alert_text += "Please enter primary audience.\n";
+
+
+    var wb = '';
+    if (document.getElementById('request-keynote').checked)
+      wb += '[keynote] ';
+    if (document.getElementById('request-talk').checked)
+      wb += '[talk] ';
+    if (document.getElementById('request-workshop').checked)
+      wb += '[workshop] ';
+    if (document.getElementById('request-sponsorship').checked)
+      wb += '[sponsorship] ';
+    if (document.getElementById('request-other').checked)
+      wb += '[other] ';
+    if (wb == '')
+      alert_text += "Please select what you're requesting.\n";
+
+    if (alert_text != '') {
+      alert(alert_text);
+      return false;
+    }
+
+    document.getElementById('status_whiteboard').value = wb.replace(/ $/, '');
+    var summary = document.getElementById('event').value + ', ' + long_start_date();
+    var loc = document.getElementById('location').value;
+    if (loc)
+      summary = summary + ' (' + loc + ')';
+    document.getElementById('short_desc').value = summary;
+    document.getElementById('bug_file_loc').value = document.getElementById('link').value;
+    document.getElementById('cf_due_date').value = document.getElementById('start_date').value;
+
+    return true;
+  }
+
+  function long_start_date() {
+    var ymd = document.getElementById('start_date').value.split('-');
+    if (ymd.length != 3)
+      return '';
+    var month = YAHOO.bugzilla.calendar_start_date.cfg.getProperty('MONTHS_LONG')[ymd[1] - 1];
+    return month + ' ' + ymd[0];
+  }
+
+  YAHOO.util.Event.onDOMReady(function() {
+    createCalendar('start_date');
+    createCalendar('end_date');
+    onRequestOtherChange();
+    onRequestSponsorshipChange();
+    onProductOtherChange();
+  });
+// </script>
+[% END %]
+
+[% mandatory = BLOCK %]
+  <span class="mandatory" title="Mandatory">*</span>
+[% END %]
+
+[% PROCESS global/header.html.tmpl
+   title = "Developer Events Request Form"
+   style = inline_css
+   style_urls = [ 'skins/standard/enter_bug.css' ]
+   javascript = inline_js
+   javascript_urls = [ 'extensions/BMO/web/js/form_validate.js', 'js/field.js', 'js/util.js' ]
+   yui = [ 'calendar' ]
+%]
+
+<h2>Developer Events Request Form</h2>
+
+<form method="post" action="post_bug.cgi" id="bug_form" class="enter_bug_form"
+      enctype="multipart/form-data" onsubmit="return onSubmit();">
+<input type="hidden" name="format" value="dev-engagement-event">
+<input type="hidden" name="product" value="Developer Engagement">
+<input type="hidden" name="short_desc" id="short_desc" value="">
+<input type="hidden" name="component" value="Events Request">
+<input type="hidden" name="rep_platform" value="All">
+<input type="hidden" name="op_sys" value="All">
+<input type="hidden" name="priority" value="--">
+<input type="hidden" name="version" value="unspecified">
+<input type="hidden" name="bug_severity" id="bug_severity" value="normal">
+<input type="hidden" name="comment" id="comment" value="">
+<input type="hidden" name="status_whiteboard" id="status_whiteboard" value="">
+<input type="hidden" name="bug_file_loc" id="bug_file_loc" value="">
+<input type="hidden" name="cf_due_date" id="cf_due_date" value="">
+<input type="hidden" name="groups" id="groups" value="mozilla-corporation-confidential">
+<input type="hidden" name="token" value="[% token FILTER html %]">
+
+<table id="bug_form">
+
+<tr>
+  <td>
+    <p>
+      Hi! Thanks so much for asking Mozilla to participate at your event!
+    </p>
+    <p>
+      The Developer Events Team evaluates each request individually, based on
+      multiple criteria, including quarterly goals and priorities. We meet at
+      least biweekly, and this form is designed to gather all the information
+      we need to evaluate each request at these meetings. Please take a minute
+      to fill it out thoroughly so we can process your request as soon as
+      possible.
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <th class="section-head">
+    First, tell us about yourself!
+  </th>
+</tr>
+
+<tr>
+  <th>
+    What is your name? [% mandatory FILTER none %]
+  </th>
+</tr>
+<tr>
+  <td>
+    <input type="text" name="name" id="name" size="40" class="wide"
+           value="[% user.name FILTER html %]">
+  </td>
+</tr>
+
+<tr>
+  <th>
+    Please provide your email address. [% mandatory FILTER none %]
+  </th>
+</tr>
+<tr>
+  <td>
+    <input type="text" name="email" id="email" size="40" class="wide"
+           value="[% user.login FILTER html %]">
+  </td>
+</tr>
+
+<tr>
+  <th>
+    What is your role in relation to this event? [% mandatory FILTER none %]
+  </th>
+</tr>
+<tr>
+  <td>
+    <div class="blurb">
+      eg. organizer, speaker/atendee (past), speaker/attendee (current), etc.
+    </div>
+    <input type="text" name="role" id="role" size="40" class="wide">
+  </td>
+</tr>
+
+<tr>
+  <th class="section-head">
+    Let's start with the basics.
+  </th>
+</tr>
+
+<tr>
+  <th>
+    Event Name [% mandatory FILTER none %]
+  </th>
+</tr>
+<tr>
+  <td>
+    <input type="text" name="event" id="event" size="40" class="wide">
+  </td>
+</tr>
+
+<tr>
+  <th>
+    Start Date [% mandatory FILTER none %]
+  </th>
+</tr>
+<tr>
+  <td>
+    <input type="text" name="start_date" id="start_date" size="15" class="date"
+           onchange="updateCalendarFromField(this)">
+    <button type="button" class="calendar_button"
+            id="button_calendar_start_date"
+            onclick="showCalendar('start_date')">
+      <span>Calendar</span>
+    </button>
+    <div id="con_calendar_start_date"></div>
+  </td>
+</tr>
+
+<tr>
+  <th>
+    End Date [% mandatory FILTER none %]
+  </th>
+</tr>
+<tr>
+  <td>
+    <input type="text" name="end_date" id="end_date" size="15" class="date"
+           onchange="updateCalendarFromField(this)">
+    <button type="button" class="calendar_button"
+            id="button_calendar_end_date"
+            onclick="showCalendar('end_date')">
+      <span>Calendar</span>
+    </button>
+    <div id="con_calendar_end_date"></div>
+  </td>
+</tr>
+
+<tr>
+  <th>
+    Event Location
+  </th>
+</tr>
+<tr>
+  <td>
+    <div class="blurb">
+      Include city, state, and country. Please write "Multiple" if this event
+      takes place across several locations.
+    </div>
+    <input type="text" name="location" id="location" size="40" class="wide">
+  </td>
+</tr>
+
+<tr>
+  <th>
+    Venue
+  </th>
+</tr>
+<tr>
+  <td>
+    <div class="blurb">
+      What is the name of the venue where your event will be held? Enter TBD if
+      you don't know yet.
+    </div>
+    <input type="text" name="venue" id="venue" size="40" class="wide">
+  </td>
+</tr>
+
+<tr>
+  <th>
+    Weblink
+  </th>
+</tr>
+<tr>
+  <td>
+    <div class="blurb">
+      Weblink to the event site, Eventbrite page, Lanyrd page, Meetup page, etc.
+    </div>
+    <input type="text" name="link" id="link" size="40" class="wide">
+  </td>
+</tr>
+
+<tr>
+  <th>
+    Number of expected attendees [% mandatory FILTER none %]
+  </th>
+</tr>
+<tr>
+  <td>
+    <input type="text" name="attendees" id="attendees" size="15">
+  </td>
+</tr>
+
+<tr>
+  <th>
+    Please give a [short] description of the event. [% mandatory FILTER none %]
+  </th>
+</tr>
+<tr>
+  <td>
+    <div class="blurb">
+      Include track topics, presentation topics, event format.
+    </div>
+    <textarea name="desc" id="desc" rows="10" cols="40" class="wide"></textarea>
+  </td>
+</tr>
+
+<tr>
+  <th>
+    Who is the primary audience for this event? [% mandatory FILTER none %]
+  </th>
+</tr>
+<tr>
+  <td>
+    <div class="blurb">
+      Developers (specify coding language and platform), business development,
+      marketing associates, corporate executives, etc.
+    </div>
+    <input type="text" name="audience" id="audience" size="40" class="wide">
+  </td>
+</tr>
+
+<tr>
+  <th>
+    Which Mozilla products/projects are most relevant to this event? [% mandatory FILTER none %]
+  </th>
+</tr>
+<tr>
+  <td>
+    <div class="blurb">
+      Please select all that apply.
+      See <a href="https://www.mozilla.org/en-US/products/" target="_blank">mozilla.org/products</a>
+      for more information about Mozilla products.
+    </div>
+    <input type="checkbox" name="product-fxos" id="product-fxos">
+    <label for="product-fxos">Firefox OS</label><br>
+    <input type="checkbox" name="product-fx" id="product-fx">
+    <label for="product-fx">Firefox Web Browser</label><br>
+    <input type="checkbox" name="product-webmaker" id="product-webmaker">
+    <label for="product-webmaker">Webmaker</label><br>
+    <input type="checkbox" name="product-persona" id="product-persona">
+    <label for="product-persona">Persona</label><br>
+    <input type="checkbox" name="product-marketplace" id="product-marketplace">
+    <label for="product-marketplace">Marketplace</label><br>
+    <input type="checkbox" name="product-tb" id="product-tb">
+    <label for="product-tb">Thunderbird</label><br>
+    <input type="checkbox" name="product-fow" id="product-fow">
+    <label for="product-fow">The Free and Open Web</label><br>
+    <input type="checkbox" name="product-other" id="product-other" onchange="onProductOtherChange()">
+    <label for="product-other">Other:</label>
+    <input type="text" name="product-other-text" id="product-other-text" size="40" disabled>
+  </td>
+</tr>
+
+<tr>
+  <th class="section-head">
+    Tell us more about what you're looking for!
+  </th>
+</tr>
+
+<tr>
+  <th>
+    What are you requesting from Mozilla? [% mandatory FILTER none %]
+  </th>
+</tr>
+<tr>
+  <td>
+    <div class="blurb">
+      Please select all that apply.
+    </div>
+    <input type="checkbox" name="request-keynote" id="request-keynote">
+    <label for="request-keynote">Keynote Presentation</label><br>
+    <input type="checkbox" name="request-talk" id="request-talk">
+    <label for="request-talk">Talk Presentation (non-keynote)</label><br>
+    <input type="checkbox" name="request-workshop" id="request-workshop">
+    <label for="request-workshop">Workshop</label><br>
+    <input type="checkbox" name="request-sponsorship" id="request-sponsorship" onchange="onRequestSponsorshipChange()">
+    <label for="request-sponsorship">Sponsorship</label><br>
+    <input type="checkbox" name="request-other" id="request-other" onchange="onRequestOtherChange()">
+    <label for="request-other">Other:</label>
+    <input type="text" name="request-other-text" id="request-other-text" size="40" disabled>
+  </td>
+</tr>
+
+<tbody id="sponsorship-suggestion-fields">
+  <tr>
+    <th>
+      If requesting sponsorship, what amount/level do you suggest?
+    </th>
+  </tr>
+  <tr>
+    <td>
+      <input type="text" name="sponsorship-suggestion" id="sponsorship-suggestion" size="40" class="wide">
+    </td>
+  </tr>
+</tbody>
+
+<tr>
+  <th>
+    Please list the names of anyone from Mozilla who are already registered to
+    attend, speak, or participate in this event.
+  </th>
+</tr>
+<tr>
+  <td>
+    <input type="text" name="mozillians" id="mozillians" size="40" class="wide">
+  </td>
+</tr>
+
+<tr>
+  <th>
+    Are you requesting a specific person to present or participate at this
+    event? If so, please list their name(s).
+  </th>
+</tr>
+<tr>
+  <td>
+    <input type="text" name="specific" id="specific" size="40" class="wide">
+  </td>
+</tr>
+
+<tr>
+  <th>
+    If this individual is unable to attend/speak/participate in this event, is
+    there anyone else you would like to request?
+  </th>
+</tr>
+<tr>
+  <td>
+    <input type="text" name="fallback" id="fallback" size="40" class="wide">
+  </td>
+</tr>
+
+<tr>
+  <th>
+    Please upload a Sponsorship Prospectus if you have one.
+  </th>
+</tr>
+<tr>
+  <td>
+    <input type="file" name="data" id="data" size="40">
+    <input type="hidden" name="contenttypemethod" value="autodetect">
+    <input type="hidden" id="description" name="description" value="Sponsorship Prospectus">
+  </td>
+</tr>
+
+<tr>
+  <th>
+    Anything else that may help us review this request?
+  </th>
+</tr>
+<tr>
+  <td>
+    <input type="text" name="else" id="else" size="40" class="wide">
+  </td>
+</tr>
+
+<tr>
+  <td>&nbsp;</td>
+</tr>
+<tr>
+  <td>
+    <input type="submit" id="commit" value="Submit Request">
+  </td>
+</tr>
+
+</table>
+
+</form>
+
+[% PROCESS global/footer.html.tmpl %]

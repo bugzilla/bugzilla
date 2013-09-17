@@ -189,9 +189,10 @@ tie(%$cf_visible_in_products, "Tie::IxHash",
         "Toolkit"               => [],
     },
     qw/^cf_due_date$/ => {
-        "Marketing"    => [],
-        "Mozilla Reps" => [],
-        "mozilla.org"  => ["Security Assurance: Review Request"],
+        "Developer Engagement"  => [],
+        "Marketing"             => [],
+        "mozilla.org"           => ["Security Assurance: Review Request"],
+        "Mozilla Reps"          => [],
     },
     qw/^cf_locale$/ => {
         "www.mozilla.org"       => [],

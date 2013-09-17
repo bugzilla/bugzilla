@@ -114,6 +114,12 @@ sub show {
 
     Bugzilla->switch_to_shadow_db();
 
+    # Throw error if token was provided and user is not logged
+    # in meaning token was invalid/expired.
+    if (exists $params->{token} && !Bugzilla->user->id) {
+        ThrowUserError('invalid_token');
+    }
+
     my $bug_id = delete $params->{id};
     $bug_id || ThrowCodeError('params_required',
                               { function => 'Ember.show', params => ['id'] });

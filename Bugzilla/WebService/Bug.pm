@@ -474,13 +474,13 @@ sub search {
     # Do special search types for certain fields.
     if (my $change_when = delete $params->{'delta_ts'}) {
         $params->{"f${last_field_id}"} = 'delta_ts';
-        $params->{"o${last_field_id}"} = 'equals';
+        $params->{"o${last_field_id}"} = 'greaterthaneq';
         $params->{"v${last_field_id}"} = $change_when;
         $last_field_id++;
     }
     if (my $creation_when = delete $params->{'creation_ts'}) {
         $params->{"f${last_field_id}"} = 'creation_ts';
-        $params->{"o${last_field_id}"} = 'equals';
+        $params->{"o${last_field_id}"} = 'greaterthaneq';
         $params->{"v${last_field_id}"} = $creation_when;
         $last_field_id++;
     }

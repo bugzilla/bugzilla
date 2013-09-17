@@ -1089,6 +1089,10 @@ sub _attachment_to_hash {
         $item->{'data'} = $self->type('base64', $attach->data);
     }
 
+    if (filter_wants $filters, 'size') {
+        $item->{'size'} = $self->type('int', $attach->datasize);
+    }
+
     if (filter_wants $filters, 'flags') {
         $item->{'flags'} = [ map { $self->_flag_to_hash($_) } @{$attach->flags} ];
     }
@@ -1518,6 +1522,10 @@ diagram above) are:
 =item C<data>
 
 C<base64> The raw data of the attachment, encoded as Base64.
+
+=item C<size>
+
+C<int> The length (in bytes) of the attachment.
 
 =item C<creation_time>
 

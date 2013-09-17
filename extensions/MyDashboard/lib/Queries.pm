@@ -164,7 +164,7 @@ sub query_bugs {
 }
 
 sub query_flags {
-    my ($type, $include_closed) = @_;
+    my ($type) = @_;
     my $user     = Bugzilla->user;
     my $dbh      = Bugzilla->dbh;
     my $date_now = DateTime->now(time_zone => $user->timezone);
@@ -231,10 +231,6 @@ sub query_flags {
     foreach my $flag (@unfiltered_flags) {
         # Skip this flag if the bug is not visible to the user
         next if !$visible_bugs{$flag->{'bug_id'}};
-
-        # Skip closed unless user requested closed bugs
-        next if (!$include_closed
-                 && !is_open_state($visible_bugs{$flag->{'bug_id'}}->{'bug_status'}));
 
         # Include bug status and summary with each flag
         $flag->{'bug_status'}  = $visible_bugs{$flag->{'bug_id'}}->{'bug_status'};

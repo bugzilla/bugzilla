@@ -26,8 +26,6 @@ YUI({
     var updateFlagTable = function(type) {
         if (!type) return;
 
-        var include_closed = Y.one('#' + type + '_closed').get('checked') ? 1 : 0;
-
         counter = counter + 1;
 
         var callback = {
@@ -49,7 +47,7 @@ YUI({
             version: "1.1",
             method:  "MyDashboard.run_flag_query",
             id:      counter,
-            params:  { type : type, include_closed: include_closed }
+            params:  { type : type }
         };
 
         var stringified = Y.JSON.stringify(json_object);
@@ -159,9 +157,6 @@ YUI({
     Y.one('#requestee_buglist').on('click', function(e) {
         loadBugList('requestee');
     });
-    Y.one('#requestee_closed').on('change', function(e) {
-        updateFlagTable('requestee');
-    });
 
     // Requester
     dataSource.requester = new Y.DataSource.IO({ source: 'jsonrpc.cgi' });
@@ -208,8 +203,5 @@ YUI({
     });
     Y.one('#requester_buglist').on('click', function(e) {
         loadBugList('requester');
-    });
-    Y.one('#requester_closed').on('change', function(e) {
-        updateFlagTable('requester');
     });
 });

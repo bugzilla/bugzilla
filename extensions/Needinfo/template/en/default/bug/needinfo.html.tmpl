@@ -63,12 +63,23 @@
         <td align="center">
           <script>
             function needinfo_visibility() {
-              if (YAHOO.util.Dom.get('needinfo_role').value == 'other') {
+              var role = YAHOO.util.Dom.get('needinfo_role').value;
+              if (role == 'other') {
                 YAHOO.util.Dom.removeClass('needinfo_from_container', 'bz_default_hidden');
                 YAHOO.util.Dom.get('needinfo_from').disabled = false;
+                YAHOO.util.Dom.get('needinfo_role_identity').innerHTML = '';
               } else {
                 YAHOO.util.Dom.addClass('needinfo_from_container', 'bz_default_hidden');
                 YAHOO.util.Dom.get('needinfo_from').disabled = true;
+                var identity = '';
+                if (role == 'reporter') {
+                  identity = '[% bug.reporter.identity FILTER js %]';
+                } else if (role == 'assigned_to') {
+                  identity = '[% bug.assigned_to.identity FILTER js %]';
+                } else if (role == 'qa_contact') {
+                  identity = '[% bug.qa_contact.identity FILTER js %]';
+                }
+                YAHOO.util.Dom.get('needinfo_role_identity').innerHTML = identity;
               }
             }
             function needinfo_focus() {
@@ -113,6 +124,7 @@
                field_title => "Enter one or more comma separated users to request more information from"
             %]
           </span>
+          <span id="needinfo_role_identity"></span>
         </td>
       </tr>
     [% END %]

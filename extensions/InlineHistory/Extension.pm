@@ -18,6 +18,19 @@ our $VERSION = '1.5';
 # don't show inline history for bugs with lots of changes
 use constant MAXIMUM_ACTIVITY_COUNT => 500;
 
+# don't show really long values
+use constant MAXIMUM_VALUE_LENGTH   => 256;
+
+sub template_before_create {
+    my ($self, $args) = @_;
+    $args->{config}->{FILTERS}->{ih_short_value} = sub {
+        my ($str) = @_;
+        return length($str) <= MAXIMUM_VALUE_LENGTH
+               ? $str
+               : substr($str, 0, MAXIMUM_VALUE_LENGTH - 3) . '...';
+    };
+}
+
 sub template_before_process {
     my ($self, $args) = @_;
     my $file = $args->{'file'};

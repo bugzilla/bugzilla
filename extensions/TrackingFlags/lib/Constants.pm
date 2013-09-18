@@ -26,11 +26,6 @@ use constant FLAG_TYPES => [
         collapsed   => 0,
     },
     {
-        name        => 'status',
-        description => 'Status Flags',
-        collapsed   => 1,
-    },
-    {
         name        => 'blocking',
         description => 'Blocking Flags',
         collapsed   => 1,

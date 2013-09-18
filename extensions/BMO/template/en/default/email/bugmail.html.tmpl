@@ -14,7 +14,7 @@
 <head>
   <base href="[% urlbase FILTER html %]">
   <style>
-    pre { font-size: 100% !important; }
+    .comment { font-size: 100% !important; }
   </style>
 </head>
 <body style="font-family: sans-serif">
@@ -48,7 +48,7 @@
               at [% comment.creation_ts FILTER time(undef, to_user.timezone) %]
             </b>
           [% END %]
-          <pre style="font-size: 120%">[% comment.body_full({ wrap => 1 }) FILTER quoteUrls(bug, comment) %]</pre>
+          <pre class="comment" style="font-size: 120%">[% comment.body_full({ wrap => 1 }) FILTER quoteUrls(bug, comment) %]</pre>
         </div>
       [% END %]
     </div>

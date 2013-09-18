@@ -1,0 +1,36 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% USE Bugzilla %]
+[% cgi = Bugzilla.cgi +%]
+>>Project/Request Title:
+[%+ cgi.param('short_desc') %]
+
+>>Project Goals:
+[%+ cgi.param('goals') %]
+
+>>Who are you trying to reach?:
+[%+ cgi.param("audience") %]
+
+>>Localization:
+[%+ cgi.param("localization") %]
+
+>>Destination URL:
+[%+ cgi.param("bug_file_loc") %]
+
+>>Timing:
+[%+ cgi.param("timing_date") %]
+
+>>Success:
+[%+ cgi.param("success") %]
+
+>>Mozilla Goal:
+[%+ cgi.param("mozilla_goal") %]
+
+>>Points of Contact:
+[%+ cgi.param('cc') || 'Not provided' %]

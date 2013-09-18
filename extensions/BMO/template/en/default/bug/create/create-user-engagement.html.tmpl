@@ -1,0 +1,219 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% PROCESS global/variables.none.tmpl %]
+
+[% inline_style = BLOCK %]
+#engagement_form {
+  padding: 10px;
+}
+#engagement_form .required:after {
+  content: " *";
+  color: red;
+}
+#engagement_form .field_label {
+  font-weight: bold;
+}
+#engagement_form .field_desc {
+  padding-bottom: 3px;
+}
+#engagement_form .field_desc,
+#engagement_form .head_desc {
+  width: 600px;
+  word-wrap: normal;
+}
+#engagement_form .head_desc {
+  padding-top: 5px;
+  padding-bottom: 12px;
+}
+#engagement_form .form_section {
+  margin-bottom: 10px;
+}
+#engagement_form textarea {
+  font-family: inherit;
+  font-size: inherit;
+}
+#engagement_form em {
+  font-size: 1em;
+}
+.yui-calcontainer {
+  z-index: 2;
+}
+[% END %]
+
+[% inline_javascript = BLOCK %]
+function validateAndSubmit() {
+  var alert_text = '';
+  if (!isFilledOut('goals')) alert_text += 'Please enter a value for project goals.\n';
+  if (!isFilledOut('short_desc')) alert_text += 'Please enter a value for project title.\n';
+  if (!isFilledOut('audience')) alert_text += 'Please enter a value for who you are trying to reach.\n';
+  if (!isFilledOut('timing_date')) alert_text += 'Please enter a value for project timing.\n';
+  if (!isFilledOut('localization')) alert_text += 'Please enter a value for project localization.\n';
+  if (!isFilledOut('success')) alert_text += 'Please enter a value for project success\n';
+  if (!isFilledOut('bug_file_loc')) alert_text += 'Please enter a value for project destination url.\n';
+  if (!isFilledOut('mozilla_goal')) alert_text += 'Please enter a value for Mozilla goal.\n';
+  if (alert_text != '') {
+    alert(alert_text);
+    return false;
+  }
+  return true;
+}
+function toggleGoalOther() {
+  var goal_select = YAHOO.util.Dom.get('goal');
+  if (goal_select.options[goal_select.selectedIndex].value == 'Other') {
+    YAHOO.util.Dom.removeClass('goal_other','bz_default_hidden');
+  }
+  else {
+    YAHOO.util.Dom.addClass('goal_other','bz_default_hidden');
+  }
+}
+[% END %]
+
+[% PROCESS global/header.html.tmpl
+   title = "User Engagement Form"
+   style = inline_style
+   javascript = inline_javascript
+   javascript_urls = [ 'extensions/BMO/web/js/form_validate.js',
+                       'js/field.js', 'js/util.js' ]
+   yui = [ "autocomplete", "calendar" ]
+%]
+
+[% USE Bugzilla %]
+[% cgi = Bugzilla.cgi %]
+
+<form id="engagement_form" method="post" action="post_bug.cgi" enctype="multipart/form-data"
+      onSubmit="return validateAndSubmit();">
+  <input type="hidden" name="format" value="user-engagement">
+  <input type="hidden" name="product" value="Marketing">
+  <input type="hidden" name="component" value="User Engagement">
+  <input type="hidden" name="rep_platform" value="All">
+  <input type="hidden" name="op_sys" value="Other">
+  <input type="hidden" name="version" value="unspecified">
+  <input type="hidden" name="bug_severity" id="bug_severity" value="normal">
+  <input type="hidden" name="token" value="[% token FILTER html %]">
+
+<img title="User Engagement Form" src="extensions/BMO/web/images/user-engagement.png">
+
+<div class="head_desc">
+  Have something that you think our users should know about? Is there a campaign that you
+  think may benefit from promotion on Mozilla’s User Engagement channels?<br>
+  <br>
+  Please use this form to help us understand the goals of your project or campaign.
+  We’ll use this data to recommend a promotional plan that will meet your needs.
+</div>
+
+<div class="form_section">
+  <label for="short_desc" class="field_label required">Project / Request Title</label>
+  <div class="field_desc">
+    Please tell us about your request in a few words
+  </div>
+  <input type="text" name="short_desc" id="short_desc" size="80">
+</div>
+
+<div class="form_section">
+  <label for="goals" class="field_label required">Project Goals</label>
+  <div class="field_desc">
+    Here’s where you tell us all the juicy details, especially your GOALS for this project.
+    Please tell us  “I want to achieve this awesome goal” (ie. increase sign ups for this initiative,
+    get 1 million users to do X, etc.) rather than “I want a promotion on this specific channel.”
+  </div>
+  <textarea id="goals" name="goals" cols="80" rows="5"></textarea>
+</div>
+
+<div class="form_section">
+  <label for="audience" class="field_label required">Who are you trying to reach?</label>
+  <div class="field_desc">
+    Use this section to explain the type of user you’re targeting. Who is the audience? Consumers?
+    Early adopters? Developers? Be specific.
+  </div>
+  <textarea id="audience" name="audience" cols="80" rows="5"></textarea>
+</div>
+
+<div class="form_section">
+  <label for="localization" class="field_label required">Localization</label>
+  <div class="field_desc">
+    Please tell us if your content needs to be localized, and in what languages.
+    Is the landing page localized?
+  </div>
+  <input type="text" name="localization" id="localization" size="80">
+</div>
+
+<div class="form_section">
+  <label for="bug_file_loc" class="field_label required">Destination URL</label>
+  <div class="field_desc">
+    Where would the user be sent when they click on the promotion?
+  </div>
+  <input type="text" name="bug_file_loc" id="bug_file_loc" size="80">
+</div>
+
+<div class="form_section">
+  <label for="timing_date" class="field_label required">Timing</label>
+  <div class="field_desc">
+    Here’s where you tell us when the initiative will launch. The content calendar
+    is determined at least 6 weeks in advance (to accommodate localization, etc.)
+    so the more notice we have, the better we’ll be able to help you meet your goals.
+  </div>
+  <input name="timing_date" size="20" id="timing_date" value=""
+         onchange="updateCalendarFromField(this)">
+  <button type="button" class="calendar_button"
+          id="button_calendar_timing_date"
+          onclick="showCalendar('timing_date')">
+    <span>Calendar</span>
+  </button>
+  <div id="con_calendar_timing_date"></div>
+  <script type="text/javascript">
+    createCalendar('timing_date')
+  </script>
+</div>
+
+<div class="form_section">
+  <label for="success" class="field_label required">Success</label>
+  <div class="field_desc">
+    In a few words, tell us how you will define success from promotion to our consumers?
+    (example: Success is 1000 people clicking on this link.)
+  </div>
+  <textarea id="success" name="success" cols="80" rows="5"></textarea>
+</div>
+
+<div class="form_section">
+  <label for="mozilla_goal" class="field_label required">Mozilla Goal</label>
+  <div class="field_desc">
+    What high-level Mozilla goal does this achieve?
+  </div>
+  <input type="text" name="mozilla_goal" id="mozilla_goal" size="80">
+</div>
+
+<div class="form_section">
+  <label for="cc" class="field_label">Points of Contact</label>
+  <div class="field_desc">
+    Who should be cc’d on this [% terms.bug %] and kept informed of updates?
+  </div>
+  [% INCLUDE global/userselect.html.tmpl
+     id       => "cc"
+     name     => "cc"
+     value    => ""
+     size     => 80
+     classes  => ["bz_userfield"]
+     multiple => 5
+  %]
+</div>
+
+<div class="head_desc">
+  Once your form has been submitted, a tracking [% terms.bug %] will be created. We will
+  then reach out for additional info and next steps. Thanks!
+</div>
+
+<input type="submit" id="commit" value="Submit">
+
+<p>
+  [ <span class="required_star">*</span> <span class="required_explanation">Required Field</span> ]
+</p>
+
+</form>
+
+[% PROCESS global/footer.html.tmpl %]

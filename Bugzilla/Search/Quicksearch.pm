@@ -263,7 +263,7 @@ sub quicksearch {
 sub _parse_line {
     my ($delim, $keep, $line) = @_;
     # parse_line always treats ' as a quote character, making it impossible
-    # to sanely search for contradictions. As this behavour isn't
+    # to sanely search for contractions. As this behavour isn't
     # configurable, we replace ' with a placeholder to hide it from the
     # parser.
 

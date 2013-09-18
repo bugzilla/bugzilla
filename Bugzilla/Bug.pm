@@ -270,10 +270,6 @@ use constant FIELD_MAP => {
     summary          => 'short_desc',
     url              => 'bug_file_loc',
     whiteboard       => 'status_whiteboard',
-
-    # These are special values for the WebService Bug.search method.
-    limit            => 'LIMIT',
-    offset           => 'OFFSET',
 };
 
 use constant REQUIRED_FIELD_MAP => {

@@ -493,19 +493,19 @@ sub search {
     }
 
     my %match_params = %{ $params };
-    delete $params->{include_fields};
-    delete $params->{exclude_fields};
+    delete $match_params{include_fields};
+    delete $match_params{exclude_fields};
 
     # If no other parameters have been passed other than limit and offset
     # then we throw error if system is configured to do so.
-    if (!grep(!/^(limit|offset)$/i, keys %$params)
+    if (!grep(!/^(limit|offset)$/, keys %match_params)
         && !Bugzilla->params->{search_allow_no_criteria})
     {
         ThrowUserError('buglist_parameters_required');
     }
 
-    $options{order_columns} = [ split(/\s*,\s*/, delete $params->{order}) ] if $params->{order};
-    $options{params} = $params;
+    $options{order_columns} = [ split(/\s*,\s*/, delete $match_params{order}) ] if $match_params{order};
+    $options{params} = \%match_params;
 
     my $search = new Bugzilla::Search(%options);
     my ($data) = $search->data;
@@ -518,7 +518,7 @@ sub search {
     my @bug_ids = map { $_->[0] } @$data;
     my $bug_objects = Bugzilla::Bug->new_from_list(\@bug_ids);
 
-    my @bugs = map { $self->_bug_to_hash($_, \%match_params) } @$bug_objects;
+    my @bugs = map { $self->_bug_to_hash($_, $params) } @$bug_objects;
 
     return { bugs => \@bugs };
 }

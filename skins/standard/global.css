@@ -286,7 +286,7 @@ div#docslinks {
 }
 
 .bz_comment_text {
-     max-width: 60em;
+     width: 50em;
 }
 
 .bz_comment_user, .bz_comment_time, .bz_comment_number, 
@@ -299,6 +299,14 @@ div#docslinks {
     float: right;
 }
 
+.bz_collapse_expand_comments {
+    padding: 0;
+    margin: 0 0 0 1em;
+    list-style-type: none;
+}
+.bz_collapse_expand_comments li {
+    margin-bottom: .5em;
+}
 .bz_collapse_comment {
     text-decoration: none;
 }
@@ -545,19 +553,6 @@ input.required, select.required, span.required_explanation {
 
 #keywords_container .yui-ac-content {
     margin-left: -1px;
-}
-
-#bz_big_form_parts #left {
-    float: left;
-    min-width: 55em;
-    margin-right: 1em;
-    margin-bottom: 1em;
-}
-
-#bz_big_form_parts #right {
-    float: left;
-    width: auto;
-    max-width: 35em;
 }
 
 /*******************/

@@ -66,6 +66,10 @@ table#flags {
     vertical-align: top;
 }
 
+.bz_group_visibility_section {
+    margin-left: 1em;
+}
+
 .bz_group_visibility_section .instructions {
     font-style: italic;
 }

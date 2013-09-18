@@ -119,54 +119,43 @@
     </tr>
   </table>
 
-  <div id="bz_big_form_parts">
-    <div id="left">
-      [% IF user.is_timetracker %]
-        <div id="timetracking">
-          [% PROCESS section_timetracking %]
-        </div>
-      [% END %]
+  <table id="bz_big_form_parts" cellspacing="0" cellpadding="0"><tr>
+  <td>
+    [% IF user.is_timetracker %]
+      [% PROCESS section_timetracking %]
+    [% END %]
 
-      <div id="attachments">
-        [%# *** Attachments *** %]
+    [%# *** Attachments *** %]
 
-        [% PROCESS attachment/list.html.tmpl
-                   attachments = bug.attachments
-                   bugid       = bug.bug_id
-                   num_attachment_flag_types = bug.num_attachment_flag_types
-                   show_attachment_flags = bug.show_attachment_flags
-        %]
-      </div>
+    [% PROCESS attachment/list.html.tmpl
+               attachments = bug.attachments
+               bugid       = bug.bug_id
+               num_attachment_flag_types = bug.num_attachment_flag_types
+               show_attachment_flags = bug.show_attachment_flags
+    %]
 
-      [% IF user.settings.comment_box_position.value == 'before_comments' %]
-        <div id="comment_box">
-          [% PROCESS comment_box %]
-        </div>
-      [% END %]
+    [% IF user.settings.comment_box_position.value == 'before_comments' %]
+      [% PROCESS comment_box %]
+    [% END %]
+  </td>
+  <td>
+    [% PROCESS section_restrict_visibility %]
+  </td>
+  </tr></table>
 
-      [%# *** Additional Comments *** %]
-      <div id="comments">
-        [% PROCESS bug/comments.html.tmpl
-                   comments = bug.comments
-                   mode = user.id ? "edit" : "show"
-        %]
-      </div>
-
-      [% IF user.settings.comment_box_position.value == 'after_comments' %]
-        <div id="comment_box">
-          [% PROCESS comment_box %]
-        </div>
-      [% END %]
-    </div>
-
-    <div id="right">
-      <div id="restrict_visibility">
-        [% PROCESS section_restrict_visibility %]
-      </div>
-    </div>
-
-    <div style="clear:both;"></div>
+  [%# *** Additional Comments *** %]
+  <div id="comments">
+    [% PROCESS bug/comments.html.tmpl
+      comments = bug.comments
+      mode = user.id ? "edit" : "show"
+    %]
   </div>
+
+  [% IF user.settings.comment_box_position.value == 'after_comments' %]
+    <hr>
+    [% PROCESS comment_box %]
+  [% END %]        
+
 </form>
 
 [%############################################################################%]

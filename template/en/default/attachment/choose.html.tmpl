@@ -7,7 +7,7 @@
   #%]
 
 [% PROCESS global/header.html.tmpl
-   title = "Locate attachment",
+   title = "Locate or Create Attachment",
    onload = "document.forms['choose-id'].id.focus()"
  %]
 
@@ -20,10 +20,16 @@
 </form>
 
 <form method="get" action="show_bug.cgi">
-  <p>Or, access it from the list of attachments in its associated [% terms.bug %] report:</p>
+  <p>Or, Access it from the list of attachments in its associated [% terms.bug %] report:</p>
   <p>[% terms.Bug %] ID: <input name="id" size="6">
   <input type="submit" name="action" value="View" id="action">
   </p>
 </form>
 
+<form method="get" action="attachment.cgi">
+  <p>Or, Create a new attachment by entering its [% terms.bug %] Id below:</p>
+  <p>[% terms.Bug %] ID: <input name="bugid" size="6">
+    <button name="action" value="enter" id="action">New Attachment</button>
+  </p>
+</form>
 [% PROCESS global/footer.html.tmpl %]

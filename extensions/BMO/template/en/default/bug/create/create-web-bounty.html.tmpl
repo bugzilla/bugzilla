@@ -1,0 +1,142 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% PROCESS global/variables.none.tmpl %]
+
+[% inline_style = BLOCK %]
+#web_bounty_form {
+  padding: 10px;
+}
+#web_bounty_form .required:after {
+  content: " *";
+  color: red;
+}
+#web_bounty_form .field_label {
+  font-weight: bold;
+}
+#web_bounty_form .field_desc {
+  padding-bottom: 3px;
+}
+#web_bounty_form .field_desc,
+#web_bounty_form .head_desc {
+  width: 600px;
+  word-wrap: normal;
+}
+#web_bounty_form .head_desc {
+  padding-top: 5px;
+  padding-bottom: 12px;
+}
+#web_bounty_form .form_section {
+  margin-bottom: 10px;
+}
+#web_bounty_form textarea {
+  font-family: inherit;
+  font-size: inherit;
+  margin: 0 !important;
+}
+#web_bounty_form em {
+  font-size: 1em;
+}
+[% END %]
+
+[% inline_javascript = BLOCK %]
+function validateAndSubmit() {
+  var alert_text = '';
+  if (!isFilledOut('short_desc')) alert_text += 'Please enter a value for summary.\n';
+  if (!isFilledOut('comment')) alert_text += 'Please enter a value for comment.\n';
+  if (alert_text != '') {
+    alert(alert_text);
+    return false;
+  }
+  return true;
+}
+[% END %]
+
+[% PROCESS global/header.html.tmpl
+   title = "Web Bounty Form"
+   style = inline_style
+   javascript = inline_javascript
+   javascript_urls = [ 'extensions/BMO/web/js/form_validate.js',
+                       'js/field.js', 'js/util.js' ]
+%]
+
+[% USE Bugzilla %]
+[% cgi = Bugzilla.cgi %]
+
+<form id="web_bounty_form" method="post" action="post_bug.cgi" enctype="multipart/form-data"
+      onSubmit="return validateAndSubmit();">
+  <input type="hidden" name="product" value="Websites">
+  <input type="hidden" name="component" value="Other">
+  <input type="hidden" name="rep_platform" value="All">
+  <input type="hidden" name="op_sys" value="All">
+  <input type="hidden" name="version" value="unspecified">
+  <input type="hidden" name="bug_severity" id="bug_severity" value="normal">
+  <input type="hidden" name="priority" id="priority" value="--">
+  <input type="hidden" name="target_milestone" id="target_milestone" value="---">
+  <input type="hidden" name="status_whiteboard" id="status_whiteboard" value="[reporter-external] [web-bounty-form] [verif?]">
+  <input type="hidden" name="bug_severity" id="bug_severity" value="normal">
+  <input type="hidden" name="groups" id="group_52" value="websites-security">
+  <input type="hidden" name="flag_type-791" id="flag_type-791" value="?">
+  <input type="hidden" name="token" value="[% token FILTER html %]">
+
+<div class="head_desc">
+  <a href="https://developer.mozilla.org/en-US/docs/Mozilla/QA/Bug_writing_guidelines?redirectlocale=en-US&redirectslug=Bug_writing_guidelines">
+    [% terms.Bug %] writing guidelines</a>
+</div>
+
+<div class="form_section">
+  <label for="short_desc" class="field_label required">Summary / Title</label>
+  <div class="field_desc">
+    A short description of the issue being reported including the host name
+    for the website on which it exists (example xss in blarg.foo.mozilla.org)
+  </div>
+  <input type="text" name="short_desc" id="short_desc" size="80">
+</div>
+
+<div class="form_section">
+  <label for="comment" class="field_label required">Comment</label>
+  <div class="field_desc">
+    How was this issue discovered, include the steps, tools or other information that
+    will help reproduce and diagnose the issue. A good primer on what to include can
+    be found <a href="https://developer.mozilla.org/en-US/docs/Mozilla/QA">here</a>.
+  </div>
+  <textarea id="comment" name="comment" cols="80" rows="5"></textarea>
+</div>
+
+<div class="form_section">
+  <label for="bug_file_loc" class="field_label">URL</label>
+  <div class="field_desc">
+    The full URL (hostname/subpage) where the issue exists (if the URL is especially long
+    please just include it in the comments)
+  </div>
+  <input type="text" name="bug_file_loc" id="bug_file_loc" size="80">
+</div>
+
+<div class="form_section">
+  <label for="data" class="field_label">Attachment</label>
+  <div class="field_desc">
+    A file that can add context to the report, such as a screen shot or code block for
+    reproduction purposes.
+  </div>
+  <input type="file" id="data" name="data" size="50">
+  <input type="hidden" name="contenttypemethod" value="autodetect" />
+  <div class="field_desc">
+    <label for="description">Description</label>
+  </div>
+  <input type="text" id="description" name="description" size="80">
+</div>
+
+<input type="submit" id="commit" value="Submit">
+
+<p>
+  [ <span class="required_star">*</span> <span class="required_explanation">Required Field</span> ]
+</p>
+
+</form>
+
+[% PROCESS global/footer.html.tmpl %]

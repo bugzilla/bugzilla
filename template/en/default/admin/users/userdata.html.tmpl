@@ -65,7 +65,7 @@
   # if we ever have a login system that can create accounts through
   # createaccount.cgi but can't change passwords.
   #%]
-  
+  [% password_complexity = Param('password_complexity') %]
 [% IF editusers %]
   [% IF user.authorizer.can_change_password %]
   <tr>
@@ -73,6 +73,13 @@
     <td>
       <input type="password" size="16" name="password" id="password"
              value="" autocomplete="off" />
+      [% IF password_complexity == "mixed_letters" %] 
+        (Password must contain at least one UPPER and one lowercase letter.)
+      [% ELSIF password_complexity == "letters_numbers" %] 
+        (Password must contain at least one UPPER and one lower case letter and a number.)
+      [% ELSIF password_complexity == "letters_numbers_specialchars" %] 
+        (Password must contain at least one letter, a number and a special character.)
+      [% END %]
       [% IF editform %]<br />
         (Enter new password to change.)
       [% END %]

@@ -168,11 +168,11 @@
       [% PROCESS commit_button id="_top"%]
      <a href="show_bug.cgi?id=[% bug.bug_id %]">
         [%-# %]<b>[% terms.Bug %]&nbsp;[% bug.bug_id FILTER html %]</b>
-     [%-# %]</a> -<span id="summary_alias_container" class="bz_default_hidden"> 
+     [%-# %]</a> <span id="summary_alias_container" class="bz_default_hidden"> 
       [% IF bug.alias != "" %]
         (<span id="alias_nonedit_display">[% bug.alias FILTER html %]</span>) 
       [% END %]
-      <span id="short_desc_nonedit_display">[% bug.short_desc FILTER quoteUrls(bug) %]</span>
+      - <span id="short_desc_nonedit_display">[% bug.short_desc FILTER quoteUrls(bug) %]</span>
       [% IF bug.check_can_change_field('short_desc', 0, 1) || 
             bug.check_can_change_field('alias', 0, 1)  %]
         <small class="editme">(<a href="#" id="editme_action">edit</a>)</small>

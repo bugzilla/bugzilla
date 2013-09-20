@@ -294,6 +294,7 @@ sub _parse_line {
     $line =~ tr/\001/'/;
 
     my @words = parse_line($delim, $keep, $line);
+
     foreach my $word (@words) {
         $word =~ tr/\000/'/;
     }

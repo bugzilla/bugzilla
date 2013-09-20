@@ -46,8 +46,16 @@ use constant CONFIG => {
         token_generation_error
     )],
 
-    # any error messages matching these regex's will not be sent to sentry
+    # any error/warning messages matching these regex's will not be logged or
+    # sent to sentry
     ignore => [
+        qr/^compiled template :\s*$/,
+        qr/^Use of uninitialized value \$compiled in concatenation \(\.\) or string/,
+    ],
+
+    # any error/warning messages matching these regex's will be logged but not
+    # sent to sentry
+    sentry_ignore => [
         qr/Software caused connection abort/,
         qr/Could not check out .*\/cvsroot/,
         qr/Unicode character \S+ is illegal/,
@@ -124,6 +132,11 @@ sub sentry_handle_error {
     }
     my $message = join(" ", map { trim($_) } grep { $_ ne '' } @message);
 
+    # message content filtering
+    foreach my $re (@{ CONFIG->{ignore} }) {
+        return 0 if $message =~ $re;
+    }
+
     # determine logger
     my $logger;
     foreach my $config (@{ CONFIG->{logger} }) {
@@ -154,7 +167,7 @@ sub sentry_handle_error {
 
     # message content filtering
     if ($send_to_sentry) {
-        foreach my $re (@{ CONFIG->{ignore} }) {
+        foreach my $re (@{ CONFIG->{sentry_ignore} }) {
             if ($message =~ $re) {
                 $send_to_sentry = 0;
                 last;

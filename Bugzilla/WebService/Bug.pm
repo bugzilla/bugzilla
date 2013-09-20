@@ -518,7 +518,7 @@ sub search {
         ThrowUserError('buglist_parameters_required');
     }
 
-    $options{order_columns} = [ split(/\s*,\s*/, delete $match_params{order}) ] if $match_params{order};
+    $options{order}  = [ split(/\s*,\s*/, delete $match_params{order}) ] if $match_params{order};
     $options{params} = \%match_params;
 
     my $search = new Bugzilla::Search(%options);
@@ -530,9 +530,9 @@ sub search {
 
     # Search.pm won't return bugs that the user shouldn't see so no filtering is needed.
     my @bug_ids = map { $_->[0] } @$data;
-    my $bug_objects = Bugzilla::Bug->new_from_list(\@bug_ids);
-
-    my @bugs = map { $self->_bug_to_hash($_, $params) } @$bug_objects;
+    my %bug_objects = map { $_->id => $_ } @{ Bugzilla::Bug->new_from_list(\@bug_ids) };
+    my @bugs = map { $bug_objects{$_} } @bug_ids;
+    @bugs = map { $self->_bug_to_hash($_, $params) } @bugs;
 
     return { bugs => \@bugs };
 }

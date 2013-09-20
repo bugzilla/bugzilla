@@ -368,6 +368,7 @@
   # there are exceptions where not displaying this text is problematic. %]
 [% IF user.settings.skin.value == 'Mozilla'
       && template.name.match('^attachment/')
+      && !header.match('^Bug&nbsp;\d+$')
 %]
   <h2>[% header FILTER none %]</h2>
 [% END %]

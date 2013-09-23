@@ -606,31 +606,6 @@ sub quicksearch_map {
     }
 }
 
-# Restrict content types attachable by non-privileged people
-my @mimetype_whitelist = ('^image\/', 'application\/pdf');
-
-sub object_end_of_create_validators {
-    my ($self, $args) = @_;
-    my $class = $args->{'class'};
-    
-    if ($class->isa('Bugzilla::Attachment')) {
-        my $params = $args->{'params'};
-        my $bug = $params->{'bug'};
-        if (!Bugzilla->user->in_group('editbugs', $bug->product_id)) {
-            my $mimetype = $params->{'mimetype'};
-            if (!grep { $mimetype =~ /$_/ } @mimetype_whitelist ) {
-                # Need to neuter MIME type to something non-executable
-                if ($mimetype =~ /^text\//) {
-                    $params->{'mimetype'} = "text/plain";
-                }
-                else {
-                    $params->{'mimetype'} = "application/octet-stream";
-                }
-            }
-        }
-    }
-}
-
 sub object_end_of_create {
     my ($self, $args) = @_;
     if ($args->{class} eq 'Bugzilla::User') {

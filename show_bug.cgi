@@ -136,7 +136,7 @@ $template->process($format->{'template'}, $vars)
   || ThrowTemplateError($template->error());
 $timings->time('template_time');
 
-if (scalar(@bugs) == 1) {
+if (scalar(@bugids) == 1) {
     $timings->label('bug-' . $bugs[0]->id);
     $timings->label('user-' . $user->id);
     $timings->log();

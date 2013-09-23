@@ -73,11 +73,11 @@
                 YAHOO.util.Dom.get('needinfo_from').disabled = true;
                 var identity = '';
                 if (role == 'reporter') {
-                  identity = '[% bug.reporter.identity FILTER js %]';
+                  identity = '[% bug.reporter.identity FILTER html FILTER js %]';
                 } else if (role == 'assigned_to') {
-                  identity = '[% bug.assigned_to.identity FILTER js %]';
+                  identity = '[% bug.assigned_to.identity FILTER html FILTER js %]';
                 } else if (role == 'qa_contact') {
-                  identity = '[% bug.qa_contact.identity FILTER js %]';
+                  identity = '[% bug.qa_contact.identity FILTER html FILTER js %]';
                 }
                 YAHOO.util.Dom.get('needinfo_role_identity').innerHTML = identity;
               }

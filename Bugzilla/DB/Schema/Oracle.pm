@@ -204,6 +204,10 @@ sub get_add_column_ddl {
     }
     else {
         @sql = $self->SUPER::get_add_column_ddl(@_);
+        # Create triggers to deal with empty string. 
+        if ($definition->{TYPE} =~ /varchar|TEXT/i && $definition->{NOTNULL}) {
+            push(@sql, _get_notnull_trigger_ddl($table, $column));
+        }
     }
 
     return @sql;

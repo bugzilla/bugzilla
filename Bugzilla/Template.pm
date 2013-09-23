@@ -594,6 +594,10 @@ sub create {
 
         COMPILE_DIR => bz_locations()->{'template_cache'},
 
+        # Don't check for a template update until 1 hour has passed since the
+        # last check.
+        STAT_TTL    => 60 * 60,
+
         # Initialize templates (f.e. by loading plugins like Hook).
         PRE_PROCESS => ["global/initialize.none.tmpl"],
 

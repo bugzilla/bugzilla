@@ -196,6 +196,7 @@ sub quicksearch {
         foreach my $qsword (@qswords) {
             my @or_operand = _parse_line('\|', 1, $qsword);
             foreach my $term (@or_operand) {
+                next unless defined $term;
                 my $negate = substr($term, 0, 1) eq '-';
                 if ($negate) {
                     $term = substr($term, 1);
@@ -262,6 +263,8 @@ sub quicksearch {
 
 sub _parse_line {
     my ($delim, $keep, $line) = @_;
+    return () unless defined $line;
+
     # parse_line always treats ' as a quote character, making it impossible
     # to sanely search for contractions. As this behavour isn't
     # configurable, we replace ' with a placeholder to hide it from the
@@ -276,7 +279,7 @@ sub _parse_line {
 
     my @words = parse_line($delim, $keep, $line);
     foreach my $word (@words) {
-        $word =~ tr/\000/'/;
+        $word =~ tr/\000/'/ if defined $word;
     }
     return @words;
 }
@@ -348,6 +351,7 @@ sub _handle_status_and_resolution {
 
 sub _handle_special_first_chars {
     my ($qsword, $negate) = @_;
+    return 0 if !defined $qsword || length($qsword) <= 1;
 
     my $firstChar = substr($qsword, 0, 1);
     my $baseWord = substr($qsword, 1);

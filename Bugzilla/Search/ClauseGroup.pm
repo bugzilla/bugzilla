@@ -66,7 +66,10 @@ sub add {
 
     # Unsupported fields
     if (grep { $_ eq $field } UNSUPPORTED_FIELDS ) {
-        ThrowUserError('search_grouped_field_invalid', { field => $field });
+        # XXX - Hack till bug 916882 is fixed.
+        my $operator = scalar(@args) == 3 ? $args[1] : $args[0]->{operator};
+        ThrowUserError('search_grouped_field_invalid', { field => $field })
+          unless (($field eq 'product' || $field eq 'component') && $operator =~ /^changed/);
     }
 
     $self->SUPER::add(@args);

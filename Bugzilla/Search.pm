@@ -753,6 +753,9 @@ sub data {
     # Restore the original 'fields' argument, just in case.
     $self->{fields} = \@orig_fields unless $all_in_bugs_table;
 
+    # BMO if the caller only wants the count, that's all we need to return
+    return $bug_ids->[0]->[0] if $self->_params->{count_only};
+
     # If there are no bugs found, or all fields are in the 'bugs' table,
     # there is no need for another query.
     if (!scalar @$bug_ids || $all_in_bugs_table) {
@@ -811,7 +814,15 @@ sub _sql {
                    ? "\nORDER BY " . join(', ', $self->_sql_order_by) : '';
     my $limit = $self->_sql_limit;
     $limit = "\n$limit" if $limit;
-    
+
+    # BMO allow fetching just the number of matching bugs
+    if ($self->_params->{count_only}) {
+        $select = 'COUNT(*) AS count';
+        $group_by = '';
+        $order_by = '';
+        $limit = '';
+    }
+
     my $query = <<END;
 SELECT $select
   FROM $from

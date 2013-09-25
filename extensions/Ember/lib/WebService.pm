@@ -25,7 +25,7 @@ use Bugzilla::Util qw(trick_taint);
 use Bugzilla::Extension::Ember::FakeBug;
 
 use Scalar::Util qw(blessed);
-use Data::Dumper;
+use Storable qw(dclone);
 
 use constant FIELD_TYPE_MAP => {
     0  => 'unknown',
@@ -201,6 +201,23 @@ sub show {
     $data->{attachments} = $attachments if $attachments;
 
     return $data;
+}
+
+sub search {
+    my ($self, $params) = @_;
+
+    my $total;
+    if (exists $params->{offset} && exists $params->{limit}) {
+        my $count_params = dclone($params);
+        delete $count_params->{offset};
+        delete $count_params->{limit};
+        $count_params->{count_only} = 1;
+        $total = $self->SUPER::search($count_params);
+    }
+
+    my $result = $self->SUPER::search($params);
+    $result->{total} = defined $total ? $total : scalar(@{ $result->{bugs} });
+    return $result;
 }
 
 ###################
@@ -529,7 +546,14 @@ sub rest_resources {
             GET => {
                 method => 'show'
             }
-        }
+        },
+        # search - wrapper around SUPER::search which also includes the total
+        # number of bugs when using pagination
+        qr{^/ember/search$}, {
+            GET  => {
+                method => 'search',
+            },
+        },
     ];
 };
 
@@ -632,6 +656,41 @@ You pass a field called C<id> that is the current bug id.
 =over
 
 =item Added in BMO Bugzilla B<4.0>.
+
+=back
+
+=back
+
+=head2 search
+
+B<UNSTABLE>
+
+=over
+
+=item B<Description>
+
+A wrapper around Bugzilla's C<search> method which also returns the total of
+bugs matching a query, even if the limit and offset parameters are supplied.
+
+=item B<Params>
+
+As per Bugzilla::WebService::Bug::search()
+
+=item B<Returns>
+
+=over
+
+=back
+
+=item B<Errors>
+
+=over
+
+=back
+
+=item B<History>
+
+=over
 
 =back
 

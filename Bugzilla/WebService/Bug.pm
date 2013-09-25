@@ -524,6 +524,9 @@ sub search {
     my $search = new Bugzilla::Search(%options);
     my ($data) = $search->data;
 
+    # BMO if the caller only wants the count, that's all we need to return
+    return $data if $params->{count_only};
+
     if (!scalar @$data) {
         return { bugs => [] };
     }

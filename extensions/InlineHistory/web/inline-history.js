@@ -126,16 +126,15 @@ var inline_history = {
             }
           }
 
-          var itemHtml =  '<div class="ih_history_item ' + containerClass + '" '
-                          + 'id="h' + i + '">'
-                          + item[3]
-                          + '<div class="ih_history_change">' + item[2] + '</div>'
-                          + '</div>';
+          var itemContainer = document.createElement('div');
+          itemContainer.className = 'ih_history_item' + containerClass;
+          itemContainer.id = 'h' + i;
+          itemContainer.innerHTML = item[3] + '<div class="ih_history_change">' + item[2] + '</div>';
 
           if (ih_activity_sort_order == 'oldest_to_newest') {
-            currentDiv.innerHTML = currentDiv.innerHTML + itemHtml;
+            currentDiv.appendChild(itemContainer);
           } else {
-            currentDiv.innerHTML = itemHtml + currentDiv.innerHTML;
+            currentDiv.insertBefore(itemContainer, currentDiv.firstChild);
           }
           currentDiv.setAttribute("class", "bz_comment ih_history");
           if (item[6])

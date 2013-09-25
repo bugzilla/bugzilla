@@ -65,10 +65,24 @@ sub install_update_db {
 ##############################################################################
 
 BEGIN {
-    *Bugzilla::Group::secure_mail = \&_secure_mail;
+    *Bugzilla::Group::secure_mail = \&_group_secure_mail;
+    *Bugzilla::User::public_key   = \&_user_public_key;
 }
 
-sub _secure_mail { return $_[0]->{'secure_mail'}; }
+sub _group_secure_mail { return $_[0]->{'secure_mail'}; }
+
+# We want to lazy-load the public_key.
+sub _user_public_key {
+    my $self = shift;
+    if (!exists $self->{public_key}) {
+        ($self->{public_key}) = Bugzilla->dbh->selectrow_array(
+            "SELECT public_key FROM profiles WHERE userid = ?",
+            undef,
+            $self->id
+        );
+    }
+    return $self->{public_key};
+}
 
 # Make sure generic functions know about the additional fields in the user
 # and group objects.
@@ -79,9 +93,6 @@ sub object_columns {
 
     if ($class->isa('Bugzilla::Group')) {
         push(@$columns, 'secure_mail');
-    }
-    elsif ($class->isa('Bugzilla::User')) {
-        push(@$columns, 'public_key');
     }
 }
 
@@ -182,13 +193,13 @@ sub user_preferences {
         $user->update();
 
         # Send user a test email
-        if ($user->{'public_key'}) {
+        if ($user->public_key) {
             _send_test_email($user);
             $vars->{'test_email_sent'} = 1;
         }
     }
 
-    $vars->{'public_key'} = $user->{'public_key'};
+    $vars->{'public_key'} = $user->public_key;
 
     # Set the 'handled' scalar reference to true so that the caller
     # knows the panel name is valid and that an extension took care of it.
@@ -306,7 +317,7 @@ sub mailer_before_send {
             # (but, as noted above, the check is the other way around because
             # we default to secure).
             if ($user &&
-                !$user->{'public_key'} &&
+                !$user->public_key &&
                 !grep($_->secure_mail, @{ $user->groups }))
             {
                 $make_secure = SECURE_NONE;
@@ -322,7 +333,7 @@ sub mailer_before_send {
         # If finding the user fails for some reason, but we determine we
         # should be encrypting, we want to make the mail safe. An empty key
         # does that.
-        my $public_key = $user ? $user->{'public_key'} : '';
+        my $public_key = $user ? $user->public_key : '';
 
         # Check if the new bugmail prefix should be added to the subject.
         my $add_new = ($email->header('X-Bugzilla-Type') eq 'new' &&

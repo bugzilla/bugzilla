@@ -98,14 +98,15 @@ sub _bug_mentor {
 sub _user_review_count {
     my ($self) = @_;
     if (!exists $self->{review_count}) {
-        ($self->{review_count}) = Bugzilla->dbh->selectrow_array(
+        my $dbh = Bugzilla->dbh;
+        ($self->{review_count}) = $dbh->selectrow_array(
             "SELECT COUNT(*)
-            FROM flags
+               FROM flags
                     INNER JOIN flagtypes ON flagtypes.id = flags.type_id
-            WHERE flags.requestee_id = ?
-                    AND flagtypes.name = ?",
+              WHERE flags.requestee_id = ?
+                    AND " . $dbh->sql_in('flagtypes.name', [ "'review'", "'feedback'" ]),
             undef,
-            $self->id, 'review',
+            $self->id,
         );
     }
     return $self->{review_count};

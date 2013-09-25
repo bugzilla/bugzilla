@@ -177,6 +177,8 @@ An array of hashes with the following keys/values:
 
 =item C<name> (string) - The user's display name (may not match the Bugzilla "real name").
 
+=item C<review_count> (string) - The number of "review" and "feedback" requests in the user's queue.
+
 =back
 
 =back

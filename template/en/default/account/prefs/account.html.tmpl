@@ -13,21 +13,25 @@
   #%]
 
 <table>
-  <tr>
-    <td colspan="3">
-      Please enter your existing password to confirm account changes.
-    </td>
-  </tr>
-  <tr>
-    <th>Password:</th>
-    <td>
-      <input type="hidden" name="old_login" value="[% user.login FILTER html %]">
-      <input type="password" name="old_password">
-    </td>
-  </tr>              
-  <tr>
-    <td colspan="2"><hr></td>
-  </tr>
+  [% IF user.authorizer.can_change_password
+        || (user.authorizer.can_change_email && Param('allowemailchange')) %]
+    <tr>
+      <td colspan="3">
+        Please enter your existing password to confirm account changes.
+      </td>
+    </tr>
+    <tr>
+      <th>Password:</th>
+      <td>
+        <input type="hidden" name="old_login" value="[% user.login FILTER html %]">
+        <input type="password" name="old_password">
+      </td>
+    </tr>
+    <tr>
+      <td colspan="2"><hr></td>
+    </tr>
+  [% END %]
+
   [% IF user.authorizer.can_change_password %]
     <tr>
       <th>New password:</th>

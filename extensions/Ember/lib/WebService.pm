@@ -99,7 +99,8 @@ sub create {
 
     my $product_obj = Bugzilla::Product->check($product);
 
-    my $fake_bug = Bugzilla::Extension::Ember::FakeBug->new({ product_obj => $product_obj });
+    my $fake_bug = Bugzilla::Extension::Ember::FakeBug->new(
+        { product_obj => $product_obj, reporter_id => Bugzilla->user->id });
 
     my @fields = $self->_get_fields($fake_bug);
 

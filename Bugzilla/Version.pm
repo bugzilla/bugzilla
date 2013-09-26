@@ -169,8 +169,8 @@ sub product {
 # Validators
 ################################
 
-sub set_name      { $_[0]->set('value', $_[1]);    }
-sub set_is_active { $_[0]->set('isactive', $_[1]); }
+sub set_value    { $_[0]->set('value', $_[1]);    }
+sub set_isactive { $_[0]->set('isactive', $_[1]); }
 
 sub _check_value {
     my ($invocant, $name, undef, $params) = @_;
@@ -219,7 +219,7 @@ Bugzilla::Version - Bugzilla product version class.
     my $version = Bugzilla::Version->create(
         { value => $name, product => $product_obj });
 
-    $version->set_name($new_name);
+    $version->set_value($new_name);
     $version->update();
 
     $version->remove_from_db;
@@ -255,9 +255,9 @@ below.
 
 =item DEFAULT_VERSION
 
-=item set_is_active
+=item set_isactive
 
-=item set_name
+=item set_value
 
 =item product_id
 

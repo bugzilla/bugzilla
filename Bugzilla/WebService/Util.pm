@@ -32,6 +32,7 @@ our @EXPORT_OK = qw(
     filter_wants
     taint_data
     validate
+    translate
     params_to_objects
     fix_credentials
 );
@@ -129,6 +130,16 @@ sub validate  {
     }
 
     return ($self, $params);
+}
+
+sub translate {
+    my ($params, $mapped) = @_;
+    my %changes;
+    while (my ($key,$value) = each (%$params)) {
+        my $new_field = $mapped->{$key} || $key;
+        $changes{$new_field} = $value;
+    }
+    return \%changes;
 }
 
 sub params_to_objects {

@@ -94,6 +94,12 @@ sub _rest_resources {
                 params => sub {
                     return { attachment_ids => [ $_[0] ] };
                 }
+            },
+            PUT => {
+                method => 'update_attachment',
+                params => sub {
+                    return { ids => [ $_[0] ] };
+                }
             }
         },
         qr{^/field/bug$}, {

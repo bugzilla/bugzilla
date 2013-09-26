@@ -43,6 +43,7 @@ use constant MODULE_WHITELIST => qw(
     Bugzilla::Auth::Verify::
     Bugzilla::BugUrl::
     Bugzilla::Config::
+    Bugzilla::Extension::
     Bugzilla::Job::
 );
 
@@ -82,6 +83,7 @@ foreach my $file (@module_files) {
     my $module = $file;
     $module =~ s/\.pm$//;
     $module =~ s#/#::#g;
+    $module =~ s/^extensions/Bugzilla::Extension/;
 
     my @whitelist = (DEFAULT_WHITELIST);
     push(@whitelist, $sub_whitelist{$module}) if $sub_whitelist{$module};

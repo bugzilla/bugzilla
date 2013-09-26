@@ -2523,6 +2523,10 @@ sub _set_product {
                                        OR gcm.othercontrol != ?) )',
                 undef, (@idlist, $product->id, CONTROLMAPNA, CONTROLMAPNA));
             $vars{'old_groups'} = Bugzilla::Group->new_from_list($gids);            
+
+            # Did we come here from editing multiple bugs? (affects how we
+            # show optional group changes)
+            $vars{multiple_bugs} = Bugzilla->cgi->param('id') ? 0 : 1;
         }
         
         if (%vars) {

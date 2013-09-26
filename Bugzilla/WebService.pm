@@ -188,6 +188,13 @@ For REST, you may also use the C<username> and C<password> variable
 names instead of C<Bugzilla_login> and C<Bugzilla_password> as a
 convenience.
 
+=item B<Added in Bugzilla 5.0>
+
+An error is now thrown if you pass invalid cookies or an invalid token.
+You will need to log in again to get new cookies or a new token. Previous
+releases simply ignored invalid cookies and token support was added in
+Bugzilla B<5.0>.
+
 =back
 
 =head1 STABLE, EXPERIMENTAL, and UNSTABLE

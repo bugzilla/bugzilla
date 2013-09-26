@@ -16,6 +16,7 @@ use parent qw(Bugzilla::WebService
               Bugzilla::WebService::Product);
 
 use Bugzilla::Bug;
+use Bugzilla::Component;
 use Bugzilla::Product;
 use Bugzilla::Constants;
 use Bugzilla::Error;
@@ -289,11 +290,25 @@ sub _get_fields {
     });
 
     # Add flag information as separate field
-    my $flag_params = { is_active => 1 };
-    $flag_params->{component_id} => $bug->component_obj->id if $bug->id;
-    my $flag_hash = $bug->product_obj->flag_types($flag_params);
+    my $flag_hash;
+    if ($bug->id) {
+        foreach my $flag_type ('bug', 'attachment') {
+            my $flag_params = {
+                target_type         => $flag_type,
+                product_id          => $bug->product_obj->id,
+                component_id        => $bug->component_obj->id,
+                bug_id              => $bug->id,
+                active_or_has_flags => $bug->id,
+            };
+            $flag_hash->{$flag_type} = Bugzilla::Flag->_flag_types($flag_params);
+        }
+    }
+    else {
+        my $flag_params = { is_active => 1 };
+        $flag_hash = $bug->product_obj->flag_types($flag_params);
+    }
     my @flag_values;
-    foreach my $flag_type ('bug','attachment') {
+    foreach my $flag_type ('bug', 'attachment') {
         foreach my $flag (@{ $flag_hash->{$flag_type} }) {
             push(@flag_values, $self->_flagtype_to_hash($flag, $bug));
         }
@@ -471,8 +486,8 @@ sub _flag_to_hash {
         id                => $self->type('int', $flag->id),
         name              => $self->type('string', $flag->name),
         type_id           => $self->type('int', $flag->type_id),
-        creation_date     => $self->type('dateTime', $flag->creation_date), 
-        modification_date => $self->type('dateTime', $flag->modification_date), 
+        creation_date     => $self->type('dateTime', $flag->creation_date),
+        modification_date => $self->type('dateTime', $flag->modification_date),
         status            => $self->type('string', $flag->status)
     };
 
@@ -488,7 +503,7 @@ sub _flag_to_hash {
 }
 
 sub _flagtype_to_hash {
-    my ($self, $flagtype) = @_;
+    my ($self, $flagtype, $bug) = @_;
     my $user = Bugzilla->user;
 
     my $cansetflag     = $user->can_set_flag($flagtype);
@@ -512,7 +527,38 @@ sub _flagtype_to_hash {
     }
     $data->{values} = \@values;
 
+    # if we're creating a bug, we need to return all valid flags for
+    # this product, as well as inclusions & exclusions so ember can
+    # display relevant flags once the component is selected
+    if (!$bug->id) {
+        my $inclusions = $self->_flagtype_clusions_to_hash($flagtype->inclusions, $bug->product_obj->id);
+        my $exclusions = $self->_flagtype_clusions_to_hash($flagtype->exclusions, $bug->product_obj->id);
+        # if we have both inclusions and exclusions, the exclusions are redundant
+        $exclusions = [] if @$inclusions && @$exclusions;
+        # no need to return anything if there's just "any component"
+        $data->{inclusions} = $inclusions if @$inclusions && $inclusions->[0] ne '';
+        $data->{exclusions} = $exclusions if @$exclusions && $exclusions->[0] ne '';
+    }
+
     return $data;
+}
+
+sub _flagtype_clusions_to_hash {
+    my ($self, $clusions, $product_id) = @_;
+    my $result = [];
+    foreach my $key (keys %$clusions) {
+        my ($prod_id, $comp_id) = split(/:/, $clusions->{$key}, 2);
+        if ($prod_id == 0 || $prod_id == $product_id) {
+            if ($comp_id) {
+                my $component = Bugzilla::Component->new({ id => $comp_id, cache => 1 });
+                push @$result, $component->name;
+            }
+            else {
+                return [ '' ];
+            }
+        }
+    }
+    return $result;
 }
 
 sub rest_resources {

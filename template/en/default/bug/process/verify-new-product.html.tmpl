@@ -140,19 +140,64 @@
   [% IF optional_groups.size %]
     <p>These groups are optional. You can decide to restrict [% terms.bugs %] to
     one or more of the following groups:<br>
-    [% FOREACH group = optional_groups %]
-      <input type="hidden" name="defined_groups"
-             value="[% group.group.name FILTER html %]">
-      <input type="checkbox" id="group_[% group.group.id FILTER html %]"
-             name="groups"
-             [% ' checked="checked"' IF ((group.membercontrol == constants.CONTROLMAPDEFAULT && user.in_group(group.group.name))
-                 || (group.othercontrol == constants.CONTROLMAPDEFAULT && !user.in_group(group.group.name))
-                 || cgi.param("groups").contains(group.group.name)) %]
-             value="[% group.group.name FILTER html %]">
-      <label for="group_[% group.group.id FILTER html %]">
-        [% group.group.name FILTER html %]: [% group.group.description FILTER html %]
-      </label>
-      <br>
+    [% IF multiple_bugs %]
+      [% USE Bugzilla %]
+      <script type="text/javascript">
+        function turn_off(myself, id) {
+            var other_checkbox = document.getElementById(id);
+            if (myself.checked && other_checkbox) {
+                other_checkbox.checked = false;
+            }
+        }
+      </script>
+
+      <table border="1">
+        <tr>
+          <th>Remove<br>[% terms.bugs %]<br>from this<br>group</th>
+          <th>Add<br>[% terms.bugs %]<br>to this<br>group</th>
+          <th>Group Name:</th>
+        </tr>
+
+        [% FOREACH group = optional_groups %]
+        <tr>
+          <td align="center">
+            <input type="checkbox" name="defined_groups" 
+                   id="defined_group_[% group.group.id FILTER html %]"
+                   value="[% group.group.name FILTER html %]"
+                   [% IF Bugzilla.cgi.param("defined_groups").contains(group.group.name) %] checked="checked"[% END %]
+                   onchange="turn_off(this, 'group_[% group.group.id FILTER html %]')">
+          </td>
+          <td align="center">
+            <input type="checkbox" name="groups" 
+                   id="group_[% group.group.id FILTER html %]"
+                   value="[% group.group.name FILTER html %]"
+                   [% IF Bugzilla.cgi.param("groups").contains(group.group.name) %] checked="checked"[% END %]
+                   onchange="turn_off(this, 'defined_group_[% group.group.id FILTER html %]')">
+          </td>
+
+          <td>
+            [% group.group.description FILTER html %]
+          </td>
+
+        </tr>
+        [% END %]
+
+      </table>
+    [% ELSE %]
+      [% FOREACH group = optional_groups %]
+        <input type="hidden" name="defined_groups"
+               value="[% group.group.name FILTER html %]">
+        <input type="checkbox" id="group_[% group.group.id FILTER html %]"
+               name="groups"
+               [% ' checked="checked"' IF ((group.membercontrol == constants.CONTROLMAPDEFAULT && user.in_group(group.group.name))
+                   || (group.othercontrol == constants.CONTROLMAPDEFAULT && !user.in_group(group.group.name))
+                   || cgi.param("groups").contains(group.group.name)) %]
+               value="[% group.group.name FILTER html %]">
+        <label for="group_[% group.group.id FILTER html %]">
+          [% group.group.name FILTER html %]: [% group.group.description FILTER html %]
+        </label>
+        <br>
+      [% END %]
     [% END %]
     </p>
   [% END %]

@@ -848,13 +848,10 @@
   [% END %]
   [% IF show_bug_flags %]
     <tr>
-      <th class="field_label flags_label">
+      <th class="field_label">
         <label>Flags:</label>
       </th>
-      <td></td>
-    </tr>
-    <tr>
-      <td colspan="2">
+      <td>
         [% IF bug.flag_types.size %]
           [% PROCESS "flag/list.html.tmpl" flag_no_header = 1
                                            flag_types = bug.flag_types

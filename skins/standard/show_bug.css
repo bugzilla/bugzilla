@@ -26,9 +26,6 @@
     width: 10em;
 }
 
-.flags_label {
-    text-align: left;
-}
 table#flags {
     width: auto;
 }

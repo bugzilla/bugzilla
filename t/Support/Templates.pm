@@ -12,9 +12,9 @@ use strict;
 use lib 't';
 use parent qw(Exporter);
 @Support::Templates::EXPORT = 
-         qw(@languages @include_paths $english_default_include_path
+         qw(@languages @include_paths @english_default_include_paths
          %include_path @referenced_files %actual_files $num_actual_files);
-use vars qw(@languages @include_paths $english_default_include_path
+use vars qw(@languages @include_paths @english_default_include_paths
             %include_path @referenced_files %actual_files $num_actual_files);
 
 use Bugzilla;
@@ -34,9 +34,17 @@ use File::Spec;
 # All include paths
 @include_paths = ();
 
-# English default include path
-$english_default_include_path =
+# English default include paths
+push @english_default_include_paths,
     File::Spec->catdir(bz_locations()->{'templatedir'}, 'en', 'default');
+
+# And the extensions too
+foreach my $extension (@Support::Files::extensions) {
+    my $dir = File::Spec->catdir($extension, 'template', 'en', 'default');
+    if (-e $dir) {
+        push @english_default_include_paths, $dir;
+    }
+}
 
 # Files which are referenced in the cgi files
 @referenced_files = ();

@@ -17,7 +17,7 @@ use Bugzilla::Constants;
 use Bugzilla::Error;
 use Bugzilla::Field;
 use Bugzilla::WebService::Constants;
-use Bugzilla::WebService::Util qw(filter filter_wants validate);
+use Bugzilla::WebService::Util qw(filter filter_wants validate translate);
 use Bugzilla::Bug;
 use Bugzilla::BugMail;
 use Bugzilla::Util qw(trick_taint trim diff_arrays);
@@ -54,6 +54,20 @@ use constant READ_ONLY => qw(
     legal_values
     search
 );
+
+use constant ATTACHMENT_MAPPED_SETTERS => {
+    file_name => 'filename',
+    summary   => 'description',
+};
+
+use constant ATTACHMENT_MAPPED_RETURNS => {
+    description => 'summary',
+    ispatch     => 'is_patch',
+    isprivate   => 'is_private',
+    isobsolete  => 'is_obsolete',
+    filename    => 'file_name',
+    mimetype    => 'content_type',
+};
 
 ######################################################
 # Add aliases here for old method name compatibility #
@@ -751,9 +765,8 @@ sub update_attachment {
 
     # We can't update flags, and summary is really description
     delete $params->{flags};
-    if (exists $params->{summary}) {
-        $params->{description} = delete $params->{summary};
-    }
+
+    $params = translate($params, ATTACHMENT_MAPPED_SETTERS);
 
     # Get all the attachments, after verifying that they exist and are editable
     my @attachments = ();
@@ -782,6 +795,8 @@ sub update_attachment {
     foreach my $attachment (@attachments) {
         my $changes = $attachment->update();
 
+        $changes = translate($changes, ATTACHMENT_MAPPED_RETURNS);
+
         my %hash = (
             id               => $self->type('int', $attachment->id),
             last_change_time => $self->type('dateTime', $attachment->modification_time),
@@ -790,8 +805,6 @@ sub update_attachment {
 
         foreach my $field (keys %$changes) {
             my $change = $changes->{$field};
-            # Description is shown as summary to the user
-            $field = 'summary' if $field eq 'description';
 
             # We normalize undef to an empty string, so that the API
             # stays consistent for things like Deadline that can become

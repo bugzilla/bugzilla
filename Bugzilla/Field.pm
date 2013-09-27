@@ -1324,7 +1324,7 @@ sub check_field {
 Description: Returns the ID of the specified field name and throws
              an error if this field does not exist.
 
-Params:      $name - a field name
+Params:      $fieldname - a field name
 
 Returns:     the corresponding field ID or an error if the field name
              does not exist.
@@ -1334,15 +1334,10 @@ Returns:     the corresponding field ID or an error if the field name
 =cut
 
 sub get_field_id {
-    my ($name) = @_;
-    my $dbh = Bugzilla->dbh;
+    my $field = Bugzilla->fields({ by_name => 1 })->{$_[0]}
+      or ThrowCodeError('invalid_field_name', {field => $_[0]});
 
-    trick_taint($name);
-    my $id = $dbh->selectrow_array('SELECT id FROM fielddefs
-                                    WHERE name = ?', undef, $name);
-
-    ThrowCodeError('invalid_field_name', {field => $name}) unless $id;
-    return $id
+    return $field->id;
 }
 
 1;

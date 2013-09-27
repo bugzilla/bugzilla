@@ -2196,7 +2196,8 @@ sub pronoun {
     if ($noun eq "%qacontact%") {
         return "COALESCE(bugs.qa_contact,0)";
     }
-    return 0;
+
+    ThrowUserError('illegal_pronoun', { pronoun => $noun });
 }
 
 sub _contact_pronoun {

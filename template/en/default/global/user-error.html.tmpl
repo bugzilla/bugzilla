@@ -891,6 +891,13 @@
     Your group control combination for group &quot;
     [% groupname FILTER html %]&quot; is illegal.
 
+  [% ELSIF error == "illegal_pronoun" %]
+    [% title = "Illegal Pronoun" %]
+    The pronoun you used ([% pronoun FILTER html %]) is illegal. You must use
+    one of the approved pronouns. Please see
+    <a href="[% docs_urlbase FILTER html %]query.html#pronouns">Pronoun Substitution</a>
+    for a complete list.
+
   [% ELSIF error == "illegal_query_name" %]
     [% title = "Illegal Search Name" %]
     The name of your search cannot contain any of the following characters: 

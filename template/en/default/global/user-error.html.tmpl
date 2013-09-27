@@ -1030,11 +1030,6 @@
       [%+ constants.LOGIN_LOCKOUT_INTERVAL FILTER html %] minutes.
     [% END %]
 
-  [% ELSIF error == "invalid_cookies_or_token" %]
-    [% title = "Invalid Cookies or Token" %]
-    The cookies or token provide were not valid or have expired.
-    You may login again to get new cookies or a new token.
-
   [% ELSIF error == "json_rpc_get_method_required" %]
     When using JSON-RPC over GET, you must specify a 'method'
     parameter. See the documentation at

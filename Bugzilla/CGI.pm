@@ -473,9 +473,9 @@ sub redirect_search_url {
 
     # GET requests that lacked a list_id are always redirected. POST requests
     # are only redirected if they're under the CGI_URI_LIMIT though.
-    my $uri_length = length($self->self_url());
-    if ($self->request_method() ne 'POST' or $uri_length < CGI_URI_LIMIT) {
-        print $self->redirect(-url => $self->self_url());
+    my $self_url = $self->self_url();
+    if ($self->request_method() ne 'POST' or length($self_url) < CGI_URI_LIMIT) {
+        print $self->redirect(-url => $self_url);
         exit;
     }
 }
@@ -529,7 +529,7 @@ sub url_is_attachment_base {
         $regex =~ s/\\\%bugid\\\%/\\d+/;
     }
     $regex = "^$regex";
-    return ($self->self_url =~ $regex) ? 1 : 0;
+    return ($self->url =~ $regex) ? 1 : 0;
 }
 
 sub set_dated_content_disp {

@@ -127,7 +127,7 @@ var inline_history = {
           }
 
           var itemContainer = document.createElement('div');
-          itemContainer.className = 'ih_history_item' + containerClass;
+          itemContainer.className = 'ih_history_item ' + containerClass;
           itemContainer.id = 'h' + i;
           itemContainer.innerHTML = item[3] + '<div class="ih_history_change">' + item[2] + '</div>';
 

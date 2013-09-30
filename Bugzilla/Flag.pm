@@ -399,7 +399,7 @@ sub _validate {
     my $old_requestee_id = $obj_flag->requestee_id;
 
     $obj_flag->_set_status($params->{status});
-    $obj_flag->_set_requestee($params->{requestee}, $attachment, $params->{skip_roe});
+    $obj_flag->_set_requestee($params->{requestee}, $bug, $attachment, $params->{skip_roe});
 
     # The requestee ID can be undefined.
     my $requestee_changed = ($obj_flag->requestee_id || 0) != ($old_requestee_id || 0);
@@ -625,10 +625,10 @@ sub force_retarget {
 ###############################
 
 sub _set_requestee {
-    my ($self, $requestee, $attachment, $skip_requestee_on_error) = @_;
+    my ($self, $requestee, $bug, $attachment, $skip_requestee_on_error) = @_;
 
     $self->{requestee} =
-      $self->_check_requestee($requestee, $attachment, $skip_requestee_on_error);
+      $self->_check_requestee($requestee, $bug, $attachment, $skip_requestee_on_error);
 
     $self->{requestee_id} =
       $self->{requestee} ? $self->{requestee}->id : undef;
@@ -650,7 +650,7 @@ sub _set_status {
 }
 
 sub _check_requestee {
-    my ($self, $requestee, $attachment, $skip_requestee_on_error) = @_;
+    my ($self, $requestee, $bug, $attachment, $skip_requestee_on_error) = @_;
 
     # If the flag status is not "?", then no requestee can be defined.
     return undef if ($self->status ne '?');
@@ -677,8 +677,16 @@ sub _check_requestee {
         # Note that can_see_bug() will query the DB, so if the bug
         # is being added/removed from some groups and these changes
         # haven't been committed to the DB yet, they won't be taken
-        # into account here. In this case, old restrictions matters.
-        if (!$requestee->can_see_bug($self->bug_id)) {
+        # into account here. In this case, old group restrictions matter.
+        # However, if the user has just been changed to the assignee,
+        # qa_contact, or added to the cc list of the bug and the bug
+        # is cclist_accessible, the requestee is allowed.
+        if (!$requestee->can_see_bug($self->bug_id)
+            && (!$bug->cclist_accessible
+                || !grep($_->id == $requestee->id, @{ $bug->cc_users })
+            && $requestee->id != $bug->assigned_to->id
+            && (!$bug->qa_contact || $requestee->id != $bug->qa_contact->id)))
+        {
             if ($skip_requestee_on_error) {
                 undef $requestee;
             }

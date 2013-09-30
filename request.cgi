@@ -183,22 +183,8 @@ sub queue {
     # need to display a "status" column in the report because the value for that
     # column will always be the same.
     my @excluded_columns = ();
-    
     my $do_union = $cgi->param('do_union');
 
-    # Filter requests by status: "pending", "granted", "denied", "all" 
-    # (which means any), or "fulfilled" (which means "granted" or "denied").
-    if ($status) {
-        if ($status eq "+-") {
-            push(@criteria, "flags.status IN ('+', '-')");
-            push(@excluded_columns, 'status') unless $do_union;
-        }
-        elsif ($status ne "all") {
-            push(@criteria, "flags.status = '$status'");
-            push(@excluded_columns, 'status') unless $do_union;
-        }
-    }
-    
     # Filter results by exact email address of requester or requestee.
     if (defined $cgi->param('requester') && $cgi->param('requester') ne "") {
         my $requester = $dbh->quote($cgi->param('requester'));
@@ -210,23 +196,44 @@ sub queue {
         if ($cgi->param('requestee') ne "-") {
             my $requestee = $dbh->quote($cgi->param('requestee'));
             trick_taint($requestee); # Quoted above
-            push(@criteria, $dbh->sql_istrcmp('requestees.login_name',
-                            $requestee));
+            push(@criteria, $dbh->sql_istrcmp('requestees.login_name', $requestee));
         }
-        else { push(@criteria, "flags.requestee_id IS NULL") }
+        else {
+            push(@criteria, "flags.requestee_id IS NULL");
+        }
         push(@excluded_columns, 'requestee') unless $do_union;
     }
-    
+
+    # If the user wants requester = foo OR requestee = bar, we have to join
+    # these criteria separately as all other criteria use AND.
+    if (@criteria == 2 && $do_union) {
+        my $union = join(' OR ', @criteria);
+        @criteria = ("($union)");
+    }
+
+    # Filter requests by status: "pending", "granted", "denied", "all"
+    # (which means any), or "fulfilled" (which means "granted" or "denied").
+    if ($status) {
+        if ($status eq "+-") {
+            push(@criteria, "flags.status IN ('+', '-')");
+            push(@excluded_columns, 'status');
+        }
+        elsif ($status ne "all") {
+            push(@criteria, "flags.status = '$status'");
+            push(@excluded_columns, 'status');
+        }
+    }
+
     # Filter results by exact product or component.
     if (defined $cgi->param('product') && $cgi->param('product') ne "") {
         my $product = Bugzilla::Product->check(scalar $cgi->param('product'));
         push(@criteria, "bugs.product_id = " . $product->id);
-        push(@excluded_columns, 'product') unless $do_union;
+        push(@excluded_columns, 'product');
         if (defined $cgi->param('component') && $cgi->param('component') ne "") {
             my $component = Bugzilla::Component->check({ product => $product,
                                                          name => scalar $cgi->param('component') });
             push(@criteria, "bugs.component_id = " . $component->id);
-            push(@excluded_columns, 'component') unless $do_union;
+            push(@excluded_columns, 'component');
         }
     }
 
@@ -244,14 +251,11 @@ sub queue {
         my $quoted_form_type = $dbh->quote($form_type);
         trick_taint($quoted_form_type); # Already SQL quoted
         push(@criteria, "flagtypes.name = " . $quoted_form_type);
-        push(@excluded_columns, 'type') unless $do_union;
+        push(@excluded_columns, 'type');
     }
-    
-    # Add the criteria to the query. Do a union if OR is selected.
-    # Otherwise do an intersection.
-    my $and_or = $do_union ? ' OR ' : ' AND ';
-    $query .= " AND (" . join($and_or, @criteria) . ") " if scalar(@criteria);
-    
+
+    $query .= ' AND ' . join(' AND ', @criteria) if scalar(@criteria);
+
     # Group the records by flag ID so we don't get multiple rows of data
     # for each flag.  This is only necessary because of the code that
     # removes flags on bugs the user is unauthorized to access.

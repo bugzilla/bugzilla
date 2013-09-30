@@ -109,8 +109,7 @@
         </tr>
 
         [% FOREACH bug = product.bugs %]
-          <tr [% IF bug.id == this_bug.id && canedit %] 
-            class="bz_bug_being_voted_on" [% END %]>
+          <tr [% IF bug.id == this_bug.id && canedit %] class="bz_bug_being_voted_on"[% END %]>
             <td>
               [% IF bug.id == this_bug.id && canedit %]
                 [% IF product.onevoteonly %]
@@ -120,25 +119,25 @@
                 [% END %]
               [%- END %]
             </td>
-            <td align="right"><a name="vote_[% bug.id FILTER html %]">
+            <td align="right"><a name="vote_[% bug.id FILTER none %]">
               [% IF canedit %]
                 [% IF product.onevoteonly %]
-                  <input type="checkbox" name="[% bug.id FILTER html %]" value="1"
-                    [% " checked" IF bug.count %] id="bug_[% bug.id FILTER html %]">
+                  <input type="checkbox" name="[% bug.id FILTER none %]" value="1"
+                    [% " checked" IF bug.count %] id="bug_[% bug.id FILTER none %]">
                 [% ELSE %]
-                  <input name="[% bug.id FILTER html %]" value="[% bug.count FILTER html %]"
-                         size="2" id="bug_[% bug.id FILTER html %]">
+                  <input name="[% bug.id FILTER none %]" value="[% bug.count FILTER html %]"
+                         size="2" id="bug_[% bug.id FILTER none %]">
                 [% END %]
               [% ELSE %]
                 [% bug.count FILTER html %]
               [% END %]
             </a></td>
             <td align="center">
-              [% bug.id FILTER bug_link(bug.id) FILTER none %]
+              [% PROCESS bug/link.html.tmpl bug = bug, link_text = bug.id %]
             </td>
             <td>
-              [% bug.summary FILTER html %]
-              (<a href="page.cgi?id=voting/bug.html&amp;bug_id=[% bug.id FILTER uri %]">Show Votes</a>)
+              [% bug.short_desc FILTER html %]
+              (<a href="page.cgi?id=voting/bug.html&amp;bug_id=[% bug.id FILTER none %]">Show Votes</a>)
             </td>
           </tr>
         [% END %]

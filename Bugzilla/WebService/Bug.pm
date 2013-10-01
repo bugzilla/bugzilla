@@ -26,9 +26,11 @@ use Bugzilla::Milestone;
 use Bugzilla::Status;
 use Bugzilla::Token qw(issue_hash_token);
 use Bugzilla::Search;
+use Bugzilla::Search::Quicksearch;
 
 use List::Util qw(max);
 use List::MoreUtils qw(uniq);
+use Storable qw(dclone);
 
 #############
 # Constants #
@@ -447,79 +449,86 @@ sub search {
 
     Bugzilla->switch_to_shadow_db();
 
-    if ( defined($params->{offset}) and !defined($params->{limit}) ) {
+    my $match_params = dclone($params);
+    delete $match_params->{include_fields};
+    delete $match_params->{exclude_fields};
+
+    # Determine whether this is a quicksearch query
+    if (exists $match_params->{quicksearch}) {
+        my $quicksearch = quicksearch($match_params->{'quicksearch'});
+        my $cgi = Bugzilla::CGI->new($quicksearch);
+        $match_params = $cgi->Vars;
+    }
+
+    if ( defined($match_params->{offset}) and !defined($match_params->{limit}) ) {
         ThrowCodeError('param_required',
                        { param => 'limit', function => 'Bug.search()' });
     }
 
     my $max_results = Bugzilla->params->{max_search_results};
-    unless (defined $params->{limit} && $params->{limit} == 0) {
-        if (!defined $params->{limit} || $params->{limit} > $max_results) {
-            $params->{limit} = $max_results;
+    unless (defined $match_params->{limit} && $match_params->{limit} == 0) {
+        if (!defined $match_params->{limit} || $match_params->{limit} > $max_results) {
+            $match_params->{limit} = $max_results;
         }
     }
     else {
-        delete $params->{limit};
-        delete $params->{offset};
+        delete $match_params->{limit};
+        delete $match_params->{offset};
     }
 
-    $params = Bugzilla::Bug::map_fields($params);
+    $match_params = Bugzilla::Bug::map_fields($match_params);
 
     my %options = ( fields => ['bug_id'] );
 
     # Find the highest custom field id
-    my @field_ids = grep(/^f(\d+)$/, keys %$params);
+    my @field_ids = grep(/^f(\d+)$/, keys %$match_params);
     my $last_field_id = @field_ids ? max @field_ids + 1 : 1;
 
     # Do special search types for certain fields.
-    if (my $change_when = delete $params->{'delta_ts'}) {
-        $params->{"f${last_field_id}"} = 'delta_ts';
-        $params->{"o${last_field_id}"} = 'greaterthaneq';
-        $params->{"v${last_field_id}"} = $change_when;
+    if (my $change_when = delete $match_params->{'delta_ts'}) {
+        $match_params->{"f${last_field_id}"} = 'delta_ts';
+        $match_params->{"o${last_field_id}"} = 'greaterthaneq';
+        $match_params->{"v${last_field_id}"} = $change_when;
         $last_field_id++;
     }
-    if (my $creation_when = delete $params->{'creation_ts'}) {
-        $params->{"f${last_field_id}"} = 'creation_ts';
-        $params->{"o${last_field_id}"} = 'greaterthaneq';
-        $params->{"v${last_field_id}"} = $creation_when;
+    if (my $creation_when = delete $match_params->{'creation_ts'}) {
+        $match_params->{"f${last_field_id}"} = 'creation_ts';
+        $match_params->{"o${last_field_id}"} = 'greaterthaneq';
+        $match_params->{"v${last_field_id}"} = $creation_when;
         $last_field_id++;
     }
 
     # Some fields require a search type such as short desc, keywords, etc.
     foreach my $param (qw(short_desc longdesc status_whiteboard bug_file_loc)) {
-        if (defined $params->{$param} && !defined $params->{$param . '_type'}) {
-            $params->{$param . '_type'} = 'allwordssubstr';
+        if (defined $match_params->{$param} && !defined $match_params->{$param . '_type'}) {
+            $match_params->{$param . '_type'} = 'allwordssubstr';
         }
     }
-    if (defined $params->{'keywords'} && !defined $params->{'keywords_type'}) {
-        $params->{'keywords_type'} = 'allwords';
+    if (defined $match_params->{'keywords'} && !defined $match_params->{'keywords_type'}) {
+        $match_params->{'keywords_type'} = 'allwords';
     }
 
     # Backwards compatibility with old method regarding role search
-    $params->{'reporter'} = delete $params->{'creator'} if $params->{'creator'};
+    $match_params->{'reporter'} = delete $match_params->{'creator'} if $match_params->{'creator'};
     foreach my $role (qw(assigned_to reporter qa_contact longdesc cc)) {
-        next if !exists $params->{$role};
-        my $value = delete $params->{$role};
-        $params->{"f${last_field_id}"} = $role;
-        $params->{"o${last_field_id}"} = "anywordssubstr";
-        $params->{"v${last_field_id}"} = ref $value ? join(" ", @{$value}) : $value;
+        next if !exists $match_params->{$role};
+        my $value = delete $match_params->{$role};
+        $match_params->{"f${last_field_id}"} = $role;
+        $match_params->{"o${last_field_id}"} = "anywordssubstr";
+        $match_params->{"v${last_field_id}"} = ref $value ? join(" ", @{$value}) : $value;
         $last_field_id++;
     }
 
-    my %match_params = %{ $params };
-    delete $match_params{include_fields};
-    delete $match_params{exclude_fields};
-
     # If no other parameters have been passed other than limit and offset
     # then we throw error if system is configured to do so.
-    if (!grep(!/^(limit|offset)$/, keys %match_params)
+    if (!grep(!/^(limit|offset)$/, keys %$match_params)
         && !Bugzilla->params->{search_allow_no_criteria})
     {
         ThrowUserError('buglist_parameters_required');
     }
 
-    $options{order}  = [ split(/\s*,\s*/, delete $match_params{order}) ] if $match_params{order};
-    $options{params} = \%match_params;
+    $options{order}  = [ split(/\s*,\s*/, delete $match_params->{order}) ] if $match_params->{order};
+    $options{params} = $match_params;
 
     my $search = new Bugzilla::Search(%options);
     my ($data) = $search->data;
@@ -2665,6 +2674,10 @@ C<string> Search the "Status Whiteboard" field on bugs for a substring.
 Works the same as the C<summary> field described above, but searches the
 Status Whiteboard field.
 
+=item C<quicksearch>
+
+C<string> Search for bugs using quicksearch syntax.
+
 =back
 
 =item B<Returns>
@@ -2706,8 +2719,10 @@ by system configuration.
 
 =item REST API call added in Bugzilla B<5.0>.
 
-=item Updated to allow for full search capability similar to the Bugzilla UI 
+=item Updated to allow for full search capability similar to the Bugzilla UI
 in Bugzilla B<5.0>.
+
+=item Updated to allow quicksearch capability in Bugzilla B<5.0>.
 
 =back
 

@@ -24,7 +24,7 @@ sub _user_gravatar {
     if (!$self->{gravatar}) {
         if ($self->setting('show_my_gravatar') eq 'On') {
             (my $email = $self->email) =~ s/\+(.*?)\@/@/;
-            $self->{gravatar} = 'https://secure.gravatar.com/avatar/' . md5_hex(lc($email)) . '?size=32&d=mm';
+            $self->{gravatar} = 'https://secure.gravatar.com/avatar/' . md5_hex(lc($email)) . '?size=64&d=mm';
         } else {
             $self->{gravatar} = 'extensions/Gravatar/web/default.jpg';
         }

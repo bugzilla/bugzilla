@@ -141,7 +141,6 @@
     <p>These groups are optional. You can decide to restrict [% terms.bugs %] to
     one or more of the following groups:<br>
     [% IF multiple_bugs %]
-      [% USE Bugzilla %]
       <script type="text/javascript">
         function turn_off(myself, id) {
             var other_checkbox = document.getElementById(id);
@@ -161,27 +160,24 @@
         [% FOREACH group = optional_groups %]
         <tr>
           <td align="center">
-            <input type="checkbox" name="defined_groups" 
+            <input type="checkbox" name="defined_groups"
                    id="defined_group_[% group.group.id FILTER html %]"
                    value="[% group.group.name FILTER html %]"
-                   [% IF Bugzilla.cgi.param("defined_groups").contains(group.group.name) %] checked="checked"[% END %]
+                   [% IF cgi.param("defined_groups").contains(group.group.name) %] checked="checked"[% END %]
                    onchange="turn_off(this, 'group_[% group.group.id FILTER html %]')">
           </td>
           <td align="center">
-            <input type="checkbox" name="groups" 
+            <input type="checkbox" name="groups"
                    id="group_[% group.group.id FILTER html %]"
                    value="[% group.group.name FILTER html %]"
-                   [% IF Bugzilla.cgi.param("groups").contains(group.group.name) %] checked="checked"[% END %]
+                   [% IF cgi.param("groups").contains(group.group.name) %] checked="checked"[% END %]
                    onchange="turn_off(this, 'defined_group_[% group.group.id FILTER html %]')">
           </td>
-
           <td>
             [% group.group.description FILTER html %]
           </td>
-
         </tr>
         [% END %]
-
       </table>
     [% ELSE %]
       [% FOREACH group = optional_groups %]

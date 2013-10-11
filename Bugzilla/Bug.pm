@@ -2541,6 +2541,7 @@ sub _set_product {
             my @idlist = ($self->id);
             push(@idlist, map {$_->id} @{ $params->{other_bugs} })
                 if $params->{other_bugs};
+            @idlist = uniq @idlist;
             # Get the ID of groups which are no longer valid in the new product.
             my $gids = $dbh->selectcol_arrayref(
                 'SELECT bgm.group_id
@@ -2555,13 +2556,13 @@ sub _set_product {
                                         . Bugzilla->user->groups_as_string . '))
                                        OR gcm.othercontrol != ?) )',
                 undef, (@idlist, $product->id, CONTROLMAPNA, CONTROLMAPNA));
-            $vars{'old_groups'} = Bugzilla::Group->new_from_list($gids);            
+            $vars{'old_groups'} = Bugzilla::Group->new_from_list($gids);
 
             # Did we come here from editing multiple bugs? (affects how we
             # show optional group changes)
-            $vars{multiple_bugs} = Bugzilla->cgi->param('id') ? 0 : 1;
+            $vars{multiple_bugs} = (@idlist > 1) ? 1 : 0;
         }
-        
+
         if (%vars) {
             $vars{product} = $product;
             $vars{bug} = $self;

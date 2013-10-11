@@ -76,20 +76,14 @@
     Product/Component: [% bug.product FILTER html %] :: [% bug.component FILTER html %]
   </div>
 
-[% USE Bugzilla %]
-[% tracking_flags = [] %]
-[% FOREACH field = Bugzilla.active_custom_fields(product => bug.product_obj, component => bug.component_obj, type => 2) %]
-  [% NEXT IF cf_flag_disabled(field.name, bug) %]
-  [% NEXT IF bug.${field.name} == "---" %]
-  [% tracking_flags.push(field) %]
-[% END %]
 [% IF tracking_flags.size %]
   <div id="tracking" style="font-size: 90%; color: #666666">
     <hr style="border: 1px dashed #969696">
     <b>Tracking Flags:</b>
     <ul>
-      [% FOREACH field = tracking_flags %]
-        <li>[% field.description FILTER html %]:[% bug.${field.name} FILTER html %]</li>
+      [% FOREACH flag = tracking_flags %]
+        [% NEXT IF bug.${flag.name} == "---" %]
+        <li>[% flag.description FILTER html %]:[% bug.${flag.name} FILTER html %]</li>
       [% END %]
     </ul>
   </div>

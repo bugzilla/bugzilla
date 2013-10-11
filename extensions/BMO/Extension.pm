@@ -66,11 +66,9 @@ sub template_before_process {
     my ($self, $args) = @_;
     my $file = $args->{'file'};
     my $vars = $args->{'vars'};
-    
+
     $vars->{'cf_hidden_in_product'} = \&cf_hidden_in_product;
-    $vars->{'cf_is_project_flag'}   = \&cf_is_project_flag;
-    $vars->{'cf_flag_disabled'}     = \&cf_flag_disabled;
-    
+
     if ($file =~ /^list\/list/) {
         # Purpose: enable correct sorting of list table
         # Matched to changes in list/table.html.tmpl
@@ -84,7 +82,7 @@ sub template_before_process {
         );
 
         my @orderstrings = split(/,\s*/, $vars->{'order'});
-        
+
         # contains field names of the columns being used to sort the table.
         my @order_columns;
         foreach my $o (@orderstrings) {
@@ -96,7 +94,7 @@ sub template_before_process {
         }
 
         $vars->{'order_columns'} = \@order_columns;
-        
+
         # fields that have a custom sortkey. (So they are correctly sorted 
         # when using js)
         my @sortkey_fields = qw(bug_status resolution bug_severity priority
@@ -220,53 +218,28 @@ sub active_custom_fields {
 
     my @tmp_fields;
     foreach my $field (@$$fields) { 
-        next if cf_hidden_in_product($field->name, $product_name, $component_name, $params->{'type'}); 
+        next if cf_hidden_in_product($field->name, $product_name, $component_name);
         push(@tmp_fields, $field);
     }
     $$fields = \@tmp_fields;
 }
 
-sub cf_is_project_flag {
-    my ($field_name) = @_;
-    foreach my $flag_re (@$cf_project_flags) {
-        return 1 if $field_name =~ $flag_re;
-    }
-    return 0;
-}
-
 sub cf_hidden_in_product {
-    my ($field_name, $product_name, $component_name, $custom_flag_mode) = @_;
+    my ($field_name, $product_name, $component_name) = @_;
 
     # If used in buglist.cgi, we pass in one_product which is a Bugzilla::Product
     # elsewhere, we just pass the name of the product.
-    $product_name = blessed($product_name) ? $product_name->name
-                                           : $product_name;
-   
+    $product_name = blessed($product_name)
+                    ? $product_name->name
+                    : $product_name;
+
     # Also in buglist.cgi, we pass in a list of components instead 
     # of a single component name everywhere else.
     my $component_list = [];
     if ($component_name) {
-        $component_list = ref $component_name ? $component_name 
-                                              : [ $component_name ];
-    }
-
-    if ($custom_flag_mode) {
-        if ($custom_flag_mode == 1) {
-            # skip custom flags
-            foreach my $flag_re (@$cf_flags) {
-                return 1 if $field_name =~ $flag_re;
-            }
-        } elsif ($custom_flag_mode == 2) {
-            # custom flags only
-            my $found = 0;
-            foreach my $flag_re (@$cf_flags) {
-                if ($field_name =~ $flag_re) {
-                    $found = 1;
-                    last;
-                }
-            }
-            return 1 unless $found;
-        }
+        $component_list = ref $component_name
+                          ? $component_name
+                          : [ $component_name ];
     }
 
     foreach my $field_re (keys %$cf_visible_in_products) {
@@ -295,7 +268,7 @@ sub cf_hidden_in_product {
                         }
                     }
                 }
-        
+
                 # If product matches and at at least one component matches
                 # from component_list (if a matching component was required), 
                 # we allow the field to be seen
@@ -303,19 +276,11 @@ sub cf_hidden_in_product {
                     return 0;
                 }
             }
-
             return 1;
         }
     }
-    
-    return 0;
-}
 
-sub cf_flag_disabled {
-    my ($field_name, $bug) = @_;
-    return 0 unless grep { $field_name eq $_ } @$cf_disabled_flags;
-    my $value = $bug->{$field_name};
-    return $value eq '---' || $value eq '';
+    return 0;
 }
 
 # Purpose: CC certain email addresses on bugmail when a bug is added or 
@@ -391,44 +356,7 @@ sub bug_check_can_change_field {
     my $priv_results = $args->{'priv_results'};
     my $user = Bugzilla->user;
 
-    # Only users in the appropriate drivers group can change the 
-    # cf_blocking_* fields or cf_tracking_* fields
-
-    if ($field =~ /^cf_(?:blocking|tracking)_/) {
-        # 0 -> 1 is used by show_bug, always allow so we skip this whole part
-        if (!($old_value eq '0' && $new_value eq '1')) {
-            # require privileged access to set a flag
-            if (_is_field_set($new_value)) {
-                _check_trusted($field, $blocking_trusted_setters, $priv_results);
-            }
-
-            # require editbugs to clear or re-nominate a set flag
-            elsif (_is_field_set($old_value) 
-                && !$user->in_group('editbugs', $bug->{'product_id'}))
-            {
-                push (@$priv_results, PRIVILEGES_REQUIRED_EMPOWERED);
-            }
-        }
-
-        if ($new_value =~ /\?$/) {
-            _check_trusted($field, $blocking_trusted_requesters, $priv_results);
-        }
-        if ($user->id) {
-            push (@$priv_results, PRIVILEGES_REQUIRED_NONE);
-        }
-
-    } elsif ($field =~ /^cf_status_/) {
-        # Only drivers can set wanted.
-        if ($new_value eq 'wanted') {
-            _check_trusted($field, $status_trusted_wanters, $priv_results);
-        } elsif (_is_field_set($new_value)) {
-            _check_trusted($field, $status_trusted_setters, $priv_results);
-        }
-        if ($user->id) {
-            push (@$priv_results, PRIVILEGES_REQUIRED_NONE);
-        }
-
-    } elsif ($field =~ /^cf/ && !@$priv_results && $new_value ne '---') {
+    if ($field =~ /^cf/ && !@$priv_results && $new_value ne '---') {
         # "other" custom field setters restrictions
         if (exists $other_setters->{$field}) {
             my $in_group = 0;
@@ -442,8 +370,8 @@ sub bug_check_can_change_field {
                 push (@$priv_results, PRIVILEGES_REQUIRED_EMPOWERED);
             }
         }
-
-    } elsif ($field eq 'resolution' && $new_value eq 'EXPIRED') {
+    }
+    elsif ($field eq 'resolution' && $new_value eq 'EXPIRED') {
         # The EXPIRED resolution should only be settable by gerv.
         if ($user->login ne 'gerv@mozilla.org') {
             push (@$priv_results, PRIVILEGES_REQUIRED_EMPOWERED);
@@ -574,33 +502,12 @@ sub bug_format_comment {
     });
 }
 
-# Purpose: generically handle generating pretty blocking/status "flags" from
-# custom field names.
 sub quicksearch_map {
     my ($self, $args) = @_;
     my $map = $args->{'map'};
-    
+
     foreach my $name (keys %$map) {
-        if ($name =~ /^cf_(blocking|tracking|status)_([a-z]+)?(\d+)?$/) {
-            my $type = $1;
-            my $product = $2;
-            my $version = $3;
-
-            if ($version) {
-                $version = join('.', split(//, $version));
-            }
-
-            my $pretty_name = $type;
-            if ($product) {              
-                $pretty_name .= "-" . $product;
-            }
-            if ($version) {
-                $pretty_name .= $version;
-            }
-
-            $map->{$pretty_name} = $name;
-        }
-        elsif ($name =~ /cf_crash_signature$/) {
+        if ($name =~ /cf_crash_signature$/) {
             $map->{'sig'} = $name;
         }
     }
@@ -844,36 +751,6 @@ sub mailer_before_send {
     # see bug 844724
     if ($email->header('to') && $email->header('to') eq 'sync-1@bugzilla.tld') {
         $email->header_set('to', 'mei.kong@tcl.com');
-    }
-
-    # Add X-Bugzilla-Tracking header
-    if ($email->header('X-Bugzilla-ID')) {
-        my $bug_id = $email->header('X-Bugzilla-ID');
-
-        # return if we cannot successfully load the bug object
-        my $bug = new Bugzilla::Bug($bug_id);
-        return if !$bug;
-
-        # The BMO hook in active_custom_fields will filter 
-        # the fields for us based on product and component
-        my @fields = Bugzilla->active_custom_fields({
-            product   => $bug->product_obj, 
-            component => $bug->component_obj,
-            type      => 2,  
-        });
-
-        my @set_values = ();
-        foreach my $field (@fields) {
-            next if $field->type == FIELD_TYPE_EXTENSION;
-            my $field_name = $field->name;
-            next if cf_flag_disabled($field_name, $bug);
-            next if !$bug->$field_name || $bug->$field_name eq '---';
-            push(@set_values, $field->description . ":" . $bug->$field_name);
-        }
-
-        if (@set_values) {
-            $email->header_set('X-Bugzilla-Tracking' => join(' ', @set_values));
-        } 
     }
 
     # attachments disabled, see bug 714488

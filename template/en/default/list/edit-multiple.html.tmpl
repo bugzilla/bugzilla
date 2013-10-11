@@ -284,7 +284,6 @@
   [%# Show all legal values and all fields, ignoring visibility controls. %]
   [% bug = default.defined ? default : 0 %]
   [% FOREACH field = Bugzilla.active_custom_fields %]
-    [% NEXT IF cf_hidden_in_product(field.name, one_product, components) %]
     <tr>
       [% PROCESS bug/field.html.tmpl bug = default
                                      value = dontchange

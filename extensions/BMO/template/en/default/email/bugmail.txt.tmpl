@@ -39,18 +39,11 @@ Configure [% terms.bug %]mail: [% urlbase %]userprefs.cgi?tab=email
 -------------------------------
 Product/Component: [%+ bug.product +%] :: [%+ bug.component %]
 
-[% USE Bugzilla %]
-[% show_tracking_flags = [] %]
-[% FOREACH field = Bugzilla.active_custom_fields(product => bug.product_obj, component => bug.component_obj, type => 2) %]
-  [% NEXT IF cf_flag_disabled(field.name, bug) %]
-  [% NEXT IF bug.${field.name} == "---" %]
-  [% show_tracking_flags.push(field) %]
-[% END %]
-
-[% IF show_tracking_flags.size %]
+[% IF tracking_flags.size %]
 ------- Tracking Flags: -------
-[% FOREACH field = show_tracking_flags %]
-[%+ field.description %]:[% bug.${field.name} %]
+[% FOREACH flag = tracking_flags %]
+  [% NEXT IF bug.${flag.name} == "---" %]
+[%+ flag.description %]:[% bug.${flag.name} %]
 [% END %]
 [% END %]
 

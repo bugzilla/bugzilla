@@ -65,7 +65,9 @@ sub template_before_process {
 
         $vars->{'tracking_flag_types'} = FLAG_TYPES;
     }
-    elsif ($file eq 'bug/edit.html.tmpl'|| $file eq 'bug/show.xml.tmpl') {
+    elsif ($file eq 'bug/edit.html.tmpl'|| $file eq 'bug/show.xml.tmpl'
+           || $file eq 'email/bugmail.html.tmpl' || $file eq 'email/bugmail.txt.tmpl')
+    {
         # note: bug/edit.html.tmpl doesn't support multiple bugs
         my $bug = exists $vars->{'bugs'} ? $vars->{'bugs'}[0] : $vars->{'bug'};
 
@@ -306,8 +308,9 @@ sub active_custom_fields {
 
     my @tracking_flags;
     if ($product) {
-        my $params = { product_id => $product->id };
+        $params->{'product_id'}   = $product->id;
         $params->{'component_id'} = $component->id if $component;
+        $params->{'is_active'}    = 1;
         @tracking_flags = @{ Bugzilla::Extension::TrackingFlags::Flag->match($params) };
     }
     else {
@@ -542,6 +545,35 @@ sub mailer_before_send {
                                      " " . $set_values_string;
             }
             $email->header_set('X-Bugzilla-Tracking' => $set_values_string);
+        }
+    }
+}
+
+# Purpose: generically handle generating pretty blocking/status "flags" from
+# custom field names.
+sub quicksearch_map {
+    my ($self, $args) = @_;
+    my $map = $args->{'map'};
+
+    foreach my $name (keys %$map) {
+        if ($name =~ /^cf_(blocking|tracking|status)_([a-z]+)?(\d+)?$/) {
+            my $type = $1;
+            my $product = $2;
+            my $version = $3;
+
+            if ($version) {
+                $version = join('.', split(//, $version));
+            }
+
+            my $pretty_name = $type;
+            if ($product) {
+                $pretty_name .= "-" . $product;
+            }
+            if ($version) {
+                $pretty_name .= $version;
+            }
+
+            $map->{$pretty_name} = $name;
         }
     }
 }

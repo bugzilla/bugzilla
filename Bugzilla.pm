@@ -594,8 +594,7 @@ sub active_custom_fields {
     my $cache_id = 'active_custom_fields';
     if ($params) {
         $cache_id .= ($params->{product} ? '_p' . $params->{product}->id : '') .
-                     ($params->{component} ? '_c' . $params->{component}->id : '') .
-                     ($params->{type} ? '_t' . $params->{type} : '');
+                     ($params->{component} ? '_c' . $params->{component}->id : '');
     }
     if (!exists $class->request_cache->{$cache_id}) {
         my $fields = Bugzilla::Field->match({ custom => 1, obsolete => 0});

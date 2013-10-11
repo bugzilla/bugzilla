@@ -144,7 +144,6 @@
     [% ELSIF field == "see_also" %]
       [% val = val.name %]
     [% END %]
-    [% NEXT IF cf_hidden_in_product(field.name, bug.product, bug.component) %]
     <[% field %][% IF name != '' %] name="[% name FILTER xml %]"[% END -%]>
       [%- val FILTER xml %]</[% field %]>
   [% END %]

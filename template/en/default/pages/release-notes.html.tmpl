@@ -53,6 +53,36 @@
 
 <h2 id="v42_point">Updates in this 4.2.x Release</h2>
 
+<h3>4.2.7</h3>
+
+<p>This release fixes several security issues. See the
+  <a href="http://www.bugzilla.org/security/4.0.10/">Security Advisory</a>
+  for details.</p>
+
+<p>In addition, the following [% terms.bugs %] have been fixed in this release:</p>
+
+<ul>
+  <li>Internet Explorer 11 and KHTML-based browsers such as Konqueror can now
+    display buglists correctly.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=902515">[% terms.Bug %] 902515</a> and
+    <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=914262">[% terms.bug %] 914262</a>)</li>
+  <li>When the <kbd>password_complexity</kbd> parameter was set to
+    'letters_numbers_specialchars', passwords containing numbers and special
+    characters only were accepted. Now it makes sure that a letter is also present.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=897264">[% terms.Bug %] 897264</a>)</li>
+  <li>With DB servers doing case-insensitive comparisons, such as MySQL, tokens
+    and login cookies were not correctly validated as the case was ignored.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=906745">[% terms.Bug %] 906745</a> and
+    <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=907438">[% terms.bug %] 907438</a>)</li>
+  <li>All security headers (such as X-Frame-Options) are now returned when using XML-RPC.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=787328">[% terms.Bug %] 787328</a>)</li>
+  <li>Oracle crashed when reporting a new [% terms.bug %] if a custom free-text field
+    was non-mandatory and left empty.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=919475">[% terms.Bug %] 919475</a>)</li>
+  <li>It was not possible to import [% terms.bugs %] using <kbd>importxml.pl</kbd> with Oracle.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=848063">[% terms.Bug %] 848063</a>)</li>
+</ul>
+
 <h3>4.2.6</h3>
 
 <p>The following important fixes/changes have been made in this release:</p>

@@ -1045,6 +1045,7 @@ sub _bug_to_hash {
     # eliminate them anyway.
     if (filter_wants $params, 'assigned_to') {
         $item{'assigned_to'} = $self->type('email', $bug->assigned_to->login);
+        $item{'assigned_to_detail'} = $self->_user_to_hash($bug->assigned_to, $params, 'assigned_to');
     }
     if (filter_wants $params, 'blocks') {
         my @blocks = map { $self->type('int', $_) } @{ $bug->blocked };
@@ -1062,6 +1063,7 @@ sub _bug_to_hash {
     }
     if (filter_wants $params, 'creator') {
         $item{'creator'} = $self->type('email', $bug->reporter->login);
+        $item{'creator_detail'} = $self->_user_to_hash($bug->reporter, $params, 'creator');
     }
     if (filter_wants $params, 'depends_on') {
         my @depends_on = map { $self->type('int', $_) } @{ $bug->dependson };
@@ -1089,6 +1091,9 @@ sub _bug_to_hash {
     if (filter_wants $params, 'qa_contact') {
         my $qa_login = $bug->qa_contact ? $bug->qa_contact->login : '';
         $item{'qa_contact'} = $self->type('email', $qa_login);
+        if ($bug->qa_contact) {
+            $item{'qa_contact_detail'} = $self->_user_to_hash($bug->qa_contact, $params, 'qa_contact');
+        }
     }
     if (filter_wants $params, 'see_also') {
         my @see_also = map { $self->type('string', $_->name) }
@@ -1139,6 +1144,17 @@ sub _bug_to_hash {
                                                  $bug->reporter_accessible);
 
     return filter $params, \%item;
+}
+
+sub _user_to_hash {
+    my ($self, $user, $filters, $prefix) = @_;
+    my $item = filter $filters, {
+        id        => $self->type('int', $user->id),
+        real_name => $self->type('string', $user->name),
+        name      => $self->type('email', $user->login),
+        email     => $self->type('email', $user->email),
+    }, $prefix;
+    return $item;
 }
 
 sub _attachment_to_hash {
@@ -2006,6 +2022,11 @@ C<string> The unique alias of this bug.
 
 C<string> The login name of the user to whom the bug is assigned.
 
+=item C<assigned_to_detail> 
+
+C<hash> A hash containing detailed user information for the assigned_to. To see the 
+keys included in the user detail hash, see below.
+
 =item C<blocks>
 
 C<array> of C<int>s. The ids of bugs that are "blocked" by this bug.
@@ -2030,6 +2051,11 @@ C<dateTime> When the bug was created.
 =item C<creator>
 
 C<string> The login name of the person who filed this bug (the reporter).
+
+=item C<creator_detail> 
+
+C<hash> A hash containing detailed user information for the creator. To see the 
+keys included in the user detail hash, see below.
 
 =item C<deadline>
 
@@ -2152,6 +2178,11 @@ C<string> The name of the product this bug is in.
 
 C<string> The login name of the current QA Contact on the bug.
 
+=item C<qa_contact_detail>
+
+C<hash> A hash containing detailed user information for the qa_contact. To see the
+keys included in the user detail hash, see below.
+
 =item C<remaining_time>
 
 C<double> The number of hours of work remaining until work on this bug
@@ -2226,6 +2257,30 @@ field types have different return values:
 =item Date/Time Fields - C<dateTime>
 
 =back 
+
+=item I<user detail hashes> 
+
+Each user detail hash contains the following items:
+
+=over
+
+=item C<id>
+
+C<int> The user id for this user.
+
+=item C<real_name>
+
+C<string> The 'real' name for this user, if any.
+
+=item C<name>
+
+C<string> The user's Bugzilla login.
+
+=item C<email>
+
+C<string> The user's email address. Currently this is the same value as the name.
+
+=back
 
 =back
 
@@ -2327,6 +2382,8 @@ and all custom fields.
 in Bugzilla B<4.4>.
 
 =item REST API call added in Bugzilla B<5.0>.
+
+=item In Bugzilla B<5.0>, the following items were added to the bugs return value: C<assigned_to_detail>, C<creator_detail>, C<qa_contact_detail>. 
 
 =back
 

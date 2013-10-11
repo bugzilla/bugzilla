@@ -433,12 +433,19 @@ sub install_update_db {
     my $dbh = Bugzilla->dbh;
     $dbh->bz_add_column(
         'products',
-        'reviewer_required',
-        {
-            TYPE    => 'BOOLEAN',
-            NOTNULL => 1,
-            DEFAULT => 'FALSE',
-        }
+        'reviewer_required', { TYPE => 'BOOLEAN', NOTNULL => 1, DEFAULT => 'FALSE' }
+    );
+    $dbh->bz_add_column(
+        'profiles',
+        'review_request_count', { TYPE => 'INT2', NOTNULL => 1, DEFAULT => 0 }
+    );
+    $dbh->bz_add_column(
+        'profiles',
+        'feedback_request_count', { TYPE => 'INT2', NOTNULL => 1, DEFAULT => 0 }
+    );
+    $dbh->bz_add_column(
+        'profiles',
+        'needinfo_request_count', { TYPE => 'INT2', NOTNULL => 1, DEFAULT => 0 }
     );
 }
 

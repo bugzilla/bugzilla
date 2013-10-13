@@ -475,7 +475,8 @@ sub bug_end_of_update {
 
     my (@flag_changes);
     foreach my $flag (@$tracking_flags) {
-        my $new_value = $params->{$flag->name} || '---';
+        next if !exists $params->{$flag->name};
+        my $new_value = $params->{$flag->name};
         my $old_value = $flag->bug_flag->value;
 
         next if $new_value eq $old_value;

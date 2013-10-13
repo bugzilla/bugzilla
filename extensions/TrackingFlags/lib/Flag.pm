@@ -282,6 +282,12 @@ sub preload_all_the_things {
         foreach my $obj (@$bug_objects) {
             my $flag_id = $obj->tracking_flag_id;
 
+            # Load the flag object if it does not yet exist.
+            # This can happen if the bug value tracking flag
+            # is no longer visible for the product/component
+            $flag_hash{$flag_id}
+                ||= Bugzilla::Extension::TrackingFlags::Flag->new($flag_id);
+
             # Prepopulate the tracking flag object in the bug flag object
             $obj->{'tracking_flag'} = $flag_hash{$flag_id};
 

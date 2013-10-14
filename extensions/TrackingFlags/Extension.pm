@@ -476,13 +476,32 @@ sub bug_end_of_create {
     }
 }
 
+sub object_end_of_set_all {
+    my ($self, $args) = @_;
+    my $object = $args->{object};
+    my $params = Bugzilla->input_params;
+
+    return unless $object->isa('Bugzilla::Bug');
+
+    # Do not filter by product/component as we may be changing those
+    my $tracking_flags = Bugzilla::Extension::TrackingFlags::Flag->match({
+        bug_id    => $object->id,
+        is_active => 1,
+    });
+
+    foreach my $flag (@$tracking_flags) {
+        my $flag_name = $flag->name;
+        if (defined $params->{$flag_name}) {
+            $object->{$flag_name} = $params->{$flag_name};
+        }
+    }
+}
+
 sub bug_end_of_update {
     my ($self, $args) = @_;
-    my $bug       = $args->{'bug'};
-    my $timestamp = $args->{'timestamp'};
-    my $changes   = $args->{'changes'};
-    my $params    = Bugzilla->input_params;
-    my $user      = Bugzilla->user;
+    my ($bug, $old_bug, $timestamp, $changes)
+        = @$args{qw(bug old_bug timestamp changes)};
+    my $user = Bugzilla->user;
 
     # Do not filter by product/component as we may be changing those
     my $tracking_flags = Bugzilla::Extension::TrackingFlags::Flag->match({
@@ -492,9 +511,9 @@ sub bug_end_of_update {
 
     my (@flag_changes);
     foreach my $flag (@$tracking_flags) {
-        next if !exists $params->{$flag->name};
-        my $new_value = $params->{$flag->name};
-        my $old_value = $flag->bug_flag->value;
+        my $flag_name = $flag->name;
+        my $new_value = $bug->$flag_name;
+        my $old_value = $old_bug->$flag_name;
 
         next if $new_value eq $old_value;
 

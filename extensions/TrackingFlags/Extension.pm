@@ -492,8 +492,8 @@ sub object_end_of_set_all {
 
     foreach my $flag (@$tracking_flags) {
         my $flag_name = $flag->name;
-        if (defined $params->{$flag_name}) {
-            $object->{$flag_name} = $params->{$flag_name};
+        if (exists $params->{$flag_name}) {
+            $object->set($flag_name, $params->{$flag_name});
         }
     }
 }
@@ -515,8 +515,6 @@ sub bug_end_of_update {
         my $flag_name = $flag->name;
         my $new_value = $bug->$flag_name;
         my $old_value = $old_bug->$flag_name;
-
-        next if $new_value eq $old_value;
 
         if ($new_value ne $old_value) {
             # Do not allow if the user cannot set the old value or the new value

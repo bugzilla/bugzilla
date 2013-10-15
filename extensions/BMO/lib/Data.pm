@@ -39,7 +39,10 @@ our @EXPORT = qw( $cf_visible_in_products
                   %group_auto_cc
                   %product_sec_groups
                   %create_bug_formats
-                  @default_named_queries );
+                  @default_named_queries
+                  GITHUB_PR_CONTENT_TYPE );
+
+use constant GITHUB_PR_CONTENT_TYPE => 'text/x-github-pull-request';
 
 # Which custom fields are visible in which products and components.
 #

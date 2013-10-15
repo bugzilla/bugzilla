@@ -52,6 +52,7 @@ use Bugzilla::Attachment;
 use Bugzilla::Attachment::PatchReader;
 use Bugzilla::Token;
 use Bugzilla::Keyword;
+use Bugzilla::Hook;
 
 use Encode qw(encode find_encoding);
 
@@ -385,6 +386,9 @@ sub view {
 
     # Return the appropriate HTTP response headers.
     $attachment->datasize || ThrowUserError("attachment_removed");
+
+    # BMO add a hook for github url redirection
+    Bugzilla::Hook::process('attachment_view', { attachment => $attachment });
 
     $filename =~ s/^.*[\/\\]//;
     # escape quotes and backslashes in the filename, per RFCs 2045/822

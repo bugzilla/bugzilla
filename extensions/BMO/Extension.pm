@@ -33,6 +33,7 @@ use Bugzilla::Mailer;
 use Bugzilla::Product;
 use Bugzilla::Status;
 use Bugzilla::Token;
+use Bugzilla::Install::Filesystem;
 use Bugzilla::User;
 use Bugzilla::User::Setting;
 use Bugzilla::Util;
@@ -580,6 +581,55 @@ sub bug_end_of_create {
     }
 }
 
+# detect github pull requests and set a unique content-type
+sub attachment_process_data {
+    my ($self, $args) = @_;
+    my $attributes = $args->{attributes};
+
+    # quick checks - must be a text/plain non-patch
+    return if $attributes->{ispatch} || $attributes->{mimetype} ne 'text/plain';
+
+    # check the attachment size, and get attachment content if it isn't too large
+    my $data = $attributes->{data};
+    my $url;
+    if (blessed($data) && blessed($data) eq 'Fh') {
+        # filehandle
+        my $size = -s $data;
+        return if $size > 256;
+        sysread($data, $url, $size);
+        seek($data, 0, 0);
+    } else {
+        # string
+        return if length($data) > 256;
+        $url = $data;
+    }
+
+    # trim and check for the pull request url
+    $url = trim($url);
+    return if $url =~ /\s/;
+    return unless $url =~ m#^https://github\.com/[^/]+/[^/]+/pull/\d+$#i;
+
+    # must be a valid pull-request
+    $attributes->{mimetype} = GITHUB_PR_CONTENT_TYPE;
+}
+
+# redirect automatically to github urls
+sub attachment_view {
+    my ($self, $args) = @_;
+    my $attachment = $args->{attachment};
+    my $cgi = Bugzilla->cgi;
+
+    # don't redirect if the content-type is specified explicitly
+    return if defined $cgi->param('content_type');
+
+    # must be our github content-type
+    return unless $attachment->contenttype eq GITHUB_PR_CONTENT_TYPE;
+
+    # redirect
+    print $cgi->redirect(trim($attachment->data));
+    exit;
+}
+
 sub install_before_final_checks {
     my ($self, $args) = @_;
     
@@ -1062,6 +1112,15 @@ sub _check_default_product_security_group {
         push @groups, $group->name unless grep { $_ eq $group->name } @groups;
         $cgi->param('groups', @groups);
     }
+}
+
+sub install_filesystem {
+    my ($self, $args) = @_;
+    my $files = $args->{files};
+    my $extensions_dir = bz_locations()->{extensionsdir};
+    $files->{"$extensions_dir/BMO/bin/migrate-github-pull-requests.pl"} = {
+        perms => Bugzilla::Install::Filesystem::OWNER_EXECUTE
+    };
 }
 
 __PACKAGE__->NAME;

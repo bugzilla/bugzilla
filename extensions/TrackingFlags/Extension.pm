@@ -409,7 +409,8 @@ sub search_clause_structure {
     my @tracking_flags = map { $_->name } Bugzilla::Extension::TrackingFlags::Flag->get_all;
     $clause->walk_conditions(sub {
         my ($clause, $condition) = @_;
-        if (grep { $condition->field eq $_ } @tracking_flags
+        if (defined($condition->field)
+            and grep { $condition->field eq $_ } @tracking_flags
             and $condition->{value} eq '---')
         {
             $condition->{operator} = $condition->{operator} =~ /^not/

@@ -214,6 +214,17 @@ sub get_all {
            values %{ $cache->{'tracking_flags'} };
 }
 
+# avoids the overhead of pre-loading if just the field names are required
+sub get_all_names {
+    my $self = shift;
+    my $cache = Bugzilla->request_cache;
+    if (!exists $cache->{'tracking_flags_names'}) {
+        $cache->{'tracking_flags_names'} =
+            Bugzilla->dbh->selectcol_arrayref("SELECT name FROM tracking_flags ORDER BY name");
+    }
+    return @{ $cache->{'tracking_flags_names'} };
+}
+
 sub remove_from_db {
     my $self = shift;
     my $dbh = Bugzilla->dbh;

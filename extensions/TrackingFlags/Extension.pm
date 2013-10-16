@@ -341,6 +341,10 @@ sub buglist_columns {
 
 sub buglist_column_joins {
     my ($self, $args) = @_;
+    # if there are elements in the tracking_flags array, then they have been
+    # removed from the query, so we mustn't generate joins
+    return if scalar @{ $args->{search}->{tracking_flags} };
+
     my $column_joins = $args->{'column_joins'};
     my @tracking_flags = Bugzilla::Extension::TrackingFlags::Flag->get_all;
     foreach my $flag (@tracking_flags) {

@@ -739,9 +739,18 @@ sub data {
     my $all_in_bugs_table = 1;
     foreach my $field (@orig_fields) {
         next if $self->COLUMNS->{$field}->{name} =~ /^bugs\.\w+$/;
-        $self->{fields} = ['bug_id'];
         $all_in_bugs_table = 0;
         last;
+    }
+
+    # BMO - tracking flags are not on the bugs table anymore
+    $self->_display_columns();
+    if (@{ $self->{tracking_flags} }) {
+        $all_in_bugs_table = 0;
+    }
+
+    if (!$all_in_bugs_table) {
+        $self->{fields} = ['bug_id'];
     }
 
     my $start_time = [gettimeofday()];
@@ -789,6 +798,44 @@ sub data {
     # and this avoids additional table joins in the SQL query.
     my %data = map { $_->[$pos] => $_ } @$unsorted_data;
     $self->{data} = [map { $data{$_} } @$bug_ids];
+
+    # BMO - get tracking flags values, and insert into result
+    if (@{ $self->{tracking_flags} }) {
+        # read values
+        my $values;
+        $sql = "
+            SELECT bugs.bug_id, tracking_flags.name, tracking_flags_bugs.value
+            FROM bugs
+                LEFT JOIN tracking_flags_bugs ON tracking_flags_bugs.bug_id = bugs.bug_id
+                LEFT JOIN tracking_flags ON tracking_flags.id = tracking_flags_bugs.tracking_flag_id
+            WHERE " . $dbh->sql_in('bugs.bug_id', $bug_ids);
+        $start_time = [gettimeofday()];
+        my $rows = $dbh->selectall_arrayref($sql);
+        push(@extra_data, {sql => $sql, time => tv_interval($start_time)});
+        foreach my $row (@$rows) {
+            $values->{$row->[0]}{$row->[1]} = $row->[2] if defined($row->[2]);
+        }
+
+        # find the columns of the tracking flags
+        my %tf_pos;
+        for (my $i = 0; $i <= $#orig_fields; $i++) {
+            if (grep { $_ eq $orig_fields[$i] } @{ $self->{tracking_flags} }) {
+                $tf_pos{$orig_fields[$i]} = $i;
+            }
+        }
+
+        # replace the placeholder value with the field's value
+        foreach my $row (@{ $self->{data} }) {
+            my $bug_id = $row->[$pos];
+            next unless exists $values->{$bug_id};
+            foreach my $field (keys %{ $values->{$bug_id} }) {
+                if (exists $tf_pos{$field}) {
+                    $row->[$tf_pos{$field}] = $values->{$bug_id}{$field};
+                }
+            }
+        }
+    }
+
     return wantarray ? ($self->{data}, \@extra_data) : $self->{data};
 }
 
@@ -952,6 +999,23 @@ sub _display_columns {
     # duplicated columns. Those are passed by the caller, and the caller
     # expects to get them back in the exact same order.
     my @columns = $self->_input_columns;
+
+    # BMO - to avoid massive amounts of joins, if we're selecting a lot of
+    # tracking flags, replace them with placeholders. the values will be
+    # retrieved later and injected into the result.
+    my %tf_map = map { $_ => 1 } Bugzilla::Extension::TrackingFlags::Flag->get_all_names();
+    my @tf_selected = grep { exists $tf_map{$_} } @columns;
+    # mysql has a limit of 61 joins, and we want to avoid massive amounts of joins
+    # 30 ensures we won't hit the limit, nor generate too many joins
+    if (scalar @tf_selected > 30) {
+        foreach my $column (@tf_selected) {
+            $self->COLUMNS->{$column}->{name} = "'---'";
+        }
+        $self->{tracking_flags} = \@tf_selected;
+    }
+    else {
+        $self->{tracking_flags} = [];
+    }
 
     # Only add columns which are not already listed.
     my %list = map { $_ => 1 } @columns;
@@ -1960,8 +2024,9 @@ sub _get_column_joins {
     return $cache->{column_joins} if defined $cache->{column_joins};
 
     my %column_joins = %{ COLUMN_JOINS() };
+    # BMO - add search object to hook
     Bugzilla::Hook::process('buglist_column_joins',
-                            { column_joins => \%column_joins });
+                            { column_joins => \%column_joins, search => $self });
 
     $cache->{column_joins} = \%column_joins;
     return $cache->{column_joins};

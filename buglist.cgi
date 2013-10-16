@@ -546,16 +546,7 @@ if (defined $params->param('columnlist')) {
     if ($params->param('columnlist') eq "all") {
         # If the value of the CGI parameter is "all", display all columns,
         # but remove the redundant "short_desc" column.
-        # BMO: Skip tracking flag columns when retrieving all columns
-        # MySQL bombs on greater than 61 joins.
-        my @non_tf_columns;
-        foreach my $column (keys %$columns) {
-            next if $column eq 'short_desc';
-            next if ($column =~ /^cf_(blocking|tracking|status)/
-                     && $columns->{$column}->{name} =~ /^COALESCE/);
-            push(@non_tf_columns, $column);
-        }
-        @displaycolumns = @non_tf_columns;
+        @displaycolumns = grep($_ ne 'short_desc', keys(%$columns));
     }
     else {
         @displaycolumns = split(/[ ,]+/, $params->param('columnlist'));

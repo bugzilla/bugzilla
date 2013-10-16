@@ -53,10 +53,10 @@
 %]
 
 <form method="post" action="editflagtypes.cgi">
-  <input type="hidden" name="action" value="[% action %]">
-  <input type="hidden" name="id" value="[% type.id %]">
+  <input type="hidden" name="action" value="[% action FILTER html %]">
+  <input type="hidden" name="id" value="[% type.id FILTER html %]">
   <input type="hidden" name="token" value="[% token FILTER html %]">
-  <input type="hidden" name="target_type" value="[% type.target_type %]">
+  <input type="hidden" name="target_type" value="[% type.target_type FILTER html %]">
   [% FOREACH category = type.inclusions %]
     <input type="hidden" name="inclusions" value="[% category.value FILTER html %]">
   [% END %]
@@ -143,7 +143,7 @@
         when displayed to users in a list; ignore if you don't care
         what order the types appear in or if you want them to appear
         in alphabetical order<br>
-        <input type="text" name="sortkey" value="[% type.sortkey || 1 %]" size="5" maxlength="5">
+        <input type="text" name="sortkey" value="[% type.sortkey || 1 FILTER html %]" size="5" maxlength="5">
       </td>
     </tr>
 

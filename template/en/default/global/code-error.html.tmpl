@@ -438,6 +438,9 @@
   [% ELSIF error == "token_generation_error" %]
     Something is seriously wrong with the token generation system.
 
+  [% ELSIF error == "cancel_token_does_not_exist" %]
+    The token to be cancelled does not exist.
+
   [% ELSIF error == "template_error" %]
     [% template_error_msg FILTER html %]
 

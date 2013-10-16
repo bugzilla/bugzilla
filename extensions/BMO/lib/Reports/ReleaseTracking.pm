@@ -265,8 +265,13 @@ sub report {
             push @params, '%' . $q->{flag_name} . $q->{flag_status} . '%';
         }
 
-        push @where, "(f.type_id IN (SELECT id FROM flagtypes WHERE name = ?))";
-        push @params, $q->{flag_name};
+        my ($type_id) = $dbh->selectrow_array(
+            "SELECT id FROM flagtypes WHERE name = ?",
+            undef,
+            $q->{flag_name}
+        );
+        push @where, "(f.type_id = ?)";
+        push @params, $type_id;
 
         push @where, "(f.status = ?)";
         push @params, $q->{flag_status};
@@ -279,14 +284,14 @@ sub report {
         if (scalar @{$q->{fields}}) {
             my @fields;
             foreach my $field (@{$q->{fields}}) {
-                my $field_sql = "(" . ($field->{value} eq '+' ? '' : '!') . "(";
+                my $field_sql = "(";
                 if ($field->{type} == FIELD_TYPE_EXTENSION) {
-                    $field_sql .= "tf.name = " . $dbh->quote($field->{name}) . " AND tfb.value";
+                    $field_sql .= "tf.name = " . $dbh->quote($field->{name}) . " AND COALESCE(tfb.value, '')";
                 }
                 else {
                     $field_sql .= "b." . $field->{name};
                 }
-                $field_sql .= " IN ('fixed','verified')))";
+                $field_sql .= " " . ($field->{value} eq '+' ? '' : 'NOT ') . "IN ('fixed','verified'))";
                 push(@fields, $field_sql);
             }
             my $join = uc $q->{join};
@@ -299,7 +304,7 @@ sub report {
             print "Content-Type: text/plain\n\n";
             $query =~ s/\?/\000/g;
             foreach my $param (@params) {
-                $query =~ s/\000/$param/;
+                $query =~ s/\000/'$param'/;
             }
             print "$query\n";
             exit;

@@ -410,8 +410,6 @@
 ],
 
 'admin/flag-type/edit.html.tmpl' => [
-  'type.id', 
-  'type.sortkey || 1',
   'selname',
 ],
 

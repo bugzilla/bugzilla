@@ -69,7 +69,7 @@ if ($token) {
   # Make sure the token exists in the database.
   my ($db_token, $tokentype) = $dbh->selectrow_array('SELECT token, tokentype FROM tokens
                                                        WHERE token = ?', undef, $token);
-  (defined $db_token && $db_token eq $token && $tokentype)
+  (defined $db_token && $db_token eq $token)
     || ThrowUserError("token_does_not_exist");
 
   # Make sure the token is the correct type for the action being taken.

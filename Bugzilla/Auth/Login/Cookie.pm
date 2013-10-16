@@ -66,8 +66,8 @@ sub get_login_info {
         trick_taint($login_cookie);
         detaint_natural($user_id);
 
-        my $is_valid =
-          $dbh->selectrow_array('SELECT 1
+        my $db_cookie =
+          $dbh->selectrow_array('SELECT cookie
                                    FROM logincookies
                                   WHERE cookie = ?
                                         AND userid = ?
@@ -77,7 +77,7 @@ sub get_login_info {
         # If the cookie or token is valid, return a valid username.
         # If they were not valid and we are using a webservice, then
         # throw an error notifying the client.
-        if ($is_valid) {
+        if (defined $db_cookie && $login_cookie eq $db_cookie) {
             # If we logged in successfully, then update the lastused 
             # time on the login cookie
             $dbh->do("UPDATE logincookies SET lastused = NOW() 

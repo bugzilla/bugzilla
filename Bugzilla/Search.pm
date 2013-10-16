@@ -1669,10 +1669,6 @@ sub _params_to_data_structure {
     # And then process the modern "custom search" format.
     $clause->add( $self->_custom_search );
 
-    # BMO - allow post-processing of search clauses
-    Bugzilla::Hook::process('search_clause_structure',
-                            { search => $self, clause => $clause });
-
     return $clause;
 }
 

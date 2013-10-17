@@ -149,19 +149,19 @@ $timings->time('load_bug');
 
 # Check for a mid-air collision. Currently this only works when updating
 # an individual bug.
-if (defined $cgi->param('delta_ts'))
-{
-    my $delta_ts_z = datetime_from($cgi->param('delta_ts'));
+my $delta_ts = $cgi->param('delta_ts') || '';
+
+if ($delta_ts) {
+    my $delta_ts_z = datetime_from($delta_ts)
+      or ThrowCodeError('invalid_timestamp', { timestamp => $delta_ts });
+
     my $first_delta_tz_z =  datetime_from($first_bug->delta_ts);
+
     if ($first_delta_tz_z ne $delta_ts_z) {
-        ($vars->{'operations'}) =
-            Bugzilla::Bug::GetBugActivity($first_bug->id, undef,
-                                          scalar $cgi->param('delta_ts'));
+        ($vars->{'operations'}) = Bugzilla::Bug::GetBugActivity($first_bug->id, undef, $delta_ts);
 
-        ThrowCodeError('undefined_field', { field => 'longdesclength' })
-            if !defined $cgi->param('longdesclength');
-
-        my $start_at = $cgi->param('longdesclength');
+        my $start_at = $cgi->param('longdesclength')
+          or ThrowCodeError('undefined_field', { field => 'longdesclength' });
 
         # Always sort midair collision comments oldest to newest,
         # regardless of the user's personal preference.
@@ -206,7 +206,7 @@ if (defined $cgi->param('delta_ts'))
 my $token = $cgi->param('token');
 
 if ($cgi->param('id')) {
-    check_hash_token($token, [$first_bug->id, $first_bug->delta_ts]);
+    check_hash_token($token, [$first_bug->id, $delta_ts]);
 }
 else {
     check_token_data($token, 'buglist_mass_change', 'query.cgi');

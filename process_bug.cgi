@@ -167,9 +167,6 @@ if ($delta_ts) {
         # regardless of the user's personal preference.
         my $comments = $first_bug->comments({ order => "oldest_to_newest" });
 
-        # The token contains the old delta_ts. We need a new one.
-        $cgi->param('token', issue_hash_token([$first_bug->id, $first_bug->delta_ts]));
-
         # Show midair if previous changes made other than CC
         # and/or one or more comments were made
         my $do_midair = scalar @$comments > $start_at ? 1 : 0;
@@ -191,6 +188,8 @@ if ($delta_ts) {
             $vars->{'start_at'} = $start_at;
             $vars->{'comments'} = $comments;
             $vars->{'bug'} = $first_bug;
+            # The token contains the old delta_ts. We need a new one.
+            $cgi->param('token', issue_hash_token([$first_bug->id, $first_bug->delta_ts]));
 
             # Warn the user about the mid-air collision and ask them what to do.
             $template->process("bug/process/midair.html.tmpl", $vars)

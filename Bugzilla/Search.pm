@@ -740,17 +740,8 @@ sub data {
     foreach my $field (@orig_fields) {
         next if $self->COLUMNS->{$field}->{name} =~ /^bugs\.\w+$/;
         $all_in_bugs_table = 0;
-        last;
-    }
-
-    # BMO - tracking flags are not on the bugs table anymore
-    $self->_display_columns();
-    if (@{ $self->{tracking_flags} }) {
-        $all_in_bugs_table = 0;
-    }
-
-    if (!$all_in_bugs_table) {
         $self->{fields} = ['bug_id'];
+        last;
     }
 
     my $start_time = [gettimeofday()];

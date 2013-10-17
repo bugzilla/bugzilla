@@ -136,8 +136,10 @@ if ($delta_ts) {
         if (!$do_midair) {
             foreach my $operation (@{ $vars->{'operations'} }) {
                 foreach my $change (@{ $operation->{'changes'} }) {
-                    $do_midair = 1 if $change->{'fieldname'} ne 'cc';
-                    last;
+                    if ($change->{'fieldname'} ne 'cc') {
+                        $do_midair = 1;
+                        last;
+                    }
                 }
                 last if $do_midair;
             }

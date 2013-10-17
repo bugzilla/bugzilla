@@ -111,7 +111,7 @@ print $cgi->header() unless Bugzilla->usage_mode == USAGE_MODE_EMAIL;
 
 # Check for a mid-air collision. Currently this only works when updating
 # an individual bug.
-my $delta_ts = $cgi->param('delta_ts');
+my $delta_ts = $cgi->param('delta_ts') || '';
 
 if ($delta_ts) {
     my $delta_ts_z = datetime_from($delta_ts)
@@ -167,7 +167,7 @@ if ($delta_ts) {
 my $token = $cgi->param('token');
 
 if ($cgi->param('id')) {
-    check_hash_token($token, [$first_bug->id, $first_bug->delta_ts]);
+    check_hash_token($token, [$first_bug->id, $delta_ts]);
 }
 else {
     check_token_data($token, 'buglist_mass_change', 'query.cgi');

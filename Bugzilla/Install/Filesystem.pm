@@ -281,6 +281,7 @@ sub FILESYSTEM {
         # Directories that cgi scripts can write to.
         "$datadir/db"           => DIR_CGI_WRITE,
         $attachdir              => DIR_CGI_WRITE,
+        $template_cache         => DIR_CGI_WRITE,
         $graphsdir              => DIR_CGI_WRITE | DIR_ALSO_WS_SERVE,
         $webdotdir              => DIR_CGI_WRITE | DIR_ALSO_WS_SERVE,
         # Directories that contain content served directly by the web server.

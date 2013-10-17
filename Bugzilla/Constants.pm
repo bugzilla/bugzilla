@@ -650,7 +650,7 @@ sub bz_locations {
         # make sure this still points to the CGIs.
         'cgi_path'    => $libpath,
         'templatedir' => "$libpath/template",
-        'template_cache' => "$datadir/template",
+        'template_cache' => "$libpath/template_cache",
         'project'     => $project,
         'localconfig' => "$libpath/$localconfig",
         'datadir'     => $datadir,

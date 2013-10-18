@@ -181,7 +181,7 @@ sub _product_to_hash {
     };
     if (filter_wants($params, 'components')) {
         $field_data->{components} = [map {
-            $self->_component_to_hash($_)
+            $self->_component_to_hash($_, $params)
         } @{$product->components}];
     }
     if (filter_wants($params, 'versions')) {
@@ -215,7 +215,47 @@ sub _component_to_hash {
         is_active =>
             $self->type('boolean', $component->is_active),
     };
+    if (filter_wants($params, 'flag_types', 'components')) {
+        $field_data->{flag_types} = {
+            bug =>
+                [map {
+                    $self->_flag_type_to_hash($_)
+                } @{$component->flag_types->{'bug'}}],
+            attachment =>
+                [map {
+                    $self->_flag_type_to_hash($_)
+                } @{$component->flag_types->{'attachment'}}],
+        };
+    }
     return filter($params, $field_data, 'components');
+}
+
+sub _flag_type_to_hash {
+    my ($self, $flag_type, $params) = @_;
+    return {
+        id =>
+            $self->type('int', $flag_type->id),
+        name =>
+            $self->type('string', $flag_type->name),
+        description =>
+            $self->type('string', $flag_type->description),
+        cc_list =>
+            $self->type('string', $flag_type->cc_list),
+        sort_key =>
+            $self->type('int', $flag_type->sortkey),
+        is_active =>
+            $self->type('boolean', $flag_type->is_active),
+        is_requestable =>
+            $self->type('boolean', $flag_type->is_requestable),
+        is_requesteeble =>
+            $self->type('boolean', $flag_type->is_requesteeble),
+        is_multiplicable =>
+            $self->type('boolean', $flag_type->is_multiplicable),
+        grant_group =>
+            $self->type('int', $flag_type->grant_group_id),
+        request_group =>
+            $self->type('int', $flag_type->request_group_id),
+    };
 }
 
 sub _version_to_hash {
@@ -513,6 +553,68 @@ and then secondly by their name.
 C<boolean> A boolean indicating if the component is active.  Inactive
 components are not enabled for new bugs.
 
+=item C<flag_types>
+
+A hash containing the two items C<bug> and C<attachment> that each contains an
+array of hashes, where each hash describes a flagtype, and has the
+following items:
+
+=over
+
+=item C<id>
+
+C<int> Returns the ID of the flagtype.
+
+=item C<name>
+
+C<string> Returns the name of the flagtype.
+
+=item C<description>
+
+C<string> Returns the description of the flagtype.
+
+=item C<cc_list>
+
+C<string> Returns the concatenated CC list for the flagtype, as a single string.
+
+=item C<sort_key>
+
+C<int> Returns the sortkey of the flagtype.
+
+=item C<is_active>
+
+C<boolean> Returns whether the flagtype is active or disabled. Flags being
+in a disabled flagtype are not deleted. It only prevents you from
+adding new flags to it.
+
+=item C<is_requestable>
+
+C<boolean> Returns whether you can request for the given flagtype
+(i.e. whether the '?' flag is available or not).
+
+=item C<is_requesteeble>
+
+C<boolean> Returns whether you can ask someone specifically or not.
+
+=item C<is_multiplicable>
+
+C<boolean> Returns whether you can have more than one flag for the given
+flagtype in a given bug/attachment.
+
+=item C<grant_group>
+
+C<int> the group id that is allowed to grant/deny flags of this type.
+If the item is not included all users are allowed to grant/deny this
+flagtype.
+
+=item C<request_group>
+
+C<int> the group id that is allowed to request the flag if the flag
+is of the type requestable. If the item is not included all users
+are allowed request this flagtype.
+
+=back
+
 =back
 
 =item C<versions>
@@ -546,6 +648,9 @@ the fields returned by C<get> as a replacement for C<internals>, which has
 been removed.
 
 =item REST API call added in Bugzilla B<5.0>.
+
+=item In Bugzilla B<4.4>, C<flag_types> was added to the fields returned
+by C<get>.
 
 =back
 

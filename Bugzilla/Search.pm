@@ -744,6 +744,23 @@ sub data {
         last;
     }
 
+    # BMO - to avoid massive amounts of joins, if we're selecting a lot of
+    # tracking flags, replace them with placeholders. the values will be
+    # retrieved later and injected into the result.
+    my %tf_map = map { $_ => 1 } Bugzilla::Extension::TrackingFlags::Flag->get_all_names();
+    my @tf_selected = grep { exists $tf_map{$_} } @orig_fields;
+    # mysql has a limit of 61 joins, and we want to avoid massive amounts of joins
+    # 30 ensures we won't hit the limit, nor generate too many joins
+    if (scalar @tf_selected > 30) {
+        foreach my $column (@tf_selected) {
+            $self->COLUMNS->{$column}->{name} = "'---'";
+        }
+        $self->{tracking_flags} = \@tf_selected;
+    }
+    else {
+        $self->{tracking_flags} = [];
+    }
+
     my $start_time = [gettimeofday()];
     my $sql = $self->_sql;
     # Do we just want bug IDs to pass to the 2nd query or all the data immediately?
@@ -990,23 +1007,6 @@ sub _display_columns {
     # duplicated columns. Those are passed by the caller, and the caller
     # expects to get them back in the exact same order.
     my @columns = $self->_input_columns;
-
-    # BMO - to avoid massive amounts of joins, if we're selecting a lot of
-    # tracking flags, replace them with placeholders. the values will be
-    # retrieved later and injected into the result.
-    my %tf_map = map { $_ => 1 } Bugzilla::Extension::TrackingFlags::Flag->get_all_names();
-    my @tf_selected = grep { exists $tf_map{$_} } @columns;
-    # mysql has a limit of 61 joins, and we want to avoid massive amounts of joins
-    # 30 ensures we won't hit the limit, nor generate too many joins
-    if (scalar @tf_selected > 30) {
-        foreach my $column (@tf_selected) {
-            $self->COLUMNS->{$column}->{name} = "'---'";
-        }
-        $self->{tracking_flags} = \@tf_selected;
-    }
-    else {
-        $self->{tracking_flags} = [];
-    }
 
     # Only add columns which are not already listed.
     my %list = map { $_ => 1 } @columns;

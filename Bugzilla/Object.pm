@@ -59,10 +59,13 @@ sub TO_JSON { return { %{ $_[0] } }; }
 sub new {
     my $invocant = shift;
     my $class    = ref($invocant) || $invocant;
-    my $object   = $class->_init(@_);
-    bless($object, $class) if $object;
+    my $param    = shift;
 
-    Bugzilla::Hook::process('object_end_of_new', { object => $object });
+    my $object = $class->_cache_get($param);
+    return $object if $object;
+
+    $object = $class->new_from_hash($class->_load_from_db($param));
+    $class->_cache_set($param, $object);
 
     return $object;
 }
@@ -72,11 +75,9 @@ sub new {
 # Bugzilla::Object, make sure that you modify bz_setup_database
 # in Bugzilla::DB::Pg appropriately, to add the right LOWER
 # index. You can see examples already there.
-sub _init {
+sub _load_from_db {
     my $class = shift;
     my ($param) = @_;
-    my $object = $class->_cache_get($param);
-    return $object if $object;
     my $dbh = Bugzilla->dbh;
     my $columns = join(',', $class->_get_db_columns);
     my $table   = $class->DB_TABLE;
@@ -88,17 +89,18 @@ sub _init {
         $id = $param->{id};
     }
 
+    my $object_data;
     if (defined $id) {
         # We special-case if somebody specifies an ID, so that we can
         # validate it as numeric.
         detaint_natural($id)
           || ThrowCodeError('param_must_be_numeric',
-                            {function => $class . '::_init'});
+                            {function => $class . '::_load_from_db'});
 
         # Too large integers make PostgreSQL crash.
         return if $id > MAX_INT_32;
 
-        $object = $dbh->selectrow_hashref(qq{
+        $object_data = $dbh->selectrow_hashref(qq{
             SELECT $columns FROM $table
              WHERE $id_field = ?}, undef, $id);
     } else {
@@ -125,12 +127,47 @@ sub _init {
         }
 
         map { trick_taint($_) } @values;
-        $object = $dbh->selectrow_hashref(
+        $object_data = $dbh->selectrow_hashref(
             "SELECT $columns FROM $table WHERE $condition", undef, @values);
     }
+    return $object_data;
+}
 
-    $class->_cache_set($param, $object) if $object;
-    return $object;
+sub new_from_list {
+    my $invocant = shift;
+    my $class = ref($invocant) || $invocant;
+    my ($id_list) = @_;
+    my $id_field = $class->ID_FIELD;
+
+    my @detainted_ids;
+    foreach my $id (@$id_list) {
+        detaint_natural($id) ||
+            ThrowCodeError('param_must_be_numeric',
+                          {function => $class . '::new_from_list'});
+        # Too large integers make PostgreSQL crash.
+        next if $id > MAX_INT_32;
+        push(@detainted_ids, $id);
+    }
+
+    # We don't do $invocant->match because some classes have
+    # their own implementation of match which is not compatible
+    # with this one. However, match() still needs to have the right $invocant
+    # in order to do $class->DB_TABLE and so on.
+    return match($invocant, { $id_field => \@detainted_ids });
+}
+
+sub new_from_hash {
+    my $invocant = shift;
+    my $class = ref($invocant) || $invocant;
+    my $object_data = shift || return;
+    $class->_serialisation_keys($object_data);
+    bless($object_data, $class);
+    $object_data->initialize();
+    return $object_data;
+}
+
+sub initialize {
+    # abstract
 }
 
 # Provides a mechanism for objects to be cached in the request_cahce
@@ -171,6 +208,15 @@ sub cache_key {
     }
 }
 
+# To support serialisation, we need to capture the keys in an object's default
+# hashref.
+sub _serialisation_keys {
+    my ($class, $object) = @_;
+    my $cache = Bugzilla->request_cache->{serialisation_keys} ||= {};
+    $cache->{$class} = [ keys %$object ] if $object && !exists $cache->{$class};
+    return @{ $cache->{$class} };
+}
+
 sub check {
     my ($invocant, $param) = @_;
     my $class = ref($invocant) || $invocant;
@@ -202,28 +248,6 @@ sub check {
         }
     }
     return $obj;
-}
-
-sub new_from_list {
-    my $invocant = shift;
-    my $class = ref($invocant) || $invocant;
-    my ($id_list) = @_;
-    my $id_field = $class->ID_FIELD;
-
-    my @detainted_ids;
-    foreach my $id (@$id_list) {
-        detaint_natural($id) ||
-            ThrowCodeError('param_must_be_numeric',
-                          {function => $class . '::new_from_list'});
-        # Too large integers make PostgreSQL crash.
-        next if $id > MAX_INT_32;
-        push(@detainted_ids, $id);
-    }
-    # We don't do $invocant->match because some classes have
-    # their own implementation of match which is not compatible
-    # with this one. However, match() still needs to have the right $invocant
-    # in order to do $class->DB_TABLE and so on.
-    return match($invocant, { $id_field => \@detainted_ids });
 }
 
 # Note: Future extensions to this could be:
@@ -324,8 +348,11 @@ sub _do_list_select {
     my @untainted = @{ $values || [] };
     trick_taint($_) foreach @untainted;
     my $objects = $dbh->selectall_arrayref($sql, {Slice=>{}}, @untainted);
-    bless ($_, $class) foreach @$objects;
-    return $objects
+    $class->_serialisation_keys($objects->[0]) if @$objects;
+    foreach my $object (@$objects) {
+        $object = $class->new_from_hash($object);
+    }
+    return $objects;
 }
 
 ###############################
@@ -501,6 +528,13 @@ sub audit_log {
         my ($from, $to) = @{ $changes->{$field} };
         $sth->execute($user_id, $class, $self->id, $field, $from, $to);
     }
+}
+
+sub flatten_to_hash {
+    my $self = shift;
+    my $class = blessed($self);
+    my %hash = map { $_ => $self->{$_} } $class->_serialisation_keys;
+    return \%hash;
 }
 
 ###############################
@@ -1027,6 +1061,17 @@ are intended B<only> for use by subclasses.
 
 A fully-initialized object, or C<undef> if there is no object in the
 database matching the parameters you passed in.
+
+=back
+
+=item C<initialize>
+
+=over
+
+=item B<Description>
+
+Abstract method to allow subclasses to perform initialization tasks after an
+object has been created.
 
 =back
 

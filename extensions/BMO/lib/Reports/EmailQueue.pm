@@ -39,11 +39,26 @@ sub report {
     $vars->{'jobs'} = $dbh->selectall_arrayref($query, { Slice => {} });
     foreach my $job (@{ $vars->{'jobs'} }) {
         eval {
-            my $msg = _cond_thaw(delete $job->{'arg'})->{msg};
-            if (ref($msg) && blessed($msg) eq 'Email::MIME') {
-                $job->{'subject'} = $msg->header('subject');
-            } else {
-                ($job->{'subject'}) = $msg =~ /\nSubject: ([^\n]+)/;
+            my ($recipient, $description);
+            my $arg = _cond_thaw(delete $job->{arg});
+
+            if (exists $arg->{vars}) {
+                my $vars = $arg->{vars};
+                $recipient = $vars->{to_user}->{login_name};
+                $description = '[Bug ' . $vars->{bug}->{bug_id} . '] ' . $vars->{bug}->{short_desc};
+            } elsif (exists $arg->{msg}) {
+                my $msg = $arg->{msg};
+                if (ref($msg) && blessed($msg) eq 'Email::MIME') {
+                    $recipient = $msg->header('to');
+                    $description = $msg->header('subject');
+                } else {
+                    ($recipient) = $msg =~ /\nTo: ([^\n]+)/;
+                    ($description) = $msg =~ /\nSubject: ([^\n]+)/;
+                }
+            }
+
+            if ($recipient) {
+                $job->{subject} = "<$recipient> $description";
             }
         };
     }

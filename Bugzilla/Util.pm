@@ -36,7 +36,7 @@ use base qw(Exporter);
                              detaint_signed
                              html_quote url_quote xml_quote
                              css_class_quote html_light_quote
-                             i_am_cgi correct_urlbase remote_ip validate_ip
+                             i_am_cgi i_am_webservice correct_urlbase remote_ip validate_ip
                              do_ssl_redirect_if_required use_attachbase
                              diff_arrays on_main_db
                              trim wrap_hard wrap_comment find_wrap_point
@@ -257,6 +257,13 @@ sub i_am_cgi {
     # I use SERVER_SOFTWARE because it's required to be
     # defined for all requests in the CGI spec.
     return exists $ENV{'SERVER_SOFTWARE'} ? 1 : 0;
+}
+
+sub i_am_webservice {
+    my $usage_mode = Bugzilla->usage_mode;
+    return $usage_mode == USAGE_MODE_XMLRPC
+           || $usage_mode == USAGE_MODE_JSON
+           || $usage_mode == USAGE_MODE_REST;
 }
 
 # This exists as a separate function from Bugzilla::CGI::redirect_to_https

@@ -65,7 +65,7 @@
 [% END %]
 
 [% PROCESS global/header.html.tmpl
-   title = "Boot2Gecko Partner $terms.Bug Submission"
+   title = "Firefox OS Partner $terms.Bug Submission"
    style_urls = [ 'skins/standard/enter_bug.css' ]
    javascript = inline_js
    javascript_urls = [ 'extensions/BMO/web/js/form_validate.js',
@@ -73,14 +73,14 @@
    onload = "showCompDesc(document.getElementById('component'));"
 %]
 
-<h2>Boot2Gecko Partner [% terms.Bug %] Submission</h2>
+<h2>Firefox OS Partner [% terms.Bug %] Submission</h2>
 
 <p>All fields are mandatory</p>
 
 <form method="post" action="post_bug.cgi" id="bug_form" class="enter_bug_form"
       enctype="multipart/form-data" onsubmit="return onSubmit();">
 <input type="hidden" name="format" value="fxos-partner">
-<input type="hidden" name="product" value="Boot2Gecko">
+<input type="hidden" name="product" value="Firefox OS">
 <input type="hidden" name="rep_platform" value="ARM">
 <input type="hidden" name="op_sys" value="Gonk (Firefox OS)">
 <input type="hidden" name="priority" value="--">

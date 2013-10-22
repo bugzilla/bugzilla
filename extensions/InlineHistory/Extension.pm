@@ -170,28 +170,25 @@ sub _add_duplicates {
 
     my ($bug_id, $activity) = @_;
 
+    # we're ignoring pre-bugzilla 3.0 ".. has been marked as a duplicate .."
+    # comments because searching each comment's text is expensive.  these
+    # legacy comments will not be visible at all in the bug's comment/activity
+    # stream.  bug 928786 deals with migrating those comments to be stored as
+    # CMT_HAS_DUPE instead.
+
     my $dbh = Bugzilla->dbh;
     my $sth = $dbh->prepare("
         SELECT profiles.login_name, " .
                $dbh->sql_date_format('bug_when', '%Y.%m.%d %H:%i:%s') . ",
-               extra_data,
-               thetext
+               extra_data
           FROM longdescs
                INNER JOIN profiles ON profiles.userid = longdescs.who
-         WHERE bug_id = ?
-               AND (
-                 type = ?
-                 OR thetext LIKE '%has been marked as a duplicate of this%'
-               )
+         WHERE bug_id = ? AND type = ?
          ORDER BY bug_when
     ");
     $sth->execute($bug_id, CMT_HAS_DUPE);
 
-    while (my($who, $when, $dupe_id, $the_text) = $sth->fetchrow_array) {
-        if (!$dupe_id) {
-            next unless $the_text =~ / (\d+) has been marked as a duplicate of this/;
-            $dupe_id = $1;
-        }
+    while (my($who, $when, $dupe_id) = $sth->fetchrow_array) {
         my $entry = {
             'when' => $when,
             'who' => $who,

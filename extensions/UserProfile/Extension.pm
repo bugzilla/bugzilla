@@ -13,9 +13,11 @@ use warnings;
 use base qw(Bugzilla::Extension);
 
 use Bugzilla::Constants;
+use Bugzilla::Extension::UserProfile::TimeAgo qw(time_ago);
 use Bugzilla::Extension::UserProfile::Util;
 use Bugzilla::Install::Filesystem;
 use Bugzilla::User;
+use Bugzilla::Util qw(datetime_from);
 use Scalar::Util qw(blessed);
 
 our $VERSION = '1';
@@ -259,6 +261,14 @@ sub webservice_user_get {
         my $id = blessed($user->{id}) ? $user->{id}->value : $user->{id};
         $user->{last_activity} = $service->type('dateTime', $timestamps->{$id}->{last_activity_ts});
     }
+}
+
+sub template_before_create {
+    my ($self, $args) = @_;
+    $args->{config}->{FILTERS}->{timeago} = sub {
+        my ($time_str) = @_;
+        return time_ago(datetime_from($time_str, 'UTC'));
+    };
 }
 
 sub page_before_template {

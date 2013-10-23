@@ -74,6 +74,16 @@
   <td width="100%">&nbsp;</td>
 </tr>
 
+[%# user.creation_ts is added by the TagNewUsers extension %]
+[% IF target.can('creation_ts') %]
+  <tr>
+    <th>Created</th>
+    <td colspan="2">
+      [% target.creation_ts FILTER time %] ([% target.creation_ts FILTER timeago FILTER html %])
+    </td>
+  </tr>
+[% END %]
+
 <tr>
   <th>Last activity</th>
   <td colspan="2">

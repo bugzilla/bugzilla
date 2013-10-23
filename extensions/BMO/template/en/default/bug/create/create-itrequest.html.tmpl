@@ -34,7 +34,7 @@
                        'Desktop/Laptop/Printer/Phone/Tablet/License problem/order/request';
 
   function setcompdesc(theRadio) {
-    if (theRadio.id == 'componentmvd') {
+    if (theRadio.id == 'componentsd') {
       [%# helpdesk issue/request %]
       document.getElementById('main_form').style.display = 'none';
       document.getElementById('service_now_form').style.display = '';
@@ -44,7 +44,7 @@
       document.getElementById('service_now_form').style.display = 'none';
       var theValue = theRadio.value;
       var compDescText = compdesc[theValue];
-      if (theRadio.id == 'componentso') {
+      if (theRadio.id == 'componentio') {
         compDescText = compDescText + '<br><br>' + serviceNowText;
       }
       document.getElementById('compdescription').innerHTML = compDescText;
@@ -52,7 +52,7 @@
   }
 
   function on_submit() {
-    if (document.getElementById('componentmvd').checked) {
+    if (document.getElementById('componentsd').checked) {
       [%# redirect desktop issues to service-now #%]
       document.location.href = 'https://mozilla.service-now.com/';
       return false;
@@ -85,7 +85,7 @@
 
 <form method="post" action="post_bug.cgi" id="itRequestForm" enctype="multipart/form-data"
       onsubmit="return on_submit()">
-  <input type="hidden" name="product" value="mozilla.org">
+  <input type="hidden" name="product" value="Infrastructure & Operations">
   <input type="hidden" name="rep_platform" value="All">
   <input type="hidden" name="op_sys" value="Other">
   <input type="hidden" name="priority" value="--">
@@ -118,15 +118,15 @@
     <tr>
       <td align="right"><strong>Request Type:</strong></td>
       <td style="white-space: nowrap;">
-        <input type="radio" name="component" id="componentmvd" onclick="setcompdesc(this)" value="Server Operations: Desktop Issues">
-        <label for="componentmvd">Service Desk issue/request</label><br>
-        <input type="radio" name="component" id="componenttbm" onclick="setcompdesc(this)" value="Server Operations: RelEng">
+        <input type="radio" name="component" id="componentsd" onclick="setcompdesc(this)" value="Desktop Issues">
+        <label for="componentsd">Service Desk issue/request</label><br>
+        <input type="radio" name="component" id="componentrelops" onclick="setcompdesc(this)" value="RelOps">
         <label for="componenttbm">Report a problem with a tinderbox machine</label><br>
-        <input type="radio" name="component" id="componentwcp" onclick="setcompdesc(this)" value="Server Operations: Web Operations">
+        <input type="radio" name="component" id="componentwo" onclick="setcompdesc(this)" value="WebOps: Other">
         <label for="componentwcp">Report a problem with a Mozilla website, or to request a change or push</label><br>
-        <input type="radio" name="component" id="componentacl" onclick="setcompdesc(this)" value="Server Operations: ACL Request">
+        <input type="radio" name="component" id="componentacl" onclick="setcompdesc(this)" value="NetOps: DC Other">
         <label for="componentacl">Request a firewall change</label><br>
-        <input type="radio" name="component" id="componentso" onclick="setcompdesc(this)" value="Server Operations">
+        <input type="radio" name="component" id="componentio" onclick="setcompdesc(this)" value="Infrastructure: Other">
         <label for="componentso">Any other issue</label><br>
         Mailing list requests should be filed <a href="[% ulrbase FILTER none %]enter_bug.cgi?product=mozilla.org&amp;format=mozlist">here</a> instead.
       </td>

@@ -997,6 +997,10 @@ sub update {
     $_->update foreach @{ $self->{_update_ref_bugs} || [] };
     delete $self->{_update_ref_bugs};
 
+    # BMO - allow extensions to alter what is logged into bugs_activity
+    Bugzilla::Hook::process('bug_update_before_logging',
+        { bug => $self, timestamp => $delta_ts, changes => $changes, old_bug => $old_bug });
+
     # Log bugs_activity items
     # XXX Eventually, when bugs_activity is able to track the dupe_id,
     # this code should go below the duplicates-table-updating code below.

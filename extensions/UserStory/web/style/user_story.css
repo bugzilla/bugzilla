@@ -1,0 +1,26 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this file,
+ * You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * This Source Code Form is "Incompatible With Secondary Licenses", as
+ * defined by the Mozilla Public License, v. 2.0. */
+
+
+#user_story_readonly {
+    border: 1px solid black;
+    border-radius: 4px;
+}
+
+.skin-standard #user_story_readonly {
+    padding: 2px;
+}
+
+.skin-Mozilla #user_story_readonly {
+    border: none;
+    border-radius: 0px;
+}
+
+.skin-Mozilla #user_story_readonly .bz_comment_text {
+    border: 1px solid darkgrey;
+    border-radius: 4px;
+}

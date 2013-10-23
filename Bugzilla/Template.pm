@@ -682,6 +682,14 @@ sub create {
                 return $var;
             },
 
+            # preserve newline by converting them to <br>
+            html_br => sub {
+                my ($var) = @_;
+                $var = html_quote($var);
+                $var =~ s/\n/<br>/g;
+                return $var;
+            },
+
             # Prevents line break on hyphens and whitespaces.
             no_break => sub {
                 my ($var) = @_;

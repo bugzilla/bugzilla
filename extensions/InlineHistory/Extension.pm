@@ -57,6 +57,9 @@ sub template_before_process {
         return;
     }
 
+    # allow other extensions to alter history
+    Bugzilla::Hook::process('inline_history_activtiy', { activity => $activity });
+
     # prime caches with objects already loaded
     my %user_cache;
     foreach my $comment (@{$bug->comments}) {

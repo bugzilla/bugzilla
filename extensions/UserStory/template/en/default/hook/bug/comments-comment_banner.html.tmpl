@@ -1,0 +1,51 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% RETURN UNLESS bug.product_obj.user_story_group %]
+[% can_edit_story = bug.check_can_change_field('cf_user_story', 0, 1) %]
+
+<div class="user_story">
+  <div id="user_story_header">
+    <b>User Story</b>
+    [% IF can_edit_story %]
+      <span id="user_story_edit">
+        (<a href="javascript:void(0)" id="user_story_edit_action" >edit</a>)
+      </span>
+    [% END %]
+  </div>
+
+  [% IF bug.cf_user_story != "" %]
+    <div id="user_story_readonly" class="bz_comment">
+      <pre class="bz_comment_text">
+        [%- bug.cf_user_story FILTER quoteUrls(bug) -%]
+      </pre>
+    </div>
+  [% ELSE %]
+    <br id="user_story_readonly">
+  [% END %]
+
+  [% IF can_edit_story %]
+    <div id="user_story_edit_container" class="bz_default_hidden">
+      [% INCLUDE global/textarea.html.tmpl
+                name    = 'cf_user_story'
+                id      = 'user_story'
+                minrows = 10
+                maxrows = 10
+                cols    = constants.COMMENT_COLS
+                defaultcontent = bug.cf_user_story %]
+    </div>
+    <script type="text/javascript">
+      YAHOO.util.Event.addListener('user_story_edit_action', 'click', function() {
+        YAHOO.util.Dom.addClass('user_story_edit', 'bz_default_hidden');
+        YAHOO.util.Dom.addClass('user_story_readonly', 'bz_default_hidden');
+        YAHOO.util.Dom.removeClass('user_story_edit_container', 'bz_default_hidden');
+        YAHOO.util.Dom.get('user_story').focus();
+      });
+    </script>
+  [% END %]
+</div>

@@ -110,7 +110,7 @@
                change.fieldname == 'flagtypes.name' %]
         [% display_value(change.fieldname, change_type) FILTER email FILTER html %]
       [% ELSE %]
-        [% display_value(change.fieldname, change_type) FILTER html %]
+        [% display_value(change.fieldname, change_type) FILTER html_br %]
       [% END %]
     [% ELSE %]
       &nbsp;

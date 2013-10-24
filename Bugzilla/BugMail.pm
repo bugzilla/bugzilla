@@ -436,11 +436,14 @@ sub sendMail {
         bugmailtype        => $bugmailtype,
     };
 
-    if (Bugzilla->params->{'use_mailer_queue'}) {
-        enqueue($vars);
-    } else {
-        MessageToMTA(_generate_bugmail($vars));
-    }
+    # disabled for now, causing problems
+    #if (Bugzilla->params->{'use_mailer_queue'}) {
+    #    enqueue($vars);
+    #} else {
+    #    MessageToMTA(_generate_bugmail($vars));
+    #}
+
+    MessageToMTA(_generate_bugmail($vars));
 
     return 1;
 }

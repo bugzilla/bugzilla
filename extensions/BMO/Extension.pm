@@ -607,7 +607,7 @@ sub attachment_process_data {
     # trim and check for the pull request url
     $url = trim($url);
     return if $url =~ /\s/;
-    return unless $url =~ m#^https://github\.com/[^/]+/[^/]+/pull/\d+$#i;
+    return unless $url =~ m#^https://github\.com/[^/]+/[^/]+/pull/\d+\/?$#i;
 
     # must be a valid pull-request
     $attributes->{mimetype} = GITHUB_PR_CONTENT_TYPE;

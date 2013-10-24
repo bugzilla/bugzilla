@@ -205,7 +205,7 @@ if ($delta_ts) {
 my $token = $cgi->param('token');
 
 if ($cgi->param('id')) {
-    check_hash_token($token, [$first_bug->id, $delta_ts]);
+    check_hash_token($token, [$first_bug->id, $delta_ts || $first_bug->delta_ts]);
 }
 else {
     check_token_data($token, 'buglist_mass_change', 'query.cgi');

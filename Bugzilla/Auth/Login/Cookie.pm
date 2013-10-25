@@ -21,6 +21,7 @@ use base qw(Bugzilla::Auth::Login);
 
 use Bugzilla::Constants;
 use Bugzilla::Util;
+use Bugzilla::Error;
 
 use List::Util qw(first);
 
@@ -88,12 +89,16 @@ sub get_login_info {
                        WHERE cookie = ?", undef, $login_cookie);
             return { user_id => $user_id };
         }
+        elsif (i_am_webservice()) {
+            ThrowUserError('invalid_cookies_or_token');
+        }
     }
 
-    # Either the he cookie is invalid, or we got no cookie. We don't want 
-    # to ever return AUTH_LOGINFAILED, because we don't want Bugzilla to 
-    # actually throw an error when it gets a bad cookie. It should just 
-    # look like there was no cookie to begin with.
+    # Either the cookie or token is invalid and we are not authenticating
+    # via a webservice, or we did not receive a cookie or token. We don't
+    # want to ever return AUTH_LOGINFAILED, because we don't want Bugzilla to
+    # actually throw an error when it gets a bad cookie or token. It should just
+    # look like there was no cookie or token to begin with.
     return { failure => AUTH_NODATA };
 }
 
@@ -104,9 +109,7 @@ sub login_token {
 
     return $self->{'_login_token'} if exists $self->{'_login_token'};
 
-    if ($usage_mode ne USAGE_MODE_XMLRPC
-        && $usage_mode ne USAGE_MODE_JSON
-        && $usage_mode ne USAGE_MODE_REST) {
+    if (!i_am_webservice()) {
         return $self->{'_login_token'} = undef;
     }
 

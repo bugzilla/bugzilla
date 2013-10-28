@@ -1060,6 +1060,7 @@ sub _bug_to_hash {
     if (filter_wants $params, 'cc') {
         my @cc = map { $self->type('email', $_) } @{ $bug->cc };
         $item{'cc'} = \@cc;
+        $item{'cc_detail'} = [ map { $self->_user_to_hash($_, $params, 'cc') } @{ $bug->cc_users } ];
     }
     if (filter_wants $params, 'creator') {
         $item{'creator'} = $self->type('email', $bug->reporter->login);
@@ -2035,6 +2036,11 @@ C<array> of C<int>s. The ids of bugs that are "blocked" by this bug.
 
 C<array> of C<string>s. The login names of users on the CC list of this
 bug.
+
+=item C<cc_detail>
+
+C<array> of hashes containing detailed user information for each of the cc list
+members. To see the keys included in the user detail hash, see below.
 
 =item C<classification>
 

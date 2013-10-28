@@ -132,6 +132,11 @@ use Time::HiRes qw(gettimeofday tv_interval);
 # Constants #
 #############
 
+# BMO - product aliases for searching
+use constant PRODUCT_ALIASES => {
+    'Boot2Gecko' => 'Firefox OS',
+};
+
 # When doing searches, NULL datetimes are treated as this date.
 use constant EMPTY_DATETIME => '1970-01-01 00:00:00';
 use constant EMPTY_DATE     => '1970-01-01';
@@ -892,6 +897,24 @@ sub search_description {
     my ($self, $params) = @_;
     my $desc = $self->{'search_description'} ||= [];
     if ($params) {
+
+        # BMO - product aliases
+        # display the new product name on the search results name to avoid a
+        # disparity between the search summary and the results.
+        if ($params->{field} eq 'product') {
+            my $aliased;
+            my @values = split(/,/, $params->{value});
+            foreach my $value (@values) {
+                if (exists PRODUCT_ALIASES->{lc($value)}) {
+                    $value = PRODUCT_ALIASES->{lc($value)};
+                    $aliased = 1;
+                }
+            }
+            if ($aliased) {
+                $params->{value} = join(',', @values);
+            }
+        }
+
         push(@$desc, $params);
     }
     # Make sure that the description has actually been generated if
@@ -2700,7 +2723,28 @@ sub _component_nonchanged {
 
 sub _product_nonchanged {
     my ($self, $args) = @_;
-    
+
+    # BMO - product aliases
+    # swap out old product names for new ones
+    if (ref($args->{all_values})) {
+        my $aliased;
+        foreach my $value (@{ $args->{all_values} }) {
+            if (exists PRODUCT_ALIASES->{lc($value)}) {
+                $value = PRODUCT_ALIASES->{lc($value)};
+                $aliased = 1;
+            }
+        }
+        if ($aliased) {
+            $args->{value} = join(',', @{ $args->{all_values} });
+            $args->{quoted} = Bugzilla->dbh->quote($args->{value});
+        }
+    }
+    elsif (exists PRODUCT_ALIASES->{lc($args->{value})}) {
+        $args->{value} = PRODUCT_ALIASES->{lc($args->{value})};
+        $args->{all_values} = $args->{value};
+        $args->{quoted} = Bugzilla->dbh->quote($args->{value});
+    }
+
     # Generate the restriction condition
     $args->{full_field} = "products.name";
     $self->_do_operator_function($args);
@@ -3365,6 +3409,12 @@ sub translate_old_column {
     }
 
     return $column;
+}
+
+# BMO - make product aliases lowercase
+foreach my $name (keys %{ PRODUCT_ALIASES() }) {
+    PRODUCT_ALIASES->{lc($name)} = PRODUCT_ALIASES->{$name};
+    delete PRODUCT_ALIASES->{$name};
 }
 
 1;

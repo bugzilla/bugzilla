@@ -104,9 +104,9 @@ foreach my $file (@module_files) {
                   ". Undocumented methods: " . join(', ', $cover->uncovered));
         }
     }
-    # This error is thrown when the module couldn't be loaded due to
+    # These errors are thrown when the module couldn't be loaded due to
     # a missing dependency.
-    elsif ($reason eq "no public symbols defined") {
+    elsif ($reason =~ /^(?:no public symbols defined|requiring '[^']+' failed)$/) {
         ok(1, "$file cannot be loaded");
     }
     elsif ($reason eq "couldn't find pod") {

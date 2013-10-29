@@ -185,20 +185,64 @@ my $col_isnumeric = 1;
 my $row_isnumeric = 1;
 my $tbl_isnumeric = 1;
 
+# define which fields are multiselect
+my @multi_selects = map { $_->name } @{Bugzilla->fields(
+    {
+        obsolete => 0,
+        type => [FIELD_TYPE_MULTI_SELECT, FIELD_TYPE_KEYWORDS]
+    }
+)};
+my $col_ismultiselect = scalar grep {$col_field eq $_} @multi_selects;
+my $row_ismultiselect = scalar grep {$row_field eq $_} @multi_selects;
+my $tbl_ismultiselect = scalar grep {$tbl_field eq $_} @multi_selects;
+
+
 foreach my $result (@$results) {
     # handle empty dimension member names
-    my $row = check_value($row_field, $result);
-    my $col = check_value($col_field, $result);
-    my $tbl = check_value($tbl_field, $result);
-
-    $data{$tbl}{$col}{$row}++;
-    $names{"col"}{$col}++;
-    $names{"row"}{$row}++;
-    $names{"tbl"}{$tbl}++;
     
-    $col_isnumeric &&= ($col =~ /^-?\d+(\.\d+)?$/o);
-    $row_isnumeric &&= ($row =~ /^-?\d+(\.\d+)?$/o);
-    $tbl_isnumeric &&= ($tbl =~ /^-?\d+(\.\d+)?$/o);
+    my @rows = check_value($row_field, $result, $row_ismultiselect);
+    my @cols = check_value($col_field, $result, $col_ismultiselect);
+    my @tbls = check_value($tbl_field, $result, $tbl_ismultiselect);
+
+    my %in_total_row;
+    my %in_total_col;
+    for my $tbl (@tbls) {
+        my %in_row_total;
+        for my $col (@cols) {
+            for my $row (@rows) {
+                $data{$tbl}{$col}{$row}++;
+                $names{"row"}{$row}++;
+                $row_isnumeric &&= ($row =~ /^-?\d+(\.\d+)?$/o);
+                if ($formatparam eq "table") {
+                    if (!$in_row_total{$row}) {
+                        $data{$tbl}{'-total-'}{$row}++;
+                        $in_row_total{$row} = 1;
+                    }
+                    if (!$in_total_row{$row}) {
+                        $data{'-total-'}{'-total-'}{$row}++;
+                        $in_total_row{$row} = 1;
+                    }
+                }
+            }
+            if ($formatparam eq "table") {
+                $data{$tbl}{$col}{'-total-'}++;
+                if (!$in_total_col{$col}) {
+                    $data{'-total-'}{$col}{'-total-'}++;
+                    $in_total_col{$col} = 1;
+                }
+            }
+            $names{"col"}{$col}++;
+            $col_isnumeric &&= ($col =~ /^-?\d+(\.\d+)?$/o);
+        }
+        $names{"tbl"}{$tbl}++;
+        $tbl_isnumeric &&= ($tbl =~ /^-?\d+(\.\d+)?$/o);
+        if ($formatparam eq "table") {
+            $data{$tbl}{'-total-'}{'-total-'}++;
+        }
+    }
+    if ($formatparam eq "table") {
+        $data{'-total-'}{'-total-'}{'-total-'}++;
+    }
 }
 
 my @col_names = get_names($names{"col"}, $col_isnumeric, $col_field);
@@ -242,6 +286,7 @@ $vars->{'time'} = localtime(time());
 $vars->{'col_names'} = \@col_names;
 $vars->{'row_names'} = \@row_names;
 $vars->{'tbl_names'} = \@tbl_names;
+$vars->{'note_multi_select'} = $row_ismultiselect || $col_ismultiselect;
 
 # Below a certain width, we don't see any bars, so there needs to be a minimum.
 if ($formatparam eq "bar") {
@@ -352,7 +397,8 @@ sub get_names {
         foreach my $value (@{$field->legal_values}) {
             push(@sorted, $value->name) if $names->{$value->name};
         }
-        unshift(@sorted, '---') if $field_name eq 'resolution';
+        unshift(@sorted, '---') if ($field_name eq 'resolution'
+                                    || $field->type == FIELD_TYPE_MULTI_SELECT);
         @sorted = uniq @sorted;
     }  
     elsif ($isnumeric) {
@@ -369,7 +415,7 @@ sub get_names {
 }
 
 sub check_value {
-    my ($field, $result) = @_;
+    my ($field, $result, $ismultiselect) = @_;
 
     my $value;
     if (!defined $field) {
@@ -381,9 +427,15 @@ sub check_value {
     else {
         $value = shift @$result;
         $value = ' ' if (!defined $value || $value eq '');
-        $value = '---' if ($field eq 'resolution' && $value eq ' ');
+        $value = '---' if (($field eq 'resolution' || $ismultiselect ) &&
+                           $value eq ' ');
     }
-    return $value;
+    if ($ismultiselect) {
+        # Some DB servers have a space after the comma, some others don't.
+        return split(/, ?/, $value);
+    } else {
+        return ($value);
+    }
 }
 
 sub get_field_restrictions {

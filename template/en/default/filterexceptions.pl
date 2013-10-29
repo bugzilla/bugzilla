@@ -78,9 +78,6 @@
   'classes.$row_idx.$col_idx', 
   'urlbase', 
   'data.$tbl.$col.$row', 
-  'row_total',
-  'col_totals.$col',
-  'grand_total', 
 ],
 
 'reports/report.html.tmpl' => [

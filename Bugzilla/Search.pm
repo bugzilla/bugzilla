@@ -656,12 +656,7 @@ sub REPORT_COLUMNS {
     # or simply don't work with the current reporting system.
     my @no_report_columns = 
         qw(bug_id alias short_short_desc opendate changeddate
-           flagtypes.name keywords relevance);
-
-    # Multi-select fields are not currently supported.
-    my @multi_selects = @{Bugzilla->fields(
-        { obsolete => 0, type => FIELD_TYPE_MULTI_SELECT })};
-    push(@no_report_columns, map { $_->name } @multi_selects);
+           flagtypes.name relevance);
 
     # If you're not a time-tracker, you can't use time-tracking
     # columns.
@@ -2863,9 +2858,10 @@ sub _multiselect_table {
 sub _multiselect_term {
     my ($self, $args, $not) = @_;
     my ($operator) = $args->{operator};
+    my $value = $args->{value} || '';
     # 'empty' operators require special handling
     return $self->_multiselect_isempty($args, $not)
-        if $operator =~ /^is(not)?empty$/;
+        if ($operator =~ /^is(not)?empty$/ || $value eq '---');
     my $table = $self->_multiselect_table($args);
     $self->_do_operator_function($args);
     my $term = $args->{term};

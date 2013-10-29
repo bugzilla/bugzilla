@@ -156,7 +156,7 @@ YAHOO.util.Event.addListener(window, "load", function() {
 [% classes = [ [ "t1", "t2" ] , [ "t3", "t4" ] ] %]
 [% col_idx = 0 %]
 [% row_idx = 0 %]
-[% grand_total = 0 %]
+[% total_key = '-total-' %]
 <div id="tabular_report_container_[% tbl FILTER html %]">
 <table id="tabular_report" border="1">
   [% IF col_field %]
@@ -165,7 +165,6 @@ YAHOO.util.Event.addListener(window, "load", function() {
       <th class="[% classes.$row_idx.$col_idx %]">
       </th>
       [% FOREACH col = col_names %]
-        [% col_totals.$col = 0 %]
         [% NEXT IF col == "" %]
         
         [% col_idx = 1 - col_idx %]
@@ -181,17 +180,13 @@ YAHOO.util.Event.addListener(window, "load", function() {
   [% END %]
   <tbody>
   [% FOREACH row = row_names %]
-    [% row_total = 0 %]
-    
     [% row_idx = 1 - row_idx %]
     <tr>
       <td class="[% classes.$row_idx.$col_idx %]" align="right">
         [% PROCESS value_display value = row field = row_field %]
       </td>
       [% FOREACH col = col_names %]
-        [% row_total = row_total + data.$tbl.$col.$row %]
         [% NEXT IF col == "" %]
-        [% col_totals.$col = (col_totals.$col || 0) + data.$tbl.$col.$row %]
         
         [% col_idx = 1 - col_idx %]
         <td class="[% classes.$row_idx.$col_idx %]" align="center">
@@ -209,8 +204,7 @@ YAHOO.util.Event.addListener(window, "load", function() {
         <a href="[% urlbase %]&amp;
           [% row_field FILTER uri %]=[% row FILTER uri %]
           [% "&amp;$col_vals" IF col_vals %]">
-        [% row_total %]</a>
-        [% grand_total = grand_total + row_total %]
+        [% data.$tbl.$total_key.$row OR 0 FILTER html %]</a>
       </td>
     </tr>
   [% END %]
@@ -221,19 +215,19 @@ YAHOO.util.Event.addListener(window, "load", function() {
       </td>
       [% FOREACH col = col_names %]
         [% NEXT IF col == "" %]
-      
+
         <td class="ttotal" align="center">
           <a href="[% urlbase %]&amp;
             [% col_field FILTER uri %]=[% col FILTER uri %]
             [% "&amp;$row_vals" IF row_vals %]">
-          [% col_totals.$col %]</a>
+          [% data.$tbl.$col.$total_key OR 0 FILTER html %]</a>
         </td>
       [% END %]
       <td class="ttotal" align="right">
         <strong>
           <a href="[% urlbase %]
             [% "&amp;$row_vals" IF row_vals %]
-            [% "&amp;$col_vals" IF col_vals %]">[% grand_total %]</a>
+            [% "&amp;$col_vals" IF col_vals %]">[% data.$tbl.$total_key.$total_key OR 0 FILTER html %]</a>
         </strong>
       </td>
     </tr>
@@ -244,6 +238,13 @@ YAHOO.util.Event.addListener(window, "load", function() {
     </td>
   </tr>
 </table>
+
+[% IF note_multi_select %]
+  <p class="extra_info">
+    NOTE: Axes contain multi-value fields, so the total numbers might not add up,
+    as a single [% terms.bug %] can match several rows or columns.
+  </p>
+[% END %]
 
 [% BLOCK value_display %]
   [% SET disp_value = display_value(field, value) %]

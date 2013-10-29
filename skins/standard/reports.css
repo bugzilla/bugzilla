@@ -102,3 +102,8 @@
   max-width: 100%;
   height: auto;
 }
+
+.extra_info {
+  font-size: smaller;
+  font-style: italic;
+}

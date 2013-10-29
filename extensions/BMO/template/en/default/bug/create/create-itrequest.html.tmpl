@@ -27,14 +27,16 @@
   [% FOREACH comp IN product.components %]
   compdesc['[% comp.name FILTER js %]'] = '[% comp.description FILTER js %]';
   [% END %]
-  compdesc['invalid'] = '';
+  compdesc['Server Operations'] = 'System administration for the mozilla.org servers. ' +
+                                  'Requests for Server Ops that don\'t fit in any of the ' +
+                                  'other Server Ops components can go here.';
 
   var serviceNowText = 'Use <a href="https://mozilla.service-now.com/">Service Now</a> to:<br>' +
                        'Request an LDAP/E-mail/etc. account<br>' +
                        'Desktop/Laptop/Printer/Phone/Tablet/License problem/order/request';
 
   function setcompdesc(theRadio) {
-    if (theRadio.id == 'componentsd') {
+    if (theRadio.id == 'component_service_desk') {
       [%# helpdesk issue/request %]
       document.getElementById('main_form').style.display = 'none';
       document.getElementById('service_now_form').style.display = '';
@@ -44,8 +46,14 @@
       document.getElementById('service_now_form').style.display = 'none';
       var theValue = theRadio.value;
       var compDescText = compdesc[theValue];
-      if (theRadio.id == 'componentio') {
+      // If 'Server Operations', product must be changed to 'mozilla.org'
+      // otherwise set to 'Infrastructure & Operations'
+      if (theRadio.id == 'component_server_ops') {
         compDescText = compDescText + '<br><br>' + serviceNowText;
+        document.getElementById('product').value = 'mozilla.org';
+      }
+      else {
+        document.getElementById('product').value = 'Infrastructure & Operations';
       }
       document.getElementById('compdescription').innerHTML = compDescText;
     }
@@ -85,7 +93,7 @@
 
 <form method="post" action="post_bug.cgi" id="itRequestForm" enctype="multipart/form-data"
       onsubmit="return on_submit()">
-  <input type="hidden" name="product" value="Infrastructure & Operations">
+  <input type="hidden" id="product" name="product" value="Infrastructure & Operations">
   <input type="hidden" name="rep_platform" value="All">
   <input type="hidden" name="op_sys" value="Other">
   <input type="hidden" name="priority" value="--">
@@ -118,16 +126,16 @@
     <tr>
       <td align="right"><strong>Request Type:</strong></td>
       <td style="white-space: nowrap;">
-        <input type="radio" name="component" id="componentsd" onclick="setcompdesc(this)" value="Desktop Issues">
-        <label for="componentsd">Service Desk issue/request</label><br>
-        <input type="radio" name="component" id="componentrelops" onclick="setcompdesc(this)" value="RelOps">
-        <label for="componenttbm">Report a problem with a tinderbox machine</label><br>
-        <input type="radio" name="component" id="componentwo" onclick="setcompdesc(this)" value="WebOps: Other">
-        <label for="componentwcp">Report a problem with a Mozilla website, or to request a change or push</label><br>
-        <input type="radio" name="component" id="componentacl" onclick="setcompdesc(this)" value="NetOps: DC Other">
-        <label for="componentacl">Request a firewall change</label><br>
-        <input type="radio" name="component" id="componentio" onclick="setcompdesc(this)" value="Infrastructure: Other">
-        <label for="componentso">Any other issue</label><br>
+        <input type="radio" name="component" id="component_service_desk" onclick="setcompdesc(this)" value="Desktop Issues">
+        <label for="component_service_desk">Service Desk issue/request</label><br>
+        <input type="radio" name="component" id="component_relops" onclick="setcompdesc(this)" value="RelOps">
+        <label for="component_relops">Report a problem with a tinderbox machine</label><br>
+        <input type="radio" name="component" id="component_webops_other" onclick="setcompdesc(this)" value="WebOps: Other">
+        <label for="component_webops_other">Report a problem with a Mozilla website, or to request a change or push</label><br>
+        <input type="radio" name="component" id="component_netops_acl" onclick="setcompdesc(this)" value="NetOps: DC Other">
+        <label for="component_netops_acl">Request a firewall change</label><br>
+        <input type="radio" name="component" id="component_server_ops" onclick="setcompdesc(this)" value="Server Operations">
+        <label for="component_server_ops">Any other issue</label><br>
         Mailing list requests should be filed <a href="[% ulrbase FILTER none %]enter_bug.cgi?product=mozilla.org&amp;format=mozlist">here</a> instead.
       </td>
       <td id="compdescription" align="left" style="color: green; padding-left: 1em">

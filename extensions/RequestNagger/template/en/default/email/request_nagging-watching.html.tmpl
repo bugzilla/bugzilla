@@ -1,0 +1,105 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% PROCESS "global/field-descs.none.tmpl" %]
+
+<!doctype html>
+<html>
+
+<head>
+  <title>[[% terms.Bugzilla %]] Outstanding Requests Report</title>
+</head>
+
+<body bgcolor="#ffffff">
+
+<p>
+  The following is a list of people who you are watching that have outstanding
+  requests.
+</p>
+
+<hr>
+
+[% FOREACH login = requests.keys.sort %]
+  [% requestee = requests.$login.requestee %]
+  [% requestee.identity FILTER html %]
+  <ul>
+    <li>
+      [%+ FOREACH type = requests.$login.typelist %]
+        [% requests.$login.types.item(type).size %] [%+ type FILTER html %]
+        [% ", " UNLESS loop.last %]
+      [% END %]
+    </li>
+  </ul>
+[% END %]
+
+[% FOREACH login = requests.keys.sort %]
+  [% requestee = requests.$login.requestee %]
+
+  [% bug_ids = [] %]
+  [% FOREACH type = requests.$login.typelist %]
+    [% FOREACH request = requests.$login.types.$type %]
+      [% bug_ids.push(request.bug.id) %]
+    [% END %]
+  [% END %]
+
+  <hr>
+  <h3>
+    [% requestee.identity FILTER html %]
+    <span style="font-size: x-small; font-weight: normal">
+      (<a href="[% urlbase FILTER none %]buglist.cgi?bug_id=[% bug_ids.join(",") FILTER uri %]">buglist</a>)
+    </span><br>
+    <span style="font-size: x-small; font-weight: normal">
+      [% FOREACH type = requests.$login.typelist %]
+        [% requests.$login.types.item(type).size %] [%+ type FILTER html %]
+        [% ", " UNLESS loop.last %]
+      [% END %]
+    </span>
+  </h3>
+
+  [% FOREACH type = requests.$login.typelist %]
+
+    <h3>[% type FILTER upper FILTER html %] requests</h3>
+
+    <ul>
+      [% FOREACH request = requests.$login.types.$type %]
+        <li>
+          <a href="[% urlbase FILTER none %]show_bug.cgi?id=[% request.bug.id FILTER none %]"
+            title="[% request.bug.bug_status FILTER html %]
+                   [% request.bug.product FILTER html %] :: [% request.bug.component FILTER html %]">
+            [% request.bug.id FILTER none %] - [% request.bug.short_desc FILTER html %]
+          </a><br>
+          <b>[%+ request.flag.age FILTER html %]</b> from [% request.requester.identity FILTER html %]<br>
+          [% IF request.flag.deferred %]
+            Deferred until [%+ request.flag.deferred.ymd FILTER html %]<br>
+          [% END %]
+          <br>
+        </li>
+      [% END %]
+    </ul>
+
+  [% END %]
+
+[% END %]
+
+<div>
+  <hr style="border: 1px dashed #969696">
+  <a href="[% urlbase FILTER none %]userprefs.cgi?tab=request_nagging">
+    Change who you are watching
+  </a>
+</div>
+
+<div style="font-size: 90%; color: #666666">
+  <hr style="border: 1px dashed #969696">
+  <b>You are receiving this mail because:</b>
+  <ul>
+    <li>you are watching someone with outstanding requests.</li>
+  </ul>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,101 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% PROCESS global/header.html.tmpl
+   title = "Defer Request Reminder"
+   style_urls = [ "extensions/RequestNagger/web/style/requestnagger.css" ]
+   javascript_urls = [ "js/util.js" , "extensions/RequestNagger/web/js/requestnagger.js" ]
+%]
+
+<h2>Defer Request Reminder</h2>
+
+[% IF saved %]
+  <div id="message">
+    Request reminder deferral has been saved.
+  </div>
+[% END %]
+
+<form method="post" action="page.cgi">
+<input type="hidden" name="id" value="request_defer.html">
+<input type="hidden" name="flag" value="[% flag.id FILTER none %]">
+<input type="hidden" name="save" value="1">
+
+<table class="edit_form">
+<tr><td>
+
+  <div class="flag-bug">
+    <a href="show_bug.cgi?id=[% flag.bug.id FILTER none %]">
+      [% terms.Bug %] [%+ flag.bug.id FILTER none %]
+    </a>
+    -
+    <a href="show_bug.cgi?id=[% flag.bug.id FILTER none %]">
+      [% flag.bug.short_desc FILTER html %]
+    </a>
+  </div>
+
+  [% IF flag.attachment %]
+    <div class="flag-attach">
+      <div class="flag-attach-desc">
+        <a href="attachment.cgi?id=[% flag.attachment.id FILTER none %]&amp;action=edit">
+          [% flag.attachment.description FILTER html %]
+        </a>
+      </div>
+      <div class="flag-attach-details">
+        [% flag.attachment.filename FILTER html %] ([% flag.attachment.contenttype FILTER html %]),
+        [% IF flag.attachment.datasize %]
+          [%+ flag.attachment.datasize FILTER unitconvert %]
+        [% ELSE %]
+          <em>deleted</em>
+        [% END %],
+        created by [%+ INCLUDE global/user.html.tmpl who = flag.attachment.attacher %]
+      </div>
+      [% IF flag.attachment.ispatch %]
+        <div class="flag-attach-actions">
+          <a href="attachment.cgi?id=[% flag.attachment.id FILTER none ~%]
+                   &amp;action=diff">Diff</a> |
+          <a href="review?bug=[% flag.bug.id FILTER none ~%]
+                   &amp;attachment=[% flag.attachment.id FILTER none %]">Review</a>
+        </div>
+      [% END %]
+    </div>
+  [% END %]
+
+  <div class="flag-details">
+    <span class="flag-type">
+      [% flag.type.name FILTER html %]
+    </span>
+    requested by [%+ INCLUDE global/user.html.tmpl who = flag.setter %]
+    [% flag.age FILTER html %]
+  </div>
+
+  [% IF saved %]
+    <div class="deferred">
+      Deferred until [% defer_until.ymd FILTER html %].
+    </div>
+  [% ELSE %]
+    <div class="defer">
+      Defer[% "ed" IF flag.deferred %] for
+      <select name="defer-until" id="defer-until">
+        [% FOREACH defer = defer_until %]
+          <option value="[% defer.date.ymd FILTER html %]"
+            [%+ "selected" IF flag.deferred.ymd == defer.date.ymd %]
+          >
+            [% defer.days FILTER html %] Day[% "s" UNLESS defer.days == 1 %]
+          </option>
+        [% END %]
+      </select>
+      <span id="defer-date"></span>
+    </div>
+    <input type="submit" value="Submit">
+  [% END %]
+</td></tr>
+</table>
+
+</form>
+
+[% PROCESS global/footer.html.tmpl %]

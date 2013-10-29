@@ -1,0 +1,14 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% IF changes.nag_interval.defined %]
+  <p>
+    Changed request reminder interval from '[% changes.nag_interval.0 / 24 FILTER html %]' to
+    '[% product.nag_interval / 24 FILTER html %]'.
+  </p>
+[% END %]

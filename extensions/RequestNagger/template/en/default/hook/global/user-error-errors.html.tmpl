@@ -1,0 +1,25 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% IF error == "request_nagging_flag_invalid" %]
+  [% title = "Invalid Flag" %]
+  Invalid or missing Flag ID
+
+[% ELSIF error == "request_nagging_flag_set" %]
+  [% title = "Flag Already Set" %]
+  The requested Flag has been set, and is no longer pending.
+
+[% ELSIF error == "request_nagging_flag_wind" %]
+  [% title = "No Requestee" %]
+  The requested Flag does not have a requestee, and cannot be deferred.
+
+[% ELSIF error == "request_nagging_flag_not_owned" %]
+  [% title = "Not The Requestee" %]
+  You cannot defer Flags unless you are the requestee.
+
+[% END %]

@@ -1,0 +1,16 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+<tr>
+  <th align="right">Remind for outstanding requests after:</th>
+  <td>
+    <input name="nag_interval" size="5"
+           value="[% product.id ? product.nag_interval / 24 : 7 %]">
+    days (Setting this to 0 disables request reminding).
+  </td>
+</tr>

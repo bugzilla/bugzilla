@@ -1,0 +1,56 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+<label for="request_nagging">
+  Send me reminders for outstanding requests:
+</label>
+<select name="request_nagging" id="request_nagging">
+  <option value="default" [% "selected" IF user.settings.request_nagging.is_default %]>
+    Site Default (On)
+  </option>
+  <option value="on" [% "selected" IF !user.settings.request_nagging.is_default
+                                      && user.settings.request_nagging.value == "on" %]>
+    On
+  </option>
+  <option value="off" [% "selected" IF !user.settings.request_nagging.is_default
+                                       && user.settings.request_nagging.value == "off" %]>
+    Off
+  </option>
+</select>
+
+<h4>User Request Reminder Watching</h4>
+
+<p>
+  If you watch a user, you will receive a report of their outstanding
+  requests.
+</p>
+
+<p>
+  [% IF watching.size %]
+    You are watching everyone in the following list:<br>
+    <select id="del_watching" name="del_watching" multiple="multiple" size="5">
+    [% FOREACH u = watching %]
+      <option value="[% u FILTER html %]">[% u FILTER html %]</option>
+    [% END %]
+    </select><br>
+    <input type="checkbox" id="remove_watched_users" name="remove_watched_users">
+    <label for="remove_watched_users">Remove selected users from my watch list</label>
+  [% ELSE %]
+    <i>You are currently not watching any users.</i>
+  [% END %]
+</p>
+
+<p>Add users to my watch list (comma separated list):
+  [% INCLUDE global/userselect.html.tmpl
+     id       => "add_watching"
+     name     => "add_watching"
+     value    => ""
+     size     => 60
+     multiple => 5
+  %]
+</p>

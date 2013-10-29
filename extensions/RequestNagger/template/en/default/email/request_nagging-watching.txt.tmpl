@@ -1,0 +1,47 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% PROCESS "global/field-descs.none.tmpl" %]
+
+The following is a list of people who you are watching that have outstanding
+requests.
+
+[% FOREACH login = requests.keys.sort %]
+[% requestee = requests.$login.requestee %]
+::
+:: [% requestee.identity %]
+:: [% FOREACH type = requests.$login.typelist %]
+      [%- requests.$login.types.item(type).size %] [%+ type %]
+      [% ", " UNLESS loop.last %]
+   [% END %]
+::
+
+[% FOREACH type = requests.$login.typelist %]
+:: [% type FILTER upper FILTER html %] requests
+
+[% FOREACH request = requests.$login.types.$type %]
+[[% terms.Bug %] [%+ request.bug.id %]] [% request.bug.short_desc %]
+  [%+ request.flag.age %] from [% request.requester.identity %]
+  [%+ urlbase %]show_bug.cgi?id=[% request.bug.id +%]
+  [% IF request.flag.deferred %]
+  Deferred until [%+ request.flag.deferred.ymd %]
+  [% END %]
+
+[% END %]
+[% END %]
+
+[% END %]
+
+::
+
+Change who you are watching
+  [%+ urlbase %]userprefs.cgi?tab=request_nagging
+
+--
+You are receiving this mail because: you are watching someone with outstanding
+requests.

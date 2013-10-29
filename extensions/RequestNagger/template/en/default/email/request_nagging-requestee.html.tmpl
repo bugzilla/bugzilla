@@ -1,0 +1,91 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% PROCESS "global/field-descs.none.tmpl" %]
+
+<!doctype html>
+<html>
+
+<head>
+  <title>[[% terms.Bugzilla %]] Your Outstanding Requests</title>
+</head>
+
+<body bgcolor="#ffffff">
+
+<p>
+  The following is a list of requests people have made of you, which are
+  currently outstanding. To avoid disappointing others, please deal with them as
+  quickly as possible.
+</p>
+
+[% requests = requests.item(recipient.login) %]
+[% FOREACH type = requests.typelist %]
+
+  <h3>
+    [% type FILTER upper FILTER html %] requests
+    <span style="font-size: x-small; font-weight: normal">
+      (<a href="[% urlbase FILTER none %]buglist.cgi?bug_id=
+        [% FOREACH request = requests.types.$type %]
+          [% request.bug.id FILTER none %]
+          [% "%2C" UNLESS loop.last %]
+        [% END %]">buglist</a>)
+    </span>
+  </h3>
+
+  <ul>
+    [% FOREACH request = requests.types.$type %]
+      <li>
+        <a href="[% urlbase FILTER none %]show_bug.cgi?id=[% request.bug.id FILTER none %]"
+           title="[% request.bug.bug_status FILTER html %]
+                  [% request.bug.product FILTER html %] :: [% request.bug.component FILTER html %]">
+          [% request.bug.id FILTER none %] - [% request.bug.short_desc FILTER html %]
+        </a><br>
+        <b>[%+ request.flag.age FILTER html %]</b> from [% request.requester.identity FILTER html %]<br>
+        <div style="font-size: x-small">
+          [% IF request.attachment %]
+            <a href="[% urlbase FILTER none %]attachment.cgi?id=[% request.attachment.id FILTER none %]">Details</a>
+            [% IF request.attachment.ispatch %]
+              | <a href="[% urlbase FILTER none %]attachment.cgi?id=[% request.attachment.id FILTER none %]&amp;action=diff">Diff</a>
+              | <a href="[% urlbase FILTER none %]review?bug=[% request.bug.id FILTER none %]&amp;attachment=[% request.attachment.id FILTER none %]">Review</a>
+            [% END %]
+            |
+          [% END %]
+          <a href="[% urlbase FILTER none %]request_defer?flag=[% request.flag.id FILTER none %]">Defer</a>
+        </div>
+        <br>
+      </li>
+    [% END %]
+  </ul>
+
+[% END %]
+
+<div>
+  <hr style="border: 1px dashed #969696">
+  [% IF requests.types.item('review').size || requests.types.item('feedback').size %]
+    <a href="https://wiki.mozilla.org/BMO/Handling_Requests">
+      Guidance on handling requests
+    </a><br>
+  [% END %]
+  <a href="[% urlbase FILTER none %]request.cgi?action=queue&amp;requestee=[% recipient.login FILTER uri %]&amp;group=type">
+    See all your outstanding requests
+  </a><br>
+  <a href="[% urlbase FILTER none %]userprefs.cgi#request_nagging">
+    Opt out of these emails
+  </a><br>
+</div>
+
+<div style="font-size: 90%; color: #666666">
+  <hr style="border: 1px dashed #969696">
+  <b>You are receiving this mail because:</b>
+  <ul>
+    <li>You have outstanding requests.</li>
+  </ul>
+</div>
+
+</body>
+</html>

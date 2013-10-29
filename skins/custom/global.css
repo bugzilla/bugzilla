@@ -71,3 +71,7 @@ a.controller {
     width: 100%;
     text-align: right;
 }
+
+.highlighted {
+    background: lightyellow;
+}

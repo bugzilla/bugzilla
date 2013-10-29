@@ -150,7 +150,7 @@ sub DoSettings {
     my $settings = $user->settings;
     $vars->{'settings'} = $settings;
 
-    my @setting_list = keys %$settings;
+    my @setting_list = sort keys %$settings;
     $vars->{'setting_names'} = \@setting_list;
 
     $vars->{'has_settings_enabled'} = 0;

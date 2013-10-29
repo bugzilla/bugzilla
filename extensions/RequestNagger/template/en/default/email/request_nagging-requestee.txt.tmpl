@@ -1,0 +1,45 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% PROCESS "global/field-descs.none.tmpl" %]
+
+The following is a list of requests people have made of you, which are
+currently outstanding. To avoid disappointing others, please deal with them as
+quickly as possible.
+
+[% requests = requests.item(recipient.login) %]
+[% FOREACH type = requests.typelist %]
+:: [% type FILTER upper FILTER html %] requests
+
+[% FOREACH request = requests.types.$type %]
+[[% terms.Bug %] [%+ request.bug.id %]] [% request.bug.short_desc %]
+  [%+ request.flag.age %] from [% request.requester.identity %]
+  [%+ urlbase %]show_bug.cgi?id=[% request.bug.id +%]
+  [% IF request.attachment && request.attachment.ispatch %]
+  Review: [% urlbase %]review?bug=[% request.bug.id %]&attachment=[% request.attachment.id %]
+  [% END %]
+  Defer: [% urlbase %]request_defer?flag=[% request.flag.id %]
+
+[% END %]
+[% END %]
+
+::
+
+[% IF requests.types.item('review').size || requests.types.item('feedback').size %]
+Guidance on handling requests:
+  https://wiki.mozilla.org/BMO/Handling_Requests
+[% END %]
+
+See all your outstanding requests:
+  [%+ urlbase %]request.cgi?action=queue&requestee=[% recipient.login FILTER uri %]&group=type
+
+Opt out of these emails:
+  [%+ urlbase %]userprefs.cgi#request_nagging
+
+--
+You are receiving this mail because: you have outstanding requests.

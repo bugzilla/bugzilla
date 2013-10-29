@@ -42,7 +42,7 @@
     [% FOREACH name = setting_names %]
       [% default_name = name _ '-isdefault' %]
       [% default_val = settings.${name}.default_value %]
-      <tr>
+      <tr id="[% name FILTER html %]_row">
         <td align="right">
           [% setting_descs.$name OR name FILTER html %]
         </td>
@@ -75,3 +75,10 @@
   </table>
 [% END %]
 <br>
+
+<script>
+YAHOO.util.Event.onDOMReady(function() {
+  var id = document.location.hash.substring(1) + '_row';
+  YAHOO.util.Dom.addClass(id, 'highlighted');
+});
+</script>

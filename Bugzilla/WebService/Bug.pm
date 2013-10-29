@@ -348,8 +348,7 @@ sub get {
     (defined $ids && scalar @$ids) 
         || ThrowCodeError('param_required', { param => 'ids' });
 
-    my @bugs;
-    my @faults;
+    my (@bugs, @faults, @hashes);
 
     # Cache permissions for bugs. This highly reduces the number of calls to the DB.
     # visible_bugs() is only able to handle bug IDs, so we have to skip aliases.
@@ -373,7 +372,8 @@ sub get {
         else {
             $bug = Bugzilla::Bug->check($bug_id);
         }
-        push(@bugs, $self->_bug_to_hash($bug, $params));
+        push(@bugs, $bug);
+        push(@hashes, $self->_bug_to_hash($bug, $params));
     }
 
     # Set the ETag before inserting the update tokens
@@ -381,14 +381,9 @@ sub get {
     # the data has not changed.
     $self->bz_etag(\@bugs);
 
-    if (Bugzilla->user->id) {
-        foreach my $bug (@bugs) {
-            my $token = issue_hash_token([$bug->{'id'}, $bug->{'last_change_time'}]);
-            $bug->{'update_token'} = $self->type('string', $token);
-        }
-    }
+    $self->_add_update_tokens($params, \@bugs, \@hashes);
 
-    return { bugs => \@bugs, faults => \@faults };
+    return { bugs => \@hashes, faults => \@faults };
 }
 
 # this is a function that gets bug activity for list of bug ids 
@@ -583,6 +578,7 @@ sub possible_duplicates {
         { summary => $params->{summary}, products => \@products,
           limit   => $params->{limit} });
     my @hashes = map { $self->_bug_to_hash($_, $params) } @$possible_dupes;
+    $self->_add_update_tokens($params, $possible_dupes, \@hashes);
     return { bugs => \@hashes };
 }
 
@@ -1242,6 +1238,18 @@ sub _flag_to_hash {
     }
 
     return $item;
+}
+
+sub _add_update_tokens {
+    my ($self, $params, $bugs, $hashes) = @_;
+
+    return if !Bugzilla->user->id;
+    return if !filter_wants($params, 'update_token');
+
+    for(my $i = 0; $i < @$bugs; $i++) {
+        my $token = issue_hash_token([$bugs->[$i]->id, $bugs->[$i]->delta_ts]);
+        $hashes->[$i]->{'update_token'} = $self->type('string', $token);
+    }
 }
 
 1;

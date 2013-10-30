@@ -995,6 +995,14 @@ sub enter_bug_start {
     } elsif (my $format = forced_format($cgi->param('product'))) {
         $cgi->param('format', $format);
     }
+
+    # If product eq 'mozilla.org' and format eq 'itrequest', then
+    # switch to the new 'Infrastructure & Operations' product.
+    if ($cgi->param('product') && $cgi->param('product') eq 'mozilla.org'
+        && $cgi->param('format') && $cgi->param('format') eq 'itrequest')
+    {
+        $cgi->param('product', 'Infrastructure & Operations');
+    }
 }
 
 sub forced_format {

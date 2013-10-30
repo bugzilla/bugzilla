@@ -69,8 +69,7 @@
       [% FOREACH request = requests.$login.types.$type %]
         <li>
           <a href="[% urlbase FILTER none %]show_bug.cgi?id=[% request.bug.id FILTER none %]"
-            title="[% request.bug.bug_status FILTER html %]
-                   [% request.bug.product FILTER html %] :: [% request.bug.component FILTER html %]">
+            title="[% request.bug.tooltip  FILTER html %]">
             [% request.bug.id FILTER none %] - [% request.bug.short_desc FILTER html %]
           </a><br>
           <b>[%+ request.flag.age FILTER html %]</b> from [% request.requester.identity FILTER html %]<br>

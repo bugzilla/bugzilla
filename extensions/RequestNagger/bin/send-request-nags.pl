@@ -21,6 +21,7 @@ use Bugzilla::Bug;
 use Bugzilla::Constants;
 use Bugzilla::Error;
 use Bugzilla::Extension::RequestNagger::Constants;
+use Bugzilla::Extension::RequestNagger::Bug;
 use Bugzilla::Mailer;
 use Bugzilla::User;
 use Bugzilla::Util qw(format_time);
@@ -107,8 +108,30 @@ sub send_email {
     my $vars = \%vars;
     return unless $vars->{recipient} && @{ $vars->{requests} };
 
-    # restructure the list to group by requestee then flag type
     my $request_list = delete $vars->{requests};
+
+    # if securemail is installed, we need to encrypt or censor emails which
+    # contain non-public bugs
+    my $default_user = Bugzilla::User->new();
+    my $securemail = $vars->{recipient}->can('public_key');
+    my $has_key = $securemail && $vars->{recipient}->public_key;
+    # have to do this each time as objects are shared between requests
+    my $has_private_bug = 0;
+    foreach my $request (@{ $request_list }) {
+        # rebless bug objects into our subclass
+        bless($request->{bug}, 'Bugzilla::Extension::RequestNagger::Bug');
+        # and tell that object to hide the summary if required
+        if ($securemail && !$default_user->can_see_bug($request->{bug})) {
+            $has_private_bug = 1;
+            $request->{bug}->{secure_bug} = !$has_key;
+        }
+        else {
+            $request->{bug}->{secure_bug} = 0;
+        }
+    }
+    my $encrypt = $securemail && $has_private_bug && $has_key;
+
+    # restructure the list to group by requestee then flag type
     my $requests = {};
     my %seen_types;
     foreach my $request (@{ $request_list }) {
@@ -172,6 +195,9 @@ sub send_email {
         $email->content_type_set('multipart/alternative');
     }
     $email->parts_set(\@parts);
+    if ($encrypt) {
+        $email->header_set('X-Bugzilla-Encrypt' => '1');
+    }
 
     # send
     if ($DO_NOT_NAG) {

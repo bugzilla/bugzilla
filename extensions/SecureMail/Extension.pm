@@ -261,8 +261,14 @@ sub mailer_before_send {
     my $is_passwordmail = !$is_bugmail && ($body =~ /cfmpw.*cxlpw/s);
     my $is_test_email   = $email->header('X-Bugzilla-Type') =~ /securemail-test/ ? 1 : 0;
     my $is_whine_email  = $email->header('X-Bugzilla-Type') eq 'whine' ? 1 : 0;
+    my $encrypt_header  = $email->header('X-Bugzilla-Encrypt') ? 1 : 0;
 
-    if ($is_bugmail || $is_passwordmail || $is_test_email || $is_whine_email) {
+    if ($is_bugmail
+        || $is_passwordmail
+        || $is_test_email
+        || $is_whine_email
+        || $encrypt_header
+    ) {
         # Convert the email's To address into a User object
         my $login = $email->header('To');
         my $emailsuffix = Bugzilla->params->{'emailsuffix'};
@@ -328,6 +334,11 @@ sub mailer_before_send {
             # encrypt the entire email body. Subject can be left alone as it
             # comes from the whine settings.
             $make_secure = _should_secure_whine($email) ? SECURE_BODY : SECURE_NONE;
+        }
+        elsif ($encrypt_header) {
+            # Templates or code may set the X-Bugzilla-Encrypt header to
+            # trigger encryption of emails. Remove that header from the email.
+            $email->header_set('X-Bugzilla-Encrypt');
         }
 
         # If finding the user fails for some reason, but we determine we

@@ -34,9 +34,11 @@
     [% FOREACH flag = needinfo_flags %]
       <tr>
         [% IF !flag.requestee || flag.requestee.id == user.id %]
+          [%# needinfo targetted at the current user, or anyone %]
           <td align="center">
             <input type="checkbox" id="needinfo_override_[% flag.id FILTER html %]"
-                   name="needinfo_override_[% flag.id FILTER html %]" value="1" checked>
+                   name="needinfo_override_[% flag.id FILTER html %]" value="1"
+                   [% "checked" IF flag.requestee || user.in_group("canconfirm") %]>
           </td>
           <td>
             <label for="needinfo_override_[% flag.id FILTER html %]">
@@ -44,7 +46,8 @@
               <em>[% IF !flag.requestee %]anyone[% ELSE %][% flag.requestee.login FILTER html %][% END %]</em>.
             </label>
           </td>
-        [% ELSE %]
+        [% ELSIF user.in_group("canconfirm") || flag.setter_id == user.id %]
+          [%# needinfo targetted at someone else, but the user can clear %]
           <td align="center">
             <input type="checkbox" id="needinfo_override_[% flag.id FILTER html %]"
                    name="needinfo_override_[% flag.id FILTER html %]" value="1">
@@ -54,6 +57,12 @@
               I am providing the requested information for <em>[% flag.requestee.login FILTER html %]</em>
               (clears the needinfo request).
             </label>
+          </td>
+        [% ELSE %]
+          [%# current user does not have permissions to clear needinfo %]
+          <td>&nbsp;</td>
+          <td>
+            Needinfo requested from <em>[% flag.requestee.login FILTER html %]</em>.
           </td>
         [% END %]
       </tr>

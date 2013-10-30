@@ -10,9 +10,10 @@ use strict;
 
 use base qw(Bugzilla::Extension);
 
-use Bugzilla::User;
+use Bugzilla::Error;
 use Bugzilla::Flag;
 use Bugzilla::FlagType;
+use Bugzilla::User;
 
 our $VERSION = '0.01';
 
@@ -57,7 +58,7 @@ sub bug_start_of_update {
     my $cgi    = Bugzilla->cgi;
     my $params = Bugzilla->input_params;
 
-    if ($user->in_group('canconfirm') && $params->{needinfo}) {
+    if ($params->{needinfo}) {
         # do a match if applicable
         Bugzilla::User::match_field({
             'needinfo_from' => { 'type' => 'multi' }
@@ -69,7 +70,7 @@ sub bug_start_of_update {
     $params->{needinfo_done} = 1;
     Bugzilla->input_params($params);
 
-    my $needinfo      = delete $params->{needinfo};
+    my $add_needinfo  = delete $params->{needinfo};
     my $needinfo_from = delete $params->{needinfo_from};
     my $needinfo_role = delete $params->{needinfo_role};
     my $is_private    = $params->{'comment_is_private'};
@@ -85,7 +86,7 @@ sub bug_start_of_update {
     my @new_flags;
     my $needinfo_requestee;
 
-    if ($user->in_group('canconfirm') && $needinfo) {
+    if ($add_needinfo) {
         foreach my $type (@{ $bug->flag_types }) {
             next if $type->name ne 'needinfo';
             my %requestees;
@@ -99,7 +100,7 @@ sub bug_start_of_update {
                 $requestees{$bug->assigned_to->login} = 1;
             }
             # Use reporter as requestee
-            elsif ( $needinfo_role eq 'reporter') {
+            elsif ($needinfo_role eq 'reporter') {
                 $requestees{$bug->reporter->login} = 1;
             }
             # Use qa_contact as requestee
@@ -138,34 +139,37 @@ sub bug_start_of_update {
         }
     }
 
-    # Clear the flag if additional information was given as requested
     my @flags;
     foreach my $flag (@{ $bug->flags }) {
         next if $flag->type->name ne 'needinfo';
-        my $clear_needinfo = 0;
-
         # Clear if somehow the flag has been set to +/-
-        $clear_needinfo = 1 if $flag->status ne '?';
-
-        # Clear if current user has selected override
-        $clear_needinfo = 1 if grep($_ == $flag->id, @needinfo_overrides);
-
-        # Clear if comment provided by the proper requestee
-        if ($bug->{added_comments}
-            && (!$flag->requestee || $flag->requestee->login eq Bugzilla->user->login)
-            && (!$is_private || $flag->setter->is_insider)
-            && grep($_ == $flag->id, @needinfo_overrides))
+        # or if the "clear needinfo" override checkbox is selected
+        if ($flag->status ne '?'
+            or grep { $_ == $flag->id } @needinfo_overrides)
         {
-            $clear_needinfo = 1;
-        }
-
-        if ($clear_needinfo) {
             push(@flags, { id => $flag->id, status => 'X' });
         }
     }
 
     if (@flags || @new_flags) {
         $bug->set_flags(\@flags, \@new_flags);
+    }
+}
+
+sub object_before_delete {
+    my ($self, $args) = @_;
+    my $object = $args->{object};
+    return unless $object->isa('Bugzilla::Flag')
+                  && $object->type->name eq 'needinfo';
+    my $user = Bugzilla->user;
+
+    # Require canconfirm to clear requests targetted at someone else
+    if ($object->setter_id != $user->id
+        && $object->requestee
+        && $object->requestee->id != $user->id
+        && !$user->in_group('canconfirm'))
+    {
+        ThrowUserError('needinfo_illegal_change');
     }
 }
 

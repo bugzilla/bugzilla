@@ -24,11 +24,13 @@ Bugzilla->usage_mode(USAGE_MODE_CMDLINE);
 
 
 my $config = {
-    # Filter by assignee or product
+    # filter by assignee or product
     assignee        => '',
     product         => '',
     unassigned      => 'nobody@mozilla.org',
-    # Time in hours to wait before paging/warning
+    # severities
+    severity        => 'major,critical,blocker',
+    # time in hours to wait before paging/warning
     major_alarm     => 24,
     major_warn      => 20,
     critical_alarm  => 8,
@@ -48,6 +50,13 @@ FILTERS
   --product <name>      filter bugs by product name
   --unassigned <email>  set the unassigned user (default: $config->{unassigned})
 
+SEVERITIES
+
+  by default alerts and warnings will be generated for 'major', 'critical', and
+  'blocker' bugs.  you can alter this list with the 'severity' switch.
+
+  --severity <major|critical|blocker>[,..]
+
 TIMING
 
   time in hours to wait before paging or warning
@@ -63,12 +72,13 @@ EXAMPLES
 
   nagios_blocker_checker.pl --assignee server-ops\@mozilla-org.bugs
   nagios_blocker_checker.pl server-ops\@mozilla-org.bugs
-  nagios_blocker_checker.pl --product 'mozilla developer network'
+  nagios_blocker_checker.pl --product 'mozilla developer network' --severity blocker
 EOF
 
 die($usage) unless GetOptions(
     'assignee=s'        => \$config->{assignee},
     'product=s'         => \$config->{product},
+    'severity=s'        => \$config->{severity},
     'major_alarm=i'     => \$config->{major_alarm},
     'major_warn=i'      => \$config->{major_warn},
     'critical_alarm=i'  => \$config->{critical_alarm},
@@ -81,7 +91,8 @@ $config->{assignee} = $ARGV[0] if !$config->{assignee} && @ARGV;
 die $usage if
     $config->{help}
     || !($config->{assignee} || $config->{product})
-    || ($config->{assignee} && $config->{product});
+    || ($config->{assignee} && $config->{product})
+    || !$config->{severity};
 
 #
 
@@ -90,7 +101,8 @@ use constant NAGIOS_WARNING     => 1;
 use constant NAGIOS_CRITICAL    => 2;
 use constant NAGIOS_NAMES       => [qw( OK WARNING CRITICAL )];
 
-my($where, @values);
+my $dbh = Bugzilla->switch_to_shadow_db;
+my($where, @values, $severity);
 
 if ($config->{assignee}) {
     $where = 'bugs.assigned_to = ?';
@@ -101,12 +113,14 @@ if ($config->{assignee}) {
     push @values, Bugzilla::User->check({ name => $config->{unassigned} })->id;
 }
 
+$severity = '(' . join(',', map { $dbh->quote($_) } split(/,/, $config->{severity})) . ')';
+
 my $sql = <<EOF;
     SELECT bug_id, bug_severity, UNIX_TIMESTAMP(bugs.creation_ts) AS ts
       FROM bugs
      WHERE $where
            AND COALESCE(resolution, '') = ''
-           AND bug_severity IN ('blocker', 'critical', 'major')
+           AND bug_severity IN $severity
 EOF
 
 my $bugs = {
@@ -117,32 +131,31 @@ my $bugs = {
 my $current_state = NAGIOS_OK;
 my $current_time = time;
 
-my $dbh = Bugzilla->switch_to_shadow_db;
 foreach my $bug (@{ $dbh->selectall_arrayref($sql, { Slice => {} }, @values) }) {
     my $severity = $bug->{bug_severity};
     my $age = ($current_time - $bug->{ts}) / 3600;
 
     if ($age > $config->{"${severity}_alarm"}) {
         $current_state = NAGIOS_CRITICAL;
-        push @{$bugs->{$severity}}, "https://bugzil.la/" . $bug->{bug_id};
+        push @{$bugs->{$severity}}, $bug->{bug_id};
 
     } elsif ($age > $config->{"${severity}_warn"}) {
         if ($current_state < NAGIOS_WARNING) {
             $current_state = NAGIOS_WARNING;
         }
-        push @{$bugs->{$severity}}, "https://bugzil.la/" . $bug->{bug_id};
+        push @{$bugs->{$severity}}, $bug->{bug_id};
 
     }
 }
 
 print "bugs " . NAGIOS_NAMES->[$current_state] . ": ";
 if ($current_state == NAGIOS_OK) {
-    print "No blocker, critical, or major bugs found."
+    print "No $config->{severity} bugs found."
 }
 foreach my $severity (qw( blocker critical major )) {
     my $list = $bugs->{$severity};
     if (@$list) {
-        printf "%s %s bug(s) found " . join(' , ', @$list) . " ", scalar(@$list), $severity;
+        printf "%s %s bug(s) found https://bugzil.la/" . join(',', @$list) . " ", scalar(@$list), $severity;
     }
 }
 print "\n";

@@ -196,8 +196,8 @@ is an attachment flag, else undefined.
 sub type {
     my $self = shift;
 
-    $self->{'type'} ||= new Bugzilla::FlagType($self->{'type_id'});
-    return $self->{'type'};
+    return $self->{'type'}
+        ||= new Bugzilla::FlagType($self->{'type_id'}, cache => 1 );
 }
 
 sub setter {

@@ -6,6 +6,13 @@
   # defined by the Mozilla Public License, v. 2.0.
   #%]
 
+[% IF user.review_request_count
+      || user.feedback_request_count
+      || user.needinfo_request_count
+%]
+  [% style_urls.push('extensions/Review/web/styles/badge.css') %]
+[% END %]
+
 [% RETURN UNLESS template.name == 'attachment/edit.html.tmpl'
       || template.name == 'attachment/create.html.tmpl'
       || template.name == 'attachment/diff-header.html.tmpl'

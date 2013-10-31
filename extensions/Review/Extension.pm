@@ -15,6 +15,8 @@ our $VERSION = '1';
 use Bugzilla;
 use Bugzilla::Constants;
 use Bugzilla::Error;
+use Bugzilla::Extension::Review::Util;
+use Bugzilla::Install::Filesystem;
 use Bugzilla::User;
 use Bugzilla::Util qw(clean_text);
 
@@ -35,7 +37,7 @@ BEGIN {
 }
 
 #
-# reviewers
+# monkey-patched methods
 #
 
 sub _product_reviewers         { _reviewers($_[0],      'product',   $_[1])   }
@@ -124,6 +126,9 @@ sub object_columns {
     if ($class->isa('Bugzilla::Product')) {
         push @$columns, 'reviewer_required';
     }
+    elsif ($class->isa('Bugzilla::User')) {
+        push @$columns, qw(review_request_count feedback_request_count needinfo_request_count);
+    }
 }
 
 sub object_update_columns {
@@ -131,6 +136,9 @@ sub object_update_columns {
     my ($object, $columns) = @$args{qw(object columns)};
     if ($object->isa('Bugzilla::Product')) {
         push @$columns, 'reviewer_required';
+    }
+    elsif ($object->isa('Bugzilla::User')) {
+        push @$columns, qw(review_request_count feedback_request_count needinfo_request_count);
     }
 }
 
@@ -157,23 +165,91 @@ sub object_end_of_set_all {
 sub object_end_of_create {
     my ($self, $args) = @_;
     my ($object, $params) = @$args{qw(object params)};
-    return unless $object->isa('Bugzilla::Product') || $object->isa('Bugzilla::Component');;
 
-    my ($new, $new_users) = _new_reviewers_from_input();
-    _update_reviewers($object, [], $new_users);
+    if ($object->isa('Bugzilla::Product') || $object->isa('Bugzilla::Component')) {
+        my ($new, $new_users) = _new_reviewers_from_input();
+        _update_reviewers($object, [], $new_users);
+    }
+    elsif (_is_countable_flag($object) && $object->requestee_id && $object->status eq '?') {
+        _adjust_request_count($object, +1);
+    }
 }
 
 sub object_end_of_update {
     my ($self, $args) = @_;
     my ($object, $old_object, $changes) = @$args{qw(object old_object changes)};
-    return unless $object->isa('Bugzilla::Product') || $object->isa('Bugzilla::Component');;
 
-    my ($new, $new_users) = _new_reviewers_from_input();
-    my $old = $old_object->reviewers(1);
-    if ($old ne $new) {
-        _update_reviewers($object, $old_object->reviewers_objs(1), $new_users);
-        $changes->{reviewers} = [ $old ? $old : undef, $new ? $new : undef ];
+    if ($object->isa('Bugzilla::Product') || $object->isa('Bugzilla::Component')) {
+        my ($new, $new_users) = _new_reviewers_from_input();
+        my $old = $old_object->reviewers(1);
+        if ($old ne $new) {
+            _update_reviewers($object, $old_object->reviewers_objs(1), $new_users);
+            $changes->{reviewers} = [ $old ? $old : undef, $new ? $new : undef ];
+        }
     }
+    elsif (_is_countable_flag($object)) {
+        my ($old_status, $new_status) = ($old_object->status, $object->status);
+        if ($old_status ne '?' && $new_status eq '?') {
+            # setting flag to ?
+            _adjust_request_count($object, +1);
+        }
+        elsif ($old_status eq '?' && $new_status ne '?') {
+            # setting flag from ?
+            _adjust_request_count($old_object, -1);
+        }
+        elsif ($old_object->requestee_id && !$object->requestee_id) {
+            # removing requestee
+            _adjust_request_count($old_object, -1);
+        }
+        elsif (!$old_object->requestee_id && $object->requestee_id) {
+            # setting requestee
+            _adjust_request_count($object, +1);
+        }
+        elsif ($old_object->requestee_id && $object->requestee_id
+               && $old_object->requestee_id != $object->requestee_id)
+        {
+            # changing requestee
+            _adjust_request_count($old_object, -1);
+            _adjust_request_count($object, +1);
+        }
+    }
+}
+
+sub object_before_delete {
+    my ($self, $args) = @_;
+    my $object = $args->{object};
+
+    if (_is_countable_flag($object) && $object->requestee_id && $object->status eq '?') {
+        _adjust_request_count($object, -1);
+    }
+}
+
+sub _is_countable_flag {
+    my ($object) = @_;
+    return unless $object->isa('Bugzilla::Flag');
+    my $type_name = $object->type->name;
+    return $type_name eq 'review' || $type_name eq 'feedback' || $type_name eq 'needinfo';
+}
+
+sub _adjust_request_count {
+    my ($flag, $add) = @_;
+    return unless my $requestee_id = $flag->requestee_id;
+    my $field = $flag->type->name . '_request_count';
+
+    # update the current user's object so things are display correctly on the
+    # post-processing page
+    my $user = Bugzilla->user;
+    if ($requestee_id == $user->id) {
+        $user->{$field} += $add;
+    }
+
+    # update database directly to avoid creating audit_log entries
+    $add = $add == -1 ? ' - 1' : ' + 1';
+    Bugzilla->dbh->do(
+        "UPDATE profiles SET $field = $field $add WHERE userid = ?",
+        undef,
+        $requestee_id
+    );
 }
 
 sub _new_reviewers_from_input {
@@ -295,7 +371,7 @@ sub flag_end_of_update {
 }
 
 #
-# web service / reports
+# web service / pages
 #
 
 sub webservice {
@@ -306,7 +382,18 @@ sub webservice {
 
 sub page_before_template {
     my ($self, $args) = @_;
-    return unless $args->{page_id} eq 'review_suggestions.html';
+
+    if ($args->{page_id} eq 'review_suggestions.html') {
+        $self->review_suggestions_report($args);
+    }
+    elsif ($args->{page_id} eq 'review_requests_rebuild.html') {
+        $self->review_requests_rebuild($args);
+    }
+}
+
+sub review_suggestions_report {
+    my ($self, $args) = @_;
+
     my $user = Bugzilla->login(LOGIN_REQUIRED);
     my $products = [];
     my @products = sort { lc($a->name) cmp lc($b->name) }
@@ -336,6 +423,24 @@ sub page_before_template {
         }
     }
     $args->{vars}->{products} = $products;
+}
+
+sub review_requests_rebuild {
+    my ($self, $args) = @_;
+
+    Bugzilla->user->in_group('admin')
+        || ThrowUserError('auth_failure', { group  => 'admin',
+                                            action => 'run',
+                                            object => 'review_requests_rebuild' });
+    if (Bugzilla->cgi->param('rebuild')) {
+        my $processed_users = 0;
+        rebuild_review_counters(sub {
+            my ($count, $total) = @_;
+            $processed_users = $total;
+        });
+        $args->{vars}->{rebuild} = 1;
+        $args->{vars}->{total}   = $processed_users;
+    }
 }
 
 #
@@ -448,5 +553,15 @@ sub install_update_db {
         'needinfo_request_count', { TYPE => 'INT2', NOTNULL => 1, DEFAULT => 0 }
     );
 }
+
+sub install_filesystem {
+    my ($self, $args) = @_;
+    my $files = $args->{files};
+    my $extensions_dir = bz_locations()->{extensionsdir};
+    $files->{"$extensions_dir/Review/bin/review_requests_rebuild.pl"} = {
+        perms => Bugzilla::Install::Filesystem::OWNER_EXECUTE
+    };
+}
+
 
 __PACKAGE__->NAME;

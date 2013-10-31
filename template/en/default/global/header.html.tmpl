@@ -252,7 +252,9 @@
       <td id="title">
         <a href="./" title="Home">[% terms.BugzillaTitle %]</a>
       </td>
-      <td id="information"></td>
+      <td>
+        [% Hook.process("message") %]
+      </td>
       <td id="moz_login">
         [% IF user.id %]
           <ul class="links">
@@ -321,6 +323,7 @@
 <tr>
     <td id="title">
       <p>[% terms.BugzillaTitle %]
+      [% Hook.process("message") %]
       [% " &ndash; $header" IF header %]</p>
     </td>
 

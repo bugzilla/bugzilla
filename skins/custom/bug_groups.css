@@ -1,4 +1,6 @@
 /* colorize bugs in various groups */
+/* these are also defined in skins/contrib/Mozilla/global.css */
+
 body[class*=bz_group_] {
     background-color: #e0e0ff;
     border-left: solid red 2px;

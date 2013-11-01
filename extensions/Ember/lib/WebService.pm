@@ -113,12 +113,13 @@ sub show {
     my ($self, $params) = @_;
     my (@fields, $attachments, $comments, $data);
     my $dbh = Bugzilla->dbh;
+    my $user = Bugzilla->user;
 
     Bugzilla->switch_to_shadow_db();
 
     # Throw error if token was provided and user is not logged
     # in meaning token was invalid/expired.
-    if (exists $params->{token} && !Bugzilla->user->id) {
+    if (exists $params->{token} && !$user->id) {
         ThrowUserError('invalid_token');
     }
 
@@ -177,7 +178,34 @@ sub show {
 
     # Place the fields current value along with the field definition
     foreach my $field (@fields) {
-        $field->{current_value} = delete $bug_hash->{$field->{name}} || '';
+        if (($field->{name} eq 'depends_on'
+            || $field->{name} eq 'blocks')
+            && scalar @{ $bug_hash->{$field->{name}} })
+        {
+            my $bug_ids = $bug_hash->{$field->{name}};
+            $user->visible_bugs($bug_ids);
+            my $bug_objs = Bugzilla::Bug->new_from_list($bug_ids);
+
+            my @new_list;
+            foreach my $bug (@$bug_objs) {
+                my $data;
+                if ($user->can_see_bug($bug)) {
+                    $data = {
+                        id      => $bug->id,
+                        status  => $bug->bug_status,
+                        summary => $bug->short_desc
+                    };
+                }
+                else {
+                    $data = { id => $bug->id };
+                }
+                push(@new_list, $data);
+            }
+            $field->{current_value} = \@new_list;
+        }
+        else {
+            $field->{current_value} = delete $bug_hash->{$field->{name}} || '';
+        }
     }
 
     # Any left over bug values will be added to the field list

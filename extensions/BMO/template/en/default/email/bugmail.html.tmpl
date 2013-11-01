@@ -44,7 +44,7 @@
               [% "Comment # ${comment.count}"
                 FILTER bug_link(bug, { comment_num => comment.count, full_url => 1 }) FILTER none %]
               on [% "$terms.Bug $bug.id" FILTER bug_link(bug, { full_url => 1 }) FILTER none %]
-              from [% INCLUDE global/user.html.tmpl who = comment.author %]
+              from [% INCLUDE global/user.html.tmpl user = to_user, who = comment.author %]
               at [% comment.creation_ts FILTER time(undef, to_user.timezone) %]
             </b>
           [% END %]
@@ -152,7 +152,7 @@
           [% terms.Bug %]&nbsp;[% change.blocker.id FILTER none %]</a>,
           which changed state.<br>
         [% ELSE %]
-          [% INCLUDE global/user.html.tmpl who = change.who %] changed
+          [% INCLUDE global/user.html.tmpl user = to_user, who = change.who %] changed
           [%+ "${terms.Bug} ${bug.id}" FILTER bug_link(bug, full_url => 1) FILTER none %]
           at [% change.bug_when FILTER time(undef, to_user.timezone) %]</b>:<br>
         [% END %]

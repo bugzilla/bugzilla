@@ -443,7 +443,6 @@ table.edit_form hr {
 }
 
 .bz_comment_head img, .bz_first_comment_head img {
-    margin-right: 0.25em;
     vertical-align: middle;
 }
 
@@ -639,6 +638,10 @@ button[disabled], input[type=submit][disabled], input[type=button][disabled], bu
 .related_actions {
     line-height: 19px;
     padding: 5px 10px;
+}
+
+.arrow_down {
+    border-top-color: #0095dd;
 }
 
 /* Attachments */

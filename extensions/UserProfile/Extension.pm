@@ -281,16 +281,18 @@ sub page_before_template {
     my $target;
     my $input = Bugzilla->input_params;
     my $limit = Bugzilla->params->{'maxusermatches'} + 1;
-    if (!$input->{login}) {
+    my $login = $input->{login};
+    if (!$login) {
         $target = Bugzilla->login(LOGIN_REQUIRED);
+        $login = $target->login;
     } else {
-        my $users = Bugzilla::User::match($input->{login}, $limit, 1);
+        my $users = Bugzilla::User::match($login, $limit, 1);
         if (scalar(@$users) == 1) {
             # always allow singular matches without confirmation
             $target = $users->[0];
         } else {
             Bugzilla::User::match_field({ 'login' => {'type' => 'single'} });
-            $target = Bugzilla::User->check($input->{login});
+            $target = Bugzilla::User->check($login);
         }
     }
 
@@ -353,6 +355,7 @@ sub page_before_template {
     $vars->{stats}    = $stats;
     $vars->{statuses} = $statuses;
     $vars->{products} = $products;
+    $vars->{login}    = $login;
     $vars->{target}   = $target;
 }
 

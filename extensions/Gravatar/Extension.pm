@@ -20,16 +20,17 @@ BEGIN {
 }
 
 sub _user_gravatar {
-    my ($self) = @_;
+    my ($self, $size) = @_;
     if (!$self->{gravatar}) {
         if ($self->setting('show_my_gravatar') eq 'On') {
             (my $email = $self->email) =~ s/\+(.*?)\@/@/;
-            $self->{gravatar} = 'https://secure.gravatar.com/avatar/' . md5_hex(lc($email)) . '?size=64&d=mm';
+            $self->{gravatar} = 'https://secure.gravatar.com/avatar/' . md5_hex(lc($email)) . '?d=mm';
         } else {
             $self->{gravatar} = 'extensions/Gravatar/web/default.jpg';
         }
     }
-    return $self->{gravatar};
+    $size ||= 64;
+    return $self->{gravatar} . "&amp;size=$size";
 }
 
 sub install_before_final_checks {

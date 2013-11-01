@@ -1,0 +1,44 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this file,
+ * You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * This Source Code Form is "Incompatible With Secondary Licenses", as
+ * defined by the Mozilla Public License, v. 2.0. */
+
+#login_autocomplete {
+    float: left;
+}
+
+#user_profile_table th {
+    text-align: right;
+    padding-right: 1em;
+    vertical-align: middle;
+    white-space: nowrap;
+}
+
+#user_profile_table .numeric {
+    text-align: right;
+}
+
+#user_profile_table .product_span {
+    white-space: nowrap;
+}
+
+#updated {
+    font-style: italic;
+    font-size: x-small;
+}
+
+#gravatar-container {
+    text-align: center;
+    font-size: x-small;
+    vertical-align: top;
+    padding-right: 15px;
+}
+
+#gravatar {
+    -moz-box-shadow: 2px 2px 5px #888;
+    -webkit-box-shadow: 2px 2px 5px #888;
+    box-shadow: 2px 2px 5px #888;
+    margin-bottom: 5px;
+}

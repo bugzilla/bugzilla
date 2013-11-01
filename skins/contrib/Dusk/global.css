@@ -236,6 +236,10 @@ hr {
     background-color: #f0f0f0;
 }
 
+.arrow_down {
+    border-top-color: #6070cf;
+}
+
 /* Rules specific for printing */
 @media print {
     #header,

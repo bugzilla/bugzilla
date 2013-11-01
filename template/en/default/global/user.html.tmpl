@@ -27,17 +27,18 @@
   [% FILTER collapse %]
     [% IF user.id %]
       <a class="email" href="mailto:[% who.email FILTER html %]"
-      [% IF who.id && user.in_group('canconfirm') %]
          onclick="return show_usermenu(event, [% who.id FILTER none %], '[% who.email FILTER js %]',
-                  [% IF (user.in_group('editusers') || user.bless_groups.size > 0) %]true[% ELSE %]false[% END %]);"
-      [% END %]
-         title="[% who.identity FILTER html %]">
+                  [% user.in_group('editusers') || user.bless_groups.size > 0 ? "true" : "false" %]);"
+        title="[% who.identity FILTER html %]">
     [%- END -%]
     [% IF who.name %]
        <span class="fn">[% who.name FILTER html %]</span>
     [% ELSE %]
-      [% who.login FILTER email FILTER html %]
+      <span class="ln">[% who.login FILTER email FILTER html %]</span>
     [% END %]
-    [% '</a>' IF user.id %]
+    [% IF user.id %]
+      <span class="arrow_container"><span class="arrow_down"></span></span>
+      </a>
+    [% END %]
   [% END %]
 </span>

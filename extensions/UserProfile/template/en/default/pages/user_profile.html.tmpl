@@ -8,39 +8,9 @@
 
 [% PROCESS global/variables.none.tmpl %]
 
-[% inline_styles = BLOCK %]
-  #login_autocomplete {
-    float: left;
-  }
-
-  #user_profile_table th {
-    text-align: right;
-    padding-right: 1em;
-    vertical-align: middle;
-    white-space: nowrap;
-  }
-
-  #user_profile_table .numeric {
-    text-align: right;
-  }
-
-  #user_profile_table .product_span {
-    white-space: nowrap;
-  }
-
-  #what {
-    margin-top: 2em;
-  }
-
-  #updated {
-    font-style: italic;
-    font-size: x-small;
-  }
-[% END %]
-
 [% PROCESS global/header.html.tmpl
    title = "User Profile: " _ target.identity
-   style = inline_styles
+   style_urls = [ "extensions/UserProfile/web/styles/user_profile.css" ]
    yui = [ 'autocomplete' ]
    javascript_urls = [ "js/field.js" ]
 %]
@@ -48,13 +18,14 @@
 <table id="user_profile_table">
 
 <tr>
-  <th>Email</th>
+  <td>&nbsp;</td>
+  <th>Search</th>
   <td colspan="2">
     <form action="user_profile">
       [% INCLUDE global/userselect.html.tmpl
         id => "login"
         name => "login"
-        value => target.email
+        value => login
         size => 40
         emptyok => 0
       %]
@@ -64,14 +35,31 @@
 </tr>
 
 <tr>
+  <td colspan="4" class="separator"><hr></td>
+</tr>
+
+<tr>
+  <td rowspan="16" id="gravatar-container">
+    [% IF user.gravatar %]
+      <img id="gravatar" src="[% target.gravatar(256) FILTER none %]" width="128" height="128"><br>
+      [% IF target.id == user.id %]
+        <a href="http://gravatar.com/">Change my image</a>
+      [% END %]
+    [% ELSE %]
+      &nbsp;
+    [% END %]
+  </td>
   <th>Name</th>
   <td colspan="2">[% target.name FILTER html %]</td>
 </tr>
 
 <tr>
+  <th>Email</th>
+  <td colspan="2"><a href="mailto:[% target.login FILTER uri %]">[% target.login FILTER html %]</a></td>
+</tr>
+
+<tr>
   <td>&nbsp;</td>
-  <td>&nbsp;</td>
-  <td width="100%">&nbsp;</td>
 </tr>
 
 [%# user.creation_ts is added by the TagNewUsers extension %]
@@ -150,7 +138,7 @@
 </tr>
 
 <tr>
-  <th>Statuses changed</td>
+  <th>Statuses changed</th>
   <td colspan="2">
     RESOLVED ([% statuses.item('RESOLVED') || 0 FILTER html %]),
     FIXED ([% statuses.item('RESOLVED/FIXED') || 0 FILTER html %]),
@@ -160,7 +148,7 @@
 </tr>
 
 <tr>
-  <th>Activity by product</td>
+  <th>Activity by product</th>
   <td colspan="2">
     [% FOREACH p = products %]
       <span class="product_span">
@@ -174,6 +162,13 @@
       </span>
     [%+ END %]
   </td>
+</tr>
+
+<tr>
+  <td>&nbsp;</td>
+  <td>&nbsp;</td>
+  <td>&nbsp;</td>
+  <td width="100%">&nbsp;</td>
 </tr>
 
 </table>

@@ -33,7 +33,8 @@
   [% END %]
 [% END %]
 
-[% IF user.in_group('canconfirm') %]
+[%# BMO - add user context menu %]
+[% IF user.id %]
   [% yui.push('container', 'menu') %]
   [% style_urls.push('js/yui/assets/skins/sam/menu.css') %]
   [% javascript_urls.push('extensions/BMO/web/js/edituser_menu.js') %]

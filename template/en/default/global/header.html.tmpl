@@ -265,6 +265,7 @@
                   [% filtered_username = user.login FILTER uri %]
                   <li><a href="[% Param('mybugstemplate').replace('%userid%', filtered_username) %]">My [% terms.Bugs %]</a></li>
                 [% END %]
+                <li><a href="user_profile">My Profile</a></li>
                 <li><a href="userprefs.cgi">Preferences</a></li>
                 <li><a href="request.cgi?requester=[% user.login FILTER uri %]&amp;requestee=[% user.login FILTER uri %]&amp;do_union=1&amp;group=type&amp;action=queue">My Requests</a></li>
                 [% IF user.in_group('tweakparams') || user.in_group('editusers') || user.can_bless

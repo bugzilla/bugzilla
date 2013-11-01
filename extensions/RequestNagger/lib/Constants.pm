@@ -54,6 +54,7 @@ sub REQUESTEE_NAG_SQL {
         INNER JOIN products ON products.id = bugs.product_id
         LEFT JOIN attachments ON attachments.attach_id = flags.attach_id
         LEFT JOIN profile_setting ON profile_setting.setting_name = 'request_nagging'
+                  AND profile_setting.user_id = flags.requestee_id
         LEFT JOIN nag_defer ON nag_defer.flag_id = flags.id
     WHERE
         " . $dbh->sql_in('flagtypes.name', \@flag_types_sql) . "

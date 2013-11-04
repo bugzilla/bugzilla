@@ -118,14 +118,18 @@ sub bug_count {
 
 sub update {
     my $self = shift;
+    my $dbh = Bugzilla->dbh;
+
+    $dbh->bz_start_transaction();
     my ($changes, $old_self) = $self->SUPER::update(@_);
 
     if (exists $changes->{value}) {
-        my $dbh = Bugzilla->dbh;
         $dbh->do('UPDATE bugs SET version = ?
                   WHERE version = ? AND product_id = ?',
                   undef, ($self->name, $old_self->name, $self->product_id));
     }
+    $dbh->bz_commit_transaction();
+
     return $changes;
 }
 

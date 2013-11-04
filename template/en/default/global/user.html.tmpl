@@ -31,14 +31,16 @@
                   [% user.in_group('editusers') || user.bless_groups.size > 0 ? "true" : "false" %]);"
         title="[% who.identity FILTER html %]">
     [%- END -%]
-    [% IF who.name %]
-       <span class="fn">[% who.name FILTER html %]</span>
-    [% ELSE %]
-      <span class="ln">[% who.login FILTER email FILTER html %]</span>
-    [% END %]
-    [% IF user.id %]
-      <span class="arrow_container"><span class="arrow_down"></span></span>
-      </a>
+    [% IF who %]
+      [% IF who.name %]
+        <span class="fn">[% who.name FILTER html %]</span>
+      [% ELSE %]
+        <span class="ln">[% who.login FILTER email FILTER html %]</span>
+      [% END %]
+      [% IF user.id %]
+        <span class="arrow_container"><span class="arrow_down"></span></span>
+        </a>
+      [% END %]
     [% END %]
   [% END %]
 </span>

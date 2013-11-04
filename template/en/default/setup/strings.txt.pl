@@ -196,6 +196,22 @@ blank, then MySQL's compiled-in default will be used. You probably
 want that.
 END
     localconfig_db_user => "Who we connect to the database as.",
+    localconfig_db_mysql_ssl_ca_file => <<'END',
+Path to a PEM file with a list of trusted SSL CA certificates.
+The file must be readable by web server user.
+END
+    localconfig_db_mysql_ssl_ca_path => <<'END',
+Path to a directory containing trusted SSL CA certificates in PEM format.
+Directory and files inside must be readable by the web server user.
+END
+    localconfig_db_mysql_ssl_client_cert => <<'END',
+Full path to the client SSL certificate in PEM format we will present to the DB server.
+The file must be readable by web server user.
+END
+    localconfig_db_mysql_ssl_client_key => <<'END',
+Full path to the private key corresponding to the client SSL certificate.
+The file must not be password-protected and must be readable by web server user.
+END
     localconfig_diffpath => <<'END',
 For the "Difference Between Two Patches" feature to work, we need to know
 what directory the "diff" bin is in. (You only need to set this if you

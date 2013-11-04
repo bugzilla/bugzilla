@@ -80,6 +80,22 @@ use constant LOCALCONFIG_VARS => (
         default => 1,
     },
     {
+        name    => 'db_mysql_ssl_ca_file',
+        default => '',
+    },
+    {
+        name    => 'db_mysql_ssl_ca_path',
+        default => '',
+    },
+    {
+        name    => 'db_mysql_ssl_client_cert',
+        default => '',
+    },
+    {
+        name    => 'db_mysql_ssl_client_key',
+        default => '',
+    },
+    {
         name    => 'index_html',
         default => 0,
     },

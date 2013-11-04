@@ -46,7 +46,8 @@
      },
      {
        name => "allows_unconfirmed"
-       heading => "Allow UNCONFIRMED $terms.Bugs"
+       heading => "Allow " _ display_value('bug_status', 'UNCONFIRMED') _
+                       " " _ terms.Bugs
        yesno_field => 1
      },
 ] %]

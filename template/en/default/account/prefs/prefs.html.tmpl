@@ -23,14 +23,6 @@
   #%]
 
 [% filtered_login = user.login FILTER html %]
-[% PROCESS global/header.html.tmpl
-   title = "User Preferences"
-   subheader = filtered_login
-   style_urls = ['skins/standard/admin.css']
-   javascript_urls = ['js/util.js', 'js/field.js']
-   doc_section = "userpreferences.html"
-   yui = ['autocomplete']
- %]
 
 [% tabs = [{ name => "settings", label => "General Preferences",
               link => "userprefs.cgi?tab=settings", saveable => "1" },
@@ -51,6 +43,15 @@
     [% LAST %]
   [% END %]
 [% END %]
+
+[% PROCESS global/header.html.tmpl
+   title = current_tab.label
+   subheader = filtered_login
+   style_urls = ['skins/standard/admin.css']
+   javascript_urls = ['js/util.js', 'js/field.js']
+   doc_section = "userpreferences.html"
+   yui = ['autocomplete']
+ %]
 
 [% WRAPPER global/tabs.html.tmpl
    tabs        = tabs

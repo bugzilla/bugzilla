@@ -576,3 +576,8 @@ form th {
 th.left {
     text-align: left;
 }
+
+tr.shared_search {
+    background-color: #fff7cd;
+    color: #000;
+}

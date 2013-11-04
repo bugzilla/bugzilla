@@ -83,7 +83,7 @@
       [% Hook.process('saved-row') %]
     </tr>
     [% FOREACH q = user.queries %]
-      <tr>
+      <tr [% 'class="shared_search"' IF q.shared_with_group.id %]>
         <td>[% q.name FILTER html %]</td>
         <td>
           <a href="buglist.cgi?cmdtype=dorem&amp;remaction=run&amp;namedcmd=[% q.name FILTER uri %]

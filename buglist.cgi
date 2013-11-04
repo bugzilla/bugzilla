@@ -766,6 +766,7 @@ my $time_info = { 'estimated_time' => 0,
     
 my $bugowners = {};
 my $bugproducts = {};
+my $bugcomponents = {};
 my $bugstatuses = {};
 my @bugidlist;
 
@@ -798,6 +799,7 @@ foreach my $row (@$data) {
     # Record the assignee, product, and status in the big hashes of those things.
     $bugowners->{$bug->{'assigned_to'}} = 1 if $bug->{'assigned_to'};
     $bugproducts->{$bug->{'product'}} = 1 if $bug->{'product'};
+    $bugcomponents->{$bug->{'component'}} = 1 if $bug->{'component'};
     $bugstatuses->{$bug->{'bug_status'}} = 1 if $bug->{'bug_status'};
 
     $bug->{'secure_mode'} = undef;
@@ -928,6 +930,20 @@ elsif (my @product_input = $cgi->param('product')) {
 # enter bugs against it.
 if ($one_product && $user->can_enter_product($one_product)) {
     $vars->{'one_product'} = $one_product;
+}
+
+# See if there's only one component in all the results (or only one component
+# that we searched for), which allows us to provide more helpful links.
+my @components = keys %$bugcomponents;
+my $one_component;
+if (scalar(@components) == 1) {
+    $vars->{one_component} = $components[0];
+}
+# This is used in the "Zarroo Boogs" case.
+elsif (my @component_input = $cgi->param('component')) {
+    if (scalar(@component_input) == 1 and $component_input[0] ne '') {
+        $vars->{one_component}= $cgi->param('component');
+    }
 }
 
 # The following variables are used when the user is making changes to multiple bugs.

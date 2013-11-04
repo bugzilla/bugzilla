@@ -313,10 +313,16 @@
 [% BLOCK enter_bug_link %]
   <a href="enter_bug.cgi
            [%- IF one_product.defined %]?product=
-             [%- one_product.name FILTER uri %][% END %]">File
+             [%- one_product.name FILTER uri %]
+             [%- IF one_component.defined %]&amp;component=
+               [%- one_component FILTER uri %][% END %][% END %]">File
     a new [% terms.bug %]
    [% IF one_product.defined %]
-     in the "[% one_product.name FILTER html %]" product
+     in the
+     [% IF one_component.defined %]
+       "[% one_component FILTER html %]" component of the
+     [% END %]
+     "[% one_product.name FILTER html %]" product
    [% END %]</a>
 [% END %]
 

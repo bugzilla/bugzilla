@@ -20,6 +20,8 @@
 #   Gervase Markham <gerv@gerv.net>
 #   Reed Loden <reed@reedloden.com>
 
+# XXX most of the data in this file is no longer used
+
 package Bugzilla::Extension::BMO::Data;
 use strict;
 

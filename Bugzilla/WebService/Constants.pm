@@ -123,7 +123,7 @@ use constant WS_ERROR_CODE => {
     illegal_bug_status_transition => 123,
 
     # Authentication errors are usually 300-400.
-    invalid_username_or_password => 300,
+    invalid_login_or_password => 300,
     account_disabled             => 301,
     auth_invalid_email           => 302,
     extern_id_conflict           => -303,

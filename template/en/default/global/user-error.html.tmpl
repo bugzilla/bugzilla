@@ -1046,9 +1046,9 @@
     Either you misspelled it, or the person has not
     registered for a [% terms.Bugzilla %] account.
 
-  [% ELSIF error == "invalid_username_or_password" %]
-    [% title = "Invalid Username Or Password" %]
-    The username or password you entered is not valid.
+  [% ELSIF error == "invalid_login_or_password" %]
+    [% title = "Invalid Login Or Password" %]
+    The login or password you entered is not valid.
     [%# People get two login attempts before being warned about
       # being locked out.
       #%]

@@ -178,7 +178,7 @@ sub _handle_login_result {
     elsif ($fail_code == AUTH_LOGINFAILED or $fail_code == AUTH_NO_SUCH_USER) {
         my $remaining_attempts = MAX_LOGIN_ATTEMPTS 
                                  - ($result->{failure_count} || 0);
-        ThrowUserError("invalid_username_or_password", 
+        ThrowUserError("invalid_login_or_password", 
                        { remaining => $remaining_attempts });
     }
     # The account may be disabled

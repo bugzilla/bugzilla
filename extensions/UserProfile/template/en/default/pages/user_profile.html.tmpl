@@ -8,8 +8,9 @@
 
 [% PROCESS global/variables.none.tmpl %]
 
+[% filtered_identity = target.identity FILTER html %]
 [% PROCESS global/header.html.tmpl
-   title = "User Profile: " _ target.identity
+   title = "User Profile: $filtered_identity"
    style_urls = [ "extensions/UserProfile/web/styles/user_profile.css" ]
    yui = [ 'autocomplete' ]
    javascript_urls = [ "js/field.js" ]

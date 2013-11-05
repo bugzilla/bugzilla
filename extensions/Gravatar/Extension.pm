@@ -15,19 +15,20 @@ use base qw(Bugzilla::Extension);
 use Bugzilla::User::Setting;
 use Digest::MD5 qw(md5_hex);
 
+use constant DEFAULT_URL => 'extensions/Gravatar/web/default.jpg';
+
 BEGIN {
     *Bugzilla::User::gravatar = \&_user_gravatar;
 }
 
 sub _user_gravatar {
     my ($self, $size) = @_;
+    if ($self->setting('show_my_gravatar') eq 'Off') {
+        return DEFAULT_URL;
+    }
     if (!$self->{gravatar}) {
-        if ($self->setting('show_my_gravatar') eq 'On') {
-            (my $email = $self->email) =~ s/\+(.*?)\@/@/;
-            $self->{gravatar} = 'https://secure.gravatar.com/avatar/' . md5_hex(lc($email)) . '?d=mm';
-        } else {
-            $self->{gravatar} = 'extensions/Gravatar/web/default.jpg';
-        }
+        (my $email = $self->email) =~ s/\+(.*?)\@/@/;
+        $self->{gravatar} = 'https://secure.gravatar.com/avatar/' . md5_hex(lc($email)) . '?d=mm';
     }
     $size ||= 64;
     return $self->{gravatar} . "&amp;size=$size";

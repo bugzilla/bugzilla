@@ -47,7 +47,9 @@ sub template_before_process {
     my $bug_id = $bug->id;
 
     # build bug activity
-    my ($activity) = Bugzilla::Bug::GetBugActivity($bug_id);
+    my ($activity) = $bug->can('get_activity')
+        ? $bug->get_activity()
+        : Bugzilla::Bug::GetBugActivity($bug_id);
     $activity = _add_duplicates($bug_id, $activity);
 
     if (scalar @$activity > MAXIMUM_ACTIVITY_COUNT) {

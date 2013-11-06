@@ -40,6 +40,7 @@ use constant PRODUCT_SPECIFIC_FIELDS => qw(version target_milestone component);
 
 use constant DATE_FIELDS => {
     comments => ['new_since'],
+    history  => ['new_since'],
     search   => ['last_change_time', 'creation_time'],
 };
 
@@ -400,7 +401,7 @@ sub history {
         $bug_id = $bug->id;
         $item{id} = $self->type('int', $bug_id);
 
-        my ($activity) = $bug->get_activity;
+        my ($activity) = $bug->get_activity(undef, $params->{new_since});
 
         my @history;
         foreach my $changeset (@$activity) {
@@ -2432,7 +2433,12 @@ An array of numbers and strings.
 If an element in the array is entirely numeric, it represents a bug_id 
 from the Bugzilla database to fetch. If it contains any non-numeric 
 characters, it is considered to be a bug alias instead, and the data bug 
-with that alias will be loaded. 
+with that alias will be loaded.
+
+item C<new_since>
+
+C<dateTime> If specified, the method will only return changes I<newer>
+than this time.
 
 =back
 
@@ -2513,6 +2519,8 @@ consistent with other methods. Since Bugzilla B<4.4>, they now match
 names used by L<Bug.update|/"update"> for consistency.
 
 =item REST API call added Bugzilla B<5.0>.
+
+=item Added C<new_since> parameter if Bugzilla B<5.0>.
 
 =back
 

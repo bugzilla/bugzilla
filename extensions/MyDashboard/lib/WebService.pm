@@ -42,7 +42,7 @@ sub run_bug_query {
         foreach my $b (@$bugs) {
             my $last_changes = {};
             my $activity = $self->history({ ids => [ $b->{bug_id} ], 
-                                            start_time => $b->{changeddate} });
+                                            new_since => $b->{changeddate} });
             if (@{$activity->{bugs}[0]{history}}) {
                 my $change_set = $activity->{bugs}[0]{history}[0];
                 $last_changes->{activity} = $change_set->{changes};

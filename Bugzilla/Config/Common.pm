@@ -24,7 +24,7 @@ use parent qw(Exporter);
     qw(check_multi check_numeric check_regexp check_url check_group
        check_sslbase check_priority check_severity check_platform
        check_opsys check_shadowdb check_urlbase check_webdotbase
-       check_user_verify_class check_ip
+       check_user_verify_class check_ip check_font_file
        check_mail_delivery_method check_notification check_utf8
        check_bug_status check_smtp_auth check_theschwartz_available
        check_maxattachmentsize check_email check_smtp_ssl
@@ -240,6 +240,20 @@ sub check_webdotbase {
         }
     }
     return "";
+}
+
+sub check_font_file {
+    my ($font) = @_;
+    $font = trim($font);
+    return '' unless $font;
+
+    if ($font !~ /\.ttf$/) {
+        return "The file must point to a TrueType font file (its extension must be .ttf)"
+    }
+    if (! -f $font) {
+        return "The file '$font' cannot be found. Make sure you typed the full path to the file"
+    }
+    return '';
 }
 
 sub check_user_verify_class {
@@ -478,6 +492,8 @@ Checks that the value is a valid regexp
 =item check_email
 
 =item check_webdotbase
+
+=item check_font_file
 
 =item get_param_list
 

@@ -2074,6 +2074,9 @@ sub check_and_send_account_creation_confirmation {
         ThrowUserError('account_creation_restricted');
     }
 
+    # BMO - add a hook to allow extra validation prior to account creation.
+    Bugzilla::Hook::process("user_verify_login", { login => $login });
+
     # Create and send a token for this new account.
     require Bugzilla::Token;
     Bugzilla::Token::issue_new_user_account_token($login);

@@ -13,7 +13,7 @@ use base qw(Bugzilla::WebService Bugzilla::WebService::Bug);
 
 use Bugzilla::Constants;
 use Bugzilla::Error;
-use Bugzilla::Util qw(detaint_natural trick_taint template_var);
+use Bugzilla::Util qw(detaint_natural trick_taint template_var datetime_from);
 use Bugzilla::WebService::Util qw(validate);
 
 use Bugzilla::Extension::MyDashboard::Queries qw(QUERY_DEFS query_bugs query_flags);
@@ -41,8 +41,12 @@ sub run_bug_query {
         # Add last changes to each bug
         foreach my $b (@$bugs) {
             my $last_changes = {};
-            my $activity = $self->history({ ids => [ $b->{bug_id} ], 
-                                            new_since => $b->{changeddate} });
+            # Remove one second so we get the changes made at $change_date (>=)
+            my $changed_date = datetime_from($b->{changeddate});
+            next if !$changed_date;
+            $changed_date->subtract(seconds => 1);
+            my $activity = $self->history({ ids       => [ $b->{bug_id} ],
+                                            new_since => $changed_date });
             if (@{$activity->{bugs}[0]{history}}) {
                 my $change_set = $activity->{bugs}[0]{history}[0];
                 $last_changes->{activity} = $change_set->{changes};
@@ -55,8 +59,8 @@ sub run_bug_query {
             }
             my $last_comment_id = $dbh->selectrow_array("
                 SELECT comment_id FROM longdescs 
-                WHERE bug_id = ? AND bug_when >= ?",
-                undef, $b->{bug_id}, $b->{changeddate});
+                WHERE bug_id = ? AND bug_when > ?",
+                undef, $b->{bug_id}, $changed_date);
             if ($last_comment_id) {
                 my $comments = $self->comments({ comment_ids => [ $last_comment_id ] });
                 my $comment = $comments->{comments}{$last_comment_id};

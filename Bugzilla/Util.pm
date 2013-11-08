@@ -496,8 +496,9 @@ sub join_activity_entries {
         return $current_change . $new_change;
     }
 
-    # All other fields get a space
-    if (substr($new_change, 0, 1) eq ' ') {
+    # All other fields get a space unless the first character of the second
+    # string is a comma or space
+    if (substr($new_change, 0, 1) eq ',' || substr($new_change, 0, 1) eq ' ') {
         return $current_change . $new_change;
     } else {
         return $current_change . ' ' . $new_change;

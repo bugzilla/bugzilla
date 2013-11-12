@@ -940,7 +940,7 @@ sub post_bug_after_creation {
                 component         => 'Security Assurance: Incident',
                 status_whiteboard => '[infrasec:incident]',
                 bug_severity      => 'critical',
-                cc                => [ 'mcoates@mozilla.com', 'jstevensen@mozilla.com' ],
+                cc                => [ 'jstevensen@mozilla.com' ],
                 groups            => [ 'infrasec' ], 
                 comment           => $comment,
                 op_sys            => 'All', 

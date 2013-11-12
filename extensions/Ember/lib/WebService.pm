@@ -182,7 +182,7 @@ sub show {
             || $field->{name} eq 'blocks')
             && scalar @{ $bug_hash->{$field->{name}} })
         {
-            my $bug_ids = $bug_hash->{$field->{name}};
+            my $bug_ids = delete $bug_hash->{$field->{name}};
             $user->visible_bugs($bug_ids);
             my $bug_objs = Bugzilla::Bug->new_from_list($bug_ids);
 

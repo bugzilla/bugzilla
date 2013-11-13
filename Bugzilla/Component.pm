@@ -506,7 +506,7 @@ Component.pm represents a Product Component object.
 
  Returns:     Integer with the number of bugs.
 
-=item C<bugs_ids()>
+=item C<bug_ids()>
 
  Description: Returns all bug IDs that belong to the component.
 

@@ -591,6 +591,13 @@ use constant AUDIT_CREATE => '__create__';
 use constant AUDIT_REMOVE => '__remove__';
 
 sub bz_locations {
+    # Force memoize() to re-compute data per project, to avoid
+    # sharing the same data across different installations.
+    return _bz_locations($ENV{'PROJECT'});
+}
+
+sub _bz_locations {
+    my $project = shift;
     # We know that Bugzilla/Constants.pm must be in %INC at this point.
     # So the only question is, what's the name of the directory
     # above it? This is the most reliable way to get our current working
@@ -607,12 +614,13 @@ sub bz_locations {
     $libpath =~ /(.*)/;
     $libpath = $1;
 
-    my ($project, $localconfig, $datadir);
-    if ($ENV{'PROJECT'} && $ENV{'PROJECT'} =~ /^(\w+)$/) {
+    my ($localconfig, $datadir);
+    if ($project && $project =~ /^(\w+)$/) {
         $project = $1;
         $localconfig = "localconfig.$project";
         $datadir = "data/$project";
     } else {
+        $project = undef;
         $localconfig = "localconfig";
         $datadir = "data";
     }
@@ -647,6 +655,6 @@ sub bz_locations {
 
 # This makes us not re-compute all the bz_locations data every time it's
 # called.
-BEGIN { memoize('bz_locations') };
+BEGIN { memoize('_bz_locations') };
 
 1;

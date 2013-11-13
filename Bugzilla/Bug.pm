@@ -694,21 +694,20 @@ sub create {
     # Set up dependencies (blocked/dependson)
     my $sth_deps = $dbh->prepare(
         'INSERT INTO dependencies (blocked, dependson) VALUES (?, ?)');
-    my $sth_bug_time = $dbh->prepare('UPDATE bugs SET delta_ts = ? WHERE bug_id = ?');
 
     foreach my $depends_on_id (@$depends_on) {
         $sth_deps->execute($bug->bug_id, $depends_on_id);
         # Log the reverse action on the other bug.
         LogActivityEntry($depends_on_id, 'blocked', '', $bug->bug_id,
                          $bug->{reporter_id}, $timestamp);
-        $sth_bug_time->execute($timestamp, $depends_on_id);
+        _update_delta_ts($depends_on_id, $timestamp);
     }
     foreach my $blocked_id (@$blocked) {
         $sth_deps->execute($blocked_id, $bug->bug_id);
         # Log the reverse action on the other bug.
         LogActivityEntry($blocked_id, 'dependson', '', $bug->bug_id,
                          $bug->{reporter_id}, $timestamp);
-        $sth_bug_time->execute($timestamp, $blocked_id);
+        _update_delta_ts($blocked_id, $timestamp);
     }
 
     # Insert the values into the multiselect value tables
@@ -891,8 +890,7 @@ sub update {
             LogActivityEntry($removed_id, $other, $self->id, '',
                              $user->id, $delta_ts);
             # Update delta_ts on the other bug so that we trigger mid-airs.
-            $dbh->do('UPDATE bugs SET delta_ts = ? WHERE bug_id = ?',
-                     undef, $delta_ts, $removed_id);
+            _update_delta_ts($removed_id, $delta_ts);
         }
         foreach my $added_id (@$added) {
             $dbh->do("INSERT INTO dependencies ($type, $other) VALUES (?,?)",
@@ -902,8 +900,7 @@ sub update {
             LogActivityEntry($added_id, $other, '', $self->id,
                              $user->id, $delta_ts);
             # Update delta_ts on the other bug so that we trigger mid-airs.
-            $dbh->do('UPDATE bugs SET delta_ts = ? WHERE bug_id = ?',
-                     undef, $delta_ts, $added_id);
+            _update_delta_ts($added_id, $delta_ts);
         }
         
         if (scalar(@$removed) || scalar(@$added)) {
@@ -1035,8 +1032,7 @@ sub update {
     if (scalar(keys %$changes) || $self->{added_comments}
         || $self->{comment_isprivate})
     {
-        $dbh->do('UPDATE bugs SET delta_ts = ? WHERE bug_id = ?',
-                 undef, ($delta_ts, $self->id));
+        _update_delta_ts($self->id, $delta_ts);
         $self->{delta_ts} = $delta_ts;
     }
 
@@ -1145,6 +1141,17 @@ sub _sync_fulltext {
     }
 }
 
+# Update a bug's delta_ts without requiring the full object to be loaded.
+sub _update_delta_ts {
+    my ($bug_id, $timestamp) = @_;
+    Bugzilla->dbh->do(
+        "UPDATE bugs SET delta_ts = ? WHERE bug_id = ?",
+        undef,
+        $timestamp, $bug_id
+    );
+    Bugzilla::Hook::process('bug_end_of_update_delta_ts',
+                            { bug_id => $bug_id, timestamp => $timestamp });
+}
 
 # This is the correct way to delete bugs from the DB.
 # No bug should be deleted from anywhere else except from here.

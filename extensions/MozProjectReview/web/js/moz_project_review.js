@@ -13,6 +13,7 @@ var MPR = {
     required_fields: {
         "initial_questions": {
             "short_desc": "Please enter a value for project or feature name in the initial questions section",
+            "visibility": "Please select a value for project visibility in the initial questions section",
             "cc": "Please enter a value for points of contact in the initial questions section",
             "key_initiative": "Please select a value for key initiative in the initial questions section",
             "release_date": "Please enter a value for release date in the initial questions section",
@@ -240,6 +241,15 @@ var MPR = {
         if (alert_text) {
             alert(alert_text);
             return false;
+        }
+
+        var visibility = MPR.fieldValue('visibility');
+        if (visibility == 'private') {
+            var groups = document.createElement('input');
+            groups.type = 'hidden';
+            groups.name = 'groups';
+            groups.value = 'mozilla-corporation-confidential';
+            Dom.get('mozProjectForm').appendChild(groups);
         }
 
         return true;

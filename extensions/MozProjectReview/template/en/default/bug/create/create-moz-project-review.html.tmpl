@@ -26,12 +26,11 @@
   <span class="required_explanation">Required Field</span>)
 </p>
 
-<form method="post" action="post_bug.cgi" id="incidentForm" enctype="multipart/form-data"
+<form method="post" action="post_bug.cgi" id="mozProjectForm" enctype="multipart/form-data"
       onSubmit="return MPR.validateAndSubmit();">
   <input type="hidden" id="product" name="product" value="mozilla.org">
   <input type="hidden" id="component" name="component" value="Project Review">
   <input type="hidden" id="rep_platform" name="rep_platform" value="All">
-  <input type="hidden" id="groups" name="groups" value="mozilla-corporation-confidential">
   <input type="hidden" id="op_sys" name="op_sys" value="All">
   <input type="hidden" id="priority" name="priority" value="--">
   <input type="hidden" id="version" name="version" value="other">
@@ -48,6 +47,21 @@
         <div class="field_description">Be brief yet descriptive as possible. Include name of product, 
           feature, or name of vendor involved as well if appropriate.</div>
         <input type="text" name="short_desc" id="short_desc" size="60" maxsize="255">
+      </span>
+    </div>
+
+    <div id="visibility_row" class="field_row">
+      <span class="field_label required">Project Visibility:</span>
+      <span class="field_data">
+        <div class="field_description">
+          Whether project itself is a secret or not (dependent [% terms.bugs %],
+          e.g. Finance and Sec Review, will be made secure whatever you choose).
+        </div>
+        <select name="visibility" id="visibility">
+          <option value="">Select One</option>
+          <option value="public">Public</option>
+          <option value="private">MoCo Confidentional</option>
+        </select>
       </span>
     </div>
 

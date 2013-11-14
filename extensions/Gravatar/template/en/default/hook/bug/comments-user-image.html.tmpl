@@ -8,7 +8,11 @@
 
 [% IF user.settings.show_gravatars.value == 'On' %]
   [% IF who.last_activity_ts %]
-    <a href="user_profile?login=[% who.login FILTER uri %]">
+    [% IF user.id %]
+      <a href="user_profile?login=[% who.login FILTER uri %]">
+    [% ELSE %]
+      <a href="user_profile?user_id=[% who.id FILTER uri %]">
+    [% END %]
   [% END %]
   <img align="middle" src="[% who.gravatar FILTER none %]" width="32" height="32" border="0">
   [% "</a>" IF who.last_activity_ts %]

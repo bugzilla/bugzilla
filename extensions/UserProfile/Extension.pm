@@ -277,24 +277,33 @@ sub page_before_template {
     return unless $page eq 'user_profile.html';
     my $user = Bugzilla->user;
 
-    # check login
-    my $target;
+    # determine user to display
+    my ($target, $login);
     my $input = Bugzilla->input_params;
-    my $limit = Bugzilla->params->{'maxusermatches'} + 1;
-    my $login = $input->{login};
-    if (!$login) {
-        $target = Bugzilla->login(LOGIN_REQUIRED);
-        $login = $target->login;
+    if (my $user_id = $input->{user_id}) {
+        # load from user_id
+        $user_id = 0 if $user_id =~ /\D/;
+        $target = Bugzilla::User->check({ id => $user_id });
     } else {
-        my $users = Bugzilla::User::match($login, $limit, 1);
-        if (scalar(@$users) == 1) {
-            # always allow singular matches without confirmation
-            $target = $users->[0];
+        # loading from login name requires authentication
+        Bugzilla->login(LOGIN_REQUIRED);
+        $login = $input->{login};
+        if (!$login) {
+            # show current user's profile by default
+            $target = $user;
         } else {
-            Bugzilla::User::match_field({ 'login' => {'type' => 'single'} });
-            $target = Bugzilla::User->check($login);
+            my $limit = Bugzilla->params->{'maxusermatches'} + 1;
+            my $users = Bugzilla::User::match($login, $limit, 1);
+            if (scalar(@$users) == 1) {
+                # always allow singular matches without confirmation
+                $target = $users->[0];
+            } else {
+                Bugzilla::User::match_field({ 'login' => {'type' => 'single'} });
+                $target = Bugzilla::User->check($login);
+            }
         }
     }
+    $login ||= $target->login;
 
     # load statistics into $vars
     my $dbh = Bugzilla->switch_to_shadow_db;

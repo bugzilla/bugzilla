@@ -18,29 +18,31 @@
 
 <table id="user_profile_table">
 
-<tr>
-  <td>&nbsp;</td>
-  <th>Search</th>
-  <td colspan="2">
-    <form action="user_profile">
-      [% INCLUDE global/userselect.html.tmpl
-        id => "login"
-        name => "login"
-        value => login
-        size => 40
-        emptyok => 0
-      %]
-      &nbsp;&nbsp;<input type="submit" value="Show">
-    </form>
-  </td>
-</tr>
+[% IF user.id %]
+  <tr>
+    <td>&nbsp;</td>
+    <th>Search</th>
+    <td colspan="2">
+      <form action="user_profile">
+        [% INCLUDE global/userselect.html.tmpl
+          id => "login"
+          name => "login"
+          value => login
+          size => 40
+          emptyok => 0
+        %]
+        &nbsp;&nbsp;<input type="submit" value="Show">
+      </form>
+    </td>
+  </tr>
+
+  <tr>
+    <td colspan="4" class="separator"><hr></td>
+  </tr>
+[% END %]
 
 <tr>
-  <td colspan="4" class="separator"><hr></td>
-</tr>
-
-<tr>
-  <td rowspan="16" id="gravatar-container">
+  <td rowspan="[% user.id ? 16 : 15 %]" id="gravatar-container">
     [% IF user.gravatar %]
       <img id="gravatar" src="[% target.gravatar(256) FILTER none %]" width="128" height="128"><br>
       [% IF target.id == user.id %]
@@ -54,10 +56,12 @@
   <td colspan="2">[% target.name FILTER html %]</td>
 </tr>
 
-<tr>
-  <th>Email</th>
-  <td colspan="2"><a href="mailto:[% target.login FILTER uri %]">[% target.login FILTER html %]</a></td>
-</tr>
+[% IF user.id %]
+  <tr>
+    <th>Email</th>
+    <td colspan="2"><a href="mailto:[% target.login FILTER uri %]">[% target.login FILTER html %]</a></td>
+  </tr>
+[% END %]
 
 <tr>
   <td>&nbsp;</td>

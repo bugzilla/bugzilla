@@ -389,7 +389,9 @@ sub can_set_value {
             last;
         }
     }
-    return $new_value_obj && $user->in_group($new_value_obj->setter_group->name)
+    return $new_value_obj
+           && $new_value_obj->setter_group
+           && $user->in_group($new_value_obj->setter_group->name)
            ? 1
            : 0;
 }

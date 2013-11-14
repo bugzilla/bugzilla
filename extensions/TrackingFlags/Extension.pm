@@ -17,12 +17,13 @@ use Bugzilla::Extension::TrackingFlags::Flag::Bug;
 use Bugzilla::Extension::TrackingFlags::Admin;
 
 use Bugzilla::Bug;
-use Bugzilla::Constants;
-use Bugzilla::Field;
-use Bugzilla::Product;
 use Bugzilla::Component;
+use Bugzilla::Constants;
 use Bugzilla::Error;
 use Bugzilla::Extension::BMO::Data;
+use Bugzilla::Field;
+use Bugzilla::Install::Filesystem;
+use Bugzilla::Product;
 
 our $VERSION = '1';
 
@@ -296,6 +297,15 @@ sub install_update_db {
     );
 }
 
+sub install_filesystem {
+    my ($self, $args) = @_;
+    my $files = $args->{files};
+    my $extensions_dir = bz_locations()->{extensionsdir};
+    $files->{"$extensions_dir/TrackingFlags/bin/bulk_flag_clear.pl"} = {
+        perms => Bugzilla::Install::Filesystem::OWNER_EXECUTE
+    };
+}
+
 sub active_custom_fields {
     my ($self, $args) = @_;
     my $fields    = $args->{'fields'};
@@ -362,24 +372,31 @@ sub bug_create_cf_accessors {
     my @tracking_flags = Bugzilla::Extension::TrackingFlags::Flag->get_all;
     foreach my $flag (@tracking_flags) {
         my $flag_name = $flag->name;
-        my $accessor = sub {
-            my $self = shift;
-            return $self->{$flag_name} if defined $self->{$flag_name};
-            if (!exists $self->{'_tf_bug_values_preloaded'}) {
-                # preload all values currently set for this bug
-                my $bug_values
-                    = Bugzilla::Extension::TrackingFlags::Flag::Bug->match({ bug_id => $self->id });
-                foreach my $value (@$bug_values) {
-                    $self->{$value->tracking_flag->name} = $value->value;
-                }
-                $self->{'_tf_bug_values_preloaded'} = 1;
-            }
-            return $self->{$flag_name} ||= '---';
-        };
-        my $name = "Bugzilla::Bug::$flag_name";
         if (!Bugzilla::Bug->can($flag_name)) {
+            my $accessor = sub {
+                my $self = shift;
+                return $self->{$flag_name} if defined $self->{$flag_name};
+                if (!exists $self->{'_tf_bug_values_preloaded'}) {
+                    # preload all values currently set for this bug
+                    my $bug_values
+                        = Bugzilla::Extension::TrackingFlags::Flag::Bug->match({ bug_id => $self->id });
+                    foreach my $value (@$bug_values) {
+                        $self->{$value->tracking_flag->name} = $value->value;
+                    }
+                    $self->{'_tf_bug_values_preloaded'} = 1;
+                }
+                return $self->{$flag_name} ||= '---';
+            };
             no strict 'refs';
-            *{$name} = $accessor;
+            *{"Bugzilla::Bug::$flag_name"} = $accessor;
+        }
+        if (!Bugzilla::Bug->can("set_$flag_name")) {
+            my $setter = sub {
+                my ($self, $value) = @_;
+                $self->set($flag_name, $value);
+            };
+            no strict 'refs';
+            *{"Bugzilla::Bug::set_$flag_name"} = $setter;
         }
     }
 }
@@ -466,7 +483,7 @@ sub bug_end_of_create {
 sub object_end_of_set_all {
     my ($self, $args) = @_;
     my $object = $args->{object};
-    my $params = Bugzilla->input_params;
+    my $params = $args->{params};
 
     return unless $object->isa('Bugzilla::Bug');
 
@@ -479,7 +496,10 @@ sub object_end_of_set_all {
     foreach my $flag (@$tracking_flags) {
         my $flag_name = $flag->name;
         if (exists $params->{$flag_name}) {
-            $object->set($flag_name, $params->{$flag_name});
+            my $value = ref($params->{$flag_name})
+                        ? $params->{$flag_name}->[0]
+                        : $params->{$flag_name};
+            $object->set($flag_name, $value);
         }
     }
 }

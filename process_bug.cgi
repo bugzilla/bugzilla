@@ -122,16 +122,14 @@ if ($delta_ts) {
     if ($first_delta_tz_z ne $delta_ts_z) {
         ($vars->{'operations'}) = $first_bug->get_activity(undef, $delta_ts);
 
-        my $start_at = $cgi->param('longdesclength')
-          or ThrowCodeError('undefined_field', { field => 'longdesclength' });
-
         # Always sort midair collision comments oldest to newest,
         # regardless of the user's personal preference.
-        my $comments = $first_bug->comments({ order => "oldest_to_newest" });
+        my $comments = $first_bug->comments({ order => 'oldest_to_newest',
+                                              after => $delta_ts });
 
         # Show midair if previous changes made other than CC
         # and/or one or more comments were made
-        my $do_midair = scalar @$comments > $start_at ? 1 : 0;
+        my $do_midair = scalar @$comments ? 1 : 0;
 
         if (!$do_midair) {
             foreach my $operation (@{ $vars->{'operations'} }) {
@@ -147,7 +145,6 @@ if ($delta_ts) {
 
         if ($do_midair) {
             $vars->{'title_tag'} = "mid_air";
-            $vars->{'start_at'} = $start_at;
             $vars->{'comments'} = $comments;
             $vars->{'bug'} = $first_bug;
             # The token contains the old delta_ts. We need a new one.

@@ -251,7 +251,6 @@ sub process_bug {
     foreach my $field (keys %fields) {
         $cgi->param(-name => $field, -value => $fields{$field});
     }
-    $cgi->param('longdesclength', scalar @{ $bug->comments });
     $cgi->param('token', issue_hash_token([$bug->id, $bug->delta_ts]));
 
     require 'process_bug.cgi';

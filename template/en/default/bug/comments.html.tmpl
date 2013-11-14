@@ -44,16 +44,8 @@
 //-->
 </script>
 
-[% DEFAULT start_at = 0 mode = "show" %]
-[% sort_order = user.settings.comment_sort_order.value %]
+[% DEFAULT mode = "show" %]
 [% user_cache = template_cache.users %]
-
-[%# NOTE: (start_at > 0) means we came here from a midair collision,
-  #       in which case we don't care what the user's preference is.
- %]
-[% IF (start_at > 0) %]
-    [% sort_order = "oldest_to_newest" %]
-[% END %]
 
 <!-- This auto-sizes the comments and positions the collapse/expand links 
      to the right. -->
@@ -61,9 +53,7 @@
 <td>
 
 [% FOREACH comment = comments %]
-  [% IF comment.count >= start_at %]
-    [% PROCESS a_comment %]
-  [% END %]
+  [% PROCESS a_comment %]
 [% END %]
 
 [% IF mode == "edit" && user.id

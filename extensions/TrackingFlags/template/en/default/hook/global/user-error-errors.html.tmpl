@@ -9,7 +9,7 @@
 [% IF error == "tracking_flags_change_denied" %]
   [% title = "Tracking Flag Modification Denied" %]
   You tried to update the status of the tracking flag '[% flag.name FILTER html %]'
-  [% IF value %] to '[% value.name FILTER html %]'[% END %].
+  [% IF value %] to '[% value FILTER html %]'[% END %].
   Only a user with the required permissions may make this change.
 
 [% ELSIF error == "tracking_flags_missing_mandatory" %]

@@ -393,6 +393,9 @@ sub bug_create_cf_accessors {
         if (!Bugzilla::Bug->can("set_$flag_name")) {
             my $setter = sub {
                 my ($self, $value) = @_;
+                $value = ref($value) eq 'ARRAY'
+                         ? $value->[0]
+                         : $value;
                 $self->set($flag_name, $value);
             };
             no strict 'refs';
@@ -496,11 +499,30 @@ sub object_end_of_set_all {
     foreach my $flag (@$tracking_flags) {
         my $flag_name = $flag->name;
         if (exists $params->{$flag_name}) {
-            my $value = ref($params->{$flag_name})
+            my $value = ref($params->{$flag_name}) eq 'ARRAY'
                         ? $params->{$flag_name}->[0]
                         : $params->{$flag_name};
             $object->set($flag_name, $value);
         }
+    }
+}
+
+sub bug_check_can_change_field {
+    my ($self, $args) = @_;
+    my ($bug, $field, $old_value, $new_value, $priv_results)
+        = @$args{qw(bug field old_value new_value priv_results)};
+
+    return if $field !~ /^cf_/ or $old_value eq $new_value;
+    return unless my $flag = Bugzilla::Extension::TrackingFlags::Flag->new({ name => $field });
+
+    if ($flag->can_set_value($new_value)) {
+        push @$priv_results, PRIVILEGES_REQUIRED_NONE;
+    }
+    else {
+        # we can't return PRIVILEGES_REQUIRED_EMPOWERED as that has different
+        # conditions (eg. it assumes reporters can always change fields).
+        ThrowUserError('tracking_flags_change_denied',
+                       { flag => $flag, value => $new_value });
     }
 }
 

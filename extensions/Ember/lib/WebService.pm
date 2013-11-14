@@ -51,7 +51,6 @@ use constant NON_EDIT_FIELDS => qw(
     content
     creation_ts
     days_elapsed
-    delta_ts
     everconfirmed
     qacontact_accessible
     reporter
@@ -140,16 +139,10 @@ sub show {
             $dbh->selectcol_arrayref('SELECT fieldid FROM bugs_activity
                                        WHERE bug_when > ? AND bug_id = ?',
                                      undef, ($last_updated, $bug->id));
-        if ($updated_fields) {
-            # Also add in the delta_ts value which is in the
-            # bugs_activity entries
-            push(@$updated_fields, get_field_id('delta_ts'));
-            @fields = $self->_get_fields($bug, $updated_fields);
-        }
 
         # Find any comments created since the last_updated date
         $comments = $self->comments({ ids => $bug_id, new_since => $last_updated });
-        $comments = $comments->{bugs}->{$bug_id}->{comments} || undef;
+        $comments = $comments->{bugs}->{$bug_id}->{comments};
 
         # Find any new attachments or modified attachments since the
         # last_updated date
@@ -164,12 +157,19 @@ sub show {
             $attachments = [ map { $attachments->{attachments}->{$_} }
                              keys %{ $attachments->{attachments} } ];
         }
+
+        if (@$updated_fields || @$comments || @$updated_attachments) {
+            # Also add in the delta_ts value which is in the bugs_activity
+            # entries
+            push(@$updated_fields, get_field_id('delta_ts'));
+            @fields = $self->_get_fields($bug, $updated_fields);
+        }
     }
     # Return all the things
     else {
         @fields = $self->_get_fields($bug);
         $comments = $self->comments({ ids => $bug_id });
-        $comments = $comments->{bugs}->{$bug_id}->{comments} || undef;
+        $comments = $comments->{bugs}->{$bug_id}->{comments};
         $attachments = $self->attachments({ ids => $bug_id,
                                             exclude_fields => ['data'] });
         $attachments = $attachments->{bugs}->{$bug_id} || undef;
@@ -225,10 +225,10 @@ sub show {
     my $data = { id => $bug->id, fields => \@fields };
 
     # Add the comments
-    $data->{comments} = $comments if $comments;
+    $data->{comments} = $comments;
 
     # Add the attachments
-    $data->{attachments} = $attachments if $attachments;
+    $data->{attachments} = $attachments;
 
     return $data;
 }
@@ -276,8 +276,12 @@ sub _get_fields {
         push(@field_objs, Bugzilla->active_custom_fields($cf_params));
     }
 
+    my $return_groups = my $return_flags = $field_ids ? 0 : 1;
     my @fields;
     foreach my $field (@field_objs) {
+        $return_groups = 1 if $field->name eq 'bug_group';
+        $return_flags  = 1 if $field->name eq 'flagtypes.name';
+
         # Skip any special fields containing . in the name such as
         # for attachments.*, etc.
         next if $field->name =~ /\./;
@@ -303,53 +307,55 @@ sub _get_fields {
         next if (!$bug->id && $field->custom
                  && ($field->obsolete || !$field->enter_bug));
 
-        my $field_hash = $self->_field_to_hash($field, $bug);
-
-        push(@fields, $field_hash);
+        push(@fields, $self->_field_to_hash($field, $bug));
     }
 
     # Add group information as separate field
-    push(@fields, {
-        description  => $self->type('string', 'Groups'),
-        is_custom    => $self->type('boolean', 0),
-        is_mandatory => $self->type('boolean', 0),
-        name         => $self->type('string', 'groups'),
-        values       => [ map { $self->_group_to_hash($_, $bug) }
-                          @{ $bug->product_obj->groups_available } ]
-    });
+    if ($return_groups) {
+        push(@fields, {
+            description  => $self->type('string', 'Groups'),
+            is_custom    => $self->type('boolean', 0),
+            is_mandatory => $self->type('boolean', 0),
+            name         => $self->type('string', 'groups'),
+            values       => [ map { $self->_group_to_hash($_, $bug) }
+                            @{ $bug->product_obj->groups_available } ]
+        });
+    }
 
     # Add flag information as separate field
-    my $flag_hash;
-    if ($bug->id) {
+    if ($return_flags) {
+        my $flag_hash;
+        if ($bug->id) {
+            foreach my $flag_type ('bug', 'attachment') {
+                my $flag_params = {
+                    target_type         => $flag_type,
+                    product_id          => $bug->product_obj->id,
+                    component_id        => $bug->component_obj->id,
+                    bug_id              => $bug->id,
+                    active_or_has_flags => $bug->id,
+                };
+                $flag_hash->{$flag_type} = Bugzilla::Flag->_flag_types($flag_params);
+            }
+        }
+        else {
+            my $flag_params = { is_active => 1 };
+            $flag_hash = $bug->product_obj->flag_types($flag_params);
+        }
+        my @flag_values;
         foreach my $flag_type ('bug', 'attachment') {
-            my $flag_params = {
-                target_type         => $flag_type,
-                product_id          => $bug->product_obj->id,
-                component_id        => $bug->component_obj->id,
-                bug_id              => $bug->id,
-                active_or_has_flags => $bug->id,
-            };
-            $flag_hash->{$flag_type} = Bugzilla::Flag->_flag_types($flag_params);
+            foreach my $flag (@{ $flag_hash->{$flag_type} }) {
+                push(@flag_values, $self->_flagtype_to_hash($flag, $bug));
+            }
         }
-    }
-    else {
-        my $flag_params = { is_active => 1 };
-        $flag_hash = $bug->product_obj->flag_types($flag_params);
-    }
-    my @flag_values;
-    foreach my $flag_type ('bug', 'attachment') {
-        foreach my $flag (@{ $flag_hash->{$flag_type} }) {
-            push(@flag_values, $self->_flagtype_to_hash($flag, $bug));
-        }
-    }
 
-    push(@fields, {
-        description  => $self->type('string', 'Flags'),
-        is_custom    => $self->type('boolean', 0),
-        is_mandatory => $self->type('boolean', 0),
-        name         => $self->type('string', 'flags'),
-        values       => \@flag_values
-    });
+        push(@fields, {
+            description  => $self->type('string', 'Flags'),
+            is_custom    => $self->type('boolean', 0),
+            is_mandatory => $self->type('boolean', 0),
+            name         => $self->type('string', 'flags'),
+            values       => \@flag_values
+        });
+    }
 
     return @fields;
 }
@@ -393,7 +399,12 @@ sub _field_to_hash {
     $data->{name} = $self->type('string', $field_name);
 
     # Set can_edit true or false if we are editing a current bug
-    $data->{can_edit} = $self->_can_change_field($field, $bug) if $bug->id;
+    if ($bug->id) {
+        # 'delta_ts's can_edit is incorrectly set in fielddefs
+        $data->{can_edit} = $field->name eq 'delta_ts'
+                            ? $self->type('boolean', 0)
+                            : $self->_can_change_field($field, $bug);
+    }
 
     # description for creating a new bug, otherwise comment
 

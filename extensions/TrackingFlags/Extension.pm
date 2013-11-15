@@ -519,10 +519,7 @@ sub bug_check_can_change_field {
         push @$priv_results, PRIVILEGES_REQUIRED_NONE;
     }
     else {
-        # we can't return PRIVILEGES_REQUIRED_EMPOWERED as that has different
-        # conditions (eg. it assumes reporters can always change fields).
-        ThrowUserError('tracking_flags_change_denied',
-                       { flag => $flag, value => $new_value });
+        push @$priv_results, PRIVILEGES_REQUIRED_EMPOWERED;
     }
 }
 

@@ -217,6 +217,8 @@ sub show {
                 name          => $key,
                 current_value => $bug_hash->{$key}
             };
+            my $name = Bugzilla::Bug::FIELD_MAP()->{$key} || $key;
+            $field->{can_edit} = $self->_can_change_field($name, $bug);
             push(@fields, $field);
         }
     }
@@ -503,20 +505,21 @@ sub _get_field_values {
 sub _can_change_field {
     my ($self, $field, $bug, $value) = @_;
     my $user = Bugzilla->user;
+    my $field_name = blessed $field ? $field->name : $field;
 
     # Cannot set resolution on bug creation
-    return $self->type('boolean', 0) if ($field->name eq 'resolution' && !$bug->{bug_id});
+    return $self->type('boolean', 0) if ($field_name eq 'resolution' && !$bug->{bug_id});
 
     # Cannot edit an obsolete or inactive custom field
-    return $self->type('boolean', 0) if ($field->custom && $field->obsolete);
+    return $self->type('boolean', 0) if (blessed $field && $field->custom && $field->obsolete);
 
     # If not a multi-select or single-select, value is not provided
     # and we just check if the field itself is editable by the user.
     if (!defined $value) {
-        return $self->type('boolean', $bug->check_can_change_field($field->name, 1, 0));
+        return $self->type('boolean', $bug->check_can_change_field($field_name, 0, 1));
     }
 
-    return $self->type('boolean', $bug->check_can_change_field($field->name, '', $value));
+    return $self->type('boolean', $bug->check_can_change_field($field_name, '', $value));
 }
 
 sub _flag_to_hash {

@@ -39,8 +39,8 @@
       [% END %]
       [% IF user.id %]
         <span class="arrow_container"><span class="arrow_down"></span></span>
-        </a>
       [% END %]
     [% END %]
+    [% '</a>' IF user.id %]
   [% END %]
 </span>

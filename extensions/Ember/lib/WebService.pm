@@ -28,6 +28,10 @@ use Bugzilla::Extension::Ember::FakeBug;
 use Scalar::Util qw(blessed);
 use Storable qw(dclone);
 
+use constant DATE_FIELDS => {
+    show => ['last_updated'],
+};
+
 use constant FIELD_TYPE_MAP => {
     0  => 'unknown',
     1  => 'freetext',

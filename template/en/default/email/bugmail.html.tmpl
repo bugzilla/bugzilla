@@ -29,9 +29,26 @@
         </div>
       [% END %]
       </p>
+
+      [% IF referenced_bugs.size %]
+        <div id="referenced">
+          <hr style="border: 1px dashed #969696">
+          <b>Referenced [% terms.Bugs %]:</b>
+          <ul>
+            [% FOREACH ref_bug = referenced_bugs %]
+              <li>
+                [[% "${terms.Bug} ${ref_bug.id}" FILTER bug_link(ref_bug, {full_url => 1, user => to_user}) FILTER none %]] 
+                [% ref_bug.short_desc FILTER html %]
+              </li>
+            [% END %]
+          </ul>
+        </div>
+        <br>
+      [% END %]
+
       <hr>
       <span>You are receiving this mail because:</span>
-      
+
       <ul>
       [% FOREACH reason = reasons %]
         [%  IF reason_descs.$reason  %]

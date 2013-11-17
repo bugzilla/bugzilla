@@ -117,7 +117,10 @@ sub Send {
     # A user_id => roles hash to keep track of people.
     my %recipients;
     my %watching;
-    
+
+    # We also record bugs that are referenced
+    my @referenced_bug_ids = ();
+
     # Now we work out all the people involved with this bug, and note all of
     # the relationships in a hash. The keys are userids, the values are an
     # array of role constants.
@@ -161,7 +164,16 @@ sub Send {
                 $recipients{$uid}->{+REL_ASSIGNEE} = BIT_DIRECT if $uid;
             }
         }
+
+        if ($change->{field_name} eq 'dependson' || $change->{field_name} eq 'blocked') {
+            push @referenced_bug_ids, split(/[\s,]+/, $change->{old});
+            push @referenced_bug_ids, split(/[\s,]+/, $change->{new});
+        }
     }
+
+    my $referenced_bugs = scalar(@referenced_bug_ids)
+        ? Bugzilla::Bug->new_from_list([uniq @referenced_bug_ids])
+        : [];
 
     # Make sure %user_cache has every user in it so far referenced
     foreach my $user_id (keys %recipients) {
@@ -249,16 +261,17 @@ sub Send {
             # Email the user if the dep check passed.
             if ($dep_ok) {
                 my $sent_mail = sendMail(
-                    { to       => $user, 
-                      bug      => $bug,
-                      comments => $comments,
-                      date     => $date,
-                      changer  => $changer,
-                      watchers => exists $watching{$user_id} ?
-                                  $watching{$user_id} : undef,
-                      diffs    => \@diffs,
+                    { to              => $user, 
+                      bug             => $bug,
+                      comments        => $comments,
+                      date            => $date,
+                      changer         => $changer,
+                      watchers        => exists $watching{$user_id} ?
+                                         $watching{$user_id} : undef,
+                      diffs           => \@diffs,
                       rels_which_want => \%rels_which_want,
-                      dep_only => $params->{dep_only}
+                      dep_only        => $params->{dep_only},
+                      referenced_bugs => $referenced_bugs,
                     });
                 push(@sent, $user->login) if $sent_mail;
             }
@@ -280,15 +293,16 @@ sub Send {
 sub sendMail {
     my $params = shift;
 
-    my $user   = $params->{to};
-    my $bug    = $params->{bug};
-    my @send_comments = @{ $params->{comments} };
-    my $date = $params->{date};
-    my $changer = $params->{changer};
-    my $watchingRef = $params->{watchers};
-    my @diffs = @{ $params->{diffs} };
-    my $relRef      = $params->{rels_which_want};
-    my $dep_only = $params->{dep_only};
+    my $user            = $params->{to};
+    my $bug             = $params->{bug};
+    my @send_comments   = @{ $params->{comments} };
+    my $date            = $params->{date};
+    my $changer         = $params->{changer};
+    my $watchingRef     = $params->{watchers};
+    my @diffs           = @{ $params->{diffs} };
+    my $relRef          = $params->{rels_which_want};
+    my $dep_only        = $params->{dep_only};
+    my $referenced_bugs = $params->{referenced_bugs};
 
     # Only display changes the user is allowed see.
     my @display_diffs;
@@ -350,6 +364,7 @@ sub sendMail {
         changer            => $changer,
         diffs              => \@display_diffs,
         changedfields      => \@changedfields,
+        referenced_bugs    => $user->visible_bugs($referenced_bugs),
         new_comments       => \@send_comments,
         threadingmarker    => build_thread_marker($bug->id, $user->id, !$bug->lastdiffed),
         bugmailtype        => $bugmailtype,

@@ -22,6 +22,15 @@
 [%+ comment.body_full({ is_bugmail => 1, wrap => 1 }) %]
 [% END %]
 
+[% IF referenced_bugs.size %]
+
+Referenced [% terms.Bugs %]:
+
+[% FOREACH ref_bug = referenced_bugs %]
+[%+ urlbase %]show_bug.cgi?id=[% ref_bug.id %]
+[%+ "[" _ terms.Bug _ " " _ ref_bug.id _ "] " _ ref_bug.short_desc FILTER wrap_comment %]
+[% END %]
+[% END %]
 -- [%# Protect the trailing space of the signature marker %]
 You are receiving this mail because:
 [% SET reason_lines = [] %]

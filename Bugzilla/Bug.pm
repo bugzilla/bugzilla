@@ -94,6 +94,7 @@ sub DB_COLUMNS {
         bug_status
         cclist_accessible
         component_id
+        creation_ts
         delta_ts
         estimated_time
         everconfirmed
@@ -112,7 +113,6 @@ sub DB_COLUMNS {
         version
     ),
     'reporter    AS reporter_id',
-    $dbh->sql_date_format('creation_ts', '%Y.%m.%d %H:%i') . ' AS creation_ts',
     $dbh->sql_date_format('deadline', '%Y-%m-%d') . ' AS deadline',
     @custom_names);
 

@@ -101,7 +101,7 @@ function toggle_display(link) {
             <br>
             <a href="#attach_[% attachment.id %]"
                title="Go to the comment associated with the attachment">
-              [%- attachment.attached FILTER time %]</a>,
+              [%- attachment.attached FILTER time("%Y-%m-%d %H:%M %Z") %]</a>,
 
             [%# No need to recreate the exact same template if we already have it. %]
             [% attacher_id = attachment.attacher.id %]

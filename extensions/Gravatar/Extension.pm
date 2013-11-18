@@ -27,8 +27,8 @@ sub _user_gravatar {
         return DEFAULT_URL;
     }
     if (!$self->{gravatar}) {
-        (my $email = $self->email) =~ s/\+(.*?)\@/@/;
-        $self->{gravatar} = 'https://secure.gravatar.com/avatar/' . md5_hex(lc($email)) . '?d=mm';
+        $self->{gravatar} = 'https://secure.gravatar.com/avatar/' .
+                            md5_hex(lc($self->email)) . '?d=mm';
     }
     $size ||= 64;
     return $self->{gravatar} . "&amp;size=$size";

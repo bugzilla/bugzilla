@@ -694,6 +694,12 @@ sub create {
     }
 
     Bugzilla->login(LOGIN_REQUIRED);
+
+    # Some fields cannot be sent to Bugzilla::Bug->create
+    foreach my $key (qw(login password token)) {
+        delete $params->{$key};
+    }
+
     $params = Bugzilla::Bug::map_fields($params);
     my $bug = Bugzilla::Bug->create($params);
     Bugzilla::BugMail::Send($bug->bug_id, { changer => $bug->reporter });

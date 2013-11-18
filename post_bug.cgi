@@ -98,9 +98,7 @@ $template->process($format->{'template'}, $vars, \$comment)
     || ThrowTemplateError($template->error());
 
 # Include custom fields editable on bug creation.
-my @custom_bug_fields = grep {$_->type != FIELD_TYPE_MULTI_SELECT
-                              && $_->type != FIELD_TYPE_EXTENSION
-                              && $_->enter_bug}
+my @custom_bug_fields = grep {$_->type != FIELD_TYPE_MULTI_SELECT && $_->enter_bug}
                              Bugzilla->active_custom_fields;
 
 # Undefined custom fields are ignored to ensure they will get their default

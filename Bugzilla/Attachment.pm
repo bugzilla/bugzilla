@@ -59,22 +59,19 @@ use constant LIST_ORDER => ID_FIELD;
 use constant AUDIT_CREATES => 0;
 use constant AUDIT_UPDATES => 0;
 
-sub DB_COLUMNS {
-    my $dbh = Bugzilla->dbh;
-
-    return qw(
-        attach_id
-        bug_id
-        description
-        filename
-        isobsolete
-        ispatch
-        isprivate
-        mimetype
-        modification_time
-        submitter_id),
-        $dbh->sql_date_format('attachments.creation_ts', '%Y.%m.%d %H:%i') . ' AS creation_ts';
-}
+use constant DB_COLUMNS => qw(
+    attach_id
+    bug_id
+    creation_ts
+    description
+    filename
+    isobsolete
+    ispatch
+    isprivate
+    mimetype
+    modification_time
+    submitter_id
+);
 
 use constant REQUIRED_FIELD_MAP => {
     bug_id => 'bug',

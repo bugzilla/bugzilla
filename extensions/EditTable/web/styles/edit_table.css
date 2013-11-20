@@ -1,0 +1,39 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this file,
+ * You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * This Source Code Form is "Incompatible With Secondary Licenses", as
+ * defined by the Mozilla Public License, v. 2.0. */
+
+
+#edit_table table {
+    border-spacing: 0;
+    border-collapse: collapse;
+    margin-bottom: 1em;
+}
+
+#edit_table td, #edit_table th {
+    padding: 5px;
+}
+
+#edit_table th {
+    background: #ccc;
+    text-align: left;
+}
+
+#edit_table .editable {
+    background: #fff;
+}
+
+#edit_table tr:hover {
+    background: #eee;
+}
+
+#edit_table .action {
+    display: none;
+}
+
+#edit_table tr:hover .action {
+    display: block;
+}
+

@@ -1,0 +1,43 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% PROCESS global/variables.none.tmpl %]
+
+[% PROCESS global/header.html.tmpl
+   title = "Edit Table"
+   javascript_urls = [ 'extensions/EditTable/web/js/edit_table.js' ]
+   style_urls = [ "extensions/EditTable/web/styles/edit_table.css" ]
+%]
+
+<h2>[% table_name FILTER html %]</h2>
+
+[% IF updated %]
+  <p id="message">Table [% table_name FILTER html %] updated.</p>
+[% ELSIF error %]
+  <p class="throw_error">[% error FILTER html FILTER html_line_break %]</p>
+[% END %]
+
+<p>[% blurb FILTER html FILTER html_line_break %]</p>
+
+<div id="edit_table"></div>
+<br>
+<form method="post" action="page.cgi" enctype="multipart/form-data"
+      onsubmit="editTable.to_json('table_data')">
+<input type="hidden" name="id" value="edit_table.html">
+<input type="hidden" name="table" value="[% table_name FILTER html %]">
+<input type="hidden" name="table_data" id="table_data">
+<input type="submit" value="Commit Changes" id="commit_btn" class="bz_default_hidden">
+</form>
+
+<script>
+  var table_data = [% table_data FILTER none %];
+  var editTable = new EditTable('edit_table', table_data);
+  editTable.render();
+</script>
+
+[% PROCESS global/footer.html.tmpl %]

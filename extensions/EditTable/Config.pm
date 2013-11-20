@@ -5,11 +5,11 @@
 # This Source Code Form is "Incompatible With Secondary Licenses", as
 # defined by the Mozilla Public License, v. 2.0.
 
-package Bugzilla::Extension::ProjectHoneyPot;
+package Bugzilla::Extension::EditTable;
 use strict;
 
-use constant NAME => 'ProjectHoneyPot';
-use constant REQUIRED_MODULES => [ ];
-use constant OPTIONAL_MODULES => [ ];
+use constant NAME => 'EditTable';
+use constant REQUIRED_MODULES => [];
+use constant OPTIONAL_MODULES => [];
 
 __PACKAGE__->NAME;

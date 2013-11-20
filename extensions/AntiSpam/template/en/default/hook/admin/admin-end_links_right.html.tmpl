@@ -1,0 +1,16 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% IF user.in_group('can_configure_antispam') %]
+  <dt id="antispam" >AntiSpam</dt>
+  <dd>
+    <a href="page.cgi?id=edit_table.html&amp;table=antispam_domain_blocklist">Domain Blocklist</a><br>
+    <a href="page.cgi?id=edit_table.html&amp;table=antispam_comment_blocklist">Comment Blocklist</a><br>
+    <a href="page.cgi?id=edit_table.html&amp;table=antispam_ip_blocklist">IP Address Blocklist</a><br>
+  </dd>
+[% END %]

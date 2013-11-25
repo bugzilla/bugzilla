@@ -24,7 +24,10 @@
 [% END %]
 [% title = title _ filtered_desc %]
 [% yui = ['autocomplete', 'calendar'] %]
+[% yui.push('container') IF user.can_tag_comments %]
 [% javascript_urls = [ "js/util.js", "js/field.js" ] %]
+[% javascript_urls.push('js/comment-tagging.js')
+     IF user.id && Param('comment_taggers_group') %]
 [% IF bug.defined %]
   [% header = "$terms.Bug&nbsp;$bug.bug_id" %]
   [% header_addl_info = "Last modified: $filtered_timestamp" %]

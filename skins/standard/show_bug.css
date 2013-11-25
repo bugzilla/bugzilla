@@ -121,3 +121,42 @@ table#flags {
 .bz_bug .bz_alias_short_desc_container {
     width: inherit;
 }
+
+.bz_comment_tags {
+    margin-top: 3px;
+}
+
+.bz_comment_tag {
+    border: 1px solid #c8c8ba;
+    padding: 1px 3px;
+    margin-right: 2px;
+    border-radius: 0.5em;
+    background-color: #eee;
+    color: #000;
+}
+
+#bz_ctag_div {
+    display: inline-block;
+}
+
+#bz_ctag_error {
+    border: 1px solid #ff6666;
+    padding: 0px 2px;
+    border-radius: 0.5em;
+    margin: 2px;
+    display: inline-block;
+}
+
+#comment_tags_collapse_expand_container {
+    padding-top: 1em;
+}
+
+#comment_tags_collapse_expand {
+    list-style-type: none;
+    padding-left: 1em;
+}
+
+#comment_tags_collapse_expand li {
+    margin-bottom: 0px;
+}
+

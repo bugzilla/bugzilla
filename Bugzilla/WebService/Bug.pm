@@ -13,6 +13,7 @@ use strict;
 use parent qw(Bugzilla::WebService);
 
 use Bugzilla::Comment;
+use Bugzilla::Comment::TagWeights;
 use Bugzilla::Constants;
 use Bugzilla::Error;
 use Bugzilla::Field;
@@ -20,7 +21,7 @@ use Bugzilla::WebService::Constants;
 use Bugzilla::WebService::Util qw(filter filter_wants validate translate);
 use Bugzilla::Bug;
 use Bugzilla::BugMail;
-use Bugzilla::Util qw(trick_taint trim diff_arrays);
+use Bugzilla::Util qw(trick_taint trim diff_arrays detaint_natural);
 use Bugzilla::Version;
 use Bugzilla::Milestone;
 use Bugzilla::Status;
@@ -320,7 +321,8 @@ sub _translate_comment {
     my ($self, $comment, $filters) = @_;
     my $attach_id = $comment->is_about_attachment ? $comment->extra_data
                                                   : undef;
-    return filter $filters, {
+
+    my $comment_hash = {
         id         => $self->type('int', $comment->id),
         bug_id     => $self->type('int', $comment->bug_id),
         creator    => $self->type('email', $comment->author->login),
@@ -332,6 +334,16 @@ sub _translate_comment {
         attachment_id => $self->type('int', $attach_id),
         count      => $self->type('int', $comment->count),
     };
+
+    # Don't load comment tags unless enabled
+    if (Bugzilla->params->{'comment_taggers_group'}) {
+        $comment_hash->{tags} = [
+            map { $self->type('string', $_) }
+            @{ $comment->tags }
+        ];
+    }
+
+    return filter $filters, $comment_hash;
 }
 
 sub get {
@@ -998,6 +1010,70 @@ sub update_tags {
 
     return { changes => \%changes };
 }
+
+sub update_comment_tags {
+    my ($self, $params) = @_;
+
+    my $user = Bugzilla->login(LOGIN_REQUIRED);
+    Bugzilla->params->{'comment_taggers_group'}
+        || ThrowUserError("comment_tag_disabled");
+    $user->can_tag_comments
+        || ThrowUserError("auth_failure",
+                          { group  => Bugzilla->params->{'comment_taggers_group'},
+                            action => "update",
+                            object => "comment_tags" });
+
+    my $comment_id  = $params->{comment_id}
+        // ThrowCodeError('param_required',
+                          { function => 'Bug.update_comment_tags',
+                            param    => 'comment_id' });
+
+    my $comment = Bugzilla::Comment->new($comment_id)
+        || return [];
+    $comment->bug->check_is_visible();
+    if ($comment->is_private && !$user->is_insider) {
+        ThrowUserError('comment_is_private', { id => $comment_id });
+    }
+
+    my $dbh = Bugzilla->dbh;
+    $dbh->bz_start_transaction();
+    foreach my $tag (@{ $params->{add} || [] }) {
+        $comment->add_tag($tag) if defined $tag;
+    }
+    foreach my $tag (@{ $params->{remove} || [] }) {
+        $comment->remove_tag($tag) if defined $tag;
+    }
+    $comment->update();
+    $dbh->bz_commit_transaction();
+
+    return $comment->tags;
+}
+
+sub search_comment_tags {
+    my ($self, $params) = @_;
+
+    Bugzilla->login(LOGIN_REQUIRED);
+    Bugzilla->params->{'comment_taggers_group'}
+        || ThrowUserError("comment_tag_disabled");
+    Bugzilla->user->can_tag_comments
+        || ThrowUserError("auth_failure", { group  => Bugzilla->params->{'comment_taggers_group'},
+                                            action => "search",
+                                            object => "comment_tags"});
+
+    my $query = $params->{query};
+    $query
+        // ThrowCodeError('param_required', { param => 'query' });
+    my $limit = detaint_natural($params->{limit}) || 7;
+
+    my $tags = Bugzilla::Comment::TagWeights->match({
+        WHERE => {
+            'tag LIKE ?' => "\%$query\%",
+        },
+        LIMIT => $limit,
+    });
+    return [ map { $_->tag } @$tags ];
+}
+
 
 ##############################
 # Private Helper Subroutines #
@@ -4027,6 +4103,137 @@ This method can throw the same errors as L</get>.
 =over
 
 =item Added in Bugzilla B<4.4>.
+
+=back
+
+=back
+
+=head2 search_comment_tags
+
+B<UNSTABLE>
+
+=over
+
+=item B<Description>
+
+Searches for tags which contain the provided substring.
+
+=item B<REST>
+
+To search for comment tags:
+
+GET /bug/comment/tags/<query>
+
+=item B<Params>
+
+=over
+
+=item C<query>
+
+B<Required> C<string> Only tags containg this substring will be returned.
+
+=item C<limit>
+
+C<int> If provided will return no more than C<limit> tags.  Defaults to C<10>.
+
+=back
+
+=item B<Returns>
+
+An C<array of strings> of matching tags.
+
+=item B<Errors>
+
+This method can throw all of the errors that L</get> throws, plus:
+
+=over
+
+=item 125 (Comment Tagging Disabled)
+
+Comment tagging support is not available or enabled.
+
+=back
+
+=item B<History>
+
+=over
+
+=item Added in Bugzilla B<5.0>.
+
+=back
+
+=back
+
+=head2 update_comment_tags
+
+B<UNSTABLE>
+
+=over
+
+=item B<Description>
+
+Adds or removes tags from a comment.
+
+=item B<REST>
+
+To update the tags comments attached to a comment:
+
+PUT /bug/comment/tags
+
+The params to include in the PUT body as well as the returned data format,
+are the same as below.
+
+=item B<Params>
+
+=over
+
+=item C<comment_id>
+
+B<Required> C<int> The ID of the comment to update.
+
+=item C<add>
+
+C<array of strings> The tags to attach to the comment.
+
+=item C<remove>
+
+C<array of strings> The tags to detach from the comment.
+
+=back
+
+=item B<Returns>
+
+An C<array of strings> containing the comment's updated tags.
+
+=item B<Errors>
+
+This method can throw all of the errors that L</get> throws, plus:
+
+=over
+
+=item 125 (Comment Tagging Disabled)
+
+Comment tagging support is not available or enabled.
+
+=item 126 (Invalid Comment Tag)
+
+The comment tag provided was not valid (eg. contains invalid characters).
+
+=item 127 (Comment Tag Too Short)
+
+The comment tag provided is shorter than the minimum length.
+
+=item 128 (Comment Tag Too Long)
+
+The comment tag provided is longer than the maximum length.
+
+=back
+
+=item B<History>
+
+=over
+
+=item Added in Bugzilla B<5.0>.
 
 =back
 

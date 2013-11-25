@@ -84,7 +84,13 @@ sub get_param_list {
    choices => ['', @legal_OS],
    default => '',
    checker => \&check_opsys
-  } );
+  },
+
+  {
+   name => 'collapsed_comment_tags',
+   type => 't',
+   default => 'obsolete, spam',
+  });
   return @param_list;
 }
 

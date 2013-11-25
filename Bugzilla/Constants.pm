@@ -69,6 +69,9 @@ use Memoize;
     COMMENT_COLS
     MAX_COMMENT_LENGTH
 
+    MIN_COMMENT_TAG_LENGTH
+    MAX_COMMENT_TAG_LENGTH
+
     CMT_NORMAL
     CMT_DUPE_OF
     CMT_HAS_DUPE
@@ -290,6 +293,10 @@ use constant SAVE_NUM_SEARCHES => 10;
 use constant COMMENT_COLS => 80;
 # Used in _check_comment(). Gives the max length allowed for a comment.
 use constant MAX_COMMENT_LENGTH => 65535;
+
+# The minimum and maximum length of comment tags.
+use constant MIN_COMMENT_TAG_LENGTH => 3;
+use constant MAX_COMMENT_TAG_LENGTH => 24;
 
 # The type of bug comments.
 use constant CMT_NORMAL => 0;

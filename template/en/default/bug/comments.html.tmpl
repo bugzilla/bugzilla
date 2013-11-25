@@ -13,7 +13,7 @@
 
 <script type="text/javascript">
 <!--
-  /* Adds the reply text to the `comment' textarea */
+  /* Adds the reply text to the 'comment' textarea */
   function replyToComment(id, real_id, name) {
       var prefix = "(In reply to " + name + " from comment #" + id + ")\n";
       var replytext = "";
@@ -74,15 +74,18 @@
 <td>
   [% IF mode == "edit" %]
     <ul class="bz_collapse_expand_comments">
-      <li><a href="#" onclick="toggle_all_comments('collapse'); 
+      <li><a href="#" onclick="toggle_all_comments('collapse');
                                return false;">Collapse All Comments</a></li>
       <li><a href="#" onclick="toggle_all_comments('expand');
                                return false;">Expand All Comments</a></li>
+      [% IF Param('comment_taggers_group') %]
+        <li><div id="comment_tags_collapse_expand_container"></div></li>
+      [% END %]
       [% IF user.settings.comment_box_position.value == "after_comments" && user.id %]
         <li class="bz_add_comment"><a href="#" 
             onclick="return goto_add_comments('bug_status_bottom');">
             Add Comment</a></li>
-      [% END %]                               
+      [% END %]
     </ul>
   [% END %]
 </td>
@@ -109,18 +112,21 @@
       [% END %]
 
       <div class="[% class_name FILTER html %]">
-
         [% IF mode == "edit" %]
           <span class="bz_comment_actions">
             [% IF bug.check_can_change_field('longdesc', 0, 1) %]
+              [% IF user.can_tag_comments %]
+                [<a href="#"
+                    onclick="YAHOO.bugzilla.commentTagging.toggle([% comment.id %], [% comment.count %]);return false">tag</a>]
+              [% END %]
               [<a class="bz_reply_link" href="#add_comment"
                 [% IF user.settings.quote_replies.value != 'off' %]
                   onclick="replyToComment('[% comment.count %]', '[% comment.id %]', '[% comment.author.name || comment.author.nick FILTER html FILTER js %]'); return false;"
                 [% END %]
               >reply</a>]
             [% END %]
-            <script type="text/javascript"><!--
-              addCollapseLink([% comment.count %], 'Toggle comment display'); // -->
+            <script type="text/javascript">
+              addCollapseLink([% comment.count %], [% comment.collapsed FILTER js %], 'Toggle comment display');
             </script>
           </span>
         [% END %]
@@ -175,10 +181,29 @@
          [% PROCESS formattimeunit time_unit=comment.work_time %]
       [% END %]
 
+      [% IF user.id && Param('comment_taggers_group') %]
+        <div id="comment_tag_[% comment.count FILTER html %]"
+             class="bz_comment_tags[% " collapsed" IF comment.collapsed %]">
+          <span id="ct_[% comment.count %]"
+                class="[% 'bz_default_hidden' UNLESS comment.tags.size %]">
+            [% IF comment.tags.size %]
+              <script>
+                YAHOO.bugzilla.commentTagging.showTags([% comment.id FILTER none %],
+                  [% comment.count FILTER none %], [
+                [% FOREACH tag = comment.tags %]
+                  [%~%]'[% tag FILTER js %]'[% "," UNLESS loop.last %]
+                [% END %]
+                [%~%]]);
+              </script>
+            [% END %]
+          </span>
+        </div>
+      [% END %]
+
 [%# Don't indent the <pre> block, since then the spaces are displayed in the
   # generated HTML
   #%]
-<pre class="bz_comment_text" 
+<pre class="bz_comment_text[% " collapsed" IF comment.collapsed %]"
      [% ' id="comment_text_' _ comment.count _ '"' IF mode == "edit" %]>
   [%- comment_text FILTER quoteUrls(bug, comment) -%]
 </pre>

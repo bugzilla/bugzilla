@@ -98,7 +98,12 @@ use constant WS_ERROR_CODE => {
     comment_is_private => 110,
     comment_id_invalid => 111,
     comment_too_long => 114,
-    comment_invalid_isprivate => 117, 
+    comment_invalid_isprivate => 117,
+    # Comment tagging
+    comment_tag_disabled => 125,
+    comment_tag_invalid => 126,
+    comment_tag_too_long => 127,
+    comment_tag_too_short => 128,
     # See Also errors
     bug_url_invalid => 112,
     bug_url_too_long => 112,

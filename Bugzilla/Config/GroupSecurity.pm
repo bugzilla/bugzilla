@@ -56,7 +56,15 @@ sub get_param_list {
    default => 'editbugs',
    checker => \&check_group
   },
-  
+
+  {
+   name => 'comment_taggers_group',
+   type => 's',
+   choices => \&_get_all_group_names,
+   default => 'editbugs',
+   checker => \&check_comment_taggers_group
+  },
+
   {
    name => 'debug_group',
    type => 's',
@@ -84,4 +92,5 @@ sub _get_all_group_names {
     unshift(@group_names, '');
     return \@group_names;
 }
+
 1;

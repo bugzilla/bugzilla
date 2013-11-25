@@ -170,6 +170,8 @@
       classifications
     [% ELSIF object == "components" %]
       components
+    [% ELSIF object == "comment_tags" %]
+      comment tags
     [% ELSIF object == "custom_fields" %]
       custom fields
     [% ELSIF object == "field_values" %]
@@ -317,6 +319,25 @@
     [% title = "Comment Too Long" %]
     Comments cannot be longer than 
     [%+ constants.MAX_COMMENT_LENGTH FILTER html %] characters.
+
+  [% ELSIF error == "comment_tag_disabled" %]
+    [% title = "Comment Tagging Disabled" %]
+    The comment tagging is not enabled.
+
+  [% ELSIF error == "comment_tag_invalid" %]
+    [% title = "Invalid Comment Tag" %]
+    The comment tag "[% tag FILTER html %]" contains invalid characters or
+    words.
+
+  [% ELSIF error == "comment_tag_too_long" %]
+    [% title = "Comment Tag Too Long" %]
+    Comment tags cannot be longer than
+    [%+ constants.MAX_COMMENT_TAG_LENGTH FILTER html %] characters.
+
+  [% ELSIF error == "comment_tag_too_short" %]
+    [% title = "Comment Tag Too Short" %]
+    Comment tags must be at least
+    [%+ constants.MIN_COMMENT_TAG_LENGTH FILTER html %] characters.
 
   [% ELSIF error == "auth_classification_not_enabled" %]
     [% title = "Classification Not Enabled" %]
@@ -1720,8 +1741,12 @@
 
   [% ELSIF error == "tag_name_too_long" %]
     [% title = "Tag Name Too Long" %]
-    The tag name must be less than [% constants.MAX_LEN_QUERY_NAME FILTER html %]
+    The tag must be less than [% constants.MAX_LEN_QUERY_NAME FILTER html %]
     characters long.
+
+  [% ELSIF error == "tag_name_invalid" %]
+    [% title = "Invalid Tag Name" %]
+    A tag cannot contain a space or a comma.
 
   [% ELSIF error == "token_does_not_exist" %]
     [% title = "Token Does Not Exist" %]

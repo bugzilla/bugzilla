@@ -406,6 +406,54 @@ use constant ABSTRACT_SCHEMA => {
         ],
     },
 
+    longdescs_tags => {
+        FIELDS => [
+            id         => { TYPE => 'MEDIUMSERIAL', NOTNULL => 1, PRIMARYKEY => 1 },
+            comment_id => { TYPE => 'INT4',
+                            REFERENCES => { TABLE  => 'longdescs',
+                                            COLUMN => 'comment_id',
+                                            DELETE => 'CASCADE' }},
+            tag        => { TYPE => 'varchar(24)',  NOTNULL => 1 },
+        ],
+        INDEXES => [
+            longdescs_tags_idx => { FIELDS => ['comment_id', 'tag'], TYPE => 'UNIQUE' },
+        ],
+    },
+
+    longdescs_tags_weights => {
+        FIELDS => [
+            id     => { TYPE => 'MEDIUMSERIAL', NOTNULL => 1, PRIMARYKEY => 1 },
+            tag    => { TYPE => 'varchar(24)',  NOTNULL => 1 },
+            weight => { TYPE => 'INT3',         NOTNULL => 1 },
+        ],
+        INDEXES => [
+            longdescs_tags_weights_tag_idx => { FIELDS => ['tag'], TYPE => 'UNIQUE' },
+        ],
+    },
+
+    longdescs_tags_activity => {
+        FIELDS => [
+            id         => { TYPE => 'MEDIUMSERIAL', NOTNULL => 1, PRIMARYKEY => 1 },
+            bug_id     => { TYPE => 'INT3', NOTNULL => 1,
+                            REFERENCES =>  { TABLE  =>  'bugs',
+                                             COLUMN =>  'bug_id',
+                                             DELETE => 'CASCADE' }},
+            comment_id => { TYPE => 'INT4',
+                            REFERENCES => { TABLE  => 'longdescs',
+                                            COLUMN => 'comment_id',
+                                            DELETE => 'CASCADE' }},
+            who        => { TYPE => 'INT3', NOTNULL => 1,
+                            REFERENCES => { TABLE  => 'profiles',
+                                            COLUMN => 'userid' }},
+            bug_when  => { TYPE => 'DATETIME', NOTNULL => 1 },
+            added     => { TYPE => 'varchar(24)' },
+            removed   => { TYPE => 'varchar(24)' },
+        ],
+        INDEXES => [
+            longdescs_tags_activity_bug_id_idx  => ['bug_id'],
+        ],
+    },
+
     dependencies => {
         FIELDS => [
             blocked   => {TYPE => 'INT3', NOTNULL => 1,

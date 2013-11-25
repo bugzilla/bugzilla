@@ -3416,7 +3416,8 @@ sub comments {
             $comment->{count} = $count++;
             $comment->{bug} = $self;
         }
-        Bugzilla::Comment->preload($self->{'comments'});
+        # Some bugs may have no comments when upgrading old installations.
+        Bugzilla::Comment->preload($self->{'comments'}) if $count;
     }
     my @comments = @{ $self->{'comments'} };
 

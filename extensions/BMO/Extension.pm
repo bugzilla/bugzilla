@@ -707,32 +707,77 @@ sub field_end_of_create {
     my ($self, $args) = @_;
     my $field = $args->{'field'};
 
-    # email mozilla's DBAs so they can update the grants for metrics
-    # this really should create a bug in mozilla.org/Server Operations: Database
+    # Create an IT bug so Mozilla's DBAs so they can update the grants for metrics
 
-    if (Bugzilla->params->{'urlbase'} ne 'https://bugzilla.mozilla.org/') {
-        return;
-    }
-
-    if (Bugzilla->usage_mode == USAGE_MODE_CMDLINE) {
-        print "Emailing notification to infra-dbnotices\@mozilla.com\n";
-    }
+#    if (Bugzilla->params->{'urlbase'} ne 'https://bugzilla.mozilla.org/') {
+#        return;
+#    }
 
     my $name = $field->name;
-    my @message;
-    push @message, 'To: infra-dbnotices@mozilla.com';
-    push @message, "Subject: custom field '$name' added to bugzilla.mozilla.org";
-    push @message, 'From: ' . Bugzilla->params->{mailfrom};
-    push @message, '';
-    push @message, "The custom field '$name' has been added to the BMO database.";
-    push @message, '';
-    push @message, 'Please run the following on bugzilla1.db.scl3.mozilla.com:';
-    push @message, "  GRANT SELECT ON `bugs`.`$name` TO 'metrics'\@'10.22.70.20_';";
-    push @message, "  GRANT SELECT ($name) ON `bugs`.`bugs` TO 'metrics'\@'10.22.70.20_';";
-    push @message, "  GRANT SELECT ON `bugs`.`$name` TO 'metrics'\@'10.22.70.21_';";
-    push @message, "  GRANT SELECT ($name) ON `bugs`.`bugs` TO 'metrics'\@'10.22.70.21_';";
-    push @message, '';
-    MessageToMTA(join("\n", @message));
+
+    if (Bugzilla->usage_mode == USAGE_MODE_CMDLINE) {
+        Bugzilla->set_user(Bugzilla::User->check({ name => 'nobody@mozilla.org' }));
+        print "Creating IT permission grant bug for new field '$name'...";
+    }
+
+    my $bug_data = {
+        short_desc   => "Custom field '$name' added to bugzilla.mozilla.org",
+        product      => 'mozilla.org',
+        component    => 'Server Operations: Database',
+        bug_severity => 'normal',
+        op_sys       => 'All',
+        rep_platform => 'All',
+        version      => 'other',
+    };
+
+    my $comment = <<COMMENT;
+The custom field '$name' has been added to the BMO database.
+Please run the following on bugzilla1.db.scl3.mozilla.com:
+COMMENT
+
+    if ($field->type == FIELD_TYPE_SINGLE_SELECT
+        || $field->type == FIELD_TYPE_MULTI_SELECT) {
+        $comment .= <<COMMENT;
+  GRANT SELECT ON `bugs`.`$name` TO 'metrics'\@'10.22.70.20_';
+  GRANT SELECT ON `bugs`.`$name` TO 'metrics'\@'10.22.70.21_';
+COMMENT
+    }
+    if ($field->type == FIELD_TYPE_MULTI_SELECT) {
+        $comment .= <<COMMENT;
+  GRANT SELECT ON `bugs`.`bug_$name` TO 'metrics'\@'10.22.70.20_';
+  GRANT SELECT ON `bugs`.`bug_$name` TO 'metrics'\@'10.22.70.21_';
+COMMENT
+    }
+    if ($field->type != FIELD_TYPE_MULTI_SELECT) {
+        $comment .= <<COMMENT;
+  GRANT SELECT ($name) ON `bugs`.`bugs` TO 'metrics'\@'10.22.70.20_';
+  GRANT SELECT ($name) ON `bugs`.`bugs` TO 'metrics'\@'10.22.70.21_';
+COMMENT
+    }
+
+    $bug_data->{'comment'} = $comment;
+
+    my $old_error_mode = Bugzilla->error_mode;
+    Bugzilla->error_mode(ERROR_MODE_DIE);
+
+    my $new_bug = eval { Bugzilla::Bug->create($bug_data) };
+
+    my $error = $@;
+    undef $@;
+    Bugzilla->error_mode($old_error_mode);
+
+    if ($error || !($new_bug && $new_bug->{'bug_id'})) {
+        warn "Error creating IT bug for new field $name: $error";
+        if (Bugzilla->usage_mode == USAGE_MODE_CMDLINE) {
+            print "\nError: $error\n";
+        }
+    }
+    else {
+        Bugzilla::BugMail::Send($new_bug->id, { changer => Bugzilla->user });
+        if (Bugzilla->usage_mode == USAGE_MODE_CMDLINE) {
+            print "bug " . $new_bug->id . " created.\n";
+        }
+    }
 }
 
 sub webservice {

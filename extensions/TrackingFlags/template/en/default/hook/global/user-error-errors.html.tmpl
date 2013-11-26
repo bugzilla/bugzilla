@@ -26,10 +26,6 @@
   [% title = "Invalid flag name" %]
   The flag name must start with 'cf_'.
 
-[% ELSIF error == "tracking_flags_duplicate_field" %]
-  [% title = "Duplicate field" %]
-  A tracking flag field named "[% name FILTER html %]" already exists.
-
 [% ELSIF error == "tracking_flags_missing_values" %]
   [% title = "Missing values" %]
   You must provide at least one value.

@@ -641,6 +641,33 @@ spaces.
 =back
 
 
+=head2 cgi_headers
+
+This allows you to modify the HTTP headers sent out on every Bugzilla
+response.
+
+Params:
+
+=over
+
+=item C<headers>
+
+A hashref, where the keys are header names and the values are header
+values. Keys need to be lower-case, and begin with a "-". If you use
+the "_" character it will be converted to "-", and the library will
+also fix the casing to Camel-Case.
+
+You can delete (some) headers that Bugzilla adds by deleting entries
+from the hash.
+
+=item C<cgi>
+
+The CGI object, which may tell you useful things about the response on
+which to base a decision of whether or not to add a header.
+
+=back
+
+
 =head2 config_add_panels
 
 If you want to add new panels to the Parameters administrative interface,

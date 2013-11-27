@@ -15,6 +15,7 @@ use parent qw(CGI);
 use Bugzilla::Constants;
 use Bugzilla::Error;
 use Bugzilla::Util;
+use Bugzilla::Hook;
 use Bugzilla::Search::Recent;
 
 use File::Basename;
@@ -275,19 +276,23 @@ sub multipart_start {
 sub header {
     my $self = shift;
 
+    my %headers;
+   
     # If there's only one parameter, then it's a Content-Type.
     if (scalar(@_) == 1) {
-        # Since we're adding parameters below, we have to name it.
-        unshift(@_, '-type' => shift(@_));
+        %headers = ('-type' => shift(@_));
+    }
+    else {
+        %headers = @_;
     }
 
     if ($self->{'_content_disp'}) {
-        unshift(@_, '-content_disposition' => $self->{'_content_disp'});
+        $headers{'-content_disposition'} = $self->{'_content_disp'};
     }
 
     # Add the cookies in if we have any
     if (scalar(@{$self->{Bugzilla_cookie_list}})) {
-        unshift(@_, '-cookie' => $self->{Bugzilla_cookie_list});
+        $headers{'-cookie'} = $self->{Bugzilla_cookie_list};
     }
 
     # Add Strict-Transport-Security (STS) header if this response
@@ -301,24 +306,29 @@ sub header {
         {
             $sts_opts .= '; includeSubDomains';
         }
-        unshift(@_, '-strict_transport_security' => $sts_opts);
+        
+        $headers{'-strict_transport_security'} = $sts_opts;
     }
 
     # Add X-Frame-Options header to prevent framing and subsequent
     # possible clickjacking problems.
     unless ($self->url_is_attachment_base) {
-        unshift(@_, '-x_frame_options' => 'SAMEORIGIN');
+        $headers{'-x_frame_options'} = 'SAMEORIGIN';
     }
 
     # Add X-XSS-Protection header to prevent simple XSS attacks
     # and enforce the blocking (rather than the rewriting) mode.
-    unshift(@_, '-x_xss_protection' => '1; mode=block');
+    $headers{'-x_xss_protection'} = '1; mode=block';
 
     # Add X-Content-Type-Options header to prevent browsers sniffing
     # the MIME type away from the declared Content-Type.
-    unshift(@_, '-x_content_type_options' => 'nosniff');
+    $headers{'-x_content_type_options'} = 'nosniff';
 
-    return $self->SUPER::header(@_) || "";
+    Bugzilla::Hook::process('cgi_headers',
+        { cgi => $self, headers => \%headers }
+    );
+
+    return $self->SUPER::header(%headers) || "";
 }
 
 sub param {

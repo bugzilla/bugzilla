@@ -38,7 +38,6 @@ our @EXPORT_OK = qw(
     include_languages
     success
     template_include_path
-    vers_cmp
     init_console
 );
 
@@ -476,49 +475,6 @@ sub template_include_path {
     return \@include_path;
 }
 
-# This is taken straight from Sort::Versions 1.5, which is not included
-# with perl by default.
-sub vers_cmp {
-    my ($a, $b) = @_;
-
-    # Remove leading zeroes - Bug 344661
-    $a =~ s/^0*(\d.+)/$1/;
-    $b =~ s/^0*(\d.+)/$1/;
-
-    my @A = ($a =~ /([-.]|\d+|[^-.\d]+)/g);
-    my @B = ($b =~ /([-.]|\d+|[^-.\d]+)/g);
-
-    my ($A, $B);
-    while (@A and @B) {
-        $A = shift @A;
-        $B = shift @B;
-        if ($A eq '-' and $B eq '-') {
-            next;
-        } elsif ( $A eq '-' ) {
-            return -1;
-        } elsif ( $B eq '-') {
-            return 1;
-        } elsif ($A eq '.' and $B eq '.') {
-            next;
-        } elsif ( $A eq '.' ) {
-            return -1;
-        } elsif ( $B eq '.' ) {
-            return 1;
-        } elsif ($A =~ /^\d+$/ and $B =~ /^\d+$/) {
-            if ($A =~ /^0/ || $B =~ /^0/) {
-                return $A cmp $B if $A cmp $B;
-            } else {
-                return $A <=> $B if $A <=> $B;
-            }
-        } else {
-            $A = uc $A;
-            $B = uc $B;
-            return $A cmp $B if $A cmp $B;
-        }
-    }
-    @A <=> @B;
-}
-
 sub no_checksetup_from_cgi {
     print "Content-Type: text/html; charset=UTF-8\r\n\r\n";
     print install_string('no_checksetup_from_cgi');
@@ -893,28 +849,6 @@ in their browser, usually), and extensions are sorted alphabetically.
 Used by L<Bugzilla::Template> to determine the languages' list which 
 are compiled with the browser's I<Accept-Language> and the languages 
 of installed templates.
-
-=item C<vers_cmp>
-
-=over
-
-=item B<Description>
-
-This is a comparison function, like you would use in C<sort>, except that
-it compares two version numbers. So, for example, 2.10 would be greater
-than 2.2.
-
-It's based on versioncmp from L<Sort::Versions>, with some Bugzilla-specific
-fixes.
-
-=item B<Params>: C<$a> and C<$b> - The versions you want to compare.
-
-=item B<Returns>
-
-C<-1> if C<$a> is less than C<$b>, C<0> if they are equal, or C<1> if C<$a>
-is greater than C<$b>.
-
-=back
 
 =back
 

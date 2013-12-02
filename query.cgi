@@ -18,9 +18,9 @@ use Bugzilla::User;
 use Bugzilla::Util;
 use Bugzilla::Error;
 use Bugzilla::Product;
+use Bugzilla::Version;
 use Bugzilla::Keyword;
 use Bugzilla::Field;
-use Bugzilla::Install::Util qw(vers_cmp);
 use Bugzilla::Token;
 
 ###############

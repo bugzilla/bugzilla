@@ -17,7 +17,7 @@ use 5.10.1;
 use strict;
 
 use Bugzilla::Constants;
-use Bugzilla::Install::Util qw(vers_cmp install_string bin_loc 
+use Bugzilla::Install::Util qw(install_string bin_loc
                                extension_requirement_packages);
 use List::Util qw(max);
 use Term::ANSIColor;
@@ -86,7 +86,6 @@ use constant APACHE_PATH => [qw(
 # are 'blacklisted'--that is, even if the version is high enough, Bugzilla
 # will refuse to say that it's OK to run with that version.
 sub REQUIRED_MODULES {
-    my $perl_ver = sprintf('%vd', $^V);
     my @modules = (
     {
         package => 'CGI.pm',
@@ -125,7 +124,7 @@ sub REQUIRED_MODULES {
     {
         package => 'DBI',
         module  => 'DBI',
-        version => (vers_cmp($perl_ver, '5.13.3') > -1) ? '1.614' : '1.54'
+        version => ($^V >= v5.13.3) ? '1.614' : '1.54'
     },
     # 2.24 contains several useful text virtual methods.
     {
@@ -187,7 +186,6 @@ sub REQUIRED_MODULES {
 };
 
 sub OPTIONAL_MODULES {
-    my $perl_ver = sprintf('%vd', $^V);
     my @modules = (
     {
         package => 'GD',
@@ -198,8 +196,9 @@ sub OPTIONAL_MODULES {
     {
         package => 'Chart',
         module  => 'Chart::Lines',
-        # Versions below 2.1 cannot be detected accurately.
-        version => '2.1',
+        # Versions below 2.4.1 cannot be compared accurately, see
+        # https://rt.cpan.org/Public/Bug/Display.html?id=28218.
+        version => '2.4.1',
         feature => [qw(new_charts old_charts)],
     },
     {
@@ -314,7 +313,7 @@ sub OPTIONAL_MODULES {
         # We need the 'utf8_mode' method of HTML::Parser, for HTML::Scrubber.
         package => 'HTML-Parser',
         module  => 'HTML::Parser',
-        version => (vers_cmp($perl_ver, '5.13.3') > -1) ? '3.67' : '3.40',
+        version => ($^V >= v5.13.3) ? '3.67' : '3.40',
         feature => ['html_desc'],
     },
     {
@@ -668,8 +667,8 @@ sub check_graphviz {
     return $return;
 }
 
-# This was originally clipped from the libnet Makefile.PL, adapted here to
-# use the below vers_cmp routine for accurate version checking.
+# This was originally clipped from the libnet Makefile.PL, adapted here for
+# accurate version checking.
 sub have_vers {
     my ($params, $output) = @_;
     my $module  = $params->{module};
@@ -694,15 +693,17 @@ sub have_vers {
     if ($@) {
         no strict 'refs';
         $vnum = ${"${module}::VERSION"};
+
+        # If we come here, then the version is not a valid one.
+        # We try to sanitize it.
+        if ($vnum =~ /^((\d+)(\.\d+)*)/) {
+            $vnum = $1;
+        }
     }
     $vnum ||= -1;
 
-    # Fix CPAN versions like 1.9304.
-    if ($module eq 'CPAN' and $vnum =~ /^(\d\.\d{2})\d{2}$/) {
-        $vnum = $1;
-    }
-
-    my $vok = (vers_cmp($vnum,$wanted) > -1);
+    # Must do a string comparison as $vnum may be of the form 5.10.1.
+    my $vok = ($vnum ne '-1' && version->new($vnum) >= version->new($wanted)) ? 1 : 0;
     my $blacklisted;
     if ($vok && $params->{blacklist}) {
         $blacklisted = grep($vnum =~ /$_/, @{$params->{blacklist}});

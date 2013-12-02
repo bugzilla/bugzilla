@@ -23,7 +23,7 @@ use Bugzilla::Install::CPAN;
 
 use Bugzilla::Constants;
 use Bugzilla::Install::Requirements;
-use Bugzilla::Install::Util qw(bin_loc init_console vers_cmp);
+use Bugzilla::Install::Util qw(bin_loc init_console);
 
 use Data::Dumper;
 use Getopt::Long;

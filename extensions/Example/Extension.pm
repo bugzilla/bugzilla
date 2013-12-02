@@ -338,9 +338,9 @@ sub bugmail_relationships {
 
 sub cgi_headers {
     my ($self, $args) = @_;
-	my $headers = $args->{'headers'};
-	
-	$headers->{'-x_test_header'} = "Test header from Example extension";
+    my $headers = $args->{'headers'};
+
+    $headers->{'-x_test_header'} = "Test header from Example extension";
 }
 
 sub config_add_panels {

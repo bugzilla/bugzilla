@@ -312,6 +312,13 @@
     </tr>
     </table>
 
+    [%# display the version number on the index page %]
+    [% IF title == "$terms.Bugzilla Main Page" %]
+      <div id="bugzilla_version">
+        [% header_addl_info FILTER html %]
+      </div>
+    [% END %]
+
     [% PROCESS "global/common-links.html.tmpl" qs_suffix = "_top" %]
 
   </div>

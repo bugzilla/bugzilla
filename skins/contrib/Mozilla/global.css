@@ -130,6 +130,12 @@ hr {
     visibility: hidden;
 }
 
+#bugzilla_version {
+    float: right;
+    color: #888;
+    padding: 5px 20px;
+}
+
 #titles {
     width: 100%;
     background-color: transparent;

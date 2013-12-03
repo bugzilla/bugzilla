@@ -12,11 +12,18 @@ use warnings;
 
 use base qw(Exporter);
 
-our @EXPORT = qw( USER_STORY_PRODUCTS );
+our @EXPORT = qw( USER_STORY );
 
-use constant USER_STORY_PRODUCTS => {
-    # product   group required to edit
-    Tracking    => 'editbugs',
+use constant USER_STORY => {
+    # note - an empty components array means all components
+    Tracking    => {
+        group       => 'editbugs',
+        components  => [],
+    },
+    Firefox     => {
+        group       => 'editbugs',
+        components  => [ 'Developer Tools: User Stories' ],
+    },
 };
 
 1;

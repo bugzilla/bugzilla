@@ -19,12 +19,25 @@ use Bugzilla::Extension::UserStory::Constants;
 use Text::Diff;
 
 BEGIN {
-    *Bugzilla::Product::user_story_group = \&_product_user_story_group;
+    *Bugzilla::Bug::user_story_group = \&_bug_user_story_group;
 }
 
-sub _product_user_story_group {
+sub _bug_user_story_group {
     my ($self) = @_;
-    return USER_STORY_PRODUCTS->{$self->name};
+    if (!exists $self->{user_story_group}) {
+        my ($product, $component) = ($self->product, $self->component);
+        my $edit_group = '';
+        if (exists USER_STORY->{$product}) {
+            my $components = USER_STORY->{$product}->{components};
+            if (scalar(@$components) == 0
+                || grep { $_ eq $component } @$components)
+            {
+                $edit_group = USER_STORY->{$product}->{group};
+            }
+        }
+        $self->{user_story_group} = $edit_group;
+    }
+    return $self->{user_story_group};
 }
 
 # ensure user is allowed to edit the story
@@ -34,7 +47,7 @@ sub bug_check_can_change_field {
     return unless $field eq 'cf_user_story';
 
     my $user = Bugzilla->user;
-    my $group = $bug->product_obj->user_story_group()
+    my $group = $bug->user_story_group()
         || return;
     if (!$user->in_group($group)) {
         push (@$priv_results, PRIVILEGES_REQUIRED_EMPOWERED);

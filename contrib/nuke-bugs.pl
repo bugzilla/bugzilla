@@ -52,7 +52,7 @@ delete_from_table('bug_group_map');
 delete_from_table('bugs');
 delete_from_table('longdescs');
 
-$dbh->do("ALTER TABLE bugs AUTO_INCREMENT = 1"); # MySQL specific
+$dbh->do($dbh->_bz_real_schema->get_set_serial_sql('bugs', 'bug_id', 1));
 
 $dbh->bz_commit_transaction();
 

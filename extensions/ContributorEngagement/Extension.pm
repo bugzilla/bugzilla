@@ -83,7 +83,8 @@ sub flag_end_of_update {
     {
         my $attachment = $object;
 
-        foreach my $change (@$new_flags) {
+        foreach my $orig_change (@$new_flags) {
+            my $change = $orig_change;
             $change =~ s/^[^:]+://; # get rid of setter
             $change =~ s/\([^\)]+\)$//; # get rid of requestee
             my ($name, $value) = $change =~ /^(.+)(.)$/;

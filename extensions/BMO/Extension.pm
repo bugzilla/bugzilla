@@ -595,8 +595,8 @@ sub attachment_process_data {
     my ($self, $args) = @_;
     my $attributes = $args->{attributes};
 
-    # quick checks - must be a text/plain non-patch
-    return if $attributes->{ispatch} || $attributes->{mimetype} ne 'text/plain';
+    # must be a text attachment
+    return unless $attributes->{mimetype} eq 'text/plain';
 
     # check the attachment size, and get attachment content if it isn't too large
     my $data = $attributes->{data};
@@ -614,12 +614,18 @@ sub attachment_process_data {
     }
 
     # trim and check for the pull request url
+    return unless defined $url;
     $url = trim($url);
     return if $url =~ /\s/;
-    return unless $url =~ m#^https://github\.com/[^/]+/[^/]+/pull/\d+\/?$#i;
 
-    # must be a valid pull-request
-    $attributes->{mimetype} = GITHUB_PR_CONTENT_TYPE;
+    if ($url =~ m#^https://github\.com/[^/]+/[^/]+/pull/\d+/?$#i) {
+        $attributes->{mimetype} = GITHUB_PR_CONTENT_TYPE;
+        $attributes->{ispatch}  = 0;
+    }
+    elsif ($url =~ m#^https://reviewboard(?:-dev)?\.allizom\.org/r/\d+/?#i) {
+        $attributes->{mimetype} = RB_REQUEST_CONTENT_TYPE;
+        $attributes->{ispatch}  = 0;
+    }
 }
 
 # redirect automatically to github urls
@@ -632,7 +638,9 @@ sub attachment_view {
     return if defined $cgi->param('content_type');
 
     # must be our github content-type
-    return unless $attachment->contenttype eq GITHUB_PR_CONTENT_TYPE;
+    return unless
+        $attachment->contenttype eq GITHUB_PR_CONTENT_TYPE
+        or $attachment->contenttype eq RB_REQUEST_CONTENT_TYPE;
 
     # redirect
     print $cgi->redirect(trim($attachment->data));

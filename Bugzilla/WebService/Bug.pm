@@ -555,7 +555,7 @@ sub search {
 }
 
 sub possible_duplicates {
-    my ($self, $params) = validate(@_, 'product');
+    my ($self, $params) = validate(@_, 'products');
     my $user = Bugzilla->user;
 
     Bugzilla->switch_to_shadow_db();
@@ -565,7 +565,7 @@ sub possible_duplicates {
         { function => 'Bug.possible_duplicates', param => 'summary' });
 
     my @products;
-    foreach my $name (@{ $params->{'product'} || [] }) {
+    foreach my $name (@{ $params->{'products'} || [] }) {
         my $object = $user->can_enter_product($name, THROW_ERROR);
         push(@products, $object);
     }
@@ -2651,6 +2651,9 @@ search for duplicates.
 =over
 
 =item Added in Bugzilla B<4.0>.
+
+=item The C<product> parameter has been renamed to C<products> in
+Bugzilla B<5.0>.
 
 =back
 

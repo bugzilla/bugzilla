@@ -38,7 +38,6 @@ use base qw(Exporter);
 @Bugzilla::Search::EXPORT = qw(
     IsValidQueryType
     split_order_term
-    translate_old_column
 );
 
 use Bugzilla::Error;
@@ -598,10 +597,10 @@ sub COLUMNS {
     );
 
     # Backward-compatibility for old field names. Goes new_name => old_name.
-    # These are here and not in translate_old_column because the rest of the
+    # These are here and not in _translate_old_column because the rest of the
     # code actually still uses the old names, while the fielddefs table uses
     # the new names (which is not the case for the fields handled by 
-    # translate_old_column).
+    # _translate_old_column).
     my %old_names = (
         creation_ts => 'opendate',
         delta_ts    => 'changeddate',
@@ -744,8 +743,8 @@ sub data {
     my $all_in_bugs_table = 1;
     foreach my $field (@orig_fields) {
         next if $self->COLUMNS->{$field}->{name} =~ /^bugs\.\w+$/;
-        $all_in_bugs_table = 0;
         $self->{fields} = ['bug_id'];
+        $all_in_bugs_table = 0;
         last;
     }
 
@@ -944,6 +943,21 @@ sub boolean_charts_to_custom_search {
     }
 }
 
+sub invalid_order_columns {
+   my ($self) = @_;
+   my @invalid_columns;
+   foreach my $order ($self->_input_order) {
+       next if defined $self->_validate_order_column($order);
+       push(@invalid_columns, $order);
+   }
+   return \@invalid_columns;
+}
+
+sub order {
+   my ($self) = @_;
+   return $self->_valid_order;
+}
+
 ######################
 # Internal Accessors #
 ######################
@@ -1009,7 +1023,7 @@ sub _extra_columns {
     my ($self) = @_;
     # Everything that's going to be in the ORDER BY must also be
     # in the SELECT.
-    push(@{ $self->{extra_columns} }, $self->_input_order_columns);
+    push(@{ $self->{extra_columns} }, $self->_valid_order_columns);
     return @{ $self->{extra_columns} };
 }
 
@@ -1079,10 +1093,32 @@ sub _sql_select {
 # The "order" that was requested by the consumer, exactly as it was
 # requested.
 sub _input_order { @{ $_[0]->{'order'} || [] } }
-# The input order with just the column names, and no ASC or DESC.
-sub _input_order_columns {
+# Requested order with invalid values removed and old names translated
+sub _valid_order {
     my ($self) = @_;
-    return map { (split_order_term($_))[0] } $self->_input_order;
+    return map { ($self->_validate_order_column($_)) } $self->_input_order;
+}
+# The valid order with just the column names, and no ASC or DESC.
+sub _valid_order_columns {
+    my ($self) = @_;
+    return map { (split_order_term($_))[0] } $self->_valid_order;
+}
+
+sub _validate_order_column {
+    my ($self, $order_item) = @_;
+
+    # Translate old column names
+    my ($field, $direction) = split_order_term($order_item);
+    $field = $self->_translate_old_column($field);
+
+    # Only accept valid columns
+    return if (!exists $self->COLUMNS->{$field});
+
+    # Relevance column can be used only with one or more fulltext searches
+    return if ($field eq 'relevance' && !$self->COLUMNS->{$field}->{name});
+
+    $direction = " $direction" if $direction;
+    return "$field$direction";
 }
 
 # A hashref that describes all the special stuff that has to be done
@@ -1114,7 +1150,7 @@ sub _sql_order_by {
     my ($self) = @_;
     if (!$self->{sql_order_by}) {
         my @order_by = map { $self->_translate_order_by_column($_) }
-                           $self->_input_order;
+                           $self->_valid_order;
         $self->{sql_order_by} = \@order_by;
     }
     return @{ $self->{sql_order_by} };
@@ -1259,7 +1295,7 @@ sub _select_order_joins {
         my @column_join = $self->_column_join($field);
         push(@joins, @column_join);
     }
-    foreach my $field ($self->_input_order_columns) {
+    foreach my $field ($self->_valid_order_columns) {
         my $join_info = $self->_special_order->{$field}->{join};
         if ($join_info) {
             # Don't let callers modify SPECIAL_ORDER.
@@ -1417,7 +1453,7 @@ sub _sql_group_by {
 
     # And all items from ORDER BY must be in the GROUP BY. The above loop 
     # doesn't catch items that were put into the ORDER BY from SPECIAL_ORDER.
-    foreach my $column ($self->_input_order_columns) {
+    foreach my $column ($self->_valid_order_columns) {
         my $special_order = $self->_special_order->{$column}->{order};
         next if !$special_order;
         push(@extra_group_by, @$special_order);
@@ -3388,8 +3424,8 @@ sub split_order_term {
 
 # Used to translate old SQL fragments from buglist.cgi's "order" argument
 # into our modern field IDs.
-sub translate_old_column {
-    my ($column) = @_;
+sub _translate_old_column {
+    my ($self, $column) = @_;
     # All old SQL fragments have a period in them somewhere.
     return $column if $column !~ /\./;
 
@@ -3403,9 +3439,9 @@ sub translate_old_column {
     
     # If it doesn't match the regexps above, check to see if the old 
     # SQL fragment matches the SQL of an existing column
-    foreach my $key (%{ COLUMNS() }) {
-        next unless exists COLUMNS->{$key}->{name};
-        return $key if COLUMNS->{$key}->{name} eq $column;
+    foreach my $key (%{ $self->COLUMNS }) {
+        next unless exists $self->COLUMNS->{$key}->{name};
+        return $key if $self->COLUMNS->{$key}->{name} eq $column;
     }
 
     return $column;

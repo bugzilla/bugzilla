@@ -20,9 +20,9 @@ sub suggestions {
     my ($self, $params) = @_;
     my $dbh = Bugzilla->switch_to_shadow_db();
 
-    my ($product, $component);
+    my ($bug, $product, $component);
     if (exists $params->{bug_id}) {
-        my $bug = Bugzilla::Bug->check($params->{bug_id});
+        $bug = Bugzilla::Bug->check($params->{bug_id});
         $product = $bug->product_obj;
         $component = $bug->component_obj;
     }
@@ -38,16 +38,27 @@ sub suggestions {
         ThrowUserError("reviewer_suggestions_param_required");
     }
 
-    my $reviewers = [];
-    if ($component) {
-        $reviewers = $component->reviewers_objs;
+    my @reviewers;
+    if ($bug) {
+        # we always need to be authentiated to perform user matching
+        my $user = Bugzilla->user;
+        if (!$user->id) {
+            Bugzilla->set_user(Bugzilla::User->check({ name => 'nobody@mozilla.org' }));
+            push @reviewers, @{ $bug->mentors };
+            Bugzilla->set_user($user);
+        } else {
+            push @reviewers, @{ $bug->mentors };
+        }
     }
-    if (!@$reviewers) {
-        $reviewers = $product->reviewers_objs;
+    if ($component) {
+        push @reviewers, @{ $component->reviewers_objs };
+    }
+    if (!@{ $component->reviewers_objs }) {
+        push @reviewers, @{ $product->reviewers_objs };
     }
 
     my @result;
-    foreach my $reviewer (@$reviewers) {
+    foreach my $reviewer (@reviewers) {
         push @result, {
             id    => $self->type('int', $reviewer->id),
             email => $self->type('email', $reviewer->login),

@@ -107,8 +107,8 @@ var REVIEW = {
         // build review list
         if (field.component != component) {
             field.menu.clearContent();
-            if (review_suggestions._mentor) {
-                REVIEW.add_menu_item(field_idx, review_suggestions._mentor, true);
+            for (var i = 0, il = review_suggestions._mentors.length; i < il; i++) {
+                REVIEW.add_menu_item(field_idx, review_suggestions._mentors[i], true);
             }
             if (review_suggestions[component] && review_suggestions[component].length) {
                 REVIEW.add_menu_items(field_idx, review_suggestions[component]);
@@ -129,6 +129,12 @@ var REVIEW = {
 
     add_menu_item: function(field_idx, user, is_mentor) {
         var menu = REVIEW.fields[field_idx].menu;
+        var items = menu.getItems();
+        for (var i = 0, il = items.length; i < il; i++) {
+            if (items[i].cfg.config.url.value == '#' + user.login) {
+                return;
+            }
+        }
         var queue = '';
         if (user.review_count == 0) {
             queue = 'empty queue';

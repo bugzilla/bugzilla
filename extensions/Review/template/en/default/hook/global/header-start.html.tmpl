@@ -23,26 +23,28 @@
 
 [% IF bug %]
   [%# create attachment %]
-  [% mentor = bug.mentor %]
+  [% mentors = bug.mentors %]
   [% product_obj = bug.product_obj %]
   [% component_obj = bug.component_obj %]
 [% ELSIF attachment.bug %]
   [%# edit attachment %]
-  [% mentor = attachment.bug.mentor %]
+  [% mentors = attachment.bug.mentors %]
   [% product_obj = attachment.bug.product_obj %]
   [% component_obj = attachment.bug.component_obj %]
 [% ELSE %]
   [%# create bug %]
-  [% mentor = '' %]
+  [% mentors = [] %]
   [% product_obj = product %]
   [% component_obj = 0 %]
 [% END %]
 
 [% review_js = BLOCK %]
   review_suggestions = {
-    [% IF mentor %]
-      _mentor: [% PROCESS reviewer u = mentor %],
-    [% END %]
+    _mentors: [
+      [% FOREACH u = mentors %]
+        [% PROCESS reviewer %][% "," UNLESS loop.last %]
+      [% END %]
+    ],
 
     [% IF product_obj.reviewers %]
       _product: [

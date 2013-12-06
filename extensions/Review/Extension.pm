@@ -32,7 +32,7 @@ BEGIN {
     *Bugzilla::Product::reviewer_required = \&_product_reviewer_required;
     *Bugzilla::Component::reviewers       = \&_component_reviewers;
     *Bugzilla::Component::reviewers_objs  = \&_component_reviewers_objs;
-    *Bugzilla::Bug::mentor                = \&_bug_mentor;
+    *Bugzilla::Bug::mentors               = \&_bug_mentors;
     *Bugzilla::User::review_count         = \&_user_review_count;
 }
 
@@ -72,29 +72,35 @@ sub _reviewers_objs {
     return $object->{reviewers};
 }
 
-sub _bug_mentor {
+sub _bug_mentors {
     my ($self) = @_;
-    # extract the mentor from the status_whiteboard
-    # when the mentor gets its own field, this will be easier
-    if (!exists $self->{mentor}) {
-        my $mentor;
-        if ($self->status_whiteboard =~ /\[mentor=([^\]]+)\]/) {
+    # extract the mentors from the status_whiteboard
+    # when the mentors gets its own field, this will be easier
+    if (!exists $self->{mentors}) {
+        my @mentors;
+        my $whiteboard = $self->status_whiteboard;
+        while ($whiteboard =~ /\[mentor=([^\]]+)\]/g) {
             my $mentor_string = $1;
+            my $user;
             if ($mentor_string =~ /\@/) {
                 # assume it's a full username if it contains an @
-                $mentor = Bugzilla::User->new({ name => $mentor_string });
+                $user = Bugzilla::User->new({ name => $mentor_string });
             } else {
                 # otherwise assume it's a : prefixed nick.  only works if a
                 # single user matches.
-                my $matches = Bugzilla::User::match("*:$mentor_string*", 2);
-                if ($matches && scalar(@$matches) == 1) {
-                    $mentor = $matches->[0];
+                foreach my $query ("*:$mentor_string*", "*$mentor_string*") {
+                    my $matches = Bugzilla::User::match($query, 2);
+                    if ($matches && scalar(@$matches) == 1) {
+                        $user = $matches->[0];
+                        last;
+                    }
                 }
             }
+            push @mentors, $user if $user;
         }
-        $self->{mentor} = $mentor;
+        $self->{mentors} = \@mentors;
     }
-    return $self->{mentor};
+    return $self->{mentors};
 }
 
 sub _user_review_count {

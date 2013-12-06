@@ -33,6 +33,7 @@ BEGIN {
     *Bugzilla::Component::reviewers       = \&_component_reviewers;
     *Bugzilla::Component::reviewers_objs  = \&_component_reviewers_objs;
     *Bugzilla::Bug::mentors               = \&_bug_mentors;
+    *Bugzilla::Bug::is_mentor             = \&_bug_is_mentor;
     *Bugzilla::User::review_count         = \&_user_review_count;
 }
 
@@ -101,6 +102,12 @@ sub _bug_mentors {
         $self->{mentors} = \@mentors;
     }
     return $self->{mentors};
+}
+
+sub _bug_is_mentor {
+    my ($self, $user) = @_;
+    my $user_id = ($user || Bugzilla->user)->id;
+    return (grep { $_->id == $user_id} @{ $self->mentors }) ? 1 : 0;
 }
 
 sub _user_review_count {

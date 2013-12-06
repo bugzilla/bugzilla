@@ -73,21 +73,26 @@
 
   <div id="bug_details" style="font-size: 90%; color: #666666">
     <hr style="border: 1px dashed #969696">
-    Product/Component: [% bug.product FILTER html %] :: [% bug.component FILTER html %]
+    Product/Component: [% bug.product FILTER html %] :: [% bug.component FILTER html %]<br>
+    [% "You are mentoring this " _ terms.bug IF bug.is_mentor(to_user) %]
   </div>
 
-[% IF tracking_flags.size %]
-  <div id="tracking" style="font-size: 90%; color: #666666">
-    <hr style="border: 1px dashed #969696">
-    <b>Tracking Flags:</b>
-    <ul>
-      [% FOREACH flag = tracking_flags %]
-        [% NEXT IF bug.${flag.name} == "---" %]
-        <li>[% flag.description FILTER html %]:[% bug.${flag.name} FILTER html %]</li>
-      [% END %]
-    </ul>
-  </div>
-[% END %]
+  [% seen_header = 0 %]
+  [% FOREACH flag = tracking_flags %]
+    [% NEXT IF bug.${flag.name} == "---" %]
+    [% IF !seen_header %]
+      [% seen_header = 1 %]
+      <div id="tracking" style="font-size: 90%; color: #666666">
+        <hr style="border: 1px dashed #969696">
+        <b>Tracking Flags:</b>
+        <ul>
+    [% END %]
+    <li>[% flag.description FILTER html %]:[% bug.${flag.name} FILTER html %]</li>
+  [% END %]
+  [% IF seen_header %]
+      </ul>
+    </div>
+  [% END %]
 
   <div id="reason" style="font-size: 90%; color: #666666">
     <hr style="border: 1px dashed #969696">

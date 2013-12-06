@@ -860,6 +860,11 @@ sub mailer_before_send {
 
     _log_sent_email($email);
 
+    # $bug->mentors is added by the Review extension
+    if (Bugzilla::Bug->can('mentors')) {
+        _add_mentors_header($email);
+    }
+
     # see bug 844724
     if ($email->header('to') && $email->header('to') eq 'sync-1@bugzilla.tld') {
         $email->header_set('to', 'mei.kong@tcl.com');
@@ -943,6 +948,16 @@ sub _log_sent_email {
     $subject =~ s/[\[\(]Bug \d+[\]\)]\s*//;
 
     _syslog("[bugmail] $recipient ($message_type) $bug_id $subject");
+}
+
+# Add X-Bugzilla-Mentors field to bugmail
+sub _add_mentors_header {
+    my $email = shift;
+    return unless my $bug_id = $email->header('X-Bugzilla-ID');
+    return unless my $bug = Bugzilla::Bug->new({ id => $bug_id, cache => 1 });
+    return unless my $mentors = $bug->mentors;
+    return unless @$mentors;
+    $email->header_set('X-Bugzilla-Mentors', join(', ', map { $_->login } @$mentors));
 }
 
 sub _syslog {

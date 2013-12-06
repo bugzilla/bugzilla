@@ -38,13 +38,16 @@ Configure [% terms.bug %]mail: [% urlbase %]userprefs.cgi?tab=email
 
 -------------------------------
 Product/Component: [%+ bug.product +%] :: [%+ bug.component %]
+[%+ "You are mentoring this " _ terms.bug IF bug.is_mentor(to_user) %]
 
-[% IF tracking_flags.size %]
-------- Tracking Flags: -------
+[% seen_header = 0 %]
 [% FOREACH flag = tracking_flags %]
   [% NEXT IF bug.${flag.name} == "---" %]
+  [% IF !seen_header %]
+    [% seen_header = 1 %]
+------- Tracking Flags: -------
+  [% END %]
 [%+ flag.description %]:[% bug.${flag.name} %]
-[% END %]
 [% END %]
 
 ------- You are receiving this mail because: -------

@@ -717,7 +717,9 @@ sub field_end_of_create {
 
     # Create an IT bug so Mozilla's DBAs so they can update the grants for metrics
 
-    if (Bugzilla->params->{'urlbase'} ne 'https://bugzilla.mozilla.org/') {
+    if (Bugzilla->params->{'urlbase'} ne 'https://bugzilla.mozilla.org/'
+        && Bugzilla->params->{'urlbase'} ne 'https://bugzilla.allizom.org/')
+    {
         return;
     }
 

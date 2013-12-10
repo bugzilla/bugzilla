@@ -143,11 +143,28 @@ function bz_overlayBelow(item, parent) {
  */
 function bz_isValueInArray(aArray, aValue)
 {
-  var run = 0;
-  var len = aArray.length;
-
-  for ( ; run < len; run++) {
+  for (var run = 0, len = aArray.length ; run < len; run++) {
     if (aArray[run] == aValue) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+/**
+ * Checks if a specified value is in the specified array by performing a
+ * case-insensitive comparison.
+ *
+ * @param  aArray Array to search for the value.
+ * @param  aValue Value to search from the array.
+ * @return        Boolean; true if value is found in the array and false if not.
+ */
+function bz_isValueInArrayIgnoreCase(aArray, aValue)
+{
+  var re = new RegExp(aValue.replace(/([^A-Za-z0-9])/g, "\\$1"), 'i');
+  for (var run = 0, len = aArray.length ; run < len; run++) {
+    if (aArray[run].match(re)) {
       return true;
     }
   }

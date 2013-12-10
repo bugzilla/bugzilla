@@ -3458,7 +3458,8 @@ sub comments {
             $comment->{count} = $count++;
             $comment->{bug} = $self;
         }
-        Bugzilla::Comment->preload($self->{'comments'});
+        # Some bugs may have no comments when upgrading old installations.
+        Bugzilla::Comment->preload($self->{'comments'}) if $count;
     }
     return unless defined wantarray;
 
@@ -3879,7 +3880,7 @@ sub _bugs_in_order {
 # Get the activity of a bug, starting from $starttime (if given).
 # This routine assumes Bugzilla::Bug->check has been previously called.
 sub GetBugActivity {
-    my ($bug_id, $attach_id, $starttime) = @_;
+    my ($bug_id, $attach_id, $starttime, $include_comment_tags) = @_;
     my $dbh = Bugzilla->dbh;
 
     # Arguments passed to the SQL query.
@@ -3890,7 +3891,7 @@ sub GetBugActivity {
     if (defined $starttime) {
         trick_taint($starttime);
         push (@args, $starttime);
-        $datepart = "AND bugs_activity.bug_when > ?";
+        $datepart = "AND bug_when > ?";
     }
 
     my $attachpart = "";
@@ -3911,7 +3912,7 @@ sub GetBugActivity {
 
     my $query = "SELECT fielddefs.name, bugs_activity.attach_id, " .
         $dbh->sql_date_format('bugs_activity.bug_when', '%Y.%m.%d %H:%i:%s') .
-            ", bugs_activity.removed, bugs_activity.added, profiles.login_name, 
+            " AS bug_when, bugs_activity.removed, bugs_activity.added, profiles.login_name,
                bugs_activity.comment_id
           FROM bugs_activity
                $suppjoins
@@ -3922,8 +3923,31 @@ sub GetBugActivity {
          WHERE bugs_activity.bug_id = ?
                $datepart
                $attachpart
-               $suppwhere
-      ORDER BY bugs_activity.bug_when, bugs_activity.id";
+               $suppwhere ";
+
+    if (Bugzilla->params->{'comment_taggers_group'}
+        && $include_comment_tags
+        && !$attach_id)
+    {
+        $query .= "
+            UNION ALL
+            SELECT 'comment_tag' AS name,
+                   NULL AS attach_id," .
+                   $dbh->sql_date_format('longdescs_tags_activity.bug_when', '%Y.%m.%d %H:%i:%s') . " AS bug_when,
+                   longdescs_tags_activity.removed,
+                   longdescs_tags_activity.added,
+                   profiles.login_name,
+                   longdescs_tags_activity.comment_id as comment_id
+              FROM longdescs_tags_activity
+                   INNER JOIN profiles ON profiles.userid = longdescs_tags_activity.who
+             WHERE longdescs_tags_activity.bug_id = ?
+                   $datepart
+        ";
+        push @args, $bug_id;
+        push @args, $starttime if defined $starttime;
+    }
+
+    $query .= "ORDER BY bug_when, comment_id";
 
     my $list = $dbh->selectall_arrayref($query, undef, @args);
 

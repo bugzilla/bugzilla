@@ -476,4 +476,9 @@ Checks that the value is a valid number
 
 Checks that the value is a valid regexp
 
+=item C<check_comment_taggers_group>
+
+Checks that the required modules for comment tagging are installed, and that a
+valid group is provided.
+
 =back

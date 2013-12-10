@@ -30,6 +30,31 @@
 
 [% PROCESS bug/time.html.tmpl %]
 
+[% IF Param('comment_taggers_group') %]
+  [% IF user.can_tag_comments %]
+    <div id="bz_ctag_div" class="bz_default_hidden">
+      <a href="javascript:void(0)" onclick="YAHOO.bugzilla.commentTagging.hideInput()">x</a>
+      <div>
+        <input id="bz_ctag_add" size="10" placeholder="add tag"
+              maxlength="[% constants.MAX_COMMENT_TAG_LENGTH FILTER html %]">
+        <span id="bz_ctag_autocomp"></span>
+      </div>
+      &nbsp;
+    </div>
+    <div id="bz_ctag_error" class="bz_default_hidden">
+      <a href="javascript:void(0)" onclick="YAHOO.bugzilla.commentTagging.hideError()">x</a>
+      <span id="bz_ctag_error_msg"></span>
+    </div>
+  [% END %]
+  [% IF user.id %]
+    <script type="text/javascript">
+      YAHOO.bugzilla.commentTagging.init([% user.can_tag_comments ? 'true' : 'false' %]);
+      YAHOO.bugzilla.commentTagging.min_len = [% constants.MIN_COMMENT_TAG_LENGTH FILTER js %];
+      YAHOO.bugzilla.commentTagging.max_len = [% constants.MAX_COMMENT_TAG_LENGTH FILTER js %];
+    </script>
+  [% END %]
+[% END %]
+
 <script type="text/javascript">
 <!--
 [% IF user.is_timetracker %]

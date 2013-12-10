@@ -115,4 +115,5 @@ sub _get_all_group_names {
     unshift(@group_names, '');
     return \@group_names;
 }
+
 1;

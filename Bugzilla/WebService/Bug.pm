@@ -26,6 +26,7 @@ use strict;
 use base qw(Bugzilla::WebService);
 
 use Bugzilla::Comment;
+use Bugzilla::Comment::TagWeights;
 use Bugzilla::Constants;
 use Bugzilla::Error;
 use Bugzilla::Field;
@@ -33,7 +34,7 @@ use Bugzilla::WebService::Constants;
 use Bugzilla::WebService::Util qw(filter filter_wants validate translate);
 use Bugzilla::Bug;
 use Bugzilla::BugMail;
-use Bugzilla::Util qw(trick_taint trim);
+use Bugzilla::Util qw(trick_taint trim detaint_natural);
 use Bugzilla::Version;
 use Bugzilla::Milestone;
 use Bugzilla::Status;
@@ -327,7 +328,8 @@ sub _translate_comment {
     my ($self, $comment, $filters) = @_;
     my $attach_id = $comment->is_about_attachment ? $comment->extra_data
                                                   : undef;
-    return filter $filters, {
+
+    my $comment_hash = {
         id         => $self->type('int', $comment->id),
         bug_id     => $self->type('int', $comment->bug_id),
         creator    => $self->type('email', $comment->author->login),
@@ -338,6 +340,16 @@ sub _translate_comment {
         text       => $self->type('string', $comment->body_full),
         attachment_id => $self->type('int', $attach_id),
     };
+
+    # Don't load comment tags unless enabled
+    if (Bugzilla->params->{'comment_taggers_group'}) {
+        $comment_hash->{tags} = [
+            map { $self->type('string', $_) }
+            @{ $comment->tags }
+        ];
+    }
+
+    return filter $filters, $comment_hash;
 }
 
 sub get {
@@ -1037,6 +1049,70 @@ sub attachments {
 
     return { bugs => \%bugs, attachments => \%attachments };
 }
+
+sub update_comment_tags {
+    my ($self, $params) = @_;
+
+    my $user = Bugzilla->login(LOGIN_REQUIRED);
+    Bugzilla->params->{'comment_taggers_group'}
+        || ThrowUserError("comment_tag_disabled");
+    $user->can_tag_comments
+        || ThrowUserError("auth_failure",
+                          { group  => Bugzilla->params->{'comment_taggers_group'},
+                            action => "update",
+                            object => "comment_tags" });
+
+    my $comment_id  = $params->{comment_id}
+        // ThrowCodeError('param_required',
+                          { function => 'Bug.update_comment_tags',
+                            param    => 'comment_id' });
+
+    my $comment = Bugzilla::Comment->new($comment_id)
+        || return [];
+    $comment->bug->check_is_visible();
+    if ($comment->is_private && !$user->is_insider) {
+        ThrowUserError('comment_is_private', { id => $comment_id });
+    }
+
+    my $dbh = Bugzilla->dbh;
+    $dbh->bz_start_transaction();
+    foreach my $tag (@{ $params->{add} || [] }) {
+        $comment->add_tag($tag) if defined $tag;
+    }
+    foreach my $tag (@{ $params->{remove} || [] }) {
+        $comment->remove_tag($tag) if defined $tag;
+    }
+    $comment->update();
+    $dbh->bz_commit_transaction();
+
+    return $comment->tags;
+}
+
+sub search_comment_tags {
+    my ($self, $params) = @_;
+
+    Bugzilla->login(LOGIN_REQUIRED);
+    Bugzilla->params->{'comment_taggers_group'}
+        || ThrowUserError("comment_tag_disabled");
+    Bugzilla->user->can_tag_comments
+        || ThrowUserError("auth_failure", { group  => Bugzilla->params->{'comment_taggers_group'},
+                                            action => "search",
+                                            object => "comment_tags"});
+
+    my $query = $params->{query};
+    $query
+        // ThrowCodeError('param_required', { param => 'query' });
+    my $limit = detaint_natural($params->{limit}) || 7;
+
+    my $tags = Bugzilla::Comment::TagWeights->match({
+        WHERE => {
+            'tag LIKE ?' => "\%$query\%",
+        },
+        LIMIT => $limit,
+    });
+    return [ map { $_->tag } @$tags ];
+}
+
 
 ##############################
 # Private Helper Subroutines #

@@ -559,6 +559,35 @@ table.edit_form hr {
     padding: 5px !important;
 }
 
+.bz_comment_tags {
+    background: #eee;
+    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
+    padding: 5px;
+}
+
+.bz_comment_tag {
+    background: #fff;
+    color: #444;
+    border: none;
+    padding: 2px 6px;
+}
+
+.bz_comment_tag a {
+    color: #0095DD;
+}
+
+#bz_ctag_error {
+    border: none;
+    background-color: #faa;
+    color: #444;
+    padding: 2px 6px;
+}
+
+#bz_ctag_error a {
+    color: #0095DD;
+}
+
 .ih_inlinehistory {
     background: #eee;
     border-top: 1px solid rgba(0, 0, 0, 0.1);

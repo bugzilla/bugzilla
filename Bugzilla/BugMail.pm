@@ -383,11 +383,14 @@ sub enqueue {
     # we need to flatten all objects to a hash before pushing to the job queue.
     # the hashes need to be inflated in the dequeue method.
     $vars->{bug}          = _flatten_object($vars->{bug});
-    $vars->{to_user}      = $vars->{to_user}->flatten_to_hash;
+    $vars->{to_user}      = _flatten_object($vars->{to_user});
     $vars->{changer}      = _flatten_object($vars->{changer});
     $vars->{new_comments} = [ map { _flatten_object($_) } @{ $vars->{new_comments} } ];
     foreach my $diff (@{ $vars->{diffs} }) {
         $diff->{who} = _flatten_object($diff->{who});
+        if (exists $diff->{blocker}) {
+            $diff->{blocker} = _flatten_object($diff->{blocker});
+        }
     }
     Bugzilla->job_queue->insert('bug_mail', { vars => $vars });
 }
@@ -404,6 +407,9 @@ sub dequeue {
     $vars->{new_comments} = [ map { Bugzilla::Comment->new_from_hash($_) } @{ $vars->{new_comments} } ];
     foreach my $diff (@{ $vars->{diffs} }) {
         $diff->{who} = Bugzilla::User->new_from_hash($diff->{who});
+        if (exists $diff->{blocker}) {
+            $diff->{blocker} = Bugzilla::Bug->new_from_hash($diff->{blocker});
+        }
     }
     # generate bugmail and send
     MessageToMTA(_generate_bugmail($vars), 1);

@@ -70,6 +70,10 @@ sub run_bug_query {
                     = $self->datetime_format_inbound($comment->{creation_time}) if !$last_changes->{when};
             }
             $b->{last_changes} = $last_changes;
+
+            # Set the data type properly for webservice clients
+            # for non-string values.
+            $b->{bug_id} = $self->type('int', $b->{bug_id});
         }
 
         $query_string =~ s/^POSTDATA=&//;
@@ -92,6 +96,16 @@ sub run_flag_query {
                               param    => 'type' });
 
     my $results = query_flags($type);
+
+    # Set the data type properly for webservice clients
+    # for non-string values.
+    foreach my $flag (@$results) {
+        $flag->{id}        = $self->type('int', $flag->{id});
+        $flag->{attach_id} = $self->type('int', $flag->{attach_id});
+        $flag->{bug_id}    = $self->type('int', $flag->{bug_id});
+        $flag->{is_patch}  = $self->type('boolean', $flag->{is_patch});
+    }
+
     return { result => { $type => $results }};
 }
 

@@ -674,12 +674,12 @@
     </div>
 
     <div id="finance_purchase_urgency_row" class="field_row">
-      <span class="field_label required">When do the items need<br>to be ordered by?:</span>
+      <span class="field_label required">When do the items need<br>to be purchased by?:</span>
       <span class="field_data">
         <select name="finance_purchase_urgency" id="finance_purchase_urgency">
-          <option value="within 24 hours">within 24 hours</option>
-          <option value="1 to 3 days">1 to 3 days</option>
-          <option value="a week">a week</option>
+          <option value="3 to 5 days">3 to 5 days</option>
+          <option value="7 to 10 days">7 to 10 days</option>
+          <option value="two weeks">two weeks</option>
           <option value="no rush" selected>no rush</option>
         </select>
       </span>
@@ -696,6 +696,7 @@
     <div id="finance_purchase_cost_row" class="field_row">
       <span class="field_label required">Total Cost:</span>
       <span class="field_data">
+        <div class="field_description">Please include currency type (e.g. USD, EUR)</div>
         <input type="text" name="finance_purchase_cost" id="finance_purchase_cost" size="60">
       </span>
     </div>

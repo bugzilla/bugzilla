@@ -267,6 +267,7 @@
               wrap    = 'soft'
               classes = classNames          
             %]
+            [% Hook.process('after_comment_textarea') %]
           </div>
         [% END %]             
         <div id="attachment_flags">

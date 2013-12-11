@@ -6,11 +6,7 @@
   # defined by the Mozilla Public License, v. 2.0.
   #%]
 
-<tr>
-  <td>&nbsp;</td>
-  <td>
-    [% PROCESS bug/needinfo.html.tmpl
-       bug => bug
-    %]
-  </td>
-</tr>
+[% IF template.name == 'attachment/create.html.tmpl'
+      || template.name == 'attachment/edit.html.tmpl' %]
+  [% style_urls.push('extensions/Needinfo/web/styles/needinfo.css') %]
+[% END %]

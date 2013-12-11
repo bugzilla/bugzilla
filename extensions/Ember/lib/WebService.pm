@@ -156,10 +156,8 @@ sub show {
                                              AND bug_id = ?',
                                      undef, ($last_updated, $last_updated, $bug->id));
         if ($updated_attachments) {
-            $attachments = $self->attachments({ attachment_ids => $updated_attachments,
-                                                exclude_fields => ['data'] });
-            $attachments = [ map { $attachments->{attachments}->{$_} }
-                             keys %{ $attachments->{attachments} } ];
+            $attachments = $self->_get_attachments({ attachment_ids => $updated_attachments,
+                                                     exclude_fields => ['data'] });
         }
 
         if (@$updated_fields || @$comments || @$updated_attachments) {
@@ -174,10 +172,8 @@ sub show {
         @fields = $self->_get_fields($bug);
         $comments = $self->comments({ ids => $bug_id });
         $comments = $comments->{bugs}->{$bug_id}->{comments};
-        $attachments = $self->attachments({ ids => $bug_id,
-                                            exclude_fields => ['data'] });
-        $attachments = $attachments->{bugs}->{$bug_id} || undef;
-
+        $attachments = $self->_get_attachments({ ids => $bug_id,
+                                                 exclude_fields => ['data'] });
     }
 
     # Place the fields current value along with the field definition
@@ -259,6 +255,29 @@ sub search {
 ###################
 # Private Methods #
 ###################
+
+sub _get_attachments {
+    my ($self, $params) = @_;
+    my $user = Bugzilla->user;
+
+    my $attachments = $self->attachments($params);
+
+    if ($params->{ids}) {
+        $attachments = [ map { @{ $attachments->{bugs}->{$_} } }
+                         keys %{ $attachments->{bugs} } ];
+    }
+    elsif ($params->{attachment_ids}) {
+        $attachments = [ map { $attachments->{attachments}->{$_} }
+                         keys %{ $attachments->{attachments} } ];
+    }
+
+    foreach my $attachment (@$attachments) {
+        $attachment->{can_edit}
+            = ($user->login eq $attachment->{creator} || $user->in_group('editbugs')) ? 1 : 0;
+    }
+
+    return $attachments;
+}
 
 sub _get_fields {
     my ($self, $bug, $field_ids) = @_;

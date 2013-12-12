@@ -42,7 +42,7 @@
 [% END %]
 
 <tr>
-  <td rowspan="[% user.id ? 16 : 15 %]" id="gravatar-container">
+  <td rowspan="[% user.id ? 6 : 5 %]" id="gravatar-container">
     [% IF user.gravatar %]
       <img id="gravatar" src="[% target.gravatar(256) FILTER none %]" width="128" height="128"><br>
       [% IF target.id == user.id %]
@@ -85,7 +85,69 @@
     </a>
   </td>
 </tr>
+
 <tr>
+  <td>&nbsp;</td>
+</tr>
+
+[%# request counters provided by the Review extension %]
+[% IF target.can("review_count")
+      && (
+        stats.reviews
+        || (
+          target.review_request_count
+          || target.feedback_request_count
+          || target.needinfo_request_count
+        )
+      )
+%]
+  <tr>
+    <td colspan="4" class="separator"><hr></td>
+  </tr>
+  <tr>
+    <td>Review Queue</td>
+  </tr>
+  <tr>
+    <td>&nbsp;</td>
+    <th>Review requests</th>
+    <td class="numeric">
+      <a href="request.cgi?action=queue&amp;type=review&amp;requestee=[% target.login FILTER uri %]&amp;group=type"
+         target="_blank">
+        [% target.review_request_count FILTER html %]
+      </a>
+    </td>
+  </tr>
+  <tr>
+    <td>&nbsp;</td>
+    <th>Feedback requests</th>
+    <td class="numeric">
+      <a href="request.cgi?action=queue&amp;type=feedback&amp;requestee=[% target.login FILTER uri %]&amp;group=type"
+         target="_blank">
+        [% target.feedback_request_count FILTER html %]
+      </a>
+    </td>
+  </tr>
+  <tr>
+    <td>&nbsp;</td>
+    <th>Needinfo requests</th>
+    <td class="numeric">
+      <a href="request.cgi?action=queue&amp;type=needinfo&amp;requestee=[% target.login FILTER uri %]&amp;group=type"
+         target="_blank">
+        [% target.needinfo_request_count FILTER html %]
+      </a>
+    </td>
+  </tr>
+[% END %]
+
+<tr>
+  <td colspan="4" class="separator"><hr></td>
+</tr>
+<tr>
+  <td>User Statistics</td>
+</tr>
+
+<tr>
+  <td>&nbsp;</td>
   <th>[% terms.Bugs %] filed</th>
   <td class="numeric">
     <a href="buglist.cgi?query_format=advanced&amp;emailtype1=exact&amp;emailreporter1=1&amp;email1=[% target.login FILTER uri %]"
@@ -95,10 +157,12 @@
   </td>
 </tr>
 <tr>
+  <td>&nbsp;</td>
   <th>Comments made</th>
   <td class="numeric">[% stats.comments || 0 FILTER html %]</td>
 </tr>
 <tr>
+  <td>&nbsp;</td>
   <th>Assigned to</th>
   <td class="numeric">
     <a href="buglist.cgi?query_format=advanced&amp;emailtype1=exact&amp;emailassigned_to1=1&amp;email1=[% target.login FILTER uri %]"
@@ -108,6 +172,7 @@
   </td>
 </tr>
 <tr>
+  <td>&nbsp;</td>
   <th>Commented on</th>
   <td class="numeric">
     <a href="buglist.cgi?query_format=advanced&amp;emailtype1=exact&amp;emaillongdesc1=1&amp;email1=[% target.login FILTER uri %]"
@@ -117,6 +182,7 @@
   </td>
 </tr>
 <tr>
+  <td>&nbsp;</td>
   <th>QA-Contact</th>
   <td class="numeric">
     <a href="buglist.cgi?query_format=advanced&amp;emailtype1=exact&amp;emailqa_contact1=1&amp;email1=[% target.login FILTER uri %]"
@@ -126,14 +192,17 @@
   </td>
 </tr>
 <tr>
+  <td>&nbsp;</td>
   <th>Patches submitted</th>
   <td class="numeric">[% stats.patches || 0 FILTER html %]</td>
 </tr>
 <tr>
+  <td>&nbsp;</td>
   <th>Patches reviewed</th>
   <td class="numeric">[% stats.reviews || 0 FILTER html %]</td>
 </tr>
 <tr>
+  <td>&nbsp;</td>
   <th>[% terms.Bugs %] poked</th>
   <td class="numeric">[% stats.touched || 0 FILTER html %]</td>
 </tr>
@@ -143,6 +212,7 @@
 </tr>
 
 <tr>
+  <td>&nbsp;</td>
   <th>Statuses changed</th>
   <td colspan="2">
     RESOLVED ([% statuses.item('RESOLVED') || 0 FILTER html %]),
@@ -153,6 +223,7 @@
 </tr>
 
 <tr>
+  <td>&nbsp;</td>
   <th>Activity by product</th>
   <td colspan="2">
     [% FOREACH p = products %]
@@ -170,6 +241,20 @@
 </tr>
 
 <tr>
+  <td colspan="3">
+    <div id="what">
+      <a href="https://wiki.mozilla.org/BMO/User_profile_fields" target="_blank">
+        What do these fields mean?
+      </a>
+    </div>
+
+    <div id="updated">
+      This information is updated daily
+    </div>
+  </td>
+</tr>
+
+<tr>
   <td>&nbsp;</td>
   <td>&nbsp;</td>
   <td>&nbsp;</td>
@@ -177,16 +262,6 @@
 </tr>
 
 </table>
-
-<div id="what">
-  <a href="https://wiki.mozilla.org/BMO/User_profile_fields" target="_blank">
-    What do these fields mean?
-  </a>
-</div>
-
-<div id="updated">
-  This information is updated daily
-</div>
 
 [% PROCESS global/footer.html.tmpl %]
 

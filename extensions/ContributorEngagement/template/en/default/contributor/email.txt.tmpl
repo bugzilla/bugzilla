@@ -7,13 +7,15 @@
   #%]
 [% PROCESS "global/variables.none.tmpl" %]
 From: [% from_user FILTER none %]
-To: [% to_user FILTER none %]
+To: [% attachment.attacher.email FILTER none %]
 Subject: Congratulations on having your first patch approved
 Date: [% date FILTER none %]
 X-Bugzilla-Type: contributor-engagement
 
 Congratulations on having your first patch approved, and thank you for your
 contribution to Mozilla.
+
+[%+ urlbase %]attachment.cgi?id=[% attachment.id FILTER uri %]&action=edit
 
 The next step is to get the patch actually checked in to our repository. For
 more information about how to make that happen, check out this post:

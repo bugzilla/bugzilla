@@ -105,9 +105,9 @@ sub _send_mail {
     my ($attachment, $timestamp) = @_;
 
     my $vars = {
-        date      => format_time($timestamp, '%a, %d %b %Y %T %z', 'UTC'),
-        to_user   => $attachment->attacher->email,
-        from_user => EMAIL_FROM,
+        date       => format_time($timestamp, '%a, %d %b %Y %T %z', 'UTC'),
+        attachment => $attachment,
+        from_user  => EMAIL_FROM,
     };
 
     my $msg;

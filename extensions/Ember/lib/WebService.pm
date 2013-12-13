@@ -252,6 +252,28 @@ sub search {
     return $result;
 }
 
+sub get_attachments {
+    my ($self, $params) = @_;
+    my $attachments = $self->_get_attachments($params);
+    my $flag_types = [];
+    my $bug;
+    if ($params->{ids}) {
+        $bug = Bugzilla::Bug->check($params->{ids}->[0]);
+        $flag_types = $self->_get_flag_types_bug($bug, 'attachment');
+    }
+    elsif ($params->{attachment_ids} && @$attachments) {
+        $bug = Bugzilla::Bug->check($attachments->[0]->{bug_id});
+        $flag_types = $self->_get_flag_types_all($bug, 'attachment')->{attachment};
+    }
+    if (@$flag_types) {
+        @$flag_types = map { $self->_flagtype_to_hash($_, $bug) } @$flag_types;
+    }
+    return {
+        attachments => $attachments,
+        flag_types  => $flag_types
+    };
+}
+
 ###################
 # Private Methods #
 ###################
@@ -352,19 +374,11 @@ sub _get_fields {
         my $flag_hash;
         if ($bug->id) {
             foreach my $flag_type ('bug', 'attachment') {
-                my $flag_params = {
-                    target_type         => $flag_type,
-                    product_id          => $bug->product_obj->id,
-                    component_id        => $bug->component_obj->id,
-                    bug_id              => $bug->id,
-                    active_or_has_flags => $bug->id,
-                };
-                $flag_hash->{$flag_type} = Bugzilla::Flag->_flag_types($flag_params);
+                $flag_hash->{$flag_type} = $self->_get_flag_types_bug($bug, $flag_type);
             }
         }
         else {
-            my $flag_params = { is_active => 1 };
-            $flag_hash = $bug->product_obj->flag_types($flag_params);
+            $flag_hash = $self->_get_flag_types_all($bug);
         }
         my @flag_values;
         foreach my $flag_type ('bug', 'attachment') {
@@ -383,6 +397,25 @@ sub _get_fields {
     }
 
     return @fields;
+}
+
+sub _get_flag_types_all {
+    my ($self, $bug, $type) = @_;
+    my $params = { is_active => 1 };
+    $params->{target_type} = $type if $type;
+    return $bug->product_obj->flag_types($params);
+}
+
+sub _get_flag_types_bug {
+    my ($self, $bug, $type) = @_;
+    my $params = {
+        target_type         => $type,
+        product_id          => $bug->product_obj->id,
+        component_id        => $bug->component_obj->id,
+        bug_id              => $bug->id,
+        active_or_has_flags => $bug->id,
+    };
+    return Bugzilla::Flag->_flag_types($params);
 }
 
 sub _group_to_hash {
@@ -666,6 +699,24 @@ sub rest_resources {
                 method => 'search',
             },
         },
+        # attachments - wrapper around SUPER::attachments that also includes
+        # can_edit attribute
+        qr{^/ember/bug/(\d+)/attachments$}, {
+            GET => {
+                method => 'get_attachments',
+                params => sub {
+                    return { ids => $_[0] };
+                }
+            }
+        },
+        qr{^/ember/bug/attachments/(\d+)$}, {
+            GET => {
+                method => 'get_attachments',
+                params => sub {
+                    return { attachment_ids => $_[0] };
+                }
+            }
+        }
     ];
 };
 

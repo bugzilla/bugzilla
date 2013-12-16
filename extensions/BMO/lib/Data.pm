@@ -209,6 +209,9 @@ tie(%$cf_visible_in_products, "Tie::IxHash",
     qw/^cf_mozilla_project$/ => {
         "Data & BI Services Team" => [],
     },
+    qw/^cf_machine_state$/ => {
+        "Release Engineering" => ["Buildduty"],
+    },
 );
 
 # Which custom fields are acting as flags (ie. custom flags)

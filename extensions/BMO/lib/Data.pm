@@ -197,13 +197,17 @@ tie(%$cf_visible_in_products, "Tie::IxHash",
         "Toolkit"               => [],
     },
     qw/^cf_due_date$/ => {
-        "Developer Engagement"  => [],
-        "Marketing"             => [],
-        "mozilla.org"           => ["Security Assurance: Review Request"],
-        "Mozilla Reps"          => [],
+        "Data & BI Services Team" => [],
+        "Developer Engagement"    => [],
+        "Marketing"               => [],
+        "mozilla.org"             => ["Security Assurance: Review Request"],
+        "Mozilla Reps"            => [],
     },
     qw/^cf_locale$/ => {
         "www.mozilla.org"       => [],
+    },
+    qw/^cf_mozilla_project$/ => {
+        "Data & BI Services Team" => [],
     },
 );
 

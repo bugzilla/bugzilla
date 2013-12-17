@@ -11,7 +11,6 @@ use warnings;
 
 use Bugzilla::Constants;
 use Bugzilla::Error;
-use Bugzilla::Extension::BMO::Data qw($cf_disabled_flags);
 use Date::Parse;
 use DateTime;
 
@@ -83,12 +82,6 @@ sub is_active_status_field {
         && $field->name =~ /_status_/
     ) {
         return $field->is_active;
-    }
-
-    if ($field->type != FIELD_TYPE_EXTENSION
-        && $field->name =~ /^cf_status/
-    ) {
-        return !grep { $field->name eq $_ } @$cf_disabled_flags
     }
 
     return 0;

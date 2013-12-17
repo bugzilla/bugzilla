@@ -358,9 +358,9 @@ sub bug_check_can_change_field {
 
     if ($field =~ /^cf/ && !@$priv_results && $new_value ne '---') {
         # "other" custom field setters restrictions
-        if (exists $other_setters->{$field}) {
+        if (exists $cf_setters->{$field}) {
             my $in_group = 0;
-            foreach my $group (@{$other_setters->{$field}}) {
+            foreach my $group (@{$cf_setters->{$field}}) {
                 if ($user->in_group($group, $bug->product_id)) {
                     $in_group = 1;
                     last;

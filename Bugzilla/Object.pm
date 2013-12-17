@@ -477,6 +477,7 @@ sub update {
 
     $dbh->bz_commit_transaction();
     $self->_cache_remove({ id => $self->id });
+    $self->_cache_remove({ name => $self->name }) if $self->name;
 
     if (wantarray) {
         return (\%changes, $old_self);
@@ -496,6 +497,7 @@ sub remove_from_db {
     $dbh->do("DELETE FROM $table WHERE $id_field = ?", undef, $self->id);
     $dbh->bz_commit_transaction();
     $self->_cache_remove({ id => $self->id });
+    $self->_cache_remove({ name => $self->name }) if $self->name;
     undef $self;
 }
 

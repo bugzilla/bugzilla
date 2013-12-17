@@ -258,7 +258,8 @@ TUI_hide_default('attachment_text_field');
       field = bug_fields.version editable = 1 rowspan = 3 
     %]
     <td rowspan="3">
-      <select name="version" id="version" size="5">
+      <select name="version" id="version" size="5" aria-required="true"
+              class="required">
         [%- FOREACH v = version %]
           [% NEXT IF NOT v.is_active %]
           <option value="[% v.name FILTER html %]"

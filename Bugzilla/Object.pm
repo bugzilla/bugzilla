@@ -173,11 +173,21 @@ sub _cache_set {
     Bugzilla->request_cache->{$cache_key} = $object;
 }
 
+sub _cache_remove {
+    my $class = shift;
+    my ($param) = @_;
+    $param->{cache} = 1;
+    my $cache_key = $class->cache_key($param)
+      || return;
+    delete Bugzilla->request_cache->{$cache_key};
+}
+
 sub cache_key {
     my $class = shift;
     my ($param) = @_;
     if (ref($param) && $param->{cache} && ($param->{id} || $param->{name})) {
-        return $class . ',' . ($param->{id} || $param->{name});
+        $class = blessed($class) if blessed($class);
+        return $class  . ',' . ($param->{id} || $param->{name});
     } else {
         return;
     }
@@ -451,6 +461,8 @@ sub update {
     $self->audit_log(\%changes) if $self->AUDIT_UPDATES;
 
     $dbh->bz_commit_transaction();
+    $self->_cache_remove({ id => $self->id });
+    $self->_cache_remove({ name => $self->name }) if $self->name;
 
     if (wantarray) {
         return (\%changes, $old_self);
@@ -469,6 +481,8 @@ sub remove_from_db {
     $self->audit_log(AUDIT_REMOVE) if $self->AUDIT_REMOVES;
     $dbh->do("DELETE FROM $table WHERE $id_field = ?", undef, $self->id);
     $dbh->bz_commit_transaction();
+    $self->_cache_remove({ id => $self->id });
+    $self->_cache_remove({ name => $self->name }) if $self->name;
     undef $self;
 }
 

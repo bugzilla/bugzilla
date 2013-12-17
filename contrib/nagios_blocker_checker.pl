@@ -24,9 +24,10 @@ Bugzilla->usage_mode(USAGE_MODE_CMDLINE);
 
 
 my $config = {
-    # filter by assignee or product
+    # filter by assignee, product or component
     assignee        => '',
     product         => '',
+    component       => '',
     unassigned      => 'nobody@mozilla.org',
     # severities
     severity        => 'major,critical,blocker',
@@ -42,12 +43,13 @@ my $config = {
 my $usage = <<EOF;
 FILTERS
 
-  the filter determines which bugs to check, either by assignee or product.
-  for backward compatibility, if just an email address is provided, it will be
-  used as the assignee.
+  the filter determines which bugs to check, either by assignee, product or the
+  product's component. For backward compatibility, if just an email address is
+  provided, it will be used as the assignee.
 
   --assignee <email>    filter bugs by assignee
   --product <name>      filter bugs by product name
+  --component <name>    filter bugs by product's component name
   --unassigned <email>  set the unassigned user (default: $config->{unassigned})
 
 SEVERITIES
@@ -78,6 +80,7 @@ EOF
 die($usage) unless GetOptions(
     'assignee=s'        => \$config->{assignee},
     'product=s'         => \$config->{product},
+    'component=s'       => \$config->{component},
     'severity=s'        => \$config->{severity},
     'major_alarm=i'     => \$config->{major_alarm},
     'major_warn=i'      => \$config->{major_warn},
@@ -92,6 +95,7 @@ die $usage if
     $config->{help}
     || !($config->{assignee} || $config->{product})
     || ($config->{assignee} && $config->{product})
+    || ($config->{component} && !$config->{product})
     || !$config->{severity};
 
 #
@@ -107,6 +111,11 @@ my($where, @values, $severity);
 if ($config->{assignee}) {
     $where = 'bugs.assigned_to = ?';
     push @values, Bugzilla::User->check({ name => $config->{assignee} })->id;
+} elsif ($config->{component}) {
+    $where = 'bugs.product_id = ? AND bugs.component_id = ? AND bugs.assigned_to = ?';
+    push @values, Bugzilla::Product->check({ name => $config->{product} })->id;
+    push @values, Bugzilla::Component->check({ name => $config->{component} })->id;
+    push @values, Bugzilla::User->check({ name => $config->{unassigned} })->id;
 } else {
     $where = 'bugs.product_id = ? AND bugs.assigned_to = ?';
     push @values, Bugzilla::Product->check({ name => $config->{product} })->id;

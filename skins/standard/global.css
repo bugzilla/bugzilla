@@ -383,6 +383,10 @@ input.requestee {
     padding: 0.5em 1em;
 }
 
+.throw_error a:visited {
+    color: darkblue ;
+}
+
 dt {
     font-weight: bold;
 }

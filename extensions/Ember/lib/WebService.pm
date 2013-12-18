@@ -252,6 +252,72 @@ sub search {
     return $result;
 }
 
+sub bug {
+    my ($self, $params) = @_;
+    my $dbh = Bugzilla->dbh;
+
+    my $bug_id = delete $params->{id};
+    $bug_id || ThrowCodeError('param_required',
+                              { function => 'Ember.bug', param => 'id' });
+
+    my ($comments, $attachments) = ([], []);
+    my $bug = $self->get({ ids => [ $bug_id ] });
+    $bug = $bug->{bugs}->[0];
+
+    # Only return changes since last_updated if provided
+    my $last_updated = delete $params->{last_updated};
+    if ($last_updated) {
+        trick_taint($last_updated);
+        my $updated_fields = $dbh->selectcol_arrayref('SELECT fielddefs.name
+                                                         FROM fielddefs INNER JOIN bugs_activity
+                                                              ON fielddefs.id = bugs_activity.fieldid
+                                                        WHERE bugs_activity.bug_when > ?
+                                                              AND bugs_activity.bug_id = ?',
+                                                      undef, ($last_updated, $bug->{id}));
+
+        my %field_map = reverse %{ Bugzilla::Bug::FIELD_MAP() };
+        $field_map{'flagtypes.name'} = 'flags';
+
+        my $changed_bug = {};
+        foreach my $field (@$updated_fields) {
+            my $field_name = $field_map{$field} || $field;
+            if ($bug->{$field_name}) {
+                $changed_bug->{$field_name} = $bug->{$field_name};
+            }
+        }
+        $bug = $changed_bug;
+
+        # Find any comments created since the last_updated date
+        $comments = $self->comments({ ids => $bug_id, new_since => $last_updated });
+
+        # Find any new attachments or modified attachments since the
+        # last_updated date
+        my $updated_attachments =
+            $dbh->selectcol_arrayref('SELECT attach_id FROM attachments
+                                       WHERE (creation_ts > ? OR modification_time > ?)
+                                             AND bug_id = ?',
+                                     undef, ($last_updated, $last_updated, $bug->{id}));
+        if ($updated_attachments) {
+            $attachments = $self->_get_attachments({ attachment_ids => $updated_attachments,
+                                                exclude_fields => ['data'] });
+        }
+    }
+    else {
+        $comments    = $self->comments({ ids => [ $bug_id ] });
+        $attachments = $self->_get_attachments({ ids => [ $bug_id ],
+                                                 exclude_fields => ['data'] });
+
+    }
+
+    $comments = $comments->{bugs}->{$bug_id}->{comments};
+
+    return {
+        bug         => $bug,
+        comments    => $comments,
+        attachments => $attachments,
+    };
+}
+
 sub get_attachments {
     my ($self, $params) = @_;
     my $attachments = $self->_get_attachments($params);
@@ -686,18 +752,21 @@ sub rest_resources {
                 }
             }
         },
-        # show bug page - one or more bug ids
-        qr{^/ember/show$}, {
-            GET => {
-                method => 'show'
-            }
-        },
         # search - wrapper around SUPER::search which also includes the total
         # number of bugs when using pagination
         qr{^/ember/search$}, {
             GET  => {
                 method => 'search',
             },
+        },
+        # get current bug attributes without field information - single bug id
+        qr{^/ember/bug/(\d+)$}, {
+            GET => {
+                method => 'bug',
+                params => sub {
+                    return { id => $_[0] };
+                }
+            }
         },
         # attachments - wrapper around SUPER::attachments that also includes
         # can_edit attribute
@@ -854,6 +923,98 @@ As per Bugzilla::WebService::Bug::search()
 =item B<History>
 
 =over
+
+=back
+
+=back
+
+=head2 bug
+
+B<UNSTABLE>
+
+=over
+
+=item B<Description>
+
+This method returns just the current bug values, comments, and attachments without
+all of the field information.
+
+=item B<Params>
+
+You pass a field called C<id> that is a valid bug ids.
+
+=over
+
+=item C<id> (integer) - A valid bug id
+
+=item C<last_updated> - (dateTime) An optional timestamp that includes only fields,
+attachments, or comments that have been changed or added since.
+
+=back
+
+=item B<Returns>
+
+=over
+
+=back
+
+=item B<Errors>
+
+=over
+
+=back
+
+=item B<History>
+
+=over
+
+=item Added in BMO Bugzilla B<4.2>.
+
+=back
+
+=back
+
+=head2 get_attachments
+
+B<UNSTABLE>
+
+=over
+
+=item B<Description>
+
+This method returns the current attachment data and flag types for a given
+bug id or attachment id.
+
+=item B<Params>
+
+You pass a field called C<id> that is a valid bug id or an C<attachment_id> which
+is a valid attachment id.
+
+=over
+
+=item C<id> (integer) - A valid bug id.
+
+=item C<attachment_id> (integer) - A valid attachment id.
+
+=back
+
+=item B<Returns>
+
+=over
+
+=back
+
+=item B<Errors>
+
+=over
+
+=back
+
+=item B<History>
+
+=over
+
+=item Added in BMO Bugzilla B<4.2>.
 
 =back
 

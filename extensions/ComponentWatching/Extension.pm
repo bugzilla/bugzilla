@@ -194,7 +194,7 @@ sub user_preferences {
             $ra_componentNames = [$ra_componentNames || ''] unless ref($ra_componentNames);
 
             # load product and verify access
-            my $product = Bugzilla::Product->new({ name => $productName });
+            my $product = Bugzilla::Product->new({ name => $productName, cache => 1 });
             unless ($product && $user->can_access_product($product)) {
                 ThrowUserError('product_access_denied', { product => $productName });
             }
@@ -206,7 +206,9 @@ sub user_preferences {
             } else {
                 # watching specific components
                 foreach my $componentName (@$ra_componentNames) {
-                    my $component = Bugzilla::Component->new({ name => $componentName, product => $product });
+                    my $component = Bugzilla::Component->new({
+                        name => $componentName, product => $product, cache => 1
+                    });
                     unless ($component) {
                         ThrowUserError('product_access_denied', { product => $productName });
                     }
@@ -258,18 +260,20 @@ sub bugmail_recipients {
             next if !(exists $ra->{'old'}
                       && exists $ra->{'field_name'});
             if ($ra->{'field_name'} eq 'product') {
-                $product = Bugzilla::Product->new({ name => $ra->{'old'} });
+                $product = Bugzilla::Product->new({ name => $ra->{'old'}, cache => 1 });
                 $oldProductId = $product->id;
             }
         }
         if (!$product) {
-            $product = Bugzilla::Product->new($oldProductId);
+            $product = Bugzilla::Product->new({ id => $oldProductId, cache => 1 });
         }
         foreach my $ra (@$diffs) {
             next if !(exists $ra->{'old'}
                       && exists $ra->{'field_name'});
             if ($ra->{'field_name'} eq 'component') {
-                my $component = Bugzilla::Component->new({ name => $ra->{'old'}, product => $product });
+                my $component = Bugzilla::Component->new({
+                    name => $ra->{'old'}, product => $product, cache => 1
+                });
                 $oldComponentId = $component->id;
             }
         }
@@ -342,22 +346,27 @@ sub _getWatches {
     $sth->execute($user->id);
     my @watches;
     while (my ($productId, $componentId) = $sth->fetchrow_array) {
-        my $product = Bugzilla::Product->new($productId);
+        my $product = Bugzilla::Product->new({ id => $productId, cache => 1 });
         next unless $product && $user->can_access_product($product);
 
-        my %watch = ( product => $product );
+        my %watch = (
+            product         => $product,
+            product_name    => $product->name,
+            component_name  => '',
+        );
         if ($componentId) {
-            my $component = Bugzilla::Component->new($componentId);
+            my $component = Bugzilla::Component->new({ id => $componentId, cache => 1 });
             next unless $component;
             $watch{'component'} = $component;
+            $watch{'component_name'} = $component->name;
         }
 
         push @watches, \%watch;
     }
 
     @watches = sort {
-        $a->{'product'}->name cmp $b->{'product'}->name
-        || $a->{'component'}->name cmp $b->{'component'}->name
+        $a->{'product_name'} cmp $b->{'product_name'}
+        || $a->{'component_name'} cmp $b->{'component_name'}
     } @watches;
 
     return \@watches;
@@ -377,12 +386,12 @@ sub _getUserWatches {
     $sth->execute($user->id);
     my @watches;
     while (my ($productId, $componentId, $login) = $sth->fetchrow_array) {
-        my $product = Bugzilla::Product->new($productId);
+        my $product = Bugzilla::Product->new({ id => $productId, cache => 1 });
         next unless $product && $user->can_access_product($product);
 
         my %watch = (
             product => $product,
-            component => Bugzilla::Component->new($componentId),
+            component => Bugzilla::Component->new({ id => $componentId, cache => 1 }),
             user      => Bugzilla::User->check($login),
         );
         push @watches, \%watch;

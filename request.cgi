@@ -118,20 +118,27 @@ sub queue {
                   ON bugs.product_id = products.id
           INNER JOIN components
                   ON bugs.component_id = components.id
-           LEFT JOIN bug_group_map AS bgmap
-                  ON bgmap.bug_id = bugs.bug_id
-                 AND bgmap.group_id NOT IN (" .
-                     $user->groups_as_string . ")
            LEFT JOIN bug_group_map AS privs
                   ON privs.bug_id = bugs.bug_id
            LEFT JOIN cc AS ccmap
                   ON ccmap.who = $userid
                  AND ccmap.bug_id = bugs.bug_id
-    " .
+           LEFT JOIN bug_group_map AS bgmap
+                  ON bgmap.bug_id = bugs.bug_id
+    ";
+
+    if (Bugzilla->params->{or_groups}) {
+        $query .= " AND bgmap.group_id IN (" . $user->groups_as_string . ")";
+        $query .= " WHERE     (privs.group_id IS NULL OR bgmap.group_id IS NOT NULL OR";
+    }
+    else {
+        $query .= " AND bgmap.group_id NOT IN (" . $user->groups_as_string . ")";
+        $query .= " WHERE     (bgmap.group_id IS NULL OR";
+    }
 
     # Weed out bug the user does not have access to
-    " WHERE     ((bgmap.group_id IS NULL) OR
-                 (ccmap.who IS NOT NULL AND cclist_accessible = 1) OR
+    $query .=
+    "            (ccmap.who IS NOT NULL AND cclist_accessible = 1) OR
                  (bugs.reporter = $userid AND bugs.reporter_accessible = 1) OR
                  (bugs.assigned_to = $userid) " .
                  (Bugzilla->params->{'useqacontact'} ? "OR

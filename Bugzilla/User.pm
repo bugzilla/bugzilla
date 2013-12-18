@@ -875,15 +875,34 @@ sub can_edit_product {
     my ($self, $prod_id) = @_;
     my $dbh = Bugzilla->dbh;
 
-    my $has_external_groups =
-      $dbh->selectrow_array('SELECT 1
-                               FROM group_control_map
-                              WHERE product_id = ?
-                                AND canedit != 0
-                                AND group_id NOT IN(' . $self->groups_as_string . ')',
-                             undef, $prod_id);
+    if (Bugzilla->params->{'or_groups'}) {
+        my $groups = $self->groups_as_string;
+        # For or-groups, we check if there are any can_edit groups for the
+        # product, and if the user is in any of them. If there are none or
+        # the user is in at least one of them, they can edit the product
+        my ($cnt_can_edit, $cnt_group_member) = $dbh->selectrow_array(
+           "SELECT SUM(p.cnt_can_edit),
+                   SUM(p.cnt_group_member)
+              FROM (SELECT CASE WHEN canedit = 1 THEN 1 ELSE 0 END AS cnt_can_edit,
+                           CASE WHEN canedit = 1 AND group_id IN ($groups) THEN 1 ELSE 0 END AS cnt_group_member
+                    FROM group_control_map
+                    WHERE product_id = $prod_id) AS p");
+        return ($cnt_can_edit == 0 or $cnt_group_member > 0);
+    }
+    else {
+        # For and-groups, a user needs to be in all canedit groups. Therefore
+        # if the user is not in a can_edit group for the product, they cannot
+        # edit the product.
+        my $has_external_groups =
+          $dbh->selectrow_array('SELECT 1
+                                   FROM group_control_map
+                                  WHERE product_id = ?
+                                    AND canedit != 0
+                                    AND group_id NOT IN(' . $self->groups_as_string . ')',
+                                 undef, $prod_id);
 
-    return !$has_external_groups;
+        return !$has_external_groups;
+    }
 }
 
 sub can_see_bug {
@@ -904,9 +923,6 @@ sub visible_bugs {
     my @check_ids = grep(!exists $visible_cache->{$_}, @bug_ids);
 
     if (@check_ids) {
-        my $dbh = Bugzilla->dbh;
-        my $user_id = $self->id;
-
         foreach my $id (@check_ids) {
             my $orig_id = $id;
             detaint_natural($id)
@@ -914,54 +930,111 @@ sub visible_bugs {
                                                            function => 'Bugzilla::User->visible_bugs'});
         }
 
-        my $sth;
-        # Speed up the can_see_bug case.
-        if (scalar(@check_ids) == 1) {
-            $sth = $self->{_sth_one_visible_bug};
-        }
-        $sth ||= $dbh->prepare(
-            # This checks for groups that the bug is in that the user
-            # *isn't* in. Then, in the Perl code below, we check if
-            # the user can otherwise access the bug (for example, by being
-            # the assignee or QA Contact).
-            #
-            # The DISTINCT exists because the bug could be in *several*
-            # groups that the user isn't in, but they will all return the
-            # same result for bug_group_map.bug_id (so DISTINCT filters
-            # out duplicate rows).
-            "SELECT DISTINCT bugs.bug_id, reporter, assigned_to, qa_contact,
-                    reporter_accessible, cclist_accessible, cc.who,
-                    bug_group_map.bug_id
-               FROM bugs
-                    LEFT JOIN cc
-                              ON cc.bug_id = bugs.bug_id
-                                 AND cc.who = $user_id
-                    LEFT JOIN bug_group_map 
-                              ON bugs.bug_id = bug_group_map.bug_id
-                                 AND bug_group_map.group_id NOT IN ("
-                                     . $self->groups_as_string . ')
-              WHERE bugs.bug_id IN (' . join(',', ('?') x @check_ids) . ')
-                    AND creation_ts IS NOT NULL ');
-        if (scalar(@check_ids) == 1) {
-            $self->{_sth_one_visible_bug} = $sth;
-        }
-
-        $sth->execute(@check_ids);
-        my $use_qa_contact = Bugzilla->params->{'useqacontact'};
-        while (my $row = $sth->fetchrow_arrayref) {
-            my ($bug_id, $reporter, $owner, $qacontact, $reporter_access, 
-                $cclist_access, $isoncclist, $missinggroup) = @$row;
-            $visible_cache->{$bug_id} ||= 
-                ((($reporter == $user_id) && $reporter_access)
-                 || ($use_qa_contact
-                     && $qacontact && ($qacontact == $user_id))
-                 || ($owner == $user_id)
-                 || ($isoncclist && $cclist_access)
-                 || !$missinggroup) ? 1 : 0;
-        }
+        Bugzilla->params->{'or_groups'}
+            ? $self->_visible_bugs_check_or(\@check_ids)
+            : $self->_visible_bugs_check_and(\@check_ids);
     }
 
     return [grep { $visible_cache->{blessed $_ ? $_->id : $_} } @$bugs];
+}
+
+sub _visible_bugs_check_or {
+    my ($self, $check_ids) = @_;
+    my $visible_cache = $self->{_visible_bugs_cache};
+    my $dbh = Bugzilla->dbh;
+    my $user_id = $self->id;
+
+    my $sth;
+    # Speed up the can_see_bug case.
+    if (scalar(@$check_ids) == 1) {
+        $sth = $self->{_sth_one_visible_bug};
+    }
+    my $query = qq{
+        SELECT DISTINCT bugs.bug_id
+        FROM bugs
+            LEFT JOIN bug_group_map AS security_map ON bugs.bug_id = security_map.bug_id
+            LEFT JOIN cc AS security_cc ON bugs.bug_id = security_cc.bug_id AND security_cc.who = $user_id
+        WHERE bugs.bug_id IN (} . join(',', ('?') x @$check_ids) . qq{)
+          AND ((security_map.group_id IS NULL OR security_map.group_id IN (} . $self->groups_as_string . qq{))
+            OR (bugs.reporter_accessible = 1 AND bugs.reporter = $user_id)
+            OR (bugs.cclist_accessible = 1 AND security_cc.who IS NOT NULL)
+            OR bugs.assigned_to = $user_id
+    };
+
+    if (Bugzilla->params->{'useqacontact'}) {
+        $query .= " OR bugs.qa_contact = $user_id";
+    }
+    $query .= ')';
+
+    $sth ||= $dbh->prepare($query);
+    if (scalar(@$check_ids) == 1) {
+        $self->{_sth_one_visible_bug} = $sth;
+    }
+
+    # Set all bugs as non visible
+    foreach my $bug_id (@$check_ids) {
+        $visible_cache->{$bug_id} = 0;
+    }
+
+    # Now get the bugs the user can see
+    my $visible_bug_ids = $dbh->selectcol_arrayref($sth, undef, @$check_ids);
+    foreach my $bug_id (@$visible_bug_ids) {
+        $visible_cache->{$bug_id} = 1;
+    }
+}
+
+sub _visible_bugs_check_and {
+    my ($self, $check_ids) = @_;
+    my $visible_cache = $self->{_visible_bugs_cache};
+    my $dbh = Bugzilla->dbh;
+    my $user_id = $self->id;
+
+    my $sth;
+    # Speed up the can_see_bug case.
+    if (scalar(@$check_ids) == 1) {
+        $sth = $self->{_sth_one_visible_bug};
+    }
+    $sth ||= $dbh->prepare(
+        # This checks for groups that the bug is in that the user
+        # *isn't* in. Then, in the Perl code below, we check if
+        # the user can otherwise access the bug (for example, by being
+        # the assignee or QA Contact).
+        #
+        # The DISTINCT exists because the bug could be in *several*
+        # groups that the user isn't in, but they will all return the
+        # same result for bug_group_map.bug_id (so DISTINCT filters
+        # out duplicate rows).
+        "SELECT DISTINCT bugs.bug_id, reporter, assigned_to, qa_contact,
+                reporter_accessible, cclist_accessible, cc.who,
+                bug_group_map.bug_id
+           FROM bugs
+                LEFT JOIN cc
+                          ON cc.bug_id = bugs.bug_id
+                             AND cc.who = $user_id
+                LEFT JOIN bug_group_map 
+                          ON bugs.bug_id = bug_group_map.bug_id
+                             AND bug_group_map.group_id NOT IN ("
+                                 . $self->groups_as_string . ')
+          WHERE bugs.bug_id IN (' . join(',', ('?') x @$check_ids) . ')
+                AND creation_ts IS NOT NULL ');
+    if (scalar(@$check_ids) == 1) {
+        $self->{_sth_one_visible_bug} = $sth;
+    }
+
+    $sth->execute(@$check_ids);
+    my $use_qa_contact = Bugzilla->params->{'useqacontact'};
+    while (my $row = $sth->fetchrow_arrayref) {
+        my ($bug_id, $reporter, $owner, $qacontact, $reporter_access, 
+            $cclist_access, $isoncclist, $missinggroup) = @$row;
+        $visible_cache->{$bug_id} ||= 
+            ((($reporter == $user_id) && $reporter_access)
+             || ($use_qa_contact
+                 && $qacontact && ($qacontact == $user_id))
+             || ($owner == $user_id)
+             || ($isoncclist && $cclist_access)
+             || !$missinggroup) ? 1 : 0;
+    }
+
 }
 
 sub clear_product_cache {
@@ -983,14 +1056,25 @@ sub get_selectable_products {
     my $class_restricted = Bugzilla->params->{'useclassification'} && $class_id;
 
     if (!defined $self->{selectable_products}) {
-        my $query = "SELECT id " .
-                    "  FROM products " .
-                 "LEFT JOIN group_control_map " .
-                        "ON group_control_map.product_id = products.id " .
-                      " AND group_control_map.membercontrol = " . CONTROLMAPMANDATORY .
-                      " AND group_id NOT IN(" . $self->groups_as_string . ") " .
-                  "   WHERE group_id IS NULL " .
-                  "ORDER BY name";
+        my $query =
+            Bugzilla->params->{'or_groups'}
+                ?  "SELECT id
+                    FROM products
+                    WHERE id NOT IN (
+                        SELECT product_id
+                        FROM group_control_map
+                        WHERE group_control_map.membercontrol = " . CONTROLMAPMANDATORY . "
+                          AND group_id NOT IN (" . $self->groups_as_string . ")
+                    )
+                    ORDER BY name"
+                :  "SELECT id
+                    FROM products
+                        LEFT JOIN group_control_map
+                            ON group_control_map.product_id = products.id
+                            AND group_control_map.membercontrol = " . CONTROLMAPMANDATORY . "
+                            AND group_id NOT IN(" . $self->groups_as_string . ")
+                    WHERE group_id IS NULL
+                    ORDER BY name";
 
         my $prod_ids = Bugzilla->dbh->selectcol_arrayref($query);
         $self->{selectable_products} = Bugzilla::Product->new_from_list($prod_ids);
@@ -1084,14 +1168,21 @@ sub get_enterable_products {
     }
 
      # All products which the user has "Entry" access to.
-     my $enterable_ids = $dbh->selectcol_arrayref(
+     my $query =
            'SELECT products.id FROM products
-         LEFT JOIN group_control_map
-                   ON group_control_map.product_id = products.id
-                      AND group_control_map.entry != 0
-                      AND group_id NOT IN (' . $self->groups_as_string . ')
-            WHERE group_id IS NULL
-                  AND products.isactive = 1');
+            LEFT JOIN group_control_map
+                ON group_control_map.product_id = products.id
+                    AND group_control_map.entry != 0';
+
+    if (Bugzilla->params->{'or_groups'}) {
+        $query .= " WHERE (group_id IN (" . $self->groups_as_string . ")" .
+                  "    OR group_id IS NULL)";
+    } else {
+        $query .= " AND group_id NOT IN (" . $self->groups_as_string . ")" .
+                  " WHERE group_id IS NULL"
+    }
+    $query .= " AND products.isactive = 1";
+    my $enterable_ids = $dbh->selectcol_arrayref($query);
 
     if (scalar @$enterable_ids) {
         # And all of these products must have at least one component
@@ -2476,6 +2567,12 @@ Returns 1 if the specified user account exists and is visible to the user,
 Determines if, given a product id, the user can edit bugs in this product
 at all.
 
+=item C<visible_bugs($bugs)>
+
+Description: Determines if a list of bugs are visible to the user.
+Params:      C<$bugs> - An arrayref of Bugzilla::Bug objects or bug ids
+Returns:     An arrayref of the bug ids that the user can see
+
 =item C<can_see_bug(bug_id)>
 
 Determines if the user can see the specified bug.
@@ -2845,8 +2942,6 @@ L<Bugzilla|Bugzilla>
 =item DB_COLUMNS
 
 =item extern_id
-
-=item visible_bugs
 
 =item UPDATE_COLUMNS
 

@@ -196,6 +196,9 @@ sub update_params {
 
     $param->{'utf8'} = 1 if $new_install;
 
+    # Bug 452525: OR based groups are on by default for new installations
+    $param->{'or_groups'} = 1 if $new_install;
+
     # --- REMOVE OLD PARAMS ---
 
     my %oldparams;

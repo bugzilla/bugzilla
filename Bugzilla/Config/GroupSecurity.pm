@@ -83,6 +83,12 @@ sub get_param_list {
    name => 'strict_isolation',
    type => 'b',
    default => 0
+  },
+
+  {
+   name => 'or_groups',
+   type => 'b',
+   default => 0
   } );
   return @param_list;
 }

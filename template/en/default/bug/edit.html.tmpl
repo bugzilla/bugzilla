@@ -651,8 +651,9 @@
       [% IF NOT emitted_description %]
         [% emitted_description = 1 %]
           <div id="bz_restrict_group_visibility_help">
-            <b>Only users in all of the selected groups can view this 
-              [%+ terms.bug %]:</b>
+            <b>Only users in
+              [%+ IF Param('or_groups') %]at least one[% ELSE %]all[% END %]
+              of the selected groups can view this [% terms.bug %]:</b>
              <p class="instructions">
                Unchecking all boxes makes this a more public [% terms.bug %].
              </p>

@@ -1228,9 +1228,12 @@ sub _standard_joins {
     push(@joins, $security_join);
 
     if ($user->id) {
-        $security_join->{extra} =
-            ["NOT (" . $user->groups_in_sql('security_map.group_id') . ")"];
-            
+        # See also _standard_joins for the other half of the below statement
+        if (!Bugzilla->params->{'or_groups'}) {
+            $security_join->{extra} =
+                ["NOT (" . $user->groups_in_sql('security_map.group_id') . ")"];
+        }
+
         my $security_cc_join = {
             table => 'cc',
             as    => 'security_cc',
@@ -1304,10 +1307,17 @@ sub _standard_where {
     # until their group controls are set. So if a bug has a NULL creation_ts,
     # it shouldn't show up in searches at all.
     my @where = ('bugs.creation_ts IS NOT NULL');
-    
-    my $security_term = 'security_map.group_id IS NULL';
 
     my $user = $self->_user;
+    my $security_term = '';
+    # See also _standard_joins for the other half of the below statement
+    if (Bugzilla->params->{'or_groups'}) {
+        $security_term .= " (security_map.group_id IS NULL OR security_map.group_id IN (" . $user->groups_as_string . "))";
+    }
+    else {
+        $security_term = 'security_map.group_id IS NULL';
+    }
+
     if ($user->id) {
         my $userid = $user->id;
         # This indentation makes the resulting SQL more readable.

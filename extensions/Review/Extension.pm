@@ -80,6 +80,7 @@ sub _bug_mentors {
     if (!exists $self->{mentors}) {
         my @mentors;
         my $whiteboard = $self->status_whiteboard;
+        my $logout = 0;
         while ($whiteboard =~ /\[mentor=([^\]]+)\]/g) {
             my $mentor_string = $1;
             my $user;
@@ -89,6 +90,13 @@ sub _bug_mentors {
             } else {
                 # otherwise assume it's a : prefixed nick.  only works if a
                 # single user matches.
+
+                # we need to be logged in to do user searching
+                if (!Bugzilla->user->id) {
+                    Bugzilla->set_user(Bugzilla::User->check({ name => 'nobody@mozilla.org' }));
+                    $logout = 1;
+                }
+
                 foreach my $query ("*:$mentor_string*", "*$mentor_string*") {
                     my $matches = Bugzilla::User::match($query, 2);
                     if ($matches && scalar(@$matches) == 1) {
@@ -99,6 +107,7 @@ sub _bug_mentors {
             }
             push @mentors, $user if $user;
         }
+        Bugzilla->logout_request() if $logout;
         $self->{mentors} = \@mentors;
     }
     return $self->{mentors};

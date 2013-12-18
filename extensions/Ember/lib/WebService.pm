@@ -144,23 +144,7 @@ sub show {
                                        WHERE bug_when > ? AND bug_id = ?',
                                      undef, ($last_updated, $bug->id));
 
-        # Find any comments created since the last_updated date
-        $comments = $self->comments({ ids => $bug_id, new_since => $last_updated });
-        $comments = $comments->{bugs}->{$bug_id}->{comments};
-
-        # Find any new attachments or modified attachments since the
-        # last_updated date
-        my $updated_attachments =
-            $dbh->selectcol_arrayref('SELECT attach_id FROM attachments
-                                       WHERE (creation_ts > ? OR modification_time > ?)
-                                             AND bug_id = ?',
-                                     undef, ($last_updated, $last_updated, $bug->id));
-        if ($updated_attachments) {
-            $attachments = $self->_get_attachments({ attachment_ids => $updated_attachments,
-                                                     exclude_fields => ['data'] });
-        }
-
-        if (@$updated_fields || @$comments || @$updated_attachments) {
+        if (@$updated_fields) {
             # Also add in the delta_ts value which is in the bugs_activity
             # entries
             push(@$updated_fields, get_field_id('delta_ts'));
@@ -170,10 +154,6 @@ sub show {
     # Return all the things
     else {
         @fields = $self->_get_fields($bug);
-        $comments = $self->comments({ ids => $bug_id });
-        $comments = $comments->{bugs}->{$bug_id}->{comments};
-        $attachments = $self->_get_attachments({ ids => $bug_id,
-                                                 exclude_fields => ['data'] });
     }
 
     # Place the fields current value along with the field definition
@@ -225,12 +205,6 @@ sub show {
 
     # Complete the return data
     my $data = { id => $bug->id, fields => \@fields };
-
-    # Add the comments
-    $data->{comments} = $comments;
-
-    # Add the attachments
-    $data->{attachments} = $attachments;
 
     return $data;
 }

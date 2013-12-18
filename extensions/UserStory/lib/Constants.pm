@@ -24,6 +24,10 @@ use constant USER_STORY => {
         group       => 'editbugs',
         components  => [ 'Developer Tools: User Stories' ],
     },
+    'Firefox OS' => {
+        group       => 'editbugs',
+        components  => [],
+    },
 };
 
 1;

@@ -353,9 +353,9 @@ sub initialize {
     $_[0]->_create_cf_accessors();
 }
 
-sub cache_key {
+sub object_cache_key {
     my $class = shift;
-    my $key = $class->SUPER::cache_key(@_)
+    my $key = $class->SUPER::object_cache_key(@_)
       || return;
     return $key . ',' . Bugzilla->user->id;
 }
@@ -4422,7 +4422,7 @@ Ensures the accessors for custom fields are always created.
 
 =item set_op_sys
 
-=item cache_key
+=item object_cache_key
 
 =item bug_group
 

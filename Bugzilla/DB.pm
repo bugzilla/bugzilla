@@ -1362,14 +1362,19 @@ sub _bz_real_schema {
     my ($self) = @_;
     return $self->{private_real_schema} if exists $self->{private_real_schema};
 
-    my ($data, $version) = $self->selectrow_array(
-        "SELECT schema_data, version FROM bz_schema");
+    my $bz_schema;
+    unless ($bz_schema = Bugzilla->memcached->get({ key => 'bz_schema' })) {
+        $bz_schema = $self->selectrow_arrayref(
+            "SELECT schema_data, version FROM bz_schema"
+        );
+        Bugzilla->memcached->set({ key => 'bz_schema', value => $bz_schema });
+    }
 
     (die "_bz_real_schema tried to read the bz_schema table but it's empty!")
-        if !$data;
+        if !$bz_schema;
 
-    $self->{private_real_schema} = 
-        $self->_bz_schema->deserialize_abstract($data, $version);
+    $self->{private_real_schema} =
+        $self->_bz_schema->deserialize_abstract($bz_schema->[0], $bz_schema->[1]);
 
     return $self->{private_real_schema};
 }
@@ -1411,6 +1416,8 @@ sub _bz_store_real_schema {
     $sth->bind_param(1, $store_me, $self->BLOB_TYPE);
     $sth->bind_param(2, $schema_version);
     $sth->execute();
+
+    Bugzilla->memcached->clear({ key => 'bz_schema' });
 }
 
 # For bz_populate_enum_tables

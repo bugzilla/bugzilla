@@ -34,6 +34,11 @@ use constant AUDIT_CREATES => 1;
 use constant AUDIT_UPDATES => 1;
 use constant AUDIT_REMOVES => 1;
 
+# When USE_MEMCACHED is true, the class is suitable for serialisation to
+# Memcached. This will be flipped to true by default once the majority of
+# Bugzilla Object have been tested with Memcached.
+use constant USE_MEMCACHED => 0;
+
 # This allows the JSON-RPC interface to return Bugzilla::Object instances
 # as though they were hashes. In the future, this may be modified to return
 # less information.
@@ -48,11 +53,41 @@ sub new {
     my $class    = ref($invocant) || $invocant;
     my $param    = shift;
 
-    my $object = $class->_cache_get($param);
+    my $object = $class->_object_cache_get($param);
     return $object if $object;
 
-    $object = $class->new_from_hash($class->_load_from_db($param));
-    $class->_cache_set($param, $object);
+    my ($data, $set_memcached);
+    if (Bugzilla->feature('memcached')
+        && $class->USE_MEMCACHED
+        && ref($param) eq 'HASH' && $param->{cache})
+    {
+        if (defined $param->{id}) {
+            $data = Bugzilla->memcached->get({
+                table => $class->DB_TABLE,
+                id    => $param->{id},
+            });
+        }
+        elsif (defined $param->{name}) {
+            $data = Bugzilla->memcached->get({
+                table => $class->DB_TABLE,
+                name  => $param->{name},
+            });
+        }
+        $set_memcached = $data ? 0 : 1;
+    }
+    $data ||= $class->_load_from_db($param);
+
+    if ($data && $set_memcached) {
+        Bugzilla->memcached->set({
+            table => $class->DB_TABLE,
+            id    => $data->{$class->ID_FIELD},
+            name  => $data->{$class->NAME_FIELD},
+            data  => $data,
+        });
+    }
+
+    $object = $class->new_from_hash($data);
+    $class->_object_cache_set($param, $object);
 
     return $object;
 }
@@ -157,32 +192,32 @@ sub initialize {
 }
 
 # Provides a mechanism for objects to be cached in the request_cache
-sub _cache_get {
+sub _object_cache_get {
     my $class = shift;
     my ($param) = @_;
-    my $cache_key = $class->cache_key($param)
+    my $cache_key = $class->object_cache_key($param)
       || return;
     return Bugzilla->request_cache->{$cache_key};
 }
 
-sub _cache_set {
+sub _object_cache_set {
     my $class = shift;
     my ($param, $object) = @_;
-    my $cache_key = $class->cache_key($param)
+    my $cache_key = $class->object_cache_key($param)
       || return;
     Bugzilla->request_cache->{$cache_key} = $object;
 }
 
-sub _cache_remove {
+sub _object_cache_remove {
     my $class = shift;
     my ($param) = @_;
     $param->{cache} = 1;
-    my $cache_key = $class->cache_key($param)
+    my $cache_key = $class->object_cache_key($param)
       || return;
     delete Bugzilla->request_cache->{$cache_key};
 }
 
-sub cache_key {
+sub object_cache_key {
     my $class = shift;
     my ($param) = @_;
     if (ref($param) && $param->{cache} && ($param->{id} || $param->{name})) {
@@ -461,8 +496,9 @@ sub update {
     $self->audit_log(\%changes) if $self->AUDIT_UPDATES;
 
     $dbh->bz_commit_transaction();
-    $self->_cache_remove({ id => $self->id });
-    $self->_cache_remove({ name => $self->name }) if $self->name;
+    Bugzilla->memcached->clear({ table => $table, id => $self->id });
+    $self->_object_cache_remove({ id => $self->id });
+    $self->_object_cache_remove({ name => $self->name }) if $self->name;
 
     if (wantarray) {
         return (\%changes, $old_self);
@@ -481,8 +517,9 @@ sub remove_from_db {
     $self->audit_log(AUDIT_REMOVE) if $self->AUDIT_REMOVES;
     $dbh->do("DELETE FROM $table WHERE $id_field = ?", undef, $self->id);
     $dbh->bz_commit_transaction();
-    $self->_cache_remove({ id => $self->id });
-    $self->_cache_remove({ name => $self->name }) if $self->name;
+    Bugzilla->memcached->clear({ table => $table, id => $self->id });
+    $self->_object_cache_remove({ id => $self->id });
+    $self->_object_cache_remove({ name => $self->name }) if $self->name;
     undef $self;
 }
 
@@ -1399,7 +1436,7 @@ C<0> otherwise.
 
 =over
 
-=item cache_key
+=item object_cache_key
 
 =item check_time
 

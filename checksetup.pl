@@ -206,6 +206,9 @@ Bugzilla::Hook::process('install_before_final_checks', { silent => $silent });
 # Final checks
 ###########################################################################
 
+# Clear all keys from Memcached
+Bugzilla->memcached->clear_all();
+
 # Check if the default parameter for urlbase is still set, and if so, give
 # notification that they should go and visit editparams.cgi 
 if (Bugzilla->params->{'urlbase'} eq '') {

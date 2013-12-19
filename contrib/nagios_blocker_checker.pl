@@ -113,8 +113,9 @@ if ($config->{assignee}) {
     push @values, Bugzilla::User->check({ name => $config->{assignee} })->id;
 } elsif ($config->{component}) {
     $where = 'bugs.product_id = ? AND bugs.component_id = ? AND bugs.assigned_to = ?';
-    push @values, Bugzilla::Product->check({ name => $config->{product} })->id;
-    push @values, Bugzilla::Component->check({ name => $config->{component} })->id;
+    my $product = Bugzilla::Product->check({ name => $config->{product} });
+    push @values, $product->id;
+    push @values, Bugzilla::Component->check({ product => $product, name => $config->{component} })->id;
     push @values, Bugzilla::User->check({ name => $config->{unassigned} })->id;
 } else {
     $where = 'bugs.product_id = ? AND bugs.assigned_to = ?';

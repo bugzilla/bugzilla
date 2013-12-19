@@ -750,7 +750,7 @@ sub template_var {
     my $name = shift;
     my $request_cache = Bugzilla->request_cache;
     my $cache = $request_cache->{util_template_var} ||= {};
-    my $lang = $request_cache->{template_current_lang}->[0];
+    my $lang = $request_cache->{template_current_lang}->[0] || '';
     return $cache->{$lang}->{$name} if defined $cache->{$lang};
 
     my $template = Bugzilla->template_inner($lang);

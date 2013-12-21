@@ -165,10 +165,8 @@ sub init_page {
             print Bugzilla->cgi->header(-status => 503, 
                 -retry_after => SHUTDOWNHTML_RETRY_AFTER);
         }
-        my $t_output;
-        $template->process("global/message.$extension.tmpl", $vars, \$t_output)
+        $template->process("global/message.$extension.tmpl", $vars)
             || ThrowTemplateError($template->error);
-        say $t_output;
         exit;
     }
 }

@@ -108,8 +108,8 @@ sub logout {
     if ($cookie) {
         push(@login_cookies, $cookie->value);
     }
-    else {
-        push(@login_cookies, $cgi->cookie("Bugzilla_logincookie"));
+    elsif ($cookie = $cgi->cookie('Bugzilla_logincookie')) {
+        push(@login_cookies, $cookie);
     }
 
     # If we are a webservice using a token instead of cookie
@@ -118,7 +118,8 @@ sub logout {
         push(@login_cookies, $login_token->{'login_token'});
     }
 
-    return if !@login_cookies;
+    # Make sure that @login_cookies is not empty to not break SQL statements.
+    push(@login_cookies, '') unless @login_cookies;
 
     # These queries use both the cookie ID and the user ID as keys. Even
     # though we know the userid must match, we still check it in the SQL

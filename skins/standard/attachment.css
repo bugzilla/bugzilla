@@ -210,6 +210,18 @@ div#update_container {
     margin-left: 2%;
 }
 
+.viewall_desc {
+    width: 75%;
+    border: 1px solid black;
+    border-spacing: 0px;
+    border-collapse: collapse;
+}
+
+.viewall_desc th, .viewall_desc td {
+    border: 1px solid black;
+    padding: 0.3em;
+}
+
 .viewall_frame {
     width: 75%;
     height: 350px;

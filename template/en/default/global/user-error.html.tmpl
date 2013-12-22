@@ -885,9 +885,9 @@
 
   [% ELSIF error == "illegal_date" %]
     [% title = "Illegal Date" %]
-    '<tt>[% date FILTER html %]</tt>' is not a legal date.
+    '<kbd>[% date FILTER html %]</kbd>' is not a legal date.
     [% IF format %]
-      Please use the format '<tt>[% format FILTER html %]</tt>'.
+      Please use the format '<code>[% format FILTER html %]</code>'.
     [% END %]
     
   [% ELSIF error == "illegal_email_address" %]
@@ -938,9 +938,9 @@
 
   [% ELSIF error == "illegal_time" %]
     [% title = "Illegal Time" %]
-    '<tt>[% time FILTER html %]</tt>' is not a legal time.
+    '<kbd>[% time FILTER html %]</kbd>' is not a legal time.
     [% IF format %]
-      Please use the format '<tt>[% format FILTER html %]</tt>'.
+      Please use the format '<code>[% format FILTER html %]</code>'.
     [% END %]
 
   [% ELSIF error == "illegal_regexp" %]
@@ -1064,7 +1064,7 @@
 
   [% ELSIF error == "invalid_username" %]
     [% title = "Invalid Username" %]
-    The name <tt>[% name FILTER html %]</tt> is not a valid username.  
+    The name <kbd>[% name FILTER html %]</kbd> is not a valid username.
     Either you misspelled it, or the person has not
     registered for a [% terms.Bugzilla %] account.
 
@@ -1832,7 +1832,7 @@
 
   [% ELSIF error == "user_match_failed" %]
     [% title = "Match Failed" %]
-    <tt>[% name FILTER html %]</tt> does not exist or you are not allowed 
+    <kbd>[% name FILTER html %]</kbd> does not exist or you are not allowed
     to see that user.
 
   [% ELSIF error == "user_match_too_many" %]

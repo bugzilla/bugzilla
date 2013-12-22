@@ -372,8 +372,8 @@ END
     <p>
       You <b>must not</b> execute this script from your web browser.
       To install or upgrade Bugzilla, run this script from
-      the command-line (e.g. <tt>bash</tt> or <tt>ssh</tt> on Linux
-      or <tt>cmd.exe</tt> on Windows), and follow instructions given there.
+      the command-line (e.g. <kbd>bash</kbd> or <kbd>ssh</kbd> on Linux
+      or <kbd>cmd.exe</kbd> on Windows), and follow instructions given there.
     </p>
 
     <p>

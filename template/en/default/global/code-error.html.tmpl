@@ -64,13 +64,13 @@
 
   [% ELSIF error == "chart_datafile_corrupt" %]
     The chart data file [% file FILTER html %] is corrupt.
-        
+
   [% ELSIF error == "chart_dir_nonexistent" %]
-    One of the directories <tt>[% dir FILTER html %]</tt> and 
-    <tt>[% graph_dir FILTER html %]</tt> does not exist.
-  
+    One of the directories <kbd>[% dir FILTER html %]</kbd> and
+    <kbd>[% graph_dir FILTER html %]</kbd> does not exist.
+
   [% ELSIF error == "chart_file_open_fail" %]
-    Unable to open the chart datafile <tt>[% filename FILTER html %]</tt>.
+    Unable to open the chart datafile <kbd>[% filename FILTER html %]</kbd>.
  
   [% ELSIF error == "column_alter_nonexistent_fk" %]
     You attempted to modify the foreign key for 
@@ -430,15 +430,15 @@
   with details of what you were doing at the time this message appeared.
 </p>
 
-<tt>
+<samp>
   <script type="text/javascript"> <!--
-    document.write("<p>URL: " + 
+    document.write("<p>URL: " +
                     document.location.href.replace(/&/g,"&amp;")
                                           .replace(/</g,"&lt;")
                                           .replace(/>/g,"&gt;") + "</p>");
   // -->
   </script>
-</tt>
+</samp>
 
 <table cellpadding="20">
   <tr>

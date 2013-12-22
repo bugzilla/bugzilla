@@ -798,6 +798,30 @@
     or you don't have access to it. The following is a list of the
     products you can choose from.
 
+  [% ELSIF message_tag == "quips_added" %]
+    Your quip <em>[% added_quip FILTER html %]</em> has been added.
+    [% IF Param("quip_list_entry_control") == "moderated" AND
+          !user.in_group('bz_quip_moderators') %]
+      It will be used as soon as it gets approved.
+    [% END %]
+
+  [% ELSIF message_tag == "quips_deleted" %]
+    The quip <em>[% deleted_quip FILTER html %]</em> has been deleted.
+
+  [% ELSIF message_tag == "quips_approved_unapproved" %]
+    [% IF approved.size == 1 %]
+      One quip
+    [% ELSE %]
+      [% approved.size %] quips
+    [% END %]
+    approved and
+    [% IF unapproved.size == 1 %]
+      one quip
+    [% ELSE %]
+      [%+ unapproved.size %] quips
+    [% END %]
+    unapproved.
+
   [% ELSIF message_tag == "report_created" %]
     OK, you have a new saved report named <em>[% reportname FILTER html %]</em>.
 

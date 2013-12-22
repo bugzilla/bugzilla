@@ -10,7 +10,8 @@
     Edit Group Controls for [% product.name FILTER html %]
 [% END %]
 [% PROCESS global/header.html.tmpl 
-   title = title 
+  title = title
+  style_urls = ['skins/standard/admin.css']
 %]
 
 [% display_headers = 1 %]
@@ -24,7 +25,7 @@
       <input type="hidden" name="token" value="[% token FILTER html %]">
 
       <table id="form" cellspacing="0" cellpadding="4" border="1">
-        <tr bgcolor="#6666ff">
+        <tr class="column_header">
           <th>Group</th>
           <th>Entry</th>
           <th>MemberControl</th>
@@ -37,7 +38,7 @@
         </tr>
   [% END %]
   [% IF !group.group.isactive %]
-    <tr bgcolor="#bbbbbb">
+    <tr class="disabled">
       <td>[% group.group.name FILTER html %]</td>
       <td align="center" colspan="7">Disabled</td>
       <td>[% group.bug_count FILTER html %]</td>

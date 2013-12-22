@@ -25,7 +25,7 @@
 %]
 
 <table border="1" cellpadding="4" cellspacing="0">
-  <tr bgcolor="#6666FF">
+  <tr class="column_header">
     <th valign="top" class="left">Field</th>
     <th valign="top" class="left">Value</th>
   </tr>
@@ -42,7 +42,7 @@
         [% IF classification.description %]
           [% classification.description FILTER html_light %]
         [% ELSE %]
-          <span style="color: red">missing</span>
+          <span class="warning">missing</span>
         [% END %]
       </td>
     </tr>
@@ -59,13 +59,7 @@
   <tr>
     <td valign="top">Description:</td>
     [%# descriptions are intentionally not filtered to allow html content %]
-    <td valign="top">
-      [% IF product.description %]
-        [% product.description FILTER html_light %]
-      [% ELSE %]
-        <span style="color: red">missing</span>
-      [% END %]
-    </td>
+    <td valign="top">[% product.description FILTER html_light %]</td>
   </tr>
 
   [% IF Param('usetargetmilestone') %]
@@ -111,14 +105,7 @@
           [% FOREACH c = product.components %]
             <tr>
               <th>[% c.name FILTER html %]:</th>
-              [%# descriptions are intentionally not filtered to allow html content %]
-              <td>
-                [% IF c.description %]
-                  [% c.description FILTER html_light %]
-                [% ELSE %]
-                  <span style="color: red">missing</span>
-                [% END %]
-              </td>
+              <td>[% c.description FILTER html_light %]</td>
             </tr>
           [% END %]
         </table>
@@ -214,7 +201,7 @@
 
   [% ELSE %]
 
-    <table border="0" cellpadding="20" width="70%" bgcolor="red">
+    <table class="confirmation">
       <tr>
         <td>
           There

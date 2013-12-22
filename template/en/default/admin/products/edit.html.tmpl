@@ -45,16 +45,12 @@
           [% FOREACH component = product.components %]
             <a href="editcomponents.cgi?action=edit&product=
             [%- product.name FILTER uri %]&component=
-            [%- component.name FILTER uri %]">[% component.name FILTER html %]</a>:&nbsp;
-            [% IF component.description %]
-              [% component.description FILTER html_light %]
-            [% ELSE %]
-              <font color="red">description missing</font>
-            [% END %]
+            [%- component.name FILTER uri %]">[% component.name FILTER html %]</a>:
+            [% component.description FILTER html_light %]
             <br>
           [% END %]
         [% ELSE %]
-          <font color="red">missing</font>
+          <span class="warning">missing</span>
         [% END %]
       </td>
     </tr>
@@ -70,7 +66,7 @@ versions:</a>
             <br>
           [% END %]
         [% ELSE %]
-          <font color="red">missing</font>
+          <span class="warning">missing</span>
         [% END %]
       </td>
     </tr>
@@ -87,7 +83,7 @@ versions:</a>
             <br>
             [% END %]
           [% ELSE %]
-            <font color="red">missing</font>
+            <span class="warning">missing</span>
           [% END %]
         </td>
       </tr>

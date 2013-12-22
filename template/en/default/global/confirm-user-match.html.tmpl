@@ -100,9 +100,9 @@
             [% IF query.value.users.size %]
                 [% IF query.value.users.size > 1 %]
                   [% IF query.value.status == 'fail' %]
-                    <font color="#FF0000">
+                    <span class="warning">
                       matches multiple users.
-                    </font>
+                    </span>
                     Please go back and try again with a more specific
                     name/address.
                   [% ELSE %]
@@ -136,12 +136,13 @@
                   <b>[% query.value.users.0.identity FILTER html %]</b>
                 [% END %]
             [% ELSE %]
+              <span class="warning">
                 [% IF query.key.length < 3 %]
-                  <font color="#FF0000">was too short for substring match
-                  (minimum 3 characters)</font>
+                  was too short for substring match (minimum 3 characters)
                 [% ELSE %]
-                  <font color="#FF0000">did not match anything</font>
+                  did not match anything
                 [% END %]
+              </span>
             [% END %]
             </div>
         [% END %]

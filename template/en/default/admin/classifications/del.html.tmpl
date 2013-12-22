@@ -8,10 +8,11 @@
 
 [% PROCESS global/header.html.tmpl
   title = "Delete classification"
+  style_urls = ['skins/standard/admin.css']
 %]
 
 <table border=1 cellpadding=4 cellspacing=0>
-<tr bgcolor="#6666ff">
+<tr class="column_header">
   <th valign="top" class="left">Part</th>
   <th valign="top" class="left">Value</th>
 
@@ -25,7 +26,7 @@
     [% IF classification.description %]
       [% classification.description FILTER html_light %]
     [% ELSE %]
-      <font color="red">description missing</font>
+      <span class="warning">description missing</span>
     [% END %]
   </td>
 

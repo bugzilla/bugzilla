@@ -107,10 +107,10 @@
           [% END %]
         </select>
       [% ELSE %]
-        <font color="red">
+        <span class="warning">
           Unknown param type [% param.type FILTER html %]!!!
-        </font>
-      [% END %]  
+        </span>
+      [% END %]
       </p>
       [% UNLESS param.no_reset %]
         <p>

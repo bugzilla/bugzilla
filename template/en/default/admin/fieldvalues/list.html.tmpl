@@ -23,6 +23,7 @@
                    ([% field.name FILTER html %]) field[% END %]
 [% PROCESS global/header.html.tmpl
   title = title
+  style_urls = ['skins/standard/admin.css']
 %]
 
 [% edit_contentlink = BLOCK %]editvalues.cgi?action=edit&amp;field=

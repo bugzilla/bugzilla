@@ -273,7 +273,6 @@
 ],
 
 'bug/create/create-guided.html.tmpl' => [
-  'tablecolour',
   'sel',
   'productstring', 
 ],

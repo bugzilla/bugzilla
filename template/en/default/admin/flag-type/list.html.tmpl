@@ -10,12 +10,7 @@
 
 [% PROCESS global/header.html.tmpl
   title = 'Administer Flag Types'
-  style = "
-    table#flag_types_bugs tr th,
-    table#flag_types_attachments tr th { text-align: left; }
-    .inactive { color: #787878; }
-    .multiplicable { display: block; }
-  "
+  style_urls = ['skins/standard/admin.css']
   onload="var f = document.flagtype_form; selectProduct(f.product, f.component, null, null, '__All__');"
   javascript_urls=["js/productform.js"]
   doc_section = "flags-overview.html#flag-types"
@@ -98,7 +93,7 @@
 [% BLOCK display_flag_types %]
   <table id="flag_types_[% types_id FILTER html %]" cellspacing="0" cellpadding="4" border="1">
 
-    <tr>
+    <tr class="column_header">
       <th>Edit name ...</th>
       <th>Description</th>
       <th>Sortkey</th>

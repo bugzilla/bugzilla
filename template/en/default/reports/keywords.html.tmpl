@@ -17,6 +17,7 @@
 
 [% PROCESS global/header.html.tmpl
   title = "$terms.Bugzilla Keyword Descriptions"
+  style_urls = ['skins/standard/admin.css']
 %]
 
 [% FOREACH keyword = keywords %]
@@ -26,7 +27,7 @@
     [% END %]
 
     <table border="1" cellpadding="4" cellspacing="0">
-      <tr bgcolor="#6666FF">
+      <tr class="column_header">
         <th>Name</th>
         <th>Description</th>
         <th>Open [% terms.Bugs %]</th>

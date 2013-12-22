@@ -853,6 +853,12 @@
       [%+ series.name FILTER html %]</em>
       has been deleted.
 
+  [% ELSIF message_tag == "series_updated" %]
+    [% title = "Series Updated" %]
+    The series <em>[% default.category FILTER html %] /
+    [%+ default.subcategory FILTER html %] /
+    [%+ default.name FILTER html %]</em> has been updated.
+
   [% ELSIF message_tag == "shutdown" %]
     [% title = "$terms.Bugzilla is Down" %]
     [% Param("shutdownhtml") %]

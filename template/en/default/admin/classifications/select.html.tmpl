@@ -8,10 +8,11 @@
 
 [% PROCESS global/header.html.tmpl
   title = "Select classification"
+  style_urls = ['skins/standard/admin.css']
 %]
 
 <table border=1 cellpadding=4 cellspacing=0>
-  <tr bgcolor="#6666ff">
+  <tr class="column_header">
     <th>Edit Classification ...</th>
     <th>Description</th>
     <th>Sortkey</th>
@@ -26,7 +27,7 @@
       [% IF cl.description %]
         [% cl.description FILTER html_light %]
       [% ELSE %]
-        <font color="red">none</font>
+        <span class="warning">none</span>
       [% END %]
       </td>
       <td valign="top">[% cl.sortkey FILTER html %]</td>

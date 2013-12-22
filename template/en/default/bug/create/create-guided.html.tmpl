@@ -16,24 +16,8 @@
 [% PROCESS global/header.html.tmpl
    title = "Enter $terms.ABug"
    onload = "PutDescription()"
-   style = "#somebugs { width: 100%; height: 500px }"
+   style_urls = ['skins/standard/enter_bug.css']
  %]
-
-[% style = "" %]
-
-<p>
-  <font color="red">
-    This is a template used on mozilla.org.  This template, and the
-    comment-guided.txt.tmpl template that formats the data submitted via 
-    the form in this template, are included as a demo of what it's
-    possible to do with custom templates in general, and custom [% terms.bug %]
-    entry templates in particular. As much of the text will not apply, 
-    you should alter it 
-    if you want to use this form on your [% terms.Bugzilla %] installation.
-  </font>
-</p>
-
-[% tablecolour = "#FFFFCC" %]
 
 [%# This script displays the descriptions for selected components. %]
 <script type="text/javascript">
@@ -56,12 +40,12 @@ function PutDescription() {
 
 <h3 id="step1">Step 1 of 3 - has your [% terms.bug %] already been reported?</h3>
 
+<p class="warning">
+  Please don't skip this step - half of all [% terms.bugs %] filed are
+  reported already.
 <p>
-  <font color="red">Please don't skip this step - half of all 
-  [% terms.bugs %] filed are
-  reported already.</font>
-    Check the two lists of frequently-reported [% terms.bugs %]:
-</p>
+
+<p>Check the two lists of frequently-reported [% terms.bugs %]:</p>
 
 [%# Include other products if sensible %]
 [% IF product.name == "Firefox" %]
@@ -85,7 +69,7 @@ function PutDescription() {
 <p>
     If your [% terms.bug %] isn't there, search [% terms.Bugzilla %] by entering
     a few key words having to do with your [% terms.bug %] in this box.
-    For example: <tt><b>pop3 mail</b></tt> or <tt><b>copy paste</b></tt>.
+    For example: <kbd><b>pop3 mail</b></kbd> or <kbd><b>copy paste</b></kbd>.
     The results will appear above.
   </p>
 
@@ -114,7 +98,7 @@ function PutDescription() {
 
 <p>
   Look through the search results. If you get the
-  <tt><b>[% terms.zeroSearchResults %]</b></tt> message, [% terms.Bugzilla %]
+  <kbd><b>[% terms.zeroSearchResults %]</b></kbd> message, [% terms.Bugzilla %]
   found no [% terms.bugs %] that
   match. Check for typing mistakes, or try fewer or different keywords.
   If you find [% terms.abug %] that looks the same as yours, please add
@@ -140,7 +124,7 @@ function PutDescription() {
 
 <table valign="top" cellpadding="5" cellspacing="5" border="0">
 
-  <tr bgcolor="[% tablecolour %]">
+  <tr class="guided_form_field">
     <td align="right" valign="top">
       <b>Product</b>
     </td>
@@ -174,8 +158,7 @@ function PutDescription() {
             </select>
           </td>
           <td valign="top" width="100%">
-              <div id="description" style="color: green; margin-left: 10px;
-                                           height: 5em; overflow: auto;">
+              <div id="description" class="comment">
                 <script type="text/javascript">
                   if ((document.getElementById) && (document.body.innerHTML)) {
                     document.write("\
@@ -202,7 +185,7 @@ function PutDescription() {
       are based on which are most common in the b.m.o database %]
   [% rep_platform = [ "PC", "Macintosh", "All", "Other" ] %]
 
-  <tr bgcolor="[% tablecolour %]">
+  <tr class="guided_form_field">
     <td align="right" valign="top">
       <b>[% field_descs.rep_platform FILTER html %]</b>
     </td>
@@ -233,7 +216,7 @@ function PutDescription() {
     [% buildid = cgi.param("buildid") %]
   [% END %]
 
-  <tr bgcolor="[% tablecolour %]">
+  <tr class="guided_form_field">
     <td align="right" valign="top">
       <b>Build Identifier</b>
     </td>
@@ -265,7 +248,7 @@ function PutDescription() {
    </td>
   </tr>
 
-  <tr bgcolor="[% tablecolour %]">
+  <tr class="guided_form_field">
     <td align="right" valign="top">
       <b>Summary</b>
     </td>
@@ -277,14 +260,14 @@ function PutDescription() {
         Please be descriptive and use lots of keywords.
       </p>
       <p>
-        <tt>
-          <font color="#990000">Bad example</font>: mail crashed
-        </tt>
+        <kbd>
+          <span class="bad">Bad example</span>: mail crashed
+        </kbd>
         <br>
-        <tt>
-          <font color="#009900">Good example</font>:
+        <kbd>
+          <span class="good">Good example</span>:
           crash if I close the mail window while checking for new POP mail
-        </tt>
+        </kbd>
       </p>
     </td>
   </tr>
@@ -304,22 +287,22 @@ function PutDescription() {
         as specific as possible about what is wrong.
       </p>
       <p>
-        <tt>
-          <font color="#990000">Bad example</font>: Mozilla crashed.
+        <kbd>
+          <span class="bad">Bad example</span>: Mozilla crashed.
           You suck!
-        </tt>
+        </kbd>
         <br>
-        <tt>
-          <font color="#009900">Good example</font>: After a crash which
+        <kbd>
+          <span class="good">Good example</span>: After a crash which
           happened when I was sorting in the Bookmark Manager,<br> all of my
           top-level bookmark folders beginning with the letters Q to Z are 
           no longer present.
-        </tt>
+        </kbd>
       </p>
     </td>
   </tr>
 
-  <tr bgcolor="[% tablecolour %]">
+  <tr class="guided_form_field">
     <td align="right" valign="top">
       <b>Reproducibility</b>
     </td>
@@ -359,7 +342,7 @@ function PutDescription() {
     </td>
   </tr>
 
-  <tr bgcolor="[% tablecolour %]">
+  <tr class="guided_form_field">
     <td valign="top" align="right">
       <b>Actual Results</b>
     </td>
@@ -391,7 +374,7 @@ function PutDescription() {
     </td>
   </tr>
 
-  <tr bgcolor="[% tablecolour %]">
+  <tr class="guided_form_field">
     <td valign="top" align="right">
       <b>Additional Information</b>
     </td>
@@ -412,13 +395,13 @@ function PutDescription() {
         testcase</b>, should be added
         using the "Add an Attachment" link on the [% terms.bug %], after
         it is filed. If you believe that it's relevant, please also include
-        your build configuration, obtained by typing <tt>about:buildconfig</tt>
+        your build configuration, obtained by typing <kbd>about:buildconfig</kbd>
         into your URL bar.
         <br>
         <br>
         If you are reporting a crash, note the module in
-        which the software crashed (e.g., <tt>Application Violation in
-        gkhtml.dll</tt>).
+        which the software crashed (e.g., <kbd>Application Violation in
+        gkhtml.dll</kbd>).
       </p>
     </td>
   </tr>

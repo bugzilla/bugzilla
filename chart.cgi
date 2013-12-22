@@ -291,6 +291,7 @@ sub edit {
 
     $vars->{'category'} = Bugzilla::Chart::getVisibleSeries();
     $vars->{'default'} = $series;
+    $vars->{'message'} = 'series_updated' if $vars->{'changes_saved'};
 
     print $cgi->header();
     $template->process("reports/edit-series.html.tmpl", $vars)

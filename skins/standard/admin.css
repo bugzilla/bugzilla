@@ -6,6 +6,10 @@
  * defined by the Mozilla Public License, v. 2.0.
  */
 
+.column_header {
+    background-color: #66f;
+}
+
 .warningmessages, .criticalmessages {
     background-color: white;
     border-style: solid;
@@ -39,7 +43,7 @@ p.areyoureallyreallysure {
     font-weight: bold;
 }
 
-tr.param_disabled {
+tr.disabled {
     background-color: lightgrey;
 }
 
@@ -123,4 +127,16 @@ th.title {
 
 #edit_custom_field th.narrow_label {
     white-space: normal;
+}
+
+#flag_types_bugs tr th, #flag_types_attachments tr th {
+    text-align: left;
+}
+
+#flag_types_bugs .inactive, #flag_types_attachments .inactive {
+    color: #787878;
+}
+
+#flag_types_bugs .multiplicable, #flag_types_attachments .multiplicable {
+    display: block;
 }

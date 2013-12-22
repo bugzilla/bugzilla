@@ -16,6 +16,7 @@
                    '[% product.name FILTER html %]'[% END %]
 [% PROCESS global/header.html.tmpl
   title = title
+  style_urls = ['skins/standard/admin.css']
 %]
 
 [% edit_contentlink = BLOCK %]editcomponents.cgi?action=edit&amp;product=

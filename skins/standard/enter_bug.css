@@ -24,11 +24,16 @@
 #Create #field_container_component { width: 1px; }
 #Create #field_container_reporter  { width: 100%; }
 
-#Create .comment {
+#Create .comment, #description.comment {
     vertical-align: top;
     overflow: auto;
     color: green;
 }
+
+#description.comment {
+    margin-left: 10px;
+}
+
 #Create #comp_desc_container td { padding: 0; }
 #Create #comp_desc { height: 11ex; }
 #Create #os_guess_note {
@@ -53,3 +58,23 @@
 #possible_duplicates .yui-dt-col-update_token { white-space: nowrap; }
 
 form#Create #possible_duplicates td { vertical-align: middle; }
+
+
+/* CSS rules for the guided form. */
+
+.guided_form_field {
+    background-color: #ffc;
+}
+
+#somebugs {
+    width: 100%;
+    height: 500px;
+}
+
+.good {
+    color: #090;
+}
+
+.bad {
+    color: #900;
+}

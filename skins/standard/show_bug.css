@@ -47,6 +47,11 @@ table#flags {
     display: inline;
 }
 
+.navigation_link {
+    color: #777;
+    font-style: italic;
+}
+
 .bz_show_bug_column {
   vertical-align: top;
 }

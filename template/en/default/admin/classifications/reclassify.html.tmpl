@@ -22,7 +22,7 @@
         [% IF classification.description %]
           [% classification.description FILTER html_light %]
         [% ELSE %]
-          <font color="red">description missing</font>
+          <span class="warning">description missing</span>
         [% END %]
       </td>
 

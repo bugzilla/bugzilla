@@ -413,7 +413,8 @@ dl dl > dt {
     border: 1px solid #333333;
 }
 
-#attachment_table th, .bz_attach_footer, .bz_time_tracking_table th {
+#attachment_table th, .bz_attach_footer, .bz_time_tracking_table th,
+.dependency_tree_controls {
     background-color: #E0E0E0;
     color: black;
 }
@@ -422,7 +423,7 @@ dl dl > dt {
     border: 1px solid #333333;
 }
 
-.bz_attach_extra_info {
+.bz_attach_extra_info, .bz_info {
     font-size: smaller;
 }
 

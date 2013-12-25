@@ -92,6 +92,10 @@ sub new {
     # into bugs_fulltext).
     $self->do('SET SESSION group_concat_max_len = 128000000');
 
+    # MySQL 5.5.2 and older have this variable set to true, which causes
+    # trouble, see bug 870369.
+    $self->do('SET SESSION sql_auto_is_null = 0');
+
     return $self;
 }
 

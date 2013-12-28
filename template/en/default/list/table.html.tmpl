@@ -177,12 +177,12 @@
     [% END %]
     <td class="first-child bz_id_column">
       <a href="show_bug.cgi?id=[% bug.bug_id %]">[% bug.bug_id %]</a>
-      <span style="display: none">[%+ '[SEC]' IF bug.secure_mode %]</span>
+      <span class="bz_default_hidden">[%+ '[SEC]' IF bug.secure_mode %]</span>
     </td>
 
     [% FOREACH column = displaycolumns %]
       [% col_abbrev = abbrev.$column %]
-    <td [% 'style="white-space: nowrap"' IF NOT col_abbrev.wrap %]
+    <td [% 'class="nowrap"' IF NOT col_abbrev.wrap %]
         class="bz_[% column FILTER css_class_quote %]_column">
       [% IF col_abbrev.maxlength %]
         <span title="[%- display_value(column, bug.$column) FILTER html %]">

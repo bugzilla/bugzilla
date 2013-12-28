@@ -36,7 +36,7 @@
     [%# parts contains date ranges (from, to). %]
     [% part = parts.shift %]
     <div align="right">
-      <h4 style="padding-right: 2em; margin: 0;">
+      <h4>
         [% IF part.0 or part.1 %]
           [% part.0 OR "Up" FILTER html %] to [% part.1 OR "now" FILTER html %]
         [% ELSE %]
@@ -52,7 +52,7 @@
   [% END %]
 
   [% IF detailed %]
-    <h4 style="margin: 0">
+    <h4>
       Total of [% global.remaining FILTER format("%.2f") %]h remains from
       original estimate of [% global.estimated FILTER format("%.2f") %]h
       [% IF global.deadline %]
@@ -62,13 +62,13 @@
   [% END %]
 
   [% IF monthly %]
-    <h4 style="margin: 0">Total of [% global.grand_total FILTER format("%.2f") %] hours worked</h4>
+    <h4>Total of [% global.grand_total FILTER format("%.2f") %] hours worked</h4>
     <hr noshade size="1">
   [% END %]
 
   [% IF null.size > 0 %]
     [% INCLUDE inactive_report %]
-    <h4 style="margin: 0">Total of [% null.size %] inactive [% terms.bugs %]</h4>
+    <h4>Total of [% null.size %] inactive [% terms.bugs %]</h4>
   [% END %]
 
 [% END %]
@@ -255,15 +255,16 @@
 
 [% BLOCK query_form %]
 <hr noshade size=1>
-<form method="post" name="summary" style="display: inline" action="summarize_time.cgi">
+<form method="post" name="summary" action="summarize_time.cgi">
 <input type="hidden" name="do_depends" value="[% do_depends FILTER html %]">
 <input type="hidden" name="id" value="[% ids.join(",") FILTER html %]">
 <input type="hidden" name="do_report" value="1">
 
 [% IF warn_swap_dates %]
-    <h4 style="border: 1px solid red; margin: 1em; padding: 0.5em">The
-    end date specified occurs before the start date, which doesn't
-    make sense; the dates below have therefore been swapped.</h4>
+  <p class="warning_swapped_data">
+    The end date specified occurs before the start date, which doesn't
+    make sense; the dates below have therefore been swapped.
+  </p>
 [% END %]
 
 <table>

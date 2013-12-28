@@ -43,6 +43,20 @@ p.areyoureallyreallysure {
     font-weight: bold;
 }
 
+#admin_table {
+    border-collapse: collapse;
+    border: 1px solid black;
+}
+
+#admin_table th {
+    white-space: normal !important;
+}
+
+#admin_table th, #admin_table td {
+    border: 1px solid black;
+    padding: 0.3em;
+}
+
 tr.disabled {
     background-color: lightgrey;
 }
@@ -139,4 +153,30 @@ th.title {
 
 #flag_types_bugs .multiplicable, #flag_types_attachments .multiplicable {
     display: block;
+}
+
+table.whining_list {
+    border: 1px solid black;
+    border-collapse: collapse;
+    width: 100%;
+}
+
+table.whining_list th, table.whining_list td {
+    padding: 0.3em;
+}
+
+table.whining_list th {
+    text-align: right;
+    font-weight: normal !important;
+    white-space: normal !important;
+}
+
+table.whining_list th.subtitle {
+    font-weight: bold !important;
+    text-align: left !important;
+}
+
+table.schedule_list th, table.search_list th {
+    text-align: center;
+    font-weight: bold !important;
 }

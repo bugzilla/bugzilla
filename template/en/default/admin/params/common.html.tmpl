@@ -69,14 +69,14 @@
                 [% END %]
               </select>
             </td>
-            <td style="vertical-align: bottom">
+            <td class="bottom">
               <button type="button"
                       onClick="sortedList_moveItem('[% param.name FILTER html %]', -1, '[% sortlist_separator %]');">&uarr;</button>
             </td>
           </tr>
 
           <tr>
-            <td style="vertical-align: top">
+            <td class="top">
               <button type="button"
                       onClick="sortedList_moveItem('[% param.name FILTER html %]', +1, '[% sortlist_separator %]');">&darr;</button>
             </td>

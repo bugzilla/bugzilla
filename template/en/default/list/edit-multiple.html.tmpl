@@ -28,15 +28,16 @@
 
 <hr>
 
-<p style="font-size:smaller">
- To change multiple [% terms.bugs %]:</p>
-<ol style="font-size:smaller">
-  <li>Check the [% terms.bugs %] you want to change above.</li>
-  <li>Make your changes in the form fields below.  If the change
-   you are making requires an explanation, include it in
-   the comments box.</li>
-  <li>Click the <em>Commit</em> button.</li>
-</ol>
+<div class="bz_info">
+  To change multiple [% terms.bugs %]:
+  <ol>
+    <li>Check the [% terms.bugs %] you want to change above.</li>
+    <li>Make your changes in the form fields below.  If the change
+        you are making requires an explanation, include it in
+        the comments box.</li>
+    <li>Click the <em>Commit</em> button.</li>
+  </ol>
+</div>
 
 <table id="form">
   <tr>
@@ -355,7 +356,7 @@
   </table>
 
   [% IF foundinactive %]
-    <p style="font-size:smaller">(Note: [% terms.Bugs %] may not be added to [% FILTER inactive %]inactive
+    <p class="bz_info">(Note: [% terms.Bugs %] may not be added to [% FILTER inactive %]inactive
     groups[% END %], only removed.)</p>
   [% END %]
 

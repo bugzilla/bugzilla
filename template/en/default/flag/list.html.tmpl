@@ -132,9 +132,8 @@
         </select>
       </td>
       [% IF any_flags_requesteeble %]
-        <td>
+        <td class="bz_flags">
           [% IF (type.is_active && type.is_requestable && type.is_requesteeble) || (flag && flag.requestee) %]
-            <span style="white-space: nowrap;">
               [% SET grant_list = [] %]
               [% IF Param('usemenuforusers') %]
                 [% grant_list = type.grant_list %]
@@ -158,7 +157,6 @@
                          classes  => ["requestee"]
                          custom_userlist => grant_list
               %]
-            </span>
           [% END %]
         </td>
       [% END %]

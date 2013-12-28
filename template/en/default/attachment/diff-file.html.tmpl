@@ -14,7 +14,11 @@
   # considers the first row to determine column widths. If a colspan is found,
   # it then share the width equally among all columns, which we don't want.
   #%]
-<table class="file_table"><thead><tr><td class="num"></td><td></td><td class="num"></td><td></td></tr><tr><td class="file_head" colspan="4"><a href="#" onclick="return twisty_click(this)">[% collapsed ? '(+)' : '(-)' %]</a><input type="checkbox" name="[% file.filename FILTER html %]"[% collapsed ? '' : ' checked' %] style="display: none">
+<table class="file_table"><thead><tr><td class="num"></td><td></td><td
+ class="num"></td><td></td></tr><tr><td class="file_head" colspan="4"><a href="#"
+ onclick="return twisty_click(this)">[% collapsed ? '(+)' : '(-)' %]</a><input
+ type="checkbox" name="[% file.filename FILTER html %]"[% collapsed ? '' : ' checked' %]
+ class="bz_default_hidden">
   [% IF lxr_prefix && !file.is_add %]
     <a href="[% lxr_prefix %]">[% file.filename FILTER html %]</a>
   [% ELSE %]

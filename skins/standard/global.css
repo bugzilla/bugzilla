@@ -397,10 +397,6 @@ dl dl > dt {
     border-top: none;
 }
 
-#admin_table th {
-    white-space: normal !important;
-}
-
 /* Arrow buttons are buttons with only &uarr;, &darr;, &larr; or &rarr; on
  * them. We want these to look a little less spidery. */
 .arrow_button {
@@ -427,7 +423,7 @@ dl dl > dt {
     font-size: smaller;
 }
 
-.bz_attach_flags, .bz_attach_footer {
+.bz_attach_flags, .bz_attach_footer, .bz_flags, .nowrap {
     white-space: nowrap;
 }
 
@@ -440,6 +436,10 @@ div.user_match {
     margin-bottom: 1em;
 }
 
+.indented {
+    margin-left: 3em;
+}
+
 .box {
     border: 1px solid black;
     color: black;
@@ -450,6 +450,12 @@ div.user_match {
 
 .collapsed {
     display: none;
+}
+
+#serverpush_msg {
+    margin-top: 20%;
+    text-align: center;
+    font-size: xx-large;
 }
 
 /* Rules specific for printing */
@@ -480,9 +486,14 @@ div.user_match {
 .field_help_link {
     cursor: help;
 }
-.field_value, form#Create th, form#Create td {
+.field_value, form#Create th, form#Create td, .top {
     vertical-align: top;
 }
+
+.bottom {
+    vertical-align: bottom;
+}
+
 .field_value .text_input {
   width: 100%;
   min-width: 25em;
@@ -578,8 +589,21 @@ input.required, select.required, span.required_explanation {
 form th {
     text-align: right;
 }
-th.left {
+
+.left {
     text-align: left;
+}
+
+.center {
+    text-align: center;
+}
+
+.right {
+    text-align: right;
+}
+
+.inline {
+    display: inline;
 }
 
 tr.shared_search {

@@ -23,10 +23,7 @@
 
 [% PROCESS global/header.html.tmpl
   title = title
-  style = "
-    table#form th { text-align: right; vertical-align: baseline; white-space: nowrap; }
-    table#form td { text-align: left; vertical-align: baseline; }
-  "
+  style_urls = ['skins/standard/admin.css']
   onload="var f = document.forms['flagtype_properties'];
           selectProduct(f.product, f.component, null, null, '__Any__');"
   javascript_urls=["js/productform.js"]
@@ -49,7 +46,7 @@
 
   [%# Add a hidden button at the top of the form so that the user pressing "return"
     # really submit the form, as expected. %]
-  <input type="submit" id="commit" value="Submit" style="display: none;">
+  <input type="submit" id="commit" value="Submit" class="bz_default_hidden">
 
   <table id="form" cellspacing="0" cellpadding="4" border="0">
     <tr>
@@ -90,8 +87,8 @@
         [% END %]
         <table>
           <tr>
-            <td style="vertical-align: top;">
-              <b>Product/Component:</b><br>
+            <th class="top left">
+              Product/Component:<br>
               <select name="product" onchange="selectProduct(this, this.form.component, null, null, '__Any__');">
                 <option value="">__Any__</option>
                 [% FOREACH prod = products %]
@@ -108,19 +105,19 @@
                                    name="categoryAction-include" value="Include">
               <input type="submit" id="categoryAction-exclude"
                                    name="categoryAction-exclude" value="Exclude">
-            </td>
-            <td style="vertical-align: top;">
-              <b>Inclusions:</b><br>
+            </th>
+            <th class="top left">
+              Inclusions:<br>
               [% PROCESS category_select name="inclusion_to_remove" categories = inclusions %]<br>
               <input type="submit" id="categoryAction-removeInclusion" 
                      name="categoryAction-removeInclusion" value="Remove Inclusion">
-            </td>
-            <td style="vertical-align: top;">
-              <b>Exclusions:</b><br>
+            </th>
+            <th class="top left">
+              Exclusions:<br>
               [% PROCESS category_select name="exclusion_to_remove" categories = exclusions %]<br>
               <input type="submit" id="categoryAction-removeExclusion" 
                      name="categoryAction-removeExclusion" value="Remove Exclusion">
-            </td>
+            </th>
           </tr>
         </table>
       </td>

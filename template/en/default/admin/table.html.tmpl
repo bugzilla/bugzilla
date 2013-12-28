@@ -67,11 +67,11 @@
 
 [%###################  TABLE HEADER   ######################%]
 
-<table id="admin_table" border="1" cellpadding="4" cellspacing="0">
+<table id="admin_table">
   <tr class="column_header">
     [% FOREACH c = columns %]
       [%# Default to align left for headers %]
-      <th style="text-align:[% (c.align || 'left') FILTER html %];">
+      <th class="[% (c.align || 'left') FILTER css_class_quote %]">
         [% c.heading FILTER html %]
       </th>
     [% END %]

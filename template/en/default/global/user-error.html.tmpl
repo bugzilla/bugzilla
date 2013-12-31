@@ -745,6 +745,16 @@
     You are not allowed to edit properties of the '[% flagtype.name FILTER html %]'
     flag type, because this flag type is not available for the products you can administer.
 
+  [% ELSIF error == "flag_not_unique" %]
+    [% title = "Flag not Unique" %]
+    The flag '[% value FILTER html %]' has been set multiple times.
+    You must specify the id value to update the flag.
+
+  [% ELSIF error == "flag_type_not_unique" %]
+    [% title = "Flag Type not Unique" %]
+    The flag type '[% value FILTER html %]' matches several flag types.
+    You must specify the type id value to update or add a flag.
+
   [% ELSIF error == "flag_type_not_multiplicable" %]
     [% docslinks = {'flags-overview.html' => 'An overview on Flags',
                     'flags.html' => 'Using Flags'} %]

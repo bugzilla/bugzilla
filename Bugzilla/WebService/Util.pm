@@ -10,6 +10,12 @@ package Bugzilla::WebService::Util;
 use 5.10.1;
 use strict;
 
+use Bugzilla::Flag;
+use Bugzilla::FlagType;
+use Bugzilla::Error;
+
+use Storable qw(dclone);
+
 use parent qw(Exporter);
 
 # We have to "require", not "use" this, because otherwise it tries to
@@ -17,6 +23,7 @@ use parent qw(Exporter);
 require Test::Taint;
 
 our @EXPORT_OK = qw(
+    extract_flags
     filter
     filter_wants
     taint_data
@@ -25,6 +32,80 @@ our @EXPORT_OK = qw(
     params_to_objects
     fix_credentials
 );
+
+sub extract_flags {
+    my ($flags, $bug, $attachment) = @_;
+    my (@new_flags, @old_flags);
+
+    my $flag_types    = $attachment ? $attachment->flag_types : $bug->flag_types;
+    my $current_flags = $attachment ? $attachment->flags : $bug->flags;
+
+    # Copy the user provided $flags as we may call extract_flags more than
+    # once when editing multiple bugs or attachments.
+    my $flags_copy = dclone($flags);
+
+    foreach my $flag (@$flags_copy) {
+        my $id      = $flag->{id};
+        my $type_id = $flag->{type_id};
+
+        my $new  = delete $flag->{new};
+        my $name = delete $flag->{name};
+
+        if ($id) {
+            my $flag_obj = grep($id == $_->id, @$current_flags);
+            $flag_obj || ThrowUserError('object_does_not_exist',
+                                        { class => 'Bugzilla::Flag', id => $id });
+        }
+        elsif ($type_id) {
+            my $type_obj = grep($type_id == $_->id, @$flag_types);
+            $type_obj || ThrowUserError('object_does_not_exist',
+                                        { class => 'Bugzilla::FlagType', id => $type_id });
+            if (!$new) {
+                my @flag_matches = grep($type_id == $_->type->id, @$current_flags);
+                @flag_matches > 1 && ThrowUserError('flag_not_unique',
+                                                     { value => $type_id });
+                if (!@flag_matches) {
+                    delete $flag->{id};
+                }
+                else {
+                    delete $flag->{type_id};
+                    $flag->{id} = $flag_matches[0]->id;
+                }
+            }
+        }
+        elsif ($name) {
+            my @type_matches = grep($name eq $_->name, @$flag_types);
+            @type_matches > 1 && ThrowUserError('flag_type_not_unique',
+                                                { value => $name });
+            @type_matches || ThrowUserError('object_does_not_exist',
+                                            { class => 'Bugzilla::FlagType', name => $name });
+            if ($new) {
+                delete $flag->{id};
+                $flag->{type_id} = $type_matches[0]->id;
+            }
+            else {
+                my @flag_matches = grep($name eq $_->type->name, @$current_flags);
+                @flag_matches > 1 && ThrowUserError('flag_not_unique', { value => $name });
+                if (@flag_matches) {
+                    $flag->{id} = $flag_matches[0]->id;
+                }
+                else {
+                    delete $flag->{id};
+                    $flag->{type_id} = $type_matches[0]->id;
+                }
+            }
+        }
+
+        if ($flag->{id}) {
+            push(@old_flags, $flag);
+        }
+        else {
+            push(@new_flags, $flag);
+        }
+    }
+
+    return (\@old_flags, \@new_flags);
+}
 
 sub filter ($$;$) {
     my ($params, $hash, $prefix) = @_;
@@ -231,6 +312,12 @@ by both "ids" and "names". Returns an arrayref of objects.
 Allows for certain parameters related to authentication such as Bugzilla_login,
 Bugzilla_password, and Bugzilla_token to have shorter named equivalents passed in.
 This function converts the shorter versions to their respective internal names.
+
+=head2 extract_flags
+
+Subroutine that takes a list of hashes that are potential flag changes for
+both bugs and attachments. Then breaks the list down into two separate lists
+based on if the change is to add a new flag or to update an existing flag.
 
 =head1 B<Methods in need of POD>
 

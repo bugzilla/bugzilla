@@ -274,7 +274,6 @@
 
 'bug/create/create-guided.html.tmpl' => [
   'sel',
-  'productstring', 
 ],
 
 'bug/activity/table.html.tmpl' => [

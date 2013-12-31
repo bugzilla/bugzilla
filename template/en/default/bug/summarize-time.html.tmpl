@@ -83,7 +83,7 @@
 
 [% BLOCK owner_report %]
     [% global.total = 0 global.bug_count = {} global.owner_count = {} %]
-    <table cellpadding="4" cellspacing="0" width="90%" class="realitems owner">
+    <table class="realitems owner">
         [% FOREACH owner = workdata.keys.sort %]
             [% INCLUDE do_one_owner owner=owner ownerdata=workdata.$owner
                                     detailed=detailed %]
@@ -128,7 +128,7 @@
 [% BLOCK number_report %]
     [% global.total = 0 global.owner_count = {} global.bug_count = {} %]
 
-    <table cellpadding="4" cellspacing="0" width="90%" class="realitems number">
+    <table class="realitems number">
     [% FOREACH bug = workdata.keys.nsort %]
         [% INCLUDE do_one_bug id=bug bugdata=workdata.$bug
                               detailed=detailed %]
@@ -188,7 +188,7 @@
       <tr class="bug_header[% '2' IF cid % 2 %]">
         <td>&nbsp;</td>
         <td colspan="3">
-          <table width="100%" cellpadding="0" cellspacing="0">
+          <table>
             <tr>
               <td width="33%">
                 Estimated: [% bugs.$id.estimated_time FILTER format("%.2f") %]h
@@ -222,7 +222,7 @@
 
 [% BLOCK inactive_report %]
     <h3>Inactive [% terms.bugs %]</h3>
-    <table cellpadding="4" cellspacing="0" width="90%" class="zeroitems">
+    <table class="zeroitems">
     [% cid = 0 %]
     [% FOREACH bug_id = null.nsort %]
         [% INCLUDE bug_header id=bug_id cid=cid %]
@@ -296,7 +296,7 @@
 </td></tr>
 <tr>
 <td>&nbsp;</td><td colspan="4">
-  <small>(Dates are optional, and in YYYY-MM-DD format)</small>
+  <span class="bz_info">(Dates are optional, and in YYYY-MM-DD format)</span>
 </td>
 <tr><td align="right">
   <b>Group by</b>:

@@ -86,8 +86,6 @@
       <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     [% END %]
 
-[%# Migration note: contents of the old Param 'headerhtml' would go here %]
-
     [% PROCESS "global/site-navigation.html.tmpl" %]
 
     [% PROCESS 'global/setting-descs.none.tmpl' %]
@@ -215,75 +213,58 @@
     [% Hook.process("additional_header") %]
   </head>
 
-[%# Migration note: contents of the old Param 'bodyhtml' go in the body tag,
-  # but set the onload attribute in the DEFAULT directive above.
-  #%]
-
-  <body onload="[% onload %]"
+  <body [% IF onload %] onload="[% onload %]"[% END %]
         class="[% urlbase.replace('^https?://','').replace('/$','').replace('[-~@:/.]+','-') FILTER css_class_quote %]
                [% FOREACH class = bodyclasses %]
-                 [% ' ' %][% class FILTER css_class_quote %]
+                 [%+ class FILTER css_class_quote %]
                [% END %] yui-skin-sam">
 
-[%# Migration note: the following file corresponds to the old Param
-  # 'bannerhtml'
-  #%]
+  <div id="header">
+    [% INCLUDE global/banner.html.tmpl %]
 
-<div id="header">
+    <div id="titles">
+      <span id="title">[% terms.Bugzilla %][% " &ndash; $header" IF header %]</span>
 
-[% INCLUDE global/banner.html.tmpl %]
+      [% IF subheader %]
+        <span id="subtitle" class="subheader">[% subheader %]</span>
+      [% END %]
 
-<table border="0" cellspacing="0" cellpadding="0" id="titles">
-<tr>
-    <td id="title">
-      <p>[% terms.Bugzilla %]
-      [% " &ndash; $header" IF header %]</p>
-    </td>
+      [% IF header_addl_info %]
+        <span id="information" class="header_addl_info">[% header_addl_info %]</span>
+      [% END %]
+    </div>
 
-  [% IF subheader %]
-    <td id="subtitle">
-      <p class="subheader">[% subheader %]</p>
-    </td>
-  [% END %]
+    <div id="common_links">
+      [% PROCESS "global/common-links.html.tmpl" qs_suffix = "_top" %]
+    </div>
 
-  [% IF header_addl_info %]
-    <td id="information">
-      <p class="header_addl_info">[% header_addl_info %]</p>
-    </td>
-  [% END %]
-</tr>
-</table>
-
-<table id="lang_links_container" cellpadding="0" cellspacing="0"
-       class="bz_default_hidden"><tr><td>
-[% IF Bugzilla.languages.size > 1 %]
-  <ul class="links">
-  [% FOREACH lang = Bugzilla.languages.sort %]
-    <li>[% IF NOT loop.first %]<span class="separator"> | </span>[% END %]
-    [% IF lang == current_language %]
-      <span class="lang_current">[% lang FILTER html FILTER upper %]</span>
-    [% ELSE %]
-      <a href="#" onclick="set_language('[% lang FILTER none %]');">
-       [%- lang FILTER html FILTER upper %]</a>
+    [% IF Bugzilla.languages.size > 1 %]
+      <div id="lang_links_container" class="bz_default_hidden">
+        <ul class="links">
+          [% FOREACH lang = Bugzilla.languages.sort %]
+            <li>
+              [% IF NOT loop.first %]<span class="separator"> | </span>[% END %]
+              [% IF lang == current_language %]
+                <span class="lang_current">[% lang FILTER html FILTER upper %]</span>
+              [% ELSE %]
+                <a href="#" onclick="set_language('[% lang FILTER none %]');">
+                  [%- lang FILTER html FILTER upper %]</a>
+              [% END %]
+            </li>
+          [% END %]
+        </ul>
+      </div>
     [% END %]
-    </li>
-  [% END %]
-  </ul>
-[% END %]
-</td></tr></table>
+  </div>
 
-[% PROCESS "global/common-links.html.tmpl" qs_suffix = "_top" %]
-</div> [%# header %]
+  <div id="bugzilla-body">
+    [% IF Param('announcehtml') %]
+      [% Param('announcehtml') FILTER none %]
+    [% END %]
 
-<div id="bugzilla-body">
-
-[% IF Param('announcehtml') %]
-[% Param('announcehtml') FILTER none %]
-[% END %]
-
-[% IF message %]
-  <div id="message">[% message %]</div>
-[% END %]
+    [% IF message %]
+      <div id="message">[% message %]</div>
+    [% END %]
 
 [% BLOCK format_css_link %]
   [% IF style_url.match('/IE-fixes\.css') %]

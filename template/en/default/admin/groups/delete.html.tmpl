@@ -13,21 +13,28 @@
   #                 group.
   #%]
 
-
+[% title = BLOCK %]Delete group '[% group.name FILTER html %]'[% END %]
 [% PROCESS global/header.html.tmpl
-  title = "Delete group"
+  title = title
+  style_urls = ['skins/standard/admin.css']
   doc_section = "groups.html"
 %]
 
-<table border="1">
-  <tr>
-    <th>Id</th>
-    <th>Name</th>
-    <th>Description</th>
+<table id="admin_table">
+  <tr class="column_header">
+    <th>Field</th>
+    <th>Value</th>
   </tr>
   <tr>
+    <td>Id</td>
     <td>[% group.id FILTER html %]</td>
+  </tr>
+  <tr>
+    <td>Name</td>
     <td>[% group.name FILTER html %]</td>
+  </tr>
+  <tr>
+    <td>Description</td>
     <td>[% group.description FILTER html_light %]</td>
   </tr>
 </table>
@@ -150,7 +157,9 @@
 
   <h2>Confirmation</h2>
 
-  <p>Do you really want to delete this group?</p>
+  <p class="confirmation">
+    Do you really want to delete this group?
+  </p>
   [% IF group.users.size || group.bugs.size || group.products.size 
         || group.flags.size
   %]

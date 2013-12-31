@@ -23,23 +23,23 @@
            doc_section = "custom-fields.html#delete-custom-fields"
 %]
 
-<table border="1" cellpadding="4" cellspacing="0">
-<tr class="column_header">
-  <th valign="top" class="left">Field</th>
-  <th valign="top" class="left">Value</th>
-</tr>
-<tr>
-  <td valign="top">Custom Field:</td>
-  <td valign="top">[% field.name FILTER html %]</td>
-</tr>
-<tr>
-  <td valign="top">Description:</td>
-  <td valign="top">[% field.description FILTER html %]</td>
-</tr>
-<tr>
-  <td valign="top">Type:</td>
-  <td valign="top">[% field_types.${field.type} FILTER html %]</td>
-</tr>
+<table id="admin_table">
+  <tr class="column_header">
+    <th>Field</th>
+    <th>Value</th>
+  </tr>
+  <tr>
+    <td>Custom Field</td>
+    <td>[% field.name FILTER html %]</td>
+  </tr>
+  <tr>
+    <td>Description</td>
+    <td>[% field.description FILTER html %]</td>
+  </tr>
+  <tr>
+    <td>Type</td>
+    <td>[% field_types.${field.type} FILTER html %]</td>
+  </tr>
 </table>
 
 <h2>Confirmation</h2>

@@ -6,14 +6,9 @@
  * defined by the Mozilla Public License, v. 2.0.
  */
 
-.column_header {
-    background-color: #66f;
-}
-
 .warningmessages, .criticalmessages {
     background-color: white;
-    border-style: solid;
-    border-width: 1px;
+    border: 1px solid;
     padding: 1ex 1ex 1ex 4ex;
     margin: 1ex;
 }
@@ -43,18 +38,28 @@ p.areyoureallyreallysure {
     font-weight: bold;
 }
 
-#admin_table {
+#admin_table, #flag_types_bugs, #flag_types_attachments {
     border-collapse: collapse;
     border: 1px solid black;
 }
 
-#admin_table th {
+#admin_table th, #flag_types_bugs th, #flag_types_attachments th {
     white-space: normal !important;
 }
 
-#admin_table th, #admin_table td {
+#admin_table th, #admin_table td,
+#flag_types_bugs th , #flag_types_bugs td,
+#flag_types_attachments th, #flag_types_attachments td {
     border: 1px solid black;
     padding: 0.3em;
+}
+
+table.no-border th, table.no-border td {
+    border: 0 !important;
+}
+
+table.no-border th {
+    text-align: left;
 }
 
 tr.disabled {
@@ -131,20 +136,8 @@ th.title {
     vertical-align: middle;
 }
 
-#edit_custom_field tr {
-    vertical-align: top;
-}
-
-#edit_custom_field th {
-    text-align: right;
-}
-
-#edit_custom_field th.narrow_label {
-    white-space: normal;
-}
-
-#flag_types_bugs tr th, #flag_types_attachments tr th {
-    text-align: left;
+td.max-width {
+    width: 100%;
 }
 
 #flag_types_bugs .inactive, #flag_types_attachments .inactive {
@@ -155,13 +148,27 @@ th.title {
     display: block;
 }
 
-table.whining_list {
+#flagtype_form div.inline {
+    white-space: nowrap;
+}
+
+#flagtype_form label, #grant_table label {
+    font-weight:bold;
+}
+
+table.whining_list, #group_settings_desc {
     border: 1px solid black;
     border-collapse: collapse;
     width: 100%;
 }
 
-table.whining_list th, table.whining_list td {
+#group_settings_desc th, #group_settings_desc td {
+    border: 1px solid black;
+    padding: 0.3em;
+}
+
+table.whining_list th, table.whining_list td,
+#admin_table_edit th, #admin_table_edit td {
     padding: 0.3em;
 }
 
@@ -179,4 +186,29 @@ table.whining_list th.subtitle {
 table.schedule_list th, table.search_list th {
     text-align: center;
     font-weight: bold !important;
+}
+
+#settings #update {
+    margin-top: 2em;
+}
+
+#grant_table td, #grant_table th {
+    text-align: center;
+    padding: 0.5em;
+}
+
+#grant_table th {
+    padding: 2em 3em 0.5em 3em;
+}
+
+#grant_table tr:first-child th {
+    padding-top: 0.5em;
+}
+
+#mass-remove {
+    max-width: 50%;
+}
+
+#mass-remove legend {
+    white-space: nowrap;
 }

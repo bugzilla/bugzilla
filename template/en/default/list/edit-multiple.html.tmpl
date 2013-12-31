@@ -318,23 +318,23 @@
   </script>
 
   <b>Groups:</b><br>
-  <table border="1">
+  <table id="groups_edit_multiple">
     <tr>
-      <th>Remove<br>[% terms.bugs %]<br>from this<br>group</th>
-      <th>Add<br>[% terms.bugs %]<br>to this<br>group</th>
-      <th>Group Name:</th>
+      <th class="narrow_column">Remove [% terms.bugs %] from this group</th>
+      <th class="narrow_column">Add [% terms.bugs %] to this group</th>
+      <th>Group Name</th>
     </tr>
 
     [% FOREACH group = groups %]
     <tr>
-      <td align="center">
+      <td class="center">
         <input type="checkbox" name="defined_groups" 
                id="defined_group_[% group.id %]"
                value="[% group.name FILTER html %]"
                onchange="turn_off(this, 'group_[% group.id %]')">
       </td>
       [% IF group.is_active %]
-        <td align="center">
+        <td class="center">
           <input type="checkbox" name="groups" 
                  id="group_[% group.id FILTER html %]"
                  value="[% group.name FILTER html %]"

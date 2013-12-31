@@ -18,7 +18,9 @@
   #%]
 
 [% PROCESS global/header.html.tmpl
-  title = 'Verify New Product Details...' %]
+  title = 'Verify New Product Details...'
+  style_urls = ['skins/standard/buglist.css']
+%]
 
 <form action="process_bug.cgi" method="post">
 
@@ -150,23 +152,23 @@
         }
       </script>
 
-      <table border="1">
+      <table id="groups_edit_multiple">
         <tr>
-          <th>Remove<br>[% terms.bugs %]<br>from this<br>group</th>
-          <th>Add<br>[% terms.bugs %]<br>to this<br>group</th>
-          <th>Group Name:</th>
+          <th class="narrow_column">Remove [% terms.bugs %] from this group</th>
+          <th class="narrow_column">Add [% terms.bugs %] to this group</th>
+          <th>Group Name</th>
         </tr>
 
         [% FOREACH group = optional_groups %]
         <tr>
-          <td align="center">
+          <td class="center">
             <input type="checkbox" name="defined_groups"
                    id="defined_group_[% group.group.id FILTER html %]"
                    value="[% group.group.name FILTER html %]"
                    [% IF cgi.param("defined_groups").contains(group.group.name) %] checked="checked"[% END %]
                    onchange="turn_off(this, 'group_[% group.group.id FILTER html %]')">
           </td>
-          <td align="center">
+          <td class="center">
             <input type="checkbox" name="groups"
                    id="group_[% group.group.id FILTER html %]"
                    value="[% group.group.name FILTER html %]"

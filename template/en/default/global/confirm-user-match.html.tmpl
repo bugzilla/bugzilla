@@ -79,21 +79,13 @@
   <p>Please go back and try other names or email addresses.</p>
 [% END %]
 
-  <table border="0">
-    <tr>
-      <td colspan="2">
-        <hr width="100%" size="1">
-      </td>
-    </tr>
-
-  [%# this is messy to allow later expansion %]
-
+<table id="user_match_table">
   [% FOREACH field = matches %]
     <tr>
-      <td align="left" valign="top">
+      <td>
         [% PROCESS field_names field_name=field.key %]:
       </td>
-      <td align="left" valign="top">
+      <td>
           [% FOREACH query = field.value %]
             <div class="user_match">
               <b>[% query.key FILTER html %]</b>
@@ -148,14 +140,8 @@
         [% END %]
       </td>
     </tr>
-    <tr>
-      <td colspan="2">
-        <hr width="100%" size="1">
-      </td>
-    </tr>
   [% END %]
-
-  </table>
+</table>
 
 [% IF matchsuccess == 1 %]
 

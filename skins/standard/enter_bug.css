@@ -71,6 +71,10 @@ form#Create #possible_duplicates td { vertical-align: middle; }
     height: 500px;
 }
 
+#guided_form #description {
+    display: inline;
+}
+
 .good {
     color: #090;
 }

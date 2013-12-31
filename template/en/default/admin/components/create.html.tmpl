@@ -10,21 +10,22 @@
   # product: object; Bugzilla::Product object representing the product to
   #               which the component belongs.
   #%]
-  
+
 [% title = BLOCK %]Add component to the [% product.name FILTER html %] product[% END %]
 [% PROCESS global/header.html.tmpl
+  title = title
+  style_urls = ['skins/standard/admin.css']
   yui = [ 'autocomplete' ]
   javascript_urls = [ "js/field.js" ]
-  title = title
 %]
 
 <form method="post" action="editcomponents.cgi">
-  <table border="0" cellpadding="4" cellspacing="0">
+  <table id="admin_table_edit">
 
     [% PROCESS "admin/components/edit-common.html.tmpl" %]
-    
+
   </table>
-  <hr>
+
   <input type="submit" id="create" value="Add">
   <input type="hidden" name="action" value="new">
   <input type="hidden" name='product' value="[% product.name FILTER html %]">

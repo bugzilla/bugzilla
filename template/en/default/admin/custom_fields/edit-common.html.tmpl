@@ -12,9 +12,9 @@
 
 [% PROCESS "global/field-descs.none.tmpl" %]
 
-<table border="0" cellspacing="0" cellpadding="5" id="edit_custom_field">
+<table id="admin_table_edit">
   <tr>
-    <th class="narrow_label"><label for="name">Name:</label></th>
+    <th><label for="name">Name:</label></th>
     <td>
       [% IF field %]
         [% field.name FILTER html %]
@@ -34,7 +34,7 @@
   </tr>
 
   <tr>
-    <th class="narrow_label"><label for="desc">Description:</label></th>
+    <th><label for="desc">Description:</label></th>
     <td>
       <input type="text" id="desc" name="desc" size="40"
              value="[% field.description FILTER html %]">
@@ -50,7 +50,7 @@
   </tr>
 
   <tr>
-    <th class="narrow_label"><label for="type">Type:</label></th>
+    <th><label for="type">Type:</label></th>
     <td>
       [% IF field %]
         [% field_types.${field.type} FILTER html %]
@@ -72,7 +72,7 @@
   </tr>
 
   <tr>
-    <th class="narrow_label"><label for="sortkey">Sortkey:</label></th>
+    <th><label for="sortkey">Sortkey:</label></th>
     <td>
       <input type="text" id="sortkey" name="sortkey" size="6" maxlength="6"
              value="[% field.sortkey FILTER html %]">
@@ -86,7 +86,7 @@
   </tr>
 
   <tr>
-    <th class="narrow_label">Long Description:</th>
+    <th>Long Description:</th>
     <td>
       [% INCLUDE global/textarea.html.tmpl
        name           = 'long_desc'
@@ -147,7 +147,7 @@
           <a href="editvalues.cgi?field=[% field.name FILTER uri %]">Edit legal values for this field</a>.
         </td>
       [% ELSE %]
-        <th class="narrow_label">
+        <th>
           <label for="reverse_desc">Reverse Relationship Description:</label>
         </th>
         <td>
@@ -164,7 +164,7 @@
       [% END %]
 
       [% IF !field || field.is_select %]
-        <th class="narrow_label">
+        <th>
           <label for="value_field_id">
             Field that controls the values<br>
             that appear in this field:

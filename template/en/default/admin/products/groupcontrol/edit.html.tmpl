@@ -24,7 +24,7 @@
       <input type="hidden" name="product" value="[% product.name FILTER html %]">
       <input type="hidden" name="token" value="[% token FILTER html %]">
 
-      <table id="form" cellspacing="0" cellpadding="4" border="1">
+      <table id="admin_table">
         <tr class="column_header">
           <th>Group</th>
           <th>Entry</th>
@@ -40,7 +40,7 @@
   [% IF !group.group.isactive %]
     <tr class="disabled">
       <td>[% group.group.name FILTER html %]</td>
-      <td align="center" colspan="7">Disabled</td>
+      <td class="center" colspan="7">Disabled</td>
       <td>[% group.bug_count FILTER html %]</td>
     </tr>
   [% ELSE %]
@@ -167,7 +167,7 @@ indicate which [% terms.bugs %] will be placed in
 this group according to the following definitions.
 </p>
 
-<table border=1>
+<table id="group_settings_desc">
   <tr>
     <th>
       MemberControl

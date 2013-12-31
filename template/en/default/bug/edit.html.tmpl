@@ -113,7 +113,7 @@
       </td>
       [%# 2nd Column %]
       <td id="bz_show_bug_column_2" class="bz_show_bug_column">
-        <table cellpadding="3" cellspacing="1">
+        <table>
         [%# *** Reported and modified dates *** %]
          [% PROCESS section_dates %]
 
@@ -143,7 +143,8 @@
     </tr>
   </table>
 
-  <table id="bz_big_form_parts" cellspacing="0" cellpadding="0"><tr>
+  <table id="bz_big_form_parts">
+  <tr>
   <td>
     [% IF user.is_timetracker %]
       [% PROCESS section_timetracking %]
@@ -618,7 +619,7 @@
     <tr>
       <th>&nbsp;</th>
 
-      <td colspan="2" align="left" id="show_dependency_tree_or_graph">
+      <td colspan="2" id="show_dependency_tree_or_graph">
         Show dependency <a href="showdependencytree.cgi?id=[% bug.bug_id %]&amp;hide_resolved=1">tree</a>
 
         [% IF Param('webdotbase') %]
@@ -1123,8 +1124,7 @@
         <br>
         [% PROCESS commit_button id=""%]
 
-        <table id="bug_status_bottom"
-               class="status" cellspacing="0" cellpadding="0">
+        <table id="bug_status_bottom" class="status">
           <tr>
             <th class="field_label">
               <a href="page.cgi?id=fields.html#bug_status">Status</a>:

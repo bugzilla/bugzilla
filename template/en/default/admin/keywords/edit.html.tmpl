@@ -12,10 +12,11 @@
 
 [% PROCESS global/header.html.tmpl
   title = "Edit keyword"
+  style_urls = ['skins/standard/admin.css']
 %]
 
 <form method="post" action="editkeywords.cgi">
-  <table border="0" cellpadding="4" cellspacing="0">
+  <table id="admin_table_edit">
     <tr>
       <th>Name:</th>
       <td><input size="64" maxlength="64" name="name" 

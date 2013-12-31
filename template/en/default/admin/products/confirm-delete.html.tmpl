@@ -24,20 +24,19 @@
   style_urls = ['skins/standard/admin.css']
 %]
 
-<table border="1" cellpadding="4" cellspacing="0">
+<table id="admin_table">
   <tr class="column_header">
-    <th valign="top" class="left">Field</th>
-    <th valign="top" class="left">Value</th>
+    <th>Field</th>
+    <th>Value</th>
   </tr>
 
   [% IF Param('useclassification') %]
     <tr>
-      <td>Classification:</td>
+      <td>Classification</td>
       <td>[% classification.name FILTER html %]</td>
     </tr>
     <tr>
-      <td>Classification Description:</td>
-      [%# descriptions are intentionally not filtered to allow html content %]
+      <td>Classification Description</td>
       <td>
         [% IF classification.description %]
           [% classification.description FILTER html_light %]
@@ -49,22 +48,21 @@
   [% END %]
 
   <tr>
-    <td valign="top">Product:</td>
-    <td valign="top">
+    <td>Product</td>
+    <td>
       <a href="editproducts.cgi?product=[% product.name FILTER uri %]">
         [% product.name FILTER html %]
       </a>
     </td>
   </tr>
   <tr>
-    <td valign="top">Description:</td>
-    [%# descriptions are intentionally not filtered to allow html content %]
-    <td valign="top">[% product.description FILTER html_light %]</td>
+    <td>Description</td>
+    <td>[% product.description FILTER html_light %]</td>
   </tr>
 
   [% IF Param('usetargetmilestone') %]
     <tr>
-      <td>Milestone URL:</td>
+      <td>Milestone URL</td>
       <td>
         [% IF product.milestone_url %]
           <a href="[% product.milestone_url FILTER html %]">
@@ -78,7 +76,7 @@
   [% END %]
 
   <tr>
-    <td>Closed for [% terms.bugs %]:</td>
+    <td>Closed for [% terms.bugs %]</td>
     <td>
       [% IF product.is_active %]
         open
@@ -93,15 +91,15 @@
       [% IF product.components.size > 0 %]
         <a href="editcomponents.cgi?product=[% product.name FILTER uri %]"
            title="Edit components for product '[% product.name FILTER html %]'">
-          Components:
+          Components
         </a>
       [% ELSE %]
-        Components:
+        Components
       [% END %]
     </td>
     <td>
       [% IF product.components.size > 0 %]
-        <table>
+        <table class="no-border">
           [% FOREACH c = product.components %]
             <tr>
               <th>[% c.name FILTER html %]:</th>
@@ -119,17 +117,19 @@
     <td>
       [% IF product.versions.size > 0 %]
         <a href="editversions.cgi?product=[%- product.name FILTER uri %]">
-          Versions:
+          Versions
         </a>
       [% ELSE %]
-        Versions:
+        Versions
       [% END %]
     </td>
     <td>
       [% IF product.versions.size > 0 %]
-        [% FOREACH v = product.versions %]
-          [% v.name FILTER html %]<br>
-        [% END %]
+        <div class="multi-columns">
+          [% FOREACH v = product.versions %]
+            [% v.name FILTER html %]<br>
+          [% END %]
+        </div>
       [% ELSE %]
         none
       [% END %]
@@ -139,20 +139,22 @@
 
   [% IF Param('usetargetmilestone') %]
     <tr>
-      <td valign="top">
+      <td>
         [% IF product.milestones.size > 0 %]
           <a href="editmilestones.cgi?product=[%- product.name FILTER uri %]">
-            Milestones:
+            Milestones
           </a>
         [% ELSE %]
-          Milestones:
+          Milestones
         [% END %]
       </td>
       <td>
         [% IF product.milestones.size > 0 %]
-          [% FOREACH m = product.milestones %]
-            [% m.name FILTER html %]<br>
-          [% END %]
+          <div class="multi-columns">
+            [% FOREACH m = product.milestones %]
+              [% m.name FILTER html %]<br>
+            [% END %]
+          </div>
         [% ELSE %]
           none
         [% END %]
@@ -161,7 +163,7 @@
   [% END %]
 
   <tr>
-    <td>[% terms.Bugs %]:</td>
+    <td>[% terms.Bugs %]</td>
     <td>
       [% IF product.bug_count %]
         <a href="buglist.cgi?product=[% product.name FILTER uri %]"
@@ -181,41 +183,34 @@
 
   [% IF !Param("allowbugdeletion") %]
 
-    <p class="confirmation">Sorry, there
-
-    [% IF product.bug_count > 1 %]
-      are [% product.bug_count FILTER html %] [%+ terms.bugs %]
-    [% ELSE %]
-      is 1 [% terms.bug %]
-    [% END %]
-
-    outstanding for this product. You must reassign
-
-    [% IF product.bug_count > 1 %]
-       those [% terms.bugs %]
-    [% ELSE %]
-       that [% terms.bug %]
-    [% END %]
-
-    to another product before you can delete this one.</p>
+    <p class="confirmation">
+      Sorry, there
+      [% IF product.bug_count > 1 %]
+        are [% product.bug_count FILTER html %] [%+ terms.bugs %]
+      [% ELSE %]
+        is 1 [% terms.bug %]
+      [% END %]
+      outstanding for this product. You must reassign
+      [% IF product.bug_count > 1 %]
+        those [% terms.bugs %]
+      [% ELSE %]
+        that [% terms.bug %]
+      [% END %]
+      to another product before you can delete this one.
+    </p>
 
   [% ELSE %]
 
-    <table class="confirmation">
-      <tr>
-        <td>
-          There
-          [% IF product.bug_count > 1 %]
-            are [% product.bug_count FILTER html %] [%+ terms.bugs %]
-          [% ELSE %]
-            is 1 [% terms.bug %]
-          [% END %]
-          entered for this product!  When you delete this
-          product, <b>ALL</b> stored [% terms.bugs %] and
-          their history will be deleted, too.
-        </td>
-      </tr>
-    </table>
+    <p class="confirmation">
+      There
+      [% IF product.bug_count > 1 %]
+        are [% product.bug_count FILTER html %] [%+ terms.bugs %]
+      [% ELSE %]
+        is 1 [% terms.bug %]
+      [% END %]
+      entered for this product!  When you delete this product, <b>ALL</b>
+      stored [% terms.bugs %] and their history will be deleted, too.
+    </p>
 
   [% END %]
 

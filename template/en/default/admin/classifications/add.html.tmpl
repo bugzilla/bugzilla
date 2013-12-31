@@ -8,10 +8,11 @@
 
 [% PROCESS global/header.html.tmpl
   title = "Add new classification"
+  style_urls = ['skins/standard/admin.css']
 %]
 
 <form method=post action="editclassifications.cgi">
-  <table border=0 cellpadding=4 cellspacing=0>
+  <table id="admin_table_edit">
 
     [% PROCESS "admin/classifications/edit-common.html.tmpl" %]
 

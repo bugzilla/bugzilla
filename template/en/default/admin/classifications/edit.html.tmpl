@@ -8,14 +8,15 @@
 
 [% PROCESS global/header.html.tmpl
   title = "Edit classification"
+  style_urls = ['skins/standard/admin.css']
 %]
 
 <form method=post action="editclassifications.cgi">
-  <table  border=0 cellpadding=4 cellspacing=0>
+  <table id="admin_table_edit">
 
     [% PROCESS "admin/classifications/edit-common.html.tmpl" %]
 
-    <tr valign=top>
+    <tr>
       <th>
         <a href="editproducts.cgi?classification=[% classification.name FILTER uri %]">
         Edit Products</a>:
@@ -25,8 +26,8 @@
           <table>
             [% FOREACH product = classification.products %]
               <tr>
-                <th valign=top>[% product.name FILTER html %]</th>
-                <td valign=top>[% product.description FILTER html_light %]</td>
+                <th>[% product.name FILTER html %]</th>
+                <td>[% product.description FILTER html_light %]</td>
               </tr>
             [% END %]
           </table>

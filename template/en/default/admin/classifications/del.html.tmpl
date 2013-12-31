@@ -11,30 +11,29 @@
   style_urls = ['skins/standard/admin.css']
 %]
 
-<table border=1 cellpadding=4 cellspacing=0>
-<tr class="column_header">
-  <th valign="top" class="left">Part</th>
-  <th valign="top" class="left">Value</th>
-
-</tr><tr>
-  <td valign="top">Classification:</td>
-  <td valign="top">[% classification.name FILTER html %]</td>
-
-</tr><tr>
-  <td valign="top">Description:</td>
-  <td valign="top">
-    [% IF classification.description %]
-      [% classification.description FILTER html_light %]
-    [% ELSE %]
-      <span class="warning">description missing</span>
-    [% END %]
-  </td>
-
-</tr><tr>
-  <td valign="top">Sortkey:</td>
-  <td valign="top">[% classification.sortkey FILTER html %]</td>
-
-</tr>
+<table id="admin_table">
+  <tr class="column_header">
+    <th>Field</th>
+    <th>Value</th>
+  </tr>
+  <tr>
+    <td>Classification</td>
+    <td>[% classification.name FILTER html %]</td>
+  </tr>
+  <tr>
+    <td>Description</td>
+    <td>
+      [% IF classification.description %]
+        [% classification.description FILTER html_light %]
+      [% ELSE %]
+        <span class="warning">description missing</span>
+      [% END %]
+    </td>
+  </tr>
+  <tr>
+    <td>Sortkey</td>
+    <td>[% classification.sortkey FILTER html %]</td>
+  </tr>
 </table>
 
 <h2>Confirmation</h2>

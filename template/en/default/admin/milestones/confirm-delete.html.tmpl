@@ -21,33 +21,33 @@
   style_urls = ['skins/standard/admin.css']
 %]
 
-<table border="1" cellpadding="4" cellspacing="0">
-<tr class="column_header">
-  <th valign="top" class="left">Field</th>
-  <th valign="top" class="left">Value</th>
-</tr>
-<tr>
-  <td valign="top">Milestone:</td>
-  <td valign="top">[% milestone.name FILTER html %]</td>
-</tr>
-<tr>
-  <td valign="top">Milestone of Product:</td>
-  <td valign="top">[% product.name FILTER html %]</td>
-</tr>
-<tr>
-  <td valign="top">[% terms.Bugs %]:</td>
-  <td valign="top">
-[% IF milestone.bug_count %]
-  <a title="List of [% terms.bugs %] targetted at milestone '
-           [% milestone.name FILTER html %]'"
-     href="buglist.cgi?target_milestone=[% milestone.name FILTER uri %]&amp;product=
-          [%- product.name FILTER uri %]">
+<table id="admin_table">
+  <tr class="column_header">
+    <th>Field</th>
+    <th>Value</th>
+  </tr>
+  <tr>
+    <td>Milestone</td>
+    <td>[% milestone.name FILTER html %]</td>
+  </tr>
+  <tr>
+    <td>Milestone of Product</td>
+    <td>[% product.name FILTER html %]</td>
+  </tr>
+  <tr>
+    <td>[% terms.Bugs %]</td>
+    <td>
+      [% IF milestone.bug_count %]
+        <a title="List of [% terms.bugs %] targetted at milestone '
+                 [%- milestone.name FILTER html %]'"
+           href="buglist.cgi?target_milestone=[% milestone.name FILTER uri %]&amp;product=
+                [%- product.name FILTER uri %]">
           [% milestone.bug_count FILTER none %]</a>
-[% ELSE %]
-  None
-[% END %]
-  </td>
-</tr>
+      [% ELSE %]
+        None
+      [% END %]
+    </td>
+  </tr>
 </table>
 
 <h2>Confirmation</h2>

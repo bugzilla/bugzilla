@@ -8,7 +8,6 @@
 
 #menu {
   width: 10em;
-  margin-top: 1em;
   margin-right: 0.5em;
   border: solid thin;
   border-spacing: 0px;
@@ -34,8 +33,13 @@
   padding: 0.2em 0.5em;
 }
 
-table td {
-  vertical-align: top;
+div.table {
+    display: inline-table;
+}
+
+div.cell {
+    display: table-cell;
+    vertical-align: top;
 }
 
 td.selected_section {

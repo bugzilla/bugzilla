@@ -17,15 +17,13 @@
 [% END %]
 [% PROCESS global/header.html.tmpl
   title = title
+  style_urls = ['skins/standard/admin.css']
 %]
 
 <form method="post" action="editvalues.cgi">
-  <table border="0" cellpadding="4" cellspacing="0">
-
+  <table id="admin_table_edit">
     <tr>
-      <th valign="top">
-        <label for="value_new">Field Value:</label>
-      </th>
+      <th><label for="value_new">Field Value:</label></th>
       <td>
         [% IF value.is_static %]
           <input type="hidden" name="value_new" id="value_new"
@@ -71,7 +69,7 @@
               </option>
             [% END %]
           </select>
-          <small>(Leave unset to have this value always appear.)</small>
+          <span class="bz_info">(Leave unset to have this value always appear.)</span>
         </td>
       </tr>
     [% END %]

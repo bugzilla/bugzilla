@@ -172,7 +172,7 @@ document.write('<input type="button" value="Disable All Mail" onclick="SetCheckb
 
 [% num_columns = relationships.size %]
 
-<table class="bz_emailprefs" id="email_prefs" border="1">
+<table id="email_prefs">
   <tr>
     <td colspan="[% num_columns FILTER html %]" align="center" width="50%">
       <b>When my relationship to this [% terms.bug %] is:</b>

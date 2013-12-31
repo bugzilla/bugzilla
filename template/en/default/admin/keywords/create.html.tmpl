@@ -9,14 +9,15 @@
 [%# INTERFACE:
   # none
   #%]
-  
+
 [% PROCESS global/header.html.tmpl
   title = "Add keyword"
   subheader = "This page allows you to add a new keyword."
+  style_urls = ['skins/standard/admin.css']
 %]
 
 <form method="post" action="editkeywords.cgi">
-  <table border="0" cellpadding="4" cellspacing="0">
+  <table id="admin_table_edit">
     <tr>
       <th>Name:</th>
       <td><input size="64" maxlength="64" name="name" value=""></td>
@@ -33,12 +34,14 @@
       </td>
     </tr>
   </table>
-  <hr>
+
   <input type="hidden" name="id" value="-1">
   <input type="submit" id="create" value="Add">
   <input type="hidden" name="action" value="new">
   <input type="hidden" name="token" value="[% token FILTER html %]">
 </form>
+
+<hr>
 
 <p><a href="editkeywords.cgi">Edit other keywords</a>.</p>
 

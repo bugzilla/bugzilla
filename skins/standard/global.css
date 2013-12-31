@@ -12,7 +12,7 @@
         color: #000;
         background: #fff url("global/body-back.gif") repeat-x;
     }
-    body, td, th, input {
+    body, td, th, input, dt, #titles {
         font-family: Verdana, sans-serif;
         font-size: small;
     }
@@ -20,6 +20,11 @@
     pre, code, kbd {
         font-size: medium;
     }
+
+    #bugzilla-body {
+        clear: both;
+    }
+
 /* global (end) */
 
 /* header (begin) */
@@ -43,9 +48,14 @@
         padding: 0.5em;
     }
 
+    #common_links {
+        clear: both;
+    }
+
     #lang_links_container {
         float: right;
     }
+
     #lang_links_container .links {
         border: none;
         padding: .5em;
@@ -90,10 +100,9 @@
         color: #fff;
         border-top-left-radius: 5px;
         border-top-right-radius: 5px;
-        font-size: 110%;
         margin: 0;
-        padding: 0.5em;
         vertical-align: bottom;
+        display: table;
     }
 
     #titles a {
@@ -107,20 +116,25 @@
 
     #titles #title {
         font-weight: bold;
+        padding: 0.5em;
         white-space: nowrap;
+        display: table-cell;
     }
 
     #titles #subtitle {
         font-weight: normal;
-        width: 100%;
         text-align: center;
-    }
+        padding: 0.5em;
+        display: table-cell;
+   }
 
     #titles #information {
         font-weight: normal;
         text-align: right;
         font-size: 90%;
+        padding: 0.5em;
         white-space: nowrap;
+        display: table-cell;
     }
 
 /* titles (end) */
@@ -177,6 +191,14 @@
 /* link lists (end) */
 
 /* tabs (begin) */
+    table.tabs {
+        width: 100%;
+    }
+
+    .tabs th, .tabs td {
+        padding: 1em;
+    }
+
     .tabs td {
         background: #eee;
         text-align: center;
@@ -289,6 +311,12 @@ div#docslinks {
      width: 50em;
 }
 
+.bz_comment_text span.quote {
+    color: #65379c;
+    /* Make quoted text not wrap. */
+    white-space: pre;
+}
+
 .bz_comment_user, .bz_comment_time, .bz_comment_number, 
 .bz_private_checkbox, .bz_comment_actions
 {
@@ -342,23 +370,48 @@ div#docslinks {
     display: none !important;
 }
 
-.bz_comment_text span.quote {
-    color: #65379c;
-    /* Make quoted text not wrap. */
-    white-space: pre;
-}
-
 table#flags th,
 table#flags td {
     vertical-align: middle;
     text-align: left;
 }
 
-table#email_prefs th,
-table#shared_search_prefs th,
-table#saved_search_prefs th {
+#email_prefs, #saved_search_prefs, #shared_search_prefs,
+#bug_activity {
+    border: 1px solid black;
+    border-collapse: collapse;
+}
+
+#email_prefs th,
+#shared_search_prefs th,
+#saved_search_prefs th {
     text-align: center;
 }
+
+#email_prefs th, #email_prefs td,
+#shared_search_prefs th, #shared_search_prefs td,
+#saved_search_prefs th, #saved_search_prefs td,
+#bug_activity td {
+    border: 1px solid;
+    padding: 0.3em;
+}
+
+#bug_activity td {
+    vertical-align: top;
+}
+
+#user_prefs th, #user_prefs td {
+    padding: 0.5em;
+}
+
+.column_header {
+    background-color: #66f;
+}
+
+.column_header th {
+    text-align: center;
+}
+
 .flag_select {
     min-width: 3em;
 }
@@ -371,16 +424,25 @@ input.requestee {
     font-size: x-large;
 }
 
+#post_err_msg {
+    clear: both;
+}
+
 .warning {
   color: red;
 }
 
 .throw_error {
-    background-color: #ff0000;
+    background-color: red;
     color: black;
     font-size: 120%;
-    margin: 1em;
+    margin-bottom: 2em;
     padding: 0.5em 1em;
+    float: left;
+}
+
+.label {
+    font-weight: bold;
 }
 
 .throw_error a:visited {
@@ -419,6 +481,10 @@ dl dl > dt {
     border: 1px solid #333333;
 }
 
+#attachment_table th, #attachment_table td {
+    padding: 0.3em;
+}
+
 .bz_attach_extra_info, .bz_info {
     font-size: smaller;
 }
@@ -430,6 +496,16 @@ dl dl > dt {
 .bz_attach_view_hide {
     float: right;
     padding-left: 1em;
+}
+
+#user_match_table {
+    border-collapse: collapse;
+}
+
+#user_match_table td {
+    vertical-align: top;
+    border-bottom: 1px solid black;
+    padding: 1em 0.5em;
 }
 
 div.user_match {
@@ -609,4 +685,10 @@ form th {
 tr.shared_search {
     background-color: #fff7cd;
     color: #000;
+}
+
+.multi-columns {
+    columns: 3;
+    -moz-columns: 3;
+    -webkit-columns: 3;
 }

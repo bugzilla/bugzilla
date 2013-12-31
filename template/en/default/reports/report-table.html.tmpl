@@ -141,7 +141,7 @@ YAHOO.util.Event.addListener(window, "load", function() {
   <tr>
     <td>
     </td>
-    <td align="center">
+    <td class="center">
       <strong>[% col_field_disp FILTER html %]</strong>
     </td>
   </tr>
@@ -158,7 +158,7 @@ YAHOO.util.Event.addListener(window, "load", function() {
 [% row_idx = 0 %]
 [% total_key = '-total-' %]
 <div id="tabular_report_container_[% tbl FILTER html %]">
-<table id="tabular_report" border="1">
+<table id="tabular_report">
   [% IF col_field %]
     <thead>
     <tr>
@@ -182,14 +182,14 @@ YAHOO.util.Event.addListener(window, "load", function() {
   [% FOREACH row = row_names %]
     [% row_idx = 1 - row_idx %]
     <tr>
-      <td class="[% classes.$row_idx.$col_idx %]" align="right">
+      <td class="[% classes.$row_idx.$col_idx %] right">
         [% PROCESS value_display value = row field = row_field %]
       </td>
       [% FOREACH col = col_names %]
         [% NEXT IF col == "" %]
         
         [% col_idx = 1 - col_idx %]
-        <td class="[% classes.$row_idx.$col_idx %]" align="center">
+        <td class="[% classes.$row_idx.$col_idx %]">
           [% IF data.$tbl.$col.$row AND data.$tbl.$col.$row > 0 %]
             <a href="[% urlbase %]&amp;
               [% row_field FILTER uri %]=[% row FILTER uri %]&amp;
@@ -200,7 +200,7 @@ YAHOO.util.Event.addListener(window, "load", function() {
           [% END %]
         </td>
       [% END %] 
-      <td class="ttotal" align="right">
+      <td class="ttotal right">
         <a href="[% urlbase %]&amp;
           [% row_field FILTER uri %]=[% row FILTER uri %]
           [% "&amp;$col_vals" IF col_vals %]">
@@ -216,14 +216,14 @@ YAHOO.util.Event.addListener(window, "load", function() {
       [% FOREACH col = col_names %]
         [% NEXT IF col == "" %]
 
-        <td class="ttotal" align="center">
+        <td class="ttotal">
           <a href="[% urlbase %]&amp;
             [% col_field FILTER uri %]=[% col FILTER uri %]
             [% "&amp;$row_vals" IF row_vals %]">
           [% data.$tbl.$col.$total_key OR 0 FILTER html %]</a>
         </td>
       [% END %]
-      <td class="ttotal" align="right">
+      <td class="ttotal right">
         <strong>
           <a href="[% urlbase %]
             [% "&amp;$row_vals" IF row_vals %]

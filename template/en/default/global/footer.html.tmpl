@@ -11,26 +11,17 @@
   # global/useful-links.html.tmpl.
   #%]
 
-  [% Hook.process('main-end') %]
-</div>
+      [% Hook.process('main-end') %]
+    </div>
 
-[%# Migration note: below this point, this file corresponds to the old Param
-  # 'footerhtml'
-  #%]
+    <div id="footer">
+      <div class="intro">[% Hook.process('intro') %]</div>
 
-<div id="footer">
-  <div class="intro">[% Hook.process('intro') %]</div>
+      [% PROCESS "global/useful-links.html.tmpl" %]
 
-[%# Migration note: the old param 'blurbhtml' goes here %]
+      <div class="outro">[% Hook.process('outro') %]</div>
+    </div>
 
-[%# Migration note: useful-links.html.tmpl corresponds to %commandmenu% %]
-
-           [% PROCESS "global/useful-links.html.tmpl" %]
-
-  <div class="outro">[% Hook.process('outro') %]</div>
-</div>
-
-[% Hook.process("end") %]
-
-</body>
+    [% Hook.process("end") %]
+  </body>
 </html>

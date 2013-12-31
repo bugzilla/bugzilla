@@ -12,7 +12,6 @@
   #   name: the name of the keyword
   #   description: keyword description. Can contain some limited HTML code.
   #   bug_count: number of bugs with that keyword
-  # caneditkeywords: boolean. True if this user can edit keywords
  %]
 
 [% PROCESS global/header.html.tmpl
@@ -20,27 +19,19 @@
   style_urls = ['skins/standard/admin.css']
 %]
 
-[% FOREACH keyword = keywords %]
-  [% IF loop.index % 50 == 0 %]
-    [% IF loop.index != 0 %]
-       </table>
-    [% END %]
+<table id="admin_table">
+  <tr class="column_header">
+    <th>Name</th>
+    <th>Description</th>
+    <th>Open [% terms.Bugs %]</th>
+    <th>Total [% terms.Bugs %]</th>
+  </tr>
 
-    <table border="1" cellpadding="4" cellspacing="0">
-      <tr class="column_header">
-        <th>Name</th>
-        <th>Description</th>
-        <th>Open [% terms.Bugs %]</th>
-        <th>Total [% terms.Bugs %]</th>
-      </tr>
-  [% END %]
-
+  [% FOREACH keyword = keywords %]
   <tr id="[% keyword.name FILTER html %]">
-    <th>
-        [% keyword.name FILTER html %]
-    </th>
+    <td>[% keyword.name FILTER html %]</td>
     <td>[% keyword.description FILTER html_light %]</td>
-    <td align="center">
+    <td class="center">
       [% IF keyword.bug_count > 0 %]
         <a href="buglist.cgi?keywords=[% keyword.name FILTER uri %]&amp;resolution=---">
           Search</a>
@@ -48,7 +39,7 @@
         none
       [% END %]
     </td>
-    <td align="right">
+    <td class="right">
       [% IF keyword.bug_count > 0 %]
         <a href="buglist.cgi?keywords=[% keyword.name FILTER uri %]">
           [% keyword.bug_count %]</a>
@@ -57,13 +48,10 @@
       [% END %]
     </td>
   </tr>
-[% END %]
+  [% END %]
+</table>
 
-[% IF keywords.size > 0 %]
-  </table>
-[% END %]
-
-[% IF caneditkeywords %]
+[% IF user.in_group("editkeywords") %]
   <p>
     <a href="editkeywords.cgi">Edit keywords</a>.
   </p>

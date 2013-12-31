@@ -30,12 +30,12 @@
  %]
 
 <form method="post" action="editproducts.cgi">
-  <table border="0" cellpadding="4" cellspacing="0">
+  <table id="admin_table_edit">
 
     [% PROCESS "admin/products/edit-common.html.tmpl" %]
 
     <tr>
-      <th valign="top">
+      <th>
         <a href="editcomponents.cgi?product=[% product.name FILTER uri %]">
         Edit components:
         </a>
@@ -55,16 +55,16 @@
       </td>
     </tr>
     <tr>
-      <th valign="top">
-        <a href="editversions.cgi?product=[% product.name FILTER uri %]">Edit
-versions:</a>
+      <th>
+        <a href="editversions.cgi?product=[% product.name FILTER uri %]">Edit versions:</a>
       </th>
       <td>
         [%- IF product.versions.size -%]
-          [% FOREACH v = product.versions %]
-            [% v.name FILTER html %]
-            <br>
-          [% END %]
+          <div class="multi-columns">
+            [% FOREACH v = product.versions %]
+              [% v.name FILTER html %]<br>
+            [% END %]
+          </div>
         [% ELSE %]
           <span class="warning">missing</span>
         [% END %]
@@ -72,16 +72,17 @@ versions:</a>
     </tr>
     [% IF Param('usetargetmilestone') %]
       <tr>
-        <th valign="top">
+        <th>
           <a href="editmilestones.cgi?product=[% product.name FILTER uri %]">
           Edit milestones:</a>
         </th>
         <td>
           [%- IF product.milestones.size -%]
-            [%- FOREACH m = product.milestones -%]
-              [% m.name FILTER html %]
-            <br>
-            [% END %]
+            <div class="multi-columns">
+              [%- FOREACH m = product.milestones -%]
+                [% m.name FILTER html %]<br>
+              [% END %]
+            </div>
           [% ELSE %]
             <span class="warning">missing</span>
           [% END %]
@@ -89,7 +90,7 @@ versions:</a>
       </tr>
     [% END %]
     <tr>
-      <th valign="top">
+      <th>
         <a href="editproducts.cgi?action=editgroupcontrols&product=
           [%- product.name FILTER uri %]">
           Edit Group Access Controls:
@@ -98,7 +99,7 @@ versions:</a>
       <td>
         [% IF product.group_controls.size %]
           [% FOREACH g = product.group_controls.values.sort("name") %]
-            <b>[% g.group.name FILTER html %]:</b>&nbsp;
+            <b>[% g.group.name FILTER html %]:</b>
             [% IF g.group.isactive %]
               [% group_control.${g.membercontrol} FILTER html %]/
               [% group_control.${g.othercontrol} FILTER html %]
@@ -119,8 +120,10 @@ versions:</a>
     </tr>
     <tr>
       <th>[% terms.Bugs %]:</th>
-      <td><a href="buglist.cgi?product=[% product.name FILTER uri %]">
-            [% product.bug_count FILTER html %]</a></td>
+      <td>
+        <a href="buglist.cgi?product=[% product.name FILTER uri %]">
+          [% product.bug_count FILTER html %]</a>
+      </td>
     </tr>
   </table>
   

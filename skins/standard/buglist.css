@@ -63,7 +63,13 @@
 /* Align columns in the "change multiple bugs" form to the right. */
 table#form tr th { text-align: right; }
 
-table.bz_buglist td, table.bz_buglist th { 
+table.bz_buglist {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+table.bz_buglist td, table.bz_buglist th {
+  padding: 0.4em;
 }
 
 /* we use a first-child class and not the pseudo-class because IE
@@ -76,7 +82,7 @@ tr.bz_secure td.first-child, a.bz_secure {
 }
 
 th.first-child, td.first-child, a.bz_secure {
-  padding-left: 20px;
+  padding-left: 20px !important;
 }
 
 tr.bz_secure_mode_implied td.first-child {
@@ -115,6 +121,26 @@ td.bz_total {
     color: inherit;
 }
 
+#groups_edit_multiple, #quips {
+    border: 1px solid black;
+    border-collapse: collapse;
+}
+
+#groups_edit_multiple th, #groups_edit_multiple td,
+#quips th, #quips td {
+    border: 1px solid;
+    padding: 0.3em;
+}
+
+#groups_edit_multiple th, #quips th {
+    text-align: center;
+    white-space: normal !important;
+}
+
+#groups_edit_multiple th.narrow_column {
+    width: 8em;
+}
+
 /* The "filtering" table is specific to request.cgi.
  * Same for the "requests" class used for tables. */
 
@@ -124,6 +150,17 @@ td.bz_total {
 
 #filtering th {
     text-align: right;
+}
+
+table.requests {
+    border: 1px solid black;
+    border-collapse: collapse;
+    width: 100%;
+}
+
+table.requests th, table.requests td {
+    border: 1px solid;
+    padding: 0.5em;
 }
 
 table.requests th {

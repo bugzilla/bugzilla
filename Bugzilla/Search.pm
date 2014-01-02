@@ -1999,7 +1999,7 @@ sub _quote_unless_numeric {
     my $is_numeric = $numeric_operator && $numeric_field && $numeric_value;
 
     # These operators are really numeric operators with numeric fields.
-    $numeric_operator = grep { $_ eq $operator } keys SIMPLE_OPERATORS;
+    $numeric_operator = grep { $_ eq $operator } keys %{ SIMPLE_OPERATORS() };
 
     if ($is_numeric) {
         my $quoted = $value;

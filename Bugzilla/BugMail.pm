@@ -89,15 +89,17 @@ sub Send {
 
     if ($params->{dep_only}) {
         push(@diffs, { field_name => 'bug_status',
-                       old => $params->{changes}->{bug_status}->[0],
-                       new => $params->{changes}->{bug_status}->[1],
+                       old        => $params->{changes}->{bug_status}->[0],
+                       new        => $params->{changes}->{bug_status}->[1],
                        login_name => $changer->login,
-                       blocker => $params->{blocker} },
+                       who        => $changer,
+                       blocker    => $params->{blocker} },
                      { field_name => 'resolution',
-                       old => $params->{changes}->{resolution}->[0],
-                       new => $params->{changes}->{resolution}->[1],
+                       old        => $params->{changes}->{resolution}->[0],
+                       new        => $params->{changes}->{resolution}->[1],
                        login_name => $changer->login,
-                       blocker => $params->{blocker} });
+                       who        => $changer,
+                       blocker    => $params->{blocker} });
     }
     else {
         push(@diffs, _get_diffs($bug, $end, \%user_cache));
@@ -566,7 +568,10 @@ sub _get_new_bugmail_fields {
         # If there isn't anything to show, don't include this header.
         next unless $value;
 
-        push(@diffs, {field_name => $name, new => $value});
+        push(@diffs, {
+            field_name => $name,
+            who        => $bug->reporter,
+            new        => $value});
     }
 
     return @diffs;

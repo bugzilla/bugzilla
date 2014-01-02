@@ -45,6 +45,7 @@ use Bugzilla::Hook;
 
 use File::Copy;
 use List::Util qw(max);
+use Storable qw(dclone);
 
 use parent qw(Bugzilla::Object);
 
@@ -653,23 +654,27 @@ sub get_attachments_by_bug {
     my $attachments = Bugzilla::Attachment->new_from_list($attach_ids);
     $_->{bug} = $bug foreach @$attachments;
 
-    # To avoid $attachment->flags to run SQL queries itself for each
-    # attachment listed here, we collect all the data at once and
-    # populate $attachment->{flags} ourselves.
-    # We also load all attachers and datasizes at once for the same reason.
+    # To avoid $attachment->flags and $attachment->flag_types running SQL queries
+    # themselves for each attachment listed here, we collect all the data at once and
+    # populate $attachment->{flag_types} ourselves. We also load all attachers and
+    # datasizes at once for the same reason.
     if ($vars->{preload}) {
-        # Preload flags.
-        $_->{flags} = [] foreach @$attachments;
-        my %att = map { $_->id => $_ } @$attachments;
+        # Preload flag types and flags
+        my $vars = { target_type  => 'attachment',
+                     product_id   => $bug->product_id,
+                     component_id => $bug->component_id,
+                     attach_id    => $attach_ids };
+        my $flag_types = Bugzilla::Flag->_flag_types($vars);
 
-        my $flags = Bugzilla::Flag->match({ bug_id      => $bug->id,
-                                            target_type => 'attachment' });
-
-        # Exclude flags for private attachments you cannot see.
-        @$flags = grep {exists $att{$_->attach_id}} @$flags;
-
-        push(@{$att{$_->attach_id}->{flags}}, $_) foreach @$flags;
-        $attachments = [sort {$a->id <=> $b->id} values %att];
+        foreach my $attachment (@$attachments) {
+            $attachment->{flag_types} = [];
+            my $new_types = dclone($flag_types);
+            foreach my $new_type (@$new_types) {
+                $new_type->{flags} = [ grep($_->attach_id == $attachment->id,
+                                            @{ $new_type->{flags} }) ];
+                push(@{ $attachment->{flag_types} }, $new_type);
+            }
+        }
 
         # Preload attachers.
         my %user_ids = map { $_->{submitter_id} => 1 } @$attachments;
@@ -689,6 +694,7 @@ sub get_attachments_by_bug {
         # Force the size of attachments not in the DB to be recalculated.
         $_->{datasize} = $sizes->{$_->id}->{datasize} || undef foreach @$attachments;
     }
+
     return $attachments;
 }
 

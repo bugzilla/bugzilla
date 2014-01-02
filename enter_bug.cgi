@@ -149,9 +149,16 @@ if ($cloned_bug_id) {
     $cloned_bug_id = $cloned_bug->id;
 }
 
-if (scalar(@{$product->components}) == 1) {
-    # Only one component; just pick it.
-    $cgi->param('component', $product->components->[0]->name);
+# If there is only one active component, choose it
+my @active = grep { $_->is_active } @{$product->components};
+if (scalar(@active) == 1) {
+    $cgi->param('component', $active[0]->name);
+}
+
+# If there is only one active version, choose it
+@active = grep { $_->is_active } @{$product->versions};
+if (scalar(@active) == 1) {
+    $cgi->param('version', $active[0]->name);
 }
 
 my %default;

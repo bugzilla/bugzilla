@@ -269,7 +269,21 @@ sub multipart_start {
         $headers .= "Set-Cookie: ${cookie}${CGI::CRLF}";
     }
     $headers .= $CGI::CRLF;
+    $self->{_multipart_in_progress} = 1;
     return $headers;
+}
+
+sub close_standby_message {
+    my ($self, $contenttype, $disp, $disp_prefix, $extension) = @_;
+    $self->set_dated_content_disp($disp, $disp_prefix, $extension);
+
+    if ($self->{_multipart_in_progress}) {
+        print $self->multipart_end();
+        print $self->multipart_start(-type => $contenttype);
+    }
+    else {
+        print $self->header($contenttype);
+    }
 }
 
 # Override header so we can add the cookies in
@@ -665,6 +679,15 @@ instead of calling this directly.
 
 Redirects from the current URL to one prefixed by the urlbase parameter.
 
+=item C<multipart_start>
+
+Starts a new part of the multipart document using the specified MIME type.
+If not specified, text/html is assumed.
+
+=item C<close_standby_message>
+
+Ends a part of the multipart document, and starts another part.
+
 =item C<set_dated_content_disp>
 
 Sets an appropriate date-dependent value for the Content Disposition header
@@ -687,8 +710,6 @@ L<CGI|CGI>, L<CGI::Cookie|CGI::Cookie>
 =item url_is_attachment_base
 
 =item should_set
-
-=item multipart_start
 
 =item redirect_search_url
 

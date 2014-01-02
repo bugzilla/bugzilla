@@ -279,22 +279,6 @@ sub GetGroups {
     return [values %legal_groups];
 }
 
-sub _close_standby_message {
-    my ($contenttype, $disp, $disp_prefix, $extension, $serverpush) = @_;
-    my $cgi = Bugzilla->cgi;
-    $cgi->set_dated_content_disp($disp, $disp_prefix, $extension);
-    
-    # Close the "please wait" page, then open the buglist page
-    if ($serverpush) {
-        print $cgi->multipart_end();
-        print $cgi->multipart_start(-type => $contenttype);
-    }
-    else {
-        print $cgi->header($contenttype);
-    }
-}
-
-
 ################################################################################
 # Command Execution
 ################################################################################
@@ -949,8 +933,6 @@ elsif (my @component_input = $cgi->param('component')) {
 # The following variables are used when the user is making changes to multiple bugs.
 if ($dotweak && scalar @bugs) {
     if (!$vars->{'caneditbugs'}) {
-        _close_standby_message('text/html', 
-                               'inline', "error", "html", $serverpush);
         ThrowUserError('auth_failure', {group  => 'editbugs',
                                         action => 'modify',
                                         object => 'multiple_bugs'});
@@ -1057,8 +1039,7 @@ if ($format->{'extension'} eq "csv") {
     $vars->{'human'} = $cgi->param('human');
 }
 
-_close_standby_message($contenttype, $disposition, $disp_prefix, 
-                       $format->{'extension'}, $serverpush);
+$cgi->close_standby_message($contenttype, $disposition, $disp_prefix, $format->{'extension'});
 
 ################################################################################
 # Content Generation

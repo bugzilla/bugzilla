@@ -1997,10 +1997,17 @@ sub _quote_unless_numeric {
     my $numeric_field = $self->_chart_fields->{$field}->is_numeric;
     my $numeric_value = ($value =~ NUMBER_REGEX) ? 1 : 0;
     my $is_numeric = $numeric_operator && $numeric_field && $numeric_value;
+
+    # These operators are really numeric operators with numeric fields.
+    $numeric_operator = grep { $_ eq $operator } keys SIMPLE_OPERATORS;
+
     if ($is_numeric) {
         my $quoted = $value;
         trick_taint($quoted);
         return $quoted;
+    }
+    elsif ($numeric_field && !$numeric_value && $numeric_operator) {
+        ThrowUserError('number_not_numeric', { field => $field, num => $value });
     }
     return Bugzilla->dbh->quote($value);
 }

@@ -36,18 +36,21 @@ You are receiving this mail because:
 
 [% BLOCK generate_diffs %]
   [% urlbase %]show_bug.cgi?id=[% bug.id %]
-
 [%+ last_changer = 0 %]
+[% IF isnew %]
+[%+ +%]
+[% END %]
   [% FOREACH change = diffs %]
-    [% IF !isnew && changer.id != last_changer %]
-      [% last_changer = changer.id %]
+    [% IF !isnew && change.who.id != last_changer %]
+      [% last_changer = change.who.id %]
       [% IF change.blocker %]
         [% terms.Bug %] [%+ bug.id %] depends on [% terms.bug %] [%+ change.blocker.id %], which changed state.
 
 [%+ terms.Bug %] [%+ change.blocker.id %] Summary: [% change.blocker.short_desc %]
 [%+ urlbase %]show_bug.cgi?id=[% change.blocker.id %]
       [% ELSE %]
-        [%~ changer.identity %] changed:
+
+[% change.who.identity %] changed:
       [% END %]
 
            What    |Removed                     |Added

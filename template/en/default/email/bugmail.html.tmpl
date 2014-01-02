@@ -51,8 +51,8 @@
   [% SET in_table = 0 %]
   [% last_changer = 0 %]
     [% FOREACH change = diffs %]
-      [% IF !isnew && changer.id != last_changer %]
-        [% last_changer = changer.id %]
+      [% IF !isnew && change.who.id != last_changer %]
+        [% last_changer = change.who.id %]
         [% IF in_table == 1 %]
           </table>
           [% SET in_table = 0 %]

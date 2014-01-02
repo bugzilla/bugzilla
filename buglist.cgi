@@ -284,23 +284,6 @@ sub GetGroups {
     return [values %legal_groups];
 }
 
-sub _close_standby_message {
-    my ($contenttype, $disposition, $serverpush) = @_;
-    my $cgi = Bugzilla->cgi;
-
-    # Close the "please wait" page, then open the buglist page
-    if ($serverpush) {
-        print $cgi->multipart_end();
-        print $cgi->multipart_start(-type                => $contenttype,
-                                    -content_disposition => $disposition);
-    }
-    else {
-        print $cgi->header(-type                => $contenttype,
-                           -content_disposition => $disposition);
-    }
-}
-
-
 ################################################################################
 # Command Execution
 ################################################################################
@@ -945,7 +928,6 @@ if ($one_product && $user->can_enter_product($one_product)) {
 # The following variables are used when the user is making changes to multiple bugs.
 if ($dotweak && scalar @bugs) {
     if (!$vars->{'caneditbugs'}) {
-        _close_standby_message('text/html', 'inline', $serverpush);
         ThrowUserError('auth_failure', {group  => 'editbugs',
                                         action => 'modify',
                                         object => 'multiple_bugs'});
@@ -1055,7 +1037,7 @@ if ($format->{'extension'} eq "csv") {
 # Suggest a name for the bug list if the user wants to save it as a file.
 $disposition .= "; filename=\"$filename\"";
 
-_close_standby_message($contenttype, $disposition, $serverpush);
+$cgi->close_standby_message($contenttype, $disposition);
 
 ################################################################################
 # Content Generation

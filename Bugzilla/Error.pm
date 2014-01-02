@@ -92,8 +92,10 @@ sub _throw_error {
                                              message => \$message });
 
     if (Bugzilla->error_mode == ERROR_MODE_WEBPAGE) {
-        print Bugzilla->cgi->header();
+        my $cgi = Bugzilla->cgi;
+        $cgi->close_standby_message('text/html', 'inline');
         print $message;
+        print $cgi->multipart_final() if $cgi->{_multipart_in_progress};
     }
     elsif (Bugzilla->error_mode == ERROR_MODE_TEST) {
         die Dumper($vars);

@@ -108,10 +108,7 @@ table.attachment_info td {
     padding-bottom: 0.4em;
 }
 
-#attachment_attributes label,
-#attachment_attributes span.label,
-#attachment_actions span.label
-{
+#attachment_attributes label {
     font-weight: bold;
 }
 
@@ -208,6 +205,18 @@ div#update_container {
     height: 400px; 
     width: 95%;
     margin-left: 2%;
+}
+
+.viewall_desc {
+    width: 75%;
+    border: 1px solid black;
+    border-spacing: 0px;
+    border-collapse: collapse;
+}
+
+.viewall_desc th, .viewall_desc td {
+    border: 1px solid black;
+    padding: 0.3em;
 }
 
 .viewall_frame {

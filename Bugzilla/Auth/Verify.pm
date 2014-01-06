@@ -7,6 +7,7 @@
 
 package Bugzilla::Auth::Verify;
 
+use 5.10.1;
 use strict;
 use fields qw();
 
@@ -231,5 +232,13 @@ used, users with editusers permission will be be allowed to
 edit the extern_id for all users.
 
 The default value is C<false>.
+
+=back
+
+=head1 B<Methods in need of POD>
+
+=over
+
+=item can_change_password
 
 =back

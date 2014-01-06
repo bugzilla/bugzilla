@@ -19,6 +19,23 @@
   #               receiving mail for that reason when in that role.
   #%]
 
+[%# If the user's bugmail has been disabled by admins, show a warning. %]
+[% IF user.email_disabled %]
+  <div class="warningmessages">
+    Your [% terms.bug %]mail has been disabled by the [% terms.Bugzilla %]
+    administrator.  Please contact [% Param('maintainer') %] to enable
+    [%+ terms.bug %]mails.
+  </div>
+[% END %]
+
+[% IF user.authorizer.can_change_email && Param('allowemailchange') %]
+  <p>
+    If you want to change your e-mail address
+    <b>[% user.email FILTER html %]</b> to which [% terms.Bugzilla %] sends
+    notifications, click the "Account Information" tab above.
+  </p>
+[% END %]
+
 <p>
   If you don't like getting a notification for "trivial"
   changes to [% terms.bugs %], you can use the settings below to
@@ -30,9 +47,12 @@
 function SetCheckboxes(setting) {
   for (var count = 0; count < document.userprefsform.elements.length; count++) {
     var theinput = document.userprefsform.elements[count];
-    if (theinput.type == "checkbox" && !theinput.disabled) {
+    if (theinput.type == "checkbox"
+        && !theinput.disabled
+        && !theinput.name.match("remove_ignored_bug"))
+    {
       if (theinput.name.match("neg")) {
-        theinput.checked = false;
+        theinput.checked = !setting;
       }
       else {
         theinput.checked = setting;
@@ -112,7 +132,7 @@ document.write('<input type="button" value="Disable All Mail" onclick="SetCheckb
     { id = constants.EVT_ATTACHMENT,
       description = "New attachments are added" },
     { id = constants.EVT_ATTACHMENT_DATA,
-      description = "Some attachment data changes" },
+      description = "Attachment details changes" },
     { id = constants.EVT_KEYWORD,
       description = "The keywords field changes" },
     { id = constants.EVT_CC,
@@ -152,7 +172,7 @@ document.write('<input type="button" value="Disable All Mail" onclick="SetCheckb
 
 [% num_columns = relationships.size %]
 
-<table class="bz_emailprefs" border="1">
+<table id="email_prefs">
   <tr>
     <td colspan="[% num_columns FILTER html %]" align="center" width="50%">
       <b>When my relationship to this [% terms.bug %] is:</b>
@@ -164,7 +184,7 @@ document.write('<input type="button" value="Disable All Mail" onclick="SetCheckb
 
   <tr>
     [% FOREACH relationship = relationships %]
-      <th align="center" width="9%">
+      <th width="9%">
         [% relationship.description FILTER html %]
       </th>
     [% END %]
@@ -270,6 +290,40 @@ You are currently not watching any users.
   [% END %]
 </p>
 
-<hr>
+<b>Ignore [% terms.Bugs %]</b>
 
-<br>
+<p>
+  You can specify a list of [% terms.bugs %] from which you never want to get
+  any email notification of any kind by adding their ID(s) as a comma-separated
+  list. Removing [% terms.abug %] by selecting it from the current ignored list 
+  will re-enable email notifications for the [% terms.bug %].
+</p>
+[% IF user.bugs_ignored.size %]
+  <p>
+    You are currently ignoring:
+    <table>
+    [% FOREACH bug = user.bugs_ignored %]
+      <tr>
+        <td>
+          <input type="checkbox" name="remove_ignored_bug_[% bug.id FILTER html %]" value="1">
+        </td>
+        <td><a href="[% urlbase FILTER html %]show_bug.cgi?id=[% bug.id FILTER uri %]">
+          [% bug.id FILTER html %]</a>
+        </td>
+        <td>[% bug.status FILTER html %]</td>
+        <td>
+          [% IF user.can_see_bug(bug.id) %]
+            - [% bug.summary FILTER html %]
+          [% ELSE %]
+            (private)
+          [% END %]
+        </td>
+      </tr>
+    [% END %]
+    </table>
+  </p>
+[% END %]
+
+<p>Add [% terms.bugs %]:<br>
+  <input type="text" id="add_ignored_bugs" 
+         name="add_ignored_bugs" size="60"></p>

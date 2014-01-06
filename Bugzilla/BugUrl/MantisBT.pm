@@ -6,11 +6,11 @@
 # defined by the Mozilla Public License, v. 2.0.
 
 package Bugzilla::BugUrl::MantisBT;
-use strict;
-use base qw(Bugzilla::BugUrl);
 
-use Bugzilla::Error;
-use Bugzilla::Util;
+use 5.10.1;
+use strict;
+
+use parent qw(Bugzilla::BugUrl);
 
 ###############################
 ####        Methods        ####
@@ -18,6 +18,9 @@ use Bugzilla::Util;
 
 sub should_handle {
     my ($class, $uri) = @_;
+
+    # MantisBT URLs look like the following ('bugs' directory is optional):
+    #   http://www.mantisbt.org/bugs/view.php?id=1234
     return ($uri->path_query =~ m|view\.php\?id=\d+$|) ? 1 : 0;
 }
 
@@ -25,9 +28,6 @@ sub _check_value {
     my $class = shift;
 
     my $uri = $class->SUPER::_check_value(@_);
-
-    # MantisBT URLs look like the following ('bugs' directory is optional):
-    #   http://www.mantisbt.org/bugs/view.php?id=1234
 
     # Remove any # part if there is one.
     $uri->fragment(undef);

@@ -17,31 +17,8 @@
 [% PROCESS global/header.html.tmpl
            title = "$terms.Bugzilla Quip System"
            header = "Add your own clever headline"
+           style_urls = ['skins/standard/buglist.css']
  %]
-
-[% IF added_quip %]
-  <p>
-    <font color="red">
-      Your quip '<tt>[% added_quip FILTER html %]</tt>' has been added.
-      [% IF Param("quip_list_entry_control") == "moderated" AND !user.in_group('bz_quip_moderators') %]
-        It will be used as soon as it gets approved.
-      [% END %]
-    </font>
-  </p>
-[% END %]
-
-[% IF deleted_quip %]
-  <p>
-    <font color="red">
-      The quip '<tt>[% deleted_quip FILTER html %]</tt>' has been deleted.
-    </font>
-  </p>
-[% END %]
-
-[% IF approved or unapproved %]
-  <p>[% approved.size %] quips approved and [% unapproved.size %] quips unapproved</p>
-[% END %]
-
 
 <p>
   [% terms.Bugzilla %] will pick a random quip for the headline on each 
@@ -61,7 +38,7 @@
     <input type="hidden" name="action" value="add">
     <input type="hidden" name="token"
            value="[% issue_hash_token(['create-quips']) FILTER html %]">
-    <input size="80" name="quip">
+    <input size="80" name="quip" maxlength="512">
     <p>
       <input type="submit" id="add" value="Add This Quip">
     </p>
@@ -93,13 +70,17 @@
       <input type="hidden" name="action" value="approve">
       <input type="hidden" name="token"
              value="[% issue_hash_token(['approve-quips']) FILTER html %]">
-      <table border="1">
-        <thead><tr>
+      <table id="quips">
+        <thead>
+        <tr class="column_header">
           <th>Quip</th>
           <th>Author</th>
           <th>Action</th>
           <th>Approved</th>
-        </tr></thead><tbody>
+        </tr>
+        </thead>
+
+        <tbody>
         [% FOREACH quipid = quipids %]
           <tr>
             <td>[% quips.$quipid.quip FILTER html %]</td>
@@ -114,7 +95,7 @@
                 Delete
               </a>
             </td>
-            <td>
+            <td class="center">
               <input type="hidden" name="defined_quipid_[% quipid FILTER html %]"
                      id="defined_quipid_[% quipid FILTER html %]"
                      value="1">

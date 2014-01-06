@@ -446,16 +446,53 @@
 
         </section>
 
-        <section id="param-dependency-graphs">
-          <title>Dependency Graphs</title>
+        <section id="param-graphs">
+          <title>Graphs</title>
           <para>
-            This page has one parameter that sets the location of a Web Dot
-            server, or of the Web Dot binary on the local system, that is used
-            to generate dependency graphs. Web Dot is a CGI program that creates
-            images from <filename>.dot</filename> graphic description files. If
-            no Web Dot server or binary is specified, then dependency graphs will
-            be disabled.
+            This page contains parameters to control how graphs are generated.
           </para>
+
+          <variablelist>
+
+          <varlistentry>
+            <term>
+              webdotbase
+            </term>
+            <listitem>
+              <para>
+                This sets the location of a Web Dot server, or of the Web Dot
+                binary on the local system, that is used to generate dependency
+                graphs. Web Dot is a CGI program that creates images from
+                <filename>.dot</filename> graphic description files. If no Web Dot
+                server or binary is specified, then dependency graphs will be disabled.
+              </para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>
+              font_file
+            </term>
+            <listitem>
+              <para>
+                This defines the full path to a TrueType font file which will be
+                used to display text in charts and graphical reports. The recommended
+                font is Unifont which supports all languages in the Basic Multilingual
+                Plane. On Linux, the path is of the form
+                <filename>/usr/share/fonts/TTF/unifont/unifont-6.3.20131006.ttf</filename>
+                and on Windows, the path would be
+                <filename>C:\Windows\Fonts\unifont-6.3.20131006.ttf</filename>.
+              </para>
+              <para>
+                If you don't have this font installed, you can download it from the
+                <ulink url="http://unifoundry.com/unifont.html">Unifoundry.com</ulink>
+                website and install it at the location specified above. This font
+                is free of charge and can be installed on all operating systems.
+              </para>
+            </listitem>
+          </varlistentry>
+
+          </variablelist>
         </section>
 
         <section id="param-group-security">
@@ -1065,7 +1102,7 @@
             <para>
             <emphasis>Login Name</emphasis>: 
             This is generally the user's full email address. However, if you
-            have are using the <quote>emailsuffix</quote> parameter, this may
+            are using the <quote>emailsuffix</quote> parameter, this may
             just be the user's login name. Note that users can now change their
             login names themselves (to any valid email address).
             </para>
@@ -2362,7 +2399,7 @@ ReadOnly: ENTRY, NA/NA, CANEDIT
     <para>
     Keywords are global, rather than per-product. If the administrator changes
     a keyword currently applied to any bugs, the keyword cache must be rebuilt
-    using the <xref linkend="sanitycheck"/> script. Currently keywords can not
+    using the <xref linkend="sanitycheck"/> script. Currently keywords cannot
     be marked obsolete to prevent future usage.
     </para>
     <para>
@@ -2386,7 +2423,7 @@ ReadOnly: ENTRY, NA/NA, CANEDIT
     </para>
     <tip>
       <para>
-        Before adding a Custom Field, make sure that Bugzilla can not already
+        Before adding a Custom Field, make sure that Bugzilla cannot already
         do the desired behavior. Many Bugzilla options are not enabled by 
         default, and many times Administrators find that simply enabling
         certain options that already exist is sufficient. 
@@ -2434,37 +2471,72 @@ ReadOnly: ENTRY, NA/NA, CANEDIT
               <emphasis>Type:</emphasis>
               The type of field to create. There are
               several types available:
-               <simplelist>
-                 <member>
-                   Bug ID: A field where you can enter the ID of another bug from
-                   the same Bugzilla installation. To point to a bug in a remote
-                   installation, use the See Also field instead.
-                 </member>
-                 <member>
-                   Large Text Box: A multiple line box for entering free text.
-                 </member>
-                 <member>
-                   Free Text: A single line box for entering free text.
-                 </member>
-                 <member>
-                   Multiple-Selection Box: A list box where multiple options 
-                   can be selected. After creating this field, it must be edited
-                   to add the selection options. See 
-                   <xref linkend="edit-values-list" /> for information about 
-                   editing legal values.
-                 </member>
-                 <member>
-                   Drop Down: A list box where only one option can be selected.
-                   After creating this field, it must be edited to add the
-                   selection options. See 
-                   <xref linkend="edit-values-list" /> for information about 
-                   editing legal values.
-                 </member>
-                 <member>
-                   Date/Time: A date field. This field appears with a 
-                   calendar widget for choosing the date.
-                 </member>
-               </simplelist>
+              <variablelist>
+                <varlistentry>
+                  <term>Bug ID:</term>
+                  <listitem>
+                    <para>
+                      A field where you can enter the ID of another bug from
+                      the same Bugzilla installation. To point to a bug in a remote
+                      installation, use the See Also field instead.
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Large Text Box:</term>
+                  <listitem>
+                    <para>
+                      A multiple line box for entering free text.
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Free Text:</term>
+                  <listitem>
+                    <para>
+                      A single line box for entering free text.
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Multiple-Selection Box:</term>
+                  <listitem>
+                    <para>
+                      A list box where multiple options
+                      can be selected. After creating this field, it must be edited
+                      to add the selection options. See
+                      <xref linkend="edit-values-list" /> for information about
+                      editing legal values.
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Drop Down:</term>
+                  <listitem>
+                    <para>
+                      A list box where only one option can be selected.
+                      After creating this field, it must be edited to add the
+                      selection options. See
+                      <xref linkend="edit-values-list" /> for information about
+                      editing legal values.
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Date/Time:</term>
+                  <listitem>
+                    <para>
+                      A date field. This field appears with a
+                      calendar widget for choosing the date.
+                    </para>
+                  </listitem>
+                </varlistentry>
+              </variablelist>
             </para>
           </listitem>
 
@@ -3125,7 +3197,7 @@ ReadOnly: ENTRY, NA/NA, CANEDIT
     To run the "Sanity Check" script, log in as an Administrator and click the
     "Sanity Check" link in the admin page. Any problems that are found will be
     displayed in red letters. If the script is capable of fixing a problem,
-    it will present a link to initiate the fix. If the script can not
+    it will present a link to initiate the fix. If the script cannot
     fix the problem it will require manual database administration or recovery.
     </para>
     <para>

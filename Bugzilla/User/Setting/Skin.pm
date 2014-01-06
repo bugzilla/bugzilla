@@ -8,9 +8,10 @@
 
 package Bugzilla::User::Setting::Skin;
 
+use 5.10.1;
 use strict;
 
-use base qw(Bugzilla::User::Setting);
+use parent qw(Bugzilla::User::Setting);
 
 use Bugzilla::Constants;
 use File::Spec::Functions;
@@ -30,12 +31,8 @@ sub legal_values {
 
     foreach my $direntry (glob(catdir($dirbase, '*'))) {
         if (-d $direntry) {
-            # Stylesheet set
             next if basename($direntry) =~ /^cvs$/i;
-            push(@legal_values, basename($direntry));
-        }
-        elsif ($direntry =~ /\.css$/) {
-            # Single-file stylesheet
+            # Stylesheet set found
             push(@legal_values, basename($direntry));
         }
     }

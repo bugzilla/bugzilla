@@ -6,6 +6,7 @@
 # This Source Code Form is "Incompatible With Secondary Licenses", as
 # defined by the Mozilla Public License, v. 2.0.
 
+use 5.10.1;
 use strict;
 use lib qw(. lib);
 
@@ -15,6 +16,8 @@ use Bugzilla::Util;
 use Bugzilla::Error;
 use Bugzilla::Field;
 use Bugzilla::Search;
+use Bugzilla::Report;
+use Bugzilla::Token;
 
 use List::MoreUtils qw(uniq);
 
@@ -34,11 +37,58 @@ if (grep(/^cmd-/, $cgi->param())) {
 
 Bugzilla->login();
 my $action = $cgi->param('action') || 'menu';
+my $token  = $cgi->param('token');
 
 if ($action eq "menu") {
     # No need to do any searching in this case, so bail out early.
     print $cgi->header();
     $template->process("reports/menu.html.tmpl", $vars)
+      || ThrowTemplateError($template->error());
+    exit;
+
+}
+elsif ($action eq 'add') {
+    my $user = Bugzilla->login(LOGIN_REQUIRED);
+    check_hash_token($token, ['save_report']);
+
+    my $name = clean_text($cgi->param('name'));
+    my $query = $cgi->param('query');
+
+    if (my ($report) = grep{ lc($_->name) eq lc($name) } @{$user->reports}) {
+        $report->set_query($query);
+        $report->update;
+        $vars->{'message'} = "report_updated";
+    } else {
+        my $report = Bugzilla::Report->create({name => $name, query => $query});
+        $vars->{'message'} = "report_created";
+    }
+
+    $user->flush_reports_cache;
+
+    print $cgi->header();
+
+    $vars->{'reportname'} = $name;
+
+    $template->process("global/message.html.tmpl", $vars)
+      || ThrowTemplateError($template->error());
+    exit;
+}
+elsif ($action eq 'del') {
+    my $user = Bugzilla->login(LOGIN_REQUIRED);
+    my $report_id = $cgi->param('saved_report_id');
+    check_hash_token($token, ['delete_report', $report_id]);
+
+    my $report = Bugzilla::Report->check({id => $report_id});
+    $report->remove_from_db();
+
+    $user->flush_reports_cache;
+
+    print $cgi->header();
+
+    $vars->{'message'} = 'report_deleted';
+    $vars->{'reportname'} = $report->name;
+
+    $template->process("global/message.html.tmpl", $vars)
       || ThrowTemplateError($template->error());
     exit;
 }
@@ -54,25 +104,25 @@ if (!($col_field || $row_field || $tbl_field)) {
     ThrowUserError("no_axes_defined");
 }
 
-my $width = $cgi->param('width');
-my $height = $cgi->param('height');
+# There is no UI for these parameters anymore,
+# but they are still here just in case.
+my $width = $cgi->param('width') || 1024;
+my $height = $cgi->param('height') || 600;
 
-if (defined($width)) {
-   (detaint_natural($width) && $width > 0)
-     || ThrowCodeError("invalid_dimensions");
-   $width <= 2000 || ThrowUserError("chart_too_large");
-}
+(detaint_natural($width) && $width > 0)
+  || ThrowUserError("invalid_dimensions");
+$width <= 2000 || ThrowUserError("chart_too_large");
 
-if (defined($height)) {
-   (detaint_natural($height) && $height > 0)
-     || ThrowCodeError("invalid_dimensions");
-   $height <= 2000 || ThrowUserError("chart_too_large");
-}
+(detaint_natural($height) && $height > 0)
+  || ThrowUserError("invalid_dimensions");
+$height <= 2000 || ThrowUserError("chart_too_large");
+
+my $formatparam = $cgi->param('format') || '';
 
 # These shenanigans are necessary to make sure that both vertical and 
 # horizontal 1D tables convert to the correct dimension when you ask to
 # display them as some sort of chart.
-if (defined $cgi->param('format') && $cgi->param('format') eq "table") {
+if ($formatparam eq "table") {
     if ($col_field && !$row_field) {    
         # 1D *tables* should be displayed vertically (with a row_field only)
         $row_field = $col_field;
@@ -81,7 +131,7 @@ if (defined $cgi->param('format') && $cgi->param('format') eq "table") {
 }
 else {
     if (!Bugzilla->feature('graphical_reports')) {
-        ThrowCodeError('feature_disabled', { feature => 'graphical_reports' });
+        ThrowUserError('feature_disabled', { feature => 'graphical_reports' });
     }
 
     if ($row_field && !$col_field) {
@@ -97,13 +147,13 @@ my $valid_columns = Bugzilla::Search::REPORT_COLUMNS;
 # Validate the values in the axis fields or throw an error.
 !$row_field 
   || ($valid_columns->{$row_field} && trick_taint($row_field))
-  || ThrowCodeError("report_axis_invalid", {fld => "x", val => $row_field});
+  || ThrowUserError("report_axis_invalid", {fld => "x", val => $row_field});
 !$col_field 
   || ($valid_columns->{$col_field} && trick_taint($col_field))
-  || ThrowCodeError("report_axis_invalid", {fld => "y", val => $col_field});
+  || ThrowUserError("report_axis_invalid", {fld => "y", val => $col_field});
 !$tbl_field 
   || ($valid_columns->{$tbl_field} && trick_taint($tbl_field))
-  || ThrowCodeError("report_axis_invalid", {fld => "z", val => $tbl_field});
+  || ThrowUserError("report_axis_invalid", {fld => "z", val => $tbl_field});
 
 my @axis_fields = grep { $_ } ($row_field, $col_field, $tbl_field);
 
@@ -114,13 +164,12 @@ my $search = new Bugzilla::Search(
     params => scalar $params->Vars,
     allow_unlimited => 1,
 );
-my $query = $search->sql;
 
 $::SIG{TERM} = 'DEFAULT';
 $::SIG{PIPE} = 'DEFAULT';
 
-my $dbh = Bugzilla->switch_to_shadow_db();
-my $results = $dbh->selectall_arrayref($query);
+Bugzilla->switch_to_shadow_db();
+my ($results, $extra_data) = $search->data;
 
 # We have a hash of hashes for the data itself, and a hash to hold the 
 # row/col/table names.
@@ -136,20 +185,64 @@ my $col_isnumeric = 1;
 my $row_isnumeric = 1;
 my $tbl_isnumeric = 1;
 
+# define which fields are multiselect
+my @multi_selects = map { $_->name } @{Bugzilla->fields(
+    {
+        obsolete => 0,
+        type => [FIELD_TYPE_MULTI_SELECT, FIELD_TYPE_KEYWORDS]
+    }
+)};
+my $col_ismultiselect = scalar grep {$col_field eq $_} @multi_selects;
+my $row_ismultiselect = scalar grep {$row_field eq $_} @multi_selects;
+my $tbl_ismultiselect = scalar grep {$tbl_field eq $_} @multi_selects;
+
+
 foreach my $result (@$results) {
     # handle empty dimension member names
-    my $row = check_value($row_field, $result);
-    my $col = check_value($col_field, $result);
-    my $tbl = check_value($tbl_field, $result);
-
-    $data{$tbl}{$col}{$row}++;
-    $names{"col"}{$col}++;
-    $names{"row"}{$row}++;
-    $names{"tbl"}{$tbl}++;
     
-    $col_isnumeric &&= ($col =~ /^-?\d+(\.\d+)?$/o);
-    $row_isnumeric &&= ($row =~ /^-?\d+(\.\d+)?$/o);
-    $tbl_isnumeric &&= ($tbl =~ /^-?\d+(\.\d+)?$/o);
+    my @rows = check_value($row_field, $result, $row_ismultiselect);
+    my @cols = check_value($col_field, $result, $col_ismultiselect);
+    my @tbls = check_value($tbl_field, $result, $tbl_ismultiselect);
+
+    my %in_total_row;
+    my %in_total_col;
+    for my $tbl (@tbls) {
+        my %in_row_total;
+        for my $col (@cols) {
+            for my $row (@rows) {
+                $data{$tbl}{$col}{$row}++;
+                $names{"row"}{$row}++;
+                $row_isnumeric &&= ($row =~ /^-?\d+(\.\d+)?$/o);
+                if ($formatparam eq "table") {
+                    if (!$in_row_total{$row}) {
+                        $data{$tbl}{'-total-'}{$row}++;
+                        $in_row_total{$row} = 1;
+                    }
+                    if (!$in_total_row{$row}) {
+                        $data{'-total-'}{'-total-'}{$row}++;
+                        $in_total_row{$row} = 1;
+                    }
+                }
+            }
+            if ($formatparam eq "table") {
+                $data{$tbl}{$col}{'-total-'}++;
+                if (!$in_total_col{$col}) {
+                    $data{'-total-'}{$col}{'-total-'}++;
+                    $in_total_col{$col} = 1;
+                }
+            }
+            $names{"col"}{$col}++;
+            $col_isnumeric &&= ($col =~ /^-?\d+(\.\d+)?$/o);
+        }
+        $names{"tbl"}{$tbl}++;
+        $tbl_isnumeric &&= ($tbl =~ /^-?\d+(\.\d+)?$/o);
+        if ($formatparam eq "table") {
+            $data{$tbl}{'-total-'}{'-total-'}++;
+        }
+    }
+    if ($formatparam eq "table") {
+        $data{'-total-'}{'-total-'}{'-total-'}++;
+    }
 }
 
 my @col_names = get_names($names{"col"}, $col_isnumeric, $col_field);
@@ -193,9 +286,10 @@ $vars->{'time'} = localtime(time());
 $vars->{'col_names'} = \@col_names;
 $vars->{'row_names'} = \@row_names;
 $vars->{'tbl_names'} = \@tbl_names;
+$vars->{'note_multi_select'} = $row_ismultiselect || $col_ismultiselect;
 
 # Below a certain width, we don't see any bars, so there needs to be a minimum.
-if ($width && $cgi->param('format') eq "bar") {
+if ($formatparam eq "bar") {
     my $min_width = (scalar(@col_names) || 1) * 20;
 
     if (!$cgi->param('cumulate')) {
@@ -205,13 +299,17 @@ if ($width && $cgi->param('format') eq "bar") {
     $vars->{'min_width'} = $min_width;
 }
 
-$vars->{'width'} = $width if $width;
-$vars->{'height'} = $height if $height;
+$vars->{'width'} = $width;
+$vars->{'height'} = $height;
+$vars->{'queries'} = $extra_data;
+$vars->{'saved_report_id'} = $cgi->param('saved_report_id');
 
-$vars->{'query'} = $query;
-$vars->{'debug'} = $cgi->param('debug');
-
-my $formatparam = $cgi->param('format');
+if ($cgi->param('debug')
+    && Bugzilla->params->{debug_group}
+    && Bugzilla->user->in_group(Bugzilla->params->{debug_group})
+) {
+    $vars->{'debug'} = 1;
+}
 
 if ($action eq "wrap") {
     # So which template are we using? If action is "wrap", we will be using
@@ -221,7 +319,6 @@ if ($action eq "wrap") {
     # data, or images generated by calling report.cgi again with action as
     # "plot".
     $formatparam =~ s/[^a-zA-Z\-]//g;
-    trick_taint($formatparam);
     $vars->{'format'} = $formatparam;
     $formatparam = '';
 
@@ -262,11 +359,8 @@ my $format = $template->get_format("reports/report", $formatparam,
 # set debug=1 to always get an HTML content-type, and view the error.
 $format->{'ctype'} = "text/html" if $cgi->param('debug');
 
-my @time = localtime(time());
-my $date = sprintf "%04d-%02d-%02d", 1900+$time[5],$time[4]+1,$time[3];
-my $filename = "report-$date.$format->{extension}";
-print $cgi->header(-type => $format->{'ctype'},
-                   -content_disposition => "inline; filename=$filename");
+$cgi->set_dated_content_disp("inline", "report", $format->{extension});
+print $cgi->header($format->{'ctype'});
 
 # Problems with this CGI are often due to malformed data. Setting debug=1
 # prints out both data structures.
@@ -290,6 +384,10 @@ $template->process("$format->{'template'}", $vars)
 sub get_names {
     my ($names, $isnumeric, $field_name) = @_;
     my ($field, @sorted);
+    # XXX - This is a hack to handle the actual_time/work_time field,
+    # because it's named 'actual_time' in Search.pm but 'work_time' in Field.pm.
+    $_[2] = $field_name = 'work_time' if $field_name eq 'actual_time';
+
     # _realname fields aren't real Bugzilla::Field objects, but they are a
     # valid axis, so we don't vailidate them as Bugzilla::Field objects.
     $field = Bugzilla::Field->check($field_name) 
@@ -299,7 +397,8 @@ sub get_names {
         foreach my $value (@{$field->legal_values}) {
             push(@sorted, $value->name) if $names->{$value->name};
         }
-        unshift(@sorted, ' ') if $field_name eq 'resolution';
+        unshift(@sorted, '---') if ($field_name eq 'resolution'
+                                    || $field->type == FIELD_TYPE_MULTI_SELECT);
         @sorted = uniq @sorted;
     }  
     elsif ($isnumeric) {
@@ -316,7 +415,7 @@ sub get_names {
 }
 
 sub check_value {
-    my ($field, $result) = @_;
+    my ($field, $result, $ismultiselect) = @_;
 
     my $value;
     if (!defined $field) {
@@ -328,13 +427,20 @@ sub check_value {
     else {
         $value = shift @$result;
         $value = ' ' if (!defined $value || $value eq '');
+        $value = '---' if (($field eq 'resolution' || $ismultiselect ) &&
+                           $value eq ' ');
     }
-    return $value;
+    if ($ismultiselect) {
+        # Some DB servers have a space after the comma, some others don't.
+        return split(/, ?/, $value);
+    } else {
+        return ($value);
+    }
 }
 
 sub get_field_restrictions {
     my $field = shift;
     my $cgi = Bugzilla->cgi;
 
-    return join('&', map {"$field=$_"} $cgi->param($field));
+    return join('&amp;', map {url_quote($field) . '=' . url_quote($_)} $cgi->param($field));
 }

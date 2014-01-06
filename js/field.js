@@ -83,9 +83,17 @@ function _errorFor(field, name) {
     YAHOO.util.Dom.addClass(field, 'validation_error_field');
 }
 
-function createCalendar(name) {
+/* This function is never to be called directly, but only indirectly
+ * using template/en/default/global/calendar.js.tmpl, so that localization
+ * works. For the same reason, if you modify this function's parameter list,
+ * you need to modify the documentation in said template as well. */
+function createCalendar(name, start_weekday, months_long, weekdays_short) {
     var cal = new YAHOO.widget.Calendar('calendar_' + name, 
-                                        'con_calendar_' + name);
+                                        'con_calendar_' + name,
+                                        { START_WEEKDAY:  start_weekday,
+                                          MONTHS_LONG:    months_long,
+                                          WEEKDAYS_SHORT: weekdays_short
+                                        });
     YAHOO.bugzilla['calendar_' + name] = cal;
     var field = document.getElementById(name);
     cal.selectEvent.subscribe(setFieldFromCalendar, field, false);
@@ -206,14 +214,14 @@ function setupEditLink(id) {
 }
 
 /* Hide input/select fields and show the text with (edit) next to it */
-function hideEditableField( container, input, action, field_id, original_value, new_value ) {
+function hideEditableField( container, input, action, field_id, original_value, new_value, hide_input ) {
     YAHOO.util.Dom.removeClass(container, 'bz_default_hidden');
     YAHOO.util.Dom.addClass(input, 'bz_default_hidden');
     YAHOO.util.Event.addListener(action, 'click', showEditableField,
                                  new Array(container, input, field_id, new_value));
     if(field_id != ""){
         YAHOO.util.Event.addListener(window, 'load', checkForChangedFieldValues,
-                        new Array(container, input, field_id, original_value));
+                        new Array(container, input, field_id, original_value, hide_input ));
     }
 }
 
@@ -261,7 +269,7 @@ function showEditableField (e, ContainerInputArray) {
         }
         // focus on the first field, this makes it easier to edit
         inputs[0].focus();
-        if ( type == "input" ) {
+        if ( type == "input" || type == "textarea" ) {
             inputs[0].select();
         }
     }
@@ -285,8 +293,10 @@ function checkForChangedFieldValues(e, ContainerInputArray ) {
     var el = document.getElementById(ContainerInputArray[2]);
     var unhide = false;
     if ( el ) {
-        if ( el.value != ContainerInputArray[3] ||
-            ( el.value == "" && el.id != "alias") ) {
+        if ( !ContainerInputArray[4]
+             && (el.value != ContainerInputArray[3]
+                 || (el.value == "" && el.id != "alias" && el.id != "qa_contact")) )
+        {
             unhide = true;
         }
         else {
@@ -295,7 +305,7 @@ function checkForChangedFieldValues(e, ContainerInputArray ) {
             if ( set_default ) {
                 if(set_default.checked){
                     unhide = true;
-                }              
+                }
             }
         }
     }
@@ -328,13 +338,19 @@ function showPeopleOnChange( field_id_list ) {
     }
 }
 
-function assignToDefaultOnChange(field_id_list) {
-    showPeopleOnChange( field_id_list );
-    for(var i = 0; i < field_id_list.length; i++) {
-        YAHOO.util.Event.addListener( field_id_list[i],'change', setDefaultCheckbox,
-                                      'set_default_assignee');
-        YAHOO.util.Event.addListener( field_id_list[i],'change',setDefaultCheckbox,
-                                      'set_default_qa_contact');    
+function assignToDefaultOnChange(field_id_list, default_assignee, default_qa_contact) {
+    showPeopleOnChange(field_id_list);
+    for(var i = 0, l = field_id_list.length; i < l; i++) {
+        YAHOO.util.Event.addListener(field_id_list[i], 'change', function(evt, defaults) {
+            if (document.getElementById('assigned_to').value == defaults[0]) {
+                setDefaultCheckbox(evt, 'set_default_assignee');
+            }
+            if (document.getElementById('qa_contact')
+                && document.getElementById('qa_contact').value == defaults[1])
+            {
+                setDefaultCheckbox(evt, 'set_default_qa_contact');
+            }
+        }, [default_assignee, default_qa_contact]);
     }
 }
 
@@ -431,7 +447,7 @@ function setResolutionToDuplicate(e, duplicate_or_move_bug_status) {
     YAHOO.util.Event.preventDefault(e);
 }
 
-function setDefaultCheckbox(e, field_id ) { 
+function setDefaultCheckbox(e, field_id) {
     var el = document.getElementById(field_id);
     var elLabel = document.getElementById(field_id + "_label");
     if( el && elLabel ) {
@@ -870,32 +886,39 @@ YAHOO.bugzilla.userAutocomplete = {
     }
 };
 
-YAHOO.bugzilla.keywordAutocomplete = {
-    dataSource : null,
-    init_ds : function(){
-        this.dataSource = new YAHOO.util.LocalDataSource( YAHOO.bugzilla.keyword_array );
+YAHOO.bugzilla.fieldAutocomplete = {
+    dataSource : [],
+    init_ds : function( field ) {
+        this.dataSource[field] =
+          new YAHOO.util.LocalDataSource( YAHOO.bugzilla.field_array[field] );
     },
     init : function( field, container ) {
-        if( this.dataSource == null ){
-            this.init_ds();
+        if( this.dataSource[field] == null ) {
+            this.init_ds( field );
         }
-        var keywordAutoComp = new YAHOO.widget.AutoComplete(field, container, this.dataSource);
-        keywordAutoComp.maxResultsDisplayed = YAHOO.bugzilla.keyword_array.length;
-        keywordAutoComp.minQueryLength = 0;
-        keywordAutoComp.useIFrame = true;
-        keywordAutoComp.delimChar = [","," "];
-        keywordAutoComp.resultTypeList = false;
-        keywordAutoComp.queryDelay = 0;
-        /*  Causes all the possibilities in the keyword to appear when a user 
+        var fieldAutoComp =
+          new YAHOO.widget.AutoComplete(field, container, this.dataSource[field]);
+        fieldAutoComp.maxResultsDisplayed = YAHOO.bugzilla.field_array[field].length;
+        fieldAutoComp.formatResult = fieldAutoComp.formatEscapedResult;
+        fieldAutoComp.minQueryLength = 0;
+        fieldAutoComp.useIFrame = true;
+        fieldAutoComp.delimChar = [","," "];
+        fieldAutoComp.resultTypeList = false;
+        fieldAutoComp.queryDelay = 0;
+        /*  Causes all the possibilities in the field to appear when a user
          *  focuses on the textbox 
          */
-        keywordAutoComp.textboxFocusEvent.subscribe( function(){
-            var sInputValue = YAHOO.util.Dom.get('keywords').value;
-            if( sInputValue.length === 0 ){
+        fieldAutoComp.textboxFocusEvent.subscribe( function(){
+            var sInputValue = YAHOO.util.Dom.get(field).value;
+            if( sInputValue.length === 0
+                && YAHOO.bugzilla.field_array[field].length > 0 ){
                 this.sendQuery(sInputValue);
                 this.collapseContainer();
                 this.expandContainer();
             }
+        });
+        fieldAutoComp.dataRequestEvent.subscribe( function(type, args) {
+            args[0].autoHighlight = args[1] != '';
         });
     }
 };
@@ -910,5 +933,53 @@ function userDisabledTextOnChange(disabledtext) {
     }
     if (disabledtext.value !== "" && !disable_mail_manually_set) {
         disable_mail.checked = true;
+    }
+}
+
+/**
+ * Force the browser to honour the selected option when a page is refreshed,
+ * but only if the user hasn't explicitly selected a different option.
+ */
+function initDirtyFieldTracking() {
+    // old IE versions don't provide the information we need to make this fix work
+    // however they aren't affected by this issue, so it's ok to ignore them
+    if (YAHOO.env.ua.ie > 0 && YAHOO.env.ua.ie <= 8) return;
+    var selects = document.getElementById('changeform').getElementsByTagName('select');
+    for (var i = 0, l = selects.length; i < l; i++) {
+        var el = selects[i];
+        var el_dirty = document.getElementById(el.name + '_dirty');
+        if (!el_dirty) continue;
+        if (!el_dirty.value) {
+            var preSelected = bz_preselectedOptions(el);
+            if (!el.multiple) {
+                preSelected.selected = true;
+            } else {
+                el.selectedIndex = -1;
+                for (var j = 0, m = preSelected.length; j < m; j++) {
+                    preSelected[j].selected = true;
+                }
+            }
+        }
+        YAHOO.util.Event.on(el, "change", function(e) {
+            var el = e.target || e.srcElement;
+            var preSelected = bz_preselectedOptions(el);
+            var currentSelected = bz_selectedOptions(el);
+            var isDirty = false;
+            if (!el.multiple) {
+                isDirty = preSelected.index != currentSelected.index;
+            } else {
+                if (preSelected.length != currentSelected.length) {
+                    isDirty = true;
+                } else {
+                    for (var i = 0, l = preSelected.length; i < l; i++) {
+                        if (currentSelected[i].index != preSelected[i].index) {
+                            isDirty = true;
+                            break;
+                        }
+                    }
+                }
+            }
+            document.getElementById(el.name + '_dirty').value = isDirty ? '1' : '';
+        });
     }
 }

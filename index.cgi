@@ -6,14 +6,8 @@
 # This Source Code Form is "Incompatible With Secondary Licenses", as
 # defined by the Mozilla Public License, v. 2.0.
 
-###############################################################################
-# Script Initialization
-###############################################################################
-
-# Make it harder for us to do dangerous things in Perl.
+use 5.10.1;
 use strict;
-
-# Include the Bugzilla CGI and general utility library.
 use lib qw(. lib);
 
 use Bugzilla;
@@ -37,10 +31,6 @@ if ($cgi->param('logout')) {
     $cgi->delete('logout');
 }
 
-###############################################################################
-# Main Body Execution
-###############################################################################
-
 # Return the appropriate HTTP response headers.
 print $cgi->header();
 
@@ -53,6 +43,19 @@ if ($user->in_group('admin')) {
     }
     # Inform the administrator about new releases, if any.
     $vars->{'release'} = Bugzilla::Update::get_notifications();
+}
+
+if ($user->id) {
+    my $dbh = Bugzilla->dbh;
+    $vars->{assignee_count} =
+      $dbh->selectrow_array('SELECT COUNT(*) FROM bugs WHERE assigned_to = ?
+                             AND resolution = ""', undef, $user->id);
+    $vars->{reporter_count} =
+      $dbh->selectrow_array('SELECT COUNT(*) FROM bugs WHERE reporter = ?
+                             AND resolution = ""', undef, $user->id);
+    $vars->{requestee_count} =
+      $dbh->selectrow_array('SELECT COUNT(DISTINCT bug_id) FROM flags
+                             WHERE requestee_id = ?', undef, $user->id);
 }
 
 # Generate and return the UI (HTML page) from the appropriate template.

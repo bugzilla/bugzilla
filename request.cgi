@@ -6,13 +6,8 @@
 # This Source Code Form is "Incompatible With Secondary Licenses", as
 # defined by the Mozilla Public License, v. 2.0.
 
-################################################################################
-# Script Initialization
-################################################################################
-
-# Make it harder for us to do dangerous things in Perl.
+use 5.10.1;
 use strict;
-
 use lib qw(. lib);
 
 use Bugzilla;
@@ -31,12 +26,12 @@ my $cgi = Bugzilla->cgi;
 Bugzilla->switch_to_shadow_db;
 my $template = Bugzilla->template;
 my $action = $cgi->param('action') || '';
+my $format = $template->get_format('request/queue', 
+                                   scalar($cgi->param('format')),
+                                   scalar($cgi->param('ctype')));
 
-print $cgi->header();
-
-################################################################################
-# Main Body Execution
-################################################################################
+$cgi->set_dated_content_disp("inline", "requests", $format->{extension});
+print $cgi->header($format->{'ctype'});
 
 my $fields;
 $fields->{'requester'}->{'type'} = 'single';
@@ -51,7 +46,7 @@ unless (defined $cgi->param('requestee')
 Bugzilla::User::match_field($fields);
 
 if ($action eq 'queue') {
-    queue();
+    queue($format);
 }
 else {
     my $flagtypes = get_flag_types();
@@ -69,7 +64,7 @@ else {
     }
     $vars->{'components'} = [ sort { $a cmp $b } keys %components ];
 
-    $template->process('request/queue.html.tmpl', $vars)
+    $template->process($format->{'template'}, $vars)
       || ThrowTemplateError($template->error());
 }
 exit;
@@ -79,6 +74,7 @@ exit;
 ################################################################################
 
 sub queue {
+    my $format = shift;
     my $cgi = Bugzilla->cgi;
     my $dbh = Bugzilla->dbh;
     my $template = Bugzilla->template;
@@ -122,20 +118,27 @@ sub queue {
                   ON bugs.product_id = products.id
           INNER JOIN components
                   ON bugs.component_id = components.id
-           LEFT JOIN bug_group_map AS bgmap
-                  ON bgmap.bug_id = bugs.bug_id
-                 AND bgmap.group_id NOT IN (" .
-                     $user->groups_as_string . ")
            LEFT JOIN bug_group_map AS privs
                   ON privs.bug_id = bugs.bug_id
            LEFT JOIN cc AS ccmap
                   ON ccmap.who = $userid
                  AND ccmap.bug_id = bugs.bug_id
-    " .
+           LEFT JOIN bug_group_map AS bgmap
+                  ON bgmap.bug_id = bugs.bug_id
+    ";
+
+    if (Bugzilla->params->{or_groups}) {
+        $query .= " AND bgmap.group_id IN (" . $user->groups_as_string . ")";
+        $query .= " WHERE     (privs.group_id IS NULL OR bgmap.group_id IS NOT NULL OR";
+    }
+    else {
+        $query .= " AND bgmap.group_id NOT IN (" . $user->groups_as_string . ")";
+        $query .= " WHERE     (bgmap.group_id IS NULL OR";
+    }
 
     # Weed out bug the user does not have access to
-    " WHERE     ((bgmap.group_id IS NULL) OR
-                 (ccmap.who IS NOT NULL AND cclist_accessible = 1) OR
+    $query .=
+    "            (ccmap.who IS NOT NULL AND cclist_accessible = 1) OR
                  (bugs.reporter = $userid AND bugs.reporter_accessible = 1) OR
                  (bugs.assigned_to = $userid) " .
                  (Bugzilla->params->{'useqacontact'} ? "OR
@@ -159,48 +162,57 @@ sub queue {
     # need to display a "status" column in the report because the value for that
     # column will always be the same.
     my @excluded_columns = ();
-    
-    # Filter requests by status: "pending", "granted", "denied", "all" 
-    # (which means any), or "fulfilled" (which means "granted" or "denied").
-    if ($status) {
-        if ($status eq "+-") {
-            push(@criteria, "flags.status IN ('+', '-')");
-            push(@excluded_columns, 'status') unless $cgi->param('do_union');
-        }
-        elsif ($status ne "all") {
-            push(@criteria, "flags.status = '$status'");
-            push(@excluded_columns, 'status') unless $cgi->param('do_union');
-        }
-    }
-    
+    my $do_union = $cgi->param('do_union');
+
     # Filter results by exact email address of requester or requestee.
     if (defined $cgi->param('requester') && $cgi->param('requester') ne "") {
         my $requester = $dbh->quote($cgi->param('requester'));
         trick_taint($requester); # Quoted above
         push(@criteria, $dbh->sql_istrcmp('requesters.login_name', $requester));
-        push(@excluded_columns, 'requester') unless $cgi->param('do_union');
+        push(@excluded_columns, 'requester') unless $do_union;
     }
     if (defined $cgi->param('requestee') && $cgi->param('requestee') ne "") {
         if ($cgi->param('requestee') ne "-") {
             my $requestee = $dbh->quote($cgi->param('requestee'));
             trick_taint($requestee); # Quoted above
-            push(@criteria, $dbh->sql_istrcmp('requestees.login_name',
-                            $requestee));
+            push(@criteria, $dbh->sql_istrcmp('requestees.login_name', $requestee));
         }
-        else { push(@criteria, "flags.requestee_id IS NULL") }
-        push(@excluded_columns, 'requestee') unless $cgi->param('do_union');
+        else {
+            push(@criteria, "flags.requestee_id IS NULL");
+        }
+        push(@excluded_columns, 'requestee') unless $do_union;
     }
-    
+
+    # If the user wants requester = foo OR requestee = bar, we have to join
+    # these criteria separately as all other criteria use AND.
+    if (@criteria == 2 && $do_union) {
+        my $union = join(' OR ', @criteria);
+        @criteria = ("($union)");
+    }
+
+    # Filter requests by status: "pending", "granted", "denied", "all"
+    # (which means any), or "fulfilled" (which means "granted" or "denied").
+    if ($status) {
+        if ($status eq "+-") {
+            push(@criteria, "flags.status IN ('+', '-')");
+            push(@excluded_columns, 'status');
+        }
+        elsif ($status ne "all") {
+            push(@criteria, "flags.status = '$status'");
+            push(@excluded_columns, 'status');
+        }
+    }
+
     # Filter results by exact product or component.
     if (defined $cgi->param('product') && $cgi->param('product') ne "") {
         my $product = Bugzilla::Product->check(scalar $cgi->param('product'));
         push(@criteria, "bugs.product_id = " . $product->id);
-        push(@excluded_columns, 'product') unless $cgi->param('do_union');
+        push(@excluded_columns, 'product');
         if (defined $cgi->param('component') && $cgi->param('component') ne "") {
             my $component = Bugzilla::Component->check({ product => $product,
                                                          name => scalar $cgi->param('component') });
             push(@criteria, "bugs.component_id = " . $component->id);
-            push(@excluded_columns, 'component') unless $cgi->param('do_union');
+            push(@excluded_columns, 'component');
         }
     }
 
@@ -218,15 +230,11 @@ sub queue {
         my $quoted_form_type = $dbh->quote($form_type);
         trick_taint($quoted_form_type); # Already SQL quoted
         push(@criteria, "flagtypes.name = " . $quoted_form_type);
-        push(@excluded_columns, 'type') unless $cgi->param('do_union');
+        push(@excluded_columns, 'type');
     }
-    
-    # Add the criteria to the query.  We do an intersection by default 
-    # but do a union if the "do_union" URL parameter (for which there is no UI 
-    # because it's an advanced feature that people won't usually want) is true.
-    my $and_or = $cgi->param('do_union') ? " OR " : " AND ";
-    $query .= " AND (" . join($and_or, @criteria) . ") " if scalar(@criteria);
-    
+
+    $query .= ' AND ' . join(' AND ', @criteria) if scalar(@criteria);
+
     # Group the records by flag ID so we don't get multiple rows of data
     # for each flag.  This is only necessary because of the code that
     # removes flags on bugs the user is unauthorized to access.
@@ -263,7 +271,7 @@ sub queue {
     # Pass the query to the template for use when debugging this script.
     $vars->{'query'} = $query;
     $vars->{'debug'} = $cgi->param('debug') ? 1 : 0;
-    
+
     my $results = $dbh->selectall_arrayref($query);
     my @requests = ();
     foreach my $result (@$results) {
@@ -303,8 +311,10 @@ sub queue {
     }
     $vars->{'components'} = [ sort { $a cmp $b } keys %components ];
 
+    $vars->{'urlquerypart'} = $cgi->canonicalise_query('ctype');
+
     # Generate and return the UI (HTML page) from the appropriate template.
-    $template->process("request/queue.html.tmpl", $vars)
+    $template->process($format->{'template'}, $vars)
       || ThrowTemplateError($template->error());
 }
 

@@ -6,8 +6,11 @@
 # defined by the Mozilla Public License, v. 2.0.
 
 package Bugzilla::Migrate::Gnats;
+
+use 5.10.1;
 use strict;
-use base qw(Bugzilla::Migrate);
+
+use parent qw(Bugzilla::Migrate);
 
 use Bugzilla::Constants;
 use Bugzilla::Install::Util qw(indicate_progress);
@@ -696,3 +699,23 @@ sub translate_value {
 }
 
 1;
+
+=head1 B<Methods in need of POD>
+
+=over
+
+=item user_map
+
+=item user_to_email
+
+=item add_user
+
+=item translate_value
+
+=item before_insert
+
+=item translate_bug
+
+=item CONFIG_VARS
+
+=back

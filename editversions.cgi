@@ -6,6 +6,7 @@
 # This Source Code Form is "Incompatible With Secondary Licenses", as
 # defined by the Mozilla Public License, v. 2.0.
 
+use 5.10.1;
 use strict;
 use lib qw(. lib);
 
@@ -187,8 +188,10 @@ if ($action eq 'update') {
 
     $dbh->bz_start_transaction();
 
-    $version->set_name($version_name);
-    $version->set_is_active($isactive);
+    $version->set_all({
+        value    =>  $version_name,
+        isactive =>  $isactive
+    });
     my $changes = $version->update();
 
     $dbh->bz_commit_transaction();

@@ -7,8 +7,11 @@
 
 # This exists to implement the template-before_process hook.
 package Bugzilla::Template::Context;
+
+use 5.10.1;
 use strict;
-use base qw(Template::Context);
+
+use parent qw(Template::Context);
 
 use Bugzilla::Hook;
 use Scalar::Util qw(blessed);
@@ -81,6 +84,14 @@ sub stash {
     return $stash;
 }
 
+sub filter {
+    my ($self, $name, $args) = @_;
+    # If we pass an alias for the filter name, the filter code is cached
+    # instead of looking for it at each call.
+    # If the filter has arguments, then we can't cache it.
+    $self->SUPER::filter($name, $args, $args ? undef : $name);
+}
+
 # We need a DESTROY sub for the same reason that Bugzilla::CGI does.
 sub DESTROY {
     my $self = shift;
@@ -88,3 +99,15 @@ sub DESTROY {
 };
 
 1;
+
+=head1 B<Methods in need of POD>
+
+=over
+
+=item stash
+
+=item filter
+
+=item process
+
+=back

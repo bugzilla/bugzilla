@@ -6,46 +6,152 @@
 # defined by the Mozilla Public License, v. 2.0.
 
 package Bugzilla::WebService::Util;
+
+use 5.10.1;
 use strict;
-use base qw(Exporter);
+
+use Bugzilla::Flag;
+use Bugzilla::FlagType;
+use Bugzilla::Error;
+
+use Storable qw(dclone);
+
+use parent qw(Exporter);
 
 # We have to "require", not "use" this, because otherwise it tries to
 # use features of Test::More during import().
 require Test::Taint;
 
 our @EXPORT_OK = qw(
+    extract_flags
     filter
     filter_wants
     taint_data
     validate
     translate
     params_to_objects
+    fix_credentials
 );
 
-sub filter ($$) {
-    my ($params, $hash) = @_;
+sub extract_flags {
+    my ($flags, $bug, $attachment) = @_;
+    my (@new_flags, @old_flags);
+
+    my $flag_types    = $attachment ? $attachment->flag_types : $bug->flag_types;
+    my $current_flags = $attachment ? $attachment->flags : $bug->flags;
+
+    # Copy the user provided $flags as we may call extract_flags more than
+    # once when editing multiple bugs or attachments.
+    my $flags_copy = dclone($flags);
+
+    foreach my $flag (@$flags_copy) {
+        my $id      = $flag->{id};
+        my $type_id = $flag->{type_id};
+
+        my $new  = delete $flag->{new};
+        my $name = delete $flag->{name};
+
+        if ($id) {
+            my $flag_obj = grep($id == $_->id, @$current_flags);
+            $flag_obj || ThrowUserError('object_does_not_exist',
+                                        { class => 'Bugzilla::Flag', id => $id });
+        }
+        elsif ($type_id) {
+            my $type_obj = grep($type_id == $_->id, @$flag_types);
+            $type_obj || ThrowUserError('object_does_not_exist',
+                                        { class => 'Bugzilla::FlagType', id => $type_id });
+            if (!$new) {
+                my @flag_matches = grep($type_id == $_->type->id, @$current_flags);
+                @flag_matches > 1 && ThrowUserError('flag_not_unique',
+                                                     { value => $type_id });
+                if (!@flag_matches) {
+                    delete $flag->{id};
+                }
+                else {
+                    delete $flag->{type_id};
+                    $flag->{id} = $flag_matches[0]->id;
+                }
+            }
+        }
+        elsif ($name) {
+            my @type_matches = grep($name eq $_->name, @$flag_types);
+            @type_matches > 1 && ThrowUserError('flag_type_not_unique',
+                                                { value => $name });
+            @type_matches || ThrowUserError('object_does_not_exist',
+                                            { class => 'Bugzilla::FlagType', name => $name });
+            if ($new) {
+                delete $flag->{id};
+                $flag->{type_id} = $type_matches[0]->id;
+            }
+            else {
+                my @flag_matches = grep($name eq $_->type->name, @$current_flags);
+                @flag_matches > 1 && ThrowUserError('flag_not_unique', { value => $name });
+                if (@flag_matches) {
+                    $flag->{id} = $flag_matches[0]->id;
+                }
+                else {
+                    delete $flag->{id};
+                    $flag->{type_id} = $type_matches[0]->id;
+                }
+            }
+        }
+
+        if ($flag->{id}) {
+            push(@old_flags, $flag);
+        }
+        else {
+            push(@new_flags, $flag);
+        }
+    }
+
+    return (\@old_flags, \@new_flags);
+}
+
+sub filter ($$;$) {
+    my ($params, $hash, $prefix) = @_;
     my %newhash = %$hash;
 
     foreach my $key (keys %$hash) {
-        delete $newhash{$key} if !filter_wants($params, $key);
+        delete $newhash{$key} if !filter_wants($params, $key, $prefix);
     }
 
     return \%newhash;
 }
 
-sub filter_wants ($$) {
-    my ($params, $field) = @_;
+sub filter_wants ($$;$) {
+    my ($params, $field, $prefix) = @_;
+
+    # Since this is operation is resource intensive, we will cache the results
+    # This assumes that $params->{*_fields} doesn't change between calls
+    my $cache = Bugzilla->request_cache->{filter_wants} ||= {};
+    $field = "${prefix}.${field}" if $prefix;
+
+    if (exists $cache->{$field}) {
+        return $cache->{$field};
+    }
+
     my %include = map { $_ => 1 } @{ $params->{'include_fields'} || [] };
     my %exclude = map { $_ => 1 } @{ $params->{'exclude_fields'} || [] };
 
-    if (defined $params->{include_fields}) {
-        return 0 if !$include{$field};
+    my $wants = 1;
+    if (defined $params->{exclude_fields} && $exclude{$field}) {
+        $wants = 0;
     }
-    if (defined $params->{exclude_fields}) {
-        return 0 if $exclude{$field};
+    elsif (defined $params->{include_fields} && !$include{$field}) {
+        if ($prefix) {
+            # Include the field if the parent is include (and this one is not excluded)
+            $wants = 0 if !$include{$prefix};
+        }
+        else {
+            # We want to include this if one of the sub keys is included
+            my $key = $field . '.';
+            my $len = length($key);
+            $wants = 0 if ! grep { substr($_, 0, $len) eq $key  } keys %include;
+        }
     }
 
-    return 1;
+    $cache->{$field} = $wants;
+    return $wants;
 }
 
 sub taint_data {
@@ -108,17 +214,34 @@ sub translate {
 
 sub params_to_objects {
     my ($params, $class) = @_;
+    my (@objects, @objects_by_ids);
 
-    my @objects = map { $class->check($_) } 
+    @objects = map { $class->check($_) } 
         @{ $params->{names} } if $params->{names};
 
-    my @objects_by_ids = map { $class->check({ id => $_ }) } 
+    @objects_by_ids = map { $class->check({ id => $_ }) } 
         @{ $params->{ids} } if $params->{ids};
 
     push(@objects, @objects_by_ids);
     my %seen;
     @objects = grep { !$seen{$_->id}++ } @objects;
     return \@objects;
+}
+
+sub fix_credentials {
+    my ($params) = @_;
+    # Allow user to pass in login=foo&password=bar as a convenience
+    # even if not calling GET /login. We also do not delete them as
+    # GET /login requires "login" and "password".
+    if (exists $params->{'login'} && exists $params->{'password'}) {
+        $params->{'Bugzilla_login'}    = $params->{'login'};
+        $params->{'Bugzilla_password'} = $params->{'password'};
+    }
+    # Allow user to pass token=12345678 as a convenience which becomes
+    # "Bugzilla_token" which is what the auth code looks for.
+    if (exists $params->{'token'}) {
+        $params->{'Bugzilla_token'} = $params->{'token'};
+    }
 }
 
 __END__
@@ -149,6 +272,13 @@ of WebService methods. Given a hash (the second argument to this subroutine),
 this will remove any keys that are I<not> in C<include_fields> and then remove
 any keys that I<are> in C<exclude_fields>.
 
+An optional third option can be passed that prefixes the field name to allow
+filtering of data two or more levels deep.
+
+For example, if you want to filter out the C<id> key/value in components returned
+by Product.get, you would use the value C<component.id> in your C<exclude_fields>
+list.
+
 =head2 filter_wants
 
 Returns C<1> if a filter would preserve the specified field when passing
@@ -156,7 +286,7 @@ a hash to L</filter>, C<0> otherwise.
 
 =head2 validate
 
-This helps in the validation of parameters passed into the WebSerice
+This helps in the validation of parameters passed into the WebService
 methods. Currently it converts listed parameters into an array reference
 if the client only passed a single scalar value. It modifies the parameters
 hash in place so other parameters should be unaltered.
@@ -176,3 +306,23 @@ parameters passed to a WebService method (the first parameter to this function).
 Helps make life simpler for WebService methods that internally create objects
 via both "ids" and "names" fields. Also de-duplicates objects that were loaded
 by both "ids" and "names". Returns an arrayref of objects.
+
+=head2 fix_credentials
+
+Allows for certain parameters related to authentication such as Bugzilla_login,
+Bugzilla_password, and Bugzilla_token to have shorter named equivalents passed in.
+This function converts the shorter versions to their respective internal names.
+
+=head2 extract_flags
+
+Subroutine that takes a list of hashes that are potential flag changes for
+both bugs and attachments. Then breaks the list down into two separate lists
+based on if the change is to add a new flag or to update an existing flag.
+
+=head1 B<Methods in need of POD>
+
+=over
+
+=item taint_data
+
+=back

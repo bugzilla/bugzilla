@@ -7,6 +7,7 @@
 
 package Bugzilla::Config::DependencyGraph;
 
+use 5.10.1;
 use strict;
 
 use Bugzilla::Config::Common;
@@ -21,7 +22,14 @@ sub get_param_list {
    type => 't',
    default => 'http://www.research.att.com/~north/cgi-bin/webdot.cgi/%urlbase%',
    checker => \&check_webdotbase
-  } );
+  },
+
+  {
+   name => 'font_file',
+   type => 't',
+   default => '',
+   checker => \&check_font_file
+  });
   return @param_list;
 }
 

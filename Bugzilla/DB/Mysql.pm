@@ -20,8 +20,11 @@ For interface details see L<Bugzilla::DB> and L<DBI>.
 =cut
 
 package Bugzilla::DB::Mysql;
+
+use 5.10.1;
 use strict;
-use base qw(Bugzilla::DB);
+
+use parent qw(Bugzilla::DB);
 
 use Bugzilla::Constants;
 use Bugzilla::Install::Util qw(install_string);
@@ -55,6 +58,18 @@ sub new {
         mysql_auto_reconnect => 1,
     );
     
+    # MySQL SSL options
+    my ($ssl_ca_file, $ssl_ca_path, $ssl_cert, $ssl_key) =
+        @$params{qw(db_mysql_ssl_ca_file db_mysql_ssl_ca_path
+                    db_mysql_ssl_client_cert db_mysql_ssl_client_key)};
+    if ($ssl_ca_file || $ssl_ca_path || $ssl_cert || $ssl_key) {
+        $attrs{'mysql_ssl'}             = 1;
+        $attrs{'mysql_ssl_ca_file'}     = $ssl_ca_file if $ssl_ca_file;
+        $attrs{'mysql_ssl_ca_path'}     = $ssl_ca_path if $ssl_ca_path;
+        $attrs{'mysql_ssl_client_cert'} = $ssl_cert    if $ssl_cert;
+        $attrs{'mysql_ssl_client_key'}  = $ssl_key     if $ssl_key;
+    }
+
     my $self = $class->db_new({ dsn => $dsn, user => $user, 
                                 pass => $pass, attrs => \%attrs });
 
@@ -91,6 +106,10 @@ sub new {
     # Allow large GROUP_CONCATs (largely for inserting comments 
     # into bugs_fulltext).
     $self->do('SET SESSION group_concat_max_len = 128000000');
+
+    # MySQL 5.5.2 and older have this variable set to true, which causes
+    # trouble, see bug 870369.
+    $self->do('SET SESSION sql_auto_is_null = 0');
 
     return $self;
 }
@@ -305,9 +324,8 @@ sub bz_setup_database {
     # hard to fix later. We do this up here because none of the code below
     # works if InnoDB is off. (Particularly if we've already converted the
     # tables to InnoDB.)
-    my ($innodb_on) = @{$self->selectcol_arrayref(
-        q{SHOW VARIABLES LIKE '%have_innodb%'}, {Columns=>[2]})};
-    if ($innodb_on ne 'YES') {
+    my %engines = @{$self->selectcol_arrayref('SHOW ENGINES', {Columns => [1,2]})};
+    if (!$engines{InnoDB} || $engines{InnoDB} !~ /^(YES|DEFAULT)$/) {
         die install_string('mysql_innodb_disabled');
     }
 
@@ -921,7 +939,9 @@ sub _bz_raw_column_info {
               $index = name of an index
  Returns:     An abstract index definition, always in hashref format.
               If the index does not exist, the function returns undef.
+
 =cut
+
 sub bz_index_info_real {
     my ($self, $table, $index) = @_;
 
@@ -1029,3 +1049,49 @@ sub _bz_build_schema_from_disk {
 }
 
 1;
+
+=head1 B<Methods in need of POD>
+
+=over
+
+=item sql_date_format
+
+=item bz_explain
+
+=item bz_last_key
+
+=item sql_position
+
+=item sql_fulltext_search
+
+=item sql_iposition
+
+=item bz_enum_initial_values
+
+=item sql_group_by
+
+=item sql_limit
+
+=item sql_not_regexp
+
+=item sql_string_concat
+
+=item sql_date_math
+
+=item sql_to_days
+
+=item bz_check_server_version
+
+=item sql_from_days
+
+=item sql_regexp
+
+=item sql_istring
+
+=item sql_group_concat
+
+=item bz_setup_database
+
+=item bz_db_is_utf8
+
+=back

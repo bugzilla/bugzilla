@@ -15,29 +15,30 @@
 [% PROCESS global/header.html.tmpl
   title = "$terms.Bug Charts"
   h1 = "Welcome to the $terms.Bugzilla Charting Kitchen"
+  style_urls = ['skins/standard/reports.css']
   doc_section = "reporting.html#charts"
 %]
 
-<div align="center">
-  [% IF url_image %]
+[% IF url_image %]
+  <div class="center">
     <img src="[% url_image FILTER html %]">
-    <br clear="both">
-  [% ELSE %]
+  </div>
+[% ELSE %]
     <form id="choose_product" method="get" action="reports.cgi">
-      <table border="1" cellpadding="5" cellspacing="2">
+      <table id="old_charts">
         <tr>
           <th>Product:</th>
-          <td align="center">
-            <select id="product" name="product">
+          <td>
+            <select id="product_id" name="product_id">
               [% FOREACH product = products %]
-                <option value="[% product FILTER html %]">[% product FILTER html %]</option>
+                <option value="[% product.id FILTER html %]">[% product.name || '-All-' FILTER html %]</option>
               [% END %]
             </select>
           </td>
         </tr>
         <tr>
           <th>Chart datasets:</th>
-          <td align="center">
+          <td>
             <select id="datasets" name="datasets" multiple="multiple" size="5">
               [%# We cannot use translated statuses and resolutions from field-descs.none.html
                 # because old charts do not distinguish statuses from resolutions. %]
@@ -56,7 +57,6 @@
         </tr>
       </table>
     </form>
-  [% END %]
-</div>
+[% END %]
 
 [% PROCESS global/footer.html.tmpl %]

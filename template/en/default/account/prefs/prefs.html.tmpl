@@ -23,14 +23,6 @@
   #%]
 
 [% filtered_login = user.login FILTER html %]
-[% PROCESS global/header.html.tmpl
-   title = "User Preferences"
-   subheader = filtered_login
-   style_urls = ['skins/standard/admin.css']
-   javascript_urls = ['js/util.js', 'js/field.js']
-   doc_section = "userpreferences.html"
-   yui = ['autocomplete']
- %]
 
 [% tabs = [{ name => "settings", label => "General Preferences",
               link => "userprefs.cgi?tab=settings", saveable => "1" },
@@ -52,6 +44,15 @@
   [% END %]
 [% END %]
 
+[% PROCESS global/header.html.tmpl
+   title = current_tab.label
+   subheader = filtered_login
+   style_urls = ['skins/standard/admin.css']
+   javascript_urls = ['js/util.js', 'js/field.js']
+   doc_section = "userpreferences.html"
+   yui = ['autocomplete']
+ %]
+
 [% WRAPPER global/tabs.html.tmpl
    tabs        = tabs
    current_tab = current_tab
@@ -63,8 +64,9 @@
 
     [% IF email_changes_saved %]
       <p>
-        An email has been sent to both old and new email
-        addresses to confirm the change of email address.
+        In order to confirm your request, we have sent an email to your
+        new email address. As a precaution, an email has also been sent
+        to your old address allowing you to cancel this change if needed.
       </p>
     [% END %]
   </div>

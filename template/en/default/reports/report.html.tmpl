@@ -21,8 +21,8 @@
   # cumulate: boolean. For bar/line charts, whether to cumulate data sets.
   #%]
 
-[% DEFAULT width = 600
-           height = 350 
+[% DEFAULT width = 1024
+           height = 600
 %]
 
 [% IF min_width AND width < min_width %]
@@ -55,19 +55,15 @@
 [% time = time FILTER time('%Y-%m-%d %H:%M:%S') FILTER html %]
 
 [% PROCESS global/header.html.tmpl 
-  style = "
-    .t1     { background-color: #ffffff } /* white       */
-    .t2     { background-color: #dfefff } /* light blue  */
-    .t3     { background-color: #dddddd } /* grey        */
-    .t4     { background-color: #c3d3ed } /* darker blue */
-    .ttotal, .ttotal td { background-color: #cfffdf } /* light green */
-  "
   header_addl_info = time
+  style_urls = ['skins/standard/reports.css']
   yui = ['datatable']
 %]
 
 [% IF debug %]
-  <p>[% query FILTER html %]</p>
+  [% FOREACH query = queries %]
+    <p>[% query.sql FILTER html %]</p>
+  [% END %]
 [% END %]
 
 <div align="center">
@@ -98,70 +94,59 @@
               [% END %]
             [% END %]
           [% END %]
-        [% END %]width=[% width %]&amp;height=[% height %]      
+        [% END %]width=[% width %]&amp;height=[% height %]
       [% END %]
-      
-      <img alt="Graphical report results" src="[% imageurl %]"
-        width="[% width %]" height="[% height %]">
+
+      <img id="graphical_report" alt="Graphical report results" src="[% imageurl %]">
     [% END %]
     <br>
   [% END %]  
 
+  [% formats = [ { name => "pie",   description => "Pie" },
+                 { name => "bar",   description => "Bar" },
+                 { name => "line",  description => "Line" },
+                 { name => "table", description => "Table" } ] %]
+
+  [% formaturl = "report.cgi?$switchbase&amp;width=$width&amp;height=$height&amp;action=wrap" %]
+  [% FOREACH other_format = formats %]
+    [% NEXT IF other_format.name == "pie" AND row_field AND col_field %]
+    [% UNLESS other_format.name == format %]
+      <a href="[% formaturl %]&amp;format=[% other_format.name %]">
+    [% END %]
+    [% other_format.description FILTER html %]
+    [% "</a>" UNLESS other_format.name == format %] |
+  [% END %]
+  <a href="[% formaturl %]&amp;ctype=csv&amp;format=table">CSV</a>
+
   <table>
     <tr>
       <td>
-        [% formats = [ { name => "pie",   description => "Pie" },
-                       { name => "bar",   description => "Bar" },
-                       { name => "line",  description => "Line" },
-                       { name => "table", description => "Table" } ] %]
-
-        [% formaturl = "report.cgi?$switchbase&amp;width=$width" _ 
-                       "&amp;height=$height&amp;action=wrap" %]
-        [% FOREACH other_format = formats %]
-          [% NEXT IF other_format.name == "pie" AND row_field AND col_field %]
-          [% UNLESS other_format.name == format %]
-            <a href="[% formaturl %]&amp;format=[% other_format.name %]">
-          [% END %]
-          [% other_format.description FILTER html %]
-          [% "</a>" UNLESS other_format.name == format %] | 
+        [% IF format == "table" %]
+          <a href="query.cgi?[% switchbase %]&amp;format=report-table">Edit this report</a>
+        [% ELSE %]
+          <a href="query.cgi?[% switchbase %]&amp;chart_format=
+                  [%~ format FILTER uri %]&amp;format=report-graph&amp;cumulate=[% cumulate %]">
+          Edit this report</a>
         [% END %]
-        <a href="[% formaturl %]&amp;ctype=csv&amp;format=table">CSV</a> 
       </td>
-      
-      [% IF format != "table" %]
-        <td>
-          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        </td>
-
-        [% sizeurl = BLOCK %]report.cgi?
-          [% switchbase %]&amp;action=wrap&amp;format=
-          [% format FILTER html %][% END %]
-        <td align="center">
-          <a href="[% sizeurl %]&amp;width=[% width %]&amp;height=
-                   [% height + 100 %]">Taller</a><br>
-          <a href="[% sizeurl %]&amp;width=[% width - 100 %]&amp;height=
-                   [% height %]">Thinner</a> * 
-          <a href="[% sizeurl %]&amp;width=[% width + 100 %]&amp;height=
-                   [% height %]">Fatter</a>&nbsp;&nbsp;&nbsp;&nbsp;<br>
-          <a href="[% sizeurl %]&amp;width=[% width %]&amp;height=
-                   [% height - 100 %]">Shorter</a><br>
-        </td>
-      [% END %]
+      <td>|</td>
+      <td>
+        [% IF saved_report_id %]
+          <a href="report.cgi?action=del&amp;saved_report_id=[% saved_report_id FILTER uri %]&amp;token=
+                  [%~ issue_hash_token(['delete_report', saved_report_id]) FILTER uri %]">Forget this report</a>
+        [% ELSE %]
+          <form method="get" action="report.cgi">
+            <input type="submit" id="remember" value="Remember report"> as
+            <input type="hidden" name="query" value="[% switchbase %]&amp;format=[% format FILTER uri %]&amp;action=wrap">
+            <input type="hidden" name="action" value="add">
+            <input type="hidden" name="token" value="[% issue_hash_token(['save_report']) FILTER html %]">
+            <input type="text" id="name" name="name" size="20" value="" maxlength="64">
+          </form>
+        [% END %]
+      </td>
     </tr>
   </table>
 
-  <p>
-    [% IF format == "table" %]
-      <a href="query.cgi?[% switchbase %]&amp;format=report-table">Edit 
-      this report</a>
-    [% ELSE %]
-      <a href="query.cgi?[% switchbase %]&amp;chart_format=
-        [% format %]&amp;format=report-graph&amp;cumulate=[% cumulate %]">
-        Edit this report
-      </a>
-    [% END %]
-  </p>
- 
 </div>
 
 [% PROCESS global/footer.html.tmpl %]

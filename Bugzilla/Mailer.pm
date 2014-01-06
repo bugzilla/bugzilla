@@ -7,9 +7,10 @@
 
 package Bugzilla::Mailer;
 
+use 5.10.1;
 use strict;
 
-use base qw(Exporter);
+use parent qw(Exporter);
 @Bugzilla::Mailer::EXPORT = qw(MessageToMTA build_thread_marker);
 
 use Bugzilla::Constants;
@@ -23,6 +24,12 @@ use Encode qw(encode);
 use Encode::MIME::Header;
 use Email::Address;
 use Email::MIME;
+# Return::Value 1.666002 pollutes the error log with warnings about this
+# deprecated module. We have to set NO_CLUCK = 1 before loading Email::Send
+# to disable these warnings.
+BEGIN {
+    $Return::Value::NO_CLUCK = 1;
+}
 use Email::Send;
 
 sub MessageToMTA {
@@ -129,6 +136,8 @@ sub MessageToMTA {
     Bugzilla::Hook::process('mailer_before_send', 
                             { email => $email, mailer_args => \@args });
 
+    return if $email->header('to') eq '';
+
     $email->walk_parts(sub {
         my ($part) = @_;
         return if $part->parts > 1; # Top-level
@@ -200,3 +209,13 @@ sub build_thread_marker {
 }
 
 1;
+
+=head1 B<Methods in need of POD>
+
+=over
+
+=item build_thread_marker
+
+=item MessageToMTA
+
+=back

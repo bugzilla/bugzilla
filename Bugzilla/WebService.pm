@@ -8,7 +8,10 @@
 # This is the base class for $self in WebService method calls. For the 
 # actual RPC server, see Bugzilla::WebService::Server and its subclasses.
 package Bugzilla::WebService;
+
+use 5.10.1;
 use strict;
+
 use Bugzilla::WebService::Server;
 
 # Used by the JSON-RPC server to convert incoming date fields apprpriately.
@@ -42,14 +45,19 @@ This is the standard API for external programs that want to interact
 with Bugzilla. It provides various methods in various modules.
 
 You can interact with this API via
-L<XML-RPC|Bugzilla::WebService::Server::XMLRPC> or
-L<JSON-RPC|Bugzilla::WebService::Server::JSONRPC>.
+L<XML-RPC|Bugzilla::WebService::Server::XMLRPC>,
+L<JSON-RPC|Bugzilla::WebService::Server::JSONRPC> or
+L<REST|Bugzilla::WebService::Server::REST>.
 
 =head1 CALLING METHODS
 
-Methods are grouped into "packages", like C<Bug> for 
+Methods are grouped into "packages", like C<Bug> for
 L<Bugzilla::WebService::Bug>. So, for example,
 L<Bugzilla::WebService::Bug/get>, is called as C<Bug.get>.
+
+For REST, the "package" is more determined by the path
+used to access the resource. See each relevant method
+for specific details on how to access via REST.
 
 =head1 PARAMETERS
 
@@ -68,6 +76,11 @@ A floating-point number. May be null.
 =item C<string>
 
 A string. May be null.
+
+=item C<email>
+
+A string representing an email address. This value, when returned, 
+may be filtered based on if the user is logged in or not. May be null.
 
 =item C<dateTime>
 
@@ -127,7 +140,7 @@ There are various ways to log in:
 
 =item C<User.login>
 
-You can use L<Bugzilla::WebService::User/login> to log in as a Bugzilla 
+You can use L<Bugzilla::WebService::User/login> to log in as a Bugzilla
 user. This issues standard HTTP cookies that you must then use in future
 calls, so your client must be capable of receiving and transmitting
 cookies.
@@ -157,12 +170,23 @@ not expire.
 =back
 
 The C<Bugzilla_restrictlogin> and C<Bugzilla_rememberlogin> options
-are only used when you have also specified C<Bugzilla_login> and 
+are only used when you have also specified C<Bugzilla_login> and
 C<Bugzilla_password>.
 
 Note that Bugzilla will return HTTP cookies along with the method
 response when you use these arguments (just like the C<User.login> method
 above).
+
+For REST, you may also use the C<username> and C<password> variable
+names instead of C<Bugzilla_login> and C<Bugzilla_password> as a
+convenience.
+
+=item B<Added in Bugzilla 5.0>
+
+An error is now thrown if you pass invalid cookies or an invalid token.
+You will need to log in again to get new cookies or a new token. Previous
+releases simply ignored invalid cookies and token support was added in
+Bugzilla B<5.0>.
 
 =back
 
@@ -258,6 +282,9 @@ would return something like:
 
   { users => [{ id => 1, name => 'user@domain.com' }] }
 
+Note for REST, C<include_fields> may instead be a comma delimited string
+for GET type requests.
+
 =item C<exclude_fields>
 
 C<array> An array of strings, representing the (case-sensitive) names of
@@ -266,6 +293,13 @@ the returned hashes.
 
 If you specify all the fields, then this function will return empty
 hashes.
+
+Some RPC calls support specifying sub fields. If an RPC call states that
+it support sub field restrictions, you can restrict what information is
+returned within the first field. For example, if you call Products.get
+with an include_fields of components.name, then only the component name
+would be returned (and nothing else). You can include the main field,
+and exclude a sub field.
 
 Invalid field names are ignored.
 
@@ -279,6 +313,9 @@ Example:
 would return something like:
 
   { users => [{ id => 1, real_name => 'John Smith' }] }
+
+Note for REST, C<exclude_fields> may instead be a comma delimited string
+for GET type requests.
 
 =back
 
@@ -294,7 +331,7 @@ would return something like:
 
 =back
 
-=head2 WebService Methods
+=head2 WebService Modules
 
 =over
 
@@ -302,10 +339,20 @@ would return something like:
 
 =item L<Bugzilla::WebService::Bugzilla>
 
+=item L<Bugzilla::WebService::Classification>
+
 =item L<Bugzilla::WebService::Group>
 
 =item L<Bugzilla::WebService::Product>
 
 =item L<Bugzilla::WebService::User>
+
+=back
+
+=head1 B<Methods in need of POD>
+
+=over
+
+=item login_exempt
 
 =back

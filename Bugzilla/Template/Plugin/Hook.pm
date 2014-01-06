@@ -6,8 +6,11 @@
 # defined by the Mozilla Public License, v. 2.0.
 
 package Bugzilla::Template::Plugin::Hook;
+
+use 5.10.1;
 use strict;
-use base qw(Template::Plugin);
+
+use parent qw(Template::Plugin);
 
 use Bugzilla::Constants;
 use Bugzilla::Install::Util qw(template_include_path); 

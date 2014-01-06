@@ -6,8 +6,10 @@
 # defined by the Mozilla Public License, v. 2.0.
 
 package Bugzilla::Extension::MoreBugUrl::RT;
+
+use 5.10.1;
 use strict;
-use base qw(Bugzilla::BugUrl);
+use parent qw(Bugzilla::BugUrl);
 
 ###############################
 ####        Methods        ####
@@ -19,7 +21,7 @@ sub should_handle {
     # RT URLs can look like various things:
     #   http://example.com/rt/Ticket/Display.html?id=1234
     #   https://example.com/Public/Bug/Display.html?id=1234
-    return ($uri->path =~ m|/Display.html$|
+    return ($uri->path =~ m|/Display\.html$|
             and $uri->query_param('id') =~ /^\d+$/) ? 1 : 0;
 }
 

@@ -6,6 +6,7 @@
 # This Source Code Form is "Incompatible With Secondary Licenses", as
 # defined by the Mozilla Public License, v. 2.0.
 
+use 5.10.1;
 use strict;
 use lib qw(. lib);
 
@@ -15,7 +16,7 @@ use Bugzilla::Error;
 use Bugzilla::WebService::Constants;
 BEGIN {
     if (!Bugzilla->feature('xmlrpc')) {
-        ThrowCodeError('feature_disabled', { feature => 'xmlrpc' });
+        ThrowUserError('feature_disabled', { feature => 'xmlrpc' });
     }
 }
 use Bugzilla::WebService::Server::XMLRPC;

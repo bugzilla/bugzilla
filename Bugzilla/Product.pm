@@ -6,8 +6,11 @@
 # defined by the Mozilla Public License, v. 2.0.
 
 package Bugzilla::Product;
+
+use 5.10.1;
 use strict;
-use base qw(Bugzilla::Field::ChoiceInterface Bugzilla::Object);
+
+use parent qw(Bugzilla::Field::ChoiceInterface Bugzilla::Object);
 
 use Bugzilla::Constants;
 use Bugzilla::Util;
@@ -807,8 +810,8 @@ sub flag_types {
 
 sub classification {
     my $self = shift;
-    $self->{'classification'} ||= 
-        new Bugzilla::Classification($self->classification_id);
+    $self->{'classification'} ||=
+        new Bugzilla::Classification({ id => $self->classification_id, cache => 1 });
     return $self->{'classification'};
 }
 
@@ -1067,3 +1070,37 @@ C<Bugzilla::Product::preload($products)>.
 L<Bugzilla::Object>
 
 =cut
+
+=head1 B<Methods in need of POD>
+
+=over
+
+=item set_allows_unconfirmed
+
+=item allows_unconfirmed
+
+=item set_name
+
+=item set_default_milestone
+
+=item set_group_controls
+
+=item create
+
+=item set_description
+
+=item set_is_active
+
+=item classification_id
+
+=item description
+
+=item default_milestone
+
+=item remove_from_db
+
+=item is_active
+
+=item update
+
+=back

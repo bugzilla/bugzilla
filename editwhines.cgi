@@ -10,8 +10,8 @@
 # Script Initialization
 ################################################################################
 
+use 5.10.1;
 use strict;
-
 use lib qw(. lib);
 
 use Bugzilla;
@@ -24,6 +24,8 @@ use Bugzilla::Token;
 use Bugzilla::Whine::Schedule;
 use Bugzilla::Whine::Query;
 use Bugzilla::Whine;
+
+use DateTime;
 
 # require the user to have logged in
 my $user = Bugzilla->login(LOGIN_REQUIRED);

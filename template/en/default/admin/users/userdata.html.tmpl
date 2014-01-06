@@ -65,7 +65,7 @@
   # if we ever have a login system that can create accounts through
   # createaccount.cgi but can't change passwords.
   #%]
-  
+  [% password_complexity = Param('password_complexity') %]
 [% IF editusers %]
   [% IF user.authorizer.can_change_password %]
   <tr>
@@ -73,6 +73,13 @@
     <td>
       <input type="password" size="16" name="password" id="password"
              value="" autocomplete="off" />
+      [% IF password_complexity == "mixed_letters" %] 
+        (Password must contain at least one UPPER and one lowercase letter.)
+      [% ELSIF password_complexity == "letters_numbers" %] 
+        (Password must contain at least one UPPER and one lower case letter and a number.)
+      [% ELSIF password_complexity == "letters_numbers_specialchars" %] 
+        (Password must contain at least one letter, a number and a special character.)
+      [% END %]
       [% IF editform %]<br />
         (Enter new password to change.)
       [% END %]
@@ -102,8 +109,17 @@
          defaultcontent = otheruser.disabledtext
          onchange       = "userDisabledTextOnChange(this);"
        %]<br>
-      (If non-empty, then the account will be disabled, and this text should
-      explain why.)
+      (If non-empty, then it will not be possible to log in using this account,
+      and this text should explain why.)
+    </td>
+  </tr>
+[% END %]
+[% UNLESS editform %]
+  <tr>
+    <th><label for="notify_user">Notify User:</label></th>
+    <td>
+      <input type="checkbox" name="notify_user" id="notify_user" value="1">
+      (Email this user their account information. The password will not be included.)
     </td>
   </tr>
 [% END %]

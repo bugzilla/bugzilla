@@ -78,9 +78,6 @@
   'classes.$row_idx.$col_idx', 
   'urlbase', 
   'data.$tbl.$col.$row', 
-  'row_total',
-  'col_totals.$col',
-  'grand_total', 
 ],
 
 'reports/report.html.tmpl' => [
@@ -89,9 +86,7 @@
   'imageurl', 
   'formaturl', 
   'other_format.name', 
-  'sizeurl', 
   'switchbase',
-  'format',
   'cumulate',
 ],
 
@@ -139,7 +134,6 @@
 'list/table.html.tmpl' => [
   'tableheader',
   'bug.bug_id', 
-  'abbrev.$id.title || field_descs.$id || column.title',
 ],
 
 'list/list.csv.tmpl' => [
@@ -177,10 +171,6 @@
   'series.frequency * 2',
 ],
 
-'global/per-bug-queries.html.tmpl' => [
-  '" value=\"$bugids\"" IF bugids',
-],
-
 'global/select-menu.html.tmpl' => [
   'options', 
   'size', 
@@ -198,7 +188,6 @@
 
 'global/confirm-user-match.html.tmpl' => [
   'script',
-  'fields.${field_name}.flag_type.name',
 ],
 
 'global/site-navigation.html.tmpl' => [
@@ -207,6 +196,7 @@
 
 'bug/comments.html.tmpl' => [
   'comment.id',
+  'comment.count',
   'bug.bug_id',
 ],
 
@@ -269,16 +259,13 @@
 
 
 'bug/time.html.tmpl' => [
-  'time_unit FILTER format(\'%.1f\')', 
-  'time_unit FILTER format(\'%.2f\')', 
+  "time_unit.replace('0\\Z', '')",
   '(act / (act + rem)) * 100 
        FILTER format("%d")', 
 ],
 
 'bug/process/results.html.tmpl' => [
-  'title.$type', 
-  '"$terms.Bug $id" FILTER bug_link(id)',
-  '"$terms.bug $id" FILTER bug_link(id)',
+  'title.$type.ucfirst',
 ],
 
 'bug/create/create.html.tmpl' => [
@@ -286,9 +273,7 @@
 ],
 
 'bug/create/create-guided.html.tmpl' => [
-  'tablecolour',
   'sel',
-  'productstring', 
 ],
 
 'bug/activity/table.html.tmpl' => [
@@ -308,7 +293,6 @@
 'attachment/edit.html.tmpl' => [
   'attachment.id', 
   'attachment.bug_id', 
-  'a',
   'editable_or_hide',
 ],
 
@@ -357,7 +341,7 @@
 ],
 
 'admin/table.html.tmpl' => [
-  'link_uri'
+  'contentlink'
 ],
 
 'admin/custom_fields/cf-js.js.tmpl' => [
@@ -397,8 +381,6 @@
 ],
 
 'admin/flag-type/edit.html.tmpl' => [
-  'type.id', 
-  'type.sortkey || 1',
   'selname',
 ],
 

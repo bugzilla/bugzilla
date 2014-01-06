@@ -5,11 +5,12 @@
 # This Source Code Form is "Incompatible With Secondary Licenses", as
 # defined by the Mozilla Public License, v. 2.0.
 
-use strict;
-
 package Bugzilla::Keyword;
 
-use base qw(Bugzilla::Object);
+use 5.10.1;
+use strict;
+
+use parent qw(Bugzilla::Object);
 
 use Bugzilla::Error;
 use Bugzilla::Util;
@@ -104,7 +105,7 @@ sub _check_name {
 
     # We only want to validate the non-existence of the name if
     # we're creating a new Keyword or actually renaming the keyword.
-    if (!ref($self) || $self->name ne $name) {
+    if (!ref($self) || lc($self->name) ne lc($name)) {
         my $keyword = new Bugzilla::Keyword({ name => $name });
         ThrowUserError("keyword_already_exists", { name => $name }) if $keyword;
     }
@@ -165,3 +166,17 @@ implements.
 =back
 
 =cut
+
+=head1 B<Methods in need of POD>
+
+=over
+
+=item set_description
+
+=item bug_count
+
+=item set_name
+
+=item description
+
+=back

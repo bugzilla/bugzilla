@@ -37,17 +37,21 @@ my $fh;
 }
 
 # Check to make sure all templates that are referenced in Bugzilla
-# exist in the proper place in the English template directory.
+# exist in the proper place in the English template or extension directory.
 # All other languages may or may not include any template as Bugzilla will
 # fall back to English if necessary.
 
 foreach my $file (@referenced_files) {
-    my $path = File::Spec->catfile($english_default_include_path, $file);
-    if (-e $path) {
-        ok(1, "$path exists");
-    } else {
-        ok(0, "$path cannot be located --ERROR");
+    my $found = 0;
+    foreach my $path (@english_default_include_paths) {
+        my $pathfile = File::Spec->catfile($path, $file);
+        if (-e $pathfile) {
+            $found = 1;
+            last;
+        }
     }
+
+    ok($found, "$file found");
 }
 
 foreach my $include_path (@include_paths) {

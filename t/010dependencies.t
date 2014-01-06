@@ -27,7 +27,7 @@ use constant MODULE_REGEX => qr/
     ['"]?
     ([\w:\.\\]+)
 /x;
-use constant BASE_REGEX => qr/^use base qw\(([^\)]+)/;
+use constant BASE_REGEX => qr/^use (?:base|parent) (?:-norequire, )?qw\(([^\)]+)/;
 
 # Extract all Perl modules.
 foreach my $file (@Support::Files::testitems) {
@@ -59,7 +59,7 @@ foreach my $module (keys %mods) {
       }
       elsif ($line =~ BASE_REGEX or $line =~ MODULE_REGEX) {
         my $used_string = $1;
-        # "use base" can have multiple modules
+        # "use base"/"use parent" can have multiple modules
         my @used_array = split(/\s+/, $used_string);
         foreach my $used (@used_array) {
             next if $used !~ /^Bugzilla/;

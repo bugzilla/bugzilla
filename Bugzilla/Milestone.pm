@@ -5,11 +5,12 @@
 # This Source Code Form is "Incompatible With Secondary Licenses", as
 # defined by the Mozilla Public License, v. 2.0.
 
-use strict;
-
 package Bugzilla::Milestone;
 
-use base qw(Bugzilla::Object);
+use 5.10.1;
+use strict;
+
+use parent qw(Bugzilla::Object);
 
 use Bugzilla::Constants;
 use Bugzilla::Util;
@@ -64,7 +65,7 @@ sub new {
     my $dbh = Bugzilla->dbh;
 
     my $product;
-    if (ref $param) {
+    if (ref $param and !defined $param->{id}) {
         $product = $param->{product};
         my $name = $param->{name};
         if (!defined $product) {
@@ -97,10 +98,12 @@ sub run_create_validators {
 
 sub update {
     my $self = shift;
+    my $dbh = Bugzilla->dbh;
+
+    $dbh->bz_start_transaction();
     my $changes = $self->SUPER::update(@_);
 
     if (exists $changes->{value}) {
-        my $dbh = Bugzilla->dbh;
         # The milestone value is stored in the bugs table instead of its ID.
         $dbh->do('UPDATE bugs SET target_milestone = ?
                   WHERE target_milestone = ? AND product_id = ?',
@@ -111,12 +114,16 @@ sub update {
                   WHERE id = ? AND defaultmilestone = ?',
                  undef, ($self->name, $self->product_id, $changes->{value}->[0]));
     }
+    $dbh->bz_commit_transaction();
+
     return $changes;
 }
 
 sub remove_from_db {
     my $self = shift;
     my $dbh = Bugzilla->dbh;
+
+    $dbh->bz_start_transaction();
 
     # The default milestone cannot be deleted.
     if ($self->name eq $self->product->default_milestone) {
@@ -146,8 +153,9 @@ sub remove_from_db {
                              Bugzilla->user->id, $timestamp);
         }
     }
-
     $self->SUPER::remove_from_db();
+
+    $dbh->bz_commit_transaction();
 }
 
 ################################
@@ -241,7 +249,9 @@ Bugzilla::Milestone - Bugzilla product milestone class.
 
     use Bugzilla::Milestone;
 
-    my $milestone = new Bugzilla::Milestone({ name => $name, product => $product });
+    my $milestone = new Bugzilla::Milestone({ name => $name, product => $product_obj });
+    my $milestone = Bugzilla::Milestone->check({ name => $name, product => $product_obj });
+    my $milestone = Bugzilla::Milestone->check({ id => $id });
 
     my $name       = $milestone->name;
     my $product_id = $milestone->product_id;
@@ -265,7 +275,7 @@ Milestone.pm represents a Product Milestone object.
 
 =over
 
-=item C<new({name => $name, product => $product})>
+=item C<< new({name => $name, product => $product}) >>
 
  Description: The constructor is used to load an existing milestone
               by passing a product object and a milestone name.
@@ -355,7 +365,7 @@ Milestone.pm represents a Product Milestone object.
 
 =over
 
-=item C<create({value => $value, product => $product, sortkey => $sortkey})>
+=item C<< create({value => $value, product => $product, sortkey => $sortkey}) >>
 
  Description: Create a new milestone for the given product.
 
@@ -365,5 +375,15 @@ Milestone.pm represents a Product Milestone object.
               $sortkey - the sortkey of the new milestone (signed integer)
 
  Returns:     A Bugzilla::Milestone object.
+
+=back
+
+=head1 B<Methods in need of POD>
+
+=over
+
+=item set_is_active
+
+=item is_active
 
 =back

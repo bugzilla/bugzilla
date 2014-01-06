@@ -6,8 +6,11 @@
 # defined by the Mozilla Public License, v. 2.0.
 
 package Bugzilla::BugUrl::Bugzilla::Local;
+
+use 5.10.1;
 use strict;
-use base qw(Bugzilla::BugUrl::Bugzilla);
+
+use parent qw(Bugzilla::BugUrl::Bugzilla);
 
 use Bugzilla::Error;
 use Bugzilla::Util;

@@ -6,8 +6,8 @@
 # This Source Code Form is "Incompatible With Secondary Licenses", as
 # defined by the Mozilla Public License, v. 2.0.
 
+use 5.10.1;
 use strict;
-
 use lib qw(. lib);
 
 use Bugzilla;
@@ -38,7 +38,7 @@ my $bug = Bugzilla::Bug->check($id);
 # visible immediately due to replication lag.
 Bugzilla->switch_to_shadow_db;
 
-($vars->{'operations'}, $vars->{'incomplete_data'}) = $bug->get_activity;
+($vars->{'operations'}, $vars->{'incomplete_data'}) = $bug->get_activity(undef, undef, 1);
 
 $vars->{'bug'} = $bug;
 

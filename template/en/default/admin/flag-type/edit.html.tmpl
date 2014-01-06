@@ -23,10 +23,7 @@
 
 [% PROCESS global/header.html.tmpl
   title = title
-  style = "
-    table#form th { text-align: right; vertical-align: baseline; white-space: nowrap; }
-    table#form td { text-align: left; vertical-align: baseline; }
-  "
+  style_urls = ['skins/standard/admin.css']
   onload="var f = document.forms['flagtype_properties'];
           selectProduct(f.product, f.component, null, null, '__Any__');"
   javascript_urls=["js/productform.js"]
@@ -36,7 +33,7 @@
 <form id="flagtype_properties" method="post" action="editflagtypes.cgi">
   <input type="hidden" name="action" value="[% action FILTER html %]">
   <input type="hidden" name="can_fully_edit" value="[% can_fully_edit FILTER html %]">
-  <input type="hidden" name="id" value="[% type.id %]">
+  <input type="hidden" name="id" value="[% type.id FILTER html %]">
   <input type="hidden" name="token" value="[% token FILTER html %]">
   <input type="hidden" name="target_type" value="[% type.target_type FILTER html %]">
   <input type="hidden" name="check_clusions" value="[% check_clusions FILTER none %]">
@@ -49,9 +46,9 @@
 
   [%# Add a hidden button at the top of the form so that the user pressing "return"
     # really submit the form, as expected. %]
-  <input type="submit" id="commit" value="Submit" style="display: none;">
+  <input type="submit" id="commit" value="Submit" class="bz_default_hidden">
 
-  <table id="form" cellspacing="0" cellpadding="4" border="0">
+  <table id="admin_table_edit">
     <tr>
       <th>Name:</th>
       <td>
@@ -90,8 +87,8 @@
         [% END %]
         <table>
           <tr>
-            <td style="vertical-align: top;">
-              <b>Product/Component:</b><br>
+            <th class="top left">
+              Product/Component:<br>
               <select name="product" onchange="selectProduct(this, this.form.component, null, null, '__Any__');">
                 <option value="">__Any__</option>
                 [% FOREACH prod = products %]
@@ -108,19 +105,19 @@
                                    name="categoryAction-include" value="Include">
               <input type="submit" id="categoryAction-exclude"
                                    name="categoryAction-exclude" value="Exclude">
-            </td>
-            <td style="vertical-align: top;">
-              <b>Inclusions:</b><br>
+            </th>
+            <th class="top left">
+              Inclusions:<br>
               [% PROCESS category_select name="inclusion_to_remove" categories = inclusions %]<br>
               <input type="submit" id="categoryAction-removeInclusion" 
                      name="categoryAction-removeInclusion" value="Remove Inclusion">
-            </td>
-            <td style="vertical-align: top;">
-              <b>Exclusions:</b><br>
+            </th>
+            <th class="top left">
+              Exclusions:<br>
               [% PROCESS category_select name="exclusion_to_remove" categories = exclusions %]<br>
               <input type="submit" id="categoryAction-removeExclusion" 
                      name="categoryAction-removeExclusion" value="Remove Exclusion">
-            </td>
+            </th>
           </tr>
         </table>
       </td>
@@ -129,12 +126,12 @@
     <tr>
       <th>Sort Key:</th>
       <td>
-        a number between 1 and [% constants.MAX_SMALLINT FILTER none %] by which
+        a number between 0 and [% constants.MAX_SMALLINT FILTER none %] by which
         this type will be sorted when displayed to users in a list; ignore if you
         don't care what order the types appear in or if you want them to appear
         in alphabetical order.<br>
-        <input type="text" name="sortkey" value="[% type.sortkey || 1 %]" size="5" maxlength="5"
-               [%- ' disabled="disabled"' UNLESS can_fully_edit %]>
+        <input type="text" name="sortkey" value="[% type.sortkey || 0 FILTER html %]" size="5"
+               maxlength="5" [% ' disabled="disabled"' UNLESS can_fully_edit %]>
       </td>
     </tr>
 

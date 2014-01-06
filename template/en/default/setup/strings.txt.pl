@@ -91,14 +91,17 @@ END
     feature_jsonrpc_faster    => 'Make JSON-RPC Faster',
     feature_new_charts        => 'New Charts',
     feature_old_charts        => 'Old Charts',
+    feature_memcached         => 'Memcached Support',
     feature_mod_perl          => 'mod_perl',
     feature_moving            => 'Move Bugs Between Installations',
     feature_patch_viewer      => 'Patch Viewer',
+    feature_rest              => 'REST Interface',
     feature_smtp_auth         => 'SMTP Authentication',
     feature_smtp_ssl          => 'SSL Support for SMTP',
     feature_updates           => 'Automatic Update Notifications',
     feature_xmlrpc            => 'XML-RPC Interface',
     feature_detect_charset    => 'Automatic charset detection for text attachments',
+    feature_typesniffer       => 'Sniff MIME type of attachments',
 
     file_remove => 'Removing ##name##...',
     file_rename => 'Renaming ##from## to ##to##...',
@@ -194,6 +197,22 @@ blank, then MySQL's compiled-in default will be used. You probably
 want that.
 END
     localconfig_db_user => "Who we connect to the database as.",
+    localconfig_db_mysql_ssl_ca_file => <<'END',
+Path to a PEM file with a list of trusted SSL CA certificates.
+The file must be readable by web server user.
+END
+    localconfig_db_mysql_ssl_ca_path => <<'END',
+Path to a directory containing trusted SSL CA certificates in PEM format.
+Directory and files inside must be readable by the web server user.
+END
+    localconfig_db_mysql_ssl_client_cert => <<'END',
+Full path to the client SSL certificate in PEM format we will present to the DB server.
+The file must be readable by web server user.
+END
+    localconfig_db_mysql_ssl_client_key => <<'END',
+Full path to the private key corresponding to the client SSL certificate.
+The file must not be password-protected and must be readable by web server user.
+END
     localconfig_diffpath => <<'END',
 For the "Difference Between Two Patches" feature to work, we need to know
 what directory the "diff" bin is in. (You only need to set this if you
@@ -353,8 +372,8 @@ END
     <p>
       You <b>must not</b> execute this script from your web browser.
       To install or upgrade Bugzilla, run this script from
-      the command-line (e.g. <tt>bash</tt> or <tt>ssh</tt> on Linux
-      or <tt>cmd.exe</tt> on Windows), and follow instructions given there.
+      the command-line (e.g. <kbd>bash</kbd> or <kbd>ssh</kbd> on Linux
+      or <kbd>cmd.exe</kbd> on Windows), and follow instructions given there.
     </p>
 
     <p>
@@ -370,26 +389,8 @@ OPTIONAL NOTE: If you want to be able to use the 'difference between two
 patches' feature of Bugzilla (which requires the PatchReader Perl module
 as well), you should install patchutils from:
 
-    http://cyberelk.net/tim/patchutils/
+    http://cyberelk.net/tim/software/patchutils/
 END
-    ppm_repo_add => <<EOT,
-***********************************************************************
-* Note For Windows Users                                              *
-***********************************************************************
-* In order to install the modules listed below, you first have to run * 
-* the following command as an Administrator:                          *
-*                                                                     *
-*   ppm repo add theory58S ##theory_url##
-EOT
-    ppm_repo_up => <<EOT,
-*                                                                     *
-* Then you have to do (also as an Administrator):                     *
-*                                                                     *
-*   ppm repo up theory58S                                             *
-*                                                                     *
-* Do that last command over and over until you see "theory58S" at the *
-* top of the displayed list.                                          *
-EOT
     template_precompile   => "Precompiling templates...",
     template_removal_failed => <<END,
 WARNING: The directory '##template_cache##' could not be removed.

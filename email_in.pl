@@ -6,6 +6,7 @@
 # This Source Code Form is "Incompatible With Secondary Licenses", as
 # defined by the Mozilla Public License, v. 2.0.
 
+use 5.10.1;
 use strict;
 use warnings;
 
@@ -30,6 +31,7 @@ use HTML::FormatText::WithLinks;
 use Pod::Usage;
 use Encode;
 use Scalar::Util qw(blessed);
+use List::MoreUtils qw(firstidx);
 
 use Bugzilla;
 use Bugzilla::Attachment;
@@ -37,6 +39,7 @@ use Bugzilla::Bug;
 use Bugzilla::BugMail;
 use Bugzilla::Constants;
 use Bugzilla::Error;
+use Bugzilla::Field;
 use Bugzilla::Mailer;
 use Bugzilla::Token;
 use Bugzilla::User;
@@ -133,6 +136,29 @@ sub parse_mail {
         $fields{'short_desc'} = $summary;
     }
 
+    # The Importance/X-Priority headers are only used when creating a new bug.
+    # 1) If somebody specifies a priority, use it.
+    # 2) If there is an Importance or X-Priority header, use it as
+    #    something that is relative to the default priority.
+    #    If the value is High or 1, increase the priority by 1.
+    #    If the value is Low or 5, decrease the priority by 1.
+    # 3) Otherwise, use the default priority.
+    # Note: this will only work if the 'letsubmitterchoosepriority'
+    # parameter is enabled.
+    my $importance = $input_email->header('Importance')
+                     || $input_email->header('X-Priority');
+    if (!$fields{'bug_id'} && !$fields{'priority'} && $importance) {
+        my @legal_priorities = @{get_legal_field_values('priority')};
+        my $i = firstidx { $_ eq Bugzilla->params->{'defaultpriority'} } @legal_priorities;
+        if ($importance =~ /(high|[12])/i) {
+            $i-- unless $i == 0;
+        }
+        elsif ($importance =~ /(low|[45])/i) {
+            $i++ unless $i == $#legal_priorities;
+        }
+        $fields{'priority'} = $legal_priorities[$i];
+    }
+
     my $comment = '';
     # Get the description, except the signature.
     foreach my $line (@body_lines) {
@@ -225,7 +251,6 @@ sub process_bug {
     foreach my $field (keys %fields) {
         $cgi->param(-name => $field, -value => $fields{$field});
     }
-    $cgi->param('longdesclength', scalar @{ $bug->comments });
     $cgi->param('token', issue_hash_token([$bug->id, $bug->delta_ts]));
 
     require 'process_bug.cgi';
@@ -233,7 +258,8 @@ sub process_bug {
 
     my $added_comment;
     if (trim($fields{'comment'})) {
-        $added_comment = $bug->comments->[-1];
+        # The "old" bug object doesn't contain the comment we just added.
+        $added_comment = Bugzilla::Bug->check($bug_id)->comments->[-1];
     }
     return ($bug, $added_comment);
 }

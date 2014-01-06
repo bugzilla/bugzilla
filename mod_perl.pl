@@ -7,6 +7,8 @@
 # defined by the Mozilla Public License, v. 2.0.
 
 package Bugzilla::ModPerl;
+
+use 5.10.1;
 use strict;
 use warnings;
 
@@ -73,7 +75,7 @@ PerlChildInitHandler "sub { Bugzilla::RNG::srand(); srand(); }"
     PerlCleanupHandler  Apache2::SizeLimit Bugzilla::ModPerl::CleanupHandler
     PerlOptions +ParseHeaders
     Options +ExecCGI
-    AllowOverride Limit FileInfo Indexes
+    AllowOverride Limit FileInfo Indexes Options
     DirectoryIndex index.cgi index.html
 </Directory>
 EOT
@@ -107,9 +109,13 @@ foreach my $file (glob "$cgi_path/*.cgi") {
 }
 
 package Bugzilla::ModPerl::ResponseHandler;
+
+use 5.10.1;
 use strict;
-use base qw(ModPerl::Registry);
+
+use parent qw(ModPerl::Registry);
 use Bugzilla;
+use Bugzilla::Constants qw(USAGE_MODE_REST);
 
 sub handler : method {
     my $class = shift;
@@ -127,12 +133,22 @@ sub handler : method {
     use warnings;
 
     Bugzilla::init_page();
-    return $class->SUPER::handler(@_);
+    my $result = $class->SUPER::handler(@_);
+
+    # When returning data from the REST api we must only return 200 or 304,
+    # which tells Apache not to append its error html documents to the
+    # response.
+    return Bugzilla->usage_mode == USAGE_MODE_REST && $result != 304
+           ? Apache2::Const::OK
+           : $result;
 }
 
 
 package Bugzilla::ModPerl::CleanupHandler;
+
+use 5.10.1;
 use strict;
+
 use Apache2::Const -compile => qw(OK);
 
 sub handler {

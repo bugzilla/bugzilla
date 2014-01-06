@@ -85,9 +85,9 @@ function checkNewState() {
 [%###########################################################################%]
 
 [% BLOCK series_select %]
-  <td align="left">
+  <td>
     <select name="[% sel.name %]" id="[% sel.name %]"
-            size="[% sel.size %]" style="width: 15em"
+            size="[% sel.size %]"
             [%+ 'multiple="multiple"' IF sel.multiple %]
             [%+ "disabled=\"disabled\"" UNLESS ${sel.name}.keys.size || newtext %]
             [%+ "onchange=\"$sel.onchange\"" IF sel.onchange %]>

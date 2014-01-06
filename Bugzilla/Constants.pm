@@ -6,8 +6,11 @@
 # defined by the Mozilla Public License, v. 2.0.
 
 package Bugzilla::Constants;
+
+use 5.10.1;
 use strict;
-use base qw(Exporter);
+
+use parent qw(Exporter);
 
 # For bz_locations
 use File::Basename;
@@ -66,6 +69,9 @@ use Memoize;
     COMMENT_COLS
     MAX_COMMENT_LENGTH
 
+    MIN_COMMENT_TAG_LENGTH
+    MAX_COMMENT_TAG_LENGTH
+
     CMT_NORMAL
     CMT_DUPE_OF
     CMT_HAS_DUPE
@@ -101,10 +107,12 @@ use Memoize;
     FIELD_TYPE_MULTI_SELECT
     FIELD_TYPE_TEXTAREA
     FIELD_TYPE_DATETIME
+    FIELD_TYPE_DATE
     FIELD_TYPE_BUG_ID
     FIELD_TYPE_BUG_URLS
     FIELD_TYPE_KEYWORDS
-
+    FIELD_TYPE_HIGHEST_PLUS_ONE
+    
     EMPTY_DATETIME_REGEX
 
     ABNORMAL_SELECTS
@@ -117,12 +125,14 @@ use Memoize;
     USAGE_MODE_EMAIL
     USAGE_MODE_JSON
     USAGE_MODE_TEST
+    USAGE_MODE_REST
 
     ERROR_MODE_WEBPAGE
     ERROR_MODE_DIE
     ERROR_MODE_DIE_SOAP_FAULT
     ERROR_MODE_JSON_RPC
     ERROR_MODE_TEST
+    ERROR_MODE_REST
 
     COLOR_ERROR
     COLOR_SUCCESS
@@ -156,10 +166,13 @@ use Memoize;
     MAX_MILESTONE_SIZE
     MAX_COMPONENT_SIZE
     MAX_FIELD_VALUE_SIZE
+    MAX_FIELD_LONG_DESC_LENGTH
     MAX_FREETEXT_LENGTH
     MAX_BUG_URL_LENGTH
     MAX_POSSIBLE_DUPLICATES
     MAX_ATTACH_FILENAME_LENGTH
+    MAX_QUIP_LENGTH
+    MAX_WEBDOT_BUGS
 
     PASSWORD_DIGEST_ALGORITHM
     PASSWORD_SALT_LENGTH
@@ -180,7 +193,7 @@ use Memoize;
 # CONSTANTS
 #
 # Bugzilla version
-use constant BUGZILLA_VERSION => "4.3.1+";
+use constant BUGZILLA_VERSION => "4.5.1+";
 
 # Location of the remote and local XML files to track new releases.
 use constant REMOTE_FILE => 'http://updates.bugzilla.org/bugzilla-update.xml';
@@ -281,6 +294,10 @@ use constant COMMENT_COLS => 80;
 # Used in _check_comment(). Gives the max length allowed for a comment.
 use constant MAX_COMMENT_LENGTH => 65535;
 
+# The minimum and maximum length of comment tags.
+use constant MIN_COMMENT_TAG_LENGTH => 3;
+use constant MAX_COMMENT_TAG_LENGTH => 24;
+
 # The type of bug comments.
 use constant CMT_NORMAL => 0;
 use constant CMT_DUPE_OF => 1;
@@ -380,6 +397,10 @@ use constant FIELD_TYPE_DATETIME  => 5;
 use constant FIELD_TYPE_BUG_ID  => 6;
 use constant FIELD_TYPE_BUG_URLS => 7;
 use constant FIELD_TYPE_KEYWORDS => 8;
+use constant FIELD_TYPE_DATE => 9;
+# Add new field types above this line, and change the below value in the
+# obvious fashion
+use constant FIELD_TYPE_HIGHEST_PLUS_ONE => 10;
 
 use constant EMPTY_DATETIME_REGEX => qr/^[0\-:\sA-Za-z]+$/; 
 
@@ -394,8 +415,7 @@ use constant ABNORMAL_SELECTS => {
 # The fields from fielddefs that are blocked from non-timetracking users.
 # work_time is sometimes called actual_time.
 use constant TIMETRACKING_FIELDS =>
-    qw(estimated_time remaining_time work_time actual_time
-       percentage_complete deadline);
+    qw(estimated_time remaining_time work_time actual_time percentage_complete);
 
 # The maximum number of days a token will remain valid.
 use constant MAX_TOKEN_AGE => 3;
@@ -448,6 +468,7 @@ use constant USAGE_MODE_XMLRPC     => 2;
 use constant USAGE_MODE_EMAIL      => 3;
 use constant USAGE_MODE_JSON       => 4;
 use constant USAGE_MODE_TEST       => 5;
+use constant USAGE_MODE_REST       => 6;
 
 # Error modes. Default set by Bugzilla->usage_mode (so ERROR_MODE_WEBPAGE
 # usually). Use with Bugzilla->error_mode.
@@ -456,6 +477,7 @@ use constant ERROR_MODE_DIE            => 1;
 use constant ERROR_MODE_DIE_SOAP_FAULT => 2;
 use constant ERROR_MODE_JSON_RPC       => 3;
 use constant ERROR_MODE_TEST           => 4;
+use constant ERROR_MODE_REST           => 5;
 
 # The ANSI colors of messages that command-line scripts use
 use constant COLOR_ERROR => 'red';
@@ -485,7 +507,9 @@ use constant DB_MODULE => {
                 dbd => {
                     package => 'DBD-Pg',
                     module  => 'DBD::Pg',
-                    version => '1.45',
+                    # 2.7.0 fixes a problem with quoting strings
+                    # containing backslashes in them.
+                    version => '2.7.0',
                 },
                 name => 'PostgreSQL'},
      'oracle'=> {db => 'Bugzilla::DB::Oracle', db_version => '10.02.0',
@@ -537,6 +561,9 @@ use constant MAX_COMPONENT_SIZE => 64;
 # The maximum length for values of <select> fields.
 use constant MAX_FIELD_VALUE_SIZE => 64;
 
+# The maximum length for the long description of fields.
+use constant MAX_FIELD_LONG_DESC_LENGTH => 255;
+
 # Maximum length allowed for free text fields.
 use constant MAX_FREETEXT_LENGTH => 255;
 
@@ -552,19 +579,26 @@ use constant MAX_POSSIBLE_DUPLICATES => 25;
 # necessary schema changes to store longer names.
 use constant MAX_ATTACH_FILENAME_LENGTH => 255;
 
+# Maximum length of a quip.
+use constant MAX_QUIP_LENGTH => 512;
+
+# Maximum number of bugs to display in a dependency graph
+use constant MAX_WEBDOT_BUGS => 2000;
+
 # This is the name of the algorithm used to hash passwords before storing
 # them in the database. This can be any string that is valid to pass to
 # Perl's "Digest" module. Note that if you change this, it won't take
-# effect until a user changes his password.
+# effect until a user logs in or changes his password.
 use constant PASSWORD_DIGEST_ALGORITHM => 'SHA-256';
-# How long of a salt should we use? Note that if you change this, none
-# of your users will be able to log in until they reset their passwords.
+# How long of a salt should we use? Note that if you change this, it
+# won't take effect until a user logs in or changes his password.
 use constant PASSWORD_SALT_LENGTH => 8;
 
 # Certain scripts redirect to GET even if the form was submitted originally
 # via POST such as buglist.cgi. This value determines whether the redirect
 # can be safely done or not based on the web server's URI length setting.
-use constant CGI_URI_LIMIT => 8000;
+# See http://support.microsoft.com/kb/208427 for why MSIE is different
+use constant CGI_URI_LIMIT => ($ENV{'HTTP_USER_AGENT'} || '') =~ /MSIE/ ? 2083 : 8000;
 
 # If the user isn't allowed to change a field, we must tell him who can.
 # We store the required permission set into the $PrivilegesRequired
@@ -581,6 +615,13 @@ use constant AUDIT_CREATE => '__create__';
 use constant AUDIT_REMOVE => '__remove__';
 
 sub bz_locations {
+    # Force memoize() to re-compute data per project, to avoid
+    # sharing the same data across different installations.
+    return _bz_locations($ENV{'PROJECT'});
+}
+
+sub _bz_locations {
+    my $project = shift;
     # We know that Bugzilla/Constants.pm must be in %INC at this point.
     # So the only question is, what's the name of the directory
     # above it? This is the most reliable way to get our current working
@@ -597,12 +638,13 @@ sub bz_locations {
     $libpath =~ /(.*)/;
     $libpath = $1;
 
-    my ($project, $localconfig, $datadir);
-    if ($ENV{'PROJECT'} && $ENV{'PROJECT'} =~ /^(\w+)$/) {
+    my ($localconfig, $datadir);
+    if ($project && $project =~ /^(\w+)$/) {
         $project = $1;
         $localconfig = "localconfig.$project";
         $datadir = "data/$project";
     } else {
+        $project = undef;
         $localconfig = "localconfig";
         $datadir = "data";
     }
@@ -637,6 +679,18 @@ sub bz_locations {
 
 # This makes us not re-compute all the bz_locations data every time it's
 # called.
-BEGIN { memoize('bz_locations') };
+BEGIN { memoize('_bz_locations') };
 
 1;
+
+=head1 B<Methods in need of POD>
+
+=over
+
+=item DB_MODULE
+
+=item contenttypes
+
+=item bz_locations
+
+=back

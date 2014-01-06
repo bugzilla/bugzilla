@@ -5,9 +5,12 @@
 # This Source Code Form is "Incompatible With Secondary Licenses", as
 # defined by the Mozilla Public License, v. 2.0.
 
-use strict;
 package Bugzilla::DB::Sqlite;
-use base qw(Bugzilla::DB);
+
+use 5.10.1;
+use strict;
+
+use parent qw(Bugzilla::DB);
 
 use Bugzilla::Constants;
 use Bugzilla::Error;
@@ -128,6 +131,7 @@ sub new {
     # so that's what we use, and I don't know of any way in SQLite to
     # alias the SQL "substr" function to be called "SUBSTRING".
     $self->sqlite_create_function('substring', 3, \&CORE::substr);
+    $self->sqlite_create_function('char_length', 1, sub { length($_[0]) });
     $self->sqlite_create_function('mod', 2, \&_sqlite_mod);
     $self->sqlite_create_function('now', 0, \&_sqlite_now);
     $self->sqlite_create_function('localtimestamp', 1, \&_sqlite_now);
@@ -212,7 +216,7 @@ sub sql_to_days {
 
 sub sql_date_format {
     my ($self, $date, $format) = @_;
-    $format = "%Y.%m.%d %H:%M:%s" if !$format;
+    $format = "%Y.%m.%d %H:%M:%S" if !$format;
     $format =~ s/\%i/\%M/g;
     return "STRFTIME(" . $self->quote($format) . ", $date)";
 }
@@ -295,3 +299,39 @@ SQLite-specific implementation. It is instantiated by the Bugzilla::DB module
 and should never be used directly.
 
 For interface details see L<Bugzilla::DB> and L<DBI>.
+
+=head1 B<Methods in need of POD>
+
+=over
+
+=item sql_date_format
+
+=item bz_explain
+
+=item sql_position
+
+=item sql_iposition
+
+=item sql_group_by
+
+=item sql_not_regexp
+
+=item sql_limit
+
+=item sql_date_math
+
+=item sql_to_days
+
+=item sql_from_days
+
+=item bz_table_list_real
+
+=item sql_regexp
+
+=item sql_group_concat
+
+=item sql_istring
+
+=item bz_setup_database
+
+=back

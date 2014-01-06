@@ -34,10 +34,6 @@
   width: 8em;
 }
 
-#bug_id_container input {
-  width: 9em;
-}
-
 #bug_id_type{
   width: inherit;
 }
@@ -95,11 +91,15 @@
   text-align: right;
 }
 
+.field_label_sup {
+  font-weight: normal;
+}
+
 #summary_field.search_field_row {
   width: inherit;
 }
 
-#keyword_container {
+#keywords_container {
   padding-bottom: 0;
 }
 

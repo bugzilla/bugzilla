@@ -6,6 +6,7 @@
 # This Source Code Form is "Incompatible With Secondary Licenses", as
 # defined by the Mozilla Public License, v. 2.0.
 
+use 5.10.1;
 use strict;
 use lib qw(. lib);
 
@@ -20,6 +21,7 @@ use Bugzilla::Flag;
 use Bugzilla::Field;
 use Bugzilla::Group;
 use Bugzilla::Token;
+use Bugzilla::Mailer;
 
 my $user = Bugzilla->login(LOGIN_REQUIRED);
 
@@ -66,7 +68,7 @@ if ($action eq 'search') {
     my $matchstr      = trim($cgi->param('matchstr'));
     my $matchtype     = $cgi->param('matchtype');
     my $grouprestrict = $cgi->param('grouprestrict') || '0';
-    my $enabled_only  = $cgi->param('enabled_only') || '0';
+    my $is_enabled    = scalar $cgi->param('is_enabled');
     my $query = 'SELECT DISTINCT userid, login_name, realname, is_enabled, ' .
                 $dbh->sql_date_format('last_seen_date', '%Y-%m-%d') . ' AS last_seen_date ' .
                 'FROM profiles';
@@ -145,8 +147,7 @@ if ($action eq 'search') {
             } elsif ($matchtype eq 'exact') {
                 $query .= $expr . ' = ?';
             } else { # substr or unknown
-                $query .= $dbh->sql_istrcmp($expr, '?', 'LIKE');
-                $matchstr = "%$matchstr%";
+                $query .= $dbh->sql_iposition('?', $expr) . ' > 0';
             }
             $nextCondition = 'AND';
             push(@bindValues, $matchstr);
@@ -159,11 +160,12 @@ if ($action eq 'search') {
             $query .= " $nextCondition ugm.group_id IN($grouplist) ";
         }
 
-        if ($enabled_only eq '1') {
-            $query .= " $nextCondition profiles.is_enabled = 1 ";
+        detaint_natural($is_enabled);
+        if ($is_enabled == 0 || $is_enabled == 1) {
+            $query .= " $nextCondition profiles.is_enabled = ?";
             $nextCondition = 'AND';
+            push(@bindValues, $is_enabled);
         }
-
         $query .= ' ORDER BY profiles.login_name';
 
         $vars->{'users'} = $dbh->selectall_arrayref($query,
@@ -217,6 +219,15 @@ if ($action eq 'search') {
     userDataToVars($new_user->id);
 
     delete_token($token);
+
+    if ($cgi->param('notify_user')) {
+        $vars->{'new_user'} = $new_user;
+        my $message;
+      
+        $template->process('email/new-user-details.txt.tmpl', $vars, \$message)
+            || ThrowTemplateError($template->error());
+        MessageToMTA($message);
+    }
 
     # We already display the updated page. We have to recreate a token now.
     $vars->{'token'} = issue_session_token('edit_user');
@@ -701,7 +712,7 @@ sub check_user {
         $otherUser = new Bugzilla::User({ name => $otherUserLogin });
         $vars->{'user_login'} = $otherUserLogin;
     }
-    ($otherUser && $otherUser->id) || ThrowCodeError('invalid_user', $vars);
+    ($otherUser && $otherUser->id) || ThrowUserError('invalid_user', $vars);
 
     return $otherUser;
 }

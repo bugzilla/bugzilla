@@ -125,11 +125,28 @@ function bz_overlayBelow(item, parent) {
  */
 function bz_isValueInArray(aArray, aValue)
 {
-  var run = 0;
-  var len = aArray.length;
-
-  for ( ; run < len; run++) {
+  for (var run = 0, len = aArray.length ; run < len; run++) {
     if (aArray[run] == aValue) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+/**
+ * Checks if a specified value is in the specified array by performing a
+ * case-insensitive comparison.
+ *
+ * @param  aArray Array to search for the value.
+ * @param  aValue Value to search from the array.
+ * @return        Boolean; true if value is found in the array and false if not.
+ */
+function bz_isValueInArrayIgnoreCase(aArray, aValue)
+{
+  var re = new RegExp(aValue.replace(/([^A-Za-z0-9])/g, "\\$1"), 'i');
+  for (var run = 0, len = aArray.length ; run < len; run++) {
+    if (aArray[run].match(re)) {
       return true;
     }
   }
@@ -225,6 +242,27 @@ function bz_selectedOptions(aSelect) {
     for (var i = start_at + 1; i < options_length; i++) {
         var this_option = aSelect.options[i];
         if (this_option.selected) selected.push(this_option);
+    }
+    return selected;
+}
+
+/**
+ * Returns all Option elements that have the "selected" attribute, as an array.
+ * Returns an empty array if nothing is selected.
+ *
+ * @param aSelect The select you want the pre-selected values of.
+ */
+function bz_preselectedOptions(aSelect) {
+    var options = aSelect.options;
+    var selected = new Array();
+    for (var i = 0, l = options.length; i < l; i++) {
+        var attributes = options[i].attributes;
+        for (var j = 0, m = attributes.length; j < m; j++) {
+            if (attributes[j].name == 'selected') {
+                if (!aSelect.multiple) return options[i];
+                selected.push(options[i]);
+            }
+        }
     }
     return selected;
 }

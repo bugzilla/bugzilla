@@ -79,30 +79,22 @@
   <p>Please go back and try other names or email addresses.</p>
 [% END %]
 
-  <table border="0">
-    <tr>
-      <td colspan="2">
-        <hr width="100%" size="1">
-      </td>
-    </tr>
-
-  [%# this is messy to allow later expansion %]
-
+<table id="user_match_table">
   [% FOREACH field = matches %]
     <tr>
-      <td align="left" valign="top">
+      <td>
         [% PROCESS field_names field_name=field.key %]:
       </td>
-      <td align="left" valign="top">
+      <td>
           [% FOREACH query = field.value %]
             <div class="user_match">
               <b>[% query.key FILTER html %]</b>
             [% IF query.value.users.size %]
                 [% IF query.value.users.size > 1 %]
                   [% IF query.value.status == 'fail' %]
-                    <font color="#FF0000">
+                    <span class="warning">
                       matches multiple users.
-                    </font>
+                    </span>
                     Please go back and try again with a more specific
                     name/address.
                   [% ELSE %]
@@ -134,34 +126,29 @@
                 [% ELSE %]
                   matched
                   <b>[% query.value.users.0.identity FILTER html %]</b>
-                  <input type="hidden" name="[% field.key FILTER html %]"
-                         value="[% query.value.users.0.login FILTER html %]">
                 [% END %]
             [% ELSE %]
-                [% IF (query.key.length < 3) && !Param('emailsuffix') %]
-                  <font color="#FF0000">was too short for substring match
-                  (minimum 3 characters)</font>
+              <span class="warning">
+                [% IF query.key.length < 3 %]
+                  was too short for substring match (minimum 3 characters)
                 [% ELSE %]
-                  <font color="#FF0000">did not match anything</font>
+                  did not match anything
                 [% END %]
+              </span>
             [% END %]
             </div>
         [% END %]
       </td>
     </tr>
-    <tr>
-      <td colspan="2">
-        <hr width="100%" size="1">
-      </td>
-    </tr>
   [% END %]
-
-  </table>
+</table>
 
 [% IF matchsuccess == 1 %]
 
-  [% SET exclude_these = 
-           matches.keys.merge(['Bugzilla_login', 'Bugzilla_password']) %]
+  [% SET exclude_these = ['Bugzilla_login', 'Bugzilla_password'] %]
+  [% FOREACH key IN matches.keys %]
+    [% exclude_these.push(key) IF cgi.param(key) == '' %]
+  [% END %]
   [% SET exclude = '^' _ exclude_these.join('|') _ '$' %]
   [% PROCESS "global/hidden-fields.html.tmpl" exclude = exclude %]
 
@@ -183,7 +170,7 @@
   [% ELSIF field_labels.$field_name %]
     [% field_labels.$field_name FILTER html %]
   [% ELSIF field_name.match("^requestee") %]
-    [% fields.${field_name}.flag_type.name %] requestee
+    [% fields.${field_name}.flag_type.name FILTER html %] requestee
   [% ELSE %]
     [% field_name FILTER html %]
   [% END %]

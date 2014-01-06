@@ -7,6 +7,7 @@
 
 package Bugzilla;
 
+use 5.10.1;
 use strict;
 
 # We want any compile errors to get to the browser, if possible.
@@ -18,23 +19,24 @@ BEGIN {
     }
 }
 
-use Bugzilla::Config;
-use Bugzilla::Constants;
 use Bugzilla::Auth;
 use Bugzilla::Auth::Persist::Cookie;
 use Bugzilla::CGI;
-use Bugzilla::Extension;
+use Bugzilla::Config;
+use Bugzilla::Constants;
 use Bugzilla::DB;
-use Bugzilla::Install::Localconfig qw(read_localconfig);
-use Bugzilla::Install::Requirements qw(OPTIONAL_MODULES);
-use Bugzilla::Install::Util qw(init_console);
-use Bugzilla::Template;
-use Bugzilla::User;
 use Bugzilla::Error;
-use Bugzilla::Util;
+use Bugzilla::Extension;
 use Bugzilla::Field;
 use Bugzilla::Flag;
+use Bugzilla::Install::Localconfig qw(read_localconfig);
+use Bugzilla::Install::Requirements qw(OPTIONAL_MODULES);
+use Bugzilla::Install::Util qw(init_console include_languages);
+use Bugzilla::Memcached;
+use Bugzilla::Template;
 use Bugzilla::Token;
+use Bugzilla::User;
+use Bugzilla::Util;
 
 use File::Basename;
 use File::Spec::Functions;
@@ -67,7 +69,7 @@ use constant SHUTDOWNHTML_RETRY_AFTER => 3600;
 # Global Code
 #####################################################################
 
-# $::SIG{__DIE__} = i_am_cgi() ? \&CGI::Carp::confess : \&Carp::confess;
+#$::SIG{__DIE__} = i_am_cgi() ? \&CGI::Carp::confess : \&Carp::confess;
 
 # Note that this is a raw subroutine, not a method, so $class isn't available.
 sub init_page {
@@ -163,10 +165,8 @@ sub init_page {
             print Bugzilla->cgi->header(-status => 503, 
                 -retry_after => SHUTDOWNHTML_RETRY_AFTER);
         }
-        my $t_output;
-        $template->process("global/message.$extension.tmpl", $vars, \$t_output)
+        $template->process("global/message.$extension.tmpl", $vars)
             || ThrowTemplateError($template->error);
-        print $t_output . "\n";
         exit;
     }
 }
@@ -176,9 +176,7 @@ sub init_page {
 #####################################################################
 
 sub template {
-    my $class = shift;
-    $class->request_cache->{template} ||= Bugzilla::Template->create();
-    return $class->request_cache->{template};
+    return $_[0]->request_cache->{template} ||= Bugzilla::Template->create();
 }
 
 sub template_inner {
@@ -186,9 +184,7 @@ sub template_inner {
     my $cache = $class->request_cache;
     my $current_lang = $cache->{template_current_lang}->[0];
     $lang ||= $current_lang || '';
-    $class->request_cache->{"template_inner_$lang"}
-        ||= Bugzilla::Template->create(language => $lang);
-    return $class->request_cache->{"template_inner_$lang"};
+    return $cache->{"template_inner_$lang"} ||= Bugzilla::Template->create(language => $lang);
 }
 
 our $extension_packages;
@@ -235,21 +231,14 @@ sub feature {
 
     my $success = 1;
     foreach my $module (@{ $feature_map->{$feature} }) {
-        # We can't use a string eval and "use" here (it kills Template-Toolkit,
-        # see https://rt.cpan.org/Public/Bug/Display.html?id=47929), so we have
-        # to do a block eval.
-        $module =~ s{::}{/}g;
-        $module .= ".pm";
-        eval { require $module; 1; } or $success = 0;
+        eval "require $module" or $success = 0;
     }
     $cache->{feature}->{$feature} = $success;
     return $success;
 }
 
 sub cgi {
-    my $class = shift;
-    $class->request_cache->{cgi} ||= new Bugzilla::CGI();
-    return $class->request_cache->{cgi};
+    return $_[0]->request_cache->{cgi} ||= new Bugzilla::CGI();
 }
 
 sub input_params {
@@ -268,22 +257,16 @@ sub input_params {
     return $cache->{input_params};
 }
 
-our $_localconfig;
 sub localconfig {
-    $_localconfig ||= read_localconfig();
-    return $_localconfig;
+    return $_[0]->process_cache->{localconfig} ||= read_localconfig();
 }
 
 sub params {
-    my $class = shift;
-    $class->request_cache->{params} ||= Bugzilla::Config::read_param_file();
-    return $class->request_cache->{params};
+    return $_[0]->request_cache->{params} ||= Bugzilla::Config::read_param_file();
 }
 
 sub user {
-    my $class = shift;
-    $class->request_cache->{user} ||= new Bugzilla::User;
-    return $class->request_cache->{user};
+    return $_[0]->request_cache->{user} ||= new Bugzilla::User;
 }
 
 sub set_user {
@@ -292,8 +275,7 @@ sub set_user {
 }
 
 sub sudoer {
-    my $class = shift;    
-    return $class->request_cache->{sudoer};
+    return $_[0]->request_cache->{sudoer};
 }
 
 sub sudo_request {
@@ -415,29 +397,25 @@ sub logout_request {
 }
 
 sub job_queue {
-    my $class = shift;
     require Bugzilla::JobQueue;
-    $class->request_cache->{job_queue} ||= Bugzilla::JobQueue->new();
-    return $class->request_cache->{job_queue};
+    return $_[0]->request_cache->{job_queue} ||= Bugzilla::JobQueue->new();
 }
 
 sub dbh {
-    my $class = shift;
     # If we're not connected, then we must want the main db
-    $class->request_cache->{dbh} ||= $class->dbh_main;
-
-    return $class->request_cache->{dbh};
+    return $_[0]->request_cache->{dbh} ||= $_[0]->dbh_main;
 }
 
 sub dbh_main {
-    my $class = shift;
-    $class->request_cache->{dbh_main} ||= Bugzilla::DB::connect_main();
-    return $class->request_cache->{dbh_main};
+    return $_[0]->request_cache->{dbh_main} ||= Bugzilla::DB::connect_main();
 }
 
 sub languages {
-    my $class = shift;
     return Bugzilla::Install::Util::supported_languages();
+}
+
+sub current_language {
+    return $_[0]->request_cache->{current_language} ||= (include_languages())[0];
 }
 
 sub error_mode {
@@ -484,6 +462,9 @@ sub usage_mode {
         }
         elsif ($newval == USAGE_MODE_TEST) {
             $class->error_mode(ERROR_MODE_TEST);
+        }
+        elsif ($newval == USAGE_MODE_REST) {
+            $class->error_mode(ERROR_MODE_REST);
         }
         else {
             ThrowCodeError('usage_mode_invalid',
@@ -593,7 +574,8 @@ sub fields {
         }
     }
 
-    return $do_by_name ? \%requested : [values %requested];
+    return $do_by_name ? \%requested
+        : [sort { $a->sortkey <=> $b->sortkey || $a->name cmp $b->name } values %requested];
 }
 
 sub active_custom_fields {
@@ -615,13 +597,8 @@ sub has_flags {
 }
 
 sub local_timezone {
-    my $class = shift;
-
-    if (!defined $class->request_cache->{local_timezone}) {
-        $class->request_cache->{local_timezone} =
-          DateTime::TimeZone->new(name => 'local');
-    }
-    return $class->request_cache->{local_timezone};
+    return $_[0]->process_cache->{local_timezone}
+             ||= DateTime::TimeZone->new(name => 'local');
 }
 
 # This creates the request cache for non-mod_perl installations.
@@ -642,6 +619,33 @@ sub request_cache {
     return $_request_cache;
 }
 
+sub clear_request_cache {
+    $_request_cache = {};
+    if ($ENV{MOD_PERL}) {
+        require Apache2::RequestUtil;
+        my $request = eval { Apache2::RequestUtil->request };
+        if ($request) {
+            my $pnotes = $request->pnotes;
+            delete @$pnotes{(keys %$pnotes)};
+        }
+    }
+}
+
+# This is a per-process cache.  Under mod_cgi it's identical to the
+# request_cache.  When using mod_perl, items in this cache live until the
+# worker process is terminated.
+our $_process_cache = {};
+
+sub process_cache {
+    return $_process_cache;
+}
+
+# This is a memcached wrapper, which provides cross-process and cross-system
+# caching.
+sub memcached {
+    return $_[0]->process_cache->{memcached} ||= Bugzilla::Memcached->_new();
+}
+
 # Private methods
 
 # Per-process cleanup. Note that this is a plain subroutine, not a method,
@@ -654,7 +658,7 @@ sub _cleanup {
         $dbh->bz_rollback_transaction() if $dbh->bz_in_transaction;
         $dbh->disconnect;
     }
-    undef $_request_cache;
+    clear_request_cache();
 
     # These are both set by CGI.pm but need to be undone so that
     # Apache can actually shut down its children if it needs to.
@@ -775,10 +779,10 @@ not an arrayref.
 
 =item C<user>
 
-C<undef> if there is no currently logged in user or if the login code has not
-yet been run.  If an sudo session is in progress, the C<Bugzilla::User>
-corresponding to the person who is being impersonated.  If no session is in
-progress, the current C<Bugzilla::User>.
+Default C<Bugzilla::User> object if there is no currently logged in user or
+if the login code has not yet been run.  If an sudo session is in progress,
+the C<Bugzilla::User> corresponding to the person who is being impersonated.
+If no session is in progress, the current C<Bugzilla::User>.
 
 =item C<set_user>
 
@@ -848,7 +852,7 @@ in a hashref:
 =item C<by_name>
 
 If false (or not specified), this method will return an arrayref of
-the requested fields. The order of the returned fields is random.
+the requested fields.
 
 If true, this method will return a hashref of fields, where the keys
 are field names and the valules are L<Bugzilla::Field> objects.
@@ -915,6 +919,10 @@ The main database handle. See L<DBI>.
 Currently installed languages.
 Returns a reference to a list of RFC 1766 language tags of installed languages.
 
+=item C<current_language>
+
+The currently active language.
+
 =item C<switch_to_shadow_db>
 
 Switch from using the main database to using the shadow database.
@@ -945,5 +953,101 @@ this Bugzilla installation.
 
 Tells you whether or not a specific feature is enabled. For names
 of features, see C<OPTIONAL_MODULES> in C<Bugzilla::Install::Requirements>.
+
+=back
+
+=head1 B<CACHING>
+
+Bugzilla has several different caches available which provide different
+capabilities and lifetimes.
+
+The keys of all caches are unregulated; use of prefixes is suggested to avoid
+collisions.
+
+=over
+
+=item B<Request Cache>
+
+The request cache is a hashref which supports caching any perl variable for the
+duration of the current request. At the end of the current request the contents
+of this cache are cleared.
+
+Examples of its use include caching objects to avoid re-fetching the same data
+from the database, and passing data between otherwise unconnected parts of
+Bugzilla.
+
+=over
+
+=item C<request_cache>
+
+Returns a hashref which can be checked and modified to store any perl variable
+for the duration of the current request.
+
+=item C<clear_request_cache>
+
+Removes all entries from the C<request_cache>.
+
+=back
+
+=item B<Process Cache>
+
+The process cache is a hashref which support caching of any perl variable. If
+Bugzilla is configured to run using Apache mod_perl, the contents of this cache
+are persisted across requests for the lifetime of the Apache worker process
+(which varies depending on the SizeLimit configuration in mod_perl.pl).
+
+If Bugzilla isn't running under mod_perl, the process cache's contents are
+cleared at the end of the request.
+
+The process cache is only suitable for items which never change while Bugzilla
+is running (for example the path where Bugzilla is installed).
+
+=over
+
+=item C<process_cache>
+
+Returns a hashref which can be checked and modified to store any perl variable
+for the duration of the current process (mod_perl) or request (mod_cgi).
+
+=back
+
+=item B<Memcached>
+
+If Memcached is installed and configured, Bugzilla can use it to cache data
+across requests and between webheads. Unlike the request and process caches,
+only scalars, hashrefs, and arrayrefs can be stored in Memcached.
+
+Memcached integration is only required for large installations of Bugzilla -- if
+you have multiple webheads then configuring Memcached is recommended.
+
+=over
+
+=item C<memcached>
+
+Returns a C<Bugzilla::Memcached> object. An object is always returned even if
+Memcached is not available.
+
+See the documentation for the C<Bugzilla::Memcached> module for more
+information.
+
+=back
+
+=back
+
+=head1 B<Methods in need of POD>
+
+=over
+
+=item init_page
+
+=item extensions
+
+=item logout_user_by_id
+
+=item localconfig
+
+=item active_custom_fields
+
+=item has_flags
 
 =back

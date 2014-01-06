@@ -64,11 +64,27 @@
     [% END %] 
   </h3>
   [% IF ids.size %]
-    ([% IF maxdepth -%]Up to [% maxdepth %] level[% "s" IF maxdepth > 1 %] deep | [% END -%]
-    <a href="buglist.cgi?bug_id=[% ids.join(",") %]">view as [% terms.bug %] list</a>
-    [% IF user.in_group('editbugs') && ids.size > 1 %]
-      | <a href="buglist.cgi?bug_id=[% ids.join(",") %]&amp;tweak=1">change several</a>
-    [% END %])
+    [%# 27 chars is the length of buglist.cgi?tweak=&bug_id=" %]
+    [% use_post = (ids.join(",").length > constants.CGI_URI_LIMIT - 27 ) ? 1 : 0 %]
+    [% IF use_post %]
+      <form action="buglist.cgi" method="post">
+      <input type="hidden" name="bug_id" value="[% ids.join(",") %]">
+    [% END %]
+
+    [% IF maxdepth -%]Up to [% maxdepth %] level[% "s" IF maxdepth > 1 %] deep | [% END -%]
+    [% IF use_post %]
+      <button>view as [% terms.bug %] list</button>
+      [% IF user.in_group('editbugs') && ids.size > 1 %]
+        | <button type="submit" name="tweak" value="1">change several</button>
+      [% END %]
+      </form>
+    [% ELSE %]
+      <a href="buglist.cgi?bug_id=[% ids.join(",") %]">view as [% terms.bug %] list</a>
+      [% IF user.in_group('editbugs') && ids.size > 1 %]
+        | <a href="buglist.cgi?bug_id=[% ids.join(",") %]&amp;tweak=1">change several</a>
+      [% END %]
+    [% END %]
+
     <ul class="tree">
       [% INCLUDE display_tree tree=$tree_name %]
     </ul>
@@ -146,13 +162,12 @@
 [%###########################################################################%]
 
 [% BLOCK depthControlToolbar %]
- <table cellpadding="3" border="0" cellspacing="0" bgcolor="#e0e0e0">
+ <table class="dependency_tree_controls">
    <tr>
    [%# Hide/show resolved button
        Swaps text depending on the state of hide_resolved %]
-   <td align="center">
-   <form method="get" action="showdependencytree.cgi"
-           style="display: inline; margin: 0px;">
+   <td>
+   <form method="get" action="showdependencytree.cgi">
      <input name="id" type="hidden" value="[% bugid %]">
      [% IF maxdepth %]
        <input name="maxdepth" type="hidden" value="[% maxdepth %]">
@@ -172,11 +187,9 @@
    </td>
 
    <td>
-   <form method="get" action="showdependencytree.cgi"
-         style="display: inline; margin: 0px;">
+   <form method="get" action="showdependencytree.cgi">
      [%# set to one form %]
-     <input type="submit" id="change_maxdepth"
-       value="&nbsp;1&nbsp;" 
+     <input type="submit" id="change_maxdepth" value="1"
        [% "disabled" IF realdepth < 2 || maxdepth == 1 %]>
      <input name="id" type="hidden" value="[% bugid %]">
      <input name="maxdepth" type="hidden" value="1">
@@ -185,8 +198,7 @@
    </td>
 
    <td>
-   <form method="get" action="showdependencytree.cgi"
-         style="display: inline; margin: 0px;">
+   <form method="get" action="showdependencytree.cgi">
      [%# Minus one form
          Allow subtracting only when realdepth and maxdepth > 1 %]
      <input name="id" type="hidden" value="[% bugid %]">
@@ -195,15 +207,14 @@
                        : ( maxdepth ? maxdepth - 1 : realdepth - 1 )
      %]">
      <input name="hide_resolved" type="hidden" value="[% hide_resolved %]">
-     <input type="submit" id="decrease_depth" value="&nbsp;&lt;&nbsp;"
+     <input type="submit" id="decrease_depth" value="&lt;"
        [% "disabled" IF realdepth < 2 || ( maxdepth && maxdepth < 2 ) %]>
    </form>
    </td>
 
    <td>
-   <form method="get" action="showdependencytree.cgi"
-         style="display: inline; margin: 0px;">
-     [%# Limit entry form: the button can not do anything when total depth
+   <form method="get" action="showdependencytree.cgi">
+     [%# Limit entry form: the button cannot do anything when total depth
          is less than two, so disable it %]
      <input name="maxdepth" size="4" maxlength="4" value="[%
          maxdepth > 0 && maxdepth <= realdepth ? maxdepth : ""
@@ -218,8 +229,7 @@
    </td>
 
    <td>
-   <form method="get" action="showdependencytree.cgi"
-         style="display: inline; margin: 0px;">
+   <form method="get" action="showdependencytree.cgi">
      [%# plus one form
          Disable button if total depth < 2, or if depth set to unlimited %]
      <input name="id" type="hidden" value="[% bugid %]">
@@ -227,19 +237,18 @@
        <input name="maxdepth" type="hidden" value="[% maxdepth + 1 %]">
      [% END %]
      <input name="hide_resolved" type="hidden" value="[% hide_resolved %]">
-     <input type="submit" id="increase_depth" value="&nbsp;&gt;&nbsp;" 
+     <input type="submit" id="increase_depth" value="&gt;"
         [% "disabled" IF realdepth < 2 || !maxdepth || maxdepth >= realdepth %]>
    </form>
    </td>
 
    <td>
-   <form method="get" action="showdependencytree.cgi"
-         style="display: inline; margin: 0px;">
+   <form method="get" action="showdependencytree.cgi">
      [%# Unlimited button %]
      <input name="id" type="hidden" value="[% bugid %]">
      <input name="hide_resolved" type="hidden" value="[% hide_resolved %]">
      <input type="submit" id="remove_limit"
-       value="&nbsp;Unlimited&nbsp;"
+       value="Unlimited"
        [% "disabled" IF maxdepth == 0 || maxdepth == realdepth %]>
    </form>
    </td>

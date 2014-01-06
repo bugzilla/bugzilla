@@ -31,57 +31,40 @@
 <p>Your saved searches are as follows:</p>
 
 <blockquote>
-  <table border="1" cellpadding="3">  
-    <tr>
-      <th>
-        Search
-      </th>
-      <th>
-        Run
-      </th>
-      <th>
-        Edit
-      </th>
-      <th>
-        Forget
-      </th>
-      <th>
-        Show in
-        Footer
-      </th>
+  <table id="saved_search_prefs">
+    <tr class="column_header">
+      <th>Search</th>
+      <th>Run</th>
+      <th>Edit</th>
+      <th>Forget</th>
+      <th>Show in Footer</th>
       [% may_share = user.in_group(Param('querysharegroup')) && queryshare_groups.size %]
       [% IF may_share %]
-        <th>
-          Share With a Group
-        </th>
+        <th>Share With a Group</th>
       [% END %]
+      [% Hook.process('saved-header') %]
     </tr>
+
     <tr>
       <td>My [% terms.Bugs %]</td>
       <td>
         [% filtered_username = user.login FILTER uri %]
         <a href="[% Param('mybugstemplate').replace('%userid%', filtered_username) %]">Run</a>
       </td>
-      <td>
-        &nbsp;
-      </td>
-      <td>
-        &nbsp;
-      </td>
+      <td></td>
+      <td></td>
       <td align="center">
-        <input type="checkbox" 
-               name="showmybugslink"
-               value="1"
-               [% " checked" IF user.showmybugslink %]>
+        <input type="checkbox" name="showmybugslink" value="1"
+               [%+ 'checked="checked"' IF user.showmybugslink %]>
       </td>
       [% IF may_share %]
-        <td>
-          &mdash;
-        </td>
+        <td>&mdash;</td>
       [% END %]
+      [% Hook.process('saved-row') %]
     </tr>
+
     [% FOREACH q = user.queries %]
-      <tr>
+      <tr [% 'class="shared_search"' IF q.shared_with_group.id %]>
         <td>[% q.name FILTER html %]</td>
         <td>
           <a href="buglist.cgi?cmdtype=dorem&amp;remaction=run&amp;namedcmd=[% q.name FILTER uri %]
@@ -100,7 +83,7 @@
                      [% issue_hash_token([q.id, q.name]) FILTER uri %]">Forget</a>
           [% END %]
         </td>
-        <td align="center">
+        <td class="center">
           <input type="checkbox" 
                  name="link_in_footer_[% q.id FILTER html %]"
                  value="1"
@@ -133,6 +116,7 @@
             [% END %]
           </td>
         [% END %]
+        [% Hook.process('saved-row') %]
       </tr>
     [% END %]
   </table>
@@ -146,28 +130,16 @@
 [% IF user.queries_available.size %]
   <p>You may use these searches saved and shared by others:</p>
 
-  <table border="1" cellpadding="3">  
-    <tr>
-      <th>
-        Search
-      </th>
-      <th>
-        Shared By
-      </th>
-      <th>
-        Shared To
-      </th>
-      <th>
-        Run
-      </th>
-      <th>
-        Edit
-      </th>
-      <th>
-        Show in
-        Footer
-      </th>
+  <table id="shared_search_prefs">
+    <tr class="column_header">
+      <th>Search</th>
+      <th>Shared By</th>
+      <th>Shared To</th>
+      <th>Run</th>
+      <th>Edit</th>
+      <th>Show in Footer</th>
     </tr>
+
     [% FOREACH q = user.queries_available %]
       <tr>
         <td>[% q.name FILTER html %]</td>
@@ -182,7 +154,7 @@
           <a href="query.cgi?[% q.edit_link FILTER html %]&amp;known_name=
                    [% q.name FILTER uri %]">Edit</a>
         </td>
-        <td align="center">
+        <td class="center">
           <input type="checkbox" 
                  name="link_in_footer_[% q.id FILTER html %]"
                  value="1"

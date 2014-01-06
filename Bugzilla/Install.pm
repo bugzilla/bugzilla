@@ -15,6 +15,7 @@ package Bugzilla::Install;
 # make those assumptions, then it should go into one of the
 # packages under the Bugzilla::Install namespace.
 
+use 5.10.1;
 use strict;
 
 use Bugzilla::Component;
@@ -25,7 +26,7 @@ use Bugzilla::Group;
 use Bugzilla::Product;
 use Bugzilla::User;
 use Bugzilla::User::Setting;
-use Bugzilla::Util qw(get_text say);
+use Bugzilla::Util qw(get_text);
 use Bugzilla::Version;
 
 use constant STATUS_WORKFLOW => (
@@ -61,8 +62,6 @@ sub SETTINGS {
     csv_colsepchar     => { options => [',',';'], default => ',' },
     # 2005-10-26 wurblzap@gmail.com -- Bug 291459
     zoom_textareas     => { options => ["on", "off"], default => "on" },
-    # 2005-10-21 LpSolit@gmail.com -- Bug 313020
-    per_bug_queries    => { options => ['on', 'off'], default => 'off' },
     # 2006-05-01 olav@bkor.dhs.org -- Bug 7710
     state_addselfcc    => { options => ['always', 'never',  'cc_unless_role'],
                             default => 'cc_unless_role' },
@@ -86,6 +85,10 @@ sub SETTINGS {
                             default => 'html' },
     # 2011-10-11 glob@mozilla.com -- Bug 301656
     requestee_cc       => { options => ['on', 'off'], default => 'on' },
+    # 2012-04-30 glob@mozilla.com -- Bug 663747
+    bugmail_new_prefix => { options => ['on', 'off'], default => 'on' },
+    # 2013-07-26 joshi_sunil@in.com -- Bug 669535
+    possible_duplicates => { options => ['on', 'off'], default => 'on' },
     }
 };
 
@@ -192,6 +195,9 @@ sub update_settings {
                     $settings{$setting}->{subclass}, undef,
                     !$any_settings);
     }
+
+    # Delete the obsolete 'per_bug_queries' user preference. Bug 616191.
+    $dbh->do('DELETE FROM setting WHERE name = ?', undef, 'per_bug_queries');
 }
 
 sub update_system_groups {
@@ -316,7 +322,7 @@ sub create_admin {
         print get_text('install_admin_get_email') . ' ';
         $login = <STDIN>;
         chomp $login;
-        eval { Bugzilla::User->check_login_name_for_creation($login); };
+        eval { Bugzilla::User->check_login_name($login); };
         if ($@) {
             say $@;
             undef $login;
@@ -373,6 +379,12 @@ sub make_admin {
     if (!Bugzilla->params->{'maintainer'}) {
         SetParam('maintainer', $user->email);
         write_params();
+    }
+
+    # Make sure the new admin isn't disabled
+    if ($user->disabledtext) {
+        $user->set_disabledtext('');
+        $user->update();
     }
 
     if (Bugzilla->usage_mode == USAGE_MODE_CMDLINE) {
@@ -481,5 +493,21 @@ Description: Creates the default product and component if
 Params:      none
 
 Returns:     nothing
+
+=back
+
+=head1 B<Methods in need of POD>
+
+=over
+
+=item update_system_groups
+
+=item reset_password
+
+=item make_admin
+
+=item create_admin
+
+=item init_workflow
 
 =back

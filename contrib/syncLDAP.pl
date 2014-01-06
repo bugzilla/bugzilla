@@ -51,7 +51,7 @@ foreach my $arg (@ARGV)
          print "usage:\n syncLDAP.pl [options]\n\n";
          print "options:\n";
          print " -r Readonly, do not make changes to Bugzilla tables\n";
-         print " -d No disable, don't disable users, which are not in LDAP\n";
+         print " -d No disable, don't disable login by users who are not in LDAP\n";
          print " -u No update, don't update users, which have different description in LDAP\n";
          print " -c No create, don't create users, which are in LDAP but not in Bugzilla\n";
          print " -q Quiet mode, give less output\n";
@@ -194,7 +194,7 @@ while( my ($create_key, $create_value) = each(%create_users) ) {
 }
 
 if($quiet == 0) {
-   print "\nUsers to disable: \n";
+   print "\nUsers to disable login for: \n";
    while( my ($key, $value) = each(%disable_users) ) {
      print " " . $key . " '" . $value->{'realname'} . "'\n";
    }
@@ -221,7 +221,7 @@ if($quiet == 0) {
 # now do the DB-Update
 ###
 if($readonly == 0) {
-   print "Performing DB update:\nPhase 1: disabling not-existing users... " unless $quiet;
+   print "Performing DB update:\nPhase 1: disabling login for users not in LDAP... " unless $quiet;
 
    my $sth_disable = $dbh->prepare(
        'UPDATE profiles
@@ -240,22 +240,15 @@ if($readonly == 0) {
    
    print "Phase 2: updating existing users... " unless $quiet;
 
-   my $sth_update_login = $dbh->prepare(
-       'UPDATE profiles
-           SET login_name = ? 
-         WHERE ' . $dbh->sql_istrcmp('login_name', '?'));
-   my $sth_update_realname = $dbh->prepare(
-       'UPDATE profiles
-           SET realname = ? 
-         WHERE ' . $dbh->sql_istrcmp('login_name', '?'));
-
    if($noupdate == 0) {
       while( my ($key, $value) = each(%update_users) ) {
+        my $user = Bugzilla::User->check($key);
         if(defined $value->{'new_login_name'}) {
-          $sth_update_login->execute($value->{'new_login_name'}, $key);
+          $user->set_login($value->{'new_login_name'});
         } else {
-          $sth_update_realname->execute($value->{'realname'}, $key);
+          $user->set_name($value->{'realname'});
         }
+        $user->update();
       }
       print "done!\n" unless $quiet;
    }

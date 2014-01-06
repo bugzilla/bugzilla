@@ -5,9 +5,10 @@
 # This Source Code Form is "Incompatible With Secondary Licenses", as
 # defined by the Mozilla Public License, v. 2.0.
 
-use strict;
-
 package Bugzilla::Object;
+
+use 5.10.1;
+use strict;
 
 use Bugzilla::Constants;
 use Bugzilla::Hook;
@@ -33,6 +34,11 @@ use constant AUDIT_CREATES => 1;
 use constant AUDIT_UPDATES => 1;
 use constant AUDIT_REMOVES => 1;
 
+# When USE_MEMCACHED is true, the class is suitable for serialisation to
+# Memcached. This will be flipped to true by default once the majority of
+# Bugzilla Object have been tested with Memcached.
+use constant USE_MEMCACHED => 0;
+
 # This allows the JSON-RPC interface to return Bugzilla::Object instances
 # as though they were hashes. In the future, this may be modified to return
 # less information.
@@ -45,17 +51,52 @@ sub TO_JSON { return { %{ $_[0] } }; }
 sub new {
     my $invocant = shift;
     my $class    = ref($invocant) || $invocant;
-    my $object   = $class->_init(@_);
-    bless($object, $class) if $object;
+    my $param    = shift;
+
+    my $object = $class->_object_cache_get($param);
+    return $object if $object;
+
+    my ($data, $set_memcached);
+    if (Bugzilla->feature('memcached')
+        && $class->USE_MEMCACHED
+        && ref($param) eq 'HASH' && $param->{cache})
+    {
+        if (defined $param->{id}) {
+            $data = Bugzilla->memcached->get({
+                table => $class->DB_TABLE,
+                id    => $param->{id},
+            });
+        }
+        elsif (defined $param->{name}) {
+            $data = Bugzilla->memcached->get({
+                table => $class->DB_TABLE,
+                name  => $param->{name},
+            });
+        }
+        $set_memcached = $data ? 0 : 1;
+    }
+    $data ||= $class->_load_from_db($param);
+
+    if ($data && $set_memcached) {
+        Bugzilla->memcached->set({
+            table => $class->DB_TABLE,
+            id    => $data->{$class->ID_FIELD},
+            name  => $data->{$class->NAME_FIELD},
+            data  => $data,
+        });
+    }
+
+    $object = $class->new_from_hash($data);
+    $class->_object_cache_set($param, $object);
+
     return $object;
 }
-
 
 # Note: Because this uses sql_istrcmp, if you make a new object use
 # Bugzilla::Object, make sure that you modify bz_setup_database
 # in Bugzilla::DB::Pg appropriately, to add the right LOWER
 # index. You can see examples already there.
-sub _init {
+sub _load_from_db {
     my $class = shift;
     my ($param) = @_;
     my $dbh = Bugzilla->dbh;
@@ -68,19 +109,19 @@ sub _init {
     if (ref $param eq 'HASH') {
         $id = $param->{id};
     }
-    my $object;
 
+    my $object_data;
     if (defined $id) {
         # We special-case if somebody specifies an ID, so that we can
         # validate it as numeric.
         detaint_natural($id)
           || ThrowCodeError('param_must_be_numeric',
-                            {function => $class . '::_init'});
+                            {function => $class . '::_load_from_db'});
 
         # Too large integers make PostgreSQL crash.
         return if $id > MAX_INT_32;
 
-        $object = $dbh->selectrow_hashref(qq{
+        $object_data = $dbh->selectrow_hashref(qq{
             SELECT $columns FROM $table
              WHERE $id_field = ?}, undef, $id);
     } else {
@@ -107,11 +148,93 @@ sub _init {
         }
 
         map { trick_taint($_) } @values;
-        $object = $dbh->selectrow_hashref(
+        $object_data = $dbh->selectrow_hashref(
             "SELECT $columns FROM $table WHERE $condition", undef, @values);
     }
+    return $object_data;
+}
 
-    return $object;
+sub new_from_list {
+    my $invocant = shift;
+    my $class = ref($invocant) || $invocant;
+    my ($id_list) = @_;
+    my $id_field = $class->ID_FIELD;
+
+    my @detainted_ids;
+    foreach my $id (@$id_list) {
+        detaint_natural($id) ||
+            ThrowCodeError('param_must_be_numeric',
+                          {function => $class . '::new_from_list'});
+        # Too large integers make PostgreSQL crash.
+        next if $id > MAX_INT_32;
+        push(@detainted_ids, $id);
+    }
+
+    # We don't do $invocant->match because some classes have
+    # their own implementation of match which is not compatible
+    # with this one. However, match() still needs to have the right $invocant
+    # in order to do $class->DB_TABLE and so on.
+    return match($invocant, { $id_field => \@detainted_ids });
+}
+
+sub new_from_hash {
+    my $invocant = shift;
+    my $class = ref($invocant) || $invocant;
+    my $object_data = shift || return;
+    $class->_serialisation_keys($object_data);
+    bless($object_data, $class);
+    $object_data->initialize();
+    return $object_data;
+}
+
+sub initialize {
+    # abstract
+}
+
+# Provides a mechanism for objects to be cached in the request_cache
+sub _object_cache_get {
+    my $class = shift;
+    my ($param) = @_;
+    my $cache_key = $class->object_cache_key($param)
+      || return;
+    return Bugzilla->request_cache->{$cache_key};
+}
+
+sub _object_cache_set {
+    my $class = shift;
+    my ($param, $object) = @_;
+    my $cache_key = $class->object_cache_key($param)
+      || return;
+    Bugzilla->request_cache->{$cache_key} = $object;
+}
+
+sub _object_cache_remove {
+    my $class = shift;
+    my ($param) = @_;
+    $param->{cache} = 1;
+    my $cache_key = $class->object_cache_key($param)
+      || return;
+    delete Bugzilla->request_cache->{$cache_key};
+}
+
+sub object_cache_key {
+    my $class = shift;
+    my ($param) = @_;
+    if (ref($param) && $param->{cache} && ($param->{id} || $param->{name})) {
+        $class = blessed($class) if blessed($class);
+        return $class  . ',' . ($param->{id} || $param->{name});
+    } else {
+        return;
+    }
+}
+
+# To support serialisation, we need to capture the keys in an object's default
+# hashref.
+sub _serialisation_keys {
+    my ($class, $object) = @_;
+    my $cache = Bugzilla->request_cache->{serialisation_keys} ||= {};
+    $cache->{$class} = [ keys %$object ] if $object && !exists $cache->{$class};
+    return @{ $cache->{$class} };
 }
 
 sub check {
@@ -145,28 +268,6 @@ sub check {
         }
     }
     return $obj;
-}
-
-sub new_from_list {
-    my $invocant = shift;
-    my $class = ref($invocant) || $invocant;
-    my ($id_list) = @_;
-    my $id_field = $class->ID_FIELD;
-
-    my @detainted_ids;
-    foreach my $id (@$id_list) {
-        detaint_natural($id) ||
-            ThrowCodeError('param_must_be_numeric',
-                          {function => $class . '::new_from_list'});
-        # Too large integers make PostgreSQL crash.
-        next if $id > MAX_INT_32;
-        push(@detainted_ids, $id);
-    }
-    # We don't do $invocant->match because some classes have
-    # their own implementation of match which is not compatible
-    # with this one. However, match() still needs to have the right $invocant
-    # in order to do $class->DB_TABLE and so on.
-    return match($invocant, { $id_field => \@detainted_ids });
 }
 
 # Note: Future extensions to this could be:
@@ -267,8 +368,11 @@ sub _do_list_select {
     my @untainted = @{ $values || [] };
     trick_taint($_) foreach @untainted;
     my $objects = $dbh->selectall_arrayref($sql, {Slice=>{}}, @untainted);
-    bless ($_, $class) foreach @$objects;
-    return $objects
+    $class->_serialisation_keys($objects->[0]) if @$objects;
+    foreach my $object (@$objects) {
+        $object = $class->new_from_hash($object);
+    }
+    return $objects;
 }
 
 ###############################
@@ -321,12 +425,17 @@ sub set_all {
     my %field_values = %$params;
 
     my @sorted_names = $self->_sort_by_dep(keys %field_values);
+
     foreach my $key (@sorted_names) {
         # It's possible for one set_ method to delete a key from $params
         # for another set method, so if that's happened, we don't call the
         # other set method.
         next if !exists $field_values{$key};
         my $method = "set_$key";
+        if (!$self->can($method)) {
+            my $class = ref($self) || $self;
+            ThrowCodeError("unknown_method", { method => "${class}::${method}" });
+        }
         $self->$method($field_values{$key}, \%field_values);
     }
     Bugzilla::Hook::process('object_end_of_set_all', 
@@ -387,6 +496,9 @@ sub update {
     $self->audit_log(\%changes) if $self->AUDIT_UPDATES;
 
     $dbh->bz_commit_transaction();
+    Bugzilla->memcached->clear({ table => $table, id => $self->id });
+    $self->_object_cache_remove({ id => $self->id });
+    $self->_object_cache_remove({ name => $self->name }) if $self->name;
 
     if (wantarray) {
         return (\%changes, $old_self);
@@ -405,6 +517,9 @@ sub remove_from_db {
     $self->audit_log(AUDIT_REMOVE) if $self->AUDIT_REMOVES;
     $dbh->do("DELETE FROM $table WHERE $id_field = ?", undef, $self->id);
     $dbh->bz_commit_transaction();
+    Bugzilla->memcached->clear({ table => $table, id => $self->id });
+    $self->_object_cache_remove({ id => $self->id });
+    $self->_object_cache_remove({ name => $self->name }) if $self->name;
     undef $self;
 }
 
@@ -437,6 +552,13 @@ sub audit_log {
         my ($from, $to) = @{ $changes->{$field} };
         $sth->execute($user_id, $class, $self->id, $field, $from, $to);
     }
+}
+
+sub flatten_to_hash {
+    my $self = shift;
+    my $class = blessed($self);
+    my %hash = map { $_ => $self->{$_} } $class->_serialisation_keys;
+    return \%hash;
 }
 
 ###############################
@@ -790,7 +912,7 @@ your own C<DB_COLUMNS> subroutine in a subclass.)
 The name of the column that should be considered to be the unique
 "name" of this object. The 'name' is a B<string> that uniquely identifies
 this Object in the database. Defaults to 'name'. When you specify 
-C<{name => $name}> to C<new()>, this is the column that will be 
+C<< {name => $name} >> to C<new()>, this is the column that will be 
 matched against in the DB.
 
 =item C<ID_FIELD>
@@ -953,7 +1075,7 @@ for each placeholder in C<condition>, in order.
 
 This is to allow subclasses to have complex parameters, and then to
 translate those parameters into C<condition> and C<values> when they
-call C<$self->SUPER::new> (which is this function, usually).
+call C<< $self->SUPER::new >> (which is this function, usually).
 
 If you try to call C<new> outside of a subclass with the C<condition>
 and C<values> parameters, Bugzilla will throw an error. These parameters
@@ -963,6 +1085,17 @@ are intended B<only> for use by subclasses.
 
 A fully-initialized object, or C<undef> if there is no object in the
 database matching the parameters you passed in.
+
+=back
+
+=item C<initialize>
+
+=over
+
+=item B<Description>
+
+Abstract method to allow subclasses to perform initialization tasks after an
+object has been created.
 
 =back
 
@@ -1004,6 +1137,13 @@ template.
                           be skipped.
 
  Returns:     A reference to an array of objects.
+
+=item C<new_from_hash($hashref)>
+
+  Description: Create an object from the given hash.
+
+  Params:      $hashref - A reference to a hash which was created by
+                          flatten_to_hash.
 
 =item C<match>
 
@@ -1078,8 +1218,9 @@ Notes:       In order for this function to work in your subclass,
              your subclass's L</ID_FIELD> must be of C<SERIAL>
              type in the database.
 
-             Subclass Implementors: This function basically just
-             calls L</check_required_create_fields>, then
+Subclass Implementors:
+             This function basically just calls 
+             L</check_required_create_fields>, then
              L</run_create_validators>, and then finally
              L</insert_create_data>. So if you have a complex system that
              you need to implement, you can do it by calling these
@@ -1241,6 +1382,17 @@ that should be passed to the C<set_> function that is called.
 
 =back
 
+=head2 Simple Methods
+
+=over
+
+=item C<flatten_to_hash>
+
+Returns a hashref suitable for serialisation and re-inflation with C<new_from_hash>.
+
+=back
+
+
 =head2 Simple Validators
 
 You can use these in your subclass L</VALIDATORS> or L</UPDATE_VALIDATORS>.
@@ -1272,10 +1424,26 @@ C<0> otherwise.
 
  Returns:     A list of objects, or an empty list if there are none.
 
- Notes:       Note that you must call this as C<$class->get_all>. For 
-              example, C<Bugzilla::Keyword->get_all>. 
-              C<Bugzilla::Keyword::get_all> will not work.
+ Notes:       Note that you must call this as $class->get_all. For 
+              example, Bugzilla::Keyword->get_all. 
+              Bugzilla::Keyword::get_all will not work.
 
 =back
 
 =cut
+
+=head1 B<Methods in need of POD>
+
+=over
+
+=item object_cache_key
+
+=item check_time
+
+=item id
+
+=item TO_JSON
+
+=item audit_log
+
+=back

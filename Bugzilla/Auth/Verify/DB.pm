@@ -6,8 +6,11 @@
 # defined by the Mozilla Public License, v. 2.0.
 
 package Bugzilla::Auth::Verify::DB;
+
+use 5.10.1;
 use strict;
-use base qw(Bugzilla::Auth::Verify);
+
+use parent qw(Bugzilla::Auth::Verify);
 
 use Bugzilla::Constants;
 use Bugzilla::Token;
@@ -63,11 +66,22 @@ sub check_credentials {
     Bugzilla::Token::DeletePasswordTokens($user->id, "user_logged_in");
     $user->clear_login_failures();
 
+    my $update_password = 0;
+
     # If their old password was using crypt() or some different hash
     # than we're using now, convert the stored password to using
     # whatever hashing system we're using now.
     my $current_algorithm = PASSWORD_DIGEST_ALGORITHM;
-    if ($real_password_crypted !~ /{\Q$current_algorithm\E}$/) {
+    $update_password = 1 if ($real_password_crypted !~ /{\Q$current_algorithm\E}$/);
+
+    # If their old password was using a different length salt than what
+    # we're using now, update the password to use the new salt length.
+    if ($real_password_crypted =~ /^([^,]+),/) {
+        $update_password = 1 if (length($1) != PASSWORD_SALT_LENGTH);
+    }
+
+    # If needed, update the user's password.
+    if ($update_password) {
         $user->set_password($password);
         $user->update();
     }

@@ -7,8 +7,9 @@
 
 package Bugzilla::Auth::Login;
 
+use 5.10.1;
 use strict;
-use fields qw();
+use fields qw(_login_token);
 
 # Determines whether or not a user can logout. It's really a subroutine,
 # but we implement it here as a constant. Override it in subclasses if

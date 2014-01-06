@@ -34,12 +34,12 @@ table.groups tr.indirect {
 }
 table.groups th {
     text-align: left;
-    padding: 0 0 0 1ex;
+    padding: 0 1ex;
 }
 table.groups td {
     padding: 2px;
 }
-table.groups td.checkbox {
+table.groups th.checkbox, table.groups td.checkbox {
     text-align: center;
     white-space: nowrap;
 }

@@ -18,8 +18,8 @@
 # 3) If we are processing just the one id, then it is stored in @idlist for
 # later processing.
 
+use 5.10.1;
 use strict;
-
 use lib qw(. lib);
 
 use Bugzilla;
@@ -28,10 +28,6 @@ use Bugzilla::Bug;
 use Bugzilla::User;
 use Bugzilla::Util;
 use Bugzilla::Error;
-use Bugzilla::Field;
-use Bugzilla::Product;
-use Bugzilla::Component;
-use Bugzilla::Keyword;
 use Bugzilla::Flag;
 use Bugzilla::Status;
 use Bugzilla::Token;
@@ -115,30 +111,50 @@ print $cgi->header() unless Bugzilla->usage_mode == USAGE_MODE_EMAIL;
 
 # Check for a mid-air collision. Currently this only works when updating
 # an individual bug.
-if (defined $cgi->param('delta_ts'))
-{
-    my $delta_ts_z = datetime_from($cgi->param('delta_ts'));
+my $delta_ts = $cgi->param('delta_ts') || '';
+
+if ($delta_ts) {
+    my $delta_ts_z = datetime_from($delta_ts)
+      or ThrowCodeError('invalid_timestamp', { timestamp => $delta_ts });
+
     my $first_delta_tz_z =  datetime_from($first_bug->delta_ts);
+
     if ($first_delta_tz_z ne $delta_ts_z) {
-        ($vars->{'operations'}) = $first_bug->get_activity(undef, $cgi->param('delta_ts'));
+        ($vars->{'operations'}) = $first_bug->get_activity(undef, $delta_ts);
 
-        $vars->{'title_tag'} = "mid_air";
-    
-        ThrowCodeError('undefined_field', { field => 'longdesclength' })
-            if !defined $cgi->param('longdesclength');
-
-        $vars->{'start_at'} = $cgi->param('longdesclength');
         # Always sort midair collision comments oldest to newest,
         # regardless of the user's personal preference.
-        $vars->{'comments'} = $first_bug->comments({ order => "oldest_to_newest" });
-        $vars->{'bug'} = $first_bug;
+        my $comments = $first_bug->comments({ order => 'oldest_to_newest',
+                                              after => $delta_ts });
 
-        # The token contains the old delta_ts. We need a new one.
-        $cgi->param('token', issue_hash_token([$first_bug->id, $first_bug->delta_ts]));
-        # Warn the user about the mid-air collision and ask them what to do.
-        $template->process("bug/process/midair.html.tmpl", $vars)
-          || ThrowTemplateError($template->error());
-        exit;
+        # Show midair if previous changes made other than CC
+        # and/or one or more comments were made
+        my $do_midair = scalar @$comments ? 1 : 0;
+
+        if (!$do_midair) {
+            foreach my $operation (@{ $vars->{'operations'} }) {
+                foreach my $change (@{ $operation->{'changes'} }) {
+                    if ($change->{'fieldname'} ne 'cc') {
+                        $do_midair = 1;
+                        last;
+                    }
+                }
+                last if $do_midair;
+            }
+        }
+
+        if ($do_midair) {
+            $vars->{'title_tag'} = "mid_air";
+            $vars->{'comments'} = $comments;
+            $vars->{'bug'} = $first_bug;
+            # The token contains the old delta_ts. We need a new one.
+            $cgi->param('token', issue_hash_token([$first_bug->id, $first_bug->delta_ts]));
+
+            # Warn the user about the mid-air collision and ask them what to do.
+            $template->process("bug/process/midair.html.tmpl", $vars)
+                || ThrowTemplateError($template->error());
+            exit;
+        }
     }
 }
 
@@ -148,7 +164,7 @@ if (defined $cgi->param('delta_ts'))
 my $token = $cgi->param('token');
 
 if ($cgi->param('id')) {
-    check_hash_token($token, [$first_bug->id, $first_bug->delta_ts]);
+    check_hash_token($token, [$first_bug->id, $delta_ts || $first_bug->delta_ts]);
 }
 else {
     check_token_data($token, 'buglist_mass_change', 'query.cgi');
@@ -196,9 +212,9 @@ my @set_fields = qw(op_sys rep_platform priority bug_severity
                     bug_file_loc status_whiteboard short_desc
                     deadline remaining_time estimated_time
                     work_time set_default_assignee set_default_qa_contact
-                    cclist_accessible reporter_accessible 
+                    cclist_accessible reporter_accessible
                     product confirm_product_change
-                    bug_status resolution dup_id);
+                    bug_status resolution dup_id bug_ignored);
 push(@set_fields, 'assigned_to') if !$cgi->param('set_default_assignee');
 push(@set_fields, 'qa_contact')  if !$cgi->param('set_default_qa_contact');
 my %field_translation = (
@@ -243,7 +259,7 @@ foreach my $dep_field (qw(dependson blocked)) {
     if (should_set($dep_field)) {
         if (my $dep_action = $cgi->param("${dep_field}_action")) {
             $set_all_fields{$dep_field}->{$dep_action} =
-                [split(/\s,/, $cgi->param($dep_field))];
+                [split(/[\s,]+/, $cgi->param($dep_field))];
         }
         else {
             $set_all_fields{$dep_field}->{set} = $cgi->param($dep_field);
@@ -330,6 +346,14 @@ if (defined $cgi->param('id')) {
     my ($flags, $new_flags) = Bugzilla::Flag->extract_flags_from_cgi(
         $first_bug, undef, $vars);
     $first_bug->set_flags($flags, $new_flags);
+
+    # Tags can only be set to one bug at once.
+    if (should_set('tag')) {
+        my @new_tags = split(/[\s,]+/, $cgi->param('tag'));
+        my ($tags_removed, $tags_added) = diff_arrays($first_bug->tags, \@new_tags);
+        $first_bug->remove_tag($_) foreach @$tags_removed;
+        $first_bug->add_tag($_) foreach @$tags_added;
+    }
 }
 
 ##############################

@@ -6,8 +6,8 @@
 # This Source Code Form is "Incompatible With Secondary Licenses", as
 # defined by the Mozilla Public License, v. 2.0.
 
+use 5.10.1;
 use strict;
-
 use lib qw(. lib);
 
 use Date::Parse;         # strptime
@@ -254,7 +254,7 @@ $user->is_timetracker
 
 my @ids = split(",", $cgi->param('id') || '');
 @ids = map { Bugzilla::Bug->check($_)->id } @ids;
-scalar(@ids) || ThrowUserError('no_bugs_chosen', {action => 'view'});
+scalar(@ids) || ThrowUserError('no_bugs_chosen', {action => 'summarize'});
 
 my $group_by = $cgi->param('group_by') || "number";
 my $monthly = $cgi->param('monthly');
@@ -275,7 +275,7 @@ if ($do_report) {
                                         function=>"summarize_time"});
         }
         @bugs = get_blocker_ids($bugs[0]);
-        @bugs = grep { $user->can_see_bug($_) } @bugs;
+        @bugs = @{ $user->visible_bugs(\@bugs) };
     }
 
     $start_date = trim $cgi->param('start_date');

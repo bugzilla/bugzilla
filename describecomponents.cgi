@@ -6,6 +6,7 @@
 # This Source Code Form is "Incompatible With Secondary Licenses", as
 # defined by the Mozilla Public License, v. 2.0.
 
+use 5.10.1;
 use strict;
 use lib qw(. lib);
 
@@ -13,6 +14,7 @@ use Bugzilla;
 use Bugzilla::Constants;
 use Bugzilla::Util;
 use Bugzilla::Error;
+use Bugzilla::Classification;
 use Bugzilla::Product;
 
 my $user = Bugzilla->login();
@@ -40,7 +42,7 @@ unless ($product && $user->can_access_product($product->name)) {
     # product only, to not confuse the user with components of a
     # product he didn't request.
     elsif (scalar(@products) > 1 || $product_name) {
-        $vars->{'classifications'} = [{object => undef, products => \@products}];
+        $vars->{'classifications'} = sort_products_by_classification(\@products);
         $vars->{'target'} = "describecomponents.cgi";
         # If an invalid product name is given, or the user is not
         # allowed to access that product, a message is displayed

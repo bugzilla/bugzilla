@@ -34,7 +34,9 @@
   "changedto"      => "changed to",
   "changedby"      => "changed by",
   "matches"        => "matches",
-  "notmatches"      => "does not match",
+  "notmatches"     => "does not match",
+  "isempty"        => "is empty",
+  "isnotempty"     => "is not empty",
 } %]
 
 [% field_types = { ${constants.FIELD_TYPE_UNKNOWN}       => "Unknown Type",
@@ -43,6 +45,7 @@
                    ${constants.FIELD_TYPE_MULTI_SELECT}  => "Multiple-Selection Box",
                    ${constants.FIELD_TYPE_TEXTAREA}      => "Large Text Box",
                    ${constants.FIELD_TYPE_DATETIME}      => "Date/Time",
+                   ${constants.FIELD_TYPE_DATE}          => "Date",
                    ${constants.FIELD_TYPE_BUG_ID}        => "$terms.Bug ID",
                 } %]
 
@@ -117,9 +120,10 @@
      "setting"                 => "Setting",
      "settings"                => "Settings",
      "short_desc"              => "Summary",
+     "short_short_desc"        => "Summary",
      "sighting"                => "Sighting",
      "status_whiteboard"       => "Whiteboard",
-     "tag.name"                => "Tags",
+     "tag"                     => "Tags",
      "target_milestone"        => "Target Milestone",
      "version"                 => "Version",
      "work_time"               => "Hours Worked",

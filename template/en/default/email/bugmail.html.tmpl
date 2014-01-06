@@ -20,17 +20,35 @@
       [% FOREACH comment = new_comments.reverse %]
         <div>
           [% IF comment.count %]
-            <b>[% "Comment # ${comment.count}" FILTER bug_link( bug, 
-              {comment_num => comment.count, full_url => 1}) FILTER none %] 
-              from [% INCLUDE global/user.html.tmpl who = comment.author %]</b>
+            <b>[% "Comment # ${comment.count}" FILTER bug_link(bug,
+              {comment_num => comment.count, full_url => 1, user => to_user}) FILTER none %]
+              on [% "$terms.bug $bug.id" FILTER bug_link(bug, { full_url => 1, user => to_user }) FILTER none %]
+              from [% INCLUDE global/user.html.tmpl user = to_user, who = comment.author %]</b>
           [% END %]
-        <pre>[% comment.body_full({ wrap => 1 }) FILTER quoteUrls(bug, comment) %]</pre>
+        <pre>[% comment.body_full({ wrap => 1 }) FILTER quoteUrls(bug, comment, to_user) %]</pre>
         </div>
       [% END %]
       </p>
+
+      [% IF referenced_bugs.size %]
+        <div id="referenced">
+          <hr style="border: 1px dashed #969696">
+          <b>Referenced [% terms.Bugs %]:</b>
+          <ul>
+            [% FOREACH ref_bug = referenced_bugs %]
+              <li>
+                [[% "${terms.Bug} ${ref_bug.id}" FILTER bug_link(ref_bug, {full_url => 1, user => to_user}) FILTER none %]] 
+                [% ref_bug.short_desc FILTER html %]
+              </li>
+            [% END %]
+          </ul>
+        </div>
+        <br>
+      [% END %]
+
       <hr>
       <span>You are receiving this mail because:</span>
-      
+
       <ul>
       [% FOREACH reason = reasons %]
         [%  IF reason_descs.$reason  %]
@@ -50,20 +68,21 @@
   [% SET in_table = 0 %]
   [% last_changer = 0 %]
     [% FOREACH change = diffs %]
-      [% IF !isnew && changer.id != last_changer %]
-        [% last_changer = changer.id %]
+      [% IF !isnew && change.who.id != last_changer %]
+        [% last_changer = change.who.id %]
         [% IF in_table == 1 %]
           </table>
           [% SET in_table = 0 %]
         [% END %]
         [% IF change.blocker %]
-              [% "${terms.Bug} ${bug.id}" FILTER bug_link(bug, full_url => 1) FILTER none  %] depends 
-              on [% "${terms.bug} ${change.blocker.id}" 
-                  FILTER bug_link(change.blocker, full_url => 1) FILTER none %],
+              [% "${terms.Bug} ${bug.id}" FILTER bug_link(bug, {full_url => 1, user => to_user}) FILTER none %]
+              depends on
+              [%+ "${terms.bug} ${change.blocker.id}"
+                  FILTER bug_link(change.blocker, {full_url => 1, user => to_user}) FILTER none %],
               which changed state.
         [% ELSE %]
-              [% INCLUDE global/user.html.tmpl who = change.who %]
-              changed [% "${terms.Bug} ${bug.id}" FILTER bug_link(bug, full_url => 1) FILTER none %]
+              [% INCLUDE global/user.html.tmpl user = to_user, who = change.who %] changed
+              [%+ "${terms.bug} ${bug.id}" FILTER bug_link(bug, {full_url => 1, user => to_user}) FILTER none %]
         [% END %]
           <br>
           [% IF in_table == 0 %]
@@ -87,7 +106,7 @@
           <th>[% field_label FILTER html %]</th>
           <td>
             [% IF change.field_name == "bug_id" %]
-              [% new_value FILTER bug_link(bug, full_url => 1) FILTER none %]
+              [% new_value FILTER bug_link(bug, {full_url => 1, user => to_user}) FILTER none %]
             [% ELSE %]
               [% new_value FILTER html %]
             [% END %]

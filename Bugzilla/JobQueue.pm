@@ -7,17 +7,22 @@
 
 package Bugzilla::JobQueue;
 
+use 5.10.1;
 use strict;
 
 use Bugzilla::Constants;
 use Bugzilla::Error;
 use Bugzilla::Install::Util qw(install_string);
+use File::Basename;
+use File::Slurp;
 use base qw(TheSchwartz);
+use fields qw(_worker_pidfile);
 
 # This maps job names for Bugzilla::JobQueue to the appropriate modules.
 # If you add new types of jobs, you should add a mapping here.
 use constant JOB_MAP => {
     send_mail => 'Bugzilla::Job::Mailer',
+    bug_mail  => 'Bugzilla::Job::BugMail',
 };
 
 # Without a driver cache TheSchwartz opens a new database connection
@@ -39,7 +44,7 @@ sub new {
     my $class = shift;
 
     if (!Bugzilla->feature('jobqueue')) {
-        ThrowCodeError('feature_disabled', { feature => 'jobqueue' });
+        ThrowUserError('feature_disabled', { feature => 'jobqueue' });
     }
 
     my $lc = Bugzilla->localconfig;
@@ -92,6 +97,64 @@ sub insert {
     return $retval;
 }
 
+# To avoid memory leaks/fragmentation which tends to happen for long running
+# perl processes; check for jobs, and spawn a new process to empty the queue.
+sub subprocess_worker {
+    my $self = shift;
+
+    my $command = "$0 -d -p '" . $self->{_worker_pidfile} . "' onepass";
+
+    while (1) {
+        my $time = (time);
+        my @jobs = $self->list_jobs({
+            funcname      => $self->{all_abilities},
+            run_after     => $time,
+            grabbed_until => $time,
+            limit         => 1,
+        });
+        if (@jobs) {
+            $self->debug("Spawning queue worker process");
+            # Run the worker as a daemon
+            system $command;
+            # And poll the PID to detect when the working has finished.
+            # We do this instead of system() to allow for the INT signal to
+            # interrup us and trigger kill_worker().
+            my $pid = read_file($self->{_worker_pidfile}, err_mode => 'quiet');
+            if ($pid) {
+                sleep(3) while(kill(0, $pid));
+            }
+            $self->debug("Queue worker process completed");
+        } else {
+            $self->debug("No jobs found");
+        }
+        sleep(5);
+    }
+}
+
+sub kill_worker {
+    my $self = Bugzilla->job_queue();
+    if ($self->{_worker_pidfile} && -e $self->{_worker_pidfile}) {
+        my $worker_pid = read_file($self->{_worker_pidfile});
+        if ($worker_pid && kill(0, $worker_pid)) {
+            $self->debug("Stopping worker process");
+            system "$0 -f -p '" . $self->{_worker_pidfile} . "' stop";
+        }
+    }
+}
+
+sub set_pidfile {
+    my ($self, $pidfile) = @_;
+    $self->{_worker_pidfile} = bz_locations->{'datadir'} .
+                               '/worker-' . basename($pidfile);
+}
+
+# Clear the request cache at the start of each run.
+sub work_once {
+    my $self = shift;
+    Bugzilla->clear_request_cache();
+    return $self->SUPER::work_once(@_);
+}
+
 1;
 
 __END__
@@ -117,3 +180,19 @@ Bugzilla to use some sort of service to schedule jobs to happen asyncronously.
 See the synopsis above for an easy to follow example on how to insert a
 job into the queue.  Give it a name and some arguments and the job will
 be sent away to be done later.
+
+=head1 B<Methods in need of POD>
+
+=over
+
+=item insert
+
+=item bz_databases
+
+=item job_map
+
+=item set_pidfile
+
+=item kill_worker
+
+=back

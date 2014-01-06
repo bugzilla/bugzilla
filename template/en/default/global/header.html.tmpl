@@ -86,8 +86,6 @@
       <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     [% END %]
 
-[%# Migration note: contents of the old Param 'headerhtml' would go here %]
-
     [% PROCESS "global/site-navigation.html.tmpl" %]
 
     [% PROCESS 'global/setting-descs.none.tmpl' %]
@@ -95,12 +93,8 @@
     [% SET yui = yui_resolve_deps(yui, yui_deps) %]
     [% SET css_sets = css_files(style_urls, yui, yui_css) %]
 
-    [%# CSS cascade, part 1: Standard Bugzilla stylesheet set (persistent).
-      # Always present.
-      #%]
-    [%# This allows people to switch back to the "Classic" skin if they
-      # are in another skin. 
-      #%]
+    [%# CSS cascade, parts 1 & 2: YUI & Standard Bugzilla stylesheet set (persistent).
+      # Always present. %]
     <link href="[% 'skins/standard/global.css' FILTER mtime FILTER html %]"
           rel="alternate stylesheet" 
           title="[% setting_descs.standard FILTER html %]">
@@ -108,22 +102,12 @@
       [% PROCESS format_css_link css_set_name = 'standard' %]
     [% END %]
 
-    [%# CSS cascade, part 2 & 3: Third-party stylesheet set (selected and
-      # selectable). All third-party skins are present as alternate
-      # stylesheets, even if they are not currently in use.
-      #%]
+    [%# CSS cascade, part 3: Third-party stylesheet set, per user prefs. %]
     [% FOREACH style_url = css_sets.skin %]
       [% PROCESS format_css_link css_set_name = user.settings.skin.value %]
     [% END %]
 
-    [% FOREACH alternate_skin = css_sets.alternate.keys %]
-      [% FOREACH style_url = css_sets.alternate.$alternate_skin %]
-        [% PROCESS format_css_link css_set_name = alternate_skin %]
-      [% END %]
-    [% END %]
-
-    [%# CSS cascade, part 4: page-specific styles.
-      #%]
+    [%# CSS cascade, part 4: page-specific styles. %]
     [% IF style %]
       <style type="text/css">
         [% style %]
@@ -229,75 +213,58 @@
     [% Hook.process("additional_header") %]
   </head>
 
-[%# Migration note: contents of the old Param 'bodyhtml' go in the body tag,
-  # but set the onload attribute in the DEFAULT directive above.
-  #%]
-
-  <body onload="[% onload %]"
-        class="[% urlbase.replace('^https?://','').replace('/$','').replace('[-~@:/.]+','-') %]
+  <body [% IF onload %] onload="[% onload %]"[% END %]
+        class="[% urlbase.replace('^https?://','').replace('/$','').replace('[-~@:/.]+','-') FILTER css_class_quote %]
                [% FOREACH class = bodyclasses %]
-                 [% ' ' %][% class FILTER css_class_quote %]
+                 [%+ class FILTER css_class_quote %]
                [% END %] yui-skin-sam">
 
-[%# Migration note: the following file corresponds to the old Param
-  # 'bannerhtml'
-  #%]
+  <div id="header">
+    [% INCLUDE global/banner.html.tmpl %]
 
-<div id="header">
+    <div id="titles">
+      <span id="title">[% terms.Bugzilla %][% " &ndash; $header" IF header %]</span>
 
-[% INCLUDE global/banner.html.tmpl %]
+      [% IF subheader %]
+        <span id="subtitle" class="subheader">[% subheader %]</span>
+      [% END %]
 
-<table border="0" cellspacing="0" cellpadding="0" id="titles">
-<tr>
-    <td id="title">
-      <p>[% terms.Bugzilla %]
-      [% " &ndash; $header" IF header %]</p>
-    </td>
+      [% IF header_addl_info %]
+        <span id="information" class="header_addl_info">[% header_addl_info %]</span>
+      [% END %]
+    </div>
 
-  [% IF subheader %]
-    <td id="subtitle">
-      <p class="subheader">[% subheader %]</p>
-    </td>
-  [% END %]
+    <div id="common_links">
+      [% PROCESS "global/common-links.html.tmpl" qs_suffix = "_top" %]
+    </div>
 
-  [% IF header_addl_info %]
-    <td id="information">
-      <p class="header_addl_info">[% header_addl_info %]</p>
-    </td>
-  [% END %]
-</tr>
-</table>
-
-<table id="lang_links_container" cellpadding="0" cellspacing="0"
-       class="bz_default_hidden"><tr><td>
-[% IF Bugzilla.languages.size > 1 %]
-  <ul class="links">
-  [% FOREACH lang = Bugzilla.languages.sort %]
-    <li>[% IF NOT loop.first %]<span class="separator"> | </span>[% END %]
-    [% IF lang == current_language %]
-      <span class="lang_current">[% lang FILTER html FILTER upper %]</span>
-    [% ELSE %]
-      <a href="#" onclick="set_language('[% lang FILTER none %]');">
-       [%- lang FILTER html FILTER upper %]</a>
+    [% IF Bugzilla.languages.size > 1 %]
+      <div id="lang_links_container" class="bz_default_hidden">
+        <ul class="links">
+          [% FOREACH lang = Bugzilla.languages.sort %]
+            <li>
+              [% IF NOT loop.first %]<span class="separator"> | </span>[% END %]
+              [% IF lang == current_language %]
+                <span class="lang_current">[% lang FILTER html FILTER upper %]</span>
+              [% ELSE %]
+                <a href="#" onclick="set_language('[% lang FILTER none %]');">
+                  [%- lang FILTER html FILTER upper %]</a>
+              [% END %]
+            </li>
+          [% END %]
+        </ul>
+      </div>
     [% END %]
-    </li>
-  [% END %]
-  </ul>
-[% END %]
-</td></tr></table>
+  </div>
 
-[% PROCESS "global/common-links.html.tmpl" qs_suffix = "_top" %]
-</div> [%# header %]
+  <div id="bugzilla-body">
+    [% IF Param('announcehtml') %]
+      [% Param('announcehtml') FILTER none %]
+    [% END %]
 
-<div id="bugzilla-body">
-
-[% IF Param('announcehtml') %]
-[% Param('announcehtml') FILTER none %]
-[% END %]
-
-[% IF message %]
-<div id="message">[% message %]</div>
-[% END %]
+    [% IF message %]
+      <div id="message">[% message %]</div>
+    [% END %]
 
 [% BLOCK format_css_link %]
   [% IF style_url.match('/IE-fixes\.css') %]
@@ -308,26 +275,15 @@
         #%]
   [% END %]
 
-  [% IF css_set_name == 'standard'
-       OR css_set_name == user.settings.skin.value
-  %]
-    [% SET css_rel = 'stylesheet' %]
-    [% SET css_set_display_name = setting_descs.${user.settings.skin.value}
-                                  || user.settings.skin.value %]
-  [% ELSE %]
-    [% SET css_rel = 'alternate stylesheet' %]
-    [% SET css_set_display_name = setting_descs.$css_set_name || css_set_name %]
-  [% END %]
-
   [% IF css_set_name == 'standard' %]
     [% SET css_title_link = '' %]
   [% ELSE %]
     [% css_title_link = BLOCK ~%]
-      title="[% css_set_display_name FILTER html %]"
+      title="[% setting_descs.${user.settings.skin.value} || user.settings.skin.value FILTER html %]"
     [% END %]
   [% END %]
 
-  <link href="[% style_url FILTER html %]" rel="[% css_rel FILTER none %]"
+  <link href="[% style_url FILTER html %]" rel="stylesheet"
         type="text/css" [% css_title_link FILTER none %]>
 
   [% '<![endif]-->' IF style_url.match('/IE-fixes\.css') %]

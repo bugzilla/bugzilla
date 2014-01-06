@@ -7,6 +7,7 @@
 
 package Bugzilla::Config::UserMatch;
 
+use 5.10.1;
 use strict;
 
 use Bugzilla::Config::Common;

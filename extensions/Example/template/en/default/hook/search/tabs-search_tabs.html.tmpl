@@ -6,15 +6,8 @@
   # defined by the Mozilla Public License, v. 2.0.
   #%]
 
-[% USE Bugzilla %]
-[% cgi = Bugzilla.cgi %]
+[% 
+    tabs.push ({ name => 'newsearch', label => "New Search",
+                 link => "query.cgi?format=newsearch" }) 
+%]
 
-[% IF cgi.param("help") %]
-  <script type="text/javascript"> <!--
-    [% FOREACH help_name = help_html.keys %]
-      g_helpTexts["[% help_name FILTER js %]"] = 
-        "[%- help_html.$help_name FILTER js -%]";
-    [% END %]
-    // -->
-  </script>
-[% END %]

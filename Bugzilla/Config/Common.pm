@@ -7,6 +7,7 @@
 
 package Bugzilla::Config::Common;
 
+use 5.10.1;
 use strict;
 
 use Email::Address;
@@ -18,15 +19,16 @@ use Bugzilla::Field;
 use Bugzilla::Group;
 use Bugzilla::Status;
 
-use base qw(Exporter);
+use parent qw(Exporter);
 @Bugzilla::Config::Common::EXPORT =
     qw(check_multi check_numeric check_regexp check_url check_group
        check_sslbase check_priority check_severity check_platform
        check_opsys check_shadowdb check_urlbase check_webdotbase
-       check_user_verify_class check_ip
+       check_user_verify_class check_ip check_font_file
        check_mail_delivery_method check_notification check_utf8
        check_bug_status check_smtp_auth check_theschwartz_available
        check_maxattachmentsize check_email check_smtp_ssl
+       check_comment_taggers_group
 );
 
 # Checking functions for the various values
@@ -241,6 +243,20 @@ sub check_webdotbase {
     return "";
 }
 
+sub check_font_file {
+    my ($font) = @_;
+    $font = trim($font);
+    return '' unless $font;
+
+    if ($font !~ /\.ttf$/) {
+        return "The file must point to a TrueType font file (its extension must be .ttf)"
+    }
+    if (! -f $font) {
+        return "The file '$font' cannot be found. Make sure you typed the full path to the file"
+    }
+    return '';
+}
+
 sub check_user_verify_class {
     # doeditparams traverses the list of params, and for each one it checks,
     # then updates. This means that if one param checker wants to look at 
@@ -352,6 +368,14 @@ sub check_theschwartz_available {
     return "";
 }
 
+sub check_comment_taggers_group {
+    my $group_name = shift;
+    if ($group_name && !Bugzilla->feature('jsonrpc')) {
+        return "Comment tagging requires installation of the JSONRPC feature";
+    }
+    return check_group($group_name);
+}
+
 # OK, here are the parameter definitions themselves.
 #
 # Each definition is a hash with keys:
@@ -449,5 +473,62 @@ Checks that the value is a valid number
 =item C<check_regexp>
 
 Checks that the value is a valid regexp
+
+=item C<check_comment_taggers_group>
+
+Checks that the required modules for comment tagging are installed, and that a
+valid group is provided.
+
+=back
+
+=head1 B<Methods in need of POD>
+
+=over
+
+=item check_notification
+
+=item check_priority
+
+=item check_ip
+
+=item check_user_verify_class
+
+=item check_bug_status
+
+=item check_shadowdb
+
+=item check_smtp_auth
+
+=item check_url
+
+=item check_urlbase
+
+=item check_email
+
+=item check_webdotbase
+
+=item check_font_file
+
+=item get_param_list
+
+=item check_maxattachmentsize
+
+=item check_utf8
+
+=item check_group
+
+=item check_opsys
+
+=item check_platform
+
+=item check_severity
+
+=item check_sslbase
+
+=item check_mail_delivery_method
+
+=item check_theschwartz_available
+
+=item check_smtp_ssl
 
 =back

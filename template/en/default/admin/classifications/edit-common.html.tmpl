@@ -11,12 +11,12 @@
   #%]
 
 <tr>
-  <th align="right">Classification:</th>
+  <th>Classification:</th>
   <td><input size=64 maxlength=64 name="classification" 
              value="[% classification.name FILTER html %]"></td>
 </tr>
 <tr>
-  <th align="right">Description:</th>
+  <th>Description:</th>
   <td>
     [% INCLUDE global/textarea.html.tmpl
       name           = 'description'
@@ -27,7 +27,7 @@
   </td>
 </tr>
 <tr>
-  <th align="right"><label for="sortkey">Sortkey:</label></th>
+  <th><label for="sortkey">Sortkey:</label></th>
   <td><input id="sortkey" size="20" maxlength="20" name="sortkey"
              value="[%- classification.sortkey FILTER html %]"></td>
 </tr>

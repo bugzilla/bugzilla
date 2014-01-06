@@ -30,32 +30,42 @@
 [% END %]
 
 <script type="text/javascript">
+function bz_encode (str, decode) {
+  // First decode HTML entities, if requested.
+  if (decode)
+    str = str.replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&quot;/g, '"')
+             .replace(/&nbsp;/g, " ").replace(/&amp;/g, "&").replace(/\s+$/,"");
+
+  // encodeURIComponent() doesn't escape single quotes.
+  return encodeURIComponent(str).replace(/'/g, escape);
+};
+
 YAHOO.util.Event.addListener(window, "load", function() {
   this.Linkify = function(elLiner, oRecord, oColumn, oData) {
     if (oData == 0)
       elLiner.innerHTML = ".";
     else if (oRecord.getData("row_title") == "Total")
-      elLiner.innerHTML = "<a href='[% urlbase %]&amp;[% col_field FILTER js %]="
-                          + oColumn.field + "[% '&amp;' _ row_vals IF row_vals %]'>"
-                          + oData + "</a>";
+      elLiner.innerHTML = '<a href="[% urlbase FILTER js %]&amp;[% col_field FILTER uri FILTER js %]='
+                          + bz_encode(oColumn.field)
+                          + '[% "&amp;" _ row_vals IF row_vals %]">' + oData + '</a>';
     else
-      elLiner.innerHTML = "<a href='[% urlbase %]&amp;[% row_field FILTER js %]="
-                          + oRecord.getData("row_title").replace(/\s+$/,"")
-                          + "&amp;[% col_field FILTER js %]=" + oColumn.field
-                          + "'>" + oData + "</a>";
+      elLiner.innerHTML = '<a href="[% urlbase FILTER js %]&amp;[% row_field FILTER uri FILTER js %]='
+                          + bz_encode(oRecord.getData("row_title"), 1)
+                          + '&amp;[% col_field FILTER uri FILTER js %]='
+                          + bz_encode(oColumn.field) + '">' + oData + '</a>';
   };
 
   this.LinkifyTotal = function(elLiner, oRecord, oColumn, oData) {
     if (oData == 0)
       elLiner.innerHTML = ".";
     else if (oRecord.getData("row_title") == "Total")
-      elLiner.innerHTML = "<a href='[% urlbase %][% '&amp;' _ row_vals IF row_vals %]
-                          [%~ '&amp;' _ col_vals IF col_vals %]'>"
-                          + oData + "</a>";
+      elLiner.innerHTML = '<a href="[% urlbase FILTER js %][% "&amp;" _ row_vals IF row_vals %]
+                          [%~ "&amp;" _ col_vals IF col_vals %]">'
+                          + oData + '</a>';
     else
-      elLiner.innerHTML = "<a href='[% urlbase %]&amp;[% row_field FILTER js %]="
-                          + oRecord.getData("row_title").replace(/\s+$/,"")
-                          + "[% '&amp;' _ col_vals IF col_vals %]'>" + oData + "</a>";
+      elLiner.innerHTML = '<a href="[% urlbase FILTER js %]&amp;[% row_field FILTER uri FILTER js %]='
+                          + bz_encode(oRecord.getData("row_title"), 1)
+                          + '[% "&amp;" _ col_vals IF col_vals %]">' + oData + '</a>';
 
     YAHOO.util.Dom.addClass(elLiner.parentNode, "ttotal");
   };
@@ -85,7 +95,7 @@ YAHOO.util.Event.addListener(window, "load", function() {
   var myColumnDefs = [
         {key:"row_title", label:"", sortable:true, sortOptions: { sortFunction:totalNumberSorter }},
         [% FOREACH col = col_names %]
-          {key:"[% col FILTER js %]", label:"[% display_value(col_field, col) FILTER js %]", sortable:true,
+          {key:"[% col FILTER js %]", label:"[% display_value(col_field, col) FILTER html FILTER js %]", sortable:true,
            formatter:this.Linkify, sortOptions: { defaultDir: YAHOO.widget.DataTable.CLASS_DESC, sortFunction:totalNumberSorter }},
         [% END %]
         {key:"total", label:"Total", sortable:true, formatter:this.LinkifyTotal,
@@ -131,7 +141,7 @@ YAHOO.util.Event.addListener(window, "load", function() {
   <tr>
     <td>
     </td>
-    <td align="center">
+    <td class="center">
       <strong>[% col_field_disp FILTER html %]</strong>
     </td>
   </tr>
@@ -146,16 +156,15 @@ YAHOO.util.Event.addListener(window, "load", function() {
 [% classes = [ [ "t1", "t2" ] , [ "t3", "t4" ] ] %]
 [% col_idx = 0 %]
 [% row_idx = 0 %]
-[% grand_total = 0 %]
-<div id="tabular_report_container_[% tbl FILTER js %]">
-<table id="tabular_report" border="1">
+[% total_key = '-total-' %]
+<div id="tabular_report_container_[% tbl FILTER html %]">
+<table id="tabular_report">
   [% IF col_field %]
     <thead>
     <tr>
       <th class="[% classes.$row_idx.$col_idx %]">
       </th>
       [% FOREACH col = col_names %]
-        [% col_totals.$col = 0 %]
         [% NEXT IF col == "" %]
         
         [% col_idx = 1 - col_idx %]
@@ -171,20 +180,16 @@ YAHOO.util.Event.addListener(window, "load", function() {
   [% END %]
   <tbody>
   [% FOREACH row = row_names %]
-    [% row_total = 0 %]
-    
     [% row_idx = 1 - row_idx %]
     <tr>
-      <td class="[% classes.$row_idx.$col_idx %]" align="right">
+      <td class="[% classes.$row_idx.$col_idx %] right">
         [% PROCESS value_display value = row field = row_field %]
       </td>
       [% FOREACH col = col_names %]
-        [% row_total = row_total + data.$tbl.$col.$row %]
         [% NEXT IF col == "" %]
-        [% col_totals.$col = (col_totals.$col || 0) + data.$tbl.$col.$row %]
         
         [% col_idx = 1 - col_idx %]
-        <td class="[% classes.$row_idx.$col_idx %]" align="center">
+        <td class="[% classes.$row_idx.$col_idx %]">
           [% IF data.$tbl.$col.$row AND data.$tbl.$col.$row > 0 %]
             <a href="[% urlbase %]&amp;
               [% row_field FILTER uri %]=[% row FILTER uri %]&amp;
@@ -195,12 +200,11 @@ YAHOO.util.Event.addListener(window, "load", function() {
           [% END %]
         </td>
       [% END %] 
-      <td class="ttotal" align="right">
+      <td class="ttotal right">
         <a href="[% urlbase %]&amp;
           [% row_field FILTER uri %]=[% row FILTER uri %]
           [% "&amp;$col_vals" IF col_vals %]">
-        [% row_total %]</a>
-        [% grand_total = grand_total + row_total %]
+        [% data.$tbl.$total_key.$row OR 0 FILTER html %]</a>
       </td>
     </tr>
   [% END %]
@@ -211,19 +215,19 @@ YAHOO.util.Event.addListener(window, "load", function() {
       </td>
       [% FOREACH col = col_names %]
         [% NEXT IF col == "" %]
-      
-        <td class="ttotal" align="center">
+
+        <td class="ttotal">
           <a href="[% urlbase %]&amp;
             [% col_field FILTER uri %]=[% col FILTER uri %]
             [% "&amp;$row_vals" IF row_vals %]">
-          [% col_totals.$col %]</a>
+          [% data.$tbl.$col.$total_key OR 0 FILTER html %]</a>
         </td>
       [% END %]
-      <td class="ttotal" align="right">
+      <td class="ttotal right">
         <strong>
           <a href="[% urlbase %]
             [% "&amp;$row_vals" IF row_vals %]
-            [% "&amp;$col_vals" IF col_vals %]">[% grand_total %]</a>
+            [% "&amp;$col_vals" IF col_vals %]">[% data.$tbl.$total_key.$total_key OR 0 FILTER html %]</a>
         </strong>
       </td>
     </tr>
@@ -234,6 +238,13 @@ YAHOO.util.Event.addListener(window, "load", function() {
     </td>
   </tr>
 </table>
+
+[% IF note_multi_select %]
+  <p class="extra_info">
+    NOTE: Axes contain multi-value fields, so the total numbers might not add up,
+    as a single [% terms.bug %] can match several rows or columns.
+  </p>
+[% END %]
 
 [% BLOCK value_display %]
   [% SET disp_value = display_value(field, value) %]

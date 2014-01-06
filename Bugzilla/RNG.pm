@@ -6,8 +6,11 @@
 # defined by the Mozilla Public License, v. 2.0.
 
 package Bugzilla::RNG;
+
+use 5.10.1;
 use strict;
-use base qw(Exporter);
+
+use parent qw(Exporter);
 use Bugzilla::Constants qw(ON_WINDOWS);
 
 use Math::Random::ISAAC;
@@ -216,3 +219,15 @@ sub _win2k_seed {
 }
 
 1;
+
+=head1 B<Methods in need of POD>
+
+=over
+
+=item srand
+
+=item rand
+
+=item irand
+
+=back

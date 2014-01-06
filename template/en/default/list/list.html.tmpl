@@ -30,19 +30,22 @@
 [% qorder = order FILTER uri IF order %]
 
 [% javascript =  BLOCK %]
-  [% new_url = cgi.self_url %]
   [% IF quicksearch %]
-    [% new_url = BLOCK ~%]
-      buglist.cgi?quicksearch=[% quicksearch FILTER uri %]
+    [% new_param = BLOCK ~%]
+      quicksearch=[% quicksearch FILTER uri %]
       [%~ IF cgi.param('list_id') ~%]
         &list_id=[% cgi.param('list_id') FILTER uri %]
       [%~ END %]
     [% END %]
+  [% ELSIF cgi.param('token') != '' %]
+    [% new_param = cgi.canonicalise_query('token', 'cmdtype', 'remtype') %]
+  [% ELSE %]
+    [% new_param = cgi.canonicalise_query %]
   [% END %]
 
   if (history && history.replaceState) {
     history.replaceState(null, "[% unfiltered_title FILTER js %]",
-                         "[% new_url FILTER js %]");
+                         "buglist.cgi?[% new_param FILTER js %]");
     document.title = "[% unfiltered_title FILTER js %]";
   }
   [% javascript FILTER none %]
@@ -54,7 +57,6 @@
 
 [% PROCESS global/header.html.tmpl
   title = title
-  style = style
   atomlink = "buglist.cgi?$urlquerypart&title=$title&ctype=atom" 
   yui = [ 'autocomplete', 'calendar' ]
   javascript_urls = [ "js/util.js", "js/field.js", "js/TUI.js" ]
@@ -69,10 +71,13 @@
 
   [% IF debug %]
     <div class="bz_query_debug">
-      <p>[% query FILTER html %]</p>
-      <p>Execution time: [% query_time FILTER html %] seconds</p>
-      [% IF query_explain.defined %]
-        <pre>[% query_explain FILTER html %]</pre>
+      <p>Total execution time: [% query_time FILTER html %] seconds</p>
+      [% FOREACH query = queries %]
+        <p>[% query.sql FILTER html %]</p>
+        <p>Execution time: [% query.time FILTER html %] seconds</p>
+        [% IF query.explain %]
+          <pre>[% query.explain FILTER html %]</pre>
+        [% END %]
       [% END %]
     </div>
   [% END %]
@@ -97,7 +102,7 @@
   'notequals', 'regexp', 'notregexp', 'lessthan', 'lessthaneq', 
   'greaterthan', 'greaterthaneq', 'changedbefore', 'changedafter', 
   'changedfrom', 'changedto', 'changedby', 'notsubstring', 'nowords',
-  'nowordssubstr', 'notmatches',
+  'nowordssubstr', 'notmatches', 'isempty', 'isnotempty'
 ] %]
 <a id="search_description_controller" class="bz_default_hidden"
    href="javascript:TUI_toggle_class('search_description')">Hide Search Description</a>
@@ -188,9 +193,8 @@
     [% IF bugs.size > 0 %]
       <td valign="middle" class="bz_query_buttons">
         <form method="post" action="show_bug.cgi">
-          [% FOREACH id = buglist %]
-            <input type="hidden" name="id" value="[% id FILTER html %]">
-          [% END %]
+          [% id = buglist.join(",") %]
+          <input type="hidden" name="id" value="[% id FILTER html %]">
           <input type="hidden" name="format" value="multiple">
           <input type="submit" id="long_format" value="Long Format">
         </form>
@@ -308,10 +312,16 @@
 [% BLOCK enter_bug_link %]
   <a href="enter_bug.cgi
            [%- IF one_product.defined %]?product=
-             [%- one_product.name FILTER uri %][% END %]">File
+             [%- one_product.name FILTER uri %]
+             [%- IF one_component.defined %]&amp;component=
+               [%- one_component FILTER uri %][% END %][% END %]">File
     a new [% terms.bug %]
    [% IF one_product.defined %]
-     in the "[% one_product.name FILTER html %]" product
+     in the
+     [% IF one_component.defined %]
+       "[% one_component FILTER html %]" component of the
+     [% END %]
+     "[% one_product.name FILTER html %]" product
    [% END %]</a>
 [% END %]
 

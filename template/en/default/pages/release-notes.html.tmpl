@@ -6,13 +6,590 @@
   # defined by the Mozilla Public License, v. 2.0.
   #%]
 
-[% SET title = "$terms.Bugzilla 4.2 Release Notes" %]
+[% SET title = "$terms.Bugzilla 4.4 Release Notes" %]
 [% INCLUDE global/header.html.tmpl 
   title = title
   style_urls = ['skins/standard/page.css'] 
 %]
 
 <h1>[% title FILTER html %]</h1>
+
+<ul class="bz_toc">
+  <li><a href="#v44_introduction">Introduction</a></li>
+  <li><a href="#v44_point">Updates in this 4.4.x Release</a></li>
+  <li><a href="#v44_req">Minimum Requirements</a></li>
+  <li><a href="#v44_feat">New Features and Improvements</a></li>
+  <li><a href="#v44_issues">Outstanding Issues</a></li>
+  <li><a href="#v44_upgrading">Notes On Upgrading From a Previous Version</a></li>
+  <li><a href="#v44_code_changes">Code Changes Which May Affect
+    Customizations and Extensions</a></li>
+  <li><a href="#v44_previous">Release Notes for Previous Versions</a></li>
+</ul>
+
+<h2 id="v44_introduction">Introduction</h2>
+
+<p>Welcome to [% terms.Bugzilla %] 4.4! It has been over a year since we
+  released [% terms.Bugzilla %] 4.2 on February 2012, and this new major
+  release comes with several new features and improvements. This release
+  contains major improvements to WebServices, which were our main target in
+  this release, a rewritten tagging system, a real MIME type auto-detection for
+  attachments, improved support for Oracle, performance improvements and lots
+  of other enhancements.</p>
+
+<p>If you're upgrading, make sure to read <a href="#v44_upgrading">Notes On
+  Upgrading From a Previous Version</a>. If you are upgrading from a release
+  before 4.2, make sure to read the release notes for all the
+  <a href="#v44_previous">previous versions</a> in between your version and
+  this one, <strong>particularly the Upgrading section of each version's
+  release notes</strong>.</p>
+
+<h2 id="v44_point">Updates in this 4.4.x Release</h2>
+
+<h3>4.4.1</h3>
+
+<p>This release fixes several security issues. See the
+  <a href="http://www.bugzilla.org/security/4.0.10/">Security Advisory</a>
+  for details.</p>
+
+<p>In addition, the following [% terms.bugs %] have been fixed in this release:</p>
+
+<ul>
+  <li><kbd>checksetup.pl</kbd> no longer fails with "Invalid version format (non-numeric data)"
+    when a Perl module contains an invalid version number.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=781672">[% terms.Bug %] 781672</a>)</li>
+  <li>Internet Explorer 11 and KHTML-based browsers such as Konqueror can now
+    display buglists correctly.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=902515">[% terms.Bug %] 902515</a> and
+    <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=914262">[% terms.bug %] 914262</a>)</li>
+  <li>When editing several [% terms.bugs %] at once and moving them into a new
+    product, [% terms.bugs %] restricted to a group in the old product could
+    loose these group restrictions in the new product.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=769134">[% terms.Bug %] 769134</a>)</li>
+  <li>When the <kbd>password_complexity</kbd> parameter was set to
+    'letters_numbers_specialchars', passwords containing numbers and special
+    characters only were accepted. Now it makes sure that a letter is also present.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=897264">[% terms.Bug %] 897264</a>)</li>
+  <li>Large dependency trees are now displayed much faster.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=917370">[% terms.Bug %] 917370</a>)</li>
+  <li>When a user has set many votes, the "Votes" page is now displayed much faster.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=851267">[% terms.Bug %] 851267</a>)</li>
+  <li>The "My Requests" page now correctly uses the AND/OR operator for the
+    requester and requestee fields only instead of using it for all fields.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=891311">[% terms.Bug %] 891311</a>)</li>
+  <li>With DB servers doing case-insensitive comparisons, such as MySQL, tokens
+    and login cookies were not correctly validated as the case was ignored.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=906745">[% terms.Bug %] 906745</a> and
+    <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=907438">[% terms.bug %] 907438</a>)</li>
+  <li>All security headers (such as X-Frame-Options) are now returned when using XML-RPC.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=787328">[% terms.Bug %] 787328</a>)</li>
+  <li>Oracle crashed when reporting a new [% terms.bug %] if a custom free-text field
+    was non-mandatory and left empty.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=919475">[% terms.Bug %] 919475</a>)</li>
+  <li>It was not possible to import [% terms.bugs %] using <kbd>importxml.pl</kbd> with Oracle.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=848063">[% terms.Bug %] 848063</a>)</li>
+</ul>
+
+<h2 id="v44_req">Minimum Requirements</h2>
+
+<p>Any requirements that are new since 4.2 will look like
+  <span class="req_new">this</span>.</p>
+
+<ul>
+  <li><a href="#v44_req_perl">Perl</a></li>
+  <li><a href="#v44_req_mysql">For MySQL Users</a></li>
+  <li><a href="#v44_req_pg">For PostgreSQL Users</a></li>
+  <li><a href="#v44_req_oracle">For Oracle Users</a></li>
+  <li><a href="#v44_req_sqlite">For SQLite Users</a></li>
+  <li><a href="#v44_req_modules">Required Perl Modules</a></li>
+  <li><a href="#v44_req_optional_mod">Optional Perl Modules</a></li>
+  <li><a href="#v44_req_apache">Optional Apache Modules</a></li>
+</ul>
+
+<h3 id="v44_req_perl">Perl</h3>
+
+<p>Perl v5.8.1</p>
+
+<p><strong>IMPORTANT:</strong> This is the last major release to support
+  Perl 5.8.x! The next major release, [% terms.Bugzilla %] 5.0, will require
+  Perl 5.10.1 as a minimum.</p>
+
+[% INCLUDE db_req db='mysql' %]
+
+[% INCLUDE db_req db='pg' dbd_new => 1 %]
+
+[% INCLUDE db_req db='oracle' %]
+
+[% INCLUDE db_req db='sqlite' %]
+
+<h3 id="v44_req_modules">Required Perl Modules</h3>
+
+[% INCLUDE req_table reqs = REQUIRED_MODULES
+                     updated = ['TimeDate', 'DBI', 'Email-Send', 'List-MoreUtils'] %]
+
+<h3 id="v44_req_optional_mod">Optional Perl Modules</h3>
+
+<p>The following perl modules, if installed, enable various
+  features of [% terms.Bugzilla %]:</p>
+
+[% INCLUDE req_table reqs = OPTIONAL_MODULES
+                     new  = ['Net-SMTP-SSL', 'HTML-FormatText-WithLinks',
+                             'File-MimeInfo', 'IO-stringy']
+                     updated = ['TheSchwartz']
+                     include_feature = 1 %]
+
+<h3 id="v44_req_apache">Optional Apache Modules</h3>
+
+<p>If you are using Apache as your webserver, [% terms.Bugzilla %] can
+  take advantage of some Apache features if you have the below Apache
+  modules installed and enabled. Currently,
+  <a href="#v40_feat_js_css_update">certain [% terms.Bugzilla %] features</a>
+  are enabled only if you have all of the following modules installed
+  and enabled:</p>
+
+<ul>
+  <li>mod_headers</li>
+  <li>mod_expires</li>
+  <li>mod_env</li>
+</ul>
+
+<p>On most systems (but not on Windows), <kbd>checksetup.pl</kbd> is able to
+  tell whether or not you have these modules installed, and it will tell
+  you.</p>
+
+
+<h2 id="v44_feat">New Features and Improvements</h2>
+
+<ul>
+  <li><a href="#v44_feat_search">Allow Multiple Search Criteria to Match one Field</a></li>
+  <li><a href="#v44_feat_search_perf">Improved Performance for Searches</a></li>
+  <li><a href="#v44_feat_bug_tags">Overhaul of the Tagging System</a></li>
+  <li><a href="#v44_feat_mimetype_autodetect">Auto-Detection of the Attachment MIME Type</a></li>
+  <li><a href="#v44_feat_saved_reports">Saving Tabular and Graphical Reports</a></li>
+  <li><a href="#v44_feat_whining">Custom Columns in Whine Emails</a></li>
+  <li><a href="#v44_feat_webservices">Improved WebServices</a></li>
+  <li><a href="#v44_feat_apache_config">New Apache Configuration</a></li>
+  <li><a href="#v44_feat_other">Other Enhancements and Changes</a></li>
+</ul>
+
+<h3 id="v44_feat_search">Allow Multiple Search Criteria to Match one Field</h3>
+
+<p>
+  In the "Advanced Search" page, it is now possible to build queries using
+  multiple custom search criteria against the same field. In [% terms.Bugzilla %]
+  4.2 and older, queries of the form
+  <br><br>
+  <kbd>"Status changed to VERIFIED" AND "Status changed by foo@bar.com"</kbd>
+  <br><br>
+  were returning all [% terms.bugs %] which had their status changed to VERIFIED
+  by some user and which were edited by foo@bar.com once, but both actions could
+  be independent. In [% terms.Bugzilla %] 4.4, you can now decide if both
+  criteria must match the exact same action or not, i.e. if you want
+  [%+ terms.bugs %] whose status has been set to VERIFIED by foo@bar.com himself.
+  In the same way, queries of the form
+  <br><br>
+  <kbd>"Flags changed to approval+" AND "Flags changed by foo@bar.com"</kbd>
+  <br><br>
+  can now return [% terms.bugs %] for which the approval flag has been set to
+  "+" by foo@bar.com himself. In previous versions, both actions were treated
+  independently and [% terms.bugs %] for which foo@bar.com set the approval flag
+  to "?" and which is then set to "+" by someone else were also returned.
+</p>
+<p>
+  This new feature gives you the ability to build more accurate queries and to
+  get more relevant results.
+</p>
+
+<h3 id="v44_feat_search_perf">Improved Performance for Searches</h3>
+
+<p>
+  The search system got a performance boost which in some cases decreases the
+  time spent to run queries from several minutes to a few seconds only.
+  The more complex your queries are, the more visible the performance win
+  should be.
+</p>
+
+<h3 id="v44_feat_bug_tags">Overhaul of the Tagging System</h3>
+
+<p>
+  The old tagging system which was in the footer of all pages had severe design
+  and usability limitations and has been replaced by a shiny new one which lets
+  you tag [% terms.bugs %] from the [% terms.bug %] report directly. Tags now
+  mostly work like keywords, but with two major differences. First of all, they
+  are personal, meaning that tags you set on [% terms.bugs %] are only visible
+  by you, and nobody else is notified nor can see which tags you set. This
+  behavior is the same as the old tagging system and so this feature didn't
+  change. The second major difference is that the list of available tags is
+  unlimited and is in no way hardcoded by administrators. You can type either
+  a new tag of your choice, or you can select one from an auto-generated list
+  of tags which you already used in other [% terms.bugs %]. Again, this feature
+  was already present in the old tagging system, but its usability has been
+  greatly improved. In particular, this means that tags are now displayed in
+  [%+ terms.bug %] reports directly, so that you immediately know which tags
+  you already set for that [% terms.bug %]. This feature is new in this release.
+</p>
+<p>
+  Another new feature is that your personal tags can now be listed in buglists.
+  They can also be used as search criteria in your queries. If you decide to
+  share a saved search which uses tags as criteria, this will work too! Note
+  that when you add a new tag, no saved search based on this tag is created
+  anymore, as you can easily create it yourself if you really need it.
+</p>
+<p>
+  The tags set with the old tagging system are automatically migrated to the
+  new system.
+</p>
+
+<h3 id="v44_feat_mimetype_autodetect">Auto-Detection of the Attachment MIME Type</h3>
+
+<p>
+  When a user uploads a new attachment and lets the "Content Type" field set to
+  "auto-detect", [% terms.Bugzilla %] now does its own MIME type detection
+  if the web browser tells him that the attachment is of type
+  "application/octet-stream", in an attempt to make a better guess than the web
+  browser. In all other cases, [% terms.Bugzilla %] still trusts what the browser
+  tells him.
+</p>
+<p>
+  Check the <a href="#v44_req_optional_mod">list of optional Perl modules</a> to
+  know which modules to install in order to enable MIME type sniffing.
+</p>
+
+<h3 id="v44_feat_saved_reports">Saving Tabular and Graphical Reports</h3>
+
+<p>
+  It is now possible to save tabular and graphical reports in the same way as
+  you save searches. Saved reports will appear in the footer of pages, below
+  saved searches.
+</p>
+<p>
+  Unlike saved searches, it is not yet possible to share saved reports with
+  other users.
+</p>
+
+<h3 id="v44_feat_whining">Custom Columns in Whine Emails</h3>
+
+<p>
+  The list of columns to display in buglists contained in emails sent by the
+  whining system on a regular basis is no longer hardcoded. If the saved
+  search used for whining emails contains a list of columns, these columns are
+  used to be displayed in the emails. If no custom list is found, the default
+  column list is used instead.
+</p>
+<p>
+  This means that depending on the kind of email notifications you want, you
+  can fully customize data to return, on a per saved search basis!
+</p>
+
+<h3 id="v44_feat_webservices">Improved WebServices</h3>
+
+<p>
+  This release got major improvements in its WebServices interface. Many new
+  methods have been implemented to let third-party applications interact with
+  [%+ terms.Bugzilla %] even more closely. For instance, it is now possible to
+  know what parameters are set to using <kbd>B[%%]ugzilla.parameters</kbd>.
+  It is now also possible to update tags, products, groups or user accounts
+  using our API.
+<p>
+<p>
+  Several existing methods have also been improved to return data which
+  weren't available till now, such as [% terms.bug %] and attachment flags
+  using <kbd>B[%%]ug.get</kbd>, <kbd>B[%%]ug.attachments</kbd> or
+  <kbd>Product.get</kbd>. Users can also get their saved searches and reports
+  using <kbd>User.get</kbd>; and much more, see the
+  <a href="#v44_feat_webservices_details">detailed list</a> below.
+</p>
+
+<h3 id="v44_feat_apache_config">New Apache Configuration</h3>
+
+<p>
+  For improved security, [% terms.Bugzilla %] now prevents directory browsing
+  by default. If you run [% terms.Bugzilla %] under Apache (as most people do),
+  you most likely require a <strong>new Apache configuration</strong> for this
+  version of [% terms.Bugzilla %]. See the
+  <a href="#v44_upgrading">Notes On Upgrading From a Previous Version</a>
+  section for details.
+</p>
+
+<h3 id="v44_feat_other">Other Enhancements and Changes</h3>
+
+<h4>Enhancements for Users</h4>
+
+<ul>
+  <li><strong>[% terms.Bugs %]:</strong> It is now possible to add yourself to
+    the CC list when uploading an attachment and when editing an existing one.</li>
+  <li><strong>[% terms.Bugs %]:</strong> There is a new user preference to be
+    automatically added to the CC list of [% terms.bugs %] for which a flag
+    request is addressed to you (the flag has you as the requestee).</li>
+  <li><strong>[% terms.Bugs %]:</strong> Changes to the CC list no longer
+    causes midair collisions.</li>
+  <li><strong>[% terms.Bugs %]:</strong> There is now a <em>(take)</em> link
+    besides the QA Contact field to easily set yourself as QA contact.</li>
+  <li><strong>[% terms.Bugs %]:</strong> [% terms.Bugs %] are no longer
+    reassigned to the default assignee when moving the [% terms.bug %] into
+    another product or component if the current assignee is not the default
+    one. Same goes for the QA contact.</li>
+  <li><strong>[% terms.Bugs %]:</strong> When reporting a new [% terms.bug %],
+    flags which are not available for the selected component and those which
+    the reporter cannot edit are now hidden instead of being disabled. For
+    existing [% terms.bugs %], unset flags are also hidden by default. Clicking
+    the <em>(set flags)</em> or <em>(more flags)</em> link will make them
+    appear.</li>
+  <li><strong>[% terms.Bugs %]:</strong> When viewing [% terms.abug %], the list
+    of duplicated [% terms.bugs %] is now listed near the top of the page.</li>
+  <li><strong>[% terms.Bugs %]:</strong> Private comments now always remain
+    visible to their author. Previously, the author of a comment couldn't see
+    it anymore if the comment was marked private and the author isn't in the
+    insider group.</li>
+  <li><strong>[% terms.Bugs %]:</strong> The See Also field now supports URLs
+    pointing to GitHub by default. If the new MoreBugUrl extension included in
+    this release is enabled, then you can also add URLs pointing to:
+    b[%%]ugs.php.net, RT, appspot.com (Rietveld), Review Board, and
+    getsatisfaction.com.</li>
+  <li><strong>Searches:</strong> The alias of [% terms.bugs %] you cannot see
+    are no longer resolved to their [% terms.bug %] ID, meaning that it is no
+    longer possible to connect an alias with its ID unless you can see the
+    [%+ terms.bug %].</li>
+  <li><strong>Searches:</strong> Custom multi-select fields are now available
+    in the "Search By Change History" section of the query page.</li>
+  <li><strong>Searches:</strong> The <em>changed by</em> operator in boolean
+    charts now accepts pronouns.</li>
+  <li><strong>Searches:</strong> The requester and requestee fields in boolean
+    charts now accept pronouns.</li>
+  <li><strong>Searches:</strong> It is now possible to hide the description of
+    queries appearing at the top of buglists.</li>
+  <li><strong>Requests:</strong> The "My Requests" page now displays an AND/OR
+    radio button to define the interaction between the requester and requestee
+    fields.</li>
+  <li><strong>Email Notifications:</strong> There is a new user preference to
+    not prepend "New:" to the subject of [% terms.bug %]mails when reporting
+    a new [% terms.bug %]. Some email clients couldn't thread emails correctly
+    due to this.</li>
+  <li><strong>Email Notifications:</strong> There is a new email event to get
+    notifications when the product or component of [% terms.abug %] changes.</li>
+  <li><strong>Email Notifications:</strong> All [% terms.bug %]mails now have
+    a <em>X-Bugzilla-Flags</em> email header, listing currently set flags.</li>
+  <li><strong>Email Notifications:</strong> All [% terms.bug %]mails now have
+    a <em>X-Bugzilla-Version</em> email header with the current product
+    version.</li>
+  <li><strong>Whining:</strong> The sort order of the saved search is used to
+    sort [% terms.bugs %] in the emails.</li>
+  <li><strong>User Accounts:</strong> To confirm an email address change, the
+    password is now requested instead of the old email address.</li>
+  <li><strong>Graphical Reports:</strong> The size of graphical reports is now
+    set dynamically to fit within the window of the web browser.
+    The Taller/Thinner/Fatter/Shorter links are now gone.</li>
+  <li><strong>Incoming Emails:</strong> <kbd>email_in.pl</kbd> now accepts
+    HTML-only emails to create and edit [% terms.bugs %] by email.</li>
+  <li><strong>Incoming Emails:</strong> When creating a new [% terms.bug %],
+    <kbd>email_in.pl</kbd> will look at the <em>Importance</em> and
+    <em>X-Priority</em> email headers to increase or decrease the initial
+    priority of the [% terms.bug %], unless the priority is already explicitly
+    set in the email itself.</li>
+  <li><strong>Skins:</strong> [% terms.Bugzilla %] no longer fetches all skins
+    available when viewing a page. It only loads the skin selected by the user
+    in his preferences, which results in less requests to the server.</li>
+</ul>
+
+<h4>Enhancements for Administrators and Developers</h4>
+
+<ul>
+  <li><strong>License:</strong> The [% terms.Bugzilla %] code is now released
+    under the MPL 2.0 license (previously was MPL 1.1).</li>
+  <li><strong>Installation:</strong> On mod_perl, templates now remain in
+    memory for one hour, which can cause an increase in memory requirements.
+    This also means that it can take up to one hour before changes in templates
+    become active (unless you restart Apache).</li>
+  <li><strong>Installation:</strong> Running
+    <kbd>checksetup.pl --make-admin=foo@bar.com</kbd> now automatically
+    re-enables the user account if it was disabled.</li>
+  <li><strong>Configuration:</strong> A new parameter <em>smtp_ssl</em> can be
+    turned on to enable SSL connections to the SMTP server to send email
+    notifications.</li>
+  <li><strong>Administration:</strong> Custom fields now have a new <em>Long
+    description</em> attribute to better describe what the custom field is
+    about. This description then appears as a tooltip when hovering the custom
+    field in [% terms.bug %] reports.</li>
+  <li><strong>Administration:</strong> When creating a new product, the form
+    lets you add a component at the same time.</li>
+  <li><strong>Administration:</strong> When viewing a user account in
+    <kbd>editusers.cgi</kbd>, the date of the last login is displayed. Users
+    who did not log in since you upgraded to 4.4 will have this field empty.</li>
+  <li><strong>Administration:</strong> It is now possible to exclude disabled
+    user accounts when running a query in <kbd>editusers.cgi</kbd>.</li>
+  <li><strong>Administration:</strong> The default CC list is now also displayed
+    when listing components in <kbd>editcomponents.cgi</kbd>.</li>
+  <li><strong>Administration:</strong> Target milestones can now be 64 characters
+    long, for consistency with versions (previously was limited to 20 characters
+    only).</li>
+  <li><strong>Administration:</strong> The result code returned by
+    <kbd>contrib/bugzilla-queue.rhel</kbd> when it's not running is now 2
+    instead of 0.</li>
+  <li><strong>Database:</strong> Support for MySQL 5.6 has been added.</li>
+  <li><strong>Database:</strong> Support for Oracle has been greatly improved.</li>
+  <li><strong>Security:</strong> For improved security, the
+    "X-Content-Type-Options:&nbsp;nosniff" and "X-XSS-Protection:&nbsp;block"
+    headers are now sent with every response.</li>
+  <li><strong>Security:</strong> Tokens are now generated using HMAC SHA-256
+    instead of MD5.</li>
+  <li><strong>Documentation:</strong> The documentation is now generated with
+    <kbd>xmlto</kbd> and <kbd>dblatex</kbd> instead of <kbd>jade</kbd>.</li>
+</ul>
+
+<h4 id="v44_feat_webservices_details">WebService Changes</h4>
+
+<ul>
+  <li>Several new methods have been added: <kbd>B[%%]ug.update_tags</kbd>,
+    <kbd>B[%%]ugzilla.parameters</kbd>, <kbd>B[%%]ugzilla.last_audit_time</kbd>,
+    <kbd>Classification.get</kbd>, <kbd>Group.update</kbd>,
+    <kbd>Product.update</kbd>, <kbd>User.update</kbd>.</li>
+  <li><kbd>B[%%]ug.add_attachment</kbd> now only returns the ID of the newly
+    created attachments instead of all the attachment data.</li>
+  <li><kbd>B[%%]ug.attachments</kbd> now also returns the <kbd>size</kbd> field
+    containing the size of the attachment.</li>
+  <li><kbd>B[%%]ug.attachments</kbd> and <kbd>B[%%]ug.get</kbd> now return
+    data about flags.</li>
+  <li><kbd>B[%%]ug.comments</kbd> now also returns <kbd>creation_time</kbd>
+    which is exactly the same as <kbd>time</kbd>, but is provided for
+    consistency with <kbd>B[%%]ug.get</kbd> and <kbd>B[%%]ug.attachments</kbd>.
+    The <kbd>time</kbd> field may be deprecated and removed in a future release,
+    so you should use <kbd>creation_time</kbd> instead.</li>
+  <li><kbd>B[%%]ug.comments</kbd> now also returns the <kbd>count</kbd> field
+    containing the comment ID relative to the [% terms.bug %] it belongs to.
+    This is the same comment ID as the one you can see in [% terms.bug %]
+    reports.</li>
+  <li>It is now possible to create new [% terms.bugs %] with a closed status with
+    <kbd>B[%%]ug.create</kbd>.</li>
+  <li>The <kbd>bug_status</kbd> field returned by <kbd>B[%%]ug.fields</kbd> now
+    also includes [% terms.bug %] statuses available on [% terms.bug %] creation.</li>
+  <li><kbd>B[%%]ug.fields</kbd> now also returns keyword descriptions, not only
+    their names.</li>
+  <li><kbd>B[%%]ug.fields</kbd> now also returns the <kbd>is_active</kbd> field
+    for product-specific fields.</li>
+  <li>For users in the timetracking group, <kbd>B[%%]ug.get</kbd> now also
+    returns the <kbd>actual_time</kbd> field with the total number of hours
+    spent in the [% terms.bug %].</li>
+  <li>Field names returned in the <kbd>field_name</kbd> field of the
+    <kbd>B[%%]ug.history</kbd> method have changed to be consistent with other
+    methods.</li>
+  <li>The <kbd>B[%%]ug.search</kbd> method was returning all visible [% terms.bugs %]
+    when called with no arguments, ignoring the <kbd>max_search_results</kbd>
+    and <kbd>search_allow_no_criteria</kbd> parameters. This has been fixed.</li>
+  <li><kbd>Product.get</kbd> now also returns the <kbd>flag_types</kbd> field
+    containing all the relevant data for attachment and [% terms.bug %] flag types.</li>
+  <li><kbd>Product.get</kbd> now throws an error if neither <kbd>ids</kbd> nor
+    <kbd>names</kbd> is passed to the method.</li>
+  <li>When requesting data for your own account using <kbd>User.get</kbd>,
+    this method now returns two additional fields: <kbd>saved_searches</kbd>
+    and <kbd>saved_reports</kbd> containing all your saved searches and
+    graphical and tabular reports.</li>
+  <li><kbd>User.get</kbd> now also returns the <kbd>groups</kbd> field
+    containing the list of groups the user belongs to. The list is filtered
+    based on your privileges.</li>
+</ul>
+
+
+<h2 id="v44_issues">Outstanding Issues</h2>
+
+<ul>
+  <li><a href="https://bugzilla.mozilla.org/show_bug.cgi?id=89822">
+    [%- terms.Bug %] 89822</a>: When changing multiple [% terms.bugs %] at
+    the same time, there is no "mid-air collision" protection.</li>
+  <li><a href="https://bugzilla.mozilla.org/show_bug.cgi?id=276230">
+    [%- terms.Bug %] 276230</a>: The support for restricting access to
+    particular Categories of New Charts is not complete. You should treat the
+    <em>chartgroup</em> parameter as the only access mechanism available.</li>
+  <li><a href="https://bugzilla.mozilla.org/show_bug.cgi?id=584742">
+    [%- terms.Bug %] 584742</a>: When viewing [% terms.abug %], WebKit-based
+    browsers can automatically reset a field's selected value when the field
+    has disabled values.</li>
+</ul>
+
+
+<h2 id="v44_upgrading">Notes On Upgrading From a Previous Version</h2>
+
+<h3>IMPORTANT: Apache Configuration Change</h3>
+
+<p>
+  For improved security, [% terms.Bugzilla %] now prevents directory browsing
+  by default. In order to do that, the root <kbd>bugzilla/.htaccess</kbd> file
+  now contains the <kbd>Options -Indexes</kbd> directive. By default, this
+  directive is not allowed in <kbd>.htaccess</kbd> and so you must configure
+  Apache to allow it. To do that, add <kbd>Options</kbd> to the
+  <kbd>AllowOverride</kbd> directive in <kbd>httpd.conf</kbd>. This means you
+  should now have something like this:
+  <p>
+    <kbd>AllowOverride Limit FileInfo Indexes Options</kbd>
+  </p>
+  Check the
+  <a href="http://www.bugzilla.org/docs/4.4/en/html/configuration.html#http-apache">documentation</a>
+  for more information about how to configure Apache.
+</p>
+
+<h2 id="v44_code_changes">Code Changes Which May Affect Customizations and Extensions</h2>
+
+<ul>
+  <li>The <em>usebugaliases</em> parameter has been removed. Aliases are now
+    always available.</li>
+  <li>There is a new code hook <kbd>admin_editusers_action</kbd> to alter the
+    way <kbd>editusers.cgi</kbd> works.</li>
+  <li>There is a new code hook <kbd>buglist_column_joins</kbd> to alter the way
+    tables and columns are joined in queries. In combination with the
+    <kbd>buglist_columns</kbd> hook, this permits to customize the list of
+    columns to display in buglists.</li>
+  <li>There is a new code hook <kbd>bug_start_of_update</kbd> which is called
+    after <kbd>object_end_of_update</kbd> but before <kbd>bug_end_of_update</kbd>
+    for a better control on how to update [% terms.bugs %].</li>
+  <li>There is a new code hook <kbd>bug_url_sub_classes</kbd> to support
+    additional URLs in the See Also field.</li>
+  <li>There is a new code hook <kbd>error_catch</kbd> to catch errors thrown
+    by [% terms.Bugzilla %] and to take the appropriate actions.</li>
+  <li>There is a new code hook <kbd>path_info_whitelist</kbd> to whitelist
+    scripts which should still get the Path-Info information from URLs. By
+    default, Path-Info is now removed before being passed to CGI scripts.</li>
+  <li>It is now illegal to have a product with no components and no versions.
+    Trying to delete the last component or version of a product is now
+    rejected.</li>
+  <li>Trying to set the component, target milestone or version of [% terms.abug %]
+    to a disabled value is no longer accepted. The change will be rejected.</li>
+  <li>The comment box now checks the returned value of check_can_change_field()
+    to determine if it should be displayed or not. This means its visibility
+    can now be controlled by the <kbd>bug_check_can_change_field</kbd> hook.</li>
+  <li>Flags now checks the returned value of check_can_change_field() to
+    determine if they should appear as editable or not. This means their
+    visibility can now be controlled by the <kbd>bug_check_can_change_field</kbd>
+    hook.</li>
+  <li>Quips can no longer exceed 512 characters. Existing quips longer than
+    that are automatically truncated when upgrading.</li>
+  <li>The static <kbd>bugzilla.dtd</kbd> file has been replaced by a dynamic
+    one to take custom fields into account. The old
+    <em>&lt;urlbase&gt;/bugzilla.dtd</em> URL is now
+    <em>&lt;urlbase&gt;/page.cgi?id=bugzilla.dtd</em>.</li>
+  <li>There is a new extension located at <kbd>extensions/MoreBugUrl/</kbd>
+    which permits to add new classes of URLs in the See Also field. It uses
+    the <kbd>bug_url_sub_classes</kbd> hook mentioned above.</li>
+  <li>There is a new <kbd>B[%%]ugzilla->process_cache</kbd> method to store
+    data which should remain available for the lifetime of the worker process,
+    on mod_perl. On mod_cgi, it behaves the same way as
+    <kbd>B[%%]ugzilla->request_cache</kbd>.</li>
+  <li>In the RDF output of <kbd>config.cgi</kbd>, URIs used to identify
+    versions and target milestones have been changed to be unique across
+    products.</li>
+  <li>The RDF output of <kbd>config.cgi</kbd> now also returns data about
+    classifications.</li>
+  <li>It is now legal to call <kbd>B[%%]ugzilla::Version->check({ id => $id })</kbd>
+    and <kbd>B[%%]ugzilla::Milestone->check({ id => $id })</kbd> to validate
+    and get an object using its ID.</li>
+  <li>Rows in the <kbd>dependencies</kbd>, <kbd>flaginclusions</kbd> and
+    <kbd>flagexclusions</kbd> DB tables are now enforced to be unique.</li>
+  <li>The <kbd>b[%%]ugs_activity</kbd> and <kbd>profiles_activity</kbd> DB
+    tables now have an auto-incremented primary key named <kbd>id</kbd>.</li>
+  <li>A custom <kbd>B[%%]ugzilla.pm</kbd> module has been added into
+    <kbd>contrib/</kbd> to help packagers to package B[%%]ugzilla in their
+    Linux distros.</li>
+</ul>
+
+
+<h1 id="v44_previous">[% terms.Bugzilla %] 4.2 Release Notes</h1>
 
 <ul class="bz_toc">
   <li><a href="#v42_introduction">Introduction</a></li>
@@ -39,6 +616,86 @@
   section of each version's release notes</strong>.</p>
 
 <h2 id="v42_point">Updates in this 4.2.x Release</h2>
+
+<h3>4.2.3</h3>
+
+<p>This release fixes two security issues. See the
+  <a href="http://www.bugzilla.org/security/3.6.10/">Security Advisory</a>
+  for details.</p>
+
+<p>In addition, the following important fixes/changes have been made in this
+  release:</p>
+
+<ul>
+  <li>Attaching a file to [% terms.abug %] was broken due to a change in
+    Perl 5.16.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=771100">[% terms.Bug %] 771100</a>)</li>
+  <li>A regression in [% terms.Bugzilla %] 4.2.2 made Oracle crash when
+    displaying a buglist.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=780028">[% terms.Bug %] 780028</a>)</li>
+  <li>It was possible to search on history for comments and attachments you
+    cannot see (though these private comments and attachments are never disclosed).
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=779709">[% terms.Bug %] 779709</a>)</li>
+  <li>PostgreSQL databases could be created with the wrong encoding despite
+    the utf8 parameter being enabled.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=783786">[% terms.Bug %] 783786</a>)</li>
+  <li>Scheduled whines could be sent at the wrong time on Oracle.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=559539">[% terms.Bug %] 559539</a>)</li>
+  <li>Tokens are no longer included in saved queries.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=772953">[% terms.Bug %] 772953</a>)</li>
+  <li>An admin could unintentionally break the display of buglists if a custom
+    field description contains a &lt; or &gt; character, because these characters
+    were not filtered.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=785917">[% terms.Bug %] 785917</a>)</li>
+  <li>Adding or removing a DB column in Oracle didn't handle SERIAL columns
+    correctly.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=731156">[% terms.Bug %] 731156</a>)</li>
+  <li>A minor CSRF vulnerability in token.cgi allowed possible unauthorized
+    password reset e-mail requests.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=706271">[% terms.Bug %] 706271</a>)</li>
+</ul>
+
+<h3>4.2.2</h3>
+
+<p>This release fixes two security issues. See the
+  <a href="http://www.bugzilla.org/security/3.6.9/">Security Advisory</a>
+  for details.</p>
+
+<p>In addition, the following important fixes/changes have been made in this
+  release:</p>
+
+<ul>
+  <li>A regression introduced in [% terms.Bugzilla %] 4.0 caused some login
+    names to be ignored when entered in the CC list of [% terms.bugs %].
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=756314">[% terms.Bug %] 756314</a>)</li>
+  <li>Some queries could trigger an invalid SQL query if strings entered by
+    the user contained leading or trailing whitespaces.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=760075">[% terms.Bug %] 760075</a>)</li>
+  <li>The auto-completion form for keywords no longer automatically selects
+    the first keyword in the list when the field is empty.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=764517">[% terms.Bug %] 764517</a>)</li>
+  <li>A regression in [% terms.Bugzilla %] 4.2 prevented classifications
+    from being used in graphical and tabular reports in the "Multiple Tables"
+    field.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=753688">[% terms.Bug %] 753688</a>)</li>
+  <li>Attachments created by the <kbd>email_in.pl</kbd> script were associated
+    to the wrong comment.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=762785">[% terms.Bug %] 762785</a>)</li>
+  <li>Very long dependency lists can now be viewed correctly.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=762783">[% terms.Bug %] 762783</a>)</li>
+  <li>Keywords are now correctly escaped in the auto-completion form to prevent
+    any XSS abuse.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=754561">[% terms.Bug %] 754561</a>)</li>
+  <li>A regression introduced in [% terms.Bugzilla %] 4.0rc2 when fixing
+    CVE-2011-0046 caused the "Un-forget the search" link to not work correctly
+    anymore when restoring a deleted saved search, because this link was
+    lacking a valid token.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=768870">[% terms.Bug %] 768870</a>)</li>
+  <li>Two minor CSRF vulnerabilities have been fixed which could let an attacker
+    alter your default search criteria in the Advanced Search page.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=754672">[% terms.Bugs %] 754672</a>
+    and <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=754673">754673</a>)</li>
+</ul>
 
 <h3>4.2.1</h3>
 
@@ -106,29 +763,239 @@
 
 <p>Perl v5.8.1</p>
 
-[% INCLUDE db_req db='mysql' db_new => 1 dbd_new => 1 %]
+<h3 id="v42_req_mysql">For MySQL Users</h3>
 
-[% INCLUDE db_req db='pg' db_new => 1 %]
+<ul>
+  <li>MySQL <span class="req_new">v5.0.15</span></li>
+  <li><strong>perl module:</strong> DBD::mysql <span class="req_new">v4.001</span></li>
+</ul>
 
-[% INCLUDE db_req db='oracle' %]
+<h3 id="v42_req_pg">For PostgreSQL Users</h3>
 
-[% INCLUDE db_req db='sqlite' %]
+<ul>
+  <li>PostgreSQL <span class="req_new">v8.03.0000</span></li>
+  <li><strong>perl module:</strong> DBD::Pg v1.45</li>
+</ul>
+
+<h3 id="v42_req_oracle">For Oracle Users</h3>
+
+<ul>
+  <li>Oracle v10.02.0</li>
+  <li><strong>perl module:</strong> DBD::Oracle v1.19</li>
+</ul>
+
+<h3 id="v42_req_sqlite">For SQLite Users</h3>
+
+<ul>
+  <li>SQLite v3.6.22</li>
+  <li><strong>perl module:</strong> DBD::SQLite v1.29</li>
+</ul>
 
 <h3 id="v42_req_modules">Required Perl Modules</h3>
 
-[% INCLUDE req_table reqs = REQUIRED_MODULES
-                     new = ['Math-Random-ISAAC']
-                     updated = ['URI'] %]
+
+<table class="req_table">
+  <tbody>
+      <tr>
+        <th>Module</th>
+        <th>Version</th>
+      </tr>
+      <tr>
+        <td>CGI</td>
+        <td>3.51</td>
+      </tr>
+      <tr>
+        <td>Digest::SHA</td>
+        <td>(Any)</td>
+      </tr>
+      <tr>
+        <td>Date::Format</td>
+        <td>2.21</td>
+      </tr>
+      <tr>
+        <td>DateTime</td>
+        <td>0.28</td>
+      </tr>
+      <tr>
+        <td>DateTime::TimeZone</td>
+        <td>0.71</td>
+      </tr>
+      <tr>
+        <td>DBI</td>
+        <td>1.614</td>
+      </tr>
+      <tr>
+        <td>Template</td>
+        <td>2.22</td>
+      </tr>
+      <tr>
+        <td>Email::Send</td>
+        <td>2.00</td>
+      </tr>
+      <tr>
+        <td>Email::MIME</td>
+        <td>1.904</td>
+      </tr>
+      <tr>
+        <td>URI</td>
+        <td class="req_new">1.37</td>
+      </tr>
+      <tr>
+        <td>List::MoreUtils</td>
+        <td>0.22</td>
+      </tr>
+      <tr>
+        <td class="req_new">Math::Random::ISAAC</td>
+        <td class="req_new">1.0.1</td>
+      </tr>
+  </tbody>
+</table>
 
 <h3 id="v42_req_optional_mod">Optional Perl Modules</h3>
 
 <p>The following perl modules, if installed, enable various
   features of [% terms.Bugzilla %]:</p>
 
-[% INCLUDE req_table reqs = OPTIONAL_MODULES
-                     new  = ['Encode', 'Encode-Detect']
-                     updated = ['PatchReader', 'Apache-SizeLimit']
-                     include_feature = 1 %]
+
+<table class="req_table">
+  <tbody>
+      <tr>
+        <th>Module</th>
+        <th>Version</th>
+        <th>Enables Feature</th>
+      </tr>
+      <tr>
+        <td>GD</td>
+        <td>1.20</td>
+        <td>Graphical Reports, New Charts, Old Charts</td>
+      </tr>
+      <tr>
+        <td>Chart::Lines</td>
+        <td>2.1</td>
+        <td>New Charts, Old Charts</td>
+      </tr>
+      <tr>
+        <td>Template::Plugin::GD::Image</td>
+        <td>(Any)</td>
+        <td>Graphical Reports</td>
+      </tr>
+      <tr>
+        <td>GD::Text</td>
+        <td>(Any)</td>
+        <td>Graphical Reports</td>
+      </tr>
+      <tr>
+        <td>GD::Graph</td>
+        <td>(Any)</td>
+        <td>Graphical Reports</td>
+      </tr>
+      <tr>
+        <td>MIME::Parser</td>
+        <td>5.406</td>
+        <td>Move [% terms.Bugs %] Between Installations</td>
+      </tr>
+      <tr>
+        <td>LWP::UserAgent</td>
+        <td>(Any)</td>
+        <td>Automatic Update Notifications</td>
+      </tr>
+      <tr>
+        <td>XML::Twig</td>
+        <td>(Any)</td>
+        <td>Move [% terms.Bugs %] Between Installations, Automatic Update Notifications</td>
+      </tr>
+      <tr>
+        <td>PatchReader</td>
+        <td class="req_new">0.9.6</td>
+        <td>Patch Viewer</td>
+      </tr>
+      <tr>
+        <td>Net::LDAP</td>
+        <td>(Any)</td>
+        <td>LDAP Authentication</td>
+      </tr>
+      <tr>
+        <td>Authen::SASL</td>
+        <td>(Any)</td>
+        <td>SMTP Authentication</td>
+      </tr>
+      <tr>
+        <td>Authen::Radius</td>
+        <td>(Any)</td>
+        <td>RADIUS Authentication</td>
+      </tr>
+      <tr>
+        <td>SOAP::Lite</td>
+        <td>0.712</td>
+        <td>XML-RPC Interface</td>
+      </tr>
+      <tr>
+        <td>JSON::RPC</td>
+        <td>(Any)</td>
+        <td>JSON-RPC Interface</td>
+      </tr>
+      <tr>
+        <td>JSON::XS</td>
+        <td>2.0</td>
+        <td>Make JSON-RPC Faster</td>
+      </tr>
+      <tr>
+        <td>Test::Taint</td>
+        <td>(Any)</td>
+        <td>JSON-RPC Interface, XML-RPC Interface</td>
+      </tr>
+      <tr>
+        <td>HTML::Parser</td>
+        <td>3.67</td>
+        <td>More HTML in Product/Group Descriptions</td>
+      </tr>
+      <tr>
+        <td>HTML::Scrubber</td>
+        <td>(Any)</td>
+        <td>More HTML in Product/Group Descriptions</td>
+      </tr>
+      <tr>
+        <td class="req_new">Encode</td>
+        <td class="req_new">2.21</td>
+        <td>Automatic charset detection for text attachments</td>
+      </tr>
+      <tr>
+        <td class="req_new">Encode::Detect</td>
+        <td class="req_new">(Any)</td>
+        <td>Automatic charset detection for text attachments</td>
+      </tr>
+      <tr>
+        <td>Email::MIME::Attachment::Stripper</td>
+        <td>(Any)</td>
+        <td>Inbound Email</td>
+      </tr>
+      <tr>
+        <td>Email::Reply</td>
+        <td>(Any)</td>
+        <td>Inbound Email</td>
+      </tr>
+      <tr>
+        <td>TheSchwartz</td>
+        <td>(Any)</td>
+        <td>Mail Queueing</td>
+      </tr>
+      <tr>
+        <td>Daemon::Generic</td>
+        <td>(Any)</td>
+        <td>Mail Queueing</td>
+      </tr>
+      <tr>
+        <td>mod_perl2</td>
+        <td>1.999022</td>
+        <td>mod_perl</td>
+      </tr>
+      <tr>
+        <td>Apache2::SizeLimit</td>
+        <td class="req_new">0.96</td>
+        <td>mod_perl</td>
+      </tr>
+  </tbody>
+</table>
 
 <h3 id="v42_req_apache">Optional Apache Modules</h3>
 
@@ -374,6 +1241,9 @@
     [%- terms.Bug %] 584742</a>: When viewing [% terms.abug %], WebKit-based
     browsers can automatically reset a field's selected value when the field
     has disabled values.</li>
+  <li><a href="https://bugzilla.mozilla.org/show_bug.cgi?id=780053">
+    [%- terms.Bug %] 780053</a>: Oracle crashes when listing keywords, tags
+    or flags in buglists.</li>
 </ul>
 
 
@@ -573,7 +1443,7 @@
 
 <h3 id="v40_req_modules">Required Perl Modules</h3>
 
-  <table cellspacing="0" cellpadding="0" border="0" class="req_table">
+  <table class="req_table">
     <tbody>
       <tr>
         <th>Module</th><th>Version</th>
@@ -631,7 +1501,7 @@
 <p>The following perl modules, if installed, enable various
   features of [% terms.Bugzilla %]:</p>
 
-  <table cellspacing="0" cellpadding="0" border="0" class="req_table">
+  <table class="req_table">
     <tbody>
       <tr>
         <th>Module</th><th>Version</th><th>Enables Feature</th>
@@ -1371,7 +2241,7 @@
 
 
 [% BLOCK req_table %]
-  <table class="req_table" border="0" cellspacing="0" cellpadding="0">
+  <table class="req_table">
     <tr>
       <th>Module</th> <th>Version</th>
       [% IF include_feature %]

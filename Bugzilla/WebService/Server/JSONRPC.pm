@@ -7,7 +7,9 @@
 
 package Bugzilla::WebService::Server::JSONRPC;
 
+use 5.10.1;
 use strict;
+
 use Bugzilla::WebService::Server;
 BEGIN {
     our @ISA = qw(Bugzilla::WebService::Server);
@@ -23,8 +25,8 @@ BEGIN {
 
 use Bugzilla::Error;
 use Bugzilla::WebService::Constants;
-use Bugzilla::WebService::Util qw(taint_data);
-use Bugzilla::Util qw(correct_urlbase trim disable_utf8);
+use Bugzilla::WebService::Util qw(taint_data fix_credentials);
+use Bugzilla::Util;
 
 use HTTP::Message;
 use MIME::Base64 qw(decode_base64 encode_base64);
@@ -73,12 +75,12 @@ sub response_header {
 
 sub response {
     my ($self, $response) = @_;
+    my $cgi = $self->cgi;
 
     # Implement JSONP.
     if (my $callback = $self->_bz_callback) {
         my $content = $response->content;
         $response->content("$callback($content)");
-
     }
 
     # Use $cgi->header properly instead of just printing text directly.
@@ -93,9 +95,18 @@ sub response {
             push(@header_args, "-$name", $value);
         }
     }
-    my $cgi = $self->cgi;
-    print $cgi->header(-status => $response->code, @header_args);
-    print $response->content;
+
+    # ETag support
+    my $etag = $self->bz_etag;
+    if ($etag && $cgi->check_etag($etag)) {
+        push(@header_args, "-ETag", $etag);
+        print $cgi->header(-status => '304 Not Modified', @header_args);
+    }
+    else {
+        push(@header_args, "-ETag", $etag) if $etag;
+        print $cgi->header(-status => $response->code, @header_args);
+        print $response->content;
+    }
 }
 
 # The JSON-RPC 1.1 GET specification is not so great--you can't specify
@@ -207,6 +218,9 @@ sub type {
         utf8::encode($value) if utf8::is_utf8($value);
         $retval = encode_base64($value, '');
     }
+    elsif ($type eq 'email' && Bugzilla->params->{'webservice_email_filter'}) {
+        $retval = email_filter($value);
+    }
 
     return $retval;
 }
@@ -252,7 +266,17 @@ sub _handle {
     my $self = shift;
     my ($obj) = @_;
     $self->{_bz_request_id} = $obj->{id};
-    return $self->SUPER::_handle(@_);
+
+    my $result = $self->SUPER::_handle(@_);
+
+    # Set the ETag if not already set in the webservice methods.
+    my $etag = $self->bz_etag;
+    if (!$etag && ref $result) {
+        my $data = $self->json->decode($result)->{'result'};
+        $self->bz_etag($data);
+    }
+
+    return $result;
 }
 
 # Make all error messages returned by JSON::RPC go into the 100000
@@ -348,6 +372,10 @@ sub _argument_type_check {
             $params->{$field} = decode_base64($params->{$field});
         }
     }
+
+    # Update the params to allow for several convenience key/values
+    # use for authentication
+    fix_credentials($params);
 
     Bugzilla->input_params($params);
 
@@ -566,3 +594,25 @@ the JSON-RPC library that Bugzilla uses, not by Bugzilla.
 =head1 SEE ALSO
 
 L<Bugzilla::WebService>
+
+=head1 B<Methods in need of POD>
+
+=over
+
+=item response
+
+=item response_header
+
+=item cgi
+
+=item retrieve_json_from_get
+
+=item create_json_coder
+
+=item type
+
+=item handle_login
+
+=item datetime_format_outbound
+
+=back

@@ -5,11 +5,12 @@
 # This Source Code Form is "Incompatible With Secondary Licenses", as
 # defined by the Mozilla Public License, v. 2.0.
 
-use strict;
-
 package Bugzilla::Whine::Schedule;
 
-use base qw(Bugzilla::Object);
+use 5.10.1;
+use strict;
+
+use parent qw(Bugzilla::Object);
 
 use Bugzilla::Constants;
 
@@ -153,5 +154,13 @@ Returns an array reference of L<Bugzilla::User>s. This is derived from the
 L<Bugzilla::Group> stored in L</mailto> if L</mailto_is_group> is true and
 the group is still active, otherwise it will contain a single array element
 for the L<Bugzilla::User> in L</mailto>.
+
+=back
+
+=head1 B<Methods in need of POD>
+
+=over
+
+=item eventid
 
 =back

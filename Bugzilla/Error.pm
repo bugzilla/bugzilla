@@ -7,8 +7,10 @@
 
 package Bugzilla::Error;
 
+use 5.10.1;
 use strict;
-use base qw(Exporter);
+
+use parent qw(Exporter);
 
 @Bugzilla::Error::EXPORT = qw(ThrowCodeError ThrowTemplateError ThrowUserError);
 
@@ -92,8 +94,10 @@ sub _throw_error {
                                              message => \$message });
 
     if (Bugzilla->error_mode == ERROR_MODE_WEBPAGE) {
-        print Bugzilla->cgi->header();
+        my $cgi = Bugzilla->cgi;
+        $cgi->close_standby_message('text/html', 'inline', 'error', 'html');
         print $message;
+        print $cgi->multipart_final() if $cgi->{_multipart_in_progress};
     }
     elsif (Bugzilla->error_mode == ERROR_MODE_TEST) {
         die Dumper($vars);
@@ -102,7 +106,8 @@ sub _throw_error {
         die("$message\n");
     }
     elsif (Bugzilla->error_mode == ERROR_MODE_DIE_SOAP_FAULT
-           || Bugzilla->error_mode == ERROR_MODE_JSON_RPC)
+           || Bugzilla->error_mode == ERROR_MODE_JSON_RPC
+           || Bugzilla->error_mode == ERROR_MODE_REST)
     {
         # Clone the hash so we aren't modifying the constant.
         my %error_map = %{ WS_ERROR_CODE() };
@@ -119,13 +124,20 @@ sub _throw_error {
         }
         else {
             my $server = Bugzilla->_json_server;
+
+            my $status_code = 0;
+            if (Bugzilla->error_mode == ERROR_MODE_REST) {
+                my %status_code_map = %{ REST_STATUS_CODE_MAP() };
+                $status_code = $status_code_map{$code} || $status_code_map{'_default'};
+            }
             # Technically JSON-RPC isn't allowed to have error numbers
             # higher than 999, but we do this to avoid conflicts with
             # the internal JSON::RPC error codes.
-            $server->raise_error(code    => 100000 + $code,
-                                 message => $message,
-                                 id      => $server->{_bz_request_id},
-                                 version => $server->version);
+            $server->raise_error(code        => 100000 + $code,
+                                 status_code => $status_code,
+                                 message     => $message,
+                                 id          => $server->{_bz_request_id},
+                                 version     => $server->version);
             # Most JSON-RPC Throw*Error calls happen within an eval inside
             # of JSON::RPC. So, in that circumstance, instead of exiting,
             # we die with no message. JSON::RPC checks raise_error before

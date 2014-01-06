@@ -6,8 +6,8 @@
   # defined by the Mozilla Public License, v. 2.0.
   #%]
 [%
-   title = "Dependency Graphs"
-   desc = "Optional setup for dependency graphing"
+   title = "Graphs"
+   desc = "Optional setup to generate graphs"
 %]
 
 [% param_descs = {
@@ -32,5 +32,15 @@
                  this value, make certain that the webdot server can read files from your
                  webdot directory. On Apache you do this by editing the .htaccess file,
                  for other systems the needed measures may vary. You can run <kbd>checksetup.pl</kbd>
-                 to recreate the .htaccess file if it has been lost."}
+                 to recreate the .htaccess file if it has been lost.",
+
+  font_file => "You can specify the full path to a TrueType font file which will be used " _
+               "to display text (labels, legends, ...) in charts and graphical reports. " _
+               "To support as many languages as possible, we recommend to specify a TrueType " _
+               "font such as <a href=\"http://unifoundry.com/unifont.html\">Unifont</a> " _
+               "which supports all printable characters in the Basic Multilingual Plane. " _
+               "If you leave this parameter empty, a default font will be used, but " _
+               "its support is limited to English characters only and so other characters " _
+               "will be displayed incorrectly.",
+  }
 %]

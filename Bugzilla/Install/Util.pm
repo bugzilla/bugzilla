@@ -11,6 +11,7 @@ package Bugzilla::Install::Util;
 # module may require *only* Bugzilla::Constants and built-in
 # perl modules.
 
+use 5.10.1;
 use strict;
 
 use Bugzilla::Constants;
@@ -23,7 +24,7 @@ use Scalar::Util qw(tainted);
 use Term::ANSIColor qw(colored);
 use PerlIO;
 
-use base qw(Exporter);
+use parent qw(Exporter);
 our @EXPORT_OK = qw(
     bin_loc
     get_version_and_os
@@ -37,7 +38,6 @@ our @EXPORT_OK = qw(
     include_languages
     success
     template_include_path
-    vers_cmp
     init_console
 );
 
@@ -370,7 +370,10 @@ sub include_languages {
 
     # Basically, the way this works is that we have a list of languages
     # that we *want*, and a list of languages that Bugzilla actually
-    # supports.
+    # supports. If there is only one language installed, we take it.
+    my $supported = supported_languages();
+    return @$supported if @$supported == 1;
+
     my $wanted;
     if ($params->{language}) {
         # We can pass several languages at once as an arrayref
@@ -381,7 +384,6 @@ sub include_languages {
     else {
         $wanted = _wanted_languages();
     }
-    my $supported = supported_languages();
     my $actual    = _wanted_to_actual_languages($wanted, $supported);
     return @$actual;
 }
@@ -471,49 +473,6 @@ sub template_include_path {
         }
     }
     return \@include_path;
-}
-
-# This is taken straight from Sort::Versions 1.5, which is not included
-# with perl by default.
-sub vers_cmp {
-    my ($a, $b) = @_;
-
-    # Remove leading zeroes - Bug 344661
-    $a =~ s/^0*(\d.+)/$1/;
-    $b =~ s/^0*(\d.+)/$1/;
-
-    my @A = ($a =~ /([-.]|\d+|[^-.\d]+)/g);
-    my @B = ($b =~ /([-.]|\d+|[^-.\d]+)/g);
-
-    my ($A, $B);
-    while (@A and @B) {
-        $A = shift @A;
-        $B = shift @B;
-        if ($A eq '-' and $B eq '-') {
-            next;
-        } elsif ( $A eq '-' ) {
-            return -1;
-        } elsif ( $B eq '-') {
-            return 1;
-        } elsif ($A eq '.' and $B eq '.') {
-            next;
-        } elsif ( $A eq '.' ) {
-            return -1;
-        } elsif ( $B eq '.' ) {
-            return 1;
-        } elsif ($A =~ /^\d+$/ and $B =~ /^\d+$/) {
-            if ($A =~ /^0/ || $B =~ /^0/) {
-                return $A cmp $B if $A cmp $B;
-            } else {
-                return $A <=> $B if $A <=> $B;
-            }
-        } else {
-            $A = uc $A;
-            $B = uc $B;
-            return $A cmp $B if $A cmp $B;
-        }
-    }
-    @A <=> @B;
 }
 
 sub no_checksetup_from_cgi {
@@ -891,26 +850,36 @@ Used by L<Bugzilla::Template> to determine the languages' list which
 are compiled with the browser's I<Accept-Language> and the languages 
 of installed templates.
 
-=item C<vers_cmp>
+=back
+
+=head1 B<Methods in need of POD>
 
 =over
 
-=item B<Description>
+=item supported_languages
 
-This is a comparison function, like you would use in C<sort>, except that
-it compares two version numbers. So, for example, 2.10 would be greater
-than 2.2.
+=item extension_template_directory
 
-It's based on versioncmp from L<Sort::Versions>, with some Bugzilla-specific
-fixes.
+=item extension_code_files
 
-=item B<Params>: C<$a> and C<$b> - The versions you want to compare.
+=item extension_web_directory
 
-=item B<Returns>
+=item trick_taint
 
-C<-1> if C<$a> is less than C<$b>, C<0> if they are equal, or C<1> if C<$a>
-is greater than C<$b>.
+=item success
 
-=back
+=item trim
+
+=item extension_package_directory
+
+=item set_output_encoding
+
+=item extension_requirement_packages
+
+=item prevent_windows_dialog_boxes
+
+=item sortQvalue
+
+=item no_checksetup_from_cgi
 
 =back

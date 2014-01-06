@@ -17,10 +17,11 @@ use Support::Files;
 use Support::Templates;
 
 use File::Spec;
-use Test::More tests => (  scalar(@Support::Files::testitems)
+use Test::More tests => (scalar(@Support::Files::testitems)
+                         + scalar(@Support::Files::test_files)
                          + $Support::Templates::num_actual_files) * 3;
 
-my @testitems = @Support::Files::testitems;
+my @testitems = (@Support::Files::testitems, @Support::Files::test_files);
 for my $path (@Support::Templates::include_paths) {
    push(@testitems, map(File::Spec->catfile($path, $_),
                         Support::Templates::find_actual_files($path)));

@@ -7,20 +7,22 @@
 
 package Bugzilla::DB;
 
+use 5.10.1;
 use strict;
 
 use DBI;
 
 # Inherit the DB class from DBI::db.
-use base qw(DBI::db);
+use parent -norequire, qw(DBI::db);
 
 use Bugzilla::Constants;
 use Bugzilla::Install::Requirements;
-use Bugzilla::Install::Util qw(vers_cmp install_string);
+use Bugzilla::Install::Util qw(install_string);
 use Bugzilla::Install::Localconfig;
 use Bugzilla::Util;
 use Bugzilla::Error;
 use Bugzilla::DB::Schema;
+use Bugzilla::Version;
 
 use List::Util qw(max);
 use Storable qw(dclone);
@@ -384,8 +386,10 @@ sub sql_string_until {
 }
 
 sub sql_in {
-    my ($self, $column_name, $in_list_ref) = @_;
-    return " $column_name IN (" . join(',', @$in_list_ref) . ") ";
+    my ($self, $column_name, $in_list_ref, $negate) = @_;
+    return " $column_name "
+             . ($negate ? "NOT " : "")
+             . "IN (" . join(',', @$in_list_ref) . ") ";
 }
 
 sub sql_fulltext_search {
@@ -1246,11 +1250,9 @@ sub db_new {
                        ShowErrorStatement => 1,
                        HandleError => \&_handle_error,
                        TaintIn => 1,
-                       FetchHashKeyName => 'NAME',  
-                       # Note: NAME_lc causes crash on ActiveState Perl
-                       # 5.8.4 (see Bug 253696)
-                       # XXX - This will likely cause problems in DB
-                       # back ends that twiddle column case (Oracle?)
+                       # See https://rt.perl.org/rt3/Public/Bug/Display.html?id=30933
+                       # for the reason to use NAME instead of NAME_lc (bug 253696).
+                       FetchHashKeyName => 'NAME',
                      };
 
     if ($override_attrs) {
@@ -1360,14 +1362,19 @@ sub _bz_real_schema {
     my ($self) = @_;
     return $self->{private_real_schema} if exists $self->{private_real_schema};
 
-    my ($data, $version) = $self->selectrow_array(
-        "SELECT schema_data, version FROM bz_schema");
+    my $bz_schema;
+    unless ($bz_schema = Bugzilla->memcached->get({ key => 'bz_schema' })) {
+        $bz_schema = $self->selectrow_arrayref(
+            "SELECT schema_data, version FROM bz_schema"
+        );
+        Bugzilla->memcached->set({ key => 'bz_schema', value => $bz_schema });
+    }
 
     (die "_bz_real_schema tried to read the bz_schema table but it's empty!")
-        if !$data;
+        if !$bz_schema;
 
-    $self->{private_real_schema} = 
-        $self->_bz_schema->deserialize_abstract($data, $version);
+    $self->{private_real_schema} =
+        $self->_bz_schema->deserialize_abstract($bz_schema->[0], $bz_schema->[1]);
 
     return $self->{private_real_schema};
 }
@@ -1409,6 +1416,8 @@ sub _bz_store_real_schema {
     $sth->bind_param(1, $store_me, $self->BLOB_TYPE);
     $sth->bind_param(2, $schema_version);
     $sth->execute();
+
+    Bugzilla->memcached->clear({ key => 'bz_schema' });
 }
 
 # For bz_populate_enum_tables
@@ -2680,3 +2689,63 @@ our check for implementation of C<new> by derived class useless.
 L<DBI>
 
 L<Bugzilla::Constants/DB_MODULE>
+
+=head1 B<Methods in need of POD>
+
+=over
+
+=item bz_add_fks
+
+=item bz_add_fk
+
+=item bz_drop_index_raw
+
+=item bz_table_info
+
+=item bz_add_index_raw
+
+=item bz_get_related_fks
+
+=item quote
+
+=item bz_drop_fk
+
+=item bz_drop_field_tables
+
+=item bz_drop_related_fks
+
+=item bz_table_columns
+
+=item bz_drop_foreign_keys
+
+=item bz_alter_column_raw
+
+=item bz_table_list_real
+
+=item bz_fk_info
+
+=item bz_setup_database
+
+=item bz_setup_foreign_keys
+
+=item bz_table_indexes
+
+=item bz_check_regexp
+
+=item bz_enum_initial_values
+
+=item bz_alter_fk
+
+=item bz_set_next_serial_value
+
+=item bz_table_list
+
+=item bz_table_columns_real
+
+=item bz_check_server_version
+
+=item bz_server_version
+
+=item bz_add_field_tables
+
+=back

@@ -13,8 +13,10 @@ package Bugzilla::DB::Schema::Pg;
 #
 ###############################################################################
 
+use 5.10.1;
 use strict;
-use base qw(Bugzilla::DB::Schema);
+
+use parent qw(Bugzilla::DB::Schema);
 use Storable qw(dclone);
 
 #------------------------------------------------------------------------------
@@ -64,7 +66,7 @@ sub _initialize {
         LONGBLOB =>     'bytea',
 
         DATETIME =>     'timestamp(0) without time zone',
-
+        DATE     =>     'date',
     };
 
     $self->_adjust_schema;
@@ -73,6 +75,16 @@ sub _initialize {
 
 } #eosub--_initialize
 #--------------------------------------------------------------------
+
+sub get_create_database_sql {
+    my ($self, $name) = @_;
+    # We only create as utf8 if we have no params (meaning we're doing
+    # a new installation) or if the utf8 param is on.
+    my $create_utf8 = Bugzilla->params->{'utf8'}
+                      || !defined Bugzilla->params->{'utf8'};
+    my $charset = $create_utf8 ? "ENCODING 'UTF8' TEMPLATE template0" : '';
+    return ("CREATE DATABASE $name $charset");
+}
 
 sub get_rename_column_ddl {
     my ($self, $table, $old_name, $new_name) = @_;
@@ -176,3 +188,17 @@ sub _get_alter_type_sql {
 }
 
 1;
+
+=head1 B<Methods in need of POD>
+
+=over
+
+=item get_rename_column_ddl
+
+=item get_rename_table_sql
+
+=item get_create_database_sql
+
+=item get_set_serial_sql
+
+=back

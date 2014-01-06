@@ -13,9 +13,10 @@ package Bugzilla::DB::Schema::Oracle;
 #
 ###############################################################################
 
+use 5.10.1;
 use strict;
 
-use base qw(Bugzilla::DB::Schema);
+use parent qw(Bugzilla::DB::Schema);
 use Carp qw(confess);
 use Bugzilla::Util;
 
@@ -55,7 +56,7 @@ sub _initialize {
         LONGBLOB =>     'blob',
 
         DATETIME =>     'date',
-
+        DATE     =>     'date',
     };
 
     $self->_adjust_schema;
@@ -182,6 +183,35 @@ sub _get_fk_name {
     $fk_name      = "fk_" . $self->_hash_identifier($fk_name);
     
     return $fk_name;
+}
+
+sub get_add_column_ddl {
+    my $self = shift;
+    my ($table, $column, $definition, $init_value) = @_;
+    my @sql;
+
+    # Create sequences and triggers to emulate SERIAL datatypes.
+    if ($definition->{TYPE} =~ /SERIAL/i) {
+        # Clone the definition to not alter the original one.
+        my %def = %$definition;
+        # Oracle requires to define the column is several steps.
+        my $pk = delete $def{PRIMARYKEY};
+        my $notnull = delete $def{NOTNULL};
+        @sql = $self->SUPER::get_add_column_ddl($table, $column, \%def, $init_value);
+        push(@sql, $self->_get_create_seq_ddl($table, $column));
+        push(@sql, "UPDATE $table SET $column = ${table}_${column}_SEQ.NEXTVAL");
+        push(@sql, "ALTER TABLE $table MODIFY $column NOT NULL") if $notnull;
+        push(@sql, "ALTER TABLE $table ADD PRIMARY KEY ($column)") if $pk;
+    }
+    else {
+        @sql = $self->SUPER::get_add_column_ddl(@_);
+        # Create triggers to deal with empty string. 
+        if ($definition->{TYPE} =~ /varchar|TEXT/i && $definition->{NOTNULL}) {
+            push(@sql, _get_notnull_trigger_ddl($table, $column));
+        }
+    }
+
+    return @sql;
 }
 
 sub get_alter_column_ddl {
@@ -349,6 +379,29 @@ sub get_rename_column_ddl {
     return @sql;
 }
 
+sub get_drop_column_ddl {
+    my $self = shift;
+    my ($table, $column) = @_;
+    my @sql;
+    push(@sql, $self->SUPER::get_drop_column_ddl(@_));
+    my $dbh=Bugzilla->dbh;
+    my $trigger_name = uc($table . "_" . $column);
+    my $exist_trigger = $dbh->selectcol_arrayref(
+        "SELECT OBJECT_NAME FROM USER_OBJECTS
+         WHERE OBJECT_NAME = ?", undef, $trigger_name);
+    if(@$exist_trigger) {
+        push(@sql, "DROP TRIGGER $trigger_name");
+    }
+    # If this column is of type SERIAL, we need to drop the sequence
+    # and trigger that went along with it.
+    my $def = $self->get_column_abstract($table, $column);
+    if ($def->{TYPE} =~ /SERIAL/i) {
+        push(@sql, "DROP SEQUENCE ${table}_${column}_SEQ");
+        push(@sql, "DROP TRIGGER ${table}_${column}_TR");
+    }
+    return @sql;
+}
+
 sub get_rename_table_sql {
     my ($self, $old_name, $new_name) = @_;
     if (lc($old_name) eq lc($new_name)) {
@@ -450,20 +503,34 @@ sub get_set_serial_sql {
     return @sql;
 } 
 
-sub get_drop_column_ddl {
-    my $self = shift;
-    my ($table, $column) = @_;
-    my @sql;
-    push(@sql, $self->SUPER::get_drop_column_ddl(@_));
-    my $dbh=Bugzilla->dbh;
-    my $trigger_name = uc($table . "_" . $column);
-    my $exist_trigger = $dbh->selectcol_arrayref(
-        "SELECT OBJECT_NAME FROM USER_OBJECTS
-         WHERE OBJECT_NAME = ?", undef, $trigger_name);
-    if(@$exist_trigger) {
-        push(@sql, "DROP TRIGGER $trigger_name");
-    }
-    return @sql;
-}
-
 1;
+
+=head1 B<Methods in need of POD>
+
+=over
+
+=item get_rename_column_ddl
+
+=item get_add_fks_sql
+
+=item get_drop_index_ddl
+
+=item get_rename_table_sql
+
+=item get_add_column_ddl
+
+=item get_set_serial_sql
+
+=item get_drop_column_ddl
+
+=item get_drop_table_ddl
+
+=item get_drop_fk_sql
+
+=item get_table_ddl
+
+=item get_alter_column_ddl
+
+=item get_fk_ddl
+
+=back

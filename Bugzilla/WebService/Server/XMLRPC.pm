@@ -7,7 +7,9 @@
 
 package Bugzilla::WebService::Server::XMLRPC;
 
+use 5.10.1;
 use strict;
+
 use XMLRPC::Transport::HTTP;
 use Bugzilla::WebService::Server;
 if ($ENV{MOD_PERL}) {
@@ -17,9 +19,10 @@ if ($ENV{MOD_PERL}) {
 }
 
 use Bugzilla::WebService::Constants;
+use Bugzilla::Util;
 
-# Allow WebService methods to call XMLRPC::Lite's type method directly
 BEGIN {
+    # Allow WebService methods to call XMLRPC::Lite's type method directly
     *Bugzilla::WebService::type = sub {
         my ($self, $type, $value) = @_;
         if ($type eq 'dateTime') {
@@ -28,7 +31,18 @@ BEGIN {
             $value = Bugzilla::WebService::Server->datetime_format_outbound($value);
             $value =~ s/-//g;
         }
+        elsif ($type eq 'email') {
+            $type = 'string';
+            if (Bugzilla->params->{'webservice_email_filter'}) {
+                $value = email_filter($value);
+            }
+        }
         return XMLRPC::Data->type($type)->value($value);
+    };
+
+    # Add support for ETags into XMLRPC WebServices
+    *Bugzilla::WebService::bz_etag = sub {
+        return Bugzilla::WebService::Server->bz_etag($_[1]);
     };
 }
 
@@ -43,13 +57,37 @@ sub initialize {
 
 sub make_response {
     my $self = shift;
+    my $cgi = Bugzilla->cgi;
 
     $self->SUPER::make_response(@_);
 
     # XMLRPC::Transport::HTTP::CGI doesn't know about Bugzilla carrying around
     # its cookies in Bugzilla::CGI, so we need to copy them over.
-    foreach (@{Bugzilla->cgi->{'Bugzilla_cookie_list'}}) {
-        $self->response->headers->push_header('Set-Cookie', $_);
+    foreach my $cookie (@{$cgi->{'Bugzilla_cookie_list'}}) {
+        $self->response->headers->push_header('Set-Cookie', $cookie);
+    }
+
+    # Copy across security related headers from Bugzilla::CGI
+    foreach my $header (split(/[\r\n]+/, $cgi->header)) {
+        my ($name, $value) = $header =~ /^([^:]+): (.*)/;
+        if (!$self->response->headers->header($name)) {
+           $self->response->headers->header($name => $value);
+        }
+    }
+
+    # ETag support
+    my $etag = $self->bz_etag;
+    if (!$etag) {
+        my $data = $self->response->as_string;
+        $etag = $self->bz_etag($data);
+    }
+
+    if ($etag && $cgi->check_etag($etag)) {
+        $self->response->headers->push_header('ETag', $etag);
+        $self->response->headers->push_header('status', '304 Not Modified');
+    }
+    elsif ($etag) {
+        $self->response->headers->push_header('ETag', $etag);
     }
 }
 
@@ -66,8 +104,11 @@ sub handle_login {
 # This exists to validate input parameters (which XMLRPC::Lite doesn't do)
 # and also, in some cases, to more-usefully decode them.
 package Bugzilla::XMLRPC::Deserializer;
+
+use 5.10.1;
 use strict;
-# We can't use "use base" because XMLRPC::Serializer doesn't return
+
+# We can't use "use parent" because XMLRPC::Serializer doesn't return
 # a true value.
 use XMLRPC::Lite;
 our @ISA = qw(XMLRPC::Deserializer);
@@ -161,7 +202,10 @@ sub _validation_subs {
 1;
 
 package Bugzilla::XMLRPC::SOM;
+
+use 5.10.1;
 use strict;
+
 use XMLRPC::Lite;
 our @ISA = qw(XMLRPC::SOM);
 use Bugzilla::WebService::Util qw(taint_data);
@@ -184,9 +228,12 @@ sub paramsin {
 # This package exists to fix a UTF-8 bug in SOAP::Lite.
 # See http://rt.cpan.org/Public/Bug/Display.html?id=32952.
 package Bugzilla::XMLRPC::Serializer;
-use Scalar::Util qw(blessed);
+
+use 5.10.1;
 use strict;
-# We can't use "use base" because XMLRPC::Serializer doesn't return
+
+use Scalar::Util qw(blessed reftype);
+# We can't use "use parent" because XMLRPC::Serializer doesn't return
 # a true value.
 use XMLRPC::Lite;
 our @ISA = qw(XMLRPC::Serializer);
@@ -219,8 +266,8 @@ sub envelope {
     my $self = shift;
     my ($type, $method, $data) = @_;
     # If the type isn't a successful response we don't want to change the values.
-    if ($type eq 'response'){
-        $data = _strip_undefs($data);
+    if ($type eq 'response') {
+        _strip_undefs($data);
     }
     return $self->SUPER::envelope($type, $method, $data);
 }
@@ -231,7 +278,9 @@ sub envelope {
 # so it cannot be recursed like the other hash type objects.
 sub _strip_undefs {
     my ($initial) = @_;
-    if (ref $initial eq "HASH" || (blessed $initial && $initial->isa("HASH"))) {
+    my $type = reftype($initial) or return;
+
+    if ($type eq "HASH") {
         while (my ($key, $value) = each(%$initial)) {
             if ( !defined $value
                  || (blessed $value && $value->isa('XMLRPC::Data') && !defined $value->value) )
@@ -240,11 +289,11 @@ sub _strip_undefs {
                 delete $initial->{$key};
             }
             else {
-                $initial->{$key} = _strip_undefs($value);
+                _strip_undefs($value);
             }
         }
     }
-    if (ref $initial eq "ARRAY" || (blessed $initial && $initial->isa("ARRAY"))) {
+    elsif ($type eq "ARRAY") {
         for (my $count = 0; $count < scalar @{$initial}; $count++) {
             my $value = $initial->[$count];
             if ( !defined $value
@@ -255,11 +304,10 @@ sub _strip_undefs {
                 $count--;
             }
             else {
-                $initial->[$count] = _strip_undefs($value);
+                _strip_undefs($value);
             }
         }
     }
-    return $initial;
 }
 
 sub BEGIN {
@@ -361,3 +409,15 @@ perl-SOAP-Lite package in versions 0.68-1 and above.
 =head1 SEE ALSO
 
 L<Bugzilla::WebService>
+
+=head1 B<Methods in need of POD>
+
+=over
+
+=item make_response
+
+=item initialize
+
+=item handle_login
+
+=back

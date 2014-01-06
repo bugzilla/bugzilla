@@ -15,6 +15,7 @@ package Bugzilla::Install::Filesystem;
 # * Files do not have the correct permissions.
 # * The database does not exist.
 
+use 5.10.1;
 use strict;
 
 use Bugzilla::Constants;
@@ -28,10 +29,11 @@ use File::Find;
 use File::Path;
 use File::Basename;
 use File::Copy qw(move);
+use File::Spec;
 use IO::File;
 use POSIX ();
 
-use base qw(Exporter);
+use parent qw(Exporter);
 our @EXPORT = qw(
     update_filesystem
     create_htaccess
@@ -396,6 +398,13 @@ sub update_filesystem {
         _update_old_charts($datadir);
     }
 
+    # If there is a file named '-All-' in $datadir/mining, then we're still
+    # having mining files named by product name, and we need to convert them to
+    # files named by product ID.
+    if (-e File::Spec->catfile($datadir, 'mining', '-All-')) {
+        _update_old_mining_filenames(File::Spec->catdir($datadir, 'mining'));
+    }
+
     # By sorting the dirs, we assure that shorter-named directories
     # (meaning parent directories) are always created before their
     # child directories.
@@ -637,6 +646,59 @@ sub _update_old_charts {
     } 
 }
 
+# The old naming scheme has product names as mining file names; we rename them
+# to product IDs.
+sub _update_old_mining_filenames {
+    my ($miningdir) = @_;
+    my @conversion_errors;
+
+    require Bugzilla::Product;
+
+    # We use a dummy product instance with ID 0, representing all products
+    my $product_all = {id => 0, name => '-All-'};
+    bless($product_all, 'Bugzilla::Product');
+
+    print "Updating old charting data file names...";
+    my @products = Bugzilla::Product->get_all();
+    push(@products, $product_all);
+    foreach my $product (@products) {
+        if (-e File::Spec->catfile($miningdir, $product->id)) {
+            push(@conversion_errors,
+                 { product => $product,
+                   message => 'A file named "' . $product->id .
+                              '" already exists.' });
+        }
+    }
+
+    if (! @conversion_errors) {
+        # Renaming mining files should work now without a hitch.
+        foreach my $product (@products) {
+            if (! rename(File::Spec->catfile($miningdir, $product->name),
+                         File::Spec->catfile($miningdir, $product->id))) {
+                push(@conversion_errors,
+                     { product => $product,
+                       message => $! });
+            }
+        }
+    }
+
+    # Error reporting
+    if (! @conversion_errors) {
+        print " done.\n";
+    }
+    else {
+        print " FAILED:\n";
+        foreach my $error (@conversion_errors) {
+            printf "Cannot rename charting data file for product %d (%s): %s\n",
+                   $error->{product}->id, $error->{product}->name,
+                   $error->{message};
+        }
+        print "You need to empty the \"$miningdir\" directory, then run\n",
+              "   collectstats.pl --regenerate\n",
+              "in order to clean this up.\n";
+    }
+}
+
 sub fix_dir_permissions {
     my ($dir) = @_;
     return if ON_WINDOWS;
@@ -866,5 +928,31 @@ If it fails to set the permissions, a warning will be printed to STDERR.
 Given the name of a file, its permissions will be fixed according to
 how they are supposed to be set in Bugzilla's current configuration.
 If it fails to set the permissions, a warning will be printed to STDERR.
+
+=back
+
+=head1 B<Methods in need of POD>
+
+=over
+
+=item CGI_WRITE
+
+=item DIR_WS_SERVE
+
+=item DIR_ALSO_WS_SERVE
+
+=item WS_SERVE
+
+=item FILESYSTEM
+
+=item WS_EXECUTE
+
+=item CGI_READ
+
+=item DIR_CGI_READ
+
+=item DIR_CGI_WRITE
+
+=item DIR_CGI_OVERWRITE
 
 =back

@@ -22,34 +22,34 @@
   style_urls = ['skins/standard/admin.css']
 %]
 
-<table border="1" cellpadding="4" cellspacing="0">
-<tr bgcolor="#6666FF">
-  <th valign="top" align="left">Field</th>
-  <th valign="top" align="left">Value</th>
-</tr>
-<tr>
-  <td valign="top">Field Name:</td>
-  <td valign="top">[% field.description FILTER html %]</td>
-</tr>
-<tr>
-  <td valign="top">Field Value:</td>
-  <td valign="top">[% value.name FILTER html %]</td>
-</tr>
-<tr>
-  <td valign="top">[% terms.Bugs %]:</td>
-  <td valign="top">
-[% IF value.bug_count %]
-  <a title="List of [% terms.bugs %] where '
-            [%- field.description FILTER html %]' is '
-            [%- value.name FILTER html %]'"
-     href="buglist.cgi?[% field.name FILTER uri %]=
-           [%- value.name FILTER uri %]">
-   [%- value.bug_count FILTER html %]</a>
-[% ELSE %]
-  None
-[% END %]
-  </td>
-</tr>
+<table id="admin_table">
+  <tr class="column_header">
+    <th>Field</th>
+    <th>Value</th>
+  </tr>
+  <tr>
+    <td>Field Name</td>
+    <td>[% field.description FILTER html %]</td>
+  </tr>
+  <tr>
+    <td>Field Value</td>
+    <td>[% value.name FILTER html %]</td>
+  </tr>
+  <tr>
+    <td>[% terms.Bugs %]</td>
+    <td>
+      [% IF value.bug_count %]
+        <a title="List of [% terms.bugs %] where '
+                  [%- field.description FILTER html %]' is '
+                  [%- value.name FILTER html %]'"
+           href="buglist.cgi?[% field.name FILTER uri %]=
+                 [%- value.name FILTER uri %]">
+          [%- value.bug_count FILTER html %]</a>
+      [% ELSE %]
+        None
+      [% END %]
+    </td>
+  </tr>
 </table>
 
 <h2>Confirmation</h2>
@@ -101,7 +101,7 @@
 
     [% IF value_count == 1 %]
       <li>'[% value.name FILTER html %]' is the last value for
-        '[%- field.description FILTER html %]', and so it can not be deleted.
+        '[%- field.description FILTER html %]', and so it cannot be deleted.
       </li>
     [% END %]
 
@@ -149,6 +149,6 @@
 
 [% PROCESS admin/fieldvalues/footer.html.tmpl
   no_edit_link = 1
- +%]
+%]
 
 [% PROCESS global/footer.html.tmpl %] 

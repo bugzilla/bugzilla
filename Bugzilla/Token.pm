@@ -5,15 +5,10 @@
 # This Source Code Form is "Incompatible With Secondary Licenses", as
 # defined by the Mozilla Public License, v. 2.0.
 
-################################################################################
-# Module Initialization
-################################################################################
-
-# Make it harder for us to do dangerous things in Perl.
-use strict;
-
-# Bundle the functions in this file together into the "Bugzilla::Token" package.
 package Bugzilla::Token;
+
+use 5.10.1;
+use strict;
 
 use Bugzilla::Constants;
 use Bugzilla::Error;
@@ -24,9 +19,9 @@ use Bugzilla::User;
 use Date::Format;
 use Date::Parse;
 use File::Basename;
-use Digest::MD5 qw(md5_hex);
+use Digest::SHA qw(hmac_sha256_base64);
 
-use base qw(Exporter);
+use parent qw(Exporter);
 
 @Bugzilla::Token::EXPORT = qw(issue_session_token check_token_data delete_token
                               issue_hash_token check_hash_token);
@@ -127,13 +122,15 @@ sub IssuePasswordToken {
 
     ThrowUserError('too_soon_for_new_token', {'type' => 'password'}) if $too_soon;
 
-    my ($token, $token_ts) = _create_token($user->id, 'password', remote_ip());
+    my $ip_addr = remote_ip();
+    my ($token, $token_ts) = _create_token($user->id, 'password', $ip_addr);
 
     # Mail the user the token along with instructions for using it.
     my $template = Bugzilla->template_inner($user->setting('lang'));
     my $vars = {};
 
     $vars->{'token'} = $token;
+    $vars->{'ip_addr'} = $ip_addr;
     $vars->{'emailaddress'} = $user->email;
     $vars->{'expiration_ts'} = ctime($token_ts + MAX_TOKEN_AGE * 86400);
     # The user is not logged in (else he wouldn't request a new password).
@@ -167,15 +164,13 @@ sub issue_hash_token {
     my $user_id = Bugzilla->user->id || remote_ip();
 
     # The concatenated string is of the form
-    # token creation time + site-wide secret + user ID (either ID or remote IP) + data
-    my @args = ($time, Bugzilla->localconfig->{'site_wide_secret'}, $user_id, @$data);
+    # token creation time + user ID (either ID or remote IP) + data
+    my @args = ($time, $user_id, @$data);
 
     my $token = join('*', @args);
-    # Wide characters cause md5_hex() to die.
-    if (Bugzilla->params->{'utf8'}) {
-        utf8::encode($token) if utf8::is_utf8($token);
-    }
-    $token = md5_hex($token);
+    $token = hmac_sha256_base64($token, Bugzilla->localconfig->{'site_wide_secret'});
+    $token =~ s/\+/-/g;
+    $token =~ s/\//_/g;
 
     # Prepend the token creation time, unencrypted, so that the token
     # lifetime can be validated.
@@ -260,12 +255,17 @@ sub Cancel {
 
     # Get information about the token being canceled.
     trick_taint($token);
-    my ($issuedate, $tokentype, $eventdata, $userid) =
-        $dbh->selectrow_array('SELECT ' . $dbh->sql_date_format('issuedate') . ',
+    my ($db_token, $issuedate, $tokentype, $eventdata, $userid) =
+        $dbh->selectrow_array('SELECT token, ' . $dbh->sql_date_format('issuedate') . ',
                                       tokentype, eventdata, userid
                                  FROM tokens
                                 WHERE token = ?',
                                 undef, $token);
+
+    # Some DBs such as MySQL are case-insensitive by default so we do
+    # a quick comparison to make sure the tokens are indeed the same.
+    (defined $db_token && $db_token eq $token)
+        || ThrowCodeError("cancel_token_does_not_exist");
 
     # If we are canceling the creation of a new user account, then there
     # is no entry in the 'profiles' table.
@@ -331,10 +331,17 @@ sub GetTokenData {
     $token = clean_text($token);
     trick_taint($token);
 
-    return $dbh->selectrow_array(
-        "SELECT userid, " . $dbh->sql_date_format('issuedate') . ", eventdata, tokentype
-         FROM   tokens 
+    my @token_data = $dbh->selectrow_array(
+        "SELECT token, userid, " . $dbh->sql_date_format('issuedate') . ", eventdata, tokentype
+         FROM   tokens
          WHERE  token = ?", undef, $token);
+
+    # Some DBs such as MySQL are case-insensitive by default so we do
+    # a quick comparison to make sure the tokens are indeed the same.
+    my $db_token = shift @token_data;
+    return undef if (!defined $db_token || $db_token ne $token);
+
+    return @token_data;
 }
 
 # Deletes specified token
@@ -604,3 +611,13 @@ although they can be used separately.
 =back
 
 =cut
+
+=head1 B<Methods in need of POD>
+
+=over
+
+=item check_hash_token
+
+=item issue_hash_token
+
+=back

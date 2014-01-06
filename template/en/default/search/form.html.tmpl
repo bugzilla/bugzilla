@@ -114,7 +114,7 @@ TUI_hide_default('information_query');
     [%+ field_descs.longdesc FILTER html %]s, [%+ field_descs.bug_file_loc FILTER html %], 
     [% IF Param('usestatuswhiteboard') %] [%+ field_descs.status_whiteboard FILTER html %], [%+ END %]
     [% IF use_keywords %] [%+ field_descs.keywords FILTER html %], [%+ END %]
-    [% IF user.is_timetracker %] [%+ field_descs.deadline FILTER html %], [%+ END %]
+    [% IF Param('timetrackinggroup') %] [%+ field_descs.deadline FILTER html %], [%+ END %]
     [% terms.Bug %] Numbers, [%+ field_descs.version FILTER html %], 
     [% IF Param('usetargetmilestone') %] [%+ field_descs.target_milestone FILTER html %], [%+ END %]
     [% field_descs.bug_severity FILTER html %], [%+ field_descs.priority FILTER html %], [%+ field_descs.rep_platform FILTER html %], 
@@ -142,6 +142,7 @@ TUI_hide_default('information_query');
     %]
     <div class="search_field_row">
       [% type = field_container.field.name _ "_type" %]
+      [% possible_values = field_container.field.name == 'keywords' ? all_keywords : [] %]
       [% INCLUDE "search/field.html.tmpl" 
           field => field_container.field
           types => field_container.qtypes || query_types
@@ -152,8 +153,7 @@ TUI_hide_default('information_query');
     </div>
   [% END %]
 
-  [%# Deadline %]
-  [% IF user.is_timetracker %]
+  [% IF Param('timetrackinggroup') %]
     <div class="search_field_row">
         [% INCLUDE "search/field.html.tmpl" 
                     field = bug_fields.deadline 
@@ -170,11 +170,13 @@ TUI_hide_default('information_query');
            value="[% default.bug_id.0 FILTER html %]" size="20">
            <div class="field_help">(comma-separated list)</div>
     </div>
-    should be 
-    <select name="bug_id_type" id="bug_id_type">
-      <option value="anyexact"[% " selected" IF default.bug_id_type.0 == "anyexact" %]>only included in</option>
-      <option value="nowords"[% " selected" IF default.bug_id_type.0 == "nowords" %]>excluded from</option>
-    </select> the results
+    <span class="field_label field_label_sup">
+      should be 
+      <select name="bug_id_type" id="bug_id_type">
+        <option value="anyexact"[% " selected" IF default.bug_id_type.0 == "anyexact" %]>only included in</option>
+        <option value="nowords"[% " selected" IF default.bug_id_type.0 == "nowords" %]>excluded from</option>
+      </select> the results
+    </span>
   </div>
 
   [% Hook.process('after_freetext_fields') %]
@@ -256,12 +258,12 @@ TUI_hide_default('information_query');
           [% " selected" IF default.emailtype.$n == qv.name %]>[% qv.description %]</option>
       [% END %]
       </select>
-      [% IF feature_enabled('jsonrpc') %]
+      [% IF feature_enabled('jsonrpc') && Param('ajax_user_autocompletion') %]
         <div id="email[% n %]_autocomplete">
       [% END %]
       <input name="email[% n %]" class="email" id="email[% n %]" 
              value="[% default.email.$n FILTER html %]">
-      [% IF feature_enabled('jsonrpc') %]
+      [% IF feature_enabled('jsonrpc') && Param('ajax_user_autocompletion') %]
         <div id="email[% n %]_autocomplete_container"></div>
         </div>
         <script type="text/javascript">
@@ -318,9 +320,10 @@ TUI_hide_default('information_query');
           <div id="con_calendar_chfieldto"></div>
     (YYYY-MM-DD or relative dates)
     <script type="text/javascript">
-      createCalendar('chfieldfrom');
-      createCalendar('chfieldto');
-    </script>
+      <!--
+        [%+ PROCESS "global/calendar.js.tmpl" id = 'chfieldfrom' %]
+        [% PROCESS "global/calendar.js.tmpl" id = 'chfieldto' %]
+      //--></script>
   </li>    
 </ul>
 

@@ -7,6 +7,7 @@
 
 package Bugzilla::Auth;
 
+use 5.10.1;
 use strict;
 use fields qw(
     _info_getter
@@ -22,6 +23,7 @@ use Bugzilla::User::Setting ();
 use Bugzilla::Auth::Login::Stack;
 use Bugzilla::Auth::Verify::Stack;
 use Bugzilla::Auth::Persist::Cookie;
+use Socket;
 
 sub new {
     my ($class, $params) = @_;
@@ -107,6 +109,15 @@ sub can_logout {
     return $getter->can_logout;
 }
 
+sub login_token {
+    my ($self) = @_;
+    my $getter = $self->{_info_getter}->{successful};
+    if ($getter && $getter->isa('Bugzilla::Auth::Login::Cookie')) {
+        return $getter->login_token;
+    }
+    return undef;
+}
+
 sub user_can_create_account {
     my ($self) = @_;
     my $verifier = $self->{_verifier}->{successful};
@@ -167,7 +178,7 @@ sub _handle_login_result {
     elsif ($fail_code == AUTH_LOGINFAILED or $fail_code == AUTH_NO_SUCH_USER) {
         my $remaining_attempts = MAX_LOGIN_ATTEMPTS 
                                  - ($result->{failure_count} || 0);
-        ThrowUserError("invalid_username_or_password", 
+        ThrowUserError("invalid_login_or_password", 
                        { remaining => $remaining_attempts });
     }
     # The account may be disabled
@@ -199,10 +210,18 @@ sub _handle_login_result {
             my $default_settings = Bugzilla::User::Setting::get_defaults();
             my $template = Bugzilla->template_inner(
                                $default_settings->{lang}->{default_value});
+            my $address = $attempts->[0]->{ip_addr};
+            # Note: inet_aton will only resolve IPv4 addresses.
+            # For IPv6 we'll need to use inet_pton which requires Perl 5.12.
+            my $n = inet_aton($address);
+            if ($n) {
+                $address = gethostbyaddr($n, AF_INET) . " ($address)"
+            }
             my $vars = {
                 locked_user => $user,
                 attempts    => $attempts,
                 unlock_at   => $unlock_at,
+                address     => $address,
             };
             my $message;
             $template->process('email/lockout.txt.tmpl', $vars, \$message)
@@ -399,6 +418,14 @@ Description: Whether or not the current login system allows users to
 Params:      None
 Returns:     C<true> if users can change their own email address,
              C<false> otherwise.
+
+=item C<login_token>
+
+Description: If a login token was used instead of a cookie then this
+             will return the current login token data such as user id
+             and the token itself.
+Params:      None
+Returns:     A hash containing C<login_token> and C<user_id>.
 
 =back
 

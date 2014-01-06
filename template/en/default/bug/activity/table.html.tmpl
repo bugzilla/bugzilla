@@ -33,8 +33,8 @@
 [% END %]
 
 [% IF operations.size > 0 %]
-  <table border cellpadding="4">
-    <tr>
+  <table id="bug_activity">
+    <tr class="column_header">
       <th>Who</th>
       <th>When</th>
       <th>What</th>
@@ -44,10 +44,10 @@
 
     [% FOREACH operation = operations %]
       <tr>
-        <td rowspan="[% operation.changes.size %]" valign="top">
+        <td rowspan="[% operation.changes.size %]">
           [% operation.who FILTER email FILTER html %]
         </td>
-        <td rowspan="[% operation.changes.size %]" valign="top">
+        <td rowspan="[% operation.changes.size %]">
           [% operation.when FILTER time %]
         </td>
         [% FOREACH change = operation.changes %]
@@ -94,7 +94,7 @@
                change.fieldname == 'flagtypes.name' %]
         [% display_value(change.fieldname, change_type) FILTER email FILTER html %]
       [% ELSE %]
-        [% display_value(change.fieldname, change_type) FILTER html %]
+        [% display_value(change.fieldname, change_type) FILTER html FILTER html_line_break %]
       [% END %]
     [% ELSE %]
       &nbsp;

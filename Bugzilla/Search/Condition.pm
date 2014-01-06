@@ -6,8 +6,11 @@
 # defined by the Mozilla Public License, v. 2.0.
 
 package Bugzilla::Search::Condition;
+
+use 5.10.1;
 use strict;
-use base qw(Exporter);
+
+use parent qw(Exporter);
 our @EXPORT_OK = qw(condition);
 
 sub new {
@@ -18,8 +21,15 @@ sub new {
 }
 
 sub field    { return $_[0]->{field}    }
-sub operator { return $_[0]->{operator} }
 sub value    { return $_[0]->{value}    }
+
+sub operator {
+    my ($self, $value) = @_;
+    if (@_ == 2) {
+        $self->{operator} = $value;
+    }
+    return $self->{operator};
+}
 
 sub fov {
     my ($self) = @_;
@@ -66,3 +76,27 @@ sub condition {
 }
 
 1;
+
+=head1 B<Methods in need of POD>
+
+=over
+
+=item as_string
+
+=item fov
+
+=item value
+
+=item negate
+
+=item translated
+
+=item operator
+
+=item as_params
+
+=item condition
+
+=item field
+
+=back

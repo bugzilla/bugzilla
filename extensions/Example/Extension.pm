@@ -6,8 +6,10 @@
 # defined by the Mozilla Public License, v. 2.0.
 
 package Bugzilla::Extension::Example;
+
+use 5.10.1;
 use strict;
-use base qw(Bugzilla::Extension);
+use parent qw(Bugzilla::Extension);
 
 use Bugzilla::Constants;
 use Bugzilla::Error;
@@ -28,6 +30,20 @@ use Data::Dumper;
 use constant REL_EXAMPLE => -127;
 
 our $VERSION = '1.0';
+
+sub admin_editusers_action {
+    my ($self, $args) = @_;
+    my ($vars, $action, $user) = @$args{qw(vars action user)};
+    my $template = Bugzilla->template;
+
+    if ($action eq 'my_action') {
+        # Allow to restrict the search to any group the user is allowed to bless.
+        $vars->{'restrictablegroups'} = $user->bless_groups();
+        $template->process('admin/users/search.html.tmpl', $vars)
+            || ThrowTemplateError($template->error());
+        exit;
+    }
+}
 
 sub attachment_process_data {
     my ($self, $args) = @_;
@@ -65,6 +81,44 @@ sub auth_verify_methods {
     }
 }
 
+sub bug_check_can_change_field {
+    my ($self, $args) = @_;
+
+    my ($bug, $field, $new_value, $old_value, $priv_results)
+        = @$args{qw(bug field new_value old_value priv_results)};
+
+    my $user = Bugzilla->user;
+
+    # Disallow a bug from being reopened if currently closed unless user 
+    # is in 'admin' group
+    if ($field eq 'bug_status' && $bug->product_obj->name eq 'Example') {
+        if (!is_open_state($old_value) && is_open_state($new_value) 
+            && !$user->in_group('admin')) 
+        {
+            push(@$priv_results, PRIVILEGES_REQUIRED_EMPOWERED);
+            return;
+        }
+    }
+
+    # Disallow a bug's keywords from being edited unless user is the
+    # reporter of the bug 
+    if ($field eq 'keywords' && $bug->product_obj->name eq 'Example' 
+        && $user->login ne $bug->reporter->login) 
+    {
+        push(@$priv_results, PRIVILEGES_REQUIRED_REPORTER);
+        return;
+    }
+
+    # Allow updating of priority even if user cannot normally edit the bug 
+    # and they are in group 'engineering'
+    if ($field eq 'priority' && $bug->product_obj->name eq 'Example'
+        && $user->in_group('engineering')) 
+    {
+        push(@$priv_results, PRIVILEGES_REQUIRED_NONE);
+        return;
+    }
+}
+
 sub bug_columns {
     my ($self, $args) = @_;
     my $columns = $args->{'columns'};
@@ -99,6 +153,42 @@ sub bug_end_of_create_validators {
     # This would remove all ccs from the bug, preventing ANY ccs from being
     # added on bug creation.
     # $bug_params->{cc} = [];
+}
+
+sub bug_start_of_update {
+    my ($self, $args) = @_;
+
+    # This code doesn't actually *do* anything, it's just here to show you
+    # how to use this hook.
+    my ($bug, $old_bug, $timestamp, $changes) = 
+        @$args{qw(bug old_bug timestamp changes)};
+
+    foreach my $field (keys %$changes) {
+        my $used_to_be = $changes->{$field}->[0];
+        my $now_it_is  = $changes->{$field}->[1];
+    }
+
+    my $old_summary = $old_bug->short_desc;
+
+    my $status_message;
+    if (my $status_change = $changes->{'bug_status'}) {
+        my $old_status = new Bugzilla::Status({ name => $status_change->[0] });
+        my $new_status = new Bugzilla::Status({ name => $status_change->[1] });
+        if ($new_status->is_open && !$old_status->is_open) {
+            $status_message = "Bug re-opened!";
+        }
+        if (!$new_status->is_open && $old_status->is_open) {
+            $status_message = "Bug closed!";
+        }
+    }
+
+    my $bug_id = $bug->id;
+    my $num_changes = scalar keys %$changes;
+    my $result = "There were $num_changes changes to fields on bug $bug_id"
+                 . " at $timestamp.";
+    # Uncomment this line to see $result in your webserver's error log whenever
+    # you update a bug.
+    # warn $result;
 }
 
 sub bug_end_of_update {
@@ -246,6 +336,13 @@ sub bugmail_relationships {
     $relationships->{+REL_EXAMPLE} = 'Example';
 }
 
+sub cgi_headers {
+    my ($self, $args) = @_;
+    my $headers = $args->{'headers'};
+
+    $headers->{'-x_test_header'} = "Test header from Example extension";
+}
+
 sub config_add_panels {
     my ($self, $args) = @_;
     
@@ -356,7 +453,13 @@ sub error_catch {
     my $new_error_msg = "Ah ah, you tried to access $page_id? Good try!";
     $new_error_msg = html_quote($new_error_msg);
     # There are better tools to parse an HTML page, but it's just an example.
-    $$page =~ s/(?<=<td id="error_msg" class="throw_error">).*(?=<\/td>)/$new_error_msg/si;
+    # Since Perl 5.16, we can no longer write "class" inside look-behind
+    # assertions, because "ss" is also seen as the german ß character, which
+    # makes Perl 5.16 complain. The right fix is to use the /aa modifier,
+    # but it's only understood since Perl 5.14. So the workaround is to write
+    # "clas[s]" instead of "class". Stupid and ugly hack, but it works with
+    # all Perl versions.
+    $$page =~ s/(?<=<td id="error_msg" clas[s]="throw_error">).*(?=<\/td>)/$new_error_msg/si;
 }
 
 sub flag_end_of_update {
@@ -657,10 +760,12 @@ sub _check_short_desc {
     my $invocant = shift;
     my $value = $invocant->$original(@_);
     if ($value !~ /example/i) {
-        # Uncomment this line to make Bugzilla throw an error every time
+        # Use this line to make Bugzilla throw an error every time
         # you try to file a bug or update a bug without the word "example"
         # in the summary.
-        #ThrowUserError('example_short_desc_invalid');
+        if (0) {
+            ThrowUserError('example_short_desc_invalid');
+        }
     }
     return $value;
 }
@@ -674,6 +779,12 @@ sub page_before_template {
     if ($page eq 'example.html') {
         $vars->{cgi_variables} = { Bugzilla->cgi->Vars };
     }
+}
+
+sub path_info_whitelist {
+    my ($self, $args) = @_;
+    my $whitelist = $args->{whitelist};
+    push(@$whitelist, "page.cgi");
 }
 
 sub post_bug_after_creation {
@@ -801,58 +912,6 @@ sub template_before_process {
 
     if ($file eq 'bug/edit.html.tmpl') {
         $vars->{'viewing_the_bug_form'} = 1;
-    }
-}
-
-sub bug_check_can_change_field {
-    my ($self, $args) = @_;
-
-    my ($bug, $field, $new_value, $old_value, $priv_results)
-        = @$args{qw(bug field new_value old_value priv_results)};
-
-    my $user = Bugzilla->user;
-
-    # Disallow a bug from being reopened if currently closed unless user 
-    # is in 'admin' group
-    if ($field eq 'bug_status' && $bug->product_obj->name eq 'Example') {
-        if (!is_open_state($old_value) && is_open_state($new_value) 
-            && !$user->in_group('admin')) 
-        {
-            push(@$priv_results, PRIVILEGES_REQUIRED_EMPOWERED);
-            return;
-        }
-    }
-
-    # Disallow a bug's keywords from being edited unless user is the
-    # reporter of the bug 
-    if ($field eq 'keywords' && $bug->product_obj->name eq 'Example' 
-        && $user->login ne $bug->reporter->login) 
-    {
-        push(@$priv_results, PRIVILEGES_REQUIRED_REPORTER);
-        return;
-    }
-
-    # Allow updating of priority even if user cannot normally edit the bug 
-    # and they are in group 'engineering'
-    if ($field eq 'priority' && $bug->product_obj->name eq 'Example'
-        && $user->in_group('engineering')) 
-    {
-        push(@$priv_results, PRIVILEGES_REQUIRED_NONE);
-        return;
-    }
-}
-
-sub admin_editusers_action {
-    my ($self, $args) = @_;
-    my ($vars, $action, $user) = @$args{qw(vars action user)};
-    my $template = Bugzilla->template;
-
-    if ($action eq 'my_action') {
-        # Allow to restrict the search to any group the user is allowed to bless.
-        $vars->{'restrictablegroups'} = $user->bless_groups();
-        $template->process('admin/users/search.html.tmpl', $vars)
-            || ThrowTemplateError($template->error());
-        exit;
     }
 }
 

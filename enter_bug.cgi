@@ -16,8 +16,8 @@
 #
 ##############################################################################
 
+use 5.10.1;
 use strict;
-
 use lib qw(. lib);
 
 use Bugzilla;
@@ -25,15 +25,14 @@ use Bugzilla::Constants;
 use Bugzilla::Util;
 use Bugzilla::Error;
 use Bugzilla::Bug;
-use Bugzilla::User;
 use Bugzilla::Hook;
-use Bugzilla::Product;
 use Bugzilla::Classification;
-use Bugzilla::Keyword;
 use Bugzilla::Token;
 use Bugzilla::Field;
 use Bugzilla::Status;
 use Bugzilla::UserAgent;
+
+use List::MoreUtils qw(none);
 
 my $user = Bugzilla->login(LOGIN_REQUIRED);
 
@@ -65,23 +64,7 @@ if ($product_name eq '') {
     my @classifications;
 
     unless ($classification && $classification ne '__all') {
-        if (Bugzilla->params->{'useclassification'}) {
-            my $class;
-            # Get all classifications with at least one enterable product.
-            foreach my $product (@enterable_products) {
-                $class->{$product->classification_id}->{'object'} ||=
-                    new Bugzilla::Classification($product->classification_id);
-                # Nice way to group products per classification, without querying
-                # the DB again.
-                push(@{$class->{$product->classification_id}->{'products'}}, $product);
-            }
-            @classifications = sort {$a->{'object'}->sortkey <=> $b->{'object'}->sortkey
-                                     || lc($a->{'object'}->name) cmp lc($b->{'object'}->name)}
-                                    (values %$class);
-        }
-        else {
-            @classifications = ({object => undef, products => \@enterable_products});
-        }
+        @classifications = @{sort_products_by_classification(\@enterable_products)};
     }
 
     unless ($classification) {
@@ -166,9 +149,16 @@ if ($cloned_bug_id) {
     $cloned_bug_id = $cloned_bug->id;
 }
 
-if (scalar(@{$product->components}) == 1) {
-    # Only one component; just pick it.
-    $cgi->param('component', $product->components->[0]->name);
+# If there is only one active component, choose it
+my @active = grep { $_->is_active } @{$product->components};
+if (scalar(@active) == 1) {
+    $cgi->param('component', $active[0]->name);
+}
+
+# If there is only one active version, choose it
+@active = grep { $_->is_active } @{$product->versions};
+if (scalar(@active) == 1) {
+    $cgi->param('version', $active[0]->name);
 }
 
 my %default;
@@ -225,13 +215,14 @@ if ($cloned_bug_id) {
     $vars->{'deadline'}       = $cloned_bug->deadline;
     $vars->{'estimated_time'} = $cloned_bug->estimated_time;
 
-    if (defined $cloned_bug->cc) {
+    if (scalar @{$cloned_bug->cc}) {
         $vars->{'cc'}         = join (", ", @{$cloned_bug->cc});
     } else {
         $vars->{'cc'}         = formvalue('cc');
     }
     
-    if ($cloned_bug->reporter->id != $user->id) {
+    if ($cloned_bug->reporter->id != $user->id
+        && none { $_ eq $cloned_bug->reporter->login } @{$cloned_bug->cc}) {
         $vars->{'cc'} = join (", ", $cloned_bug->reporter->login, $vars->{'cc'}); 
     }
 

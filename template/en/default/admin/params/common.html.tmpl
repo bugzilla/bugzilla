@@ -69,14 +69,14 @@
                 [% END %]
               </select>
             </td>
-            <td style="vertical-align: bottom">
+            <td class="bottom">
               <button type="button"
                       onClick="sortedList_moveItem('[% param.name FILTER html %]', -1, '[% sortlist_separator %]');">&uarr;</button>
             </td>
           </tr>
 
           <tr>
-            <td style="vertical-align: top">
+            <td class="top">
               <button type="button"
                       onClick="sortedList_moveItem('[% param.name FILTER html %]', +1, '[% sortlist_separator %]');">&darr;</button>
             </td>
@@ -107,10 +107,10 @@
           [% END %]
         </select>
       [% ELSE %]
-        <font color="red">
-          <blink>Unknown param type [% param.type FILTER html %]!!!</blink>
-        </font>
-      [% END %]  
+        <span class="warning">
+          Unknown param type [% param.type FILTER html %]!!!
+        </span>
+      [% END %]
       </p>
       [% UNLESS param.no_reset %]
         <p>

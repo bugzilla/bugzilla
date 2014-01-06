@@ -14,6 +14,7 @@
 # param. (We have NEW and REOPENED in there to keep compatibility with old
 # Bugzillas.)
 
+use 5.10.1;
 use strict;
 use lib qw(. lib);
 

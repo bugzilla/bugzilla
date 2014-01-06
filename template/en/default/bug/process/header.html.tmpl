@@ -17,7 +17,7 @@
 [% IF    title_tag == "bug_processed" %]
   [% title = BLOCK %]
     [% IF Bugzilla.cgi.param('id') %]
-      [% terms.Bug %] [%+ id FILTER html %]
+      [%+ id FILTER html %]
     [% ELSE %]
       [% terms.Bugs %]
     [% END %]

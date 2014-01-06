@@ -13,23 +13,46 @@
   # be overridden by the calling templates.
   #%]
 
+[% filtered_alias = bug.alias FILTER html %]
 [% filtered_desc = bug.short_desc FILTER html %]
-[% subheader = filtered_desc %]
 [% filtered_timestamp = bug.delta_ts FILTER time %]
-[% title = "$terms.Bug $bug.bug_id &ndash; $filtered_desc" %]
-[% header = "$terms.Bug&nbsp;$bug.bug_id" %]
-[% header_addl_info = "Last modified: $filtered_timestamp" %]
+
+[% subheader = filtered_desc %]
+[% title = "$bug.bug_id &ndash; " %]
+[% IF bug.alias != '' %]
+  [% title = title _ "($filtered_alias) " %]
+[% END %]
+[% title = title _ filtered_desc %]
 [% yui = ['autocomplete', 'calendar'] %]
+[% yui.push('container') IF user.can_tag_comments %]
 [% javascript_urls = [ "js/util.js", "js/field.js" ] %]
+[% javascript_urls.push('js/comment-tagging.js')
+     IF user.id && Param('comment_taggers_group') %]
 [% IF bug.defined %]
-  [% unfiltered_title = "$terms.Bug $bug.bug_id – $bug.short_desc" %]
+  [% header = "$terms.Bug&nbsp;$bug.bug_id" %]
+  [% header_addl_info = "Last modified: $filtered_timestamp" %]
+  [% unfiltered_title = "$bug.bug_id – " %]
+  [% IF bug.alias != '' %]
+    [% unfiltered_title = unfiltered_title _ "($bug.alias) " %]
+  [% END %]
+  [% unfiltered_title = unfiltered_title _ bug.short_desc %]
   [% javascript =  BLOCK %]
-    if( !document.location.href.match(/show_bug\.cgi/) && history && history.replaceState ) {
-      history.replaceState( null, 
-                         "[% unfiltered_title FILTER js %]",  
-                         "show_bug.cgi?id=[% bug.bug_id FILTER js %]" );
-      document.title = "[% unfiltered_title FILTER js %]";
+    if (history && history.replaceState) {
+      if(!document.location.href.match(/show_bug\.cgi/)) {
+        history.replaceState( null,
+                             "[% unfiltered_title FILTER js %]",
+                             "show_bug.cgi?id=[% bug.bug_id FILTER js %]" );
+        document.title = "[% unfiltered_title FILTER js %]";
+      }
+      if (document.location.href.match(/show_bug\.cgi\?.*list_id=/)) {
+        var href = document.location.href;
+        href = href.replace(/[\?&]+list_id=(\d+|cookie)/, '');
+        history.replaceState(null, "[% unfiltered_title FILTER js %]", href);
+      }
     }
+    YAHOO.util.Event.onDOMReady(function() {
+      initDirtyFieldTracking();
+    });
     [% javascript FILTER none %]
   [% END %]
 [% END %]

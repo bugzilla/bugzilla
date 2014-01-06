@@ -6,6 +6,7 @@
 # This Source Code Form is "Incompatible With Secondary Licenses", as
 # defined by the Mozilla Public License, v. 2.0.
 
+use 5.10.1;
 use strict;
 use lib qw(. lib);
 
@@ -119,7 +120,7 @@ if ($action eq 'save' && $current_module) {
                 }
             } elsif ($name eq 'globalwatchers') {
                 # can't check this as others, as Bugzilla::Config::Common
-                # can not use Bugzilla::User
+                # cannot use Bugzilla::User
                 foreach my $watcher (split(/[,\s]+/, $value)) {
                     ThrowUserError(
                         'invalid_parameter',

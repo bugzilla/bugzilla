@@ -5,11 +5,12 @@
 # This Source Code Form is "Incompatible With Secondary Licenses", as
 # defined by the Mozilla Public License, v. 2.0.
 
-use strict;
-
 package Bugzilla::Search::Saved;
 
-use base qw(Bugzilla::Object);
+use 5.10.1;
+use strict;
+
+use parent qw(Bugzilla::Object);
 
 use Bugzilla::CGI;
 use Bugzilla::Constants;
@@ -96,7 +97,7 @@ sub check {
     if (!$search->shared_with_group
         or !$user->in_group($search->shared_with_group)) 
     {
-        ThrowUserError('missing_query', { queryname => $search->name, 
+        ThrowUserError('missing_query', { name => $search->name,
                                           sharer_id => $search->user->id });
     }
 
@@ -383,5 +384,23 @@ this search isn't shared.
 
 Returns how many users (besides the author of the saved search) are
 using the saved search, i.e. have it displayed in their footer.
+
+=back
+
+=head1 B<Methods in need of POD>
+
+=over
+
+=item create
+
+=item set_name
+
+=item set_url
+
+=item rename_field_value
+
+=item user
+
+=item used_in_whine
 
 =back

@@ -13,31 +13,35 @@
   #%]
 
 <table>
-  <tr>
-    <td colspan="3">
-      Please enter your existing password to confirm account changes.
-    </td>
-  </tr>
-  <tr>
-    <th align="right">Password:</th>
-    <td>
-      <input type="hidden" name="old_login" value="[% user.login FILTER html %]">
-      <input type="password" name="old_password">
-    </td>
-  </tr>              
-  <tr>
-    <td colspan="2"><hr></td>
-  </tr>
+  [% IF user.authorizer.can_change_password
+        || (user.authorizer.can_change_email && Param('allowemailchange')) %]
+    <tr>
+      <td colspan="3">
+        Please enter your existing password to confirm account changes.
+      </td>
+    </tr>
+    <tr>
+      <th>Password:</th>
+      <td>
+        <input type="hidden" name="old_login" value="[% user.login FILTER html %]">
+        <input type="password" name="old_password">
+      </td>
+    </tr>
+    <tr>
+      <td colspan="2"><hr></td>
+    </tr>
+  [% END %]
+
   [% IF user.authorizer.can_change_password %]
     <tr>
-      <th align="right">New password:</th>
+      <th>New password:</th>
       <td>
         <input type="password" name="new_password1">
       </td>
     </tr>              
 
     <tr>
-      <th align="right">Confirm new password:</th>
+      <th>Confirm new password:</th>
       <td>
         <input type="password" name="new_password2">
       </td>
@@ -45,7 +49,7 @@
   [% END %]
 
   <tr>
-    <th align="right">Your real name (optional, but encouraged):</th>
+    <th>Your real name (optional, but encouraged):</th>
     <td>
       <input size="35" name="realname" value="[% realname FILTER html %]">
     </td>
@@ -55,26 +59,26 @@
     [% IF login_change_date %]
       [% IF new_login_name %]
         <tr>
-          <th align="right">Pending email address:</th>
+          <th>Pending email address:</th>
           <td>[% new_login_name FILTER html %]</td>
         </tr>
         <tr>
-          <th align="right">Change request expires:</th>
+          <th>Change request expires:</th>
           <td>[% login_change_date FILTER time %]</td>
         </tr>
       [% ELSE %]
         <tr>
-          <th align="right">Confirmed email address:</th>
+          <th>Confirmed email address:</th>
           <td>[% user.login FILTER html %]</td>
         </tr>
         <tr>
-          <th align="right">Completion date:</th>
+          <th>Completion date:</th>
           <td>[% login_change_date FILTER time %]</td>
         </tr>
       [% END %]
     [% ELSE %]
       <tr>
-        <th align="right">New email address:</th>
+        <th>New email address:</th>
         <td>
           <input size="35" name="new_login_name">
         </td>

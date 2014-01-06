@@ -6,7 +6,10 @@
 # defined by the Mozilla Public License, v. 2.0.
 
 package Bugzilla::Config::General;
+
+use 5.10.1;
 use strict;
+
 use Bugzilla::Config::Common;
 
 our $sortkey = 150;

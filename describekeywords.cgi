@@ -6,12 +6,12 @@
 # This Source Code Form is "Incompatible With Secondary Licenses", as
 # defined by the Mozilla Public License, v. 2.0.
 
+use 5.10.1;
 use strict;
 use lib qw(. lib);
 
 use Bugzilla;
 use Bugzilla::Error;
-use Bugzilla::User;
 use Bugzilla::Keyword;
 
 my $user = Bugzilla->login();
@@ -24,7 +24,9 @@ my $vars = {};
 Bugzilla->switch_to_shadow_db;
 
 $vars->{'keywords'} = Bugzilla::Keyword->get_all_with_bug_count();
-$vars->{'caneditkeywords'} = $user->in_group("editkeywords");
+if (!@{$vars->{keywords}}) {
+    ThrowUserError("no_keywords");
+}
 
 print $cgi->header();
 $template->process("reports/keywords.html.tmpl", $vars)

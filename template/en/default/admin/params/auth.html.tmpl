@@ -93,20 +93,27 @@
                   "front page will require a login. No anonymous users will " _
                   "be permitted.",
 
+  webservice_email_filter =>
+    "Filter email addresses returned by the WebService API depending on " _
+    "if the user is logged in or not. This works similarly to how the " _
+    "web UI currently filters email addresses. If <var>requirelogin</var> " _
+    "is enabled, then this parameter has no effect as users must be logged " _
+    "in to use ${terms.Bugzilla}.",
+
   emailregexp =>
     "This defines the regular expression to use for legal email addresses. " _
     "The default tries to match fully qualified email addresses. " _
-    "Use <tt>.*</tt> to accept any email address following the " _
-    "<a href='http://tools.ietf.org/html/rfc2822#section-3.4.1'>RFC 2822</a> " _
-    "specification. Another popular value to put here is <tt>^[^@]+$</tt>, " _
+    "Use <kbd>.*</kbd> to accept any email address following the " _
+    "<a href=\"http://tools.ietf.org/html/rfc2822#section-3.4.1\">RFC 2822</a> " _
+    "specification. Another popular value to put here is <kbd>^[^@]+$</kbd>, " _
     "which means 'local usernames, no @ allowed.'",
 
-  emailregexpdesc => "This describes in English words what kinds of legal addresses " _
-                     "are allowed by the <tt>emailregexp</tt> param.",
+  emailregexpdesc => "This description explains valid addresses that " _
+                     "are allowed by the <var>emailregexp</var> param.",
 
   emailsuffix => "This is a string to append to any email addresses when actually " _
                  "sending mail to that address. It is useful if you have changed " _
-                 "the <tt>emailregexp</tt> param to only allow local usernames, " _
+                 "the <var>emailregexp</var> param to only allow local usernames, " _
                  "but you want the mail to be delivered to username@my.local.hostname.",
 
   createemailregexp => "This defines the (case-insensitive) regexp to use for email addresses that are " _
@@ -125,6 +132,6 @@
     "<li>letters_numbers - Passwords must contain at least one UPPER and one " _
     "lower case letter and a number.</li>" _
     "<li>letters_numbers_specialchars - Passwords must contain at least one " _
-    "UPPER or one lower case letter, a number and a special character.</li></ul>"
+    "letter, a number and a special character.</li></ul>"
   }
 %]

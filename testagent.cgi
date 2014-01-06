@@ -10,7 +10,9 @@
 # are being run instead of shown. This script does not rely on database access
 # or correct params.
 
+use 5.10.1;
 use strict;
-print "content-type:text/plain\n\n";
-print "OK " . ($::ENV{MOD_PERL} || "mod_cgi") . "\n";
+
+say "content-type:text/plain\n";
+say "OK " . ($::ENV{MOD_PERL} || "mod_cgi");
 exit;

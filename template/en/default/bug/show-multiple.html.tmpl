@@ -76,7 +76,7 @@
       [% rightcells.push('qa_contact') %]
     [% END %]
     [% rightcells.push('') %]
-    [% IF bug.cc %]
+    [% IF bug.cc.size %]
       [% rightcells.push('cc') %]
     [% END %]
     [% IF bug.keywords %]
@@ -233,6 +233,8 @@
           </table>
         </td>
       </tr>
+    [% END %]
+    [% IF Param("timetrackinggroup") && bug.deadline %]
       [% PROCESS row cell="deadline" %]
     [% END %]
 

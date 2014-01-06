@@ -7,11 +7,12 @@
 
 package Bugzilla::User::Setting::Timezone;
 
+use 5.10.1;
 use strict;
 
 use DateTime::TimeZone;
 
-use base qw(Bugzilla::User::Setting);
+use parent qw(Bugzilla::User::Setting);
 
 use Bugzilla::Constants;
 

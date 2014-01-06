@@ -6,6 +6,7 @@
 # This Source Code Form is "Incompatible With Secondary Licenses", as
 # defined by the Mozilla Public License, v. 2.0.
 
+use 5.10.1;
 use strict;
 use warnings;
 
@@ -22,7 +23,7 @@ use Bugzilla::Install::CPAN;
 
 use Bugzilla::Constants;
 use Bugzilla::Install::Requirements;
-use Bugzilla::Install::Util qw(bin_loc init_console vers_cmp);
+use Bugzilla::Install::Util qw(bin_loc init_console);
 
 use Data::Dumper;
 use Getopt::Long;

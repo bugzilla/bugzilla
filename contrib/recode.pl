@@ -29,8 +29,10 @@ use constant MAX_STRING_LEN => 25;
 # For certain tables, we can't automatically determine their Primary Key.
 # So, we specify it here as a string.
 use constant SPECIAL_KEYS => {
+    # bugs_activity since 4.4 has a unique primary key added
     bugs_activity     => 'bug_id,bug_when,fieldid',
     profile_setting   => 'user_id,setting_name',
+    # profiles_activity since 4.4 has a unique primary key added
     profiles_activity => 'userid,profiles_when,fieldid',
     setting_value     => 'name,value',
     # longdescs didn't used to have a PK, before 2.20.

@@ -76,9 +76,13 @@ estimated_time =>
   "The amount of time that has been estimated it will take to resolve
    this ${terms.bug}.",
 
+importance =>
+  "The importance of $terms.abug is described as the combination of
+   its $vars.field_descs.priority and ${vars.field_descs.bug_severity}.",
+
 keywords =>
    "You can add keywords from a defined list to $terms.bugs, in order"
-   _ " to tag and group them.",
+   _ " to easily identify and group them.",
 
 longdesc =>
   "$terms.Bugs have comments added to them by $terms.Bugzilla users."
@@ -136,6 +140,13 @@ short_desc =>
 status_whiteboard =>
   "Each $terms.bug has a free-form single line text entry box for"
   _ " adding tags and status information.",
+
+tag =>
+  "Unlike ${vars.field_descs.keywords} which are global and visible by
+   all users, ${vars.field_descs.tag} are personal and can only be
+   viewed and edited by their author.
+   Editing them won't send any notification to other users. Use them
+   to tag and keep track of ${terms.bugs}.",
 
 target_milestone =>
    "The $vars.field_descs.target_milestone field is used to define when the"
@@ -207,13 +218,17 @@ email1 =>
 
   [%# Add help for custom fields. %]
   [% IF !vars.help_html.${help_field}.defined %]
-    [% SET field_type = bug_fields.${help_field}.type %]
-    [% field_type_desc = BLOCK -%]
-      [% field_types.$field_type FILTER html %]
-    [%- END %]
-    [% vars.help_html.${help_field} = 
-      "A custom $field_type_desc field in this installation"
-      _ " of ${terms.Bugzilla}." %]
+    [% IF bug_fields.${help_field}.long_desc %]
+      [% vars.help_html.${help_field} = bug_fields.${help_field}.long_desc %]
+    [% ELSE %]
+      [% SET field_type = bug_fields.${help_field}.type %]
+      [% field_type_desc = BLOCK -%]
+        [% field_types.$field_type FILTER html %]
+      [%- END %]
+      [% vars.help_html.${help_field} = 
+        "A custom $field_type_desc field in this installation"
+        _ " of ${terms.Bugzilla}." %]
+    [% END %]
   [% END %]
 
   [%# Add help for the search types, for query.cgi. %]

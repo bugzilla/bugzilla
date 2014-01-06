@@ -7,9 +7,10 @@
 
 package Bugzilla::Whine::Query;
 
+use 5.10.1;
 use strict;
 
-use base qw(Bugzilla::Object);
+use parent qw(Bugzilla::Object);
 
 use Bugzilla::Constants;
 use Bugzilla::Search::Saved;
@@ -119,5 +120,13 @@ bugs or one email per bug.
 =item C<title>
 
 The title of this object as it appears in the user forms and emails.
+
+=back
+
+=head1 B<Methods in need of POD>
+
+=over
+
+=item eventid
 
 =back

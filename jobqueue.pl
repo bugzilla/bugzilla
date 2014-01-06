@@ -6,9 +6,16 @@
 # This Source Code Form is "Incompatible With Secondary Licenses", as
 # defined by the Mozilla Public License, v. 2.0.
 
+use 5.10.1;
 use strict;
+
+use Cwd qw(abs_path);
 use File::Basename;
-BEGIN { chdir dirname($0); }
+BEGIN {
+    # Untaint the abs_path.
+    my ($a) = abs_path($0) =~ /^(.*)$/;
+    chdir dirname($a);
+}
 
 use lib qw(. lib);
 use Bugzilla;
@@ -39,6 +46,7 @@ jobqueue.pl - Runs jobs in the background for Bugzilla.
              starts a new one.
    once      Checks the job queue once, executes the first item found (if
              any) and then exits
+   onepass   Checks the job queue, executes all items found, and then exits
    check     Report the current status of the daemon.
    install   On some *nix systems, this automatically installs and
              configures jobqueue.pl as a system service so that it will

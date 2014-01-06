@@ -5,9 +5,10 @@
 # This Source Code Form is "Incompatible With Secondary Licenses", as
 # defined by the Mozilla Public License, v. 2.0.
 
-use strict;
-
 package Bugzilla::FlagType;
+
+use 5.10.1;
+use strict;
 
 =head1 NAME
 
@@ -40,7 +41,7 @@ use Bugzilla::Group;
 
 use Email::Address;
 
-use base qw(Bugzilla::Object);
+use parent qw(Bugzilla::Object);
 
 ###############################
 ####    Initialization     ####
@@ -82,7 +83,7 @@ use constant VALIDATORS => {
     description      => \&_check_description,
     cc_list          => \&_check_cc_list,
     target_type      => \&_check_target_type,
-    sortkey          => \&_check_sortey,
+    sortkey          => \&_check_sortkey,
     is_active        => \&Bugzilla::Object::check_boolean,
     is_requestable   => \&Bugzilla::Object::check_boolean,
     is_requesteeble  => \&Bugzilla::Object::check_boolean,
@@ -308,7 +309,7 @@ sub _check_target_type {
     return $target_type;
 }
 
-sub _check_sortey {
+sub _check_sortkey {
     my ($invocant, $sortkey) = @_;
 
     (detaint_natural($sortkey) && $sortkey <= MAX_SMALLINT)
@@ -620,22 +621,10 @@ sub count {
 # Private Functions
 ######################################################################
 
-=begin private
-
-=head1 PRIVATE FUNCTIONS
-
-=over
-
-=item C<sqlify_criteria($criteria, $tables)>
-
-Converts a hash of criteria into a list of SQL criteria.
-$criteria is a reference to the criteria (field => value), 
-$tables is a reference to an array of tables being accessed 
-by the query.
-
-=back
-
-=cut
+# Converts a hash of criteria into a list of SQL criteria.
+# $criteria is a reference to the criteria (field => value), 
+# $tables is a reference to an array of tables being accessed 
+# by the query.
 
 sub sqlify_criteria {
     my ($criteria, $tables) = @_;
@@ -664,7 +653,10 @@ sub sqlify_criteria {
     }
     if ($criteria->{product_id}) {
         my $product_id = $criteria->{product_id};
-        
+        detaint_natural($product_id)
+          || ThrowCodeError('bad_arg', { argument => 'product_id',
+                                         function => 'Bugzilla::FlagType::sqlify_criteria' });
+
         # Add inclusions to the query, which simply involves joining the table
         # by flag type ID and target product/component.
         push(@$tables, "INNER JOIN flaginclusions AS i ON flagtypes.id = i.type_id");
@@ -681,6 +673,10 @@ sub sqlify_criteria {
         my $addl_join_clause = "";
         if ($criteria->{component_id}) {
             my $component_id = $criteria->{component_id};
+            detaint_natural($component_id)
+              || ThrowCodeError('bad_arg', { argument => 'component_id',
+                                             function => 'Bugzilla::FlagType::sqlify_criteria' });
+
             push(@criteria, "(i.component_id = $component_id OR i.component_id IS NULL)");
             $join_clause .= "AND (e.component_id = $component_id OR e.component_id IS NULL) ";
         }
@@ -694,7 +690,10 @@ sub sqlify_criteria {
     }
     if ($criteria->{group}) {
         my $gid = $criteria->{group};
-        detaint_natural($gid);
+        detaint_natural($gid)
+          || ThrowCodeError('bad_arg', { argument => 'group',
+                                         function => 'Bugzilla::FlagType::sqlify_criteria' });
+
         push(@criteria, "(flagtypes.grant_group_id = $gid " .
                         " OR flagtypes.request_group_id = $gid)");
     }
@@ -704,26 +703,42 @@ sub sqlify_criteria {
 
 1;
 
-=end private
-
-=head1 SEE ALSO
+=head1 B<Methods in need of POD>
 
 =over
 
-=item B<Bugzilla::Flags>
+=item exclusions_as_hash
+
+=item request_group_id
+
+=item set_is_active
+
+=item set_is_multiplicable
+
+=item inclusions_as_hash
+
+=item set_sortkey
+
+=item grant_group_id
+
+=item set_cc_list
+
+=item set_request_group
+
+=item set_name
+
+=item set_is_specifically_requestable
+
+=item set_grant_group
+
+=item create
+
+=item set_clusions
+
+=item set_description
+
+=item set_is_requestable
+
+=item update
 
 =back
-
-=head1 CONTRIBUTORS
-
-=over
-
-=item Myk Melez <myk@mozilla.org>
-
-=item Kevin Benton <kevin.benton@amd.com>
-
-=item Frédéric Buclin <LpSolit@gmail.com>
-
-=back
-
-=cut

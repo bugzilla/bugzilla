@@ -8,6 +8,7 @@
 
 package Bugzilla::Template;
 
+use 5.10.1;
 use strict;
 
 use Bugzilla::Constants;
@@ -33,7 +34,7 @@ use IO::Dir;
 use List::MoreUtils qw(firstidx);
 use Scalar::Util qw(blessed);
 
-use base qw(Template);
+use parent qw(Template);
 
 use constant FORMAT_TRIPLE => '%19s|%-28s|%-28s';
 use constant FORMAT_3_SIZE => [19,28,28];
@@ -43,7 +44,7 @@ use constant FORMAT_2_SIZE => [19,55];
 # Pseudo-constant.
 sub SAFE_URL_REGEXP {
     my $safe_protocols = join('|', SAFE_PROTOCOLS);
-    return qr/($safe_protocols):[^\s<>\"]+[\w\/]/i;
+    return qr/($safe_protocols):[^:\s<>\"][^\s<>\"]+[\w\/]/i;
 }
 
 # Convert the constants in the Bugzilla::Constants and Bugzilla::WebService::Constants
@@ -95,12 +96,15 @@ sub get_format {
     my $self = shift;
     my ($template, $format, $ctype) = @_;
 
-    $ctype ||= 'html';
-    $format ||= '';
+    $ctype //= 'html';
+    $format //= '';
 
-    # Security - allow letters and a hyphen only
-    $ctype =~ s/[^a-zA-Z\-]//g;
-    $format =~ s/[^a-zA-Z\-]//g;
+    # ctype and format can have letters and a hyphen only.
+    if ($ctype =~ /[^a-zA-Z\-]/ || $format =~ /[^a-zA-Z\-]/) {
+        ThrowUserError('format_not_found', {'format' => $format,
+                                            'ctype'  => $ctype,
+                                            'invalid' => 1});
+    }
     trick_taint($ctype);
     trick_taint($format);
 
@@ -126,6 +130,7 @@ sub get_format {
     return
     {
         'template'    => $template,
+        'format'      => $format,
         'extension'   => $ctype,
         'ctype'       => Bugzilla::Constants::contenttypes->{$ctype}
     };
@@ -139,8 +144,9 @@ sub get_format {
 # If you want to modify this routine, read the comments carefully
 
 sub quoteUrls {
-    my ($text, $bug, $comment) = (@_);
+    my ($text, $bug, $comment, $user) = @_;
     return $text unless $text;
+    $user ||= Bugzilla->user;
 
     # We use /g for speed, but uris can have other things inside them
     # (http://foo/bug#3 for example). Filtering that out filters valid
@@ -153,6 +159,10 @@ sub quoteUrls {
     # escape the 2nd escape char we're using
     my $chr1 = chr(1);
     $text =~ s/\0/$chr1\0/g;
+
+    # If the comment is already wrapped, we should ignore newlines when
+    # looking for matching regexps. Else we should take them into account.
+    my $s = ($comment && $comment->already_wrapped) ? qr/\s/ : qr/\h/;
 
     # However, note that adding the title (for buglinks) can affect things
     # In particular, attachment matches go before bug titles, so that titles
@@ -170,7 +180,7 @@ sub quoteUrls {
     my @hook_regexes;
     Bugzilla::Hook::process('bug_format_comment',
         { text => \$text, bug => $bug, regexes => \@hook_regexes,
-          comment => $comment });
+          comment => $comment, user => $user });
 
     foreach my $re (@hook_regexes) {
         my ($match, $replace) = @$re{qw(match replace)};
@@ -192,7 +202,7 @@ sub quoteUrls {
         map { qr/$_/ } grep($_, Bugzilla->params->{'urlbase'}, 
                             Bugzilla->params->{'sslbase'})) . ')';
     $text =~ s~\b(${urlbase_re}\Qshow_bug.cgi?id=\E([0-9]+)(\#c([0-9]+))?)\b
-              ~($things[$count++] = get_bug_link($3, $1, { comment_num => $5 })) &&
+              ~($things[$count++] = get_bug_link($3, $1, { comment_num => $5, user => $user })) &&
                ("\0\0" . ($count-1) . "\0\0")
               ~egox;
 
@@ -220,8 +230,8 @@ sub quoteUrls {
               ~<a href=\"mailto:$2\">$1$2</a>~igx;
 
     # attachment links
-    $text =~ s~\b(attachment\s*\#?\s*(\d+)(?:\s+\[details\])?)
-              ~($things[$count++] = get_attachment_link($2, $1)) &&
+    $text =~ s~\b(attachment$s*\#?$s*(\d+)(?:$s+\[details\])?)
+              ~($things[$count++] = get_attachment_link($2, $1, $user)) &&
                ("\0\0" . ($count-1) . "\0\0")
               ~egmxi;
 
@@ -233,21 +243,52 @@ sub quoteUrls {
     # Also, we can't use $bug_re?$comment_re? because that will match the
     # empty string
     my $bug_word = template_var('terms')->{bug};
-    my $bug_re = qr/\Q$bug_word\E\s*\#?\s*(\d+)/i;
-    my $comment_re = qr/comment\s*\#?\s*(\d+)/i;
-    $text =~ s~\b($bug_re(?:\s*,?\s*$comment_re)?|$comment_re)
+    my $bug_re = qr/\Q$bug_word\E$s*\#?$s*(\d+)/i;
+    my $comment_word = template_var('terms')->{comment};
+    my $comment_re = qr/(?:\Q$comment_word\E|comment)$s*\#?$s*(\d+)/i;
+    $text =~ s~\b($bug_re(?:$s*,?$s*$comment_re)?|$comment_re)
               ~ # We have several choices. $1 here is the link, and $2-4 are set
                 # depending on which part matched
-               (defined($2) ? get_bug_link($2, $1, { comment_num => $3 }) :
+               (defined($2) ? get_bug_link($2, $1, { comment_num => $3, user => $user }) :
                               "<a href=\"$current_bugurl#c$4\">$1</a>")
-              ~egox;
+              ~egx;
+
+    # Handle a list of bug ids: bugs 1, #2, 3, 4
+    # Currently, the only delimiter supported is comma.
+    # Concluding "and" and "or" are not supported.
+    my $bugs_word = template_var('terms')->{bugs};
+
+    my $bugs_re = qr/\Q$bugs_word\E$s*\#?$s*
+                     \d+(?:$s*,$s*\#?$s*\d+)+/ix;
+    while ($text =~ m/($bugs_re)/g) {
+        my $offset = $-[0];
+        my $length = $+[0] - $-[0];
+        my $match  = $1;
+
+        $match =~ s/((?:#$s*)?(\d+))/get_bug_link($2, $1);/eg;
+        # Replace the old string with the linkified one.
+        substr($text, $offset, $length) = $match;
+    }
+
+    my $comments_word = template_var('terms')->{comments};
+
+    my $comments_re = qr/(?:comments|\Q$comments_word\E)$s*\#?$s*
+                         \d+(?:$s*,$s*\#?$s*\d+)+/ix;
+    while ($text =~ m/($comments_re)/g) {
+        my $offset = $-[0];
+        my $length = $+[0] - $-[0];
+        my $match  = $1;
+
+        $match =~ s|((?:#$s*)?(\d+))|<a href="$current_bugurl#c$2">$1</a>|g;
+        substr($text, $offset, $length) = $match;
+    }
 
     # Old duplicate markers. These don't use $bug_word because they are old
     # and were never customizable.
     $text =~ s~(?<=^\*\*\*\ This\ bug\ has\ been\ marked\ as\ a\ duplicate\ of\ )
                (\d+)
                (?=\ \*\*\*\Z)
-              ~get_bug_link($1, $1)
+              ~get_bug_link($1, $1, { user => $user })
               ~egmx;
 
     # Now remove the encoding hacks in reverse order
@@ -261,15 +302,18 @@ sub quoteUrls {
 
 # Creates a link to an attachment, including its title.
 sub get_attachment_link {
-    my ($attachid, $link_text) = @_;
+    my ($attachid, $link_text, $user) = @_;
     my $dbh = Bugzilla->dbh;
+    $user ||= Bugzilla->user;
 
-    my $attachment = new Bugzilla::Attachment($attachid);
+    my $attachment = new Bugzilla::Attachment({ id => $attachid, cache => 1 });
 
     if ($attachment) {
         my $title = "";
         my $className = "";
-        if (Bugzilla->user->can_see_bug($attachment->bug_id)) {
+        if ($user->can_see_bug($attachment->bug_id)
+            && (!$attachment->isprivate || $user->is_insider))
+        {
             $title = $attachment->description;
         }
         if ($attachment->isobsolete) {
@@ -309,12 +353,13 @@ sub get_attachment_link {
 sub get_bug_link {
     my ($bug, $link_text, $options) = @_;
     $options ||= {};
+    $options->{user} ||= Bugzilla->user;
     my $dbh = Bugzilla->dbh;
 
-    if (defined $bug) {
+    if (defined $bug && $bug ne '') {
         if (!blessed($bug)) {
             require Bugzilla::Bug;
-            $bug = new Bugzilla::Bug($bug);
+            $bug = new Bugzilla::Bug({ id => $bug, cache => 1 });
         }
         return $link_text if $bug->{error};
     }
@@ -382,13 +427,10 @@ sub mtime_filter {
 #
 #  1. YUI CSS
 #  2. Standard Bugzilla stylesheet set (persistent)
-#  3. Standard Bugzilla stylesheet set (selectable)
-#  4. All third-party "skin" stylesheet sets (selectable)
-#  5. Page-specific styles
-#  6. Custom Bugzilla stylesheet set (persistent)
-#
-# "Selectable" skin file sets may be either preferred or alternate.
-# Exactly one is preferred, determined by the "skin" user preference.
+#  3. Third-party "skin" stylesheet set, per user prefs (persistent)
+#  4. Page-specific styles
+#  5. Custom Bugzilla stylesheet set (persistent)
+
 sub css_files {
     my ($style_urls, $yui, $yui_css) = @_;
     
@@ -405,18 +447,10 @@ sub css_files {
     
     my @css_sets = map { _css_link_set($_) } @requested_css;
     
-    my %by_type = (standard => [], alternate => {}, skin => [], custom => []);
+    my %by_type = (standard => [], skin => [], custom => []);
     foreach my $set (@css_sets) {
         foreach my $key (keys %$set) {
-            if ($key eq 'alternate') {
-                foreach my $alternate_skin (keys %{ $set->{alternate} }) {
-                    my $files = $by_type{alternate}->{$alternate_skin} ||= [];
-                    push(@$files, $set->{alternate}->{$alternate_skin});
-                }
-            }
-            else {
-                push(@{ $by_type{$key} }, $set->{$key});
-            }
+            push(@{ $by_type{$key} }, $set->{$key});
         }
     }
     
@@ -433,27 +467,15 @@ sub _css_link_set {
     if ($file_name !~ m{(^|/)skins/standard/}) {
         return \%set;
     }
-    
-    my $skin_user_prefs = Bugzilla->user->settings->{skin};
+
+    my $skin = Bugzilla->user->settings->{skin}->{value};
     my $cgi_path = bz_locations()->{'cgi_path'};
-    # If the DB is not accessible, user settings are not available.
-    my $all_skins = $skin_user_prefs ? $skin_user_prefs->legal_values : [];
-    my %skin_urls;
-    foreach my $option (@$all_skins) {
-        next if $option eq 'standard';
-        my $skin_file_name = $file_name;
-        $skin_file_name =~ s{(^|/)skins/standard/}{skins/contrib/$option/};
-        if (my $mtime = _mtime("$cgi_path/$skin_file_name")) {
-            $skin_urls{$option} = mtime_filter($skin_file_name, $mtime);
-        }
+    my $skin_file_name = $file_name;
+    $skin_file_name =~ s{(^|/)skins/standard/}{skins/contrib/$skin/};
+    if (my $mtime = _mtime("$cgi_path/$skin_file_name")) {
+        $set{skin} = mtime_filter($skin_file_name, $mtime);
     }
-    $set{alternate} = \%skin_urls;
-    
-    my $skin = $skin_user_prefs->{'value'};
-    if ($skin ne 'standard' and defined $set{alternate}->{$skin}) {
-        $set{skin} = delete $set{alternate}->{$skin};
-    }
-    
+
     my $custom_file_name = $file_name;
     $custom_file_name =~ s{(^|/)skins/standard/}{skins/custom/};
     if (my $custom_mtime = _mtime("$cgi_path/$custom_file_name")) {
@@ -539,10 +561,9 @@ $Template::Stash::SCALAR_OPS->{ 0 } =
 $Template::Stash::SCALAR_OPS->{ truncate } = 
   sub {
       my ($string, $length, $ellipsis) = @_;
-      $ellipsis ||= "";
-      
       return $string if !$length || length($string) <= $length;
-      
+
+      $ellipsis ||= '';
       my $strlen = $length - length($ellipsis);
       my $newstr = substr($string, 0, $strlen) . $ellipsis;
       return $newstr;
@@ -597,6 +618,10 @@ sub create {
         RELATIVE => $ENV{MOD_PERL} ? 0 : 1,
 
         COMPILE_DIR => bz_locations()->{'template_cache'},
+
+        # Don't check for a template update until 1 hour has passed since the
+        # last check.
+        STAT_TTL    => 60 * 60,
 
         # Initialize templates (f.e. by loading plugins like Hook).
         PRE_PROCESS => ["global/variables.none.tmpl"],
@@ -688,10 +713,10 @@ sub create {
             clean_text => \&Bugzilla::Util::clean_text ,
 
             quoteUrls => [ sub {
-                               my ($context, $bug, $comment) = @_;
+                               my ($context, $bug, $comment, $user) = @_;
                                return sub {
                                    my $text = shift;
-                                   return quoteUrls($text, $bug, $comment);
+                                   return quoteUrls($text, $bug, $comment, $user);
                                };
                            },
                            1
@@ -707,10 +732,9 @@ sub create {
                           1
                         ],
 
-            bug_list_link => sub
-            {
-                my $buglist = shift;
-                return join(", ", map(get_bug_link($_, $_), split(/ *, */, $buglist)));
+            bug_list_link => sub {
+                my ($buglist, $options) = @_;
+                return join(", ", map(get_bug_link($_, $_, $options), split(/ *, */, $buglist)));
             },
 
             # In CSV, quotes are doubled, and any value containing a quote or a
@@ -813,9 +837,7 @@ sub create {
                 # (Wrapping the message in the WebService is unnecessary
                 # and causes awkward things like \n's appearing in error
                 # messages in JSON-RPC.)
-                unless (Bugzilla->usage_mode == USAGE_MODE_JSON
-                        or Bugzilla->usage_mode == USAGE_MODE_XMLRPC)
-                {
+                unless (i_am_webservice()) {
                     $var = wrap_comment($var, 72);
                 }
                 $var =~ s/\&nbsp;/ /g;
@@ -865,14 +887,9 @@ sub create {
             # Currently logged in user, if any
             # If an sudo session is in progress, this is the user we're faking
             'user' => sub { return Bugzilla->user; },
-           
+
             # Currenly active language
-            # XXX Eventually this should probably be replaced with something
-            # like Bugzilla->language.
-            'current_language' => sub {
-                my ($language) = include_languages();
-                return $language;
-            },
+            'current_language' => sub { return Bugzilla->current_language; },
 
             # If an sudo session is in progress, this is the user who
             # started the session.
@@ -883,7 +900,7 @@ sub create {
 
             # Allow templates to access docs url with users' preferred language
             'docs_urlbase' => sub { 
-                my ($language) = include_languages();
+                my $language = Bugzilla->current_language;
                 my $docs_urlbase = Bugzilla->params->{'docs_urlbase'};
                 $docs_urlbase =~ s/\%lang\%/$language/;
                 return $docs_urlbase;
@@ -928,7 +945,9 @@ sub create {
             'use_keywords' => sub { return Bugzilla::Keyword->any_exist; },
 
             # All the keywords.
-            'all_keywords' => sub { return Bugzilla::Keyword->get_all(); },
+            'all_keywords' => sub {
+                return [map { $_->name } Bugzilla::Keyword->get_all()];
+            },
 
             'feature_enabled' => sub { return Bugzilla->feature(@_); },
 
@@ -964,9 +983,15 @@ sub create {
                 }
                 return \@optional;
             },
-            'default_authorizer' => new Bugzilla::Auth(),
+            'default_authorizer' => sub { return Bugzilla::Auth->new() },
         },
     };
+    # Use a per-process provider to cache compiled templates in memory across
+    # requests.
+    my $provider_key = join(':', @{ $config->{INCLUDE_PATH} });
+    my $shared_providers = Bugzilla->process_cache->{shared_providers} ||= {};
+    $shared_providers->{$provider_key} ||= Template::Provider->new($config);
+    $config->{LOAD_TEMPLATES} = [ $shared_providers->{$provider_key} ];
 
     local $Template::Config::CONTEXT = 'Bugzilla::Template::Context';
 
@@ -1031,6 +1056,9 @@ sub precompile_templates {
             # effect of writing the compiled version to disk.
             $template->context->template($file);
         }
+
+        # Clear out the cached Provider object
+        Bugzilla->process_cache->{shared_providers} = undef;
     }
 
     # Under mod_perl, we look for templates using the absolute path of the
@@ -1150,3 +1178,29 @@ Returns:     nothing
 =head1 SEE ALSO
 
 L<Bugzilla>, L<Template>
+
+=head1 B<Methods in need of POD>
+
+=over
+
+=item multiline_sprintf
+
+=item create
+
+=item css_files
+
+=item mtime_filter
+
+=item yui_resolve_deps
+
+=item process
+
+=item get_bug_link
+
+=item quoteUrls
+
+=item get_attachment_link
+
+=item SAFE_URL_REGEXP
+
+=back

@@ -7,8 +7,10 @@
 
 package Bugzilla::UserAgent;
 
+use 5.10.1;
 use strict;
-use base qw(Exporter);
+
+use parent qw(Exporter);
 our @EXPORT = qw(detect_platform detect_op_sys);
 
 use Bugzilla::Field;
@@ -47,6 +49,7 @@ use constant PLATFORMS_MAP => (
     # HP
     qr/\(.*9000.*\)/ => ["PA-RISC", "HP"],
     # ARM
+    qr/\(.*(?:iPod|iPad|iPhone).*\)/ => ["ARM"],
     qr/\(.*ARM.*\)/ => ["ARM", "PocketPC"],
     # PocketPC intentionally before PowerPC
     qr/\(.*Windows CE.*PPC.*\)/ => ["ARM", "PocketPC"],
@@ -99,8 +102,10 @@ use constant OS_MAP => (
     qr/\(.*QNX.*\)/ => ["Neutrino"],
     qr/\(.*VMS.*\)/ => ["OpenVMS"],
     qr/\(.*HP-?UX.*\)/ => ["HP-UX"],
+    qr/\(.*Android.*\)/ => ["Android"],
     # Windows
     qr/\(.*Windows XP.*\)/ => ["Windows XP"],
+    qr/\(.*Windows NT 6\.3.*\)/ => ["Windows 8.1"],
     qr/\(.*Windows NT 6\.2.*\)/ => ["Windows 8"],
     qr/\(.*Windows NT 6\.1.*\)/ => ["Windows 7"],
     qr/\(.*Windows NT 6\.0.*\)/ => ["Windows Vista"],
@@ -116,6 +121,13 @@ use constant OS_MAP => (
     qr/\(.*Win(?:dows[ -]|)NT.*\)/ => ["Windows NT"],
     qr/\(.*Windows.*NT.*\)/ => ["Windows NT"],
     # OS X
+    qr/\(.*(?:iPad|iPhone).*OS 7.*\)/ => ["iOS 7"],
+    qr/\(.*(?:iPad|iPhone).*OS 6.*\)/ => ["iOS 6"],
+    qr/\(.*(?:iPad|iPhone).*OS 5.*\)/ => ["iOS 5"],
+    qr/\(.*(?:iPad|iPhone).*OS 4.*\)/ => ["iOS 4"],
+    qr/\(.*(?:iPad|iPhone).*OS 3.*\)/ => ["iOS 3"],
+    qr/\(.*(?:iPod|iPad|iPhone).*\)/ => ["iOS"],
+    qr/\(.*Mac OS X (?:|Mach-O |\()10.8.*\)/ => ["Mac OS X 10.8"],
     qr/\(.*Mac OS X (?:|Mach-O |\()10.7.*\)/ => ["Mac OS X 10.7"],
     qr/\(.*Mac OS X (?:|Mach-O |\()10.6.*\)/ => ["Mac OS X 10.6"],
     qr/\(.*Mac OS X (?:|Mach-O |\()10.5.*\)/ => ["Mac OS X 10.5"],
@@ -164,7 +176,7 @@ sub detect_platform {
 }
 
 sub detect_op_sys {
-    my $userAgent = $ENV{'HTTP_USER_AGENT'};
+    my $userAgent = $ENV{'HTTP_USER_AGENT'} || '';
     my @detected;
     my $iterator = natatime(2, OS_MAP);
     while (my($re, $ra) = $iterator->()) {

@@ -6,6 +6,7 @@
 # This Source Code Form is "Incompatible With Secondary Licenses", as
 # defined by the Mozilla Public License, v. 2.0.
 
+use 5.10.1;
 use strict;
 use lib qw(. lib);
 
@@ -17,11 +18,7 @@ use Bugzilla::Util;
 use Bugzilla::Error;
 use Bugzilla::Bug;
 use Bugzilla::User;
-use Bugzilla::Field;
 use Bugzilla::Hook;
-use Bugzilla::Product;
-use Bugzilla::Component;
-use Bugzilla::Keyword;
 use Bugzilla::Token;
 use Bugzilla::Flag;
 
@@ -201,8 +198,6 @@ $vars->{'id'} = $id;
 $vars->{'bug'} = $bug;
 
 Bugzilla::Hook::process('post_bug_after_creation', { vars => $vars });
-
-ThrowCodeError("bug_error", { bug => $bug }) if $bug->error;
 
 my $recipients = { changer => $user };
 my $bug_sent = Bugzilla::BugMail::Send($id, $recipients);

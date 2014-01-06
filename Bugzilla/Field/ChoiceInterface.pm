@@ -6,6 +6,8 @@
 # defined by the Mozilla Public License, v. 2.0.
 
 package Bugzilla::Field::ChoiceInterface;
+
+use 5.10.1;
 use strict;
 
 use Bugzilla::Constants;
@@ -169,6 +171,7 @@ sub is_set_on_bug {
     # This allows bug/create/create.html.tmpl to pass in a hashref that 
     # looks like a bug object.
     my $value = blessed($bug) ? $bug->$field_name : $bug->{$field_name};
+    $value = $value->name if blessed($value);
     return 0 if !defined $value;
 
     if ($self->field->type == FIELD_TYPE_BUG_URLS
@@ -266,5 +269,15 @@ L<Bugzilla::Bug>). For multi-valued fields, we return C<1> if
 I<any> of the currently selected values are this value.
 
 Returns C<0> otherwise.
+
+=back
+
+=head1 B<Methods in need of POD>
+
+=over
+
+=item FIELD_NAME
+
+=item controlled_values_array
 
 =back

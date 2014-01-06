@@ -78,3 +78,7 @@ ul.tree a.tree_link img {
     color: #333;
     font-weight: bold;
 }
+
+.dependency_tree_controls input[type=submit] {
+    min-width: 3em;
+}

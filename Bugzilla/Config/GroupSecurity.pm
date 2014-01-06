@@ -7,6 +7,7 @@
 
 package Bugzilla::Config::GroupSecurity;
 
+use 5.10.1;
 use strict;
 
 use Bugzilla::Config::Common;
@@ -55,6 +56,22 @@ sub get_param_list {
    default => 'editbugs',
    checker => \&check_group
   },
+
+  {
+   name => 'comment_taggers_group',
+   type => 's',
+   choices => \&_get_all_group_names,
+   default => 'editbugs',
+   checker => \&check_comment_taggers_group
+  },
+
+  {
+   name => 'debug_group',
+   type => 's',
+   choices => \&_get_all_group_names,
+   default => 'admin',
+   checker => \&check_group
+  },
   
   {
    name => 'usevisibilitygroups',
@@ -66,6 +83,12 @@ sub get_param_list {
    name => 'strict_isolation',
    type => 'b',
    default => 0
+  },
+
+  {
+   name => 'or_groups',
+   type => 'b',
+   default => 0
   } );
   return @param_list;
 }
@@ -75,4 +98,5 @@ sub _get_all_group_names {
     unshift(@group_names, '');
     return \@group_names;
 }
+
 1;

@@ -42,9 +42,9 @@
             [% ELSIF field == 'cryptpassword' %]
               A new password has been set.
             [% ELSIF field == 'disabledtext' %]
-              The disable text has been modified.
+              The "login disabled" text has been modified.
             [% ELSIF field == 'is_enabled' %]
-              The user has been [% otheruser.is_enabled ? 'enabled' : 'disabled' %].
+              Logging in with this user account has been [% otheruser.is_enabled ? 'enabled' : 'disabled' %].
             [% ELSIF field == 'extern_id' %]
               The user's External Login ID has been modified.
             [% ELSIF field == 'disable_mail' %]
@@ -97,8 +97,8 @@
     successfully.
 
   [% ELSIF message_tag == "account_disabled" %]
-    The user account [% account FILTER html %] is disabled, so you
-    cannot change its password.
+    Logging in with this user account [% account FILTER html %] is disabled, so
+    you cannot change its password.
 
   [% ELSIF message_tag == "attachment_creation_failed" %]
     The [% terms.bug %] was created successfully, but attachment creation
@@ -204,7 +204,7 @@
         <li>Default assignee updated to '[% comp.default_assignee.login FILTER html %]'</li>
       [% END %]
       [% IF changes.initialqacontact.defined %]
-        [% IF comp.default_qa_contact.id %]
+        [% IF comp.default_qa_contact %]
           <li>Default QA contact updated to '[% comp.default_qa_contact.login FILTER html %]'</li>
         [% ELSE %]
           <li>Default QA contact deleted</li>
@@ -421,6 +421,8 @@
           [% CASE 'visible_to_me_remove' %]
             <li>This group may no longer see users in the following groups:
               [%+ changes.visible_to_me_remove.join(', ') FILTER html %]</li>
+          [% CASE %]
+            [% Hook.process('group_updated_fields') %]
         [% END %]
       [% END %]
       </ul>
@@ -466,7 +468,7 @@
     [% title = "Logged Out" %]
     [% url = "index.cgi?GoAheadAndLogIn=1" %]
     [% link = "Log in again." %]
-    <b>Your login has been forgotten</b>.
+    <b>You logged out successfully</b>.
     The cookie that was remembering your login is now gone. You will be
     prompted for a login the next time it is required.
 
@@ -569,7 +571,8 @@
 
   [% ELSIF message_tag == "password_change_request" %]
     [% title = "Request to Change Password" %]
-    A token for changing your password has been emailed to you.
+    A token for changing your password has been emailed to
+    <em>[% login_name FILTER html %]</em>.
     Follow the instructions in that email to change your password.
 
   [% ELSIF message_tag == "password_changed" %]
@@ -795,6 +798,39 @@
     or you don't have access to it. The following is a list of the
     products you can choose from.
 
+  [% ELSIF message_tag == "quips_added" %]
+    Your quip <em>[% added_quip FILTER html %]</em> has been added.
+    [% IF Param("quip_list_entry_control") == "moderated" AND
+          !user.in_group('bz_quip_moderators') %]
+      It will be used as soon as it gets approved.
+    [% END %]
+
+  [% ELSIF message_tag == "quips_deleted" %]
+    The quip <em>[% deleted_quip FILTER html %]</em> has been deleted.
+
+  [% ELSIF message_tag == "quips_approved_unapproved" %]
+    [% IF approved.size == 1 %]
+      One quip
+    [% ELSE %]
+      [% approved.size %] quips
+    [% END %]
+    approved and
+    [% IF unapproved.size == 1 %]
+      one quip
+    [% ELSE %]
+      [%+ unapproved.size %] quips
+    [% END %]
+    unapproved.
+
+  [% ELSIF message_tag == "report_created" %]
+    OK, you have a new saved report named <em>[% reportname FILTER html %]</em>.
+
+  [% ELSIF message_tag == "report_deleted" %]
+    OK, the <em>[% reportname FILTER html %]</em> report is gone.
+
+  [% ELSIF message_tag == "report_updated" %]
+    The saved report <em>[% reportname FILTER html %]</em> has been updated.
+
   [% ELSIF message_tag == "remaining_time_zeroed" %]
     The [% field_descs.remaining_time FILTER html %] field has been 
     set to zero automatically as part of closing this [% terms.bug %]
@@ -822,8 +858,8 @@
   
   [% ELSIF message_tag == "sudo_ended" %]
     [% title = "Sudo session complete" %]
-      The sudo session has been ended.  From this point forward, everything you 
-      do you do as yourself.
+      Your sudo session has ended. All future actions will be attributed
+      to your own account.
 
   [% ELSIF message_tag == "series_created" %]
     [% title = "Series Created" %]
@@ -841,6 +877,12 @@
       [%+ series.name FILTER html %]</em>
       has been deleted.
 
+  [% ELSIF message_tag == "series_updated" %]
+    [% title = "Series Updated" %]
+    The series <em>[% default.category FILTER html %] /
+    [%+ default.subcategory FILTER html %] /
+    [%+ default.name FILTER html %]</em> has been updated.
+
   [% ELSIF message_tag == "shutdown" %]
     [% title = "$terms.Bugzilla is Down" %]
     [% Param("shutdownhtml") %]
@@ -848,18 +890,6 @@
       <p>For security reasons, you have been logged out automatically.
       The cookie that was remembering your login is now gone.
     [% END %]
-
-  [% ELSIF message_tag == "tag_updated" %]
-    [% title = "Tag Updated" %]
-    The '<a href="buglist.cgi?tag=[% tag FILTER uri %]">[% tag FILTER html %]</a>'
-    tag has been
-    [% IF action == "add" %]
-      added to
-    [% ELSE %]
-      removed from
-    [% END %]
-    [%+ buglist.size > 1 ? terms.bugs : terms.bug %]
-    [%+ buglist.join(", ") FILTER html %].
 
   [% ELSIF message_tag == "term" %]
     [% terms.$term FILTER html %]

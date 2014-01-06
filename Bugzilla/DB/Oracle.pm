@@ -20,8 +20,11 @@ For interface details see L<Bugzilla::DB> and L<DBI>.
 =cut
 
 package Bugzilla::DB::Oracle;
+
+use 5.10.1;
 use strict;
-use base qw(Bugzilla::DB);
+
+use parent qw(Bugzilla::DB);
 
 use DBD::Oracle;
 use DBD::Oracle qw(:ora_types);
@@ -57,7 +60,7 @@ sub new {
     my $dsn = "dbi:Oracle:host=$host;sid=$dbname";
     $dsn .= ";port=$port" if $port;
     my $attrs = { FetchHashKeyName => 'NAME_lc',  
-                  LongReadLen => max(Bugzilla->params->{'maxattachmentsize'},
+                  LongReadLen => max(Bugzilla->params->{'maxattachmentsize'} || 0,
                                      MIN_LONG_READ_LEN) * 1024,
                 };
     my $self = $class->db_new({ dsn => $dsn, user => $user, 
@@ -109,7 +112,8 @@ sub bz_explain {
 sub sql_group_concat {
     my ($self, $text, $separator) = @_;
     $separator = $self->quote(', ') if !defined $separator;
-    return "group_concat(T_CLOB_DELIM($text, $separator))";
+    my ($distinct, $rest) = $text =~/^(\s*DISTINCT\s|)(.+)$/i;
+    return "group_concat($distinct T_CLOB_DELIM(NVL($rest, ' '), $separator))";
 }
 
 sub sql_regexp {
@@ -155,10 +159,13 @@ sub sql_from_days{
 
     return " TO_DATE($date,'J') ";
 }
+
 sub sql_fulltext_search {
-    my ($self, $column, $text, $label) = @_;
+    my ($self, $column, $text) = @_;
+    state $label = 0;
     $text = $self->quote($text);
     trick_taint($text);
+    $label++;
     return "CONTAINS($column,$text,$label) > 0", "SCORE($label)";
 }
 
@@ -196,16 +203,16 @@ sub sql_position {
 }
 
 sub sql_in {
-    my ($self, $column_name, $in_list_ref) = @_;
+    my ($self, $column_name, $in_list_ref, $negate) = @_;
     my @in_list = @$in_list_ref;
-    return $self->SUPER::sql_in($column_name, $in_list_ref) if $#in_list < 1000;
+    return $self->SUPER::sql_in($column_name, $in_list_ref, $negate) if $#in_list < 1000;
     my @in_str;
     while (@in_list) {
         my $length = $#in_list + 1;
         my $splice = $length > 1000 ? 1000 : $length;
         my @sub_in_list = splice(@in_list, 0, $splice);
         push(@in_str, 
-             $self->SUPER::sql_in($column_name, \@sub_in_list)); 
+             $self->SUPER::sql_in($column_name, \@sub_in_list, $negate));
     }
     return "( " . join(" OR ", @in_str) . " )";
 }
@@ -294,6 +301,9 @@ sub adjust_statement {
     my $is_select = ($part =~ m/^\s*SELECT\b/io);
     my $has_from =  ($part =~ m/\bFROM\b/io) if $is_select;
 
+    # Oracle includes the time in CURRENT_DATE.
+    $part =~ s/\bCURRENT_DATE\b/TRUNC(CURRENT_DATE)/io;
+
     # Oracle use SUBSTR instead of SUBSTRING
     $part =~ s/\bSUBSTRING\b/SUBSTR/io;
    
@@ -321,6 +331,9 @@ sub adjust_statement {
         # Look for a FROM if this is a SELECT and we haven't found one yet
         $has_from = ($nonstring =~ m/\bFROM\b/io) 
                     if ($is_select and !$has_from);
+
+        # Oracle includes the time in CURRENT_DATE.
+        $nonstring =~ s/\bCURRENT_DATE\b/TRUNC(CURRENT_DATE)/io;
 
         # Oracle use SUBSTR instead of SUBSTRING
         $nonstring =~ s/\bSUBSTRING\b/SUBSTR/io;
@@ -518,14 +531,19 @@ sub bz_setup_database {
               . " RETURN NUMBER IS BEGIN RETURN LENGTH(COLUMN_NAME); END;");
     
     # Create types for group_concat
-    my $t_clob_delim = $self->selectcol_arrayref("
-        SELECT TYPE_NAME FROM USER_TYPES WHERE TYPE_NAME=?",
-        undef, 'T_CLOB_DELIM'); 
-
-    if ( !@$t_clob_delim ) {
-        $self->do("CREATE OR REPLACE TYPE T_CLOB_DELIM AS OBJECT "
-              . "( p_CONTENT CLOB, p_DELIMITER VARCHAR2(256));");
-    }
+    my $type_exists = $self->selectrow_array("SELECT 1 FROM user_types
+                                              WHERE type_name = 'T_GROUP_CONCAT'");
+    $self->do("DROP TYPE T_GROUP_CONCAT") if $type_exists;
+    $self->do("CREATE OR REPLACE TYPE T_CLOB_DELIM AS OBJECT "
+          . "( p_CONTENT CLOB, p_DELIMITER VARCHAR2(256)"
+          . ", MAP MEMBER FUNCTION T_CLOB_DELIM_ToVarchar return VARCHAR2"
+          . ");");
+    $self->do("CREATE OR REPLACE TYPE BODY T_CLOB_DELIM IS
+                  MAP MEMBER FUNCTION T_CLOB_DELIM_ToVarchar return VARCHAR2 is
+                  BEGIN
+                      RETURN p_CONTENT;
+                  END;
+              END;");
 
     $self->do("CREATE OR REPLACE TYPE T_GROUP_CONCAT AS OBJECT 
                (  CLOB_CONTENT CLOB,
@@ -610,11 +628,25 @@ sub bz_setup_database {
 
     $self->SUPER::bz_setup_database(@_);
 
+    my $sth = $self->prepare("SELECT OBJECT_NAME FROM USER_OBJECTS WHERE OBJECT_NAME = ?");
     my @tables = $self->bz_table_list_real();
+
     foreach my $table (@tables) {
         my @columns = $self->bz_table_columns_real($table);
         foreach my $column (@columns) {
             my $def = $self->bz_column_info($table, $column);
+            # bz_add_column() before Bugzilla 4.2.3 didn't handle primary keys
+            # correctly (bug 731156). We have to add missing sequences and
+            # triggers ourselves.
+            if ($def->{TYPE} =~ /SERIAL/i) {
+                my $sequence = "${table}_${column}_SEQ";
+                my $exists = $self->selectrow_array($sth, undef, $sequence);
+                if (!$exists) {
+                    my @sql = $self->_get_create_seq_ddl($table, $column);
+                    $self->do($_) foreach @sql;
+                }
+            }
+
             if ($def->{REFERENCES}) {
                 my $references = $def->{REFERENCES};
                 my $update = $references->{UPDATE} || 'CASCADE';
@@ -628,15 +660,13 @@ sub bz_setup_database {
                     $to_table = 'tag';
                 }
                 if ( $update =~ /CASCADE/i ){
-                     my $trigger_name = uc($fk_name . "_UC");
-                     my $exist_trigger = $self->selectcol_arrayref(
-                         "SELECT OBJECT_NAME FROM USER_OBJECTS 
-                          WHERE OBJECT_NAME = ?", undef, $trigger_name);
+                    my $trigger_name = uc($fk_name . "_UC");
+                    my $exist_trigger = $self->selectcol_arrayref($sth, undef, $trigger_name);
                     if(@$exist_trigger) {
                         $self->do("DROP TRIGGER $trigger_name");
                     }
   
-                     my $tr_str = "CREATE OR REPLACE TRIGGER $trigger_name"
+                    my $tr_str = "CREATE OR REPLACE TRIGGER $trigger_name"
                          . " AFTER UPDATE OF $to_column ON $to_table "
                          . " REFERENCING "
                          . " NEW AS NEW "
@@ -647,24 +677,52 @@ sub bz_setup_database {
                          . "        SET $column = :NEW.$to_column"
                          . "      WHERE $column = :OLD.$to_column;"
                          . " END $trigger_name;";
-                         $self->do($tr_str);
-               }
-         }
-     }
-   }
+                    $self->do($tr_str);
+                }
+            }
+        }
+    }
 
    # Drop the trigger which causes bug 541553
    my $trigger_name = "PRODUCTS_MILESTONEURL";
-   my $exist_trigger = $self->selectcol_arrayref(
-       "SELECT OBJECT_NAME FROM USER_OBJECTS
-        WHERE OBJECT_NAME = ?", undef, $trigger_name);
+   my $exist_trigger = $self->selectcol_arrayref($sth, undef, $trigger_name);
    if(@$exist_trigger) {
        $self->do("DROP TRIGGER $trigger_name");
    }
 }
 
+# These two methods have been copied from Bugzilla::DB::Schema::Oracle.
+sub _get_create_seq_ddl {
+    my ($self, $table, $column) = @_;
+
+    my $seq_name = "${table}_${column}_SEQ";
+    my $seq_sql = "CREATE SEQUENCE $seq_name INCREMENT BY 1 START WITH 1 " .
+                  "NOMAXVALUE NOCYCLE NOCACHE";
+    my $trigger_sql = $self->_get_create_trigger_ddl($table, $column, $seq_name);
+    return ($seq_sql, $trigger_sql);
+}
+
+sub _get_create_trigger_ddl {
+    my ($self, $table, $column, $seq_name) = @_;
+
+    my $trigger_sql = "CREATE OR REPLACE TRIGGER ${table}_${column}_TR "
+                    . " BEFORE INSERT ON $table "
+                    . " FOR EACH ROW "
+                    . " BEGIN "
+                    . "   SELECT ${seq_name}.NEXTVAL "
+                    . "   INTO :NEW.$column FROM DUAL; "
+                    . " END;";
+    return $trigger_sql;
+}
+
+############################################################################
+
 package Bugzilla::DB::Oracle::st;
-use base qw(DBI::st);
+
+use 5.10.1;
+use strict;
+
+use parent -norequire, qw(DBI::st);
  
 sub fetchrow_arrayref {
     my $self = shift;
@@ -729,3 +787,69 @@ sub fetch {
    return $row;
 }
 1;
+
+=head1 B<Methods in need of POD>
+
+=over
+
+=item adjust_statement
+
+=item bz_check_regexp
+
+=item bz_drop_table
+
+=item bz_explain
+
+=item bz_last_key
+
+=item bz_setup_database
+
+=item bz_table_columns_real
+
+=item bz_table_list_real
+
+=item do
+
+=item prepare
+
+=item prepare_cached
+
+=item quote_identifier
+
+=item selectall_arrayref
+
+=item selectall_hashref
+
+=item selectcol_arrayref
+
+=item selectrow_array
+
+=item selectrow_arrayref
+
+=item selectrow_hashref
+
+=item sql_date_format
+
+=item sql_date_math
+
+=item sql_from_days
+
+=item sql_fulltext_search
+
+=item sql_group_concat
+
+=item sql_in
+
+=item sql_limit
+
+=item sql_not_regexp
+
+=item sql_position
+
+=item sql_regexp
+
+=item sql_string_concat
+
+=item sql_to_days
+
+=back

@@ -13,16 +13,23 @@ package Bugzilla::Install::Requirements;
 # Subroutines may "require" and "import" from modules, but they
 # MUST NOT "use."
 
+use 5.10.1;
 use strict;
 
 use Bugzilla::Constants;
-use Bugzilla::Install::Util qw(vers_cmp install_string bin_loc 
+use Bugzilla::Install::Util qw(install_string bin_loc
                                extension_requirement_packages);
 use List::Util qw(max);
-use Safe;
 use Term::ANSIColor;
 
-use base qw(Exporter);
+# Return::Value 1.666002 pollutes the error log with warnings about this
+# deprecated module. We have to set NO_CLUCK = 1 before loading Email::Send
+# in have_vers() to disable these warnings.
+BEGIN {
+    $Return::Value::NO_CLUCK = 1;
+}
+
+use parent qw(Exporter);
 our @EXPORT = qw(
     REQUIRED_MODULES
     OPTIONAL_MODULES
@@ -79,7 +86,6 @@ use constant APACHE_PATH => [qw(
 # are 'blacklisted'--that is, even if the version is high enough, Bugzilla
 # will refuse to say that it's OK to run with that version.
 sub REQUIRED_MODULES {
-    my $perl_ver = sprintf('%vd', $^V);
     my @modules = (
     {
         package => 'CGI.pm',
@@ -93,10 +99,11 @@ sub REQUIRED_MODULES {
         module  => 'Digest::SHA',
         version => 0
     },
+    # 0.23 fixes incorrect handling of 1/2 & 3/4 timezones.
     {
         package => 'TimeDate',
         module  => 'Date::Format',
-        version => '2.21'
+        version => '2.23'
     },
     # 0.28 fixed some important bugs in DateTime.
     {
@@ -113,22 +120,23 @@ sub REQUIRED_MODULES {
         module  => 'DateTime::TimeZone',
         version => ON_WINDOWS ? '0.79' : '0.71'
     },
+    # 1.54 is required for Perl 5.10+. It also makes DBD::Oracle happy.
     {
         package => 'DBI',
         module  => 'DBI',
-        version => (vers_cmp($perl_ver, '5.13.3') > -1) ? '1.614' : '1.41'
+        version => ($^V >= v5.13.3) ? '1.614' : '1.54'
     },
-    # 2.22 fixes various problems related to UTF8 strings in hash keys,
-    # as well as line endings on Windows.
+    # 2.24 contains several useful text virtual methods.
     {
         package => 'Template-Toolkit',
         module  => 'Template',
-        version => '2.22'
+        version => '2.24'
     },
+    # 2.04 implement the "Test" method (to write to data/mailer.testfile).
     {
         package => 'Email-Send',
         module  => 'Email::Send',
-        version => ON_WINDOWS ? '2.16' : '2.00',
+        version => ON_WINDOWS ? '2.16' : '2.04',
         blacklist => ['^2\.196$']
     },
     {
@@ -144,10 +152,11 @@ sub REQUIRED_MODULES {
         # in a URL query string.
         version => '1.37',
     },
+    # 0.32 fixes several memory leaks in the XS version of some functions.
     {
         package => 'List-MoreUtils',
         module  => 'List::MoreUtils',
-        version => 0.22,
+        version => 0.32,
     },
     {
         package => 'Math-Random-ISAAC',
@@ -177,7 +186,6 @@ sub REQUIRED_MODULES {
 };
 
 sub OPTIONAL_MODULES {
-    my $perl_ver = sprintf('%vd', $^V);
     my @modules = (
     {
         package => 'GD',
@@ -188,8 +196,9 @@ sub OPTIONAL_MODULES {
     {
         package => 'Chart',
         module  => 'Chart::Lines',
-        # Versions below 2.1 cannot be detected accurately.
-        version => '2.1',
+        # Versions below 2.4.1 cannot be compared accurately, see
+        # https://rt.cpan.org/Public/Bug/Display.html?id=28218.
+        version => '2.4.1',
         feature => [qw(new_charts old_charts)],
     },
     {
@@ -262,6 +271,8 @@ sub OPTIONAL_MODULES {
         version => 0,
         feature => ['auth_radius'],
     },
+    # XXX - Once we require XMLRPC::Lite 0.717 or higher, we can
+    # remove SOAP::Lite from the list.
     {
         package => 'SOAP-Lite',
         module  => 'SOAP::Lite',
@@ -270,11 +281,19 @@ sub OPTIONAL_MODULES {
         version => '0.712',
         feature => ['xmlrpc'],
     },
+    # Since SOAP::Lite 1.0, XMLRPC::Lite is no longer included
+    # and so it must be checked separately.
+    {
+        package => 'XMLRPC-Lite',
+        module  => 'XMLRPC::Lite',
+        version => '0.712',
+        feature => ['xmlrpc'],
+    },
     {
         package => 'JSON-RPC',
         module  => 'JSON::RPC',
         version => 0,
-        feature => ['jsonrpc'],
+        feature => ['jsonrpc', 'rest'],
     },
     {
         package => 'JSON-XS',
@@ -286,14 +305,15 @@ sub OPTIONAL_MODULES {
     {
         package => 'Test-Taint',
         module  => 'Test::Taint',
-        version => 0,
-        feature => ['jsonrpc', 'xmlrpc'],
+        # 1.06 no longer throws warnings with Perl 5.10+.
+        version => 1.06,
+        feature => ['jsonrpc', 'xmlrpc', 'rest'],
     },
     {
         # We need the 'utf8_mode' method of HTML::Parser, for HTML::Scrubber.
         package => 'HTML-Parser',
         module  => 'HTML::Parser',
-        version => (vers_cmp($perl_ver, '5.13.3') > -1) ? '3.67' : '3.40',
+        version => ($^V >= v5.13.3) ? '3.67' : '3.40',
         feature => ['html_desc'],
     },
     {
@@ -335,7 +355,8 @@ sub OPTIONAL_MODULES {
     {
         package => 'TheSchwartz',
         module  => 'TheSchwartz',
-        version => 0,
+        # 1.07 supports the prioritization of jobs.
+        version => 1.07,
         feature => ['jobqueue'],
     },
     {
@@ -359,6 +380,28 @@ sub OPTIONAL_MODULES {
         version => '0.96',
         feature => ['mod_perl'],
     },
+
+    # typesniffer
+    {
+        package => 'File-MimeInfo',
+        module  => 'File::MimeInfo::Magic',
+        version => '0',
+        feature => ['typesniffer'],
+    },
+    {
+        package => 'IO-stringy',
+        module  => 'IO::Scalar',
+        version => '0',
+        feature => ['typesniffer'],
+    },
+
+    # memcached
+    {
+        package => 'Cache-Memcached',
+        module  => 'Cache::Memcached',
+        version => '0',
+        feature => ['memcached'],
+    },
     );
 
     my $extra_modules = _get_extension_requirements('OPTIONAL_MODULES');
@@ -372,6 +415,8 @@ use constant FEATURE_FILES => (
     jsonrpc       => ['Bugzilla/WebService/Server/JSONRPC.pm', 'jsonrpc.cgi'],
     xmlrpc        => ['Bugzilla/WebService/Server/XMLRPC.pm', 'xmlrpc.cgi',
                       'Bugzilla/WebService.pm', 'Bugzilla/WebService/*.pm'],
+    rest          => ['Bugzilla/WebService/Server/REST.pm', 'rest.cgi',
+                      'Bugzilla/WebService/Server/REST/Resources/*.pm'],
     moving        => ['importxml.pl'],
     auth_ldap     => ['Bugzilla/Auth/Verify/LDAP.pm'],
     auth_radius   => ['Bugzilla/Auth/Verify/RADIUS.pm'],
@@ -380,6 +425,7 @@ use constant FEATURE_FILES => (
                       'Bugzilla/JobQueue/*', 'jobqueue.pl'],
     patch_viewer  => ['Bugzilla/Attachment/PatchReader.pm'],
     updates       => ['Bugzilla/Update.pm'],
+    memcached     => ['Bugzilla/Memcache.pm'],
 );
 
 # This implements the REQUIRED_MODULES and OPTIONAL_MODULES stuff
@@ -544,26 +590,6 @@ sub print_module_instructions {
         ( (!$output and @{$check_results->{missing}})
           or ($output and $check_results->{any_missing}) ) ? 1 : 0;
 
-    # We only print the PPM repository note if we have to.
-    my $perl_ver = sprintf('%vd', $^V);
-    if ($need_module_instructions && ON_ACTIVESTATE && vers_cmp($perl_ver, '5.12') < 0) {
-        # URL when running Perl 5.8.x.
-        my $url_to_theory58S = 'http://theoryx5.uwinnipeg.ca/ppms';
-        # Packages for Perl 5.10 are not compatible with Perl 5.8.
-        if (vers_cmp($perl_ver, '5.10') > -1) {
-            $url_to_theory58S = 'http://cpan.uwinnipeg.ca/PPMPackages/10xx/';
-        }
-        print colored(
-            install_string('ppm_repo_add', 
-                           { theory_url => $url_to_theory58S }),
-            COLOR_ERROR);
-
-        # ActivePerls older than revision 819 require an additional command.
-        if (ON_ACTIVESTATE < 819) {
-            print install_string('ppm_repo_up');
-        }
-    }
-
     if ($need_module_instructions or @{ $check_results->{apache} }) {
         # If any output was required, we want to close the "table"
         print "*" x TABLE_WIDTH . "\n";
@@ -650,8 +676,8 @@ sub check_graphviz {
     return $return;
 }
 
-# This was originally clipped from the libnet Makefile.PL, adapted here to
-# use the below vers_cmp routine for accurate version checking.
+# This was originally clipped from the libnet Makefile.PL, adapted here for
+# accurate version checking.
 sub have_vers {
     my ($params, $output) = @_;
     my $module  = $params->{module};
@@ -669,21 +695,24 @@ sub have_vers {
     Bugzilla::Install::Util::set_output_encoding();
 
     # VERSION is provided by UNIVERSAL::, and can be called even if
-    # the module isn't loaded.
-    my $vnum = $module->VERSION || -1;
+    # the module isn't loaded. We eval'uate ->VERSION because it can die
+    # when the version is not valid (yes, this happens from time to time).
+    # In that case, we use an uglier method to get the version.
+    my $vnum = eval { $module->VERSION };
+    if ($@) {
+        no strict 'refs';
+        $vnum = ${"${module}::VERSION"};
 
-    # CGI's versioning scheme went 2.75, 2.751, 2.752, 2.753, 2.76
-    # That breaks the standard version tests, so we need to manually correct
-    # the version
-    if ($module eq 'CGI' && $vnum =~ /(2\.7\d)(\d+)/) {
-        $vnum = $1 . "." . $2;
+        # If we come here, then the version is not a valid one.
+        # We try to sanitize it.
+        if ($vnum =~ /^((\d+)(\.\d+)*)/) {
+            $vnum = $1;
+        }
     }
-    # CPAN did a similar thing, where it has versions like 1.9304.
-    if ($module eq 'CPAN' and $vnum =~ /^(\d\.\d{2})\d{2}$/) {
-        $vnum = $1;
-    }
+    $vnum ||= -1;
 
-    my $vok = (vers_cmp($vnum,$wanted) > -1);
+    # Must do a string comparison as $vnum may be of the form 5.10.1.
+    my $vok = ($vnum ne '-1' && version->new($vnum) >= version->new($wanted)) ? 1 : 0;
     my $blacklisted;
     if ($vok && $params->{blacklist}) {
         $blacklisted = grep($vnum =~ /$_/, @{$params->{blacklist}});
@@ -911,5 +940,13 @@ Returns:     C<1> if the check was successful, C<0> otherwise.
 
 Returns a hashref where file names are the keys and the value is the feature
 that must be enabled in order to compile that file.
+
+=back
+
+=head1 B<Methods in need of POD>
+
+=over
+
+=item print_module_instructions
 
 =back

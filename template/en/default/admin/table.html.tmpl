@@ -67,11 +67,11 @@
 
 [%###################  TABLE HEADER   ######################%]
 
-<table id="admin_table" border="1" cellpadding="4" cellspacing="0">
-  <tr bgcolor="#6666FF">
+<table id="admin_table">
+  <tr class="column_header">
     [% FOREACH c = columns %]
       [%# Default to align left for headers %]
-      <th align="[% (c.align || 'left') FILTER html %]">
+      <th class="[% (c.align || 'left') FILTER css_class_quote %]">
         [% c.heading FILTER html %]
       </th>
     [% END %]
@@ -125,41 +125,26 @@
           [% IF class %] class="[% class FILTER html %]" [% END %]>
 
         [% IF contentlink %]
-          [% link_uri = contentlink %]
-          [% WHILE link_uri.search('%%(.+?)%%')%]
-            [% FOREACH m = link_uri.match('%%(.+?)%%') %]
-              [% IF row.$m.defined %]
-                [% replacement_value = FILTER uri; row.$m; END %]
-              [% ELSE %]
-                [% replacement_value = "" %]
-              [% END %]
-              [% link_uri = link_uri.replace("%%$m%%", replacement_value) %]
-            [% END %]
+          [% FOREACH m = contentlink.match('%%(.+?)%%', 1) %]
+            [% replacement_value = FILTER uri; row.$m; END %]
+            [% contentlink = contentlink.replace("%%$m%%", replacement_value) %]
           [% END %]
-          <a href="[% link_uri %]">
+          <a href="[% contentlink %]">
         [% END %]
-        
+
         [% IF content_use_field %]
-           [% colname = row.${c.name} %]
-           [% field_descs.${colname} FILTER html %]
+          [% colname = row.${c.name} %]
+          [% field_descs.${colname} FILTER html %]
         [% ELSIF content %]
-            [% content FILTER html_light %]
+          [% content FILTER html_light %]
+        [% ELSIF yesno_field %]
+          [% row.${c.name} ? "Yes" : "No" %]
+        [% ELSIF allow_html_content %]
+          [% row.${c.name} FILTER html_light %]
         [% ELSE %]
-          [% IF yesno_field %]
-            [% IF row.${c.name} %]
-              Yes
-            [% ELSE %]
-              No
-            [% END %]
-          [% ELSE %]
-            [% IF allow_html_content %]
-              [% row.${c.name} FILTER html_light %]
-            [% ELSE %]
-              [% row.${c.name} FILTER html %]
-            [% END %]
-          [% END %]
+          [% row.${c.name} FILTER html %]
         [% END %]
-        
+
         [% IF contentlink %]
           </a>
         [% END %]

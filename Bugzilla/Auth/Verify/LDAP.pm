@@ -6,7 +6,10 @@
 # defined by the Mozilla Public License, v. 2.0.
 
 package Bugzilla::Auth::Verify::LDAP;
+
+use 5.10.1;
 use strict;
+
 use base qw(Bugzilla::Auth::Verify);
 use fields qw(
     ldap
@@ -18,6 +21,7 @@ use Bugzilla::User;
 use Bugzilla::Util;
 
 use Net::LDAP;
+use Net::LDAP::Util qw(escape_filter_value);
 
 use constant admin_can_create_account => 0;
 use constant user_can_create_account  => 0;
@@ -121,6 +125,7 @@ sub check_credentials {
 
 sub _bz_search_params {
     my ($username) = @_;
+    $username = escape_filter_value($username);
     return (base   => Bugzilla->params->{"LDAPBaseDN"},
             scope  => "sub",
             filter => '(&(' . Bugzilla->params->{"LDAPuidattribute"} 

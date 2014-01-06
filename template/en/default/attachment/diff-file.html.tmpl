@@ -14,7 +14,11 @@
   # considers the first row to determine column widths. If a colspan is found,
   # it then share the width equally among all columns, which we don't want.
   #%]
-<table class="file_table"><thead><tr><td class="num"></td><td></td><td class="num"></td><td></td></tr><tr><td class="file_head" colspan="4"><a href="#" onclick="return twisty_click(this)">[% collapsed ? '(+)' : '(-)' %]</a><input type="checkbox" name="[% file.filename FILTER html %]"[% collapsed ? '' : ' checked' %] style="display: none">
+<table class="file_table"><thead><tr><td class="num"></td><td></td><td
+ class="num"></td><td></td></tr><tr><td class="file_head" colspan="4"><a href="#"
+ onclick="return twisty_click(this)">[% collapsed ? '(+)' : '(-)' %]</a><input
+ type="checkbox" name="[% file.filename FILTER html %]"[% collapsed ? '' : ' checked' %]
+ class="bz_default_hidden">
   [% IF lxr_prefix && !file.is_add %]
     <a href="[% lxr_prefix %]">[% file.filename FILTER html %]</a>
   [% ELSE %]
@@ -40,8 +44,8 @@ incremental_restore()
 [% FOREACH section = sections %]
   [% section_num = section_num + 1 %]
   <tr><th colspan="4" class="section_head">
-    <table id="[% file.filename FILTER html %]_sec[% section_num %]" cellpadding="0" cellspacing="0">
-    <tr><th width="95%" align="left">
+    <table id="[% file.filename FILTER html %]_sec[% section_num %]">
+    <tr><th width="95%" class="left">
   [% IF file.is_add %]
     Added
   [% ELSIF file.is_remove %]

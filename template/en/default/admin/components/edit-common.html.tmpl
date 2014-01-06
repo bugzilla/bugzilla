@@ -15,12 +15,12 @@
 [% DEFAULT desc_name = "description" %]
 
 <tr>
-  <th class="field_label"><label for="component">Component:</label></th>
+  <th><label for="component">Component:</label></th>
   <td><input size="64" maxlength="64" name="component" id="component"
              value="[%- comp.name FILTER html %]"></td>
 </tr>
 <tr>
-  <th class="field_label"><label for="[% desc_name FILTER html %]">Component Description:</label></th>
+  <th><label for="[% desc_name FILTER html %]">Component Description:</label></th>
   <td>
     [% INCLUDE global/textarea.html.tmpl
       name           = desc_name
@@ -33,7 +33,7 @@
   </td>
 </tr>
 <tr>
-  <th class="field_label"><label for="initialowner">Default Assignee:</label></th>
+  <th><label for="initialowner">Default Assignee:</label></th>
   <td>
     [% INCLUDE global/userselect.html.tmpl
        name => "initialowner"
@@ -45,7 +45,7 @@
 </tr>
 [% IF Param('useqacontact') %]
   <tr>
-    <th class="field_label"><label for="initialqacontact">Default QA contact:</label></th>
+    <th><label for="initialqacontact">Default QA contact:</label></th>
     <td>
       [% INCLUDE global/userselect.html.tmpl
          name => "initialqacontact"
@@ -58,7 +58,7 @@
   </tr>
 [% END %]
 <tr>
-  <th class="field_label"><label for="initialcc">Default CC List:</label></th>
+  <th><label for="initialcc">Default CC List:</label></th>
   <td>
     [% INCLUDE global/userselect.html.tmpl
        name     => "initialcc"
@@ -69,7 +69,7 @@
     %]
     <br>
     [% IF !Param("usemenuforusers") %]
-      <em>Enter user names for the CC list as a comma-separated list.</em>
+      <span class="bz_info">Enter user names for the CC list as a comma-separated list.</span>
     [% END %]
   </td>
 </tr>

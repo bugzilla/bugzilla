@@ -5,16 +5,16 @@
 # This Source Code Form is "Incompatible With Secondary Licenses", as
 # defined by the Mozilla Public License, v. 2.0.
 
-use strict;
-
 package Bugzilla::Status;
 
-use Bugzilla::Error;
+use 5.10.1;
+use strict;
+
 # This subclasses Bugzilla::Field::Choice instead of implementing 
 # ChoiceInterface, because a bug status literally is a special type
 # of Field::Choice, not just an object that happens to have the same
 # methods.
-use base qw(Bugzilla::Field::Choice Exporter);
+use parent qw(Bugzilla::Field::Choice Exporter);
 @Bugzilla::Status::EXPORT = qw(
     BUG_STATE_OPEN
     SPECIAL_STATUS_WORKFLOW_ACTIONS
@@ -22,6 +22,8 @@ use base qw(Bugzilla::Field::Choice Exporter);
     is_open_state 
     closed_bug_statuses
 );
+
+use Bugzilla::Error;
 
 ################################
 #####   Initialization     #####
@@ -175,8 +177,8 @@ sub _status_condition {
     my ($self, $old_status) = @_;
     my @values;
     my $cond = 'old_status IS NULL';
-    # For newly-filed bugs
-    if ($old_status) {
+    # We may pass a fake status object to represent the initial unset state.
+    if ($old_status && $old_status->id)  {
         $cond = 'old_status = ?';
         push(@values, $old_status->id);
     }
@@ -295,3 +297,27 @@ C<1> if a comment is required on this change, C<0> if not.
 =back
 
 =cut
+
+=head1 B<Methods in need of POD>
+
+=over
+
+=item create
+
+=item BUG_STATE_OPEN
+
+=item is_static
+
+=item is_open_state
+
+=item is_active
+
+=item remove_from_db
+
+=item DB_COLUMNS
+
+=item is_open
+
+=item VALIDATORS
+
+=back

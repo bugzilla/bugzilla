@@ -45,6 +45,7 @@ my $add_comment;
 my $private;
 my $work_time;
 my $fetch_extension_info = 0;
+my $debug;
 
 GetOptions('help|h|?'       => \$help,
            'uri=s'          => \$Bugzilla_uri,
@@ -58,7 +59,8 @@ GetOptions('help|h|?'       => \$help,
            'comment:s'      => \$add_comment,
            'private:i'      => \$private,
            'worktime:f'     => \$work_time,
-           'extension_info'    => \$fetch_extension_info
+           'extension_info' => \$fetch_extension_info,
+           'debug'          => \$debug
           ) or pod2usage({'-verbose' => 0, '-exitval' => 1});
 
 =head1 OPTIONS
@@ -130,6 +132,10 @@ An optional double precision number specifying the work time for B<--comment>.
 If specified on the command line, the script returns the information about the
 extensions that are installed.
 
+=item --debug
+
+Enable tracing at the debug level of XMLRPC requests and responses.
+
 =back
 
 =head1 DESCRIPTION
@@ -166,6 +172,16 @@ of C<http://your.bugzilla.installation/path/to/bugzilla/xmlrpc.cgi>.
 
 my $proxy = XMLRPC::Lite->proxy($Bugzilla_uri,
                                 'cookie_jar' => $cookie_jar);
+
+=head2 Debugging
+
+Enable tracing at the debug level of XMLRPC requests and responses if requested.
+
+=cut
+
+if ($debug) {
+   $proxy->import(+trace => 'debug');
+}
 
 =head2 Checking Bugzilla's version
 
@@ -277,24 +293,32 @@ if ($bug_id) {
 
 =head2 Retrieving Product Information
 
-Call C<Product.get_product> with the name of the product you want to know more
-of.
+Call C<Product.get> with the name of the product you want to know more of.
 The call will return a C<Bugzilla::Product> object.
 
 =cut
 
 if ($product_name) {
-    $soapresult = $proxy->call('Product.get_product', $product_name);
+    $soapresult = $proxy->call('Product.get', {'names' => [$product_name]});
     _die_on_fault($soapresult);
-    $result = $soapresult->result;
+    $result = $soapresult->result()->{'products'}->[0];
 
-    if (ref($result) eq 'HASH') {
-        foreach (keys(%$result)) {
-            print "$_: $$result{$_}\n";
+    # Iterate all entries, the values may be scalars or array refs with hash refs.
+    foreach my $key (sort(keys %$result)) {
+      my $value = $result->{$key};
+
+      if (ref($value)) {
+        my $counter = 0;
+        foreach my $hash (@$value) {
+          while (my ($innerKey, $innerValue) = each %$hash) {
+            print "$key.$counter.$innerKey: $innerValue\n";
+          }
+          ++$counter;
         }
-    }
-    else {
-        print "$result\n";
+      }
+      else {
+        print "$key: $value\n"
+      }
     }
 }
 

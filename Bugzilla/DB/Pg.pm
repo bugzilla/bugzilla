@@ -21,13 +21,14 @@ For interface details see L<Bugzilla::DB> and L<DBI>.
 
 package Bugzilla::DB::Pg;
 
+use 5.10.1;
 use strict;
 
 use Bugzilla::Error;
 use DBD::Pg;
 
 # This module extends the DB interface via inheritance
-use base qw(Bugzilla::DB);
+use parent qw(Bugzilla::DB);
 
 use constant BLOB_TYPE => { pg_type => DBD::Pg::PG_BYTEA };
 
@@ -195,11 +196,12 @@ sub bz_check_server_version {
     my $self = shift;
     my ($db) = @_;
     my $server_version = $self->SUPER::bz_check_server_version(@_);
-    my ($major_version) = $server_version =~ /^(\d+)/;
-    # Pg 9 requires DBD::Pg 2.17.2 in order to properly read bytea values.
+    my ($major_version, $minor_version) = $server_version =~ /^0*(\d+)\.0*(\d+)/;
+    # Pg 9.0 requires DBD::Pg 2.17.2 in order to properly read bytea values.
+    # Pg 9.2 requires DBD::Pg 2.19.3 as spclocation no longer exists.
     if ($major_version >= 9) {
-        local $db->{dbd}->{version} = '2.17.2';
-        local $db->{name} = $db->{name} . ' 9+';
+        local $db->{dbd}->{version} = ($minor_version >= 2) ? '2.19.3' : '2.17.2';
+        local $db->{name} = $db->{name} . " ${major_version}.$minor_version";
         Bugzilla::DB::_bz_check_dbd(@_);
     }
 }
@@ -365,3 +367,43 @@ sub bz_table_list_real {
 }
 
 1;
+
+=head1 B<Methods in need of POD>
+
+=over
+
+=item sql_date_format
+
+=item bz_explain
+
+=item bz_sequence_exists
+
+=item bz_last_key
+
+=item sql_position
+
+=item sql_limit
+
+=item sql_not_regexp
+
+=item sql_string_concat
+
+=item sql_date_math
+
+=item sql_to_days
+
+=item bz_check_server_version
+
+=item sql_from_days
+
+=item bz_table_list_real
+
+=item sql_regexp
+
+=item sql_istring
+
+=item sql_group_concat
+
+=item bz_setup_database
+
+=back

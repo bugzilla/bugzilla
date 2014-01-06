@@ -31,18 +31,14 @@
 [% FOREACH a = attachments %]
 
   <div align="center">
-  <table class="attachment_info" cellspacing="0" cellpadding="4" border="1" width="75%">
+  <table class="viewall_desc">
     <tr>
-      <td valign="top" bgcolor="#cccccc" colspan="6">
-        <big><b>Attachment #[% a.id %]</b></big>
-      </td>
+      <th colspan="6" class="bz_attach_footer">Attachment #[% a.id %]</th>
     </tr>
     <tr>
-      <td valign="top">
-        [% a.description FILTER html FILTER obsolete(a.isobsolete) %]
-      </td>
+      <td>[% a.description FILTER html FILTER obsolete(a.isobsolete) %]</td>
 
-      <td valign="top">
+      <td>
         [% IF a.ispatch %]
           <i>patch</i>
         [% ELSE %]
@@ -50,10 +46,10 @@
         [% END %]
       </td>
 
-      <td valign="top">[% a.attached FILTER time %]</td>
-      <td valign="top">[% a.datasize FILTER unitconvert %]</td>
+      <td>[% a.attached FILTER time %]</td>
+      <td>[% a.datasize FILTER unitconvert %]</td>
 
-      <td valign="top">
+      <td>
         [% IF a.flags.size == 0 %]
           <i>no flags</i>
         [% ELSE %]
@@ -68,9 +64,7 @@
         [% END %]
       </td>
 
-      <td valign="top">
-        <a href="attachment.cgi?id=[% a.id %]&amp;action=edit">Details</a>
-      </td>
+      <td><a href="attachment.cgi?id=[% a.id %]&amp;action=edit">Details</a></td>
     </tr>
   </table>
 

@@ -6,8 +6,8 @@
 # This Source Code Form is "Incompatible With Secondary Licenses", as
 # defined by the Mozilla Public License, v. 2.0.
 
+use 5.10.1;
 use strict;
-
 use lib qw(. lib);
 
 use Bugzilla;
@@ -207,7 +207,7 @@ if ($cgi->param('repair_bugs_fulltext')) {
                                             WHERE bugs_fulltext.bug_id IS NULL');
 
    foreach my $bugid (@$bug_ids) {
-       Bugzilla::Bug->new($bugid)->_sync_fulltext('new_bug');
+       Bugzilla::Bug->new($bugid)->_sync_fulltext( new_bug => 1 );
    }
 
    Status('bugs_fulltext_fixed', {bug_count => scalar(@$bug_ids)});

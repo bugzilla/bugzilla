@@ -6,13 +6,8 @@
 # This Source Code Form is "Incompatible With Secondary Licenses", as
 # defined by the Mozilla Public License, v. 2.0.
 
-################################################################################
-# Script Initialization
-################################################################################
-
-# Make it harder for us to do dangerous things in Perl.
+use 5.10.1;
 use strict;
-
 use lib qw(. lib);
 
 use Bugzilla;
@@ -24,11 +19,9 @@ use Bugzilla::FlagType;
 use Bugzilla::User;
 use Bugzilla::Util;
 use Bugzilla::Bug;
-use Bugzilla::Field;
 use Bugzilla::Attachment;
 use Bugzilla::Attachment::PatchReader;
 use Bugzilla::Token;
-use Bugzilla::Keyword;
 
 use Encode qw(encode find_encoding);
 
@@ -39,10 +32,6 @@ use Encode qw(encode find_encoding);
 local our $cgi = Bugzilla->cgi;
 local our $template = Bugzilla->template;
 local our $vars = {};
-
-################################################################################
-# Main Body Execution
-################################################################################
 
 # All calls to this script should contain an "action" variable whose
 # value determines what the user wants to do.  The code below checks
@@ -151,7 +140,7 @@ sub validateID {
                           { attach_id => scalar $cgi->param($param) });
   
     # Make sure the attachment exists in the database.
-    my $attachment = new Bugzilla::Attachment($attach_id)
+    my $attachment = new Bugzilla::Attachment({ id => $attach_id, cache => 1 })
         || ThrowUserError("invalid_attach_id", { attach_id => $attach_id });
 
     return $attachment if ($dont_validate_access || check_can_access($attachment));
@@ -163,7 +152,7 @@ sub check_can_access {
     my $user = Bugzilla->user;
 
     # Make sure the user is authorized to access this attachment's bug.
-    Bugzilla::Bug->check($attachment->bug_id);
+    Bugzilla::Bug->check({ id => $attachment->bug_id, cache => 1 });
     if ($attachment->isprivate && $user->id != $attachment->attacher->id 
         && !$user->is_insider) 
     {
@@ -385,8 +374,7 @@ sub view {
     }
     print $cgi->header(-type=>"$contenttype; name=\"$filename\"",
                        -content_disposition=> "$disposition; filename=\"$filename\"",
-                       -content_length => $attachment->datasize,
-                       -x_content_type_options => "nosniff");
+                       -content_length => $attachment->datasize);
     disable_utf8();
     print $attachment->data;
 }
@@ -426,7 +414,7 @@ sub diff {
 # HTML page.
 sub viewall {
     # Retrieve and validate parameters
-    my $bug = Bugzilla::Bug->check(scalar $cgi->param('bugid'));
+    my $bug = Bugzilla::Bug->check({ id => scalar $cgi->param('bugid'), cache => 1 });
 
     my $attachments = Bugzilla::Attachment->get_attachments_by_bug($bug);
     # Ignore deleted attachments.
@@ -575,6 +563,8 @@ sub insert {
       $owner = $bug->assigned_to->login;
       $bug->set_assigned_to($user);
   }
+
+  $bug->add_cc($user) if $cgi->param('addselfcc');
   $bug->update($timestamp);
 
   $dbh->bz_commit_transaction;
@@ -605,8 +595,6 @@ sub edit {
 
   my $bugattachments =
       Bugzilla::Attachment->get_attachments_by_bug($attachment->bug);
-  # We only want attachment IDs.
-  @$bugattachments = map { $_->id } @$bugattachments;
 
   my $any_flags_requesteeble =
     grep { $_->is_requestable && $_->is_requesteeble } @{$attachment->flag_types};
@@ -649,19 +637,22 @@ sub update {
         $attachment->set_filename(scalar $cgi->param('filename'));
 
         # Now make sure the attachment has not been edited since we loaded the page.
-        if (defined $cgi->param('delta_ts')
-            && $cgi->param('delta_ts') ne $attachment->modification_time)
-        {
-            ($vars->{'operations'}) = $bug->get_activity($attachment->id, $cgi->param('delta_ts'));
+        my $delta_ts = $cgi->param('delta_ts');
+        my $modification_time = $attachment->modification_time;
 
-            # The token contains the old modification_time. We need a new one.
-            $cgi->param('token', issue_hash_token([$attachment->id, $attachment->modification_time]));
+        if ($delta_ts && $delta_ts ne $modification_time) {
+            datetime_from($delta_ts)
+              or ThrowCodeError('invalid_timestamp', { timestamp => $delta_ts });
+            ($vars->{'operations'}) = $bug->get_activity($attachment->id, $delta_ts);
 
             # If the modification date changed but there is no entry in
             # the activity table, this means someone commented only.
             # In this case, there is no reason to midair.
             if (scalar(@{$vars->{'operations'}})) {
-                $cgi->param('delta_ts', $attachment->modification_time);
+                $cgi->param('delta_ts', $modification_time);
+                # The token contains the old modification_time. We need a new one.
+                $cgi->param('token', issue_hash_token([$attachment->id, $modification_time]));
+
                 $vars->{'attachment'} = $attachment;
 
                 print $cgi->header();
@@ -686,6 +677,8 @@ sub update {
                                       type => CMT_ATTACHMENT_UPDATED,
                                       extra_data => $attachment->id });
     }
+
+    $bug->add_cc($user) if $cgi->param('addselfcc');
 
     if ($can_edit) {
         my ($flags, $new_flags) =
@@ -761,7 +754,6 @@ sub delete_attachment {
         # The token is valid. Delete the content of the attachment.
         my $msg;
         $vars->{'attachment'} = $attachment;
-        $vars->{'date'} = $date;
         $vars->{'reason'} = clean_text($cgi->param('reason') || '');
 
         $template->process("attachment/delete_reason.txt.tmpl", $vars, \$msg)

@@ -56,9 +56,18 @@
     </li>
   [% END %]
 
-  [%# Individual bugs addition %]
-
-  [% PROCESS "global/per-bug-queries.html.tmpl" %]
+  [% IF user.reports.size %]
+    <li id="reports-saved">
+      <ul class="links">
+        [% FOREACH r = user.reports %]
+          <li>[% '<span class="separator">| </span>' IF print_pipe %]
+          <a href="report.cgi?[% r.query FILTER html %]&amp;saved_report_id=
+                  [%~ r.id FILTER uri %]">[% r.name FILTER html %]</a></li>
+          [% print_pipe = 1 %]
+        [% END %]
+      </ul>
+    </li>
+  [% END %]
 
   [%# Sections of links to more things users can do on this installation. %]
   [% Hook.process("end") %]

@@ -11,10 +11,6 @@
 
 [% PROCESS global/header.html.tmpl
   title="Request Queue"
-  style = "
-    table.requests th { text-align: left; }
-    table#filtering th { text-align: right; }
-  "
   onload="var f = document.request_form; selectProduct(f.product, f.component, null, null, 'Any');"
   javascript_urls=["js/productform.js", "js/field.js"]
   style_urls = ['skins/standard/buglist.css']
@@ -147,10 +143,20 @@ to some group are shown by default.
           } %]
         [% PROCESS "global/select-menu.html.tmpl" name="group" options=groups default=cgi.param('group') %]
       </td>
+    </tr>
+    <tr>
+      <th></th>
+      <td>
+        <select id="do_union" name="do_union">
+          <option value="0">Match the requester AND requestee</option>
+          <option value="1" [% 'selected="selected"' IF cgi.param('do_union') %]>
+            Match the requester OR requestee</option>
+        </select>
+      </td>
+      <td colspan="3"></td>
       <td><input type="submit" id="filter" value="Filter"></td>
     </tr>
   </table>
-
 </form>
 
 [% column_headers = {
@@ -195,6 +201,8 @@ to some group are shown by default.
     </tr>
   [% END %]
   [% PROCESS display_buglist %]
+  <br><br>
+  <a href="request.cgi?[% urlquerypart FILTER html %]&amp;ctype=csv">View entire list as CSV</a>
 [% END %]
 
 [% PROCESS global/footer.html.tmpl %]
@@ -204,7 +212,7 @@ to some group are shown by default.
 
   <h3>[% column_headers.$group_field %]: 
     [%+ (request.$group_field || "None") FILTER email FILTER html %]</h3>
-  <table class="requests" cellspacing="0" cellpadding="4" border="1">
+  <table class="requests">
     <tr>
       [% FOREACH column = display_columns %]
         [% NEXT IF column == group_field || excluded_columns.contains(column) %]
@@ -252,6 +260,6 @@ to some group are shown by default.
   </table>
   [% NEXT UNLESS buglist.keys.size %]
   <a href="buglist.cgi?bug_id=
-           [%- buglist.keys.nsort.join(",") FILTER html %]">(view as
-  [%+ terms.bug %] list)</a>
+           [%- buglist.keys.nsort.join(",") FILTER html %]">View as
+  [%+ terms.bug %] list</a>
 [% END %]

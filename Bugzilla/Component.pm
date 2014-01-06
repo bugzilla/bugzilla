@@ -6,8 +6,11 @@
 # defined by the Mozilla Public License, v. 2.0.
 
 package Bugzilla::Component;
+
+use 5.10.1;
 use strict;
-use base qw(Bugzilla::Field::ChoiceInterface Bugzilla::Object);
+
+use parent qw(Bugzilla::Field::ChoiceInterface Bugzilla::Object);
 
 use Bugzilla::Constants;
 use Bugzilla::Util;
@@ -339,21 +342,16 @@ sub bug_ids {
 sub default_assignee {
     my $self = shift;
 
-    if (!defined $self->{'default_assignee'}) {
-        $self->{'default_assignee'} =
-            new Bugzilla::User($self->{'initialowner'});
-    }
-    return $self->{'default_assignee'};
+    return $self->{'default_assignee'}
+      ||= new Bugzilla::User({ id => $self->{'initialowner'}, cache => 1 });
 }
 
 sub default_qa_contact {
     my $self = shift;
 
-    if (!defined $self->{'default_qa_contact'}) {
-        $self->{'default_qa_contact'} =
-            new Bugzilla::User($self->{'initialqacontact'});
-    }
-    return $self->{'default_qa_contact'};
+    return unless $self->{'initialqacontact'};
+    return $self->{'default_qa_contact'}
+      ||= new Bugzilla::User({id => $self->{'initialqacontact'}, cache => 1 });
 }
 
 sub flag_types {
@@ -415,10 +413,10 @@ use constant is_default => 0;
 
 sub is_set_on_bug {
     my ($self, $bug) = @_;
-    # We treat it like a hash always, so that we don't have to check if it's
-    # a hash or an object.
-    return 0 if !defined $bug->{component_id};
-    $bug->{component_id} == $self->id ? 1 : 0;
+    my $value = blessed($bug) ? $bug->component_id : $bug->{component};
+    $value = $value->id if blessed($value);
+    return 0 unless $value;
+    return $value == $self->id ? 1 : 0;
 }
 
 ###############################
@@ -487,10 +485,12 @@ Component.pm represents a Product Component object.
 
  Params:      $param - If you pass an integer, the integer is the
                        component ID from the database that we want to
-                       read in. If you pass in a hash with the 'name'
-                       and 'product' keys, then the value of the name
-                       key is the name of a component being in the given
-                       product.
+                       read in. 
+                       However, If you pass in a hash, it must contain
+                       two keys:
+                       name (string): the name of the component
+                       product (object): an object of Bugzilla::Product
+                       representing the product that the component belongs to.
 
  Returns:     A Bugzilla::Component object.
 
@@ -502,7 +502,7 @@ Component.pm represents a Product Component object.
 
  Returns:     Integer with the number of bugs.
 
-=item C<bugs_ids()>
+=item C<bug_ids()>
 
  Description: Returns all bug IDs that belong to the component.
 
@@ -526,7 +526,8 @@ Component.pm represents a Product Component object.
 
  Params:      none.
 
- Returns:     A Bugzilla::User object.
+ Returns:     A Bugzilla::User object if the default QA contact is defined for
+              the component. Otherwise, returns undef.
 
 =item C<initial_cc>
 
@@ -628,20 +629,36 @@ Component.pm represents a Product Component object.
  Description: Create a new component for the given product.
 
  Params:      The hashref must have the following keys:
-              name            - name of the new component (string). This name
-                                must be unique within the product.
-              product         - a Bugzilla::Product object to which
-                                the Component is being added.
-              description     - description of the new component (string).
-              initialowner    - login name of the default assignee (string).
+              name             - name of the new component (string). This name
+                                 must be unique within the product.
+              product          - a Bugzilla::Product object to which
+                                 the Component is being added.
+              description      - description of the new component (string).
+              initialowner     - login name of the default assignee (string).
               The following keys are optional:
-              initiaqacontact - login name of the default QA contact (string),
-                                or an empty string to clear it.
-              initial_cc      - an arrayref of login names to add to the
-                                CC list by default.
+              initialqacontact - login name of the default QA contact (string),
+                                 or an empty string to clear it.
+              initial_cc       - an arrayref of login names to add to the
+                                 CC list by default.
 
  Returns:     A Bugzilla::Component object.
 
 =back
 
 =cut
+
+=head1 B<Methods in need of POD>
+
+=over
+
+=item is_set_on_bug
+
+=item product_id
+
+=item set_is_active
+
+=item description
+
+=item is_active
+
+=back

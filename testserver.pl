@@ -10,12 +10,13 @@
 # as its only argument.  It attempts to troubleshoot as many installation
 # issues as possible.
 
+use 5.10.1;
 use strict;
 use lib qw(. lib);
 
 use Bugzilla;
 use Bugzilla::Constants;
-use Bugzilla::Util qw(say);
+use Bugzilla::Util;
 
 use Socket;
 
@@ -24,7 +25,7 @@ my $datadir = bz_locations()->{'datadir'};
 eval "require LWP; require LWP::UserAgent;";
 my $lwp = $@ ? 0 : 1;
 
-if ((@ARGV != 1) || ($ARGV[0] !~ /^https?:/))
+if ((@ARGV != 1) || ($ARGV[0] !~ /^https?:/i))
 {
     say "Usage: $0 <URL to this Bugzilla installation>";
     say "e.g.:  $0 http://www.mycompany.com/bugzilla";
@@ -97,7 +98,7 @@ Check your web server configuration and try again.";
 }
 
 # Try to execute a cgi script
-my $response = fetch($ARGV[0] . "/testagent.cgi");
+my $response = clean_text(fetch($ARGV[0] . "/testagent.cgi"));
 if ($response =~ /^OK (.*)$/) {
     say "TEST-OK Webserver is executing CGIs via $1.";
 } elsif ($response =~ /^#!/) {

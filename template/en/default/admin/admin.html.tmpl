@@ -44,7 +44,7 @@
         <dt id="sanitycheck" class="[% class %]"><a href="sanitycheck.cgi">Sanity Check</a></dt>
         <dd class="[% class %]">Run sanity checks to locate problems in your database.
         This may take several tens of minutes depending on the size of your installation.
-        You can also automate this check by running <tt>sanitycheck.pl</tt> from a cron job.
+        You can also automate this check by running <kbd>sanitycheck.pl</kbd> from a cron job.
         A notification will be sent per email to the specified user if errors are detected.</dd>
 
         [% class = (user.in_group('editusers') || user.can_bless) ? "" : "forbidden" %]

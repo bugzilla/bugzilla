@@ -6,11 +6,11 @@
 # defined by the Mozilla Public License, v. 2.0.
 
 package Bugzilla::BugUrl::Trac;
-use strict;
-use base qw(Bugzilla::BugUrl);
 
-use Bugzilla::Error;
-use Bugzilla::Util;
+use 5.10.1;
+use strict;
+
+use parent qw(Bugzilla::BugUrl);
 
 ###############################
 ####        Methods        ####
@@ -18,6 +18,10 @@ use Bugzilla::Util;
 
 sub should_handle {
     my ($class, $uri) = @_;
+
+    # Trac URLs can look like various things:
+    #   http://dev.mutt.org/trac/ticket/1234
+    #   http://trac.roundcube.net/ticket/1484130
     return ($uri->path =~ m|/ticket/\d+$|) ? 1 : 0;
 }
 
@@ -25,10 +29,6 @@ sub _check_value {
     my $class = shift;
 
     my $uri = $class->SUPER::_check_value(@_);
-
-    # Trac URLs can look like various things:
-    #   http://dev.mutt.org/trac/ticket/1234
-    #   http://trac.roundcube.net/ticket/1484130
 
     # Make sure there are no query parameters.
     $uri->query(undef);

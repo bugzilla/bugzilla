@@ -19,7 +19,7 @@
   docs_urlbase => 
     "The URL that is the common initial leading part of all"
     _ " $terms.Bugzilla documentation URLs. It may be an absolute URL,"
-    _ " or a URL relative to the <tt>urlbase</tt> parameter. Leave this"
+    _ " or a URL relative to the <var>urlbase</var> parameter. Leave this"
     _ " empty to suppress links to the documentation."
     _ "'%lang%' will be replaced by user's preferred language (if"
     _ " documentation is available in that language).",
@@ -45,12 +45,11 @@
     _ " display whatever is in this field at the top of every"
     _ " HTML page. The HTML you put in this field is not wrapped or"
     _ " enclosed in anything. You might want to wrap it inside a"
-    _ "<tt>&lt;div&gt;</tt>. Give the div <em>id=\"message\"</em> to get"
+    _ "<code>&lt;div&gt;</code>. Give the div <em>id=\"message\"</em> to get"
     _ " green text inside a red box, or <em>class=\"bz_private\"</em> for"
     _ " dark red on a red background.  Anything defined in "
-    _ " <tt>skins/standard/global.css</tt> or <tt>skins/custom/global.css</tt>"
-    _ " will work.  To get centered text, use <em>style=\"text-align: "
-    _  " center;\"</em>.",
+    _ " <code>skins/standard/global.css</code> or <code>skins/custom/global.css</code>"
+    _ " will work.  To get centered text, use <em>class=\"center\"</em>.",
 
   upgrade_notification => 
     "$terms.Bugzilla can inform you when a new release is available."
@@ -68,6 +67,6 @@
     _ " <li>'disabled' will never notify you about new releases and no"
     _ " connection will be established to a remote server.</li></ul>"
     _ " <p>Note that if your $terms.Bugzilla server requires a proxy to"
-    _ " access the Internet, you may also need to set the <tt>proxy_url</tt>"
+    _ " access the Internet, you may also need to set the <var>proxy_url</var>"
     _ " parameter in the Advanced section.</p>",
 } %]

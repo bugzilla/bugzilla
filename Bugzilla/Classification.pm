@@ -5,9 +5,10 @@
 # This Source Code Form is "Incompatible With Secondary Licenses", as
 # defined by the Mozilla Public License, v. 2.0.
 
-use strict;
-
 package Bugzilla::Classification;
+
+use 5.10.1;
+use strict;
 
 use Bugzilla::Constants;
 use Bugzilla::Field;
@@ -15,7 +16,8 @@ use Bugzilla::Util;
 use Bugzilla::Error;
 use Bugzilla::Product;
 
-use base qw(Bugzilla::Field::ChoiceInterface Bugzilla::Object);
+use parent qw(Bugzilla::Field::ChoiceInterface Bugzilla::Object Exporter);
+@Bugzilla::Classification::EXPORT = qw(sort_products_by_classification);
 
 ###############################
 ####    Initialization     ####
@@ -152,6 +154,38 @@ sub products {
 sub description { return $_[0]->{'description'}; }
 sub sortkey     { return $_[0]->{'sortkey'};     }
 
+
+###############################
+####       Helpers         ####
+###############################
+
+# This function is a helper to sort products to be listed
+# in global/choose-product.html.tmpl.
+
+sub sort_products_by_classification {
+    my $products = shift;
+    my $list;
+
+    if (Bugzilla->params->{'useclassification'}) {
+        my $class = {};
+        # Get all classifications with at least one product.
+        foreach my $product (@$products) {
+            $class->{$product->classification_id}->{'object'} ||=
+                new Bugzilla::Classification($product->classification_id);
+            # Nice way to group products per classification, without querying
+            # the DB again.
+            push(@{$class->{$product->classification_id}->{'products'}}, $product);
+        }
+        $list = [sort {$a->{'object'}->sortkey <=> $b->{'object'}->sortkey
+                       || lc($a->{'object'}->name) cmp lc($b->{'object'}->name)}
+                      (values %$class)];
+    }
+    else {
+        $list = [{object => undef, products => $products}];
+    }
+    return $list;
+}
+
 1;
 
 __END__
@@ -208,4 +242,39 @@ A Classification is a higher-level grouping of Products.
 
 =back
 
+=head1 SUBROUTINES
+
+=over
+
+=item C<sort_products_by_classification>
+
+ Description: This is a helper which returns a list of products sorted
+              by classification in a form suitable to be passed to the
+              global/choose-product.html.tmpl template.
+
+ Params:      An arrayref of product objects.
+
+ Returns:     An arrayref of hashes suitable to be passed to
+              global/choose-product.html.tmpl.
+
+=back
+
 =cut
+
+=head1 B<Methods in need of POD>
+
+=over
+
+=item set_description
+
+=item sortkey
+
+=item set_name
+
+=item description
+
+=item remove_from_db
+
+=item set_sortkey
+
+=back

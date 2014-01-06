@@ -35,22 +35,24 @@
        types = types, 
        selected = type_selected
     %]
-    <div id="keyword_container">
+    <div id="[% field.name FILTER html %]_container">
        <input name="[% field.name FILTER html %]" 
               id="[% field.name FILTER html %]" size="40"
               [% IF onchange %] onchange="[% onchange FILTER html %]"[% END %]
               value="[% value FILTER html %]">
-       <div id="keyword_autocomplete"></div>
+       <div id="[% field.name FILTER html %]_autocomplete"></div>
     </div>
     <script type="text/javascript" defer="defer">
-      YAHOO.bugzilla.keyword_array = [
-        [%- FOREACH keyword = all_keywords %]
-          [%-# %]"[% keyword.name FILTER js %]"
+      if (typeof YAHOO.bugzilla.field_array === "undefined")
+        YAHOO.bugzilla.field_array = [];
+      YAHOO.bugzilla.field_array["[% field.name FILTER js %]"] = [
+        [%- FOREACH val = possible_values %]
+          [%-# %]"[% val FILTER js %]"
           [%- "," IF NOT loop.last %][% END %]];
-      YAHOO.bugzilla.keywordAutocomplete.init('[% field.name FILTER js %]',
-                                              'keyword_autocomplete');
+      YAHOO.bugzilla.fieldAutocomplete.init('[% field.name FILTER js %]',
+                                            '[% field.name FILTER js %]_autocomplete');
     </script>
-  [% CASE constants.FIELD_TYPE_DATETIME %]
+  [% CASE [constants.FIELD_TYPE_DATETIME, constants.FIELD_TYPE_DATE] %]
     [% INCLUDE "bug/field-label.html.tmpl"
       field = field
       tag_name = "span"
@@ -80,9 +82,10 @@
     
     <span id="con_calendar_[% field.name FILTER html %]to"></span>
     <script type="text/javascript">
-      createCalendar('[% field.name FILTER js %]');
-      createCalendar('[% field.name FILTER js %]to');
-    </script>
+      <!--
+        [%+ PROCESS "global/calendar.js.tmpl" id = field.name %]
+        [% PROCESS "global/calendar.js.tmpl" id = field.name _ 'to' %]
+      //--></script>
   [% CASE [ constants.FIELD_TYPE_SINGLE_SELECT, 
             constants.FIELD_TYPE_MULTI_SELECT ] %]
     <div id="container_[% field.name FILTER html %]" class="search_field_grid">      
@@ -102,7 +105,7 @@
         [% FOREACH current_value = legal_values %]
           [% SET v = current_value.name OR '---' -%]
           [% SET display = display_value(field.name, current_value.name) %]
-          <option [% IF v != display %]value="[% v FILTER html %]"[% END ~%]
+          <option value="[% v FILTER html %]"
             id="v[% current_value.id FILTER html %]_[% field.name FILTER html %]"
             [% ' selected="selected"' IF value.contains( v ) %]>
             [%~ display FILTER html ~%]
@@ -155,10 +158,21 @@
   });
 
   [% SET sub_field = value_controllers.${field.name}.$accessor %]
+  [% SET prod_per_class = {} %]
+  [% IF field.name == "classification" %]
+    [% FOREACH p = product %]
+      [% prod_per_class.${p.classification_id}.${p.id} = 1 %]
+    [% END %]
+  [% END %]
+
   [% FOREACH legal_value = legal_values %]
     [% SET controlled_ids = [] %]
-    [% FOREACH sub_value = legal_value.$accessor %]
-      [% controlled_ids.push(sub_value.id) %]
+    [% IF field.name == "classification" %]
+      [% controlled_ids = prod_per_class.${legal_value.id}.keys %]
+    [% ELSE %]
+      [% FOREACH sub_value = legal_value.$accessor %]
+        [% controlled_ids.push(sub_value.id) %]
+      [% END %]
     [% END %]
     [% NEXT IF !controlled_ids.size %]
       showValueWhen('[% sub_field.name FILTER js %]',

@@ -6,6 +6,8 @@
 # defined by the Mozilla Public License, v. 2.0.
 
 package Bugzilla::Extension;
+
+use 5.10.1;
 use strict;
 
 use Bugzilla::Constants;
@@ -238,7 +240,7 @@ F<extensions/Foo.pm>:
 
  package Bugzilla::Extension::Foo
  use strict;
- use base qw(Bugzilla::Extension);
+ use parent qw(Bugzilla::Extension);
 
  our $VERSION = '0.02';
  use constant NAME => 'Foo';
@@ -807,3 +809,13 @@ package name of the loaded extension.
 
 Calls L</load> for every enabled extension installed into Bugzilla,
 and returns an arrayref of all the package names that were loaded.
+
+=head1 B<Methods in need of POD>
+
+=over
+
+=item modify_inc
+
+=item my_inc
+
+=back

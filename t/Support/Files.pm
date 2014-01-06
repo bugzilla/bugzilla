@@ -16,6 +16,16 @@ use File::Find;
 find(sub { push(@files, $File::Find::name) if $_ =~ /\.pm$/;}, 'Bugzilla');
 push(@files, 'extensions/create.pl');
 
+@extensions =
+    grep { $_ ne 'extensions/create.pl' && ! -e "$_/disabled" }
+    glob('extensions/*');
+
+foreach my $extension (@extensions) {
+    find(sub { push(@files, $File::Find::name) if $_ =~ /\.pm$/;}, $extension);
+}
+
+@test_files = glob('t/*.t');
+
 sub isTestingFile {
     my ($file) = @_;
     my $exclude;
@@ -34,6 +44,7 @@ foreach $currentfile (@files) {
     if (isTestingFile($currentfile)) {
         push(@testitems,$currentfile);
     }
+    push(@module_files, $currentfile) if $currentfile =~ /\.pm$/;
 }
 
 

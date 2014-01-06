@@ -10,7 +10,7 @@
 package Bugzilla::Test::Search::FieldTestNormal;
 use strict;
 use warnings;
-use base qw(Bugzilla::Test::Search::FieldTest);
+use parent qw(Bugzilla::Test::Search::FieldTest);
 
 use Scalar::Util qw(blessed);
 

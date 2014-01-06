@@ -28,15 +28,16 @@
 
 <hr>
 
-<p style="font-size:smaller">
- To change multiple [% terms.bugs %]:</p>
-<ol style="font-size:smaller">
-  <li>Check the [% terms.bugs %] you want to change above.</li>
-  <li>Make your changes in the form fields below.  If the change
-   you are making requires an explanation, include it in
-   the comments box.</li>
-  <li>Click the <em>Commit</em> button.</li>
-</ol>
+<div class="bz_info">
+  To change multiple [% terms.bugs %]:
+  <ol>
+    <li>Check the [% terms.bugs %] you want to change above.</li>
+    <li>Make your changes in the form fields below.  If the change
+        you are making requires an explanation, include it in
+        the comments box.</li>
+    <li>Click the <em>Commit</em> button.</li>
+  </ol>
+</div>
 
 <table id="form">
   <tr>
@@ -127,7 +128,9 @@
   </tr>
   [% IF user.is_timetracker %]
     <tr>
-      <th><label for="estimated_time">Estimated Hours:</label></th>
+      [% INCLUDE "bug/field-label.html.tmpl"
+         field = bug_fields.estimated_time, editable = 1
+      %]
       <td>
         <input id="estimated_time"
                name="estimated_time"
@@ -139,7 +142,9 @@
           editable = 1, allow_dont_change = 1 %]
     </tr>
     <tr>
-      <th><label for="remaining_time">Remaining Hours:</label></th>
+      [% INCLUDE "bug/field-label.html.tmpl"
+         field = bug_fields.remaining_time, editable = 1
+      %]
       <td>
         <input id="remaining_time"
                name="remaining_time"
@@ -210,6 +215,7 @@
       <td colspan="3">
         [% INCLUDE bug/field.html.tmpl
            field = bug_fields.keywords, editable = 1, value = keywords
+           possible_values = all_keywords
            no_tds = 1
         %]
         <select name="keywordaction">
@@ -312,23 +318,23 @@
   </script>
 
   <b>Groups:</b><br>
-  <table border="1">
+  <table id="groups_edit_multiple">
     <tr>
-      <th>Remove<br>[% terms.bugs %]<br>from this<br>group</th>
-      <th>Add<br>[% terms.bugs %]<br>to this<br>group</th>
-      <th>Group Name:</th>
+      <th class="narrow_column">Remove [% terms.bugs %] from this group</th>
+      <th class="narrow_column">Add [% terms.bugs %] to this group</th>
+      <th>Group Name</th>
     </tr>
 
     [% FOREACH group = groups %]
     <tr>
-      <td align="center">
+      <td class="center">
         <input type="checkbox" name="defined_groups" 
                id="defined_group_[% group.id %]"
                value="[% group.name FILTER html %]"
                onchange="turn_off(this, 'group_[% group.id %]')">
       </td>
       [% IF group.is_active %]
-        <td align="center">
+        <td class="center">
           <input type="checkbox" name="groups" 
                  id="group_[% group.id FILTER html %]"
                  value="[% group.name FILTER html %]"
@@ -350,7 +356,7 @@
   </table>
 
   [% IF foundinactive %]
-    <p style="font-size:smaller">(Note: [% terms.Bugs %] may not be added to [% FILTER inactive %]inactive
+    <p class="bz_info">(Note: [% terms.Bugs %] may not be added to [% FILTER inactive %]inactive
     groups[% END %], only removed.)</p>
   [% END %]
 

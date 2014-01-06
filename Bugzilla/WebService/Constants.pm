@@ -7,14 +7,29 @@
 
 package Bugzilla::WebService::Constants;
 
+use 5.10.1;
 use strict;
-use base qw(Exporter);
+
+use parent qw(Exporter);
 
 our @EXPORT = qw(
     WS_ERROR_CODE
+
+    STATUS_OK
+    STATUS_CREATED
+    STATUS_ACCEPTED
+    STATUS_NO_CONTENT
+    STATUS_MULTIPLE_CHOICES
+    STATUS_BAD_REQUEST
+    STATUS_NOT_FOUND
+    STATUS_GONE
+    REST_STATUS_CODE_MAP
+
     ERROR_UNKNOWN_FATAL
     ERROR_UNKNOWN_TRANSIENT
+
     XMLRPC_CONTENT_TYPE_WHITELIST
+    REST_CONTENT_TYPE_WHITELIST
 
     WS_DISPATCH
 );
@@ -83,7 +98,12 @@ use constant WS_ERROR_CODE => {
     comment_is_private => 110,
     comment_id_invalid => 111,
     comment_too_long => 114,
-    comment_invalid_isprivate => 117, 
+    comment_invalid_isprivate => 117,
+    # Comment tagging
+    comment_tag_disabled => 125,
+    comment_tag_invalid => 126,
+    comment_tag_too_long => 127,
+    comment_tag_too_short => 128,
     # See Also errors
     bug_url_invalid => 112,
     bug_url_too_long => 112,
@@ -106,9 +126,16 @@ use constant WS_ERROR_CODE => {
     missing_resolution => 121,
     resolution_not_allowed => 122,
     illegal_bug_status_transition => 123,
+    # Flag errors
+    flag_status_invalid => 129,
+    flag_update_denied => 130,
+    flag_type_requestee_disabled => 131,
+    flag_not_unique => 132,
+    flag_type_not_unique => 133,
+    flag_type_inactive => 134,
 
     # Authentication errors are usually 300-400.
-    invalid_username_or_password => 300,
+    invalid_login_or_password => 300,
     account_disabled             => 301,
     auth_invalid_email           => 302,
     extern_id_conflict           => -303,
@@ -156,6 +183,13 @@ use constant WS_ERROR_CODE => {
     group_exists => 801,
     empty_group_description => 802,
     invalid_regexp => 803,
+    invalid_group_name => 804,
+
+    # Classification errors are 900-1000
+    auth_classification_not_enabled => 900,
+
+    # Search errors are 1000-1100
+    buglist_parameters_required => 1000,
 
     # Errors thrown by the WebService itself. The ones that are negative 
     # conform to http://xmlrpc-epi.sourceforge.net/specs/rfc.fault_codes.php
@@ -163,8 +197,47 @@ use constant WS_ERROR_CODE => {
     unknown_method       => -32601,
     json_rpc_post_only   => 32610,
     json_rpc_invalid_callback => 32611,
-    xmlrpc_illegal_content_type   => 32612, 
-    json_rpc_illegal_content_type => 32613, 
+    xmlrpc_illegal_content_type   => 32612,
+    json_rpc_illegal_content_type => 32613,
+    rest_invalid_resource         => 32614,
+};
+
+# RESTful webservices use the http status code
+# to describe whether a call was successful or
+# to describe the type of error that occurred.
+use constant STATUS_OK               => 200;
+use constant STATUS_CREATED          => 201;
+use constant STATUS_ACCEPTED         => 202;
+use constant STATUS_NO_CONTENT       => 204;
+use constant STATUS_MULTIPLE_CHOICES => 300;
+use constant STATUS_BAD_REQUEST      => 400;
+use constant STATUS_NOT_AUTHORIZED   => 401;
+use constant STATUS_NOT_FOUND        => 404;
+use constant STATUS_GONE             => 410;
+
+# The integer value is the error code above returned by
+# the related webvservice call. We choose the appropriate
+# http status code based on the error code or use the
+# default STATUS_BAD_REQUEST.
+use constant REST_STATUS_CODE_MAP => {
+    51       => STATUS_NOT_FOUND,
+    101      => STATUS_NOT_FOUND,
+    102      => STATUS_NOT_AUTHORIZED,
+    106      => STATUS_NOT_AUTHORIZED,
+    109      => STATUS_NOT_AUTHORIZED,
+    110      => STATUS_NOT_AUTHORIZED,
+    113      => STATUS_NOT_AUTHORIZED,
+    115      => STATUS_NOT_AUTHORIZED,
+    120      => STATUS_NOT_AUTHORIZED,
+    300      => STATUS_NOT_AUTHORIZED,
+    301      => STATUS_NOT_AUTHORIZED,
+    302      => STATUS_NOT_AUTHORIZED,
+    303      => STATUS_NOT_AUTHORIZED,
+    304      => STATUS_NOT_AUTHORIZED,
+    410      => STATUS_NOT_AUTHORIZED,
+    504      => STATUS_NOT_AUTHORIZED,
+    505      => STATUS_NOT_AUTHORIZED,
+    _default => STATUS_BAD_REQUEST
 };
 
 # These are the fallback defaults for errors not in ERROR_CODE.
@@ -178,6 +251,13 @@ use constant XMLRPC_CONTENT_TYPE_WHITELIST => qw(
     application/xml
 );
 
+use constant REST_CONTENT_TYPE_WHITELIST => qw(
+    text/html
+    application/javascript
+    application/json
+    text/javascript
+);
+
 sub WS_DISPATCH {
     # We "require" here instead of "use" above to avoid a dependency loop.
     require Bugzilla::Hook;
@@ -185,14 +265,23 @@ sub WS_DISPATCH {
     Bugzilla::Hook::process('webservice', { dispatch => \%hook_dispatch });
 
     my $dispatch = {
-        'Bugzilla' => 'Bugzilla::WebService::Bugzilla',
-        'Bug'      => 'Bugzilla::WebService::Bug',
-        'User'     => 'Bugzilla::WebService::User',
-        'Product'  => 'Bugzilla::WebService::Product',
-        'Group'    => 'Bugzilla::WebService::Group',
+        'Bugzilla'       => 'Bugzilla::WebService::Bugzilla',
+        'Bug'            => 'Bugzilla::WebService::Bug',
+        'Classification' => 'Bugzilla::WebService::Classification',
+        'Group'          => 'Bugzilla::WebService::Group',
+        'Product'        => 'Bugzilla::WebService::Product',
+        'User'           => 'Bugzilla::WebService::User',
         %hook_dispatch
     };
     return $dispatch;
 };
 
 1;
+
+=head1 B<Methods in need of POD>
+
+=over
+
+=item WS_DISPATCH
+
+=back

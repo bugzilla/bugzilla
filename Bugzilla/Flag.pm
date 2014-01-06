@@ -5,9 +5,10 @@
 # This Source Code Form is "Incompatible With Secondary Licenses", as
 # defined by the Mozilla Public License, v. 2.0.
 
-use strict;
-
 package Bugzilla::Flag;
+
+use 5.10.1;
+use strict;
 
 =head1 NAME
 
@@ -49,7 +50,7 @@ use Bugzilla::Mailer;
 use Bugzilla::Constants;
 use Bugzilla::Field;
 
-use base qw(Bugzilla::Object Exporter);
+use parent qw(Bugzilla::Object Exporter);
 @Bugzilla::Flag::EXPORT = qw(SKIP_REQUESTEE_ON_ERROR);
 
 ###############################
@@ -180,22 +181,20 @@ is an attachment flag, else undefined.
 sub type {
     my $self = shift;
 
-    $self->{'type'} ||= new Bugzilla::FlagType($self->{'type_id'});
-    return $self->{'type'};
+    return $self->{'type'} ||= new Bugzilla::FlagType($self->{'type_id'});
 }
 
 sub setter {
     my $self = shift;
 
-    $self->{'setter'} ||= new Bugzilla::User($self->{'setter_id'});
-    return $self->{'setter'};
+    return $self->{'setter'} ||= new Bugzilla::User({ id => $self->{'setter_id'}, cache => 1 });
 }
 
 sub requestee {
     my $self = shift;
 
     if (!defined $self->{'requestee'} && $self->{'requestee_id'}) {
-        $self->{'requestee'} = new Bugzilla::User($self->{'requestee_id'});
+        $self->{'requestee'} = new Bugzilla::User({ id => $self->{'requestee_id'}, cache => 1 });
     }
     return $self->{'requestee'};
 }
@@ -205,16 +204,15 @@ sub attachment {
     return undef unless $self->attach_id;
 
     require Bugzilla::Attachment;
-    $self->{'attachment'} ||= new Bugzilla::Attachment($self->attach_id);
-    return $self->{'attachment'};
+    return $self->{'attachment'}
+      ||= new Bugzilla::Attachment({ id => $self->attach_id, cache => 1 });
 }
 
 sub bug {
     my $self = shift;
 
     require Bugzilla::Bug;
-    $self->{'bug'} ||= new Bugzilla::Bug($self->bug_id);
-    return $self->{'bug'};
+    return $self->{'bug'} ||= new Bugzilla::Bug({ id => $self->bug_id, cache => 1 });
 }
 
 ################################
@@ -295,6 +293,12 @@ sub set_flag {
     else {
         ThrowCodeError('flag_unexpected_object', { 'caller' => ref $obj });
     }
+
+    # Make sure the user can change flags
+    my $privs;
+    $bug->check_can_change_field('flagtypes.name', 0, 1, \$privs)
+        || ThrowUserError('illegal_change',
+                          { field => 'flagtypes.name', privs => $privs });
 
     # Update (or delete) an existing flag.
     if ($params->{id}) {
@@ -393,7 +397,7 @@ sub _validate {
     my $old_requestee_id = $obj_flag->requestee_id;
 
     $obj_flag->_set_status($params->{status});
-    $obj_flag->_set_requestee($params->{requestee}, $attachment, $params->{skip_roe});
+    $obj_flag->_set_requestee($params->{requestee}, $bug, $attachment, $params->{skip_roe});
 
     # The requestee ID can be undefined.
     my $requestee_changed = ($obj_flag->requestee_id || 0) != ($old_requestee_id || 0);
@@ -619,10 +623,10 @@ sub force_retarget {
 ###############################
 
 sub _set_requestee {
-    my ($self, $requestee, $attachment, $skip_requestee_on_error) = @_;
+    my ($self, $requestee, $bug, $attachment, $skip_requestee_on_error) = @_;
 
     $self->{requestee} =
-      $self->_check_requestee($requestee, $attachment, $skip_requestee_on_error);
+      $self->_check_requestee($requestee, $bug, $attachment, $skip_requestee_on_error);
 
     $self->{requestee_id} =
       $self->{requestee} ? $self->{requestee}->id : undef;
@@ -644,7 +648,7 @@ sub _set_status {
 }
 
 sub _check_requestee {
-    my ($self, $requestee, $attachment, $skip_requestee_on_error) = @_;
+    my ($self, $requestee, $bug, $attachment, $skip_requestee_on_error) = @_;
 
     # If the flag status is not "?", then no requestee can be defined.
     return undef if ($self->status ne '?');
@@ -664,15 +668,28 @@ sub _check_requestee {
         # is specifically requestable. For existing flags, if the requestee
         # was set before the flag became specifically unrequestable, the
         # user can either remove him or leave him alone.
-        ThrowCodeError('flag_requestee_disabled', { type => $self->type })
+        ThrowUserError('flag_type_requestee_disabled', { type => $self->type })
           if !$self->type->is_requesteeble;
+
+        # You can't ask a disabled account, as they don't have the ability to
+        # set the flag.
+        ThrowUserError('flag_requestee_disabled', { requestee => $requestee })
+          if !$requestee->is_enabled;
 
         # Make sure the requestee can see the bug.
         # Note that can_see_bug() will query the DB, so if the bug
         # is being added/removed from some groups and these changes
         # haven't been committed to the DB yet, they won't be taken
-        # into account here. In this case, old restrictions matters.
-        if (!$requestee->can_see_bug($self->bug_id)) {
+        # into account here. In this case, old group restrictions matter.
+        # However, if the user has just been changed to the assignee,
+        # qa_contact, or added to the cc list of the bug and the bug
+        # is cclist_accessible, the requestee is allowed.
+        if (!$requestee->can_see_bug($self->bug_id)
+            && (!$bug->cclist_accessible
+                || !grep($_->id == $requestee->id, @{ $bug->cc_users })
+            && $requestee->id != $bug->assigned_to->id
+            && (!$bug->qa_contact || $requestee->id != $bug->qa_contact->id)))
+        {
             if ($skip_requestee_on_error) {
                 undef $requestee;
             }
@@ -718,7 +735,7 @@ sub _check_setter {
     # By default, the currently logged in user is the setter.
     $setter ||= Bugzilla->user;
     (blessed($setter) && $setter->isa('Bugzilla::User') && $setter->id)
-      || ThrowCodeError('invalid_user');
+      || ThrowUserError('invalid_user');
 
     # set_status() has already been called. So this refers
     # to the new flag status.
@@ -1057,29 +1074,30 @@ sub _flag_types {
     return $flag_types;
 }
 
-=head1 SEE ALSO
-
-=over
-
-=item B<Bugzilla::FlagType>
-
-=back
-
-
-=head1 CONTRIBUTORS
-
-=over
-
-=item Myk Melez <myk@mozilla.org>
-
-=item Jouni Heikniemi <jouni@heikniemi.net>
-
-=item Kevin Benton <kevin.benton@amd.com>
-
-=item Frédéric Buclin <LpSolit@gmail.com>
-
-=back
-
-=cut
-
 1;
+
+=head1 B<Methods in need of POD>
+
+=over
+
+=item update_activity
+
+=item setter_id
+
+=item bug
+
+=item requestee_id
+
+=item DB_COLUMNS
+
+=item set_flag
+
+=item type_id
+
+=item snapshot
+
+=item update_flags
+
+=item update
+
+=back

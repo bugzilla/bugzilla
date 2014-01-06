@@ -18,41 +18,42 @@
 
 [% PROCESS global/header.html.tmpl
   title = title
+  style_urls = ['skins/standard/admin.css']
 %]
 
-<table border="1" cellpadding="4" cellspacing="0">
-<tr bgcolor="#6666FF">
-  <th valign="top" align="left">Field</th>
-  <th valign="top" align="left">Value</th>
-</tr>
-<tr>
-  <td valign="top">Version:</td>
-  <td valign="top">[% version.name FILTER html %]</td>
-</tr>
-<tr>
-  <td valign="top">Version of Product:</td>
-  <td valign="top">[% product.name FILTER html %]</td>
-</tr>
-<tr>
-  <td valign="top">[% terms.Bugs %]:</td>
-  <td valign="top">
-[% IF version.bug_count %]
-  <a title="List of [% terms.bugs %] targetted at version '
-           [%- version.name FILTER html %]'"
-     href="buglist.cgi?version=[% version.name FILTER uri %]&amp;product=
-          [%- product.name FILTER uri %]">
-          [%- version.bug_count FILTER none %]</a>
-[% ELSE %]
-  None
-[% END %]
-  </td>
-</tr>
+<table id="admin_table">
+  <tr class="column_header">
+    <th>Field</th>
+    <th>Value</th>
+  </tr>
+  <tr>
+    <td>Version</td>
+    <td>[% version.name FILTER html %]</td>
+  </tr>
+  <tr>
+    <td>Version of Product</td>
+    <td>[% product.name FILTER html %]</td>
+  </tr>
+  <tr>
+    <td>[% terms.Bugs %]</td>
+    <td>
+      [% IF version.bug_count %]
+        <a title="List of [% terms.bugs %] targetted at version '
+                  [%- version.name FILTER html %]'"
+           href="buglist.cgi?version=[% version.name FILTER uri %]&amp;product=
+                 [%- product.name FILTER uri %]">
+                 [%- version.bug_count FILTER none %]</a>
+      [% ELSE %]
+        None
+      [% END %]
+    </td>
+  </tr>
 </table>
 
 <h2>Confirmation</h2>
 
 [% IF version.bug_count %]
-  <p>
+  <p class="confirmation">
   Sorry, there
   [% IF version.bug_count > 1 %] 
     are [% version.bug_count FILTER none %] outstanding [% terms.bugs %]

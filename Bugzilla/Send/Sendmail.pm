@@ -7,9 +7,10 @@
 
 package Bugzilla::Send::Sendmail;
 
+use 5.10.1;
 use strict;
 
-use base qw(Email::Send::Sendmail);
+use parent qw(Email::Send::Sendmail);
 
 use Return::Value;
 use Symbol qw(gensym);
@@ -93,3 +94,10 @@ sub _map_exitcode {
 
 1;
 
+=head1 B<Methods in need of POD>
+
+=over
+
+=item send
+
+=back

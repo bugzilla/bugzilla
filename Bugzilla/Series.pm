@@ -5,8 +5,6 @@
 # This Source Code Form is "Incompatible With Secondary Licenses", as
 # defined by the Mozilla Public License, v. 2.0.
 
-use strict;
-
 # This module implements a series - a set of data to be plotted on a chart.
 #
 # This Series is in the database if and only if self->{'series_id'} is defined. 
@@ -15,6 +13,9 @@ use strict;
 # altered.
 
 package Bugzilla::Series;
+
+use 5.10.1;
+use strict;
 
 use Bugzilla::Error;
 use Bugzilla::Util;
@@ -269,3 +270,29 @@ sub remove_from_db {
 }
 
 1;
+
+=head1 B<Methods in need of POD>
+
+=over
+
+=item creator
+
+=item existsInDatabase
+
+=item name
+
+=item getCategoryID
+
+=item initFromParameters
+
+=item initFromCGI
+
+=item initFromDatabase
+
+=item remove_from_db
+
+=item writeToDatabase
+
+=item id
+
+=back

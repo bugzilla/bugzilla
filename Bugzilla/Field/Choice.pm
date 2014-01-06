@@ -5,11 +5,12 @@
 # This Source Code Form is "Incompatible With Secondary Licenses", as
 # defined by the Mozilla Public License, v. 2.0.
 
-use strict;
-
 package Bugzilla::Field::Choice;
 
-use base qw(Bugzilla::Field::ChoiceInterface Bugzilla::Object);
+use 5.10.1;
+use strict;
+
+use parent qw(Bugzilla::Field::ChoiceInterface Bugzilla::Object);
 
 use Bugzilla::Config qw(SetParam write_params);
 use Bugzilla::Constants;
@@ -94,7 +95,7 @@ sub type {
     if (!defined *{"${package}::DB_TABLE"}) {
         eval <<EOC;
             package $package;
-            use base qw(Bugzilla::Field::Choice);
+            use parent qw(Bugzilla::Field::Choice);
             use constant DB_TABLE => '$field_name';
 EOC
     }
@@ -256,7 +257,7 @@ sub _check_sortkey {
     return 0 if !$value;
     # Store for the error message in case detaint_natural clears it.
     my $orig_value = $value;
-    detaint_natural($value)
+    (detaint_natural($value) && $value <= MAX_SMALLINT)
         || ThrowUserError('fieldvalue_sortkey_invalid',
                           { sortkey => $orig_value,
                             field   => $invocant->field });
@@ -333,3 +334,23 @@ must call C<type> to get a class you can call methods on.
 
 This class implements mutators for all of the settable accessors in
 L<Bugzilla::Field::ChoiceInterface>.
+
+=head1 B<Methods in need of POD>
+
+=over
+
+=item create
+
+=item remove_from_db
+
+=item set_is_active
+
+=item set_sortkey
+
+=item set_name
+
+=item update
+
+=item set_visibility_value
+
+=back

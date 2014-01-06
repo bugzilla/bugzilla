@@ -6,6 +6,8 @@
 # defined by the Mozilla Public License, v. 2.0.
 
 package Bugzilla::Search::Clause;
+
+use 5.10.1;
 use strict;
 
 use Bugzilla::Error;
@@ -26,6 +28,11 @@ sub children {
     my ($self) = @_;
     $self->{children} ||= [];
     return $self->{children};
+}
+
+sub update_search_args {
+    my ($self, $search_args) = @_;
+    # abstract
 }
 
 sub joiner { return $_[0]->{joiner} }
@@ -69,7 +76,7 @@ sub walk_conditions {
     my ($self, $callback) = @_;
     foreach my $child (@{ $self->children }) {
         if ($child->isa('Bugzilla::Search::Condition')) {
-            $callback->($child);
+            $callback->($self, $child);
         }
         else {
             $child->walk_conditions($callback);
@@ -79,25 +86,29 @@ sub walk_conditions {
 
 sub as_string {
     my ($self) = @_;
-    my @strings;
-    foreach my $child (@{ $self->children }) {
-        next if $child->isa(__PACKAGE__) && !$child->has_translated_conditions;
-        next if $child->isa('Bugzilla::Search::Condition')
-                && !$child->translated;
+    if (!$self->{sql}) {
+        my @strings;
+        foreach my $child (@{ $self->children }) {
+            next if $child->isa(__PACKAGE__) && !$child->has_translated_conditions;
+            next if $child->isa('Bugzilla::Search::Condition')
+                    && !$child->translated;
 
-        my $string = $child->as_string;
-        if ($self->joiner eq 'AND') {
-            $string = "( $string )" if $string =~ /OR/;
+            my $string = $child->as_string;
+            next unless $string;
+            if ($self->joiner eq 'AND') {
+                $string = "( $string )" if $string =~ /OR/;
+            }
+            else {
+                $string = "( $string )" if $string =~ /AND/;
+            }
+            push(@strings, $string);
         }
-        else {
-            $string = "( $string )" if $string =~ /AND/;
-        }
-        push(@strings, $string);
+
+        my $sql = join(' ' . $self->joiner . ' ', @strings);
+        $sql = "NOT( $sql )" if $sql && $self->negate;
+        $self->{sql} = $sql;
     }
-    
-    my $sql = join(' ' . $self->joiner . ' ', @strings);
-    $sql = "NOT( $sql )" if $sql && $self->negate;
-    return $sql;
+    return $self->{sql};
 }
 
 # Search.pm converts URL parameters to Clause objects. This helps do the
@@ -122,3 +133,27 @@ sub as_params {
 }
 
 1;
+
+=head1 B<Methods in need of POD>
+
+=over
+
+=item has_translated_conditions
+
+=item as_string
+
+=item add
+
+=item children
+
+=item negate
+
+=item update_search_args
+
+=item walk_conditions
+
+=item joiner
+
+=item as_params
+
+=back

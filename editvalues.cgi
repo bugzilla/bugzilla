@@ -10,6 +10,7 @@
 # or select boxes. It is largely a copy of editmilestones.cgi, but 
 # with some cleanup.
 
+use 5.10.1;
 use strict;
 use lib qw(. lib);
 

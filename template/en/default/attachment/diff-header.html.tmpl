@@ -43,7 +43,9 @@ Interdiff of #[% oldid %] and #[% newid %] for [% terms.bug %] #[% bugid %]
 [% ELSE %]
   <html>
   <head>
-  <link href="[% 'skins/standard/attachment.css' FILTER mtime %]" 
+  <link href="[% 'skins/standard/global.css' FILTER mtime %]"
+        rel="stylesheet" type="text/css">
+  <link href="[% 'skins/standard/attachment.css' FILTER mtime %]"
         rel="stylesheet" type="text/css">
   <script src="[% 'js/attachment.js' FILTER mtime %]" 
           type="text/javascript"></script>
@@ -57,13 +59,15 @@ Interdiff of #[% oldid %] and #[% newid %] for [% terms.bug %] #[% bugid %]
   [% IF headers %]
     <a href="[% PROCESS viewurl id=attachid %]">View</a>
     | <a href="[% PROCESS editurl id=attachid %]">Details</a>
-    | <a href="[% PROCESS diffurl id=attachid %]&amp;context=[% context FILTER uri %]&amp;collapsed=[% collapsed FILTER uri %]&amp;headers=[% headers FILTER uri %]&amp;format=raw">Raw&nbsp;Unified</a>
+    | <a href="[% PROCESS diffurl id=attachid %]&amp;context=[%
+               context FILTER uri %]&amp;collapsed=[% collapsed FILTER uri %]&amp;headers=[%
+               headers FILTER uri %]&amp;format=raw">Raw&nbsp;Unified</a>
     | Return to [% "$terms.bug $bugid" FILTER bug_link(bugid) FILTER none %]
   [% END %]
   [% IF other_patches.size > 0 %]
     [% IF headers %] |[%END%]
     Differences between
-    <form style="display: inline" action="attachment.cgi">
+    <form class="inline" action="attachment.cgi">
       <select name="oldid">
       [% FOREACH patch = other_patches %]
         <option value="[% patch.id %]"
@@ -99,7 +103,7 @@ Interdiff of #[% oldid %] and #[% newid %] for [% terms.bug %] #[% bugid %]
 
 [% IF do_context %]
   [%# only happens for normal viewing, not interdiff %]
-  | <span style='font-weight: bold'>Context:</span>
+  | <strong>Context:</strong>
   [% IF context == "patch" %]
     (<strong>Patch</strong> / 
   [% ELSE %]
@@ -115,19 +119,28 @@ Interdiff of #[% oldid %] and #[% newid %] for [% terms.bug %] #[% bugid %]
     [% context = 3 %]
   [% END %]
   [%# textbox for context %]
-  <form style="display: inline" action="attachment.cgi"><input type="hidden" name="action" value="diff"><input type="hidden" name="id" value="[% attachid %]"><input type="hidden" name="collapsed" value="[% collapsed FILTER html %]"><input type="hidden" name="headers" value="[% headers FILTER html %]"><input type="text" name="context" value="[% context FILTER html %]" size="3"></form>)
+  <form class="inline" action="attachment.cgi">
+    <input type="hidden" name="action" value="diff">
+    <input type="hidden" name="id" value="[% attachid %]">
+    <input type="hidden" name="collapsed" value="[% collapsed FILTER html %]">
+    <input type="hidden" name="headers" value="[% headers FILTER html %]">
+    <input type="text" name="context" value="[% context FILTER html %]" size="3">
+  </form>)
 [% END %]
 
 [% IF warning %]
-<h2 class="warning">Warning: 
+<h2 class="warning">
+  Warning:
   [% IF warning == "interdiff1" %]
-  this difference between two patches may show things in the wrong places due
-  to a limitation in [% terms.Bugzilla %] when comparing patches with different
-  sets of files.
-  [% END %]
-  [% IF warning == "interdiff2" %]
-  this difference between two patches may be inaccurate due to a limitation in
-  [%+ terms.Bugzilla %] when comparing patches made against different revisions.
+    this difference between two patches may show things in the wrong places due
+    to a limitation in [% terms.Bugzilla %] when comparing patches with
+    different sets of files.
+  [% ELSIF warning == "interdiff2" %]
+    this difference between two patches may be inaccurate due to a limitation
+    in [%+ terms.Bugzilla %] when comparing patches made against different
+    revisions.
+  [% ELSIF warning == "interdiff3" %]
+    interdiff encountered errors while comparing these patches.
   [% END %]
 </h2>
 [% ELSE %]
@@ -136,4 +149,4 @@ Interdiff of #[% oldid %] and #[% newid %] for [% terms.bug %] #[% bugid %]
  
 [%# Restore Stuff %]
 <form name="checkboxform" action="attachment.cgi">
-<input type="checkbox" name="restore_indicator" style="display: none">
+<input type="checkbox" name="restore_indicator" class="bz_default_hidden">

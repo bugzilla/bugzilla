@@ -54,13 +54,18 @@
     </Seq>
   </bz:resolution>
 
-  <bz:keyword>
+  <bz:keywords>
     <Seq>
-      [% FOREACH item = keyword %]
-        <li>[% item FILTER html %]</li>
+      [% FOREACH keyword = keywords %]
+        <li>
+          <bz:keyword rdf:about="[% escaped_urlbase %]keyword.cgi?name=[% keyword.name FILTER uri %]">
+            <bz:name>[% keyword.name FILTER html %]</bz:name>
+            <bz:description>[% keyword.description FILTER html %]</bz:description>
+          </bz:keyword>
+        </li>
       [% END %]
     </Seq>
-  </bz:keyword>
+  </bz:keywords>
 
   <bz:platform>
     <Seq>
@@ -144,7 +149,8 @@
             <bz:versions>
               <Seq>
                 [% FOREACH version = product.versions %]
-                  <li resource="[% escaped_urlbase %]version.cgi?name=[% version.name FILTER uri %]"/>
+                  <li resource="[% escaped_urlbase %]version.cgi?name=[% version.name FILTER uri
+                      %]&amp;product=[% product.name FILTER uri %]"/>
                 [% END %]
               </Seq>
             </bz:versions>
@@ -153,7 +159,8 @@
               <bz:target_milestones>
                 <Seq>
                   [% FOREACH milestone = product.milestones %]
-                    <li resource="[% escaped_urlbase %]milestone.cgi?name=[% milestone.name FILTER uri %]"/>
+                    <li resource="[% escaped_urlbase %]milestone.cgi?name=[% milestone.name FILTER uri
+                        %]&amp;product=[% product.name FILTER uri %]"/>
                   [% END %]
                 </Seq>
               </bz:target_milestones>
@@ -174,6 +181,7 @@
             <bz:component rdf:about="[% escaped_urlbase %]component.cgi?name=[% component.name FILTER uri
                           %]&amp;product=[% product.name FILTER uri %]">
               <bz:name>[% component.name FILTER html %]</bz:name>
+              <bz:is_active>[% component.is_active FILTER html %]</bz:is_active>
               [% IF show_flags %]
                 <bz:flag_types>
                   <Seq>
@@ -199,8 +207,10 @@
       [% FOREACH product = products %]
         [% FOREACH version = product.versions %]
           <li>
-            <bz:version rdf:about="[% escaped_urlbase %]version.cgi?name=[% version.name FILTER uri %]">
+            <bz:version rdf:about="[% escaped_urlbase %]version.cgi?name=[% version.name FILTER uri
+                        %]&amp;product=[% product.name FILTER uri %]">
               <bz:name>[% version.name FILTER html %]</bz:name>
+              <bz:is_active>[% version.is_active FILTER html %]</bz:is_active>
             </bz:version>
           </li>
         [% END %]
@@ -214,8 +224,10 @@
         [% FOREACH product = products %]
           [% FOREACH milestone = product.milestones %]
             <li>
-              <bz:target_milestone rdf:about="[% escaped_urlbase %]milestone.cgi?name=[% milestone.name FILTER uri %]">
+              <bz:target_milestone rdf:about="[% escaped_urlbase %]milestone.cgi?name=[% milestone.name FILTER uri
+                                   %]&amp;product=[% product.name FILTER uri %]">
                 <bz:name>[% milestone.name FILTER html %]</bz:name>
+                <bz:is_active>[% milestone.is_active FILTER html %]</bz:is_active>
               </bz:target_milestone>
             </li>
           [% END %]
@@ -262,6 +274,9 @@
               <bz:type>[% item.type FILTER html %]</bz:type>
               <bz:type_desc>[% field_types.${item.type} FILTER html %]</bz:type_desc>
               <bz:enter_bug>[% item.enter_bug FILTER html %]</bz:enter_bug>
+            [% END %]
+            [% IF item.is_active.defined %]
+              <bz:is_active>[% item.is_active FILTER html %]</bz:is_active>
             [% END %]
           </bz:field>
         </li>

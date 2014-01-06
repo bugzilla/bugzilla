@@ -13,15 +13,9 @@
   [%+ default.name FILTER html %]
 [% END %]
 
-[% PROCESS global/header.html.tmpl %]
-
-[% IF changes_saved %]
-  <p>
-    <font color="red">
-      Series updated.
-    </font>
-  </p>
-[% END %]
+[% PROCESS global/header.html.tmpl
+  style_urls = [ "skins/standard/reports.css" ]
+%]
 
 <form method="get" action="chart.cgi" name="chartform">
   

@@ -6,8 +6,11 @@
 # defined by the Mozilla Public License, v. 2.0.
 
 package Bugzilla::Auth::Login::Env;
+
+use 5.10.1;
 use strict;
-use base qw(Bugzilla::Auth::Login);
+
+use parent qw(Bugzilla::Auth::Login);
 
 use Bugzilla::Constants;
 use Bugzilla::Error;

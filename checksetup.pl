@@ -13,7 +13,7 @@
 ######################################################################
 
 use strict;
-use 5.008001;
+use 5.10.1;
 use File::Basename;
 use Getopt::Long qw(:config bundling);
 use Pod::Usage;
@@ -205,6 +205,9 @@ Bugzilla::Hook::process('install_before_final_checks', { silent => $silent });
 ###########################################################################
 # Final checks
 ###########################################################################
+
+# Clear all keys from Memcached
+Bugzilla->memcached->clear_all();
 
 # Check if the default parameter for urlbase is still set, and if so, give
 # notification that they should go and visit editparams.cgi 

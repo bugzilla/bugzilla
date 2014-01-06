@@ -10,8 +10,8 @@
 # Script Initialization
 ################################################################################
 
+use 5.10.1;
 use strict;
-
 use lib qw(. lib);
 
 use Bugzilla;
@@ -338,6 +338,7 @@ while (my $event = get_next_event) {
 #  - queries        array of hashes containing:
 #          - bugs:  array of hashes mapping fieldnames to values for this bug
 #          - title: text title given to this query in the whine event
+#          - columnlist: array of fieldnames to display in the mail
 #          - name:  text name of this query
 #  - schedule_id    integer id of the schedule being run
 #  - subject        Subject line for the message
@@ -408,6 +409,7 @@ sub run_queries {
               'name'          => $_->[0],
               'title'         => $_->[1],
               'onemailperbug' => $_->[2],
+              'columnlist'    => [],
               'bugs'          => [],
             }
         );
@@ -420,21 +422,22 @@ sub run_queries {
         next unless $savedquery;    # silently ignore missing queries
 
         # Execute the saved query
-        my @searchfields = qw(
-            bug_id
-            bug_severity
-            priority
-            rep_platform
-            assigned_to
-            bug_status
-            resolution
-            short_desc
-        );
+        my @searchfields = ('bug_id', DEFAULT_COLUMN_LIST);
+
         # A new Bugzilla::CGI object needs to be created to allow
         # Bugzilla::Search to execute a saved query.  It's exceedingly weird,
         # but that's how it works.
         my $searchparams = new Bugzilla::CGI($savedquery);
-        my @orderstrings = split(/,\s*/, $searchparams->param('order'));
+
+        # Use the columnlist for the saved query, if it exists, and make
+        # sure bug_id is always in the list.
+        if (my $columnlist = $searchparams->param('columnlist')) {
+            @searchfields = split(/[\s,]+/, $columnlist);
+            unshift(@searchfields, 'bug_id') unless grep { $_ eq 'bug_id' } @searchfields;
+        }
+        push @{$thisquery->{'columnlist'}}, @searchfields;
+
+        my @orderstrings = split(/,\s*/, $searchparams->param('order') || '');
         my $search = new Bugzilla::Search(
             'fields' => \@searchfields,
             'params' => scalar $searchparams->Vars,
@@ -442,7 +445,7 @@ sub run_queries {
             'order'  => \@orderstrings
         );
         # If a query fails for whatever reason, it shouldn't kill the script.
-        my $sqlquery = eval { $search->sql };
+        my $data = eval { $search->data };
         if ($@) {
             print STDERR get_text('whine_query_failed', { query_name => $thisquery->{'name'},
                                                           author => $args->{'author'},
@@ -450,15 +453,12 @@ sub run_queries {
             next;
         }
 
-        $sth = $dbh->prepare($sqlquery);
-        $sth->execute;
-
-        while (my @row = $sth->fetchrow_array) {
+        foreach my $row (@$data) {
             my $bug = {};
             for my $field (@searchfields) {
                 my $fieldname = $field;
                 $fieldname =~ s/^bugs\.//;  # No need for bugs.whatever
-                $bug->{$fieldname} = shift @row;
+                $bug->{$fieldname} = shift @$row;
             }
 
             if ($thisquery->{'onemailperbug'}) {
@@ -466,6 +466,7 @@ sub run_queries {
                     {
                         'name' => $thisquery->{'name'},
                         'title' => $thisquery->{'title'},
+                        'columnlist' => $thisquery->{'columnlist'},
                         'bugs' => [ $bug ],
                     },
                 ];

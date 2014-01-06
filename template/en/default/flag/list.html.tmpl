@@ -6,7 +6,7 @@
   # defined by the Mozilla Public License, v. 2.0.
   #%]
 
-[% IF user.id AND !read_only_flags %]
+[% IF user.id && !read_only_flags && (!bug || bug.check_can_change_field('flagtypes.name', 0, 1)) %]
 
 [%# We list flags by looping twice over the flag types relevant for the bug.
   # In the first loop, we display existing flags and then, for active types,
@@ -91,6 +91,7 @@
 [%# Display a table row for flags %]
 
 [% BLOCK flag_row %]
+  [% RETURN IF !flag && !((type.is_requestable && user.can_request_flag(type)) || user.can_set_flag(type)) %]
   [% SET fid = flag ? "flag-$flag.id" : "flag_type-$type.id" %]
   <tbody[% ' class="bz_flag_type"' IF !flag %]>
     <tr>
@@ -106,10 +107,8 @@
           [%- type.name FILTER html FILTER no_break -%]</label>
       </td>
       <td>
+        <input type="hidden" id="[% fid FILTER html %]_dirty">
         <select id="[% fid FILTER html %]" name="[% fid FILTER html %]"
-                [% IF !flag && !((type.is_requestable && user.can_request_flag(type)) || user.can_set_flag(type)) %]
-                  disabled="disabled"
-                [% END %]
                 title="[% type.description FILTER html %]"
                 onchange="toggleRequesteeField(this);"
                 class="flag_select flag_type-[% type.id %]">
@@ -133,9 +132,8 @@
         </select>
       </td>
       [% IF any_flags_requesteeble %]
-        <td>
+        <td class="bz_flags">
           [% IF (type.is_active && type.is_requestable && type.is_requesteeble) || (flag && flag.requestee) %]
-            <span style="white-space: nowrap;">
               [% SET grant_list = [] %]
               [% IF Param('usemenuforusers') %]
                 [% grant_list = type.grant_list %]
@@ -159,7 +157,6 @@
                          classes  => ["requestee"]
                          custom_userlist => grant_list
               %]
-            </span>
           [% END %]
         </td>
       [% END %]

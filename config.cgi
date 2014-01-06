@@ -6,13 +6,8 @@
 # This Source Code Form is "Incompatible With Secondary Licenses", as
 # defined by the Mozilla Public License, v. 2.0.
 
-################################################################################
-# Script Initialization
-################################################################################
-
-# Make it harder for us to do dangerous things in Perl.
+use 5.10.1;
 use strict;
-
 use lib qw(. lib);
 
 use Bugzilla;
@@ -44,7 +39,7 @@ $vars->{'priority'}  = get_legal_field_values('priority');
 $vars->{'severity'}  = get_legal_field_values('bug_severity');
 $vars->{'platform'}  = get_legal_field_values('rep_platform');
 $vars->{'op_sys'}    = get_legal_field_values('op_sys');
-$vars->{'keyword'}    = [map($_->name, Bugzilla::Keyword->get_all)];
+$vars->{'keywords'}  = [Bugzilla::Keyword->get_all];
 $vars->{'resolution'} = get_legal_field_values('resolution');
 $vars->{'status'}    = get_legal_field_values('bug_status');
 $vars->{'custom_fields'} =
@@ -105,7 +100,21 @@ $vars->{'closed_status'} = \@closed_status;
 my @fields = @{Bugzilla::Field->match({obsolete => 0})};
 # Exclude fields the user cannot query.
 if (!$user->is_timetracker) {
-    @fields = grep { $_->name !~ /^(estimated_time|remaining_time|work_time|percentage_complete|deadline)$/ } @fields;
+    foreach my $tt_field (TIMETRACKING_FIELDS) {
+        @fields = grep { $_->name ne $tt_field } @fields;
+    }
+}
+
+my %FIELD_PARAMS = (
+    classification    => 'useclassification',
+    target_milestone  => 'usetargetmilestone',
+    qa_contact        => 'useqacontact',
+    status_whiteboard => 'usestatuswhiteboard',
+    see_also          => 'use_see_also',
+);
+foreach my $field (@fields) {
+    my $param = $FIELD_PARAMS{$field->name};
+    $field->{is_active} =  Bugzilla->params->{$param} if $param;
 }
 $vars->{'field'} = \@fields;
 
@@ -133,7 +142,11 @@ sub display_data {
     utf8::encode($digest_data) if utf8::is_utf8($digest_data);
     my $digest = md5_base64($digest_data);
 
-    $cgi->check_etag($digest);
+    if ($cgi->check_etag($digest)) {
+        print $cgi->header(-ETag   => $digest,
+                           -status => '304 Not Modified');
+        exit;
+    }
 
     print $cgi->header (-ETag => $digest,
                         -type => $format->{'ctype'});

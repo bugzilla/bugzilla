@@ -22,9 +22,6 @@
 <!--
 function onLoadActions() {
   quicksearchHelpText('quicksearch_main', 'show');
-  if( window.external.AddSearchProvider ){
-    YAHOO.util.Dom.removeClass('quicksearch_plugin', 'bz_default_hidden');
-  }
   document.getElementById('quicksearch_top').focus();
 }
 var quicksearch_message = "Enter [% terms.abug %] # or some search terms";
@@ -101,73 +98,105 @@ YAHOO.util.Event.onDOMReady(onLoadActions);
 [% END %]
 
 <div id="page-index">
-  <table>
-    <tr>
-      <td>
-        <h1 id="welcome"> Welcome to [% terms.Bugzilla %]</h1>
-        <div class="intro">[% Hook.process('intro') %]</div>
+  <h1 id="welcome"> Welcome to [% terms.Bugzilla %]</h1>
+  <div class="intro">[% Hook.process('intro') %]</div>
 
-        <div class="bz_common_actions">
-          <ul>
-            <li>
-              <a id="enter_bug" href="enter_bug.cgi"><span>File
-              [%= terms.aBug %]</span></a>
-            </li>
-            <li>
-              <a id="query" href="query.cgi"><span>Search</span></a>
-            </li>
-            <li>
-              <a id="account"
-                 [% IF user.id %]
-                   href="userprefs.cgi"><span>User Preferences</span></a>
-                 [% ELSIF Param('createemailregexp')
-                          && user.authorizer.user_can_create_account 
-                 %]
-                   href="createaccount.cgi"><span>Open a New Account</span></a>
-                 [% ELSE %]
-                   href="?GoAheadAndLogIn=1"><span>Log In</span></a>
-                 [% END %]
-            </li>
-          </ul>
-        </div>
+  <div class="bz_common_actions">
+    <ul>
+      <li>
+        <a id="enter_bug" href="enter_bug.cgi"><span>File [% terms.aBug %]</span></a>
+      </li>
+      <li>
+        <a id="query" href="query.cgi"><span>Search</span></a>
+      </li>
+      <li>
+        <a id="account"
+          [% IF user.id %]
+            href="userprefs.cgi"><span>User Preferences</span></a>
+          [% ELSIF Param('createemailregexp') && user.authorizer.user_can_create_account %]
+            href="createaccount.cgi"><span>Open a New Account</span></a>
+          [% ELSE %]
+            href="?GoAheadAndLogIn=1"><span>Log In</span></a>
+          [% END %]
+      </li>
+      [% IF Param("docs_urlbase") %]
+        <li>
+          <a id="help" href="[% docs_urlbase FILTER html %]using.html"><span>Documentation</span></a>
+        </li>
+      [% END %]
+    </ul>
+  </div>
 
-        <form id="quicksearchForm" name="quicksearchForm" action="buglist.cgi"
-              onsubmit="return checkQuicksearch(this);">
-          <div>
-            <input id="quicksearch_main" type="text" name="quicksearch"
-              title="Quick Search" 
-              onfocus="quicksearchHelpText(this.id, 'hide');"
-              onblur="quicksearchHelpText(this.id, 'show');"
-            >
-            <input id="find" type="submit" value="Quick Search">
-            <ul class="additional_links" id="quicksearch_links">
-              <li>
-                <a href="page.cgi?id=quicksearch.html">Quick Search help</a>
-              </li>
-              <li class="bz_default_hidden" id="quicksearch_plugin">
-                |
-                <a href="javascript:window.external.AddSearchProvider('[% urlbase FILTER html %]search_plugin.cgi')">
-                 Install the Quick Search plugin
-                </a>
-              </li>
-            </ul>
-            <ul class="additional_links">
-              <li>
-                <a href="[% docs_urlbase FILTER html %]using.html">
-                  [%- terms.Bugzilla %] User's Guide</a>
-              </li>
-              <li>
-                |
-                <a href="page.cgi?id=release-notes.html">Release Notes</a>
-              </li>
-              [% Hook.process('additional_links') %]
-            </ul>
-          </div>
-        </form>
-        <div class="outro">[% Hook.process('outro') %]</div>
-      </td>
-    </tr>
-  </table>
+  <div>
+    <form id="quicksearchForm" name="quicksearchForm" action="buglist.cgi"
+          onsubmit="return checkQuicksearch(this);">
+      <input id="quicksearch_main" type="text" name="quicksearch" title="Quick Search"
+             onfocus="quicksearchHelpText(this.id, 'hide');"
+             onblur="quicksearchHelpText(this.id, 'show');">
+      <input id="find" type="submit" value="Quick Search">
+      <a href="page.cgi?id=quicksearch.html" title="Quick Search help">[?]</a>
+    </form>
+
+    <ul class="additional_links">
+      [% Hook.process('additional_links') %]
+    </ul>
+  </div>
+
+  <div id="common_queries">
+    <h4>Common Queries:</h4>
+    <ul>
+      [% IF user.id %]
+        <li>
+          [% title = BLOCK %]Open [% terms.bugs %] assigned to me[% END %]
+          <a href="buglist.cgi?f1=assigned_to&amp;o1=equals&amp;v1=%25user%25&amp;resolution=---">
+            [% title FILTER html %]</a> ([% assignee_count FILTER html %])
+          <a href="buglist.cgi?f1=assigned_to&amp;o1=equals&amp;v1=%25user%25&amp;resolution=---&amp;ctype=atom&amp;title=[% title FILTER uri %]"
+             class="rss">&nbsp;</a>
+        </li>
+        <li>
+          [% title = BLOCK %]Open [% terms.bugs %] reported by me[% END %]
+          <a href="buglist.cgi?f1=reporter&amp;o1=equals&amp;v1=%25user%25&amp;resolution=---">
+            [% title FILTER html %]</a> ([% reporter_count FILTER html %])
+          <a href="buglist.cgi?f1=reporter&amp;o1=equals&amp;v1=%25user%25&amp;resolution=---&amp;ctype=atom&amp;title=[% title FILTER uri %]"
+             class="rss">&nbsp;</a>
+        </li>
+        [% IF Bugzilla.has_flags %]
+          <li>
+            [% title = BLOCK %]Requests addressed to me[% END %]
+            <a href="request.cgi?action=queue&amp;requestee=[% user.login FILTER uri %]&amp;group=type&amp;do_union=0">
+              [% title FILTER html %]</a> ([% requestee_count FILTER html %])
+            <a href="buglist.cgi?f1=requestees.login_name&amp;o1=equals&amp;v1=%25user%25&amp;ctype=atom&amp;title=[% title FILTER uri %]"
+               class="rss">&nbsp;</a>
+          </li>
+        [% END %]
+      [% END %]
+
+      <li>
+        [% terms.Bugs %] reported in the
+        <a href="buglist.cgi?chfield=[Bug%20creation]&amp;chfieldfrom=24h">last 24 hours</a>
+        [% title = BLOCK %][% terms.Bugs %] reported in the last 24 hours[% END %]
+        <a href="buglist.cgi?chfield=[Bug%20creation]&amp;chfieldfrom=24h&amp;ctype=atom&amp;title=[% title FILTER uri %]"
+           class="rss">&nbsp;</a>
+        | <a href="buglist.cgi?chfield=[Bug%20creation]&amp;chfieldfrom=7d">last 7 days</a>
+        [% title = BLOCK %][% terms.Bugs %] reported in the last 7 days[% END %]
+        <a href="buglist.cgi?chfield=[Bug%20creation]&amp;chfieldfrom=7d&amp;ctype=atom&amp;title=[% title FILTER uri %]"
+           class="rss">&nbsp;</a>
+      </li>
+      <li>
+        [% terms.Bugs %] changed in the
+        <a href="buglist.cgi?chfieldfrom=24h">last 24 hours</a>
+        [% title = BLOCK %][% terms.Bugs %] changed in the last 24 hours[% END %]
+        <a href="buglist.cgi?chfieldfrom=24h&amp;ctype=atom&amp;title=[% title FILTER uri %]"
+           class="rss">&nbsp;</a>
+        | <a href="buglist.cgi?chfieldfrom=7d">last 7 days</a>
+        [% title = BLOCK %][% terms.Bugs %] changed in the last 7 days[% END %]
+        <a href="buglist.cgi?chfieldfrom=7d&amp;ctype=atom&amp;title=[% title FILTER uri %]"
+           class="rss">&nbsp;</a>
+      </li>
+    </ul>
+  </div>
+
+  <div class="outro">[% Hook.process('outro') %]</div>
 </div>
 
 [% PROCESS global/footer.html.tmpl %]

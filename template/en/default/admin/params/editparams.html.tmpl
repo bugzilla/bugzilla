@@ -40,9 +40,8 @@
    doc_section = "parameters.html"
 %]
 
-<table border="0" width="100%">
-  <tr>
-    <td>
+<div class="table">
+  <div class="cell">
       [%# NAVIGATION BAR %]
       <table id="menu">
         <tr>
@@ -66,18 +65,20 @@
           </tr>
         [% END %]
       </table>
-    </td>
-    <td>
+  </div>
+
+  <div class="cell">
       [% IF curpanel == -1 %]
         [% PROCESS admin/params/index.html.tmpl panels = panels %]
       [% ELSE %]
 
         <div class="contribute"><strong>Note:</strong>
-          [%+ terms.Bugzilla %] is developed entirely by volunteers. The
-          best way to give back to the [% terms.Bugzilla %] project is
-          to <a href="http://www.bugzilla.org/contribute/">contribute</a>
-          yourself! You don't have to be a programmer to contribute, there are
-          lots of things that we need.
+          B[% %]ugzilla is developed entirely by volunteers.
+          The best way to give back to the B[% %]ugzilla project is to
+          <a href="http://www.bugzilla.org/contribute/">contribute</a>
+          yourself!
+          You don't have to be a programmer to contribute, there are lots of
+          things that we need.
         </div>
 
         <p>
@@ -95,8 +96,7 @@
           <input type="submit" id="save-params" value="Save Changes">
         </form>
       [% END %]
-    </td>
-  </tr>
-</table>
+  </div>
+</div>
 
 [% INCLUDE global/footer.html.tmpl %]

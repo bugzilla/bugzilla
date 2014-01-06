@@ -13,10 +13,12 @@ package Bugzilla::DB::Schema::Mysql;
 #
 ###############################################################################
 
+use 5.10.1;
 use strict;
+
 use Bugzilla::Error;
 
-use base qw(Bugzilla::DB::Schema);
+use parent qw(Bugzilla::DB::Schema);
 
 # This is for column_info_to_column, to know when a tinyint is a 
 # boolean and when it's really a tinyint. This only has to be accurate
@@ -104,7 +106,7 @@ sub _initialize {
         LONGBLOB =>     'longblob',
 
         DATETIME =>     'datetime',
-
+        DATE     =>     'date',
     };
 
     $self->_adjust_schema;
@@ -381,3 +383,27 @@ sub get_rename_column_ddl {
 }
 
 1;
+
+=head1 B<Methods in need of POD>
+
+=over
+
+=item get_rename_column_ddl
+
+=item get_create_database_sql
+
+=item get_drop_index_ddl
+
+=item get_set_serial_sql
+
+=item get_rename_indexes_ddl
+
+=item get_drop_fk_sql
+
+=item MYISAM_TABLES
+
+=item column_info_to_column
+
+=item get_alter_column_ddl
+
+=back

@@ -68,13 +68,11 @@
     .bz_common_actions a:hover {
         text-decoration: none;
     }
-    #enter_bug { background: url(index/file-a-bug.png)     no-repeat; }
-    #query     { background: url(index/search.png)  no-repeat; }
-    #account   { 
-      background: url(index/new-account.png) no-repeat; 
-      margin-right: 0;
-    }
-    
+    #enter_bug { background: url(index/file-a-bug.png)  no-repeat; }
+    #query     { background: url(index/search.png)      no-repeat; }
+    #account   { background: url(index/new-account.png) no-repeat; }
+    #help      { background: url(index/help.png)        no-repeat; }
+
     #quicksearchForm
     {
         clear: both;
@@ -106,7 +104,16 @@
         margin: 0 0 0.8em 0;
         padding: 0;
     }
-    
+
+    #common_queries ul {
+        list-style: none;
+        padding-left: 1.5em;
+    }
+
+    #common_queries li a {
+        text-decoration: none;
+    }
+
     ul.additional_links 
     {
         list-style: none;

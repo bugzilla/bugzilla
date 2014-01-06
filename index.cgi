@@ -45,6 +45,19 @@ if ($user->in_group('admin')) {
     $vars->{'release'} = Bugzilla::Update::get_notifications();
 }
 
+if ($user->id) {
+    my $dbh = Bugzilla->dbh;
+    $vars->{assignee_count} =
+      $dbh->selectrow_array('SELECT COUNT(*) FROM bugs WHERE assigned_to = ?
+                             AND resolution = ""', undef, $user->id);
+    $vars->{reporter_count} =
+      $dbh->selectrow_array('SELECT COUNT(*) FROM bugs WHERE reporter = ?
+                             AND resolution = ""', undef, $user->id);
+    $vars->{requestee_count} =
+      $dbh->selectrow_array('SELECT COUNT(DISTINCT bug_id) FROM flags
+                             WHERE requestee_id = ?', undef, $user->id);
+}
+
 # Generate and return the UI (HTML page) from the appropriate template.
 $template->process("index.html.tmpl", $vars)
   || ThrowTemplateError($template->error());

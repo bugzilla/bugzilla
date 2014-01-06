@@ -259,6 +259,12 @@ div#docslinks {
     margin: 0;
 }
 
+.rss {
+    background: transparent url(../../images/rss.png) no-repeat;
+    padding-left: 16px;
+    line-height: 1.5em;
+}
+
 /**************************/
 /* Bug links and statuses */
 /**************************/

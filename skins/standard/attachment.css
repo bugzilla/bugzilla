@@ -48,6 +48,18 @@ table#flags td {
   background-color: #f0f0f0;
   border: 1px solid black;
   text-align: left;
+  padding: 0.2em;
+}
+
+.section_head .link_here {
+  float: right;
+  padding-left: 1em;
+  padding-right: 0.5em;
+}
+
+.lines_count a {
+  padding-left: 0.5em;
+  padding-right: 1em;
 }
 
 table.file_table {

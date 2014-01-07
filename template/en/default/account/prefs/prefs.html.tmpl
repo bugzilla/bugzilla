@@ -85,16 +85,10 @@
 
 [% IF current_tab.saveable %]
     <input type="hidden" name="dosave" value="1">
-
     [% UNLESS dont_show_button %]
-      <table>
-        <tr>
-          <td width="150">&nbsp;</td>
-          <td>
-            <input type="submit" id="update" value="Submit Changes">
-          </td>
-        </tr>
-      </table>
+      <p>
+        <input type="submit" id="update" value="Submit Changes">
+      </p>
     [% END %]
   </form>
 [% END %]

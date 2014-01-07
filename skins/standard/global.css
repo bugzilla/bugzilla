@@ -211,7 +211,7 @@
         border-color: black;
         border-width: 0px 0px 2px 0px;
     }
-        
+
     .tabs td.selected {
         background: white;
         border-width: 2px 2px 0px 2px;
@@ -634,8 +634,8 @@ input.required, select.required, span.required_explanation {
 .calendar_button span { display: none }
 /* These classes are set by YUI. */
 .yui-calcontainer {
-    display: none; 
-    background-color: white; 
+    display: none;
+    background-color: white;
     padding: 10px;
     border: 1px solid #404D6C;
 }

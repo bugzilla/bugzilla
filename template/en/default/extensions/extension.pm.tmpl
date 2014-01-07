@@ -12,18 +12,18 @@
 
 [% PROCESS extensions/license.txt.tmpl %]
 
-package B[% %]ugzilla::Extension::[% name %];
+package Bugzilla::Extension::[% name %];
 
 use 5.10.1;
 use strict;
-use parent qw(B[% %]ugzilla::Extension);
+use parent qw(Bugzilla::Extension);
 
 # This code for this is in [% path %]/lib/Util.pm
-use B[% %]ugzilla::Extension::[% name %]::Util;
+use Bugzilla::Extension::[% name %]::Util;
 
 our $VERSION = '0.01';
 
-# See the documentation of B[% %]ugzilla::Hook ("perldoc B[% %]ugzilla::Hook" 
+# See the documentation of Bugzilla::Hook ("perldoc Bugzilla::Hook" 
 # in the bugzilla directory) for a list of all available hooks.
 sub install_update_db {
     my ($self, $args) = @_;

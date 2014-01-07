@@ -112,7 +112,7 @@
     Every cookie must have a value.
 
   [% ELSIF error == "env_no_email" %]
-    [% terms.Bugzilla %] did not receive an email address from the 
+    Bugzilla did not receive an email address from the
     environment.
     [% IF Param("auth_env_email") %]
       This means that the '[% Param("auth_env_email") FILTER html %]'
@@ -384,7 +384,7 @@
     Invalid setting for post_bug_submit_action
 
   [% ELSIF error == "search_field_operator_unsupported" %]
-    [% terms.Bugzilla %] does not support the search type
+    Bugzilla does not support the search type
     "[% operator FILTER html %]".
 
   [% ELSE %]
@@ -392,7 +392,7 @@
     [% error_message = Hook.process("errors") %]
     [% IF NOT error_message %]
       [% title = "Internal error" %]
-      An internal error has occurred, but [% terms.Bugzilla %] doesn't know
+      An internal error has occurred, but Bugzilla doesn't know
       what <code>[% error FILTER html %]</code> means.
 
       If you are a [% terms.Bugzilla %] end-user seeing this message, please save

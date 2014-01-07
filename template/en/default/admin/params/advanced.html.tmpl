@@ -18,7 +18,7 @@
   security to your SSL connections by forcing the browser to always
   access your domain over SSL and never accept an invalid certificate. 
   However, it should only be used if you have the <code>ssl_redirect</code>
-  parameter turned on, [% terms.Bugzilla %] is the only thing running
+  parameter turned on, Bugzilla is the only thing running
   on its domain (i.e., your <code>urlbase</code> is something like
   <code>http://bugzilla.example.com/</code>), and you never plan to disable
   the <code>ssl_redirect</code> parameter.
@@ -35,7 +35,7 @@
       with the <code>includeSubDomains</code> flag, which will apply the
       security change to all subdomains. This is especially useful when
       combined with an <code>attachment_base</code> that exists as (a)
-      subdomain(s) under the main [% terms.Bugzilla %] domain.
+      subdomain(s) under the main Bugzilla domain.
     </li>
   </ul>
 [% END %]
@@ -44,22 +44,22 @@
   cookiedomain => 
     "If your website is at 'www.foo.com', setting this to"
     _ " '.foo.com' will also allow 'bar.foo.com' to access"
-    _ " $terms.Bugzilla cookies. This is useful if you have more than"
+    _ " Bugzilla cookies. This is useful if you have more than"
     _ " one hostname pointing at the same web server, and you"
-    _ " want them to share the $terms.Bugzilla cookie.",
+    _ " want them to share the Bugzilla cookie.",
 
   inbound_proxies =>
-    "When inbound traffic to $terms.Bugzilla goes through a proxy,"
-    _ " $terms.Bugzilla thinks that the IP address of every single"
+    "When inbound traffic to Bugzilla goes through a proxy,"
+    _ " Bugzilla thinks that the IP address of every single"
     _ " user is the IP address of the proxy. If you enter a comma-separated"
-    _ " list of IPs in this parameter, then $terms.Bugzilla will trust any"
+    _ " list of IPs in this parameter, then Bugzilla will trust any"
     _ " <code>X-Forwarded-For</code> header sent from those IPs,"
     _ " and use the value of that header as the end user's IP address.",
 
   proxy_url => 
-    "$terms.Bugzilla may have to access the web to get notifications about"
+    "Bugzilla may have to access the web to get notifications about"
     _ " new releases (see the <var>upgrade_notification</var> parameter)."
-    _ " If your $terms.Bugzilla server is behind a proxy, it may be"
+    _ " If your Bugzilla server is behind a proxy, it may be"
     _ " necessary to enter its URL if the web server cannot access the"
     _ " HTTP_PROXY environment variable. If you have to authenticate,"
     _ " use the <code>http://user:pass@proxy_url/</code> syntax.",

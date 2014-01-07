@@ -38,7 +38,7 @@
 
 <ul class="qs_help">
   <li>If you just put a word or series of words in the search box, 
-    [%+ terms.Bugzilla %] will search the 
+    Bugzilla will search the
     [%+ field_descs.product FILTER html %],
     [%+ field_descs.component FILTER html %], 
     [%+ IF use_keywords %][%+ field_descs.keywords FILTER html %],[% END %]
@@ -53,14 +53,14 @@
   </li>
 
   <li>Adding more terms <strong>narrows down</strong> the search, it does not
-     expand it. (In other words, [% terms.Bugzilla %] searches for 
+     expand it. (In other words, Bugzilla searches for
      [%+ terms.bugs %] that match <em>all</em> your criteria, not
      [%+ terms.bugs %] that match <em>any</em> of your criteria.)</li>
 
   <li>Searching is <strong>case-insensitive</strong>. So <kbd>table</kbd>,
     <kbd>Table</kbd>, and <kbd>TABLE</kbd> are all the same.</li>
 
-  <li>[% terms.Bugzilla %] does not just search for the exact word you put in,
+  <li>Bugzilla does not just search for the exact word you put in,
     but also for any word that <strong>contains</strong> that word.
     So, for example, searching for "cat" would also find [% terms.bugs %]
     that contain it as part of other words&mdash;for example, [% terms.abug %]
@@ -128,7 +128,7 @@
     referred to as 
     <kbd>[% first_field.name.replace('^cf_') FILTER html %]</kbd>,
     also. However, if this causes a conflict between the standard
-    [%+ terms.Bugzilla %] field names and the custom field names, the
+    Bugzilla field names and the custom field names, the
     standard field names always take precedence.</p>
 [% END %]
 

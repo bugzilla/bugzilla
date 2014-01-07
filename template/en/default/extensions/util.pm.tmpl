@@ -12,7 +12,7 @@
 
 [% PROCESS extensions/license.txt.tmpl %]
 
-package B[% %]ugzilla::Extension::[% name %]::Util;
+package Bugzilla::Extension::[% name %]::Util;
 
 use 5.10.1;
 use strict;
@@ -22,7 +22,7 @@ our @EXPORT = qw(
 );
 
 # This file can be loaded by your extension via 
-# "use B[% %]ugzilla::Extension::[% name %]::Util". You can put functions
+# "use Bugzilla::Extension::[% name %]::Util". You can put functions
 # used by your extension in here. (Make sure you also list them in
 # @EXPORT.)
 

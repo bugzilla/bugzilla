@@ -28,13 +28,13 @@
     [% PROCESS "bug/process/bugmail.html.tmpl" mailing_bugid = attachment.bug_id %]
     [% IF convertedbmp %]
       <p>
-        <b>Note:</b> [% terms.Bugzilla %] automatically converted your BMP image file to a
+        <b>Note:</b> Bugzilla automatically converted your BMP image file to a
         compressed PNG format.
       </p>
     [% END %]
     [% IF contenttypemethod == 'autodetect' %]
       <p>
-        <b>Note:</b> [% terms.Bugzilla %] automatically detected the content type
+        <b>Note:</b> Bugzilla automatically detected the content type
         <em>[% attachment.contenttype FILTER html %]</em> for this attachment.  If this is
         incorrect, correct the value by editing the attachment's
         <a href="attachment.cgi?id=[% attachment.id %]&amp;action=edit">details</a>.

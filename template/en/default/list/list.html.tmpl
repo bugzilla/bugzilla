@@ -83,7 +83,7 @@
   [% END %]
 
   [% IF user.settings.display_quips.value == 'on' %]
-    [% DEFAULT quip = "$terms.Bugzilla would like to put a random quip here, but no one has entered any." %]
+    [% DEFAULT quip = "Bugzilla would like to put a random quip here, but no one has entered any." %]
     <span class="bz_quip">
       <a href="quips.cgi"><em>[% quip FILTER html %]</em></a>
     </span>
@@ -93,7 +93,7 @@
 
 [% IF toolong %]
   <h2 class="bz_smallminded">
-    This list is too long for [% terms.Bugzilla %]'s little mind; the
+    This list is too long for Bugzilla's little mind; the
     Next/Prev/First/Last buttons won't appear on individual [% terms.bugs %].
   </h2>
 [% END %]

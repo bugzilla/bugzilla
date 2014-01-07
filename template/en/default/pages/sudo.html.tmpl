@@ -9,13 +9,13 @@
 [% INCLUDE global/header.html.tmpl title = "sudo: User Impersonation" %]
 
 <p>
-  [%+ terms.Bugzilla %] includes the ability to have one user impersonate 
+  Bugzilla includes the ability to have one user impersonate
 another, in something called a <i>sudo session</i>, so long as the person 
 doing the impersonating has the appropriate privileges.
 </p>
 
 <p>
-  While a session is in progress, [% terms.Bugzilla %] will act as if the 
+  While a session is in progress, Bugzilla will act as if the
   impersonated user is doing everything.  This is especially useful for testing,
   and for doing critical work when the impersonated user is unavailable.  The 
   impersonated user will receive an email from [% terms.Bugzilla %] when the 

@@ -42,3 +42,7 @@
 #reps-form .missing {
   background: #FFC1C1;
 }
+
+.yui-calcontainer {
+  z-index: 2;
+}

@@ -14,7 +14,7 @@
    javascript_urls = [ 'extensions/REMO/web/js/form_validate.js',
                        'js/util.js',
                        'js/field.js' ]
-  yui = [ 'autocomplete' ]
+  yui = [ 'autocomplete', 'calendar' ]
 %]
 
 [% IF user.in_group("mozilla-reps") %]
@@ -39,7 +39,8 @@ function validateAndSubmit() {
   if(!isFilledOut('firstname')) alert_text += "Please enter your first name\n";
   if(!isFilledOut('lastname')) alert_text += "Please enter your last name\n";
   if(!isFilledOut('profilepage')) alert_text += "Please enter a Mozilla Reps profile page.\n";
-  if(!isFilledOut('eventpage')) alert_text += "Please enter a event page address.\n";
+  if(!isFilledOut('eventpage')) alert_text += "Please enter an event page address.\n";
+  if(!isFilledOut('cf_due_date')) alert_text += "Please enter an event date.\n";
   if(!isFilledOut('mentoremail')) alert_text += "Please enter a valid [% terms.Bugzilla %] email for mentor.\n";
   if(!isFilledOut('country')) alert_text += "Please enter a valid value for country.\n";
   if(!isFilledOut('budgettotal')) alert_text += "Please enter the total budget for the event.\n";
@@ -117,6 +118,23 @@ function validateAndSubmit() {
 </tr>
 
 <tr class="odd">
+  <th class="field_label required">Event Date:</th>
+  <td>
+    <input name="cf_due_date" size="20" id="cf_due_date" value=""
+           onchange="updateCalendarFromField(this)">
+    <button type="button" class="calendar_button"
+            id="button_calendar_cf_due_date"
+            onclick="showCalendar('cf_due_date')">
+      <span>Calendar</span>
+    </button>
+    <div id="con_calendar_cf_due_date"></div>
+    <script type="text/javascript">
+      createCalendar('cf_due_date')
+    </script>
+  </td>
+</tr>
+
+<tr class="even">
   <th class="field_label required">[% terms.Bugzilla %] Email of Your Mentor:</th>
   <td>
     [% INCLUDE global/userselect.html.tmpl
@@ -128,7 +146,7 @@ function validateAndSubmit() {
   </td>
 </tr>
 
-<tr class="even">
+<tr class="odd">
   <th class="field_label">Paypal Account Email:</th>
   <td>
     <input type="text" name="paypal" id="paypal"
@@ -138,7 +156,7 @@ function validateAndSubmit() {
   </td>
 </tr>
 
-<tr class="odd">
+<tr class="even">
   <th class="field_label required">Country You Reside:</th>
   <td>
     <input type="text" name="country" id="country"
@@ -146,34 +164,34 @@ function validateAndSubmit() {
   </td>
 </tr>
 
-<tr class="even">
+<tr class="odd">
   <th class="field_label">Is advance payment needed?</th>
   <td>
     <input type="checkbox" name="advancepayment" id="advancepayment" value="1">
   </td>
 </tr>
 
-<tr class="odd">
+<tr class="even">
   <td><!--spacer-->&nbsp;</td>
   <td><!--spacer-->&nbsp;</td>
 </tr>
 
-<tr class="even">
+<tr class="odd">
   <th colspan="2" class="field_label">Budget Request:</th>
 </tr>
 
-<tr class="even">
+<tr class="odd">
   <th class="field_label required">Total amount requested in $USD:</th>
   <td>
     <input type="text" name="budgettotal" id="budgettotal" value="" size="40">
   </td>
  </tr>
 
-<tr class="even">
+<tr class="odd">
   <th colspan="2" class="field_label">Costs per service:</th>
 </tr>
 
-<tr class="even">
+<tr class="odd">
   <td colspan="2">
     <table>
     <tr>
@@ -210,17 +228,17 @@ function validateAndSubmit() {
   </td>
 </tr>
 
-<tr class="even">
+<tr class="odd">
   <th colspan="2" class="field_label">Additional costs:</th>
 </tr>
 
-<tr class="even">
+<tr class="odd">
   <td colspan="2">
     <textarea id="costadditional" name="costadditional" rows="5" cols="50"></textarea>
   </td>
 </tr>
 
-<tr class="odd">
+<tr class="even">
   <td>&nbsp;</td>
   <td align="right">
     <input type="submit" id="commit" value="Submit Request">

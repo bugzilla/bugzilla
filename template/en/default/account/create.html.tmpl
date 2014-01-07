@@ -68,24 +68,14 @@
 [% END %]
 
 <form id="account_creation_form" method="get" action="createaccount.cgi">
-  <table>
-    <tr>
-      <td align="right">
-        <b>
-          [% IF Param('emailsuffix') %]
-            Login:
-          [% ELSE %]
-            Email address:
-          [% END %]
-        </b>
-      </td>
-      <td>
-        <input size="35" id="login" name="login">
-        [% Param('emailsuffix') FILTER html %]
-      </td>
-    </tr>
-  </table>
-  <br>
+  <span class="label">
+    [% IF Param('emailsuffix') %]
+      Login:
+    [% ELSE %]
+      Email address:
+    [% END %]
+  </span>
+  <input size="35" id="login" name="login"> [% Param('emailsuffix') FILTER html %]
   <input type="hidden" id="token" name="token" value="[% issue_hash_token(['create_account']) FILTER html %]">
   <input type="submit" id="send" value="Send">
 </form>

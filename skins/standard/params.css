@@ -33,13 +33,17 @@
   padding: 0.2em 0.5em;
 }
 
+#params_index {
+  padding-left: 1em;
+}
+
 div.table {
-    display: inline-table;
+  display: inline-table;
 }
 
 div.cell {
-    display: table-cell;
-    vertical-align: top;
+  display: table-cell;
+  vertical-align: top;
 }
 
 td.selected_section {

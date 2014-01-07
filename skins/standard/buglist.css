@@ -5,7 +5,8 @@
  * This Source Code Form is "Incompatible With Secondary Licenses", as
  * defined by the Mozilla Public License, v. 2.0.
  */
-.bz_query_head {
+
+#groups_edit_multiple th, .bz_query_head {
   text-align: center;
 }
 
@@ -121,6 +122,15 @@ td.bz_total {
     color: inherit;
 }
 
+.buglist_menu {
+    margin-top: 1em;
+}
+
+.buglist_menu div {
+    display: inline-block;
+    vertical-align: middle;
+}
+
 #groups_edit_multiple, #quips {
     border: 1px solid black;
     border-collapse: collapse;
@@ -130,11 +140,6 @@ td.bz_total {
 #quips th, #quips td {
     border: 1px solid;
     padding: 0.3em;
-}
-
-#groups_edit_multiple th, #quips th {
-    text-align: center;
-    white-space: normal !important;
 }
 
 #groups_edit_multiple th.narrow_column {

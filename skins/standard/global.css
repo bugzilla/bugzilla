@@ -25,6 +25,11 @@
         clear: both;
     }
 
+    #bugzilla-body th {
+        font-weight: bold;
+        vertical-align: top;
+    }
+
 /* global (end) */
 
 /* header (begin) */
@@ -402,12 +407,35 @@ table#flags td {
     padding: 0.3em;
 }
 
+#email_prefs th.role_header {
+    width: 10%;
+}
+
 #bug_activity td {
     vertical-align: top;
 }
 
 #user_prefs th, #user_prefs td {
     padding: 0.5em;
+}
+
+#permissions {
+    margin-left: auto;
+    margin-right: auto;
+    width: 40em;
+}
+
+#permissions p {
+    margin-top: 2em;
+    margin-bottom: 0.5em;
+}
+
+#permissions li {
+    list-style-type: none;
+}
+
+#permissions table td {
+    vertical-align: top;
 }
 
 .column_header {
@@ -682,6 +710,10 @@ form th {
 
 .right {
     text-align: right;
+}
+
+.middle {
+    vertical-align: middle;
 }
 
 .inline {

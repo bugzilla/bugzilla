@@ -134,11 +134,11 @@ function subcatSelected() {
           [% labelidx = labelidx + 1 %]
           [% NEXT %]
         [% END %]
-        
+
         [% FOREACH series = line %]
           <tr>
             [% IF loop.first %]
-              <td align="center" rowspan="[% line.size %]">
+              <td class="center" rowspan="[% line.size %]">
                 <input type="checkbox" value="1" name="select[% newidx %]">
               </td>
               <td rowspan="[% line.size %]">
@@ -160,7 +160,7 @@ function subcatSelected() {
                      value="[% series.series_id %]">
             </td>
 
-            <td align="center">
+            <td>
               [% IF user.id == series.creator_id OR user.in_group("admin") %]
                <a href="chart.cgi?action=edit&amp;series_id=
                        [% series.series_id %]">Edit</a> |
@@ -172,7 +172,7 @@ function subcatSelected() {
                 [% series.subcategory FILTER uri %]%20/%20
                 [% series.name FILTER uri -%]&amp;series_id=
                 [% series.series_id %]&amp;remaction=runseries">Run Search</a>
-            </td>        
+            </td>
           </tr>
         [% END %]
         [% labelidx = labelidx + 1 %]
@@ -181,7 +181,7 @@ function subcatSelected() {
 
       [% IF chart.gt %]
         <tr>
-          <td align="center">
+          <td class="center">
             <input type="checkbox" value="1" name="select65536">
             <input type="hidden" value="1" name="gt">
           </td>

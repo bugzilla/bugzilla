@@ -66,12 +66,6 @@ hr {
 
 /* edit */
 
-#bugzilla-body th {
-    font-weight: bold;
-    vertical-align: top;
-    white-space: nowrap;
-}
-
 #bug-form td {
     padding-top: 2px;
 }

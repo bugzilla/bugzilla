@@ -31,7 +31,7 @@
       [% body FILTER html %]
     </pre>
 
-    <p align="left">
+    <p>
       [% IF author.login == recipient.login %]
         <a href="[%+ urlbase FILTER html %]editwhines.cgi">Click
             here to edit your whine schedule</a>
@@ -45,7 +45,7 @@
 
     <h2>[%+ query.title FILTER html %] ([% query.bugs.size %] [%+ terms.bugs %])</h2>
 
-    <table width="100%">
+    <table>
       <tr>
         <th>ID</th>
         [% FOREACH col = query.columnlist %]
@@ -56,18 +56,18 @@
 
       [% FOREACH bug=query.bugs %]
         <tr>
-          <td align="left"><a href="[%+ urlbase FILTER html %]show_bug.cgi?id=
+          <td><a href="[%+ urlbase FILTER html %]show_bug.cgi?id=
               [%- bug.bug_id %]">[% bug.bug_id %]</a></td>
           [% FOREACH col = query.columnlist %]
             [% NEXT IF col == 'bug_id' %]
-            <td align="left">[% display_value(col, bug.$col) FILTER html %]</td>
+            <td>[% display_value(col, bug.$col) FILTER html %]</td>
           [% END %]
         </tr>
       [% END %]
     </table>
 
     [% IF author.login == recipient.login %]
-      <p align="left">
+      <p>
         <a href="[% urlbase FILTER html %]buglist.cgi?cmdtype=runnamed&amp;namedcmd=[% query.name FILTER uri %]">View as [% terms.bug %] list</a>
       </p>
     [% END %]

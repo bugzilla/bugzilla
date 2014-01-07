@@ -43,10 +43,6 @@ p.areyoureallyreallysure {
     border: 1px solid black;
 }
 
-#admin_table th, #flag_types_bugs th, #flag_types_attachments th {
-    white-space: normal !important;
-}
-
 #admin_table th, #admin_table td,
 #flag_types_bugs th , #flag_types_bugs td,
 #flag_types_attachments th, #flag_types_attachments td {
@@ -88,12 +84,9 @@ td.admin_links dt.forbidden a, td.admin_links dd.forbidden a {
     cursor: default;
 }
 
-.col-header {
+.open-status, .closed-status {
     width: 8em;
-}
-
-.checkbox-cell {
-    border: 1px black solid;
+    padding: 0.3em;
 }
 
 /* Grey-green color */
@@ -175,7 +168,6 @@ table.whining_list th, table.whining_list td,
 table.whining_list th {
     text-align: right;
     font-weight: normal !important;
-    white-space: normal !important;
 }
 
 table.whining_list th.subtitle {
@@ -211,4 +203,13 @@ table.schedule_list th, table.search_list th {
 
 #mass-remove legend {
     white-space: nowrap;
+}
+
+#workflow {
+    border-collapse: collapse;
+}
+
+#workflow td {
+    border: 1px dotted black;
+    text-align: center;
 }

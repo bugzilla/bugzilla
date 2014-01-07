@@ -49,7 +49,7 @@ sub process_diff {
         if ($lc->{interdiffbin} && $lc->{diffpath}) {
             # Get the list of attachments that the user can view in this bug.
             my @attachments =
-                @{Bugzilla::Attachment->get_attachments_by_bug($attachment->bug_id)};
+                @{Bugzilla::Attachment->get_attachments_by_bug($attachment->bug)};
             # Extract patches only.
             @attachments = grep {$_->ispatch == 1} @attachments;
             # We want them sorted from newer to older.

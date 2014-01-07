@@ -459,9 +459,8 @@ sub diff {
 sub viewall {
     # Retrieve and validate parameters
     my $bug = Bugzilla::Bug->check({ id => scalar $cgi->param('bugid'), cache => 1 });
-    my $bugid = $bug->id;
 
-    my $attachments = Bugzilla::Attachment->get_attachments_by_bug($bugid);
+    my $attachments = Bugzilla::Attachment->get_attachments_by_bug($bug);
     # Ignore deleted attachments.
     @$attachments = grep { $_->datasize } @$attachments;
 
@@ -637,7 +636,7 @@ sub edit {
   my $attachment = validateID();
 
   my $bugattachments =
-      Bugzilla::Attachment->get_attachments_by_bug($attachment->bug_id);
+      Bugzilla::Attachment->get_attachments_by_bug($attachment->bug);
 
   my $any_flags_requesteeble =
     grep { $_->is_requestable && $_->is_requesteeble } @{$attachment->flag_types};

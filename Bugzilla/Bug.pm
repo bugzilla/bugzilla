@@ -3254,7 +3254,7 @@ sub attachments {
     return [] if $self->{'error'};
 
     $self->{'attachments'} =
-        Bugzilla::Attachment->get_attachments_by_bug($self->bug_id, {preload => 1});
+        Bugzilla::Attachment->get_attachments_by_bug($self, {preload => 1});
     return $self->{'attachments'};
 }
 

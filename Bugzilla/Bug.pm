@@ -3929,6 +3929,15 @@ sub GetBugActivity {
         && $include_comment_tags
         && !$attach_id)
     {
+        # Only includes comment tag activity for comments the user is allowed to see.
+        $suppjoins = "";
+        $suppwhere = "";
+        if (!Bugzilla->user->is_insider) {
+            $suppjoins = "INNER JOIN longdescs
+                          ON longdescs.comment_id = longdescs_tags_activity.comment_id";
+            $suppwhere = "AND longdescs.isprivate = 0";
+        }
+
         $query .= "
             UNION ALL
             SELECT 'comment_tag' AS name,
@@ -3940,8 +3949,10 @@ sub GetBugActivity {
                    longdescs_tags_activity.comment_id as comment_id
               FROM longdescs_tags_activity
                    INNER JOIN profiles ON profiles.userid = longdescs_tags_activity.who
+                   $suppjoins
              WHERE longdescs_tags_activity.bug_id = ?
                    $datepart
+                   $suppwhere
         ";
         push @args, $bug_id;
         push @args, $starttime if defined $starttime;

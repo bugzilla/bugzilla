@@ -28,6 +28,10 @@ use constant USER_STORY => {
         group       => 'editbugs',
         components  => [],
     },
+    'support.mozilla.org' => {
+        group      => 'editbugs',
+        components => [],
+    }
 };
 
 1;

@@ -20,10 +20,11 @@
 [% PROCESS global/header.html.tmpl
            title = "Show Votes"
            subheader = subheader
+           style_urls = [ "extensions/Voting/web/style.css" ]
  %]
 
 [% total = 0 %]
-<table cellspacing="4">
+<table id="bug_votes">
   <tr>
     <th>Who</th>
     <th>Number of votes</th>
@@ -38,7 +39,7 @@
           [% voter.login_name FILTER email FILTER html %]
         </a>
       </td>
-      <td align="right">
+      <td class="right">
         [% voter.vote_count FILTER html %]
       </td>
     </tr>

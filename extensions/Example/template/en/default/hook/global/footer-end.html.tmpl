@@ -8,7 +8,7 @@
 
 [% USE date %]
 
-<p align="center">
+<p class="center">
   <em>[% component.callers.first FILTER html %]</em> processed
   on [% date.format(date.now, '%b %d, %Y at %H:%M:%S') FILTER html %].
   <br>

@@ -19,3 +19,12 @@ tr.bz_bug_being_voted_on td {
 #votes_container { 
     white-space: nowrap; 
 }
+
+#user_votes th {
+    text-align: center;
+}
+
+#user_votes th, #user_votes td,
+#bug_votes th, #bug_votes td {
+    padding: 0.2em;
+}

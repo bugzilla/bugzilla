@@ -360,8 +360,7 @@ WARNING: We are about to convert your table storage format to UTF-8. This
          recommend that you stop checksetup.pl NOW and run contrib/recode.pl.
 END
     no_checksetup_from_cgi => <<END,
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
-          "http://www.w3.org/TR/html4/strict.dtd">
+<!DOCTYPE html>
 <html>
   <head>
     <title>checksetup.pl cannot run from a web browser</title>

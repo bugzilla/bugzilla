@@ -41,18 +41,19 @@ Interdiff of #[% oldid %] and #[% newid %] for [% terms.bug %] #[% bugid %]
                                      javascript_urls = "js/attachment.js"
                                      style_urls = ['skins/standard/attachment.css'] %]
 [% ELSE %]
+  <!DOCTYPE html>
   <html>
-  <head>
-  <link href="[% 'skins/standard/global.css' FILTER mtime %]"
-        rel="stylesheet" type="text/css">
-  <link href="[% 'skins/standard/attachment.css' FILTER mtime %]"
-        rel="stylesheet" type="text/css">
-  <script src="[% 'js/attachment.js' FILTER mtime %]" 
-          type="text/javascript"></script>
-  </head>
-  <body onload="[% onload FILTER html %]">
+    <head>
+      <link href="[% 'skins/standard/global.css' FILTER mtime %]"
+            rel="stylesheet" type="text/css">
+      <link href="[% 'skins/standard/attachment.css' FILTER mtime %]"
+            rel="stylesheet" type="text/css">
+      <script src="[% 'js/attachment.js' FILTER mtime %]"
+              type="text/javascript"></script>
+    </head>
+    <body onload="[% onload FILTER html %]">
 [% END %]
-  
+
 [%# If we have attachid, we are in diff, otherwise we're in interdiff %]
 [% IF attachid %]
   [%# HEADER %]

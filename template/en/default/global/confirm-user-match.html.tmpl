@@ -54,7 +54,7 @@
 
   <p>
     [% IF matchmultiple %]
-      [% terms.Bugzilla %] cannot make a conclusive match for one or more
+      Bugzilla cannot make a conclusive match for one or more
       of the names and/or email addresses you entered on the previous page.
       <br>Please examine the lists of potential matches below and select the
       ones you want,
@@ -69,7 +69,7 @@
 [% ELSE %]
   [% PROCESS global/header.html.tmpl title="Match Failed" %]
   <p>
-    [% terms.Bugzilla %] was unable to make any match at all for one or more of
+    Bugzilla was unable to make any match at all for one or more of
     the names and/or email addresses you entered on the previous page.
     [% IF !user.id %]
       <b>Note: You are currently logged out. Only exact matches against e-mail

@@ -32,7 +32,7 @@
   You will receive an email at this address to confirm the creation of your
   account. <b>You will not be able to log in until you receive the email.</b>
   If it doesn't arrive within a reasonable amount of time, you may contact
-  the maintainer of this [% terms.Bugzilla %] installation
+  the maintainer of this Bugzilla installation
   at <a href="mailto:[% Param("maintainer") %]">[% Param("maintainer") %]</a>.
 </p>
 
@@ -53,7 +53,7 @@
   existing ones, as you may be contacted for more information if needed.
   This also lets other users clearly identify who is the author of comments
   or changes made into [% terms.bugs %]. <b>Note that your email address will
-  <u>never</u> be displayed to logged out users. Only registered users will be
+  <em>never</em> be displayed to logged out users. Only registered users will be
   able to see it.</b>
 </p>
 
@@ -68,24 +68,14 @@
 [% END %]
 
 <form id="account_creation_form" method="get" action="createaccount.cgi">
-  <table>
-    <tr>
-      <td align="right">
-        <b>
-          [% IF Param('emailsuffix') %]
-            Login:
-          [% ELSE %]
-            Email address:
-          [% END %]
-        </b>
-      </td>
-      <td>
-        <input size="35" id="login" name="login">
-        [% Param('emailsuffix') FILTER html %]
-      </td>
-    </tr>
-  </table>
-  <br>
+  <span class="label">
+    [% IF Param('emailsuffix') %]
+      Login:
+    [% ELSE %]
+      Email address:
+    [% END %]
+  </span>
+  <input size="35" id="login" name="login"> [% Param('emailsuffix') FILTER html %]
   <input type="hidden" id="token" name="token" value="[% issue_hash_token(['create_account']) FILTER html %]">
   <input type="submit" id="send" value="Send">
 </form>

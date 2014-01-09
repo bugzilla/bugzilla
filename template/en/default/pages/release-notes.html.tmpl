@@ -6,7 +6,7 @@
   # defined by the Mozilla Public License, v. 2.0.
   #%]
 
-[% SET title = "$terms.Bugzilla 4.4 Release Notes" %]
+[% SET title = "Bugzilla 4.4 Release Notes" %]
 [% INCLUDE global/header.html.tmpl 
   title = title
   style_urls = ['skins/standard/page.css'] 
@@ -28,8 +28,8 @@
 
 <h2 id="v44_introduction">Introduction</h2>
 
-<p>Welcome to [% terms.Bugzilla %] 4.4! It has been over a year since we
-  released [% terms.Bugzilla %] 4.2 on February 2012, and this new major
+<p>Welcome to Bugzilla 4.4! It has been over a year since we
+  released Bugzilla 4.2 on February 2012, and this new major
   release comes with several new features and improvements. This release
   contains major improvements to WebServices, which were our main target in
   this release, a rewritten tagging system, a real MIME type auto-detection for
@@ -110,7 +110,7 @@
 <p>Perl v5.8.1</p>
 
 <p><strong>IMPORTANT:</strong> This is the last major release to support
-  Perl 5.8.x! The next major release, [% terms.Bugzilla %] 5.0, will require
+  Perl 5.8.x! The next major release, Bugzilla 5.0, will require
   Perl 5.10.1 as a minimum.</p>
 
 [% INCLUDE db_req db='mysql' %]
@@ -129,7 +129,7 @@
 <h3 id="v44_req_optional_mod">Optional Perl Modules</h3>
 
 <p>The following perl modules, if installed, enable various
-  features of [% terms.Bugzilla %]:</p>
+  features of Bugzilla:</p>
 
 [% INCLUDE req_table reqs = OPTIONAL_MODULES
                      new  = ['Net-SMTP-SSL', 'HTML-FormatText-WithLinks',
@@ -139,10 +139,10 @@
 
 <h3 id="v44_req_apache">Optional Apache Modules</h3>
 
-<p>If you are using Apache as your webserver, [% terms.Bugzilla %] can
+<p>If you are using Apache as your webserver, Bugzilla can
   take advantage of some Apache features if you have the below Apache
   modules installed and enabled. Currently,
-  <a href="#v40_feat_js_css_update">certain [% terms.Bugzilla %] features</a>
+  <a href="#v40_feat_js_css_update">certain Bugzilla features</a>
   are enabled only if you have all of the following modules installed
   and enabled:</p>
 
@@ -175,14 +175,14 @@
 
 <p>
   In the "Advanced Search" page, it is now possible to build queries using
-  multiple custom search criteria against the same field. In [% terms.Bugzilla %]
+  multiple custom search criteria against the same field. In Bugzilla
   4.2 and older, queries of the form
   <br><br>
   <kbd>"Status changed to VERIFIED" AND "Status changed by foo@bar.com"</kbd>
   <br><br>
   were returning all [% terms.bugs %] which had their status changed to VERIFIED
   by some user and which were edited by foo@bar.com once, but both actions could
-  be independent. In [% terms.Bugzilla %] 4.4, you can now decide if both
+  be independent. In Bugzilla 4.4, you can now decide if both
   criteria must match the exact same action or not, i.e. if you want
   [%+ terms.bugs %] whose status has been set to VERIFIED by foo@bar.com himself.
   In the same way, queries of the form
@@ -243,10 +243,10 @@
 
 <p>
   When a user uploads a new attachment and lets the "Content Type" field set to
-  "auto-detect", [% terms.Bugzilla %] now does its own MIME type detection
+  "auto-detect", Bugzilla now does its own MIME type detection
   if the web browser tells him that the attachment is of type
   "application/octet-stream", in an attempt to make a better guess than the web
-  browser. In all other cases, [% terms.Bugzilla %] still trusts what the browser
+  browser. In all other cases, Bugzilla still trusts what the browser
   tells him.
 </p>
 <p>
@@ -285,7 +285,7 @@
 <p>
   This release got major improvements in its WebServices interface. Many new
   methods have been implemented to let third-party applications interact with
-  [%+ terms.Bugzilla %] even more closely. For instance, it is now possible to
+  Bugzilla even more closely. For instance, it is now possible to
   know what parameters are set to using <kbd>B[%%]ugzilla.parameters</kbd>.
   It is now also possible to update tags, products, groups or user accounts
   using our API.
@@ -302,10 +302,10 @@
 <h3 id="v44_feat_apache_config">New Apache Configuration</h3>
 
 <p>
-  For improved security, [% terms.Bugzilla %] now prevents directory browsing
-  by default. If you run [% terms.Bugzilla %] under Apache (as most people do),
+  For improved security, Bugzilla now prevents directory browsing
+  by default. If you run Bugzilla under Apache (as most people do),
   you most likely require a <strong>new Apache configuration</strong> for this
-  version of [% terms.Bugzilla %]. See the
+  version of Bugzilla. See the
   <a href="#v44_upgrading">Notes On Upgrading From a Previous Version</a>
   section for details.
 </p>
@@ -385,7 +385,7 @@
     <em>X-Priority</em> email headers to increase or decrease the initial
     priority of the [% terms.bug %], unless the priority is already explicitly
     set in the email itself.</li>
-  <li><strong>Skins:</strong> [% terms.Bugzilla %] no longer fetches all skins
+  <li><strong>Skins:</strong> Bugzilla no longer fetches all skins
     available when viewing a page. It only loads the skin selected by the user
     in his preferences, which results in less requests to the server.</li>
 </ul>
@@ -393,7 +393,7 @@
 <h4>Enhancements for Administrators and Developers</h4>
 
 <ul>
-  <li><strong>License:</strong> The [% terms.Bugzilla %] code is now released
+  <li><strong>License:</strong> The Bugzilla code is now released
     under the MPL 2.0 license (previously was MPL 1.1).</li>
   <li><strong>Installation:</strong> On mod_perl, templates now remain in
     memory for one hour, which can cause an increase in memory requirements.
@@ -510,7 +510,7 @@
 <h3>IMPORTANT: Apache Configuration Change</h3>
 
 <p>
-  For improved security, [% terms.Bugzilla %] now prevents directory browsing
+  For improved security, Bugzilla now prevents directory browsing
   by default. In order to do that, the root <kbd>bugzilla/.htaccess</kbd> file
   now contains the <kbd>Options -Indexes</kbd> directive. By default, this
   directive is not allowed in <kbd>.htaccess</kbd> and so you must configure
@@ -542,7 +542,7 @@
   <li>There is a new code hook <kbd>bug_url_sub_classes</kbd> to support
     additional URLs in the See Also field.</li>
   <li>There is a new code hook <kbd>error_catch</kbd> to catch errors thrown
-    by [% terms.Bugzilla %] and to take the appropriate actions.</li>
+    by Bugzilla and to take the appropriate actions.</li>
   <li>There is a new code hook <kbd>path_info_whitelist</kbd> to whitelist
     scripts which should still get the Path-Info information from URLs. By
     default, Path-Info is now removed before being passed to CGI scripts.</li>
@@ -589,7 +589,7 @@
 </ul>
 
 
-<h1 id="v44_previous">[% terms.Bugzilla %] 4.2 Release Notes</h1>
+<h1 id="v44_previous">Bugzilla 4.2 Release Notes</h1>
 
 <ul class="bz_toc">
   <li><a href="#v42_introduction">Introduction</a></li>
@@ -604,8 +604,8 @@
 
 <h2 id="v42_introduction">Introduction</h2>
 
-<p>Welcome to [% terms.Bugzilla %] 4.2! It has been almost a year since we
-  released [% terms.Bugzilla %] 4.0 on February 2011, and this new major
+<p>Welcome to Bugzilla 4.2! It has been almost a year since we
+  released Bugzilla 4.0 on February 2011, and this new major
   release comes with several new features and improvements. This release
   contains major improvements to search, support for SQLite, improved
   WebServices, and lots of other enhancements.</p>
@@ -630,7 +630,7 @@
   <li>Attaching a file to [% terms.abug %] was broken due to a change in
     Perl 5.16.
     (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=771100">[% terms.Bug %] 771100</a>)</li>
-  <li>A regression in [% terms.Bugzilla %] 4.2.2 made Oracle crash when
+  <li>A regression in Bugzilla 4.2.2 made Oracle crash when
     displaying a buglist.
     (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=780028">[% terms.Bug %] 780028</a>)</li>
   <li>It was possible to search on history for comments and attachments you
@@ -665,7 +665,7 @@
   release:</p>
 
 <ul>
-  <li>A regression introduced in [% terms.Bugzilla %] 4.0 caused some login
+  <li>A regression introduced in Bugzilla 4.0 caused some login
     names to be ignored when entered in the CC list of [% terms.bugs %].
     (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=756314">[% terms.Bug %] 756314</a>)</li>
   <li>Some queries could trigger an invalid SQL query if strings entered by
@@ -674,7 +674,7 @@
   <li>The auto-completion form for keywords no longer automatically selects
     the first keyword in the list when the field is empty.
     (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=764517">[% terms.Bug %] 764517</a>)</li>
-  <li>A regression in [% terms.Bugzilla %] 4.2 prevented classifications
+  <li>A regression in Bugzilla 4.2 prevented classifications
     from being used in graphical and tabular reports in the "Multiple Tables"
     field.
     (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=753688">[% terms.Bug %] 753688</a>)</li>
@@ -686,7 +686,7 @@
   <li>Keywords are now correctly escaped in the auto-completion form to prevent
     any XSS abuse.
     (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=754561">[% terms.Bug %] 754561</a>)</li>
-  <li>A regression introduced in [% terms.Bugzilla %] 4.0rc2 when fixing
+  <li>A regression introduced in Bugzilla 4.0rc2 when fixing
     CVE-2011-0046 caused the "Un-forget the search" link to not work correctly
     anymore when restoring a deleted saved search, because this link was
     lacking a valid token.
@@ -854,7 +854,7 @@
 <h3 id="v42_req_optional_mod">Optional Perl Modules</h3>
 
 <p>The following perl modules, if installed, enable various
-  features of [% terms.Bugzilla %]:</p>
+  features of Bugzilla:</p>
 
 
 <table class="req_table">
@@ -999,10 +999,10 @@
 
 <h3 id="v42_req_apache">Optional Apache Modules</h3>
 
-<p>If you are using Apache as your webserver, [% terms.Bugzilla %] can
+<p>If you are using Apache as your webserver, Bugzilla can
   take advantage of some Apache features if you have the below Apache
   modules installed and enabled. Currently,
-  <a href="#v40_feat_js_css_update">certain [% terms.Bugzilla %] features</a>
+  <a href="#v40_feat_js_css_update">certain Bugzilla features</a>
   are enabled only if you have all of the following modules installed
   and enabled:</p>
 
@@ -1028,14 +1028,14 @@
   <li><a href="#v42_feat_product">Disabling Old Components, Versions and Milestones</a></li>
   <li><a href="#v42_feat_custom">Displaying a Custom Field Value Based on Multiple
     Values of Another Field</a></li>
-  <li><a href="#v42_feat_audit">Auditing of All Changes Within [% terms.Bugzilla %]</a></li>
+  <li><a href="#v42_feat_audit">Auditing of All Changes Within Bugzilla</a></li>
   <li><a href="#v42_feat_wai">Accessibility Improvements</a></li>
   <li><a href="#v42_feat_other">Other Enhancements and Changes</a></li>
 </ul>
 
 <h3 id="v42_feat_sqlite">Experimental SQLite Support</h3>
 
-<p>SQLite is now supported by [% terms.Bugzilla %] and becomes the 4th supported
+<p>SQLite is now supported by Bugzilla and becomes the 4th supported
   database besides MySQL, PostgreSQL and Oracle. SQLite support must be considered
   as experimental, at least till the next major release.</p>
 
@@ -1076,7 +1076,7 @@
   Previously, you could only display a custom field based on a single value of
   another field.</p>
 
-<h3 id="v42_feat_audit">Auditing of All Changes Within [% terms.Bugzilla %]</h3>
+<h3 id="v42_feat_audit">Auditing of All Changes Within Bugzilla</h3>
 
 <p>Most changes made through the admin interface are now logged to the database,
   in the <kbd>audit_log</kbd> table. There is no UI to access this table yet,
@@ -1087,7 +1087,7 @@
 <h3 id="v42_feat_wai">Accessibility Improvements</h3>
 
 <p>A project has started thanks to Francisco Donalisio from IBM to make
-  [%+ terms.Bugzilla %] compliant with the W3C Web Accessibility Initiative
+  Bugzilla compliant with the W3C Web Accessibility Initiative
   standards. A lot more work still needs to be done, but we expect a much
   better compatibility for the next major release.</p>
 
@@ -1162,12 +1162,12 @@
 <ul>
   <li><strong>Installation:</strong> <kbd>checksetup.pl</kbd> is now much quieter
     when creating a new database.</li>
-  <li><strong>Security:</strong> [% terms.Bugzilla %] 4.0 is using
+  <li><strong>Security:</strong> Bugzilla 4.0 is using
     <kbd>Math::Random::Secure</kbd> to generate cryptographically secure
     pseudorandom numbers, but it appeared that installing this Perl module from
     CPAN caused a lot of trouble for some people due to its numerous dependencies.
     So the RNG code has been rewritten to only depend on <kbd>Math::Random::ISAAC</kbd>,
-    which was already in use in previous versions of [% terms.Bugzilla %].</li>
+    which was already in use in previous versions of Bugzilla.</li>
   <li><strong>Security:</strong> <kbd>X-Frame-Options = SAMEORIGIN</kbd> is now
     passed to all page headers (except when viewing attachments, as they can be
     on a different host) to protect users from framing and subsequent possible
@@ -1260,23 +1260,23 @@
   <li>YUI has been upgraded to 2.9.0.</li>
   <li>Due to the major code refactor of <kbd>B[%%]ugzilla/Search.pm</kbd>, any
     customization made against this file will probably need to be rewritten.</li>
-  <li>The [% terms.Bugzilla %]-specific <kbd>url_quote</kbd> filter used in templates
+  <li>The Bugzilla-specific <kbd>url_quote</kbd> filter used in templates
     has been removed and replaced by the <kbd>uri</kbd> filter from Template::Toolkit
     as they are now similar.</li>
   <li><kbd>long_list.cgi</kbd>, <kbd>showattachment.cgi</kbd> and <kbd>xml.cgi</kbd>
     have been removed from the codebase. As <a href="#v40_code_changes">announced</a>
-    in the release notes of [% terms.Bugzilla %] 4.0, these scripts were deprecated
-    since [% terms.Bugzilla %] 2.19.</li>
+    in the release notes of Bugzilla 4.0, these scripts were deprecated
+    since Bugzilla 2.19.</li>
   <li><kbd>sidebar.cgi</kbd> has been removed, because Gecko-based browsers no
     longer support remote XUL, and its popularity is very low.</li>
   <li><kbd>contrib/yp_nomail.sh</kbd> has been removed. This script is no longer
-    useful since [% terms.Bugzilla %] 3.0.</li>
+    useful since Bugzilla 3.0.</li>
   <li><kbd>contrib/bugzilla_ldapsync.rb</kbd> has been removed. This script didn't
     work for a long time.</li>
 </ul>
 
 
-<h1 id="v42_previous">[% terms.Bugzilla %] 4.0 Release Notes</h1>
+<h1 id="v42_previous">Bugzilla 4.0 Release Notes</h1>
 
 <ul class="bz_toc">
   <li><a href="#v40_introduction">Introduction</a></li>
@@ -1292,20 +1292,20 @@
 
 <h2 id="v40_introduction">Introduction</h2>
 
-<p>This is [% terms.Bugzilla %] 4.0! Since 3.6 (our previous major
+<p>This is Bugzilla 4.0! Since 3.6 (our previous major
   release) we've come a long way, and we've come even further compared to
-  3.0 in 2007! Since [% terms.Bugzilla %] 3.0, almost every major user
-  interface in [% terms.Bugzilla %] has been redesigned, the WebServices have
+  3.0 in 2007! Since Bugzilla 3.0, almost every major user
+  interface in Bugzilla has been redesigned, the WebServices have
   evolved enormously, there's a great new Extensions system, and there
   are hundreds of other new features. With the major redesigns that come
   particularly in this release compared to 3.6, we felt that it was time to
   call this release 4.0.</p>
 
 <p>It's not just major WebService and UI enhancements that are new in
-  [%+ terms.Bugzilla %] 4.0&mdash;there are many other exciting new features,
+  Bugzilla 4.0&mdash;there are many other exciting new features,
   including automatic duplicate detection, enhanced custom field
   functionality, autocomplete for users, search improvements, and much
-  more. Overall, 4.0 is far and away the best version of [% terms.Bugzilla %]
+  more. Overall, 4.0 is far and away the best version of Bugzilla
   we've ever released.</p>
 
 <p>If you're upgrading, make sure to read <a href="#v40_upgrading">Notes
@@ -1320,7 +1320,7 @@
   the <a href="http://www.ibm.com/linux/ltc/">IBM Linux Technology Center</a>,
   and <a href="http://www.redhat.com/">Red Hat</a> for funding the development
   of certain features and improvements in this release of
-  [%+ terms.Bugzilla %].</p>
+  Bugzilla.</p>
 
 <h2 id="v40_point">Updates in this 4.0.x Release</h2>
 
@@ -1335,7 +1335,7 @@
 
 <ul>
   <li>The <kbd>B[% %]ug.create</kbd> WebService method now throws an error if you
-    pass a group name which doesn't exist. In [% terms.Bugzilla %] 4.0 and 4.0.1,
+    pass a group name which doesn't exist. In Bugzilla 4.0 and 4.0.1,
     this group name was silently ignored, leaving your [% terms.bug %] unsecure
     if no other group applied.
     (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=653341">[% terms.Bug %] 653341</a>)</li>
@@ -1353,7 +1353,7 @@
     (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=652427">[% terms.Bug %] 652427</a>)</li>
   <li>WebServices methods will return undefined [% terms.bug %] fields as undefined
     instead of as an empty string. This change is consistent with how
-    [%+ terms.Bugzilla %] 4.2 behaves.
+    Bugzilla 4.2 behaves.
     (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=657561">[% terms.Bug %] 657561</a>)</li>
   <li>The XML-RPC interface now works with SOAP::Lite 0.711 and 0.712 under mod_perl.
     (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=600810">[% terms.Bug %] 600810</a>)</li>
@@ -1499,7 +1499,7 @@
 <h3 id="v40_req_optional_mod">Optional Perl Modules</h3>
 
 <p>The following perl modules, if installed, enable various
-  features of [% terms.Bugzilla %]:</p>
+  features of Bugzilla:</p>
 
   <table class="req_table">
     <tbody>
@@ -1637,10 +1637,10 @@
 
 <h3 id="v40_req_apache">Optional Apache Modules</h3>
 
-<p>If you are using Apache as your webserver, [% terms.Bugzilla %] can
+<p>If you are using Apache as your webserver, Bugzilla can
   now take advantage of some Apache features if you have the below Apache
   modules installed and enabled. Currently,
-  <a href="#v40_feat_js_css_update">certain [% terms.Bugzilla %] features</a>
+  <a href="#v40_feat_js_css_update">certain Bugzilla features</a>
   are enabled only if you have all of the following modules installed
   and enabled:</p>
 
@@ -1682,11 +1682,11 @@
   [%+ terms.Bugs %]</h3>
 
 <p>When filing [% terms.abug %], as soon as you start typing in the summary
-  field, [% terms.Bugzilla %] will suggest possible duplicates of the
+  field, Bugzilla will suggest possible duplicates of the
   [%+ terms.bug %] you are filing.</p>
 
 <p>In order for this feature to work, all pre-requisites for JSON-RPC
-  support must be installed on your [% terms.Bugzilla %]. It will be
+  support must be installed on your Bugzilla. It will be
   much faster on installations that run under mod_perl than it will
   be on other installations.</p>
 
@@ -1715,7 +1715,7 @@
   [%+ field_descs.qa_contact FILTER html %], or
   [%+ field_descs.assigned_to FILTER html %] fields), a list will appear
   containing all of the users whose real names or usernames match what you are
-  typing. Your [% terms.Bugzilla %] must have all of the optional Perl
+  typing. Your Bugzilla must have all of the optional Perl
   modules required for JSON-RPC support installed, though, in order for
   this feature to work. Also, this feature will be <strong>much</strong>
   faster on installations that run under mod_perl than it will be on
@@ -1727,14 +1727,14 @@
 <h3 id="v40_feat_ui">General Usability Improvements</h3>
 
 <p>In addition to the enhancements listed above, there have been
-  <strong>many</strong> improvements made across the [% terms.Bugzilla %]
+  <strong>many</strong> improvements made across the Bugzilla
   user interface. For a list of specific enhancements that were significant,
   see the <a href="#v40_feat_other">Other Enhancements and Changes</a>
   section.</p>
 
 <h3 id="v40_feat_workflow">New Default Status Workflow</h3>
 
-<p>For new installations of [% terms.Bugzilla %], the default set of
+<p>For new installations of Bugzilla, the default set of
   statuses will now be:</p>
 
 <ul>
@@ -1754,7 +1754,7 @@
   can run after you use <kbd>checksetup.pl</kbd> to upgrade. The
   <kbd>whineatnews.pl</kbd> and <kbd>bugzilla-submit</kbd> scripts
   will probably not work properly if you continue to use the old workflow
-  (though most other parts of [% terms.Bugzilla %] will still function
+  (though most other parts of Bugzilla will still function
   normally).</p>
 
 <p>For more information about the workflow and our rationale for changing
@@ -1766,25 +1766,25 @@
 
 <h3 id="v40_feat_lists">"Last Search" Now Remembers Multiple Searches</h3>
 
-<p>At the top of every [% terms.bug %] in [% terms.Bugzilla %], there are
+<p>At the top of every [% terms.bug %] in Bugzilla, there are
   links that look like: "First", "Last", "Prev", "Next", and
-  "Show last search results". In earlier versions of [% terms.Bugzilla %],
+  "Show last search results". In earlier versions of Bugzilla,
   if you did two separate searches in separate windows, these links would
-  only work for the <em>last</em> search you did. Now, [% terms.Bugzilla %]
+  only work for the <em>last</em> search you did. Now, Bugzilla
   will "remember" which search result you came from and give you the right
   "last search results" or "next [% terms.bug %]" from <em>that</em> list,
   instead of always using your most recent search.</p>
 
-<p>There are still some situations where [% terms.Bugzilla %] will have to
+<p>There are still some situations where Bugzilla will have to
   "guess" which search you are trying to navigate through, but it does its
   best to get it right.</p>
 
 <h3 id="v40_feat_jsonp">Cross-Domain WebServices with JSONP</h3>
 
-<p>[% terms.Bugzilla %] now supports making WebService calls from
+<p>Bugzilla now supports making WebService calls from
   another domain, inside of a web browser, thanks to support for
   <a href="http://bob.pythonmac.org/archives/2005/12/05/remote-json-jsonp/">JSONP</a>.
-  This will allow for web "mash-ups" to use [% terms.Bugzilla %] data.
+  This will allow for web "mash-ups" to use Bugzilla data.
   When using JSONP, you may only call functions that <em>get</em> data, 
   you may not call functions that <em>change</em> data.</p>
 
@@ -1809,46 +1809,46 @@
 
 <h3 id="v40_feat_vot_ext">Voting Is Now An Extension</h3>
 
-<p>All of the code for voting in [% terms.Bugzilla %] has been moved
+<p>All of the code for voting in Bugzilla has been moved
   into an extension, called "Voting", in the <kbd>extensions/Voting/</kbd>
   directory. To enable it, you must remove the <kbd>disabled</kbd> file
   from that directory, and run <kbd>checksetup.pl</kbd>.</p>
 
-<p>In a future version of [% terms.Bugzilla %], the Voting extension will
-  be moved outside of the [% terms.Bugzilla %] core code, so we are looking
+<p>In a future version of Bugzilla, the Voting extension will
+  be moved outside of the Bugzilla core code, so we are looking
   for somebody who has an interest in the Voting system and would like to
   maintain it as a separate extension. There are many enhancement requests
   that have been made against the Voting system, and the best way for those
   to get addressed is for somebody to step up and offer to maintain the
-  system outside of [% terms.Bugzilla %]'s core code.</p>
+  system outside of Bugzilla's core code.</p>
 
 <h3 id="v40_feat_js_css_update">Users Get New CSS and Javascript
   Automatically</h3>
   
-<p>In past versions of [% terms.Bugzilla %], if you changed
-  [%+ terms.Bugzilla %]'s CSS or Javascript files, then every user of
-  [%+ terms.Bugzilla %] would have to clear their cache in order to get
+<p>In past versions of Bugzilla, if you changed
+  Bugzilla's CSS or Javascript files, then every user of
+  Bugzilla would have to clear their cache in order to get
   the updated files. Now, if you are using Apache as your webserver and
   you have the <a href="#v40_req_apache">optional Apache modules</a>
   installed and enabled, users will automatically get every new version of
-  [%+ terms.Bugzilla %]'s Javascript and CSS without having to clear
+  Bugzilla's Javascript and CSS without having to clear
   their caches.</p>
 
 <p>This feature also gives a slight performance speedup to
-  [%+ terms.Bugzilla %] in some cases, and so we recommend that all
+  Bugzilla in some cases, and so we recommend that all
   administrators install and enable the optional Apache modules if possible.</p>
 
 <h3 id="v40_feat_hooks">Many New Hooks</h3>
 
 <p>Many new code hooks have been added for use by Extensions,
-  in [% terms.Bugzilla %] 4.0. Now Extensions can access and modify
-  nearly every part of [% terms.Bugzilla %].</p>
+  in Bugzilla 4.0. Now Extensions can access and modify
+  nearly every part of Bugzilla.</p>
 
 <h3 id="v40_feat_apache_config">New Apache Configuration</h3>
 
-<p>If you run [% terms.Bugzilla %] under Apache (as most people do),
+<p>If you run Bugzilla under Apache (as most people do),
   you most likely require a <strong>new Apache configuration</strong> 
-  for this version of [% terms.Bugzilla %]. See the 
+  for this version of Bugzilla. See the
   <a href="#v40_upgrading">Notes On Upgrading From a Previous Version</a>
   section for details.</p>
 
@@ -1857,7 +1857,7 @@
 <h4>Enhancements for Users</h4>
 
 <ul>
-  <li>Now, everywhere in [% terms.Bugzilla %] where you can enter a date,
+  <li>Now, everywhere in Bugzilla where you can enter a date,
     there is a Calendar widget where you can select the date on a
     calendar.</li>
   <li>The big icons on the front page have been replaced with much nicer
@@ -1874,9 +1874,9 @@
   <li><strong>[% terms.Bugs %]:</strong> There is now a user preference
     for whether the comment box appears above or below the existing
     comments.</li>
-  <li><strong>[% terms.Bugs %]:</strong> [% terms.Bugzilla %] will now
+  <li><strong>[% terms.Bugs %]:</strong> Bugzilla will now
     send an email for every comment that you mark or un-mark as being
-    private. (Previous versions of [% terms.Bugzilla %] did not send emails
+    private. (Previous versions of Bugzilla did not send emails
     to users about this change.) The state of comments being made private
     is also now stored in [% terms.abug %]'s history.</li>
   <li><strong>[% terms.Bugs %]:</strong> The box to "Add [% terms.Bug %] URLs"
@@ -1922,14 +1922,14 @@
   
   <li>When using the Reports interface, you can now choose many more fields
     as the X, Y, or Z axis of a report, including custom fields.</li>
-  <li>[% terms.Bugzilla %] now prevents
+  <li>Bugzilla now prevents
     Internet Explorer 8 and later from attempting to render
     <kbd>text/plain</kbd> attachments as HTML.</li>
   <li>If you receive a Whine mail that is empty, there will now be a brief
     message explaining that your search found no results.</li>
   <li>The <a href="page.cgi?id=fields.html">Field Help Page</a> now
     contains a description of every single field that can be on
-    [%+ terms.abug %] in [% terms.Bugzilla %].</li>
+    [%+ terms.abug %] in Bugzilla.</li>
 </ul>
 
 <h4>Enhancements for Administrators and Developers</h4>
@@ -1937,11 +1937,11 @@
 <ul>
   <li>The system for moving [% terms.bugs %] between installations has been
     moved into an extension called <kbd>OldBugMove</kbd>. This system was used
-    by very few [% terms.Bugzilla %] installations--if you aren't certain
+    by very few Bugzilla installations--if you aren't certain
     whether or not you are using it, you're not using it. To enable the system,
     you have to remove the file <kbd>extensions/OldBugMove/disabled</kbd>
-    and then run <kbd>checksetup.pl</kbd>. In a future version of [% terms.Bugzilla %],
-    this extension may be moved outside of the core [% terms.Bugzilla %] code,
+    and then run <kbd>checksetup.pl</kbd>. In a future version of Bugzilla,
+    this extension may be moved outside of the core Bugzilla code,
     so if you are interested in maintaining it, please let us know.</li>
   <li><strong>Custom Fields: </strong> "[% terms.Bug %] ID" custom fields can
     now represent relationships between [% terms.bugs %], similarly to how the
@@ -1961,15 +1961,15 @@
     defaults for everything so that people do not have to specify any field
     values when filing [% terms.abug %] via email.)</li>
   <li><strong>Installation:</strong> If you are using a localized version of
-    [%+ terms.Bugzilla %] and your terminal does not understand Unicode,
+    Bugzilla and your terminal does not understand Unicode,
     <kbd>checksetup.pl</kbd> will now attempt to output its messages in your
     terminal's character set.</li>
-  <li><strong>Installation:</strong> [% terms.Bugzilla %] no longer needs empty
+  <li><strong>Installation:</strong> Bugzilla no longer needs empty
     "placeholder" CSS in the <kbd>skins/custom</kbd> directory and other
     directories. When you update, <kbd>checksetup.pl</kbd> will remove these.
     This also significantly reduces the number of HTTP requests required to
-    load a page for the first time in [% terms.Bugzilla %].</li>
-  <li><strong>Installation:</strong> For Windows users, [% terms.Bugzilla %]
+    load a page for the first time in Bugzilla.</li>
+  <li><strong>Installation:</strong> For Windows users, Bugzilla
     now supports Strawberry Perl fully.</li>
   <li><strong>Installation:</strong> Now, whenever <kbd>checksetup.pl</kbd>
     throws an error, it will be printed in the color red, to make it
@@ -1979,25 +1979,25 @@
     almost anything it does.</li>
   <li><strong>Installation:</strong> The process of adding foreign keys
     to a table is now much faster. This will particularly improve the speed
-    of upgrading from [% terms.Bugzilla %] 3.4 or earlier.</li>
+    of upgrading from Bugzilla 3.4 or earlier.</li>
   <li>If you are using <kbd>jobqueue.pl</kbd> and email gets heavily delayed
     for some reason, those emails will now have a Date header reflecting the
     time they were <em>supposed</em> to be sent, instead of when they actually
     <em>were</em> sent.</li>
   <li><kbd>./jobqueue.pl install</kbd> now works on SuSE Linux.</li>
-  <li>[% terms.Bugzilla %] now runs much better in Apache's suexec mode
+  <li>Bugzilla now runs much better in Apache's suexec mode
     than it used to. As part of this, <kbd>checksetup.pl</kbd> sets
-    much stricter permissions on all the files in [% terms.Bugzilla %]
-    than it used to. In particular, any files that [% terms.Bugzilla %]
+    much stricter permissions on all the files in Bugzilla
+    than it used to. In particular, any files that Bugzilla
     does not know about will not be readable by the webserver.</li>
   <li>The <kbd>sendmailnow</kbd> parameter has been removed, as it was
     not necessary for any modern version of Sendmail or other Mail Transfer
     Agent.</li>
   <li>When editing a user via the Users administration panel, you can now
     see if they are a Default CC on any component.</li>
-  <li>For new installations of [% terms.Bugzilla %], all users will be
+  <li>For new installations of Bugzilla, all users will be
     able to see and use the Whining system by default.</li>
-  <li>When you are using SSL with [% terms.Bugzilla %], you can now
+  <li>When you are using SSL with Bugzilla, you can now
     turn on the <kbd>strict_transport_security</kbd> parameter to
     send the
     <a href="https://developer.mozilla.org/en/Security/HTTP_Strict_Transport_Security">Strict-Transport-Security</a>
@@ -2009,19 +2009,19 @@
     and object_validators. The colchange_columns hook has been removed,
     as it is no longer necessary (buglist_columns will be used for data
     about which columns can be on the [% terms.bug %] list).</li>
-  <li>When [% terms.Bugzilla %] throws certain types of errors, it will
+  <li>When Bugzilla throws certain types of errors, it will
     now include a "traceback" of where exactly the error occurred in the
     code, to help administrators and developers debug problems.</li>
   <li>There is now a test, <kbd>xt/search.t</kbd>, that assures that all
     of the functionality of <kbd>Bugzilla::Search</kbd> is working properly.
-    If you customize the search functionality of [% terms.Bugzilla %],
+    If you customize the search functionality of Bugzilla,
     you may wish to run this test to assure that your changes are correct.
     You can see more information about running this test by doing
     <kbd>perldoc xt/search.t</kbd> at the command line.</li>
-  <li>[% terms.Bugzilla %] now sends the
+  <li>Bugzilla now sends the
     <a href="https://developer.mozilla.org/en/the_x-frame-options_response_header"><code>X-Frame-Options: SAMEORIGIN</code></a> header
     with every page request in order to prevent "clickjacking" attacks. Note
-    that this prevents other domains from displaying [% terms.Bugzilla %]
+    that this prevents other domains from displaying Bugzilla
     in an HTML frame.</li> 
 </ul>
 
@@ -2047,7 +2047,7 @@
     and <kbd>exclude_fields</kbd> arguments: <kbd>B[% %]ug.get</kbd>,
     <kbd>B[% %]ug.search</kbd>, and <kbd>B[% %]ug.attachments</kbd>. Also,
     server-side performance of the WebService is actually increased when
-    using these arguments, now, as [% terms.Bugzilla %] will no longer
+    using these arguments, now, as Bugzilla will no longer
     get data from the database for fields you haven't asked for.</li>
   <li>You can now mark the initial description of [% terms.abug %] as
     private when filing [% terms.abug %] via the <kbd>B[% %]ug.create</kbd>
@@ -2062,7 +2062,7 @@
   <li>There is a new, undocumented B[% %]ug.possible_duplicates
     function that helps implement the automatic duplicate detection
     system. Because this function is not documented, its API may change
-    between releases of [% terms.Bugzilla %].</li>
+    between releases of Bugzilla.</li>
   <li>You can no longer search using the <kbd>votes</kbd> argument in
     <kbd>B[% %]ug.search</kbd>.</li>
   <li><kbd>B[% %]ug.attachments</kbd> now returns the attachment's description
@@ -2070,12 +2070,12 @@
     consistent with the fact that [% terms.bug %] summaries are called
     "summary". The value is still <em>also</em> returned as "description",
     for backwards compatibility, but this backwards compatibility will go
-    away in [% terms.Bugzilla %] 5.0.</li>
+    away in Bugzilla 5.0.</li>
   <li>In the return values of various <kbd>B[% %]ug</kbd> functions, the author
     of comments, [% terms.bugs %], and attachments is now called "creator",
     instead of sometimes being called "reporter", "author", or "attacher".
     The old names are retained for backwards-compatibility, and will stay
-    around until [% terms.Bugzilla %] 5.0.</li>
+    around until Bugzilla 5.0.</li>
 </ul>
 
 <h2 id="v40_issues">Outstanding Issues</h2>
@@ -2104,10 +2104,10 @@
 
 <h4>mod_cgi</h4>
 
-<p>If you run [% terms.Bugzilla %] under mod_cgi (this is the most common
+<p>If you run Bugzilla under mod_cgi (this is the most common
   configuration, involving a &lt;Directory&gt; block in your Apache config
   file), you will need to update the configuration of Apache for 
-  [%+ terms.Bugzilla %]. In particular, this line in the [% terms.Bugzilla %]
+  Bugzilla. In particular, this line in the Bugzilla
   <kbd>&lt;Directory&gt;</kbd> block:</p>
 
 <blockquote><code>AllowOverride Limit</code></blockquote>
@@ -2116,14 +2116,14 @@
 
 <blockquote><code>AllowOverride Limit FileInfo Indexes</code></blockquote>
  
-<p>For full details on how to configure Apache for [% terms.Bugzilla %],
+<p>For full details on how to configure Apache for Bugzilla,
   see the
   <a href="[% docs_urlbase FILTER html %]configuration.html#http-apache">Configuration</a>
-  section of the [% terms.Bugzilla %] Guide.</p>
+  section of the Bugzilla Guide.</p>
 
 <h4>mod_perl</h4>
 
-<p>If your [% terms.Bugzilla %] runs under mod_perl, the required Apache
+<p>If your Bugzilla runs under mod_perl, the required Apache
   configuration is now simpler. The line that used to look like:</p>
 
 <blockquote><code>PerlSwitches -w -T -I/var/www/html/bugzilla 
@@ -2137,16 +2137,16 @@
 
 <h3>New .htaccess file</h3>
 
-<p>In previous versions of [% terms.Bugzilla %], there was a file
-  in [% terms.Bugzilla %]'s root directory called ".htaccess" that was
+<p>In previous versions of Bugzilla, there was a file
+  in Bugzilla's root directory called ".htaccess" that was
   generated by <kbd>checksetup.pl</kbd>. This file is now shipped with
-  [%+ terms.Bugzilla %] instead of being generated during installation.</p>
+  Bugzilla instead of being generated during installation.</p>
 
 <p>If you update via CVS or bzr, you will get a message that your existing
   .htaccess file conflicts with the new one. You must
   <strong>remove your existing .htaccess file</strong> and use the new one
   instead. Continuing to use your old .htaccess file will cause certain new
-  features of [% terms.Bugzilla %] to not work properly, and may also lead
+  features of Bugzilla to not work properly, and may also lead
   to security issues for your system in the future.</p>
 
 <h2 id="v40_code_changes">Code Changes Which May Affect Customizations and
@@ -2158,9 +2158,9 @@
     (For example, <kbd>extensions/Foo/web/</kbd>). <kbd>checksetup.pl</kbd>
     sets permissions on extensions much more strictly now, and files in
     other locations (such as your base <kbd>extensions/Foo/</kbd> directory)
-    will no longer be available to [% terms.Bugzilla %] users via the web
+    will no longer be available to Bugzilla users via the web
     under certain configurations.</li>
-  <li>Previous versions of [% terms.Bugzilla %] used to allow putting a
+  <li>Previous versions of Bugzilla used to allow putting a
     single file into the "skins" directory and having that be an entire
     skin. That is no longer allowed, and on upgrade, <kbd>checksetup.pl</kbd>
     will convert any such skins into a directory with a single
@@ -2193,7 +2193,7 @@
     that were passed in, while an object is being created. For an example of
     how to use <kbd>VALIDATOR_DEPENDENCIES</kbd>, see
     <kbd>Bugzilla/Field.pm</kbd>.</li>
-  <li>In previous versions of [% terms.Bugzilla %], you had to call
+  <li>In previous versions of Bugzilla, you had to call
     <code>Bugzilla-&gt;template_inner("")</code> after any time
     that you called <kbd>template_inner</kbd> for a specific language.
     It is no longer necessary to do this second <kbd>template_inner</kbd>
@@ -2209,17 +2209,17 @@
     now be easier to customize.</li>
   <li>The <kbd>Bugzilla::Util::lsearch</kbd> function is gone. Use
     <kbd>firstidx</kbd> from <kbd>List::MoreUtils</kbd>, instead.</li>
-  <li>[% terms.Bugzilla %] now includes YUI 2.8.2.</li>
+  <li>Bugzilla now includes YUI 2.8.2.</li>
   <li><kbd>long_list.cgi</kbd>, <kbd>showattachment.cgi</kbd> and
     <kbd>xml.cgi</kbd> are deprecated scripts which are no longer actively
-    used since [% terms.Bugzilla %] 2.19. These scripts will be removed in
-    [%+ terms.Bugzilla %] 4.2.</li>
+    used since Bugzilla 2.19. These scripts will be removed in
+    Bugzilla 4.2.</li>
 </ul>
 
 <h2 id="v40_previous">Release Notes For Previous Versions</h2>
 
 <p><a href="page.cgi?id=release-notes3.html">Release Notes for
-  [%+ terms.Bugzilla %] 3.x and Earlier</a></p>
+  Bugzilla 3.x and Earlier</a></p>
 
 [% INCLUDE global/footer.html.tmpl %]
 

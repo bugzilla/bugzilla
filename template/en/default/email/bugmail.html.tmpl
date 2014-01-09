@@ -11,7 +11,7 @@
 [% isnew = bug.lastdiffed ? 0 : 1 %]
 <html>
     <head>
-      <base href="[% urlbase FILTER html %]" />
+      <base href="[% urlbase FILTER html %]">
     </head>
     <body>
       [% Hook.process('start') %]

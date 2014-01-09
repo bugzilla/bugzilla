@@ -35,36 +35,28 @@ var queryform = "reportform"
 [% button_name = "Generate Report" %]
 
 <form method="get" action="report.cgi" name="reportform" id="reportform">
+  <table id="tabular_reports_menu">
+    <tr>
+      <th></th>
+      <th id="reports_menu_horizontal_axis">
+        Horizontal Axis:<br>
+        [% PROCESS select name = 'x_axis_field' %]
+      </th>
+    </tr>
 
-<table align="center">
-  <tr>
-    <td>
-    </td>
-    <td align="center">
-      <b>Horizontal Axis:</b>
-      [% PROCESS select name = 'x_axis_field' %]
-    </td>
-  </tr>
+    <tr>
+      <th id="reports_menu_vertical_axis">
+        Vertical Axis:<br>
+        [% PROCESS select name = 'y_axis_field' %]
+      </th>
+      <th id="reports_menu_multiple_tables">
+        Multiple Tables:<br>
+        [% PROCESS select name = 'z_axis_field' %]
+      </th>
+    </tr>
+  </table>
 
-  <tr>
-    <td valign="middle" align="center">
-      <b>Vertical Axis:</b><br>
-      [% PROCESS select name = 'y_axis_field' %]
-    </td>
-    <td width="150" height="150">
-      <table border="1" width="100%">
-        <tr>
-          <td align="center" valign="middle" height="150">
-            <b>Multiple Tables:</b><br>
-            [% PROCESS select name = 'z_axis_field' %]
-          </td>
-        </tr>
-      </table>
-    </td>
-  </tr>
-</table>
-
-<hr>
+  <hr>
 
   [% PROCESS search/form.html.tmpl %]
 

@@ -116,7 +116,7 @@ YAHOO.util.Event.addListener(window, "load", function() {
       return parseFloat(res[1]);
   };
 
-  this.myDataSource = new YAHOO.util.DataSource(YAHOO.util.Dom.get("tabular_report"));
+  this.myDataSource = new YAHOO.util.DataSource(YAHOO.util.Dom.get("tabular_report_[% tbl FILTER html FILTER js %]"));
   this.myDataSource.responseType = YAHOO.util.DataSource.TYPE_HTMLTABLE;
   this.myDataSource.responseSchema = {
     fields: [
@@ -137,7 +137,7 @@ YAHOO.util.Event.addListener(window, "load", function() {
   <h2>[% tbl_disp FILTER email FILTER html %]</h2>
 [% END %]
 
-<table>
+<table class="tabular_report_container">
   <tr>
     <td>
     </td>
@@ -147,7 +147,7 @@ YAHOO.util.Event.addListener(window, "load", function() {
   </tr>
 
   <tr>
-    <td valign="middle">
+    <td class="middle">
       <strong>[% row_field_disp FILTER html %]</strong>
     </td>
     <td>
@@ -158,7 +158,7 @@ YAHOO.util.Event.addListener(window, "load", function() {
 [% row_idx = 0 %]
 [% total_key = '-total-' %]
 <div id="tabular_report_container_[% tbl FILTER html %]">
-<table id="tabular_report">
+<table id="tabular_report_[% tbl FILTER html %]" class="tabular_report">
   [% IF col_field %]
     <thead>
     <tr>
@@ -234,7 +234,7 @@ YAHOO.util.Event.addListener(window, "load", function() {
   </tbody>
 </table>
 </div>
-      
+
     </td>
   </tr>
 </table>

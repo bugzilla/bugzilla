@@ -11,16 +11,16 @@
   product.votesperuser = 0
   product.votestoconfirm = 0
 %]
-  
+
 <tr>
-  <th align="right">Maximum votes per person:</th>
+  <th>Maximum votes per person:</th>
   <td><input size="5" maxlength="5" name="votesperuser" id="votesperuser"
              value="[% product.votesperuser FILTER html %]">
   </td>
 </tr>
 
 <tr>
-  <th align="right">
+  <th>
     Maximum votes a person can put on a single [% terms.bug %]:
   </th>
   <td><input size="5" maxlength="5" name="maxvotesperbug" id="maxvotesperbug"
@@ -30,7 +30,7 @@
 
 <tr id="votes_to_confirm_container"
     [%- ' class="bz_default_hidden"' IF !product.allows_unconfirmed %]>
-  <th align="right">
+  <th>
     Confirm [% terms.abug %] if it gets this many votes:
   </th>
   <td>

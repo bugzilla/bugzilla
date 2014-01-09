@@ -21,11 +21,11 @@
   <th><label for="login">Login name:</label></th>
   <td>
     [% IF editusers %]
-      <input size="64" maxlength="255" name="login" 
-             id="login" value="[% otheruser.login FILTER html %]" />
+      <input size="64" maxlength="255" id="login" name="login"
+             value="[% otheruser.login FILTER html %]">
       [% IF editform %]
         [% IF !otheruser.in_group('bz_sudo_protect') %]
-          <br />
+          <br>
           <a href="relogin.cgi?action=prepare-sudo&amp;target_login=
           [%- otheruser.login FILTER uri %]">Impersonate this user</a>
         [% END %]
@@ -52,9 +52,8 @@
   <th><label for="name">Real name:</label></th>
   <td>
     [% IF editusers %]
-      <input size="64" maxlength="255" name="name"
-             autocomplete="off"
-             id="name" value="[% otheruser.name FILTER html %]" />
+      <input size="64" maxlength="255" id="name" name="name"
+             autocomplete="off" value="[% otheruser.name FILTER html %]">
     [% ELSE %]
       [% otheruser.name FILTER html %]
     [% END %]
@@ -72,7 +71,7 @@
     <th><label for="password">Password:</label></th>
     <td>
       <input type="password" size="16" name="password" id="password"
-             value="" autocomplete="off" />
+             value="" autocomplete="off">
       [% IF password_complexity == "mixed_letters" %] 
         (Password must contain at least one UPPER and one lowercase letter.)
       [% ELSIF password_complexity == "letters_numbers" %] 
@@ -80,7 +79,7 @@
       [% ELSIF password_complexity == "letters_numbers_specialchars" %] 
         (Password must contain at least one letter, a number and a special character.)
       [% END %]
-      [% IF editform %]<br />
+      [% IF editform %]<br>
         (Enter new password to change.)
       [% END %]
     </td>

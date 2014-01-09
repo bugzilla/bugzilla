@@ -260,11 +260,11 @@
 
   [% IF Param('usestatuswhiteboard') %]
     <tr>
-      <td align="right">
-        <b>Status Whiteboard:</b>
-      </td>
+      <th>
+        <label for="status_whiteboard">Status Whiteboard:</label>
+      </th>
       <td colspan="7">
-        <input name="status_whiteboard" 
+        <input name="status_whiteboard" id="status_whiteboard"
                value="[% dontchange FILTER html %]" size="60">
       </td>
     </tr>
@@ -289,7 +289,7 @@
 [% IF user.is_insider %]
   <input type="checkbox" name="comment_is_private" value="1"
          id="newcommentprivacy"
-         onClick="updateCommentTagControl(this, form)"/>
+         onClick="updateCommentTagControl(this, form)">
    <label for="newcommentprivacy">
      Make comment private (visible only to members of the
      <strong>[% Param('insidergroup') FILTER html %]</strong> group)

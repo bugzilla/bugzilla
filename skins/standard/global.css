@@ -25,6 +25,11 @@
         clear: both;
     }
 
+    #bugzilla-body th {
+        font-weight: bold;
+        vertical-align: top;
+    }
+
 /* global (end) */
 
 /* header (begin) */
@@ -206,7 +211,7 @@
         border-color: black;
         border-width: 0px 0px 2px 0px;
     }
-        
+
     .tabs td.selected {
         background: white;
         border-width: 2px 2px 0px 2px;
@@ -402,12 +407,35 @@ table#flags td {
     padding: 0.3em;
 }
 
+#email_prefs th.role_header {
+    width: 10%;
+}
+
 #bug_activity td {
     vertical-align: top;
 }
 
 #user_prefs th, #user_prefs td {
     padding: 0.5em;
+}
+
+#permissions {
+    margin-left: auto;
+    margin-right: auto;
+    width: 40em;
+}
+
+#permissions p {
+    margin-top: 2em;
+    margin-bottom: 0.5em;
+}
+
+#permissions li {
+    list-style-type: none;
+}
+
+#permissions table td {
+    vertical-align: top;
 }
 
 .column_header {
@@ -614,8 +642,8 @@ input.required, select.required, span.required_explanation {
 .calendar_button span { display: none }
 /* These classes are set by YUI. */
 .yui-calcontainer {
-    display: none; 
-    background-color: white; 
+    display: none;
+    background-color: white;
     padding: 10px;
     border: 1px solid #404D6C;
 }
@@ -690,6 +718,10 @@ form th {
 
 .right {
     text-align: right;
+}
+
+.middle {
+    vertical-align: middle;
 }
 
 .inline {

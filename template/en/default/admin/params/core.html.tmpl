@@ -8,7 +8,7 @@
 
 [% 
    title = "Required Settings"
-   desc = "Settings that are required for proper operation of $terms.Bugzilla" 
+   desc = "Settings that are required for proper operation of Bugzilla"
 %]
 
 [% param_descs = {
@@ -19,17 +19,17 @@
              "(SSL) $terms.Bugzilla URLs.",
 
   ssl_redirect => 
-    "When this is enabled, $terms.Bugzilla will ensure that every page is"
+    "When this is enabled, Bugzilla will ensure that every page is"
     _ " accessed over SSL, by redirecting any plain HTTP requests to HTTPS"
     _ " using the <var>sslbase</var> parameter. Also, when this is enabled,"
-    _ " $terms.Bugzilla will send out links using <var>sslbase</var> in emails"
+    _ " Bugzilla will send out links using <var>sslbase</var> in emails"
     _ " instead of <var>urlbase</var>.",
 
   cookiepath => "Path, relative to your web document root, to which to restrict " _
-                "$terms.Bugzilla cookies. Normally this is the URI portion of your URL " _
+                "Bugzilla cookies. Normally this is the URI portion of your URL " _
                 "base. Begin with a / (single slash mark). For instance, if " _
-                "$terms.Bugzilla serves from 'http://www.somedomain.com/bugzilla/', set " _
+                "Bugzilla serves from 'http://www.somedomain.com/bugzilla/', set " _
                 "this parameter to /bugzilla/. Setting it to / will allow " _
                 "all sites served by this web server or virtual host to read " _
-                "$terms.Bugzilla cookies.",
+                "Bugzilla cookies.",
 } %]

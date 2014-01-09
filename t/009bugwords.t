@@ -60,15 +60,6 @@ foreach my $file (@testitems) {
                 next;
             }
         }
-
-        # "Bugzilla"
-        if (grep /(?<!X\-)Bugzilla(?!_|::|-&gt|\.pm)/, $text) {
-            # Exclude JS comments, hyperlinks, USE, and variable assignment.
-            unless (grep /(\/\/.*|org.*>|api\/|USE |= )Bugzilla/, $text) {
-                push(@errors, [$lineno, $text]);
-                next;
-            }
-        }
     }
         
     if (scalar(@errors)) {

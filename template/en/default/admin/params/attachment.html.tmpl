@@ -25,12 +25,12 @@
   attachment_base => 
     "When the <var>allow_attachment_display</var> parameter is on, it is "
     _ " possible for a malicious attachment to steal your cookies or"
-    _ " perform an attack on $terms.Bugzilla using your credentials."
+    _ " perform an attack on Bugzilla using your credentials."
     _ "<p>If you would like additional security on attachments to avoid"
-    _ " this, set this parameter to an alternate URL for your $terms.Bugzilla"
+    _ " this, set this parameter to an alternate URL for your Bugzilla"
     _ " that is not the same as <var>urlbase</var> or <var>sslbase</var>."
     _ " That is, a different domain name that resolves to this exact"
-    _ " same $terms.Bugzilla installation.</p>"
+    _ " same Bugzilla installation.</p>"
     _ "<p>Note that if you have set the"
     _ " <a href=\"editparams.cgi?section=advanced#cookiedomain_desc\"><var>cookiedomain</var>"
     _" parameter</a>, you should set <var>attachment_base</var> to use a"
@@ -42,14 +42,14 @@
     _ " attachments to accessing only other attachments on the same"
     _ " ${terms.bug}. Remember, though, that all those possible domain names "
     _ " (such as <kbd>1234.your.domain.com</kbd>) must point to this same"
-    _ " $terms.Bugzilla instance.",
+    _ " Bugzilla instance.",
 
   allow_attachment_deletion => "If this option is on, administrators will be able to delete " _
                                "the content of attachments.",
 
   maxattachmentsize => "The maximum size (in kilobytes) of attachments to be stored " _
                        "in the database. If a file larger than this size is attached " _
-                       "to ${terms.abug}, $terms.Bugzilla will look at the " _
+                       "to ${terms.abug}, Bugzilla will look at the " _
                        "<a href=\"#maxlocalattachment\"><var>maxlocalattachment</var> parameter</a> " _
                        "to determine if the file can be stored locally on the web server. " _
                        "If the file size exceeds both limits, then the attachment is rejected. " _

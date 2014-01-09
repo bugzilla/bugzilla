@@ -23,7 +23,7 @@
                                in 'data/mailer.testfile' instead of being sent.
                              </li>
                              <li>
-                               'none' will completely disable email. $terms.Bugzilla continues
+                               'none' will completely disable email. Bugzilla continues
                                to act as though it is sending mail, but nothing is sent or
                                stored.
                              </li>
@@ -32,14 +32,14 @@
   mailfrom => "The email address of the $terms.Bugzilla mail daemon.  Some email systems " _
               "require this to be a valid email address.",
 
-  use_mailer_queue => "In a large $terms.Bugzilla installation, updating"
-    _ " $terms.bugs can be very slow, because $terms.Bugzilla sends all"
-    _ " email at once. If you enable this parameter, $terms.Bugzilla will"
+  use_mailer_queue => "In a large Bugzilla installation, updating"
+    _ " $terms.bugs can be very slow, because Bugzilla sends all"
+    _ " email at once. If you enable this parameter, Bugzilla will"
     _ " queue all mail and then send it in the background. This requires"
     _ " that you have installed certain Perl modules (as listed by"
     _ " <kbd>checksetup.pl</kbd> for this feature), and that you are"
     _ " running the <code>jobqueue.pl</code> daemon (otherwise your mail"
-    _ " won't get sent). This affects all mail sent by $terms.Bugzilla,"
+    _ " won't get sent). This affects all mail sent by Bugzilla,"
     _ " not just $terms.bug updates.",
 
   smtpserver => "The SMTP server address (if using SMTP for mail delivery).",
@@ -54,7 +54,7 @@
 
   smtp_debug => "If enabled, this will print detailed information to your" _
                 " web server's error log about the communication between" _
-                " $terms.Bugzilla and your SMTP server. You can use this to" _
+                " Bugzilla and your SMTP server. You can use this to" _
                 " troubleshoot email problems.",
 
   whinedays => "The number of days that we'll let a $terms.bug sit untouched in a CONFIRMED " _

@@ -43,36 +43,37 @@ incremental_restore()
 [% section_num = 0 %]
 [% FOREACH section = sections %]
   [% section_num = section_num + 1 %]
-  <tr><th colspan="4" class="section_head">
-    <table id="[% file.filename FILTER html %]_sec[% section_num %]">
-    <tr><th width="95%" class="left">
-  [% IF file.is_add %]
-    Added
-  [% ELSIF file.is_remove %]
-    [% IF bonsai_prefix %]
-      <a href="[% bonsai_prefix %]">Removed</a>
-    [% ELSE %]
-      Removed
-    [% END %]
-  [% ELSE %]
-    [% IF bonsai_prefix %]
-      <a href="[% bonsai_prefix %]#[% section.old_start %]">
-    [% END %]
-    [% IF section.old_lines > 1 %]
-      &nbsp;Lines&nbsp;[% section.old_start %]-[% section.old_start + 
-                                             section.old_lines - 1 %]
-    [% ELSE %]
-      Line&nbsp;[% section.old_start %]
-    [% END %]
-    [% IF bonsai_prefix %]
-      </a>
-    [% END %]
-    &nbsp;&nbsp;[% section.func_info FILTER html IF section.func_info %]
-  [% END %] 
-    </th><th>
-  <a href="#[% file.filename FILTER html %]_sec[% section_num %]">Link&nbsp;Here</a>&nbsp;
-    </th></tr></table>
-  </th></tr>
+  <tr>
+    <th colspan="4" class="section_head">
+      <span id="[% file.filename FILTER html %]_sec[% section_num %]" class="lines_count">
+        [% IF file.is_add %]
+          Added
+        [% ELSIF file.is_remove %]
+          [% IF bonsai_prefix %]
+            <a href="[% bonsai_prefix %]">Removed</a>
+          [% ELSE %]
+            Removed
+          [% END %]
+        [% ELSE %]
+          [% IF bonsai_prefix %]
+            <a href="[% bonsai_prefix %]#[% section.old_start %]">
+          [% END %]
+          [% IF section.old_lines > 1 %]
+            Lines&nbsp;[% section.old_start %]-[% section.old_start + section.old_lines - 1 %]
+          [% ELSE %]
+            Line&nbsp;[% section.old_start %]
+          [% END %]
+          [% IF bonsai_prefix %]
+            </a>
+          [% END %]
+          [%+ section.func_info FILTER html IF section.func_info %]
+        [% END %]
+      </span>
+      <span class="link_here">
+        <a href="#[% file.filename FILTER html %]_sec[% section_num %]">Link&nbsp;Here</a>
+      </span>
+    </th>
+  </tr>
   [% current_line_old = section.old_start %]
   [% current_line_new = section.new_start %]
   [% FOREACH group = section.groups %]

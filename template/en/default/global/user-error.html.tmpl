@@ -258,7 +258,7 @@
     [% ELSE %]
       [%+ field_descs.see_also FILTER html %] URLs should point to one of:
       <ul>
-        <li><code>show_bug.cgi</code> in a [% terms.Bugzilla %]
+        <li><code>show_bug.cgi</code> in a Bugzilla
           installation.</li>
         <li>A b[% %]ug on launchpad.net</li>
         <li>An issue on code.google.com.</li>
@@ -493,7 +493,7 @@
 
   [% ELSIF error == "feature_disabled" %]
     The [% install_string("feature_$feature") FILTER html %] feature is not
-    available in this [% terms.Bugzilla %].
+    available in this Bugzilla.
     [% IF user.in_group('admin') %]
       If you would like to enable this feature, please run
       <kbd>checksetup.pl</kbd> to see how to install the necessary
@@ -1164,7 +1164,7 @@
 
   [% ELSIF error == "migrate_from_invalid" %]
     '[% from FILTER html %]' is not a valid type of [% terms.bug %]-tracker
-    to migrate from. See the contents of the <kbd>B[% %]ugzilla/Migrate/</kbd>
+    to migrate from. See the contents of the <kbd>Bugzilla/Migrate/</kbd>
     directory for a list of valid [% terms.bug %]-trackers.
 
   [% ELSIF error == "milestone_already_exists" %]
@@ -1567,7 +1567,7 @@
 
   [% ELSIF error == "quicksearch_unbalanced_quotes" %]
     [% title = "Badly Formatted Query" %]
-    [% terms.Bugzilla %] is unable to parse your query correctly:
+    Bugzilla is unable to parse your query correctly:
     <em>[% string FILTER html %]</em>.<br>
     If you use quotes to enclose strings, make sure both quotes are present.
     If you really want to look for a quote in a string, type \" instead of ".
@@ -1666,7 +1666,7 @@
     field.
 
   [% ELSIF error == "search_grouped_field_invalid" %]
-    [% terms.Bugzilla %] does not support using the 
+    Bugzilla does not support using the
     "[%+ field_descs.$field FILTER html %]" ([% field FILTER html %])
     field with grouped search conditions.
 
@@ -1677,7 +1677,7 @@
     All conditions under a groups search must use the same field.
 
   [% ELSIF error == "search_field_operator_invalid" %]
-    [% terms.Bugzilla %] does not support using the 
+    Bugzilla does not support using the
     "[%+ field_descs.$field FILTER html %]" ([% field FILTER html %])
     field with the "[% search_descs.$operator FILTER html %]" 
     ([% operator FILTER html %]) search type.
@@ -1852,7 +1852,7 @@
 
   [% ELSIF error == "user_match_too_many" %]
     [% title = "No Conclusive Match" %]
-    [% terms.Bugzilla %] cannot make a conclusive match for one or more
+    Bugzilla cannot make a conclusive match for one or more
     of the names and/or email addresses you entered for
     the [% fields.join(', ') FILTER html %] field(s).
 

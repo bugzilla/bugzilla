@@ -30,7 +30,6 @@
 
 <p>Your saved searches are as follows:</p>
 
-<blockquote>
   <table id="saved_search_prefs">
     <tr class="column_header">
       <th>Search</th>
@@ -53,7 +52,7 @@
       </td>
       <td></td>
       <td></td>
-      <td align="center">
+      <td class="center">
         <input type="checkbox" name="showmybugslink" value="1"
                [%+ 'checked="checked"' IF user.showmybugslink %]>
       </td>
@@ -120,12 +119,12 @@
       </tr>
     [% END %]
   </table>
+
 [% IF user.can_bless %]
   <p>Note that for every search that has the "Add to footer" selected, a
      link to the shared search is added to the footer of every user that is
      a direct member of the group at the time you click Submit Changes.</p>
 [% END %]
-</blockquote>
 
 [% IF user.queries_available.size %]
   <p>You may use these searches saved and shared by others:</p>

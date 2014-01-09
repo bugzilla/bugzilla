@@ -192,3 +192,34 @@ div.bz_section_title span {
 .bz_simple_search_form th {
   text-align: right;
 }
+
+#tabular_reports_menu, #graphical_reports_menu {
+    width: 30em;
+    margin: 2em auto;
+}
+
+#tabular_reports_menu th, #graphical_reports_menu th {
+    vertical-align: middle;
+    white-space: nowrap;
+    padding: 0.3em;
+}
+
+#tabular_reports_menu th {
+    text-align: center;
+}
+
+#graphical_reports_menu th {
+    text-align: left;
+}
+
+#graphical_reports_menu label {
+    font-weight: normal;
+}
+
+th#reports_menu_multiple_tables {
+    text-align: center;
+    width: 15em;
+    height: 15em;
+    border: 1px solid black;
+    border-collapse: collapse;
+}

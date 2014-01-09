@@ -83,7 +83,7 @@
   [% END %]
 
   [% IF user.settings.display_quips.value == 'on' %]
-    [% DEFAULT quip = "$terms.Bugzilla would like to put a random quip here, but no one has entered any." %]
+    [% DEFAULT quip = "Bugzilla would like to put a random quip here, but no one has entered any." %]
     <span class="bz_quip">
       <a href="quips.cgi"><em>[% quip FILTER html %]</em></a>
     </span>
@@ -93,7 +93,7 @@
 
 [% IF toolong %]
   <h2 class="bz_smallminded">
-    This list is too long for [% terms.Bugzilla %]'s little mind; the
+    This list is too long for Bugzilla's little mind; the
     Next/Prev/First/Last buttons won't appear on individual [% terms.bugs %].
   </h2>
 [% END %]
@@ -172,8 +172,6 @@
   </ul>
 [% END %]
 
-<br>
-
 [%############################################################################%]
 [%# Rest of Change Form                                                      #%]
 [%############################################################################%]
@@ -188,10 +186,9 @@
 [%# Navigation Bar                                                           #%]
 [%############################################################################%]
 
-<table>
-  <tr>
-    [% IF bugs.size > 0 %]
-      <td valign="middle" class="bz_query_buttons">
+  [% IF bugs.size > 0 %]
+    <div class="buglist_menu">
+      <div class="bz_query_buttons">
         <form method="post" action="show_bug.cgi">
           [% id = buglist.join(",") %]
           <input type="hidden" name="id" value="[% id FILTER html %]">
@@ -213,19 +210,19 @@
             <input type="submit" id="timesummary" value="Time Summary">
           </form>
           [% IF time_summary_limited %]
-            <small>
-              Time Summary will only include the [% terms.bugs %] shown above. In order to
-              to see a time summary for all [% terms.bugs %] found by the search, you can 
+            <span class="bz_info">
+              Time Summary will only include the [% terms.bugs %] shown above.
+              In order to see a time summary for all [% terms.bugs %] found
+              by the search, you can
               <a href="buglist.cgi?[% urlquerypart FILTER html %]
                        [%- "&order=$qorder" FILTER html IF order %]&limit=0">
-                Show all search results</a>.</small>
+                show all search results</a>.
+            </span>
           [% END %]
         [% END %]
-      </td>
-      
-      <td>&nbsp;</td>
-      
-      <td valign="middle" class="bz_query_links">
+      </div>
+
+      <div class="bz_query_links">
         <a href="buglist.cgi?
         [% urlquerypart FILTER html %]&amp;ctype=csv&amp;human=1">CSV</a> |
         <a href="buglist.cgi?
@@ -251,39 +248,35 @@
 
         [%# Links to more things users can do with this bug list. %]
         [% Hook.process("links") %]
-      </td>
-    [% END %]
-    
-    <td valign="middle" class="bz_query_edit">
-      <a href="[% PROCESS edit_search_url %]">Edit&nbsp;Search</a>
-    </td>
-      
-    [% IF searchtype == "saved" %]
-      <td valign="middle" nowrap="nowrap" class="bz_query_forget">
-        |
-        <a href="buglist.cgi?cmdtype=dorem&amp;remaction=forget&amp;namedcmd=
+      </div>
+
+      <div class="bz_query_edit">
+        <a href="[% PROCESS edit_search_url %]">Edit&nbsp;Search</a>
+      </div>
+
+      [% IF searchtype == "saved" %]
+        <div class="bz_query_forget">
+          | <a href="buglist.cgi?cmdtype=dorem&amp;remaction=forget&amp;namedcmd=
                 [% searchname FILTER uri %]&amp;token=
                 [% issue_hash_token([search_id, searchname]) FILTER uri %]">
-          Forget&nbsp;Search&nbsp;'[% searchname FILTER html %]'</a>
-      </td>
-    [% ELSE %]
-      <td>&nbsp;</td>
-      
-      <td valign="middle" class="bz_query_remember">
-        <form method="get" action="buglist.cgi">
-          <input type="submit" id="remember" value="Remember search"> as 
-          <input type="hidden" name="newquery" 
-                 value="[% urlquerypart FILTER html %][% "&order=$qorder" FILTER html IF order %]">
-          <input type="hidden" name="cmdtype" value="doit">
-          <input type="hidden" name="remtype" value="asnamed">
-          <input type="hidden" name="token" value="[% issue_hash_token(['savedsearch']) FILTER html %]">
-          <input type="text" id="save_newqueryname" name="newqueryname" size="20"
-                 title="New query name" value="[% defaultsavename FILTER html %]"> 
-        </form> 
-      </td>
-    [% END %]  
-  </tr>
-</table>
+              Forget&nbsp;Search&nbsp;'[% searchname FILTER html %]'</a>
+        </div>
+      [% ELSE %]
+        <div class="bz_query_remember">
+          <form method="get" action="buglist.cgi">
+            <input type="submit" id="remember" value="Remember search"> as
+            <input type="hidden" name="newquery"
+                   value="[% urlquerypart FILTER html %][% "&order=$qorder" FILTER html IF order %]">
+            <input type="hidden" name="cmdtype" value="doit">
+            <input type="hidden" name="remtype" value="asnamed">
+            <input type="hidden" name="token" value="[% issue_hash_token(['savedsearch']) FILTER html %]">
+            <input type="text" id="save_newqueryname" name="newqueryname" size="20"
+                   title="New query name" value="[% defaultsavename FILTER html %]">
+          </form>
+        </div>
+      [% END %]
+    </div>
+  [% END %]
 
 [% IF one_product.defined && bugs.size %]
   <p class="bz_query_single_product">

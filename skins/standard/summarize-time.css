@@ -6,8 +6,6 @@
  * defined by the Mozilla Public License, v. 2.0.
  */
 
-td { vertical-align: top }
-
 table.zeroitems, table.realitems {
     margin-left: 2.0em;
     margin-top: 2px;
@@ -22,6 +20,9 @@ tr.section_total {
 
 td.subtotal {
     background: #B0C0D9;
+    text-align: right;
+    font-weight: bold;
+    width: 8em;
 }
 
 .zeroitems .bug_header { background: #d0e0f0 }
@@ -50,4 +51,15 @@ table.owner, table.number, table.zeroitems {
     border: 1px solid red;
     margin: 1em;
     padding: 0.5em;
+}
+
+th.bug_id, th.bug_status {
+    white-space: nowrap;
+    text-align: left;
+    padding-right: 2em;
+    width: 6em;
+}
+
+.time_info {
+    padding-right: 3em;
 }

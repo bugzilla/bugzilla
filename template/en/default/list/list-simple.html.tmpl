@@ -12,8 +12,8 @@
 
 [% DEFAULT title = "$terms.Bug List" %]
 
+<!DOCTYPE html>
 <html>
-
   <head>
     <title>[% title FILTER html %]</title>
     <base href="[% urlbase FILTER html %]">
@@ -28,5 +28,4 @@
       [% PROCESS list/table.html.tmpl %]
     [% END %]
   </body>
-
 </html>

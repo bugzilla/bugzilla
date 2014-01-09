@@ -7,7 +7,7 @@
   #%]
 
 [% title = BLOCK %]
-  Administer your installation ([% terms.Bugzilla %]
+  Administer your installation (Bugzilla
   [%+ constants.BUGZILLA_VERSION FILTER html %])
 [% END %]
 
@@ -83,7 +83,7 @@
       <dl>
         [% class = user.in_group('admin') ? "" : "forbidden" %]
         <dt id="custom_fields" class="[% class %]"><a href="editfields.cgi">Custom Fields</a></dt>
-        <dd class="[% class %]">[% terms.Bugzilla %] lets you define fields which are
+        <dd class="[% class %]">Bugzilla lets you define fields which are
         not implemented by default, based on your local and specific requirements.
         These fields can then be used as any other field, meaning that you can set
         them in [% terms.bugs %] and run any search involving them.<br>

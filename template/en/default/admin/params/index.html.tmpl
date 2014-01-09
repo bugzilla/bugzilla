@@ -6,33 +6,23 @@
   # defined by the Mozilla Public License, v. 2.0.
   #%]
 
-<p>
-  All parameters are displayed below, per section.
-  If you cannot find one from here, then the parameter does not exist.
-</p>
+<div id="params_index">
+  <p>
+    All parameters are displayed below, per section.
+    If you cannot find one from here, then the parameter does not exist.
+  </p>
 
-<div align="center">
-  <table>
-    <tr>
-      <th>Parameter</th>
-      <th>Section</th>
-    </tr>
-    [% FOREACH panel = panels %]
+  [% FOREACH panel = panels %]
+    <h3>[% panel.title FILTER html %]</h3>
+
+    <ul>
       [% FOREACH param = panel.param_list.sort('name') %]
-        <tr>
-          <td>
-            <a href="editparams.cgi?section=
-              [%- panel.name FILTER uri %]#[% param.name FILTER uri %]_desc">
-              [% param.name FILTER html %]</a>
-          </td>    
-          <td>
-            [% panel.title FILTER html %]
-          </td>
-        </tr>
+        <li>
+          <a href="editparams.cgi?section=
+                   [%- panel.name FILTER uri %]#[% param.name FILTER uri %]_desc">
+            [% param.name FILTER html %]</a>
+        </li>
       [% END %]
-      <tr>
-        <td>&nbsp;</td><td>&nbsp;</td>
-      </tr>
-    [% END %]
-  </table>
+    </ul>
+  [% END %]
 </div>

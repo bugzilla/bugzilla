@@ -56,12 +56,12 @@ YAHOO.util.Event.onDOMReady(onLoadActions);
   <div id="new_release">
     [% IF release.data %]
       [% IF release.deprecated %]
-        <p>[% terms.Bugzilla %] [%+ release.deprecated FILTER html %] is no longer
+        <p>Bugzilla [%+ release.deprecated FILTER html %] is no longer
         supported. You are highly encouraged to upgrade in order to keep your
         system secure.</p>
       [% END %]
 
-      <p>A new [% terms.Bugzilla %] version ([% release.data.latest_ver FILTER html %])
+      <p>A new Bugzilla version ([% release.data.latest_ver FILTER html %])
       is available at
       <a href="[% release.data.url FILTER html %]">[% release.data.url FILTER html %]</a>.<br>
       Release date: [% release.data.date FILTER html %]</p>
@@ -173,13 +173,13 @@ YAHOO.util.Event.onDOMReady(onLoadActions);
 
       <li>
         [% terms.Bugs %] reported in the
-        <a href="buglist.cgi?chfield=[Bug%20creation]&amp;chfieldfrom=24h">last 24 hours</a>
+        <a href="buglist.cgi?chfield=%5BBug%20creation%5D&amp;chfieldfrom=24h">last 24 hours</a>
         [% title = BLOCK %][% terms.Bugs %] reported in the last 24 hours[% END %]
-        <a href="buglist.cgi?chfield=[Bug%20creation]&amp;chfieldfrom=24h&amp;ctype=atom&amp;title=[% title FILTER uri %]"
+        <a href="buglist.cgi?chfield=%5BBug%20creation%5D&amp;chfieldfrom=24h&amp;ctype=atom&amp;title=[% title FILTER uri %]"
            class="rss">&nbsp;</a>
-        | <a href="buglist.cgi?chfield=[Bug%20creation]&amp;chfieldfrom=7d">last 7 days</a>
+        | <a href="buglist.cgi?chfield=%5BBug%20creation%5D&amp;chfieldfrom=7d">last 7 days</a>
         [% title = BLOCK %][% terms.Bugs %] reported in the last 7 days[% END %]
-        <a href="buglist.cgi?chfield=[Bug%20creation]&amp;chfieldfrom=7d&amp;ctype=atom&amp;title=[% title FILTER uri %]"
+        <a href="buglist.cgi?chfield=%5BBug%20creation%5D&amp;chfieldfrom=7d&amp;ctype=atom&amp;title=[% title FILTER uri %]"
            class="rss">&nbsp;</a>
       </li>
       <li>

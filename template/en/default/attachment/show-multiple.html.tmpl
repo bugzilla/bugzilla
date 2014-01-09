@@ -26,11 +26,9 @@
     <a href="attachment.cgi?bugid=[% bug.id FILTER html %]&amp;action=viewall">click here</a>.
   </div>
 [% END %]
-<br>
 
 [% FOREACH a = attachments %]
-
-  <div align="center">
+<div class="viewall_frame_container">
   <table class="viewall_desc">
     <tr>
       <th colspan="6" class="bz_attach_footer">Attachment #[% a.id %]</th>
@@ -91,10 +89,7 @@
       <a href="attachment.cgi?id=[% a.id %]">Download the attachment instead</a>.
     </b></p>
   [% END %]
-  </div>
-
-  <br><br>
-
+</div>
 [% END %]
 
 [% PROCESS global/footer.html.tmpl %]

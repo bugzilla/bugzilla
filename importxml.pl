@@ -54,6 +54,7 @@ use lib qw(. lib);
 use Bugzilla;
 use Bugzilla::Object;
 use Bugzilla::Bug;
+use Bugzilla::Attachment;
 use Bugzilla::Product;
 use Bugzilla::Version;
 use Bugzilla::Component;
@@ -1053,6 +1054,7 @@ sub process_bug {
 
     $dbh->do( $query, undef, @values );
     my $id = $dbh->bz_last_key( 'bugs', 'bug_id' );
+    my $bug_obj = Bugzilla::Bug->new($id);
 
     # We are almost certain to get some uninitialized warnings
     # Since this is just for debugging the query, let's shut them up
@@ -1135,31 +1137,41 @@ sub process_bug {
             $err .= "No attachment ID specified, dropping attachment\n";
             next;
         }
-        if (!$exporter->is_insider && $att->{'isprivate'}) {
-            $err .= "Exporter not in insidergroup and attachment marked private.\n";
+
+        my $attacher;
+        if ($att->{'attacher'}) {
+            $attacher = Bugzilla::User->new({name => $att->{'attacher'}, cache => 1});
+        }
+        my $new_attacher = $attacher || $exporter;
+
+        if ($att->{'isprivate'} && !$new_attacher->is_insider) {
+            my $who = $new_attacher->login;
+            $err .= "$who not in insidergroup and attachment marked private.\n";
             $err .= "   Marking attachment public\n";
             $att->{'isprivate'} = 0;
         }
 
-        my $attacher_id = $att->{'attacher'} ? login_to_id($att->{'attacher'}) : undef;
+        # We log in the user so that the attachment creator is set correctly.
+        Bugzilla->set_user($new_attacher);
 
-        $dbh->do("INSERT INTO attachments 
-                 (bug_id, creation_ts, modification_time, filename, description,
-                 mimetype, ispatch, isprivate, isobsolete, submitter_id) 
-                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-            undef, $id, $att->{'date'}, $att->{'date'}, $att->{'filename'},
-            $att->{'desc'}, $att->{'ctype'}, $att->{'ispatch'},
-            $att->{'isprivate'}, $att->{'isobsolete'}, $attacher_id || $exporterid);
-        my $att_id   = $dbh->bz_last_key( 'attachments', 'attach_id' );
-        my $att_data = $att->{'data'};
-        my $sth = $dbh->prepare("INSERT INTO attach_data (id, thedata) 
-                                 VALUES ($att_id, ?)" );
-        trick_taint($att_data);
-        $sth->bind_param( 1, $att_data, $dbh->BLOB_TYPE );
-        $sth->execute();
+        my $attachment = Bugzilla::Attachment->create(
+            { bug           => $bug_obj,
+              creation_ts   => $att->{date},
+              data          => $att->{data},
+              description   => $att->{desc},
+              filename      => $att->{filename},
+              ispatch       => $att->{ispatch},
+              isprivate     => $att->{isprivate},
+              isobsolete    => $att->{isobsolete},
+              mimetype      => $att->{ctype},
+            });
+        my $att_id = $attachment->id;
+
+        # We log out the attacher as the remaining steps are not on his behalf.
+        Bugzilla->logout_request;
 
         $comments .= "Imported an attachment (id=$att_id)\n";
-        if (!$attacher_id) {
+        if (!$attacher) {
             if ($att->{'attacher'}) {
                 $err .= "The original submitter of attachment $att_id was\n   ";
                 $err .= $att->{'attacher'} . ", but he doesn't have an account here.\n";

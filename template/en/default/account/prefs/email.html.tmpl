@@ -60,61 +60,36 @@ function SetCheckboxes(setting) {
     }
   }
 }
-
-document.write('<input type="button" value="Enable All Mail" onclick="SetCheckboxes(true); return false;">\n');
-document.write('<input type="button" value="Disable All Mail" onclick="SetCheckboxes(false); return false;">\n');
 // -->
 </script>
 
+<input type="button" value="Enable All Mail" onclick="SetCheckboxes(true); return false;">
+<input type="button" value="Disable All Mail" onclick="SetCheckboxes(false); return false;">
+
 <hr>
 
-<table>
-  <tr>
-    <td colspan="2">
-      <b>Global options:</b>
-    </td>
-  </tr>
+<h3>Global options</h3>
 
-  <tr>
-    <td width="150"></td>
-    <td>
-      [% prefname = "email-$constants.REL_ANY-$constants.EVT_FLAG_REQUESTED" %]
-      <input type="checkbox" name="[% prefname %]" id="[% prefname %]" 
-        value="1"
-        [% " checked"
-           IF user.mail_settings.${constants.REL_ANY}.${constants.EVT_FLAG_REQUESTED} %]>
-      <label for="[% prefname %]">Email me when someone asks me to set a flag</label>
-      <br>
-    </td>
-  </tr>
-  <tr>
-    <td width="150"></td>
-    <td>
-      [% prefname = "email-$constants.REL_ANY-$constants.EVT_REQUESTED_FLAG" %]
-      <input type="checkbox" name="[% prefname %]" id="[% prefname %]" 
-        value="1"
-        [% " checked"
-           IF user.mail_settings.${constants.REL_ANY}.${constants.EVT_REQUESTED_FLAG} %]>
-      <label for="[% prefname %]">Email me when someone sets a flag I asked for</label>
-      <br>
-    </td>
-  </tr>
+[% prefname = "email-$constants.REL_ANY-$constants.EVT_FLAG_REQUESTED" %]
+<input type="checkbox" name="[% prefname %]" id="[% prefname %]" value="1"
+       [%+ 'checked="checked"' IF user.mail_settings.${constants.REL_ANY}.${constants.EVT_FLAG_REQUESTED} %]>
+<label for="[% prefname %]">Email me when someone asks me to set a flag</label>
+<br>
+[% prefname = "email-$constants.REL_ANY-$constants.EVT_REQUESTED_FLAG" %]
+<input type="checkbox" name="[% prefname %]" id="[% prefname %]" value="1"
+       [%+ 'checked="checked"' IF user.mail_settings.${constants.REL_ANY}.${constants.EVT_REQUESTED_FLAG} %]>
+<label for="[% prefname %]">Email me when someone sets a flag I asked for</label>
+
 [% IF user.is_global_watcher %]
-  <tr>
-    <td width="150"></td>
-    <td>
-      You are watching all [% terms.bugs %]. To be removed from this role,
-      contact
-      <a href="mailto:[% Param("maintainer") %]">[% Param("maintainer") %]</a>.
-    </td>
-  </tr>
+  <p>
+    You are watching all [% terms.bugs %]. To be removed from this role, contact
+    <a href="mailto:[% Param("maintainer") %]">[% Param("maintainer") %]</a>.
+  </p>
 [% END %]
-</table>
 
 <hr>
-<b>Field/recipient specific options:</b>
-<br>
-<br>
+
+<h3>Field/recipient specific options</h3>
 
 [% events = [
     { id = constants.EVT_ADDED_REMOVED,
@@ -173,39 +148,33 @@ document.write('<input type="button" value="Disable All Mail" onclick="SetCheckb
 [% num_columns = relationships.size %]
 
 <table id="email_prefs">
-  <tr>
-    <td colspan="[% num_columns FILTER html %]" align="center" width="50%">
-      <b>When my relationship to this [% terms.bug %] is:</b>
-    </td>
-    <td rowspan="2" width="40%">
-      <b>I want to receive mail when:</b>
-    </td>
+  <tr class="column_header">
+    <th colspan="[% num_columns FILTER html %]">
+      When my relationship to this [% terms.bug %] is:
+    </th>
+    <th>I want to receive mail when:</th>
   </tr>
 
   <tr>
     [% FOREACH relationship = relationships %]
-      <th width="9%">
-        [% relationship.description FILTER html %]
-      </th>
+      <th class="role_header">[% relationship.description FILTER html %]</th>
     [% END %]
   </tr>
-  
+
   [% FOREACH event = events %]  
     [% count = loop.count() %]
     <tr class="bz_row_[% count % 2 == 1 ? "odd" : "even" %]">
       [% FOREACH relationship = relationships %]
-        <td align="center">
-          <input type="checkbox" 
-            name="email-[% relationship.id %]-[% event.id %]"
-            value="1"
-            [%# The combinations don't always make sense; disable a couple %]
-            [% IF event.id == constants.EVT_ADDED_REMOVED AND 
-                  no_added_removed.contains(relationship.id) 
-            %]
-               disabled
-            [% ELSIF user.mail_settings.${relationship.id}.${event.id} %]
-               checked
-            [% END %]>
+        <td class="center">
+          <input type="checkbox" value="1"
+                 name="email-[% relationship.id %]-[% event.id %]"
+                 [%# The combinations don't always make sense; disable a couple %]
+                 [% IF event.id == constants.EVT_ADDED_REMOVED
+                       AND no_added_removed.contains(relationship.id) %]
+                   disabled="disabled"
+                 [% ELSIF user.mail_settings.${relationship.id}.${event.id} %]
+                   checked="checked"
+                 [% END %]>
         </td>
       [% END %]
       <td>
@@ -213,62 +182,54 @@ document.write('<input type="button" value="Disable All Mail" onclick="SetCheckb
       </td>
     </tr>
   [% END %]
-  
-  <tr>
-    <td colspan="[% num_columns FILTER html %]" 
-        align="center" width="50%">
-      &nbsp;
-    </td>
-    <td width="40%">
-      <b>but not when (overrides above):</b>
-    </td>
+
+  <tr class="column_header">
+    <th colspan="[% num_columns FILTER html %]">&nbsp;</th>
+    <th>but not when (overrides above):</th>
   </tr>
 
   [% FOREACH event = neg_events %]  
     [% count = loop.count() %]
     <tr class="bz_row_[% count % 2 == 1 ? "odd" : "even" %]">
       [% FOREACH relationship = relationships %]
-        <td align="center">
-          <input type="checkbox" 
-            name="neg-email-[% relationship.id %]-[% event.id %]"
-            value="1"
-            [% " checked" IF NOT user.mail_settings.${relationship.id}.${event.id} %]>
+        <td class="center">
+          <input type="checkbox" value="1"
+                 name="neg-email-[% relationship.id %]-[% event.id %]"
+                 [%+ 'checked="checked"' IF NOT user.mail_settings.${relationship.id}.${event.id} %]>
         </td>
       [% END %]
-      <td>
-        [% event.description FILTER html %]
-      </td>
+      <td>[% event.description FILTER html %]</td>
     </tr>
   [% END %]
-  
 </table>
 
 <hr>
-<b>User Watching</b>
+
+<h3>User Watching</h3>
 
 <p>
 If you watch a user, it is as if you are standing in their shoes for the 
-purposes of getting email. Email is sent or not according to <u>your</u>
-preferences for <u>their</u> relationship to the [% terms.bug %] 
+purposes of getting email. Email is sent or not according to <em>your</em>
+preferences for <em>their</em> relationship to the [% terms.bug %]
 (e.g. Assignee).
 </p>
 
-<p>
 [% IF watchedusers.size %]
-You are watching everyone in the following list:
-  </p>
+  <p>You are watching everyone in the following list:</p>
   <p>
     <select id="watched_by_you" name="watched_by_you" multiple="multiple" size="5">
         [% FOREACH w = watchedusers %]
            <option value="[% w FILTER html %]">[% w FILTER html %]</option>
         [% END %]
-    </select> <br />
+    </select>
+    <br>
     <input type="checkbox" id="remove_watched_users" name="remove_watched_users">
     <label for="remove_watched_users">Remove selected users from my watch list</label>
+  </p>
 [% ELSE %]
-You are currently not watching any users.
+  <p>You are currently not watching any users.</p>
 [% END %]
-</p>
+
 
 <p id="new_watched_by_you">Add users to my watch list (comma separated list):
   [% INCLUDE global/userselect.html.tmpl
@@ -278,7 +239,7 @@ You are currently not watching any users.
      size => 60
      multiple => 5
   %]
-</p>            
+</p>
 
 <p id="watching_you">Users watching you:<br>
   [% IF watchers.size %]
@@ -290,7 +251,9 @@ You are currently not watching any users.
   [% END %]
 </p>
 
-<b>Ignore [% terms.Bugs %]</b>
+<hr>
+
+<h3>Ignore [% terms.Bugs %]</h3>
 
 <p>
   You can specify a list of [% terms.bugs %] from which you never want to get
@@ -324,6 +287,8 @@ You are currently not watching any users.
   </p>
 [% END %]
 
-<p>Add [% terms.bugs %]:<br>
+<p>
+  Add [% terms.bugs %]:<br>
   <input type="text" id="add_ignored_bugs" 
-         name="add_ignored_bugs" size="60"></p>
+         name="add_ignored_bugs" size="60">
+</p>

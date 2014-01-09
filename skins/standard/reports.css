@@ -66,13 +66,20 @@
   background-color: #cfffdf; /* light green */
 }
 
-#tabular_report {
+.tabular_report_container {
+  /* Force tables to be horizontally centered */
+  margin-left: auto;
+  margin-right: auto;
+  text-align: center;
+}
+
+.tabular_report {
   border: 1px dotted black;
   border-collapse: collapse;
   text-align: center;
 }
 
-#tabular_report th, #tabular_report td {
+.tabular_report th, .tabular_report td {
   border: 1px dotted;
   padding: 0.2em;
 }

@@ -25,8 +25,6 @@
   #                        field_descs hash will be used instead of "content."
   #                        See fieldvalues/select-field for an example of use.
   #                        This content WILL be HTML-filtered in this case.
-  #     align: left/center/right. Controls the horizontal alignment of the
-  #            text in the column.
   #     allow_html_content: if defined, then this column allows some html content
   #                         and so it will be only partially filtered.
   #     yesno_field: Turn the data from 0/!0 into Yes/No
@@ -89,7 +87,6 @@
       [% contentlink = c.contentlink
          content = c.content
          content_use_field = c.content_use_field
-         align = c.align
          class = c.class
          allow_html_content = c.allow_html_content
          yesno_field = c.yesno_field
@@ -121,8 +118,7 @@
           [% END %]
       [% END %]
 
-      <td [% IF align %] align="[% align FILTER html %]" [% END %]
-          [% IF class %] class="[% class FILTER html %]" [% END %]>
+      <td [% IF class %] class="[% class FILTER html %]"[% END %]>
 
         [% IF contentlink %]
           [% FOREACH m = contentlink.match('%%(.+?)%%', 1) %]
@@ -155,7 +151,7 @@
 [% END %]
 
 [% IF data.size == 0 %]
-  <tr><td colspan="[% columns.size %]" align="center"><i>&lt;none&gt;</i></td></tr>
+  <tr><td colspan="[% columns.size %]" class="center"><i>&lt;none&gt;</i></td></tr>
 [% END %]
 
 

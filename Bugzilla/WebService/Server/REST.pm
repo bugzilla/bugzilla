@@ -504,11 +504,21 @@ C<Bugzilla::WebService::Server::XMLRPC|XML-RPC> interface.
 =head1 CONNECTING
 
 The endpoint for the REST interface is the C<rest.cgi> script in
-your Bugzilla installation. If using Apache and mod_rewrite is installed
-and enabled, you can also use /rest/ as your endpoint. For example, if your
-Bugzilla is at C<bugzilla.yourdomain.com>, then your REST client would
-access the API via: C<http://bugzilla.yourdomain.com/rest/bug/35> which
-looks cleaner.
+your Bugzilla installation. For example, if your Bugzilla is at
+C<bugzilla.yourdomain.com>, to access the API and load a bug,
+you would use C<http://bugzilla.yourdomain.com/rest.cgi/bug/35>.
+
+If using Apache and mod_rewrite is installed and enabled, you can
+simplify the endpoint by changing /rest.cgi/ to something like /rest/
+or something similar. So the same example from above would be:
+C<http://bugzilla.yourdomain.com/rest/bug/35> which is simpler to remember.
+
+Add this to your .htaccess file:
+
+  <IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteRule ^rest/(.*)$ rest.cgi/$1 [NE]
+  </IfModule>
 
 =head1 BROWSING
 

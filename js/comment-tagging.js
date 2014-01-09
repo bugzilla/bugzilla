@@ -197,7 +197,7 @@ YAHOO.bugzilla.commentTagging = {
                     YAHOO.util.Event.stopEvent(evt);
                 }, tag);
                 li.appendChild(document.createTextNode(' (' + this.nos_by_tag[tag].length + ')'));
-                a.innerHTML = tag;
+                a.innerHTML = YAHOO.lang.escapeHTML(tag);
             }
             while (container.hasChildNodes()) {
                 container.removeChild(container.lastChild);

@@ -1,0 +1,45 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% IF Param('edit_comments_group') && user.in_group(Param('edit_comments_group')) %]
+  <span id="edit_comment_link_[% comment.count FILTER html %]">
+    [<a href="javascript:void(0);" id="edit_comment_edit_link_[% comment.count FILTER html %]"
+        onclick="editComment('[% comment.count FILTER js %]','[% comment.id FILTER js %]');">edit</a>
+    [% IF comment.edit_count %]
+      | <a href="page.cgi?id=editcomments.html&bug_id=[% bug.id FILTER uri %]&comment_id=[% comment.id FILTER uri %]">history</a>
+      ([% comment.edit_count FILTER html %])
+    [% END %]]
+  </span>
+  <div id="edit_comment_[% comment.count FILTER html %]">
+    <div class="bz_comment_text bz_default_hidden" id="edit_comment_loading_[% comment.count FILTER html %]">Loading...</div>
+    [% INCLUDE global/textarea.html.tmpl
+       name      = "edit_comment_textarea_${comment.id}"
+       id        = "edit_comment_textarea_${comment.count}"
+       minrows   = 10
+       maxrows   = 25
+       classes   = "edit_comment_textarea bz_default_hidden"
+       cols      = constants.COMMENT_COLS
+       disabled  = 1
+    %]
+  </div>
+  <script>
+    YAHOO.util.Event.onDOMReady(function() {
+      // Insert edit links near other comment actions such as reply
+      var comment_div = YAHOO.util.Dom.get('c[% comment.count FILTER js %]');
+      var bz_comment_actions = YAHOO.util.Dom.getElementsByClassName('bz_comment_actions', 'span', comment_div)[0];
+      var edit_comment_link = YAHOO.util.Dom.get('edit_comment_link_[% comment.count FILTER js %]');
+      bz_comment_actions.insertBefore(edit_comment_link, bz_comment_actions.firstChild);
+
+      // Insert blank textarea right below formatted comment
+      var comment_div = YAHOO.util.Dom.get('c[% comment.count FILTER js %]');
+      var comment_pre = YAHOO.util.Dom.get('comment_text_[% comment.count FILTER js %]');
+      var edit_comment_div = YAHOO.util.Dom.get('edit_comment_[% comment.count FILTER js %]');
+      comment_div.insertBefore(edit_comment_div, comment_pre);
+    });
+  </script>
+[% END %]

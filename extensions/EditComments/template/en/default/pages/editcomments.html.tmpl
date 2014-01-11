@@ -1,0 +1,122 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% PROCESS global/variables.none.tmpl %]
+
+[% PROCESS global/header.html.tmpl
+  title = "Comment changes made to $terms.bug $bug.id, comment $comment.id"
+  header = "Activity log for $terms.bug $bug.id, comment $comment.id"
+ %]
+
+<script type="text/javascript">
+/* The functions below expand and collapse comments  */
+function toggle_comment_display(link, comment_id) {
+    if (YAHOO.util.Dom.hasClass('comment_text_' + comment_id, 'collapsed')) {
+        expand_comment(link, comment);
+    }
+    else {
+        collapse_comment(link, comment);
+    }
+}
+
+function toggle_all_comments(action) {
+    var num_comments = [% comment.activity.size FILTER html %];
+
+    // If for some given ID the comment doesn't exist, this doesn't mean
+    // there are no more comments, but that the comment is private and
+    // the user is not allowed to view it.
+
+    for (var id = 0; id < num_comments; id++) {
+        var comment = document.getElementById('comment_text_' + id);
+        if (!comment) {
+            continue;
+        }
+
+        var link = document.getElementById('comment_link_' + id);
+        if (action == 'collapse') {
+            collapse_comment(link, comment);
+        }
+        else {
+            expand_comment(link, comment);
+        }
+    }
+}
+
+function collapse_comment(link, comment) {
+    link.innerHTML = "[+]";
+    link.title = "Expand the comment.";
+    YAHOO.util.Dom.addClass(comment, 'collapsed');
+}
+
+function expand_comment(link, comment) {
+    link.innerHTML = "[-]";
+    link.title = "Collapse the comment";
+    YAHOO.util.Dom.removeClass(comment, 'collapsed');
+}
+</script>
+
+<p>
+  [% "Back to $terms.bug $bug.id" FILTER bug_link(bug.id) FILTER none %]
+</p>
+
+<p>
+  <strong>Note</strong>: The actual edited comment in the [% terms.bug %] view page will always show the original commentor's name and original timestamp.
+</p>
+
+<p>
+  <a href="#" onclick="toggle_all_comments('collapse'); return false;">Collapse All Changes</a> -
+  <a href="#" onclick="toggle_all_comments('expand'); return false;">Expand All Changes</a>
+</p>
+
+[% count = 0 %]
+[% FOREACH a = comment.activity %]
+  <div class="bz_comment">
+    <div class="bz_comment_head">
+      <i>
+        [% IF a.original %]
+          Original comment by [% (a.author.name || "Need Real Name") FILTER html %]
+          <span class="vcard">
+            (<a class="fn email" href="mailto:[% a.author.email FILTER html %]">
+            [%- a.author.email FILTER html -%]</a>)
+          </span>
+          on [%+ a.time FILTER time %]
+        [% ELSE %]
+          Revision by [% (a.author.name || "Need Real Name") FILTER html %]
+          <span class="vcard">
+            (<a class="fn email" href="mailto:[% a.author.email FILTER html %]">
+            [%- a.author.email FILTER html -%]</a>)
+          </span>
+          on [%+ a.time FILTER time %]
+        [% END %]
+      </i>
+      <a href="#" id="comment_link_[% count FILTER html %]"
+         onclick="toggle_comment_display(this, '[% count FILTER html FILTER js %]'); return false;"
+         title="Collapse the comment.">[-]</a>
+    </div>
+    [% IF a.original %]
+      [% wrapped_comment = a.body FILTER wrap_comment %]
+    [% ELSE %]
+      [% wrapped_comment = a.new FILTER wrap_comment %]
+    [% END %]
+[%# Don't indent the <pre> block, since then the spaces are displayed in the
+  # generated HTML %]
+<pre class="bz_comment_text" id="comment_text_[% count FILTER html %]">
+  [%- wrapped_comment FILTER quoteUrls(bug) -%]
+</pre>
+  </div>
+  [% count = count + 1 %]
+[% END %]
+
+[% IF comment.activity.size > 0 %]
+  <p>
+    [% "Back to $terms.bug $bug.id" FILTER bug_link(bug.id) FILTER none %]
+  </p>
+[% END %]
+
+[% PROCESS global/footer.html.tmpl %]
+

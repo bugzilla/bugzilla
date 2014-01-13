@@ -66,7 +66,8 @@ sub _reviewers_objs {
         my %user_map = map { $_->id => $_ } @$users;
         my @reviewers = map { $user_map{$_} } @$user_ids;
         if (!$include_disabled) {
-            @reviewers = grep { $_->name !~ UNAVAILABLE_RE } @reviewers;
+            @reviewers = grep { $_->is_enabled
+                                && $_->name !~ UNAVAILABLE_RE } @reviewers;
         }
         $object->{reviewers} = \@reviewers;
     }

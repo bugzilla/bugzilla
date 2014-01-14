@@ -496,7 +496,8 @@ sub update {
     $self->audit_log(\%changes) if $self->AUDIT_UPDATES;
 
     $dbh->bz_commit_transaction();
-    Bugzilla->memcached->clear({ table => $table, id => $self->id });
+    Bugzilla->memcached->clear({ table => $table, id => $self->id })
+        if $self->USE_MEMCACHED && @values;
     $self->_object_cache_remove({ id => $self->id });
     $self->_object_cache_remove({ name => $self->name }) if $self->name;
 
@@ -517,7 +518,8 @@ sub remove_from_db {
     $self->audit_log(AUDIT_REMOVE) if $self->AUDIT_REMOVES;
     $dbh->do("DELETE FROM $table WHERE $id_field = ?", undef, $self->id);
     $dbh->bz_commit_transaction();
-    Bugzilla->memcached->clear({ table => $table, id => $self->id });
+    Bugzilla->memcached->clear({ table => $table, id => $self->id })
+        if $self->USE_MEMCACHED;
     $self->_object_cache_remove({ id => $self->id });
     $self->_object_cache_remove({ name => $self->name }) if $self->name;
     undef $self;

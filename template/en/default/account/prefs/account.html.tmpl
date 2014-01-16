@@ -38,14 +38,14 @@
       <td>
         <input type="password" name="new_password1">
       </td>
-    </tr>              
+    </tr>
 
     <tr>
       <th>Confirm new password:</th>
       <td>
         <input type="password" name="new_password2">
       </td>
-    </tr>              
+    </tr>
   [% END %]
 
   <tr>
@@ -78,9 +78,16 @@
       [% END %]
     [% ELSE %]
       <tr>
-        <th>New email address:</th>
+        <th>
+          [% IF Param('emailsuffix') %]
+            New login:
+          [% ELSE %]
+            New email address:
+          [% END %]
+        </th>
         <td>
-          <input size="35" name="new_login_name">
+          <input size="35" id="new_login_name" name="new_login_name"
+                 [%- ' type="email"' UNLESS Param('emailsuffix') %]>
         </td>
       </tr>
     [% END %]

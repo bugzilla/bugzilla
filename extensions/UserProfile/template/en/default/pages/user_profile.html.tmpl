@@ -53,7 +53,12 @@
     [% END %]
   </td>
   <th>Name</th>
-  <td colspan="2">[% target.name FILTER html %]</td>
+  <td colspan="2">
+    [% target.name FILTER html %]
+    [% IF target.id == user.id %]
+      <span style="font-size: x-small;">(<a href="userprefs.cgi?tab=account">change</a>)</span>
+    [% END %]
+  </td>
 </tr>
 
 [% IF user.id %]

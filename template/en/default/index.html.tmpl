@@ -17,41 +17,6 @@
    style_urls = [ 'skins/standard/index.css' ]
 %]
 
-
-<script type="text/javascript">
-<!--
-function onLoadActions() {
-  quicksearchHelpText('quicksearch_main', 'show');
-  document.getElementById('quicksearch_top').focus();
-}
-var quicksearch_message = "Enter [% terms.abug %] # or some search terms";
-
-function checkQuicksearch( form ) {
-  if (form.quicksearch.value == '' || form.quicksearch.value == quicksearch_message ) { 
-    alert('Please enter one or more search terms first.');
-    return false; 
-  }
-  return true;         
-}
-
-function quicksearchHelpText(el_id, action){
-  var el = document.getElementById(el_id);
-  if ( action == "show") {
-    if( el.value == "" ) {
-      el.value = quicksearch_message
-      YAHOO.util.Dom.addClass(el, "quicksearch_help_text");
-    }
-  } else {
-    if( el.value == quicksearch_message ) {
-      el.value = "";
-      YAHOO.util.Dom.removeClass(el, "quicksearch_help_text");
-    }
-  }
-}
-YAHOO.util.Event.onDOMReady(onLoadActions);
-//-->
-</script>
-
 [% IF release %]
   <div id="new_release">
     [% IF release.data %]
@@ -128,11 +93,10 @@ YAHOO.util.Event.onDOMReady(onLoadActions);
   </div>
 
   <div>
-    <form id="quicksearchForm" name="quicksearchForm" action="buglist.cgi"
-          onsubmit="return checkQuicksearch(this);">
-      <input id="quicksearch_main" type="text" name="quicksearch" title="Quick Search"
-             onfocus="quicksearchHelpText(this.id, 'hide');"
-             onblur="quicksearchHelpText(this.id, 'show');">
+    <form id="quicksearchForm" name="quicksearchForm" action="buglist.cgi">
+      <input id="quicksearch_main" name="quicksearch" title="Quick Search"
+             placeholder="Enter [% terms.abug %] # or some search terms"
+             autofocus required>
       <input id="find" type="submit" value="Quick Search">
       <a href="page.cgi?id=quicksearch.html" title="Quick Search help">[?]</a>
     </form>

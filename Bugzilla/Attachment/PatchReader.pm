@@ -10,12 +10,16 @@ package Bugzilla::Attachment::PatchReader;
 use 5.10.1;
 use strict;
 
+use Config;
+use IO::Select;
 use IPC::Open3;
 use Symbol 'gensym';
 
 use Bugzilla::Error;
 use Bugzilla::Attachment;
 use Bugzilla::Util;
+
+use constant PERLIO_IS_ENABLED => $Config{useperlio};
 
 sub process_diff {
     my ($attachment, $format, $context) = @_;
@@ -30,8 +34,7 @@ sub process_diff {
         require PatchReader::DiffPrinter::raw;
         $last_reader->sends_data_to(new PatchReader::DiffPrinter::raw());
         # Actually print out the patch.
-        print $cgi->header(-type => 'text/plain',
-                           -expires => '+3M');
+        print $cgi->header(-type => 'text/plain');
         disable_utf8();
         $reader->iterate_string('Attachment ' . $attachment->id, $attachment->data);
     }
@@ -102,9 +105,12 @@ sub process_interdiff {
 
     # Send through interdiff, send output directly to template.
     # Must hack path so that interdiff will work.
-    $ENV{'PATH'} = $lc->{diffpath};
+    local $ENV{'PATH'} = $lc->{diffpath};
 
-    my ($pid, $interdiff_stdout, $interdiff_stderr);
+    # Open the interdiff pipe, reading from both STDOUT and STDERR
+    # To avoid deadlocks, we have to read the entire output from all handles
+    my ($stdout, $stderr) = ('', '');
+    my ($pid, $interdiff_stdout, $interdiff_stderr, $use_select);
     if ($ENV{MOD_PERL}) {
         require Apache2::RequestUtil;
         require Apache2::SubProcess;
@@ -112,37 +118,73 @@ sub process_interdiff {
         (undef, $interdiff_stdout, $interdiff_stderr) = $request->spawn_proc_prog(
             $lc->{interdiffbin}, [$old_filename, $new_filename]
         );
+        $use_select = !PERLIO_IS_ENABLED;
     } else {
         $interdiff_stderr = gensym;
-        my $pid = open3(gensym, $interdiff_stdout, $interdiff_stderr,
+        $pid = open3(gensym, $interdiff_stdout, $interdiff_stderr,
                         $lc->{interdiffbin}, $old_filename, $new_filename);
+        $use_select = 1;
     }
-    binmode $interdiff_stdout;
 
-    # Check for errors
-    {
-        local $/ = undef;
-        my $error = <$interdiff_stderr>;
-        if ($error) {
-            warn($error);
-            $warning = 'interdiff3';
+    if ($format ne 'raw' && Bugzilla->params->{'utf8'}) {
+        binmode $interdiff_stdout, ':utf8';
+        binmode $interdiff_stderr, ':utf8';
+    } else {
+        binmode $interdiff_stdout;
+        binmode $interdiff_stderr;
+    }
+
+    if ($use_select) {
+        my $select = IO::Select->new();
+        $select->add($interdiff_stdout, $interdiff_stderr);
+        while (my @handles = $select->can_read) {
+            foreach my $handle (@handles) {
+                my $line = <$handle>;
+                if (!defined $line) {
+                    $select->remove($handle);
+                    next;
+                }
+                if ($handle == $interdiff_stdout) {
+                    $stdout .= $line;
+                } else {
+                    $stderr .= $line;
+                }
+            }
         }
+        waitpid($pid, 0) if $pid;
+
+    } else {
+        local $/ = undef;
+        $stdout = <$interdiff_stdout>;
+        $stdout //= '';
+        $stderr = <$interdiff_stderr>;
+        $stderr //= '';
+    }
+
+    close($interdiff_stdout),
+    close($interdiff_stderr);
+
+    # Tidy up
+    unlink($old_filename) or warn "Could not unlink $old_filename: $!";
+    unlink($new_filename) or warn "Could not unlink $new_filename: $!";
+
+    # Any output on STDERR means interdiff failed to full process the patches.
+    # Interdiff's error messages are generic and not useful to end users, so we
+    # show a generic failure message.
+    if ($stderr) {
+        warn($stderr);
+        $warning = 'interdiff3';
     }
 
     my ($reader, $last_reader) = setup_patch_readers("", $context);
-
     if ($format eq 'raw') {
         require PatchReader::DiffPrinter::raw;
         $last_reader->sends_data_to(new PatchReader::DiffPrinter::raw());
         # Actually print out the patch.
-        print $cgi->header(-type => 'text/plain',
-                           -expires => '+3M');
+        print $cgi->header(-type => 'text/plain');
         disable_utf8();
     }
     else {
-        # In case the HTML page is displayed with the UTF-8 encoding.
-        binmode $interdiff_stdout, ':utf8' if Bugzilla->params->{'utf8'};
-
         $vars->{'warning'} = $warning if $warning;
         $vars->{'bugid'} = $new_attachment->bug_id;
         $vars->{'oldid'} = $old_attachment->id;
@@ -152,14 +194,8 @@ sub process_interdiff {
 
         setup_template_patch_reader($last_reader, $format, $context, $vars);
     }
-    $reader->iterate_fh($interdiff_stdout, 'interdiff #' . $old_attachment->id .
-                        ' #' . $new_attachment->id);
-    waitpid($pid, 0) if $pid;
-    $ENV{'PATH'} = '';
-
-    # Delete temporary files.
-    unlink($old_filename) or warn "Could not unlink $old_filename: $!";
-    unlink($new_filename) or warn "Could not unlink $new_filename: $!";
+    $reader->iterate_string('interdiff #' . $old_attachment->id .
+                            ' #' . $new_attachment->id, $stdout);
 }
 
 ######################

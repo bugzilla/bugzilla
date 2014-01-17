@@ -336,7 +336,8 @@ use constant OPERATOR_FIELD_OVERRIDE => {
         _non_changed => \&_product_nonchanged,
     },
     tag => MULTI_SELECT_OVERRIDE,
-    
+    comment_tag => MULTI_SELECT_OVERRIDE,
+
     # Timetracking Fields
     deadline => { _non_changed => \&_deadline },
     percentage_complete => {
@@ -3032,6 +3033,13 @@ sub _multiselect_table {
         $args->{full_field} = $dbh->sql_string_concat("flagtypes.name",
                                                       "flags.status");
         return "flags INNER JOIN flagtypes ON flags.type_id = flagtypes.id";
+    }
+    elsif ($field eq 'comment_tag') {
+        $args->{_extra_where} = " AND longdescs.isprivate = 0"
+            if !$self->_user->is_insider;
+        $args->{full_field} = 'longdescs_tags.tag';
+        return "longdescs INNER JOIN longdescs_tags".
+               " ON longdescs.comment_id = longdescs_tags.comment_id";
     }
     my $table = "bug_$field";
     $args->{full_field} = "bug_$field.value";

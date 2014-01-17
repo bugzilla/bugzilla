@@ -1,11 +1,11 @@
 .htaccess
 /lib/*
 /template/en/custom
-/docs/bugzilla.ent
-/docs/en/xml/bugzilla.ent
-/docs/en/txt
+/docs/definitions.rst
 /docs/en/html
-/docs/en/pdf
+/docs/en/txt
+/docs/en/latex
+/docs/en/doctrees
 /skins/custom
 /graphs
 /data

@@ -6,6 +6,8 @@
  * defined by the Mozilla Public License, v. 2.0.
  */
 
+/* This style file is used by the API documentation */
+
 body {
   background: white;
   color: #111;
@@ -92,4 +94,4 @@ pre.code, pre.programlisting, pre.screen {
   background-color: #eee;
 }
 
-.pod_desc_table 
+.pod_desc_table

@@ -139,7 +139,7 @@ END_HTML
 
     $converter->contents_page_start($contents_start);
     $converter->contents_page_end("</body></html>");
-    $converter->add_css('./../../../../style.css');
+    $converter->add_css('./../../../style.css');
     $converter->javascript_flurry(0);
     $converter->css_flurry(0);
     mkdir("html");

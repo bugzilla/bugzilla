@@ -38,14 +38,16 @@ Apache
 
     Useful Directives when configuring Bugzilla
 
-    ```AddHandler <http://httpd.apache.org/docs/2.0/mod/mod_mime.html#addhandler>`_``
+    `AddHandler <http://httpd.apache.org/docs/2.0/mod/mod_mime.html#addhandler>`_
         Tell Apache that it's OK to run CGI scripts.
-    ```AllowOverride <http://httpd.apache.org/docs-2.0/mod/core.html#allowoverride>`_``, ```Options <http://httpd.apache.org/docs-2.0/mod/core.html#options>`_``
+
+    `AllowOverride <http://httpd.apache.org/docs-2.0/mod/core.html#allowoverride>`_, `Options <http://httpd.apache.org/docs-2.0/mod/core.html#options>`_
         These directives are used to tell Apache many things about
         the directory they apply to. For Bugzilla's purposes, we need
         them to allow script execution and :file:`.htaccess`
         overrides.
-    ```DirectoryIndex <http://httpd.apache.org/docs-2.0/mod/mod_dir.html#directoryindex>`_``
+
+    `DirectoryIndex <http://httpd.apache.org/docs-2.0/mod/mod_dir.html#directoryindex>`_
         Used to tell Apache what files are indexes. If you can
         not add :file:`index.cgi` to the list of valid files,
         you'll need to set ``$index_html`` to
@@ -53,7 +55,8 @@ Apache
         :command:`./checksetup.pl` will create an
         :file:`index.html` that redirects to
         :file:`index.cgi`.
-    ```ScriptInterpreterSource <http://httpd.apache.org/docs-2.0/mod/core.html#scriptinterpretersource>`_``
+
+    `ScriptInterpreterSource <http://httpd.apache.org/docs-2.0/mod/core.html#scriptinterpretersource>`_
         Used when running Apache on windows so the shebang line
         doesn't have to be changed in every Bugzilla script.
 

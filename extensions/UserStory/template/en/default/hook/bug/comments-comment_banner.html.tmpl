@@ -10,11 +10,30 @@
 [% can_edit_story = bug.check_can_change_field('cf_user_story', 0, 1) %]
 
 <div class="user_story">
+  <script type="text/javascript">
+    function userStoryComment() {
+        var commenttext = "(Commenting on User Story)\n";
+        var text_elem = document.getElementById('user_story');
+        var commenttext = commenttext + wrapReplyText(text_elem.value);
+        var textarea = document.getElementById('comment');
+        if (textarea.value != commenttext) {
+            textarea.value += commenttext;
+        }
+        textarea.focus();
+    }
+  </script>
   <div id="user_story_header">
     <b>User Story</b>
     [% IF can_edit_story %]
       <span id="user_story_edit">
         (<a href="javascript:void(0)" id="user_story_edit_action" >edit</a>)
+      </span>
+    [% END %]
+    [% IF bug.cf_user_story != "" %]
+      <span id="user_story_comment">
+        [<a class="bz_reply_link" href="#user_story_comment"
+           onclick="userStoryComment(); return false;"
+         >comment</a>]
       </span>
     [% END %]
   </div>

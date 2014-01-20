@@ -5,6 +5,21 @@
  * This Source Code Form is "Incompatible With Secondary Licenses", as
  * defined by the Mozilla Public License, v. 2.0. */
 
+.user_story {
+    width: 50em;
+}
+
+.skin-Mozilla .user_story {
+    width: 65em;
+}
+
+textarea#user_story {
+    width: 100%;
+}
+
+#user_story_comment {
+    float: right;
+}
 
 #user_story_readonly {
     border: 1px solid black;

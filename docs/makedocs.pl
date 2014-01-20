@@ -170,7 +170,9 @@ foreach my $lang (@langs) {
 
     make_pod() if $pod_simple;
 
+    next if grep { $_ eq '--pod-only' } @ARGV;
+
     MakeDocs('HTML', 'make html');
     MakeDocs('TXT', 'make text');
-    MakeDocs('PDF', 'make latexpdf');
+    MakeDocs('PDF', 'make latexpdf') if grep { $_ eq '--with-pdf' } @ARGV;
 }

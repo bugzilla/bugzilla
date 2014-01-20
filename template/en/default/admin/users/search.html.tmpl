@@ -18,7 +18,6 @@
 [% PROCESS global/header.html.tmpl
   title = "Search users"
   style_urls = ['skins/standard/editusers.css']
-  onload = "document.forms['f'].matchstr.focus()"
   doc_section = "useradmin.html#user-account-search"
 %]
 
@@ -35,7 +34,7 @@
   <option value="userid">user id</option>
 </select>
 <label for="matchstr">matching</label>
-<input size="32" name="matchstr" id="matchstr">
+<input size="32" name="matchstr" id="matchstr" autofocus>
 <select name="matchtype">
   <option value="substr" selected="selected">case-insensitive substring</option>
   <option value="regexp">case-insensitive regexp</option>

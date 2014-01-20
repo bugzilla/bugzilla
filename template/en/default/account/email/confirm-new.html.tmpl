@@ -15,7 +15,7 @@
 [% title = BLOCK %]Create a new user account for '[% email FILTER html %]'[% END %]
 [% PROCESS "global/header.html.tmpl"
            title = title
-           onload = "document.forms['confirm_account_form'].realname.focus();" %]
+%]
 
 <p>
   To create your account, you must enter a password in the form below.
@@ -33,7 +33,7 @@
     </tr>
     <tr>
       <th><small><i>(OPTIONAL)</i></small> <label for="realname">Real Name</label>:</th>
-      <td><input type="text" id="realname" name="realname" value=""></td>
+      <td><input id="realname" name="realname" autofocus></td>
     </tr>
     <tr>
       <th><label for="passwd1">Type your password</label>:</th>

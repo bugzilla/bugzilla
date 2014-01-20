@@ -18,7 +18,6 @@
   title = title
   subheader = subheader
   style_urls = ['skins/standard/admin.css']
-  onload = "document.forms['f'].milestone.focus()"
 %]
 
 <form name="f" method="post" action="editmilestones.cgi">
@@ -26,12 +25,11 @@
     <tr>
       <th><label for="milestone">Milestone:</label></th>
       <td><input id="milestone" size="64" maxlength="64" name="milestone"
-                 value=""></td>
+                 autofocus></td>
     </tr>
     <tr>
       <th><label for="sortkey">Sortkey:</label></th>
-      <td><input id="sortkey" size="20" maxlength="20" name="sortkey"
-                 value=""></td>
+      <td><input id="sortkey" size="20" maxlength="20" name="sortkey"></td>
     </tr>
   </table>
   <input type="submit" id="create" value="Add">

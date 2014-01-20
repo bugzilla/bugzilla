@@ -15,8 +15,7 @@
 [% END %]
 
 [% PROCESS global/header.html.tmpl
-  title = "Log in to $terms.Bugzilla",
-  onload = "document.forms['login'].Bugzilla_login.focus()"
+  title = "Log in to $terms.Bugzilla"
 %]
 
 [% USE Bugzilla %]
@@ -40,7 +39,7 @@
       </th>
       <td>
         <input size="35" id="Bugzilla_login" name="Bugzilla_login"
-               [%- ' type="email"' UNLESS Param('emailsuffix') %]>
+               [%- ' type="email"' UNLESS Param('emailsuffix') %] autofocus>
         [% Param('emailsuffix') FILTER html %]
       </td>
     </tr>

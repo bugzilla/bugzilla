@@ -22,7 +22,8 @@
   <td>
     [% IF editusers %]
       <input size="64" maxlength="255" id="login" name="login"
-             value="[% otheruser.login FILTER html %]">
+             value="[% otheruser.login FILTER html %]"
+             [%- " autofocus" UNLESS editform %]>
       [% IF editform %]
         [% IF !otheruser.in_group('bz_sudo_protect') %]
           <br>

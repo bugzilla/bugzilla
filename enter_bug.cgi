@@ -75,8 +75,6 @@ if ($product_name eq '') {
             $vars->{'classifications'} = [map {$_->{'object'}} @classifications];
 
             $vars->{'target'} = "enter_bug.cgi";
-            $vars->{'format'} = $cgi->param('format');
-            $vars->{'cloned_bug_id'} = $cgi->param('cloned_bug_id');
 
             print $cgi->header();
             $template->process("global/choose-classification.html.tmpl", $vars)
@@ -107,8 +105,6 @@ if ($product_name eq '') {
     elsif (scalar(@enterable_products) > 1) {
         $vars->{'classifications'} = \@classifications;
         $vars->{'target'} = "enter_bug.cgi";
-        $vars->{'format'} = $cgi->param('format');
-        $vars->{'cloned_bug_id'} = $cgi->param('cloned_bug_id');
 
         print $cgi->header();
         $template->process("global/choose-product.html.tmpl", $vars)

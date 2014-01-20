@@ -6,7 +6,11 @@
   # defined by the Mozilla Public License, v. 2.0.
   #%]
 
-[% IF Param('edit_comments_group') && user.in_group(Param('edit_comments_group')) %]
+[% IF Param('edit_comments_group')
+   && user.in_group(Param('edit_comments_group'))
+   && (comment.type == 0 || comment.type == 5)
+   && comment.body != ''
+%]
   <span id="edit_comment_link_[% comment.count FILTER html %]">
     [<a href="javascript:void(0);" id="edit_comment_edit_link_[% comment.count FILTER html %]"
         onclick="editComment('[% comment.count FILTER js %]','[% comment.id FILTER js %]');">edit</a>

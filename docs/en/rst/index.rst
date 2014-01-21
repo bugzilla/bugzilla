@@ -6,8 +6,6 @@
 Bugzilla Documentation
 ======================
 
-Contents:
-
 .. toctree::
    :maxdepth: 3
    :numbered:
@@ -23,10 +21,3 @@ Contents:
    modules
    gfdl
    glossary
-
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`search`

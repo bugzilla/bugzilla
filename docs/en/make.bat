@@ -187,4 +187,11 @@ results in %BUILDDIR%/doctest/output.txt.
 	goto end
 )
 
+if "%1" == "pdf" (
+        %SPHINXBUILD% -b pdf -t enable_rst2pdf %ALLSPHINXOPTS% %BUILDDIR%/pdf
+        echo.
+        echo.Build finished. The PDF file is in %BUILDDIR%/pdf
+        goto end
+)
+
 :end

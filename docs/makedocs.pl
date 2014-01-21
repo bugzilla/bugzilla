@@ -50,6 +50,9 @@ use Bugzilla::Install::Requirements
     qw(REQUIRED_MODULES OPTIONAL_MODULES);
 use Bugzilla::Constants qw(DB_MODULE BUGZILLA_VERSION);
 
+use File::Path qw(rmtree);
+use File::Which qw(which);
+
 ###############################################################################
 # Generate minimum version list
 ###############################################################################
@@ -174,5 +177,17 @@ foreach my $lang (@langs) {
 
     MakeDocs('HTML', 'make html');
     MakeDocs('TXT', 'make text');
-    MakeDocs('PDF', 'make latexpdf') if grep { $_ eq '--with-pdf' } @ARGV;
+
+    if (grep { $_ eq '--with-pdf' } @ARGV) {
+        if (which('pdflatex')) {
+            MakeDocs('PDF', 'make latexpdf');
+        }
+        elsif (which('rst2pdf')) {
+            rmtree('pdf', 0, 1);
+            MakeDocs('PDF', 'make pdf');
+        }
+        else {
+            say 'pdflatex or rst2pdf not found. Skipping PDF file creation';
+        }
+    }
 }

@@ -372,6 +372,14 @@ sub OPTIONAL_MODULES {
         version => '0.96',
         feature => ['mod_perl'],
     },
+
+    # memcached
+    {
+        package => 'Cache-Memcached',
+        module  => 'Cache::Memcached',
+        version => '0',
+        feature => ['memcached'],
+    },
     );
 
     my $extra_modules = _get_extension_requirements('OPTIONAL_MODULES');
@@ -394,6 +402,7 @@ use constant FEATURE_FILES => (
                       'Bugzilla/JobQueue/*', 'jobqueue.pl'],
     patch_viewer  => ['Bugzilla/Attachment/PatchReader.pm'],
     updates       => ['Bugzilla/Update.pm'],
+    memcached     => ['Bugzilla/Memcache.pm'],
 );
 
 # This implements the REQUIRED_MODULES and OPTIONAL_MODULES stuff

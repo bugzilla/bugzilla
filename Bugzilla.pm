@@ -35,24 +35,25 @@ BEGIN {
     }
 }
 
-use Bugzilla::Config;
-use Bugzilla::Constants;
 use Bugzilla::Auth;
 use Bugzilla::Auth::Persist::Cookie;
 use Bugzilla::CGI;
-use Bugzilla::Extension;
+use Bugzilla::Config;
+use Bugzilla::Constants;
 use Bugzilla::DB;
+use Bugzilla::Error;
+use Bugzilla::Extension;
+use Bugzilla::Field;
+use Bugzilla::Flag;
 use Bugzilla::Hook;
 use Bugzilla::Install::Localconfig qw(read_localconfig);
 use Bugzilla::Install::Requirements qw(OPTIONAL_MODULES);
 use Bugzilla::Install::Util qw(init_console include_languages);
+use Bugzilla::Memcached;
 use Bugzilla::Template;
-use Bugzilla::User;
-use Bugzilla::Error;
-use Bugzilla::Util;
-use Bugzilla::Field;
-use Bugzilla::Flag;
 use Bugzilla::Token;
+use Bugzilla::User;
+use Bugzilla::Util;
 
 use File::Basename;
 use File::Spec::Functions;
@@ -659,6 +660,12 @@ sub process_cache {
     return $_process_cache;
 }
 
+# This is a memcached wrapper, which provides cross-process and cross-system
+# caching.
+sub memcached {
+    return $_[0]->process_cache->{memcached} ||= Bugzilla::Memcached->_new();
+}
+
 # Private methods
 
 # Per-process cleanup. Note that this is a plain subroutine, not a method,
@@ -792,10 +799,10 @@ not an arrayref.
 
 =item C<user>
 
-C<undef> if there is no currently logged in user or if the login code has not
-yet been run.  If an sudo session is in progress, the C<Bugzilla::User>
-corresponding to the person who is being impersonated.  If no session is in
-progress, the current C<Bugzilla::User>.
+Default C<Bugzilla::User> object if there is no currently logged in user or
+if the login code has not yet been run.  If an sudo session is in progress,
+the C<Bugzilla::User> corresponding to the person who is being impersonated.
+If no session is in progress, the current C<Bugzilla::User>.
 
 =item C<set_user>
 
@@ -968,3 +975,82 @@ Tells you whether or not a specific feature is enabled. For names
 of features, see C<OPTIONAL_MODULES> in C<Bugzilla::Install::Requirements>.
 
 =back
+
+=head1 B<CACHING>
+
+Bugzilla has several different caches available which provide different
+capabilities and lifetimes.
+
+The keys of all caches are unregulated; use of prefixes is suggested to avoid
+collisions.
+
+=over
+
+=item B<Request Cache>
+
+The request cache is a hashref which supports caching any perl variable for the
+duration of the current request. At the end of the current request the contents
+of this cache are cleared.
+
+Examples of its use include caching objects to avoid re-fetching the same data
+from the database, and passing data between otherwise unconnected parts of
+Bugzilla.
+
+=over
+
+=item C<request_cache>
+
+Returns a hashref which can be checked and modified to store any perl variable
+for the duration of the current request.
+
+=item C<clear_request_cache>
+
+Removes all entries from the C<request_cache>.
+
+=back
+
+=item B<Process Cache>
+
+The process cache is a hashref which support caching of any perl variable. If
+Bugzilla is configured to run using Apache mod_perl, the contents of this cache
+are persisted across requests for the lifetime of the Apache worker process
+(which varies depending on the SizeLimit configuration in mod_perl.pl).
+
+If Bugzilla isn't running under mod_perl, the process cache's contents are
+cleared at the end of the request.
+
+The process cache is only suitable for items which never change while Bugzilla
+is running (for example the path where Bugzilla is installed).
+
+=over
+
+=item C<process_cache>
+
+Returns a hashref which can be checked and modified to store any perl variable
+for the duration of the current process (mod_perl) or request (mod_cgi).
+
+=back
+
+=item B<Memcached>
+
+If Memcached is installed and configured, Bugzilla can use it to cache data
+across requests and between webheads. Unlike the request and process caches,
+only scalars, hashrefs, and arrayrefs can be stored in Memcached.
+
+Memcached integration is only required for large installations of Bugzilla -- if
+you have multiple webheads then configuring Memcached is recommended.
+
+=over
+
+=item C<memcached>
+
+Returns a C<Bugzilla::Memcached> object. An object is always returned even if
+Memcached is not available.
+
+See the documentation for the C<Bugzilla::Memcached> module for more
+information.
+
+=back
+
+=back
+

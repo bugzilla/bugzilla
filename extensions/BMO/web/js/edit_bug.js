@@ -24,7 +24,7 @@
  */
 
 function init_clone_bug_menu(el, bug_id, product, component) {
-  var diff_url = 'enter_bug.cgi?cloned_bug_id=' + bug_id;
+  var diff_url = 'enter_bug.cgi?format=__default__&cloned_bug_id=' + bug_id;
   var cur_url = diff_url +
     '&product=' + encodeURIComponent(product) +
     '&component=' + encodeURIComponent(component);

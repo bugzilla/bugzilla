@@ -148,13 +148,9 @@ Document Conventions
 
 This document uses the following conventions:
 
-.. caution:: This is a caution. Make sure to read this to not be in trouble!
-
-.. tip:: This is a hint or tip, especially about some configuration tweaks.
+.. warning:: This is a warning - something you should be aware of.
 
 .. note:: This is just a note, for your information.
-
-.. warning:: This is a warning, something you should take care of.
 
 A filename or a path to a filename is displayed like this:
 :file:`/path/to/filename.ext`
@@ -177,7 +173,7 @@ A sample of code is illustrated like this:
     Second Line of Code
     ...
 
-This documentation is maintained in ReStructured Text format.
+This documentation is maintained in reStructured Text format.
 Changes are best submitted as diffs, attached
 to a bug filed in the `Bugzilla Documentation <https://bugzilla.mozilla.org/enter_bug.cgi?product=Bugzilla;component=Documentation>`_
 component.

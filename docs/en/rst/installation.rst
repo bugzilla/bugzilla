@@ -176,7 +176,7 @@ Good locations are either directly in the web server's document directories or
 in :file:`/usr/local` with a symbolic link to the web server's
 document directories or an alias in the web server's configuration.
 
-.. caution:: The default Bugzilla distribution is NOT designed to be placed
+.. warning:: The default Bugzilla distribution is NOT designed to be placed
    in a :file:`cgi-bin` directory. This
    includes any directory which is configured using the
    ``ScriptAlias`` directive of Apache.
@@ -228,7 +228,7 @@ you invoke :file:`install-module.pl` as follows:
 
     bash# perl install-module.pl <modulename>
 
-.. tip:: Many people complain that Perl modules will not install for
+.. note:: Many people complain that Perl modules will not install for
    them. Most times, the error messages complain that they are missing a
    file in
    ``@INC``.
@@ -435,7 +435,7 @@ hosting account), you will need to leave
 that :file:`checksetup.pl` will subsequently display
 every time it is run.
 
-.. caution:: If you are using suexec, you should use your own primary group
+.. warning:: If you are using suexec, you should use your own primary group
    for *webservergroup* rather than leaving it
    empty, and see the additional directions in the suexec section :ref:`suexec`.
 
@@ -471,7 +471,7 @@ see what has changed.
 MySQL
 -----
 
-.. caution:: MySQL's default configuration is insecure.
+.. warning:: MySQL's default configuration is insecure.
    We highly recommend to run :file:`mysql_secure_installation`
    on Linux or the MySQL installer on Windows, and follow the instructions.
    Important points to note are:
@@ -706,7 +706,7 @@ When this is done, restart your web server.
 SQLite
 ------
 
-.. caution:: Due to SQLite's `concurrency
+.. warning:: Due to SQLite's `concurrency
    limitations <http://sqlite.org/faq.html#q5>`_ we recommend SQLite only for small and development
    Bugzilla installations.
 
@@ -1214,7 +1214,7 @@ the ActiveState repository.
    provided when you run :command:`checksetup.pl` as it will
    tell you what package you'll need to install.
 
-.. tip:: If you are behind a corporate firewall, you will need to let the
+.. note:: If you are behind a corporate firewall, you will need to let the
    ActiveState PPM utility know how to get through it to access
    the repositories by setting the HTTP_proxy system environmental
    variable. For more information on setting that variable, see
@@ -1712,7 +1712,7 @@ using Bzr.
     ...
     All changes applied successfully.
 
-.. caution:: If a line in the output from :command:`bzr up` mentions
+.. warning:: If a line in the output from :command:`bzr up` mentions
    a conflict, then that represents a file with local changes that
    Bzr was unable to properly merge. You need to resolve these
    conflicts manually before Bugzilla (or at least the portion using
@@ -1754,7 +1754,7 @@ omit the first three lines of the example.
    is a very important detail--it means that the destination
    directory is the current working directory.
 
-.. caution:: If you have some extensions installed, you will have to copy them
+.. warning:: If you have some extensions installed, you will have to copy them
    to the new bugzilla directory too. Extensions are located in :file:`bugzilla/extensions/`.
    Only copy those you
    installed, not those managed by the Bugzilla team.
@@ -1831,7 +1831,7 @@ steps to complete your upgrade.
       command :command:`./checksetup.pl` is important and cannot
       be omitted.
 
-   .. caution:: If this is a major upgrade (say, 3.6 to 4.2 or similar),
+   .. warning:: If this is a major upgrade (say, 3.6 to 4.2 or similar),
       running :command:`checksetup.pl` on a large
       installation (75,000 or more bugs) can take a long time,
       possibly several hours.

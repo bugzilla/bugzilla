@@ -93,7 +93,7 @@ be accessible is rather complicated. A quick way is to run
 Bugzilla files as expected. If not, you may want to follow the few
 steps below.
 
-.. tip:: Bugzilla ships with the ability to create :file:`.htaccess`
+.. note:: Bugzilla ships with the ability to create :file:`.htaccess`
    files that enforce these rules. Instructions for enabling these
    directives in Apache can be found in :ref:`http-apache`
 
@@ -134,7 +134,7 @@ or
 `Bugtraq ID 6501 <http://online.securityfocus.com/bid/6501>`_.
 To test, simply run :file:`testserver.pl`, as said above.
 
-.. tip:: Be sure to check :ref:`http` for instructions
+.. note:: Be sure to check :ref:`http` for instructions
    specific to the web server you use.
 
 .. _security-bugzilla:

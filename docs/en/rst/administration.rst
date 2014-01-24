@@ -327,7 +327,7 @@ authentication, all other user-related tasks are still handled by email
 address, not LDAP username. For example, bugs are still assigned by
 email address and users are still queried by email address.
 
-.. caution:: Because the Bugzilla account is not created until the first time
+.. warning:: Because the Bugzilla account is not created until the first time
    a user logs in, a user who has not yet logged is unknown to Bugzilla.
    This means they cannot be used as an assignee or QA contact (default or
    otherwise), added to any CC list, or any other such operation. One
@@ -360,7 +360,7 @@ LDAPserver
     the URI, the default is either 389 or 636 for 'LDAP' and 'LDAPS'
     schemes respectively.
 
-    .. tip:: In order to use SSL with LDAP, specify a URI with "ldaps://".
+    .. note:: In order to use SSL with LDAP, specify a URI with "ldaps://".
        This will force the use of SSL over port 636.
        For example, normal LDAP:
        ``ldap://ldap.company.com``, LDAP over SSL:
@@ -577,7 +577,7 @@ password for this "super user". If for some reason you delete
 the "super user" account, re-running checksetup.pl will again prompt
 you for this username and password.
 
-.. tip:: If you wish to add more administrative users, add them to
+.. note:: If you wish to add more administrative users, add them to
    the "admin" group and, optionally, edit the tweakparams, editusers,
    creategroups, editcomponents, and editkeywords groups to add the
    entire admin group to those groups (which is the case by default).
@@ -1645,7 +1645,7 @@ adding too many fields can make the user interface more complicated and
 harder to use. Custom Fields should be added only when necessary and with
 careful consideration.
 
-.. tip:: Before adding a Custom Field, make sure that Bugzilla cannot already
+.. note:: Before adding a Custom Field, make sure that Bugzilla cannot already
    do the desired behavior. Many Bugzilla options are not enabled by
    default, and many times Administrators find that simply enabling
    certain options that already exist is sufficient.

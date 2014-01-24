@@ -20,4 +20,3 @@ Bugzilla Documentation
    patches
    modules
    gfdl
-   glossary

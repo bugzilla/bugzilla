@@ -162,9 +162,6 @@ bash$ represents a normal user's prompt under bash shell
 
 bash# represents a root user's prompt under bash shell
 
-A word which is in the glossary will appear like this:
-Bugzilla
-
 A sample of code is illustrated like this:
 
 ::

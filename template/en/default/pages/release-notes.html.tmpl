@@ -45,6 +45,44 @@
 
 <h2 id="v44_point">Updates in this 4.4.x Release</h2>
 
+<h3>4.4.2</h3>
+
+<p>The following [% terms.bugs %] have been fixed in this release:</p>
+
+<ul>
+  <li><kbd>checksetup.pl</kbd> was incorrectly reporting DBI 1.630 (1.63) as
+    being older than 1.614, preventing the upgrade to complete.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=938300">[% terms.Bug %] 938300</a>)</li>
+  <li>An error about <kbd>longdescs.comment_id</kbd> was thrown by MySQL 5.0
+    and 5.1 when upgrading to [% terms.Bugzilla %] 4.4 or 4.4.1.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=870369">[% terms.Bug %] 870369</a>)</li>
+  <li>A regression in [% terms.Bugzilla %] 4.4.1 caused <kbd>email_in.pl</kbd>
+    to fail with an "invalid token" error message.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=928331">[% terms.Bug %] 928331</a> and
+    <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=930013">[% terms.bug %] 930013</a>)</li>
+  <li>The PROJECT environment variable is now correctly taken into account
+    when mod_perl is enabled (this variable allows several installations to
+    share the same codebase).
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=843457">[% terms.Bug %] 843457</a>)</li>
+  <li>Mandatory custom fields whose visibility depends on a component are now
+    correctly required on [% terms.bug %] creation.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=895813">[% terms.Bug %] 895813</a>)</li>
+  <li>Windows 8.1 is now recognized when reporting new [% terms.bugs %].
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=928092">[% terms.Bug %] 928092</a>)</li>
+  <li>[% terms.Bugzilla %] no longer crashes when the <kbd>shutdownhtml</kbd>
+    parameter is set and using a non-cookie based authentication method.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=748095">[% terms.Bug %] 748095</a>)</li>
+  <li><kbd>importxml.pl</kbd> no longer ignores the <kbd>maxattachmentsize</kbd>
+    and <kbd>maxlocalattachment</kbd> parameters when importing [% terms.bugs %].
+    This means that large attachments are now stored locally in
+    <kbd>data/attachments/</kbd> if parameters are configured this way.
+    The script must now be run as the webserver user (e.g. apache) to make these
+    attachments readable from web browsers.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=360231">[% terms.Bug %] 360231</a>)</li>
+  <li>The default date and time format used for SQLite has been fixed.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=938161">[% terms.Bug %] 938161</a>)</li>
+</ul>
+
 <h3>4.4.1</h3>
 
 <p>This release fixes several security issues. See the

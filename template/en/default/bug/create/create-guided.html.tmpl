@@ -23,6 +23,7 @@
 <script type="text/javascript">
 var descriptions = [
 [% FOREACH c = product.components %]
+  [% NEXT IF NOT c.is_active %]
   '[% c.description FILTER js %]',
 [% END %]
 ];

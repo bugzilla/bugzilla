@@ -121,6 +121,7 @@ function PutDescription() {
           [% default.component_ = "General" %]
         [% END %]
         [% FOREACH c = product.components %]
+          [% NEXT IF NOT c.is_active %]
           <option value="[% c.name FILTER html %]"
                   [%+ 'selected="selected"' IF c.name == default.component_ %]>
             [% c.name FILTER html %]

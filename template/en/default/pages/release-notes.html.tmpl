@@ -52,6 +52,11 @@
 <ul>
   <li><kbd>checksetup.pl</kbd> was incorrectly reporting DBI 1.630 (1.63) as
     being older than 1.614, preventing the upgrade to complete.
+    If you still use Perl 5.10.0 or older, make sure you have the
+    <a href="http://search.cpan.org/~jpeacock/version/lib/version.pod">version</a>
+    module installed before running <kbd>checksetup.pl</kbd>.
+    If you use Perl 5.10.1 or newer, this module is already available and
+    no special action is required.
     (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=938300">[% terms.Bug %] 938300</a>)</li>
   <li>An error about <kbd>longdescs.comment_id</kbd> was thrown by MySQL 5.0
     and 5.1 when upgrading to Bugzilla 4.4 or 4.4.1.

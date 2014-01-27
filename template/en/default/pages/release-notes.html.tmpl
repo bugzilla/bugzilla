@@ -61,6 +61,9 @@
   <li>An error about <kbd>longdescs.comment_id</kbd> was thrown by MySQL 5.0
     and 5.1 when upgrading to [% terms.Bugzilla %] 4.4 or 4.4.1.
     (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=870369">[% terms.Bug %] 870369</a>)</li>
+  <li>Saved searches containing Unicode characters in their name could not
+    be run if Digest::SHA 5.82 or newer is installed.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=964113">[% terms.Bug %] 964113</a>)</li>
   <li>A regression in [% terms.Bugzilla %] 4.4.1 caused <kbd>email_in.pl</kbd>
     to fail with an "invalid token" error message.
     (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=928331">[% terms.Bug %] 928331</a> and

@@ -12,7 +12,7 @@ Introduction
 ############
 
 This section contains information for end-users of Bugzilla.  There
-is a Bugzilla test installation, called
+is a machine with many Bugzilla test installations, called
 `Landfill <http://landfill.bugzilla.org/>`_, which you are
 welcome to play with (if it's up). However, not all of the Bugzilla
 installations there will necessarily have all Bugzilla features enabled,
@@ -31,8 +31,8 @@ Create a Bugzilla Account
 If you want to use Bugzilla, first you need to create an account.
 Consult with the administrator responsible for your installation of
 Bugzilla for the URL you should use to access it. If you're
-test-driving Bugzilla, use this URL:
-`<|landfillbase|>`_.
+test-driving Bugzilla, use an installation on
+`Landfill <http://landfill.bugzilla.org/>`_.
 
 #. On the home page :file:`index.cgi`, click the
    ``Open a new Bugzilla account`` link, or the
@@ -86,7 +86,7 @@ Anatomy of a Bug
 
 The core of Bugzilla is the screen which displays a particular
 bug. It's a good place to explain some Bugzilla concepts.
-`Bug 1 on Landfill <|landfillbase|show_bug.cgi?id=1>`_
+`Bug 1 on Landfill <http://landfill.bugzilla.org/bugzilla-tip/show_bug.cgi?id=1>`_
 is a good example. Note that the labels for most fields are hyperlinks;
 clicking them will take you to context-sensitive help on that
 particular field. Fields marked * may not be present on every
@@ -255,9 +255,9 @@ Searching for Bugs
 ##################
 
 The Bugzilla Search page is the interface where you can find
-any bug report, comment, or patch currently in the Bugzilla system. You
-can play with it here:
-`<|landfillbase|query.cgi>`_.
+any bug report, comment, or patch currently in the Bugzilla system.
+`You can play with it on
+Landfill <http://landfill.bugzilla.org/bugzilla-tip/query.cgi?format=advanced>`_.
 
 The Search page has controls for selecting different possible
 values for all of the fields in a bug, as described above. For some
@@ -504,7 +504,7 @@ Reporting a New Bug
 
 Years of bug writing experience has been distilled for your
 reading pleasure into the
-`Bug Writing Guidelines <|landfillbase|page.cgi?id=bug-writing.html>`_.
+`Bug Writing Guidelines <http://landfill.bugzilla.org/bugzilla-tip/page.cgi?id=bug-writing.html>`_.
 While some of the advice is Mozilla-specific, the basic principles of
 reporting Reproducible, Specific bugs, isolating the Product you are
 using, the Version of the Product, the Component which failed, the
@@ -520,7 +520,7 @@ The procedure for filing a bug is as follows:
 
    .. note:: If you want to file a test bug to see how Bugzilla works,
       you can do it on one of our test installations on
-      `the Landfill server <|landfillbase|>`_.
+      `Landfill <http://landfill.bugzilla.org/>`_.
 
 #. You first have to select the product in which you found a bug.
 

@@ -307,7 +307,7 @@ should be used inside the form.
 
 An example of this is the mozilla.org
 `guided
-bug submission form <|landfillbase|enter_bug.cgi?product=WorldControl;format=guided>`_. The code for this comes with the Bugzilla
+bug submission form <http://landfill.bugzilla.org/bugzilla-tip/enter_bug.cgi?product=WorldControl;format=guided>`_. The code for this comes with the Bugzilla
 distribution as an example for you to copy. It can be found in the
 files
 :file:`create-guided.html.tmpl` and

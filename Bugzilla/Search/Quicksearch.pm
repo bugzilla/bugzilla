@@ -103,6 +103,17 @@ use constant FIELD_OPERATOR => {
     owner_idle_time => 'greaterthan',
 };
 
+# Mappings for operators symbols to support operators other than "substring"
+use constant OPERATOR_SYMBOLS => {
+    ':'  => 'substring',
+    '='  => 'equals',
+    '!=' => 'notequals',
+    '>=' => 'greaterthaneq',
+    '<=' => 'lessthaneq',
+    '>'  => 'greaterthan',
+    '<'  => 'lessthan',
+};
+
 # We might want to put this into localconfig or somewhere
 use constant PRODUCT_EXCEPTIONS => (
     'row',   # [Browser]
@@ -391,10 +402,11 @@ sub _handle_field_names {
 
     # Generic field1,field2,field3:value1,value2 notation.
     # We have to correctly ignore commas and colons in quotes.
-    my @field_values = _parse_line(':', 1, $or_operand);
-    if (scalar @field_values == 2) {
-        my @fields = _parse_line(',', 1, $field_values[0]);
-        my @values = _parse_line(',', 1, $field_values[1]);
+    foreach my $symbol (keys OPERATOR_SYMBOLS) {
+        my @field_values = parse_line($symbol, 1, $or_operand);
+        next unless scalar @field_values == 2;
+        my @fields = parse_line(',', 1, $field_values[0]);
+        my @values = parse_line(',', 1, $field_values[1]);
         foreach my $field (@fields) {
             my $translated = _translate_field_name($field);
             # Skip and record any unknown fields
@@ -411,7 +423,9 @@ sub _handle_field_names {
                     $bug_status_set = 1;
                 }
                 foreach my $value (@values) {
-                    my $operator = FIELD_OPERATOR->{$translated} || 'substring';
+                    my $operator = FIELD_OPERATOR->{$translated}
+                        || OPERATOR_SYMBOLS->{$symbol}
+                        || 'substring';
                     # If the string was quoted to protect some special
                     # characters such as commas and colons, we need
                     # to remove quotes.

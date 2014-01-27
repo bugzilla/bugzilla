@@ -209,6 +209,52 @@
       (<kbd>url</kbd> OR <kbd>location</kbd>) AND (<kbd>bar</kbd> OR 
       <kbd>field</kbd>) AND (NOT <kbd>focus</kbd>)</p>
   </li>
+
+  <li>
+    The default operator, colon (:), performs a <strong>substring</strong>
+    match of the value. The following operators are supported:
+    <ul>
+      <li>
+        <strong>:</strong> (substring):<br>
+        <kbd><em>summary:foo</em></kbd> will search for [% terms.bugs %]
+        where the <kbd>summary</kbd> contains <kbd>foo</kbd>.
+      </li>
+      <li>
+        <strong>=</strong> (equals):<br>
+        <kbd><em>summary=foo</em></kbd> will search for [% terms.bugs %]
+        where the <kbd>summary</kbd> is exactly <kbd>foo</kbd>.
+      </li>
+      <li>
+        <strong>!=</strong> (notequals):<br>
+        <kbd><em>summary!=foo</em></kbd> will search for [% terms.bugs %]
+        where the <kbd>summary</kbd> is not <kbd>foo</kbd>.
+      </li>
+      <li>
+        <strong>&gt;</strong> (greaterthan):<br>
+        <kbd><em>creation_ts&gt;-2w</em></kbd> will search for [% terms.bugs %]
+        where that were created between two weeks ago and now, excluding [%
+        terms.bugs %] exactly two weeks old.
+      </li>
+      <li>
+        <strong>&gt;=</strong> (greaterthaneq):<br>
+        <kbd><em>creation_ts&gt;=-2w</em></kbd> will search for [% terms.bugs %]
+        where that were created between two weeks ago and now, including [%
+        terms.bugs %] exactly two weeks old.
+      </li>
+      <li>
+        <strong>&lt;</strong> (lessthan):<br>
+        <kbd><em>creation_ts&lt;-2w</em></kbd> will search for [% terms.bugs %]
+        where that were created more than two weeks ago, excluding [%
+        terms.bugs %] exactly two weeks old.
+      </li>
+      <li>
+        <strong>&lt;=</strong> (lessthaneq):<br>
+        <kbd><em>creation_ts&lt;=-2w</em></kbd> will search for [% terms.bugs %]
+        where that were created more than two weeks ago, including [%
+        terms.bugs %] exactly two weeks old.
+      </li>
+    </ul>
+  </li>
 </ul>
 
 <h2 id="shortcuts">Advanced Shortcuts</h2>

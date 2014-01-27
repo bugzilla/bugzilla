@@ -26,7 +26,7 @@ Documentation Page <http://www.bugzilla.org/docs/>`_.
 Copyright Information
 #####################
 
-This document is copyright (c) 2000-2012 by the various
+This document is copyright (c) 2000-2014 by the various
 Bugzilla contributors who wrote it.
 
     Permission is granted to copy, distribute and/or modify this

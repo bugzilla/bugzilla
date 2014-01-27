@@ -1,4 +1,4 @@
-
+.. highlight:: console
 
 .. _installing-bugzilla:
 
@@ -61,7 +61,7 @@ Perl
 Installed Version Test:
 ::
 
-    perl -v
+    $ perl -v
 
 Any machine that doesn't have Perl on it is a sad machine indeed.
 If you don't have it and your OS doesn't provide official packages,
@@ -85,7 +85,7 @@ MySQL
 Installed Version Test:
 ::
 
-    mysql -V
+    $ mysql -V
 
 If you don't have it and your OS doesn't provide official packages,
 visit `<http://www.mysql.com>`_. You need MySQL version
@@ -111,7 +111,7 @@ PostgreSQL
 Installed Version Test:
 ::
 
-    psql -V
+    $ psql -V
 
 If you don't have it and your OS doesn't provide official packages,
 visit `<http://www.postgresql.org/>`_. You need PostgreSQL
@@ -128,9 +128,10 @@ Oracle
 ------
 
 Installed Version Test:
-::
 
-    select * from v$version
+.. code-block:: sql
+
+    SELECT * FROM v$version
 
 (you first have to log in into your DB)
 
@@ -205,7 +206,7 @@ required modules, run:
 
 ::
 
-    bash# ./checksetup.pl --check-modules
+    # ./checksetup.pl --check-modules
 
 :file:`checksetup.pl` will print out a list of the
 required and optional Perl modules, together with the versions
@@ -226,7 +227,7 @@ you invoke :file:`install-module.pl` as follows:
 
 ::
 
-    bash# perl install-module.pl <modulename>
+    # perl install-module.pl <modulename>
 
 .. note:: Many people complain that Perl modules will not install for
    them. Most times, the error messages complain that they are missing a
@@ -407,7 +408,7 @@ without the ``--check-modules`` switch.
 
 ::
 
-    bash# ./checksetup.pl
+    # ./checksetup.pl
 
 This time, :file:`checksetup.pl` should tell you that all
 the correct modules are installed and will display a message about, and
@@ -552,13 +553,14 @@ machine or as a different user.
 
 Run the :file:`mysql` command-line client and enter:
 
-::
+.. code-block:: sql
 
-    mysql> GRANT SELECT, INSERT,
+    GRANT SELECT, INSERT,
     UPDATE, DELETE, INDEX, ALTER, CREATE, LOCK TABLES,
     CREATE TEMPORARY TABLES, DROP, REFERENCES ON bugs.*
     TO bugs@localhost IDENTIFIED BY '$db_pass';
-    mysql> FLUSH PRIVILEGES;
+
+    FLUSH PRIVILEGES;
 
 Permit attachments table to grow beyond 4GB
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -573,11 +575,11 @@ database setup parts), you should run the :file:`MySQL`
 command-line client and enter the following, replacing ``$bugs_db``
 with your Bugzilla database name (*bugs* by default):
 
-::
+.. code-block:: sql
 
-    mysql> use $bugs_db
-    mysql> ALTER TABLE attachments
-    AVG_ROW_LENGTH=1000000, MAX_ROWS=20000;
+    USE $bugs_db;
+    
+    ALTER TABLE attachments AVG_ROW_LENGTH=1000000, MAX_ROWS=20000;
 
 The above command will change the limit to 20GB. Mysql will have
 to make a temporary copy of your entire table to do this. Ideally,
@@ -607,13 +609,13 @@ login as the root user, and then
 
 ::
 
-    bash# su - postgres
+    # su - postgres
 
 As the postgres user, you then need to create a new user:
 
 ::
 
-    bash$ createuser -U postgres -dRSP bugs
+    $ createuser -U postgres -dRSP bugs
 
 When asked for a password, provide the password which will be set as
 $db_pass in :file:`localconfig`.
@@ -652,7 +654,7 @@ Create a New Tablespace
 You can use the existing tablespace or create a new one for Bugzilla.
 To create a new tablespace, run the following command:
 
-::
+.. code-block:: sql
 
     CREATE TABLESPACE bugs
     DATAFILE '*$path_to_datafile*' SIZE 500M
@@ -674,7 +676,7 @@ and ``$db_pass``, respectively). Here, we assume that
 the user name is 'bugs' and the tablespace name is the same
 as above.
 
-::
+.. code-block:: sql
 
     CREATE USER bugs
     IDENTIFIED BY "$db_pass"
@@ -694,7 +696,7 @@ Configure the Web Server
 If you use Apache, append these lines to :file:`httpd.conf`
 to set ORACLE_HOME and LD_LIBRARY_PATH. For instance:
 
-::
+.. code-block:: apache
 
     SetEnv ORACLE_HOME /u01/app/oracle/product/10.2.0/
     SetEnv LD_LIBRARY_PATH /u01/app/oracle/product/10.2.0/lib/
@@ -781,7 +783,8 @@ mod_cgi, do the following:
    exist, you'll want to add one.) In this example, Bugzilla has
    been installed at :file:`/var/www/html/bugzilla`.
 
-   ::
+.. code-block:: apache
+
        <Directory /var/www/html/bugzilla>
        AddHandler cgi-script .cgi
        Options +ExecCGI
@@ -789,26 +792,26 @@ mod_cgi, do the following:
        AllowOverride Limit FileInfo Indexes Options
        </Directory>
 
-   These instructions: allow apache to run .cgi files found
-   within the bugzilla directory; instructs the server to look
-   for a file called :file:`index.cgi` or, if not
-   found, :file:`index.html` if someone
-   only types the directory name into the browser; and allows
-   Bugzilla's :file:`.htaccess` files to override
-   some global permissions.
+These instructions: allow apache to run .cgi files found
+within the bugzilla directory; instructs the server to look
+for a file called :file:`index.cgi` or, if not
+found, :file:`index.html` if someone
+only types the directory name into the browser; and allows
+Bugzilla's :file:`.htaccess` files to override
+some global permissions.
 
-   .. note:: It is possible to make these changes globally, or to the
-      directive controlling Bugzilla's parent directory (e.g.
-      ``<Directory /var/www/html/>``).
-      Such changes would also apply to the Bugzilla directory...
-      but they would also apply to many other places where they
-      may or may not be appropriate. In most cases, including
-      this one, it is better to be as restrictive as possible
-      when granting extra access.
+.. note:: It is possible to make these changes globally, or to the
+   directive controlling Bugzilla's parent directory (e.g.
+   ``<Directory /var/www/html/>``).
+   Such changes would also apply to the Bugzilla directory...
+   but they would also apply to many other places where they
+   may or may not be appropriate. In most cases, including
+   this one, it is better to be as restrictive as possible
+   when granting extra access.
 
-   .. note:: On Windows, you may have to also add the
-      ``ScriptInterpreterSource Registry-Strict``
-      line, see :ref:`Windows specific notes <win32-http>`.
+.. note:: On Windows, you may have to also add the
+   ``ScriptInterpreterSource Registry-Strict``
+   line, see :ref:`Windows specific notes <win32-http>`.
 
 #. :file:`checksetup.pl` can set tighter permissions
    on Bugzilla's files and directories if it knows what group the
@@ -824,12 +827,13 @@ mod_cgi, do the following:
    ``<Directory>`` directive
    (the same one as in the step above):
 
-   ::
+.. code-block:: apache
+
        +FollowSymLinks
 
-   Without this directive, Apache will not follow symbolic links
-   to places outside its own directory structure, and you will be
-   unable to run Bugzilla.
+Without this directive, Apache will not follow symbolic links
+to places outside its own directory structure, and you will be
+unable to run Bugzilla.
 
 .. _http-apache-mod_perl:
 
@@ -853,7 +857,8 @@ and mod_perl
    .. warning:: You should also ensure that you have disabled ``KeepAlive``
       support in your Apache install when utilizing Bugzilla under mod_perl
 
-   ::
+.. code-block:: apache
+
        PerlSwitches -w -T
        PerlConfigRequire /var/www/html/bugzilla/mod_perl.pl
 
@@ -1001,14 +1006,14 @@ graphs.
 
 ::
 
-    bash# crontab -e
+    # crontab -e
 
 This should bring up the crontab file in your editor.
 Add a cron entry like this to run
 :file:`collectstats.pl`
 daily at 5 after midnight:
 
-::
+.. code-block:: none
 
     5 0 * * * cd <your-bugzilla-directory> && ./collectstats.pl
 
@@ -1034,7 +1039,7 @@ This can be done by adding the following command as a daily
 crontab entry, in the same manner as explained above for bug
 graphs. This example runs it at 12.55am.
 
-::
+.. code-block:: none
 
     55 0 * * * cd <your-bugzilla-directory> && ./whineatnews.pl
 
@@ -1059,7 +1064,7 @@ This can be done by adding the following command as a daily
 crontab entry, in the same manner as explained above for bug
 graphs. This example runs it every 15 minutes.
 
-::
+.. code-block:: none
 
     */15 * * * * cd <your-bugzilla-directory> && ./whine.pl
 
@@ -1092,7 +1097,7 @@ add the following lines to your Apache configuration, either in the
 Bugzilla, or in the ``<Directory>``
 section for your Bugzilla:
 
-::
+.. code-block:: apache
 
     AddType application/vnd.mozilla.xul+xml .xul
     AddType application/rdf+xml .rdf
@@ -1127,7 +1132,8 @@ Now you have to configure the web server to pass this environment
 variable when accessed via an alternate URL, such as virtual host for
 instance. The following is an example of how you could do it in Apache,
 other Webservers may differ.
-::
+
+.. code-block:: apache
 
     <VirtualHost 212.85.153.228:80>
     ServerName foo.bar.baz
@@ -1434,13 +1440,13 @@ in place, you must initialize the databases (ONCE).
 
 ::
 
-    bash$ mysql_install_db
+    $ mysql_install_db
 
 Then start the daemon with
 
 ::
 
-    bash$ safe_mysql &
+    $ safe_mysql &
 
 After you start mysqld the first time, you then connect to
 it as "root" and :command:`GRANT` permissions to other
@@ -1467,11 +1473,11 @@ installed with your own personal version of Perl:
 
 ::
 
-    bash$ wget http://perl.org/CPAN/src/stable.tar.gz
-    bash$ tar zvxf stable.tar.gz
-    bash$ cd perl-|min-perl-ver|
-    bash$ sh Configure -de -Dprefix=/home/foo/perl
-    bash$ make && make test && make install
+    $ wget http://perl.org/CPAN/src/stable.tar.gz
+    $ tar zvxf stable.tar.gz
+    $ cd perl-|min-perl-ver|
+    $ sh Configure -de -Dprefix=/home/foo/perl
+    $ make && make test && make install
 
 Once you have Perl installed into a directory (probably
 in :file:`~/perl/bin`), you will need to
@@ -1698,10 +1704,10 @@ using Bzr.
 
 ::
 
-    bash$ cd /var/www/html/bugzilla
-    bash$ bzr switch 4.2
+    $ cd /var/www/html/bugzilla
+    $ bzr switch 4.2
       (only run the previous command when not yet running 4.2)
-    bash$ bzr up -r tag:bugzilla-4.2.1
+    $ bzr up -r tag:bugzilla-4.2.1
     +N  extensions/MoreBugUrl/
     +N  extensions/MoreBugUrl/Config.pm
     +N  extensions/MoreBugUrl/Extension.pm
@@ -1736,19 +1742,19 @@ omit the first three lines of the example.
 
 ::
 
-    bash$ cd /var/www/html
-    bash$ wget http://ftp.mozilla.org/pub/mozilla.org/webtools/bugzilla-4.2.1.tar.gz
+    $ cd /var/www/html
+    $ wget http://ftp.mozilla.org/pub/mozilla.org/webtools/bugzilla-4.2.1.tar.gz
     ...
-    bash$ tar xzvf bugzilla-4.2.1.tar.gz
+    $ tar xzvf bugzilla-4.2.1.tar.gz
     bugzilla-4.2.1/
     bugzilla-4.2.1/colchange.cgi
     ...
-    bash$ cd bugzilla-4.2.1
-    bash$ cp ../bugzilla/localconfig* .
-    bash$ cp -r ../bugzilla/data .
-    bash$ cd ..
-    bash$ mv bugzilla bugzilla.old
-    bash$ mv bugzilla-4.2.1 bugzilla
+    $ cd bugzilla-4.2.1
+    $ cp ../bugzilla/localconfig* .
+    $ cp -r ../bugzilla/data .
+    $ cd ..
+    $ mv bugzilla bugzilla.old
+    $ mv bugzilla-4.2.1 bugzilla
 
 .. warning:: The :command:`cp` commands both end with periods which
    is a very important detail--it means that the destination
@@ -1783,11 +1789,11 @@ first two commands.
 
 ::
 
-    bash$ cd /var/www/html/bugzilla
-    bash$ wget http://ftp.mozilla.org/pub/mozilla.org/webtools/bugzilla-4.2-to-4.2.1.diff.gz
+    $ cd /var/www/html/bugzilla
+    $ wget http://ftp.mozilla.org/pub/mozilla.org/webtools/bugzilla-4.2-to-4.2.1.diff.gz
     ...
-    bash$ gunzip bugzilla-4.2-to-4.2.1.diff.gz
-    bash$ patch -p1 < bugzilla-4.2-to-4.2.1.diff
+    $ gunzip bugzilla-4.2-to-4.2.1.diff.gz
+    $ patch -p1 < bugzilla-4.2-to-4.2.1.diff
     patching file Bugzilla/Constants.pm
     patching file enter_bug.cgi
     ...
@@ -1824,8 +1830,9 @@ steps to complete your upgrade.
    and settings for the new version:
 
    ::
-       bash$ :command:`cd /var/www/html/bugzilla`
-       bash$ :command:`./checksetup.pl`
+   
+       $ :command:`cd /var/www/html/bugzilla`
+       $ :command:`./checksetup.pl`
 
    .. warning:: The period at the beginning of the
       command :command:`./checksetup.pl` is important and cannot

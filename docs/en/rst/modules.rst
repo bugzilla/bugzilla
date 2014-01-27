@@ -1,4 +1,4 @@
-
+.. highlight:: console
 
 .. _install-perlmodules-manual:
 
@@ -17,12 +17,12 @@ apply this magic incantation, as root:
 
 ::
 
-    bash# tar -xzvf <module>.tar.gz
-    bash# cd <module>
-    bash# perl Makefile.PL
-    bash# make
-    bash# make test
-    bash# make install
+    # tar -xzvf <module>.tar.gz
+    # cd <module>
+    # perl Makefile.PL
+    # make
+    # make test
+    # make install
 
 .. note:: In order to compile source code under Windows you will need to obtain
    a 'make' utility.  The :command:`nmake` utility provided with

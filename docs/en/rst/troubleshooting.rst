@@ -1,4 +1,4 @@
-
+.. highlight:: console
 
 .. _troubleshooting:
 
@@ -55,7 +55,7 @@ Bugzilla.
 
 ::
 
-    bash$ ./testserver.pl http://landfill.bugzilla.org/bugzilla-tip
+    $ ./testserver.pl http://landfill.bugzilla.org/bugzilla-tip
     TEST-OK Webserver is running under group id in $webservergroup.
     TEST-OK Got ant picture.
     TEST-OK Webserver is executing CGIs.
@@ -97,23 +97,27 @@ To fix this, go to
 :file:`<path-to-perl>/lib/DBD/sponge.pm`
 in your Perl installation and replace
 
-::
+.. code-block:: perl
 
     my $numFields;
     if ($attribs->{'NUM_OF_FIELDS'}) {
-    $numFields = $attribs->{'NUM_OF_FIELDS'};
-    } elsif ($attribs->{'NAME'}) {
-    $numFields = @{$attribs->{NAME}};
+        $numFields = $attribs->{'NUM_OF_FIELDS'};
+    }
+    elsif ($attribs->{'NAME'}) {
+        $numFields = @{$attribs->{NAME}};
+    }
 
 with
 
-::
+.. code-block:: perl
 
     my $numFields;
     if ($attribs->{'NUM_OF_FIELDS'}) {
-    $numFields = $attribs->{'NUM_OF_FIELDS'};
-    } elsif ($attribs->{'NAMES'}) {
-    $numFields = @{$attribs->{NAMES}};
+        $numFields = $attribs->{'NUM_OF_FIELDS'};
+    }
+    elsif ($attribs->{'NAMES'}) {
+        $numFields = @{$attribs->{NAMES}};
+    }
 
 (note the S added to NAME.)
 

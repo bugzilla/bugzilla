@@ -465,7 +465,7 @@ sub bug_format_comment {
 
     # link bzr commit messages
     push (@$regexes, {
-        match => qr/\b(Committing\sto:\sbzr\+ssh:\/\/
+        match => qr/\b(Committing\s+to:\sbzr\+ssh:\/\/
                     (?:[^\@]+\@)?(bzr\.mozilla\.org[^\n]+)\n.*?\bCommitted\s)
                     (revision\s(\d+))/sx,
         replace => sub {

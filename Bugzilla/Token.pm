@@ -168,6 +168,10 @@ sub issue_hash_token {
     my @args = ($time, $user_id, @$data);
 
     my $token = join('*', @args);
+    # Wide characters cause Digest::SHA to die.
+    if (Bugzilla->params->{'utf8'}) {
+        utf8::encode($token) if utf8::is_utf8($token);
+    }
     $token = hmac_sha256_base64($token, Bugzilla->localconfig->{'site_wide_secret'});
     $token =~ s/\+/-/g;
     $token =~ s/\//_/g;

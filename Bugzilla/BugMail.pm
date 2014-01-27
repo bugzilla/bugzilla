@@ -344,7 +344,7 @@ sub sendMail {
     my @watchingrel = map { $relationships{$_} } @reasons_watch;
     push(@headerrel,   'None') unless @headerrel;
     push(@watchingrel, 'None') unless @watchingrel;
-    push @watchingrel, map { user_id_to_login($_) } @$watchingRef;
+    push @watchingrel, map { Bugzilla::User->new($_)->login } @$watchingRef;
 
     my @changedfields = uniq map { $_->{field_name} } @display_diffs;
 

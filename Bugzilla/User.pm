@@ -28,7 +28,7 @@ use URI::QueryParam;
 
 use parent qw(Bugzilla::Object Exporter);
 @Bugzilla::User::EXPORT = qw(is_available_username
-    login_to_id user_id_to_login validate_password
+    login_to_id validate_password
     USER_MATCH_MULTIPLE USER_MATCH_FAILED USER_MATCH_SUCCESS
     MATCH_SKIP_CONFIRM
 );
@@ -2193,17 +2193,6 @@ sub login_to_id {
     }
 }
 
-sub user_id_to_login {
-    my $user_id = shift;
-    my $dbh = Bugzilla->dbh;
-
-    return '' unless ($user_id && detaint_natural($user_id));
-
-    my $login = $dbh->selectrow_array('SELECT login_name FROM profiles
-                                       WHERE userid = ?', undef, $user_id);
-    return $login || '';
-}
-
 sub validate_password {
     my ($password, $matchpassword) = @_;
 
@@ -2830,12 +2819,6 @@ of a user, but you don't want the full weight of Bugzilla::User.
 
 However, consider using a Bugzilla::User object instead of this function
 if you need more information about the user than just their ID.
-
-=item C<user_id_to_login($user_id)>
-
-Returns the login name of the user account for the given user ID. If no
-valid user ID is given or the user has no entry in the profiles table,
-we return an empty string.
 
 =item C<validate_password($passwd1, $passwd2)>
 

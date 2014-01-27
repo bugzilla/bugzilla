@@ -2187,8 +2187,8 @@ sub _set_global_validator {
     my $can = $self->check_can_change_field($field, $current, $value, \$privs);
     if (!$can) {
         if ($field eq 'assigned_to' || $field eq 'qa_contact') {
-            $value   = user_id_to_login($value);
-            $current = user_id_to_login($current);
+            $value   = Bugzilla::User->new($value)->login;
+            $current = Bugzilla::User->new($current)->login;
         }
         ThrowUserError('illegal_change', { field    => $field,
                                            oldvalue => $current,

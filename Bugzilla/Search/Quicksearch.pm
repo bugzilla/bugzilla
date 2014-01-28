@@ -403,10 +403,10 @@ sub _handle_field_names {
     # Generic field1,field2,field3:value1,value2 notation.
     # We have to correctly ignore commas and colons in quotes.
     foreach my $symbol (keys %{ OPERATOR_SYMBOLS() }) {
-        my @field_values = parse_line($symbol, 1, $or_operand);
+        my @field_values = _parse_line($symbol, 1, $or_operand);
         next unless scalar @field_values == 2;
-        my @fields = parse_line(',', 1, $field_values[0]);
-        my @values = parse_line(',', 1, $field_values[1]);
+        my @fields = _parse_line(',', 1, $field_values[0]);
+        my @values = _parse_line(',', 1, $field_values[1]);
         foreach my $field (@fields) {
             my $translated = _translate_field_name($field);
             # Skip and record any unknown fields

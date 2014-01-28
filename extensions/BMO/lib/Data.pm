@@ -53,6 +53,7 @@ tie(%$cf_visible_in_products, "Tie::IxHash",
     },
     qr/^cf_crash_signature$/ => {
         "Add-on SDK"            => [],
+        "Android Background Services" => [],
         "addons.mozilla.org"    => [],
         "Firefox OS"            => [],
         "Calendar"              => [],

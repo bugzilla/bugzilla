@@ -100,13 +100,13 @@ latex:
 	@echo
 	@echo "Build finished; the LaTeX files are in $(BUILDDIR)/latex."
 	@echo "Run \`make' in that directory to run these through (pdf)latex" \
-	      "(use \`make latexpdf' here to do that automatically)."
+	      "(use \`make latexpdf' to have that step done automatically)."
 
 latexpdf:
-	$(SPHINXBUILD) -b latex $(ALLSPHINXOPTS) $(BUILDDIR)/latex
+	$(SPHINXBUILD) -b latex $(ALLSPHINXOPTS) $(BUILDDIR)/pdf
 	@echo "Running LaTeX files through pdflatex..."
-	$(MAKE) -C $(BUILDDIR)/latex all-pdf
-	@echo "pdflatex finished; the PDF files are in $(BUILDDIR)/latex."
+	$(MAKE) -C $(BUILDDIR)/pdf all-pdf
+	@echo "pdflatex finished; the PDF files are in $(BUILDDIR)/pdf."
 
 pdf:
 	$(SPHINXBUILD) -b pdf -t enable_rst2pdf $(ALLSPHINXOPTS) $(BUILDDIR)/pdf

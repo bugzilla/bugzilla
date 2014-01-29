@@ -971,88 +971,194 @@ sub _syslog {
 
 sub post_bug_after_creation {
     my ($self, $args) = @_;
+    return unless my $format = Bugzilla->input_params->{format};
+    my $bug = $args->{vars}->{bug};
+
+    if ($format eq 'employee-incident'
+        && $bug->component eq 'Server Operations: Desktop Issues')
+    {
+        $self->_post_employee_incident_bug($args);
+    }
+    elsif ($format eq 'swag') {
+        $self->_post_gear_bug($args);
+    }
+}
+
+sub _post_employee_incident_bug {
+    my ($self, $args) = @_;
     my $vars = $args->{vars};
     my $bug = $vars->{bug};
 
-    if (Bugzilla->input_params->{format}
-        && Bugzilla->input_params->{format} eq 'employee-incident'
-        && $bug->component eq 'Server Operations: Desktop Issues')
-    {
-        my $error_mode_cache = Bugzilla->error_mode;
-        Bugzilla->error_mode(ERROR_MODE_DIE);
+    my $error_mode_cache = Bugzilla->error_mode;
+    Bugzilla->error_mode(ERROR_MODE_DIE);
 
-        my $template = Bugzilla->template;
-        my $cgi = Bugzilla->cgi;
+    my $template = Bugzilla->template;
+    my $cgi = Bugzilla->cgi;
 
-        my ($investigate_bug, $ssh_key_bug);
-        my $old_user = Bugzilla->user;
-        eval {
-            Bugzilla->set_user(Bugzilla::User->new({ name => 'nobody@mozilla.org' }));
-            my $new_user = Bugzilla->user;
+    my ($investigate_bug, $ssh_key_bug);
+    my $old_user = Bugzilla->user;
+    eval {
+        Bugzilla->set_user(Bugzilla::User->new({ name => 'nobody@mozilla.org' }));
+        my $new_user = Bugzilla->user;
 
-            # HACK: User needs to be in the editbugs and primary bug's group to allow
-            # setting of dependencies.
-            $new_user->{'groups'} = [ Bugzilla::Group->new({ name => 'editbugs' }), 
-                                      Bugzilla::Group->new({ name => 'infra' }), 
-                                      Bugzilla::Group->new({ name => 'infrasec' }) ];
+        # HACK: User needs to be in the editbugs and primary bug's group to allow
+        # setting of dependencies.
+        $new_user->{'groups'} = [ Bugzilla::Group->new({ name => 'editbugs' }),
+                                    Bugzilla::Group->new({ name => 'infra' }),
+                                    Bugzilla::Group->new({ name => 'infrasec' }) ];
 
-            my $recipients = { changer => $new_user };
-            $vars->{original_reporter} = $old_user;
+        my $recipients = { changer => $new_user };
+        $vars->{original_reporter} = $old_user;
 
-            my $comment;
-            $cgi->param('display_action', '');
-            $template->process('bug/create/comment-employee-incident.txt.tmpl', $vars, \$comment)
-                || ThrowTemplateError($template->error());
+        my $comment;
+        $cgi->param('display_action', '');
+        $template->process('bug/create/comment-employee-incident.txt.tmpl', $vars, \$comment)
+            || ThrowTemplateError($template->error());
 
-            $investigate_bug = Bugzilla::Bug->create({ 
-                short_desc        => 'Investigate Lost Device',
-                product           => 'mozilla.org',
-                component         => 'Security Assurance: Incident',
-                status_whiteboard => '[infrasec:incident]',
-                bug_severity      => 'critical',
-                cc                => [ 'jstevensen@mozilla.com' ],
-                groups            => [ 'infrasec' ], 
-                comment           => $comment,
-                op_sys            => 'All', 
-                rep_platform      => 'All',
-                version           => 'other',
-                dependson         => $bug->bug_id, 
-            });
-            $bug->set_all({ blocked => { add => [ $investigate_bug->bug_id ] }});
-            Bugzilla::BugMail::Send($investigate_bug->id, $recipients);
-
-            Bugzilla->set_user($old_user);
-            $vars->{original_reporter} = '';
-            $comment = '';
-            $cgi->param('display_action', 'ssh');
-            $template->process('bug/create/comment-employee-incident.txt.tmpl', $vars, \$comment)
-                || ThrowTemplateError($template->error());
-
-            $ssh_key_bug = Bugzilla::Bug->create({ 
-                short_desc        => 'Disable/Regenerate SSH Key',
-                product           => $bug->product,
-                component         => $bug->component,
-                bug_severity      => 'critical',
-                cc                => $bug->cc,
-                groups            => [ map { $_->{name} } @{ $bug->groups } ],
-                comment           => $comment,
-                op_sys            => 'All', 
-                rep_platform      => 'All',
-                version           => 'other',
-                dependson         => $bug->bug_id, 
-            });
-            $bug->set_all({ blocked => { add => [ $ssh_key_bug->bug_id ] }});
-            Bugzilla::BugMail::Send($ssh_key_bug->id, $recipients);
-        };
-        my $error = $@;
+        $investigate_bug = Bugzilla::Bug->create({
+            short_desc        => 'Investigate Lost Device',
+            product           => 'mozilla.org',
+            component         => 'Security Assurance: Incident',
+            status_whiteboard => '[infrasec:incident]',
+            bug_severity      => 'critical',
+            cc                => [ 'jstevensen@mozilla.com' ],
+            groups            => [ 'infrasec' ],
+            comment           => $comment,
+            op_sys            => 'All',
+            rep_platform      => 'All',
+            version           => 'other',
+            dependson         => $bug->bug_id,
+        });
+        $bug->set_all({ blocked => { add => [ $investigate_bug->bug_id ] }});
+        Bugzilla::BugMail::Send($investigate_bug->id, $recipients);
 
         Bugzilla->set_user($old_user);
-        Bugzilla->error_mode($error_mode_cache);
+        $vars->{original_reporter} = '';
+        $comment = '';
+        $cgi->param('display_action', 'ssh');
+        $template->process('bug/create/comment-employee-incident.txt.tmpl', $vars, \$comment)
+            || ThrowTemplateError($template->error());
 
-        if ($error || !$investigate_bug || !$ssh_key_bug) {
-            warn "Failed to create additional employee-incident bug: $error" if $error;
-            $vars->{'message'} = 'employee_incident_creation_failed';
+        $ssh_key_bug = Bugzilla::Bug->create({
+            short_desc        => 'Disable/Regenerate SSH Key',
+            product           => $bug->product,
+            component         => $bug->component,
+            bug_severity      => 'critical',
+            cc                => $bug->cc,
+            groups            => [ map { $_->{name} } @{ $bug->groups } ],
+            comment           => $comment,
+            op_sys            => 'All',
+            rep_platform      => 'All',
+            version           => 'other',
+            dependson         => $bug->bug_id,
+        });
+        $bug->set_all({ blocked => { add => [ $ssh_key_bug->bug_id ] }});
+        Bugzilla::BugMail::Send($ssh_key_bug->id, $recipients);
+    };
+    my $error = $@;
+
+    Bugzilla->set_user($old_user);
+    Bugzilla->error_mode($error_mode_cache);
+
+    if ($error || !$investigate_bug || !$ssh_key_bug) {
+        warn "Failed to create additional employee-incident bug: $error" if $error;
+        $vars->{'message'} = 'employee_incident_creation_failed';
+    }
+}
+
+sub _post_gear_bug {
+    my ($self, $args) = @_;
+    my $vars = $args->{vars};
+    my $bug = $vars->{bug};
+    my $input = Bugzilla->input_params;
+
+    my ($team, $code) = $input->{teamcode} =~ /^(.+?) \((\d+)\)$/;
+    my @request = (
+        "Date Required: $input->{date_required}",
+        "$input->{firstname} $input->{lastname}",
+        $input->{email},
+        $input->{mozspace},
+        $team,
+        $code,
+        $input->{purpose},
+    );
+    my @recipient = (
+        "$input->{shiptofirstname} $input->{shiptolastname}",
+        $input->{shiptoemail},
+        $input->{shiptoaddress1},
+        $input->{shiptoaddress2},
+        $input->{shiptocity},
+        $input->{shiptostate},
+        $input->{shiptopostcode},
+        $input->{shiptocountry},
+        "Phone: $input->{shiptophone}",
+        $input->{shiptoidrut},
+    );
+
+    # the csv has 14 item fields
+    my @items = map { trim($_) } split(/\n/, $input->{items});
+    my @csv;
+    while (@items) {
+        my @batch;
+        if (scalar(@items) > 14) {
+            @batch = splice(@items, 0, 14);
         }
+        else {
+            @batch = @items;
+            push @batch, '' for scalar(@items)..13;
+            @items = ();
+        }
+        push @csv, [ @request, @batch, @recipient ];
+    }
+
+    # csv quoting and concat
+    foreach my $line (@csv) {
+        foreach my $field (@$line) {
+            if ($field =~ s/"/""/g || $field =~ /,/) {
+                $field = qq#"$field"#;
+            }
+        }
+        $line = join(',', @$line);
+    }
+
+    $self->_add_attachment($args, {
+        data        => join("\n", @csv),
+        description => "Items (CSV)",
+        filename    => "gear_" . $bug->id . ".csv",
+        mimetype    => "text/csv",
+    });
+}
+
+sub _add_attachment {
+    my ($self, $args, $attachment_args) = @_;
+
+    my $bug = $args->{vars}->{bug};
+    $attachment_args->{bug}         = $bug;
+    $attachment_args->{creation_ts} = $bug->creation_ts;
+    $attachment_args->{ispatch}     = 0 unless exists $attachment_args->{ispatch};
+    $attachment_args->{isprivate}   = 0 unless exists $attachment_args->{isprivate};
+
+    # If the attachment cannot be successfully added to the bug,
+    # we notify the user, but we don't interrupt the bug creation process.
+    my $old_error_mode = Bugzilla->error_mode;
+    Bugzilla->error_mode(ERROR_MODE_DIE);
+    my $attachment;
+    eval {
+        $attachment = Bugzilla::Attachment->create($attachment_args);
+    };
+    warn "$@" if $@;
+    Bugzilla->error_mode($old_error_mode);
+
+    if ($attachment) {
+        # Insert comment for attachment
+        $bug->add_comment('', { isprivate  => 0,
+                                type       => CMT_ATTACHMENT_CREATED,
+                                extra_data => $attachment->id });
+        $bug->update($bug->creation_ts);
+        delete $bug->{attachments};
+    }
+    else {
+        $args->{vars}->{'message'} = 'attachment_creation_failed';
     }
 }
 

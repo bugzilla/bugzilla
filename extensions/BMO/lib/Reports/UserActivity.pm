@@ -39,7 +39,7 @@ sub report {
     }
 
     if ($action eq 'run') {
-        if ($input->{'who'} eq '') {
+        if (!exists $input->{'who'} || $input->{'who'} eq '') {
             ThrowUserError('user_activity_missing_username');
         }
         Bugzilla::User::match_field({ 'who' => {'type' => 'multi'} });

@@ -35,9 +35,8 @@ use constant AUDIT_UPDATES => 1;
 use constant AUDIT_REMOVES => 1;
 
 # When USE_MEMCACHED is true, the class is suitable for serialisation to
-# Memcached. This will be flipped to true by default once the majority of
-# Bugzilla Object have been tested with Memcached.
-use constant USE_MEMCACHED => 0;
+# Memcached.  See documentation in Bugzilla::Memcached for more information.
+use constant USE_MEMCACHED => 1;
 
 # This allows the JSON-RPC interface to return Bugzilla::Object instances
 # as though they were hashes. In the future, this may be modified to return

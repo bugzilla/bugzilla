@@ -42,6 +42,9 @@ use constant VALIDATORS => {
 
 use constant UPDATE_COLUMNS => qw(bug_list list_order);
 
+# There's no gain to caching these objects
+use constant USE_MEMCACHED => 0;
+
 ###################
 # DB Manipulation #
 ###################

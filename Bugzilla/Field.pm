@@ -1075,6 +1075,8 @@ sub create {
         # Restore the original obsolete state of the custom field.
         $dbh->do('UPDATE fielddefs SET obsolete = 0 WHERE id = ?', undef, $field->id)
           unless $is_obsolete;
+
+        Bugzilla->memcached->clear({ table => 'fielddefs', id => $field->id });
     }
 
     return $field;

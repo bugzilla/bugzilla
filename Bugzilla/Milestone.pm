@@ -113,6 +113,7 @@ sub update {
         $dbh->do('UPDATE products SET defaultmilestone = ?
                   WHERE id = ? AND defaultmilestone = ?',
                  undef, ($self->name, $self->product_id, $changes->{value}->[0]));
+        Bugzilla->memcached->clear({ table => 'produles', id => $self->product_id });
     }
     $dbh->bz_commit_transaction();
 

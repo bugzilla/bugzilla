@@ -908,6 +908,9 @@ sub update {
         $dbh->do('UPDATE bugs SET delta_ts = ? WHERE bug_id = ?',
                  undef, ($timestamp, $self->bug_id));
         $self->{modification_time} = $timestamp;
+        # because we updated the attachments table after SUPER::update(), we
+        # need to ensure the cache is flushed.
+        Bugzilla->memcached->clear({ table => 'attachments', id => $self->id });
     }
 
     return $changes;
@@ -932,7 +935,10 @@ sub remove_from_db {
     my $dbh = Bugzilla->dbh;
 
     $dbh->bz_start_transaction();
-    $dbh->do('DELETE FROM flags WHERE attach_id = ?', undef, $self->id);
+    my @flag_ids = $dbh->selectrow_array(
+        'SELECT id FROM flags WHERE attach_id = ?', undef, $self->id);
+    $dbh->do('DELETE FROM flags WHERE ' . $dbh->sql_in('id', \@flag_ids))
+        if @flag_ids;
     $dbh->do('DELETE FROM attach_data WHERE id = ?', undef, $self->id);
     $dbh->do('UPDATE attachments SET mimetype = ?, ispatch = ?, isobsolete = ?
               WHERE attach_id = ?', undef, ('text/plain', 0, 1, $self->id));
@@ -941,6 +947,13 @@ sub remove_from_db {
     my $filename = $self->_get_local_filename;
     if (-e $filename) {
         unlink $filename or warn "Couldn't unlink $filename: $!";
+    }
+
+    # As we don't call SUPER->remove_from_db we need to manually clear
+    # memcached here.
+    Bugzilla->memcached->clear({ table => 'attachments', id => $self->id });
+    foreach my $flag_id (@flag_ids) {
+        Bugzilla->memcached->clear({ table => 'flags', id => $flag_id });
     }
 }
 

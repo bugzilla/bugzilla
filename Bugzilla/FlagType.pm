@@ -185,8 +185,13 @@ sub update {
     # Silently remove requestees from flags which are no longer
     # specifically requestable.
     if (!$self->is_requesteeble) {
-        $dbh->do('UPDATE flags SET requestee_id = NULL WHERE type_id = ?',
-                  undef, $self->id);
+        my @ids = $dbh->selectrow_array(
+            "SELECT id FROM flags WHERE type_id = ?", undef, $self->id);
+        $dbh->do("UPDATE flags SET requestee_id = NULL WHERE "
+            . $dbh->sql_in('type_id', \@ids));
+        foreach my $id (@ids) {
+            Bugzilla->memcached->clear({ table => 'flags', id => $id });
+        }
     }
 
     $dbh->bz_commit_transaction();

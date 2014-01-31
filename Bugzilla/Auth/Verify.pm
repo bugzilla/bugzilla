@@ -89,6 +89,7 @@ sub create_or_update_user {
         if ($extern_id && $username_user_id && !$extern_user_id) {
             $dbh->do('UPDATE profiles SET extern_id = ? WHERE userid = ?',
                      undef, $extern_id, $username_user_id);
+            Bugzilla->memcached->clear({ table => 'profiles', id => $username_user_id });
         }
 
         # Finally, at this point, one of these will give us a valid user id.

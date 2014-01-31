@@ -95,6 +95,7 @@ sub change_password {
     my $cryptpassword = bz_crypt($password);
     $dbh->do("UPDATE profiles SET cryptpassword = ? WHERE userid = ?",
              undef, $cryptpassword, $user->id);
+    Bugzilla->memcached->clear({ table => 'profiles', id => $user->id });
 }
 
 1;

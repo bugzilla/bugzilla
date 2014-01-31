@@ -461,6 +461,7 @@ sub update {
         $dbh->do('UPDATE flags SET modification_date = ? WHERE id = ?',
                  undef, ($timestamp, $self->id));
         $self->{'modification_date'} = format_time($timestamp, '%Y.%m.%d %T');
+        Bugzilla->memcached->clear({ table => 'flags', id => $self->id });
     }
     return $changes;
 }
@@ -607,6 +608,7 @@ sub force_retarget {
         if ($is_retargetted) {
             $dbh->do('UPDATE flags SET type_id = ? WHERE id = ?',
                      undef, ($flag->type_id, $flag->id));
+            Bugzilla->memcached->clear({ table => 'flags', id => $flag->id });
         }
         else {
             # Track deleted attachment flags.

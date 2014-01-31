@@ -278,6 +278,7 @@ sub update_last_seen_date {
         # pending changes
         $dbh->do("UPDATE profiles SET last_seen_date = ? WHERE userid = ?",
                  undef, $date, $self->id);
+        Bugzilla->memcached->clear({ table => 'profiles', id => $self->id });
     }
 }
 

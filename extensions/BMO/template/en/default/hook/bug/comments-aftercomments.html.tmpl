@@ -9,17 +9,21 @@
 [% IF has_tbpl_comment %]
   [% expand_caption   = 'Expand TinderboxPushlog Comments' %]
   [% collapse_caption = 'Collapse TinderboxPushlog Comments' %]
+  [% show_caption     = 'Show TinderboxPushlog Comments' %]
+  [% hide_caption     = 'Hide TinderboxPushlog Comments' %]
   <script>
     YAHOO.util.Event.onDOMReady(function () {
         var ul = document.getElementsByClassName('bz_collapse_expand_comments');
         if (ul.length == 0)
-            return; 
+            return;
+
         var li = document.createElement('li');
         var a = document.createElement('a');
         Dom.setAttribute(a, 'href', 'javascript:void(0)');
-        Dom.setAttribute(a, 'id', 'toggle_tbplbot_comments');
+        Dom.setAttribute(a, 'id', 'tbpl_toggle_collapse');
         a.innerHTML = '[% expand_caption FILTER js %]';
         YAHOO.util.Event.on(a, 'click', function() {
+            var a = document.getElementById('tbpl_toggle_collapse');
             var do_expand = a.innerHTML == '[% expand_caption FILTER js %]';
             for (var i = 0, n = tbpl_comment_ids.length; i < n; i++) {
                 var id = tbpl_comment_ids[i];
@@ -34,6 +38,29 @@
             a.innerHTML = do_expand
               ? '[% collapse_caption FILTER js %]'
               : '[% expand_caption FILTER js %]';
+        });
+        li.appendChild(a);
+        ul[0].appendChild(li);
+
+        li = document.createElement('li');
+        a = document.createElement('a');
+        Dom.setAttribute(a, 'href', 'javascript:void(0)');
+        Dom.setAttribute(a, 'id', 'tbpl_toggle_visible');
+        a.innerHTML = '[% hide_caption FILTER js %]';
+        YAHOO.util.Event.on(a, 'click', function() {
+            var a = document.getElementById('tbpl_toggle_visible');
+            var do_show = a.innerHTML == '[% show_caption FILTER js %]';
+            for (var i = 0, n = tbpl_comment_ids.length; i < n; i++) {
+                var id = tbpl_comment_ids[i];
+                if (do_show) {
+                    Dom.removeClass('c' + id, 'bz_default_hidden');
+                } else {
+                    Dom.addClass('c' + id, 'bz_default_hidden');
+                }
+            }
+            a.innerHTML = do_show
+              ? '[% hide_caption FILTER js %]'
+              : '[% show_caption FILTER js %]';
         });
         li.appendChild(a);
         ul[0].appendChild(li);

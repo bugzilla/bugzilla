@@ -39,6 +39,8 @@ sub handle {
 
     # Determine how the data should be represented. We do this early so
     # errors will also be returned with the proper content type.
+    # If no accept header was sent or the content types specified were not
+    # matched, we default to the first type in the whitelist.
     $self->content_type($self->_best_content_type(REST_CONTENT_TYPE_WHITELIST()));
 
     # Using current path information, decide which class/method to
@@ -440,6 +442,10 @@ sub _best_content_type {
 sub _simple_content_negotiation {
     my ($self, @types) = @_;
     my @accept_types = $self->_get_content_prefs();
+    # Return the types as-is if no accept header sent, since sorting will be a no-op.
+    if (!@accept_types) {
+        return @types;
+    }
     my $score = sub { $self->_score_type(shift, @accept_types) };
     return sort {$score->($b) <=> $score->($a)} @types;
 }
@@ -478,7 +484,7 @@ sub _get_content_prefs {
     # Sort the types by score, subscore by order, and pull out just the name
     @prefs = map {$_->{name}} sort {$b->{score} <=> $a->{score} ||
                                     $a->{order} <=> $b->{order}} @prefs;
-    return @prefs, '*/*';  # Allows allow for */*
+    return @prefs;
 }
 
 1;

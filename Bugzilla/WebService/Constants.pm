@@ -256,11 +256,12 @@ use constant XMLRPC_CONTENT_TYPE_WHITELIST => qw(
     application/xml
 );
 
+# The first content type specified is used as the default.
 use constant REST_CONTENT_TYPE_WHITELIST => qw(
-    text/html
-    application/javascript
     application/json
+    application/javascript
     text/javascript
+    text/html
 );
 
 sub WS_DISPATCH {

@@ -17,7 +17,7 @@ use Bugzilla::Error;
 use Bugzilla::Group;
 use Bugzilla::User;
 use Bugzilla::Util qw(trim);
-use Bugzilla::WebService::Util qw(filter validate translate params_to_objects);
+use Bugzilla::WebService::Util qw(filter filter_wants validate translate params_to_objects);
 
 use List::Util qw(first);
 
@@ -226,9 +226,7 @@ sub get {
         }
     }
 
-    my $in_group = $self->_filter_users_by_group(
-        \@user_objects, $params);
-
+    my $in_group = $self->_filter_users_by_group(\@user_objects, $params);
     foreach my $user (@$in_group) {
         my $user_info = {
             id        => $self->type('int', $user->id),
@@ -244,15 +242,27 @@ sub get {
         }
 
         if (Bugzilla->user->id == $user->id) {
-            $user_info->{saved_searches} = [map { $self->_query_to_hash($_) } @{ $user->queries }];
-            $user_info->{saved_reports}  = [map { $self->_report_to_hash($_) } @{ $user->reports }];
+            if (filter_wants($params, 'saved_searches')) {
+                $user_info->{saved_searches} = [
+                    map { $self->_query_to_hash($_) } @{ $user->queries }
+                ];
+            }
+            if (filter_wants($params, 'saved_reports')) {
+                $user_info->{saved_reports}  = [
+                    map { $self->_report_to_hash($_) } @{ $user->reports }
+                ];
+            }
         }
 
-        if (Bugzilla->user->id == $user->id || Bugzilla->user->in_group('editusers')) {
-            $user_info->{groups} = [map {$self->_group_to_hash($_)} @{ $user->groups }];
-        }
-        else {
-            $user_info->{groups} = $self->_filter_bless_groups($user->groups);
+        if (filter_wants($params, 'groups')) {
+            if (Bugzilla->user->id == $user->id || Bugzilla->user->in_group('editusers')) {
+                $user_info->{groups} = [
+                    map { $self->_group_to_hash($_) } @{ $user->groups }
+                ];
+            }
+            else {
+                $user_info->{groups} = $self->_filter_bless_groups($user->groups);
+            }
         }
 
         push(@users, filter($params, $user_info));

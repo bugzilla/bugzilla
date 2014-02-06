@@ -28,7 +28,7 @@ use Bugzilla::Error;
 use Bugzilla::Group;
 use Bugzilla::User;
 use Bugzilla::Util qw(trim);
-use Bugzilla::WebService::Util qw(filter validate);
+use Bugzilla::WebService::Util qw(filter filter_wants validate);
 use Bugzilla::Hook;
 
 use List::Util qw(first);
@@ -224,33 +224,41 @@ sub get {
         }
     }
 
-    my $in_group = $self->_filter_users_by_group(
-        \@user_objects, $params); 
-    if (Bugzilla->user->in_group('editusers')) {
-        @users = 
-            map {filter $params, {
-                id        => $self->type('int', $_->id),
-                real_name => $self->type('string', $_->name),
-                name      => $self->type('email', $_->login),
-                email     => $self->type('email', $_->email),
-                can_login => $self->type('boolean', $_->is_enabled ? 1 : 0),
-                groups    => $self->_filter_bless_groups($_->groups), 
-                email_enabled     => $self->type('boolean', $_->email_enabled),
-                login_denied_text => $self->type('string', $_->disabledtext),
-                saved_searches    => [map { $self->_query_to_hash($_) } @{ $_->queries }],
-            }} @$in_group;
-    }    
-    else {
-        @users =
-            map {filter $params, {
-                id        => $self->type('int', $_->id),
-                real_name => $self->type('string', $_->name),
-                name      => $self->type('email', $_->login),
-                email     => $self->type('email', $_->email),
-                can_login => $self->type('boolean', $_->is_enabled ? 1 : 0),
-                groups    => $self->_filter_bless_groups($_->groups),
-                saved_searches => [map { $self->_query_to_hash($_) } @{ $_->queries }],
-            }} @$in_group;
+    my $in_group = $self->_filter_users_by_group(\@user_objects, $params);
+    foreach my $user (@$in_group) {
+        my $user_info = {
+            id        => $self->type('int', $user->id),
+            real_name => $self->type('string', $user->name),
+            name      => $self->type('email', $user->login),
+            email     => $self->type('email', $user->email),
+            can_login => $self->type('boolean', $user->is_enabled ? 1 : 0),
+        };
+
+        if (Bugzilla->user->in_group('editusers')) {
+            $user_info->{email_enabled}     = $self->type('boolean', $user->email_enabled);
+            $user_info->{login_denied_text} = $self->type('string', $user->disabledtext);
+        }
+
+        if (Bugzilla->user->id == $user->id) {
+            if (filter_wants($params, 'saved_searches')) {
+                $user_info->{saved_searches} = [
+                    map { $self->_query_to_hash($_) } @{ $user->queries }
+                ];
+            }
+        }
+
+        if (filter_wants($params, 'groups')) {
+            if (Bugzilla->user->id == $user->id || Bugzilla->user->in_group('editusers')) {
+                $user_info->{groups} = [
+                    map { $self->_group_to_hash($_) } @{ $user->groups }
+                ];
+            }
+            else {
+                $user_info->{groups} = $self->_filter_bless_groups($user->groups);
+            }
+        }
+
+        push(@users, filter($params, $user_info));
     }
 
     Bugzilla::Hook::process('webservice_user_get', 

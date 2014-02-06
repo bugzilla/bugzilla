@@ -11,6 +11,7 @@ use base qw(Bugzilla::Extension);
 use Bugzilla::Field;
 use Bugzilla::User;
 use Bugzilla::Install::Util qw(indicate_progress);
+use Bugzilla::WebService::Util qw(filter_wants);
 use Date::Parse;
 use Scalar::Util qw(blessed);
 
@@ -244,6 +245,8 @@ sub mailer_before_send {
 sub webservice_user_get {
     my ($self, $args) = @_;
     my ($webservice, $params, $users) = @$args{qw(webservice params users)};
+
+    return unless filter_wants($params, 'is_new');
 
     foreach my $user (@$users) {
         # Most of the time the hash values are XMLRPC::Data objects

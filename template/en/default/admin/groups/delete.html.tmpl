@@ -108,7 +108,8 @@
           ([% active.join(', ') FILTER html %])
           [% IF hidden %]
             <strong>WARNING: This product is currently hidden.
-            Deleting this group will make this product publicly visible.
+            Deleting this group could make this product publicly visible
+            if no other group applies.
             </strong>
           [% END %]</li>
       [% END %]

@@ -47,73 +47,53 @@ Download Locations
 
 CGI:
 
-::
-
-    CPAN Download Page: `<http://search.cpan.org/dist/CGI.pm/>`_
-    Documentation: `<http://perldoc.perl.org/CGI.html>`_
+* CPAN Download Page: `<http://search.cpan.org/dist/CGI.pm/>`_
+* Documentation: `<http://perldoc.perl.org/CGI.html>`_
 
 Data-Dumper:
 
-::
-
-    CPAN Download Page: `<http://search.cpan.org/dist/Data-Dumper/>`_
-    Documentation: `<http://search.cpan.org/dist/Data-Dumper/Dumper.pm>`_
+* CPAN Download Page: `<http://search.cpan.org/dist/Data-Dumper/>`_
+* Documentation: `<http://search.cpan.org/dist/Data-Dumper/Dumper.pm>`_
 
 Date::Format (part of TimeDate):
 
-::
-
-    CPAN Download Page: `<http://search.cpan.org/dist/TimeDate/>`_
-    Documentation: `<http://search.cpan.org/dist/TimeDate/lib/Date/Format.pm>`_
+* CPAN Download Page: `<http://search.cpan.org/dist/TimeDate/>`_
+* Documentation: `<http://search.cpan.org/dist/TimeDate/lib/Date/Format.pm>`_
 
 DBI:
 
-::
-
-    CPAN Download Page: `<http://search.cpan.org/dist/DBI/>`_
-    Documentation: `<http://dbi.perl.org/docs/>`_
+* CPAN Download Page: `<http://search.cpan.org/dist/DBI/>`_
+* Documentation: `<http://dbi.perl.org/docs/>`_
 
 DBD::mysql:
 
-::
-
-    CPAN Download Page: `<http://search.cpan.org/dist/DBD-mysql/>`_
-    Documentation: `<http://search.cpan.org/dist/DBD-mysql/lib/DBD/mysql.pm>`_
+* CPAN Download Page: `<http://search.cpan.org/dist/DBD-mysql/>`_
+* Documentation: `<http://search.cpan.org/dist/DBD-mysql/lib/DBD/mysql.pm>`_
 
 DBD::Pg:
 
-::
-
-    CPAN Download Page: `<http://search.cpan.org/dist/DBD-Pg/>`_
-    Documentation: `<http://search.cpan.org/dist/DBD-Pg/Pg.pm>`_
+* CPAN Download Page: `<http://search.cpan.org/dist/DBD-Pg/>`_
+* Documentation: `<http://search.cpan.org/dist/DBD-Pg/Pg.pm>`_
 
 Template-Toolkit:
 
-::
-
-    CPAN Download Page: `<http://search.cpan.org/dist/Template-Toolkit/>`_
-    Documentation: `<http://www.template-toolkit.org/docs.html>`_
+* CPAN Download Page: `<http://search.cpan.org/dist/Template-Toolkit/>`_
+* Documentation: `<http://www.template-toolkit.org/docs.html>`_
 
 GD:
 
-::
-
-    CPAN Download Page: `<http://search.cpan.org/dist/GD/>`_
-    Documentation: `<http://search.cpan.org/dist/GD/GD.pm>`_
+* CPAN Download Page: `<http://search.cpan.org/dist/GD/>`_
+* Documentation: `<http://search.cpan.org/dist/GD/GD.pm>`_
 
 Template::Plugin::GD:
 
-::
-
-    CPAN Download Page: `<http://search.cpan.org/dist/Template-GD/>`_
-    Documentation: `<http://www.template-toolkit.org/docs/aqua/Modules/index.html>`_
+* CPAN Download Page: `<http://search.cpan.org/dist/Template-GD/>`_
+* Documentation: `<http://www.template-toolkit.org/docs/aqua/Modules/index.html>`_
 
 MIME::Parser (part of MIME-tools):
 
-::
-
-    CPAN Download Page: `<http://search.cpan.org/dist/MIME-tools/>`_
-    Documentation: `<http://search.cpan.org/dist/MIME-tools/lib/MIME/Parser.pm>`_
+* CPAN Download Page: `<http://search.cpan.org/dist/MIME-tools/>`_
+* Documentation: `<http://search.cpan.org/dist/MIME-tools/lib/MIME/Parser.pm>`_
 
 .. _modules-manual-optional:
 
@@ -122,37 +102,25 @@ Optional Modules
 
 Chart::Lines:
 
-::
-
-    CPAN Download Page: `<http://search.cpan.org/dist/Chart/>`_
-    Documentation: `<http://search.cpan.org/dist/Chart/Chart.pod>`_
+* CPAN Download Page: `<http://search.cpan.org/dist/Chart/>`_
+* Documentation: `<http://search.cpan.org/dist/Chart/Chart.pod>`_
 
 GD::Graph:
 
-::
-
-    CPAN Download Page: `<http://search.cpan.org/dist/GDGraph/>`_
-    Documentation: `<http://search.cpan.org/dist/GDGraph/Graph.pm>`_
+* CPAN Download Page: `<http://search.cpan.org/dist/GDGraph/>`_
+* Documentation: `<http://search.cpan.org/dist/GDGraph/Graph.pm>`_
 
 GD::Text::Align (part of GD::Text::Util):
 
-::
-
-    CPAN Download Page: `<http://search.cpan.org/dist/GDTextUtil/>`_
-    Documentation: `<http://search.cpan.org/dist/GDTextUtil/Text/Align.pm>`_
+* CPAN Download Page: `<http://search.cpan.org/dist/GDTextUtil/>`_
+* Documentation: `<http://search.cpan.org/dist/GDTextUtil/Text/Align.pm>`_
 
 XML::Twig:
 
-::
-
-    CPAN Download Page: `<http://search.cpan.org/dist/XML-Twig/>`_
-    Documentation: `<http://standards.ieee.org/resources/spasystem/twig/twig_stable.html>`_
+* CPAN Download Page: `<http://search.cpan.org/dist/XML-Twig/>`_
+* Documentation: `<http://standards.ieee.org/resources/spasystem/twig/twig_stable.html>`_
 
 PatchReader:
 
-::
-
-    CPAN Download Page: `<http://search.cpan.org/author/JKEISER/PatchReader/>`_
-    Documentation: `<http://www.johnkeiser.com/mozilla/Patch_Viewer.html>`_
-
-
+* CPAN Download Page: `<http://search.cpan.org/author/JKEISER/PatchReader/>`_
+* Documentation: `<http://www.johnkeiser.com/mozilla/Patch_Viewer.html>`_

@@ -46,63 +46,10 @@ if (eval { require Pod::Simple }) {
     $pod_simple = 1;
 };
 
-use Bugzilla::Install::Requirements
-    qw(REQUIRED_MODULES OPTIONAL_MODULES);
-use Bugzilla::Constants qw(DB_MODULE BUGZILLA_VERSION);
+use Bugzilla::Constants qw(BUGZILLA_VERSION);
 
 use File::Path qw(rmtree);
 use File::Which qw(which);
-
-###############################################################################
-# Generate minimum version list
-###############################################################################
-
-my $modules = REQUIRED_MODULES;
-my $opt_modules = OPTIONAL_MODULES;
-
-my $template;
-{
-    open(TEMPLATE, '<', 'definitions.rst.tmpl')
-      or die('Could not open definitions.rst.tmpl: ' . $!);
-    local $/;
-    $template = <TEMPLATE>;
-    close TEMPLATE;
-}
-
-# This file is included at the end of Sphinx's conf.py. Unfortunately there's
-# no way to 'epilog' a file, only text.
-open(SUBSTS, '>', 'definitions.rst') or die('Could not open definitions.rst: ' . $!);
-print SUBSTS 'rst_epilog = """' . "\n$template\n";
-print SUBSTS ".. Module Versions\n\n";
-
-foreach my $module (@$modules, @$opt_modules)
-{
-    my $name = $module->{'module'};
-    $name =~ s/::/-/g;
-    $name = lc($name);
-    #This needs to be a string comparison, due to the modules having
-    #version numbers like 0.9.4
-    my $version = $module->{'version'} eq 0 ? 'any' : $module->{'version'};
-    print SUBSTS '.. |min-' . $name . '-ver| replace:: ' . $version . "\n";
-}
-
-print SUBSTS "\n.. Database Versions\n\n";
-
-my $db_modules = DB_MODULE;
-foreach my $db (keys %$db_modules) {
-    my $dbd  = $db_modules->{$db}->{dbd};
-    my $name = $dbd->{module};
-    $name =~ s/::/-/g;
-    $name = lc($name);
-    my $version    = $dbd->{version} || 'any';
-    my $db_version = $db_modules->{$db}->{'db_version'};
-    print SUBSTS '.. |min-' . $name . '-ver| replace:: ' . $version . "\n";
-    print SUBSTS '.. |min-' . lc($db) . '-ver| replace:: ' . $db_version . "\n";
-}
-
-print SUBSTS '"""';
-
-close(SUBSTS);
 
 ###############################################################################
 # Subs

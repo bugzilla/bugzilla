@@ -215,14 +215,12 @@ The list of required modules is reasonably long; however, you
 may already have several of them installed.
 
 The preferred way to install missing Perl modules is to use the package
-manager provided by your operating system (e.g ``rpm`` or
+manager provided by your operating system (e.g ``rpm``, ``apt-get`` or
 ``yum`` on Linux distros, or ``ppm`` on Windows
 if using ActivePerl, see :ref:`win32-perl-modules`).
 If some Perl modules are still missing or are too old, then we recommend
 using the :file:`install-module.pl` script (doesn't work
-with ActivePerl on Windows). If for some reason you really need to
-install the Perl modules manually, see
-:ref:`install-perlmodules-manual`. For instance, on Unix,
+with ActivePerl on Windows). For instance, on Unix,
 you invoke :file:`install-module.pl` as follows:
 
 ::
@@ -248,93 +246,8 @@ you invoke :file:`install-module.pl` as follows:
    these packages will vary depending on the specific distribution you are using,
    but are often called :file:`<packagename>-devel`.
 
-Here is a complete list of modules and their minimum versions.
-Some modules have special installation notes, which follow.
-
-Required Perl modules:
-
-#. CGI (|min-cgi-ver|)
-
-#. Date::Format (|min-date-format-ver|)
-
-#. DateTime (|min-datetime-ver|)
-
-#. DateTime::TimeZone (|min-datetime-timezone-ver|)
-
-#. DBI (|min-dbi-ver|)
-
-#. DBD::mysql (|min-dbd-mysql-ver|) if using MySQL
-
-#. DBD::Pg (|min-dbd-pg-ver|) if using PostgreSQL
-
-#. DBD::Oracle (|min-dbd-oracle-ver|) if using Oracle
-
-#. Digest::SHA (|min-digest-sha-ver|)
-
-#. Email::Send (|min-email-send-ver|)
-
-#. Email::MIME (|min-email-mime-ver|)
-
-#. Template (|min-template-ver|)
-
-#. URI (|min-uri-ver|)
-
-Optional Perl modules:
-
-#. GD (|min-gd-ver|) for bug charting
-
-#. Template::Plugin::GD::Image
-   (|min-template-plugin-gd-image-ver|) for Graphical Reports
-
-#. Chart::Lines (|min-chart-lines-ver|) for bug charting
-
-#. GD::Graph (|min-gd-graph-ver|) for bug charting
-
-#. GD::Text (|min-gd-text-ver|) for bug charting
-
-#. XML::Twig (|min-xml-twig-ver|) for bug import/export
-
-#. MIME::Parser (|min-mime-parser-ver|) for bug import/export
-
-#. LWP::UserAgent
-   (|min-lwp-useragent-ver|) for Automatic Update Notifications
-
-#. PatchReader (|min-patchreader-ver|) for pretty HTML view of patches
-
-#. Net::LDAP
-   (|min-net-ldap-ver|) for LDAP Authentication
-
-#. Authen::SASL
-   (|min-authen-sasl-ver|) for SASL Authentication
-
-#. Authen::Radius
-   (|min-authen-radius-ver|) for RADIUS Authentication
-
-#. SOAP::Lite (|min-soap-lite-ver|) for the web service interface
-
-#. JSON::RPC
-   (|min-json-rpc-ver|) for the JSON-RPC interface
-
-#. Test::Taint
-   (|min-test-taint-ver|) for the web service interface
-
-#. HTML::Parser
-   (|min-html-parser-ver|) for More HTML in Product/Group Descriptions
-
-#. HTML::Scrubber
-   (|min-html-scrubber-ver|) for More HTML in Product/Group Descriptions
-
-#. Email::Reply
-   (|min-email-reply-ver|) for Inbound Email
-
-#. TheSchwartz
-   (|min-theschwartz-ver|) for Mail Queueing
-
-#. Daemon::Generic
-   (|min-daemon-generic-ver|) for Mail Queueing
-
-#. mod_perl2
-   (|min-mod_perl2-ver|) for mod_perl
+If for some reason you really need to install the Perl modules manually, see
+:ref:`install-perlmodules-manual`.
 
 .. _install-MTA:
 

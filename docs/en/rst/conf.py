@@ -258,10 +258,10 @@ texinfo_documents = [
 # How to display URL addresses: 'footnote', 'no', or 'inline'.
 #texinfo_show_urls = 'footnote'
 
-definitions = "../../definitions.rst"
-if os.path.exists(definitions):
-    execfile(definitions)
-
+# Global substitutions and other markup required in every page
+rst_epilog = """
+.. |min-perl-ver| replace:: 5.10.1
+"""
 
 # -- Options for PDF output --------------------------------------------------
 

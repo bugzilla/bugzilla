@@ -72,7 +72,7 @@ EOF
     SELECT COUNT(*)
     FROM attachments
     WHERE submitter_id = ?
-        AND ispatch = 1
+        AND (ispatch = 1 OR mimetype = 'text/x-github-pull-request')
 EOF
 
     # patches reviewed
@@ -81,7 +81,7 @@ EOF
     FROM flags
         INNER JOIN attachments ON attachments.attach_id = flags.attach_id
     WHERE setter_id = ?
-        AND attachments.ispatch = 1
+        AND (attachments.ispatch = 1 OR attachments.mimetype = 'text/x-github-pull-request')
         AND status IN ('+', '-')
 EOF
 

@@ -20,7 +20,7 @@ use CGI qw(-no_debug);
 
 use File::Spec;
 use Template;
-use Test::More tests => ( scalar(@referenced_files) + $num_actual_files );
+use Test::More tests => ( scalar(@referenced_files) + 2 * $num_actual_files );
 
 # Capture the TESTOUT from Test::More or Test::Builder for printing errors.
 # This will handle verbosity for us automatically.
@@ -103,6 +103,20 @@ foreach my $include_path (@include_paths) {
         else {
             ok(0, "$path has bad syntax --ERROR");
             print $fh $data . "\n";
+        }
+
+        # Make sure no forbidden constructs are present.
+        local $/;
+        open(FILE, '<', $path) or die "Can't open $file: $!\n";
+        $data = <FILE>;
+        close (FILE);
+
+        # Forbid single quotes to delimit URLs, see bug 926085.
+        if ($data =~ /href=\\?'/) {
+            ok(0, "$path contains blacklisted constructs: href='...'");
+        }
+        else {
+            ok(1, "$path contains no blacklisted constructs");
         }
     }
 }

@@ -137,4 +137,6 @@ foreach my $lang (@langs) {
             say 'pdflatex or rst2pdf not found. Skipping PDF file creation';
         }
     }
+
+    rmtree('doctrees', 0, 1);
 }

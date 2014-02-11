@@ -511,8 +511,10 @@ sub possible_duplicates {
     my $dbh = Bugzilla->dbh;
     my $user = Bugzilla->user;
     my @words = split(/[\b\s]+/, $short_desc || '');
-    # Exclude punctuation from the array.
-    @words = map { /(\w+)/; $1 } @words;
+    # Remove leading/trailing punctuation from words
+    foreach my $word (@words) {
+        $word =~ s/(?:^\W+|\W+$)//g;
+    }
     # And make sure that each word is longer than 2 characters.
     @words = grep { defined $_ and length($_) > 2 } @words;
 

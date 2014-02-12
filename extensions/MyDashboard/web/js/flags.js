@@ -38,8 +38,11 @@ YUI({
                 }
             },
             failure: function(o) {
-                var resp = o.responseText;
-                alert("IO request failed : " + resp);
+                if (o.error) {
+                    alert("Failed to load flag list from Bugzilla:\n\n" + o.error.message);
+                } else {
+                    alert("Failed to load flag list from Bugzilla.");
+                }
             }
         };
 
@@ -120,6 +123,15 @@ YUI({
 
     // Requestee
     dataSource.requestee = new Y.DataSource.IO({ source: 'jsonrpc.cgi' });
+    dataSource.requestee.on('error', function(e) {
+        try {
+            var response = Y.JSON.parse(e.data.responseText);
+            if (response.error)
+                e.error.message = response.error.message;
+        } catch(ex) {
+            // ignore
+        }
+    });
     dataTable.requestee = new Y.DataTable({
         columns: [
             { key: "requester", label: "Requester", sortable: true },
@@ -160,6 +172,15 @@ YUI({
 
     // Requester
     dataSource.requester = new Y.DataSource.IO({ source: 'jsonrpc.cgi' });
+    dataSource.requester.on('error', function(e) {
+        try {
+            var response = Y.JSON.parse(e.data.responseText);
+            if (response.error)
+                e.error.message = response.error.message;
+        } catch(ex) {
+            // ignore
+        }
+    });
     dataTable.requester = new Y.DataTable({
         columns: [
             { key:"requestee", label:"Requestee", sortable:true,

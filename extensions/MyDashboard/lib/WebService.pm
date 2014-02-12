@@ -38,6 +38,15 @@ sub run_bug_query {
         next if $qdef->{name} ne $params->{query};
         my ($bugs, $query_string) = query_bugs($qdef);
 
+        my $last_comment_sql = "
+            SELECT comment_id
+              FROM longdescs
+             WHERE bug_id = ? AND bug_when > ?";
+        if (!$user->is_insider) {
+            $last_comment_sql .= " AND isprivate = 0";
+        }
+        my $last_comment_sth = $dbh->prepare($last_comment_sql);
+
         # Add last changes to each bug
         foreach my $b (@$bugs) {
             my $last_changes = {};
@@ -57,9 +66,8 @@ sub run_bug_query {
                 $last_changes->{email} = $change_set->{who};
                 $last_changes->{when} = $self->datetime_format_inbound($change_set->{when});
             }
-            my $last_comment_id = $dbh->selectrow_array("
-                SELECT comment_id FROM longdescs 
-                WHERE bug_id = ? AND bug_when > ?",
+            my $last_comment_id = $dbh->selectrow_array(
+                $last_comment_sth,
                 undef, $b->{bug_id}, $changed_date);
             if ($last_comment_id) {
                 my $comments = $self->comments({ comment_ids => [ $last_comment_id ] });

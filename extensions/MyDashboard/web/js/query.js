@@ -63,8 +63,11 @@ YUI({
                 }
             },
             failure: function(o) {
-                var resp = o.responseText;
-                alert("IO request failed : " + resp);
+                if (o.error) {
+                    alert("Failed to load bug list from Bugzilla:\n\n" + o.error.message);
+                } else {
+                    alert("Failed to load bug list from Bugzilla.");
+                }
             }
         };
 
@@ -110,6 +113,16 @@ YUI({
                 heading:     "result.result.heading",
                 buffer:      "result.result.buffer"
             }
+        }
+    });
+
+    dataSource.on('error', function(e) {
+        try {
+            var response = Y.JSON.parse(e.data.responseText);
+            if (response.error)
+                e.error.message = response.error.message;
+        } catch(ex) {
+            // ignore
         }
     });
 

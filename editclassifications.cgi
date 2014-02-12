@@ -32,7 +32,7 @@ sub LoadTemplate {
       if ($action eq 'select');
     # There is currently only one section about classifications,
     # so all pages point to it. Let's define it here.
-    $vars->{'doc_section'} = 'classifications.html';
+    $vars->{'doc_section'} = 'administration.html#classifications';
 
     $action =~ /(\w+)/;
     $action = $1;

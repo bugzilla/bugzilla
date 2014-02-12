@@ -15,10 +15,8 @@
       Based on [% type.name FILTER html %]
     [% END %]
   [% END %]
-  [% doc_section = "flags-overview.html#flags-create" %]
 [% ELSE %]
   [% title = BLOCK %]Edit Flag Type [% type.name FILTER html %][% END %]
-  [% doc_section = "flags-overview.html#flags-edit" %]
 [% END %]
 
 [% PROCESS global/header.html.tmpl
@@ -27,7 +25,7 @@
   onload="var f = document.forms['flagtype_properties'];
           selectProduct(f.product, f.component, null, null, '__Any__');"
   javascript_urls=["js/productform.js"]
-  doc_section = doc_section
+  doc_section = "administration.html#administering-flags"
 %]
 
 <form id="flagtype_properties" method="post" action="editflagtypes.cgi">

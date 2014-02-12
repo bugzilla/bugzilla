@@ -993,8 +993,8 @@ the Search show up in the footer of the group's direct members by default.
 
 .. _accountpreferences:
 
-Name and Password
-=================
+Account Information
+===================
 
 On this tab, you can change your basic account information,
 including your password, email address and real name. For security

@@ -522,9 +522,7 @@ TUI_hide_default('attachment_text_field');
           # by global/textarea.html.tmpl. So we must not escape the comment here. %]
         [% comment FILTER none %]
       [%- END %]
-      [% INCLUDE global/textarea.html.tmpl
-         name           = 'comment'
-         id             = 'comment'
+      [% INCLUDE bug/comment.html.tmpl
          minrows        = 10
          maxrows        = 25
          cols           = constants.COMMENT_COLS

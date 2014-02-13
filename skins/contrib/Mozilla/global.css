@@ -449,11 +449,15 @@ table.edit_form hr {
 }
 
 .bz_comment {
-    width: 65em !important;
+    width: 65em;
     margin: 0 0 20px;
 }
 
-.bz_comment pre {
+.bz_comment_table .bz_comment {
+    width: 65em !important;
+}
+
+.bz_comment pre, #comment {
     font: 13px/1.2 "Droid Sans Mono", Menlo, Monaco, "Courier New", Courier, monospace;
 }
 
@@ -618,7 +622,17 @@ table.edit_form hr {
     -moz-box-sizing: content-box;
     -webkit-box-sizing: content-box;
     box-sizing: content-box;
-    margin: 5px 0 20px;
+}
+
+#comment_tabs {
+    margin-top: 2px;
+}
+
+#comment_preview_text {
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    padding: 2px 2px 2px 1px;
 }
 
 #footer {

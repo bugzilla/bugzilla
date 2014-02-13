@@ -150,6 +150,7 @@ our %product_sec_groups = (
     "addons.mozilla.org"           => 'client-services-security',
     "Air Mozilla"                  => 'mozilla-corporation-confidential',
     "Android Background Services"  => 'mozilla-services-security',
+    "Audio/Visual Infrastructure"  => 'mozilla-corporation-confidential',
     "AUS"                          => 'client-services-security',
     "Bugzilla"                     => 'bugzilla-security',
     "bugzilla.mozilla.org"         => 'bugzilla-security',

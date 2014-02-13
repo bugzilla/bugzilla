@@ -983,3 +983,79 @@ function initDirtyFieldTracking() {
         });
     }
 }
+
+/**
+ * Comment preview
+ */
+
+var last_comment_text = '';
+
+function show_comment_preview(bug_id) {
+    var Dom = YAHOO.util.Dom;
+    var comment = document.getElementById('comment');
+    var preview = document.getElementById('comment_preview');
+    if (!comment || !preview) return;
+    if (Dom.hasClass('comment_preview_tab', 'active_comment_tab')) return;
+
+    preview.style.width = (comment.clientWidth - 4) + 'px';
+    preview.style.height = comment.offsetHeight + 'px';
+
+    Dom.addClass(comment, 'bz_default_hidden');
+    Dom.removeClass('comment_tab', 'active_comment_tab');
+    Dom.removeClass(preview, 'bz_default_hidden');
+    Dom.addClass('comment_preview_tab', 'active_comment_tab');
+
+    Dom.addClass('comment_preview_error', 'bz_default_hidden');
+
+    if (last_comment_text == comment.value)
+        return;
+
+    Dom.addClass('comment_preview_text', 'bz_default_hidden');
+    Dom.removeClass('comment_preview_loading', 'bz_default_hidden');
+
+    YAHOO.util.Connect.setDefaultPostHeader('application/json', true);
+    YAHOO.util.Connect.asyncRequest('POST', 'jsonrpc.cgi',
+    {
+        success: function(res) {
+            data = YAHOO.lang.JSON.parse(res.responseText);
+            if (data.error) {
+                Dom.addClass('comment_preview_loading', 'bz_default_hidden');
+                Dom.removeClass('comment_preview_error', 'bz_default_hidden');
+                Dom.get('comment_preview_error').innerHTML =
+                    YAHOO.lang.escapeHTML(data.error.message);
+            } else {
+                document.getElementById('comment_preview_text').innerHTML = data.result.html;
+                Dom.addClass('comment_preview_loading', 'bz_default_hidden');
+                Dom.removeClass('comment_preview_text', 'bz_default_hidden');
+                last_comment_text = comment.value;
+            }
+        },
+        failure: function(res) {
+            Dom.addClass('comment_preview_loading', 'bz_default_hidden');
+            Dom.removeClass('comment_preview_error', 'bz_default_hidden');
+            Dom.get('comment_preview_error').innerHTML =
+                YAHOO.lang.escapeHTML(res.responseText);
+        }
+    },
+    YAHOO.lang.JSON.stringify({
+        version: "1.1",
+        method: 'Bug.render_comment',
+        params: {
+            id: bug_id,
+            text: comment.value
+        }
+    })
+    );
+}
+
+function show_comment_edit() {
+    var comment = document.getElementById('comment');
+    var preview = document.getElementById('comment_preview');
+    if (!comment || !preview) return;
+    if (YAHOO.util.Dom.hasClass(comment, 'active_comment_tab')) return;
+
+    YAHOO.util.Dom.addClass(preview, 'bz_default_hidden');
+    YAHOO.util.Dom.removeClass('comment_preview_tab', 'active_comment_tab');
+    YAHOO.util.Dom.removeClass(comment, 'bz_default_hidden');
+    YAHOO.util.Dom.addClass('comment_tab', 'active_comment_tab');
+}

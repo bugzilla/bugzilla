@@ -318,6 +318,30 @@ sub comments {
     return { bugs => \%bugs, comments => \%comments };
 }
 
+sub render_comment {
+    my ($self, $params) = @_;
+
+    unless (defined $params->{text}) {
+        ThrowCodeError('params_required',
+                       { function => 'Bug.render_comment',
+                         params   => ['text'] });
+    }
+
+    Bugzilla->switch_to_shadow_db();
+    my $bug = $params->{id} ? Bugzilla::Bug->check($params->{id}) : undef;
+
+    my $tmpl = '[% text FILTER quoteUrls(bug) %]';
+    my $html;
+    my $template = Bugzilla->template;
+    $template->process(
+        \$tmpl,
+        { bug => $bug, text => $params->{text}},
+        \$html
+    );
+
+    return { html => $html };
+}
+
 # Helper for Bug.comments
 sub _translate_comment {
     my ($self, $comment, $filters) = @_;
@@ -4671,6 +4695,48 @@ The comment tag provided is shorter than the minimum length.
 The comment tag provided is longer than the maximum length.
 
 =back
+
+=item B<History>
+
+=over
+
+=item Added in Bugzilla B<5.0>.
+
+=back
+
+=back
+
+=head2 render_comment
+
+B<UNSTABLE>
+
+=over
+
+=item B<Description>
+
+Returns the HTML rendering of the provided comment text.
+
+=item B<Params>
+
+=over
+
+=item C<text>
+
+B<Required> C<strings> Text comment text to render.
+
+=item C<id>
+
+C<int> The ID of the bug to render the comment against.
+
+=back
+
+=item B<Returns>
+
+C<html> containing the HTML rendering.
+
+=item B<Errors>
+
+This method can throw all of the errors that L</get> throws.
 
 =item B<History>
 

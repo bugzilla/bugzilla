@@ -678,6 +678,40 @@ input.required, select.required, span.required_explanation {
     margin-left: -1px;
 }
 
+.comment_tab {
+    float: left;
+    border: 1px solid silver;
+    border-bottom: 0px;
+    padding: 2px 1em;
+    cursor: pointer;
+    background: transparent;
+}
+
+.active_comment_tab {
+    background: #fff;
+    font-weight: bold;
+}
+
+#comment_preview {
+    border: 1px solid silver;
+    padding: 2px;
+    overflow: auto;
+    margin: 0px;
+}
+
+#comment_preview_text {
+    margin: 0px;
+    width: auto;
+}
+
+#comment_preview_loading {
+    font-style: italic;
+}
+
+#comment {
+    margin-top: 0px;
+}
+
 /*******************/
 /* Form Validation */
 /*******************/

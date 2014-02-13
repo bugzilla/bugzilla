@@ -628,6 +628,10 @@ table.edit_form hr {
     margin-top: 2px;
 }
 
+#comment_preview {
+    background: white;
+}
+
 #comment_preview_text {
     background: transparent;
     border: none;

@@ -632,6 +632,8 @@ table.edit_form hr {
 
 #comment_preview {
     background: white;
+    display: block;
+    clear: both;
 }
 
 #comment_preview_text {

@@ -32,8 +32,6 @@ use Bugzilla::BugUrl;
 use List::MoreUtils qw(firstidx uniq part);
 use List::Util qw(min max first);
 use Storable qw(dclone);
-use URI;
-use URI::QueryParam;
 use Scalar::Util qw(blessed);
 
 use parent qw(Bugzilla::Object Exporter);

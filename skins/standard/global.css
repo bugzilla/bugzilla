@@ -455,7 +455,7 @@ input.requestee {
     font-size: x-large;
 }
 
-#post_err_msg {
+#post_err_msg, form#check {
     clear: both;
 }
 

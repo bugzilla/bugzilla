@@ -152,11 +152,18 @@ elsif ($action eq 'begin-sudo') {
 
     # For future sessions, store the unique ID of the target user
     my $token = Bugzilla::Token::_create_token($user->id, 'sudo', $target_user->id);
+
+    my %args;
+    if (Bugzilla->params->{ssl_redirect}) {
+        $args{'-secure'} = 1;
+    }
+
     $cgi->send_cookie('-name'    => 'sudo',
                       '-expires' => $time_string,
-                      '-value'   => $token
-    );
-    
+                      '-value'   => $token,
+                      '-httponly' => 1,
+                      %args);
+
     # For the present, change the values of Bugzilla::user & Bugzilla::sudoer
     Bugzilla->sudo_request($target_user, $user);
     

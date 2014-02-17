@@ -1057,26 +1057,24 @@ sub get_selectable_products {
     my $class_restricted = Bugzilla->params->{'useclassification'} && $class_id;
 
     if (!defined $self->{selectable_products}) {
-        my $query =
-            Bugzilla->params->{'or_groups'}
-                ?  "SELECT id
-                    FROM products
-                    WHERE id NOT IN (
-                        SELECT product_id
-                        FROM group_control_map
-                        WHERE group_control_map.membercontrol = " . CONTROLMAPMANDATORY . "
-                          AND group_id NOT IN (" . $self->groups_as_string . ")
-                    )
-                    ORDER BY name"
-                :  "SELECT id
-                    FROM products
-                        LEFT JOIN group_control_map
-                            ON group_control_map.product_id = products.id
-                            AND group_control_map.membercontrol = " . CONTROLMAPMANDATORY . "
-                            AND group_id NOT IN(" . $self->groups_as_string . ")
-                    WHERE group_id IS NULL
-                    ORDER BY name";
-
+        my $query = "SELECT id
+                     FROM products
+                         LEFT JOIN group_control_map
+                             ON group_control_map.product_id = products.id
+                             AND group_control_map.membercontrol = " . CONTROLMAPMANDATORY;
+                             
+        if (Bugzilla->params->{'or_groups'}) {
+            # Either the user is in at least one of the MANDATORY groups, or
+            # there are no such groups for the product.
+            $query .= " WHERE group_id IN (" . $self->groups_as_string . ")
+                        OR group_id IS NULL";
+        }
+        else {
+            # There must be no MANDATORY groups that the user is not in.
+            $query .= " AND group_id NOT IN (" . $self->groups_as_string . ")
+                        WHERE group_id IS NULL";
+        }
+        
         my $prod_ids = Bugzilla->dbh->selectcol_arrayref($query);
         $self->{selectable_products} = Bugzilla::Product->new_from_list($prod_ids);
     }

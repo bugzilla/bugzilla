@@ -37,52 +37,57 @@ sub update_statistics_by_user {
     # bugs filed
     _update_statistics($statistics, 'bugs_filed', [ $user_id ], <<EOF);
     SELECT COUNT(*)
-    FROM bugs
-    WHERE bugs.reporter = ?
+      FROM bugs
+     WHERE bugs.reporter = ?
 EOF
 
     # comments made
     _update_statistics($statistics, 'comments', [ $user_id ], <<EOF);
     SELECT COUNT(*)
-    FROM longdescs
-    WHERE who = ?
+      FROM longdescs
+     WHERE who = ?
 EOF
 
     # commented on
     _update_statistics($statistics, 'commented_on', [ $user_id ], <<EOF);
     SELECT COUNT(*) FROM (
         SELECT longdescs.bug_id
-        FROM longdescs
-        WHERE who = ?
-        GROUP BY longdescs.bug_id
+          FROM longdescs
+         WHERE who = ?
+         GROUP BY longdescs.bug_id
     ) AS temp
 EOF
 
     # confirmed
     _update_statistics($statistics, 'confirmed', [ $user_id, _field_id('bug_status') ], <<EOF);
     SELECT COUNT(*)
-    FROM bugs_activity
-    WHERE who = ?
-        AND fieldid = ?
-        AND removed = 'UNCONFIRMED' AND added = 'NEW'
+      FROM bugs_activity
+     WHERE who = ?
+           AND fieldid = ?
+           AND removed = 'UNCONFIRMED'
+           AND added = 'NEW'
 EOF
 
     # patches submitted
     _update_statistics($statistics, 'patches', [ $user_id ], <<EOF);
     SELECT COUNT(*)
-    FROM attachments
-    WHERE submitter_id = ?
-        AND (ispatch = 1 OR mimetype = 'text/x-github-pull-request')
+      FROM attachments
+     WHERE submitter_id = ?
+           AND (ispatch = 1
+                OR mimetype = 'text/x-github-pull-request'
+                OR mimetype = 'text/x-review-board-request')
 EOF
 
     # patches reviewed
     _update_statistics($statistics, 'reviews', [ $user_id ], <<EOF);
     SELECT COUNT(*)
-    FROM flags
-        INNER JOIN attachments ON attachments.attach_id = flags.attach_id
-    WHERE setter_id = ?
-        AND (attachments.ispatch = 1 OR attachments.mimetype = 'text/x-github-pull-request')
-        AND status IN ('+', '-')
+      FROM flags
+           INNER JOIN attachments ON attachments.attach_id = flags.attach_id
+     WHERE setter_id = ?
+           AND (attachments.ispatch = 1
+                OR attachments.mimetype = 'text/x-github-pull-request'
+                OR attachments.mimetype = 'text/x-review-board-request')
+           AND status IN ('+', '-')
 EOF
 
     # assigned to
@@ -103,14 +108,14 @@ EOF
     _update_statistics($statistics, 'touched', [ $user_id, $user_id], <<EOF);
     SELECT COUNT(*) FROM (
         SELECT bugs_activity.bug_id
-        FROM bugs_activity
-        WHERE who = ?
-        GROUP BY bugs_activity.bug_id
+          FROM bugs_activity
+         WHERE who = ?
+         GROUP BY bugs_activity.bug_id
         UNION
         SELECT longdescs.bug_id
-        FROM longdescs
-        WHERE who = ?
-        GROUP BY longdescs.bug_id
+          FROM longdescs
+         WHERE who = ?
+         GROUP BY longdescs.bug_id
     ) temp
 EOF
 

@@ -1193,6 +1193,30 @@ sub enter_bug_start {
     {
         $cgi->param('product', 'Infrastructure & Operations');
     }
+
+    # map renamed groups
+    $cgi->param('groups', _map_groups($cgi->param('groups')));
+}
+
+sub bug_before_create {
+    my ($self, $args) = @_;
+    my $params = $args->{params};
+    if (exists $params->{groups}) {
+        # map renamed groups
+        $params->{groups} = [ _map_groups($params->{groups}) ];
+    }
+}
+
+sub _map_groups {
+    my (@groups) = @_;
+    return unless @groups;
+    @groups = @{ $groups[0] } if ref($groups[0]);
+    return map {
+        # map mozilla-corporation-confidential => mozilla-employee-confidential
+        $_ eq 'mozilla-corporation-confidential'
+        ? 'mozilla-employee-confidential'
+        : $_
+    } @groups;
 }
 
 sub forced_format {

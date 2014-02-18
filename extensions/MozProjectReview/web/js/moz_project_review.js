@@ -248,7 +248,7 @@ var MPR = {
             var groups = document.createElement('input');
             groups.type = 'hidden';
             groups.name = 'groups';
-            groups.value = 'mozilla-corporation-confidential';
+            groups.value = 'mozilla-employee-confidential';
             Dom.get('mozProjectForm').appendChild(groups);
         }
 

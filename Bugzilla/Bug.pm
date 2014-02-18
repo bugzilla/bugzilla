@@ -635,6 +635,9 @@ sub create {
     my ($class, $params) = @_;
     my $dbh = Bugzilla->dbh;
 
+    # BMO - allow parameter alteration before creation
+    Bugzilla::Hook::process('bug_before_create', { params => $params });
+
     $dbh->bz_start_transaction();
 
     # These fields have default values which we can use if they are undefined.
@@ -3684,7 +3687,7 @@ sub groups {
     }
 
     # BMO: if required, hack in groups exposed by -visible membership
-    # (eg mozilla-corporation-confidential-visible), so reporters can add the
+    # (eg mozilla-employee-confidential-visible), so reporters can add the
     # bug to a group on show_bug.
     # if the bug is already in the group, the user will not be able to remove
     # it unless they are a true group member.

@@ -201,14 +201,14 @@ function trySubmit() {
   var shortdesc = 'Event - (' + date + ' ' + time + ') - ' + location + ' - ' + topic;
   document.getElementById('short_desc').value = shortdesc;
 
-  // If intended audience is employees only, add mozilla-corporation-confidential group
+  // If intended audience is employees only, add mozilla-employee-confidential group
   var audience = document.getElementById('audience').value;
   if (audience == 'Employees Only') {
     var brownbagRequestForm = document.getElementById('brownbagRequestForm');
     var groups = document.createElement('input');
     groups.type = 'hidden';
     groups.name = 'groups';
-    groups.value = 'mozilla-corporation-confidential';
+    groups.value = 'mozilla-employee-confidential';
     brownbagRequestForm.appendChild(groups);
   }
 

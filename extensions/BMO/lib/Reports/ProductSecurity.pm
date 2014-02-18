@@ -22,7 +22,7 @@ sub report {
                                             action => 'run',
                                             object => 'product_security' });
 
-    my $moco = Bugzilla::Group->new({ name => 'mozilla-corporation-confidential' })
+    my $moco = Bugzilla::Group->new({ name => 'mozilla-employee-confidential' })
         or return;
 
     my $products = [];

@@ -41,6 +41,8 @@ function validateAndSubmit() {
   if(!isFilledOut('profilepage')) alert_text += "Please enter a Mozilla Reps profile page.\n";
   if(!isFilledOut('eventpage')) alert_text += "Please enter an event page address.\n";
   if(!isFilledOut('cf_due_date')) alert_text += "Please enter an event date.\n";
+  if(!isFilledOut('ambassador_hosted')) alert_text += "Please select whether this event is hosted by ambassadors.\n";
+  if(!isFilledOut('ambassador_audience')) alert_text += "Please select whether this event's main audience is ambassadors.\n";
   if(!isFilledOut('mentoremail')) alert_text += "Please enter a valid [% terms.Bugzilla %] email for mentor.\n";
   if(!isFilledOut('country')) alert_text += "Please enter a valid value for country.\n";
   if(!isFilledOut('budgettotal')) alert_text += "Please enter the total budget for the event.\n";
@@ -131,6 +133,32 @@ function validateAndSubmit() {
     <script type="text/javascript">
       createCalendar('cf_due_date')
     </script>
+  </td>
+</tr>
+
+<tr class="even">
+  <th class="field_label required">
+    Is this event being hosted by a<br>Firefox Student Ambassador(s)?:
+  </th>
+  <td>
+    <select id="ambassador_hosted" name="ambassador_hosted">
+      <option value="">Select One</option>
+      <option value="Yes">Yes</option>
+      <option value="No">No</option>
+    </select>
+  </td>
+</tr>
+
+<tr class="odd">
+  <th class="field_label required">
+    Is the main audience of this event<br>Firefox Student Ambassadors?:
+  </th>
+  <td>
+    <select id="ambassador_audience" name="ambassador_audience">
+      <option value="">Select One</option>
+      <option value="Yes">Yes</option>
+      <option value="No">No</option>
+    </select>
   </td>
 </tr>
 

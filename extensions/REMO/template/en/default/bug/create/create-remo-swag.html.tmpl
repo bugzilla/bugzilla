@@ -43,6 +43,8 @@ function validateAndSubmit() {
   if(!isFilledOut('eventname')) alert_text += "Please enter your event name\n";
   if(!isFilledOut('eventpage')) alert_text += "Please enter the event page.\n";
   if(!isFilledOut('attendance')) alert_text += "Please enter the estimated attendance.\n";
+  if(!isFilledOut('ambassador_hosted')) alert_text += "Please select whether this event is hosted by ambassadors.\n";
+  if(!isFilledOut('ambassador_audience')) alert_text += "Please select whether this event's main audience is ambassadors.\n";
   if(!isFilledOut('shiptofirstname')) alert_text += "Please enter the shipping first name\n";
   if(!isFilledOut('shiptolastname')) alert_text += "Please enter the shipping last name\n";
   if(!isFilledOut('shiptoaddress1')) alert_text += "Please enter the ship to address\n";
@@ -130,7 +132,35 @@ function validateAndSubmit() {
       <option value="501-1000+">501-1000+</option>
     </select>
   </td>
-</tr
+</tr>
+
+<tr class="odd">
+  <td>
+    <strong>Is this event being hosted by a<br>Firefox Student Ambassador(s)?:
+      <span style="color: red;" title="Required">*</span></strong>
+  </td>
+  <td>
+    <select id="ambassador_hosted" name="ambassador_hosted">
+      <option value="">Select One</option>
+      <option value="Yes">Yes</option>
+      <option value="No">No</option>
+    </select>
+  </td>
+</tr>
+
+<tr class="even">
+  <td>
+    <strong>Is the main audience of this event<br>Firefox Student Ambassadors?:
+      <span style="color: red;" title="Required">*</span></strong>
+  </td>
+  <td>
+    <select id="ambassador_audience" name="ambassador_audience">
+      <option value="">Select One</option>
+      <option value="Yes">Yes</option>
+      <option value="No">No</option>
+    </select>
+  </td>
+</tr>
 
 <tr class="odd">
   <td><!--spacer-->&nbsp;</td>

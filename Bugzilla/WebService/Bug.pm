@@ -1491,11 +1491,11 @@ part is the request method and the rest is the related path needed.
 
 To get information about all fields:
 
-GET /field/bug
+GET /rest/field/bug
 
 To get information related to a single field:
 
-GET /field/bug/<id_or_name>
+GET /rest/field/bug/<id_or_name>
 
 The returned data format is the same as below.
 
@@ -1722,11 +1722,11 @@ part is the request method and the rest is the related path needed.
 
 To get information about all flag types for a product:
 
-GET /flag_types/<product>
+GET /rest/flag_types/<product>
 
 To get information about flag_types for a product and component:
 
-GET /flag_types/<product>/<component>
+GET /rest/flag_types/<product>/<component>
 
 The returned data format is the same as below.
 
@@ -1817,11 +1817,11 @@ Tells you what values are allowed for a particular field.
 
 To get information on the values for a field based on field name:
 
-GET /field/bug/<field_name>/values
+GET /rest/field/bug/<field_name>/values
 
 To get information based on field name and a specific product:
 
-GET /field/bug/<field_name>/<product_id>/values
+GET /rest/field/bug/<field_name>/<product_id>/values
 
 The returned data format is the same as below.
 
@@ -1887,11 +1887,11 @@ insidergroup or if you are the submitter of the attachment.
 
 To get all current attachments for a bug:
 
-GET /bug/<bug_id>/attachment
+GET /rest/bug/<bug_id>/attachment
 
 To get a specific attachment based on attachment ID:
 
-GET /bug/attachment/<attachment_id>
+GET /rest/bug/attachment/<attachment_id>
 
 The returned data format is the same as below.
 
@@ -2114,11 +2114,11 @@ and/or comment ids.
 
 To get all comments for a particular bug using the bug ID or alias:
 
-GET /bug/<id_or_alias>/comment
+GET /rest/bug/<id_or_alias>/comment
 
 To get a specific comment based on the comment ID:
 
-GET /bug/comment/<comment_id>
+GET /rest/bug/comment/<comment_id>
 
 The returned data format is the same as below.
 
@@ -2290,7 +2290,7 @@ Note: Can also be called as "get_bugs" for compatibilty with Bugzilla 3.0 API.
 
 To get information about a particular bug using its ID or alias:
 
-GET /bug/<id_or_alias>
+GET /rest/bug/<id_or_alias>
 
 The returned data format is the same as below.
 
@@ -2735,7 +2735,7 @@ Gets the history of changes for particular bugs in the database.
 
 To get the history for a specific bug ID:
 
-GET /bug/<bug_id>/history
+GET /rest/bug/<bug_id>/history
 
 The returned data format will be the same as below.
 
@@ -3153,7 +3153,7 @@ likely change in the future.
 
 To create a new bug in Bugzilla:
 
-POST /bug
+POST /rest/bug
 
 The params to include in the POST body as well as the returned data format,
 are the same as below.
@@ -3391,7 +3391,7 @@ This allows you to add an attachment to a bug in Bugzilla.
 
 To create attachment on a current bug:
 
-POST /bug/<bug_id>/attachment
+POST /rest/bug/<bug_id>/attachment
 
 The params to include in the POST body, as well as the returned
 data format are the same as below. The C<ids> param will be
@@ -3563,7 +3563,7 @@ This allows you to update attachment metadata in Bugzilla.
 
 To update attachment metadata on a current attachment:
 
-PUT /bug/attachment/<attach_id>
+PUT /rest/bug/attachment/<attach_id>
 
 The params to include in the POST body, as well as the returned
 data format are the same as below. The C<ids> param will be
@@ -3776,7 +3776,7 @@ This allows you to add a comment to a bug in Bugzilla.
 
 To create a comment on a current bug:
 
-POST /bug/<bug_id>/comment
+POST /rest/bug/<bug_id>/comment
 
 The params to include in the POST body as well as the returned data format,
 are the same as below.
@@ -3878,7 +3878,7 @@ out about the changes.
 
 To update the fields of a current bug:
 
-PUT /bug/<bug_id>
+PUT /rest/bug/<bug_id>
 
 The params to include in the PUT body as well as the returned data format,
 are the same as below. The C<ids> param will be overridden as it is
@@ -4589,7 +4589,7 @@ Searches for tags which contain the provided substring.
 
 To search for comment tags:
 
-GET /bug/comment/tags/<query>
+GET /rest/bug/comment/tags/<query>
 
 =item B<Params>
 
@@ -4645,7 +4645,7 @@ Adds or removes tags from a comment.
 
 To update the tags comments attached to a comment:
 
-PUT /bug/comment/tags
+PUT /rest/bug/comment/tags
 
 The params to include in the PUT body as well as the returned data format,
 are the same as below.

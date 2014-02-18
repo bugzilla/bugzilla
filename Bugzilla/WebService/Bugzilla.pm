@@ -197,7 +197,7 @@ Returns the current version of Bugzilla.
 
 =item B<REST>
 
-GET /version
+GET /rest/version
 
 The returned data format is the same as below.
 
@@ -233,7 +233,7 @@ in this Bugzilla.
 
 =item B<REST>
 
-GET /extensions
+GET /rest/extensions
 
 The returned data format is the same as below.
 
@@ -286,7 +286,7 @@ Returns the timezone that Bugzilla expects dates and times in.
 
 =item B<REST>
 
-GET /timezone
+GET /rest/timezone
 
 The returned data format is the same as below.
 
@@ -324,7 +324,7 @@ what timezone it's running in.
 
 =item B<REST>
 
-GET /time
+GET /rest/time
 
 The returned data format is the same as below.
 
@@ -406,7 +406,7 @@ Returns parameter values currently used in this Bugzilla.
 
 =item B<REST>
 
-GET /parameters
+GET /rest/parameters
 
 The returned data format is the same as below.
 
@@ -485,7 +485,7 @@ Gets the latest time of the audit_log table.
 
 =item B<REST>
 
-GET /last_audit_time
+GET /rest/last_audit_time
 
 The returned data format is the same as below.
 

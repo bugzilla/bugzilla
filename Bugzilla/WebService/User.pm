@@ -629,7 +629,7 @@ call this function.
 
 =item B<REST>
 
-POST /user
+POST /rest/user
 
 The params to include in the POST body as well as the returned data format,
 are the same as below.
@@ -695,7 +695,7 @@ Updates user accounts in Bugzilla.
 
 =item B<REST>
 
-PUT /user/<user_id_or_name>
+PUT /rest/user/<user_id_or_name>
 
 The params to include in the PUT body as well as the returned data format,
 are the same as below. The C<ids> and C<names> params are overridden as they
@@ -813,11 +813,11 @@ Gets information about user accounts in Bugzilla.
 
 To get information about a single user:
 
-GET /user/<user_id_or_name>
+GET /rest/user/<user_id_or_name>
 
 To search for users by name, group using URL params same as below:
 
-GET /user
+GET /rest/user
 
 The returned data format is the same as below.
 

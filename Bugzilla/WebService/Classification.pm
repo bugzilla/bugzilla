@@ -114,7 +114,7 @@ Returns a hash containing information about a set of classifications.
 
 To return information on a single classification:
 
-GET /classification/<classification_id_or_name>
+GET /rest/classification/<classification_id_or_name>
 
 The returned data format will be the same as below.
 

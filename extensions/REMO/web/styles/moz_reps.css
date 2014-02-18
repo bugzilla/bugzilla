@@ -6,6 +6,7 @@
 
 #reps-form th, #reps-form td {
   padding: 5px;
+  vertical-align: top;
 }
 
 #reps-form .even th, #reps-form .even td {
@@ -20,6 +21,10 @@
   font-family: Verdana, sans-serif;
   font-size: small;
   width: 590px;
+}
+
+#reps-form textarea.small {
+  width: 295px;
 }
 
 #reps-form .mandatory {

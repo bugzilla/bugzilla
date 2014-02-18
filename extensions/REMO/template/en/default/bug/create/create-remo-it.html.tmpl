@@ -1,0 +1,294 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% PROCESS global/variables.none.tmpl %]
+
+[% PROCESS global/header.html.tmpl
+   onload = "init()"
+   title = "Community IT Request"
+   style_urls = [ "extensions/REMO/web/styles/moz_reps.css" ]
+%]
+
+[% USE Bugzilla %]
+[% mandatory = '<span class="mandatory" title="Required">*</span>' %]
+
+<script type="text/javascript">
+var Dom = YAHOO.util.Dom;
+
+function mandatory(elements) {
+  result = true;
+  for (i in elements) {
+    element = elements[i];
+
+    if (typeof(element) == "object") {
+      missing = true;
+      for (j = 0; j < element.length; j++) {
+        if (element[j].checked) {
+          missing = false;
+          break;
+        }
+      }
+
+      if (missing) {
+        Dom.addClass(element[0].name, 'missing');
+      } else {
+        Dom.removeClass(element[0].name, 'missing');
+      }
+    } else {
+      el = Dom.get(element);
+      value = el.value.replace(/^\s\s*/, '').replace(/\s\s*$/, '');
+      el.value = value;
+
+      if (value == '') {
+        Dom.addClass(element, 'missing');
+        result = false;
+      } else {
+        Dom.removeClass(element, 'missing');
+      }
+    }
+  }
+  return result;
+}
+
+function submitForm() {
+  fields = [ 'name', 'mozillian', 'community', document.forms.f.items ];
+  if (Dom.get('item_hosting').checked) {
+    fields.push('hosting_visits');
+    fields.push('hosting_running');
+  }
+  if (Dom.get('item_domain').checked
+      || Dom.get('item_apps_email').checked
+      || Dom.get('item_ssl').checked
+  ) {
+    fields.push('domain_name');
+  }
+  if (Dom.get('item_discourse').checked) {
+    fields.push('discourse_names');
+    fields.push('discourse_mods');
+  }
+  if (Dom.get('item_other').checked) {
+    fields.push('other_value');
+  }
+
+  if (!mandatory(fields)) {
+    alert('Please enter all the required fields.');
+    return false;
+  }
+
+  Dom.get('short_desc').value =
+    "IT Request: " + Dom.get('community').value + ' (' + Dom.get('name').value + ')';
+  return true;
+}
+
+function setItemVisibility() {
+  if (Dom.get('item_hosting').checked) {
+    Dom.removeClass('hosting', 'bz_default_hidden');
+  } else {
+    Dom.addClass('hosting', 'bz_default_hidden');
+  }
+  if (Dom.get('item_domain').checked
+      || Dom.get('item_apps_email').checked
+      || Dom.get('item_ssl').checked
+  ) {
+    var title = [];
+    if (Dom.get('item_apps_email').checked)
+      title.push('Google Apps Email');
+    if (Dom.get('item_domain').checked)
+      title.push('Domain');
+    if (Dom.get('item_ssl').checked)
+      title.push('SSL');
+    Dom.get('domain_title').innerHTML = title.join(', ');
+    Dom.removeClass('domain', 'bz_default_hidden');
+  } else {
+    Dom.addClass('domain', 'bz_default_hidden');
+  }
+  if (Dom.get('item_discourse').checked) {
+    Dom.removeClass('discourse', 'bz_default_hidden');
+  } else {
+    Dom.addClass('discourse', 'bz_default_hidden');
+  }
+  if (Dom.get('item_other').checked) {
+    Dom.removeClass('other', 'bz_default_hidden');
+  } else {
+    Dom.addClass('other', 'bz_default_hidden');
+  }
+}
+
+function init() {
+  items = document.forms.f.items;
+  for (i = 0; i < items.length; i++) {
+    YAHOO.util.Event.on(items[i], 'click', setItemVisibility);
+  }
+  setItemVisibility();
+}
+
+</script>
+
+<noscript>
+<h1>Javascript is required to use this form.</h1>
+</noscript>
+
+<h1>Community IT Request</h1>
+
+<form method="post" action="post_bug.cgi" id="tmRequestForm" name="f">
+<input type="hidden" name="product" value="Mozilla Reps">
+<input type="hidden" name="component" value="Community IT Requests">
+<input type="hidden" name="bug_severity" value="normal">
+<input type="hidden" name="rep_platform" value="All">
+<input type="hidden" name="priority" value="--">
+<input type="hidden" name="op_sys" value="Other">
+<input type="hidden" name="version" value="unspecified">
+<input type="hidden" name="groups" value="mozilla-reps">
+<input type="hidden" name="format" value="[% format FILTER html %]">
+<input type="hidden" name="comment" id="comment" value="">
+<input type="hidden" name="short_desc" id="short_desc" value="">
+<input type="hidden" name="token" value="[% token FILTER html %]">
+
+<table id="reps-form">
+
+<tr class="odd">
+  <th>Your Name:[% mandatory FILTER none %]</th>
+  <td><input id="name" name="name" size="40" value="[% user.name FILTER html %]"></td>
+</tr>
+
+<tr class="even">
+  <th>Mozillians.org Profile:[% mandatory FILTER none %]</th>
+  <td><input id="mozillian" name="mozillian" size="40"></td>
+</tr>
+
+<tr class="odd">
+  <th>Reps Profile (if applicable):</th>
+  <td><input id="reps" name="reps" size="40"></td>
+</tr>
+
+<tr class="even">
+  <th>Your Community's Name:[% mandatory FILTER none %]</th>
+  <td><input id="community" name="community" size="40"></td>
+</tr>
+
+<tr class="odd">
+  <th>
+    Items Requesting:[% mandatory FILTER none %]
+  </th>
+  <td>
+    <div id="items">
+      <div>
+        <input type="checkbox" name="items" value="hosting" id="item_hosting">
+        <label for="item_hosting">Hosting</label>
+      </div>
+      <div>
+        <input type="checkbox" name="items" value="apps_email" id="item_apps_email">
+        <label for="item_apps_email">Google Apps Emails</label>
+      </div>
+      <div>
+        <input type="checkbox" name="items" value="domain" id="item_domain">
+        <label for="item_domain">Domain</label>
+      </div>
+      <div>
+        <input type="checkbox" name="items" value="discourse" id="item_discourse">
+        <label for="item_discourse">Discourse Category</label>
+      </div>
+      <div>
+        <input type="checkbox" name="items" value="ssl" id="item_ssl">
+        <label for="item_ssl">SSL</label>
+      </div>
+      <div>
+        <input type="checkbox" name="items" value="other" id="item_other">
+        <label for="item_other">Other</label>
+      </div>
+    </div>
+  </td>
+</tr>
+
+<tbody id="hosting">
+<tr class="even">
+  <th colspan="2">Hosting</th>
+</tr>
+<tr class="odd">
+  <th>Expected visits per month:[% mandatory FILTER none %]</th>
+  <td><input id="hosting_visits" name="hosting_visits" size="40"></td>
+</tr>
+<tr class="odd">
+  <th>What will run on the hosting?:[% mandatory FILTER none %]</th>
+  <td><textarea id="hosting_running" name="hosting_running" class="small"></textarea></td>
+</tr>
+<tr class="odd">
+  <th>Data:</td>
+  <td>
+    Any data we can use to help choose the best solution (traffic graphs etc).<br>
+    <textarea id="hosting_data" name="hosting_data" class="small"></textarea>
+  </td>
+</tr>
+</tbody>
+
+<tbody id="domain">
+<tr class="even">
+  <th colspan="2" id="domain_title">Domain</th>
+</tr>
+<tr class="odd">
+  <th>Domain Name:[% mandatory FILTER none %]</th>
+  <td><input id="domain_name" name="domain_name" size="40"></td>
+</tr>
+</tbody>
+
+<tbody id="discourse">
+<tr class="even">
+  <th colspan="2">Discourse Category</th>
+</tr>
+<tr class="odd">
+  <th>Discourse Category Names:[% mandatory FILTER none %]</th>
+  <td><input id="discourse_names" name="discourse_names" size="40"></td>
+</tr>
+<tr class="odd">
+  <th>Moderators:[% mandatory FILTER none %]</th>
+  <td><input id="discourse_mods" name="discourse_mods" size="40"></td>
+</tr>
+<tr class="odd">
+  <th>Hex code of background of category tag:</th>
+  <td><input id="discourse_bg" name="discourse_bg" size="40"></td>
+</tr>
+</tbody>
+
+<tbody id="other">
+<tr class="even">
+  <th colspan="2">Other Item</th>
+</tr>
+<tr class="odd">
+  <th>Other:[% mandatory FILTER none %]</th>
+  <td><input id="other_value" name="other_value" size="40"></td>
+</tr>
+</tbody>
+
+<tr class="even">
+  <th colspan="2">
+    Other Comments
+  </th>
+</tr>
+<tr class="even">
+  <td colspan="2">
+    Please explain why you'd like the hosting, and anything else this form does not include.<br>
+    <textarea id="comments" name="comments" rows="4"></textarea>
+  </td>
+</tr>
+
+<tr class="even">
+  <td colspan="2">
+    <input id="submit" type="submit" value="Submit" onclick="return submitForm()">
+  </td>
+</tr>
+
+<tr class="even">
+  <td width="35%">&nbsp;</td>
+  <td width="65%">&nbsp;</td>
+</tr>
+
+</table>
+
+</form>
+
+[% PROCESS global/footer.html.tmpl %]

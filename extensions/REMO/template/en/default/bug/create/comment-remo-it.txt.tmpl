@@ -1,0 +1,79 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% USE Bugzilla %]
+[% cgi = Bugzilla.cgi %]
+
+Name:
+[%+ cgi.param('name') %]
+
+Mozillians.org Profile:
+[%+ cgi.param('mozillian') %]
+
+Reps Profile:
+[%+ cgi.param('reps') || "-" %]
+
+Community Name:
+[%+ cgi.param('community') %]
+
+[% FOREACH item = cgi.param('items') %]
+[% IF item == "apps_email" || item == "domain" || item == "ssl" %]
+[% IF item == "apps_email" %]
+[% domain_title = domain_title _ ":: Google Apps Emails\n" %]
+[% END %]
+[% IF item == "domain" %]
+[% domain_title = domain_title _ ":: Domain Name\n" %]
+[% END %]
+[% IF item == "ssl" %]
+[% domain_title = domain_title _ ":: SSL\n" %]
+[% END %]
+[% END %]
+[% END %]
+
+[% FOREACH item = cgi.param('items') %]
+[% IF item == "hosting" %]
+:: Hosting
+
+Expected visits per month:
+[%+ cgi.param('hosting_visits') %]
+
+What will run on the hosting:
+[%+ cgi.param('hosting_running') %]
+
+Hosting data:
+[%+ cgi.param('hosting_data') || "-" %]
+
+[% ELSIF (item == "apps_email" || item == "domain" || item == "ssl")
+         && domain_title %]
+[% domain_title FILTER html %]
+[% domain_title = "" %]
+Domain Name:
+[%+ cgi.param('domain_name') %]
+
+[% ELSIF item == "discourse" %]
+:: Discourse Category
+
+Category Names:
+[%+ cgi.param('discourse_names') %]
+
+Moderators:
+[%+ cgi.param('discourse_mods') %]
+
+Background Hex Code:
+[%+ cgi.param('discourse_bg') || "-" %]
+
+[% ELSIF item == "other" %]
+:: Other
+
+[%+ cgi.param('other_value') %]
+
+[% END %]
+[% END %]
+
+Comments:
+[%+ cgi.param('comments') || "-" %]

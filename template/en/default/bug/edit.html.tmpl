@@ -1122,6 +1122,8 @@
         <br>
         [% PROCESS commit_button id=""%]
 
+        [% Hook.process("after_comment_commit_button", 'bug/edit.html.tmpl') %]
+
         <table id="bug_status_bottom" class="status">
           <tr>
             <th class="field_label">

@@ -91,28 +91,14 @@ for "crash secure SSL flash".
       <label for="content">Words:</label>
     </th>
     <td>
-      <input name="content" size="40" id="content"
-             value="[% default.content.0 FILTER html %]">
-      <script type="text/javascript"> <!--
-          document.forms['queryform'].content.focus(); 
-      // -->
-      </script>
+      <input name="content" size="40" id="content" autofocus
+             value="[% default.content.0 FILTER html %]"
+             [%- " required" UNLESS Param('search_allow_no_criteria') %]>
     </td>
   </tr>
   <tr>
     <td></td>
-    <td>
-    
-      [% IF Param('search_allow_no_criteria') %]
-        <input type="submit" id="search" value="Search">
-      [% ELSE %]
-        <input type="submit" id="search" value="Search"
-             onclick="if (this.form.content.value == '')
-                      {alert('The Words field cannot be empty. You have to ' +
-                             'enter at least one word in your search criteria.');
-                       return false;} return true;">
-      [% END %]
-    </td>
+    <td><input type="submit" id="search" value="Search"></td>
   </tr>
 </table>
 </form>

@@ -23,6 +23,7 @@
 <script type="text/javascript">
 var descriptions = [
 [% FOREACH c = product.components %]
+  [% NEXT IF NOT c.is_active %]
   '[% c.description FILTER js %]',
 [% END %]
 ];
@@ -121,6 +122,7 @@ function PutDescription() {
           [% default.component_ = "General" %]
         [% END %]
         [% FOREACH c = product.components %]
+          [% NEXT IF NOT c.is_active %]
           <option value="[% c.name FILTER html %]"
                   [%+ 'selected="selected"' IF c.name == default.component_ %]>
             [% c.name FILTER html %]
@@ -223,9 +225,10 @@ function PutDescription() {
     <th>Details</th>
     <td>
       [% INCLUDE global/textarea.html.tmpl
-        name    = 'comment'
-        minrows = 6
-        cols    = constants.COMMENT_COLS
+        name      = 'comment'
+        minrows   = 6
+        cols      = constants.COMMENT_COLS
+        mandatory = 1
       %]
       <p>
         Expand on the Summary. Please be
@@ -379,11 +382,7 @@ function PutDescription() {
 <h3 id="step3">Step 3 of 3 - submit the [% terms.bug %] report</h3>
 
 <p>
-  <input type="submit" id="report" value="    Submit [% terms.Bug %] Report    "
-   onclick="if (this.form.comment.value == '')
-   { alert('Please enter some details about this [% terms.bug %].');
-     this.form.comment.focus();
-     return false; } return true;">
+  <input type="submit" id="report" value="Submit [% terms.Bug %] Report">
 </p>
 
 <p>

@@ -65,7 +65,7 @@ if (grep(/^cmd-/, $cgi->param())) {
 
 my $action = $cgi->param('action');
 my $series_id = $cgi->param('series_id');
-$vars->{'doc_section'} = 'reporting.html#charts';
+$vars->{'doc_section'} = 'using.html#charts';
 
 # Because some actions are chosen by buttons, we can't encode them as the value
 # of the action param, because that value is localization-dependent. So, we

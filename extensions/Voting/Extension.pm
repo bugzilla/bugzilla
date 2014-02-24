@@ -656,8 +656,8 @@ sub _modify_bug_votes {
             # If some votes are removed, _remove_votes() returns a list
             # of messages to send to voters.
             push(@msgs, _remove_votes($id, $who, 'votes_too_many_per_bug'));
-            my $name = user_id_to_login($who);
-
+            my $name = Bugzilla::User->new($who)->login;
+            
             push(@toomanyvotes_list, {id => $id, name => $name});
         }
     }
@@ -697,12 +697,12 @@ sub _modify_bug_votes {
                         AND votes.who = ?',
                 undef, $product->id, $who);
 
+            my $name = Bugzilla::User->new($who)->login;
             foreach my $bug_id (@$bug_ids) {
                 # _remove_votes returns a list of messages to send
                 # in case some voters had too many votes.
                 push(@msgs, _remove_votes($bug_id, $who, 
                                           'votes_too_many_per_user'));
-                my $name = user_id_to_login($who);
 
                 push(@toomanytotalvotes_list, {id => $bug_id, name => $name});
             }

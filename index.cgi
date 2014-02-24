@@ -48,11 +48,11 @@ if ($user->in_group('admin')) {
 if ($user->id) {
     my $dbh = Bugzilla->dbh;
     $vars->{assignee_count} =
-      $dbh->selectrow_array('SELECT COUNT(*) FROM bugs WHERE assigned_to = ?
-                             AND resolution = ""', undef, $user->id);
+      $dbh->selectrow_array("SELECT COUNT(*) FROM bugs WHERE assigned_to = ?
+                             AND resolution = ''", undef, $user->id);
     $vars->{reporter_count} =
-      $dbh->selectrow_array('SELECT COUNT(*) FROM bugs WHERE reporter = ?
-                             AND resolution = ""', undef, $user->id);
+      $dbh->selectrow_array("SELECT COUNT(*) FROM bugs WHERE reporter = ?
+                             AND resolution = ''", undef, $user->id);
     $vars->{requestee_count} =
       $dbh->selectrow_array('SELECT COUNT(DISTINCT bug_id) FROM flags
                              WHERE requestee_id = ?', undef, $user->id);

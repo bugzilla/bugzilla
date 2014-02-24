@@ -123,10 +123,8 @@ sub _generate_tree {
             _generate_tree($dep_id, $relationship, $depth + 1, $bugs, $ids);
         }
 
-        # remove bugs according to visiblity and filters
-        if (!Bugzilla->user->can_see_bug($dep_id)
-            || ($hide_resolved && !$bugs->{$dep_id}->isopened))
-        {
+        # remove bugs according to visiblity
+        if (!Bugzilla->user->can_see_bug($dep_id)) {
             delete $ids->{$dep_id};
         }
         elsif (!grep { $_ == $dep_id } @{ $bugs->{dependencies}->{$bug_id} }) {
@@ -140,7 +138,7 @@ sub _get_dependencies {
     my $cache = Bugzilla->request_cache->{dependency_cache} ||= {};
     return $cache->{$bug_id}->{$relationship} ||=
         $relationship eq 'dependson'
-        ? Bugzilla::Bug::EmitDependList('blocked',   'dependson', $bug_id)
-        : Bugzilla::Bug::EmitDependList('dependson', 'blocked',   $bug_id);
+        ? Bugzilla::Bug::EmitDependList('blocked',   'dependson', $bug_id, $hide_resolved)
+        : Bugzilla::Bug::EmitDependList('dependson', 'blocked',   $bug_id, $hide_resolved);
 }
 

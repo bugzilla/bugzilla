@@ -17,6 +17,7 @@ use Bugzilla::Error;
 use Bugzilla::Constants;
 use Bugzilla::Hook;
 
+use URI;
 use URI::QueryParam;
 
 ###############################

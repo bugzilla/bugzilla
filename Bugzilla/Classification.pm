@@ -48,6 +48,7 @@ use constant VALIDATORS => {
 ###############################
 ####     Constructors     #####
 ###############################
+
 sub remove_from_db {
     my $self = shift;
     my $dbh = Bugzilla->dbh;
@@ -55,9 +56,18 @@ sub remove_from_db {
     ThrowUserError("classification_not_deletable") if ($self->id == 1);
 
     $dbh->bz_start_transaction();
+
     # Reclassify products to the default classification, if needed.
-    $dbh->do("UPDATE products SET classification_id = 1
-              WHERE classification_id = ?", undef, $self->id);
+    my $product_ids = $dbh->selectcol_arrayref(
+        'SELECT id FROM products WHERE classification_id = ?', undef, $self->id);
+
+    if (@$product_ids) {
+        $dbh->do('UPDATE products SET classification_id = 1 WHERE '
+                  . $dbh->sql_in('id', $product_ids));
+        foreach my $id (@$product_ids) {
+            Bugzilla->memcached->clear({ table => 'products', id => $id });
+        }
+    }
 
     $self->SUPER::remove_from_db();
 

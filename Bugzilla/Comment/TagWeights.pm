@@ -35,6 +35,9 @@ use constant NAME_FIELD => 'tag';
 use constant LIST_ORDER => 'weight DESC';
 use constant VALIDATORS => { };
 
+# There's no gain to caching these objects
+use constant USE_MEMCACHED => 0;
+
 sub tag    { return $_[0]->{'tag'} }
 sub weight { return $_[0]->{'weight'} }
 

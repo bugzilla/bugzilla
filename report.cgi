@@ -373,7 +373,7 @@ if ($cgi->param('debug')) {
 }
 
 # All formats point to the same section of the documentation.
-$vars->{'doc_section'} = 'reporting.html#reports';
+$vars->{'doc_section'} = 'using.html#reports-and-charts';
 
 disable_utf8() if ($format->{'ctype'} =~ /^image\//);
 

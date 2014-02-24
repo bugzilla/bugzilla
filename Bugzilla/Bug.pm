@@ -32,8 +32,6 @@ use Bugzilla::BugUrl;
 use List::MoreUtils qw(firstidx uniq part);
 use List::Util qw(min max first);
 use Storable qw(dclone);
-use URI;
-use URI::QueryParam;
 use Scalar::Util qw(blessed);
 
 use parent qw(Bugzilla::Object Exporter);
@@ -54,6 +52,8 @@ use constant LIST_ORDER => ID_FIELD;
 # Bugs have their own auditing table, bugs_activity.
 use constant AUDIT_CREATES => 0;
 use constant AUDIT_UPDATES => 0;
+# This will be enabled later
+use constant USE_MEMCACHED => 0;
 
 # This is a sub because it needs to call other subroutines.
 sub DB_COLUMNS {
@@ -523,8 +523,10 @@ sub possible_duplicates {
     my $dbh = Bugzilla->dbh;
     my $user = Bugzilla->user;
     my @words = split(/[\b\s]+/, $short_desc || '');
-    # Exclude punctuation from the array.
-    @words = map { /(\w+)/; $1 } @words;
+    # Remove leading/trailing punctuation from words
+    foreach my $word (@words) {
+        $word =~ s/(?:^\W+|\W+$)//g;
+    }
     # And make sure that each word is longer than 2 characters.
     @words = grep { defined $_ and length($_) > 2 } @words;
 
@@ -2202,8 +2204,8 @@ sub _set_global_validator {
     my $can = $self->check_can_change_field($field, $current, $value, \$privs);
     if (!$can) {
         if ($field eq 'assigned_to' || $field eq 'qa_contact') {
-            $value   = user_id_to_login($value);
-            $current = user_id_to_login($current);
+            $value   = Bugzilla::User->new($value)->login;
+            $current = Bugzilla::User->new($current)->login;
         }
         ThrowUserError('illegal_change', { field    => $field,
                                            oldvalue => $current,
@@ -3828,17 +3830,24 @@ sub editable_bug_fields {
 # Join with bug_status and bugs tables to show bugs with open statuses first,
 # and then the others
 sub EmitDependList {
-    my ($myfield, $targetfield, $bug_id) = (@_);
+    my ($my_field, $target_field, $bug_id, $exclude_resolved) = @_;
+    my $cache = Bugzilla->request_cache->{bug_dependency_list} ||= {};
+
     my $dbh = Bugzilla->dbh;
-    my $list_ref = $dbh->selectcol_arrayref(
-          "SELECT $targetfield
+    $exclude_resolved = $exclude_resolved ? 1 : 0;
+    my $is_open_clause = $exclude_resolved ? 'AND is_open = 1' : '';
+
+    $cache->{"${target_field}_sth_$exclude_resolved"} ||= $dbh->prepare(
+          "SELECT $target_field
              FROM dependencies
-                  INNER JOIN bugs ON dependencies.$targetfield = bugs.bug_id
+                  INNER JOIN bugs ON dependencies.$target_field = bugs.bug_id
                   INNER JOIN bug_status ON bugs.bug_status = bug_status.value
-            WHERE $myfield = ?
-            ORDER BY is_open DESC, $targetfield",
-            undef, $bug_id);
-    return $list_ref;
+            WHERE $my_field = ? $is_open_clause
+            ORDER BY is_open DESC, $target_field");
+
+    return $dbh->selectcol_arrayref(
+        $cache->{"${target_field}_sth_$exclude_resolved"},
+        undef, $bug_id);
 }
 
 # Creates a lot of bug objects in the same order as the input array.

@@ -7,6 +7,19 @@
 # defined by the Mozilla Public License, v. 2.0.
 
 # This script compiles all the documentation.
+#
+# Required software:
+#
+# 1) Sphinx documentation builder (python-sphinx package on Debian/Ubuntu)
+#
+# 2) pdflatex, which means the following Debian/Ubuntu packages:
+#    * texlive-latex-base
+#    * texlive-latex-recommended
+#    * texlive-latex-extra
+#    * texlive-fonts-recommended
+#
+# All these TeX packages together are close to a gig :-| But after you've
+# installed them, you can remove texlive-latex-extra-doc to save 400MB.
 
 use 5.10.1;
 use strict;
@@ -33,71 +46,25 @@ if (eval { require Pod::Simple }) {
     $pod_simple = 1;
 };
 
-use Bugzilla::Install::Requirements 
-    qw(REQUIRED_MODULES OPTIONAL_MODULES);
-use Bugzilla::Constants qw(DB_MODULE BUGZILLA_VERSION);
+use Bugzilla::Constants qw(BUGZILLA_VERSION);
 
-###############################################################################
-# Generate minimum version list
-###############################################################################
-
-my $modules = REQUIRED_MODULES;
-my $opt_modules = OPTIONAL_MODULES;
-
-my $template;
-{
-    open(TEMPLATE, '<', 'bugzilla.ent.tmpl')
-      or die('Could not open bugzilla.ent.tmpl: ' . $!);
-    local $/;
-    $template = <TEMPLATE>;
-    close TEMPLATE;
-}
-open(ENTITIES, '>', 'bugzilla.ent') or die('Could not open bugzilla.ent: ' . $!);
-print ENTITIES "$template\n";
-print ENTITIES '<!-- Module Versions -->' . "\n";
-foreach my $module (@$modules, @$opt_modules)
-{
-    my $name = $module->{'module'};
-    $name =~ s/::/-/g;
-    $name = lc($name);
-    #This needs to be a string comparison, due to the modules having
-    #version numbers like 0.9.4
-    my $version = $module->{'version'} eq 0 ? 'any' : $module->{'version'};
-    print ENTITIES '<!ENTITY min-' . $name . '-ver "'.$version.'">' . "\n";
-}
-
-print ENTITIES "\n <!-- Database Versions --> \n";
-
-my $db_modules = DB_MODULE;
-foreach my $db (keys %$db_modules) {
-    my $dbd  = $db_modules->{$db}->{dbd};
-    my $name = $dbd->{module};
-    $name =~ s/::/-/g;
-    $name = lc($name);
-    my $version    = $dbd->{version} || 'any';
-    my $db_version = $db_modules->{$db}->{'db_version'};
-    print ENTITIES '<!ENTITY min-' . $name . '-ver "'.$version.'">' . "\n";
-    print ENTITIES '<!ENTITY min-' . lc($db) . '-ver "'.$db_version.'">' . "\n";
-}
-close(ENTITIES);
+use File::Path qw(rmtree);
+use File::Which qw(which);
 
 ###############################################################################
 # Subs
 ###############################################################################
 
 sub MakeDocs {
-
     my ($name, $cmdline) = @_;
 
     say "Creating $name documentation ..." if defined $name;
     say "$cmdline\n";
     system $cmdline;
     print "\n";
-
 }
 
 sub make_pod {
-
     say "Creating API documentation...";
 
     my $converter = Pod::Simple::HTMLBatch::Bugzilla->new;
@@ -125,6 +92,8 @@ END_HTML
     $converter->add_css('./../../../style.css');
     $converter->javascript_flurry(0);
     $converter->css_flurry(0);
+    mkdir("html");
+    mkdir("html/api");
     $converter->batch_convert(['../../'], 'html/api/');
 
     print "\n";
@@ -135,11 +104,11 @@ END_HTML
 ###############################################################################
 
 my @langs;
-# search for sub directories which have a 'xml' sub-directory
+# search for sub directories which have a 'rst' sub-directory
 opendir(LANGS, './');
 foreach my $dir (readdir(LANGS)) {
     next if (($dir eq '.') || ($dir eq '..') || (! -d $dir));
-    if (-d "$dir/xml") {
+    if (-d "$dir/rst") {
         push(@langs, $dir);
     }
 }
@@ -148,34 +117,26 @@ closedir(LANGS);
 my $docparent = getcwd();
 foreach my $lang (@langs) {
     chdir "$docparent/$lang";
-    MakeDocs(undef, 'cp ../bugzilla.ent ./xml/');
-
-    if (!-d 'txt') {
-        unlink 'txt';
-        mkdir 'txt', 0755;
-    }
-    if (!-d 'pdf') {
-        unlink 'pdf';
-        mkdir 'pdf', 0755;
-    }
-    if (!-d 'html') {
-        unlink 'html';
-        mkdir 'html', 0755;
-    }
-    if (!-d 'html/api') {
-        unlink 'html/api';
-        mkdir 'html/api', 0755;
-    }
 
     make_pod() if $pod_simple;
 
-    MakeDocs('separate HTML', 'xmlto -m ../xsl/chunks.xsl -o html html xml/Bugzilla-Guide.xml');
-    MakeDocs('big HTML', 'xmlto -m ../xsl/nochunks.xsl -o html html-nochunks xml/Bugzilla-Guide.xml');
-    MakeDocs('big text', 'lynx -dump -justify=off -nolist html/Bugzilla-Guide.html > txt/Bugzilla-Guide.txt');
+    next if grep { $_ eq '--pod-only' } @ARGV;
 
-    if (! grep($_ eq "--with-pdf", @ARGV)) {
-        next;
+    MakeDocs('HTML', 'make html');
+    MakeDocs('TXT', 'make text');
+
+    if (grep { $_ eq '--with-pdf' } @ARGV) {
+        if (which('pdflatex')) {
+            MakeDocs('PDF', 'make latexpdf');
+        }
+        elsif (which('rst2pdf')) {
+            rmtree('pdf', 0, 1);
+            MakeDocs('PDF', 'make pdf');
+        }
+        else {
+            say 'pdflatex or rst2pdf not found. Skipping PDF file creation';
+        }
     }
 
-    MakeDocs('PDF', 'dblatex -p ../xsl/pdf.xsl -o pdf/Bugzilla-Guide.pdf xml/Bugzilla-Guide.xml');
+    rmtree('doctrees', 0, 1);
 }

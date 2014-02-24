@@ -131,7 +131,7 @@ This allows you to create a new group in Bugzilla.
 
 =item B<REST>
 
-POST /group
+POST /rest/group
 
 The params to include in the POST body as well as the returned data format,
 are the same as below.
@@ -221,7 +221,7 @@ This allows you to update a group in Bugzilla.
 
 =item B<REST>
 
-PUT /group/<group_name_or_id>
+PUT /rest/group/<group_name_or_id>
 
 The params to include in the PUT body as well as the returned data format,
 are the same as below. The C<ids> param will be overridden as it is pulled

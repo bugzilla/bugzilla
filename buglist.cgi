@@ -382,6 +382,7 @@ if ($cmdtype eq "dorem") {
             $dbh->do('DELETE FROM namedquery_group_map
                             WHERE namedquery_id = ?',
                      undef, $query_id);
+            Bugzilla->memcached->clear({ table => 'namedqueries', id => $query_id });
         }
 
         # Now reset the cached queries

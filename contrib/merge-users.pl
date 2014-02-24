@@ -222,4 +222,9 @@ $user->derive_regexp_groups();
 # Commit the transaction
 $dbh->bz_commit_transaction();
 
+# It's complex to determine which items now need to be flushed from memcached.
+# As user merge is expected to be a rare event, we just flush the entire cache
+# when users are merged.
+Bugzilla->memcached->clear_all();
+
 print "Done.\n";

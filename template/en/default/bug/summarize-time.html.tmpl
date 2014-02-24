@@ -21,7 +21,7 @@
     title = title 
     header = header 
     style_urls = ["skins/standard/summarize-time.css"]
-    doc_section = "timetracking.html"
+    doc_section = "using.html#time-tracking-information"
     yui = ['calendar']
     javascript_urls = [ "js/util.js", "js/field.js" ]
     %]
@@ -261,7 +261,7 @@
       <label accesskey="s" for="start_date">Period <u>s</u>tarting</label>:
     </th>
     <td>
-      <input type="text" id="start_date" name="start_date" size="10"
+      <input id="start_date" name="start_date" size="10" autofocus
              value="[% start_date FILTER html %]" maxlength="10"
              onchange="updateCalendarFromField(this)">
       <button type="button" class="calendar_button" id="button_calendar_start_date"
@@ -323,7 +323,6 @@
   <!--
     [%+ PROCESS "global/calendar.js.tmpl" id = 'start_date' %]
     [% PROCESS "global/calendar.js.tmpl" id = 'end_date' %]
-    document.forms['summary'].start_date.focus();
   //-->
 </script>
 <hr>

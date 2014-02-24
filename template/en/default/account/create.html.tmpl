@@ -13,13 +13,9 @@
   # Param("emailsuffix") is used to pre-fill the email field.
   #%]
 
-[% title = BLOCK %]
-  Create a new [% terms.Bugzilla %] account
-[% END %]
-
 [% PROCESS global/header.html.tmpl
-           title = title
-           onload = "document.forms['account_creation_form'].login.focus();" %]
+           title = "Create a new $terms.Bugzilla account"
+%]
 
 <p>
   To create a [% terms.Bugzilla %] account, all you need to do is to enter
@@ -75,7 +71,7 @@
       Email address:
     [% END %]
   </span>
-  <input size="35" id="login" name="login"
+  <input size="35" id="login" name="login" autofocus
          [%- ' type="email"' UNLESS Param('emailsuffix') %]>
   [% Param('emailsuffix') FILTER html %]
   <input type="hidden" id="token" name="token" value="[% issue_hash_token(['create_account']) FILTER html %]">

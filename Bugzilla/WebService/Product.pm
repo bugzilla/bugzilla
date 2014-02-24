@@ -382,7 +382,7 @@ Returns a list of the ids of the products the user can search on.
 
 =item B<REST>
 
-GET /product_selectable
+GET /rest/product_selectable
 
 the returned data format is same as below.
 
@@ -418,7 +418,7 @@ against.
 
 =item B<REST>
 
-GET /product_enterable
+GET /rest/product_enterable
 
 the returned data format is same as below.
 
@@ -454,7 +454,7 @@ bugs against.
 
 =item B<REST>
 
-GET /product_accessible
+GET /rest/product_accessible
 
 the returned data format is same as below.
 
@@ -496,16 +496,16 @@ B<Note>: Can also be called as "get_products" for compatibilty with Bugzilla 3.0
 To return information about a specific groups of products such as
 C<accessible>, C<selectable>, or C<enterable>:
 
-GET /product?type=accessible
+GET /rest/product?type=accessible
 
 To return information about a specific product by C<id> or C<name>:
 
-GET /product/<product_id_or_name>
+GET /rest/product/<product_id_or_name>
 
 You can also return information about more than one specific product
 by using the following in your query string:
 
-GET /product?ids=1&ids=2&ids=3 or GET /product?names=ProductOne&names=Product2
+GET /rest/product?ids=1&ids=2&ids=3 or GET /product?names=ProductOne&names=Product2
 
 the returned data format is same as below.
 
@@ -730,7 +730,7 @@ This allows you to create a new product in Bugzilla.
 
 =item B<REST>
 
-POST /product
+POST /rest/product
 
 The params to include in the POST body as well as the returned data format,
 are the same as below.
@@ -838,7 +838,7 @@ This allows you to update a product in Bugzilla.
 
 =item B<REST>
 
-PUT /product/<product_id_or_name>
+PUT /rest/product/<product_id_or_name>
 
 The params to include in the PUT body as well as the returned data format,
 are the same as below. The C<ids> and C<names> params will be overridden as

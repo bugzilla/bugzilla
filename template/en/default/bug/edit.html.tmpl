@@ -1110,9 +1110,7 @@
       <!-- This table keeps the submit button aligned with the box. -->
       <table><tr><td>
         [% IF bug.check_can_change_field('longdesc', 0, 1) %]
-          [% INCLUDE global/textarea.html.tmpl
-                     name      = 'comment'
-                     id        = 'comment'
+          [% INCLUDE bug/comment.html.tmpl
                      minrows   = 10
                      maxrows   = 25
                      cols      = constants.COMMENT_COLS
@@ -1123,6 +1121,8 @@
         [% END %]
         <br>
         [% PROCESS commit_button id=""%]
+
+        [% Hook.process("after_comment_commit_button", 'bug/edit.html.tmpl') %]
 
         <table id="bug_status_bottom" class="status">
           <tr>

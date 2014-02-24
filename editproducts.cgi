@@ -33,7 +33,7 @@ my $template = Bugzilla->template;
 my $vars = {};
 # Remove this as soon as the documentation about products has been
 # improved and each action has its own section.
-$vars->{'doc_section'} = 'products.html';
+$vars->{'doc_section'} = 'administration.html#products';
 
 print $cgi->header();
 

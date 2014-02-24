@@ -14,6 +14,10 @@ use warnings;
 use Bugzilla::Error;
 use Bugzilla::Util qw(trick_taint);
 use Scalar::Util qw(blessed);
+use URI::Escape;
+
+# memcached keys have a maximum length of 250 bytes
+use constant MAX_KEY_LENGTH => 250;
 
 sub _new {
     my $invocant = shift;
@@ -26,10 +30,11 @@ sub _new {
         && Bugzilla->params->{memcached_servers})
     {
         require Cache::Memcached;
+        $self->{namespace} = Bugzilla->params->{memcached_namespace} || '';
         $self->{memcached} =
             Cache::Memcached->new({
                 servers   => [ split(/[, ]+/, Bugzilla->params->{memcached_servers}) ],
-                namespace => Bugzilla->params->{memcached_namespace} || '',
+                namespace => $self->{namespace},
             });
     }
     return bless($self, $class);
@@ -155,6 +160,14 @@ sub _prefix {
     return $request_cache->{memcached_prefix};
 }
 
+sub _encode_key {
+    my ($self, $key) = @_;
+    $key = $self->_prefix . ':' . uri_escape_utf8($key);
+    return length($self->{namespace} . $key) > MAX_KEY_LENGTH
+        ? undef
+        : $key;
+}
+
 sub _set {
     my ($self, $key, $value) = @_;
     if (blessed($value)) {
@@ -162,13 +175,17 @@ sub _set {
         ThrowCodeError('param_invalid', { function => "Bugzilla::Memcached::set",
                                           param    => "value" });
     }
-    return $self->{memcached}->set($self->_prefix . ':' . $key, $value);
+    $key = $self->_encode_key($key)
+        or return;
+    return $self->{memcached}->set($key, $value);
 }
 
 sub _get {
     my ($self, $key) = @_;
 
-    my $value = $self->{memcached}->get($self->_prefix . ':' . $key);
+    $key = $self->_encode_key($key)
+        or return;
+    my $value = $self->{memcached}->get($key);
     return unless defined $value;
 
     # detaint returned values
@@ -187,7 +204,9 @@ sub _get {
 
 sub _delete {
     my ($self, $key) = @_;
-    return $self->{memcached}->delete($self->_prefix . ':' . $key);
+    $key = $self->_encode_key($key)
+        or return;
+    return $self->{memcached}->delete($key);
 }
 
 1;

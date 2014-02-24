@@ -148,9 +148,8 @@ sub REQUIRED_MODULES {
     {
         package => 'URI',
         module  => 'URI',
-        # This version properly handles a semicolon as the delimiter
-        # in a URL query string.
-        version => '1.37',
+        # Follows RFC 3986 to escape characters in URI::Escape.
+        version => '1.55',
     },
     # 0.32 fixes several memory leaks in the XS version of some functions.
     {

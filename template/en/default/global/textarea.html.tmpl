@@ -46,7 +46,7 @@
             onFocus="this.rows=[% maxrows FILTER html %]"
           [% END %]
           [% IF mandatory %]
-            aria-required="true"
+            aria-required="true" required
           [% END %]
           [% IF onchange %]
             onchange="[% onchange FILTER html %]"

@@ -4662,4 +4662,10 @@ Ensures the accessors for custom fields are always created.
 
 =item target_milestone
 
+=item master_bug
+
+=item master_bug_id
+
+=item sightings
+
 =back

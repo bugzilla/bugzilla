@@ -935,10 +935,10 @@ sub remove_from_db {
     my $dbh = Bugzilla->dbh;
 
     $dbh->bz_start_transaction();
-    my @flag_ids = $dbh->selectrow_array(
+    my $flag_ids = $dbh->selectcol_arrayref(
         'SELECT id FROM flags WHERE attach_id = ?', undef, $self->id);
-    $dbh->do('DELETE FROM flags WHERE ' . $dbh->sql_in('id', \@flag_ids))
-        if @flag_ids;
+    $dbh->do('DELETE FROM flags WHERE ' . $dbh->sql_in('id', $flag_ids))
+        if @$flag_ids;
     $dbh->do('DELETE FROM attach_data WHERE id = ?', undef, $self->id);
     $dbh->do('UPDATE attachments SET mimetype = ?, ispatch = ?, isobsolete = ?
               WHERE attach_id = ?', undef, ('text/plain', 0, 1, $self->id));
@@ -952,7 +952,7 @@ sub remove_from_db {
     # As we don't call SUPER->remove_from_db we need to manually clear
     # memcached here.
     Bugzilla->memcached->clear({ table => 'attachments', id => $self->id });
-    foreach my $flag_id (@flag_ids) {
+    foreach my $flag_id (@$flag_ids) {
         Bugzilla->memcached->clear({ table => 'flags', id => $flag_id });
     }
 }

@@ -48,6 +48,7 @@ use constant VALIDATORS => {
 ###############################
 ####     Constructors     #####
 ###############################
+
 sub remove_from_db {
     my $self = shift;
     my $dbh = Bugzilla->dbh;
@@ -57,13 +58,13 @@ sub remove_from_db {
     $dbh->bz_start_transaction();
 
     # Reclassify products to the default classification, if needed.
-    my @product_ids = $dbh->selectrow_array(
-        "SELECT id FROM products WHERE classification_id = ?",
-        undef, $self->id);
-    if (@product_ids) {
-        $dbh->do("UPDATE products SET classification_id = 1 WHERE " .
-            $dbh->sql_in('id', \@product_ids));
-        foreach my $id (@product_ids) {
+    my $product_ids = $dbh->selectcol_arrayref(
+        'SELECT id FROM products WHERE classification_id = ?', undef, $self->id);
+
+    if (@$product_ids) {
+        $dbh->do('UPDATE products SET classification_id = 1 WHERE '
+                  . $dbh->sql_in('id', $product_ids));
+        foreach my $id (@$product_ids) {
             Bugzilla->memcached->clear({ table => 'products', id => $id });
         }
     }

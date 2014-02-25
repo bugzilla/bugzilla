@@ -27,8 +27,10 @@ use strict;
 use lib qw(.);
 
 use Bugzilla;
+use Bugzilla::Bug;
 use Bugzilla::Constants;
 use Bugzilla::Util;
+use List::MoreUtils qw(uniq);
 
 use Getopt::Long;
 
@@ -79,6 +81,7 @@ if ($dry_run) {
 eval {
     delete_non_public_products();
     delete_secure_bugs();
+    delete_deleted_comments();
     delete_insider_comments() unless $keep_insider;
     delete_security_groups();
     delete_sensitive_user_data();
@@ -127,6 +130,20 @@ sub delete_secure_bugs {
         $bug->remove_from_db();
     }
     print "\rDone            \n" unless $from_cron;
+}
+
+sub delete_deleted_comments {
+    # Delete all comments tagged as 'deleted'
+    my $comment_ids = $dbh->selectcol_arrayref("SELECT comment_id FROM longdescs_tags WHERE tag='deleted'");
+    return unless @$comment_ids;
+    print "Deleting 'deleted' comments...\n";
+    my @bug_ids = uniq @{
+        $dbh->selectcol_arrayref("SELECT bug_id FROM longdescs WHERE comment_id IN (" . join(',', @$comment_ids) . ")")
+    };
+    $dbh->do("DELETE FROM longdescs WHERE comment_id IN (" . join(',', @$comment_ids) . ")");
+    foreach my $bug_id (@bug_ids) {
+        Bugzilla::Bug->new($bug_id)->_sync_fulltext(update_comments => 1);
+    }
 }
 
 sub delete_insider_comments {

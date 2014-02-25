@@ -29,6 +29,7 @@ use Bugzilla::Attachment;
 use Bugzilla::Comment::TagWeights;
 use Bugzilla::Constants;
 use Bugzilla::Error;
+use Bugzilla::Hook;
 use Bugzilla::User;
 use Bugzilla::Util;
 
@@ -165,18 +166,16 @@ sub preload {
         $comment->{author} = $user_map{$comment->{who}};
     }
     # Tags
-    if (Bugzilla->params->{'comment_taggers_group'}) {
-        my $dbh = Bugzilla->dbh;
-        my @comment_ids = map { $_->id } @$comments;
-        my %comment_map = map { $_->id => $_ } @$comments;
-        my $rows = $dbh->selectall_arrayref(
-            "SELECT comment_id, " . $dbh->sql_group_concat('tag', "','") . "
-               FROM longdescs_tags
-              WHERE " . $dbh->sql_in('comment_id', \@comment_ids) . "
-              GROUP BY comment_id");
-        foreach my $row (@$rows) {
-            $comment_map{$row->[0]}->{tags} = [ split(/,/, $row->[1]) ];
-        }
+    my $dbh = Bugzilla->dbh;
+    my @comment_ids = map { $_->id } @$comments;
+    my %comment_map = map { $_->id => $_ } @$comments;
+    my $rows = $dbh->selectall_arrayref(
+        "SELECT comment_id, " . $dbh->sql_group_concat('tag', "','") . "
+            FROM longdescs_tags
+            WHERE " . $dbh->sql_in('comment_id', \@comment_ids) . "
+            GROUP BY comment_id");
+    foreach my $row (@$rows) {
+        $comment_map{$row->[0]}->{tags} = [ split(/,/, $row->[1]) ];
     }
 }
 
@@ -294,6 +293,8 @@ sub add_tag {
     return if grep { lc($tag) eq lc($_) } @$tags;
     push @$tags, $tag;
     $self->{'tags'} = [ sort @$tags ];
+    Bugzilla::Hook::process("comment_after_add_tag",
+                            { comment => $self, tag => $tag });
 }
 
 sub remove_tag {
@@ -304,6 +305,8 @@ sub remove_tag {
     my $index = first { lc($tags->[$_]) eq lc($tag) } 0..scalar(@$tags) - 1;
     return unless defined $index;
     splice(@$tags, $index, 1);
+    Bugzilla::Hook::process("comment_after_remove_tag",
+                            { comment => $self, tag => $tag });
 }
 
 ##############

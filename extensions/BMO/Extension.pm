@@ -1342,4 +1342,79 @@ sub install_filesystem {
     };
 }
 
+# "deleted" comment tag
+
+sub config_modify_panels {
+    my ($self, $args) = @_;
+    push @{ $args->{panels}->{groupsecurity}->{params} }, {
+        name    => 'delete_comments_group',
+        type    => 's',
+        choices => \&Bugzilla::Config::GroupSecurity::_get_all_group_names,
+        default => 'admin',
+        checker => \&check_group
+    };
+}
+
+sub comment_after_add_tag {
+    my ($self, $args) = @_;
+    my $tag = $args->{tag};
+    return unless lc($tag) eq 'deleted';
+
+    my $group_name = Bugzilla->params->{delete_comments_group};
+    if (!$group_name || !Bugzilla->user->in_group($group_name)) {
+        ThrowUserError('auth_failure', { group  => $group_name,
+                                         action => 'delete',
+                                         object => 'comments' });
+    }
+}
+
+sub comment_after_remove_tag {
+    my ($self, $args) = @_;
+    my $tag = $args->{tag};
+    return unless lc($tag) eq 'deleted';
+
+    my $group_name = Bugzilla->params->{delete_comments_group};
+    if (!$group_name || !Bugzilla->user->in_group($group_name)) {
+        ThrowUserError('auth_failure', { group  => $group_name,
+                                         action => 'delete',
+                                         object => 'comments' });
+    }
+}
+
+BEGIN {
+    *Bugzilla::Comment::has_tag = \&_comment_has_tag;
+}
+
+sub _comment_has_tag {
+    my ($self, $test_tag) = @_;
+    $test_tag = lc($test_tag);
+    foreach my $tag (@{ $self->tags }) {
+        return 1 if lc($tag) eq $test_tag;
+    }
+    return 0;
+}
+
+sub bug_comments {
+    my ($self, $args) = @_;
+    my $can_delete = Bugzilla->user->in_group(Bugzilla->params->{delete_comments_group});
+    my $comments = $args->{comments};
+    my @deleted = grep { $_->has_tag('deleted') } @$comments;
+    while (my $comment = pop @deleted) {
+        for (my $i = scalar(@$comments) - 1; $i >= 0; $i--) {
+            if ($comment == $comments->[$i]) {
+                if ($can_delete) {
+                    # don't remove comment from users who can "delete" them
+                    # just collapse it instead
+                    $comment->{collapsed} = 1;
+                }
+                else {
+                    # otherwise, remove it from the array
+                    splice(@$comments, $i, 1);
+                }
+                last;
+            }
+        }
+    }
+}
+
 __PACKAGE__->NAME;

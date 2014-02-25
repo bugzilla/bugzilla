@@ -622,8 +622,6 @@ table.edit_form hr {
     -moz-box-sizing: content-box;
     -webkit-box-sizing: content-box;
     box-sizing: content-box;
-    display: block;
-    clear: both;
 }
 
 #comment_tabs {

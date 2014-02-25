@@ -18,7 +18,7 @@ use Bugzilla::User;
 use Bugzilla::Util qw(trim detaint_natural);
 use Bugzilla::WebService::Util qw(filter validate translate params_to_objects);
 
-use List::Util qw(first min);
+use List::Util qw(min);
 
 # Don't need auth to login
 use constant LOGIN_EXEMPT => {
@@ -74,25 +74,14 @@ sub login {
     $input_params->{'Bugzilla_password'} = $params->{password};
     $input_params->{'Bugzilla_remember'} = $remember;
 
-    my $user = Bugzilla->login();
-
-    my $result = { id => $self->type('int', $user->id) };
-
-    # We will use the stored cookie value combined with the user id
-    # to create a token that can be used with future requests in the
-    # query parameters
-    my $login_cookie = first { $_->name eq 'Bugzilla_logincookie' }
-                              @{ Bugzilla->cgi->{'Bugzilla_cookie_list'} };
-    if ($login_cookie) {
-        $result->{'token'} = $user->id . "-" . $login_cookie->value;
-    }
-
-    return $result;
+    Bugzilla->login();
+    return { id => $self->type('int', Bugzilla->user->id) };
 }
 
 sub logout {
     my $self = shift;
     Bugzilla->logout;
+    return undef;
 }
 
 #################
@@ -450,12 +439,10 @@ management of cookies across sessions.
 
 =item B<Returns>
 
-On success, a hash containing two items, C<id>, the numeric id of the
-user that was logged in, and a C<token> which can be passed in
-the parameters as authentication in other calls. A set of http cookies
-is also sent with the response. These cookies *or* the token can be sent
-along with any future requests to the webservice, for the duration of the
-session.
+On success, a hash containing one item, C<id>, the numeric id of the
+user that was logged in.  A set of http cookies is also sent with the
+response.  These cookies must be sent along with any future requests
+to the webservice, for the duration of the session.
 
 =item B<Errors>
 

@@ -254,6 +254,9 @@ sub fix_credentials {
     if (exists $params->{'token'}) {
         $params->{'Bugzilla_token'} = $params->{'token'};
     }
+
+    # Allow extensions to modify the credential data before login
+    Bugzilla::Hook::process('webservice_fix_credentials', { params => $params });
 }
 
 __END__

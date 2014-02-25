@@ -1787,17 +1787,23 @@ sub _handle_chart {
     my ($field, $operator, $value) = $condition->fov;
     return if (!defined $field or !defined $operator or !defined $value);
     $field = FIELD_MAP->{$field} || $field;
-    
-    my $string_value;
+
+    my ($string_value, $orig_value);
     if (ref $value eq 'ARRAY') {
         # Trim input and ignore blank values.
         @$value = map { trim($_) } @$value;
         @$value = grep { defined $_ and $_ ne '' } @$value;
         return if !@$value;
+        $orig_value = join(',', @$value);
+        if ($field eq 'longdesc') {
+            @$value = map { _convert_unicode_characters($_) } @$value;
+        }
         $string_value = join(',', @$value);
     }
     else {
         return if $value eq '';
+        $orig_value = $value;
+        $value = _convert_unicode_characters($value) if $field eq 'longdesc';
         $string_value = $value;
     }
     
@@ -1844,7 +1850,7 @@ sub _handle_chart {
     # do_search_function modified them.   
     $self->search_description({
         field => $field, type => $operator,
-        value => $string_value, term => $search_args{term},
+        value => $orig_value, term => $search_args{term},
     });
 
     foreach my $join (@{ $search_args{joins} }) {
@@ -1853,6 +1859,18 @@ sub _handle_chart {
     }
 
     $condition->translated(\%search_args);
+}
+
+# XXX - This is a hack for MySQL which doesn't understand Unicode characters
+# above U+FFFF, see Bugzilla::Comment::_check_thetext(). This hack can go away
+# once we require MySQL 5.5.3 and use utf8mb4.
+sub _convert_unicode_characters {
+    my $string = shift;
+
+    if (Bugzilla->dbh->isa('Bugzilla::DB::Mysql')) {
+        $string =~ s/([\x{10000}-\x{10FFFF}])/"\x{FDD0}[" . uc(sprintf('U+%04x', ord($1))) . "]\x{FDD1}"/eg;
+    }
+    return $string;
 }
 
 ##################################

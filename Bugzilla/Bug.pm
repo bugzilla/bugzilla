@@ -3412,9 +3412,15 @@ sub comments {
     if (!defined $self->{'comments'}) {
         $self->{'comments'} = Bugzilla::Comment->match({ bug_id => $self->id });
         my $count = 0;
+        my $is_mysql = Bugzilla->dbh->isa('Bugzilla::DB::Mysql') ? 1 : 0;
         foreach my $comment (@{ $self->{'comments'} }) {
             $comment->{count} = $count++;
             $comment->{bug} = $self;
+            # XXX - hack for MySQL. Convert [U+....] back into its Unicode
+            # equivalent for characters above U+FFFF as MySQL older than 5.5.3
+            # cannot store them, see Bugzilla::Comment::_check_thetext().
+            $comment->{thetext} =~ s/\x{FDD0}\[U\+((?:[1-9A-F]|10)[0-9A-F]{4})\]\x{FDD1}/chr(hex $1)/eg
+              if $is_mysql;
         }
         # Some bugs may have no comments when upgrading old installations.
         Bugzilla::Comment->preload($self->{'comments'}) if $count;

@@ -424,6 +424,15 @@ sub _check_thetext {
     $thetext =~ s/\s*$//s;
     $thetext =~ s/\r\n?/\n/g; # Get rid of \r.
 
+    # Characters above U+FFFF cannot be stored by MySQL older than 5.5.3 as they
+    # require the new utf8mb4 character set. Other DB servers are handling them
+    # without any problem. So we need to replace these characters if we use MySQL,
+    # else the comment is truncated.
+    # XXX - Once we use utf8mb4 for comments, this hack for MySQL can go away.
+    if (Bugzilla->dbh->isa('Bugzilla::DB::Mysql')) {
+        $thetext =~ s/([\x{10000}-\x{10FFFF}])/"\x{FDD0}[" . uc(sprintf('U+%04x', ord($1))) . "]\x{FDD1}"/eg;
+    }
+
     ThrowUserError('comment_too_long') if length($thetext) > MAX_COMMENT_LENGTH;
     return $thetext;
 }

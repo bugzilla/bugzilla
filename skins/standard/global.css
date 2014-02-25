@@ -678,10 +678,13 @@ input.required, select.required, span.required_explanation {
     margin-left: -1px;
 }
 
+#comment_tabs {
+    border-spacing: 0;
+}
+
 .comment_tab {
-    float: left;
+    display: table-cell;
     border: 1px solid silver;
-    border-bottom: 0px;
     padding: 2px 1em;
     cursor: pointer;
     background: transparent;
@@ -694,7 +697,7 @@ input.required, select.required, span.required_explanation {
 
 #comment_preview {
     border: 1px solid silver;
-    padding: 2px;
+    padding: 0px 1px;
     overflow: auto;
     margin: 0px;
 }
@@ -709,7 +712,8 @@ input.required, select.required, span.required_explanation {
 }
 
 #comment {
-    margin-top: 0px;
+    margin: 0px 0px 1em 0px;
+    padding: 0px;
 }
 
 /*******************/

@@ -23,7 +23,7 @@ BEGIN {
 
 use Bugzilla::Error;
 use Bugzilla::WebService::Constants;
-use Bugzilla::WebService::Util qw(taint_data);
+use Bugzilla::WebService::Util qw(taint_data fix_credentials);
 use Bugzilla::Util qw(correct_urlbase trim disable_utf8);
 
 use HTTP::Message;
@@ -348,6 +348,10 @@ sub _argument_type_check {
             $params->{$field} = decode_base64($params->{$field});
         }
     }
+
+    # Update the params to allow for several convenience key/values
+    # use for authentication
+    fix_credentials($params);
 
     Bugzilla->input_params($params);
 

@@ -949,5 +949,57 @@ sub webservice_error_codes {
     $error_map->{'example_my_error'} = 10001;
 }
 
+sub webservice_fix_credentials {
+    my ($self, $args) = @_;
+    my $rpc    = $args->{'rpc'};
+    my $params = $args->{'params'};
+    # Allow user to pass in username=foo&password=bar
+    if (exists $params->{'username'} && exists $params->{'password'}) {
+        $params->{'Bugzilla_login'}    = $params->{'username'};
+        $params->{'Bugzilla_password'} = $params->{'password'};
+    }
+}
+
+sub webservice_rest_request {
+    my ($self, $args) = @_;
+    my $rpc    = $args->{'rpc'};
+    my $params = $args->{'params'};
+    # Internally we may have a field called 'cf_test_field' but we allow users
+    # to use the shorter 'test_field' name.
+    if (exists $params->{'test_field'}) {
+        $params->{'test_field'} = delete $params->{'cf_test_field'};
+    }
+}
+
+sub webservice_rest_resources {
+    my ($self, $args) = @_;
+    my $rpc = $args->{'rpc'};
+    my $resources = $args->{'resources'};
+    # Add a new resource that allows for /rest/example/hello
+    # to call Example.hello
+    $resources->{'Bugzilla::Extension::Example::WebService'} = [
+        qr{^/example/hello$}, {
+            GET => {
+                method => 'hello',
+            }
+        }
+    ];
+}
+
+sub webservice_rest_response {
+    my ($self, $args) = @_;
+    my $rpc      = $args->{'rpc'};
+    my $result   = $args->{'result'};
+    my $response = $args->{'response'};
+    # Convert a list of bug hashes to a single bug hash if only one is
+    # being returned.
+    if (ref $$result eq 'HASH'
+        && exists $$result->{'bugs'}
+        && scalar @{ $$result->{'bugs'} } == 1)
+    {
+        $$result = $$result->{'bugs'}->[0];
+    }
+}
+
 # This must be the last line of your extension.
 __PACKAGE__->NAME;

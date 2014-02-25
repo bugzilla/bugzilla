@@ -15,9 +15,10 @@ use parent qw(Bugzilla::WebService::Server::JSONRPC);
 use Bugzilla;
 use Bugzilla::Constants;
 use Bugzilla::Error;
+use Bugzilla::Hook;
+use Bugzilla::Util qw(correct_urlbase html_quote);
 use Bugzilla::WebService::Constants;
 use Bugzilla::WebService::Util qw(taint_data fix_credentials);
-use Bugzilla::Util qw(correct_urlbase html_quote);
 
 # Load resource modules
 use Bugzilla::WebService::Server::REST::Resources::Bug;
@@ -124,6 +125,9 @@ sub response {
         $result = $json_data->{result};
     }
 
+    Bugzilla::Hook::process('webservice_rest_response',
+        { rpc => $self, result => \$result, response => $response });
+
     # Access Control
     $response->header("Access-Control-Allow-Origin", "*");
     $response->header("Access-Control-Allow-Headers", "origin, content-type, accept");
@@ -226,8 +230,6 @@ sub _argument_type_check {
 
     taint_data($params);
 
-    Bugzilla->input_params($params);
-
     # Now, convert dateTime fields on input.
     my $method = $self->bz_method_name;
     my $pkg = $self->{dispatch_path}->{$self->path_info};
@@ -261,6 +263,10 @@ sub _argument_type_check {
     my $isa_string = 'our @ISA = qw(' . ref($self) . " $pkg)";
     eval "package $new_class;$isa_string;";
     bless $self, $new_class;
+
+    # Allow extensions to modify the params post login
+    Bugzilla::Hook::process('webservice_rest_request',
+                            { rpc => $self, params => $params });
 
     if ($params_is_array) {
         $params = [$params];
@@ -376,6 +382,9 @@ sub _find_resource {
         next if !$module->can('rest_resources');
         $resources->{$module} = $module->rest_resources;
     }
+
+    Bugzilla::Hook::process('webservice_rest_resources',
+                            { rpc => $self, resources => $resources });
 
     # Use the resources hash from each module loaded earlier to determine
     # which handler to use based on a regex match of the CGI path.

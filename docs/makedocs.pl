@@ -25,6 +25,8 @@ use 5.10.1;
 use strict;
 
 use Cwd;
+use File::Find;
+use File::Copy;
 
 # We need to be in this directory to use our libraries.
 BEGIN {
@@ -121,6 +123,24 @@ foreach my $lang (@langs) {
     make_pod() if $pod_simple;
 
     next if grep { $_ eq '--pod-only' } @ARGV;
+
+    # Collect up local extension documentation into the extensions/ dir.
+    sub wanted {
+        if ($File::Find::dir =~ /\/doc\/?$/ &&
+            $_ =~ /\.rst$/)
+        {
+            copy($File::Find::name, "rst/extensions");
+        }
+    };
+
+    # Clear out old extensions docs
+    rmtree('rst/extensions', 0, 1);
+    mkdir('rst/extensions');
+    
+    find({
+        'wanted' => \&wanted,
+        'no_chdir' => 1,
+    }, "$docparent/../extensions");
 
     MakeDocs('HTML', 'make html');
     MakeDocs('TXT', 'make text');

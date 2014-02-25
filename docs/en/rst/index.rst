@@ -15,8 +15,9 @@ Bugzilla Documentation
    administration
    security
    using
+   extensions
    customization
-   troubleshooting
    patches
+   troubleshooting
    modules
    gfdl

@@ -30,7 +30,7 @@ mkpath($extension_dir)
   || die "$extension_dir already exists or cannot be created.\n";
 
 my $lcname = lc($name);
-foreach my $path (qw(lib web template/en/default/hook), 
+foreach my $path (qw(lib doc web template/en/default/hook), 
                   "template/en/default/$lcname")
 {
     mkpath("$extension_dir/$path") || die "$extension_dir/$path: $!";
@@ -45,6 +45,7 @@ my %create_files = (
     'web-readme.txt.tmpl'  => 'web/README',
     'hook-readme.txt.tmpl' => 'template/en/default/hook/README',
     'name-readme.txt.tmpl' => "template/en/default/$lcname/README",
+    'name.rst.tmpl'        => "doc/$lcname.rst",
 );
 
 foreach my $template_file (keys %create_files) {

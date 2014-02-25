@@ -836,13 +836,13 @@
     [% title = "Not allowed" %]
     You tried to change the
     <strong>[% field_descs.$field FILTER html %]</strong> field 
-    [% IF oldvalue.defined %]
+    [% IF oldvalue.defined AND oldvalue != "" %]
       from <em>[% oldvalue.join(', ') FILTER html %]</em>
     [% END %]
-    [% IF newvalue.defined %]
+    [% IF newvalue.defined AND newvalue != "" %]
       to <em>[% newvalue.join(', ') FILTER html %]</em>
-    [% END %]
-    , but only
+    [% END %],
+    but only
     [% IF privs < constants.PRIVILEGES_REQUIRED_EMPOWERED %]
       the assignee
       [% IF privs < constants.PRIVILEGES_REQUIRED_ASSIGNEE %] or reporter [% END %]

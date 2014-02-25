@@ -2749,31 +2749,23 @@ sub add_comment {
     push(@{$self->{added_comments}}, $params);
 }
 
-# There was a lot of duplicate code when I wrote this as three separate
-# functions, so I just combined them all into one. This is also easier for
-# process_bug to use.
 sub modify_keywords {
     my ($self, $keywords, $action) = @_;
-    
-    $action ||= 'set';
-    if (!grep($action eq $_, qw(add remove set))) {
+
+    if (!$action || !grep { $action eq $_ } qw(add remove set)) {
         $action = 'set';
     }
-    
-    $keywords = $self->_check_keywords($keywords);
 
-    my (@result, $any_changes);
+    $keywords = $self->_check_keywords($keywords);
+    my @old_keywords = @{ $self->keyword_objects };
+    my @result;
+
     if ($action eq 'set') {
         @result = @$keywords;
-        # Check if anything was added or removed.
-        my @old_ids = map { $_->id } @{$self->keyword_objects};
-        my @new_ids = map { $_->id } @result;
-        my ($removed, $added) = diff_arrays(\@old_ids, \@new_ids);
-        $any_changes = scalar @$removed || scalar @$added;
     }
     else {
         # We're adding or deleting specific keywords.
-        my %keys = map {$_->id => $_} @{$self->keyword_objects};
+        my %keys = map { $_->id => $_ } @old_keywords;
         if ($action eq 'add') {
             $keys{$_->id} = $_ foreach @$keywords;
         }
@@ -2781,11 +2773,17 @@ sub modify_keywords {
             delete $keys{$_->id} foreach @$keywords;
         }
         @result = values %keys;
-        $any_changes = scalar @$keywords;
     }
+
+    # Check if anything was added or removed.
+    my @old_ids = map { $_->id } @old_keywords;
+    my @new_ids = map { $_->id } @result;
+    my ($removed, $added) = diff_arrays(\@old_ids, \@new_ids);
+    my $any_changes = scalar @$removed || scalar @$added;
+
     # Make sure we retain the sort order.
     @result = sort {lc($a->name) cmp lc($b->name)} @result;
-    
+
     if ($any_changes) {
         my $privs;
         my $new = join(', ', (map {$_->name} @result));

@@ -1744,7 +1744,7 @@ You must pass a product name and an optional component name.
 
 =item B<Returns>
 
-A hash containing a two keys, C<bug> and C<attachment>. Each key value is an array of hashes,
+A hash containing two keys, C<bug> and C<attachment>. Each key value is an array of hashes,
 containing the following keys:
 
 =over
@@ -3244,7 +3244,7 @@ product.
 
 C<array> An array of hashes with flags to add to the bug. To create a flag,
 at least the status and the type_id or name must be provided. An optional
-requestee can be passed if the flag type is requesteeble.
+requestee can be passed if the flag type is requestable to a specific user.
 
 =over
 
@@ -3262,7 +3262,7 @@ C<string> The flags new status (i.e. "?", "+", "-" or "X" to clear a flag).
 
 =item C<requestee>
 
-C<string> The login of the requestee if the flag type is requesteeable.
+C<string> The login of the requestee if the flag type is requestable to a specific user.
 
 =back
 
@@ -3452,7 +3452,7 @@ Defaults to False if not specified.
 
 C<array> An array of hashes with flags to add to the attachment. to create a flag,
 at least the status and the type_id or name must be provided. An optional requestee
-can be passed if the flag type is requesteeble.
+can be passed if the flag type is requestable to a specific user.
 
 =over
 
@@ -3470,7 +3470,7 @@ C<string> The flags new status (i.e. "?", "+", "-" or "X" to clear a flag).
 
 =item C<requestee>
 
-C<string> The login of the requestee if the flag type is requesteeable.
+C<string> The login of the requestee if the flag type is requestable to a specific user.
 
 =back
 
@@ -3632,7 +3632,7 @@ C<string> The flags new status (i.e. "?", "+", "-" or "X" to clear a flag).
 
 =item C<requestee>
 
-C<string> The login of the requestee if the flag type is requesteeable.
+C<string> The login of the requestee if the flag type is requestable to a specific user.
 
 =item C<id>
 
@@ -4027,7 +4027,7 @@ C<string> The flags new status (i.e. "?", "+", "-" or "X" to clear a flag).
 
 =item C<requestee>
 
-C<string> The login of the requestee if the flag type is requesteeable.
+C<string> The login of the requestee if the flag type is requestable to a specific user.
 
 =item C<id>
 

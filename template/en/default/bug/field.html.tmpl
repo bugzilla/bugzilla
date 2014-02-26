@@ -35,11 +35,13 @@
 [% Hook.process('start_field_column') %]
 [% IF editable %]
   [% SWITCH field.type %]
-    [% CASE constants.FIELD_TYPE_FREETEXT %]
+    [% CASE [ constants.FIELD_TYPE_FREETEXT
+              constants.FIELD_TYPE_INTEGER ] %]
         <input id="[% field.name FILTER html %]" class="text_input"
                name="[% field.name FILTER html %]"
                value="[% value FILTER html %]" size="40"
                maxlength="[% constants.MAX_FREETEXT_LENGTH FILTER none %]"
+               [% ' pattern="\d+"' IF field.type == constants.FIELD_TYPE_INTEGER %]
                [% ' aria-required="true"' IF field.is_mandatory %]>
     [% CASE [constants.FIELD_TYPE_DATETIME, constants.FIELD_TYPE_DATE] %]
       [% size = (field.type == constants.FIELD_TYPE_DATE) ? 10 : 20 %]

@@ -153,6 +153,7 @@ use constant SQL_DEFINITIONS => {
     FIELD_TYPE_DATETIME,      { TYPE => 'DATETIME'   },
     FIELD_TYPE_DATE,          { TYPE => 'DATE'       },
     FIELD_TYPE_BUG_ID,        { TYPE => 'INT3'       },
+    FIELD_TYPE_INTEGER,       { TYPE => 'INT4',  NOTNULL => 1, DEFAULT => 0 },
 };
 
 # Field definitions for the fields that ship with Bugzilla.

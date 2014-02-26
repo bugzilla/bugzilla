@@ -1366,6 +1366,12 @@
     Either no products have been defined to enter [% terms.bugs %] against or you have not
     been given access to any.
 
+  [% ELSIF error == "number_not_integer" %]
+    [% title = "Integer Value Required" %]
+    The value '[% num FILTER html %]' in the
+    <em>[% field_descs.$field FILTER html %]</em> field
+    is not an integer value (i.e. a whole number).
+
   [% ELSIF error == "number_not_numeric" %]
     [% title = "Numeric Value Required" %]
     The value '[% num FILTER html %]' in the 

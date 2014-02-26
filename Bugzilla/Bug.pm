@@ -158,6 +158,9 @@ sub VALIDATORS {
         elsif ($field->type == FIELD_TYPE_TEXTAREA) {
             $validator = \&_check_textarea_field;
         }
+        elsif ($field->type == FIELD_TYPE_INTEGER) {
+            $validator = \&_check_integer_field;
+        }
         else {
             $validator = \&_check_default_field;
         }
@@ -2108,6 +2111,27 @@ sub _check_textarea_field {
     $text =~ s/\r?\n/\r\n/g;
 
     return $text;
+}
+
+sub _check_integer_field {
+    my ($invocant, $value, $field) = @_;
+    $value = defined($value) ? trim($value) : '';
+
+    if ($value eq '') {
+        return 0;
+    }
+
+    my $orig_value = $value;
+    if (!detaint_signed($value)) {
+        ThrowUserError("number_not_integer",
+                       {field => $field, num => $orig_value});
+    }
+    elsif ($value > MAX_INT_32) {
+        ThrowUserError("number_too_large",
+                       {field => $field, num => $orig_value, max_num => MAX_INT_32});
+    }
+
+    return $value;
 }
 
 sub _check_relationship_loop {

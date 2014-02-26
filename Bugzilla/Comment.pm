@@ -429,7 +429,10 @@ sub _check_thetext {
     # without any problem. So we need to replace these characters if we use MySQL,
     # else the comment is truncated.
     # XXX - Once we use utf8mb4 for comments, this hack for MySQL can go away.
-    if (Bugzilla->dbh->isa('Bugzilla::DB::Mysql')) {
+    state $is_mysql = Bugzilla->dbh->isa('Bugzilla::DB::Mysql') ? 1 : 0;
+    if ($is_mysql) {
+        # Perl 5.13.8 and older complain about non-characters.
+        no warnings 'utf8';
         $thetext =~ s/([\x{10000}-\x{10FFFF}])/"\x{FDD0}[" . uc(sprintf('U+%04x', ord($1))) . "]\x{FDD1}"/eg;
     }
 

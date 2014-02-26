@@ -1789,13 +1789,15 @@ sub _handle_chart {
     $field = FIELD_MAP->{$field} || $field;
 
     my ($string_value, $orig_value);
+    state $is_mysql = $dbh->isa('Bugzilla::DB::Mysql') ? 1 : 0;
+
     if (ref $value eq 'ARRAY') {
         # Trim input and ignore blank values.
         @$value = map { trim($_) } @$value;
         @$value = grep { defined $_ and $_ ne '' } @$value;
         return if !@$value;
         $orig_value = join(',', @$value);
-        if ($field eq 'longdesc') {
+        if ($field eq 'longdesc' && $is_mysql) {
             @$value = map { _convert_unicode_characters($_) } @$value;
         }
         $string_value = join(',', @$value);
@@ -1803,10 +1805,12 @@ sub _handle_chart {
     else {
         return if $value eq '';
         $orig_value = $value;
-        $value = _convert_unicode_characters($value) if $field eq 'longdesc';
+        if ($field eq 'longdesc' && $is_mysql) {
+            $value = _convert_unicode_characters($value);
+        }
         $string_value = $value;
     }
-    
+
     $self->_chart_fields->{$field}
         or ThrowCodeError("invalid_field_name", { field => $field });
     trick_taint($field);
@@ -1867,9 +1871,9 @@ sub _handle_chart {
 sub _convert_unicode_characters {
     my $string = shift;
 
-    if (Bugzilla->dbh->isa('Bugzilla::DB::Mysql')) {
-        $string =~ s/([\x{10000}-\x{10FFFF}])/"\x{FDD0}[" . uc(sprintf('U+%04x', ord($1))) . "]\x{FDD1}"/eg;
-    }
+    # Perl 5.13.8 and older complain about non-characters.
+    no warnings 'utf8';
+    $string =~ s/([\x{10000}-\x{10FFFF}])/"\x{FDD0}[" . uc(sprintf('U+%04x', ord($1))) . "]\x{FDD1}"/eg;
     return $string;
 }
 

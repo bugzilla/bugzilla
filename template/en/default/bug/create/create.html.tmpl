@@ -565,6 +565,9 @@ TUI_hide_default('attachment_text_field');
           Make description and any new attachment private (visible only to members 
           of the <strong>[% Param('insidergroup') FILTER html %]</strong> group)
         </label>
+        <script>
+          updateCommentTagControl(document.getElementById('comment_is_private'), 'comment');
+        </script>
       </td>
     </tr>
   [% END %]

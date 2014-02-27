@@ -566,6 +566,9 @@ TUI_hide_default('attachment_text_field');
         </label>
       </td>
     </tr>
+    <script>
+      updateCommentTagControl(document.getElementById('comment_is_private'), 'comment');
+    </script>
   [% END %]
 
   [% IF Param("maxattachmentsize") || Param("maxlocalattachment") %]

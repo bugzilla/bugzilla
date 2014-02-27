@@ -289,7 +289,7 @@
 [% IF user.is_insider %]
   <input type="checkbox" name="comment_is_private" value="1"
          id="newcommentprivacy"
-         onClick="updateCommentTagControl(this, form)">
+         onClick="updateCommentTagControl(this, 'comment')">
    <label for="newcommentprivacy">
      Make comment private (visible only to members of the
      <strong>[% Param('insidergroup') FILTER html %]</strong> group)
@@ -303,6 +303,11 @@
   maxrows = 25
   cols    = constants.COMMENT_COLS
 %]<br>
+[% IF user.is_insider %]
+  <script>
+     updateCommentTagControl(document.getElementById('newcommentprivacy'), 'comment');
+  </script>
+[% END %]
 
 [% Hook.process('before_groups') %]
 

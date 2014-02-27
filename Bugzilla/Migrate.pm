@@ -756,7 +756,7 @@ sub insert_bugs {
         # File the bug as the reporter.
         my $super_user = Bugzilla->user;
         my $reporter = Bugzilla::User->check($bug->{reporter});
-        # Allow the user to file a bug in any product, no matter his current
+        # Allow the user to file a bug in any product, no matter their current
         # permissions.
         $reporter->{groups} = $super_user->groups;
         Bugzilla->set_user($reporter);

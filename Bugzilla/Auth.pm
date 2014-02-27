@@ -53,7 +53,7 @@ sub login {
         return $self->_handle_login_result($login_info, $type);
     }
 
-    # Now verify his username and password against the DB, LDAP, etc.
+    # Now verify their username and password against the DB, LDAP, etc.
     if ($self->{_info_getter}->{successful}->requires_verification) {
         $login_info = $self->{_verifier}->check_credentials($login_info);
         if ($login_info->{failure}) {
@@ -297,7 +297,7 @@ An incorrect username or password was given.
 The hashref may also contain a C<failure_count> element, which specifies
 how many times the account has failed to log in within the lockout
 period (see L</AUTH_LOCKOUT>). This is used to warn the user when
-he is getting close to being locked out.
+they are getting close to being locked out.
 
 =head2 C<AUTH_NO_SUCH_USER>
 

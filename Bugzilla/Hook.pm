@@ -587,7 +587,7 @@ about, and the value should always be C<1>. The "relationships"
 are described by the various C<REL_> constants in L<Bugzilla::Constants>.
 
 Here's an example of adding userid C<123> to the recipient list
-as though he were on the CC list:
+as though they were on the CC list:
 
  $recipients->{123}->{+REL_CC} = 1
 

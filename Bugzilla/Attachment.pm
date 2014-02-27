@@ -729,7 +729,7 @@ sub validate_can_edit {
 Description: validates if attachments the user wants to mark as obsolete
              really belong to the given bug and are not already obsolete.
              Moreover, a user cannot mark an attachment as obsolete if
-             he cannot view it (due to restrictions on it).
+             they cannot view it (due to restrictions on it).
 
 Params:      $bug - The bug object obsolete attachments should belong to.
              $attach_ids - The list of attachments to mark as obsolete.

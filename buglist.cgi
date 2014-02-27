@@ -262,7 +262,7 @@ sub GetGroups {
         my $product = new Bugzilla::Product({name => $product_name});
 
         foreach my $gid (keys %{$product->group_controls}) {
-            # The user can only edit groups he belongs to.
+            # The user can only edit groups they belong to.
             next unless $user->in_group_id($gid);
 
             # The user has no control on groups marked as NA or MANDATORY.
@@ -369,7 +369,7 @@ if ($cmdtype eq "dorem") {
         ($buffer, $query_id) = LookupNamedQuery(scalar $cgi->param("namedcmd"),
                                                 $user->id);
         if ($query_id) {
-            # Make sure the user really wants to delete his saved search.
+            # Make sure the user really wants to delete their saved search.
             my $token = $cgi->param('token');
             check_hash_token($token, [$query_id, $qname]);
 

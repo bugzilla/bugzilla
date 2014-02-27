@@ -314,11 +314,11 @@ sub confirm_create_account {
     # Now delete this token.
     delete_token($token);
 
-    # Let the user know that his user account has been successfully created.
+    # Let the user know that their user account has been successfully created.
     $vars->{'message'} = 'account_created';
     $vars->{'otheruser'} = $otheruser;
 
-    # Log in the new user using credentials he just gave.
+    # Log in the new user using credentials they just gave.
     $cgi->param('Bugzilla_login', $otheruser->login);
     $cgi->param('Bugzilla_password', $password);
     Bugzilla->login(LOGIN_OPTIONAL);

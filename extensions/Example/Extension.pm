@@ -324,8 +324,8 @@ sub bugmail_recipients {
         # were on the CC list.
         #$recipients->{$user->id}->{+REL_CC} = 1;
 
-        # And this line adds the maintainer as though he had the "REL_EXAMPLE"
-        # relationship from the bugmail_relationships hook below.
+        # And this line adds the maintainer as though they had the
+        # "REL_EXAMPLE" relationship from the bugmail_relationships hook below.
         #$recipients->{$user->id}->{+REL_EXAMPLE} = 1;
     }
 }
@@ -406,8 +406,8 @@ sub email_in_after_parse {
     # No other check needed if this is a valid regular user.
     return if login_to_id($reporter);
 
-    # The reporter is not a regular user. We create an account for him,
-    # but he can only comment on existing bugs.
+    # The reporter is not a regular user. We create an account for them,
+    # but they can only comment on existing bugs.
     # This is useful for people who reply by email to bugmails received
     # in mailing-lists.
     if ($args->{fields}->{bug_id}) {

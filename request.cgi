@@ -35,7 +35,7 @@ print $cgi->header($format->{'ctype'});
 
 my $fields;
 $fields->{'requester'}->{'type'} = 'single';
-# If the user doesn't restrict his search to requests from the wind
+# If the user doesn't restrict their search to requests from the wind
 # (requestee ne '-'), include the requestee for completion.
 unless (defined $cgi->param('requestee')
         && $cgi->param('requestee') eq '-')

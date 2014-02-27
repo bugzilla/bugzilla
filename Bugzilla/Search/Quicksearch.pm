@@ -467,7 +467,7 @@ sub _handle_flags {
         # are unable to run queries of the form (a AND b) OR c. In our case:
         # (flag name is foo AND requestee is bar) OR (any other criteria).
         # But this has never been possible, so this is not a regression. If one
-        # needs to run such queries, he must use the Custom Search section of
+        # needs to run such queries, they must use the Custom Search section of
         # the Advanced Search page.
         $chart++;
         $and = $or = 0;

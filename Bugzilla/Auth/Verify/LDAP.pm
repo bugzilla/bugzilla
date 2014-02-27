@@ -152,7 +152,7 @@ sub _bind_ldap_for_search {
 # We can't just do this in new(), because we're not allowed to throw any
 # error from anywhere under Bugzilla::Auth::new -- otherwise we
 # could create a situation where the admin couldn't get to editparams
-# to fix his mistake. (Because Bugzilla->login always calls 
+# to fix their mistake. (Because Bugzilla->login always calls
 # Bugzilla::Auth->new, and almost every page calls Bugzilla->login.)
 sub ldap {
     my ($self) = @_;

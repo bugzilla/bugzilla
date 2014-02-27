@@ -871,8 +871,8 @@ sub _populate_longdescs {
 
                         if (!$who) {
                             # This username doesn't exist.  Maybe someone
-                            # renamed him or something.  Invent a new profile
-                            # entry disabled, just to represent him.
+                            # renamed them or something.  Invent a new profile
+                            # entry disabled, just to represent them.
                             $dbh->do("INSERT INTO profiles (login_name, 
                                       cryptpassword, disabledtext) 
                                       VALUES (?,?,?)", undef, $name, '*',

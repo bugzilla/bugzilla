@@ -669,7 +669,7 @@ sub _check_requestee {
         # Make sure the user didn't specify a requestee unless the flag
         # is specifically requestable. For existing flags, if the requestee
         # was set before the flag became specifically unrequestable, the
-        # user can either remove him or leave him alone.
+        # user can either remove them or leave them alone.
         ThrowUserError('flag_type_requestee_disabled', { type => $self->type })
           if !$self->type->is_requesteeble;
 

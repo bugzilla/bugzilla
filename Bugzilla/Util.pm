@@ -1131,7 +1131,7 @@ template. Just pass in the name of the variable that you want the value of.
 Takes a time and converts it to the desired format and timezone.
 If no format is given, the routine guesses the correct one and returns
 an empty array if it cannot. If no timezone is given, the user's timezone
-is used, as defined in his preferences.
+is used, as defined in their preferences.
 
 This routine is mainly called from templates to filter dates, see
 "FILTER time" in L<Bugzilla::Template>.

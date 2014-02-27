@@ -193,7 +193,7 @@ sub get {
     my $obj_by_ids;
     $obj_by_ids = Bugzilla::User->new_from_list($params->{ids}) if $params->{ids};
 
-    # obj_by_ids are only visible to the user if he can see 
+    # obj_by_ids are only visible to the user if they can see
     # the otheruser, for non visible otheruser throw an error
     foreach my $obj (@$obj_by_ids) {
         if (Bugzilla->user->can_see_user($obj)){
@@ -501,7 +501,7 @@ specified with the error.
 =item 305 (New Password Required)
 
 The current password is correct, but the user is asked to change
-his password.
+their password.
 
 =item 50 (Param Required)
 
@@ -939,7 +939,7 @@ disabled/closed.
 =item groups
 
 C<array> An array of group hashes the user is a member of. If the currently
-logged in user is querying his own account or is a member of the 'editusers'
+logged in user is querying their own account or is a member of the 'editusers'
 group, the array will contain all the groups that the user is a
 member of. Otherwise, the array will only contain groups that the logged in
 user can bless. Each hash describes the group and contains the following items:

@@ -321,7 +321,7 @@ sub authorizer {
 }
 
 # Generate a string to identify the user by name + login if the user
-# has a name or by login only if she doesn't.
+# has a name or by login only if they don't.
 sub identity {
     my $self = shift;
 
@@ -1252,7 +1252,7 @@ sub check_can_admin_flagtype {
         my $e = $flagtype->exclusions_as_hash;
 
         # If there is at least one product for which the user doesn't have
-        # editcomponents privs, then don't allow him to do everything with
+        # editcomponents privs, then don't allow them to do everything with
         # this flagtype, independently of whether this product is in the
         # exclusion list or not.
         my %product_ids;
@@ -2438,7 +2438,7 @@ Returns the 'real' name for this user, if any.
 
 =item C<showmybugslink>
 
-Returns C<1> if the user has set his preference to show the 'My Bugs' link in
+Returns C<1> if the user has set their preference to show the 'My Bugs' link in
 the page footer, and C<0> otherwise.
 
 =item C<identity>
@@ -2542,7 +2542,7 @@ that you need to be able to see a group in order to bless it.
 =item C<get_products_by_permission($group)>
 
 Returns a list of product objects for which the user has $group privileges
-and which he can access.
+and which they can access.
 $group must be one of the groups defined in PER_PRODUCT_PRIVILEGES.
 
 =item C<can_see_user(user)>
@@ -2660,7 +2660,7 @@ not be aware of the existence of the product.
  Description: Checks whether the user is allowed to edit properties of the flag type.
               If the flag type is also used by some products for which the user
               hasn't editcomponents privs, then the user is only allowed to edit
-              the inclusion and exclusion lists for products he can administrate.
+              the inclusion and exclusion lists for products they can administrate.
 
  Params:      $flagtype_id - a flag type ID.
 
@@ -2769,7 +2769,7 @@ Params: login_name - B<Required> The login name for the new user.
             a plain-text password. If you specify '*', the user will not
             be able to log in using DB authentication.
         disabledtext - The disable-text for the new user. If given, the user 
-            will be disabled, meaning he cannot log in. Defaults to an
+            will be disabled, meaning they cannot log in. Defaults to an
             empty string.
         disable_mail - If 1, bug-related mail will not be  sent to this user; 
             if 0, mail will be sent depending on the user's  email preferences.
@@ -2799,8 +2799,8 @@ Params: $username (scalar, string) - The full login name of the username
             that you are checking.
         $old_username (scalar, string) - If you are checking an email-change
             token, insert the "old" username that the user is changing from,
-            here. Then, as long as it's the right user for that token, he 
-            can change his username to $username. (That is, this function
+            here. Then, as long as it's the right user for that token, they
+            can change their username to $username. (That is, this function
             will return a boolean true value).
 
 =item C<login_to_id($login, $throw_error)>

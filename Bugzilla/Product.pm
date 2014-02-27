@@ -273,8 +273,8 @@ sub remove_from_db {
         if (Bugzilla->params->{'allowbugdeletion'}) {
             require Bugzilla::Bug;
             foreach my $bug_id (@{$self->bug_ids}) {
-                # Note that we allow the user to delete bugs he can't see,
-                # which is okay, because he's deleting the whole Product.
+                # Note that we allow the user to delete bugs they can't see,
+                # which is okay, because they're deleting the whole Product.
                 my $bug = new Bugzilla::Bug($bug_id);
                 $bug->remove_from_db();
             }
@@ -1025,7 +1025,7 @@ a group is valid in a particular product.)
 
  Params:      C<$user> - A Bugzilla::User object.
 
- Returns      C<1> If this user's groups allow him C<entry> access to
+ Returns      C<1> If this user's groups allow them C<entry> access to
               this Product, C<0> otherwise.
 
 =item C<flag_types()>

@@ -39,8 +39,8 @@ if (!$cgi->param('id') && $single) {
 my (@bugs, @illegal_bugs);
 my %marks;
 
-# If the user isn't logged in, we use data from the shadow DB. If he plans
-# to edit the bug(s), he will have to log in first, meaning that the data
+# If the user isn't logged in, we use data from the shadow DB. If they plan
+# to edit the bug(s), they will have to log in first, meaning that the data
 # will be reloaded anyway, from the main DB.
 Bugzilla->switch_to_shadow_db unless $user->id;
 

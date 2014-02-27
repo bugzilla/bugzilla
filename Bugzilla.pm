@@ -826,7 +826,7 @@ default), LOGOUT_ALL or LOGOUT_KEEP_CURRENT.
 
 =item C<logout_user($user)>
 
-Logs out the specified user (invalidating all his sessions), taking a
+Logs out the specified user (invalidating all their sessions), taking a
 Bugzilla::User instance.
 
 =item C<logout_by_id($id)>

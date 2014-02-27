@@ -40,7 +40,7 @@ unless ($product && $user->can_access_product($product->name)) {
     # If there is only one product available but the user entered
     # another product name, we display a list with this single
     # product only, to not confuse the user with components of a
-    # product he didn't request.
+    # product they didn't request.
     elsif (scalar(@products) > 1 || $product_name) {
         $vars->{'classifications'} = sort_products_by_classification(\@products);
         $vars->{'target'} = "describecomponents.cgi";

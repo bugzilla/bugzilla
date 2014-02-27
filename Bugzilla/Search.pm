@@ -3376,7 +3376,7 @@ value for this field. At least one search criteria must be defined if the
 
 =item C<sharer>
 
-When a saved search is shared by a user, this is his user ID.
+When a saved search is shared by a user, this is their user ID.
 
 =item C<user>
 

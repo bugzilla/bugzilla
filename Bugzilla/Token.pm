@@ -39,7 +39,7 @@ sub issue_new_user_account_token {
     my $vars = {};
 
     # Is there already a pending request for this login name? If yes, do not throw
-    # an error because the user may have lost his email with the token inside.
+    # an error because the user may have lost their email with the token inside.
     # But to prevent using this way to mailbomb an email address, make sure
     # the last request is old enough before sending a new email (default: 10 minutes).
 
@@ -66,7 +66,7 @@ sub issue_new_user_account_token {
 
     # In 99% of cases, the user getting the confirmation email is the same one
     # who made the request, and so it is reasonable to send the email in the same
-    # language used to view the "Create a New Account" page (we cannot use his
+    # language used to view the "Create a New Account" page (we cannot use their
     # user prefs as the user has no account yet!).
     MessageToMTA($message);
 }
@@ -133,7 +133,7 @@ sub IssuePasswordToken {
     $vars->{'ip_addr'} = $ip_addr;
     $vars->{'emailaddress'} = $user->email;
     $vars->{'expiration_ts'} = ctime($token_ts + MAX_TOKEN_AGE * 86400);
-    # The user is not logged in (else he wouldn't request a new password).
+    # The user is not logged in (else they wouldn't request a new password).
     # So we have to pass this information to the template.
     $vars->{'timezone'} = $user->timezone;
 
@@ -374,7 +374,7 @@ sub check_token_data {
     {
         # Something is going wrong. Ask confirmation before processing.
         # It is possible that someone tried to trick an administrator.
-        # In this case, we want to know his name!
+        # In this case, we want to know their name!
         require Bugzilla::User;
 
         my $vars = {};
@@ -471,7 +471,7 @@ Bugzilla::Token - Provides different routines to manage tokens.
  Description: Creates and sends a token per email to the email address
               requesting a new user account. It doesn't check whether
               the user account already exists. The user will have to
-              use this token to confirm the creation of his user account.
+              use this token to confirm the creation of their user account.
 
  Params:      $login_name - The new login name requested by the user.
 
@@ -494,7 +494,7 @@ Bugzilla::Token - Provides different routines to manage tokens.
 
  Description: Sends a token per email to the given user. This token
               can be used to change the password (e.g. in case the user
-              cannot remember his password and wishes to enter a new one).
+              cannot remember their password and wishes to enter a new one).
 
  Params:      $user - User object of the user requesting a new password.
 
@@ -524,7 +524,7 @@ Bugzilla::Token - Provides different routines to manage tokens.
 
  Description: Invalidates an existing token, generally when the token is used
               for an action which is not the one expected. An email is sent
-              to the user who originally requested this token to inform him
+              to the user who originally requested this token to inform them
               that this token has been invalidated (e.g. because an hacker
               tried to use this token for some malicious action).
 
@@ -537,7 +537,7 @@ Bugzilla::Token - Provides different routines to manage tokens.
 =item C<DeletePasswordTokens($user_id, $reason)>
 
  Description: Cancels all password tokens for the given user. Emails are sent
-              to the user to inform him about this action.
+              to the user to inform them about this action.
 
  Params:      $user_id: The user ID of the user account whose password tokens
                         are canceled.

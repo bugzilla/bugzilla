@@ -12,12 +12,12 @@
     || user.needinfo_request_count
 %]
 
-<span id="badge" title="Flags requested of you:
-  [%- " review (" _ user.review_request_count _ ")" IF user.review_request_count -%]
-  [%- " feedback (" _ user.feedback_request_count _ ")" IF user.feedback_request_count -%]
-  [%- " needinfo (" _ user.needinfo_request_count _ ")" IF user.needinfo_request_count -%]
+<a id="badge"
+  href="request.cgi?action=queue&amp;requestee=[% user.login FILTER uri %]&amp;group=type"
+  title="Flags requested of you:
+    [%- " review (" _ user.review_request_count _ ")" IF user.review_request_count -%]
+    [%- " feedback (" _ user.feedback_request_count _ ")" IF user.feedback_request_count -%]
+    [%- " needinfo (" _ user.needinfo_request_count _ ")" IF user.needinfo_request_count -%]
 ">
-  <a href="request.cgi?action=queue&amp;requestee=[% user.login FILTER uri %]&amp;group=type">
-    [%- user.review_request_count + user.feedback_request_count + user.needinfo_request_count ~%]
-  </a>
-</span>
+  [%- user.review_request_count + user.feedback_request_count + user.needinfo_request_count ~%]
+</a>

@@ -858,9 +858,6 @@ Bugzilla itself. Users will be returned whose real name or login name
 contains any one of the specified strings. Users that you cannot see will
 not be included in the returned list.
 
-Some Bugzilla installations have user-matching turned off, in which
-case you will only be returned exact matches.
-
 Most installations have a limit on how many matches are returned for
 each string, which defaults to 1000 but can be changed by the Bugzilla
 administrator.

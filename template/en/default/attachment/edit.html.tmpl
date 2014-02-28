@@ -247,13 +247,12 @@
             <label for="comment">Comment (on the [% terms.bug %]):</label>
             [% classNames = 'block' %]
             [% classNames = "$classes bz_private" IF attachment.isprivate %]
-            [% INCLUDE global/textarea.html.tmpl
-              id      = 'comment'
-              name    = 'comment'
-              minrows = 10
-              cols    = 80
-              wrap    = 'soft'
-              classes = classNames
+            [% INCLUDE bug/comment.html.tmpl
+               bug     = attachment.bug
+               minrows = 10
+               cols    = 80
+               classes = classNames
+               wrap    = 'soft'
             %]
             [% IF NOT attachment.bug.cc.contains(user.login) %]
               <input type="checkbox" id="addselfcc" name="addselfcc"

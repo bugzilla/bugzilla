@@ -84,13 +84,11 @@ TUI_hide_default('attachment_text_field');
       <th><label for="comment">Comment:</label></th>
       <td>
         <em>(optional) Add a comment about this attachment to the [% terms.bug %].</em><br>
-        [% INCLUDE global/textarea.html.tmpl
-          name    = 'comment'
-          id      = 'comment'
-          minrows = 6
-          maxrows = 15
-          cols    = constants.COMMENT_COLS
-          wrap    = 'soft'
+        [% INCLUDE bug/comment.html.tmpl
+           minrows = 6
+           maxrows = 15
+           cols    = constants.COMMENT_COLS
+           wrap    = 'soft'
         %]
         [% IF NOT bug.cc.contains(user.login) %]
           <br>

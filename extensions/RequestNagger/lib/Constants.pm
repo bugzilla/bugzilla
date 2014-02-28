@@ -23,6 +23,10 @@ use constant FLAG_TYPES => (
         group   => 'everyone',  # the user must be a member of this group to receive reminders
     },
     {
+        type    => 'superview',
+        group   => 'everyone',
+    },
+    {
         type    => 'feedback',
         group   => 'everyone',
     },

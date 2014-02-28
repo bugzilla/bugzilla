@@ -259,23 +259,21 @@
             <label for="comment">Comment (on the [% terms.bug %]):</label>
             [% classNames = 'block' %]
             [% classNames = "$classes bz_private" IF attachment.isprivate %]
-            [% INCLUDE global/textarea.html.tmpl
-              id      = 'comment'
-              name    = 'comment'
-              minrows = 10
-              cols    = 80
-              wrap    = 'soft'
-              classes = classNames          
+            [% INCLUDE bug/comment.html.tmpl
+               minrows = 10
+               cols    = 80
+               wrap    = 'soft'
+               classes = classNames
             %]
             [% Hook.process('after_comment_textarea') %]
           </div>
-        [% END %]             
+        [% END %]
         <div id="attachment_flags">
           [% IF attachment.flag_types.size > 0 %]
               [% PROCESS "flag/list.html.tmpl" flag_types = attachment.flag_types
                                                read_only_flags = !can_edit
               %]
-     
+
           [% END %]
         </div>
 

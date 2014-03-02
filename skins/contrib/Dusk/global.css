@@ -212,6 +212,10 @@ hr {
     background-color: #f0f0f0;
 }
 
+#page-index .outro {
+    clear:both;
+}
+
 /* Rules specific for printing */
 @media print {
     #header,

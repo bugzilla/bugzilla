@@ -765,3 +765,211 @@ tr.shared_search {
     -moz-columns: 3;
     -webkit-columns: 3;
 }
+
+/* index.cgi (begin) */
+
+#page-index {
+    padding: 0.2em 0.2em 0.15em 0.2em;
+    max-width: 1000px;
+}
+
+/* By default these contain nothing, but these CSS rules make things
+   easier on customizers. */
+.intro, .outro {
+    text-align: center;
+}
+
+#new_release {
+    border: 2px solid red;
+    padding: 0.5em 1em;
+    margin: 1em;
+    font-weight: bold;
+}
+
+#new_release .notice {
+    font-size: 80%;
+    font-weight: normal;
+}
+
+#welcome-admin a {
+    font-weight: bold;
+}
+
+.bz_common_actions {
+    text-align: center;
+}
+
+.bz_common_actions ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+.bz_common_actions ul li {
+    display: inline;
+    vertical-align: top;
+}
+
+.bz_common_actions ul li a {
+    display: inline-block;
+    height: 170px;
+    width: 145px;
+    margin: 0 2ex 2em 0;
+}
+
+.bz_common_actions ul li a span {
+    position: relative;
+    top: 90%;
+    font-weight: bold;
+}
+
+.bz_common_actions a,
+.bz_common_actions a:visited,
+.bz_common_actions a:hover {
+    text-decoration: none;
+}
+
+#enter_bug { background: url(index/file-a-bug.png)  no-repeat; }
+#query     { background: url(index/search.png)      no-repeat; }
+#account   { background: url(index/new-account.png) no-repeat; }
+#help      { background: url(index/help.png)        no-repeat; }
+
+#quicksearchForm {
+    clear: both;
+    text-align: center;
+    margin-bottom: 2em;
+}
+
+#quicksearchForm #quicksearch_main {
+    width: 27em;
+}
+
+#quicksearchForm {
+    margin: 0;
+    padding: 0;
+}
+
+#page-index table {
+    border-collapse: collapse;
+    margin: auto;
+}
+
+#welcome {
+    font-size: x-large;
+    font-weight: bold;
+    text-align: center;
+    margin: 0 0 0.8em 0;
+    padding: 0;
+}
+
+#common_queries ul {
+    list-style: none;
+    padding-left: 1.5em;
+}
+
+#common_queries li a {
+    text-decoration: none;
+}
+
+ul#quicksearch_links {
+    margin-bottom: 1em;
+}
+
+ul.additional_links {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+ul.additional_links li {
+    display: inline;
+}
+
+ul.additional_links li.bz_default_hidden {
+    display: none;
+}
+
+input.quicksearch_help_text {
+    color: #ccc;
+}
+
+/* index.cgi (end) */
+
+/* page.cgi (begin) */
+
+body.narrow_page #bugzilla-body > * {
+    /* People have an easier time reading narrower columns of text. */
+    max-width: 45em;
+}
+
+/*****************/
+/* Release Notes */
+/*****************/
+
+.req_new {
+    color: red;
+}
+
+.req_table {
+    border-collapse: collapse;
+}
+
+.req_table td, .req_table th {
+    border: 1px solid black;
+    padding: .25em;
+}
+
+/********************/
+/* QuickSearch Help */
+/********************/
+
+.qs_help li {
+   margin-top: 1ex;
+}
+
+.qs_fields th {
+    padding: 0 .25em;
+}
+.qs_fields th.field_nickname {
+    text-align: left;
+}
+.qs_fields td {
+    padding: .25em;
+    border-top: 1px solid gray;
+}
+.qs_fields .field_name {
+    width: 10em;
+}
+
+/***************/
+/* fields.html */
+/***************/
+
+table.field_value_explanation {
+    table-layout: fixed;
+    border-collapse: collapse;
+}
+
+.field_value_explanation thead h2 {
+    margin: 0;
+}
+
+.field_value_explanation .header_row td {
+    text-align: center;
+    font-size: 120%;
+    font-weight: bold;
+}
+
+.field_value_explanation tbody td {
+    border: 1px solid black;
+    padding: 1em;
+}
+
+.field_value_explanation dt, .field_descriptions dt {
+    margin-top: 1em;
+}
+
+.field_descriptions dt {
+    font-size: 120%;
+}
+
+/* page.cgi (end) */

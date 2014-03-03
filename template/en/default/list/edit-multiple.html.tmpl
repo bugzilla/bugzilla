@@ -283,7 +283,13 @@
   [% USE Bugzilla %]
   [%# Show all legal values and all fields, ignoring visibility controls. %]
   [% bug = default.defined ? default : 0 %]
-  [% FOREACH field = Bugzilla.active_custom_fields %]
+  [% custom_fields = [] %]
+  [% IF one_product.defined %]
+    [% custom_fields = Bugzilla.active_custom_fields(product=>one_product) %]
+  [% ELSE %]
+    [% custom_fields = Bugzilla.active_custom_fields %]
+  [% END %]
+  [% FOREACH field = custom_fields %]
     <tr>
       [% PROCESS bug/field.html.tmpl bug = default
                                      value = dontchange

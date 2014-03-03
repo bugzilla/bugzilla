@@ -162,6 +162,7 @@ our %product_sec_groups = (
     "Firefox Health Report"        => 'mozilla-services-security',
     "Infrastructure & Operations"  => 'mozilla-employee-confidential',
     "Input"                        => 'websites-security',
+    "Intellego"                    => 'intellego-team',
     "Internet Public Policy"       => 'mozilla-employee-confidential',
     "L20n"                         => 'l20n-security',
     "Legal"                        => 'legal',

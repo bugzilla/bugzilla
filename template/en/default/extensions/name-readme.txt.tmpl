@@ -14,7 +14,7 @@ my $template = Bugzilla->template;
 $template->process('[% name FILTER lower %]/some-template.html.tmpl')
   or ThrowTemplateError($template->error());
 
-That would be how to load a file called some-template.html.tmpl that
+That would be how to load a file called <kbd>some-template.html.tmpl</kbd> that
 was in this directory.
 
 Note that you have to be careful that the full path of your template

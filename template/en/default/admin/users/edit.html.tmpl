@@ -22,7 +22,7 @@
 [% PROCESS global/header.html.tmpl
   title = title
   message = message
-  style_urls = ['skins/standard/admin.css', 'skins/standard/editusers.css']
+  style_urls = ['skins/standard/admin.css']
   doc_section = "administration.html#modifying-users"
   javascript_urls = [ 'js/field.js' ]
 %]
@@ -32,7 +32,7 @@
 %]
 
 <form method="post" action="editusers.cgi">
-<table class="main">
+<table id="admin_table_edit">
   [% PROCESS admin/users/userdata.html.tmpl
     editform  = 1
     editusers = editusers
@@ -42,7 +42,7 @@
     <tr>
       <th>Group access:</th>
       <td>
-        <table class="groups">
+        <table id="group_membership">
           <tr>
             [% IF editusers %]
               <th colspan="3">

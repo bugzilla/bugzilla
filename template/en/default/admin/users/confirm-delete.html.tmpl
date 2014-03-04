@@ -38,8 +38,7 @@
 
 [% PROCESS global/header.html.tmpl
   title = title
-  style_urls = ['skins/standard/admin.css',
-                'skins/standard/editusers.css']
+  style_urls = ['skins/standard/admin.css']
   doc_section = "administration.html#deleting-users"
 %]
 
@@ -47,7 +46,11 @@
   listselectionvalues = listselectionvalues
 %]
 
-<table class="main">
+<table id="admin_table">
+  <tr class="column_header">
+    <th>Field</th>
+    <th>Value</th>
+  </tr>
   <tr>
     <th>Login name:</th>
     <td>[% otheruser.login FILTER html %]</td>

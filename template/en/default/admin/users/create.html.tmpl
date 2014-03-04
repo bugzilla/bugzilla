@@ -14,7 +14,7 @@
 
 [% PROCESS global/header.html.tmpl
   title = "Add user"
-  style_urls = ['skins/standard/editusers.css']
+  style_urls = ['skins/standard/admin.css']
   doc_section = "administration.html#creating-new-users"
 %]
 
@@ -22,20 +22,20 @@
   listselectionvalues = listselectionvalues
 %]
 
-<form name="f" method="post" action="editusers.cgi">
-<table class="main">
-  [% PROCESS admin/users/userdata.html.tmpl
-    editform  = 0
-    editusers = editusers
-    otheruser = []
-  %]
-</table>
-<p>
-  <input type="submit" id="add" value="Add">
-  <input type="hidden" name="action" value="new">
-  <input type="hidden" name="token" value="[% token FILTER html %]">
-  [% INCLUDE listselectionhiddenfields %]
-</p>
+<form method="post" action="editusers.cgi">
+  <table id="admin_table_edit">
+    [% PROCESS admin/users/userdata.html.tmpl
+      editform  = 0
+      editusers = editusers
+      otheruser = []
+    %]
+  </table>
+  <p>
+    <input type="submit" id="add" value="Add">
+    <input type="hidden" name="action" value="new">
+    <input type="hidden" name="token" value="[% token FILTER html %]">
+    [% INCLUDE listselectionhiddenfields %]
+  </p>
 </form>
 
 <p>

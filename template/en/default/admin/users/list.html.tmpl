@@ -16,7 +16,7 @@
 
 [% PROCESS global/header.html.tmpl
   title = "Select user"
-  style_urls = ['skins/standard/admin.css', 'skins/standard/editusers.css']
+  style_urls = ['skins/standard/admin.css']
   doc_section = "administration.html#user-administration"
 %]
 
@@ -65,11 +65,11 @@
 [% FOREACH thisuser = users %]
   [% IF !thisuser.realname %]
     [%# We cannot pass one class now and one class later. %]
-    [% SET classes = (thisuser.is_enabled ? "missing" : "bz_inactive missing") %]
+    [% SET classes = (thisuser.is_enabled ? "warning" : "bz_inactive warning") %]
     [% overrides.realname.login_name.${thisuser.login_name} = {
            content          => "missing"
            override_content => 1
-           class            => "$classes"
+           class            => classes
            override_class   => 1
        }
     %]

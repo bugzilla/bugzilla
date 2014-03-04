@@ -895,7 +895,7 @@ sub create {
             # started the session.
             'sudoer' => sub { return Bugzilla->sudoer; },
 
-            # Allow templates to access the "corect" URLBase value
+            # Allow templates to access the "correct" URLBase value
             'urlbase' => sub { return Bugzilla::Util::correct_urlbase(); },
 
             # Allow templates to access docs url with users' preferred language

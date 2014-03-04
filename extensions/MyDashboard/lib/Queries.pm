@@ -131,10 +131,10 @@ sub QUERY_DEFS {
 }
 
 sub query_bugs {
-    my $qdef     = shift;
-    my $dbh      = Bugzilla->dbh;
-    my $user     = Bugzilla->user;
-    my $date_now = DateTime->now(time_zone => $user->timezone);
+    my $qdef         = shift;
+    my $dbh          = Bugzilla->dbh;
+    my $user         = Bugzilla->user;
+    my $datetime_now = DateTime->now(time_zone => $user->timezone);
 
     ## HACK to remove POST
     delete $ENV{REQUEST_METHOD};
@@ -152,9 +152,16 @@ sub query_bugs {
         foreach my $column (SELECT_COLUMNS) {
             $bug->{$column} = shift @$row;
             if ($column eq 'changeddate') {
-                $bug->{$column} = format_time($bug->{$column});
-                my $date_then = datetime_from($bug->{$column});
-                $bug->{'changeddate_fancy'} = time_ago($date_then, $date_now);
+                my $datetime = datetime_from($bug->{$column});
+                $datetime->set_time_zone($user->timezone);
+                $bug->{$column} = $datetime->strftime('%Y-%m-%d %T %Z');
+                $bug->{'changeddate_fancy'} = time_ago($datetime, $datetime_now);
+
+                # Provide a version for use by Bug.history and also for looking up last comment.
+                # We have to set to server's timezone and also subtract one second.
+                $datetime->set_time_zone(Bugzilla->local_timezone);
+                $datetime->subtract(seconds => 1);
+                $bug->{changeddate_api} = $datetime->strftime('%Y-%m-%d %T');
             }
         }
         push(@bugs, $bug);
@@ -165,9 +172,9 @@ sub query_bugs {
 
 sub query_flags {
     my ($type) = @_;
-    my $user     = Bugzilla->user;
-    my $dbh      = Bugzilla->dbh;
-    my $date_now = DateTime->now(time_zone => $user->timezone);
+    my $user         = Bugzilla->user;
+    my $dbh          = Bugzilla->dbh;
+    my $datetime_now = DateTime->now(time_zone => $user->timezone);
 
     ($type ne 'requestee' || $type ne 'requester')
         || ThrowCodeError('param_required', { param => 'type' });
@@ -238,10 +245,11 @@ sub query_flags {
 
         # Format the updated date specific to the user's timezone
         # and add the fancy human readable version
-        $flag->{'updated'} = format_time($flag->{'updated'});
-        my $date_then = datetime_from($flag->{'updated'});
-        $flag->{'updated_epoch'} = $date_then->epoch;
-        $flag->{'updated_fancy'} = time_ago($date_then, $date_now);
+        my $datetime = datetime_from($flag->{'updated'});
+        $datetime->set_time_zone($user->timezone);
+        $flag->{'updated'} = $datetime->strftime('%Y-%m-%d %T %Z');
+        $flag->{'updated_epoch'} = $datetime->epoch;
+        $flag->{'updated_fancy'} = time_ago($datetime, $datetime_now);
 
         push(@filtered_flags, $flag);
     }

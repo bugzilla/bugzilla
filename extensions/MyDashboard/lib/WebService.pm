@@ -45,17 +45,14 @@ sub run_bug_query {
         if (!$user->is_insider) {
             $last_comment_sql .= " AND isprivate = 0";
         }
+        $last_comment_sql .= " LIMIT 1";
         my $last_comment_sth = $dbh->prepare($last_comment_sql);
 
         # Add last changes to each bug
         foreach my $b (@$bugs) {
             my $last_changes = {};
-            # Remove one second so we get the changes made at $change_date (>=)
-            my $changed_date = datetime_from($b->{changeddate});
-            next if !$changed_date;
-            $changed_date->subtract(seconds => 1);
             my $activity = $self->history({ ids       => [ $b->{bug_id} ],
-                                            new_since => $changed_date });
+                                            new_since => $b->{changeddate_api} });
             if (@{$activity->{bugs}[0]{history}}) {
                 my $change_set = $activity->{bugs}[0]{history}[0];
                 $last_changes->{activity} = $change_set->{changes};
@@ -64,18 +61,20 @@ sub run_bug_query {
                         = template_var('field_descs')->{$change->{field_name}} || $change->{field_name};
                 }
                 $last_changes->{email} = $change_set->{who};
-                $last_changes->{when} = $self->datetime_format_inbound($change_set->{when});
+                my $datetime = datetime_from($change_set->{when});
+                $datetime->set_time_zone($user->timezone);
+                $last_changes->{when} = $datetime->strftime('%Y-%m-%d %T %Z');
             }
             my $last_comment_id = $dbh->selectrow_array(
-                $last_comment_sth,
-                undef, $b->{bug_id}, $changed_date);
+                $last_comment_sth, undef, $b->{bug_id}, $b->{changeddate_api});
             if ($last_comment_id) {
                 my $comments = $self->comments({ comment_ids => [ $last_comment_id ] });
                 my $comment = $comments->{comments}{$last_comment_id};
                 $last_changes->{comment} = $comment->{text};
                 $last_changes->{email} = $comment->{creator} if !$last_changes->{email};
-                $last_changes->{when}
-                    = $self->datetime_format_inbound($comment->{creation_time}) if !$last_changes->{when};
+                my $datetime = datetime_from($comment->{creation_time});
+                $datetime->set_time_zone($user->timezone);
+                $last_changes->{when} = $datetime->strftime('%Y-%m-%d %T %Z');
             }
             $b->{last_changes} = $last_changes;
 

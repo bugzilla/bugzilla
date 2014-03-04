@@ -58,16 +58,14 @@
         [% END %]
         [% IF groups_added_to.size %]
           <li>
-            The account has been added to the
+            The account has been added to the following group[% 's' IF groups_added_to.size > 1 %]:
             [%+ groups_added_to.join(', ') FILTER html %]
-            group[% 's' IF groups_added_to.size > 1 %].
           </li>
         [% END %]
         [% IF groups_removed_from.size %]
           <li>
-            The account has been removed from the
+            The account has been removed from the following group[% 's' IF groups_removed_from.size > 1 %]:
             [%+ groups_removed_from.join(', ') FILTER html %]
-            group[% 's' IF groups_removed_from.size > 1 %].
           </li>
         [% END %]
         [% IF groups_granted_rights_to_bless.size %]

@@ -428,15 +428,13 @@ sub mtime_filter {
 #  1. YUI CSS
 #  2. Standard Bugzilla stylesheet set (persistent)
 #  3. Third-party "skin" stylesheet set, per user prefs (persistent)
-#  4. Page-specific styles
-#  5. Custom Bugzilla stylesheet set (persistent)
+#  4. Custom Bugzilla stylesheet set (persistent)
 
 sub css_files {
     my ($style_urls, $yui, $yui_css) = @_;
-    
-    # global.css goes on every page, and so does IE-fixes.css.
-    my @requested_css = ('skins/standard/global.css', @$style_urls,
-                         'skins/standard/IE-fixes.css');
+
+    # global.css goes on every page.
+    my @requested_css = ('skins/standard/global.css', @$style_urls);
 
     my @yui_required_css;
     foreach my $yui_name (@$yui) {

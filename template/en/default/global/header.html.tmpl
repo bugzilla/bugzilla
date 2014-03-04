@@ -266,14 +266,6 @@
     [% END %]
 
 [% BLOCK format_css_link %]
-  [% IF style_url.match('/IE-fixes\.css') %]
-    <!--[if lte IE 7]>
-      [%# Internet Explorer treats [if IE] HTML comments as uncommented.
-        # We use it to import CSS fixes so that Bugzilla looks decent on IE 7
-        # and below.
-        #%]
-  [% END %]
-
   [% IF css_set_name == 'standard' %]
     [% SET css_title_link = '' %]
   [% ELSE %]
@@ -284,8 +276,6 @@
 
   <link href="[% style_url FILTER html %]" rel="stylesheet"
         type="text/css" [% css_title_link FILTER none %]>
-
-  [% '<![endif]-->' IF style_url.match('/IE-fixes\.css') %]
 [% END %]
 
 [% BLOCK format_js_link %]

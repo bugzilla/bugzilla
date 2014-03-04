@@ -73,7 +73,7 @@
     <div class="bz_query_debug">
       <p>Total execution time: [% query_time FILTER html %] seconds</p>
       [% FOREACH query = queries %]
-        <p>[% query.sql FILTER html %]</p>
+        <pre>[% query.sql FILTER html %]</pre>
         <p>Execution time: [% query.time FILTER html %] seconds</p>
         [% IF query.explain %]
           <pre>[% query.explain FILTER html %]</pre>
@@ -190,8 +190,8 @@
     <div class="buglist_menu">
       <div class="bz_query_buttons">
         <form method="post" action="show_bug.cgi">
-          [% id = buglist.join(",") %]
-          <input type="hidden" name="id" value="[% id FILTER html %]">
+          [% buglist_joined = buglist.join(",") %]
+          <input type="hidden" name="id" value="[% buglist_joined FILTER html %]">
           <input type="hidden" name="format" value="multiple">
           <input type="submit" id="long_format" value="Long Format">
         </form>

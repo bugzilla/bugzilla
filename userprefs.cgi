@@ -511,12 +511,13 @@ sub SaveSavedSearches {
     }
 
     $user->flush_queries_cache;
-    
+
     # Update profiles.mybugslink.
     my $showmybugslink = defined($cgi->param("showmybugslink")) ? 1 : 0;
     $dbh->do("UPDATE profiles SET mybugslink = ? WHERE userid = ?",
-             undef, ($showmybugslink, $user->id));    
+             undef, ($showmybugslink, $user->id));
     $user->{'showmybugslink'} = $showmybugslink;
+    Bugzilla->memcached->clear({ table => 'profiles', id => $user->id });
 }
 
 

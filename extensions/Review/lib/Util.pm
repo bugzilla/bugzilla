@@ -58,6 +58,7 @@ sub _update_profile {
         $data->{needinfo} || 0,
         $data->{id}
     );
+    Bugzilla->memcached->clear({ table => 'profiles', id => $data->{id} });
 }
 
 1;

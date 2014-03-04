@@ -199,6 +199,7 @@ sub rename_field_value {
         }
         $dbh->do("UPDATE $table SET query = ? WHERE $id_field = ?",
                  undef, $query, $id);
+        Bugzilla->memcached->clear({ table => $table, id => $id });
     }
 
     $dbh->bz_commit_transaction();

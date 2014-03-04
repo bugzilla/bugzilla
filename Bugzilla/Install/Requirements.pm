@@ -375,6 +375,12 @@ sub OPTIONAL_MODULES {
 
     # memcached
     {
+        package => 'URI-Escape',
+        module  => 'URI::Escape',
+        version => 0,
+        feature => ['memcached'],
+    },
+    {
         package => 'Cache-Memcached',
         module  => 'Cache::Memcached',
         version => '0',

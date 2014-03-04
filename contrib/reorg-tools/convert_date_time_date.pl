@@ -55,4 +55,8 @@ Bugzilla->dbh->bz_alter_column('bugs', $column, { TYPE => 'DATE' });
 Bugzilla->dbh->do("UPDATE fielddefs SET type = ? WHERE name = ?",
                   undef, FIELD_TYPE_DATE, $column);
 
+# It's complex to determine which items now need to be flushed from memcached.
+# As this is expected to be a rare event, we just flush the entire cache.
+Bugzilla->memcached->clear_all();
+
 print "\ndone.\n";

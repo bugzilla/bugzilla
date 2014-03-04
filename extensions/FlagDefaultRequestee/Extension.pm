@@ -121,6 +121,7 @@ sub _set_default_requestee {
 
     $dbh->do("UPDATE flagtypes SET default_requestee = ? WHERE id = ?",
              undef, $requestee_id, $type->id);
+    Bugzilla->memcached->clear({ table => 'flagtypes', id => $type->id });
 }
 
 ##################

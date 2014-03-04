@@ -136,6 +136,8 @@ foreach my $bug (@$bugs) {
         $dbh->do("UPDATE bugs SET delta_ts = ?, lastdiffed = ? WHERE bug_id = ?",
                  undef, $timestamp, $timestamp, $bug_id);
 
+        Bugzilla->memcached->clear({ table => 'bugs', id => $bug_id });
+
         print "done.\n";
     }
 }

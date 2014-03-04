@@ -226,6 +226,7 @@ sub bug_end_of_update {
         $dbh->do("UPDATE longdescs SET thetext = ?, edit_count = edit_count + 1
                   WHERE comment_id = ?",
                  undef, $new_comment, $comment_id);
+        Bugzilla->memcached->clear({ table => 'longdescs', id => $comment_id });
 
         # Log old comment to the longdescs activity table
         $timestamp ||= $dbh->selectrow_array("SELECT NOW()");

@@ -137,4 +137,8 @@ print "Adding new status '$new_status'.\n\n";
 do_namedqueries($new_status);
 do_series($new_status);
 
+# It's complex to determine which items now need to be flushed from memcached.
+# As this is expected to be a rare event, we just flush the entire cache.
+Bugzilla->memcached->clear_all();
+
 exit(0);

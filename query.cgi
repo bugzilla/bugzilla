@@ -32,6 +32,7 @@ use Bugzilla;
 use Bugzilla::Bug;
 use Bugzilla::Constants;
 use Bugzilla::Search;
+use Bugzilla::Search::Saved;
 use Bugzilla::User;
 use Bugzilla::Util;
 use Bugzilla::Error;
@@ -54,9 +55,11 @@ if ($cgi->param('nukedefaultquery')) {
     if ($userid) {
         my $token = $cgi->param('token');
         check_hash_token($token, ['nukedefaultquery']);
-        $dbh->do("DELETE FROM namedqueries" .
-                 " WHERE userid = ? AND name = ?", 
-                 undef, ($userid, DEFAULT_QUERY_NAME));
+        my $named_queries = Bugzilla::Search::Saved->match(
+            { userid => $userid, name => DEFAULT_QUERY_NAME });
+        if (@$named_queries) {
+            $named_queries->[0]->remove_from_db();
+        }
     }
     $buffer = "";
 }

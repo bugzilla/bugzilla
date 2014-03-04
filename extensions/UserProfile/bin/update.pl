@@ -50,6 +50,7 @@ if (@$user_ids) {
             last_user_activity($user_id),
             $user_id
         );
+        Bugzilla->memcached->clear({ table => 'profiles', id => $user_id });
     }
     $dbh->do(
         "DELETE FROM profiles_statistics_recalc WHERE " . $dbh->sql_in('user_id', $user_ids)

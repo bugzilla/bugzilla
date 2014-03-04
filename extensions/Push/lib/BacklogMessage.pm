@@ -15,6 +15,7 @@ use base 'Bugzilla::Object';
 use constant AUDIT_CREATES => 0;
 use constant AUDIT_UPDATES => 0;
 use constant AUDIT_REMOVES => 0;
+use constant USE_MEMCACHED => 0;
 
 use Bugzilla;
 use Bugzilla::Error;

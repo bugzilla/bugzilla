@@ -273,6 +273,7 @@ sub _adjust_request_count {
         undef,
         $requestee_id
     );
+    Bugzilla->memcached->clear({ table => 'profiles', id => $requestee_id });
 }
 
 sub _new_reviewers_from_input {

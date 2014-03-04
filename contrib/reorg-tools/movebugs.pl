@@ -173,3 +173,7 @@ Bugzilla::Hook::process('reorg_move_bugs', { bug_ids => $ra_ids } );
 
 $dbh->bz_commit_transaction();
 
+foreach my $bug_id (@$ra_ids) {
+    Bugzilla->memcached->clear({ table => 'bugs', id => $bug_id });
+}
+

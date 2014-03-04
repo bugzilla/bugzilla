@@ -48,9 +48,8 @@ use constant AUDIT_UPDATES => 1;
 use constant AUDIT_REMOVES => 1;
 
 # When USE_MEMCACHED is true, the class is suitable for serialisation to
-# Memcached. This will be flipped to true by default once the majority of
-# Bugzilla Object have been tested with Memcached.
-use constant USE_MEMCACHED => 0;
+# Memcached.  See documentation in Bugzilla::Memcached for more information.
+use constant USE_MEMCACHED => 1;
 
 # This allows the JSON-RPC interface to return Bugzilla::Object instances
 # as though they were hashes. In the future, this may be modified to return
@@ -188,7 +187,20 @@ sub new_from_list {
     # their own implementation of match which is not compatible
     # with this one. However, match() still needs to have the right $invocant
     # in order to do $class->DB_TABLE and so on.
-    return match($invocant, { $id_field => \@detainted_ids });
+    my $list = match($invocant, { $id_field => \@detainted_ids });
+
+    # BMO: Populate the object cache with bug objects, which helps
+    # inline-history when viewing bugs with dependencies.
+    if ($class eq 'Bugzilla::Bug') {
+        foreach my $object (@$list) {
+            $class->_object_cache_set(
+                { id => $object->id, cache => 1 },
+                $object
+            );
+        }
+    }
+
+    return $list;
 }
 
 sub new_from_hash {

@@ -168,6 +168,7 @@ sub _update_comment_count {
         'UPDATE profiles SET comment_count=? WHERE userid=?',
         undef, $count, $id
     );
+    Bugzilla->memcached->clear({ table => 'profiles', id => $id });
     $self->{comment_count} = $count;
 }
 
@@ -179,6 +180,7 @@ sub _first_patch_bug_id {
         'UPDATE profiles SET first_patch_bug_id=? WHERE userid=?',
         undef, $bug_id, $self->id
     );
+    Bugzilla->memcached->clear({ table => 'profiles', id => $self->id });
     $self->{first_patch_bug_id} = $bug_id;
 }
 

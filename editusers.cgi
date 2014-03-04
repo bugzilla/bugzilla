@@ -646,6 +646,11 @@ if ($action eq 'search') {
     $dbh->bz_commit_transaction();
     delete_token($token);
 
+    # It's complex to determine which items now need to be flushed from
+    # memcached.  As user deletion is expected to be a rare event, we just
+    # flush the entire cache when a user is deleted.
+    Bugzilla->memcached->clear_all();
+
     $vars->{'message'} = 'account_deleted';
     $vars->{'otheruser'}{'login'} = $otherUser->login;
     $vars->{'restrictablegroups'} = $user->bless_groups();

@@ -193,4 +193,13 @@ $dbh->do("INSERT INTO bugs_activity(bug_id, who, bug_when, fieldid, removed,
          ($userid, $fieldid, $oldproduct, $newproduct, $compid));
 
 Bugzilla::Hook::process('reorg_move_bugs', { bug_ids => $ra_ids } ) if $doit;
-$dbh->bz_commit_transaction() if $doit;
+
+if ($doit) {
+    $dbh->bz_commit_transaction();
+
+    # It's complex to determine which items now need to be flushed from memcached.
+    # As this is expected to be a rare event, we just flush the entire cache.
+    Bugzilla->memcached->clear_all();
+}
+
+

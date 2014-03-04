@@ -45,6 +45,7 @@ sub _user_set_last_activity_ts     {
         "UPDATE profiles SET last_activity_ts = ? WHERE userid = ?",
         undef,
         $value, $self->id);
+    Bugzilla->memcached->clear({ table => 'profiles', id => $self->id });
 }
 
 sub _user_clear_last_statistics_ts {
@@ -56,6 +57,7 @@ sub _user_clear_last_statistics_ts {
         "UPDATE profiles SET last_statistics_ts = NULL WHERE userid = ?",
         undef,
         $self->id);
+    Bugzilla->memcached->clear({ table => 'profiles', id => $self->id });
 }
 
 #

@@ -171,6 +171,9 @@ EOF
     $dbh->do(
         "UPDATE profiles SET last_statistics_ts=NULL WHERE " . $dbh->sql_in('userid', $user_ids)
     );
+    foreach my $id (@$user_ids) {
+        Bugzilla->memcached->clear({ table => 'profiles', id => $id });
+    }
     return scalar(@$user_ids);
 }
 
@@ -209,6 +212,7 @@ sub _set_last_statistics_ts {
         undef,
         $timestamp, $user_id,
     );
+    Bugzilla->memcached->clear({ table => 'profiles', id => $user_id });
 }
 
 sub _update_statistics {

@@ -982,7 +982,10 @@ sub create {
     $shared_providers->{$provider_key} ||= Template::Provider->new($config);
     $config->{LOAD_TEMPLATES} = [ $shared_providers->{$provider_key} ];
 
-    local $Template::Config::CONTEXT = 'Bugzilla::Template::Context';
+    # BMO - use metrics subclass
+    local $Template::Config::CONTEXT = Bugzilla->metrics_enabled()
+        ? 'Bugzilla::Metrics::Template::Context'
+        : 'Bugzilla::Template::Context';
 
     Bugzilla::Hook::process('template_before_create', { config => $config });
     my $template = $class->new($config) 

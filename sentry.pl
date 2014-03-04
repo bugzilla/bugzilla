@@ -16,6 +16,10 @@
 use strict;
 use warnings;
 
+BEGIN {
+    delete $ENV{SERVER_SOFTWARE};
+}
+
 use FindBin qw($Bin);
 use lib $Bin;
 use lib "$Bin/lib";

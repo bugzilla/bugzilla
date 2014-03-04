@@ -31,6 +31,11 @@ sub handle_login {
     # Throw error if the supplied class does not exist or the method is private
     ThrowCodeError('unknown_method', {method => $full_method}) if (!$class or $method =~ /^_/);
 
+    # BMO - use the class and method as the name, instead of the cgi filename
+    if (Bugzilla->metrics_enabled) {
+        Bugzilla->metrics->name("$class $method");
+    }
+
     eval "require $class";
     ThrowCodeError('unknown_method', {method => $full_method}) if $@;
     return if ($class->login_exempt($method) 

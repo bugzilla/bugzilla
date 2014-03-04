@@ -58,7 +58,6 @@ use Bugzilla::Keyword;
 use Bugzilla::Flag;
 use Bugzilla::Status;
 use Bugzilla::Token;
-use Bugzilla::Instrument;
 
 use List::MoreUtils qw(firstidx);
 use Storable qw(dclone);
@@ -69,8 +68,6 @@ my $cgi = Bugzilla->cgi;
 my $dbh = Bugzilla->dbh;
 my $template = Bugzilla->template;
 my $vars = {};
-
-my $timings = Bugzilla::Instrument->new('process_bug');
 
 ######################################################################
 # Subroutines
@@ -145,8 +142,6 @@ Bugzilla::User::match_field({
 
 print $cgi->header() unless Bugzilla->usage_mode == USAGE_MODE_EMAIL;
 
-$timings->time('load_bug');
-
 # Check for a mid-air collision. Currently this only works when updating
 # an individual bug.
 my $delta_ts = $cgi->param('delta_ts') || '';
@@ -210,8 +205,6 @@ if ($cgi->param('id')) {
 else {
     check_token_data($token, 'buglist_mass_change', 'query.cgi');
 }
-
-$timings->time('mid_air');
 
 ######################################################################
 # End Data/Security Validation
@@ -401,14 +394,11 @@ if (defined $cgi->param('id')) {
     $first_bug->set_flags($flags, $new_flags);
 }
 
-$timings->time('update_time');
-
 ##############################
 # Do Actual Database Updates #
 ##############################
 foreach my $bug (@bug_objects) {
     my $changes = $bug->update();
-    $timings->time('db_time');
 
     if ($changes->{'bug_status'}) {
         my $new_status = $changes->{'bug_status'}->[1];
@@ -421,10 +411,6 @@ foreach my $bug (@bug_objects) {
     }
 
     my $recipient_count = $bug->send_changes($changes, $vars);
-    $timings->time('bugmail_time');
-    $timings->label('bug-' . $bug->id);
-    $timings->label('user-' . $user->id);
-    $timings->value('recipient_count', $recipient_count);
 }
 
 # Delete the session token used for the mass-change.
@@ -450,8 +436,6 @@ elsif ($action eq 'next_bug' or $action eq 'same_bug') {
         }
         $template->process("bug/show.html.tmpl", $vars)
           || ThrowTemplateError($template->error());
-        $timings->time('template_time');
-        $timings->log() if scalar(@bug_objects) == 1;
         exit;
     }
 } elsif ($action ne 'nothing') {
@@ -464,8 +448,6 @@ unless (Bugzilla->usage_mode == USAGE_MODE_EMAIL) {
         || ThrowTemplateError($template->error());
     $template->process("global/footer.html.tmpl", $vars)
         || ThrowTemplateError($template->error());
-    $timings->time('template_time');
-    $timings->log() if scalar(@bug_objects) == 1;
 }
 
 1;

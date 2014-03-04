@@ -386,6 +386,13 @@ sub OPTIONAL_MODULES {
         version => '0',
         feature => ['memcached'],
     },
+
+    # BMO - metrics
+    {
+        package => 'ElasticSearch',
+        module  => 'ElasticSearch',
+        version => '0',
+    },
     );
 
     my $extra_modules = _get_extension_requirements('OPTIONAL_MODULES');

@@ -85,5 +85,19 @@
   sentry_uri =>
     "When set, important errors and warnings will be sent to the"
     _ " specified Sentry server. Enter the full API KEY URL."
-    _ " eg <code>https://01234567890123456780123456780123:01234567890123456780123456780123@errormill.mozilla.org/10</code>.",
+    _ " eg <kbd>https://01234567890123456780123456780123:01234567890123456780123456780123@errormill.mozilla.org/10</kbd>.",
+
+  metrics_enabled =>
+    "Collect metrics for reporting to ElasticSearch",
+  metrics_user_ids =>
+    "Comma separated list of user_id's which trigger data collection and reporting."
+    _ " eg <kbd>3881,5038,5898,13647,20209,251051,373476,409787</kbd>.",
+  metrics_elasticsearch_server =>
+    "Metrics ElasticSearch server and port. eg <kbd>127.0.0.1:9200</kbd>",
+  metrics_elasticsearch_index =>
+    "Metrics ElasticSearch index. eg <kbd>bmo-metrics</kbd>",
+  metrics_elasticsearch_type =>
+    "Metrics ElasticSearch type. eg <kbd>timings</kbd>",
+  metrics_elasticsearch_ttl =>
+    "The time to live for data in the ElasticSearch cluster, in milliseconds. eg <kbd>1210000000</kbd>",
 } %]

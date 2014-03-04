@@ -78,6 +78,11 @@ if ($id) {
         ThrowCodeError("bad_page_cgi_id", { "page_id" => $id });
     }
 
+    # BMO - append template filename to metrics data
+    if (Bugzilla->metrics_enabled) {
+        Bugzilla->metrics->name("page.cgi $id");
+    }
+
     my %vars = ( 
       quicksearch_field_names => \&quicksearch_field_names,
     );

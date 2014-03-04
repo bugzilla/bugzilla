@@ -43,6 +43,8 @@ use Bugzilla::Util;
 use Bugzilla::Error;
 use Bugzilla::DB::Schema;
 
+use Bugzilla::Metrics::Mysql;
+
 use List::Util qw(max);
 use Storable qw(dclone);
 
@@ -148,6 +150,12 @@ sub _connect {
                 . " localconfig: " . $@);
 
     # instantiate the correct DB specific module
+
+    # BMO - enable instrumentation of db calls
+    if (Bugzilla->metrics_enabled) {
+        $pkg_module = 'Bugzilla::Metrics::Mysql';
+    }
+
     my $dbh = $pkg_module->new($params);
 
     return $dbh;

@@ -192,24 +192,18 @@ sub ThrowTemplateError {
         my $maintainer = Bugzilla->params->{'maintainer'};
         my $error = html_quote($vars->{'template_error_msg'});
         my $error2 = html_quote($template->error());
+        my $url = html_quote(Bugzilla->cgi->self_url);
+
         print <<END;
-        <tt>
           <p>
             Bugzilla has suffered an internal error. Please save this page and 
             send it to $maintainer with details of what you were doing at the 
             time this message appeared.
           </p>
-          <script type="text/javascript"> <!--
-          document.write("<p>URL: " + 
-                          document.location.href.replace(/&/g,"&amp;")
-                                                .replace(/</g,"&lt;")
-                                                .replace(/>/g,"&gt;") + "</p>");
-          // -->
-          </script>
+          <p>URL: $url</p>
           <p>Template->process() failed twice.<br>
           First error: $error<br>
           Second error: $error2</p>
-        </tt>
 END
     }
     exit;

@@ -30,14 +30,14 @@
     [% admindocslinks = {'voting.html' => 'Setting up the voting feature'} %]
     You may only use at most [% max FILTER html %] votes for a single
     [%+ terms.bug %] in the
-    <tt>[% product FILTER html %]</tt> product, but you are trying to
+    <em>[% product FILTER html %]</em> product, but you are trying to
     use [% votes FILTER html %].
 
 [% ELSIF error == "voting_too_many_votes_for_product" %]
     [% title = "Illegal Vote" %]
     [% admindocslinks = {'voting.html' => 'Setting up the voting feature'} %]
     You tried to use [% votes FILTER html %] votes in the
-    <tt>[% product FILTER html %]</tt> product, which exceeds the maximum of
+    <em>[% product FILTER html %]</em> product, which exceeds the maximum of
     [%+ max FILTER html %] votes for this product.
 
 [% END %]

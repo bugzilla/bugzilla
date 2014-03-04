@@ -236,11 +236,6 @@ function viewRaw(patchviewerinstalled)
 
 function switchToMode(mode, patchviewerinstalled)
 {
-    if (mode == current_mode) {
-      alert('switched to same mode!  This should not happen.');
-      return;
-    }
-
     // Switch out of current mode
     if (current_mode == 'edit') {
       hideElementById('editFrame');

@@ -16,7 +16,7 @@ our @EXPORT = qw( USER_STORY );
 
 use constant USER_STORY => {
     # note - an empty components array means all components
-    Talkilla    => {
+    Loop => {
         group       => 'editbugs',
         components  => [],
     },

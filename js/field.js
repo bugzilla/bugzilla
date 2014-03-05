@@ -864,16 +864,22 @@ function show_comment_preview(bug_id) {
     var Dom = YAHOO.util.Dom;
     var comment = document.getElementById('comment');
     var preview = document.getElementById('comment_preview');
+
     if (!comment || !preview) return;
     if (Dom.hasClass('comment_preview_tab', 'active_comment_tab')) return;
 
     preview.style.width = (comment.clientWidth - 4) + 'px';
     preview.style.height = comment.offsetHeight + 'px';
 
+    var comment_tab = document.getElementById('comment_tab');
     Dom.addClass(comment, 'bz_default_hidden');
-    Dom.removeClass('comment_tab', 'active_comment_tab');
+    Dom.removeClass(comment_tab, 'active_comment_tab');
+    comment_tab.setAttribute('aria-selected', 'false');
+
+    var preview_tab = document.getElementById('comment_preview_tab');
     Dom.removeClass(preview, 'bz_default_hidden');
-    Dom.addClass('comment_preview_tab', 'active_comment_tab');
+    Dom.addClass(preview_tab, 'active_comment_tab');
+    preview_tab.setAttribute('aria-selected', 'true');
 
     Dom.addClass('comment_preview_error', 'bz_default_hidden');
 
@@ -924,8 +930,13 @@ function show_comment_edit() {
     if (!comment || !preview) return;
     if (YAHOO.util.Dom.hasClass(comment, 'active_comment_tab')) return;
 
+    var preview_tab = document.getElementById('comment_preview_tab');
     YAHOO.util.Dom.addClass(preview, 'bz_default_hidden');
-    YAHOO.util.Dom.removeClass('comment_preview_tab', 'active_comment_tab');
+    YAHOO.util.Dom.removeClass(preview_tab, 'active_comment_tab');
+    preview_tab.setAttribute('aria-selected', 'false');
+
+    var comment_tab = document.getElementById('comment_tab');
     YAHOO.util.Dom.removeClass(comment, 'bz_default_hidden');
-    YAHOO.util.Dom.addClass('comment_tab', 'active_comment_tab');
+    YAHOO.util.Dom.addClass(comment_tab, 'active_comment_tab');
+    comment_tab.setAttribute('aria-selected', 'true');
 }

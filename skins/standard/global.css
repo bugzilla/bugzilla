@@ -697,7 +697,7 @@ input.required, select.required, span.required_explanation {
 
 #comment_preview {
     border: 1px solid silver;
-    padding: 0px 1px;
+    padding: 1px;
     overflow: auto;
     margin: 0px;
 }
@@ -713,7 +713,6 @@ input.required, select.required, span.required_explanation {
 
 #comment {
     margin: 0px 0px 1em 0px;
-    padding: 0px;
 }
 
 /*******************/

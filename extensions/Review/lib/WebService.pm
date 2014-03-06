@@ -15,6 +15,8 @@ use base qw(Bugzilla::WebService);
 use Bugzilla::Bug;
 use Bugzilla::Component;
 use Bugzilla::Error;
+use Bugzilla::Util qw(detaint_natural);
+use Bugzilla::WebService::Util 'filter';
 
 sub suggestions {
     my ($self, $params) = @_;
@@ -69,6 +71,20 @@ sub suggestions {
     return \@result;
 }
 
+sub flag_activity {
+    my ( $self, $params ) = @_;
+    my $dbh = Bugzilla->switch_to_shadow_db();
+
+    my $flag_id = $params->{flag_id};
+
+    detaint_natural($flag_id)
+        or ThrowUserError('invalid_flag_id', { flag_id => $flag_id });
+
+    my $matches = Bugzilla::Extension::Review::FlagStateActivity->match({flag_id => $flag_id});
+    my @results = map { $self->_flag_state_activity_to_hash($_, $params) } @$matches;
+    return \@results;
+}
+
 sub rest_resources {
     return [
         # bug-id
@@ -104,11 +120,61 @@ sub rest_resources {
                 method => 'suggestions',
             },
         },
+        # flag activity by flag id
+        qr{^/review/flag_activity/(\d+)$}, {
+            GET => {
+                method => 'flag_activity',
+                params => sub {
+                    return {flag_id => $_[0]}
+                },
+            },
+        },
     ];
-};
+}
+
+sub _flag_state_activity_to_hash {
+    my ($self, $fsa, $params) = @_;
+
+    my %flag = (
+        creation_time => $self->type('string', $fsa->flag_when),
+        type          => $self->_flagtype_to_hash($fsa->type),
+        setter        => $self->_user_to_hash($fsa->setter),
+        bug_id        => $self->type('int',    $fsa->bug_id),
+        attachment_id => $self->type('int',    $fsa->attachment_id),
+        status        => $self->type('string', $fsa->status),
+    );
+
+    $flag{requestee} = $self->_user_to_hash($fsa->requestee) if $fsa->requestee;
+
+    return filter($params, \%flag);
+}
+
+sub _flagtype_to_hash {
+    my ($self, $flagtype) = @_;
+    my $user = Bugzilla->user;
+
+    return {
+        id               => $self->type('int',     $flagtype->id),
+        name             => $self->type('string',  $flagtype->name),
+        description      => $self->type('string',  $flagtype->description),
+        type             => $self->type('string',  $flagtype->target_type),
+        is_active        => $self->type('boolean', $flagtype->is_active),
+        is_requesteeble  => $self->type('boolean', $flagtype->is_requesteeble),
+        is_multiplicable => $self->type('boolean', $flagtype->is_multiplicable),
+    };
+}
+
+sub _user_to_hash {
+    my ($self, $user) = @_;
+
+    return {
+        id        => $self->type('int',    $user->id),
+        real_name => $self->type('string', $user->name),
+        name      => $self->type('email',  $user->login),
+    };
+}
 
 1;
-
 __END__
 =head1 NAME
 

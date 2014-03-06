@@ -482,6 +482,10 @@ sub update {
         $self->{'modification_date'} = format_time($timestamp,  '%Y.%m.%d %T');
         Bugzilla->memcached->clear({ table => 'flags', id => $self->id });
     }
+
+    # BMO - provide a hook which passes the flag object
+    Bugzilla::Hook::process('flag_updated', {flag => $self, changes => $changes});
+
     return $changes;
 }
 

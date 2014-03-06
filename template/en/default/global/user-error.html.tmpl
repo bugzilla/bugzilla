@@ -991,6 +991,10 @@
     Invalid datasets <em>[% datasets.join(":") FILTER html %]</em>. Only digits,
     letters and colons are allowed.
 
+  [% ELSIF error == "invalid_flag_id" %]
+    [% title = "Invalid Flag ID" %]
+    The flag id [% flag_id FILTER html %] is invalid.
+
   [% ELSIF error == "invalid_format" %]
     [% title = "Invalid Format" %]
     The format "[% format FILTER html %]" is invalid (must be one of

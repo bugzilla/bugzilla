@@ -15,6 +15,7 @@ our $VERSION = '1';
 use Bugzilla;
 use Bugzilla::Constants;
 use Bugzilla::Error;
+use Bugzilla::Extension::Review::FlagStateActivity;
 use Bugzilla::Extension::Review::Util;
 use Bugzilla::Install::Filesystem;
 use Bugzilla::User;
@@ -196,6 +197,9 @@ sub object_end_of_create {
     elsif (_is_countable_flag($object) && $object->requestee_id && $object->status eq '?') {
         _adjust_request_count($object, +1);
     }
+    if (_is_countable_flag($object)) {
+        $self->_log_flag_state_activity($object, $object->status);
+    }
 }
 
 sub object_end_of_update {
@@ -238,12 +242,27 @@ sub object_end_of_update {
     }
 }
 
+sub flag_updated {
+    my ( $self, $args ) = @_;
+    my $flag = $args->{flag};
+    my $changes = $args->{changes};
+
+    return unless scalar(keys %$changes);
+    if ( _is_countable_flag($flag) ) {
+        $self->_log_flag_state_activity( $flag, $flag->status );
+    }
+}
+
 sub object_before_delete {
     my ($self, $args) = @_;
     my $object = $args->{object};
 
     if (_is_countable_flag($object) && $object->requestee_id && $object->status eq '?') {
         _adjust_request_count($object, -1);
+    }
+
+    if (_is_countable_flag($object)) {
+        $self->_log_flag_state_activity($object, 'X');
     }
 }
 
@@ -252,6 +271,21 @@ sub _is_countable_flag {
     return unless $object->isa('Bugzilla::Flag');
     my $type_name = $object->type->name;
     return $type_name eq 'review' || $type_name eq 'feedback' || $type_name eq 'needinfo';
+}
+
+sub _log_flag_state_activity {
+    my ($self, $flag, $status) = @_;
+
+    Bugzilla::Extension::Review::FlagStateActivity->create({
+        flag_when     => $flag->modification_date,
+        type_id       => $flag->type_id,
+        flag_id       => $flag->id,
+        setter_id     => $flag->setter_id,
+        requestee_id  => $flag->requestee_id,
+        bug_id        => $flag->bug_id,
+        attachment_id => $flag->attach_id,
+        status        => $status,
+    });
 }
 
 sub _adjust_request_count {
@@ -626,7 +660,6 @@ sub db_schema_abstract_schema {
             },
         ],
     };
-
 }
 
 sub install_update_db {

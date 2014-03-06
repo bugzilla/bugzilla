@@ -697,8 +697,14 @@ sub process_cache {
 
 sub metrics_enabled {
     if (defined $_[1]) {
+        if (!$_[1]
+            && $_[0]->request_cache->{metrics_enabled}
+            && $_[0]->request_cache->{metrics})
+        {
+            $_[0]->request_cache->{metrics}->cancel();
+            delete $_[0]->request_cache->{metrics};
+        }
         $_[0]->request_cache->{metrics_enabled} = $_[1];
-        delete $_[0]->request_cache->{metrics} unless $_[1];
     }
     else {
         return $_[0]->request_cache->{metrics_enabled};

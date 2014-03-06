@@ -42,6 +42,11 @@ sub end {
     $self->{head} = $self->{head}->{parent} if $is_head;
 }
 
+sub cancel {
+    my ($self) = @_;
+    delete $self->{head};
+}
+
 sub DESTROY {
     my ($self) = @_;
     $self->finish() if $self->{head};

@@ -43,6 +43,7 @@ sub background {
 
     # spawn delivery worker
     my $command = bz_locations()->{'cgi_path'} . "/metrics.pl '$class' '$filename' &";
+    $ENV{PATH} = '';
     system($command);
 }
 

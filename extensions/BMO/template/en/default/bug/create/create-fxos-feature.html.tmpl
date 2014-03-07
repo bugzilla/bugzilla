@@ -1,0 +1,181 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% PROCESS global/variables.none.tmpl %]
+
+[% inline_style = BLOCK %]
+#feature_form {
+  padding: 10px;
+}
+#feature_form .required:after {
+  content: " *";
+  color: red;
+}
+#feature_form .field_label {
+  font-weight: bold;
+}
+#feature_form .field_desc {
+  padding-bottom: 3px;
+}
+#feature_form .field_desc,
+#feature_form .head_desc {
+  width: 600px;
+  word-wrap: normal;
+}
+#feature_form .head_desc {
+  padding-top: 5px;
+  padding-bottom: 12px;
+}
+#feature_form .form_section {
+  margin-bottom: 10px;
+}
+#feature_form textarea {
+  font-family: inherit;
+  font-size: inherit;
+}
+#feature_form #comp_description {
+  test-align: left;
+  color: green;
+  padding-left: 1em;
+}
+[% END %]
+
+[% inline_javascript = BLOCK %]
+var compdesc = new Array();
+compdesc[""] = 'Please select a component from the list above.';
+[% FOREACH comp = product.components %]
+  compdesc['[% comp.name FILTER js %]'] = '[% comp.description FILTER js %]';
+[% END %]
+function showCompDesc() {
+  var comp_select = document.getElementById('component');
+  document.getElementById('comp_description').innerHTML = compdesc[comp_select.value];
+}
+function validateAndSubmit() {
+  var alert_text = '';
+  if (!isFilledOut('component')) alert_text += 'Please select a value for product component.\n';
+  if (!isFilledOut('short_desc')) alert_text += 'Please enter a value for feature request title.\n';
+  if (alert_text != '') {
+    alert(alert_text);
+    return false;
+  }
+  return true;
+}
+YAHOO.util.Event.onDOMReady(showCompDesc);
+[% END %]
+
+[% PROCESS global/header.html.tmpl
+   title = "Firefox OS Feature Request Form"
+   style = inline_style
+   javascript = inline_javascript
+   javascript_urls = [ 'extensions/BMO/web/js/form_validate.js' ]
+%]
+
+[% USE Bugzilla %]
+[% cgi = Bugzilla.cgi %]
+
+<form id="feature_form" method="post" action="post_bug.cgi" enctype="multipart/form-data"
+      onSubmit="return validateAndSubmit();">
+  <input type="hidden" name="format" value="fxos-feature">
+  <input type="hidden" name="product" value="Firefox OS">
+  <input type="hidden" name="keywords" value="feature">
+  <input type="hidden" name="rep_platform" value="All">
+  <input type="hidden" name="op_sys" value="Other">
+  <input type="hidden" name="version" value="unspecified">
+  <input type="hidden" name="bug_severity" id="bug_severity" value="normal">
+  <input type="hidden" name="token" value="[% token FILTER html %]">
+
+<img title="Firefox OS Feature Form" src="extensions/BMO/web/producticons/firefox.png">
+
+<div class="form_section">
+  <label for="component" class="field_label required">Product Component</label>
+  <div class="field_desc">
+    Which product component is your feature request applicable to?
+    If you are not sure, choose "General".
+  </div>
+  <select name="component" id="component" onchange="showCompDesc(this);">
+    <option value="">Select One</option>
+      [%- FOREACH c = product.components %]
+        [% NEXT IF NOT c.is_active %]
+        <option value="[% c.name FILTER html %]"
+                id="v[% c.id FILTER html %]_component"
+          [% IF c.name == default.component_ %]
+                selected="selected"
+          [% END %]>
+          [% c.name FILTER html -%]
+    </option>
+  [%- END %]
+  </select>
+  <div id="comp_description"></div>
+</div>
+
+<div class="form_section">
+  <label for="short_desc" class="field_label required">Feature Request Title</label>
+  <div class="field_desc">
+    Please enter a title for your feature request that is brief and self explanatory.
+    (Example: "Memory dialing using keypad numbers")
+  </div>
+  <input type="text" name="short_desc" id="short_desc" size="80">
+</div>
+
+<div class="form_section">
+  <label for="description" class="field_label">Description of feature or problem to be solved</label>
+  <div class="field_desc">
+    Please describe the feature that you are requesting or the problem that you would like solved in detail
+    (Example, "Today, there is no way for the user to quickly dial user-defined numbers from the dial pad.
+    Instead the user must search for an find the contact in their contact list.").
+    If the described feature only applies to certain device types (eg. tablet vs. smartphone), please make note of it.
+  </div>
+  <textarea id="description" name="description" cols="80" rows="5"></textarea>
+</div>
+
+<div class="form_section">
+  <label for="implement_impact" class="field_label">Impact of implementing the feature/solution</label>
+  <div class="field_desc">
+    If this solution were to be implemented, what would the impact be?
+    (Example, "If this solution were to be implemented, it would save the users
+    significant time when dialing commonly used phone numbers.")
+  </div>
+  <textarea id="implement_impact" name="implement_impact" cols="80" rows="5"></textarea>
+</div>
+
+<div class="form_section">
+  <label for="not_implement_impact" class="field_label">Impact of NOT implementing the feature/solution</label>
+  <div class="field_desc">
+    If this solution were NOT to be implemented, what would the impact be?
+    (Example, "By not implementing this solution, we are unable to sell phones in
+    Iceland which has a certification requirement to have support for memory dialing.")
+  </div>
+  <textarea id="not_implement_impact" name="not_implement_impact" cols="80" rows="5"></textarea>
+</div>
+
+<div class="form_section">
+  <label for="date_required" class="field_label">Date required</label>
+  <div class="field_desc">
+    Is this solution required by a certain date? Why?
+    (Example: "March 2014. We plan to sell phones in Iceland in June 2014 using Firefox OS 1.4.
+    Completing the feature in March would allow the device to pass operator certification in time
+    for a June retail launch.")<br>
+    <strong>Note:</strong> completing this field does not imply that the feature will indeed be delivered in this timeframe.
+  </div>
+  <textarea id="date_required" name="date_required" cols="80" rows="5"></textarea>
+</div>
+
+<div class="head_desc">
+  Once your form has been submitted, a tracking [% terms.bug %] will be created. We will
+  then reach out for additional info and next steps. Thanks!
+</div>
+
+<input type="submit" id="commit" value="Submit">
+
+<p>
+  [ <span class="required_star">*</span> <span class="required_explanation">Required Field</span> ]
+</p>
+
+</form>
+
+[% PROCESS global/footer.html.tmpl %]

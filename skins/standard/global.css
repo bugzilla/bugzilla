@@ -602,12 +602,12 @@ div.user_match {
 }
 
 .field_value .text_input {
-  width: 100%;
-  min-width: 25em;
+    width: 100%;
+    min-width: 25em;
 }
 
 .uneditable_textarea {
-    width: 30em;
+    max-width: 30em;
     font-size: medium;
 }
 
@@ -972,3 +972,38 @@ table.field_value_explanation {
 }
 
 /* page.cgi (end) */
+
+/* duplicates.cgi (start) */
+
+#duplicates_table {
+    border-collapse: collapse;
+}
+
+#duplicates_table .resolved {
+    background-color: #d9d9d9;
+    color: black;
+}
+
+#duplicates_table thead tr {
+    background-color: #ccc;
+    color: black;
+}
+
+#duplicates_table thead tr th {
+    vertical-align: middle;
+}
+
+#duplicates_table td, #duplicates_table th {
+    border: 1px solid black;
+    padding: .1em .25em;
+}
+
+#duplicates_table tbody td {
+    text-align: center;
+}
+
+#duplicates_table tbody td.short_desc {
+    text-align: left;
+}
+
+/* duplicates.cgi (end) */

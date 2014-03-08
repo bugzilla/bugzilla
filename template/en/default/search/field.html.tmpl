@@ -23,7 +23,7 @@
     <input name="[% field.name FILTER html %]" 
            id="[% field.name FILTER html %]" size="40"
            [% IF onchange %] onchange="[% onchange FILTER html %]"[% END %]
-           value="[% value FILTER html %]">              
+           value="[% value FILTER html %]" [% 'autofocus' IF focus %]>
   [% CASE constants.FIELD_TYPE_KEYWORDS %]
     [% INCLUDE "bug/field-label.html.tmpl"
       field = field
@@ -39,7 +39,7 @@
        <input name="[% field.name FILTER html %]" 
               id="[% field.name FILTER html %]" size="40"
               [% IF onchange %] onchange="[% onchange FILTER html %]"[% END %]
-              value="[% value FILTER html %]">
+              value="[% value FILTER html %]" [% 'autofocus' IF focus %]>
        <div id="[% field.name FILTER html %]_autocomplete"></div>
     </div>
     <script type="text/javascript" defer="defer">

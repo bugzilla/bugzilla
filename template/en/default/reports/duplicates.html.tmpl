@@ -27,10 +27,7 @@
   [% title = "Most Frequently Reported $terms.Bugs" %]
 [% END%]
 
-[% PROCESS global/header.html.tmpl
-   title = title
-   style_urls = ['skins/standard/duplicates.css']
-%]
+[% PROCESS global/header.html.tmpl title = title %]
 
 <p>
   <a href="#explanation">What is this data?</a>

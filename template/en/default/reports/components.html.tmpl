@@ -16,8 +16,8 @@
 [% END %]
 
 [% PROCESS global/header.html.tmpl 
-  style_urls = [ "skins/standard/reports.css" ]
-  title = title 
+  style_urls = ['skins/standard/buglist.css']
+  title = title
 %]
 
 [% IF Param("useqacontact") %]
@@ -28,10 +28,10 @@
 
 <h1>[% product.name FILTER html %]</h1>
 
-<div class="product_desc">[% product.description FILTER html_light %]</div>
+<div id="product_desc">[% product.description FILTER html_light %]</div>
 <p>Select a component to see open [% terms.bugs %] in that component.</p>
 
-<table class="component_table">
+<table id="component_table">
   <tr>
     <th>Component</th>
     <th>Default Assignee</th>

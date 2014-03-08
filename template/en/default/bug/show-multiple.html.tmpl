@@ -9,10 +9,12 @@
 [% PROCESS global/header.html.tmpl
   title = "Full Text $terms.Bug Listing"
   h1 = ""
-  style_urls = ["skins/standard/show_multiple.css",
-                "skins/standard/buglist.css"]
+  style_urls = ['skins/standard/buglist.css']
   doc_section = "using.html#anatomy-of-a-bug"
 %]
+
+[% USE Bugzilla %]
+
 [% PROCESS bug/time.html.tmpl %]
 [% IF bugs.first %]
   [% ids = [] %]
@@ -55,7 +57,7 @@
   <table class="bugfields">
   [% IF bug.error %]
     <tr>
-      <td class="error">
+      <td class="warning">
         [% IF bug.error == "InvalidBugId" %]
           '[%+ bug.bug_id FILTER html %]' is not a valid [% terms.bug %] number
           nor a known [% terms.bug %] alias.
@@ -170,7 +172,6 @@
       [% PROCESS row cell = "status_whiteboard" fullrow = 1 %]
     [% END %]
 
-    [% USE Bugzilla %]
     [% field_counter = 0 %]
     [% FOREACH field = Bugzilla.active_custom_fields %]
         [% field_counter = field_counter + 1 %]

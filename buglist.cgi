@@ -553,6 +553,9 @@ if ($dotweak) {
 
 if ($format->{'extension'} eq 'ics') {
     push(@selectcolumns, "opendate") if !grep($_ eq 'opendate', @selectcolumns);
+    if (Bugzilla->params->{'timetrackinggroup'}) {
+        push(@selectcolumns, "deadline") if !grep($_ eq 'deadline', @selectcolumns);
+    }
 }
 
 if ($format->{'extension'} eq 'atom') {

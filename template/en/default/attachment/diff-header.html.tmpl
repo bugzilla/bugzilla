@@ -39,14 +39,14 @@ Interdiff of #[% oldid %] and #[% newid %] for [% terms.bug %] #[% bugid %]
   [% END %]
   [% PROCESS global/header.html.tmpl doc_section = "using.html#patch-viewer"
                                      javascript_urls = "js/attachment.js"
-                                     style_urls = ['skins/standard/attachment.css'] %]
+                                     style_urls = ['skins/standard/bug.css'] %]
 [% ELSE %]
   <!DOCTYPE html>
   <html>
     <head>
       <link href="[% 'skins/standard/global.css' FILTER mtime %]"
             rel="stylesheet" type="text/css">
-      <link href="[% 'skins/standard/attachment.css' FILTER mtime %]"
+      <link href="[% 'skins/standard/bug.css' FILTER mtime %]"
             rel="stylesheet" type="text/css">
       <script src="[% 'js/attachment.js' FILTER mtime %]"
               type="text/javascript"></script>

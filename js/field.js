@@ -1070,3 +1070,16 @@ function show_comment_edit() {
     YAHOO.util.Dom.addClass(comment_tab, 'active_comment_tab');
     comment_tab.setAttribute('aria-selected', 'true');
 }
+
+function adjustRemainingTime() {
+    // subtracts time spent from remaining time
+    // prevent negative values if work_time > bz_remaining_time
+    var new_time = Math.max(bz_remaining_time - document.changeform.work_time.value, 0.0);
+    // get upto 2 decimal places
+    document.changeform.remaining_time.value = Math.round(new_time * 100)/100;
+}
+
+function updateRemainingTime() {
+    // if the remaining time is changed manually, update bz_remaining_time
+    bz_remaining_time = document.changeform.remaining_time.value;
+}

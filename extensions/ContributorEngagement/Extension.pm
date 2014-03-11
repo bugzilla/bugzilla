@@ -97,7 +97,7 @@ sub flag_end_of_update {
 
             Bugzilla->dbh->do("UPDATE profiles SET first_patch_reviewed_id = ? WHERE userid = ?",
                               undef, $attachment->id, $attachment->attacher->id);
-            Bugzilla->memcached->clear({ table => 'profiles', id => $$attachment->attacher->id });
+            Bugzilla->memcached->clear({ table => 'profiles', id => $attachment->attacher->id });
             last;
         }
     }

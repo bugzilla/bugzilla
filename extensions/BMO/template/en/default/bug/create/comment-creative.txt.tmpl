@@ -14,14 +14,23 @@
 >>Project Overview:
 [%+ cgi.param('overview') %]
 
->>Creative Specs & Deliverables:
+>> Creative Help Needed:
+Copy:   [% IF cgi.param('type_copy')   %] Yes [% ELSE %] No [% END %]
+Design: [% IF cgi.param('type_design') %] Yes [% ELSE %] No [% END %]
+Video:  [% IF cgi.param('type_video')  %] Yes [% ELSE %] No [% END %]
+Other:  [% IF cgi.param('type_other')  %][% cgi.param('type_other_text') %][% ELSE %]No[% END %]
+
+>>Creative Specs:
 [%+ cgi.param("specs") %]
 
->>Launch Date:
-[%+ cgi.param("cf_due_date") || 'Not provided' %]
+>>CTA and Design:
+[%+ cgi.param('cta_design') %]
 
 >>Creative Due Date:
-[%+ cgi.param("creative_due_date") || 'Not provided' %]
+[%+ cgi.param("cf_due_date") || 'Not provided' %]
+
+>>Launch Date:
+[%+ cgi.param("launch_date") || 'Not provided' %]
 
 >>Mozilla Goal:
 [%+ IF cgi.param("goal_other") %][% cgi.param("goal_other") %][% ELSE %][% cgi.param("goal") %][% END %]

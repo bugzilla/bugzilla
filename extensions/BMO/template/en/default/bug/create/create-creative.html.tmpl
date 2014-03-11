@@ -52,9 +52,21 @@ function validateAndSubmit() {
   if (!isFilledOut('overview')) alert_text += 'Please enter a value for Project Overview.\n';
   if (!isFilledOut('short_desc')) alert_text += 'Please enter a value for Request Title.\n';
   if (!isFilledOut('specs')) alert_text += 'Please enter a value for Creative Specs.\n';
+  if (!isFilledOut('cta_design')) alert_text += 'Please enter a value for CTA Design.\n';
+  if (!isFilledOut('cf_due_date')) alert_text += 'Please enter a value for the creative due date.\n';
   if (!isFilledOut('goal')) alert_text += 'Please select a value for Mozilla Goal.\n';
   if (YAHOO.util.Dom.get('goal').value == 'Other') {
     if (!isFilledOut('goal_other')) alert_text += 'Please select a value for Mozilla Goal Other.\n';
+  }
+  if (YAHOO.util.Dom.get('type_copy').checked == false
+      && YAHOO.util.Dom.get('type_design').checked == false
+      && YAHOO.util.Dom.get('type_video').checked == false
+      && YAHOO.util.Dom.get('type_other').checked == false)
+  {
+     alert_text += 'Please select at least one type of help needed.\n';
+  }
+  if (YAHOO.util.Dom.get('type_other').checked == true) {
+    if (!isFilledOut('type_other_text')) alert_text += 'Please enter a value for other type of help needed.\n';
   }
   if (alert_text != '') {
     alert(alert_text);
@@ -71,6 +83,17 @@ function toggleGoalOther() {
     YAHOO.util.Dom.addClass('goal_other','bz_default_hidden');
   }
 }
+function toggleTypeOther(element) {
+  var other_text = YAHOO.util.Dom.get('type_other_text');
+  if (element.checked == true) {
+    other_text.disabled = false;
+    other_text.focus();
+  }
+  else {
+    other_text.disabled = true;
+  }
+}
+
 [% END %]
 
 [% PROCESS global/header.html.tmpl
@@ -123,17 +146,35 @@ function toggleGoalOther() {
 <div class="form_section">
   <label for="specs" class="field_label required">Creative Specs and Deliverables</label>
   <div class="field_desc">
-    What is the final deliverable (e.g. copy, snippet graphic, email template, website design, video, etc.)
-    and what format should it be delivered in? (e.g. PSD file, 403x403 transparent PNG/JPG, etc.) Be as
-    specific as you can. We like details.
+    Select what sort of help you need (check at least one or more)
+  </div>
+  <input type="checkbox" name="type_copy" id="type_copy" value="1">Copy<br>
+  <input type="checkbox" name="type_design" id="type_design" value="1">Design<br>
+  <input type="checkbox" name="type_video" id="type_video" value="1">Video<br>
+  <input type="checkbox" name="type_other" id="type_other" value="1" onchange="toggleTypeOther(this);">Other&nbsp;&nbsp;
+  <input type="text" name="type_other_text" id="type_other_text"><br>
+  <br>
+  <div class="field_desc">
+    <strong class="required">Specs</strong><br>
+    What is the final deliverable and what format should it be delivered in?
+    Please include information on the format, image/file size, word count, video length,
+    etc. We like details here.
   </div>
   <textarea id="specs" name="specs" cols="80" rows="5"></textarea>
+  <br>
+  <br>
+  <div class="field_desc">
+    <strong class="required">CTAs and design directions</strong><br>
+    Provide as much information as possible. Make sure to include links to documents with copy,
+    mock-ups, wireframes, or any other information or assets that could help with direction.
+  </div>
+  <textarea id="cta_design" name="cta_design" cols="80" rows="5"></textarea>
 </div>
 
 <div class="form_section">
-  <label for="cf_due_date" class="field_label">Launch Date</label>
+  <label for="cf_due_date" class="field_label required">Creative Due Date</label>
   <div class="field_desc">
-    When will your project go forth into the world?
+    Working backwards from your launch/go-live date, when do you need final assets?
   </div>
   <input name="cf_due_date" size="20" id="cf_due_date" value=""
          onchange="updateCalendarFromField(this)">
@@ -149,20 +190,20 @@ function toggleGoalOther() {
 </div>
 
 <div class="form_section">
-  <label for="creative_due_date" class="field_label">Creative Due Date</label>
+  <label for="launch_date" class="field_label">Launch Date</label>
   <div class="field_desc">
-    Working backwards from your launch/go-live date, when do you need final assets?
+    When will your project go forth into the world?
   </div>
-  <input name="creative_due_date" size="20" id="creative_due_date" value=""
+  <input name="launch_date" size="20" id="launch_date" value=""
          onchange="updateCalendarFromField(this)">
   <button type="button" class="calendar_button"
-          id="button_calendar_creative_due_date"
-          onclick="showCalendar('creative_due_date')">
+          id="button_calendar_launch_date"
+          onclick="showCalendar('launch_date')">
     <span>Calendar</span>
   </button>
-  <div id="con_calendar_creative_due_date"></div>
+  <div id="con_calendar_launch_date"></div>
   <script type="text/javascript">
-    createCalendar('creative_due_date')
+    createCalendar('launch_date')
   </script>
 </div>
 
@@ -174,13 +215,21 @@ function toggleGoalOther() {
   <select id="goal" name="goal"
           onchange="toggleGoalOther();">
     <option value="">Please select..</option>
-    <option value="Firefox Deskop">Firefox Desktop</option>
     <option value="Firefox OS">Firefox OS</option>
-    <option value="Firefox Android">Firefox Android</option>
-    <option value="Firefox Marketplace">Firefox Marketplace</option>
-    <option value="Corporate Support">Corporate Support</option>
-    <option value="All">All</option>
+    <option value="Firefox Browser">Firefox Browser</option>
+    <option value="Million Mozillians">Million Mozillians</option>
+    <option value="Services">Services</option>
+    <option value="Org Support">Org Support</option>
     <option value="Other">Other</option>
+
+
+    - Firefox OS
+    - Firefox Browser
+    - Million Mozillians
+    - Services 
+    - Org Support
+    - Other (which continues to bring up the box to type in)
+
   </select>
   <br>
   <input type="text" name="goal_other" id="goal_other" size="40"

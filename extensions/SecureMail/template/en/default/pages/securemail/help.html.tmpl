@@ -41,8 +41,40 @@ S/MIME certificates can be obtained from a number of providers. You can get a fr
 Once you have it, <a href="https://www.startssl.com/?app=25#52">export it from your browser as a .p12 file and import it into your mail client</a>. 
 You'll need to provide a password when you export - pick a strong one, and then back up the .p12 file somewhere safe.</p>
 
+<p>Import on Thunderbird as follows:</p>
+
+<ul>
+<li>Open Preferences in Thunderbird.</li>
+<li>Activate the Advanced pane.</li>
+<li>Activate the Certificates tab.</li>
+<li>Press the button View Certificates.</li>
+<li>Press the Import button.</li>
+<li>Open your .p12 file.</li>
+<li>Enter the password for unlocking the .p12 if asked.</li>
+</ul>
+
 <p>
-Then, you need to convert it to a .pem file. If you have OpenSSL installed, one way is as follows:</p>
+Then, you need to convert it to a .pem file. Here are two possible ways to do this.</p>
+
+<h3>Thunderbird</h3>
+
+<ul>
+<li>Open Preferences in Thunderbird.</li>
+<li>Activate the Advanced pane.</li>
+<li>Activate the Certificates tab.</li>
+<li>Press the button View Certificates.</li>
+<li>Select the line in the tree widget that represents the certificate you imported.</li>
+<li>Press the View button.</li>
+<li>Activate the Details tab.</li>
+<li>Press the Export button.</li>
+<li>Choose where to save the .pem file.</li>
+</ul>
+
+<p>Paste the contents of the .pem file into the SecureMail text field in [% terms.Bugzilla %].</p>
+
+<h3>OpenSSL</h3>
+
+<p>Or, if you have OpenSSL installed, do the following:</p>
 
 <p>
 <code>openssl pkcs12 -in certificate.p12 -out certificate.pem -nodes -nokeys</code></p>
@@ -52,7 +84,7 @@ Open the .pem file in a text editor. You can recognise the public key because
 it starts "BEGIN CERTIFICATE" and ends "END CERTIFICATE" and 
 has an appropriate friendly name (e.g. "StartCom Free Certificate Member's StartCom Ltd. ID").</p>
 
-<p>Paste the contents of the certificate into the SecureMail text field in [% terms.Bugzilla %].</p>
+<p>Paste the contents of the .pem file into the SecureMail text field in [% terms.Bugzilla %].</p>
 
 <h2>PGP</h2>
 

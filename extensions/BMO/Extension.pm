@@ -480,6 +480,20 @@ sub bug_format_comment {
         }
     });
 
+    # link git.mozilla.org commit messages
+    push (@$regexes, {
+        match => qr#^(To\sssh://[^\@]+\@git\.mozilla\.org\/(.+?.git)\n
+                    \s+)([0-9a-z]+\.\.([0-9a-z]+)\s+\S+\s->\s\S+)#mx,
+        replace => sub {
+            my $args = shift;
+            my $preamble = html_quote($args->{matches}->[0]);
+            my $repo = html_quote($args->{matches}->[1]);
+            my $text = $args->{matches}->[2];
+            my $revision = $args->{matches}->[3];
+            return qq#$preamble<a href="http://git.mozilla.org/?p=$repo;a=commit;h=$revision">$text</a>#;
+        }
+    });
+
     # link to hg.m.o
     # Note: for grouping in this regexp, always use non-capturing parentheses.
     my $hgrepos = join('|', qw!(?:releases/)?comm-[\w.]+ 

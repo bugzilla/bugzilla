@@ -20,7 +20,7 @@
           "membership": "direct",
         [% ELSE %]
           "membership": "indirect",
-          "group": [% type.name FILTER js %]",
+          "group": "[% type.name FILTER js %]",
         [% END %]
         [% IF include_disabled %]
           "disabled": "[% member.is_enabled ? "false" : "true" %]",

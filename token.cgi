@@ -226,6 +226,7 @@ sub changePassword {
                SET      cryptpassword = ?
                WHERE    userid = ?},
              undef, ($cryptedpassword, $userid) );
+    Bugzilla->memcached->clear({ table => 'profiles', id => $userid });
     $dbh->do('DELETE FROM tokens WHERE token = ?', undef, $token);
     $dbh->bz_commit_transaction();
 
@@ -276,6 +277,7 @@ sub changeEmail {
                SET      login_name = ?
                WHERE    userid = ?},
              undef, ($new_email, $userid));
+    Bugzilla->memcached->clear({ table => 'profiles', id => $userid });
     $dbh->do('DELETE FROM tokens WHERE token = ?', undef, $token);
     $dbh->do(q{DELETE FROM tokens WHERE userid = ?
                AND tokentype = 'emailnew'}, undef, $userid);
@@ -325,6 +327,7 @@ sub cancelChangeEmail {
                        SET      login_name = ?
                        WHERE    userid = ?},
                      undef, ($old_email, $userid));
+            Bugzilla->memcached->clear({ table => 'profiles', id => $userid });
 
             # email has changed, so rederive groups
 

@@ -19,6 +19,7 @@ sub rebuild_review_counters {
     my $dbh = Bugzilla->dbh;
 
     $dbh->bz_start_transaction;
+
     my $rows = $dbh->selectall_arrayref("
         SELECT flags.requestee_id AS user_id,
                flagtypes.name AS flagtype,
@@ -41,7 +42,26 @@ sub rebuild_review_counters {
         $current->{$row->{flagtype}} = $row->{count};
     }
     _update_profile($dbh, $current) if $current->{id};
+
+    foreach my $field (qw( review feedback needinfo )) {
+        _fix_negatives($dbh, $field);
+    }
+
     $dbh->bz_commit_transaction;
+}
+
+sub _fix_negatives {
+    my ($dbh, $field) = @_;
+    my $user_ids = $dbh->selectcol_arrayref(
+        "SELECT userid FROM profiles WHERE ${field}_request_count < 0"
+    );
+    return unless @$user_ids;
+    $dbh->do(
+        "UPDATE profiles SET ${field}_request_count = 0 WHERE " . $dbh->sql_in('userid', $user_ids)
+    );
+    foreach my $user_id (@$user_ids) {
+        Bugzilla->memcached->clear({ table => 'profiles', id => $user_id });
+    }
 }
 
 sub _update_profile {

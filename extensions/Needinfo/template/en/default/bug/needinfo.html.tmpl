@@ -38,7 +38,7 @@
           <td align="center">
             <input type="checkbox" id="needinfo_override_[% flag.id FILTER html %]"
                    name="needinfo_override_[% flag.id FILTER html %]" value="1"
-                   [% "checked" IF flag.requestee || user.in_group("canconfirm") %]>
+                   [% " checked" IF flag.requestee || user.in_group("canconfirm") %]>
           </td>
           <td>
             <label for="needinfo_override_[% flag.id FILTER html %]">
@@ -71,6 +71,16 @@
       <tr>
         <td align="center">
           <script>
+            function needinfo_init() {
+              needinfo_visibility();
+              [% FOREACH flag = needinfo_flags %]
+                YAHOO.util.Event.on('requestee-[% flag.id FILTER none %]', 'blur', function(e) {
+                  YAHOO.util.Dom.get('needinfo_override_[% flag.id FILTER none %]').checked =
+                    e.target.value == '[% flag.requestee.login FILTER js %]';
+                });
+              [% END %]
+            }
+
             function needinfo_visibility() {
               var role = YAHOO.util.Dom.get('needinfo_role').value;
               if (role == 'other') {
@@ -91,6 +101,7 @@
                 YAHOO.util.Dom.get('needinfo_role_identity').innerHTML = identity;
               }
             }
+
             function needinfo_focus() {
               if (YAHOO.util.Dom.get('needinfo').checked
                   && YAHOO.util.Dom.get('needinfo_role').value == 'other')
@@ -99,15 +110,18 @@
                 YAHOO.util.Dom.get('needinfo_from').select();
               }
             }
+
             function needinfo_role_changed() {
               YAHOO.util.Dom.get('needinfo').checked = true;
               needinfo_visibility();
               needinfo_focus();
             }
+
             function needinfo_other_changed() {
               YAHOO.util.Dom.get('needinfo').checked = YAHOO.util.Dom.get('needinfo_from').value != '';
             }
-            YAHOO.util.Event.onDOMReady(needinfo_visibility);
+
+            YAHOO.util.Event.onDOMReady(needinfo_init);
           </script>
           <input type="checkbox" name="needinfo" value="1" id="needinfo" onchange="needinfo_focus()">
         </td>

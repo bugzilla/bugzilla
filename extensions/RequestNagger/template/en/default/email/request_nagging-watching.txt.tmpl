@@ -8,7 +8,7 @@
 
 [% PROCESS "global/field-descs.none.tmpl" %]
 
-The following is a list of people who you are watching that have outstanding
+The following is a list of people who you are watching that have overdue
 requests.
 
 [% FOREACH login = requests.keys.sort %]
@@ -43,5 +43,5 @@ Change who you are watching
   [%+ urlbase %]userprefs.cgi?tab=request_nagging
 
 --
-You are receiving this mail because: you are watching someone with outstanding
+You are receiving this mail because: you are watching someone with overdue
 requests.

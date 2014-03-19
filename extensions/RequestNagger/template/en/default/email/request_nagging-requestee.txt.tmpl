@@ -9,7 +9,7 @@
 [% PROCESS "global/field-descs.none.tmpl" %]
 
 The following is a list of requests people have made of you, which are
-currently outstanding. To avoid disappointing others, please deal with them as
+currently overdue. To avoid disappointing others, please deal with them as
 quickly as possible.
 
 [% requests = requests.item(recipient.login) %]
@@ -35,11 +35,11 @@ Guidance on handling requests:
   https://wiki.mozilla.org/BMO/Handling_Requests
 [% END %]
 
-See all your outstanding requests:
+See all your overdue requests:
   [%+ urlbase %]request.cgi?action=queue&requestee=[% recipient.login FILTER uri %]&group=type
 
 Opt out of these emails:
   [%+ urlbase %]userprefs.cgi#request_nagging
 
 --
-You are receiving this mail because: you have outstanding requests.
+You are receiving this mail because: you have overdue requests.

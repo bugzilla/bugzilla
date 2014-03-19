@@ -7,7 +7,7 @@
   #%]
 
 <label for="request_nagging">
-  Send me reminders for outstanding requests:
+  Send me reminders for overdue requests:
 </label>
 <select name="request_nagging" id="request_nagging">
   <option value="default" [% "selected" IF user.settings.request_nagging.is_default %]>
@@ -26,7 +26,7 @@
 <h4>User Request Reminder Watching</h4>
 
 <p>
-  If you watch a user, you will receive a report of their outstanding
+  If you watch a user, you will receive a report of their overdue
   requests.
 </p>
 

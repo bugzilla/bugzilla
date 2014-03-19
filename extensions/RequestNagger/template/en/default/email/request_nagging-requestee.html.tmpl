@@ -12,14 +12,14 @@
 <html>
 
 <head>
-  <title>[[% terms.Bugzilla %]] Your Outstanding Requests</title>
+  <title>[[% terms.Bugzilla %]] Your Overdue Requests</title>
 </head>
 
 <body bgcolor="#ffffff">
 
 <p>
   The following is a list of requests people have made of you, which are
-  currently outstanding. To avoid disappointing others, please deal with them as
+  currently overdue. To avoid disappointing others, please deal with them as
   quickly as possible.
 </p>
 
@@ -71,7 +71,7 @@
     </a><br>
   [% END %]
   <a href="[% urlbase FILTER none %]request.cgi?action=queue&amp;requestee=[% recipient.login FILTER uri %]&amp;group=type">
-    See all your outstanding requests
+    See all your overdue requests
   </a><br>
   <a href="[% urlbase FILTER none %]userprefs.cgi#request_nagging">
     Opt out of these emails
@@ -82,7 +82,7 @@
   <hr style="border: 1px dashed #969696">
   <b>You are receiving this mail because:</b>
   <ul>
-    <li>You have outstanding requests.</li>
+    <li>You have overdue requests.</li>
   </ul>
 </div>
 

@@ -10,7 +10,7 @@
 [% PROCESS "global/reason-descs.none.tmpl" %]
 From: [% Param('mailfrom') %]
 To: [% recipient.email %]
-Subject: [[% terms.Bugzilla %]] Your Outstanding Requests
+Subject: [[% terms.Bugzilla %]] Your Overdue Requests
   ([% FOREACH type = requests.item(recipient.email).typelist %]
       [%- requests.item(recipient.email).types.item(type).size %] [%+ type %]
       [% ", " UNLESS loop.last %]

@@ -79,10 +79,18 @@ sub report {
 
     # throw at ES
     require ElasticSearch;
-    ElasticSearch->new(
+    my $es = ElasticSearch->new(
         servers     => Bugzilla->params->{metrics_elasticsearch_server},
         transport   => 'http',
-    )->index(
+    );
+    # the ElasticSearch module queries the server for a list of nodes and
+    # connects directly to a random node. that bypasses our load balancer so we
+    # disable that by setting the server list directly.
+    $es->transport->servers(Bugzilla->params->{metrics_elasticsearch_server});
+    # as the discovered node list is lazy-loaded, increase _refresh_in so it
+    # won't call ->refresh_servers()
+    $es->transport->{_refresh_in} = 1;
+    $es->index(
         index   => Bugzilla->params->{metrics_elasticsearch_index},
         type    => Bugzilla->params->{metrics_elasticsearch_type},
         ttl     => Bugzilla->params->{metrics_elasticsearch_ttl},

@@ -20,7 +20,6 @@ use lib "$Bin/lib";
 
 use Bugzilla;
 use Bugzilla::Constants;
-use File::Slurp;
 use POSIX qw(setsid nice);
 
 Bugzilla->metrics_enabled(0);

@@ -9,6 +9,7 @@ package Bugzilla::Metrics::Collector;
 
 use strict;
 use warnings;
+use 5.10.1;
 
 # the reporter needs to be a constant and use'd here to ensure it's loaded at
 # compile time.
@@ -19,6 +20,8 @@ use Bugzilla::Metrics::Reporter::ElasticSearch;
 #use constant REPORTER => 'Bugzilla::Metrics::Reporter::STDERR';
 #use Bugzilla::Metrics::Reporter::STDERR;
 
+use Bugzilla::Constants;
+use Cwd qw(abs_path);
 use File::Basename;
 use Time::HiRes qw(gettimeofday clock_gettime CLOCK_MONOTONIC);
 
@@ -102,12 +105,15 @@ sub db_start {
 
     my @stack;
     my $i = 0;
+    state $path = quotemeta(abs_path(bz_locations()->{cgi_path}) . '/');
     while (1) {
         my @caller = caller($i);
         last unless @caller;
-        last if substr($caller[1], -5, 5) eq '.tmpl';
-        push @stack, "$caller[1]:$caller[2]"
-            unless substr($caller[1], 0, 16) eq 'Bugzilla/Metrics';
+        my $file = $caller[1];
+        $file =~ s/^$path//o;
+        push @stack, "$file:$caller[2]"
+            unless substr($file, 0, 16) eq 'Bugzilla/Metrics';
+        last if $file =~ /\.(?:tmpl|cgi)$/;
         $i++;
     }
     $timer->{stack} = \@stack;

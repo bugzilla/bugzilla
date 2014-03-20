@@ -665,6 +665,7 @@ sub create {
     my $blocked          = delete $params->{blocked};
     my $keywords         = delete $params->{keywords};
     my $creation_comment = delete $params->{comment};
+    my $see_also         = delete $params->{see_also};
 
     # We don't want the bug to appear in the system until it's correctly
     # protected by groups.
@@ -725,6 +726,25 @@ sub create {
             $dbh->do("INSERT INTO bug_$field (bug_id, value) VALUES (?,?)",
                     undef, $bug->bug_id, $value);
         }
+    }
+
+    # Insert any see_also values
+    if ($see_also) {
+        my $see_also_array = $see_also;
+        if (!ref $see_also_array) {
+            $see_also = trim($see_also);
+            $see_also_array = [ split(/[\s,]+/, $see_also) ];
+        }
+        foreach my $value (@$see_also_array) {
+            $bug->add_see_also($value);
+        }
+        foreach my $see_also (@{ $bug->see_also }) {
+            $see_also->insert_create_data($see_also);
+        }
+        foreach my $ref_bug (@{ $bug->{_update_ref_bugs} || [] }) {
+            $ref_bug->update();
+        }
+        delete $bug->{_update_ref_bugs};
     }
 
     # Comment #0 handling...

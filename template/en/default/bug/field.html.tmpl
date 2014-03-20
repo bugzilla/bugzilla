@@ -204,32 +204,33 @@
                            true);
        </script>
      [% CASE constants.FIELD_TYPE_BUG_URLS %]
-       [% '<ul class="bug_urls">' IF value.size %]
-       [% FOREACH bug_url = value %]
-         <li>
-           [% PROCESS bug_url_link bug_url = bug_url %]
-           <label><input type="checkbox" value="[% bug_url.name FILTER html %]"
-                         name="remove_[% field.name FILTER html %]">
-             Remove</label>
-         </li>
+       [% IF bug.id && value.size %]
+         <ul class="bug_urls">
+         [% FOREACH bug_url = value %]
+           <li>
+             [% PROCESS bug_url_link bug_url = bug_url %]
+             <label><input type="checkbox" value="[% bug_url.name FILTER html %]"
+                           name="remove_[% field.name FILTER html %]">
+               Remove</label>
+           </li>
+         [% END %]
+         </ul>
        [% END %]
-       [% '</ul>' IF value.size %]
-
        [% IF Param('use_see_also') %]
          <span id="container_showhide_[% field.name FILTER html %]"
                class="bz_default_hidden">
            (<a href="#" id="showhide_[% field.name FILTER html %]">add</a>)
          </span>
          <div id="container_[% field.name FILTER html %]">
-           <label for="[% field.name FILTER html %]">
-             Add [% terms.Bug %] URLs:
-           </label><br>
            <input type="text" id="[% field.name FILTER html %]" size="40"
-                  class="text_input" name="[% field.name FILTER html %]">
+                  class="text_input" name="[% field.name FILTER html %]"
+                  [% IF !bug.id %]value="[% value FILTER html %]"[% END %]>
          </div>
-         <script type="text/javascript">
+         [% IF bug.id %]
+           <script type="text/javascript">
              setupEditLink('[% field.name FILTER js %]');
-         </script>
+           </script>
+         [% END %]
        [% END %]
      [% CASE constants.FIELD_TYPE_KEYWORDS %]
        <div id="keyword_container">

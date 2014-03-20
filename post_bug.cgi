@@ -43,6 +43,8 @@ use Bugzilla::Keyword;
 use Bugzilla::Token;
 use Bugzilla::Flag;
 
+use List::MoreUtils qw(uniq);
+
 my $user = Bugzilla->login(LOGIN_REQUIRED);
 
 my $cgi = Bugzilla->cgi;
@@ -128,7 +130,7 @@ push(@bug_fields, qw(
     version
     target_milestone
     status_whiteboard
-
+    see_also
     estimated_time
     deadline
 ));
@@ -239,12 +241,21 @@ my $bug_sent = Bugzilla::BugMail::Send($id, $recipients);
 $bug_sent->{type} = 'created';
 $bug_sent->{id}   = $id;
 my @all_mail_results = ($bug_sent);
+
 foreach my $dep (@{$bug->dependson || []}, @{$bug->blocked || []}) {
     my $dep_sent = Bugzilla::BugMail::Send($dep, $recipients);
     $dep_sent->{type} = 'dep';
     $dep_sent->{id}   = $dep;
     push(@all_mail_results, $dep_sent);
 }
+
+# Sending emails for any referenced bugs.
+foreach my $ref_bug_id (uniq @{ $bug->{see_also_changes} || [] }) {
+    my $ref_sent = Bugzilla::BugMail::Send($ref_bug_id, $recipients);
+    $ref_sent->{id} = $ref_bug_id;
+    push(@all_mail_results, $ref_sent);
+}
+
 $vars->{sentmail} = \@all_mail_results;
 
 $format = $template->get_format("bug/create/created",

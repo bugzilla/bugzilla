@@ -314,6 +314,7 @@ else {
     $vars->{'deadline'}       = formvalue('deadline');
     $vars->{'estimated_time'} = formvalue('estimated_time');
     $vars->{'bug_ignored'}    = formvalue('bug_ignored');
+    $vars->{'see_also'}       = formvalue('see_also');
 
     $vars->{'cc'}             = join(', ', $cgi->param('cc'));
 

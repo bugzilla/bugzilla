@@ -72,15 +72,47 @@ sub suggestions {
 }
 
 sub flag_activity {
-    my ( $self, $params ) = @_;
+    my ($self, $params) = @_;
     my $dbh = Bugzilla->switch_to_shadow_db();
+    my %match_criteria;
 
-    my $flag_id = $params->{flag_id};
+    if (my $flag_id = $params->{flag_id}) {
+        detaint_natural($flag_id)
+          or ThrowUserError('invalid_flag_id', { flag_id => $flag_id });
 
-    detaint_natural($flag_id)
-        or ThrowUserError('invalid_flag_id', { flag_id => $flag_id });
+        $match_criteria{flag_id} = $flag_id;
+    }
 
-    my $matches = Bugzilla::Extension::Review::FlagStateActivity->match({flag_id => $flag_id});
+    if (my $type_id = $params->{type_id}) {
+        detaint_natural($type_id)
+          or ThrowUserError('invalid_flag_type_id', { type_id => $type_id });
+
+        $match_criteria{type_id} = $type_id;
+    }
+
+    for my $user_field (qw( requestee setter )) {
+        if (my $user_name = $params->{$user_field}) {
+            my $user = Bugzilla::User->check({ name => $user_name, cache => 1, _error => 'invalid_username' });
+
+            $match_criteria{ $user_field . "_id" } = $user->id;
+        }
+    }
+
+    ThrowCodeError('param_required', { param => 'limit', function => 'Review.flag_activity()' })
+      if defined $params->{offset} && !defined $params->{limit};
+
+    my $limit       = delete $params->{limit};
+    my $offset      = delete $params->{offset};
+    my $max_results = Bugzilla->params->{max_search_results};
+
+    if (!$limit || $limit > $max_results) {
+        $limit = $max_results;
+    }
+
+    $match_criteria{LIMIT} = $limit;
+    $match_criteria{OFFSET} = $offset if defined $offset;
+
+    my $matches = Bugzilla::Extension::Review::FlagStateActivity->match(\%match_criteria);
     my @results = map { $self->_flag_state_activity_to_hash($_, $params) } @$matches;
     return \@results;
 }
@@ -125,9 +157,22 @@ sub rest_resources {
             GET => {
                 method => 'flag_activity',
                 params => sub {
-                    return {flag_id => $_[0]}
+                    return { flag_id => $_[0] }
                 },
             },
+        },
+        # flag activity by user
+        qr{^/review/flag_activity/(requestee|setter|type_id)/(.*)$}, {
+            GET => {
+                method => 'flag_activity',
+                params => sub {
+                    return { $_[0] => $_[1] };
+                },
+            },
+        },
+        # flag activity with only query strings
+        qr{^/review/flag_activity$}, {
+            GET => { method => 'flag_activity' },
         },
     ];
 }
@@ -145,6 +190,7 @@ sub _flag_state_activity_to_hash {
     );
 
     $flag{requestee} = $self->_user_to_hash($fsa->requestee) if $fsa->requestee;
+    $flag{flag_id}   = $self->type('int', $fsa->flag_id) unless $params->{flag_id};
 
     return filter($params, \%flag);
 }
@@ -255,6 +301,140 @@ An array of hashes with the following keys/values:
 =item C<name> (string) - The user's display name (may not match the Bugzilla "real name").
 
 =item C<review_count> (string) - The number of "review" and "feedback" requests in the user's queue.
+
+=back
+
+=back
+
+=head2 flag_activity
+
+B<EXPERIMENTAL>
+
+=over
+
+=item B<Description>
+
+Returns the history of flag status changes based on requestee, setter, flag_id, type_id, or all.
+
+=item B<REST>
+
+GET /rest/review/flag_activity/C<flag-id>
+
+GET /rest/review/flag_activity/requestee/C<requestee>
+
+GET /rest/review/flag_activity/setter/C<setter>
+
+GET /rest/review/flag_activity/type_id/C<type-id>
+
+GET /rest/review/flag_activity
+
+The returned data format is the same as below.
+
+=item B<Params>
+
+Use one or more of the following parameters to find specific flag status changes.
+
+=over
+
+=item C<flag_id> (integer) - The flag ID.
+
+Note that searching by C<flag_id> is not reliable because when flags are removed, flag_ids cease to exist.
+
+=item C<requestee> (string) - The bugzilla login of the flag's requestee
+
+=item C<setter> (string) - The bugzilla login of the flag's setter
+
+=item C<type_id> (int) - The flag type id of a change
+
+=back
+
+=item B<Returns>
+
+An array of hashes with the following keys/values:
+
+=over
+
+=item C<flag_id> (integer)
+
+The id of the flag that changed. This field may be absent after a flag is deleted.
+
+=item C<creation_time> (dateTime)
+
+Timestamp of when the flag status changed.
+
+=item C<type> (object)
+
+An object with the following fields:
+
+=over
+
+=item C<id> (integer)
+
+The flag type id of the flag that changed
+
+=item C<name> (string)
+
+The name of the flag type (review, feedback, etc)
+
+=item C<description> (string)
+
+A plain english description of the flag type.
+
+=item C<type> (string)
+
+The content of the target_type field of the flagtypes table.
+
+=item C<is_active> (boolean)
+
+Boolean flag indicating if the flag type is available for use.
+
+=item C<is_requesteeble> (boolean)
+
+Boolean flag indicating if the flag type is requesteeable.
+
+=item C<is_multiplicable> (boolean)
+
+Boolean flag indicating if the flag type is multiplicable.
+
+=back
+
+=item C<setter> (object)
+
+The setter is the bugzilla user that set the flag. It is represented by an object with the following fields.
+
+=over
+
+=item C<id> (integer)
+
+The id of the bugzilla user. A unique integer value.
+
+=item C<real_name> (string)
+
+The real name of the bugzilla user. 
+
+=item C<name> (string)
+
+The bugzilla login of the bugzilla user (typically an email address).
+
+=back
+
+=item C<requestee> (object)
+
+The requestee is the bugzilla user that is specified by the flag. Optional - absent if there is no requestee.
+
+Requestee has the same keys/values as the setter object.
+
+=item C<bug_id> (integer)
+
+The id of the bugzilla bug that the changed flag belongs to.
+
+=item C<attachment_id> (integer)
+
+The id of the bugzilla attachment that the changed flag belongs to.
+
+=item C<status> (string)
+
+The status of the bugzilla flag that changed. One of C<+ - ? X>.
 
 =back
 

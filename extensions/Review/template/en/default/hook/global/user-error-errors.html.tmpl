@@ -15,4 +15,8 @@
   You must provide either a bug_id, or a product (and optionally a
   component).
 
+[% ELSIF error == "invalid_flag_type_id" %]
+  [% title = "Invalid Flag Type ID" %]
+  The flag type id [% type_id FILTER html %] is invalid.
+
 [% END %]

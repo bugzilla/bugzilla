@@ -625,6 +625,15 @@ TUI_hide_default('attachment_text_field');
       </td>
     </tr>
   [% END %]
+
+  <tr>
+    [% INCLUDE bug/field.html.tmpl
+       bug            = default
+       field          = bug_fields.see_also
+       editable       = 1
+       value          = see_also
+    %]
+  </tr>
 </tbody>
 
 <tbody class="expert_fields">

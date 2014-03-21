@@ -262,6 +262,7 @@ else {
     $vars->{'blocked'}        = formvalue('blocked');
     $vars->{'deadline'}       = formvalue('deadline');
     $vars->{'estimated_time'} = formvalue('estimated_time');
+    $vars->{'see_also'}       = formvalue('see_also');
 
     $vars->{'cc'}             = join(', ', $cgi->param('cc'));
 

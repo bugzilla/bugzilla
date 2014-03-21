@@ -172,10 +172,9 @@ my %since_dups = @{$dbh->selectcol_arrayref(
     $reso_field_id, $changedsince)};
 add_indirect_dups(\%since_dups, \%dupe_relation);
 
-# Enforce the mostfreqthreshold parameter and the "bug_id" cgi param.
-my $mostfreq = Bugzilla->params->{'mostfreqthreshold'};
+# Enforce the MOST_FREQUENT_THRESHOLD constant and the "bug_id" cgi param.
 foreach my $id (keys %total_dups) {
-    if ($total_dups{$id} < $mostfreq) {
+    if ($total_dups{$id} < MOST_FREQUENT_THRESHOLD) {
         delete $total_dups{$id};
         next;
     }

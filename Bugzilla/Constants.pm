@@ -187,6 +187,8 @@ use Memoize;
 
     AUDIT_CREATE
     AUDIT_REMOVE
+
+    MOST_FREQUENT_THRESHOLD
 );
 
 @Bugzilla::Constants::EXPORT_OK = qw(contenttypes);
@@ -615,6 +617,10 @@ use constant PRIVILEGES_REQUIRED_EMPOWERED => 3;
 # "we just created this object" or "we just deleted this object".
 use constant AUDIT_CREATE => '__create__';
 use constant AUDIT_REMOVE => '__remove__';
+
+# The minimum number of duplicates a bug needs to show up
+# on the "Most frequently reported bugs" page.
+use constant MOST_FREQUENT_THRESHOLD => 2;
 
 sub bz_locations {
     # Force memoize() to re-compute data per project, to avoid

@@ -26,13 +26,6 @@ sub get_param_list {
   },
 
   {
-   name => 'mostfreqthreshold',
-   type => 't',
-   default => '2',
-   checker => \&check_numeric
-  },
-
-  {
    name => 'mybugstemplate',
    type => 't',
    default => 'buglist.cgi?resolution=---&amp;emailassigned_to1=1&amp;emailreporter1=1&amp;emailtype1=exact&amp;email1=%userid%'

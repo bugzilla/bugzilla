@@ -626,7 +626,7 @@ sub update {
     my $attachment = validateID();
     my $bug = $attachment->bug;
     $attachment->_check_bug;
-    my $can_edit = $attachment->validate_can_edit($bug->product_id);
+    my $can_edit = $attachment->validate_can_edit;
 
     if ($can_edit) {
         $attachment->set_description(scalar $cgi->param('description'));
@@ -680,10 +680,32 @@ sub update {
 
     $bug->add_cc($user) if $cgi->param('addselfcc');
 
+    my ($flags, $new_flags) =
+      Bugzilla::Flag->extract_flags_from_cgi($bug, $attachment, $vars);
+
     if ($can_edit) {
-        my ($flags, $new_flags) =
-          Bugzilla::Flag->extract_flags_from_cgi($bug, $attachment, $vars);
         $attachment->set_flags($flags, $new_flags);
+    }
+    # Requestees can set flags targetted to them, even if they cannot
+    # edit the attachment. Flag setters can edit their own flags too.
+    elsif (scalar @$flags) {
+        my %flag_list = map { $_->{id} => $_ } @$flags;
+        my $flag_objs = Bugzilla::Flag->new_from_list([keys %flag_list]);
+
+        my @editable_flags;
+        foreach my $flag_obj (@$flag_objs) {
+            if ($flag_obj->setter_id == $user->id
+                || ($flag_obj->requestee_id && $flag_obj->requestee_id == $user->id))
+            {
+                push(@editable_flags, $flag_list{$flag_obj->id});
+            }
+        }
+
+        if (scalar @editable_flags) {
+            $attachment->set_flags(\@editable_flags, []);
+            # Flag changes must be committed.
+            $can_edit = 1;
+        }
     }
 
     # Figure out when the changes were made.

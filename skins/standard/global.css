@@ -262,7 +262,7 @@ div#docslinks {
 }
 
 .rss {
-    background: transparent url(../../images/rss.png) no-repeat;
+    background: transparent url(../../images/rss_small.png) no-repeat;
     padding-left: 16px;
     line-height: 1.5em;
 }

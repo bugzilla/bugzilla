@@ -195,14 +195,6 @@
           <input type="hidden" name="format" value="multiple">
           <input type="submit" id="long_format" value="Long Format">
         </form>
-        <form method="post" action="show_bug.cgi">
-            <input type="hidden" name="ctype" value="xml">
-          [% FOREACH id = buglist %]
-            <input type="hidden" name="id" value="[% id FILTER html %]">
-          [% END %]
-            <input type="hidden" name="excludefield" value="attachmentdata">
-            <input type="submit" value="XML" id="xml">
-        </form>
 
         [% IF user.is_timetracker %]
           <form method="post" action="summarize_time.cgi">
@@ -220,46 +212,55 @@
             </span>
           [% END %]
         [% END %]
-      </div>
 
+        <form method="post" action="show_bug.cgi">
+          <input type="hidden" name="ctype" value="xml">
+          [% FOREACH id = buglist %]
+            <input type="hidden" name="id" value="[% id FILTER html %]">
+          [% END %]
+          <input type="hidden" name="excludefield" value="attachmentdata">
+          <button type="submit" id="xml">
+            <img src="images/xml.png" width="24" height="24" alt="XML" title="XML Format">
+          </button>
+        </form>
+      </div>
       <div class="bz_query_links">
-        <a href="buglist.cgi?
-        [% urlquerypart FILTER html %]&amp;ctype=csv&amp;human=1">CSV</a> |
-        <a href="buglist.cgi?
-        [% urlquerypart FILTER html %]&amp;title=
-        [%- title FILTER html %]&amp;ctype=atom">Feed</a> |
-        <a href="buglist.cgi?
-        [% urlquerypart FILTER html %]&amp;ctype=ics">iCalendar</a> |
-        <a href="colchange.cgi?
-        [% urlquerypart FILTER html %]&amp;query_based_on=
-          [% defaultsavename OR searchname FILTER uri %]">Change&nbsp;Columns</a> |
+        <a href="buglist.cgi?[% urlquerypart FILTER html %]&amp;ctype=csv&amp;human=1"
+        ><img title="CSV Format" alt="CSV" src="images/csv.png" height="24" width="24"></a>
+        <a href="buglist.cgi?[% urlquerypart FILTER html %]&amp;title=
+           [%- title FILTER uri %]&amp;ctype=atom"
+        ><img title="Feed Format" alt="Feed" src="images/rss.png" height="24" width="24"></a>
+        <a href="buglist.cgi?[% urlquerypart FILTER html %]&amp;ctype=ics"
+        ><img title="iCal Format" alt="iCal" src="images/ical.png" height="24" width="24"></a>
+        <a href="colchange.cgi?[% urlquerypart FILTER html %]&amp;query_based_on=
+           [% defaultsavename OR searchname FILTER uri %]"
+        ><button>Change Columns</button></a>
 
         [% IF bugs.size > 1 && caneditbugs && !dotweak %]
           <a href="buglist.cgi?[% urlquerypart FILTER html %]
             [%- "&order=$qorder" FILTER html IF order %]&amp;tweak=1"
-            >Change&nbsp;Several&nbsp;[% terms.Bugs %]&nbsp;at&nbsp;Once</a>
-          |
+          ><button>Change Several [% terms.Bugs %] at Once</button></a>
         [% END %]
 
         [% IF bugowners && user.id %]
-          <a href="mailto:
-            [% bugowners FILTER html %]">Send&nbsp;Mail&nbsp;to&nbsp;[% terms.Bug %]&nbsp;Assignees</a> |
+          <a href="mailto:[% bugowners FILTER html %]"
+          ><button>Send Mail to [% terms.Bug %] Assignees</button></a>
         [% END %]
 
         [%# Links to more things users can do with this bug list. %]
         [% Hook.process("links") %]
       </div>
-
+      <br>
       <div class="bz_query_edit">
-        <a href="[% PROCESS edit_search_url %]">Edit&nbsp;Search</a>
+        <a href="[% PROCESS edit_search_url %]"><button>Edit Search</button></a>
       </div>
 
       [% IF searchtype == "saved" %]
         <div class="bz_query_forget">
-          | <a href="buglist.cgi?cmdtype=dorem&amp;remaction=forget&amp;namedcmd=
+           <a href="buglist.cgi?cmdtype=dorem&amp;remaction=forget&amp;namedcmd=
                 [% searchname FILTER uri %]&amp;token=
-                [% issue_hash_token([search_id, searchname]) FILTER uri %]">
-              Forget&nbsp;Search&nbsp;'[% searchname FILTER html %]'</a>
+                [% issue_hash_token([search_id, searchname]) FILTER uri %]"
+           ><button>Forget Search '[% searchname FILTER html %]'</button></a>
         </div>
       [% ELSE %]
         <div class="bz_query_remember">

@@ -42,6 +42,31 @@
 .bz_sort_order_primary   { color: black; }
 .bz_sort_order_secondary { color: #777;  }
 
+.bz_query_buttons #xml {
+    vertical-align: middle;
+    padding: 0;
+}
+
+.bz_query_buttons button {
+    border: 0px;
+    background: transparent;
+}
+
+.bz_query_buttons form {
+    display: inline;
+}
+
+.bz_query_links a img {
+    vertical-align: bottom;
+}
+
+.bz_query_links a {
+    text-decoration: none;
+}
+
+.bz_query_links button, .bz_query_edit button {
+    font-size: small;
+}
 
 .bz_id_column {
 }
@@ -129,6 +154,10 @@ td.bz_total {
 .buglist_menu div {
     display: inline-block;
     vertical-align: middle;
+}
+
+.buglist_menu .bz_query_buttons {
+    display: inline;
 }
 
 div.bz_query_buttons {

@@ -19,7 +19,7 @@
       [% IF field %]
         [% field.name FILTER html %]
       [% ELSE %]
-        <input type="text" id="name" name="name" value="cf_" size="40" maxlength="64">
+        <input type="text" id="name" name="name" value="cf_" size="40" maxlength="64" required>
       [% END %]
     </td>
 
@@ -37,7 +37,7 @@
     <th><label for="desc">Description:</label></th>
     <td>
       <input type="text" id="desc" name="desc" size="40"
-             value="[% field.description FILTER html %]">
+             value="[% field.description FILTER html %]" required>
     </td>
 
     <th>

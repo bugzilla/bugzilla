@@ -32,7 +32,7 @@
       <td>
         [% IF group.is_bug_group %]
           <input type="text" name="name" size="60" maxlength="255"
-                 value="[% group.name FILTER html %]">
+                 value="[% group.name FILTER html %]" required>
         [% ELSE %]
           [% group.name FILTER html %]
         [% END %]
@@ -44,7 +44,7 @@
       <td>
         [% IF group.is_bug_group %]
           <input type="text" name="desc" size="60"
-                 value="[% group.description FILTER html %]">
+                 value="[% group.description FILTER html %]" required>
         [% ELSE %]
           [% group.description FILTER html %]
         [% END %]

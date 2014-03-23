@@ -39,14 +39,14 @@
       </th>
       <td>
         <input size="35" id="Bugzilla_login" name="Bugzilla_login"
-               [%- ' type="email"' UNLESS Param('emailsuffix') %] autofocus>
+               [%- ' type="email"' UNLESS Param('emailsuffix') %] autofocus required>
         [% Param('emailsuffix') FILTER html %]
       </td>
     </tr>
     <tr>
       <th><label for="Bugzilla_password">Password:</label></th>
       <td>
-        <input type="password" size="35" id="Bugzilla_password" name="Bugzilla_password">
+        <input type="password" size="35" id="Bugzilla_password" name="Bugzilla_password" required>
       </td>
     </tr>
 
@@ -115,7 +115,7 @@
       If you have an account, but have forgotten your password,
       enter your login name below and submit a request
       to change your password.<br>
-      <input size="35" name="loginname">
+      <input size="35" name="loginname" required>
       <input type="hidden" id="token" name="token" value="[% issue_hash_token(['reqpw']) FILTER html %]">
       <input type="submit" id="request" value="Reset Password">
     </form>

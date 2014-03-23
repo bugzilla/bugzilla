@@ -23,7 +23,7 @@
     [% IF editusers %]
       <input size="64" maxlength="255" id="login" name="login"
              value="[% otheruser.login FILTER html %]"
-             [%- " autofocus" UNLESS editform %]>
+             [%- " autofocus" UNLESS editform %] required>
       [% IF editform %]
         [% IF !otheruser.in_group('bz_sudo_protect') %]
           <br>
@@ -72,7 +72,7 @@
     <th><label for="password">Password:</label></th>
     <td>
       <input type="password" size="16" name="password" id="password"
-             value="" autocomplete="off">
+             value="" autocomplete="off" [% 'required' IF !editform %]>
       [% IF password_complexity == "mixed_letters" %] 
         (Password must contain at least one UPPER and one lowercase letter.)
       [% ELSIF password_complexity == "letters_numbers" %] 

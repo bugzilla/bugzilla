@@ -20,7 +20,7 @@
   <table id="admin_table_edit">
     <tr>
       <th>Name:</th>
-      <td><input size="64" maxlength="64" name="name" value=""></td>
+      <td><input size="64" maxlength="64" name="name" value="" required></td>
     </tr>
     <tr>
       <th>Description:</th>
@@ -30,6 +30,7 @@
           minrows = 4
           cols    = 64
           wrap    = 'virtual'
+          mandatory = 1
         %]
       </td>
     </tr>

@@ -72,7 +72,7 @@
     [% END %]
   </span>
   <input size="35" id="login" name="login" autofocus
-         [%- ' type="email"' UNLESS Param('emailsuffix') %]>
+         [%- ' type="email"' UNLESS Param('emailsuffix') %] required>
   [% Param('emailsuffix') FILTER html %]
   <input type="hidden" id="token" name="token" value="[% issue_hash_token(['create_account']) FILTER html %]">
   <input type="submit" id="send" value="Send">

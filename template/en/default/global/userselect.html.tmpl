@@ -20,6 +20,7 @@
   # multiple: optional, do multiselect box, value is size (height) of box
   # custom_userlist: optional, specify a limited list of users to use
   # field_title: optional, extra information to display as a tooltip
+  # mandatory: optional; if true, the field cannot be empty.
   #%]
 
 [% IF Param("usemenuforusers") %]
@@ -31,6 +32,7 @@
   [% IF accesskey %] accesskey="[% accesskey FILTER html %]" [% END %]
   [% IF multiple %] multiple="multiple" size="[% multiple FILTER html %]" [% END %]
   [% IF field_title %] title="[% field_title FILTER html %]" [% END %]
+  [% IF mandatory %] required [% END %]
 >
   [% IF emptyok %]
     <option value=""></option>
@@ -83,6 +85,7 @@
     [% IF field_title %] title="[% field_title FILTER html %]" [% END %]
     [% IF size %] size="[% size FILTER html %]" [% END %]
     [% IF id %] id="[% id FILTER html %]" [% END %]
+    [% IF mandatory %] required [% END %]
   >
   [% IF feature_enabled('jsonrpc') && Param('ajax_user_autocompletion') && id %]
     <div id="[% id FILTER html %]_autocomplete_container"></div>

@@ -22,12 +22,12 @@
 <tr>
   <th>Product:</th>
   <td><input size="64" maxlength="64" name="product" 
-             value="[% product.name FILTER html %]">
+             value="[% product.name FILTER html %]" required>
   </td>
 </tr>
 <tr>
   <th>Description:</th>
-  <td><textarea rows="4" cols="64" wrap="virtual" name="description">
+  <td><textarea rows="4" cols="64" wrap="virtual" name="description" required>
         [% product.description FILTER html %]</textarea>
   </td>
 </tr>

@@ -38,7 +38,7 @@
     <input type="hidden" name="action" value="add">
     <input type="hidden" name="token"
            value="[% issue_hash_token(['create-quips']) FILTER html %]">
-    <input size="80" name="quip" maxlength="512">
+    <input size="80" name="quip" maxlength="512" required>
     <p>
       <input type="submit" id="add" value="Add This Quip">
     </p>

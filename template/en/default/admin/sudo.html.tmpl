@@ -41,6 +41,7 @@
        value => target_login_default
        accesskey => "u"
        size => 30
+       mandatory => 1
     %]
   </p>
   
@@ -69,7 +70,7 @@
       password</label>:
       <input type="hidden" name="Bugzilla_login" value="
       [%- user.login FILTER html %]">
-      <input type="password" id="Bugzilla_password" name="Bugzilla_password" size="20">
+      <input type="password" id="Bugzilla_password" name="Bugzilla_password" size="20" required>
       <br>
       This is done for two reasons.  First of all, it is done to reduce 
       the chances of someone doing large amounts of damage using your 

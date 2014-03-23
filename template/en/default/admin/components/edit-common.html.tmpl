@@ -17,7 +17,7 @@
 <tr>
   <th><label for="component">Component:</label></th>
   <td><input size="64" maxlength="64" name="component" id="component"
-             value="[%- comp.name FILTER html %]"></td>
+             value="[%- comp.name FILTER html %]" required></td>
 </tr>
 <tr>
   <th><label for="[% desc_name FILTER html %]">Component Description:</label></th>
@@ -29,6 +29,7 @@
       cols           = 64
       wrap           = 'virtual'
       defaultcontent = comp.description
+      mandatory      = 1
     %]
   </td>
 </tr>
@@ -40,6 +41,7 @@
        id => "initialowner"
        value => comp.default_assignee.login
        size => 64
+       mandatory => 1
      %]
   </td>
 </tr>

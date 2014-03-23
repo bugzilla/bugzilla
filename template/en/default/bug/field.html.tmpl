@@ -42,13 +42,13 @@
                value="[% value FILTER html %]" size="40"
                maxlength="[% constants.MAX_FREETEXT_LENGTH FILTER none %]"
                [% ' pattern="\d+"' IF field.type == constants.FIELD_TYPE_INTEGER %]
-               [% ' aria-required="true"' IF field.is_mandatory %]>
+               [% ' aria-required="true" required' IF field.is_mandatory %]>
     [% CASE [constants.FIELD_TYPE_DATETIME, constants.FIELD_TYPE_DATE] %]
       [% size = (field.type == constants.FIELD_TYPE_DATE) ? 10 : 20 %]
       <input name="[% field.name FILTER html %]" size="[% size FILTER none %]"
              id="[% field.name FILTER html %]"
              value="[% value FILTER html %]"
-             [% ' aria-required="true"' IF field.is_mandatory %]
+             [% ' aria-required="true" required' IF field.is_mandatory %]
              onchange="updateCalendarFromField(this)">
       <button type="button" class="calendar_button"
               id="button_calendar_[% field.name FILTER html %]"
@@ -66,7 +66,7 @@
         <span id="[% field.name FILTER html %]_input_area">
           <input name="[% field.name FILTER html %]" id="[% field.name FILTER html %]"
                  value="[% value FILTER html %]" size="7"
-                 [% ' aria-required="true"' IF field.is_mandatory %]>
+                 [% ' aria-required="true" required' IF field.is_mandatory %]>
 
         </span>
 
@@ -94,7 +94,7 @@
                         [% SET field_size = field.legal_values.size %]
                     [% END %]
                     size="[% field_size FILTER html %]" multiple="multiple"
-                    [% ' aria-required="true"' IF field.is_mandatory %]
+                    [% ' aria-required="true" required' IF field.is_mandatory %]
                 [% END %]
                 >
           [% IF allow_dont_change %]

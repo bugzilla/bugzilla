@@ -118,3 +118,74 @@ YAHOO.bugzilla.dupTable = {
                             [dt, data.product_name]);
     }
 };
+
+function set_assign_to(use_qa_contact) {
+    // Based on the selected component, fill the "Assign To:" field
+    // with the default component owner, and the "QA Contact:" field
+    // with the default QA Contact. It also selectively enables flags.
+    var form = document.Create;
+    var assigned_to = form.assigned_to.value;
+
+    if (use_qa_contact) {
+    	var qa_contact = form.qa_contact.value;
+    }
+
+    var index = -1;
+    if (form.component.type == 'select-one') {
+        index = form.component.selectedIndex;
+    } else if (form.component.type == 'hidden') {
+        // Assume there is only one component in the list
+        index = 0;
+    }
+    if (index != -1) {
+        var owner = initialowners[index];
+        var component = components[index];
+        if (assigned_to == last_initialowner
+            || assigned_to == owner
+            || assigned_to == '') {
+            form.assigned_to.value = owner;
+            last_initialowner = owner;
+        }
+
+        document.getElementById('initial_cc').innerHTML = initialccs[index];
+        document.getElementById('comp_desc').innerHTML = comp_desc[index];
+
+        if (use_qa_contact) {
+            var contact = initialqacontacts[index];
+            if (qa_contact == last_initialqacontact
+                || qa_contact == contact
+                || qa_contact == '') {
+                  form.qa_contact.value = contact;
+                  last_initialqacontact = contact;
+            }
+        }
+
+        // We show or hide the available flags depending on the selected component.
+        var flag_rows = YAHOO.util.Dom.getElementsByClassName('bz_flag_type', 'tbody');
+        for (var i = 0; i < flag_rows.length; i++) {
+            // Each flag table row should have one flag form select element
+            // We get the flag type id from the id attribute of the select.
+            var flag_select = YAHOO.util.Dom.getElementsByClassName('flag_select', 
+                                                                    'select', 
+                                                                    flag_rows[i])[0];
+            var type_id = flag_select.id.split('-')[1];
+            var can_set = flag_select.options.length > 1 ? 1 : 0;
+            var show = 0;
+            // Loop through the allowed flag ids for the selected component
+            // and if we match, then show the row, otherwise hide the row.
+            for (var j = 0; j < flags[index].length; j++) {
+                if (flags[index][j] == type_id) {
+                    show = 1;
+                    break;
+                }
+            }
+            if (show && can_set) {
+                flag_select.disabled = false;
+                YAHOO.util.Dom.removeClass(flag_rows[i], 'bz_default_hidden');
+            } else {
+                flag_select.disabled = true;
+                YAHOO.util.Dom.addClass(flag_rows[i], 'bz_default_hidden');
+            }
+        }
+    }
+}

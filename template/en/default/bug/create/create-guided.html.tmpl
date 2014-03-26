@@ -29,13 +29,12 @@ var descriptions = [
 ];
 
 function PutDescription() {
-    if ((document.getElementById) && (document.body.innerHTML)) {
-        var componentIndex = document.getElementById('component').selectedIndex;
-        if (componentIndex != -1) {
-            var description = document.getElementById('description');
-            description.innerHTML = descriptions[componentIndex];
-        }
-    }
+  var description = document.getElementById('description');
+  var componentIndex = document.getElementById('component').selectedIndex;
+  YAHOO.util.Dom.removeClass("description", "bz_default_hidden");
+  if (componentIndex != -1) {
+    description.innerHTML = descriptions[componentIndex];
+  }
 }
 </script>
 
@@ -130,12 +129,8 @@ function PutDescription() {
         [% END %]
       </select>
 
-      <div id="description" class="comment">
-        <script type="text/javascript">
-          if ((document.getElementById) && (document.body.innerHTML)) {
-            document.write("Select a component to see its description here.");
-          }
-        </script>
+      <div id="description" class="comment bz_default_hidden">
+        Select a component to see its description here.
       </div>
 
       <p>

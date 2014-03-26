@@ -28,7 +28,7 @@
 %]
 
 [%# No need to display the Diff button and iframe if the attachment is not a patch. %]
-[% use_patchviewer = (feature_enabled('patch_viewer') && attachment.ispatch) %]
+[% use_patchviewer = (feature_enabled('patch_viewer') && attachment.ispatch) ? 1 : 0 %]
 [% can_edit = attachment.validate_can_edit %]
 [% editable_or_hide = can_edit ? "" : " bz_hidden_option" %]
 
@@ -202,30 +202,33 @@
                 <a href="attachment.cgi?id=[% attachment.id %]">View the attachment on a separate page</a>.</b>
               </iframe>
             [% END %]
+
+            [% IF use_patchviewer %]
+              <iframe id="viewDiffFrame" class="bz_default_hidden"></iframe>
+            [% END %]
+
+            [% IF user.id %]
+              <button type="button" id="editButton" class="bz_default_hidden"
+                      onclick="editAsComment([% use_patchviewer %]);">Edit Attachment As Comment</button>
+              <button type="button" id="undoEditButton" class="bz_default_hidden"
+                      onclick="undoEditAsComment([% use_patchviewer %]);">Undo Edit As Comment</button>
+              <button type="button" id="redoEditButton" class="bz_default_hidden"
+                      onclick="redoEditAsComment([% use_patchviewer %]);">Redo Edit As Comment</button>
+            [% END %]
+
+            [% IF use_patchviewer %]
+              <button type="button" id="viewDiffButton" class="bz_default_hidden"
+                      onclick="viewDiff([% attachment.id %], [% use_patchviewer %]);">View Attachment As Diff</button>
+            [% END %]
+            <button type="button" id="viewRawButton" class="bz_default_hidden"
+                    onclick="viewRaw([% use_patchviewer %]);">View Attachment As Raw</button>
+
             <script type="text/javascript">
-              <!--
-              var patchviewerinstalled = 0;
-              var attachment_id = [% attachment.id %];
-              if (typeof document.getElementById == "function") {
-                [% IF use_patchviewer %]
-                  var patchviewerinstalled = 1;
-                  document.write('<iframe id="viewDiffFrame" class="bz_default_hidden"><\/iframe>');
-                [% END %]
-                [% IF user.id %]
-                  document.write('<button type="button" id="editButton" onclick="editAsComment(patchviewerinstalled);">Edit Attachment As Comment<\/button>');
-                  document.write('<button type="button" id="undoEditButton" onclick="undoEditAsComment(patchviewerinstalled);" class="bz_default_hidden">Undo Edit As Comment<\/button>');
-                  document.write('<button type="button" id="redoEditButton" onclick="redoEditAsComment(patchviewerinstalled);" class="bz_default_hidden">Redo Edit As Comment<\/button>');
-                  var editFrame = document.getElementById('editFrame');
-                  if (editFrame) {
-                    editFrame.disabled = false;
-                  }
-                [% END %]
-                [% IF use_patchviewer %]
-                  document.write('<button type="button" id="viewDiffButton" onclick="viewDiff(attachment_id, patchviewerinstalled);">View Attachment As Diff<\/button>');
-                [% END %]
-                document.write('<button type="button" id="viewRawButton" onclick="viewRaw(patchviewerinstalled);" class="bz_default_hidden">View Attachment As Raw<\/button>');
-              }
-              //-->
+              [% IF user.id %]
+                document.getElementById('editFrame').disabled = false;
+                YAHOO.util.Dom.removeClass("editButton", "bz_default_hidden");
+              [% END %]
+              YAHOO.util.Dom.removeClass("viewDiffButton", "bz_default_hidden");
             </script>
           </div>
         [% ELSE %]

@@ -430,15 +430,9 @@
   with details of what you were doing at the time this message appeared.
 </p>
 
-<samp>
-  <script type="text/javascript"> <!--
-    document.write("<p>URL: " +
-                    document.location.href.replace(/&/g,"&amp;")
-                                          .replace(/</g,"&lt;")
-                                          .replace(/>/g,"&gt;") + "</p>");
-  // -->
-  </script>
-</samp>
+<p>
+  <samp>URL: [% Bugzilla.cgi.self_url FILTER html %]</samp>
+</p>
 
 <div id="error_msg" class="throw_error">
   [% error_message FILTER none %]

@@ -107,7 +107,15 @@
         [% END %]
         </tbody>
       </table>
-      <script type="text/javascript"><!--
+
+      <input type="button" id="uncheck_all" value="Uncheck All"
+             class="bz_default_hidden" onclick="SetCheckboxes(false);">
+      <input type="button" id="check_all" value="Check All"
+             class="bz_default_hidden" onclick="SetCheckboxes(true);">
+      <input type="submit" id="update" value="Save Changes">
+
+      <script type="text/javascript">
+        <!--
         var numelements = document.forms.editform.elements.length;
         function SetCheckboxes(value) {
           var item;
@@ -116,13 +124,10 @@
             item.checked = value;
           }
         }
-        document.write(' <input type="button" name="uncheck_all" '
-                      +'value="Uncheck All" onclick="SetCheckboxes(false);">');
-        document.write(' <input type="button" name="check_all" '
-                      +'value="Check All" onclick="SetCheckboxes(true);">');
-        //--></script>
-
-      <input type="submit" id="update" value="Save Changes">
+        YAHOO.util.Dom.removeClass("check_all", "bz_default_hidden");
+        YAHOO.util.Dom.removeClass("uncheck_all", "bz_default_hidden");
+        //-->
+      </script>
     </form>
     <br>
   [% END %]

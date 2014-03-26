@@ -294,6 +294,7 @@
   'attachment.id', 
   'attachment.bug_id', 
   'editable_or_hide',
+  'use_patchviewer',
 ],
 
 'attachment/list.html.tmpl' => [

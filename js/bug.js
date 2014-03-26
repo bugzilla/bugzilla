@@ -127,7 +127,7 @@ function set_assign_to(use_qa_contact) {
     var assigned_to = form.assigned_to.value;
 
     if (use_qa_contact) {
-    	var qa_contact = form.qa_contact.value;
+        var qa_contact = form.qa_contact.value;
     }
 
     var index = -1;

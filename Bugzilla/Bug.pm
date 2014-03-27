@@ -3354,11 +3354,8 @@ sub cc_users {
 
 sub component {
     my ($self) = @_;
-    return $self->{component} if exists $self->{component};
     return '' if $self->{error};
-    ($self->{component}) = Bugzilla->dbh->selectrow_array(
-        'SELECT name FROM components WHERE id = ?',
-        undef, $self->{component_id});
+    ($self->{component}) //= $self->component_obj->name;
     return $self->{component};
 }
 
@@ -3529,11 +3526,8 @@ sub percentage_complete {
 
 sub product {
     my ($self) = @_;
-    return $self->{product} if exists $self->{product};
     return '' if $self->{error};
-    ($self->{product}) = Bugzilla->dbh->selectrow_array(
-        'SELECT name FROM products WHERE id = ?',
-        undef, $self->{product_id});
+    ($self->{product}) //= $self->product_obj->name;
     return $self->{product};
 }
 

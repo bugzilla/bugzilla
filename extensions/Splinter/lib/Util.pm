@@ -106,6 +106,9 @@ sub get_review_link {
         return "<a href='" . html_quote(get_review_url($attachment->bug, $attach_id)) . 
                "'>$link_text</a>";
     }
+    else {
+        return $link_text;
+    }
 }
 
 sub munge_create_attachment {

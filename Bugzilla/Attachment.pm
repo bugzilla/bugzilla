@@ -98,7 +98,8 @@ use constant VALIDATORS => {
 };
 
 use constant VALIDATOR_DEPENDENCIES => {
-    mimetype => ['ispatch'],
+    content_type => ['ispatch'],
+    mimetype     => ['ispatch'],
 };
 
 use constant UPDATE_VALIDATORS => {

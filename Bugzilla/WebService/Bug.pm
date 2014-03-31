@@ -917,6 +917,7 @@ sub update_attachment {
     }
 
     my $flags = delete $params->{flags};
+    my $comment = delete $params->{comment};
 
     # Update the values
     foreach my $attachment (@attachments) {
@@ -933,6 +934,13 @@ sub update_attachment {
     my @result;
     foreach my $attachment (@attachments) {
         my $changes = $attachment->update();
+
+        if ($comment = trim($comment)) {
+            $attachment->bug->add_comment($comment,
+                { isprivate  => $attachment->isprivate,
+                  type       => CMT_ATTACHMENT_UPDATED,
+                  extra_data => $attachment->id });
+        }
 
         $changes = translate($changes, ATTACHMENT_MAPPED_RETURNS);
 
@@ -961,7 +969,8 @@ sub update_attachment {
 
     # Email users about the change
     foreach my $bug (values %bugs) {
-        Bugzilla::BugMail::Send($bug->id, { 'changer' => $user });
+        $bug->update();
+        $bug->send_changes();
     }
 
     # Return the information to the user
@@ -3604,6 +3613,10 @@ in the UI for this attachment.
 
 C<string> A short string describing the
 attachment.
+
+=item C<comment>
+
+C<string> An optional comment to add to the attachment's bug.
 
 =item C<content_type>
 

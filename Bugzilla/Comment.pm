@@ -177,6 +177,9 @@ sub preload {
     foreach my $row (@$rows) {
         $comment_map{$row->[0]}->{tags} = [ split(/,/, $row->[1]) ];
     }
+    foreach my $comment (@$comments) {
+        $comment->{tags} //= [];
+    }
 }
 
 ###############################

@@ -849,7 +849,7 @@ sub extract_flags_from_cgi {
     # Extract a list of existing flag IDs.
     my @flag_ids = map(/^flag-(\d+)$/ ? $1 : (), $cgi->param());
 
-    return () if (!scalar(@flagtype_ids) && !scalar(@flag_ids));
+    return ([], []) unless (scalar(@flagtype_ids) || scalar(@flag_ids));
 
     my (@new_flags, @flags);
     foreach my $flag_id (@flag_ids) {

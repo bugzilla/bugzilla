@@ -61,7 +61,7 @@ sub db_schema_abstract_schema {
     $args->{'schema'}->{'autoland_attachments'} = {
         FIELDS => [
             attach_id => {
-                TYPE       => 'INT3',
+                TYPE       => 'INT5',
                 NOTNULL    => 1,
                 PRIMARYKEY => 1, 
                 REFERENCES => {

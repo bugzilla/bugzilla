@@ -261,7 +261,7 @@ sub update_table_definitions {
     $dbh->bz_add_column("bugs", "cclist_accessible",
                         {TYPE => 'BOOLEAN', NOTNULL => 1, DEFAULT => 'TRUE'});
 
-    $dbh->bz_add_column("bugs_activity", "attach_id", {TYPE => 'INT3'});
+    $dbh->bz_add_column("bugs_activity", "attach_id", {TYPE => 'INT5'});
 
     _delete_logincookies_cryptpassword_and_handle_invalid_cookies();
 
@@ -686,8 +686,9 @@ sub update_table_definitions {
                         {TYPE => 'MEDIUMSERIAL', NOTNULL => 1, PRIMARYKEY => 1});
 
     # 2012-07-24 dkl@mozilla.com - Bug 776972
-    $dbh->bz_alter_column('bugs_activity', 'id', 
-                          {TYPE => 'INTSERIAL', NOTNULL => 1, PRIMARYKEY => 1});
+    # BMO - we change this to BIGSERIAL further down
+    #$dbh->bz_alter_column('bugs_activity', 'id',
+    #                      {TYPE => 'INTSERIAL', NOTNULL => 1, PRIMARYKEY => 1});
 
 
     # 2012-07-24 dkl@mozilla.com - Bug 776982
@@ -704,6 +705,14 @@ sub update_table_definitions {
 
     # 2013-08-16 glob@mozilla.com - Bug 905925
     $dbh->bz_add_index('attachments', 'attachments_ispatch_idx', ['ispatch']);
+
+    # 2014-03-11 glob@mozilla.com - Bug 981756 (BMO only)
+    _fix_attachments_primary_key();
+    if ($dbh->bz_column_info('bugs_activity', 'id')->{TYPE} ne 'BIGSERIAL') {
+        $dbh->bz_drop_related_fks('bugs_activity', 'id');
+        $dbh->bz_alter_column('bugs_activity', 'id',
+                              {TYPE => 'BIGSERIAL',  NOTNULL => 1,  PRIMARYKEY => 1});
+    }
 
     ################################################################
     # New --TABLE-- changes should go *** A B O V E *** this point #
@@ -3733,6 +3742,21 @@ sub _fix_longdescs_primary_key {
         $dbh->bz_alter_column('bugs_activity', 'comment_id', {TYPE => 'INT4'});
         $dbh->bz_alter_column('longdescs', 'comment_id',
                               {TYPE => 'INTSERIAL',  NOTNULL => 1,  PRIMARYKEY => 1});
+    }
+}
+
+sub _fix_attachments_primary_key {
+    my $dbh = Bugzilla->dbh;
+    if ($dbh->bz_column_info('attachments', 'attach_id')->{TYPE} ne 'BIGSERIAL') {
+        $dbh->bz_drop_related_fks('attachments', 'attach_id');
+        $dbh->bz_alter_column('attach_data', 'id', {TYPE => 'INT5'});
+        $dbh->bz_alter_column('bugs_activity', 'attach_id', {TYPE => 'INT5'});
+        $dbh->bz_alter_column('flags', 'attach_id', {TYPE => 'INT5'});
+        # the following two are bmo extensions
+        $dbh->bz_alter_column('flag_state_activity', 'attachment_id', {TYPE => 'INT5'});
+        $dbh->bz_alter_column('autoland_attachments', 'attach_id', {TYPE => 'INT5'});
+        $dbh->bz_alter_column('attachments', 'attach_id',
+                              {TYPE => 'BIGSERIAL',  NOTNULL => 1,  PRIMARYKEY => 1});
     }
 }
 

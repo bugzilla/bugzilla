@@ -88,6 +88,7 @@ tie(%$cf_visible_in_products, "Tie::IxHash",
     qw/^cf_due_date$/ => {
         "Data & BI Services Team" => [],
         "Developer Engagement"    => [],
+        "Infrastructure & Operations" => [],
         "Marketing"               => [],
         "mozilla.org"             => ["Security Assurance: Review Request"],
         "Mozilla Reps"            => [],

@@ -3054,6 +3054,14 @@ on spaces. So searching for C<foo bar> will match "This is a foo bar"
 but not "This foo is a bar". C<['foo', 'bar']>, would, however, match
 the second item.
 
+=item C<tag>
+
+C<string> Searches for a bug with the specified tag.  If you specify an
+array, then any bugs that match I<any> of the tags will be returned.
+
+Note that tags are personal and only bugs belonging to the logged in
+user will be returned.
+
 =item C<target_milestone>
 
 C<string> The Target Milestone field of a bug. Note that even if this

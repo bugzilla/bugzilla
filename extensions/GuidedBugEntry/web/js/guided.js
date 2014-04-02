@@ -212,6 +212,8 @@ var product = {
             data = YAHOO.lang.JSON.parse(res.responseText);
             if (data.error)
               throw(data.error.message);
+            if (data.result.products.length == 0)
+              document.location.href = 'enter_bug.cgi?format=guided';
             product.details = data.result.products[0];
             bugForm.onProductUpdated();
           } catch (err) {

@@ -60,7 +60,7 @@
       _gaq.push(["_set", "title", "[%+ bug.id FILTER none %] – (private bug)"]);
     [% END %]
     _gaq.push(['_setAccount', 'UA-36116321-3']);
-    _gaq.push(['_trackPageview']);
+    _gaq.push(['_trackPageview', window.location.pathname]);
     (function() {
       var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
       ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';

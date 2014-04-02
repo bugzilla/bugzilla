@@ -13,11 +13,13 @@ var inline_history = {
   init: function() {
     Dom = YAHOO.util.Dom;
 
-    // remove 'has been marked as a duplicate of this bug' comments
     var reDuplicate = /^\*\*\* \S+ \d+ has been marked as a duplicate of this/;
     var reBugId = /show_bug\.cgi\?id=(\d+)/;
+    var reHours = /Additional hours worked: \d+\.\d+/;
+
     var comments = Dom.getElementsByClassName("bz_comment", 'div', 'comments');
     for (var i = 1, il = comments.length; i < il; i++) {
+      // remove 'has been marked as a duplicate of this bug' comments
       var textDiv = Dom.getElementsByClassName('bz_comment_text', 'pre', comments[i]);
       if (textDiv) {
         var match = reDuplicate.exec(textDiv[0].textContent || textDiv[0].innerText);
@@ -50,12 +52,22 @@ var inline_history = {
           }
         }
       }
+
+      // remove 'Additional hours worked: ' comments
+      var commentNodes = comments[i].childNodes;
+      for (var j = 0, jl = commentNodes.length; j < jl; j++) {
+        if (reHours.exec(commentNodes[j].textContent)) {
+            comments[i].removeChild(commentNodes[j]);
+            // Remove the <br> before it
+            comments[i].removeChild(commentNodes[j-1]);
+            break;
+        }
+      }
     }
 
     // ensure new items are placed immediately after the last comment
-    var commentDivs = Dom.getElementsByClassName('bz_comment', 'div', 'comments');
-    if (!commentDivs.length) return;
-    var lastCommentDiv = commentDivs[commentDivs.length - 1];
+    if (!comments.length) return;
+    var lastCommentDiv = comments[comments.length - 1];
 
     // insert activity into the correct location
     var commentTimes = Dom.getElementsByClassName('bz_comment_time', 'span', 'comments');

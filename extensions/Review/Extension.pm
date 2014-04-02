@@ -365,6 +365,16 @@ sub _update_reviewers {
 # reviewer requirements.  instead we just throw an error.
 sub post_bug_attachment_flags {
     my ($self, $args) = @_;
+    $self->_check_review_flag($args);
+}
+
+sub create_attachment_flags {
+    my ($self, $args) = @_;
+    $self->_check_review_flag($args);
+}
+
+sub _check_review_flag {
+    my ($self, $args) = @_;
     my $bug = $args->{bug};
     my $cgi = Bugzilla->cgi;
 

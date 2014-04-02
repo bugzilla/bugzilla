@@ -107,6 +107,10 @@ sub bug_start_of_update {
             elsif ($needinfo_role eq 'qa_contact') {
                 $requestees{$bug->qa_contact->login} = 1;
             }
+            # Use current user as requestee
+            elsif ($needinfo_role eq 'user') {
+                $requestees{$user->login} = 1;
+            }
             # Use user specified requestee
             elsif ($needinfo_role eq 'other' && $needinfo_from) {
                 my @needinfo_from_list = ref $needinfo_from

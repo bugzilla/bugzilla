@@ -59,13 +59,7 @@ if (! defined($product_id)) {
         push(@datasets, $datasets);
     }
 
-    # Start our product list with an entry for all products, then add those
-    # products that the user has permissions for.
-    my @myproducts = ($product_all);
-    push( @myproducts, @{$user->get_selectable_products} );
-
     $vars->{'datasets'} = \@datasets;
-    $vars->{'products'} = \@myproducts;
 
     print $cgi->header();
 }

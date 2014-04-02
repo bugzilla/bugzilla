@@ -171,8 +171,9 @@ sub _delete_bad_keys {
             # Making something a hash key always untaints it, in Perl.
             # However, we need to validate our argument names in some way.
             # We know that all hash keys passed in to the WebService will 
-            # match \w+, so we delete any key that doesn't match that.
-            if ($key !~ /^\w+$/) {
+            # match \w+, contain '.' or '-', so we delete any key that
+            # doesn't match that.
+            if ($key !~ /^[\w\.\-]+$/) {
                 delete $item->{$key};
             }
         }

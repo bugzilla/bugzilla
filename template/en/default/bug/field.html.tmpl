@@ -278,6 +278,12 @@
       [% value.join(', ') FILTER html %]
   [% END %]
 [% END %]
+
+[% IF bug && field.name == 'component' %]
+  (<a href="buglist.cgi?component=[% bug.component FILTER uri %]&amp;product=[% bug.product FILTER uri %]&amp;bug_status=__open__"
+      target="_blank">show other [% terms.bugs %]</a>)
+[% END %]
+
 [% Hook.process('end_field_column') %]
 [% '</td>' IF NOT no_tds %]
 

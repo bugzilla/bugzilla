@@ -19,4 +19,8 @@
   [% title = "Invalid Flag Type ID" %]
   The flag type id [% type_id FILTER html %] is invalid.
 
+[% ELSIF error == "flag_activity_parameters_required" %]
+  [% title = "Parameters Required" %]
+  You may not search flag state activity without any search terms.
+
 [% END %]

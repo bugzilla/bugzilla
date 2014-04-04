@@ -112,6 +112,11 @@ sub flag_activity {
     $match_criteria{LIMIT} = $limit;
     $match_criteria{OFFSET} = $offset if defined $offset;
 
+    # Throw error if no other parameters have been passed other than limit and offset
+    if (!grep(!/^(LIMIT|OFFSET)$/, keys %match_criteria)) {
+        ThrowUserError('flag_activity_parameters_required');
+    }
+
     my $matches = Bugzilla::Extension::Review::FlagStateActivity->match(\%match_criteria);
     my @results = map { $self->_flag_state_activity_to_hash($_, $params) } @$matches;
     return \@results;

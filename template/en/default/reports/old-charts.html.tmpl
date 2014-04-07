@@ -14,7 +14,6 @@
   #%]
 
 [%# INTERFACE:
-  # products: an array of product names the user is allowed to view.
   # datasets: an array of hashes with available statuses and resolutions.
   # url_image: URL of the generated graph.
   #%]
@@ -37,11 +36,11 @@
         <tr>
           <th>Product:</th>
           <td align="center">
-            <select id="product" name="product">
-              [% FOREACH product = products %]
-                <option value="[% product FILTER html %]">[% product FILTER html %]</option>
-              [% END %]
-            </select>
+            [% INCLUDE "global/product-select.html.tmpl"
+              id   => "product"
+              name => "product"
+              add  => "-All-"
+            %]
           </td>
         </tr>
         <tr>

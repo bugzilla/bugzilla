@@ -34,6 +34,8 @@ use constant DEFAULT_CLASSIFICATION_ID => 1;
 ####    Initialization     ####
 ###############################
 
+use constant IS_CONFIG => 1;
+
 use constant DB_TABLE => 'products';
 
 use constant DB_COLUMNS => qw(

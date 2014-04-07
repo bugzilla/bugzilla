@@ -74,6 +74,8 @@ use Scalar::Util qw(blessed);
 ####    Initialization     ####
 ###############################
 
+use constant IS_CONFIG => 1;
+
 use constant DB_TABLE   => 'fielddefs';
 use constant LIST_ORDER => 'sortkey, name';
 
@@ -1078,6 +1080,7 @@ sub create {
           unless $is_obsolete;
 
         Bugzilla->memcached->clear({ table => 'fielddefs', id => $field->id });
+        Bugzilla->memcached->clear_config();
     }
 
     return $field;

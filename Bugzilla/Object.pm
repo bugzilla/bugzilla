@@ -38,6 +38,11 @@ use constant AUDIT_REMOVES => 1;
 # Memcached.  See documentation in Bugzilla::Memcached for more information.
 use constant USE_MEMCACHED => 1;
 
+# When IS_CONFIG is true, the class is used to track seldom changed
+# configuration objects.  This includes, but is not limited to, fields, field
+# values, keywords, products, classifications, priorities, severities, etc.
+use constant IS_CONFIG => 0;
+
 # This allows the JSON-RPC interface to return Bugzilla::Object instances
 # as though they were hashes. In the future, this may be modified to return
 # less information.
@@ -56,7 +61,7 @@ sub new {
     return $object if $object;
 
     my ($data, $set_memcached);
-    if (Bugzilla->feature('memcached')
+    if (Bugzilla->memcached->enabled
         && $class->USE_MEMCACHED
         && ref($param) eq 'HASH' && $param->{cache})
     {
@@ -352,22 +357,42 @@ sub _do_list_select {
     my $cols  = join(',', $class->_get_db_columns);
     my $order = $class->LIST_ORDER;
 
-    my $sql = "SELECT $cols FROM $table";
-    if (defined $where) {
-        $sql .= " WHERE $where ";
+    # Unconditional requests for configuration data are cacheable.
+    my ($objects, $set_memcached, $memcached_key);
+    if (!defined $where
+        && Bugzilla->memcached->enabled
+        && $class->IS_CONFIG)
+    {
+        $memcached_key = "$class:get_all";
+        $objects = Bugzilla->memcached->get_config({ key => $memcached_key });
+        $set_memcached = $objects ? 0 : 1;
     }
-    $sql .= " ORDER BY $order";
-    
-    $sql .= " $postamble" if $postamble;
-        
-    my $dbh = Bugzilla->dbh;
-    # Sometimes the values are tainted, but we don't want to untaint them
-    # for the caller. So we copy the array. It's safe to untaint because
-    # they're only used in placeholders here.
-    my @untainted = @{ $values || [] };
-    trick_taint($_) foreach @untainted;
-    my $objects = $dbh->selectall_arrayref($sql, {Slice=>{}}, @untainted);
-    $class->_serialisation_keys($objects->[0]) if @$objects;
+
+    if (!$objects) {
+        my $sql = "SELECT $cols FROM $table";
+        if (defined $where) {
+            $sql .= " WHERE $where ";
+        }
+        $sql .= " ORDER BY $order";
+        $sql .= " $postamble" if $postamble;
+
+        my $dbh = Bugzilla->dbh;
+        # Sometimes the values are tainted, but we don't want to untaint them
+        # for the caller. So we copy the array. It's safe to untaint because
+        # they're only used in placeholders here.
+        my @untainted = @{ $values || [] };
+        trick_taint($_) foreach @untainted;
+        $objects = $dbh->selectall_arrayref($sql, {Slice=>{}}, @untainted);
+        $class->_serialisation_keys($objects->[0]) if @$objects;
+    }
+
+    if ($objects && $set_memcached) {
+        Bugzilla->memcached->set_config({
+            key  => $memcached_key,
+            data => $objects
+        });
+    }
+
     foreach my $object (@$objects) {
         $object = $class->new_from_hash($object);
     }
@@ -495,8 +520,11 @@ sub update {
     $self->audit_log(\%changes) if $self->AUDIT_UPDATES;
 
     $dbh->bz_commit_transaction();
-    Bugzilla->memcached->clear({ table => $table, id => $self->id })
-        if $self->USE_MEMCACHED && @values;
+    if ($self->USE_MEMCACHED && @values) {
+        Bugzilla->memcached->clear({ table => $table, id => $self->id });
+        Bugzilla->memcached->clear_config()
+            if $self->IS_CONFIG;
+    }
     $self->_object_cache_remove({ id => $self->id });
     $self->_object_cache_remove({ name => $self->name }) if $self->name;
 
@@ -517,8 +545,11 @@ sub remove_from_db {
     $self->audit_log(AUDIT_REMOVE) if $self->AUDIT_REMOVES;
     $dbh->do("DELETE FROM $table WHERE $id_field = ?", undef, $self->id);
     $dbh->bz_commit_transaction();
-    Bugzilla->memcached->clear({ table => $table, id => $self->id })
-        if $self->USE_MEMCACHED;
+    if ($self->USE_MEMCACHED) {
+        Bugzilla->memcached->clear({ table => $table, id => $self->id });
+        Bugzilla->memcached->clear_config()
+            if $self->IS_CONFIG;
+    }
     $self->_object_cache_remove({ id => $self->id });
     $self->_object_cache_remove({ name => $self->name }) if $self->name;
     undef $self;
@@ -584,6 +615,13 @@ sub create {
     my $field_values = $class->run_create_validators($params);
     my $object = $class->insert_create_data($field_values);
     $dbh->bz_commit_transaction();
+
+    if (Bugzilla->memcached->enabled
+        && $class->USE_MEMCACHED
+        && $class->IS_CONFIG)
+    {
+        Bugzilla->memcached->clear_config();
+    }
 
     return $object;
 }
@@ -680,7 +718,7 @@ sub insert_create_data {
 
 sub get_all {
     my $class = shift;
-    return @{$class->_do_list_select()};
+    return @{ $class->_do_list_select() };
 }
 
 ###############################

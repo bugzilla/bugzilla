@@ -24,6 +24,8 @@ use Scalar::Util qw(blessed);
 # Initialization #
 ##################
 
+use constant IS_CONFIG => 1;
+
 use constant DB_COLUMNS => qw(
     id
     value

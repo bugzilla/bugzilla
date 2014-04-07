@@ -222,6 +222,7 @@ if ($action eq 'reclassify') {
     foreach my $name (@names) {
         Bugzilla->memcached->clear({ table => 'products', name => $name });
     }
+    Bugzilla->memcached->clear_config();
 
     LoadTemplate($action);
 }

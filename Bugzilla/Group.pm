@@ -21,6 +21,8 @@ use Bugzilla::Config qw(:admin);
 ##### Module Initialization ###
 ###############################
 
+use constant IS_CONFIG => 1;
+
 use constant DB_COLUMNS => qw(
     groups.id
     groups.name

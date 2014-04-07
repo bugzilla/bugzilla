@@ -151,6 +151,7 @@ if ($enable_unconfirmed) {
     $dbh->do('UPDATE products SET allows_unconfirmed = 1');
 }
 $dbh->bz_commit_transaction();
+Bugzilla->memcached->clear_all();
 
 print <<END;
 Done. There are some things you may want to fix, now:

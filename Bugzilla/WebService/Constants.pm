@@ -266,12 +266,13 @@ sub WS_DISPATCH {
     Bugzilla::Hook::process('webservice', { dispatch => \%hook_dispatch });
 
     my $dispatch = {
-        'Bugzilla'       => 'Bugzilla::WebService::Bugzilla',
-        'Bug'            => 'Bugzilla::WebService::Bug',
-        'Classification' => 'Bugzilla::WebService::Classification',
-        'Group'          => 'Bugzilla::WebService::Group',
-        'Product'        => 'Bugzilla::WebService::Product',
-        'User'           => 'Bugzilla::WebService::User',
+        'Bugzilla'         => 'Bugzilla::WebService::Bugzilla',
+        'Bug'              => 'Bugzilla::WebService::Bug',
+        'Classification'   => 'Bugzilla::WebService::Classification',
+        'Group'            => 'Bugzilla::WebService::Group',
+        'Product'          => 'Bugzilla::WebService::Product',
+        'User'             => 'Bugzilla::WebService::User',
+        'BugUserLastVisit' => 'Bugzilla::WebService::BugUserLastVisit',
         %hook_dispatch
     };
     return $dispatch;

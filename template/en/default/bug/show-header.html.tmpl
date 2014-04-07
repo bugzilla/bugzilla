@@ -26,6 +26,7 @@
 [% yui = ['autocomplete', 'calendar'] %]
 [% yui.push('container') IF user.can_tag_comments %]
 [% javascript_urls = [ "js/util.js", "js/field.js" ] %]
+[% javascript_urls.push("js/bug.js") IF user.id  %]
 [% javascript_urls.push('js/comment-tagging.js')
      IF user.id && Param('comment_taggers_group') %]
 [% IF bug.defined %]
@@ -52,6 +53,10 @@
     }
     YAHOO.util.Event.onDOMReady(function() {
       initDirtyFieldTracking();
+
+      [% IF user.id AND user.is_involved_in_bug(bug) %]
+        YAHOO.bugzilla.bugUserLastVisit.update([% bug.bug_id FILTER none %]);
+      [% END %]
     });
     [% javascript FILTER none %]
   [% END %]

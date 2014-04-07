@@ -258,6 +258,8 @@ use constant DEFAULT_FIELDS => (
      type => FIELD_TYPE_BUG_URLS},
     {name => 'tag',                   desc => 'Personal Tags', buglist => 1,
      type => FIELD_TYPE_KEYWORDS},
+    {name => 'last_visit_ts',         desc => 'Last Visit', buglist => 1,
+     type => FIELD_TYPE_DATETIME},
     {name => 'comment_tag',           desc => 'Comment Tag'},
 );
 

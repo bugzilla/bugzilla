@@ -28,6 +28,7 @@ use Bugzilla::Group;
 use Bugzilla::Status;
 use Bugzilla::Comment;
 use Bugzilla::BugUrl;
+use Bugzilla::BugUserLastVisit;
 
 use List::MoreUtils qw(firstidx uniq part);
 use List::Util qw(min max first);
@@ -4081,6 +4082,23 @@ sub LogActivityEntry {
     }
 }
 
+# Update bug_user_last_visit table
+sub update_user_last_visit {
+    my ($self, $user, $last_visit_ts) = @_;
+    my $lv = Bugzilla::BugUserLastVisit->match({ bug_id  => $self->id,
+                                                 user_id => $user->id })->[0];
+
+    if ($lv) {
+        $lv->set(last_visit_ts => $last_visit_ts);
+        $lv->update;
+    }
+    else {
+        Bugzilla::BugUserLastVisit->create({ bug_id        => $self->id,
+                                             user_id       => $user->id,
+                                             last_visit_ts => $last_visit_ts });
+    }
+}
+
 # Convert WebService API and email_in.pl field names to internal DB field
 # names.
 sub map_fields {
@@ -4407,6 +4425,7 @@ sub _multi_select_accessor {
 
 1;
 
+__END__
 =head1 B<Methods>
 
 =over
@@ -4414,6 +4433,11 @@ sub _multi_select_accessor {
 =item C<initialize>
 
 Ensures the accessors for custom fields are always created.
+
+=item C<update_user_last_visit($user, $last_visit)>
+
+Creates or updates a L<Bugzilla::BugUserLastVisit> for this bug and the supplied
+$user, the timestamp given as $last_visit.
 
 =back
 

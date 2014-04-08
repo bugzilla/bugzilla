@@ -122,6 +122,22 @@ sub preload_all_the_things {
     }
 }
 
+##############################
+####    Class Methods     ####
+##############################
+
+sub update_all_values {
+    my ($invocant, $params) = @_;
+    my $dbh = Bugzilla->dbh;
+    $dbh->do(
+        "UPDATE tracking_flags_bugs SET value=? WHERE tracking_flag_id=? AND value=?",
+        undef,
+        $params->{new_value},
+        $params->{value_obj}->tracking_flag_id,
+        $params->{old_value},
+    );
+}
+
 ###############################
 ####      Validators       ####
 ###############################

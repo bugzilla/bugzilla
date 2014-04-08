@@ -342,13 +342,13 @@ use constant ABSTRACT_SCHEMA => {
 
     bugs_activity => {
         FIELDS => [
-            id        => {TYPE => 'BIGSERIAL', NOTNULL => 1,
+            id        => {TYPE => 'INTSERIAL', NOTNULL => 1, 
                           PRIMARYKEY => 1}, 
             bug_id    => {TYPE => 'INT3', NOTNULL => 1,
                           REFERENCES    =>  {TABLE  =>  'bugs',
                                              COLUMN =>  'bug_id',
                                              DELETE => 'CASCADE'}},
-            attach_id => {TYPE => 'INT5',
+            attach_id => {TYPE => 'INT3',
                           REFERENCES    =>  {TABLE  =>  'attachments',
                                             COLUMN  =>  'attach_id',
                                             DELETE => 'CASCADE'}},
@@ -492,7 +492,7 @@ use constant ABSTRACT_SCHEMA => {
 
     attachments => {
         FIELDS => [
-            attach_id    => {TYPE => 'BIGSERIAL', NOTNULL => 1,
+            attach_id    => {TYPE => 'MEDIUMSERIAL', NOTNULL => 1,
                              PRIMARYKEY => 1},
             bug_id       => {TYPE => 'INT3', NOTNULL => 1,
                              REFERENCES    =>  {TABLE  => 'bugs',
@@ -523,7 +523,7 @@ use constant ABSTRACT_SCHEMA => {
     },
     attach_data => {
         FIELDS => [
-            id      => {TYPE => 'INT5', NOTNULL => 1,
+            id      => {TYPE => 'INT3', NOTNULL => 1,
                         PRIMARYKEY => 1,
                         REFERENCES  =>  {TABLE  => 'attachments',
                                          COLUMN => 'attach_id',
@@ -636,7 +636,7 @@ use constant ABSTRACT_SCHEMA => {
                                   REFERENCES => {TABLE  => 'bugs',
                                                  COLUMN => 'bug_id',
                                                  DELETE => 'CASCADE'}},
-            attach_id         => {TYPE => 'INT5',
+            attach_id         => {TYPE => 'INT3',
                                   REFERENCES => {TABLE  => 'attachments',
                                                  COLUMN => 'attach_id',
                                                  DELETE => 'CASCADE'}},

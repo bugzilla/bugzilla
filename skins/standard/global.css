@@ -472,6 +472,7 @@ div.user_match {
 
 .arrow_container {
     margin: 0 2px;
+    display: inline-block;
 }
 
 .collapsed {

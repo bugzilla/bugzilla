@@ -40,13 +40,16 @@ function toggle_all_comments(action) {
         var comment = comments[i];
         if (!comment)
             continue;
-
-        var id = comments[i].id.match(/\d*$/);
+        var id = comment.id.match(/^comment_text_(\d*)$/);
+        if (!id)
+            continue;
+        id = id[1];
         var link = document.getElementById('comment_link_' + id);
-        if (action == 'collapse')
+        if (action == 'collapse') {
             collapse_comment(link, comment, id);
-        else
+        } else {
             expand_comment(link, comment, id);
+        }
     }
 }
 

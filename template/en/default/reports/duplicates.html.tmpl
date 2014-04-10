@@ -82,11 +82,13 @@
       </td>
       <td rowspan="4" valign="top">Restrict to products:</td>
       <td rowspan="4" valign="top">
-        [% INCLUDE "global/product-select.html.tmpl"
-          id       => "product"
-          name     => "product"
-          multiple => 5
-        %]
+        <select name="product" size="5" multiple="multiple">
+          [% FOREACH p = user.get_selectable_products %]
+            <option name="[% p.name FILTER html %]"
+            [% ' selected="selected"' IF product.contains(p.name) %]
+            >[% p.name FILTER html %]</option>
+          [% END %]
+        </select>
       </td>
      </tr>
 

@@ -61,11 +61,9 @@
 
     <th><label for="product">Product:</label></th>
     <td>
-      [% INCLUDE "global/product-select.html.tmpl"
-         id         => "product"
-         name       => "product"
-         dontchange => dontchange
-       %]
+      [% PROCESS selectmenu menuname = "product"
+                            menuitems = products
+                            property = "name" %]
     </td>
 
     <th><label for="version">Version:</label></th>

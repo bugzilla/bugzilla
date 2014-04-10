@@ -77,7 +77,13 @@ if (!$product_name) {
         push(@datasets, $datasets);
     }
 
+    # We only want those products that the user has permissions for.
+    my @myproducts = ('-All-');
+    # Extract product names from objects and add them to the list.
+    push( @myproducts, map { $_->name } @{$user->get_selectable_products} );
+
     $vars->{'datasets'} = \@datasets;
+    $vars->{'products'} = \@myproducts;
 
     print $cgi->header();
 }

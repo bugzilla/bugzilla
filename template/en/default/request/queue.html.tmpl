@@ -81,12 +81,28 @@ to some group are shown by default.
       </td>
       <th>Product:</th>
       <td>
-        [% INCLUDE "global/product-select.html.tmpl"
-           id       => "product"
-           name     => "product"
-           add      => "Any"
-           onchange => "selectProduct(this, this.form.component, null, null, 'Any');"
-        %]
+        <select name="product" onchange="selectProduct(this, this.form.component, null, null, 'Any');">
+          <option value="">Any</option>
+          [% IF Param('useclassification') %]
+            [% FOREACH c = user.get_selectable_classifications %]
+              <optgroup label="[% c.name FILTER html %]">
+                [% FOREACH p = user.get_selectable_products(c.id) %]
+                  <option value="[% p.name FILTER html %]"
+                    [% " selected" IF cgi.param('product') == p.name %]>
+                    [% p.name FILTER html %]
+                  </option>
+                [% END %]
+              </optgroup>
+            [% END %]
+          [% ELSE %]
+            [% FOREACH p = user.get_selectable_products %]
+              <option value="[% p.name FILTER html %]"
+                [% " selected" IF cgi.param('product') == p.name %]>
+                [% p.name FILTER html %]
+              </option>
+            [% END %]
+          [% END %]
+        </select>
       </td>
       <th>Flag:</th>
       <td>

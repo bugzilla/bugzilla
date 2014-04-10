@@ -144,6 +144,8 @@ Bugzilla::DB::bz_create_database() if $lc_hash->{'db_check'};
 
 # now get a handle to the database:
 my $dbh = Bugzilla->dbh;
+# Clear all keys from Memcached to ensure we see the correct schema.
+Bugzilla->memcached->clear_all();
 # Create the tables, and do any database-specific schema changes.
 $dbh->bz_setup_database();
 # Populate the tables that hold the values for the <select> fields.

@@ -19,6 +19,7 @@ use Bugzilla::Util qw(trim detaint_natural);
 
 use Bugzilla::Extension::TrackingFlags::Constants;
 use Bugzilla::Extension::TrackingFlags::Flag;
+use Bugzilla::Extension::TrackingFlags::Flag::Bug;
 use Bugzilla::Extension::TrackingFlags::Flag::Value;
 use Bugzilla::Extension::TrackingFlags::Flag::Visibility;
 
@@ -338,8 +339,16 @@ sub _update_db_values {
         if ($value->{id}) {
             my $value_obj = Bugzilla::Extension::TrackingFlags::Flag::Value->new($value->{id})
                 || ThrowCodeError('tracking_flags_invalid_item_id', { item => 'flag value', id => $flag->{id} });
-            $value_obj->set_all($object_set);
-            $value_obj->update();
+            my $old_value = $value_obj->value;
+            if ($object_set->{value} ne $old_value) {
+                $value_obj->set_all($object_set);
+                $value_obj->update();
+                Bugzilla::Extension::TrackingFlags::Flag::Bug->update_all_values({
+                    value_obj => $value_obj,
+                    old_value => $old_value,
+                    new_value => $value_obj->value,
+                });
+            }
         } else {
             $object_set->{tracking_flag_id} = $flag_obj->flag_id;
             Bugzilla::Extension::TrackingFlags::Flag::Value->create($object_set);

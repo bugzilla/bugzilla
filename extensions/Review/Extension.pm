@@ -380,7 +380,7 @@ sub _check_review_flag {
 
     # extract the set flag-types
     my @flagtype_ids = map { /^flag_type-(\d+)$/ ? $1 : () } $cgi->param();
-    @flagtype_ids = grep { $cgi->param("flag_type-$_") ne 'X' } @flagtype_ids;
+    @flagtype_ids = grep { $cgi->param("flag_type-$_") eq '?' } @flagtype_ids;
     return unless scalar(@flagtype_ids);
 
     # find valid review flagtypes

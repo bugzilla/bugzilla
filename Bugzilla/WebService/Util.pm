@@ -107,19 +107,19 @@ sub extract_flags {
     return (\@old_flags, \@new_flags);
 }
 
-sub filter ($$;$) {
-    my ($params, $hash, $prefix) = @_;
+sub filter($$;$$) {
+    my ($params, $hash, $types, $prefix) = @_;
     my %newhash = %$hash;
 
     foreach my $key (keys %$hash) {
-        delete $newhash{$key} if !filter_wants($params, $key, $prefix);
+        delete $newhash{$key} if !filter_wants($params, $key, $types, $prefix);
     }
 
     return \%newhash;
 }
 
-sub filter_wants ($$;$) {
-    my ($params, $field, $prefix) = @_;
+sub filter_wants($$;$$) {
+    my ($params, $field, $types, $prefix) = @_;
 
     # Since this is operation is resource intensive, we will cache the results
     # This assumes that $params->{*_fields} doesn't change between calls
@@ -130,28 +130,58 @@ sub filter_wants ($$;$) {
         return $cache->{$field};
     }
 
+    # Mimic old behavior if no types provided
+    my %field_types = map { $_ => 1 } (ref $types ? @$types : ($types || 'default'));
+
     my %include = map { $_ => 1 } @{ $params->{'include_fields'} || [] };
     my %exclude = map { $_ => 1 } @{ $params->{'exclude_fields'} || [] };
 
-    my $wants = 1;
-    if (defined $params->{exclude_fields} && $exclude{$field}) {
-        $wants = 0;
+    my %include_types;
+    my %exclude_types;
+
+    # Only return default fields if nothing is specified
+    $include_types{default} = 1 if !%include;
+
+    # Look for any field types requested
+    foreach my $key (keys %include) {
+        next if $key !~ /^_(.*)$/;
+        $include_types{$1} = 1;
+        delete $include{$key};
     }
-    elsif (defined $params->{include_fields} && !$include{$field}) {
-        if ($prefix) {
-            # Include the field if the parent is include (and this one is not excluded)
-            $wants = 0 if !$include{$prefix};
-        }
-        else {
-            # We want to include this if one of the sub keys is included
-            my $key = $field . '.';
-            my $len = length($key);
-            $wants = 0 if ! grep { substr($_, 0, $len) eq $key  } keys %include;
-        }
+    foreach my $key (keys %exclude) {
+        next if $key !~ /^_(.*)$/;
+        $exclude_types{$1} = 1;
+        delete $exclude{$key};
     }
 
-    $cache->{$field} = $wants;
-    return $wants;
+    # If the user has asked to include all or exclude all
+    return $cache->{$field} = 0 if $exclude_types{'all'};
+    return $cache->{$field} = 1 if $include_types{'all'};
+
+    # Explicit inclusion/exclusion
+    return $cache->{$field} = 0 if $exclude{$field};
+    return $cache->{$field} = 1 if $include{$field};
+
+    # If the user has not asked for any fields specifically or if the user has asked
+    # for one or more of the field's types (and not excluded them)
+    foreach my $type (keys %field_types) {
+        return $cache->{$field} = 0 if $exclude_types{$type};
+        return $cache->{$field} = 1 if $include_types{$type};
+    }
+
+    my $wants = 0;
+    if ($prefix) {
+        # Include the field if the parent is include (and this one is not excluded)
+        $wants = 1 if $include{$prefix};
+    }
+    else {
+        # We want to include this if one of the sub keys is included
+        my $key = $field . '.';
+        my $len = length($key);
+        $wants = 1 if grep { substr($_, 0, $len) eq $key  } keys %include;
+    }
+
+    return $cache->{$field} = $wants;
 }
 
 sub taint_data {

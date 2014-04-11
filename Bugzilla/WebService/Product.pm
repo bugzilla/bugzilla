@@ -255,7 +255,7 @@ sub _product_to_hash {
 
 sub _component_to_hash {
     my ($self, $component, $params) = @_;
-    my $field_data = {
+    my $field_data = filter $params, {
         id =>
             $self->type('int', $component->id),
         name =>
@@ -271,9 +271,9 @@ sub _component_to_hash {
             0,
         is_active =>
             $self->type('boolean', $component->is_active),
-    };
+    }, undef, 'components';
 
-    if (filter_wants($params, 'flag_types', 'components')) {
+    if (filter_wants($params, 'flag_types', undef, 'components')) {
         $field_data->{flag_types} = {
             bug =>
                 [map {
@@ -285,12 +285,13 @@ sub _component_to_hash {
                 } @{$component->flag_types->{'attachment'}}],
         };
     }
-    return filter($params, $field_data, 'components');
+
+    return $field_data;
 }
 
 sub _flag_type_to_hash {
-    my ($self, $flag_type) = @_;
-    return {
+    my ($self, $flag_type, $params) = @_;
+    return filter $params, {
         id =>
             $self->type('int', $flag_type->id),
         name =>
@@ -313,12 +314,12 @@ sub _flag_type_to_hash {
             $self->type('int', $flag_type->grant_group_id),
         request_group =>
             $self->type('int', $flag_type->request_group_id),
-    };
+    }, undef, 'flag_types';
 }
 
 sub _version_to_hash {
     my ($self, $version, $params) = @_;
-    my $field_data = {
+    return filter $params, {
         id =>
             $self->type('int', $version->id),
         name =>
@@ -327,13 +328,12 @@ sub _version_to_hash {
             0,
         is_active =>
             $self->type('boolean', $version->is_active),
-    };
-    return filter($params, $field_data, 'versions');
+    }, undef, 'versions';
 }
 
 sub _milestone_to_hash {
     my ($self, $milestone, $params) = @_;
-    my $field_data = {
+    return filter $params, {
         id =>
             $self->type('int', $milestone->id),
         name =>
@@ -342,8 +342,7 @@ sub _milestone_to_hash {
             $self->type('int', $milestone->sortkey),
         is_active =>
             $self->type('boolean', $milestone->is_active),
-    };
-    return filter($params, $field_data, 'milestones');
+    }, undef, 'milestones';
 }
 
 1;

@@ -319,6 +319,34 @@ for GET type requests.
 
 =back
 
+There are several shortcut identifiers to ask for only certain groups of
+fields to be returned or excluded.
+
+=over
+
+=item C<_all>
+
+All possible fields are returned if C<_all> is specified in C<include_fields>.
+
+=item C<_default>
+
+These fields are returned if C<include_fields> is empty or C<_default>
+is specified. All fields described in the documentation are returned
+by default unless specified otherwise.
+
+=item C<_extra>
+
+These fields are not returned by default and need to be manually specified
+in C<include_fields> either by field name, or using C<_extra>.
+
+=item C<_custom>
+
+Only custom fields are returned if C<_custom> is specified in C<include_fields>.
+This is normally specific to bug objects and not relevant for other returned
+objects.
+
+=back
+
 =head1 SEE ALSO
 
 =head2 Server Types

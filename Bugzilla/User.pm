@@ -832,7 +832,8 @@ sub in_group_id {
 # besides the name of the commenter.
 sub groups_with_icon {
     my $self = shift;
-    return $self->{groups_with_icon} //= [grep { $_->icon_url } @{ $self->direct_group_membership }];
+
+    return $self->{groups_with_icon} //= [grep { $_->icon_url } @{ $self->groups }];
 }
 
 sub get_products_by_permission {
@@ -1208,24 +1209,6 @@ sub can_set_flag {
     return (!$flag_type->grant_group_id
             || $self->in_group_id($flag_type->grant_group_id)) ? 1 : 0;
 }
-
-sub direct_group_membership {
-    my $self = shift;
-    my $dbh = Bugzilla->dbh;
-
-    if (!$self->{'direct_group_membership'}) {
-        my $gid = $dbh->selectcol_arrayref('SELECT id
-                                              FROM groups
-                                        INNER JOIN user_group_map
-                                                ON groups.id = user_group_map.group_id
-                                             WHERE user_id = ?
-                                               AND isbless = 0',
-                                             undef, $self->id);
-        $self->{'direct_group_membership'} = Bugzilla::Group->new_from_list($gid);
-    }
-    return $self->{'direct_group_membership'};
-}
-
 
 # visible_groups_inherited returns a reference to a list of all the groups
 # whose members are visible to this user.
@@ -2623,11 +2606,6 @@ not be aware of the existence of the product.
 Returns a reference to an array of users.  The array is populated with hashrefs
 containing the login, identity and visibility.  Users that are not visible to this
 user will have 'visible' set to zero.
-
-=item C<direct_group_membership>
-
-Returns a reference to an array of group objects. Groups the user belong to
-by group inheritance are excluded from the list.
 
 =item C<visible_groups_inherited>
 

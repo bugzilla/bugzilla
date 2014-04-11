@@ -47,7 +47,7 @@
         <b>[%+ request.flag.age FILTER html %]</b> from [% request.requester.identity FILTER html %]<br>
         <div style="font-size: x-small">
           [% IF request.attachment %]
-            <a href="[% urlbase FILTER none %]attachment.cgi?id=[% request.attachment.id FILTER none %]">Details</a>
+            <a href="[% urlbase FILTER none %]attachment.cgi?id=[% request.attachment.id FILTER none %]&amp;action=edit">Details</a>
             [% IF request.attachment.ispatch %]
               | <a href="[% urlbase FILTER none %]attachment.cgi?id=[% request.attachment.id FILTER none %]&amp;action=diff">Diff</a>
               | <a href="[% urlbase FILTER none %]review?bug=[% request.bug.id FILTER none %]&amp;attachment=[% request.attachment.id FILTER none %]">Review</a>

@@ -62,12 +62,6 @@ sub template_before_process {
     # allow other extensions to alter history
     Bugzilla::Hook::process('inline_history_activtiy', { activity => $activity });
 
-    # prime caches with objects already loaded
-    my %user_cache;
-    foreach my $comment (@{$bug->comments}) {
-        $user_cache{$comment->{author}->login} = $comment->{author};
-    }
-
     my %attachment_cache;
     foreach my $attachment (@{$bug->attachments}) {
         $attachment_cache{$attachment->id} = $attachment;
@@ -79,8 +73,8 @@ sub template_before_process {
     # augment and tweak
     foreach my $operation (@$activity) {
         # make operation.who an object
-        $user_cache{$operation->{who}} ||= Bugzilla::User->new({ name => $operation->{who} });
-        $operation->{who} = $user_cache{$operation->{who}};
+        $operation->{who} =
+          Bugzilla::User->new({ name => $operation->{who}, cache => 1 });
 
         for (my $i = 0; $i < scalar(@{$operation->{changes}}); $i++) {
             my $change = $operation->{changes}->[$i];

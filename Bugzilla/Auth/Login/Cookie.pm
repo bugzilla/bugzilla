@@ -6,8 +6,11 @@
 # defined by the Mozilla Public License, v. 2.0.
 
 package Bugzilla::Auth::Login::Cookie;
+
 use strict;
+
 use base qw(Bugzilla::Auth::Login);
+use fields qw(_login_token);
 
 use Bugzilla::Constants;
 use Bugzilla::Util;

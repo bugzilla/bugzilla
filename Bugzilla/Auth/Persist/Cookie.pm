@@ -13,8 +13,6 @@ use Bugzilla::Constants;
 use Bugzilla::Util;
 use Bugzilla::Token;
 
-use Bugzilla::Auth::Login::Cookie qw(login_token);
-
 use List::Util qw(first);
 
 sub new {

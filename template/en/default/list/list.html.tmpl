@@ -43,11 +43,13 @@
     [% new_param = cgi.canonicalise_query %]
   [% END %]
 
-  if (history && history.replaceState) {
-    history.replaceState(null, "[% unfiltered_title FILTER js %]",
-                         "buglist.cgi?[% new_param FILTER js %]");
-    document.title = "[% unfiltered_title FILTER js %]";
-  }
+  [% IF new_param.length + 12 < constants.CGI_URI_LIMIT %]
+    if (history && history.replaceState) {
+      history.replaceState(null, "[% unfiltered_title FILTER js %]",
+                           "buglist.cgi?[% new_param FILTER js %]");
+      document.title = "[% unfiltered_title FILTER js %]";
+    }
+  [% END %]
   [% javascript FILTER none %]
 [% END %]
 

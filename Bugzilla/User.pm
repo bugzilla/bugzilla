@@ -906,7 +906,7 @@ sub can_edit_product {
                            CASE WHEN canedit = 1 AND group_id IN ($groups) THEN 1 ELSE 0 END AS cnt_group_member
                     FROM group_control_map
                     WHERE product_id = $prod_id) AS p");
-        return ($cnt_can_edit == 0 or $cnt_group_member > 0);
+        return (!$cnt_can_edit or $cnt_group_member);
     }
     else {
         # For and-groups, a user needs to be in all canedit groups. Therefore

@@ -765,34 +765,42 @@ sub bless_groups {
         return $self->{'bless_groups'};
     }
 
+    if (Bugzilla->params->{usevisibilitygroups}
+        && !$self->visible_groups_inherited) {
+        return [];
+    }
+
     my $dbh = Bugzilla->dbh;
 
-    # Get all groups for the user where:
-    #    + They have direct bless privileges
-    #    + They are a member of a group that inherits bless privs.
-    my @group_ids = map {$_->id} @{ $self->groups };
-    @group_ids = (-1) if !@group_ids;
-    my $query =
-        'SELECT DISTINCT groups.id
-           FROM groups, user_group_map, group_group_map AS ggm
-          WHERE user_group_map.user_id = ?
-                AND ( (user_group_map.isbless = 1
-                       AND groups.id=user_group_map.group_id)
-                     OR (groups.id = ggm.grantor_id
-                         AND ggm.grant_type = ' . GROUP_BLESS . '
-                         AND ' . $dbh->sql_in('ggm.member_id', \@group_ids)
-                     . ') )';
-
-    # If visibilitygroups are used, restrict the set of groups.
-    if (Bugzilla->params->{'usevisibilitygroups'}) {
-        return [] if !$self->visible_groups_as_string;
-        # Users need to see a group in order to bless it.
+    # Get all groups for the user where they have direct bless privileges.
+    my $query = "
+        SELECT DISTINCT group_id
+          FROM user_group_map
+         WHERE user_id = ?
+               AND isbless = 1";
+    if (Bugzilla->params->{usevisibilitygroups}) {
         $query .= " AND "
-            . $dbh->sql_in('groups.id', $self->visible_groups_inherited);
+            . $dbh->sql_in('group_id', $self->visible_groups_inherited);
+    }
+
+    # Get all groups for the user where they are a member of a group that
+    # inherits bless privs.
+    my @group_ids = map { $_->id } @{ $self->groups };
+    if (@group_ids) {
+        $query .= "
+            UNION
+            SELECT DISTINCT grantor_id
+            FROM group_group_map
+            WHERE grant_type = " . GROUP_BLESS . "
+                AND " . $dbh->sql_in('member_id', \@group_ids);
+        if (Bugzilla->params->{usevisibilitygroups}) {
+            $query .= " AND "
+                . $dbh->sql_in('grantor_id', $self->visible_groups_inherited);
+        }
     }
 
     my $ids = $dbh->selectcol_arrayref($query, undef, $self->id);
-    return $self->{'bless_groups'} = Bugzilla::Group->new_from_list($ids);
+    return $self->{bless_groups} = Bugzilla::Group->new_from_list($ids);
 }
 
 sub in_group {

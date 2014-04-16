@@ -402,7 +402,11 @@ sub _handle_field_names {
 
     # Generic field1,field2,field3:value1,value2 notation.
     # We have to correctly ignore commas and colons in quotes.
-    foreach my $symbol (keys %{ OPERATOR_SYMBOLS() }) {
+    # Longer operators must be tested first as we don't want single character
+    # operators such as <, > and = to be tested before <=, >= and !=.
+    my @operators = sort { length($b) <=> length($a) } keys %{ OPERATOR_SYMBOLS() };
+
+    foreach my $symbol (@operators) {
         my @field_values = _parse_line($symbol, 1, $or_operand);
         next unless scalar @field_values == 2;
         my @fields = _parse_line(',', 1, $field_values[0]);

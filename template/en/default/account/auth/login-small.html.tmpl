@@ -46,7 +46,9 @@
              [%+ "checked" IF Param('rememberlogin') == "defaulton" %]>
       <label for="Bugzilla_remember[% qs_suffix %]">Remember</label>
     [% END %]
-    <input type="submit" name="GoAheadAndLogIn" value="Log in" 
+    <input type="hidden" name="Bugzilla_login_token"
+           value="[% get_login_request_token() FILTER html %]">
+    <input type="submit" name="GoAheadAndLogIn" value="Log in"
             id="log_in[% qs_suffix %]">
     <a href="#" onclick="return hide_mini_login_form('[% qs_suffix %]')">[x]</a>
   </form>

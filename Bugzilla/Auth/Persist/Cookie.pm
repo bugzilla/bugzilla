@@ -54,6 +54,10 @@ sub persist_login {
 
     $dbh->bz_commit_transaction();
 
+    # We do not want WebServices to generate login cookies.
+    # All we need is the login token for User.login.
+    return $login_cookie if i_am_webservice();
+
     # Prevent JavaScript from accessing login cookies.
     my %cookieargs = ('-httponly' => 1);
 

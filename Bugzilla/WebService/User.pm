@@ -51,7 +51,6 @@ use constant MAPPED_RETURNS => {
 
 sub login {
     my ($self, $params) = @_;
-    my $remember = $params->{remember};
 
     # Username and password params are required 
     foreach my $param ("login", "password") {
@@ -59,33 +58,18 @@ sub login {
             || ThrowCodeError('param_required', { param => $param });
     }
 
-    # Convert $remember from a boolean 0/1 value to a CGI-compatible one.
-    if (defined($remember)) {
-        $remember = $remember? 'on': '';
-    }
-    else {
-        # Use Bugzilla's default if $remember is not supplied.
-        $remember =
-            Bugzilla->params->{'rememberlogin'} eq 'defaulton'? 'on': '';
-    }
-
     # Make sure the CGI user info class works if necessary.
     my $input_params = Bugzilla->input_params;
     $input_params->{'Bugzilla_login'} =  $params->{login};
     $input_params->{'Bugzilla_password'} = $params->{password};
-    $input_params->{'Bugzilla_remember'} = $remember;
+    $input_params->{'Bugzilla_restrictlogin'} = $params->{restrict_login};
 
     my $user = Bugzilla->login();
 
     my $result = { id => $self->type('int', $user->id) };
 
-    # We will use the stored cookie value combined with the user id
-    # to create a token that can be used with future requests in the
-    # query parameters
-    my $login_cookie = first { $_->name eq 'Bugzilla_logincookie' }
-                              @{ Bugzilla->cgi->{'Bugzilla_cookie_list'} };
-    if ($login_cookie) {
-        $result->{'token'} = $user->id . "-" . $login_cookie->value;
+    if ($user->{_login_token}) {
+        $result->{'token'} = $user->id . "-" . $user->{_login_token};
     }
 
     return $result;
@@ -464,13 +448,9 @@ etc. This method logs in an user.
 
 =item C<password> (string) - The user's password.
 
-=item C<remember> (bool) B<Optional> - if the cookies returned by the
-call to login should expire with the session or not.  In order for
-this option to have effect the Bugzilla server must be configured to
-allow the user to set this option - the Bugzilla parameter
-I<rememberlogin> must be set to "defaulton" or
-"defaultoff". Addionally, the client application must implement
-management of cookies across sessions.
+=item C<restrict_login> (bool) B<Optional> - If set to a true value,
+the token returned by this method will only be valid from the IP address
+which called this method.
 
 =back
 
@@ -478,12 +458,9 @@ management of cookies across sessions.
 
 On success, a hash containing two items, C<id>, the numeric id of the
 user that was logged in, and a C<token> which can be passed in
-the parameters as authentication in other calls. A set of http cookies
-is also sent with the response. These cookies *or* the token can be sent
+the parameters as authentication in other calls. The token can be sent
 along with any future requests to the webservice, for the duration of the
-session. Note that cookies are not accepted for GET requests for JSONRPC
-and REST for security reasons. You may, however, use the token or valid
-login parameters for those requests.
+session, i.e. till L<User.logout|/logout> is called.
 
 =item B<Errors>
 
@@ -506,6 +483,19 @@ their password.
 =item 50 (Param Required)
 
 A login or password parameter was not provided.
+
+=back
+
+=item B<History>
+
+=over
+
+=item C<remember> was removed in Bugzilla B<5.0> as this method no longer
+creates a login cookie.
+
+=item C<restrict_login> was added in Bugzilla B<5.0>.
+
+=item C<token> was added in Bugzilla B<5.0>.
 
 =back
 

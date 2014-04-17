@@ -291,7 +291,8 @@ sub header {
     my $self = shift;
 
     my %headers;
-   
+    my $user = Bugzilla->user;
+
     # If there's only one parameter, then it's a Content-Type.
     if (scalar(@_) == 1) {
         %headers = ('-type' => shift(@_));
@@ -302,6 +303,18 @@ sub header {
 
     if ($self->{'_content_disp'}) {
         $headers{'-content_disposition'} = $self->{'_content_disp'};
+    }
+
+    if (!$user->id && $user->authorizer->can_login
+        && !$self->cookie('Bugzilla_login_request_cookie'))
+    {
+        my %args;
+        $args{'-secure'} = 1 if Bugzilla->params->{ssl_redirect};
+
+        $self->send_cookie(-name => 'Bugzilla_login_request_cookie',
+                           -value => generate_random_password(),
+                           -httponly => 1,
+                           %args);
     }
 
     # Add the cookies in if we have any

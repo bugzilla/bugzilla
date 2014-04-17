@@ -219,6 +219,15 @@
 
     [% Hook.process("auth_failure") %]
 
+  [% ELSIF error == "auth_untrusted_request" %]
+    [% title = "Untrusted Authentication Request" %]
+    You tried to log in using the <em>[% login FILTER html %]</em> account,
+    but [% terms.Bugzilla %] is unable to trust your request. Make sure
+    your web browser accepts cookies and that you haven't been redirected
+    here from an external web site.
+    <a href="index.cgi?GoAheadAndLogIn=1">Click here</a> if you really want
+    to log in.
+
   [% ELSIF error == "attachment_deletion_disabled" %]
     [% title = "Attachment Deletion Disabled" %]
     Attachment deletion is disabled on this installation.

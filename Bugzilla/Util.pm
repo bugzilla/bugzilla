@@ -75,6 +75,10 @@ sub html_quote {
     state $use_utf8 = Bugzilla->params->{'utf8'};
 
     if ($use_utf8) {
+        # Remove control characters if the encoding is utf8.
+        # Other multibyte encodings may be using this range; so ignore if not utf8.
+        $var =~ s/(?![\t\r\n])[[:cntrl:]]//g;
+
         # Remove the following characters because they're
         # influencing BiDi:
         # --------------------------------------------------------

@@ -14,19 +14,52 @@ use Bugzilla::Constants;
 use Bugzilla::WebService::Constants;
 use Bugzilla::Util;
 use Bugzilla::Error;
+use Bugzilla::Token;
 
 sub get_login_info {
     my ($self) = @_;
     my $params = Bugzilla->input_params;
+    my $cgi = Bugzilla->cgi;
 
-    my $username = trim(delete $params->{"Bugzilla_login"});
-    my $password = delete $params->{"Bugzilla_password"};
+    my $login = trim(delete $params->{'Bugzilla_login'});
+    my $password = delete $params->{'Bugzilla_password'};
+    # The token must match the cookie to authenticate the request.
+    my $login_token = delete $params->{'Bugzilla_login_token'};
+    my $login_cookie = $cgi->cookie('Bugzilla_login_request_cookie');
 
-    if (!defined $username || !defined $password) {
+    my $valid = 0;
+    # If the web browser accepts cookies, use them.
+    if ($login_token && $login_cookie) {
+        my ($time, undef) = split(/-/, $login_token);
+        # Regenerate the token based on the information we have.
+        my $expected_token = issue_hash_token(['login_request', $login_cookie], $time);
+        $valid = 1 if $expected_token eq $login_token;
+        $cgi->remove_cookie('Bugzilla_login_request_cookie');
+    }
+    # WebServices and other local scripts can bypass this check.
+    # This is safe because we won't store a login cookie in this case.
+    elsif (Bugzilla->usage_mode != USAGE_MODE_BROWSER) {
+        $valid = 1;
+    }
+    # Else falls back to the Referer header and accept local URLs.
+    # Attachments are served from a separate host (ideally), and so
+    # an evil attachment cannot abuse this check with a redirect.
+    elsif (my $referer = $cgi->referer) {
+        my $urlbase = correct_urlbase();
+        $valid = 1 if $referer =~ /^\Q$urlbase\E/;
+    }
+    # If the web browser doesn't accept cookies and the Referer header
+    # is missing, we have no way to make sure that the authentication
+    # request comes from the user.
+    elsif ($login && $password) {
+        ThrowUserError('auth_untrusted_request', { login => $login });
+    }
+
+    if (!$login || !$password || !$valid) {
         return { failure => AUTH_NODATA };
     }
 
-    return { username => $username, password => $password };
+    return { username => $login, password => $password };
 }
 
 sub fail_nodata {

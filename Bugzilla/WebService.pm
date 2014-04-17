@@ -128,9 +128,7 @@ There are various ways to log in:
 =item C<User.login>
 
 You can use L<Bugzilla::WebService::User/login> to log in as a Bugzilla 
-user. This issues standard HTTP cookies that you must then use in future
-calls, so your client must be capable of receiving and transmitting
-cookies.
+user. This issues a token that you must then use in future calls.
 
 =item C<Bugzilla_login> and C<Bugzilla_password>
 
@@ -150,19 +148,21 @@ WebService method to perform a login:
 =item C<Bugzilla_restrictlogin> (boolean) - Optional. If true,
 then your login will only be valid for your IP address.
 
-=item C<Bugzilla_rememberlogin> (boolean) - Optional. If true,
-then the cookie sent back to you with the method response will
-not expire.
-
 =back
 
-The C<Bugzilla_restrictlogin> and C<Bugzilla_rememberlogin> options
-are only used when you have also specified C<Bugzilla_login> and 
-C<Bugzilla_password>.
+The C<Bugzilla_restrictlogin> option is only used when you have also
+specified C<Bugzilla_login> and C<Bugzilla_password>.
 
-Note that Bugzilla will return HTTP cookies along with the method
-response when you use these arguments (just like the C<User.login> method
-above).
+=item C<Bugzilla_token>
+
+B<Added in Bugzilla 5.0 and backported to 4.4.3>
+
+You can specify C<Bugzilla_token> as argument to any WebService method,
+and you will be logged in as that user if the token is correct. This is
+the token returned when calling C<User.login> mentioned above.
+
+Support for using login cookies for authentication has been dropped
+for security reasons.
 
 =back
 

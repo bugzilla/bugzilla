@@ -68,8 +68,10 @@
   [% PROCESS "global/hidden-fields.html.tmpl"
      exclude="^Bugzilla_(login|password|restrictlogin)$" %]
 
+  <input type="hidden" name="Bugzilla_login_token"
+         value="[% get_login_request_token() FILTER html %]">
   <input type="submit" name="GoAheadAndLogIn" value="Log in" id="log_in">
-  
+
   <p>
     (Note: you should make sure cookies are enabled for this site. 
     Otherwise, you will be required to log in frequently.)

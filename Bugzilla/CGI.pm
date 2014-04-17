@@ -286,11 +286,24 @@ sub close_standby_message {
 # Override header so we can add the cookies in
 sub header {
     my $self = shift;
+    my $user = Bugzilla->user;
 
     # If there's only one parameter, then it's a Content-Type.
     if (scalar(@_) == 1) {
         # Since we're adding parameters below, we have to name it.
         unshift(@_, '-type' => shift(@_));
+    }
+
+    if (!$user->id && $user->authorizer->can_login
+        && !$self->cookie('Bugzilla_login_request_cookie'))
+    {
+        my %args;
+        $args{'-secure'} = 1 if Bugzilla->params->{ssl_redirect};
+
+        $self->send_cookie(-name => 'Bugzilla_login_request_cookie',
+                           -value => generate_random_password(),
+                           -httponly => 1,
+                           %args);
     }
 
     # Add the cookies in if we have any

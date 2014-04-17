@@ -889,6 +889,11 @@ sub create {
             # Allow templates to generate a token themselves.
             'issue_hash_token' => \&Bugzilla::Token::issue_hash_token,
 
+            'get_login_request_token' => sub {
+                my $cookie = Bugzilla->cgi->cookie('Bugzilla_login_request_cookie');
+                return $cookie ? issue_hash_token(['login_request', $cookie]) : '';
+            },
+
             # A way for all templates to get at Field data, cached.
             'bug_fields' => sub {
                 my $cache = Bugzilla->request_cache;

@@ -152,7 +152,7 @@ sub _handle_login_result {
         if ($self->{_info_getter}->{successful}->requires_persistence
             and !Bugzilla->request_cache->{auth_no_automatic_login}) 
         {
-            $self->{_persister}->persist_login($user);
+            $user->{_login_token} = $self->{_persister}->persist_login($user);
         }
     }
     elsif ($fail_code == AUTH_ERROR) {

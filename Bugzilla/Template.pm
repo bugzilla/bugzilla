@@ -657,6 +657,17 @@ sub create {
                 my ($data) = @_;
                 return encode_base64($data);
             },
+
+            # Strips out control characters excepting whitespace
+            strip_control_chars => sub {
+                my ($data) = @_;
+                # Only run for utf8 to avoid issues with other multibyte encodings 
+                # that may be reassigning meaning to ascii characters.
+                if (Bugzilla->params->{'utf8'}) {
+                    $data =~ s/(?![\t\r\n])[[:cntrl:]]//g;
+                }
+                return $data;
+            },
             
             # HTML collapses newlines in element attributes to a single space,
             # so form elements which may have whitespace (ie comments) need

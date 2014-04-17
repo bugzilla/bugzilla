@@ -81,7 +81,7 @@ Attachment [% attidsummary %]
 [%-# .defined is necessary to avoid a taint issue in Perl < 5.10.1, see bug 509794. %]
 [% IF Bugzilla.cgi.param("comment").defined && Bugzilla.cgi.param("comment").length > 0 %]
 ------- Additional Comments from [% user.identity %]
-[%+ Bugzilla.cgi.param("comment") %]
+[%+ Bugzilla.cgi.param("comment") FILTER strip_control_chars %]
 [% END %]
 
 [%- END %]

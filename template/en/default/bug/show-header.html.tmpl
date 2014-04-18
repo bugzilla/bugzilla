@@ -56,11 +56,11 @@
     [% javascript FILTER none %]
   [% END %]
 [% END %]
-+[% javascript = BLOCK %]
-        YAHOO.util.Event.onDOMReady(function() {
-            YAHOO.util.Event.addListener(window, 'keydown', keys_pressed, [% bug.id FILTER none %]);
-            YAHOO.util.Event.addListener(window, 'keyup', keys_released);
-        });
+[% javascript = BLOCK %]
+  YAHOO.util.Event.onDOMReady(function() {
+    YAHOO.util.Event.addListener(window, 'keydown', keys_pressed, [% bug.id FILTER none %]);
+    YAHOO.util.Event.addListener(window, 'keyup', keys_released);
+  });
 [% END %]
 [% style_urls = ['skins/standard/bug.css'] %]
 [% doc_section = "using.html#anatomy-of-a-bug" %]

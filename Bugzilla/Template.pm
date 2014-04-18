@@ -150,13 +150,11 @@ sub quoteUrls {
     # (http://foo/bug#3 for example). Filtering that out filters valid
     # bug refs out, so we have to do replacements.
     # mailto can't contain space or #, so we don't have to bother for that
-    # Do this by escaping \0 to \1\0, and replacing matches with \0\0$count\0\0
-    # \0 is used because it's unlikely to occur in the text, so the cost of
-    # doing this should be very small
-
-    # escape the 2nd escape char we're using
-    my $chr1 = chr(1);
-    $text =~ s/\0/$chr1\0/g;
+    # Do this by replacing matches with \x{FDD2}$count\x{FDD3}
+    # \x{FDDx} is used because it's unlikely to occur in the text
+    # and are reserved unicode characters. We disable warnings for now
+    # until we require Perl 5.13.9 or newer.
+    no warnings 'utf8';
 
     # However, note that adding the title (for buglinks) can affect things
     # In particular, attachment matches go before bug titles, so that titles
@@ -183,21 +181,21 @@ sub quoteUrls {
                                                                $1, $2, $3, $4,
                                                                $5, $6, $7, $8, 
                                                                $9, $10]}))
-                               && ("\0\0" . ($count-1) . "\0\0")/egx;
+                               && ("\x{FDD2}" . ($count-1) . "\x{FDD3}")/egx;
         }
         else {
             $text =~ s/$match/($things[$count++] = $replace) 
-                              && ("\0\0" . ($count-1) . "\0\0")/egx;
+                              && ("\x{FDD2}" . ($count-1) . "\x{FDD3}")/egx;
         }
     }
 
     # Provide tooltips for full bug links (Bug 74355)
     my $urlbase_re = '(' . join('|',
-        map { qr/$_/ } grep($_, Bugzilla->params->{'urlbase'}, 
+        map { qr/$_/ } grep($_, Bugzilla->params->{'urlbase'},
                             Bugzilla->params->{'sslbase'})) . ')';
     $text =~ s~\b(${urlbase_re}\Qshow_bug.cgi?id=\E([0-9]+)(\#c([0-9]+))?)\b
               ~($things[$count++] = get_bug_link($3, $1, { comment_num => $5 })) &&
-               ("\0\0" . ($count-1) . "\0\0")
+               ("\x{FDD2}" . ($count-1) . "\x{FDD3}")
               ~egox;
 
     # non-mailto protocols
@@ -209,7 +207,7 @@ sub quoteUrls {
                   [\w\/])          # so that we end in \w or /
               ~($tmp = html_quote($1)) &&
                ($things[$count++] = "<a href=\"$tmp\">$tmp</a>") &&
-               ("\0\0" . ($count-1) . "\0\0")
+               ("\x{FDD2}" . ($count-1) . "\x{FDD3}")
               ~egox;
 
     # We have to quote now, otherwise the html itself is escaped
@@ -230,7 +228,7 @@ sub quoteUrls {
     # attachment links
     $text =~ s~\b(attachment\s*\#?\s*(\d+)(?:\s+\[details\])?)
               ~($things[$count++] = get_attachment_link($2, $1)) &&
-               ("\0\0" . ($count-1) . "\0\0")
+               ("\x{FDD2}" . ($count-1) . "\x{FDD3}")
               ~egmxi;
 
     # Current bug ID this comment belongs to
@@ -260,9 +258,8 @@ sub quoteUrls {
 
     # Now remove the encoding hacks in reverse order
     for (my $i = $#things; $i >= 0; $i--) {
-        $text =~ s/\0\0($i)\0\0/$things[$i]/eg;
+        $text =~ s/\x{FDD2}($i)\x{FDD3}/$things[$i]/eg;
     }
-    $text =~ s/$chr1\0/\0/g;
 
     return $text;
 }

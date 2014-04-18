@@ -1083,33 +1083,3 @@ function updateRemainingTime() {
     // if the remaining time is changed manually, update bz_remaining_time
     bz_remaining_time = document.changeform.remaining_time.value;
 }
-
-var keys = [];
-function keys_pressed(e, bug_id) {
-    // Store an entry for every key pressed
-    keys[e.keyCode] = true;
-
-    // (Ctrl XOR cmd) + Shift + P
-    if ((!keys[17] != !keys[224]) && keys[16] && keys[80]) {
-        // Check if we are already in preview mode
-        if (YAHOO.util.Dom.hasClass('comment_preview_tab', 'active_comment_tab')){
-            show_comment_edit();
-            document.getElementById('comment').focus();
-            YAHOO.util.Event.preventDefault(e);
-        }
-
-        else {
-            // Ensure that we switch to preview mode only if the textarea is in focus
-            var comment = document.getElementById('comment');
-            if (document.activeElement == comment) {
-                show_comment_preview(bug_id);
-                YAHOO.util.Event.preventDefault(e);
-            }
-        }
-    }
-}
-
-function keys_released(e) {
-    // Mark keys that were released
-    keys[e.keyCode] = false;
-}

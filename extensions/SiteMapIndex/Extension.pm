@@ -45,10 +45,10 @@ sub template_before_process {
     my ($self, $args) = @_;
     my ($vars, $file) = @$args{qw(vars file)};
 
-    return if !$file eq 'global/header.html.tmpl';
-    return unless (exists $vars->{bug} or exists $vars->{bugs});
+    return if $file ne 'global/header.html.tmpl';
+    return unless (exists $vars->{bug} || exists $vars->{bugs});
     my $bugs = exists $vars->{bugs} ? $vars->{bugs} : [$vars->{bug}];
-    return if !ref $bugs eq 'ARRAY';
+    return if ref $bugs ne 'ARRAY';
 
     foreach my $bug (@$bugs) {
         if (!bug_is_ok_to_index($bug)) {

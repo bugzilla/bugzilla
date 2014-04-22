@@ -126,6 +126,73 @@ sub _ip_blocking {
 }
 
 #
+# spam user disabling
+#
+
+sub comment_after_add_tag {
+    my ($self, $args) = @_;
+    return unless lc($args->{tag}) eq 'spam';
+    my $comment = $args->{comment};
+    my $author = $comment->author;
+
+    # exclude disabled users
+    return if !$author->is_enabled;
+
+    # exclude users by group
+    return if $author->in_group(Bugzilla->params->{antispam_spammer_exclude_group});
+
+    # exclude users who are no longer new
+    return if !$author->is_new;
+
+    # exclude users who haven't made enough comments
+    my $spam_count = Bugzilla->params->{antispam_spammer_comment_count};
+    return if $author->comment_count < $spam_count;
+
+    # get user's comments
+    my $comments = Bugzilla->dbh->selectall_arrayref("
+        SELECT longdescs.comment_id,longdescs_tags.id
+          FROM longdescs
+          LEFT JOIN longdescs_tags
+               ON longdescs_tags.comment_id = longdescs.comment_id
+               AND longdescs_tags.tag = 'spam'
+         WHERE longdescs.who = ?
+         ORDER BY longdescs.bug_when
+    ", undef, $author->id);
+
+    # this comment is spam
+    my $comment_id = $comment->id;
+    foreach my $ra (@$comments) {
+        if ($ra->[0] == $comment_id) {
+            $ra->[1] = 1;
+            last;
+        }
+    }
+
+    # throw away comment id and negate bool to make it a list of not-spam
+    $comments = [ map { $_->[1] ? 0 : 1 } @$comments ];
+
+    my $reason;
+
+    # check if the first N comments are spam
+    if (!scalar(grep { $_ } @$comments[0..($spam_count - 1)])) {
+        $reason = "first $spam_count comments are spam";
+    }
+
+    # check if the last N comments are spam
+    elsif (!scalar(grep { $_ } @$comments[-$spam_count..-1])) {
+        $reason = "last $spam_count comments are spam";
+    }
+
+    # disable
+    if ($reason) {
+        $author->set_disabledtext(Bugzilla->params->{antispam_spammer_disable_text});
+        $author->set_disable_mail(1);
+        $author->update();
+        _syslog(sprintf("[audit] antispam disabled <%s>: %s", $author->login, $reason));
+    }
+}
+
+#
 # hooks
 #
 
@@ -169,6 +236,12 @@ sub editable_tables {
         blurb    => 'List of IPv4 addresses which are prevented from creating accounts.',
         group    => 'can_configure_antispam',
     };
+}
+
+sub config_add_panels {
+    my ($self, $args) = @_;
+    my $modules = $args->{panel_modules};
+    $modules->{AntiSpam} = "Bugzilla::Extension::AntiSpam::Config";
 }
 
 #

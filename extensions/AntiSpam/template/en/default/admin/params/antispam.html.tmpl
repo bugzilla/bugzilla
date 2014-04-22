@@ -1,0 +1,28 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[%
+  title = "Anti-Spam"
+  desc = "Edit Anti-Spam Configuration"
+%]
+
+[% param_descs =
+{
+  antispam_spammer_exclude_group =>
+    "Users in this group will be excluded from automatic disabling."
+
+  antispam_spammer_comment_count =>
+    "If a user has made at least this many comments, and either their first " _
+    "NNN comments or their last NNN comments have been tagged as spam, their " _
+    "account will be automatically disabled."
+
+  antispam_spammer_disable_text =>
+    "This message will be displayed to the user when they try to log " _
+    "in after their account is disabled."
+}
+%]

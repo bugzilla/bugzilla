@@ -8,7 +8,11 @@
 
 [% PROCESS global/variables.none.tmpl %]
 
-[% filtered_identity = target.identity FILTER html %]
+[% IF user.id %]
+  [% filtered_identity = target.identity FILTER html %]
+[% ELSE %]
+  [% filtered_identity = target.name || target.address.user FILTER html %]
+[% END %]
 [% PROCESS global/header.html.tmpl
    title = "User Profile: $filtered_identity"
    style_urls = [ "extensions/UserProfile/web/styles/user_profile.css" ]
@@ -54,7 +58,7 @@
   </td>
   <th>Name</th>
   <td colspan="2">
-    [% target.name FILTER html %]
+    [% target.name || target.address.user FILTER html %]
     [% IF target.id == user.id %]
       <span style="font-size: x-small;">(<a href="userprefs.cgi?tab=account">change</a>)</span>
     [% END %]

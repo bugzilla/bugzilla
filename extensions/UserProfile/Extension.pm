@@ -18,6 +18,7 @@ use Bugzilla::Extension::UserProfile::Util;
 use Bugzilla::Install::Filesystem;
 use Bugzilla::User;
 use Bugzilla::Util qw(datetime_from);
+use Email::Address;
 use Scalar::Util qw(blessed);
 
 our $VERSION = '1';
@@ -31,10 +32,12 @@ BEGIN {
     *Bugzilla::User::set_last_activity_ts     = \&_user_set_last_activity_ts;
     *Bugzilla::User::last_statistics_ts       = \&_user_last_statistics_ts;
     *Bugzilla::User::clear_last_statistics_ts = \&_user_clear_last_statistics_ts;
+    *Bugzilla::User::address                  = \&_user_address;
 }
 
-sub _user_last_activity_ts         { $_[0]->{last_activity_ts}               }
-sub _user_last_statistics_ts       { $_[0]->{last_statistics_ts}             }
+sub _user_last_activity_ts         { $_[0]->{last_activity_ts}                }
+sub _user_last_statistics_ts       { $_[0]->{last_statistics_ts}              }
+sub _user_address                  { Email::Address->new(undef, $_[0]->email) }
 
 sub _user_set_last_activity_ts     {
     my ($self, $value) = @_;

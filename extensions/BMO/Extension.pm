@@ -482,7 +482,7 @@ sub bug_format_comment {
 
     # link git.mozilla.org commit messages
     push (@$regexes, {
-        match => qr#^(To\sssh://[^\@]+\@git\.mozilla\.org\/(.+?.git)\n
+        match => qr#^(To\s(?:ssh://)?[^\@]+\@git\.mozilla\.org[:/](.+?\.git)\n
                     \s+)([0-9a-z]+\.\.([0-9a-z]+)\s+\S+\s->\s\S+)#mx,
         replace => sub {
             my $args = shift;

@@ -302,9 +302,8 @@ sub url  { return $_[0]->{'query'}; }
 
 sub user {
     my ($self) = @_;
-    return $self->{user} if defined $self->{user};
-    $self->{user} = new Bugzilla::User($self->{userid});
-    return $self->{user};
+    return $self->{user} ||=
+        Bugzilla::User->new({ id => $self->{userid}, cache => 1 });
 }
 
 ############

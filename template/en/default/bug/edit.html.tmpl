@@ -241,7 +241,7 @@
     [%#  PRODUCT  #%]
     [%#############%]
     <tr>
-      [% PROCESS "bug/field-label.html.tmpl"
+      [% INCLUDE "bug/field-label.html.tmpl"
          field = bug_fields.product
          desc_url = 'describecomponents.cgi'
          value = bug.product

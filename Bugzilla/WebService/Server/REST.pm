@@ -12,7 +12,6 @@ use strict;
 
 use parent qw(Bugzilla::WebService::Server::JSONRPC);
 
-use Bugzilla;
 use Bugzilla::Constants;
 use Bugzilla::Error;
 use Bugzilla::Hook;

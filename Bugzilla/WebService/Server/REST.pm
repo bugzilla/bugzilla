@@ -27,7 +27,7 @@ use Bugzilla::WebService::Server::REST::Resources::Classification;
 use Bugzilla::WebService::Server::REST::Resources::Group;
 use Bugzilla::WebService::Server::REST::Resources::Product;
 use Bugzilla::WebService::Server::REST::Resources::User;
-use Bugzilla::WebService::Server::REST::Resources::BugUserLastVisit;;
+use Bugzilla::WebService::Server::REST::Resources::BugUserLastVisit;
 
 use Scalar::Util qw(blessed reftype);
 use MIME::Base64 qw(decode_base64);

@@ -36,4 +36,4 @@ Other:  [% IF cgi.param('type_other')  %][% cgi.param('type_other_text') %][% EL
 [%+ IF cgi.param("goal_other") %][% cgi.param("goal_other") %][% ELSE %][% cgi.param("goal") %][% END %]
 
 >>Points of Contact:
-[%+ cgi.param('cc') || 'Not provided' %]
+[%+ cgi.param('cc').join(', ') || 'Not provided' %]

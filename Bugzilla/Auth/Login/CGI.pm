@@ -55,7 +55,7 @@ sub get_login_info {
         ThrowUserError('auth_untrusted_request', { login => $login });
     }
 
-    if (!$login || !$password || !$valid) {
+    if (!defined($login) || !defined($password) || !$valid) {
         return { failure => AUTH_NODATA };
     }
 

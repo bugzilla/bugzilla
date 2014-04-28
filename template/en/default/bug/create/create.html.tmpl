@@ -647,11 +647,8 @@ TUI_hide_default('attachment_text_field');
 [% FOREACH field = Bugzilla.active_custom_fields(product=>product) %]
   [% NEXT IF field.type == constants.FIELD_TYPE_EXTENSION %]
   [% NEXT UNLESS field.enter_bug %]
-  [%# crash-signature gets custom handling %]
-  [% IF field.name == 'cf_crash_signature' %]
-    [% show_crash_signature = 1 %]
-    [% NEXT %]
-  [% END %] 
+  [% Hook.process('custom_field', 'bug/create/create.html.tmpl') %]
+  [% NEXT IF field.hidden %]
   [% SET value = ${field.name}.defined ? ${field.name} : "" %]
   <tr [% 'class="expert_fields"' IF !field.is_mandatory %]>
     [% INCLUDE bug/field.html.tmpl 
@@ -661,26 +658,7 @@ TUI_hide_default('attachment_text_field');
 [% END %]
 </tbody>
 
-[%# crash-signature handling %]
-[% IF show_crash_signature %]
-<tbody class="expert_fields">
-  <tr>
-    <th id="field_label_cf_crash_signature" class="field_label">
-      <label for="cf_crash_signature"> Crash Signature: </label>
-    </th>
-    <td colspan="3">
-      <span id="cf_crash_signature_container">
-        <span id="cf_crash_signature_nonedit_display"><i>None</i></span>
-        (<a id="cf_crash_signature_action" href="#">edit</a>)
-      </span>
-      <span id="cf_crash_signature_input">
-        <textarea id="cf_crash_signature" name="cf_crash_signature" rows="4" cols="60"
-        >[% cf_crash_signature FILTER html %]</textarea>
-      </span>
-    </td>
-  </tr>
-</tbody>
-[% END %]
+[% Hook.process('after_custom_fields') %]
 
 [% display_flags = 0 %]
 [% any_flags_requesteeble = 0 %]

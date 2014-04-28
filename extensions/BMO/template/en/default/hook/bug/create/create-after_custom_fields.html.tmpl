@@ -1,0 +1,30 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[%# crash-signature handling %]
+[% IF show_crash_signature %]
+  <tbody class="expert_fields">
+    <tr>
+      <th id="field_label_cf_crash_signature" class="field_label">
+        <label for="cf_crash_signature"> Crash Signature: </label>
+      </th>
+      <td colspan="3">
+        <span id="cf_crash_signature_container">
+          <span id="cf_crash_signature_nonedit_display"><i>None</i></span>
+          (<a id="cf_crash_signature_action" href="#">edit</a>)
+        </span>
+        <span id="cf_crash_signature_input">
+          <textarea id="cf_crash_signature" name="cf_crash_signature" rows="4" cols="60"
+          >[% cf_crash_signature FILTER html %]</textarea>
+        </span>
+      </td>
+    </tr>
+  </tbody>
+[% END %]
+
+

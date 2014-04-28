@@ -6,6 +6,8 @@
   # defined by the Mozilla Public License, v. 2.0.
   #%]
 
-[% IF field.name == 'cf_user_story' %]
+[%# crash-signature gets custom handling %]
+[% IF field.name == 'cf_crash_signature' %]
   [% field.hidden = 1 %]
+  [% show_crash_signature = 1 %]
 [% END %]

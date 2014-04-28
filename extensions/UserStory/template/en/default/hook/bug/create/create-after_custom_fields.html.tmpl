@@ -1,0 +1,76 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% RETURN UNLESS default.user_story_group.0 && default.check_can_change_field('cf_user_story', 0, 1) %]
+
+<tbody id="cf_user_story_container" class="expert_fields bz_default_hidden">
+  <tr>
+    <th class="field_label">
+      <label for="cf_user_story">User Story:</label>
+    </th>
+    <td colspan="3">
+      <div id="user_story_header">
+          <span id="user_story_edit">
+            (<a href="javascript:void(0)" id="user_story_edit_action" >edit</a>)
+          </span>
+      </div>
+      <div id="user_story_edit_container" class="bz_default_hidden">
+          [% INCLUDE global/textarea.html.tmpl
+            name     = 'cf_user_story'
+            id       = 'user_story'
+            minrows  = 10
+            maxrows  = 10
+            cols     = constants.COMMENT_COLS
+            disabled = 1
+          %]
+      </div>
+      <script type="text/javascript">
+        var user_story_components = [];
+        [% FOREACH c = default.user_story_group.1 %]
+          user_story_components.push('[% c FILTER js %]');
+        [% END %]
+        function toggleUserStory() {
+          if (user_story_components.length == 0) {
+            YAHOO.util.Dom.removeClass('cf_user_story_container', 'bz_default_hidden');
+            YAHOO.util.Dom.get('user_story').disabled = false;
+            return;
+          }
+          var index = -1;
+          var form = document.Create;
+          if (form.component.type == 'select-one') {
+            index = form.component.selectedIndex;
+          } else if (form.component.type == 'hidden') {
+            // Assume there is only one component in the list
+            index = 0;
+          }
+          if (index != -1) {
+            for (var i = 0, l = user_story_components.length; i < l; i++) {
+              if (user_story_components[i] == components[index]) {
+                YAHOO.util.Dom.removeClass('cf_user_story_container', 'bz_default_hidden');
+                YAHOO.util.Dom.get('user_story').disabled = false;
+                return;
+              }
+              else {
+                YAHOO.util.Dom.addClass('cf_user_story_container', 'bz_default_hidden');
+                YAHOO.util.Dom.get('user_story').disabled = true;
+              }
+            }
+          }
+        }
+        YAHOO.util.Event.addListener('component', 'change', toggleUserStory);
+        YAHOO.util.Event.addListener('user_story_edit_action', 'click', function() {
+          YAHOO.util.Dom.addClass('user_story_edit', 'bz_default_hidden');
+          YAHOO.util.Dom.addClass('user_story_readonly', 'bz_default_hidden');
+          YAHOO.util.Dom.removeClass('user_story_edit_container', 'bz_default_hidden');
+          YAHOO.util.Dom.get('user_story').focus();
+        });
+        toggleUserStory();
+      </script>
+    </td>
+  </tr>
+</tbody>

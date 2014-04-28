@@ -16,10 +16,13 @@ use Bugzilla;
 use Bugzilla::Constants;
 use Bugzilla::Error;
 use Bugzilla::Extension::UserStory::Constants;
+use Bugzilla::Extension::BMO::FakeBug;
+
 use Text::Diff;
 
 BEGIN {
     *Bugzilla::Bug::user_story_group = \&_bug_user_story_group;
+    *Bugzilla::Extension::BMO::FakeBug::user_story_group = \&_bug_user_story_group;
 }
 
 sub _bug_user_story_group {
@@ -27,17 +30,20 @@ sub _bug_user_story_group {
     if (!exists $self->{user_story_group}) {
         my ($product, $component) = ($self->product, $self->component);
         my $edit_group = '';
+        my $components = [];
         if (exists USER_STORY->{$product}) {
-            my $components = USER_STORY->{$product}->{components};
-            if (scalar(@$components) == 0
+            $components = USER_STORY->{$product}->{components};
+            if (!$component
+                || scalar(@$components) == 0
                 || grep { $_ eq $component } @$components)
             {
                 $edit_group = USER_STORY->{$product}->{group};
             }
         }
-        $self->{user_story_group} = $edit_group;
+        $self->{user_story_group}      = $edit_group;
+        $self->{user_story_components} = $components;
     }
-    return $self->{user_story_group};
+    return ($self->{user_story_group}, $self->{user_story_components});
 }
 
 # ensure user is allowed to edit the story
@@ -47,8 +53,8 @@ sub bug_check_can_change_field {
     return unless $field eq 'cf_user_story';
 
     my $user = Bugzilla->user;
-    my $group = $bug->user_story_group()
-        || return;
+    my ($group) = $bug->user_story_group();
+    $group || return;
     if (!$user->in_group($group)) {
         push (@$priv_results, PRIVILEGES_REQUIRED_EMPOWERED);
     }

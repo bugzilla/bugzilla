@@ -41,39 +41,37 @@ sub get {
         @classification_objs = grep { $selectable_class{$_->id} } @classification_objs;
     }
 
-    my @classifications = map { filter($params, $self->_classification_to_hash($_)) } @classification_objs;
+    my @classifications = map { $self->_classification_to_hash($_, $params) } @classification_objs;
 
     return { classifications => \@classifications };
 }
 
 sub _classification_to_hash {
-    my ($self, $classification) = @_;
+    my ($self, $classification, $params) = @_;
 
     my $user = Bugzilla->user;
     return unless (Bugzilla->params->{'useclassification'} || $user->in_group('editclassifications'));
 
     my $products = $user->in_group('editclassifications') ?
                      $classification->products : $user->get_selectable_products($classification->id);
-    my %hash = (
+
+    return filter $params, {
         id          => $self->type('int',    $classification->id),
         name        => $self->type('string', $classification->name),
         description => $self->type('string', $classification->description),
         sort_key    => $self->type('int',    $classification->sortkey),
-        products    => [ map { $self->_product_to_hash($_) } @$products ],
-    );
-
-    return \%hash;
+        products    => [ map { $self->_product_to_hash($_, $params) } @$products ],
+    };
 }
 
 sub _product_to_hash {
-    my ($self, $product) = @_;
-    my %hash = (
+    my ($self, $product, $params) = @_;
+
+    return filter $params, {
        id          => $self->type('int', $product->id),
        name        => $self->type('string', $product->name),
        description => $self->type('string', $product->description),
-   );
-
-   return \%hash;
+   }, undef, 'products';
 }
 
 1;

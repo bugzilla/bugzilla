@@ -312,15 +312,6 @@ sub bz_rest_options {
 sub rest_include_exclude {
     my ($params) = @_;
 
-    # _all is same as default columns
-    if ($params->{'include_fields'}
-        && ($params->{'include_fields'} eq '_all'
-            || $params->{'include_fields'} eq '_default'))
-    {
-        delete $params->{'include_fields'};
-        delete $params->{'exclude_fields'} if $params->{'exclude_fields'};
-    }
-
     if ($params->{'include_fields'} && !ref $params->{'include_fields'}) {
         $params->{'include_fields'} = [ split(/[\s+,]/, $params->{'include_fields'}) ];
     }

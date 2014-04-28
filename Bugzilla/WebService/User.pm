@@ -179,11 +179,11 @@ sub get {
         }
         my $in_group = $self->_filter_users_by_group(
             \@user_objects, $params);
-        @users = map {filter $params, {
+        @users = map { filter $params, {
                      id        => $self->type('int', $_->id),
                      real_name => $self->type('string', $_->name),
                      name      => $self->type('email', $_->login),
-                 }} @$in_group;
+                 } } @$in_group;
 
         return { users => \@users };
     }
@@ -226,7 +226,7 @@ sub get {
 
     my $in_group = $self->_filter_users_by_group(\@user_objects, $params);
     foreach my $user (@$in_group) {
-        my $user_info = {
+        my $user_info = filter $params, {
             id        => $self->type('int', $user->id),
             real_name => $self->type('string', $user->name),
             name      => $self->type('email', $user->login),
@@ -258,7 +258,7 @@ sub get {
             }
         }
 
-        push(@users, filter($params, $user_info));
+        push(@users, $user_info);
     }
 
     Bugzilla::Hook::process('webservice_user_get', 

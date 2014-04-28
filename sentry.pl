@@ -86,7 +86,7 @@ flock(DATA, LOCK_EX);
 
 # and post to sentry
 my $request = POST $uri->canonical, %header, Content => $message;
-my $response = LWP::UserAgent->new->request($request);
+my $response = LWP::UserAgent->new(timeout => 10)->request($request);
 
 __DATA__
 this exists so the flock() code works.

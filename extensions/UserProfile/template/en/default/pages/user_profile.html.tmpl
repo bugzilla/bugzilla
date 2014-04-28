@@ -68,7 +68,10 @@
 [% IF user.id %]
   <tr>
     <th>Email</th>
-    <td colspan="2"><a href="mailto:[% target.login FILTER uri %]">[% target.login FILTER html %]</a></td>
+    <td colspan="2">
+      <a href="mailto:[% target.login FILTER uri %]">[% target.login FILTER html %]</a>
+      [% " (disabled)" UNLESS target.enabled %]
+    </td>
   </tr>
 [% END %]
 

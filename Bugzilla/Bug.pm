@@ -246,7 +246,6 @@ use constant MAX_LINE_LENGTH => 254;
 # use.)
 use constant FIELD_MAP => {
     blocks           => 'blocked',
-    cc_accessible    => 'cclist_accessible',
     commentprivacy   => 'comment_is_private',
     creation_time    => 'creation_ts',
     creator          => 'reporter',

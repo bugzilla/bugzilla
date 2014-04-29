@@ -57,12 +57,14 @@ use File::Which qw(which);
 # Subs
 ###############################################################################
 
+my $error_found = 0;
 sub MakeDocs {
     my ($name, $cmdline) = @_;
 
     say "Creating $name documentation ..." if defined $name;
     say "$cmdline\n";
-    system $cmdline;
+    system($cmdline) == 0
+        or $error_found = 1;
     print "\n";
 }
 
@@ -160,3 +162,5 @@ foreach my $lang (@langs) {
 
     rmtree('doctrees', 0, 1);
 }
+
+die "Error occurred building the documentation\n" if $error_found;

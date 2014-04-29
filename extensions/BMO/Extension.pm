@@ -556,8 +556,8 @@ sub object_end_of_create {
 
     } elsif ($class eq 'Bugzilla::Bug') {
         # Log real IP addresses for auditing
-        my $user = $args->{object};
-        _syslog(sprintf('[audit] %s <%s> created bug %s', $user->login, remote_ip(), $args->{object}->id));
+        _syslog(sprintf('[audit] %s <%s> created bug %s',
+            Bugzilla->user->login, remote_ip(), $args->{object}->id));
     }
 }
 

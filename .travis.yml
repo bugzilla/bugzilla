@@ -1,0 +1,39 @@
+language: perl
+perl:
+  - 5.10
+  - 5.12
+  - 5.14
+  - 5.16
+
+env:
+  - TEST_SUITE=sanity
+  - TEST_SUITE=docs
+
+matrix:
+  exclude:
+    - perl: 5.10
+      env: TEST_SUITE=docs
+    - perl: 5.12
+      env: TEST_SUITE=docs
+    - perl: 5.14
+      env: TEST_SUITE=docs
+
+before_install:
+  - git clone https://github.com/dklawren/qa.git -b 4.4 qa
+
+install: true
+
+script: ./qa/travis.sh
+
+after_failure:
+  - sudo cat /var/log/apache2/error.log
+
+notifications:
+  on_success: never
+  on_failure: always
+  irc: "irc.mozilla.org#qa-bugzilla"
+  email:
+    recipients:
+      - dkl@mozilla.com
+    on_success: change
+    on_failure: always

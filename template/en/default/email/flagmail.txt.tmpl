@@ -27,6 +27,9 @@
 [% ELSE %]
   [% IF old_flag && old_flag.status == '?' %]
     [% to_identity = old_flag.setter.identity _ "'s request for" %]
+    [% IF old_flag.requestee.defined %]
+        [% requestee_identity = old_flag.requestee.identity _ "'s" %]
+    [% END %]
   [% END %]
   [% subject_status = statuses.$action %]
 [% END %]
@@ -44,10 +47,10 @@ X-Bugzilla-Type: request
 [%- FILTER bullet = wrap(80) -%]
 
 [% IF on_behalf_of %]
-[% user.identity %] has reassigned [% flag.setter.identity %]'s request for [% flagtype_name %]
+[% user.identity %] has reassigned [% flag.setter.identity %]'s request for [% IF requestee_identity %] [%+ requestee_identity %] [% END %] [% flagtype_name %]
 [% to_identity %]:
 [% ELSE %]
-[% user.identity %] has [% statuses.$action %] [%+ to_identity %] [%+ flagtype_name %]:
+[% user.identity %] has [% statuses.$action %] [%+ to_identity %] [% IF requestee_identity %] [%+ requestee_identity %] [% END %] [%+ flagtype_name %]:
 [% END %]
 
 [% terms.Bug %] [%+ bugidsummary %]

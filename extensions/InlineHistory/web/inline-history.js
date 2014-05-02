@@ -34,6 +34,7 @@ var inline_history = {
             dupeId = match[1];
           // remove the element
           comment.parentNode.removeChild(comment);
+          comments[i] = false;
           // update the html for the history item to include the comment number
           if (dupeId == 0)
             continue;
@@ -52,6 +53,8 @@ var inline_history = {
           }
         }
       }
+      if (!comments[i])
+        continue;
 
       // remove 'Additional hours worked: ' comments
       var commentNodes = comments[i].childNodes;
@@ -63,6 +66,14 @@ var inline_history = {
             break;
         }
       }
+    }
+
+    // remove deleted comments
+    for (var i = 0; i < comments.length; i++) {
+        if (!comments[i]) {
+            comments.splice(i, 1);
+            i--;
+        }
     }
 
     // ensure new items are placed immediately after the last comment

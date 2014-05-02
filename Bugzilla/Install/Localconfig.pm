@@ -222,14 +222,20 @@ sub update_localconfig {
         # a 256-character string for site_wide_secret.
         $value = undef if ($name eq 'site_wide_secret' and defined $value
                            and length($value) == 256);
-        
+
         if (!defined $value) {
-            push(@new_vars, $name);
             $var->{default} = &{$var->{default}} if ref($var->{default}) eq 'CODE';
             if (exists $answer->{$name}) {
                 $localconfig->{$name} = $answer->{$name};
             }
             else {
+                # If the user did not supply an answers file, then they get
+                # notified about every variable that gets added. If there was
+                # an answer file, then we don't notify about site_wide_secret
+                # because we assume the intent was to auto-generate it anyway.
+                if (!scalar(keys %$answer) || $name ne 'site_wide_secret') {
+                    push(@new_vars, $name);
+                }
                 $localconfig->{$name} = $var->{default};
             }
         }

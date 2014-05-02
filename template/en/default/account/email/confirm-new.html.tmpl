@@ -17,6 +17,8 @@
            title = title
 %]
 
+[% password_complexity = Param('password_complexity') %]
+
 <p>
   To create your account, you must enter a password in the form below.
   Your email address and Real Name (if provided) will be shown with
@@ -39,7 +41,15 @@
       <th><label for="passwd1">Type your password</label>:</th>
       <td>
         <input type="password" id="passwd1" name="passwd1" value="" required>
-        (minimum [% constants.USER_PASSWORD_MIN_LENGTH FILTER none %] characters)
+        (Password should be a minimum of [% constants.USER_PASSWORD_MIN_LENGTH FILTER none %] characters long
+        [% IF password_complexity == "mixed_letters" %]
+          and must contain at least one UPPER and one lowercase letter
+        [% ELSIF password_complexity == "letters_numbers" %]
+          and must contain at least one UPPER and one lowercase letter and a number
+        [% ELSIF password_complexity == "letters_numbers_specialchars" %] 
+          and must contain at least one letter, a number and a special character
+        [% END ~%]
+        .)
       </td>
     </tr>
     <tr>

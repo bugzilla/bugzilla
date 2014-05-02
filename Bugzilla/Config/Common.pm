@@ -99,7 +99,7 @@ sub check_sslbase {
         my $iaddr = inet_aton($host) || return "The host $host cannot be resolved";
         my $sin = sockaddr_in($port, $iaddr);
         if (!connect(SOCK, $sin)) {
-            return "Failed to connect to $host:$port; unable to enable SSL";
+            return "Failed to connect to $host:$port ($!); unable to enable SSL";
         }
         close(SOCK);
     }

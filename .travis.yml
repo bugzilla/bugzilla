@@ -19,7 +19,7 @@ matrix:
       env: TEST_SUITE=selenium
 
 before_install:
-  - git clone https://github.com/bugzilla/qa.git -b 4.2 qa
+  - git clone https://github.com/bugzilla/qa.git -b 4.4 qa
 
 install: true
 

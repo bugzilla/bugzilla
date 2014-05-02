@@ -33,7 +33,7 @@ sub build_requires {
 
 sub recommends {
     my $recommends = OPTIONAL_MODULES();
-    my @blacklist = ('Apache2-SizeLimit', 'mod_perl'); # Does not compile properly on Travis
+    my @blacklist = ('Apache-SizeLimit', 'mod_perl'); # Does not compile properly on Travis
     my $hrecommends = {};
     foreach my $module (@$recommends) {
         next if grep($_ eq $module->{package}, @blacklist);

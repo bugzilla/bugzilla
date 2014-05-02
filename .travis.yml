@@ -1,0 +1,39 @@
+language: perl
+perl:
+  - 5.10
+  - 5.12
+
+env:
+  - TEST_SUITE=sanity
+  - TEST_SUITE=docs
+  - TEST_SUITE=webservices
+  - TEST_SUITE=selenium
+
+matrix:
+  exclude:
+    - perl: 5.12
+      env: TEST_SUITE=docs
+    - perl: 5.12
+      env: TEST_SUITE=webservices
+    - perl: 5.12
+      env: TEST_SUITE=selenium
+
+before_install:
+  - git clone https://github.com/bugzilla/qa.git -b 4.0 qa
+
+install: true
+
+script: ./qa/travis.sh
+
+after_failure:
+  - sudo cat /var/log/apache2/error.log
+
+notifications:
+  on_success: never
+  on_failure: always
+  irc: "irc.mozilla.org#qa-bugzilla"
+  email:
+    recipients:
+      - dkl@mozilla.com
+    on_success: change
+    on_failure: always

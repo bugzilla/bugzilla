@@ -1968,6 +1968,13 @@ sub _quote_unless_numeric {
 
 sub build_subselect {
     my ($outer, $inner, $table, $cond, $negate) = @_;
+    if ($table =~ /\battach_data\b/) {
+        # It takes a long time to scan the whole attach_data table
+        # unconditionally, so we return the subselect and let the DB optimizer
+        # restrict the search based on other search criteria.
+        my $not = $negate ? "NOT" : "";
+        return "$outer $not IN (SELECT DISTINCT $inner FROM $table WHERE $cond)";
+    }
     # Execute subselects immediately to avoid dependent subqueries, which are
     # large performance hits on MySql
     my $q = "SELECT DISTINCT $inner FROM $table WHERE $cond";

@@ -30,16 +30,12 @@ use Bugzilla::Error;
 use Bugzilla::User;
 use Bugzilla::Keyword;
 use Bugzilla::Bug;
-use Bugzilla::Instrument;
-
-my $timings = Bugzilla::Instrument->new('show_bug');
 
 my $cgi = Bugzilla->cgi;
 my $template = Bugzilla->template;
 my $vars = {};
 
 my $user = Bugzilla->login();
-$timings->time('login_time');
 
 my $format = $template->get_format("bug/show", scalar $cgi->param('format'),
                                    scalar $cgi->param('ctype'));
@@ -93,10 +89,8 @@ if ($single) {
         }
     }
 }
-$timings->time('load_bug_time');
 
 Bugzilla::Bug->preload(\@bugs);
-$timings->time('preload_time');
 
 $vars->{'bugs'} = \@bugs;
 $vars->{'marks'} = \%marks;
@@ -134,10 +128,3 @@ print $cgi->header($format->{'ctype'});
 
 $template->process($format->{'template'}, $vars)
   || ThrowTemplateError($template->error());
-$timings->time('template_time');
-
-if (scalar(@bugids) == 1) {
-    $timings->label('bug-' . $bugs[0]->id);
-    $timings->label('user-' . $user->id);
-    $timings->log();
-}

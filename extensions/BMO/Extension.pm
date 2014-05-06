@@ -605,7 +605,7 @@ sub bug_end_of_create {
     }
 }
 
-# detect github pull requests and set a unique content-type
+# detect github pull requests and reviewboard reviews, set the content-type
 sub attachment_process_data {
     my ($self, $args) = @_;
     my $attributes = $args->{attributes};
@@ -637,7 +637,7 @@ sub attachment_process_data {
         $attributes->{mimetype} = GITHUB_PR_CONTENT_TYPE;
         $attributes->{ispatch}  = 0;
     }
-    elsif ($url =~ m#^https://reviewboard(?:-dev)?\.allizom\.org/r/\d+/?#i) {
+    elsif ($url =~ m#^https?://reviewboard(?:-dev)?\.(?:allizom|mozilla)\.org/r/\d+/?#i) {
         $attributes->{mimetype} = RB_REQUEST_CONTENT_TYPE;
         $attributes->{ispatch}  = 0;
     }

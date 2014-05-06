@@ -216,10 +216,14 @@ if ($cloned_bug_id) {
     } else {
         $vars->{'cc'}         = formvalue('cc');
     }
-    
-    if ($cloned_bug->reporter->id != $user->id
-        && none { $_ eq $cloned_bug->reporter->login } @{$cloned_bug->cc}) {
-        $vars->{'cc'} = join (", ", $cloned_bug->reporter->login, $vars->{'cc'}); 
+
+    foreach my $role (qw(reporter assigned_to qa_contact)) {
+        if (defined($cloned_bug->$role)
+            && $cloned_bug->$role->id != $user->id
+            && none { $_ eq $cloned_bug->$role->login } @{$cloned_bug->cc})
+        {
+            $vars->{'cc'} = join (", ", $cloned_bug->$role->login, $vars->{'cc'});
+        }
     }
 
     foreach my $field (@enter_bug_fields) {

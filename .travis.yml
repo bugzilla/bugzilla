@@ -29,11 +29,9 @@ after_failure:
   - sudo cat /var/log/apache2/error.log
 
 notifications:
-  on_success: never
+  on_success: change
   on_failure: always
   irc: "irc.mozilla.org#qa-bugzilla"
   email:
     recipients:
       - dkl@mozilla.com
-    on_success: change
-    on_failure: always

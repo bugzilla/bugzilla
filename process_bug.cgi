@@ -250,7 +250,7 @@ if (should_set('comment')) {
 }
 if (should_set('see_also')) {
     $set_all_fields{'see_also'}->{add} = 
-        [split(/[\s,]+/, $cgi->param('see_also'))];
+        [split(/[\s]+/, $cgi->param('see_also'))];
 }
 if (should_set('remove_see_also')) {
     $set_all_fields{'see_also'}->{remove} = [$cgi->param('remove_see_also')];

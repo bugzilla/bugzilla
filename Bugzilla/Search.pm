@@ -407,6 +407,7 @@ use constant FIELD_MAP => {
     bugidtype => 'bug_id_type',
     changedin => 'days_elapsed',
     long_desc => 'longdesc',
+    tags      => 'tag',
 };
 
 # Some fields are not sorted on themselves, but on other fields.

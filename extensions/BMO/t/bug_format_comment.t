@@ -39,9 +39,13 @@ Committed revision 9257.
 To gitolite3@git.mozilla.org:bugzilla/bugzilla.git
    36f56bd..eab44b1  nouri -> nouri
 
-# git with uri
+# git with uri (with login)
 To ssh://gitolite3@git.mozilla.org/bugzilla/bugzilla.git
    36f56bd..eab44b1  withuri -> withuri
+
+# git with uri (without login)
+To ssh://git.mozilla.org/bugzilla/bugzilla.git
+   36f56bd..eab44b1  nologin -> nologin
 END_OF_LINKS
 
 my @regexes;
@@ -68,6 +72,7 @@ my @links = (
     '<a href="http://viewvc.svn.mozilla.org/vc?view=rev&amp;revision=2424">r2424</a>',
     '<a href="http://git.mozilla.org/?p=bugzilla/bugzilla.git;a=commit;h=eab44b1">36f56bd..eab44b1  withuri -> withuri</a>',
     '<a href="http://git.mozilla.org/?p=bugzilla/bugzilla.git;a=commit;h=eab44b1">36f56bd..eab44b1  nouri -> nouri</a>',
+    '<a href="http://git.mozilla.org/?p=bugzilla/bugzilla.git;a=commit;h=eab44b1">36f56bd..eab44b1  nologin -> nologin</a>',
     'http://bzr.mozilla.org/bmo/4.2/revision/9257',
 );
 

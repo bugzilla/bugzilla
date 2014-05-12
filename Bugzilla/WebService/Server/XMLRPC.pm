@@ -115,7 +115,6 @@ our @ISA = qw(XMLRPC::Deserializer);
 
 use Bugzilla::Error;
 use Bugzilla::WebService::Constants qw(XMLRPC_CONTENT_TYPE_WHITELIST);
-use Bugzilla::WebService::Util qw(fix_credentials);
 use Scalar::Util qw(tainted);
 
 sub deserialize {
@@ -139,11 +138,6 @@ sub deserialize {
     my $params = $som->paramsin;
     # This allows positional parameters for Testopia.
     $params = {} if ref $params ne 'HASH';
-
-    # Update the params to allow for several convenience key/values
-    # use for authentication
-    fix_credentials($params);
-
     Bugzilla->input_params($params);
     return $som;
 }

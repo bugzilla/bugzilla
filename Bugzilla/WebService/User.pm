@@ -55,9 +55,15 @@ sub login {
 
     # Username and password params are required 
     foreach my $param ("login", "password") {
-        (!defined $params->{$param} && !defined $params->{'Bugzilla_' . $param})
+        defined $params->{$param} 
             || ThrowCodeError('param_required', { param => $param });
     }
+
+    # Make sure the CGI user info class works if necessary.
+    my $input_params = Bugzilla->input_params;
+    $input_params->{'Bugzilla_login'} =  $params->{login};
+    $input_params->{'Bugzilla_password'} = $params->{password};
+    $input_params->{'Bugzilla_restrictlogin'} = $params->{restrict_login};
 
     my $user = Bugzilla->login();
 

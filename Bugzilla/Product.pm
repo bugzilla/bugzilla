@@ -41,6 +41,8 @@ use constant DEFAULT_CLASSIFICATION_ID => 1;
 ####    Initialization     ####
 ###############################
 
+use constant IS_CONFIG => 1;
+
 use constant DB_TABLE => 'products';
 
 use constant DB_COLUMNS => qw(
@@ -107,6 +109,7 @@ sub create {
     Bugzilla::Hook::process('product_end_of_create', { product => $product });
 
     $dbh->bz_commit_transaction();
+    Bugzilla->memcached->clear_config();
     return $product;
 }
 
@@ -262,6 +265,7 @@ sub update {
     # Changes have been committed.
     delete $self->{check_group_controls};
     Bugzilla->user->clear_product_cache();
+    Bugzilla->memcached->clear_config();
 
     return $changes;
 }
@@ -320,6 +324,7 @@ sub remove_from_db {
     $dbh->do("DELETE FROM products WHERE id = ?", undef, $self->id);
 
     $dbh->bz_commit_transaction();
+    Bugzilla->memcached->clear_config();
 
     # We have to delete these internal variables, else we get
     # the old lists of products and classifications again.

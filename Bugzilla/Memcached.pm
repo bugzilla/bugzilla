@@ -42,6 +42,10 @@ sub _new {
     return bless($self, $class);
 }
 
+sub enabled {
+    return $_[0]->{memcached} ? 1 : 0;
+}
+
 sub set {
     my ($self, $args) = @_;
     return unless $self->{memcached};
@@ -97,6 +101,32 @@ sub get {
     }
 }
 
+sub set_config {
+    my ($self, $args) = @_;
+    return unless $self->{memcached};
+
+    if (exists $args->{key}) {
+        return $self->_set($self->_config_prefix . ':' . $args->{key}, $args->{data});
+    }
+    else {
+        ThrowCodeError('params_required', { function => "Bugzilla::Memcached::set_config",
+                                            params   => [ 'key' ] });
+    }
+}
+
+sub get_config {
+    my ($self, $args) = @_;
+    return unless $self->{memcached};
+
+    if (exists $args->{key}) {
+        return $self->_get($self->_config_prefix . ':' . $args->{key});
+    }
+    else {
+        ThrowCodeError('params_required', { function => "Bugzilla::Memcached::get_config",
+                                            params   => [ 'key' ] });
+    }
+}
+
 sub clear {
     my ($self, $args) = @_;
     return unless $self->{memcached};
@@ -132,44 +162,66 @@ sub clear {
 
 sub clear_all {
     my ($self) = @_;
-    return unless my $memcached = $self->{memcached};
-    if (!$memcached->incr("prefix", 1)) {
-        $memcached->add("prefix", time());
-    }
+    return unless $self->{memcached};
+    $self->_inc_prefix("global");
+}
 
-    # BMO - log that we've wiped the cache
-    openlog('apache', 'cons,pid', 'local4');
-    syslog('notice', encode_utf8('[memcached] cache cleared'));
-    closelog();
+sub clear_config {
+    my ($self) = @_;
+    return unless $self->{memcached};
+    $self->_inc_prefix("config");
 }
 
 # in order to clear all our keys, we add a prefix to all our keys.  when we
 # need to "clear" all current keys, we increment the prefix.
 sub _prefix {
-    my ($self) = @_;
+    my ($self, $name) = @_;
     # we don't want to change prefixes in the middle of a request
     my $request_cache = Bugzilla->request_cache;
-    if (!$request_cache->{memcached_prefix}) {
+    my $request_cache_key = "memcached_prefix_$name";
+    if (!$request_cache->{$request_cache_key}) {
         my $memcached = $self->{memcached};
-        my $prefix = $memcached->get("prefix");
+        my $prefix = $memcached->get($name);
         if (!$prefix) {
             $prefix = time();
-            if (!$memcached->add("prefix", $prefix)) {
+            if (!$memcached->add($name, $prefix)) {
                 # if this failed, either another process set the prefix, or
                 # memcached is down.  assume we lost the race, and get the new
                 # value.  if that fails, memcached is down so use a dummy
                 # prefix for this request.
-                $prefix = $memcached->get("prefix") || 0;
+                $prefix = $memcached->get($name) || 0;
             }
         }
-        $request_cache->{memcached_prefix} = $prefix;
+        $request_cache->{$request_cache_key} = $prefix;
     }
-    return $request_cache->{memcached_prefix};
+    return $request_cache->{$request_cache_key};
+}
+
+sub _inc_prefix {
+    my ($self, $name) = @_;
+    my $memcached = $self->{memcached};
+    if (!$memcached->incr($name, 1)) {
+        $memcached->add($name, time());
+    }
+    delete Bugzilla->request_cache->{"memcached_prefix_$name"};
+
+    # BMO - log that we've wiped the cache
+    openlog('apache', 'cons,pid', 'local4');
+    syslog('notice', encode_utf8("[memcached] $name cache cleared"));
+    closelog();
+}
+
+sub _global_prefix {
+    return $_[0]->_prefix("global");
+}
+
+sub _config_prefix {
+    return $_[0]->_prefix("config");
 }
 
 sub _encode_key {
     my ($self, $key) = @_;
-    $key = $self->_prefix . ':' . uri_escape_utf8($key);
+    $key = $self->_global_prefix . ':' . uri_escape_utf8($key);
     return length($self->{namespace} . $key) > MAX_KEY_LENGTH
         ? undef
         : $key;
@@ -182,6 +234,7 @@ sub _set {
         ThrowCodeError('param_invalid', { function => "Bugzilla::Memcached::set",
                                           param    => "value" });
     }
+
     $key = $self->_encode_key($key)
         or return;
     return $self->{memcached}->set($key, $value);
@@ -198,15 +251,33 @@ sub _get {
     # detaint returned values
     # hashes and arrays are detainted just one level deep
     if (ref($value) eq 'HASH') {
-        map { defined($_) && trick_taint($_) } values %$value;
+        _detaint_hashref($value);
     }
     elsif (ref($value) eq 'ARRAY') {
-        trick_taint($_) foreach @$value;
+        foreach my $value (@$value) {
+            next unless defined $value;
+            # arrays of hashes are common
+            if (ref($value) eq 'HASH') {
+                _detaint_hashref($value);
+            }
+            elsif (!ref($value)) {
+                trick_taint($value);
+            }
+        }
     }
     elsif (!ref($value)) {
         trick_taint($value);
     }
     return $value;
+}
+
+sub _detaint_hashref {
+    my ($hashref) = @_;
+    foreach my $value (values %$hashref) {
+        if (defined($value) && !ref($value)) {
+            trick_taint($value);
+        }
+    }
 }
 
 sub _delete {
@@ -273,6 +344,14 @@ L<Bugzilla-E<gt>memcached()|Bugzilla/memcached>.
 
 =head1 METHODS
 
+=over
+
+=item C<enabled>
+
+Returns true if Memcached support is available and enabled.
+
+=back
+
 =head2 Setting
 
 Adds a value to Memcached.
@@ -291,6 +370,13 @@ to C<undef>.
 
 This is a convenience method which allows cached data to be later retrieved by
 specifying the C<table> and either the C<id> or C<name>.
+
+=item C<set_config({ key =E<gt> $key, data =E<gt> $data })>
+
+Adds the C<data> using the C<key> while identifying the data as part of
+Bugzilla's configuration (such as fields, products, components, groups, etc).
+Values set with C<set_config> are automatically cleared when changes are made
+to Bugzilla's configuration.
 
 =back
 
@@ -313,6 +399,11 @@ Return C<value> with the specified C<table> and C<id>.
 
 Return C<value> with the specified C<table> and C<name>.
 
+=item C<get_config({ key =E<gt> $key })>
+
+Return C<value> with the specified C<key> from the configuration cache.  See
+C<set_config> for more information.
+
 =back
 
 =head2 Clearing
@@ -334,6 +425,11 @@ corresponding C<table> and C<name> entry.
 
 Removes C<value> with the specified C<table> and C<name>, as well as the
 corresponding C<table> and C<id> entry.
+
+=item C<clear_config>
+
+Removes all configuration related values from the cache.  See C<set_config> for
+more information.
 
 =item C<clear_all>
 

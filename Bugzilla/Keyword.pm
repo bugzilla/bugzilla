@@ -27,6 +27,8 @@ use Bugzilla::Util;
 ####    Initialization     ####
 ###############################
 
+use constant IS_CONFIG => 1;
+
 use constant DB_COLUMNS => qw(
    keyworddefs.id
    keyworddefs.name

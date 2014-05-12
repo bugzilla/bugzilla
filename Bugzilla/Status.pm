@@ -126,11 +126,21 @@ sub _check_value {
 
 sub BUG_STATE_OPEN {
     my $dbh = Bugzilla->dbh;
-    my $cache = Bugzilla->request_cache;
-    $cache->{status_bug_state_open} ||=
-        $dbh->selectcol_arrayref('SELECT value FROM bug_status 
-                                   WHERE is_open = 1');
-    return @{ $cache->{status_bug_state_open} };
+    my $request_cache = Bugzilla->request_cache;
+    my $cache_key = 'status_bug_state_open';
+    return @{ $request_cache->{$cache_key} }
+        if exists $request_cache->{$cache_key};
+
+    my $rows = Bugzilla->memcached->get_config({ key => $cache_key });
+    if (!$rows) {
+        $rows = $dbh->selectcol_arrayref(
+            'SELECT value FROM bug_status WHERE is_open = 1'
+        );
+        Bugzilla->memcached->set_config({ key => $cache_key, data => $rows });
+    }
+
+    $request_cache->{$cache_key} = $rows;
+    return @$rows;
 }
 
 # Tells you whether or not the argument is a valid "open" state.

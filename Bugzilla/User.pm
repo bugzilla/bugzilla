@@ -683,13 +683,23 @@ sub groups {
             FROM user_group_map
            WHERE user_id = ? AND isbless = 0}, undef, $self->id);
 
-    my $rows = $dbh->selectall_arrayref(
-        "SELECT DISTINCT grantor_id, member_id
-           FROM group_group_map
-          WHERE grant_type = " . GROUP_MEMBERSHIP);
+    my $cache_key = 'group_grant_type_' . GROUP_MEMBERSHIP;
+    my $membership_rows = Bugzilla->memcached->get_config({
+        key => $cache_key,
+    });
+    if (!$membership_rows) {
+        $membership_rows = $dbh->selectall_arrayref(
+            "SELECT DISTINCT grantor_id, member_id
+               FROM group_group_map
+              WHERE grant_type = " . GROUP_MEMBERSHIP);
+        Bugzilla->memcached->set_config({
+            key  => $cache_key,
+            data => $membership_rows,
+        });
+    }
 
     my %group_membership;
-    foreach my $row (@$rows) {
+    foreach my $row (@$membership_rows) {
         my ($grantor_id, $member_id) = @$row; 
         push (@{ $group_membership{$member_id} }, $grantor_id);
     }

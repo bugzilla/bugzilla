@@ -31,6 +31,8 @@ use base qw(Bugzilla::Field::ChoiceInterface Bugzilla::Object);
 ####    Initialization     ####
 ###############################
 
+use constant IS_CONFIG => 1;
+
 use constant DB_TABLE => 'classifications';
 use constant LIST_ORDER => 'sortkey, name';
 
@@ -75,6 +77,7 @@ sub remove_from_db {
         foreach my $id (@$product_ids) {
             Bugzilla->memcached->clear({ table => 'products', id => $id });
         }
+        Bugzilla->memcached->clear_config();
     }
 
     $self->SUPER::remove_from_db();

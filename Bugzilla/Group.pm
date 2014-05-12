@@ -37,6 +37,8 @@ use Bugzilla::Config qw(:admin);
 ##### Module Initialization ###
 ###############################
 
+use constant IS_CONFIG => 1;
+
 use constant DB_COLUMNS => qw(
     groups.id
     groups.name
@@ -231,6 +233,7 @@ sub update {
     Bugzilla::Hook::process('group_end_of_update', 
                             { group => $self, changes => $changes });
     $dbh->bz_commit_transaction();
+    Bugzilla->memcached->clear_config();
     return $changes;
 }
 
@@ -420,6 +423,7 @@ sub create {
 
     Bugzilla::Hook::process('group_end_of_create', { group => $group });
     $dbh->bz_commit_transaction();
+    Bugzilla->memcached->clear_config();
     return $group;
 }
 

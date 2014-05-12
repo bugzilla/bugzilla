@@ -108,10 +108,12 @@ sub run_create_validators {
 
 sub update {
     my $self = shift;
+    my $dbh = Bugzilla->dbh;
+
+    $dbh->bz_start_transaction();
     my $changes = $self->SUPER::update(@_);
 
     if (exists $changes->{value}) {
-        my $dbh = Bugzilla->dbh;
         # The milestone value is stored in the bugs table instead of its ID.
         $dbh->do('UPDATE bugs SET target_milestone = ?
                   WHERE target_milestone = ? AND product_id = ?',
@@ -121,14 +123,19 @@ sub update {
         $dbh->do('UPDATE products SET defaultmilestone = ?
                   WHERE id = ? AND defaultmilestone = ?',
                  undef, ($self->name, $self->product_id, $changes->{value}->[0]));
-        Bugzilla->memcached->clear({ table => 'produles', id => $self->product_id });
+        Bugzilla->memcached->clear({ table => 'products', id => $self->product_id });
     }
+    $dbh->bz_commit_transaction();
+    Bugzilla->memcached->clear_config();
+
     return $changes;
 }
 
 sub remove_from_db {
     my $self = shift;
     my $dbh = Bugzilla->dbh;
+
+    $dbh->bz_start_transaction();
 
     # The default milestone cannot be deleted.
     if ($self->name eq $self->product->default_milestone) {
@@ -158,8 +165,9 @@ sub remove_from_db {
                              Bugzilla->user->id, $timestamp);
         }
     }
+    $self->SUPER::remove_from_db();
 
-    $dbh->do('DELETE FROM milestones WHERE id = ?', undef, $self->id);
+    $dbh->bz_commit_transaction();
 }
 
 ################################

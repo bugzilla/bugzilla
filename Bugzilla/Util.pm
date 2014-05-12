@@ -628,13 +628,13 @@ sub bz_crypt {
         $algorithm = $1;
     }
 
+    # Wide characters cause crypt and Digest to die.
+    if (Bugzilla->params->{'utf8'}) {
+        utf8::encode($password) if utf8::is_utf8($password);
+    }
+
     my $crypted_password;
     if (!$algorithm) {
-        # Wide characters cause crypt to die
-        if (Bugzilla->params->{'utf8'}) {
-            utf8::encode($password) if utf8::is_utf8($password);
-        }
-    
         # Crypt the password.
         $crypted_password = crypt($password, $salt);
 

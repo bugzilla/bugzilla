@@ -216,6 +216,7 @@ sub update {
     Bugzilla::Hook::process('group_end_of_update', 
                             { group => $self, changes => $changes });
     $dbh->bz_commit_transaction();
+    Bugzilla->memcached->clear_config();
     return $changes;
 }
 

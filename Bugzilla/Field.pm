@@ -1058,6 +1058,7 @@ sub create {
     $field->_update_visibility_values();
 
     $dbh->bz_commit_transaction();
+    Bugzilla->memcached->clear_config();
 
     if ($field->custom) {
         my $name = $field->name;
@@ -1096,6 +1097,7 @@ sub update {
         $dbh->do("UPDATE " . $self->name . " SET visibility_value_id = NULL");
     }
     $self->_update_visibility_values();
+    Bugzilla->memcached->clear_config();
     return $changes;
 }
 

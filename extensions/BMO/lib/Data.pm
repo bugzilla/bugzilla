@@ -172,6 +172,7 @@ our %product_sec_groups = (
     "Mozilla Communities"          => 'mozilla-communities-security',
     "Mozilla Corporation"          => 'mozilla-employee-confidential',
     "Mozilla Developer Network"    => 'websites-security',
+    "Mozilla Foundation"           => 'mozilla-employee-confidential',
     "Mozilla Grants"               => 'grants',
     "mozillaignite"                => 'websites-security',
     "Mozilla Messaging"            => 'mozilla-messaging-confidential',

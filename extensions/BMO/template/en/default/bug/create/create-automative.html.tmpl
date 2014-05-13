@@ -1,0 +1,276 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% PROCESS global/variables.none.tmpl %]
+
+[% inline_style = BLOCK %]
+#automative_form {
+  padding: 10px;
+}
+#automative_form .required:after {
+  content: " *";
+  color: red;
+}
+#automative_form .field_label {
+  font-weight: bold;
+}
+#automative_form .field_desc {
+  padding-bottom: 3px;
+}
+#automative_form .field_desc,
+#automative_form .head_desc {
+  width: 600px;
+  word-wrap: normal;
+}
+#automative_form .head_desc {
+  padding-top: 5px;
+  padding-bottom: 12px;
+}
+#automative_form .form_section {
+  margin-bottom: 10px;
+}
+#automative_form textarea {
+  font-family: inherit;
+  font-size: inherit;
+}
+#automative_form em {
+  font-size: 1em;
+}
+.yui-calcontainer {
+  z-index: 2;
+}
+[% END %]
+
+[% inline_javascript = BLOCK %]
+function validateAndSubmit() {
+  'use strict';
+  var alert_text = '';
+  var requiredLabels = YAHOO.util.Selector.query('label.required');
+  if (requiredLabels) {
+    requiredLabels.forEach(function (label) {
+      var name = label.getAttribute('for');
+      var ids = YAHOO.util.Selector.query(
+        '#automative_form *[name="' + name + '"]'
+      ).map(function (e) {
+        return e.id
+      });
+
+      if (ids && ids[0]) {
+        if (!isFilledOut(ids[0])) {
+          var desc = label.textContent || name;
+          alert_text +=
+            "Please enter a value for " +
+            desc.replace(/[\r\n]+/, "").replace(/\s+/g, " ") +
+            "\n";
+        }
+      }
+    });
+  }
+
+  if (alert_text != '') {
+    alert(alert_text);
+    return false;
+  }
+  return true;
+}
+[% END %]
+
+[% PROCESS global/header.html.tmpl
+   title = "Automation Request Form"
+   style = inline_style
+   javascript = inline_javascript
+   javascript_urls = [ 'extensions/BMO/web/js/form_validate.js',
+                       'js/field.js', 'js/util.js' ]
+   yui = [ "autocomplete", "calendar", "selector" ]
+%]
+
+[% USE Bugzilla %]
+[% cgi = Bugzilla.cgi %]
+
+<form id="automative_form" method="post" action="post_bug.cgi"
+  enctype="multipart/form-data" onSubmit="return validateAndSubmit();">
+  <input type="hidden" name="format" value="automative">
+  <input type="hidden" name="product" value="Testing">
+  <input type="hidden" name="component" value="General">
+  <input type="hidden" name="rep_platform" value="All">
+  <input type="hidden" name="op_sys" value="Other">
+  <input type="hidden" name="version" value="unspecified">
+  <input type="hidden" name="bug_severity" id="bug_severity" value="normal">
+  <input type="hidden" name="token" value="[% token FILTER html %]">
+  <input type="hidden" name="assigned_to" value="jgriffin@mozilla.com">
+
+  <div class="head_desc">
+    Welcome to the Automation Request Form!
+  </div>
+
+  <div class="form_section">
+    <label for="short_desc" class="field_label required">Summary</label>
+    <div class="field_desc">
+      One-line summary of the problem you'd like automation to help solve
+    </div>
+    <input type="text" name="short_desc" id="short_desc" size="80">
+  </div>
+
+  <div class="form_section">
+    <label for="desc_problem" class="field_label required">Problem</label>
+    <div class="field_desc">
+      Detailed description of the problem
+    </div>
+    <textarea id="desc_problem" name="desc_problem"
+      cols="80" rows="5"></textarea>
+  </div>
+
+  <div class="form_section">
+    <label for="desc_solution" class="field_label required">Solution</label>
+    <div class="field_desc">
+      Detailed description of the proposed automation solution
+    </div>
+    <textarea id="desc_solution" name="desc_solution"
+      cols="80" rows="5"></textarea>
+  </div>
+
+  <div class="form_section">
+    <label for="desc_top_level_goal" class="field_label required">Top Level
+      Goal</label>
+    <div class="field_desc">Describe the top-level project goal which this is
+      supporting</div>
+    <textarea id="desc_top_level_goal" name="desc_top_level_goal" cols="80"
+      rows="5"></textarea>
+  </div>
+
+  <div class="form_section">
+    <label for="existing_bug" class="field_label">Existing [% terms.Bug %]
+      number </label>
+    <div class="field_desc"> Existing [% terms.bug %] (if any) </div>
+    <input type="text" name="existing_bug" id="existing_bug" size="80">
+  </div>
+
+  <div class="form_section">
+    <label for="per_commit" class="field_label">Run per-commit?</label>
+    <div class="field_desc">
+      Does this automation need to be run per-commit and report to TBPL?  Can it
+      be run less frequently?
+    </div>
+    <input type="text" name="per_commit" id="per_commit" size="80">
+  </div>
+
+  <div class="form_section">
+    <label for="desc_data_produce" class="field_label">Data capture?</label>
+    <div class="field_desc">If this automation will report data other than
+      pass/fail (e.g. some sort of performance metric), describe the data that
+      you'd like to have the automation produce.  Do we already have a method of
+      capturing this kind of data, or do we need to develop one?</div>
+    <textarea id="desc_data_produce" name="desc_data_produce" cols="80"
+      rows="5"></textarea>
+  </div>
+
+  <div class="form_section">
+    <label for="prototype_date" class="field_label">Prototype Date</label>
+    <div class="field_desc">
+      When is a prototype needed?
+    </div>
+    <input name="prototype_date" size="20" id="prototype_date" value=""
+      onchange="updateCalendarFromField(this)">
+    <button type="button" class="calendar_button"
+      id="button_calendar_prototype_date"
+      onclick="showCalendar('prototype_date')">
+      <span>Calendar</span>
+    </button>
+    <div id="con_calendar_prototype_date"></div>
+    <script type="text/javascript">
+      createCalendar('prototype_date')
+    </script>
+  </div>
+
+  <div class="form_section">
+    <label for="production_date" class="field_label">Production Date</label>
+    <div class="field_desc">
+      When is a finished project running in production needed?
+    </div>
+    <input name="production_date" size="20" id="production_date" value=""
+      onchange="updateCalendarFromField(this)">
+    <button type="button" class="calendar_button"
+      id="button_calendar_production_date"
+      onclick="showCalendar('production_date')">
+      <span>Calendar</span>
+    </button>
+    <div id="con_calendar_production_date"></div>
+    <script type="text/javascript">
+      createCalendar('production_date')
+    </script>
+  </div>
+
+  <div class="form_section">
+    <label for="most_valuable_piece" class="field_label">Most Valuable
+      Piece?</label>
+    <div class="field_desc">If there are multiple pieces, tests, or features in
+      the proposed automation, what is the single most valuable piece?</div>
+    <input type="text" name="most_valuable_piece" id="most_valuable_piece"
+      size="80">
+  </div>
+
+  <div class="form_section">
+    <label for="responsible_engineer" class="field_label">Responsible
+      Engineer</label>
+    <div class="field_desc">
+      Which engineer is responsible for working with the automation engineer for
+      information, support, and troubleshooting?
+    </div>
+    [% INCLUDE global/userselect.html.tmpl
+      id       => "responsible_engineer"
+      name     => "responsible_engineer"
+      value    => ""
+      size     => 80
+      classes  => ["bz_userfield"]
+    %]
+  </div>
+
+  <div class="form_section">
+    <label for="manager" class="field_label">Manager</label>
+    <div class="field_desc">
+      Which manager/project manager is responsible for issues related to
+      milestones and priorities?
+    </div>
+    [% INCLUDE global/userselect.html.tmpl
+      id       => "manager"
+      name     => "manager"
+      value    => ""
+      size     => 80
+      classes  => ["bz_userfield"]
+    %]
+  </div>
+
+  <div class="form_section">
+    <label for="other_teams" class="field_label">Other Teams</label>
+    <div class="field_desc">
+      What other teams are involved and are there any other external
+      dependencies?
+    </div>
+    <textarea id="other_teams" name="other_teams" cols="80"
+      rows="5"></textarea>
+  </div>
+
+  <div class="form_section">
+    <label for="additional_info" class="field_label">Additional
+    Information</label>
+    <div class="field_desc">
+      Additional information
+    </div>
+    <textarea id="additional_info" name="additional_info" cols="80"
+      rows="5"></textarea>
+  </div>
+
+  <input type="submit" id="commit" value="Submit">
+
+  <p>
+    [ <span class="required_star">*</span> <span class="required_explanation">
+      Required Field</span> ]
+  </p>
+</form>
+
+[% PROCESS global/footer.html.tmpl %]

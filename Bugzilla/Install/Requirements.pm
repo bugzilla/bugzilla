@@ -368,6 +368,12 @@ sub OPTIONAL_MODULES {
         version => 0,
         feature => ['jobqueue'],
     },
+    {
+        package => 'File-Slurp',
+        module  => 'File::Slurp',
+        version => '9999.13',
+        feature => ['jobqueue'],
+    },
 
     # mod_perl
     {

@@ -36,9 +36,14 @@ after_failure:
   - sudo cat /var/log/apache2/error.log
 
 notifications:
+  irc:
+    channels:
+      - "irc.mozilla.org#qa-bugzilla"
+      - "irc.mozilla.org#bugzilla"
+    template:
+      - "Bugzilla %{branch} : %{author} : %{message}"
+      - "Commit Message : %{commit_message}"
+      - "Commit Link : %{compare_url}"
+      - "Build Link : %{build_url}"
   on_success: change
   on_failure: always
-  irc: "irc.mozilla.org#qa-bugzilla"
-  email:
-    recipients:
-      - dkl@mozilla.com

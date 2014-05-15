@@ -15,7 +15,7 @@ matrix:
   exclude:
     - perl: 5.12
       env: TEST_SUITE=docs
-    - perl: 5.12
+    - perl: 5.10
       env: TEST_SUITE=webservices DB=mysql
     - perl: 5.12
       env: TEST_SUITE=selenium DB=mysql

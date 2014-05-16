@@ -21,7 +21,7 @@
 
 [% PROCESS global/variables.none.tmpl %]
 
-From: [% Param('mailfrom') %]
+From: "[% terms.BugzillaTitle %]" <[% Param('mailfrom') %]>
 To: [% email %]
 Subject: [% terms.Bugzilla %]: confirm account creation
 X-Bugzilla-Type: admin

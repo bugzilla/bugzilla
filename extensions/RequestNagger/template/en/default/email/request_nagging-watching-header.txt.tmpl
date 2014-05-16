@@ -8,7 +8,7 @@
 
 [% PROCESS "global/field-descs.none.tmpl" %]
 [% PROCESS "global/reason-descs.none.tmpl" %]
-From: [% Param('mailfrom') %]
+From: "[% terms.BugzillaTitle %]" <[% Param('mailfrom') %]>
 To: [% recipient.email %]
 Subject: [[% terms.Bugzilla %]] Overdue Requests Report
 Date: [% date %]

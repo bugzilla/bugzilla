@@ -19,7 +19,7 @@
   #%]
 
 [% PROCESS "global/variables.none.tmpl" %]
-From: [% Param('mailfrom') %]
+From: "[% terms.BugzillaTitle %]" <[% Param('mailfrom') %]>
 To: [% addressee %]
 Subject: [[% terms.Bugzilla %]] Sanity Check Results
 X-Bugzilla-Type: sanitycheck

@@ -21,7 +21,7 @@
 [% PROCESS global/variables.none.tmpl %]
 
 Content-Type: text/plain
-From: [% Param('mailfrom') %]
+From: "[% terms.BugzillaTitle %]" <[% Param('mailfrom') %]>
 To: [% user.email %]
 Subject: [[% terms.Bugzilla %]] Your account [% user.login -%]
  is being impersonated

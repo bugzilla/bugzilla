@@ -20,7 +20,7 @@
 
 [% PROCESS global/variables.none.tmpl %]
 
-From: [% Param('mailfrom') %]
+From: "[% terms.BugzillaTitle %]" <[% Param('mailfrom') %]>
 To: [% Param('maintainer') %]
 Subject: [[% terms.Bugzilla %]] Account Lock-Out: [% locked_user.login %] ([% address %])
 X-Bugzilla-Type: admin

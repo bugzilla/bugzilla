@@ -25,7 +25,7 @@
 
 [% PROCESS global/variables.none.tmpl %]
 
-From: [% Param('mailfrom') %]
+From: "[% terms.BugzillaTitle %]" <[% Param('mailfrom') %]>
 To: [% emailaddress %]
 Subject: [% terms.Bugzilla %] Change Email Address Request
 Importance: High

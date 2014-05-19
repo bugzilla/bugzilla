@@ -157,8 +157,11 @@ sub _object_modified {
         changes   => [],
     };
     foreach my $field_name (sort keys %$changes) {
+        my $new_field_name = $field_name;
+        $new_field_name =~ s/isprivate/is_private/;
+
         push @{$changes_data->{'changes'}}, {
-            field   => $field_name,
+            field   => $new_field_name,
             removed => $changes->{$field_name}[0],
             added   => $changes->{$field_name}[1],
         };

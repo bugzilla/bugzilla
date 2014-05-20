@@ -2915,11 +2915,11 @@ sub add_group {
     # If the bug is already in this group, then there is nothing to do.
     return if $self->in_group($group);
 
-
     # BMO : allow bugs to be always placed into some groups by the bug's
-    # reporter
-    if ($self->{reporter_id} != Bugzilla->user->id
-        || !$self->product_obj->group_always_settable($group))
+    # reporter, or by users with editbugs
+    my $user = Bugzilla->user;
+    if (!$self->product_obj->group_always_settable($group)
+        || ($self->{reporter_id} != $user->id && !$user->in_group('editbugs')))
     {
         # Make sure that bugs in this product can actually be restricted
         # to this group by the current user.
@@ -2928,7 +2928,7 @@ sub add_group {
 
         # OtherControl people can add groups only during a product change,
         # and only when the group is not NA for them.
-        if (!Bugzilla->user->in_group($group->name)) {
+        if (!$user->in_group($group->name)) {
             my $controls = $self->product_obj->group_controls->{$group->id};
             if (!$self->{_old_product_name}
                 || $controls->{othercontrol} == CONTROLMAPNA)

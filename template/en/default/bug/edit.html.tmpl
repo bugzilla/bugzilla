@@ -200,6 +200,8 @@
     [% END %]
   </td>
   <td>
+    [%# BMO hook for adding custom group visibility %]
+    [% Hook.process('before_restrict_visibility', 'bug/edit.html.tmpl') %]
     [% PROCESS section_restrict_visibility %]
   </td>
   </tr></table>

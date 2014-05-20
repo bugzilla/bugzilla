@@ -1,0 +1,25 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% RETURN IF
+  bug.in_group(bug.product_obj.default_security_group_obj)
+  || user.in_group(bug.product_obj.default_security_group)
+  || (user.id != bug.reporter.id && !user.in_group('editbugs'))
+  %]
+
+<div class="bz_group_visibility_section">
+  <input type="checkbox" name="groups"
+         value="[% bug.product_obj.default_security_group FILTER none %]"
+         id="group_[% bug.product_obj.default_security_group_obj.id FILTER html %]"
+         onchange="if (this.checked) document.getElementById('addselfcc').checked = true"
+  >
+  <label for="group_[% bug.product_obj.default_security_group_obj.id FILTER html %]"
+    title="This [% terms.bug %] is security sensitive and should be hidden from the public until it is resolved">
+    Restrict access to this [% terms.bug %]
+  </label>
+</div><br>

@@ -91,6 +91,16 @@ sub QUERY_DEFS {
                 'email1'     => $user->login
             }
         },
+        {
+            name        => 'lastvisitedbugs',
+            heading     => 'Updated Since Last Visit',
+            description => 'Bugs updated since list visited',
+            params      => {
+                o1 => 'lessthan',
+                v1 => '%last_changed%',
+                f1 => 'last_visit_ts',
+            },
+        },
     );
 
     if (Bugzilla->params->{'useqacontact'}) {

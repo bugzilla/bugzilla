@@ -50,6 +50,7 @@ use Bugzilla::Group;
 use Bugzilla::Status;
 use Bugzilla::Comment;
 use Bugzilla::BugUrl;
+use Bugzilla::BugUserLastVisit;
 
 use List::MoreUtils qw(firstidx uniq part);
 use List::Util qw(min max first);
@@ -4140,6 +4141,23 @@ sub LogActivityEntry {
                   (bug_id, who, bug_when, fieldid, removed, added, comment_id)
                   VALUES (?, ?, ?, ?, ?, ?, ?)",
                   undef, ($i, $whoid, $timestamp, $fieldid, $removestr, $addstr, $comment_id));
+    }
+}
+
+# Update bug_user_last_visit table
+sub update_user_last_visit {
+    my ($self, $user, $last_visit_ts) = @_;
+    my $lv = Bugzilla::BugUserLastVisit->match({ bug_id  => $self->id,
+                                                 user_id => $user->id })->[0];
+
+    if ($lv) {
+        $lv->set(last_visit_ts => $last_visit_ts);
+        $lv->update;
+    }
+    else {
+        Bugzilla::BugUserLastVisit->create({ bug_id        => $self->id,
+                                             user_id       => $user->id,
+                                             last_visit_ts => $last_visit_ts });
     }
 }
 

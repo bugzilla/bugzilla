@@ -56,6 +56,13 @@ sub get_param_list {
    name => 'allowuserdeletion',
    type => 'b',
    default => 0
+  },
+
+  {
+   name => 'last_visit_keep_days',
+   type => 't',
+   default => 10,
+   checker => \&check_numeric
   });
   return @param_list;
 }

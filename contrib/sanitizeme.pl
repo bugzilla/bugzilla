@@ -86,6 +86,7 @@ eval {
     delete_security_groups();
     delete_sensitive_user_data();
     delete_attachment_data() unless $keep_attachments;
+    delete_bug_user_last_visit();
     disable_email_delivery() unless $enable_email;
     print "All done!\n";
     $dbh->bz_rollback_transaction() if $dry_run;
@@ -199,6 +200,11 @@ sub delete_attachment_data {
     # Delete unnecessary attachment data.
     print "Removing attachment data to preserve disk space...\n";
     $dbh->do("UPDATE attach_data SET thedata = ''");
+}
+
+sub delete_bug_user_last_visit {
+    print "Removing all entries from bug_user_last_visit...\n"
+    $dbh->do('TRUNCATE TABLE bug_user_last_visit');
 }
 
 sub disable_email_delivery {

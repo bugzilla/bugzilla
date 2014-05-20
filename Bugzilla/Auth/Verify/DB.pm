@@ -82,7 +82,9 @@ sub check_credentials {
 
     # If needed, update the user's password.
     if ($update_password) {
-        $user->set_password($password);
+        # We can't call $user->set_password because we don't want the password
+        # complexity rules to apply here.
+        $user->{cryptpassword} = bz_crypt($password);
         $user->update();
     }
 

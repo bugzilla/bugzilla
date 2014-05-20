@@ -68,7 +68,9 @@ sub check_credentials {
     # whatever hashing system we're using now.
     my $current_algorithm = PASSWORD_DIGEST_ALGORITHM;
     if ($real_password_crypted !~ /{\Q$current_algorithm\E}$/) {
-        $user->set_password($password);
+        # We can't call $user->set_password because we don't want the password
+        # complexity rules to apply here.
+        $user->{cryptpassword} = bz_crypt($password);
         $user->update();
     }
 

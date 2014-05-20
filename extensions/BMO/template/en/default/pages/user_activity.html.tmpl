@@ -160,6 +160,10 @@
                [% "Comment $change.comment.count"
                   FILTER bug_link(operation.bug, comment_num => change.comment.count)
                   FILTER none %]
+            [% ELSIF change.comment.defined && change.fieldname == 'comment_tag' %]
+               [% "Comment $change.comment.count Tagged"
+                  FILTER bug_link(operation.bug, comment_num => change.comment.count)
+                  FILTER none %]
             [% ELSE %]
               [%+ field_descs.${change.fieldname} FILTER html %]
             [% END %]

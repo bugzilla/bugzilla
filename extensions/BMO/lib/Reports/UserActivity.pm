@@ -54,6 +54,7 @@ sub report {
 
         my ($activity_joins, $activity_where) = ('', '');
         my ($attachments_joins, $attachments_where) = ('', '');
+        my ($tags_activity_joins, $tags_activity_where) = ('', '');
         if (Bugzilla->params->{"insidergroup"}
             && !Bugzilla->user->in_group(Bugzilla->params->{'insidergroup'}))
         {
@@ -61,6 +62,10 @@ sub report {
                        ON attachments.attach_id = bugs_activity.attach_id";
             $activity_where = "AND COALESCE(attachments.isprivate, 0) = 0";
             $attachments_where = $activity_where;
+
+            $tags_activity_joins = 'LEFT JOIN longdescs
+                ON longdescs_tags_activity.comment_id = longdescs.comment_id';
+            $tags_activity_where = 'AND COALESCE(longdescs.isprivate, 0) = 0';
         }
 
         my @who_bits;
@@ -92,7 +97,7 @@ sub report {
         $from_dt = $from_dt->ymd() . ' 00:00:00';
         $to_dt = $to_dt->ymd() . ' 23:59:59';
         my @params;
-        for (1..4) {
+        for (1..5) {
             push @params, @who;
             push @params, ($from_dt, $to_dt);
         }
@@ -125,6 +130,28 @@ sub report {
              WHERE profiles.login_name IN ($who_bits)
                    AND bugs_activity.bug_when >= ? AND bugs_activity.bug_when <= ?
                    $activity_where
+
+        UNION ALL
+
+        SELECT
+                   'comment_tag' AS name,
+                   longdescs_tags_activity.bug_id,
+                   NULL as attach_id,
+                   ".$dbh->sql_date_format('longdescs_tags_activity.bug_when',
+                       '%Y.%m.%d %H:%i:%s') . " AS bug_when,
+                   longdescs_tags_activity.removed,
+                   longdescs_tags_activity.added,
+                   profiles.login_name,
+                   longdescs_tags_activity.comment_id,
+                   longdescs_tags_activity.bug_when
+              FROM longdescs_tags_activity
+                   $tags_activity_joins
+        INNER JOIN profiles
+                ON profiles.userid = longdescs_tags_activity.who
+             WHERE profiles.login_name IN ($who_bits)
+                   AND longdescs_tags_activity.bug_when >= ?
+                   AND longdescs_tags_activity.bug_when <= ?
+                  $tags_activity_where
 
         UNION ALL
 

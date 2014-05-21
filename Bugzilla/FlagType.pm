@@ -644,9 +644,19 @@ sub sqlify_criteria {
     my @criteria = ("1=1");
 
     if ($criteria->{name}) {
-        my $name = $dbh->quote($criteria->{name});
-        trick_taint($name); # Detaint data as we have quoted it.
-        push(@criteria, "flagtypes.name = $name");
+        if (ref($criteria->{name}) eq 'ARRAY') {
+            my @names = map { $dbh->quote($_) } @{$criteria->{name}};
+            # Detaint data as we have quoted it.
+            foreach my $name (@names) {
+                trick_taint($name);
+            }
+            push @criteria, $dbh->sql_in('flagtypes.name', \@names);
+        }
+        else {
+            my $name = $dbh->quote($criteria->{name});
+            trick_taint($name); # Detaint data as we have quoted it.
+            push(@criteria, "flagtypes.name = $name");
+        }
     }
     if ($criteria->{target_type}) {
         # The target type is stored in the database as a one-character string

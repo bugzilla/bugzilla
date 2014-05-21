@@ -259,7 +259,7 @@ sub GetGroups {
     my %legal_groups;
 
     foreach my $product_name (@$product_names) {
-        my $product = new Bugzilla::Product({name => $product_name});
+        my $product = Bugzilla::Product->new({name => $product_name, cache => 1});
 
         foreach my $gid (keys %{$product->group_controls}) {
             # The user can only edit groups they belong to.
@@ -874,7 +874,7 @@ $vars->{'time_info'} = $time_info;
 
 if (!$user->in_group('editbugs')) {
     foreach my $product (keys %$bugproducts) {
-        my $prod = new Bugzilla::Product({name => $product});
+        my $prod = Bugzilla::Product->new({name => $product, cache => 1});
         if (!$user->in_group('editbugs', $prod->id)) {
             $vars->{'caneditbugs'} = 0;
             last;
@@ -905,12 +905,12 @@ $vars->{'currenttime'} = localtime(time());
 my @products = keys %$bugproducts;
 my $one_product;
 if (scalar(@products) == 1) {
-    $one_product = new Bugzilla::Product({ name => $products[0] });
+    $one_product = Bugzilla::Product->new({ name => $products[0], cache => 1 });
 }
 # This is used in the "Zarroo Boogs" case.
 elsif (my @product_input = $cgi->param('product')) {
     if (scalar(@product_input) == 1 and $product_input[0] ne '') {
-        $one_product = new Bugzilla::Product({ name => $cgi->param('product') });
+        $one_product = Bugzilla::Product->new({ name => $cgi->param('product'), cache => 1 });
     }
 }
 # We only want the template to use it if the user can actually 
@@ -993,8 +993,45 @@ if ($dotweak && scalar @bugs) {
         $vars->{'versions'} = [map($_->name, grep($_->is_active, @{ $one_product->versions }))];
         $vars->{'components'} = [map($_->name, grep($_->is_active, @{ $one_product->components }))];
         if (Bugzilla->params->{'usetargetmilestone'}) {
-            $vars->{'targetmilestones'} = [map($_->name, grep($_->is_active,  
+            $vars->{'milestones'} = [map($_->name, grep($_->is_active,
                                                @{ $one_product->milestones }))];
+        }
+    }
+    else {
+        # We will only show the values at are active in all products.
+        my %values = ();
+        my @fields = ('components', 'versions');
+        if (Bugzilla->params->{'usetargetmilestone'}) {
+            push @fields, 'milestones';
+        }
+
+        # Go through each product and count the number of times each field
+        # is used
+        foreach my $product_name (@products) {
+            my $product = Bugzilla::Product->new({name => $product_name, cache => 1});
+            foreach my $field (@fields) {
+                my $list = $product->$field;
+                foreach my $item (@$list) {
+                    ++$values{$field}{$item->name} if $item->is_active;
+                }
+            }
+        }
+
+        # Now we get the list of each field and see which values have
+        # $product_count (i.e. appears in every product)
+        my $product_count = scalar(@products);
+        foreach my $field (@fields) {
+            my @values = grep { $values{$field}{$_} == $product_count } keys %{$values{$field}};
+            if (scalar @values) {
+                @{$vars->{$field}} = $field eq 'version'
+                    ? sort { vers_cmp(lc($a), lc($b)) } @values
+                    : sort { lc($a) cmp lc($b) } @values
+            }
+
+            # Do we need to show a warning about limited visiblity?
+            if (@values != scalar keys %{$values{$field}}) {
+                $vars->{excluded_values} = 1;
+            }
         }
     }
 }

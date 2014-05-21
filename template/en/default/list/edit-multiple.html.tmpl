@@ -44,6 +44,11 @@
   </ol>
 </div>
 
+[% IF excluded_values %]
+  <p class="extra_info">Only values that are available for all products of the above
+  [%+ terms.bugs %] are shown.</p>
+[% END %]
+
 <table id="form">
   <tr>
 
@@ -124,7 +129,7 @@
       <th><label for="target_milestone">Target Milestone:</label></th>
       <td>
         [% PROCESS selectmenu menuname = "target_milestone"
-                              menuitems = targetmilestones %]
+                              menuitems = milestones %]
       </td>
     [% END %]
   </tr>

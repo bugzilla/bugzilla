@@ -365,6 +365,8 @@ objects.
 
 =item L<Bugzilla::WebService::Classification>
 
+=item L<Bugzilla::WebService::FlagType>
+
 =item L<Bugzilla::WebService::Group>
 
 =item L<Bugzilla::WebService::Product>

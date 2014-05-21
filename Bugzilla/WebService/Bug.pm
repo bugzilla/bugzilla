@@ -352,7 +352,6 @@ sub _translate_comment {
         id         => $self->type('int', $comment->id),
         bug_id     => $self->type('int', $comment->bug_id),
         creator    => $self->type('email', $comment->author->login),
-        author     => $self->type('email', $comment->author->login),
         time       => $self->type('dateTime', $comment->creation_ts),
         creation_time => $self->type('dateTime', $comment->creation_ts),
         is_private => $self->type('boolean', $comment->is_private),
@@ -1349,19 +1348,16 @@ sub _attachment_to_hash {
         bug_id           => $self->type('int', $attach->bug_id),
         file_name        => $self->type('string', $attach->filename),
         summary          => $self->type('string', $attach->description),
-        description      => $self->type('string', $attach->description),
         content_type     => $self->type('string', $attach->contenttype),
         is_private       => $self->type('int', $attach->isprivate),
         is_obsolete      => $self->type('int', $attach->isobsolete),
         is_patch         => $self->type('int', $attach->ispatch),
     }, $types, $prefix;
 
-    # creator/attacher require an extra lookup, so we only send them if
+    # creator requires an extra lookup, so we only send them if
     # the filter wants them.
-    foreach my $field (qw(creator attacher)) {
-        if (filter_wants $filters, $field, $types, $prefix) {
-            $item->{$field} = $self->type('email', $attach->attacher->login);
-        }
+    if (filter_wants $filters, 'creator', $types, $prefix) {
+        $item->{'creator'} = $self->type('email', $attach->attacher->login);
     }
 
     if (filter_wants $filters, 'data', $types, $prefix) {
@@ -1997,10 +1993,6 @@ C<string> The file name of the attachment.
 
 C<string> A short string describing the attachment.
 
-Also returned as C<description>, for backwards-compatibility with older
-Bugzillas. (However, this backwards-compatibility will go away in Bugzilla
-5.0.)
-
 =item C<content_type>
 
 C<string> The MIME type of the attachment.
@@ -2021,10 +2013,6 @@ C<boolean> True if the attachment is a patch, False otherwise.
 =item C<creator>
 
 C<string> The login name of the user that created the attachment.
-
-Also returned as C<attacher>, for backwards-compatibility with older
-Bugzillas. (However, this backwards-compatibility will go away in Bugzilla
-5.0.)
 
 =item C<flags>
 
@@ -2222,10 +2210,6 @@ C<string> The actual text of the comment.
 =item creator
 
 C<string> The login name of the comment's author.
-
-Also returned as C<author>, for backwards-compatibility with older
-Bugzillas. (However, this backwards-compatibility will go away in Bugzilla
-5.0.)
 
 =item time
 

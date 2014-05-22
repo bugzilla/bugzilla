@@ -511,6 +511,7 @@ sub _concatenate_css {
         write_file($file, $content);
     }
 
+    $file =~ s/^\Q$cgi_path\E\///;
     return mtime_filter($file);
 }
 

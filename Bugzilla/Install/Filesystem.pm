@@ -211,6 +211,8 @@ sub FILESYSTEM {
                                   dirs => DIR_CGI_WRITE | DIR_ALSO_WS_SERVE },
          "$datadir/db"      => { files => CGI_WRITE,
                                   dirs => DIR_CGI_WRITE },
+         "$skinsdir/assets" => { files => WS_SERVE,
+                                  dirs => DIR_CGI_OVERWRITE | DIR_ALSO_WS_SERVE },
 
          # Readable directories
          "$datadir/mining"     => { files => CGI_READ,
@@ -284,6 +286,7 @@ sub FILESYSTEM {
         $attachdir              => DIR_CGI_WRITE,
         $graphsdir              => DIR_CGI_WRITE | DIR_ALSO_WS_SERVE,
         $webdotdir              => DIR_CGI_WRITE | DIR_ALSO_WS_SERVE,
+        "$skinsdir/assets"      => DIR_CGI_WRITE | DIR_ALSO_WS_SERVE,
         # Directories that contain content served directly by the web server.
         "$skinsdir/custom"      => DIR_WS_SERVE,
         "$skinsdir/contrib"     => DIR_WS_SERVE,
@@ -483,6 +486,7 @@ EOT
 
     _remove_empty_css_files();
     _convert_single_file_skins();
+    _remove_dynamic_css_files();
 }
 
 sub _remove_empty_css_files {
@@ -524,6 +528,14 @@ sub _convert_single_file_skins {
         $dir_name =~ s/\.css$//;
         mkdir $dir_name or warn "$dir_name: $!";
         _rename_file($skin_file, "$dir_name/global.css");
+    }
+}
+
+# delete all automatically generated css files to force recreation at the next
+# request.
+sub _remove_dynamic_css_files {
+    foreach my $file (glob(bz_locations()->{skinsdir} . '/assets/*.css')) {
+        unlink($file);
     }
 }
 

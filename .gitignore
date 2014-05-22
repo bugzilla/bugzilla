@@ -10,5 +10,6 @@
 /data
 /localconfig
 /index.html
+/skins/assets
 /template_cache
 .DS_Store

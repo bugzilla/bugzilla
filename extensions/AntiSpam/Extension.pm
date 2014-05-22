@@ -131,7 +131,8 @@ sub _ip_blocking {
 
 sub comment_after_add_tag {
     my ($self, $args) = @_;
-    return unless lc($args->{tag}) eq 'spam';
+    my $tag = lc($args->{tag});
+    return unless $tag eq 'spam' or $tag eq 'abusive';
     my $comment = $args->{comment};
     my $author = $comment->author;
 
@@ -145,21 +146,24 @@ sub comment_after_add_tag {
     return if !$author->is_new;
 
     # exclude users who haven't made enough comments
-    my $spam_count = Bugzilla->params->{antispam_spammer_comment_count};
-    return if $author->comment_count < $spam_count;
+    my $count = $tag eq 'spam'
+        ? Bugzilla->params->{antispam_spammer_comment_count}
+        : Bugzilla->params->{antispam_abusive_comment_count};
+    return if $author->comment_count < $count;
 
     # get user's comments
+    trick_taint($tag);
     my $comments = Bugzilla->dbh->selectall_arrayref("
         SELECT longdescs.comment_id,longdescs_tags.id
           FROM longdescs
           LEFT JOIN longdescs_tags
                ON longdescs_tags.comment_id = longdescs.comment_id
-               AND longdescs_tags.tag = 'spam'
+               AND longdescs_tags.tag = ?
          WHERE longdescs.who = ?
          ORDER BY longdescs.bug_when
-    ", undef, $author->id);
+    ", undef, $tag, $author->id);
 
-    # this comment is spam
+    # this comment needs to be counted too
     my $comment_id = $comment->id;
     foreach my $ra (@$comments) {
         if ($ra->[0] == $comment_id) {
@@ -168,24 +172,28 @@ sub comment_after_add_tag {
         }
     }
 
-    # throw away comment id and negate bool to make it a list of not-spam
+    # throw away comment id and negate bool to make it a list of not-spam/abuse
     $comments = [ map { $_->[1] ? 0 : 1 } @$comments ];
 
     my $reason;
 
-    # check if the first N comments are spam
-    if (!scalar(grep { $_ } @$comments[0..($spam_count - 1)])) {
-        $reason = "first $spam_count comments are spam";
+    # check if the first N comments are spam/abuse
+    if (!scalar(grep { $_ } @$comments[0..($count - 1)])) {
+        $reason = "first $count comments are $tag";
     }
 
-    # check if the last N comments are spam
-    elsif (!scalar(grep { $_ } @$comments[-$spam_count..-1])) {
-        $reason = "last $spam_count comments are spam";
+    # check if the last N comments are spam/abuse
+    elsif (!scalar(grep { $_ } @$comments[-$count..-1])) {
+        $reason = "last $count comments are $tag";
     }
 
     # disable
     if ($reason) {
-        $author->set_disabledtext(Bugzilla->params->{antispam_spammer_disable_text});
+        $author->set_disabledtext(
+            $tag eq 'spam'
+                ? Bugzilla->params->{antispam_spammer_disable_text}
+                : Bugzilla->params->{antispam_abusive_disable_text}
+        );
         $author->set_disable_mail(1);
         $author->update();
         _syslog(sprintf("[audit] antispam disabled <%s>: %s", $author->login, $reason));

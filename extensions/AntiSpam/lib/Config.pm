@@ -36,9 +36,30 @@ sub get_param_list {
             name => 'antispam_spammer_disable_text',
             type => 'l',
             default =>
-                "This account has been automatically disabled as a result of a " .
-                "high number of spam comments.\n\nPlease contact the address at ".
-                "the end of this message if you believe this to be an error."
+                "This account has been automatically disabled as a result of " .
+                "a high number of spam comments.<br>\n<br>\n" .
+                "Please contact the address at the end of this message if " .
+                "you believe this to be an error."
+        },
+        {
+            name => 'antispam_abusive_comment_count',
+            type => 't',
+            default => '5',
+            checker => \&check_numeric
+        },
+        {
+            name => 'antispam_abusive_disable_text',
+            type => 'l',
+            default =>
+                "This account has been automatically disabled as a result of " .
+                "a high number of comments tagged as abusive.<br>\n<br>\n" .
+                "All interactions on Bugzilla should follow our " .
+                "<a href=\"https://bugzilla.mozilla.org/page.cgi?id=etiquette.html\">" .
+                "etiquette guidelines</a>.<br>\n<br>\n" .
+                "Please contact the address at the end of this message if you " .
+                "believe this to be an error, or if you would like your account " .
+                "reactivated in order to interact within our etiquette " .
+                "guidelines."
         },
     );
 

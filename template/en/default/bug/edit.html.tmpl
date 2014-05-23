@@ -392,9 +392,12 @@
   </tr>
   [% IF Param('usestatuswhiteboard') %]
     <tr>
-      <th class="field_label">
-        <label for="status_whiteboard" accesskey="w"><u>W</u>hiteboard</label>:
-      </th>
+      [% INCLUDE "bug/field-label.html.tmpl"
+        field     = bug_fields.status_whiteboard
+        editable  = 1
+        accesskey = "w"
+        desc_url  = "https://wiki.mozilla.org/BMO/Whiteboard"
+      %]
       [% PROCESS input inputname => "status_whiteboard" size => "40" colspan => 2 %]
     </tr>
   [% END %]

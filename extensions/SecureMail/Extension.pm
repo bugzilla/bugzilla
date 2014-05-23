@@ -413,6 +413,9 @@ sub _should_secure_whine {
 sub _make_secure {
     my ($email, $key, $sanitise_subject, $add_new) = @_;
 
+    # Add header showing this email has been secured
+    $email->header_set('X-Bugzilla-Secure-Email', 'Yes');
+
     my $subject = $email->header('Subject');
     my ($bug_id) = $subject =~ /\[\D+(\d+)\]/;
 

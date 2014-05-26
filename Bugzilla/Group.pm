@@ -95,7 +95,8 @@ sub members_non_inherited {
 sub _get_members {
     my ($self, $grant_type) = @_;
     my $dbh = Bugzilla->dbh;
-    my $grant_clause = $grant_type ? "AND grant_type = $grant_type" : "";
+    my $grant_clause = defined($grant_type) ? "AND grant_type = $grant_type"
+                                            : "";
     my $user_ids = $dbh->selectcol_arrayref(
         "SELECT DISTINCT user_id
            FROM user_group_map

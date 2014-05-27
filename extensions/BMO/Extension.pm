@@ -624,23 +624,31 @@ sub attachment_process_data {
         seek($data, 0, 0);
     } else {
         # string
-        return if length($data) > 256;
         $url = $data;
     }
 
+    if (my $content_type = _get_review_content_type($url)) {
+        $attributes->{mimetype} = $content_type;
+        $attributes->{ispatch}  = 0;
+    }
+}
+
+sub _get_review_content_type {
+    my ($url) = @_;
+
     # trim and check for the pull request url
     return unless defined $url;
+    return if length($url) > 256;
     $url = trim($url);
     return if $url =~ /\s/;
 
     if ($url =~ m#^https://github\.com/[^/]+/[^/]+/pull/\d+/?$#i) {
-        $attributes->{mimetype} = GITHUB_PR_CONTENT_TYPE;
-        $attributes->{ispatch}  = 0;
+        return GITHUB_PR_CONTENT_TYPE;
     }
-    elsif ($url =~ m#^https?://reviewboard(?:-dev)?\.(?:allizom|mozilla)\.org/r/\d+/?#i) {
-        $attributes->{mimetype} = RB_REQUEST_CONTENT_TYPE;
-        $attributes->{ispatch}  = 0;
+    if ($url =~ m#^https?://reviewboard(?:-dev)?\.(?:allizom|mozilla)\.org/r/\d+/?#i) {
+        return RB_REQUEST_CONTENT_TYPE;
     }
+    return;
 }
 
 # redirect automatically to github urls
@@ -652,10 +660,13 @@ sub attachment_view {
     # don't redirect if the content-type is specified explicitly
     return if defined $cgi->param('content_type');
 
-    # must be our github content-type
+    # must be our github/reviewboard content-type
     return unless
         $attachment->contenttype eq GITHUB_PR_CONTENT_TYPE
         or $attachment->contenttype eq RB_REQUEST_CONTENT_TYPE;
+
+    # must still be a valid url
+    return unless _get_review_content_type($attachment->data);
 
     # redirect
     print $cgi->redirect(trim($attachment->data));

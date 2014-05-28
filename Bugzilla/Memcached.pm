@@ -104,7 +104,7 @@ sub set_config {
     return unless $self->{memcached};
 
     if (exists $args->{key}) {
-        return $self->_set($self->_config_prefix . ':' . $args->{key}, $args->{data});
+        return $self->_set($self->_config_prefix . '.' . $args->{key}, $args->{data});
     }
     else {
         ThrowCodeError('params_required', { function => "Bugzilla::Memcached::set_config",
@@ -117,7 +117,7 @@ sub get_config {
     return unless $self->{memcached};
 
     if (exists $args->{key}) {
-        return $self->_get($self->_config_prefix . ':' . $args->{key});
+        return $self->_get($self->_config_prefix . '.' . $args->{key});
     }
     else {
         ThrowCodeError('params_required', { function => "Bugzilla::Memcached::get_config",
@@ -165,9 +165,14 @@ sub clear_all {
 }
 
 sub clear_config {
-    my ($self) = @_;
-    return unless $self->{memcached};
-    $self->_inc_prefix("config");
+    my ($self, $args) = @_;
+    if ($args && exists $args->{key}) {
+        $self->_delete($self->_config_prefix . '.' . $args->{key});
+    }
+    else {
+        return unless $self->{memcached};
+        $self->_inc_prefix("config");
+    }
 }
 
 # in order to clear all our keys, we add a prefix to all our keys.  when we
@@ -214,7 +219,7 @@ sub _config_prefix {
 
 sub _encode_key {
     my ($self, $key) = @_;
-    $key = $self->_global_prefix . ':' . uri_escape_utf8($key);
+    $key = $self->_global_prefix . '.' . uri_escape_utf8($key);
     return length($self->{namespace} . $key) > MAX_KEY_LENGTH
         ? undef
         : $key;
@@ -418,6 +423,11 @@ corresponding C<table> and C<name> entry.
 
 Removes C<value> with the specified C<table> and C<name>, as well as the
 corresponding C<table> and C<id> entry.
+
+=item C<clear_config({ key =E<gt> $key })>
+
+Remove C<value> with the specified C<key> from the configuration cache.  See
+C<set_config> for more information.
 
 =item C<clear_config>
 

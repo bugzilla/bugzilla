@@ -668,66 +668,78 @@ sub flush_queries_cache {
 sub groups {
     my $self = shift;
 
-    return $self->{groups} if defined $self->{groups};
     return [] unless $self->id;
+    return $self->{groups} if defined $self->{groups};
 
-    my $dbh = Bugzilla->dbh;
-    my $groups_to_check = $dbh->selectcol_arrayref(
-        q{SELECT DISTINCT group_id
-            FROM user_group_map
-           WHERE user_id = ? AND isbless = 0}, undef, $self->id);
-
-    my $cache_key = 'group_grant_type_' . GROUP_MEMBERSHIP;
-    my $membership_rows = Bugzilla->memcached->get_config({
-        key => $cache_key,
+    my $user_groups_key = "user_groups." . $self->id;
+    my $groups = Bugzilla->memcached->get_config({
+        key => $user_groups_key
     });
-    if (!$membership_rows) {
-        $membership_rows = $dbh->selectall_arrayref(
-            "SELECT DISTINCT grantor_id, member_id
-               FROM group_group_map
-              WHERE grant_type = " . GROUP_MEMBERSHIP);
+
+    if (!$groups) {
+        my $dbh = Bugzilla->dbh;
+        my $groups_to_check = $dbh->selectcol_arrayref(
+            "SELECT DISTINCT group_id
+               FROM user_group_map
+              WHERE user_id = ? AND isbless = 0", undef, $self->id);
+
+        my $grant_type_key = 'group_grant_type_' . GROUP_MEMBERSHIP;
+        my $membership_rows = Bugzilla->memcached->get_config({
+            key => $grant_type_key,
+        });
+        if (!$membership_rows) {
+            $membership_rows = $dbh->selectall_arrayref(
+                "SELECT DISTINCT grantor_id, member_id
+                FROM group_group_map
+                WHERE grant_type = " . GROUP_MEMBERSHIP);
+            Bugzilla->memcached->set_config({
+                key  => $grant_type_key,
+                data => $membership_rows,
+            });
+        }
+
+        my %group_membership;
+        foreach my $row (@$membership_rows) {
+            my ($grantor_id, $member_id) = @$row;
+            push (@{ $group_membership{$member_id} }, $grantor_id);
+        }
+
+        # Let's walk the groups hierarchy tree (using FIFO)
+        # On the first iteration it's pre-filled with direct groups
+        # membership. Later on, each group can add its own members into the
+        # FIFO. Circular dependencies are eliminated by checking
+        # $checked_groups{$member_id} hash values.
+        # As a result, %groups will have all the groups we are the member of.
+        my %checked_groups;
+        my %groups;
+        while (scalar(@$groups_to_check) > 0) {
+            # Pop the head group from FIFO
+            my $member_id = shift @$groups_to_check;
+
+            # Skip the group if we have already checked it
+            if (!$checked_groups{$member_id}) {
+                # Mark group as checked
+                $checked_groups{$member_id} = 1;
+
+                # Add all its members to the FIFO check list
+                # %group_membership contains arrays of group members
+                # for all groups. Accessible by group number.
+                my $members = $group_membership{$member_id};
+                my @new_to_check = grep(!$checked_groups{$_}, @$members);
+                push(@$groups_to_check, @new_to_check);
+
+                $groups{$member_id} = 1;
+            }
+        }
+        $groups = [ keys %groups ];
+
         Bugzilla->memcached->set_config({
-            key  => $cache_key,
-            data => $membership_rows,
+            key  => $user_groups_key,
+            data => $groups,
         });
     }
 
-    my %group_membership;
-    foreach my $row (@$membership_rows) {
-        my ($grantor_id, $member_id) = @$row; 
-        push (@{ $group_membership{$member_id} }, $grantor_id);
-    }
-    
-    # Let's walk the groups hierarchy tree (using FIFO)
-    # On the first iteration it's pre-filled with direct groups 
-    # membership. Later on, each group can add its own members into the
-    # FIFO. Circular dependencies are eliminated by checking
-    # $checked_groups{$member_id} hash values.
-    # As a result, %groups will have all the groups we are the member of.
-    my %checked_groups;
-    my %groups;
-    while (scalar(@$groups_to_check) > 0) {
-        # Pop the head group from FIFO
-        my $member_id = shift @$groups_to_check;
-        
-        # Skip the group if we have already checked it
-        if (!$checked_groups{$member_id}) {
-            # Mark group as checked
-            $checked_groups{$member_id} = 1;
-            
-            # Add all its members to the FIFO check list
-            # %group_membership contains arrays of group members 
-            # for all groups. Accessible by group number.
-            my $members = $group_membership{$member_id};
-            my @new_to_check = grep(!$checked_groups{$_}, @$members);
-            push(@$groups_to_check, @new_to_check);
-
-            $groups{$member_id} = 1;
-        }
-    }
-
-    $self->{groups} = Bugzilla::Group->new_from_list([keys %groups]);
-
+    $self->{groups} = Bugzilla::Group->new_from_list($groups);
     return $self->{groups};
 }
 
@@ -1448,6 +1460,8 @@ sub derive_regexp_groups {
             $group_delete->execute($id, $group, GRANT_REGEXP) if $present;
         }
     }
+
+    Bugzilla->memcached->clear_config({ key => "user_groups.$id" });
 }
 
 sub product_responsibilities {

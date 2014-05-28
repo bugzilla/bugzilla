@@ -668,8 +668,8 @@ sub flush_queries_cache {
 sub groups {
     my $self = shift;
 
-    return [] unless $self->id;
     return $self->{groups} if defined $self->{groups};
+    return [] unless $self->id;
 
     my $user_groups_key = "user_groups." . $self->id;
     my $groups = Bugzilla->memcached->get_config({

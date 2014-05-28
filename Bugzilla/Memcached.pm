@@ -166,11 +166,11 @@ sub clear_all {
 
 sub clear_config {
     my ($self, $args) = @_;
+    return unless $self->{memcached};
     if ($args && exists $args->{key}) {
         $self->_delete($self->_config_prefix . '.' . $args->{key});
     }
     else {
-        return unless $self->{memcached};
         $self->_inc_prefix("config");
     }
 }

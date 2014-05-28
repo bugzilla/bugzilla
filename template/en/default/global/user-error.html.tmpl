@@ -1817,11 +1817,6 @@
     Sorry, but you are not allowed to (un)mark comments or attachments
     as private.
 
-  [% ELSIF error == "user_not_involved" %]
-    [% title = "User Not Involved with $terms.Bug" %]
-    Sorry, but you are not involved with [% terms.Bug %] [%+
-        bug_id FILTER bug_link(bug_id) FILTER none %].
-
   [% ELSIF error == "webdot_too_large" %]
     [% title = "Dependency Graph Too Large" %]
     The dependency graph contains too many [% terms.bugs %] to display (more

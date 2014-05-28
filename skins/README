@@ -1,4 +1,4 @@
-There are four directories here, standard/, custom/, contrib/, and assets/.
+There are three directories here, standard/, custom/, and contrib/.
 
 standard/ holds the standard stylesheets. These are used no matter what skin
 the user selects. If the user selects the "Classic" skin, then *only* the
@@ -16,6 +16,3 @@ if you want to override some CSS in skins/standard/global.css, then you should
 create a file called "global.css" in custom/ and put some CSS in it. The CSS
 you put into files in custom/ will be used *in addition* to the CSS in
 skins/standard/ or the CSS in skins/contrib/. It will apply to every skin.
-
-assets/ holds the minified and concatenated files which are created by
-checksetup.pl and Bugzilla::Template.  Do not edit the files in this directory.

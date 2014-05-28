@@ -499,13 +499,13 @@ sub _concatenate_css {
         } @sources;
 
     my $cgi_path   = bz_locations()->{cgi_path};
-    my $skins_path = bz_locations()->{skinsdir};
+    my $skins_path = bz_locations()->{assetsdir};
 
     # build minified files
     my @minified;
     foreach my $source (@sources) {
         next unless -e "$cgi_path/$files{$source}";
-        my $file = $skins_path . '/assets/' . md5_hex($source) . '.css';
+        my $file = $skins_path . '/' . md5_hex($source) . '.css';
         if (!-e $file) {
             my $content = read_file("$cgi_path/$files{$source}");
 
@@ -523,7 +523,7 @@ sub _concatenate_css {
     }
 
     # concat files
-    my $file = $skins_path . '/assets/' . md5_hex(join(' ', @sources)) . '.css';
+    my $file = $skins_path . '/' . md5_hex(join(' ', @sources)) . '.css';
     if (!-e $file) {
         my $content = '';
         foreach my $source (@minified) {

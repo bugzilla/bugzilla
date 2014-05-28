@@ -682,6 +682,7 @@ sub _bz_locations {
         # The script should really generate these graphs directly...
         'webdotdir'   => "$datadir/webdot",
         'extensionsdir' => "$libpath/extensions",
+        'assetsdir'   => "$datadir/assets",
     };
 }
 

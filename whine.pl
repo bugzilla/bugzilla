@@ -97,7 +97,8 @@ my $sth_schedules_by_event = $dbh->prepare(
 
 # Send whines from the address in the 'mailfrom' Parameter so that all
 # Bugzilla-originated mail appears to come from a single address.
-my $fromaddress = Bugzilla->params->{'mailfrom'};
+my $fromaddress = '"' . template_var('terms')->{'BugzillaTitle'} . '"' .
+                  ' <' . Bugzilla->params->{'mailfrom'} . '>';
 
 # get the current date and time
 my ($now_sec, $now_minute, $now_hour, $now_day, $now_month, $now_year, 

@@ -342,6 +342,7 @@ if ($action eq 'search') {
                  ($otherUserID, $userid,
                   get_field_id('bug_group'),
                   join(', ', @groupsRemovedFrom), join(', ', @groupsAddedTo)));
+        Bugzilla->memcached->clear_config({ key => "user_groups.$otherUserID" })
     }
     # XXX: should create profiles_activity entries for blesser changes.
 

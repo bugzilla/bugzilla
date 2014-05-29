@@ -1714,6 +1714,25 @@ use constant ABSTRACT_SCHEMA => {
         ],
     },
 
+    bug_user_last_visit => {
+        FIELDS => [
+            id            => {TYPE => 'INTSERIAL', NOTNULL => 1,
+                              PRIMARYKEY => 1},
+            user_id       => {TYPE => 'INT3', NOTNULL => 1,
+                              REFERENCES => {TABLE  => 'profiles',
+                                             COLUMN => 'userid',
+                                             DELETE => 'CASCADE'}},
+            bug_id        => {TYPE => 'INT3', NOTNULL => 1,
+                              REFERENCES => {TABLE  => 'bugs',
+                                             COLUMN => 'bug_id',
+                                             DELETE => 'CASCADE'}},
+            last_visit_ts => {TYPE => 'DATETIME', NOTNULL => 1},
+        ],
+        INDEXES => [
+            bug_user_last_visit_idx => {FIELDS => ['user_id', 'bug_id'],
+                                        TYPE => 'UNIQUE'}
+        ],
+    },
 };
 
 # Foreign Keys are added in Bugzilla::DB::bz_add_field_tables

@@ -494,7 +494,7 @@ sub _concatenate_css {
 
     my %files =
         map {
-            (my $file = $_) =~ s/(^[^\?]+).+/$1/;
+            (my $file = $_) =~ s/(^[^\?]+)\?.+/$1/;
             $_ => $file;
         } @sources;
 

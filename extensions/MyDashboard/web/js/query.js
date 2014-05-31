@@ -24,10 +24,12 @@ YUI({
 }).use("node", "datatable", "datatable-sort", "datatable-message", "json-stringify",
        "datatable-datasource", "datasource-io", "datasource-jsonschema", "cookie",
        "gallery-datatable-row-expansion-bmo", "handlebars", "escape", function(Y) {
-    var counter = 0,
-        dataSource = null,
-        dataTable = null,
-        default_query = "assignedbugs";
+    var counter          = 0,
+        bugQueryTable    = null,
+        bugQuery         = null,
+        lastChangesQuery = null,
+        lastChangesCache = {},
+        default_query    = "assignedbugs";
 
     // Grab last used query name from cookie or use default
     var query_cookie = Y.Cookie.get("my_dashboard_query");
@@ -45,69 +47,13 @@ YUI({
         }
     }
 
-    var updateQueryTable = function(query_name) {
-        if (!query_name) return;
+    var bugQuery = new Y.DataSource.IO({ source: 'jsonrpc.cgi' });
 
-        counter = counter + 1;
-
-        var callback = {
-            success: function(e) {
-                if (e.response) {
-                    Y.one('#query_count_refresh').removeClass('bz_default_hidden');
-                    Y.one("#query_container .query_description").setHTML(e.response.meta.description);
-                    Y.one("#query_container .query_heading").setHTML(e.response.meta.heading);
-                    Y.one("#query_bugs_found").setHTML(
-                        '<a href="buglist.cgi?' + e.response.meta.buffer +
-                        '" target="_blank">' + e.response.results.length + ' bugs found</a>');
-                    dataTable.set('data', e.response.results);
-                }
-            },
-            failure: function(o) {
-                if (o.error) {
-                    alert("Failed to load bug list from Bugzilla:\n\n" + o.error.message);
-                } else {
-                    alert("Failed to load bug list from Bugzilla.");
-                }
-            }
-        };
-
-        var json_object = {
-            version: "1.1",
-            method:  "MyDashboard.run_bug_query",
-            id:      counter,
-            params:  { query : query_name }
-        };
-
-        var stringified = Y.JSON.stringify(json_object);
-
-        Y.one('#query_count_refresh').addClass('bz_default_hidden');
-
-        dataTable.set('data', []);
-        dataTable.render("#query_table");
-        dataTable.showMessage('loadingMessage');
-
-        dataSource.sendRequest({
-            request: stringified,
-            cfg: {
-                method:  "POST",
-                headers: { 'Content-Type': 'application/json' }
-            },
-            callback: callback
-        });
-    };
-
-    var updatedFormatter = function(o) {
-        return '<span title="' + Y.Escape.html(o.value) + '">' +
-               Y.Escape.html(o.data.changeddate_fancy) + '</span>';
-    };
-
-    dataSource = new Y.DataSource.IO({ source: 'jsonrpc.cgi' });
-
-    dataSource.plug(Y.Plugin.DataSourceJSONSchema, {
+    bugQuery.plug(Y.Plugin.DataSourceJSONSchema, {
         schema: {
             resultListLocator: "result.result.bugs",
             resultFields: ["bug_id", "changeddate", "changeddate_fancy",
-                           "bug_status", "short_desc", "last_changes"],
+                           "bug_status", "short_desc", "changeddate_api" ],
             metaFields: {
                 description: "result.result.description",
                 heading:     "result.result.heading",
@@ -116,7 +62,7 @@ YUI({
         }
     });
 
-    dataSource.on('error', function(e) {
+    bugQuery.on('error', function(e) {
         try {
             var response = Y.JSON.parse(e.data.responseText);
             if (response.error)
@@ -126,7 +72,81 @@ YUI({
         }
     });
 
-    dataTable = new Y.DataTable({
+    var bugQueryCallback = {
+        success: function(e) {
+            if (e.response) {
+                Y.one('#query_count_refresh').removeClass('bz_default_hidden');
+                Y.one("#query_container .query_description").setHTML(e.response.meta.description);
+                Y.one("#query_container .query_heading").setHTML(e.response.meta.heading);
+                Y.one("#query_bugs_found").setHTML(
+                    '<a href="buglist.cgi?' + e.response.meta.buffer +
+                    '" target="_blank">' + e.response.results.length + ' bugs found</a>');
+                bugQueryTable.set('data', e.response.results);
+            }
+        },
+        failure: function(o) {
+            if (o.error) {
+                alert("Failed to load bug list from Bugzilla:\n\n" + o.error.message);
+            } else {
+                alert("Failed to load bug list from Bugzilla.");
+            }
+        }
+    };
+
+    var updateQueryTable = function(query_name) {
+        if (!query_name) return;
+
+        counter = counter + 1;
+        lastChangesCache = {};
+
+        Y.one('#query_count_refresh').addClass('bz_default_hidden');
+        bugQueryTable.set('data', []);
+        bugQueryTable.render("#query_table");
+        bugQueryTable.showMessage('loadingMessage');
+
+        var bugQueryParams = {
+            version: "1.1",
+            method:  "MyDashboard.run_bug_query",
+            id:      counter,
+            params:  { query : query_name }
+        };
+
+        bugQuery.sendRequest({
+            request: Y.JSON.stringify(bugQueryParams),
+            cfg: {
+                method:  "POST",
+                headers: { 'Content-Type': 'application/json' }
+            },
+            callback: bugQueryCallback
+        });
+    };
+
+    var updatedFormatter = function(o) {
+        return '<span title="' + Y.Escape.html(o.value) + '">' +
+               Y.Escape.html(o.data.changeddate_fancy) + '</span>';
+    };
+
+
+    lastChangesQuery = new Y.DataSource.IO({ source: 'jsonrpc.cgi' });
+
+    lastChangesQuery.plug(Y.Plugin.DataSourceJSONSchema, {
+        schema: {
+            resultListLocator: "result.results",
+            resultFields: ["last_changes"],
+        }
+    });
+
+    lastChangesQuery.on('error', function(e) {
+        try {
+            var response = Y.JSON.parse(e.data.responseText);
+            if (response.error)
+                e.error.message = response.error.message;
+        } catch(ex) {
+            // ignore
+        }
+    });
+
+    bugQueryTable = new Y.DataTable({
         columns: [
             { key: Y.Plugin.DataTableRowExpansion.column_key, label: ' ', sortable: false },
             { key: "bug_id", label: "Bug", allowHTML: true, sortable: true,
@@ -138,29 +158,65 @@ YUI({
         ],
     });
 
-    var last_changes_source = Y.one('#last-changes-template').getHTML(),
+    var last_changes_source   = Y.one('#last-changes-template').getHTML(),
         last_changes_template = Y.Handlebars.compile(last_changes_source);
 
-    dataTable.plug(Y.Plugin.DataTableRowExpansion, {
+    var stub_source           = Y.one('#last-changes-stub').getHTML(),
+        stub_template         = Y.Handlebars.compile(stub_source);
+
+
+    bugQueryTable.plug(Y.Plugin.DataTableRowExpansion, {
         uniqueIdKey: 'bug_id',
         template: function(data) {
-            var last_changes = {};
-            if (data.last_changes.email) {
-                last_changes = {
-                    activity: data.last_changes.activity, 
-                    email: data.last_changes.email,
-                    when: data.last_changes.when, 
-                    comment: data.last_changes.comment,
+            var bug_id = data.bug_id;
+
+            var lastChangesCallback = {
+                success: function(e) {
+                    if (e.response) {
+                        var last_changes = e.response.results[0].last_changes;
+                        last_changes['bug_id'] = bug_id;
+                        lastChangesCache[bug_id] = last_changes;
+                        Y.one('#last_changes_stub_' + bug_id).setHTML(last_changes_template(last_changes));
+                    }
+                },
+                failure: function(o) {
+                    if (o.error) {
+                        alert("Failed to load last changes from Bugzilla:\n\n" + o.error.message);
+                    } else {
+                        alert("Failed to load last changes from Bugzilla.");
+                    }
+                }
+            };
+
+            if (!lastChangesCache[bug_id]) {
+                var lastChangesParams = {
+                    version: "1.1",
+                    method:  "MyDashboard.run_last_changes",
+                    params:  { bug_id: data.bug_id, changeddate_api: data.changeddate_api  }
                 };
+
+                lastChangesQuery.sendRequest({
+                    request: Y.JSON.stringify(lastChangesParams),
+                    cfg: {
+                        method:  "POST",
+                        headers: { 'Content-Type': 'application/json' }
+                    },
+                    callback: lastChangesCallback
+                });
+
+                return stub_template({bug_id: bug_id});
             }
-            return last_changes_template(last_changes);
+            else {
+                return last_changes_template(lastChangesCache[bug_id]);
+            }
+
         }
     });
 
-    dataTable.plug(Y.Plugin.DataTableSort);
+    bugQueryTable.plug(Y.Plugin.DataTableSort);
 
-    dataTable.plug(Y.Plugin.DataTableDataSource, {
-        datasource: dataSource
+    bugQueryTable.plug(Y.Plugin.DataTableDataSource, {
+        datasource: bugQuery
     });
 
     // Initial load
@@ -183,7 +239,7 @@ YUI({
     });
 
     Y.one('#query_buglist').on('click', function(e) {
-        var data = dataTable.data;
+        var data = bugQueryTable.data;
         var ids = [];
         for (var i = 0, l = data.size(); i < l; i++) {
             ids.push(data.item(i).get('bug_id'));

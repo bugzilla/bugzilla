@@ -25,8 +25,11 @@
   [% saved_queries.push(q) IF q.saved %]
 [% END %]
 
+<script id="last-changes-stub" type="text/x-handlebars-template">
+  <div id="last_changes_stub_{{bug_id}}">Loading...</div>
+</script>
 <script id="last-changes-template" type="text/x-handlebars-template">
-  <div id="last_changes">
+  <div id="last_changes_{{bug_id}}">
     {{#if email}}
       <div id="last_changes_header">
         Last Changes :: {{email}} :: {{when}}

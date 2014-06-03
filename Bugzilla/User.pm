@@ -770,6 +770,7 @@ sub is_involved_in_bug {
         return 1 if $user_id == $bug->qa_contact->id;
     }
 
+    return unless $bug->cc;
     return any { $user_login eq $_ } @{ $bug->cc };
 }
 

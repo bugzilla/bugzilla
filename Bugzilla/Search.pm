@@ -349,6 +349,10 @@ use constant OPERATOR_FIELD_OVERRIDE => {
         changedafter  => \&_work_time_changedbefore_after,
         _default      => \&_work_time,
     },
+    last_visit_ts => {
+        _non_changed => \&_last_visit_ts,
+        _default     => \&_last_visit_ts_invalid_operator,
+    },
     
     # Custom Fields
     FIELD_TYPE_FREETEXT, { _non_changed => \&_nullable },
@@ -376,6 +380,10 @@ sub SPECIAL_PARSING {
         creation_ts => \&_datetime_translate,
         deadline    => \&_date_translate,
         delta_ts    => \&_datetime_translate,
+
+        # last_visit field that accept both a 1d, 1w, 1m, 1y format and the
+        # %last_changed% pronoun.
+        last_visit_ts => \&_last_visit_datetime,
     };
     foreach my $field (Bugzilla->active_custom_fields) {
         if ($field->type == FIELD_TYPE_DATETIME) {
@@ -454,79 +462,91 @@ use constant COLUMN_DEPENDS => {
 # certain columns in the buglist. For the most part, Search.pm uses
 # DB::Schema to figure out what needs to be joined, but for some
 # fields it needs a little help.
-use constant COLUMN_JOINS => {
-    actual_time => {
-        table => '(SELECT bug_id, SUM(work_time) AS total'
-                 . ' FROM longdescs GROUP BY bug_id)',
-        join  => 'INNER',
-    },
-    assigned_to => {
-        from  => 'assigned_to',
-        to    => 'userid',
-        table => 'profiles',
-        join  => 'INNER',
-    },
-    reporter => {
-        from  => 'reporter',
-        to    => 'userid',
-        table => 'profiles',
-        join  => 'INNER',
-    },
-    qa_contact => {
-        from  => 'qa_contact',
-        to    => 'userid',
-        table => 'profiles',
-    },
-    component => {
-        from  => 'component_id',
-        to    => 'id',
-        table => 'components',
-        join  => 'INNER',
-    },
-    product => {
-        from  => 'product_id',
-        to    => 'id',
-        table => 'products',
-        join  => 'INNER',
-    },
-    classification => {
-        table => 'classifications',
-        from  => 'map_product.classification_id',
-        to    => 'id',
-        join  => 'INNER',
-    },
-    'flagtypes.name' => {
-        as    => 'map_flags',
-        table => 'flags',
-        extra => ['map_flags.attach_id IS NULL'],
-        then_to => {
-            as    => 'map_flagtypes',
-            table => 'flagtypes',
-            from  => 'map_flags.type_id',
-            to    => 'id',
+sub COLUMN_JOINS {
+    my $user = Bugzilla->user;
+
+    my $joins = {
+        actual_time => {
+            table => '(SELECT bug_id, SUM(work_time) AS total'
+                    . ' FROM longdescs GROUP BY bug_id)',
+            join  => 'INNER',
         },
-    },
-    keywords => {
-        table => 'keywords',
-        then_to => {
-            as    => 'map_keyworddefs',
-            table => 'keyworddefs',
-            from  => 'map_keywords.keywordid',
-            to    => 'id',
+        assigned_to => {
+            from  => 'assigned_to',
+            to    => 'userid',
+            table => 'profiles',
+            join  => 'INNER',
         },
-    },
-    blocked => {
-        table => 'dependencies', 
-        to => 'dependson', 
-    }, 
-    dependson => {
-        table => 'dependencies', 
-        to => 'blocked', 
-    },
-    'longdescs.count' => {
-        table => 'longdescs',
-        join  => 'INNER',
-    },
+        reporter => {
+            from  => 'reporter',
+            to    => 'userid',
+            table => 'profiles',
+            join  => 'INNER',
+        },
+        qa_contact => {
+            from  => 'qa_contact',
+            to    => 'userid',
+            table => 'profiles',
+        },
+        component => {
+            from  => 'component_id',
+            to    => 'id',
+            table => 'components',
+            join  => 'INNER',
+        },
+        product => {
+            from  => 'product_id',
+            to    => 'id',
+            table => 'products',
+            join  => 'INNER',
+        },
+        classification => {
+            table => 'classifications',
+            from  => 'map_product.classification_id',
+            to    => 'id',
+            join  => 'INNER',
+        },
+        'flagtypes.name' => {
+            as    => 'map_flags',
+            table => 'flags',
+            extra => ['map_flags.attach_id IS NULL'],
+            then_to => {
+                as    => 'map_flagtypes',
+                table => 'flagtypes',
+                from  => 'map_flags.type_id',
+                to    => 'id',
+            },
+        },
+        keywords => {
+            table => 'keywords',
+            then_to => {
+                as    => 'map_keyworddefs',
+                table => 'keyworddefs',
+                from  => 'map_keywords.keywordid',
+                to    => 'id',
+            },
+        },
+        blocked => {
+            table => 'dependencies',
+            to => 'dependson',
+        },
+        dependson => {
+            table => 'dependencies',
+            to => 'blocked',
+        },
+        'longdescs.count' => {
+            table => 'longdescs',
+            join  => 'INNER',
+        },
+        last_visit_ts => {
+            as    => 'bug_user_last_visit',
+            table => 'bug_user_last_visit',
+            extra => ['bug_user_last_visit.user_id = ' . $user->id],
+            from  => 'bug_id',
+            to    => 'bug_id',
+        },
+    };
+    return $joins;
 };
 
 # This constant defines the columns that can be selected in a query 
@@ -595,6 +615,7 @@ sub COLUMNS {
         dependson => $dbh->sql_group_concat('DISTINCT map_dependson.dependson'),
         
         'longdescs.count' => 'COUNT(DISTINCT map_longdescs_count.comment_id)',
+        last_visit_ts => 'bug_user_last_visit.last_visit_ts',
     );
 
     # Backward-compatibility for old field names. Goes new_name => old_name.
@@ -2202,6 +2223,21 @@ sub _datetime_translate {
     return shift->_timestamp_translate(0, @_);
 }
 
+sub _last_visit_datetime {
+    my ($self, $args) = @_;
+    my $value = $args->{value};
+
+    $self->_datetime_translate($args);
+    if ($value eq $args->{value}) {
+        # Failed to translate a datetime. let's try the pronoun expando.
+        if ($value eq '%last_changed%') {
+            $self->_add_extra_column('changeddate');
+            $args->{value} = $args->{quoted} = 'bugs.delta_ts';
+        }
+    }
+}
+
+
 sub _date_translate {
     return shift->_timestamp_translate(1, @_);
 }
@@ -2724,6 +2760,21 @@ sub _percentage_complete {
     # We need actual_time in _select_columns, otherwise we can't use
     # it in the expression for searching percentage_complete.
     $self->_add_extra_column('actual_time');
+}
+
+sub _last_visit_ts {
+    my ($self, $args) = @_;
+
+    $args->{full_field} = $self->COLUMNS->{last_visit_ts}->{name};
+    $self->_add_extra_column('last_visit_ts');
+}
+
+sub _last_visit_ts_invalid_operator {
+    my ($self, $args) = @_;
+
+    ThrowUserError('search_field_operator_invalid',
+        { field    => $args->{field},
+          operator => $args->{operator} });
 }
 
 sub _days_elapsed {

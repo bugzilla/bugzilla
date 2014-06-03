@@ -51,9 +51,11 @@ use Bugzilla::Classification;
 use Bugzilla::Field;
 use Bugzilla::Group;
 use Bugzilla::Hook;
+use Bugzilla::BugUserLastVisit;
 
 use DateTime::TimeZone;
 use List::Util qw(max);
+use List::MoreUtils qw(any);
 use Scalar::Util qw(blessed);
 use Storable qw(dclone);
 use URI;
@@ -747,6 +749,28 @@ sub groups {
 
     $self->{groups} = Bugzilla::Group->new_from_list($groups);
     return $self->{groups};
+}
+
+sub last_visited {
+    my ($self) = @_;
+
+    return Bugzilla::BugUserLastVisit->match({ user_id => $self->id });
+}
+
+sub is_involved_in_bug {
+    my ($self, $bug) = @_;
+    my $user_id    = $self->id;
+    my $user_login = $self->login;
+
+    return unless $user_id;
+    return 1 if $user_id == $bug->assigned_to->id;
+    return 1 if $user_id == $bug->reporter->id;
+
+    if (Bugzilla->params->{'useqacontact'} and $bug->qa_contact) {
+        return 1 if $user_id == $bug->qa_contact->id;
+    }
+
+    return any { $user_login eq $_ } @{ $bug->cc };
 }
 
 # It turns out that calling ->id on objects a few hundred thousand
@@ -2693,6 +2717,35 @@ i.e. if the 'globalwatchers' parameter contains the user.
 Returns true if the user can attach tags to comments.
 i.e. if the 'comment_taggers_group' parameter is set and the user belongs to
 this group.
+
+=item C<last_visited>
+
+Returns an arrayref L<Bugzilla::BugUserLastVisit> objects.
+
+=item C<is_involved_in_bug($bug)>
+
+Returns true if any of the following conditions are met, false otherwise.
+
+=over
+
+=item *
+
+User is the assignee of the bug
+
+=item *
+
+User is the reporter of the bug
+
+=item *
+
+User is the QA contact of the bug (if Bugzilla is configured to use a QA
+contact)
+
+=item *
+
+User is in the cc list for the bug.
+
+=back
 
 =back
 

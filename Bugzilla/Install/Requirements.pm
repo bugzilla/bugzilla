@@ -105,20 +105,18 @@ sub REQUIRED_MODULES {
         module  => 'Date::Format',
         version => '2.23'
     },
-    # 0.28 fixed some important bugs in DateTime.
+    # 0.75 fixes a warning thrown with Perl 5.17 and newer.
     {
         package => 'DateTime',
         module  => 'DateTime',
-        version => '0.28'
+        version => '0.75'
     },
-    # 0.79 is required to work on Windows Vista and Windows Server 2008.
-    # As correctly detecting the flavor of Windows is not easy,
-    # we require this version for all Windows installations.
-    # 0.71 fixes a major bug affecting all platforms.
+    # 1.64 fixes a taint issue preventing the local timezone from
+    # being determined on some systems.
     {
         package => 'DateTime-TimeZone',
         module  => 'DateTime::TimeZone',
-        version => ON_WINDOWS ? '0.79' : '0.71'
+        version => '1.64'
     },
     # 1.54 is required for Perl 5.10+. It also makes DBD::Oracle happy.
     {

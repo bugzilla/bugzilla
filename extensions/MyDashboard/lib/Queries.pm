@@ -94,7 +94,7 @@ sub QUERY_DEFS {
         {
             name => 'lastvisitedbugs',
             heading => 'Updated Since Last Visit',
-            description => 'Bugs updated since list visited',
+            description => 'Bugs updated since last visited',
             params => {
                 o1 => 'lessthan',
                 v1 => '%last_changed%',

@@ -79,6 +79,9 @@ sub DoAccount {
 sub SaveAccount {
     my $cgi = Bugzilla->cgi;
     my $dbh = Bugzilla->dbh;
+
+    $dbh->bz_start_transaction;
+
     my $user = Bugzilla->user;
 
     my $oldpassword = $cgi->param('old_password');
@@ -101,12 +104,7 @@ sub SaveAccount {
             validate_password($pwd1, $pwd2);
 
             if ($oldpassword ne $pwd1) {
-                my $cryptedpassword = bz_crypt($pwd1);
-                $dbh->do(q{UPDATE profiles
-                              SET cryptpassword = ?
-                            WHERE userid = ?},
-                         undef, ($cryptedpassword, $user->id));
-
+                $user->set_password($pwd1);
                 # Invalidate all logins except for the current one
                 Bugzilla->logout(LOGOUT_KEEP_CURRENT);
             }
@@ -137,10 +135,9 @@ sub SaveAccount {
         }
     }
 
-    my $realname = trim($cgi->param('realname'));
-    trick_taint($realname); # Only used in a placeholder
-    $dbh->do("UPDATE profiles SET realname = ? WHERE userid = ?",
-             undef, ($realname, $user->id));
+    $user->set_name($cgi->param('realname'));
+    $user->update({ keep_session => 1, keep_tokens => 1 });
+    $dbh->bz_commit_transaction;
 }
 
 

@@ -294,6 +294,9 @@ if ($cloned_bug_id) {
         $vars->{'comment_is_private'} = $isprivate;
     }
 
+    # BMO Bug 1019747
+    $vars->{'cloned_bug'} = $cloned_bug;
+
 } # end of cloned bug entry form
 
 else {

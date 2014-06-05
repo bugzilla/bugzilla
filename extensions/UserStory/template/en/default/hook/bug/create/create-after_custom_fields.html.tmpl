@@ -20,14 +20,16 @@
           </span>
       </div>
       <div id="user_story_edit_container" class="bz_default_hidden">
-          [% INCLUDE global/textarea.html.tmpl
+        [% user_story_default = cloned_bug ? cloned_bug.cf_user_story : "" %]
+        [% INCLUDE global/textarea.html.tmpl
             name     = 'cf_user_story'
             id       = 'user_story'
             minrows  = 10
             maxrows  = 10
             cols     = constants.COMMENT_COLS
             disabled = 1
-          %]
+            defaultcontent = user_story_default
+        %]
       </div>
       <script type="text/javascript">
         var user_story_components = [];

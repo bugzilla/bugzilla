@@ -144,12 +144,80 @@ sub super_user {
     return $user;
 }
 
+sub _update_groups {
+    my $self = shift;
+    my $group_changes = shift;
+    my $changes = shift;
+    my $dbh = Bugzilla->dbh;
+
+    # Update group settings.
+    my $sth_add_mapping = $dbh->prepare(
+        qq{INSERT INTO user_group_map (
+                  user_id, group_id, isbless, grant_type
+                 ) VALUES (
+                  ?, ?, ?, ?
+                 )
+          });
+    my $sth_remove_mapping = $dbh->prepare(
+        qq{DELETE FROM user_group_map
+            WHERE user_id = ?
+              AND group_id = ?
+              AND isbless = ?
+              AND grant_type = ?
+          });
+
+    foreach my $is_bless (keys %$group_changes) {
+        my ($removed, $added) = @{$group_changes->{$is_bless}};
+
+        foreach my $group (@$removed) {
+            $sth_remove_mapping->execute(
+                $self->id, $group->id, $is_bless, GRANT_DIRECT
+             );
+        }
+        foreach my $group (@$added) {
+            $sth_add_mapping->execute(
+                $self->id, $group->id, $is_bless, GRANT_DIRECT
+             );
+        }
+
+        if (! $is_bless) {
+            my $query = qq{
+                INSERT INTO profiles_activity
+                    (userid, who, profiles_when, fieldid, oldvalue, newvalue)
+                VALUES ( ?, ?, now(), ?, ?, ?)
+            };
+
+            $dbh->do(
+                $query, undef,
+                $self->id, Bugzilla->user->id,
+                get_field_id('bug_group'),
+                join(', ', map { $_->name } @$removed),
+                join(', ', map { $_->name } @$added)
+            );
+        }
+        else {
+            # XXX: should create profiles_activity entries for blesser changes.
+        }
+
+        Bugzilla->memcached->clear_config({ key => 'user_groups.' . $self->id });
+
+        my $type = $is_bless ? 'bless_groups' : 'groups';
+        $changes->{$type} = [
+            [ map { $_->name } @$removed ],
+            [ map { $_->name } @$added ],
+        ];
+    }
+}
+
 sub update {
     my $self = shift;
     my $options = shift;
-    
+
+    my $group_changes = delete $self->{_group_changes};
+
     my $changes = $self->SUPER::update(@_);
     my $dbh = Bugzilla->dbh;
+    $self->_update_groups($group_changes, $changes);
 
     if (exists $changes->{login_name}) {
         # Delete all the tokens related to the userid
@@ -264,6 +332,111 @@ sub set_password { $_[0]->set('cryptpassword', $_[1]); }
 sub set_disabledtext {
     $_[0]->set('disabledtext', $_[1]);
     $_[0]->set('is_enabled', $_[1] ? 0 : 1);
+}
+
+sub set_groups {
+    my $self = shift;
+    $self->_set_groups(GROUP_MEMBERSHIP, @_);
+}
+
+sub set_bless_groups {
+    my $self = shift;
+
+    # The person making the change needs to be in the editusers group
+    Bugzilla->user->in_group('editusers')
+        || ThrowUserError("auth_failure", {group  => "editusers",
+                                           reason => "cant_bless",
+                                           action => "edit",
+                                           object => "users"});
+
+    $self->_set_groups(GROUP_BLESS, @_);
+}
+
+sub _set_groups {
+    my $self     = shift;
+    my $is_bless = shift;
+    my $changes  = shift;
+    my $dbh = Bugzilla->dbh;
+
+    # The person making the change is $user, $self is the person being changed
+    my $user = Bugzilla->user;
+
+    # Input is a hash of arrays. Key is 'set', 'add' or 'remove'. The array
+    # is a list of group ids and/or names.
+
+    # First turn the arrays into group objects.
+    $changes = $self->_set_groups_to_object($changes);
+
+    # Get a list of the groups the user currently is a member of
+    my $ids = $dbh->selectcol_arrayref(
+        q{SELECT DISTINCT group_id
+            FROM user_group_map
+           WHERE user_id = ? AND isbless = ? AND grant_type = ?},
+        undef, $self->id, $is_bless, GRANT_DIRECT);
+
+    my $new_groups = my $current_groups = Bugzilla::Group->new_from_list($ids);
+
+    # Record the changes
+    if (exists $changes->{set}) {
+        $new_groups = $changes->{set};
+
+        # We need to check the user has bless rights on the existing groups
+        # If they don't, then we need to add them back to new_groups
+        foreach my $group (@$current_groups) {
+            if (! $user->can_bless($group->id)) {
+                push @$new_groups, $group
+                    unless grep { $_->id eq $group->id } @$new_groups;
+            }
+        }
+    }
+    else {
+        foreach my $group (@{$changes->{removed} // []}) {
+            @$new_groups = grep { $_->id ne $group->id } @$new_groups;
+        }
+        foreach my $group (@{$changes->{added} // []}) {
+            push @$new_groups, $group
+                unless grep { $_->id eq $group->id } @$new_groups;
+        }
+    }
+
+    # Stash the changes, so self->update can actually make them
+    my @diffs = diff_arrays($current_groups, $new_groups, 'id');
+    if (scalar(@{$diffs[0]}) || scalar(@{$diffs[1]})) {
+        $self->{_group_changes}{$is_bless} = \@diffs;
+    }
+}
+
+sub _set_groups_to_object {
+    my $self = shift;
+    my $changes = shift;
+    my $user = Bugzilla->user;
+
+    foreach my $key (keys %$changes) {
+        # Check we were given an array
+        unless (ref($changes->{$key}) eq 'ARRAY') {
+            ThrowCodeError(
+                'param_invalid',
+                { param => $changes->{$key}, function => $key }
+            );
+        }
+
+        # Go through the array, and turn items into group objects
+        my @groups = ();
+        foreach my $value (@{$changes->{$key}}) {
+            my $type = $value =~ /^\d+$/ ? 'id' : 'name';
+            my $group = Bugzilla::Group->new({$type => $value});
+
+            if (! $group || ! $user->can_bless($group->id)) {
+                ThrowUserError('auth_failure',
+                    { group  => $value, reason => 'cant_bless',
+                      action => 'edit', object => 'users' });
+            }
+            push @groups, $group;
+        }
+        $changes->{$key} = \@groups;
+    }
+
+    return $changes;
 }
 
 sub update_last_seen_date {
@@ -2833,6 +3006,37 @@ contact)
 User is in the cc list for the bug.
 
 =back
+
+=item C<set_groups>
+
+C<hash> These specify the groups that this user is directly a member of.
+To set these, you should pass a hash as the value. The hash may contain
+the following fields:
+
+=over
+
+=item C<add> An array of C<int>s or C<string>s. The group ids or group names
+that the user should be added to.
+
+=item C<remove> An array of C<int>s or C<string>s. The group ids or group names
+that the user should be removed from.
+
+=item C<set> An array of C<int>s or C<string>s. An exact set of group ids
+and group names that the user should be a member of. NOTE: This does not
+remove groups from the user where the person making the change does not
+have the bless privilege for.
+
+If you specify C<set>, then C<add> and C<remove> will be ignored. A group in
+both the C<add> and C<remove> list will be added. Specifying a group that the
+user making the change does not have bless rights will generate an error.
+
+=back
+
+=item C<set_bless_groups>
+
+C<hash> - This is the same as set_groups, but affects what groups a user
+has direct membership to bless that group. It takes the same inputs as
+set_groups.
 
 =back
 

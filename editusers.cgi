@@ -248,13 +248,17 @@ if ($action eq 'search') {
 
     # Lock tables during the check+update session.
     $dbh->bz_start_transaction();
- 
+
     $editusers || $user->can_see_user($otherUser)
         || ThrowUserError('auth_failure', {reason => "not_visible",
                                            action => "modify",
                                            object => "user"});
 
     $vars->{'loginold'} = $otherUser->login;
+
+    # Update groups
+    my @group_ids = grep { s/group_// } keys %{ Bugzilla->cgi->Vars };
+    $otherUser->set_groups({ set => \@group_ids });
 
     # Update profiles table entry; silently skip doing this if the user
     # is not authorized.
@@ -268,87 +272,12 @@ if ($action eq 'search') {
         $otherUser->set_disable_mail($cgi->param('disable_mail'));
         $otherUser->set_extern_id($cgi->param('extern_id'))
             if defined($cgi->param('extern_id'));
-        $changes = $otherUser->update();
+
+        # Update bless groups
+        my @bless_ids = grep { s/bless_// } keys %{ Bugzilla->cgi->Vars };
+        $otherUser->set_bless_groups({ set => \@bless_ids });
     }
-
-    # Update group settings.
-    my $sth_add_mapping = $dbh->prepare(
-        qq{INSERT INTO user_group_map (
-                  user_id, group_id, isbless, grant_type
-                 ) VALUES (
-                  ?, ?, ?, ?
-                 )
-          });
-    my $sth_remove_mapping = $dbh->prepare(
-        qq{DELETE FROM user_group_map
-            WHERE user_id = ?
-              AND group_id = ?
-              AND isbless = ?
-              AND grant_type = ?
-          });
-
-    my @groupsAddedTo;
-    my @groupsRemovedFrom;
-    my @groupsGrantedRightsToBless;
-    my @groupsDeniedRightsToBless;
-
-    # Regard only groups the user is allowed to bless and skip all others
-    # silently.
-    # XXX: checking for existence of each user_group_map entry
-    #      would allow to display a friendlier error message on page reloads.
-    userDataToVars($otherUserID);
-    my $permissions = $vars->{'permissions'};
-    foreach my $blessable (@{$user->bless_groups()}) {
-        my $id = $blessable->id;
-        my $name = $blessable->name;
-
-        # Change memberships.
-        my $groupid = $cgi->param("group_$id") || 0;
-        if ($groupid != $permissions->{$id}->{'directmember'}) {
-            if (!$groupid) {
-                $sth_remove_mapping->execute(
-                    $otherUserID, $id, 0, GRANT_DIRECT);
-                push(@groupsRemovedFrom, $name);
-            } else {
-                $sth_add_mapping->execute(
-                    $otherUserID, $id, 0, GRANT_DIRECT);
-                push(@groupsAddedTo, $name);
-            }
-        }
-
-        # Only members of the editusers group may change bless grants.
-        # Skip silently if this is not the case.
-        if ($editusers) {
-            my $groupid = $cgi->param("bless_$id") || 0;
-            if ($groupid != $permissions->{$id}->{'directbless'}) {
-                if (!$groupid) {
-                    $sth_remove_mapping->execute(
-                        $otherUserID, $id, 1, GRANT_DIRECT);
-                    push(@groupsDeniedRightsToBless, $name);
-                } else {
-                    $sth_add_mapping->execute(
-                        $otherUserID, $id, 1, GRANT_DIRECT);
-                    push(@groupsGrantedRightsToBless, $name);
-                }
-            }
-        }
-    }
-    if (@groupsAddedTo || @groupsRemovedFrom) {
-        $dbh->do(qq{INSERT INTO profiles_activity (
-                           userid, who,
-                           profiles_when, fieldid,
-                           oldvalue, newvalue
-                          ) VALUES (
-                           ?, ?, now(), ?, ?, ?
-                          )
-                   },
-                 undef,
-                 ($otherUserID, $userid,
-                  get_field_id('bug_group'),
-                  join(', ', @groupsRemovedFrom), join(', ', @groupsAddedTo)));
-        Bugzilla->memcached->clear_config({ key => "user_groups.$otherUserID" })
-    }
-    # XXX: should create profiles_activity entries for blesser changes.
+    $changes = $otherUser->update();
 
     $dbh->bz_commit_transaction();
 
@@ -357,11 +286,7 @@ if ($action eq 'search') {
     delete_token($token);
 
     $vars->{'message'} = 'account_updated';
-    $vars->{'changed_fields'} = [keys %$changes];
-    $vars->{'groups_added_to'} = \@groupsAddedTo;
-    $vars->{'groups_removed_from'} = \@groupsRemovedFrom;
-    $vars->{'groups_granted_rights_to_bless'} = \@groupsGrantedRightsToBless;
-    $vars->{'groups_denied_rights_to_bless'} = \@groupsDeniedRightsToBless;
+    $vars->{'changes'} = \%$changes;
     # We already display the updated page. We have to recreate a token now.
     $vars->{'token'} = issue_session_token('edit_user');
 

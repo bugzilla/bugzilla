@@ -133,8 +133,7 @@ sub MailMessage {
     my $subject    = shift;
     my $message    = shift;
     my @recipients = @_;
-    my $from = '"' . template_var('terms')->{'BugzillaTitle'} . '"' .
-               ' <' . Bugzilla->params->{'mailfrom'} . '>';
+    my $from   = $params->{"mailfrom"};
     $from =~ s/@/\@/g;
 
     foreach my $to (@recipients){

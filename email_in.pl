@@ -387,8 +387,7 @@ sub die_handler {
        $msg =~ s/at .+ line.*$//ms;
        $msg =~ s/^Compilation failed in require.+$//ms;
        $msg = html_strip($msg);
-       my $from = '"' . template_var('terms')->{'BugzillaTitle'} . '"' .
-                  ' <' . Bugzilla->params->{'mailfrom'} . '>';
+       my $from = Bugzilla->params->{'mailfrom'};
        my $reply = reply(to => $input_email, from => $from, top_post => 1, 
                          body => "$msg\n");
        MessageToMTA($reply->as_string);

@@ -19,7 +19,7 @@
   #%]
 
 [% PROCESS "global/field-descs.none.tmpl" %]
-From: "[% terms.BugzillaTitle %]" <[% Param('mailfrom') %]>
+From: [% Param("mailfrom") %]
 To: [% email %][% Param("emailsuffix") %]
 Subject: Your [% terms.Bugzilla %] [%+ terms.bug %] list needs attention.
 X-Bugzilla-Type: whine

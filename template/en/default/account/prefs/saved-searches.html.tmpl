@@ -101,6 +101,11 @@
                 >[% group.name FILTER html %]</option>
               [% END %]
             </select>
+            [% IF q.shared_with_group.id %]
+              (<a href="buglist.cgi?cmdtype=dorem&amp;remaction=run&amp;namedcmd=
+                 [% q.name FILTER uri %]&amp;sharer_id=
+                 [% user.id FILTER uri %]">Link</a>)
+            [% END %]
             [% IF user.can_bless %]
               <span [% IF !bless_group_ids.grep("^$q.shared_with_group.id\$").0
                      %]class="bz_default_hidden"[% END %]>

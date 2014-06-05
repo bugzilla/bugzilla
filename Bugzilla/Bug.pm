@@ -1047,6 +1047,11 @@ sub update {
         $self->{delta_ts} = $delta_ts;
     }
 
+    # Update last-visited
+    if ($user->is_involved_in_bug($self)) {
+        $self->update_user_last_visit($user, $delta_ts);
+    }
+
     # Update bug ignore data if user wants to ignore mail for this bug
     if (exists $self->{'bug_ignored'}) {
         my $bug_ignored_changed;

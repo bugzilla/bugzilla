@@ -1279,6 +1279,9 @@ sub _bug_to_hash {
     if (filter_wants $params, 'flags') {
         $item{'flags'} = [ map { $self->_flag_to_hash($_) } @{$bug->flags} ];
     }
+    if (filter_wants $params, 'tags', 'extra') {
+        $item{'tags'} = $bug->tags;
+    }
 
     # And now custom fields
     my @custom_fields = Bugzilla->active_custom_fields;
@@ -2621,6 +2624,18 @@ C<string> The user's email address. Currently this is the same value as the name
 
 =back
 
+These fields are returned only by specifying "_extra" or the field name in "include_fields".
+
+=over
+
+=item C<tags>
+
+C<array> of C<string>s.  Each array item is a tag name.
+
+Note that tags are personal to the currently logged in user.
+
+=back
+
 =item C<faults> B<EXPERIMENTAL>
 
 An array of hashes that contains invalid bug ids with error messages
@@ -3049,13 +3064,12 @@ on spaces. So searching for C<foo bar> will match "This is a foo bar"
 but not "This foo is a bar". C<['foo', 'bar']>, would, however, match
 the second item.
 
-=item C<tag>
+=item C<tags>
 
 C<string> Searches for a bug with the specified tag.  If you specify an
 array, then any bugs that match I<any> of the tags will be returned.
 
-Note that tags are personal and only bugs belonging to the logged in
-user will be returned.
+Note that tags are personal to the currently logged in user.
 
 =item C<target_milestone>
 

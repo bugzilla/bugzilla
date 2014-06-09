@@ -28,8 +28,13 @@ sub db_schema_abstract_schema {
     my ($self, $args) = @_;
     $args->{'schema'}->{'component_watch'} = {
         FIELDS => [
+            id => {
+                TYPE       => 'MEDIUMSERIAL',
+                NOTNULL    => 1,
+                PRIMARYKEY => 1,
+            },
             user_id => {
-                TYPE => 'INT3',
+                TYPE    => 'INT3',
                 NOTNULL => 1,
                 REFERENCES => {
                     TABLE  => 'profiles',
@@ -38,7 +43,7 @@ sub db_schema_abstract_schema {
                 }
             },
             component_id => {
-                TYPE => 'INT2',
+                TYPE    => 'INT2',
                 NOTNULL => 0,
                 REFERENCES => {
                     TABLE  => 'components',
@@ -47,13 +52,17 @@ sub db_schema_abstract_schema {
                 }
             },
             product_id => {
-                TYPE => 'INT2',
+                TYPE    => 'INT2',
                 NOTNULL => 0,
                 REFERENCES => {
                     TABLE  => 'products',
                     COLUMN => 'id',
                     DELETE => 'CASCADE',
                 }
+            },
+            component_prefix => {
+                TYPE    => 'VARCHAR(64)',
+                NOTNULL => 0,
             },
         ],
     };
@@ -71,6 +80,23 @@ sub install_update_db {
                 COLUMN => 'userid',
                 DELETE => 'SET NULL',
             }
+        }
+    );
+    $dbh->bz_add_column(
+        'component_watch',
+        'id',
+        {
+            TYPE       => 'MEDIUMSERIAL',
+            NOTNULL    => 1,
+            PRIMARYKEY => 1,
+        },
+    );
+    $dbh->bz_add_column(
+        'component_watch',
+        'component_prefix',
+        {
+            TYPE    => 'VARCHAR(64)',
+            NOTNULL => 0,
         }
     );
 }

@@ -11,6 +11,18 @@
 [% SET selectable_products = user.get_selectable_products %]
 [% SET dont_show_button = 1 %]
 
+<style>
+#add_compwatch input[type=text],
+#add_compwatch select
+{
+  width: 30em;
+}
+
+#component[disabled] {
+  color: silver;
+}
+</style>
+
 <script>
 var Dom = YAHOO.util.Dom;
 var useclassification = false;
@@ -70,6 +82,19 @@ function onSelectComponent() {
   Dom.get('add').disabled = Dom.get('component').selectedIndex == -1;
 }
 
+function onStartingWith(el) {
+  var value = el.value.replace(/(^\s*|\s*$)/g, '');
+  if (value == '') {
+    Dom.get('component').disabled = false;
+    onSelectProduct();
+  } else {
+    Dom.get('component').selectedIndex = -1;
+    Dom.get('watch-user-div').style.display = 'none';
+    Dom.get('component').disabled = true;
+    Dom.get('add').disabled = false;
+  }
+}
+
 YAHOO.util.Event.onDOMReady(onSelectProduct);
 
 function onRemoveChange() {
@@ -88,15 +113,20 @@ YAHOO.util.Event.onDOMReady(onRemoveChange);
 </script>
 
 <p>
-  Select the components you want to watch.
+  Select the components you want to watch.<br>
   To watch all components in a product, watch "__Any__".<br>
+  Watching components starting with "Developer Tools" is the same as watching
+  "Developer Tools", "Developer Tools: Console", "Developer Tools: Debugger",
+  etc.  If a new component is added which starts with "Developer Tools", you'll
+  automatically start watching that too.
+  <br>
   Use <a href="userprefs.cgi?tab=email">Email Preferences</a> to filter which
   notification emails you receive.
 </p>
 
-<table border="0" cellpadding="3" cellspacing="0">
+<table border="0" cellpadding="3" cellspacing="0" id="add_compwatch">
 <tr>
-  <td align="right">Product:</td>
+  <th align="right">Product:</th>
   <td colspan="2">
     <select name="add_product" id="product" onChange="onSelectProduct()">
     [% FOREACH product IN selectable_products %]
@@ -107,9 +137,13 @@ YAHOO.util.Event.onDOMReady(onRemoveChange);
   </td>
 </tr>
 <tr>
-  <td align="right" valign="top">Component:</td>
+  <th align="right" valign="top">Component:</th>
+  <td>Select the component(s) to add to your watch list:</td>
+</tr>
+<tr>
+  <td></td>
   <td>
-    <select name="add_component" id="component" multiple size="10" onChange="onSelectComponent()">
+    <select name="add_component" id="component" multiple size="5" onChange="onSelectComponent()">
       <option value="">__Any__</option>
     [% FOREACH product IN selectable_products %]
       [% FOREACH component IN product.components %]
@@ -117,7 +151,10 @@ YAHOO.util.Event.onDOMReady(onRemoveChange);
           [%~ component.name FILTER html %]</option>
       [% END %]
     [% END %]
-    </select>
+    </select><br>
+    Or watch components starting with:<br>
+    <input type="text" name="add_starting" id="add_starting" maxlength="64"
+           onKeyUp="onStartingWith(this)" onBlur="onStartingWith(this)">
   </td>
   <td valign="top">
     <div id="watch-user-div"
@@ -149,38 +186,30 @@ YAHOO.util.Event.onDOMReady(onRemoveChange);
   </tr>
   [% FOREACH watch IN watches %]
     <tr>
-    [% IF (watch.component) %]
       <td>
-        <input type="checkbox" onChange="onRemoveChange()" id="cwdel_[% loop.count %]" value="1"
-               name="del_[% watch.product.id FILTER html %]_[% watch.component.id FILTER html %]">
+        <input type="checkbox" onChange="onRemoveChange()"
+               id="cwdel_[% watch.id FILTER none %]"
+               name="del_watch" value="[% watch.id FILTER none %]">
       </td>
       <td>
-        <label for="cwdel_[% loop.count %]">
-          [% watch.component.product.name FILTER html %]
-        </label>
-      </td>
-      <td>&nbsp;
-        <a href="buglist.cgi?product=[% watch.product.name FILTER uri ~%]
-                &component=[% watch.component.name FILTER uri %]&resolution=---">
-        [% watch.component.name FILTER html %]
-        </a>
-      </td>
-    [% ELSE %]
-      <td>
-        <input type="checkbox" onChange="onRemoveChange()" id="cwdel_[% loop.count %]" value="1"
-               name="del_[% watch.product.id FILTER html %]" value="1">
-      </td>
-      <td>
-        <label for="cwdel_[% loop.count %]">
+        <label for="cwdel_[% watch.id FILTER none %]">
           [% watch.product.name FILTER html %]
         </label>
       </td>
       <td>&nbsp;
-        <a href="describecomponents.cgi?product=[% watch.product.name FILTER uri %]">
-        __Any__
-        </a>
+        [% IF (watch.component) %]
+          <a href="buglist.cgi?product=[% watch.product.name FILTER uri ~%]
+                  &component=[% watch.component.name FILTER uri %]&resolution=---">
+          [% watch.component.name FILTER html %]
+          </a>
+        [% ELSIF watch.component_prefix %]
+          <i>starts with:</i> [% watch.component_prefix FILTER html %]
+        [% ELSE %]
+          <a href="describecomponents.cgi?product=[% watch.product.name FILTER uri %]">
+          __Any__
+          </a>
+        [% END %]
       </td>
-    [% END %]
     </tr>
   [% END %]
   </table>

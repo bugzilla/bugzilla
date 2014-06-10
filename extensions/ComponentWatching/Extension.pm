@@ -14,7 +14,7 @@ use Bugzilla::Error;
 use Bugzilla::Group;
 use Bugzilla::User;
 use Bugzilla::User::Setting;
-use Bugzilla::Util qw(trim);
+use Bugzilla::Util qw(trim trick_taint);
 
 our $VERSION = '2';
 
@@ -210,35 +210,39 @@ sub user_preferences {
     my $input = Bugzilla->input_params;
 
     if ($save) {
-        my ($sth, $sthAdd, $sthDel);
-
         if ($input->{'add'} && $input->{'add_product'}) {
             # add watch
 
-            my $productName = $input->{'add_product'};
-            my $ra_componentNames = $input->{'add_component'};
-            $ra_componentNames = [$ra_componentNames || ''] unless ref($ra_componentNames);
-
             # load product and verify access
+            my $productName = $input->{'add_product'};
             my $product = Bugzilla::Product->new({ name => $productName, cache => 1 });
             unless ($product && $user->can_access_product($product)) {
                 ThrowUserError('product_access_denied', { product => $productName });
             }
 
-            if (grep { $_ eq '' } @$ra_componentNames) {
-                # watching a product
-                _addProductWatch($user, $product);
+            # starting-with
+            if (my $prefix = $input->{add_starting}) {
+                _addPrefixWatch($user, $product, $prefix);
 
             } else {
-                # watching specific components
-                foreach my $componentName (@$ra_componentNames) {
-                    my $component = Bugzilla::Component->new({
-                        name => $componentName, product => $product, cache => 1
-                    });
-                    unless ($component) {
-                        ThrowUserError('product_access_denied', { product => $productName });
+                my $ra_componentNames = $input->{'add_component'};
+                $ra_componentNames = [$ra_componentNames || ''] unless ref($ra_componentNames);
+
+                if (grep { $_ eq '' } @$ra_componentNames) {
+                    # watching a product
+                    _addProductWatch($user, $product);
+
+                } else {
+                    # watching specific components
+                    foreach my $componentName (@$ra_componentNames) {
+                        my $component = Bugzilla::Component->new({
+                            name => $componentName, product => $product, cache => 1
+                        });
+                        unless ($component) {
+                            ThrowUserError('product_access_denied', { product => $productName });
+                        }
+                        _addComponentWatch($user, $component);
                     }
-                    _addComponentWatch($user, $component);
                 }
             }
 
@@ -247,14 +251,14 @@ sub user_preferences {
         } else {
             # remove watch(s)
 
-            foreach my $name (keys %$input) {
-                if ($name =~ /^del_(\d+)$/) {
-                    _deleteProductWatch($user, $1);
-                } elsif ($name =~ /^del_(\d+)_(\d+)$/) {
-                    _deleteComponentWatch($user, $1, $2);
-                }
+            my $delete = ref $input->{del_watch}
+                ? $input->{del_watch}
+                : [ $input->{del_watch} ];
+            foreach my $id (@$delete) {
+                _deleteWatch($user, $id);
             }
         }
+
     }
 
     $vars->{'add_product'}   = $input->{'product'};
@@ -312,8 +316,19 @@ sub bugmail_recipients {
           FROM component_watch
          WHERE ((product_id = ? OR product_id = ?) AND component_id IS NULL)
                OR (component_id = ? OR component_id = ?)
+        UNION
+        SELECT user_id
+          FROM component_watch
+               INNER JOIN components ON components.product_id = component_watch.product_id
+         WHERE component_prefix IS NOT NULL
+               AND (component_watch.product_id = ? OR component_watch.product_id = ?)
+               AND components.name LIKE CONCAT(component_prefix, '%')
     ");
-    $sth->execute($oldProductId, $newProductId, $oldComponentId, $newComponentId);
+    $sth->execute(
+        $oldProductId, $newProductId,
+        $oldComponentId, $newComponentId,
+        $oldProductId, $newProductId
+    );
     while (my ($uid) = $sth->fetchrow_array) {
         if (!exists $recipients->{$uid}) {
             $recipients->{$uid}->{+REL_COMPONENT_WATCHER} = Bugzilla::BugMail::BIT_WATCHING();
@@ -365,20 +380,22 @@ sub _getWatches {
     my $dbh = Bugzilla->dbh;
 
     my $sth = $dbh->prepare("
-        SELECT product_id, component_id
+        SELECT id, product_id, component_id, component_prefix
           FROM component_watch
          WHERE user_id = ?
     ");
     $sth->execute($user->id);
     my @watches;
-    while (my ($productId, $componentId) = $sth->fetchrow_array) {
+    while (my ($id, $productId, $componentId, $prefix) = $sth->fetchrow_array) {
         my $product = Bugzilla::Product->new({ id => $productId, cache => 1 });
         next unless $product && $user->can_access_product($product);
 
         my %watch = (
-            product         => $product,
-            product_name    => $product->name,
-            component_name  => '',
+            id               => $id,
+            product          => $product,
+            product_name     => $product->name,
+            component_name   => '',
+            component_prefix => $prefix,
         );
         if ($componentId) {
             my $component = Bugzilla::Component->new({ id => $componentId, cache => 1 });
@@ -393,6 +410,7 @@ sub _getWatches {
     @watches = sort {
         $a->{'product_name'} cmp $b->{'product_name'}
         || $a->{'component_name'} cmp $b->{'component_name'}
+        || $a->{'component_prefix'} cmp $b->{'component_prefix'}
     } @watches;
 
     return \@watches;
@@ -476,26 +494,40 @@ sub _addComponentWatch {
     $sth->execute($user->id, $component->product_id, $component->id);
 }
 
-sub _deleteProductWatch {
-    my ($user, $productId) = @_;
+sub _addPrefixWatch {
+    my ($user, $product, $prefix) = @_;
     my $dbh = Bugzilla->dbh;
 
+    trick_taint($prefix);
     my $sth = $dbh->prepare("
-        DELETE FROM component_watch
-              WHERE user_id = ? AND product_id = ? AND component_id IS NULL
+        SELECT 1
+          FROM component_watch
+         WHERE user_id = ?
+               AND (
+                   (product_id = ? AND component_prefix = ?)
+                   OR (product_id = ? AND component_id IS NULL)
+               )
     ");
-    $sth->execute($user->id, $productId);
+    $sth->execute(
+        $user->id,
+        $product->id, $prefix,
+        $product->id
+    );
+    return if $sth->fetchrow_array;
+
+    $sth = $dbh->prepare("
+        INSERT INTO component_watch(user_id, product_id, component_prefix)
+             VALUES (?, ?, ?)
+    ");
+    $sth->execute($user->id, $product->id, $prefix);
 }
 
-sub _deleteComponentWatch {
-    my ($user, $productId, $componentId) = @_;
+sub _deleteWatch {
+    my ($user, $id) = @_;
     my $dbh = Bugzilla->dbh;
 
-    my $sth = $dbh->prepare("
-        DELETE FROM component_watch
-              WHERE user_id = ? AND product_id = ? AND component_id = ?
-    ");
-    $sth->execute($user->id, $productId, $componentId);
+    trick_taint($id);
+    $dbh->do("DELETE FROM component_watch WHERE id=?", undef, $id);
 }
 
 sub _addDefaultSettings {

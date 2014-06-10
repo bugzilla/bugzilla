@@ -1,0 +1,23 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% IF san_tag == "tracking_flags_repair" %]
+    <a href="sanitycheck.cgi?tracking_flags_repair=1&amp;token=
+       [%- issue_hash_token(['sanitycheck']) FILTER uri %]"
+    >Repair invalid product_id values in the tracking_flags_visibility table</a>
+
+[% ELSIF san_tag == "tracking_flags_check" %]
+  Checking tracking_flags_visibility table for bad values of product_id.
+
+[% ELSIF san_tag == "tracking_flags_alert" %]
+  Bad values for product_id found in the tracking_flags_visibility table.
+
+[% ELSIF san_tag == "tracking_flags_repairing" %]
+  OK, now fixing bad product_id values in the tracking_flags_visibility table.
+
+[% END %]

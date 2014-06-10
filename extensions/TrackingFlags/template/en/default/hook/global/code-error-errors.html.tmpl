@@ -12,7 +12,8 @@
 
 [% ELSIF error == "tracking_flags_invalid_component" %]
   [% title = "Invalid Component" %]
-  The component named '[% component FILTER html %]' does not exist.
+  The component named '[% component_name FILTER html %]' does not exist in the
+  product '[% product FILTER html %]'.
 
 [% ELSIF error == "tracking_flags_invalid_item_id" %]
   [% title = "Invalid " _ item _ " ID" %]

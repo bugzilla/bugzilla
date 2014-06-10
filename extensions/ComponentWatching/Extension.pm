@@ -530,4 +530,65 @@ sub _addDefaultSettings {
     }
 }
 
+sub reorg_move_component {
+    my ($self, $args) = @_;
+    my $new_product = $args->{new_product};
+    my $component   = $args->{component};
+
+    Bugzilla->dbh->do(
+        "UPDATE component_watch SET product_id=? WHERE component_id=?",
+        undef,
+        $new_product->id, $component->id,
+    );
+}
+
+sub sanitycheck_check {
+    my ($self, $args) = @_;
+    my $status = $args->{status};
+
+    $status->('component_watching_check');
+
+    my ($count) = Bugzilla->dbh->selectrow_array("
+        SELECT COUNT(*)
+          FROM component_watch
+         INNER JOIN components ON components.id = component_watch.component_id
+         WHERE component_watch.product_id <> components.product_id
+    ");
+    if ($count) {
+        $status->('component_watching_alert', undef, 'alert');
+        $status->('component_watching_repair');
+    }
+}
+
+sub sanitycheck_repair {
+    my ($self, $args) = @_;
+    return unless Bugzilla->cgi->param('component_watching_repair');
+
+    my $status = $args->{'status'};
+    my $dbh = Bugzilla->dbh;
+    $status->('component_watching_repairing');
+
+    my $rows = $dbh->selectall_arrayref("
+        SELECT DISTINCT component_watch.product_id AS bad_product_id,
+               components.product_id AS good_product_id,
+               component_watch.component_id
+          FROM component_watch
+         INNER JOIN components ON components.id = component_watch.component_id
+         WHERE component_watch.product_id <> components.product_id
+        ",
+        { Slice => {} }
+    );
+    foreach my $row (@$rows) {
+        $dbh->do("
+            UPDATE component_watch
+               SET product_id=?
+             WHERE product_id=? AND component_id=?
+            ", undef,
+            $row->{good_product_id},
+            $row->{bad_product_id},
+            $row->{component_id},
+        );
+    }
+}
+
 __PACKAGE__->NAME;

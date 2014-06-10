@@ -263,7 +263,10 @@ sub _validate {
         if ($visibility->{component} ne '') {
             $visibility->{component_obj} = Bugzilla::Component->new({ product => $visibility->{product_obj},
                                                                       name    => $visibility->{component} })
-                || ThrowCodeError('tracking_flags_invalid_component', { component => $visibility->{component} });
+                || ThrowCodeError('tracking_flags_invalid_component', {
+                    product        => $visibility->{product},
+                    component_name => $visibility->{component},
+                });
         }
     }
 

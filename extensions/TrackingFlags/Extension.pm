@@ -657,4 +657,65 @@ sub quicksearch_map {
     }
 }
 
+sub reorg_move_component {
+    my ($self, $args) = @_;
+    my $new_product = $args->{new_product};
+    my $component   = $args->{component};
+
+    Bugzilla->dbh->do(
+        "UPDATE tracking_flags_visibility SET product_id=? WHERE component_id=?",
+        undef,
+        $new_product->id, $component->id,
+    );
+}
+
+sub sanitycheck_check {
+    my ($self, $args) = @_;
+    my $status = $args->{status};
+
+    $status->('tracking_flags_check');
+
+    my ($count) = Bugzilla->dbh->selectrow_array("
+        SELECT COUNT(*)
+          FROM tracking_flags_visibility
+         INNER JOIN components ON components.id = tracking_flags_visibility.component_id
+         WHERE tracking_flags_visibility.product_id <> components.product_id
+    ");
+    if ($count) {
+        $status->('tracking_flags_alert', undef, 'alert');
+        $status->('tracking_flags_repair');
+    }
+}
+
+sub sanitycheck_repair {
+    my ($self, $args) = @_;
+    return unless Bugzilla->cgi->param('tracking_flags_repair');
+
+    my $status = $args->{'status'};
+    my $dbh = Bugzilla->dbh;
+    $status->('tracking_flags_repairing');
+
+    my $rows = $dbh->selectall_arrayref("
+        SELECT DISTINCT tracking_flags_visibility.product_id AS bad_product_id,
+               components.product_id AS good_product_id,
+               tracking_flags_visibility.component_id
+          FROM tracking_flags_visibility
+         INNER JOIN components ON components.id = tracking_flags_visibility.component_id
+         WHERE tracking_flags_visibility.product_id <> components.product_id
+        ",
+        { Slice => {} }
+    );
+    foreach my $row (@$rows) {
+        $dbh->do("
+            UPDATE tracking_flags_visibility
+               SET product_id=?
+             WHERE product_id=? AND component_id=?
+            ", undef,
+            $row->{good_product_id},
+            $row->{bad_product_id},
+            $row->{component_id},
+        );
+    }
+}
+
 __PACKAGE__->NAME;

@@ -30,7 +30,7 @@ use constant DEFAULT_WHITELIST => qr/^(?:new|new_from_list|check|run_create_vali
 use constant SUB_WHITELIST => (
     'Bugzilla::Flag'     => qr/^(?:(force_)?retarget|force_cleanup)$/,
     'Bugzilla::FlagType' => qr/^sqlify_criteria$/,
-    'Bugzilla::JobQueue' => qr/(?:^work_once|subprocess_worker)$/,
+    'Bugzilla::JobQueue' => qr/(?:^work_once|work_until_done|subprocess_worker)$/,
     'Bugzilla::Search'   => qr/^SPECIAL_PARSING$/,
 );
 

@@ -45,7 +45,7 @@ jobqueue.pl - Runs jobs in the background for Bugzilla.
    restart   Stops a running jobqueue if one is running, and then
              starts a new one.
    once      Checks the job queue once, executes the first item found (if
-             any) and then exits
+             any, up to a limit of 1000 items) and then exits
    onepass   Checks the job queue, executes all items found, and then exits
    check     Report the current status of the daemon.
    install   On some *nix systems, this automatically installs and

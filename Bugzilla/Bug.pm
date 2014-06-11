@@ -3938,7 +3938,8 @@ sub get_activity {
 
 # Update the bugs_activity table to reflect changes made in bugs.
 sub LogActivityEntry {
-    my ($i, $col, $removed, $added, $whoid, $timestamp, $comment_id) = @_;
+    my ($i, $col, $removed, $added, $whoid, $timestamp, $comment_id,
+        $attach_id) = @_;
     my $dbh = Bugzilla->dbh;
     # in the case of CCs, deps, and keywords, there's a possibility that someone
     # might try to add or remove a lot of them at once, which might take more
@@ -3963,10 +3964,13 @@ sub LogActivityEntry {
         trick_taint($addstr);
         trick_taint($removestr);
         my $fieldid = get_field_id($col);
-        $dbh->do("INSERT INTO bugs_activity
-                  (bug_id, who, bug_when, fieldid, removed, added, comment_id)
-                  VALUES (?, ?, ?, ?, ?, ?, ?)",
-                  undef, ($i, $whoid, $timestamp, $fieldid, $removestr, $addstr, $comment_id));
+        $dbh->do(
+            "INSERT INTO bugs_activity
+            (bug_id, who, bug_when, fieldid, removed, added, comment_id, attach_id)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+            undef,
+            ($i, $whoid, $timestamp, $fieldid, $removestr, $addstr, $comment_id,
+                $attach_id));
     }
 }
 

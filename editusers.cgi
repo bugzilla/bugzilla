@@ -483,10 +483,6 @@ if ($action eq 'search') {
     my $sth_set_bug_timestamp =
         $dbh->prepare('UPDATE bugs SET delta_ts = ? WHERE bug_id = ?');
 
-    my $sth_updateFlag = $dbh->prepare('INSERT INTO bugs_activity
-                  (bug_id, attach_id, who, bug_when, fieldid, removed, added)
-                  VALUES (?, ?, ?, ?, ?, ?, ?)');
-
     # Flags
     my $flag_ids =
       $dbh->selectcol_arrayref('SELECT id FROM flags WHERE requestee_id = ?',
@@ -501,16 +497,15 @@ if ($action eq 'search') {
     # so we have to log these changes manually.
     my %bugs;
     push(@{$bugs{$_->bug_id}->{$_->attach_id || 0}}, $_) foreach @$flags;
-    my $fieldid = get_field_id('flagtypes.name');
     foreach my $bug_id (keys %bugs) {
         foreach my $attach_id (keys %{$bugs{$bug_id}}) {
             my @old_summaries = Bugzilla::Flag->snapshot($bugs{$bug_id}->{$attach_id});
             $_->_set_requestee() foreach @{$bugs{$bug_id}->{$attach_id}};
             my @new_summaries = Bugzilla::Flag->snapshot($bugs{$bug_id}->{$attach_id});
             my ($removed, $added) =
-              Bugzilla::Flag->update_activity(\@old_summaries, \@new_summaries);
-            $sth_updateFlag->execute($bug_id, $attach_id || undef, $userid,
-                                     $timestamp, $fieldid, $removed, $added);
+                Bugzilla::Flag->update_activity(\@old_summaries, \@new_summaries);
+            LogActivityEntry($bug_id, 'flagtypes.name', $removed, $added,
+                $userid, $timestamp, undef, $attach_id);
         }
         $sth_set_bug_timestamp->execute($timestamp, $bug_id);
         $updatedbugs{$bug_id} = 1;

@@ -890,16 +890,12 @@ sub update {
     }
 
     # Record changes in the activity table.
-    my $sth = $dbh->prepare('INSERT INTO bugs_activity (bug_id, attach_id, who, bug_when,
-                                                        fieldid, removed, added)
-                             VALUES (?, ?, ?, ?, ?, ?, ?)');
-
+    require Bugzilla::Bug;
     foreach my $field (keys %$changes) {
         my $change = $changes->{$field};
         $field = "attachments.$field" unless $field eq "flagtypes.name";
-        my $fieldid = get_field_id($field);
-        $sth->execute($self->bug_id, $self->id, $user->id, $timestamp,
-                      $fieldid, $change->[0], $change->[1]);
+        Bugzilla::Bug::LogActivityEntry($self->bug_id, $field, $change->[0],
+            $change->[1], $user->id, $timestamp, undef, $self->id);
     }
 
     if (scalar(keys %$changes)) {

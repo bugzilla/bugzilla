@@ -9,6 +9,7 @@
 [%# Define strings that will serve as the title and header of this page %]
 [% title = BLOCK %]
   Attachment [% attachment.id %] Details for [% terms.Bug %] [%+ attachment.bug_id %]
+  &ndash; [% attachment.description FILTER html %]
 [% END %]
 [% header = BLOCK %]
   Attachment [% attachment.id %] Details for

@@ -43,6 +43,10 @@ use constant JOB_MAP => {
 # across requests.
 use constant DRIVER_CACHE_TIME => 300; # 5 minutes
 
+# To avoid memory leak/fragmentation, a worker process won't process more than
+# MAX_MESSAGES messages.
+use constant MAX_MESSAGES => 1000;
+
 sub job_map {
     if (!defined(Bugzilla->request_cache->{job_map})) {
         my $job_map = JOB_MAP;
@@ -158,6 +162,16 @@ sub work_once {
     my $self = shift;
     Bugzilla->clear_request_cache();
     return $self->SUPER::work_once(@_);
+}
+
+# Never process more than MAX_MESSAGES in one batch, to avoid memory
+# leak/fragmentation issues.
+sub work_until_done {
+    my $self = shift;
+    my $count = 0;
+    while ($count++ < MAX_MESSAGES) {
+        $self->work_once or last;
+    }
 }
 
 1;

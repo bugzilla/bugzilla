@@ -177,6 +177,66 @@ sub _remo_form_payment {
     }
 }
 
+my %CSV_COLUMNS = (
+    "Date Required"   => { pos =>  1, value => '%cf_due_date' },
+    "Requester"       => { pos =>  2, value => 'Konstantina Papadea' },
+    "Email 1"         => { pos =>  3, value => 'kpapadea@mozilla.com' },
+    "Mozilla Space"   => { pos =>  4, value => 'Remote' },
+    "Team"            => { pos =>  5, value => 'Community Engagement' },
+    "Department Code" => { pos =>  6, value => '2300' },
+    "Purpose"         => { pos =>  7, value => 'Rep event: %eventpage' },
+    "Item 1"          => { pos =>  8  },
+    "Item 2"          => { pos =>  9  },
+    "Item 3"          => { pos =>  10 },
+    "Item 4"          => { pos =>  11 },
+    "Item 5"          => { pos =>  12 },
+    "Item 6"          => { pos =>  13 },
+    "Item 7"          => { pos =>  14 },
+    "Item 8"          => { pos =>  15 },
+    "Item 9"          => { pos =>  16 },
+    "Item 10"         => { pos =>  17 },
+    "Item 11"         => { pos =>  18 },
+    "Item 12"         => { pos =>  19 },
+    "Item 13"         => { pos =>  20 },
+    "Item 14"         => { pos =>  21 },
+    "Recipient Name"  => { pos =>  22, value => '%shiptofirstname %shiptolastname' },
+    "Email 2"         => { pos =>  23, value => sub { Bugzilla->user->email } },
+    "Address 1"       => { pos =>  24, value => '%shiptoaddress1' },
+    "Address 2"       => { pos =>  25, value => '%shiptoaddress2' },
+    "City"            => { pos =>  26, value => '%shiptocity' },
+    "State"           => { pos =>  27, value => '%shiptostate' },
+    "Zip"             => { pos =>  28, value => '%shiptopcode' },
+    "Country"         => { pos =>  29, value => '%shiptocountry' },
+    "Phone number"    => { pos =>  30, value => '%shiptophone' },
+    "Notes"           => { pos =>  31, value => '%shipadditional' },
+);
+
+sub _expand_value {
+    my $value = shift;
+    if (ref $value && ref $value eq 'CODE') {
+        return $value->();
+    }
+    else {
+        my $cgi = Bugzilla->cgi;
+        $value =~ s/%(\w+)/$cgi->param($1)/ge;
+        return $value;
+    }
+}
+
+sub _csv_quote {
+    my $s = shift;
+    $s =~ s/"/""/g;
+    return qq{"$s"};
+}
+
+sub _csv_line {
+    return join(",", map { _csv_quote($_) } @_);
+}
+
+sub _csv_encode {
+    return join("\r\n", map { _csv_line(@$_) } @_) . "\r\n";
+}
+
 sub post_bug_after_creation {
     my ($self, $args) = @_;
     my $vars = $args->{vars};
@@ -191,33 +251,52 @@ sub post_bug_after_creation {
         my $error_mode_cache = Bugzilla->error_mode;
         Bugzilla->error_mode(ERROR_MODE_DIE);
 
-        my $attachment;
+        my @attachments;
         eval {
             my $xml;
             $template->process("bug/create/create-remo-swag.xml.tmpl", {}, \$xml)
                 || ThrowTemplateError($template->error());
 
-            $attachment = Bugzilla::Attachment->create(
-                { bug           => $bug,
-                  creation_ts   => $bug->creation_ts,
-                  data          => $xml,
-                  description   => 'Remo Swag Request (XML)',
-                  filename      => 'remo-swag.xml',
-                  ispatch       => 0,
-                  isprivate     => 0,
-                  mimetype      => 'text/xml',
+            push @attachments, Bugzilla::Attachment->create(
+                { bug         => $bug,
+                  creation_ts => $bug->creation_ts,
+                  data        => $xml,
+                  description => 'Remo Swag Request (XML)',
+                  filename    => 'remo-swag.xml',
+                  ispatch     => 0,
+                  isprivate   => 0,
+                  mimetype    => 'text/xml',
+            });
+
+            my @columns_raw = sort { $CSV_COLUMNS{$a}{pos} <=> $CSV_COLUMNS{$b}{pos} } keys %CSV_COLUMNS;
+            my @data        = map { _expand_value( $CSV_COLUMNS{$_}{value} ) } @columns_raw;
+            my @columns     = map { s/^(Item|Email) \d+$/$1/g; $_ } @columns_raw;
+            my $csv         = _csv_encode(\@columns, \@data);
+
+            push @attachments, Bugzilla::Attachment->create({
+                bug         => $bug,
+                creation_ts => $bug->creation_ts,
+                data        => $csv,
+                description => 'Remo Swag Request (CSV)',
+                filename    => 'remo-swag.csv',
+                ispatch     => 0,
+                isprivate   => 0,
+                mimetype    => 'text/csv',
             });
         };
         if ($@) {
             warn "$@";
         }
 
-        if ($attachment) {
+        if (@attachments) {
             # Insert comment for attachment
-            $bug->add_comment('', { isprivate  => 0,
-                                    type       => CMT_ATTACHMENT_CREATED,
-                                    extra_data => $attachment->id });
+            foreach my $attachment (@attachments) {
+                $bug->add_comment('', { isprivate  => 0,
+                                        type       => CMT_ATTACHMENT_CREATED,
+                                        extra_data => $attachment->id });
+            }
             $bug->update($bug->creation_ts);
+            delete $bug->{attachments};
         }
         else {
             $vars->{'message'} = 'attachment_creation_failed';

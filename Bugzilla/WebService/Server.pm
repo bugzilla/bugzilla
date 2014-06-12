@@ -41,6 +41,10 @@ sub handle_login {
     return if ($class->login_exempt($method) 
                and !defined Bugzilla->input_params->{Bugzilla_login});
     Bugzilla->login();
+
+    Bugzilla::Hook::process(
+        'webservice_before_call',
+        { 'method'  => $method, full_method => $full_method });
 }
 
 sub datetime_format_inbound {

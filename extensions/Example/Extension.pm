@@ -955,6 +955,19 @@ sub webservice_error_codes {
     $error_map->{'example_my_error'} = 10001;
 }
 
+sub webservice_before_call {
+    my ($self, $args) = @_;
+
+    # This code doesn't actually *do* anything, it's just here to show you
+    # how to use this hook.
+    my $method      = $args->{method};
+    my $full_method = $args->{full_method};
+
+    # Uncomment this line to see a line in your webserver's error log whenever
+    # a webservice call is made
+    #warn "RPC call $full_method made by ", Bugzilla->user->login, "\n";
+}
+
 sub webservice_fix_credentials {
     my ($self, $args) = @_;
     my $rpc    = $args->{'rpc'};

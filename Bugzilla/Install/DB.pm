@@ -706,6 +706,11 @@ sub update_table_definitions {
     # 2013-08-16 glob@mozilla.com - Bug 905925
     $dbh->bz_add_index('attachments', 'attachments_ispatch_idx', ['ispatch']);
 
+    # 2014-06-09 dylan@mozilla.com - Bug 1022923
+    $dbh->bz_add_index('bug_user_last_visit',
+                       'bug_user_last_visit_last_visit_ts_idx',
+                       ['last_visit_ts']);
+
     ################################################################
     # New --TABLE-- changes should go *** A B O V E *** this point #
     ################################################################

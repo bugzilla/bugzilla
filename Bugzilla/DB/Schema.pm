@@ -1730,7 +1730,8 @@ use constant ABSTRACT_SCHEMA => {
         ],
         INDEXES => [
             bug_user_last_visit_idx => {FIELDS => ['user_id', 'bug_id'],
-                                        TYPE => 'UNIQUE'}
+                                        TYPE => 'UNIQUE'},
+            bug_user_last_visit_last_visit_ts_idx => ['last_visit_ts'],
         ],
     },
 };

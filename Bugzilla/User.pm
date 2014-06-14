@@ -1446,6 +1446,30 @@ sub get_accessible_products {
     return [ sort { $a->name cmp $b->name } values %products ];
 }
 
+sub can_administer {
+    my $self = shift;
+
+    if (not defined $self->{can_administer}) {
+        my $can_administer = 0;
+
+        $can_administer = 1 if $self->in_group('admin')
+            || $self->in_group('tweakparams')
+            || $self->in_group('editusers')
+            || $self->can_bless
+            || (Bugzilla->params->{'useclassification'} && $self->in_group('editclassifications'))
+            || $self->in_group('editcomponents')
+            || scalar(@{$self->get_products_by_permission('editcomponents')})
+            || $self->in_group('creategroups')
+            || $self->in_group('editkeywords')
+            || $self->in_group('bz_canusewhines');
+
+        Bugzilla::Hook::process('user_can_administer', { can_administer => \$can_administer });
+        $self->{can_administer} = $can_administer;
+    }
+
+    return $self->{can_administer};
+}
+
 sub check_can_admin_product {
     my ($self, $product_name) = @_;
 
@@ -2875,6 +2899,10 @@ not be aware of the existence of the product.
  Params:      none
 
  Returns:     an array of product objects.
+
+=item C<can_administer>
+
+Returns 1 if the user can see the admin menu. Otherwise, returns 0
 
 =item C<check_can_admin_product($product_name)>
 

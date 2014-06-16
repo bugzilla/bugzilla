@@ -24,7 +24,6 @@ use Getopt::Long;
 use Pod::Usage;
 use File::Basename qw(dirname);
 use File::Spec;
-use HTTP::Cookies;
 use XMLRPC::Lite;
 
 # If you want, say “use Bugzilla::WebService::Constants” here to get access
@@ -36,7 +35,8 @@ my $help;
 my $Bugzilla_uri;
 my $Bugzilla_login;
 my $Bugzilla_password;
-my $Bugzilla_remember;
+my $Bugzilla_restrict;
+my $Bugzilla_token;
 my $bug_id;
 my $product_name;
 my $create_file_name;
@@ -51,7 +51,7 @@ GetOptions('help|h|?'       => \$help,
            'uri=s'          => \$Bugzilla_uri,
            'login:s'        => \$Bugzilla_login,
            'password=s'     => \$Bugzilla_password,
-           'rememberlogin!' => \$Bugzilla_remember,
+           'restrictlogin!' => \$Bugzilla_restrict,
            'bug_id:s'       => \$bug_id,
            'product_name:s' => \$product_name,
            'create:s'       => \$create_file_name,
@@ -86,14 +86,14 @@ Specify this without a value in order to log out.
 
 Bugzilla password. Specify this together with B<--login> in order to log in.
 
-=item --rememberlogin
+=item --restrictlogin
 
-Gives access to Bugzilla's "Bugzilla_remember" option.
-Specify this option while logging in to do the same thing as ticking the
-C<Bugzilla_remember> box on Bugilla's log in form.
+Gives access to Bugzilla's "Bugzilla_restrictlogin" option.
+Specify this option while logging in to restrict the login token to be
+only valid from the IP address which called
 Don't specify this option to do the same thing as unchecking the box.
 
-See Bugzilla's rememberlogin parameter for details.
+See Bugzilla's restrictlogin parameter for details.
 
 =item --bug_id
 
@@ -151,17 +151,6 @@ my $soapresult;
 # We will use this variable for function call results.
 my $result;
 
-# Open our cookie jar. We save it into a file so that we may re-use cookies
-# to avoid the need of logging in every time. You're encouraged, but not
-# required, to do this in your applications, too.
-# Cookies are only saved if Bugzilla's rememberlogin parameter is set to one of
-#    - on
-#    - defaulton (and you didn't pass 0 as third parameter to User.login)
-#    - defaultoff (and you passed 1 as third parameter to User.login)
-my $cookie_jar =
-    new HTTP::Cookies('file' => File::Spec->catdir(dirname($0), 'cookies.txt'),
-                      'autosave' => 1);
-
 =head2 Initialization
 
 Using the XMLRPC::Lite class, you set up a proxy, as shown in this script.
@@ -170,8 +159,7 @@ of C<http://your.bugzilla.installation/path/to/bugzilla/xmlrpc.cgi>.
 
 =cut
 
-my $proxy = XMLRPC::Lite->proxy($Bugzilla_uri,
-                                'cookie_jar' => $cookie_jar);
+my $proxy = XMLRPC::Lite->proxy($Bugzilla_uri);
 
 =head2 Debugging
 
@@ -205,25 +193,6 @@ $soapresult = $proxy->call('Bugzilla.timezone');
 _die_on_fault($soapresult);
 print 'Bugzilla\'s timezone is ' . $soapresult->result()->{timezone} . ".\n";
 
-=head2 Getting Extension Information
-
-Returns all the information any extensions have decided to provide to the webservice.
-
-=cut
-
-if ($fetch_extension_info) {
-    $soapresult = $proxy->call('Bugzilla.extensions');
-    _die_on_fault($soapresult);
-    my $extensions = $soapresult->result()->{extensions};
-    foreach my $extensionname (keys(%$extensions)) {
-        print "Extension '$extensionname' information\n";
-        my $extension = $extensions->{$extensionname};
-        foreach my $data (keys(%$extension)) {
-            print '  ' . $data . ' => ' . $extension->{$data} . "\n";
-        }
-    }
-}
-
 =head2 Logging In and Out
 
 =head3 Using Bugzilla's Environment Authentication
@@ -238,11 +207,9 @@ You don't log out if you're using this kind of authentication.
 Use the C<User.login> and C<User.logout> calls to log in and out, as shown
 in this script.
 
-The C<Bugzilla_remember> parameter is optional.
-If omitted, Bugzilla's defaults apply (as specified by its C<rememberlogin>
+The C<Bugzilla_restrictlogin> parameter is optional.
+If omitted, Bugzilla's defaults apply (as specified by its C<restrictlogin>
 parameter).
-
-Bugzilla hands back cookies you'll need to pass along during your work calls.
 
 =cut
 
@@ -250,9 +217,10 @@ if (defined($Bugzilla_login)) {
     if ($Bugzilla_login ne '') {
         # Log in.
         $soapresult = $proxy->call('User.login',
-                                   { login => $Bugzilla_login, 
+                                   { login => $Bugzilla_login,
                                      password => $Bugzilla_password,
-                                     remember => $Bugzilla_remember } );
+                                     restrict_login => $Bugzilla_restrict } );
+        $Bugzilla_token = $soapresult->result->{token};
         _die_on_fault($soapresult);
         print "Login successful.\n";
     }
@@ -264,17 +232,36 @@ if (defined($Bugzilla_login)) {
     }
 }
 
+=head2 Getting Extension Information
+
+Returns all the information any extensions have decided to provide to the webservice.
+
+=cut
+
+if ($fetch_extension_info) {
+    $soapresult = $proxy->call('Bugzilla.extensions', {token => $Bugzilla_token});
+    _die_on_fault($soapresult);
+    my $extensions = $soapresult->result()->{extensions};
+    foreach my $extensionname (keys(%$extensions)) {
+        print "Extension '$extensionname' information\n";
+        my $extension = $extensions->{$extensionname};
+        foreach my $data (keys(%$extension)) {
+            print '  ' . $data . ' => ' . $extension->{$data} . "\n";
+        }
+    }
+}
+
 =head2 Retrieving Bug Information
 
 Call C<Bug.get> with the ID of the bug you want to know more of.
-The call will return a C<Bugzilla::Bug> object. 
+The call will return a C<Bugzilla::Bug> object.
 
 Note: You can also use "Bug.get_bugs" for compatibility with Bugzilla 3.0 API.
 
 =cut
 
 if ($bug_id) {
-    $soapresult = $proxy->call('Bug.get', { ids => [$bug_id] });
+    $soapresult = $proxy->call('Bug.get', { ids => [$bug_id], token => $Bugzilla_token});
     _die_on_fault($soapresult);
     $result = $soapresult->result;
     my $bug = $result->{bugs}->[0];
@@ -299,7 +286,7 @@ The call will return a C<Bugzilla::Product> object.
 =cut
 
 if ($product_name) {
-    $soapresult = $proxy->call('Product.get', {'names' => [$product_name]});
+    $soapresult = $proxy->call('Product.get', {'names' => [$product_name], token => $Bugzilla_token});
     _die_on_fault($soapresult);
     $result = $soapresult->result()->{'products'}->[0];
 
@@ -325,14 +312,16 @@ if ($product_name) {
 =head2 Creating A Bug
 
 Call C<Bug.create> with the settings read from the file indicated on
-the command line. The file must contain a valid anonymous hash to use 
+the command line. The file must contain a valid anonymous hash to use
 as argument for the call to C<Bug.create>.
 The call will return a hash with a bug id for the newly created bug.
 
 =cut
 
 if ($create_file_name) {
-    $soapresult = $proxy->call('Bug.create', do "$create_file_name" );
+    my $bug_fields = do "$create_file_name";
+    $bug_fields->{Bugzilla_token} = $Bugzilla_token;
+    $soapresult = $proxy->call('Bug.create', \%$bug_fields);
     _die_on_fault($soapresult);
     $result = $soapresult->result;
 
@@ -356,7 +345,7 @@ list of legal values for this field.
 =cut
 
 if ($legal_field_values) {
-    $soapresult = $proxy->call('Bug.legal_values', {field => $legal_field_values} );
+    $soapresult = $proxy->call('Bug.legal_values', {field => $legal_field_values, token => $Bugzilla_token} );
     _die_on_fault($soapresult);
     $result = $soapresult->result;
 
@@ -374,7 +363,7 @@ or not.
 if ($add_comment) {
     if ($bug_id) {
         $soapresult = $proxy->call('Bug.add_comment', {id => $bug_id,
-            comment => $add_comment, private => $private, work_time => $work_time});
+            comment => $add_comment, private => $private, work_time => $work_time, token => $Bugzilla_token});
         _die_on_fault($soapresult);
         print "Comment added.\n";
     }

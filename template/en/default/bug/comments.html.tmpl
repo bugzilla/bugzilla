@@ -155,6 +155,7 @@
   [% RETURN IF comment_text == '' AND (comment.work_time - 0) != 0 AND !user.is_timetracker %]
 
     <div id="c[% comment.count %]" class="bz_comment[% " bz_private" IF comment.is_private %]
+                [% " bz_default_collapsed" IF comment.collapsed %]
                 [% " bz_comment_hilite" IF marks.${comment.count} %]
                 [% " bz_first_comment" IF comment.count == description %]">
       [% IF comment.count == 0 %]
@@ -169,6 +170,9 @@
 
         [% IF mode == "edit" %]
           <span class="bz_comment_actions">
+            [% IF comment.collapsed %]
+              <span class="bz_collapsed_actions">
+            [% END %]
             [% IF comment_text.search("(?:^>|\n>)") %]
               [<a class="bz_wrap_link" href="#"
                   onclick="return toggleCommentWrap(this, [% comment.count %])">wrap</a>]
@@ -184,6 +188,15 @@
                 [% END %]
               >reply</a>]
             [% END %]
+            [% IF comment.collapsed %]
+              </span>
+            [% END %]
+            <script type="text/javascript">
+              addCollapseLink([% comment.count %], [% comment.collapsed FILTER js %], 'Toggle comment display');
+            </script>
+          </span>
+        [% ELSIF comment.collapsed %]
+          <span class="bz_comment_actions">
             <script type="text/javascript">
               addCollapseLink([% comment.count %], [% comment.collapsed FILTER js %], 'Toggle comment display');
             </script>
@@ -234,6 +247,14 @@
         <span class="bz_comment_time">
           [%+ comment.creation_ts FILTER time %]
         </span>
+
+        [% IF comment.collapsed %]
+          <span id="cr[% comment.count %]" class="bz_comment_collapse_reason"
+             title="[% comment.author.name || comment.author.login FILTER html %]
+                    [%~ %] [[% comment.creation_ts FILTER time %]]">
+            Comment hidden ([% comment.tags.join(', ') FILTER html %])
+          </span>
+        [% END %]
       </div>
 
       [% IF user.is_timetracker &&
@@ -245,8 +266,8 @@
 
       [% IF user.id && Param('comment_taggers_group') %]
         <div id="comment_tag_[% comment.count FILTER html %]"
-             class="bz_comment_tags[% " collapsed" IF comment.collapsed %]
-                    [% " bz_default_hidden" UNLESS comment.tags.size %]">
+             class="bz_comment_tags
+                   [% " bz_default_hidden" UNLESS comment.tags.size %]">
           <span id="ct_[% comment.count %]">
             [% IF comment.tags.size %]
               <script>
@@ -266,7 +287,9 @@
   # generated HTML
   #%]
 <pre class="bz_comment_text[% " collapsed" IF comment.collapsed %]"
-     [% ' id="comment_text_' _ comment.count _ '"' IF mode == "edit" %]>
+  [% IF mode == "edit" || comment.collapsed %]
+    id="comment_text_[% comment.count FILTER none %]"
+  [% END %]>
   [%- comment_text FILTER quoteUrls(bug, comment) -%]
 </pre>
     [% Hook.process('a_comment-end', 'bug/comments.html.tmpl') %]

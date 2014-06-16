@@ -350,6 +350,11 @@ div#docslinks {
     padding: 1em 0;
 }
 
+.bz_comment_collapse_reason,
+.bz_default_collapsed .bz_comment_number {
+    font-weight: normal;
+}
+
 /** End Comments **/
 
 .bz_default_hidden, .bz_tui_hidden, .bz_hidden_field, .bz_hidden_option {
@@ -475,7 +480,15 @@ div.user_match {
     display: inline-block;
 }
 
-.collapsed {
+.collapsed,
+.bz_default_collapsed .bz_private_checkbox,
+.bz_default_collapsed .bz_comment_user,
+.bz_default_collapsed .bz_comment_user_images,
+.bz_default_collapsed .bz_comment_time,
+.bz_default_collapsed .bz_comment_tags,
+.bz_default_collapsed .bz_comment_text,
+.bz_default_collapsed .bz_collapsed_actions
+{
     display: none;
 }
 

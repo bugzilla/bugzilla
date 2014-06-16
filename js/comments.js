@@ -38,11 +38,11 @@ function updateCommentPrivacy(checkbox, id) {
 
 function toggle_comment_display(link, comment_id) {
     var comment = document.getElementById('comment_text_' + comment_id);
-    var re = new RegExp(/\bcollapsed\b/);
-    if (comment.className.match(re))
+    if (YAHOO.util.Dom.hasClass(comment, 'collapsed')) {
         expand_comment(link, comment, comment_id);
-    else
+    } else {
         collapse_comment(link, comment, comment_id);
+    }
 }
 
 function toggle_all_comments(action) {
@@ -76,6 +76,8 @@ function collapse_comment(link, comment, comment_id) {
 
 function expand_comment(link, comment, comment_id) {
     link.innerHTML = "[-]";
+    YAHOO.util.Dom.addClass('cr' + comment_id, 'collapsed');
+    YAHOO.util.Dom.removeClass('c' + comment_id, 'bz_default_collapsed');
     YAHOO.util.Dom.removeClass(comment, 'collapsed');
     YAHOO.util.Dom.removeClass('comment_tag_' + comment_id, 'collapsed');
 }

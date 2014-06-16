@@ -166,13 +166,13 @@ sub filter_wants($$;$$) {
         delete $exclude{$key};
     }
 
-    # If the user has asked to include all or exclude all
-    return $cache->{$field} = 0 if $exclude_types{'all'};
-    return $cache->{$field} = 1 if $include_types{'all'};
-
     # Explicit inclusion/exclusion
     return $cache->{$field} = 0 if $exclude{$field};
     return $cache->{$field} = 1 if $include{$field};
+
+    # If the user has asked to include all or exclude all
+    return $cache->{$field} = 0 if $exclude_types{'all'};
+    return $cache->{$field} = 1 if $include_types{'all'};
 
     # If the user has not asked for any fields specifically or if the user has asked
     # for one or more of the field's types (and not excluded them)
@@ -214,7 +214,7 @@ sub _delete_bad_keys {
             # However, we need to validate our argument names in some way.
             # We know that all hash keys passed in to the WebService will 
             # match \w+, so we delete any key that doesn't match that.
-            if ($key !~ /^\w+$/) {
+            if ($key !~ /^[\w\.\-]+$/) {
                 delete $item->{$key};
             }
         }

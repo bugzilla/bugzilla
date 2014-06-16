@@ -54,11 +54,25 @@ use Storable qw(dclone);
 
 use constant PRODUCT_SPECIFIC_FIELDS => qw(version target_milestone component);
 
-use constant DATE_FIELDS => {
-    comments => ['new_since'],
-    history  => ['new_since'],
-    search   => ['last_change_time', 'creation_time'],
-};
+sub DATE_FIELDS {
+    my $fields = {
+        comments => ['new_since'],
+        create   => [],
+        history  => ['new_since'],
+        search   => ['last_change_time', 'creation_time'],
+        update   => []
+    };
+
+    # Add date related custom fields
+    foreach my $field (Bugzilla->active_custom_fields) {
+        next unless ($field->type == FIELD_TYPE_DATETIME
+                     || $field->type == FIELD_TYPE_DATE);
+        push(@{ $fields->{create} }, $field->name);
+        push(@{ $fields->{update} }, $field->name);
+    }
+
+    return $fields;
+}
 
 use constant BASE64_FIELDS => {
     add_attachment => ['data'],
@@ -558,7 +572,7 @@ sub search {
 
     # Backwards compatibility with old method regarding role search
     $match_params->{'reporter'} = delete $match_params->{'creator'} if $match_params->{'creator'};
-    foreach my $role (qw(assigned_to reporter qa_contact longdesc cc)) {
+    foreach my $role (qw(assigned_to reporter qa_contact commenter cc)) {
         next if !exists $match_params->{$role};
         my $value = delete $match_params->{$role};
         $match_params->{"f${last_field_id}"} = $role;
@@ -593,6 +607,9 @@ sub search {
     my %bug_objects = map { $_->id => $_ } @{ Bugzilla::Bug->new_from_list(\@bug_ids) };
     my @bugs = map { $bug_objects{$_} } @bug_ids;
     @bugs = map { $self->_bug_to_hash($_, $params) } @bugs;
+
+    # BzAPI
+    Bugzilla->request_cache->{bzapi_search_bugs} = [ map { $bug_objects{$_} } @bug_ids ];
 
     return { bugs => \@bugs };
 }

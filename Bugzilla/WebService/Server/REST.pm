@@ -16,7 +16,7 @@ use Bugzilla;
 use Bugzilla::Constants;
 use Bugzilla::Error;
 use Bugzilla::Hook;
-use Bugzilla::Util qw(correct_urlbase html_quote);
+use Bugzilla::Util qw(correct_urlbase html_quote disable_utf8 enable_utf8);
 use Bugzilla::WebService::Constants;
 use Bugzilla::WebService::Util qw(taint_data fix_credentials);
 
@@ -78,8 +78,12 @@ sub handle {
     # Fix includes/excludes for each call
     rest_include_exclude($params);
 
-    # Set callback name if exists
-    $self->_bz_callback($params->{'callback'}) if $params->{'callback'};
+    # Set callback name if content-type is 'application/javascript'
+    if ($params->{'callback'}
+        || $self->content_type eq 'application/javascript')
+    {
+        $self->_bz_callback($params->{'callback'} || 'callback');
+    }
 
     Bugzilla->input_params($params);
 
@@ -111,8 +115,13 @@ sub response {
     # along with the result/error such as version and id which
     # we will strip off for REST calls.
     my $content = $response->content;
+
     my $json_data = {};
     if ($content) {
+        # Content is in bytes at this point and needs to be converted
+        # back to utf8 string.
+        enable_utf8();
+        utf8::decode($content) if !utf8::is_utf8($content);
         $json_data = $self->json->decode($content);
     }
 
@@ -151,6 +160,9 @@ sub response {
     else {
         $content = $self->json->encode($result);
     }
+
+    utf8::encode($content) if utf8::is_utf8($content);
+    disable_utf8();
 
     $response->content($content);
 
@@ -307,16 +319,16 @@ sub bz_rest_params {
 sub bz_rest_options {
     my ($self, $options) = @_;
     $self->{_bz_rest_options} = $options if $options;
-    return $self->{_bz_rest_options};
+    return [ sort { $a cmp $b } @{ $self->{_bz_rest_options} } ];
 }
 
 sub rest_include_exclude {
     my ($params) = @_;
 
-    if ($params->{'include_fields'} && !ref $params->{'include_fields'}) {
+    if (exists $params->{'include_fields'} && !ref $params->{'include_fields'}) {
         $params->{'include_fields'} = [ split(/[\s+,]/, $params->{'include_fields'}) ];
     }
-    if ($params->{'exclude_fields'} && !ref $params->{'exclude_fields'}) {
+    if (exists $params->{'exclude_fields'} && !ref $params->{'exclude_fields'}) {
         $params->{'exclude_fields'} = [ split(/[\s+,]/, $params->{'exclude_fields'}) ];
     }
 
@@ -344,7 +356,7 @@ sub _retrieve_json_params {
         my $extra_params = {};
         my $json = delete $params->{'POSTDATA'} || delete $params->{'PUTDATA'};
         if ($json) {
-            eval { $extra_params = $self->json->decode($json); };
+            eval { $extra_params = $self->json->utf8(0)->decode($json); };
             if ($@) {
                 ThrowUserError('json_rpc_invalid_params', { err_msg  => $@ });
             }

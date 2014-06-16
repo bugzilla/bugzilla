@@ -1,23 +1,10 @@
-[%# The contents of this file are subject to the Mozilla Public
-  # License Version 1.1 (the "License"); you may not use this file
-  # except in compliance with the License. You may obtain a copy of
-  # the License at http://www.mozilla.org/MPL/
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
   #
-  # Software distributed under the License is distributed on an "AS
-  # IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
-  # implied. See the License for the specific language governing
-  # rights and limitations under the License.
-  #
-  # The Original Code is the Bugzilla Bug Tracking System.
-  #
-  # The Initial Developer of the Original Code is Netscape Communications
-  # Corporation. Portions created by Netscape are
-  # Copyright (C) 1998 Netscape Communications Corporation. All
-  # Rights Reserved.
-  #
-  # Contributor(s): Gervase Markham <gerv@gerv.net>
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
   #%]
-
 [%
   # Pinched from Bugzilla/API/Model/Utils.pm in BzAPI - need to keep in sync
 OLD2NEW = {
@@ -28,7 +15,7 @@ OLD2NEW = {
   'bug_id'              => 'id',
   'rep_platform'        => 'platform',
   'bug_severity'        => 'severity',
-  'bug_status'          => 'status',     
+  'bug_status'          => 'status',
   'short_desc'          => 'summary',
   'short_short_desc'    => 'summary',
   'bug_file_loc'        => 'url',
@@ -103,8 +90,8 @@ OLDATTACH2NEW = {
 
 %]
 
-[%# Add attachment stuff to the main hash - but with right prefix. (This is  
-  # the way the code is structured in BzAPI, and changing it makes it harder 
+[%# Add attachment stuff to the main hash - but with right prefix. (This is
+  # the way the code is structured in BzAPI, and changing it makes it harder
   # to keep the two in sync.)
   #%]
 [% FOREACH entry IN OLDATTACH2NEW %]
@@ -119,7 +106,7 @@ OLDATTACH2NEW = {
   "maintainer": "[% Param('maintainer') FILTER json %]",
   "announcement": "[% Param('announcehtml') FILTER json %]",
   "max_attachment_size": [% (Param('maxattachmentsize') * 1000) FILTER json %],
-  
+
 [% IF Param('useclassification') %]
   [% cl_name_for = {} %]
   "classification": {
@@ -154,7 +141,7 @@ OLDATTACH2NEW = {
           "id": [% component.id FILTER json %],
 [% IF show_flags %]
           "flag_type": [
-          [% flag_types = 
+          [% flag_types =
               component.flag_types(is_active=>1).bug.merge(component.flag_types(is_active=>1).attachment) %]
           [%-# "first" flag used to get commas right; can't use loop.last() in case
              # last flag is inactive %]
@@ -173,7 +160,7 @@ OLDATTACH2NEW = {
         "[% version.name FILTER json %]"[% ',' UNLESS loop.last() %]
       [% END %]
       ],
-      
+
 [% IF Param('usetargetmilestone') %]
       "default_target_milestone": "[% product.defaultmilestone FILTER json %]",
       "target_milestone": [
@@ -191,7 +178,7 @@ OLDATTACH2NEW = {
     }[% ',' UNLESS loop.last() %]
   [% END %]
   },
-  
+
   "group": {
   [% FOREACH group = product.groups_valid %]
     "[% group.id FILTER json %]": {
@@ -227,7 +214,7 @@ OLDATTACH2NEW = {
 [% END %]
 
   [% PROCESS "global/field-descs.none.tmpl" %]
-  
+
   [%# Put custom field value data where below loop expects to find it %]
   [% FOREACH cf = custom_fields %]
     [% ${cf.name} = [] %]
@@ -235,8 +222,8 @@ OLDATTACH2NEW = {
       [% ${cf.name}.push(value.name) %]
     [% END %]
   [% END %]
-  
-  [%# Built-in fields do not have type IDs. There aren't ID values for all  
+
+  [%# Built-in fields do not have type IDs. There aren't ID values for all
     # the types of the built-in fields, but we do what we can, and leave the
     # rest as "0" (unknown).
     #%]
@@ -257,12 +244,12 @@ OLDATTACH2NEW = {
        "alias" => 1,
        "deadline" => 5,
      } %]
-  
+
   "field": {
   [% FOREACH item = field %]
     [% newname = OLD2NEW.${item.name} || item.name %]
     "[% newname FILTER json %]": {
-      "description": "[% (field_descs.${item.name} OR 
+      "description": "[% (field_descs.${item.name} OR
                           item.description) FILTER json %]",
       "is_active": [% field.obsolete ? "false" : "true" %],
       [% blacklist = ["version", "group", "product", "component"] %]

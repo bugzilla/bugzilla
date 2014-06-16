@@ -75,3 +75,4 @@ RewriteRule ^form[\.:]mobile[\.\-:]compat$ enter_bug.cgi?product=Tech+Evangelism
 RewriteRule ^form[\.:]web[\.:]bounty$ enter_bug.cgi?product=mozilla.org&format=web-bounty 
 RewriteRule ^form[\.:]automative$ enter_bug.cgi?product=Testing&format=automative
 RewriteRule ^rest/(.*)$ rest.cgi/$1 [NE]
+RewriteRule ^bzapi/(.*)$ extensions/BzAPI/bin/rest.cgi/$1 [NE]

@@ -45,7 +45,7 @@ use base qw(Exporter);
                              bz_crypt generate_random_password
                              validate_email_syntax clean_text
                              get_text template_var disable_utf8
-                             detect_encoding email_filter);
+                             enable_utf8 detect_encoding email_filter);
 
 use Bugzilla::Constants;
 use Bugzilla::RNG qw(irand);
@@ -775,6 +775,12 @@ sub display_value {
 sub disable_utf8 {
     if (Bugzilla->params->{'utf8'}) {
         binmode STDOUT, ':bytes'; # Turn off UTF8 encoding.
+    }
+}
+
+sub enable_utf8 {
+    if (Bugzilla->params->{'utf8'}) {
+        binmode STDOUT, ':utf8'; # Turn on UTF8 encoding.
     }
 }
 

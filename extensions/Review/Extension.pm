@@ -670,6 +670,36 @@ sub db_schema_abstract_schema {
             },
         ],
     };
+
+    $args->{'schema'}->{'bug_mentors'} = {
+        FIELDS => [
+            bug_id => {
+                TYPE       => 'INT3',
+                NOTNULL    => 1,
+                REFERENCES => {
+                    TABLE  => 'bugs',
+                    COLUMN => 'bug_id',
+                    DELETE => 'CASCADE',
+                },
+            },
+            user_id => {
+                TYPE    => 'INT3',
+                NOTNULL => 1,
+                REFERENCES => {
+                    TABLE  => 'profiles',
+                    COLUMN => 'userid',
+                    DELETE => 'CASCADE',
+                }
+            },
+        ],
+        INDEXES => [
+            bug_mentors_idx => {
+                FIELDS => [ 'bug_id', 'user_id' ],
+                TYPE => 'UNIQUE',
+            },
+            bug_mentors_bug_id_idx => [ 'bug_id' ],
+        ],
+    };
 }
 
 sub install_update_db {
@@ -690,6 +720,13 @@ sub install_update_db {
         'profiles',
         'needinfo_request_count', { TYPE => 'INT2', NOTNULL => 1, DEFAULT => 0 }
     );
+    my $field = Bugzilla::Field->new({ name => 'bug_mentor' });
+    if (!$field) {
+        Bugzilla::Field->create({
+            name => 'bug_mentor',
+            description => 'Mentor'
+        });
+    }
 }
 
 sub install_filesystem {

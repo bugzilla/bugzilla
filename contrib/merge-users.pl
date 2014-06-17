@@ -164,6 +164,19 @@ Bugzilla::Hook::process('merge_users_before', { old_id => $old_id, new_id => $ne
 $dbh->do('DELETE FROM logincookies WHERE userid = ?', undef, $old_id);
 $dbh->do('DELETE FROM tokens WHERE userid = ?', undef, $old_id);
 
+# Special care needs to be done with bug_user_last_visit table as the
+# source user and destination user may have visited the same bug id at one time.
+# In this case we remove the one with the oldest timestamp.
+my $dupe_ids = $dbh->selectcol_arrayref("
+    SELECT earlier.id
+      FROM bug_user_last_visit as earlier
+           INNER JOIN bug_user_last_visit as later
+           ON (earlier.user_id != later.user_id AND earlier.last_visit_ts < later.last_visit_ts
+               AND earlier.bug_id = later.bug_id)
+     WHERE (earlier.user_id = ? OR earlier.user_id = ?)",
+    undef, $old_id, $new_id);
+$dbh->do("DELETE FROM bug_user_last_visit WHERE " . $dbh->sql_in('id', $dupe_ids));
+
 # Migrate records from old user to new user.
 foreach my $table (keys %changes) {
     foreach my $column_list (@{ $changes{$table} }) {

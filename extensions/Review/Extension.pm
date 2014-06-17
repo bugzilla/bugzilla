@@ -18,8 +18,9 @@ use Bugzilla::Error;
 use Bugzilla::Extension::Review::FlagStateActivity;
 use Bugzilla::Extension::Review::Util;
 use Bugzilla::Install::Filesystem;
+use Bugzilla::Search;
 use Bugzilla::User;
-use Bugzilla::Util qw(clean_text);
+use Bugzilla::Util qw(clean_text diff_arrays);
 
 use constant UNAVAILABLE_RE => qr/\b(?:unavailable|pto|away)\b/i;
 
@@ -77,42 +78,19 @@ sub _reviewers_objs {
 
 sub _bug_mentors {
     my ($self) = @_;
-    # extract the mentors from the status_whiteboard
-    # when the mentors gets its own field, this will be easier
-    if (!exists $self->{mentors}) {
-        my @mentors;
-        my $whiteboard = $self->status_whiteboard;
-        my $logout = 0;
-        while ($whiteboard =~ /\[mentor=([^\]]+)\]/g) {
-            my $mentor_string = $1;
-            my $user;
-            if ($mentor_string =~ /\@/) {
-                # assume it's a full username if it contains an @
-                $user = Bugzilla::User->new({ name => $mentor_string });
-            } else {
-                # otherwise assume it's a : prefixed nick.  only works if a
-                # single user matches.
-
-                # we need to be logged in to do user searching
-                if (!Bugzilla->user->id) {
-                    Bugzilla->set_user(Bugzilla::User->check({ name => 'nobody@mozilla.org' }));
-                    $logout = 1;
-                }
-
-                foreach my $query ("*:$mentor_string*", "*$mentor_string*") {
-                    my $matches = Bugzilla::User::match($query, 2);
-                    if ($matches && scalar(@$matches) == 1) {
-                        $user = $matches->[0];
-                        last;
-                    }
-                }
-            }
-            push @mentors, $user if $user;
+    my $dbh = Bugzilla->dbh;
+    if (!$self->{bug_mentors}) {
+        my $mentor_ids = $dbh->selectcol_arrayref("
+            SELECT user_id FROM bug_mentors WHERE bug_id = ?",
+            undef,
+            $self->id);
+        $self->{bug_mentors} = [];
+        foreach my $mentor_id (@$mentor_ids) {
+            push(@{ $self->{bug_mentors} },
+                 Bugzilla::User->new({ id => $mentor_id, cache => 1 }));
         }
-        Bugzilla->logout_request() if $logout;
-        $self->{mentors} = \@mentors;
     }
-    return $self->{mentors};
+    return [ sort { $a->login cmp $b->login } @{ $self->{bug_mentors} } ];
 }
 
 sub _bug_is_mentor {
@@ -191,14 +169,18 @@ sub object_end_of_create {
     my ($object, $params) = @$args{qw(object params)};
 
     if ($object->isa('Bugzilla::Product') || $object->isa('Bugzilla::Component')) {
-        my ($new, $new_users) = _new_reviewers_from_input();
-        _update_reviewers($object, [], $new_users);
+        my ($new, $new_users) = _new_users_from_input('reviewers');
+        _update_users($object, [], $new_users);
     }
     elsif (_is_countable_flag($object) && $object->requestee_id && $object->status eq '?') {
         _adjust_request_count($object, +1);
     }
     if (_is_countable_flag($object)) {
         $self->_log_flag_state_activity($object, $object->status);
+    }
+    elsif ($object->isa('Bugzilla::Bug')) {
+        my ($new, $new_users) = _new_users_from_input('bug_mentors');
+        _update_users($object, [], $new_users);
     }
 }
 
@@ -207,10 +189,10 @@ sub object_end_of_update {
     my ($object, $old_object, $changes) = @$args{qw(object old_object changes)};
 
     if ($object->isa('Bugzilla::Product') || $object->isa('Bugzilla::Component')) {
-        my ($new, $new_users) = _new_reviewers_from_input();
+        my ($new, $new_users) = _new_users_from_input('reviewers');
         my $old = $old_object->reviewers(1);
         if ($old ne $new) {
-            _update_reviewers($object, $old_object->reviewers_objs(1), $new_users);
+            _update_users($object, $old_object->reviewers_objs(1), $new_users);
             $changes->{reviewers} = [ $old ? $old : undef, $new ? $new : undef ];
         }
     }
@@ -238,6 +220,19 @@ sub object_end_of_update {
             # changing requestee
             _adjust_request_count($old_object, -1);
             _adjust_request_count($object, +1);
+        }
+    }
+    elsif ($object->isa('Bugzilla::Bug')) {
+        my ($new, $new_mentors) = _new_users_from_input('bug_mentors');
+        my $old = join(", ", map { $_->login } @{ $old_object->mentors });
+        if ($old ne $new) {
+            _update_users($object, $old_object->mentors, $new_mentors);
+
+            my @old_names = map { $_->login } @{ $old_object->mentors };
+            my @new_names = map { $_->login } @{ $new_mentors };
+            my ($removed, $added) = diff_arrays(\@old_names, \@new_names);
+            $changes->{bug_mentor} = [ @$removed ? join(", ", @$removed) : undef,
+                                       @$added   ? join(", ", @$added)   : undef ];
         }
     }
 }
@@ -310,12 +305,13 @@ sub _adjust_request_count {
     Bugzilla->memcached->clear({ table => 'profiles', id => $requestee_id });
 }
 
-sub _new_reviewers_from_input {
-    if (!Bugzilla->input_params->{reviewers}) {
+sub _new_users_from_input {
+    my $field = shift;
+    if (!Bugzilla->input_params->{$field}) {
         return ('', []);
     }
-    Bugzilla::User::match_field({ 'reviewers' => {'type' => 'multi'} });
-    my $new = Bugzilla->input_params->{reviewers};
+    Bugzilla::User::match_field({ $field => {'type' => 'multi'} });
+    my $new = Bugzilla->input_params->{$field};
     $new = [ $new ] unless ref($new);
     my $new_users = [];
     foreach my $login (@$new) {
@@ -325,38 +321,63 @@ sub _new_reviewers_from_input {
     return ($new, $new_users);
 }
 
-sub _update_reviewers {
+sub _update_users {
     my ($object, $old_users, $new_users) = @_;
     my $dbh = Bugzilla->dbh;
-    my $type = $object->isa('Bugzilla::Product') ? 'product' : 'component';
 
-    # remove deleted users
-    foreach my $old_user (@$old_users) {
-        if (!grep { $_->id == $old_user->id } @$new_users) {
-            $dbh->do(
-                "DELETE FROM ${type}_reviewers WHERE ${type}_id=? AND user_id=?",
-                undef,
-                $object->id, $old_user->id,
-            );
+    if ($object->isa('Bugzilla::Bug')) {
+        # remove deleted users
+        foreach my $old_user (@$old_users) {
+            if (!grep { $_->id == $old_user->id } @$new_users) {
+                $dbh->do(
+                    "DELETE FROM bug_mentors WHERE bug_id = ? AND user_id = ?",
+                    undef,
+                    $object->id, $old_user->id,
+                );
+            }
+        }
+        # add new users
+        foreach my $new_user (@$new_users) {
+            if (!grep { $_->id == $new_user->id } @$old_users) {
+                $dbh->do(
+                    "INSERT INTO bug_mentors (bug_id,user_id) VALUES (?, ?)",
+                    undef,
+                    $object->id, $new_user->id,
+                );
+            }
         }
     }
-    # add new users
-    foreach my $new_user (@$new_users) {
-        if (!grep { $_->id == $new_user->id } @$old_users) {
+    else {
+        my $type = $object->isa('Bugzilla::Product') ? 'product' : 'component';
+
+        # remove deleted users
+        foreach my $old_user (@$old_users) {
+            if (!grep { $_->id == $old_user->id } @$new_users) {
+                $dbh->do(
+                    "DELETE FROM ${type}_reviewers WHERE ${type}_id=? AND user_id=?",
+                    undef,
+                    $object->id, $old_user->id,
+                );
+            }
+        }
+        # add new users
+        foreach my $new_user (@$new_users) {
+            if (!grep { $_->id == $new_user->id } @$old_users) {
+                $dbh->do(
+                    "INSERT INTO ${type}_reviewers(${type}_id,user_id) VALUES (?,?)",
+                    undef,
+                    $object->id, $new_user->id,
+                );
+            }
+        }
+        # and update the sortkey for all users
+        for (my $i = 0; $i < scalar(@$new_users); $i++) {
             $dbh->do(
-                "INSERT INTO ${type}_reviewers(${type}_id,user_id) VALUES (?,?)",
+                "UPDATE ${type}_reviewers SET sortkey=? WHERE ${type}_id=? AND user_id=?",
                 undef,
-                $object->id, $new_user->id,
+                ($i + 1) * 10, $object->id, $new_users->[$i]->id,
             );
         }
-    }
-    # and update the sortkey for all users
-    for (my $i = 0; $i < scalar(@$new_users); $i++) {
-        $dbh->do(
-            "UPDATE ${type}_reviewers SET sortkey=? WHERE ${type}_id=? AND user_id=?",
-            undef,
-            ($i + 1) * 10, $object->id, $new_users->[$i]->id,
-        );
     }
 }
 
@@ -436,6 +457,51 @@ sub flag_end_of_update {
             ThrowUserError('reviewer_required');
         }
     }
+}
+
+#
+# search
+#
+
+sub buglist_columns {
+    my ($self, $args) = @_;
+    my $dbh = Bugzilla->dbh;
+    my $columns = $args->{columns};
+    $columns->{bug_mentor} = { title => 'Mentor' };
+    if (Bugzilla->user->id) {
+        $columns->{bug_mentor}->{name}
+            = $dbh->sql_group_concat('map_mentors_names.login_name');
+    }
+    else {
+        $columns->{bug_mentor}->{name}
+            = $dbh->sql_group_concat('map_mentors_names.realname');
+
+    }
+}
+
+sub buglist_column_joins {
+    my ($self, $args) = @_;
+    my $column_joins = $args->{column_joins};
+    $column_joins->{bug_mentor} = {
+        as    => 'map_mentors',
+        table => 'bug_mentors',
+        then_to => {
+            as    => 'map_mentors_names',
+            table => 'profiles',
+            from  => 'map_mentors.user_id',
+            to    => 'userid',
+        },
+    },
+}
+
+sub search_operator_field_override {
+    my ($self, $args) = @_;
+    my $operators = $args->{operators};
+    $operators->{bug_mentor} = {
+        _non_changed => sub {
+            Bugzilla::Search::_user_nonchanged(@_)
+        }
+    };
 }
 
 #
@@ -700,6 +766,36 @@ sub db_schema_abstract_schema {
             bug_mentors_bug_id_idx => [ 'bug_id' ],
         ],
     };
+
+    $args->{'schema'}->{'bug_mentors'} = {
+        FIELDS => [
+            bug_id => {
+                TYPE       => 'INT3',
+                NOTNULL    => 1,
+                REFERENCES => {
+                    TABLE  => 'bugs',
+                    COLUMN => 'bug_id',
+                    DELETE => 'CASCADE',
+                },
+            },
+            user_id => {
+                TYPE    => 'INT3',
+                NOTNULL => 1,
+                REFERENCES => {
+                    TABLE  => 'profiles',
+                    COLUMN => 'userid',
+                    DELETE => 'CASCADE',
+                }
+            },
+        ],
+        INDEXES => [
+            bug_mentors_idx => {
+                FIELDS => [ 'bug_id', 'user_id' ],
+                TYPE => 'UNIQUE',
+            },
+            bug_mentors_bug_id_idx => [ 'bug_id' ],
+        ],
+    };
 }
 
 sub install_update_db {
@@ -720,6 +816,7 @@ sub install_update_db {
         'profiles',
         'needinfo_request_count', { TYPE => 'INT2', NOTNULL => 1, DEFAULT => 0 }
     );
+
     my $field = Bugzilla::Field->new({ name => 'bug_mentor' });
     if (!$field) {
         Bugzilla::Field->create({

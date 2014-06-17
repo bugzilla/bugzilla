@@ -384,6 +384,9 @@ sub SPECIAL_PARSING {
         # last_visit field that accept both a 1d, 1w, 1m, 1y format and the
         # %last_changed% pronoun.
         last_visit_ts => \&_last_visit_datetime,
+
+        # BMO - Add ability to use pronoun for bug mentors field
+        bug_mentor => \&_commenter_pronoun,
     };
     foreach my $field (Bugzilla->active_custom_fields) {
         if ($field->type == FIELD_TYPE_DATETIME) {
@@ -425,6 +428,11 @@ use constant USER_FIELDS => {
         field    => 'setter_id',
         join     => { table => 'flags' },
     },
+    # BMO - Ability to search for bugs with specific mentors
+    'bug_mentor' => {
+        field => 'user_id',
+        join  => { table => 'bug_mentors' },
+    }
 };
 
 # Backwards compatibility for times that we changed the names of fields
@@ -1701,7 +1709,7 @@ sub _special_parse_email {
         $type = "anyexact" if $type eq "exact";
 
         my $or_clause = new Bugzilla::Search::Clause('OR');
-        foreach my $field (qw(assigned_to reporter cc qa_contact)) {
+        foreach my $field (qw(assigned_to reporter cc qa_contact bug_mentor)) {
             if ($params->{"email$field$id"}) {
                 $or_clause->add($field, $type, $email);
             }

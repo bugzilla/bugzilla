@@ -775,6 +775,9 @@ sub is_involved_in_bug {
         return 1 if $user_id == $bug->qa_contact->id;
     }
 
+    # BMO - Bug mentors are considered involved with the bug
+    return 1 if $bug->is_mentor($self);
+
     return unless $bug->cc;
     return any { $user_login eq $_ } @{ $bug->cc };
 }

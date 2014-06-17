@@ -633,10 +633,11 @@ TUI_hide_default('attachment_text_field');
   [% IF Param('use_see_also') %]
     <tr>
       [% INCLUDE bug/field.html.tmpl
-         bug            = default
-         field          = bug_fields.see_also
-         editable       = 1
-         value          = see_also
+         bug        = default
+         field      = bug_fields.see_also
+         editable   = 1
+         value      = see_also
+         value_span = 3
       %]
     </tr>
   [% END %]
@@ -656,9 +657,8 @@ TUI_hide_default('attachment_text_field');
       value_span = 3 %]
   </tr>
 [% END %]
-</tbody>
-
 [% Hook.process('after_custom_fields') %]
+</tbody>
 
 [% display_flags = 0 %]
 [% any_flags_requesteeble = 0 %]

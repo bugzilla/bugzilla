@@ -330,6 +330,8 @@ TUI_hide_default('information_query');
                   label=> "a ${field_descs.cc} list member" } %]
       [% PROCESS role_types field = { count => n, name => "emaillongdesc", 
                   label=> " a ${field_descs.commenter}" } %]
+      [% PROCESS role_types field = { count => n, name => "emailbug_mentor",
+                                      label => " a ${field_descs.bug_mentor}" } %]
       <select name="emailtype[% n %]">
       [% FOREACH qv = [
         { name => "substring", description => "contains" },
@@ -357,8 +359,8 @@ TUI_hide_default('information_query');
       [% END %]
     </div>
   [% END %]
-   [% Hook.process('email_numbering_end') %]
-   </div>
+  [% Hook.process('email_numbering_end') %]
+  </div>
 [%# *** Bug Changes *** %]
 <div class="bz_section_title" id="history_filter">
   <div id="history_query_controller" class="arrow">&#9660;</div>

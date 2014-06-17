@@ -1376,6 +1376,14 @@ sub _bug_to_hash {
         $item{'is_creator_accessible'} = $self->type('boolean', $bug->reporter_accessible);
     }
 
+    # BMO - support for special mentors field
+    if (filter_wants $params, 'mentors') {
+        $item{'mentors'}
+          = [ map { $self->type('email', $_->login) } @{ $bug->mentors || [] } ];
+        $item{'mentors_detail'}
+          = [ map { $self->_user_to_hash($_, $params, undef, 'mentors') } @{ $bug->mentors } ];
+    }
+
     return \%item;
 }
 

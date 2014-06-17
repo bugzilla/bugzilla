@@ -1,0 +1,50 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% mentor_logins = [] %]
+[% FOREACH mentor = bug.mentors %]
+  [% mentor_logins.push(mentor.login) %]
+[% END %]
+<tr>
+  <th class="field_label">Mentors:</th>
+  <td>
+    [% IF bug.check_can_change_field("bug_mentors", 0, 1) %]
+      <div id="bz_bug_mentors_edit_container" class="bz_default_hidden">
+        <span>
+          [% FOREACH mentor = bug.mentors %]
+            [% INCLUDE global/user.html.tmpl who = mentor %]<br>
+          [% END %]
+          (<a href="#" id="bz_bug_mentors_edit_action">edit</a>)
+        </span>
+      </div>
+      <div id="bz_bug_mentors_input">
+        [% INCLUDE global/userselect.html.tmpl
+           id       = "bug_mentors"
+           name     = "bug_mentors"
+           value    = mentor_logins.join(", ")
+           classes  = ["bz_userfield"]
+           size     = 30
+           multiple = 5
+         %]
+        <br>
+      </div>
+      <script type="text/javascript">
+        hideEditableField('bz_bug_mentors_edit_container',
+                          'bz_bug_mentors_input',
+                          'bz_bug_mentors_edit_action',
+                          'bug_mentors',
+                          '[% mentor_logins.join(", ") FILTER js %]' );
+      </script>
+    [% ELSE %]
+      [% FOREACH mentor = bug.mentors %]
+        [% INCLUDE global/user.html.tmpl who = mentor %]<br>
+      [% END %]
+    [% END %]
+  </td>
+</tr>
+

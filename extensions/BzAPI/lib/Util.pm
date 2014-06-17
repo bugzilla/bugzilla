@@ -180,9 +180,16 @@ sub fix_bug {
         }
     }
 
+    # Remove empty values in some cases
     foreach my $key (keys %$data) {
-        # Remove empty values in some cases
-        next if $key eq 'qa_contact'; # Return qa_contact even if null
+        # QA Contact is null if single bug or "" if doing search
+        if ($key eq 'qa_contact' && !$data->{$key}->{name}) {
+            if ($method eq 'Bug.search') {
+                $data->{$key}->{name} = $rpc->type('string', '');
+            }
+            next;
+        }
+
         next if $method eq 'Bug.search' && $key eq 'keywords'; # Return keywords even if empty
         next if $method eq 'Bug.get' && grep($_ eq $key, TIMETRACKING_FIELDS);
 

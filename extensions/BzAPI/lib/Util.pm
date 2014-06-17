@@ -190,6 +190,7 @@ sub fix_bug {
             next;
         }
 
+        next if $method eq 'Bug.search' && $key eq 'url'; # Return url even if empty
         next if $method eq 'Bug.search' && $key eq 'keywords'; # Return keywords even if empty
         next if $method eq 'Bug.get' && grep($_ eq $key, TIMETRACKING_FIELDS);
 
@@ -232,7 +233,7 @@ sub fix_user {
         $data = {
             name => filter_email($object->login)
         };
-        if ($user->id) {
+        if ($user->id && $object->name) {
             $data->{real_name} = $rpc->type('string', $object->name);
         }
     }
@@ -243,6 +244,8 @@ sub fix_user {
     if ($user->id) {
         $data->{ref} = $rpc->type('string', ref_urlbase . "/user/" . $object->login);
     }
+
+    delete $data->{real_name} if !$data->{real_name};
 
     return $data;
 }

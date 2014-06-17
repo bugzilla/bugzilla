@@ -41,7 +41,66 @@ my $nobody = Bugzilla::User->check({ name => 'nobody@mozilla.org' });
 $nobody->{groups} = [ Bugzilla::Group->get_all ];
 Bugzilla->set_user($nobody);
 
+my $mentor_field = Bugzilla::Field->check({ name => 'bug_mentor' });
 my $dbh = Bugzilla->dbh;
+
+# fix broken migration
+
+my $sth = $dbh->prepare("
+    SELECT id, bug_id, bug_when, removed, added
+      FROM bugs_activity
+     WHERE fieldid = ?
+     ORDER BY bug_id,bug_when,removed
+");
+$sth->execute($mentor_field->id);
+my %pair;
+while (my $row = $sth->fetchrow_hashref) {
+    if ($row->{added} && $row->{removed}) {
+        %pair = ();
+        next;
+    }
+    if ($row->{added}) {
+        $pair{bug_id} = $row->{bug_id};
+        $pair{bug_when} = $row->{bug_when};
+        $pair{who} = $row->{added};
+        next;
+    }
+    if (!$pair{bug_id}) {
+        next;
+    }
+    if ($row->{removed}) {
+        if ($row->{bug_id} == $pair{bug_id}
+            && $row->{bug_when} eq $pair{bug_when}
+            && $row->{removed} eq $pair{who})
+        {
+            print "Fixing mentor on bug $row->{bug_id}\n";
+            my $user = Bugzilla::User->check({ name => $row->{removed} });
+            $dbh->bz_start_transaction;
+            $dbh->do(
+                "DELETE FROM bugs_activity WHERE id = ?",
+                undef,
+                $row->{id}
+            );
+            my ($exists) = $dbh->selectrow_array(
+                "SELECT 1 FROM bug_mentors WHERE bug_id = ? AND user_id = ?",
+                undef,
+                $row->{bug_id}, $user->id
+            );
+            if (!$exists) {
+                $dbh->do(
+                    "INSERT INTO bug_mentors (bug_id, user_id) VALUES (?, ?)",
+                    undef,
+                    $row->{bug_id}, $user->id,
+                );
+            }
+            $dbh->bz_commit_transaction;
+            %pair = ();
+        }
+    }
+}
+
+# migrate remaining bugs
+
 my $bug_ids = $dbh->selectcol_arrayref("
     SELECT bug_id
       FROM bugs
@@ -53,6 +112,7 @@ print "Bugs found: " . scalar(@$bug_ids) . "\n";
 my $bugs = Bugzilla::Bug->new_from_list($bug_ids);
 foreach my $bug (@$bugs) {
     my $whiteboard = $bug->status_whiteboard;
+    my $orig_whiteboard = $whiteboard;
     my ($mentors, $errors) = extract_mentors($whiteboard);
 
     printf "%7s %s\n", $bug->id, $whiteboard;
@@ -85,7 +145,19 @@ foreach my $bug (@$bugs) {
 
     my $delta_ts = $dbh->selectrow_array('SELECT LOCALTIMESTAMP(0)');
     $dbh->bz_start_transaction;
-    $bug->set_all({ status_whiteboard => $whiteboard });
+    $dbh->do(
+        "UPDATE bugs SET status_whiteboard=? WHERE bug_id=?",
+        undef,
+        $whiteboard, $bug->id
+    );
+    Bugzilla::Bug::LogActivityEntry(
+        $bug->id,
+        'status_whiteboard',
+        $orig_whiteboard,
+        $whiteboard,
+        $nobody->id,
+        $delta_ts,
+    );
     foreach my $mentor (@$mentors) {
         $dbh->do(
             "INSERT INTO bug_mentors (bug_id, user_id) VALUES (?, ?)",
@@ -101,7 +173,6 @@ foreach my $bug (@$bugs) {
             $delta_ts,
         );
     }
-    $bug->update($delta_ts);
     $dbh->do(
         "UPDATE bugs SET lastdiffed = delta_ts WHERE bug_id = ?",
         undef,
@@ -120,7 +191,7 @@ sub extract_mentors {
         $mentor_string =~ s/(^\s+|\s+$)//g;
         if ($mentor_string =~ /\@/) {
             # assume it's a full username if it contains an @
-            my $user = Bugzilla::User->new({ name => $mentor_string, cache => 1 });
+            my $user = Bugzilla::User->new({ name => $mentor_string });
             if (!$user) {
                 push @errors, "'$mentor_string' failed to match any users";
             } else {
@@ -148,16 +219,11 @@ sub extract_mentors {
     return (\@mentors, \@errors);
 }
 
-my %cache;
-
 sub find_users {
     my ($query) = @_;
-    if (!exists $cache{$query}) {
-        my $matches = Bugzilla::User::match("*$query*", 2);
-        $cache{$query} = [
-            grep { $_->name =~ /:?\Q$query\E\b/i }
-            @$matches
-        ];
-    }
-    return $cache{$query};
+    my $matches = Bugzilla::User::match("*$query*", 2);
+    return [
+        grep { $_->name =~ /:?\Q$query\E\b/i }
+        @$matches
+    ];
 }

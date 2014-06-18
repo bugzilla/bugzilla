@@ -120,7 +120,7 @@ sub fix_bug {
         my $attachments = $rpc->attachments($attachment_params);
 
         my @fixed_attachments;
-        foreach my $attachment (@{ $attachments->{bugs}->{$data->{id}} }) {
+        foreach my $attachment (@{ $attachments->{bugs}->{$bug->id} }) {
             my $fixed = fix_attachment($attachment);
             push(@fixed_attachments, filter($params, $fixed, undef, 'attachments'));
         }
@@ -265,7 +265,7 @@ sub fix_comment {
 
     if ($data->{attachment_id} && $method ne 'Bug.search') {
         $data->{attachment_ref} = $rpc->type('string', ref_urlbase() .
-                                             "/attachment/" . $data->{attachment_id});
+                                             "/attachment/" . $object->extra_data);
     }
     else {
         delete $data->{attachment_id};
@@ -332,7 +332,7 @@ sub fix_attachment {
     }
 
     if (exists $data->{bug_id}) {
-        $data->{bug_ref} = $rpc->type('string', ref_urlbase() . "/bug/" . $data->{bug_id});
+        $data->{bug_ref} = $rpc->type('string', ref_urlbase() . "/bug/" . $object->bug_id);
     }
 
     # Upstream API returns these as integers where bzapi returns as booleans
@@ -357,7 +357,7 @@ sub fix_attachment {
         delete $data->{flags};
     }
 
-    $data->{ref} = $rpc->type('string', ref_urlbase() . "/attachment/" . $data->{id});
+    $data->{ref} = $rpc->type('string', ref_urlbase() . "/attachment/" . $object->id);
 
     # Add update token if we are getting an attachment outside of Bug.get and user is logged in
     if ($user->id && ($method eq 'Bug.attachments'|| $method eq 'Bug.search')) {

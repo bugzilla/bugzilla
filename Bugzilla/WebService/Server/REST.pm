@@ -23,6 +23,7 @@ use Bugzilla::WebService::Util qw(taint_data fix_credentials);
 use Bugzilla::WebService::Server::REST::Resources::Bug;
 use Bugzilla::WebService::Server::REST::Resources::Bugzilla;
 use Bugzilla::WebService::Server::REST::Resources::Classification;
+use Bugzilla::WebService::Server::REST::Resources::FlagType;
 use Bugzilla::WebService::Server::REST::Resources::Group;
 use Bugzilla::WebService::Server::REST::Resources::Product;
 use Bugzilla::WebService::Server::REST::Resources::User;

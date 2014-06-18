@@ -151,23 +151,6 @@ sub _rest_resources {
                 }
             }
         },
-        qr{^/flag_types/([^/]+)/([^/]+)$}, {
-            GET => {
-                method => 'flag_types',
-                params => sub {
-                    return { product   => $_[0],
-                             component => $_[1] };
-                }
-            }
-        },
-        qr{^/flag_types/([^/]+)$}, {
-            GET => {
-                method => 'flag_types',
-                params => sub {
-                    return { product => $_[0] };
-                }
-            }
-        }
     ];
     return $rest_resources;
 }

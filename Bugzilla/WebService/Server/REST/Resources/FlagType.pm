@@ -21,13 +21,28 @@ BEGIN {
 
 sub _rest_resources {
     my $rest_resources = [
-        qr{^/flagtype$}, {
+        qr{^/flag_type$}, {
             POST => {
                 method => 'create',
                 success_code => STATUS_CREATED
             }
         },
-        qr{^/flagtype/([^/]+)$}, {
+        qr{^/flag_type/([^/]+)/([^/]+)$}, {
+            GET => {
+                method => 'get',
+                params => sub {
+                    return { product   => $_[0],
+                             component => $_[1] };
+                }
+            }
+        },
+        qr{^/flag_type/([^/]+)$}, {
+            GET => {
+                method => 'get',
+                params => sub {
+                    return { product => $_[0] };
+                }
+            },
             PUT => {
                 method => 'update',
                 params => sub {

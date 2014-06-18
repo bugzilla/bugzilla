@@ -20,6 +20,38 @@ use Bugzilla::Util qw(trim);
 
 use List::MoreUtils qw(uniq);
 
+sub get {
+    my ($self, $params) = @_;
+    my $dbh  = Bugzilla->switch_to_shadow_db();
+    my $user = Bugzilla->user;
+
+    defined $params->{product}
+        || ThrowCodeError('param_required',
+                          { function => 'Bug.flag_types',
+                            param   => 'product' });
+
+    my $product   = delete $params->{product};
+    my $component = delete $params->{component};
+
+    $product = Bugzilla::Product->check({ name => $product, cache => 1 });
+    $component = Bugzilla::Component->check(
+        { name => $component, product => $product, cache => 1 }) if $component;
+
+    my $flag_params = { product_id => $product->id };
+    $flag_params->{component_id} = $component->id if $component;
+    my $matched_flag_types = Bugzilla::FlagType::match($flag_params);
+
+    my $flag_types = { bug => [], attachment => [] };
+    foreach my $flag_type (@$matched_flag_types) {
+        push(@{ $flag_types->{bug} }, $self->_flagtype_to_hash($flag_type, $product))
+            if $flag_type->target_type eq 'bug';
+        push(@{ $flag_types->{attachment} }, $self->_flagtype_to_hash($flag_type, $product))
+            if $flag_type->target_type eq 'attachment';
+    }
+
+    return $flag_types;
+}
+
 sub create {
     my ($self, $params) = @_;
 
@@ -177,6 +209,56 @@ sub update {
     return { flagtypes => \@result };
 }
 
+sub _flagtype_to_hash {
+    my ($self, $flagtype, $product) = @_;
+    my $user = Bugzilla->user;
+
+    my @values = ('X');
+    push(@values, '?') if ($flagtype->is_requestable && $user->can_request_flag($flagtype));
+    push(@values, '+', '-') if $user->can_set_flag($flagtype);
+
+    my $item = {
+        id          => $self->type('int'    , $flagtype->id),
+        name        => $self->type('string' , $flagtype->name),
+        description => $self->type('string' , $flagtype->description),
+        type        => $self->type('string' , $flagtype->target_type),
+        values      => \@values,
+        is_active   => $self->type('boolean', $flagtype->is_active),
+        is_requesteeble  => $self->type('boolean', $flagtype->is_requesteeble),
+        is_multiplicable => $self->type('boolean', $flagtype->is_multiplicable)
+    };
+
+    if ($product) {
+        my $inclusions = $self->_flagtype_clusions_to_hash($flagtype->inclusions, $product->id);
+        my $exclusions = $self->_flagtype_clusions_to_hash($flagtype->exclusions, $product->id);
+        # if we have both inclusions and exclusions, the exclusions are redundant
+        $exclusions = [] if @$inclusions && @$exclusions;
+        # no need to return anything if there's just "any component"
+        $item->{inclusions} = $inclusions if @$inclusions && $inclusions->[0] ne '';
+        $item->{exclusions} = $exclusions if @$exclusions && $exclusions->[0] ne '';
+    }
+
+    return $item;
+}
+
+sub _flagtype_clusions_to_hash {
+    my ($self, $clusions, $product_id) = @_;
+    my $result = [];
+    foreach my $key (keys %$clusions) {
+        my ($prod_id, $comp_id) = split(/:/, $clusions->{$key}, 2);
+        if ($prod_id == 0 || $prod_id == $product_id) {
+            if ($comp_id) {
+                my $component = Bugzilla::Component->new({ id => $comp_id, cache => 1 });
+                push @$result, $component->name;
+            }
+            else {
+                return [ '' ];
+            }
+        }
+    }
+    return $result;
+}
+
 sub _process_lists {
     my $list = shift;
     my $user = Bugzilla->user;
@@ -242,6 +324,104 @@ This part of the Bugzilla API allows you to create new flags
 See L<Bugzilla::WebService> for a description of what B<STABLE>, B<UNSTABLE>,
 and B<EXPERIMENTAL> mean, and for more description about error codes.
 
+=head2 Get Flag Types
+
+=over
+
+=item C<get> B<UNSTABLE>
+
+=item B<Description>
+
+Get information about valid flag types that can be set for bugs and attachments.
+
+=item B<REST>
+
+You have several options for retreiving information about flag types. The first
+part is the request method and the rest is the related path needed.
+
+To get information about all flag types for a product:
+
+GET /rest/flag_type/<product>
+
+To get information about flag_types for a product and component:
+
+GET /rest/flag_type/<product>/<component>
+
+The returned data format is the same as below.
+
+=item B<Params>
+
+You must pass a product name and an optional component name.
+
+=over
+
+=item C<product>   (string) - The name of a valid product.
+
+=item C<component> (string) - An optional valid component name associated with the product.
+
+=back
+
+=item B<Returns>
+
+A hash containing two keys, C<bug> and C<attachment>. Each key value is an array of hashes,
+containing the following keys:
+
+=over
+
+=item C<id>
+
+C<int> An integer id uniquely identifying this flag type.
+
+=item C<name>
+
+C<string> The name for the flag type.
+
+=item C<type>
+
+C<string> The target of the flag type which is either C<bug> or C<attachment>.
+
+=item C<description>
+
+C<string> The description of the flag type.
+
+=item C<values>
+
+C<array> An array of string values that the user can set on the flag type.
+
+=item C<is_requesteeble>
+
+C<boolean> Users can ask specific other users to set flags of this type.
+
+=item C<is_multiplicable>
+
+C<boolean> Multiple flags of this type can be set for the same bug or attachment.
+
+=back
+
+=item B<Errors>
+
+=over
+
+=item 106 (Product Access Denied)
+
+Either the product does not exist or you don't have access to it.
+
+=item 51 (Invalid Component)
+
+The component provided does not exist in the product.
+
+=back
+
+=item B<History>
+
+=over
+
+=item Added in Bugzilla B<5.0>.
+
+=back
+
+=back
+
 =head2 Create Flag
 
 =over
@@ -254,7 +434,7 @@ Creates a new FlagType
 
 =item B<REST>
 
-POST /rest/flagtype
+POST /rest/flag_type
 
 The params to include in the POST body as well as the returned data format,
 are the same as below.
@@ -427,7 +607,7 @@ This allows you to update a flag type in Bugzilla.
 
 =item B<REST>
 
-PUT /rest/flagtype/<product_id_or_name>
+PUT /rest/flag_type/<product_id_or_name>
 
 The params to include in the PUT body as well as the returned data format,
 are the same as below. The C<ids> and C<names> params will be overridden as

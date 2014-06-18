@@ -111,6 +111,7 @@ sub webservice_fix_credentials {
     my ($self, $args) = @_;
     my $rpc    = $args->{rpc};
     my $params = $args->{params};
+    return if !Bugzilla->request_cache->{bzapi};
     fix_credentials($params);
 }
 

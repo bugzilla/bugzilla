@@ -431,8 +431,9 @@ sub filter {
 sub fix_credentials {
     my ($params) = @_;
     # Allow user to pass in username=foo&password=bar to be compatible
-    $params->{'Bugzilla_login'}    = delete $params->{'username'} if exists $params->{'username'};
-    $params->{'Bugzilla_password'} = delete $params->{'password'} if exists $params->{'password'};
+    $params->{'Bugzilla_login'} = $params->{'login'} = delete $params->{'username'}
+      if exists $params->{'username'};
+    $params->{'Bugzilla_password'} = $params->{'password'} if exists $params->{'password'};
 
     # Allow user to pass userid=1&cookie=3iYGuKZdyz for compatibility with BzAPI
     if (exists $params->{'userid'} && exists $params->{'cookie'}) {

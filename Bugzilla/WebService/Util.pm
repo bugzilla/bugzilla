@@ -154,13 +154,13 @@ sub filter_wants($$;$$) {
         delete $exclude{$key};
     }
 
-    # If the user has asked to include all or exclude all
-    return $cache->{$field} = 0 if $exclude_types{'all'};
-    return $cache->{$field} = 1 if $include_types{'all'};
-
     # Explicit inclusion/exclusion
     return $cache->{$field} = 0 if $exclude{$field};
     return $cache->{$field} = 1 if $include{$field};
+
+    # If the user has asked to include all or exclude all
+    return $cache->{$field} = 0 if $exclude_types{'all'};
+    return $cache->{$field} = 1 if $include_types{'all'};
 
     # If the user has not asked for any fields specifically or if the user has asked
     # for one or more of the field's types (and not excluded them)

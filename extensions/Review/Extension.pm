@@ -178,7 +178,7 @@ sub object_end_of_create {
     if (_is_countable_flag($object)) {
         $self->_log_flag_state_activity($object, $object->status);
     }
-    elsif ($object->isa('Bugzilla::Bug')) {
+    elsif ($object->isa('Bugzilla::Bug') && exists Bugzilla->input_params->{bug_mentors}) {
         my ($new, $new_users) = _new_users_from_input('bug_mentors');
         _update_users($object, [], $new_users);
     }
@@ -222,7 +222,7 @@ sub object_end_of_update {
             _adjust_request_count($object, +1);
         }
     }
-    elsif ($object->isa('Bugzilla::Bug')) {
+    elsif ($object->isa('Bugzilla::Bug') && exists Bugzilla->input_params->{bug_mentors}) {
         my ($new, $new_mentors) = _new_users_from_input('bug_mentors');
         my $old = join(", ", map { $_->login } @{ $old_object->mentors });
         if ($old ne $new) {

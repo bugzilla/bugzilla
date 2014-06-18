@@ -302,7 +302,7 @@ function checkForChangedFieldValues(e, ContainerInputArray ) {
     if ( el ) {
         if ( !ContainerInputArray[4]
              && (el.value != ContainerInputArray[3]
-                 || (el.value == "" && el.id != "alias" && el.id != "qa_contact")) )
+                 || (el.value == "" && el.id != "alias" && el.id != "qa_contact" && el.id != "bug_mentors")) )
         {
 
             unhide = true;

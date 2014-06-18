@@ -467,6 +467,10 @@ sub remove_cookie {
 # URLs that get POSTed to buglist.cgi.
 sub redirect_search_url {
     my $self = shift;
+
+    # If there is no parameter, there is nothing to do.
+    return unless $self->param;
+
     # If we're retreiving an old list, we never need to redirect or
     # do anything related to Bugzilla::Search::Recent.
     return if $self->param('regetlastlist');

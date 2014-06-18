@@ -364,11 +364,10 @@
 
     [% IF Param("usetargetmilestone") && bug.target_milestone %]
       <tr>
-        <th class="field_label">
-          <label for="target_milestone">
-            <a href="page.cgi?id=fields.html#target_milestone">
-            Target&nbsp;Milestone</a></label>:
-        </th>
+        [% INCLUDE "bug/field-label.html.tmpl"
+          field = bug_fields.target_milestone
+          editable = 1
+        %]
         [% PROCESS select selname = "target_milestone" %]
       </tr>
     [% END %]
@@ -547,17 +546,11 @@
   
   [% IF use_keywords %]
     <tr>
-      <th class="field_label">
-        <label for="keywords" accesskey="k">
-          <a href="describekeywords.cgi"><u>K</u>eywords</a></label>:
-      </th>
-      <td class="field_value" colspan="2">
         [% INCLUDE bug/field.html.tmpl
-           bug = bug, field = bug_fields.keywords, value = bug.keywords
-           editable = bug.check_can_change_field("keywords", 0, 1),
-           no_tds = 1, possible_values = all_keywords
+          bug = bug, field = bug_fields.keywords, value = bug.keywords
+          editable = bug.check_can_change_field("keywords", 0, 1),
+          desc_url = "describekeywords.cgi", possible_values = all_keywords
         %]
-      </td>
     </tr>
   [% END %]
 

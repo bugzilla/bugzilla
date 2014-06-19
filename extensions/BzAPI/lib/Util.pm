@@ -110,7 +110,7 @@ sub fix_bug {
 
     # Attachment metadata is included by default but not data
     if (filter_wants_nocache($params, 'attachments')) {
-        my $attachment_params = { ids => $data->{id} };
+        my $attachment_params = { ids => $bug->id };
         if (!filter_wants_nocache($params, 'data', 'extra', 'attachments')
             && !$params->{attachmentdata})
         {
@@ -132,8 +132,8 @@ sub fix_bug {
 
     # Comments
     if (filter_wants_nocache($params, 'comments', 'extra', 'comments')) {
-        my $comments = $rpc->comments({ ids => $data->{id} });
-        $comments = $comments->{bugs}->{$data->{id}}->{comments};
+        my $comments = $rpc->comments({ ids => $bug->id });
+        $comments = $comments->{bugs}->{$bug->id}->{comments};
         my @new_comments;
         foreach my $comment (@$comments) {
             $comment = fix_comment($comment);
@@ -144,7 +144,7 @@ sub fix_bug {
 
     # History
     if (filter_wants_nocache($params, 'history', 'extra', 'history')) {
-        my $history = $rpc->history({ ids => [ $data->{id} ] });
+        my $history = $rpc->history({ ids => [ $bug->id ] });
         my @new_history;
         foreach my $changeset (@{ $history->{bugs}->[0]->{history} }) {
             push(@new_history, fix_changeset($changeset, $bug));

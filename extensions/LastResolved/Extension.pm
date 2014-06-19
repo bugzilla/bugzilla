@@ -61,11 +61,12 @@ sub _migrate_last_resolved {
     }
 }
 
-sub active_custom_fields {
+sub bug_check_can_change_field {
     my ($self, $args) = @_;
-    my $fields = $args->{'fields'};
-    my @tmp_fields = grep($_->name ne 'cf_last_resolved', @$$fields);
-    $$fields = \@tmp_fields;
+    my ($field, $priv_results) = @$args{qw(field priv_results)};
+    if ($field eq 'cf_last_resolved') {
+        push (@$priv_results, PRIVILEGES_REQUIRED_EMPOWERED);
+    }
 }
 
 sub bug_end_of_update {

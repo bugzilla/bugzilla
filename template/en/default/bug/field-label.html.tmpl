@@ -16,12 +16,21 @@
   #%]
 
 [% DEFAULT tag_name = "th" %]
+[% DEFAULT field_name = field_descs.${field.name} FILTER html %]
+
 <[% tag_name FILTER html %] class="field_label [% ' bz_hidden_field' IF hidden %]
            [%- ' required' IF field.is_mandatory && NOT bug.id %]"
     id="field_label_[% field.name FILTER html %]"
     [% IF rowspan %] rowspan="[% rowspan FILTER html %]"[% END %]>
 
   [% IF editable %]
+    [%# Underline the accesskey if defined and found in the field name %]
+    [% IF accesskey %]
+      [% matches = field_name.match("(?i)($accesskey)") %]
+      [% IF matches.0 %]
+        [% field_name = field_name.replace(matches.0, "<u>${matches.0}</u>") %]
+      [% END %]
+    [% END %]
     <label for="[% field.name FILTER html %]"[% IF accesskey %] accesskey="[% accesskey FILTER html %]"[% END %]>
   [% END %]
 
@@ -35,7 +44,7 @@
     [% ELSE %]
       href="page.cgi?id=fields.html#[% field.name FILTER uri %]"
     [% END %]
-  >[%- field_descs.${field.name} FILTER html %]:</a>
+  >[%- field_name FILTER none %]:</a>
 
   [% '</label>' IF editable %]
 </[% tag_name FILTER html %]>

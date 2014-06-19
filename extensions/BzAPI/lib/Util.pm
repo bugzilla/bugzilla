@@ -287,7 +287,7 @@ sub fix_changeset {
 
     if ($data->{who}) {
         $data->{changer} = {
-            name => filter_email($data->{who}),
+            name => $rpc->type('string', $data->{who}),
             ref  => $rpc->type('string', ref_urlbase() . "/user/" . $data->{who})
         };
         delete $data->{who};

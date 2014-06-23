@@ -99,6 +99,10 @@
                   identity = '[% bug.qa_contact.realname || bug.qa_contact.login FILTER html FILTER js %]';
                 } else if (role == 'user') {
                   identity = '[% user.realname || user.login FILTER html FILTER js %]';
+                [% FOREACH mentor = bug.mentors %]
+                  } else if (role == '[% mentor.login FILTER js %]') {
+                    identity = '[% mentor.realname || mentor.login FILTER html FILTER js +%] [%+ IF bug.mentors.size > 1 %](mentor)[% END %]';
+                [% END %]
                 }
                 YAHOO.util.Dom.get('needinfo_role_identity').innerHTML = identity;
               }
@@ -137,6 +141,11 @@
               <option value="qa_contact">qa contact</option>
             [% END %]
             <option value="user">myself</option>
+            [% FOREACH mentor = bug.mentors %]
+              <option [% IF bug.mentors.size > 1 %]title="mentor"[% END %] value="[% mentor.login FILTER html %]">
+                [% bug.mentors.size == 1 ? "mentor" : mentor.login FILTER html %]
+              </option>
+            [% END %]
           </select>
           <span id="needinfo_from_container">
             [% INCLUDE global/userselect.html.tmpl

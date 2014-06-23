@@ -16,8 +16,6 @@ our @EXPORT = qw(
     sentry_should_notify
 );
 
-use Apache2::Log;
-use Apache2::SubProcess;
 use Carp;
 use Data::Dumper;
 use DateTime;
@@ -240,6 +238,7 @@ sub sentry_handle_error {
 sub _write_to_error_log {
     my ($message, $is_error) = @_;
     if ($ENV{MOD_PERL}) {
+        require Apache2::Log;
         if ($is_error) {
             Apache2::ServerRec::log_error($message);
         } else {

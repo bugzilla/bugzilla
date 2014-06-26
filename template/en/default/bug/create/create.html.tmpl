@@ -473,7 +473,8 @@ TUI_hide_default('attachment_text_field');
     </td>
   </tr>
 
-  [% IF feature_enabled('jsonrpc') AND !cloned_bug_id %]
+  [% IF feature_enabled('jsonrpc') AND !cloned_bug_id
+     	 AND user.settings.possible_duplicates.value == 'on' %]
     <tr id="possible_duplicates_container" class="bz_default_hidden">
       <th>Possible<br>Duplicates:</th>
       <td colspan="3">

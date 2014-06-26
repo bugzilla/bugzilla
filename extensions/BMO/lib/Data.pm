@@ -193,6 +193,7 @@ our %product_sec_groups = (
     "Talkback"                     => 'talkback-private',
     "Tamarin"                      => 'tamarin-security',
     "Testopia"                     => 'bugzilla-security',
+    "Tree Management"              => 'mozilla-employee-confidential',
     "Web Apps"                     => 'client-services-security',
     "Webmaker"                     => 'websites-security',
     "Websites"                     => 'websites-security',

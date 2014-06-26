@@ -3488,9 +3488,11 @@ sub comments {
             $comment->{count} = $count++;
             $comment->{bug} = $self;
         }
-        Bugzilla::Hook::process('bug_comments', { bug => $self, comments => $self->{'comments'} });
         # Some bugs may have no comments when upgrading old installations.
         Bugzilla::Comment->preload($self->{'comments'}) if @{ $self->{'comments'} };
+        # BMO - for comment deletion support
+        Bugzilla::Hook::process('bug_comments',
+            { bug => $self, comments => $self->{'comments'} });
     }
     return unless defined wantarray;
 

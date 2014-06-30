@@ -170,7 +170,9 @@ sub object_end_of_create {
 
     if ($object->isa('Bugzilla::Product') || $object->isa('Bugzilla::Component')) {
         my ($new, $new_users) = _new_users_from_input('reviewers');
-        _update_users($object, [], $new_users);
+        if (defined $new) {
+            _update_users($object, [], $new_users);
+        }
     }
     elsif (_is_countable_flag($object) && $object->requestee_id && $object->status eq '?') {
         _adjust_request_count($object, +1);
@@ -178,9 +180,11 @@ sub object_end_of_create {
     if (_is_countable_flag($object)) {
         $self->_log_flag_state_activity($object, $object->status);
     }
-    elsif ($object->isa('Bugzilla::Bug') && exists Bugzilla->input_params->{bug_mentors}) {
+    elsif ($object->isa('Bugzilla::Bug')) {
         my ($new, $new_users) = _new_users_from_input('bug_mentors');
-        _update_users($object, [], $new_users);
+        if (defined $new) {
+            _update_users($object, [], $new_users);
+        }
     }
 }
 
@@ -190,10 +194,12 @@ sub object_end_of_update {
 
     if ($object->isa('Bugzilla::Product') || $object->isa('Bugzilla::Component')) {
         my ($new, $new_users) = _new_users_from_input('reviewers');
-        my $old = $old_object->reviewers(1);
-        if ($old ne $new) {
-            _update_users($object, $old_object->reviewers_objs(1), $new_users);
-            $changes->{reviewers} = [ $old ? $old : undef, $new ? $new : undef ];
+        if (defined $new) {
+            my $old = $old_object->reviewers(1);
+            if ($old ne $new) {
+                _update_users($object, $old_object->reviewers_objs(1), $new_users);
+                $changes->{reviewers} = [ $old ? $old : undef, $new ? $new : undef ];
+            }
         }
     }
     elsif (_is_countable_flag($object)) {
@@ -222,17 +228,21 @@ sub object_end_of_update {
             _adjust_request_count($object, +1);
         }
     }
-    elsif ($object->isa('Bugzilla::Bug') && exists Bugzilla->input_params->{bug_mentors}) {
+    elsif ($object->isa('Bugzilla::Bug')) {
         my ($new, $new_mentors) = _new_users_from_input('bug_mentors');
-        my $old = join(", ", map { $_->login } @{ $old_object->mentors });
-        if ($old ne $new) {
-            _update_users($object, $old_object->mentors, $new_mentors);
+        if (defined $new) {
+            my $old = join(", ", map { $_->login } @{ $old_object->mentors });
+            if ($old ne $new) {
+                _update_users($object, $old_object->mentors, $new_mentors);
 
-            my @old_names = map { $_->login } @{ $old_object->mentors };
-            my @new_names = map { $_->login } @{ $new_mentors };
-            my ($removed, $added) = diff_arrays(\@old_names, \@new_names);
-            $changes->{bug_mentor} = [ @$removed ? join(", ", @$removed) : undef,
-                                       @$added   ? join(", ", @$added)   : undef ];
+                my @old_names = map { $_->login } @{ $old_object->mentors };
+                my @new_names = map { $_->login } @{ $new_mentors };
+                my ($removed, $added) = diff_arrays(\@old_names, \@new_names);
+                $changes->{bug_mentor} = [
+                    @$removed ? join(", ", @$removed) : undef,
+                    @$added   ? join(", ", @$added)   : undef,
+                ];
+            }
         }
     }
 }
@@ -306,10 +316,9 @@ sub _adjust_request_count {
 }
 
 sub _new_users_from_input {
-    my $field = shift;
-    if (!Bugzilla->input_params->{$field}) {
-        return ('', []);
-    }
+    my ($field) = @_;
+    return unless exists Bugzilla->input_params->{$field};
+    return ('', []) unless Bugzilla->input_params->{$field};
     Bugzilla::User::match_field({ $field => {'type' => 'multi'} });
     my $new = Bugzilla->input_params->{$field};
     $new = [ $new ] unless ref($new);

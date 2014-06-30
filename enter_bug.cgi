@@ -297,6 +297,9 @@ if ($cloned_bug_id) {
     # BMO Bug 1019747
     $vars->{'cloned_bug'} = $cloned_bug;
 
+    # BMO Allow mentors to be cloned as well
+    $vars->{'bug_mentors'} = join(', ', map { $_->login } @{ $cloned_bug->mentors });
+
 } # end of cloned bug entry form
 
 else {
@@ -323,6 +326,9 @@ else {
 
     $vars->{'comment'}        = formvalue('comment');
     $vars->{'comment_is_private'} = formvalue('comment_is_private');
+
+    # BMO Add support for mentors
+    $vars->{'bug_mentors'}    = formvalue('bug_mentors');
 
 } # end of normal/bookmarked entry form
 

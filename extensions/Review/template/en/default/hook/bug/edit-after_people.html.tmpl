@@ -17,7 +17,8 @@
       <div id="bz_bug_mentors_edit_container" class="bz_default_hidden">
         <span>
           [% FOREACH mentor = bug.mentors %]
-            [% INCLUDE global/user.html.tmpl who = mentor %]<br>
+            [% INCLUDE global/user.html.tmpl who = mentor %]
+            [% "<br>" UNLESS loop.last %]
           [% END %]
           (<a href="#" id="bz_bug_mentors_edit_action">edit</a>)
         </span>

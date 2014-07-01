@@ -563,6 +563,10 @@
       </td>
     </tr>
     [% END %]
+
+    [%# BMO - hook for adding mentors %]
+    [% Hook.process("after_people", "bug/edit.html.tmpl") %]
+
     <script type="text/javascript">
       assignToDefaultOnChange(['product', 'component'],
         '[% bug.component_obj.default_assignee.login FILTER js %]',

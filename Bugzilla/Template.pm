@@ -17,6 +17,7 @@ use Bugzilla::Hook;
 use Bugzilla::Install::Requirements;
 use Bugzilla::Install::Util qw(install_string template_include_path 
                                include_languages);
+use Bugzilla::Classification;
 use Bugzilla::Keyword;
 use Bugzilla::Util;
 use Bugzilla::Error;
@@ -1017,6 +1018,11 @@ sub create {
 
             'css_files' => \&css_files,
             yui_resolve_deps => \&yui_resolve_deps,
+
+            # All classifications (sorted by sortkey, name)
+            'all_classifications' => sub {
+                return [map { $_->name } Bugzilla::Classification->get_all()];
+            },
 
             # Whether or not keywords are enabled, in this Bugzilla.
             'use_keywords' => sub { return Bugzilla::Keyword->any_exist; },

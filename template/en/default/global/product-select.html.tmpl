@@ -63,8 +63,10 @@
           [% END %]
         [% END %]
       [% END %]
-      [% FOREACH c = classifications.keys.sort %]
-         <optgroup label="[% c FILTER html %]">
+
+      [% FOREACH c = all_classifications %]
+        [% NEXT UNLESS classifications.${c}.size %]
+        <optgroup label="[% c FILTER html %]">
           [% FOREACH p = classifications.$c %]
             <option value="[% p.$valueattribute FILTER html %]"
               [% " selected" IF (cgi.param(name) == p.name) || (value.contains(p.name)) %]>

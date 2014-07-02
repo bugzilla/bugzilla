@@ -587,6 +587,12 @@ sub add_attachment_request {
             }
         }
     }
+
+    # Add comment if one is provided
+    if (exists $params->{comments} && scalar @{ $params->{comments} }) {
+        $params->{comment} = $params->{comments}->[0]->{text};
+        delete $params->{comments};
+    }
 }
 
 sub update_attachment_request {
@@ -613,8 +619,9 @@ sub update_attachment_request {
             }
         }
     }
+
     # Add comment if one is provided
-    if ($params->{comments}) {
+    if (exists $params->{comments} && scalar @{ $params->{comments} }) {
         $params->{comment} = $params->{comments}->[0]->{text};
         delete $params->{comments};
     }

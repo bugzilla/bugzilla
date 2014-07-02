@@ -812,6 +812,11 @@
     in the database which refer to it. All references to this group must
     be removed before you can remove it.
 
+  [% ELSIF error == "group_cannot_view" %]
+    [% title = "Cannot View Groups" %]
+    In order to view groups, you need to be a member of the 'editusers' or
+    'creategroups' group, or have bless privileges to at least one group.
+
   [% ELSIF error == "group_exists" %]
     [% title = "The group already exists" %]
     The group [% name FILTER html %] already exists.

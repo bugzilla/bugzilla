@@ -20,6 +20,9 @@ BEGIN {
 sub _rest_resources {
     my $rest_resources = [
         qr{^/group$}, {
+            GET  => {
+                method => 'get'
+            },
             POST => {
                 method => 'create',
                 success_code => STATUS_CREATED

@@ -94,6 +94,125 @@ sub update {
     return { groups => \@result };
 }
 
+sub get {
+    my ($self, $params) = validate(@_, 'ids', 'names', 'type');
+
+    Bugzilla->login(LOGIN_REQUIRED);
+
+    # Reject access if there is no sense in continuing.
+    my $user = Bugzilla->user;
+    my $all_groups = $user->in_group('edituser') || $user->in_group('creategroups');
+    if (!$all_groups && ! scalar(@{$user->bless_groups})) {
+        ThrowUserError('group_cannot_view');
+    }
+
+    Bugzilla->switch_to_shadow_db();
+
+    my $groups = [];
+
+    if (defined $params->{ids}) {
+        # Get the groups by id
+        $groups = Bugzilla::Group->new_from_list($params->{ids});
+    }
+
+    if (defined $params->{names}) {
+        # Get the groups by name. Check will throw an error if a bad name is given
+        foreach my $name (@{$params->{names}}) {
+            # Skip if we got this from params->{id}
+            next if grep { $_->name eq $name } @$groups;
+
+            push @$groups, Bugzilla::Group->check({ name => $name });
+        }
+    }
+
+    if (!defined $params->{ids} && !defined $params->{names}) {
+        if ($all_groups) {
+            @$groups = Bugzilla::Group->get_all;
+        }
+        else {
+            # Get only groups the user has bless groups too
+            $groups = $user->bless_groups;
+        }
+    }
+
+    # Now create a result entry for each.
+    my @groups = map { $self->_group_to_hash($params, $_) } @$groups;
+    return { groups => \@groups };
+}
+
+sub _group_to_hash {
+    my ($self, $params, $group) = @_;
+    my $user = Bugzilla->user;
+
+    my $field_data = {
+        id          => $self->type('int', $group->id),
+        name        => $self->type('string', $group->name),
+        description => $self->type('string', $group->description),
+    };
+
+    if ($user->in_group('creategroups')) {
+        $field_data->{is_active}    = $self->type('boolean', $group->is_active);
+        $field_data->{is_bug_group} = $self->type('boolean', $group->is_bug_group);
+        $field_data->{user_regexp}  = $self->type('string', $group->user_regexp);
+    }
+
+    if ($params->{membership}) {
+        $field_data->{membership} = $self->_get_group_membership($group, $params);
+    }
+    return $field_data;
+}
+
+sub _get_group_membership {
+    my ($self, $group, $params) = @_;
+    my $user = Bugzilla->user;
+
+    my %users_only;
+    my $dbh = Bugzilla->dbh;
+    my $editusers = $user->in_group('editusers');
+
+    my $query = 'SELECT userid FROM profiles';
+    my $visibleGroups;
+
+    if (!$editusers && Bugzilla->params->{'usevisibilitygroups'}) {
+        # Show only users in visible groups.
+        $visibleGroups = $user->visible_groups_inherited;
+
+        if (scalar @$visibleGroups) {
+            $query .= qq{, user_group_map AS ugm
+                         WHERE ugm.user_id = profiles.userid
+                           AND ugm.isbless = 0
+                           AND } . $dbh->sql_in('ugm.group_id', $visibleGroups);
+        }
+    } elsif ($editusers || $user->can_bless($group->id) || $user->in_group('creategroups')) {
+        $visibleGroups = 1;
+        $query .= qq{, user_group_map AS ugm
+                     WHERE ugm.user_id = profiles.userid
+                       AND ugm.isbless = 0
+                    };
+    }
+    if (!$visibleGroups) {
+        ThrowUserError('group_not_visible', { group => $group });
+    }
+
+    my $grouplist = Bugzilla::Group->flatten_group_membership($group->id);
+    $query .= ' AND ' . $dbh->sql_in('ugm.group_id', $grouplist);
+
+    my $userids = $dbh->selectcol_arrayref($query);
+    my $user_objects = Bugzilla::User->new_from_list($userids);
+    my @users =
+        map {{
+            id                => $self->type('int', $_->id),
+            real_name         => $self->type('string', $_->name),
+            name              => $self->type('string', $_->login),
+            email             => $self->type('string', $_->email),
+            can_login         => $self->type('boolean', $_->is_enabled),
+            email_enabled     => $self->type('boolean', $_->email_enabled),
+            login_denied_text => $self->type('string', $_->disabledtext),
+        }} @$user_objects;
+
+    return \@users;
+}
+
 1;
 
 __END__
@@ -310,6 +429,168 @@ The same as L</create>.
 =over
 
 =item REST API call added in Bugzilla B<5.0>.
+
+=back
+
+=back
+
+=head1 Group Information
+
+=head2 get
+
+B<UNSTABLE>
+
+=over
+
+=item B<Description>
+
+Returns information about L<Bugzilla::Group|Groups>.
+
+=item B<REST>
+
+To return information about a specific group by C<id> or C<name>:
+
+GET /rest/group/<group_id_or_name>
+
+You can also return information about more than one specific group
+by using the following in your query string:
+
+GET /rest/group?ids=1&ids=2&ids=3 or GET /group?names=ProductOne&names=Product2
+
+the returned data format is same as below.
+
+=item B<Params>
+
+If neither ids or names is passed, and you are in the creategroups or
+editusers group, then all groups will be retrieved. Otherwise, only groups
+that you have bless privileges for will be returned.
+
+=over
+
+=item C<ids>
+
+C<array> Contain ids of groups to update.
+
+=item C<names>
+
+C<array> Contain names of groups to update.
+
+=item C<membership>
+
+C<boolean> Set to 1 then a list of members of the passed groups' names and
+ids will be returned.
+
+=back
+
+=item B<Returns>
+
+If the user is a member of the "creategroups" group they will receive
+information about all groups or groups matching the criteria that they passed.
+You have to be in the creategroups group unless you're requesting membership
+information.
+
+If the user is not a member of the "creategroups" group, but they are in the
+"editusers" group or have bless privileges to the groups they require
+membership information for, the is_active, is_bug_group and user_regexp values
+are not supplied.
+
+The return value will be a hash containing group names as the keys, each group
+name will point to a hash that describes the group and has the following items:
+
+=over
+
+=item id
+
+C<int> The unique integer ID that Bugzilla uses to identify this group.
+Even if the name of the group changes, this ID will stay the same.
+
+=item name
+
+C<string> The name of the group.
+
+=item description
+
+C<string> The description of the group.
+
+=item is_bug_group
+
+C<int> Whether this groups is to be used for bug reports or is only administrative specific.
+
+=item user_regexp
+
+C<string> A regular expression that allows users to be added to this group if their login matches.
+
+=item is_active
+
+C<int> Whether this group is currently active or not.
+
+=item users
+
+C<array> An array of hashes, each hash contains a user object for one of the
+members of this group, only returned if the user sets the C<membership>
+parameter to 1, the user hash has the following items:
+
+=over
+
+=item id
+
+C<int> The id of the user.
+
+=item real_name
+
+C<string> The actual name of the user.
+
+=item email
+
+C<string> The email address of the user.
+
+=item name
+
+C<string> The login name of the user. Note that in some situations this is
+different than their email.
+
+=item can_login
+
+C<boolean> A boolean value to indicate if the user can login into bugzilla.
+
+=item email_enabled
+
+C<boolean> A boolean value to indicate if bug-related mail will be sent
+to the user or not.
+
+=item disabled_text
+
+C<string> A text field that holds the reason for disabling a user from logging
+into bugzilla, if empty then the user account is enabled otherwise it is
+disabled/closed.
+
+=back
+
+=back
+
+=item B<Errors>
+
+=over
+
+=item 51 (Invalid Object)
+
+A non existing group name was passed to the function, as a result no
+group object existed for that invalid name.
+
+=item 805 (Cannot view groups)
+
+Logged-in users are not authorized to edit bugzilla groups as they are not
+members of the creategroups group in bugzilla, or they are not authorized to
+access group member's information as they are not members of the "editusers"
+group or can bless the group.
+
+=back
+
+=item B<History>
+
+=over
+
+=item This function was added in Bugzilla B<5.0>.
 
 =back
 

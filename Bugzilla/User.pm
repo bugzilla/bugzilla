@@ -25,6 +25,7 @@ use DateTime::TimeZone;
 use List::Util qw(max);
 use List::MoreUtils qw(any);
 use Scalar::Util qw(blessed);
+use Storable qw(dclone);
 use URI;
 use URI::QueryParam;
 
@@ -374,7 +375,8 @@ sub _set_groups {
            WHERE user_id = ? AND isbless = ? AND grant_type = ?},
         undef, $self->id, $is_bless, GRANT_DIRECT);
 
-    my $new_groups = my $current_groups = Bugzilla::Group->new_from_list($ids);
+    my $current_groups = Bugzilla::Group->new_from_list($ids);
+    my $new_groups = dclone($current_groups);
 
     # Record the changes
     if (exists $changes->{set}) {
@@ -390,10 +392,10 @@ sub _set_groups {
         }
     }
     else {
-        foreach my $group (@{$changes->{removed} // []}) {
+        foreach my $group (@{$changes->{remove} // []}) {
             @$new_groups = grep { $_->id ne $group->id } @$new_groups;
         }
-        foreach my $group (@{$changes->{added} // []}) {
+        foreach my $group (@{$changes->{add} // []}) {
             push @$new_groups, $group
                 unless grep { $_->id eq $group->id } @$new_groups;
         }

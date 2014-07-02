@@ -314,6 +314,10 @@ sub update {
             # stays consistent for things that can become empty.
             $change->[0] = '' if !defined $change->[0];
             $change->[1] = '' if !defined $change->[1];
+            # We also flatten arrays (used by groups and blessed_groups)
+            $change->[0] = join(',', @{$change->[0]}) if ref $change->[0];
+            $change->[1] = join(',', @{$change->[1]}) if ref $change->[1];
+
             $hash{changes}{$field} = {
                 removed => $self->type('string', $change->[0]),
                 added   => $self->type('string', $change->[1]) 
@@ -732,6 +736,37 @@ C<boolean> A boolean value to enable/disable sending bug-related mail to the use
 C<string> A text field that holds the reason for disabling a user from logging
 into bugzilla, if empty then the user account is enabled otherwise it is
 disabled/closed.
+
+=item C<groups>
+
+C<hash> These specify the groups that this user is directly a member of.
+To set these, you should pass a hash as the value. The hash may contain
+the following fields:
+
+=over
+
+=item C<add> An array of C<int>s or C<string>s. The group ids or group names
+that the user should be added to.
+
+=item C<remove> An array of C<int>s or C<string>s. The group ids or group names
+that the user should be removed from.
+
+=item C<set> An array of C<int>s or C<string>s. An exact set of group ids
+and group names that the user should be a member of. NOTE: This does not
+remove groups from the user where the person making the change does not
+have the bless privilege for.
+
+If you specify C<set>, then C<add> and C<remove> will be ignored. A group in
+both the C<add> and C<remove> list will be added. Specifying a group that the
+user making the change does not have bless rights will generate an error.
+
+=back
+
+=item C<bless_groups>
+
+C<hash> - This is the same as groups, but affects what groups a user
+has direct membership to bless that group. It takes the same inputs as
+groups.
 
 =back
 

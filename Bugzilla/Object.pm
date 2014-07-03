@@ -196,6 +196,23 @@ sub initialize {
 }
 
 # Provides a mechanism for objects to be cached in the request_cache
+
+sub object_cache_get {
+    my ($class, $id) = @_;
+    return $class->_object_cache_get(
+        { id => $id, cache => 1},
+        $class
+    );
+}
+
+sub object_cache_set {
+    my $self = shift;
+    return $self->_object_cache_set(
+        { id => $self->id, cache => 1 },
+        $self
+    );
+}
+
 sub _object_cache_get {
     my $class = shift;
     my ($param) = @_;
@@ -1443,6 +1460,58 @@ you can't just write C<\&check_boolean>.
 =item C<check_boolean>
 
 Returns C<1> if the passed-in value is true, C<0> otherwise.
+
+=back
+
+=head2 CACHE FUNCTIONS
+
+=over
+
+=item C<object_cache_get>
+
+=over
+
+=item B<Description>
+
+Class function which returns an object from the object-cache for the provided
+C<$id>.
+
+=item B<Params>
+
+Takes an integer C<$id> of the object to retrieve.
+
+=item B<Returns>
+
+Returns the object from the cache if found, otherwise returns C<undef>.
+
+=item B<Example>
+
+my $bug_from_cache = Bugzilla::Bug->object_cache_get(35);
+
+=back
+
+=item C<object_cache_set>
+
+=over
+
+=item B<Description>
+
+Object function which injects the object into the object-cache, using the
+object's C<id> as the key.
+
+=item B<Params>
+
+(none)
+
+=item B<Returns>
+
+(nothing)
+
+=item B<Example>
+
+$bug->object_cache_set();
+
+=back
 
 =back
 

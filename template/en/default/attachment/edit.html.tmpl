@@ -266,6 +266,7 @@
                            && user.settings.state_addselfcc.value == 'cc_unless_role') %]>
               <label for="addselfcc">Add me to CC list</label>
             [% END %]
+            [% Hook.process('after_comment_textarea') %]
           </div>
         [% END %]
         <div id="attachment_flags">

@@ -41,7 +41,7 @@
                name="[% field.name FILTER html %]"
                value="[% value FILTER html %]" size="40"
                maxlength="[% constants.MAX_FREETEXT_LENGTH FILTER none %]"
-               [% IF field.type == constants.FIELD_TYPE_INTEGER %] pattern="\d+[% IF dontchange %]|[% dontchange FILTER html %][% END %]"' [% END %]
+               [% IF field.type == constants.FIELD_TYPE_INTEGER %] pattern="\d+[% IF dontchange %]|[% dontchange FILTER html %][% END %]" [% END %]
                [% ' aria-required="true" required' IF field.is_mandatory %]>
     [% CASE [constants.FIELD_TYPE_DATETIME, constants.FIELD_TYPE_DATE] %]
       [% size = (field.type == constants.FIELD_TYPE_DATE) ? 10 : 20 %]

@@ -1,0 +1,185 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% PROCESS global/variables.none.tmpl %]
+
+[% inline_style = BLOCK %]
+#fxos_preload_app_form {
+  padding: 10px;
+}
+#fxos_preload_app_form .required:after {
+  content: " *";
+  color: red;
+}
+#fxos_preload_app_form .field_label {
+  font-weight: bold;
+}
+#fxos_preload_app_form .field_desc {
+  padding-bottom: 3px;
+}
+#fxos_preload_app_form .field_desc,
+#fxos_preload_app_form .head_desc {
+  width: 600px;
+  word-wrap: normal;
+}
+#fxos_preload_app_form .head_desc {
+  padding-top: 5px;
+  padding-bottom: 12px;
+}
+#fxos_preload_app_form .form_section {
+  margin-bottom: 10px;
+}
+#fxos_preload_app_form textarea {
+  font-family: inherit;
+  font-size: inherit;
+}
+#fxos_preload_app_form em {
+  font-size: 1em;
+}
+.yui-calcontainer {
+  z-index: 2;
+}
+[% END %]
+
+[% inline_javascript = BLOCK %]
+function validateAndSubmit() {
+  'use strict';
+  var alert_text = '';
+  var requiredLabels = YAHOO.util.Selector.query('label.required');
+  if (requiredLabels) {
+    requiredLabels.forEach(function (label) {
+      var name = label.getAttribute('for');
+      var ids = YAHOO.util.Selector.query(
+        '#fxos_preload_app_form *[name="' + name + '"]'
+      ).map(function (e) {
+        return e.id
+      });
+
+      if (ids && ids[0]) {
+        if (!isFilledOut(ids[0])) {
+          var desc = label.textContent || name;
+          alert_text +=
+            "Please enter a value for " +
+            desc.replace(/[\r\n]+/, "").replace(/\s+/g, " ") +
+            "\n";
+        }
+      }
+    });
+  }
+
+  if (alert_text != '') {
+    alert(alert_text);
+    return false;
+  }
+  return true;
+}
+[% END %]
+
+[% PROCESS global/header.html.tmpl
+   title = "Firefox OS Pre-load App"
+   style = inline_style
+   javascript = inline_javascript
+   javascript_urls = [ 'extensions/BMO/web/js/form_validate.js',
+                       'js/field.js', 'js/util.js' ]
+   yui = [ "autocomplete", "calendar", "selector" ]
+%]
+
+[% USE Bugzilla %]
+[% cgi = Bugzilla.cgi %]
+
+<form id="fxos_preload_app_form" method="post" action="post_bug.cgi"
+  enctype="multipart/form-data" onSubmit="return validateAndSubmit();">
+  <input type="hidden" name="format" value="fxos-preload-app">
+  <input type="hidden" name="product" value="Marketplace">
+  <input type="hidden" name="component" value="Pre-Installed Apps">
+  <input type="hidden" name="rep_platform" value="All">
+  <input type="hidden" name="op_sys" value="Other">
+  <input type="hidden" name="version" value="1.0">
+  <input type="hidden" name="bug_severity" id="bug_severity" value="normal">
+  <input type="hidden" name="token" value="[% token FILTER html %]">
+  <input type="hidden" name="short_desc" value="Information Request: Pre-Installed Apps">
+  <input type="hidden" name="groups" value="mozilla-employee-confidential">
+
+  <div class="head_desc">
+    Welcome to the Firefox OS Pre-load App Info Request Form!
+  </div>
+
+  <div class="form_section">
+    <label for="company_name" class="field_label required">Company Name</label>
+    <div class="field_desc">
+      Please enter the legal name of your company
+    </div>
+    <input type="text" name="company_name" id="company_name" size="80">
+  </div>
+
+
+  <div class="form_section">
+    <label for="apps_business_dev_contact_name" class="field_label required">Apps Business Development Contact Name</label>
+    <div class="field_desc">Please enter your Name</div>
+    <input type="text" name="apps_business_dev_contact_name" id="apps_business_dev_contact_name" size="80">
+  </div>
+
+  <div class="form_section">
+    <label for="apps_business_dev_contact_email" class="field_label required">Apps Business Development Contact Email</label>
+    <div class="field_desc">Please enter your Email address.</div>
+    <input type="text" name="apps_business_dev_contact_email" id="apps_business_dev_contact_email"
+    value="[% user.email FILTER html %]" size="80">
+  </div>
+
+  <div class="form_section">
+    <label for="preload_apps" class="field_label required">Name of Firefox Marketplace apps of interest to you:</label>
+    <div class="field_desc">
+      Please provide the App Name and Marketplace URL for each app you wish to pre-load on your certified, branded
+      Firefox OS device.  The Marketplace URL is an important identifier because there are many apps in Marketplace with
+      the same name.
+    </div>
+    <textarea id="preload_apps" name="preload_apps"
+      cols="80" rows="5"></textarea>
+  </div>
+
+  <div class="form_section">
+    <label for="countries" class="field_label required">Countries where your device will be distributed</label>
+    <div class="field_desc">
+      Please list the countries where your device will be distributed.  This information is required because it
+      corresponds to the countries that the developers will evaluate for distribution rights.
+    </div>
+    <textarea id="countries" name="countries"
+      cols="80" rows="5"></textarea>
+  </div>
+
+  <div class="form_section">
+    <label for="release_info" class="field_label required">Release Information</label>
+    <div class="field_desc">
+      Please provide the Version of Firefox OS for your Branded, Certified device on which you plan to pre-load the
+      requested apps.
+    </div>
+    <input type="text" name="release_info" id="release_info" size="80">
+  </div>
+
+  <div class="form_section">
+    <label for="device_info" class="field_label required">Device Information</label>
+    <div class="field_desc">
+      Please include the device make and model, screen size, Chipset and RAM configuration for the Branded, Certified
+      device on which you plan to pre-load the requested apps.
+    </div>
+    <textarea id="device_info" name="device_info"
+      cols="80" rows="5"></textarea>
+  </div>
+
+  <p>When you press submit the information you've provided will be routed to Mozilla team members for follow up.  The
+  system will also respond with a [% terms.Bugzilla %] tracking number that you may use for follow up.</p>
+
+  <input type="submit" id="commit" value="Submit">
+
+  <p>
+    [ <span class="required_star">*</span> <span class="required_explanation">
+      Required Field</span> ]
+  </p>
+</form>
+
+[% PROCESS global/footer.html.tmpl %]

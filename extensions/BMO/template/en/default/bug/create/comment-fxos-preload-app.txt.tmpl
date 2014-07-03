@@ -1,0 +1,28 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+[% PROCESS global/variables.none.tmpl %]
+[% USE Bugzilla %]
+[% cgi = Bugzilla.cgi +%]
+
+>>Company Name
+[%+ cgi.param('company_name') %]
+
+>>Apps Business Development Contact
+[%+ cgi.param('apps_business_dev_contact') %]
+
+>>Name of Firefox Marketplace apps of interest to you:
+[%+ cgi.param('preload_apps') %]
+
+>>Countries where your device will be distributed
+[%+ cgi.param('countries') %]
+
+>>Release Information
+[%+ cgi.param('release_info') %]
+
+>>Device Information
+[%+ cgi.param('device_info') %]

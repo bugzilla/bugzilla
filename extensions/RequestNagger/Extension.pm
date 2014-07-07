@@ -69,16 +69,22 @@ sub object_before_create {
     my ($self, $args) = @_;
     my ($class, $params) = @$args{qw(class params)};
     return unless $class->isa('Bugzilla::Product');
-    my $interval = _check_nag_interval(Bugzilla->cgi->param('nag_interval'));
-    $params->{nag_interval} = $interval;
+    my $input = Bugzilla->input_params;
+    if (exists $input->{nag_interval}) {
+        my $interval = _check_nag_interval($input->{nag_interval});
+        $params->{nag_interval} = $interval;
+    }
 }
 
 sub object_end_of_set_all {
     my ($self, $args) = @_;
     my ($object, $params) = @$args{qw(object params)};
     return unless $object->isa('Bugzilla::Product');
-    my $interval = _check_nag_interval(Bugzilla->cgi->param('nag_interval'));
-    $object->set('nag_interval', $interval);
+    my $input = Bugzilla->input_params;
+    if (exists $input->{nag_interval}) {
+        my $interval = _check_nag_interval($input->{nag_interval});
+        $object->set('nag_interval', $interval);
+    }
 }
 
 sub _check_nag_interval {

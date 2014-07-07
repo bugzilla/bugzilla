@@ -395,7 +395,7 @@ sub _translate_comment {
 sub get {
     my ($self, $params) = validate(@_, 'ids');
 
-    Bugzilla->switch_to_shadow_db();
+    Bugzilla->switch_to_shadow_db() unless Bugzilla->user->id;
 
     my $ids = $params->{ids};
     (defined $ids && scalar @$ids) 
@@ -1100,7 +1100,7 @@ sub update_see_also {
 sub attachments {
     my ($self, $params) = validate(@_, 'ids', 'attachment_ids');
 
-    Bugzilla->switch_to_shadow_db();
+    Bugzilla->switch_to_shadow_db() unless Bugzilla->user->id;
 
     if (!(defined $params->{ids}
           or defined $params->{attachment_ids}))

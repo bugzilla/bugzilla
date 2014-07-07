@@ -514,6 +514,52 @@ sub preload {
     foreach my $bug (@$bugs) {
         $bug->comments();
     }
+
+    foreach my $bug (@$bugs) {
+        $bug->_preload_referenced_bugs();
+    }
+}
+
+# Helps load up bugs referenced in comments by retrieving them with a single
+# query from the database and injecting bug objects into the object-cache.
+sub _preload_referenced_bugs {
+    my $self = shift;
+    my @referenced_bug_ids;
+
+    # inject current duplicates into the object-cache first
+    foreach my $bug (@{ $self->duplicates }) {
+        $bug->object_cache_set()
+            unless Bugzilla::Bug->object_cache_get($bug->id);
+    }
+
+    # preload bugs from comments
+    require Bugzilla::Template;
+    foreach my $comment (@{ $self->comments }) {
+        if ($comment->type == CMT_HAS_DUPE || $comment->type == CMT_DUPE_OF) {
+            # duplicate bugs that aren't currently in $self->duplicates
+            push @referenced_bug_ids, $comment->extra_data
+                unless Bugzilla::Bug->object_cache_get($comment->extra_data);
+        }
+        else {
+            # bugs referenced in comments
+            Bugzilla::Template::quoteUrls($comment->body, undef, undef, undef,
+                sub {
+                    my $bug_id = $_[0];
+                    push @referenced_bug_ids, $bug_id
+                        unless Bugzilla::Bug->object_cache_get($bug_id);
+                });
+        }
+    }
+
+    # inject into object-cache
+    my $referenced_bugs = Bugzilla::Bug->new_from_list(
+        [ uniq @referenced_bug_ids ]);
+    foreach my $bug (@$referenced_bugs) {
+        $bug->object_cache_set();
+    }
+
+    # preload bug visibility
+    Bugzilla->user->visible_bugs(\@referenced_bug_ids);
 }
 
 sub possible_duplicates {
@@ -3908,10 +3954,23 @@ sub EmitDependList {
 # Creates a lot of bug objects in the same order as the input array.
 sub _bugs_in_order {
     my ($self, $bug_ids) = @_;
-    my $bugs = $self->new_from_list($bug_ids);
-    my %bug_map = map { $_->id => $_ } @$bugs;
-    my @result = map { $bug_map{$_} } @$bug_ids;
-    return \@result;
+    my %bug_map;
+    # there's no need to load bugs from the database if they are already in the
+    # object-cache
+    my @missing_ids;
+    foreach my $bug_id (@$bug_ids) {
+        if (my $bug = Bugzilla::Bug->object_cache_get($bug_id)) {
+            $bug_map{$bug_id} = $bug;
+        }
+        else {
+            push @missing_ids, $bug_id;
+        }
+    }
+    my $bugs = $self->new_from_list(\@missing_ids);
+    foreach my $bug (@$bugs) {
+        $bug_map{$bug->id} = $bug;
+    }
+    return [ map { $bug_map{$_} } @$bug_ids ];
 }
 
 # Get the activity of a bug, starting from $starttime (if given).

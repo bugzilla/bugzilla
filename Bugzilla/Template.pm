@@ -156,9 +156,10 @@ sub get_format {
 # If you want to modify this routine, read the comments carefully
 
 sub quoteUrls {
-    my ($text, $bug, $comment, $user) = @_;
+    my ($text, $bug, $comment, $user, $bug_link_func) = @_;
     return $text unless $text;
     $user ||= Bugzilla->user;
+    $bug_link_func ||= \&get_bug_link;
 
     # We use /g for speed, but uris can have other things inside them
     # (http://foo/bug#3 for example). Filtering that out filters valid
@@ -212,7 +213,7 @@ sub quoteUrls {
         map { qr/$_/ } grep($_, Bugzilla->params->{'urlbase'}, 
                             Bugzilla->params->{'sslbase'})) . ')';
     $text =~ s~\b(${urlbase_re}\Qshow_bug.cgi?id=\E([0-9]+)(\#c([0-9]+))?)\b
-              ~($things[$count++] = get_bug_link($3, $1, { comment_num => $5, user => $user })) &&
+              ~($things[$count++] = $bug_link_func->($3, $1, { comment_num => $5, user => $user })) &&
                ("\x{FDD2}" . ($count-1) . "\x{FDD3}")
               ~egox;
 
@@ -259,7 +260,7 @@ sub quoteUrls {
     $text =~ s~\b($bug_re(?:$s*,?$s*$comment_re)?|$comment_re)
               ~ # We have several choices. $1 here is the link, and $2-4 are set
                 # depending on which part matched
-               (defined($2) ? get_bug_link($2, $1, { comment_num => $3, user => $user }) :
+               (defined($2) ? $bug_link_func->($2, $1, { comment_num => $3, user => $user }) :
                               "<a href=\"$current_bugurl#c$4\">$1</a>")
               ~egx;
 
@@ -268,7 +269,7 @@ sub quoteUrls {
     $text =~ s~(?<=^\*\*\*\ This\ bug\ has\ been\ marked\ as\ a\ duplicate\ of\ )
                (\d+)
                (?=\ \*\*\*\Z)
-              ~get_bug_link($1, $1, { user => $user })
+              ~$bug_link_func->($1, $1, { user => $user })
               ~egmx;
 
     # Now remove the encoding hacks in reverse order

@@ -977,7 +977,7 @@ sub bless_groups {
     }
 
     if (Bugzilla->params->{usevisibilitygroups}
-        && !$self->visible_groups_inherited) {
+        && !@{ $self->visible_groups_inherited }) {
         return [];
     }
 

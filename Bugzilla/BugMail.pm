@@ -407,6 +407,12 @@ sub sendMail {
     my @changedfields = uniq map { $_->{field_desc} } @display_diffs;
     my @changedfieldnames = uniq map { $_->{field_name} } @display_diffs;
 
+    # BMO: Add a field to indicate when a comment was added
+    if (grep($_->type != CMT_ATTACHMENT_CREATED, @send_comments)) {
+        push(@changedfields, 'Comment Created');
+        push(@changedfieldnames, 'comment');
+    }
+
     # Add attachments.created to changedfields if one or more
     # comments contain information about a new attachment
     if (grep($_->type == CMT_ATTACHMENT_CREATED, @send_comments)) {

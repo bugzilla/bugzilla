@@ -27,6 +27,17 @@ use Bugzilla::Product;
 
 our $VERSION = '1';
 
+BEGIN {
+    *Bugzilla::tracking_flag_names = \&_tracking_flag_names;
+}
+
+sub _tracking_flag_names {
+    # return just a list of names, hitting the database directly to avoid the
+    # overhead of object creation
+    return Bugzilla->request_cache->{tracking_flag_names} ||=
+        Bugzilla->dbh->selectcol_arrayref("SELECT name FROM tracking_flags");
+}
+
 sub page_before_template {
     my ($self, $args) = @_;
     my $page = $args->{'page_id'};

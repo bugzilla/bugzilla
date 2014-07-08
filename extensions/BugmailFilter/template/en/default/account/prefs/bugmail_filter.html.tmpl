@@ -1,0 +1,256 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+<link href="[% "extensions/BugmailFilter/web/style/bugmail-filter.css" FILTER mtime %]"
+      rel="stylesheet" type="text/css">
+<script type="text/javascript"
+        src="[% "extensions/BugmailFilter/web/js/bugmail-filter.js" FILTER mtime %]"></script>
+
+[% SET selectable_products = user.get_selectable_products %]
+[% SET dont_show_button = 1 %]
+
+<script>
+var useclassification = false;
+var first_load = true;
+var last_sel = [];
+var cpts = new Array();
+[% n = 1 %]
+[% FOREACH prod = selectable_products %]
+  cpts['[% n %]'] = [
+    [%- FOREACH comp = prod.components %]'[% comp.name FILTER js %]'[% ", " UNLESS loop.last %] [%- END -%] ];
+  [% n = n + 1 %]
+[% END %]
+</script>
+<script type="text/javascript" src="[% 'js/productform.js' FILTER mtime FILTER html %]">
+</script>
+
+<hr>
+<b>Bugmail Filtering</b>
+
+<p>
+  You can instruct [% terms.Bugzilla %] to filter bugmail based on the field
+  that was changed.
+</p>
+
+<table id="add_filter_table">
+<tr>
+  <th>Field:</th>
+  <td>
+    <select name="field" id="field">
+      <option value="">__Any__</option>
+      [% FOREACH field = fields %]
+        <option value="[% field.name FILTER html %]">
+          [% field_descs.${field.name} || field.description FILTER html %]
+        </option>
+      [% END %]
+    </select>
+  </td>
+  <td class="blurb">
+    the field that was changed
+  </td>
+</tr>
+<tr>
+  <th>Product:</th>
+  <td>
+    <select name="product" id="product" onChange="onFilterProductChange()">
+      <option value="">__Any__</option>
+      [% FOREACH product IN selectable_products %]
+        <option>[% product.name FILTER html %]</option>
+      [% END %]
+    </select>
+  </td>
+  <td class="blurb">
+    the [% terms.bug %]'s current product
+  </td>
+</tr>
+<tr>
+  <th>Component:</th>
+  <td>
+    <select name="component" id="component">
+      <option value="">__Any__</option>
+      [% FOREACH product IN selectable_products %]
+        [% FOREACH component IN product.components %]
+          <option>[% component.name FILTER html %]</option>
+        [% END %]
+      [% END %]
+    </select>
+  </td>
+  <td class="blurb">
+    the [% terms.bug %]'s current component
+  </td>
+</tr>
+<tr>
+  <th>Relationship:</th>
+  <td>
+    <select name="relationship" id="relationship">
+      <option value="">__Any__</option>
+      [% FOREACH rel IN relationships %]
+        <option value="[% rel.value FILTER html %]">
+          [% rel.name FILTER html %]
+        </option>
+      [% END %]
+    </select>
+  </td>
+  <td class="blurb">
+    your relationship with the [% terms.bug %]
+  </td>
+</tr>
+<tr>
+  <th>Action:</th>
+  <td>
+    <select name="action" id="action">
+      <option></option>
+      <option>Exclude</option>
+      <option>Include</option>
+    </select>
+  </td>
+  <td class="blurb">
+    action to take when all conditions match
+  </td>
+</tr>
+<tr>
+  <td></td>
+  <td><input type="submit" id="add_filter" name="add_filter" value="Add"></td>
+</tr>
+</table>
+
+<hr>
+<p>
+  You are currently filtering on:
+</p>
+
+[% IF filters.size %]
+
+  <table id="filters_table">
+    <tr>
+      <td></td>
+      <th>Product</th>
+      <th>Component</th>
+      <th>Field</th>
+      <th>Relationship</th>
+      <th>Action</th>
+    </tr>
+    [% FOREACH filter = filters %]
+      <tr class="[% "row_odd" UNLESS loop.count % 2 %]">
+        <td>
+          <input type="checkbox" name="remove" value="[% filter.id FILTER none %]"
+                 onChange="onRemoveChange()">
+        </td>
+        <td>[% filter.product ? filter.product.name : 'Any' FILTER html %]</td>
+        <td>[% filter.component ? filter.component.name : 'Any' FILTER html %]</td>
+        <td>[% filter.field ? filter.field.description : 'Any' FILTER html %]</td>
+        <td>[% filter.relationship ? filter.relationship_name : 'Any' FILTER html %]</td>
+        <td>[% filter.action ? 'Exclude' : 'Include' %]</td>
+      </tr>
+    [% END %]
+    <tr>
+      <td></td>
+      <td><input id="remove" name="remove_filter" type="submit" value="Remove Selected"></td>
+    </tr>
+  </table>
+
+[% ELSE %]
+
+  <p>
+    <i>You do not have any filters configured.</i>
+  </p>
+
+[% END %]
+
+<hr>
+<p>
+  This feature provides fine-grained control over what changes to [% terms.bugs
+  %] will result in an email notification.  These filters are applied
+  <b>after</b> the rules configured on the
+  <a href="userprefs.cgi?tab=email">Email Preferences</a> tab.
+</p>
+<p>
+  If multiple filters are applicable to the same [% terms.bug %] change,
+  <b>include</b> filters override <b>exclude</b> filters.
+</p>
+<p>
+  Examples:
+</p>
+<p>
+  To never receive changes made to the "QA Whiteboard" field for [% terms.bugs %]
+  where you are not the assignee:<br>
+  <table class="example_filter_table">
+    <tr>
+      <th>Field:</th>
+      <td>QA Whiteboard</td>
+    </tr>
+    <tr>
+      <th>Product:</th>
+      <td>__Any__</td>
+    </tr>
+    <tr>
+      <th>Component:</th>
+      <td>__Any__</td>
+    </tr>
+    <tr>
+      <th>Relationship:</th>
+      <td>Not Assignee</td>
+    </tr>
+    <tr>
+      <th>Action:</th>
+      <td>Exclude</td>
+    </tr>
+  </table>
+</p>
+<p>
+  To receive just comments made to Firefox [% terms.bugs %], and no other
+  changes, you require two filters.  First an <b>exclude</b> filter to drop all
+  changes made to [% terms.bugs %] in that product:<br>
+  <table class="example_filter_table">
+    <tr>
+      <th>Field:</th>
+      <td>__Any__</td>
+    </tr>
+    <tr>
+      <th>Product:</th>
+      <td>Firefox</td>
+    </tr>
+    <tr>
+      <th>Component:</th>
+      <td>__Any__</td>
+    </tr>
+    <tr>
+      <th>Relationship:</th>
+      <td>__Any__</td>
+    </tr>
+    <tr>
+      <th>Action:</th>
+      <td>Exclude</td>
+    </tr>
+  </table>
+  <br>
+  Then an <b>include</b> filter to indicate that you want to receive
+  comments:<br>
+  <table class="example_filter_table">
+    <tr>
+      <th>Field:</th>
+      <td>Comment Created</td>
+    </tr>
+    <tr>
+      <th>Product:</th>
+      <td>Firefox</td>
+    </tr>
+    <tr>
+      <th>Component:</th>
+      <td>__Any__</td>
+    </tr>
+    <tr>
+      <th>Relationship:</th>
+      <td>__Any__</td>
+    </tr>
+    <tr>
+      <th>Action:</th>
+      <td>Include</td>
+    </tr>
+  </table>
+</p>

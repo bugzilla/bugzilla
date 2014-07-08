@@ -1,0 +1,44 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this file,
+ * You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * This Source Code Form is "Incompatible With Secondary Licenses", as
+ * defined by the Mozilla Public License, v. 2.0. */
+
+#add_filter_table th {
+    text-align: right;
+}
+
+.example_filter_table {
+    margin-left: 2em;
+}
+
+.example_filter_table th {
+    text-align: right;
+    font-weight: normal;
+}
+
+.example_filter_table td {
+    padding-left: 1em;
+}
+
+#add_filter_table .blurb {
+    font-style: italic;
+    padding-left: 2em;
+}
+
+#filters_table {
+    margin-bottom: 1em;
+    border-spacing: 0;
+}
+
+#filters_table th, #filters_table td {
+    text-align: left;
+    padding-right: 1em;
+    padding: 2px;
+}
+
+#filters_table .row_odd {
+    background-color: #eeeeee;
+    color: #000000;
+}

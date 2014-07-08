@@ -1834,7 +1834,19 @@ sub wants_bug_mail {
     if ($wants_mail && $bug->bug_status eq 'UNCONFIRMED') {
         $wants_mail &= $self->wants_mail([EVT_UNCONFIRMED], $relationship);
     }
-    
+
+    # BMO: add a hook to allow custom bugmail filtering
+    Bugzilla::Hook::process("user_wants_mail", {
+        user            => $self,
+        wants_mail      => \$wants_mail,
+        bug             => $bug,
+        relationship    => $relationship,
+        fieldDiffs      => $fieldDiffs,
+        comments        => $comments,
+        dep_mail        => $dep_mail,
+        changer         => $changer,
+    });
+
     return $wants_mail;
 }
 

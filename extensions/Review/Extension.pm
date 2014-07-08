@@ -89,8 +89,11 @@ sub _bug_mentors {
             push(@{ $self->{bug_mentors} },
                  Bugzilla::User->new({ id => $mentor_id, cache => 1 }));
         }
+        $self->{bug_mentors} = [
+            sort { $a->login cmp $b->login } @{ $self->{bug_mentors} }
+        ];
     }
-    return [ sort { $a->login cmp $b->login } @{ $self->{bug_mentors} } ];
+    return $self->{bug_mentors};
 }
 
 sub _bug_is_mentor {

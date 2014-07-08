@@ -343,9 +343,9 @@ sub _update_db_values {
             my $value_obj = Bugzilla::Extension::TrackingFlags::Flag::Value->new($value->{id})
                 || ThrowCodeError('tracking_flags_invalid_item_id', { item => 'flag value', id => $flag->{id} });
             my $old_value = $value_obj->value;
+            $value_obj->set_all($object_set);
+            $value_obj->update();
             if ($object_set->{value} ne $old_value) {
-                $value_obj->set_all($object_set);
-                $value_obj->update();
                 Bugzilla::Extension::TrackingFlags::Flag::Bug->update_all_values({
                     value_obj => $value_obj,
                     old_value => $old_value,

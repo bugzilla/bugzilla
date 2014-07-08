@@ -247,7 +247,9 @@ sub _should_drop {
         $rel_map[5] = $bug->qa_contact->id == $user_id;
         $rel_map[6] = !$rel_map[6];
     }
-    $rel_map[7] = grep { $_ eq $login } @{ $bug->cc };
+    $rel_map[7] = $bug->cc
+                  ? grep { $_ eq $login } @{ $bug->cc }
+                  : 0;
     $rel_map[8] = !$rel_map[8];
     $rel_map[9] = (
                     $relationship & $bit_watching

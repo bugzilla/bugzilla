@@ -192,6 +192,7 @@ sub fix_bug {
 
         next if $method eq 'Bug.search' && $key eq 'url'; # Return url even if empty
         next if $method eq 'Bug.search' && $key eq 'keywords'; # Return keywords even if empty
+        next if $method eq 'Bug.search' && $key eq 'whiteboard'; # Return whiteboard even if empty
         next if $method eq 'Bug.get' && grep($_ eq $key, TIMETRACKING_FIELDS);
 
         next if ($method eq 'Bug.search'

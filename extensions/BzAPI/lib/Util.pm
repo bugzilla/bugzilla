@@ -328,8 +328,16 @@ sub fix_attachment {
         }
     }
 
-    if ($data->{data}) {
+    if (exists $data->{data}) {
         $data->{encoding} = $rpc->type('string', 'base64');
+        if ($params->{attachmentdata}
+            || filter_wants_nocache($params, 'attachments.data'))
+        {
+            $data->{encoding} = $rpc->type('string', 'base64');
+        }
+        else {
+            delete $data->{data};
+        }
     }
 
     if (exists $data->{bug_id}) {

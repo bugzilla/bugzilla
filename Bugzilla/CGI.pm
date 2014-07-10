@@ -124,7 +124,8 @@ sub canonicalise_query {
         my $esc_key = url_quote($key);
 
         foreach my $value ($self->param($key)) {
-            if (defined($value)) {
+            # Omit params with an empty value
+            if (defined($value) && $value ne '') {
                 my $esc_value = url_quote($value);
 
                 push(@parameters, "$esc_key=$esc_value");
@@ -659,7 +660,9 @@ I<Bugzilla::CGI> also includes additional functions.
 
 =item C<canonicalise_query(@exclude)>
 
-This returns a sorted string of the parameters, suitable for use in a url.
+This returns a sorted string of the parameters whose values are non-empty,
+suitable for use in a url.
+
 Values in C<@exclude> are not included in the result.
 
 =item C<send_cookie>

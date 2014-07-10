@@ -154,8 +154,9 @@ my $dupe_ids = $dbh->selectcol_arrayref("
            INNER JOIN bug_user_last_visit as later
            ON (earlier.user_id != later.user_id AND earlier.last_visit_ts < later.last_visit_ts
                AND earlier.bug_id = later.bug_id)
-     WHERE (earlier.user_id = ? OR earlier.user_id = ?)",
-    undef, $old_id, $new_id);
+     WHERE (earlier.user_id = ? OR earlier.user_id = ?)
+           AND (later.user_id = ? OR later.user_id = ?)",
+    undef, $old_id, $new_id, $old_id, $new_id);
 $dbh->do("DELETE FROM bug_user_last_visit WHERE " . $dbh->sql_in('id', $dupe_ids));
 
 # Migrate records from old user to new user.

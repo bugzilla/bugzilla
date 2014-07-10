@@ -2997,7 +2997,7 @@ sub _multiselect_isempty {
     my ($self, $args, $not) = @_;
     my ($field, $operator, $joins, $chart_id) = @$args{qw(field operator joins chart_id)};
     my $dbh = Bugzilla->dbh;
-    $operator = $self->_reverseoperator($operator) if $not;
+    $operator = $self->_reverse_operator($operator) if $not;
     $not = $operator eq 'isnotempty' ? 'NOT' : '';
 
     if ($field eq 'keywords') {

@@ -51,14 +51,14 @@ my $answers_file = $ARGV[0];
 my $silent = $answers_file && !$switch{'verbose'};
 
 print(install_string('header', get_version_and_os()) . "\n") unless $silent;
-exit if $switch{'version'};
+exit 0 if $switch{'version'};
 # Check required --MODULES--
 my $module_results = check_requirements(!$silent);
 Bugzilla::Install::Requirements::print_module_instructions(
     $module_results, !$silent);
-exit if !$module_results->{pass};
+exit 1 if !$module_results->{pass};
 # Break out if checking the modules is all we have been asked to do.
-exit if $switch{'check-modules'};
+exit 0 if $switch{'check-modules'};
 
 ###########################################################################
 # Load Bugzilla Modules

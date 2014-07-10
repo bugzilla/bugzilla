@@ -1,22 +1,72 @@
-@font-face {
-  font-family: 'Open Sans';
-  font-style: normal;
-  font-weight: 400;
-  src: local('Open Sans'), local('OpenSans'), url(opensans.woff) format('woff');
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this file,
+ * You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * This Source Code Form is "Incompatible With Secondary Licenses", as
+ * defined by the Mozilla Public License, v. 2.0. */
+
+@font-face{
+    font-family: 'Fira Sans';
+    src: local('Fira Sans'), local('FiraSans'),
+         url('fira/FiraSans-Regular.woff') format('woff');
+    font-weight: 400;
+    font-style: normal;
 }
 
-@font-face {
-  font-family: 'Open Sans';
-  font-style: normal;
-  font-weight: 600;
-  src: local('Open Sans Semibold'), local('OpenSans-Semibold'), url(opensans-semibold.woff) format('woff');
+@font-face{
+    font-family: 'Fira Sans';
+    src: local('Fira Sans Italic'), local('FiraSansItalic'),
+         url('fira/FiraSans-Italic.woff') format('woff');
+    font-weight: 400;
+    font-style: italic;
 }
 
-@font-face {
-  font-family: 'Open Sans';
-  font-style: normal;
-  font-weight: 700;
-  src: local('Open Sans Bold'), local('OpenSans-Bold'), url(opensans-bold.woff) format('woff');
+@font-face{
+    font-family: 'Fira Sans';
+    src: local('Fira Sans SemiBold'), local('FiraSansSemiBold'),
+         url('fira/FiraSans-SemiBold.woff') format('woff');
+    font-weight: 600;
+    font-style: normal;
+}
+
+@font-face{
+    font-family: 'Fira Sans';
+    src: local('Fira Sans SemiBold Italic'), local('FiraSansSemiBoldItalic'),
+         url('fira/FiraSans-SemiBoldItalic.woff') format('woff');
+    font-weight: 600;
+    font-style: italic;
+}
+
+@font-face{
+    font-family: 'Fira Sans';
+    src: local('Fira Sans Bold'), local('FiraSansBold'),
+         url('fira/FiraSans-Bold.woff') format('woff');
+    font-weight: 700;
+    font-style: normal;
+}
+
+@font-face{
+    font-family: 'Fira Sans';
+    src: local('Fira Sans Bold Italic'), local('FiraSansBoldItalic'),
+         url('fira/FiraSans-BoldItalic.woff') format('woff');
+    font-weight: 700;
+    font-style: italic;
+}
+
+@font-face{
+    font-family: 'Fira Mono';
+    src: local('Fira Mono'), local('FiraMono'),
+         url('fira/FiraMono-Regular.woff') format('woff');
+    font-weight: 400;
+    font-style: normal;
+}
+
+@font-face{
+    font-family: 'Fira Mono';
+    src: local('Fira Mono Bold'), local('FiraMonoBold'),
+         url('fira/FiraMono-Bold.woff') format('woff');
+    font-weight: 600;
+    font-style: normal;
 }
 
 body {
@@ -30,7 +80,7 @@ body {
 }
 
 body, td, th, input, select, option, optgroup, .text_input {
-    font-family: "Open Sans", "Helvetica Neue", Arial, Helvetica, sans-serif;
+    font-family: "Fira Sans", "Open Sans", "Helvetica Neue", Arial, Helvetica, sans-serif;
 }
 
 /* security group colouring */
@@ -458,7 +508,7 @@ table.edit_form hr {
 }
 
 .bz_comment pre, #comment {
-    font: 13px/1.2 "Droid Sans Mono", Menlo, Monaco, "Courier New", Courier, monospace;
+    font: 13px/1.2 "Fira Mono", "Droid Sans Mono", Menlo, Monaco, "Courier New", Courier, monospace;
 }
 
 .bz_first_comment_head, .bz_comment_head {

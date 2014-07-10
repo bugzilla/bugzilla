@@ -201,6 +201,11 @@ sub sentry_handle_error {
     my $uri = URI->new(Bugzilla->cgi->self_url);
     $uri->query(undef);
 
+    foreach my $field (qw( QUERY_STRING REQUEST_URI HTTP_REFERER )) {
+        $ENV{$field} =~ s/\b((?:Bugzilla_password|password)=)[^ &]+/$1*/gi
+            if exists $ENV{$field};
+    }
+
     my $data = {
         event_id    => $id,
         message     => $message,

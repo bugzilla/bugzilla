@@ -246,6 +246,7 @@ use constant REST_STATUS_CODE_MAP => {
     410      => STATUS_NOT_AUTHORIZED,
     504      => STATUS_NOT_AUTHORIZED,
     505      => STATUS_NOT_AUTHORIZED,
+    32614    => STATUS_NOT_FOUND,
     _default => STATUS_BAD_REQUEST
 };
 

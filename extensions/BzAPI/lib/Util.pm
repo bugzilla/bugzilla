@@ -270,6 +270,7 @@ sub fix_comment {
 
     delete $data->{author};
     delete $data->{time};
+    delete $data->{raw_text};
 
     return $data;
 }

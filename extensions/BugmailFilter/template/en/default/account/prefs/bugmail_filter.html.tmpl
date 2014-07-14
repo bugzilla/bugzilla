@@ -45,7 +45,7 @@ var cpts = new Array();
       <option value="">__Any__</option>
       [% FOREACH field = fields %]
         <option value="[% field.name FILTER html %]">
-          [% field_descs.${field.name} || field.description FILTER html %]
+          [% field.description FILTER html %]
         </option>
       [% END %]
     </select>

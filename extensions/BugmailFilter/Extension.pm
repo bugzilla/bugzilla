@@ -22,6 +22,7 @@ use Bugzilla::Extension::BugmailFilter::Filter;
 use Bugzilla::Field;
 use Bugzilla::Product;
 use Bugzilla::User;
+use Bugzilla::Util qw(template_var);
 use Encode;
 use Sys::Syslog qw(:DEFAULT);
 
@@ -94,42 +95,41 @@ sub user_preferences {
     }
 
     my $vars = $args->{vars};
+    my $field_descs = template_var('field_descs');
 
-    my @fields = @{ Bugzilla->fields({ obsolete => 0 }) };
+    # load all fields into a hash for easy manipulation
+    my %fields =
+        map { $_->name => $field_descs->{$_->name} }
+        @{ Bugzilla->fields({ obsolete => 0 }) };
 
     # remove time trackinger fields
     if (!Bugzilla->user->is_timetracker) {
-        foreach my $tt_field (TIMETRACKING_FIELDS) {
-            @fields = grep { $_->name ne $tt_field } @fields;
+        foreach my $field (TIMETRACKING_FIELDS) {
+            delete $fields{$field};
         }
     }
 
     # remove fields which don't make any sense to filter on
-    foreach my $ignore_field (IGNORE_FIELDS) {
-        @fields = grep { $_->name ne $ignore_field } @fields;
+    foreach my $field (IGNORE_FIELDS) {
+        delete $fields{$field};
     }
 
     # remove all tracking flag fields.  these change too frequently to be of
     # value, so they only add noise to the list.
-    foreach my $name (@{ Bugzilla->tracking_flag_names }) {
-        @fields = grep { $_->name ne $name } @fields;
+    foreach my $field (@{ Bugzilla->tracking_flag_names }) {
+        delete $fields{$field};
     }
 
     # add tracking flag types instead
     foreach my $field (
         @{ Bugzilla::Extension::BugmailFilter::FakeField->tracking_flag_fields() }
     ) {
-        push @fields, $field;
+        $fields{$field->name} = $field->description;
     }
 
-    # adjust the description for selected fields. as we shouldn't touch the
-    # real Field objects, we remove the object and insert a FakeField object
-    foreach my $override_field (keys %{ FIELD_DESCRIPTION_OVERRIDE() }) {
-        @fields = grep { $_->name ne $override_field } @fields;
-        push @fields, Bugzilla::Extension::BugmailFilter::FakeField->new({
-            name        => $override_field,
-            description => FIELD_DESCRIPTION_OVERRIDE->{$override_field},
-        });
+    # adjust the description for selected fields
+    foreach my $field (keys %{ FIELD_DESCRIPTION_OVERRIDE() }) {
+        $fields{$field} = FIELD_DESCRIPTION_OVERRIDE->{$field};
     }
 
     # some fields are present in the changed-fields x-header but are not real
@@ -137,11 +137,14 @@ sub user_preferences {
     foreach my $field (
         @{ Bugzilla::Extension::BugmailFilter::FakeField->fake_fields() }
     ) {
-        push @fields, $field;
+        $fields{$field->name} = $field->description;
     }
 
-    @fields = sort { lc($a->description) cmp lc($b->description) } @fields;
-    $vars->{fields} = \@fields;
+    $vars->{fields} = [
+        sort { lc($a->{description}) cmp lc($b->{description}) }
+        map { { name => $_, description => $fields{$_} } }
+        keys %fields
+    ];
 
     $vars->{relationships} = FILTER_RELATIONSHIPS();
 

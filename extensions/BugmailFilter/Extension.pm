@@ -116,7 +116,7 @@ sub user_preferences {
 
     # remove all tracking flag fields.  these change too frequently to be of
     # value, so they only add noise to the list.
-    foreach my $field (@{ Bugzilla->tracking_flag_names }) {
+    foreach my $field (Bugzilla->tracking_flag_names) {
         delete $fields{$field};
     }
 
@@ -159,6 +159,27 @@ sub user_preferences {
         }) }
     ];
 
+    # build a list of tracking-flags, grouped by type
+    require Bugzilla::Extension::TrackingFlags::Constants;
+    require Bugzilla::Extension::TrackingFlags::Flag;
+    my %flag_types =
+        map { $_->{name} => $_->{description} }
+        @{ Bugzilla::Extension::TrackingFlags::Constants::FLAG_TYPES() };
+    my %tracking_flags_by_type;
+    foreach my $flag (Bugzilla::Extension::TrackingFlags::Flag->get_all) {
+        my $type = $flag_types{$flag->flag_type};
+        $tracking_flags_by_type{$type} //= [];
+        push @{ $tracking_flags_by_type{$type} }, $flag;
+    }
+    my @tracking_flags_by_type;
+    foreach my $type (sort keys %tracking_flags_by_type) {
+        push @tracking_flags_by_type, {
+            name  => $type,
+            flags => $tracking_flags_by_type{$type},
+        };
+    }
+    $vars->{tracking_flags_by_type} = \@tracking_flags_by_type;
+
     ${ $args->{handled} } = 1;
 }
 
@@ -197,7 +218,7 @@ sub user_wants_mail {
     require Bugzilla::Extension::TrackingFlags::Flag;
     my %count;
     my @tracking_flags;
-    foreach my $field (@$fields, @{ Bugzilla->tracking_flag_names }) {
+    foreach my $field (@$fields, Bugzilla->tracking_flag_names) {
         $count{$field}++;
     }
     foreach my $field (keys %count) {
@@ -212,7 +233,7 @@ sub user_wants_mail {
     foreach my $type (keys %tracking_types) {
         push @$fields, 'tracking.' . $type;
     }
-    foreach my $field (@{ Bugzilla->tracking_flag_names }) {
+    foreach my $field (Bugzilla->tracking_flag_names) {
         $fields = [ grep { $_ ne $field } @$fields ];
     }
 

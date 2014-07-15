@@ -29,6 +29,11 @@ function onRemoveChange() {
   Dom.get('remove').disabled = true;
 }
 
+function showAllFlags() {
+    Dom.addClass('show_all', 'bz_default_hidden');
+    Dom.removeClass('all_flags', 'bz_default_hidden');
+}
+
 Event.onDOMReady(function() {
     Event.on('action', 'change', onFilterActionChange);
     onFilterProductChange();

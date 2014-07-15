@@ -173,84 +173,142 @@ var cpts = new Array();
   If multiple filters are applicable to the same [% terms.bug %] change,
   <b>include</b> filters override <b>exclude</b> filters.
 </p>
+
+<hr>
+<h4>Field Groups</h4>
+
 <p>
-  Examples:
+  Some fields are grouped into a single entry in the "field" list.
+  Following is a list of the groups and all the fields they contain:
 </p>
+
+[% FOREACH type = tracking_flags_by_type %]
+  [% type.name FILTER html %]:
+  <blockquote>
+    [% flag_count = type.flags.size %]
+    [% FOREACH flag = type.flags %]
+      [% IF flag_count > 10 && loop.count == 10 %]
+        <span id="show_all">
+          &hellip;
+          (<a href="#" onclick="showAllFlags(); return false">show all</a>)
+        </span>
+        <span id="all_flags" class="bz_default_hidden">
+      [% END %]
+      [% flag.description FILTER html FILTER no_break %]
+      [% ", " UNLESS loop.last %]
+      [% IF loop.last && flag_count > 10 %]
+        </span>
+      [% END %]
+    [% END %]
+  </blockquote>
+[% END %]
+
+<hr>
+<h4>Examples</h4>
 <p>
   To never receive changes made to the "QA Whiteboard" field for [% terms.bugs %]
   where you are not the assignee:<br>
-  <table class="example_filter_table">
-    <tr>
-      <th>Field:</th>
-      <td>QA Whiteboard</td>
-    </tr>
-    <tr>
-      <th>Product:</th>
-      <td>__Any__</td>
-    </tr>
-    <tr>
-      <th>Component:</th>
-      <td>__Any__</td>
-    </tr>
-    <tr>
-      <th>Relationship:</th>
-      <td>Not Assignee</td>
-    </tr>
-    <tr>
-      <th>Action:</th>
-      <td>Exclude</td>
-    </tr>
-  </table>
 </p>
+<table class="example_filter_table">
+  <tr>
+    <th>Field:</th>
+    <td>QA Whiteboard</td>
+  </tr>
+  <tr>
+    <th>Product:</th>
+    <td>__Any__</td>
+  </tr>
+  <tr>
+    <th>Component:</th>
+    <td>__Any__</td>
+  </tr>
+  <tr>
+    <th>Relationship:</th>
+    <td>Not Assignee</td>
+  </tr>
+  <tr>
+    <th>Action:</th>
+    <td>Exclude</td>
+  </tr>
+</table>
+
 <p>
-  To receive just comments made to Firefox [% terms.bugs %], and no other
-  changes, you require two filters.  First an <b>exclude</b> filter to drop all
-  changes made to [% terms.bugs %] in that product:<br>
-  <table class="example_filter_table">
-    <tr>
-      <th>Field:</th>
-      <td>__Any__</td>
-    </tr>
-    <tr>
-      <th>Product:</th>
-      <td>Firefox</td>
-    </tr>
-    <tr>
-      <th>Component:</th>
-      <td>__Any__</td>
-    </tr>
-    <tr>
-      <th>Relationship:</th>
-      <td>__Any__</td>
-    </tr>
-    <tr>
-      <th>Action:</th>
-      <td>Exclude</td>
-    </tr>
-  </table>
-  <br>
-  Then an <b>include</b> filter to indicate that you want to receive
-  comments:<br>
-  <table class="example_filter_table">
-    <tr>
-      <th>Field:</th>
-      <td>Comment Created</td>
-    </tr>
-    <tr>
-      <th>Product:</th>
-      <td>Firefox</td>
-    </tr>
-    <tr>
-      <th>Component:</th>
-      <td>__Any__</td>
-    </tr>
-    <tr>
-      <th>Relationship:</th>
-      <td>__Any__</td>
-    </tr>
-    <tr>
-      <th>Action:</th>
-      <td>Include</td>
-    </tr>
-  </table>
+  To receive notifications of new [% terms.bugs %] in Firefox's "New Tab Page"
+  component, and no other changes, you require three filters.  First an
+  <b>exclude</b> filter to drop all changes made to [% terms.bugs %] in that
+  component:<br>
 </p>
+<table class="example_filter_table">
+  <tr>
+    <th>Field:</th>
+    <td>__Any__</td>
+  </tr>
+  <tr>
+    <th>Product:</th>
+    <td>Firefox</td>
+  </tr>
+  <tr>
+    <th>Component:</th>
+    <td>New Tab Page</td>
+  </tr>
+  <tr>
+    <th>Relationship:</th>
+    <td>__Any__</td>
+  </tr>
+  <tr>
+    <th>Action:</th>
+    <td>Exclude</td>
+  </tr>
+</table>
+<p>
+  Then an <b>include</b> filter to indicate that you want to receive
+  notifications when a [% terms.bug %] is created:
+</p>
+<table class="example_filter_table">
+  <tr>
+    <th>Field:</th>
+    <td>[% terms.Bug %] Created</td>
+  </tr>
+  <tr>
+    <th>Product:</th>
+    <td>Firefox</td>
+  </tr>
+  <tr>
+    <th>Component:</th>
+    <td>New Tab Page</td>
+  </tr>
+  <tr>
+    <th>Relationship:</th>
+    <td>__Any__</td>
+  </tr>
+  <tr>
+    <th>Action:</th>
+    <td>Include</td>
+  </tr>
+</table>
+<p>
+  And finally another <b>include</b> filter to catch when a [% terms.bug %] is
+  moved into the "New Tab Page" component.
+</p>
+<table class="example_filter_table">
+  <tr>
+    <th>Field:</th>
+    <td>Component</td>
+  </tr>
+  <tr>
+    <th>Product:</th>
+    <td>Firefox</td>
+  </tr>
+  <tr>
+    <th>Component:</th>
+    <td>New Tab Page</td>
+  </tr>
+  <tr>
+    <th>Relationship:</th>
+    <td>__Any__</td>
+  </tr>
+  <tr>
+    <th>Action:</th>
+    <td>Include</td>
+  </tr>
+</table>

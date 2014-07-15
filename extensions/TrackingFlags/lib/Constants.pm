@@ -34,12 +34,6 @@ sub FLAG_TYPES {
             collapsed   => 1,
             sortkey     => 2
         },
-        {
-            name        => 'b2g',
-            description => 'B2G Flags',
-            collapsed   => 1,
-            sortkey     => 3
-        },
     );
     return [ sort { $a->{'sortkey'} <=> $b->{'sortkey'} } @flag_types ];
 }

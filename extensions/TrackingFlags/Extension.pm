@@ -32,10 +32,7 @@ BEGIN {
 }
 
 sub _tracking_flag_names {
-    # return just a list of names, hitting the database directly to avoid the
-    # overhead of object creation
-    return Bugzilla->request_cache->{tracking_flag_names} ||=
-        Bugzilla->dbh->selectcol_arrayref("SELECT name FROM tracking_flags");
+    return Bugzilla::Extension::TrackingFlags::Flag->get_all_names();
 }
 
 sub page_before_template {

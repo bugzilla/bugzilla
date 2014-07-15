@@ -508,7 +508,7 @@ table.edit_form hr {
 }
 
 .bz_comment pre, #comment {
-    font: 13px/1.2 "Fira Mono", "Droid Sans Mono", Menlo, Monaco, "Courier New", Courier, monospace;
+    font: 13px/1.2 "Droid Sans Mono", Menlo, Monaco, "Courier New", Courier, monospace;
 }
 
 .bz_first_comment_head, .bz_comment_head {

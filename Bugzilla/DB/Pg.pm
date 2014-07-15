@@ -25,6 +25,7 @@ use 5.10.1;
 use strict;
 
 use Bugzilla::Error;
+use Bugzilla::Version;
 use DBD::Pg;
 
 # This module extends the DB interface via inheritance
@@ -79,14 +80,33 @@ sub bz_last_key {
 }
 
 sub sql_group_concat {
-    my ($self, $text, $separator, $sort) = @_;
+    my ($self, $text, $separator, $sort, $order_by) = @_;
     $sort = 1 if !defined $sort;
     $separator = $self->quote(', ') if !defined $separator;
-    my $sql = "array_accum($text)";
-    if ($sort) {
-        $sql = "array_sort($sql)";
+
+    if ($order_by && $text =~ /^DISTINCT\s*(.+)$/i) {
+        # Since Postgres (quite rightly) doesn't support "SELECT DISTINCT x
+        # ORDER BY y", we need to sort the list, and then get the unique
+        # values
+        return "ARRAY_TO_STRING(ANYARRAY_UNIQ(ARRAY_AGG($1 ORDER BY $order_by)), $separator)";
     }
-    return "array_to_string($sql, $separator)";
+
+    # Determine the ORDER BY clause (if any)
+    if ($order_by) {
+        $order_by = " ORDER BY $order_by";
+    }
+    elsif ($sort) {
+        # We don't include the DISTINCT keyword in an order by
+        $text =~ /^(?:DISTINCT\s*)?(.+)$/i;
+        $order_by = " ORDER BY $1";
+    }
+
+    if (vers_cmp($self->bz_server_version, 9) < 0) {
+        # PostgreSQL 8.x doesn't support STRING_AGG
+        return "ARRAY_TO_STRING(ARRAY_AGG($text$order_by), $separator)";
+    }
+
+    return "STRING_AGG($text, $separator$order_by)";
 }
 
 sub sql_istring {
@@ -211,32 +231,53 @@ sub bz_setup_database {
     $self->SUPER::bz_setup_database(@_);
 
     # Custom Functions
-    my $function = 'array_accum';
-    my $array_accum = $self->selectrow_array(
-        'SELECT 1 FROM pg_proc WHERE proname = ?', undef, $function);
-    if (!$array_accum) {
-        print "Creating function $function...\n";
-        $self->do("CREATE AGGREGATE array_accum (
-                       SFUNC = array_append,
-                       BASETYPE = anyelement,
-                       STYPE = anyarray,
-                       INITCOND = '{}' 
-                   )");
-    }
 
-   $self->do(<<'END');
-CREATE OR REPLACE FUNCTION array_sort(ANYARRAY)
-RETURNS ANYARRAY LANGUAGE SQL
-IMMUTABLE STRICT
-AS $$
-SELECT ARRAY(
-    SELECT $1[s.i] AS each_item
-    FROM
-        generate_series(array_lower($1,1), array_upper($1,1)) AS s(i)
-    ORDER BY each_item
-);
-$$;
-END
+    # -Copyright © 2013 Joshua D. Burns (JDBurnZ) and Message In Action LLC
+    # JDBurnZ: https://github.com/JDBurnZ
+    # Message In Action: https://www.messageinaction.com
+    #
+    #Permission is hereby granted, free of charge, to any person obtaining a copy of
+    #this software and associated documentation files (the "Software"), to deal in
+    #the Software without restriction, including without limitation the rights to
+    #use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+    #the Software, and to permit persons to whom the Software is furnished to do so,
+    #subject to the following conditions:
+    #
+    #The above copyright notice and this permission notice shall be included in all
+    #copies or substantial portions of the Software.
+    #
+    #THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+    #IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+    #FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+    #COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+    #IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+    #CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+    $self->do(q|
+        DROP FUNCTION IF EXISTS anyarray_uniq(anyarray);
+        CREATE OR REPLACE FUNCTION anyarray_uniq(with_array anyarray)
+        RETURNS anyarray AS $BODY$
+        DECLARE
+            -- The variable used to track iteration over "with_array".
+            loop_offset integer;
+
+            -- The array to be returned by this function.
+            return_array with_array%TYPE := '{}';
+        BEGIN
+            IF with_array IS NULL THEN
+                return NULL;
+            END IF;
+
+            -- Iterate over each element in "concat_array".
+            FOR loop_offset IN ARRAY_LOWER(with_array, 1)..ARRAY_UPPER(with_array, 1) LOOP
+                IF NOT with_array[loop_offset] = ANY(return_array) THEN
+                    return_array = ARRAY_APPEND(return_array, with_array[loop_offset]);
+                END IF;
+            END LOOP;
+
+            RETURN return_array;
+        END;
+        $BODY$ LANGUAGE plpgsql;
+    |);
 
     # PostgreSQL doesn't like having *any* index on the thetext
     # field, because it can't have index data longer than 2770

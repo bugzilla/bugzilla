@@ -125,10 +125,13 @@ sub bz_last_key {
 }
 
 sub sql_group_concat {
-    my ($self, $column, $separator, $sort) = @_;
+    my ($self, $column, $separator, $sort, $order_by) = @_;
     $separator = $self->quote(', ') if !defined $separator;
     $sort = 1 if !defined $sort;
-    if ($sort) {
+    if ($order_by) {
+        $column .= " ORDER BY $order_by";
+    }
+    elsif ($sort) {
         my $sort_order = $column;
         $sort_order =~ s/^DISTINCT\s+//i;
         $column = "$column ORDER BY $sort_order";

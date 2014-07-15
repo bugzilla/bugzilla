@@ -599,7 +599,8 @@ sub COLUMNS {
                 . " END)",
 
         'flagtypes.name' => $dbh->sql_group_concat('DISTINCT ' 
-            . $dbh->sql_string_concat('map_flagtypes.name', 'map_flags.status')),
+            . $dbh->sql_string_concat('map_flagtypes.name', 'map_flags.status'),
+            undef, undef, 'map_flagtypes.sortkey, map_flagtypes.name'),
 
         'keywords' => $dbh->sql_group_concat('DISTINCT map_keyworddefs.name'),
 

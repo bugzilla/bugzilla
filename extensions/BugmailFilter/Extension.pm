@@ -140,7 +140,8 @@ sub user_preferences {
         $fields{$field->name} = $field->description;
     }
 
-    $vars->{fields} = [
+    $vars->{fields} = \%fields;
+    $vars->{field_list} = [
         sort { lc($a->{description}) cmp lc($b->{description}) }
         map { { name => $_, description => $fields{$_} } }
         keys %fields

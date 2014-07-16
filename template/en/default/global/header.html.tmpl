@@ -231,7 +231,7 @@
 
 <div id="header">
 
-[% IF user.settings.skin.value == 'Mozilla' %]
+[% IF user.settings.skin.value == 'Mozilla' || user.settings.skin.value == 'Mozilla-OpenSans' %]
   <div class="wrapper">
     <table border="0" cellspacing="0" cellpadding="0" id="titles">
     <tr>
@@ -364,7 +364,7 @@
 
 [%# in most cases the "header" variable provides redundant information, however
   # there are exceptions where not displaying this text is problematic. %]
-[% IF user.settings.skin.value == 'Mozilla'
+[% IF (user.settings.skin.value == 'Mozilla' || user.settings.skin.value == 'Mozilla-OpenSans')
       && template.name.match('^attachment/')
       && !header.match('^Bug&nbsp;\d+$')
 %]

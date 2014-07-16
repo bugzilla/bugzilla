@@ -44,7 +44,7 @@
 
   <li><span class="separator">| </span><a href="report.cgi">Reports</a></li>
 
-  [% IF user.settings.skin.value != 'Mozilla' %]
+  [% IF user.settings.skin.value != 'Mozilla' && user.settings.skin.value != 'Mozilla-OpenSans' %]
   <li>
     [% IF Param('shutdownhtml') || Bugzilla.has_flags %]
       <span class="separator">| </span>
@@ -60,7 +60,7 @@
 
   [% Hook.process('action-links') %]
 
-  [% IF user.settings.skin.value != 'Mozilla' %]
+  [% IF user.settings.skin.value != 'Mozilla' && user.settings.skin.value != 'Mozilla-OpenSans' %]
   [% IF user.login %]
     <li><span class="separator">| </span><a href="userprefs.cgi">Preferences</a></li>
     [% IF user.in_group('tweakparams') || user.in_group('editusers') || user.can_bless

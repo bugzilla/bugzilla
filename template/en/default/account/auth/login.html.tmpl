@@ -24,7 +24,7 @@
   [% terms.Bugzilla %] needs a legitimate login and password to continue.
 </p>
 
-<form name="login" action="[% target FILTER html %]" method="POST"
+<form name="login" action="[% urlbase FILTER html %][% target FILTER html %]" method="POST"
 [%- IF Bugzilla.cgi.param("data") %] enctype="multipart/form-data"[% END %]>
   <table>
     <tr>

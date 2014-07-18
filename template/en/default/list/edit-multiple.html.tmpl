@@ -290,8 +290,11 @@
     [% custom_fields = Bugzilla.active_custom_fields %]
   [% END %]
   [% FOREACH field = custom_fields %]
+    [%# BMO hook for controlling field visibility %]
+    [% Hook.process('custom_field', 'list/edit-multiple.html.tmpl', ) %]
+    [% NEXT IF field.hidden %]
     <tr>
-      [% PROCESS bug/field.html.tmpl bug = default
+      [% PROCESS bug/field.html.tmpl bug = bug
                                      value = dontchange
                                      editable = 1
                                      allow_dont_change = 1 %]

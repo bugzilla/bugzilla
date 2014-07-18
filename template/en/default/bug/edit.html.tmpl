@@ -1000,6 +1000,7 @@
   [% FOREACH field = Bugzilla.active_custom_fields(product=>bug.product_obj,component=>bug.component_obj) %]
     [% NEXT IF field.type == constants.FIELD_TYPE_EXTENSION %]
     [% NEXT IF NOT user.id AND field.value == "---" %]
+    [%# BMO hook for controlling field visibility %]
     [% Hook.process('custom_field', 'bug/edit.html.tmpl') %]
     [% NEXT IF field.hidden %]
     <tr>

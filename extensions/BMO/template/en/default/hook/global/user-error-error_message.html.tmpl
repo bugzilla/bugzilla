@@ -13,3 +13,13 @@
     out how to get the necessary permissions</a>.
   </p>
 [% END %]
+
+[% IF error == 'entry_access_denied' && product == 'Legal' %]
+  <p>
+    Unfortunately, we need to keep [% terms.bugs %] in the Legal product restricted to
+    employees, in order to preserve attorney-client privilege and protect confidentiality.
+    Due to the way [% terms.Bugzilla %] works, this means we can't let you file such a
+    [% terms.bug %] yourself. However, you can contact Mozilla Legal through either
+    legal-notices@mozilla.com or trademarks@mozilla.com, as appropriate.
+  </p>
+[% END %]

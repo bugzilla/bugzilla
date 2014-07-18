@@ -205,7 +205,7 @@ sub fix_bug {
         else {
             if (ref $data->{$key} eq 'ARRAY' && !@{$data->{$key}}) {
                 # Return empty string if blocks or depends_on is empty
-                if ($key eq 'depends_on' || $key eq 'blocks') {
+                if ($method eq 'Bug.search' && ($key eq 'depends_on' || $key eq 'blocks')) {
                     $data->{$key} = '';
                 }
                 else {

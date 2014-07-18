@@ -196,6 +196,10 @@ sub db_schema_abstract_schema {
                 NOTNULL => 1,
                 DEFAULT => 'TRUE',
             },
+            comment => {
+                TYPE    => 'TEXT',
+                NOTNULL => 0,
+            },
         ],
         INDEXES => [
             tracking_flags_values_idx => {
@@ -302,6 +306,14 @@ sub install_update_db {
             NOTNULL => 1,
             DEFAULT => 'TRUE',
         }
+    );
+    $dbh->bz_add_column(
+        'tracking_flags_values',
+        'comment',
+        {
+            TYPE    => 'TEXT',
+            NOTNULL => 0,
+        },
     );
 }
 

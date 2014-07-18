@@ -254,11 +254,7 @@ this is another way to quickly get a distinctive look and feel for
 your Bugzilla installation.
 
 :command:`global/variables.none.tmpl`:
-This defines a list of terms that may be changed in order to
-``brand`` the Bugzilla instance In this way, terms
-like ``bugs`` can be replaced with ``issues``
-across the whole Bugzilla installation. The name
-``Bugzilla`` and other words can be customized as well.
+XXX Need to describe the use of this file
 
 :command:`list/table.html.tmpl`:
 This template controls the appearance of the bug lists created

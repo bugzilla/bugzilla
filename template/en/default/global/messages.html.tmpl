@@ -652,6 +652,7 @@
         [% IF changes.inclusions.defined || changes.exclusions.defined %]
           <li>The inclusions and exclusions lists have been updated</li>
         [% END %]
+        [% Hook.process('flag_type_updated_fields') %]
      </ul>
     [% ELSE %]
       No changes made to flag type <em>[% flagtype.name FILTER html %]</em>.

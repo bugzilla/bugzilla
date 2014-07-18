@@ -13,6 +13,7 @@ use base qw(Bugzilla::Extension);
 use Bugzilla::Error;
 use Bugzilla::FlagType;
 use Bugzilla::User;
+use Bugzilla::Util 'trim';
 
 use Bugzilla::Extension::FlagDefaultRequestee::Constants;
 
@@ -24,14 +25,13 @@ our $VERSION = '1';
 
 sub install_update_db {
     my $dbh = Bugzilla->dbh;
-    if (!$dbh->bz_column_info('flagtypes', 'default_requestee')) {
-        $dbh->bz_add_column('flagtypes', 'default_requestee', {
-            TYPE => 'INT3', NOTNULL => 0,
-            REFERENCES => { TABLE  => 'profiles',
-                            COLUMN => 'userid',
-                            DELETE => 'SET NULL' }
-        });
-    }
+    $dbh->bz_add_column('flagtypes', 'default_requestee', {
+        TYPE       => 'INT3',
+        NOTNULL    => 0,
+        REFERENCES => {  TABLE => 'profiles',
+                        COLUMN => 'userid',
+                        DELETE => 'SET NULL' }
+    });
 }
 
 #############
@@ -40,11 +40,8 @@ sub install_update_db {
 
 sub template_before_process {
     my ($self, $args) = @_;
-    my ($vars, $file) = @$args{qw(vars file)};
-    my $dbh = Bugzilla->dbh;
-
     return unless Bugzilla->user->id;
-
+    my ($vars, $file) = @$args{qw(vars file)};
     return unless grep { $_ eq $file } FLAGTYPE_TEMPLATES;
 
     my $flag_types = [];
@@ -82,46 +79,11 @@ sub template_before_process {
 
     return if !@$flag_types;
 
-    $vars->{flag_default_requestees}  ||= {};
+    $vars->{flag_default_requestees} ||= {};
     foreach my $type (@$flag_types) {
         next if !$type->default_requestee;
         $vars->{flag_default_requestees}->{$type->id} = $type->default_requestee->login;
     }
-}
-
-#########
-# Admin #
-#########
-
-sub flagtype_end_of_create {
-    my ($self, $args) = @_;
-    _set_default_requestee($args->{type});
-}
-
-sub flagtype_end_of_update {
-    my ($self, $args) = @_;
-    _set_default_requestee($args->{type});
-}
-
-sub _set_default_requestee {
-    my $type  = shift;
-    my $input = Bugzilla->input_params;
-    my $dbh   = Bugzilla->dbh;
-
-    my $requestee_login = $input->{'default_requestee'};
-
-    my $requestee_id = undef;
-    if ($requestee_login) {
-        if ($type->name eq 'review') {
-            ThrowUserError("flag_default_requestee_review");
-        }
-        my $requestee = Bugzilla::User->check($requestee_login);
-        $requestee_id = $requestee->id;
-    }
-
-    $dbh->do("UPDATE flagtypes SET default_requestee = ? WHERE id = ?",
-             undef, $requestee_id, $type->id);
-    Bugzilla->memcached->clear({ table => 'flagtypes', id => $type->id });
 }
 
 ##################
@@ -132,18 +94,80 @@ BEGIN {
     *Bugzilla::FlagType::default_requestee = \&_default_requestee;
 }
 
+sub object_columns {
+    my ($self, $args) = @_;
+    my ($class, $columns) = @$args{qw(class columns)};
+    if ($class->isa('Bugzilla::FlagType')) {
+        push(@$columns, 'default_requestee');
+    }
+}
+
+sub object_update_columns {
+    my ($self, $args) = @_;
+    my $object = $args->{object};
+    return unless $object->isa('Bugzilla::FlagType');
+
+    my $columns = $args->{columns};
+    push(@$columns, 'default_requestee');
+
+    # editflagtypes.cgi doesn't call set_all, so we have to do this here
+    my $input = Bugzilla->input_params;
+    $object->set('default_requestee', $input->{default_requestee})
+        if exists $input->{default_requestee};
+}
+
+sub object_validators {
+    my ($self, $args) = @_;
+    my $class = $args->{class};
+    return unless $class->isa('Bugzilla::FlagType');
+
+    my $validators = $args->{validators};
+    $validators->{default_requestee} = \&_check_default_requestee;
+}
+
+sub object_before_create {
+    my ($self, $args) = @_;
+    my $class = $args->{class};
+    return unless $class->isa('Bugzilla::FlagType');
+
+    my $params = $args->{params};
+    my $input = Bugzilla->input_params;
+    $params->{default_requestee} = $input->{default_requestee}
+        if exists $params->{default_requestee};
+}
+
+sub object_end_of_update {
+    my ($self, $args) = @_;
+    my $object = $args->{object};
+    return unless $object->isa('Bugzilla::FlagType');
+
+    my $old_object = $args->{old_object};
+    my $changes = $args->{changes};
+    my $old_id = $old_object->default_requestee
+        ? $old_object->default_requestee->id
+        : 0;
+    my $new_id = $object->default_requestee
+        ? $object->default_requestee->id
+        : 0;
+    return if $old_id == $new_id;
+
+    $changes->{default_requestee} = [ $old_id, $new_id ];
+}
+
+sub _check_default_requestee {
+    my ($self, $value, $field) = @_;
+    $value = trim($value // '');
+    return undef if $value eq '';
+    ThrowUserError("flag_default_requestee_review")
+        if $self->name eq 'review';
+    return Bugzilla::User->check($value)->id;
+}
+
 sub _default_requestee {
     my ($self) = @_;
-    my $dbh = Bugzilla->dbh;
-    return $self->{default_requestee} if exists $self->{default_requestee};
-    my $requestee_id = $dbh->selectrow_array("SELECT default_requestee
-                                                FROM flagtypes
-                                               WHERE id = ?", 
-                                             undef, $self->id);
-    $self->{default_requestee} = $requestee_id 
-                                 ? Bugzilla::User->new($requestee_id)
-                                 : undef;
-    return $self->{default_requestee};
+    return $self->{default_requestee}
+        ? Bugzilla::User->new({ id => $self->{default_requestee}, cache => 1 })
+        : undef;
 }
 
 __PACKAGE__->NAME;

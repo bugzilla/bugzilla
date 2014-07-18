@@ -165,6 +165,8 @@ use constant OS_MAP => (
     qr/\(.*Mac OS 8[^.].*\)/ => ["Mac System 8.0"],
     qr/\(.*Mac OS 8.*\)/ => ["Mac System 8.6"],
     qr/\(.*Darwin.*\)/ => [("Mac OS X 10.0", "Mac OS X")],
+    # Firefox OS
+    qr/\(Mobile;.*Gecko.*Firefox/ => ["Gonk (Firefox OS)"],
     # Silly
     qr/\(.*Mac.*PowerPC.*\)/ => ["Mac System 9.x"],
     qr/\(.*Mac.*PPC.*\)/ => ["Mac System 9.x"],

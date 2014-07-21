@@ -38,16 +38,22 @@ use constant FAKE_FIELD_NAMES => [
 use constant IGNORE_FIELDS => qw(
     attach_data.thedata
     attachments.submitter
+    cf_last_resolved
+    commenter
     comment_tag
+    creation_ts
     days_elapsed
     delta_ts
     everconfirmed
+    last_visit_ts
     longdesc
     longdescs.count
     owner_idle_time
     reporter
     reporter_accessible
+    setters.login_name
     tag
+    votes
 );
 
 # override the description of some fields

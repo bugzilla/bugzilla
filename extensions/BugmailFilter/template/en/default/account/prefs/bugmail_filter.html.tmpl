@@ -143,7 +143,7 @@ var cpts = new Array();
         </td>
         <td>[% filter.product ? filter.product.name : 'Any' FILTER html %]</td>
         <td>[% filter.component ? filter.component.name : 'Any' FILTER html %]</td>
-        <td>[% filter.field ? fields.${filter.field.name} : 'Any' FILTER html %]</td>
+        <td>[% filter.field ? fields.${filter.field.name} || filter.field.description : 'Any' FILTER html %]</td>
         <td>[% filter.relationship ? filter.relationship_name : 'Any' FILTER html %]</td>
         <td>[% filter.action ? 'Exclude' : 'Include' %]</td>
       </tr>

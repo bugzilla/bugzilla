@@ -310,7 +310,22 @@ sub multipart_start {
         $headers .= "Set-Cookie: ${cookie}${CGI::CRLF}";
     }
     $headers .= $CGI::CRLF;
+    $self->{_multipart_in_progress} = 1;
     return $headers;
+}
+
+sub close_standby_message {
+    my ($self, $contenttype, $disposition) = @_;
+
+    if ($self->{_multipart_in_progress}) {
+        print $self->multipart_end();
+        print $self->multipart_start(-type                => $contenttype,
+                                     -content_disposition => $disposition);
+    }
+    else {
+        print $self->header(-type                => $contenttype,
+                            -content_disposition => $disposition);
+    }
 }
 
 # Override header so we can add the cookies in

@@ -117,9 +117,11 @@ sub _throw_error {
             $vars->{maintainers_notified} = 0;
         }
 
-        print Bugzilla->cgi->header();
+        my $cgi = Bugzilla->cgi;
+        $cgi->close_standby_message('text/html', 'inline');
         $template->process($name, $vars)
           || ThrowTemplateError($template->error());
+        print $cgi->multipart_final() if $cgi->{_multipart_in_progress};
 
         if ($vars->{maintainers_notified}) {
             sentry_handle_error($vars->{error}, $vars->{processed}->{error_message});

@@ -80,7 +80,7 @@ function update_flag_values() {
     for (var i = 0, l = flag_values.length; i < l; i++) {
         var value = flag_values[i];
 
-        var row = tbl.insertRow(2 + i);
+        var row = tbl.insertRow(2 + (i * 2));
         var cell;
 
         // value
@@ -157,10 +157,31 @@ function update_flag_values() {
                 ? '<span class="txt_icon">&nbsp;-&nbsp;</span>'
                 : '<a class="txt_icon" href="#" onclick="value_move_down(' + i + ');return false"> &nabla; </a>'
             );
-        if (value.value != '---')
-            html += '| <a href="#" onclick="remove_value(' + i + ');return false">Remove</a>';
-        html += ']';
+        if (value.value != '---') {
+            var lbl = value.comment == '' ? 'Set Comment' : 'Edit Comment';
+            html +=
+                '|<a href="#" onclick="remove_value(' + i + ');return false">Remove</a>' +
+                '|<a href="#" onclick="toggle_value_comment(this, ' + i + ');return false">' + lbl + '</a>'
+
+        }
+        html += ' ]';
         cell.innerHTML = html;
+
+        row = tbl.insertRow(3 + (i * 2));
+        row.className = 'bz_default_hidden';
+        row.id = 'comment_row_' + i;
+        cell = row.insertCell(0);
+        cell = row.insertCell(1);
+        cell.colSpan = 3;
+        var ta = document.createElement('textarea');
+        ta.className = 'value_comment';
+        ta.id = 'value_comment_' + i;
+        ta.rows = 5;
+        ta.value = value.comment;
+        cell.appendChild(ta);
+        Event.addListener(ta, 'blur', function(e, idx) {
+            flag_values[idx].comment = e.target.value;
+        }, i);
     }
 
     tag_invalid_values();
@@ -227,6 +248,19 @@ function remove_value(idx) {
 function update_value(e, o) {
     var i = o.value.match(/\d+/);
     flag_values[i].value = o.value;
+}
+
+function toggle_value_comment(btn, idx) {
+    var row = Dom.get('comment_row_' + idx);
+    if (Dom.hasClass(row, 'bz_default_hidden')) {
+        Dom.removeClass(row, 'bz_default_hidden');
+        btn.innerHTML = 'Hide Comment';
+        Dom.get('value_comment_' + idx).select();
+        Dom.get('value_comment_' + idx).focus();
+    } else {
+        Dom.addClass(row, 'bz_default_hidden');
+        btn.innerHTML = flag_values[idx].comment == '' ? 'Set Comment' : 'Edit Comment';
+    }
 }
 
 // visibility

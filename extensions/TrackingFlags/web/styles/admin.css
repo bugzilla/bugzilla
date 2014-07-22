@@ -87,6 +87,10 @@
     width: 10em;
 }
 
+.value_comment {
+    width: 100%;
+}
+
 .hidden {
     display: none;
 }

@@ -30,7 +30,8 @@
       [% IF user.id %]
         <input type="hidden" id="[% flag.name FILTER html %]_dirty">
         <select id="[% flag.name FILTER html %]"
-                name="[% flag.name FILTER html %]">
+                name="[% flag.name FILTER html %]"
+                onchange="tracking_flag_change(this)">
           [% FOREACH value = flag.values %]
             [% IF new_bug || value.name != flag_bug_value  %]
               [% NEXT IF !value.is_active || !flag.can_set_value(value.name) %]
@@ -55,3 +56,7 @@
     </td>
   </tr>
 [% END %]
+
+<script type="text/javascript">
+  TrackingFlags = [% tracking_flags_json FILTER none %];
+</script>

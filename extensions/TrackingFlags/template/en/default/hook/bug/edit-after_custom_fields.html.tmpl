@@ -6,49 +6,41 @@
   # defined by the Mozilla Public License, v. 2.0.
   #%]
 
-[% IF tracking_flags.size %]
-  [% FOREACH type = tracking_flag_types %]
-    [% flag_list = [] %]
-    [% FOREACH flag = tracking_flags %]
-      [% flag_list.push(flag) IF flag.flag_type == type.name %]
-    [% END %]
-    [% IF flag_list.size %]
-      <tr>
-        <td class="field_label">
-          <label>[% type.description FILTER html %]:</label>
-        </td>
-        <td>
-          [% IF bug.check_can_change_field('flagtypes.name', 0, 1) %]
-            [% IF user.id && type.collapsed %]
-              <span id="edit_[% type.name FILTER html %]_flags_action">
-                (<a href="#" name="[% type.name FILTER html %]" class="edit_tracking_flags_link">edit</a>)
-              </span>
-            [% END %]
-            <table class="tracking_flags">
-            [% INCLUDE bug/tracking_flags.html.tmpl
-               flag_list = flag_list %]
-            </table>
-            [% IF type.collapsed %]
-              <script type="text/javascript">
-                TrackingFlags.flags['[% type.name FILTER js %]'] = {};
-                [% FOREACH flag = flag_list %]
-                  TrackingFlags.flags['[% type.name FILTER js %]']['[% flag.name FILTER js %]'] = '[% flag.bug_flag.value FILTER js %]';
-                [% END %]
-                TrackingFlags.types.push('[% type.name FILTER js %]');
-            </script>
-            [% END %]
-          [% ELSE %]
-            [% FOREACH flag = flag_list %]
-              [% NEXT IF flag.status == '---' %]
-              [% flag.description FILTER html %]: [% flag.bug_flag.value FILTER html %]<br>
-            [% END %]
+[% RETURN UNLESS tracking_flags.size %]
+
+[% FOREACH type = tracking_flag_types %]
+  [% flag_list = [] %]
+  [% FOREACH flag = tracking_flags %]
+    [% flag_list.push(flag) IF flag.flag_type == type.name %]
+  [% END %]
+  [% IF flag_list.size %]
+    <tr>
+      <td class="field_label">
+        <label>[% type.description FILTER html %]:</label>
+      </td>
+      <td>
+        [% IF bug.check_can_change_field('flagtypes.name', 0, 1) %]
+          [% IF user.id && type.collapsed %]
+            <span id="edit_[% type.name FILTER html %]_flags_action">
+              (<a href="#" name="[% type.name FILTER html %]" class="edit_tracking_flags_link">edit</a>)
+            </span>
           [% END %]
-        </td>
-      </tr>
-    [% END %]
+          <table class="tracking_flags">
+          [% INCLUDE bug/tracking_flags.html.tmpl
+              flag_list = flag_list %]
+          </table>
+        [% ELSE %]
+          [% FOREACH flag = flag_list %]
+            [% NEXT IF flag.status == '---' %]
+            [% flag.description FILTER html %]: [% flag.bug_flag.value FILTER html %]<br>
+          [% END %]
+        [% END %]
+      </td>
+    </tr>
   [% END %]
 [% END %]
 
 <script type="text/javascript">
+  TrackingFlags = [% tracking_flags_json FILTER none %];
   hide_tracking_flags();
 </script>

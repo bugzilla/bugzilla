@@ -78,7 +78,7 @@ var selected_components = [
       <option value=""></option>
       [% FOREACH type = tracking_flag_types %]
         <option value="[% type.name FILTER html %]"
-                [% 'selected="selected"' IF flag.flag_type == type.name %]>
+                [% " selected" IF flag.flag_type == type.name %]>
           [% type.name FILTER html %]</option>
       [% END %]
     </select>

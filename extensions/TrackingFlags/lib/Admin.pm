@@ -133,6 +133,7 @@ sub admin_edit {
                     value           => '---',
                     setter_group_id => '',
                     is_active       => 1,
+                    comment         => '',
                 },
             ]);
             $vars->{visibility} = '';
@@ -337,6 +338,7 @@ sub _update_db_values {
             setter_group_id => $value->{setter_group_id},
             is_active       => $value->{is_active},
             sortkey         => $sortkey,
+            comment         => $value->{comment},
         };
 
         if ($value->{id}) {
@@ -345,13 +347,11 @@ sub _update_db_values {
             my $old_value = $value_obj->value;
             $value_obj->set_all($object_set);
             $value_obj->update();
-            if ($object_set->{value} ne $old_value) {
-                Bugzilla::Extension::TrackingFlags::Flag::Bug->update_all_values({
-                    value_obj => $value_obj,
-                    old_value => $old_value,
-                    new_value => $value_obj->value,
-                });
-            }
+            Bugzilla::Extension::TrackingFlags::Flag::Bug->update_all_values({
+                value_obj => $value_obj,
+                old_value => $old_value,
+                new_value => $value_obj->value,
+            });
         } else {
             $object_set->{tracking_flag_id} = $flag_obj->flag_id;
             Bugzilla::Extension::TrackingFlags::Flag::Value->create($object_set);
@@ -406,6 +406,7 @@ sub _flag_values_to_json {
             value           => $value->{value},
             setter_group_id => $value->{setter_group_id},
             is_active       => $value->{is_active} ? JSON::true : JSON::false,
+            comment         => $value->{comment} // '',
         };
     }
     return encode_json(\@data);

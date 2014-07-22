@@ -14,7 +14,7 @@ use warnings;
 
 use Bugzilla::Error;
 use Bugzilla::Group;
-use Bugzilla::Util qw(detaint_natural);
+use Bugzilla::Util qw(detaint_natural trim);
 use Scalar::Util qw(blessed);
 
 ###############################
@@ -30,6 +30,7 @@ use constant DB_COLUMNS => qw(
     value
     sortkey
     is_active
+    comment
 );
 
 use constant LIST_ORDER => 'sortkey';
@@ -39,6 +40,7 @@ use constant UPDATE_COLUMNS => qw(
     value
     sortkey
     is_active
+    comment
 );
 
 use constant VALIDATORS => {
@@ -47,6 +49,7 @@ use constant VALIDATORS => {
     value            => \&_check_value,
     sortkey          => \&_check_sortkey,
     is_active        => \&Bugzilla::Object::check_boolean,
+    comment          => \&_check_comment,
 };
 
 ###############################
@@ -86,6 +89,13 @@ sub _check_sortkey {
     return $sortkey;
 }
 
+sub _check_comment {
+    my ($invocant, $value) = @_;
+    return undef unless defined $value;
+    $value = trim($value);
+    return $value eq '' ? undef : $value;
+}
+
 ###############################
 ####       Setters         ####
 ###############################
@@ -94,6 +104,7 @@ sub set_setter_group_id { $_[0]->set('setter_group_id', $_[1]); }
 sub set_value           { $_[0]->set('value', $_[1]);           }
 sub set_sortkey         { $_[0]->set('sortkey', $_[1]);         }
 sub set_is_active       { $_[0]->set('is_active', $_[1]);       }
+sub set_comment         { $_[0]->set('comment', $_[1]);         }
 
 ###############################
 ####      Accessors        ####
@@ -104,6 +115,7 @@ sub setter_group_id  { return $_[0]->{'setter_group_id'};  }
 sub value            { return $_[0]->{'value'};            }
 sub sortkey          { return $_[0]->{'sortkey'};          }
 sub is_active        { return $_[0]->{'is_active'};        }
+sub comment          { return $_[0]->{'comment'};          }
 
 sub tracking_flag {
     return $_[0]->{'tracking_flag'} ||= Bugzilla::Extension::TrackingFlags::Flag->new({

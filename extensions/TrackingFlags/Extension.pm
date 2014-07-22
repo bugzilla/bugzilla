@@ -25,6 +25,8 @@ use Bugzilla::Field;
 use Bugzilla::Install::Filesystem;
 use Bugzilla::Product;
 
+use JSON;
+
 our $VERSION = '1';
 
 BEGIN {
@@ -66,13 +68,15 @@ sub template_before_process {
     if ($file eq 'bug/create/create.html.tmpl'
         || $file eq 'bug/create/create-winqual.html.tmpl')
     {
-        $vars->{'tracking_flags'} = Bugzilla::Extension::TrackingFlags::Flag->match({
+        my $flags = Bugzilla::Extension::TrackingFlags::Flag->match({
             product   => $vars->{'product'}->name,
             enter_bug => 1,
             is_active => 1,
         });
 
-        $vars->{'tracking_flag_types'} = FLAG_TYPES;
+        $vars->{tracking_flags}      = $flags;
+        $vars->{tracking_flags_json} = _flags_to_json($flags);
+        $vars->{tracking_flag_types} = FLAG_TYPES;
     }
     elsif ($file eq 'bug/edit.html.tmpl'|| $file eq 'bug/show.xml.tmpl'
            || $file eq 'email/bugmail.html.tmpl' || $file eq 'email/bugmail.txt.tmpl')
@@ -81,12 +85,15 @@ sub template_before_process {
         my $bug = exists $vars->{'bugs'} ? $vars->{'bugs'}[0] : $vars->{'bug'};
 
         if ($bug && !$bug->{error}) {
-            $vars->{'tracking_flags'} = Bugzilla::Extension::TrackingFlags::Flag->match({
+            my $flags = Bugzilla::Extension::TrackingFlags::Flag->match({
                 product     => $bug->product,
                 component   => $bug->component,
                 bug_id      => $bug->id,
                 is_active   => 1,
             });
+
+            $vars->{tracking_flags}      = $flags;
+            $vars->{tracking_flags_json} = _flags_to_json($flags);
         }
 
         $vars->{'tracking_flag_types'} = FLAG_TYPES;
@@ -97,6 +104,37 @@ sub template_before_process {
             is_active => 1
         });
     }
+}
+
+sub _flags_to_json {
+    my ($flags) = @_;
+
+    my $json = {
+        flags => {},
+        types => [],
+        comments => {},
+    };
+
+    my %type_map = map { $_->{name} => $_ } @{ FLAG_TYPES() };
+    foreach my $flag (@$flags) {
+        my $flag_type = $flag->flag_type;
+
+        $json->{flags}->{$flag_type}->{$flag->name} = $flag->bug_flag->value;
+
+        if ($type_map{$flag_type}->{collapsed}
+            && !grep { $_ eq $flag_type } @{ $json->{types} })
+        {
+            push @{ $json->{types} }, $flag_type;
+        }
+
+        foreach my $value (@{ $flag->values }) {
+            if (defined($value->comment) && $value->comment ne '') {
+                $json->{comments}->{$flag->name}->{$value->value} = $value->comment;
+            }
+        }
+    }
+
+    return encode_json($json);
 }
 
 sub db_schema_abstract_schema {

@@ -42,11 +42,6 @@ use constant REQUIRED_MODULES => [
 use constant OPTIONAL_MODULES => [
     # connectors need the ability to extend this
     {
-        package => 'Net--RabbitMQ',
-        module  => 'Net::RabbitMQ',
-        version => '0'
-    },
-    {
         package => 'Net-SFTP',
         module  => 'Net::SFTP',
         version => '0'

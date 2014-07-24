@@ -204,6 +204,7 @@ use Memoize;
 # Bugzilla version
 use constant BUGZILLA_VERSION => "4.2.10";
 
+
 # Location of the remote and local XML files to track new releases.
 use constant REMOTE_FILE => 'http://updates.bugzilla.org/bugzilla-update.xml';
 use constant LOCAL_FILE  => 'bugzilla-update.xml'; # Relative to datadir.

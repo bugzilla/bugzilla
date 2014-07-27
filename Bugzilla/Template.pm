@@ -1001,6 +1001,12 @@ sub create {
                 return $cookie ? issue_hash_token(['login_request', $cookie]) : '';
             },
 
+            'get_api_token' => sub {
+                return '' unless Bugzilla->user->id;
+                my $cache = Bugzilla->request_cache;
+                return $cache->{api_token} //= issue_api_token();
+            },
+
             # A way for all templates to get at Field data, cached.
             'bug_fields' => sub {
                 my $cache = Bugzilla->request_cache;

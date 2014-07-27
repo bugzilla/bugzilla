@@ -97,6 +97,15 @@
     [% terms.Bug %] aliases cannot be longer than 20 characters.
     Please choose a shorter alias.
 
+  [% ELSIF error == "api_key_not_valid" %]
+    [% title = "Invalid API key" %]
+    The API key you specified is invalid. Please check that you typed it
+    correctly.
+
+  [% ELSIF error == "api_key_revoked" %]
+    [% title = "Invalid API key" %]
+    The API key you specified has been revoked by the user that created it.
+
   [% ELSIF error == "attachment_bug_id_mismatch" %]
     [% title = "Invalid Attachments" %]
     You tried to perform an action on attachments from different [% terms.bugs %].
@@ -218,6 +227,11 @@
     [% END %].
 
     [% Hook.process("auth_failure") %]
+
+  [% ELSIF error == "auth_invalid_token" %]
+    [% title = 'A token error occurred' %]
+    The token '[% token FILTER html %]' is not valid. It could be because
+    you loaded this page more than 3 days ago.
 
   [% ELSIF error == "auth_untrusted_request" %]
     [% title = "Untrusted Authentication Request" %]

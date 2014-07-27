@@ -432,9 +432,13 @@ where applicable.
 
 =head1 Logging In and Out
 
+These method are now deprecated, and will be removed in the release after
+Bugzilla 5.0. The correct way of use these REST and RPC calls is noted in
+L<Bugzilla::WebService>
+
 =head2 login
 
-B<STABLE>
+B<DEPRECATED>
 
 =over
 
@@ -499,7 +503,9 @@ creates a login cookie.
 
 =item C<restrict_login> was added in Bugzilla B<5.0>.
 
-=item C<token> was added in Bugzilla B<5.0>.
+=item C<token> was added in Bugzilla B<4.4.3>.
+
+=item This function will be removed in the release after Bugzilla 5.0, in favour of API keys.
 
 =back
 
@@ -507,7 +513,7 @@ creates a login cookie.
 
 =head2 logout
 
-B<STABLE>
+B<DEPRECATED>
 
 =over
 
@@ -525,7 +531,7 @@ Log out the user. Does nothing if there is no user logged in.
 
 =head2 valid_login
 
-B<UNSTABLE>
+B<DEPRECATED>
 
 =over
 
@@ -562,6 +568,8 @@ for the provided username.
 =over
 
 =item Added in Bugzilla B<5.0>.
+
+=item This function will be removed in the release after Bugzilla 5.0, in favour of API keys.
 
 =back
 

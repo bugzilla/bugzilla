@@ -1005,6 +1005,22 @@ If you attempt to change your email address, a confirmation
 email is sent to both the old and new addresses, with a link to use to
 confirm the change. This helps to prevent account hijacking.
 
+.. _apikey:
+
+API Keys
+========
+
+API keys are used to authenticate REST calls. You can create more than one
+API key if required. Each API key has an optional description which can help
+you record what each key is used for.
+
+On this page, you can unrevoke, revoke and change the description of existing
+API keys for your login. A revoked key means that it cannot be used. The
+description for purely for your information, and is optional.
+
+You can also create a new API key by selecting the check box under the 'New
+API key' section of the page.
+
 .. _permissionsettings:
 
 Permissions

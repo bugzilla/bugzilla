@@ -1177,7 +1177,7 @@ use constant ABSTRACT_SCHEMA => {
             issuedate => {TYPE => 'DATETIME', NOTNULL => 1} ,
             token     => {TYPE => 'varchar(16)', NOTNULL => 1,
                           PRIMARYKEY => 1},
-            tokentype => {TYPE => 'varchar(8)', NOTNULL => 1} ,
+            tokentype => {TYPE => 'varchar(16)', NOTNULL => 1} ,
             eventdata => {TYPE => 'TINYTEXT'},
         ],
         INDEXES => [
@@ -1731,6 +1731,26 @@ use constant ABSTRACT_SCHEMA => {
             bug_user_last_visit_idx => {FIELDS => ['user_id', 'bug_id'],
                                         TYPE => 'UNIQUE'},
             bug_user_last_visit_last_visit_ts_idx => ['last_visit_ts'],
+        ],
+    },
+
+    user_api_keys => {
+        FIELDS => [
+            id            => {TYPE => 'INTSERIAL', NOTNULL => 1,
+                              PRIMARYKEY => 1},
+            user_id       => {TYPE => 'INT3', NOTNULL => 1,
+                              REFERENCES => {TABLE  => 'profiles',
+                                             COLUMN => 'userid',
+                                             DELETE => 'CASCADE'}},
+            api_key       => {TYPE => 'VARCHAR(40)', NOTNULL => 1},
+            description   => {TYPE => 'VARCHAR(255)'},
+            revoked       => {TYPE => 'BOOLEAN', NOTNULL => 1,
+                              DEFAULT => 'FALSE'},
+            last_used     => {TYPE => 'DATETIME'},
+        ],
+        INDEXES => [
+            user_api_keys_key     => {FIELDS => ['api_key'], TYPE => 'UNIQUE'},
+            user_api_keys_user_id => {FIELDS => ['user_id']},
         ],
     },
 };

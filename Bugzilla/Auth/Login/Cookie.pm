@@ -14,8 +14,9 @@ use base qw(Bugzilla::Auth::Login);
 use fields qw(_login_token);
 
 use Bugzilla::Constants;
-use Bugzilla::Util;
 use Bugzilla::Error;
+use Bugzilla::Token;
+use Bugzilla::Util;
 
 use List::Util qw(first);
 
@@ -48,6 +49,17 @@ sub get_login_info {
             my $cookie = first {$_->name eq 'Bugzilla_login'}
                                 @{$cgi->{'Bugzilla_cookie_list'}};
             $user_id = $cookie->value if $cookie;
+        }
+
+        # If the call is for a web service, and an api token is provided, check
+        # it is valid.
+        if (i_am_webservice() && Bugzilla->input_params->{Bugzilla_api_token}) {
+            my $api_token = Bugzilla->input_params->{Bugzilla_api_token};
+            my ($token_user_id, undef, undef, $token_type)
+                = Bugzilla::Token::GetTokenData($api_token);
+            if ($token_type ne 'api_token' || $user_id != $token_user_id) {
+                ThrowUserError('auth_invalid_token', { token => $api_token });
+            }
         }
     }
 

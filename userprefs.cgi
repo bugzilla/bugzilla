@@ -13,10 +13,12 @@ use lib qw(. lib);
 use Bugzilla;
 use Bugzilla::BugMail;
 use Bugzilla::Constants;
+use Bugzilla::Mailer;
 use Bugzilla::Search;
 use Bugzilla::Util;
 use Bugzilla::Error;
 use Bugzilla::User;
+use Bugzilla::User::APIKey;
 use Bugzilla::Token;
 
 my $template = Bugzilla->template;
@@ -501,6 +503,65 @@ sub SaveSavedSearches {
 }
 
 
+sub DoApiKey {
+    my $user = Bugzilla->user;
+
+    my $api_keys = Bugzilla::User::APIKey->match({ user_id => $user->id });
+    $vars->{api_keys} = $api_keys;
+    $vars->{any_revoked} = grep { $_->revoked } @$api_keys;
+}
+
+sub SaveApiKey {
+    my $cgi = Bugzilla->cgi;
+    my $dbh = Bugzilla->dbh;
+    my $user = Bugzilla->user;
+
+    # Do it in a transaction.
+    $dbh->bz_start_transaction;
+
+    # Update any existing keys
+    my $api_keys = Bugzilla::User::APIKey->match({ user_id => $user->id });
+    foreach my $api_key (@$api_keys) {
+        my $description = $cgi->param('description_'.$api_key->id);
+        my $revoked = $cgi->param('revoked_'.$api_key->id);
+
+        if ($description ne $api_key->description
+            || $revoked != $api_key->revoked)
+        {
+            $api_key->set_all({
+                description => $description,
+                revoked     => $revoked,
+            });
+            $api_key->update();
+        }
+    }
+
+    # Was a new api key requested
+    if ($cgi->param('new_key')) {
+        my $new_key = Bugzilla::User::APIKey->create({
+            user_id     => $user->id,
+            description => $cgi->param('new_description'),
+        });
+
+        # As a security precaution, we always sent out an e-mail when
+        # an API key is created
+        my $lang = $user->setting('lang')
+            // Bugzilla::User->new()->setting('lang');
+
+        my $template = Bugzilla->template_inner($lang);
+        my $message;
+        $template->process(
+            'email/new-api-key.txt.tmpl',
+            { user => $user, new_key => $new_key },
+            \$message
+        ) || ThrowTemplateError($template->error());
+
+        MessageToMTA($message);
+    }
+
+    $dbh->bz_commit_transaction;
+}
+
 ###############################################################################
 # Live code (not subroutine definitions) starts here
 ###############################################################################
@@ -568,6 +629,11 @@ SWITCH: for ($current_tab_name) {
     /^saved-searches$/ && do {
         SaveSavedSearches() if $save_changes;
         DoSavedSearches();
+        last SWITCH;
+    };
+    /^apikey$/ && do {
+        SaveApiKey() if $save_changes;
+        DoApiKey();
         last SWITCH;
     };
 

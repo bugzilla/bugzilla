@@ -719,6 +719,10 @@ sub update_table_definitions {
                        'bug_user_last_visit_last_visit_ts_idx',
                        ['last_visit_ts']);
 
+    # 2014-07-14 sgreen@redhat.com - Bug 726696
+    $dbh->bz_alter_column('tokens', 'tokentype',
+                          {TYPE => 'varchar(16)', NOTNULL => 1});
+
     ################################################################
     # New --TABLE-- changes should go *** A B O V E *** this point #
     ################################################################

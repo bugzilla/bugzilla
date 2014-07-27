@@ -166,6 +166,9 @@
                 version_required:
                     'You must select a Version for this [% terms.bug %].'
             }
+            [% IF javascript_urls.containsany(['js/bug.js', 'js/field.js', 'js/comment-tagging.js']) %]
+              , api_token: '[% get_api_token FILTER js FILTER html %]'
+            [% END %]
         };
 
         [% FOREACH yui_name = yui %]

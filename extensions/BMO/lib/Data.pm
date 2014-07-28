@@ -95,6 +95,7 @@ tie(%$cf_visible_in_products, "Tie::IxHash",
     },
     qw/^cf_locale$/ => {
         "www.mozilla.org"       => [],
+        "Mozilla Localizations" => ['Other'],
     },
     qw/^cf_mozilla_project$/ => {
         "Data & BI Services Team" => [],

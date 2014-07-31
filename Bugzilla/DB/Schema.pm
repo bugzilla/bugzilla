@@ -1749,8 +1749,8 @@ use constant ABSTRACT_SCHEMA => {
             last_used     => {TYPE => 'DATETIME'},
         ],
         INDEXES => [
-            user_api_keys_key     => {FIELDS => ['api_key'], TYPE => 'UNIQUE'},
-            user_api_keys_user_id => {FIELDS => ['user_id']},
+            user_api_keys_api_key_idx => {FIELDS => ['api_key'], TYPE => 'UNIQUE'},
+            user_api_keys_user_id_idx => ['user_id'],
         ],
     },
 };

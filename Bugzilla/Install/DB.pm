@@ -723,6 +723,9 @@ sub update_table_definitions {
     $dbh->bz_alter_column('tokens', 'tokentype',
                           {TYPE => 'varchar(16)', NOTNULL => 1});
 
+    # 2014-07-27 LpSolit@gmail.com - Bug 1044561
+    _fix_user_api_keys_indexes();
+
     ################################################################
     # New --TABLE-- changes should go *** A B O V E *** this point #
     ################################################################
@@ -3878,6 +3881,20 @@ sub _fix_components_primary_key {
                               {TYPE => 'INT3', NOTNULL => 1});
         $dbh->bz_alter_column("component_cc", "component_id",
                               {TYPE => 'INT3', NOTNULL => 1});
+    }
+}
+
+sub _fix_user_api_keys_indexes {
+    my $dbh = Bugzilla->dbh;
+
+    if ($dbh->bz_index_info('user_api_keys', 'user_api_keys_key')) {
+        $dbh->bz_drop_index('user_api_keys', 'user_api_keys_key');
+        $dbh->bz_add_index('user_api_keys', 'user_api_keys_api_key_idx',
+                           { FIELDS => ['api_key'], TYPE => 'UNIQUE' });
+    }
+    if ($dbh->bz_index_info('user_api_keys', 'user_api_keys_user_id')) {
+        $dbh->bz_drop_index('user_api_keys', 'user_api_keys_user_id');
+        $dbh->bz_add_index('user_api_keys', 'user_api_keys_user_id_idx', ['user_id']);
     }
 }
 

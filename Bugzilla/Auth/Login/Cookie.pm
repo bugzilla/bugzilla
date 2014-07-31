@@ -57,7 +57,10 @@ sub get_login_info {
             my $api_token = Bugzilla->input_params->{Bugzilla_api_token};
             my ($token_user_id, undef, undef, $token_type)
                 = Bugzilla::Token::GetTokenData($api_token);
-            if ($token_type ne 'api_token' || $user_id != $token_user_id) {
+            if (!defined $token_type
+                || $token_type ne 'api_token'
+                || $user_id != $token_user_id)
+            {
                 ThrowUserError('auth_invalid_token', { token => $api_token });
             }
         }

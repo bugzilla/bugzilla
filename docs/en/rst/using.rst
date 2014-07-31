@@ -1010,8 +1010,8 @@ confirm the change. This helps to prevent account hijacking.
 API Keys
 ========
 
-API keys are used to authenticate REST calls. You can create more than one
-API key if required. Each API key has an optional description which can help
+API keys are used to authenticate WebService API calls. You can create more than
+one API key if required. Each API key has an optional description which can help
 you record what each key is used for.
 
 On this page, you can unrevoke, revoke and change the description of existing

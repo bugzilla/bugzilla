@@ -37,7 +37,7 @@
       [% ELSE %]
         <span class="ln">[% who.login FILTER email FILTER html %]</span>
       [% END %]
-      [% IF user.id %]
+      [% IF user.id && who.id %]
         <span class="arrow_container"><span class="arrow_down"></span></span>
       [% END %]
     [% END %]

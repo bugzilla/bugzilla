@@ -110,7 +110,7 @@ DateTime::Duration::Fuzzy -- express dates as fuzzy human-friendly strings
 
  use DateTime::Duration::Fuzzy qw(time_ago);
  use DateTime;
- 
+
  my $now = DateTime->new(
     year => 2010, month => 12, day => 12,
     hour => 19, minute => 59,
@@ -121,7 +121,7 @@ DateTime::Duration::Fuzzy -- express dates as fuzzy human-friendly strings
  );
  print time_ago($then, $now);
  # outputs 'several hours ago'
- 
+
  print time_ago($then);
  # $now taken from C<time> function
 

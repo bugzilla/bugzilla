@@ -94,7 +94,7 @@ license at
  <http://www.perlfoundation.org/artistic_license_1_0>.
 
 This module is distributed in the hope that it will be useful, but it is
-provided “as is” and without any warranty; without even the implied warranty
+provided "as is" and without any warranty; without even the implied warranty
 of merchantability or fitness for a particular purpose.
 
 Files with different licenses or copyright holders:

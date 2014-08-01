@@ -1100,29 +1100,30 @@ sub _flag_types {
     return $flag_types;
 }
 
-=head1 SEE ALSO
+=head1 B<Methods in need of POD>
 
 =over
 
-=item B<Bugzilla::FlagType>
+=item update_activity
+
+=item setter_id
+
+=item bug
+
+=item requestee_id
+
+=item DB_COLUMNS
+
+=item set_flag
+
+=item type_id
+
+=item snapshot
+
+=item update_flags
+
+=item update
 
 =back
-
-
-=head1 CONTRIBUTORS
-
-=over
-
-=item Myk Melez <myk@mozilla.org>
-
-=item Jouni Heikniemi <jouni@heikniemi.net>
-
-=item Kevin Benton <kevin.benton@amd.com>
-
-=item Frédéric Buclin <LpSolit@gmail.com>
-
-=back
-
-=cut
 
 1;

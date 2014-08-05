@@ -254,7 +254,7 @@ sub cancelChangeEmail {
         # check to see if it has been altered
         if ($user->login ne $old_email) {
             $user->set_login($old_email);
-            $user->update({ keep_session => 1 });
+            $user->update({ keep_tokens => 1 });
 
             $vars->{'message'} = "email_change_canceled_reinstated";
         } 

@@ -6,7 +6,7 @@
   # defined by the Mozilla Public License, v. 2.0.
   #%]
 
-[% RETURN UNLESS bug.user_story_group.0 %]
+[% RETURN UNLESS bug.user_story_visible.0 %]
 [% can_edit_story = bug.check_can_change_field('cf_user_story', 0, 1) %]
 
 <div class="user_story">

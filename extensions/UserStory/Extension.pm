@@ -21,29 +21,28 @@ use Bugzilla::Extension::BMO::FakeBug;
 use Text::Diff;
 
 BEGIN {
-    *Bugzilla::Bug::user_story_group = \&_bug_user_story_group;
-    *Bugzilla::Extension::BMO::FakeBug::user_story_group = \&_bug_user_story_group;
+    *Bugzilla::Bug::user_story_visible = \&_bug_user_story_visible;
+    *Bugzilla::Extension::BMO::FakeBug::user_story_visible = \&_bug_user_story_visible;
 }
 
-sub _bug_user_story_group {
+sub _bug_user_story_visible {
     my ($self) = @_;
-    if (!exists $self->{user_story_group}) {
+    if (!exists $self->{user_story_visible}) {
+        # Visible by default
+        $self->{user_story_visible} = 1;
         my ($product, $component) = ($self->product, $self->component);
-        my $edit_group = '';
-        my $components = [];
-        if (exists USER_STORY->{$product}) {
-            $components = USER_STORY->{$product}->{components};
-            if (!$component
-                || scalar(@$components) == 0
-                || grep { $_ eq $component } @$components)
+        my $exclude_components = [];
+        if (exists USER_STORY_EXCLUDE->{$product}) {
+            $exclude_components = USER_STORY_EXCLUDE->{$product};
+            if (scalar(@$exclude_components) == 0
+                || ($component && grep { $_ eq $component } @$exclude_components))
             {
-                $edit_group = USER_STORY->{$product}->{group};
+                $self->{user_story_visible} = 0;
             }
         }
-        $self->{user_story_group}      = $edit_group;
-        $self->{user_story_components} = $components;
+        $self->{user_story_exclude_components} = $exclude_components;
     }
-    return ($self->{user_story_group}, $self->{user_story_components});
+    return ($self->{user_story_visible}, $self->{user_story_exclude_components});
 }
 
 # ensure user is allowed to edit the story
@@ -51,11 +50,7 @@ sub bug_check_can_change_field {
     my ($self, $args) = @_;
     my ($bug, $field, $priv_results) = @$args{qw(bug field priv_results)};
     return unless $field eq 'cf_user_story';
-
-    my $user = Bugzilla->user;
-    my ($group) = $bug->user_story_group();
-    $group || return;
-    if (!$user->in_group($group)) {
+    if (!Bugzilla->user->in_group(USER_STORY_GROUP)) {
         push (@$priv_results, PRIVILEGES_REQUIRED_EMPOWERED);
     }
 }

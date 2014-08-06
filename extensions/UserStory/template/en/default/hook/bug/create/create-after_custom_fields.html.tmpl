@@ -6,7 +6,7 @@
   # defined by the Mozilla Public License, v. 2.0.
   #%]
 
-[% RETURN UNLESS default.user_story_group.0 && default.check_can_change_field('cf_user_story', 0, 1) %]
+[% RETURN UNLESS default.user_story_visible.0 && default.check_can_change_field('cf_user_story', 0, 1) %]
 
 </tbody>
 <tbody id="cf_user_story_container" class="expert_fields bz_default_hidden">
@@ -33,15 +33,15 @@
         %]
       </div>
       <script type="text/javascript">
-        var user_story_components = [];
-        [% FOREACH c = default.user_story_group.1 %]
-          user_story_components.push('[% c FILTER js %]');
+        var user_story_exclude_components = [];
+        [% FOREACH c = default.user_story_visible.1 %]
+          user_story_exclude_components.push('[% c FILTER js %]');
         [% END %]
         function toggleUserStory() {
           if (YAHOO.util.Dom.get('user_story').value != '') {
             hideUserStoryEdit();
           }
-          if (user_story_components.length == 0) {
+          if (user_story_exclude_components.length == 0) {
             YAHOO.util.Dom.removeClass('cf_user_story_container', 'bz_default_hidden');
             YAHOO.util.Dom.get('user_story').disabled = false;
             return;
@@ -55,15 +55,15 @@
             index = 0;
           }
           if (index != -1) {
-            for (var i = 0, l = user_story_components.length; i < l; i++) {
-              if (user_story_components[i] == components[index]) {
-                YAHOO.util.Dom.removeClass('cf_user_story_container', 'bz_default_hidden');
-                YAHOO.util.Dom.get('user_story').disabled = false;
+            for (var i = 0, l = user_story_exclude_components.length; i < l; i++) {
+              if (user_story_exclude_components[i] == components[index]) {
+                YAHOO.util.Dom.addClass('cf_user_story_container', 'bz_default_hidden');
+                YAHOO.util.Dom.get('user_story').disabled = true;
                 return;
               }
               else {
-                YAHOO.util.Dom.addClass('cf_user_story_container', 'bz_default_hidden');
-                YAHOO.util.Dom.get('user_story').disabled = true;
+                YAHOO.util.Dom.removeClass('cf_user_story_container', 'bz_default_hidden');
+                YAHOO.util.Dom.get('user_story').disabled = false;
               }
             }
           }

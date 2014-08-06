@@ -12,51 +12,18 @@ use warnings;
 
 use base qw(Exporter);
 
-our @EXPORT = qw( USER_STORY );
+our @EXPORT = qw( USER_STORY_EXCLUDE USER_STORY_GROUP );
 
-use constant USER_STORY => {
-    # note - an empty components array means all components
-    Loop => {
-        group       => 'editbugs',
-        components  => [],
-    },
-    Tracking    => {
-        group       => 'editbugs',
-        components  => [],
-    },
-    Firefox => {
-        group => 'editbugs',
-        components => [
-               "Developer Tools",
-               "Developer Tools: 3D View",
-               "Developer Tools: Canvas Debugger",
-               "Developer Tools: Console",
-               "Developer Tools: Debugger",
-               "Developer Tools: Framework",
-               "Developer Tools: Graphic Commandline and Toolbar",
-               "Developer Tools: Inspector",
-               "Developer Tools: Memory",
-               "Developer Tools: Netmonitor",
-               "Developer Tools: Object Inspector",
-               "Developer Tools: Profiler",
-               "Developer Tools: Responsive Mode",
-               "Developer Tools: Scratchpad",
-               "Developer Tools: Source Editor",
-               "Developer Tools: Style Editor",
-               "Developer Tools: User Stories",
-               "Developer Tools: Web Audio Editor",
-               "Developer Tools: WebGL Shader Editor",
-               "Developer Tools: WebIDE",
-        ],
-    },
-    'Firefox OS' => {
-        group       => 'editbugs',
-        components  => [],
-    },
-    'support.mozilla.org' => {
-        group      => 'editbugs',
-        components => [],
-    }
-};
+# Group allowed to set/edit the user story field
+use constant USER_STORY_GROUP => 'editbugs';
+
+# Exclude showing the user story field for these products/components.
+# Examples:
+# Don't show User Story on any Firefox OS component:
+#   'Firefox OS' => [],
+# Don't show User Story on Developer Tools component, visible on all other
+# Firefox components
+#   'Firefox'    => ['Developer Tools'],
+use constant USER_STORY_EXCLUDE => { };
 
 1;

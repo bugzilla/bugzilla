@@ -596,7 +596,14 @@ sub search {
     my ($data) = $search->data;
 
     # BMO if the caller only wants the count, that's all we need to return
-    return $data if $params->{count_only};
+    if ($params->{count_only}) {
+        if (Bugzilla->usage_mode == USAGE_MODE_XMLRPC) {
+            return $data;
+        }
+        else {
+            return { bug_count => $data };
+        }
+    }
 
     if (!scalar @$data) {
         return { bugs => [] };

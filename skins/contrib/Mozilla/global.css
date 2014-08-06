@@ -495,16 +495,9 @@ table.edit_form hr {
     background: #ffffff;
 }
 
-.bz_comment_table {
-}
-
 .bz_comment {
-    width: 65em;
-    margin: 0 0 20px;
-}
-
-.bz_comment_table .bz_comment {
     width: 65em !important;
+    margin: 0 0 20px;
 }
 
 .bz_comment pre, #comment {

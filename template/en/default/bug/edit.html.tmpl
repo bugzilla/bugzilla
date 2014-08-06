@@ -195,7 +195,7 @@
 
     [% IF user.settings.comment_box_position.value == 'before_comments' %]
       [% PROCESS comment_box %]
-    [% ELSE %]
+    [% ELSIF user.id %]
       [% PROCESS summon_comment_box %]
     [% END %]
   </td>

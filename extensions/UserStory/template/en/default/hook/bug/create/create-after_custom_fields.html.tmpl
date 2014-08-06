@@ -8,6 +8,7 @@
 
 [% RETURN UNLESS default.user_story_group.0 && default.check_can_change_field('cf_user_story', 0, 1) %]
 
+</tbody>
 <tbody id="cf_user_story_container" class="expert_fields bz_default_hidden">
   <tr>
     <th class="field_label">
@@ -37,6 +38,9 @@
           user_story_components.push('[% c FILTER js %]');
         [% END %]
         function toggleUserStory() {
+          if (YAHOO.util.Dom.get('user_story').value != '') {
+            hideUserStoryEdit();
+          }
           if (user_story_components.length == 0) {
             YAHOO.util.Dom.removeClass('cf_user_story_container', 'bz_default_hidden');
             YAHOO.util.Dom.get('user_story').disabled = false;
@@ -64,15 +68,17 @@
             }
           }
         }
-        YAHOO.util.Event.addListener('component', 'change', toggleUserStory);
-        YAHOO.util.Event.addListener('user_story_edit_action', 'click', function() {
+        function hideUserStoryEdit() {
           YAHOO.util.Dom.addClass('user_story_edit', 'bz_default_hidden');
           YAHOO.util.Dom.addClass('user_story_readonly', 'bz_default_hidden');
           YAHOO.util.Dom.removeClass('user_story_edit_container', 'bz_default_hidden');
+        }
+        YAHOO.util.Event.addListener('component', 'change', toggleUserStory);
+        YAHOO.util.Event.addListener('user_story_edit_action', 'click', function() {
+          hideUserStoryEdit();
           YAHOO.util.Dom.get('user_story').focus();
         });
         toggleUserStory();
       </script>
     </td>
   </tr>
-</tbody>

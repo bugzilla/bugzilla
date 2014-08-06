@@ -127,22 +127,7 @@ PostgreSQL server is started when the machine boots.
 Oracle
 ------
 
-Installed Version Test:
-
-.. code-block:: sql
-
-    SELECT * FROM v$version
-
-(you first have to log in into your DB)
-
-If you don't have it and your OS doesn't provide official packages,
-visit `<http://www.oracle.com/>`_. You need Oracle
-version 10.02.0 or higher.
-
-If you install from something other than a packaging/installation
-system, such as .rpm (RPM Package Manager), .deb (Debian Package), .exe
-(Windows Executable), or .msi (Windows Installer), make sure the
-Oracle server is started when the machine boots.
+XXX Need to replace instructions for Oracle
 
 .. _install-webserver:
 

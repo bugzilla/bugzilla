@@ -37,7 +37,8 @@ function bz_findPosX(obj)
 
     if (obj.offsetParent) {
         while (obj) {
-            curleft += obj.offsetLeft;
+            if (getComputedStyle(obj).position != 'relative')
+                curleft += obj.offsetLeft;
             obj = obj.offsetParent;
         }
     }
@@ -61,7 +62,8 @@ function bz_findPosY(obj)
 
     if (obj.offsetParent) {
         while (obj) {
-            curtop += obj.offsetTop;
+            if (getComputedStyle(obj).position != 'relative')
+                curtop += obj.offsetTop;
             obj = obj.offsetParent;
         }
     }
@@ -132,6 +134,7 @@ function bz_overlayBelow(item, parent) {
     item.style.position = 'absolute';
     item.style.left = elemX + "px";
     item.style.top = elemY + elemH + 1 + "px";
+    item.style.zIndex = 999;
 }
 
 /**

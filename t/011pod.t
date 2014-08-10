@@ -32,6 +32,7 @@ use constant SUB_WHITELIST => (
     'Bugzilla::FlagType' => qr/^sqlify_criteria$/,
     'Bugzilla::JobQueue' => qr/(?:^work_once|work_until_done|subprocess_worker)$/,
     'Bugzilla::Search'   => qr/^SPECIAL_PARSING$/,
+    'Bugzilla::Template' => qr/^field_name$/,
 );
 
 # These modules do not need to be documented, generally because they

@@ -17,7 +17,7 @@
   <select name="[% name FILTER html %]">
     <option value="">&lt;none&gt;</option>
     
-    [% FOREACH field = report_columns.keys.sort %]
+    [% FOREACH field = report_columns.keys.sort_by_field_name(field_descs) %]
       [% NEXT IF field == "classification" AND !Param('useclassification') %]
       [% NEXT IF field == "target_milestone" AND !Param('usetargetmilestone') %]
       [% NEXT IF field == "qa_contact" AND !Param('useqacontact') %]

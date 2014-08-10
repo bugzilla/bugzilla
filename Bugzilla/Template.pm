@@ -611,6 +611,21 @@ $Template::Stash::LIST_OPS->{ clone } =
       return [@$list];
   };
 
+# Allow us to sort the list of fields correctly
+$Template::Stash::LIST_OPS->{ sort_by_field_name } =
+    sub {
+        sub field_name {
+            if ($_[0] eq 'noop') {
+                # Sort --- first
+                return '';
+            }
+            # Otherwise sort by field_desc or description
+            return $_[1]{$_[0]} || $_[0];
+        }
+        my ($list, $field_desc) = @_;
+        return [ sort { lc field_name($a, $field_desc) cmp lc field_name($b, $field_desc) } @$list ];
+    };
+
 # Allow us to still get the scalar if we use the list operation ".0" on it,
 # as we often do for defaults in query.cgi and other places.
 $Template::Stash::SCALAR_OPS->{ 0 } = 

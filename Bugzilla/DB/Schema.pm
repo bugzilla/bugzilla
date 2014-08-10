@@ -1616,6 +1616,16 @@ use constant ABSTRACT_SCHEMA => {
         ],
      },
 
+    # BUGMAIL
+    # -------
+
+    mail_staging => {
+        FIELDS => [
+            id      => {TYPE => 'INTSERIAL', PRIMARYKEY => 1, NOTNULL => 1},
+            message => {TYPE => 'LONGBLOB', NOTNULL => 1},
+        ],
+    },
+
     # THESCHWARTZ TABLES
     # ------------------
     # Note: In the standard TheSchwartz schema, most integers are unsigned,

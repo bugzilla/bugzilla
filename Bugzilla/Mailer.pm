@@ -37,7 +37,10 @@ sub MessageToMTA {
     my $method = Bugzilla->params->{'mail_delivery_method'};
     return if $method eq 'None';
 
-    if (Bugzilla->params->{'use_mailer_queue'} and !$send_now) {
+    if (Bugzilla->params->{'use_mailer_queue'}
+        && ! $send_now
+        && ! Bugzilla->dbh->bz_in_transaction()
+    ) {
         Bugzilla->job_queue->insert('send_mail', { msg => $msg });
         return;
     }
@@ -57,6 +60,18 @@ sub MessageToMTA {
         $email = new Email::MIME($msg);
     }
 
+    # If we're called from within a transaction, we don't want to send the
+    # email immediately, in case the transaction is rolled back. Instead we
+    # insert it into the mail_staging table, and bz_commit_transaction calls
+    # send_staged_mail() after the transaction is committed.
+    if (! $send_now && Bugzilla->dbh->bz_in_transaction()) {
+        # The e-mail string may contain tainted values.
+        my $string = $email->as_string;
+        trick_taint($string);
+        Bugzilla->dbh->do("INSERT INTO mail_staging (message) VALUES(?)", undef, $string);
+        return;
+    }
+
     # We add this header to uniquely identify all email that we
     # send as coming from this Bugzilla installation.
     #
@@ -64,7 +79,7 @@ sub MessageToMTA {
     # *always* be the same for this Bugzilla, in every email,
     # even if the admin changes the "ssl_redirect" parameter some day.
     $email->header_set('X-Bugzilla-URL', Bugzilla->params->{'urlbase'});
-    
+
     # We add this header to mark the mail as "auto-generated" and
     # thus to hopefully avoid auto replies.
     $email->header_set('Auto-Submitted', 'auto-generated');
@@ -208,14 +223,50 @@ sub build_thread_marker {
     return $threadingmarker;
 }
 
+sub send_staged_mail {
+    my $dbh = Bugzilla->dbh;
+    my @ids;
+    my $emails
+        = $dbh->selectall_arrayref("SELECT id, message FROM mail_staging");
+
+    foreach my $row (@$emails) {
+        MessageToMTA($row->[1]);
+        push(@ids, $row->[0]);
+    }
+
+    if (@ids) {
+        $dbh->do("DELETE FROM mail_staging WHERE " . $dbh->sql_in('id', \@ids));
+    }
+}
+
 1;
 
-=head1 B<Methods in need of POD>
+__END__
+
+=head1 NAME
+
+Bugzilla::Mailer - Provides methods for sending email
+
+=head1 METHODS
 
 =over
 
-=item build_thread_marker
+=item C<MessageToMTA>
 
-=item MessageToMTA
+Sends the passed message to the mail transfer agent.
+
+The actual behaviour depends on a number of factors: if called from within a
+database transaction, the message will be staged and sent when the transaction
+is committed.  If email queueing is enabled, the message will be sent to
+TheSchwartz job queue where it will be processed by the jobqueue daemon, else
+the message is sent immediately.
+
+=item C<build_thread_marker>
+
+Builds header suitable for use as a threading marker in email notifications.
+
+=item C<send_staged_mail>
+
+Sends all staged messages -- called after a database transaction is committed.
 
 =back

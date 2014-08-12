@@ -1,0 +1,207 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% PROCESS global/variables.none.tmpl %]
+
+[% inline_style = BLOCK %]
+#fxos_mcts_waiver_form {
+  padding: 10px;
+}
+#fxos_mcts_waiver_form .required:after {
+  content: " *";
+  color: red;
+}
+#fxos_mcts_waiver_form .field_label {
+  font-weight: bold;
+}
+#fxos_mcts_waiver_form .field_desc {
+  padding-bottom: 3px;
+}
+#fxos_mcts_waiver_form .field_desc,
+#fxos_mcts_waiver_form .head_desc {
+  width: 600px;
+  word-wrap: normal;
+}
+#fxos_mcts_waiver_form .head_desc {
+  padding-top: 5px;
+  padding-bottom: 12px;
+}
+#fxos_mcts_waiver_form .form_section {
+  margin-bottom: 10px;
+}
+#fxos_mcts_waiver_form textarea {
+  font-family: inherit;
+  font-size: inherit;
+}
+#fxos_mcts_waiver_form em {
+  font-size: 1em;
+}
+[% END %]
+
+[% inline_javascript = BLOCK %]
+function validateAndSubmit() {
+  'use strict';
+  var alert_text = '';
+  var requiredLabels = YAHOO.util.Selector.query('label.required');
+  if (requiredLabels) {
+    requiredLabels.forEach(function (label) {
+      var name = label.getAttribute('for');
+      var ids = YAHOO.util.Selector.query(
+        '#fxos_mcts_waiver_form *[name="' + name + '"]'
+      ).map(function (e) {
+        return e.id
+      });
+
+      if (ids && ids[0]) {
+        if (!isFilledOut(ids[0])) {
+          var desc = label.textContent || name;
+          alert_text +=
+            "Please enter a value for " +
+            desc.replace(/[\r\n]+/, "").replace(/\s+/g, " ") +
+            "\n";
+        }
+      }
+    });
+  }
+
+  if (alert_text != '') {
+    alert(alert_text);
+    return false;
+  }
+
+  var short_desc = document.getElementById('short_desc');
+  var company_name = document.getElementById('company_name').value;
+  short_desc.value = "MCTS Waiver for " + company_name;
+
+  return true;
+}
+[% END %]
+
+[% PROCESS global/header.html.tmpl
+   title = "Firefox OS MCTS Waiver Form"
+   style = inline_style
+   javascript = inline_javascript
+   javascript_urls = [ 'extensions/BMO/web/js/form_validate.js',
+                       'js/field.js', 'js/util.js' ]
+%]
+
+[% USE Bugzilla %]
+[% cgi = Bugzilla.cgi %]
+
+<form id="fxos_mcts_waiver_form" method="post" action="post_bug.cgi"
+  enctype="multipart/form-data" onSubmit="return validateAndSubmit();">
+  <input type="hidden" name="format" value="fxos-mcts-waiver">
+  <input type="hidden" name="product" value="Firefox OS">
+  <input type="hidden" name="component" value="MCTS Waiver Request">
+  <input type="hidden" name="rep_platform" value="All">
+  <input type="hidden" name="op_sys" value="Other">
+  <input type="hidden" name="version" value="unspecified">
+  <input type="hidden" name="bug_severity" id="bug_severity" value="normal">
+  <input type="hidden" name="token" value="[% token FILTER html %]">
+  <input type="hidden" name="groups" value="mozilla-employee-confidential">
+  <input type="hidden" id="short_desc" name="short_desc" value="">
+  <input type="hidden" name="cf_user_story" value="Engineering Analysis:
+
+
+Technical Account Manager Recommendation:
+
+
+">
+
+  <div class="head_desc">
+    Welcome to the [% title FILTER html %]!
+  </div>
+
+  <div class="form_section">
+    <label for="company_name" class="field_label required">Company Name</label>
+    <div class="field_desc">
+      Please enter the legal name of the company requesting the Waiver
+    </div>
+    <input type="text" name="company_name" id="company_name" size="80">
+  </div>
+
+  <div class="form_section">
+    <label for="device_desc" class="field_label required">Device Description</label>
+    <div class="field_desc">
+      Please enter the Make, Model, Chipset, screensize and type the device associated with the waiver request. For
+      example type may be mobile phone, tablet, dongle, tv, etc.
+    </div>
+    <textarea id="device_desc" name="device_desc" cols="80" rows="5"></textarea>
+  </div>
+
+  <div class="form_section">
+    <label for="ffos_release" class="field_label required">FFOS Release</label>
+    <div class="field_desc">
+      Please Enter the Release this Waiver applies to for this partner.
+    </div>
+    <input type="text" name="ffos_release" id="ffos_release" size="80">
+  </div>
+
+  <div class="form_section">
+    <label for="branding_tier" class="field_label required">Branding Tier</label>
+    <div class="field_desc">
+      Please Enter the Branding Tier associated with the Waiver Request (Powered by Firefox OS or Co-Branded).
+    </div>
+    <select name="branding_tier" id="branding_tier">
+        <option value="Firefox OS Inside">Firefox OS Inside</option>
+        <option value="Powered by Firefox OS">Powered by Firefox OS</option>
+        <option value="Firefox OS Co-branded">Firefox OS Co-branded</option>
+    </select>
+  </div>
+
+  <div class="form_section">
+    <label for="dist_countries" class="field_label required">Distribution Countries</label>
+    <div class="field_desc">
+      Please include list of countries where the device is planned to be distributed.
+    </div>
+    <textarea id="dist_countries" name="dist_countries" cols="80" rows="5"></textarea>
+  </div>
+
+  <div class="form_section">
+    <label for="dist_channel" class="field_label required">Distribution Channel</label>
+    <div class="field_desc">
+      Please identify how this device will be sold.  For example, Operator, Retail.
+    </div>
+    <input type="text" name="dist_channel" id="dist_channel" size="80">
+  </div>
+
+  <div class="form_section">
+    <label for="reason" class="field_label required">Reason for Waiver Request</label>
+    <div class="field_desc">
+      Please describe which test cases, Branding Guidelines and/or Requirements the Partner is request waived.
+    </div>
+    <textarea id="reason" name="reason" cols="80" rows="5"></textarea>
+  </div>
+
+  <div class="form_section">
+    <label for="rationale" class="field_label required">Rationale for Granting Waiver Request</label>
+    <div class="field_desc">
+      Please document why the Partner thinks a waiver should be granted.
+    </div>
+    <textarea id="rationale" name="rationale" cols="80" rows="5"></textarea>
+  </div>
+
+  <div class="form_section">
+    <label for="impact" class="field_label required">Impact Analysis</label>
+    <div class="field_desc">
+      Please provide an assessment of the impact of granting this waiver in general business terms (this should include
+      broad perspective of potential issues such as brand consistency, impacts on reporting &amp; tracking capabilities,
+      help desk/support issues, etc.)
+    </div>
+    <textarea id="impact" name="impact" cols="80" rows="5"></textarea>
+  </div>
+
+  <input type="submit" id="commit" value="Submit">
+
+  <p>
+    [ <span class="required_star">*</span> <span class="required_explanation">
+      Required Field</span> ]
+  </p>
+</form>
+
+[% PROCESS global/footer.html.tmpl %]

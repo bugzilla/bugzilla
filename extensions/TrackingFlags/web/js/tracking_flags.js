@@ -42,11 +42,35 @@ function show_tracking_flags(flag_type) {
 
 function tracking_flag_change(e) {
     var value = e.value;
-    if (!TrackingFlags.comments[e.name])
+    var prefill;
+    if (TrackingFlags.comments[e.name])
+        prefill = TrackingFlags.comments[e.name][e.value];
+    if (!prefill) {
+        var cr = document.getElementById('cr_' + e.id);
+        if (cr)
+            cr.parentElement.removeChild(cr);
         return;
-    var prefill = TrackingFlags.comments[e.name][e.value];
-    if (!prefill)
-        return;
+    }
+    if (!document.getElementById('cr_' + e.id)) {
+        // create "comment required"
+        var span = document.createElement('span');
+        span.id = 'cr_' + e.id;
+        span.appendChild(document.createTextNode('('));
+        var a = document.createElement('a');
+        a.appendChild(document.createTextNode('comment required'));
+        a.href = '#';
+        a.onclick = function() {
+            var c = document.getElementById('comment');
+            c.focus();
+            c.select();
+            document.getElementById('add_comment').scrollIntoView();
+            return false;
+        };
+        span.appendChild(a);
+        span.appendChild(document.createTextNode(')'));
+        e.parentNode.appendChild(span);
+    }
+    // prefill comment
     var commentEl = document.getElementById('comment');
     if (!commentEl)
         return;

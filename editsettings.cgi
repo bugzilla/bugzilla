@@ -62,6 +62,7 @@ if ($action eq 'update') {
     }
     $vars->{'message'} = 'default_settings_updated';
     $vars->{'changes_saved'} = $changed;
+    Bugzilla->memcached->clear_config();
     delete_token($token);
 }
 

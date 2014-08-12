@@ -389,6 +389,8 @@ objects.
 
 =item L<Bugzilla::WebService::FlagType>
 
+=item L<Bugzilla::WebService::Component>
+
 =item L<Bugzilla::WebService::Group>
 
 =item L<Bugzilla::WebService::Product>

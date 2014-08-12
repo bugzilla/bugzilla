@@ -15,8 +15,12 @@ use parent qw(Exporter);
 
 
 # Module stuff
-@Bugzilla::User::Setting::EXPORT = qw(get_all_settings get_defaults
-     add_setting);
+@Bugzilla::User::Setting::EXPORT = qw(
+    get_all_settings
+    get_defaults
+    add_setting
+    clear_settings_cache
+);
 
 use Bugzilla::Error;
 use Bugzilla::Util qw(trick_taint get_text);
@@ -159,15 +163,20 @@ sub get_all_settings {
     my $settings = {};
     my $dbh = Bugzilla->dbh;
 
-    my $rows = $dbh->selectall_arrayref(
-           q{SELECT name, default_value, is_enabled, setting_value, subclass
-               FROM setting
-          LEFT JOIN profile_setting
-                 ON setting.name = profile_setting.setting_name
-                AND profile_setting.user_id = ?}, undef, ($user_id));
+    my $cache_key = "user_settings.$user_id";
+    my $rows = Bugzilla->memcached->get_config({ key => $cache_key });
+    if (!$rows) {
+        $rows = $dbh->selectall_arrayref(
+            q{SELECT name, default_value, is_enabled, setting_value, subclass
+                FROM setting
+           LEFT JOIN profile_setting
+                     ON setting.name = profile_setting.setting_name
+                     AND profile_setting.user_id = ?}, undef, ($user_id));
+        Bugzilla->memcached->set_config({ key => $cache_key, data => $rows });
+    }
 
     foreach my $row (@$rows) {
-        my ($name, $default_value, $is_enabled, $value, $subclass) = @$row; 
+        my ($name, $default_value, $is_enabled, $value, $subclass) = @$row;
 
         my $is_default;
 
@@ -179,11 +188,16 @@ sub get_all_settings {
         }
 
         $settings->{$name} = new Bugzilla::User::Setting(
-           $name, $user_id, $is_enabled, 
+           $name, $user_id, $is_enabled,
            $default_value, $value, $is_default, $subclass);
     }
 
     return $settings;
+}
+
+sub clear_settings_cache {
+    my ($user_id) = @_;
+    Bugzilla->memcached->clear_config({ key => "user_settings.$user_id" });
 }
 
 sub get_defaults {
@@ -366,6 +380,13 @@ Description: Sets the global default for a given setting. Also sets
 Params:      C<$setting_name> - string - the name of the setting
              C<$default_value> - string - the new default value for this setting
              C<$is_enabled> - boolean - if false, all users must use the global default
+Returns:     nothing
+
+=item C<clear_settings_cache($user_id)>
+
+Description: Clears cached settings data for the specified user.  Must be
+             called after updating any user's setting.
+Params:      C<$user_id> - integer - the user id.
 Returns:     nothing
 
 =begin private

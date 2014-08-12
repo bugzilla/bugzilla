@@ -19,6 +19,7 @@ use Bugzilla::Util;
 use Bugzilla::Error;
 use Bugzilla::User;
 use Bugzilla::User::APIKey;
+use Bugzilla::User::Setting qw(clear_settings_cache);
 use Bugzilla::Token;
 
 my $template = Bugzilla->template;
@@ -170,6 +171,7 @@ sub SaveSettings {
         }
     }
     $vars->{'settings'} = $user->settings(1);
+    clear_settings_cache($user->id);
 }
 
 sub DoEmail {

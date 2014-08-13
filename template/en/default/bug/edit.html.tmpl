@@ -66,9 +66,13 @@
         <table>
           [%# *** ID, product, component, status, resolution, Hardware, and  OS *** %]
           [% PROCESS section_status %]
-          
+
           [% PROCESS section_spacer %]
-          
+
+          [% PROCESS section_aliases %]
+
+          [% PROCESS section_spacer %]
+
           [% PROCESS section_details1 %]
           
           [% PROCESS section_spacer %]
@@ -173,61 +177,37 @@
 
 [% BLOCK section_title %]
   [%# That's the main table, which contains all editable fields. %]
-  <div class="bz_alias_short_desc_container edit_form">
+  <div class="bz_short_desc_container edit_form">
       [% PROCESS commit_button id="_top"%]
      <a href="show_bug.cgi?id=[% bug.bug_id %]">
         [%-# %]<b>[% terms.Bug %]&nbsp;[% bug.bug_id FILTER html %]</b>
-     [%-# %]</a> <span id="summary_alias_container" class="bz_default_hidden"> 
-      [% IF bug.alias != "" %]
-        (<span id="alias_nonedit_display">[% bug.alias FILTER html %]</span>) 
+     [%-# %]</a> <span id="summary_container" class="bz_default_hidden">
+      [% IF bug.alias.size > 0 %]
+        (<span id="alias_nonedit_display">[% bug.alias.join(', ') FILTER html %]</span>)
       [% END %]
       - <span id="short_desc_nonedit_display">[% bug.short_desc FILTER quoteUrls(bug) %]</span>
-      [% IF bug.check_can_change_field('short_desc', 0, 1) || 
-            bug.check_can_change_field('alias', 0, 1)  %]
-        <small class="editme">(<a href="#" id="editme_action">edit</a>)</small>
+      [% IF bug.check_can_change_field('short_desc', 0, 1) %]
+        <small>(<a href="#" id="summary_edit_action">edit</a>)</small>
       [% END %]
      </span>
-  
-       
-    <div id="summary_alias_input">
-      <table id="summary"> 
-        <tr>
-          [% IF bug.check_can_change_field('alias', 0, 1) %]      
-            [% INCLUDE "bug/field-label.html.tmpl"
-               field = bug_fields.alias
-               editable = 1
-            %]
-            <td>
-          [% ELSIF bug.alias %]
-            <td colspan="2">(
-          [% ELSE %]
-            <td colspan="2">
-          [% END %]
-          [% PROCESS input inputname => "alias" 
-                     size => "20" 
-                     maxlength => "20"  
-                     no_td => 1 
-                     %][% ")" IF NOT bug.check_can_change_field('alias', 0, 1) 
-                                  && bug.alias %]
-          </td>
-        </tr>
-        [%# *** Summary *** %]
-        <tr>
-          [% INCLUDE "bug/field-label.html.tmpl"
-            field = bug_fields.short_desc
-            editable = 1
-            accesskey = "s"
-          %]
-          <td>
-            [% PROCESS input inputname => "short_desc" size => "80" colspan => 2
-                             maxlength => 255 spellcheck => "true" no_td => 1 %]
-          </td>
-        </tr>
-      </table>
+
+    <div id="summary_input">
+      [% INCLUDE "bug/field-label.html.tmpl"
+        field = bug_fields.short_desc
+        editable = 1
+        accesskey = "s"
+        tag_name = 'span'
+      %]
+      [% PROCESS input inputname => "short_desc" size => "80"
+                       maxlength => 255 spellcheck => "true" no_td => 1 %]
     </div>
   </div>
   <script type="text/javascript">
-    hideAliasAndSummary('[% bug.short_desc FILTER js %]', '[% bug.alias FILTER js %]');
+    hideEditableField('summary_container',
+                      'summary_input',
+                      'summary_edit_action',
+                      'short_desc',
+                      '[% bug.short_desc FILTER js %]' );
   </script>
 [% END %]
 
@@ -865,6 +845,56 @@
       %]
     </tr>
   [% END %]
+[% END %]
+
+[% BLOCK section_aliases %]
+  <tr>
+    [% INCLUDE "bug/field-label.html.tmpl"
+       field = bug_fields.alias, editable = 1
+    %]
+    <td>
+      [% IF bug.alias.size %]
+        [% bug.alias.join(', ') FILTER html %]
+      [% ELSE %]
+        None
+      [% END %]
+      [% IF bug.check_can_change_field('alias', 0, 1) %]
+        <span id="alias_edit_area_showhide_container" class="bz_default_hidden">
+          (<a href="#" id="alias_edit_area_showhide">edit</a>)
+        </span>
+        <br>
+        <div id="alias_edit_area">
+          <div>
+            <div>
+              <label for="aliases">
+                <b>Add</b>
+              </label>
+            </div>
+              <input name="newalias" id="newalias" size="20">
+          </div>
+          [% IF bug.alias.size %]
+            <select id="alias" name="alias" multiple="multiple" size="5">
+              [% FOREACH a = bug.alias %]
+                <option value="[% a FILTER html %]">[% a FILTER html %]</option>
+              [% END %]
+            </select>
+            <br>
+
+            <input type="checkbox" id="removealias" name="removealias">
+            <label for="removealias">Remove selected aliases</label>
+
+          [% END %]
+        </div>
+        <script type="text/javascript">
+          hideEditableField( 'alias_edit_area_showhide_container',
+                             'alias_edit_area',
+                             'alias_edit_area_showhide',
+                             '',
+                             '');
+        </script>
+      [% END %]
+    </td>
+  </tr>
 [% END %]
 
 [%############################################################################%]

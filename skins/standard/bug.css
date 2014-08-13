@@ -114,7 +114,7 @@ table#attachment_flags th, table#attachment_flags td {
 
 /* show_bug.cgi (start) */
 
-.bz_alias_short_desc_container {
+.bz_short_desc_container {
     margin: 8px 0;
     padding: 0.3em;
     background-color: rgb(208, 208, 208);
@@ -231,7 +231,7 @@ table#flags {
 .text_input, .bz_userfield, #keywords_container, #tag_container {
     width: 100%;
 }
-.bz_bug .bz_alias_short_desc_container {
+.bz_bug .bz_short_desc_container {
     width: inherit;
 }
 

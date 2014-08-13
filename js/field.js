@@ -295,7 +295,7 @@ function checkForChangedFieldValues(e, ContainerInputArray ) {
     if ( el ) {
         if ( !ContainerInputArray[4]
              && (el.value != ContainerInputArray[3]
-                 || (el.value == "" && el.id != "alias" && el.id != "qa_contact")) )
+                 || (el.value == "" && el.id != "qa_contact")) )
         {
             unhide = true;
         }
@@ -314,17 +314,6 @@ function checkForChangedFieldValues(e, ContainerInputArray ) {
         YAHOO.util.Dom.removeClass(ContainerInputArray[1], 'bz_default_hidden');
     }
 
-}
-
-function hideAliasAndSummary(short_desc_value, alias_value) {
-    // check the short desc field
-    hideEditableField( 'summary_alias_container','summary_alias_input',
-                       'editme_action','short_desc', short_desc_value);  
-    // check that the alias hasn't changed
-    var bz_alias_check_array = new Array('summary_alias_container',
-                                     'summary_alias_input', 'alias', alias_value);
-    YAHOO.util.Event.addListener( window, 'load', checkForChangedFieldValues,
-                                 bz_alias_check_array);
 }
 
 function showPeopleOnChange( field_id_list ) {

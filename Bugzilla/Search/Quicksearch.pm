@@ -322,7 +322,7 @@ sub _handle_alias {
         my $alias = $1;
         # We use this direct SQL because we want quicksearch to be VERY fast.
         my $bug_id = Bugzilla->dbh->selectrow_array(
-            q{SELECT bug_id FROM bugs WHERE alias = ?}, undef, $alias);
+            q{SELECT bug_id FROM bugs_aliases WHERE alias = ?}, undef, $alias);
         # If the user cannot see the bug or if we are using a webservice,
         # do not resolve its alias.
         if ($bug_id && Bugzilla->user->can_see_bug($bug_id) && !i_am_webservice()) {

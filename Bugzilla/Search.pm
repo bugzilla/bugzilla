@@ -265,7 +265,7 @@ use constant OPERATOR_FIELD_OVERRIDE => {
     },
 
     # General Bug Fields
-    alias        => { _non_changed => \&_nullable },
+    alias        => { _non_changed => \&_alias_nonchanged },
     'attach_data.thedata' => MULTI_SELECT_OVERRIDE,
     # We check all attachment fields against this.
     attachments  => MULTI_SELECT_OVERRIDE,
@@ -456,6 +456,10 @@ sub COLUMN_JOINS {
                      . ' FROM longdescs GROUP BY bug_id)',
             join  => 'INNER',
         },
+        alias => {
+            table => 'bugs_aliases',
+            as => 'map_alias',
+        },
         assigned_to => {
             from  => 'assigned_to',
             to    => 'userid',
@@ -586,6 +590,7 @@ sub COLUMNS {
     # like "bugs.bug_id".
     my $total_time = "(map_actual_time.total + bugs.remaining_time)";
     my %special_sql = (
+        alias       => $dbh->sql_group_concat('DISTINCT map_alias.alias'),
         deadline    => $dbh->sql_date_format('bugs.deadline', '%Y-%m-%d'),
         actual_time => 'map_actual_time.total',
 
@@ -2725,6 +2730,15 @@ sub _product_nonchanged {
     my $term = $args->{term};
     $args->{term} = build_subselect("bugs.product_id",
         "products.id", "products", $term);
+}
+
+sub _alias_nonchanged {
+    my ($self, $args) = @_;
+
+    $args->{full_field} = "bugs_aliases.alias";
+    $self->_do_operator_function($args);
+    $args->{term} = build_subselect("bugs.bug_id",
+        "bugs_aliases.bug_id", "bugs_aliases", $args->{term});
 }
 
 sub _classification_nonchanged {

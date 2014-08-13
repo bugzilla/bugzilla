@@ -289,8 +289,17 @@ if (defined $cgi->param('newcc')
 if (defined $cgi->param('id')) {
     # Since aliases are unique (like bug numbers), they can only be changed
     # for one bug at a time.
-    if (defined $cgi->param('alias')) {
-        $set_all_fields{alias} = $cgi->param('alias');
+    if (defined $cgi->param('newalias') || defined $cgi->param('removealias')) {
+        my @alias_add = split /[, ]+/, $cgi->param('newalias');
+
+        # We came from bug_form which uses a select box to determine what
+        # aliases need to be removed...
+        my @alias_remove = ();
+        if ($cgi->param('removealias') && $cgi->param('alias')) {
+            @alias_remove = $cgi->param('alias');
+        }
+
+        $set_all_fields{alias} = { add => \@alias_add, remove => \@alias_remove };
     }
 }
 

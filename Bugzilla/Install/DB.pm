@@ -727,6 +727,9 @@ sub update_table_definitions {
     # 2014-07-27 LpSolit@gmail.com - Bug 1044561
     _fix_user_api_keys_indexes();
 
+    # 2014-08-11 sgreen@redhat.com - Bug 1012506
+     _update_alias();
+
     ################################################################
     # New --TABLE-- changes should go *** A B O V E *** this point #
     ################################################################
@@ -3897,6 +3900,19 @@ sub _fix_user_api_keys_indexes {
         $dbh->bz_drop_index('user_api_keys', 'user_api_keys_user_id');
         $dbh->bz_add_index('user_api_keys', 'user_api_keys_user_id_idx', ['user_id']);
     }
+}
+
+sub _update_alias {
+    my $dbh = Bugzilla->dbh;
+    return unless $dbh->bz_column_info('bugs', 'alias');
+
+    # We need to move the aliases from the bugs table to the bugs_aliases table
+    $dbh->do(q{
+        INSERT INTO bugs_aliases (bug_id, alias)
+        SELECT bug_id, alias FROM bugs WHERE alias IS NOT NULL
+    });
+
+    $dbh->bz_drop_column('bugs', 'alias');
 }
 
 1;

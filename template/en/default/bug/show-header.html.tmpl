@@ -13,7 +13,7 @@
   # be overridden by the calling templates.
   #%]
 
-[% filtered_alias = bug.alias FILTER html %]
+[% filtered_alias = bug.alias.join(', ') FILTER html %]
 [% filtered_desc = bug.short_desc FILTER html %]
 [% filtered_timestamp = bug.delta_ts FILTER time %]
 
@@ -34,7 +34,7 @@
   [% header_addl_info = "Last modified: $filtered_timestamp" %]
   [% unfiltered_title = "$bug.bug_id – " %]
   [% IF bug.alias != '' %]
-    [% unfiltered_title = unfiltered_title _ "($bug.alias) " %]
+    [% unfiltered_title = unfiltered_title _ "(" _ bug.alias.join(', ') _ ") " %]
   [% END %]
   [% unfiltered_title = unfiltered_title _ bug.short_desc %]
   [% javascript =  BLOCK %]

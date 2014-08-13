@@ -278,11 +278,8 @@ use constant ABSTRACT_SCHEMA => {
             remaining_time      => {TYPE => 'decimal(7,2)',
                                     NOTNULL => 1, DEFAULT => '0'},
             deadline            => {TYPE => 'DATETIME'},
-            alias               => {TYPE => 'varchar(20)'},
         ],
         INDEXES => [
-            bugs_alias_idx            => {FIELDS => ['alias'],
-                                          TYPE => 'UNIQUE'},
             bugs_assigned_to_idx      => ['assigned_to'],
             bugs_creation_ts_idx      => ['creation_ts'],
             bugs_delta_ts_idx         => ['delta_ts'],
@@ -356,6 +353,21 @@ use constant ABSTRACT_SCHEMA => {
             bugs_activity_fieldid_idx => ['fieldid'],
             bugs_activity_added_idx   => ['added'],
             bugs_activity_removed_idx => ['removed'], 
+        ],
+    },
+
+    bugs_aliases => {
+        FIELDS => [
+            alias     => {TYPE => 'varchar(40)', NOTNULL => 1},
+            bug_id    => {TYPE => 'INT3',
+                          REFERENCES => {TABLE  => 'bugs',
+                                         COLUMN => 'bug_id',
+                                         DELETE => 'CASCADE'}},
+        ],
+        INDEXES => [
+            bugs_aliases_bug_id_idx => ['bug_id'],
+            bugs_aliases_alias_idx  => {FIELDS => ['alias'],
+                                        TYPE => 'UNIQUE'},
         ],
     },
 

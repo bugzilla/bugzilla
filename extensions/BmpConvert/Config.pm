@@ -9,6 +9,8 @@ package Bugzilla::Extension::BmpConvert;
 
 use 5.10.1;
 use strict;
+use warnings;
+
 use constant NAME => 'BmpConvert';
 use constant REQUIRED_MODULES => [
   {

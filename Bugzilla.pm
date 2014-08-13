@@ -9,6 +9,7 @@ package Bugzilla;
 
 use 5.10.1;
 use strict;
+use warnings;
 
 # We want any compile errors to get to the browser, if possible.
 BEGIN {

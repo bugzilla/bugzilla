@@ -10,7 +10,9 @@
 #Bugzilla Test 3#
 ###Safesystem####
 
+use 5.10.1;
 use strict;
+use warnings;
 
 use lib 't';
 
@@ -22,7 +24,7 @@ use Test::More tests => scalar(@Support::Files::testitems);
 # This will handle verbosity for us automatically.
 my $fh;
 {
-    local $^W = 0;  # Don't complain about non-existent filehandles
+    no warnings qw(unopened);  # Don't complain about non-existent filehandles
     if (-e \*Test::More::TESTOUT) {
         $fh = \*Test::More::TESTOUT;
     } elsif (-e \*Test::Builder::TESTOUT) {

@@ -9,6 +9,7 @@ package Bugzilla::Send::Sendmail;
 
 use 5.10.1;
 use strict;
+use warnings;
 
 use parent qw(Email::Send::Sendmail);
 

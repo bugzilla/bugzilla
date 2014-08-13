@@ -13,6 +13,7 @@ package Bugzilla::JobQueue::Runner;
 
 use 5.10.1;
 use strict;
+use warnings;
 
 use Cwd qw(abs_path);
 use File::Basename;

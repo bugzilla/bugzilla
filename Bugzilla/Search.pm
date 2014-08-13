@@ -9,6 +9,7 @@ package Bugzilla::Search;
 
 use 5.10.1;
 use strict;
+use warnings;
 
 use parent qw(Exporter);
 @Bugzilla::Search::EXPORT = qw(

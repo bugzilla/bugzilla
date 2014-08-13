@@ -9,6 +9,7 @@ package Bugzilla::Search::Quicksearch;
 
 use 5.10.1;
 use strict;
+use warnings;
 
 use Bugzilla::Error;
 use Bugzilla::Constants;

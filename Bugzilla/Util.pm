@@ -9,6 +9,7 @@ package Bugzilla::Util;
 
 use 5.10.1;
 use strict;
+use warnings;
 
 use parent qw(Exporter);
 @Bugzilla::Util::EXPORT = qw(trick_taint detaint_natural detaint_signed

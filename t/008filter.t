@@ -15,10 +15,11 @@
 
 # Sample exploit code: '>"><script>alert('Oh dear...')</script>
 
+use 5.10.1;
 use strict;
-use lib qw(. lib t);
+use warnings;
 
-use vars qw(%safe);
+use lib qw(. lib t);
 
 use Bugzilla::Constants;
 use Support::Templates;
@@ -30,6 +31,7 @@ use Cwd;
 my $oldrecsep = $/;
 my $topdir = cwd;
 $/ = undef;
+our %safe;
 
 foreach my $path (@Support::Templates::include_paths) {
     $path =~ s|\\|/|g if ON_WINDOWS;  # convert \ to / in path if on windows
@@ -84,9 +86,9 @@ foreach my $path (@Support::Templates::include_paths) {
             ok(1, "($lang/$flavor) $file is filter-safe");
             next;
         }
-        
+
         # Read the entire file into a string
-        open (FILE, "<$file") || die "Can't open $file: $!\n";    
+        open (FILE, "<$file") || die "Can't open $file: $!\n";
         my $slurp = <FILE>;
         close (FILE);
 

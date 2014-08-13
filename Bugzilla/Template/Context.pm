@@ -10,6 +10,7 @@ package Bugzilla::Template::Context;
 
 use 5.10.1;
 use strict;
+use warnings;
 
 use parent qw(Template::Context);
 

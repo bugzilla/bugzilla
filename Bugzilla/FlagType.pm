@@ -9,6 +9,7 @@ package Bugzilla::FlagType;
 
 use 5.10.1;
 use strict;
+use warnings;
 
 =head1 NAME
 

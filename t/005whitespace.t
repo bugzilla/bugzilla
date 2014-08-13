@@ -9,7 +9,9 @@
 #Bugzilla Test 5#
 #####no_tabs#####
 
+use 5.10.1;
 use strict;
+use warnings;
 
 use lib 't';
 

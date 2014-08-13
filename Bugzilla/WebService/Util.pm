@@ -9,6 +9,7 @@ package Bugzilla::WebService::Util;
 
 use 5.10.1;
 use strict;
+use warnings;
 
 use Bugzilla::Flag;
 use Bugzilla::FlagType;

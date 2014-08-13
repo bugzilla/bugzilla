@@ -9,6 +9,7 @@ package Bugzilla::Attachment::PatchReader;
 
 use 5.10.1;
 use strict;
+use warnings;
 
 use Config;
 use IO::Select;

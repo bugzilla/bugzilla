@@ -9,6 +9,7 @@ package Bugzilla::Job::BugMail;
 
 use 5.10.1;
 use strict;
+use warnings;
 
 use Bugzilla::BugMail;
 BEGIN { eval "use parent qw(Bugzilla::Job::Mailer)"; }

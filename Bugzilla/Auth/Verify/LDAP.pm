@@ -9,6 +9,7 @@ package Bugzilla::Auth::Verify::LDAP;
 
 use 5.10.1;
 use strict;
+use warnings;
 
 use base qw(Bugzilla::Auth::Verify);
 use fields qw(

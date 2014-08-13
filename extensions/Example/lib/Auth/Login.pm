@@ -9,6 +9,8 @@ package Bugzilla::Extension::Example::Auth::Login;
 
 use 5.10.1;
 use strict;
+use warnings;
+
 use parent qw(Bugzilla::Auth::Login);
 use constant user_can_create_account => 0;
 use Bugzilla::Constants;

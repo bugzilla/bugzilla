@@ -9,6 +9,8 @@ package Bugzilla::Auth;
 
 use 5.10.1;
 use strict;
+use warnings;
+
 use fields qw(
     _info_getter
     _verifier

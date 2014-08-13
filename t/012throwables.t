@@ -11,7 +11,10 @@
 #Bugzilla Test 12#
 ######Errors######
 
+use 5.10.1;
 use strict;
+use warnings;
+
 use lib qw(. lib t);
 
 use Bugzilla::Constants;

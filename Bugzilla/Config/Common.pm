@@ -9,6 +9,7 @@ package Bugzilla::Config::Common;
 
 use 5.10.1;
 use strict;
+use warnings;
 
 use Email::Address;
 use Socket;

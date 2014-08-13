@@ -1,4 +1,4 @@
-#!/usr/bin/perl -wT
+#!/usr/bin/perl -T
 # This Source Code Form is subject to the terms of the Mozilla Public
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
@@ -6,20 +6,10 @@
 # This Source Code Form is "Incompatible With Secondary Licenses", as
 # defined by the Mozilla Public License, v. 2.0.
 
-# Implementation notes for this file:
-#
-# 1) the 'id' form parameter is validated early on, and if it is not a valid
-# bugid an error will be reported, so it is OK for later code to simply check
-# for a defined form 'id' value, and it can assume a valid bugid.
-#
-# 2) If the 'id' form parameter is not defined (after the initial validation),
-# then we are processing multiple bugs, and @idlist will contain the ids.
-#
-# 3) If we are processing just the one id, then it is stored in @idlist for
-# later processing.
-
 use 5.10.1;
 use strict;
+use warnings;
+
 use lib qw(. lib);
 
 use Bugzilla;

@@ -9,6 +9,7 @@ package Bugzilla::Hook;
 
 use 5.10.1;
 use strict;
+use warnings;
 
 sub process {
     my ($name, $args) = @_;

@@ -17,6 +17,7 @@ package Bugzilla::Install::Localconfig;
 
 use 5.10.1;
 use strict;
+use warnings;
 
 use Bugzilla::Constants;
 use Bugzilla::Install::Util qw(bin_loc install_string);

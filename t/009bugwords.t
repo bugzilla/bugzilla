@@ -15,7 +15,9 @@
 # "[% terms.bug %]". This test makes sure the relevant words aren't used
 # bare.
 
+use 5.10.1;
 use strict;
+use warnings;
 
 use lib 't';
 

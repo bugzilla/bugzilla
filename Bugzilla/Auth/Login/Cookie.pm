@@ -9,6 +9,7 @@ package Bugzilla::Auth::Login::Cookie;
 
 use 5.10.1;
 use strict;
+use warnings;
 
 use base qw(Bugzilla::Auth::Login);
 use fields qw(_login_token);

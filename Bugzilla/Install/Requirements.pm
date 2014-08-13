@@ -15,6 +15,7 @@ package Bugzilla::Install::Requirements;
 
 use 5.10.1;
 use strict;
+use warnings;
 
 use Bugzilla::Constants;
 use Bugzilla::Install::Util qw(install_string bin_loc

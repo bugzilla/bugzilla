@@ -9,14 +9,18 @@
 #Bugzilla Test 7#
 #####Util.pm#####
 
+use 5.10.1;
+use strict;
+use warnings;
+
 use lib 't';
 use Support::Files;
 use Test::More tests => 17;
 use DateTime;
 
 BEGIN { 
-    use_ok(Bugzilla);
-    use_ok(Bugzilla::Util);
+    use_ok('Bugzilla');
+    use_ok('Bugzilla::Util');
 }
 
 # We need to override user preferences so we can get an expected value when

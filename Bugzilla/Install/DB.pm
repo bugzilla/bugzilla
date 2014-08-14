@@ -273,10 +273,6 @@ sub update_table_definitions {
     $dbh->bz_add_column('attachments', 'isprivate',
                         {TYPE => 'BOOLEAN', NOTNULL => 1, DEFAULT => 'FALSE'});
 
-    $dbh->bz_add_column("bugs", "alias", {TYPE => "varchar(20)"});
-    $dbh->bz_add_index('bugs', 'bugs_alias_idx',
-                       {TYPE => 'UNIQUE', FIELDS => [qw(alias)]});
-
     _move_quips_into_db();
 
     $dbh->bz_drop_column("namedqueries", "watchfordiffs");

@@ -52,6 +52,7 @@ YAHOO.bugzilla.commentTagging = {
             YAHOO.bugzilla.commentTagging.counter = YAHOO.bugzilla.commentTagging.counter + 1;
             YAHOO.util.Connect.setDefaultPostHeader('application/json', true);
             return YAHOO.lang.JSON.stringify({
+                version: "1.1",
                 method : "Bug.search_comment_tags",
                 id : YAHOO.bugzilla.commentTagging.counter,
                 params : {

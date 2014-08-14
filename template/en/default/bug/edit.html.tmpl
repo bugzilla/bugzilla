@@ -29,6 +29,13 @@
       YAHOO.bugzilla.commentTagging.init([% user.can_tag_comments ? 'true' : 'false' %]);
       YAHOO.bugzilla.commentTagging.min_len = [% constants.MIN_COMMENT_TAG_LENGTH FILTER js %];
       YAHOO.bugzilla.commentTagging.max_len = [% constants.MAX_COMMENT_TAG_LENGTH FILTER js %];
+      YAHOO.bugzilla.commentTagging.label = 'Comment Tags:';
+      YAHOO.bugzilla.commentTagging.min_len_error =
+        'Comment tags must be at least
+        [%~ " " _ constants.MIN_COMMENT_TAG_LENGTH FILTER js %] characters.';
+      YAHOO.bugzilla.commentTagging.max_len_error =
+        'Comment tags cannot be longer than
+        [%~ " " _ constants.MAX_COMMENT_TAG_LENGTH FILTER js %] characters.';
     </script>
   [% END %]
 [% END %]

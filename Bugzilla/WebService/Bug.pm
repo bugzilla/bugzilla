@@ -1146,7 +1146,11 @@ sub search_comment_tags {
     my $query = $params->{query};
     $query
         // ThrowCodeError('param_required', { param => 'query' });
-    my $limit = detaint_natural($params->{limit}) || 7;
+    my $limit = $params->{limit} || 7;
+    detaint_natural($limit)
+        || ThrowCodeError('param_must_be_numeric', { param    => 'limit',
+                                                     function => 'Bug.search_comment_tags' });
+
 
     my $tags = Bugzilla::Comment::TagWeights->match({
         WHERE => {

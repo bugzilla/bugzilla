@@ -748,6 +748,29 @@ Without this directive, Apache will not follow symbolic links
 to places outside its own directory structure, and you will be
 unable to run Bugzilla.
 
+Apache *httpd * log files with bugzilla
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+For security reasons it is recommended to prevent Apache from logging
+query strings.
+
+For example:
+When external systems interact with Bugzilla via webservices (REST/XMLRPC/JSONRPC)
+they include the user's credentials as part of the URL (query-string). For security
+reasons we recommend configuring Apache to not include the query-string in its log
+files to avoid storing passwords in clear text on the server.
+
+#. Load :file:`httpd.conf` or :file:`apache2.conf` in your editor.
+	 In most of the Linux distributions this file is found in :folder:`/etc/httpd/conf/httpd.conf`
+	 or in :folder:`/etc/apache2/apache2.conf`.
+
+#. Find the following line in the above mentioned file.
+   LogFormat "%v:%p %h %l %u %t \"%r\" %>s %O \"%{Referer}i\" \"%{User-Agent}i\"" vhost_combined.
+
+#. Replace \"%r\" with \"%m	%U\".
+
+#. Now restart Apache.
+
 .. _http-apache-mod_perl:
 
 Apache *httpd* with mod_perl

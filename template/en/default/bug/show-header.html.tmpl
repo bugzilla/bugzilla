@@ -19,7 +19,7 @@
 
 [% subheader = filtered_desc %]
 [% title = "$bug.bug_id &ndash; " %]
-[% IF bug.alias != '' %]
+[% IF bug.alias.size %]
   [% title = title _ "($filtered_alias) " %]
 [% END %]
 [% title = title _ filtered_desc %]
@@ -33,7 +33,7 @@
   [% header = "$terms.Bug&nbsp;$bug.bug_id" %]
   [% header_addl_info = "Last modified: $filtered_timestamp" %]
   [% unfiltered_title = "$bug.bug_id – " %]
-  [% IF bug.alias != '' %]
+  [% IF bug.alias.size %]
     [% unfiltered_title = unfiltered_title _ "(" _ bug.alias.join(', ') _ ") " %]
   [% END %]
   [% unfiltered_title = unfiltered_title _ bug.short_desc %]

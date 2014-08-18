@@ -1499,6 +1499,12 @@ C<int> The number of the fieldtype. The following values are defined:
 
 =item C<7> Bug URLs ("See Also")
 
+=item C<8> Keywords
+
+=item C<9> Date
+
+=item C<10> Integer value
+
 =back
 
 =item C<is_custom>

@@ -645,4 +645,14 @@ sub install_filesystem {
     };
 }
 
+sub db_sanitize {
+    my $dbh = Bugzilla->dbh;
+    print "Deleting push extension logs and messages...\n";
+    $dbh->do("DELETE FROM push");
+    $dbh->do("DELETE FROM push_backlog");
+    $dbh->do("DELETE FROM push_backoff");
+    $dbh->do("DELETE FROM push_log");
+    $dbh->do("DELETE FROM push_options");
+}
+
 __PACKAGE__->NAME;

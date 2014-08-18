@@ -260,4 +260,11 @@ sub webservice {
     $dispatch->{EditComments} = "Bugzilla::Extension::EditComments::WebService";
 }
 
+sub db_sanitize {
+    my $dbh = Bugzilla->dbh;
+    print "Deleting edited comment histories...\n";
+    $dbh->do("DELETE FROM longdescs_activity");
+    $dbh->do("UPDATE longdescs SET edit_count=0");
+}
+
 __PACKAGE__->NAME;

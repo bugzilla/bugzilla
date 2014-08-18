@@ -29,6 +29,7 @@ use lib qw(.);
 use Bugzilla;
 use Bugzilla::Bug;
 use Bugzilla::Constants;
+use Bugzilla::Hook;
 use Bugzilla::Util;
 use List::MoreUtils qw(uniq);
 
@@ -87,6 +88,7 @@ eval {
     delete_sensitive_user_data();
     delete_attachment_data() unless $keep_attachments;
     delete_bug_user_last_visit();
+    Bugzilla::Hook::process('db_sanitize');
     disable_email_delivery() unless $enable_email;
     print "All done!\n";
     $dbh->bz_rollback_transaction() if $dry_run;
@@ -188,12 +190,6 @@ sub delete_sensitive_user_data {
     $dbh->do("DELETE FROM ts_funcmap");
     $dbh->do("DELETE FROM ts_job");
     $dbh->do("DELETE FROM ts_note");
-    # push extension messages
-    $dbh->do("DELETE FROM push");
-    $dbh->do("DELETE FROM push_backlog");
-    $dbh->do("DELETE FROM push_backoff");
-    $dbh->do("DELETE FROM push_log");
-    $dbh->do("DELETE FROM push_options");
 }
 
 sub delete_attachment_data {
@@ -203,7 +199,7 @@ sub delete_attachment_data {
 }
 
 sub delete_bug_user_last_visit {
-    print "Removing all entries from bug_user_last_visit...\n"
+    print "Removing all entries from bug_user_last_visit...\n";
     $dbh->do('TRUNCATE TABLE bug_user_last_visit');
 }
 

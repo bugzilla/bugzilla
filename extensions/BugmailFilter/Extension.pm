@@ -427,4 +427,10 @@ sub db_schema_abstract_schema {
     };
 }
 
+sub db_sanitize {
+    my $dbh = Bugzilla->dbh;
+    print "Deleting bugmail filters...\n";
+    $dbh->do("DELETE FROM bugmail_filters");
+}
+
 __PACKAGE__->NAME;

@@ -22,9 +22,6 @@ use Bugzilla::Product;
 use Bugzilla::User;
 use Bugzilla::Token;
 
-use constant SPECIAL_GROUPS => ('chartgroup', 'insidergroup',
-                                'timetrackinggroup', 'querysharegroup');
-
 my $cgi = Bugzilla->cgi;
 my $dbh = Bugzilla->dbh;
 my $template = Bugzilla->template;

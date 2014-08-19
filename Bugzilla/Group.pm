@@ -53,7 +53,7 @@ use constant UPDATE_COLUMNS => qw(
 
 # Parameters that are lists of groups.
 use constant GROUP_PARAMS => qw(chartgroup insidergroup timetrackinggroup
-                                querysharegroup);
+                                querysharegroup debug_group);
 
 ###############################
 ####      Accessors      ######

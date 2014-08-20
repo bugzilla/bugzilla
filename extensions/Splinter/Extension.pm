@@ -116,11 +116,12 @@ sub bug_format_comment {
     # there is only one match in the text we are linkifying, since they all
     # get the same link.
     my $REVIEW_RE = qr/Review\s+of\s+attachment\s+(\d+)\s*:/;
-    
+
     if ($$text =~ $REVIEW_RE) {
-        my $review_link = get_review_link($bug, $1, "Review");
-        my $attach_link = Bugzilla::Template::get_attachment_link($1, "attachment $1");
-    
+        my $attach_id = $1;
+        my $review_link = get_review_link($attach_id, "Review");
+        my $attach_link = Bugzilla::Template::get_attachment_link($attach_id, "attachment $attach_id");
+
         push(@$regexes, { match => $REVIEW_RE,
                           replace => "$review_link of $attach_link:"});
     }

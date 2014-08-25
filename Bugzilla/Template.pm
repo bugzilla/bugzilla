@@ -263,28 +263,23 @@ sub quoteUrls {
 
     my $bugs_re = qr/\Q$bugs_word\E$s*\#?$s*
                      \d+(?:$s*,$s*\#?$s*\d+)+/ix;
-    while ($text =~ m/($bugs_re)/g) {
-        my $offset = $-[0];
-        my $length = $+[0] - $-[0];
-        my $match  = $1;
 
+    $text =~ s{($bugs_re)}{
+        my $match = $1;
         $match =~ s/((?:#$s*)?(\d+))/$bug_link_func->($2, $1);/eg;
-        # Replace the old string with the linkified one.
-        substr($text, $offset, $length) = $match;
-    }
+        $match;
+    }eg;
 
     my $comments_word = template_var('terms')->{comments};
 
     my $comments_re = qr/(?:comments|\Q$comments_word\E)$s*\#?$s*
                          \d+(?:$s*,$s*\#?$s*\d+)+/ix;
-    while ($text =~ m/($comments_re)/g) {
-        my $offset = $-[0];
-        my $length = $+[0] - $-[0];
-        my $match  = $1;
 
+    $text =~ s{($comments_re)}{
+        my $match = $1;
         $match =~ s|((?:#$s*)?(\d+))|<a href="$current_bugurl#c$2">$1</a>|g;
-        substr($text, $offset, $length) = $match;
-    }
+        $match;
+    }eg;
 
     # Old duplicate markers. These don't use $bug_word because they are old
     # and were never customizable.

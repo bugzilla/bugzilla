@@ -1,0 +1,33 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% RETURN UNLESS product.name == 'Bugzilla' &&
+    (user.in_group('mozilla-corporation') || user.in_group('mozilla-foundation')) %]
+
+<div id="bug_create_warning">
+  <div id="bug_create_warning_image">
+    <img src="extensions/BMO/web/images/sign_warning.png" width="32" height="32">
+  </div>
+  <div id="bug_create_warning_text">
+    <b>Mozilla employees</b><br>
+    This is <i>not</i> the place to request configuration, permission, or
+    account changes to this installation of [% terms.Bugzilla %] (bugzilla.mozilla.org).<br>
+    This includes, but is not limited to:
+    <ul>
+      <li>New or updates to products and components</li>
+      <li>Changes to the values of existing fields (versions, milestones, etc)</li>
+    </ul>
+    Instead, please file such changes under
+    <a href="enter_bug.cgi?product=bugzilla.mozilla.org;component=Administration">
+      <b>
+        the Administration component in the bugzilla.mozilla.org
+      </b>
+    </a>
+    product.
+  </div>
+</div>

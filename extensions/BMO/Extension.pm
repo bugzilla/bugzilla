@@ -490,7 +490,7 @@ sub bug_format_comment {
             my $repo = html_quote($args->{matches}->[1]);
             my $text = $args->{matches}->[2];
             my $revision = $args->{matches}->[3];
-            return qq#$preamble<a href="http://git.mozilla.org/?p=$repo;a=commit;h=$revision">$text</a>#;
+            return qq#$preamble<a href="http://git.mozilla.org/?p=$repo;a=commitdiff;h=$revision">$text</a>#;
         }
     });
 

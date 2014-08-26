@@ -684,8 +684,13 @@ sub create {
     my ($class, $params) = @_;
     my $dbh = Bugzilla->dbh;
 
-    # BMO - allow parameter alteration before creation
-    Bugzilla::Hook::process('bug_before_create', { params => $params });
+    # BMO - allow parameter alteration before creation.  also add support for
+    # fields which are not bug columns (eg bug_mentors). extensions should move
+    # fields from $params to $stash, then use the bug_end_of_create hook to
+    # update the database
+    my $stash = {};
+    Bugzilla::Hook::process('bug_before_create', { params => $params,
+                                                   stash  => $stash });
 
     $dbh->bz_start_transaction();
 
@@ -803,8 +808,10 @@ sub create {
     # but sometimes it's blank.
     Bugzilla::Comment->insert_create_data($creation_comment);
 
+    # BMO - add the stash param from bug_start_of_create
     Bugzilla::Hook::process('bug_end_of_create', { bug => $bug,
                                                    timestamp => $timestamp,
+                                                   stash => $stash,
                                                  });
 
     $dbh->bz_commit_transaction();

@@ -58,6 +58,7 @@ use Bugzilla::Keyword;
 use Bugzilla::Flag;
 use Bugzilla::Status;
 use Bugzilla::Token;
+use Bugzilla::Hook;
 
 use List::MoreUtils qw(firstidx);
 use Storable qw(dclone);
@@ -133,12 +134,15 @@ if (defined $cgi->param('dontchange')) {
 }
 
 # do a match on the fields if applicable
-Bugzilla::User::match_field({
-    'qa_contact'                => { 'type' => 'single' },
-    'newcc'                     => { 'type' => 'multi'  },
-    'masscc'                    => { 'type' => 'multi'  },
-    'assigned_to'               => { 'type' => 'single' },
-});
+# BMO: allow extensions to define custom user fields
+my $user_match_fields = {
+    'qa_contact'    => { 'type' => 'single' },
+    'newcc'         => { 'type' => 'multi'  },
+    'masscc'        => { 'type' => 'multi'  },
+    'assigned_to'   => { 'type' => 'single' },
+};
+Bugzilla::Hook::process('bug_user_match_fields', { fields => $user_match_fields });
+Bugzilla::User::match_field($user_match_fields);
 
 print $cgi->header() unless Bugzilla->usage_mode == USAGE_MODE_EMAIL;
 
@@ -369,6 +373,13 @@ foreach my $field (@custom_fields) {
     if (should_set($fname, 1)) {
         $set_all_fields{$fname} = [$cgi->param($fname)];
     }
+}
+
+# BMO - add user_match_fields.  it's important to source from input_params
+# instead of $cgi->param to ensure we get the correct value.
+foreach my $field (keys %$user_match_fields) {
+    next if exists $set_all_fields{$field};
+    $set_all_fields{$field} = Bugzilla->input_params->{$field} // [];
 }
 
 # We are going to alter the list of removed groups, so we keep a copy here.

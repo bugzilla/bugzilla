@@ -73,11 +73,14 @@ my $token = trim($cgi->param('token'));
 check_token_data($token, 'create_bug', 'index.cgi');
 
 # do a match on the fields if applicable
-Bugzilla::User::match_field ({
+# BMO: allow extensions to define custom user fields
+my $user_match_fields = {
     'cc'            => { 'type' => 'multi'  },
     'assigned_to'   => { 'type' => 'single' },
     'qa_contact'    => { 'type' => 'single' },
-});
+};
+Bugzilla::Hook::process('bug_user_match_fields', { fields => $user_match_fields });
+Bugzilla::User::match_field($user_match_fields);
 
 if (defined $cgi->param('maketemplate')) {
     $vars->{'url'} = $cgi->canonicalise_query('token');
@@ -150,6 +153,13 @@ my @multi_selects = grep {$_->type == FIELD_TYPE_MULTI_SELECT && $_->enter_bug}
 foreach my $field (@multi_selects) {
     next if !$cgi->should_set($field->name);
     $bug_params{$field->name} = [$cgi->param($field->name)];
+}
+
+# BMO - add user_match_fields.  it's important to source from input_params
+# instead of $cgi->param to ensure we get the correct value.
+foreach my $field (keys %$user_match_fields) {
+    next if exists $bug_params{$field};
+    $bug_params{$field} = Bugzilla->input_params->{$field} // [];
 }
 
 my $bug = Bugzilla::Bug->create(\%bug_params);

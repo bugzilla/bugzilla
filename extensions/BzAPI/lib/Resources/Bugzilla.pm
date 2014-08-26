@@ -17,6 +17,9 @@ use Bugzilla::Keyword;
 use Bugzilla::Product;
 use Bugzilla::Status;
 use Bugzilla::Field;
+use Bugzilla::Util qw(correct_urlbase);
+
+use Bugzilla::Extension::BzAPI::Constants;
 
 use Digest::MD5 qw(md5_base64);
 
@@ -27,10 +30,18 @@ use Digest::MD5 qw(md5_base64);
 BEGIN {
     require Bugzilla::WebService::Bugzilla;
     *Bugzilla::WebService::Bugzilla::get_configuration = \&get_configuration;
+    *Bugzilla::WebService::Bugzilla::get_empty = \&get_empty;
 }
 
 sub rest_handlers {
     my $rest_handlers = [
+        qr{^/$}, {
+            GET => {
+                resource => {
+                    method => 'get_empty'
+                }
+            }
+        },
         qr{^/configuration$}, {
             GET  => {
                 resource => {
@@ -113,6 +124,15 @@ sub get_configuration {
         $result = $self->json->decode($json);
     }
     return $result;
+}
+
+sub get_empty {
+    my ($self) = @_;
+    return {
+        urlbase       => $self->type('string', correct_urlbase() . "bzapi/"),
+        documentation => $self->type('string', BZAPI_DOC),
+        version       => $self->type('string', BUGZILLA_VERSION)
+    };
 }
 
 1;

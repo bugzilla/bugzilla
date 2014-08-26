@@ -17,6 +17,8 @@ our @EXPORT = qw(
     ATTACHMENT_FIELD_MAP
     DEFAULT_BUG_FIELDS
     DEFAULT_ATTACHMENT_FIELDS
+
+    BZAPI_DOC
 );
 
 # These are fields that are normally exported as a single value such
@@ -146,5 +148,8 @@ use constant ATTACHMENT_FIELD_MAP => {
     'flag'        => 'flags',
     'type'        => 'content_type',
 };
+
+# A base link to the current BzAPI Documentation.
+use constant BZAPI_DOC => 'https://wiki.mozilla.org/Bugzilla:BzAPI';
 
 1;

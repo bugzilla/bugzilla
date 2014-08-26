@@ -146,8 +146,12 @@ sub webservice_rest_response {
     $cache->{bzapi_rpc} ||= $rpc;
 
     return if !Bugzilla->request_cache->{bzapi}
-              || ref $$result ne 'HASH'
-              || exists $$result->{error};
+              || ref $$result ne 'HASH';
+
+    if (exists $$result->{error}) {
+        $$result->{documentation} = BZAPI_DOC;
+        return;
+    }
 
     # Load the appropriate response handler based on path and type
     if (my $handler = _find_handler($rpc, 'response')) {

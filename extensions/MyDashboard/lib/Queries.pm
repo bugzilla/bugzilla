@@ -92,6 +92,17 @@ sub QUERY_DEFS {
             }
         },
         {
+            name        => 'mentorbugs',
+            heading     => "You Are a Mentor",
+            description => 'You are one of the mentors for the bug.',
+            params      => {
+                'bug_status' => ['__open__'],
+                'emailbug_mentor1' => 1,
+                'emailtype1' => 'exact',
+                'email1'     => $user->login
+            }
+        },
+        {
             name => 'lastvisitedbugs',
             heading => 'Updated Since Last Visit',
             description => 'Bugs updated since last visited',

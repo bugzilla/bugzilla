@@ -129,7 +129,7 @@ sub get_configuration {
 sub get_empty {
     my ($self) = @_;
     return {
-        urlbase       => $self->type('string', correct_urlbase() . "bzapi/"),
+        ref           => $self->type('string', correct_urlbase() . "bzapi/"),
         documentation => $self->type('string', BZAPI_DOC),
         version       => $self->type('string', BUGZILLA_VERSION)
     };

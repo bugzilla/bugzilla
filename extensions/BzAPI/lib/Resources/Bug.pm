@@ -668,7 +668,7 @@ sub create_bug_response {
     return if !exists $$result->{id};
     my $bug_id = $$result->{id};
 
-    $$result = { ref => $rpc->type('string', ref_urlbase() . "/bug/$bug_id") };
+    $$result->{ref} = $rpc->type('string', ref_urlbase() . "/bug/$bug_id");
     $response->code(STATUS_CREATED);
 }
 

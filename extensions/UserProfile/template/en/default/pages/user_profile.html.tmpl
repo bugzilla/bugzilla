@@ -92,9 +92,11 @@
 <tr>
   <th>Last activity</th>
   <td colspan="2">
-    <a href="page.cgi?id=user_activity.html&amp;action=run&amp;who=[% target.login FILTER uri %]&amp;from=-4w">
-      [% target.last_activity_ts FILTER time %]
-    </a>
+    [% IF user.id %]
+      <a href="page.cgi?id=user_activity.html&amp;action=run&amp;who=[% target.login FILTER uri %]&amp;from=-4w">
+    [% END %]
+    [% target.last_activity_ts FILTER time %]
+    [% "</a>" IF user.id %]
   </td>
 </tr>
 
@@ -123,30 +125,36 @@
     <td>&nbsp;</td>
     <th>Review requests</th>
     <td class="numeric">
-      <a href="request.cgi?action=queue&amp;type=review&amp;requestee=[% target.login FILTER uri %]&amp;group=type"
-         target="_blank">
-        [% target.review_request_count FILTER html %]
-      </a>
+      [% IF user.id %]
+        <a href="request.cgi?action=queue&amp;type=review&amp;requestee=[% target.login FILTER uri %]&amp;group=type"
+          target="_blank">
+      [% END %]
+      [% target.review_request_count FILTER html %]
+      [% "</a>" IF user.id %]
     </td>
   </tr>
   <tr>
     <td>&nbsp;</td>
     <th>Feedback requests</th>
     <td class="numeric">
-      <a href="request.cgi?action=queue&amp;type=feedback&amp;requestee=[% target.login FILTER uri %]&amp;group=type"
-         target="_blank">
-        [% target.feedback_request_count FILTER html %]
-      </a>
+      [% IF user.id %]
+        <a href="request.cgi?action=queue&amp;type=feedback&amp;requestee=[% target.login FILTER uri %]&amp;group=type"
+          target="_blank">
+      [% END %]
+      [% target.feedback_request_count FILTER html %]
+      [% "</a>" IF user.id %]
     </td>
   </tr>
   <tr>
     <td>&nbsp;</td>
     <th>Needinfo requests</th>
     <td class="numeric">
-      <a href="request.cgi?action=queue&amp;type=needinfo&amp;requestee=[% target.login FILTER uri %]&amp;group=type"
-         target="_blank">
-        [% target.needinfo_request_count FILTER html %]
-      </a>
+      [% IF user.id %]
+        <a href="request.cgi?action=queue&amp;type=needinfo&amp;requestee=[% target.login FILTER uri %]&amp;group=type"
+          target="_blank">
+      [% END %]
+      [% target.needinfo_request_count FILTER html %]
+      [% "</a>" IF user.id %]
     </td>
   </tr>
 [% END %]
@@ -162,10 +170,12 @@
   <td>&nbsp;</td>
   <th>[% terms.Bugs %] filed</th>
   <td class="numeric">
-    <a href="buglist.cgi?query_format=advanced&amp;emailtype1=exact&amp;emailreporter1=1&amp;email1=[% target.login FILTER uri %]"
-       target="_blank">
-      [% stats.bugs_filed || 0 FILTER html %]
-    </a>
+    [% IF user.id %]
+      <a href="buglist.cgi?query_format=advanced&amp;emailtype1=exact&amp;emailreporter1=1&amp;email1=[% target.login FILTER uri %]"
+        target="_blank">
+    [% END %]
+    [% stats.bugs_filed || 0 FILTER html %]
+    [% "</a>" IF user.id %]
   </td>
 </tr>
 <tr>
@@ -177,30 +187,36 @@
   <td>&nbsp;</td>
   <th>Assigned to</th>
   <td class="numeric">
-    <a href="buglist.cgi?query_format=advanced&amp;emailtype1=exact&amp;emailassigned_to1=1&amp;email1=[% target.login FILTER uri %]"
-       target="_blank">
-      [% stats.assigned || 0 FILTER html %]
-    </a>
+    [% IF user.id %]
+      <a href="buglist.cgi?query_format=advanced&amp;emailtype1=exact&amp;emailassigned_to1=1&amp;email1=[% target.login FILTER uri %]"
+        target="_blank">
+    [% END %]
+    [% stats.assigned || 0 FILTER html %]
+    [% "</a>" IF user.id %]
   </td>
 </tr>
 <tr>
   <td>&nbsp;</td>
   <th>Commented on</th>
   <td class="numeric">
-    <a href="buglist.cgi?query_format=advanced&amp;emailtype1=exact&amp;emaillongdesc1=1&amp;email1=[% target.login FILTER uri %]"
-       target="_blank">
-      [% stats.commented_on || 0 FILTER html %]
-    </a>
+    [% IF user.id %]
+      <a href="buglist.cgi?query_format=advanced&amp;emailtype1=exact&amp;emaillongdesc1=1&amp;email1=[% target.login FILTER uri %]"
+        target="_blank">
+    [% END %]
+    [% stats.commented_on || 0 FILTER html %]
+    [% "</a>" IF user.id %]
   </td>
 </tr>
 <tr>
   <td>&nbsp;</td>
   <th>QA-Contact</th>
   <td class="numeric">
-    <a href="buglist.cgi?query_format=advanced&amp;emailtype1=exact&amp;emailqa_contact1=1&amp;email1=[% target.login FILTER uri %]"
-       target="_blank">
-      [% stats.qa_contact || 0 FILTER html %]
-    </a>
+    [% IF user.id %]
+      <a href="buglist.cgi?query_format=advanced&amp;emailtype1=exact&amp;emailqa_contact1=1&amp;email1=[% target.login FILTER uri %]"
+        target="_blank">
+    [% END %]
+    [% stats.qa_contact || 0 FILTER html %]
+    [% "</a>" IF user.id %]
   </td>
 </tr>
 <tr>

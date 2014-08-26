@@ -159,6 +159,7 @@ foreach my $field (@multi_selects) {
 # instead of $cgi->param to ensure we get the correct value.
 foreach my $field (keys %$user_match_fields) {
     next if exists $bug_params{$field};
+    next unless $cgi->should_set($field);
     $bug_params{$field} = Bugzilla->input_params->{$field} // [];
 }
 

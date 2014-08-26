@@ -379,6 +379,7 @@ foreach my $field (@custom_fields) {
 # instead of $cgi->param to ensure we get the correct value.
 foreach my $field (keys %$user_match_fields) {
     next if exists $set_all_fields{$field};
+    next unless should_set($field, 1);
     $set_all_fields{$field} = Bugzilla->input_params->{$field} // [];
 }
 

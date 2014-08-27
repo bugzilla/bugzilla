@@ -132,6 +132,11 @@
       [% target.review_request_count FILTER html %]
       [% "</a>" IF user.id %]
     </td>
+    [% IF user.id %]
+      <td>
+        (<a href="page.cgi?id=review_history.html&amp;requestee=[% target.login FILTER uri %]">Review History</a>)
+      </td>
+    [% END %]
   </tr>
   <tr>
     <td>&nbsp;</td>

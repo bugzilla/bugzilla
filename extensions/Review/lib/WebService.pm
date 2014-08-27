@@ -15,7 +15,7 @@ use base qw(Bugzilla::WebService);
 use Bugzilla::Bug;
 use Bugzilla::Component;
 use Bugzilla::Error;
-use Bugzilla::Util qw(detaint_natural);
+use Bugzilla::Util qw(detaint_natural trick_taint);
 use Bugzilla::WebService::Util 'filter';
 
 sub suggestions {
@@ -83,11 +83,26 @@ sub flag_activity {
         $match_criteria{flag_id} = $flag_id;
     }
 
+    if (my $flag_ids = $params->{flag_ids}) {
+        foreach my $flag_id (@$flag_ids) {
+            detaint_natural($flag_id)
+              or ThrowUserError('invalid_flag_id', { flag_id => $flag_id });
+        }
+
+        $match_criteria{flag_id} = $flag_ids;
+    }
+
     if (my $type_id = $params->{type_id}) {
         detaint_natural($type_id)
           or ThrowUserError('invalid_flag_type_id', { type_id => $type_id });
 
         $match_criteria{type_id} = $type_id;
+    }
+
+    if (my $type_name = $params->{type_name}) {
+        trick_taint($type_name);
+        my $flag_types = Bugzilla::FlagType::match({ name => $type_name });
+        $match_criteria{type_id} = [map { $_->id } @$flag_types];
     }
 
     for my $user_field (qw( requestee setter )) {
@@ -175,6 +190,14 @@ sub rest_resources {
                 method => 'flag_activity',
                 params => sub {
                     return { flag_id => $_[0] }
+                },
+            },
+        },
+        qr{^/review/flag_activity/type_name/(\w+)$}, {
+            GET => {
+                method => 'flag_activity',
+                params => sub {
+                    return { type_name => $_[0] }
                 },
             },
         },
@@ -335,13 +358,15 @@ Returns the history of flag status changes based on requestee, setter, flag_id, 
 
 =item B<REST>
 
-GET /rest/review/flag_activity/C<flag-id>
+GET /rest/review/flag_activity/C<flag_id>
 
 GET /rest/review/flag_activity/requestee/C<requestee>
 
 GET /rest/review/flag_activity/setter/C<setter>
 
-GET /rest/review/flag_activity/type_id/C<type-id>
+GET /rest/review/flag_activity/type_id/C<type_id>
+
+GET /rest/review/flag_activity/type/C<type_name>
 
 GET /rest/review/flag_activity
 
@@ -362,6 +387,8 @@ Note that searching by C<flag_id> is not reliable because when flags are removed
 =item C<setter> (string) - The bugzilla login of the flag's setter
 
 =item C<type_id> (int) - The flag type id of a change
+
+=item C<type_name> (string) - the flag type name of a change
 
 =back
 

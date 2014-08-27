@@ -1,0 +1,62 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% PROCESS global/variables.none.tmpl %]
+
+[% PROCESS global/header.html.tmpl
+  title = "Review History"
+  style_urls = [ "extensions/Review/web/styles/review_history.css" ]
+  javascript_urls = [ 'js/yui3/yui/yui-min.js',
+            'extensions/Review/web/js/review_history.js',
+            'extensions/Review/web/js/moment.min.js',
+            'js/util.js',
+            'js/field.js' ]
+  yui = [ "autocomplete" ]
+%]
+
+<script type="text/javascript">
+  YUI({
+    base: 'js/yui3/',
+    combine: false,
+    groups: {
+      gallery: {
+        combine: false,
+        base: 'js/yui3/',
+        patterns: { 'gallery-': {} }
+      }
+    }
+  }).use('bz-review-history', function(Y) {
+    Y.ReviewHistory.render('#history', '#history-loading');
+    var requestee = Y.one('#requestee');
+
+    Y.ReviewHistory.refresh('[% requestee.login FILTER js %]', '[% requestee.name FILTER html FILTER js %]');
+  });
+</script>
+
+<div>
+  <form method="get">
+    <label class="field_label" for="user">Requestee </label>
+
+    [% INCLUDE global/userselect.html.tmpl
+      id      => "requestee"
+      name    => "requestee"
+      value   => requestee.login
+      classes => ["bz_userfield"]
+    %]
+
+    <input type="submit" value="Generate Report">
+    <input type="hidden" name="id" value="review_history.html">
+  </form>
+</div>
+
+<div class="yui3-skin-sam">
+  <div id="history-loading">Loading...</div>
+  <div id="history"></div>
+</div>
+
+[% PROCESS global/footer.html.tmpl %]

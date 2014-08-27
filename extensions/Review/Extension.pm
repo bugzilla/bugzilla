@@ -601,6 +601,9 @@ sub page_before_template {
     elsif ($args->{page_id} eq 'review_requests_rebuild.html') {
         $self->review_requests_rebuild($args);
     }
+    elsif ($args->{page_id} eq 'review_history.html') {
+        $self->review_history($args);
+    }
 }
 
 sub review_suggestions_report {
@@ -652,6 +655,21 @@ sub review_requests_rebuild {
         });
         $args->{vars}->{rebuild} = 1;
         $args->{vars}->{total}   = $processed_users;
+    }
+}
+
+sub review_history {
+    my ($self, $args) = @_;
+
+    my $user = Bugzilla->login(LOGIN_REQUIRED);
+
+    Bugzilla::User::match_field({ 'requestee' => { 'type' => 'single' } });
+    my $requestee = Bugzilla->input_params->{requestee};
+    if ($requestee) {
+        $args->{vars}{requestee} = Bugzilla::User->check({ name => $requestee, cache => 1 });
+    }
+    else {
+        $args->{vars}{requestee} = $user;
     }
 }
 

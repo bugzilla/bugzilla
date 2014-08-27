@@ -102,7 +102,7 @@ var inline_history = {
         var text = commentTimes[j].textContent || commentTimes[j].innerText;
         var mainTime = this.trim(text);
 
-        if (ih_activity_sort_order == 'oldest_to_newest' ? time > mainTime : time < mainTime) {
+        if (ih_activity_sort_order == 'oldest_to_newest' ? time >= mainTime : time <= mainTime) {
           if (j < commentTimes.length - 1) {
             continue;
           } else {

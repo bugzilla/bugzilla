@@ -328,7 +328,7 @@ sub object_end_of_update {
     my ($self, $args) = @_;
     my ($object, $old_object, $changes) = @$args{qw(object old_object changes)};
 
-    if ($object->isa('Bugzilla::Product')) {
+    if ($object->isa('Bugzilla::Product') && exists Bugzilla->input_params->{reviewers}) {
         my $diff = $self->_update_user_table({
             object      => $object,
             old_users   => $old_object->reviewers_objs(1),

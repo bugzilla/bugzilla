@@ -35,3 +35,11 @@
     <pre id="comment_preview_text" class="bz_comment_text"></pre>
   </div>
 [% END %]
+
+[% IF feature_enabled('markdown') AND  user.settings.use_markdown.value == 'on' %]
+  <div id="comment_markdown">
+    <input type="checkbox" name="use_markdown" id="use_markdown" value="1"
+    [% "checked=\"checked\"" IF user.settings.use_markdown.value == 'on' %] >
+    <label id="use_markdown_label" for="use_markdown">Use Markdown for this [% terms.comment %]</label>
+  </div>
+[% END %]

@@ -331,7 +331,9 @@ sub render_comment {
     Bugzilla->switch_to_shadow_db();
     my $bug = $params->{id} ? Bugzilla::Bug->check($params->{id}) : undef;
 
-    my $tmpl = '[% text FILTER quoteUrls(bug) %]';
+    my $markdown = $params->{markdown} ? 1 : 0;
+    my $tmpl = $markdown ? '[% text FILTER markdown(bug, { is_markdown => 1 }) %]' : '[% text FILTER markdown(bug) %]';
+
     my $html;
     my $template = Bugzilla->template;
     $template->process(

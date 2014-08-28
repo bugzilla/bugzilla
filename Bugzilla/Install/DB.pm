@@ -726,6 +726,10 @@ sub update_table_definitions {
     # 2014-08-11 sgreen@redhat.com - Bug 1012506
      _update_alias();
 
+    # 2014-08-14 koosha.khajeh@gmail.com - Bug 330707
+    $dbh->bz_add_column('longdescs', 'is_markdown',
+                        {TYPE => 'BOOLEAN', NOTNULL => 1, DEFAULT => 'FALSE'});
+
     ################################################################
     # New --TABLE-- changes should go *** A B O V E *** this point #
     ################################################################

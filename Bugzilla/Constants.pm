@@ -191,6 +191,8 @@ use Memoize;
     AUDIT_REMOVE
 
     MOST_FREQUENT_THRESHOLD
+
+    MARKDOWN_TAB_WIDTH
 );
 
 @Bugzilla::Constants::EXPORT_OK = qw(contenttypes);
@@ -627,6 +629,10 @@ use constant AUDIT_REMOVE => '__remove__';
 # The minimum number of duplicates a bug needs to show up
 # on the "Most frequently reported bugs" page.
 use constant MOST_FREQUENT_THRESHOLD => 2;
+
+# The number of spaces used to represent each tab character
+# by Markdown engine
+use constant MARKDOWN_TAB_WIDTH => 2;
 
 sub bz_locations {
     # Force memoize() to re-compute data per project, to avoid

@@ -233,9 +233,13 @@ if (should_set('keywords')) {
     $set_all_fields{keywords}->{$action} = $cgi->param('keywords');
 }
 if (should_set('comment')) {
+    my $is_markdown = ($user->settings->{use_markdown}->{is_enabled} &&
+                            $cgi->param('use_markdown') eq '1') ? 1 : 0;
+
     $set_all_fields{comment} = {
-        body       => scalar $cgi->param('comment'),
-        is_private => scalar $cgi->param('comment_is_private'),
+        body        => scalar $cgi->param('comment'),
+        is_private  => scalar $cgi->param('comment_is_private'),
+        is_markdown => $is_markdown,
     };
 }
 if (should_set('see_also')) {

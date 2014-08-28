@@ -118,6 +118,7 @@ foreach my $field (qw(cc groups)) {
     $bug_params{$field} = [$cgi->param($field)];
 }
 $bug_params{'comment'} = $comment;
+$bug_params{'is_markdown'} = $cgi->param('use_markdown');
 
 my @multi_selects = grep {$_->type == FIELD_TYPE_MULTI_SELECT && $_->enter_bug}
                          Bugzilla->active_custom_fields;

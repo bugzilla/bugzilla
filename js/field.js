@@ -979,11 +979,13 @@ function initDirtyFieldTracking() {
  */
 
 var last_comment_text = '';
+var last_markdown_cb_value = null;
 
 function show_comment_preview(bug_id) {
     var Dom = YAHOO.util.Dom;
     var comment = document.getElementById('comment');
     var preview = document.getElementById('comment_preview');
+    var markdown_cb = document.getElementById('use_markdown');
 
     if (!comment || !preview) return;
     if (Dom.hasClass('comment_preview_tab', 'active_comment_tab')) return;
@@ -1003,7 +1005,7 @@ function show_comment_preview(bug_id) {
 
     Dom.addClass('comment_preview_error', 'bz_default_hidden');
 
-    if (last_comment_text == comment.value)
+    if (last_comment_text == comment.value && last_markdown_cb_value == markdown_cb.checked)
         return;
 
     Dom.addClass('comment_preview_text', 'bz_default_hidden');
@@ -1024,6 +1026,7 @@ function show_comment_preview(bug_id) {
                 Dom.addClass('comment_preview_loading', 'bz_default_hidden');
                 Dom.removeClass('comment_preview_text', 'bz_default_hidden');
                 last_comment_text = comment.value;
+                last_markdown_cb_value = markdown_cb.checked;
             }
         },
         failure: function(res) {
@@ -1039,7 +1042,8 @@ function show_comment_preview(bug_id) {
         params: {
             Bugzilla_api_token: BUGZILLA.api_token,
             id: bug_id,
-            text: comment.value
+            text: comment.value,
+            markdown: (markdown_cb != null) && markdown_cb.checked ? 1 : 0
         }
     })
     );

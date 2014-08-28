@@ -785,6 +785,29 @@ Don't use sigs in comments. Signing your name ("Bill") is acceptable,
 if you do it out of habit, but full mail/news-style
 four line ASCII art creations are not.
 
+.. _markdown:
+
+Markdown
+--------
+
+Markdown lets you write your comments in a structured plain-text format and
+have your comments generated as HTML. For example, you may use Markdown for
+making a part of your comment look italic or bold in the generated HTML. Bugzilla
+supports most of the structures defined by `standard Markdown <http://daringfireball.net/projects/markdown/basics>`_.
+but does NOT support inline images and inline HTML.
+
+Additionally, three Github Flavored Markdown features are supported.
+
+- `Multiple underscores in words <https://help.github.com/articles/github-flavored-markdown#multiple-underscores-in-words>`_
+
+- `strikethrough <https://help.github.com/articles/github-flavored-markdown#strikethrough>`_
+
+- `fenced code blocks <https://help.github.com/articles/github-flavored-markdown#fenced-code-blocks>`_
+
+To use the Markdown feature, make sure that ``Enable Markdown support for comments`` is set to ``on``
+in your :ref:`userpreferences` and that you also check the ``Use Markdown for this comment`` option below
+the comment box when you want to submit a new comment.
+
 .. _comment-wrapping:
 
 Server-Side Comment Wrapping

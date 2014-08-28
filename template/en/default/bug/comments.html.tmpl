@@ -229,7 +229,7 @@
   [% IF mode == "edit" || comment.collapsed %]
     id="comment_text_[% comment.count FILTER none %]"
   [% END %]>
-  [%- comment_text FILTER quoteUrls(bug, comment) -%]
+  [%- comment_text FILTER markdown(bug, comment) -%]
 </pre>
     [% Hook.process('a_comment-end', 'bug/comments.html.tmpl') %]
     </div>

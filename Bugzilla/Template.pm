@@ -807,6 +807,23 @@ sub create {
                            1
                          ],
 
+            markdown => [ sub {
+                              my ($context, $bug, $comment, $user) = @_;
+                              return sub {
+                                  my $text = shift;
+                                  return unless $text;
+
+                                  if ((ref($comment) eq 'HASH' && $comment->{is_markdown})
+                                       || (ref($comment) eq 'Bugzilla::Comment' && $comment->is_markdown))
+                                  {
+                                      return Bugzilla->markdown->markdown($text);
+                                  }
+                                  return quoteUrls($text, $bug, $comment, $user);
+                              };
+                          },
+                          1
+                        ],
+
             bug_link => [ sub {
                               my ($context, $bug, $options) = @_;
                               return sub {

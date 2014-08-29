@@ -32,8 +32,8 @@
 [% IF user.can_see_bug(bug) %]
   [% link_title = link_title _ ' - ' _ bug.short_desc %]
 
-  [% IF use_alias && bug.alias %]
-    [% link_text = bug.alias %]
+  [% IF use_alias && bug.alias.size %]
+    [% link_text = bug.alias.join(', ') %]
   [% END %]
 [% END %]
 

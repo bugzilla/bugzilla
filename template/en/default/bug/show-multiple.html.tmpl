@@ -48,9 +48,10 @@
   <h1>
     [% terms.Bug %] 
     <a href="show_bug.cgi?id=[% bug.bug_id FILTER html %]">[% bug.bug_id FILTER html %]</a>
-    [% IF bug.alias AND NOT bug.error %]
-      (<a href="show_bug.cgi?id=[% bug.alias FILTER uri %]">
-        [% bug.alias FILTER html %]</a>)
+    [% IF bug.alias AND NOT bug.error %] (
+      [%- FOREACH alias IN bug.alias %]<a href="show_bug.cgi?id=[% alias FILTER uri %]">
+        [% alias FILTER html %]</a>[% UNLESS loop.last %], [% END %]
+      [%- END %])
     [% END %]
   </h1>
 

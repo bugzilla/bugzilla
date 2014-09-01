@@ -25,6 +25,15 @@
   font-weight: bold;
 }
 
+.bz_query_buttons form {
+  float: left;
+  margin-right: 2px;
+}
+
+.bz_query_edit {
+  padding-left: 2em;
+}
+
 .search_description {
   margin: .5em 0;
   padding: 0;

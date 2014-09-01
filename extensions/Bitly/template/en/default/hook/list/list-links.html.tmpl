@@ -1,0 +1,24 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% RETURN UNLESS user.id && Bugzilla.params.bitly_token %]
+
+<div id="bitly_overlay">
+  <div class="bd">
+    <select id="bitly_type" onchange="YAHOO.bitly.execute()">
+      <option value="shorten">Share a link to this search</option>
+      <option value="list">Share a link to this list of [% terms.bugs %]</option>
+    </select>
+    <input id="bitly_url" readonly placeholder="Generating short link...">
+  </div>
+  <div class="ft">
+    <button id="bitly_close" class="notransition">Close</button>
+  </div>
+</div>
+<a id="bitly_shorten" href="#" onclick="YAHOO.bitly.toggle();return false">Short URL</a>
+|&nbsp; [%# using nbsp because tt always trims trailing whitespace from templates %]

@@ -208,31 +208,27 @@
       <td>&nbsp;</td>
       
       <td valign="middle" class="bz_query_links">
+        [%# Links to more things users can do with this bug list. %]
+        [% Hook.process("links") %]
+
         <a href="buglist.cgi?
         [% urlquerypart FILTER html %]&amp;ctype=csv&amp;human=1">CSV</a> |
         <a href="buglist.cgi?
         [% urlquerypart FILTER html %]&amp;title=
         [%- title FILTER uri %]&amp;ctype=atom">Feed</a> |
         <a href="buglist.cgi?
-        [% urlquerypart FILTER html %]&amp;ctype=ics">iCalendar</a> |
+        [% urlquerypart FILTER html %]&amp;ctype=ics">iCalendar</a>
+
+        <br>
         <a href="colchange.cgi?
         [% urlquerypart FILTER html %]&amp;query_based_on=
-          [% defaultsavename OR searchname FILTER uri %]">Change&nbsp;Columns</a> |
+          [% defaultsavename OR searchname FILTER uri %]">Change&nbsp;Columns</a>
 
         [% IF bugs.size > 1 && caneditbugs && !dotweak %]
-          <a href="buglist.cgi?[% urlquerypart FILTER html %]
+          | <a href="buglist.cgi?[% urlquerypart FILTER html %]
             [%- "&order=$qorder" FILTER html IF order %]&amp;tweak=1"
             >Change&nbsp;Several&nbsp;[% terms.Bugs %]&nbsp;at&nbsp;Once</a>
-          |
         [% END %]
-
-        [% IF bugowners && user.id %]
-          <a href="mailto:
-            [% bugowners FILTER html %]">Send&nbsp;Mail&nbsp;to&nbsp;[% terms.Bug %]&nbsp;Assignees</a> |
-        [% END %]
-
-        [%# Links to more things users can do with this bug list. %]
-        [% Hook.process("links") %]
       </td>
     [% END %]
     

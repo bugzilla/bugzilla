@@ -747,6 +747,14 @@ button[disabled], input[type=submit][disabled], input[type=button][disabled], bu
     cursor: pointer;
 }
 
+.notransition {
+  -webkit-transition: none !important;
+  -moz-transition: none !important;
+  -o-transition: none !important;
+  -ms-transition: none !important;
+  transition: none !important;
+}
+
 .calendar_button, .calendar_button:hover {
     box-shadow: none;
     padding: 0;

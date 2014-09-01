@@ -1,0 +1,23 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this file,
+ * You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * This Source Code Form is "Incompatible With Secondary Licenses", as
+ * defined by the Mozilla Public License, v. 2.0. */
+
+#bitly_overlay {
+    position: absolute;
+    background: #eee;
+    border: 1px solid black;
+    padding: 5px;
+    margin: 10px;
+    visibility: collapse;
+    box-shadow: 3px 3px 6px #888;
+    -moz-box-shadow: 3px 3px 6px #888;
+}
+
+#bitly_url {
+    margin: 2px 0;
+    display: block;
+    width: 100%;
+}

@@ -1261,8 +1261,6 @@ sub _bug_to_hash {
     # database call to get the info.
     my %item = %{ filter $params, {
         alias            => $self->type('string', $bug->alias),
-        classification   => $self->type('string', $bug->classification),
-        component        => $self->type('string', $bug->component),
         creation_time    => $self->type('dateTime', $bug->creation_ts),
         id               => $self->type('int', $bug->bug_id),
         is_confirmed     => $self->type('boolean', $bug->everconfirmed),
@@ -1270,7 +1268,6 @@ sub _bug_to_hash {
         op_sys           => $self->type('string', $bug->op_sys),
         platform         => $self->type('string', $bug->rep_platform),
         priority         => $self->type('string', $bug->priority),
-        product          => $self->type('string', $bug->product),
         resolution       => $self->type('string', $bug->resolution),
         severity         => $self->type('string', $bug->bug_severity),
         status           => $self->type('string', $bug->bug_status),
@@ -1291,6 +1288,12 @@ sub _bug_to_hash {
     if (filter_wants $params, 'blocks') {
         my @blocks = map { $self->type('int', $_) } @{ $bug->blocked };
         $item{'blocks'} = \@blocks;
+    }
+    if (filter_wants $params, 'classification') {
+        $item{classification} = $self->type('string', $bug->classification);
+    }
+    if (filter_wants $params, 'component') {
+        $item{component} = $self->type('string', $bug->component);
     }
     if (filter_wants $params, 'cc') {
         my @cc = map { $self->type('email', $_) } @{ $bug->cc || [] };
@@ -1320,6 +1323,9 @@ sub _bug_to_hash {
         my @keywords = map { $self->type('string', $_->name) }
                        @{ $bug->keyword_objects };
         $item{'keywords'} = \@keywords;
+    }
+    if (filter_wants $params, 'product') {
+        $item{product} = $self->type('string', $bug->product);
     }
     if (filter_wants $params, 'qa_contact') {
         my $qa_login = $bug->qa_contact ? $bug->qa_contact->login : '';

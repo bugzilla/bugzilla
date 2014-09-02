@@ -932,6 +932,117 @@ sub extract_flags_from_cgi {
 
 =over
 
+=item C<multi_extract_flags_from_cgi($bug, $hr_vars)>
+
+Checks whether or not there are new flags to create and returns an
+array of hashes. This array is then passed to Flag::create(). This differs
+from the previous sub-routine as it is called for changing multiple bugs
+
+=back
+
+=cut
+
+sub multi_extract_flags_from_cgi {
+    my ($class, $bug, $vars, $skip) = @_;
+    my $cgi = Bugzilla->cgi;
+
+    my $match_status = Bugzilla::User::match_field({
+        '^requestee(_type)?-(\d+)$' => { 'type' => 'multi' },
+    }, undef, $skip);
+
+    $vars->{'match_field'} = 'requestee';
+    if ($match_status == USER_MATCH_FAILED) {
+        $vars->{'message'} = 'user_match_failed';
+    }
+    elsif ($match_status == USER_MATCH_MULTIPLE) {
+        $vars->{'message'} = 'user_match_multiple';
+    }
+
+    # Extract a list of flag type IDs from field names.
+    my @flagtype_ids = map(/^flag_type-(\d+)$/ ? $1 : (), $cgi->param());
+
+    my (@new_flags, @flags);
+
+    # Get a list of active flag types available for this product/component.
+    my $flag_types = Bugzilla::FlagType::match(
+        { 'product_id'   => $bug->{'product_id'},
+          'component_id' => $bug->{'component_id'},
+          'is_active'    => 1 });
+
+    foreach my $flagtype_id (@flagtype_ids) {
+        # Checks if there are unexpected flags for the product/component.
+        if (!scalar(grep { $_->id == $flagtype_id } @$flag_types)) {
+            $vars->{'message'} = 'unexpected_flag_types';
+            last;
+        }
+    }
+
+    foreach my $flag_type (@$flag_types) {
+        my $type_id = $flag_type->id;
+
+        # Bug flags are only valid for bugs
+        next unless ($flag_type->target_type eq 'bug');
+
+        # We are only interested in flags the user tries to create.
+        next unless scalar(grep { $_ == $type_id } @flagtype_ids);
+
+        # Get the flags of this type already set for this bug.
+        my $current_flags = $class->match(
+            { 'type_id'     => $type_id,
+              'target_type' => 'bug',
+              'bug_id'      => $bug->bug_id });
+
+        # We will update existing flags (instead of creating new ones)
+        # if the flag exists and the user has not chosen the 'always add'
+        # option
+        my $update = scalar(@$current_flags) && ! $cgi->param("flags_add-$type_id");
+
+        my $status = $cgi->param("flag_type-$type_id");
+        trick_taint($status);
+
+        my @logins = $cgi->param("requestee_type-$type_id");
+        if ($status eq "?" && scalar(@logins)) {
+            foreach my $login (@logins) {
+                if ($update) {
+                foreach my $current_flag (@$current_flags) {
+                    push (@flags, { id        => $current_flag->id,
+                                    status    => $status,
+                                    requestee => $login,
+                                    skip_roe  => $skip });
+                    }
+                }
+                else {
+                    push (@new_flags, { type_id   => $type_id,
+                                        status    => $status,
+                                        requestee => $login,
+                                        skip_roe  => $skip });
+                }
+
+                last unless $flag_type->is_multiplicable;
+            }
+        }
+        else {
+            if ($update) {
+                foreach my $current_flag (@$current_flags) {
+                    push (@flags, { id      => $current_flag->id,
+                                    status  => $status });
+                }
+            }
+            else {
+                push (@new_flags, { type_id => $type_id,
+                                    status  => $status });
+            }
+        }
+    }
+
+    # Return the list of flags to update and/or to create.
+    return (\@flags, \@new_flags);
+}
+
+=pod
+
+=over
+
 =item C<notify($flag, $old_flag, $object, $timestamp)>
 
 Sends an email notification about a flag being created, fulfilled

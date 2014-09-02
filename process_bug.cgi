@@ -358,6 +358,17 @@ if (defined $cgi->param('id')) {
         $first_bug->add_tag($_) foreach @$tags_added;
     }
 }
+else {
+    # Update flags on multiple bugs. The cgi params are slightly different
+    # than on a single bug, so we need to call a different sub. We also
+    # need to call this per bug, since we might be updating a flag in one
+    # bug, but adding it to a second bug
+    foreach my $b (@bug_objects) {
+        my ($flags, $new_flags)
+            = Bugzilla::Flag->multi_extract_flags_from_cgi($b, $vars);
+        $b->set_flags($flags, $new_flags);
+    }
+}
 
 ##############################
 # Do Actual Database Updates #

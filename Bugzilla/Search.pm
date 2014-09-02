@@ -647,6 +647,7 @@ sub COLUMNS {
 
     foreach my $col (@id_fields) {
         $special_sql{$col} = "map_${col}.name";
+        $columns{"${col}_id"}{name} = "bugs.${col}_id";
     }
 
     # Do the actual column-getting from fielddefs, now.

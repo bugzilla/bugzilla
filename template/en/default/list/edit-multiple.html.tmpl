@@ -321,6 +321,13 @@
   </script>
 [% END %]
 
+[% IF flag_types %]
+<b><label for="flags">Flags:</label></b><br>
+[% PROCESS "flag/list.html.tmpl"
+           edit_multiple_bugs = 1
+           flag_no_header = 1 %]
+[% END %]
+
 [% Hook.process('before_groups') %]
 
 [% IF groups.size > 0 %]

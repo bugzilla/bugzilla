@@ -119,6 +119,9 @@
                 class="flag_select flag_type-[% type.id %]"
                 [% IF !can_edit_flag %] disabled="disabled"[% END %]>
         [%# Only display statuses the user is allowed to set. %]
+        [% IF edit_multiple_bugs %]
+          <option value="--do_not_change--">--do_not_change--</option>
+        [% END %]
         [% IF !flag || (can_edit_flag && user.can_request_flag(type)) || flag.setter_id == user.id %]
           <option value="X"></option>
         [% END %]
@@ -168,6 +171,19 @@
           [% END %]
         </td>
       [% END %]
+      <td>
+        [% IF type.is_multiplicable && edit_multiple_bugs %]
+          <input type="checkbox"
+                 name="flags_add-[% type.id %]"
+                 id="flags_add-[% type.id %]">
+          <label for="flags_add-[% type.id %]">
+            <a class="field_help_link"
+               title="If ticked, always create a new flag. Leaving it unchecked will update existing flag(s) and add a new flag if it does not exist">
+               Always add?
+            </a>
+          </label>
+        [% END %]
+      <td>
     </tr>
   </tbody>
 [% END %]

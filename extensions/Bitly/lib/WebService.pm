@@ -102,6 +102,14 @@ sub _bitly {
 
     # request
     my $ua = LWP::UserAgent->new(agent => 'Bugzilla');
+    $ua->timeout(10);
+    $ua->protocols_allowed(['http', 'https']);
+    if (my $proxy_url = Bugzilla->params->{proxy_url}) {
+        $ua->proxy(['http', 'https'], $proxy_url);
+    }
+    else {
+        $ua->env_proxy();
+    }
     my $response = $ua->get($bitly_url);
     if ($response->is_error) {
         ThrowUserError('bitly_failure', { message => $response->message });

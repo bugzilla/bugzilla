@@ -8,14 +8,32 @@
 package Bugzilla::Extension::Bitly;
 use strict;
 
+use Bugzilla::Install::Util qw(vers_cmp);
+
 use constant NAME => 'Bitly';
-use constant REQUIRED_MODULES => [
-    {
-        package => 'LWP-Protocol-https',
-        module  => 'LWP::Protocol::https',
-        version => 0
-    },
-];
+
+sub REQUIRED_MODULES {
+    my @required;
+    push @required, {
+        package => 'LWP',
+        module  => 'LWP',
+        version => 5,
+    };
+    # LWP 6 split https support into a separate package
+    if (Bugzilla::Install::Requirements::have_vers({
+        package => 'LWP',
+        module  => 'LWP',
+        version => 6,
+    })) {
+        push @required, {
+            package => 'LWP-Protocol-https',
+            module  => 'LWP::Protocol::https',
+            version => 0
+        };
+    }
+    return \@required;
+}
+
 use constant OPTIONAL_MODULES => [
     {
         package => 'Mozilla-CA',

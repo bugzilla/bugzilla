@@ -48,6 +48,7 @@ use constant MODULE_WHITELIST => qw(
     Bugzilla::Config::
     Bugzilla::Extension::
     Bugzilla::Job::
+    Bugzilla::Migrate::
 );
 
 # Capture the TESTOUT from Test::More or Test::Builder for printing errors.

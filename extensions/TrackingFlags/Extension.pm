@@ -30,7 +30,12 @@ use JSON;
 our $VERSION = '1';
 
 BEGIN {
+    *Bugzilla::tracking_flags      = \&_tracking_flags;
     *Bugzilla::tracking_flag_names = \&_tracking_flag_names;
+}
+
+sub _tracking_flags {
+    return Bugzilla::Extension::TrackingFlags::Flag->get_all();
 }
 
 sub _tracking_flag_names {

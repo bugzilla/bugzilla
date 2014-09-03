@@ -48,16 +48,24 @@ var cpts = new Array();
           [% field.description FILTER html %]
         </option>
       [% END %]
+      <option value="~">Contains:</option>
     </select>
   </td>
   <td class="blurb">
     the field that was changed
   </td>
 </tr>
+<tr id="field_contains_row" class="bz_default_hidden">
+  <td>&nbsp;</td>
+  <td>
+      <input name="field_contains" id="field_contains"
+             placeholder="field name" maxlength="63">
+  </td>
+</tr>
 <tr>
   <th>Product:</th>
   <td>
-    <select name="product" id="product" onChange="onFilterProductChange()">
+    <select name="product" id="product">
       <option value="">__Any__</option>
       [% FOREACH product IN selectable_products %]
         <option>[% product.name FILTER html %]</option>
@@ -139,11 +147,11 @@ var cpts = new Array();
       <tr class="[% "row_odd" UNLESS loop.count % 2 %]">
         <td>
           <input type="checkbox" name="remove" value="[% filter.id FILTER none %]"
-                 onChange="onRemoveChange()">
+                 onChange="onFilterRemoveChange()">
         </td>
         <td>[% filter.product ? filter.product.name : 'Any' FILTER html %]</td>
         <td>[% filter.component ? filter.component.name : 'Any' FILTER html %]</td>
-        <td>[% filter.field ? fields.${filter.field.name} || filter.field.description : 'Any' FILTER html %]</td>
+        <td>[% filter.field_description FILTER html %]</td>
         <td>[% filter.relationship ? filter.relationship_name : 'Any' FILTER html %]</td>
         <td>[% filter.action ? 'Exclude' : 'Include' %]</td>
       </tr>

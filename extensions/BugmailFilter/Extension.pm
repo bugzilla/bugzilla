@@ -45,6 +45,9 @@ sub user_preferences {
                 user_id => Bugzilla->user->id,
             };
             $params->{field_name} = $input->{field} || IS_NULL;
+            if ($params->{field_name} eq '~') {
+                $params->{field_name} = '~' . $input->{field_contains};
+            }
             $params->{relationship} = $input->{relationship} || IS_NULL;
             if (my $product_name = $input->{product}) {
                 my $product = Bugzilla::Product->check({
@@ -160,6 +163,20 @@ sub user_preferences {
         }) }
     ];
 
+    # set field_description
+    foreach my $filter (@{ $vars->{filters} }) {
+        my $field_name = $filter->field_name;
+        if (!$field_name) {
+            $filter->field_description('Any');
+        }
+        elsif (substr($field_name, 0, 1) eq '~') {
+            $filter->field_description('~ ' . substr($field_name, 1));
+        }
+        else {
+            $filter->field_description($fields{$field_name} || $filter->field->description);
+        }
+    }
+
     # build a list of tracking-flags, grouped by type
     require Bugzilla::Extension::TrackingFlags::Constants;
     require Bugzilla::Extension::TrackingFlags::Flag;
@@ -203,39 +220,34 @@ sub user_wants_mail {
     });
     return unless @$filters;
 
-    my $fields = [ map { $_->{field_name} } @$diffs ];
+    my $fields = [
+        map { {
+            filter_field => $_->{field_name}, # filter's field_name
+            field_name   => $_->{field_name}, # raw bugzilla field_name
+        } }
+        @$diffs
+    ];
 
     # insert fake fields for new attachments and comments
     if (@$comments) {
         if (grep { $_->type == CMT_ATTACHMENT_CREATED } @$comments) {
-            push @$fields, 'attachment.created';
+            push @$fields, { filter_field => 'attachment.created' };
         }
         if (grep { $_->type != CMT_ATTACHMENT_CREATED } @$comments) {
-            push @$fields, 'comment.created';
+            push @$fields, { filter_field => 'comment.created' };
         }
     }
 
-    # replace tracking flag fields with fake tracking flag types
+    # set filter_field on tracking flags to tracking.$type
     require Bugzilla::Extension::TrackingFlags::Flag;
-    my %count;
-    my @tracking_flags;
-    foreach my $field (@$fields, Bugzilla->tracking_flag_names) {
-        $count{$field}++;
-    }
-    foreach my $field (keys %count) {
-        push @tracking_flags, $field
-            if $count{$field} > 1;
-    }
-    my %tracking_types =
-        map { $_->flag_type => 1 }
-        @{ Bugzilla::Extension::TrackingFlags::Flag->match({
-            name => \@tracking_flags
-        })};
-    foreach my $type (keys %tracking_types) {
-        push @$fields, 'tracking.' . $type;
-    }
-    foreach my $field (Bugzilla->tracking_flag_names) {
-        $fields = [ grep { $_ ne $field } @$fields ];
+    my @tracking_flags = Bugzilla->tracking_flags;
+    foreach my $field (@$fields) {
+        next unless my $field_name = $field->{field_name};
+        foreach my $tracking_flag (@tracking_flags) {
+            if ($field_name eq $tracking_flag->name) {
+                $field->{filter_field} = 'tracking.'. $tracking_flag->flag_type;
+            }
+        }
     }
 
     if (_should_drop($fields, $filters, $args)) {
@@ -290,43 +302,42 @@ sub _should_drop {
     # exclusions
     # drop email where we are excluding all changed fields
 
-    my %exclude = map { $_ => 0 } @$fields;
     my $params = {
         product_id   => $bug->product_id,
         component_id => $bug->component_id,
         rel_map      => \@rel_map,
     };
 
-    foreach my $field_name (@$fields) {
-        $params->{field_name} = $field_name;
+    foreach my $field (@$fields) {
+        $params->{field} = $field;
         foreach my $filter (grep { $_->is_exclude } @$filters) {
             if ($filter->matches($params)) {
-                $exclude{$field_name} = 1;
+                $field->{exclude} = 1;
                 last;
             }
         }
     }
 
     # no need to process includes if nothing was excluded
-    if (!grep { $exclude{$_} } @$fields) {
+    if (!grep { $_->{exclude} } @$fields) {
         return 0;
     }
 
     # inclusions
     # flip the bit for fields that should be included
 
-    foreach my $field_name (@$fields) {
-        $params->{field_name} = $field_name;
+    foreach my $field (@$fields) {
+        $params->{field} = $field;
         foreach my $filter (grep { $_->is_include } @$filters) {
             if ($filter->matches($params)) {
-                $exclude{$field_name} = 0;
+                $field->{exclude} = 0;
                 last;
             }
         }
     }
 
     # drop if all fields are still excluded
-    return !(grep { !$exclude{$_} } keys %exclude);
+    return !(grep { !$_->{exclude} } @$fields);
 }
 
 # catch when fields are renamed, and update the field_name entires

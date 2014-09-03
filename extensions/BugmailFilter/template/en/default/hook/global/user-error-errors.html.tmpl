@@ -10,4 +10,13 @@
   [% title = "Filter Already Exists" %]
   A filter already exists with the selected criteria.
 
+[% ELSIF error == "bugmail_filter_too_long" %]
+  [% title = "Invalid Field Name" %]
+  The field name to filter on is too long (must be 63 character or fewer).
+
+[% ELSIF error == "bugmail_filter_invalid" %]
+  [% title = "Invalid Field Name" %]
+  The field name contains invalid characters (alpha-numeric, underscore and
+  period only).
+
 [% END %]

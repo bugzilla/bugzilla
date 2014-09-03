@@ -19,6 +19,7 @@ use Bugzilla::Extension::BugmailFilter::FakeField;
 use Bugzilla::Field;
 use Bugzilla::Product;
 use Bugzilla::User;
+use Bugzilla::Util qw(trim);
 
 use constant DB_TABLE => 'bugmail_filters';
 
@@ -85,10 +86,20 @@ sub field_name {
     return $_[0]->{field_name} //= '';
 }
 
+sub field_description {
+    my ($self, $value) = @_;
+    $self->{field_description} = $value if defined($value);
+    return $self->{field_description};
+}
+
 sub field {
     my ($self) = @_;
     return unless $self->{field_name};
     if (!$self->{field}) {
+        if (substr($self->{field_name}, 0, 1) eq '~') {
+            # this should never happen
+            die "not implemented";
+        }
         foreach my $field (
             @{ Bugzilla::Extension::BugmailFilter::FakeField->fake_fields() },
             @{ Bugzilla::Extension::BugmailFilter::FakeField->tracking_flag_fields() },
@@ -133,6 +144,14 @@ sub _check_user {
 sub _check_field_name {
     my ($class, $field_name) = @_;
     return undef unless $field_name;
+    if (substr($field_name, 0, 1) eq '~') {
+        $field_name = lc(trim($field_name));
+        $field_name =~ /^~[a-z0-9_\.]+$/
+            || ThrowUserError('bugmail_filter_invalid');
+        length($field_name) <= 64
+            || ThrowUserError('bugmail_filter_too_long');
+        return $field_name;
+    }
     foreach my $rh (@{ FAKE_FIELD_NAMES() }) {
         return $field_name if $rh->{name} eq $field_name;
     }
@@ -147,8 +166,16 @@ sub _check_field_name {
 sub matches {
     my ($self, $args) = @_;
 
-    if ($self->{field_name} && $self->{field_name} ne $args->{field_name}) {
-        return 0;
+    if (my $field_name = $self->{field_name}) {
+        if (substr($field_name, 0, 1) eq '~') {
+            my $substring = quotemeta(substr($field_name, 1));
+            if ($args->{field}->{field_name} !~ /$substring/i) {
+                return 0;
+            }
+        }
+        elsif ($field_name ne $args->{field}->{filter_field}) {
+            return 0;
+        }
     }
 
     if ($self->{product_id} && $self->{product_id} != $args->{product_id}) {

@@ -39,7 +39,7 @@ if (!ON_WINDOWS) {
     foreach my $pscmd (@pscmds) {
         open PH, "$pscmd 2>/dev/null |";
         while (my $line = <PH>) {
-            if ($line =~ /^(?:\S*\/)?(?:httpd|apache)2?\s+(\d+)$/) {
+            if ($line =~ /^(?:\S*\/)?(?:httpd|apache?)2?\s+(\d+)$/) {
                 $sgid = $1 if $1 > $sgid;
             }
         }

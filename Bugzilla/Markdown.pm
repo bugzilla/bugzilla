@@ -47,6 +47,7 @@ our %g_escape_table;
 foreach my $char (split //, '\\`*_{}[]()>#+-.!~') {
     $g_escape_table{$char} = md5_hex($char);
 }
+$g_escape_table{'&lt;'} = md5_hex('&lt;');
 
 sub new {
     my $invocant = shift;
@@ -149,7 +150,7 @@ sub _StripLinkDefinitions {
 sub _DoAutoLinks {
     my ($self, $text) = @_;
 
-    $text =~ s{(?:<|&lt;)((?:https?|ftp):[^'">\s]+)(?:>|&gt;)}{<a href="$1">$1</a>}gi;
+    $text =~ s{(?:<|&lt;)((?:https?|ftp):[^'">\s]+?)(?:>|&gt;)}{<a href="$1">$1</a>}gi;
     return $text;
 }
 
@@ -406,8 +407,11 @@ sub _EncodeCode {
     # In other words, html_quote() will change '&gt;' to '&amp;gt;' and then we will
     # change '&amp;gt' -> '&gt;' -> '>' if we write this substitution as the first one.
     $text =~ s/&amp;/&/g;
+    $text =~ s{<a \s+ href="(?:mailto:)? (.+?)"> \1 </a>}{$1}xmgi;
     $text = $self->SUPER::_EncodeCode($text);
     $text =~ s/~/$g_escape_table{'~'}/go;
+    # Encode '&lt;' to prevent URLs from getting linkified in code spans
+    $text =~ s/&lt;/$g_escape_table{'&lt;'}/go;
 
     return $text;
 }
@@ -426,6 +430,7 @@ sub _UnescapeSpecialChars {
 
     $text = $self->SUPER::_UnescapeSpecialChars($text);
     $text =~ s/$g_escape_table{'~'}/~/go;
+    $text =~ s/$g_escape_table{'&lt;'}/&lt;/go;
 
     return $text;
 }

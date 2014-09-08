@@ -34,9 +34,16 @@ use parent qw(Exporter);
 
 # Create a token used for internal API authentication
 sub issue_api_token {
-    # Generates a random token, adds it to the tokens table, and returns
-    # the token to the caller.
-    return _create_token(Bugzilla->user->id, 'api_token', '');
+    # Generates a random token, adds it to the tokens table if one does not
+    # already exist, and returns the token to the caller.
+    my $dbh  = Bugzilla->dbh;
+    my $user = Bugzilla->user;
+    my ($token) = $dbh->selectrow_array("
+        SELECT token FROM tokens
+         WHERE userid = ? AND tokentype = 'api_token'
+               AND (" . $dbh->sql_date_math('issuedate', '+', (MAX_TOKEN_AGE * 24 - 12), 'HOUR') . ") > NOW()",
+        undef, $user->id);
+    return $token // _create_token($user->id, 'api_token', '');
 }
 
 # Creates and sends a token to create a new user account.

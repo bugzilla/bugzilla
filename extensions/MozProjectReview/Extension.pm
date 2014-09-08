@@ -17,7 +17,9 @@ use Bugzilla::Constants;
 
 our $VERSION = '0.01';
 
-our %tracker_cc = (
+# these users will be cc'd to the parent bug when the corresponding child bug
+# is created, as well as the child bug.
+our %auto_cc = (
     'legal'                   => ['liz@mozilla.com'],
     'sec-review'              => ['curtisk@mozilla.com'],
     'finance'                 => ['waoieong@mozilla.com', 'mcristobal@mozilla.com', 'echoe@mozilla.com'],
@@ -247,12 +249,15 @@ sub _file_child_bug {
         Bugzilla->template->process($full_template, $template_vars, \$comment)
             || ThrowTemplateError(Bugzilla->template->error());
         $bug_data->{'comment'} = $comment;
+        if (exists $auto_cc{$template_suffix}) {
+            $bug_data->{'cc'} = { add => $auto_cc{$template_suffix} };
+        }
         if ($new_bug = Bugzilla::Bug->create($bug_data)) {
             my $set_all = {
                 dependson => { add => [ $new_bug->bug_id ] }
             };
-            if (exists $tracker_cc{$template_suffix}) {
-                $set_all->{'cc'} = { add => $tracker_cc{$template_suffix} };
+            if (exists $auto_cc{$template_suffix}) {
+                $set_all->{'cc'} = { add => $auto_cc{$template_suffix} };
             }
             $parent_bug->set_all($set_all);
             $parent_bug->update($parent_bug->creation_ts);

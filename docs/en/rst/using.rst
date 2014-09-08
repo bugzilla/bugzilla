@@ -749,7 +749,11 @@ Other strings which get linkified in the obvious manner are:
 
 + bug 12345
 
++ bugs 123, 456, 789
+
 + comment 7
+
++ comments 1, 2, 3, 4
 
 + bug 23456, comment 53
 

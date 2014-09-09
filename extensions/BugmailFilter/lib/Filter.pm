@@ -167,7 +167,7 @@ sub matches {
     my ($self, $args) = @_;
 
     if (my $field_name = $self->{field_name}) {
-        if (substr($field_name, 0, 1) eq '~') {
+        if ($args->{field}->{field_name} && substr($field_name, 0, 1) eq '~') {
             my $substring = quotemeta(substr($field_name, 1));
             if ($args->{field}->{field_name} !~ /$substring/i) {
                 return 0;

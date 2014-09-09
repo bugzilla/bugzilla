@@ -39,6 +39,13 @@ sub bug_id        { return $_[0]->{bug_id}        }
 sub user_id       { return $_[0]->{user_id}       }
 sub last_visit_ts { return $_[0]->{last_visit_ts} }
 
+sub user {
+    my $self = shift;
+
+    $self->{user} //= Bugzilla::User->new({ id => $self->user_id, cache => 1 });
+    return $self->{user};
+}
+
 1;
 __END__
 
@@ -80,5 +87,7 @@ listed below.
 =item C<user_id>
 
 =item C<last_visit_ts>
+
+=item C<user>
 
 =back

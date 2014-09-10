@@ -562,10 +562,14 @@ sub datetime_from {
 
     return undef if !@time;
 
-    # strptime() counts years from 1900, and months from 0 (January).
-    # We have to fix both values.
+    # strptime() counts years from 1900, except if they are older than 1901
+    # in which case it returns the full year (so 1890 -> 1890, but 1984 -> 84,
+    # and 3790 -> 1890). We make a guess and assume that 1100 <= year < 3000.
+    $time[5] += 1900 if $time[5] < 1100;
+
     my %args = (
-        year   => $time[5] + 1900,
+        year   => $time[5],
+        # Months start from 0 (January).
         month  => $time[4] + 1,
         day    => $time[3],
         hour   => $time[2],

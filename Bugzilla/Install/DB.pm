@@ -2561,7 +2561,7 @@ sub _fix_whine_queries_title_and_op_sys_value {
                  undef, "Other", "other");
         if (Bugzilla->params->{'defaultopsys'} eq 'other') {
             # We can't actually fix the param here, because WriteParams() will
-            # make $datadir/params unwriteable to the webservergroup.
+            # make $datadir/params.js unwriteable to the webservergroup.
             # It's too much of an ugly hack to copy the permission-fixing code
             # down to here. (It would create more potential future bugs than
             # it would solve problems.)

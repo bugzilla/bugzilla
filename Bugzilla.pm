@@ -122,8 +122,8 @@ sub init_page {
     #
     # This code must go here. It cannot go anywhere in Bugzilla::CGI, because
     # it uses Template, and that causes various dependency loops.
-    if (Bugzilla->params->{"shutdownhtml"}
-        && !grep { $_ eq $script } SHUTDOWNHTML_EXEMPT)
+    if (!grep { $_ eq $script } SHUTDOWNHTML_EXEMPT
+        and Bugzilla->params->{'shutdownhtml'})
     {
         # Allow non-cgi scripts to exit silently (without displaying any
         # message), if desired. At this point, no DBI call has been made
@@ -939,9 +939,9 @@ Change the database object to refer to the main database.
 
 =item C<params>
 
-The current Parameters of Bugzilla, as a hashref. If C<data/params>
-does not exist, then we return an empty hashref. If C<data/params>
-is unreadable or is not valid perl, we C<die>.
+The current Parameters of Bugzilla, as a hashref. If C<data/params.js>
+does not exist, then we return an empty hashref. If C<data/params.js>
+is unreadable or is not valid, we C<die>.
 
 =item C<local_timezone>
 

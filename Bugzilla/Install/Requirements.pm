@@ -166,6 +166,12 @@ sub REQUIRED_MODULES {
         module  => 'File::Slurp',
         version => '9999.13',
     },
+    {
+        package => 'JSON-XS',
+        module  => 'JSON::XS',
+        # 2.0 is the first version that will work with JSON::RPC.
+        version => '2.01',
+    },
     );
 
     if (ON_WINDOWS) {
@@ -297,13 +303,6 @@ sub OPTIONAL_MODULES {
         module  => 'JSON::RPC',
         version => 0,
         feature => ['jsonrpc', 'rest'],
-    },
-    {
-        package => 'JSON-XS',
-        module  => 'JSON::XS',
-        # 2.0 is the first version that will work with JSON::RPC.
-        version => '2.0',
-        feature => ['jsonrpc_faster'],
     },
     {
         package => 'Test-Taint',

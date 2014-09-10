@@ -12,11 +12,16 @@ use strict;
 use warnings;
 
 use parent qw(Exporter);
+use autodie qw(:default);
 
 use Bugzilla::Constants;
 use Bugzilla::Hook;
-use Data::Dumper;
+use Bugzilla::Util qw(trick_taint);
+
+use JSON::XS;
+use File::Slurp;
 use File::Temp;
+use File::Basename;
 
 # Don't export localvars by default - people should have to explicitly
 # ask for it, as a (probably futile) attempt to stop code using it
@@ -93,8 +98,30 @@ sub SetParam {
 sub update_params {
     my ($params) = @_;
     my $answer = Bugzilla->installation_answers;
+    my $datadir = bz_locations()->{'datadir'};
+    my $param;
 
-    my $param = read_param_file();
+    # If the old data/params file using Data::Dumper output still exists,
+    # read it. It will be deleted once the parameters are stored in the new
+    # data/params.js file.
+    my $old_file = "$datadir/params";
+
+    if (-e $old_file) {
+        require Safe;
+        my $s = new Safe;
+
+        $s->rdo($old_file);
+        die "Error reading $old_file: $!" if $!;
+        die "Error evaluating $old_file: $@" if $@;
+
+        # Now read the param back out from the sandbox.
+        $param = \%{ $s->varglob('param') };
+    }
+    else {
+        # Read the new data/params.js file.
+        $param = read_param_file();
+    }
+
     my %new_params;
 
     # If we didn't return any param values, then this is a new installation.
@@ -212,7 +239,6 @@ sub update_params {
     }
 
     # Write any old parameters to old-params.txt
-    my $datadir = bz_locations()->{'datadir'};
     my $old_param_file = "$datadir/old-params.txt";
     if (scalar(keys %oldparams)) {
         my $op_file = new IO::File($old_param_file, '>>', 0600)
@@ -222,12 +248,9 @@ sub update_params {
               " and so have been\nmoved from your parameters file into",
               " $old_param_file:\n";
 
-        local $Data::Dumper::Terse  = 1;
-        local $Data::Dumper::Indent = 0;
-
         my $comma = "";
         foreach my $item (keys %oldparams) {
-            print $op_file "\n\n$item:\n" . Data::Dumper->Dump([$oldparams{$item}]) . "\n";
+            print $op_file "\n\n$item:\n" . $oldparams{$item} . "\n";
             print "${comma}$item";
             $comma = ", ";
         }
@@ -258,6 +281,11 @@ sub update_params {
 
     write_params($param);
 
+    if (-e $old_file) {
+        unlink $old_file;
+        say "$old_file has been converted into $old_file.js, using the JSON format.";
+    }
+
     # Return deleted params and values so that checksetup.pl has a chance
     # to convert old params to new data.
     return %oldparams;
@@ -266,22 +294,10 @@ sub update_params {
 sub write_params {
     my ($param_data) = @_;
     $param_data ||= Bugzilla->params;
+    my $param_file = bz_locations()->{'datadir'} . '/params.js';
 
-    my $datadir    = bz_locations()->{'datadir'};
-    my $param_file = "$datadir/params";
-
-    local $Data::Dumper::Sortkeys = 1;
-
-    my ($fh, $tmpname) = File::Temp::tempfile('params.XXXXX',
-                                              DIR => $datadir );
-
-    print $fh (Data::Dumper->Dump([$param_data], ['*param']))
-      || die "Can't write param file: $!";
-
-    close $fh;
-
-    rename $tmpname, $param_file
-      or die "Can't rename $tmpname to $param_file: $!";
+    my $json_data = JSON::XS->new->canonical->pretty->encode($param_data);
+    write_file($param_file, { binmode => ':utf8', atomic => 1 }, \$json_data);
 
     # It's not common to edit parameters and loading
     # Bugzilla::Install::Filesystem is slow.
@@ -295,21 +311,23 @@ sub write_params {
 
 sub read_param_file {
     my %params;
-    my $datadir = bz_locations()->{'datadir'};
-    if (-e "$datadir/params") {
-        # Note that checksetup.pl sets file permissions on '$datadir/params'
+    my $file = bz_locations()->{'datadir'} . '/params.js';
 
-        # Using Safe mode is _not_ a guarantee of safety if someone does
-        # manage to write to the file. However, it won't hurt...
-        # See bug 165144 for not needing to eval this at all
-        my $s = new Safe;
+    if (-e $file) {
+        my $data;
+        read_file($file, binmode => ':utf8', buf_ref => \$data);
 
-        $s->rdo("$datadir/params");
-        die "Error reading $datadir/params: $!" if $!;
-        die "Error evaluating $datadir/params: $@" if $@;
-
-        # Now read the param back out from the sandbox
-        %params = %{$s->varglob('param')};
+        # If params.js has been manually edited and e.g. some quotes are
+        # missing, we don't want JSON::XS to leak the content of the file
+        # to all users in its error message, so we have to eval'uate it.
+        %params = eval { %{JSON::XS->new->decode($data)} };
+        if ($@) {
+            my $error_msg = (basename($0) eq 'checksetup.pl') ?
+                $@ : 'run checksetup.pl to see the details.';
+            die "Error parsing $file: $error_msg";
+        }
+        # JSON::XS doesn't detaint data for us.
+        trick_taint($params{$_}) foreach keys %params;
     }
     elsif ($ENV{'SERVER_SOFTWARE'}) {
        # We're in a CGI, but the params file doesn't exist. We can't
@@ -319,7 +337,7 @@ sub read_param_file {
        # so that the user sees the error.
        require CGI::Carp;
        CGI::Carp->import('fatalsToBrowser');
-       die "The $datadir/params file does not exist."
+       die "The $file file does not exist."
            . ' You probably need to run checksetup.pl.',
     }
     return \%params;
@@ -375,7 +393,7 @@ specified.
 Description: Writes the parameters to disk.
 
 Params:      C<$params> (optional) - A hashref to write to the disk
-               instead of C<Bugzilla->params>. Used only by
+               instead of C<Bugzilla-E<gt>params>. Used only by
                C<update_params>.
 
 Returns:     nothing
@@ -383,12 +401,12 @@ Returns:     nothing
 =item C<read_param_file()>
 
 Description: Most callers should never need this. This is used
-             by C<Bugzilla->params> to directly read C<$datadir/params>
-             and load it into memory. Use C<Bugzilla->params> instead.
+             by C<Bugzilla-E<gt>params> to directly read C<$datadir/params.js>
+             and load it into memory. Use C<Bugzilla-E<gt>params> instead.
 
 Params:      none
 
-Returns:     A hashref containing the current params in C<$datadir/params>.
+Returns:     A hashref containing the current params in C<$datadir/params.js>.
 
 =item C<param_panels()>
 

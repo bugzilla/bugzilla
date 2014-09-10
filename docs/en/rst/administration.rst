@@ -346,7 +346,7 @@ user_verify_class
     well, you may otherwise not be able to log back in to Bugzilla once
     you log out.
     If this happens to you, you will need to manually edit
-    :file:`data/params` and set user_verify_class to
+    :file:`data/params.js` and set user_verify_class to
     ``DB``.
 
 LDAPserver
@@ -414,7 +414,7 @@ user_verify_class
     well, you may otherwise not be able to log back in to Bugzilla once
     you log out.
     If this happens to you, you will need to manually edit
-    :file:`data/params` and set user_verify_class to
+    :file:`data/params.js` and set user_verify_class to
     ``DB``.
 
 RADIUS_server

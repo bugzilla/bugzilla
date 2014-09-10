@@ -46,10 +46,14 @@ function validateEnterBug(theform) {
         _errorFor(attach_desc, 'attach_desc');
         focus_me = attach_desc;
     }
-    var check_description = status_comment_required[bug_status.value];
-    if (check_description && YAHOO.lang.trim(description.value) == '') {
-        _errorFor(description, 'description');
-        focus_me = description;
+    // bug_status can be undefined if the bug_status field is not editable by
+    // the currently logged in user.
+    if (bug_status) {
+        var check_description = status_comment_required[bug_status.value];
+        if (check_description && YAHOO.lang.trim(description.value) == '') {
+            _errorFor(description, 'description');
+            focus_me = description;
+        }
     }
     if (YAHOO.lang.trim(short_desc.value) == '') {
         _errorFor(short_desc);

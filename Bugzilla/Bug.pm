@@ -555,6 +555,9 @@ sub _preload_referenced_bugs {
     foreach my $bug (@$referenced_bugs) {
         $bug->object_cache_set();
     }
+
+    # preload bug visibility
+    Bugzilla->user->visible_bugs(\@referenced_bug_ids);
 }
 
 sub possible_duplicates {

@@ -190,10 +190,6 @@
   'script',
 ],
 
-'global/site-navigation.html.tmpl' => [
-  'bug.bug_id', 
-],
-
 'bug/comments.html.tmpl' => [
   'comment.id',
   'comment.count',

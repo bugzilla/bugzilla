@@ -93,6 +93,7 @@ sub prod_comp_search {
                INNER JOIN components ON products.id = components.product_id
          WHERE (" . join(" AND ", @terms) . ")
                AND products.id IN (" . join(",", @$enterable_ids) . ")
+               AND components.isactive = 1
       ORDER BY " . join(", ", @order) . " $limit",
         { Slice => {} });
 

@@ -114,7 +114,14 @@ sub get_param_list {
                 'letters_numbers_specialchars' ],
    default => 'no_constraints',
    checker => \&check_multi
-  } );
+  },
+
+  {
+   name => 'password_check_on_login',
+   type => 'b',
+   default => '1'
+  },
+  );
   return @param_list;
 }
 

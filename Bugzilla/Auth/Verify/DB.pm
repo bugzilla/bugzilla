@@ -56,10 +56,19 @@ sub check_credentials {
                };
     } 
 
-    # Force the user to type a longer password if it's too short.
-    if (length($password) < USER_PASSWORD_MIN_LENGTH) {
-        return { failure => AUTH_ERROR, user_error => 'password_current_too_short',
-                 details => { locked_user => $user } };
+    # Force the user to change their password if it does not meet the current
+    # criteria. This should usually only happen if the criteria has changed.
+    if (Bugzilla->usage_mode == USAGE_MODE_BROWSER &&
+        Bugzilla->params->{password_check_on_login})
+    {
+        my $check = validate_password_check($password);
+        if ($check) {
+            return {
+                failure => AUTH_ERROR,
+                user_error => $check,
+                details => { locked_user => $user }
+            }
+        }
     }
 
     # The user's credentials are okay, so delete any outstanding

@@ -510,7 +510,12 @@ sub _tracking_flags_search_nonchanged {
 
     push(@$joins, $bugs_join);
 
-    $args->{'full_field'} = "COALESCE($bugs_alias.value, '---')";
+    if ($operator eq 'isempty' or $operator eq 'isnotempty') {
+        $args->{'full_field'} = "$bugs_alias.value";
+    }
+    else {
+        $args->{'full_field'} = "COALESCE($bugs_alias.value, '---')";
+    }
 }
 
 sub bug_end_of_create {

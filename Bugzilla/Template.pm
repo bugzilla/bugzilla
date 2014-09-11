@@ -813,8 +813,9 @@ sub create {
                                   my $text = shift;
                                   return unless $text;
 
-                                  if ((ref($comment) eq 'HASH' && $comment->{is_markdown})
-                                       || (ref($comment) eq 'Bugzilla::Comment' && $comment->is_markdown))
+                                  if (Bugzilla->feature('markdown')
+                                      && ((ref($comment) eq 'HASH' && $comment->{is_markdown})
+                                         || (ref($comment) eq 'Bugzilla::Comment' && $comment->is_markdown)))
                                   {
                                       return Bugzilla->markdown->markdown($text);
                                   }

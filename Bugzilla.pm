@@ -398,6 +398,8 @@ sub logout_request {
 }
 
 sub markdown {
+    return if !Bugzilla->feature('markdown');
+
     require Bugzilla::Markdown;
     return $_[0]->request_cache->{markdown} ||= Bugzilla::Markdown->new();
 }

@@ -62,8 +62,7 @@ sub markdown {
     my $text = shift;
     my $user = Bugzilla->user;
 
-    if (Bugzilla->feature('markdown')
-        && $user->settings->{use_markdown}->{is_enabled}
+    if ($user->settings->{use_markdown}->{is_enabled}
         && $user->setting('use_markdown') eq 'on')
     {
         return $self->SUPER::markdown($text, @_);

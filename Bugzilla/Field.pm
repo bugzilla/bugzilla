@@ -216,6 +216,8 @@ use constant DEFAULT_FIELDS => (
     {name => 'blocked',      desc => 'Blocks',     in_new_bugmail => 1,
      is_numeric => 1, buglist => 1},
 
+    {name => 'assignee_last_login', desc => 'Assignee Last Login Date', buglist => 1},
+
     {name => 'attachments.description', desc => 'Attachment description'},
     {name => 'attachments.filename',    desc => 'Attachment filename'},
     {name => 'attachments.mimetype',    desc => 'Attachment mime type'},

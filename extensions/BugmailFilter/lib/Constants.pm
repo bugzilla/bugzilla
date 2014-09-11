@@ -36,6 +36,7 @@ use constant FAKE_FIELD_NAMES => [
 # these fields don't make any sense to filter on
 
 use constant IGNORE_FIELDS => qw(
+    assignee_last_login
     attach_data.thedata
     attachments.submitter
     cf_last_resolved

@@ -288,6 +288,9 @@ use constant OPERATOR_FIELD_OVERRIDE => {
     'attach_data.thedata' => MULTI_SELECT_OVERRIDE,
     # We check all attachment fields against this.
     attachments  => MULTI_SELECT_OVERRIDE,
+    assignee_last_login => {
+        _default => \&_assignee_last_login,
+    },
     blocked      => MULTI_SELECT_OVERRIDE,
     bug_file_loc => { _non_changed => \&_nullable },
     bug_group    => MULTI_SELECT_OVERRIDE,
@@ -485,6 +488,13 @@ sub COLUMN_JOINS {
             table => 'profiles',
             join  => 'INNER',
         },
+        assignee_last_login => {
+            as    => 'assignee',
+            from  => 'assigned_to',
+            to    => 'userid',
+            table => 'profiles',
+            join  => 'INNER',
+        },
         reporter => {
             from  => 'reporter',
             to    => 'userid',
@@ -624,6 +634,7 @@ sub COLUMNS {
         
         'longdescs.count' => 'COUNT(DISTINCT map_longdescs_count.comment_id)',
         last_visit_ts => 'bug_user_last_visit.last_visit_ts',
+        assignee_last_login => 'assignee.last_seen_date',
     );
 
     # Backward-compatibility for old field names. Goes new_name => old_name.
@@ -2791,6 +2802,21 @@ sub _days_elapsed {
     
     $args->{full_field} = "(" . $dbh->sql_to_days('NOW()') . " - " .
                                 $dbh->sql_to_days('bugs.delta_ts') . ")";
+}
+
+sub _assignee_last_login {
+    my ($self, $args) = @_;
+
+    push @{ $args->{joins} }, {
+        as    => 'assignee',
+        table => 'profiles',
+        from  => 'assigned_to',
+        to    => 'userid',
+        join  => 'INNER',
+    };
+    # coalesce to 1998 to make it easy to search for users who haven't logged
+    # in since we added last_seen_date
+    $args->{full_field} = "COALESCE(assignee.last_seen_date, '1998-01-01')";
 }
 
 sub _component_nonchanged {

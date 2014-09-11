@@ -1,11 +1,25 @@
-
-
-.. _administration:
+.. _administering:
 
 ======================
 Administering Bugzilla
 ======================
 
+.. toctree::
+   :maxdepth: 2
+
+   administering/parameters
+   administering/preferences
+   administering/users
+   administering/products
+   administering/versions-and-milestones
+   administering/flags
+   administering/fields
+   administering/workflow
+   administering/groups
+   administering/keywords
+   administering/whining
+   administering/extensions
+   
 .. _parameters:
 
 Bugzilla Configuration

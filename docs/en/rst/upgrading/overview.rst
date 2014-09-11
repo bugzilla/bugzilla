@@ -1,3 +1,5 @@
+.. _upgrading-overview:
+
 Overview
 ########
 

@@ -87,15 +87,10 @@ Inline Directives
    can't have a substitution inside a link, or bold inside italics.
 
 A filename or a path to a filename is displayed like this:
-:file:`/path/to/filename.ext`
+:file:`/path/to/{variable-bit-of-path}/filename.ext`
 
 A command to type in the shell is displayed like this:
 :command:`command --arguments`
 
-We place static values for substitution (using |subst-name|) in the file
-:file:`$BUGZILLA_HOME/docs/definitions.rst.tmpl`.
-This gets built into definitions.rst, with the script adding some definitions
-for minimum module versions etc. generated from the source itself. Lines in
-that file look like this:
-
-.. |subst-name| replace:: Some Text Here
+A parameter name is displayed like this:
+:guilabel:`shutdownhtml`

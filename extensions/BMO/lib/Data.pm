@@ -87,6 +87,7 @@ tie(%$cf_visible_in_products, "Tie::IxHash",
     },
     qw/^cf_due_date$/ => {
         "bugzilla.mozilla.org"        => [],
+        "Community Building"          => [],
         "Data & BI Services Team"     => [],
         "Developer Engagement"        => [],
         "Infrastructure & Operations" => [],

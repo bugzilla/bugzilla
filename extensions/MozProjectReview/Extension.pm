@@ -250,7 +250,7 @@ sub _file_child_bug {
             || ThrowTemplateError(Bugzilla->template->error());
         $bug_data->{'comment'} = $comment;
         if (exists $auto_cc{$template_suffix}) {
-            $bug_data->{'cc'} = { add => $auto_cc{$template_suffix} };
+            $bug_data->{'cc'} = $auto_cc{$template_suffix};
         }
         if ($new_bug = Bugzilla::Bug->create($bug_data)) {
             my $set_all = {

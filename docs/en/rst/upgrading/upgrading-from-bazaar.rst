@@ -3,17 +3,17 @@
 Upgrading from Bazaar
 #####################
 
-The procedure to switch to Git is as follows:
+The procedure to switch to Git is as follows. The idea is to switch version
+control systems without changing the exact version of Bugzilla you are using,
+to minimise the risk of conflict or problems. Any major upgrade can then
+happen as a separate step. 
 
-Update Your Bugzilla To The Latest Point Release
-================================================
+Update Bugzilla To The Latest Point Release
+===========================================
 
-The idea is to switch version control systems without changing the exact
-version of Bugzilla you are using, to minimise the risk of conflict or
-problems. Any major upgrade can then happen
-as a separate step. It is recommended that you switch while using the latest
-point release for your version. You can update to the latest point release
-using bzr.
+It is recommended that you switch while using the latest
+point release for your major version. You can update to the latest point
+release using bzr.
 
 First, you need to find what version of Bugzilla you are using. It should be
 in the top right corner of the front page but, if not, open the file
@@ -75,7 +75,7 @@ into a separate directory alongside your existing Bugzilla installation
 
 You will need a copy of the git program. All Linux installations have it;
 search your package manager for "git". On Windows or Mac OS X, you can
-`download the official build <http://www.git-scm.com/downloads>`_. XXXmake_common
+`download the official build <http://www.git-scm.com/downloads>`_.
 
 Once git is installed, run these commands to pull a copy of Bugzilla:
 
@@ -87,8 +87,8 @@ Once git is installed, run these commands to pull a copy of Bugzilla:
 
 Replace $VERSION with the two-digit version number of your current Bugzilla, e.g.
 4.2. These command will automatically change your version to the latest
-point release of version X.Y. :file:`bugzilla-git` is the name of the local
-directory into which the source code will be downloaded.
+point release of version $VERSION. :file:`bugzilla-git` is the name of the
+local directory into which the source code will be downloaded.
 
 Shut Down Bugzilla
 ==================
@@ -158,7 +158,7 @@ Now we swap the directories over, and run checksetup.pl to confirm that all
 is well. From the directory containing the :file:`bugzilla` and
 :file:`bugzilla-git` directories, run:
 
-:command:`mv bugzilla bugzilla-bzr`
+:command:`mv bugzilla bugzilla-old`
 
 :command:`mv bugzilla-git bugzilla`
 

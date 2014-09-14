@@ -32,6 +32,9 @@ steps to take:
    upgrading to and all intermediate versions, particularly the "Notes for
    Upgraders" sections, if present.
 
+   XXX We need to make these more accessible - they are currently rather hard
+   to find. We could collate them on a single page with no intervening cruft.
+
 #. Run the :ref:`sanity-check` on your installation. Attempt to fix all
    warnings that the page produces before you go any further, or it's
    possible that you may experience problems during your upgrade.
@@ -45,8 +48,8 @@ steps to take:
 
 .. _upgrade-modified:
 
-If you have modified your Bugzilla
-----------------------------------
+Customized Bugzilla?
+--------------------
 
 If you have modified the code or templates of your Bugzilla,
 then upgrading requires a bit more thought and effort than the simple process
@@ -94,8 +97,9 @@ your existing database and settings to the new version.
    .. warning:: For some upgrades, running :file:`checksetup.pl` on a large
       installation (75,000 or more bugs) can take a long time,
       possibly several hours, if e.g. indexes need to be rebuilt. If this
-      would be a problem for you, you can determine timings by doing a test
-      upgrade on a development server with the production data.
+      length of downtime would be a problem for you, you can determine
+      timings for your particular situation by doing a test upgrade on a
+      development server with the production data.
 
 .. _upgrade-finish:
 

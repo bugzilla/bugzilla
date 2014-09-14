@@ -22,8 +22,8 @@ home page. It requires a little familiarity with Linux and the command line.
    Here are some tips:
 
    * Choose any server name you like.
-   * When creating the initial user, call it "bugzilla", give it a strong
-     password, and write it down.
+   * When creating the initial Linux user, call it "bugzilla", give it a 
+     strong password, and write that password down.
    * You do not need an encrypted home directory.
    * Choose all the defaults for the "partitioning" part (excepting of course
      where the default is "No" and you need to press "Yes" to continue).
@@ -31,7 +31,7 @@ home page. It requires a little familiarity with Linux and the command line.
      them manually.
    * From the install options, choose "OpenSSH Server" and "LAMP Server".
    * Set the password for the MySQL root user to a strong password, and write
-     it down.
+     that password down.
    * Install the Grub boot loader to the Master Boot Record.
 
    Reboot when the installer finishes.
@@ -124,9 +124,9 @@ home page. It requires a little familiarity with Linux and the command line.
 8. Check Setup
 
    Bugzilla comes with a :file:`checksetup.pl` script which helps with the
-   installation process. It needs to be run twice. The first time, it
+   installation process. It will need to be run twice. The first time, it
    generates a config file (called :file:`localconfig`) for the database
-   access information, and the second time
+   access information, and the second time (step 10)
    it uses the info you put in the config file to set up the database.
 
    :command:`cd /var/www/html`
@@ -176,14 +176,15 @@ home page. It requires a little familiarity with Linux and the command line.
 
     :command:`lynx http://localhost/`
 
-    Using Bugzilla through Lynx doesn't work for real, but viewing the front
-    page can validate visually that it's up and running.
+    It's not really possible to use Bugzilla for real through Lynx, but you
+    can view the front page to validate visually that it's up and running.
     
     You might well need to configure your DNS such that the server has, and
     is reachable by, a name rather than IP address. Doing so is out of scope
     of this document. In the mean time, it is available on your local network
-    at ``http://<ip address>/``, where ``<ip address>`` is probably the "inet addr"
-    value displayed when you run :command:`ifconfig eth0`.
+    at ``http://<ip address>/``, where ``<ip address>`` is (unless you have
+    a complext network setup) the "inet addr" value displayed when you run
+    :command:`ifconfig eth0`.
 
 13. Configure Bugzilla
 
@@ -199,16 +200,16 @@ home page. It requires a little familiarity with Linux and the command line.
     Click "Save Changes" at the bottom of the page.
 
     There are several ways to get Bugzilla to send email. The easiest is to
-    use Gmail, so we do that here so you have it working. Create a new Gmail
-    account for your Bugzilla to use at https://gmail.com. Then, open the "Email"
-    section of the Parameters using the link in the left column, and set the
-    following parameter values:
+    use Gmail, so we do that here so you have it working. Visit
+    https://gmail.com and create a new Gmail account for your Bugzilla to use.
+    Then, open the "Email" section of the Parameters using the link in the
+    left column, and set the following parameter values:
     
     * mail_delivery_method: SMTP
-    * mailfrom: ``bugzilla_email_address@gmail.com``
+    * mailfrom: ``new_gmail_address@gmail.com``
     * smtpserver: ``smtp.gmail.com:465``
-    * smtp_username: ``bugzilla_email_address@gmail.com``
-    * smtp_password: ``the_gmail_password``
+    * smtp_username: ``new_gmail_address@gmail.com``
+    * smtp_password: ``new_gmail_password``
     * smtp_ssl: On
 
     Click "Save Changes" at the bottom of the page.

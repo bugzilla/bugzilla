@@ -4,7 +4,9 @@ Apache
 ######
 
 You have two options for running Bugzilla under Apache - mod_cgi (the
-default) and mod_perl. mod_perl is faster but takes more resources.
+default) and mod_perl. mod_perl is faster but takes more resources. You
+should probably only consider mod_perl if your Bugzilla is going to be heavily
+used.
 
 .. _http-apache-mod_cgi:
 
@@ -46,12 +48,18 @@ some global permissions.
    ``ScriptInterpreterSource Registry-Strict``
    line, see :ref:`Windows specific notes <win32-http>`.
 
+   XXX Does this link still work?
+
 .. _http-apache-mod_perl:
 
 Apache with mod_perl
 ====================
 
 Bugzilla requires version 1.999022 (AKA 2.0.0-RC5) of mod_perl.
+
+XXX Is this relevant any more - how old is that version?
+
+XXX Can one use mod_perl on Windows?
 
 Some configuration is required to make Bugzilla work with Apache
 and mod_perl.
@@ -62,18 +70,20 @@ and mod_perl.
 #. Add the following information to your httpd.conf file, substituting
    where appropriate with your own local paths.
 
-   .. note:: This should be used instead of the <Directory> block
-      shown above. This should also be above any other ``mod_perl``
-      directives within the :file:`httpd.conf` and must be specified
-      in the order as below.
-
-   .. warning:: You should also ensure that you have disabled ``KeepAlive``
-      support in your Apache install when utilizing Bugzilla under mod_perl
-
    .. code-block:: apache
 
        PerlSwitches -w -T
        PerlConfigRequire /var/www/html/bugzilla/mod_perl.pl
+
+   .. note:: This should be used instead of the <Directory> block
+      shown above. This should also be above any other ``mod_perl``
+      directives within the :file:`httpd.conf` and the directives must be
+      specified in the order above.
+
+   .. warning:: You should also ensure that you have disabled ``KeepAlive``
+      support in your Apache install when utilizing Bugzilla under mod_perl
+
+      XXX How?
 
 On restarting Apache, Bugzilla should now be running within the
 mod_perl environment.
@@ -89,11 +99,11 @@ under mod_perl:
 - Under mod_perl, you have to restart Apache if you make any manual change to
   any Bugzilla file. You can't just reload--you have to actually
   *restart* the server (as in make sure it stops and starts
-  again). You *can* change localconfig and the params file
+  again). You *can* change :file:`localconfig` and the :file:`params` file
   manually, if you want, because those are re-read every time you load a page.
 
 - You must run in Apache's Prefork MPM (this is the default). The Worker MPM
-  may not work--we haven't tested Bugzilla's mod_perl support under threads.
+  may not work -- we haven't tested Bugzilla's mod_perl support under threads.
   (And, in fact, we're fairly sure it *won't* work.)
 
 - Bugzilla generally expects to be the only mod_perl application running on

@@ -15,10 +15,6 @@ A filename or a path to a filename is displayed like this:
 A command to type in the shell is displayed like this:
 :command:`command --arguments`
 
-bash$ represents a normal user's prompt under bash shell
-
-bash# represents a root user's prompt under bash shell
-
 A sample of code is illustrated like this:
 
 ::
@@ -27,7 +23,8 @@ A sample of code is illustrated like this:
     Second Line of Code
     ...
 
-This documentation is maintained in reStructured Text format.
+This documentation is maintained in reStructured Text format using the
+`Sphinx <http://www.sphinx-doc.org/>`_ documentation system.
 Changes are best submitted as diffs, attached
 to a bug filed in the `Bugzilla Documentation <https://bugzilla.mozilla.org/enter_bug.cgi?product=Bugzilla;component=Documentation>`_
 component.

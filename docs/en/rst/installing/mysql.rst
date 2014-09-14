@@ -38,12 +38,13 @@ command-line client and enter:
 
     FLUSH PRIVILEGES;
 
-The above permits an account called ``bugs``
+You need to replace ``$db_pass`` with a strong password you have chosen.
+Write that password down somewhere.
+
+The above command permits an account called ``bugs``
 to connect from the local machine, ``localhost``. Modify the command to
 reflect your setup if you will be connecting from another
 machine or as a different user.
-
-Make a note of the password you set.
 
 .. _mysql-max-allowed-packet:
 
@@ -55,7 +56,11 @@ configuration file, which is usually :file:`/etc/my.cnf`
 on Linux.
 
 By default, MySQL will only allow you to insert things
-into the database that are smaller than 1MB. Bugzilla attachments
+into the database that are smaller than 1MB.
+
+XXX Is this still true? It's 16MB on Ubuntu 14.04...
+
+Bugzilla attachments
 may be larger than this. Also, Bugzilla combines all comments
 on a single bug into one field for full-text searching, and the
 combination of all comments on a single bug could in some cases
@@ -64,6 +69,8 @@ be larger than 1MB.
 We recommend that you allow at least 16MB packets by
 adding the ``max_allowed_packet`` parameter to your MySQL
 configuration in the ``[mysqld]`` section, like this:
+
+XXX is "adding" right? Surely it's normally present?
 
 ::
 

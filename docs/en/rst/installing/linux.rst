@@ -3,14 +3,21 @@
 Linux
 #####
 
-Many Linux distributions include Bugzilla and its dependencies in their
+Some Linux distributions include Bugzilla and its dependencies in their
 package management systems. If you have root access, installing Bugzilla on
 any Linux system could be as simple as finding the Bugzilla package in the
 package management application and installing it. There may be a small bit
-of additional configuration required. If you are installing the machine from
-scratch, :ref:`quick-start` may be the best instructions for you.
+of additional configuration required.
 
-XXX What's our current position on Debian/Ubuntu packages of Bugzilla?
+If you are installing your machine from scratch, :ref:`quick-start` may be
+the best instructions for you.
+
+XXX What's our current position on Debian/Ubuntu packages of Bugzilla? Are
+there any, and are they any good?
+
+XXX Which versions of RHEL have packages new enough for us to support them?
+
+XXX What's the right order for all these steps?
 
 Install Packages
 ================
@@ -77,6 +84,13 @@ until the end of the install.
 
 XXX Is this true, if they are installing modules locally?
 
+To check whether you have all the required modules and what is still missing,
+run:
+
+:command:`./checksetup.pl --check-modules`
+
+You can run this command as many times as necessary.
+
 Install all missing modules locally like this:
 
 :command:`./install-module.pl --all`
@@ -84,12 +98,6 @@ Install all missing modules locally like this:
 Or, you can pass an individual module name:
 
 :command:`./install-module.pl <modulename>`
-
-To check you indeed have new enough versions of all the required modules, run:
-
-:command:`./checksetup.pl --check-modules`
-
-You can run this command as many times as necessary.
 
 .. note:: If you are using a package-based distribution, and attempting to
    install the Perl modules from CPAN (e.g. by using
@@ -99,27 +107,27 @@ You can run this command as many times as necessary.
    distribution you are using, but are often called
    :file:`<packagename>-devel`.
 
-.. _config-database:
+   XXX Give examples for Debian/Ubuntu and RedHat?
+
+.. _config-webserver:
 
 Web Server
 ==========
 
-We have instructions for configuring Apache and IIS, although we strongly
-recommend using Apache. However, pretty much any web server that is capable of
-running CGI scripts will work.
+Any web server that is capable of running CGI scripts can be made to work.
+We have specific instructions for the following:
 
 .. toctree::
    :maxdepth: 1
 
    apache
-   iis
-
-XXX Don't need IIS in the Linux docs.
 
 You can run :command:`testserver.pl http://bugzilla-url/` from the command
 line to check if your web server is correctly configured.
 
 XXX Does this work before doing any localconfig stuff?
+
+.. _config-database:
 
 Database Engine
 ===============
@@ -154,29 +162,27 @@ This file contains the default settings for a number of
 Bugzilla parameters, the most important of which are the group your web
 server runs as, and information on how to connect to your database.
 
-Load this file in your editor. The only two values you
-need to change are ``$db_driver`` and ``$db_pass``,
-respectively the type of the database and the password for
-the user you will create for your database. Pick a strong
-password (for simplicity, it should not contain single quote
-characters) and put it here. ``$db_driver`` can be either ``mysql``,
-``Pg``, ``Oracle`` or ``Sqlite`` (case-sensitive).
-
-.. note:: In Oracle, ``$db_name`` should actually be
-   the SID name of your database (e.g. "XE" if you are using Oracle XE).
+Load this file in your editor. You will need to check/change ``$db_driver``
+and ``$db_pass``, which are respectively the type of the database you are
+using and the password for the ``bugs`` database user you have created.
+``$db_driver`` can be either ``mysql``, ``Pg`` (PostgreSQL), ``Oracle`` or
+``Sqlite``. All values are case-sensitive.
 
 Set the value of ``$webservergroup`` to the group your web server runs as.
-The default is ``apache`` (correct for Red Hat/Fedora). On Debian and Ubuntu,
-Apache uses the ``www-data`` group.
+The default is ``apache``, which is correct for Red Hat and Fedora. On Debian
+and Ubuntu, the correct value is ``www-data``.
 
 The other options in the :file:`localconfig` file are documented by their
 accompanying comments. If you have a non-standard database setup, you may
 need to change one or more of the other ``$db_*`` parameters.
 
+.. note:: If you are using Oracle, ``$db_name`` should be set to
+   the SID name of your database (e.g. "XE" if you are using Oracle XE).
+
 checksetup.pl
 =============
 
-Next, run :file:`checksetup.pl` an additional. It reconfirms
+Next, run :file:`checksetup.pl` an additional time. It reconfirms
 that all the modules are present, and notices the altered
 localconfig file, which it assumes you have edited to your
 satisfaction. It compiles the UI templates,
@@ -206,16 +212,13 @@ you should see the Bugzilla front page.
    subdirectory or used a symbolic link from your web site root to
    the Bugzilla directory.
 
-Log in with the administrator account you defined in the last
-:file:`checksetup.pl` run. You should go through
-the Parameters page and see if there are any you wish to change.
-They key parameters are documented in :ref:`parameters`;
-you should certainly alter
-:command:`maintainer` and :command:`urlbase`;
-you may also want to alter
-:command:`cookiepath` or :command:`requirelogin`.
+Next, do the :ref:`post-install-config`.
 
-== Gentoo ==
+XXXX How to we integrate the below (copied from the wiki)?
+
+Gentoo
+======
+
 Gentoo pulls in all dependencies and, if you don't have the vhosts USE flag enabled, installs Bugzilla to /var/www/localhost/bugzilla when you issue:
 
 <code># emerge -av bugzilla</code>
@@ -232,7 +235,8 @@ Else:
 mysql>CREATE DATABASE databasename;<br />
 mysql>GRANT <privs> ON databasename.* to 'bugzillauser'@'hostname' identified by 'pa$$w0rd';</code>
  
-== Fedora ==
+Fedora
+======
 
 '''Please be aware of this:''' https://bugzilla.mozilla.org/show_bug.cgi?id=415605
 (Please remove this link once determined the RPM has been repaired)

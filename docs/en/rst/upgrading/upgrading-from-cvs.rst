@@ -3,11 +3,14 @@
 Upgrading from CVS
 ##################
 
-XXX https://wiki.mozilla.org/Bugzilla:Moving_From_CVS_To_Bazaar
+XXX Fill in commands from https://wiki.mozilla.org/Bugzilla:Moving_From_CVS_To_Bazaar
 
-This will be the same as the Bzr instructions but using CVS commands.
-There are only 3 bzr commands, so we should be able to share the rest of
-the text.
+.. |updatecommand| replace:: :command:`bzr up -r tag:bugzilla-$VERSION`
+.. |diffcommand|   replace:: :command:`bzr diff > patch.diff`
+.. |extstatusinfo| replace:: The command :command:`bzr status extensions/` should help you work out what you added, if anything.
 
-I'm not going to fill it in until the Bzr instructions have had a review,
-to save having to maintain two copies of the same stuff.
+.. include:: upgrading-from-1.rst
+.. include:: get-from-git.rst
+.. include:: upgrading-from-2.rst
+
+

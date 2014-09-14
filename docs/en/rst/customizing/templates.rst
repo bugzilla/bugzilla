@@ -3,13 +3,11 @@
 Templates
 #########
 
-Administrators can configure the look and feel of Bugzilla without
-having to edit Perl files or face the nightmare of massive merge
-conflicts when they upgrade to a newer version in the future.
-
-It's possible to have Bugzilla's UI language
-determined by the user's browser. More information is available in
-:ref:`template-http-accept`.
+Bugzilla uses a system of templates to define its user interface. Templates
+can be modified, replaced or overridden. This means that administrators can
+configure the look and feel of Bugzilla without having to edit Perl files or
+facing the nightmare of massive merge conflicts when they upgrade to a newer
+version in the future.
 
 .. _template-directory:
 
@@ -18,8 +16,7 @@ Template Directory Structure
 
 The template directory structure starts with top level directory
 named :file:`template`, which contains a directory
-for each installed localization. The next level defines the
-language used in the templates. Bugzilla comes with English
+for each installed localization. Bugzilla comes with English
 templates, so the directory name is :file:`en`,
 and we will discuss :file:`template/en` throughout
 the documentation. Below :file:`template/en` is the
@@ -56,16 +53,11 @@ into a mirrored directory structure under
 :file:`template/en/custom`. Templates in this
 directory structure automatically override any identically-named
 and identically-located templates in the
-:file:`default` directory.
+:file:`template/en/default` directory. (The :file:`custom` directory does not
+exist by default and must be created if you want to use it.)
 
-The :file:`custom` directory does not exist at first and must be created if
-you want to use it.
-
-The second method of customization should be used if you
-use the overwriting method of upgrade, because otherwise
-your changes will be lost.  This method may also be better if
-you are using the Bzr method of upgrading and are going to make major
-changes, because it is guaranteed that the contents of this directory
+The second method of customization should be used if you are going to make
+major changes, because it is guaranteed that the contents of this directory
 will not be touched during an upgrade, and you can then decide whether
 to continue using your own templates, or make the effort to merge your
 changes into the new versions by hand.
@@ -73,34 +65,22 @@ changes into the new versions by hand.
 Using this method, your installation may break if incompatible
 changes are made to the template interface.  Such changes should
 be documented in the release notes, provided you are using a
-stable release of Bugzilla.  If you use using unstable code, you will
-need to deal with this one yourself, although if possible the changes
-will be mentioned before they occur in the deprecations section of the
-previous stable release's release notes.
-
-.. note:: Regardless of which method you choose, it is recommended that
-   you run :command:`./checksetup.pl` after
-   editing any templates in the :file:`template/en/default`
-   directory, and after creating or editing any templates in
-   the :file:`custom` directory.
-
-.. warning:: It is *required* that you run :command:`./checksetup.pl` after
-   creating a new
-   template in the :file:`custom` directory. Failure
-   to do so will raise an incomprehensible error message.
+stable release of Bugzilla, so you should be able to see them coming.
 
 .. _template-edit:
 
 How To Edit Templates
 =====================
 
-.. note:: If you are making template changes that you intend on submitting back
-   for inclusion in standard Bugzilla, you should read the relevant
+.. note:: If you are making template changes that you intend on submitting 
+   back for inclusion in standard Bugzilla, you should read the relevant
    sections of the
-   `Developers'
-   Guide <http://www.bugzilla.org/docs/developer.html>`_.
+   `Developers' Guide <http://www.bugzilla.org/docs/developer.html>`_.
 
-The syntax of the Template Toolkit language is beyond the scope of
+   XXX Is this still there?
+
+Bugzilla uses a templating system called Template Toolkit. The syntax of the
+TT language is beyond the scope of
 this guide. It's reasonably easy to pick up by looking at the current
 templates; or, you can read the manual, available on the
 `Template Toolkit home
@@ -115,13 +95,17 @@ Template Toolkit to do this (or the 'uri' filter to encode special
 characters in URLs).  If you forget, you may open up your installation
 to cross-site scripting attacks.
 
-Editing templates is a good way of doing a ``poor man's custom
-fields``.
-For example, if you don't use the Status Whiteboard, but want to have
-a free-form text entry box for ``Build Identifier``,
+XXXMOVE Editing templates is a good way of doing a 'poor man's custom
+fields'.
+For example, if you don't use the :guilabel:`Status Whiteboard`, but want to
+have a free-form text entry box for :guilabel:`Build Identifier`,
 then you can just
 edit the templates to change the field labels. It's still be called
 status_whiteboard internally, but your users don't need to know that.
+
+.. note:: you should run :command:`./checksetup.pl` after
+   editing any templates. Failure to do so may mean your changes are
+   not picked up.
 
 .. _template-formats:
 
@@ -179,130 +163,116 @@ Particular Templates
 There are a few templates you may be particularly interested in
 customizing for your installation.
 
-:command:`index.html.tmpl`:
-This is the Bugzilla front page.
+:file:`index.html.tmpl`:
+  This is the Bugzilla front page.
 
-:command:`global/header.html.tmpl`:
-This defines the header that goes on all Bugzilla pages.
-The header includes the banner, which is what appears to users
-and is probably what you want to edit instead.  However the
-header also includes the HTML HEAD section, so you could for
-example add a stylesheet or META tag by editing the header.
+:file:`global/header.html.tmpl`:
+  This defines the header that goes on all Bugzilla pages.
+  The header includes the banner, which is what appears to users
+  and is probably what you want to edit instead.  However the
+  header also includes the HTML HEAD section, so you could for
+  example add a stylesheet or META tag by editing the header.
 
-:command:`global/banner.html.tmpl`:
-This contains the ``banner``, the part of the header
-that appears
-at the top of all Bugzilla pages.  The default banner is reasonably
-barren, so you'll probably want to customize this to give your
-installation a distinctive look and feel.  It is recommended you
-preserve the Bugzilla version number in some form so the version
-you are running can be determined, and users know what docs to read.
+:file:`global/banner.html.tmpl`:
+  This contains the ``banner``, the part of the header that appears
+  at the top of all Bugzilla pages.  The default banner is reasonably
+  barren, so you'll probably want to customize this to give your
+  installation a distinctive look and feel.  It is recommended you
+  preserve the Bugzilla version number in some form so the version
+  you are running can be determined, and users know what docs to read.
 
-:command:`global/footer.html.tmpl`:
-This defines the footer that goes on all Bugzilla pages.  Editing
-this is another way to quickly get a distinctive look and feel for
-your Bugzilla installation.
+:file:`global/footer.html.tmpl`:
+  This defines the footer that goes on all Bugzilla pages.  Editing
+  this is another way to quickly get a distinctive look and feel for
+  your Bugzilla installation.
 
-:command:`global/variables.none.tmpl`:
-XXX Need to describe the use of this file
+:file:`global/variables.none.tmpl`:
+  XXX Need to describe the use of this file
 
-:command:`list/table.html.tmpl`:
-This template controls the appearance of the bug lists created
-by Bugzilla. Editing this template allows per-column control of
-the width and title of a column, the maximum display length of
-each entry, and the wrap behaviour of long entries.
-For long bug lists, Bugzilla inserts a 'break' every 100 bugs by
-default; this behaviour is also controlled by this template, and
-that value can be modified here.
+:file:`list/table.html.tmpl`:
+  This template controls the appearance of the bug lists created
+  by Bugzilla. Editing this template allows per-column control of
+  the width and title of a column, the maximum display length of
+  each entry, and the wrap behaviour of long entries.
+  For long bug lists, Bugzilla inserts a 'break' every 100 bugs by
+  default; this behaviour is also controlled by this template, and
+  that value can be modified here.
 
-:command:`bug/create/user-message.html.tmpl`:
-This is a message that appears near the top of the bug reporting page.
-By modifying this, you can tell your users how they should report
-bugs.
+:file:`bug/create/user-message.html.tmpl`:
+  This is a message that appears near the top of the bug reporting page.
+  By modifying this, you can tell your users how they should report
+  bugs.
 
-:command:`bug/process/midair.html.tmpl`:
-This is the page used if two people submit simultaneous changes to the
-same bug.  The second person to submit their changes will get this page
-to tell them what the first person did, and ask if they wish to
-overwrite those changes or go back and revisit the bug.  The default
-title and header on this page read "Mid-air collision detected!"  If
-you work in the aviation industry, or other environment where this
-might be found offensive (yes, we have true stories of this happening)
-you'll want to change this to something more appropriate for your
-environment.
+:file:`bug/process/midair.html.tmpl`:
+  This is the page used if two people submit simultaneous changes to the
+  same bug.  The second person to submit their changes will get this page
+  to tell them what the first person did, and ask if they wish to
+  overwrite those changes or go back and revisit the bug.  The default
+  title and header on this page read "Mid-air collision detected!"  If
+  you work in the aviation industry, or other environment where this
+  might be found offensive (yes, we have true stories of this happening)
+  you'll want to change this to something more appropriate for your
+  environment.
 
-:command:`bug/create/create.html.tmpl` and
-:command:`bug/create/comment.txt.tmpl`:
-You may not wish to go to the effort of creating custom fields in
-Bugzilla, yet you want to make sure that each bug report contains
-a number of pieces of important information for which there is not
-a special field. The bug entry system has been designed in an
-extensible fashion to enable you to add arbitrary HTML widgets,
-such as drop-down lists or textboxes, to the bug entry page
-and have their values appear formatted in the initial comment.
-A hidden field that indicates the format should be added inside
-the form in order to make the template functional. Its value should
-be the suffix of the template filename. For example, if the file
-is called :file:`create-cust.html.tmpl`, then
+:file:`bug/create/create.html.tmpl` and :file:`bug/create/comment.txt.tmpl`:
+    You may not wish to go to the effort of creating custom fields in
+    Bugzilla, yet you want to make sure that each bug report contains
+    a number of pieces of important information for which there is not
+    a special field. The bug entry system has been designed in an
+    extensible fashion to enable you to add arbitrary HTML widgets,
+    such as drop-down lists or textboxes, to the bug entry page
+    and have their values appear formatted in the initial comment.
+    A hidden field that indicates the format should be added inside
+    the form in order to make the template functional. Its value should
+    be the suffix of the template filename. For example, if the file
+    is called :file:`create-cust.html.tmpl`, then
 
-::
+    ::
 
-    <input type="hidden" name="format" value="cust">
+        <input type="hidden" name="format" value="cust">
 
-should be used inside the form.
+    should be used inside the form.
 
-An example of this is the mozilla.org
-`guided
-bug submission form <http://landfill.bugzilla.org/bugzilla-tip/enter_bug.cgi?product=WorldControl;format=guided>`_. The code for this comes with the Bugzilla
-distribution as an example for you to copy. It can be found in the
-files
-:file:`create-guided.html.tmpl` and
-:file:`comment-guided.html.tmpl`.
+    An example of this is the mozilla.org
+    `guided
+    bug submission form <http://landfill.bugzilla.org/bugzilla-tip/enter_bug.cgi?product=WorldControl;format=guided>`_. The code for this comes with the Bugzilla
+    distribution as an example for you to copy. It can be found in the
+    files
+    :file:`create-guided.html.tmpl` and :file:`comment-guided.html.tmpl`.
 
-So to use this feature, create a custom template for
-:file:`enter_bug.cgi`. The default template, on which you
-could base it, is
-:file:`custom/bug/create/create.html.tmpl`.
-Call it :file:`create-<formatname>.html.tmpl`, and
-in it, add widgets for each piece of information you'd like
-collected - such as a build number, or set of steps to reproduce.
+    So to use this feature, create a custom template for
+    :file:`enter_bug.cgi`. The default template, on which you
+    could base it, is
+    :file:`custom/bug/create/create.html.tmpl`.
+    Call it :file:`create-<formatname>.html.tmpl`, and
+    in it, add widgets for each piece of information you'd like
+    collected - such as a build number, or set of steps to reproduce.
 
-Then, create a template like
-:file:`custom/bug/create/comment.txt.tmpl`, and call it
-:file:`comment-<formatname>.txt.tmpl`. This
-template should reference the form fields you have created using
-the syntax :file:`[% form.<fieldname> %]`. When a
-bug report is
-submitted, the initial comment attached to the bug report will be
-formatted according to the layout of this template.
+    Then, create a template like
+    :file:`custom/bug/create/comment.txt.tmpl`, and call it
+    :file:`comment-<formatname>.txt.tmpl`. This
+    template should reference the form fields you have created using
+    the syntax :file:`[% form.<fieldname> %]`. When a
+    bug report is
+    submitted, the initial comment attached to the bug report will be
+    formatted according to the layout of this template.
 
-For example, if your custom enter_bug template had a field
+    For example, if your custom enter_bug template had a field
 
-::
+    ::
 
-    <input type="text" name="buildid" size="30">
+        <input type="text" name="buildid" size="30">
 
-and then your comment.txt.tmpl had
+    and then your comment.txt.tmpl had
 
-::
+    ::
 
-    BuildID: \[% form.buildid %]
+        BuildID: [% form.buildid %]
 
-then something like
+    then something like
 
-::
+    ::
 
-    BuildID: 20020303
+        BuildID: 20140303
 
-would appear in the initial comment.
-
-.. _template-http-accept:
-
-Configuring Bugzilla to Detect the User's Language
-==================================================
-
-Bugzilla honours the user's Accept: HTTP header. You can install
-templates in other languages, and Bugzilla will pick the most appropriate
-according to a priority order defined by you. Many
-language templates can be obtained from `<http://www.bugzilla.org/download.html#localizations>`_. Instructions
-for submitting new languages are also available from that location.
+    would appear in the initial comment.

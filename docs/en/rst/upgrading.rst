@@ -11,4 +11,4 @@ Upgrading Bugzilla
    upgrading/upgrading-with-git
    upgrading/upgrading-from-bazaar
    upgrading/upgrading-from-cvs
-   upgrading/upgrading-from-a-tarball
+   upgrading/upgrading-with-a-tarball

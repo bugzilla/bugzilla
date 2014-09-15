@@ -23,10 +23,14 @@ A sample of code is illustrated like this:
     Second Line of Code
     ...
 
-This documentation is maintained in reStructured Text format using the
-`Sphinx <http://www.sphinx-doc.org/>`_ documentation system.
-Changes are best submitted as diffs, attached
-to a bug filed in the `Bugzilla Documentation
+This documentation is maintained in
+`reStructured Text
+<http://docutils.sourceforge.net/docs/user/rst/quickstart.html>`_ format using
+the `Sphinx <http://www.sphinx-doc.org/>`_ documentation system. It has
+recently been rewritten, so undoubtedly has bugs. Please file bugs on it in
+the `Bugzilla Documentation
 <https://bugzilla.mozilla.org/enter_bug.cgi?product=Bugzilla;component=Documentation>`_
-component. There is a :ref:`Style Guide <style-guide>` to help you.
+component. If you want to make a patch, that would be wonderful. Changes are
+best submitted as diffs, attached to a bug. There is a
+:ref:`Style Guide <style-guide>` to help you write any new text and markup.
 

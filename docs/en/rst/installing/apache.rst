@@ -8,6 +8,33 @@ default) and mod_perl. mod_perl is faster but takes more resources. You
 should probably only consider mod_perl if your Bugzilla is going to be heavily
 used.
 
+These instructions require editing the Apache configuration file.
+In Fedora and Red Hat Linux, this file is found as
+:file:`/etc/httpd/conf/httpd.conf`.
+In Ubuntu and Debian, it is :file:`/etc/apache2/apache2.conf`.
+
+Securing Apache
+===============
+
+When external systems interact with Bugzilla via webservices
+(REST/XMLRPC/JSONRPC) they include the user's credentials as part of the URL
+(query-string). Therefore, to avoid storing passwords in clear text on the
+server we recommend configuring Apache to not include the query-string in its
+log files.
+
+#. Edit the Apache configuration file (see above).
+
+#. Find the following line in the above mentioned file, which defines the
+   logging format for ``vhost_combined``:
+
+   .. code-block:: apache
+
+      LogFormat "%v:%p %h %l %u %t \"%r\" %>s %O \"%{Referer}i\" \"%{User-Agent}i\"" vhost_combined
+
+#. Replace ``%r`` with ``%m %U``.
+
+#. Restart Apache.
+
 .. _apache-mod_cgi:
 
 Apache with mod_cgi
@@ -18,9 +45,7 @@ mod_cgi, do the following:
 
 XXX Shouldn't we be using sites-available/sites-enabled here?
 
-#. Load :file:`httpd.conf` in your editor.
-   In Fedora and Red Hat Linux, this file is found in
-   :file:`/etc/httpd/conf`.
+#. Edit the Apache configuration file (see above).
 
 #. Apache uses ``<Directory>``
    directives to permit fine-grained permission setting. Add the

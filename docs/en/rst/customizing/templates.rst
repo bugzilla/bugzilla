@@ -35,37 +35,50 @@ Choosing a Customization Method
 ===============================
 
 If you want to edit Bugzilla's templates, the first decision
-you must make is how you want to go about doing so. There are two
+you must make is how you want to go about doing so. There are three
 choices, and which you use depends mainly on the scope of your
 modifications, and the method you plan to use to upgrade Bugzilla.
 
-The first method of making customizations is to directly edit the
-templates found in :file:`template/en/default`.
-This is probably the best way for minor changes, because when you upgrade
-Bugzilla, either the source code management system or the :file:`patch` tool
-will merge your changes into the new version for you.
+#. You can directly edit the templates found in :file:`template/en/default`.
+   This is probably the best way for minor changes, because when you upgrade
+   Bugzilla, either the source code management system or the :file:`patch` tool
+   will merge your changes into the new version for you.
 
-On the downside, if the merge fails then Bugzilla will not work properly until
-you have fixed the problem and re-integrated your code.
+   On the downside, if the merge fails then Bugzilla will not work properly until
+   you have fixed the problem and re-integrated your code.
 
-The second method is to copy the templates to be modified
-into a mirrored directory structure under
-:file:`template/en/custom`. Templates in this
-directory structure automatically override any identically-named
-and identically-located templates in the
-:file:`template/en/default` directory. (The :file:`custom` directory does not
-exist by default and must be created if you want to use it.)
+#. You can copy the templates to be modified into a mirrored directory
+   structure under :file:`template/en/custom`. Templates in this
+   directory structure automatically override any identically-named
+   and identically-located templates in the
+   :file:`template/en/default` directory. (The :file:`custom` directory does
+   not exist by default and must be created if you want to use it.)
 
-The second method of customization should be used if you are going to make
-major changes, because it is guaranteed that the contents of this directory
-will not be touched during an upgrade, and you can then decide whether
+#. You can use the hooks built into many of the templates to add or modify
+   the UI from an :ref:`extension`. Hooks generally don't go away and have
+   a stable interface. 
+
+The third method is the best if there are hooks in the appropriate places.
+Unlike code hooks, there is no requirement to document template hooks, so
+you just have to open up the template and see (search for 'Hook.process').
+
+If there are no hooks available, then the second method of customization
+should be used if you are going to make major changes, because it is
+guaranteed that the contents of the :file:`custom` directory will not be
+touched during an upgrade, and you can then decide whether
 to continue using your own templates, or make the effort to merge your
-changes into the new versions by hand.
+changes into the new versions by hand. It's also good for entirely new files,
+and for a few files like :file:`bug/create/user-message.html.tmpl` which
+are designed to be entirely replaced.
 
-Using this method, your installation may break if incompatible
-changes are made to the template interface.  Such changes should
+Using the second method, your installation may break if incompatible
+changes are made to the template interface. Such changes should
 be documented in the release notes, provided you are using a
 stable release of Bugzilla, so you should be able to see them coming.
+
+For minor changes, the convenience of the first method is hard to beat. You
+can see what you've changed using :command:`git diff`, which you can't if
+you fork the file into the :file:`custom` directory.
 
 .. _template-edit:
 
@@ -76,8 +89,6 @@ How To Edit Templates
    back for inclusion in standard Bugzilla, you should read the relevant
    sections of the
    `Developers' Guide <http://www.bugzilla.org/docs/developer.html>`_.
-
-   XXX Is this still there?
 
 Bugzilla uses a templating system called Template Toolkit. The syntax of the
 TT language is beyond the scope of
@@ -146,7 +157,7 @@ constant. If your content type is not there, add it. Remember
 the three- or four-letter tag assigned to your content type.
 This tag will be part of the template filename.
 
-.. note:: After adding or changing a content type, it's suitable to
+.. note:: After adding or changing a content type, you need to
    edit :file:`Bugzilla/Constants.pm` in order to reflect
    the changes. Also, the file should be kept up to date after an
    upgrade if content types have been customized in the past.

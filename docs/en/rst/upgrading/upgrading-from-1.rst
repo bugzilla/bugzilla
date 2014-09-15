@@ -6,9 +6,8 @@ happen as a separate step.
 Update Bugzilla To The Latest Point Release
 ===========================================
 
-It is recommended that you switch while using the latest
-point release for your major version. You can update to the latest point
-release using bzr.
+It is recommended that you switch to Git while using the latest
+point release for your major version. 
 
 First, you need to find what version of Bugzilla you are using. It should be
 in the top right corner of the front page but, if not, open the file
@@ -25,10 +24,6 @@ is a list of the final point releases:
 * 3.4.14
 * 3.2.10
 * 3.0.11
-
-XXX Do we need below here? Are these versions in bzr? Will anyone be running
-them from a bzr install?
-
 * 2.22.7
 * 2.20.7
 * 2.18.6
@@ -57,7 +52,7 @@ Download a copy of your current version of Bugzilla from the git repository
 into a separate directory alongside your existing Bugzilla installation
 (which we will assume is in a directory called :file:`bugzilla`).
 
-You will need a copy of the git program. All Linux installations have it;
+You will need a copy of the git program. All Linux distributions have it;
 search your package manager for "git". On Windows or Mac OS X, you can
 `download the official build <http://www.git-scm.com/downloads>`_.
 

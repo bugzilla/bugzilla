@@ -9,16 +9,6 @@ intermediate steps. There is a script named :file:`checksetup.pl` included
 with Bugzilla that will automatically do all of the database migration
 for you.
 
-.. warning:: Upgrading is a one-way process. You cannot "downgrade" an
-   upgraded Bugzilla. If you wish to revert to the old Bugzilla
-   version for any reason, you will have to restore your database
-   from a backup. Those with critical data or large installations may wish
-   to trial the upgrade on a development server first, using a copy of the
-   production data and configuration.
-
-In the commands below, ``$BUGZILLA_HOME`` represents the directory
-in which Bugzilla is installed.
-
 .. _upgrade-before:
 
 Before You Upgrade
@@ -30,21 +20,18 @@ steps to take:
 #. Read the
    `Release Notes <http://www.bugzilla.org/releases/>`_ of the version you're
    upgrading to and all intermediate versions, particularly the "Notes for
-   Upgraders" sections, if present.
+   Upgraders" sections, if present. They may make you aware of additional
+   considerations.
 
    XXX We need to make these more accessible - they are currently rather hard
    to find. We could collate them on a single page with no intervening cruft.
 
 #. Run the :ref:`sanity-check` on your installation. Attempt to fix all
-   warnings that the page produces before you go any further, or it's
+   warnings that the page produces before you start, or it's
    possible that you may experience problems during your upgrade.
 
-#. Shut down your Bugzilla installation by putting some explanatory text
-   in the :param:`shutdownhtml` parameter.
-
-#. Make all necessary :ref:`backups`.
-   *THIS IS VERY IMPORTANT*. If anything goes wrong during the upgrade,
-   having a backup allows you to roll back to a known good state.
+#. Work out how to :ref:`back up <backups>` your Bugzilla entirely, and
+   how to restore from a backup if need be.
 
 .. _upgrade-modified:
 
@@ -67,12 +54,29 @@ changes at all, however, then upgrading should be approximately
 the same amount of work regardless of how long it has been since
 your version was released.
 
-XXX Need more here
+You should do the upgrade on a test system with the same configuration and
+make sure all your customizations still work. If not, port and test them so
+you have them ready for the real thing.
+
+Starting the Upgrade
+====================
+
+When you are ready to go:
+
+#. Shut down your Bugzilla installation by putting some explanatory text
+   in the :param:`shutdownhtml` parameter.
+
+#. Make all necessary :ref:`backups`.
+   *THIS IS VERY IMPORTANT*. If anything goes wrong during the upgrade,
+   having a backup allows you to roll back to a known good state.
 
 .. _upgrade-files:
 
 Getting The New Bugzilla
 ========================
+
+In the commands below, ``$BUGZILLA_HOME`` represents the directory
+in which Bugzilla is installed.
 
 :command:`cd $BUGZILLA_HOME`
 
@@ -80,7 +84,7 @@ Getting The New Bugzilla
 
 :command:`git pull`
 
-XXX How to pull latest stable?
+XXX What is the best way to pull latest stable?
 
 .. _upgrade-database:
 
@@ -109,7 +113,7 @@ Finishing The Upgrade
 #. Reactivate Bugzilla by clear the text that you put into the
    :param:`shutdownhtml` parameter.
 
-#. Run a :ref:`sanity-check` on your
+#. Run another :ref:`sanity-check` on your
    upgraded Bugzilla. It is recommended that you fix any problems
    you see immediately. Failure to do this may mean that Bugzilla
-   will not work entirely correctly. 
+   may not work entirely correctly. 

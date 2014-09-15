@@ -6,6 +6,13 @@ Overview
 You can upgrade Bugzilla from any version to any later version in one go -
 there is no need to pass through intermediate versions unless you are changing
 the method by which you obtain the code along the way.
+
+.. warning:: Upgrading is a one-way process. You cannot "downgrade" an
+   upgraded Bugzilla. If you wish to revert to the old Bugzilla
+   version for any reason, you will have to restore your system
+   from a backup. Those with critical data or large installations may wish
+   to trial the upgrade on a development server first, using a copy of the
+   production data and configuration.
  
 Bugzilla uses the Git version control system to store its code. A modern Bugzilla
 installation consists of a checkout of a stable version of the code from our
@@ -39,6 +46,3 @@ following subdirectories in your root Bugzilla directory:
 It is also possible, particularly if your server machine does not have and
 cannot be configured to have access to the public internet, to upgrade using
 a tarball. See :ref:`upgrading-with-a-tarball`.
-
-Before performing any upgrade, it's a good idea to :ref:`back up <backups>`
-both your Bugzilla directory and your database.

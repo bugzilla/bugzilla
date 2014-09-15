@@ -38,8 +38,8 @@ things should still work.
    appropriate variables in :file:`localconfig`.
 
 6. If the new URL to your new Bugzilla installation is different from the old
-   one, update the :param:`urlbase` parameter in :file:`data/params` using
-   a text editor.
+   one, update the :param:`urlbase` parameter in :file:`data/params.json`
+   using a text editor.
 
 7. Copy the database backup file :file:`bugzilla-backup.sql` file from your
    old server to the new one.

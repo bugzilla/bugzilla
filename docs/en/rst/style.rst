@@ -10,8 +10,10 @@ The Bugzilla documentation uses
 `reStructured Text (reST) <http://docutils.sourceforge.net/rst.html>`_,
 as extended by our documentation compilation tool,
 `Sphinx <http://sphinx-doc.org/>`_. This document is a reST document for
-demonstration purposes. When you build the docs, it gets built (at least in
-the HTML version) as a standalone file, although it isn't as readable in that
+demonstration purposes. To learn from it, you need to read it in reST form.
+
+When you build the docs, this document gets built (at least in
+the HTML version) as a standalone file, although it isn't as useful in that
 form because some of the directives discussed are invisible or change when
 rendered.
 
@@ -74,13 +76,17 @@ this:
 
 .. code-block:: perl
 
-  # This is some Perl code
-  print "Hello";
+   # This is some Perl code
+   print "Hello";
 
 There is a
 `list of all available lexer names <http://pygments.org/docs/lexers/>`_
 available. We currently use ``console``, ``perl``, and ``sql``. ``none`` is
 also a valid value.
+
+Use 4-space indentation, except where a different value is better so that
+things line up. So normally two spaces for bulleted lists, and 3 spaces
+for .. blocks.
 
 Inline Directives
 #################

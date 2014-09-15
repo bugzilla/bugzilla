@@ -3,9 +3,9 @@
 Upgrading with a Tarball
 ########################
 
-If you are unable (or unwilling) to use Git, another option that's
-always available is to obtain a tarball of the latest version from our
-website and upgrade your Bugzilla installation from that.
+If you are unable (or unwilling) to use Git, another option is to obtain a
+tarball of the latest version from our website and upgrade your Bugzilla
+installation using that.
 
 Download Bugzilla
 =================

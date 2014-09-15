@@ -25,9 +25,43 @@ Install Packages
 Use your distribution's package manager to install Perl, your preferred
 database engine (MySQL if in doubt), and a webserver (Apache if in doubt).
 
-XXX Package lists for specific distros
+The commands below will install those things and some of Bugzilla's other
+prerequisites as well. If you find a package doesn't install or the name
+is not found, just remove it from the list and reissue the command.
 
-.. _install-perl:
+Fedora and Red Hat
+------------------
+
+:command:`yum install httpd mysql-server mod_perl mod_perl-devel httpd-devel
+graphviz patchutils gcc perl-DateTime perl-Template-Toolkit perl-Email-Send
+perl-Email-MIME perl-GD perl-Chart perl-Template-GD perl-GDGraph
+perl-GDTextUtil perl-PatchReader perl-MIME-tools perl-LDAP perl-Authen-SASL
+perl-RadiusPerl perl-SOAP-Lite perl-JSON-RPC perl-JSON-XS perl-Test-Taint
+perl-HTML-Scrubber perl-Email-MIME-Attachment-Stripper perl-Email-Reply
+perl-TheSchwartz perl-Daemon-Generic perl-Math-Random-Secure perl-YAML
+perl-Class-Inspector`
+
+If you are running RHEL6, you will have to enable the "RHEL Server Optional"
+channel in RHN to get some of those packages. 
+
+Ubuntu and Debian
+-----------------
+
+:command:`apt-get install git nano`
+
+:command:`apt-get install apache2 mysql-server libappconfig-perl
+libdate-calc-perl libtemplate-perl libmime-perl build-essential
+libdatetime-timezone-perl libdatetime-perl libemail-send-perl
+libemail-mime-perl libemail-mime-modifier-perl libdbi-perl libdbd-mysql-perl
+libcgi-pm-perl libmath-random-isaac-perl libmath-random-isaac-xs-perl
+apache2-mpm-prefork libapache2-mod-perl2 libapache2-mod-perl2-dev
+libchart-perl libxml-perl libxml-twig-perl perlmagick libgd-graph-perl
+libtemplate-plugin-gd-perl libsoap-lite-perl libhtml-scrubber-perl
+libjson-rpc-perl libdaemon-generic-perl libtheschwartz-perl
+libtest-taint-perl libauthen-radius-perl libfile-slurp-perl
+libencode-detect-perl libmodule-build-perl libnet-ldap-perl
+libauthen-sasl-perl libtemplate-perl-doc libfile-mimeinfo-perl
+libhtml-formattext-withlinks-perl libgd-dev lynx-cur`
 
 Perl
 ====

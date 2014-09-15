@@ -123,9 +123,20 @@ confirm the change. This helps to prevent account hijacking.
 API Keys
 ========
 
-API Keys allow you to give a "token" to a web service so it can log in to
-Bugzilla as you without knowing your password. You can then revoke that token
-if you stop using the web service.
+API Keys allow you to give a "token" to some external software so it can log
+in to the WebService API as you without knowing your password. You can then
+revoke that token if you stop using the web service, and you don't need to
+change your password everywhere.
+
+You can create more than one API key if required. Each API key has an optional
+description which can help you record what each key is used for.
+
+On this page, you can unrevoke, revoke and change the description of existing
+API keys for your login. A revoked key means that it cannot be used. The
+description for purely for your information, and is optional.
+
+You can also create a new API key by selecting the check box under the 'New
+API key' section of the page.
 
 .. _permissions:
 

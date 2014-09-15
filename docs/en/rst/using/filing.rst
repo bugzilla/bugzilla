@@ -23,14 +23,14 @@ for the bug that bit you.
 
 The procedure for filing a bug is as follows:
 
-#. Click the ``New`` link available in the header or footer
-   of pages, or the ``File a Bug`` link on the home page.
+#. Click the :guilabel:`New` link available in the header or footer
+   of pages, or the :guilabel:`File a Bug` link on the home page.
 
 #. First, you have to select the product in which you found a bug.
 
 #. You now see a form where you can specify the component (part of
    the product which is affected by the bug you discovered; if you have
-   no idea, just select ``General`` if such a component exists),
+   no idea, just select :guilabel:`General` if such a component exists),
    the version of the program you were using, the operating system and
    platform your program is running on and the severity of the bug (if the
    bug you found crashes the program, it's probably a major or a critical
@@ -38,7 +38,7 @@ The procedure for filing a bug is as follows:
    something you would like to see implemented, then that's an enhancement).
 
 #. You also need to provide a short but descriptive summary of the bug you found.
-   ``My program is crashing all the time`` is a very poor summary
+   "My program is crashing all the time" is a very poor summary
    and doesn't help developers at all. Try something more meaningful or
    your bug will probably be ignored due to a lack of precision.
    In the Description, give a detailed list of steps to reproduce
@@ -67,7 +67,7 @@ The procedure for filing a bug is as follows:
    should know in order to reproduce the problem, and make sure your
    description of the problem is explicit and clear enough.
    When you think your bug report is ready to go, the last step is to
-   click the ``Submit Bug`` button to add your report into the database.
+   click the :guilabel:`Submit Bug` button to add your report into the database.
 
 .. _cloning-a-bug:
 
@@ -77,7 +77,7 @@ Clone an Existing Bug
 Bugzilla allows you to 'clone' an existing bug. The newly created bug will
 inherit most settings from the old bug. This allows you to track similar
 concerns which require different handling in a new bug. To use this, go to
-the bug that you want to clone, then click the ``Clone This Bug``
-link on the bug page. This will take you to the ``Enter Bug``
+the bug that you want to clone, then click the :guilabel:`Clone This Bug`
+link on the bug page. This will take you to the :guilabel:`Enter Bug`
 page that is filled with the values that the old bug has.
 You can then change the values and/or text if needed.

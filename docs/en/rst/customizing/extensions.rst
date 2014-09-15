@@ -11,5 +11,6 @@ effort.
 
 We maintain a
 `list of available extensions <https://wiki.mozilla.org/Bugzilla:Addons>`_
-on our wiki. You would need to
+written by other people on our wiki. You would need to
 make sure that the extension in question works with your version of Bugzilla.
+Or you can look into :ref:`writing your own extension <writing-extensions>`.

@@ -19,7 +19,11 @@ Other strings which get linkified in the obvious manner are:
 
 + bug 12345
 
++ bugs 123, 456, 789
+
 + comment 7
+
++ comments 1, 2, 3, 4
 
 + bug 23456, comment 53
 
@@ -59,3 +63,29 @@ If you feel a bug you filed was incorrectly marked as a
 DUPLICATE of another, please question it in your bug, not
 the bug it was duped to. Feel free to CC the person who duped it
 if they are not already CCed.
+
+.. _markdown:
+
+Markdown
+--------
+
+Markdown is a structured plain-text format which lets you write comments that
+have more styling than plain text. For example, you may use Markdown for
+making a part of your comment look italic or bold in the generated HTML.
+Bugzilla supports most of the structures defined by
+`standard Markdown <http://daringfireball.net/projects/markdown/basics>`_,
+but does NOT support inline images and inline HTML.
+
+Additionally, three Github Flavored Markdown features are supported.
+
+* `Multiple underscores in words <https://help.github.com/articles/github-flavored-markdown#multiple-underscores-in-words>`_
+
+* `strikethrough <https://help.github.com/articles/github-flavored-markdown#strikethrough>`_
+
+* `fenced code blocks <https://help.github.com/articles/github-flavored-markdown#fenced-code-blocks>`_
+
+To use the Markdown feature, make sure that :guilabel:`Enable Markdown
+support for comments` is set to :guilabel:`on`
+in your :ref:`user-preferences` and that you also check the :guilabel:`Use
+Markdown for this comment` option below the comment box when you want to
+submit a new comment which uses Markdown.

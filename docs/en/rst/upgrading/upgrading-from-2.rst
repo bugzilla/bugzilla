@@ -9,7 +9,7 @@ If you have made customizations to your Bugzilla, and you made them by
 changing the Bugzilla code itself (rather than using the Extension system),
 then :file:`patch.diff` will have non-zero size. You will want to keep a copy
 of those changes by keeping a copy of this file. If the file has zero size,
-you haven't made any local customizations.
+you haven't made any local customizations of this sort.
 
 Shut Down Bugzilla
 ==================
@@ -33,13 +33,12 @@ of Bugzilla into the corresponding directory in :file:`bugzilla-new/`:
 
   lib/
   data/
+  template/en/custom (may or may not exist)
 
-You also need to copy an extensions you have written or installed, which are
-in the :file:`extensions/` directory.
+You also need to copy any extensions you have written or installed, which are
+in the :file:`extensions/` directory. |extstatusinfo|
 
-|extstatusinfo|
-
-Then, copy the following file from your current installation of Bugzilla
+Lastly, copy the following file from your current installation of Bugzilla
 into the corresponding place in :file:`bugzilla-new/`:
 
 .. code-block:: none

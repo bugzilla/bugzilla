@@ -941,8 +941,8 @@ Change the database object to refer to the main database.
 
 =item C<params>
 
-The current Parameters of Bugzilla, as a hashref. If C<data/params.js>
-does not exist, then we return an empty hashref. If C<data/params.js>
+The current Parameters of Bugzilla, as a hashref. If C<data/params.json>
+does not exist, then we return an empty hashref. If C<data/params.json>
 is unreadable or is not valid, we C<die>.
 
 =item C<local_timezone>

@@ -109,7 +109,7 @@ my $lc_hash = Bugzilla->localconfig;
 
 # At this point, localconfig is defined and is readable. So we know
 # everything we need to create the DB. We have to create it early,
-# because some data required to populate data/params.js is stored in the DB.
+# because some data required to populate data/params.json is stored in the DB.
 
 Bugzilla::DB::bz_check_requirements(!$silent);
 Bugzilla::DB::bz_create_database() if $lc_hash->{'db_check'};
@@ -364,7 +364,7 @@ L<Bugzilla::Install::Filesystem/create_htaccess>.
 
 =item 9
 
-Updates the system parameters (stored in F<data/params.js>), using
+Updates the system parameters (stored in F<data/params.json>), using
 L<Bugzilla::Config/update_params>.
 
 =item 10

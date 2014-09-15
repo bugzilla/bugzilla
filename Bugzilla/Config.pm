@@ -103,7 +103,7 @@ sub update_params {
 
     # If the old data/params file using Data::Dumper output still exists,
     # read it. It will be deleted once the parameters are stored in the new
-    # data/params.js file.
+    # data/params.json file.
     my $old_file = "$datadir/params";
 
     if (-e $old_file) {
@@ -118,7 +118,12 @@ sub update_params {
         $param = \%{ $s->varglob('param') };
     }
     else {
-        # Read the new data/params.js file.
+        # Rename params.js to params.json if checksetup.pl
+        # was executed with an earlier version of this change
+        rename "$old_file.js", "$old_file.json"
+            if -e "$old_file.js" && !-e "$old_file.json";
+
+        # Read the new data/params.json file.
         $param = read_param_file();
     }
 
@@ -283,7 +288,7 @@ sub update_params {
 
     if (-e $old_file) {
         unlink $old_file;
-        say "$old_file has been converted into $old_file.js, using the JSON format.";
+        say "$old_file has been converted into $old_file.json, using the JSON format.";
     }
 
     # Return deleted params and values so that checksetup.pl has a chance
@@ -294,7 +299,7 @@ sub update_params {
 sub write_params {
     my ($param_data) = @_;
     $param_data ||= Bugzilla->params;
-    my $param_file = bz_locations()->{'datadir'} . '/params.js';
+    my $param_file = bz_locations()->{'datadir'} . '/params.json';
 
     my $json_data = JSON::XS->new->canonical->pretty->encode($param_data);
     write_file($param_file, { binmode => ':utf8', atomic => 1 }, \$json_data);
@@ -311,13 +316,13 @@ sub write_params {
 
 sub read_param_file {
     my %params;
-    my $file = bz_locations()->{'datadir'} . '/params.js';
+    my $file = bz_locations()->{'datadir'} . '/params.json';
 
     if (-e $file) {
         my $data;
         read_file($file, binmode => ':utf8', buf_ref => \$data);
 
-        # If params.js has been manually edited and e.g. some quotes are
+        # If params.json has been manually edited and e.g. some quotes are
         # missing, we don't want JSON::XS to leak the content of the file
         # to all users in its error message, so we have to eval'uate it.
         %params = eval { %{JSON::XS->new->decode($data)} };
@@ -401,12 +406,12 @@ Returns:     nothing
 =item C<read_param_file()>
 
 Description: Most callers should never need this. This is used
-             by C<Bugzilla-E<gt>params> to directly read C<$datadir/params.js>
+             by C<Bugzilla-E<gt>params> to directly read C<$datadir/params.json>
              and load it into memory. Use C<Bugzilla-E<gt>params> instead.
 
 Params:      none
 
-Returns:     A hashref containing the current params in C<$datadir/params.js>.
+Returns:     A hashref containing the current params in C<$datadir/params.json>.
 
 =item C<param_panels()>
 

@@ -55,7 +55,7 @@ values. If none is selected, then the field can take any value.
 After a search is run, you can save it as a Saved Search, which
 will appear in the page footer. If you are in the group defined
 by the "querysharegroup" parameter, you may share your queries
-with other users, see :ref:`savedsearches` for more details.
+with other users, see :ref:`saved-searches` for more details.
 
 .. _custom-search:
 

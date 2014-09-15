@@ -182,7 +182,7 @@ emailregexp
     used for login names. The default attempts to match fully
     qualified email addresses (i.e. 'user\@example.com') in a slightly
     more restrictive way than what is allowed in RFC 2822.
-    Another popular value to put here is :paramval:``^[^@]+`, which means 'local usernames, no @ allowed.' 
+    Another popular value to put here is :paramval:`^[^@]+`, which means 'local usernames, no @ allowed.' 
 
 emailregexpdesc
     This description is shown to the user to explain which email addresses are allowed by the :param:`emailregexp` param. 
@@ -406,7 +406,7 @@ timetrackinggroup
 querysharegroup
     The name of the group of users who are allowed to share saved
     searches with one another. For more information on using
-    saved searches, see :ref:`savedsearches`.
+    saved searches, see :ref:`saved-searches`.
 
 comment_taggers_group
     The name of the group of users who can tag comment. Setting this to empty disables comment tagging.

@@ -94,11 +94,7 @@ Serving the web pages
 
 As is the case on Unix based systems, any web server should
 be able to handle Bugzilla; however, the Bugzilla Team still
-recommends Apache whenever asked. No matter what web server
-you choose, be sure to pay attention to the security notes
-in :ref:`security-webserver-access`. More
-information on configuring specific web servers can be found
-in :ref:`http`.
+recommends Apache whenever asked.
 
 .. note:: The web server looks at :file:`/usr/bin/perl` to
    call Perl. If you are using Apache on windows, you can set the

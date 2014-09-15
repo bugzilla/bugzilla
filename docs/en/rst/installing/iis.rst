@@ -63,6 +63,6 @@ doesn't use any of them.
 Also, and this can't be stressed enough, make sure that files
 such as :file:`localconfig` and your
 :file:`data` directory are
-secured as described in :ref:`security-webserver-access`.
+secured.
 
 XXX See also https://wiki.mozilla.org/Installing_under_IIS_7.5

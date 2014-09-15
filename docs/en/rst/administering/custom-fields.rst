@@ -85,7 +85,7 @@ The following attributes must be set for each new custom field:
 - *Can be set on bug creation:*
   Boolean that determines whether this field can be set on
   bug creation. If not selected, then a bug must be created
-  before this field can be set. See :ref:`bugreports`
+  before this field can be set. See :ref:`filing`
   for information about filing bugs.
 
 - *Displayed in bugmail for new bugs:*

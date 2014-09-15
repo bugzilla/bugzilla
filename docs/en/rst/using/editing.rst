@@ -31,7 +31,7 @@ field; Bugzilla will convert it into an attachment. This is pretty useful
 when you are copying and pasting, to avoid the extra step of saving the text
 in a temporary file.
 
-.. _flags:
+.. _editing-flags:
 
 Flags
 =====

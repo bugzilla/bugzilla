@@ -8,6 +8,8 @@ Bugs in Bugzilla are classified into one of a set of admin-defined Components.
 Components are themselves each part of a single Product. Optionally, Products
 can be part of a single Classification, adding a third level to the hierarchy.
 
+.. _classifications:
+
 Classifications
 ###############
 
@@ -69,7 +71,7 @@ Version
 Create chart datasets for this product
     Select to make chart datasets available for this product.
 
-It is compulsory to create at least one :ref:`component` in a product, and
+It is compulsory to create at least one :ref:`component <components>` in a product, and
 so you will be asked for the details of that too.
  
 When editing a product you can change all of the above, and there is also a

@@ -55,7 +55,7 @@ modifications, and the method you plan to use to upgrade Bugzilla.
    not exist by default and must be created if you want to use it.)
 
 #. You can use the hooks built into many of the templates to add or modify
-   the UI from an :ref:`extension`. Hooks generally don't go away and have
+   the UI from an :ref:`extension <extensions>`. Hooks generally don't go away and have
    a stable interface. 
 
 The third method is the best if there are hooks in the appropriate places.

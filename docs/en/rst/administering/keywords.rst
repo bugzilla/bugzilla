@@ -11,7 +11,7 @@ bugs much easier.
 
 Keywords are global, rather than per-product. If the administrator changes
 a keyword currently applied to any bugs, the keyword cache must be rebuilt
-using the :ref:`sanitycheck` script. XXXDoes this mean changing the name of the keyword? Is it still true?
+using the :ref:`sanity-check` script. XXXDoes this mean changing the name of the keyword? Is it still true?
 Currently keywords cannot
 be marked obsolete to prevent future usage.
 

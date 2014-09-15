@@ -166,8 +166,8 @@ A User can become a member of a group in several ways:
    address in the search results to edit their profile. The profile
    page lists all the groups, and indicates if the user is a member of
    the group either directly or indirectly. More information on indirect
-   group membership is below. For more details on User administration,
-   see :ref:`useradmin`.
+   group membership is below. For more details on User Administration,
+   see :ref:`users`.
 
 #. The group can include another group of which the user is
    a member. This is indicated by square brackets around the checkbox

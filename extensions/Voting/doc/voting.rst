@@ -3,7 +3,7 @@
 Voting
 ######
 
-To enable the Voting exteion, you must remove the :file:`disabled`
+To enable the Voting extension, you must remove the :file:`disabled`
 file from the directory :file:`extensions/Voting/`, and run
 :file:`checksetup.pl`.
 

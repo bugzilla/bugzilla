@@ -17,6 +17,8 @@ Bugzilla installation (which we will assume is in a directory called
 :file:`bugzilla`).
 
 .. |diffcommand|   replace:: :command:`diff -u > patch.diff`
-.. |extstatusinfo| replace:: With no SCM to help you, you will have to work out by hand which extensions came with Bugzilla and which you added.
+.. |extstatusinfo| replace:: With no SCM to help you, you will have to
+                             work out by hand which extensions came with
+                             Bugzilla and which you added.
 
 .. include:: upgrading-from-2.rst

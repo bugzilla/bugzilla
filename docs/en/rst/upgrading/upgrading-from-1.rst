@@ -1,5 +1,3 @@
-:orphan:
-
 The procedure to switch to Git is as follows. The idea is to switch version
 control systems without changing the exact version of Bugzilla you are using,
 to minimise the risk of conflict or problems. Any major upgrade can then
@@ -49,3 +47,28 @@ Then run checksetup to upgrade your database:
 
 You should then test your Bugzilla carefully, or just use it for a day or two,
 to make sure it's all still working fine.
+
+.. _get-from-git:
+
+Download Code from Git
+======================
+
+Download a copy of your current version of Bugzilla from the git repository
+into a separate directory alongside your existing Bugzilla installation
+(which we will assume is in a directory called :file:`bugzilla`).
+
+You will need a copy of the git program. All Linux installations have it;
+search your package manager for "git". On Windows or Mac OS X, you can
+`download the official build <http://www.git-scm.com/downloads>`_.
+
+Once git is installed, run these commands to pull a copy of Bugzilla:
+
+:command:`git clone https://git.mozilla.org/bugzilla/bugzilla bugzilla-new`
+
+:command:`cd bugzilla-new`
+
+:command:`git checkout $VERSION`
+
+Replace $VERSION with the two-digit version number of your current Bugzilla, e.g.
+4.2. These command will automatically change your version to the latest
+point release of version $VERSION.

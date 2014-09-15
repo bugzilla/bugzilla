@@ -15,7 +15,7 @@ things should still work.
 
 1. Shut down your Bugzilla by loading the front page, going to
    :guilabel:`Administration` | :guilabel:`Parameters` | :guilabel:`General`
-   and putting some text into the :guilabel:`shutdownhtml` parameter.
+   and putting some text into the :param:`shutdownhtml` parameter.
 
 2. Make a backup of the bugs database. For a typical Bugzilla setup using
    MySQL, such a command might look like this:
@@ -30,8 +30,6 @@ things should still work.
    :ref:`installing`. Look at the old machine if you need to know what values
    you used for configuring e.g. MySQL.
 
-   XXX Need to say how far to go on the install
-
 4. Copy the :file:`data` directory and the :file:`localconfig` file from the
    old Bugzilla installation to the new one.
 
@@ -40,22 +38,22 @@ things should still work.
    appropriate variables in :file:`localconfig`.
 
 6. If the new URL to your new Bugzilla installation is different from the old
-   one, update the :guilabel:`urlbase` parameter in :file:`data/params` using
+   one, update the :param:`urlbase` parameter in :file:`data/params` using
    a text editor.
 
 7. Copy the database backup file :file:`bugzilla-backup.sql` file from your
    old server to the new one.
 
-8. Create an empty "bugs" database on the new server:
+8. Create an empty ``bugs`` database on the new server:
 
    :command:`mysql -u root -p -e "CREATE DATABASE bugs DEFAULT CHARACTER SET utf8;"`
 
-9. Import your :file:`bugzilla-backup.sql` file into your new "bugs" database:
+9. Import your :file:`bugzilla-backup.sql` file into your new ``bugs`` database:
 
    :command:`mysql -u root -p bugs < bugzilla-backup.sql`
 
-   If you get an error about "packet too large" or "mysql server has gone
-   away", you need to adjust the :guilabel:`max_allowed_packet` setting in
+   If you get an error about "packet too large" or "MySQL server has gone
+   away", you need to adjust the ``max_allowed_packet`` setting in
    your :file:`my.cnf` file (usually :file:`/etc/my.cnf`) file to be larger
    than the largest attachment ever added to your Bugzilla.
 
@@ -70,4 +68,4 @@ things should still work.
 
 11. Activate your new Bugzilla by loading the front page, going to
     :guilabel:`Administration` | :guilabel:`Parameters` | :guilabel:`General`
-    and removing the text from the :guilabel:`shutdownhtml` parameter.
+    and removing the text from the :param:`shutdownhtml` parameter.

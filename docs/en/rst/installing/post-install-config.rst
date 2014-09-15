@@ -17,26 +17,26 @@ explicitly decide not to change).
 
 The first set of these are in the :guilabel:`Required Settings` section.
 
-* :guilabel:`urlbase`: this is the URL by which people should access
+* :param:`urlbase`: this is the URL by which people should access
   Bugzilla's front page.
-* :guilabel:`sslbase`: if you have configured SSL on your Bugzilla server,
+* :param:`sslbase`: if you have configured SSL on your Bugzilla server,
   this is the SSL URL by which people should access Bugzilla's front page.
-* :guilabel:`ssl_redirect`: Set this if you want everyone to be redirected
+* :param:`ssl_redirect`: Set this if you want everyone to be redirected
   to use the SSL version. Recommended if you have set up SSL.
-* :guilabel:`cookiebase`: Bugzilla uses cookies to remember who each user is.
+* :param:`cookiebase`: Bugzilla uses cookies to remember who each user is.
   In order to set those cookies in the correct scope, you may need to set a
   cookiebase. If your Bugzilla is at the root of your domain, you don't need
   to change the default value.
 
 You will also need to tell Bugzilla how to :ref:`send email <email>`.
 
-You may want to put your email address in the :guilabel:`maintainer`
+You may want to put your email address in the :param:`maintainer`
 parameter in the :guilabel:`General` section. This will then let people
 know who to contact if they see problems or hit errors.
 
 If you don't want just anyone able to read your Bugzilla, set the
-:guilabel:`requirelogin` parameter in the :guilabel:`User Authentication`
-section, and change or clear the :guilabel:`createemailregexp` parameter.
+:param:`requirelogin` parameter in the :guilabel:`User Authentication`
+section, and change or clear the :param:`createemailregexp` parameter.
 
 .. _optional-features:
 
@@ -128,30 +128,6 @@ graphs. This example runs it every 15 minutes.
    Scheduler, which performs the same duties. There are also
    third-party tools that can be used to implement cron, such as
    `nncron <http://www.nncron.ru/>`_.
-
-.. _apache-addtype:
-
-Serving Alternate Formats with the right MIME type
---------------------------------------------------
-
-Some Bugzilla pages have alternate formats, other than just plain
-HTML. In particular, a few Bugzilla pages can
-output their contents as either XUL (a special
-Mozilla format, that looks like a program GUI)
-or RDF (a type of structured XML
-that can be read by various programs).
-
-In order for your users to see these pages correctly, Apache must
-send them with the right MIME type. To do this,
-add the following lines to your Apache configuration, either in the
-``<VirtualHost>`` section for your
-Bugzilla, or in the ``<Directory>``
-section for your Bugzilla:
-
-.. code-block:: apache
-
-    AddType application/vnd.mozilla.xul+xml .xul
-    AddType application/rdf+xml .rdf
 
 .. _multiple-bz-dbs:
 

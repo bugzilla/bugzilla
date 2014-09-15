@@ -1,4 +1,4 @@
-.. _install-oracle:
+.. _oracle:
 
 Oracle
 ######
@@ -7,6 +7,8 @@ Oracle
    it. Your mileage may vary.
 
 You need Oracle version 10.02.0 or later.
+
+.. _oracle-tablespace:
 
 Create a New Tablespace
 =======================
@@ -26,6 +28,8 @@ the path to the file containing your database, for instance
 :file:`/u01/oradata/bugzilla.dbf`.
 The initial size of the database file is set in this example to 500 Mb,
 with an increment of 30 Mb everytime we reach the size limit of the file.
+
+.. _oracle-add-user:
 
 Add a User to Oracle
 ====================
@@ -48,6 +52,8 @@ as above.
     -- GRANT/REVOKE SYSTEM PRIVILEGES
     GRANT UNLIMITED TABLESPACE TO bugs;
     GRANT EXECUTE ON CTXSYS.CTX_DDL TO bugs;
+
+.. _oracle_webserver:
 
 Configure the Web Server
 ========================

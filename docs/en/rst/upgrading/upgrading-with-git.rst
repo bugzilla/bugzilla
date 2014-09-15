@@ -16,7 +16,7 @@ for you.
    to trial the upgrade on a development server first, using a copy of the
    production data and configuration.
 
-In the commands below, :command:`$BUGZILLA_HOME` represents the directory
+In the commands below, ``$BUGZILLA_HOME`` represents the directory
 in which Bugzilla is installed.
 
 .. _upgrade-before:
@@ -40,7 +40,7 @@ steps to take:
    possible that you may experience problems during your upgrade.
 
 #. Shut down your Bugzilla installation by putting some explanatory text
-   in the :guilabel:`shutdownhtml` parameter.
+   in the :param:`shutdownhtml` parameter.
 
 #. Make all necessary :ref:`backups`.
    *THIS IS VERY IMPORTANT*. If anything goes wrong during the upgrade,
@@ -107,7 +107,7 @@ Finishing The Upgrade
 =====================
 
 #. Reactivate Bugzilla by clear the text that you put into the
-   :guilabel:`shutdownhtml` parameter.
+   :param:`shutdownhtml` parameter.
 
 #. Run a :ref:`sanity-check` on your
    upgraded Bugzilla. It is recommended that you fix any problems

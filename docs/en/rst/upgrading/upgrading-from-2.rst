@@ -1,5 +1,3 @@
-:orphan:
-
 Save Any Local Customizations
 =============================
 
@@ -18,7 +16,7 @@ Shut Down Bugzilla
 
 At this point, you should shut down Bugzilla to make sure nothing changes
 while you make the switch. Go into the administrative interface and put an
-appropriate message into the :guilabel:`shutdownhtml` parameter, which is in the
+appropriate message into the :param:`shutdownhtml` parameter, which is in the
 "General" section of the administration parameters. As the name implies, HTML
 is allowed.
 
@@ -94,7 +92,7 @@ Re-enable Bugzilla
 ==================
 
 Go into the administrative interface and clear the contents of the
-:guilabel:`shutdownhtml` parameter.
+:param:`shutdownhtml` parameter.
 
 Test Bugzilla
 =============

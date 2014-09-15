@@ -9,4 +9,4 @@ that tracks millions of bugs and issues for thousands of organizations around
 the world.
 
 The most current version of this document can always be found on the
-`Bugzilla Documentation Page <http://www.bugzilla.org/docs/>`_.
+`Bugzilla website <http://www.bugzilla.org/docs/>`_.

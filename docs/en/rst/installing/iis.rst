@@ -1,6 +1,6 @@
 :orphan:
 
-.. _http-iis:
+.. _iis:
 
 Microsoft IIS
 #############

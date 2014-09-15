@@ -1,4 +1,4 @@
-.. _install-mysql:
+.. _mysql:
 
 MySQL
 #####
@@ -12,7 +12,7 @@ You need MySQL version 5.0.15 or higher.
 If you install MySQL manually rather than from a package, make sure the
 server is started when the machine boots.
 
-.. _secure-mysql:
+.. _mysql-secure:
 
 Secure MySQL
 ============
@@ -23,7 +23,9 @@ On non-Windows platforms, run
 
 and follow its advice.
 
-Add a user
+.. _mysql-add-user:
+
+Add a User
 ==========
 
 You need to add a new MySQL user for Bugzilla to use. Run the :file:`mysql`
@@ -34,11 +36,11 @@ command-line client and enter:
     GRANT SELECT, INSERT,
     UPDATE, DELETE, INDEX, ALTER, CREATE, LOCK TABLES,
     CREATE TEMPORARY TABLES, DROP, REFERENCES ON bugs.*
-    TO bugs@localhost IDENTIFIED BY '$db_pass';
+    TO bugs@localhost IDENTIFIED BY '$DB_PASS';
 
     FLUSH PRIVILEGES;
 
-You need to replace ``$db_pass`` with a strong password you have chosen.
+You need to replace ``$DB_PASS`` with a strong password you have chosen.
 Write that password down somewhere.
 
 The above command permits an account called ``bugs``
@@ -48,7 +50,7 @@ machine or as a different user.
 
 .. _mysql-max-allowed-packet:
 
-Allow large attachments and many comments
+Allow Large Attachments and Many Comments
 =========================================
 
 To change MySQL's configuration, you need to edit your MySQL
@@ -78,7 +80,9 @@ XXX is "adding" right? Surely it's normally present?
     # Allow packets up to 16MB
     max_allowed_packet=16M
 
-Allow small words in full-text indexes
+.. _mysql-small-words:
+
+Allow Small Words in Full-Text Indexes
 ======================================
 
 By default, words must be at least four characters in length
@@ -95,9 +99,9 @@ MySQL can be configured to index those words by setting the
     # Allow small words in full-text indexes
     ft_min_word_len=2
 
-.. _install-setupdatabase-adduser:
+.. _mysql-attach-table-size:
 
-Permit attachments table to grow beyond 4GB
+Permit Attachments Table to Grow Beyond 4GB
 ===========================================
 
 This is optional configuration for Bugzillas which are expected to become

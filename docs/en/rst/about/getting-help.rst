@@ -1,4 +1,4 @@
-.. _help:
+.. _getting-help:
 
 Getting More Help
 #################

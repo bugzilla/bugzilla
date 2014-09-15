@@ -28,7 +28,7 @@ will appear in the Administration page.
 The first screen is a search form to search for existing user
 accounts. You can run searches based either on the user ID, real
 name or login name (i.e. the email address, or just the first part
-of the email address if the :guilabel:`emailsuffix` parameter is set).
+of the email address if the :param:`emailsuffix` parameter is set).
 The search can be conducted
 in different ways using the listbox to the right of the text entry
 box. You can match by case-insensitive substring (the default),

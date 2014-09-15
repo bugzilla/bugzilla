@@ -5,7 +5,7 @@ Using Bugzilla
 ==============
 
 .. toctree::
-   :maxdepth: 1
+   :maxdepth: 2
 
    using/creating-an-account
    using/filing

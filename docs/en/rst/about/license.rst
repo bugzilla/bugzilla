@@ -16,6 +16,7 @@ to worry about that; it's only relevant if you redistribute the code or any
 changes you make. 
 
 Bugzilla's documentation is made available under the
-`Creative Commons CC-BY-SA International License 4.0 <https://creativecommons.org/licenses/by-sa/4.0/>`_,
+`Creative Commons CC-BY-SA International License 4.0
+<https://creativecommons.org/licenses/by-sa/4.0/>`_,
 or any later version.
 

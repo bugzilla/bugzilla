@@ -22,7 +22,7 @@ home page. It requires a little familiarity with Linux and the command line.
    Here are some tips:
 
    * Choose any server name you like.
-   * When creating the initial Linux user, call it "bugzilla", give it a 
+   * When creating the initial Linux user, call it ``bugzilla``, give it a 
      strong password, and write that password down.
    * You do not need an encrypted home directory.
    * Choose all the defaults for the "partitioning" part (excepting of course
@@ -84,7 +84,7 @@ home page. It requires a little familiarity with Linux and the command line.
    make it possible to search for short words and terms:
 
    * Alter on Line 52: ``max_allowed_packet=100M``
-   * Add as new line 31, in [mysqld] section: ``ft_min_word_len=2``
+   * Add as new line 31, in the ``[mysqld]`` section: ``ft_min_word_len=2``
 
    Save and exit.
 
@@ -139,10 +139,10 @@ home page. It requires a little familiarity with Linux and the command line.
 
    You will need to set the following values:
    
-   * Line 29: set $webservergroup to ``www-data``
-   * Line 60: set $db_user to ``root``
-   * Line 67: set $db_pass to the MySQL root user password you created when
-     installing Ubuntu
+   * Line 29: set ``$webservergroup`` to ``www-data``
+   * Line 60: set ``$db_user`` to ``root``
+   * Line 67: set ``$db_pass`` to the MySQL root user password you created
+     when installing Ubuntu
 
    XXX Given this is a quick setup on a dedicated box, is it OK to use the
    MySQL root user?
@@ -189,31 +189,32 @@ home page. It requires a little familiarity with Linux and the command line.
 13. Configure Bugzilla
 
     Once you have worked out how to access your Bugzilla in a graphical
-    web browser, bring up the front page, click "Log In" in the header, and
-    log in as the admin user you defined in step 10.
+    web browser, bring up the front page, click :guilabel:`Log In` in the
+    header, and log in as the admin user you defined in step 10.
 
-    Click the "Parameters" link on the page it gives you, and set the
-    following parameters in the 'Required Settings' section:
+    Click the :guilabel:`Parameters` link on the page it gives you, and set
+    the following parameters in the :guilabel:`Required Settings` section:
 
-    * urlbase: ``http://<servername>/`` or ``http://<ip address>/``
+    * :param:`urlbase`:
+      :paramval:`http://<servername>/` or :paramval:`http://<ip address>/`
 
-    Click "Save Changes" at the bottom of the page.
+    Click :guilabel:`Save Changes` at the bottom of the page.
 
     There are several ways to get Bugzilla to send email. The easiest is to
     use Gmail, so we do that here so you have it working. Visit
     https://gmail.com and create a new Gmail account for your Bugzilla to use.
-    Then, open the "Email" section of the Parameters using the link in the
-    left column, and set the following parameter values:
+    Then, open the :guilabel:`Email` section of the Parameters using the link
+    in the left column, and set the following parameter values:
     
-    * mail_delivery_method: SMTP
-    * mailfrom: ``new_gmail_address@gmail.com``
-    * smtpserver: ``smtp.gmail.com:465``
-    * smtp_username: ``new_gmail_address@gmail.com``
-    * smtp_password: ``new_gmail_password``
-    * smtp_ssl: On
+    * :param:`mail_delivery_method`: :paramval:`SMTP`
+    * :param:`mailfrom`: :paramval:`new_gmail_address@gmail.com`
+    * :param:`smtpserver`: :paramval:`smtp.gmail.com:465`
+    * :param:`smtp_username`: :paramval:`new_gmail_address@gmail.com`
+    * :param:`smtp_password`: :paramval:`new_gmail_password`
+    * :param:`smtp_ssl`: :paramval:`On`
 
-    Click "Save Changes" at the bottom of the page.
+    Click :guilabel:`Save Changes` at the bottom of the page.
 
     XXX There should be a "send test email" button on that page
 
-    Now proceed to Chapter XXX, "Initial Configuration".
+    And you're all ready to go. :-)

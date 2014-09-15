@@ -8,5 +8,4 @@ Upgrading from Bazaar
 .. |extstatusinfo| replace:: The command :command:`bzr status extensions/` should help you work out what you added, if anything.
 
 .. include:: upgrading-from-1.rst
-.. include:: get-from-git.rst
 .. include:: upgrading-from-2.rst

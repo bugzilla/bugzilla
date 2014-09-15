@@ -1,5 +1,7 @@
 :orphan:
 
+.. _style-guide:
+
 ==============================
 Writing Bugzilla Documentation
 ==============================
@@ -86,11 +88,23 @@ Inline Directives
 .. warning:: Remember that reST does not support nested inline markup. So you
    can't have a substitution inside a link, or bold inside italics.
 
-A filename or a path to a filename is displayed like this:
-:file:`/path/to/{variable-bit-of-path}/filename.ext`
+* A filename or a path to a filename:
+  :file:`/path/to/{variable-bit-of-path}/filename.ext`
 
-A command to type in the shell is displayed like this:
-:command:`command --arguments`
+* A command to type in the shell:
+  :command:`command --arguments`
 
-A parameter name is displayed like this:
-:guilabel:`shutdownhtml`
+* A parameter name:
+  :param:`shutdownhtml`
+
+* A parameter value:
+  :paramval:`DB`
+
+* A group name:
+  :group:`editbugs`
+
+* A bug field name:
+  :field:`Summary`
+
+* Any string from the UI:
+  :guilabel:`Administration`

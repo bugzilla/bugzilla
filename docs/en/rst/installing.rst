@@ -19,7 +19,7 @@ operating system that provides an ideal environment for Bugzilla. In that
 case, you may want to read the :ref:`Quick Start instructions <quick-start>`.
 
 .. toctree::
-   :maxdepth: 1
+   :maxdepth: 2
 
    installing/quick-start
    installing/linux

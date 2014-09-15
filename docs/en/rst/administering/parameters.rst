@@ -4,8 +4,8 @@ Parameters
 ##########
 
 Bugzilla is configured by changing various parameters, accessed
-from the "Parameters" link, which is found on the Administration page.
-The parameters are divided into several categories,
+from the :guilabel:`Parameters` link, which is found on the Administration
+page. The parameters are divided into several categories,
 accessed via the menu on the left.
 
 .. _param-required-settings:
@@ -14,7 +14,7 @@ Required Settings
 =================
 
 The core required parameters for any Bugzilla installation are set
-here. :guilabel:`urlbase` is always required; the other parameters should be
+here. :param:`urlbase` is always required; the other parameters should be
 set, or it must be explicitly decided not to
 set them, before the new Bugzilla installation starts to be used.
 
@@ -23,30 +23,30 @@ urlbase
     server path to this Bugzilla installation.
     For example, if the Bugzilla query page is
     :file:`http://www.foo.com/bugzilla/query.cgi`,
-    the :guilabel:`urlbase` should be set
-    to :file:`http://www.foo.com/bugzilla/`.
+    the :param:`urlbase` should be set
+    to :paramval:`http://www.foo.com/bugzilla/`.
 
 ssl_redirect
     If enabled, Bugzilla will force HTTPS (SSL) connections, by
     automatically redirecting any users who try to use a non-SSL
     connection. Also, when this is enabled, Bugzilla will send out links
-    using sslbase in emails instead of urlbase. 
+    using :param:`sslbase` in emails instead of :param:`urlbase`. 
 
 sslbase
     Defines the fully qualified domain name and web
     server path for HTTPS (SSL) connections to this Bugzilla installation.
     For example, if the Bugzilla main page is
     :file:`https://www.foo.com/bugzilla/index.cgi`,
-    the :guilabel:`sslbase` should be set
-    to :file:`https://www.foo.com/bugzilla/`.
+    the :param:`sslbase` should be set
+    to :paramval:`https://www.foo.com/bugzilla/`.
 
 cookiepath
     Defines a path, relative to the web document root, that Bugzilla
     cookies will be restricted to. For example, if the
-    :guilabel:`urlbase` is set to
+    :param:`urlbase` is set to
     :file:`http://www.foo.com/bugzilla/`, the
-    :guilabel:`cookiepath` should be set to
-    :file:`/bugzilla/`. Setting it to "/" will allow all sites
+    :param:`cookiepath` should be set to
+    :paramval:`/bugzilla/`. Setting it to :paramval:`/` will allow all sites
     served by this web server or virtual host to read Bugzilla cookies.
 
 .. _param-general:
@@ -79,7 +79,7 @@ shutdownhtml
     of site maintenance or outage situations.
 
     .. note:: Although regular log-in capability is disabled
-       while :guilabel:`shutdownhtml`
+       while :param:`shutdownhtml`
        is enabled, safeguards are in place to protect the unfortunate
        admin who loses connection to Bugzilla. Should this happen to you,
        go directly to the :file:`editparams.cgi` (by typing
@@ -100,12 +100,12 @@ announcehtml
 upgrade_notification
     Enable or disable a notification on the homepage of this Bugzilla
     installation when a newer version of Bugzilla is available. This
-    notification is only visible to administrators. Choose "disabled",
+    notification is only visible to administrators. Choose :paramval:`disabled`,
     to turn off the notification. Otherwise, choose which version of
-    Bugzilla you want to be notified about: "development_snapshot" is the
-    latest release on the trunk; "latest_stable_release" is the most
+    Bugzilla you want to be notified about: :paramval:`development_snapshot` is the
+    latest release on the trunk:paramval:`latest_stable_release` is the most
     recent release available on the most recent stable branch;
-    "stable_branch_release" the most recent release on the branch
+    :paramval:`stable_branch_release` the most recent release on the branch
     this installation is based on.
 
 .. _param-administrative-policies:
@@ -154,22 +154,22 @@ auth_env_realname
 user_info_class
     Mechanism(s) to be used for gathering a user's login information. More than one may be selected. If the first one returns nothing, the second is tried, and so on. The types are:
 
-    * CGI: asks for username and password via CGI form interface. 
-    * Env: info for a pre-authenticated user is passed in system environment variables. 
+    * :paramval:`CGI`: asks for username and password via CGI form interface. 
+    * :paramval:`Env`: info for a pre-authenticated user is passed in system environment variables. 
 
 user_verify_class
     Mechanism(s) to be used for verifying (authenticating) information gathered by user_info_class. More than one may be selected. If the first one cannot find the user, the second is tried, and so on. The types are:
 
-    * DB: Bugzilla's built-in authentication. This is the most common choice. 
-    * RADIUS: RADIUS authentication using a RADIUS server. Using this method requires additional parameters to be set. Please see :ref:`param-radius` for more information.  
-    * LDAP: LDAP authentication using an LDAP server. Using this method requires additional parameters to be set. Please see :ref:`param-ldap` for more information. 
+    * :paramval:`DB`: Bugzilla's built-in authentication. This is the most common choice. 
+    * :paramval:`RADIUS`: RADIUS authentication using a RADIUS server. Using this method requires additional parameters to be set. Please see :ref:`param-radius` for more information.  
+    * :paramval:`LDAP1: LDAP authentication using an LDAP server. Using this method requires additional parameters to be set. Please see :ref:`param-ldap` for more information. 
 
 rememberlogin
     Controls management of session cookies.
 
-    * on - Session cookies never expire (the user has to login only once per browser).
-    * off - Session cookies last until the users session ends (the user will have to login in each new browser session).
-    * defaulton/defaultoff - Default behavior as described above, but user can choose whether Bugzilla will remember their login or not.
+    * :paramval:`on` - Session cookies never expire (the user has to login only once per browser).
+    * :paramval:`off` - Session cookies last until the users session ends (the user will have to login in each new browser session).
+    * :paramval:`defaulton`/:paramval:`defaultoff` - Default behavior as described above, but user can choose whether Bugzilla will remember their login or not.
 
 requirelogin
     If this option is set, all access to the system beyond the front page will require a login. No anonymous users will be permitted. 
@@ -180,26 +180,26 @@ webservice_email_filter
 emailregexp
     Defines the regular expression used to validate email addresses
     used for login names. The default attempts to match fully
-    qualified email addresses (i.e. 'user@example.com') in a slightly
+    qualified email addresses (i.e. 'user\@example.com') in a slightly
     more restrictive way than what is allowed in RFC 2822.
-    Another popular value to put here is ^[^@]+, which means 'local usernames, no @ allowed.' 
+    Another popular value to put here is :paramval:``^[^@]+`, which means 'local usernames, no @ allowed.' 
 
 emailregexpdesc
-    This description is shown to the user to explain which email addresses are allowed by the emailregexp param. 
+    This description is shown to the user to explain which email addresses are allowed by the :param:`emailregexp` param. 
 
 emailsuffix
-    This is a string to append to any email addresses when actually sending mail to that address. It is useful if you have changed the emailregexp param to only allow local usernames, but you want the mail to be delivered to username@my.local.hostname. 
+    This is a string to append to any email addresses when actually sending mail to that address. It is useful if you have changed the :param:`emailregexp` param to only allow local usernames, but you want the mail to be delivered to username\@my.local.hostname. 
 
 createemailregexp
-    This defines the (case-insensitive) regexp to use for email addresses that are permitted to self-register using a 'New Account' feature. The default (.*) permits any account matching the emailregexp to be created. If this parameter is left blank, no users will be permitted to create their own accounts and all accounts will have to be created by an administrator. 
+    This defines the (case-insensitive) regexp to use for email addresses that are permitted to self-register. The default (.*) permits any account matching the emailregexp to be created. If this parameter is left blank, no users will be permitted to create their own accounts and all accounts will have to be created by an administrator. 
 
 password_complexity
     Set the complexity required for passwords. In all cases must the passwords be at least 6 characters long.
 
-    * no_constraints - No complexity required.
-    * mixed_letters - Passwords must contain at least one UPPER and one lower case letter.
-    * letters_numbers - Passwords must contain at least one UPPER and one lower case letter and a number.
-    * letters_numbers_specialchars - Passwords must contain at least one letter, a number and a special character.
+    * :paramval:`no_constraints` - No complexity required.
+    * :paramval:`mixed_letters` - Passwords must contain at least one UPPER and one lower case letter.
+    * :paramval:`letters_numbers` - Passwords must contain at least one UPPER and one lower case letter and a number.
+    * :paramval:`letters_numbers_specialchars` - Passwords must contain at least one letter, a number and a special character.
 
 password_check_on_login
     If set, Bugzilla will check that the password meets the current complexity rules and minimum length requirements when the user logs into the Bugzilla web interface. If it doesn't, the user would not be able to log in, and will receive a message to reset their password. 
@@ -216,14 +216,14 @@ and whether to allow pointing to external files via a URI.
 allow_attachment_display
     If this option is on, users will be able to view attachments from their browser, if their browser supports the attachment's MIME type. If this option is off, users are forced to download attachments, even if the browser is able to display them.
 
-    If you do not trust your users (e.g. if your Bugzilla is public), you should either leave this option off, or configure and set the :guilabel:`attachment_base` parameter (see below). Untrusted users may upload attachments that could be potentially damaging if viewed directly in the browser.
+    If you do not trust your users (e.g. if your Bugzilla is public), you should either leave this option off, or configure and set the :param:`attachment_base` parameter (see below). Untrusted users may upload attachments that could be potentially damaging if viewed directly in the browser.
 
 attachment_base
-    When the :guilabel:`allow_attachment_display` parameter is on, it is possible for a malicious attachment to steal your cookies or perform an attack on Bugzilla using your credentials.
+    When the :param:`allow_attachment_display` parameter is on, it is possible for a malicious attachment to steal your cookies or perform an attack on Bugzilla using your credentials.
 
-    If you would like additional security on attachments to avoid this, set this parameter to an alternate URL for your Bugzilla that is not the same as :guilabel:`urlbase` or :guilabel:`sslbase`. That is, a different domain name that resolves to this exact same Bugzilla installation.
+    If you would like additional security on attachments to avoid this, set this parameter to an alternate URL for your Bugzilla that is not the same as :param:`urlbase` or :param:`sslbase`. That is, a different domain name that resolves to this exact same Bugzilla installation.
 
-    Note that if you have set the :guilabel:`cookiedomain` parameter, you should set :guilabel:`attachment_base` to use a domain that would not be matched by :guilabel:`cookiedomain`.
+    Note that if you have set the :param:`cookiedomain` parameter, you should set :param:`attachment_base` to use a domain that would not be matched by :param:`cookiedomain`.
 
     For added security, you can insert ``%bugid%`` into the URL, which will be replaced with the ID of the current bug that the attachment is on, when you access an attachment. This will limit attachments to accessing only other attachments on the same bug. Remember, though, that all those possible domain names (such as 1234.your.domain.com) must point to this same Bugzilla instance.
 
@@ -240,7 +240,7 @@ maxattachmentsize
     XXX Talk about MySQL max_allowed_packet
     
 maxlocalattachment
-    The maximum size (in megabytes) of attachments to be stored locally on the web server. If set to a value lower than the maxattachmentsize parameter, attachments will never be kept on the local filesystem.
+    The maximum size (in megabytes) of attachments to be stored locally on the web server. If set to a value lower than the :param:`maxattachmentsize` parameter, attachments will never be kept on the local filesystem.
 
     XXX When should people use this feature?
 
@@ -300,13 +300,15 @@ Bug Fields
 The parameters in this section determine the default settings of
 several Bugzilla fields for new bugs, and also control whether
 certain fields are used. For example, choose whether to use the
-"target milestone" field or the "status whiteboard" field.
+:field:`Target Milestone` field or the :field:`Status Whiteboard` field.
 
 useclassification
-    If this is on, Bugzilla will associate each product with a specific classification. But you must have 'editclassification' permissions enabled in order to edit classifications.
+    If this is on, Bugzilla will associate each product with a specific
+    classification. But you must have :group:`editclassification` permissions
+    enabled in order to edit classifications.
 
 usetargetmilestone
-    Do you wish to use the Target Milestone field?
+    Do you wish to use the :field:`Target Milestone` field?
 
 useqacontact
     This allows you to define an email address for each component,
@@ -315,13 +317,16 @@ useqacontact
 
 usestatuswhiteboard
     This defines whether you wish to have a free-form, overwritable field
-    associated with each bug. The advantage of the Status Whiteboard is
-    that it can be deleted or modified with ease, and provides an
+    associated with each bug. The advantage of the :field:`Status Whiteboard`
+    is that it can be deleted or modified with ease, and provides an
     easily-searchable field for indexing some bugs that have some trait
     in common.
 
 use_see_also
-    Do you wish to use the See Also field? It allows you mark bugs in other bug tracker installations as being related. Disabling this field prevents addition of new relationships, but existing ones will continue to appear.
+    Do you wish to use the :field:`See Also` field? It allows you mark bugs
+    in other bug tracker installations as being related. Disabling this field
+    prevents addition of new relationships, but existing ones will continue to
+    appear.
 
 defaultpriority
     This is the priority that newly entered bugs are set to.
@@ -331,14 +336,17 @@ defaultseverity
 
 defaultplatform
     This is the platform that is preselected on the bug entry form.
-    You can leave this empty; Bugzilla will then use the platform that the browser is running on as the default.
+    You can leave this empty; Bugzilla will then use the platform that the
+    browser is running on as the default.
 
 defaultopsys
     This is the operating system that is preselected on the bug entry form.
-    You can leave this empty; Bugzilla will then use the operating system that the browser reports to be running on as the default.
+    You can leave this empty; Bugzilla will then use the operating system
+    that the browser reports to be running on as the default.
 
 collapsed_comment_tags
-    A comma separated list of tags which, when applied to comments, will cause them to be collapsed by default.
+    A comma separated list of tags which, when applied to comments, will
+    cause them to be collapsed by default.
 
 .. _param-dependency-graphs:
 
@@ -359,7 +367,7 @@ webdotbase
     * A URL prefix pointing to an installation of the webdot package will generate the graphs remotely.
     * A blank value will disable dependency graphing.
 
-    The default value is a publicly-accessible webdot server. If you change this value, make certain that the webdot server can read files from your webdot directory. On Apache you do this by editing the .htaccess file, for other systems the needed measures may vary. You can run checksetup.pl to recreate the .htaccess file if it has been lost.
+    The default value is a publicly-accessible webdot server. If you change this value, make certain that the webdot server can read files from your webdot directory. On Apache you do this by editing the :file:`.htaccess` file, for other systems the needed measures may vary. You can run :command:`checksetup.pl` to recreate the :file:`.htaccess` file if it has been lost.
 
 font_file
     You can specify the full path to a TrueType font file which will be used to display text (labels, legends, ...) in charts and graphical reports. To support as many languages as possible, we recommend to specify a TrueType font such as Unifont which supports all printable characters in the Basic Multilingual Plane. If you leave this parameter empty, a default font will be used, but its support is limited to English characters only and so other characters will be displayed incorrectly. 
@@ -375,8 +383,9 @@ specific users. Specific products can also be associated with
 groups, and users restricted to only see products in their groups.
 Several parameters are described in more detail below. Most of the
 configuration of groups and their relationship to products is done
-on the "Groups" and "Product" pages of the "Administration" area.
-The options on this page control global default behavior.
+on the :guilabel:`Groups` and :guilabel:`Product` pages of the
+:guilabel:`Administration` area.
+The options on this page control global default behaviour.
 For more information on Groups and Group Security, see
 :ref:`groups`.
 
@@ -434,8 +443,8 @@ than replacing it. The initial log-in is done with a username and
 password for the LDAP directory. Bugzilla tries to bind to LDAP using
 those credentials and, if successful, tries to map this account to a
 Bugzilla account. If an LDAP mail attribute is defined, the value of this
-attribute is used, otherwise the "emailsuffix" parameter is appended to LDAP
-username to form a full email address. If an account for this address
+attribute is used, otherwise the :param:`emailsuffix` parameter is appended to
+the LDAP username to form a full email address. If an account for this address
 already exists in the Bugzilla installation, it will log in to that account.
 If no account for that email address exists, one is created at the time
 of login. (In this case, Bugzilla will attempt to use the "displayName"
@@ -457,21 +466,21 @@ email address and users are still queried by email address.
 Parameters required to use LDAP Authentication:
 
 user_verify_class (in the Authentication section)
-    If you want to list ``LDAP`` here,
+    If you want to list :paramval:`LDAP` here,
     make sure to have set up the other parameters listed below.
     Unless you have other (working) authentication methods listed as
     well, you may otherwise not be able to log back in to Bugzilla once
     you log out.
     If this happens to you, you will need to manually edit
-    :file:`data/params` and set :guilabel:`user_verify_class` to
-    ``DB``.
+    :file:`data/params` and set :param:`user_verify_class` to
+    :paramval:`DB`.
 
 LDAPserver
     This parameter should be set to the name (and optionally the
     port) of your LDAP server. If no port is specified, it assumes
     the default LDAP port of 389.
-    For example: ``ldap.company.com``
-    or ``ldap.company.com:3268``
+    For example: :paramval:`ldap.company.com`
+    or :paramval:`ldap.company.com:3268`
     You can also specify a LDAP URI, so as to use other
     protocols, such as LDAPS or LDAPI. If port was not specified in
     the URI, the default is either 389 or 636 for 'LDAP' and 'LDAPS'
@@ -480,41 +489,43 @@ LDAPserver
     .. note:: In order to use SSL with LDAP, specify a URI with "ldaps://".
        This will force the use of SSL over port 636.
        For example, normal LDAP:
-       ``ldap://ldap.company.com``, LDAP over SSL:
-       ``ldaps://ldap.company.com`` or LDAP over a UNIX
-       domain socket ``ldapi://%2fvar%2flib%2fldap_sock``.
+       :paramval:`ldap://ldap.company.com`, LDAP over SSL:
+       :paramval:`ldaps://ldap.company.com` or LDAP over a UNIX
+       domain socket :paramval:`ldapi://%2fvar%2flib%2fldap_sock`.
 
 LDAPstarttls
-    Whether to require encrypted communication once a normal LDAP connection is achieved with the server.
+    Whether to require encrypted communication once a normal LDAP connection
+    is achieved with the server.
 
 LDAPbinddn [Optional]
     Some LDAP servers will not allow an anonymous bind to search
     the directory. If this is the case with your configuration you
-    should set the :guilabel:`LDAPbinddn` parameter to the user account Bugzilla
+    should set the :param:`LDAPbinddn` parameter to the user account Bugzilla
     should use instead of the anonymous bind.
-    Ex. ``cn=default,cn=user:password``
+    Ex. :paramval:`cn=default,cn=user:password`
 
 LDAPBaseDN
     The location in
     your LDAP tree that you would like to search for email addresses.
     Your uids should be unique under the DN specified here.
-    Ex. ``ou=People,o=Company``
+    Ex. :paramval:`ou=People,o=Company`
 
 LDAPuidattribute
     The attribute
     which contains the unique UID of your users. The value retrieved
     from this attribute will be used when attempting to bind as the
     user to confirm their password.
-    Ex. ``uid``
+    Ex. :paramval:`uid`
 
 LDAPmailattribute
     The name of the
     attribute which contains the email address your users will enter
     into the Bugzilla login boxes.
-    Ex. ``mail``
+    Ex. :paramval:`mail`
 
 LDAPfilter
-    LDAP filter to AND with the LDAPuidattribute for filtering the list of valid users.
+    LDAP filter to AND with the LDAPuidattribute for filtering the list of
+    valid users.
 
 .. _param-radius:
 
@@ -531,24 +542,24 @@ necessary for configuring Bugzilla to use RADIUS authentication.
 Parameters required to use RADIUS Authentication:
 
 user_verify_class (in the Authentication section)
-    If you want to list ``RADIUS`` here,
+    If you want to list :paramval:`RADIUS` here,
     make sure to have set up the other parameters listed below.
     Unless you have other (working) authentication methods listed as
     well, you may otherwise not be able to log back in to Bugzilla once
     you log out.
     If this happens to you, you will need to manually edit
-    :file:`data/params` and set user_verify_class to
-    ``DB``.
+    :file:`data/params` and set :param:`user_verify_class` to
+    :paramval:`DB`.
 
 RADIUS_server
-    The name (and optionally the
-    port) of your RADIUS server.
+    The name (and optionally the port) of your RADIUS server.
 
 RADIUS_secret
     The RADIUS server's secret.
 
 RADIUS_NAS_IP
-    The NAS-IP-Address attribute to be used when exchanging data with your RADIUS server. If unspecified, 127.0.0.1 will be used.
+    The NAS-IP-Address attribute to be used when exchanging data with your
+    RADIUS server. If unspecified, 127.0.0.1 will be used.
 
 RADIUS_email_suffix
     Bugzilla needs an e-mail address for each user account.
@@ -576,9 +587,9 @@ mail_delivery_method
     This is used to specify how email is sent, or if it is sent at
     all.  There are several options included for different MTAs,
     along with two additional options that disable email sending.
-    "Test" does not send mail, but instead saves it in
+    :paramval:`Test` does not send mail, but instead saves it in
     :file:`data/mailer.testfile` for later review.
-    "None" disables email sending entirely.
+    :paramval:`None` disables email sending entirely.
 
 mailfrom
     This is the email address that will appear in the "From" field
@@ -590,8 +601,8 @@ use_mailer_queue
     In a large Bugzilla installation, updating bugs can be very slow, because Bugzilla sends all email at once. If you enable this parameter, Bugzilla will queue all mail and then send it in the background. This requires that you have installed certain Perl modules (as listed by :file:`checksetup.pl` for this feature), and that you are running the :file:`jobqueue.pl` daemon (otherwise your mail won't get sent). This affects all mail sent by Bugzilla, not just bug updates.
 
 smtpserver
-    The SMTP server address, if the :guilabel:`mail_delivery_method`
-    parameter is set to SMTP.  Use "localhost" if you have a local MTA
+    The SMTP server address, if the :param:`mail_delivery_method`
+    parameter is set to :paramval:`SMTP`.  Use :paramval:`localhost` if you have a local MTA
     running, otherwise use a remote SMTP server.  Append ":" and the port
     number if a non-default port is needed.
 
@@ -601,7 +612,7 @@ smtp_username
 
 smtp_password
     Password to use for SASL authentication to the SMTP server. This
-    parameter will be ignored if the :guilabel:`smtp_username`
+    parameter will be ignored if the :param:`smtp_username`
     parameter is left empty.
 
 smtp_ssl
@@ -667,9 +678,9 @@ needed to add a bug to the "most frequently reported" list.
 quip_list_entry_control
     Controls how easily users can add entries to the quip list.
 
-    * open - Users may freely add to the quip list, and their entries will immediately be available for viewing.
-    * moderated - quips can be entered, but need to be approved by a moderator before they will be shown.
-    * closed - no new additions to the quips list are allowed.
+    * :paramval:`open` - Users may freely add to the quip list, and their entries will immediately be available for viewing.
+    * :paramval:`moderated` - quips can be entered, but need to be approved by a moderator before they will be shown.
+    * :paramval:`closed` - no new additions to the quips list are allowed.
 
 mybugstemplate
     This is the URL to use to bring up a simple 'all of my bugs' list for a user. %userid% will get replaced with the login name of a user. Special characters must be URL-encoded.
@@ -720,7 +731,10 @@ Memcached
 =========
 
 memcached_servers
-    If this option is set, Bugzilla will integrate with XXXlink Memcached. Specify one of more server, separated by spaces, using hostname:port notation (for example: 127.0.0.1:11211).
+    If this option is set, Bugzilla will integrate with `Memcached
+    <http://www.memcached.org/>`_. Specify one of more server, separated by
+    spaces, using hostname:port notation (for example:
+    :paramval:`127.0.0.1:11211`).
 
 memcached_namespace
     Specify a string to prefix to each key on Memcached. 
@@ -765,23 +779,23 @@ cookiedomain
     require the same cookie, then this parameter can be utilized. For
     example, If your website is at
     ``https://bugzilla.example.com/``, setting this to
-    ``.example.com/`` will also allow
+    :paramval:`.example.com/` will also allow
     ``attachments.example.com/`` to access Bugzilla cookies.
 
 inbound_proxies
-    When inbound traffic to Bugzilla goes through a proxy, Bugzilla thinks that the IP address of the proxy is the IP address of every single user. If you enter a comma-separated list of IPs in this parameter, then Bugzilla will trust any X-Forwarded-For header sent from those IPs, and use the value of that header as the end user's IP address.
+    When inbound traffic to Bugzilla goes through a proxy, Bugzilla thinks that the IP address of the proxy is the IP address of every single user. If you enter a comma-separated list of IPs in this parameter, then Bugzilla will trust any ``X-Forwarded-For`` header sent from those IPs, and use the value of that header as the end user's IP address.
 
 proxy_url
     If this Bugzilla installation is behind a proxy, enter the proxy
     information here to enable Bugzilla to access the Internet. Bugzilla
     requires Internet access to utilize the
-    :guilabel:`upgrade_notification` parameter. If the
+    :param:`upgrade_notification` parameter. If the
     proxy requires authentication, use the syntax:
-    :file:`http://user:pass@proxy_url/`.
+    :paramval:`http://user:pass@proxy_url/`.
 
 strict_transport_security
-    Enables the sending of the Strict-Transport-Security header along with HTTP responses on SSL connections. This adds greater security to your SSL connections by forcing the browser to always access your domain over SSL and never accept an invalid certificate. However, it should only be used if you have the :guilabel:`ssl_redirect` parameter turned on, Bugzilla is the only thing running on its domain (i.e., your urlbase is something like http://bugzilla.example.com/), and you never plan to stop supporting SSL.
+    Enables the sending of the Strict-Transport-Security header along with HTTP responses on SSL connections. This adds greater security to your SSL connections by forcing the browser to always access your domain over SSL and never accept an invalid certificate. However, it should only be used if you have the :param:`ssl_redirect` parameter turned on, Bugzilla is the only thing running on its domain (i.e., your :param:`urlbase` is something like :paramval:`http://bugzilla.example.com/`), and you never plan to stop supporting SSL.
 
-    * off - Don't send the Strict-Transport-Security header with requests.
-    * this_domain_only - Send the Strict-Transport-Security header with all requests, but only support it for the current domain.
-    * include_subdomains - Send the Strict-Transport-Security header along with the includeSubDomains flag, which will apply the security change to all subdomains. This is especially useful when combined with an :guilabel:`attachment_base` that exists as (a) subdomain(s) under the main Bugzilla domain.
+    * :paramval:`off` - Don't send the Strict-Transport-Security header with requests.
+    * :paramval:`this_domain_only` - Send the Strict-Transport-Security header with all requests, but only support it for the current domain.
+    * :paramval:`include_subdomains` - Send the Strict-Transport-Security header along with the includeSubDomains flag, which will apply the security change to all subdomains. This is especially useful when combined with an :param:`attachment_base` that exists as (a) subdomain(s) under the main Bugzilla domain.

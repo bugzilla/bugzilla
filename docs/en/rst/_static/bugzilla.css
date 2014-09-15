@@ -1,3 +1,10 @@
 @import 'default.css';
 
 dt { font-weight: bold; }
+
+/* Custom roles */
+.param    { font-weight: bold; }
+.paramval { font-family: monospace; }
+.group    { font-family: monospace; }
+.field    { font-weight: bold; }
+.command  { font-family: monospace; font-size: 130% }

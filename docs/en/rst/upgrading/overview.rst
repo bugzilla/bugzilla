@@ -40,5 +40,5 @@ It is also possible, particularly if your server machine does not have and
 cannot be configured to have access to the public internet, to upgrade using
 a tarball. See :ref:`upgrading-with-a-tarball`.
 
-Before performing any upgrade, it's a good idea to back up both your Bugzilla
-directory and your database. XXXlink to backup info in Maintenance
+Before performing any upgrade, it's a good idea to :ref:`back up <backups>`
+both your Bugzilla directory and your database.

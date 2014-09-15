@@ -14,7 +14,6 @@ adjustments. A detailed step-by-step
 `installation guide for Windows <https://wiki.mozilla.org/Bugzilla:Win32Install>`_ is also available
 if you need more help with your installation.
 
-
 :file:`checksetup.pl` will print out a list of the
 required and optional Perl modules, together with the versions
 (if any) installed on your machine.

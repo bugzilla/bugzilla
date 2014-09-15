@@ -98,7 +98,7 @@ Saved Searches
 
 On this tab you can view and run any Saved Searches that you have
 created, and also any Saved Searches that other members of the group
-defined in the :guilabel:`querysharegroup` parameter have shared.
+defined in the :param:`querysharegroup` parameter have shared.
 Saved Searches can be added to the page footer from this screen.
 If somebody is sharing a Search with a group she or he is allowed to
 :ref:`assign users to <groups>`, the sharer may opt to have

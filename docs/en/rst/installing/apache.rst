@@ -1,4 +1,4 @@
-.. _http-apache:
+.. _apache:
 
 Apache
 ######
@@ -8,13 +8,15 @@ default) and mod_perl. mod_perl is faster but takes more resources. You
 should probably only consider mod_perl if your Bugzilla is going to be heavily
 used.
 
-.. _http-apache-mod_cgi:
+.. _apache-mod_cgi:
 
 Apache with mod_cgi
 ===================
 
 To configure your Apache web server to work with Bugzilla while using
 mod_cgi, do the following:
+
+XXX Shouldn't we be using sites-available/sites-enabled here?
 
 #. Load :file:`httpd.conf` in your editor.
    In Fedora and Red Hat Linux, this file is found in
@@ -46,20 +48,12 @@ some global permissions.
 
 .. note:: On Windows, you may have to also add the
    ``ScriptInterpreterSource Registry-Strict``
-   line, see :ref:`Windows specific notes <win32-http>`.
+   line; see :ref:`Windows specific notes <win32-http>`.
 
-   XXX Does this link still work?
-
-.. _http-apache-mod_perl:
+.. _apache-mod_perl:
 
 Apache with mod_perl
 ====================
-
-Bugzilla requires version 1.999022 (AKA 2.0.0-RC5) of mod_perl.
-
-XXX Is this relevant any more - how old is that version?
-
-XXX Can one use mod_perl on Windows?
 
 Some configuration is required to make Bugzilla work with Apache
 and mod_perl.
@@ -83,7 +77,7 @@ and mod_perl.
    .. warning:: You should also ensure that you have disabled ``KeepAlive``
       support in your Apache install when utilizing Bugzilla under mod_perl
 
-      XXX How?
+      XXX How? Why?
 
 On restarting Apache, Bugzilla should now be running within the
 mod_perl environment.

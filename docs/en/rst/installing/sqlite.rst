@@ -1,4 +1,4 @@
-.. _install-sqlite:
+.. _sqlite:
 
 SQLite
 ######
@@ -8,7 +8,7 @@ SQLite
    small and development Bugzilla installations.
 
 Once you have SQLite installed, no additional configuration is required to
-run Bugzilla. Simply set $db_driver to "Sqlite" (case-sensitive) in
+run Bugzilla. Simply set ``$db_driver`` to ``Sqlite`` (case-sensitive) in
 :file:`localconfig`, when you get to that point in the installation.
 
 XXX This doesn't work - gives a timezone-related error on my box.

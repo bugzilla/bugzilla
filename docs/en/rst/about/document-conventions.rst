@@ -26,6 +26,7 @@ A sample of code is illustrated like this:
 This documentation is maintained in reStructured Text format using the
 `Sphinx <http://www.sphinx-doc.org/>`_ documentation system.
 Changes are best submitted as diffs, attached
-to a bug filed in the `Bugzilla Documentation <https://bugzilla.mozilla.org/enter_bug.cgi?product=Bugzilla;component=Documentation>`_
-component.
+to a bug filed in the `Bugzilla Documentation
+<https://bugzilla.mozilla.org/enter_bug.cgi?product=Bugzilla;component=Documentation>`_
+component. There is a :ref:`Style Guide <style-guide>` to help you.
 

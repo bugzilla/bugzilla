@@ -13,7 +13,7 @@ Only one bug status, UNCONFIRMED, can never be renamed nor deleted. However,
 it can be disabled entirely on a per-product basis (see :ref:`categorization`).
 One other status may be
 marked as undeletable, because it's the value of the
-:guilabel:`duplicate_or_move_bug_status` parameter. To make it deletable,
+:param:`duplicate_or_move_bug_status` parameter. To make it deletable,
 simply set the value of that parameter to a different status.
 
 Aside from the empty value, two resolutions, DUPLICATE and FIXED, cannot be
@@ -27,7 +27,7 @@ starting status and on the top for the target status in the transition.
 If the checkbox is checked, then the transition from the left to the top
 status is legal; if it's unchecked, that transition is forbidden.
 
-The status used as the :guilabel:`duplicate_or_move_bug_status` parameter
+The status used as the :param:`duplicate_or_move_bug_status` parameter
 (normally RESOLVED or its equivalent) is required to be a legal transition
 from every other bug status, and so this is enforced on the page.   
 

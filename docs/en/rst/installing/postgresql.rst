@@ -1,4 +1,4 @@
-.. _install-pg:
+.. _postgresql:
 
 PostgreSQL
 ##########
@@ -11,6 +11,8 @@ You need PostgreSQL version 8.03.0000 or higher.
 
 If you install PostgreSQL manually rather than from a package, make sure the
 server is started when the machine boots.
+
+.. _posgresql-add-user:
 
 Add a User
 ==========
@@ -33,6 +35,8 @@ When asked for a password, provide one and write it down for later reference.
 
 The created user will not be a superuser (-S) and will not be able to create
 new users (-R). He will only have the ability to create databases (-d).
+
+.. _postgresql-access:
 
 Permit Access
 =============

@@ -21,20 +21,20 @@ other ways wrong.
 Use Another Mail Server
 =======================
 
-This section corresponds to choosing a :guilabel:`mail_delivery_method` of
-``SMTP``.
+This section corresponds to choosing a :param:`mail_delivery_method` of
+:paramval:`SMTP`.
 
 This method passes the email off to an existing mail server. Your
 organization may well already have one running for their internal email, and
 may prefer to use it for confidentiality reasons. If so, you need the
 following information about it:
 
-* The domain name of the server (Parameter: :guilabel:`smtpserver`)
-* The username and password to use (Parameters: :guilabel:`smtp_username` and 
-  :guilabel:`smtp_password`)
-* Whether the server uses SSL (Parameter: :guilabel:`smtp_ssl`)
+* The domain name of the server (Parameter: :param:`smtpserver`)
+* The username and password to use (Parameters: :param:`smtp_username` and 
+  :param:`smtp_password`)
+* Whether the server uses SSL (Parameter: :param:`smtp_ssl`)
 * The address you should be sending mail 'From' (Parameter:
-  :guilabel:`mailfrom``)
+  :param:`mailfrom``)
 
 If your organization does not run its own mail server, you can use the
 services of one of any number of popular email providers.
@@ -45,18 +45,18 @@ Gmail
 Visit https://gmail.com and create a new Gmail account for your Bugzilla to
 use. Then, set the following parameter values in the "Email" section:
 
-* :guilabel:`mail_delivery_method`: ``SMTP``
-* :guilabel:`mailfrom`: ``new_gmail_address@gmail.com``
-* :guilabel:`smtpserver`: ``smtp.gmail.com:465``
-* :guilabel:`smtp_username`: ``new_gmail_address@gmail.com``
-* :guilabel:`smtp_password`: ``new_gmail_password``
-* :guilabel:`smtp_ssl`: ``On``
+* :param:`mail_delivery_method`: :paramval:`SMTP`
+* :param:`mailfrom`: :paramval:`new_gmail_address@gmail.com`
+* :param:`smtpserver`: :paramval:`smtp.gmail.com:465`
+* :param:`smtp_username`: :paramval:`new_gmail_address@gmail.com`
+* :param:`smtp_password`: :paramval:`new_gmail_password`
+* :param:`smtp_ssl`: :paramval:`On`
 
 Run Your Own Mail Server
 ========================
 
-This section corresponds to choosing a :guilabel:`mail_delivery_method` of
-``Sendmail``.
+This section corresponds to choosing a :param:`mail_delivery_method` of
+:paramval:`Sendmail`.
 
 XXX Do we still need this? Why would anyone want to do this in 2014?
 
@@ -84,5 +84,5 @@ ensure that the mail is delivered properly. They are implemented
 as services, and you should ensure that the MTA is in the auto-start
 list of services for the machine.
 
-If a simple mail sent with the command-line 'mail' program
+If a simple mail sent with the command-line :file:`mail` program
 succeeds, then Bugzilla should also be fine.

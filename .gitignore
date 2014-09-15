@@ -1,6 +1,7 @@
 .htaccess
 /lib/*
 /template/en/custom
+/docs/en/rst/extensions/*
 /docs/en/html
 /docs/en/txt
 /docs/en/pdf

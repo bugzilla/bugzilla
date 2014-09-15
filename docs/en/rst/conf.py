@@ -183,6 +183,21 @@ html_show_copyright = False
 # Output file base name for HTML help builder.
 htmlhelp_basename = 'Bugzilladoc'
 
+rst_prolog = """
+.. role:: param
+    :class: param
+
+.. role:: paramval
+    :class: paramval
+
+.. role:: group
+    :class: group
+
+.. role:: field
+    :class: field
+
+.. |min-perl-ver| replace:: 5.10.1
+"""
 
 # -- Options for LaTeX output --------------------------------------------------
 
@@ -257,11 +272,6 @@ texinfo_documents = [
 
 # How to display URL addresses: 'footnote', 'no', or 'inline'.
 #texinfo_show_urls = 'footnote'
-
-# Global substitutions and other markup required in every page
-rst_epilog = """
-.. |min-perl-ver| replace:: 5.10.1
-"""
 
 # -- Options for PDF output --------------------------------------------------
 

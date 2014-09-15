@@ -4,11 +4,23 @@
 Classifications, Products, Components, Versions and Milestones
 ==============================================================
 
+Bugs in Bugzilla are classified into one of a set of admin-defined Components.
+Components are themselves each part of a single Product. Optionally, Products
+can be part of a single Classification, adding a third level to the hierarchy.
+
 Classifications
 ###############
 
-Classifications tend to be used in order to group several related
+Classifications are used in order to group several related
 products into one distinct entity.
+
+For example, if a company makes computer games,
+they could have a classification of "Games", and a separate
+product for each game. This company might also have a
+``Common`` classification, containing products representing units of
+technology used in multiple games, and perhaps an ``Other`` classification
+containing a few special products that represent items that are not actually
+shipping products (for example, "Website", or "Administration").
 
 The classifications layer is disabled by default; it can be turned
 on or off using the useclassification parameter,
@@ -27,22 +39,8 @@ will also appear in the advanced search form.
 Products
 ########
 
-Products typically represent real-world
-shipping products. Products can be given
-:ref:`classifications`.
-For example, if a company makes computer games,
-they could have a classification of "Games", and a separate
-product for each game. This company might also have a
-``Common`` product for units of technology used
-in multiple games, and perhaps a few special products that
-represent items that are not actually shipping products
-(for example, "Website", or "Administration").
-
-Many of Bugzilla's settings are configurable on a per-product
-basis. The number of ``votes`` available to
-users is set per-product, as is the number of votes
-required to move a bug automatically from the UNCONFIRMED
-status to the CONFIRMED status.
+Products usually represent real-world shipping products.
+Many of Bugzilla's settings are configurable on a per-product basis.
 
 When creating or editing products the following options are
 available:
@@ -53,34 +51,29 @@ Product
 Description
     A brief description of the product
 
+Open for bug entry
+    Deselect this box to prevent new bugs from being
+    entered against this product.
+
+Enable the UNCONFIRMED status in this product
+    Select this option if you want to use the UNCONFIRMED status
+    (see :ref:`workflow`)
+
 Default milestone
     Select the default milestone for this product.
 
-Closed for bug entry
-    Select this box to prevent new bugs from being
-    entered against this product.
-
-Maximum votes per person
-    Maximum votes a user is allowed to give for this
-    product
-
-Maximum votes a person can put on a single bug
-    Maximum votes a user is allowed to give for this
-    product in a single bug
-
-Confirmation threshold
-    Number of votes needed to automatically remove any
-    bug against this product from the UNCONFIRMED state
-
 Version
     Specify which version of the product bugs will be
-    entered against.
+    entered against. XXX is this the "default version" in any sense?
 
 Create chart datasets for this product
     Select to make chart datasets available for this product.
 
-When editing a product there is also a link to edit Group Access Controls,
-see :ref:`product-group-controls`.
+It is compulsory to create at least one :ref:`component` in a product, and
+so you will be asked for the details of that too.
+ 
+When editing a product you can change all of the above, and there is also a
+link to edit Group Access Controls, see :ref:`product-group-controls`.
 
 .. _create-product:
 
@@ -94,14 +87,9 @@ To create a new product:
 
 #. Select the ``Add`` link in the bottom right.
 
-#. Enter the name of the product and a description. The
-   Description field may contain HTML.
+#. Enter the details as outlined above.
 
-#. When the product is created, Bugzilla will give a message
-   stating that a component must be created before any bugs can
-   be entered against the new product. Follow the link to create
-   a new component. See :ref:`components` for more
-   information.
+XXX This section is pointless; if it's not obvious, we should make it more obvious :-)
 
 .. _edit-products:
 
@@ -364,8 +352,7 @@ that component. The QA Contact should be the person who will ensure
 these bugs are completely fixed. The Assignee, QA Contact, and Reporter
 will get email when new bugs are created in this Component and when
 these bugs change. Default Assignee and Default QA Contact fields only
-dictate the
-*default assignments*;
+dictate the *default assignments*;
 these can be changed on bug submission, or at any later point in
 a bug's life.
 

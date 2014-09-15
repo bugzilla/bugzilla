@@ -1,16 +1,13 @@
-.. _fields:
-
-Fields
-######
-
 .. _custom-fields:
 
 Custom Fields
 #############
 
-The release of Bugzilla 3.0 added the ability to create Custom Fields.
-Custom Fields are treated like any other field - they can be set in bugs
-and used for search queries. Administrators should keep in mind that
+Custom Fields are fields defined by the administrator, in addition to those
+which come with Bugzilla by default. Custom Fields are treated like any other
+field - they can be set in bugs and used for search queries.
+
+Administrators should keep in mind that
 adding too many fields can make the user interface more complicated and
 harder to use. Custom Fields should be added only when necessary and with
 careful consideration.
@@ -149,50 +146,4 @@ as obsolete, a "Delete" link will appear in the ``Action``
 column. If the custom field has been used in the past, the deletion
 will be rejected. But marking the field as obsolete is sufficient
 to hide it from the user interface entirely.
-
-.. _edit-values:
-
-Legal Values
-############
-
-Legal values for the operating system, platform, bug priority and
-severity, custom fields of type ``Drop Down`` and
-``Multiple-Selection Box`` (see :ref:`custom-fields`),
-as well as the list of valid bug statuses and resolutions can be
-customized from the same interface. You can add, edit, disable and
-remove values which can be used with these fields.
-
-.. _edit-values-list:
-
-Viewing/Editing legal values
-============================
-
-Editing legal values requires ``admin`` privileges.
-Select "Field Values" from the Administration page. A list of all
-fields, both system fields and Custom Fields, for which legal values
-can be edited appears. Click a field name to edit its legal values.
-
-There is no limit to how many values a field can have, but each value
-must be unique to that field. The sortkey is important to display these
-values in the desired order.
-
-When the availability of the values of a custom field is controlled
-by another field, you can select from here which value of the other field
-must be set for the value of the custom field to appear.
-
-.. _edit-values-delete:
-
-Deleting legal values
-=====================
-
-Legal values from Custom Fields can be deleted, but only if the
-following two conditions are respected:
-
-#. The value is not used by default for the field.
-
-#. No bug is currently using this value.
-
-If any of these conditions is not respected, the value cannot be deleted.
-The only way to delete these values is to reassign bugs to another value
-and to set another value as default for the field.
 

@@ -5,38 +5,30 @@ Users
 
 .. _defaultuser:
 
-Creating the Default User
-=========================
+Creating Admin Users
+====================
 
 When you first run checksetup.pl after installing Bugzilla, it
 will prompt you for the administrative username (email address) and
-password for this "super user". If for some reason you delete
-the "super user" account, re-running checksetup.pl will again prompt
-you for this username and password.
+password for the first admin user. If for some reason you delete
+all the admin users, re-running checksetup.pl will again prompt
+you for a username and password and make a new admin.
 
-.. note:: If you wish to add more administrative users, add them to
-   the "admin" group and, optionally, edit the tweakparams, editusers,
-   creategroups, editcomponents, and editkeywords groups to add the
-   entire admin group to those groups (which is the case by default).
-
-.. _manageusers:
-
-Managing Other Users
-====================
+If you wish to add more administrative users, add them to the "admin" group.
 
 .. _user-account-search:
 
-Searching for existing users
-----------------------------
+Searching For Users
+===================
 
 If you have ``editusers`` privileges or if you are allowed
-to grant privileges for some groups, the ``Users`` link
+to grant privileges for some groups, the :guilabel:`Users` link
 will appear in the Administration page.
 
 The first screen is a search form to search for existing user
 accounts. You can run searches based either on the user ID, real
 name or login name (i.e. the email address, or just the first part
-of the email address if the "emailsuffix" parameter is set).
+of the email address if the :guilabel:`emailsuffix` parameter is set).
 The search can be conducted
 in different ways using the listbox to the right of the text entry
 box. You can match by case-insensitive substring (the default),
@@ -55,52 +47,10 @@ the change and the user who made the change. For example, the Account
 History page will display details of when a user was added or removed
 from a group.
 
-.. _createnewusers:
-
-Creating new users
-------------------
-
-.. _self-registration:
-
-Self-registration
-~~~~~~~~~~~~~~~~~
-
-By default, users can create their own user accounts by clicking the
-``New Account`` link at the bottom of each page (assuming
-they aren't logged in as someone else already). If you want to disable
-this self-registration, or if you want to restrict who can create his
-own user account, you have to edit the ``createemailregexp``
-parameter in the ``Configuration`` page, see
-:ref:`parameters`.
-
-.. _user-account-creation:
-
-Accounts created by an administrator
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Users with ``editusers`` privileges, such as administrators,
-can create user accounts for other users:
-
-#. After logging in, click the "Users" link at the footer of
-   the query page, and then click "Add a new user".
-
-#. Fill out the form presented. This page is self-explanatory.
-   When done, click "Submit".
-
-   .. note:: Adding a user this way will *not*
-      send an email informing them of their username and password.
-      While useful for creating dummy accounts (watchers which
-      shuttle mail to another system, for instance, or email
-      addresses which are a mailing list), in general it is
-      preferable to log out and use the ``New Account``
-      button to create users, as it will pre-populate all the
-      required fields and also notify the user of her account name
-      and password.
-
 .. _modifyusers:
 
 Modifying Users
----------------
+===============
 
 Once you have found your user, you can change the following
 fields:
@@ -204,10 +154,52 @@ fields:
   created. The user must still have the ``editbugs``
   privilege to edit bugs in these products.
 
+.. _createnewusers:
+
+Creating New Users
+==================
+
+.. _self-registration:
+
+Self-Registration
+-----------------
+
+By default, users can create their own user accounts by clicking the
+``New Account`` link at the bottom of each page (assuming
+they aren't logged in as someone else already). If you want to disable
+this self-registration, or if you want to restrict who can create his
+own user account, you have to edit the ``createemailregexp``
+parameter in the ``Configuration`` page, see
+:ref:`parameters`.
+
+.. _user-account-creation:
+
+Administrator Registration
+--------------------------
+
+Users with ``editusers`` privileges, such as administrators,
+can create user accounts for other users:
+
+#. After logging in, click the "Users" link at the footer of
+   the query page, and then click "Add a new user".
+
+#. Fill out the form presented. This page is self-explanatory.
+   When done, click "Submit".
+
+   .. note:: Adding a user this way will *not*
+      send an email informing them of their username and password.
+      While useful for creating dummy accounts (watchers which
+      shuttle mail to another system, for instance, or email
+      addresses which are a mailing list), in general it is
+      preferable to log out and use the ``New Account``
+      button to create users, as it will pre-populate all the
+      required fields and also notify the user of her account name
+      and password.
+
 .. _user-account-deletion:
 
 Deleting Users
---------------
+==============
 
 If the ``allowuserdeletion`` parameter is turned on, see
 :ref:`parameters`, then you can also delete user accounts.
@@ -222,7 +214,7 @@ incorrectly. You have been warned!
 .. _impersonatingusers:
 
 Impersonating Users
--------------------
+===================
 
 There may be times when an administrator would like to do something as
 another user.  The :command:`sudo` feature may be used to do

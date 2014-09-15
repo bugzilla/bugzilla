@@ -104,7 +104,7 @@ graphs. This example runs it at 12.55am.
 Whining
 -------
 
-As of Bugzilla 2.20, users can configure Bugzilla to regularly annoy
+Users can configure Bugzilla to regularly annoy
 them at regular intervals, by having Bugzilla execute saved searches
 at certain times and emailing the results to the user.  This is known
 as "Whining".  The process of configuring Whining is described

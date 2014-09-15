@@ -1,3 +1,5 @@
+:orphan:
+
 .. _http-iis:
 
 Microsoft IIS

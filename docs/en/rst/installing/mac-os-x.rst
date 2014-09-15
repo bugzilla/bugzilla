@@ -3,7 +3,7 @@
 Mac OS X
 ########
 
-`https://wiki.mozilla.org/Bugzilla:Mac_OS_X_installation`_ is what we have
+`<https://wiki.mozilla.org/Bugzilla:Mac_OS_X_installation>`_ is what we have
 right now...
 
 *Mac OS X*

@@ -1,3 +1,5 @@
+:orphan:
+
 The procedure to switch to Git is as follows. The idea is to switch version
 control systems without changing the exact version of Bugzilla you are using,
 to minimise the risk of conflict or problems. Any major upgrade can then

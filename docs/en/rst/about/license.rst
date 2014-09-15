@@ -1,7 +1,7 @@
 .. _license:
 
 License
-######
+#######
 
 Bugzilla is `free <http://www.gnu.org/philosophy/free-sw.html>`_ and
 `open source <http://opensource.org/osd>`_ software, which means (among other

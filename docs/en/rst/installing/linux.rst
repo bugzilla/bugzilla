@@ -145,8 +145,6 @@ setup. Configure your server according to the instructions below.
    oracle
    sqlite
 
-.. _config-webserver:
-
 .. _localconfig:
 
 localconfig

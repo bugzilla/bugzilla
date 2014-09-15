@@ -12,7 +12,8 @@ Administering Bugzilla
    administering/users
    administering/categorization
    administering/flags
-   administering/fields
+   administering/custom-fields
+   administering/field-values
    administering/workflow
    administering/groups
    administering/keywords

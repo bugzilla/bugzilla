@@ -86,17 +86,18 @@ sub new {
     $self->{private_bz_dsn} = $dsn;
 
     bless ($self, $class);
-    
-    # Bug 321645 - disable MySQL strict mode, if set
+
+    # Check for MySQL modes.
     my ($var, $sql_mode) = $self->selectrow_array(
         "SHOW VARIABLES LIKE 'sql\\_mode'");
 
+    # Disable ANSI and strict modes, else Bugzilla will crash.
     if ($sql_mode) {
         # STRICT_TRANS_TABLE or STRICT_ALL_TABLES enable MySQL strict mode,
         # causing bug 321645. TRADITIONAL sets these modes (among others) as
         # well, so it has to be stipped as well
         my $new_sql_mode =
-            join(",", grep {$_ !~ /^STRICT_(?:TRANS|ALL)_TABLES|TRADITIONAL$/}
+            join(",", grep {$_ !~ /^(?:ANSI|STRICT_(?:TRANS|ALL)_TABLES|TRADITIONAL)$/}
                             split(/,/, $sql_mode));
 
         if ($sql_mode ne $new_sql_mode) {

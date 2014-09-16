@@ -366,7 +366,7 @@ GET /rest/review/flag_activity/setter/C<setter>
 
 GET /rest/review/flag_activity/type_id/C<type_id>
 
-GET /rest/review/flag_activity/type/C<type_name>
+GET /rest/review/flag_activity/type_name/C<type_name>
 
 GET /rest/review/flag_activity
 

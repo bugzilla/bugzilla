@@ -484,7 +484,7 @@ sub update {
     }
 
     # BMO - provide a hook which passes the flag object
-    Bugzilla::Hook::process('flag_updated', {flag => $self, changes => $changes});
+    Bugzilla::Hook::process('flag_updated', {flag => $self, changes => $changes, timestamp => $timestamp});
 
     return $changes;
 }
@@ -540,6 +540,10 @@ sub update_flags {
     # These flags have been deleted.
     foreach my $old_flag (values %old_flags) {
         $class->notify(undef, $old_flag, $self, $timestamp);
+
+        # BMO - provide a hook which passes the timestamp,
+        # because that isn't passed to remove_from_db().
+        Bugzilla::Hook::process('flag_deleted', {flag => $old_flag, timestamp => $timestamp});
         $old_flag->remove_from_db();
     }
 
@@ -637,6 +641,11 @@ sub force_retarget {
             # Track deleted attachment flags.
             push(@removed, $class->snapshot([$flag])) if $flag->attach_id;
             $class->notify(undef, $flag, $bug || $flag->bug);
+
+            # BMO - provide a hook which passes the timestamp,
+            # because that isn't passed to remove_from_db().
+            my ($timestamp) = $dbh->selectrow_array('SELECT LOCALTIMESTAMP(0)');
+            Bugzilla::Hook::process('flag_deleted', {flag => $flag, timestamp => $timestamp});
             $flag->remove_from_db();
         }
     }

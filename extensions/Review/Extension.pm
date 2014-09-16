@@ -262,7 +262,7 @@ sub object_update_columns {
 sub _new_users_from_input {
     my ($field) = @_;
     my $input_params = Bugzilla->input_params;
-    return unless exists $input_params->{$field};
+    return undef unless exists $input_params->{$field};
     return [] unless $input_params->{$field};
     Bugzilla::User::match_field({ $field => {'type' => 'multi'} });;
     my $value = $input_params->{$field};

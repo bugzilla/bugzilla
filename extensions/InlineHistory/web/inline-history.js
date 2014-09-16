@@ -219,6 +219,9 @@ var inline_history = {
         } else {
           this._hasBugFlags = true;
         }
+        if (flagItem[3].match(/^needinfo\?/)) {
+          this.lastNeedinfo = flagItem;
+        }
         // don't break as there may be multiple flag changes at once
       }
     }
@@ -392,6 +395,12 @@ var inline_history = {
     while (el = el.nextSibling) {
       if (el.nodeType == 1)
         return el;
+    }
+  },
+
+  getNeedinfoDiv: function () {
+    if (this.lastNeedinfo && this.lastNeedinfo[5]) {
+      return this.lastNeedinfo[5];
     }
   },
 

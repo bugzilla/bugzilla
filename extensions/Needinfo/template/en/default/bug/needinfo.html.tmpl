@@ -21,13 +21,43 @@
   [% END %]
 [% END %]
 
+[%
+  BLOCK needinfo_comment_div;
+    match = needinfo_flags.last.creation_date.match('^(\d{4})\.(\d{2})\.(\d{2})(.+)$');
+    date  = "$match.0-$match.1-$match.2$match.3";
+    FOREACH comment IN bug.comments;
+      NEXT IF comment.is_private AND NOT (user.is_insider || user.id == comment.author.id);
+      IF comment.creation_ts == date;
+        GET "c$comment.count";
+        LAST;
+      END;
+    END;
+  END;
+%]
+
 [% IF needinfo_flagtype %]
   <div id="needinfo_container">
     [% IF needinfo_flags.size > 0 %]
       [%# Displays NEEDINFO tag in bug header %]
       <script>
+        var needinfo_comment_div = '[% INCLUDE needinfo_comment_div FILTER js %]';
         var summary_container = document.getElementById('static_bug_status');
-        summary_container.appendChild(document.createTextNode('[NEEDINFO]'));
+        if (document.getElementById('inline-history-ext')) {
+          needinfo_comment_div = inline_history.getNeedinfoDiv();
+        }
+
+        if (needinfo_comment_div) {
+          var a = document.createElement('a');
+          a.id = 'needinfo-lnk';
+          a.href = "#" + needinfo_comment_div;
+          a.appendChild(document.createTextNode('NEEDINFO'));
+          summary_container.appendChild(document.createTextNode('['));
+          summary_container.appendChild(a);
+          summary_container.appendChild(document.createTextNode(']'));
+        }
+        else {
+          summary_container.appendChild(document.createTextNode('[NEEDINFO]'));
+        }
       </script>
     [% END %]
     <table>

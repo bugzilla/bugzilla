@@ -1,0 +1,130 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% USE Bugzilla %]
+[% cgi = Bugzilla.cgi +%]
+[% PROCESS global/variables.none.tmpl +%]
+
+      Project Title: [% cgi.param("short_desc") %]
+
+Project Description and Scope:
+[%+ cgi.param("desc") %]
+
+== Timings
+
+         Start Date: [% cgi.param("start_date") %]
+  Announcement Date: [% cgi.param("announce_date") %]
+  Internal Deadline: [% cgi.param("deadline") %]
+
+== Owners
+
+   Project PR Owner: [% cgi.param("pr_owner") %]
+[%~ " " _ cgi.param("pr_owner_other") IF cgi.param("pr_owner") == "Other:" %]
+      Project Owner: [% cgi.param("owner") %]
+
+== RASCI
+
+        Responsible: [% cgi.param("rasci_r") || "-" %]
+           Approver: [% cgi.param("rasci_a") %]
+          Supporter: [% cgi.param("rasci_s") || "-" %]
+         Consultant: [% cgi.param("rasci_c") || "-" %]
+           Informed: [% cgi.param("rasci_i") || "-" %]
+
+== Details
+
+               Tier: [% cgi.param("tier") %]
+        PR Approach: [% cgi.param("pr_approach") %]
+Product Group Focus: [% cgi.param("group_focus") %]
+[%~ " " _ cgi.param("group_focus_other") IF cgi.param("group_focus") == "Other:" %]
+             Region: [% cgi.param("region") %]
+[%~ " " _ cgi.param("region_other") IF cgi.param("region") == "Other:" %]
+
+== Goals, Audience, and Messages
+
+Project Goals:
+[%+ cgi.param("project_goals") %]
+
+PR Goals:
+[%+ cgi.param("pr_goals") %]
+
+Company Goal: [% cgi.param("company_goal") %]
+
+Audiences:
+[% FOREACH audience = cgi.param("audience") %]
+  - [% audience %]
+[% " " _ cgi.param("audience_other") IF audience == "Other:" %]
+[% END %]
+
+Key Messages:
+[%+ cgi.param("key_messages") %]
+[% IF cgi.param("proj_mat_online") %]
+
+== Project Materials - Online Documentation
+
+        Description: [% cgi.param("proj_mat_online_desc") %]
+               Link: [% cgi.param("proj_mat_online_link") %]
+[% END %]
+[% IF cgi.param("proj_mat_file") %]
+
+== Project Materials - Attached
+
+        Description: [% cgi.param("proj_mat_file_desc") %]
+          File Name: [% cgi.param("proj_mat_file_attach") %]
+[% END %]
+[% IF cgi.param("pr_mat_online") %]
+
+== PR Project Materials - Online Documentation
+
+        Description: [% cgi.param("pr_mat_online_desc") %]
+               Link: [% cgi.param("pr_mat_online_link") %]
+[% END %]
+[% IF cgi.param("pr_mat_file") %]
+
+== PR Project Materials - Attached
+
+        Description: [% cgi.param("pr_mat_file_desc") %]
+          File Name: [% cgi.param("pr_mat_file_attach") %]
+[% END %]
+
+== Requirements
+
+   Metrica Coverage: [% cgi.param("metrica") %]
+[% IF cgi.param("press_center") %]
+
+Press Center Update:
+[% FOREACH option = cgi.param("press_center") %]
+  - [% option %]
+[% " " _ cgi.param("press_center_other") IF option == "Other:" %]
+[% END %]
+[% END %]
+[% IF cgi.param("resources") || cgi.param("internal_resources") %]
+
+ Internal Resources:
+[% " " _ cgi.param("resources") IF cgi.param("resources") %]
+[% FOREACH option = cgi.param("internal_resources") %]
+  - [% option %]
+[% " " _ cgi.param("internal_resources_other") IF option == "Other:" %]
+[% END %]
+[% END %]
+[% IF cgi.param("resources") || cgi.param("external_resources") %]
+
+ External Resources:
+[% FOREACH option = cgi.param("external_resources") %]
+  - [% option %]
+[% " " _ cgi.param("external_resources_other") IF option == "Other:" %]
+[% END %]
+[% END %]
+
+       Localization: [% cgi.param("localization") %]
+[%~ " " _ cgi.param("localization_other") IF cgi.param("localization") == "Other:" %]
+
+== Budget
+
+             Budget: [% cgi.param("budget") %]
+[%~ " " _ cgi.param("budget_extra") IF cgi.param("budget") == "Extra" %]
+

@@ -34,7 +34,12 @@ use constant REQUIRED_MODULES => [
         package => 'Sys-Syslog',
         module  => 'Sys::Syslog',
         version => 0
-    }
+    },
+    {
+        package => 'File-MimeInfo',
+        module  => 'File::MimeInfo::Magic',
+        version => '0'
+    },
 ];
 
 use constant OPTIONAL_MODULES => [

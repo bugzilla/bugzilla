@@ -1,655 +1,683 @@
-[%# The contents of this file are subject to the Mozilla Public
-  # License Version 1.1 (the "License"); you may not use this file
-  # except in compliance with the License. You may obtain a copy of
-  # the License at http://www.mozilla.org/MPL/
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
   #
-  # Software distributed under the License is distributed on an "AS
-  # IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
-  # implied. See the License for the specific language governing
-  # rights and limitations under the License.
-  #
-  # The Original Code is the Bugzilla Bug Tracking System.
-  #
-  # The Initial Developer of the Original Code is Netscape Communications
-  # Corporation. Portions created by Netscape are
-  # Copyright (C) 1998 Netscape Communications Corporation. All
-  # Rights Reserved.
-  #
-  # Contributor(s): Gervase Markham <gerv@gerv.net>
-  #                 Ville Skyttä <ville.skytta@iki.fi>
-  #                 Shane H. W. Travis <travis@sedsystems.ca>
-  #                 Marc Schumann <wurblzap@gmail.com>
-  #                 Akamai Technologies <bugzilla-dev@akamai.com>
-  #                 Max Kanat-Alexander <mkanat@bugzilla.org>
-  #                 Frédéric Buclin <LpSolit@gmail.com>
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
   #%]
 
-[% PROCESS "global/field-descs.none.tmpl" %]
+[% PROCESS global/variables.none.tmpl %]
 
-[% title = BLOCK %]Create a PR Request[% END %]
-
-[% PROCESS global/header.html.tmpl
-  title = title
-  style_urls = [ 'skins/standard/attachment.css' ]
-  javascript_urls = [ "js/attachment.js", "js/util.js",
-                      "js/field.js", "js/TUI.js" ]
-  onload = 'set_assign_to();'
-  yui = [ 'autocomplete' ]
-%]
-
-<script type="text/javascript">
-<!--
-
-var initialowners = new Array([% product.components.size %]);
-var last_initialowner;
-var initialccs = new Array([% product.components.size %]);
-var components = new Array([% product.components.size %]);
-var comp_desc = new Array([% product.components.size %]);
-var flags = new Array([% product.components.size %]);
-[% IF Param("useqacontact") %]
-    var initialqacontacts = new Array([% product.components.size %]);
-    var last_initialqacontact;
-[% END %]
-[% count = 0 %]
-[%- FOREACH c = product.components %]
-    [% NEXT IF NOT c.is_active %]
-    components[[% count %]] = "[% c.name FILTER js %]";
-    comp_desc[[% count %]] = "[% c.description FILTER html_light FILTER js %]";
-    initialowners[[% count %]] = "[% c.default_assignee.login FILTER js %]";
-    [% flag_list = [] %]
-    [% FOREACH f = c.flag_types(is_active=>1).bug %]
-      [% flag_list.push(f.id) %]
-    [% END %]
-    [% FOREACH f = c.flag_types(is_active=>1).attachment %]
-      [% flag_list.push(f.id) %]
-    [% END %]
-    flags[[% count %]] = [[% flag_list.join(",") FILTER js %]];
-    [% IF Param("useqacontact") %]
-        initialqacontacts[[% count %]] = "[% c.default_qa_contact.login FILTER js %]";
-    [% END %]
-
-    [% SET initial_cc_list = [] %]
-    [% FOREACH cc_user = c.initial_cc %]
-      [% initial_cc_list.push(cc_user.login) %]
-    [% END %]
-    initialccs[[% count %]] = "[% initial_cc_list.join(', ') FILTER js %]";
-
-    [% count = count + 1 %]
-[%- END %]
-
-function set_assign_to() {
-    // Based on the selected component, fill the "Assign To:" field
-    // with the default component owner, and the "QA Contact:" field
-    // with the default QA Contact. It also selectively enables flags.
-    var form = document.Create;
-    var assigned_to = form.assigned_to.value;
-
-[% IF Param("useqacontact") %]
-    var qa_contact = form.qa_contact.value;
-[% END %]
-
-    var index = -1;
-    if (form.component.type == 'select-one') {
-        index = form.component.selectedIndex;
-    } else if (form.component.type == 'hidden') {
-        // Assume there is only one component in the list
-        index = 0;
-    }
-    if (index != -1) {
-        var owner = initialowners[index];
-        var component = components[index];
-        if (assigned_to == last_initialowner
-            || assigned_to == owner
-            || assigned_to == '') {
-            form.assigned_to.value = owner;
-            last_initialowner = owner;
-        }
-
-        document.getElementById('initial_cc').innerHTML = initialccs[index];
-        document.getElementById('comp_desc').innerHTML = comp_desc[index];
-
-        [% IF Param("useqacontact") %]
-            var contact = initialqacontacts[index];
-            if (qa_contact == last_initialqacontact
-                || qa_contact == contact
-                || qa_contact == '') {
-                  form.qa_contact.value = contact;
-                  last_initialqacontact = contact;
-            }
-        [% END %]
-
-        // First, we disable all flags. Then we re-enable those
-        // which are available for the selected component.
-        var inputElements = document.getElementsByTagName("select");
-        var inputElement, flagField;
-        for ( var i=0 ; i<inputElements.length ; i++ ) {
-            inputElement = inputElements.item(i);
-            if (inputElement.name.search(/^flag_type-(\d+)$/) != -1) {
-                var id = inputElement.name.replace(/^flag_type-(\d+)$/, "$1");
-                inputElement.disabled = true;
-                // Also disable the requestee field, if it exists.
-                inputElement = document.getElementById("requestee_type-" + id);
-                if (inputElement) inputElement.disabled = true;
-            }
-        }
-        // Now enable flags available for the selected component.
-        for (var i = 0; i < flags[index].length; i++) {
-            flagField = document.getElementById("flag_type-" + flags[index][i]);
-            // Do not enable flags the user cannot set nor request.
-            if (flagField && flagField.options.length > 1) {
-                flagField.disabled = false;
-                // Re-enabling the requestee field depends on the status
-                // of the flag.
-                toggleRequesteeField(flagField, 1);
-            }
-        }
-    }
+[% inline_style = BLOCK %]
+#pr_form {
+  padding: 10px;
+  width: 600px;
 }
 
-function fix_component() {
-    var form = document.Create;
-    var location = form.location.options[form.location.selectedIndex].value;
-    var fakecomp = form.fakecomp.options[form.fakecomp.selectedIndex].value;
-    var newcomp = location + " - " + fakecomp;
-    form.component.value = newcomp;
-    set_assign_to();
+#pr_form input[type="text"], #pr_form textarea {
+  width: 100%;
+  margin-bottom: 2px;
 }
 
-function handleWantsAttachment(wants_attachment) {
-    if (wants_attachment) {
-        document.getElementById('attachment_false').style.display = 'none';
-        document.getElementById('attachment_true').style.display = 'block';
+#pr_form .calendar {
+  width: 100px;
+}
+
+#pr_form .user {
+  width: 300px;
+}
+
+#pr_form select {
+  width: 200px;
+}
+
+#pr_form .required:after {
+  content: " *";
+  color: red;
+}
+
+#pr_form .missing {
+  box-shadow: 0px 0px 5px red;
+}
+
+#pr_form label {
+  font-weight: bold;
+  display: block;
+}
+
+#pr_form label.normal {
+  font-weight: normal;
+  display: inline;
+}
+
+#pr_form .calendar_button {
+  margin-top: 0.5em;
+}
+
+#pr_form .desc {
+  padding-bottom: 3px;
+}
+
+#pr_form .field {
+  margin-bottom: 10px;
+}
+
+#pr_form .indent {
+  margin-left: 30px;
+}
+
+#pr_form textarea {
+  font-family: inherit;
+  font-size: inherit;
+}
+
+#pr_form .head {
+  font-weight: bold;
+  border-top: 1px solid silver;
+  border-bottom: 1px solid silver;
+  padding: 5px;
+  margin: 1em 0;
+  background: #ddd;
+}
+
+#pr_form fieldset {
+  border: none;
+}
+
+#pr_form .extra {
+  font-style: italic;
+}
+
+#pr_form .extra a {
+  text-decoration: underline;
+}
+
+#pr_form #commit {
+  margin-top: 20px;
+}
+
+#pr_form .linked {
+  display: block;
+  margin-top: 2px;
+  width: 300px;
+}
+
+[% END %]
+
+[% inline_javascript = BLOCK %]
+var pr_inited = false;
+
+function init_listener(id, event, fn) {
+  YAHOO.util.Event.addListener(id, event, fn);
+  bz_fireEvent(document.getElementById(id), event);
+}
+
+function toggle_linked(id, value, suffix) {
+  var el = document.getElementById(id);
+  var show = el.type == 'checkbox' ? el.checked : el.value == value;
+  if (show) {
+    var linked = document.getElementById(id + suffix);
+    YAHOO.util.Dom.addClass(linked, 'linked');
+    YAHOO.util.Dom.removeClass(linked, 'bz_default_hidden');
+    if (pr_inited && linked.nodeName == "INPUT") {
+      linked.focus();
+      linked.select();
+    }
+  }
+  else {
+      YAHOO.util.Dom.addClass(id + suffix, 'bz_default_hidden');
+  }
+}
+
+function init_other(id) {
+  init_listener(id, 'change', function(o) {
+    toggle_linked(id, 'Other:', '_other');
+  });
+}
+
+YAHOO.util.Event.onDOMReady(function() {
+  init_listener('metrica', 'change', function(o) {
+    toggle_linked('metrica', 'Yes', '_extra');
+  });
+  init_listener('budget', 'change', function(o) {
+    toggle_linked('budget', 'Extra', '_extra');
+  });
+  init_listener('proj_mat_online', 'click', function(o) {
+    toggle_linked('proj_mat_online', 0, '_extra');
+  });
+  init_listener('proj_mat_file', 'click', function(o) {
+    toggle_linked('proj_mat_file', 0, '_extra');
+  });
+  init_listener('pr_mat_online', 'click', function(o) {
+    toggle_linked('pr_mat_online', 0, '_extra');
+  });
+  init_listener('pr_mat_file', 'click', function(o) {
+    toggle_linked('pr_mat_file', 0, '_extra');
+  });
+
+  init_other('pr_owner');
+  init_other('group_focus');
+  init_other('project_type');
+  init_other('region');
+  init_other('press_center');
+  init_other('internal_resources');
+  init_other('external_resources');
+  init_other('localization');
+  init_other('audience');
+
+  pr_inited = true;
+});
+
+function validate_other(id, value, suffix) {
+  var el = document.getElementById(id);
+  if (!value) value = 'Other:';
+  if (!suffix) suffix = '_other';
+  if (!el) {
+    console.error('Failed to find element: ' + elem_id);
+    return false;
+  }
+  if (el.type == 'checkbox') {
+    if (!el.checked) return true;
+  }
+  else if (el.value != value) {
+    return true;
+  }
+  return isFilledOut(id + suffix);
+}
+
+function validate_form() {
+  var Dom = YAHOO.util.Dom;
+
+  var old_missing = Dom.getElementsByClassName('missing');
+  for (var i = 0, il = old_missing.length; i < il; i++) {
+    Dom.removeClass(old_missing[i], 'missing');
+  }
+
+  var missing = [];
+  if (!isFilledOut('short_desc'))     missing.push(['short_desc', 'Project Title']);
+  if (!isFilledOut('desc'))           missing.push(['desc', 'Project Description and Scope']);
+
+  if (!isFilledOut('start_date'))     missing.push(['start_date', 'Start Date']);
+  if (!isFilledOut('announce_date'))  missing.push(['announce_date', 'Announcement Date']);
+  if (!isFilledOut('deadline'))       missing.push(['deadline', 'Internal Deadline']);
+
+  if (!isFilledOut('pr_owner'))       missing.push(['pr_owner', 'Project PR Owner']);
+  if (!isFilledOut('owner'))          missing.push(['owner', 'Project Owner']);
+
+  if (!isFilledOut('rasci_a'))        missing.push(['rasci_a', 'RASCI Approver']);
+
+  if (!isFilledOut('tier'))           missing.push(['tier', 'Tier']);
+  if (!isFilledOut('project_type'))   missing.push(['project_type', 'Project Type']);
+  if (!isFilledOut('pr_approach'))    missing.push(['pr_approach', 'PR Approach']);
+  if (!isFilledOut('group_focus'))    missing.push(['group_focus', 'Product Group Focus']);
+  if (!validate_other('group_focus')) missing.push(['group_focus', 'Product Group Focus - Other']);
+  if (!isFilledOut('region'))         missing.push(['region', 'Region']);
+  if (!validate_other('region'))      missing.push(['region', 'Region - Other']);
+
+  if (!isFilledOut('project_goals'))  missing.push(['project_goals', 'Project Goals']);
+  if (!isFilledOut('pr_goals'))       missing.push(['pr_goals', 'PR Goals']);
+  if (!isFilledOut('company_goal'))   missing.push(['company_goal', 'Company Goal']);
+  if (!isOneChecked(document.forms.pr_form.audience))
+    missing.push(['audience_group', 'Audiences']);
+  if (!validate_other('audience'))    missing.push(['audience', 'Audience - Other']);
+  if (!isFilledOut('key_messages'))   missing.push(['key_messages', 'Key Messages']);
+
+  if (Dom.get('proj_mat_online').checked) {
+    if (!isFilledOut('proj_mat_online_desc')) missing.push(['proj_mat_online_desc', 'Project Materials - Online Description']);
+    if (!isFilledOut('proj_mat_online_link')) missing.push(['proj_mat_online_link', 'Project Materials - Online Link']);
+  }
+  if (Dom.get('proj_mat_file').checked) {
+    if (!isFilledOut('proj_mat_file_desc'))   missing.push(['proj_mat_file_desc', 'Project Materials - Upload Description']);
+    if (!isFilledOut('proj_mat_file_attach')) missing.push(['proj_mat_file_attach', 'Project Materials - Upload File']);
+  }
+  if (Dom.get('pr_mat_online').checked) {
+    if (!isFilledOut('pr_mat_online_desc')) missing.push(['pr_mat_online_desc', 'PR Project Materials - Online Description']);
+    if (!isFilledOut('pr_mat_online_link')) missing.push(['pr_mat_online_link', 'PR Project Materials - Online Link']);
+  }
+  if (Dom.get('pr_mat_file').checked) {
+    if (!isFilledOut('pr_mat_file_desc'))   missing.push(['pr_mat_file_desc', 'PR Project Materials - Upload Description']);
+    if (!isFilledOut('pr_mat_file_attach')) missing.push(['pr_mat_file_attach', 'PR Project Materials - Upload File']);
+  }
+
+  if (!validate_other('press_center'))        missing.push(['press_center', 'Press Center Update - Other']);
+  if (!validate_other('internal_resources'))  missing.push(['internal_resources', 'Internal Resources Needed - Other']);
+  if (!validate_other('external_resources'))  missing.push(['external_resources', 'External Resources Needed - Other']);
+  if (!validate_other('localization'))        missing.push(['localization', 'Localization Needed - Other']);
+
+  if (!isFilledOut('budget'))                       missing.push(['budget', 'Budget']);
+  if (!validate_other('budget', 'Extra', '_extra')) missing.push(['budget', 'Budget - Extra']);
+
+  if (missing.length) {
+    var missing_text = [];
+    for (var i = 0, il = missing.length; i < il; i++) {
+      Dom.addClass(missing[i][0], 'missing');
+      missing_text.push(missing[i][1]);
+    }
+    if (missing_text.length == 1) {
+      alert("The field '" + missing_text[0] + "' is required.");
     }
     else {
-        document.getElementById('attachment_false').style.display = 'block';
-        document.getElementById('attachment_true').style.display = 'none';
-        clearAttachmentFields();
+      alert("The following fields are required:\n- " + missing_text.join("\n- "));
     }
+    return false;
+  }
+
+  return true;
 }
 
+[% END %]
 
-TUI_alternates['expert_fields'] = 'Show Advanced Fields';
-// Hide the Advanced Fields by default, unless the user has a cookie
-// that specifies otherwise.
-TUI_hide_default('expert_fields');
+[% PROCESS global/header.html.tmpl
+   title = "PR Project Form"
+   style = inline_style
+   javascript = inline_javascript
+   javascript_urls = [ 'extensions/BMO/web/js/form_validate.js',
+                       'js/field.js', 'js/util.js' ]
+   yui = [ "autocomplete", "calendar" ]
+%]
 
--->
-</script>
-
-[% IF user.in_group("mozilla-confidential") %]
+[% UNLESS user.in_group('pr-private') %]
+  <div id="error_msg" class="throw_error">
+    This form is only available to members of the Mozilla PR team.
+  </div>
+  [% PROCESS global/footer.html.tmpl %]
+  [% RETURN %]
+[% END %]
 
 [% USE Bugzilla %]
+[% cgi = Bugzilla.cgi %]
 
-<form name="Create" id="Create" method="post" action="post_bug.cgi"
-      enctype="multipart/form-data">
-<input type="hidden" name="product" value="[% product.name FILTER html %]">
+<form id="pr_form" name="pr_form" method="post" action="post_bug.cgi"
+      enctype="multipart/form-data" onSubmit="return validate_form()">
+<input type="hidden" name="format" value="mozpr">
+<input type="hidden" name="product" value="Mozilla PR">
+<input type="hidden" name="component" value="Projects">
+<input type="hidden" name="rep_platform" value="All">
+<input type="hidden" name="op_sys" value="Other">
+<input type="hidden" name="version" value="unspecified">
+<input type="hidden" name="bug_severity" value="normal">
+<input type="hidden" name="group" value="pr-private">
+<input type="hidden" name="assigned_to" id="assigned_to" value="nobody@mozilla.org">
 <input type="hidden" name="token" value="[% token FILTER html %]">
 
-<table cellspacing="4" cellpadding="2" border="0" style="background: url(extensions/BMO/web/images/presshat.png) top right no-repeat">
-<tbody>
-  <tr>
-    <td colspan="2">
-      <a id="expert_fields_controller" class="controller bz_default_hidden"
-         href="javascript:TUI_toggle_class('expert_fields')">Hide
-        Advanced Fields</a>
-      [%# Show the link if the browser supports JS %]
-      <script type="text/javascript">
-        YAHOO.util.Dom.removeClass('expert_fields_controller', 
-                                   'bz_default_hidden');
-      </script>
-    </td>
-    <td colspan="2">
-      (<span class="required_star">*</span> =
-      <span class="required_explanation">Required Field</span>)
-   </td>
-  </tr>
+<div class="head">
+  PR Project Form
+</div>
 
-  <tr>
-    <th>Product:</th>
-    <td width="10%">[% product.name FILTER html %]</td>
+<div class="field">
+  <label for="short_desc" class="required">Project Title</label>
+  <input type="text" name="short_desc" id="short_desc" placeholder="Your project's title">
+</div>
 
-    <th>Reporter:</th>
-    <td width="100%">[% user.login FILTER html %]</td>
-  </tr>
+<div class="field">
+  <label for="desc" class="required">Project Description and Scope</label>
+  <textarea name="desc" id="desc" placeholder="A short description of your PR project"></textarea>
+</div>
 
-  [%# We can't use the select block in these two cases for various reasons. %]
-[% matches = default.component_.matches('^(.*) - (.*)$') %]
-[% default.location = matches.0 %]
-[% default.fakecomp = matches.1 %]
-[% IF default.location == '' %]
-  [% default.location = 'US' %]
-[% END %]
-[% locations = [] %]
-[% fakecomps = [] %]
-[% FOREACH c = product.components %]
-  [% matches = c.name.match('^(.*) - (.*)$') %]
-  [% locations.push(matches.0) %]
-  [% fakecomps.push(matches.1) %]
-[% END %]
-[% locations = locations.unique %]
-[% fakecomps = fakecomps.unique %]
-  <tr>
-    <th class="required">
-      Location:
-    </th>
-    <td>
-  
-      <select name="location" onchange="fix_component();" size="7">
-        [% FOREACH l = locations %]
-          <option value="[% l FILTER html %]" [% " selected=\"selected\"" IF l == default.location %]>
-          [% l FILTER html %]
-          </option>
-        [% END %]
-      </select>
-      <select name="component" onchange="set_assign_to();" size="7"
-              aria-required="true" class="required" style="display: none;">
-        [%# Build the lists of assignees and QA contacts if "usemenuforusers" is enabled. %]
-        [% IF Param("usemenuforusers") %]
-          [% assignees_list = user.get_userlist.clone %]
-          [% qa_contacts_list = user.get_userlist.clone %]
-        [% END %]
+<div class="head">
+  Timings
+</div>
 
-        [%- FOREACH c = product.components %]
-          [% NEXT IF NOT c.is_active %]
-          <option value="[% c.name FILTER html %]"
-            [% " selected=\"selected\"" IF c.name == default.component_ %]>
-            [% c.name FILTER html -%]
-          </option>
-          [% IF Param("usemenuforusers") %]
-            [% INCLUDE build_userlist default_user = c.default_assignee,
-                                      userlist = assignees_list %]
-            [% INCLUDE build_userlist default_user = c.default_qa_contact,
-                                      userlist = qa_contacts_list %]
-          [% END %]
-        [%- END %]
-      </select>
-    </td>
+<div class="field">
+  <label for="start_date" class="required">Start Date</label>
+  <input name="start_date" id="start_date" value="" class="calendar"
+    onchange="updateCalendarFromField(this)">
+  <button type="button" class="calendar_button" id="button_calendar_start_date"
+    onclick="showCalendar('start_date')">
+    <span>Calendar</span>
+  </button>
+  <div id="con_calendar_start_date"></div>
+  <script type="text/javascript">
+    createCalendar('start_date')
+  </script>
+</div>
 
-  </tr>
-  <tr>
-    <th>
-      Request type:
-    </th>
-    <td>
-  
-      <select name="fakecomp" onchange="fix_component();" size="7">
-        [% FOREACH f = fakecomps %]
-          <option value="[% f FILTER html %]" [% " selected=\"selected\"" IF f == default.fakecomp %]>
-          [% f FILTER html %]
-          </option>
-        [% END %]
-      </select>
-    </td>
-    <td colspan="2">
-      [%# Enclose the fieldset in a nested table so that its width changes based
-        # on the length on the component description. %]
-      <table>
-        <tr>
-          <td>
-            <fieldset>
-              <legend>Request Description</legend>
-              <div id="comp_desc" class="comment">Select a request type to read its description.</div>
-            </fieldset>
-          </td>
-        </tr>
-      </table>
-      <input type="hidden" name="bug_severity" value="[% default.bug_severity FILTER html %]">
-      <input type="hidden" name="rep_platform" value="[% default.rep_platform FILTER html %]">
-      <input type="hidden" name="op_sys" value="[% default.op_sys FILTER html %]">
-      <input type="hidden" name="version" value="unspecified">
-    </td>
-  </tr>
-</tbody>
+<div class="field">
+  <label for="announce_date" class="required">Announcement Date</label>
+  <input name="announce_date" id="announce_date" value="" class="calendar"
+    onchange="updateCalendarFromField(this)">
+  <button type="button" class="calendar_button" id="button_calendar_announce_date"
+    onclick="showCalendar('announce_date')">
+    <span>Calendar</span>
+  </button>
+  <div id="con_calendar_announce_date"></div>
+  <script type="text/javascript">
+    createCalendar('announce_date')
+  </script>
+</div>
 
-<tbody class="expert_fields">
-  <tr>
-    <td colspan="4">&nbsp;</td>
-  </tr>
+<div class="field">
+  <label for="deadline" class="required">Internal Deadline</label>
+  <input name="deadline" id="deadline" value="" class="calendar"
+    onchange="updateCalendarFromField(this)">
+  <button type="button" class="calendar_button" id="button_calendar_deadline"
+    onclick="showCalendar('deadline')">
+    <span>Calendar</span>
+  </button>
+  <div id="con_calendar_deadline"></div>
+  <script type="text/javascript">
+    createCalendar('deadline')
+  </script>
+</div>
 
-  <tr>
-[% IF bug_status.size <= 1 %]
-  <input type="hidden" name="bug_status" 
-         value="[% default.bug_status FILTER html %]">
-    <th>Initial State:</th>
-    <td>[% display_value("bug_status", default.bug_status) FILTER html %]</td>
-[% ELSE %]
-  [% INCLUDE bug/field.html.tmpl
-    bug = default, field = bug_fields.bug_status,
-    editable = (bug_status.size > 1), value = default.bug_status
-    override_legal_values = bug_status %]
-[% END %]
+<div class="head">
+  Owners
+</div>
 
-    <td>&nbsp;</td>
-    [%# Calculate the number of rows we can use for flags %]
-    [% num_rows = 6 + (Param("useqacontact") ? 1 : 0) +
-                      (user.is_timetracker ? 3 : 0) +
-                      (Param("usebugaliases") ? 1 : 0)
-    %]
+<div class="field">
+  <label for="pr_owner" class="required">Project PR Owner</label>
+  <select name="pr_owner" id="pr_owner">
+    <option value=""></option>
+    <option value="ahubert@mozilla.com">Aurelien Hubert</option>
+    <option value="bhueppe@mozilla.com">Barbara Hüppe</option>
+    <option value="ej@mozilla.com">Erica Jostedt</option>
+    <option value="jokelly@mozilla.com">Justin O'Kelly</option>
+    <option value="kshaw@mozilla.com">Karolina Shaw</option>
+    <option value="kshaw@mozilla.com">Mike Manning</option>
+    <option value="lnapoli@mozilla.com">Laura Napoli</option>
+    <option value="pjarratt@mozilla.com">Paul Jarratt</option>
+    <option value="tnitot@mozilla.com">Tristan Nitot</option>
+    <option value="vponell@mozilla.com">Valerie Ponell</option>
+    <option value="Other:">Other:</option>
+  </select>
+  <input name="pr_owner_other" id="pr_owner_other" class="bz_default_hidden">
+</div>
 
-    <td rowspan="[% num_rows FILTER html %]">
-      [% IF product.flag_types(is_active=>1).bug.size > 0 %]
-        [% display_flag_headers = 0 %]
-        [% any_flags_requesteeble = 0 %]
+<div class="field">
+  <label for="owner" class="required">Project Owner</label>
+  <input name="owner" id="owner" class="user">
+</div>
 
-        [% FOREACH flag_type = product.flag_types(is_active=>1).bug %]
-          [% display_flag_headers = 1 %]
-          [% SET any_flags_requesteeble = 1 IF flag_type.is_requestable && flag_type.is_requesteeble %]
-        [% END %]
+<div class="head">
+  RASCI
+</div>
 
-        [% IF display_flag_headers %]
-          [% PROCESS "flag/list.html.tmpl" flag_types = product.flag_types(is_active=>1).bug
-                                           any_flags_requesteeble = any_flags_requesteeble
-                                           flag_table_id = "bug_flags"
-          %]
-        [% END %]
-      [% END %]
-    </td>
-  </tr>
+<div class="field">
+  <label for="rasci_r">Responsible</label>
+  <input name="rasci_r" id="rasci_r" class="user">
+</div>
 
-  <tr>
-    <th><a href="page.cgi?id=fields.html#assigned_to">Assign To</a>:</th>
-    <td colspan="2">
-      [% INCLUDE global/userselect.html.tmpl
-         id => "assigned_to"
-         name => "assigned_to"
-         value => assigned_to
-         disabled => assigned_to_disabled
-         size => 30
-         emptyok => 1
-         custom_userlist => assignees_list
-       %]
-      <noscript>(Leave blank to assign to component's default assignee)</noscript>
-    </td>
-  </tr>
-  
-[% IF Param("useqacontact") %]
-    <tr>
-      <th>QA Contact:</th>
-      <td colspan="2">
-      [% INCLUDE global/userselect.html.tmpl
-         id => "qa_contact"
-         name => "qa_contact"
-         value => qa_contact
-         disabled => qa_contact_disabled
-         size => 30
-         emptyok => 1
-         custom_userlist => qa_contacts_list
-       %]
-        <noscript>(Leave blank to assign to default qa contact)</noscript>
-      </td>
-    </tr>
-[% END %]
+<div class="field">
+  <label for="rasci_a" class="required">Approver</label>
+  <input name="rasci_a" id="rasci_a" class="user">
+</div>
 
-  <tr>
-    <th>CC:</th>
-    <td colspan="2">
-      [% INCLUDE global/userselect.html.tmpl
-         id => "cc"
-         name => "cc"
-         value => cc
-         disabled => cc_disabled
-         size => 30
-         multiple => 5
-       %]
-    </td>
-  </tr>
+<div class="field">
+  <label for="rasci_s">Supporter</label>
+  <input name="rasci_s" id="rasci_s" class="user">
+</div>
 
-  <tr>
-    <th>Default CC:</th>
-    <td colspan="2">
-      <div id="initial_cc">
-      </div>
-   </td>
-  </tr>
-  
-  <tr>
-    <td colspan="3">&nbsp;</td>
-  </tr>
+<div class="field">
+  <label for="rasci_c">Consultant</label>
+  <input name="rasci_c" id="rasci_c" class="user">
+</div>
 
-[% IF user.is_timetracker %]
-  <tr>
-    <th>Estimated Hours:</th>
-    <td colspan="2">
-      <input name="estimated_time" size="6" maxlength="6" value="[% estimated_time FILTER html %]">
-    </td>
-  </tr>
-  <tr>
-    <th>Deadline:</th>
-    <td colspan="2">
-      <input name="deadline" size="10" maxlength="10" value="[% deadline FILTER html %]">
-      <small>(YYYY-MM-DD)</small>
-    </td>
-  </tr>
+<div class="field">
+  <label for="rasci_i">Informed</label>
+  <input name="rasci_i" id="rasci_i" class="user">
+</div>
 
-  <tr>
-    <td colspan="3">&nbsp;</td>
-  </tr>
-[% END %]
+<div class="head">
+  Details
+</div>
 
-[% IF Param("usebugaliases") %]
-  <tr>
-    <th>Alias:</th>
-    <td colspan="2">
-      <input name="alias" size="20" value="[% alias FILTER html %]">
-    </td>
-  </tr>
-[% END %]
+<div class="field">
+  <label for="tier" class="required">Tier</label>
+  <select name="tier" id="tier">
+    <option value=""></option>
+    <option value="1">1</option>
+    <option value="2">2</option>
+    <option value="3">3</option>
+  </select>
+</div>
 
-  <tr>
-    <th>URL:</th>
-    <td colspan="2">
-      <input name="bug_file_loc" size="40"
-             value="[% bug_file_loc FILTER html %]">
-    </td>
-  </tr>
-</tbody>
+<div class="field">
+  <label for="project_type" class="required">Project Type</label>
+  <select name="project_type" id="project_type">
+    <option value=""></option>
+    <option>Announcement</option>
+    <option>Speaking and Events</option>
+    <option>Planning</option>
+    <option>Messaging and Materials</option>
+    <option>Campaign</option>
+    <option>Other:</option>
+  </select>
+  <input name="project_type_other" id="project_type_other" class="bz_default_hidden">
+</div>
 
-<tbody>
+<div class="field">
+  <label for="pr_approach" class="required">PR Approach</label>
+  <select name="pr_approach" id="pr_approach">
+    <option value=""></option>
+    <option value="Proactive">Proactive</option>
+    <option value="Reactive">Reactive</option>
+  </select>
+</div>
 
-  <tr>
-    <th class="required">Summary:</th>
-    <td colspan="3">
-      <input name="short_desc" size="70" value="[% short_desc FILTER html %]"
-             maxlength="255" spellcheck="true" aria-required="true"
-             class="required">
-    </td>
-  </tr>
+<div class="field">
+  <label for="group_focus" class="required">Product Group Focus</label>
+  <select name="group_focus" id="group_focus">
+    <option value=""></option>
+    <option>Firefox Desktop</option>
+    <option>Firefox for Android</option>
+    <option>Marketplace</option>
+    <option>Developer Tools</option>
+    <option>Cloud</option>
+    <option>Firefox OS</option>
+    <option>Corporate / Business Support</option>
+    <option>Other:</option>
+  </select>
+  <input name="group_focus_other" id="group_focus_other" class="bz_default_hidden">
+</div>
 
-  <tr>
-    <th>Description:</th>
-    <td colspan="3">
-      [% defaultcontent = BLOCK %]
-        [% IF cloned_bug_id %]
-+++ This [% terms.bug %] was initially created as a clone of [% terms.Bug %] #[% cloned_bug_id FILTER html %] +++
+<div class="field">
+  <label for="region" class="required">Region</label>
+  <select name="region" id="region">
+    <option value=""></option>
+    <option>Global</option>
+    <option>US</option>
+    <option>LatAm</option>
+    <option>Europe</option>
+    <option>Africa</option>
+    <option>Asia</option>
+    <option>Other:</option>
+  </select>
+  <input name="region_other" id="region_other" class="bz_default_hidden">
+</div>
 
+<div class="head">
+  Goals, Audience, and Messages
+</div>
 
-        [% END %]
-        [%-# We are within a BLOCK. The comment will be correctly HTML-escaped
-          # by global/textarea.html.tmpl. So we must not escape the comment here. %]
-        [% comment FILTER none %]
-      [%- END %]
-      [% INCLUDE global/textarea.html.tmpl
-         name           = 'comment'
-         id             = 'comment'
-         minrows        = 10
-         maxrows        = 25
-         cols           = constants.COMMENT_COLS
-         defaultcontent = defaultcontent
-       %]
-      <br>
-    </td>
-  </tr>
+<div class="field">
+  <label for="project_goals" class="required">Project Goals</label>
+  <textarea name="project_goals" id="project_goals"></textarea>
+</div>
 
-  [% IF user.is_insider %]
-    <tr class="expert_fields">
-      <th>&nbsp;</th>
-      <td colspan="3">
-        &nbsp;&nbsp;
-        <input type="checkbox" id="commentprivacy" name="commentprivacy"
-          [% " checked=\"checked\"" IF commentprivacy %]>
-        <label for="commentprivacy">
-          Make description private (visible only to members of the 
-          <strong>[% Param('insidergroup') FILTER html %]</strong> group)
-        </label>
-      </td>
-    </tr>
-  [% END %]
+<div class="field">
+  <label for="pr_goals" class="required">PR Goals</label>
+  <textarea name="pr_goals" id="pr_goals"></textarea>
+</div>
 
-  <tr>
-    <th>Attachment:</th>
-    <td colspan="3">
-      <script type="text/javascript">
-        <!--
-        document.write( '<div id="attachment_false">'
-                      +   '<input type="button" value="Add an attachment" '
-                      +          'onClick="handleWantsAttachment(true)"> '
-                      +   '<em style="display: none">This button has no '
-                      +   'functionality for you because your browser does '
-                      +   'not support CSS or does not use it.<\/em>'
-                      + '<\/div>'
-                      + '<div id="attachment_true" style="display: none">'
-                      +   '<input type="button" '
-                      +          'value="Don\'t add an attachment " '
-                      +          'onClick="handleWantsAttachment(false)">');
-        //-->
-      </script>
-        <fieldset>
-          <legend>Add an attachment</legend>
-          <table class="attachment_entry">
-            [% PROCESS attachment/createformcontents.html.tmpl
-                       flag_types = product.flag_types(is_active=>1).attachment
-                       any_flags_requesteeble = 1
-                       flag_table_id ="attachment_flags" %]
-          </table>
-        </fieldset>
-      <script type="text/javascript">
-        <!--
-        document.write('<\/div>');
-        //-->
-      </script>
-    </td>
-  </tr>
-</tbody>
+<div class="field">
+  <label for="company_goal" class="required">Company Goal</label>
+  <select name="company_goal" id="company_goal">
+    <option value=""></option>
+    <option>Scale Firefox OS</option>
+    <option>Add Services to our Product Lines</option>
+    <option>Get Firefox on a Growth Trajectory</option>
+    <option>Invest in Sustainability</option>
+    <option>Risk Mitigation</option>
+  </select>
+</div>
 
-<tbody class="expert_fields">
-  [% IF user.in_group('editbugs', product.id) %]
-    [% IF use_keywords %]
-      <tr>
-        [% INCLUDE bug/field.html.tmpl
-           bug = default, field = bug_fields.keywords, editable = 1,
-           value = keywords, desc_url = "describekeywords.cgi",
-           value_span = 3 %]
-      </tr>
-    [% END %]
+<div class="field" id="audience_group">
+  <label class="required">Audiences</label>
+  <input type="checkbox" name="audience" id="audience_business" value="Business Press">
+  <label for="audience_business" class="normal">Business Press</label><br>
+  <input type="checkbox" name="audience" id="audience_con_tech" value="Consumer Tech">
+  <label for="audience_con_tech" class="normal">Consumer Tech</label><br>
+  <input type="checkbox" name="audience" id="audience_con" value="Consumer">
+  <label for="audience_con" class="normal">Consumer</label><br>
+  <input type="checkbox" name="audience" id="audience_dev" value="Developer">
+  <label for="audience_dev" class="normal">Developer</label><br>
+  <input type="checkbox" name="audience" id="audience" value="Other:">
+  <label for="audience" class="normal">Other:</label><br>
+  <input name="audience_other" id="audience_other" class="bz_default_hidden indent">
+</div>
 
-    <tr>
-      <th>Status Whiteboard:</th>
-      <td colspan="3">
-        <input id="status_whiteboard" name="status_whiteboard" size="70"
-               value="[% status_whiteboard FILTER html %]">
-      </td>
-    </tr>
-    <tr>
-      <th>Depends on:</th>
-      <td colspan="3">
-        <input name="dependson" accesskey="d" value="[% dependson FILTER html %]">
-      </td>
-    </tr>
-    <tr>
-      <th>Blocks:</th>
-      <td colspan="3">
-        <input name="blocked" accesskey="b" value="[% blocked FILTER html %]">
-      </td>
-    </tr>
-  [% END %]
-</tbody>
+<div class="field">
+  <label for="key_messages" class="required">Key Messages</label>
+  <textarea name="key_messages" id="key_messages" placeholder="State (draft) key messages of what we would like to get across to
+  press for this project."></textarea>
+</div>
 
-<tbody class="expert_fields">
-  [%# exclude the default security from from the groups_available %]
-  [%# list, as it will be added by the BMO extension %]
-  [% groups_available = [] %]
-  [% FOREACH group = product.groups_available %]
-    [% NEXT IF group.name == product.default_security_group %]
-    [% groups_available.push(group) %]
-  [% END %]
-  [% IF groups_available.size %]
-  <tr>
-    <th>&nbsp;</th>
-    <td colspan="3">
-      <br>
-        <strong>
-          Only users in all of the selected groups can view this 
-          [%+ terms.bug %]:
-        </strong>
-      <br>
-      <font size="-1">
-        (Leave all boxes unchecked to make this a public [% terms.bug %].)
-      </font>
-      <br>
-      <br>
+<div class="head">
+  Materials
+</div>
 
-      <!-- Checkboxes -->
-      <input type="hidden" name="defined_groups" value="1">
-      [% FOREACH group = groups_available %]
-        <input type="checkbox" id="group_[% group.id FILTER html %]"
-               name="groups" value="[% group.name FILTER html %]"
-               [% ' checked="checked"' IF default.groups.contains(group.name)
-                                          OR group.is_default %]>
-        <label for="group_[% group.id FILTER html %]">
-          [%- group.description FILTER html_light %]</label><br>
-      [% END %]
-    </td>
-  </tr>
-  [% END %]
-</tbody>
+<div class="field">
+  <label>Project Materials</label>
+  <div>
+    <input type="checkbox" name="proj_mat_online" id="proj_mat_online">
+    <label class="normal" for="proj_mat_online">
+      Online Documentation (e.g. WAVE Dashboard)
+    </label>
+    <div id="proj_mat_online_extra" class="bz_default_hidden indent">
+      <label for="proj_mat_online_desc" class="required">Material Description</label>
+      <input type="text" name="proj_mat_online_desc" id="proj_mat_online_desc">
+      <label for="proj_mat_online_link" class="required">Material Link</label>
+      <input type="text" name="proj_mat_online_link" id="proj_mat_online_link">
+    </div>
+  </div>
+  <div>
+    <input type="checkbox" name="proj_mat_file" id="proj_mat_file">
+    <label class="normal" for="proj_mat_file">
+      Upload File
+    </label>
+    <div id="proj_mat_file_extra" class="bz_default_hidden indent">
+      <label for="proj_mat_file_desc" class="required">File Description</label>
+      <input type="text" name="proj_mat_file_desc" id="proj_mat_file_desc">
+      <label for="proj_mat_file_attach" class="required">File Upload</label>
+      <input type="file" name="proj_mat_file_attach" id="proj_mat_file_attach">
+    </div>
+  </div>
+</div>
 
-<tbody>
-  [%# Form controls for entering additional data about the bug being created. %]
-  [% Hook.process("form") %]
+<div class="field">
+  <label>PR Project Materials</label>
+  <div>
+    <input type="checkbox" name="pr_mat_online" id="pr_mat_online">
+    <label class="normal" for="pr_mat_online">
+      Online Documentation (e.g. comms plan)
+    </label>
+    <div id="pr_mat_online_extra" class="bz_default_hidden indent">
+      <label for="pr_mat_online_desc" class="required">Material Description</label>
+      <input type="text" name="pr_mat_online_desc" id="pr_mat_online_desc">
+      <label for="pr_mat_online_link" class="required">Material Link</label>
+      <input type="text" name="pr_mat_online_link" id="pr_mat_online_link">
+    </div>
+  </div>
+  <div>
+    <input type="checkbox" name="pr_mat_file" id="pr_mat_file">
+    <label class="normal" for="pr_mat_file">
+      Upload File
+    </label>
+    <div id="pr_mat_file_extra" class="bz_default_hidden indent">
+      <label for="pr_mat_file_desc" class="required">File Description</label>
+      <input type="text" name="pr_mat_file_desc" id="pr_mat_file_desc">
+      <label for="pr_mat_file_attach" class="required">File Upload</label>
+      <input type="file" name="pr_mat_file_attach" id="pr_mat_file_attach">
+    </div>
+  </div>
+</div>
 
-  <tr>
-    <th>&nbsp;</th>
-    <td colspan="3">
-      <input type="submit" id="commit" value="Submit [% terms.Bug %]"
-             onclick="if (this.form.short_desc.value == '')
-             { alert('Please enter a summary sentence for this [% terms.bug %].');
-               return false; } return true;">
-      &nbsp;&nbsp;&nbsp;&nbsp;
-      <input type="submit" name="maketemplate" id="maketemplate"
-             value="Remember values as bookmarkable template"
-             class="expert_fields">
-    </td>
-  </tr>
-</tbody>
-  </table>
-  <input type="hidden" name="form_name" value="enter_bug">
+<div class="head">
+  Requirements
+</div>
+
+<div class="field">
+  <label for="metrica">Metrica Coverage Reporting Scope</label>
+  <select name="metrica" id="metrica">
+    <option>No</option>
+    <option>Yes</option>
+  </select>
+  <div id="metrica_extra" class="bz_default_hidden extra">
+    Please fill out the
+    <a href="https://basecamp.com/2256351/projects/2980983/messages/12008835" target="_blank">Metrica form</a>
+    and submit to Metrica no later than a week before project starts.
+  </div>
+</div>
+
+<div class="field" id="press_center_group">
+  <label>Press Center Update</label>
+  <input type="checkbox" name="press_center" id="press_center_post" value="Post on press pages">
+  <label for="press_center_post" class="normal">Post on press pages</label><br>
+  <input type="checkbox" name="press_center" id="press_center_library" value="Media Library update">
+  <label for="press_center_library" class="normal">Media Library update</label><br>
+  <input type="checkbox" name="press_center" id="press_center" value="Other:">
+  <label for="press_center" class="normal">Other:</label><br>
+  <input name="press_center_other" id="press_center_other" class="bz_default_hidden indent">
+</div>
+
+<div class="field" id="internal_resources_group">
+  <label>Internal Resources Needed</label>
+  <input type="text" name="resources" id="resources">
+  <input type="checkbox" name="internal_resources" id="internal_resources_spokesperson" value="Spokesperson">
+  <label for="internal_resources_spokesperson" class="normal">Spokesperson</label><br>
+  <input type="checkbox" name="internal_resources" id="internal_resources_staff" value="Demo Staff">
+  <label for="internal_resources_staff" class="normal">Demo Staff</label><br>
+  <input type="checkbox" name="internal_resources" id="internal_resources_support" value="Creative Support">
+  <label for="internal_resources_support" class="normal">Creative Support</label><br>
+  <input type="checkbox" name="internal_resources" id="internal_resources" value="Other:">
+  <label for="internal_resources" class="normal">Other:</label><br>
+  <input name="internal_resources_other" id="internal_resources_other" class="bz_default_hidden indent">
+</div>
+
+<div class="field" id="external_resources_group">
+  <label>External Resources Needed</label>
+  <input type="checkbox" name="external_resources" id="external_resources_pr" value="PR Agency Support">
+  <label for="external_resources_pr" class="normal">PR Agency Support</label><br>
+  <input type="checkbox" name="external_resources" id="external_resources_design" value="Design Support">
+  <label for="external_resources_design" class="normal">Design Support</label><br>
+  <input type="checkbox" name="external_resources" id="external_resources_community" value="Community Support">
+  <label for="external_resources_community" class="normal">Community Support</label><br>
+  <input type="checkbox" name="external_resources" id="external_resources" value="Other:">
+  <label for="external_resources" class="normal">Other:</label><br>
+  <input name="external_resources_other" id="external_resources_other" class="bz_default_hidden indent">
+</div>
+
+<div class="field">
+  <label for="localization">Localization Needed</label>
+  <select name="localization" id="localization">
+    <option>None</option>
+    <option>Yes - Agency Localization</option>
+    <option>Yes - Community Localization</option>
+    <option>Other:</option>
+  </select>
+  <input name="localization_other" id="localization_other" class="bz_default_hidden">
+</div>
+
+<div class="head">
+  Budget
+</div>
+
+<div class="field">
+  <label for="budget" class="required">Budget</label>
+  <select name="budget" id="budget">
+    <option value=""></option>
+    <option value="Covered">Covered in budget</option>
+    <option value="Extra">Extra budget required:</option>
+  </select>
+  <input name="budget_extra" id="budget_extra" class="bz_default_hidden">
+</div>
+
+<input type="submit" id="commit" value="Submit">
+
+<p>
+  [ <span class="required_star">*</span> <span class="required_explanation">Required Field</span> ]
+</p>
+
 </form>
 
-[%# Links or content with more information about the bug being created. %]
-[% Hook.process("end") %]
-
-[% ELSE %]
-
-<p>Sorry, you do not have access to this page.</p>
-
-[% END %]
-
 [% PROCESS global/footer.html.tmpl %]
-
-[% BLOCK build_userlist %]
-  [% user_found = 0 %]
-  [% default_login = default_user.login %]
-  [% RETURN UNLESS default_login %]
-
-  [% FOREACH user = userlist %]
-    [% IF user.login == default_login %]
-      [% user_found = 1 %]
-      [% LAST %]
-    [% END %]
-  [% END %]
-
-  [% userlist.push({login    => default_login,
-                    identity => default_user.identity,
-                    visible  => 1})
-     UNLESS user_found %]
-[% END %]

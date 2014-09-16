@@ -87,10 +87,9 @@
     <thead> 
     <tr class="bz_buglist_header bz_first_buglist_header">
       [% IF dotweak %]
-      <th>&nbsp;</th>
+      <th class="sorttable_nosort">&nbsp;</th>
       [% END %]
       <th colspan="[% splitheader ? 2 : 1 %]" class="first-child
-                   sortable_column_0
                    sorted_[% lsearch(order_columns, 'bug_id') FILTER html %]">
         <a href="buglist.cgi?
                   [% urlquerypart FILTER html %]&amp;order=

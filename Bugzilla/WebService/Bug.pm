@@ -1179,13 +1179,11 @@ sub _bug_to_hash {
     # A bug attribute is "basic" if it doesn't require an additional
     # database call to get the info.
     my %item = %{ filter $params, {
-        creation_time    => $self->type('dateTime', $bug->creation_ts),
         # No need to format $bug->deadline specially, because Bugzilla::Bug
         # already does it for us.
         deadline         => $self->type('string', $bug->deadline),
         id               => $self->type('int', $bug->bug_id),
         is_confirmed     => $self->type('boolean', $bug->everconfirmed),
-        last_change_time => $self->type('dateTime', $bug->delta_ts),
         op_sys           => $self->type('string', $bug->op_sys),
         platform         => $self->type('string', $bug->rep_platform),
         priority         => $self->type('string', $bug->priority),
@@ -1199,9 +1197,8 @@ sub _bug_to_hash {
         whiteboard       => $self->type('string', $bug->status_whiteboard),
     } };
 
-    # First we handle any fields that require extra SQL calls.
-    # We don't do the SQL calls at all if the filter would just
-    # eliminate them anyway.
+    # First we handle any fields that require extra work (such as date parsing
+    # or SQL calls).
     if (filter_wants $params, 'alias') {
         $item{alias} = [ map { $self->type('string', $_) } @{ $bug->alias } ];
     }
@@ -1223,6 +1220,9 @@ sub _bug_to_hash {
         my @cc = map { $self->type('email', $_) } @{ $bug->cc };
         $item{'cc'} = \@cc;
         $item{'cc_detail'} = [ map { $self->_user_to_hash($_, $params, undef, 'cc') } @{ $bug->cc_users } ];
+    }
+    if (filter_wants $params, 'creation_time') {
+        $item{'creation_time'} = $self->type('dateTime', $bug->creation_ts);
     }
     if (filter_wants $params, 'creator') {
         $item{'creator'} = $self->type('email', $bug->reporter->login);
@@ -1247,6 +1247,9 @@ sub _bug_to_hash {
         my @keywords = map { $self->type('string', $_->name) }
                        @{ $bug->keyword_objects };
         $item{'keywords'} = \@keywords;
+    }
+    if (filter_wants $params, 'last_change_time') {
+        $item{'last_change_time'} = $self->type('dateTime', $bug->delta_ts);
     }
     if (filter_wants $params, 'product') {
         $item{product} = $self->type('string', $bug->product);

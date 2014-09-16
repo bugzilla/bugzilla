@@ -69,10 +69,8 @@ combination of all comments on a single bug could in some cases
 be larger than 1MB.
 
 We recommend that you allow at least 16MB packets by
-adding the ``max_allowed_packet`` parameter to your MySQL
+adding or altering the ``max_allowed_packet`` parameter in your MySQL
 configuration in the ``[mysqld]`` section, like this:
-
-XXX is "adding" right? Surely it's normally present?
 
 ::
 

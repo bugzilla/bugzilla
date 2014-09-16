@@ -65,8 +65,7 @@ Default milestone
     Select the default milestone for this product.
 
 Version
-    Specify which version of the product bugs will be
-    entered against. XXX is this the "default version" in any sense?
+    Specify the default version for this product.
 
 Create chart datasets for this product
     Select to make chart datasets available for this product.

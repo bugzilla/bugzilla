@@ -147,10 +147,6 @@ home page. It requires a little familiarity with Linux and the command line.
    XXX Given this is a quick setup on a dedicated box, is it OK to use the
    MySQL root user?
     
-   XXX Why can't checksetup determine webservergroup automatically,
-   and prompt for db_user and db_pass, and just keep going? Perhaps with a
-   --simple switch?
-
 10. Check Setup (again)
 
     Run the :file:`checksetup.pl` script again to set up the database.

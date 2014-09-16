@@ -230,10 +230,10 @@ attachment_base
     XXX So this requires wildcard DNS? We should explain a bit about what is needed here.
 
 allow_attachment_deletion
-    If this option is on, administrators will be able to delete the content of attachments.
+    If this option is on, administrators will be able to delete the contents
+    of attachments (i.e. replace the attached file with a 0 byte file),
+    leaving only the metadata.
 
-    XXX Does the attachment itself still exist, it's just empty?
-    
 maxattachmentsize
     The maximum size (in kilobytes) of attachments to be stored in the database. If a file larger than this size is attached to a bug, Bugzilla will look at the maxlocalattachment parameter to determine if the file can be stored locally on the web server. If the file size exceeds both limits, then the attachment is rejected. Settings both parameters to 0 will prevent attaching files to bugs.
 
@@ -706,24 +706,35 @@ max_search_results
 Shadow Database
 ===============
 
-This page controls whether a shadow database is used, and all the
-parameters associated with the shadow database. Versions of Bugzilla
-prior to 3.2 used the MyISAM table type, which supports
-only table-level write locking. With MyISAM, any time someone is making a change to
-a bug, the entire table is locked until the write operation is complete.
-Locking for write also blocks reads until the write is complete.
+This page controls whether a shadow database is used. If your Bugzilla is
+not large, you will not need these options.
 
-The ``shadowdb`` parameter was designed to get around
-this limitation. While only a single user is allowed to write to
-a table at a time, reads can continue unimpeded on a read-only
-shadow copy of the database.
+A standard large database setup involves a single master server and a pool of
+read-only slaves (which Bugzilla calls the "shadowdb"). Queries which are not
+updating data can be directed to the slave pool, removing the load/locking
+from the master, freeing it up to handle writes. Bugzilla will switch to the
+shadowdb when it knows it doesn't need to update the database (e.g. when
+searching, or displaying a bug to a not-logged-in user).
 
-.. note:: As of version 3.2, Bugzilla no longer uses the MyISAM table type.
-   Instead, InnoDB is used, which can do transaction-based locking.
-   Therefore, the limitations the Shadow Database feature was designed
-   to workaround no longer exist.
+Bugzilla does not make sure the shadowdb is kept up to date so if you use
+one, you will need to set up replication in your database server.
 
-XXX Do we need to document it, then? Or even still support it?
+If your shadowdb is on a different machine, specify :param:`shadowdbhost`
+and :param:`shadowdbport`. If it's on the same machine, specify
+:param:`shadowdbsock`.
+
+shadowdbhost
+    The host the shadow database is on.
+
+shadowdbport
+    The port the shadow database is on.
+
+shadowdbsock
+    The socket used to connect to the shadow database, if the host is the
+    local machine.
+
+shadowdb
+    The database name of the shadow database.
 
 .. _admin-memcached:
 

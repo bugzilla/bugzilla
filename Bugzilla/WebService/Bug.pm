@@ -1261,10 +1261,8 @@ sub _bug_to_hash {
     # database call to get the info.
     my %item = %{ filter $params, {
         alias            => $self->type('string', $bug->alias),
-        creation_time    => $self->type('dateTime', $bug->creation_ts),
         id               => $self->type('int', $bug->bug_id),
         is_confirmed     => $self->type('boolean', $bug->everconfirmed),
-        last_change_time => $self->type('dateTime', $bug->delta_ts),
         op_sys           => $self->type('string', $bug->op_sys),
         platform         => $self->type('string', $bug->rep_platform),
         priority         => $self->type('string', $bug->priority),
@@ -1278,9 +1276,8 @@ sub _bug_to_hash {
         whiteboard       => $self->type('string', $bug->status_whiteboard),
     } };
 
-    # First we handle any fields that require extra SQL calls.
-    # We don't do the SQL calls at all if the filter would just
-    # eliminate them anyway.
+    # First we handle any fields that require extra work (such as date parsing
+    # or SQL calls).
     if (filter_wants $params, 'assigned_to') {
         $item{'assigned_to'} = $self->type('email', $bug->assigned_to->login);
         $item{'assigned_to_detail'} = $self->_user_to_hash($bug->assigned_to, $params, undef, 'assigned_to');
@@ -1299,6 +1296,9 @@ sub _bug_to_hash {
         my @cc = map { $self->type('email', $_) } @{ $bug->cc || [] };
         $item{'cc'} = \@cc;
         $item{'cc_detail'} = [ map { $self->_user_to_hash($_, $params, undef, 'cc') } @{ $bug->cc_users } ];
+    }
+    if (filter_wants $params, 'creation_time') {
+        $item{'creation_time'} = $self->type('dateTime', $bug->creation_ts);
     }
     if (filter_wants $params, 'creator') {
         $item{'creator'} = $self->type('email', $bug->reporter->login);
@@ -1323,6 +1323,9 @@ sub _bug_to_hash {
         my @keywords = map { $self->type('string', $_->name) }
                        @{ $bug->keyword_objects };
         $item{'keywords'} = \@keywords;
+    }
+    if (filter_wants $params, 'last_change_time') {
+        $item{'last_change_time'} = $self->type('dateTime', $bug->delta_ts);
     }
     if (filter_wants $params, 'product') {
         $item{product} = $self->type('string', $bug->product);

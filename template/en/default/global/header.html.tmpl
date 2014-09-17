@@ -110,8 +110,16 @@
     [% SET yui = yui_resolve_deps(yui, yui_deps) %]
 
     [% SET css_sets = css_files(style_urls, yui, yui_css) %]
-    <link href="[% css_sets.unified_standard_skin FILTER html %]"
-          rel="stylesheet" type="text/css">
+    [% IF constants.CONCATENATE_ASSETS %]
+      [% PROCESS format_css_link asset_url = css_sets.unified_standard_skin %]
+    [% ELSE %]
+      [% FOREACH asset_url = css_sets.standard %]
+        [% PROCESS format_css_link %]
+      [% END %]
+      [% FOREACH asset_url = css_sets.skin %]
+        [% PROCESS format_css_link %]
+      [% END %]
+    [% END %]
 
     [% IF style %]
       <style type="text/css">
@@ -120,8 +128,13 @@
     [% END %]
 
     [% IF css_sets.unified_custom %]
-      <link href="[% css_sets.unified_custom FILTER html %]"
-            rel="stylesheet" type="text/css">
+      [% IF constants.CONCATENATE_ASSETS %]
+        [% PROCESS format_css_link asset_url = css_sets.unified_custom %]
+      [% ELSE %]
+        [% FOREACH asset_rul = css_sets.custom %]
+          [% PROCESS format_css_link %]
+        [% END %]
+      [% END %]
     [% END %]
 
     [%# YUI Scripts %]
@@ -130,7 +143,7 @@
     [% END %]
     [% starting_js_urls.push('js/global.js') %]
 
-    [% FOREACH javascript_url = starting_js_urls %]
+    [% FOREACH asset_url = concatenate_js(starting_js_urls) %]
       [% PROCESS format_js_link %]
     [% END %]
 
@@ -197,7 +210,7 @@
     // -->
     </script>
 
-    [% FOREACH javascript_url = javascript_urls %]
+    [% FOREACH asset_url = concatenate_js(javascript_urls) %]
       [% PROCESS format_js_link %]
     [% END %]
 
@@ -379,6 +392,10 @@
   <div id="message">[% message %]</div>
 [% END %]
 
+[% BLOCK format_css_link %]
+  <link href="[% asset_url FILTER html %]" rel="stylesheet" type="text/css">
+[% END %]
+
 [% BLOCK format_js_link %]
-  <script type="text/javascript" src="[% javascript_url FILTER mtime FILTER html %]"></script>
+  <script type="text/javascript" src="[% asset_url FILTER mtime FILTER html %]"></script>
 [% END %]

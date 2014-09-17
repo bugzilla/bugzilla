@@ -530,7 +530,7 @@ sub _concatenate_css {
         write_file($file, $content);
     }
 
-    $file =~ s/^\Q$cgi_path\E\///;
+    $file =~ s/^\Q$cgi_path\E\///o;
     return mtime_filter($file);
 }
 
@@ -541,6 +541,54 @@ sub _css_url_rewrite {
     $url =~ s/(^['"]|['"]$)//g;
     return $url if substr($url, 0, 1) eq '/';
     return 'url(../../' . dirname($source) . '/' . $url . ')';
+}
+
+sub _concatenate_js {
+    return @_ unless CONCATENATE_ASSETS;
+    my ($sources) = @_;
+    return [] unless $sources && ref($sources);
+
+    my %files =
+        map {
+            (my $file = $_) =~ s/(^[^\?]+)\?.+/$1/;
+            $_ => $file;
+        } @$sources;
+
+    my $cgi_path   = bz_locations()->{cgi_path};
+    my $skins_path = bz_locations()->{assetsdir};
+
+    # build minified files
+    my @minified;
+    foreach my $source (@$sources) {
+        next unless -e "$cgi_path/$files{$source}";
+        my $file = $skins_path . '/' . md5_hex($source) . '.js';
+        if (!-e $file) {
+            my $content = read_file("$cgi_path/$files{$source}");
+
+            # minimal minification
+            $content =~ s#/\*.*?\*/##sg;    # block comments
+            $content =~ s#(^ +| +$)##gm;    # leading/trailing spaces
+            $content =~ s#^//.+$##gm;       # single line comments
+            $content =~ s#\n{2,}#\n#g;      # blank lines
+            $content =~ s#(^\s+|\s+$)##g;   # whitespace at the start/end of file
+
+            write_file($file, "/* $files{$source} */\n" . $content . "\n");
+        }
+        push @minified, $file;
+    }
+
+    # concat files
+    my $file = $skins_path . '/' . md5_hex(join(' ', @$sources)) . '.js';
+    if (!-e $file) {
+        my $content = '';
+        foreach my $source (@minified) {
+            $content .= read_file($source);
+        }
+        write_file($file, $content);
+    }
+
+    $file =~ s/^\Q$cgi_path\E\///o;
+    return [ $file ];
 }
 
 # YUI dependency resolution
@@ -1054,6 +1102,7 @@ sub create {
 
             'css_files' => \&css_files,
             yui_resolve_deps => \&yui_resolve_deps,
+            concatenate_js => \&_concatenate_js,
 
             # All classifications (sorted by sortkey, name)
             'all_classifications' => sub {

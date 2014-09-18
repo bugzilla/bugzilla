@@ -416,6 +416,15 @@ sub db_schema_abstract_schema {
                     DELETE => 'CASCADE'
                 },
             },
+            changer_id => {
+                TYPE       => 'INT3',
+                NOTNULL    => 0,
+                REFERENCES => {
+                    TABLE  => 'profiles',
+                    COLUMN => 'userid',
+                    DELETE => 'CASCADE'
+                },
+            },
             relationship => {
                 TYPE       => 'INT2',
                 NOTNULL    => 0,
@@ -436,6 +445,17 @@ sub db_schema_abstract_schema {
             ],
         ],
     };
+}
+
+sub install_update_db {
+    Bugzilla->dbh->bz_add_column(
+        'bugmail_filters',
+        'changer_id',
+        {
+            TYPE    => 'INT3',
+            NOTNULL => 0,
+        }
+    );
 }
 
 sub db_sanitize {

@@ -312,8 +312,8 @@ sub new {
     # If we get something that looks like a word (not a number),
     # make it the "name" param.
     if (!defined $param
-        || (!ref($param) && $param =~ /\D/)
-        || (ref($param) && $param->{id} =~ /\D/))
+        || (!ref($param) && $param !~ /^\d+$/)
+        || (ref($param) && $param->{id} !~ /^\d+$/))
     {
         if ($param) {
             my $alias = ref($param) ? $param->{id} : $param;

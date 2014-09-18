@@ -373,10 +373,7 @@ sub param {
         if (!scalar(@result)
             && $self->request_method && $self->request_method eq 'POST')
         {
-            # Some servers fail to set the QUERY_STRING parameter, which
-            # causes undef issues
-            $ENV{'QUERY_STRING'} = '' unless exists $ENV{'QUERY_STRING'};
-            @result = $self->SUPER::url_param(@_);
+            @result = $self->url_param(@_);
         }
 
         # Fix UTF-8-ness of input parameters.
@@ -399,6 +396,14 @@ sub param {
     }
 
     return $self->SUPER::param(@_);
+}
+
+sub url_param {
+    my $self = shift;
+    # Some servers fail to set the QUERY_STRING parameter, which
+    # causes undef issues
+    $ENV{'QUERY_STRING'} //= '';
+    return $self->SUPER::url_param(@_);
 }
 
 sub _fix_utf8 {
@@ -731,6 +736,8 @@ L<CGI|CGI>, L<CGI::Cookie|CGI::Cookie>
 =item redirect_search_url
 
 =item param
+
+=item url_param
 
 =item header
 

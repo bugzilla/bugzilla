@@ -234,7 +234,7 @@ if (should_set('keywords')) {
 }
 if (should_set('comment')) {
     my $is_markdown = ($user->settings->{use_markdown}->{is_enabled} &&
-                            $cgi->param('use_markdown') eq '1') ? 1 : 0;
+                            $cgi->param('use_markdown')) ? 1 : 0;
 
     $set_all_fields{comment} = {
         body        => scalar $cgi->param('comment'),

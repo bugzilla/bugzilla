@@ -552,9 +552,14 @@ sub datetime_from {
     # In the database, this is the "0" date.
     return undef if $date =~ /^0000/;
 
-    # strptime($date) returns an empty array if $date has an invalid
-    # date format.
-    my @time = strptime($date);
+    my @time;
+    # Most dates will be in this format, avoid strptime's generic parser
+    if ($date =~ /^(\d{4})[\.-](\d{2})[\.-](\d{2})(?: (\d{2}):(\d{2}):(\d{2}))?$/) {
+        @time = ($6, $5, $4, $3, $2 - 1, $1 - 1900, undef);
+    }
+    else {
+        @time = strptime($date);
+    }
 
     unless (scalar @time) {
         # If an unknown timezone is passed (such as MSK, for Moskow),

@@ -25,7 +25,7 @@ needs_sphinx = '1.0'
 
 # Add any Sphinx extension module names here, as strings. They can be extensions
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
-extensions = ['sphinx.ext.todo']
+extensions = ['sphinx.ext.todo', 'sphinx.ext.extlinks']
 
 if tags.has('enable_rst2pdf'):
   extensions.append('rst2pdf.pdfbuilder')
@@ -78,7 +78,7 @@ for line in open("../../../Bugzilla/Constants.pm"):
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
-exclude_patterns = ['*.inc.rst']
+exclude_patterns = ['**.inc.rst']
 
 # The reST default role (used for this markup: `text`) to use for all documents.
 #default_role = None
@@ -371,4 +371,7 @@ pdf_use_numbered_links = True
 # Background images fitting mode
 pdf_fit_background_mode = 'scale'
 
+# -- Options for Sphinx extensions -------------------------------------------
+
+# Temporary highlighting of TODO items
 todo_include_todos = True

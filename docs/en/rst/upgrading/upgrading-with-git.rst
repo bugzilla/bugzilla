@@ -9,7 +9,7 @@ intermediate steps. There is a script named :file:`checksetup.pl` included
 with Bugzilla that will automatically do all of the database migration
 for you.
 
-.. include:: upgrading-with-1.rst.inc
+.. include:: upgrading-with-1.inc.rst
 
 You can see if you have local code customizations using:
 
@@ -58,4 +58,4 @@ it fails, then you should implement the plan you came up with when you
 detected these customizations in the step above, before you started the
 upgrade.
 
-.. include:: upgrading-with-2.rst.inc
+.. include:: upgrading-with-2.inc.rst

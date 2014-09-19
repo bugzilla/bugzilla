@@ -22,4 +22,4 @@ in the top right corner of the front page but, if not, open the file
 :file:`Bugzilla/Constants.pm` in your Bugzilla directory and search for
 :code:`BUGZILLA_VERSION`.
 
-.. include:: migrating-from-2.rst.inc
+.. include:: migrating-from-2.inc.rst

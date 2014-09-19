@@ -1,4 +1,4 @@
-.. _migrating:
+.. _migrating-from-other-btses:
 
 Migrating From Other Bug-Tracking Systems
 #########################################

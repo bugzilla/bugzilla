@@ -10,7 +10,7 @@ installation using that.
 Without a source code management system to help you, the process may be
 trickier.
 
-.. include:: upgrading-with-1.rst.inc
+.. include:: upgrading-with-1.inc.rst
 
 As you are using a tarball and not an SCM, it's not at all easy to see if
 you've made local code customizations. You may have to use institutional
@@ -71,4 +71,4 @@ Now we swap the directories over. From the directory containing the
 
 :command:`cd bugzilla`
 
-.. include:: upgrading-with-2.rst.inc
+.. include:: upgrading-with-2.inc.rst

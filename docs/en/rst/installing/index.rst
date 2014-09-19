@@ -21,10 +21,10 @@ case, you may want to read the :ref:`Quick Start instructions <quick-start>`.
 .. toctree::
    :maxdepth: 2
 
-   installing/quick-start
-   installing/linux
-   installing/windows
-   installing/mac-os-x
-   installing/post-install-config
-   installing/migrating
-   installing/moving
+   quick-start
+   linux
+   windows
+   mac-os-x
+   post-install-config
+   migrating
+   moving

@@ -9,50 +9,21 @@ intermediate steps. There is a script named :file:`checksetup.pl` included
 with Bugzilla that will automatically do all of the database migration
 for you.
 
-.. _upgrade-before:
+.. include:: upgrading-with-1.rst.inc
 
-Before You Upgrade
-==================
+You can see if you have local code customizations using:
 
-Before you start your upgrade, there are a few important
-steps to take:
+:command:`git diff`
 
-#. Read the
-   `Release Notes <http://www.bugzilla.org/releases/>`_ of the version you're
-   upgrading to and all intermediate versions, particularly the "Notes for
-   Upgraders" sections, if present. They may make you aware of additional
-   considerations.
+If that comes up empty, then run:
 
-#. Run the :ref:`sanity-check` on your installation. Attempt to fix all
-   warnings that the page produces before you start, or it's
-   possible that you may experience problems during your upgrade.
+:command:`git log | head`
 
-#. Work out how to :ref:`back up <backups>` your Bugzilla entirely, and
-   how to restore from a backup if need be.
+and see if the last commit looks like one made by the Bugzilla team, or
+by you. If it looks like it was made by us, then you have made no local
+code customizations.
 
-.. _upgrade-modified:
-
-Customized Bugzilla?
---------------------
-
-If you have modified the code or templates of your Bugzilla,
-then upgrading requires a bit more thought and effort than the simple process
-below. See :ref:`template-method` for a discussion of the various methods of
-customization that may have been used.
-
-The larger the jump you are trying to make, the more difficult it
-is going to be to upgrade if you have made local customizations.
-Upgrading from 4.2 to 4.2.1 should be fairly painless even if
-you are heavily customized, but going from 2.18 to 4.2 is going
-to mean a fair bit of work re-writing your local changes to use
-the new files, logic, templates, etc. If you have done no local
-changes at all, however, then upgrading should be approximately
-the same amount of work regardless of how long it has been since
-your version was released.
-
-You should do the upgrade on a test system with the same configuration and
-make sure all your customizations still work. If not, port and test them so
-you have them ready for the real thing.
+.. _start-upgrade-git:
 
 Starting the Upgrade
 ====================
@@ -62,11 +33,11 @@ When you are ready to go:
 #. Shut down your Bugzilla installation by putting some explanatory text
    in the :param:`shutdownhtml` parameter.
 
-#. Make all necessary :ref:`backups`.
+#. Make all necessary :ref:`backups <backups>`.
    *THIS IS VERY IMPORTANT*. If anything goes wrong during the upgrade,
    having a backup allows you to roll back to a known good state.
 
-.. _upgrade-files:
+.. _upgrade-files-git:
 
 Getting The New Bugzilla
 ========================
@@ -82,34 +53,9 @@ in which Bugzilla is installed.
 
 .. todo:: What is the best way to pull latest stable?
 
-.. _upgrade-database:
+If you have local code customizations, git will attempt to merge them. If
+it fails, then you should implement the plan you came up with when you
+detected these customizations in the step above, before you started the
+upgrade.
 
-Upgrading the Database
-======================
-
-Run :file:`checksetup.pl`. This will do everything required to convert
-your existing database and settings to the new version.
-
-:command:`cd $BUGZILLA_HOME`
-
-:command:`./checksetup.pl`
-
-   .. warning:: For some upgrades, running :file:`checksetup.pl` on a large
-      installation (75,000 or more bugs) can take a long time,
-      possibly several hours, if e.g. indexes need to be rebuilt. If this
-      length of downtime would be a problem for you, you can determine
-      timings for your particular situation by doing a test upgrade on a
-      development server with the production data.
-
-.. _upgrade-finish:
-
-Finishing The Upgrade
-=====================
-
-#. Reactivate Bugzilla by clear the text that you put into the
-   :param:`shutdownhtml` parameter.
-
-#. Run another :ref:`sanity-check` on your
-   upgraded Bugzilla. It is recommended that you fix any problems
-   you see immediately. Failure to do this may mean that Bugzilla
-   may not work entirely correctly. 
+.. include:: upgrading-with-2.rst.inc

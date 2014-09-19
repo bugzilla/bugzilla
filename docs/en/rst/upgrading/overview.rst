@@ -14,10 +14,10 @@ the method by which you obtain the code along the way.
    to test the upgrade on a development server first, using a copy of the
    production data and configuration.
  
-Bugzilla uses the Git version control system to store its code. A modern Bugzilla
-installation consists of a checkout of a stable version of the code from our
-Git repository. This makes upgrading much easier. If this is
-true of your installation, see :ref:`upgrading-with-git`.
+Bugzilla uses the Git version control system to store its code. A modern
+Bugzilla installation consists of a checkout of a stable version of the code
+from our Git repository. This makes upgrading much easier. If this is
+already true of your installation, see :ref:`upgrading-with-git`.
 
 Before Git, we used to use Bazaar and, before that, CVS. If your installation
 of Bugzilla consists of a checkout from one of those two systems, you need to
@@ -27,7 +27,7 @@ upgrade in three steps:
 2. move to Git while staying on exactly the same release;
 3. upgrade to the latest Bugzilla using the instructions for :ref:`upgrading-with-git`.
 
-See :ref:`upgrading-from-bazaar` or :ref:`upgrading-from-cvs` as appropriate.
+See :ref:`migrating-from-bazaar` or :ref:`migrating-from-cvs` as appropriate.
 
 Some Bugzillas were installed simply by downloading a copy of the code as
 an archive file ("tarball"). However, recent tarballs have included source
@@ -39,9 +39,10 @@ version control system your copy of Bugzilla recognizes, look for the
 following subdirectories in your root Bugzilla directory:
 
 * :file:`.git`: you installed using Git - follow :ref:`upgrading-with-git`
-* :file:`.bzr`: you installed using Bazaar - follow :ref:`upgrading-from-bazaar`
-* :file:`CVS`: you installed using CVS - follow :ref:`upgrading-from-cvs`
-* none of the above: you installed using an old tarball - follow :ref:`upgrading-with-a-tarball`
+* :file:`.bzr`: you installed using Bazaar - follow :ref:`migrating-from-bazaar`
+* :file:`CVS`: you installed using CVS - follow :ref:`migrating-from-cvs`
+* none of the above: you installed using an old tarball - follow
+  :ref:`migrating-from-a-tarball`
 
 It is also possible, particularly if your server machine does not have and
 cannot be configured to have access to the public internet, to upgrade using

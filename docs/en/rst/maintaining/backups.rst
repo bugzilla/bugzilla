@@ -31,9 +31,8 @@ PostgreSQL
 Bugzilla
 ========
 
-It's also a good idea to back up the Bugzilla directory itself, as there are
-some data files and configuration files stored there which you would want to
-retain. A simple recursive copy will do the job here.
+The Bugzilla directory contains some data files and configuration files which
+you would want to retain. A simple recursive copy will do the job here.
 
 :command:`cp -rp $BUGZILLA_HOME /var/backups/bugzilla`
 

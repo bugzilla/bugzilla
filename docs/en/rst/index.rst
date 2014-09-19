@@ -6,11 +6,11 @@ Bugzilla Documentation
    :maxdepth: 2
    :numbered:
 
-   about
-   installing
-   upgrading
-   maintaining
-   customizing
-   integrating
-   administering
-   using
+   about/index
+   installing/index
+   upgrading/index
+   maintaining/index
+   customizing/index
+   integrating/index
+   administering/index
+   using/index

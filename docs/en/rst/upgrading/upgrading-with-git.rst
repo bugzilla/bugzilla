@@ -23,9 +23,6 @@ steps to take:
    Upgraders" sections, if present. They may make you aware of additional
    considerations.
 
-.. todo:: We need to make these more accessible - they are currently rather hard
-          to find. We could collate them on a single page with no intervening cruft.
-
 #. Run the :ref:`sanity-check` on your installation. Attempt to fix all
    warnings that the page produces before you start, or it's
    possible that you may experience problems during your upgrade.
@@ -40,9 +37,8 @@ Customized Bugzilla?
 
 If you have modified the code or templates of your Bugzilla,
 then upgrading requires a bit more thought and effort than the simple process
-below. A discussion of the various methods of updating compared with
-degree and methods of local customization can be found in
-:ref:`template-method`.
+below. See :ref:`template-method` for a discussion of the various methods of
+customization that may have been used.
 
 The larger the jump you are trying to make, the more difficult it
 is going to be to upgrade if you have made local customizations.

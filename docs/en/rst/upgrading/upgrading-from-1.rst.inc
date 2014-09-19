@@ -14,7 +14,10 @@ point release for your major version, so if you aren't running that, you may
 want to do a minor upgrade first.
 
 .. todo:: Is this actually necessary? It adds several extra steps. What are we
-          trying to avoid here?
+          trying to avoid here? If we do have to do it, can we avoid them
+          having to work out the latest point release manually? And do the
+          bzr and CVS update commands take the full version number including
+          the third digit, or do they just take major and minor?
 
 First, you need to find what version of Bugzilla you are using. It should be
 in the top right corner of the front page but, if not, open the file

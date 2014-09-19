@@ -11,13 +11,13 @@ the method by which you obtain the code along the way.
    upgraded Bugzilla. If you wish to revert to the old Bugzilla
    version for any reason, you will have to restore your system
    from a backup. Those with critical data or large installations may wish
-   to trial the upgrade on a development server first, using a copy of the
+   to test the upgrade on a development server first, using a copy of the
    production data and configuration.
  
 Bugzilla uses the Git version control system to store its code. A modern Bugzilla
 installation consists of a checkout of a stable version of the code from our
 Git repository. This makes upgrading much easier. If this is
-true of you, see :ref:`upgrading-with-git`.
+true of your installation, see :ref:`upgrading-with-git`.
 
 Before Git, we used to use Bazaar and, before that, CVS. If your installation
 of Bugzilla consists of a checkout from one of those two systems, you need to

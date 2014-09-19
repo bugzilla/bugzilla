@@ -17,6 +17,12 @@ MySQL
 
 :command:`mysqldump --opt -u $USERNAME -p $DATABASENAME > backup.sql`
 
+See the
+`mysqldump documentation <http://dev.mysql.com/doc/mysql/en/mysqldump.html>`_
+for more information on :file:`mysqldump`.
+
+.. todo:: Mention max_allowed_packet?
+
 PostgreSQL
 ----------
 

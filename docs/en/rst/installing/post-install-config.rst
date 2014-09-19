@@ -9,8 +9,10 @@ then click :guilabel:`Administration` in the header, and then
 :guilabel:`Parameters`. You will see the different parameter sections
 down the left hand side of the page.
 
-Essential
-=========
+.. _config-essential-params:
+
+Essential Parameters
+====================
 
 There are a few parameters which it is very important to define (or
 explicitly decide not to change).
@@ -37,6 +39,13 @@ know who to contact if they see problems or hit errors.
 If you don't want just anyone able to read your Bugzilla, set the
 :param:`requirelogin` parameter in the :guilabel:`User Authentication`
 section, and change or clear the :param:`createemailregexp` parameter.
+
+.. _config-products:
+
+Products, Components, Versions and Milestones
+=============================================
+
+.. todo:: WRITE ME
 
 .. _optional-features:
 

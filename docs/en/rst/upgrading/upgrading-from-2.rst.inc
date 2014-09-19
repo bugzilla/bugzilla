@@ -76,7 +76,7 @@ Swap The New Version In
 
 Now we swap the directories over, and run checksetup.pl to confirm that all
 is well. From the directory containing the :file:`bugzilla` and
-:file:`bugzilla-git` directories, run:
+:file:`bugzilla-new` directories, run:
 
 :command:`mv bugzilla bugzilla-old`
 

@@ -106,7 +106,9 @@ Template Toolkit to do this (or the 'uri' filter to encode special
 characters in URLs).  If you forget, you may open up your installation
 to cross-site scripting attacks.
 
-XXXMOVE Editing templates is a good way of doing a 'poor man's custom
+.. todo:: Move the below.
+
+Editing templates is a good way of doing a 'poor man's custom
 fields'.
 For example, if you don't use the :guilabel:`Status Whiteboard`, but want to
 have a free-form text entry box for :guilabel:`Build Identifier`,
@@ -198,7 +200,7 @@ customizing for your installation.
   your Bugzilla installation.
 
 :file:`global/variables.none.tmpl`:
-  XXX Need to describe the use of this file
+  .. todo:: Need to describe the use of this file
 
 :file:`list/table.html.tmpl`:
   This template controls the appearance of the bug lists created

@@ -13,8 +13,8 @@ or run one yourself on the Bugzilla machine.
 Bugzilla's approach to email is configured in the :guilabel:`Email` section
 of the Parameters.
 
-XXX Bug: description of mail_delivery_method talks about Qmail, and is in
-other ways wrong.
+.. todo:: Bug: description of mail_delivery_method talks about Qmail, and is in
+          other ways wrong.
 
 .. _install-MTA:
 
@@ -58,7 +58,7 @@ Run Your Own Mail Server
 This section corresponds to choosing a :param:`mail_delivery_method` of
 :paramval:`Sendmail`.
 
-XXX Do we still need this? Why would anyone want to do this in 2014?
+.. todo:: Do we still need this? Why would anyone want to do this in 2014?
 
 Unless you know what you are doing, and can deal with the possible problems
 of spam, bounces and blacklists, it is probably unwise to set up your own

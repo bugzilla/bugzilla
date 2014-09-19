@@ -11,9 +11,11 @@ bugs much easier.
 
 Keywords are global, rather than per-product. If the administrator changes
 a keyword currently applied to any bugs, the keyword cache must be rebuilt
-using the :ref:`sanity-check` script. XXXDoes this mean changing the name of the keyword? Is it still true?
-Currently keywords cannot
-be marked obsolete to prevent future usage.
+using the :ref:`sanity-check` script.
+
+.. todo:: Does this mean changing the name of the keyword? Is it still true?
+
+Currently keywords cannot be marked obsolete to prevent future usage.
 
 Keywords can be created, edited or deleted by clicking the "Keywords"
 link in the admin page. There are two fields for each keyword - the keyword

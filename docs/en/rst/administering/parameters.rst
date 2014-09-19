@@ -87,7 +87,7 @@ shutdownhtml
        log in, and your name/password will be accepted here (but nowhere
        else).
 
-       XXX Is this still true?
+       .. todo:: Is this still true?
 
 announcehtml
     Any text in this field will be displayed at the top of every HTML
@@ -227,7 +227,7 @@ attachment_base
 
     For added security, you can insert ``%bugid%`` into the URL, which will be replaced with the ID of the current bug that the attachment is on, when you access an attachment. This will limit attachments to accessing only other attachments on the same bug. Remember, though, that all those possible domain names (such as 1234.your.domain.com) must point to this same Bugzilla instance.
 
-    XXX So this requires wildcard DNS? We should explain a bit about what is needed here.
+    .. todo:: So this requires wildcard DNS? We should explain a bit about what is needed here.
 
 allow_attachment_deletion
     If this option is on, administrators will be able to delete the contents
@@ -237,12 +237,12 @@ allow_attachment_deletion
 maxattachmentsize
     The maximum size (in kilobytes) of attachments to be stored in the database. If a file larger than this size is attached to a bug, Bugzilla will look at the maxlocalattachment parameter to determine if the file can be stored locally on the web server. If the file size exceeds both limits, then the attachment is rejected. Settings both parameters to 0 will prevent attaching files to bugs.
 
-    XXX Talk about MySQL max_allowed_packet
+    .. todo:: Talk about MySQL max_allowed_packet
     
 maxlocalattachment
     The maximum size (in megabytes) of attachments to be stored locally on the web server. If set to a value lower than the :param:`maxattachmentsize` parameter, attachments will never be kept on the local filesystem.
 
-    XXX When should people use this feature?
+    .. todo:: When should people use this feature?
 
 .. _param-bug-change-policies:
 
@@ -392,7 +392,9 @@ For more information on Groups and Group Security, see
 makeproductgroups
     Determines whether or not to automatically create groups
     when new products are created. If this is on, the groups will be
-    used for querying bugs. XXX This is spectacularly unclear.
+    used for querying bugs.
+
+    .. todo:: This is spectacularly unclear.
 
 chartgroup
     The name of the group of users who can use the 'New Charts' feature. Administrators should ensure that the public categories and series definitions do not divulge confidential information before enabling this for an untrusted population. If left blank, no users will be able to use New Charts.
@@ -627,7 +629,9 @@ whinedays
     in the CONFIRMED state before notifying people they have
     untouched new bugs. If you do not plan to use this feature, simply
     do not set up the whining cron job described in the installation
-    instructions, or set this value to "0" (never whine). XXXlink
+    instructions, or set this value to "0" (never whine).
+
+    .. todo:: link
 
 globalwatchers
     This allows you to define specific users who will
@@ -647,7 +651,7 @@ features of the Patch Viewer. Bonsai is a tool that enables queries
 to a CVS tree. LXR is a tool that can cross reference and index source
 code.
 
-XXX Does anyone use this stuff any more?
+.. todo:: Does anyone use this stuff any more?
 
 cvsroot
     The CVS root that most users of your system will be using for 'cvs diff'. Used in Patch Viewer ('Diff' option on patches) to figure out where patches are rooted even if users did the 'cvs diff' from different places in the directory structure. (NOTE: if your CVS repository is remote and requires a password, you must either ensure the Bugzilla user has done a 'cvs login' or specify the password as part of the CVS root.) Leave this blank if you have no CVS repository.

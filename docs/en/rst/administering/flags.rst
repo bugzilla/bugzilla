@@ -365,7 +365,7 @@ the flag description.
 
 .. COMMENT: flags-admin
 
-.. COMMENT: XXX We should add a "Uses of Flags" section, here, with examples.
+.. todo:: We should add a "Uses of Flags" section, here, with examples.
 
 .. COMMENT: flags
 

@@ -60,7 +60,7 @@ on Linux.
 By default, MySQL will only allow you to insert things
 into the database that are smaller than 1MB.
 
-XXX Is this still true? It's 16MB on Ubuntu 14.04...
+.. todo:: Is this still true? It's 16MB on Ubuntu 14.04...
 
 Bugzilla attachments
 may be larger than this. Also, Bugzilla combines all comments

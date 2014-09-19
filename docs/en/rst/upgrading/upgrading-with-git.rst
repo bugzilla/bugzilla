@@ -23,8 +23,8 @@ steps to take:
    Upgraders" sections, if present. They may make you aware of additional
    considerations.
 
-   XXX We need to make these more accessible - they are currently rather hard
-   to find. We could collate them on a single page with no intervening cruft.
+.. todo:: We need to make these more accessible - they are currently rather hard
+          to find. We could collate them on a single page with no intervening cruft.
 
 #. Run the :ref:`sanity-check` on your installation. Attempt to fix all
    warnings that the page produces before you start, or it's
@@ -84,7 +84,7 @@ in which Bugzilla is installed.
 
 :command:`git pull`
 
-XXX What is the best way to pull latest stable?
+.. todo:: What is the best way to pull latest stable?
 
 .. _upgrade-database:
 

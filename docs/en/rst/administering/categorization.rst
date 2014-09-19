@@ -90,7 +90,7 @@ To create a new product:
 
 #. Enter the details as outlined above.
 
-XXX This section is pointless; if it's not obvious, we should make it more obvious :-)
+.. todo:: This section is pointless; if it's not obvious, we should make it more obvious :-)
 
 .. _edit-products:
 

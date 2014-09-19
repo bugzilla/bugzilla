@@ -8,3 +8,8 @@ dt { font-weight: bold; }
 .group    { font-family: monospace; }
 .field    { font-weight: bold; }
 .command  { font-family: monospace; font-size: 130% }
+
+.admonition-todo {
+  background-color: lightpink;
+  border: 2px darkred solid;
+}

@@ -43,7 +43,7 @@ section, and change or clear the :param:`createemailregexp` parameter.
 Optional
 ========
 
-XXXHACKME
+.. todo:: HACKME
 
 Bugzilla has a number of optional features. This section describes how
 to configure or enable them.

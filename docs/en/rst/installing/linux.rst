@@ -12,12 +12,12 @@ of additional configuration required.
 If you are installing your machine from scratch, :ref:`quick-start` may be
 the best instructions for you.
 
-XXX What's our current position on Debian/Ubuntu packages of Bugzilla? Are
-there any, and are they any good?
+.. todo:: What's our current position on Debian/Ubuntu packages of Bugzilla? Are
+          there any, and are they any good?
 
-XXX Which versions of RHEL have packages new enough for us to support them?
+.. todo:: Which versions of RHEL have packages new enough for us to support them?
 
-XXX What's the right order for all these steps?
+.. todo:: What's the right order for all the following steps?
 
 Install Packages
 ================
@@ -116,7 +116,7 @@ Bugzilla-only copy of the newer version.
 At this point, you need to :file:`su` to root. You should remain as root
 until the end of the install.
 
-XXX Is this true, if they are installing modules locally?
+.. todo:: Is this true, if they are installing modules locally?
 
 To check whether you have all the required modules and what is still missing,
 run:
@@ -141,7 +141,7 @@ Or, you can pass an individual module name:
    distribution you are using, but are often called
    :file:`<packagename>-devel`.
 
-   XXX Give examples for Debian/Ubuntu and RedHat?
+   .. todo:: Give examples for Debian/Ubuntu and RedHat?
 
 .. _config-webserver:
 
@@ -159,7 +159,7 @@ We have specific instructions for the following:
 You can run :command:`testserver.pl http://bugzilla-url/` from the command
 line to check if your web server is correctly configured.
 
-XXX Does this work before doing any localconfig stuff?
+.. todo:: Does this work before doing any localconfig stuff?
 
 .. _config-database:
 
@@ -246,7 +246,7 @@ you should see the Bugzilla front page.
 
 Next, do the :ref:`post-install-config`.
 
-XXXX How to we integrate the below (copied from the wiki)?
+.. todo:: How to we integrate the below (copied from the wiki)?
 
 Gentoo
 ======

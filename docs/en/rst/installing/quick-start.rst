@@ -70,8 +70,8 @@ home page. It requires a little familiarity with Linux and the command line.
    You will get a notification about having a detached HEAD. Don't worry,
    your head is still firmly on your shoulders.
 
-   XXX is this the right way to get the current bugzilla-stable code? Or
-   should we pull directly from a branch?
+   .. todo:: is this the right way to get the current bugzilla-stable code? Or
+             should we pull directly from a branch?
    
 5. Configure MySQL
 
@@ -88,11 +88,11 @@ home page. It requires a little familiarity with Linux and the command line.
 
    Save and exit.
 
-   XXX default value of maxattachmentsize is 1MB. Default value of max_allowed_packet
-   is 16MB. Should we just omit this step entirely, for simplicity? Do we need
-   ft_min_word_len changed?
+   .. todo:: default value of maxattachmentsize is 1MB. Default value of max_allowed_packet
+             is 16MB. Should we just omit this step entirely, for simplicity? Do we need
+             ft_min_word_len changed?
 
-   XXX docs for maxattachmentsize should mention max_allowed_packet. File bug.
+   .. todo:: docs for maxattachmentsize should mention max_allowed_packet. File bug.
 
    Restart MySQL:
    
@@ -144,8 +144,8 @@ home page. It requires a little familiarity with Linux and the command line.
    * Line 67: set ``$db_pass`` to the MySQL root user password you created
      when installing Ubuntu
 
-   XXX Given this is a quick setup on a dedicated box, is it OK to use the
-   MySQL root user?
+   .. todo:: Given this is a quick setup on a dedicated box, is it OK to use the
+             MySQL root user?
     
 10. Check Setup (again)
 
@@ -164,7 +164,7 @@ home page. It requires a little familiarity with Linux and the command line.
     All the tests should pass. (Note: currently, the first one will give a
     warning instead. You can ignore that. Bug 1040728.)
 
-    XXX Also, Chart::Base gives deprecation warnings :-|
+    .. todo:: Also, Chart::Base gives deprecation warnings :-|
    
 12. Access Via Web Browser
 
@@ -211,6 +211,6 @@ home page. It requires a little familiarity with Linux and the command line.
 
     Click :guilabel:`Save Changes` at the bottom of the page.
 
-    XXX There should be a "send test email" button on that page
+    .. todo:: There should be a "send test email" button on that page
 
     And you're all ready to go. :-)

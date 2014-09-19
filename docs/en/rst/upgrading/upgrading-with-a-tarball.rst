@@ -21,4 +21,4 @@ Bugzilla installation (which we will assume is in a directory called
                              work out by hand which extensions came with
                              Bugzilla and which you added.
 
-.. include:: upgrading-from-2.rst
+.. include:: upgrading-from-2.rst.inc

@@ -97,7 +97,7 @@ There are three fields in each row of a boolean search.
 Multiple Charts
 ---------------
 
-XXX This needs rewriting for the new UI.
+.. todo:: This needs rewriting for the new UI.
 
 The terms within a single row of a boolean chart are all
 constraints on a single piece of data. If you are looking for
@@ -243,7 +243,7 @@ Remember Search As:
 Adding and Removing Tags on Bugs
 ================================
 
-XXX Looks like you can no longer do this from search results; is that right?
+.. todo:: Looks like you can no longer do this from search results; is that right?
 
 You can add and remove tags from individual bugs, which let you find and
 manage bugs more easily. Tags are per-user and so are only visible and editable

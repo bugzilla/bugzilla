@@ -43,7 +43,7 @@ Apache with mod_cgi
 To configure your Apache web server to work with Bugzilla while using
 mod_cgi, do the following:
 
-XXX Shouldn't we be using sites-available/sites-enabled here?
+.. todo:: Shouldn't we be using sites-available/sites-enabled here?
 
 #. Edit the Apache configuration file (see above).
 
@@ -102,7 +102,7 @@ and mod_perl.
    .. warning:: You should also ensure that you have disabled ``KeepAlive``
       support in your Apache install when utilizing Bugzilla under mod_perl
 
-      XXX How? Why?
+      .. todo:: How? Why?
 
 On restarting Apache, Bugzilla should now be running within the
 mod_perl environment.

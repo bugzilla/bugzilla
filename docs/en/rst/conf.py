@@ -370,3 +370,5 @@ pdf_use_numbered_links = True
 
 # Background images fitting mode
 pdf_fit_background_mode = 'scale'
+
+todo_include_todos = True

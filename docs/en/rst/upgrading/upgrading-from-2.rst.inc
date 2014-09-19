@@ -1,3 +1,6 @@
+.. This file is included in multiple places, so can't have labels as they
+   appear as duplicates.
+   
 Save Any Local Customizations
 =============================
 

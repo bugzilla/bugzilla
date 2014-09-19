@@ -1,5 +1,8 @@
+.. This file is included in multiple places, so can't have labels as they
+   appear as duplicates.
+   
 The procedure to switch to Git is as follows. The idea is to switch version
-control systems without changing the exact version of Bugzilla you are using,
+control systems without changing the version of Bugzilla you are using,
 to minimise the risk of conflict or problems. Any major upgrade can then
 happen as a separate step. 
 
@@ -7,7 +10,11 @@ Update Bugzilla To The Latest Point Release
 ===========================================
 
 It is recommended that you switch to Git while using the latest
-point release for your major version. 
+point release for your major version, so if you aren't running that, you may
+want to do a minor upgrade first.
+
+.. todo:: Is this actually necessary? It adds several extra steps. What are we
+          trying to avoid here?
 
 First, you need to find what version of Bugzilla you are using. It should be
 in the top right corner of the front page but, if not, open the file
@@ -42,8 +49,6 @@ Then run checksetup to upgrade your database:
 
 You should then test your Bugzilla carefully, or just use it for a day or two,
 to make sure it's all still working fine.
-
-.. _get-from-git:
 
 Download Code from Git
 ======================

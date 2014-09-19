@@ -8,8 +8,8 @@ documentation <../html/api/Bugzilla/Extension.html>`_ for the core
 documentation on how to write an Extension. We also have some additional
 tips and tricks here.
 
-XXX These came from the wiki. Should they actually be integrated into the
-POD, or should some of the POD come here, or something else?
+.. todo:: These came from the wiki. Should they actually be integrated into the
+          POD, or should some of the POD come here, or something else?
 
 Checking Syntax
 ===============

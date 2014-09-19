@@ -7,7 +7,7 @@ Upgrading from CVS
 .. |diffcommand|   replace:: :command:`cvs diff -puN > patch.diff`
 .. |extstatusinfo| replace:: The command :command:`cvs status extensions/` should help you work out what you added, if anything.
 
-.. include:: upgrading-from-1.rst
-.. include:: upgrading-from-2.rst
+.. include:: upgrading-from-1.rst.inc
+.. include:: upgrading-from-2.rst.inc
 
 

@@ -65,4 +65,4 @@ such as :file:`localconfig` and your
 :file:`data` directory are
 secured.
 
-XXX See also https://wiki.mozilla.org/Installing_under_IIS_7.5
+.. todo:: See also https://wiki.mozilla.org/Installing_under_IIS_7.5

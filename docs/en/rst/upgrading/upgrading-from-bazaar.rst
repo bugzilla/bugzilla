@@ -7,5 +7,5 @@ Upgrading from Bazaar
 .. |diffcommand|   replace:: :command:`bzr diff > patch.diff`
 .. |extstatusinfo| replace:: The command :command:`bzr status extensions/` should help you work out what you added, if anything.
 
-.. include:: upgrading-from-1.rst
-.. include:: upgrading-from-2.rst
+.. include:: upgrading-from-1.rst.inc
+.. include:: upgrading-from-2.rst.inc

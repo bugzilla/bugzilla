@@ -185,16 +185,19 @@ sub update_params {
     }
 
     # Old mail_delivery_method choices contained no uppercase characters
-    if (exists $param->{'mail_delivery_method'}
-        && $param->{'mail_delivery_method'} !~ /[A-Z]/) {
-        my $method = $param->{'mail_delivery_method'};
-        my %translation = (
-            'sendmail' => 'Sendmail',
-            'smtp'     => 'SMTP',
-            'qmail'    => 'Qmail',
-            'testfile' => 'Test',
-            'none'     => 'None');
-        $param->{'mail_delivery_method'} = $translation{$method};
+    my $mta = $param->{'mail_delivery_method'};
+    if ($mta) {
+        if ($mta !~ /[A-Z]/) {
+            my %translation = (
+                'sendmail' => 'Sendmail',
+                'smtp'     => 'SMTP',
+                'qmail'    => 'Qmail',
+                'testfile' => 'Test',
+                'none'     => 'None');
+            $param->{'mail_delivery_method'} = $translation{$mta};
+        }
+        # This will force the parameter to be reset to its default value.
+        delete $param->{'mail_delivery_method'} if $param->{'mail_delivery_method'} eq 'Qmail';
     }
 
     # Convert the old "ssl" parameter to the new "ssl_redirect" parameter.

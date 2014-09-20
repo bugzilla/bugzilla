@@ -12,13 +12,6 @@ use strict;
 use warnings;
 
 use Bugzilla::Config::Common;
-# Return::Value 1.666002 pollutes the error log with warnings about this
-# deprecated module. We have to set NO_CLUCK = 1 before loading Email::Send
-# to disable these warnings.
-BEGIN {
-    $Return::Value::NO_CLUCK = 1;
-}
-use Email::Send;
 
 our $sortkey = 1200;
 
@@ -28,9 +21,7 @@ sub get_param_list {
   {
    name => 'mail_delivery_method',
    type => 's',
-   # Bugzilla is not ready yet to send mails to newsgroups, and 'IO'
-   # is of no use for now as we already have our own 'Test' mode.
-   choices => [grep {$_ ne 'NNTP' && $_ ne 'IO'} Email::Send->new()->all_mailers(), 'None'],
+   choices => ['Sendmail', 'SMTP', 'Test', 'None'],
    default => 'Sendmail',
    checker => \&check_mail_delivery_method
   },

@@ -10,14 +10,25 @@
 
     YUI.add('bz-review-history', function (Y) {
         function format_duration(o) {
-            return moment.duration(o.value).humanize();
+            if (o.value) {
+                if (o.value < 0) {
+                    return "???";
+                } else {
+                    return moment.duration(o.value).humanize();
+                }
+            }
+            else {
+                return "---";
+            }
         }
 
         function format_attachment(o) {
-            return o.value.description;
+            if (o.value) {
+                return o.value.description;
+            }
         }
 
-        function format_status(o) {
+        function format_action(o) {
             return o.value;
         }
 
@@ -42,6 +53,7 @@
             schema: {
                 resultListLocator: 'result',
                 resultFields: [
+                    { key: 'id' },
                     { key: 'requestee' },
                     { key: 'setter' },
                     { key: 'flag_id' },
@@ -77,7 +89,7 @@
                 { key: 'creation_time', label: 'Created', sortable: true, formatter: format_date },
                 { key: 'attachment', label: 'Attachment', formatter: format_attachment, allowHTML: true },
                 { key: 'setter', label: 'Requester', formatter: format_setter },
-                { key: "status", label: "Status", sortable: true, allowHTML: true, formatter: format_status },
+                { key: "action", label: "Action", sortable: true, allowHTML: true, formatter: format_action },
                 { key: "duration", label: "Duration", sortable: true, formatter: format_duration },
                 { key: "bug_id", label: "Bug", sortable: true, allowHTML: true,
                   formatter: '<a href="show_bug.cgi?id={value}" target="_blank">{value}</a>' },
@@ -91,7 +103,7 @@
                     success: function (e) {
                         var flags = e.response.results;
                         var flag_ids = flags.filter(function (flag) {
-                            return flag.status === '?';
+                            return flag.status == '?';
                         })
                         .map(function (flag) {
                             return flag.flag_id;
@@ -141,7 +153,15 @@
                     },
                     callback: {
                         success: function (e) {
-                            resolve(e.response.results);
+                            var flags = e.response.results;
+                            flags.forEach(function(flag) {
+                                flag.creation_time = parse_date(flag.creation_time);
+                            });
+                            resolve(flags.sort(function (a, b) {
+                                if (a.id > b.id) return 1;
+                                if (a.id < b.id) return -1;
+                                return 0;
+                            }));
                         },
                         failure: function (e) {
                             reject(e.error.message);
@@ -169,7 +189,7 @@
                     },
                     callback: {
                         success: function (e) {
-                            var bugs = e.response.results,
+                            var bugs    = e.response.results,
                                 summary = {};
 
                             bugs.forEach(function (bug) {
@@ -223,60 +243,91 @@
             });
         }
 
-        function generate_history(flags) {
+        function add_historical_action(history, flag, stash, action) {
+            history.push({
+                attachment:    flag.attachment,
+                bug_id:        flag.bug_id,
+                bug_summary:   flag.bug_summary,
+                creation_time: stash.creation_time,
+                duration:      flag.creation_time - stash.creation_time,
+                setter:        stash.setter,
+                action:        action
+            });
+        }
+
+        function generate_history(flags, user) {
             var history = [],
-                stash = {},
-                i = 1, stash_key;
+                stash   = {},
+                flag, stash_key ;
 
             flags.forEach(function (flag) {
                 var flag_id = flag.flag_id;
 
                 switch (flag.status) {
                     case '?':
-                        if (stash[flag_id]) {
-                            stash["#" + i] = stash[flag_id];
-                            i = i + 1;
-                        }
+                        // If we get a ? after a + or -, we get a fresh start.
+                        if (stash[flag_id] && stash[flag_id].is_complete)
+                            delete stash[flag_id];
 
-                        stash[flag_id] = {
-                            setter: flag.setter,
-                            bug_id: flag.bug_id,
-                            bug_summary: flag.bug_summary,
-                            attachment: flag.attachment,
-                            start: parse_date(flag.creation_time),
-                            creation_time: parse_date(flag.creation_time)
-                        };
+                        // handle untargeted review requests.
+                        if (!flag.requestee)
+                            flag.requestee = { id: 'the wind', name: 'the wind' };
+
+                        if (stash[flag_id]) {
+                            // flag was reassigned
+                            if (flag.requestee.id != stash[flag_id].requestee.id) {
+                                // if ? started out mine, but went to someone else.
+                                if (stash[flag_id].requestee.name == user) {
+                                    add_historical_action(history, flag, stash[flag_id], 'reassigned to ' + flag.requestee.name);
+                                    stash[flag_id] = flag;
+                                }
+                                else {
+                                    // flag changed hands. Reset the creation_time and requestee
+                                    stash[flag_id].creation_time = flag.creation_time;
+                                    stash[flag_id].requestee     = flag.requestee;
+                                }
+                            }
+                        } else {
+                            stash[flag_id] = flag;
+                        }
                         break;
+
+                    case 'X':
+                        if (stash[flag_id]) {
+                            // Only process if we did not get a + or a - since
+                            if (!stash[flag_id].is_complete) {
+                                add_historical_action(history, flag, stash[flag_id], 'cancelled');
+                            }
+                            delete stash[flag_id];
+                        }
+                        break;
+
 
                     case '+':
                     case '-':
-                        if (stash[flag_id]) {
-                            history.push({
-                                setter: stash[flag_id].setter,
-                                bug_id: stash[flag_id].bug_id,
-                                bug_summary: stash[flag_id].bug_summary,
-                                attachment: stash[flag_id].attachment,
-                                status: 'review' + flag.status,
-                                duration: parse_date(flag.creation_time) - stash[flag_id].start,
-                                creation_time: stash[flag_id].creation_time
-                            });
-                            stash[flag_id] = null;
+                        // if we get a + or -, we only accept it if the requestee is the user we're interested in.
+                        // we set is_complete to handle cancelations.
+                        if (stash[flag_id] && stash[flag_id].requestee.name == user) {
+                            add_historical_action(history, flag, stash[flag_id], "review" + flag.status);
+                            stash[flag_id].is_complete = true;
                         }
                         break;
                 }
             });
+
             for (stash_key in stash) {
-                if (stash[stash_key]) {
-                    history.push({
-                        setter: stash[stash_key].setter,
-                        bug_id: stash[stash_key].bug_id,
-                        bug_summary: stash[stash_key].bug_summary,
-                        attachment: stash[stash_key].attachment,
-                        creation_time: stash[stash_key].creation_time,
-                        status: 'review?',
-                        duration: new Date() - stash[stash_key].creation_time
-                    });
-                }
+                flag = stash[stash_key];
+                if (flag.is_complete) continue;
+                if (flag.requestee.name != user) continue;
+                history.push({
+                    attachment:    flag.attachment,
+                    bug_id:        flag.bug_id,
+                    bug_summary:   flag.bug_summary,
+                    creation_time: flag.creation_time,
+                    duration:      new Date() - flag.creation_time,
+                    setter:        flag.setter,
+                    action:        'review?'
+                });
             }
 
             return history;
@@ -303,11 +354,20 @@
             .then(fetch_flags)
             .then(fetch_bug_summaries)
             .then(fetch_attachment_descriptions)
-            .then(generate_history)
+            .then(function (flags) {
+                return new Y.Promise(function (resolve, reject) {
+                    try {
+                        resolve(generate_history(flags, user));
+                    }
+                    catch (e) {
+                        reject(e.message);
+                    }
+                });
+            })
             .then(function (history) {
                 historyTable.set('data', history);
                 historyTable.sort({
-                    creation_time: 'asc'
+                    creation_time: 'desc'
                 });
             }, function (message) {
                 historyTable.showMessage(message);

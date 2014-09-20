@@ -221,6 +221,7 @@ sub _flag_state_activity_to_hash {
     my ($self, $fsa, $params) = @_;
 
     my %flag = (
+        id            => $self->type('int', $fsa->id),
         creation_time => $self->type('string', $fsa->flag_when),
         type          => $self->_flagtype_to_hash($fsa->type),
         setter        => $self->_user_to_hash($fsa->setter),

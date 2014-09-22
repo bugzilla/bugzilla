@@ -9,3 +9,17 @@
 [% PROCESS bug/needinfo.html.tmpl
    bug => attachment.bug
 %]
+<script type="text/javascript">
+  document.getElementById('editButton').addEventListener('click', function() {
+    document.getElementById('attachment_view_window')
+      .appendChild(document.getElementById('needinfo_container'));
+  });
+  document.getElementById('redoEditButton').addEventListener('click', function() {
+    document.getElementById('attachment_view_window')
+      .appendChild(document.getElementById('needinfo_container'));
+  });
+  document.getElementById('undoEditButton').addEventListener('click', function() {
+    document.getElementById('smallCommentFrame')
+      .appendChild(document.getElementById('needinfo_container'));
+  });
+</script>

@@ -281,6 +281,38 @@ sub GetGroups {
     return [values %legal_groups];
 }
 
+sub _get_common_flag_types {
+    my $component_ids = shift;
+
+    # Get all the different components in the bug list
+    my $components = Bugzilla::Component->new_from_list($component_ids);
+    my %flag_types;
+    my @flag_types_ids;
+    foreach my $component (@$components) {
+        foreach my $flag_type (@{$component->flag_types->{'bug'}}) {
+            push @flag_types_ids, $flag_type->id;
+            $flag_types{$flag_type->id} = $flag_type;
+        }
+    }
+
+    # We only want flags that appear in all components
+    my %common_flag_types;
+    foreach my $id (keys %flag_types) {
+        my $flag_type_count = scalar grep { $_ == $id } @flag_types_ids;
+        $common_flag_types{$id} = $flag_types{$id}
+            if $flag_type_count == scalar @$components;
+    }
+
+    # We only show flags that a user has request or set rights on
+    my @show_flag_types
+        = grep { $user->can_request_flag($_) || $user->can_set_flag($_) }
+        values %common_flag_types;
+    my $any_flags_requesteeble =
+        grep($_->is_requesteeble, @show_flag_types);
+
+    return(\@show_flag_types, $any_flags_requesteeble);
+}
+
 ################################################################################
 # Command Execution
 ################################################################################
@@ -510,38 +542,6 @@ if (grep('relevance', @displaycolumns) && !$fulltext) {
     @displaycolumns = grep($_ ne 'relevance', @displaycolumns);
 }
 
-sub _get_common_flag_types {
-    my $component_ids = shift;
-
-    # Get all the different components in the bug list
-    my $components = Bugzilla::Component->new_from_list($component_ids);
-    my %flag_types;
-    my @flag_types_ids;
-    foreach my $component (@$components) {
-        foreach my $flag_type (@{$component->flag_types->{'bug'}}) {
-            push @flag_types_ids, $flag_type->id;
-            $flag_types{$flag_type->id} = $flag_type;
-        }
-    }
-
-    # We only want flags that appear in all components
-    my %common_flag_types;
-    foreach my $id (keys %flag_types) {
-        my $flag_type_count = scalar grep { $_ == $id } @flag_types_ids;
-        $common_flag_types{$id} = $flag_types{$id}
-            if $flag_type_count == scalar @$components;
-    }
-
-    # We only show flags that a user has request or set rights on
-    my @show_flag_types
-        = grep { $user->can_request_flag($_) || $user->can_set_flag($_) }
-        values %common_flag_types;
-    my $any_flags_requesteeble =
-        grep($_->is_requesteeble, @show_flag_types);
-
-    return(\@show_flag_types, $any_flags_requesteeble);
-}
-
 ################################################################################
 # Select Column Determination
 ################################################################################
@@ -582,7 +582,7 @@ foreach my $col (@displaycolumns) {
 # has for modifying the bugs.
 if ($dotweak) {
     push(@selectcolumns, "bug_status") if !grep($_ eq 'bug_status', @selectcolumns);
-    push(@selectcolumns, "component_id") if !grep($_ eq 'component_id', @selectcolumns);
+    push(@selectcolumns, "bugs.component_id");
 }
 
 if ($format->{'extension'} eq 'ics') {
@@ -822,7 +822,7 @@ foreach my $row (@$data) {
     # Record the assignee, product, and status in the big hashes of those things.
     $bugowners->{$bug->{'assigned_to'}} = 1 if $bug->{'assigned_to'};
     $bugproducts->{$bug->{'product'}} = 1 if $bug->{'product'};
-    $bugcomponentids->{$bug->{'component_id'}} = 1 if $bug->{'component_id'};
+    $bugcomponentids->{$bug->{'bugs.component_id'}} = 1 if $bug->{'bugs.component_id'};
     $bugcomponents->{$bug->{'component'}} = 1 if $bug->{'component'};
     $bugstatuses->{$bug->{'bug_status'}} = 1 if $bug->{'bug_status'};
 

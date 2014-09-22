@@ -647,7 +647,6 @@ sub COLUMNS {
 
     foreach my $col (@id_fields) {
         $special_sql{$col} = "map_${col}.name";
-        $columns{"${col}_id"}{name} = "bugs.${col}_id";
     }
 
     # Do the actual column-getting from fielddefs, now.
@@ -762,7 +761,7 @@ sub data {
     my @orig_fields = $self->_input_columns;
     my $all_in_bugs_table = 1;
     foreach my $field (@orig_fields) {
-        next if $self->COLUMNS->{$field}->{name} =~ /^bugs\.\w+$/;
+        next if ($self->COLUMNS->{$field}->{name} // $field) =~ /^bugs\.\w+$/;
         $self->{fields} = ['bug_id'];
         $all_in_bugs_table = 0;
         last;
@@ -1014,10 +1013,16 @@ sub _sql_select {
     my ($self) = @_;
     my @sql_fields;
     foreach my $column ($self->_display_columns) {
-        my $alias = $column;
-        # Aliases cannot contain dots in them. We convert them to underscores.
-        $alias =~ s/\./_/g;
-        my $sql = $self->COLUMNS->{$column}->{name} . " AS $alias";
+        my $sql = $self->COLUMNS->{$column}->{name} // '';
+        if ($sql) {
+            my $alias = $column;
+            # Aliases cannot contain dots in them. We convert them to underscores.
+            $alias =~ tr/./_/;
+            $sql .= " AS $alias";
+        }
+        else {
+            $sql = $column;
+        }
         push(@sql_fields, $sql);
     }
     return @sql_fields;
@@ -1394,7 +1399,7 @@ sub _sql_group_by {
     my @extra_group_by;
     foreach my $column ($self->_select_columns) {
         next if $self->_skip_group_by->{$column};
-        my $sql = $self->COLUMNS->{$column}->{name};
+        my $sql = $self->COLUMNS->{$column}->{name} // $column;
         push(@extra_group_by, $sql);
     }
 

@@ -1,6 +1,6 @@
 --block-brace-tightness=0
 --brace-tightness=1
---continuation-indedntation=2
+--continuation-indentation=2
 --indent-columns=4
 --line-up-parentheses
 --maximum-line-length=120

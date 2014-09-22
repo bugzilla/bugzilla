@@ -90,8 +90,6 @@ To create a new product:
 
 #. Enter the details as outlined above.
 
-.. todo:: This section is pointless; if it's not obvious, we should make it more obvious :-)
-
 .. _edit-products:
 
 Editing Products

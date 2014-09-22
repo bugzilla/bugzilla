@@ -11,16 +11,18 @@ used.
 These instructions require editing the Apache configuration file.
 In Fedora and Red Hat Linux, this file is found as
 :file:`/etc/httpd/conf/httpd.conf`.
-In Ubuntu and Debian, it is :file:`/etc/apache2/apache2.conf`.
+In Ubuntu and Debian, it is :file:`/etc/apache2/apache2.conf`. Alternatively,
+on those latter two distributions, you can instead put the below code into a
+separate file in the directory :file:`/etc/apache2/sites-enabled/`.
 
 Securing Apache
 ===============
 
 When external systems interact with Bugzilla via webservices
 (REST/XMLRPC/JSONRPC) they include the user's credentials as part of the URL
-(query-string). Therefore, to avoid storing passwords in clear text on the
-server we recommend configuring Apache to not include the query-string in its
-log files.
+(in the "query string"). Therefore, to avoid storing passwords in clear text
+on the server we recommend configuring Apache to not include the query string
+in its log files.
 
 #. Edit the Apache configuration file (see above).
 
@@ -43,15 +45,10 @@ Apache with mod_cgi
 To configure your Apache web server to work with Bugzilla while using
 mod_cgi, do the following:
 
-.. todo:: Shouldn't we be using sites-available/sites-enabled here?
-
 #. Edit the Apache configuration file (see above).
 
-#. Apache uses ``<Directory>``
-   directives to permit fine-grained permission setting. Add the
-   following lines to a directive that applies to the location
-   of your Bugzilla installation. (If such a section does not
-   exist, you'll want to add one.) In this example, Bugzilla has
+#. Create a ``<Directory>`` directive that applies to the location
+   of your Bugzilla installation. In this example, Bugzilla has
    been installed at :file:`/var/www/html/bugzilla`.
 
 .. code-block:: apache
@@ -83,11 +80,10 @@ Apache with mod_perl
 Some configuration is required to make Bugzilla work with Apache
 and mod_perl.
 
-#. Load :file:`httpd.conf` in your editor.
-   In Fedora and Red Hat Linux, this file is found in :file:`/etc/httpd/conf`.
+#. Edit the Apache configuration file (see above).
 
-#. Add the following information to your httpd.conf file, substituting
-   where appropriate with your own local paths.
+#. Add the following information, substituting where appropriate with your
+   own local paths.
 
    .. code-block:: apache
 
@@ -110,25 +106,25 @@ mod_perl environment.
 Please bear the following points in mind when considering using Bugzilla
 under mod_perl:
 
-- mod_perl support in Bugzilla can take up a HUGE amount of RAM - easily
+* mod_perl support in Bugzilla can take up a HUGE amount of RAM - easily
   30MB per httpd child. The more RAM you can get, the better. mod_perl is
   basically trading RAM for speed. At least 2GB total system RAM is
   recommended for running Bugzilla under mod_perl.
   
-- Under mod_perl, you have to restart Apache if you make any manual change to
+* Under mod_perl, you have to restart Apache if you make any manual change to
   any Bugzilla file. You can't just reload--you have to actually
   *restart* the server (as in make sure it stops and starts
   again). You *can* change :file:`localconfig` and the :file:`params` file
   manually, if you want, because those are re-read every time you load a page.
 
-- You must run in Apache's Prefork MPM (this is the default). The Worker MPM
+* You must run in Apache's Prefork MPM (this is the default). The Worker MPM
   may not work -- we haven't tested Bugzilla's mod_perl support under threads.
   (And, in fact, we're fairly sure it *won't* work.)
 
-- Bugzilla generally expects to be the only mod_perl application running on
+* Bugzilla generally expects to be the only mod_perl application running on
   your entire server. It may or may not work if there are other applications also
   running under mod_perl. It does try its best to play nice with other mod_perl
   applications, but it still may have conflicts.
 
-- It is recommended that you have one Bugzilla instance running under mod_perl
+* It is recommended that you have one Bugzilla instance running under mod_perl
   on your server. Bugzilla has not been tested with more than one instance running.

@@ -44,10 +44,11 @@ Bugzilla has a `REST API
 <http://www.bugzilla.org/docs/tip/en/html/api/Bugzilla/WebService/Server/REST.html>`_
 which is the currently-recommended API for integrating with Bugzilla. The
 current REST API is version 1. It is stable, and so will not be changed in a
-backwardly-incompatible way.
+backwardly-incompatible way. **This is the currently-recommended API for
+new development.**
 
-BzAPI-Compatible REST
-=====================
+BzAPI/BzAPI-Compatible REST
+===========================
 
 The first ever REST API for Bugzilla was implemented using an external proxy
 called `BzAPI <https://wiki.mozilla.org/Bugzilla:BzAPI>`_. This became popular

@@ -5,22 +5,9 @@ Writing Extensions
 
 See the `Bugzilla Extension
 documentation <../html/api/Bugzilla/Extension.html>`_ for the core
-documentation on how to write an Extension. We also have some additional
-tips and tricks here.
-
-.. todo:: These came from the wiki. Should they actually be integrated into the
-          POD, or should some of the POD come here, or something else?
-
-Checking Syntax
-===============
-
-It's not immediately obvious how to check the syntax of your extension's
-modules. Running checksetup.pl might do some of it, but the errors aren't
-necessarily massively informative.
-
-:command:`perl -Mlib=lib -MBugzilla -e 'BEGIN { Bugzilla->extensions; } use Bugzilla::Extension::ExtensionName::Class;'`
-
-(run from ``$BUGZILLA_HOME``) will do the trick.
+documentation on how to write an Extension. It would make sense to read
+the section on :ref:`templates`. This section explains how to achieve some
+common tasks using the Extension APIs.
 
 Adding New Fields To Bugs
 =========================
@@ -69,7 +56,7 @@ Adding New Fields To Other Things
 =================================
 
 If you are adding the new fields to an object other than a bug, you need to
-go a bit lower-level. 
+go a bit lower-level. With reference to the instructions above:
 
 * In ``install_update_db``, use ``bz_add_column`` instead
 
@@ -80,8 +67,12 @@ go a bit lower-level.
 
 The process for adding accessor functions is the same.
 
-Adding Configuration Panels
-===========================
+Adding Admin Configuration Panels
+=================================
+
+If you add new functionality to Bugzilla, it may well have configurable
+options or parameters. The way to allow an administrator to set those
+is to add a new configuration panel.
 
 As well as using the ``config_add_panels`` hook, you will need a template to
 define the UI strings for the panel. See the templates in
@@ -100,7 +91,7 @@ To add a new user preference:
 
 * Add descriptions for the identifiers for your setting and choices
   (setting_name, some_option etc.) to the hash defined in
-  :file:`global/setting-descs.none.tmpl`. Do this in a hook:
+  :file:`global/setting-descs.none.tmpl`. Do this in a template hook:
   :file:`hook/global/setting-descs-settings.none.tmpl`. Your code can see the
   hash variable; just set more members in it.
 
@@ -108,3 +99,40 @@ To add a new user preference:
   ``[% user.settings.setting_name.value %]``. Reference it in code using
   ``$user->settings->{'setting_name'}->{'value'}``. The value will be one of
   the option tag names (e.g. some_option).
+
+.. _who-can-change-what:
+
+Altering Who Can Change What
+============================
+
+Companies often have rules about which employees, or classes of employees,
+are allowed to change certain things in the bug system. For example,
+only the bug's designated QA Contact may be allowed to VERIFY the bug.
+Bugzilla has been
+designed to make it easy for you to write your own custom rules to define
+who is allowed to make what sorts of value transition.
+
+By default, assignees, QA owners and users
+with *editbugs* privileges can edit all fields of bugs,
+except group restrictions (unless they are members of the groups they
+are trying to change). Bug reporters also have the ability to edit some
+fields, but in a more restrictive manner. Other users, without
+*editbugs* privileges, cannot edit
+bugs, except to comment and add themselves to the CC list.
+
+Because this kind of change is such a common request, we have added a
+specific hook for it that :ref:`extensions` can call. It's called
+``bug_check_can_change_field``, and it's documented `in the Hooks
+documentation <http://www.bugzilla.org/docs/tip/en/html/api/Bugzilla/Hook.html#bug_check_can_change_field>`_.
+
+Checking Syntax
+===============
+
+It's not immediately obvious how to check the syntax of your extension's
+Perl modules, if it contains any. Running :command:`checksetup.pl` might do
+some of it, but the errors aren't necessarily massively informative.
+
+:command:`perl -Mlib=lib -MBugzilla -e 'BEGIN { Bugzilla->extensions; } use Bugzilla::Extension::ExtensionName::Class;'`
+
+(run from ``$BUGZILLA_HOME``) is what you need.
+

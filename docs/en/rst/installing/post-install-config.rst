@@ -30,8 +30,6 @@ The first set of these are in the :guilabel:`Required Settings` section.
   cookiebase. If your Bugzilla is at the root of your domain, you don't need
   to change the default value.
 
-You will also need to tell Bugzilla how to :ref:`send email <email>`.
-
 You may want to put your email address in the :param:`maintainer`
 parameter in the :guilabel:`General` section. This will then let people
 know who to contact if they see problems or hit errors.
@@ -40,19 +38,36 @@ If you don't want just anyone able to read your Bugzilla, set the
 :param:`requirelogin` parameter in the :guilabel:`User Authentication`
 section, and change or clear the :param:`createemailregexp` parameter.
 
+You will also need to set appropriate parameters so Bugzilla knows how to
+:ref:`send email <email>`.
+
 .. _config-products:
 
 Products, Components, Versions and Milestones
 =============================================
 
-.. todo:: WRITE ME
+Bugs in Bugzilla are categorised into Products and, inside those Products,
+Components (and, optionally, if you turn on the :param:`useclassifications`
+parameter, Classifications as a level above Products).
+
+Bugzilla comes with a single Product, called "TestProduct", which contains a
+single component, imaginatively called "TestComponent". You will want to
+create your own Products and their Components. It's OK to have just one
+Component inside a Product. Products have Versions (which represents the
+version of the software in which a bug was found) and Target Milestones
+(which represent the future version of the product in which the bug is
+hopefully to be fixed - or, for RESOLVED bugs, was fixed. You may also want
+to add some of those.
+
+Once you've created your own, you will want to delete TestProduct (which
+will delete TestComponent automatically). Note that if you've filed a bug in
+TestProduct to try Bugzilla out, you'll need to move it elsewhere before it's
+possible to delete TestProduct.
 
 .. _optional-features:
 
-Optional
-========
-
-.. todo:: HACKME
+Optional Features
+=================
 
 Bugzilla has a number of optional features. This section describes how
 to configure or enable them.
@@ -60,18 +75,14 @@ to configure or enable them.
 Bug Graphs
 ----------
 
-If you have installed the necessary Perl modules you
-can start collecting statistics for the nifty Bugzilla
-graphs.
+If you have installed the necessary Perl modules, as indicated by
+:file:`checksetup.pl`, you can ask Bugzilla to regularly collect statistics
+so that you can see graphs and charts. Run:
 
-::
+:command:`crontab -e`
 
-    # crontab -e
-
-This should bring up the crontab file in your editor.
-Add a cron entry like this to run
-:file:`collectstats.pl`
-daily at 5 after midnight:
+This should bring up the crontab file in your editor. Add a cron entry like
+this to run :file:`collectstats.pl` daily at 5 after midnight:
 
 .. code-block:: none
 
@@ -80,73 +91,56 @@ daily at 5 after midnight:
 After two days have passed you'll be able to view bug graphs from
 the Reports page.
 
-.. note:: Windows does not have 'cron', but it does have the Task
-   Scheduler, which performs the same duties. There are also
-   third-party tools that can be used to implement cron, such as
-   `nncron <http://www.nncron.ru/>`_.
-
-.. _installation-whining-cron:
-
-The Whining Cron
-----------------
-
-What good are
-bugs if they're not annoying? To help make them more so you
-can set up Bugzilla's automatic whining system to complain at engineers
-which leave their bugs in the CONFIRMED state without triaging them.
-
-This can be done by adding the following command as a daily
-crontab entry, in the same manner as explained above for bug
-graphs. This example runs it at 12.55am.
-
-.. code-block:: none
-
-    55 0 * * * cd <your-bugzilla-directory> && ./whineatnews.pl
-
-.. note:: Windows does not have 'cron', but it does have the Task
-   Scheduler, which performs the same duties. There are also
-   third-party tools that can be used to implement cron, such as
-   `nncron <http://www.nncron.ru/>`_.
+Windows does not have 'cron', but it does have the Task Scheduler, which
+performs the same duties. There are also third-party tools that can be used
+to implement cron, such as `nncron <http://www.nncron.ru/>`_.
 
 .. _installation-whining:
 
 Whining
 -------
 
-Users can configure Bugzilla to regularly annoy
-them at regular intervals, by having Bugzilla execute saved searches
-at certain times and emailing the results to the user.  This is known
-as "Whining".  The process of configuring Whining is described
-in :ref:`whining`, but for it to work a Perl script must be
-executed at regular intervals.
+Users can configure Bugzilla to annoy them at regular intervals, by having
+Bugzilla execute saved searches at certain times and emailing the results to
+the user.  This is known as "Whining".  The details of how a user configures
+Whining is described in :ref:`whining`, but for it to work a Perl script must
+be executed at regular intervals.
 
-This can be done by adding the following command as a daily
-crontab entry, in the same manner as explained above for bug
-graphs. This example runs it every 15 minutes.
+This can be done by adding the following repeating command, in
+the same manner as explained above for bug graphs. This example, using cron
+syntax, runs it every 15 minutes, which is the recommended interval.
 
 .. code-block:: none
 
     */15 * * * * cd <your-bugzilla-directory> && ./whine.pl
 
-.. note:: Whines can be executed as often as every 15 minutes, so if you specify
-   longer intervals between executions of whine.pl, some users may not
-   be whined at as often as they would expect.  Depending on the person,
-   this can either be a very Good Thing or a very Bad Thing.
+.. _installation-whining-cron:
 
-.. note:: Windows does not have 'cron', but it does have the Task
-   Scheduler, which performs the same duties. There are also
-   third-party tools that can be used to implement cron, such as
-   `nncron <http://www.nncron.ru/>`_.
+Whining at Untriaged Bugs
+-------------------------
+
+It's possible for bugs to languish in an untriaged state. Bugzilla has a
+specific system to issue complaints about this particular problem to all the
+relevant engineers automatically by email.
+
+This can be done by adding the following repeating command, in
+the same manner as explained above for bug graphs. This example, using cron
+syntax, runs it at 12.55am:
+
+.. code-block:: none
+
+    55 0 * * * cd <your-bugzilla-directory> && ./whineatnews.pl
 
 .. _multiple-bz-dbs:
 
-Multiple Bugzilla databases with a single installation
-------------------------------------------------------
+Running Multiple Bugzillas from a Single Code Installation
+----------------------------------------------------------
 
-The previous instructions referred to a standard installation, with
-one unique Bugzilla database. However, you may want to host several
-distinct installations, without having several copies of the code. This is
-possible by using the PROJECT environment variable. When accessed,
+This is a somewhat specialist feature; if you don't know whether you need it,
+you don't. It is useful to admins who want to run many separate instances of
+Bugzilla from a single codebase.
+
+This is possible by using the ``PROJECT`` environment variable. When accessed,
 Bugzilla checks for the existence of this variable, and if present, uses
 its value to check for an alternative configuration file named
 :file:`localconfig.<PROJECT>` in the same location as
@@ -154,10 +148,10 @@ the default one (:file:`localconfig`). It also checks for
 customized templates in a directory named
 :file:`<PROJECT>` in the same location as the
 default one (:file:`template/<langcode>`). By default
-this is :file:`template/en/default` so PROJECT's templates
+this is :file:`template/en/default` so ``PROJECT``'s templates
 would be located at :file:`template/en/PROJECT`.
 
-To set up an alternate installation, just export PROJECT=foo before
+To set up an alternate installation, just export ``PROJECT=foo`` before
 running :command:`checksetup.pl` for the first time. It will
 result in a file called :file:`localconfig.foo` instead of
 :file:`localconfig`. Edit this file as described above, with
@@ -171,12 +165,10 @@ other Webservers may differ.
 
 .. code-block:: apache
 
-    <VirtualHost 212.85.153.228:80>
-    ServerName foo.bar.baz
-    SetEnv PROJECT foo
-    Alias /bugzilla /var/www/bugzilla
+    <VirtualHost 12.34.56.78:80>
+        ServerName bugzilla.example.com
+        SetEnv PROJECT foo
     </VirtualHost>
 
 Don't forget to also export this variable before accessing Bugzilla
-by other means, such as cron tasks for instance.
-
+by other means, such as repeating tasks like those above.

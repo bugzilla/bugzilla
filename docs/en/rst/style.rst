@@ -114,3 +114,6 @@ Inline Directives
 
 * Any string from the UI:
   :guilabel:`Administration`
+
+* A specific BMO bug:
+  :bug:`201069`

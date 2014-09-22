@@ -87,7 +87,8 @@ shutdownhtml
        log in, and your name/password will be accepted here (but nowhere
        else).
 
-       .. todo:: Is this still true?
+       .. todo:: Is this still true? The editparams.cgi code seems to
+                 call using LOGIN_REQUIRED in the conventional manner...
 
 announcehtml
     Any text in this field will be displayed at the top of every HTML
@@ -394,7 +395,8 @@ makeproductgroups
     when new products are created. If this is on, the groups will be
     used for querying bugs.
 
-    .. todo:: This is spectacularly unclear.
+    .. todo:: This is spectacularly unclear. I have no idea what makeproductgroups
+              does - can someone explain it to me?
 
 chartgroup
     The name of the group of users who can use the 'New Charts' feature. Administrators should ensure that the public categories and series definitions do not divulge confidential information before enabling this for an untrusted population. If left blank, no users will be able to use New Charts.
@@ -461,9 +463,7 @@ email address and users are still queried by email address.
    otherwise), added to any CC list, or any other such operation. One
    possible workaround is the :file:`bugzilla_ldapsync.rb`
    script in the :file:`contrib`
-   directory. Another possible solution is fixing
-   `bug
-   201069 <https://bugzilla.mozilla.org/show_bug.cgi?id=201069>`_.
+   directory. Another possible solution is fixing :bug:`201069`.
 
 Parameters required to use LDAP Authentication:
 
@@ -628,10 +628,8 @@ whinedays
     Set this to the number of days you want to let bugs go
     in the CONFIRMED state before notifying people they have
     untouched new bugs. If you do not plan to use this feature, simply
-    do not set up the whining cron job described in the installation
-    instructions, or set this value to "0" (never whine).
-
-    .. todo:: link
+    do not set up the :ref:`whining cron job <installation-whining>` described
+    in the installation instructions, or set this value to "0" (never whine).
 
 globalwatchers
     This allows you to define specific users who will
@@ -647,11 +645,11 @@ Patch Viewer
 
 This page contains configuration parameters for the CVS server,
 Bonsai server and LXR server that Bugzilla will use to enable the
-features of the Patch Viewer. Bonsai is a tool that enables queries
+certain features of the Patch Viewer. Bonsai is a tool that enables queries
 to a CVS tree. LXR is a tool that can cross reference and index source
 code.
 
-.. todo:: Does anyone use this stuff any more?
+This page is scheduled to be removed in :bug:`1068494`.
 
 cvsroot
     The CVS root that most users of your system will be using for 'cvs diff'. Used in Patch Viewer ('Diff' option on patches) to figure out where patches are rooted even if users did the 'cvs diff' from different places in the directory structure. (NOTE: if your CVS repository is remote and requires a password, you must either ensure the Bugzilla user has done a 'cvs login' or specify the password as part of the CVS root.) Leave this blank if you have no CVS repository.

@@ -8,209 +8,216 @@ those who are able to choose their environment. It creates a system using
 Ubuntu 14.04 LTS, Apache and MySQL, and installs Bugzilla as the default
 home page. It requires a little familiarity with Linux and the command line.
 
-0. Obtain Your Hardware
+Obtain Your Hardware
+====================
 
-   Ubuntu 14.04 LTS Server requires a 64-bit processor.
-   Bugzilla itself has no prerequisites beyond that, although you should pick
-   reliable hardware. You can also probably use any 64-bit virtual machine
-   or cloud instance that you have root access on. 
+Ubuntu 14.04 LTS Server requires a 64-bit processor.
+Bugzilla itself has no prerequisites beyond that, although you should pick
+reliable hardware. You can also probably use any 64-bit virtual machine
+or cloud instance that you have root access on. 
 
-1. Install the OS
+Install the OS
+==============
 
-   Get `Ubuntu Server 14.04 LTS <http://www.ubuntu.com/download/server>`_
-   and follow the `installation instructions <http://www.ubuntu.com/download/server/install-ubuntu-server>`_.
-   Here are some tips:
+Get `Ubuntu Server 14.04 LTS <http://www.ubuntu.com/download/server>`_
+and follow the `installation instructions <http://www.ubuntu.com/download/server/install-ubuntu-server>`_.
+Here are some tips:
 
-   * Choose any server name you like.
-   * When creating the initial Linux user, call it ``bugzilla``, give it a 
-     strong password, and write that password down.
-   * You do not need an encrypted home directory.
-   * Choose all the defaults for the "partitioning" part (excepting of course
-     where the default is "No" and you need to press "Yes" to continue).
-   * Choose "install security updates automatically" unless you want to do
-     them manually.
-   * From the install options, choose "OpenSSH Server" and "LAMP Server".
-   * Set the password for the MySQL root user to a strong password, and write
-     that password down.
-   * Install the Grub boot loader to the Master Boot Record.
+* Choose any server name you like.
+* When creating the initial Linux user, call it ``bugzilla``, give it a 
+  strong password, and write that password down.
+* You do not need an encrypted home directory.
+* Choose all the defaults for the "partitioning" part (excepting of course
+  where the default is "No" and you need to press "Yes" to continue).
+* Choose "install security updates automatically" unless you want to do
+  them manually.
+* From the install options, choose "OpenSSH Server" and "LAMP Server".
+* Set the password for the MySQL root user to a strong password, and write
+  that password down.
+* Install the Grub boot loader to the Master Boot Record.
 
-   Reboot when the installer finishes.
+Reboot when the installer finishes.
 
-2. Become root
+Become root
+===========
 
-   ssh to the machine as the 'bugzilla' user, or start a console. Then:
+ssh to the machine as the 'bugzilla' user, or start a console. Then:
+
+:command:`sudo su`
    
-   :command:`sudo su`
+Install Prerequisites
+=====================
+
+:command:`apt-get install git nano`
+
+:command:`apt-get install apache2 mysql-server libappconfig-perl libdate-calc-perl libtemplate-perl libmime-perl build-essential libdatetime-timezone-perl libdatetime-perl libemail-send-perl libemail-mime-perl libemail-mime-modifier-perl libdbi-perl libdbd-mysql-perl libcgi-pm-perl libmath-random-isaac-perl libmath-random-isaac-xs-perl apache2-mpm-prefork libapache2-mod-perl2 libapache2-mod-perl2-dev libchart-perl libxml-perl libxml-twig-perl perlmagick libgd-graph-perl libtemplate-plugin-gd-perl libsoap-lite-perl libhtml-scrubber-perl libjson-rpc-perl libdaemon-generic-perl libtheschwartz-perl libtest-taint-perl libauthen-radius-perl libfile-slurp-perl libencode-detect-perl libmodule-build-perl libnet-ldap-perl libauthen-sasl-perl libtemplate-perl-doc libfile-mimeinfo-perl libhtml-formattext-withlinks-perl libgd-dev lynx-cur`
+
+This will take a little while. It's split into two commands so you can do
+the next steps (up to step 7) in another terminal while you wait for the
+second command to finish. If you start another terminal, you will need to
+:command:`sudo su` again.
+
+Download Bugzilla
+=================
+
+Get it from our Git repository:
+
+:command:`cd /var/www`
+
+:command:`rm -rf html`
+
+:command:`git clone https://git.mozilla.org/bugzilla/bugzilla html`
+
+:command:`cd html`
+
+:command:`git checkout bugzilla-stable`
+
+You will get a notification about having a detached HEAD. Don't worry,
+your head is still firmly on your shoulders.
+
+.. todo:: is this the right way to get the current bugzilla-stable code? Or
+         should we pull directly from a branch?
    
-3. Install Prerequisites
+Configure MySQL
+===============
 
-   :command:`apt-get install git nano`
-   
-   :command:`apt-get install apache2 mysql-server libappconfig-perl libdate-calc-perl libtemplate-perl libmime-perl build-essential libdatetime-timezone-perl libdatetime-perl libemail-send-perl libemail-mime-perl libemail-mime-modifier-perl libdbi-perl libdbd-mysql-perl libcgi-pm-perl libmath-random-isaac-perl libmath-random-isaac-xs-perl apache2-mpm-prefork libapache2-mod-perl2 libapache2-mod-perl2-dev libchart-perl libxml-perl libxml-twig-perl perlmagick libgd-graph-perl libtemplate-plugin-gd-perl libsoap-lite-perl libhtml-scrubber-perl libjson-rpc-perl libdaemon-generic-perl libtheschwartz-perl libtest-taint-perl libauthen-radius-perl libfile-slurp-perl libencode-detect-perl libmodule-build-perl libnet-ldap-perl libauthen-sasl-perl libtemplate-perl-doc libfile-mimeinfo-perl libhtml-formattext-withlinks-perl libgd-dev lynx-cur`
+The following instructions use the simple :file:`nano` editor, but feel
+free to use any text editor you are comfortable with.
 
-   This will take a little while. It's split into two commands so you can do
-   the next steps (up to step 7) in another terminal while you wait for the
-   second command to finish. If you start another terminal, you will need to
-   :command:`sudo su` again.
+:command:`nano /etc/mysql/my.cnf`
 
-4. Download Bugzilla
+Set the following values, which increase the maximum attachment size and
+make it possible to search for short words and terms:
 
-   Get it from our Git repository:
+* Alter on Line 52: ``max_allowed_packet=100M``
+* Add as new line 31, in the ``[mysqld]`` section: ``ft_min_word_len=2``
 
-   :command:`cd /var/www`
+Save and exit.
 
-   :command:`rm -rf html`
+Restart MySQL:
 
-   :command:`git clone https://git.mozilla.org/bugzilla/bugzilla html`
+:command:`service mysql restart`
 
-   :command:`cd html`
+Configure Apache
+================
 
-   :command:`git checkout bugzilla-stable`
+:command:`nano /etc/apache2/sites-available/bugzilla.conf`
 
-   You will get a notification about having a detached HEAD. Don't worry,
-   your head is still firmly on your shoulders.
+Paste in the following and save:
 
-   .. todo:: is this the right way to get the current bugzilla-stable code? Or
-             should we pull directly from a branch?
-   
-5. Configure MySQL
+.. code-block:: none
 
-   The following instructions use the simple :file:`nano` editor, but feel
-   free to use any text editor you are comfortable with.
+ ServerName localhost
 
-   :command:`nano /etc/mysql/my.cnf`
+ <Directory /var/www/html>
+   AddHandler cgi-script .cgi
+   Options +ExecCGI
+   DirectoryIndex index.cgi index.html
+   AllowOverride Limit FileInfo Indexes Options
+ </Directory>
 
-   Set the following values, which increase the maximum attachment size and
-   make it possible to search for short words and terms:
+:command:`a2ensite bugzilla`
 
-   * Alter on Line 52: ``max_allowed_packet=100M``
-   * Add as new line 31, in the ``[mysqld]`` section: ``ft_min_word_len=2``
+:command:`a2enmod cgi headers expires`
 
-   Save and exit.
+:command:`service apache2 restart`
 
-   .. todo:: default value of maxattachmentsize is 1MB. Default value of max_allowed_packet
-             is 16MB. Should we just omit this step entirely, for simplicity? Do we need
-             ft_min_word_len changed?
+Check Setup
+===========
 
-   .. todo:: docs for maxattachmentsize should mention max_allowed_packet. File bug.
+Bugzilla comes with a :file:`checksetup.pl` script which helps with the
+installation process. It will need to be run twice. The first time, it
+generates a config file (called :file:`localconfig`) for the database
+access information, and the second time (step 10)
+it uses the info you put in the config file to set up the database.
 
-   Restart MySQL:
-   
-   :command:`service mysql restart`
+:command:`cd /var/www/html`
+
+:command:`./checksetup.pl`
+
+Edit :file:`localconfig`
+========================
+
+:command:`nano localconfig`
+
+You will need to set the following values:
+
+* Line 29: set ``$webservergroup`` to ``www-data``
+* Line 60: set ``$db_user`` to ``root``
+* Line 67: set ``$db_pass`` to the MySQL root user password you created
+  when installing Ubuntu
+
+.. todo:: Given this is a quick setup on a dedicated box, is it OK to use the
+         MySQL root user?
     
-6. Configure Apache
+Check Setup (again)
+===================
 
-   :command:`nano /etc/apache2/sites-available/bugzilla.conf`
+Run the :file:`checksetup.pl` script again to set up the database.
 
-   Paste in the following and save:
+:command:`./checksetup.pl`
 
-   .. code-block:: none
+It will ask you to give an email address, real name and password for the
+first Bugzilla account to be created, which will be an administrator.
+Write down the email address and password you set.
 
-     ServerName localhost
+Test Server
+===========
 
-     <Directory /var/www/html>
-       AddHandler cgi-script .cgi
-       Options +ExecCGI
-       DirectoryIndex index.cgi index.html
-       AllowOverride Limit FileInfo Indexes Options
-     </Directory>
+:command:`./testserver.pl http://localhost/`
 
-   :command:`a2ensite bugzilla`
+All the tests should pass. (Note: currently, the first one will give a
+warning instead. You can ignore that. :bug:`1040728`.)
 
-   :command:`a2enmod cgi headers expires`
+.. todo:: Also, Chart::Base gives deprecation warnings :-|
+          https://rt.cpan.org/Public/Bug/Display.html?id=79658 , unfixed for
+          2 years. :bug:`1070117`.
 
-   :command:`service apache2 restart`
+Access Via Web Browser
+======================
 
-8. Check Setup
+Access the front page:
 
-   Bugzilla comes with a :file:`checksetup.pl` script which helps with the
-   installation process. It will need to be run twice. The first time, it
-   generates a config file (called :file:`localconfig`) for the database
-   access information, and the second time (step 10)
-   it uses the info you put in the config file to set up the database.
+:command:`lynx http://localhost/`
 
-   :command:`cd /var/www/html`
-   
-   :command:`./checksetup.pl`
+It's not really possible to use Bugzilla for real through Lynx, but you
+can view the front page to validate visually that it's up and running.
 
-9. Edit :file:`localconfig`
+You might well need to configure your DNS such that the server has, and
+is reachable by, a name rather than IP address. Doing so is out of scope
+of this document. In the mean time, it is available on your local network
+at ``http://<ip address>/``, where ``<ip address>`` is (unless you have
+a complex network setup) the "inet addr" value displayed when you run
+:command:`ifconfig eth0`.
 
-   :command:`nano localconfig`
+Configure Bugzilla
+==================
 
-   You will need to set the following values:
-   
-   * Line 29: set ``$webservergroup`` to ``www-data``
-   * Line 60: set ``$db_user`` to ``root``
-   * Line 67: set ``$db_pass`` to the MySQL root user password you created
-     when installing Ubuntu
+Once you have worked out how to access your Bugzilla in a graphical
+web browser, bring up the front page, click :guilabel:`Log In` in the
+header, and log in as the admin user you defined in step 10.
 
-   .. todo:: Given this is a quick setup on a dedicated box, is it OK to use the
-             MySQL root user?
-    
-10. Check Setup (again)
+Click the :guilabel:`Parameters` link on the page it gives you, and set
+the following parameters in the :guilabel:`Required Settings` section:
 
-    Run the :file:`checksetup.pl` script again to set up the database.
-   
-    :command:`./checksetup.pl`
+* :param:`urlbase`:
+  :paramval:`http://<servername>/` or :paramval:`http://<ip address>/`
 
-    It will ask you to give an email address, real name and password for the
-    first Bugzilla account to be created, which will be an administrator.
-    Write down the email address and password you set.
+Click :guilabel:`Save Changes` at the bottom of the page.
 
-11. Test Server
+There are several ways to get Bugzilla to send email. The easiest is to
+use Gmail, so we do that here so you have it working. Visit
+https://gmail.com and create a new Gmail account for your Bugzilla to use.
+Then, open the :guilabel:`Email` section of the Parameters using the link
+in the left column, and set the following parameter values:
 
-    :command:`./testserver.pl http://localhost/`
+* :param:`mail_delivery_method`: :paramval:`SMTP`
+* :param:`mailfrom`: :paramval:`new_gmail_address@gmail.com`
+* :param:`smtpserver`: :paramval:`smtp.gmail.com:465`
+* :param:`smtp_username`: :paramval:`new_gmail_address@gmail.com`
+* :param:`smtp_password`: :paramval:`new_gmail_password`
+* :param:`smtp_ssl`: :paramval:`On`
 
-    All the tests should pass. (Note: currently, the first one will give a
-    warning instead. You can ignore that. Bug 1040728.)
+Click :guilabel:`Save Changes` at the bottom of the page.
 
-    .. todo:: Also, Chart::Base gives deprecation warnings :-|
-   
-12. Access Via Web Browser
-
-    Access the front page:
-
-    :command:`lynx http://localhost/`
-
-    It's not really possible to use Bugzilla for real through Lynx, but you
-    can view the front page to validate visually that it's up and running.
-    
-    You might well need to configure your DNS such that the server has, and
-    is reachable by, a name rather than IP address. Doing so is out of scope
-    of this document. In the mean time, it is available on your local network
-    at ``http://<ip address>/``, where ``<ip address>`` is (unless you have
-    a complext network setup) the "inet addr" value displayed when you run
-    :command:`ifconfig eth0`.
-
-13. Configure Bugzilla
-
-    Once you have worked out how to access your Bugzilla in a graphical
-    web browser, bring up the front page, click :guilabel:`Log In` in the
-    header, and log in as the admin user you defined in step 10.
-
-    Click the :guilabel:`Parameters` link on the page it gives you, and set
-    the following parameters in the :guilabel:`Required Settings` section:
-
-    * :param:`urlbase`:
-      :paramval:`http://<servername>/` or :paramval:`http://<ip address>/`
-
-    Click :guilabel:`Save Changes` at the bottom of the page.
-
-    There are several ways to get Bugzilla to send email. The easiest is to
-    use Gmail, so we do that here so you have it working. Visit
-    https://gmail.com and create a new Gmail account for your Bugzilla to use.
-    Then, open the :guilabel:`Email` section of the Parameters using the link
-    in the left column, and set the following parameter values:
-    
-    * :param:`mail_delivery_method`: :paramval:`SMTP`
-    * :param:`mailfrom`: :paramval:`new_gmail_address@gmail.com`
-    * :param:`smtpserver`: :paramval:`smtp.gmail.com:465`
-    * :param:`smtp_username`: :paramval:`new_gmail_address@gmail.com`
-    * :param:`smtp_password`: :paramval:`new_gmail_password`
-    * :param:`smtp_ssl`: :paramval:`On`
-
-    Click :guilabel:`Save Changes` at the bottom of the page.
-
-    .. todo:: There should be a "send test email" button on that page
-
-    And you're all ready to go. :-)
+And you're all ready to go. :-)

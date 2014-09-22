@@ -3,11 +3,10 @@
 Templates
 #########
 
-Bugzilla uses a system of templates to define its user interface. Templates
-can be modified, replaced or overridden. This means that administrators can
-configure the look and feel of Bugzilla without having to edit Perl files or
-facing the nightmare of massive merge conflicts when they upgrade to a newer
-version in the future.
+Bugzilla uses a system of templates to define its user interface. The standard
+templates can be modified, replaced or overridden. You can also use template
+hooks in an :ref:`extension <writing-extensions>` to add or modify the
+behaviour of templates using a stable interface.
 
 .. _template-directory:
 
@@ -40,12 +39,6 @@ choices, and which you use depends mainly on the scope of your
 modifications, and the method you plan to use to upgrade Bugzilla.
 
 #. You can directly edit the templates found in :file:`template/en/default`.
-   This is probably the best way for minor changes, because when you upgrade
-   Bugzilla, either the source code management system or the :file:`patch` tool
-   will merge your changes into the new version for you.
-
-   On the downside, if the merge fails then Bugzilla will not work properly until
-   you have fixed the problem and re-integrated your code.
 
 #. You can copy the templates to be modified into a mirrored directory
    structure under :file:`template/en/custom`. Templates in this
@@ -60,25 +53,30 @@ modifications, and the method you plan to use to upgrade Bugzilla.
 
 The third method is the best if there are hooks in the appropriate places.
 Unlike code hooks, there is no requirement to document template hooks, so
-you just have to open up the template and see (search for 'Hook.process').
+you just have to open up the template and see (search for ``Hook.process``).
 
 If there are no hooks available, then the second method of customization
 should be used if you are going to make major changes, because it is
 guaranteed that the contents of the :file:`custom` directory will not be
 touched during an upgrade, and you can then decide whether
-to continue using your own templates, or make the effort to merge your
-changes into the new versions by hand. It's also good for entirely new files,
-and for a few files like :file:`bug/create/user-message.html.tmpl` which
-are designed to be entirely replaced.
+to revert to the standard templates, continue using yours, or make the effort
+to merge your changes into the new versions by hand. It's also good for
+entirely new files, and for a few files like
+:file:`bug/create/user-message.html.tmpl` which are designed to be entirely
+replaced.
 
-Using the second method, your installation may break if incompatible
-changes are made to the template interface. Such changes should
-be documented in the release notes, provided you are using a
-stable release of Bugzilla, so you should be able to see them coming.
+Using the second method, your user interface may break if incompatible
+changes are made to the template interface. Templates do change regularly
+and so interface changes are not individually documented, and you would
+need to work out what had changed and adapt your template accordingly.
 
-For minor changes, the convenience of the first method is hard to beat. You
-can see what you've changed using :command:`git diff`, which you can't if
-you fork the file into the :file:`custom` directory.
+For minor changes, the convenience of the first method is hard to beat. When
+you upgrade Bugzilla, :command:`git` will merge your changes into the new
+version for you. On the downside, if the merge fails then Bugzilla will not
+work properly until you have fixed the problem and re-integrated your code.
+
+Also, you can see what you've changed using :command:`git diff`, which you
+can't if you fork the file into the :file:`custom` directory.
 
 .. _template-edit:
 
@@ -91,34 +89,22 @@ How To Edit Templates
    `Developers' Guide <http://www.bugzilla.org/docs/developer.html>`_.
 
 Bugzilla uses a templating system called Template Toolkit. The syntax of the
-TT language is beyond the scope of
-this guide. It's reasonably easy to pick up by looking at the current
-templates; or, you can read the manual, available on the
-`Template Toolkit home
-page <http://www.template-toolkit.org>`_.
+language is beyond the scope of this guide. It's reasonably easy to pick up by
+looking at the current templates; or, you can read the manual, available on
+the `Template Toolkit home page <http://www.template-toolkit.org>`_.
 
 One thing you should take particular care about is the need
 to properly HTML filter data that has been passed into the template.
 This means that if the data can possibly contain special HTML characters
-such as <, and the data was not intended to be HTML, they need to be
-converted to entity form, i.e. &lt;.  You use the 'html' filter in the
-Template Toolkit to do this (or the 'uri' filter to encode special
+such as ``<``, and the data was not intended to be HTML, they need to be
+converted to entity form, i.e. ``&lt;``.  You use the ``html`` filter in the
+Template Toolkit to do this (or the ``uri`` filter to encode special
 characters in URLs).  If you forget, you may open up your installation
 to cross-site scripting attacks.
 
-.. todo:: Move the below.
 
-Editing templates is a good way of doing a 'poor man's custom
-fields'.
-For example, if you don't use the :guilabel:`Status Whiteboard`, but want to
-have a free-form text entry box for :guilabel:`Build Identifier`,
-then you can just
-edit the templates to change the field labels. It's still be called
-status_whiteboard internally, but your users don't need to know that.
-
-.. note:: you should run :command:`./checksetup.pl` after
-   editing any templates. Failure to do so may mean your changes are
-   not picked up.
+You should run :command:`./checksetup.pl` after editing any templates. Failure
+to do so may mean your changes are not picked up.
 
 .. _template-formats:
 
@@ -126,21 +112,23 @@ Template Formats and Types
 ==========================
 
 Some CGI's have the ability to use more than one template. For example,
-:file:`buglist.cgi` can output itself as RDF, or as two
-formats of HTML (complex and simple). The mechanism that provides this
-feature is extensible.
+:file:`buglist.cgi` can output itself as two formats of HTML (complex and
+simple). Each of these is a separate template. The mechanism that provides
+this feature is extensible - you can create new templates to add new formats.
 
-Bugzilla can support different types of output, which again can have
-multiple formats. In order to request a certain type, you can append
-the &ctype=<contenttype> (such as rdf or html) to the
-:file:`<cginame>.cgi` URL. If you would like to
-retrieve a certain format, you can use the &format=<format>
-(such as simple or complex) in the URL.
+You might use this feature to e.g. add a custom bug entry form for a
+particular subset of users or a particular type of bug.
+
+Bugzilla can also support different types of output - e.g. bugs are available
+as HTML and as XML, and this mechanism is extensible also to add new content
+types. However, instead of using such interfaces or enhancing Bugzilla to add
+more, you would be better off using the :ref:`apis` to integrate with
+Bugzilla.
 
 To see if a CGI supports multiple output formats and types, grep the
 CGI for ``get_format``. If it's not present, adding
 multiple format/type support isn't too hard - see how it's done in
-other CGIs, e.g. config.cgi.
+other CGIs, e.g. :file:`config.cgi`.
 
 To make a new format template for a CGI which supports this,
 open a current template for
@@ -153,20 +141,16 @@ Write your template in whatever markup or text style is appropriate.
 
 You now need to decide what content type you want your template
 served as. The content types are defined in the
-:file:`Bugzilla/Constants.pm` file in the
-:file:`contenttypes`
+:file:`Bugzilla/Constants.pm` file in the :file:`contenttypes`
 constant. If your content type is not there, add it. Remember
 the three- or four-letter tag assigned to your content type.
 This tag will be part of the template filename.
 
-.. note:: After adding or changing a content type, you need to
-   edit :file:`Bugzilla/Constants.pm` in order to reflect
-   the changes. Also, the file should be kept up to date after an
-   upgrade if content types have been customized in the past.
-
-Save the template as :file:`<stubname>-<formatname>.<contenttypetag>.tmpl`.
+Save your new template as
+:file:`<stubname>-<formatname>.<contenttypetag>.tmpl`.
 Try out the template by calling the CGI as
-:file:`<cginame>.cgi?format=<formatname>&ctype=<type>` .
+``<cginame>.cgi?format=<formatname>``. Add ``&ctype=<type>`` if the type is
+not HTML.
 
 .. _template-specific:
 
@@ -200,7 +184,9 @@ customizing for your installation.
   your Bugzilla installation.
 
 :file:`global/variables.none.tmpl`:
-  .. todo:: Need to describe the use of this file
+  This allows you to change the word 'bug' to something else (e.g. "issue")
+  throughout the interface, and also to change the name Bugzilla to something
+  else (e.g. "FooCorp Bug Tracker").
 
 :file:`list/table.html.tmpl`:
   This template controls the appearance of the bug lists created
@@ -227,6 +213,8 @@ customizing for your installation.
   you'll want to change this to something more appropriate for your
   environment.
 
+.. _custom-bug-entry:
+
 :file:`bug/create/create.html.tmpl` and :file:`bug/create/comment.txt.tmpl`:
     You may not wish to go to the effort of creating custom fields in
     Bugzilla, yet you want to make sure that each bug report contains
@@ -235,23 +223,23 @@ customizing for your installation.
     extensible fashion to enable you to add arbitrary HTML widgets,
     such as drop-down lists or textboxes, to the bug entry page
     and have their values appear formatted in the initial comment.
+
+    An example of this is the mozilla.org `guided bug submission form
+    <http://landfill.bugzilla.org/bugzilla-tip/enter_bug.cgi?product=WorldControl;format=guided>`_.
+    The code for this comes with the Bugzilla distribution as an example for
+    you to copy. It can be found in the files
+    :file:`create-guided.html.tmpl` and :file:`comment-guided.html.tmpl`.
+        
     A hidden field that indicates the format should be added inside
     the form in order to make the template functional. Its value should
     be the suffix of the template filename. For example, if the file
-    is called :file:`create-cust.html.tmpl`, then
+    is called :file:`create-guided.html.tmpl`, then
 
     ::
 
-        <input type="hidden" name="format" value="cust">
+        <input type="hidden" name="format" value="guided">
 
-    should be used inside the form.
-
-    An example of this is the mozilla.org
-    `guided
-    bug submission form <http://landfill.bugzilla.org/bugzilla-tip/enter_bug.cgi?product=WorldControl;format=guided>`_. The code for this comes with the Bugzilla
-    distribution as an example for you to copy. It can be found in the
-    files
-    :file:`create-guided.html.tmpl` and :file:`comment-guided.html.tmpl`.
+    is used inside the form.
 
     So to use this feature, create a custom template for
     :file:`enter_bug.cgi`. The default template, on which you
@@ -289,3 +277,6 @@ customizing for your installation.
         BuildID: 20140303
 
     would appear in the initial comment.
+
+    This system allows you to gather tructured data in bug reports without
+    the overhead and UI complexity of a large number of custom fields.

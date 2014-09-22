@@ -17,20 +17,34 @@ the best instructions for you.
 
 .. todo:: Which versions of RHEL have packages new enough for us to support them?
 
-.. todo:: What's the right order for all the following steps?
-
 Install Packages
 ================
 
 Use your distribution's package manager to install Perl, your preferred
 database engine (MySQL if in doubt), and a webserver (Apache if in doubt).
+Some distributions even have a Bugzilla package, although that will vary
+in age.
 
 The commands below will install those things and some of Bugzilla's other
 prerequisites as well. If you find a package doesn't install or the name
-is not found, just remove it from the list and reissue the command.
+is not found, just remove it from the list and reissue the command. If you
+want to use a different database or webserver, substitute the package
+names as appropriate.
 
 Fedora and Red Hat
 ------------------
+
+The following command will install Red Hat's packaged version of Bugzilla:
+:command:`yum install bugzilla httpd mysql-server`
+
+However, if you go this route, you need to read :bug:`415605`, which details
+some problems with the Bugzilla rpm. Then, you can skip to
+:ref:`configuring your database <config-database>`. It may be useful to know
+that Fedora stores the Bugzilla files in :file:`/usr/share/bugzilla`, so
+that's where you'll run :file:`checksetup.pl`.
+
+If you want to install a version of Bugzilla from the Bugzilla project, you
+will instead need:
 
 :command:`yum install httpd mysql-server mod_perl mod_perl-devel httpd-devel
 graphviz patchutils gcc perl-DateTime perl-Template-Toolkit perl-Email-Send
@@ -62,6 +76,16 @@ libtest-taint-perl libauthen-radius-perl libfile-slurp-perl
 libencode-detect-perl libmodule-build-perl libnet-ldap-perl
 libauthen-sasl-perl libtemplate-perl-doc libfile-mimeinfo-perl
 libhtml-formattext-withlinks-perl libgd-dev lynx-cur`
+
+Gentoo
+------
+
+:command:`emerge -av bugzilla`
+
+will install Bugzilla and all its dependencies. If you don't have the vhosts
+USE flag enabled, Bugzilla will end up in :file:`/var/www/localhost/bugzilla`.
+
+Then, you can skip to :ref:`configuring your database <config-database>`.
 
 Perl
 ====
@@ -101,6 +125,9 @@ Once all the files are in a web accessible directory, make that
 directory writable by your web server's user. This is a temporary step
 until you run the :file:`checksetup.pl` script, which locks down your
 installation.
+
+.. todo:: Why is this necessary? What does the webserver write there before
+          checksetup.pl is run?
 
 .. _install-perlmodules:
 
@@ -156,11 +183,6 @@ We have specific instructions for the following:
 
    apache
 
-You can run :command:`testserver.pl http://bugzilla-url/` from the command
-line to check if your web server is correctly configured.
-
-.. todo:: Does this work before doing any localconfig stuff?
-
 .. _config-database:
 
 Database Engine
@@ -209,7 +231,7 @@ accompanying comments. If you have a non-standard database setup, you may
 need to change one or more of the other ``$db_*`` parameters.
 
 .. note:: If you are using Oracle, ``$db_name`` should be set to
-   the SID name of your database (e.g. "XE" if you are using Oracle XE).
+   the SID name of your database (e.g. ``XE`` if you are using Oracle XE).
 
 checksetup.pl
 =============
@@ -236,72 +258,12 @@ and a suitable Bugzilla password.
 Bugzilla
 ========
 
-Your Bugzilla should now be working. Access
-:file:`http://<your-bugzilla-server>/` -
-you should see the Bugzilla front page.
+Your Bugzilla should now be working. Check by running:
 
-.. note:: The URL above may be incorrect if you installed Bugzilla into a
-   subdirectory or used a symbolic link from your web site root to
-   the Bugzilla directory.
+:command:`testserver.pl http://<your-bugzilla-server>/`
+
+If that passes, access ``http://<your-bugzilla-server>/`` in your browser -
+you should see the Bugzilla front page. Of course, if you installed Bugzilla
+in a subdirectory, make sure that's in the URL.
 
 Next, do the :ref:`post-install-config`.
-
-.. todo:: How to we integrate the below (copied from the wiki)?
-
-Gentoo
-======
-
-Gentoo pulls in all dependencies and, if you don't have the vhosts USE flag enabled, installs Bugzilla to /var/www/localhost/bugzilla when you issue:
-
-<code># emerge -av bugzilla</code>
-
-You will then have to configure and install your database according to your needs:
-
-For a first time MySQL install:
-
-<code># mysql_install_db</code>
-
-Else:
-
-<code># mysql -u root -p<br />
-mysql>CREATE DATABASE databasename;<br />
-mysql>GRANT <privs> ON databasename.* to 'bugzillauser'@'hostname' identified by 'pa$$w0rd';</code>
- 
-Fedora
-======
-
-'''Please be aware of this:''' https://bugzilla.mozilla.org/show_bug.cgi?id=415605
-(Please remove this link once determined the RPM has been repaired)
-
-Bugzilla and its dependencies are in the Fedora yum repository. To install Bugzilla and all its Perl dependencies, simply do (as root)
-
-<code>$ yum install bugzilla</code>
-
-You also need to install the database engine and web server, for example MySQL and httpd:
-
-<code>$ yum install httpd mysql-server</code>
-
-The Fedora packages automatically do the httpd configuration, so there is no need to worry about that. 
-
-To configure MySQL, you need to add the bugs user and bugs database to MySQL. You can do this with the normal MySQL tools - either use the command line, the mysqladmin tool, or the mysql-administrator GUI tool. You can also use a web-based control panel like PHPMyADMIN. Make sure the "bugs" user has write permissions ot the "bugs" database.
-
-The next step is to configure <code>/etc/bugzilla/localconfig</code> with the right database information:
-
-<pre>
-# The name of the database
-$db_name = 'bugs';
-
-# Who we connect to the database as.
-$db_user = 'bugs';
-
-# Enter your database password here. It's normally advisable to specify
-# a password for your bugzilla database user.
-# If you use apostrophe (') or a backslash (\) in your password, you'll
-# need to escape it by preceding it with a '\' character. (\') or (\)
-# (Far simpler just not to use those characters.)
-$db_pass = 'PASSWORD';
-</pre>
-
-Fedora stores the Bugzilla files in <code>/usr/share/bugzilla</code>. Change into that directory and run the <code>checksetup.pl</code> script. If any problems are encountered here, you can refer to the Bugzilla user guide.
-
-Finally, start mysqld and httpd and browse to http://localhost/bugzilla

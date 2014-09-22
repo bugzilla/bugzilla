@@ -57,10 +57,8 @@ To change MySQL's configuration, you need to edit your MySQL
 configuration file, which is usually :file:`/etc/my.cnf`
 on Linux.
 
-By default, MySQL will only allow you to insert things
+By default on some systems, MySQL will only allow you to insert things
 into the database that are smaller than 1MB.
-
-.. todo:: Is this still true? It's 16MB on Ubuntu 14.04...
 
 Bugzilla attachments
 may be larger than this. Also, Bugzilla combines all comments
@@ -70,12 +68,13 @@ be larger than 1MB.
 
 We recommend that you allow at least 16MB packets by
 adding or altering the ``max_allowed_packet`` parameter in your MySQL
-configuration in the ``[mysqld]`` section, like this:
+configuration in the ``[mysqld]`` section, so that the number is at least
+16M, like this (note that it's ``M``, not ``MB``):
 
 ::
 
     [mysqld]
-    # Allow packets up to 16MB
+    # Allow packets up to 16M
     max_allowed_packet=16M
 
 .. _mysql-small-words:

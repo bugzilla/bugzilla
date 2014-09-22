@@ -146,3 +146,142 @@ installation of Bugzilla.
 *Additional Comments:*
    You can add your two cents to the bug discussion here, if you have
    something worthwhile to say.
+
+.. _flags:
+
+Flags
+=====
+
+Flags are a way to attach a specific status to a bug or attachment,
+either ``+`` or ``-``. The meaning of these symbols depends on the name of
+the flag itself, but contextually they could mean pass/fail,
+accept/reject, approved/denied, or even a simple yes/no. If your site
+allows requestable flags, then users may set a flag to ``?`` as a
+request to another user that they look at the bug/attachment, and set
+the flag to its correct status.
+
+.. _flags-simpleexample:
+
+A Simple Example
+----------------
+
+A developer might want to ask their manager,
+"Should we fix this bug before we release version 2.0?"
+They might want to do this for a *lot* of bugs,
+so they decide to streamline the process. So:
+
+#. The Bugzilla administrator creates a flag type called
+   ``blocking2.0`` that shows up on all bugs in
+   your product.
+   It shows up on the :guilabel:`Show Bug` screen
+   as the text ``blocking2.0`` with a drop-down box next
+   to it. The drop-down box contains four values: an empty space,
+   ``?``, ``-``, and ``+``.
+
+#. The developer sets the flag to ``?``.
+
+#. The manager sees the ``blocking2.0``
+   flag with a ``?`` value.
+
+#. If the manager thinks the feature should go into the product
+   before version 2.0 can be released, he sets the flag to
+   ``+``. Otherwise, he sets it to ``-``.
+
+#. Now, every Bugzilla user who looks at the bug knows whether or
+   not the bug needs to be fixed before release of version 2.0.
+
+.. _flags-about:
+
+About Flags
+-----------
+
+Flags can have four values:
+
+``?``
+    A user is requesting that a status be set. (Think of it as 'A question is being asked'.)
+
+``-``
+    The status has been set negatively. (The question has been answered ``no``.)
+
+``+``
+    The status has been set positively.
+    (The question has been answered ``yes``.)
+
+``_``
+    ``unset`` actually shows up as a blank space. This just means that nobody
+    has expressed an opinion (or asked someone else to express an opinion)
+    about the matter covered by this flag.
+
+.. _flag-askto:
+
+Flag Requests
+-------------
+
+If a flag has been defined as 'requestable', and a user has enough privileges
+to request it (see below), the user can set the flag's status to ``?``.
+This status indicates that someone (a.k.a. "the requester") is asking
+someone else to set the flag to either ``+`` or ``-``.
+
+If a flag has been defined as 'specifically requestable',
+a text box will appear next to the flag into which the requester may
+enter a Bugzilla username. That named person (a.k.a. "the requestee")
+will receive an email notifying them of the request, and pointing them
+to the bug/attachment in question.
+
+If a flag has *not* been defined as 'specifically requestable',
+then no such text-box will appear. A request to set this flag cannot be made
+of any specific individual, but must be asked "to the wind".
+A requester may "ask the wind" on any flag simply by leaving the text-box
+blank.
+
+.. _flag-types:
+
+.. _flag-type-attachment:
+
+Attachment Flags
+----------------
+
+There are two types of flags: bug flags and attachment flags.
+
+Attachment flags are used to ask a question about a specific
+attachment on a bug.
+
+Many Bugzilla installations use this to
+request that one developer ``review`` another
+developer's code before they check it in. They attach the code to
+a bug report, and then set a flag on that attachment called
+``review`` to
+``review? reviewer@example.com``.
+reviewer\@example.com is then notified by email that
+he has to check out that attachment and approve it or deny it.
+
+For a Bugzilla user, attachment flags show up in three places:
+
+#. On the list of attachments in the :guilabel:`Show Bug`
+   screen, you can see the current state of any flags that
+   have been set to ``?``, ``+``, or ``-``. You can see who asked about
+   the flag (the requester), and who is being asked (the
+   requestee).
+
+#. When you edit an attachment, you can
+   see any settable flag, along with any flags that have
+   already been set. The :guilabel:`Edit Attachment`
+   screen is where you set flags to ``?``, ``-``, ``+``, or unset them.
+
+#. Requests are listed in the :guilabel:`Request Queue`, which
+   is accessible from the :guilabel:`My Requests` link (if you are
+   logged in) or :guilabel:`Requests` link (if you are logged out)
+   visible on all pages.
+
+.. _flag-type-bug:
+
+Bug Flags
+---------
+
+Bug flags are used to set a status on the bug itself. You can
+see Bug Flags in the :guilabel:`Show Bug` and :guilabel:`Requests`
+screens, as described above.
+
+Only users with enough privileges (see below) may set flags on bugs.
+This doesn't necessarily include the assignee, reporter, or users with the
+:group:`editbugs` permission.

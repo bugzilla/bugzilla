@@ -13,9 +13,6 @@ or run one yourself on the Bugzilla machine.
 Bugzilla's approach to email is configured in the :guilabel:`Email` section
 of the Parameters.
 
-.. todo:: Bug: description of mail_delivery_method talks about Qmail, and is in
-          other ways wrong.
-
 .. _install-MTA:
 
 Use Another Mail Server

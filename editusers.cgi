@@ -649,7 +649,9 @@ sub check_user {
 sub mirrorListSelectionValues {
     my $cgi = Bugzilla->cgi;
     if (defined($cgi->param('matchtype'))) {
-        foreach ('matchvalue', 'matchstr', 'matchtype', 'grouprestrict', 'groupid') {
+        foreach ('matchvalue', 'matchstr', 'matchtype',
+                 'grouprestrict', 'groupid', 'is_enabled')
+        {
             $vars->{'listselectionvalues'}{$_} = $cgi->param($_);
         }
     }

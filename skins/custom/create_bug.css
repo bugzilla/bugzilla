@@ -45,3 +45,27 @@
 #container_see_also {
     width: 25em
 }
+
+#custom_form_list {
+    font-weight: bold;
+    border: 1px solid #dddddd;
+    background: #fff9db;
+    color: #666458;
+    padding: 5px 5px 10px 5px;
+    min-height: 48px;
+    border-radius: 5px;
+}
+
+#custom_form_list_image {
+    float: left;
+}
+
+#custom_form_list_text {
+    margin-left: 55px;
+}
+
+#custom_form_list ul {
+    margin-top: 0.5em;
+    margin-bottom: 0;
+    padding-left: 20px;
+}

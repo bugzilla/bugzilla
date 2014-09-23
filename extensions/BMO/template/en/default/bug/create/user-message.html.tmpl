@@ -22,3 +22,28 @@
   most frequently reported [% terms.bugs %]</a> and <a href="https://bugzilla.mozilla.org/query.cgi">
   search through descriptions</a> of previously reported [% terms.bugs %].
 </p>
+
+[%
+  PROCESS bug/create/custom_forms.none.tmpl;
+  visible_forms = [];
+  FOREACH form = custom_forms.${product.name};
+    NEXT IF form.hide;
+    NEXT IF form.group && !user.in_group(form.group);
+    visible_forms.push(form);
+  END;
+  RETURN UNLESS visible_forms.size;
+%]
+
+<div id="custom_form_list">
+  <img src="extensions/BMO/web/images/notice.png" width="48" height="48" id="custom_form_list_image">
+  <div id="custom_form_list_text">
+    This product has task-specific [% terms.bug %] forms that should be used if
+    appropriate:
+
+    <ul>
+      [% FOREACH form = visible_forms.sort("title") %]
+        <li><a href="[% form.link FILTER none %]">[% form.title FILTER html %]</a></li>
+      [% END %]
+    </ul>
+  </div>
+</div>

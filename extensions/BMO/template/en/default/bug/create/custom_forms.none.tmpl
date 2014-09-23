@@ -1,0 +1,173 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[%# link  => url (can be relative to bugzilla.mozilla.org, or full url)
+  # title => visible title
+  # group => optional group name, if present the form won't be show to
+  #          users not in this group
+  # hide  => optional boolean, if true the form will not be shown on
+  #          enter_bug (but will be visible on the custom forms list)
+  #%]
+
+[%
+custom_forms = {
+  "mozilla.org" => [
+    {
+      link  => "form.moz.project.review",
+      title => "Mozilla Project Review",
+      group => "mozilla-employee-confidential",
+    },
+    {
+      link  => "form.trademark",
+      title => "Trademark Usage Requests",
+    },
+    {
+      link  => "form.gear",
+      title => "Mozilla Gear Request",
+      group => "mozilla-employee-confidential",
+    },
+    {
+      link  => "form.poweredby",
+      title => "Powered by Mozilla Logo Requests",
+    },
+    {
+      link  => "form.mozlist",
+      title => "Mozilla Discussion Forum Requests",
+      group => "mozilla-employee-confidential",
+    },
+  ],
+  "Marketing" => [
+    {
+      link  => "form.user.engagement",
+      title => "User Engagement Initiation Form",
+      group => "mozilla-employee-confidential",
+    },
+    {
+      link  => "form.gear",
+      title => "Mozilla Gear Request",
+      group => "mozilla-employee-confidential",
+    },
+    {
+      link  => "form.creative",
+      title => "Brand Engagement Initiation Form",
+      group => "mozilla-employee-confidential",
+    },
+    {
+      link  => "form.poweredby",
+      title => "Powered by Mozilla Logo Requests",
+    },
+  ],
+  "Finance" => [
+    {
+      link  => "form.finance",
+      title => "Finance Request",
+      group => "mozilla-employee-confidential",
+    },
+  ],
+  "Privacy" => [
+    {
+      link  => "form.privacy.data",
+      title => "Privacy - Data Release Proposal",
+      group => "mozilla-employee-confidential",
+    },
+  ],
+  "Mozilla PR" => [
+    {
+      link  => "form.mozpr",
+      title => "PR Project Form",
+      group => "pr-private",
+    },
+  ],
+  "Infrastructure & Operations" => [
+    {
+      link  => "form.itrequest",
+      title => "IT Request Form",
+      group => "mozilla-employee-confidential",
+    },
+    {
+      link  => "form.mozlist",
+      title => "Mozilla Discussion Forum Requests",
+      group => "mozilla-employee-confidential",
+    },
+  ],
+  "Tech Evangelism" => [
+    {
+      link  => "form.mobile.compat",
+      title => "Mobile Web Compatibility Problem",
+    },
+  ],
+  "Air Mozilla" => [
+    {
+      link  => "https://air.mozilla.org/requests/",
+      title => "Air Mozilla/Brown Bag Request",
+      group => "mozilla-employee-confidential",
+    },
+  ],
+  "Websites" => [
+    {
+      link  => "form.web.bounty",
+      title => "Web Bounty Form",
+    },
+  ],
+  "Firefox OS" => [
+    {
+      link  => "form.fxos.feature",
+      title => "Firefox OS Feature Request Form",
+    },
+    {
+      link  => "form.fxos.mcts.waiver",
+      title => "Firefox OS MCTS Waiver Form",
+    },
+    {
+      link  => "form.fxos.partner",
+      title => "Firefox OS Partner Bug Submission",
+      hide  => 1,
+    },
+    {
+      link  => "form.fxos.preload.app",
+      title => "Firefox OS Pre-load App",
+      hide  => 1,
+    },
+    {
+      link  => "form.fxos.betaprogram",
+      title => "Firefox OS Beta Program Bug Submission",
+      hide  => 1,
+    },
+  ],
+  "Testing" => [
+    {
+      link  => "form.automative",
+      title => "Automation Request Form",
+    },
+  ],
+  "Developer Engagement" => [
+    {
+      link  => "form.dev.engagement.event",
+      title => "Developer Events Request Form",
+    },
+  ],
+  "Mozilla Developer Network" => [
+    {
+      link  => "form.mdn",
+      title => "Mozilla Developer Network Feedback",
+    },
+  ],
+  "Internet Public Policy" => [
+    {
+      link  => "form.ipp",
+      title => "Internet Public Policy Issue",
+    },
+  ],
+  "Marketplace" => [
+    {
+      link  => "form.fxos.preload.app",
+      title => "Firefox OS Pre-load App",
+    },
+  ],
+}
+%]

@@ -1,0 +1,40 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% PROCESS global/header.html.tmpl
+   title = "Custom Bug Entry Forms"
+%]
+
+[%
+  visible_forms = {};
+  PROCESS bug/create/custom_forms.none.tmpl;
+  FOREACH product = custom_forms.keys;
+    product_forms = [];
+    FOREACH form = custom_forms.$product;
+      NEXT IF form.group && !user.in_group(form.group);
+      product_forms.push(form);
+    END;
+    NEXT UNLESS product_forms.size;
+    visible_forms.$product = product_forms;
+  END;
+%]
+
+<h1>Custom [% terms.Bug %] Entry Forms</h1>
+
+[% FOREACH product = visible_forms.keys.sort %]
+  <h3>[% product FILTER html %]</h3>
+  <ul>
+  [% FOREACH form = visible_forms.$product.sort("title") %]
+    <li>
+      <a href="[% form.link FILTER none %]">[% form.title FILTER html %]</a>
+    </li>
+  [% END %]
+  </ul>
+[% END %]
+
+[% PROCESS global/footer.html.tmpl %]

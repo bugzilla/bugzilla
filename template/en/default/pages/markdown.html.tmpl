@@ -1,0 +1,265 @@
+[%# this source code form is subject to the terms of the mozilla public
+  # license, v. 2.0. if a copy of the mpl was not distributed with this
+  # file, you can obtain one at http://mozilla.org/mpl/2.0/.
+  #
+  # this source code form is "incompatible with secondary licenses", as
+  # defined by the mozilla public license, v. 2.0.
+  #%]
+
+[% INCLUDE global/header.html.tmpl
+  title = "Markdown Syntax Guide"
+  bodyclasses = ['narrow_page']
+ %]
+
+<h2>What is Markdown?</h2>
+
+  Markdown is a simple text formatting language that enables you to write your
+  [%+ terms.comments %] in plain-text and have them generated as HTML. Markdown
+  in [%+ terms.Bugzilla %] supports the following structures:
+
+  <ul>
+    <li><a href="#headers">Headers</a></li>
+    <li><a href="#blockquotes">Blockquotes</a></li>
+    <li><a href="#emphasis">Emphasis</a></li>
+    <li><a href="#lists">Lists</a></li>
+    <li><a href="#code">Code</a></li>
+    <li><a href="#strikethroughs">Strikethroughs</a></li>
+    <li><a href="#links">Links</a></li>
+  </ul>
+
+<h2 id="headers">Headers</h2>
+
+  You have two options for making headers. First, you may use any number of
+  equal signs (for first-level header) or dashes (for second-level headers).
+
+  <p>
+    <pre>
+      <code>
+        This is an H1 header
+        ====================
+
+        This is an H2 header
+        --------------------
+      </code>
+    </pre>
+  </p>
+
+  Second, you can use hash signs at the beginning of the line to specify the
+  level of the header from 1 to 6.
+
+  <p>
+    <pre>
+      <code>
+        # This is the largest header (H1 level)
+        ### This is a small header (H3 level)
+        ###### This is the smallest header (H6 level)
+     </code>
+   </pre>
+  </p>
+
+<h2 id="blockquotes">Blockquotes</h2>
+
+  Use a closing angle bracket (<code>&gt;</code>) at the beginning of the line
+  to indicate a line as quoted.
+
+  <p>
+    <pre>
+      <code>
+        &gt; Some text to be quoted.
+      </code>
+    </pre>
+  </p>
+
+<h2 id="emphasis">Emphasis</h2>
+
+  Single underscores or asterisks will make the text italic. Double underscores
+  or asterisks will make the text bold.
+
+  <p>
+    <pre>
+      <code>
+        _This text will become italic_
+        *This text also will become italic*
+
+        __But this one will be bold__
+        **And this one as well**
+      </code>
+    </pre>
+  </p>
+
+  Turns into
+
+  <p>
+    <pre>
+      <em>This text will become italic</em>
+      <em>This text also will become italic</em>
+      <br>
+      <strong>But this one will be bold</strong>
+      <strong>And this one as well</strong>
+    </pre>
+  </p>
+
+  Use different signs to combine them nestedly in order to avoid ambiguity:
+
+  <p>
+    <pre>
+      <code>
+        _This [% terms.bug %] **must** be resolved ASAP._
+      </code>
+    </pre>
+  </p>
+
+  <strong>Note:</strong> [% terms.Bugzilla %] will skip emphasizing words that
+  have the form of <code>multiple_underscore_in_a_word</code>. This measure is
+  taken to not emphasize words that are possible programming variables. If your
+  word has this form and you still want it to become emphasized/bold, you must
+  use single/double asterisks (<code>*</code>) instead of underscores
+  (<code>_</code>).
+
+<h2 id="lists">Lists</h2>
+
+  Markdown supports both unordered and ordered lists.
+
+  <h3>Unordered Lists</h3>
+
+    Use asterisks (<code>*</code>), pluses (<code>+</code>) or hyphens
+    (<code>-</code>) to mark the items of an unordered list.
+
+    <p>
+      <pre>
+        <code>
+          + First item
+          + Second item
+          + Third item
+        </code>
+      </pre>
+    </p>
+
+  <h3>Ordered Lists</h3>
+
+    Use a number followed by a period to denote an item of an ordered list.
+
+    <p>
+      <pre>
+        <code>
+          1. Item one
+          4. Item two
+          3. Item three
+        </code>
+      </pre>
+    </p>
+
+    <strong>Note:</strong> Your numbers have no effect on the rendered item
+    numbers and the rendered numbers are automatically generated. Your numbers
+    are only used to specify the items of an ordered list.<br>
+
+    <p>
+      A list item can have nested lists recursively:
+    </p>
+
+    <p>
+      <pre>
+        <code>
+          1. Item one
+          4. Item two
+          3. Item three
+            * First sub-item
+            * Second sub-item
+          5. Item four
+        </code>
+      </pre>
+    </p>
+
+<h2 id="code">Code</h2>
+
+  To make a part of your text to get generated as a piece of code, use one or
+  more backticks (<code>`</code>) and close that
+  part with the same number of backticks.
+
+  <p>
+    <pre>
+      <code>Please see the manual for `printf` function.</code>
+    </pre>
+  </p>
+
+  If you want to make some lines of code, you need to use 3 or more backticks at
+  the beginning of a line followed by your code lines and concluded by 3 or more
+  backticks.
+
+  <p>
+    <pre>
+      <code>
+        See my function:
+        ```
+        int sum(int x, int y) {
+          return x + y;
+        }
+        ```
+      </code>
+    </pre>
+  </p>
+
+  You can also use a tab or [% constants.MARKDOWN_TAB_WIDTH %] or more spaces at
+  the beginning of each line of your code to make the whole block look as a code
+  block. Please take care that you might make your lines as code blocks by
+  inadvertently indenting them.
+
+<h2 id="strikethroughs">Strikethroughs</h2>
+
+  Surround your text between a pair of two tildes to have your text crossed out.
+
+  <p>
+    <pre>
+      <code>
+        Module ~~Foo~~ is deprecated.
+      </code>
+    </pre>
+  </p>
+
+<h2 id="links">Links</h2>
+
+  Literal URLs and Email addresses get linkified automatically. Besides that,
+  you can define links with link texts and titles. You may define your links
+  either as inline or as a reference. To define a link as inline, put your link
+  text in square bracket immediately followed by a pair of parentheses which
+  containts the URL that you want your link to point to and an <em>optional</em>
+  link title surrounded by quotes.
+
+  <p>
+    <pre>
+      <code>
+        This is [Bugzilla](http://www.bugzilla.org "View Bugzilla Homepage")
+        [% terms.bug %] tracking system.</code>
+        This [example link](http://www.example.com) does not have title.
+      </code>
+    </pre>
+  </p>
+
+  To define your links in a reference style, define your links any where in
+  your [% terms.comment %] with the following format:
+
+  <p>
+    <pre>
+      <code>
+        [bz]: http://www.bugzilla.org "Bugzilla Homepage"
+        [mz]: http://www.mozilla.org (Mozilla Homepage)
+      </code>
+    </pre>
+  </p>
+
+  That is, define a unique ID for each link in square brackets with their
+  corresponding URL and optional title in quotes or parentheses. Then, point to
+  those links simply by writing your link text in square brackets followed by
+  the ID in another pair of square brackets.
+
+  <p>
+    <pre>
+      <code>
+        [Bugzilla][bz] is open-sourced server software designed to help groups
+        manage software development. [Mozilla][mz] uses [Bugzilla][bz] to track
+        issues with Firefox and other projects.
+      </code>
+    </pre>
+  </p>
+
+[% PROCESS global/footer.html.tmpl %]

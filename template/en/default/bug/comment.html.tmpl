@@ -41,5 +41,6 @@
     <input type="checkbox" name="use_markdown" id="use_markdown" value="1"
     [% "checked=\"checked\"" IF user.settings.use_markdown.value == 'on' %] >
     <label id="use_markdown_label" for="use_markdown">Use Markdown for this [% terms.comment %]</label>
+    (<a href="page.cgi?id=markdown.html" target="_blank" title="View Markdown Syntax Guide">help</a>)
   </div>
 [% END %]

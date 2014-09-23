@@ -12,10 +12,12 @@
   title = "My Dashboard"
   style_urls = [ "extensions/MyDashboard/web/styles/mydashboard.css",
                  "extensions/ProdCompSearch/web/styles/prod_comp_search.css" ]
+  yui = ["json", "connection"],
   javascript_urls = [ "js/yui3/yui/yui-min.js",
                       "extensions/MyDashboard/web/js/query.js",
                       "extensions/MyDashboard/web/js/flags.js",
-                      "extensions/ProdCompSearch/web/js/prod_comp_search.js" ]
+                      "extensions/ProdCompSearch/web/js/prod_comp_search.js",
+                      "js/bug.js" ]
 %]
 
 [% standard_queries = [] %]
@@ -104,8 +106,10 @@
         <div class="query_description"></div>
         <span id="query_count_refresh" class="bz_default_hidden">
           <span class="items_found" id="query_bugs_found">0 [% terms.bugs %] found</span>
-          | <a class="refresh" href="javascript:void(0);" id="query_refresh">Refresh</a>
-          | <a class="buglist" href="javascript:void(0);" id="query_buglist">Buglist</a>
+          | <a class="refresh"     href="javascript:void(0);" id="query_refresh">Refresh</a>
+          | <a class="markvisited" href="javascript:void(0);" id="query_markvisited">Mark Visited</a>
+            <span class="markvisited bz_default_hidden" id="query_markvisited_text">Mark Visited</span>
+          | <a class="buglist"     href="javascript:void(0);" id="query_buglist">Buglist</a>
         </span>
         <div id="query_pagination_top"></div>
         <div id="query_table"></div>

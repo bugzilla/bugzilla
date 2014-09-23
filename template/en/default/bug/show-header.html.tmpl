@@ -68,7 +68,7 @@
       initDirtyFieldTracking();
 
       [% IF user.id AND user.is_involved_in_bug(bug) %]
-        YAHOO.bugzilla.bugUserLastVisit.update([% bug.bug_id FILTER none %]);
+        YAHOO.bugzilla.bugUserLastVisit.update([ [% bug.bug_id FILTER none %] ]);
       [% END %]
     });
     [% javascript FILTER none %]

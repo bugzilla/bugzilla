@@ -135,11 +135,11 @@ YAHOO.bugzilla.dupTable = {
     var JSON = YAHOO.lang.JSON;
 
     YAHOO.bugzilla.bugUserLastVisit = {
-        update: function(bug_id) {
+        update: function(bug_ids) {
             var args = JSON.stringify({
                 version: "1.1",
                 method: 'BugUserLastVisit.update',
-                params: { ids: bug_id },
+                params: { ids: bug_ids },
             });
             var callbacks = {
                 failure: function(res) {

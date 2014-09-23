@@ -99,6 +99,8 @@ YUI({
         counter = counter + 1;
         lastChangesCache = {};
 
+        Y.one('#query_markvisited').removeClass('bz_default_hidden');
+        Y.one('#query_markvisited_text').addClass('bz_default_hidden');
         Y.one('#query_count_refresh').addClass('bz_default_hidden');
         bugQueryTable.set('data', []);
         bugQueryTable.render("#query_table");
@@ -236,6 +238,19 @@ YUI({
         var index = query_select.get('selectedIndex');
         var selected_value = query_select.get("options").item(index).getAttribute('value');
         updateQueryTable(selected_value);
+    });
+
+    Y.one('#query_markvisited').on('click', function(e) {
+        var data = bugQueryTable.data;
+        var bug_ids = [];
+
+        Y.one('#query_markvisited').addClass('bz_default_hidden');
+        Y.one('#query_markvisited_text').removeClass('bz_default_hidden');
+
+        for (var i = 0, l = data.size(); i < l; i++) {
+            bug_ids.push(data.item(i).get('bug_id'));
+        }
+        YAHOO.bugzilla.bugUserLastVisit.update(bug_ids);
     });
 
     Y.one('#query_buglist').on('click', function(e) {

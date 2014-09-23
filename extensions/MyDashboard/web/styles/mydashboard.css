@@ -47,7 +47,8 @@
     width: 40%;
 }
 
-.items_found, .refresh, .buglist {
+.items_found, .refresh, .buglist, .markvisited {
+
     font-size: 80%;
 }
 

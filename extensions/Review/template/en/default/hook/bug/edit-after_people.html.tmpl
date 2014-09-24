@@ -24,6 +24,8 @@
         </span>
       </div>
       <div id="bz_bug_mentors_input">
+        <input type="hidden" name="defined_bug_mentors"
+               value="[% mentor_logins.join(", ") FILTER html %]">
         [% INCLUDE global/userselect.html.tmpl
            id       = "bug_mentors"
            name     = "bug_mentors"

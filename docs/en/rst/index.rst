@@ -15,4 +15,19 @@ Bugzilla Documentation
    administering/index
    using/index
 
+.. toctree::
+   :hidden:
+
+   installing/mysql
+   installing/postgresql
+   installing/oracle
+   installing/sqlite
+
+.. toctree::
+   :hidden:
+
+   installing/apache
+   installing/apache-windows
+   installing/iis
+
 .. todolist::

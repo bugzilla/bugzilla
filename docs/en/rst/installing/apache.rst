@@ -1,6 +1,6 @@
 .. This document is shared among all non-Windows OSes.
 
-.. _apache-linux:
+.. _apache:
 
 Apache
 ######

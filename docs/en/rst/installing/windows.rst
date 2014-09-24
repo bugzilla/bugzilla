@@ -100,11 +100,8 @@ Web Server
 Any web server that is capable of running CGI scripts can be made to work.
 We have specific instructions for the following:
 
-.. toctree::
-   :maxdepth: 1
-
-   apache-windows
-   iis
+* :ref:`apache-windows`
+* :ref:`iis`
 
 .. windows-config-database:
 
@@ -115,15 +112,12 @@ Bugzilla supports MySQL, PostgreSQL, Oracle and SQLite as database servers.
 You only require one of these systems to make use of Bugzilla. MySQL is
 most commonly used, and is the only one for which Windows instructions have
 been tested. SQLite is good for trial installations as it requires no
-setup. Configure your server according to the instructions below.
+setup. Configure your server according to the instructions below:
 
-.. toctree::
-   :maxdepth: 1
-
-   mysql
-   postgresql
-   oracle
-   sqlite
+* :ref:`mysql`
+* :ref:`postgresql`
+* :ref:`oracle`
+* :ref:`sqlite`
 
 .. |checksetupcommand| replace:: :command:`checksetup.pl`
 .. |testservercommand| replace:: :command:`testserver.pl http://<your-bugzilla-server>/`

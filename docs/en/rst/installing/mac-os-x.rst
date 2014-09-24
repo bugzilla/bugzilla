@@ -89,10 +89,7 @@ Web Server
 Any web server that is capable of running CGI scripts can be made to work.
 We have specific configuration instructions for the following:
 
-.. toctree::
-   :maxdepth: 1
-
-   apache
+* :ref:`apache`
 
 You'll need to create a symbolic link so the webserver can see Bugzilla:
 
@@ -111,17 +108,14 @@ Database Engine
 Bugzilla supports MySQL, PostgreSQL, Oracle and SQLite as database servers.
 You only require one of these systems to make use of Bugzilla. MySQL is
 most commonly used on Mac OS X. Configure your server according to the
-instructions below.
+instructions below:
 
 .. todo:: Has anyone tried anything other than MySQL on Mac OS X?
 
-.. toctree::
-   :maxdepth: 1
-
-   mysql
-   postgresql
-   oracle
-   sqlite
+* :ref:`mysql`
+* :ref:`postgresql`
+* :ref:`oracle`
+* :ref:`sqlite`
 
 .. |checksetupcommand| replace:: :command:`perl checksetup.pl`
 .. |testservercommand| replace:: :command:`perl testserver.pl http://<your-bugzilla-server>/`

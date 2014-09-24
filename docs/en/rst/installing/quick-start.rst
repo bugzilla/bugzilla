@@ -50,7 +50,7 @@ Install Prerequisites
 
 :command:`apt-get install git nano`
 
-:command:`apt-get install apache2 mysql-server libappconfig-perl libdate-calc-perl libtemplate-perl libmime-perl build-essential libdatetime-timezone-perl libdatetime-perl libemail-send-perl libemail-mime-perl libemail-mime-modifier-perl libdbi-perl libdbd-mysql-perl libcgi-pm-perl libmath-random-isaac-perl libmath-random-isaac-xs-perl apache2-mpm-prefork libapache2-mod-perl2 libapache2-mod-perl2-dev libchart-perl libxml-perl libxml-twig-perl perlmagick libgd-graph-perl libtemplate-plugin-gd-perl libsoap-lite-perl libhtml-scrubber-perl libjson-rpc-perl libdaemon-generic-perl libtheschwartz-perl libtest-taint-perl libauthen-radius-perl libfile-slurp-perl libencode-detect-perl libmodule-build-perl libnet-ldap-perl libauthen-sasl-perl libtemplate-perl-doc libfile-mimeinfo-perl libhtml-formattext-withlinks-perl libgd-dev lynx-cur`
+:command:`apt-get install apache2 mysql-server libappconfig-perl libdate-calc-perl libtemplate-perl libmime-perl build-essential libdatetime-timezone-perl libdatetime-perl libemail-sender-perl libemail-mime-perl libemail-mime-modifier-perl libdbi-perl libdbd-mysql-perl libcgi-pm-perl libmath-random-isaac-perl libmath-random-isaac-xs-perl apache2-mpm-prefork libapache2-mod-perl2 libapache2-mod-perl2-dev libchart-perl libxml-perl libxml-twig-perl perlmagick libgd-graph-perl libtemplate-plugin-gd-perl libsoap-lite-perl libhtml-scrubber-perl libjson-rpc-perl libdaemon-generic-perl libtheschwartz-perl libtest-taint-perl libauthen-radius-perl libfile-slurp-perl libencode-detect-perl libmodule-build-perl libnet-ldap-perl libauthen-sasl-perl libtemplate-perl-doc libfile-mimeinfo-perl libhtml-formattext-withlinks-perl libgd-dev lynx-cur`
 
 This will take a little while. It's split into two commands so you can do
 the next steps (up to step 7) in another terminal while you wait for the
@@ -94,6 +94,15 @@ make it possible to search for short words and terms:
 
 Save and exit.
 
+Then, add a user to MySQL for Bugzilla to use:
+
+:command:`mysql -u root -p -e "GRANT ALL PRIVILEGES ON bugs.* TO bugs@localhost IDENTIFIED BY '$db_pass'"`
+
+Replace ``$db_pass`` with a strong password you have generated. Write it down.
+When you run the above command, it will prompt you for the MySQL root password
+that you configured when you installed Ubuntu. You should make ``$db_pass``
+different to that password.
+
 Restart MySQL:
 
 :command:`service mysql restart`
@@ -105,7 +114,7 @@ Configure Apache
 
 Paste in the following and save:
 
-.. code-block:: none
+.. code-block:: apache
 
  ServerName localhost
 
@@ -143,13 +152,9 @@ Edit :file:`localconfig`
 You will need to set the following values:
 
 * Line 29: set ``$webservergroup`` to ``www-data``
-* Line 60: set ``$db_user`` to ``root``
-* Line 67: set ``$db_pass`` to the MySQL root user password you created
-  when installing Ubuntu
+* Line 67: set ``$db_pass`` to the password for the ``bugs`` user you created
+  in MySQL a few steps ago
 
-.. todo:: Given this is a quick setup on a dedicated box, is it OK to use the
-         MySQL root user?
-    
 Check Setup (again)
 ===================
 
@@ -166,10 +171,9 @@ Test Server
 
 :command:`./testserver.pl http://localhost/`
 
-All the tests should pass. (Note: currently, the first one will give a
-warning instead. You can ignore that. :bug:`1040728`.)
+All the tests should pass.
 
-.. todo:: Also, Chart::Base gives deprecation warnings :-|
+.. todo:: Chart::Base gives confusing deprecation warnings :-|
           https://rt.cpan.org/Public/Bug/Display.html?id=79658 , unfixed for
           2 years. :bug:`1070117`.
 

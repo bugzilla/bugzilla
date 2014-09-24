@@ -226,9 +226,7 @@ attachment_base
 
     Note that if you have set the :param:`cookiedomain` parameter, you should set :param:`attachment_base` to use a domain that would not be matched by :param:`cookiedomain`.
 
-    For added security, you can insert ``%bugid%`` into the URL, which will be replaced with the ID of the current bug that the attachment is on, when you access an attachment. This will limit attachments to accessing only other attachments on the same bug. Remember, though, that all those possible domain names (such as 1234.your.domain.com) must point to this same Bugzilla instance.
-
-    .. todo:: So this requires wildcard DNS? We should explain a bit about what is needed here.
+    For added security, you can insert ``%bugid%`` into the URL, which will be replaced with the ID of the current bug that the attachment is on, when you access an attachment. This will limit attachments to accessing only other attachments on the same bug. Remember, though, that all those possible domain names (such as 1234.your.domain.com) must point to this same Bugzilla instance. To set this up you need to investigate wildcard DNS.
 
 allow_attachment_deletion
     If this option is on, administrators will be able to delete the contents

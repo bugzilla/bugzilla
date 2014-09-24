@@ -50,13 +50,23 @@ If you want to install a version of Bugzilla from the Bugzilla project, you
 will instead need:
 
 :command:`yum install httpd mysql-server mod_perl mod_perl-devel httpd-devel
-graphviz patchutils gcc perl-DateTime perl-Template-Toolkit perl-Email-Send
-perl-Email-MIME perl-GD perl-Chart perl-Template-GD perl-GDGraph
-perl-GDTextUtil perl-PatchReader perl-MIME-tools perl-LDAP perl-Authen-SASL
-perl-RadiusPerl perl-SOAP-Lite perl-JSON-RPC perl-JSON-XS perl-Test-Taint
-perl-HTML-Scrubber perl-Email-MIME-Attachment-Stripper perl-Email-Reply
-perl-TheSchwartz perl-Daemon-Generic perl-Math-Random-Secure perl-YAML
-perl-Class-Inspector`
+graphviz patchutils gcc  perl(Apache2::SizeLimit) perl(Authen::Radius)
+perl(Authen::SASL) perl(Cache::Memcached) perl(CGI) perl(Chart::Lines)
+perl(Daemon::Generic) perl(Date::Format) perl(DateTime)
+perl(DateTime::TimeZone) perl(DBI) perl(Digest::SHA) perl(Email::MIME)
+perl(Email::MIME::Attachment::Stripper) perl(Email::Reply) perl(Email::Sender)
+perl(Encode) perl(Encode::Detect) perl(File::MimeInfo::Magic)
+perl(File::Slurp) perl(GD) perl(GD::Graph) perl(GD::Text)
+perl(HTML::FormatText::WithLinks) perl(HTML::Parser) perl(HTML::Scrubber)
+perl(IO::Scalar) perl(JSON::RPC) perl(JSON::XS) perl(List::MoreUtils)
+perl(LWP::UserAgent) perl(Math::Random::ISAAC) perl(MIME::Parser)
+perl(mod_perl2) perl(Net::LDAP) perl(Net::SMTP::SSL) perl(PatchReader)
+perl(SOAP::Lite) perl(Template) perl(Template::Plugin::GD::Image)
+perl(Test::Taint) perl(TheSchwartz) perl(URI) perl(XMLRPC::Lite)
+perl(XML::Twig)`
+
+.. todo:: Converted to perl() form as per glob's request using info in
+   Requirements.pm, but I have no idea if that's exactly right...
 
 If you are running RHEL6, you will have to enable the "RHEL Server Optional"
 channel in RHN to get some of those packages. 
@@ -70,7 +80,7 @@ Ubuntu and Debian
 
 :command:`apt-get install apache2 mysql-server libappconfig-perl
 libdate-calc-perl libtemplate-perl libmime-perl build-essential
-libdatetime-timezone-perl libdatetime-perl libemail-send-perl
+libdatetime-timezone-perl libdatetime-perl libemail-sender-perl
 libemail-mime-perl libemail-mime-modifier-perl libdbi-perl libdbd-mysql-perl
 libcgi-pm-perl libmath-random-isaac-perl libmath-random-isaac-xs-perl
 apache2-mpm-prefork libapache2-mod-perl2 libapache2-mod-perl2-dev

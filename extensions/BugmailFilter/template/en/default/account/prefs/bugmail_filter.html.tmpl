@@ -109,6 +109,20 @@ var cpts = new Array();
   </td>
 </tr>
 <tr>
+  <th>Changer:</th>
+  <td>
+    [% INCLUDE global/userselect.html.tmpl
+       id => "changer"
+       name => "changer"
+       size => 32
+       emptyok => 1
+    %]
+  </td>
+  <td class="blurb">
+    the person who made the change (leave empty for "anyone")
+  </td>
+</tr>
+<tr>
   <th>Action:</th>
   <td>
     <select name="action" id="action">
@@ -141,6 +155,7 @@ var cpts = new Array();
       <th>Component</th>
       <th>Field</th>
       <th>Relationship</th>
+      <th>Changer</th>
       <th>Action</th>
     </tr>
     [% FOREACH filter = filters %]
@@ -153,6 +168,15 @@ var cpts = new Array();
         <td>[% filter.component ? filter.component.name : 'Any' FILTER html %]</td>
         <td>[% filter.field_description FILTER html %]</td>
         <td>[% filter.relationship ? filter.relationship_name : 'Any' FILTER html %]</td>
+        <td>
+          [% IF filter.changer %]
+            <span title="[% filter.changer.name FILTER html %]">
+              [% filter.changer.login FILTER html %]
+            </span>
+          [% ELSE %]
+            Anyone
+          [% END %]
+        </td>
         <td>[% filter.action ? 'Exclude' : 'Include' %]</td>
       </tr>
     [% END %]
@@ -235,6 +259,40 @@ var cpts = new Array();
     <td>Not Assignee</td>
   </tr>
   <tr>
+    <th>Changer:</th>
+    <td>(empty)</td>
+  </tr>
+  <tr>
+    <th>Action:</th>
+    <td>Exclude</td>
+  </tr>
+</table>
+
+<p>
+  To never receive email for any change made by webops-kanban@mozilla.bugs:
+</p>
+<table class="example_filter_table">
+  <tr>
+    <th>Field:</th>
+    <td>__Any__</td>
+  </tr>
+  <tr>
+    <th>Product:</th>
+    <td>__Any__</td>
+  </tr>
+  <tr>
+    <th>Component:</th>
+    <td>__Any__</td>
+  </tr>
+  <tr>
+    <th>Relationship:</th>
+    <td>__Any__</td>
+  </tr>
+  <tr>
+    <th>Changer:</th>
+    <td>webops-kanban@mozilla.bugs</td>
+  </tr>
+  <tr>
     <th>Action:</th>
     <td>Exclude</td>
   </tr>
@@ -264,6 +322,10 @@ var cpts = new Array();
     <td>__Any__</td>
   </tr>
   <tr>
+    <th>Changer:</th>
+    <td>(empty)</td>
+  </tr>
+  <tr>
     <th>Action:</th>
     <td>Exclude</td>
   </tr>
@@ -290,6 +352,10 @@ var cpts = new Array();
     <td>__Any__</td>
   </tr>
   <tr>
+    <th>Changer:</th>
+    <td>(empty)</td>
+  </tr>
+  <tr>
     <th>Action:</th>
     <td>Include</td>
   </tr>
@@ -314,6 +380,10 @@ var cpts = new Array();
   <tr>
     <th>Relationship:</th>
     <td>__Any__</td>
+  </tr>
+  <tr>
+    <th>Changer:</th>
+    <td>(empty)</td>
   </tr>
   <tr>
     <th>Action:</th>

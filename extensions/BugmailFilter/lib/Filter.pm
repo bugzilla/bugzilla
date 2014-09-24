@@ -30,6 +30,7 @@ use constant DB_COLUMNS => qw(
     component_id
     field_name
     relationship
+    changer_id
     action
 );
 
@@ -117,6 +118,17 @@ sub relationship {
     return $_[0]->{relationship};
 }
 
+sub changer_id {
+    return $_[0]->{changer_id};
+}
+
+sub changer {
+    my ($self) = @_;
+    return $self->{changer_id}
+        ? Bugzilla::User->new({ id => $self->{changer_id}, cache => 1 })
+        : undef;
+}
+
 sub relationship_name {
     my ($self) = @_;
     foreach my $rel (@{ FILTER_RELATIONSHIPS() }) {
@@ -187,6 +199,10 @@ sub matches {
     }
 
     if ($self->{relationship} && !$args->{rel_map}->[$self->{relationship}]) {
+        return 0;
+    }
+
+    if ($self->{changer_id} && $self->{changer_id} != $args->{changer_id}) {
         return 0;
     }
 

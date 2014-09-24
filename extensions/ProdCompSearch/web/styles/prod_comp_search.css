@@ -15,6 +15,13 @@
     width: 360px;
 }
 
-#prod_comp_no_components, #prod_comp_error {
+#prod_comp_search_form .yui3-aclist-content {
+    max-height: 500px;
+    overflow: auto;
+}
+
+#prod_comp_no_components,
+#prod_comp_error,
+#prod_comp_too_many_components {
     color: red;
 }

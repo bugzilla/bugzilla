@@ -6,6 +6,7 @@
   # defined by the Mozilla Public License, v. 2.0.
   #%]
 
+[% DEFAULT max_results = 100 %]
 <script type="text/javascript">
   [% IF script_name %]
     ProdCompSearch.script_name = '[% script_name FILTER js %]';
@@ -19,6 +20,7 @@
   [% IF new_tab %]
     ProdCompSearch.new_tab = true;
   [% END %]
+  ProdCompSearch.max_results = [% max_results FILTER js %];
 </script>
 
 <div id="prod_comp_search_form" class="yui3-skin-sam">
@@ -28,6 +30,8 @@
          class="bz_default_hidden" width="16" height="11">
     <span id="prod_comp_no_components" class="bz_default_hidden">
       No components found</span>
+    <span id="prod_comp_too_many_components" class="bz_default_hidden">
+      Result limited to [% max_results FILTER html %] components
     <span id="prod_comp_error" class="bz_default_hidden">
       An error occured</span>
   </div>

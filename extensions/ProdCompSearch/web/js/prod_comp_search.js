@@ -12,7 +12,8 @@ var ProdCompSearch = {
     script_choices: ['enter_bug.cgi', 'describecomponents.cgi'],
     format: null,
     cloned_bug_id: null,
-    new_tab: null
+    new_tab: null,
+    max_results: 100
 };
 
 YUI({
@@ -21,8 +22,8 @@ YUI({
 }).use("node", "json-stringify", "autocomplete", "escape",
        "datasource-io", "datasource-jsonschema", function(Y) {
     Y.on("domready", function() {
-        var counter = 0,
-            dataSource = null,
+        var counter      = 0,
+            dataSource   = null,
             autoComplete = null;
 
         var resultListFormat = function(query, results) {
@@ -39,7 +40,7 @@ YUI({
                 version: "1.1",
                 method : "PCS.prod_comp_search",
                 id : counter,
-                params : { search: query }
+                params : { search: query, limit: ProdCompSearch.max_results }
             };
             return Y.JSON.stringify(json_object);
         };
@@ -79,13 +80,14 @@ YUI({
             queryDelay: 0.05,
             resultFormatter: resultListFormat,
             suppressInputUpdate: true,
-            maxResults: 25,
+            maxResults: ProdCompSearch.max_results,
             scrollIntoView: true,
             requestTemplate: requestTemplate,
             on: {
                 query: function(e) {
                     Y.one("#prod_comp_throbber").removeClass('bz_default_hidden');
                     Y.one("#prod_comp_no_components").addClass('bz_default_hidden');
+                    Y.one("#prod_comp_too_many_components").addClass('bz_default_hidden');
                     Y.one("#prod_comp_error").addClass('bz_default_hidden');
                 },
                 results: function(e) {
@@ -93,6 +95,9 @@ YUI({
                     input.ac.set('activateFirstItem', e.results.length == 1);
                     if (e.results.length == 0) {
                         Y.one("#prod_comp_no_components").removeClass('bz_default_hidden');
+                    }
+                    else if (e.results.length + 1 > ProdCompSearch.max_results) {
+                        Y.one("#prod_comp_too_many_components").removeClass('bz_default_hidden');
                     }
                 },
                 select: function(e) {

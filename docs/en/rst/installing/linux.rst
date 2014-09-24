@@ -17,6 +17,8 @@ the best instructions for you.
 
 .. todo:: Which versions of RHEL have packages new enough for us to support them?
 
+.. _linux-install-packages:
+
 Install Packages
 ================
 
@@ -35,12 +37,13 @@ Fedora and Red Hat
 ------------------
 
 The following command will install Red Hat's packaged version of Bugzilla:
+
 :command:`yum install bugzilla httpd mysql-server`
 
 However, if you go this route, you need to read :bug:`415605`, which details
-some problems with the Bugzilla rpm. Then, you can skip to
-:ref:`configuring your database <config-database>`. It may be useful to know
-that Fedora stores the Bugzilla files in :file:`/usr/share/bugzilla`, so
+some problems with the Email::Send package. Then, you can skip to
+:ref:`configuring your database <linux-config-database>`. It may be useful to
+know that Fedora stores the Bugzilla files in :file:`/usr/share/bugzilla`, so
 that's where you'll run :file:`checksetup.pl`.
 
 If you want to install a version of Bugzilla from the Bugzilla project, you
@@ -57,6 +60,8 @@ perl-Class-Inspector`
 
 If you are running RHEL6, you will have to enable the "RHEL Server Optional"
 channel in RHN to get some of those packages. 
+
+.. todo:: Add Sqlite RPMs
 
 Ubuntu and Debian
 -----------------
@@ -75,7 +80,9 @@ libjson-rpc-perl libdaemon-generic-perl libtheschwartz-perl
 libtest-taint-perl libauthen-radius-perl libfile-slurp-perl
 libencode-detect-perl libmodule-build-perl libnet-ldap-perl
 libauthen-sasl-perl libtemplate-perl-doc libfile-mimeinfo-perl
-libhtml-formattext-withlinks-perl libgd-dev lynx-cur`
+libhtml-formattext-withlinks-perl libgd-dev lynx-cur graphviz`
+
+.. todo:: Add Sqlite debs
 
 Gentoo
 ------
@@ -85,7 +92,10 @@ Gentoo
 will install Bugzilla and all its dependencies. If you don't have the vhosts
 USE flag enabled, Bugzilla will end up in :file:`/var/www/localhost/bugzilla`.
 
-Then, you can skip to :ref:`configuring your database <config-database>`.
+Then, you can skip to :ref:`configuring your database
+<linux-config-database>`.
+
+.. _linux-install-perl:
 
 Perl
 ====
@@ -97,7 +107,7 @@ Test which version of Perl you have installed with:
 
 Bugzilla requires at least Perl |min-perl-ver|.
 
-.. _install-bzfiles:
+.. _linux-install-bzfiles:
 
 Bugzilla
 ========
@@ -129,7 +139,7 @@ installation.
 .. todo:: Why is this necessary? What does the webserver write there before
           checksetup.pl is run?
 
-.. _install-perlmodules:
+.. _linux-install-perl-modules:
 
 Perl Modules
 ============
@@ -170,20 +180,20 @@ Or, you can pass an individual module name:
 
    .. todo:: Give examples for Debian/Ubuntu and RedHat?
 
-.. _config-webserver:
+.. _linux-config-webserver:
 
 Web Server
 ==========
 
 Any web server that is capable of running CGI scripts can be made to work.
-We have specific instructions for the following:
+We have specific configuration instructions for the following:
 
 .. toctree::
    :maxdepth: 1
 
    apache
 
-.. _config-database:
+.. _linux-config-database:
 
 Database Engine
 ===============
@@ -201,69 +211,9 @@ setup. Configure your server according to the instructions below.
    oracle
    sqlite
 
-.. _localconfig:
+.. |checksetupcommand| replace:: :command:`./checksetup.pl`
+.. |testservercommand| replace:: :command:`./testserver.pl http://<your-bugzilla-server>/`
 
-localconfig
-===========
+.. include:: installing-end.inc.rst
 
-You should now run :file:`checksetup.pl` again, this time
-without the ``--check-modules`` switch.
-
-:command:`./checksetup.pl`
-
-:file:`checksetup.pl` will write out a file called :file:`localconfig`.
-This file contains the default settings for a number of
-Bugzilla parameters, the most important of which are the group your web
-server runs as, and information on how to connect to your database.
-
-Load this file in your editor. You will need to check/change ``$db_driver``
-and ``$db_pass``, which are respectively the type of the database you are
-using and the password for the ``bugs`` database user you have created.
-``$db_driver`` can be either ``mysql``, ``Pg`` (PostgreSQL), ``Oracle`` or
-``Sqlite``. All values are case-sensitive.
-
-Set the value of ``$webservergroup`` to the group your web server runs as.
-The default is ``apache``, which is correct for Red Hat and Fedora. On Debian
-and Ubuntu, the correct value is ``www-data``.
-
-The other options in the :file:`localconfig` file are documented by their
-accompanying comments. If you have a non-standard database setup, you may
-need to change one or more of the other ``$db_*`` parameters.
-
-.. note:: If you are using Oracle, ``$db_name`` should be set to
-   the SID name of your database (e.g. ``XE`` if you are using Oracle XE).
-
-checksetup.pl
-=============
-
-Next, run :file:`checksetup.pl` an additional time. It reconfirms
-that all the modules are present, and notices the altered
-localconfig file, which it assumes you have edited to your
-satisfaction. It compiles the UI templates,
-connects to the database using the ``bugs``
-user you created and the password you defined, and creates the
-``bugs`` database and the tables therein.
-
-After that, it asks for details of an administrator account. Bugzilla
-can have multiple administrators - you can create more later - but
-it needs one to start off with.
-Enter the email address of an administrator, his or her full name,
-and a suitable Bugzilla password.
-
-:file:`checksetup.pl` will then finish. You may rerun
-:file:`checksetup.pl` at any time if you wish.
-
-.. _install-config-bugzilla:
-
-Bugzilla
-========
-
-Your Bugzilla should now be working. Check by running:
-
-:command:`testserver.pl http://<your-bugzilla-server>/`
-
-If that passes, access ``http://<your-bugzilla-server>/`` in your browser -
-you should see the Bugzilla front page. Of course, if you installed Bugzilla
-in a subdirectory, make sure that's in the URL.
-
-Next, do the :ref:`post-install-config`.
+Next, do the :ref:`essential-post-install-config`.

@@ -108,6 +108,7 @@ creation of this documentation:
 
 Andrew Pearson,
 Ben FrantzDale,
+Byron Jones,
 Dave Lawrence,
 Dave Miller,
 Dawn Endico,

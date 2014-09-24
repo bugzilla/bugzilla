@@ -25,6 +25,7 @@ case, you may want to read the :ref:`Quick Start instructions <quick-start>`.
    linux
    windows
    mac-os-x
-   post-install-config
+   essential-post-install-config
+   optional-post-install-config
    migrating
    moving

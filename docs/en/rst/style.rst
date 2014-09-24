@@ -23,14 +23,15 @@ that one immediately-linked page should be enough to get started. Later, the
 `inline markup section <http://sphinx-doc.org/latest/markup/inline.html>`_
 is worth a read.
 
-Bugzilla's particular documentation conventions are as follows.
+Bugzilla's particular documentation conventions are as follows:
 
 Block Directives
 ################
 
-Every heading should be preceded by an anchor, with a globally-unique name
-with no spaces. Then we demonstrate the available heading levels we haven't
-used yet:
+Chapter headings use the double-equals, page title headings the #, and then
+the three other levels are headings within a page. Every heading should be
+preceded by an anchor, with a globally-unique name with no spaces. Now, we
+demonstrate the available heading levels we haven't used yet:
 
 .. _uniqueanchorname:
 
@@ -63,6 +64,8 @@ Other block types:
 .. warning:: This is a warning of a potential serious problem you should be
    aware of.
 
+.. todo:: This is some documentation-related task that still needs doing.
+   
 Use both of the above block types sparingly. Consider putting the information
 in the main text, omitting it, or (if long) placing it in a subsidiary file.
 

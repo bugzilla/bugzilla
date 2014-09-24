@@ -3,120 +3,143 @@
 Windows
 #######
 
-Microsoft Windows
-=================
+Making Bugzilla work on Windows is more difficult than making it work on Unix,
+fewer Bugzilla developers use it and so it's less well supported. However, if
+you are still determined to do it, here's how.
 
-Making Bugzilla work on Windows is more difficult than making it
-work on Unix.  For that reason, we still recommend doing so on a Unix
-based system such as GNU/Linux.  That said, if you do want to get
-Bugzilla running on Windows, you will need to make the following
-adjustments. A detailed step-by-step
-`installation guide for Windows <https://wiki.mozilla.org/Bugzilla:Win32Install>`_ is also available
-if you need more help with your installation.
+.. note:: ``mod_perl`` doesn't work very well on Windows, so you probably
+   don't want to use Windows for a large site.
 
-:file:`checksetup.pl` will print out a list of the
-required and optional Perl modules, together with the versions
-(if any) installed on your machine.
-The list of required modules is reasonably long; however, you
-may already have several of them installed.
+.. todo:: Is this still true?
 
-The preferred way to install missing Perl modules is to use the package
-manager provided by your operating system (e.g ``rpm``, ``apt-get`` or
-``yum`` on Linux distros, or ``ppm`` on Windows
-if using ActivePerl, see :ref:`win32-perl-modules`).
-If some Perl modules are still missing or are too old, then we recommend
-using the :file:`install-module.pl` script (doesn't work
-with ActivePerl on Windows). For instance, on Unix,
-you invoke :file:`install-module.pl` as follows:
-Add a User to Oracle
+.. windows-install-perl:
 
+ActiveState Perl
+================
 
+ActiveState make a popular distribution of Perl for Windows.
 
-.. _win32-perl:
+Download the ActiveState Perl 5.12.4 or higher MSI installer from the
+`ActiveState website <http://www.activestate.com/activeperl/downloads>`_.
 
-Win32 Perl
-----------
+ActiveState Perl uses a standard Windows Installer. Install, sticking with
+the defaults, which will install Perl into :file:`C:\\Perl`. It is not
+recommended to install Perl into a directory containing a space, such as
+:file:`C:\\Program Files`.
 
-Perl for Windows can be obtained from
-`ActiveState <http://www.activestate.com/>`_.
-You should be able to find a compiled binary at `<http://aspn.activestate.com/ASPN/Downloads/ActivePerl/>`_.
-The following instructions assume that you are using version
-|min-perl-ver| of ActiveState.
+Once the install has completed, log out and log in again to pick up the
+changes to the ``PATH`` environment variable.
 
 .. note:: These instructions are for 32-bit versions of Windows. If you are
    using a 64-bit version of Windows, you will need to install 32-bit
    Perl in order to install the 32-bit modules as described below.
 
-.. _win32-perl-modules:
+.. todo:: Is this still true?
 
-Perl Modules on Win32
----------------------
+.. _windows-install-bzfiles:
 
-Bugzilla on Windows requires the same perl modules found in
-:ref:`install-perlmodules`. The main difference is that
-windows uses PPM instead
-of CPAN. ActiveState provides a GUI to manage Perl modules. We highly
-recommend that you use it. If you prefer to use ppm from the
-command-line, type:
+Bugzilla
+========
 
-::
+The best way to get Bugzilla is to check it out from git. Download and install
+git from the `git website <http://git-scm.com/download>`_, and then run:
 
-    C:\perl> ppm install <module name>
+:command:`git clone https://git.mozilla.org/bugzilla/bugzilla C:\\bugzilla`
 
-If you are using Perl |min-perl-ver|, the best source for the Windows PPM modules
-needed for Bugzilla is probably the theory58S website, which you can add
-to your list of repositories as follows:
+The rest of this documentation assumes you have installed Bugzilla into
+:file:`C:\\bugzilla`. Adjust paths appropriately if not.
 
-::
+If it's not possible to use git (e.g. because your Bugzilla machine has no
+internet access), you can
+`download a tarball of Bugzilla <http://www.bugzilla.org/download/>`_ and
+copy it across. Bugzilla comes as a 'tarball' (:file:`.tar.gz` extension),
+which any competent Windows archiving tool should be able to open.
 
-    ppm repo add theory58S http://cpan.uwinnipeg.ca/PPMPackages/10xx/
+.. windows-install-perl-modules:
 
-If you are using Perl 5.12 or newer, you no longer need to add
-this repository. All modules you need are already available from
-the ActiveState repository.
+Perl Modules
+============
 
-.. note:: The PPM repository stores modules in 'packages' that may have
-   a slightly different name than the module.  If retrieving these
-   modules from there, you will need to pay attention to the information
-   provided when you run :command:`checksetup.pl` as it will
-   tell you what package you'll need to install.
+Bugzilla requires a number of perl modules to be installed. They are
+available in the ActiveState repository, and are installed with the
+:file:`ppm` tool. You can either use it on the command line, as below,
+or just type :command:`ppm`, and you will get a GUI.
 
-.. note:: If you are behind a corporate firewall, you will need to let the
-   ActiveState PPM utility know how to get through it to access
-   the repositories by setting the HTTP_proxy system environmental
-   variable. For more information on setting that variable, see
-   the ActiveState documentation.
+If you use a proxy server or a firewall you may have trouble running PPM.
+This is covered in the
+`ActivePerl FAQ <http://aspn.activestate.com/ASPN/docs/ActivePerl/faq/ActivePerl-faq2.html#ppm_and_proxies>`_.
 
-.. _win32-http:
+Install the following modules with:
 
-Serving the web pages
----------------------
+:command:`ppm install <modulename>`
 
-As is the case on Unix based systems, any web server should
-be able to handle Bugzilla; however, the Bugzilla Team still
-recommends Apache whenever asked.
+* AppConfig
+* TimeDate
+* DBI
+* DBD-mysql
+* Template-Toolkit
+* MailTools
+* GD
+* Chart
+* GDGraph
+* PatchReader
+* Net-LDAP-Express (required only if you want to do LDAP authentication)
 
-.. note:: The web server looks at :file:`/usr/bin/perl` to
-   call Perl. If you are using Apache on windows, you can set the
-   `ScriptInterpreterSource <http://httpd.apache.org/docs-2.0/mod/core.html#scriptinterpretersource>`_
-   directive in your Apache config file to make it look at the
-   right place: insert the line
+.. todo:: Is this list current and complete?
 
-   ::
-       ScriptInterpreterSource Registry-Strict
+.. note:: The :file:`install-module.pl` script doesn't work with ActivePerl
+   on Windows. 
 
-   into your :file:`httpd.conf` file, and create the key
+.. todo:: Is this still true?
 
-   ::
-       HKEY_CLASSES_ROOT\\.cgi\\Shell\\ExecCGI\\Command
+.. _windows-config-webserver:
 
-   with ``C:\\Perl\\bin\\perl.exe -T`` as value (adapt to your
-   path if needed) in the registry. When this is done, restart Apache.
+Web Server
+==========
 
-.. _win32-email:
+Any web server that is capable of running CGI scripts can be made to work.
+We have specific instructions for the following:
 
-Sending Email
--------------
+.. toctree::
+   :maxdepth: 1
 
-To enable Bugzilla to send email on Windows, the server running the
-Bugzilla code must be able to connect to, or act as, an SMTP server.
+   apache-windows
+   iis
+
+.. windows-config-database:
+
+Database Engine
+===============
+
+Bugzilla supports MySQL, PostgreSQL, Oracle and SQLite as database servers.
+You only require one of these systems to make use of Bugzilla. MySQL is
+most commonly used, and is the only one for which Windows instructions have
+been tested. SQLite is good for trial installations as it requires no
+setup. Configure your server according to the instructions below.
+
+.. toctree::
+   :maxdepth: 1
+
+   mysql
+   postgresql
+   oracle
+   sqlite
+
+.. |checksetupcommand| replace:: :command:`checksetup.pl`
+.. |testservercommand| replace:: :command:`testserver.pl http://<your-bugzilla-server>/`
+
+.. include:: installing-end.inc.rst
+
+If you don't see the main Bugzilla page, but instead see "It works!!!",
+then somehow your Apache has not picked up your modifications to
+:file:`httpd.conf`. If you are on Windows 7 or later, this could be due to a
+new feature called "VirtualStore". `This blog post
+<http://blog.netscraps.com/bugs/apache-httpd-conf-changes-ignored-in-windows-7.html>`_
+may help to solve the problem.
+
+If you get an "Internal Error..." message, it could be that
+``ScriptInterpreterSource Registry-Strict`` is not set in your
+:ref:`Apache configuration <apache-windows>`. Check again if it is set
+properly.
+
+Next, do the :ref:`essential-post-install-config`.

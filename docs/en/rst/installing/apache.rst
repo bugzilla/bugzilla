@@ -1,4 +1,6 @@
-.. _apache:
+.. This document is shared among all non-Windows OSes.
+
+.. _apache-linux:
 
 Apache
 ######
@@ -8,11 +10,13 @@ default) and mod_perl. mod_perl is faster but takes more resources. You
 should probably only consider mod_perl if your Bugzilla is going to be heavily
 used.
 
-These instructions require editing the Apache configuration file.
-In Fedora and Red Hat Linux, this file is found as
-:file:`/etc/httpd/conf/httpd.conf`.
-In Ubuntu and Debian, it is :file:`/etc/apache2/apache2.conf`. Alternatively,
-on those latter two distributions, you can instead put the below code into a
+These instructions require editing the Apache configuration file, which is:
+
+* Fedora/Red Hat: :file:`/etc/httpd/conf/httpd.conf`
+* Debian/Ubuntu: :file:`/etc/apache2/apache2.conf`
+* Mac OS X: :file:`/etc/apache2/httpd.conf`
+
+Alternatively, on Debian or Ubuntu, you can instead put the below code into a
 separate file in the directory :file:`/etc/apache2/sites-enabled/`.
 
 Securing Apache
@@ -53,24 +57,18 @@ mod_cgi, do the following:
 
 .. code-block:: apache
 
-       <Directory /var/www/html/bugzilla>
-         AddHandler cgi-script .cgi
-         Options +ExecCGI +FollowSymLinks
-         DirectoryIndex index.cgi index.html
-         AllowOverride Limit FileInfo Indexes Options
-       </Directory>
+   <Directory /var/www/html/bugzilla>
+     AddHandler cgi-script .cgi
+     Options +ExecCGI +FollowSymLinks
+     DirectoryIndex index.cgi index.html
+     AllowOverride Limit FileInfo Indexes Options
+   </Directory>
 
-These instructions allow Apache to run .cgi files found
-within the Bugzilla directory; instructs the server to look
-for a file called :file:`index.cgi` or, if not
-found, :file:`index.html` if someone
-only types the directory name into the browser; and allows
-Bugzilla's :file:`.htaccess` files to override
+These instructions allow Apache to run .cgi files found within the Bugzilla
+directory; instructs the server to look for a file called :file:`index.cgi`
+or, if not found, :file:`index.html` if someone only types the directory name
+into the browser; and allows Bugzilla's :file:`.htaccess` files to override
 some global permissions.
-
-.. note:: On Windows, you may have to also add the
-   ``ScriptInterpreterSource Registry-Strict``
-   line; see :ref:`Windows specific notes <win32-http>`.
 
 .. _apache-mod_perl:
 
@@ -79,6 +77,8 @@ Apache with mod_perl
 
 Some configuration is required to make Bugzilla work with Apache
 and mod_perl.
+
+.. note:: It is not known whether anyone has even tried mod_perl on Mac OS X.
 
 #. Edit the Apache configuration file (see above).
 

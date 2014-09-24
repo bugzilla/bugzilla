@@ -100,6 +100,29 @@ pygments_style = 'sphinx'
 # A list of ignored prefixes for module index sorting.
 #modindex_common_prefix = []
 
+rst_prolog = """
+.. role:: param
+    :class: param
+
+.. role:: paramval
+    :class: paramval
+
+.. role:: group
+    :class: group
+
+.. role:: field
+    :class: field
+
+.. |min-perl-ver| replace:: 5.10.1
+"""
+
+rst_epilog = """
+
+----------
+
+This documentation undoubtedly has bugs; if you find some, please file
+them `here <https://bugzilla.mozilla.org/enter_bug.cgi?product=Bugzilla&component=Documentation>`_.
+"""
 
 # -- Options for HTML output ---------------------------------------------------
 
@@ -182,22 +205,6 @@ html_show_copyright = False
 
 # Output file base name for HTML help builder.
 htmlhelp_basename = 'Bugzilladoc'
-
-rst_prolog = """
-.. role:: param
-    :class: param
-
-.. role:: paramval
-    :class: paramval
-
-.. role:: group
-    :class: group
-
-.. role:: field
-    :class: field
-
-.. |min-perl-ver| replace:: 5.10.1
-"""
 
 # -- Options for LaTeX output --------------------------------------------------
 

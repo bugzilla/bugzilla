@@ -3,48 +3,52 @@
 Mac OS X
 ########
 
-`<https://wiki.mozilla.org/Bugzilla:Mac_OS_X_installation>`_ is what we have
-right now...
+.. _macosx-install-packages:
 
-*Mac OS X*
-==========
+Install Packages
+================
 
-Making Bugzilla work on Mac OS X requires the following
-adjustments.
+OS X 10.7 provides Perl 5.12 and Apache 2.2. Install the following additional
+packages:
 
-.. _macosx-sendmail:
+* git: Download an installer from
+  `the git website <http://www.git-scm.com/downloads>`_. 
+* MySQL: Download an installer from
+  `the MySQL website <http://dev.mysql.com/downloads/mysql/>`_.
 
-Sendmail
---------
+.. _macosx-install-bzfiles:
 
-In Mac OS X 10.3 and later,
-`Postfix <http://www.postfix.org/>`_
-is used as the built-in email server.  Postfix provides an executable
-that mimics sendmail enough to fool Bugzilla, as long as Bugzilla can
-find it. Bugzilla is able to find the fake sendmail executable without
-any assistance.
+Bugzilla
+========
+
+The best way to get Bugzilla is to check it out from git:
+
+:command:`git clone https://git.mozilla.org/bugzilla/bugzilla`
+
+Run the above command in your home directory. This will place Bugzilla in
+the directory :file:`$HOME/bugzilla`.
+
+If that's not possible, you can
+`download a tarball of Bugzilla <http://www.bugzilla.org/download/>`_.
 
 .. _macosx-libraries:
 
-Libraries & Perl Modules on Mac OS X
-------------------------------------
+Additional System Libraries
+===========================
 
-Apple does not include the GD library with Mac OS X. Bugzilla
-needs this for bug graphs.
+Apple does not include the GD library with Mac OS X. Bugzilla needs this if
+you want to display bug graphs.
 
-You can use MacPorts (`<http://www.macports.org/>`_)
-or Fink (`<http://sourceforge.net/projects/fink/>`_), both
-of which are similar in nature to the CPAN installer, but install
-common unix programs.
+You can use `MacPorts <http://www.macports.org/>`_ or
+`Fink <http://sourceforge.net/projects/fink/>`_, both of which install common
+Unix programs on Mac OS X.
 
-Follow the instructions for setting up MacPorts or Fink.
-Once you have one installed, you'll want to use it to install the
-:file:`gd2` package.
+Follow the instructions for setting up MacPorts or Fink. Once you have one
+installed, use it to install the :file:`gd2` package.
 
 Fink will prompt you for a number of dependencies, type 'y' and hit
 enter to install all of the dependencies and then watch it work. You will
-then be able to use CPAN to
-install the GD Perl module.
+then be able to use CPAN to install the GD Perl module.
 
 .. note:: To prevent creating conflicts with the software that Apple
    installs by default, Fink creates its own directory tree at :file:`/sw`
@@ -55,26 +59,73 @@ install the GD Perl module.
    Perl module config script asks where your :file:`libgd`
    is, be sure to tell it :file:`/sw/lib`.
 
-Also available via MacPorts and Fink is
-:file:`expat`. After installing the expat package, you
-will be able to install XML::Parser using CPAN. If you use fink, there
-is one caveat. Unlike recent versions of
-the GD module, XML::Parser doesn't prompt for the location of the
-required libraries. When using CPAN, you will need to use the following
-command sequence:
+.. _macosx-install-perl-modules:
 
-::
+Perl Modules
+============
 
-    # perl -MCPAN -e'look XML::Parser'
-    # perl Makefile.PL EXPATLIBPATH=/sw/lib EXPATINCPATH=/sw/include
-    # make; make test; make install
-    # exit
+Bugzilla requires a number of Perl modules. On Mac OS X, the easiest thing to
+do is to install local copies (rather than system-wide copies) of any ones
+that you don't already have. However, if you do want to install them
+system-wide, run the below commands as root with the :command:`--global`
+option.
 
-The :command:`look` command will download the module and spawn
-a new shell with the extracted files as the current working directory.
+To check whether you have all the required modules and what is still missing,
+run:
 
-You should watch the output from these :command:`make` commands,
-especially ``make test`` as errors may prevent
-XML::Parser from functioning correctly with Bugzilla.
+:command:`perl checksetup.pl --check-modules`
 
-The :command:`exit` command will return you to your original shell.
+You can run this command as many times as necessary.
+
+Install all missing modules locally like this:
+
+:command:`perl install-module.pl --all`
+
+.. _macosx-config-webserver:
+
+Web Server
+==========
+
+Any web server that is capable of running CGI scripts can be made to work.
+We have specific configuration instructions for the following:
+
+.. toctree::
+   :maxdepth: 1
+
+   apache
+
+You'll need to create a symbolic link so the webserver can see Bugzilla:
+
+:command:`cd /Library/WebServer/Documents`
+
+:command:`sudo ln -s $HOME/bugzilla bugzilla`
+
+In :guilabel:`System Preferences` --> :guilabel:`Sharing`, enable the
+:guilabel:`Web Sharing` checkbox to start Apache. 
+
+.. _macosx-config-database:
+
+Database Engine
+===============
+
+Bugzilla supports MySQL, PostgreSQL, Oracle and SQLite as database servers.
+You only require one of these systems to make use of Bugzilla. MySQL is
+most commonly used on Mac OS X. Configure your server according to the
+instructions below.
+
+.. todo:: Has anyone tried anything other than MySQL on Mac OS X?
+
+.. toctree::
+   :maxdepth: 1
+
+   mysql
+   postgresql
+   oracle
+   sqlite
+
+.. |checksetupcommand| replace:: :command:`perl checksetup.pl`
+.. |testservercommand| replace:: :command:`perl testserver.pl http://<your-bugzilla-server>/`
+
+.. include:: installing-end.inc.rst
+
+Next, do the :ref:`essential-post-install-config`.

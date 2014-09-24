@@ -3,25 +3,37 @@
 MySQL
 #####
 
-Test which version of MySQL you have installed with:
+You need MySQL version 5.0.15 or higher.
+
+It's possible to test which version of MySQL you have installed with:
 
 :command:`mysql -V`
 
-You need MySQL version 5.0.15 or higher.
+Installing
+==========
 
-If you install MySQL manually rather than from a package, make sure the
-server is started when the machine boots.
+Windows
+-------
 
-.. _mysql-secure:
+Download the MySQL 32-bit or 64-bit MSI installer from the
+`MySQL website <http://www.mysql.com/downloads/mysql/>`_ (~28 MB).
 
-Secure MySQL
-============
+MySQL has a standard Windows installer. It's ok to select a Typical MySQL
+install (the default). The rest of this documentation assumes assume you
+have installed MySQL into :file:`C:\\mysql`. Adjust paths appropriately if not.
 
-On non-Windows platforms, run
+Linux/Mac OS X
+--------------
+
+The package install instructions given previously should have installed MySQL
+on your machine, if it didn't come with it already. Run:
 
 :command:`mysql_secure_installation`
 
 and follow its advice.
+
+If you did install MySQL manually rather than from a package, make sure the
+server is started when the machine boots.
 
 .. _mysql-add-user:
 
@@ -48,14 +60,21 @@ to connect from the local machine, ``localhost``. Modify the command to
 reflect your setup if you will be connecting from another
 machine or as a different user.
 
+Change Configuration
+====================
+
+To change MySQL's configuration, you need to edit your MySQL
+configuration file, which is:
+
+* Red Hat/Fedora: :file:`/etc/my.cnf`
+* Debian/Ubuntu: :file:`/etc/mysql/my.cnf`
+* Windows: :file:`C:\\mysql\\bin\\my.ini`
+* Mac OS X: :file:`/etc/my/cnf`
+
 .. _mysql-max-allowed-packet:
 
 Allow Large Attachments and Many Comments
-=========================================
-
-To change MySQL's configuration, you need to edit your MySQL
-configuration file, which is usually :file:`/etc/my.cnf`
-on Linux.
+-----------------------------------------
 
 By default on some systems, MySQL will only allow you to insert things
 into the database that are smaller than 1MB.
@@ -80,7 +99,7 @@ configuration in the ``[mysqld]`` section, so that the number is at least
 .. _mysql-small-words:
 
 Allow Small Words in Full-Text Indexes
-======================================
+--------------------------------------
 
 By default, words must be at least four characters in length
 in order to be indexed by MySQL's full-text indexes. This causes

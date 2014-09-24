@@ -4,7 +4,7 @@ Bugzilla Documentation
 
 .. toctree::
    :maxdepth: 2
-   :numbered:
+   :numbered: 4
 
    about/index
    installing/index

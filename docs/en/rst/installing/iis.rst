@@ -1,68 +1,115 @@
-:orphan:
-
 .. _iis:
 
 Microsoft IIS
 #############
 
-If you are running Bugzilla on Windows and choose to use
-Microsoft's *Internet Information Services*
-or *Personal Web Server* you will need
-to perform a number of other configuration steps as explained below.
-You may also want to refer to the following Microsoft Knowledge
-Base articles:
-`245225 - HOW TO: Configure and Test a PERL Script with IIS 4.0,
-5.0, and 5.1 <http://support.microsoft.com/default.aspx?scid=kb;en-us;245225>`_
-(for *Internet Information Services*) and
-`231998 - HOW TO: FP2000: How to Use Perl with Microsoft Personal Web
-Server on Windows 95/98 <http://support.microsoft.com/default.aspx?scid=kb;en-us;231998>`_
-(for *Personal Web Server*).
+Bugzilla works with IIS as a normal CGI application. These instructions assume
+that you are using Windows 7 Ultimate x64. Procedures for other versions are
+probably similar.
 
-You will need to create a virtual directory for the Bugzilla
-install.  Put the Bugzilla files in a directory that is named
-something *other* than what you want your
-end-users accessing.  That is, if you want your users to access
-your Bugzilla installation through
-``http://<yourdomainname>/Bugzilla``, then do
-*not* put your Bugzilla files in a directory
-named ``Bugzilla``.  Instead, place them in a different
-location, and then use the IIS Administration tool to create a
-Virtual Directory named "Bugzilla" that acts as an alias for the
-actual location of the files.  When creating that virtual directory,
-make sure you add the ``Execute (such as ISAPI applications or
-CGI)`` access permission.
+Begin by starting Internet Information Services (IIS) Manager.
+:guilabel:`Start` --> :guilabel:`Administrators Tools` -->
+:guilabel:`Internet Information Services (IIS) Manager`. Or run the command:
 
-You will also need to tell IIS how to handle Bugzilla's
-.cgi files. Using the IIS Administration tool again, open up
-the properties for the new virtual directory and select the
-Configuration option to access the Script Mappings. Create an
-entry mapping .cgi to:
+:command:`inetmgr`
 
-::
+Create a New Application
+========================
 
-    <full path to perl.exe >\perl.exe -x<full path to Bugzilla> -wT "%s" %s
+Expand your :guilabel:`Server` until the :guilabel:`Default Web Site` shows
+its children.
 
-For example:
+Right-click :guilabel:`Default Web Site` and select
+:guilabel:`Add Application` from the menu.
 
-::
+Unde :guilabel:`Alias`, enter the alias for the website. This is the path
+below the domain where you want Bugzilla to appear.
 
-    c:\perl\bin\perl.exe -xc:\bugzilla -wT "%s" %s
+Under :guilabel:`Physical Path`, enter the path to Bugzilla,
+:file:`C:\\Bugzilla`.
 
-.. note:: The ActiveState install may have already created an entry for
-   .pl files that is limited to ``GET,HEAD,POST``. If
-   so, this mapping should be *removed* as
-   Bugzilla's .pl files are not designed to be run via a web server.
+When finished, click :guilabel:`OK`.
 
-IIS will also need to know that the index.cgi should be treated
-as a default document.  On the Documents tab page of the virtual
-directory properties, you need to add index.cgi as a default
-document type.  If you  wish, you may remove the other default
-document types for this particular virtual directory, since Bugzilla
-doesn't use any of them.
+Configure the Default Document
+==============================
 
-Also, and this can't be stressed enough, make sure that files
-such as :file:`localconfig` and your
-:file:`data` directory are
-secured.
+Click on the Application that you just created. Double-click on
+:guilabel:`Default Document`, and click :guilabel:`Add` underneath the
+Actions menu.
 
-.. todo:: See also https://wiki.mozilla.org/Installing_under_IIS_7.5
+Under :guilabel:`Name`, enter ``index.cgi``.
+
+All other default documents can be removed for this application.
+
+.. warning:: Do not delete the default document from the
+   :guilabel:`Default Website`.
+
+Add Handler Mappings
+====================
+
+Ensure that you are at the Default Website. Under :guilabel:`IIS`,
+double-click :guilabel:`Handler Mappings`. Under :guilabel:`Actions`, click
+:guilabel:`Add Script Map`. You need to do this twice.
+
+For the first one, set the following values (replacing paths if necessary):
+
+* :guilabel:`Request Path`: ``*.pl``
+* :guilabel:`Executable`: ``C:\Perl\bin\perl.exe "%s% %s%``
+* :guilabel:`Name`: ``Perl Script Map``
+
+At the prompt select :guilabel:`No`.
+
+.. note:: The ActiveState Perl installer may have already created an entry for
+   .pl files that is limited to ``GET,HEAD,POST``. If so, this mapping should
+   be removed, as Bugzilla's .pl files are not designed to be run via a web
+   server.
+
+.. todo:: My `source <https://wiki.mozilla.org/Installing_under_IIS_7.5>`_ says
+   to add a mapping for .pl, but that's sort of contradicted by the note above
+   from a different source. Which is right?
+
+For the second one, set the following values (replacing paths if necessary):
+
+* :guilabel:`Request Path`: ``*.cgi``
+* :guilabel:`Executable`: ``C:\Perl\bin\perl.exe "%s% %s%``
+* :guilabel:`Name`: ``CGI Script Map``
+
+At the prompt select :guilabel:`No`.
+
+Bugzilla Application
+====================
+
+Ensure that you are at the Bugzilla Application. Under :guilabel:`IIS`,
+double-click :guilabel:`Handler Mappings`. Under :guilabel:`Actions`, click
+:guilabel:`Add Script Map`.
+
+Set the following values (replacing paths if necessary):
+
+* :guilabel:`Request Path`: ``*.cgi``
+* :guilabel:`Executable`: ``C:\Perl\bin\perl.exe -x"C:\Bugzilla" -wT "%s" %s``
+* :guilabel:`Name`: ``Bugzilla``
+
+At the prompt select :guilabel:`No`.
+
+.. todo:: The Executable lines in the three things above are weirdly
+   inconsistent. Is this intentional? My source is `this page <https://wiki.mozilla.org/Installing_under_IIS_7.5>`_.
+
+.. todo:: `LpSolit <http://lpsolit.wordpress.com/2010/10/22/make-bugzilla-work-with-iis7-easy/>`_
+   suggests there's a step to do with authorizing CGI modules. Where does that fit?
+
+Common Problems
+===============
+
+Bugzilla runs but it's not possible to log in
+  You've probably configured IIS to use ActiveState's ISAPI DLL -- in other
+  words you're using PerlEx, or the executable IIS is configured to use is
+  :file:`PerlS.dll` or :file:`Perl30.dll`.
+
+  Reconfigure IIS to use :file:`perl.exe`.
+
+IIS returns HTTP 502 errors
+  You probably forgot the ``-T`` argument to :file:`perl` when configuring the
+  executable in IIS.
+
+XMLRPC interface not working with IIS
+  This is a known issue. See :bug:`708252`.

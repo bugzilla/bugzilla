@@ -528,7 +528,8 @@ sub _css_url_rewrite {
 sub _concatenate_js {
     return @_ unless CONCATENATE_ASSETS;
     my ($sources) = @_;
-    return [] unless $sources && ref($sources);
+    return [] unless $sources;
+    $sources = ref($sources) ? $sources : [ $sources ];
 
     my %files =
         map {

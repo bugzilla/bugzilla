@@ -283,6 +283,7 @@ sub GetGroups {
 
 sub _get_common_flag_types {
     my $component_ids = shift;
+    my $user = Bugzilla->user;
 
     # Get all the different components in the bug list
     my $components = Bugzilla::Component->new_from_list($component_ids);
@@ -303,12 +304,10 @@ sub _get_common_flag_types {
             if $flag_type_count == scalar @$components;
     }
 
-    # We only show flags that a user has request or set rights on
+    # We only show flags that a user can request.
     my @show_flag_types
-        = grep { $user->can_request_flag($_) || $user->can_set_flag($_) }
-        values %common_flag_types;
-    my $any_flags_requesteeble =
-        grep($_->is_requesteeble, @show_flag_types);
+        = grep { $user->can_request_flag($_) } values %common_flag_types;
+    my $any_flags_requesteeble = grep { $_->is_requesteeble } @show_flag_types;
 
     return(\@show_flag_types, $any_flags_requesteeble);
 }

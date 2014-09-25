@@ -40,23 +40,25 @@
     [% IF needinfo_flags.size > 0 %]
       [%# Displays NEEDINFO tag in bug header %]
       <script>
-        var needinfo_comment_div = '[% INCLUDE needinfo_comment_div FILTER js %]';
         var summary_container = document.getElementById('static_bug_status');
-        if (document.getElementById('inline-history-ext')) {
-          needinfo_comment_div = inline_history.getNeedinfoDiv();
-        }
+        if (summary_container) {
+          var needinfo_comment_div = '[% INCLUDE needinfo_comment_div FILTER js %]';
+          if (document.getElementById('inline-history-ext')) {
+            needinfo_comment_div = inline_history.getNeedinfoDiv();
+          }
 
-        if (needinfo_comment_div) {
-          var a = document.createElement('a');
-          a.id = 'needinfo-lnk';
-          a.href = "#" + needinfo_comment_div;
-          a.appendChild(document.createTextNode('NEEDINFO'));
-          summary_container.appendChild(document.createTextNode('['));
-          summary_container.appendChild(a);
-          summary_container.appendChild(document.createTextNode(']'));
-        }
-        else {
-          summary_container.appendChild(document.createTextNode('[NEEDINFO]'));
+          if (needinfo_comment_div) {
+            var a = document.createElement('a');
+            a.id = 'needinfo-lnk';
+            a.href = "#" + needinfo_comment_div;
+            a.appendChild(document.createTextNode('NEEDINFO'));
+            summary_container.appendChild(document.createTextNode('['));
+            summary_container.appendChild(a);
+            summary_container.appendChild(document.createTextNode(']'));
+          }
+          else {
+            summary_container.appendChild(document.createTextNode('[NEEDINFO]'));
+          }
         }
       </script>
     [% END %]

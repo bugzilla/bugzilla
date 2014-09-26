@@ -14,7 +14,12 @@
   mail_delivery_method => "Defines how email is sent, or if it is sent at all.<br>
                            <ul>
                              <li>
-                               'Sendmail' and 'SMTP' are both MTAs.
+                               'SMTP' means use the SMTP protocol to talk to a remote
+                               mail server.
+                             </li>
+                             <li>
+                               'Sendmail' means use the sendmail-compatible MTA
+                               installed on the Bugzilla machine.
                                You need to install a third-party sendmail replacement if
                                you want to use sendmail on Windows.
                              </li>

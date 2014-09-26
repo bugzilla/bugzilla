@@ -61,6 +61,8 @@ Product/Component: [%+ bug.product +%] :: [%+ bug.component %]
 [% END %]
 [%+ reason_lines.join("\n") %]
 
+@@body-headers@@
+
 [% BLOCK generate_diffs %]
   [% urlbase %]show_bug.cgi?id=[% bug.id %]
 

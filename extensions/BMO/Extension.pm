@@ -42,6 +42,7 @@ use Date::Parse;
 use DateTime;
 use Encode qw(find_encoding encode_utf8);
 use File::MimeInfo::Magic;
+use List::MoreUtils qw(natatime);
 use Scalar::Util qw(blessed);
 use Sys::Syslog qw(:DEFAULT setlogsock);
 
@@ -676,12 +677,15 @@ sub attachment_view {
 
 sub install_before_final_checks {
     my ($self, $args) = @_;
-    
-    # Add product chooser setting (although it was added long ago, so add_setting
-    # will just return every time).
-    add_setting('product_chooser', 
+
+    # Add product chooser setting
+    add_setting('product_chooser',
                 ['pretty_product_chooser', 'full_product_chooser'],
                 'pretty_product_chooser');
+
+    # Add option to inject x-bugzilla headers into the message body to work
+    # around gmail filtering limitations
+    add_setting('headers_in_body', ['on', 'off'], 'off');
 
     # Migrate from 'gmail_threading' setting to 'bugmail_new_prefix'
     my $dbh = Bugzilla->dbh;
@@ -894,57 +898,8 @@ sub mailer_before_send {
         _add_mentors_header($email);
     }
 
-    # see bug 844724
-    if ($email->header('to') && $email->header('to') eq 'sync-1@bugzilla.tld') {
-        $email->header_set('to', 'mei.kong@tcl.com');
-    }
-
-    # attachments disabled, see bug 714488
-    return;
-
-    # If email is a request for a review, add the attachment itself
-    # to the email as an attachment. Attachment must be content type
-    # text/plain and below a certain size. Otherwise the email already 
-    # contain a link to the attachment. 
-    if ($email
-        && $email->header('X-Bugzilla-Type') eq 'request'
-        && ($email->header('X-Bugzilla-Flag-Requestee') 
-            && $email->header('X-Bugzilla-Flag-Requestee') eq $email->header('to'))) 
-    {
-        my $body = $email->body;
-
-        if (my ($attach_id) = $body =~ /Attachment\s+(\d+)\s*:/) {
-            my $attachment = Bugzilla::Attachment->new($attach_id);
-            if ($attachment 
-                && $attachment->ispatch 
-                && $attachment->contenttype eq 'text/plain'
-                && $attachment->linecount 
-                && $attachment->linecount < REQUEST_MAX_ATTACH_LINES) 
-            {
-                # Don't send a charset header with attachments, as they might 
-                # not be UTF-8, unless we can properly detect it.
-                my $charset;
-                if (Bugzilla->feature('detect_charset')) {
-                    my $encoding = detect_encoding($attachment->data);
-                    if ($encoding) {
-                        $charset = find_encoding($encoding)->mime_name;
-                    }
-                }
-
-                my $attachment_part = Email::MIME->create(
-                    attributes => {
-                        content_type => $attachment->contenttype,
-                        filename     => $attachment->filename,
-                        disposition  => "attachment",
-                    },
-                    body => $attachment->data,
-                );
-                $attachment_part->charset_set($charset) if $charset;
-
-                $email->parts_add([ $attachment_part ]);
-            }
-        }       
-    }
+    # insert x-bugzilla headers into the body
+    _inject_headers_into_body($email);
 }
 
 # Log a summary of bugmail sent to the syslog, for auditing and monitoring
@@ -987,6 +942,114 @@ sub _add_mentors_header {
     return unless my $mentors = $bug->mentors;
     return unless @$mentors;
     $email->header_set('X-Bugzilla-Mentors', join(', ', map { $_->login } @$mentors));
+}
+
+sub _inject_headers_into_body {
+    my $email = shift;
+    my $replacement = '';
+
+    my $recipient = Bugzilla::User->new({ name => $email->header('To'), cache => 1 });
+    if ($recipient
+        && $recipient->settings->{headers_in_body}->{value} eq 'on')
+    {
+        my @headers;
+        my $it = natatime(2, $email->header_pairs);
+        while (my ($name, $value) = $it->()) {
+            next unless $name =~ /^X-Bugzilla-(.+)/;
+            if ($name eq 'X-Bugzilla-Flags' || $name eq 'X-Bugzilla-Changed-Field-Names') {
+                # these are multi-value fields, split on space
+                foreach my $v (split(/\s+/, $value)) {
+                    push @headers, "$name: $v";
+                }
+            }
+            elsif ($name eq 'X-Bugzilla-Changed-Fields') {
+                # cannot split on space for this field, because field names contain
+                # spaces.  instead work from a list of field names.
+                my @fields =
+                    map { $_->description }
+                    @{ Bugzilla->fields };
+                # these aren't real fields, but exist in the headers
+                push @fields, ('Comment Created', 'Attachment Created');
+                @fields =
+                    sort { length($b) <=> length($a) }
+                    @fields;
+                while ($value ne '') {
+                    foreach my $field (@fields) {
+                        if ($value eq $field) {
+                            push @headers, "$name: $field";
+                            $value = '';
+                            last;
+                        }
+                        if (substr($value, 0, length($field) + 1) eq $field . ' ') {
+                            push @headers, "$name: $field";
+                            $value = substr($value, length($field) + 1);
+                            last;
+                        }
+                    }
+                }
+            }
+            else {
+                push @headers, "$name: $value";
+            }
+        }
+        $replacement = join("\n", @headers);
+    }
+
+    # update the message body
+    if (scalar($email->parts) > 1) {
+        $email->walk_parts(sub {
+            my ($part) = @_;
+
+            # skip top-level
+            return if $part->parts > 1;
+
+            # do not filter attachments such as patches, etc.
+            return if
+                $part->header('Content-Disposition')
+                && $part->header('Content-Disposition') =~ /attachment/;
+
+            # text/plain|html only
+            return unless $part->content_type =~ /^text\/(?:html|plain)/;
+
+            # hide in html content
+            if ($replacement && $part->content_type =~ /^text\/html/) {
+                $replacement = '<pre style="font-size: 0pt; color: #fff">' . $replacement . '</pre>';
+            }
+
+            # and inject
+            _replace_placeholder_in_part($part, $replacement);
+        });
+
+        # force Email::MIME to re-create all the parts.  without this
+        # as_string() doesn't return the updated body for multi-part sub-parts.
+        $email->parts_set([ $email->subparts ]);
+    }
+    else {
+        # text-only email
+        _replace_placeholder_in_part($email, $replacement);
+    }
+}
+
+sub _replace_placeholder_in_part {
+    my ($part, $replacement) = @_;
+
+    # fix encoding
+    my $body = $part->body;
+    if (Bugzilla->params->{'utf8'}) {
+        $part->charset_set('UTF-8');
+        my $raw = $part->body_raw;
+        if (utf8::is_utf8($raw)) {
+            utf8::encode($raw);
+            $part->body_set($raw);
+        }
+    }
+    $part->encoding_set('quoted-printable') if !is_7bit_clean($body);
+
+    # replace
+    my $placeholder = quotemeta('@@body-headers@@');
+    $body = $part->body_str;
+    $body =~ s/$placeholder/$replacement/;
+    $part->body_str_set($body);
 }
 
 sub _syslog {

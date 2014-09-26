@@ -26,6 +26,7 @@ use Bugzilla::Attachment::PatchReader;
 use Bugzilla::Token;
 
 use Encode qw(encode find_encoding);
+use Cwd qw(realpath);
 
 # For most scripts we don't make $cgi and $template global variables. But
 # when preparing Bugzilla for mod_perl, this script used these
@@ -372,6 +373,21 @@ sub view {
             if ($encoding) {
                 $cgi->charset(find_encoding($encoding)->mime_name);
             }
+        }
+    }
+    if ($attachment->is_on_filesystem) {
+        # attachment is on filesystem.
+        # This means we can let webserver handle the request and stream the file
+        # for us. This is called the X-Sendfile feature. see bug 1073264.
+        my $sendfile_header = Bugzilla->params->{'xsendfile_header'};
+        if ($sendfile_header !~ /off/) {
+            # Admin turned on the feature, use X-Sendfile.
+            my $attachment_path = realpath($attachment->_get_local_filename());
+            print $cgi->header(-type=>"$contenttype; name=\"$filename\"",
+                               -content_disposition=> "$disposition; filename=\"$filename\"",
+                               -content_length => $attachment->datasize,
+                               $sendfile_header => $attachment_path);
+            return;
         }
     }
     print $cgi->header(-type=>"$contenttype; name=\"$filename\"",

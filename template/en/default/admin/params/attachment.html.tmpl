@@ -58,5 +58,23 @@
   maxlocalattachment => "The maximum size (in megabytes) of attachments to be stored " _
                         "locally on the web server. If set to a value lower than the " _
                         "<a href=\"#maxattachmentsize\"><var>maxattachmentsize</var> parameter</a>, " _
-                        "attachments will never be kept on the local filesystem." }
+                        "attachments will never be kept on the local filesystem. " _
+                        "If you want to store all attachments on disk rather than in the " _
+                        "database, then set <a href=\"#maxattachmentsize\">" _
+                        "<var>maxattachmentsize</var> parameter</a> to 0. ",
+
+
+  xsendfile_header =>
+    "By default, attachments are served by the CGI script. " _
+    "This option also known as the <kbd>X-Sendfile</kbd> feature, allows the " _
+    "webserver to handle the attachments stored on the filesystem directly " _
+    "instead of the CGI script. For Apache, this requires the " _
+    "<kbd>mod_xsendfile</kbd> module. For <kbd>NGINX</kbd>, that feature is " _
+    "called <kbd>X-Accel-Redirect</kbd>. Please refer to your webserver " _
+    "documentation for additional details. " _
+    "Please note that attachments stored in the database cannot be offloaded " _
+    "to apache/nginx/lighttpd and are always handled by the CGI script."
+
+  }
+
 %]

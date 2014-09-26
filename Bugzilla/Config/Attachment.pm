@@ -38,6 +38,14 @@ sub get_param_list {
   },
 
   {
+  name => 'xsendfile_header',
+  type => 's',
+  choices => ['off', 'X-Sendfile', 'X-Accel-Redirect', 'X-LIGHTTPD-send-file'],
+  default => 'off',
+  checker => \&check_multi
+  },
+
+  {
    name => 'maxattachmentsize',
    type => 't',
    default => '1000',

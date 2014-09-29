@@ -46,7 +46,6 @@ sub new {
 
 sub login {
     my ($self, $type) = @_;
-    my $dbh = Bugzilla->dbh;
 
     # Get login info from the cookie, form, environment variables, etc.
     my $login_info = $self->{_info_getter}->get_login_info();

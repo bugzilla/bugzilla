@@ -85,8 +85,6 @@
       <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     [% END %]
 
-    [% PROCESS 'global/setting-descs.none.tmpl' %]
-
     [% SET yui = yui_resolve_deps(yui, yui_deps) %]
 
     [% SET css_sets = css_files(style_urls, yui, yui_css) %]

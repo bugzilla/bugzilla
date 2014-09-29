@@ -414,4 +414,4 @@ var inline_history = {
   trim: function(s) {
     return s.replace(/^\s+|\s+$/g, '');
   }
-}
+};

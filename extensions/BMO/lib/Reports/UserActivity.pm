@@ -49,8 +49,6 @@ sub report {
 
         my $to_dt = string_to_datetime($to);
         $to = $to_dt->ymd();
-        # add one day to include all activity that happened on the 'to' date
-        $to_dt->add(days => 1);
 
         my ($activity_joins, $activity_where) = ('', '');
         my ($attachments_joins, $attachments_where) = ('', '');

@@ -64,12 +64,12 @@
     <div id="con_calendar_to"></div>
   </td>
   <th>
-    Sort:
+    Group by:
   </th>
   <td>
-    <select name="sort">
-      <option value="when" [% 'selected' IF sort == 'when' %]>When</option>
-      <option value="bug" [% 'selected' IF sort == 'bug' %]>[% terms.Bug %]</option>
+    <select name="group">
+      <option value="when" [% 'selected' IF group == 'when' %]>When</option>
+      <option value="bug" [% 'selected' IF group == 'bug' %]>[% terms.Bug %]</option>
     </select>
   </td>
   <td>
@@ -111,12 +111,12 @@
       [% IF who_count > 1 %]
         <th>Who</th>
       [% END %]
-      [% IF sort == 'when' %]
-        <th class="sorted">[% INCLUDE sort_when_link %]</th>
-        <th>[% INCLUDE sort_bug_link %]</th>
+      [% IF group == 'when' %]
+        <th class="sorted">[% INCLUDE group_when_link %]</th>
+        <th>[% INCLUDE group_bug_link %]</th>
       [% ELSE %]
-        <th class="sorted">[% INCLUDE sort_bug_link %]</th>
-        <th>[% INCLUDE sort_when_link %]</th>
+        <th class="sorted">[% INCLUDE group_bug_link %]</th>
+        <th>[% INCLUDE group_when_link %]</th>
       [% END %]
       <th>What</th>
       <th>Removed</th>
@@ -131,7 +131,7 @@
             [% IF who_count > 1 %]
               <td>[% operation.who FILTER email FILTER html %]</td>
             [% END %]
-            [% IF sort == 'when' %]
+            [% IF group == 'when' %]
               <td>[% change.when FILTER time FILTER no_break %]</td>
               <td>[% operation.bug FILTER bug_link(operation.bug) FILTER none %]</td>
             [% ELSE %]
@@ -143,7 +143,7 @@
               <td>&nbsp;</td>
             [% END %]
             <td>&nbsp;</td>
-            [% IF sort == 'when' %]
+            [% IF group == 'when' %]
               <td>&nbsp;</td>
             [% ELSE %]
               <td>[% change.when FILTER time FILTER no_break %]</td>
@@ -213,18 +213,18 @@
 
 [% INCLUDE global/footer.html.tmpl %]
 
-[% BLOCK sort_when_link %]
+[% BLOCK group_when_link %]
   <a href="page.cgi?id=user_activity.html&amp;action=run&amp;
     [%~%]who=[% who FILTER uri %]&amp;
     [%~%]from=[% from FILTER uri %]&amp;
     [%~%]to=[% to FILTER uri %]&amp;
-    [%~%]sort=when">When</a>
+    [%~%]group=when">When</a>
 [% END %]
 
-[% BLOCK sort_bug_link %]
+[% BLOCK group_bug_link %]
   <a href="page.cgi?id=user_activity.html&amp;action=run&amp;
     [%~%]who=[% who FILTER uri %]&amp;
     [%~%]from=[% from FILTER uri %]&amp;
     [%~%]to=[% to FILTER uri %]&amp;
-    [%~%]sort=bug">[% terms.Bug %]</a>
+    [%~%]group=bug">[% terms.Bug %]</a>
 [% END %]

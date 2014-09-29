@@ -266,7 +266,7 @@
                 [% END %]
                 <li><a href="page.cgi?id=mydashboard.html">My Dashboard</a></li>
                 <li><a href="user_profile">My Profile</a></li>
-                <li><a href="page.cgi?id=user_activity.html&amp;action=run&amp;sort=when&amp;who=[% user.login FILTER uri %]">My Activity</a></li>
+                <li><a href="page.cgi?id=user_activity.html&amp;action=run&amp;who=[% user.login FILTER uri %]">My Activity</a></li>
                 <li><a href="request.cgi?requester=[% user.login FILTER uri %]&amp;requestee=[% user.login FILTER uri %]&amp;do_union=1&amp;group=type&amp;action=queue">My Requests</a></li>
                 <li><a href="userprefs.cgi">Preferences</a></li>
                 [% IF user.in_group('tweakparams') || user.in_group('editusers') || user.can_bless

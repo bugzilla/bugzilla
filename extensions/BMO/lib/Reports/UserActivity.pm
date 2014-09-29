@@ -100,7 +100,7 @@ sub report {
             push @params, ($from_dt, $to_dt);
         }
 
-        my $order = ($input->{'sort'} && $input->{'sort'} eq 'bug')
+        my $order = ($input->{'group'} && $input->{'group'} eq 'bug')
                     ? 'bug_id, bug_when' : 'bug_when';
 
         my $comment_filter = '';
@@ -257,7 +257,7 @@ sub report {
                     $incomplete_data = 1;
                 }
 
-                # Start a new changeset if required (depends on the sort order)
+                # Start a new changeset if required (depends on the grouping type)
                 my $is_new_changeset;
                 if ($order eq 'bug_when') {
                     $is_new_changeset =
@@ -321,7 +321,7 @@ sub report {
     $vars->{'who_count'} = scalar @who;
     $vars->{'from'} = $from;
     $vars->{'to'} = $to;
-    $vars->{'sort'} = $input->{'sort'};
+    $vars->{'group'} = $input->{'group'};
 }
 
 1;

@@ -30,7 +30,7 @@ sub report {
     $to =~ s/\N{U+2011}/-/g;
 
     if ($from eq '') {
-        my $dt = DateTime->now()->subtract('weeks' => 8);
+        my $dt = DateTime->now()->subtract('weeks' => 1);
         $from = $dt->ymd('-');
     }
     if ($to eq '') {

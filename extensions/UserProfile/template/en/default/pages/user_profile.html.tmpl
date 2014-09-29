@@ -93,7 +93,7 @@
   <th>Last activity</th>
   <td colspan="2">
     [% IF user.id %]
-      <a href="page.cgi?id=user_activity.html&amp;action=run&amp;who=[% target.login FILTER uri %]&amp;from=-4w">
+      <a href="page.cgi?id=user_activity.html&amp;action=run&amp;who=[% target.login FILTER uri %]">
     [% END %]
     [% target.last_activity_ts FILTER time %]
     [% "</a>" IF user.id %]

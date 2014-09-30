@@ -126,6 +126,8 @@ sub flag_activity {
 
     $match_criteria{LIMIT} = $limit;
     $match_criteria{OFFSET} = $offset if defined $offset;
+    # Hide data until Bug 1073364 is resolved.
+    $match_criteria{WHERE} = { 'flag_when > ?' => '2014-09-23 21:17:16' };
 
     # Throw error if no other parameters have been passed other than limit and offset
     if (!grep(!/^(LIMIT|OFFSET)$/, keys %match_criteria)) {

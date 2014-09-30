@@ -454,14 +454,15 @@ sub create {
 sub update {
     my $self = shift;
     my $dbh = Bugzilla->dbh;
-    my $timestamp = shift || $dbh->selectrow_array('SELECT NOW()');
+    my $timestamp = shift || $dbh->selectrow_array('SELECT LOCALTIMESTAMP(0)');
 
     my $changes = $self->SUPER::update(@_);
 
     if (scalar(keys %$changes)) {
         $dbh->do('UPDATE flags SET modification_date = ? WHERE id = ?',
                  undef, ($timestamp, $self->id));
-        $self->{'modification_date'} = format_time($timestamp, '%Y.%m.%d %T');
+        $self->{'modification_date'} =
+          format_time($timestamp, '%Y.%m.%d %T', Bugzilla->local_timezone);
         Bugzilla->memcached->clear({ table => 'flags', id => $self->id });
     }
     return $changes;

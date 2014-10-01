@@ -163,6 +163,7 @@ sub cancelChangePassword {
 # password and that the new password is valid.
 sub changePassword {
     my ($user_id, $token) = @_;
+    my $dbh = Bugzilla->dbh;
 
     my $password = $cgi->param('password');
     (defined $password && defined $cgi->param('matchpassword'))

@@ -5,58 +5,49 @@
 # This Source Code Form is "Incompatible With Secondary Licenses", as
 # defined by the Mozilla Public License, v. 2.0.
 
-package Bugzilla::Send::Sendmail;
+package Bugzilla::Sender::Transport::Sendmail;
 
 use 5.10.1;
 use strict;
 use warnings;
 
-use parent qw(Email::Send::Sendmail);
+use parent qw(Email::Sender::Transport::Sendmail);
 
-use Return::Value;
-use Symbol qw(gensym);
+use Email::Sender::Failure;
 
-sub send {
-    my ($class, $message, @args) = @_;
-    my $mailer = $class->_find_sendmail;
+sub send_email {
+    my ($self, $email, $envelope) = @_;
 
-    return failure "Couldn't find 'sendmail' executable in your PATH"
-        ." and Email::Send::Sendmail::SENDMAIL is not set"
-        unless $mailer;
+    my $pipe = $self->_sendmail_pipe($envelope);
 
-    return failure "Found $mailer but cannot execute it"
-        unless -x $mailer;
-    
-    local $SIG{'CHLD'} = 'DEFAULT';
+    my $string = $email->as_string;
+    $string =~ s/\x0D\x0A/\x0A/g unless $^O eq 'MSWin32';
 
-    my $pipe = gensym;
+    print $pipe $string
+      or Email::Sender::Failure->throw("couldn't send message to sendmail: $!");
 
-    open($pipe, "| $mailer -t -oi @args")
-        || return failure "Error executing $mailer: $!";
-    print($pipe $message->as_string)
-        || return failure "Error printing via pipe to $mailer: $!";
     unless (close $pipe) {
-        return failure "error when closing pipe to $mailer: $!" if $!;
+        Email::Sender::Failure->throw("error when closing pipe to sendmail: $!") if $!;
         my ($error_message, $is_transient) = _map_exitcode($? >> 8);
         if (Bugzilla->params->{'use_mailer_queue'}) {
             # Return success for errors which are fatal so Bugzilla knows to
-            # remove them from the queue
+            # remove them from the queue.
             if ($is_transient) {
-                return failure "error when closing pipe to $mailer: $error_message";
+                Email::Sender::Failure->throw("error when closing pipe to sendmail: $error_message");
             } else {
-                warn "error when closing pipe to $mailer: $error_message\n";
-                return success;
+                warn "error when closing pipe to sendmail: $error_message\n";
+                return $self->success;
             }
         } else {
-            return failure "error when closing pipe to $mailer: $error_message";
+            Email::Sender::Failure->throw("error when closing pipe to sendmail: $error_message");
         }
     }
-    return success;
+    return $self->success;
 }
 
 sub _map_exitcode {
     # Returns (error message, is_transient)
-    # from the sendmail source (sendmail/sysexit.h)
+    # from the sendmail source (sendmail/sysexits.h)
     my $code = shift;
     if ($code == 64) {
         return ("Command line usage error (EX_USAGE)", 1);
@@ -99,6 +90,6 @@ sub _map_exitcode {
 
 =over
 
-=item send
+=item send_email
 
 =back

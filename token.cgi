@@ -176,6 +176,8 @@ sub changePassword {
     $user->set_password($password);
     $user->update();
     delete_token($token);
+    $dbh->do(q{DELETE FROM tokens WHERE userid = ?
+               AND tokentype = 'password'}, undef, $user_id);
 
     Bugzilla->logout_user_by_id($user_id);
 

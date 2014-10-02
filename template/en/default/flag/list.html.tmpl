@@ -173,17 +173,14 @@
       [% END %]
       <td>
         [% IF type.is_multiplicable && edit_multiple_bugs %]
-          <input type="checkbox"
-                 name="flags_add-[% type.id %]"
-                 id="flags_add-[% type.id %]">
-          <label for="flags_add-[% type.id %]">
-            <a class="field_help_link"
-               title="If ticked, always create a new flag. Leaving it unchecked will update existing flag(s) and add a new flag if it does not exist">
-               Always add?
-            </a>
+          <input type="checkbox" name="flags_add-[% type.id %]"
+                 id="flags_add-[% type.id %]" value="1">
+          <label for="flags_add-[% type.id %]"
+                 title="If ticked, always create a new flag. Leaving it unchecked will update existing flag(s) and add a new flag if it does not exist">
+            Always add
           </label>
         [% END %]
-      <td>
+      </td>
     </tr>
   </tbody>
 [% END %]

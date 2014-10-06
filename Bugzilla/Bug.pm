@@ -888,12 +888,6 @@ sub update {
                                    join(', ', @added_names)];
     }
 
-    # Flags
-    my ($removed, $added) = Bugzilla::Flag->update_flags($self, $old_bug, $delta_ts);
-    if ($removed || $added) {
-        $changes->{'flagtypes.name'} = [$removed, $added];
-    }
-
     # Comments
     foreach my $comment (@{$self->{added_comments} || []}) {
         my $columns = join(',', keys %$comment);
@@ -917,6 +911,9 @@ sub update {
         LogActivityEntry($self->id, "longdescs.isprivate", $from, $to, 
                          Bugzilla->user->id, $delta_ts, $comment_id);
     }
+
+    # Clear the cache of comments
+    delete $self->{comments};
 
     # Insert the values into the multiselect value tables
     my @multi_selects = grep {$_->type == FIELD_TYPE_MULTI_SELECT}
@@ -953,6 +950,12 @@ sub update {
     if (scalar @$removed_see || scalar @$added_see) {
         $changes->{see_also} = [join(', ', @$removed_see),
                                 join(', ', @$added_see)];
+    }
+
+    # Flags
+    my ($removed, $added) = Bugzilla::Flag->update_flags($self, $old_bug, $delta_ts);
+    if ($removed || $added) {
+        $changes->{'flagtypes.name'} = [$removed, $added];
     }
 
     # Log bugs_activity items

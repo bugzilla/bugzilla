@@ -235,8 +235,9 @@ sub validateContext
 {
   my $context = $cgi->param('context') || "patch";
   if ($context ne "file" && $context ne "patch") {
-    detaint_natural($context)
-      || ThrowUserError("invalid_context", { context => $cgi->param('context') });
+      my $orig_context = $context;
+      detaint_natural($context)
+        || ThrowUserError("invalid_context", { context => $orig_context });
   }
 
   return $context;
@@ -545,25 +546,23 @@ sub insert {
     # Must be called before create() as it may alter $cgi->param('ispatch').
     my $content_type = Bugzilla::Attachment::get_content_type();
 
-    # Get the attach data
-    my $data = scalar($cgi->param('attach_text'));
-    if ($data) {
+    # Get the filehandle of the attachment.
+    my $data_fh = $cgi->upload('data');
+    my $attach_text = $cgi->param('attach_text');
+
+    if ($attach_text) {
         # Convert to unix line-endings if pasting a patch
         if (scalar($cgi->param('ispatch'))) {
-            $data =~ s/[\012\015]{1,2}/\012/g;
+            $attach_text =~ s/[\012\015]{1,2}/\012/g;
         }
-    }
-    else {
-        # Get the filehandle of the attachment.
-        $data = $cgi->upload('data');
     }
 
     my $attachment = Bugzilla::Attachment->create(
         {bug           => $bug,
          creation_ts   => $timestamp,
-         data          => $data,
+         data          => $attach_text || $data_fh,
          description   => scalar $cgi->param('description'),
-         filename      => $cgi->param('attach_text') ? "file_$bugid.txt" : scalar $cgi->upload('data'),
+         filename      => $attach_text ? "file_$bugid.txt" : $data_fh,
          ispatch       => scalar $cgi->param('ispatch'),
          isprivate     => scalar $cgi->param('isprivate'),
          mimetype      => $content_type,

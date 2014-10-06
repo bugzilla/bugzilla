@@ -850,10 +850,12 @@ sub create {
             },
 
             # In CSV, quotes are doubled, and any value containing a quote or a
-            # comma is enclosed in quotes.
+            # comma is enclosed in quotes. If a field starts with an equals
+            # sign, it is proceed by a space.
             csv => sub
             {
                 my ($var) = @_;
+                $var = ' ' . $var if substr($var, 0, 1) eq '=';
                 $var =~ s/\"/\"\"/g;
                 if ($var !~ /^-?(\d+\.)?\d*$/) {
                     $var = "\"$var\"";

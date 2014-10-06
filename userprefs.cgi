@@ -544,7 +544,7 @@ sub SaveApiKey {
     if ($cgi->param('new_key')) {
         $vars->{new_key} = Bugzilla::User::APIKey->create({
             user_id     => $user->id,
-            description => $cgi->param('new_description'),
+            description => scalar $cgi->param('new_description'),
         });
 
         # As a security precaution, we always sent out an e-mail when

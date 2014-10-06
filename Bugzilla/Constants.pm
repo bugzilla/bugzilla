@@ -202,7 +202,7 @@ use Memoize;
 # CONSTANTS
 #
 # Bugzilla version
-use constant BUGZILLA_VERSION => "4.5.5+";
+use constant BUGZILLA_VERSION => "4.5.6";
 
 # A base link to the current REST Documentation. We place it here
 # as it will need to be updated to whatever the current release is.

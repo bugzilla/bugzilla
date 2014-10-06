@@ -170,7 +170,6 @@
 ],
 
 'global/messages.html.tmpl' => [
-  'message_tag', 
   'series.frequency * 2',
 ],
 

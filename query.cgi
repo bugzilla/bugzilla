@@ -269,8 +269,8 @@ for (my $chart = 0; $cgi->param("field$chart-0-0"); $chart++) {
             if (!defined($value)) {
                 $value = '';
             }
-            push(@cols, { field => $cgi->param("field$chart-$row-$col"),
-                          type => $cgi->param("type$chart-$row-$col") || 'noop',
+            push(@cols, { field => scalar $cgi->param("field$chart-$row-$col"),
+                          type => scalar $cgi->param("type$chart-$row-$col") || 'noop',
                           value => $value });
         }
         push(@rows, \@cols);

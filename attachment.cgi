@@ -228,8 +228,9 @@ sub validateContext
 {
   my $context = $cgi->param('context') || "patch";
   if ($context ne "file" && $context ne "patch") {
-    detaint_natural($context)
-      || ThrowUserError("invalid_context", { context => $cgi->param('context') });
+      my $orig_context = $context;
+      detaint_natural($context)
+        || ThrowUserError("invalid_context", { context => $orig_context });
   }
 
   return $context;
@@ -547,13 +548,14 @@ sub insert {
 
     # Get the filehandle of the attachment.
     my $data_fh = $cgi->upload('data');
+    my $attach_url = $cgi->param('attachurl');
 
     my $attachment = Bugzilla::Attachment->create(
         {bug           => $bug,
          creation_ts   => $timestamp,
-         data          => scalar $cgi->param('attachurl') || $data_fh,
+         data          => $attach_url || $data_fh,
          description   => scalar $cgi->param('description'),
-         filename      => $cgi->param('attachurl') ? '' : scalar $cgi->upload('data'),
+         filename      => $attach_url ? '' : $data_fh,
          ispatch       => scalar $cgi->param('ispatch'),
          isprivate     => scalar $cgi->param('isprivate'),
          isurl         => scalar $cgi->param('attachurl'),

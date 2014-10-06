@@ -186,7 +186,10 @@ if (defined $cgi->param('version')) {
 # after the bug is filed.
 
 # Add an attachment if requested.
-if (defined($cgi->upload('data')) || $cgi->param('attachurl')) {
+my $data_fh = $cgi->upload('data');
+my $attach_url = $cgi->param('attachurl');
+
+if ($data_fh || $attach_url) {
     $cgi->param('isprivate', $cgi->param('comment_is_private'));
 
     # Must be called before create() as it may alter $cgi->param('ispatch').
@@ -201,12 +204,12 @@ if (defined($cgi->upload('data')) || $cgi->param('attachurl')) {
         $attachment = Bugzilla::Attachment->create(
             {bug           => $bug,
              creation_ts   => $timestamp,
-             data          => scalar $cgi->param('attachurl') || $cgi->upload('data'),
+             data          => $attach_url || $data_fh,
              description   => scalar $cgi->param('description'),
-             filename      => $cgi->param('attachurl') ? '' : scalar $cgi->upload('data'),
+             filename      => $attach_url ? '' : $data_fh,
              ispatch       => scalar $cgi->param('ispatch'),
              isprivate     => scalar $cgi->param('isprivate'),
-             isurl         => scalar $cgi->param('attachurl'),
+             isurl         => $attach_url,
              mimetype      => $content_type,
              store_in_file => scalar $cgi->param('bigfile'),
             });

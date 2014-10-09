@@ -28,7 +28,8 @@ use Bugzilla::Error;
 use Bugzilla::Group;
 use Bugzilla::User;
 use Bugzilla::Util qw(trim);
-use Bugzilla::WebService::Util qw(filter filter_wants validate);
+use Bugzilla::WebService::Util qw(filter filter_wants validate
+                                  translate params_to_objects);
 use Bugzilla::Hook;
 
 use List::Util qw(first);
@@ -42,6 +43,20 @@ use constant LOGIN_EXEMPT => {
 use constant READ_ONLY => qw(
     get
 );
+
+use constant MAPPED_FIELDS => {
+    email => 'login',
+    full_name => 'name',
+    login_denied_text => 'disabledtext',
+    email_enabled => 'disable_mail'
+};
+
+use constant MAPPED_RETURNS => {
+    login_name => 'email',
+    realname => 'full_name',
+    disabledtext => 'login_denied_text',
+    disable_mail => 'email_enabled'
+};
 
 ##############
 # User Login #
@@ -267,6 +282,76 @@ sub get {
     return { users => \@users };
 }
 
+###############
+# User Update #
+###############
+
+sub update {
+    my ($self, $params) = @_;
+
+    my $dbh = Bugzilla->dbh;
+
+    my $user = Bugzilla->login(LOGIN_REQUIRED);
+
+    # Reject access if there is no sense in continuing.
+    $user->in_group('editusers')
+        || ThrowUserError("auth_failure", {group  => "editusers",
+                                           action => "edit",
+                                           object => "users"});
+
+    defined($params->{names}) || defined($params->{ids})
+        || ThrowCodeError('params_required',
+               { function => 'User.update', params => ['ids', 'names'] });
+
+    my $user_objects = params_to_objects($params, 'Bugzilla::User');
+
+    my $values = translate($params, MAPPED_FIELDS);
+
+    # We delete names and ids to keep only new values to set.
+    delete $values->{names};
+    delete $values->{ids};
+
+    $dbh->bz_start_transaction();
+    foreach my $user (@$user_objects){
+        $user->set_all($values);
+    }
+
+    my %changes;
+    foreach my $user (@$user_objects){
+        my $returned_changes = $user->update();
+        $changes{$user->id} = translate($returned_changes, MAPPED_RETURNS);
+    }
+    $dbh->bz_commit_transaction();
+
+    my @result;
+    foreach my $user (@$user_objects) {
+        my %hash = (
+            id      => $user->id,
+            changes => {},
+        );
+
+        foreach my $field (keys %{ $changes{$user->id} }) {
+            my $change = $changes{$user->id}->{$field};
+            # We normalize undef to an empty string, so that the API
+            # stays consistent for things that can become empty.
+            $change->[0] = '' if !defined $change->[0];
+            $change->[1] = '' if !defined $change->[1];
+            # We also flatten arrays (used by groups and blessed_groups)
+            $change->[0] = join(',', @{$change->[0]}) if ref $change->[0];
+            $change->[1] = join(',', @{$change->[1]}) if ref $change->[1];
+
+            $hash{changes}{$field} = {
+                removed => $self->type('string', $change->[0]),
+                added   => $self->type('string', $change->[1])
+            };
+        }
+
+        push(@result, \%hash);
+    }
+
+    return { users => \@result };
+}
+
 sub _filter_users_by_group {
     my ($self, $users, $params) = @_;
     my ($group_ids, $group_names) = @$params{qw(group_ids groups)};
@@ -487,7 +572,7 @@ for the provided username.
 
 =back
 
-=head1 Account Creation
+=head1 Account Creation and Modification
 
 =head2 offer_account_by_email
 
@@ -597,6 +682,135 @@ password is under three characters.)
 =item Error 503 (Password Too Long) removed in Bugzilla B<3.6>.
 
 =item REST API call added in Bugzilla B<5.0>.
+
+=back
+
+=back
+
+=head2 update
+
+B<EXPERIMENTAL>
+
+=over
+
+=item B<Description>
+
+Updates user accounts in Bugzilla.
+
+=item B<Params>
+
+=over
+
+=item C<ids>
+
+C<array> Contains ids of user to update.
+
+=item C<names>
+
+C<array> Contains email/login of user to update.
+
+=item C<full_name>
+
+C<string> The new name of the user.
+
+=item C<email>
+
+C<string> The email of the user. Note that email used to login to bugzilla.
+Also note that you can only update one user at a time when changing the
+login name / email. (An error will be thrown if you try to update this field
+for multiple users at once.)
+
+=item C<password>
+
+C<string> The password of the user.
+
+=item C<email_enabled>
+
+C<boolean> A boolean value to enable/disable sending bug-related mail to the user.
+
+=item C<login_denied_text>
+
+C<string> A text field that holds the reason for disabling a user from logging
+into bugzilla, if empty then the user account is enabled otherwise it is
+disabled/closed.
+
+=item C<groups>
+
+C<hash> These specify the groups that this user is directly a member of.
+To set these, you should pass a hash as the value. The hash may contain
+the following fields:
+
+=over
+
+=item C<add> An array of C<int>s or C<string>s. The group ids or group names
+that the user should be added to.
+
+=item C<remove> An array of C<int>s or C<string>s. The group ids or group names
+that the user should be removed from.
+
+=item C<set> An array of C<int>s or C<string>s. An exact set of group ids
+and group names that the user should be a member of. NOTE: This does not
+remove groups from the user where the person making the change does not
+have the bless privilege for.
+
+If you specify C<set>, then C<add> and C<remove> will be ignored. A group in
+both the C<add> and C<remove> list will be added. Specifying a group that the
+user making the change does not have bless rights will generate an error.
+
+=back
+
+=item C<set_bless_groups>
+
+C<hash> - This is the same as set_groups, but affects what groups a user
+has direct membership to bless that group. It takes the same inputs as
+set_groups.
+
+=back
+
+=item B<Returns>
+
+A C<hash> with a single field "users". This points to an array of hashes
+with the following fields:
+
+=over
+
+=item C<id>
+
+C<int> The id of the user that was updated.
+
+=item C<changes>
+
+C<hash> The changes that were actually done on this user. The keys are
+the names of the fields that were changed, and the values are a hash
+with two keys:
+
+=over
+
+=item C<added>
+
+C<string> The values that were added to this field,
+possibly a comma-and-space-separated list if multiple values were added.
+
+=item C<removed>
+
+C<string> The values that were removed from this field, possibly a
+comma-and-space-separated list if multiple values were removed.
+
+=back
+
+=back
+
+=item B<Errors>
+
+=over
+
+=item 51 (Bad Login Name)
+
+You passed an invalid login name in the "names" array.
+
+=item 304 (Authorization Required)
+
+Logged-in users are not authorized to edit other users.
 
 =back
 

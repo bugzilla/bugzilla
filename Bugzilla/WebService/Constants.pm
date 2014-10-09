@@ -192,6 +192,7 @@ use constant WS_ERROR_CODE => {
     empty_group_description => 802,
     invalid_regexp => 803,
     invalid_group_name => 804,
+    group_cannot_view => 805,
 
     # Search errors are 1000-1100
     buglist_parameters_required => 1000,

@@ -9,6 +9,7 @@ package Bugzilla::WebService::Server::REST::Resources::Group;
 
 use 5.10.1;
 use strict;
+use warnings;
 
 use Bugzilla::WebService::Constants;
 use Bugzilla::WebService::Group;
@@ -20,12 +21,22 @@ BEGIN {
 sub _rest_resources {
     my $rest_resources = [
         qr{^/group$}, {
+            GET  => {
+                method => 'get'
+            },
             POST => {
                 method => 'create',
                 success_code => STATUS_CREATED
             }
         },
         qr{^/group/([^/]+)$}, {
+            GET => {
+                method => 'get',
+                params => sub {
+                    my $param = $_[0] =~ /^\d+$/ ? 'ids' : 'names';
+                    return { $param => [ $_[0] ] };
+                }
+            },
             PUT => {
                 method => 'update',
                 params => sub {

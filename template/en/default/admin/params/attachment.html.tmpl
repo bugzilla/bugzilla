@@ -66,12 +66,20 @@
 
   xsendfile_header =>
     "By default, attachments are served by the CGI script. " _
-    "This option also known as the <kbd>X-Sendfile</kbd> feature, allows the " _
-    "webserver to handle the attachments stored on the filesystem directly " _
-    "instead of the CGI script. For Apache, this requires the " _
-    "<kbd>mod_xsendfile</kbd> module. For <kbd>NGINX</kbd>, that feature is " _
-    "called <kbd>X-Accel-Redirect</kbd>. Please refer to your webserver " _
-    "documentation for additional details. " _
+    "If you enable filesystem file storage for large files using the " _
+    "<a href=\"#maxlocalattachment\"><var>maxlocalattachment</var> parameter</a> " _
+    "then you can have those files served directly by the webserver, which " _
+    "avoids copying them entirely into memory, and this may result in a " _
+    "performance improvement. To do this, configure your webserver appropriately " _
+    "and then set the correct header, as follows:" _
+    "<ul>" _
+    "<li>Apache: <code>X-Sendfile</code> header; see " _
+    "<code><a href=\"https://tn123.org/mod_xsendfile/\">mod_xsendfile</a></code> module</li>" _
+    "<li>nginx: <code>X-Accel-Redirect</code> header; see "_
+    "<a href=\"http://wiki.nginx.org/X-accel\">webserver documentation</a> for additional configuration</li>" _
+    "<li>lighttpd: <code>X-LIGHTTPD-send-file</code> header; see " _
+    "<a href=\"http://redmine.lighttpd.net/projects/1/wiki/X-LIGHTTPD-send-file\">webserver documentation</a> for additional configuration</li>" _
+    "</ul><br>" _
     "Please note that attachments stored in the database cannot be offloaded " _
     "to apache/nginx/lighttpd and are always handled by the CGI script."
 

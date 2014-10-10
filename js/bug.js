@@ -168,10 +168,27 @@ YAHOO.bugzilla.dupTable = {
                                 + res.responseText);
                 },
             };
-
             YAHOO.util.Connect.setDefaultPostHeader('application/json', true);
-            YAHOO.util.Connect.asyncRequest('POST', 'jsonrpc.cgi', callbacks,
-                    args)
+            YAHOO.util.Connect.asyncRequest('POST', 'jsonrpc.cgi', callbacks, args)
+        },
+    };
+
+    YAHOO.bugzilla.bugInterest = {
+        unmark: function(bug_ids) {
+            var args = JSON.stringify({
+                version: "1.1",
+                method: 'MyDashboard.bug_interest_unmark',
+                params: { bug_ids: bug_ids },
+            });
+            var callbacks = {
+                failure: function(res) {
+                    if (console)
+                        console.log("failed to unmark interest: "
+                            + res.responseText);
+                },
+            };
+            YAHOO.util.Connect.setDefaultPostHeader('application/json', true);
+            YAHOO.util.Connect.asyncRequest('POST', 'jsonrpc.cgi', callbacks, args)
         },
     };
 })();

@@ -354,9 +354,12 @@ use constant OPERATOR_FIELD_OVERRIDE => {
     },
     last_visit_ts => {
         _non_changed => \&_last_visit_ts,
-        _default     => \&_last_visit_ts_invalid_operator,
+        _default     => \&_invalid_operator,
     },
-    
+    bug_interest_ts => {
+        _non_changed => \&_bug_interest_ts,
+        _default     => \&_invalid_operator,
+    },
     # Custom Fields
     FIELD_TYPE_FREETEXT, { _non_changed => \&_nullable },
     FIELD_TYPE_BUG_ID,   { _non_changed => \&_nullable_int },
@@ -387,6 +390,7 @@ sub SPECIAL_PARSING {
         # last_visit field that accept both a 1d, 1w, 1m, 1y format and the
         # %last_changed% pronoun.
         last_visit_ts => \&_last_visit_datetime,
+        bug_interest_ts => \&_last_visit_datetime,
 
         # BMO - Add ability to use pronoun for bug mentors field
         bug_mentor => \&_commenter_pronoun,
@@ -563,6 +567,13 @@ sub COLUMN_JOINS {
             from  => 'bug_id',
             to    => 'bug_id',
         },
+        bug_interest_ts => {
+            as    => 'bug_interest',
+            table => 'bug_interest',
+            extra => ['bug_interest.user_id = ' . $user->id],
+            from  => 'bug_id',
+            to    => 'bug_id',
+        },
     };
     return $joins;
 };
@@ -634,6 +645,7 @@ sub COLUMNS {
         
         'longdescs.count' => 'COUNT(DISTINCT map_longdescs_count.comment_id)',
         last_visit_ts => 'bug_user_last_visit.last_visit_ts',
+        bug_interest_ts => 'bug_interest.modification_time',
         assignee_last_login => 'assignee.last_seen_date',
     );
 
@@ -2788,7 +2800,14 @@ sub _last_visit_ts {
     $self->_add_extra_column('last_visit_ts');
 }
 
-sub _last_visit_ts_invalid_operator {
+sub _bug_interest_ts {
+    my ($self, $args) = @_;
+
+    $args->{full_field} = $self->COLUMNS->{bug_interest_ts}->{name};
+    $self->_add_extra_column('bug_interest_ts');
+}
+
+sub _invalid_operator {
     my ($self, $args) = @_;
 
     ThrowUserError('search_field_operator_invalid',

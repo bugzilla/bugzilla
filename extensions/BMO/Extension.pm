@@ -44,6 +44,7 @@ use Encode qw(find_encoding encode_utf8);
 use File::MimeInfo::Magic;
 use List::MoreUtils qw(natatime);
 use Scalar::Util qw(blessed);
+use List::Util qw(first);
 use Sys::Syslog qw(:DEFAULT setlogsock);
 
 use Bugzilla::Extension::BMO::Constants;
@@ -189,6 +190,104 @@ sub page_before_template {
     elsif ($page eq 'query_database.html') {
         query_database($vars);
     }
+    elsif ($page eq 'attachment_bounty_form.html') {
+        bounty_attachment($vars);
+    }
+}
+
+sub bounty_attachment {
+    my ($vars) = @_;
+    ThrowUserError('user_not_insider') unless Bugzilla->user->is_insider;
+
+    my $input      = Bugzilla->input_params;
+    my $dbh        = Bugzilla->dbh;
+    my $bug        = Bugzilla::Bug->check({ id => $input->{bug_id}, cache => 1 });
+    my $attachment = first { $_ && is_bounty_attachment($_) } @{$bug->attachments};
+    $vars->{bug}   = $bug;
+
+    if ($input->{submit}) {
+        ThrowUserError('bounty_attachment_missing_reporter')
+            unless $input->{reporter_email};
+
+        my @fields = qw( reporter_email amount_paid reported_date fixed_date awarded_date publish );
+        my %form =  map { $_ => $input->{$_} } @fields;
+        $form{credit} = [ grep { defined } map { $input->{"credit_$_"} } 1..3 ];
+
+        $dbh->bz_start_transaction();
+        if ($attachment) {
+            $attachment->set(
+                description => format_bounty_attachment_description(\%form)
+            );
+            $attachment->update;
+        }
+        else {
+            my $attachment = Bugzilla::Attachment->create({
+                bug         => $bug,
+                isprivate   => 1,
+                mimetype    => 'text/plain',
+                data        => 'bounty',
+                filename    => 'bugbounty.data',
+                description => format_bounty_attachment_description(\%form),
+            });
+        }
+        $dbh->bz_commit_transaction();
+
+        print Bugzilla->cgi->redirect('show_bug.cgi?id=' . $bug->id);
+        exit;
+    }
+
+    if ($attachment) {
+        my $form = parse_bounty_attachment_description($attachment->description);
+        $vars->{form} = $form;
+    }
+}
+
+sub is_bounty_attachment {
+    my ($attachment) = @_;
+
+    return 0 unless $attachment->filename eq 'bugbounty.data';
+    return 0 unless $attachment->contenttype eq 'text/plain';
+    return 0 unless $attachment->isprivate;
+    return $attachment->description =~ /^(?:[^,]*,)+[^,]*$/;
+}
+
+sub format_bounty_attachment_description {
+    my ($form) = @_;
+    my @fields = (
+        @$form{qw( reporter_email amount_paid reported_date fixed_date awarded_date )},
+        $form->{publish} ? 'true' : 'false',
+        @{ $form->{credit} // [] }
+    );
+
+    return join(',', map { $_ // '' } @fields);
+}
+
+sub parse_bounty_attachment_description {
+    my ($desc) = @_;
+
+    my %map = ( true => 1, false => 0 );
+    my $date = qr/\d{4}-\d{2}-\d{2}/;
+    $desc =~ m!
+        ^
+        (?<reporter_email> [^,]+)      \s*,\s*
+        (?<amount_paid>    [0-9]+)  ?  \s*,\s*
+        (?<reported_date>  $date)   ?  \s*,\s*
+        (?<fixed_date>     $date)   ?  \s*,\s*
+        (?<awarded_date>   $date)   ?  \s*,\s*
+        (?<publish>        (?i: true | false )) ?
+        (?: \s*,\s* (?<credits>.*) ) ?
+        $
+    !x;
+
+    return {
+        reporter_email => $+{reporter_email} // '',
+        amount_paid    => $+{amount_paid}    // '',
+        reported_date  => $+{reported_date}  // '',
+        fixed_date     => $+{fixed_date}     // '',
+        awarded_date   => $+{awarded_date}   // '',
+        publish        => $map{ $+{publish} // 'false' },
+        credit         => [grep { $_ } split(/\s*,\s*/, $+{credits}) ]
+    };
 }
 
 sub _get_field_values_sort_key {

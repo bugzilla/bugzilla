@@ -1,0 +1,194 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+[% PROCESS global/variables.none.tmpl %]
+
+[% inline_style = BLOCK %]
+#bounty_form {
+  padding: 10px;
+}
+#bounty_form .required:after {
+  content: " *";
+  color: red;
+}
+#bounty_form .field_label {
+  font-weight: bold;
+  display: block;
+  text-align: left;
+}
+#bounty_form .field_desc {
+  padding-bottom: 3px;
+}
+#bounty_form .field_desc,
+#bounty_form .head_desc {
+  width: 600px;
+  word-wrap: normal;
+}
+#bounty_form .head_desc {
+  padding-top: 5px;
+  padding-bottom: 12px;
+}
+#bounty_form .form_section {
+  margin-bottom: 10px;
+}
+#bounty_form textarea {
+  font-family: inherit;
+  font-size: inherit;
+}
+#bounty_form em {
+  font-size: 1em;
+}
+.yui-calcontainer {
+  z-index: 2;
+}
+[% END %]
+
+[% inline_javascript = BLOCK %]
+function validateAndSubmit() {
+  'use strict';
+  var alert_text = '';
+  var requiredLabels = YAHOO.util.Selector.query('label.required');
+  if (requiredLabels) {
+    requiredLabels.forEach(function (label) {
+      var name = label.getAttribute('for');
+      var ids = YAHOO.util.Selector.query(
+        '#bounty_form *[name="' + name + '"]'
+      ).map(function (e) {
+        return e.id
+      });
+
+      if (ids && ids[0]) {
+        if (!isFilledOut(ids[0])) {
+          var desc = label.textContent || name;
+          alert_text +=
+            "Please enter a value for " +
+            desc.replace(/[\r\n]+/, "").replace(/\s+/g, " ") +
+            "\n";
+        }
+      }
+    });
+  }
+
+  if (alert_text != '') {
+    alert(alert_text);
+    return false;
+  }
+  return true;
+}
+[% END %]
+
+[% PROCESS global/header.html.tmpl
+   title = "Bounty Attachment Form"
+   style = inline_style
+   javascript = inline_javascript
+   javascript_urls = [ 'extensions/BMO/web/js/form_validate.js',
+                       'js/field.js', 'js/util.js' ]
+   yui = [ "calendar", "selector" ]
+%]
+
+[% USE Bugzilla %]
+[% cgi = Bugzilla.cgi %]
+
+<form id="bounty_form" method="post" action="page.cgi"
+  enctype="multipart/form-data" onSubmit="return validateAndSubmit();">
+
+  <input type="hidden" name="bug_id" value="[% bug.id FILTER none %]">
+  <input type="hidden" name="id" value="attachment_bounty_form.html">
+  <input type="hidden" name="submit" value="1">
+
+  <div class="head_desc">
+    Bounty Attachment for [% "$terms.Bug $bug.id" FILTER bug_link(bug.id) FILTER none %]
+  </div>
+
+  <div class="form_section">
+    <label for="reporter_email" class="field_label required">Reporter's Email</label>
+    <input type="text" name="reporter_email" id="reporter_email" size="80"
+      value="[% form.reporter_email FILTER none %]">
+  </div>
+
+  <div class="form_section">
+    <label for="amount_paid" class="field_label">Amount Paid</label>
+    <input type="text" name="amount_paid" id="amount_paid" size="80" value="[% form.amount_paid FILTER none %]">
+  </div>
+
+  <div class="form_section">
+    <label for="reported_date" class="field_label">Reported Date</label>
+    <input name="reported_date" size="20" id="reported_date" value="[% form.reported_date FILTER none %]"
+      onchange="updateCalendarFromField(this)">
+    <button type="button" class="calendar_button"
+      id="button_calendar_reported_date"
+      onclick="showCalendar('reported_date')">
+      <span>Calendar</span>
+    </button>
+    <div id="con_calendar_reported_date"></div>
+    <script type="text/javascript">
+      createCalendar('reported_date')
+    </script>
+  </div>
+
+  <div class="form_section">
+    <label for="fixed_date" class="field_label">Fixed Date</label>
+    <input name="fixed_date" size="20" id="fixed_date" value="[% form.fixed_date FILTER none %]"
+      onchange="updateCalendarFromField(this)">
+    <button type="button" class="calendar_button"
+      id="button_calendar_fixed_date"
+      onclick="showCalendar('fixed_date')">
+      <span>Calendar</span>
+    </button>
+    <div id="con_calendar_fixed_date"></div>
+    <script type="text/javascript">
+      createCalendar('fixed_date')
+    </script>
+  </div>
+
+  <div class="form_section">
+    <label for="awarded_date" class="field_label">Awarded Date</label>
+    <input name="awarded_date" size="20" id="awarded_date" value="[% form.awarded_date FILTER none %]"
+      onchange="updateCalendarFromField(this)">
+    <button type="button" class="calendar_button"
+      id="button_calendar_awarded_date"
+      onclick="showCalendar('awarded_date')">
+      <span>Calendar</span>
+    </button>
+    <div id="con_calendar_awarded_date"></div>
+    <script type="text/javascript">
+      createCalendar('awarded_date')
+    </script>
+  </div>
+
+  <div class="form_section">
+    <label for="publish" class="field_label">Publish</label>
+    <select name="publish" id="publish">
+        <option value="1"[% IF form.publish %]selected[% END %]>Yes</option>
+        <option value="0"[% UNLESS form.publish %]selected[% END %]>No</option>
+    </select>
+  </div>
+
+  <div class="form_section">
+    <label for="credit_1" class="field_label">Credit</label>
+    <input type="text" name="credit_1" id="credit_1" size="80" value="[% form.credit.0 FILTER none %]">
+  </div>
+
+  <div class="form_section">
+    <label for="credit_2" class="field_label">Credit</label>
+    <input type="text" name="credit_2" id="credit_2" size="80" value="[% form.credit.1 FILTER none %]">
+  </div>
+
+  <div class="form_section">
+    <label for="credit_3" class="field_label">Credit</label>
+    <input type="text" name="credit_3" id="credit_3" size="80" value="[% form.credit.2 FILTER none %]">
+  </div>
+
+  <input type="submit" id="commit" value="Submit">
+
+  <p>
+    [ <span class="required_star">*</span> <span class="required_explanation">
+      Required Field</span> ]
+  </p>
+</form>
+
+[% PROCESS global/footer.html.tmpl %]

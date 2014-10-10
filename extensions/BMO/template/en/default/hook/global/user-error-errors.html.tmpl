@@ -37,4 +37,8 @@
   [% title = "Too Many Bugs" %]
   Too many [% terms.bugs %] matched your selection criteria.
 
+[% ELSIF error == "bounty_attachment_missing_reporter" %]
+  [% title = "Missing Reporter" %]
+  You must provide an email address for a bounty attachment.
+
 [% END %]

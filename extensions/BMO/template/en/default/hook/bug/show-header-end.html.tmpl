@@ -8,6 +8,10 @@
 
 [% style_urls.push('extensions/BMO/web/styles/edit_bug.css') %]
 [% javascript_urls.push('extensions/BMO/web/js/edit_bug.js') %]
+[% IF user.is_insider %]
+  [% javascript_urls.push('extensions/BMO/web/js/attachment_bounty_form.js') %]
+  [% yui.push('selector') %]
+[% END %]
 [% title = "$bug.bug_id &ndash; " %]
 [% IF bug.alias != '' %]
   [% title = title _ "($bug.alias) " %]
@@ -16,3 +20,10 @@
 [% javascript = javascript _ 
                 "document.title = document.title.replace(/^" _ terms.Bug _ " /, '');"
 %]
+[% js_bug_id = bug.bug_id FILTER js %]
+[% IF user.is_insider %]
+  [% javascript = javascript _
+                  "YAHOO.util.Event.onDOMReady(function () { " _
+                  "add_bounty_attachment('$js_bug_id'); });"
+  %]
+[% END %]

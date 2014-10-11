@@ -57,8 +57,7 @@ YUI({
             metaFields: {
                 description: "result.result.description",
                 heading:     "result.result.heading",
-                buffer:      "result.result.buffer",
-                mark_read:   "result.result.mark_read"
+                buffer:      "result.result.buffer"
             }
         }
     });
@@ -83,19 +82,6 @@ YUI({
                     '<a href="buglist.cgi?' + e.response.meta.buffer +
                     '" target="_blank">' + e.response.results.length + ' bugs found</a>');
                 bugQueryTable.set('data', e.response.results);
-
-                var mark_read = e.response.meta.mark_read;
-                if (mark_read) {
-                    Y.one('#query_markread').setHTML( mark_read );
-                    Y.one('#bar_markread').removeClass('bz_default_hidden');
-                    Y.one('#query_markread_text').setHTML( mark_read );
-                    Y.one('#query_markread').removeClass('bz_default_hidden');
-                }
-                else {
-                    Y.one('#bar_markread').addClass('bz_default_hidden');
-                    Y.one('#query_markread').addClass('bz_default_hidden');
-                }
-                Y.one('#query_markread_text').addClass('bz_default_hidden');
             }
         },
         failure: function(o) {
@@ -113,6 +99,8 @@ YUI({
         counter = counter + 1;
         lastChangesCache = {};
 
+        Y.one('#query_markvisited').removeClass('bz_default_hidden');
+        Y.one('#query_markvisited_text').addClass('bz_default_hidden');
         Y.one('#query_count_refresh').addClass('bz_default_hidden');
         bugQueryTable.set('data', []);
         bugQueryTable.render("#query_table");
@@ -252,18 +240,17 @@ YUI({
         updateQueryTable(selected_value);
     });
 
-    Y.one('#query_markread').on('click', function(e) {
+    Y.one('#query_markvisited').on('click', function(e) {
         var data = bugQueryTable.data;
         var bug_ids = [];
 
-        Y.one('#query_markread').addClass('bz_default_hidden');
-        Y.one('#query_markread_text').removeClass('bz_default_hidden');
+        Y.one('#query_markvisited').addClass('bz_default_hidden');
+        Y.one('#query_markvisited_text').removeClass('bz_default_hidden');
 
         for (var i = 0, l = data.size(); i < l; i++) {
             bug_ids.push(data.item(i).get('bug_id'));
         }
         YAHOO.bugzilla.bugUserLastVisit.update(bug_ids);
-        YAHOO.bugzilla.bugInterest.unmark(bug_ids);
     });
 
     Y.one('#query_buglist').on('click', function(e) {

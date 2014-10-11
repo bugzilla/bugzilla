@@ -106,7 +106,6 @@ sub QUERY_DEFS {
             name => 'lastvisitedbugs',
             heading => 'Updated Since Last Visit',
             description => 'Bugs updated since last visited',
-            mark_read => 'Mark Visited',
             params => {
                 o1 => 'lessthan',
                 v1 => '%last_changed%',
@@ -114,25 +113,9 @@ sub QUERY_DEFS {
             },
         },
         {
-            name        => 'interestingbugs',
-            heading     => 'Interesting Bugs',
-            description => 'Bugs that you may find interesting',
-            mark_read => 'Remove Interest',
-            params => {
-                j_top => 'OR',
-                f1    => 'bug_interest_ts',
-                o1    => 'isnotempty',
-
-                f2    => 'last_visit_ts',
-                o2    => 'lessthan',
-                v2    => '%last_changed%',
-            }
-        },
-        {
             name => 'nevervisitbugs',
             heading => 'Involved with and Never Visited',
             description => "Bugs you've never visited, but are involved with",
-            mark_read => 'Mark Visited',
             params => {
                 query_format => "advanced",
                 bug_status   => ['__open__'],,

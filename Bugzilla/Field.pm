@@ -270,8 +270,6 @@ use constant DEFAULT_FIELDS => (
     {name => 'tag',                   desc => 'Tags'},
     {name => 'last_visit_ts',         desc => 'Last Visit', buglist => 1,
      type => FIELD_TYPE_DATETIME},
-    {name => 'bug_interest_ts',       desc => 'Bug Interest', buglist => 1,
-     type => FIELD_TYPE_DATETIME},
     {name => 'comment_tag',           desc => 'Comment Tag'},
 );
 

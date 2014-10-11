@@ -17,7 +17,6 @@ use Bugzilla::Util qw(detaint_natural trick_taint template_var datetime_from);
 use Bugzilla::WebService::Util qw(validate);
 
 use Bugzilla::Extension::MyDashboard::Queries qw(QUERY_DEFS query_bugs query_flags);
-use Bugzilla::Extension::MyDashboard::BugInterest;
 
 use constant READ_ONLY => qw(
     run_bug_query
@@ -126,32 +125,6 @@ sub run_flag_query {
     }
 
     return { result => { $type => $results }};
-}
-
-sub bug_interest_unmark {
-    my ($self, $params) = @_;
-    my $user = Bugzilla->login(LOGIN_REQUIRED);
-
-    ThrowCodeError('param_required', { function => 'MyDashboard.bug_interest_unmark', param => 'bug_ids' })
-        unless $params->{bug_ids};
-
-    my @bug_ids = ref($params->{bug_ids}) ? @{$params->{bug_ids}} : ( $params->{bug_ids} );
-
-    Bugzilla->dbh->bz_start_transaction();
-    foreach my $bug_id (@bug_ids) {
-        Bugzilla::Extension::MyDashboard::BugInterest->unmark($user->id, $bug_id);
-    }
-    Bugzilla->dbh->bz_commit_transaction();
-}
-
-sub rest_resources {
-    return [
-        qr{^/bug_interest_unmark$}, {
-            PUT => {
-                method => 'bug_interest_unmark'
-            }
-        }
-    ];
 }
 
 1;

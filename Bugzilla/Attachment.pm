@@ -368,7 +368,7 @@ sub is_on_filesystem {
     # In order to serve an attachment, you also send the datasize in the
     # content-length header. Making additional queries which are exactly
     # the same as found in the datasize code path is just wasteful.
-    my $datasize = $self->{datasize};
+    my $datasize = $self->datasize;
     return $self->{is_on_filesystem};
 }
 

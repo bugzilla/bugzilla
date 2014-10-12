@@ -58,5 +58,31 @@
   maxlocalattachment => "The maximum size (in megabytes) of attachments to be stored " _
                         "locally on the web server. If set to a value lower than the " _
                         "<a href=\"#maxattachmentsize\"><var>maxattachmentsize</var> parameter</a>, " _
-                        "attachments will never be kept on the local filesystem." }
+                        "attachments will never be kept on the local filesystem. " _
+                        "If you want to store all attachments on disk rather than in the " _
+                        "database, then set <a href=\"#maxattachmentsize\">" _
+                        "<var>maxattachmentsize</var> parameter</a> to 0. ",
+
+
+  xsendfile_header =>
+    "By default, attachments are served by the CGI script. " _
+    "If you enable filesystem file storage for large files using the " _
+    "<a href=\"#maxlocalattachment\"><var>maxlocalattachment</var> parameter</a> " _
+    "then you can have those files served directly by the webserver, which " _
+    "avoids copying them entirely into memory, and this may result in a " _
+    "performance improvement. To do this, configure your webserver appropriately " _
+    "and then set the correct header, as follows:" _
+    "<ul>" _
+    "<li>Apache: <code>X-Sendfile</code> header; see " _
+    "<code><a href=\"https://tn123.org/mod_xsendfile/\">mod_xsendfile</a></code> module</li>" _
+    "<li>nginx: <code>X-Accel-Redirect</code> header; see "_
+    "<a href=\"http://wiki.nginx.org/X-accel\">webserver documentation</a> for additional configuration</li>" _
+    "<li>lighttpd: <code>X-LIGHTTPD-send-file</code> header; see " _
+    "<a href=\"http://redmine.lighttpd.net/projects/1/wiki/X-LIGHTTPD-send-file\">webserver documentation</a> for additional configuration</li>" _
+    "</ul><br>" _
+    "Please note that attachments stored in the database cannot be offloaded " _
+    "to apache/nginx/lighttpd and are always handled by the CGI script."
+
+  }
+
 %]

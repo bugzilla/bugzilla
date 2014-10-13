@@ -1,0 +1,251 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% PROCESS global/variables.none.tmpl %]
+
+[% inline_style = BLOCK %]
+#newsletter_form {
+  padding: 10px;
+}
+#newsletter_form .required:after {
+  content: " *";
+  color: red;
+}
+#newsletter_form .field_label {
+  font-weight: bold;
+}
+#newsletter_form .field_desc {
+  padding-bottom: 3px;
+}
+#newsletter_form .field_desc,
+#newsletter_form .head_desc {
+  width: 600px;
+  word-wrap: normal;
+}
+#newsletter_form .head_desc {
+  padding-top: 5px;
+  padding-bottom: 12px;
+}
+#newsletter_form .form_section {
+  margin-bottom: 10px;
+}
+#newsletter_form textarea {
+  font-family: inherit;
+  font-size: inherit;
+}
+#newsletter_form em {
+  font-size: 1em;
+}
+.yui-calcontainer {
+  z-index: 2;
+}
+[% END %]
+
+[% inline_javascript = BLOCK %]
+function validateAndSubmit() {
+  var alert_text = '';
+  if (!isFilledOut('short_desc')) alert_text += 'Please enter a value for opportunity headline.\n';
+  if (!isFilledOut('description')) alert_text += 'Please enter a value for description.\n';
+  if (!isFilledOut('time_required')) alert_text += 'Please enter a value for time required.\n';
+  if (!isFilledOut('primary_contact')) alert_text += 'Please enter a value for contact email.\n';
+  if (!isFilledOut('timeframe')) alert_text += 'Please select a value for timeframe.\n';
+  if (YAHOO.util.Dom.get('area_other').checked == true
+      && !isFilledOut('area_other_text'))
+  {
+    alert_text += 'Please enter a value for other type of functional area.\n';
+  }
+  if (alert_text != '') {
+    alert(alert_text);
+    return false;
+  }
+  return true;
+}
+function toggleAreaOther() {
+  var area_other_cb = document.getElementById('area_other');
+  if (area_other_cb.checked == true) {
+    YAHOO.util.Dom.removeClass('area_other_text', 'bz_default_hidden');
+  }
+  else {
+    YAHOO.util.Dom.addClass('area_other_text', 'bz_default_hidden');
+  }
+}
+[% END %]
+
+[% PROCESS global/header.html.tmpl
+   title = "Contributor Opportunity Submission"
+   style = inline_style
+   javascript = inline_javascript
+   javascript_urls = [ 'extensions/BMO/web/js/form_validate.js' ]
+%]
+
+[% USE Bugzilla %]
+[% cgi = Bugzilla.cgi %]
+
+<form id="newsletter_form" method="post" action="post_bug.cgi" enctype="multipart/form-data"
+      onSubmit="return validateAndSubmit();">
+  <input type="hidden" name="format" value="comm-newsletter">
+  <input type="hidden" name="product" value="Marketing">
+  <input type="hidden" name="component" value="Community">
+  <input type="hidden" name="rep_platform" value="All">
+  <input type="hidden" name="op_sys" value="Other">
+  <input type="hidden" name="version" value="unspecified">
+  <input type="hidden" name="bug_severity" id="bug_severity" value="normal">
+  <input type="hidden" name="token" value="[% token FILTER html %]">
+
+<h1>Contributor Opportunity Submission</h1>
+
+<div class="head_desc">
+  I have a contribution opportunity I’d like to promote for use in the Mozilla
+  Communities newsletter and beyond!
+</div>
+
+<p>
+  [ <span class="required_star">*</span> <span class="required_explanation">Required Field</span> ]
+</p>
+
+<div class="form_section">
+  <label for="short_desc" class="field_label required">Opportunity Headline</label>
+  <div class="field_desc">
+    What's the opportunity called?
+  </div>
+  <input type="text" name="short_desc" id="short_desc" size="80">
+</div>
+
+<div class="form_section">
+  <label for="recurring" class="field_label">
+   Is your opportunity one time or recurring?
+  </label>
+  <div class="field_desc">
+    Can contributors do this only one time or are you looking for long-term
+    contributors?
+  </div>
+  <input type="radio" name="recurring" id="recurring" value="One time">One time<br>
+  <input type="radio" name="recurring" id="recurring" value="Recurring">Recurring
+</div>
+
+<div class="form_section">
+  <label for="description" class="field_label required">
+    Describe the opportunity, project goal, and what contributors will get from
+    participating in your project. Does this project support the Mozilla Mission or
+    Goals for 2014?
+  </label>
+  <div class="field_desc">
+    Please describe how contributors can help or participate and how might you
+    recognize their participation. Please also include any information about how
+    it fits into the Mozilla Mission or Goals for 2014
+  </div>
+  <textarea id="description" name="description" cols="80" rows="5"></textarea>
+</div>
+
+<div class="form_section">
+  <label for="time_required" class="field_label required">
+    Time Required
+  </label>
+  <div class="field_desc">
+    Approximately how much time per volunteer, will this task take?
+  </div>
+  <input type="text" name="time_required" id="time_required" size="80">
+</div>
+
+<div class="form_section">
+  <label for="primary_contact" class="field_label required">
+    Email address for Contact (if needed)
+  </label>
+  <div class="field_desc">
+    Your contact information
+  </div>
+  <input type="text" name="primary_contact" id="primary_contact" size="80">
+</div>
+
+<div class="form_section">
+  <label for="backup_contact" class="field_label">
+    Backup person or group to reach out to if necessary
+  </label>
+  <div class="field_desc">
+    Is there someone else we can reach out to for information on this project?
+  </div>
+  <input type="text" name="backup_contact" id="backup_contact" size="80">
+</div>
+
+<div class="form_section">
+  <label for="functional_area" class="field_label">
+    Functional area or Product area
+  </label>
+  <div class="field_desc">
+    What product or functional area does this opportunity relate to? Click
+    multiple areas if they apply (ie both Marketplace and UX)
+  </div>
+  <input type="checkbox" name="area_coding" id="area_coding" value="Coding">Coding<br>
+  <input type="checkbox" name="area_community_building"
+         id="area_community_building" value="Community Building">Community Building<br>
+  <input type="checkbox" name="area_education"
+         id="area_education" value="Education">Education<br>
+  <input type="checkbox" name="area_badges"
+         id="area_badges" value="Badges">Badges<br>
+  <input type="checkbox" name="area_ux"
+         id="area_ux" value="UX">UX<br>
+  <input type="checkbox" name="area_design"
+         id="area_design" value="Design">Design<br>
+  <input type="checkbox" name="area_marketing"
+         id="area_marketing" value="Marketing">Marketing<br>
+  <input type="checkbox" name="area_engagement"
+         id="area_engagement" value="Engagement">Engagement<br>
+  <input type="checkbox" name="area_firefox_desktop"
+         id="area_firefox_desktop" value="Firefox Desktop">Firefox Desktop<br>
+  <input type="checkbox" name="area_firefox_android"
+         id="area_firefox_android" value="Firefox for Android">Firefox for Android<br>
+  <input type="checkbox" name="area_firefox_os"
+         id="area_firefox_os" value="Firefox OS">Firefox OS<br>
+  <input type="checkbox" name="area_marketplace"
+         id="area_marketplace" value="Marketplace">Marketplace<br>
+  <input type="checkbox" name="area_user_research"
+         id="area_user_research" value="User Research">User Research<br>
+  <input type="checkbox" name="area_security"
+         id="area_security" value="Security">Security<br>
+  <input type="checkbox" name="area_support"
+         id="area_support" value="Support">Support<br>
+  <input type="checkbox" name="area_public_policy"
+         id="area_public_policy" value="Public Policy">Public Policy<br>
+  <input type="checkbox" name="area_privacy"
+         id="area_privacy" value="Privacy">Privacy<br>
+  <input type="checkbox" name="area_other"
+         id="area_other" value="Other"
+         onchange="toggleAreaOther();">Other:<br>
+  <input class="bz_default_hidden" type="text"
+         name="area_other_text" id="area_other_text" size="80">
+</div>
+
+<div class="form_section">
+  <label for="timeframe" class="field_label required">
+    Timeframe
+  </label>
+  <div class="field_desc">
+    Please provide specifics on the timeframe for the opportunity. It can be
+    ongoing, but the newsletter is especially oriented toward time sensitive
+    contribution.
+  </div>
+  <input type="text" name="timeframe" id="timeframe" size="80">
+</div>
+
+<div class="form_section">
+  <label for="background_url" class="field_label">
+    Please provide a url that provides full background and instructions on this
+    contribution opportunity.
+  </label>
+  <div class="field_desc">
+    We especially appreciate mozilla.org urls as we can instrument them more easily
+    to count responses, but we accept other ones too.
+  </div>
+  <input type="text" name="background_url" id="background_url" size="80">
+</div>
+
+<input type="submit" id="commit" value="Submit">
+
+</form>
+
+[% PROCESS global/footer.html.tmpl %]

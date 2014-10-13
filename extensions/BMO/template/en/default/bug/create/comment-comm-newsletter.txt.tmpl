@@ -1,0 +1,55 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% USE Bugzilla %]
+[% cgi = Bugzilla.cgi +%]
+>> Opportunity Headline
+[%+ cgi.param('short_desc') FILTER html %]
+
+>> Is your opportunity one time or recurring?
+[%+ cgi.param('recurring') || 'None' FILTER html %]
+
+>> Describe the opportunity, project goal, and what contributors will get from
+>> participating in your project. Does this project support the Mozilla Mission
+>> or Goals for 2014?
+[%+ cgi.param('description') FILTER html %]
+
+>> Time Required
+[%+ cgi.param('time_required') FILTER html %]
+
+>> Email Address for Contact
+[%+ cgi.param('primary_contact') FILTER html %]
+
+>> Backup person or group to reach out to if necessary
+[%+ cgi.param('backup_contact') || 'None' FILTER html %]
+
+>> Functional area or Product area
+Coding: [% IF cgi.param('area_coding') %] Yes [% ELSE %] No [% END %]
+Community Building: [% IF cgi.param('area_community_building') %] Yes [% ELSE %] No [% END %]
+Education: [% IF cgi.param('area_education') %] Yes [% ELSE %] No [% END %]
+Badges: [% IF cgi.param('area_badges') %] Yes [% ELSE %] No [% END %]
+UX: [% IF cgi.param('area_ux') %] Yes [% ELSE %] No [% END %]
+Design: [% IF cgi.param('area_design') %] Yes [% ELSE %] No [% END %]
+Marketing: [% IF cgi.param('area_marketing') %] Yes [% ELSE %] No [% END %]
+Engagement: [% IF cgi.param('area_engagement') %] Yes [% ELSE %] No [% END %]
+Firefox Desktop: [% IF cgi.param('area_firefox_desktop') %] Yes [% ELSE %] No [% END %]
+Firefox for Android: [% IF cgi.param('area_firefox_android') %] Yes [% ELSE %] No [% END %]
+FirefoxOS: [% IF cgi.param('area_firefox_os') %] Yes [% ELSE %] No [% END %]
+Marketplace: [% IF cgi.param('area_marketplace') %] Yes [% ELSE %] No [% END %]
+User Research/User Centered Design: [% IF cgi.param('area_user_research') %] Yes [% ELSE %] No [% END %]
+Security: [% IF cgi.param('area_security') %] Yes [% ELSE %] No [% END %]
+Support: [% IF cgi.param('area_support') %] Yes [% ELSE %] No [% END %]
+Public Policy: [% IF cgi.param('area_public_policy') %] Yes [% ELSE %] No [% END %]
+Privacy: [% IF cgi.param('area_privacy') %] Yes [% ELSE %] No [% END %]
+Other: [% IF cgi.param('area_other') %][% cgi.param('area_other_text') FILTER html %][% ELSE %] No [% END %]
+
+>> Timeframe
+[%+ cgi.param("timeframe") FILTER html %]
+
+>> Background URL
+[%+ cgi.param('background_url') FILTER html %]

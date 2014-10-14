@@ -14,13 +14,16 @@
 <script type="text/javascript">
 <!--
   /* Adds the reply text to the 'comment' textarea */
-  function replyToComment(id, real_id, name) {
+  function replyToComment(id, real_id, name, text) {
       var prefix = "(In reply to " + name + " from comment #" + id + ")\n";
       var replytext = "";
       [% IF user.settings.quote_replies.value == 'quoted_reply' %]
         /* pre id="comment_name_N" */
-        var text_elem = document.getElementById('comment_text_'+id);
-        var text = getText(text_elem);
+
+        if (text == null) {
+            var text_elem = document.getElementById('comment_text_'+id);
+            text = getText(text_elem);
+        }
         replytext = prefix + wrapReplyText(text);
       [% ELSIF user.settings.quote_replies.value == 'simple_reply' %]
         replytext = prefix;
@@ -41,6 +44,39 @@
 
       textarea.focus();
   } 
+
+  function replyToMarkdownComment(id, real_id, name) {
+      var textarea = document.getElementById('comment');
+      var comment = textarea.value;
+      textarea.value += "Fetching comment...";
+      YAHOO.util.Connect.setDefaultPostHeader('application/json', true);
+      YAHOO.util.Connect.asyncRequest('POST', 'jsonrpc.cgi',
+      {
+          success: function(res) {
+              var data = YAHOO.lang.JSON.parse(res.responseText);
+              if (!data.error) {
+                  textarea.value = comment;
+                  var text = data.result.comments[real_id].text;
+                  replyToComment(id, real_id, name, text);
+              } else {
+                  replyToComment(id, real_id, name, null);
+              }
+          },
+          failure: function(res) {
+              /* On failure, quote the comment as plain-text */
+              replyToComment(id, real_id, name, null);
+          }
+      },
+      YAHOO.lang.JSON.stringify({
+          version: "1.1",
+          method: "Bug.comments",
+          params: {
+              Bugzilla_api_token: BUGZILLA.api_token,
+              comment_ids: [real_id],
+          }
+      })
+      );
+  }
 //-->
 </script>
 
@@ -126,7 +162,13 @@
               [% END %]
               [<a class="bz_reply_link" href="#add_comment"
                 [% IF user.settings.quote_replies.value != 'off' %]
-                  onclick="replyToComment('[% comment.count %]', '[% comment.id %]', '[% comment.author.name || comment.author.nick FILTER html FILTER js %]'); return false;"
+                  onclick="
+                  [% IF feature_enabled('jsonrpc') && comment.is_markdown %]
+                    replyToMarkdownComment('[% comment.count %]', '[% comment.id %]', '[% comment.author.name || comment.author.nick FILTER html FILTER js %]'); return false;"
+                  [% ELSE %]
+                    replyToComment('[% comment.count %]', '[% comment.id %]', '[% comment.author.name || comment.author.nick FILTER html FILTER js %]', null); return false;"
+
+                  [% END %]
                 [% END %]
               >reply</a>]
             [% END %]

@@ -243,6 +243,15 @@
     textarea {
         font-family: monospace;
     }
+
+    blockquote {
+        border-left: 0.2em solid #CCC;
+        color: #65379C;
+        padding: 0;
+        margin-left: 0.5em;
+        margin-bottom: -1em;
+        white-space: pre;
+    }
 /* generic (end) */
 
 /* Links that control whether or not something is visible. */

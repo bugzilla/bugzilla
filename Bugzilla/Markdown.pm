@@ -75,7 +75,7 @@ sub _Markdown {
     my $self = shift;
     my $text = shift;
 
-    $text = Bugzilla::Template::quoteUrls($text);
+    $text = Bugzilla::Template::quoteUrls($text, undef, undef, undef, undef, 1);
 
     return $self->SUPER::_Markdown($text, @_);
 }
@@ -388,6 +388,36 @@ sub _DoCodeBlocks {
 
     # And now do the standard code blocks
     $text = $self->SUPER::_DoCodeBlocks($text);
+
+    return $text;
+}
+
+sub _DoBlockQuotes {
+    my ($self, $text) = @_;
+
+    $text =~ s{
+          (                             # Wrap whole match in $1
+            (?:
+              ^[ \t]*&gt;[ \t]?         # '>' at the start of a line
+                .+\n                    # rest of the first line
+              (?:.+\n)*                 # subsequent consecutive lines
+              \n*                       # blanks
+            )+
+          )
+        }{
+            my $bq = $1;
+            $bq =~ s/^[ \t]*&gt;[ \t]?//gm; # trim one level of quoting
+            $bq =~ s/^[ \t]+$//mg;          # trim whitespace-only lines
+            $bq = $self->_RunBlockGamut($bq, {wrap_in_p_tags => 1});      # recurse
+            $bq =~ s/^/  /mg;
+            # These leading spaces screw with <pre> content, so we need to fix that:
+            $bq =~ s{(\s*<pre>.+?</pre>)}{
+                        my $pre = $1;
+                        $pre =~ s/^  //mg;
+                        $pre;
+                    }egs;
+            "<blockquote>\n$bq\n</blockquote>\n\n";
+        }egmx;
 
     return $text;
 }

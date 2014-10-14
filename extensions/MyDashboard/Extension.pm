@@ -12,10 +12,13 @@ use strict;
 use base qw(Bugzilla::Extension);
 
 use Bugzilla;
+use Bugzilla::Status 'is_open_state';
+
 use Bugzilla::Constants;
 use Bugzilla::Search::Saved;
 
 use Bugzilla::Extension::MyDashboard::Queries qw(QUERY_DEFS);
+use Bugzilla::Extension::MyDashboard::BugInterest;
 
 our $VERSION = BUGZILLA_VERSION;
 
@@ -45,6 +48,33 @@ sub db_schema_abstract_schema {
             mydashboard_user_id_idx => ['user_id'],
         ],
     };
+
+    $schema->{'bug_interest'} = {
+        FIELDS => [
+            id => { TYPE       => 'MEDIUMSERIAL',
+                    NOTNULL    => 1,
+                    PRIMARYKEY => 1 },
+
+            bug_id => { TYPE       => 'INT3',
+                        NOTNULL    => 1,
+                        REFERENCES => { TABLE  => 'bugs',
+                                        COLUMN => 'bug_id',
+                                        DELETE => 'CASCADE' } },
+
+            user_id => { TYPE       => 'INT3',
+                         NOTNOLL    => 1,
+                         REFERENCES => { TABLE  => 'profiles',
+                                         COLUMN => 'userid' } },
+
+            modification_time => { TYPE    => 'DATETIME',
+                                   NOTNULL => 1 }
+        ],
+        INDEXES => [
+            bug_interest_idx         => { FIELDS => [qw(bug_id user_id)],
+                                          TYPE => 'UNIQUE' },
+            bug_interest_user_id_idx => ['user_id']
+        ],
+    };
 }
 
 ###########
@@ -53,6 +83,7 @@ sub db_schema_abstract_schema {
 
 BEGIN {
     *Bugzilla::Search::Saved::in_mydashboard = \&_in_mydashboard;
+    *Bugzilla::Component::watcher_ids        = \&_component_watcher_ids;
 }
 
 sub _in_mydashboard {
@@ -63,6 +94,22 @@ sub _in_mydashboard {
         SELECT 1 FROM mydashboard WHERE namedquery_id = ? AND user_id = ?",
         undef, $self->id, Bugzilla->user->id);
     return $self->{'in_mydashboard'};
+}
+
+sub _component_watcher_ids {
+    my ($self) = @_;
+    my $dbh = Bugzilla->dbh;
+
+    my $query = "SELECT user_id FROM component_watch
+                  WHERE product_id = ?
+                    AND (component_id = ?
+                         OR component_id IS NULL
+                         OR ? LIKE CONCAT(component_prefix, '%'))";
+
+    $self->{watcher_ids} ||= $dbh->selectcol_arrayref($query, undef,
+        $self->product_id, $self->id, $self->name);
+
+    return $self->{watcher_ids};
 }
 
 #############
@@ -121,6 +168,71 @@ sub webservice {
     my ($self, $args) = @_;
     my $dispatch = $args->{dispatch};
     $dispatch->{MyDashboard} = "Bugzilla::Extension::MyDashboard::WebService";
+}
+
+sub bug_end_of_create {
+    my ($self, $args) = @_;
+    my ($bug, $params, $timestamp) = @$args{qw(bug params timestamp)};
+    my $user = Bugzilla->user;
+
+    # Anyone added to the CC list of a bug is now interested in that bug.
+    foreach my $cc_user (@{ $bug->cc_users }) {
+        next $user->id == $cc_user->id;
+        Bugzilla::Extension::MyDashboard::BugInterest->mark($cc_user->id, $bug->id, $timestamp);
+    }
+
+    # Anyone that is watching a component is interested when a bug is filed into the component.
+    foreach my $watcher_id (@{ $bug->component_obj->watcher_ids }) {
+        Bugzilla::Extension::MyDashboard::BugInterest->mark($watcher_id, $bug->id, $timestamp);
+    }
+}
+
+sub bug_end_of_update {
+    my ($self, $args) = @_;
+    my ($bug, $old_bug, $changes, $timestamp) = @$args{qw(bug old_bug changes timestamp)};
+    my $user = Bugzilla->user;
+
+    # Anyone added to the CC list of a bug is now interested in that bug.
+    my %old_cc = map { $_->id => $_ } grep { defined } @{ $old_bug->cc_users };
+    my @added = grep { not $old_cc{ $_->id } } grep { defined } @{ $bug->cc_users };
+    foreach my $cc_user (@added) {
+        next $user->id == $cc_user->id;
+        Bugzilla::Extension::MyDashboard::BugInterest->mark($cc_user->id, $bug->id, $timestamp);
+    }
+
+    # Anyone that is watching a component is interested when a bug is filed into the component.
+    if ($changes->{product} or $changes->{component}) {
+        # All of the watchers would be interested in this bug update
+        foreach my $watcher_id (@{ $bug->component_obj->watcher_ids }) {
+            Bugzilla::Extension::MyDashboard::BugInterest->mark($watcher_id, $bug->id, $timestamp);
+        }
+    }
+
+    if ($changes->{bug_status}) {
+        my ($old_status, $new_status) = @{ $changes->{bug_status} };
+        if (is_open_state($old_status) && !is_open_state($new_status)) {
+            my @related_bugs = (@{ $bug->blocks_obj }, @{ $bug->depends_on_obj });
+            my %involved;
+
+            foreach my $related_bug (@related_bugs) {
+                my @users = grep { defined } $related_bug->assigned_to,
+                                             $related_bug->reporter,
+                                             $related_bug->qa_contact,
+                                             @{ $related_bug->cc_users };
+
+                foreach my $involved_user (@users) {
+                    $involved{ $involved_user->id }{ $related_bug->id } = 1;
+                }
+            }
+            foreach my $involved_user_id (keys %involved) {
+                foreach my $related_bug_id (keys %{$involved{$involved_user_id}}) {
+                    Bugzilla::Extension::MyDashboard::BugInterest->mark($involved_user_id,
+                                                                        $related_bug_id,
+                                                                        $timestamp);
+                }
+            }
+        }
+    }
 }
 
 __PACKAGE__->NAME;

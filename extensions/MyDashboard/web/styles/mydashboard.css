@@ -47,8 +47,7 @@
     width: 40%;
 }
 
-.items_found, .refresh, .buglist, .markvisited {
-
+.items_found, .refresh, .buglist, .markread {
     font-size: 80%;
 }
 

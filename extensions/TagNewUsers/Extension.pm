@@ -188,7 +188,7 @@ sub _is_new {
     my ($self) = @_;
 
     if (!exists $self->{is_new}) {
-        if ($self->in_group('canconfirm')) {
+        if ($self->in_group('editbugs')) {
             $self->{is_new} = 0;
         } else {
             $self->{is_new} = ($self->comment_count <= COMMENT_COUNT)

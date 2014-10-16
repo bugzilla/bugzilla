@@ -571,7 +571,6 @@ sub insert {
     my ($flags, $new_flags) = Bugzilla::Flag->extract_flags_from_cgi(
                                   $bug, $attachment, $vars, SKIP_REQUESTEE_ON_ERROR);
     $attachment->set_flags($flags, $new_flags);
-    $attachment->update($timestamp);
 
     # Insert a comment about the new attachment into the database.
     my $comment = $cgi->param('comment');
@@ -605,6 +604,10 @@ sub insert {
       $dbh->do('UPDATE tokens SET eventdata = ? WHERE token = ?', undef,
                ("create_attachment:" . $attachment->id, $token));
   }
+
+  # We have to update the attachment after updating the bug, to ensure new
+  # comments are available.
+  $attachment->update($timestamp);
 
   $dbh->bz_commit_transaction;
 
@@ -729,15 +732,17 @@ sub update {
     # Figure out when the changes were made.
     my $timestamp = $dbh->selectrow_array('SELECT LOCALTIMESTAMP(0)');
 
+    # Commit the comment, if any.
+    # This has to happen before updating the attachment, to ensure new comments
+    # are available to $attachment->update.
+    $bug->update($timestamp);
+
     if ($can_edit) {
         my $changes = $attachment->update($timestamp);
         # If there are changes, we updated delta_ts in the DB. We have to
         # reflect this change in the bug object.
         $bug->{delta_ts} = $timestamp if scalar(keys %$changes);
     }
-
-    # Commit the comment, if any.
-    $bug->update($timestamp);
 
     # Commit the transaction now that we are finished updating the database.
     $dbh->bz_commit_transaction();

@@ -1186,6 +1186,9 @@
     [%# Used for non-web-based LOGIN_REQUIRED situations. %]
     You must log in before using this part of [% terms.Bugzilla %].
 
+  [% ELSIF error == "markdown_disabled" %]
+    Markdown feature is not enabled.
+
   [% ELSIF error == "migrate_config_created" %]
     The file <kbd>[% file FILTER html %]</kbd> contains configuration
     variables that must be set before continuing with the migration.

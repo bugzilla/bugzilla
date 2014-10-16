@@ -25,7 +25,7 @@ use Encode qw(encode);
 use Encode::MIME::Header;
 use Email::MIME;
 use Email::Sender::Simple qw(sendmail);
-use Email::Sender::Transport::SMTP;
+use Email::Sender::Transport::SMTP::Persistent;
 use Bugzilla::Sender::Transport::Sendmail;
 
 sub MessageToMTA {
@@ -127,7 +127,8 @@ sub MessageToMTA {
     }
 
     if ($method eq "SMTP") {
-        $transport = Email::Sender::Transport::SMTP->new({
+        $transport = Bugzilla->request_cache->{smtp} //=
+          Email::Sender::Transport::SMTP::Persistent->new({
             host  => Bugzilla->params->{'smtpserver'},
             sasl_username => Bugzilla->params->{'smtp_username'},
             sasl_password => Bugzilla->params->{'smtp_password'},

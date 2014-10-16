@@ -659,13 +659,16 @@ sub memcached {
 # Per-process cleanup. Note that this is a plain subroutine, not a method,
 # so we don't have $class available.
 sub _cleanup {
-    my $main   = Bugzilla->request_cache->{dbh_main};
-    my $shadow = Bugzilla->request_cache->{dbh_shadow};
+    my $cache = Bugzilla->request_cache;
+    my $main = $cache->{dbh_main};
+    my $shadow = $cache->{dbh_shadow};
     foreach my $dbh ($main, $shadow) {
         next if !$dbh;
         $dbh->bz_rollback_transaction() if $dbh->bz_in_transaction;
         $dbh->disconnect;
     }
+    my $smtp = $cache->{smtp};
+    $smtp->disconnect if $smtp;
     clear_request_cache();
 
     # These are both set by CGI.pm but need to be undone so that

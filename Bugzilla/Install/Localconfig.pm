@@ -101,10 +101,6 @@ use constant LOCALCONFIG_VARS => (
         default => 0,
     },
     {
-        name    => 'cvsbin',
-        default => sub { bin_loc('cvs') },
-    },
-    {
         name    => 'interdiffbin',
         default => sub { bin_loc('interdiff') },
     },

@@ -322,10 +322,8 @@
 ],
 
 'attachment/diff-file.html.tmpl' => [
-  'lxr_prefix',
   'file.minus_lines',
   'file.plus_lines',
-  'bonsai_prefix',
   'section.old_start',
   'section_num',
   'current_line_old',

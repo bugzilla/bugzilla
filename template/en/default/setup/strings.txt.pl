@@ -155,10 +155,6 @@ they don't exist.
 
 If this is set to 0, checksetup.pl will not create .htaccess files.
 END
-    localconfig_cvsbin => <<'END',
-If you want to use the CVS integration of the Patch Viewer, please specify
-the full path to the "cvs" executable here.
-END
     localconfig_db_check => <<'END',
 Should checksetup.pl try to verify that your database setup is correct?
 With some combinations of database servers/Perl modules/moonphase this

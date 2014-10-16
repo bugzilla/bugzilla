@@ -23,17 +23,18 @@ use Bugzilla::Util;
 use constant PERLIO_IS_ENABLED => $Config{useperlio};
 
 sub process_diff {
-    my ($attachment, $format, $context) = @_;
+    my ($attachment, $format) = @_;
     my $dbh = Bugzilla->dbh;
     my $cgi = Bugzilla->cgi;
     my $lc  = Bugzilla->localconfig;
     my $vars = {};
 
-    my ($reader, $last_reader) = setup_patch_readers(undef, $context);
+    require PatchReader::Raw;
+    my $reader = new PatchReader::Raw;
 
     if ($format eq 'raw') {
         require PatchReader::DiffPrinter::raw;
-        $last_reader->sends_data_to(new PatchReader::DiffPrinter::raw());
+        $reader->sends_data_to(new PatchReader::DiffPrinter::raw());
         # Actually print out the patch.
         print $cgi->header(-type => 'text/plain');
         disable_utf8();
@@ -71,7 +72,7 @@ sub process_diff {
         $vars->{'description'} = $attachment->description;
         $vars->{'other_patches'} = \@other_patches;
 
-        setup_template_patch_reader($last_reader, $format, $context, $vars);
+        setup_template_patch_reader($reader, $vars);
         # The patch is going to be displayed in a HTML page and if the utf8
         # param is enabled, we have to encode attachment data as utf8.
         if (Bugzilla->params->{'utf8'}) {
@@ -83,10 +84,12 @@ sub process_diff {
 }
 
 sub process_interdiff {
-    my ($old_attachment, $new_attachment, $format, $context) = @_;
+    my ($old_attachment, $new_attachment, $format) = @_;
     my $cgi = Bugzilla->cgi;
     my $lc  = Bugzilla->localconfig;
     my $vars = {};
+
+    require PatchReader::Raw;
 
     # Encode attachment data as utf8 if it's going to be displayed in a HTML
     # page using the UTF-8 encoding.
@@ -177,10 +180,11 @@ sub process_interdiff {
         $warning = 'interdiff3';
     }
 
-    my ($reader, $last_reader) = setup_patch_readers("", $context);
+    my $reader = new PatchReader::Raw;
+
     if ($format eq 'raw') {
         require PatchReader::DiffPrinter::raw;
-        $last_reader->sends_data_to(new PatchReader::DiffPrinter::raw());
+        $reader->sends_data_to(new PatchReader::DiffPrinter::raw());
         # Actually print out the patch.
         print $cgi->header(-type => 'text/plain');
         disable_utf8();
@@ -193,7 +197,7 @@ sub process_interdiff {
         $vars->{'newid'} = $new_attachment->id;
         $vars->{'new_desc'} = $new_attachment->description;
 
-        setup_template_patch_reader($last_reader, $format, $context, $vars);
+        setup_template_patch_reader($reader, $vars);
     }
     $reader->iterate_string('interdiff #' . $old_attachment->id .
                             ' #' . $new_attachment->id, $stdout);
@@ -208,7 +212,6 @@ sub get_unified_diff {
 
     # Bring in the modules we need.
     require PatchReader::Raw;
-    require PatchReader::FixPatchRoot;
     require PatchReader::DiffPrinter::raw;
     require PatchReader::PatchInfoGrabber;
     require File::Temp;
@@ -219,14 +222,6 @@ sub get_unified_diff {
     # Reads in the patch, converting to unified diff in a temp file.
     my $reader = new PatchReader::Raw;
     my $last_reader = $reader;
-
-    # Fixes patch root (makes canonical if possible).
-    if (Bugzilla->params->{'cvsroot'}) {
-        my $fix_patch_root =
-            new PatchReader::FixPatchRoot(Bugzilla->params->{'cvsroot'});
-        $last_reader->sends_data_to($fix_patch_root);
-        $last_reader = $fix_patch_root;
-    }
 
     # Grabs the patch file info.
     my $patch_info_grabber = new PatchReader::PatchInfoGrabber();
@@ -274,46 +269,8 @@ sub warn_if_interdiff_might_fail {
     return undef;
 }
 
-sub setup_patch_readers {
-    my ($diff_root, $context) = @_;
-
-    # Parameters:
-    # format=raw|html
-    # context=patch|file|0-n
-    # collapsed=0|1
-    # headers=0|1
-
-    # Define the patch readers.
-    # The reader that reads the patch in (whatever its format).
-    require PatchReader::Raw;
-    my $reader = new PatchReader::Raw;
-    my $last_reader = $reader;
-    # Fix the patch root if we have a cvs root.
-    if (Bugzilla->params->{'cvsroot'}) {
-        require PatchReader::FixPatchRoot;
-        $last_reader->sends_data_to(new PatchReader::FixPatchRoot(Bugzilla->params->{'cvsroot'}));
-        $last_reader->sends_data_to->diff_root($diff_root) if defined($diff_root);
-        $last_reader = $last_reader->sends_data_to;
-    }
-
-    # Add in cvs context if we have the necessary info to do it
-    if ($context ne 'patch' && Bugzilla->localconfig->{cvsbin} 
-        && Bugzilla->params->{'cvsroot_get'}) 
-    {
-        require PatchReader::AddCVSContext;
-        # We need to set $cvsbin as global, because PatchReader::CVSClient
-        # needs it in order to find 'cvs'.
-        $main::cvsbin = Bugzilla->localconfig->{cvsbin};
-        $last_reader->sends_data_to(
-          new PatchReader::AddCVSContext($context, Bugzilla->params->{'cvsroot_get'}));
-        $last_reader = $last_reader->sends_data_to;
-    }
-
-    return ($reader, $last_reader);
-}
-
 sub setup_template_patch_reader {
-    my ($last_reader, $format, $context, $vars) = @_;
+    my ($last_reader, $vars) = @_;
     my $cgi = Bugzilla->cgi;
     my $template = Bugzilla->template;
 
@@ -328,22 +285,15 @@ sub setup_template_patch_reader {
     }
 
     $vars->{'collapsed'} = $cgi->param('collapsed');
-    $vars->{'context'} = $context;
-    $vars->{'do_context'} = Bugzilla->localconfig->{cvsbin} 
-                            && Bugzilla->params->{'cvsroot_get'} && !$vars->{'newid'};
 
     # Print everything out.
     print $cgi->header(-type => 'text/html');
 
     $last_reader->sends_data_to(new PatchReader::DiffPrinter::template($template,
-                                "attachment/diff-header.$format.tmpl",
-                                "attachment/diff-file.$format.tmpl",
-                                "attachment/diff-footer.$format.tmpl",
-                                { %{$vars},
-                                  bonsai_url => Bugzilla->params->{'bonsai_url'},
-                                  lxr_url => Bugzilla->params->{'lxr_url'},
-                                  lxr_root => Bugzilla->params->{'lxr_root'},
-                                }));
+                                'attachment/diff-header.html.tmpl',
+                                'attachment/diff-file.html.tmpl',
+                                'attachment/diff-footer.html.tmpl',
+                                $vars));
 }
 
 1;
@@ -363,7 +313,5 @@ __END__
 =item setup_template_patch_reader
 
 =item process_interdiff
-
-=item setup_patch_readers
 
 =back

@@ -60,8 +60,7 @@ Interdiff of #[% oldid %] and #[% newid %] for [% terms.bug %] #[% bugid %]
   [% IF headers %]
     <a href="[% PROCESS viewurl id=attachid %]">View</a>
     | <a href="[% PROCESS editurl id=attachid %]">Details</a>
-    | <a href="[% PROCESS diffurl id=attachid %]&amp;context=[%
-               context FILTER uri %]&amp;collapsed=[% collapsed FILTER uri %]&amp;headers=[%
+    | <a href="[% PROCESS diffurl id=attachid %]&amp;collapsed=[% collapsed FILTER uri %]&amp;headers=[%
                headers FILTER uri %]&amp;format=raw">Raw&nbsp;Unified</a>
     | Return to [% "$terms.bug $bugid" FILTER bug_link(bugid) FILTER none %]
   [% END %]
@@ -101,33 +100,6 @@ Interdiff of #[% oldid %] and #[% newid %] for [% terms.bug %] #[% bugid %]
    onmouseover="lastStatus = window.status; window.status='Expand All'; return true"
    onmouseout="window.status = lastStatus; return true"
    onclick="return expand_all()">Expand All</a>
-
-[% IF do_context %]
-  [%# only happens for normal viewing, not interdiff %]
-  | <strong>Context:</strong>
-  [% IF context == "patch" %]
-    (<strong>Patch</strong> / 
-  [% ELSE %]
-    (<a href="[% PROCESS diffurl id=attachid %]&amp;headers=[% headers FILTER uri %]">Patch</a> / 
-  [% END %]
-  [% IF context == "file" %]
-    <strong>File</strong> /
-  [% ELSE %]
-    <a href="[% PROCESS diffurl id=attachid %]&amp;headers=[% headers FILTER uri %]&amp;context=file">File</a> / 
-  [% END %]
-
-  [% IF context == "patch" || context == "file" %]
-    [% context = 3 %]
-  [% END %]
-  [%# textbox for context %]
-  <form class="inline" action="attachment.cgi">
-    <input type="hidden" name="action" value="diff">
-    <input type="hidden" name="id" value="[% attachid %]">
-    <input type="hidden" name="collapsed" value="[% collapsed FILTER html %]">
-    <input type="hidden" name="headers" value="[% headers FILTER html %]">
-    <input type="text" name="context" value="[% context FILTER html %]" size="3">
-  </form>)
-[% END %]
 
 [% IF warning %]
 <h2 class="warning">

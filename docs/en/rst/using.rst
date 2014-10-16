@@ -623,11 +623,10 @@ file first.
 Patch Viewer
 ============
 
-Viewing and reviewing patches in Bugzilla is often difficult due to
-lack of context, improper format and the inherent readability issues that
-raw patches present.  Patch Viewer is an enhancement to Bugzilla designed
-to fix that by offering increased context, linking to sections, and
-integrating with Bonsai, LXR and CVS.
+Viewing and reviewing patches in Bugzilla is often difficult due to improper
+format and the inherent readability issues that raw patches present.  Patch
+Viewer is an enhancement to Bugzilla designed to fix that by offering linking
+to sections.
 
 Patch viewer allows you to:
 
@@ -636,16 +635,11 @@ Patch viewer allows you to:
 
 + See the difference between two patches.
 
-+ Get more context in a patch.
-
 + Collapse and expand sections of a patch for easy
   reading.
 
 + Link to a particular section of a patch for discussion or
   review
-
-+ Go to Bonsai or LXR to see more context, blame, and
-  cross-references for the part of the patch you are looking at
 
 + Create a rawtext unified format diff out of any patch, no
   matter what format it came from
@@ -671,18 +665,6 @@ dropdown at the top of the page ("Differences between \[dropdown] and
 this patch") and click the "Diff" button. This will show you what
 is new or changed in the newer patch.
 
-.. _patchviewer_context:
-
-Getting More Context in a Patch
--------------------------------
-
-To get more context in a patch, you put a number in the textbox at
-the top of Patch Viewer ("Patch / File / \[textbox]") and hit enter.
-This will give you that many lines of context before and after each
-change. Alternatively, you can click on the "File" link there and it
-will show each change in the full context of the file. This feature only
-works against files that were diffed using "cvs diff".
-
 .. _patchviewer_collapse:
 
 Collapsing and Expanding Sections of a Patch
@@ -704,20 +686,6 @@ To link to a section of a patch (for example, if you want to be
 able to give someone a URL to show them which part you are talking
 about) you simply click the "Link Here" link on the section header. The
 resulting URL can be copied and used in discussion.
-
-.. _patchviewer_bonsai_lxr:
-
-Going to Bonsai and LXR
------------------------
-
-To go to Bonsai to get blame for the lines you are interested in,
-you can click the "Lines XX-YY" link on the section header you are
-interested in. This works even if the patch is against an old
-version of the file, since Bonsai stores all versions of the file.
-
-To go to LXR, you click on the filename on the file header
-(unfortunately, since LXR only does the most recent version, line
-numbers are likely to rot).
 
 .. _patchviewer_unified_diff:
 

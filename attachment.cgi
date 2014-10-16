@@ -540,7 +540,6 @@ sub insert {
     my ($flags, $new_flags) = Bugzilla::Flag->extract_flags_from_cgi(
                                   $bug, $attachment, $vars, SKIP_REQUESTEE_ON_ERROR);
     $attachment->set_flags($flags, $new_flags);
-    $attachment->update($timestamp);
 
     # Insert a comment about the new attachment into the database.
     my $comment = $cgi->param('comment');
@@ -549,45 +548,50 @@ sub insert {
                                   type => CMT_ATTACHMENT_CREATED,
                                   extra_data => $attachment->id });
 
-  # Assign the bug to the user, if they are allowed to take it
-  my $owner = "";
-  if ($cgi->param('takebug') && $user->in_group('editbugs', $bug->product_id)) {
-      # When taking a bug, we have to follow the workflow.
-      my $bug_status = $cgi->param('bug_status') || '';
-      ($bug_status) = grep {$_->name eq $bug_status} @{$bug->status->can_change_to};
+    # Assign the bug to the user, if they are allowed to take it
+    my $owner = "";
+    if ($cgi->param('takebug') && $user->in_group('editbugs', $bug->product_id)) {
+        # When taking a bug, we have to follow the workflow.
+        my $bug_status = $cgi->param('bug_status') || '';
+        ($bug_status) = grep { $_->name eq $bug_status }
+                        @{ $bug->status->can_change_to };
 
-      if ($bug_status && $bug_status->is_open
-          && ($bug_status->name ne 'UNCONFIRMED' 
-              || $bug->product_obj->allows_unconfirmed))
-      {
-          $bug->set_bug_status($bug_status->name);
-          $bug->clear_resolution();
-      }
-      # Make sure the person we are taking the bug from gets mail.
-      $owner = $bug->assigned_to->login;
-      $bug->set_assigned_to($user);
-  }
+        if ($bug_status && $bug_status->is_open
+            && ($bug_status->name ne 'UNCONFIRMED'
+                || $bug->product_obj->allows_unconfirmed))
+        {
+            $bug->set_bug_status($bug_status->name);
+            $bug->clear_resolution();
+        }
+        # Make sure the person we are taking the bug from gets mail.
+        $owner = $bug->assigned_to->login;
+        $bug->set_assigned_to($user);
+    }
 
-  $bug->add_cc($user) if $cgi->param('addselfcc');
-  $bug->update($timestamp);
+    $bug->add_cc($user) if $cgi->param('addselfcc');
+    $bug->update($timestamp);
 
-  $dbh->bz_commit_transaction;
+    # We have to update the attachment after updating the bug, to ensure new
+    # comments are available.
+    $attachment->update($timestamp);
 
-  # Define the variables and functions that will be passed to the UI template.
-  $vars->{'attachment'} = $attachment;
-  # We cannot reuse the $bug object as delta_ts has eventually been updated
-  # since the object was created.
-  $vars->{'bugs'} = [new Bugzilla::Bug($bugid)];
-  $vars->{'header_done'} = 1;
-  $vars->{'contenttypemethod'} = $cgi->param('contenttypemethod');
+    $dbh->bz_commit_transaction;
 
-  my $recipients =  { 'changer' => $user, 'owner' => $owner };
-  $vars->{'sent_bugmail'} = Bugzilla::BugMail::Send($bugid, $recipients);
+    # Define the variables and functions that will be passed to the UI template.
+    $vars->{'attachment'} = $attachment;
+    # We cannot reuse the $bug object as delta_ts has eventually been updated
+    # since the object was created.
+    $vars->{'bugs'} = [new Bugzilla::Bug($bugid)];
+    $vars->{'header_done'} = 1;
+    $vars->{'contenttypemethod'} = $cgi->param('contenttypemethod');
 
-  print $cgi->header();
-  # Generate and return the UI (HTML page) from the appropriate template.
-  $template->process("attachment/created.html.tmpl", $vars)
-    || ThrowTemplateError($template->error());
+    my $recipients = { 'changer' => $user, 'owner' => $owner };
+    $vars->{'sent_bugmail'} = Bugzilla::BugMail::Send($bugid, $recipients);
+
+    print $cgi->header();
+    # Generate and return the UI (HTML page) from the appropriate template.
+    $template->process("attachment/created.html.tmpl", $vars)
+        || ThrowTemplateError($template->error());
 }
 
 # Displays a form for editing attachment properties.
@@ -595,25 +599,25 @@ sub insert {
 # is private and the user does not belong to the insider group.
 # Validations are done later when the user submits changes.
 sub edit {
-  my $attachment = validateID();
+    my $attachment = validateID();
 
-  my $bugattachments =
-      Bugzilla::Attachment->get_attachments_by_bug($attachment->bug);
+    my $bugattachments =
+        Bugzilla::Attachment->get_attachments_by_bug($attachment->bug);
 
-  my $any_flags_requesteeble =
-    grep { $_->is_requestable && $_->is_requesteeble } @{$attachment->flag_types};
-  # Useful in case a flagtype is no longer requestable but a requestee
-  # has been set before we turned off that bit.
-  $any_flags_requesteeble ||= grep { $_->requestee_id } @{$attachment->flags};
-  $vars->{'any_flags_requesteeble'} = $any_flags_requesteeble;
-  $vars->{'attachment'} = $attachment;
-  $vars->{'attachments'} = $bugattachments;
+    my $any_flags_requesteeble = grep { $_->is_requestable && $_->is_requesteeble }
+                                 @{ $attachment->flag_types };
+    # Useful in case a flagtype is no longer requestable but a requestee
+    # has been set before we turned off that bit.
+    $any_flags_requesteeble ||= grep { $_->requestee_id } @{ $attachment->flags };
+    $vars->{'any_flags_requesteeble'} = $any_flags_requesteeble;
+    $vars->{'attachment'} = $attachment;
+    $vars->{'attachments'} = $bugattachments;
 
-  print $cgi->header();
+    print $cgi->header();
 
-  # Generate and return the UI (HTML page) from the appropriate template.
-  $template->process("attachment/edit.html.tmpl", $vars)
-    || ThrowTemplateError($template->error());
+    # Generate and return the UI (HTML page) from the appropriate template.
+    $template->process("attachment/edit.html.tmpl", $vars)
+        || ThrowTemplateError($template->error());
 }
 
 # Updates an attachment record. Only users with "editbugs" privileges,
@@ -715,15 +719,17 @@ sub update {
     # Figure out when the changes were made.
     my $timestamp = $dbh->selectrow_array('SELECT LOCALTIMESTAMP(0)');
 
+    # Commit the comment, if any.
+    # This has to happen before updating the attachment, to ensure new comments
+    # are available to $attachment->update.
+    $bug->update($timestamp);
+
     if ($can_edit) {
         my $changes = $attachment->update($timestamp);
         # If there are changes, we updated delta_ts in the DB. We have to
         # reflect this change in the bug object.
         $bug->{delta_ts} = $timestamp if scalar(keys %$changes);
     }
-
-    # Commit the comment, if any.
-    $bug->update($timestamp);
 
     # Commit the transaction now that we are finished updating the database.
     $dbh->bz_commit_transaction();

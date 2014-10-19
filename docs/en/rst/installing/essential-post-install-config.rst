@@ -93,12 +93,20 @@ Run Your Own Mail Server
 This section corresponds to choosing a :param:`mail_delivery_method` of
 :paramval:`Sendmail`.
 
-.. todo:: Do we still need this? Why would anyone want to do this in 2014?
-
 Unless you know what you are doing, and can deal with the possible problems
 of spam, bounces and blacklists, it is probably unwise to set up your own
-mail server just for Bugzilla. However, if you wish to do so, here is some
-guidance.
+mail server just for Bugzilla. However, if you wish to do so, some guidance
+follows. Besides setting up a complete, local distinct mail server just for
+Bugzilla, :paramval:`Sendmail` can as well be used if you really don't want
+to do that: Especially on Windows there's a little application called
+sendmail.exe_ which provides sendmail compatible calling conventions and
+encapsulates the SMTP communication to another mail server. This may be
+useful if you have trouble getting Perl packages for SMTP including encrypted
+communication and such installed on Windows and therefore can't use Bugzilla's
+buil-in support for SMTP. Like Bugzilla, sendmail.exe_ can be configured to
+log SMTP communcation to files in case of problems.
+
+    .. _sendmail.exe: http://glob.com.au/sendmail/
 
 On Linux, any Sendmail-compatible MTA (Mail Transfer Agent) will
 suffice.  Sendmail, Postfix, qmail and Exim are examples of common

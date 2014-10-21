@@ -29,7 +29,7 @@ use parent qw(Exporter);
        check_mail_delivery_method check_notification check_utf8
        check_bug_status check_smtp_auth check_theschwartz_available
        check_maxattachmentsize check_email check_smtp_ssl
-       check_comment_taggers_group
+       check_comment_taggers_group check_smtp_server
 );
 
 # Checking functions for the various values
@@ -342,6 +342,33 @@ sub check_notification {
     return "";
 }
 
+sub check_smtp_server {
+    my $host = shift;
+    my $port;
+
+    if ($host =~ /:/) {
+        ($host, $port) = split(/:/, $host, 2);
+        unless ($port && detaint_natural($port)) {
+            return "Invalid port. It must be an integer (typically 25, 465 or 587)";
+        }
+    }
+    trick_taint($host);
+    # Let's first try to connect using SSL. If this fails, we fall back to
+    # an unencrypted connection.
+    foreach my $method (['Net::SMTP::SSL', 465], ['Net::SMTP', 25]) {
+        my ($class, $default_port) = @$method;
+        next if $class eq 'Net::SMTP::SSL' && !Bugzilla->feature('smtp_ssl');
+        eval "require $class";
+        my $smtp = $class->new($host, Port => $port || $default_port, Timeout => 5);
+        if ($smtp) {
+            # The connection works!
+            $smtp->quit;
+            return '';
+        }
+    }
+    return "Cannot connect to $host" . ($port ? " using port $port" : "");
+}
+
 sub check_smtp_auth {
     my $username = shift;
     if ($username and !Bugzilla->feature('smtp_auth')) {
@@ -497,6 +524,8 @@ valid group is provided.
 =item check_bug_status
 
 =item check_shadowdb
+
+=item check_smtp_server
 
 =item check_smtp_auth
 

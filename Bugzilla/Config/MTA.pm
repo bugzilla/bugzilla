@@ -42,7 +42,8 @@ sub get_param_list {
   {
    name => 'smtpserver',
    type => 't',
-   default => 'localhost'
+   default => 'localhost',
+   checker => \&check_smtp_server
   },
   {
    name => 'smtp_username',

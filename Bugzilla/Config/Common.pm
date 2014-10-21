@@ -23,7 +23,7 @@ use base qw(Exporter);
     qw(check_multi check_numeric check_regexp check_url check_group
        check_sslbase check_priority check_severity check_platform
        check_opsys check_shadowdb check_urlbase check_webdotbase
-       check_user_verify_class check_ip
+       check_user_verify_class check_ip check_smtp_server
        check_mail_delivery_method check_notification check_utf8
        check_bug_status check_smtp_auth check_theschwartz_available
        check_maxattachmentsize check_email check_smtp_ssl
@@ -321,6 +321,19 @@ sub check_notification {
     if ($option ne 'disabled' && !Bugzilla->feature('updates')) {
         return "Some Perl modules are missing to get notifications about " .
                "new releases. See the output of checksetup.pl for more information";
+    }
+    return "";
+}
+
+sub check_smtp_server {
+    my $host = shift;
+    my $port;
+
+    if ($host =~ /:/) {
+        ($host, $port) = split(/:/, $host, 2);
+        unless ($port && detaint_natural($port)) {
+            return "Invalid port. It must be an integer (typically 25, 465 or 587)";
+        }
     }
     return "";
 }

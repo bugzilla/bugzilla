@@ -327,20 +327,29 @@ use constant OPERATOR_FIELD_OVERRIDE => {
 
 # These are fields where special action is taken depending on the
 # *value* passed in to the chart, sometimes.
-use constant SPECIAL_PARSING => {
-    # Pronoun Fields (Ones that can accept %user%, etc.)
-    assigned_to => \&_contact_pronoun,
-    cc          => \&_contact_pronoun,
-    commenter   => \&_contact_pronoun,
-    qa_contact  => \&_contact_pronoun,
-    reporter    => \&_contact_pronoun,
-    'setters.login_name' => \&_contact_pronoun,
-    'requestees.login_name' => \&_contact_pronoun,
+# This is a sub because custom fields are dynamic
+sub SPECIAL_PARSING {
+    my $map = {
+        # Pronoun Fields (Ones that can accept %user%, etc.)
+        assigned_to => \&_contact_pronoun,
+        cc          => \&_contact_pronoun,
+        commenter   => \&_contact_pronoun,
+        qa_contact  => \&_contact_pronoun,
+        reporter    => \&_contact_pronoun,
+        'setters.login_name' => \&_contact_pronoun,
+        'requestees.login_name' => \&_contact_pronoun,
 
-    # Date Fields that accept the 1d, 1w, 1m, 1y, etc. format.
-    creation_ts => \&_timestamp_translate,
-    deadline    => \&_timestamp_translate,
-    delta_ts    => \&_timestamp_translate,
+        # Date Fields that accept the 1d, 1w, 1m, 1y, etc. format.
+        creation_ts => \&_timestamp_translate,
+        deadline    => \&_timestamp_translate,
+        delta_ts    => \&_timestamp_translate,
+    };
+    foreach my $field (Bugzilla->active_custom_fields) {
+        if ($field->type == FIELD_TYPE_DATETIME) {
+            $map->{$field->name} = \&_timestamp_translate;
+        }
+    }
+    return $map;
 };
 
 # Information about fields that represent "users", used by _user_nonchanged.

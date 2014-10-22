@@ -96,17 +96,7 @@ This section corresponds to choosing a :param:`mail_delivery_method` of
 Unless you know what you are doing, and can deal with the possible problems
 of spam, bounces and blacklists, it is probably unwise to set up your own
 mail server just for Bugzilla. However, if you wish to do so, some guidance
-follows. Besides setting up a complete, local distinct mail server just for
-Bugzilla, :paramval:`Sendmail` can as well be used if you really don't want
-to do that: Especially on Windows there's a little application called
-sendmail.exe_ which provides sendmail compatible calling conventions and
-encapsulates the SMTP communication to another mail server. This may be
-useful if you have trouble getting Perl packages for SMTP including encrypted
-communication and such installed on Windows and therefore can't use Bugzilla's
-buil-in support for SMTP. Like Bugzilla, sendmail.exe_ can be configured to
-log SMTP communcation to files in case of problems.
-
-    .. _sendmail.exe: http://glob.com.au/sendmail/
+follows.
 
 On Linux, any Sendmail-compatible MTA (Mail Transfer Agent) will
 suffice.  Sendmail, Postfix, qmail and Exim are examples of common
@@ -123,6 +113,14 @@ On Mac OS X 10.3 and later, `Postfix <http://www.postfix.org/>`_
 is used as the built-in email server.  Postfix provides an executable
 that mimics sendmail enough to satisfy Bugzilla.
 
+On Windows, if you find yourself unable to use Bugzilla's built-in SMTP
+support (e.g. because the necessary Perl modules are not available), you can
+use :paramval:`Sendmail` with a little application called
+`sendmail.exe <http://glob.com.au/sendmail/>`_, which provides
+sendmail-compatible calling conventions and encapsulates the SMTP
+communication to another mail server. Like Bugzilla, :command:`sendmail.exe`
+can be configured to log SMTP communication to a file in case of problems.
+
 Detailed information on configuring an MTA is outside the scope of this
 document. Consult the manual for the specific MTA you choose for detailed
 installation instructions. Each of these programs will have their own
@@ -133,6 +131,20 @@ list of services for the machine.
 
 If a simple mail sent with the command-line :file:`mail` program
 succeeds, then Bugzilla should also be fine.
+
+Troubleshooting
+---------------
+
+If you are having trouble, check that any configured SMTP server can be
+reached from your Bugzilla server and that any given authentication
+credentials are valid. If these things seem correct and your mails are still
+not sending, check if your OS uses SELinux or AppArmor. Either of these
+may prevent your web server from sending email. The SELinux boolean
+`httpd_can_sendmail <http://selinuxproject.org/page/ApacheRecipes#Allow_the_Apache_HTTP_Server_to_send_mail>`_
+may need to be set to True.
+   
+If all those things don't help, activate the :param:`smtp_debug` parameter
+and check your webserver logs.
 
 .. _config-products:
 

@@ -97,9 +97,8 @@ and mod_perl.
 
    .. warning:: You should also ensure that you have disabled ``KeepAlive``
       support in your Apache install when utilizing Bugzilla under mod_perl
-      or you may suffer from `performance penalty`_
-
-      .. `performance penalty`_: http://modperlbook.org/html/11-4-KeepAlive.html
+      or you may suffer a
+      `performance penalty <http://modperlbook.org/html/11-4-KeepAlive.html>`_.
 
 On restarting Apache, Bugzilla should now be running within the
 mod_perl environment.

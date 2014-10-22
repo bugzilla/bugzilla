@@ -1810,10 +1810,11 @@
     then try again.
 
   [% ELSIF error == "unknown_action" %]
+    [% title = "Unknown Action" %]
     [% IF action %]
-       Unknown action [% action FILTER html %]!
+      Unknown action "[% action.truncate(20, "...") FILTER html %]"!
     [% ELSE %]
-       I could not figure out what you wanted to do.
+      I could not figure out what you wanted to do.
     [% END %]
 
   [% ELSIF error == "unknown_tab" %]

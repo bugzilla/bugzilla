@@ -5,7 +5,8 @@ User Preferences
 
 Once logged in, you can customize various aspects of
 Bugzilla via the "Preferences" link in the page footer.
-The preferences are split into a number of tabs:
+The preferences are split into a number of tabs, detailed in the sections
+below.
 
 .. _generalpreferences:
 
@@ -42,7 +43,7 @@ There are two global options -- ``Email me when someone
 asks me to set a flag`` and ``Email me when someone
 sets a flag I asked for``. These define how you want to
 receive bugmail with regards to flags. Their use is quite
-straightforward; enable the checkboxes if you want Bugzilla to
+straightforward: enable the checkboxes if you want Bugzilla to
 send you mail under either of the above conditions.
 
 If you'd like to set your bugmail to something besides
@@ -57,14 +58,14 @@ or CC list member.
 
 To fine-tune your bugmail, decide the events for which you want
 to receive bugmail; then decide if you want to receive it all
-the time (enable the checkbox for every column), or only when
+the time (enable the checkbox for every column) or only when
 you have a certain relationship with a bug (enable the checkbox
-only for those columns). For example: if you didn't want to
+only for those columns). For example, if you didn't want to
 receive mail when someone added themselves to the CC list, you
 could uncheck all the boxes in the ``CC Field Changes``
 line. As another example, if you never wanted to receive email
 on bugs you reported unless the bug was resolved, you would
-un-check all boxes in the ``Reporter`` column
+uncheck all boxes in the ``Reporter`` column
 except for the one on the ``The bug is resolved or
 verified`` row.
 
@@ -97,10 +98,10 @@ Saved Searches
 ==============
 
 On this tab you can view and run any Saved Searches that you have
-created, and also any Saved Searches that other members of the group
+created, and any Saved Searches that other members of the group
 defined in the :param:`querysharegroup` parameter have shared.
 Saved Searches can be added to the page footer from this screen.
-If somebody is sharing a Search with a group she or he is allowed to
+If somebody is sharing a Search with a group they are allowed to
 :ref:`assign users to <groups>`, the sharer may opt to have
 the Search show up in the footer of the group's direct members by default.
 
@@ -115,7 +116,7 @@ reasons, in order to change anything on this page you must type your
 *current* password into the ``Password``
 field at the top of the page.
 If you attempt to change your email address, a confirmation
-email is sent to both the old and new addresses, with a link to use to
+email is sent to both the old and new addresses with a link to use to
 confirm the change. This helps to prevent account hijacking.
 
 .. _api-keys:
@@ -123,19 +124,19 @@ confirm the change. This helps to prevent account hijacking.
 API Keys
 ========
 
-API Keys allow you to give a "token" to some external software so it can log
+API keys allow you to give a "token" to some external software so it can log
 in to the WebService API as you without knowing your password. You can then
 revoke that token if you stop using the web service, and you don't need to
 change your password everywhere.
 
 You can create more than one API key if required. Each API key has an optional
-description which can help you record what each key is used for.
+description which can help you record what it is used for.
 
 On this page, you can unrevoke, revoke and change the description of existing
 API keys for your login. A revoked key means that it cannot be used. The
-description for purely for your information, and is optional.
+description is optional and purely for your information.
 
-You can also create a new API key by selecting the check box under the 'New
+You can also create a new API key by selecting the checkbox under the 'New
 API key' section of the page.
 
 .. _permissions:
@@ -178,14 +179,14 @@ editbugs
     Indicates user can edit all bug fields.
 
 editclassifications
-    Indicates user can create, destroy, and edit classifications.
+    Indicates user can create, destroy and edit classifications.
 
 editcomponents
-    Indicates user can create, destroy, and edit products, components,
+    Indicates user can create, destroy and edit products, components,
     versions, milestones and flag types.
 
 editkeywords
-    Indicates user can create, destroy, and edit keywords.
+    Indicates user can create, destroy and edit keywords.
 
 editusers
     Indicates user can create, disable and edit users.

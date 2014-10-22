@@ -13,7 +13,7 @@ Bugzilla comments are plain text - so typing <U> will
 produce less-than, U, greater-than rather than underlined text.
 However, Bugzilla will automatically make hyperlinks out of certain
 sorts of text in comments. For example, the text
-"http://www.bugzilla.org" will be turned into a link:
+``http://www.bugzilla.org`` will be turned into a link:
 `<http://www.bugzilla.org>`_.
 Other strings which get linkified in the obvious manner are:
 
@@ -47,11 +47,11 @@ Comments
 ========
 
 If you are changing the fields on a bug, only comment if
-either you have something pertinent to say, or Bugzilla requires it.
-Otherwise, you may spam people unnecessarily with bug mail.
+either you have something pertinent to say or Bugzilla requires it.
+Otherwise, you may spam people unnecessarily with bugmail.
 To take an example: a user can set up their account to filter out messages
 where someone just adds themselves to the CC field of a bug
-(which happens a lot.) If you come along, add yourself to the CC field,
+(which happens a lot). If you come along, add yourself to the CC field,
 and add a comment saying "Adding self to CC", then that person
 gets a pointless piece of mail they would otherwise have avoided.
 
@@ -74,7 +74,7 @@ have more styling than plain text. For example, you may use Markdown for
 making a part of your comment look italic or bold in the generated HTML.
 Bugzilla supports most of the structures defined by
 `standard Markdown <http://daringfireball.net/projects/markdown/basics>`_,
-but does NOT support inline images and inline HTML.
+but does **not** support inline images and inline HTML.
 
 Additionally, three Github Flavored Markdown features are supported.
 

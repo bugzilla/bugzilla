@@ -35,5 +35,5 @@ The process of creating an account is similar to many other websites.
    login form, and click the :guilabel:`Log in` button.
 
 You are now logged in. Bugzilla uses cookies to remember you are
-logged in so, unless you have cookies disabled or your IP address changes,
+logged in, so, unless you have cookies disabled or your IP address changes,
 you should not have to log in again during your session.

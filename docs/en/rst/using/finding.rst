@@ -5,7 +5,7 @@ Finding Bugs
 
 Bugzilla has a number of different search options.
 
-.. note:: Bugzilla queries are case-insensitive and accent-insensitive, when
+.. note:: Bugzilla queries are case-insensitive and accent-insensitive when
     used with either MySQL or Oracle databases. When using Bugzilla with
     PostgreSQL, however, some queries are case-sensitive. This is due to
     the way PostgreSQL handles case and accent sensitivity.
@@ -33,6 +33,9 @@ would search only in that product.
 You can also use it to go directly to a bug by entering its number or its
 alias.
 
+.. todo:: Need to incorporate the full reference, and link it properly from
+          the GUI. https://bugzilla.mozilla.org/page.cgi?id=quicksearch.html
+
 Simple Search
 =============
 
@@ -43,7 +46,7 @@ Advanced Search
 ===============
 
 The Advanced Search page is used to produce a list of all bugs fitting
-exactly-defined criteria. `You can play with it on
+exact criteria. `You can play with it on
 Landfill <http://landfill.bugzilla.org/bugzilla-tip/query.cgi?format=advanced>`_.
 
 Advanced Search has controls for selecting different possible
@@ -55,7 +58,7 @@ values. If none is selected, then the field can take any value.
 After a search is run, you can save it as a Saved Search, which
 will appear in the page footer. If you are in the group defined
 by the "querysharegroup" parameter, you may share your queries
-with other users, see :ref:`saved-searches` for more details.
+with other users; see :ref:`saved-searches` for more details.
 
 .. _custom-search:
 
@@ -220,11 +223,11 @@ Change Columns:
 
 Change several bugs at once:
     If your account is sufficiently empowered, and more than one bug
-    appear in the bug list, this link is displayed which lets you make
+    appears in the bug list, this link is displayed and lets you easily make
     the same change to all the bugs in the list - for example, changing
     their assignee.
 
-Send mail to bug assignees:
+Send mail to bug assignees:  
     If more than one bug appear in the bug list and there are at least
     two distinct bug assignees, this links is displayed which lets you
     easily send a mail to the assignees of all bugs on the list.

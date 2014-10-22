@@ -29,19 +29,19 @@ installation of Bugzilla.
    having one or more Components in it. 
 
 *Version:*
-   The "Version" field is usually used for versions of a product which
-   have been released, and is set to indicate which versions of a
-   Component have the particular problem the bug report is
-   about.
+   The "Version" field usually contains the numbers or names of released
+   versions of the product. It is used to indicate the version(s) affected by
+   the bug report.
 
 *Hardware (Platform and OS):*
    These indicate the computing environment where the bug was
    found.
 
 *Importance (Priority and Severity):*
-   The bug assignee uses the Priority field to prioritize his or her bugs.
-   It's a good idea not to change this on other people's bugs. The default
-   values are P1 to P5.
+   The Priority field is used to prioritize bugs, either by the assignee,
+   or someone else with authority to direct their time such as a project
+   manager. It's a good idea not to change this on other people's bugs. The
+   default values are P1 to P5.
 
    The Severity field indicates how severe the problem is - from blocker
    ("application unusable") to trivial ("minor cosmetic issue"). You
@@ -82,10 +82,10 @@ installation of Bugzilla.
    on), or this bug stops other bugs being fixed (blocks), their
    numbers are recorded here.
 
-   Clicking the ``Dependency tree`` link shows
+   Clicking the :guilabel:`Dependency tree` link shows
    the dependency relationships of the bug as a tree structure.
    You can change how much depth to show, and you can hide resolved bugs
-   from this page. You can also collaps/expand dependencies for
+   from this page. You can also collapse/expand dependencies for
    each non-terminal bug on the tree view, using the [-]/[+] buttons that
    appear before the summary.
 
@@ -96,13 +96,15 @@ installation of Bugzilla.
    The date and time the bug was last changed.
 
 *CC List:*
-   A list of people who get mail when the bug changes.
+   A list of people who get mail when the bug changes, in addition to the
+   Reporter, Assignee and QA Contact (if enabled).
 
 *Ignore Bug Mail:*
-   Set this if you want never to get bug mail from this bug again.
+   Set this if you want never to get bugmail from this bug again. See also
+   :ref:`emailpreferences`.
 
 *\*See Also:*
-   Bugs, in this Bugzilla or other Bugzillas or bug trackers, which are
+   Bugs, in this Bugzilla, other Bugzillas, or other bug trackers, that are
    related to this one.
 
 *Flags:*
@@ -113,9 +115,9 @@ installation of Bugzilla.
 
 *\*Time Tracking:*
    This form can be used for time tracking.
-   To use this feature, you have to be blessed group membership
-   specified by the ``timetrackinggroup`` parameter. See :ref:`time-tracking`
-   for more information.
+   To use this feature, you have to be a member of the group
+   specified by the :param:`timetrackinggroup` parameter. See
+   :ref:`time-tracking` for more information.
 
    Orig. Est.:
        This field shows the original estimated time.
@@ -139,7 +141,7 @@ installation of Bugzilla.
        This field shows the deadline for this bug.
 
 *Attachments:*
-   You can attach files (e.g. testcases or patches) to bugs. If there
+   You can attach files (e.g. test cases or patches) to bugs. If there
    are any attachments, they are listed in this section. See
    :ref:`attachments` for more information.
 
@@ -157,8 +159,24 @@ either ``+`` or ``-``. The meaning of these symbols depends on the name of
 the flag itself, but contextually they could mean pass/fail,
 accept/reject, approved/denied, or even a simple yes/no. If your site
 allows requestable flags, then users may set a flag to ``?`` as a
-request to another user that they look at the bug/attachment, and set
+request to another user that they look at the bug/attachment and set
 the flag to its correct status.
+
+A set flag appears in bug reports and on "edit attachment" pages with the
+abbreviated username of the user who set the flag prepended to the
+flag name. For example, if Jack sets a "review" flag to ``+``, it appears
+as :guilabel:`Jack: review [ + ]`.
+
+A requested flag appears with the user who requested the flag prepended
+to the flag name and the user who has been requested to set the flag
+appended to the flag name within parentheses.  For example, if Jack
+asks Jill for review, it appears as :guilabel:`Jack: review [ ? ] (Jill)`.
+
+You can browse through open requests made of you and by you by selecting
+:guilabel:`My Requests` from the footer. You can also look at open requests
+limited by other requesters, requestees, products, components, and flag names.
+Note that you can use '-' for requestee to specify flags with no requestee
+set.
 
 .. _flags-simpleexample:
 
@@ -170,22 +188,19 @@ A developer might want to ask their manager,
 They might want to do this for a *lot* of bugs,
 so they decide to streamline the process. So:
 
-#. The Bugzilla administrator creates a flag type called
-   ``blocking2.0`` that shows up on all bugs in
-   your product.
-   It shows up on the :guilabel:`Show Bug` screen
-   as the text ``blocking2.0`` with a drop-down box next
-   to it. The drop-down box contains four values: an empty space,
-   ``?``, ``-``, and ``+``.
+#. The Bugzilla administrator creates a flag type called blocking2.0 for bugs
+   in your product. It shows up on the :guilabel:`Show Bug` screen as the text
+   :guilabel:`blocking2.0` with a drop-down box next to it. The drop-down box
+   contains four values: an empty space, ``?``, ``-``, and ``+``.
 
 #. The developer sets the flag to ``?``.
 
-#. The manager sees the ``blocking2.0``
+#. The manager sees the :guilabel:`blocking2.0`
    flag with a ``?`` value.
 
 #. If the manager thinks the feature should go into the product
-   before version 2.0 can be released, he sets the flag to
-   ``+``. Otherwise, he sets it to ``-``.
+   before version 2.0 can be released, they set the flag to
+   ``+``. Otherwise, they set it to ``-``.
 
 #. Now, every Bugzilla user who looks at the bug knows whether or
    not the bug needs to be fixed before release of version 2.0.
@@ -217,22 +232,22 @@ Flags can have four values:
 Flag Requests
 -------------
 
-If a flag has been defined as 'requestable', and a user has enough privileges
-to request it (see below), the user can set the flag's status to ``?``.
-This status indicates that someone (a.k.a. "the requester") is asking
+If a flag has been defined as :guilabel:`requestable`, and a user has enough
+privileges to request it (see below), the user can set the flag's status to
+``?``. This status indicates that someone (a.k.a. "the requester") is asking
 someone else to set the flag to either ``+`` or ``-``.
 
-If a flag has been defined as 'specifically requestable',
+If a flag has been defined as :guilabel:`specifically requestable`,
 a text box will appear next to the flag into which the requester may
 enter a Bugzilla username. That named person (a.k.a. "the requestee")
 will receive an email notifying them of the request, and pointing them
 to the bug/attachment in question.
 
-If a flag has *not* been defined as 'specifically requestable',
-then no such text-box will appear. A request to set this flag cannot be made
-of any specific individual, but must be asked "to the wind".
-A requester may "ask the wind" on any flag simply by leaving the text-box
-blank.
+If a flag has *not* been defined as :guilabel:`specifically requestable`,
+then no such text box will appear. A request to set this flag cannot be made
+of any specific individual; these requests are open for anyone to answer. In
+Bugzilla this is known as "asking the wind". A requester may ask the wind on
+any flag simply by leaving the text box blank.
 
 .. _flag-types:
 
@@ -247,13 +262,13 @@ Attachment flags are used to ask a question about a specific
 attachment on a bug.
 
 Many Bugzilla installations use this to
-request that one developer ``review`` another
+request that one developer review another
 developer's code before they check it in. They attach the code to
 a bug report, and then set a flag on that attachment called
-``review`` to
-``review? reviewer@example.com``.
+:guilabel:`review` to
+:guilabel:`review? reviewer@example.com`.
 reviewer\@example.com is then notified by email that
-he has to check out that attachment and approve it or deny it.
+they have to check out that attachment and approve it or deny it.
 
 For a Bugzilla user, attachment flags show up in three places:
 

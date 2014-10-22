@@ -235,8 +235,6 @@ allow_attachment_deletion
 
 maxattachmentsize
     The maximum size (in kilobytes) of attachments to be stored in the database. If a file larger than this size is attached to a bug, Bugzilla will look at the maxlocalattachment parameter to determine if the file can be stored locally on the web server. If the file size exceeds both limits, then the attachment is rejected. Settings both parameters to 0 will prevent attaching files to bugs.
-
-    .. todo:: Talk about MySQL max_allowed_packet
     
 maxlocalattachment
     The maximum size (in megabytes) of attachments to be stored locally on the web server. If set to a value lower than the :param:`maxattachmentsize` parameter, attachments will never be kept on the local filesystem.

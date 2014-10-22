@@ -10,7 +10,5 @@ SQLite
 Once you have SQLite installed, no additional configuration is required to
 run Bugzilla.
 
-.. todo:: This doesn't work - gives a timezone-related error on my box.
-
 The database will be stored in :file:`$BUGZILLA_HOME/data/db/$db_name`, where
 ``$db_name`` is the database name defined in :file:`localconfig`.

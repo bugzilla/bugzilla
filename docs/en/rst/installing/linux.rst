@@ -126,6 +126,8 @@ The best way to get Bugzilla is to check it out from git:
 
 :command:`git clone https://git.mozilla.org/bugzilla/bugzilla`
 
+.. todo:: Need to check out stable branch, not master
+
 If that's not possible, you can
 `download a tarball of Bugzilla <http://www.bugzilla.org/download/>`_.
 

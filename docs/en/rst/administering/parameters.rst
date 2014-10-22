@@ -234,12 +234,16 @@ allow_attachment_deletion
     leaving only the metadata.
 
 maxattachmentsize
-    The maximum size (in kilobytes) of attachments to be stored in the database. If a file larger than this size is attached to a bug, Bugzilla will look at the maxlocalattachment parameter to determine if the file can be stored locally on the web server. If the file size exceeds both limits, then the attachment is rejected. Settings both parameters to 0 will prevent attaching files to bugs.
+    The maximum size (in kilobytes) of attachments to be stored in the database. If a file larger than this size is attached to a bug, Bugzilla will look at the :param:`maxlocalattachment` parameter to determine if the file can be stored locally on the web server. If the file size exceeds both limits, then the attachment is rejected. Setting both parameters to 0 will prevent attaching files to bugs.
+
+    Some databases have default limits which prevent storing larger attachments in the database. E.g. MySQL has a parameter called `max_allowed_packet <http://dev.mysql.com/doc/refman/5.1/en/packet-too-large.html>`_, whose default varies by distribution. Setting :param:`maxattachmentsize` higher than your current setting for this value will produce an error.
     
 maxlocalattachment
     The maximum size (in megabytes) of attachments to be stored locally on the web server. If set to a value lower than the :param:`maxattachmentsize` parameter, attachments will never be kept on the local filesystem.
 
-    .. todo:: When should people use this feature?
+	If this feature is useful to you highly depends on your DBMS used and the environment in which you are hosting your Bugzilla. Some DBMS might just not perform well with large binary data saved directly in a database compared to mature file systems like ext4, which are heavily optimized to do exactly that. Attachments stored in a plain directory might as well be easier to backup and restore, depending on how you choosed to implement such processes, because you might have simple file system snapshots available in file systems like BTRFS or NTFS and can browse a backed up directly using a normal file browser, which isn't possible with most of the backups for many DBMSs. Some file systems liek ZFS even provide deduplication support which might help you to reduce the overall size needed for your attachments, depending on your data, users etc. On the opposite, most of the web servers may have just little amount of storage available at all compared to what's mostly provided to DBMS.
+
+	In conclusion it really all depends, but you should keep in mind that currently Bugzilla is not able to transfer attachmens from one storage to another if you change your mind, it only behaves differently after you changed the configuration. The already available data will always stay in it's current storage.
 
 .. _param-bug-change-policies:
 

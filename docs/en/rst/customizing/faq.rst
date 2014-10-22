@@ -24,5 +24,9 @@ How do I...
   
 ...alter who can change what field when?
   See :ref:`who-can-change-what`.
-  
-.. todo:: Ask Thorsten for his input on what questions are common.
+
+...make Bugzilla send mails?
+  See :ref:`email` and check the settings according to your environment, especially you should check if a maybe configured SMTP server can be reached from your Bugzilla server and if the maybe needed auth credentials are valid. If things seem correct and your mails are still not send, check if your OS uses SELinux or AppArmor which may prevent your web server from sending mails. httpd_can_sendmail_ often needs to get activated. If all those things don't help, activate :param:`smtp_debug` and check your webserver logs.
+
+  .. _httpd_can_sendmail: http://selinuxproject.org/page/ApacheRecipes#Allow_the_Apache_HTTP_Server_to_send_mail
+  .. todo:: Ask Thorsten for his input on what questions are common.

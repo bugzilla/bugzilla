@@ -164,8 +164,23 @@ sub object_before_create {
     my $params = $args->{params};
     return unless $class->isa('Bugzilla::Component');
 
-    my $input = Bugzilla->input_params;
-    $params->{watch_user} = $input->{watch_user};
+    # We need to create a watch user for the default product/component
+    # if we are creating the database for the first time.
+    my $dbh = Bugzilla->dbh;
+    if (Bugzilla->usage_mode == USAGE_MODE_CMDLINE
+        && !$dbh->selectrow_array('SELECT 1 FROM components'))
+    {
+        my $watch_user = Bugzilla::User->create({
+            login_name    => 'testcomponent@testproduct.bugs',
+            cryptpassword => '*',
+            disable_mail  => 1
+        });
+        $params->{watch_user} = $watch_user->login;
+    }
+    else {
+        my $input = Bugzilla->input_params;
+        $params->{watch_user} = $input->{watch_user};
+    }
 }
 
 sub object_end_of_update {

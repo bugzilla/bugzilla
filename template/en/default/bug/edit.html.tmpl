@@ -276,8 +276,8 @@
             <td colspan="2">
           [% END %]
           [% PROCESS input inputname => "alias" 
-                     size => "20" 
-                     maxlength => "20"  
+                     size => "40"
+                     maxlength => "40"
                      no_td => 1 
                      %][% ")" IF NOT bug.check_can_change_field('alias', 0, 1) 
                                   && bug.alias %]

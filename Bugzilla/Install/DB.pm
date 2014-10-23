@@ -711,6 +711,9 @@ sub update_table_definitions {
                        'bug_user_last_visit_last_visit_ts_idx',
                        ['last_visit_ts']);
 
+    # 2014-10-?? dkl@mozilla.com - Bug 1062940
+    $dbh->bz_alter_column('bugs', 'alias', { TYPE => 'varchar(40)' });
+
     ################################################################
     # New --TABLE-- changes should go *** A B O V E *** this point #
     ################################################################

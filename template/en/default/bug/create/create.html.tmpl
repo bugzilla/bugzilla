@@ -455,7 +455,7 @@ TUI_hide_default('attachment_text_field');
       field = bug_fields.alias editable = 1
     %]
     <td colspan="2">
-      <input name="alias" size="20" value="[% alias FILTER html %]">
+      <input name="alias" size="30" maxlength="40" value="[% alias FILTER html %]">
     </td>
   </tr>
 [% END %]

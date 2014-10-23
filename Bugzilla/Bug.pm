@@ -1423,7 +1423,7 @@ sub _check_alias {
    return undef if (!Bugzilla->params->{'usebugaliases'} || !$alias);
 
     # Make sure the alias isn't too long.
-    if (length($alias) > 20) {
+    if (length($alias) > 40) {
         ThrowUserError("alias_too_long");
     }
     # Make sure the alias isn't just a number.

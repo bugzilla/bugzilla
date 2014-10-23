@@ -295,7 +295,7 @@ use constant ABSTRACT_SCHEMA => {
             remaining_time      => {TYPE => 'decimal(7,2)',
                                     NOTNULL => 1, DEFAULT => '0'},
             deadline            => {TYPE => 'DATETIME'},
-            alias               => {TYPE => 'varchar(20)'},
+            alias               => {TYPE => 'varchar(40)'},
         ],
         INDEXES => [
             bugs_alias_idx            => {FIELDS => ['alias'],

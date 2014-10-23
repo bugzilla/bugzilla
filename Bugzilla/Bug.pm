@@ -3951,6 +3951,11 @@ sub choices {
     my @resolutions = grep($_->name, @{ $resolution_field->legal_values });
     $choices{'resolution'} = \@resolutions;
 
+    foreach my $key (keys %choices) {
+        my $value = $self->$key;
+        $choices{$key} = [grep { $_->is_active || $_->name eq $value } @{ $choices{$key} }];
+    }
+
     $self->{'choices'} = \%choices;
     return $self->{'choices'};
 }

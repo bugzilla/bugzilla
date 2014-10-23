@@ -23,6 +23,7 @@ package Bugzilla::Extension::Profanivore;
 use strict;
 use base qw(Bugzilla::Extension);
 
+use Email::MIME::ContentType qw(parse_content_type);
 use Regexp::Common 'RE_ALL';
 
 use Bugzilla::Util qw(is_7bit_clean);
@@ -117,17 +118,26 @@ sub mailer_before_send {
 
 sub _fix_encoding {
     my $part = shift;
-    my $body = $part->body;
-    if (Bugzilla->params->{'utf8'}) {
+
+    # don't touch the top-level part of multi-part mail
+    return if $part->parts > 1;
+
+    # nothing to do if the part already has a charset
+    my $ct = parse_content_type($part->content_type);
+    my $charset = $ct->{attributes}{charset}
+        ? $ct->{attributes}{charset}
+        : '';
+    return unless !$charset || $charset eq 'us-ascii';
+
+    if (Bugzilla->params->{utf8}) {
         $part->charset_set('UTF-8');
-        # encoding_set works only with bytes, not with utf8 strings.
         my $raw = $part->body_raw;
         if (utf8::is_utf8($raw)) {
             utf8::encode($raw);
             $part->body_set($raw);
         }
     }
-    $part->encoding_set('quoted-printable') if !is_7bit_clean($body);
+    $part->encoding_set('quoted-printable');
 }
 
 sub _filter_text {

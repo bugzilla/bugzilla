@@ -25,6 +25,7 @@ use strict;
 
 use Bugzilla;
 use Bugzilla::Util;
+use Email::MIME::ContentType qw(parse_content_type);
 
 use base qw(Exporter);
 
@@ -130,7 +131,11 @@ sub munge_create_attachment {
 # (\015 and \012 are used because Perl \n is platform-dependent)
 sub add_review_links_to_email {
     my $email = shift;
-    my $body = $email->body;
+    return if $email->parts > 1;
+
+    _fix_encoding($email);
+    my $body = $email->body_str;
+
     my $new_body = 0;
     my $bug;
 
@@ -157,7 +162,31 @@ sub add_review_links_to_email {
         $new_body = 1;
     }
 
-    $email->body_set($body) if $new_body;
+    $email->body_str_set($body) if $new_body;
+}
+
+sub _fix_encoding {
+    my $part = shift;
+
+    # don't touch the top-level part of multi-part mail
+    return if $part->parts > 1;
+
+    # nothing to do if the part already has a charset
+    my $ct = parse_content_type($part->content_type);
+    my $charset = $ct->{attributes}{charset}
+        ? $ct->{attributes}{charset}
+        : '';
+    return unless !$charset || $charset eq 'us-ascii';
+
+    if (Bugzilla->params->{utf8}) {
+        $part->charset_set('UTF-8');
+        my $raw = $part->body_raw;
+        if (utf8::is_utf8($raw)) {
+            utf8::encode($raw);
+            $part->body_set($raw);
+        }
+    }
+    $part->encoding_set('quoted-printable');
 }
 
 1;

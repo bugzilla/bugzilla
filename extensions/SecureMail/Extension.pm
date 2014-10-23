@@ -36,6 +36,7 @@ use Crypt::OpenPGP::Armour;
 use Crypt::OpenPGP::KeyRing;
 use Crypt::OpenPGP;
 use Crypt::SMIME;
+use Email::MIME::ContentType qw(parse_content_type);
 use Encode;
 use HTML::Tree;
 
@@ -443,7 +444,7 @@ sub _make_secure {
             # stringify all parts for encrypting. We have to retain the old 
             # boundaries as well so that the email client can reconstruct the 
             # original message properly.
-            $email->walk_parts(\&_fix_part);
+            $email->walk_parts(\&_fix_encoding);
 
             $email->walk_parts(sub {
                 my ($part) = @_;
@@ -485,7 +486,7 @@ sub _make_secure {
                                "boundary=\"$new_boundary\"");
         }
         else {
-            _fix_part($email);
+            _fix_encoding($email);
             if ($sanitise_subject) {
                 _insert_subject($email, $subject);
             }
@@ -498,7 +499,7 @@ sub _make_secure {
         # S/MIME Encryption #
         #####################
 
-        $email->walk_parts(\&_fix_part);
+        $email->walk_parts(\&_fix_encoding);
 
         if ($sanitise_subject) {
             $email->walk_parts(sub { _insert_subject($_[0], $subject) });
@@ -598,39 +599,38 @@ sub _insert_subject {
     }
 }
 
-# Copied from Bugzilla/Mailer as this extension runs before
-# this code there and Mailer.pm will no longer see the original
-# message.
-sub _fix_part {
-    my ($part) = @_;
-    return if $part->parts > 1; # Top-level
-    my $content_type = $part->content_type || '';
-    $content_type =~ /charset=['"](.+)['"]/;
-    # If no charset is defined or is the default us-ascii,
-    # then we encode the email to UTF-8 if Bugzilla has utf8 enabled.
-    # XXX - This is a hack to workaround bug 723944.
-    if (!$1 || $1 eq 'us-ascii') {
-        my $body = $part->body;
-        if (Bugzilla->params->{'utf8'}) {
-            $part->charset_set('UTF-8');
-            # encoding_set works only with bytes, not with utf8 strings.
-            my $raw = $part->body_raw;
-            if (utf8::is_utf8($raw)) {
-                utf8::encode($raw);
-                $part->body_set($raw);
-            }
+sub _fix_encoding {
+    my $part = shift;
+
+    # don't touch the top-level part of multi-part mail
+    return if $part->parts > 1;
+
+    # nothing to do if the part already has a charset
+    my $ct = parse_content_type($part->content_type);
+    my $charset = $ct->{attributes}{charset}
+        ? $ct->{attributes}{charset}
+        : '';
+    return unless !$charset || $charset eq 'us-ascii';
+
+    if (Bugzilla->params->{utf8}) {
+        $part->charset_set('UTF-8');
+        my $raw = $part->body_raw;
+        if (utf8::is_utf8($raw)) {
+            utf8::encode($raw);
+            $part->body_set($raw);
         }
-        $part->encoding_set('quoted-printable') if !is_7bit_clean($body);
     }
+    $part->encoding_set('quoted-printable');
 }
 
 sub _filter_bug_links {
     my ($email) = @_;
     $email->walk_parts(sub {
         my $part = shift;
+        _fix_encoding($part);
         my $content_type = $part->content_type;
         return if !$content_type || $content_type !~ /text\/html/;
-        my $tree = HTML::Tree->new->parse_content($part->body);
+        my $tree = HTML::Tree->new->parse_content($part->body_str);
         my @links = $tree->look_down( _tag  => q{a}, class => qr/bz_bug_link/ );
         my $updated = 0;
         foreach my $link (@links) {

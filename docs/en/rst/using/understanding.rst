@@ -14,7 +14,7 @@ installation of Bugzilla.
    the bug number.
 
 *Status (and Resolution):*
-   These define exactly what state the bug is in - from not even
+   These define exactly what state the bug is in—from not even
    being confirmed as a bug, through to being fixed and the fix
    confirmed by Quality Assurance. The different possible values for
    Status and Resolution on your installation should be documented in the
@@ -43,7 +43,7 @@ installation of Bugzilla.
    manager. It's a good idea not to change this on other people's bugs. The
    default values are P1 to P5.
 
-   The Severity field indicates how severe the problem is - from blocker
+   The Severity field indicates how severe the problem is—from blocker
    ("application unusable") to trivial ("minor cosmetic issue"). You
    can also use this field to indicate whether a bug is an enhancement
    request.
@@ -52,7 +52,7 @@ installation of Bugzilla.
    A future version by which the bug is to
    be fixed. e.g. The Bugzilla Project's milestones for future
    Bugzilla versions are 4.4, 5.0, 6.0, etc. Milestones are not
-   restricted to numbers, though - you can use any text strings, such
+   restricted to numbers, though—you can use any text strings, such
    as dates.
 
 *Assigned To:*
@@ -69,7 +69,7 @@ installation of Bugzilla.
 
 *Keywords:*
    The administrator can define keywords which you can use to tag and
-   categorise bugs - e.g. ``crash`` or ``regression``.
+   categorise bugs—e.g. ``crash`` or ``regression``.
 
 *Personal Tags:*
    Unlike Keywords which are global and visible by all users, Personal Tags

@@ -15,7 +15,7 @@ Load this file in your editor. You will need to check/change ``$db_driver``
 and ``$db_pass``, which are respectively the type of the database you are
 using and the password for the ``bugs`` database user you have created.
 ``$db_driver`` can be either ``mysql``, ``Pg`` (PostgreSQL), ``Oracle`` or
-``Sqlite``. All values are case-sensitive.
+``Sqlite``. All values are case sensitive.
 
 Set the value of ``$webservergroup`` to the group your web server runs as.
 

@@ -7,7 +7,7 @@ Bugzilla has a number of different search options.
 
 .. note:: Bugzilla queries are case-insensitive and accent-insensitive when
     used with either MySQL or Oracle databases. When using Bugzilla with
-    PostgreSQL, however, some queries are case-sensitive. This is due to
+    PostgreSQL, however, some queries are case sensitive. This is due to
     the way PostgreSQL handles case and accent sensitivity.
 
 .. _quicksearch:

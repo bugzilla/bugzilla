@@ -198,7 +198,11 @@ sub page_before_template {
 
 sub bounty_attachment {
     my ($vars) = @_;
-    ThrowUserError('user_not_insider') unless Bugzilla->user->is_insider;
+
+    Bugzilla->user->in_group('bounty-team')
+        || ThrowUserError("auth_failure", { group  => "bounty-team",
+                                            action => "add",
+                                            object => "bounty_attachments" });
 
     my $input      = Bugzilla->input_params;
     my $dbh        = Bugzilla->dbh;

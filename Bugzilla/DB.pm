@@ -581,8 +581,11 @@ sub bz_add_column {
     my $current_def = $self->bz_column_info($table, $name);
 
     if (!$current_def) {
+        # REFERENCES need to happen later and not be created right away
+        my $trimmed_def = dclone($new_def);
+        delete $trimmed_def->{REFERENCES};
         my @statements = $self->_bz_real_schema->get_add_column_ddl(
-            $table, $name, $new_def, 
+            $table, $name, $trimmed_def,
             defined $init_value ? $self->quote($init_value) : undef);
         print get_text('install_column_add',
                        { column => $name, table => $table }) . "\n"
@@ -596,14 +599,14 @@ sub bz_add_column {
         # column exists there and has a REFERENCES item.
         # bz_setup_foreign_keys will then add this FK at the end of
         # Install::DB.
-        my $col_abstract = 
+        my $col_abstract =
             $self->_bz_schema->get_column_abstract($table, $name);
         if (exists $col_abstract->{REFERENCES}) {
             my $new_fk = dclone($col_abstract->{REFERENCES});
             $new_fk->{created} = 0;
             $new_def->{REFERENCES} = $new_fk;
         }
-        
+
         $self->_bz_real_schema->set_column($table, $name, $new_def);
         $self->_bz_store_real_schema;
     }
@@ -2318,7 +2321,11 @@ values to.
 
 =item C<$name> - the name of the new column
 
-=item C<\%definition> - Abstract column definition for the new column
+=item C<$definition> - A hashref abstract column definition for the new column.
+Note, if a  C<REFERENCES> definition is included to create a foreign key
+relationship, it will be created later instead of when the column is added.
+Normally foreign keys are added by C<checksetup.pl> at the end all at the same
+time.
 
 =item C<$init_value> (optional) - An initial value to set the column
 to. Required if your column is NOT NULL and has no DEFAULT set.

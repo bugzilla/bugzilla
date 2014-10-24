@@ -308,7 +308,8 @@ sub is_viewable {
 
 =item C<data>
 
-the content of the attachment
+Returns the content of the attachment.
+As a side-effect, sets $self->is_on_filesystem.
 
 =back
 
@@ -325,10 +326,16 @@ sub data {
                                                      undef,
                                                      $self->id);
 
+    # Setting the property here is cheap, as opposed to making an extra
+    # query later, and hitting the filesystem to see if the file is
+    # still there.
+    $self->{is_on_filesystem} = 0;
     # If there's no attachment data in the database, the attachment is stored
     # in a local file, so retrieve it from there.
     if (length($self->{data}) == 0) {
         if (open(AH, $self->_get_local_filename())) {
+            # file is actually on disk.
+            $self->{is_on_filesystem} = 1;
             local $/;
             binmode AH;
             $self->{data} = <AH>;
@@ -341,9 +348,36 @@ sub data {
 
 =over
 
+=item C<is_on_filesystem>
+
+Returns true if the attachment is stored on disk (via maxlocalattachment
+parameter), as opposed to in the database.
+
+=back
+
+=cut
+
+# When the attachment is on the filesystem, you can let the backend
+# (nginx, apache, lighttpd) serve it for you if it supports the X-Sendfile
+# feature. This means that the attachment CGI script may have a reduced
+# footprint. e.g. bug 906010 and bug 1073241.
+
+sub is_on_filesystem {
+    my $self = shift;
+    return $self->{is_on_filesystem} if exists $self->{is_on_filesystem};
+    # In order to serve an attachment, you also send the datasize in the
+    # content-length header. Making additional queries which are exactly
+    # the same as found in the datasize code path is just wasteful.
+    my $datasize = $self->datasize;
+    return $self->{is_on_filesystem};
+}
+
+=over
+
 =item C<datasize>
 
-the length (in bytes) of the attachment content
+Returns the length (in bytes) of the attachment content.
+As a side-effect, sets $self->is_on_filesystem.
 
 =back
 
@@ -370,11 +404,17 @@ sub datasize {
                                         WHERE id = ?",
                                        undef, $self->id) || 0;
 
+    # Setting the property here is cheap, as opposed to making an extra
+    # query later, and hitting the filesystem to see if the file is
+    # still there.
+    $self->{is_on_filesystem} = 0;
     # If there's no attachment data in the database, either the attachment
     # is stored in a local file, and so retrieve its size from the file,
     # or the attachment has been deleted.
     unless ($self->{datasize}) {
         if (open(AH, $self->_get_local_filename())) {
+            # file is actually on disk.
+            $self->{is_on_filesystem} = 1;
             binmode AH;
             $self->{datasize} = (stat(AH))[7];
             close(AH);

@@ -33,13 +33,14 @@ jobqueue.pl - Runs jobs in the background for Bugzilla.
  ./jobqueue.pl [OPTIONS] COMMAND
 
    OPTIONS:
-   -f        Run in the foreground (don't detach)
-   -d        Output a lot of debugging information
-   -p file   Specify the file where jobqueue.pl should store its current
-             process id. Defaults to F<data/jobqueue.pl.pid>.
-   -n name   What should this process call itself in the system log?
-             Defaults to the full path you used to invoke the script.
-
+   -f            Run in the foreground (don't detach)
+   -d            Output a lot of debugging information
+   -p file       Specify the file where jobqueue.pl should store its current
+                 process id. Defaults to F<data/jobqueue.pl.pid>.
+   -n name       What should this process call itself in the system log?
+                 Defaults to the full path you used to invoke the script.
+   -j job-name   The name of jobs to process. Can be specified multiple times.
+                 If not specified, all job types will be processed.
    COMMANDS:
    start     Starts a new jobqueue daemon if there isn't one running already
    stop      Stops a running jobqueue daemon

@@ -181,7 +181,12 @@ sub matches {
     if (my $field_name = $self->{field_name}) {
         if ($args->{field}->{field_name} && substr($field_name, 0, 1) eq '~') {
             my $substring = quotemeta(substr($field_name, 1));
-            if ($args->{field}->{field_name} !~ /$substring/i) {
+            if ($args->{field}->{filter_field} !~ /$substring/i) {
+                return 0;
+            }
+        }
+        elsif ($field_name eq 'flagtypes.name') {
+            if ($args->{field}->{field_name} ne $field_name) {
                 return 0;
             }
         }

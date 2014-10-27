@@ -235,6 +235,10 @@ sub user_wants_mail {
             filter_field => $_->{field_name}, # filter's field_name
             field_name   => $_->{field_name}, # raw bugzilla field_name
         } }
+        grep {
+            # flags are added later
+            $_->{field_name} ne 'flagtypes.name'
+        }
         @$diffs
     ];
 
@@ -245,6 +249,18 @@ sub user_wants_mail {
         }
         if (grep { $_->type != CMT_ATTACHMENT_CREATED } @$comments) {
             push @$fields, { filter_field => 'comment.created' };
+        }
+    }
+
+    # insert fake fields for flags
+    foreach my $diff (@$diffs) {
+        next unless $diff->{field_name} eq 'flagtypes.name';
+        foreach my $change (split(/, /, join(', ', ($diff->{old}, $diff->{new})))) {
+            next unless $change =~ /^(.+)[\?\-+]/;
+            push @$fields, {
+                filter_field => $1,
+                field_name   => 'flagtypes.name',
+            };
         }
     }
 

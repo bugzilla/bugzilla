@@ -852,8 +852,6 @@ This tab allows you to change several default settings of Bugzilla.
   changes to a bug are submitted. The options include to show the bug
   just modified, to show the next bug in your list, or to do nothing.
 
-- Enable tags for bugs - turn bug tagging on or off.
-
 - Zoom textareas large when in use (requires JavaScript) - enable or
   disable the automatic expanding of text areas when  text is being
   entered into them.

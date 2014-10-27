@@ -362,6 +362,7 @@ sub header {
 
 sub param {
     my $self = shift;
+    local $CGI::LIST_CONTEXT_WARN = 0;
 
     # When we are just requesting the value of a parameter...
     if (scalar(@_) == 1) {

@@ -575,7 +575,7 @@ sub _concatenate_js {
             $content =~ s#\n{2,}#\n#g;      # blank lines
             $content =~ s#(^\s+|\s+$)##g;   # whitespace at the start/end of file
 
-            write_file($file, "/* $files{$source} */\n" . $content . "\n");
+            write_file($file, ";/* $files{$source} */\n" . $content . "\n");
         }
         push @minified, $file;
     }

@@ -1239,11 +1239,6 @@
         </listitem>
         <listitem>
           <para>
-            Enable tags for bugs - turn bug tagging on or off.
-          </para>
-        </listitem>
-        <listitem>
-          <para>
             Zoom textareas large when in use (requires JavaScript) - enable or
             disable the automatic expanding of text areas when  text is being
             entered into them. 

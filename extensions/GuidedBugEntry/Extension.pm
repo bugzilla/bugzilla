@@ -30,6 +30,10 @@ sub enter_bug_start {
 
     # force guided format for new users
     my $format = $cgi->param('format') || '';
+    if ($cgi->param('maketemplate')) {
+        $format = '__default__';
+    }
+
     if (
         $format eq 'guided' ||
         (

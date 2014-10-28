@@ -101,13 +101,8 @@ $dbh->do("UPDATE bugs SET product_id = ? WHERE component_id = ?",
          ($new_product->id, $component->id));
 
 # Flags tables
-$dbh->do("UPDATE flaginclusions SET product_id = ? WHERE component_id = ?",
-         undef,
-         ($new_product->id, $component->id));
-
-$dbh->do("UPDATE flagexclusions SET product_id = ? WHERE component_id = ?",
-         undef,
-         ($new_product->id, $component->id));
+fix_flags('flaginclusions', $new_product, $component);
+fix_flags('flagexclusions', $new_product, $component);
 
 # Components
 $dbh->do("UPDATE components SET product_id = ? WHERE id = ?",
@@ -143,3 +138,17 @@ $dbh->bz_commit_transaction();
 # It's complex to determine which items now need to be flushed from memcached.
 # As this is expected to be a rare event, we just flush the entire cache.
 Bugzilla->memcached->clear_all();
+
+sub fix_flags {
+    my ($table, $new_product, $component) = @_;
+    my $dbh = Bugzilla->dbh;
+
+    my $type_ids = $dbh->selectcol_arrayref("SELECT DISTINCT type_id FROM $table WHERE component_id = ?",
+                                            undef,
+                                            $component->id);
+    $dbh->do("DELETE FROM $table WHERE component_id = ?", undef, $component->id);
+    foreach my $type_id (@$type_ids) {
+        $dbh->do("INSERT INTO $table (type_id, product_id, component_id) VALUES (?, ?, ?)",
+                 undef, ($type_id, $new_product->id, $component->id));
+    }
+}

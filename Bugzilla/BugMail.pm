@@ -619,7 +619,16 @@ sub _get_new_bugmail_fields {
         my $value = $bug->$name;
 
         if (ref $value eq 'ARRAY') {
-            $value = join(', ', @$value);
+            my @new_values;
+            foreach my $item (@$value) {
+                if (blessed($item) && $item->isa('Bugzilla::User')) {
+                    push(@new_values, $item->login);
+                }
+                else {
+                    push(@new_values, $item);
+                }
+            }
+            $value = join(', ', @new_values);
         }
         elsif (blessed($value) && $value->isa('Bugzilla::User')) {
             $value = $value->login;

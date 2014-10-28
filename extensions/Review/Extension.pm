@@ -36,6 +36,7 @@ BEGIN {
     *Bugzilla::Component::reviewers_objs  = \&_component_reviewers_objs;
     *Bugzilla::Bug::mentors               = \&_bug_mentors;
     *Bugzilla::Bug::bug_mentors           = \&_bug_mentors;
+    *Bugzilla::Bug::bug_mentor            = \&_bug_mentors;
     *Bugzilla::Bug::is_mentor             = \&_bug_is_mentor;
     *Bugzilla::Bug::set_bug_mentors       = \&_bug_set_bug_mentors;
     *Bugzilla::User::review_count         = \&_user_review_count;
@@ -920,9 +921,14 @@ sub install_update_db {
     my $field = Bugzilla::Field->new({ name => 'bug_mentor' });
     if (!$field) {
         Bugzilla::Field->create({
-            name => 'bug_mentor',
-            description => 'Mentor'
+            name        => 'bug_mentor',
+            description => 'Mentor',
+            mailhead    => 1
         });
+    }
+    elsif (!$field->in_new_bugmail) {
+        $field->set_in_new_bugmail(1);
+        $field->update();
     }
 }
 

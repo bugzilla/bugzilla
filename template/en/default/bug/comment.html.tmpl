@@ -32,14 +32,15 @@
   <div id="comment_preview" class="bz_default_hidden bz_comment">
     <div id="comment_preview_loading" class="bz_default_hidden">Generating Preview...</div>
     <div id="comment_preview_error" class="bz_default_hidden"></div>
-    <pre id="comment_preview_text" class="bz_comment_text"></pre>
+    <div id="comment_preview_text" class="bz_comment_text"></div>
   </div>
 [% END %]
 
-[% IF feature_enabled('markdown') AND  user.settings.use_markdown.value == 'on' %]
+[% IF user.use_markdown %]
   <div id="comment_markdown">
-    <input type="checkbox" name="use_markdown" id="use_markdown" value="1"
-    [% "checked=\"checked\"" IF user.settings.use_markdown.value == 'on' %] >
+    <input type="checkbox" name="use_markdown"
+           id="use_markdown" value="1" checked="checked"
+           onchange="refresh_markdown_preview([% bug.id FILTER none %])">
     <label id="use_markdown_label" for="use_markdown">Use Markdown for this [% terms.comment %]</label>
     (<a href="page.cgi?id=markdown.html" target="_blank" title="View Markdown Syntax Guide">help</a>)
   </div>

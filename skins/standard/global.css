@@ -319,7 +319,7 @@ div#docslinks {
 }
 
 /* tbody.file pre is for the Diff view of attachments. */
-.bz_comment_text, .uneditable_textarea, tbody.file pre {
+pre.bz_comment_text, .uneditable_textarea, tbody.file pre {
      font-family: monospace;
      white-space: pre-wrap;
 }
@@ -730,6 +730,10 @@ input.required, select.required, span.required_explanation {
 #comment_preview_text {
     margin: 0px;
     width: auto;
+}
+
+.comment_preview_pre {
+    white-space: pre;
 }
 
 #comment_preview_loading {

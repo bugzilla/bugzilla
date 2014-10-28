@@ -632,6 +632,14 @@ sub is_bug_ignored {
     return (grep {$_->{'id'} == $bug_id} @{$self->bugs_ignored}) ? 1 : 0;
 }
 
+sub use_markdown {
+    my ($self, $comment) = @_;
+    return Bugzilla->feature('markdown')
+           && $self->settings->{use_markdown}->{is_enabled}
+           && $self->settings->{use_markdown}->{value} eq 'on'
+           && (!defined $comment || $comment->is_markdown);
+}
+
 ##########################
 # Saved Recent Bug Lists #
 ##########################
@@ -2622,6 +2630,12 @@ C<string> The current summary of the bug.
 
 Returns true if the user does not want email notifications for the
 specified bug ID, else returns false.
+
+=item C<use_markdown>
+
+Returns true if the user has set their preferences to use Markdown
+for rendering comments. If an optional C<comment> object is passed
+then it returns true if the comment has markdown enabled.
 
 =back
 

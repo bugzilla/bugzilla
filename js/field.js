@@ -984,18 +984,32 @@ function initDirtyFieldTracking() {
 
 var last_comment_text = '';
 var last_markdown_cb_value = null;
+var comment_textarea_width = null;
+var comment_textarea_height = null;
 
-function show_comment_preview(bug_id) {
+function refresh_markdown_preview (bug_id) {
+    if (!YAHOO.util.Dom.hasClass('comment_preview_tab', 'active_comment_tab'))
+        return;
+    show_comment_preview(bug_id, 1);
+}
+
+function show_comment_preview(bug_id, refresh) {
     var Dom = YAHOO.util.Dom;
     var comment = document.getElementById('comment');
     var preview = document.getElementById('comment_preview');
     var markdown_cb = document.getElementById('use_markdown');
 
     if (!comment || !preview) return;
-    if (Dom.hasClass('comment_preview_tab', 'active_comment_tab')) return;
+    if (Dom.hasClass('comment_preview_tab', 'active_comment_tab') && !refresh)
+        return;
 
-    preview.style.width = (comment.clientWidth - 4) + 'px';
-    preview.style.height = comment.offsetHeight + 'px';
+    if (!comment_textarea_width) {
+        comment_textarea_width = (comment.clientWidth - 4) + 'px';
+        comment_textarea_height = comment.offsetHeight + 'px';
+    }
+
+    preview.style.width = comment_textarea_width;
+    preview.style.height = comment_textarea_height;
 
     var comment_tab = document.getElementById('comment_tab');
     Dom.addClass(comment, 'bz_default_hidden');
@@ -1029,6 +1043,12 @@ function show_comment_preview(bug_id) {
                 document.getElementById('comment_preview_text').innerHTML = data.result.html;
                 Dom.addClass('comment_preview_loading', 'bz_default_hidden');
                 Dom.removeClass('comment_preview_text', 'bz_default_hidden');
+                if (markdown_cb.checked) {
+                    Dom.removeClass('comment_preview_text', 'comment_preview_pre');
+                }
+                else {
+                    Dom.addClass('comment_preview_text', 'comment_preview_pre');
+                }
                 last_comment_text = comment.value;
                 last_markdown_cb_value = markdown_cb.checked;
             }

@@ -99,7 +99,7 @@ sub _RunSpanGamut {
     $text = $self->_EncodeAmpsAndAngles($text);
     $text = $self->_DoItalicsAndBold($text);
 
-    $text =~ s/ {2,}\n/ <br$self->{empty_element_suffix}\n/g;
+    $text =~ s/\n/<br$self->{empty_element_suffix}\n/g;
 
     return $text;
 }
@@ -321,13 +321,6 @@ sub _DoItalicsAndBold {
     $text =~ s{ (?<=\W) \* (?=\S) (.+?) (?<=\S) \* }{<em>$1</em>}gsx;
 
     return $text;
-}
-
-# Override this function to ignore 'wrap_in_p_tags' from
-# the caller and to not generate <p> tags around the output.
-sub _FormParagraphs {
-    my ($self, $text) = @_;
-    return $self->SUPER::_FormParagraphs($text, { wrap_in_p_tags => 0 });
 }
 
 sub _DoStrikethroughs {

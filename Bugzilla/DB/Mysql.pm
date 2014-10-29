@@ -294,7 +294,6 @@ sub _bz_get_initial_schema {
 sub bz_check_server_version {
     my $self = shift;
 
-    my $lc = Bugzilla->localconfig;
     if (lc(Bugzilla->localconfig->{db_name}) eq 'mysql') {
         die "It is not safe to run Bugzilla inside a database named 'mysql'.\n"
             . " Please pick a different value for \$db_name in localconfig.\n";

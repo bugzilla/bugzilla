@@ -115,7 +115,6 @@ sub connect_shadow {
 }
 
 sub connect_main {
-    my $lc = Bugzilla->localconfig;
     return _connect(Bugzilla->localconfig); 
 }
 

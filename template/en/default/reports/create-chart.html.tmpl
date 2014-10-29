@@ -216,9 +216,11 @@ function subcatSelected() {
         <td>
           <label for="datefrom"><b>Date Range</b></label>:
           <input type="text" size="12" name="datefrom" id="datefrom"
+            placeholder="YYYY-MM-DD"
             value="[% time2str("%Y-%m-%d", chart.datefrom) IF chart.datefrom%]">
           <label for="dateto"><b>to</b></label>
           <input type="text" size="12" name="dateto" id="dateto"
+            placeholder="YYYY-MM-DD"
             value="[% time2str("%Y-%m-%d", chart.dateto) IF chart.dateto %]">
         </td>
 

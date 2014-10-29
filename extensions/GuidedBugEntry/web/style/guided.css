@@ -207,12 +207,8 @@ ul.product-list > li > .product-item {
     padding: 5px;
 }
 
-#bugForm tr:nth-child(even) td, #bugForm tr:nth-child(even) th {
+#bugForm tr {
     background: #e0e0e0;
-}
-
-#bugForm tr.odd td {
-    background: inherit;
 }
 
 #bugForm .label {

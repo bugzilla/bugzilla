@@ -38,6 +38,7 @@ YAHOO.util.Dom.removeClass('loading', 'hidden');
 </script>
 
 <div id="steps">
+[% INCLUDE webdev_step %]
 [% INCLUDE product_step %]
 [% INCLUDE otherProducts_step %]
 [% INCLUDE dupes_step %]
@@ -52,7 +53,7 @@ YAHOO.util.Dom.removeClass('loading', 'hidden');
 
 <script type="text/javascript">
 YAHOO.util.Dom.addClass('loading', 'hidden');
-guided.init();
+guided.init({ webdev: [% webdev ? "true" : "false" %] });
 guided.detectedPlatform = '[% platform FILTER js %]';
 guided.detectedOpSys = '[% op_sys FILTER js %]';
 guided.currentUser = '[% user.login FILTER js %]';
@@ -81,8 +82,42 @@ dupes.setLabels(
 [% BLOCK page_title %]
   <div id="page_title">
     <h2>Enter A [% terms.Bug %]</h2>
-    <h3>Step [% step_number FILTER html %] of 3</h3>
   </div>
+[% END %]
+
+[%############################################################################%]
+[%# webdev step                                                             #%]
+[%############################################################################%]
+
+[% BLOCK webdev_step %]
+<div id="webdev_step" class="step hidden">
+
+[% INCLUDE page_title %]
+
+<p>Are you reporting a [% terms.bug %] with:</p>
+
+<ul class="product-list">
+[% WRAPPER product_block
+  icon="component.png"
+  onclick="product.select('Core', 'Untriaged')" %]
+HTML, CSS, JS, SVG, or some other web technology or combination of
+web technologies?
+[% END %]
+
+[% WRAPPER product_block
+  icon="devedition.png"
+  onclick="product.select('Firefox', 'Developer Tools')" %]
+Firefox's developer tools
+[% END %]
+
+[% WRAPPER product_block
+  icon="firefox.png"
+  onclick="product.select('Firefox', 'Untriaged')" %]
+Firefox's user interface (for example, an issue with bookmarks,
+tabbed browsing or the location bar)
+[% END %]
+</ul>
+</div>
 [% END %]
 
 [%############################################################################%]
@@ -92,9 +127,7 @@ dupes.setLabels(
 [% BLOCK product_step %]
 <div id="product_step" class="step hidden">
 
-[% INCLUDE page_title
-   step_number = "1"
-%]
+[% INCLUDE page_title %]
 
 [% INCLUDE exits
    show = "all"
@@ -160,9 +193,7 @@ Other Mozilla products which aren't listed here
 [% BLOCK otherProducts_step %]
 <div id="otherProducts_step" class="step hidden">
 
-[% INCLUDE page_title
-   step_number = "1"
-%]
+[% INCLUDE page_title %]
 
 [% INCLUDE exits
    show = "all"
@@ -238,7 +269,8 @@ Other Mozilla products which aren't listed here
       </div>
     </td>
     <td class="exit_text_last">
-      <a href="enter_bug.cgi?format=guided&amp;product=Core">Report an issue with Firefox on a site that I've developed</a><br>
+
+      <a onclick="product.select('Core', 'Untriaged')" href="javascript:void(0)">Report an issue with Firefox on a site that I've developed</a><br>
       <a href="http://input.mozilla.org/feedback/#sad">Report an issue with a web site that I use</a><br>
     </td>
   </tr>
@@ -249,24 +281,6 @@ Other Mozilla products which aren't listed here
 </h3>
 [% END %]
 
-[% BLOCK exit_block %]
-  <tr>
-    <td>
-      <div class="exit_img">
-        <a href="[% href FILTER none %]"
-        ><img src="extensions/GuidedBugEntry/web/images/[% icon FILTER uri %]" width="32" height="32"
-        ></a>
-      </div>
-    </td>
-    <td width="100%">
-      <h2>
-        <a href="[% href FILTER none %]">[% name FILTER html %]</a>
-      </h2>
-      [% desc FILTER html %]
-    </td>
-  </tr>
-[% END %]
-
 [%############################################################################%]
 [%# duplicates step                                                          #%]
 [%############################################################################%]
@@ -274,13 +288,11 @@ Other Mozilla products which aren't listed here
 [% BLOCK dupes_step %]
 <div id="dupes_step" class="step hidden">
 
-[% INCLUDE page_title
-   step_number = "2"
-%]
+[% INCLUDE page_title %]
 
 <p>
 Product: <b><span id="dupes_product_name">?</span></b>:
-(<a href="javascript:void(0)" onclick="guided.setStep('product')">Change</a>)
+(<a href="javascript:void(0)" onclick="guided.setStep('default')">Change</a>)
 </p>
 
 <table border="0" cellpadding="5" cellspacing="0" id="product_support" class="hidden">
@@ -329,9 +341,7 @@ Product: <b><span id="dupes_product_name">?</span></b>:
 [% BLOCK bugForm_step %]
 <div id="bugForm_step" class="step hidden">
 
-[% INCLUDE page_title
-   step_number = "3"
-%]
+[% INCLUDE page_title %]
 
 <form method="post" action="post_bug.cgi" enctype="multipart/form-data" onsubmit="return bugForm.validate()">
 <input type="hidden" name="token" value="[% token FILTER html %]">
@@ -376,7 +386,7 @@ explain how to write effective [% terms.bug %] reports.</li>
   <td class="label">Product:</td>
   <td id="productTD">
     <span id="product_label"></span>
-    (<a href="javascript:void(0)" onclick="guided.setStep('product')">Change</a>)
+    (<a href="javascript:void(0)" onclick="guided.setStep('default')">Change</a>)
   </td>
   <td id="versionTD" class="hidden">
     <span class="label">Version:
@@ -477,7 +487,7 @@ explain how to write effective [% terms.bug %] reports.</li>
   </div>
   </td>
 </tr>
-<tr>
+<tr id="data_description_tr">
   <td class="label">File Description:</td>
   <td colspan="2"><input type="text" name="description" id="data_description" class="textInput" disabled></td>
   <td>&nbsp;</td>

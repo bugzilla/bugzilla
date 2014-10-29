@@ -97,6 +97,7 @@ sub _init_vars {
 
     $vars->{'platform'} = detect_platform();
     $vars->{'op_sys'} = detect_op_sys();
+    $vars->{'webdev'} = Bugzilla->cgi->param('webdev');
 }
 
 sub page_before_template {
@@ -117,6 +118,7 @@ sub page_before_template {
         }
     }
     $vars->{'create_bug_formats'} = \%bug_formats;
+    $vars->{'webdev'} = Bugzilla->cgi->param('webdev');
 }
 
 __PACKAGE__->NAME;

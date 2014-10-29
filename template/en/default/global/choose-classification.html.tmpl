@@ -19,7 +19,9 @@
 [% DEFAULT title = "Choose the classification" %]
 [% PROCESS global/header.html.tmpl %]
 
-[% previous_params = cgi.canonicalise_query('classification') %]
+[% USE Bugzilla %]
+[% previous_params = Bugzilla.cgi.canonicalise_query('classification') %]
+
 <h2>First, you must pick a classification on which to enter [% terms.abug %]:</h2>
 <table id="choose_classification">
   <tr>

@@ -337,11 +337,28 @@ sub _retrieve_json_params {
     my $params = {};
     %{$params} = %{ Bugzilla->input_params };
 
-    # First add any params we were able to pull out of the path
-    # based on the resource regexp
-    %{$params} = (%{$params}, %{$self->bz_rest_params}) if $self->bz_rest_params;
+    # First add any parameters we were able to pull out of the path
+    # based on the resource regexp and combine with the normal URL
+    # parameters.
+    if (my $rest_params = $self->bz_rest_params) {
+        foreach my $param (keys %$rest_params) {
+            if (!exists $params->{$param}) {
+                $params->{$param} = $rest_params->{$param};
+                next;
+            }
+            my @values = ref $rest_params->{$param}
+                         ? @{ $rest_params->{$param} }
+                         : ($rest_params->{$param});
+            if (ref $params->{$param}) {
+                push(@{ $params->{$param} }, @values);
+            }
+            else {
+                $params->{$param} = [ $params->{$param}, @values ];
+            }
+        }
+    }
 
-    # Merge any additional query key/values with $obj->{params} if not a GET request
+    # Merge any additional query key/values from the request body if non-GET.
     # We do this manually cause CGI.pm doesn't understand JSON strings.
     if ($self->request->method ne 'GET') {
         my $extra_params = {};
@@ -352,14 +369,6 @@ sub _retrieve_json_params {
                 ThrowUserError('json_rpc_invalid_params', { err_msg  => $@ });
             }
         }
-
-        # Allow parameters in the query string if request was not GET.
-        # Note: query string parameters will override any matching params
-        # also specified in the request body.
-        foreach my $param ($self->cgi->url_param()) {
-            $extra_params->{$param} = $self->cgi->url_param($param);
-        }
-
         %{$params} = (%{$params}, %{$extra_params}) if %{$extra_params};
     }
 

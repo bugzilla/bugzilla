@@ -23,9 +23,9 @@ Before Git, we used to use Bazaar and, before that, CVS. If your installation
 of Bugzilla consists of a checkout from one of those two systems, you need to
 upgrade in three steps:
 
-1. upgrade to the latest point release of your current Bugzilla version;
-2. move to Git while staying on exactly the same release;
-3. upgrade to the latest Bugzilla using the instructions for :ref:`upgrading-with-git`.
+1. Upgrade to the latest point release of your current Bugzilla version.
+2. Move to Git while staying on exactly the same release.
+3. Upgrade to the latest Bugzilla using the instructions for :ref:`upgrading-with-git`.
 
 See :ref:`migrating-from-bazaar` or :ref:`migrating-from-cvs` as appropriate.
 
@@ -38,12 +38,15 @@ If you aren't sure which of these categories you fall into, to find out which
 version control system your copy of Bugzilla recognizes, look for the
 following subdirectories in your root Bugzilla directory:
 
-* :file:`.git`: you installed using Git - follow :ref:`upgrading-with-git`
-* :file:`.bzr`: you installed using Bazaar - follow :ref:`migrating-from-bazaar`
-* :file:`CVS`: you installed using CVS - follow :ref:`migrating-from-cvs`
-* none of the above: you installed using an old tarball - follow
-  :ref:`migrating-from-a-tarball`
+* :file:`.git`: you installed using Git - follow :ref:`upgrading-with-git`.
+* :file:`.bzr`: you installed using Bazaar - follow :ref:`migrating-from-bazaar`.
+* :file:`CVS`: you installed using CVS - follow :ref:`migrating-from-cvs`.
+* None of the above: you installed using an old tarball - follow
+  :ref:`migrating-from-a-tarball`.
 
 It is also possible, particularly if your server machine does not have and
 cannot be configured to have access to the public internet, to upgrade using
 a tarball. See :ref:`upgrading-with-a-tarball`.
+
+Whichever path you use, you may need help with
+:ref:`upgrading-customizations`.

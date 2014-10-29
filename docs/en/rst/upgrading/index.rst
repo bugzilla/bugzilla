@@ -13,3 +13,4 @@ Upgrading Bugzilla
    migrating-from-cvs
    migrating-from-a-tarball
    upgrading-with-a-tarball
+   upgrading-customizations

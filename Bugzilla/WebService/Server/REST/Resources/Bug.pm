@@ -28,6 +28,11 @@ sub _rest_resources {
                 status_code => STATUS_CREATED
             }
         },
+        qr{^/bug/$}, {
+            GET => {
+                method => 'get'
+            }
+        },
         qr{^/bug/([^/]+)$}, {
             GET => {
                 method => 'get',

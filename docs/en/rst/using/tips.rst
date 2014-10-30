@@ -74,15 +74,15 @@ have more styling than plain text. For example, you may use Markdown for
 making a part of your comment look italic or bold in the generated HTML.
 Bugzilla supports most of the structures defined by
 `standard Markdown <http://daringfireball.net/projects/markdown/basics>`_,
-but does **not** support inline images and inline HTML.
+but does **not** support inline images and inline HTML. For a complete
+reference on supported Markdown structures, please see the
+`syntax help <https://bugzilla.mozilla.org/page.cgi?id=markdown.html>`_ link
+next to the Markdown checkbox for new comments.
 
-Additionally, three Github Flavored Markdown features are supported.
-
-* `Multiple underscores in words <https://help.github.com/articles/github-flavored-markdown#multiple-underscores-in-words>`_
-
-* `strikethrough <https://help.github.com/articles/github-flavored-markdown#strikethrough>`_
-
-* `fenced code blocks <https://help.github.com/articles/github-flavored-markdown#fenced-code-blocks>`_
+.. todo:: The above link isn't ideal, but we can't easily link to the user's
+          Bugzilla because the docs aren't always on a Bugzilla (e.g.
+          when they are on ReadTheDocs). Best solution is to port the
+          Markdown guide to ReST.
 
 To use the Markdown feature, make sure that :guilabel:`Enable Markdown
 support for comments` is set to :guilabel:`on`

@@ -638,34 +638,6 @@ globalwatchers
     permissions. It may be useful for sending notifications to a
     mailing-list, for instance.
 
-.. _param-patchviewer:
-
-Patch Viewer
-============
-
-This page contains configuration parameters for the CVS server,
-Bonsai server and LXR server that Bugzilla will use to enable the
-certain features of the Patch Viewer. Bonsai is a tool that enables queries
-to a CVS tree. LXR is a tool that can cross reference and index source
-code.
-
-This page is scheduled to be removed in :bug:`1068494`.
-
-cvsroot
-    The CVS root that most users of your system will be using for 'cvs diff'. Used in Patch Viewer ('Diff' option on patches) to figure out where patches are rooted even if users did the 'cvs diff' from different places in the directory structure. (NOTE: if your CVS repository is remote and requires a password, you must either ensure the Bugzilla user has done a 'cvs login' or specify the password as part of the CVS root.) Leave this blank if you have no CVS repository.
-
-cvsroot_get
-    The CVS root Bugzilla will be using to get patches from. Some installations may want to mirror their CVS repository on the Bugzilla server or even have it on that same server, and thus the repository can be the local file system (and much faster). Make this the same as cvsroot if you don't understand what this is (if cvsroot is blank, make this blank too).
-
-bonsai_url
-    The URL to a Bonsai server containing information about your CVS repository. Patch Viewer will use this information to create links to bonsai's blame for each section of a patch (it will append '/cvsblame.cgi?...' to this url). Leave this blank if you don't understand what this is.
-
-lxr_url
-    The URL to an LXR server that indexes your CVS repository. Patch Viewer will use this information to create links to LXR for each file in a patch. Leave this blank if you don't understand what this is.
-
-lxr_root
-    Some LXR installations do not index the CVS repository from the root -- Mozilla's, for example, starts indexing under mozilla/. This means URLs are relative to that extra path under the root. Enter this if you have a similar situation. Leave it blank if you don't know what this is. 
-
 .. _param-querydefaults:
 
 Query Defaults

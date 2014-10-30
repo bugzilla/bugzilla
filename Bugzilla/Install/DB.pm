@@ -12,6 +12,7 @@ package Bugzilla::Install::DB;
 
 use 5.10.1;
 use strict;
+use warnings;
 
 use Bugzilla::Constants;
 use Bugzilla::Hook;
@@ -271,10 +272,6 @@ sub update_table_definitions {
                         {TYPE => 'BOOLEAN', NOTNULL => 1, DEFAULT => 'FALSE'});
     $dbh->bz_add_column('attachments', 'isprivate',
                         {TYPE => 'BOOLEAN', NOTNULL => 1, DEFAULT => 'FALSE'});
-
-    $dbh->bz_add_column("bugs", "alias", {TYPE => "varchar(20)"});
-    $dbh->bz_add_index('bugs', 'bugs_alias_idx',
-                       {TYPE => 'UNIQUE', FIELDS => [qw(alias)]});
 
     _move_quips_into_db();
 
@@ -718,6 +715,20 @@ sub update_table_definitions {
     $dbh->bz_add_index('bug_user_last_visit',
                        'bug_user_last_visit_last_visit_ts_idx',
                        ['last_visit_ts']);
+
+    # 2014-07-14 sgreen@redhat.com - Bug 726696
+    $dbh->bz_alter_column('tokens', 'tokentype',
+                          {TYPE => 'varchar(16)', NOTNULL => 1});
+
+    # 2014-07-27 LpSolit@gmail.com - Bug 1044561
+    _fix_user_api_keys_indexes();
+
+    # 2014-08-11 sgreen@redhat.com - Bug 1012506
+     _update_alias();
+
+    # 2014-08-14 koosha.khajeh@gmail.com - Bug 330707
+    $dbh->bz_add_column('longdescs', 'is_markdown',
+                        {TYPE => 'BOOLEAN', NOTNULL => 1, DEFAULT => 'FALSE'});
 
     ################################################################
     # New --TABLE-- changes should go *** A B O V E *** this point #
@@ -2550,7 +2561,7 @@ sub _fix_whine_queries_title_and_op_sys_value {
                  undef, "Other", "other");
         if (Bugzilla->params->{'defaultopsys'} eq 'other') {
             # We can't actually fix the param here, because WriteParams() will
-            # make $datadir/params unwriteable to the webservergroup.
+            # make $datadir/params.json unwriteable to the webservergroup.
             # It's too much of an ugly hack to copy the permission-fixing code
             # down to here. (It would create more potential future bugs than
             # it would solve problems.)
@@ -3875,6 +3886,33 @@ sub _fix_components_primary_key {
         $dbh->bz_alter_column("component_cc", "component_id",
                               {TYPE => 'INT3', NOTNULL => 1});
     }
+}
+
+sub _fix_user_api_keys_indexes {
+    my $dbh = Bugzilla->dbh;
+
+    if ($dbh->bz_index_info('user_api_keys', 'user_api_keys_key')) {
+        $dbh->bz_drop_index('user_api_keys', 'user_api_keys_key');
+        $dbh->bz_add_index('user_api_keys', 'user_api_keys_api_key_idx',
+                           { FIELDS => ['api_key'], TYPE => 'UNIQUE' });
+    }
+    if ($dbh->bz_index_info('user_api_keys', 'user_api_keys_user_id')) {
+        $dbh->bz_drop_index('user_api_keys', 'user_api_keys_user_id');
+        $dbh->bz_add_index('user_api_keys', 'user_api_keys_user_id_idx', ['user_id']);
+    }
+}
+
+sub _update_alias {
+    my $dbh = Bugzilla->dbh;
+    return unless $dbh->bz_column_info('bugs', 'alias');
+
+    # We need to move the aliases from the bugs table to the bugs_aliases table
+    $dbh->do(q{
+        INSERT INTO bugs_aliases (bug_id, alias)
+        SELECT bug_id, alias FROM bugs WHERE alias IS NOT NULL
+    });
+
+    $dbh->bz_drop_column('bugs', 'alias');
 }
 
 1;

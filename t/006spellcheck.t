@@ -10,28 +10,12 @@
 #Bugzilla Test 6#
 ####Spelling#####
 
+use 5.10.1;
+use strict;
+use warnings;
+
 use lib 't';
 use Support::Files;
-
-BEGIN {
-    #add the words to check here:
-    @evilwords = qw(
-        anyways
-        appearence
-        arbitary
-        cancelled
-        critera
-        databasa
-        dependan
-        existance
-        existant
-        paramater
-        refered
-        repsentation
-        suported
-        varsion
-    );
-}
 
 # -1 because 006spellcheck.t must not be checked.
 use Test::More tests => scalar(@Support::Files::testitems)
@@ -41,7 +25,7 @@ use Test::More tests => scalar(@Support::Files::testitems)
 # This will handle verbosity for us automatically.
 my $fh;
 {
-    local $^W = 0;  # Don't complain about non-existent filehandles
+    no warnings qw(unopened);  # Don't complain about non-existent filehandles
     if (-e \*Test::More::TESTOUT) {
         $fh = \*Test::More::TESTOUT;
     } elsif (-e \*Test::Builder::TESTOUT) {
@@ -53,7 +37,24 @@ my $fh;
 
 my @testitems = (@Support::Files::testitems, @Support::Files::test_files);
 
-# at last, here we actually run the test...
+#add the words to check here:
+my @evilwords = qw(
+    anyways
+    appearence
+    arbitary
+    cancelled
+    critera
+    databasa
+    dependan
+    existance
+    existant
+    paramater
+    refered
+    repsentation
+    suported
+    varsion
+);
+
 my $evilwordsregexp = join('|', @evilwords);
 
 foreach my $file (@testitems) {

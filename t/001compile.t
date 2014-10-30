@@ -10,8 +10,10 @@
 #Bugzilla Test 1#
 ###Compilation###
 
-use strict;
 use 5.10.1;
+use strict;
+use warnings;
+
 use lib qw(. lib t);
 use Config;
 use Support::Files;
@@ -52,7 +54,7 @@ sub compile_file {
        $libs = join " ", map { "-I\"$_\"" } split /$Config{path_sep}/, $ENV{PERL5LIB};
     }
     my $perl = qq{"$^X"};
-    my $output = `$perl $libs -wc$T $file 2>&1`;
+    my $output = `$perl $libs -c$T $file 2>&1`;
     chomp($output);
     my $return_val = $?;
     $output =~ s/^\Q$file\E syntax OK$//ms;

@@ -9,6 +9,7 @@ package Bugzilla::Util;
 
 use 5.10.1;
 use strict;
+use warnings;
 
 use parent qw(Exporter);
 @Bugzilla::Util::EXPORT = qw(trick_taint detaint_natural detaint_signed
@@ -551,9 +552,14 @@ sub datetime_from {
     # In the database, this is the "0" date.
     return undef if $date =~ /^0000/;
 
-    # strptime($date) returns an empty array if $date has an invalid
-    # date format.
-    my @time = strptime($date);
+    my @time;
+    # Most dates will be in this format, avoid strptime's generic parser
+    if ($date =~ /^(\d{4})[\.-](\d{2})[\.-](\d{2})(?: (\d{2}):(\d{2}):(\d{2}))?$/) {
+        @time = ($6, $5, $4, $3, $2 - 1, $1 - 1900, undef);
+    }
+    else {
+        @time = strptime($date);
+    }
 
     unless (scalar @time) {
         # If an unknown timezone is passed (such as MSK, for Moskow),
@@ -565,10 +571,14 @@ sub datetime_from {
 
     return undef if !@time;
 
-    # strptime() counts years from 1900, and months from 0 (January).
-    # We have to fix both values.
+    # strptime() counts years from 1900, except if they are older than 1901
+    # in which case it returns the full year (so 1890 -> 1890, but 1984 -> 84,
+    # and 3790 -> 1890). We make a guess and assume that 1100 <= year < 3000.
+    $time[5] += 1900 if $time[5] < 1100;
+
     my %args = (
-        year   => $time[5] + 1900,
+        year   => $time[5],
+        # Months start from 0 (January).
         month  => $time[4] + 1,
         day    => $time[3],
         hour   => $time[2],

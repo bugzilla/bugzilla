@@ -9,6 +9,7 @@ package Bugzilla::Token;
 
 use 5.10.1;
 use strict;
+use warnings;
 
 use Bugzilla::Constants;
 use Bugzilla::Error;
@@ -23,12 +24,27 @@ use Digest::SHA qw(hmac_sha256_base64);
 
 use parent qw(Exporter);
 
-@Bugzilla::Token::EXPORT = qw(issue_session_token check_token_data delete_token
+@Bugzilla::Token::EXPORT = qw(issue_api_token issue_session_token
+                              check_token_data delete_token
                               issue_hash_token check_hash_token);
 
 ################################################################################
 # Public Functions
 ################################################################################
+
+# Create a token used for internal API authentication
+sub issue_api_token {
+    # Generates a random token, adds it to the tokens table if one does not
+    # already exist, and returns the token to the caller.
+    my $dbh  = Bugzilla->dbh;
+    my $user = Bugzilla->user;
+    my ($token) = $dbh->selectrow_array("
+        SELECT token FROM tokens
+         WHERE userid = ? AND tokentype = 'api_token'
+               AND (" . $dbh->sql_date_math('issuedate', '+', (MAX_TOKEN_AGE * 24 - 12), 'HOUR') . ") > NOW()",
+        undef, $user->id);
+    return $token // _create_token($user->id, 'api_token', '');
+}
 
 # Creates and sends a token to create a new user account.
 # It assumes that the login has the correct format and is not already in use.
@@ -465,6 +481,14 @@ Bugzilla::Token - Provides different routines to manage tokens.
 =head1 SUBROUTINES
 
 =over
+
+=item C<issue_api_token($login_name)>
+
+ Description: Creates a token that can be used for API calls on the web page.
+
+ Params:      None.
+
+ Returns:     The token.
 
 =item C<issue_new_user_account_token($login_name)>
 

@@ -9,6 +9,9 @@
 [%# Use the current script name. If an empty name is returned,
   # then we are accessing the home page. %]
 
+[% USE Bugzilla %]
+[% cgi = Bugzilla.cgi %]
+
 [% login_target = cgi.url("-relative" => 1, "-query" => 1) %]
 [% IF !login_target OR login_target.match("^token.cgi") %]
  [% login_target = "index.cgi" %]

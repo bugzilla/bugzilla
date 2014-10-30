@@ -9,6 +9,7 @@ package Bugzilla::WebService::BugUserLastVisit;
 
 use 5.10.1;
 use strict;
+use warnings;
 
 use parent qw(Bugzilla::WebService);
 
@@ -68,10 +69,10 @@ sub get {
         $user->visible_bugs([grep /^[0-9]$/, @$ids]);
     }
 
-    my @last_visits = @{ $user->last_visits };
+    my @last_visits = @{ $user->last_visited };
 
     if ($ids) {
-        # remove bugs that we arn't interested in if ids is passed in.
+        # remove bugs that we are not interested in if ids is passed in.
         my %id_set = map { ($_ => 1) } @$ids;
         @last_visits = grep { $id_set{ $_->bug_id } } @last_visits;
     }
@@ -166,20 +167,13 @@ B<EXPERIMENTAL>
 
 =item B<Description>
 
-Get the last visited timestamp for one or more specified bug ids or get a
-list of the last 20 visited bugs and their timestamps.
+Get the last visited timestamp for one or more specified bug ids.
 
 =item B<REST>
 
 To return the last visited timestamp for a single bug id:
 
-GET /rest/bug_visit/<bug-id>
-
-To return more than one bug timestamp or the last 20:
-
-GET /rest/bug_visit
-
-The returned data format is the same as below.
+    GET /rest/bug_user_last_visit/<bug-id>
 
 =item B<Params>
 

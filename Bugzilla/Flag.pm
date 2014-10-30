@@ -9,6 +9,7 @@ package Bugzilla::Flag;
 
 use 5.10.1;
 use strict;
+use warnings;
 
 =head1 NAME
 
@@ -453,14 +454,15 @@ sub create {
 sub update {
     my $self = shift;
     my $dbh = Bugzilla->dbh;
-    my $timestamp = shift || $dbh->selectrow_array('SELECT NOW()');
+    my $timestamp = shift || $dbh->selectrow_array('SELECT LOCALTIMESTAMP(0)');
 
     my $changes = $self->SUPER::update(@_);
 
     if (scalar(keys %$changes)) {
         $dbh->do('UPDATE flags SET modification_date = ? WHERE id = ?',
                  undef, ($timestamp, $self->id));
-        $self->{'modification_date'} = format_time($timestamp, '%Y.%m.%d %T');
+        $self->{'modification_date'} =
+          format_time($timestamp, '%Y.%m.%d %T', Bugzilla->local_timezone);
         Bugzilla->memcached->clear({ table => 'flags', id => $self->id });
     }
     return $changes;
@@ -931,6 +933,117 @@ sub extract_flags_from_cgi {
 
 =over
 
+=item C<multi_extract_flags_from_cgi($bug, $hr_vars)>
+
+Checks whether or not there are new flags to create and returns an
+array of hashes. This array is then passed to Flag::create(). This differs
+from the previous sub-routine as it is called for changing multiple bugs
+
+=back
+
+=cut
+
+sub multi_extract_flags_from_cgi {
+    my ($class, $bug, $vars, $skip) = @_;
+    my $cgi = Bugzilla->cgi;
+
+    my $match_status = Bugzilla::User::match_field({
+        '^requestee(_type)?-(\d+)$' => { 'type' => 'multi' },
+    }, undef, $skip);
+
+    $vars->{'match_field'} = 'requestee';
+    if ($match_status == USER_MATCH_FAILED) {
+        $vars->{'message'} = 'user_match_failed';
+    }
+    elsif ($match_status == USER_MATCH_MULTIPLE) {
+        $vars->{'message'} = 'user_match_multiple';
+    }
+
+    # Extract a list of flag type IDs from field names.
+    my @flagtype_ids = map(/^flag_type-(\d+)$/ ? $1 : (), $cgi->param());
+
+    my (@new_flags, @flags);
+
+    # Get a list of active flag types available for this product/component.
+    my $flag_types = Bugzilla::FlagType::match(
+        { 'product_id'   => $bug->{'product_id'},
+          'component_id' => $bug->{'component_id'},
+          'is_active'    => 1 });
+
+    foreach my $flagtype_id (@flagtype_ids) {
+        # Checks if there are unexpected flags for the product/component.
+        if (!scalar(grep { $_->id == $flagtype_id } @$flag_types)) {
+            $vars->{'message'} = 'unexpected_flag_types';
+            last;
+        }
+    }
+
+    foreach my $flag_type (@$flag_types) {
+        my $type_id = $flag_type->id;
+
+        # Bug flags are only valid for bugs
+        next unless ($flag_type->target_type eq 'bug');
+
+        # We are only interested in flags the user tries to create.
+        next unless scalar(grep { $_ == $type_id } @flagtype_ids);
+
+        # Get the flags of this type already set for this bug.
+        my $current_flags = $class->match(
+            { 'type_id'     => $type_id,
+              'target_type' => 'bug',
+              'bug_id'      => $bug->bug_id });
+
+        # We will update existing flags (instead of creating new ones)
+        # if the flag exists and the user has not chosen the 'always add'
+        # option
+        my $update = scalar(@$current_flags) && ! $cgi->param("flags_add-$type_id");
+
+        my $status = $cgi->param("flag_type-$type_id");
+        trick_taint($status);
+
+        my @logins = $cgi->param("requestee_type-$type_id");
+        if ($status eq "?" && scalar(@logins)) {
+            foreach my $login (@logins) {
+                if ($update) {
+                foreach my $current_flag (@$current_flags) {
+                    push (@flags, { id        => $current_flag->id,
+                                    status    => $status,
+                                    requestee => $login,
+                                    skip_roe  => $skip });
+                    }
+                }
+                else {
+                    push (@new_flags, { type_id   => $type_id,
+                                        status    => $status,
+                                        requestee => $login,
+                                        skip_roe  => $skip });
+                }
+
+                last unless $flag_type->is_multiplicable;
+            }
+        }
+        else {
+            if ($update) {
+                foreach my $current_flag (@$current_flags) {
+                    push (@flags, { id      => $current_flag->id,
+                                    status  => $status });
+                }
+            }
+            else {
+                push (@new_flags, { type_id => $type_id,
+                                    status  => $status });
+            }
+        }
+    }
+
+    # Return the list of flags to update and/or to create.
+    return (\@flags, \@new_flags);
+}
+
+=pod
+
+=over
+
 =item C<notify($flag, $old_flag, $object, $timestamp)>
 
 Sends an email notification about a flag being created, fulfilled
@@ -1011,18 +1124,32 @@ sub notify {
         $default_lang = Bugzilla::User->new()->setting('lang');
     }
 
+    # Get comments on the bug
+    my $all_comments = $bug->comments({ after => $bug->lastdiffed });
+    @$all_comments   = grep { $_->type || $_->body =~ /\S/ } @$all_comments;
+
+    # Get public only comments
+    my $public_comments = [ grep { !$_->is_private } @$all_comments ];
+
     foreach my $to (keys %recipients) {
         # Add threadingmarker to allow flag notification emails to be the
         # threaded similar to normal bug change emails.
         my $thread_user_id = $recipients{$to} ? $recipients{$to}->id : 0;
 
-        my $vars = { 'flag'            => $flag,
-                     'old_flag'        => $old_flag,
-                     'to'              => $to,
-                     'date'            => $timestamp,
-                     'bug'             => $bug,
-                     'attachment'      => $attachment,
-                     'threadingmarker' => build_thread_marker($bug->id, $thread_user_id) };
+        # We only want to show private comments to users in the is_insider group
+        my $comments = $recipients{$to} && $recipients{$to}->is_insider
+            ? $all_comments : $public_comments;
+
+        my $vars = {
+            flag            => $flag,
+            old_flag        => $old_flag,
+            to              => $to,
+            date            => $timestamp,
+            bug             => $bug,
+            attachment      => $attachment,
+            threadingmarker => build_thread_marker($bug->id, $thread_user_id),
+            new_comments    => $comments,
+        };
 
         my $lang = $recipients{$to} ?
           $recipients{$to}->setting('lang') : $default_lang;

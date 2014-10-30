@@ -10,6 +10,7 @@ package Bugzilla::Template;
 
 use 5.10.1;
 use strict;
+use warnings;
 
 use Bugzilla::Constants;
 use Bugzilla::WebService::Constants;
@@ -147,10 +148,11 @@ sub get_format {
 # If you want to modify this routine, read the comments carefully
 
 sub quoteUrls {
-    my ($text, $bug, $comment, $user, $bug_link_func) = @_;
+    my ($text, $bug, $comment, $user, $bug_link_func, $for_markdown) = @_;
     return $text unless $text;
     $user ||= Bugzilla->user;
     $bug_link_func ||= \&get_bug_link;
+    $for_markdown ||= 0;
 
     # We use /g for speed, but uris can have other things inside them
     # (http://foo/bug#3 for example). Filtering that out filters valid
@@ -221,10 +223,11 @@ sub quoteUrls {
 
     $text = html_quote($text);
 
-    # Color quoted text
-    $text =~ s~^(&gt;.+)$~<span class="quote">$1</span >~mg;
-    $text =~ s~</span >\n<span class="quote">~\n~g;
-
+    unless ($for_markdown) {
+        # Color quoted text
+        $text =~ s~^(&gt;.+)$~<span class="quote">$1</span >~mg;
+        $text =~ s~</span >\n<span class="quote">~\n~g;
+    }
     # mailto:
     # Use |<nothing> so that $1 is defined regardless
     # &#64; is the encoded '@' character.
@@ -262,28 +265,23 @@ sub quoteUrls {
 
     my $bugs_re = qr/\Q$bugs_word\E$s*\#?$s*
                      \d+(?:$s*,$s*\#?$s*\d+)+/ix;
-    while ($text =~ m/($bugs_re)/g) {
-        my $offset = $-[0];
-        my $length = $+[0] - $-[0];
-        my $match  = $1;
 
+    $text =~ s{($bugs_re)}{
+        my $match = $1;
         $match =~ s/((?:#$s*)?(\d+))/$bug_link_func->($2, $1);/eg;
-        # Replace the old string with the linkified one.
-        substr($text, $offset, $length) = $match;
-    }
+        $match;
+    }eg;
 
     my $comments_word = template_var('terms')->{comments};
 
     my $comments_re = qr/(?:comments|\Q$comments_word\E)$s*\#?$s*
                          \d+(?:$s*,$s*\#?$s*\d+)+/ix;
-    while ($text =~ m/($comments_re)/g) {
-        my $offset = $-[0];
-        my $length = $+[0] - $-[0];
-        my $match  = $1;
 
+    $text =~ s{($comments_re)}{
+        my $match = $1;
         $match =~ s|((?:#$s*)?(\d+))|<a href="$current_bugurl#c$2">$1</a>|g;
-        substr($text, $offset, $length) = $match;
-    }
+        $match;
+    }eg;
 
     # Old duplicate markers. These don't use $bug_word because they are old
     # and were never customizable.
@@ -534,7 +532,7 @@ sub _concatenate_css {
         write_file($file, $content);
     }
 
-    $file =~ s/^\Q$cgi_path\E\///;
+    $file =~ s/^\Q$cgi_path\E\///o;
     return mtime_filter($file);
 }
 
@@ -545,6 +543,55 @@ sub _css_url_rewrite {
     $url =~ s/(^['"]|['"]$)//g;
     return $url if substr($url, 0, 1) eq '/';
     return 'url(../../' . dirname($source) . '/' . $url . ')';
+}
+
+sub _concatenate_js {
+    return @_ unless CONCATENATE_ASSETS;
+    my ($sources) = @_;
+    return [] unless $sources;
+    $sources = ref($sources) ? $sources : [ $sources ];
+
+    my %files =
+        map {
+            (my $file = $_) =~ s/(^[^\?]+)\?.+/$1/;
+            $_ => $file;
+        } @$sources;
+
+    my $cgi_path   = bz_locations()->{cgi_path};
+    my $skins_path = bz_locations()->{assetsdir};
+
+    # build minified files
+    my @minified;
+    foreach my $source (@$sources) {
+        next unless -e "$cgi_path/$files{$source}";
+        my $file = $skins_path . '/' . md5_hex($source) . '.js';
+        if (!-e $file) {
+            my $content = read_file("$cgi_path/$files{$source}");
+
+            # minimal minification
+            $content =~ s#/\*.*?\*/##sg;    # block comments
+            $content =~ s#(^ +| +$)##gm;    # leading/trailing spaces
+            $content =~ s#^//.+$##gm;       # single line comments
+            $content =~ s#\n{2,}#\n#g;      # blank lines
+            $content =~ s#(^\s+|\s+$)##g;   # whitespace at the start/end of file
+
+            write_file($file, ";/* $files{$source} */\n" . $content . "\n");
+        }
+        push @minified, $file;
+    }
+
+    # concat files
+    my $file = $skins_path . '/' . md5_hex(join(' ', @$sources)) . '.js';
+    if (!-e $file) {
+        my $content = '';
+        foreach my $source (@minified) {
+            $content .= read_file($source);
+        }
+        write_file($file, $content);
+    }
+
+    $file =~ s/^\Q$cgi_path\E\///o;
+    return [ $file ];
 }
 
 # YUI dependency resolution
@@ -610,6 +657,21 @@ $Template::Stash::LIST_OPS->{ clone } =
       my $list = shift;
       return [@$list];
   };
+
+# Allow us to sort the list of fields correctly
+$Template::Stash::LIST_OPS->{ sort_by_field_name } =
+    sub {
+        sub field_name {
+            if ($_[0] eq 'noop') {
+                # Sort --- first
+                return '';
+            }
+            # Otherwise sort by field_desc or description
+            return $_[1]{$_[0]} || $_[0];
+        }
+        my ($list, $field_desc) = @_;
+        return [ sort { lc field_name($a, $field_desc) cmp lc field_name($b, $field_desc) } @$list ];
+    };
 
 # Allow us to still get the scalar if we use the list operation ".0" on it,
 # as we often do for defaults in query.cgi and other places.
@@ -796,6 +858,24 @@ sub create {
                            1
                          ],
 
+            markdown => [ sub {
+                              my ($context, $bug, $comment, $user) = @_;
+                              return sub {
+                                  my $text = shift;
+                                  return unless $text;
+
+                                  if (Bugzilla->feature('markdown')
+                                      && ((ref($comment) eq 'HASH' && $comment->{is_markdown})
+                                         || (ref($comment) eq 'Bugzilla::Comment' && $comment->is_markdown)))
+                                  {
+                                      return Bugzilla->markdown->markdown($text);
+                                  }
+                                  return quoteUrls($text, $bug, $comment, $user);
+                              };
+                          },
+                          1
+                        ],
+
             bug_link => [ sub {
                               my ($context, $bug, $options) = @_;
                               return sub {
@@ -812,10 +892,12 @@ sub create {
             },
 
             # In CSV, quotes are doubled, and any value containing a quote or a
-            # comma is enclosed in quotes.
+            # comma is enclosed in quotes. If a field starts with an equals
+            # sign, it is proceed by a space.
             csv => sub
             {
                 my ($var) = @_;
+                $var = ' ' . $var if substr($var, 0, 1) eq '=';
                 $var =~ s/\"/\"\"/g;
                 if ($var !~ /^-?(\d+\.)?\d*$/) {
                     $var = "\"$var\"";
@@ -1001,6 +1083,12 @@ sub create {
                 return $cookie ? issue_hash_token(['login_request', $cookie]) : '';
             },
 
+            'get_api_token' => sub {
+                return '' unless Bugzilla->user->id;
+                my $cache = Bugzilla->request_cache;
+                return $cache->{api_token} //= issue_api_token();
+            },
+
             # A way for all templates to get at Field data, cached.
             'bug_fields' => sub {
                 my $cache = Bugzilla->request_cache;
@@ -1019,6 +1107,7 @@ sub create {
 
             'css_files' => \&css_files,
             yui_resolve_deps => \&yui_resolve_deps,
+            concatenate_js => \&_concatenate_js,
 
             # All classifications (sorted by sortkey, name)
             'all_classifications' => sub {

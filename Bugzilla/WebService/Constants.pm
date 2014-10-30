@@ -9,6 +9,7 @@ package Bugzilla::WebService::Constants;
 
 use 5.10.1;
 use strict;
+use warnings;
 
 use parent qw(Exporter);
 
@@ -100,6 +101,7 @@ use constant WS_ERROR_CODE => {
     comment_id_invalid => 111,
     comment_too_long => 114,
     comment_invalid_isprivate => 117,
+    markdown_disabled => 140,
     # Comment tagging
     comment_tag_disabled => 125,
     comment_tag_invalid => 126,
@@ -141,7 +143,11 @@ use constant WS_ERROR_CODE => {
     auth_invalid_email           => 302,
     extern_id_conflict           => -303,
     auth_failure                 => 304,
-    password_current_too_short   => 305,
+    password_too_short           => 305,
+    password_not_complex         => 305,
+    api_key_not_valid            => 306,
+    api_key_revoked              => 306,
+    auth_invalid_token           => 307,
 
     # Except, historically, AUTH_NODATA, which is 410.
     login_required               => 410,
@@ -199,6 +205,11 @@ use constant WS_ERROR_CODE => {
     flag_type_cc_list_invalid     => 1103,
     flag_type_sortkey_invalid     => 1104,
     flag_type_not_editable        => 1105,
+
+    # Component errors are 1200-1300
+    component_already_exists => 1200,
+    component_is_last        => 1201,
+    component_has_bugs       => 1202,
 
     # Errors thrown by the WebService itself. The ones that are negative 
     # conform to http://xmlrpc-epi.sourceforge.net/specs/rfc.fault_codes.php
@@ -279,6 +290,7 @@ sub WS_DISPATCH {
         'Bugzilla'         => 'Bugzilla::WebService::Bugzilla',
         'Bug'              => 'Bugzilla::WebService::Bug',
         'Classification'   => 'Bugzilla::WebService::Classification',
+        'Component'        => 'Bugzilla::WebService::Component',
         'FlagType'         => 'Bugzilla::WebService::FlagType',
         'Group'            => 'Bugzilla::WebService::Group',
         'Product'          => 'Bugzilla::WebService::Product',

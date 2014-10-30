@@ -13,6 +13,7 @@ package Bugzilla::JobQueue::Runner;
 
 use 5.10.1;
 use strict;
+use warnings;
 
 use Cwd qw(abs_path);
 use File::Basename;
@@ -79,6 +80,7 @@ sub gd_more_opt {
     return (
         'pidfile=s' => \$self->{gd_args}{pidfile},
         'n=s'       => \$self->{gd_args}{progname},
+        'j=s@'      => \$self->{gd_args}{job_name},
     );
 }
 
@@ -209,10 +211,12 @@ sub gd_run {
 sub _do_work {
     my ($self, $fn) = @_;
 
+    my @job_name = @{ $self->{gd_args}{job_name} // [] };
     my $jq = Bugzilla->job_queue();
     $jq->set_verbose($self->{debug});
     $jq->set_pidfile($self->{gd_pidfile});
-    foreach my $module (values %{ Bugzilla::JobQueue->job_map() }) {
+    while (my ($key, $module) = each %{ Bugzilla::JobQueue->job_map() }) {
+        next if @job_name and ! grep { $_ eq $key } @job_name;
         eval "use $module";
         $jq->can_do($module);
     }

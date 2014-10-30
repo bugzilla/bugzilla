@@ -9,6 +9,7 @@ package Bugzilla::Install::CPAN;
 
 use 5.10.1;
 use strict;
+use warnings;
 
 use parent qw(Exporter);
 our @EXPORT = qw(

@@ -11,6 +11,7 @@ package Bugzilla::WebService;
 
 use 5.10.1;
 use strict;
+use warnings;
 
 use Bugzilla::WebService::Server;
 
@@ -134,14 +135,22 @@ how this is implemented for those frontends.
 
 =head1 LOGGING IN
 
-There are various ways to log in:
+Some methods do not require you to log in. An example of this is Bug.get.
+However, authenticating yourself allows you to see non public information. For
+example, a bug that is not publicly visible.
+
+There are two ways to authenticate yourself:
 
 =over
 
-=item C<User.login>
+=item C<Bugzilla_api_key>
 
-You can use L<Bugzilla::WebService::User/login> to log in as a Bugzilla
-user. This issues a token that you must then use in future calls.
+B<Added in Bugzilla 5.0>
+
+You can specify C<Bugzilla_api_key> as an argument to any WebService method, and
+you will be logged in as that user if the key is correct, and has not been
+revoked. You can set up an API key by using the 'API Key' tab in the
+Preferences pages.
 
 =item C<Bugzilla_login> and C<Bugzilla_password>
 
@@ -164,15 +173,29 @@ then your login will only be valid for your IP address.
 =back
 
 The C<Bugzilla_restrictlogin> option is only used when you have also
-specified C<Bugzilla_login> and C<Bugzilla_password>.
+specified C<Bugzilla_login> and C<Bugzilla_password>. This value will be
+deprecated in the release after Bugzilla 5.0 and you will be required to
+pass the Bugzilla_login and Bugzilla_password for every call.
 
 For REST, you may also use the C<login> and C<password> variable
 names instead of C<Bugzilla_login> and C<Bugzilla_password> as a
 convenience. You may also use C<token> instead of C<Bugzilla_token>.
 
+=back
+
+There are also two deprecreated methods of authentications. This will be
+removed in the version after Bugzilla 5.0.
+
+=over
+
+=item C<User.login>
+
+You can use L<Bugzilla::WebService::User/login> to log in as a Bugzilla
+user. This issues a token that you must then use in future calls.
+
 =item C<Bugzilla_token>
 
-B<Added in Bugzilla 5.0>
+B<Added in Bugzilla 4.4.3>
 
 You can specify C<Bugzilla_token> as argument to any WebService method,
 and you will be logged in as that user if the token is correct. This is
@@ -292,7 +315,7 @@ hashes.
 
 Some RPC calls support specifying sub fields. If an RPC call states that
 it support sub field restrictions, you can restrict what information is
-returned within the first field. For example, if you call Products.get
+returned within the first field. For example, if you call Product.get
 with an include_fields of components.name, then only the component name
 would be returned (and nothing else). You can include the main field,
 and exclude a sub field.
@@ -366,6 +389,8 @@ objects.
 =item L<Bugzilla::WebService::Classification>
 
 =item L<Bugzilla::WebService::FlagType>
+
+=item L<Bugzilla::WebService::Component>
 
 =item L<Bugzilla::WebService::Group>
 

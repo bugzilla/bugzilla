@@ -15,6 +15,7 @@ package Bugzilla::Chart;
 
 use 5.10.1;
 use strict;
+use warnings;
 
 use Bugzilla::Error;
 use Bugzilla::Util;
@@ -95,10 +96,9 @@ sub init {
     if ($self->{'datefrom'} && $self->{'dateto'} && 
         $self->{'datefrom'} > $self->{'dateto'}) 
     {
-          ThrowUserError("misarranged_dates", 
-                                         {'datefrom' => $cgi->param('datefrom'),
-                                          'dateto' => $cgi->param('dateto')});
-    }    
+          ThrowUserError('misarranged_dates', { 'datefrom' => scalar $cgi->param('datefrom'),
+                                                'dateto' => scalar $cgi->param('dateto') });
+    }
 }
 
 # Alter Chart so that the selected series are added to it.

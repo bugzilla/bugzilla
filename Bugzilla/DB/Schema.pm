@@ -17,6 +17,7 @@ package Bugzilla::DB::Schema;
 
 use 5.10.1;
 use strict;
+use warnings;
 
 use Bugzilla::Error;
 use Bugzilla::Hook;
@@ -277,11 +278,8 @@ use constant ABSTRACT_SCHEMA => {
             remaining_time      => {TYPE => 'decimal(7,2)',
                                     NOTNULL => 1, DEFAULT => '0'},
             deadline            => {TYPE => 'DATETIME'},
-            alias               => {TYPE => 'varchar(20)'},
         ],
         INDEXES => [
-            bugs_alias_idx            => {FIELDS => ['alias'],
-                                          TYPE => 'UNIQUE'},
             bugs_assigned_to_idx      => ['assigned_to'],
             bugs_creation_ts_idx      => ['creation_ts'],
             bugs_delta_ts_idx         => ['delta_ts'],
@@ -358,6 +356,21 @@ use constant ABSTRACT_SCHEMA => {
         ],
     },
 
+    bugs_aliases => {
+        FIELDS => [
+            alias     => {TYPE => 'varchar(40)', NOTNULL => 1},
+            bug_id    => {TYPE => 'INT3',
+                          REFERENCES => {TABLE  => 'bugs',
+                                         COLUMN => 'bug_id',
+                                         DELETE => 'CASCADE'}},
+        ],
+        INDEXES => [
+            bugs_aliases_bug_id_idx => ['bug_id'],
+            bugs_aliases_alias_idx  => {FIELDS => ['alias'],
+                                        TYPE => 'UNIQUE'},
+        ],
+    },
+
     cc => {
         FIELDS => [
             bug_id => {TYPE => 'INT3', NOTNULL => 1,
@@ -397,7 +410,8 @@ use constant ABSTRACT_SCHEMA => {
                                 DEFAULT => 'FALSE'},
             type            => {TYPE => 'INT2', NOTNULL => 1,
                                 DEFAULT => '0'},
-            extra_data      => {TYPE => 'varchar(255)'}
+            extra_data      => {TYPE => 'varchar(255)'},
+            is_markdown     => {TYPE => 'BOOLEAN', NOTNULL => 1, DEFAULT => 'FALSE'}
         ],
         INDEXES => [
             longdescs_bug_id_idx   => [qw(bug_id work_time)],
@@ -1177,7 +1191,7 @@ use constant ABSTRACT_SCHEMA => {
             issuedate => {TYPE => 'DATETIME', NOTNULL => 1} ,
             token     => {TYPE => 'varchar(16)', NOTNULL => 1,
                           PRIMARYKEY => 1},
-            tokentype => {TYPE => 'varchar(8)', NOTNULL => 1} ,
+            tokentype => {TYPE => 'varchar(16)', NOTNULL => 1} ,
             eventdata => {TYPE => 'TINYTEXT'},
         ],
         INDEXES => [
@@ -1616,6 +1630,16 @@ use constant ABSTRACT_SCHEMA => {
         ],
      },
 
+    # BUGMAIL
+    # -------
+
+    mail_staging => {
+        FIELDS => [
+            id      => {TYPE => 'INTSERIAL', PRIMARYKEY => 1, NOTNULL => 1},
+            message => {TYPE => 'LONGBLOB', NOTNULL => 1},
+        ],
+    },
+
     # THESCHWARTZ TABLES
     # ------------------
     # Note: In the standard TheSchwartz schema, most integers are unsigned,
@@ -1731,6 +1755,26 @@ use constant ABSTRACT_SCHEMA => {
             bug_user_last_visit_idx => {FIELDS => ['user_id', 'bug_id'],
                                         TYPE => 'UNIQUE'},
             bug_user_last_visit_last_visit_ts_idx => ['last_visit_ts'],
+        ],
+    },
+
+    user_api_keys => {
+        FIELDS => [
+            id            => {TYPE => 'INTSERIAL', NOTNULL => 1,
+                              PRIMARYKEY => 1},
+            user_id       => {TYPE => 'INT3', NOTNULL => 1,
+                              REFERENCES => {TABLE  => 'profiles',
+                                             COLUMN => 'userid',
+                                             DELETE => 'CASCADE'}},
+            api_key       => {TYPE => 'VARCHAR(40)', NOTNULL => 1},
+            description   => {TYPE => 'VARCHAR(255)'},
+            revoked       => {TYPE => 'BOOLEAN', NOTNULL => 1,
+                              DEFAULT => 'FALSE'},
+            last_used     => {TYPE => 'DATETIME'},
+        ],
+        INDEXES => [
+            user_api_keys_api_key_idx => {FIELDS => ['api_key'], TYPE => 'UNIQUE'},
+            user_api_keys_user_id_idx => ['user_id'],
         ],
     },
 };

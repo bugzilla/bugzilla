@@ -9,6 +9,7 @@ package Bugzilla::WebService::Util;
 
 use 5.10.1;
 use strict;
+use warnings;
 
 use Bugzilla::Flag;
 use Bugzilla::FlagType;
@@ -267,6 +268,11 @@ sub fix_credentials {
     if (exists $params->{'login'} && exists $params->{'password'}) {
         $params->{'Bugzilla_login'}    = $params->{'login'};
         $params->{'Bugzilla_password'} = $params->{'password'};
+    }
+    # Allow user to pass api_key=12345678 as a convenience which becomes
+    # "Bugzilla_api_key" which is what the auth code looks for.
+    if (exists $params->{api_key}) {
+        $params->{Bugzilla_api_key} = delete $params->{api_key};
     }
     # Allow user to pass token=12345678 as a convenience which becomes
     # "Bugzilla_token" which is what the auth code looks for.

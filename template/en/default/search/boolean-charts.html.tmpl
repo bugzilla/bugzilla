@@ -134,7 +134,15 @@
               id="f[% cond_num FILTER html %]"
               onchange="fix_query_string(this)"
               class="custom_search_form_field">
-        [% FOREACH field = fields %]
+        [%# Turn the array in to a hash with the name as the key %]
+        [%
+          field_hash = {};
+          FOREACH field IN fields;
+            field_hash.${field.name} = field;
+          END;
+        %]
+        [% FOREACH field_name = field_hash.keys.sort_by_field_name(field_descs) %]
+          [% field = field_hash.$field_name %]
           <option value="[% field.name FILTER html %]"
                   [%~ ' selected="selected"' IF field.name == condition.f %]>
             [% field_descs.${field.name} || field.description FILTER html %]

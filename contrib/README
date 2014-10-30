@@ -33,6 +33,10 @@ bz_webservice_demo.pl --  An example script that demonstrates how to talk to
            recode.pl --  Script to convert a database from one encoding 
                          (or multiple encodings)  to UTF-8.
 
+             replyrc --  A config file for Reply (a perl shell) that loads
+                         Bugzilla, extensions and provides a few utility
+                         functions for manipulating Bugzilla data.
+
       sendbugmail.pl --  This script is a drop-in replacement for the
                          'processmail' script which used to be shipped
                          with Bugzilla, but was replaced by the

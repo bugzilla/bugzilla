@@ -9,6 +9,7 @@ package Bugzilla::UserAgent;
 
 use 5.10.1;
 use strict;
+use warnings;
 
 use parent qw(Exporter);
 our @EXPORT = qw(detect_platform detect_op_sys);

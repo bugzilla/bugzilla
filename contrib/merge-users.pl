@@ -1,4 +1,4 @@
-#!/usr/bin/perl -wT
+#!/usr/bin/perl -T
 # This Source Code Form is subject to the terms of the Mozilla Public
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
@@ -6,7 +6,9 @@
 # This Source Code Form is "Incompatible With Secondary Licenses", as
 # defined by the Mozilla Public License, v. 2.0.
 
+use 5.10.1;
 use strict;
+use warnings;
 
 =head1 NAME
 
@@ -152,12 +154,17 @@ my $dupe_ids = $dbh->selectcol_arrayref("
     SELECT earlier.id
       FROM bug_user_last_visit as earlier
            INNER JOIN bug_user_last_visit as later
-           ON (earlier.user_id != later.user_id AND earlier.last_visit_ts < later.last_visit_ts
+           ON (earlier.user_id != later.user_id
+               AND earlier.last_visit_ts < later.last_visit_ts
                AND earlier.bug_id = later.bug_id)
      WHERE (earlier.user_id = ? OR earlier.user_id = ?)
            AND (later.user_id = ? OR later.user_id = ?)",
     undef, $old_id, $new_id, $old_id, $new_id);
-$dbh->do("DELETE FROM bug_user_last_visit WHERE " . $dbh->sql_in('id', $dupe_ids));
+
+if (@$dupe_ids) {
+    $dbh->do("DELETE FROM bug_user_last_visit WHERE " .
+             $dbh->sql_in('id', $dupe_ids));
+}
 
 # Migrate records from old user to new user.
 foreach my $table (keys %changes) {

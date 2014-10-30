@@ -9,6 +9,7 @@ package Bugzilla::WebService::Server::XMLRPC;
 
 use 5.10.1;
 use strict;
+use warnings;
 
 use XMLRPC::Transport::HTTP;
 use Bugzilla::WebService::Server;
@@ -107,6 +108,7 @@ package Bugzilla::XMLRPC::Deserializer;
 
 use 5.10.1;
 use strict;
+use warnings;
 
 # We can't use "use parent" because XMLRPC::Serializer doesn't return
 # a true value.
@@ -205,6 +207,7 @@ package Bugzilla::XMLRPC::SOM;
 
 use 5.10.1;
 use strict;
+use warnings;
 
 use XMLRPC::Lite;
 our @ISA = qw(XMLRPC::SOM);
@@ -231,6 +234,7 @@ package Bugzilla::XMLRPC::Serializer;
 
 use 5.10.1;
 use strict;
+use warnings;
 
 use Scalar::Util qw(blessed reftype);
 # We can't use "use parent" because XMLRPC::Serializer doesn't return

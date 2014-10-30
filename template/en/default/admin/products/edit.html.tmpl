@@ -42,11 +42,11 @@
       </th>
       <td>
         [% IF product.components.size -%]
-          [% FOREACH component = product.components %]
+          [% FOREACH comp = product.components %]
             <a href="editcomponents.cgi?action=edit&product=
             [%- product.name FILTER uri %]&component=
-            [%- component.name FILTER uri %]">[% component.name FILTER html %]</a>:
-            [% component.description FILTER html_light %]
+            [%- comp.name FILTER uri %]">[% comp.name FILTER html %]</a>:
+            [% comp.description FILTER html_light %]
             <br>
           [% END %]
         [% ELSE %]

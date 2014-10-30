@@ -6,6 +6,7 @@ package Bugzilla;
 
 use 5.10.1;
 use strict;
+use warnings;
 
 #######################################################################
 # The goal of this tiny module is to let Bugzilla packagers of        #

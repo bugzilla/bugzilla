@@ -9,6 +9,7 @@ package Bugzilla::FlagType;
 
 use 5.10.1;
 use strict;
+use warnings;
 
 =head1 NAME
 
@@ -40,6 +41,7 @@ use Bugzilla::Util;
 use Bugzilla::Group;
 
 use Email::Address;
+use List::MoreUtils qw(uniq);
 
 use parent qw(Bugzilla::Object);
 
@@ -378,8 +380,6 @@ sub set_clusions {
                 if (!$products{$prod_id}) {
                     $params->{id} = $prod_id;
                     $products{$prod_id} = Bugzilla::Product->check($params);
-                    $user->in_group('editcomponents', $prod_id)
-                      || ThrowUserError('product_access_denied', $params);
                 }
                 $prod_name = $products{$prod_id}->name;
 
@@ -405,6 +405,22 @@ sub set_clusions {
             $clusions{"$prod_name:$comp_name"} = "$prod_id:$comp_id";
             $clusions_as_hash{$prod_id}->{$comp_id} = 1;
         }
+
+        # Check the user has the editcomponent permission on products that are changing
+        if (! $user->in_group('editcomponents')) {
+            my $current_clusions = $self->$category;
+            my ($removed, $added)
+                = diff_arrays([ values %$current_clusions ], [ values %clusions ]);
+            my @changed_product_ids
+                = uniq map { substr($_, 0, index($_, ':')) } @$removed, @$added;
+            foreach my $product_id (@changed_product_ids) {
+                $user->in_group('editcomponents', $product_id)
+                    || ThrowUserError('product_access_denied',
+                                      { name => $products{$product_id}->name });
+            }
+        }
+
+        # Set the changes
         $self->{$category} = \%clusions;
         $self->{"${category}_as_hash"} = \%clusions_as_hash;
         $self->{"_update_$category"} = 1;

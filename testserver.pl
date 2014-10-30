@@ -1,4 +1,4 @@
-#!/usr/bin/perl -w
+#!/usr/bin/perl
 # This Source Code Form is subject to the terms of the Mozilla Public
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
@@ -12,6 +12,8 @@
 
 use 5.10.1;
 use strict;
+use warnings;
+
 use lib qw(. lib);
 
 use Bugzilla;
@@ -40,7 +42,7 @@ if (!ON_WINDOWS) {
     foreach my $pscmd (@pscmds) {
         open PH, "$pscmd 2>/dev/null |";
         while (my $line = <PH>) {
-            if ($line =~ /^(?:\S*\/)?(?:httpd|apache)2?\s+(\d+)$/) {
+            if ($line =~ /^(?:\S*\/)?(?:httpd|apache?)2?\s+(\d+)$/) {
                 $sgid = $1 if $1 > $sgid;
             }
         }

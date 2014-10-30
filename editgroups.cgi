@@ -1,4 +1,4 @@
-#!/usr/bin/perl -wT
+#!/usr/bin/perl -T
 # This Source Code Form is subject to the terms of the Mozilla Public
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
@@ -8,6 +8,8 @@
 
 use 5.10.1;
 use strict;
+use warnings;
+
 use lib qw(. lib);
 
 use Bugzilla;
@@ -19,9 +21,6 @@ use Bugzilla::Group;
 use Bugzilla::Product;
 use Bugzilla::User;
 use Bugzilla::Token;
-
-use constant SPECIAL_GROUPS => ('chartgroup', 'insidergroup',
-                                'timetrackinggroup', 'querysharegroup');
 
 my $cgi = Bugzilla->cgi;
 my $dbh = Bugzilla->dbh;
@@ -225,7 +224,7 @@ if ($action eq 'new') {
 
 if ($action eq 'del') {
     # Check that an existing group ID is given
-    my $group = Bugzilla::Group->check({ id => $cgi->param('group') });
+    my $group = Bugzilla::Group->check({ id => scalar $cgi->param('group') });
     $group->check_remove({ test_only => 1 });
     $vars->{'shared_queries'} =
         $dbh->selectrow_array('SELECT COUNT(*)
@@ -249,7 +248,7 @@ if ($action eq 'del') {
 if ($action eq 'delete') {
     check_token_data($token, 'delete_group');
     # Check that an existing group ID is given
-    my $group = Bugzilla::Group->check({ id => $cgi->param('group') });
+    my $group = Bugzilla::Group->check({ id => scalar $cgi->param('group') });
     $vars->{'name'} = $group->name;
     $group->remove_from_db({
         remove_from_users => scalar $cgi->param('removeusers'),

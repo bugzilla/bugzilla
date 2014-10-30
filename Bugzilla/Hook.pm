@@ -9,6 +9,7 @@ package Bugzilla::Hook;
 
 use 5.10.1;
 use strict;
+use warnings;
 
 sub process {
     my ($name, $args) = @_;
@@ -1031,9 +1032,6 @@ Params:
 =over
 
 =item C<email> - The C<Email::MIME> object that's about to be sent.
-
-=item C<mailer_args> - An arrayref that's passed as C<mailer_args> to
-L<Email::Send/new>.
 
 =back
 

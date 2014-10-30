@@ -18,7 +18,7 @@
 
 <p>
 <pre class="bz_comment_text">
-[%- cgi.param("text") FILTER quoteUrls FILTER html -%]
+[%- cgi.param("text") FILTER markdown FILTER html -%]
 </pre>
 </p>
 
@@ -33,7 +33,7 @@
 
 <p>
 <pre class="bz_comment_text">
-[%- cgi.param("text") FILTER quoteUrls -%]
+[%- cgi.param("text") FILTER markdown -%]
 </pre>
 </p>
 

@@ -23,6 +23,7 @@ package Bugzilla::DB::Pg;
 
 use 5.10.1;
 use strict;
+use warnings;
 
 use Bugzilla::Error;
 use Bugzilla::Version;
@@ -229,6 +230,9 @@ sub bz_check_server_version {
 sub bz_setup_database {
     my $self = shift;
     $self->SUPER::bz_setup_database(@_);
+
+    my ($has_plpgsql) = $self->selectrow_array("SELECT COUNT(*) FROM pg_language WHERE lanname = 'plpgsql'");
+    $self->do('CREATE LANGUAGE plpgsql') unless $has_plpgsql;
 
     # Custom Functions
 

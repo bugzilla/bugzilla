@@ -9,6 +9,7 @@ package Bugzilla::Status;
 
 use 5.10.1;
 use strict;
+use warnings;
 
 # This subclasses Bugzilla::Field::Choice instead of implementing 
 # ChoiceInterface, because a bug status literally is a special type

@@ -1,4 +1,4 @@
-#!/usr/bin/perl -wT
+#!/usr/bin/perl -T
 # This Source Code Form is subject to the terms of the Mozilla Public
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
@@ -8,6 +8,8 @@
 
 use 5.10.1;
 use strict;
+use warnings;
+
 use lib qw(. lib);
 
 use Bugzilla;
@@ -647,7 +649,9 @@ sub check_user {
 sub mirrorListSelectionValues {
     my $cgi = Bugzilla->cgi;
     if (defined($cgi->param('matchtype'))) {
-        foreach ('matchvalue', 'matchstr', 'matchtype', 'grouprestrict', 'groupid') {
+        foreach ('matchvalue', 'matchstr', 'matchtype',
+                 'grouprestrict', 'groupid', 'is_enabled')
+        {
             $vars->{'listselectionvalues'}{$_} = $cgi->param($_);
         }
     }

@@ -9,7 +9,9 @@
 #Bugzilla Test 4#
 ####Templates####
 
+use 5.10.1;
 use strict;
+use warnings;
 
 use lib 't';
 
@@ -26,7 +28,7 @@ use Test::More tests => ( scalar(@referenced_files) + 2 * $num_actual_files );
 # This will handle verbosity for us automatically.
 my $fh;
 {
-    local $^W = 0;  # Don't complain about non-existent filehandles
+    no warnings qw(unopened);  # Don't complain about non-existent filehandles
     if (-e \*Test::More::TESTOUT) {
         $fh = \*Test::More::TESTOUT;
     } elsif (-e \*Test::Builder::TESTOUT) {
@@ -86,6 +88,7 @@ foreach my $include_path (@include_paths) {
             wrap_comment => sub { return $_ },
             none      => sub { return $_ } ,
             ics       => [ sub { return sub { return $_; } }, 1] ,
+            markdown => sub { return $_ } ,
         },
     }
     );

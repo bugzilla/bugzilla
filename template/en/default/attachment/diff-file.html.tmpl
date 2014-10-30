@@ -19,11 +19,7 @@
  onclick="return twisty_click(this)">[% collapsed ? '(+)' : '(-)' %]</a><input
  type="checkbox" name="[% file.filename FILTER html %]"[% collapsed ? '' : ' checked' %]
  class="bz_default_hidden">
-  [% IF lxr_prefix && !file.is_add %]
-    <a href="[% lxr_prefix %]">[% file.filename FILTER html %]</a>
-  [% ELSE %]
-    [% file.filename FILTER html %]
-  [% END %]
+  [% file.filename FILTER html %]
   [% IF file.plus_lines %]
     [% IF file.minus_lines %]
       (-[% file.minus_lines %]&nbsp;/&nbsp;+[% file.plus_lines %]&nbsp;lines)
@@ -49,22 +45,12 @@ incremental_restore()
         [% IF file.is_add %]
           Added
         [% ELSIF file.is_remove %]
-          [% IF bonsai_prefix %]
-            <a href="[% bonsai_prefix %]">Removed</a>
-          [% ELSE %]
-            Removed
-          [% END %]
+          Removed
         [% ELSE %]
-          [% IF bonsai_prefix %]
-            <a href="[% bonsai_prefix %]#[% section.old_start %]">
-          [% END %]
           [% IF section.old_lines > 1 %]
             Lines&nbsp;[% section.old_start %]-[% section.old_start + section.old_lines - 1 %]
           [% ELSE %]
             Line&nbsp;[% section.old_start %]
-          [% END %]
-          [% IF bonsai_prefix %]
-            </a>
           [% END %]
           [%+ section.func_info FILTER html IF section.func_info %]
         [% END %]

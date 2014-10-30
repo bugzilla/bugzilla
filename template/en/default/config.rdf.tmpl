@@ -139,8 +139,8 @@
             [% END %]
             <bz:components>
               <Seq>
-                [% FOREACH component = product.components %]
-                  <li resource="[% escaped_urlbase %]component.cgi?name=[% component.name FILTER uri
+                [% FOREACH comp = product.components %]
+                  <li resource="[% escaped_urlbase %]component.cgi?name=[% comp.name FILTER uri
                       %]&amp;product=[% product.name FILTER uri %]"/>
                 [% END %]
               </Seq>
@@ -176,16 +176,16 @@
   <bz:components>
     <Seq>
       [% FOREACH product = products %]
-        [% FOREACH component = product.components %]
+        [% FOREACH comp = product.components %]
           <li>
-            <bz:component rdf:about="[% escaped_urlbase %]component.cgi?name=[% component.name FILTER uri
+            <bz:component rdf:about="[% escaped_urlbase %]component.cgi?name=[% comp.name FILTER uri
                           %]&amp;product=[% product.name FILTER uri %]">
-              <bz:name>[% component.name FILTER html %]</bz:name>
-              <bz:is_active>[% component.is_active FILTER html %]</bz:is_active>
+              <bz:name>[% comp.name FILTER html %]</bz:name>
+              <bz:is_active>[% comp.is_active FILTER html %]</bz:is_active>
               [% IF show_flags %]
                 <bz:flag_types>
                   <Seq>
-                    [% flag_types = component.flag_types.bug.merge(component.flag_types.attachment) %]
+                    [% flag_types = comp.flag_types.bug.merge(comp.flag_types.attachment) %]
                     [% FOREACH flag_type = flag_types %]
                       [% NEXT UNLESS flag_type.is_active %]
                       [% all_visible_flag_types.${flag_type.id} = flag_type %]

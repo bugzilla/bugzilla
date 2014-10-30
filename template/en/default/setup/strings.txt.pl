@@ -88,7 +88,6 @@ END
     feature_inbound_email     => 'Inbound Email',
     feature_jobqueue          => 'Mail Queueing',
     feature_jsonrpc           => 'JSON-RPC Interface',
-    feature_jsonrpc_faster    => 'Make JSON-RPC Faster',
     feature_new_charts        => 'New Charts',
     feature_old_charts        => 'Old Charts',
     feature_memcached         => 'Memcached Support',
@@ -102,6 +101,7 @@ END
     feature_xmlrpc            => 'XML-RPC Interface',
     feature_detect_charset    => 'Automatic charset detection for text attachments',
     feature_typesniffer       => 'Sniff MIME type of attachments',
+    feature_markdown          => 'Markdown syntax support for comments',
 
     file_remove => 'Removing ##name##...',
     file_rename => 'Renaming ##from## to ##to##...',
@@ -154,10 +154,6 @@ If this is set to 1, checksetup.pl will create .htaccess files if
 they don't exist.
 
 If this is set to 0, checksetup.pl will not create .htaccess files.
-END
-    localconfig_cvsbin => <<'END',
-If you want to use the CVS integration of the Patch Viewer, please specify
-the full path to the "cvs" executable here.
 END
     localconfig_db_check => <<'END',
 Should checksetup.pl try to verify that your database setup is correct?

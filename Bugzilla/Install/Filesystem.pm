@@ -17,6 +17,7 @@ package Bugzilla::Install::Filesystem;
 
 use 5.10.1;
 use strict;
+use warnings;
 
 use Bugzilla::Constants;
 use Bugzilla::Error;
@@ -30,6 +31,7 @@ use File::Path;
 use File::Basename;
 use File::Copy qw(move);
 use File::Spec;
+use File::Slurp;
 use IO::File;
 use POSIX ();
 
@@ -170,7 +172,7 @@ sub FILESYSTEM {
         'docs/style.css'       => { perms => WS_SERVE },
         'docs/*/rel_notes.txt' => { perms => WS_SERVE },
         'docs/*/README.docs'   => { perms => OWNER_WRITE },
-        "$datadir/params"      => { perms => CGI_WRITE },
+        "$datadir/params.json" => { perms => CGI_WRITE },
         "$datadir/old-params.txt"  => { perms => OWNER_WRITE },
         "$extensionsdir/create.pl" => { perms => OWNER_EXECUTE },
         "$extensionsdir/*/*.pl"    => { perms => WS_EXECUTE },
@@ -366,7 +368,7 @@ EOT
 
         "$assetsdir/.htaccess" => { perms => WS_SERVE, contents => <<EOT
 # Allow access to .css files
-<FilesMatch \\.css\$>
+<FilesMatch \\.(css|js)\$>
   Allow from all
 </FilesMatch>
 
@@ -409,6 +411,7 @@ sub update_filesystem {
 
     my $datadir = bz_locations->{'datadir'};
     my $graphsdir = bz_locations->{'graphsdir'};
+    my $assetsdir = bz_locations->{'assetsdir'};
     # If the graphs/ directory doesn't exist, we're upgrading from
     # a version old enough that we need to update the $datadir/mining 
     # format.
@@ -447,6 +450,13 @@ sub update_filesystem {
     my $oldparamsfile = "old_params.txt";
     if (-e $oldparamsfile) {
         _rename_file($oldparamsfile, "$datadir/$oldparamsfile");
+    }
+
+    # Remove old assets htaccess file to force recreation with correct values.
+    if (-e "$assetsdir/.htaccess") {
+        if (read_file("$assetsdir/.htaccess") =~ /<FilesMatch \\\.css\$>/) {
+            unlink("$assetsdir/.htaccess");
+        }
     }
 
     _create_files(%files);
@@ -492,7 +502,7 @@ EOT
 
     _remove_empty_css_files();
     _convert_single_file_skins();
-    _remove_dynamic_css_files();
+    _remove_dynamic_assets();
 }
 
 sub _remove_empty_css_files {
@@ -537,10 +547,14 @@ sub _convert_single_file_skins {
     }
 }
 
-# delete all automatically generated css files to force recreation at the next
-# request.
-sub _remove_dynamic_css_files {
-    foreach my $file (glob(bz_locations()->{assetsdir} . '/*.css')) {
+# delete all automatically generated css/js files to force recreation at the
+# next request.
+sub _remove_dynamic_assets {
+    my @files = (
+        glob(bz_locations()->{assetsdir} . '/*.css'),
+        glob(bz_locations()->{assetsdir} . '/*.js'),
+    );
+    foreach my $file (@files) {
         unlink($file);
     }
 

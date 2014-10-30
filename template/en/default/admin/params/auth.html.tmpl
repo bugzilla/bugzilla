@@ -133,5 +133,11 @@
     "lower case letter and a number.</li>" _
     "<li>letters_numbers_specialchars - Passwords must contain at least one " _
     "letter, a number and a special character.</li></ul>"
+
+  password_check_on_login =>
+    "If set, $terms.Bugzilla will check that the password meets the current " _
+    "complexity rules and minimum length requirements  when the user logs " _
+    "into the $terms.Bugzilla web interface. If it doesn't, the user would " _
+    "not be able to log in, and recieve a message to reset their password."
   }
 %]

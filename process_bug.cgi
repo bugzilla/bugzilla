@@ -1,4 +1,4 @@
-#!/usr/bin/perl -wT
+#!/usr/bin/perl -T
 # This Source Code Form is subject to the terms of the Mozilla Public
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
@@ -6,20 +6,10 @@
 # This Source Code Form is "Incompatible With Secondary Licenses", as
 # defined by the Mozilla Public License, v. 2.0.
 
-# Implementation notes for this file:
-#
-# 1) the 'id' form parameter is validated early on, and if it is not a valid
-# bugid an error will be reported, so it is OK for later code to simply check
-# for a defined form 'id' value, and it can assume a valid bugid.
-#
-# 2) If the 'id' form parameter is not defined (after the initial validation),
-# then we are processing multiple bugs, and @idlist will contain the ids.
-#
-# 3) If we are processing just the one id, then it is stored in @idlist for
-# later processing.
-
 use 5.10.1;
 use strict;
+use warnings;
+
 use lib qw(. lib);
 
 use Bugzilla;
@@ -243,9 +233,13 @@ if (should_set('keywords')) {
     $set_all_fields{keywords}->{$action} = $cgi->param('keywords');
 }
 if (should_set('comment')) {
+    my $is_markdown = ($user->use_markdown
+                       && $cgi->param('use_markdown') eq '1') ? 1 : 0;
+
     $set_all_fields{comment} = {
-        body       => scalar $cgi->param('comment'),
-        is_private => scalar $cgi->param('comment_is_private'),
+        body        => scalar $cgi->param('comment'),
+        is_private  => scalar $cgi->param('comment_is_private'),
+        is_markdown => $is_markdown,
     };
 }
 if (should_set('see_also')) {
@@ -299,8 +293,17 @@ if (defined $cgi->param('newcc')
 if (defined $cgi->param('id')) {
     # Since aliases are unique (like bug numbers), they can only be changed
     # for one bug at a time.
-    if (defined $cgi->param('alias')) {
-        $set_all_fields{alias} = $cgi->param('alias');
+    if (defined $cgi->param('newalias') || defined $cgi->param('removealias')) {
+        my @alias_add = split /[, ]+/, $cgi->param('newalias');
+
+        # We came from bug_form which uses a select box to determine what
+        # aliases need to be removed...
+        my @alias_remove = ();
+        if ($cgi->param('removealias') && $cgi->param('alias')) {
+            @alias_remove = $cgi->param('alias');
+        }
+
+        $set_all_fields{alias} = { add => \@alias_add, remove => \@alias_remove };
     }
 }
 
@@ -353,6 +356,17 @@ if (defined $cgi->param('id')) {
         my ($tags_removed, $tags_added) = diff_arrays($first_bug->tags, \@new_tags);
         $first_bug->remove_tag($_) foreach @$tags_removed;
         $first_bug->add_tag($_) foreach @$tags_added;
+    }
+}
+else {
+    # Update flags on multiple bugs. The cgi params are slightly different
+    # than on a single bug, so we need to call a different sub. We also
+    # need to call this per bug, since we might be updating a flag in one
+    # bug, but adding it to a second bug
+    foreach my $b (@bug_objects) {
+        my ($flags, $new_flags)
+            = Bugzilla::Flag->multi_extract_flags_from_cgi($b, $vars);
+        $b->set_flags($flags, $new_flags);
     }
 }
 

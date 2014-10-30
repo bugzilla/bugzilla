@@ -1,0 +1,30 @@
+# This is a config file for Reply,
+# which is a cpan distribution. You can install it with "cpan Reply" or "cpanm Reply".
+# To use this config file, either copy as ~/.replyrc or run the following command:
+# reply --cfg `pwd`/contrib/replyrc
+
+script_line1 = use strict;
+script_line2 = use warnings;
+script_line3 = use v5.10;
+script_line4 = use Bugzilla;
+script_line5 = Bugzilla->extensions; 1;
+script_line6 = sub filter { Bugzilla->template->{SERVICE}->{CONTEXT}->{CONFIG}->{FILTERS}->{$_[0]} }
+script_line7 = sub b { Bugzilla::Bug->new(@_) }
+script_line8 = sub u { Bugzilla::User->new(@_) }
+script_line9 = sub f { Bugzilla::Field->new(@_) }
+
+[Interrupt]
+[FancyPrompt]
+[DataDumper]
+[Colors]
+[ReadLine]
+[Hints]
+[Packages]
+[LexicalPersistence]
+[ResultCache]
+[Autocomplete::Packages]
+[Autocomplete::Lexicals]
+[Autocomplete::Functions]
+[Autocomplete::Globals]
+[Autocomplete::Methods]
+[Autocomplete::Commands]

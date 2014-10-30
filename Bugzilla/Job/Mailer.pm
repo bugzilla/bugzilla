@@ -9,6 +9,7 @@ package Bugzilla::Job::Mailer;
 
 use 5.10.1;
 use strict;
+use warnings;
 
 use Bugzilla::Mailer;
 BEGIN { eval "use parent qw(TheSchwartz::Worker)"; }

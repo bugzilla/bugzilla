@@ -9,6 +9,7 @@ package Bugzilla::Migrate;
 
 use 5.10.1;
 use strict;
+use warnings;
 
 use Bugzilla::Attachment;
 use Bugzilla::Bug qw(LogActivityEntry);

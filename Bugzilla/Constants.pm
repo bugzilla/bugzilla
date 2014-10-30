@@ -9,6 +9,7 @@ package Bugzilla::Constants;
 
 use 5.10.1;
 use strict;
+use warnings;
 
 use parent qw(Exporter);
 
@@ -24,6 +25,8 @@ use Memoize;
     LOCAL_FILE
 
     bz_locations
+
+    CONCATENATE_ASSETS
 
     IS_NULL
     NOT_NULL
@@ -190,6 +193,8 @@ use Memoize;
     AUDIT_REMOVE
 
     MOST_FREQUENT_THRESHOLD
+
+    MARKDOWN_TAB_WIDTH
 );
 
 @Bugzilla::Constants::EXPORT_OK = qw(contenttypes);
@@ -197,7 +202,7 @@ use Memoize;
 # CONSTANTS
 #
 # Bugzilla version
-use constant BUGZILLA_VERSION => "4.5.4+";
+use constant BUGZILLA_VERSION => "4.5.6+";
 
 # A base link to the current REST Documentation. We place it here
 # as it will need to be updated to whatever the current release is.
@@ -206,6 +211,11 @@ use constant REST_DOC => "http://www.bugzilla.org/docs/tip/en/html/api/";
 # Location of the remote and local XML files to track new releases.
 use constant REMOTE_FILE => 'http://updates.bugzilla.org/bugzilla-update.xml';
 use constant LOCAL_FILE  => 'bugzilla-update.xml'; # Relative to datadir.
+
+# When true CSS and JavaScript assets will be concatanted and minified at
+# run-time, to reduce the number of requests required to render a page.
+# Setting this to a false value can help debugging.
+use constant CONCATENATE_ASSETS => 1;
 
 # These are unique values that are unlikely to match a string or a number,
 # to be used in criteria for match() functions and other things. They start
@@ -626,6 +636,10 @@ use constant AUDIT_REMOVE => '__remove__';
 # The minimum number of duplicates a bug needs to show up
 # on the "Most frequently reported bugs" page.
 use constant MOST_FREQUENT_THRESHOLD => 2;
+
+# The number of spaces used to represent each tab character
+# by Markdown engine
+use constant MARKDOWN_TAB_WIDTH => 2;
 
 sub bz_locations {
     # Force memoize() to re-compute data per project, to avoid

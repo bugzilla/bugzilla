@@ -9,6 +9,7 @@ package Bugzilla;
 
 use 5.10.1;
 use strict;
+use warnings;
 
 # We want any compile errors to get to the browser, if possible.
 BEGIN {
@@ -121,8 +122,8 @@ sub init_page {
     #
     # This code must go here. It cannot go anywhere in Bugzilla::CGI, because
     # it uses Template, and that causes various dependency loops.
-    if (Bugzilla->params->{"shutdownhtml"}
-        && !grep { $_ eq $script } SHUTDOWNHTML_EXEMPT)
+    if (!grep { $_ eq $script } SHUTDOWNHTML_EXEMPT
+        and Bugzilla->params->{'shutdownhtml'})
     {
         # Allow non-cgi scripts to exit silently (without displaying any
         # message), if desired. At this point, no DBI call has been made
@@ -396,6 +397,13 @@ sub logout_request {
     # there. Don't rely on it: use Bugzilla->user->login instead!
 }
 
+sub markdown {
+    return if !Bugzilla->feature('markdown');
+
+    require Bugzilla::Markdown;
+    return $_[0]->request_cache->{markdown} ||= Bugzilla::Markdown->new();
+}
+
 sub job_queue {
     require Bugzilla::JobQueue;
     return $_[0]->request_cache->{job_queue} ||= Bugzilla::JobQueue->new();
@@ -651,13 +659,16 @@ sub memcached {
 # Per-process cleanup. Note that this is a plain subroutine, not a method,
 # so we don't have $class available.
 sub _cleanup {
-    my $main   = Bugzilla->request_cache->{dbh_main};
-    my $shadow = Bugzilla->request_cache->{dbh_shadow};
+    my $cache = Bugzilla->request_cache;
+    my $main = $cache->{dbh_main};
+    my $shadow = $cache->{dbh_shadow};
     foreach my $dbh ($main, $shadow) {
         next if !$dbh;
         $dbh->bz_rollback_transaction() if $dbh->bz_in_transaction;
         $dbh->disconnect;
     }
+    my $smtp = $cache->{smtp};
+    $smtp->disconnect if $smtp;
     clear_request_cache();
 
     # These are both set by CGI.pm but need to be undone so that
@@ -933,15 +944,19 @@ Change the database object to refer to the main database.
 
 =item C<params>
 
-The current Parameters of Bugzilla, as a hashref. If C<data/params>
-does not exist, then we return an empty hashref. If C<data/params>
-is unreadable or is not valid perl, we C<die>.
+The current Parameters of Bugzilla, as a hashref. If C<data/params.json>
+does not exist, then we return an empty hashref. If C<data/params.json>
+is unreadable or is not valid, we C<die>.
 
 =item C<local_timezone>
 
 Returns the local timezone of the Bugzilla installation,
 as a DateTime::TimeZone object. This detection is very time
 consuming, so we cache this information for future references.
+
+=item C<markdown>
+
+The current L<Markdown|Bugzilla::Markdown> object, to be used for Markdown rendering.
 
 =item C<job_queue>
 

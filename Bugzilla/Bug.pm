@@ -9,6 +9,7 @@ package Bugzilla::Bug;
 
 use 5.10.1;
 use strict;
+use warnings;
 
 use Bugzilla::Attachment;
 use Bugzilla::Constants;
@@ -48,7 +49,7 @@ use parent qw(Bugzilla::Object Exporter);
 
 use constant DB_TABLE   => 'bugs';
 use constant ID_FIELD   => 'bug_id';
-use constant NAME_FIELD => 'alias';
+use constant NAME_FIELD => 'bug_id';
 use constant LIST_ORDER => ID_FIELD;
 # Bugs have their own auditing table, bugs_activity.
 use constant AUDIT_CREATES => 0;
@@ -64,7 +65,6 @@ sub DB_COLUMNS {
     my @custom_names = map {$_->name} @custom;
 
     my @columns = (qw(
-        alias
         assigned_to
         bug_file_loc
         bug_id
@@ -207,7 +207,6 @@ sub UPDATE_COLUMNS {
                       Bugzilla->active_custom_fields;
     my @custom_names = map {$_->name} @custom;
     my @columns = qw(
-        alias
         assigned_to
         bug_file_loc
         bug_severity
@@ -313,11 +312,20 @@ sub new {
     # If we get something that looks like a word (not a number),
     # make it the "name" param.
     if (!defined $param
-        || (!ref($param) && $param =~ /\D/)
-        || (ref($param) && $param->{id} =~ /\D/))
+        || (!ref($param) && $param !~ /^\d+$/)
+        || (ref($param) && $param->{id} !~ /^\d+$/))
     {
         if ($param) {
-            $param = { name => ref($param) ? $param->{id} : $param,
+            my $alias = ref($param) ? $param->{id} : $param;
+            my $bug_id = bug_alias_to_id($alias);
+            if (! $bug_id) {
+                my $error_self = {};
+                bless $error_self, $class;
+                $error_self->{'bug_id'} = $alias;
+                $error_self->{'error'}  = 'InvalidBugId';
+                return $error_self;
+            }
+            $param = { id => $bug_id,
                        cache => ref($param) ? $param->{cache} : 0 };
         }
         else {
@@ -547,6 +555,9 @@ sub _preload_referenced_bugs {
     foreach my $bug (@$referenced_bugs) {
         $bug->object_cache_set();
     }
+
+    # preload bug visibility
+    Bugzilla->user->visible_bugs(\@referenced_bug_ids);
 }
 
 sub possible_duplicates {
@@ -683,18 +694,22 @@ sub create {
       unless defined $params->{rep_platform};
     # Make sure a comment is always defined.
     $params->{comment} = '' unless defined $params->{comment};
+    $params->{is_markdown} = 0
+      unless defined $params->{is_markdown} && $params->{is_markdown} eq '1';
 
     $class->check_required_create_fields($params);
     $params = $class->run_create_validators($params);
 
     # These are not a fields in the bugs table, so we don't pass them to
     # insert_create_data.
+    my $bug_aliases      = delete $params->{alias};
     my $cc_ids           = delete $params->{cc};
     my $groups           = delete $params->{groups};
     my $depends_on       = delete $params->{dependson};
     my $blocked          = delete $params->{blocked};
     my $keywords         = delete $params->{keywords};
     my $creation_comment = delete $params->{comment};
+    my $is_markdown      = delete $params->{is_markdown};
     my $see_also         = delete $params->{see_also};
 
     # We don't want the bug to appear in the system until it's correctly
@@ -782,10 +797,18 @@ sub create {
 
     # We now have a bug id so we can fill this out
     $creation_comment->{'bug_id'} = $bug->id;
+    $creation_comment->{'is_markdown'} = $is_markdown;
 
     # Insert the comment. We always insert a comment on bug creation,
     # but sometimes it's blank.
     Bugzilla::Comment->insert_create_data($creation_comment);
+
+    # Set up aliases
+    my $sth_aliases = $dbh->prepare('INSERT INTO bugs_aliases (alias, bug_id) VALUES (?, ?)');
+    foreach my $alias (@$bug_aliases) {
+        trick_taint($alias);
+        $sth_aliases->execute($alias, $bug->bug_id);
+    }
 
     Bugzilla::Hook::process('bug_end_of_create', { bug => $bug,
                                                    timestamp => $timestamp,
@@ -906,7 +929,26 @@ sub update {
         my $added_names   = join(', ', (map {$_->login} @$added_users));
         $changes->{cc} = [$removed_names, $added_names];
     }
-    
+
+    # Aliases
+    my $old_aliases = $old_bug->alias;
+    my $new_aliases = $self->alias;
+    my ($removed_aliases, $added_aliases) = diff_arrays($old_aliases, $new_aliases);
+
+    foreach my $alias (@$removed_aliases) {
+        $dbh->do('DELETE FROM bugs_aliases WHERE bug_id = ? AND alias = ?',
+                 undef, $self->id, $alias);
+    }
+    foreach my $alias (@$added_aliases) {
+        trick_taint($alias);
+        $dbh->do('INSERT INTO bugs_aliases (bug_id, alias) VALUES (?,?)',
+                 undef, $self->id, $alias);
+    }
+    # If any changes were found, record it in the activity log
+    if (scalar @$removed_aliases || scalar @$added_aliases) {
+        $changes->{alias} = [join(', ', @$removed_aliases), join(', ', @$added_aliases)];
+    }
+
     # Keywords
     my @old_kw_ids = map { $_->id } @{$old_bug->keyword_objects};
     my @new_kw_ids = map { $_->id } @{$self->keyword_objects};
@@ -988,12 +1030,6 @@ sub update {
                                    join(', ', @added_names)];
     }
 
-    # Flags
-    my ($removed, $added) = Bugzilla::Flag->update_flags($self, $old_bug, $delta_ts);
-    if ($removed || $added) {
-        $changes->{'flagtypes.name'} = [$removed, $added];
-    }
-
     # Comments
     foreach my $comment (@{$self->{added_comments} || []}) {
         # Override the Comment's timestamp to be identical to the update
@@ -1015,6 +1051,9 @@ sub update {
         LogActivityEntry($self->id, "longdescs.isprivate", $from, $to, 
                          $user->id, $delta_ts, $comment->id);
     }
+
+    # Clear the cache of comments
+    delete $self->{comments};
 
     # Insert the values into the multiselect value tables
     my @multi_selects = grep {$_->type == FIELD_TYPE_MULTI_SELECT}
@@ -1046,6 +1085,12 @@ sub update {
     if (scalar @$removed_see || scalar @$added_see) {
         $changes->{see_also} = [join(', ', map { $_->name } @$removed_see),
                                 join(', ', map { $_->name } @$added_see)];
+    }
+
+    # Flags
+    my ($removed, $added) = Bugzilla::Flag->update_flags($self, $old_bug, $delta_ts);
+    if ($removed || $added) {
+        $changes->{'flagtypes.name'} = [$removed, $added];
     }
 
     $_->update foreach @{ $self->{_update_ref_bugs} || [] };
@@ -1093,6 +1138,13 @@ sub update {
     # Update last-visited
     if ($user->is_involved_in_bug($self)) {
         $self->update_user_last_visit($user, $delta_ts);
+    }
+
+    # If a user is no longer involved, remove their last visit entry
+    my $last_visits =
+      Bugzilla::BugUserLastVisit->match({ bug_id => $self->id });
+    foreach my $lv (@$last_visits) {
+        $lv->remove_from_db() unless $lv->user->is_involved_in_bug($self);
     }
 
     # Update bug ignore data if user wants to ignore mail for this bug
@@ -1310,32 +1362,38 @@ sub _send_bugmail {
 #####################################################################
 
 sub _check_alias {
-   my ($invocant, $alias) = @_;
-   $alias = trim($alias);
-   return undef if (!$alias);
+    my ($invocant, $aliases) = @_;
+    $aliases = ref $aliases ? $aliases : [split(/[\s,]+/, $aliases)];
 
-    # Make sure the alias isn't too long.
-    if (length($alias) > 20) {
-        ThrowUserError("alias_too_long");
-    }
-    # Make sure the alias isn't just a number.
-    if ($alias =~ /^\d+$/) {
-        ThrowUserError("alias_is_numeric", { alias => $alias });
-    }
-    # Make sure the alias has no commas or spaces.
-    if ($alias =~ /[, ]/) {
-        ThrowUserError("alias_has_comma_or_space", { alias => $alias });
-    }
-    # Make sure the alias is unique, or that it's already our alias.
-    my $other_bug = new Bugzilla::Bug($alias);
-    if (!$other_bug->{error}
-        && (!ref $invocant || $other_bug->id != $invocant->id))
-    {
-        ThrowUserError("alias_in_use", { alias => $alias,
-                                         bug_id => $other_bug->id });
+    # Remove empty aliases
+    @$aliases = grep { $_ } @$aliases;
+
+    foreach my $alias (@$aliases) {
+        $alias = trim($alias);
+
+        # Make sure the alias isn't too long.
+        if (length($alias) > 40) {
+            ThrowUserError("alias_too_long");
+        }
+        # Make sure the alias isn't just a number.
+        if ($alias =~ /^\d+$/) {
+            ThrowUserError("alias_is_numeric", { alias => $alias });
+        }
+        # Make sure the alias has no commas or spaces.
+        if ($alias =~ /[, ]/) {
+            ThrowUserError("alias_has_comma_or_space", { alias => $alias });
+        }
+        # Make sure the alias is unique, or that it's already our alias.
+        my $other_bug = new Bugzilla::Bug($alias);
+        if (!$other_bug->{error}
+            && (!ref $invocant || $other_bug->id != $invocant->id))
+        {
+            ThrowUserError("alias_in_use", { alias => $alias,
+                                             bug_id => $other_bug->id });
+        }
     }
 
-   return $alias;
+    return $aliases;
 }
 
 sub _check_assigned_to {
@@ -2372,7 +2430,15 @@ sub set_all {
         # there are lots of things that want to check if we added a comment.
         $self->add_comment($params->{'comment'}->{'body'},
             { isprivate => $params->{'comment'}->{'is_private'},
-              work_time => $params->{'work_time'} });
+              work_time => $params->{'work_time'},
+              is_markdown => $params->{'comment'}->{'is_markdown'} });
+    }
+
+    if (exists $params->{alias} && $params->{alias}{set}) {
+        $params->{alias} = {
+            add    => $params->{alias}{set},
+            remove => $self->alias,
+        };
     }
 
     my %normal_set_all;
@@ -2399,6 +2465,7 @@ sub set_all {
     }
 
     $self->_add_remove($params, 'cc');
+    $self->_add_remove($params, 'alias');
 
     # Theoretically you could move a product without ever specifying
     # a new assignee or qa_contact, or adding/removing any CCs. So,
@@ -2415,14 +2482,13 @@ sub _add_remove {
     my ($self, $params, $name) = @_;
     my @add    = @{ $params->{$name}->{add}    || [] };
     my @remove = @{ $params->{$name}->{remove} || [] };
-    $name =~ s/s$//;
+    $name =~ s/s$// if $name ne 'alias';
     my $add_method = "add_$name";
     my $remove_method = "remove_$name";
     $self->$add_method($_) foreach @add;
     $self->$remove_method($_) foreach @remove;
 }
 
-sub set_alias { $_[0]->set('alias', $_[1]); }
 sub set_assigned_to {
     my ($self, $value) = @_;
     $self->set('assigned_to', $value);
@@ -2839,6 +2905,21 @@ sub remove_cc {
     @$cc_users = grep { $_->id != $user->id } @$cc_users;
 }
 
+sub add_alias {
+    my ($self, $alias) = @_;
+    return if !$alias;
+    my $aliases = $self->_check_alias($alias);
+    $alias = $aliases->[0];
+    my $bug_aliases = $self->alias;
+    push(@$bug_aliases, $alias) if !grep($_ eq $alias, @$bug_aliases);
+}
+
+sub remove_alias {
+    my ($self, $alias) = @_;
+    my $bug_aliases = $self->alias;
+    @$bug_aliases = grep { $_ ne $alias } @$bug_aliases;
+}
+
 # $bug->add_comment("comment", {isprivate => 1, work_time => 10.5,
 #                               type => CMT_NORMAL, extra_data => $data});
 sub add_comment {
@@ -3166,7 +3247,6 @@ sub tags {
 # These are accessors that don't need to access the database.
 # Keep them in alphabetical order.
 
-sub alias               { return $_[0]->{alias}               }
 sub bug_file_loc        { return $_[0]->{bug_file_loc}        }
 sub bug_id              { return $_[0]->{bug_id}              }
 sub bug_severity        { return $_[0]->{bug_severity}        }
@@ -3274,6 +3354,24 @@ sub actual_time {
     $sth->execute($self->{bug_id});
     $self->{'actual_time'} = $sth->fetchrow_array();
     return $self->{'actual_time'};
+}
+
+sub alias {
+    my ($self) = @_;
+    return $self->{'alias'} if exists $self->{'alias'};
+    return [] if $self->{'error'};
+
+    my $dbh = Bugzilla->dbh;
+    $self->{'alias'} = $dbh->selectcol_arrayref(
+        q{SELECT alias
+            FROM bugs_aliases
+           WHERE bug_id = ?
+        ORDER BY alias},
+      undef, $self->bug_id);
+
+    $self->{'alias'} = [] if !scalar(@{$self->{'alias'}});
+
+    return $self->{'alias'};
 }
 
 sub any_flags_requesteeble {
@@ -3853,6 +3951,11 @@ sub choices {
     my @resolutions = grep($_->name, @{ $resolution_field->legal_values });
     $choices{'resolution'} = \@resolutions;
 
+    foreach my $key (keys %choices) {
+        my $value = $self->$key;
+        $choices{$key} = [grep { $_->is_active || $_->name eq $value } @{ $choices{$key} }];
+    }
+
     $self->{'choices'} = \%choices;
     return $self->{'choices'};
 }
@@ -3867,7 +3970,7 @@ sub bug_alias_to_id {
     my $dbh = Bugzilla->dbh;
     trick_taint($alias);
     return $dbh->selectrow_array(
-        "SELECT bug_id FROM bugs WHERE alias = ?", undef, $alias);
+        "SELECT bug_id FROM bugs_aliases WHERE alias = ?", undef, $alias);
 }
 
 #####################################################################
@@ -4496,6 +4599,16 @@ __END__
 
 Ensures the accessors for custom fields are always created.
 
+=item C<add_alias($alias)>
+
+Adds an alias to the internal respresentation of the bug. You will need to
+call L<update> to make the changes permanent.
+
+=item C<remove_alias($alias)>
+
+Removes an alias from the internal respresentation of the bug. You will need to
+call L<update> to make the changes permanent.
+
 =item C<update_user_last_visit($user, $last_visit)>
 
 Creates or updates a L<Bugzilla::BugUserLastVisit> for this bug and the supplied
@@ -4662,8 +4775,6 @@ $user, the timestamp given as $last_visit.
 =item reset_qa_contact
 
 =item remove_group
-
-=item set_alias
 
 =item set_dup_id
 

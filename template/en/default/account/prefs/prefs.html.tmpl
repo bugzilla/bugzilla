@@ -36,6 +36,9 @@
             { name => "account", label => "Account Information",
               link => "userprefs.cgi?tab=account", saveable => "1",
               doc_section => "using.html#account-information" },
+            { name => "apikey", label => "API Keys",
+              link => "userprefs.cgi?tab=apikey", saveable => "1",
+              doc_section => "using.html#apikey" },
             { name => "permissions", label => "Permissions",
               link => "userprefs.cgi?tab=permissions", saveable => "0",
               doc_section => "using.html#permissions" } ] %]
@@ -53,7 +56,7 @@
    title = current_tab.label
    subheader = filtered_login
    style_urls = ['skins/standard/admin.css']
-   javascript_urls = ['js/util.js', 'js/field.js']
+   javascript_urls = ['js/util.js', 'js/field.js', 'js/TUI.js']
    doc_section = current_tab.doc_section
    yui = ['autocomplete']
  %]

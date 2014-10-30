@@ -17,6 +17,7 @@ package Bugzilla::Install;
 
 use 5.10.1;
 use strict;
+use warnings;
 
 use Bugzilla::Component;
 use Bugzilla::Config qw(:admin);
@@ -89,6 +90,8 @@ sub SETTINGS {
     bugmail_new_prefix => { options => ['on', 'off'], default => 'on' },
     # 2013-07-26 joshi_sunil@in.com -- Bug 669535
     possible_duplicates => { options => ['on', 'off'], default => 'on' },
+    # 2014-05-24 koosha.khajeh@gmail.com -- Bug 1014164
+    use_markdown       => { options => ['on', 'off'], default => 'on' },
     }
 };
 

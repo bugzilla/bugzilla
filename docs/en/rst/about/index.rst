@@ -46,7 +46,7 @@ Document Conventions
 
 This document uses the following conventions:
 
-.. warning:: This is a warning - something you should be aware of.
+.. warning:: This is a warning—something you should be aware of.
 
 .. note:: This is just a note, for your information.
 
@@ -68,7 +68,7 @@ This documentation is maintained in
 `reStructured Text
 <http://docutils.sourceforge.net/docs/user/rst/quickstart.html>`_ format using
 the `Sphinx <http://www.sphinx-doc.org/>`_ documentation system. It has
-recently been rewritten, so undoubtedly has bugs. Please file any you find, in
+recently been rewritten, so it undoubtedly has bugs. Please file any you find, in
 the `Bugzilla Documentation
 <https://bugzilla.mozilla.org/enter_bug.cgi?product=Bugzilla;component=Documentation>`_
 component in Mozilla's installation of Bugzilla. If you also want to make a
@@ -83,7 +83,7 @@ License
 
 Bugzilla is `free <http://www.gnu.org/philosophy/free-sw.html>`_ and
 `open source <http://opensource.org/osd>`_ software, which means (among other
-things) that you can download it, install it and run it for any purpose
+things) that you can download it, install it, and run it for any purpose
 whatsoever without the need for license or payment. Isn't that refreshing?
 
 Bugzilla's code is made available under the
@@ -91,7 +91,7 @@ Bugzilla's code is made available under the
 specifically the variant which is Incompatible with Secondary Licenses.
 However, again, if you only want to install and run Bugzilla, you don't need
 to worry about that; it's only relevant if you redistribute the code or any
-changes you make. 
+changes you make.
 
 Bugzilla's documentation is made available under the
 `Creative Commons CC-BY-SA International License 4.0

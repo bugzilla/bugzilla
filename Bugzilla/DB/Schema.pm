@@ -1640,6 +1640,18 @@ use constant ABSTRACT_SCHEMA => {
         ],
     },
 
+    email_rates => {
+        FIELDS => [
+            id         => {TYPE => 'INTSERIAL', NOTNULL => 1,
+                           PRIMARYKEY => 1},
+            recipient  => {TYPE => 'varchar(255)', NOTNULL => 1},
+            message_ts => {TYPE => 'DATETIME', NOTNULL => 1},
+        ],
+        INDEXES => [
+            email_rates_idx => [qw(recipient message_ts)],
+        ],
+    },
+
     # THESCHWARTZ TABLES
     # ------------------
     # Note: In the standard TheSchwartz schema, most integers are unsigned,

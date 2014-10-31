@@ -1,0 +1,74 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% INCLUDE global/header.html.tmpl
+  title = "Job Queue Status"
+  style_urls = [ "skins/standard/admin.css" ]
+%]
+
+[% IF jobs.size %]
+
+  <p class="report_information">
+    [% IF too_many_jobs %]
+      [% job_count FILTER html %] jobs found,
+      limiting results to [% constants.JOB_QUEUE_VIEW_MAX_JOBS FILTER html %] jobs.
+    [% ELSE %]
+      [% jobs.size FILTER none %] jobs(s) in the queue.
+    [% END %]
+  </p>
+
+  <table id="report" class="hover" cellspacing="0" border="0" width="100%">
+  <tr id="report-header">
+    <th>Next Attempt After</th>
+    <th>Error Count</th>
+    <th>Error Time</th>
+    <th>Error Message</th>
+    <th>Job</th>
+  </tr>
+  [% FOREACH job IN jobs %]
+    <tr class="report item [% loop.count % 2 == 1 ? "report_row_odd" : "report_row_even" %]">
+      <td nowrap>
+        [% IF job.grabbed_until %]
+          [% time2str("%Y-%m-%d %H:%M:%S %Z", job.grabbed_until) FILTER html %]
+        [% ELSE %]
+          [% time2str("%Y-%m-%d %H:%M:%S %Z", job.run_time) FILTER html %]
+        [% END %]
+      </td>
+      <td>
+        [% job.error_count || "-" FILTER html %]
+      </td>
+      <td nowrap>
+        [% IF job.error_count %]
+          [% time2str("%Y-%m-%d %H:%M:%S %Z", job.error_time) FILTER html %]
+        [% ELSE %]
+          -
+        [% END %]
+      </td>
+      <td>
+        [% IF job.grabbed_until %]
+          Deferred
+        [% ELSIF job.error_count %]
+          [% job.error_message FILTER html %]
+        [% ELSE %]
+          -
+        [% END %]
+      </td>
+      <td>[% job.subject || '-' FILTER html %]</td>
+    </tr>
+  [% END %]
+  </table>
+
+[% ELSE %]
+
+  <p class="report_information">
+    The job queue is empty.
+  </p>
+
+[% END %]
+
+[% INCLUDE global/footer.html.tmpl %]

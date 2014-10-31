@@ -303,3 +303,38 @@ table.schedule_list th, table.search_list th {
     padding: .5em;
     font-size: small;
 }
+
+#report {
+    border: 1px solid #888888;
+}
+
+#report td, #report th {
+    padding: 3px 10px 3px 3px;
+    border: 0px;
+}
+
+#report th {
+    text-align: left;
+}
+
+#report-header {
+    background-color: #cccccc;
+}
+
+.report_row_odd {
+    background-color: #eeeeee;
+    color: #000000;
+}
+
+.report_row_even {
+    background-color: #ffffff;
+    color: #000000;
+}
+
+#report.hover tr:hover {
+    background-color: #ccccff;
+}
+
+.report_information {
+    font-style: italic;
+}

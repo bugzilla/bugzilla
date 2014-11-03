@@ -132,6 +132,7 @@ sub munge_create_attachment {
 sub add_review_links_to_email {
     my $email = shift;
     return if $email->parts > 1;
+    return unless $email->content_type =~ m#^text/#;
 
     _fix_encoding($email);
     my $body = $email->body_str;

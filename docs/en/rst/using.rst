@@ -404,7 +404,7 @@ You can use it to find a bug by its number or its alias, too.
 
 You'll find the Quicksearch box in Bugzilla's footer area.
 On Bugzilla's front page, there is an additional
-`quicksearcgh help <../../../page.cgi?id=quicksearch.html>`_
+`Help <../../page.cgi?id=quicksearch.html>`_
 link which details how to use it.
 
 .. _casesensitivity:
@@ -756,23 +756,6 @@ gets a pointless piece of mail they would otherwise have avoided.
 Don't use sigs in comments. Signing your name ("Bill") is acceptable,
 if you do it out of habit, but full mail/news-style
 four line ASCII art creations are not.
-
-.. _markdown:
-
-Markdown
---------
-
-Markdown lets you write your comments in a structured plain-text format and
-have your comments generated as HTML. For example, you may use Markdown for
-making a part of your comment look italic or bold in the generated HTML. Bugzilla
-supports most of the structures defined by `standard Markdown <http://daringfireball.net/projects/markdown/basics>`_.
-but does NOT support inline images and inline HTML. For a complete reference on
-supported Markdown structures, please see the `syntax help <../../../page.cgi?id=markdown.html>`_
-link next to the markdown checkbox for new comments.
-
-To use the Markdown feature, make sure that ``Enable Markdown support for comments`` is set to ``on``
-in your :ref:`userpreferences` and that you also check the ``Use Markdown for this comment`` option below
-the comment box when you want to submit a new comment.
 
 .. _comment-wrapping:
 

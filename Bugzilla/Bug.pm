@@ -694,8 +694,6 @@ sub create {
       unless defined $params->{rep_platform};
     # Make sure a comment is always defined.
     $params->{comment} = '' unless defined $params->{comment};
-    $params->{is_markdown} = 0
-      unless defined $params->{is_markdown} && $params->{is_markdown} eq '1';
 
     $class->check_required_create_fields($params);
     $params = $class->run_create_validators($params);
@@ -709,7 +707,6 @@ sub create {
     my $blocked          = delete $params->{blocked};
     my $keywords         = delete $params->{keywords};
     my $creation_comment = delete $params->{comment};
-    my $is_markdown      = delete $params->{is_markdown};
     my $see_also         = delete $params->{see_also};
 
     # We don't want the bug to appear in the system until it's correctly
@@ -797,7 +794,6 @@ sub create {
 
     # We now have a bug id so we can fill this out
     $creation_comment->{'bug_id'} = $bug->id;
-    $creation_comment->{'is_markdown'} = $is_markdown;
 
     # Insert the comment. We always insert a comment on bug creation,
     # but sometimes it's blank.
@@ -2430,8 +2426,7 @@ sub set_all {
         # there are lots of things that want to check if we added a comment.
         $self->add_comment($params->{'comment'}->{'body'},
             { isprivate => $params->{'comment'}->{'is_private'},
-              work_time => $params->{'work_time'},
-              is_markdown => $params->{'comment'}->{'is_markdown'} });
+              work_time => $params->{'work_time'} });
     }
 
     if (exists $params->{alias} && $params->{alias}{set}) {

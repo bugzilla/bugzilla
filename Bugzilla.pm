@@ -397,13 +397,6 @@ sub logout_request {
     # there. Don't rely on it: use Bugzilla->user->login instead!
 }
 
-sub markdown {
-    return if !Bugzilla->feature('markdown');
-
-    require Bugzilla::Markdown;
-    return $_[0]->request_cache->{markdown} ||= Bugzilla::Markdown->new();
-}
-
 sub job_queue {
     require Bugzilla::JobQueue;
     return $_[0]->request_cache->{job_queue} ||= Bugzilla::JobQueue->new();
@@ -953,10 +946,6 @@ is unreadable or is not valid, we C<die>.
 Returns the local timezone of the Bugzilla installation,
 as a DateTime::TimeZone object. This detection is very time
 consuming, so we cache this information for future references.
-
-=item C<markdown>
-
-The current L<Markdown|Bugzilla::Markdown> object, to be used for Markdown rendering.
 
 =item C<job_queue>
 

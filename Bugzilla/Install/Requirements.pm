@@ -396,14 +396,6 @@ sub OPTIONAL_MODULES {
         version => '0',
         feature => ['memcached'],
     },
-
-    # Markdown
-    {
-        package => 'Text-Markdown',
-        module  => 'Text::Markdown',
-        version => '1.0.26',
-        feature => ['markdown'],
-    }
     );
 
     my $extra_modules = _get_extension_requirements('OPTIONAL_MODULES');
@@ -427,7 +419,6 @@ use constant FEATURE_FILES => (
                       'Bugzilla/JobQueue/*', 'jobqueue.pl'],
     patch_viewer  => ['Bugzilla/Attachment/PatchReader.pm'],
     updates       => ['Bugzilla/Update.pm'],
-    markdown      => ['Bugzilla/Markdown.pm'],
     memcached     => ['Bugzilla/Memcache.pm'],
 );
 

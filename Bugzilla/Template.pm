@@ -148,11 +148,10 @@ sub get_format {
 # If you want to modify this routine, read the comments carefully
 
 sub quoteUrls {
-    my ($text, $bug, $comment, $user, $bug_link_func, $for_markdown) = @_;
+    my ($text, $bug, $comment, $user, $bug_link_func) = @_;
     return $text unless $text;
     $user ||= Bugzilla->user;
     $bug_link_func ||= \&get_bug_link;
-    $for_markdown ||= 0;
 
     # We use /g for speed, but uris can have other things inside them
     # (http://foo/bug#3 for example). Filtering that out filters valid
@@ -223,11 +222,10 @@ sub quoteUrls {
 
     $text = html_quote($text);
 
-    unless ($for_markdown) {
-        # Color quoted text
-        $text =~ s~^(&gt;.+)$~<span class="quote">$1</span >~mg;
-        $text =~ s~</span >\n<span class="quote">~\n~g;
-    }
+    # Color quoted text
+    $text =~ s~^(&gt;.+)$~<span class="quote">$1</span >~mg;
+    $text =~ s~</span >\n<span class="quote">~\n~g;
+
     # mailto:
     # Use |<nothing> so that $1 is defined regardless
     # &#64; is the encoded '@' character.
@@ -857,24 +855,6 @@ sub create {
                            },
                            1
                          ],
-
-            markdown => [ sub {
-                              my ($context, $bug, $comment, $user) = @_;
-                              return sub {
-                                  my $text = shift;
-                                  return unless $text;
-
-                                  if (Bugzilla->feature('markdown')
-                                      && ((ref($comment) eq 'HASH' && $comment->{is_markdown})
-                                         || (ref($comment) eq 'Bugzilla::Comment' && $comment->is_markdown)))
-                                  {
-                                      return Bugzilla->markdown->markdown($text);
-                                  }
-                                  return quoteUrls($text, $bug, $comment, $user);
-                              };
-                          },
-                          1
-                        ],
 
             bug_link => [ sub {
                               my ($context, $bug, $options) = @_;

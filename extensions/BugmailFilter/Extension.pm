@@ -245,10 +245,12 @@ sub user_wants_mail {
     # insert fake fields for new attachments and comments
     if (@$comments) {
         if (grep { $_->type == CMT_ATTACHMENT_CREATED } @$comments) {
-            push @$fields, { filter_field => 'attachment.created' };
+            push @$fields, { field_name   => 'attachment.created',
+                             filter_field => 'attachment.created' };
         }
         if (grep { $_->type != CMT_ATTACHMENT_CREATED } @$comments) {
-            push @$fields, { filter_field => 'comment.created' };
+            push @$fields, { field_name   => 'comment.created',
+                             filter_field => 'comment.created' };
         }
     }
 

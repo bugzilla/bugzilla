@@ -577,8 +577,11 @@ sub bz_add_column {
     my $current_def = $self->bz_column_info($table, $name);
 
     if (!$current_def) {
+        # REFERENCES need to happen later and not be created right away
+        my $trimmed_def = dclone($new_def);
+        delete $trimmed_def->{REFERENCES};
         my @statements = $self->_bz_real_schema->get_add_column_ddl(
-            $table, $name, $new_def, 
+            $table, $name, $trimmed_def,
             defined $init_value ? $self->quote($init_value) : undef);
         print get_text('install_column_add',
                        { column => $name, table => $table }) . "\n"
@@ -592,14 +595,14 @@ sub bz_add_column {
         # column exists there and has a REFERENCES item.
         # bz_setup_foreign_keys will then add this FK at the end of
         # Install::DB.
-        my $col_abstract = 
+        my $col_abstract =
             $self->_bz_schema->get_column_abstract($table, $name);
         if (exists $col_abstract->{REFERENCES}) {
             my $new_fk = dclone($col_abstract->{REFERENCES});
             $new_fk->{created} = 0;
             $new_def->{REFERENCES} = $new_fk;
         }
-        
+
         $self->_bz_real_schema->set_column($table, $name, $new_def);
         $self->_bz_store_real_schema;
     }

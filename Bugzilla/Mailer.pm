@@ -67,6 +67,8 @@ sub MessageToMTA {
         return;
     }
 
+    my $dbh = Bugzilla->dbh;
+
     my $email;
     if (ref $msg) {
         $email = $msg;
@@ -80,6 +82,42 @@ sub MessageToMTA {
         # https://rt.cpan.org/Ticket/Display.html?id=43345
         $msg =~ s/(?:\015+)?\012/\015\012/msg;
         $email = new Email::MIME($msg);
+    }
+
+    # Ensure that we are not sending emails too quickly to recipients.
+    if (Bugzilla->params->{use_mailer_queue}
+        && (EMAIL_LIMIT_PER_MINUTE || EMAIL_LIMIT_PER_HOUR))
+    {
+        $dbh->do(
+            "DELETE FROM email_rates WHERE message_ts < "
+            . $dbh->sql_date_math('LOCALTIMESTAMP(0)', '-', '1', 'HOUR'));
+
+        my $recipient = $email->header('To');
+
+        if (EMAIL_LIMIT_PER_MINUTE) {
+            my $minute_rate = $dbh->selectrow_array(
+                "SELECT COUNT(*)
+                   FROM email_rates
+                  WHERE recipient = ?  AND message_ts >= "
+                        . $dbh->sql_date_math('LOCALTIMESTAMP(0)', '-', '1', 'MINUTE'),
+                undef,
+                $recipient);
+            if ($minute_rate >= EMAIL_LIMIT_PER_MINUTE) {
+                die EMAIL_LIMIT_EXCEPTION;
+            }
+        }
+        if (EMAIL_LIMIT_PER_HOUR) {
+            my $hour_rate = $dbh->selectrow_array(
+                "SELECT COUNT(*)
+                   FROM email_rates
+                  WHERE recipient = ?  AND message_ts >= "
+                        . $dbh->sql_date_math('LOCALTIMESTAMP(0)', '-', '1', 'HOUR'),
+                undef,
+                $recipient);
+            if ($hour_rate >= EMAIL_LIMIT_PER_HOUR) {
+                die EMAIL_LIMIT_EXCEPTION;
+            }
+        }
     }
 
     # We add this header to uniquely identify all email that we
@@ -207,6 +245,17 @@ sub MessageToMTA {
         my $retval = $mailer->send($email);
         ThrowCodeError('mail_send_error', { msg => $retval, mail => $email })
             if !$retval;
+    }
+
+    # insert into email_rates
+    if (Bugzilla->params->{use_mailer_queue}
+        && (EMAIL_LIMIT_PER_MINUTE || EMAIL_LIMIT_PER_HOUR))
+    {
+        $dbh->do(
+            "INSERT INTO email_rates(recipient, message_ts) VALUES (?, LOCALTIMESTAMP(0))",
+            undef,
+            $email->header('To')
+        );
     }
 }
 

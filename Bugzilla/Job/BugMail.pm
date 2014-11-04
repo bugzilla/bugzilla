@@ -13,19 +13,9 @@ use strict;
 use Bugzilla::BugMail;
 BEGIN { eval "use parent qw(Bugzilla::Job::Mailer)"; }
 
-sub work {
-    my ($class, $job) = @_;
-    my $success = eval {
-        Bugzilla::BugMail::dequeue($job->arg->{vars});
-        1;
-    };
-    if (!$success) {
-        $job->failed($@);
-        undef $@;
-    }
-    else {
-        $job->completed;
-    }
+sub process_job {
+    my ($class, $arg) = @_;
+    Bugzilla::BugMail::dequeue($arg->{vars});
 }
 
 1;

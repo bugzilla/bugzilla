@@ -208,6 +208,12 @@ use Memoize;
 
     AUDIT_CREATE
     AUDIT_REMOVE
+
+    EMAIL_LIMIT_PER_MINUTE
+    EMAIL_LIMIT_PER_HOUR
+    EMAIL_LIMIT_EXCEPTION
+
+    JOB_QUEUE_VIEW_MAX_JOBS
 );
 
 @Bugzilla::Constants::EXPORT_OK = qw(contenttypes);
@@ -631,6 +637,18 @@ use constant PRIVILEGES_REQUIRED_EMPOWERED => 3;
 # "we just created this object" or "we just deleted this object".
 use constant AUDIT_CREATE => '__create__';
 use constant AUDIT_REMOVE => '__remove__';
+
+# The maximum number of emails per minute and hour a recipient can receive.
+# Email will be queued/backlogged to avoid exceeeding these limits.
+# Setting a limit to 0 will disable this feature.
+use constant EMAIL_LIMIT_PER_MINUTE => 1000;
+use constant EMAIL_LIMIT_PER_HOUR   => 2500;
+# Don't change this exception message.
+use constant EMAIL_LIMIT_EXCEPTION  => "email_limit_exceeded\n";
+
+# The maximum number of jobs to show when viewing the job queue
+# (view_job_queue.cgi).
+use constant JOB_QUEUE_VIEW_MAX_JOBS => 2500;
 
 sub bz_locations {
     # Force memoize() to re-compute data per project, to avoid

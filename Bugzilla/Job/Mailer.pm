@@ -22,6 +22,9 @@
 
 package Bugzilla::Job::Mailer;
 use strict;
+use warnings;
+
+use Bugzilla::Constants;
 use Bugzilla::Mailer;
 BEGIN { eval "use base qw(TheSchwartz::Worker)"; }
 
@@ -43,15 +46,24 @@ sub retry_delay {
 
 sub work {
     my ($class, $job) = @_;
-    my $msg = $job->arg->{msg};
-    my $success = eval { MessageToMTA($msg, 1); 1; };
-    if (!$success) {
-        $job->failed($@);
+    eval { $class->process_job($job->arg) };
+    if (my $error = $@) {
+        if ($error eq EMAIL_LIMIT_EXCEPTION) {
+            $job->declined();
+        }
+        else {
+            $job->failed($error);
+        }
         undef $@;
-    } 
+    }
     else {
         $job->completed;
     }
+}
+
+sub process_job {
+    my ($class, $arg) = @_;
+    MessageToMTA($arg, 1);
 }
 
 1;

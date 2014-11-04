@@ -348,7 +348,8 @@ sub OPTIONAL_MODULES {
     {
         package => 'TheSchwartz',
         module  => 'TheSchwartz',
-        version => 0,
+        # 1.10 supports declining of jobs.
+        version => 1.10,
         feature => ['jobqueue'],
     },
     {

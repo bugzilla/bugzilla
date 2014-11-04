@@ -169,8 +169,7 @@ sub page_before_template {
         Bugzilla::Extension::BMO::Reports::Groups::members_report($vars);
     }
     elsif ($page eq 'email_queue.html') {
-        require Bugzilla::Extension::BMO::Reports::EmailQueue;
-        Bugzilla::Extension::BMO::Reports::EmailQueue::report($vars);
+        print Bugzilla->cgi->redirect('view_job_queue.cgi');
     }
     elsif ($page eq 'release_tracking_report.html') {
         require Bugzilla::Extension::BMO::Reports::ReleaseTracking;

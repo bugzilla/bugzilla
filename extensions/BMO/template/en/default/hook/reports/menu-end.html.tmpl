@@ -51,7 +51,7 @@
   [% IF user.in_group('admin') || user.in_group('infra') %]
     <li>
       <strong>
-        <a href="[% urlbase FILTER none %]page.cgi?id=email_queue.html">Email Queue</a>
+        <a href="[% urlbase FILTER none %]view_job_queue.cgi">Email Queue</a>
       </strong> - TheSchwartz queue
     </li>
   [% END %]

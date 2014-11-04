@@ -17,7 +17,7 @@
     PD.past_due = [
     [% FOREACH bug = summary.past_due %]
       { 
-        id: '[% bug.id FILTER js %]',
+        id: [% bug.id FILTER js %],
         bug_status: '[% bug.status FILTER js %]', 
         version: '[% bug.version FILTER js %]',
         component: '[% bug.component FILTER js %]', 
@@ -32,7 +32,7 @@
   PD.updated_recently = [
   [% FOREACH bug = summary.updated_recently %]
     { 
-      id: '[% bug.id FILTER js %]',
+      id: [% bug.id FILTER js %],
       bug_status: '[% bug.status FILTER js %]', 
       version: '[% bug.version FILTER js %]',
       component: '[% bug.component FILTER js %]', 

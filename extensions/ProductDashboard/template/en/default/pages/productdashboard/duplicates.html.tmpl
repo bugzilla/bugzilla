@@ -10,8 +10,8 @@
   PD.duplicates = [
     [% FOREACH bug = by_duplicate %]
       {
-        id: '[% bug.id FILTER js %]',
-        count: '[% bug.dupe_count FILTER js %]',
+        id: [% bug.id FILTER js %],
+        count: [% bug.dupe_count FILTER js %],
         status: '[% bug.status FILTER js %]',
         version: '[% bug.version FILTER js %]',
         component: '[% bug.component FILTER js %]',

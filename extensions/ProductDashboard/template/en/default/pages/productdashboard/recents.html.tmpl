@@ -13,7 +13,7 @@
   PD.recents.opened = [
     [% FOREACH bug = recently_opened %]
       {
-        id: '[% bug.id FILTER js %]',
+        id: [% bug.id FILTER js %],
         status: '[% bug.status FILTER js %]',
         version: '[% bug.version FILTER js %]',
         component: '[% bug.component FILTER js %]',
@@ -27,7 +27,7 @@
   PD.recents.closed = [
     [% FOREACH bug = recently_closed %]
       {
-        id: '[% bug.id FILTER js %]',
+        id: [% bug.id FILTER js %],
         status: '[% bug.status FILTER js %]',
         version: '[% bug.version FILTER js %]',
         component: '[% bug.component FILTER js %]',

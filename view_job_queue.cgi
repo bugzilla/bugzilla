@@ -45,6 +45,7 @@ sub generate_report {
             j.run_after AS run_time,
             j.grabbed_until,
             f.funcname AS func,
+            (SELECT COUNT(*) FROM ts_error WHERE e.jobid = j.jobid) AS error_count,
             e.jobid AS error_count,
             e.error_time AS error_time,
             e.message AS error_message

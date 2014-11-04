@@ -77,5 +77,6 @@ RewriteRule ^form[\.:]automative$ enter_bug.cgi?product=Testing&format=automativ
 RewriteRule ^form[\.:]fxos[\.\-:]preload[\.\-:]app$ enter_bug.cgi?product=Marketplace&format=fxos-preload-app
 RewriteRule ^form[\.:]fxos[\.\-:]mcts[\.\-:]waiver$ enter_bug.cgi?product=Firefox+OS&format=fxos-mcts-waiver
 RewriteRule ^form[\.:]comm[\.:]newsletter$ enter_bug.cgi?product=Marketing&format=comm-newsletter
+RewriteRule ^form[\.:]screen[\.:]share[\.:]whitelist$ enter_bug.cgi?product=Firefox&format=screen-share-whitelist
 RewriteRule ^rest/(.*)$ rest.cgi/$1 [NE]
 RewriteRule ^bzapi/(.*)$ extensions/BzAPI/bin/rest.cgi/$1 [NE]

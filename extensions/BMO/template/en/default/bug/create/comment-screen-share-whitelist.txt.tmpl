@@ -1,0 +1,27 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% USE Bugzilla %]
+[% cgi = Bugzilla.cgi +%]
+>> Vendor name
+[%+ cgi.param('vendor') %]
+
+>> Point of contact
+[%+ cgi.param("contact") %]
+
+>> Site URLs
+[%+ cgi.param("site_urls") %]
+
+>> Does the application provide users with notice and control?
+[%+ cgi.param("notice") %]
+
+>> Have you seen and agree with the Developer Screen Sharing Submission policy?
+[%+ cgi.param("compliance_agreement") %]
+
+>> Does the usage comply with the Developer Screen Sharing Submission Policy guidelines?
+[%+ cgi.param("compliance_usage") %]

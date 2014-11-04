@@ -1,0 +1,183 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% PROCESS global/variables.none.tmpl %]
+
+[% inline_style = BLOCK %]
+#whitelist_form {
+  padding: 10px;
+}
+#whitelist_form .required:after {
+  content: " *";
+  color: red;
+}
+#whitelist_form .field_label {
+  font-weight: bold;
+}
+#whitelist_form .field_desc {
+  padding-bottom: 3px;
+}
+#whitelist_form .field_desc,
+#whitelist_form .head_desc {
+  width: 600px;
+  word-wrap: normal;
+}
+#whitelist_form .head_desc {
+  padding-top: 5px;
+  padding-bottom: 12px;
+}
+#whitelist_form .form_section {
+  margin-bottom: 10px;
+}
+#whitelist_form textarea {
+  font-family: inherit;
+  font-size: inherit;
+}
+#whitelist_form #comp_description {
+  test-align: left;
+  color: green;
+  padding-left: 1em;
+}
+[% END %]
+[% inline_javascript = BLOCK %]
+function validateAndSubmit() {
+  var alert_text = '';
+  var required_fields = {
+    vendor: "Please enter a vendor name.",
+    contact: "Please enter a point of contact.",
+    site_urls: "Please enter site urls for adding to whitelist.",
+    notice: "Please enter a notice provided to users.",
+    compliance_agreement: "Please select whether you have read and agree with the policy.",
+    compliance_usage: "Please select whether the usage complies with guidelines.",
+  };
+  for (var field in required_fields) {
+    if (!fieldValue(field))
+      alert_text += required_fields[field] + "\n";
+  }
+  if (alert_text != '') {
+    alert(alert_text);
+    return false;
+  }
+  document.getElementById('short_desc').value = fieldValue('vendor');
+  return true;
+}
+function fieldValue(elem_id) {
+    var el = document.getElementById(elem_id);
+    if (!el) return false;
+    if (el.type == 'text' || el.type == 'textarea') {
+      return el.value;
+    }
+    return el.options[el.selectedIndex].value;
+}
+[% END %]
+
+[% PROCESS global/header.html.tmpl
+   title = "Firefox Screen Sharing Whitelisti Submission"
+   style = inline_style
+   javascript = inline_javascript
+   javascript_urls = [ 'extensions/BMO/web/js/form_validate.js' ]
+%]
+
+<h2>Firefox Screen Sharing Whitelist Submission</h2>
+
+<h3>Description</h3>
+
+<div class="head_desc">
+  Please supply the following information for a new screen sharing
+  whitelist requests
+</div>
+
+<form id="whitelist_form" method="post" action="post_bug.cgi" enctype="multipart/form-data"
+      onSubmit="return validateAndSubmit();">
+  <input type="hidden" name="format" value="screen-share-whitelist">
+  <input type="hidden" name="product" value="Firefox">
+  <input type="hidden" name="component" value="Screen Sharing Whitelist">
+  <input type="hidden" name="rep_platform" value="All">
+  <input type="hidden" name="op_sys" value="Other">
+  <input type="hidden" name="version" value="Trunk">
+  <input type="hidden" name="bug_severity" id="bug_severity" value="normal">
+  <input type="hidden" name="priority" value="--">
+  <input type="hidden" name="short_desc" id="short_desc" value="">
+  <input type="hidden" name="token" value="[% token FILTER html %]">
+
+<div class="form_section">
+  <label for="vendor" class="field_label required">Vendor name</label>
+  <br>
+  <input type="text" name="vendor" id="vendor" size="80">
+</div>
+
+<div class="form_section">
+  <label for="contact" class="field_label required">Point of contact</label>
+  <br>
+  <input type="text" name="contact" id="contact" size="80">
+</div>
+
+<div class="form_section">
+  <label for="site_urls" class="field_label required">Site URLs</label>
+  <div class="field_desc">
+    Site URLs requesting addition to the Whitelist for screen sharing.
+  </div>
+  <textarea name="site_urls" id="site_urls" cols="80" rows="10"></textarea>
+</div>
+
+<h3>Access Resquest Details</h3>
+
+<div class="head_desc">
+  Please answer the questions below and freely ask for any clarification
+  needed. please provide requested information.
+</div>
+
+<div class="form_section">
+  <label for="notice" class="field_label required">
+    Does the application provide users with notice and control?
+  </label>
+  <div class="field_desc">
+    Please paste the privacy notice or a link to the privacy notice below.
+  </div>
+  <textarea name="notice" id="notice" cols="80" rows="10"></textarea>
+</div>
+
+<div class="form_section">
+  <label for="compliance_agreement" class="field_label required">
+    Please confirm that you have seen and agree to our whitelist policy.
+  </label>
+  <div class="field_desc">
+    More information at <a href="https://wiki.mozilla.org/Screensharing">
+    https://wiki.mozilla.org/Screensharing</a> under <strong>Developer
+    Screen Sharing Submission Policy</strong>.
+  </div>
+  <select name="compliance_agreement" id="compliance_agreement">
+    <option value="">Select</option>
+    <option value="Yes">Yes</option>
+    <option value="No">No</option>
+  </select>
+</div>
+
+<div class="form_section">
+  <label for="compliance_usage" class="field_label required">
+    Does the usage comply with all the guidelines under the Developer
+    Screen Sharing Submission Policy regarding not harming the user or
+    Mozilla?
+  </label>
+  <br>
+  <select name="compliance_usage" id="compliance_usage">
+    <option value="">Select</option>
+    <option value="Yes">Yes</option>
+    <option value="No">No</option>
+  </select>
+</div>
+
+<input type="submit" id="commit" value="Submit">
+
+<p>
+  [ <span class="required_star">*</span> <span class="required_explanation">Required Field</span> ]
+</p>
+
+</form>
+
+[% PROCESS global/footer.html.tmpl %]

@@ -36,8 +36,8 @@ use base qw(Exporter);
                              detaint_signed
                              html_quote url_quote xml_quote
                              css_class_quote html_light_quote
-                             i_am_cgi i_am_webservice correct_urlbase remote_ip
-                             validate_ip do_ssl_redirect_if_required use_attachbase
+                             i_am_cgi i_am_webservice correct_urlbase remote_ip validate_ip
+                             do_ssl_redirect_if_required use_attachbase
                              diff_arrays on_main_db
                              trim wrap_hard wrap_comment find_wrap_point
                              format_time validate_date validate_time datetime_from
@@ -875,7 +875,6 @@ Bugzilla::Util - Generic utility functions for bugzilla
 
   # Functions that tell you about your environment
   my $is_cgi   = i_am_cgi();
-  my $is_webservice = i_am_webservice();
   my $urlbase  = correct_urlbase();
 
   # Data manipulation
@@ -1004,11 +1003,6 @@ Functions returning information about your environment or location.
 Tells you whether or not you are being run as a CGI script in a web
 server. For example, it would return false if the caller is running
 in a command-line script.
-
-=item C<i_am_webservice()>
-
-Tells you whether or not the current usage mode is WebServices related
-such as JSONRPC or XMLRPC.
 
 =item C<correct_urlbase()>
 

@@ -1127,7 +1127,7 @@ sub _inject_headers_into_body {
         # as_string() doesn't return the updated body for multi-part sub-parts.
         $email->parts_set([ $email->subparts ]);
     }
-    else {
+    elsif ($email->content_type =~ /^text\/(?:html|plain)/) {
         # text-only email
         _replace_placeholder_in_part($email, $replacement);
     }

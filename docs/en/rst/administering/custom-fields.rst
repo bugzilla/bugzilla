@@ -5,7 +5,7 @@ Custom Fields
 
 Custom Fields are fields defined by the administrator, in addition to those
 which come with Bugzilla by default. Custom Fields are treated like any other
-field - they can be set in bugs and used for search queries.
+field—they can be set in bugs and used for search queries.
 
 Administrators should keep in mind that
 adding too many fields can make the user interface more complicated and
@@ -39,8 +39,8 @@ The following attributes must be set for each new custom field:
   be automatically added to the name entered.
 
 - *Description:*
-  A brief string which is used as the label for this Custom Field.
-  That is the string that users will see, and should be
+  A brief string used as the label for this Custom Field.
+  That is the string that users will see, and it should be
   short and explicit.
 
 - *Type:*
@@ -100,7 +100,7 @@ The following attributes must be set for each new custom field:
 - *Is mandatory:*
   Boolean that determines whether this field must be set.
   For single and multi-select fields, this means that a (non-default)
-  value must be selected, and for text and date fields, some text
+  value must be selected; for text and date fields, some text
   must be entered.
 
 - *Field only appears when:*
@@ -119,9 +119,9 @@ The following attributes must be set for each new custom field:
   ``valueY`` is only available when the bug status
   is RESOLVED while the value ``valueX`` should
   always be listed.
-  Once you have selected the field which should control the
+  Once you have selected the field that should control the
   availability of the values of this custom field, you can
-  edit values of this custom field to set the criteria, see
+  edit values of this custom field to set the criteria; see
   :ref:`edit-values-list`.
 
 .. _edit-custom-fields:
@@ -130,7 +130,7 @@ Editing Custom Fields
 =====================
 
 As soon as a Custom Field is created, its name and type cannot be
-changed. If this field is a drop down menu, its legal values can
+changed. If this field is a drop-down menu, its legal values can
 be set as described in :ref:`edit-values-list`. All
 other attributes can be edited as described above.
 
@@ -139,11 +139,11 @@ other attributes can be edited as described above.
 Deleting Custom Fields
 ======================
 
-Only custom fields which are marked as obsolete, and which never
-have been used, can be deleted completely (else the integrity
+Only custom fields that are marked as obsolete, and that have never
+been used, can be deleted completely (else the integrity
 of the bug history would be compromised). For custom fields marked
 as obsolete, a "Delete" link will appear in the ``Action``
 column. If the custom field has been used in the past, the deletion
-will be rejected. But marking the field as obsolete is sufficient
+will be rejected. Marking the field as obsolete, however, is sufficient
 to hide it from the user interface entirely.
 

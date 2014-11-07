@@ -30,7 +30,7 @@ ssl_redirect
     If enabled, Bugzilla will force HTTPS (SSL) connections, by
     automatically redirecting any users who try to use a non-SSL
     connection. Also, when this is enabled, Bugzilla will send out links
-    using :param:`sslbase` in emails instead of :param:`urlbase`. 
+    using :param:`sslbase` in emails instead of :param:`urlbase`.
 
 sslbase
     Defines the fully qualified domain name and web
@@ -60,7 +60,7 @@ maintainer
     The address need not be that of a valid Bugzilla account.
 
 docs_urlbase
-    The URL that is the common initial leading part of all Bugzilla documentation URLs. It may be an absolute URL, or a URL relative to the urlbase parameter. Leave this empty to suppress links to the documentation. ``%lang%`` will be replaced by user's preferred language (if documentation is available in that language). 
+    The URL that is the common initial leading part of all Bugzilla documentation URLs. It may be an absolute URL, or a URL relative to the urlbase parameter. Leave this empty to suppress links to the documentation. ``%lang%`` will be replaced by user's preferred language (if documentation is available in that language).
 
 utf8
     Use UTF-8 (Unicode) encoding for all text in Bugzilla. Installations where
@@ -101,12 +101,12 @@ announcehtml
 upgrade_notification
     Enable or disable a notification on the homepage of this Bugzilla
     installation when a newer version of Bugzilla is available. This
-    notification is only visible to administrators. Choose :paramval:`disabled`,
+    notification is only visible to administrators. Choose :paramval:`disabled`
     to turn off the notification. Otherwise, choose which version of
     Bugzilla you want to be notified about: :paramval:`development_snapshot` is the
-    latest release on the trunk:paramval:`latest_stable_release` is the most
-    recent release available on the most recent stable branch;
-    :paramval:`stable_branch_release` the most recent release on the branch
+    latest release from the master branch, :paramval:`latest_stable_release` is the most
+    recent release available on the most recent stable branch, and
+    :paramval:`stable_branch_release` is the most recent release on the branch
     this installation is based on.
 
 .. _param-administrative-policies:
@@ -119,16 +119,16 @@ Options include whether to allow the deletion of bugs and users,
 and whether to allow users to change their email address.
 
 allowbugdeletion
-    The pages to edit products and components can delete all associated bugs when you delete a product (or component). Since that is a pretty scary idea, you have to turn on this option before any such deletions will ever happen. 
+    The pages to edit products and components can delete all associated bugs when you delete a product (or component). Since that is a pretty scary idea, you have to turn on this option before any such deletions will ever happen.
 
 allowemailchange
-    Users can change their own email address through the preferences. Note that the change is validated by emailing both addresses, so switching this option on will not let users use an invalid address. 
+    Users can change their own email address through the preferences. Note that the change is validated by emailing both addresses, so switching this option on will not let users use an invalid address.
 
 allowuserdeletion
-    The user editing pages are capable of letting you delete user accounts. Bugzilla will issue a warning in case you'd run into inconsistencies when you're about to do so, but such deletions still remain scary. So, you have to turn on this option before any such deletions will ever happen. 
+    The user editing pages are capable of letting you delete user accounts. Bugzilla will issue a warning in case you'd run into inconsistencies when you're about to do so, but such deletions still remain scary. So, you have to turn on this option before any such deletions will ever happen.
 
 last_visit_keep_days
-    This option controls how many days Bugzilla will remember that users have visited specific bugs. 
+    This option controls how many days Bugzilla will remember that users have visited specific bugs.
 
 .. _param-user-authentication:
 
@@ -144,26 +144,26 @@ of authentication cookies, and the regular expression used to
 validate email addresses. Some parameters are highlighted below.
 
 auth_env_id
-    Environment variable used by external authentication system to store a unique identifier for each user. Leave it blank if there isn't one or if this method of authentication is not being used. 
+    Environment variable used by external authentication system to store a unique identifier for each user. Leave it blank if there isn't one or if this method of authentication is not being used.
 
 auth_env_email
-    Environment variable used by external authentication system to store each user's email address. This is a required field for environmental authentication. Leave it blank if you are not going to use this feature. 
+    Environment variable used by external authentication system to store each user's email address. This is a required field for environmental authentication. Leave it blank if you are not going to use this feature.
 
 auth_env_realname
-    Environment variable used by external authentication system to store the user's real name. Leave it blank if there isn't one or if this method of authentication is not being used. 
+    Environment variable used by external authentication system to store the user's real name. Leave it blank if there isn't one or if this method of authentication is not being used.
 
 user_info_class
     Mechanism(s) to be used for gathering a user's login information. More than one may be selected. If the first one returns nothing, the second is tried, and so on. The types are:
 
-    * :paramval:`CGI`: asks for username and password via CGI form interface. 
-    * :paramval:`Env`: info for a pre-authenticated user is passed in system environment variables. 
+    * :paramval:`CGI`: asks for username and password via CGI form interface.
+    * :paramval:`Env`: info for a pre-authenticated user is passed in system environment variables.
 
 user_verify_class
     Mechanism(s) to be used for verifying (authenticating) information gathered by user_info_class. More than one may be selected. If the first one cannot find the user, the second is tried, and so on. The types are:
 
-    * :paramval:`DB`: Bugzilla's built-in authentication. This is the most common choice. 
-    * :paramval:`RADIUS`: RADIUS authentication using a RADIUS server. Using this method requires additional parameters to be set. Please see :ref:`param-radius` for more information.  
-    * :paramval:`LDAP1: LDAP authentication using an LDAP server. Using this method requires additional parameters to be set. Please see :ref:`param-ldap` for more information. 
+    * :paramval:`DB`: Bugzilla's built-in authentication. This is the most common choice.
+    * :paramval:`RADIUS`: RADIUS authentication using a RADIUS server. Using this method requires additional parameters to be set. Please see :ref:`param-radius` for more information.
+    * :paramval:`LDAP`: LDAP authentication using an LDAP server. Using this method requires additional parameters to be set. Please see :ref:`param-ldap` for more information.
 
 rememberlogin
     Controls management of session cookies.
@@ -173,7 +173,7 @@ rememberlogin
     * :paramval:`defaulton`/:paramval:`defaultoff` - Default behavior as described above, but user can choose whether Bugzilla will remember their login or not.
 
 requirelogin
-    If this option is set, all access to the system beyond the front page will require a login. No anonymous users will be permitted. 
+    If this option is set, all access to the system beyond the front page will require a login. No anonymous users will be permitted.
 
 webservice_email_filter
     Filter email addresses returned by the WebService API depending on if the user is logged in or not. This works similarly to how the web UI currently filters email addresses. If requirelogin is enabled, then this parameter has no effect as users must be logged in to use Bugzilla anyway.
@@ -183,16 +183,16 @@ emailregexp
     used for login names. The default attempts to match fully
     qualified email addresses (i.e. 'user\@example.com') in a slightly
     more restrictive way than what is allowed in RFC 2822.
-    Another popular value to put here is :paramval:`^[^@]+`, which means 'local usernames, no @ allowed.' 
+    Another popular value to put here is :paramval:`^[^@]+`, which means 'local usernames, no @ allowed.'
 
 emailregexpdesc
-    This description is shown to the user to explain which email addresses are allowed by the :param:`emailregexp` param. 
+    This description is shown to the user to explain which email addresses are allowed by the :param:`emailregexp` param.
 
 emailsuffix
-    This is a string to append to any email addresses when actually sending mail to that address. It is useful if you have changed the :param:`emailregexp` param to only allow local usernames, but you want the mail to be delivered to username\@my.local.hostname. 
+    This is a string to append to any email addresses when actually sending mail to that address. It is useful if you have changed the :param:`emailregexp` param to only allow local usernames, but you want the mail to be delivered to username\@my.local.hostname.
 
 createemailregexp
-    This defines the (case-insensitive) regexp to use for email addresses that are permitted to self-register. The default (.*) permits any account matching the emailregexp to be created. If this parameter is left blank, no users will be permitted to create their own accounts and all accounts will have to be created by an administrator. 
+    This defines the (case-insensitive) regexp to use for email addresses that are permitted to self-register. The default (:paramval:`.*`) permits any account matching the emailregexp to be created. If this parameter is left blank, no users will be permitted to create their own accounts and all accounts will have to be created by an administrator.
 
 password_complexity
     Set the complexity required for passwords. In all cases must the passwords be at least 6 characters long.
@@ -203,7 +203,7 @@ password_complexity
     * :paramval:`letters_numbers_specialchars` - Passwords must contain at least one letter, a number and a special character.
 
 password_check_on_login
-    If set, Bugzilla will check that the password meets the current complexity rules and minimum length requirements when the user logs into the Bugzilla web interface. If it doesn't, the user would not be able to log in, and will receive a message to reset their password. 
+    If set, Bugzilla will check that the password meets the current complexity rules and minimum length requirements when the user logs into the Bugzilla web interface. If it doesn't, the user would not be able to log in, and will receive a message to reset their password.
 
 .. _param-attachments:
 
@@ -237,14 +237,14 @@ maxattachmentsize
     The maximum size (in kilobytes) of attachments to be stored in the database. If a file larger than this size is attached to a bug, Bugzilla will look at the :param:`maxlocalattachment` parameter to determine if the file can be stored locally on the web server. If the file size exceeds both limits, then the attachment is rejected. Setting both parameters to 0 will prevent attaching files to bugs.
 
     Some databases have default limits which prevent storing larger attachments in the database. E.g. MySQL has a parameter called `max_allowed_packet <http://dev.mysql.com/doc/refman/5.1/en/packet-too-large.html>`_, whose default varies by distribution. Setting :param:`maxattachmentsize` higher than your current setting for this value will produce an error.
-    
+
 maxlocalattachment
     The maximum size (in megabytes) of attachments to be stored locally on the web server. If set to a value lower than the :param:`maxattachmentsize` parameter, attachments will never be kept on the local filesystem.
 
     Whether you use this feature or not depends on your environment. Reasons to store some or all attachments as files might include poor database performance for large binary blobs, ease of backup/restore/browsing, or even filesystem-level deduplication support. However, you need to be aware of any limits on how much data your webserver environment can store. If in doubt, leave the value at 0.
-    
+
     Note that changing this value does not affect any already-submitted attachments.
-    
+
 .. _param-bug-change-policies:
 
 Bug Change Policies
@@ -270,7 +270,7 @@ musthavemilestoneonaccept
 
 commenton*
     All these fields allow you to dictate what changes can pass
-    without comment, and which must have a comment from the
+    without comment and which must have a comment from the
     person who changed them.  Often, administrators will allow
     users to add themselves to the CC list, accept bugs, or
     change the Status Whiteboard without adding a comment as to
@@ -299,7 +299,7 @@ Bug Fields
 ==========
 
 The parameters in this section determine the default settings of
-several Bugzilla fields for new bugs, and also control whether
+several Bugzilla fields for new bugs and whether
 certain fields are used. For example, choose whether to use the
 :field:`Target Milestone` field or the :field:`Status Whiteboard` field.
 
@@ -313,15 +313,15 @@ usetargetmilestone
 
 useqacontact
     This allows you to define an email address for each component,
-    in addition to that of the default assignee, who will be sent
+    in addition to that of the default assignee, that will be sent
     carbon copies of incoming bugs.
 
 usestatuswhiteboard
     This defines whether you wish to have a free-form, overwritable field
     associated with each bug. The advantage of the :field:`Status Whiteboard`
-    is that it can be deleted or modified with ease, and provides an
-    easily-searchable field for indexing some bugs that have some trait
-    in common.
+    is that it can be deleted or modified with ease and provides an
+    easily searchable field for indexing bugs that have some trait in
+    common.
 
 use_see_also
     Do you wish to use the :field:`See Also` field? It allows you mark bugs
@@ -346,7 +346,7 @@ defaultopsys
     that the browser reports to be running on as the default.
 
 collapsed_comment_tags
-    A comma separated list of tags which, when applied to comments, will
+    A comma-separated list of tags which, when applied to comments, will
     cause them to be collapsed by default.
 
 .. _param-dependency-graphs:
@@ -354,7 +354,7 @@ collapsed_comment_tags
 Graphs
 ======
 
-Bugzilla can draw graphs of bug dependency relationships, using a tool called
+Bugzilla can draw graphs of bug-dependency relationships, using a tool called
 :file:`dot` (from the `GraphViz project <http://graphviz.org/>`_) or a web
 service called Web Dot. This page allows you to set the location of the binary
 or service. If no Web Dot server or binary is specified, then dependency
@@ -365,13 +365,13 @@ webdotbase
 
     * A complete file path to :command:`dot` (part of GraphViz), which will
       generate the graphs locally.
-    * A URL prefix pointing to an installation of the webdot package, which
+    * A URL prefix pointing to an installation of the Web Dot package, which
       will generate the graphs remotely.
     * A blank value, which will disable dependency graphing.
 
     The default value is blank. We recommend using a local install of
     :file:`dot`. If you change this value to a web service, make certain that
-    the webdot server can read files from your webdot directory. On Apache
+    the Web Dot server can read files from your Web Dot directory. On Apache
     you do this by editing the :file:`.htaccess` file; for other systems the
     needed measures may vary. You can run :command:`checksetup.pl` to
     recreate the :file:`.htaccess` file if it has been lost.
@@ -398,7 +398,7 @@ Several parameters are described in more detail below. Most of the
 configuration of groups and their relationship to products is done
 on the :guilabel:`Groups` and :guilabel:`Product` pages of the
 :guilabel:`Administration` area.
-The options on this page control global default behaviour.
+The options on this page control global default behavior.
 For more information on Groups and Group Security, see
 :ref:`groups`.
 
@@ -425,7 +425,7 @@ querysharegroup
     saved searches, see :ref:`saved-searches`.
 
 comment_taggers_group
-    The name of the group of users who can tag comment. Setting this to empty disables comment tagging.
+    The name of the group of users who can tag comments. Setting this to empty disables comment tagging.
 
 debug_group
     The name of the group of users who can view the actual SQL query generated when viewing bug lists and reports. Do not expose this information to untrusted users.
@@ -439,7 +439,12 @@ usevisibilitygroups
     restrictions) see :ref:`edit-groups`.
 
 or_groups
-    Define the visibility of a bug which is in multiple groups. If this is on (recommended), a user only needs to be a member of one of the bug's groups in order to view it. If it is off, a user needs to be a member of all the bug's groups. Note that in either case, if the user has a role on the bug (e.g. reporter) that may also affect their permissions. 
+    Define the visibility of a bug which is in multiple groups. If
+    this is on (recommended), a user only needs to be a member of one
+    of the bug's groups in order to view it. If it is off, a user
+    needs to be a member of all the bug's groups. Note that in either
+    case, a user's role on the bug (e.g. reporter), if any, may also
+    affect their permissions.
 
 .. _param-ldap:
 
@@ -451,7 +456,7 @@ authentication architecture. This page contains all the parameters
 necessary to configure Bugzilla for use with LDAP authentication.
 
 The existing authentication
-scheme for Bugzilla uses email addresses as the primary user ID, and a
+scheme for Bugzilla uses email addresses as the primary user ID and a
 password to authenticate that user. All places within Bugzilla that
 require a user ID (e.g assigning a bug) use the email
 address. The LDAP authentication builds on top of this scheme, rather
@@ -459,7 +464,7 @@ than replacing it. The initial log-in is done with a username and
 password for the LDAP directory. Bugzilla tries to bind to LDAP using
 those credentials and, if successful, tries to map this account to a
 Bugzilla account. If an LDAP mail attribute is defined, the value of this
-attribute is used, otherwise the :param:`emailsuffix` parameter is appended to
+attribute is used; otherwise, the :param:`emailsuffix` parameter is appended to
 the LDAP username to form a full email address. If an account for this address
 already exists in the Bugzilla installation, it will log in to that account.
 If no account for that email address exists, one is created at the time
@@ -496,15 +501,15 @@ LDAPserver
     For example: :paramval:`ldap.company.com`
     or :paramval:`ldap.company.com:3268`
     You can also specify a LDAP URI, so as to use other
-    protocols, such as LDAPS or LDAPI. If port was not specified in
+    protocols, such as LDAPS or LDAPI. If the port was not specified in
     the URI, the default is either 389 or 636 for 'LDAP' and 'LDAPS'
     schemes respectively.
 
     .. note:: In order to use SSL with LDAP, specify a URI with "ldaps://".
        This will force the use of SSL over port 636.
-       For example, normal LDAP:
-       :paramval:`ldap://ldap.company.com`, LDAP over SSL:
-       :paramval:`ldaps://ldap.company.com` or LDAP over a UNIX
+       For example, normal LDAP
+       :paramval:`ldap://ldap.company.com`, LDAP over SSL
+       :paramval:`ldaps://ldap.company.com`, or LDAP over a UNIX
        domain socket :paramval:`ldapi://%2fvar%2flib%2fldap_sock`.
 
 LDAPstarttls
@@ -576,11 +581,11 @@ RADIUS_NAS_IP
     RADIUS server. If unspecified, 127.0.0.1 will be used.
 
 RADIUS_email_suffix
-    Bugzilla needs an e-mail address for each user account.
-    Therefore, it needs to determine the e-mail address corresponding
+    Bugzilla needs an email address for each user account.
+    Therefore, it needs to determine the email address corresponding
     to a RADIUS user.
     Bugzilla offers only a simple way to do this: it can concatenate
-    a suffix to the RADIUS user name to convert it into an e-mail
+    a suffix to the RADIUS user name to convert it into an email
     address.
     You can specify this suffix in the RADIUS_email_suffix parameter.
     If this simple solution does not work for you, you'll
@@ -608,16 +613,16 @@ mail_delivery_method
 mailfrom
     This is the email address that will appear in the "From" field
     of all emails sent by this Bugzilla installation. Some email
-    servers require mail to be from a valid email address, therefore
+    servers require mail to be from a valid email address; therefore,
     it is recommended to choose a valid email address here.
 
 use_mailer_queue
-    In a large Bugzilla installation, updating bugs can be very slow, because Bugzilla sends all email at once. If you enable this parameter, Bugzilla will queue all mail and then send it in the background. This requires that you have installed certain Perl modules (as listed by :file:`checksetup.pl` for this feature), and that you are running the :file:`jobqueue.pl` daemon (otherwise your mail won't get sent). This affects all mail sent by Bugzilla, not just bug updates.
+    In a large Bugzilla installation, updating bugs can be very slow because Bugzilla sends all email at once. If you enable this parameter, Bugzilla will queue all mail and then send it in the background. This requires that you have installed certain Perl modules (as listed by :file:`checksetup.pl` for this feature), and that you are running the :file:`jobqueue.pl` daemon (otherwise your mail won't get sent). This affects all mail sent by Bugzilla, not just bug updates.
 
 smtpserver
     The SMTP server address, if the :param:`mail_delivery_method`
     parameter is set to :paramval:`SMTP`.  Use :paramval:`localhost` if you have a local MTA
-    running, otherwise use a remote SMTP server.  Append ":" and the port
+    running; otherwise, use a remote SMTP server.  Append ":" and the port
     number if a non-default port is needed.
 
 smtp_username
@@ -648,7 +653,7 @@ globalwatchers
     receive notification each time any new bug in entered, or when
     any existing bug changes, subject to the normal groupset
     permissions. It may be useful for sending notifications to a
-    mailing-list, for instance.
+    mailing list, for instance.
 
 .. _param-querydefaults:
 
@@ -665,22 +670,25 @@ quip_list_entry_control
     Controls how easily users can add entries to the quip list.
 
     * :paramval:`open` - Users may freely add to the quip list, and their entries will immediately be available for viewing.
-    * :paramval:`moderated` - quips can be entered, but need to be approved by a moderator before they will be shown.
-    * :paramval:`closed` - no new additions to the quips list are allowed.
+    * :paramval:`moderated` - Quips can be entered but need to be approved by a moderator before they will be shown.
+    * :paramval:`closed` - No new additions to the quips list are allowed.
 
 mybugstemplate
-    This is the URL to use to bring up a simple 'all of my bugs' list for a user. %userid% will get replaced with the login name of a user. Special characters must be URL-encoded.
+    This is the URL to use to bring up a simple 'all of my bugs' list
+    for a user. %userid% will get replaced with the login name of a
+    user. Special characters must be URL encoded.
 
 defaultquery
-    This is the default query that initially comes up when you access the advanced query page. It's in URL parameter format.
+    This is the default query that initially comes up when you access
+    the advanced query page. It's in URL-parameter format.
 
 search_allow_no_criteria
     When turned off, a query must have some criteria specified to limit the number of bugs returned to the user. When turned on, a user is allowed to run a query with no criteria and get all bugs in the entire installation that they can see. Turning this parameter on is not recommended on large installations.
 
 default_search_limit
-    By default, Bugzilla limits searches done in the web interface to returning only this many results, for performance reasons. (This only affects the HTML format of search results--CSV, XML, and other formats are exempted.) Users can click a link on the search result page to see all the results.
+    By default, Bugzilla limits searches done in the web interface to returning only this many results, for performance reasons. (This only affects the HTML format of search results—CSV, XML, and other formats are exempted.) Users can click a link on the search result page to see all the results.
 
-    Usually you should not have to change this - the default value should be acceptable for most installations.
+    Usually you should not have to change this—the default value should be acceptable for most installations.
 
 max_search_results
     The maximum number of bugs that a search can ever return. Tabular and graphical reports are exempted from this limit, however.
@@ -702,7 +710,7 @@ from the master, freeing it up to handle writes. Bugzilla will switch to the
 shadowdb when it knows it doesn't need to update the database (e.g. when
 searching, or displaying a bug to a not-logged-in user).
 
-Bugzilla does not make sure the shadowdb is kept up to date so if you use
+Bugzilla does not make sure the shadowdb is kept up to date, so, if you use
 one, you will need to set up replication in your database server.
 
 If your shadowdb is on a different machine, specify :param:`shadowdbhost`
@@ -729,12 +737,12 @@ Memcached
 
 memcached_servers
     If this option is set, Bugzilla will integrate with `Memcached
-    <http://www.memcached.org/>`_. Specify one of more server, separated by
+    <http://www.memcached.org/>`_. Specify one or more servers, separated by
     spaces, using hostname:port notation (for example:
     :paramval:`127.0.0.1:11211`).
 
 memcached_namespace
-    Specify a string to prefix to each key on Memcached. 
+    Specify a string to prefix each key on Memcached.
 
 .. _admin-usermatching:
 
@@ -743,7 +751,7 @@ User Matching
 
 The settings on this page control how users are selected and queried
 when adding a user to a bug. For example, users need to be selected
-when choosing who the bug is assigned to, adding to the CC list or
+when assigning the bug, adding to the CC list, or
 selecting a QA contact. With the "usemenuforusers" parameter, it is
 possible to configure Bugzilla to
 display a list of users in the fields instead of an empty text field.
@@ -755,12 +763,16 @@ usemenuforusers
     If this option is set, Bugzilla will offer you a list to select from (instead of a text entry field) where a user needs to be selected. This option should not be enabled on sites where there are a large number of users.
 
 ajax_user_autocompletion
-    If this option is set, typing characters in a certain user fields will display a list of matches that can be selected from. It is recommended to only turn this on if you are using mod_perl, because otherwise the response will be irritatingly slow.
+    If this option is set, typing characters in a certain user fields
+    will display a list of matches that can be selected from. It is
+    recommended to only turn this on if you are using mod_perl;
+    otherwise, the response will be irritatingly slow.
 
 maxusermatches
     Provide no more than this many matches when a user is searched for.
-    If set to '1', no users will be displayed on ambiguous matches. This is useful for user privacy purposes.
-    A value of zero means no limit.
+    If set to '1', no users will be displayed on ambiguous
+    matches. This is useful for user-privacy purposes. A value of zero
+    means no limit.
 
 confirmuniqueusermatch
     Whether a confirmation screen should be displayed when only one user matches a search entry.

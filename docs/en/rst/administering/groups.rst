@@ -40,7 +40,7 @@ the bug. For information on granting read-only access to certain people and
 full edit access to others, see :ref:`product-group-controls`.
 
 .. note:: By default, bugs can also be seen by the Assignee, the Reporter, and
-   by everyone on the CC List, regardless of whether or not the bug would
+   everyone on the CC List, regardless of whether or not the bug would
    typically be viewable by them. Visibility to the Reporter and CC List can
    be overridden (on a per-bug basis) by bringing up the bug, finding the
    section that starts with ``Users in the roles selected below...``
@@ -77,7 +77,7 @@ To create a new group, follow the steps below:
       to match the regular expression. If their email address changes
       and no longer matches the regular expression, they will be removed
       from the group. Versions 2.16 and older of Bugzilla did not automatically
-      remove users who's email addresses no longer matched the RegExp.
+      remove users whose email addresses no longer matched the RegExp.
 
    .. warning:: If specifying a domain in the regular expression, end
       the regexp with a "$". Otherwise, when granting access to
@@ -103,13 +103,13 @@ you wish to edit or control permissions for.
 
 The "Edit Groups" page contains the same five fields present when
 creating a new group. Below that are two additional sections, "Group
-Permissions," and "Mass Remove". The "Mass Remove" option simply removes
+Permissions" and "Mass Remove". The "Mass Remove" option simply removes
 all users from the group who match the regular expression entered. The
 "Group Permissions" section requires further explanation.
 
 The "Group Permissions" section on the "Edit Groups" page contains four sets
 of permissions that control the relationship of this group to other
-groups. If the 'usevisibilitygroups' parameter is in use (see
+groups. If the ``usevisibilitygroups`` parameter is in use (see
 :ref:`parameters`) two additional sets of permissions are displayed.
 Each set consists of two select boxes. On the left, a select box
 with a list of all existing groups. On the right, a select box listing
@@ -142,13 +142,13 @@ Each of the six permissions is described below.
 
 *Groups That Can See This Group*
     Members of any selected group can see the users in this group.
-    This setting is only visible if the 'usevisibilitygroups' parameter
+    This setting is only visible if the ``usevisibilitygroups`` parameter
     is enabled on the Bugzilla Configuration page. See
     :ref:`parameters` for information on configuring Bugzilla.
 
 *Groups That This Group Can See*
     Members of this group can see members in any of the selected groups.
-    This setting is only visible if the 'usevisibilitygroups' parameter
+    This setting is only visible if the ``usevisibilitygroups`` parameter
     is enabled on the the Bugzilla Configuration page. See
     :ref:`parameters` for information on configuring Bugzilla.
 
@@ -164,7 +164,7 @@ A User can become a member of a group in several ways:
    from the "Administration" page. Use the search form to find the user
    you want to edit group membership for, and click on their email
    address in the search results to edit their profile. The profile
-   page lists all the groups, and indicates if the user is a member of
+   page lists all the groups and indicates if the user is a member of
    the group either directly or indirectly. More information on indirect
    group membership is below. For more details on User Administration,
    see :ref:`users`.

@@ -8,11 +8,11 @@ Users
 Creating Admin Users
 ====================
 
-When you first run checksetup.pl after installing Bugzilla, it
-will prompt you for the administrative username (email address) and
-password for the first admin user. If for some reason you delete
-all the admin users, re-running checksetup.pl will again prompt
-you for a username and password and make a new admin.
+When you first run checksetup.pl after installing Bugzilla, it will
+prompt you for the username (email address) and password for the first
+admin user. If for some reason you delete all the admin users,
+re-running checksetup.pl will again prompt you for a username and
+password and make a new admin.
 
 If you wish to add more administrative users, add them to the "admin" group.
 
@@ -76,10 +76,10 @@ fields:
 
 - *Disable Text*:
   If you type anything in this box, including just a space, the
-  user is prevented from logging in, or making any changes to
+  user is prevented from logging in and from making any changes to
   bugs via the web interface.
   The HTML you type in this box is presented to the user when
-  they attempt to perform these actions, and should explain
+  they attempt to perform these actions and should explain
   why the account was disabled.
   Users with disabled accounts will continue to receive
   mail from Bugzilla; furthermore, they will not be able
@@ -89,8 +89,8 @@ fields:
   ``Bugmail Disabled`` checkbox above.
 
   .. note:: Even users whose accounts have been disabled can still
-     submit bugs via the e-mail gateway, if one exists.
-     The e-mail gateway should *not* be
+     submit bugs via the email gateway, if one exists.
+     The email gateway should *not* be
      enabled for secure installations of Bugzilla.
 
   .. warning:: Don't disable all the administrator accounts!
@@ -120,17 +120,16 @@ fields:
 
 - *editcomponents*:
   This flag allows a user to create new products and components,
-  as well as modify and destroy those that have no bugs associated
-  with them. If a product or component has bugs associated with it,
-  those bugs must be moved to a different product or component
-  before Bugzilla will allow them to be destroyed.
+  modify existing products and components, and destroy those that have
+  no bugs associated with them. If a product or component has bugs
+  associated with it, those bugs must be moved to a different product
+  or component before Bugzilla will allow them to be destroyed.
 
 - *editkeywords*:
   If you use Bugzilla's keyword functionality, enabling this
-  feature allows a user to create and destroy keywords. As always,
-  the keywords for existing bugs containing the keyword the user
-  wishes to destroy must be changed before Bugzilla will allow it
-  to die.
+  feature allows a user to create and destroy keywords. A keyword
+  must be removed from any bugs upon which it is currently set
+  before it can be destroyed.
 
 - *editusers*:
   This flag allows a user to do what you're doing right now: edit
@@ -167,9 +166,9 @@ Self-Registration
 By default, users can create their own user accounts by clicking the
 ``New Account`` link at the bottom of each page (assuming
 they aren't logged in as someone else already). If you want to disable
-this self-registration, or if you want to restrict who can create his
+this self-registration, or if you want to restrict who can create their
 own user account, you have to edit the ``createemailregexp``
-parameter in the ``Configuration`` page, see
+parameter in the ``Configuration`` page; see
 :ref:`parameters`.
 
 .. _user-account-creation:
@@ -201,9 +200,9 @@ can create user accounts for other users:
 Deleting Users
 ==============
 
-If the ``allowuserdeletion`` parameter is turned on, see
-:ref:`parameters`, then you can also delete user accounts.
-Note that this is most of the time not the best thing to do. If only
+If the ``allowuserdeletion`` parameter is turned on (see
+:ref:`parameters`) then you can also delete user accounts.
+Note that, most of the time, this is not the best thing to do. If only
 a warning in a yellow box is displayed, then the deletion is safe.
 If a warning is also displayed in a red box, then you should NOT try
 to delete the user account, else you will get referential integrity

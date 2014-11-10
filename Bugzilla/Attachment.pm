@@ -922,6 +922,9 @@ sub update {
         Bugzilla->memcached->clear({ table => 'attachments', id => $self->id });
     }
 
+    Bugzilla::Hook::process('attachment_end_of_update',
+        { object => $self, old_object => $old_self, changes => $changes });
+
     return $changes;
 }
 

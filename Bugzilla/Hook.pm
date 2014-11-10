@@ -151,6 +151,30 @@ This is a Bugzilla::User object of the user.
 
 =back
 
+=head2 attachment_end_of_update
+
+Called during L<Bugzilla::Attachment/update>, after changes are made
+to the database, but while still inside a transaction.
+
+Params:
+
+=over
+
+=item C<object>
+
+The attachment object that C<update> was called on.
+
+=item C<old_object>
+
+The attachment object as it was before it was updated.
+
+=item C<changes>
+
+The fields that have been changed, in the same format that
+L<Bugzilla::Attachment/update> returns.
+
+=back
+
 =head2 attachment_process_data
 
 This happens at the very beginning process of the attachment creation.

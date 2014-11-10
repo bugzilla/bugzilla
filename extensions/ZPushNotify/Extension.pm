@@ -31,14 +31,38 @@ sub _notify {
 # object hooks
 #
 
-sub object_end_of_update {
+sub object_end_of_create {
+    my ($self, $args) = @_;
+    my $object = $args->{object};
+    return unless Bugzilla->params->{enable_simple_push};
+    return unless $object->isa('Bugzilla::Flag');
+    _notify($object->bug->id, $object->creation_date);
+}
+
+sub flag_updated {
+    my ($self, $args) = @_;
+    my $flag      = $args->{flag};
+    my $timestamp = $args->{timestamp};
+    my $changes   = $args->{changes};
+    return unless Bugzilla->params->{enable_simple_push};
+    return unless scalar(keys %$changes);
+    _notify($flag->bug->id, $timestamp);
+}
+
+sub flag_deleted {
+    my ($self, $args) = @_;
+    my $flag      = $args->{flag};
+    my $timestamp = $args->{timestamp};
+    return unless Bugzilla->params->{enable_simple_push};
+    _notify($flag->bug->id, $timestamp);
+}
+
+sub attachment_end_of_update {
     my ($self, $args) = @_;
     return unless Bugzilla->params->{enable_simple_push};
     return unless scalar keys %{ $args->{changes} };
     return unless my $object = $args->{object};
-    if ($object->isa('Bugzilla::Attachment')) {
-        _notify($object->bug->id, $object->bug->delta_ts);
-    }
+    _notify($object->bug->id, $object->modification_time);
 }
 
 sub object_before_delete {
@@ -46,7 +70,8 @@ sub object_before_delete {
     return unless Bugzilla->params->{enable_simple_push};
     return unless my $object = $args->{object};
     if ($object->isa('Bugzilla::Attachment')) {
-        _notify($object->bug->id, $object->bug->delta_ts);
+        my $timestamp = Bugzilla->dbh->selectrow_array('SELECT LOCALTIMESTAMP(0)');
+        _notify($object->bug->id, $timestamp);
     }
 }
 

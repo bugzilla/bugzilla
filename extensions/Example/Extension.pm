@@ -21,6 +21,7 @@ use Bugzilla::User::Setting;
 use Bugzilla::Util qw(diff_arrays html_quote);
 use Bugzilla::Status qw(is_open_state);
 use Bugzilla::Install::Filesystem;
+use Bugzilla::WebService::Constants;
 
 # This is extensions/Example/lib/Util.pm. I can load this here in my
 # Extension.pm only because I have a Config.pm.
@@ -958,9 +959,18 @@ sub webservice {
 
 sub webservice_error_codes {
     my ($self, $args) = @_;
-    
+
     my $error_map = $args->{error_map};
     $error_map->{'example_my_error'} = 10001;
+}
+
+sub webservice_status_code_map {
+    my ($self, $args) = @_;
+
+    my $status_code_map = $args->{status_code_map};
+    # Uncomment this line to override the status code for the
+    # error 'object_does_not_exist' to STATUS_BAD_REQUEST
+    #$status_code_map->{51} = STATUS_BAD_REQUEST;
 }
 
 sub webservice_before_call {

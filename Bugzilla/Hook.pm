@@ -1704,6 +1704,26 @@ The current JSONRPC, XMLRPC, or REST object.
 
 =back
 
+=head2 webservice_status_code_map
+
+This hook allows an extension to change the status codes returned by
+specific webservice errors. The valid internal error codes that Bugzilla
+generates, and the status codes they map to by default, are defined in the
+C<WS_ERROR_CODE> constant in C<Bugzilla::WebService::Constants>. When
+remapping an error, you may wish to use an existing status code constant.
+Such constants are also in C<Bugzilla::WebService::Constants> and start
+with C<STATUS_*> such as C<STATUS_BAD_REQUEST>.
+
+Params:
+
+=over
+
+=item C<status_code_map>
+
+A hash reference containing the current status code mapping.
+
+=back
+
 =head1 SEE ALSO
 
 L<Bugzilla::Extension>

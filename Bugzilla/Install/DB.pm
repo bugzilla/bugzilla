@@ -726,6 +726,9 @@ sub update_table_definitions {
     # 2014-08-11 sgreen@redhat.com - Bug 1012506
      _update_alias();
 
+    # 2014-11-10 dkl@mozilla.com - Bug 1093928
+    $dbh->bz_drop_column('longdescs', 'is_markdown');
+
     ################################################################
     # New --TABLE-- changes should go *** A B O V E *** this point #
     ################################################################

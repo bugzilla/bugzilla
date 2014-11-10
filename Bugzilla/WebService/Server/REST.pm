@@ -31,6 +31,7 @@ use Bugzilla::WebService::Server::REST::Resources::Product;
 use Bugzilla::WebService::Server::REST::Resources::User;
 use Bugzilla::WebService::Server::REST::Resources::BugUserLastVisit;
 
+use List::MoreUtils qw(uniq);
 use Scalar::Util qw(blessed reftype);
 use MIME::Base64 qw(decode_base64);
 
@@ -342,26 +343,29 @@ sub _retrieve_json_params {
     # parameters.
     if (my $rest_params = $self->bz_rest_params) {
         foreach my $param (keys %$rest_params) {
-            if (!exists $params->{$param}) {
+            # If the param does not already exist or if the
+            # rest param is a single value, add it to the
+            # global params.
+            if (!exists $params->{$param} || !ref $rest_params->{$param}) {
                 $params->{$param} = $rest_params->{$param};
-                next;
             }
-            my @values = ref $rest_params->{$param}
-                         ? @{ $rest_params->{$param} }
-                         : ($rest_params->{$param});
-            if (ref $params->{$param}) {
-                push(@{ $params->{$param} }, @values);
-            }
-            else {
-                $params->{$param} = [ $params->{$param}, @values ];
+            # If rest_param is a list then add any extra values to the list
+            elsif (ref $rest_params->{$param}) {
+                my @extra_values = ref $params->{$param}
+                                   ? @{ $params->{$param} }
+                                   : ($params->{$param});
+                $params->{$param}
+                    = [ uniq (@{ $rest_params->{$param} }, @extra_values) ];
             }
         }
     }
 
-    # Merge any additional query key/values from the request body if non-GET.
-    # We do this manually cause CGI.pm doesn't understand JSON strings.
+    # Any parameters passed in in the body of a non-GET request will override
+    # any parameters pull from the url path. Otherwise non-unique keys are
+    # combined.
     if ($self->request->method ne 'GET') {
         my $extra_params = {};
+        # We do this manually because CGI.pm doesn't understand JSON strings.
         my $json = delete $params->{'POSTDATA'} || delete $params->{'PUTDATA'};
         if ($json) {
             eval { $extra_params = $self->json->decode($json); };
@@ -369,6 +373,14 @@ sub _retrieve_json_params {
                 ThrowUserError('json_rpc_invalid_params', { err_msg  => $@ });
             }
         }
+
+        # Allow parameters in the query string if request was non-GET.
+        # Note: parameters in query string body override any matching
+        # parameters in the request body.
+        foreach my $param ($self->cgi->url_param()) {
+            $extra_params->{$param} = $self->cgi->url_param($param);
+        }
+
         %{$params} = (%{$params}, %{$extra_params}) if %{$extra_params};
     }
 

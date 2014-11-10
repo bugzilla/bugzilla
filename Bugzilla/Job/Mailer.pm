@@ -50,7 +50,7 @@ sub work {
 
 sub process_job {
     my ($class, $arg) = @_;
-    MessageToMTA($arg, 1);
+    MessageToMTA($arg->{msg}, 1);
 }
 
 1;

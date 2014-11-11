@@ -315,6 +315,7 @@ sub WS_DISPATCH {
 =over
 
 =item REST_STATUS_CODE_MAP
+
 =item WS_DISPATCH
 
 =back

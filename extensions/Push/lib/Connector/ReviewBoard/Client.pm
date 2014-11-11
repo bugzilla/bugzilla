@@ -18,6 +18,17 @@ use URI;
 
 use Bugzilla::Extension::Push::Connector::ReviewBoard::ReviewRequest;
 
+BEGIN {
+    unless (LWP::UserAgent->can('delete')) {
+        *LWP::UserAgent::delete = sub {
+            my ($self, @parameters) = @_;
+            require HTTP::Request::Common;
+            my @suff = $self->_process_colonic_headers(\@parameters, 1);
+            return $self->request(HTTP::Request::Common::DELETE(@parameters), @suff);
+        };
+    }
+};
+
 sub new {
     my ($class, %params) = @_;
 

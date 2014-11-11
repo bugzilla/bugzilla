@@ -17,6 +17,7 @@ use Bugzilla::Error;
 use Bugzilla::Util qw(trick_taint datetime_from);
 use Bugzilla::Constants;
 use Bugzilla::Install::Filesystem;
+use Bugzilla::WebService::Constants;
 
 use File::Basename;
 
@@ -167,6 +168,12 @@ sub webservice_rest_resources {
     return if !Bugzilla->request_cache->{bzapi};
 
     _add_resources($rpc, $resources);
+}
+
+sub webservice_status_code_map {
+    my ($self, $args) = @_;
+    my $status_code_map = $args->{status_code_map};
+    $status_code_map->{51} = STATUS_BAD_REQUEST;
 }
 
 #####################

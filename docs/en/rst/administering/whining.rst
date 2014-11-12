@@ -5,8 +5,8 @@ Whining
 
 Whining is a feature in Bugzilla that can regularly annoy users at
 specified times.  Using this feature, users can execute saved searches
-at specific times (i.e. the 15th of the month at midnight) or at
-regular intervals (i.e. every 15 minutes on Sundays).  The results of the
+at specific times (e.g. the 15th of the month at midnight) or at
+regular intervals (e.g. every 15 minutes on Sundays).  The results of the
 searches are sent to the user, either as a single email or as one email
 per bug, along with some descriptive text.
 
@@ -17,7 +17,7 @@ per bug, along with some descriptive text.
    the quotes).
 
    Also worth noting is the bz_canusewhineatothers group.  Members of this
-   group can create whines for any user or group in Bugzilla using a
+   group can create whines for any user or group in Bugzilla using an
    extended form of the whining interface.  Features only available to
    members of the bz_canusewhineatothers group will be noted in the
    appropriate places.
@@ -117,7 +117,7 @@ opportunity to create one (see :ref:`list`).
 
 .. note:: When running searches, the whining system acts as if you are the user
    executing the search.  This means that the whining system will ignore
-   bugs that match your search, but that you cannot access.
+   bugs that match your search but that you cannot access.
 
 Once you have chosen the saved search to be executed, give the search a
 descriptive title.  This title will appear in the email, above the
@@ -135,7 +135,7 @@ email, or if each bug should appear in its own email.
 Saving Your Changes
 ===================
 
-Once you have defined at least one schedule, and created at least one
+Once you have defined at least one schedule and created at least one
 search, go ahead and "Update/Commit".  This will save your Event and make
 it available for immediate execution.
 

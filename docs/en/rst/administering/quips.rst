@@ -4,31 +4,30 @@ Quips
 #####
 
 Quips are small user-defined messages (often quotes or witty sayings) that
-can be configured to appear at the top of thesearch results. Each Bugzilla
+can be configured to appear at the top of search results. Each Bugzilla
 installation has its own specific quips. Whenever a quip needs to be
 displayed, a random selection is made from the pool of already existing quips.
 
 Quip submission is controlled by the *quip_list_entry_control*
 parameter.  It has several possible values: open, moderated, or closed.
 In order to enable quips approval you need to set this parameter to
-"moderated". In this way, users are free to submit quips for addition
+"moderated". In this way, users are free to submit quips for addition,
 but an administrator must explicitly approve them before they are
 actually used.
 
-In order to see the user interface for the quips, it is enough to click
-on a quip when it is displayed together with the search results. Or
-it can be seen directly in the browser by visiting the quips.cgi URL
+In order to see the user interface for the quips, you can
+click on a quip when it is displayed together with the search
+results.  You can also go directly to the quips.cgi URL
 (prefixed with the usual web location of the Bugzilla installation).
-Once the quip interface is displayed, it is enough to click the
-"view and edit the whole quip list" in order to see the administration
-page. A page with all the quips available in the database will
-be displayed.
+Once the quip interface is displayed, the "view and edit the whole
+quip list" link takes you to the quips administration page, which
+lists all quips available in the database.
 
 Next to each quip there is a checkbox, under the
-"Approved" column. Quips who have this checkbox checked are
+"Approved" column. Quips that have this checkbox checked are
 already approved and will appear next to the search results.
 The ones that have it unchecked are still preserved in the
-database but they will not appear on search results pages.
+database but will not appear on search results pages.
 User submitted quips have initially the checkbox unchecked.
 
 Also, there is a delete link next to each quip,

@@ -1,8 +1,8 @@
 .. _categorization:
 
-==============================================================
-Classifications, Products, Components, Versions and Milestones
-==============================================================
+===============================================================
+Classifications, Products, Components, Versions, and Milestones
+===============================================================
 
 Bugs in Bugzilla are classified into one of a set of admin-defined Components.
 Components are themselves each part of a single Product. Optionally, Products
@@ -13,8 +13,8 @@ can be part of a single Classification, adding a third level to the hierarchy.
 Classifications
 ###############
 
-Classifications are used in order to group several related
-products into one distinct entity.
+Classifications are used to group several related products into one
+distinct entity.
 
 For example, if a company makes computer games,
 they could have a classification of "Games", and a separate
@@ -25,8 +25,8 @@ containing a few special products that represent items that are not actually
 shipping products (for example, "Website", or "Administration").
 
 The classifications layer is disabled by default; it can be turned
-on or off using the useclassification parameter,
-in the *Bug Fields* section of the edit parameters screen.
+on or off using the ``useclassification`` parameter
+in the *Bug Fields* section of :ref:`parameters`.
 
 Access to the administration of classifications is controlled using
 the *editclassifications* system group, which defines
@@ -72,9 +72,9 @@ Create chart datasets for this product
 
 It is compulsory to create at least one :ref:`component <components>` in a product, and
 so you will be asked for the details of that too.
- 
+
 When editing a product you can change all of the above, and there is also a
-link to edit Group Access Controls, see :ref:`product-group-controls`.
+link to edit Group Access Controls; see :ref:`product-group-controls`.
 
 .. _create-product:
 
@@ -96,14 +96,13 @@ Editing Products
 ================
 
 To edit an existing product, click the "Products" link from the
-"Administration" page. If the 'useclassification' parameter is
+"Administration" page. If the ``useclassification`` parameter is
 turned on, a table of existing classifications is displayed,
 including an "Unclassified" category. The table indicates how many products
 are in each classification. Click on the classification name to see its
-products. If the 'useclassification' parameter is not in use, the table
+products. If the ``useclassification`` parameter is not in use, the table
 lists all products directly. The product table summarizes the information
-about the product defined
-when the product was created. Click on the product name to edit these
+defined when the product was created. Click on the product name to edit these
 properties, and to access links to other product attributes such as the
 product's components, versions, milestones, and group access controls.
 
@@ -112,12 +111,12 @@ product's components, versions, milestones, and group access controls.
 Adding or Editing Components, Versions and Target Milestones
 ============================================================
 
-To edit existing, or add new, Components, Versions or Target Milestones
-to a Product, select the "Edit Components", "Edit Versions" or "Edit
+To add new or edit existing Components, Versions, or Target Milestones
+to a Product, select the "Edit Components", "Edit Versions", or "Edit
 Milestones" links from the "Edit Product" page. A table of existing
-Components, Versions or Milestones is displayed. Click on a item name
+Components, Versions, or Milestones is displayed. Click on an item name
 to edit the properties of that item. Below the table is a link to add
-a new Component, Version or Milestone.
+a new Component, Version, or Milestone.
 
 For more information on components, see :ref:`components`.
 
@@ -136,7 +135,7 @@ control the relationship of the groups to the product being edited.
 
 Group Access Controls are an important aspect of using groups for
 isolating products and restricting access to bugs filed against those
-products. For more information on groups, including how to create, edit
+products. For more information on groups, including how to create, edit,
 add users to, and alter permission of, see :ref:`groups`.
 
 After selecting the "Edit Group Access Controls" link from the "Edit
@@ -145,9 +144,9 @@ Bugzilla installation is displayed. The system groups that are created
 when Bugzilla is installed are not applicable to Group Access Controls.
 Below is description of what each of these fields means.
 
-Groups may be applicable (e.g bugs in this product can be associated
-with this group) , default (e.g. bugs in this product are in this group
-by default), and mandatory (e.g. bugs in this product must be associated
+Groups may be applicable (i.e. bugs in this product can be associated
+with this group), default (i.e. bugs in this product are in this group
+by default), and mandatory (i.e. bugs in this product must be associated
 with this group) for each product. Groups can also control access
 to bugs for a given product, or be used to make bugs for a product
 totally read-only unless the group restrictions are met. The best way to
@@ -182,7 +181,7 @@ all products.
 
 Any group having *editcomponents*
 selected  allows users who are in this group to edit all
-aspects of this product, including components, milestones
+aspects of this product, including components, milestones,
 and versions.
 
 Any group having *canconfirm* selected
@@ -208,7 +207,7 @@ Common Applications of Group Controls
 The use of groups is best explained by providing examples that illustrate
 configurations for common use cases. The examples follow a common syntax:
 *Group: Entry, MemberControl, OtherControl, CanEdit,
-EditComponents, CanConfirm, EditBugs*. Where "Group" is the name
+EditComponents, CanConfirm, EditBugs*, where "Group" is the name
 of the group being edited for this product. The other fields all
 correspond to the table on the "Edit Group Access Controls" page. If any
 of these options are not listed, it means they are not checked.
@@ -216,13 +215,13 @@ of these options are not listed, it means they are not checked.
 Basic Product/Group Restriction
 -------------------------------
 
-Suppose there is a product called "Bar". You would like to make it so that only
-users in the group "Foo" can enter bugs in the "Bar" product. Additionally,
-bugs filed in product "Bar" must be visible only to users in "Foo" (plus, by
-default, the reporter, assignee and CC list of each bug) at all times.
-Furthermore, only members of group "Foo" should be able to edit bugs filed
-against product "Bar", even if other users could see the bug. This arrangement
-would achieved by the following:
+Suppose there is a product called "Bar". The
+"Bar" product can only have bugs entered against it by users in the
+group "Foo". Additionally, bugs filed against product "Bar" must stay
+restricted to users in "Foo" at all times. Furthermore, only members
+of group "Foo" can edit bugs filed against product "Bar", even if other
+users could see the bug. This arrangement would achieved by the
+following:
 
 ::
 
@@ -345,7 +344,7 @@ often makes sense to divide Components in Bugzilla according to the
 natural divisions of responsibility within your Product or
 company.
 
-Each component has a default assignee and (if you turned it on in the parameters),
+Each component has a default assignee and, if you turned it on in the :ref:`parameters`,
 a QA Contact. The default assignee should be the primary person who fixes bugs in
 that component. The QA Contact should be the person who will ensure
 these bugs are completely fixed. The Assignee, QA Contact, and Reporter
@@ -358,13 +357,13 @@ a bug's life.
 To create a new Component:
 
 #. Select the ``Edit components`` link
-   from the ``Edit product`` page
+   from the ``Edit product`` page.
 
 #. Select the ``Add`` link in the bottom right.
 
 #. Fill out the ``Component`` field, a
    short ``Description``, the
-   ``Default Assignee``, ``Default CC List``
+   ``Default Assignee``, ``Default CC List``,
    and ``Default QA Contact`` (if enabled).
    The ``Component Description`` field may contain a
    limited subset of HTML tags. The ``Default Assignee``
@@ -382,7 +381,7 @@ the bug.
 
 To create and edit Versions:
 
-#. From the "Edit product" screen, select "Edit Versions"
+#. From the "Edit product" screen, select "Edit Versions".
 
 #. You will notice that the product already has the default
    version "undefined". Click the "Add" link in the bottom right.
@@ -396,14 +395,14 @@ Milestones
 ##########
 
 Milestones are "targets" that you plan to get a bug fixed by. For
-example, you have a bug that you plan to fix for your 3.0 release, it
+example, if you have a bug that you plan to fix for your 3.0 release, it
 would be assigned the milestone of 3.0.
 
 .. note:: Milestone options will only appear for a Product if you turned
    on the "usetargetmilestone" parameter in the "Bug Fields" tab of the
-   "Parameters" page.
+   :ref:`parameters` page.
 
-To create new Milestones, and set Default Milestones:
+To create new Milestones and set Default Milestones:
 
 #. Select "Edit milestones" from the "Edit product" page.
 
@@ -413,5 +412,5 @@ To create new Milestones, and set Default Milestones:
    can optionally set the "sortkey", which is a positive or negative
    number (-32768 to 32767) that defines where in the list this particular
    milestone appears. This is because milestones often do not
-   occur in alphanumeric order For example, "Future" might be
+   occur in alphanumeric order; for example, "Future" might be
    after "Release 1.2". Select "Add".

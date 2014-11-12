@@ -58,7 +58,8 @@ fields:
 - *Login Name*:
   This is generally the user's full email address. However, if you
   have are using the ``emailsuffix`` parameter, this may
-  just be the user's login name. Note that users can now change their
+  just be the user's login name. Unless you turn off the
+  :param:`allowemailchange` parameter, users can change their
   login names themselves (to any valid email address).
 
 - *Real Name*: The user's real name. Note that

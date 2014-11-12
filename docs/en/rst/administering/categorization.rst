@@ -216,34 +216,34 @@ of these options are not listed, it means they are not checked.
 Basic Product/Group Restriction
 -------------------------------
 
-Suppose there is a product called "Bar". The
-"Bar" product can only have bugs entered against it by users in the
-group "Foo". Additionally, bugs filed against product "Bar" must stay
-restricted to users to "Foo" at all times. Furthermore, only members
-of group "Foo" can edit bugs filed against product "Bar", even if other
-users could see the bug. This arrangement would achieved by the
-following:
+Suppose there is a product called "Bar". You would like to make it so that only
+users in the group "Foo" can enter bugs in the "Bar" product. Additionally,
+bugs filed in product "Bar" must be visible only to users in "Foo" (plus, by
+default, the reporter, assignee and CC list of each bug) at all times.
+Furthermore, only members of group "Foo" should be able to edit bugs filed
+against product "Bar", even if other users could see the bug. This arrangement
+would achieved by the following:
 
 ::
 
     Product Bar:
     foo: ENTRY, MANDATORY/MANDATORY, CANEDIT
 
-Perhaps such strict restrictions are not needed for product "Bar". A
-more lenient way to configure product "Bar" and group "Foo" would be:
+Perhaps such strict restrictions are not needed for product "Bar". Instead,
+you would like to make it so that only members of group "Foo" can
+enter bugs in product "Bar", but bugs in "Bar" are not required to be
+restricted in visibility to people in "Foo". Anyone with permission
+to edit a particular bug in product "Bar" can put the bug in group "Foo", even
+if they themselves are not in "Foo".
+
+Furthermore, anyone in group "Foo" can edit all aspects of the components of
+product "Bar", can confirm bugs in product "Bar", and can edit all fields of
+any bug in product "Bar". That would be done like this:
 
 ::
 
     Product Bar:
     foo: ENTRY, SHOWN/SHOWN, EDITCOMPONENTS, CANCONFIRM, EDITBUGS
-
-The above indicates that for product "Bar", members of group "Foo" can
-enter bugs. Any one with permission to edit a bug against product "Bar"
-can put the bug
-in group "Foo", even if they themselves are not in "Foo". Anyone in group
-"Foo" can edit all aspects of the components of product "Bar", can confirm
-bugs against product "Bar", and can edit all fields of any bug against
-product "Bar".
 
 General User Access With Security Group
 ---------------------------------------

@@ -8,7 +8,7 @@ can be configured to appear at the top of search results. Each Bugzilla
 installation has its own specific quips. Whenever a quip needs to be
 displayed, a random selection is made from the pool of already existing quips.
 
-Quip submission is controlled by the *quip_list_entry_control*
+Quip submission is controlled by :param:`quip_list_entry_control`
 parameter.  It has several possible values: open, moderated, or closed.
 In order to enable quips approval you need to set this parameter to
 "moderated". In this way, users are free to submit quips for addition,

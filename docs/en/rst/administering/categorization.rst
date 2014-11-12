@@ -25,7 +25,7 @@ containing a few special products that represent items that are not actually
 shipping products (for example, "Website", or "Administration").
 
 The classifications layer is disabled by default; it can be turned
-on or off using the ``useclassification`` parameter
+on or off using the :param:`useclassification` parameter
 in the *Bug Fields* section of :ref:`parameters`.
 
 Access to the administration of classifications is controlled using
@@ -96,11 +96,11 @@ Editing Products
 ================
 
 To edit an existing product, click the "Products" link from the
-"Administration" page. If the ``useclassification`` parameter is
+"Administration" page. If the :param:`useclassification` parameter is
 turned on, a table of existing classifications is displayed,
 including an "Unclassified" category. The table indicates how many products
 are in each classification. Click on the classification name to see its
-products. If the ``useclassification`` parameter is not in use, the table
+products. If the :param:`useclassification` parameter is not in use, the table
 lists all products directly. The product table summarizes the information
 defined when the product was created. Click on the product name to edit these
 properties, and to access links to other product attributes such as the
@@ -399,7 +399,7 @@ example, if you have a bug that you plan to fix for your 3.0 release, it
 would be assigned the milestone of 3.0.
 
 .. note:: Milestone options will only appear for a Product if you turned
-   on the "usetargetmilestone" parameter in the "Bug Fields" tab of the
+   on the :param:`usetargetmilestone` parameter in the "Bug Fields" tab of the
    :ref:`parameters` page.
 
 To create new Milestones and set Default Milestones:

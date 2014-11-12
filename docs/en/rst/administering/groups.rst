@@ -109,7 +109,7 @@ all users from the group who match the regular expression entered. The
 
 The "Group Permissions" section on the "Edit Groups" page contains four sets
 of permissions that control the relationship of this group to other
-groups. If the ``usevisibilitygroups`` parameter is in use (see
+groups. If the :param:`usevisibilitygroups` parameter is in use (see
 :ref:`parameters`) two additional sets of permissions are displayed.
 Each set consists of two select boxes. On the left, a select box
 with a list of all existing groups. On the right, a select box listing
@@ -142,13 +142,13 @@ Each of the six permissions is described below.
 
 *Groups That Can See This Group*
     Members of any selected group can see the users in this group.
-    This setting is only visible if the ``usevisibilitygroups`` parameter
+    This setting is only visible if the :param:`usevisibilitygroups` parameter
     is enabled on the Bugzilla Configuration page. See
     :ref:`parameters` for information on configuring Bugzilla.
 
 *Groups That This Group Can See*
     Members of this group can see members in any of the selected groups.
-    This setting is only visible if the ``usevisibilitygroups`` parameter
+    This setting is only visible if the :param:`usevisibilitygroups` parameter
     is enabled on the the Bugzilla Configuration page. See
     :ref:`parameters` for information on configuring Bugzilla.
 

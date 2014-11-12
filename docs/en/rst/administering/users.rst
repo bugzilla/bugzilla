@@ -57,7 +57,7 @@ fields:
 
 - *Login Name*:
   This is generally the user's full email address. However, if you
-  have are using the ``emailsuffix`` parameter, this may
+  have are using the :param:`emailsuffix` parameter, this may
   just be the user's login name. Unless you turn off the
   :param:`allowemailchange` parameter, users can change their
   login names themselves (to any valid email address).
@@ -145,13 +145,13 @@ fields:
 - *<productname>*:
   This allows an administrator to specify the products
   in which a user can see bugs. If you turn on the
-  ``makeproductgroups`` parameter in
+  :param:`makeproductgroups` parameter in
   the Group Security Panel in the Parameters page,
   then Bugzilla creates one group per product (at the time you create
   the product), and this group has exactly the same name as the
   product itself. Note that for products that already exist when
   the parameter is turned on, the corresponding group will not be
-  created. The user must still have the ``editbugs``
+  created. The user must still have the :group:`editbugs`
   privilege to edit bugs in these products.
 
 .. _createnewusers:
@@ -168,7 +168,7 @@ By default, users can create their own user accounts by clicking the
 ``New Account`` link at the bottom of each page (assuming
 they aren't logged in as someone else already). If you want to disable
 this self-registration, or if you want to restrict who can create their
-own user account, you have to edit the ``createemailregexp``
+own user account, you have to edit the :param:`createemailregexp`
 parameter in the ``Configuration`` page; see
 :ref:`parameters`.
 
@@ -201,7 +201,7 @@ can create user accounts for other users:
 Deleting Users
 ==============
 
-If the ``allowuserdeletion`` parameter is turned on (see
+If the :param:`allowuserdeletion` parameter is turned on (see
 :ref:`parameters`) then you can also delete user accounts.
 Note that, most of the time, this is not the best thing to do. If only
 a warning in a yellow box is displayed, then the deletion is safe.

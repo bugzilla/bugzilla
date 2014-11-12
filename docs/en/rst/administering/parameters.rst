@@ -60,17 +60,17 @@ maintainer
     The address need not be that of a valid Bugzilla account.
 
 docs_urlbase
-    The URL that is the common initial leading part of all Bugzilla documentation URLs. It may be an absolute URL, or a URL relative to the urlbase parameter. Leave this empty to suppress links to the documentation. ``%lang%`` will be replaced by user's preferred language (if documentation is available in that language).
+    The URL that is the common initial leading part of all Bugzilla documentation URLs. It may be an absolute URL, or a URL relative to the :param:`urlbase` parameter. Leave this empty to suppress links to the documentation. ``%lang%`` will be replaced by user's preferred language (if documentation is available in that language).
 
 utf8
     Use UTF-8 (Unicode) encoding for all text in Bugzilla. Installations where
-    this parameter is set to "off" should set it to "on" only
+    this parameter is set to :paramval:`off` should set it to :paramval:`on` only
     after the data has been converted from existing legacy character
     encodings to UTF-8, using the
     :file:`contrib/recode.pl` script.
 
-    .. note:: If you turn this parameter from "off" to "on", you must
-       re-run :file:`checksetup.pl` immediately afterward.
+    .. note:: If you turn this parameter from :paramval:`off` to :paramval:`on`,
+              you must re-run :file:`checksetup.pl` immediately afterward.
 
 shutdownhtml
     If there is any text in this field, this Bugzilla installation will
@@ -587,7 +587,7 @@ RADIUS_email_suffix
     Bugzilla offers only a simple way to do this: it can concatenate
     a suffix to the RADIUS user name to convert it into an email
     address.
-    You can specify this suffix in the RADIUS_email_suffix parameter.
+    You can specify this suffix in the :param:`RADIUS_email_suffix` parameter.
     If this simple solution does not work for you, you'll
     probably need to modify
     :file:`Bugzilla/Auth/Verify/RADIUS.pm` to match your
@@ -752,7 +752,7 @@ User Matching
 The settings on this page control how users are selected and queried
 when adding a user to a bug. For example, users need to be selected
 when assigning the bug, adding to the CC list, or
-selecting a QA contact. With the "usemenuforusers" parameter, it is
+selecting a QA contact. With the :param:`usemenuforusers` parameter, it is
 possible to configure Bugzilla to
 display a list of users in the fields instead of an empty text field.
 If users are selected via a text box, this page also

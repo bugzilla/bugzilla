@@ -154,7 +154,7 @@ sub MessageToMTA {
         # address, but other mailers won't.
         my $urlbase = Bugzilla->params->{'urlbase'};
         $urlbase =~ m|//([^:/]+)[:/]?|;
-        $hostname = $1;
+        $hostname = $1 || 'localhost';
         $from .= "\@$hostname" if $from !~ /@/;
         $email->header_set('From', $from);
         

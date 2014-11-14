@@ -64,44 +64,21 @@ use constant MAPPED_RETURNS => {
 
 sub login {
     my ($self, $params) = @_;
-    my $remember = $params->{remember};
+
+    # Check to see if we are already logged in
+    my $user = Bugzilla->user;
+    if ($user->id) {
+        return $self->_login_to_hash($user);
+    }
 
     # Username and password params are required 
     foreach my $param ("login", "password") {
-        defined $params->{$param} 
+        (defined $params->{$param} || defined $params->{'Bugzilla_' . $param})
             || ThrowCodeError('param_required', { param => $param });
     }
 
-    # Convert $remember from a boolean 0/1 value to a CGI-compatible one.
-    if (defined($remember)) {
-        $remember = $remember? 'on': '';
-    }
-    else {
-        # Use Bugzilla's default if $remember is not supplied.
-        $remember =
-            Bugzilla->params->{'rememberlogin'} eq 'defaulton'? 'on': '';
-    }
-
-    # Make sure the CGI user info class works if necessary.
-    my $input_params = Bugzilla->input_params;
-    $input_params->{'Bugzilla_login'} =  $params->{login};
-    $input_params->{'Bugzilla_password'} = $params->{password};
-    $input_params->{'Bugzilla_remember'} = $remember;
-
-    my $user = Bugzilla->login();
-
-    my $result = { id => $self->type('int', $user->id) };
-
-    # We will use the stored cookie value combined with the user id
-    # to create a token that can be used with future requests in the
-    # query parameters
-    my $login_cookie = first { $_->name eq 'Bugzilla_logincookie' }
-                              @{ Bugzilla->cgi->{'Bugzilla_cookie_list'} };
-    if ($login_cookie) {
-        $result->{'token'} = $user->id . "-" . $login_cookie->value;
-    }
-
-    return $result;
+    $user = Bugzilla->login();
+    return $self->_login_to_hash($user);
 }
 
 sub logout {
@@ -416,6 +393,15 @@ sub _query_to_hash {
         url  => $self->type('string', $query->url),
     };
 
+    return $item;
+}
+
+sub _login_to_hash {
+    my ($self, $user) = @_;
+    my $item = { id => $self->type('int', $user->id) };
+    if (my $login_token = $user->{_login_token}) {
+        $item->{'token'} = $user->id . "-" . $login_token;
+    }
     return $item;
 }
 

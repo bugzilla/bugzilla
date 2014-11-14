@@ -276,13 +276,13 @@ sub fix_credentials {
     # even if not calling GET /login. We also do not delete them as
     # GET /login requires "login" and "password".
     if (exists $params->{'login'} && exists $params->{'password'}) {
-        $params->{'Bugzilla_login'}    = $params->{'login'};
-        $params->{'Bugzilla_password'} = $params->{'password'};
+        $params->{'Bugzilla_login'}    = delete $params->{'login'};
+        $params->{'Bugzilla_password'} = delete $params->{'password'};
     }
     # Allow user to pass token=12345678 as a convenience which becomes
     # "Bugzilla_token" which is what the auth code looks for.
     if (exists $params->{'token'}) {
-        $params->{'Bugzilla_token'} = $params->{'token'};
+        $params->{'Bugzilla_token'} = delete $params->{'token'};
     }
 
     # Allow extensions to modify the credential data before login

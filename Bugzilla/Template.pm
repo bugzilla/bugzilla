@@ -541,7 +541,9 @@ sub _css_url_rewrite {
     # rewrite relative urls as the unified stylesheet lives in a different
     # directory from the source
     $url =~ s/(^['"]|['"]$)//g;
-    return $url if substr($url, 0, 1) eq '/';
+    if (substr($url, 0, 1) eq '/' || substr($url, 0, 5) eq 'data:') {
+        return 'url(' . $url . ')';
+    }
     return 'url(../../' . dirname($source) . '/' . $url . ')';
 }
 

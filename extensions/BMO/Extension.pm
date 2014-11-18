@@ -811,16 +811,20 @@ sub install_before_final_checks {
     }
 }
 
-# Migrate old is_active stuff to new patch (is in core in 4.2), The old column
-# name was 'is_active', the new one is 'isactive' (no underscore).
 sub install_update_db {
     my $dbh = Bugzilla->dbh;
-    
+
+    # Migrate old is_active stuff to new patch (is in core in 4.2), The old
+    # column name was 'is_active', the new one is 'isactive' (no underscore).
     if ($dbh->bz_column_info('milestones', 'is_active')) {
         $dbh->do("UPDATE milestones SET isactive = 0 WHERE is_active = 0;");
         $dbh->bz_drop_column('milestones', 'is_active');
         $dbh->bz_drop_column('milestones', 'is_searchable');
     }
+
+    # remove tables from the old TryAutoLand extension
+    $dbh->bz_drop_table('autoland_branches');
+    $dbh->bz_drop_table('autoland_attachments');
 }
 
 sub _last_closed_date {

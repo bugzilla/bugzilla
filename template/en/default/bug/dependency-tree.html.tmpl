@@ -153,9 +153,12 @@
 [% END %]
 
 [% BLOCK buginfo %]
-  [% display_value("bug_status", bug.bug_status) FILTER html -%] [%+ display_value("resolution", bug.resolution) FILTER html %];
+  [% display_value("bug_status", bug.bug_status) FILTER html -%]
+  [%- IF bug.resolution %] [%+ display_value("resolution", bug.resolution) FILTER html %][% END %];
   [%-%] assigned to [% bug.assigned_to.login FILTER email FILTER html %]
-  [%-%][% "; Target: " _ bug.target_milestone IF bug.target_milestone %]
+  [% IF Param("usetargetmilestone") AND bug.target_milestone %]
+    [%-%]; target: [% bug.target_milestone FILTER html %]
+  [% END %]
 [% END %]
 
 [%###########################################################################%]

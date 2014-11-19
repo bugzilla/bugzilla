@@ -38,18 +38,19 @@ Additional System Libraries
 ===========================
 
 Apple does not include the GD library with Mac OS X. Bugzilla needs this if
-you want to display bug graphs.
+you want to display bug graphs, and you need to install it before you try
+installing the GD Perl module.
 
-You can use `MacPorts <http://www.macports.org/>`_ or
-`Fink <http://sourceforge.net/projects/fink/>`_, both of which install common
+You can use `MacPorts <http://www.macports.org/>`_, `Homebrew <http://brew.sh/>`_ or
+`Fink <http://sourceforge.net/projects/fink/>`_, all of which can install common
 Unix programs on Mac OS X.
 
-Follow the instructions for setting up MacPorts or Fink. Once you have one
-installed, use it to install the :file:`gd2` package.
+If you don't have one of the above installed already, pick one and follow the
+instructions for setting it up. Then, use it to install the :file:`gd2` package
+(MacPorts/Fink) or the :file:`gd` package (Brew).
 
-Fink will prompt you for a number of dependencies, type 'y' and hit
-enter to install all of the dependencies and then watch it work. You will
-then be able to use CPAN to install the GD Perl module.
+The package manager may prompt you to install a number of dependencies; you
+will need to agree to this.
 
 .. note:: To prevent creating conflicts with the software that Apple
    installs by default, Fink creates its own directory tree at :file:`/sw`
@@ -57,7 +58,7 @@ then be able to use CPAN to install the GD Perl module.
    the software that it installs. This means your libraries and headers
    will be at :file:`/sw/lib` and :file:`/sw/include` instead
    of :file:`/usr/lib` and :file:`/usr/include`. When the
-   Perl module config script asks where your :file:`libgd`
+   Perl module config script for the GD module asks where your :file:`libgd`
    is, be sure to tell it :file:`/sw/lib`.
 
 .. _macosx-install-perl-modules:

@@ -21,7 +21,6 @@ our $VERSION = '0.01';
 # is created, as well as the child bug.
 our %auto_cc = (
     'legal'                   => ['liz@mozilla.com'],
-    'sec-review'              => ['curtisk@mozilla.com'],
     'finance'                 => ['waoieong@mozilla.com', 'mcristobal@mozilla.com', 'echoe@mozilla.com'],
     'privacy-vendor'          => ['smartin@mozilla.com'],
     'privacy-project'         => ['ahua@mozilla.com'],

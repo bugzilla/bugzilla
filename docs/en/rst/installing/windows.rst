@@ -44,7 +44,10 @@ Bugzilla
 The best way to get Bugzilla is to check it out from git. Download and install
 git from the `git website <http://git-scm.com/download>`_, and then run:
 
-:command:`git clone https://git.mozilla.org/bugzilla/bugzilla C:\\bugzilla`
+:command:`git clone --branch bugzilla-X.X-stable https://git.mozilla.org/bugzilla/bugzilla C:\\bugzilla`
+
+where "X.X" is the 2-digit version number of the stable release of Bugzilla
+that you want (e.g. 4.4).
 
 The rest of this documentation assumes you have installed Bugzilla into
 :file:`C:\\bugzilla`. Adjust paths appropriately if not.

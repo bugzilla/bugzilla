@@ -18,11 +18,11 @@ Once git is installed, run these commands to pull a copy of Bugzilla:
 
 :command:`cd bugzilla-new`
 
-:command:`git checkout $VERSION`
+:command:`git checkout release-$VERSION`
 
-Replace $VERSION with the two-digit version number of your current Bugzilla, e.g.
-4.2. These command will automatically switch your checkout to be a copy of
-the latest point release of version $VERSION.
+Replace $VERSION with the three-digit version number of your current Bugzilla,
+e.g. "4.2.2". (If the the final digit would have been a 0, omit it - so use
+"4.4" for the first release in the 4.4 series.)
 
 Save Any Local Customizations
 =============================

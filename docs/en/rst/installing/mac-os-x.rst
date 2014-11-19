@@ -23,10 +23,11 @@ Bugzilla
 
 The best way to get Bugzilla is to check it out from git:
 
-:command:`git clone https://git.mozilla.org/bugzilla/bugzilla`
+:command:`git clone --branch bugzilla-X.X-stable https://git.mozilla.org/bugzilla/bugzilla`
 
-Run the above command in your home directory. This will place Bugzilla in
-the directory :file:`$HOME/bugzilla`.
+Run the above command in your home directory, replacing "X.X" with the 2-digit
+version number of the stable release of Bugzilla that you want - e.g. "4.4".
+This will place Bugzilla in the directory :file:`$HOME/bugzilla`.
 
 If that's not possible, you can
 `download a tarball of Bugzilla <http://www.bugzilla.org/download/>`_.

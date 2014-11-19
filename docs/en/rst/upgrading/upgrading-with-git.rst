@@ -43,15 +43,23 @@ Getting The New Bugzilla
 ========================
 
 In the commands below, ``$BUGZILLA_HOME`` represents the directory
-in which Bugzilla is installed.
+in which Bugzilla is installed. Assuming you followed the installation
+instructions and your Bugzilla is a checkout of a stable branch,
+you can get the latest point release of your current version by simply doing:
 
 :command:`cd $BUGZILLA_HOME`
 
-:command:`git checkout`
-
 :command:`git pull`
 
-.. todo:: What is the best way to pull latest stable?
+If you want to upgrade to a newer release of Bugzilla, then you will
+additionally need to do:
+
+:command:`git checkout bugzilla-X.X-stable`
+
+where "X.X" is the 2-digit version number of the stable version you want to
+upgrade to (e.g. "4.4").
+
+.. note:: Do not attempt to downgrade Bugzilla this way - it won't work.
 
 If you have local code customizations, git will attempt to merge them. If
 it fails, then you should implement the plan you came up with when you

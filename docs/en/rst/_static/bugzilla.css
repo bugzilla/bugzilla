@@ -13,3 +13,9 @@ dt { font-weight: bold; }
   background-color: lightpink;
   border: 2px darkred solid;
 }
+
+/* Make Buggie's antenna not take up so much space */
+.logo {
+  display: block;
+  margin-top: -20px;
+}

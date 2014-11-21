@@ -45,7 +45,8 @@ tie(%$cf_visible_in_products, "Tie::IxHash",
         ],
         "Infrastructure & Operations" => [
             "RelOps",
-            "RelOps: Puppet"
+            "RelOps: Puppet",
+            "Server Operations: DCOps",
         ],
     },
     qw/^cf_office$/ => {

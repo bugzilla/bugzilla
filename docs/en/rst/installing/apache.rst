@@ -19,6 +19,12 @@ These instructions require editing the Apache configuration file, which is:
 Alternatively, on Debian or Ubuntu, you can instead put the below code into a
 separate file in the directory :file:`/etc/apache2/sites-enabled/`.
 
+In these instructions, when asked to restart Apache, the command is:
+
+:command:`sudo apachectl start`
+
+(or run it as root if your OS installation does not use sudo).
+
 Securing Apache
 ===============
 
@@ -53,7 +59,8 @@ mod_cgi, do the following:
 
 #. Create a ``<Directory>`` directive that applies to the location
    of your Bugzilla installation. In this example, Bugzilla has
-   been installed at :file:`/var/www/html/bugzilla`.
+   been installed at :file:`/var/www/html/bugzilla`. On Mac OS X, use
+   :file:`/Library/WebServer/Documents/bugzilla`.
 
 .. code-block:: apache
 

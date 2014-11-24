@@ -132,7 +132,7 @@
       [% IF constants.CONCATENATE_ASSETS %]
         [% PROCESS format_css_link asset_url = css_sets.unified_custom %]
       [% ELSE %]
-        [% FOREACH asset_rul = css_sets.custom %]
+        [% FOREACH asset_url = css_sets.custom %]
           [% PROCESS format_css_link %]
         [% END %]
       [% END %]

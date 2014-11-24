@@ -730,6 +730,17 @@ sub update_table_definitions {
     $dbh->bz_add_column('longdescs', 'is_markdown',
                         {TYPE => 'BOOLEAN', NOTNULL => 1, DEFAULT => 'FALSE'});
 
+    $dbh->do('UPDATE groups SET description = ? WHERE name = ? and description = ?',
+             undef,
+             "Can configure queries and schedules for periodic reports to be run and sent via email to other users and groups",
+             "bz_canusewhineatothers",
+             "Can configure whine reports for other users");
+    $dbh->do('UPDATE groups SET description = ? WHERE name = ? and description = ?',
+             undef,
+             "Can configure queries and schedules for periodic reports to be run and sent via email to themselves",
+             "bz_canusewhines",
+             "User can configure whine reports for self");
+
     ################################################################
     # New --TABLE-- changes should go *** A B O V E *** this point #
     ################################################################

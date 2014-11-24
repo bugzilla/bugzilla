@@ -135,13 +135,11 @@ use constant SYSTEM_GROUPS => (
     },
     {
         name         => 'bz_canusewhineatothers',
-        description  => 'Can configure queries and schedules for periodic'
-            . ' reports to be run and sent via email to other users and groups',
+        description  => 'Can configure whine reports for other users',
     },
     {
         name         => 'bz_canusewhines',
-        description  => 'Can configure queries and schedules for periodic'
-            . ' reports to be run and sent via email to themselves',
+        description  => 'User can configure whine reports for self',
         # inherited_by means that users in the groups listed below are
         # automatically members of bz_canusewhines.
         inherited_by => ['editbugs', 'bz_canusewhineatothers'],

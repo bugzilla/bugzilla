@@ -729,6 +729,17 @@ sub update_table_definitions {
     # 2014-11-10 dkl@mozilla.com - Bug 1093928
     $dbh->bz_drop_column('longdescs', 'is_markdown');
 
+    $dbh->do('UPDATE groups SET description = ? WHERE name = ? and description = ?',
+             undef,
+             "Can configure queries and schedules for periodic reports to be run and sent via email to other users and groups",
+             "bz_canusewhineatothers",
+             "Can configure whine reports for other users");
+    $dbh->do('UPDATE groups SET description = ? WHERE name = ? and description = ?',
+             undef,
+             "Can configure queries and schedules for periodic reports to be run and sent via email to themselves",
+             "bz_canusewhines",
+             "User can configure whine reports for self");
+
     ################################################################
     # New --TABLE-- changes should go *** A B O V E *** this point #
     ################################################################

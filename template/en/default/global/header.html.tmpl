@@ -82,7 +82,7 @@
   "js/jquery/ui/jquery-ui-structure-min.css",
   "js/jquery/ui/jquery-ui-theme-min.css",
 ] %]
-[% undef = style_urls.import(jquery_css, jq_css_urls) %]
+[% style_urls.import(jquery_css, jq_css_urls) FILTER null %]
 
 [%# Add jQuery cookie support %]
 [% jquery.push("cookie") %]

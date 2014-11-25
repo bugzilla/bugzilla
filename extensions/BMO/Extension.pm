@@ -64,6 +64,7 @@ BEGIN {
     *Bugzilla::Product::default_security_group_obj = \&_default_security_group_obj;
     *Bugzilla::Product::group_always_settable = \&_group_always_settable;
     *Bugzilla::check_default_product_security_group = \&_check_default_product_security_group;
+    *Bugzilla::Attachment::is_bounty_attachment = \&_is_bounty_attachment;
 }
 
 sub template_before_process {
@@ -206,7 +207,7 @@ sub bounty_attachment {
     my $input      = Bugzilla->input_params;
     my $dbh        = Bugzilla->dbh;
     my $bug        = Bugzilla::Bug->check({ id => $input->{bug_id}, cache => 1 });
-    my $attachment = first { $_ && is_bounty_attachment($_) } @{$bug->attachments};
+    my $attachment = first { $_ && _is_bounty_attachment($_) } @{$bug->attachments};
     $vars->{bug}   = $bug;
 
     if ($input->{submit}) {
@@ -246,7 +247,7 @@ sub bounty_attachment {
     }
 }
 
-sub is_bounty_attachment {
+sub _is_bounty_attachment {
     my ($attachment) = @_;
 
     return 0 unless $attachment->filename eq 'bugbounty.data';

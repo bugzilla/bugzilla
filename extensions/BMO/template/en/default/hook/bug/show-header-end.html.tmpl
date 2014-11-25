@@ -21,7 +21,7 @@
                 "document.title = document.title.replace(/^" _ terms.Bug _ " /, '');"
 %]
 [% js_bug_id = bug.bug_id FILTER js %]
-[% IF user.is_insider %]
+[% IF user.in_group("bounty-team") %]
   [% javascript = javascript _
                   "YAHOO.util.Event.onDOMReady(function () { " _
                   "add_bounty_attachment('$js_bug_id'); });"

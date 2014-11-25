@@ -22,9 +22,9 @@ the documentation. Below :file:`template/en` is the
 :file:`default` directory, which contains all the
 standard templates shipped with Bugzilla.
 
-.. warning:: A directory :file:`data/templates` also exists;
-   this is where Template Toolkit puts the compiled versions of
-   the templates. *Do not* directly edit the files in this
+.. warning:: A directory :file:`data/template` also exists;
+   this is where Template Toolkit puts the compiled versions (i.e. Perl code)
+   of the templates. *Do not* directly edit the files in this
    directory, or all your changes will be lost the next time
    Template Toolkit recompiles the templates.
 
@@ -48,10 +48,16 @@ modifications, and the method you plan to use to upgrade Bugzilla.
    not exist by default and must be created if you want to use it.)
 
 #. You can use the hooks built into many of the templates to add or modify
-   the UI from an :ref:`extension <extensions>`. Hooks generally don't go away and have
-   a stable interface. 
+   the UI from an :ref:`extension <extensions>`. Hooks generally don't go away
+   and have a stable interface. 
 
-The third method is the best if there are hooks in the appropriate places.
+The third method is the best if there are hooks in the appropriate places
+and the change you want to do is possible using hooks. It's not very easy
+to modify existing UI using hooks; they are most commonly used for additions.
+You can make modifications if you add JS code which then makes the
+modifications when the page is loaded. You can remove UI by adding CSS to hide
+it.
+
 Unlike code hooks, there is no requirement to document template hooks, so
 you just have to open up the template and see (search for ``Hook.process``).
 
@@ -104,7 +110,8 @@ to cross-site scripting attacks.
 
 
 You should run :command:`./checksetup.pl` after editing any templates. Failure
-to do so may mean your changes are not picked up.
+to do so may mean either that your changes are not picked up, or that the
+permissions on the edited files are wrong so the webserver can't read them. 
 
 .. _template-formats:
 
@@ -224,7 +231,7 @@ customizing for your installation.
     such as drop-down lists or textboxes, to the bug entry page
     and have their values appear formatted in the initial comment.
 
-    An example of this is the mozilla.org `guided bug submission form
+    An example of this is the `guided bug submission form
     <http://landfill.bugzilla.org/bugzilla-tip/enter_bug.cgi?product=WorldControl;format=guided>`_.
     The code for this comes with the Bugzilla distribution as an example for
     you to copy. It can be found in the files
@@ -244,39 +251,39 @@ customizing for your installation.
     So to use this feature, create a custom template for
     :file:`enter_bug.cgi`. The default template, on which you
     could base it, is
-    :file:`custom/bug/create/create.html.tmpl`.
-    Call it :file:`create-<formatname>.html.tmpl`, and
-    in it, add widgets for each piece of information you'd like
+    :file:`default/bug/create/create.html.tmpl`.
+    Call it :file:`custom/bug/create/create-<formatname>.html.tmpl`, and
+    in it, add form inputs for each piece of information you'd like
     collected - such as a build number, or set of steps to reproduce.
 
-    Then, create a template like
-    :file:`custom/bug/create/comment.txt.tmpl`, and call it
-    :file:`comment-<formatname>.txt.tmpl`. This
-    template should reference the form fields you have created using
-    the syntax :file:`[% form.<fieldname> %]`. When a
-    bug report is
+    Then, create a template based on
+    :file:`default/bug/create/comment.txt.tmpl`, and call it
+    :file:`custom/bug/create/comment-<formatname>.txt.tmpl`.
+    It needs a couple of lines of boilerplate at the top like this::
+
+        [% USE Bugzilla %]
+        [% cgi = Bugzilla.cgi %
+
+    Then, this template can reference the form fields you have created using
+    the syntax ``[% cgi.param("field_name") %]``. When a bug report is
     submitted, the initial comment attached to the bug report will be
     formatted according to the layout of this template.
 
-    For example, if your custom enter_bug template had a field
-
-    ::
+    For example, if your custom enter_bug template had a field::
 
         <input type="text" name="buildid" size="30">
 
-    and then your comment.txt.tmpl had
+    and then your comment.txt.tmpl had::
 
-    ::
+        [% USE Bugzilla %]
+        [% cgi = Bugzilla.cgi %]
+        Build Identifier: [%+ cgi.param("buildid") %]
 
-        BuildID: [% form.buildid %]
+    then something like::
 
-    then something like
-
-    ::
-
-        BuildID: 20140303
+        Build Identifier: 20140303
 
     would appear in the initial comment.
 
-    This system allows you to gather tructured data in bug reports without
+    This system allows you to gather structured data in bug reports without
     the overhead and UI complexity of a large number of custom fields.

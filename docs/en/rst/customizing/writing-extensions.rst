@@ -6,8 +6,27 @@ Writing Extensions
 See the `Bugzilla Extension
 documentation <../html/api/Bugzilla/Extension.html>`_ for the core
 documentation on how to write an Extension. It would make sense to read
-the section on :ref:`templates`. This section explains how to achieve some
-common tasks using the Extension APIs.
+the section on :ref:`templates`. There is also a sample extension in
+:file:`$BUGZILLA_HOME/extensions/Example/` which gives examples of how to
+use all the code hooks.
+
+This section explains how to achieve some common tasks using the Extension APIs.
+
+Adding A New Page to Bugzilla
+=============================
+
+There are occasions where it's useful to add a new page to Bugzilla which
+has little or no relation to other pages, and perhaps doesn't use very much
+Bugzilla data. A help page, or a custom report for example. The best mechanism
+for this is to use :file:`page.cgi` and the ``page_before_template`` hook.
+
+Altering Data On An Existing Page
+=================================
+
+The ``template_before_process`` hook can be used to tweak the data displayed
+on a particular existing page, if you know what template is used. It has
+access to all the template variables before they are passed to the templating
+engine.
 
 Adding New Fields To Bugs
 =========================
@@ -79,6 +98,16 @@ define the UI strings for the panel. See the templates in
 :file:`template/en/default/admin/params` for examples, and put your own
 template in :file:`template/en/default/admin/params` in your extension's
 directory.
+
+You can access param values from Templates using::
+
+    [% Param('param_name') %]
+
+and from code using:
+
+.. code-block:: perl
+
+    Bugzilla->params->{'param_name'}
 
 Adding User Preferences
 =======================

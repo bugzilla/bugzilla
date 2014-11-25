@@ -18,8 +18,8 @@ Ad-Hoc APIs
 
 Various pages on Bugzilla are available in machine-parseable formats as well
 as HTML. For example, bugs can be downloaded as XML, and buglists as CSV.
-While the team attempts not to break these ad-hoc APIs, they should not be
-used for new code.
+CSV is useful for spreadsheet import. There should be links on the HTML page
+to alternate data formats where they are available.
 
 XML-RPC
 =======
@@ -29,6 +29,8 @@ Bugzilla has an `XML-RPC API
 This will receive no further updates and will be removed in a future version
 of Bugzilla.
 
+Endpoint: :file:`/xmlrpc.cgi`
+
 JSON-RPC
 ========
 
@@ -36,6 +38,8 @@ Bugzilla has a `JSON-RPC API
 <http://www.bugzilla.org/docs/tip/en/html/api/Bugzilla/WebService/Server/JSONRPC.html>`_.
 This will receive no further updates and will be removed in a future version
 of Bugzilla.
+
+Endpoint: :file:`/jsonrpc.cgi`
 
 REST
 ====
@@ -46,6 +50,8 @@ which is the currently-recommended API for integrating with Bugzilla. The
 current REST API is version 1. It is stable, and so will not be changed in a
 backwardly-incompatible way. **This is the currently-recommended API for
 new development.**
+
+Endpoint: :file:`/rest`
 
 BzAPI/BzAPI-Compatible REST
 ===========================

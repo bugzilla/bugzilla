@@ -71,6 +71,9 @@ To add new fields to a bug, you need to do the following:
 
 * You don't have to change ``Bugzilla/DB/Schema.pm``.
 
+* You can use ``bug_end_of_create``, ``bug_end_of_create_validators``, and
+  ``bug_end_of_update`` to create or update the values for your new field.
+
 Adding New Fields To Other Things
 =================================
 
@@ -85,6 +88,27 @@ go a bit lower-level. With reference to the instructions above:
 * Add validators for the values in ``object_validators``
 
 The process for adding accessor functions is the same.
+
+You can use the hooks ``object_end_of_create``,
+``object_end_of_create_validators``, ``object_end_of_set_all``, and
+``object_end_of_update`` to create or update the values for the new object
+fields you have added. In the hooks you can check the object type being
+operated on and skip any objects you don't care about. For example, if you
+added a new field to the ``products`` table:
+
+.. code-block:: perl
+
+    sub object_end_of_create {
+        my ($self, $args) = @_;
+        my $class = $args->{'class'};
+        my $object = $args->{'object'};
+        if ($class->isa('Bugzilla::Product') {
+            [...]
+        }
+    }
+
+You will need to do this filtering for most of the hooks whose names begin with
+``object_``.
 
 Adding Admin Configuration Panels
 =================================

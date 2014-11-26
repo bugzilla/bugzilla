@@ -1199,6 +1199,9 @@ sub post_bug_after_creation {
     elsif ($format eq 'mozpr') {
         $self->_post_mozpr_bug($args);
     }
+    elsif ($format eq 'dev-engagement-event') {
+        $self->_post_dev_engagement($args);
+    }
 }
 
 sub _post_employee_incident_bug {
@@ -1368,6 +1371,120 @@ sub _post_mozpr_bug {
         });
     }
     $bug->update($bug->creation_ts);
+}
+
+sub _post_dev_engagement {
+    my ($self, $args) = @_;
+    my $vars       = $args->{vars};
+    my $parent_bug = $vars->{bug};
+    my $template   = Bugzilla->template;
+    my $cgi        = Bugzilla->cgi;
+    my $params     = Bugzilla->input_params;
+    my $old_user   = Bugzilla->user;
+
+    my $error_mode_cache = Bugzilla->error_mode;
+    Bugzilla->error_mode(ERROR_MODE_DIE);
+
+    my $discussion_bug;
+    eval {
+        # Add attachment containing tab delimited field values for
+        # spreadsheet import.
+        my @columns = qw(event start_date end_date location attendees
+                         audience desc mozilla_attending_list);
+        my @attach_values;
+        foreach my $column(@columns) {
+            my $value = $params->{$column} || "";
+            $value =~ s/"/""/g;
+            push(@attach_values, qq{"$value"});
+        }
+
+        my @requested;
+        foreach my $param (grep(/^request_/, keys %$params)) {
+            next if !$params->{$param} || $param eq 'request_other_text';
+            $param =~ s/^request_//;
+            push(@requested, ucfirst($param));
+        }
+        push(@attach_values, '"' . join(",", @requested) . '"');
+
+        my $attachment = Bugzilla::Attachment->create({
+            bug           => $parent_bug,
+            creation_ts   => $parent_bug->creation_ts,
+            data          => join("\t", @attach_values),
+            description   => 'Spreadsheet Data',
+            filename      => 'dev_engagement_submission.txt',
+            ispatch       => 0,
+            isprivate     => 0,
+            mimetype      => 'text/plain'
+        });
+
+        # Insert comment for attachment
+        $parent_bug->add_comment('', { isprivate  => 0,
+                                       type       => CMT_ATTACHMENT_CREATED,
+                                       extra_data => $attachment->id });
+        delete $parent_bug->{'attachments'}; # So the new attachment displays properly
+
+        # File discussion bug
+        Bugzilla->set_user(Bugzilla::User->new({ name => 'nobody@mozilla.org' }));
+        my $new_user = Bugzilla->user;
+
+        # HACK: User needs to be in the editbugs and primary bug's group to allow
+        # setting of dependencies.
+        $new_user->{'groups'} = [
+            Bugzilla::Group->new({ name => 'editbugs' }),
+            Bugzilla::Group->new({ name => 'mozilla-employee-confidential' })
+        ];
+
+        my $recipients = { changer => $new_user };
+        $vars->{original_reporter} = $old_user;
+
+        $discussion_bug = Bugzilla::Bug->create({
+            short_desc        => '[discussion] ' . $parent_bug->short_desc,
+            product           => 'Developer Engagement',
+            component         => 'Events Request Discussion',
+            keywords          => ['event-discussion-needs-review'],
+            bug_severity      => 'normal',
+            groups            => ['mozilla-employee-confidential'],
+            comment           => 'This is the discussion for the request ' .
+                                 'described in bug ' . $parent_bug->id . '.',
+            op_sys            => 'All',
+            rep_platform      => 'All',
+            version           => 'unspecified'
+        });
+
+        # Set the needinfo flag on the discussion bug
+        my @new_flags;
+        foreach my $type (@{ $discussion_bug->flag_types }) {
+            next if $type->name ne 'needinfo';
+            foreach my $requestee (DEV_ENGAGE_DISCUSS_NEEDINFO()) {
+                my $needinfo_flag = {
+                    type_id   => $type->id,
+                    status    => '?',
+                    requestee => $requestee,
+                };
+                push(@new_flags, $needinfo_flag);
+            }
+        }
+        $discussion_bug->set_flags(\@new_flags, []) if @new_flags;
+        $discussion_bug->update($discussion_bug->creation_ts);
+        Bugzilla::BugMail::Send($discussion_bug->id, $recipients);
+
+        # Add discussion comment to the parent bug pointing to new bug
+        # and dependency link
+        $parent_bug->set_all({ dependson => { add => [ $discussion_bug->id ] } });
+        $parent_bug->add_comment('This request is being discussed in bug ' .
+                                 $discussion_bug->id);
+        $parent_bug->update($parent_bug->creation_ts);
+        # No need to send mail for parent bug
+    };
+    my $error = $@;
+
+    Bugzilla->set_user($old_user);
+    Bugzilla->error_mode($error_mode_cache);
+
+    if ($error || !$discussion_bug) {
+       warn "Failed to create additional dev-engagement bug: $error" if $error;
+        $vars->{'message'} = 'dev_engagement_creation_failed';
+    }
 }
 
 sub _add_attachment {

@@ -39,3 +39,18 @@ function isOneChecked(form_nodelist) {
     }
     return false;
 }
+
+function fieldValue(elem_id) {
+    var el = document.getElementById(elem_id);
+    if (!el) {
+        console.error('Failed to find element: ' + elem_id);
+        return false;
+    }
+    if (el.type == 'text'
+        || el.type == 'textarea'
+        || el.type == 'file')
+    {
+      return el.value;
+    }
+    return el.options[el.selectedIndex].value;
+}

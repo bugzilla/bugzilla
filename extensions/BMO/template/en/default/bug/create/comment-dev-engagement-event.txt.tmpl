@@ -20,7 +20,32 @@ Email Address:
 Role in relation to event:
 [%+ cgi.param('role') %]
 
+Vouched Mozillian:
+[%+ cgi.param('vouched_mozillian') %]
+
+[% IF cgi.param('vouched_mozillian') == 'Yes' %]
+Mozillian URL:
+[%+ cgi.param('mozillian_profile_url') %]
+[% END %]
+
 ::
+
+Developer Event?:
+[%+ cgi.param('developer_event') %]
+
+Is Mozilla Attending?:
+[%+ cgi.param('mozilla_attending') %]
+
+[% IF cgi.param('mozilla_attending') == 'Yes' %]
+Mozilla Attending List:
+[%+ cgi.param('mozilla_attending_list') %]
+[% END %]
+
+Code of Conduct?:
+[%+ cgi.param('code_of_conduct') %]
+
+Code of Conduct URL:
+[%+ cgi.param('code_of_conduct_url') %]
 
 Event Name:
 [%+ cgi.param('event') %]
@@ -32,6 +57,9 @@ End Date:
 [%+ cgi.param('end_date') %]
 
 Event Location:
+[%+ cgi.param('event_location') %]
+
+Event Location Description:
 [%+ cgi.param('location') || "-" %]
 
 Venue:
@@ -46,39 +74,55 @@ Expected Attendees:
 Event Description:
 [%+ cgi.param('desc') || "-" %]
 
-Primary Audience:
-[%+ cgi.param('audience') || "-" %]
+::
 
 Relevant Products:
-[% "\n* Firefox OS" IF cgi.param('product-fxos') %]
-[% "\n* Firefox Web Browser" IF cgi.param('product-fx') %]
-[% "\n* Webmaker" IF cgi.param('product-webmaker') %]
-[% "\n* Persona" IF cgi.param('product-persona') %]
-[% "\n* Marketplace" IF cgi.param('product-marketplace') %]
-[% "\n* Thunderbird" IF cgi.param('product-tb') %]
-[% "\n* The Free and Open Web" IF cgi.param('product-fow') %]
-[% "\n* Other: " _ cgi.param('product-other-text') IF cgi.param('product-other') %]
+[% "\n* Firefox OS" IF cgi.param('product_fxos') %]
+[% "\n* Firefox Web Browser" IF cgi.param('product_fx') %]
+[% "\n* Webmaker" IF cgi.param('product_webmaker') %]
+[% "\n* Persona" IF cgi.param('product_persona') %]
+[% "\n* Marketplace" IF cgi.param('product_marketplace') %]
+[% "\n* Thunderbird" IF cgi.param('product_tb') %]
+[% "\n* The Free and Open Web" IF cgi.param('product_fow') %]
+[% "\n* Developer Tools" IF cgi.param('product_devtools') %]
+[% "\n* Other: " _ cgi.param('product_other_text') IF cgi.param('product_other') %]
+
+Option to Sponsor a Booth?:
+[%+ cgi.param('sponsor_booth') %]
+
+Need a Speaker?:
+[%+ cgi.param('speaker_needed') %]
+
+[% IF cgi.param('speaker_needed') == 'Yes' %]
+Speaker Needed Topic:
+[%+ cgi.param('speaker_needed_topic') %]
+[% END %]
+
+Development Session?:
+[%+ cgi.param('development_session') %]
 
 ::
 
 Requests:
-[% "\n* Keynote Presentation" IF cgi.param('request-keynote') %]
-[% "\n* Talk Presentation" IF cgi.param('request-talk') %]
-[% "\n* Workshop" IF cgi.param('request-workshop') %]
-[% "\n* Sponsorship" IF cgi.param('request-sponsorship') %]
-[% "\n* Other: " _ cgi.param('request-other-text') IF cgi.param('request-other') %]
+[% "\n* Keynote Presentation" IF cgi.param('request_keynote') %]
+[% "\n* Talk Presentation" IF cgi.param('request_talk') %]
+[% "\n* Workshop" IF cgi.param('request_workshop') %]
+[% "\n* Sponsorship" IF cgi.param('request_sponsorship') %]
+[% "\n* Other: " _ cgi.param('request_other_text') IF cgi.param('request_other') %]
+
+Mozilla Sponsored Event Before?:
+[%+ cgi.param('previous_event') %]
+
+[% IF cgi.param('previous_event') == 'Yes' %]
+Previous Event Year:
+[%+ cgi.param('previous_event_year') %]
+
+Previous Event Name:
+[%+ cgi.param('previous_event_name') %]
+[% END %]
 
 Suggested sponsorship amount/level:
-[%+ cgi.param('sponsorship-suggestion') || "-" %]
-
-Already Registered Mozillians:
-[%+ cgi.param('mozillians') || "-" %]
-
-Requesting A Specific Person:
-[%+ cgi.param('specific') || "-" %]
-
-Alternative Person:
-[%+ cgi.param('fallback') || "-" %]
+[%+ cgi.param('sponsorship_suggestion') || "-" %]
 
 Anything Else:
 [%+ cgi.param('else') || "-" %]

@@ -24,10 +24,22 @@ use strict;
 use base qw(Exporter);
 our @EXPORT = qw(
     REQUEST_MAX_ATTACH_LINES
+    DEV_ENGAGE_DISCUSS_NEEDINFO
 );
 
 # Maximum attachment size in lines that will be sent with a 
 # requested attachment flag notification.
 use constant REQUEST_MAX_ATTACH_LINES => 1000;
+
+# Requestees who need a needinfo flag set for the dev engagement
+# discussion bug
+use constant DEV_ENGAGE_DISCUSS_NEEDINFO => qw(
+    afabbro@mozilla.com
+    dcamp@mozilla.com
+    jswisher@mozilla.com
+    rchau@mozilla.com
+    stormy@mozilla.com
+    spersing@mozilla.com
+);
 
 1;

@@ -83,6 +83,7 @@ the documentation of Bugzilla::Extension for details.
 END
     feature_auth_ldap         => 'LDAP Authentication',
     feature_auth_radius       => 'RADIUS Authentication',
+    feature_documentation     => 'Documentation',
     feature_graphical_reports => 'Graphical Reports',
     feature_html_desc         => 'More HTML in Product/Group Descriptions',
     feature_inbound_email     => 'Inbound Email',

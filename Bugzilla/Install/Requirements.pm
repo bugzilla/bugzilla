@@ -403,6 +403,14 @@ sub OPTIONAL_MODULES {
         module  => 'Text::Markdown',
         version => '1.0.26',
         feature => ['markdown'],
+    },
+
+    # Documentation
+    {
+        package => 'File-Copy-Recursive',
+        module  => 'File::Copy::Recursive',
+        version => 0,
+        feature => ['documentation'],
     }
     );
 

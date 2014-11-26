@@ -19,4 +19,3 @@ documentation is copied into the same directory. So, for example, this file
 is called :file:`example.rst`, as it's part of the Example extension. If you
 need multiple documentation files, prefix the filename with the name of your
 extension, e.g. :file:`example-extra.rst`.
- 

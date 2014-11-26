@@ -191,6 +191,8 @@
       group access
     [% ELSIF object == "groups" %]
       groups
+    [% ELSIF object == "job_queue" %]
+      the job queue
     [% ELSIF object == "keywords" %]
       keywords
     [% ELSIF object == "milestones" %]
@@ -289,7 +291,7 @@
         <li>An issue in a JIRA installation.</li>
         <li>A ticket in a Trac installation.</li>
         <li>A b[% %]ug in a MantisBT installation.</li>
-        <li>A b[% %]ug on sourceforge.net.</li>
+        <li>A b[% %]ug or ticket on sourceforge.net.</li>
         <li>An issue/pull request on github.com.</li>
         [% Hook.process('bug_url_invalid_tracker') %]
       </ul>

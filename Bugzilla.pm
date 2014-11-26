@@ -760,7 +760,7 @@ If you ever need a L<Bugzilla::Template> object while you're already
 processing a template, use this. Also use it if you want to specify
 the language to use. If no argument is passed, it uses the last
 language set. If the argument is "" (empty string), the language is
-reset to the current one (the one used by Bugzilla->template).
+reset to the current one (the one used by C<Bugzilla-E<gt>template>).
 
 =item C<cgi>
 
@@ -878,8 +878,8 @@ specify this argument, all fields will be returned.
 
 =item C<error_mode>
 
-Call either C<Bugzilla->error_mode(Bugzilla::Constants::ERROR_MODE_DIE)>
-or C<Bugzilla->error_mode(Bugzilla::Constants::ERROR_MODE_DIE_SOAP_FAULT)> to
+Call either C<Bugzilla-E<gt>error_mode(Bugzilla::Constants::ERROR_MODE_DIE)>
+or C<Bugzilla-E<gt>error_mode(Bugzilla::Constants::ERROR_MODE_DIE_SOAP_FAULT)> to
 change this flag's default of C<Bugzilla::Constants::ERROR_MODE_WEBPAGE> and to
 indicate that errors should be passed to error mode specific error handlers
 rather than being sent to a browser and finished with an exit().
@@ -888,24 +888,24 @@ This is useful, for example, to keep C<eval> blocks from producing wild HTML
 on errors, making it easier for you to catch them.
 (Remember to reset the error mode to its previous value afterwards, though.)
 
-C<Bugzilla->error_mode> will return the current state of this flag.
+C<Bugzilla-E<gt>error_mode> will return the current state of this flag.
 
-Note that C<Bugzilla->error_mode> is being called by C<Bugzilla->usage_mode> on
+Note that C<Bugzilla-E<gt>error_mode> is being called by C<Bugzilla-E<gt>usage_mode> on
 usage mode changes.
 
 =item C<usage_mode>
 
-Call either C<Bugzilla->usage_mode(Bugzilla::Constants::USAGE_MODE_CMDLINE)>
-or C<Bugzilla->usage_mode(Bugzilla::Constants::USAGE_MODE_XMLRPC)> near the
+Call either C<Bugzilla-E<gt>usage_mode(Bugzilla::Constants::USAGE_MODE_CMDLINE)>
+or C<Bugzilla-E<gt>usage_mode(Bugzilla::Constants::USAGE_MODE_XMLRPC)> near the
 beginning of your script to change this flag's default of
 C<Bugzilla::Constants::USAGE_MODE_BROWSER> and to indicate that Bugzilla is
 being called in a non-interactive manner.
 
 This influences error handling because on usage mode changes, C<usage_mode>
-calls C<Bugzilla->error_mode> to set an error mode which makes sense for the
+calls C<Bugzilla-E<gt>error_mode> to set an error mode which makes sense for the
 usage mode.
 
-C<Bugzilla->usage_mode> will return the current state of this flag.
+C<Bugzilla-E<gt>usage_mode> will return the current state of this flag.
 
 =item C<installation_mode>
 

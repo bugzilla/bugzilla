@@ -349,8 +349,8 @@ sub OPTIONAL_MODULES {
     {
         package => 'TheSchwartz',
         module  => 'TheSchwartz',
-        # 1.07 supports the prioritization of jobs.
-        version => 1.07,
+        # 1.10 supports declining of jobs.
+        version => 1.10,
         feature => ['jobqueue'],
     },
     {
@@ -403,6 +403,14 @@ sub OPTIONAL_MODULES {
         module  => 'Text::Markdown',
         version => '1.0.26',
         feature => ['markdown'],
+    },
+
+    # Documentation
+    {
+        package => 'File-Copy-Recursive',
+        module  => 'File::Copy::Recursive',
+        version => 0,
+        feature => ['documentation'],
     }
     );
 

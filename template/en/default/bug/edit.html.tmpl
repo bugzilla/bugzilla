@@ -205,7 +205,7 @@
         accesskey = "s"
         tag_name = 'span'
       %]
-      [% PROCESS input inputname => "short_desc" size => "80"
+      [% INCLUDE input inputname => "short_desc" size => "80"
                        maxlength => 255 spellcheck => "true" no_td => 1 %]
     </div>
   </div>
@@ -500,7 +500,7 @@
         (<a href="#" id="bz_url_edit_action">edit</a>)</span>
       [% END %]
       <span id="bz_url_input_area">
-        [% url_output =  PROCESS input no_td=1 inputname => "bug_file_loc" size => "40" colspan => 2 %]
+        [% url_output =  INCLUDE input no_td=1 inputname => "bug_file_loc" size => "40" colspan => 2 %]
         [% IF NOT bug.check_can_change_field("bug_file_loc", 0, 1)
               AND is_safe_url(bug.bug_file_loc) %]
           <a href="[% bug.bug_file_loc FILTER html %]">[% url_output FILTER none %]</a>
@@ -527,7 +527,7 @@
         editable = 1
         accesskey = "w"
       %]
-      [% PROCESS input inputname => "status_whiteboard" size => "40" colspan => 2 %]
+      [% INCLUDE input inputname => "status_whiteboard" size => "40" colspan => 2 %]
     </tr>
   [% END %]
   
@@ -1214,7 +1214,7 @@
   [% IF no_td != 1 %]
   <td[% " colspan=\"$colspan\"" IF colspan %]>
   [% END %]
-    [% val = value ? value : bug.$inputname %]
+    [% val = bug.$inputname %]
     [% IF bug.check_can_change_field(inputname, 0, 1) %]
        <input id="[% inputname %]" name="[% inputname %]" class="text_input"
               value="[% val FILTER html %]"[% " size=\"$size\"" IF size %]
@@ -1232,13 +1232,8 @@
   [% IF no_td != 1 %]  
   </td>
   [% END %]
-  [% no_td = 0 %]
-  [% maxlength = 0 %]
-  [% colspan = 0 %]
-  [% size = 0 %]
-  [% value = undef %]
-  [% spellcheck = undef %]
 [% END %]
+
 [% BLOCK commit_button %]
   [% IF user.id %]
     <div class="knob-buttons">

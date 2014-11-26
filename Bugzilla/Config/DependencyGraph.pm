@@ -21,7 +21,7 @@ sub get_param_list {
   {
    name => 'webdotbase',
    type => 't',
-   default => 'http://www.research.att.com/~north/cgi-bin/webdot.cgi/%urlbase%',
+   default => '',
    checker => \&check_webdotbase
   },
 

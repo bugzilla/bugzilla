@@ -239,26 +239,33 @@ use constant STATUS_GONE             => 410;
 # the related webvservice call. We choose the appropriate
 # http status code based on the error code or use the
 # default STATUS_BAD_REQUEST.
-use constant REST_STATUS_CODE_MAP => {
-    51       => STATUS_NOT_FOUND,
-    101      => STATUS_NOT_FOUND,
-    102      => STATUS_NOT_AUTHORIZED,
-    106      => STATUS_NOT_AUTHORIZED,
-    109      => STATUS_NOT_AUTHORIZED,
-    110      => STATUS_NOT_AUTHORIZED,
-    113      => STATUS_NOT_AUTHORIZED,
-    115      => STATUS_NOT_AUTHORIZED,
-    120      => STATUS_NOT_AUTHORIZED,
-    300      => STATUS_NOT_AUTHORIZED,
-    301      => STATUS_NOT_AUTHORIZED,
-    302      => STATUS_NOT_AUTHORIZED,
-    303      => STATUS_NOT_AUTHORIZED,
-    304      => STATUS_NOT_AUTHORIZED,
-    410      => STATUS_NOT_AUTHORIZED,
-    504      => STATUS_NOT_AUTHORIZED,
-    505      => STATUS_NOT_AUTHORIZED,
-    32614    => STATUS_NOT_FOUND,
-    _default => STATUS_BAD_REQUEST
+sub REST_STATUS_CODE_MAP {
+    my $status_code_map = {
+        51       => STATUS_NOT_FOUND,
+        101      => STATUS_NOT_FOUND,
+        102      => STATUS_NOT_AUTHORIZED,
+        106      => STATUS_NOT_AUTHORIZED,
+        109      => STATUS_NOT_AUTHORIZED,
+        110      => STATUS_NOT_AUTHORIZED,
+        113      => STATUS_NOT_AUTHORIZED,
+        115      => STATUS_NOT_AUTHORIZED,
+        120      => STATUS_NOT_AUTHORIZED,
+        300      => STATUS_NOT_AUTHORIZED,
+        301      => STATUS_NOT_AUTHORIZED,
+        302      => STATUS_NOT_AUTHORIZED,
+        303      => STATUS_NOT_AUTHORIZED,
+        304      => STATUS_NOT_AUTHORIZED,
+        410      => STATUS_NOT_AUTHORIZED,
+        504      => STATUS_NOT_AUTHORIZED,
+        505      => STATUS_NOT_AUTHORIZED,
+        32614    => STATUS_NOT_FOUND,
+        _default => STATUS_BAD_REQUEST
+    };
+
+    Bugzilla::Hook::process('webservice_status_code_map',
+        { status_code_map => $status_code_map });
+
+    return $status_code_map;
 };
 
 # These are the fallback defaults for errors not in ERROR_CODE.
@@ -306,6 +313,8 @@ sub WS_DISPATCH {
 =head1 B<Methods in need of POD>
 
 =over
+
+=item REST_STATUS_CODE_MAP
 
 =item WS_DISPATCH
 

@@ -135,11 +135,13 @@ use constant SYSTEM_GROUPS => (
     },
     {
         name         => 'bz_canusewhineatothers',
-        description  => 'Can configure whine reports for other users',
+        description  => 'Can configure queries and schedules for periodic'
+            . ' reports to be run and sent via email to other users and groups',
     },
     {
         name         => 'bz_canusewhines',
-        description  => 'User can configure whine reports for self',
+        description  => 'Can configure queries and schedules for periodic'
+            . ' reports to be run and sent via email to themselves',
         # inherited_by means that users in the groups listed below are
         # automatically members of bz_canusewhines.
         inherited_by => ['editbugs', 'bz_canusewhineatothers'],
@@ -217,8 +219,8 @@ sub update_system_groups {
 
     # Create most of the system groups
     foreach my $definition (SYSTEM_GROUPS) {
-        my $exists = new Bugzilla::Group({ name => $definition->{name} });
-        if (!$exists) {
+        my $group = new Bugzilla::Group({ name => $definition->{name} });
+        if (!$group) {
             $definition->{isbuggroup} = 0;
             $definition->{silently} = !$editbugs_exists;
             my $inherited_by = delete $definition->{inherited_by};
@@ -233,6 +235,10 @@ sub update_system_groups {
                              undef, $created->id, $member->id);
                 }
             }
+        }
+        elsif ($group->description ne $definition->{description}) {
+            $group->set_description($definition->{description});
+            $group->update();
         }
     }
 

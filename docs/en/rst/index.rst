@@ -11,7 +11,8 @@ Bugzilla Documentation
    installing/index
    administering/index
    integrating/index
-
+   api/index
+   
 .. toctree::
    :hidden:
 

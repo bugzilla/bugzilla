@@ -1,4 +1,4 @@
-.. _apis:
+.. _api-list:
 
 APIs
 ####
@@ -6,8 +6,7 @@ APIs
 Bugzilla has a number of APIs that you can call in your code to extract
 information from and put information into Bugzilla. Some are deprecated and
 will soon be removed. Which one to use? Short answer: the
-`REST API
-<http://www.bugzilla.org/docs/tip/en/html/api/Bugzilla/WebService/Server/REST.html>`_
+:ref:`REST WebService API v1 <apis>`
 should be used for all new integrations, but keep an eye out for version 2,
 coming soon.
 
@@ -44,12 +43,11 @@ Endpoint: :file:`/jsonrpc.cgi`
 REST
 ====
 
-Bugzilla has a `REST API
-<http://www.bugzilla.org/docs/tip/en/html/api/Bugzilla/WebService/Server/REST.html>`_
-which is the currently-recommended API for integrating with Bugzilla. The
-current REST API is version 1. It is stable, and so will not be changed in a
-backwardly-incompatible way. **This is the currently-recommended API for
-new development.**
+Bugzilla has a :ref:`REST API <apis>` which is the currently-recommended API
+for integrating with Bugzilla. The current REST API is version 1. It is stable,
+and so will not be changed in a backwardly-incompatible way.
+
+**This is the currently-recommended API for new development.**
 
 Endpoint: :file:`/rest`
 

@@ -53,27 +53,20 @@ use constant MAPPED_RETURNS => {
 sub login {
     my ($self, $params) = @_;
 
+    # Check to see if we are already logged in
+    my $user = Bugzilla->user;
+    if ($user->id) {
+        return $self->_login_to_hash($user);
+    }
+
     # Username and password params are required 
     foreach my $param ("login", "password") {
-        defined $params->{$param} 
+        (defined $params->{$param} || defined $params->{'Bugzilla_' . $param})
             || ThrowCodeError('param_required', { param => $param });
     }
 
-    # Make sure the CGI user info class works if necessary.
-    my $input_params = Bugzilla->input_params;
-    $input_params->{'Bugzilla_login'} =  $params->{login};
-    $input_params->{'Bugzilla_password'} = $params->{password};
-    $input_params->{'Bugzilla_restrictlogin'} = $params->{restrict_login};
-
-    my $user = Bugzilla->login();
-
-    my $result = { id => $self->type('int', $user->id) };
-
-    if ($user->{_login_token}) {
-        $result->{'token'} = $user->id . "-" . $user->{_login_token};
-    }
-
-    return $result;
+    $user = Bugzilla->login();
+    return $self->_login_to_hash($user);
 }
 
 sub logout {
@@ -406,6 +399,15 @@ sub _report_to_hash {
         name  => $self->type('string', $report->name),
         query => $self->type('string', $report->query),
     };
+    return $item;
+}
+
+sub _login_to_hash {
+    my ($self, $user) = @_;
+    my $item = { id => $self->type('int', $user->id) };
+    if ($user->{_login_token}) {
+        $item->{'token'} = $user->id . "-" . $user->{_login_token};
+    }
     return $item;
 }
 

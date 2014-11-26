@@ -832,7 +832,8 @@ sub add_attachment {
             $comment     = $params->{comment}->{body};
         }
 
-        ThrowUserError('markdown_disabled') if $is_markdown && !_is_markdown_enabled();
+        ThrowUserError('markdown_disabled')
+            if $is_markdown && !Bugzilla->user->use_markdown();
 
         $attachment->bug->add_comment($comment,
             { is_markdown => $is_markdown,
@@ -891,7 +892,8 @@ sub update_attachment {
         $comment     = $comment->{body};
     }
 
-    ThrowUserError('markdown_disabled') if $is_markdown && !_is_markdown_enabled();
+    ThrowUserError('markdown_disabled')
+        if $is_markdown && !$user->use_markdown();
 
     # Update the values
     foreach my $attachment (@attachments) {
@@ -972,7 +974,8 @@ sub add_comment {
         $params->{is_private} = delete $params->{private};
     }
 
-    ThrowUserError('markdown_disabled') if $params->{is_markdown} && !_is_markdown_enabled();
+    ThrowUserError('markdown_disabled')
+        if $params->{is_markdown} && !$user->use_markdown();
 
     # Append comment
     $bug->add_comment($comment, { isprivate   => $params->{is_private},
@@ -1423,14 +1426,6 @@ sub _add_update_tokens {
         my $token = issue_hash_token([$bugs->[$i]->id, $bugs->[$i]->delta_ts]);
         $hashes->[$i]->{'update_token'} = $self->type('string', $token);
     }
-}
-
-sub _is_markdown_enabled {
-    my $user = Bugzilla->user;
-
-    return Bugzilla->feature('markdown')
-            && $user->settings->{use_markdown}->{is_enabled}
-            && $user->setting('use_markdown') eq 'on';
 }
 
 1;

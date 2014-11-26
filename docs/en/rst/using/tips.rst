@@ -83,7 +83,8 @@ next to the Markdown checkbox for new comments.
           Bugzilla because the docs aren't always on a Bugzilla (e.g.
           when they are on ReadTheDocs). Best solution is to port the
           Markdown guide to ReST.
-
+          Turn this item into a bug after checkin.
+          
 To use the Markdown feature, make sure that :guilabel:`Enable Markdown
 support for comments` is set to :guilabel:`on`
 in your :ref:`user-preferences` and that you also check the :guilabel:`Use

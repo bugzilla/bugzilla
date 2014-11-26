@@ -5,7 +5,7 @@ Templates
 
 Bugzilla uses a system of templates to define its user interface. The standard
 templates can be modified, replaced or overridden. You can also use template
-hooks in an :ref:`extension <writing-extensions>` to add or modify the
+hooks in an :ref:`extension <extensions>` to add or modify the
 behaviour of templates using a stable interface.
 
 .. _template-directory:

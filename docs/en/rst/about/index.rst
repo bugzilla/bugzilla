@@ -1,8 +1,8 @@
 .. _about:
 
-================
-About This Guide
-================
+========================
+About This Documentation
+========================
 
 This is the documentation for version |version| of Bugzilla, a bug-tracking
 system from Mozilla. Bugzilla is an enterprise-class piece of software

@@ -12,11 +12,6 @@ of additional configuration required.
 If you are installing your machine from scratch, :ref:`quick-start` may be
 the best instructions for you.
 
-.. todo:: What's our current position on Debian/Ubuntu packages of Bugzilla? Are
-          there any, and are they any good?
-
-.. todo:: Which versions of RHEL have packages new enough for us to support them?
-
 .. _linux-install-packages:
 
 Install Packages
@@ -50,28 +45,26 @@ If you want to install a version of Bugzilla from the Bugzilla project, you
 will instead need:
 
 :command:`yum install httpd mysql-server mod_perl mod_perl-devel httpd-devel
-graphviz patchutils gcc  perl(Apache2::SizeLimit) perl(Authen::Radius)
-perl(Authen::SASL) perl(Cache::Memcached) perl(CGI) perl(Chart::Lines)
-perl(Daemon::Generic) perl(Date::Format) perl(DateTime)
-perl(DateTime::TimeZone) perl(DBI) perl(Digest::SHA) perl(Email::MIME)
-perl(Email::MIME::Attachment::Stripper) perl(Email::Reply) perl(Email::Sender)
-perl(Encode) perl(Encode::Detect) perl(File::MimeInfo::Magic)
-perl(File::Slurp) perl(GD) perl(GD::Graph) perl(GD::Text)
-perl(HTML::FormatText::WithLinks) perl(HTML::Parser) perl(HTML::Scrubber)
-perl(IO::Scalar) perl(JSON::RPC) perl(JSON::XS) perl(List::MoreUtils)
-perl(LWP::UserAgent) perl(Math::Random::ISAAC) perl(MIME::Parser)
-perl(mod_perl2) perl(Net::LDAP) perl(Net::SMTP::SSL) perl(PatchReader)
-perl(SOAP::Lite) perl(Template) perl(Template::Plugin::GD::Image)
-perl(Test::Taint) perl(TheSchwartz) perl(URI) perl(XMLRPC::Lite)
-perl(XML::Twig)`
-
-.. todo:: Converted to perl() form as per glob's request using info in
-   Requirements.pm, but I have no idea if that's exactly right...
+graphviz patchutils gcc 'perl(Apache2::SizeLimit)' 'perl(Authen::Radius)'
+'perl(Authen::SASL)' 'perl(Cache::Memcached)' 'perl(CGI)' 'perl(Chart::Lines)'
+'perl(Daemon::Generic)' 'perl(Date::Format)' 'perl(DateTime)'
+'perl(DateTime::TimeZone)' 'perl(DBI)' 'perl(Digest::SHA)' 'perl(Email::MIME)'
+'perl(Email::MIME::Attachment::Stripper)' 'perl(Email::Reply)'
+'perl(Email::Sender)' 'perl(Encode)' 'perl(Encode::Detect)'
+'perl(File::MimeInfo::Magic)' 'perl(File::Slurp)' 'perl(GD)' 'perl(GD::Graph)'
+'perl(GD::Text)' 'perl(HTML::FormatText::WithLinks)' 'perl(HTML::Parser)'
+'perl(HTML::Scrubber)' 'perl(IO::Scalar)' 'perl(JSON::RPC)' 'perl(JSON::XS)'
+'perl(List::MoreUtils)' 'perl(LWP::UserAgent)' 'perl(Math::Random::ISAAC)'
+'perl(MIME::Parser)' 'perl(mod_perl2)' 'perl(Net::LDAP)' 'perl(Net::SMTP::SSL)'
+'perl(PatchReader)' 'perl(SOAP::Lite)' 'perl(Template)'
+'perl(Template::Plugin::GD::Image)' 'perl(Test::Taint)' 'perl(TheSchwartz)'
+'perl(URI)' 'perl(XMLRPC::Lite)' 'perl(XML::Twig)'`
 
 If you are running RHEL6, you will have to enable the "RHEL Server Optional"
 channel in RHN to get some of those packages. 
 
-.. todo:: Add Sqlite RPMs
+If you plan to use SQlite as your database, you will need to also install
+the appropriate packages for that.
 
 Ubuntu and Debian
 -----------------
@@ -92,7 +85,8 @@ libencode-detect-perl libmodule-build-perl libnet-ldap-perl
 libauthen-sasl-perl libtemplate-perl-doc libfile-mimeinfo-perl
 libhtml-formattext-withlinks-perl libgd-dev lynx-cur graphviz`
 
-.. todo:: Add Sqlite debs
+If you plan to use SQlite as your database, you will need to also install
+the appropriate packages for that.
 
 Gentoo
 ------
@@ -144,14 +138,6 @@ server's configuration.
    includes any directory which is configured using the
    ``ScriptAlias`` directive of Apache.
 
-Once all the files are in a web accessible directory, make that
-directory writable by your web server's user. This is a temporary step
-until you run the :file:`checksetup.pl` script, which locks down your
-installation.
-
-.. todo:: Why is this necessary? What does the webserver write there before
-          checksetup.pl is run?
-
 .. _linux-install-perl-modules:
 
 Perl Modules
@@ -163,19 +149,21 @@ times, Bugzilla may require a version of a Perl module newer than the one
 your distribution packages, in which case you will need to install a
 Bugzilla-only copy of the newer version.
 
-At this point, you need to :file:`su` to root. You should remain as root
-until the end of the install.
+At this point you probably need to become ``root``, e.g. by using
+:command:`su`. You should remain as root until the end of the install. This
+can be avoided in some circumstances if you are a member of your webserver's
+group, but being root is easier and will always work.
 
-.. todo:: Is this true, if they are installing modules locally?
-
-To check whether you have all the required modules and what is still missing,
-run:
+To check whether you have all the required modules, run:
 
 :command:`./checksetup.pl --check-modules`
 
 You can run this command as many times as necessary.
 
-Install all missing modules locally like this:
+If you have not already installed the necessary modules, and want to do it
+system-wide, invoke your package manager appropriately at this point.
+Alternatively, you can install all missing modules locally (i.e. just for
+Bugzilla) like this:
 
 :command:`./install-module.pl --all`
 
@@ -191,7 +179,8 @@ Or, you can pass an individual module name:
    distribution you are using, but are often called
    :file:`<packagename>-devel`.
 
-   .. todo:: Give examples for Debian/Ubuntu and RedHat?
+   .. todo:: Give examples for Debian/Ubuntu and RedHat.
+             Convert this item to a bug after checkin.
 
 .. _linux-config-webserver:
 

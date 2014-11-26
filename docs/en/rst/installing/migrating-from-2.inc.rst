@@ -4,12 +4,19 @@
 Download Code from Git
 ======================
 
-Download an additional copy of your *current* version of Bugzilla from the git
-repository into a separate directory alongside your existing Bugzilla
-installation (which we will assume is in a directory called :file:`bugzilla`).
+First, you need to find what version of Bugzilla you are using. It should be
+in the top right corner of the front page but, if not, open the file
+:file:`Bugzilla/Constants.pm` in your Bugzilla directory and search for
+:code:`BUGZILLA_VERSION`.
 
-You will need a copy of the git program. All Linux distributions have it;
-search your package manager for "git". On Windows or Mac OS X, you can
+Then, you need to download an additional copy of your *current* version of
+Bugzilla from the git repository, and place it in a separate directory
+alongside your existing Bugzilla installation (which we will assume is in a
+directory called :file:`bugzilla`).
+
+To do this, you will need a copy of the :command:`git` program. All Linux
+distributions have it; search your package manager for "git". On Windows or
+Mac OS X, you can
 `download the official build <http://www.git-scm.com/downloads>`_.
 
 Once git is installed, run these commands to pull a copy of Bugzilla:
@@ -24,6 +31,9 @@ Replace $VERSION with the three-digit version number of your current Bugzilla,
 e.g. "4.2.2". (If the the final digit would have been a 0, omit it - so use
 "4.4" for the first release in the 4.4 series.)
 
+You will get a message about a 'detached HEAD'. Don't worry; your head is
+still firmly attached to your shoulders.
+
 Save Any Local Customizations
 =============================
 
@@ -33,8 +43,9 @@ Go into your original Bugzilla directory and run this command:
 
 If you have made customizations to your Bugzilla, and you made them by
 changing the Bugzilla code itself (rather than using the Extension system),
-then :file:`patch.diff` will have non-zero size. You will want to keep a copy
-of those changes by keeping a copy of this file. If the file has zero size,
+then :file:`patch.diff` will have significant content. You will want to keep a copy
+of those changes by keeping a copy of this file and any files referenced in it
+by "Only in" lines. If the file has zero size or only insignificant content,
 you haven't made any local customizations of this sort.
 
 Shut Down Bugzilla

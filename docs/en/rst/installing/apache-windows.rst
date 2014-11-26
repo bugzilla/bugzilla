@@ -115,7 +115,8 @@ in its log files.
 
 #. Replace ``%r`` with ``%m %U``.
 
-.. todo:: Is this the right line? Or given how we've configured it above, is it not a vhost?
+(If you have configured Apache differently, a different log line might apply.
+Adjust these instructions accordingly.)
 
 Restart Apache
 ==============

@@ -1,8 +1,8 @@
 .. _using:
 
-==============
-Using Bugzilla
-==============
+==========
+User Guide
+==========
 
 .. toctree::
    :maxdepth: 2

@@ -168,3 +168,5 @@ Once you've created your own, you will want to delete TestProduct (which
 will delete TestComponent automatically). Note that if you've filed a bug in
 TestProduct to try Bugzilla out, you'll need to move it elsewhere before it's
 possible to delete TestProduct.
+
+Now, you may want to do some of the :ref:`optional-post-install-config`.

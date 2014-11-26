@@ -2,14 +2,14 @@
 
 .. _installing:
 
-===================
-Installing Bugzilla
-===================
+==================================
+Installation and Maintenance Guide
+==================================
 
 .. note:: If you just want to *use* Bugzilla,
    you do not need to install it. None of this chapter is relevant to
    you. Ask your Bugzilla administrator for the URL to access it from
-   your web browser. You may want to read :ref:`using`.
+   your web browser. You may want to read the :ref:`using`.
 
 Bugzilla can be installed under Linux, Windows, Mac OS X, and perhaps other
 operating systems. However, if you are setting it up on a dedicated machine
@@ -19,7 +19,7 @@ operating system that provides an ideal environment for Bugzilla. In that
 case, you may want to read the :ref:`Quick Start instructions <quick-start>`.
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
 
    quick-start
    linux
@@ -29,3 +29,8 @@ case, you may want to read the :ref:`Quick Start instructions <quick-start>`.
    optional-post-install-config
    migrating
    moving
+   upgrading
+   backups
+   sanity-check
+   merging-accounts
+   multiple-bugzillas

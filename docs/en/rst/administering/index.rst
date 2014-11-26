@@ -1,8 +1,8 @@
 .. _administering:
 
-======================
-Administering Bugzilla
-======================
+====================
+Administration Guide
+====================
 
 For those with :group:`admin` privileges, Bugzilla can be administered using
 the :guilabel:`Administration` link in the header. The administrative

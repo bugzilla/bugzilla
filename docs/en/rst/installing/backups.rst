@@ -21,7 +21,7 @@ See the
 `mysqldump documentation <http://dev.mysql.com/doc/mysql/en/mysqldump.html>`_
 for more information on :file:`mysqldump`.
 
-.. todo:: Mention max_allowed_packet?
+.. todo:: Mention max_allowed_packet? Convert this item to a bug on checkin.
 
 PostgreSQL
 ----------

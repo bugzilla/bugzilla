@@ -1,11 +1,11 @@
 .. _quick-start:
 
-Quick Start (Ubuntu 14.04 LTS)
-##############################
+Quick Start (Ubuntu Linux 14.04)
+################################
 
 This quick start guide makes installing Bugzilla as simple as possible for
 those who are able to choose their environment. It creates a system using
-Ubuntu 14.04 LTS, Apache and MySQL, and installs Bugzilla as the default
+Ubuntu Linux 14.04 LTS, Apache and MySQL, and installs Bugzilla as the default
 home page. It requires a little familiarity with Linux and the command line.
 
 Obtain Your Hardware
@@ -166,7 +166,8 @@ Test Server
 
 :command:`./testserver.pl http://localhost/`
 
-All the tests should pass.
+All the tests should pass. You will get warnings about deprecation from
+the ``Chart::Base`` Perl module; just ignore those.
 
 .. todo:: Chart::Base gives confusing deprecation warnings :-|
           https://rt.cpan.org/Public/Bug/Display.html?id=79658 , unfixed for

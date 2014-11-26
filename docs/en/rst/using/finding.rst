@@ -35,6 +35,7 @@ alias.
 
 .. todo:: Need to incorporate the full reference, and link it properly from
           the GUI. https://bugzilla.mozilla.org/page.cgi?id=quicksearch.html
+          Turn this item into a bug after checkin.
 
 Simple Search
 =============
@@ -101,7 +102,8 @@ Multiple Charts
 ---------------
 
 .. todo:: This needs rewriting for the new UI.
-
+          Turn this item into a bug after checkin.
+          
 The terms within a single row of a boolean chart are all
 constraints on a single piece of data. If you are looking for
 a bug that has two different people cc'd on it, then you need
@@ -247,7 +249,8 @@ Adding and Removing Tags on Bugs
 ================================
 
 .. todo:: Looks like you can no longer do this from search results; is that right?
-
+          Turn this item into a bug after checkin.
+          
 You can add and remove tags from individual bugs, which let you find and
 manage bugs more easily. Tags are per-user and so are only visible and editable
 by the user who created them. You can then run queries using tags as a criteria,

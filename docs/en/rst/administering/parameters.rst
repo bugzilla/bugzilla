@@ -78,18 +78,6 @@ shutdownhtml
     Bugzilla pages for all users, including Admins. Used in the event
     of site maintenance or outage situations.
 
-    .. note:: Although regular log-in capability is disabled
-       while :param:`shutdownhtml`
-       is enabled, safeguards are in place to protect the unfortunate
-       admin who loses connection to Bugzilla. Should this happen to you,
-       go directly to the :file:`editparams.cgi` (by typing
-       the URL in manually, if necessary). Doing this will prompt you to
-       log in, and your name/password will be accepted here (but nowhere
-       else).
-
-       .. todo:: Is this still true? The editparams.cgi code seems to
-                 call using LOGIN_REQUIRED in the conventional manner...
-
 announcehtml
     Any text in this field will be displayed at the top of every HTML
     page in this Bugzilla installation. The text is not wrapped in any
@@ -408,7 +396,7 @@ makeproductgroups
     used for querying bugs.
 
     .. todo:: This is spectacularly unclear. I have no idea what makeproductgroups
-              does - can someone explain it to me?
+              does - can someone explain it to me? Convert this item into a bug on checkin.
 
 chartgroup
     The name of the group of users who can use the 'New Charts' feature. Administrators should ensure that the public categories and series definitions do not divulge confidential information before enabling this for an untrusted population. If left blank, no users will be able to use New Charts.

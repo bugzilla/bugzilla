@@ -5,6 +5,11 @@ Mac OS X
 
 .. _macosx-install-packages:
 
+.. note:: The Bugzilla team has very little Mac expertise and we've not been
+          able to do a successful install of the latest version. We got
+          close, though. If you've managed it, tell us how and we can update
+          these docs!
+
 Install Packages
 ================
 
@@ -109,10 +114,8 @@ Database Engine
 
 Bugzilla supports MySQL, PostgreSQL, Oracle and SQLite as database servers.
 You only require one of these systems to make use of Bugzilla. MySQL is
-most commonly used on Mac OS X. Configure your server according to the
-instructions below:
-
-.. todo:: Has anyone tried anything other than MySQL on Mac OS X?
+most commonly used on Mac OS X. (In fact, we have no reports of anyone using
+anything else.) Configure your server according to the instructions below:
 
 * :ref:`mysql`
 * :ref:`postgresql`

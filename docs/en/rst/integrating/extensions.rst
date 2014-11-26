@@ -1,11 +1,19 @@
-.. _writing-extensions:
+.. _extensions:
 
-Writing Extensions
-##################
+Extensions
+##########
 
-See the `Bugzilla Extension
+One of the best ways to customize Bugzilla is by using a Bugzilla
+Extension. Extensions can modify both the code and UI of Bugzilla in a way
+that can be distributed to other Bugzilla users and ported forward to future
+versions of Bugzilla with minimal effort. We maintain a
+`list of available extensions <https://wiki.mozilla.org/Bugzilla:Addons>`_
+written by other people on our wiki. You would need to
+make sure that the extension in question works with your version of Bugzilla.
+
+Or, you can write your own extension. See the `Bugzilla Extension
 documentation <../html/api/Bugzilla/Extension.html>`_ for the core
-documentation on how to write an Extension. It would make sense to read
+documentation on how to do that. It would make sense to read
 the section on :ref:`templates`. There is also a sample extension in
 :file:`$BUGZILLA_HOME/extensions/Example/` which gives examples of how to
 use all the code hooks.

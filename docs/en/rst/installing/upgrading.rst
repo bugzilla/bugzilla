@@ -1,7 +1,7 @@
-.. _upgrading-overview:
+.. _upgrading:
 
-Overview
-########
+Upgrading
+#########
 
 You can upgrade Bugzilla from any version to any later version in one go -
 there is no need to pass through intermediate versions unless you are changing
@@ -50,3 +50,21 @@ a tarball. See :ref:`upgrading-with-a-tarball`.
 
 Whichever path you use, you may need help with
 :ref:`upgrading-customizations`.
+
+.. toctree::
+   :maxdepth: 1
+
+   upgrading-with-git
+   migrating-from-bzr
+   migrating-from-cvs
+   migrating-from-a-tarball
+   upgrading-with-a-tarball
+   upgrading-customizations
+
+Bugzilla can automatically notify administrators when new releases are
+available if the :param:`upgrade_notification` parameter is set.
+Administrators will see these notifications when they access the Bugzilla home
+page. Bugzilla will check once per day for new releases. If you are behind a
+proxy, you may have to set the :param:`proxy_url` parameter accordingly. If
+the proxy requires authentication, use the
+:paramval:`http://user:pass@proxy_url/` syntax.

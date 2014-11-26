@@ -4,13 +4,9 @@ Windows
 #######
 
 Making Bugzilla work on Windows is more difficult than making it work on Unix,
-fewer Bugzilla developers use it and so it's less well supported. However, if
-you are still determined to do it, here's how.
-
-.. note:: ``mod_perl`` doesn't work very well on Windows, so you probably
-   don't want to use Windows for a large site.
-
-.. todo:: Is this still true?
+fewer Bugzilla developers use it and so it's less well supported. We would
+particularly recommend against doing it for a large site. However, if
+you are still determined to go ahead, here's how.
 
 .. windows-install-perl:
 

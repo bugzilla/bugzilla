@@ -396,6 +396,14 @@ sub OPTIONAL_MODULES {
         version => '0',
         feature => ['memcached'],
     },
+
+    # Documentation
+    {
+        package => 'File-Copy-Recursive',
+        module  => 'File::Copy::Recursive',
+        version => 0,
+        feature => ['documentation'],
+    }
     );
 
     my $extra_modules = _get_extension_requirements('OPTIONAL_MODULES');

@@ -26,12 +26,6 @@ recommended to install Perl into a directory containing a space, such as
 Once the install has completed, log out and log in again to pick up the
 changes to the ``PATH`` environment variable.
 
-.. note:: These instructions are for 32-bit versions of Windows. If you are
-   using a 64-bit version of Windows, you will need to install 32-bit
-   Perl in order to install the 32-bit modules as described below.
-
-.. todo:: Is this still true?
-
 .. _windows-install-bzfiles:
 
 Bugzilla
@@ -72,24 +66,67 @@ Install the following modules with:
 
 :command:`ppm install <modulename>`
 
-* AppConfig
+* CGI.pm
+* Digest-SHA
 * TimeDate
+* DateTime
+* DateTime-TimeZone
 * DBI
-* DBD-mysql
 * Template-Toolkit
-* MailTools
+* Email-Sender
+* Email-MIME
+* URI
+* List-MoreUtils
+* Math-Random-ISAAC
+* File-Slurp
+* JSON-XS
+* Win32
+* Win32-API
+
+The following modules enable various optional Bugzilla features; try and
+install them, but don't worry too much to begin with if you can't get them
+installed:
+
 * GD
 * Chart
+* Template-GD
+* GDTextUtil
 * GDGraph
+* MIME-tools
+* libwww-perl
+* XML-Twig
 * PatchReader
-* Net-LDAP-Express (required only if you want to do LDAP authentication)
+* perl-ldap
+* Authen-SASL
+* Net-SMTP-SSL
+* RadiusPerl
+* SOAP-Lite
+* XMLRPC-Lite
+* JSON-RPC
+* Test-Taint
+* HTML-Parser
+* HTML-Scrubber
+* Encode
+* Encode-Detect
+* Email-Reply
+* HTML-FormatText-WithLinks
+* TheSchwartz
+* Daemon-Generic
+* mod_perl
+* Apache-SizeLimit
+* File-MimeInfo
+* IO-stringy
+* Cache-Memcached
+* Text-Markdown
+* File-Copy-Recursive
+* GraphViz
 
-.. todo:: Is this list current and complete?
+.. warning:: These lists have been extracted from Bugzilla's source code and
+             have not been tested. Please let us know if you find errors in it
+             of any sort.
 
 .. note:: The :file:`install-module.pl` script doesn't work with ActivePerl
-   on Windows. 
-
-.. todo:: Is this still true?
+   on Windows.
 
 .. _windows-config-webserver:
 

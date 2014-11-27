@@ -248,6 +248,25 @@ sub _send_test_email {
 ##############################################################################
 # Encrypting the email
 ##############################################################################
+
+# determine if the bug should be encrypted at the time it is generated
+sub bugmail_enqueue {
+    my ($self, $args) = @_;
+    my $vars = $args->{vars};
+    if (_should_secure_bug($vars->{bug})) {
+        $vars->{bugzilla_encrypt} = 1;
+    }
+}
+
+sub bugmail_generate {
+    my ($self, $args) = @_;
+    my $vars = $args->{vars};
+    my $email = $args->{email};
+    if ($vars->{bugzilla_encrypt}) {
+        $email->header_set('X-Bugzilla-Encrypt', 1);
+    }
+}
+
 sub mailer_before_send {
     my ($self, $args) = @_;
 
@@ -556,7 +575,11 @@ sub _make_secure {
         # Note: the $bug_id is required within the parentheses in order to keep
         # gmail's threading algorithm happy.
         $subject =~ s/($bug_id\])\s+(.*)$/$1$new (Secure bug $bug_id in $product :: $component)/;
-        $email->header_set('Subject', $subject);
+        {
+            # avoid excessive line wrapping done by Encode.
+            local $Encode::Encoding{'MIME-Q'}->{'bpl'} = 998;
+            $email->header_set('Subject', encode('MIME-Q', $subject));
+        }
     }
 }
 
@@ -581,21 +604,18 @@ sub _pgp_encrypt {
 # Insert the subject into the part's body, as the subject of the message will
 # be sanitised.
 # XXX this incorrectly assumes all parts of the message are the body
-# we should only alter parts who's parent is multipart/alternative
+# we should only alter parts whose parent is multipart/alternative
 sub _insert_subject {
     my ($part, $subject) = @_;
     my $content_type = $part->content_type or return;
     if ($content_type =~ /^text\/plain/) {
-        if (!is_7bit_clean($subject)) {
-            $part->encoding_set('quoted-printable');
-        }
         $part->body_str_set("Subject: $subject\015\012\015\012" . $part->body_str);
     }
     elsif ($content_type =~ /^text\/html/) {
         my $tree = HTML::Tree->new->parse_content($part->body_str);
         my $body = $tree->look_down(qw(_tag body));
-        $body->unshift_content(['div', "Subject: $subject"], ['br']);
-        _set_body_from_tree($part, $tree);
+        $body->unshift_content(['h1', "Subject: $subject"], ['br']);
+        $part->body_str_set($tree->as_HTML);
     }
 }
 
@@ -644,16 +664,9 @@ sub _filter_bug_links {
             }
         }
         if ($updated) {
-            _set_body_from_tree($part, $tree);
+            $part->body_str_set($tree->as_HTML);
         }
     });
-}
-
-sub _set_body_from_tree {
-    my ($part, $tree) = @_;
-    $part->body_set($tree->as_HTML);
-    $part->charset_set('UTF-8') if Bugzilla->params->{'utf8'};
-    $part->encoding_set('quoted-printable');
 }
 
 __PACKAGE__->NAME;

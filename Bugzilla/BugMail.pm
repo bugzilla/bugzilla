@@ -453,6 +453,10 @@ sub sendMail {
 
 sub enqueue {
     my ($vars) = @_;
+
+    # BMO: allow modification of the email at the time it was generated
+    Bugzilla::Hook::process('bugmail_enqueue', { vars => $vars });
+
     # we need to flatten all objects to a hash before pushing to the job queue.
     # the hashes need to be inflated in the dequeue method.
     $vars->{bug}          = _flatten_object($vars->{bug});
@@ -544,6 +548,10 @@ sub _generate_bugmail {
         $email->content_type_set('multipart/alternative');
     }
     $email->parts_set(\@parts);
+
+    # BMO: allow modification of the email given the enqueued variables
+    Bugzilla::Hook::process('bugmail_generate', { vars => $vars, email => $email });
+
     return $email;
 }
 

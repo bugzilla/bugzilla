@@ -167,6 +167,7 @@ sub FILESYSTEM {
         'contrib/README'       => { perms => OWNER_WRITE },
         'contrib/*/README'     => { perms => OWNER_WRITE },
         'contrib/Bugzilla.pm'  => { perms => OWNER_WRITE },
+        'contrib/replyrc'      => { perms => OWNER_WRITE },
         'docs/bugzilla.ent'    => { perms => OWNER_WRITE },
         'docs/makedocs.pl'     => { perms => OWNER_EXECUTE },
         'docs/style.css'       => { perms => WS_SERVE },

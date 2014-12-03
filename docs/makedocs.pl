@@ -156,11 +156,12 @@ foreach my $lang (@langs) {
                 my $dst = "$docparent/$lang/rst/api/extensions/$ext_name";
                 mkdir($dst) unless -d $dst;
                 rcopy("$path/*", $dst);
-                next;
             }
-            my $dst = "$docparent/$lang/rst/extensions/$ext_name";
-            mkdir($dst) unless -d $dst;
-            rcopy($path, "$dst/$file");
+            else {
+                my $dst = "$docparent/$lang/rst/extensions/$ext_name";
+                mkdir($dst) unless -d $dst;
+                rcopy($path, "$dst/$file");
+            }
         }
     }
 

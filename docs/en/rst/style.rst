@@ -1,5 +1,7 @@
 :orphan:
 
+.. _style-guide:
+
 ==============================
 Writing Bugzilla Documentation
 ==============================
@@ -8,8 +10,10 @@ The Bugzilla documentation uses
 `reStructured Text (reST) <http://docutils.sourceforge.net/rst.html>`_,
 as extended by our documentation compilation tool,
 `Sphinx <http://sphinx-doc.org/>`_. This document is a reST document for
-demonstration purposes. When you build the docs, it gets built (at least in
-the HTML version) as a standalone file, although it isn't as readable in that
+demonstration purposes. To learn from it, you need to read it in reST form.
+
+When you build the docs, this document gets built (at least in
+the HTML version) as a standalone file, although it isn't as useful in that
 form because some of the directives discussed are invisible or change when
 rendered.
 
@@ -19,14 +23,15 @@ that one immediately-linked page should be enough to get started. Later, the
 `inline markup section <http://sphinx-doc.org/latest/markup/inline.html>`_
 is worth a read.
 
-Bugzilla's particular documentation conventions are as follows.
+Bugzilla's particular documentation conventions are as follows:
 
 Block Directives
 ################
 
-Every heading should be preceded by an anchor, with a globally-unique name
-with no spaces. Then we demonstrate the available heading levels we haven't
-used yet:
+Chapter headings use the double-equals, page title headings the #, and then
+the three other levels are headings within a page. Every heading should be
+preceded by an anchor, with a globally-unique name with no spaces. Now, we
+demonstrate the available heading levels we haven't used yet:
 
 .. _uniqueanchorname:
 
@@ -59,6 +64,8 @@ Other block types:
 .. warning:: This is a warning of a potential serious problem you should be
    aware of.
 
+.. todo:: This is some documentation-related task that still needs doing.
+   
 Use both of the above block types sparingly. Consider putting the information
 in the main text, omitting it, or (if long) placing it in a subsidiary file.
 
@@ -72,13 +79,17 @@ this:
 
 .. code-block:: perl
 
-  # This is some Perl code
-  print "Hello";
+   # This is some Perl code
+   print "Hello";
 
 There is a
 `list of all available lexer names <http://pygments.org/docs/lexers/>`_
 available. We currently use ``console``, ``perl``, and ``sql``. ``none`` is
 also a valid value.
+
+Use 4-space indentation, except where a different value is better so that
+things line up. So normally two spaces for bulleted lists, and 3 spaces
+for .. blocks.
 
 Inline Directives
 #################
@@ -86,16 +97,26 @@ Inline Directives
 .. warning:: Remember that reST does not support nested inline markup. So you
    can't have a substitution inside a link, or bold inside italics.
 
-A filename or a path to a filename is displayed like this:
-:file:`/path/to/filename.ext`
+* A filename or a path to a filename:
+  :file:`/path/to/{variable-bit-of-path}/filename.ext`
 
-A command to type in the shell is displayed like this:
-:command:`command --arguments`
+* A command to type in the shell:
+  :command:`command --arguments`
 
-We place static values for substitution (using |subst-name|) in the file
-:file:`$BUGZILLA_HOME/docs/definitions.rst.tmpl`.
-This gets built into definitions.rst, with the script adding some definitions
-for minimum module versions etc. generated from the source itself. Lines in
-that file look like this:
+* A parameter name:
+  :param:`shutdownhtml`
 
-.. |subst-name| replace:: Some Text Here
+* A parameter value:
+  :paramval:`DB`
+
+* A group name:
+  :group:`editbugs`
+
+* A bug field name:
+  :field:`Summary`
+
+* Any string from the UI:
+  :guilabel:`Administration`
+
+* A specific BMO bug:
+  :bug:`201069`

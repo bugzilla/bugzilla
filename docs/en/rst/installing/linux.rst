@@ -179,9 +179,6 @@ Or, you can pass an individual module name:
    distribution you are using, but are often called
    :file:`<packagename>-devel`.
 
-   .. todo:: Give examples for Debian/Ubuntu and RedHat.
-             Convert this item to a bug after checkin.
-
 .. _linux-config-webserver:
 
 Web Server

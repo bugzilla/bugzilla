@@ -395,9 +395,6 @@ makeproductgroups
     when new products are created. If this is on, the groups will be
     used for querying bugs.
 
-    .. todo:: This is spectacularly unclear. I have no idea what makeproductgroups
-              does - can someone explain it to me? Convert this item into a bug on checkin.
-
 chartgroup
     The name of the group of users who can use the 'New Charts' feature. Administrators should ensure that the public categories and series definitions do not divulge confidential information before enabling this for an untrusted population. If left blank, no users will be able to use New Charts.
 

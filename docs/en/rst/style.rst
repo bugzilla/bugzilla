@@ -64,10 +64,12 @@ Other block types:
 .. warning:: This is a warning of a potential serious problem you should be
    aware of.
 
-.. todo:: This is some documentation-related task that still needs doing.
-   
 Use both of the above block types sparingly. Consider putting the information
 in the main text, omitting it, or (if long) placing it in a subsidiary file.
+
+.. todo:: This is some documentation-related task that still needs doing.
+          This is useful for short-term todos during development; however,
+          consider filing a bug for todos which will persist longer.
 
 Code gets highlighted using Pygments. Choose the highlighter at the top of
 each file using:

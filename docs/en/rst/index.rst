@@ -27,5 +27,3 @@ Bugzilla Documentation
    installing/apache
    installing/apache-windows
    installing/iis
-
-.. todolist::

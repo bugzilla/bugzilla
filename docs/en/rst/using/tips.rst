@@ -79,12 +79,6 @@ reference on supported Markdown structures, please see the
 `syntax help <https://bugzilla.mozilla.org/page.cgi?id=markdown.html>`_ link
 next to the Markdown checkbox for new comments.
 
-.. todo:: The above link isn't ideal, but we can't easily link to the user's
-          Bugzilla because the docs aren't always on a Bugzilla (e.g.
-          when they are on ReadTheDocs). Best solution is to port the
-          Markdown guide to ReST.
-          Turn this item into a bug after checkin.
-          
 To use the Markdown feature, make sure that :guilabel:`Enable Markdown
 support for comments` is set to :guilabel:`on`
 in your :ref:`user-preferences` and that you also check the :guilabel:`Use

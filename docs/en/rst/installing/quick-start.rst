@@ -166,12 +166,8 @@ Test Server
 
 :command:`./testserver.pl http://localhost/`
 
-All the tests should pass. You will get warnings about deprecation from
-the ``Chart::Base`` Perl module; just ignore those.
-
-.. todo:: Chart::Base gives confusing deprecation warnings :-|
-          https://rt.cpan.org/Public/Bug/Display.html?id=79658 , unfixed for
-          2 years. :bug:`1070117`.
+All the tests should pass. You may get warnings about deprecation from
+the ``Chart::Base`` Perl module; if so, just ignore them.
 
 Access Via Web Browser
 ======================

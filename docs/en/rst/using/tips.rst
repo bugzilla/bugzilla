@@ -63,30 +63,3 @@ If you feel a bug you filed was incorrectly marked as a
 DUPLICATE of another, please question it in your bug, not
 the bug it was duped to. Feel free to CC the person who duped it
 if they are not already CCed.
-
-.. _markdown:
-
-Markdown
---------
-
-Markdown is a structured plain-text format which lets you write comments that
-have more styling than plain text. For example, you may use Markdown for
-making a part of your comment look italic or bold in the generated HTML.
-Bugzilla supports most of the structures defined by
-`standard Markdown <http://daringfireball.net/projects/markdown/basics>`_,
-but does **not** support inline images and inline HTML. For a complete
-reference on supported Markdown structures, please see the
-`syntax help <https://bugzilla.mozilla.org/page.cgi?id=markdown.html>`_ link
-next to the Markdown checkbox for new comments.
-
-.. todo:: The above link isn't ideal, but we can't easily link to the user's
-          Bugzilla because the docs aren't always on a Bugzilla (e.g.
-          when they are on ReadTheDocs). Best solution is to port the
-          Markdown guide to ReST.
-          Turn this item into a bug after checkin.
-          
-To use the Markdown feature, make sure that :guilabel:`Enable Markdown
-support for comments` is set to :guilabel:`on`
-in your :ref:`user-preferences` and that you also check the :guilabel:`Use
-Markdown for this comment` option below the comment box when you want to
-submit a new comment which uses Markdown.

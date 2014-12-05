@@ -327,9 +327,9 @@ sub mailer_before_send {
                 }
                 # Encrypt if updating a private attachment without a comment
                 if ($email->header('X-Bugzilla-Changed-Fields')
-                    && $email->header('X-Bugzilla-Changed-Fields') =~ /Attachment #(\d+)/)
+                    && $email->header('X-Bugzilla-Attach-ID'))
                 {
-                    my $attachment = Bugzilla::Attachment->new($1);
+                    my $attachment = Bugzilla::Attachment->new($email->header('X-Bugzilla-Attach-ID'));
                     if ($attachment && $attachment->isprivate) {
                         $make_secure = SECURE_BODY;
                     }

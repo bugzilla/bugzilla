@@ -365,13 +365,14 @@ sub sendMail {
     my $relRef      = $params->{rels_which_want};
     my $referenced_bugs = $params->{referenced_bugs};
     my $dep_only = $params->{dep_only};
+    my $attach_id;
 
     # Only display changes the user is allowed see.
     my @display_diffs;
 
     foreach my $diff (@diffs) {
         my $add_diff = 0;
-        
+
         if (grep { $_ eq $diff->{field_name} } TIMETRACKING_FIELDS) {
             $add_diff = 1 if $user->is_timetracker;
         }
@@ -379,6 +380,7 @@ sub sendMail {
             $add_diff = 1;
         }
         push(@display_diffs, $diff) if $add_diff;
+        $attach_id = $diff->{attach_id} if $diff->{attach_id};
     }
 
     if (!$user->is_insider) {
@@ -428,6 +430,7 @@ sub sendMail {
         date               => $date,
         to_user            => $user,
         bug                => $bug,
+        attach_id          => $attach_id,
         reasons            => \@reasons,
         reasons_watch      => \@reasons_watch,
         reasonsheader      => join(" ", @headerrel),

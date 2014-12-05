@@ -1,24 +1,31 @@
-.. Bugzilla documentation master file, created by
-   sphinx-quickstart on Tue Sep  3 16:11:00 2013.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
-
+======================
 Bugzilla Documentation
 ======================
 
 .. toctree::
-   :maxdepth: 3
-   :numbered:
+   :maxdepth: 1
+   :numbered: 4
 
-   about
-   installation
-   administration
-   security
-   using
-   extensions
-   api
-   customization
-   patches
-   troubleshooting
-   modules
-   gfdl
+   about/index
+   using/index
+   installing/index
+   administering/index
+   integrating/index
+   api/index
+   
+.. toctree::
+   :hidden:
+
+   installing/mysql
+   installing/postgresql
+   installing/oracle
+   installing/sqlite
+
+.. toctree::
+   :hidden:
+
+   installing/apache
+   installing/apache-windows
+   installing/iis
+
+.. todolist::

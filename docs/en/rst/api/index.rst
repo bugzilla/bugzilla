@@ -1,5 +1,7 @@
-WebService API
-==============
+.. _apis:
+
+WebService API Reference
+========================
 
 This Bugzilla installation has the following WebService APIs available
 (as of the last time you compiled the documentation):
@@ -7,5 +9,5 @@ This Bugzilla installation has the following WebService APIs available
 .. toctree::
    :glob:
 
-   api/core/v*/index*
-   api/extensions/*/v*/index*
+   core/v*/index*
+   extensions/*/v*/index*

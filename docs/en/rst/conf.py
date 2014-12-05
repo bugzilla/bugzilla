@@ -25,7 +25,7 @@ needs_sphinx = '1.0'
 
 # Add any Sphinx extension module names here, as strings. They can be extensions
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
-extensions = ['sphinx.ext.todo']
+extensions = ['sphinx.ext.todo', 'sphinx.ext.extlinks']
 
 if tags.has('enable_rst2pdf'):
   extensions.append('rst2pdf.pdfbuilder')
@@ -78,7 +78,7 @@ for line in open("../../../Bugzilla/Constants.pm"):
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
-exclude_patterns = []
+exclude_patterns = ['**.inc.rst']
 
 # The reST default role (used for this markup: `text`) to use for all documents.
 #default_role = None
@@ -100,6 +100,29 @@ pygments_style = 'sphinx'
 # A list of ignored prefixes for module index sorting.
 #modindex_common_prefix = []
 
+rst_prolog = """
+.. role:: param
+    :class: param
+
+.. role:: paramval
+    :class: paramval
+
+.. role:: group
+    :class: group
+
+.. role:: field
+    :class: field
+
+.. |min-perl-ver| replace:: 5.10.1
+"""
+
+rst_epilog = """
+
+----------
+
+This documentation undoubtedly has bugs; if you find some, please file
+them `here <https://bugzilla.mozilla.org/enter_bug.cgi?product=Bugzilla&component=Documentation>`_.
+"""
 
 # -- Options for HTML output ---------------------------------------------------
 
@@ -126,7 +149,7 @@ html_style = "bugzilla.css"
 
 # The name of an image file (relative to this directory) to place at the top
 # of the sidebar.
-#html_logo = None
+html_logo = "../images/bugzilla.png"
 
 # The name of an image file (within the static path) to use as favicon of the
 # docs.  This file should be a Windows icon file (.ico) being 16x16 or 32x32
@@ -158,7 +181,7 @@ html_use_smartypants = False
 #html_domain_indices = True
 
 # If false, no index is generated.
-#html_use_index = True
+html_use_index = False
 
 # If true, the index is split into individual pages for each letter.
 #html_split_index = False
@@ -170,7 +193,7 @@ html_show_sourcelink = False
 #html_show_sphinx = True
 
 # If true, "(C) Copyright ..." is shown in the HTML footer. Default is True.
-#html_show_copyright = True
+html_show_copyright = False
 
 # If true, an OpenSearch description file will be output, and all pages will
 # contain a <link> tag referring to it.  The value of this option must be the
@@ -182,7 +205,6 @@ html_show_sourcelink = False
 
 # Output file base name for HTML help builder.
 htmlhelp_basename = 'Bugzilladoc'
-
 
 # -- Options for LaTeX output --------------------------------------------------
 
@@ -257,11 +279,6 @@ texinfo_documents = [
 
 # How to display URL addresses: 'footnote', 'no', or 'inline'.
 #texinfo_show_urls = 'footnote'
-
-# Global substitutions and other markup required in every page
-rst_epilog = """
-.. |min-perl-ver| replace:: 5.10.1
-"""
 
 # -- Options for PDF output --------------------------------------------------
 
@@ -360,3 +377,10 @@ pdf_use_numbered_links = True
 
 # Background images fitting mode
 pdf_fit_background_mode = 'scale'
+
+# -- Options for Sphinx extensions -------------------------------------------
+
+# Temporary highlighting of TODO items
+todo_include_todos = True
+
+extlinks = {'bug': ('https://bugzilla.mozilla.org/show_bug.cgi?id=%s', 'bug  ')}

@@ -49,7 +49,6 @@ if (eval { require Pod::Simple }) {
     $pod_simple = 1;
 };
 
-use Bugzilla;
 use Bugzilla::Constants qw(BUGZILLA_VERSION bz_locations);
 
 use File::Path qw(rmtree);

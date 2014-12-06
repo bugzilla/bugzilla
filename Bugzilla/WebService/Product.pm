@@ -857,7 +857,7 @@ C<array> of C<int>s. Numeric ids of the products that you wish to update.
 
 =item C<names>
 
-C<array> or C<string>s. Names of the products that you wish to update.
+C<array> of C<string>s. Names of the products that you wish to update.
 
 =back
 

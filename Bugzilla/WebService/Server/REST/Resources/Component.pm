@@ -28,6 +28,34 @@ sub _rest_resources {
                 success_code => STATUS_CREATED
             }
         },
+        qr{^/component/(\d+)$}, {
+            PUT => {
+                method => 'update',
+                params => sub {
+                    return { ids => [ $_[0] ] };
+                }
+            },
+            DELETE => {
+                method => 'delete',
+                params => sub {
+                    return { ids => [ $_[0] ] };
+                }
+            },
+        },
+        qr{^/component/([^/]+)/([^/]+)$}, {
+            PUT => {
+                method => 'update',
+                params => sub {
+                    return { names => [ { product => $_[0], component => $_[1] } ] };
+                }
+            },
+            DELETE => {
+                method => 'delete',
+                params => sub {
+                    return { names => [ { product => $_[0], component => $_[1] } ] };
+                }
+            },
+        },
     ];
     return $rest_resources;
 }

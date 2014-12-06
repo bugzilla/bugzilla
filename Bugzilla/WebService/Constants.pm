@@ -184,6 +184,7 @@ use constant WS_ERROR_CODE => {
     product_must_have_description => 703,
     product_must_have_version => 704,
     product_must_define_defaultmilestone => 705,
+    product_admin_denied                 => 706,
 
     # Group errors are 800-900
     empty_group_name => 800,
@@ -207,9 +208,13 @@ use constant WS_ERROR_CODE => {
     flag_type_not_editable        => 1105,
 
     # Component errors are 1200-1300
-    component_already_exists => 1200,
-    component_is_last        => 1201,
-    component_has_bugs       => 1202,
+    component_already_exists               => 1200,
+    component_is_last                      => 1201,
+    component_has_bugs                     => 1202,
+    component_blank_name                   => 1210,
+    component_blank_description            => 1211,
+    multiple_components_update_not_allowed => 1212,
+    component_need_initialowner            => 1213,
 
     # Errors thrown by the WebService itself. The ones that are negative 
     # conform to http://xmlrpc-epi.sourceforge.net/specs/rfc.fault_codes.php

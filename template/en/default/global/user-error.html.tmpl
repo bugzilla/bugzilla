@@ -1338,6 +1338,11 @@
     You cannot set aliases when modifying multiple [% terms.bugs %]
     at once.
 
+  [% ELSIF error == "multiple_components_update_not_allowed" %]
+    [% title = "Multiple Components Update Not allowed" %]
+    You can not update the name for multiple components of the
+    same product.
+
   [% ELSIF error == "need_quip" %]
     [% title = "Quip Required" %]
     [% docslinks = {'quips.html' => 'About quips'} %]

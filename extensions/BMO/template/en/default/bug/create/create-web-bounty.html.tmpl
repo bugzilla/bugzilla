@@ -68,6 +68,8 @@ function validateAndSubmit() {
 [% USE Bugzilla %]
 [% cgi = Bugzilla.cgi %]
 
+<h1>Web Bounty Form</h1>
+
 <form id="web_bounty_form" method="post" action="post_bug.cgi" enctype="multipart/form-data"
       onSubmit="return validateAndSubmit();">
   <input type="hidden" name="product" value="Websites">

@@ -2910,8 +2910,19 @@ sub add_alias {
     return if !$alias;
     my $aliases = $self->_check_alias($alias);
     $alias = $aliases->[0];
-    my $bug_aliases = $self->alias;
-    push(@$bug_aliases, $alias) if !grep($_ eq $alias, @$bug_aliases);
+    my @new_aliases;
+    my $found = 0;
+    foreach my $old_alias (@{ $self->alias }) {
+        if (lc($old_alias) eq lc($alias)) {
+            push(@new_aliases, $alias);
+            $found = 1;
+        }
+        else {
+            push(@new_aliases, $old_alias);
+        }
+    }
+    push(@new_aliases, $alias) if !$found;
+    $self->{alias} = \@new_aliases;
 }
 
 sub remove_alias {

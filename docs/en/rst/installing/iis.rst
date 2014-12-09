@@ -41,8 +41,7 @@ Under :guilabel:`Name`, enter ``index.cgi``.
 
 All other default documents can be removed for this application.
 
-.. warning:: Do not delete the default document from the
-   :guilabel:`Default Website`.
+.. warning:: Do not delete the default document from the :guilabel:`Default Website`.
 
 Add Handler Mappings
 ====================

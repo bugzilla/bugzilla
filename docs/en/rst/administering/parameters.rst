@@ -492,9 +492,8 @@ LDAPserver
 
     .. note:: In order to use SSL with LDAP, specify a URI with "ldaps://".
        This will force the use of SSL over port 636.
-       For example, normal LDAP
-       :paramval:`ldap://ldap.company.com`, LDAP over SSL
-       :paramval:`ldaps://ldap.company.com`, or LDAP over a UNIX
+       For example, normal LDAP :paramval:`ldap://ldap.company.com`, LDAP over
+       SSL :paramval:`ldaps://ldap.company.com`, or LDAP over a UNIX
        domain socket :paramval:`ldapi://%2fvar%2flib%2fldap_sock`.
 
 LDAPstarttls

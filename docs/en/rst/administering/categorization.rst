@@ -399,8 +399,8 @@ example, if you have a bug that you plan to fix for your 3.0 release, it
 would be assigned the milestone of 3.0.
 
 .. note:: Milestone options will only appear for a Product if you turned
-   on the :param:`usetargetmilestone` parameter in the "Bug Fields" tab of the
-   :ref:`parameters` page.
+   on the :param:`usetargetmilestone` parameter in the "Bug Fields" tab of
+   the :ref:`parameters` page.
 
 To create new Milestones and set Default Milestones:
 

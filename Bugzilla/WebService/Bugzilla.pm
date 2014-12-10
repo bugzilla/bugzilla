@@ -112,10 +112,6 @@ sub time {
     return {
         db_time       => $self->type('dateTime', $db_time),
         web_time      => $self->type('dateTime', $now_utc),
-        web_time_utc  => $self->type('dateTime', $now_utc),
-        tz_name       => $self->type('string', 'UTC'),
-        tz_offset     => $self->type('string', '+0000'),
-        tz_short_name => $self->type('string', 'UTC'),
     };
 }
 
@@ -356,26 +352,6 @@ This might be different by a second from C<db_time> since this comes from
 a different source. If it's any more different than a second, then there is
 likely some problem with this Bugzilla instance. In this case you should
 rely on the C<db_time>, not the C<web_time>.
-
-=item C<web_time_utc>
-
-Identical to C<web_time>. (Exists only for backwards-compatibility with
-versions of Bugzilla before 3.6.)
-
-=item C<tz_name>
-
-C<string> The literal string C<UTC>. (Exists only for backwards-compatibility
-with versions of Bugzilla before 3.6.)
-
-=item C<tz_short_name>
-
-C<string> The literal string C<UTC>. (Exists only for backwards-compatibility
-with versions of Bugzilla before 3.6.)
-
-=item C<tz_offset>
-
-C<string> The literal string C<+0000>. (Exists only for backwards-compatibility
-with versions of Bugzilla before 3.6.)
 
 =back
 

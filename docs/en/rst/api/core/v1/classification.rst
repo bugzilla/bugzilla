@@ -42,8 +42,8 @@ name            type   description
              "description": "Software that controls a piece of hardware that will create any food item through a voice interface."
            },
            {
-             "description": "Spider secretions",
-             "name": "Ѕpїdєr Séçretíøns",
+             "description": "Silk, etc.",
+             "name": "Spider Secretions",
              "id": 4
            }
          ],

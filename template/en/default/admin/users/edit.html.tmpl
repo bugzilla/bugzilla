@@ -159,7 +159,7 @@
     [% IF listselectionvalues %],
     [% END %]
   [% END %]
-  [% IF listselectionvalues.matchtype != 'exact' %]
+  [% IF listselectionvalues && listselectionvalues.matchtype != 'exact' %]
     go
     <a href="editusers.cgi?action=list[% INCLUDE listselectionurlparams %]">back
     to the user list</a>,

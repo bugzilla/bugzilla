@@ -62,7 +62,7 @@
           [% checked = workflow.${status.id}.${new_status.id}.defined ? 1 : 0 %]
           [% mandatory = (status.id && new_status.name == Param("duplicate_or_move_bug_status")) ? 1 : 0 %]
           <td class="[% "checked" IF checked || mandatory %]"
-              title="From [% status.name FILTER html %] to [% new_status.name FILTER html %]">
+              title="From [% display_value("bug_status", status.name) FILTER html %] to [% display_value("bug_status", new_status.name) FILTER html %]">
             <input type="checkbox" name="w_[% status.id %]_[% new_status.id %]"
                    id="w_[% status.id %]_[% new_status.id %]" onclick="toggle_cell(this)"
                    [%+ "checked='checked'" IF checked || mandatory %]

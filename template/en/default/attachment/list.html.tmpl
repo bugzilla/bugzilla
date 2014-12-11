@@ -70,7 +70,15 @@ function toggle_display(link) {
             <a href="attachment.cgi?id=[% attachment.id %]"
                title="View the content of the attachment">
           [% END %]
-          <b>[% attachment.description FILTER html FILTER obsolete(attachment.isobsolete) %]</b>
+          <b>
+            [% IF attachment.isobsolete %]
+              <span class="bz_obsolete">
+            [% END %]
+            [% attachment.description FILTER html %]
+            [% IF attachment.isobsolete %]
+              </span>
+            [% END %]
+          </b>
           [% "</a>" IF attachment.datasize %]
 
           <span class="bz_attach_extra_info">

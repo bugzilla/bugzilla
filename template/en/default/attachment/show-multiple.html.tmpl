@@ -34,7 +34,15 @@
       <th colspan="6" class="bz_attach_footer">Attachment #[% a.id %]</th>
     </tr>
     <tr>
-      <td>[% a.description FILTER html FILTER obsolete(a.isobsolete) %]</td>
+      <td>
+        [% IF a.isobsolete %]
+          <span class="bz_obsolete">
+        [% END %]
+        [% a.description FILTER html %]
+        [% IF a.isobsolete %]
+          </span>
+        [% END %]
+      </td>
 
       <td>
         [% IF a.ispatch %]

@@ -68,7 +68,7 @@
 
 [% IF changes_saved %]
   <div id="message">
-    The changes to your [% current_tab.label FILTER lower %] have been saved.
+    The changes to your [% current_tab.label FILTER lower FILTER html %] have been saved.
 
     [% IF email_changes_saved %]
       <p>

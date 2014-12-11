@@ -759,35 +759,6 @@ sub create {
         # built-in filter, please also add a stub filter to t/004template.t.
         FILTERS => {
 
-            # Render text in required style.
-
-            inactive => [
-                sub {
-                    my($context, $isinactive) = @_;
-                    return sub {
-                        return $isinactive ? '<span class="bz_inactive">'.$_[0].'</span>' : $_[0];
-                    }
-                }, 1
-            ],
-
-            closed => [
-                sub {
-                    my($context, $isclosed) = @_;
-                    return sub {
-                        return $isclosed ? '<span class="bz_closed">'.$_[0].'</span>' : $_[0];
-                    }
-                }, 1
-            ],
-
-            obsolete => [
-                sub {
-                    my($context, $isobsolete) = @_;
-                    return sub {
-                        return $isobsolete ? '<span class="bz_obsolete">'.$_[0].'</span>' : $_[0];
-                    }
-                }, 1
-            ],
-
             # Returns the text with backslashes, single/double quotes,
             # and newlines/carriage returns escaped for use in JS strings.
             js => sub {

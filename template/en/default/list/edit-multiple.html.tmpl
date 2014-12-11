@@ -371,7 +371,13 @@
 
       <td>
         [% SET inactive = !group.is_active %]
-        [% group.description FILTER html_light FILTER inactive(inactive) %]
+        [% IF inactive %]
+          <span class="bz_inactive">
+        [% END %]
+        [% group.description FILTER html_light %]
+        [% IF inactive %]
+          </span>
+        [% END %]
       </td>
 
     </tr>
@@ -380,8 +386,8 @@
   </table>
 
   [% IF foundinactive %]
-    <p class="bz_info">(Note: [% terms.Bugs %] may not be added to [% FILTER inactive %]inactive
-    groups[% END %], only removed.)</p>
+    <p class="bz_info">(Note: [% terms.Bugs %] may not be added to inactive
+    groups, only removed.)</p>
   [% END %]
 
 [% END %]

@@ -31,7 +31,7 @@
 [% FOREACH column = columns.keys %]
   [% NEXT IF collist.contains(column) %]
   [%# We lowecase the keys so that the sort happens case-insensitively. %]
-  [% SET column_desc = field_descs.$column || column FILTER lower %]
+  [% SET column_desc = field_descs.$column || column FILTER lower FILTER html %]
   [% available_columns.$column_desc = column %]
 [% END %]
 

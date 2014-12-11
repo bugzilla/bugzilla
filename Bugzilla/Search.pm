@@ -2206,10 +2206,14 @@ sub _date_translate {
 sub SqlifyDate {
     my ($str) = @_;
     my $fmt = "%Y-%m-%d %H:%M:%S";
-    $str = "" if (!defined $str || lc($str) eq 'now');
+    $str = "" if (!defined $str);
     if ($str eq "") {
         my ($sec, $min, $hour, $mday, $month, $year, $wday) = localtime(time());
         return sprintf("%4d-%02d-%02d 00:00:00", $year+1900, $month+1, $mday);
+    }
+    if (lc($str) eq 'now') {
+        my ($sec, $min, $hour, $mday, $month, $year, $wday) = localtime(time());
+        return sprintf("%4d-%02d-%02d %02d:%02d:%02d", $year+1900, $month+1, $mday, $hour, $min, $sec);
     }
 
     if ($str =~ /^(-|\+)?(\d+)([hdwmy])(s?)$/i) {   # relative date

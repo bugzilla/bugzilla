@@ -30,7 +30,8 @@ our @EXPORT = qw(
     FEATURE_FILES
 
     check_requirements
-    check_graphviz
+    check_webdotbase
+    check_font_file
     have_vers
     install_command
     map_files_to_features
@@ -655,10 +656,10 @@ sub _translate_feature {
     return join(', ', @strings);
 }
 
-sub check_graphviz {
+sub check_webdotbase {
     my ($output) = @_;
 
-    my $webdotbase = Bugzilla->params->{'webdotbase'};
+    my $webdotbase = Bugzilla->localconfig->{'webdotbase'};
     return 1 if $webdotbase =~ /^https?:/;
 
     my $return;
@@ -677,7 +678,7 @@ sub check_graphviz {
     if (-e "$webdotdir/.htaccess") {
         my $htaccess = new IO::File("$webdotdir/.htaccess", 'r') 
             || die "$webdotdir/.htaccess: " . $!;
-        if (!grep(/png/, $htaccess->getlines)) {
+        if (!grep(/ \\\.png\$/, $htaccess->getlines)) {
             print STDERR install_string('webdot_bad_htaccess',
                                         { dir => $webdotdir }), "\n";
         }
@@ -685,6 +686,31 @@ sub check_graphviz {
     }
 
     return $return;
+}
+
+sub check_font_file {
+    my ($output) = @_;
+
+    my $font_file = Bugzilla->localconfig->{'font_file'};
+
+    my $readable;
+    $readable = 1 if -r $font_file;
+
+    my $ttf;
+    $ttf = 1 if $font_file =~ /\.ttf$/;
+
+    if ($output) {
+        _checking_for({ package => 'Font file', ok => $readable && $ttf});
+    }
+
+    if (!$readable) {
+        print install_string('bad_font_file', { file => $font_file }), "\n";
+    }
+    elsif (!$ttf) {
+        print install_string('bad_font_file_name', { file => $font_file }), "\n";
+    }
+
+    return $readable && $ttf;
 }
 
 # This was originally clipped from the libnet Makefile.PL, adapted here for
@@ -910,10 +936,20 @@ optional modules.
 
 =back
 
-=item C<check_graphviz($output)>
+=item C<check_webdotbase($output)>
 
 Description: Checks if the graphviz binary specified in the 
   C<webdotbase> parameter is a valid binary, or a valid URL.
+
+Params:      C<$output> - C<$true> if you want the function to
+                 print out information about what it's doing.
+
+Returns:     C<1> if the check was successful, C<0> otherwise.
+
+=item C<check_font_file($output)>
+
+Description: Checks if the font file specified in the C<font_type> parameter
+  is a valid-looking font file.
 
 Params:      C<$output> - C<$true> if you want the function to
                  print out information about what it's doing.

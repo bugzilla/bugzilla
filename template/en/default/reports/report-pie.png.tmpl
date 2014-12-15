@@ -20,9 +20,10 @@
   END;
 -%]
 
-[% IF Param("font_file") %]
-  [% graph.set_title_font(Param("font_file"), 10);
-     graph.set_value_font(Param("font_file"), 9);
+[% USE Bugzilla %]
+[% IF Bugzilla.localconfig.font_file %]
+  [% graph.set_title_font(Bugzilla.localconfig.font_file, 10);
+     graph.set_value_font(Bugzilla.localconfig.font_file, 9);
   %]
 [% END %]
 

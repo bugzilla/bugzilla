@@ -23,6 +23,13 @@ happens when you are not running checksetup.pl as ##root##. To see the
 problem we ran into, run: ##command##
 END
     bad_executable => 'not a valid executable: ##bin##',
+    bad_font_file => <<'END',
+The file ##file## cannot be found. Make sure you typed the full path to the file
+END
+    bad_font_file_name => <<'END',
+The file ##file## must point to a TrueType font file (its extension must be
+.ttf)
+END
     blacklisted => '(blacklisted)',
     bz_schema_exists_before_220 => <<'END',
 You are upgrading from a version before 2.20, but the bz_schema table
@@ -215,6 +222,15 @@ For the "Difference Between Two Patches" feature to work, we need to know
 what directory the "diff" bin is in. (You only need to set this if you
 are using that feature of the Patch Viewer.)
 END
+    localconfig_font_file => <<'END',
+You can specify the full path to a TrueType font file, which will be used to
+display text (labels, legends, ...) in charts and graphical reports. To support
+as many languages as possible, we recommend to specify a TrueType font such as
+Unifont (http://unifoundry.com/unifont.html), which supports all printable
+characters in the Basic Multilingual Plane. If you leave this parameter empty,
+a default font will be used, but its support is limited to English characters
+only and so other characters will be displayed incorrectly.
+END
     localconfig_index_html => <<'END',
 Most web servers will allow you to use index.cgi as a directory
 index, and many come preconfigured that way, but if yours doesn't
@@ -251,6 +267,21 @@ a normal webserver environment.
 
 If set to 1, checksetup.pl will set file permissions so that Bugzilla
 works in a SuexecUserGroup environment. 
+END
+    localconfig_webdotbase => <<'END',
+It is possible to show graphs of dependent bugs. You may set this parameter to
+any of the following:
+
+- A complete file path to 'dot' (part of GraphViz (http://www.graphviz.org/))
+  will generate the graphs locally.
+- A URL prefix pointing to an installation of the webdot package will generate
+  the graphs remotely. (append "/%urlbase%" to the URL prefix)
+- A blank value will disable dependency graphing.
+
+If you use a webdot URL prefix, make certain that the webdot server can read
+files from your webdot directory. On Apache you do this by editing the
+.htaccess file, for other systems the needed measures may vary. You can run
+checksetup.pl to recreate the .htaccess file if it has been lost.
 END
     localconfig_webservergroup => <<'END',
 The name of the group that your web server runs as. On Red Hat

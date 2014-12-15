@@ -24,9 +24,8 @@ use parent qw(Exporter);
 @Bugzilla::Config::Common::EXPORT =
     qw(check_multi check_numeric check_regexp check_url check_group
        check_sslbase check_priority check_severity check_platform
-       check_opsys check_shadowdb check_urlbase check_webdotbase
-       check_user_verify_class check_ip check_font_file
-       check_mail_delivery_method check_notification check_utf8
+       check_opsys check_shadowdb check_urlbase check_user_verify_class
+       check_ip check_mail_delivery_method check_notification check_utf8
        check_bug_status check_smtp_auth check_theschwartz_available
        check_maxattachmentsize check_email check_smtp_ssl
        check_comment_taggers_group check_smtp_server
@@ -85,7 +84,7 @@ sub check_sslbase {
     my $url = shift;
     if ($url ne '') {
         if ($url !~ m#^https://([^/]+).*/$#) {
-            return "must be a legal URL, that starts with https and ends with a slash.";
+            return "must be a legal URL, that starts with https and ends with a slash";
         }
         my $host = $1;
         # Fall back to port 443 if for some reason getservbyname() fails.
@@ -217,43 +216,6 @@ sub check_url {
     return '' if $url eq ''; # Allow empty URLs
     if ($url !~ m:/$:) {
         return 'must be a legal URL, absolute or relative, ending with a slash.';
-    }
-    return '';
-}
-
-sub check_webdotbase {
-    my ($value) = (@_);
-    $value = trim($value);
-    if ($value eq "") {
-        return "";
-    }
-    if($value !~ /^https?:/) {
-        if(! -x $value) {
-            return "The file path \"$value\" is not a valid executable.  Please specify the complete file path to 'dot' if you intend to generate graphs locally.";
-        }
-        # Check .htaccess allows access to generated images
-        my $webdotdir = bz_locations()->{'webdotdir'};
-        if(-e "$webdotdir/.htaccess") {
-            open HTACCESS, "$webdotdir/.htaccess";
-            if(! grep(/ \\\.png\$/,<HTACCESS>)) {
-                return "Dependency graph images are not accessible.\nAssuming that you have not modified the file, delete $webdotdir/.htaccess and re-run checksetup.pl to rectify.\n";
-            }
-            close HTACCESS;
-        }
-    }
-    return "";
-}
-
-sub check_font_file {
-    my ($font) = @_;
-    $font = trim($font);
-    return '' unless $font;
-
-    if ($font !~ /\.ttf$/) {
-        return "The file must point to a TrueType font file (its extension must be .ttf)"
-    }
-    if (! -f $font) {
-        return "The file '$font' cannot be found. Make sure you typed the full path to the file"
     }
     return '';
 }
@@ -534,10 +496,6 @@ valid group is provided.
 =item check_urlbase
 
 =item check_email
-
-=item check_webdotbase
-
-=item check_font_file
 
 =item get_param_list
 

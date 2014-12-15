@@ -151,7 +151,15 @@ fix_all_file_permissions(!$silent);
 
 # If we are using a local 'dot' binary, verify the specified binary exists
 # and that the generated images are accessible.
-check_graphviz(!$silent) if Bugzilla->params->{'webdotbase'};
+check_webdotbase(!$silent) if $lc_hash->{'webdotbase'};
+
+###########################################################################
+# Check font file setup
+###########################################################################
+
+# If we are using a local font file, verify the specified file exists and
+# that it has the correct extension.
+check_font_file(!$silent) if $lc_hash->{'font_file'};
 
 ###########################################################################
 # Changes to the fielddefs --TABLE--

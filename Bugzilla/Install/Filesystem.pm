@@ -349,13 +349,13 @@ EOT
         },
 
         "$webdotdir/.htaccess" => { perms => WS_SERVE, contents => <<EOT
-# Restrict access to .dot files to the public webdot server at research.att.com
-# if research.att.com ever changes their IP, or if you use a different
-# webdot server, you'll need to edit this
-<FilesMatch \\.dot\$>
-  Allow from 192.20.225.0/24
-  Deny from all
-</FilesMatch>
+# If you run a local webdot server, you will need to allow it access to
+# generated .dot files. Uncomment this section and replace the IP address with
+# the IP address of your webdot server.
+#<FilesMatch \\.dot\$>
+#  Allow from 127.0.0.1/24
+#  Deny from all
+#</FilesMatch>
 
 # Allow access to .png files created by a local copy of 'dot'
 <FilesMatch \\.png\$>

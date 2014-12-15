@@ -235,7 +235,7 @@ if ($bug_count > MAX_WEBDOT_BUGS) {
     ThrowUserError("webdot_too_large");
 }
 
-my $webdotbase = Bugzilla->params->{'webdotbase'};
+my $webdotbase = Bugzilla->localconfig->{'webdotbase'};
 
 if ($webdotbase =~ /^https?:/) {
      # Remote dot server. We don't hardcode 'urlbase' here in case

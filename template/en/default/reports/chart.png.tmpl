@@ -34,12 +34,13 @@
   END;
 -%]
 
-[% IF Param("font_file") %]
-  [% graph.set_x_axis_font(Param("font_file"), 9);
-     graph.set_x_label_font(Param("font_file"), 10);
-     graph.set_y_axis_font(Param("font_file"), 9);
-     graph.set_y_label_font(Param("font_file"), 10);
-     graph.set_legend_font(Param("font_file"), 9);
+[% USE Bugzilla %]
+[% IF Bugzilla.localconfig.font_file %]
+  [% graph.set_x_axis_font(Bugzilla.localconfig.font_file, 9);
+     graph.set_x_label_font(Bugzilla.localconfig.font_file, 10);
+     graph.set_y_axis_font(Bugzilla.localconfig.font_file, 9);
+     graph.set_y_label_font(Bugzilla.localconfig.font_file, 10);
+     graph.set_legend_font(Bugzilla.localconfig.font_file, 9);
   %]
 [% END %]
 

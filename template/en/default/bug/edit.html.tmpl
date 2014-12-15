@@ -595,7 +595,8 @@
       <td colspan="2" id="show_dependency_tree_or_graph">
         Show dependency <a href="showdependencytree.cgi?id=[% bug.bug_id %]&amp;hide_resolved=1">tree</a>
 
-        [% IF Param('webdotbase') %]
+        [% USE Bugzilla %]
+        [% IF Bugzilla.localconfig.webdotbase %]
           /&nbsp;<a href="showdependencygraph.cgi?id=[% bug.bug_id %]">graph</a>
         [% END %]
       </td>
@@ -968,7 +969,6 @@
 
 [% BLOCK section_customfields %]
 [%# *** Custom Fields *** %]
-  [% USE Bugzilla %]
   [% FOREACH field = Bugzilla.active_custom_fields %]
     <tr>
       [% PROCESS bug/field.html.tmpl value = bug.${field.name}

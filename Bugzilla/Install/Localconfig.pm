@@ -109,6 +109,14 @@ use constant LOCALCONFIG_VARS => (
         default => sub { dirname(bin_loc('diff')) },
     },
     {
+        name    => 'font_file',
+        default => '',
+    },
+    {
+        name    => 'webdotbase',
+        default => '',
+    },
+    {
         name    => 'site_wide_secret',
         # 64 characters is roughly the equivalent of a 384-bit key, which
         # is larger than anybody would ever be able to brute-force.
@@ -224,6 +232,9 @@ sub update_localconfig {
             $var->{default} = &{$var->{default}} if ref($var->{default}) eq 'CODE';
             if (exists $answer->{$name}) {
                 $localconfig->{$name} = $answer->{$name};
+            }
+            elsif (exists Bugzilla->params->{$name}) {
+                $localconfig->{$name} = Bugzilla->params->{$name};
             }
             else {
                 # If the user did not supply an answers file, then they get

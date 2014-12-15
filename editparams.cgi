@@ -89,7 +89,7 @@ if ($action eq 'save' && $current_module) {
             }
             # Stop complaining if the URL has no trailing slash.
             # XXX - This hack can go away once bug 303662 is implemented.
-            if ($name =~ /(?<!webdot)base$/) {
+            if ($name =~ /base$/) {
                 $value = "$value/" if ($value && $value !~ m#/$#);
             }
         }

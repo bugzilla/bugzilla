@@ -79,8 +79,10 @@ function tracking_flag_change(e) {
         return;
     if (value == '') {
         commentEl.value = prefill;
+        a.innerHTML = 'comment required';
     } else {
         commentEl.value = prefill + "\n\n" + value;
+        a.innerHTML = 'comment updated';
     }
 }
 

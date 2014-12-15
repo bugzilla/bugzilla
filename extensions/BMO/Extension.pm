@@ -274,11 +274,11 @@ sub parse_bounty_attachment_description {
     my $date = qr/\d{4}-\d{2}-\d{2}/;
     $desc =~ m!
         ^
-        (?<reporter_email> [^,]+)      \s*,\s*
-        (?<amount_paid>    [0-9]+)  ?  \s*,\s*
-        (?<reported_date>  $date)   ?  \s*,\s*
-        (?<fixed_date>     $date)   ?  \s*,\s*
-        (?<awarded_date>   $date)   ?  \s*,\s*
+        (?<reporter_email> [^,]+)          \s*,\s*
+        (?<amount_paid>    [0-9]+[-+?]?) ? \s*,\s*
+        (?<reported_date>  $date)        ? \s*,\s*
+        (?<fixed_date>     $date)        ? \s*,\s*
+        (?<awarded_date>   $date)        ? \s*,\s*
         (?<publish>        (?i: true | false )) ?
         (?: \s*,\s* (?<credits>.*) ) ?
         $

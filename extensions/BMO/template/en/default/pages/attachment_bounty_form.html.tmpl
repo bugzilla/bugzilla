@@ -48,10 +48,25 @@
 [% END %]
 
 [% inline_javascript = BLOCK %]
+var validateDate = /^(\d{4}-\d{2}-\d{2}|)$/;
+var validators = {
+  reporter_email: /^[^,]+$/,
+  amount_paid:    /^[0-9]*[-+?]?$/,
+  reported_date:  validateDate,
+  fixed_date:     validateDate,
+  awarded_date:   validateDate,
+  publish:        /^(0|1)$/,
+  credit_1:       /^([^,]+|)$/,
+  credit_2:       /^([^,]+|)$/,
+  credit_3:       /^([^,]+|)$/
+};
+
 function validateAndSubmit() {
   'use strict';
   var alert_text = '';
   var requiredLabels = YAHOO.util.Selector.query('label.required');
+  var skip = {};
+
   if (requiredLabels) {
     requiredLabels.forEach(function (label) {
       var name = label.getAttribute('for');
@@ -62,15 +77,36 @@ function validateAndSubmit() {
       });
 
       if (ids && ids[0]) {
-        if (!isFilledOut(ids[0])) {
-          var desc = label.textContent || name;
+        var id = ids[0];
+        var desc = label.textContent || name;
+        if (!isFilledOut(id)) {
           alert_text +=
             "Please enter a value for " +
             desc.replace(/[\r\n]+/, "").replace(/\s+/g, " ") +
             "\n";
+          skip[id] = true;
         }
       }
     });
+    for (var id in validators) {
+      if (skip[id]) continue;
+      var el = document.getElementById(id);
+      if (validators[id] && !validators[id].test( el.value )) {
+        var labels = YAHOO.util.Selector.query('label[for="' + id + '"]');
+        var desc;
+        if (labels && labels[0]) {
+          desc = labels[0].textContent;
+        }
+        else {
+          desc = id;
+        }
+        alert_text +=
+          "Invalid value for " +
+          desc.replace(/[\r\n]+/, "").replace(/\s+/g, " ") +
+          "\n";
+      }
+    }
+
   }
 
   if (alert_text != '') {

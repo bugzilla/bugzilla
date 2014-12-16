@@ -1410,22 +1410,47 @@ sub _post_dev_engagement {
         }
         push(@attach_values, '"' . join(",", @requested) . '"');
 
-        my $attachment = Bugzilla::Attachment->create({
-            bug           => $parent_bug,
-            creation_ts   => $parent_bug->creation_ts,
-            data          => join("\t", @attach_values),
-            description   => 'Spreadsheet Data',
-            filename      => 'dev_engagement_submission.txt',
-            ispatch       => 0,
-            isprivate     => 0,
-            mimetype      => 'text/plain'
-        });
+        # we wrap the data inside a textarea to allow for the delimited data to
+        # be pasted directly into google docs.
 
-        # Insert comment for attachment
-        $parent_bug->add_comment('', { isprivate  => 0,
-                                       type       => CMT_ATTACHMENT_CREATED,
-                                       extra_data => $attachment->id });
-        delete $parent_bug->{'attachments'}; # So the new attachment displays properly
+        my $values = html_quote(join("\t", @attach_values));
+        my $data = <<EOF;
+<!doctype html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>Spreadsheet Data</title>
+        <style>
+            * {
+                box-sizing: border-box;
+                height: 100%;
+                margin: 0;
+                padding: 0;
+                width: 100%;
+            }
+            body {
+                overflow: hidden;
+            }
+            textarea {
+                background: none;
+                border: 0;
+                padding: 1em;
+                resize: none;
+            }
+        </style>
+    </head>
+    <body>
+        <textarea>$values</textarea>
+    </body>
+</html>
+EOF
+
+        $self->_add_attachment($args, {
+            data        => $data,
+            description => 'Spreadsheet Data',
+            filename    => 'dev_engagement_submission.html',
+            mimetype    => 'text/html',
+        });
 
         # File discussion bug
         Bugzilla->set_user(Bugzilla::User->new({ name => 'nobody@mozilla.org' }));
@@ -1477,16 +1502,18 @@ sub _post_dev_engagement {
         $parent_bug->set_all({ dependson => { add => [ $discussion_bug->id ] } });
         $parent_bug->add_comment('This request is being discussed in bug ' .
                                  $discussion_bug->id);
-        $parent_bug->update($parent_bug->creation_ts);
-        # No need to send mail for parent bug
     };
     my $error = $@;
 
     Bugzilla->set_user($old_user);
     Bugzilla->error_mode($error_mode_cache);
 
+    # No matter what happened, ensure the parent bug gets marked as updated
+    # There's no need to send mail for parent bug
+    $parent_bug->update($parent_bug->creation_ts);
+
     if ($error || !$discussion_bug) {
-       warn "Failed to create additional dev-engagement bug: $error" if $error;
+        warn "Failed to create additional dev-engagement bug: $error\n" if $error;
         $vars->{'message'} = 'dev_engagement_creation_failed';
     }
 }

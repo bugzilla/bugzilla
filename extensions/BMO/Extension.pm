@@ -25,6 +25,7 @@ package Bugzilla::Extension::BMO;
 use strict;
 use base qw(Bugzilla::Extension);
 
+use Bugzilla::BugMail;
 use Bugzilla::Constants;
 use Bugzilla::Error;
 use Bugzilla::Field;
@@ -199,7 +200,8 @@ sub page_before_template {
 sub bounty_attachment {
     my ($vars) = @_;
 
-    Bugzilla->user->in_group('bounty-team')
+    my $user = Bugzilla->user;
+    $user->in_group('bounty-team')
         || ThrowUserError("auth_failure", { group  => "bounty-team",
                                             action => "add",
                                             object => "bounty_attachments" });
@@ -236,6 +238,8 @@ sub bounty_attachment {
             });
         }
         $dbh->bz_commit_transaction();
+
+        Bugzilla::BugMail::Send($bug->id, { changer => $user });
 
         print Bugzilla->cgi->redirect('show_bug.cgi?id=' . $bug->id);
         exit;

@@ -87,9 +87,9 @@
         historyTable = new Y.DataTable({
             columns: [
                 { key: 'creation_time', label: 'Created', sortable: true, formatter: format_date },
-                { key: 'attachment', label: 'Attachment', formatter: format_attachment, allowHTML: true },
+                { key: 'attachment', label: 'Attachment', formatter: format_attachment },
                 { key: 'setter', label: 'Requester', formatter: format_setter },
-                { key: "action", label: "Action", sortable: true, allowHTML: true, formatter: format_action },
+                { key: "action", label: "Action", sortable: true,  formatter: format_action },
                 { key: "duration", label: "Duration", sortable: true, formatter: format_duration },
                 { key: "bug_id", label: "Bug", sortable: true, allowHTML: true,
                   formatter: '<a href="show_bug.cgi?id={value}" target="_blank">{value}</a>' },

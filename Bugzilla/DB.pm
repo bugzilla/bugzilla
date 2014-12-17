@@ -142,6 +142,11 @@ sub _handle_error {
     $_[0] = substr($_[0], 0, 2000) . ' ... ' . substr($_[0], -2000)
         if length($_[0]) > 4000;
     $_[0] = Carp::longmess($_[0]);
+
+    if (Bugzilla->usage_mode == USAGE_MODE_BROWSER) {
+        ThrowCodeError("db_error", { err_message => $_[0] });
+    }
+
     return 0; # Now let DBI handle raising the error
 }
 

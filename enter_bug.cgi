@@ -47,7 +47,7 @@ my $template = Bugzilla->template;
 my $vars = {};
 
 # All pages point to the same part of the documentation.
-$vars->{'doc_section'} = 'using.html#filing-bugs';
+$vars->{'doc_section'} = 'using/filing.html';
 
 my $product_name = trim($cgi->param('product') || '');
 # Will contain the product object the bug is created in.

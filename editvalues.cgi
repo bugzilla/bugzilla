@@ -47,7 +47,7 @@ my $vars = {};
 
 # Replace this entry by separate entries in templates when
 # the documentation about legal values becomes bigger.
-$vars->{'doc_section'} = 'administration.html#legal-values';
+$vars->{'doc_section'} = 'administering/field-values.html';
 
 print $cgi->header();
 

@@ -23,7 +23,7 @@ use Bugzilla::Token;
 my $user = Bugzilla->login(LOGIN_OPTIONAL);
 my $cgi = Bugzilla->cgi;
 my $template = Bugzilla->template;
-my $vars = { doc_section => 'using.html#create-a-bugzilla-account' };
+my $vars = { doc_section => 'using/creating-an-account.html' };
 
 print $cgi->header();
 

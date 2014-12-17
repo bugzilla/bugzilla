@@ -153,7 +153,7 @@ sub get_create_database_sql {
     my $create_utf8 = Bugzilla->params->{'utf8'} 
                       || !defined Bugzilla->params->{'utf8'};
     my $charset = $create_utf8 ? "CHARACTER SET utf8" : '';
-    return ("CREATE DATABASE $name $charset");
+    return ("CREATE DATABASE `$name` $charset");
 }
 
 # MySQL has a simpler ALTER TABLE syntax than ANSI.

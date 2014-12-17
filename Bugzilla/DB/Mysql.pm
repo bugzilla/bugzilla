@@ -839,7 +839,7 @@ sub _fix_defaults {
 sub _alter_db_charset_to_utf8 {
     my $self = shift;
     my $db_name = Bugzilla->localconfig->{db_name};
-    $self->do("ALTER DATABASE $db_name CHARACTER SET utf8"); 
+    $self->do("ALTER DATABASE `$db_name` CHARACTER SET utf8"); 
 }
 
 sub bz_db_is_utf8 {

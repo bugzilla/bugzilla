@@ -84,7 +84,7 @@ sub get_create_database_sql {
     my $create_utf8 = Bugzilla->params->{'utf8'}
                       || !defined Bugzilla->params->{'utf8'};
     my $charset = $create_utf8 ? "ENCODING 'UTF8' TEMPLATE template0" : '';
-    return ("CREATE DATABASE $name $charset");
+    return ("CREATE DATABASE \"$name\" $charset");
 }
 
 sub get_rename_column_ddl {

@@ -2205,7 +2205,7 @@ sub get_table_indexes_abstract {
 
 sub get_create_database_sql {
     my ($self, $name) = @_;
-    return ("CREATE DATABASE $name");
+    return ("CREATE DATABASE \"$name\"");
 }
 
 sub get_table_ddl {

@@ -47,6 +47,13 @@ BEGIN {
     };
 }
 
+sub new {
+    my $class = shift;
+    my $self = $class->SUPER::new(@_);
+    $self->{debug_logger} = sub {};
+    return $self;
+}
+
 sub initialize {
     my $self = shift;
     my %retval = $self->SUPER::initialize(@_);

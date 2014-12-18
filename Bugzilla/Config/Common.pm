@@ -22,7 +22,7 @@ use Bugzilla::Status;
 
 use parent qw(Exporter);
 @Bugzilla::Config::Common::EXPORT =
-    qw(check_multi check_numeric check_regexp check_url check_group
+    qw(check_multi check_numeric check_regexp check_group
        check_sslbase check_priority check_severity check_platform
        check_opsys check_shadowdb check_urlbase check_user_verify_class
        check_ip check_mail_delivery_method check_notification check_utf8
@@ -209,15 +209,6 @@ sub check_urlbase {
         return "must be a legal URL, that starts with http and ends with a slash.";
     }
     return "";
-}
-
-sub check_url {
-    my ($url) = (@_);
-    return '' if $url eq ''; # Allow empty URLs
-    if ($url !~ m:/$:) {
-        return 'must be a legal URL, absolute or relative, ending with a slash.';
-    }
-    return '';
 }
 
 sub check_user_verify_class {
@@ -490,8 +481,6 @@ valid group is provided.
 =item check_smtp_server
 
 =item check_smtp_auth
-
-=item check_url
 
 =item check_urlbase
 

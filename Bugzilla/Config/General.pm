@@ -25,13 +25,6 @@ use constant get_param_list => (
   },
 
   {
-   name => 'docs_urlbase',
-   type => 't',
-   default => 'docs/%lang%/html/',
-   checker => \&check_url
-  },
-
-  {
    name => 'utf8',
    type => 'b',
    default => '0',

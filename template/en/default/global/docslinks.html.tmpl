@@ -22,8 +22,7 @@
   #                 members of the admin group.
   #%]
 
-[% IF Param('docs_urlbase') &&
-      docslinks.keys.size || (admindocslinks.keys.size && user.in_group('admin')) %]
+[% IF docslinks.keys.size || (admindocslinks.keys.size && user.in_group('admin')) %]
   <div id="docslinks">
     <h2>Related documentation</h2>
     <ul>

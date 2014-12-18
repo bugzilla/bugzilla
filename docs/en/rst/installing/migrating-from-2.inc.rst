@@ -7,7 +7,7 @@ Download Code from Git
 First, you need to find what version of Bugzilla you are using. It should be
 in the top right corner of the front page but, if not, open the file
 :file:`Bugzilla/Constants.pm` in your Bugzilla directory and search for
-:code:`BUGZILLA_VERSION`.
+``BUGZILLA_VERSION``.
 
 Then, you need to download an additional copy of your *current* version of
 Bugzilla from the git repository, and place it in a separate directory

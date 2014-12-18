@@ -94,6 +94,7 @@ tie(%$cf_visible_in_products, "Tie::IxHash",
         "Infrastructure & Operations" => [],
         "Marketing"                   => [],
         "mozilla.org"                 => ["Security Assurance: Review Request"],
+        "Mozilla PR"                  => [],
         "Mozilla Reps"                => [],
     },
     qw/^cf_locale$/ => {

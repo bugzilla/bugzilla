@@ -125,7 +125,7 @@ function toggle_linked(id, value, suffix) {
     }
   }
   else {
-      YAHOO.util.Dom.addClass(id + suffix, 'bz_default_hidden');
+    YAHOO.util.Dom.addClass(id + suffix, 'bz_default_hidden');
   }
 }
 
@@ -199,7 +199,7 @@ function validate_form() {
 
   if (!isFilledOut('start_date'))     missing.push(['start_date', 'Start Date']);
   if (!isFilledOut('announce_date'))  missing.push(['announce_date', 'Announcement Date']);
-  if (!isFilledOut('deadline'))       missing.push(['deadline', 'Internal Deadline']);
+  if (!isFilledOut('cf_due_date'))    missing.push(['cf_due_date', 'Internal Deadline']);
 
   if (!isFilledOut('pr_owner'))       missing.push(['pr_owner', 'Project PR Owner']);
   if (!isFilledOut('owner'))          missing.push(['owner', 'Project Owner']);
@@ -347,16 +347,16 @@ function validate_form() {
 </div>
 
 <div class="field">
-  <label for="deadline" class="required">Internal Deadline</label>
-  <input name="deadline" id="deadline" value="" class="calendar"
+  <label for="cf_due_date" class="required">Internal Deadline</label>
+  <input name="cf_due_date" id="cf_due_date" value="" class="calendar"
     onchange="updateCalendarFromField(this)">
-  <button type="button" class="calendar_button" id="button_calendar_deadline"
-    onclick="showCalendar('deadline')">
+  <button type="button" class="calendar_button" id="button_calendar_cf_due_date"
+    onclick="showCalendar('cf_due_date')">
     <span>Calendar</span>
   </button>
-  <div id="con_calendar_deadline"></div>
+  <div id="con_calendar_cf_due_date"></div>
   <script type="text/javascript">
-    createCalendar('deadline')
+    createCalendar('cf_due_date')
   </script>
 </div>
 

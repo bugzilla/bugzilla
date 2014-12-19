@@ -11,7 +11,7 @@ env:
   - TEST_SUITE=webservices DB=mysql
   - TEST_SUITE=selenium DB=mysql
   - TEST_SUITE=webservices DB=pg
-  - TEST_SUITE=selenium DB=pg
+#  - TEST_SUITE=selenium DB=pg
 
 matrix:
   exclude:

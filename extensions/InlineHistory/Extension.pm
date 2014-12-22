@@ -12,6 +12,7 @@ use base qw(Bugzilla::Extension);
 use Bugzilla::User::Setting;
 use Bugzilla::Constants;
 use Bugzilla::Attachment;
+use Bugzilla::Util 'correct_urlbase';
 
 our $VERSION = '1.5';
 
@@ -121,6 +122,24 @@ sub template_before_process {
                             $visible_bug_ids{$id} = 1;
                         }
                     }
+                }
+            }
+
+            # split see-also
+            if ($change->{fieldname} eq 'see_also') {
+                my $url_base = correct_urlbase();
+                foreach my $f (qw( added removed )) {
+                    my @values;
+                    foreach my $value (split(/, /, $change->{$f})) {
+                        my ($bug_id) = substr($value, 0, length($url_base)) eq $url_base
+                            ? $value =~ /id=(\d+)$/
+                            : undef;
+                        push @values, {
+                            url    => $value,
+                            bug_id => $bug_id,
+                        };
+                    }
+                    $change->{$f} = \@values;
                 }
             }
 

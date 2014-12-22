@@ -142,9 +142,13 @@
           UNLESS is_safe_url(value) %]>
     [%~%][% value FILTER ih_short_value FILTER html FILTER js %]</a>
   [% ELSIF change.fieldname == 'see_also' %]
-    [% FOREACH see_also = value.split(', ') %]
-      [%~%]<a href="[% see_also FILTER html FILTER js %]" target="_blank">
-      [%~%][% see_also FILTER html FILTER js %]</a>
+    [% FOREACH see_also = value %]
+      [% IF see_also.bug_id %]
+        [%~%][% "$terms.bug $see_also.bug_id" FILTER bug_link(see_also.bug_id) FILTER js %]
+      [% ELSE %]
+        [%~%]<a href="[% see_also.url FILTER html FILTER js %]" target="_blank">
+        [%~%][% see_also.url FILTER html FILTER js %]</a>
+      [% END %]
       [%- ", " IF NOT loop.last %]
     [% END %]
   [% ELSIF change.fieldname == 'assigned_to' ||

@@ -135,7 +135,7 @@ sub response {
 
     # Access Control
     $response->header("Access-Control-Allow-Origin", "*");
-    $response->header("Access-Control-Allow-Headers", "origin, content-type, accept");
+    $response->header("Access-Control-Allow-Headers", "origin, content-type, accept, x-requested-with");
 
     # ETag support
     my $etag = $self->bz_etag;

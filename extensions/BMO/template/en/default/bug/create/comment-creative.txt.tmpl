@@ -35,5 +35,8 @@ Other:  [% IF cgi.param('type_other')  %][% cgi.param('type_other_text') %][% EL
 >>Mozilla Goal:
 [%+ IF cgi.param("goal_other") %][% cgi.param("goal_other") %][% ELSE %][% cgi.param("goal") %][% END %]
 
+>>Mozilla Creative Collective:
+[%+ cgi.param("collective") ? "Yes" : "No" %]
+
 >>Points of Contact:
-[%+ cgi.param('cc').join(', ') || 'Not provided' %]
+[%+ cgi.param('poc').join(', ') || 'Not provided' %]

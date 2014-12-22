@@ -41,6 +41,9 @@
 #creative_form em {
   font-size: 1em;
 }
+#creative_form input[disabled] {
+  background: transparent;
+}
 .yui-calcontainer {
   z-index: 2;
 }
@@ -72,6 +75,16 @@ function validateAndSubmit() {
     alert(alert_text);
     return false;
   }
+
+  document.getElementById('cc').value = document.getElementById('poc').value;
+  if (document.getElementById('collective').checked) {
+    document.getElementById('cc').value = document.getElementById('cc').value
+      + 'smartell@mozilla.com, enoonan@mozilla.com';
+    document.getElementById('status_whiteboard').value = 'Creative Collective Project';
+  } else {
+    document.getElementById('status_whiteboard').value = '';
+  }
+
   return true;
 }
 function toggleGoalOther() {
@@ -117,6 +130,8 @@ function toggleTypeOther(element) {
   <input type="hidden" name="op_sys" value="Other">
   <input type="hidden" name="version" value="unspecified">
   <input type="hidden" name="bug_severity" id="bug_severity" value="normal">
+  <input type="hidden" name="cc" id="cc" value="">
+  <input type="hidden" name="status_whiteboard" id="status_whiteboard" value="">
   <input type="hidden" name="token" value="[% token FILTER html %]">
 
 <img title="Creative Initiation Form" src="extensions/BMO/web/images/creative.png">
@@ -148,11 +163,19 @@ function toggleTypeOther(element) {
   <div class="field_desc">
     Select what sort of help you need (check at least one or more)
   </div>
-  <input type="checkbox" name="type_copy" id="type_copy" value="1">Copy<br>
-  <input type="checkbox" name="type_design" id="type_design" value="1">Design<br>
-  <input type="checkbox" name="type_video" id="type_video" value="1">Video<br>
-  <input type="checkbox" name="type_other" id="type_other" value="1" onchange="toggleTypeOther(this);">Other&nbsp;&nbsp;
-  <input type="text" name="type_other_text" id="type_other_text"><br>
+  <input type="checkbox" name="type_copy" id="type_copy" value="1">
+  <label for="type_copy">Copy</label>
+  <br>
+  <input type="checkbox" name="type_design" id="type_design" value="1">
+  <label for="type_design">Design</label>
+  <br>
+  <input type="checkbox" name="type_video" id="type_video" value="1">
+  <label for="type_video">Video</label>
+  <br>
+  <input type="checkbox" name="type_other" id="type_other" value="1" onchange="toggleTypeOther(this);">
+  <label for="type_other">Other</label>&nbsp;&nbsp;
+  <input type="text" name="type_other_text" id="type_other_text" disabled>
+  <br>
   <br>
   <div class="field_desc">
     <strong class="required">Specs</strong><br>
@@ -228,13 +251,25 @@ function toggleTypeOther(element) {
 </div>
 
 <div class="form_section">
-  <label for="cc" class="field_label">Points of Contact</label>
+  <label class="field_label">Mozilla Creative Collective</label>
+  <div>
+    <input type="checkbox" id="collective" name="collective">
+    <label for="collective">
+      I would like a
+      <a href="https://wiki.mozilla.org/Design/creativecollective"
+         target="_blank">Mozilla Creative Collective</a> designer to work on this project.
+    </label>
+  </div>
+</div>
+
+<div class="form_section">
+  <label for="poc" class="field_label">Points of Contact</label>
   <div class="field_desc">
     Who should be kept in the loop and informed of updates (and CC'd on the [% terms.bug %])?
   </div>
   [% INCLUDE global/userselect.html.tmpl
-     id       => "cc"
-     name     => "cc"
+     id       => "poc"
+     name     => "poc"
      value    => ""
      size     => 80
      classes  => ["bz_userfield"]

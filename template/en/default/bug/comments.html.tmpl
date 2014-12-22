@@ -8,76 +8,12 @@
 
 [% PROCESS bug/time.html.tmpl %]
 
-<script src="[% 'js/comments.js' FILTER mtime %]" type="text/javascript">
-</script>
-
 <script type="text/javascript">
-<!--
-  /* Adds the reply text to the 'comment' textarea */
-  function replyToComment(id, real_id, name, text) {
-      var prefix = "(In reply to " + name + " from comment #" + id + ")\n";
-      var replytext = "";
-      [% IF user.settings.quote_replies.value == 'quoted_reply' %]
-        /* pre id="comment_name_N" */
-
-        if (text == null) {
-            var text_elem = document.getElementById('comment_text_'+id);
-            text = getText(text_elem);
-        }
-        replytext = prefix + wrapReplyText(text);
-      [% ELSIF user.settings.quote_replies.value == 'simple_reply' %]
-        replytext = prefix;
-      [% END %]
-
-      [% IF user.is_insider %]
-        if (document.getElementById('isprivate_' + real_id).checked) {
-            document.getElementById('newcommentprivacy').checked = 'checked';
-            updateCommentTagControl(document.getElementById('newcommentprivacy'), 'comment'); 
-        }
-      [% END %]
-
-      /* <textarea id="comment"> */
-      var textarea = document.getElementById('comment');
-      if (textarea.value != replytext) {
-          textarea.value += replytext;
-      }
-
-      textarea.focus();
-  } 
-
-  function replyToMarkdownComment(id, real_id, name) {
-      var textarea = document.getElementById('comment');
-      var comment = textarea.value;
-      textarea.value += "Fetching comment...";
-      YAHOO.util.Connect.setDefaultPostHeader('application/json', true);
-      YAHOO.util.Connect.asyncRequest('POST', 'jsonrpc.cgi',
-      {
-          success: function(res) {
-              var data = YAHOO.lang.JSON.parse(res.responseText);
-              if (!data.error) {
-                  textarea.value = comment;
-                  var text = data.result.comments[real_id].text;
-                  replyToComment(id, real_id, name, text);
-              } else {
-                  replyToComment(id, real_id, name, null);
-              }
-          },
-          failure: function(res) {
-              /* On failure, quote the comment as plain-text */
-              replyToComment(id, real_id, name, null);
-          }
-      },
-      YAHOO.lang.JSON.stringify({
-          version: "1.1",
-          method: "Bug.comments",
-          params: {
-              Bugzilla_api_token: BUGZILLA.api_token,
-              comment_ids: [real_id],
-          }
-      })
-      );
-  }
-//-->
+  var replyCommentConfig = {
+      quote_replies : "[% user.settings.quote_replies.value FILTER js %]",
+      is_insider : [% user.is_insider ? 1 : 0 %],
+      markdown_fetching_comment : "Fetching comment..."
+  };
 </script>
 
 [% DEFAULT mode = "show" %]
@@ -160,14 +96,15 @@
                 [<a href="#"
                     onclick="YAHOO.bugzilla.commentTagging.toggle([% comment.id %], [% comment.count %]);return false">tag</a>]
               [% END %]
+              [% replyto_author = comment.author.name || comment.author.nick FILTER html %]
+              [% replyto_header = "(In reply to $replyto_author from comment #$comment.count)" %]
               [<a class="bz_reply_link" href="#add_comment"
                 [% IF user.settings.quote_replies.value != 'off' %]
                   onclick="
                   [% IF feature_enabled('jsonrpc') && comment.is_markdown %]
-                    replyToMarkdownComment('[% comment.count %]', '[% comment.id %]', '[% comment.author.name || comment.author.nick FILTER html FILTER js %]'); return false;"
+                    replyToMarkdownComment('[% comment.count %]', '[% comment.id %]', '[% replyto_header FILTER js %]'); return false;"
                   [% ELSE %]
-                    replyToComment('[% comment.count %]', '[% comment.id %]', '[% comment.author.name || comment.author.nick FILTER html FILTER js %]', null); return false;"
-
+                    replyToComment('[% comment.count %]', '[% comment.id %]', '[% replyto_header FILTER js %]', null); return false;"
                   [% END %]
                 [% END %]
               >reply</a>]

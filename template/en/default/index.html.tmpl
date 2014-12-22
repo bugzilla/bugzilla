@@ -83,11 +83,9 @@
             href="?GoAheadAndLogIn=1"><span>Log In</span></a>
           [% END %]
       </li>
-      [% IF Param("docs_urlbase") %]
-        <li>
-          <a id="help" href="[% docs_urlbase FILTER html %]using.html"><span>Documentation</span></a>
-        </li>
-      [% END %]
+      <li>
+        <a id="help" href="[% docs_urlbase FILTER html %]using/index.html"><span>Documentation</span></a>
+      </li>
     </ul>
   </div>
 

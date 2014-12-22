@@ -59,9 +59,6 @@ maintainer
     responsible for maintaining this Bugzilla installation.
     The address need not be that of a valid Bugzilla account.
 
-docs_urlbase
-    The URL that is the common initial leading part of all Bugzilla documentation URLs. It may be an absolute URL, or a URL relative to the :param:`urlbase` parameter. Leave this empty to suppress links to the documentation. ``%lang%`` will be replaced by user's preferred language (if documentation is available in that language).
-
 utf8
     Use UTF-8 (Unicode) encoding for all text in Bugzilla. Installations where
     this parameter is set to :paramval:`off` should set it to :paramval:`on` only

@@ -20,12 +20,16 @@
           "membership": "direct",
         [% ELSE %]
           "membership": "indirect",
-          "group": "[% type.name FILTER js %]",
+          [% IF user.in_group('editusers') || user.in_group('infrasec') %]
+            "group": "[% type.name FILTER js %]",
+          [% END %]
         [% END %]
         [% IF include_disabled %]
           "disabled": "[% member.is_enabled ? "false" : "true" %]",
         [% END %]
-        "lastseen": "[% member.lastseen FILTER js %]"
+        [% IF user.in_group('editusers') || user.in_group('infrasec') %]
+          "lastseen": "[% member.lastseen FILTER js %]"
+        [% END %]
       }[% "," UNLESS i == count %]
     [% END %]
   [% END %]

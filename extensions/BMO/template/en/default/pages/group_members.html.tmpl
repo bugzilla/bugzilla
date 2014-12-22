@@ -11,6 +11,8 @@
   style_urls = [ "extensions/BMO/web/styles/reports.css" ]
 %]
 
+[% SET privileged = (user.in_group('editusers') || user.in_group('infrasec')) %]
+
 <form method="GET" action="page.cgi">
   <input type="hidden" name="id" value="group_members.html">
 
@@ -48,15 +50,23 @@
         <th>Type</th>
         <th>Count</th>
         <th>Members</th>
-        <th class="right">Last Seen (days ago)</th>
+        [% IF privileged %]
+          <th class="right">Last Seen (days ago)</th>
+        [% END %]
       </tr>
 
       [% FOREACH type = types %]
         [% count = loop.count() %]
         <tr class="report_item [% count % 2 == 1 ? "report_row_odd" : "report_row_even" %]">
           <td valign="top">
-            [% "via&nbsp;" UNLESS type.name == 'direct' %]
-            [% type.name FILTER html %]
+            [% IF type.name == 'direct' %]
+              direct
+            [% ELSE %]
+              via&nbsp;
+              [% IF privileged %]
+                [% type.name FILTER html %]
+              [% ELSE %]another&nbsp;group[% END %]
+            [% END %]
           </td>
           <td valign="top" align="right">
             [% type.members.size FILTER html %]
@@ -66,16 +76,23 @@
               [% FOREACH member = type.members %]
                 <tr>
                   <td width="100%">
-                    <a href="editusers.cgi?action=edit&amp;userid=[% member.id FILTER none %]"
-                      target="_blank">
+                    [% IF privileged %]
+                      <a href="editusers.cgi?action=edit&amp;userid=[% member.id FILTER none %]"
+                        target="_blank">
+                    [% ELSE %]
+                      <a href="user_profile?login=[% member.login FILTER uri %]"
+                        target="_blank">
+                    [% END %]
                       <span [% 'class="bz_inactive"' UNLESS member.is_enabled %]>
                         [% member.name FILTER html %] &lt;[% member.email FILTER email FILTER html %]&gt;
                       </span>
                     </a>
                   </td>
-                  <td align="right" nowrap>
-                    [% member.lastseen FILTER html %]
-                  </td>
+                  [% IF privileged %]
+                    <td align="right" nowrap>
+                      [% member.lastseen FILTER html %]
+                    </td>
+                  [% END %]
                 </tr>
               [% END %]
             </table>

@@ -20,10 +20,17 @@ sub admins_report {
     my $dbh = Bugzilla->dbh;
     my $user = Bugzilla->user;
 
-    ($user->in_group('editusers') || $user->in_group('infrasec'))
-        || ThrowUserError('auth_failure', { group  => 'editusers',
+    ($user->in_group('editbugs'))
+        || ThrowUserError('auth_failure', { group  => 'editbugs',
                                             action => 'run',
                                             object => 'group_admins' });
+
+    my @grouplist =
+                  ($user->in_group('editusers') || $user->in_group('infrasec'))
+                  ? map { lc($_->name) } Bugzilla::Group->get_all
+                  : _get_public_membership_groups();
+
+    my $groups = join(',', map { $dbh->quote($_) } @grouplist);
 
     my $query = "
         SELECT groups.name, " .
@@ -36,6 +43,7 @@ sub admins_report {
                LEFT JOIN profiles
                     ON user_group_map.user_id = profiles.userid
          WHERE groups.isbuggroup = 1
+               AND groups.name IN ($groups)
       GROUP BY groups.name";
 
     my @groups;
@@ -160,10 +168,15 @@ sub members_report {
     my $user = Bugzilla->user;
     my $cgi = Bugzilla->cgi;
 
-    ($user->in_group('editusers') || $user->in_group('infrasec'))
-        || ThrowUserError('auth_failure', { group  => 'editusers',
+    ($user->in_group('editbugs'))
+        || ThrowUserError('auth_failure', { group  => 'editbugs',
                                             action => 'run',
                                             object => 'group_admins' });
+
+    my @grouplist =
+                  ($user->in_group('editusers') || $user->in_group('infrasec'))
+                  ? map { lc($_->name) } Bugzilla::Group->get_all
+                  : _get_public_membership_groups();
 
     my $include_disabled = $cgi->param('include_disabled') ? 1 : 0;
     $vars->{'include_disabled'} = $include_disabled;
@@ -172,8 +185,7 @@ sub members_report {
     my @group_names =
         sort
         grep { !/^(?:bz_.+|canconfirm|editbugs|editbugs-team|everyone)$/ }
-        map { lc($_->name) }
-        Bugzilla::Group->get_all;
+        @grouplist;
     unshift(@group_names, '');
     $vars->{'groups'} = \@group_names;
 
@@ -238,6 +250,27 @@ sub _filter_userlist {
     my ($list, $include_disabled) = @_;
     $list = [ grep { $_->is_enabled } @$list ] unless $include_disabled;
     return [ sort { lc($a->identity) cmp lc($b->identity) } @$list ];
+}
+
+# Groups that any user with editbugs can see the membership or admin lists for.
+# Transparency FTW.
+sub _get_public_membership_groups {
+    my @all_groups = map { lc($_->name) } Bugzilla::Group->get_all;
+
+    my %hardcoded_groups = map { $_ => 1 } qw(
+        bugzilla-approvers
+        bugzilla-reviewers
+        can_restrict_comments
+        community-it-team
+        mozilla-employee-confidential
+        mozilla-foundation-confidential
+        mozilla-reps
+        qa-approvers
+    );
+
+    # We also automatically include all drivers groups - this gives us a little
+    # future-proofing
+    return grep { /-drivers$/ || exists $hardcoded_groups{$_} } @all_groups;
 }
 
 1;

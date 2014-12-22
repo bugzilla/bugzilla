@@ -46,7 +46,8 @@
     <tr>
       <th align="right"><label for="Bugzilla_login">Email Address:</label></th>
       <td>
-        <input size="35" id="Bugzilla_login" name="Bugzilla_login">
+        <input size="35" id="Bugzilla_login" name="Bugzilla_login"
+               [%- ' type="email"' UNLESS Param('emailsuffix') %]>
         [% Param('emailsuffix') FILTER html %]
       </td>
     </tr>

@@ -36,7 +36,7 @@
       <input type="hidden" name="old_login" value="[% user.login FILTER html %]">
       <input type="password" name="old_password">
     </td>
-  </tr>              
+  </tr>
   <tr>
     <td colspan="2"><hr></td>
   </tr>
@@ -46,14 +46,14 @@
       <td>
         <input type="password" name="new_password1">
       </td>
-    </tr>              
+    </tr>
 
     <tr>
       <th align="right">Confirm new password:</th>
       <td>
         <input type="password" name="new_password2">
       </td>
-    </tr>              
+    </tr>
   [% END %]
 
   <tr>
@@ -61,7 +61,7 @@
     <td>
       <input size="35" name="realname" value="[% realname FILTER html %]">
     </td>
-  </tr>  
+  </tr>
 
   [% IF user.authorizer.can_change_email && Param('allowemailchange') %]
     [% IF login_change_date %]
@@ -86,9 +86,16 @@
       [% END %]
     [% ELSE %]
       <tr>
-        <th align="right">New email address:</th>
+        <th>
+          [% IF Param('emailsuffix') %]
+            New login:
+          [% ELSE %]
+            New email address:
+          [% END %]
+        </th>
         <td>
-          <input size="35" name="new_login_name">
+          <input size="35" id="new_login_name" name="new_login_name"
+                 [%- ' type="email"' UNLESS Param('emailsuffix') %]>
         </td>
       </tr>
     [% END %]

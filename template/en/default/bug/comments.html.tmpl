@@ -18,6 +18,7 @@
 
 [% DEFAULT mode = "show" %]
 [% user_cache = template_cache.users %]
+[% markdown_enabled = feature_enabled('jsonrpc') AND user.settings.use_markdown.value == "on" %]
 
 <!-- This auto-sizes the comments and positions the collapse/expand links 
      to the right. -->
@@ -101,7 +102,7 @@
               [<a class="bz_reply_link" href="#add_comment"
                 [% IF user.settings.quote_replies.value != 'off' %]
                   onclick="
-                  [% IF feature_enabled('jsonrpc') && comment.is_markdown %]
+                  [% IF markdown_enabled AND comment.is_markdown %]
                     replyToMarkdownComment('[% comment.count %]', '[% comment.id %]', '[% replyto_header FILTER js %]'); return false;"
                   [% ELSE %]
                     replyToComment('[% comment.count %]', '[% comment.id %]', '[% replyto_header FILTER js %]', null); return false;"

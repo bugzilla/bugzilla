@@ -1,0 +1,171 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% PROCESS global/variables.none.tmpl %]
+
+[% inline_style = BLOCK %]
+#webops {
+  padding: 10px;
+}
+#webops .required:after {
+  content: " *";
+  color: red;
+}
+#webops .field_label {
+  font-weight: bold;
+}
+#webops .head_desc {
+  width: 600px;
+  word-wrap: normal;
+}
+#webops .head_desc {
+  padding-top: 5px;
+  padding-bottom: 12px;
+}
+#webops .form_section {
+  margin-bottom: 10px;
+}
+#webops textarea {
+  font-family: inherit;
+  font-size: inherit;
+}
+[% END %]
+
+[% inline_javascript = BLOCK %]
+function validateAndSubmit() {
+  'use strict';
+  var alert_text = '';
+  var requiredLabels = YAHOO.util.Selector.query('label.required');
+  if (requiredLabels) {
+    requiredLabels.forEach(function (label) {
+      var id = label.getAttribute('for');
+      if (id) {
+        if (!isFilledOut(id)) {
+          var desc = label.textContent || id;
+          alert_text +=
+            "Please enter a value for " +
+            desc.replace(/[\r\n]+/, "").replace(/\s+/g, " ") +
+            "\n";
+        }
+      }
+    });
+  }
+
+  if (alert_text != '') {
+    alert(alert_text);
+    return false;
+  }
+  return true;
+}
+[% END %]
+
+[% PROCESS global/header.html.tmpl
+   title = "WebOps Request Form"
+   style = inline_style
+   javascript = inline_javascript
+   javascript_urls = [ 'extensions/BMO/web/js/form_validate.js',
+                       'js/field.js', 'js/util.js' ]
+   yui = [ "autocomplete", "selector" ]
+%]
+
+[% USE Bugzilla %]
+[% cgi = Bugzilla.cgi %]
+
+<form id="webops" method="post" action="post_bug.cgi"
+  enctype="multipart/form-data" onSubmit="return validateAndSubmit();">
+  <input type="hidden" name="format" value="webops-request">
+  <input type="hidden" name="product" value="Infrastructure & Operations">
+  <input type="hidden" name="component" value="WebOps: Request">
+  <input type="hidden" name="rep_platform" value="All">
+  <input type="hidden" name="op_sys" value="Other">
+  <input type="hidden" name="version" value="other">
+  <input type="hidden" name="bug_severity" id="bug_severity" value="normal">
+  <input type="hidden" name="priority" id="priority" value="--">
+  <input type="hidden" name="token" value="[% token FILTER html %]">
+
+  <div class="head_desc">
+    Welcome to the [% title FILTER html %]!
+  </div>
+
+<!-- 1. Summary -->
+  <div class="form_section">
+    <label for="short_desc" class="field_label required">Summary</label><br>
+    <input type="text" name="short_desc" id="short_desc" size="80">
+  </div>
+
+<!-- 2.  -->
+  <div class="form_section">
+    <label for="desc_1" class="field_label required">
+      What are you asking us to do?
+    </label><br>
+    <textarea id="desc_1" name="desc_1"
+      cols="80" rows="5"></textarea>
+  </div>
+
+  <div class="form_section">
+    <label for="desc_2" class="field_label required">
+      What is the problem you are trying to solve?
+    </label><br>
+    <textarea id="desc_2" name="desc_2" cols="80" rows="5"></textarea>
+  </div>
+
+  <div class="form_section">
+    <label for="desc_3" class="field_label required">
+      How would you solve this problem?  How has this problem been solved in the past?
+    </label><br>
+    <textarea id="desc_3" name="desc_3"
+      cols="80" rows="5"></textarea>
+  </div>
+
+  <div class="form_section">
+    <label for="desc_4" class="field_label required">
+      Who might be impacted by this change?
+    </label><br>
+    <textarea id="desc_4" name="desc_4"
+      cols="80" rows="5"></textarea>
+  </div>
+
+  <div class="form_section">
+    <label for="desc_5" class="field_label required">
+      What are the known dependencies for this request?
+    </label><br>
+    <textarea id="desc_5" name="desc_5"
+      cols="80" rows="5"></textarea>
+  </div>
+
+  <div class="form_section">
+    <label for="cc" class="field_label">CC</label><br>
+    [% INCLUDE global/userselect.html.tmpl
+      id       => "cc"
+      name     => "cc"
+      value    => ""
+      size     => 80
+      classes  => ["bz_userfield"]
+      multiple => 5
+    %]
+  </div>
+
+  <div class="form_section">
+    <label for="dependson" class="field_label">Depends on</label><br>
+    <input type="text" name="dependson" id="dependson" size="80">
+  </div>
+
+  <div class="form_section">
+    <label for="blocked" class="field_label">Blocks</label><br>
+    <input type="text" name="blocked" id="blocked" size="80">
+  </div>
+
+  <input type="submit" id="commit" value="Submit">
+
+  <p>
+    [ <span class="required_star">*</span> <span class="required_explanation">
+      Required Field</span> ]
+  </p>
+</form>
+
+[% PROCESS global/footer.html.tmpl %]

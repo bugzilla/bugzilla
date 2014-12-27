@@ -131,3 +131,24 @@ Download and install Graphviz from
 the complete path to :file:`dot.exe` in the :param:`webdotbase` parameter,
 using forward slashes as path separators. E.g.
 :paramval:`C:/Program Files/ATT/Graphviz/bin/dot.exe`.
+
+Documentation
+=============
+
+Bugzilla has extensive documentation and help, written in
+`reStructured Text <http://sphinx-doc.org/rest.html>`_
+format. A generic compiled copy exists on
+`bugzilla.readthedocs.org <https://bugzilla.readthedocs.org/>`_, and
+:guilabel:`Help` links point to it by default. If you want to build and use a
+local copy of the documentation, perhaps because you have added Bugzilla
+extensions which come with documentation, or because your users don't have
+Internet access from their machines, then:
+
+* Install `Sphinx <http://sphinx-doc.org/>`_
+  (:file:`python-sphinx` package on Debian/Ubuntu)
+
+Then run :command:`docs/makedocs.pl` in your Bugzilla directory.
+
+Bugzilla will automatically detect that you've compiled the documentation
+and link to it in preference to the copy on the Internet. Don't forget to
+recompile it when you upgrade Bugzilla or install new extensions.

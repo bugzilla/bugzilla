@@ -83,7 +83,7 @@ libjson-rpc-perl libdaemon-generic-perl libtheschwartz-perl
 libtest-taint-perl libauthen-radius-perl libfile-slurp-perl
 libencode-detect-perl libmodule-build-perl libnet-ldap-perl
 libauthen-sasl-perl libtemplate-perl-doc libfile-mimeinfo-perl
-libhtml-formattext-withlinks-perl libgd-dev lynx-cur graphviz`
+libhtml-formattext-withlinks-perl libgd-dev lynx-cur graphviz python-sphinx`
 
 If you plan to use SQlite as your database, you will need to also install
 the appropriate packages for that.

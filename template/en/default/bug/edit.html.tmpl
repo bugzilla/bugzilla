@@ -595,7 +595,7 @@
       [% IF bug.check_can_change_field("bug_file_loc", 0, 1) %]
         <span id="bz_url_edit_container" class="bz_default_hidden"> 
           <a href="[% bug.bug_file_loc FILTER html %]" target="_blank"
-             title="[% bug.bug_file_loc FILTER html %]"
+             rel="noreferrer" title="[% bug.bug_file_loc FILTER html %]"
              [% IF NOT is_safe_url(bug.bug_file_loc) %]
                onclick="return confirm(
                  'This is considered an unsafe URL and could possibly be harmful. '
@@ -610,7 +610,8 @@
         [% url_output =  PROCESS input no_td=1 inputname => "bug_file_loc" size => "40" colspan => 2 %]
         [% IF NOT bug.check_can_change_field("bug_file_loc", 0, 1)
               AND is_safe_url(bug.bug_file_loc) %]
-          <a href="[% bug.bug_file_loc FILTER html %]">[% url_output FILTER none %]</a>
+          <a href="[% bug.bug_file_loc FILTER html %]"
+             rel="noreferrer">[% url_output FILTER none %]</a>
         [% ELSE %]
           [% url_output FILTER none %]
         [% END %]

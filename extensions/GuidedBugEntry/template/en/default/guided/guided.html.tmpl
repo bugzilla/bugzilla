@@ -14,15 +14,12 @@
                'extensions/ProdCompSearch/web/js/prod_comp_search.js',
                'js/field.js', 'js/TUI.js', 'js/bug.js' ] %]
 
-[% yui_modules = [ 'history', 'datatable', 'container' ] %]
-[% yui_modules.push('autocomplete') %]
-
 [% PROCESS global/header.html.tmpl
    title = "Enter A Bug"
    javascript_urls = js_urls
    style_urls = [ 'extensions/GuidedBugEntry/web/style/guided.css',
                   'js/yui/assets/skins/sam/container.css' ]
-   yui = yui_modules
+   yui = [ 'history', 'datatable', 'container', 'autocomplete' ]
 %]
 
 <iframe id="yui-history-iframe" src="extensions/GuidedBugEntry/web/yui-history-iframe.txt"></iframe>
@@ -103,19 +100,15 @@ dupes.setLabels(
    show = "all"
 %]
 
-<table id="products">
+<ul class="product-list">
 [% INCLUDE 'guided/products.html.tmpl' %]
-[% INCLUDE product_block
+[% WRAPPER product_block
    name="Other Products"
    icon="other.png"
-   desc="Other Mozilla products which aren't listed here"
-   onclick="guided.setStep('otherProducts')"
-%]
-</table>
-
-<h3>
-  Or search for a Product:
-</h3>
+   onclick="guided.setStep('otherProducts')" %]
+Other Mozilla products which aren't listed here
+[% END %]
+</ul>
 
 <div id="prod_comp_search_main">
   [% PROCESS prodcompsearch/form.html.tmpl
@@ -123,7 +116,6 @@ dupes.setLabels(
      format      = "guided"
      script_name = "enter_bug.cgi" %]
 </div>
-
 </div>
 [% END %]
 
@@ -141,32 +133,24 @@ dupes.setLabels(
       [% END %]
     [% END %]
   [% END %]
-  <tr>
-    <td class="product_img">
-      <a href="javascript:void(0)"
+    <li
       [% IF onclick %]
       onclick="[% onclick FILTER html %]"
       [% ELSE %]
       onclick="product.select('[% name FILTER js %]')"
-      [% END %]
-      ><img src="extensions/BMO/web/producticons/[% icon FILTER uri %]" width="64" height="64"
-      ></a>
-    </td>
-    <td>
-      <h2>
-        <a href="javascript:void(0)"
-        [% IF onclick %]
-        onclick="[% onclick FILTER html %]"
-        [% ELSE %]
-        onclick="product.select('[% name FILTER js %]')"
-        [% END %]
-        >[% caption FILTER html %]</a>
-      </h2>
+      [% END %]>
+      <span class="product-item">
+      <img src="extensions/BMO/web/producticons/[% icon FILTER uri %]" class="product-icon" >
+      <a href="javascript:void(0)">[% caption FILTER html %]</a>
       <p>
-        [% desc FILTER html_light %]
+        [% IF content %]
+           [% content FILTER none %]
+        [% ELSE %]
+          [% desc FILTER html_light %]
+        [% END %]
       </p>
-    </td>
-  </tr>
+      </span>
+    </li>
 [% END %]
 
 [%############################################################################%]
@@ -300,11 +284,25 @@ Product: <b><span id="dupes_product_name">?</span></b>:
 </p>
 
 <table border="0" cellpadding="5" cellspacing="0" id="product_support" class="hidden">
-<tr>
-<td>
-  <img src="extensions/GuidedBugEntry/web/images/message.png" width="24" height="24">
-</td>
-<td id="product_support_message">&nbsp;</td>
+  <tr>
+    <td>
+      <img src="extensions/GuidedBugEntry/web/images/message.png" width="24" height="24">
+    </td>
+    <td id="product_support_message">&nbsp;</td>
+  </tr>
+</table>
+
+<table border="0" cellpadding="5" cellspacing="0" id="l10n_message">
+  <tr>
+    <td>
+      <img src="extensions/BMO/web/producticons/localization.png" width="24" height="24">
+    </td>
+    <td>
+      <a href="javascript:void(0)" id="l10n_link">
+        <span id="l10n_product"></span> is poorly translated into my native language.
+      </a>
+    </td>
+  </tr>
 </table>
 
 <div id="dupe_form">
@@ -358,7 +356,7 @@ explain how to write effective [% terms.bug %] reports.</li>
 
 <table id="bugForm" cellspacing="0">
 
-<tr class="odd">
+<tr>
   <td class="label">Summary:</td>
   <td width="100%" colspan="2">
     <input name="short_desc" id="short_desc" class="textInput" spellcheck="true">
@@ -374,7 +372,7 @@ explain how to write effective [% terms.bug %] reports.</li>
   </td>
 </tr>
 
-<tr class="even">
+<tr>
   <td class="label">Product:</td>
   <td id="productTD">
     <span id="product_label"></span>
@@ -392,7 +390,7 @@ explain how to write effective [% terms.bug %] reports.</li>
     </div>
 </tr>
 
-<tr class="odd" id="componentTR">
+<tr id="componentTR">
   <td valign="top">
     <div class="label">
     Component:
@@ -415,7 +413,7 @@ explain how to write effective [% terms.bug %] reports.</li>
     </div>
 </tr>
 
-<tr class="even">
+<tr>
   <td class="label" colspan="3">What did you do? (steps to reproduce)</td>
   <td valign="top">
   [% PROCESS help id="steps_help" %]
@@ -433,12 +431,12 @@ explain how to write effective [% terms.bug %] reports.</li>
   </div>
   </td>
 </tr>
-<tr class="even">
+<tr>
   <td colspan="3"><textarea id="bug_steps" name="bug_steps" rows="5"></textarea></td>
   <td>&nbsp;</td>
 </tr>
 
-<tr class="odd">
+<tr>
   <td class="label" colspan="3">What happened? (actual results)</td>
   <td valign="top">
   [% PROCESS help id="actual_help" %]
@@ -446,12 +444,12 @@ explain how to write effective [% terms.bug %] reports.</li>
   What happened after you performed the steps above?
   </div>
 </tr>
-<tr class="odd">
+<tr>
   <td colspan="3"><textarea id="actual" name="actual" rows="5"></textarea></td>
   <td>&nbsp;</td>
 </tr>
 
-<tr class="even">
+<tr>
   <td class="label" colspan="3">What should have happened? (expected results)</td>
   <td valign="top">
   [% PROCESS help id="expected_help" %]
@@ -459,12 +457,12 @@ explain how to write effective [% terms.bug %] reports.</li>
   What should the software have done instead?
   </div>
 </tr>
-<tr class="even">
+<tr>
   <td colspan="3"><textarea id="expected" name="expected" rows="5"></textarea></td>
   <td>&nbsp;</td>
 </tr>
 
-<tr class="odd">
+<tr>
   <td class="label">Attach a file:</td>
   <td colspan="2">
     <input type="file" name="data" id="data" size="50" onchange="bugForm.onFileChange()">
@@ -479,13 +477,13 @@ explain how to write effective [% terms.bug %] reports.</li>
   </div>
   </td>
 </tr>
-<tr class="odd">
+<tr>
   <td class="label">File Description:</td>
   <td colspan="2"><input type="text" name="description" id="data_description" class="textInput" disabled></td>
   <td>&nbsp;</td>
 </tr>
 
-<tr class="even">
+<tr>
   <td class="label">Security:</td>
   <td colspan="2">
     <table border="0" cellpadding="0" cellspacing="0">
@@ -503,7 +501,26 @@ explain how to write effective [% terms.bug %] reports.</li>
   <td>&nbsp;</td>
 </tr>
 
-<tr class="odd">
+<tr id="details">
+  <td class="label">Additional Details:</td>
+  <td colspan="2">
+    <table border="0" cellpadding="0" cellspacing="0">
+      <tr id="firefox_for_android_row">
+        <td>
+          <input type="checkbox" id="firefox_for_android" name="firefox_for_android" value="1">
+        </td>
+        <td>
+          <label for="firefox_for_android">This is a problem with Firefox on my phone or tablet.</label>
+        </td>
+      </tr>
+    </table>
+  </td>
+  <td>
+    &nbsp;
+  </td>
+</tr>
+
+<tr id="submitTR">
   <td>&nbsp;</td>
   <td colspan="2" id="submitTD">
     <input type="submit" id="submit" value="Submit [% terms.Bug %]">

@@ -3,6 +3,9 @@
 User Agent: [% cgi.param('user_agent') %]
 [% IF cgi.param('build_id') %]
 Build ID: [% cgi.param('build_id') %][% END %]
+[% IF cgi.param('firefox_for_android') %]
+Firefox for Android
+[% END %]
 
 [% IF cgi.param('bug_steps') %]
 Steps to reproduce:

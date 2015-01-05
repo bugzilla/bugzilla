@@ -19,6 +19,9 @@
  */
 
 var products = {
+  "addons.mozilla.org": {
+    l10n: true
+  },
 
   "Firefox": {
     related: [ "Core", "Toolkit" ],
@@ -40,6 +43,7 @@ var products = {
     defaultComponent: "Untriaged",
     noComponentSelection: true,
     detectPlatform: true,
+    l10n: true,
     support:
       'If you are new to Firefox or Bugzilla, please consider checking ' +
       '<a href="http://support.mozilla.com/">' +
@@ -50,6 +54,7 @@ var products = {
   "Firefox for Android": {
     related: [ "Core", "Toolkit" ],
     detectPlatform: true,
+    l10n: true,
     support:
       'If you are new to Firefox or Bugzilla, please consider checking ' +
       '<a href="http://support.mozilla.com/">' +
@@ -60,6 +65,7 @@ var products = {
   "SeaMonkey": {
     related: [ "Core", "Toolkit", "MailNews Core" ],
     detectPlatform: true,
+    l10n: true,
     version: function() {
       var re = /SeaMonkey\/(\d+)\.(\d+)/i;
       var match = re.exec(navigator.userAgent);
@@ -71,6 +77,10 @@ var products = {
         return false;
       }
     }
+  },
+
+  "Calendar": {
+    l10n: true
   },
 
   "Camino": {
@@ -85,6 +95,7 @@ var products = {
   "Thunderbird": {
     related: [ "Core", "Toolkit", "MailNews Core" ],
     detectPlatform: true,
+    l10n: true,
     defaultComponent: "Untriaged",
     componentFilter : function(components) {
         var index = -1;
@@ -99,6 +110,10 @@ var products = {
         }
         return components;
     }
+  },
+
+  "Marketplace": {
+    l10n: true
   },
 
   "Penelope": {

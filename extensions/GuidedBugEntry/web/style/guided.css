@@ -31,9 +31,54 @@
     visibility: hidden;
 }
 
-.step {
-    margin-left: 20px;
-    margin-bottom: 25px;
+#steps {
+    max-width: 1200px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.product-icon {
+    float: left;
+    margin: 8px 15px 8px 0px;
+    height: 64px;
+    width: 64px;
+}
+
+#product_step {
+    max-width: 1200px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+ul.product-list {
+    list-style: outside none none;
+    margin: 0px -10px 20px;
+    padding: 0px;
+}
+
+ul.product-list > li {
+    cursor: pointer;
+    height: 168px;
+    min-height: 166px;
+
+    background-color: #FFF;
+    background-image: linear-gradient(0deg, #F6F4EC, #FFF);
+    border-radius: 6px;
+    background-clip: padding-box;
+    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+    display: inline-block;
+    margin: 5px 5px 5px;
+    padding: 1px;
+    position: relative;
+    vertical-align: top;
+    width: 300px;
+    word-wrap: break-word;
+    z-index: 1;
+}
+
+ul.product-list > li > .product-item {
+    display: block;
+    padding: 10px;
 }
 
 #steps a img {
@@ -42,6 +87,8 @@
 
 #advanced {
     margin-top: 50px;
+    text-align: right;
+    margin-left: auto;
 }
 
 #advanced img {
@@ -160,8 +207,12 @@
     padding: 5px;
 }
 
-#bugForm .even th, #bugForm .even td {
+#bugForm tr:nth-child(even) td, #bugForm tr:nth-child(even) th {
     background: #e0e0e0;
+}
+
+#bugForm tr.odd td {
+    background: inherit;
 }
 
 #bugForm .label {

@@ -18,6 +18,9 @@ use Bugzilla::Util qw(trim trick_taint);
 
 our $VERSION = '2';
 
+use constant REQUIRE_WATCH_USER => 1;
+use constant DEFAULT_ASSIGNEE   => 'nobody@mozilla.org';
+
 use constant REL_COMPONENT_WATCHER => 15;
 
 #
@@ -112,6 +115,12 @@ sub template_before_create {
     $constants->{REL_COMPONENT_WATCHER} = REL_COMPONENT_WATCHER;
 }
 
+sub template_before_process {
+    my ($self, $args) = @_;
+    return unless $args->{file} eq 'admin/components/create.html.tmpl';
+    $args->{vars}{comp}{default_assignee}{login} = DEFAULT_ASSIGNEE;
+}
+
 #
 # user-watch
 #
@@ -147,6 +156,7 @@ sub object_update_columns {
     # editcomponents.cgi doesn't call set_all, so we have to do this here
     my $input = Bugzilla->input_params;
     $object->set('watch_user', $input->{watch_user});
+    $self->_create_watch_user();
 }
 
 sub object_validators {
@@ -180,6 +190,7 @@ sub object_before_create {
     else {
         my $input = Bugzilla->input_params;
         $params->{watch_user} = $input->{watch_user};
+        $self->_create_watch_user();
     }
 }
 
@@ -192,14 +203,59 @@ sub object_end_of_update {
 
     my $old_id = $old_object->watch_user ? $old_object->watch_user->id : 0;
     my $new_id = $object->watch_user ? $object->watch_user->id : 0;
-    return if $old_id == $new_id;
+    if ($old_id != $new_id) {
+        $changes->{watch_user} = [ $old_id ? $old_id : undef, $new_id ? $new_id : undef ];
+    }
 
-    $changes->{watch_user} = [ $old_id ? $old_id : undef, $new_id ? $new_id : undef ];
+    # when a component is renamed, update the watch-user to follow
+    # this only happens when the user appears to have been auto-generated from the old name
+    if ($changes->{name}
+        && $old_object->watch_user
+        && $object->watch_user
+        && $old_object->watch_user->id == $object->watch_user->id
+        && _generate_watch_user_name($old_object) eq $object->watch_user->login
+        )
+    {
+        my $old_login = $object->watch_user->login;
+        $object->watch_user->set_login(_generate_watch_user_name($object));
+        $object->watch_user->update();
+        $changes->{watch_user_login} = [ $old_login, $object->watch_user->login ];
+    }
+}
+
+sub _generate_watch_user_name {
+    # this is mirrored in template/en/default/hook/admin/components/edit-common-rows.html.tmpl
+    # that javascript needs to be kept in sync with this perl
+    my ($component) = @_;
+    return _sanitise_name($component->name)
+           . '@' . _sanitise_name($component->product->name) . '.bugs';
+}
+
+sub _sanitise_name {
+    my ($name) = @_;
+    $name = lc($name);
+    $name =~ s/[^a-z0-9_]/-/g;
+    $name =~ s/-+/-/g;
+    $name =~ s/(^-|-$)//g;
+    return $name;
+}
+
+sub _create_watch_user {
+    my $input = Bugzilla->input_params;
+    if ($input->{watch_user_auto}
+        && !Bugzilla::User->new({ name => $input->{watch_user} }))
+    {
+        Bugzilla::User->create({
+            login_name    => $input->{watch_user},
+            cryptpassword => '*',
+        });
+    }
 }
 
 sub _check_watch_user {
     my ($self, $value, $field) = @_;
     $value = trim($value || '');
+    return undef if !REQUIRE_WATCH_USER && $value eq '';
     if ($value eq '') {
         ThrowUserError('component_watch_missing_watch_user');
     }

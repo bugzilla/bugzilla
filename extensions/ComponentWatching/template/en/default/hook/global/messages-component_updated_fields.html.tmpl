@@ -13,3 +13,6 @@
     <li>Watch User deleted</li>
   [% END %]
 [% END %]
+[% IF changes.watch_user_login.defined %]
+  <li>Watch User renamed to '[% comp.watch_user.login FILTER html %]'</li>
+[% END %]

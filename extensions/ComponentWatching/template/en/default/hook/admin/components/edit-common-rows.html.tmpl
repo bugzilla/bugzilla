@@ -9,12 +9,62 @@
 <tr>
   <th class="field_label"><label for="watch_user">Watch User:</label></th>
   <td>
+    [% IF !comp.id || !comp.watch_user %]
+      <input type="checkbox" id="watch_user_auto" name="watch_user_auto" value="1" checked>
+      <label for="watch_user_auto">Automatic</label>
+      <span id="watch_user_suggestion"></span>
+      [% edit_size = 44 %]
+    [% ELSE %]
+      [% edit_size = 64 %]
+    [% END %]
     [% INCLUDE global/userselect.html.tmpl
        name    => "watch_user"
        id      => "watch_user"
        value   => comp.watch_user.login
-       size    => 64
+       size    => edit_size
        emptyok => 1
     %]
   </td>
 </tr>
+
+<script>
+function sanitise_name(name) {
+  return name.toLowerCase()
+             .replace(/[^a-z0-9_]/g, '-')
+             .replace(/-+/g, '-')
+             .replace(/(^-|-$)/g, '');
+}
+
+function update_watch_user() {
+  var Dom = YAHOO.util.Dom;
+  if (Dom.get('watch_user_auto').checked) {
+    Dom.addClass('watch_user', 'bz_default_hidden');
+
+    var component = Dom.get('component').value;
+    var watch = '';
+    if (component == '') {
+      watch = '(no component name)';
+    }
+    else {
+      watch = sanitise_name(component) +
+              '@' + sanitise_name('[% product.name FILTER js %]') + '.bugs';
+    }
+    Dom.get('watch_user_suggestion').innerHTML = ' : <b>' + watch + '</b>';
+    Dom.get('watch_user').value = watch;
+  }
+  else {
+    Dom.removeClass('watch_user', 'bz_default_hidden');
+    Dom.get('watch_user_suggestion').innerHTML = '';
+    if (Dom.get('watch_user').value == '(no component name)')
+      Dom.get('watch_user').value = '';
+  }
+}
+
+YAHOO.util.Event.onDOMReady(function() {
+  if (document.getElementById('watch_user_auto')) {
+    YAHOO.util.Event.addListener('component', 'keyup', update_watch_user);
+    YAHOO.util.Event.addListener('watch_user_auto', 'click', update_watch_user);
+    update_watch_user();
+  }
+});
+</script>

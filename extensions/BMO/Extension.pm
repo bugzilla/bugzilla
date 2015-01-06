@@ -555,7 +555,7 @@ sub bug_format_comment {
 
     # link to CVE/CAN security releases
     push (@$regexes, {
-        match => qr/(?<!\/|=)\b((?:CVE|CAN)-\d{4}-(?:\d{4}|[1-9]\d{4,6})(?!\d))\b/,
+        match => qr/(?<!\/|=)\b((?:CVE|CAN)-\d{4}-(?:\d{4}|[1-9]\d{4,})(?!\d))\b/,
         replace => sub {
             my $args = shift;
             my $match = html_quote($args->{matches}->[0]);

@@ -559,7 +559,7 @@ sub bug_format_comment {
         replace => sub {
             my $args = shift;
             my $match = html_quote($args->{matches}->[0]);
-            return qq{<a href="http://cve.mitre.org/cgi-bin/cvename.cgi?name=$match">$match</a>};
+            return qq{<a href="https://cve.mitre.org/cgi-bin/cvename.cgi?name=$match">$match</a>};
         }
     });
 
@@ -569,7 +569,7 @@ sub bug_format_comment {
         replace => sub {
             my $args = shift;
             my $match = html_quote($args->{matches}->[0]);
-            return qq{<a href="http://viewvc.svn.mozilla.org/vc?view=rev&amp;revision=$match">r$match</a>};
+            return qq{<a href="https://viewvc.svn.mozilla.org/vc?view=rev&amp;revision=$match">r$match</a>};
         }
     });
 
@@ -586,7 +586,7 @@ sub bug_format_comment {
             my $id = html_quote($args->{matches}->[3]);
             $url =~ s/\s+$//;
             $url =~ s/\/$//;
-            return qq{$preamble<a href="http://$url/revision/$id">$text</a>};
+            return qq{$preamble<a href="https://$url/revision/$id">$text</a>};
         }
     });
 
@@ -600,7 +600,7 @@ sub bug_format_comment {
             my $repo = html_quote($args->{matches}->[1]);
             my $text = $args->{matches}->[2];
             my $revision = $args->{matches}->[3];
-            return qq#$preamble<a href="http://git.mozilla.org/?p=$repo;a=commitdiff;h=$revision">$text</a>#;
+            return qq#$preamble<a href="https://git.mozilla.org/?p=$repo;a=commitdiff;h=$revision">$text</a>#;
         }
     });
 

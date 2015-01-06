@@ -26,6 +26,9 @@ bp-deadbeef-deaf-beef-beed-cafefeed1337
 
 # CVE/CAN security things
 CVE-2014-0160
+CVE-2014-0001
+CVE-2014-13579
+CVE-2014-999999999
 
 # svn
 r2424
@@ -68,12 +71,15 @@ foreach my $re (@regexes) {
 
 my @links = (
     '<a href="https://crash-stats.mozilla.com/report/index/deadbeef-deaf-beef-beed-cafefeed1337">bp-deadbeef-deaf-beef-beed-cafefeed1337</a>',
-    '<a href="http://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2014-0160">CVE-2014-0160</a>',
-    '<a href="http://viewvc.svn.mozilla.org/vc?view=rev&amp;revision=2424">r2424</a>',
-    '<a href="http://git.mozilla.org/?p=bugzilla/bugzilla.git;a=commit;h=eab44b1">36f56bd..eab44b1  withuri -> withuri</a>',
-    '<a href="http://git.mozilla.org/?p=bugzilla/bugzilla.git;a=commit;h=eab44b1">36f56bd..eab44b1  nouri -> nouri</a>',
-    '<a href="http://git.mozilla.org/?p=bugzilla/bugzilla.git;a=commit;h=eab44b1">36f56bd..eab44b1  nologin -> nologin</a>',
-    'http://bzr.mozilla.org/bmo/4.2/revision/9257',
+    '<a href="https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2014-0160">CVE-2014-0160</a>',
+    '<a href="https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2014-0001">CVE-2014-0001</a>',
+    '<a href="https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2014-13579">CVE-2014-13579</a>',
+    '<a href="https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2014-999999999">CVE-2014-999999999</a>',
+    '<a href="https://viewvc.svn.mozilla.org/vc?view=rev&amp;revision=2424">r2424</a>',
+    '<a href="https://git.mozilla.org/?p=bugzilla/bugzilla.git;a=commitdiff;h=eab44b1">36f56bd..eab44b1  withuri -> withuri</a>',
+    '<a href="https://git.mozilla.org/?p=bugzilla/bugzilla.git;a=commitdiff;h=eab44b1">36f56bd..eab44b1  nouri -> nouri</a>',
+    '<a href="https://git.mozilla.org/?p=bugzilla/bugzilla.git;a=commitdiff;h=eab44b1">36f56bd..eab44b1  nologin -> nologin</a>',
+    'https://bzr.mozilla.org/bmo/4.2/revision/9257',
 );
 
 foreach my $link (@links) {

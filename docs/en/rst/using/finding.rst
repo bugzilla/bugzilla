@@ -195,34 +195,34 @@ Long Format:
     this gives you a large page with a non-editable summary of the fields
     of each bug.
 
-XML:
-    get the buglist in the XML format.
+XML (icon):
+    get the buglist in an XML format.
 
-CSV:
+CSV (icon):
     get the buglist as comma-separated values, for import into e.g.
     a spreadsheet.
 
-Feed:
+Feed (icon):
     get the buglist as an Atom feed.  Copy this link into your
     favorite feed reader.  If you are using Firefox, you can also
     save the list as a live bookmark by clicking the live bookmark
     icon in the status bar.  To limit the number of bugs in the feed,
     add a limit=n parameter to the URL.
 
-iCalendar:
+iCalendar (icon):
     Get the buglist as an iCalendar file. Each bug is represented as a
     to-do item in the imported calendar.
 
 Change Columns:
     change the bug attributes which appear in the list.
 
-Change several bugs at once:
+Change Several Bugs At Once:
     If your account is sufficiently empowered, and more than one bug
     appears in the bug list, this link is displayed and lets you easily make
     the same change to all the bugs in the list - for example, changing
     their assignee.
 
-Send mail to bug assignees:  
+Send Mail to Bug Assignees:
     If more than one bug appear in the bug list and there are at least
     two distinct bug assignees, this links is displayed which lets you
     easily send a mail to the assignees of all bugs on the list.
@@ -236,21 +236,3 @@ Remember Search As:
     You can give a search a name and remember it; a link will appear
     in your page footer giving you quick access to run it again later.
 
-.. _individual-buglists:
-
-Adding and Removing Tags on Bugs
-================================
-
-You can add and remove tags from individual bugs, which let you find and
-manage bugs more easily. Tags are per-user and so are only visible and editable
-by the user who created them. You can then run queries using tags as a criteria,
-either by using the Advanced Search form, or simply by typing "tag\:my_tag_name"
-in the QuickSearch box at the top (or bottom) of the page. Tags can also be
-displayed in buglists.
-
-This feature is useful when you want to keep track of several bugs, but
-for different reasons. Instead of adding yourself to the CC list of all
-these bugs and mixing all these reasons, you can now store these bugs in
-separate lists, e.g. ``Keep in mind``, ``Interesting bugs``,
-or ``Triage``. One big advantage of this way to manage bugs
-is that you can easily add or remove tags from bugs one by one.

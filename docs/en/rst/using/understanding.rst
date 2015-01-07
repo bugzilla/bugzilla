@@ -74,8 +74,9 @@ installation of Bugzilla.
 *Personal Tags:*
    Unlike Keywords which are global and visible by all users, Personal Tags
    are personal and can only be viewed and edited by their author. Editing
-   them won't send any notification to other users. Use them to tag and keep
-   track of bugs. 
+   them won't send any notifications to other users. Use them to tag and keep
+   track of sets of bugs that you personally care about, using your own
+   classification system.
 
 *Dependencies (Depends On and Blocks):*
    If this bug cannot be fixed unless other bugs are fixed (depends

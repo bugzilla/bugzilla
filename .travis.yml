@@ -60,7 +60,6 @@ notifications:
   irc:
     channels:
       - "irc.mozilla.org#qa-bugzilla"
-      - "irc.mozilla.org#bugzilla"
     template:
       - "Bugzilla %{branch} : %{author} : %{message}"
       - "Commit Message : %{commit_message}"

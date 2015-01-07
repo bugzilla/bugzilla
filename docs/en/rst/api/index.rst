@@ -9,5 +9,5 @@ This Bugzilla installation has the following WebService APIs available
 .. toctree::
    :glob:
 
-   core/v*/index*
-   extensions/*/v*/index*
+   core/v*/index
+   ../extensions/*/api/v*/index

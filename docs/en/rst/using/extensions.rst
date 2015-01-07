@@ -1,4 +1,4 @@
-.. _installed-extensions-admin:
+.. _installed-extensions-user:
 
 Installed Extensions
 ====================
@@ -15,4 +15,4 @@ last time you compiled the documentation):
    :maxdepth: 1
    :glob:
    
-   ../extensions/*/index-admin
+   ../extensions/*/index-user

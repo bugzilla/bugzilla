@@ -280,6 +280,8 @@ sub OPTIONAL_MODULES {
         # Fixes various bugs, including 542931 and 552353 + stops
         # throwing warnings with Perl 5.12.
         version => '0.712',
+        # SOAP::Transport::HTTP 1.12 is bogus.
+        blacklist => ['^1\.12$'],
         feature => ['xmlrpc'],
     },
     # Since SOAP::Lite 1.0, XMLRPC::Lite is no longer included

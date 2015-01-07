@@ -651,6 +651,21 @@ So, for example, if you had a CSS file called F<style.css> and your
 extension was called F<Foo>, your file would go into 
 F<extensions/Foo/web/style.css>.
 
+=head2 Documenting Extensions
+
+Documentation goes in F<extensions/Foo/docs/en/rst/>, if it's in English, or
+change "en" to something else if it's not. The user documentation index file
+must be called index-user.rst; the admin documentation must be called
+index-admin.rst. These will end up in the User Guide and the Administration
+Guide respectively. Both documentation types are optional. You can use various
+Sphinx constructs such as :toctree: or :include: to include further reST files
+if you need more than one page of docs.
+
+When documenting extensions to the Bugzilla API, if your extension provides
+them, the index file would be F<extensions/Foo/docs/en/rst/api/v1/index.rst>.
+When and if your API has more than one version, increment the version number.
+These docs will get included in the WebService API Reference.
+
 =head2 Disabling Your Extension
 
 If you want your extension to be totally ignored by Bugzilla (it will

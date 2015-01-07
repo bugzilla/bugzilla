@@ -15,4 +15,5 @@ User Guide
    reports-and-charts
    tips
    preferences
+   extensions
 

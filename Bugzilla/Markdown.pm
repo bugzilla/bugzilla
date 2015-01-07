@@ -230,8 +230,8 @@ sub _DoAnchors {
             $url =~ s@</a$@@;
         }
 
-        # Limit URL to HTTP/HTTPS links
-        $url = "http://$url" unless $url =~ m!^https?://!i;
+        my $safe_url_regexp = Bugzilla::Template::SAFE_URL_REGEXP();
+        $url = "http://$url" unless $url =~ /^$safe_url_regexp$/;
 
         $self->_GenerateAnchor($whole_match, $link_text, undef, $url, $title);
     }xsge;

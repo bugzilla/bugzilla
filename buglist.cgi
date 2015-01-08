@@ -88,29 +88,6 @@ if (defined $cgi->param('ctype') && $cgi->param('ctype') eq "rss") {
     $cgi->param('ctype', "atom");
 }
 
-# Determine the format in which the user would like to receive the output.
-# Uses the default format if the user did not specify an output format;
-# otherwise validates the user's choice against the list of available formats.
-my $format = $template->get_format("list/list", scalar $cgi->param('format'),
-                                   scalar $cgi->param('ctype'));
-
-# Use server push to display a "Please wait..." message for the user while
-# executing their query if their browser supports it and they are viewing
-# the bug list as HTML and they have not disabled it by adding &serverpush=0
-# to the URL.
-#
-# Server push is compatible with Gecko-based browsers and Opera, but not with
-# MSIE, Lynx or Safari (bug 441496).
-
-my $serverpush =
-  $format->{'extension'} eq "html"
-    && exists $ENV{'HTTP_USER_AGENT'} 
-      && $ENV{'HTTP_USER_AGENT'} =~ /(Mozilla.[3-9]|Opera)/
-        && $ENV{'HTTP_USER_AGENT'} !~ /compatible/i
-          && $ENV{'HTTP_USER_AGENT'} !~ /(?:WebKit|Trident|KHTML)/
-            && !defined($cgi->param('serverpush'))
-              || $cgi->param('serverpush');
-
 my $order = $cgi->param('order') || "";
 
 # The params object to use for the actual query itself
@@ -334,16 +311,6 @@ if ($cmdtype eq "runnamed") {
 # This will be modified, so make a copy.
 $params ||= new Bugzilla::CGI($cgi);
 
-# Generate a reasonable filename for the user agent to suggest to the user
-# when the user saves the bug list.  Uses the name of the remembered query
-# if available.  We have to do this now, even though we return HTTP headers 
-# at the end, because the fact that there is a remembered query gets 
-# forgotten in the process of retrieving it.
-my $disp_prefix = "bugs";
-if ($cmdtype eq "dorem" && $remaction =~ /^run/) {
-    $disp_prefix = $cgi->param('namedcmd');
-}
-
 # Take appropriate action based on user's request.
 if ($cmdtype eq "dorem") {  
     if ($remaction eq "run") {
@@ -475,6 +442,40 @@ elsif (($cmdtype eq "doit") && defined $cgi->param('remtype')) {
 if (!$params->param('query_format')) {
     $params->param('query_format', 'advanced');
     $buffer = $params->query_string;
+}
+
+# Determine the format in which the user would like to receive the output.
+# Uses the default format if the user did not specify an output format;
+# otherwise validates the user's choice against the list of available formats.
+my $format = $template->get_format("list/list", scalar $cgi->param('format'),
+                                   scalar $cgi->param('ctype'));
+
+# Use server push to display a "Please wait..." message for the user while
+# executing their query if their browser supports it and they are viewing
+# the bug list as HTML and they have not disabled it by adding &serverpush=0
+# to the URL.
+#
+# Server push is compatible with Gecko-based browsers and Opera, but not with
+# MSIE, Lynx or Safari (bug 441496).
+
+my $serverpush =
+  $format->{'extension'} eq "html"
+    && exists $ENV{'HTTP_USER_AGENT'} 
+      && $ENV{'HTTP_USER_AGENT'} =~ /(Mozilla.[3-9]|Opera)/
+        && $ENV{'HTTP_USER_AGENT'} !~ /compatible/i
+          && $ENV{'HTTP_USER_AGENT'} !~ /(?:WebKit|Trident|KHTML)/
+            && !defined($cgi->param('serverpush'))
+              || $cgi->param('serverpush');
+
+
+# Generate a reasonable filename for the user agent to suggest to the user
+# when the user saves the bug list.  Uses the name of the remembered query
+# if available.  We have to do this now, even though we return HTTP headers 
+# at the end, because the fact that there is a remembered query gets 
+# forgotten in the process of retrieving it.
+my $disp_prefix = "bugs";
+if ($cmdtype eq "dorem" && $remaction =~ /^run/) {
+    $disp_prefix = $cgi->param('namedcmd');
 }
 
 ################################################################################

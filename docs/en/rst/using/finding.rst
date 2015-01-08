@@ -33,10 +33,6 @@ would search only in that product.
 You can also use it to go directly to a bug by entering its number or its
 alias.
 
-.. todo:: Need to incorporate the full reference, and link it properly from
-          the GUI. https://bugzilla.mozilla.org/page.cgi?id=quicksearch.html
-          Turn this item into a bug after checkin.
-
 Simple Search
 =============
 
@@ -66,15 +62,15 @@ with other users; see :ref:`saved-searches` for more details.
 Custom Search
 =============
 
-Highly advanced querying is done using the Custom Search feature of the
-Advanced Search page.
+Highly advanced querying is done using the :guilabel:`Custom Search` feature
+of the :guilabel:`Advanced Search` page.
 
 The search criteria here further restrict the set of results
-returned by a query over and above those defined in the fields at the top
+returned by a query, over and above those defined in the fields at the top
 of the page. It is thereby possible to search for bugs
 based on elaborate combinations of criteria.
 
-The simplest boolean searches have only one term. These searches
+The simplest custom searches have only one term. These searches
 permit the selected *field*
 to be compared using a
 selectable *operator* to a
@@ -83,10 +79,10 @@ fields. However, you can then combine terms using "Match ANY" or "Match ALL",
 using parentheses for combining and priority, in order to construct searches
 of almost arbitrary complexity.
 
-There are three fields in each row of a boolean search.
+There are three fields in each row (known as a "term") of a custom search:
 
 - *Field:*
-  the items being searched
+  the name of the field being searched
 
 - *Operator:*
   the comparison operator
@@ -94,71 +90,87 @@ There are three fields in each row of a boolean search.
 - *Value:*
   the value to which the field is being compared
 
-.. _negation:
+The list of available *fields* contains all the fields defined for a bug,
+including any custom fields, and then also some pseudofields like
+:guilabel:`Assignee Real Name`, :guilabel:`Days Since Bug Changed`,
+:guilabel:`Time Since Assignee Touched` and other things it may be useful to
+search on.
 
-.. _multiplecharts:
+There are a wide range of *operators* available, not all of which may make
+sense for a particular field. There are various string-matching operations
+(including regular expressions), numerical comparisons (which also work for
+dates), and also the ability to search for change information—when a field
+changed, what it changed from or to, and who did it. There are special
+operators for :guilabel:`is empty` and :guilabel:`is not empty`, because
+Bugzilla can't tell the difference between a value field left blank on
+purpose and one left blank by accident.
 
-Multiple Charts
----------------
+You can have an arbitrary number of rows, and the dropdown box above them
+defines how they relate—:guilabel:`Match ALL of the following separately`,
+:guilabel:`Match ANY of the following separately`, or :guilabel:`Match ALL of
+the following against the same field`. The difference between the first and
+the third can be illustrated with a comment search. If you have a search::
 
-.. todo:: This needs rewriting for the new UI.
-          Turn this item into a bug after checkin.
-          
-The terms within a single row of a boolean chart are all
-constraints on a single piece of data. If you are looking for
-a bug that has two different people cc'd on it, then you need
-to use two boolean charts. A search for
+    Comment   contains the string   "Fred"
+    Comment   contains the string   "Barney"
 
-    ("cc" "contains the string" "foo@") AND
-    ("cc" "contains the string" "@mozilla.org")
+then under the first regime (match separately) the search would return bugs
+where "Fred" appeared in one comment and "Barney" in the same or any other
+comment, whereas under the second (match against the same field), both strings
+would need to occur in exactly the same comment.
 
-would return only bugs with "foo@mozilla.org" on the cc list.
-If you wanted bugs where there is someone on the cc list
-containing "foo@" and someone else containing "@mozilla.org",
-then you would need two boolean charts.
+.. _advanced-features:
 
-    First chart: ("cc" "contains the string" "foo@")
-    Second chart: ("cc" "contains the string" "@mozilla.org")
+Advanced Features
+-----------------
 
-The bugs listed will be only the bugs where ALL the charts are true.
+If you click :guilabel:`Show Advanced Features`, then more capabilities appear.
+You can negate any row with a checkbox (see below) and also group lines of the
+search with parentheses to determine how different search terms relate. Within
+each bracketed set, you get the choice of combining them using ALL (i.e. AND)
+or ANY (i.e. OR).
 
 Negation
 --------
 
 At first glance, negation seems redundant. Rather than
-searching for
+searching for::
 
-    NOT("summary" "contains the string" "foo"),
+    NOT ( summary   contains the string   "foo" )
 
-one could search for
+one could search for::
 
-    ("summary" "does not contain the string" "foo").
+    summary   does not contain the string   "foo"
 
-However, the search
+However, the search::
 
-    ("CC" "does not contain the string" "@mozilla.org")
+    CC   does not contain the string   "@mozilla.org"
 
 would find every bug where anyone on the CC list did not contain
-"@mozilla.org" while
+"@mozilla.org" while::
 
-    NOT("CC" "contains the string" "@mozilla.org")
+    NOT ( CC   contains the string   "@mozilla.org" )
 
 would find every bug where there was nobody on the CC list who
 did contain the string. Similarly, the use of negation also permits
 complex expressions to be built using terms OR'd together and then
-negated. Negation permits queries such as
+negated. Negation permits queries such as::
 
-    NOT(("product" "equals" "update") OR
-    ("component" "equals" "Documentation"))
+    NOT ( ( product   equals   "Update" )
+          OR
+          ( component   equals   "Documentation" )
+        )
 
 to find bugs that are neither
-in the update product or in the documentation component or
+in the :guilabel:`Update` product or in the :guilabel:`Documentation` component
+or::
 
-    NOT(("commenter" "equals" "%assignee%") OR
-    ("component" "equals" "Documentation"))
+    NOT ( ( commenter   equals   "%assignee%" )
+          OR
+          (component   equals   "Documentation" )
+        )
 
-to find non-documentation
-bugs on which the assignee has never commented.
+to find non-documentation bugs on which the assignee has never commented.
 
 .. _pronouns:
 
@@ -166,26 +178,28 @@ Pronoun Substitution
 --------------------
 
 Sometimes, a query needs to compare a user-related field
-(such as Reporter) with a role-specific user (such as the
+(such as :guilabel:`Reporter`) with a role-specific user (such as the
 user running the query or the user to whom each bug is assigned). For
-example, you may want to find all bugs which are assigned to the person
+example, you may want to find all bugs that are assigned to the person
 who reported them.
 
-When the Custom Search operator is either "equals" or "notequals", the value
-can be "%reporter%", "%assignee%", "%qacontact%", or "%user%".
-The user pronoun
+When the :guilabel:`Custom Search` operator is either :guilabel:`equals` or
+:guilabel:`notequals`, the value can be "%reporter%", "%assignee%",
+"%qacontact%", or "%user%". These are known as "pronouns". The user pronoun
 refers to the user who is executing the query or, in the case
 of whining reports, the user who will be the recipient
 of the report. The reporter, assignee, and qacontact
 pronouns refer to the corresponding fields in the bug.
 
-Boolean charts also let you type a group name in any user-related
-field if the operator is either "equals", "notequals" or "anyexact".
-This will let you query for any member belonging (or not) to the
-specified group. The group name must be entered following the
-"%group.foo%" syntax, where "foo" is the group name.
+This feature also lets you search by a user's group memberships. If the
+operator is either :guilabel:`equals`, :guilabel:`notequals` or
+:guilabel:`anyexact`, you can search for
+whether a user belongs (or not) to the specified group. The group name must be
+entered using "%group.foo%" syntax, where "foo" is the group name.
 So if you are looking for bugs reported by any user being in the
-"editbugs" group, then you can type "%group.editbugs%".
+"editbugs" group, then you can use::
+
+    reporter   equals   "%group.editbugs%"
 
 .. _list:
 
@@ -242,3 +256,4 @@ Edit Search:
 Remember Search As:
     You can give a search a name and remember it; a link will appear
     in your page footer giving you quick access to run it again later.
+

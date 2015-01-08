@@ -57,11 +57,11 @@ Bugzilla::Hook - Extendable extension hooks for Bugzilla code
 
 =head1 DESCRIPTION
 
-Bugzilla allows extension modules to drop in and add routines at 
+Bugzilla allows extension modules to drop in and add routines at
 arbitrary points in Bugzilla code. These points are referred to as
 hooks. When a piece of standard Bugzilla code wants to allow an extension
 to perform additional functions, it uses Bugzilla::Hook's L</process>
-subroutine to invoke any extension code if installed. 
+subroutine to invoke any extension code if installed.
 
 The implementation of extensions is described in L<Bugzilla::Extension>.
 
@@ -98,7 +98,7 @@ mechanism.
 
 =item C<$name> - The name of the hook to invoke.
 
-=item C<$args> - A hashref. The named args to pass to the hook. 
+=item C<$args> - A hashref. The named args to pass to the hook.
 They will be passed as arguments to the hook method in the extension.
 
 =back
@@ -170,13 +170,13 @@ Params:
 =item C<modules>
 
 This is a hash--a mapping from login-type "names" to the actual module on
-disk. The keys will be all the values that were passed to 
+disk. The keys will be all the values that were passed to
 L<Bugzilla::Auth/login> for the C<Login> parameter. The values are the
 actual path to the module on disk. (For example, if the key is C<DB>, the
 value is F<Bugzilla/Auth/Login/DB.pm>.)
 
-For your extension, the path will start with 
-F<Bugzilla/Extension/Foo/>, where "Foo" is the name of your Extension. 
+For your extension, the path will start with
+F<Bugzilla/Extension/Foo/>, where "Foo" is the name of your Extension.
 (See the code in the example extension.)
 
 If your login type is in the hash as a key, you should set that key to the
@@ -253,7 +253,7 @@ Params:
 
 =over
 
-=item C<bug> 
+=item C<bug>
 
 The changed bug object, with all fields set to their updated values.
 
@@ -262,12 +262,12 @@ The changed bug object, with all fields set to their updated values.
 A bug object pulled from the database before the fields were set to
 their updated values (so it has the old values available for each field).
 
-=item C<timestamp> 
+=item C<timestamp>
 
 The timestamp used for all updates in this transaction, as a SQL date
 string.
 
-=item C<changes> 
+=item C<changes>
 
 The hash of changed fields. C<< $changes->{field} = [old, new] >>
 
@@ -276,9 +276,9 @@ The hash of changed fields. C<< $changes->{field} = [old, new] >>
 =head2 bug_check_can_change_field
 
 This hook controls what fields users are allowed to change. You can add code
-here for site-specific policy changes and other customizations. 
+here for site-specific policy changes and other customizations.
 
-This hook is only executed if the field's new and old values differ. 
+This hook is only executed if the field's new and old values differ.
 
 Any denies take priority over any allows. So, if another extension denies
 a change but yours allows the change, the other extension's deny will
@@ -373,7 +373,7 @@ An arrayref of hashrefs.
 You should push a hashref containing two keys (C<match> and C<replace>)
 in to this array. C<match> is the regular expression that matches the
 text you want to replace, C<replace> is what you want to replace that
-text with. (This gets passed into a regular expression like 
+text with. (This gets passed into a regular expression like
 C<s/$match/$replace/>.)
 
 Instead of specifying a regular expression for C<replace> you can also
@@ -394,7 +394,7 @@ do so could open a security hole in Bugzilla.
 
 A B<reference> to the exact text that you are parsing.
 
-Generally you should not modify this yourself. Instead you should be 
+Generally you should not modify this yourself. Instead you should be
 returning regular expressions using the C<regexes> array.
 
 The text has not been parsed in any way. (So, for example, it is not
@@ -435,7 +435,7 @@ Params:
 
 =over
 
-=item C<bug> 
+=item C<bug>
 
 The changed bug object, with all fields set to their updated values.
 
@@ -444,12 +444,12 @@ The changed bug object, with all fields set to their updated values.
 A bug object pulled from the database before the fields were set to
 their updated values (so it has the old values available for each field).
 
-=item C<timestamp> 
+=item C<timestamp>
 
 The timestamp used for all updates in this transaction, as a SQL date
 string.
 
-=item C<changes> 
+=item C<changes>
 
 The hash of changed fields. C<< $changes->{field} = [old, new] >>
 
@@ -509,7 +509,7 @@ Params:
 =over
 
 =item C<column_joins> - A hashref containing data to return back to
-L<Bugzilla::Search>. This hashref contains names of the columns as keys and 
+L<Bugzilla::Search>. This hashref contains names of the columns as keys and
 a hashref about table to join as values. This hashref has the following keys:
 
 =over
@@ -533,11 +533,38 @@ table should be joined with the C<bugs> table. If omitted, LEFT is used.
 
 =back
 
+=head2 buglist_format
+
+This happens in F<buglist.cgi>, used to change the template variables before
+processing the associated template hook.
+
+Params:
+
+=over
+
+=item C<vars>
+
+This is the entire set of variables that the current template
+can see.
+
+=item C<file>
+
+The name of the template file being processed. This is
+relative to the main template directory for the language (i.e. for
+F<template/en/default/list/list.html.tmpl>, this variable will contain
+C<list/list.html.tmpl>).
+
+=item C<params>
+
+A hashref. The set of named parameters extracted from cgi.
+
+=back
+
 =head2 search_operator_field_override
 
 This allows you to modify L<Bugzilla::Search/OPERATOR_FIELD_OVERRIDE>,
 which determines the search functions for fields. It allows you to specify
-custom search functionality for certain fields. 
+custom search functionality for certain fields.
 
 See L<Bugzilla::Search/OPERATOR_FIELD_OVERRIDE> for reference and see
 the code in the example extension.
@@ -599,18 +626,18 @@ instead of as a string.)
 
 This is a hash of L<Bugzilla::User> objects, keyed by id. This is so you can
 find out more information about any of the user ids in the C<recipients> hash.
-Every id in the incoming C<recipients> hash will have an object in here. 
-(But if you add additional recipients to the C<recipients> hash, you are 
+Every id in the incoming C<recipients> hash will have an object in here.
+(But if you add additional recipients to the C<recipients> hash, you are
 B<not> required to add them to this hash.)
 
 =item C<diffs>
 
-This is a list of hashes, each hash representing a change to the bug. Each 
-hash has the following members: C<field_name>, C<bug_when>, C<old>, C<new> 
-and C<who> (a L<Bugzilla::User>). If appropriate, there will also be 
-C<attach_id> or C<comment_id>; if either is present, there will be 
-C<isprivate>. See C<_get_diffs> in F<Bugzilla/BugMail.pm> to see exactly how 
-it is populated. Warning: the format and existence of the "diffs" parameter 
+This is a list of hashes, each hash representing a change to the bug. Each
+hash has the following members: C<field_name>, C<bug_when>, C<old>, C<new>
+and C<who> (a L<Bugzilla::User>). If appropriate, there will also be
+C<attach_id> or C<comment_id>; if either is present, there will be
+C<isprivate>. See C<_get_diffs> in F<Bugzilla/BugMail.pm> to see exactly how
+it is populated. Warning: the format and existence of the "diffs" parameter
 is subject to change in future releases of Bugzilla.
 
 =back
@@ -684,7 +711,7 @@ A hashref, where the keys are the "name" of the panel and the value
 is the Perl module representing that panel. For example, if
 the name is C<Auth>, the value would be C<Bugzilla::Config::Auth>.
 
-For your extension, the Perl module would start with 
+For your extension, the Perl module would start with
 C<Bugzilla::Extension::Foo>, where "Foo" is the name of your Extension.
 (See the code in the example extension.)
 
@@ -703,7 +730,7 @@ Params:
 
 =item C<panels>
 
-A hashref, where the keys are lower-case panel "names" (like C<auth>, 
+A hashref, where the keys are lower-case panel "names" (like C<auth>,
 C<admin>, etc.) and the values are hashrefs. The hashref contains a
 single key, C<params>. C<params> is an arrayref--the return value from
 C<get_param_list> for that module. You can modify C<params> and
@@ -838,7 +865,7 @@ Params:
 
 =over
 
-=item C<group> 
+=item C<group>
 
 The new L<Bugzilla::Group> object that was just created.
 
@@ -846,24 +873,24 @@ The new L<Bugzilla::Group> object that was just created.
 
 =head2 group_end_of_update
 
-This happens at the end of L<Bugzilla::Group/update>, after all other 
+This happens at the end of L<Bugzilla::Group/update>, after all other
 changes are made to the database. This occurs inside a database transaction.
 
 Params:
 
 =over
 
-=item C<group> - The changed L<Bugzilla::Group> object, with all fields set 
+=item C<group> - The changed L<Bugzilla::Group> object, with all fields set
 to their updated values.
 
-=item C<changes> - The hash of changed fields. 
+=item C<changes> - The hash of changed fields.
 C<< $changes->{$field} = [$old, $new] >>
 
 =back
 
 =head2 install_before_final_checks
 
-Allows execution of custom code before the final checks are done in 
+Allows execution of custom code before the final checks are done in
 checksetup.pl.
 
 Params:
@@ -884,7 +911,7 @@ time should be printed.
 Allows for additional files and directories to be added to the
 list of files and directories already managed by checksetup.pl.
 You will be able to also set permissions for the files and
-directories using this hook. You can also use this hook to create 
+directories using this hook. You can also use this hook to create
 appropriate .htaccess files for any directory to secure its contents.
 For examples see  L<FILESYSTEM> in L<Bugzilla::Install::Filesystem>.
 
@@ -919,7 +946,7 @@ key's value is the permissions to be set on the directory.
 
 =item C<recurse_dirs>
 
-Hash reference of directories that will have permissions set for each item inside 
+Hash reference of directories that will have permissions set for each item inside
 each of the directories, including the directory itself. Each directory key
 points to another hash reference containing the following settings.
 
@@ -953,7 +980,7 @@ empty file.
 =item C<htaccess>
 
 Hash reference containing htaccess files to be created. You can set the permissions
-for the htaccess as well as the contents of the file. Each file key points to another 
+for the htaccess as well as the contents of the file. Each file key points to another
 hash reference containing the following settings.
 
 Params:
@@ -988,7 +1015,7 @@ the L</install_update_db> hook.
 
 =head2 db_schema_abstract_schema
 
-This allows you to add tables to Bugzilla. Note that we recommend that you 
+This allows you to add tables to Bugzilla. Note that we recommend that you
 prefix the names of your tables with some word (preferably the name of
 your Extension), so that they don't conflict with any future Bugzilla tables.
 
@@ -999,7 +1026,7 @@ Params:
 
 =over
 
-=item C<schema> - A hashref, in the format of 
+=item C<schema> - A hashref, in the format of
 L<Bugzilla::DB::Schema/ABSTRACT_SCHEMA>. Add new hash keys to make new table
 definitions. F<checksetup.pl> will automatically add these tables to the
 database when run.
@@ -1008,18 +1035,18 @@ database when run.
 
 =head2 job_map
 
-Bugzilla has a system - L<Bugzilla::JobQueue> - for running jobs 
-asynchronously, if the administrator has set it up. This hook allows the 
-addition of mappings from job names to handler classes, so an extension can 
+Bugzilla has a system - L<Bugzilla::JobQueue> - for running jobs
+asynchronously, if the administrator has set it up. This hook allows the
+addition of mappings from job names to handler classes, so an extension can
 fire off jobs.
 
 Params:
 
 =over
 
-=item C<job_map> - The job map hash. Key: the name of the job, as should be 
-passed to Bugzilla->job_queue->insert(). Value: the name of the Perl module 
-which implements the task (an instance of L<TheSchwartz::Worker>). 
+=item C<job_map> - The job map hash. Key: the name of the job, as should be
+passed to Bugzilla->job_queue->insert(). Value: the name of the Perl module
+which implements the task (an instance of L<TheSchwartz::Worker>).
 
 =back
 
@@ -1045,7 +1072,7 @@ Params:
 
 =item C<class>
 
-The name of the class that C<create> was called on. You can check this 
+The name of the class that C<create> was called on. You can check this
 like C<< if ($class->isa('Some::Class')) >> in your code, to perform specific
 tasks before C<create> for only certain classes.
 
@@ -1094,7 +1121,7 @@ limit your changes to only certain subclasses of Bugzilla::Object.
 
 The name of the field being updated in the object.
 
-=item C<value> 
+=item C<value>
 
 The value being set on the object.
 
@@ -1118,17 +1145,17 @@ Params:
 
 =item C<class>
 
-The name of the class that this hook is being called on. You can check this 
+The name of the class that this hook is being called on. You can check this
 like C<< if ($class->isa('Some::Class')) >> in your code, to add new
 fields only for certain classes.
 
 =item C<columns>
 
 An arrayref. Add the string names of columns to this array to add new
-values to objects. 
+values to objects.
 
 For example, if you add an C<example> column to a particular table
-(using L</install_update_db>), and then push the string C<example> into 
+(using L</install_update_db>), and then push the string C<example> into
 this array for the object that uses that table, then you can access the
 information in that column via C<< $object->{example} >> on all objects
 of that type.
@@ -1149,7 +1176,7 @@ Params:
 
 =item C<class>
 
-The name of the class that C<create> was called on. You can check this 
+The name of the class that C<create> was called on. You can check this
 like C<< if ($class->isa('Some::Class')) >> in your code, to perform specific
 tasks for only certain classes.
 
@@ -1173,7 +1200,7 @@ Params:
 
 =item C<class>
 
-The name of the class that C<create> was called on. You can check this 
+The name of the class that C<create> was called on. You can check this
 like C<< if ($class->isa('Some::Class')) >> in your code, to perform specific
 tasks for only certain classes.
 
@@ -1300,7 +1327,7 @@ Params:
 
 =item C<class>
 
-The name of the class that C<VALIDATORS> was called on. You can check this 
+The name of the class that C<VALIDATORS> was called on. You can check this
 like C<< if ($class->isa('Some::Class')) >> in your code, to add
 validators only for certain classes.
 
@@ -1406,7 +1433,7 @@ changes will be rolled back, including the creation of the new product.
 (However, note that such rollbacks should not normally be used, as
 some databases that Bugzilla supports have very bad rollback performance.
 If you want to validate input and throw errors before the Product is created,
-use L</object_end_of_create_validators> instead, or add a validator 
+use L</object_end_of_create_validators> instead, or add a validator
 using L</object_validators>.)
 
 Params:
@@ -1417,17 +1444,56 @@ Params:
 
 =back
 
+=head2 query_default_list
+
+This happens in F<query.cgi>, used to include additional cgi params to be
+searched for in order to create the set of default values.
+
+Params:
+
+=over
+
+=item C<list>
+
+The current list of cgi params to search for.
+
+=back
+
+=head2 query_format
+
+This happens in F<query.cgi>, used to to add/modify $vars before
+processing the template.  For example, one could supply or modify the
+default values for a custom query format.
+
+Params:
+
+=over
+
+=item C<vars>
+
+This is the entire set of variables that the current template
+can see.
+
+=item C<file>
+
+The name of the template file being processed. This is
+relative to the main template directory for the language (i.e. for
+F<template/en/default/list/list.html.tmpl>, this variable will contain
+C<list/list.html.tmpl>).
+
+=back
+
 =head2 quicksearch_map
 
-This hook allows you to alter the Quicksearch syntax to include e.g. special 
+This hook allows you to alter the Quicksearch syntax to include e.g. special
 searches for custom fields you have.
 
 Params:
 
 =over
 
-=item C<map> - a hash where the key is the name you want to use in 
-Quicksearch, and the value is the name from the C<fielddefs> table that you 
+=item C<map> - a hash where the key is the name you want to use in
+Quicksearch, and the value is the name from the C<fielddefs> table that you
 want it to map to. You can modify existing mappings or add new ones.
 
 =back
@@ -1491,7 +1557,7 @@ the template being processed, or to modify the variables that are currently
 in the template. It works exactly as though you inserted code to modify
 template variables at the top of a template.
 
-You probably want to restrict this hook to operating only if a certain 
+You probably want to restrict this hook to operating only if a certain
 file is being processed (which is why you get a C<file> argument
 below). Otherwise, modifying the C<vars> argument will affect every single
 template in Bugzilla.
@@ -1581,7 +1647,7 @@ Params:
 =item C<dispatch>
 
 A hashref where you can specify the names of your modules and which Perl
-module handles the functions for that module. (This is actually sent to 
+module handles the functions for that module. (This is actually sent to
 L<SOAP::Lite/dispatch_with>. You can see how that's used in F<xmlrpc.cgi>.)
 
 The Perl module name will most likely start with C<Bugzilla::Extension::Foo::>

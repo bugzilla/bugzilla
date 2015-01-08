@@ -1,0 +1,99 @@
+[%# The contents of this file are subject to the Mozilla Public
+  # License Version 1.1 (the "License"); you may not use this file
+  # except in compliance with the License. You may obtain a copy of
+  # the License at http://www.mozilla.org/MPL/
+  #
+  # Software distributed under the License is distributed on an "AS
+  # IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
+  # implied. See the License for the specific language governing
+  # rights and limitations under the License.
+  #
+  # The Original Code is the Bugzilla Bug Tracking System.
+  #
+  # The Initial Developer of the Original Code is Netscape Communications
+  # Corporation. Portions created by Netscape are
+  # Copyright (C) 1998 Netscape Communications Corporation. All
+  # Rights Reserved.
+  #
+  # Contributor(s): Bradley Baetz <bbaetz@student.usyd.edu.au>
+  #                 Max Kanat-Alexander <mkanat@bugzilla.org>
+  #%]
+
+[%# INTERFACE:
+  # product: object. The product for which we want to display component
+  # descriptions.
+  # component: string. The name of the component to hilight in the browser
+  #%]
+
+[% title = BLOCK %]
+  Components for [% product.name FILTER html %]
+[% END %]
+
+[% inline_style = BLOCK %]
+.product_name {
+  font-size: 2em;
+  font-weight: normal;
+}
+.component_name {
+  font-size: 1.5em;
+  font-weight: normal;
+}
+.product_desc, .component_desc {
+  padding-left: 1em;
+  font-size: 1em;
+}
+.component_container {
+  padding-left: 1em;
+  margin-bottom: 1em;
+}
+.product_container, .instructions {
+  margin-bottom: 1em;
+}
+.component_highlight {
+  padding: 0 0 0 1em;
+}
+[% END %]
+
+[% PROCESS global/header.html.tmpl
+  style_urls = [ "skins/standard/reports.css" ]
+  title = title
+  style = inline_style
+%]
+
+<h2>[% mark FILTER html %]</h2>
+
+<div class="product_container">
+ <span class="product_name">[% product.name FILTER html %]</span>
+  <div class="product_desc">
+    [% product.description FILTER html_light %]
+  </div>
+</div>
+
+<div class="instructions">
+  Select a component to see open [% terms.bugs %] in that component:
+</div>
+
+[% FOREACH comp = product.components %]
+  [% INCLUDE describe_comp %]
+[% END %]
+
+[% PROCESS global/footer.html.tmpl %]
+
+[%############################################################################%]
+[%# BLOCK for components                                                      %]
+[%############################################################################%]
+
+[% BLOCK describe_comp %]
+  <div class="component_container [%- IF comp.name == component_mark %] component_hilite[% END %]">
+    <div class="component_name">
+      <a name="[% comp.name FILTER html %]"
+         href="buglist.cgi?product=
+               [%- product.name FILTER uri %]&amp;component=
+               [%- comp.name FILTER uri %]&amp;resolution=---">
+      [% comp.name FILTER html %]</a>
+    </div>
+    <div class="component_desc">
+      [% comp.description FILTER html_light %]
+    </div>
+  </div>
+[% END %]

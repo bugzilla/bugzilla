@@ -301,6 +301,8 @@ my $format = $template->get_format("search/search",
                                    $vars->{'query_format'} || $vars->{'format'}, 
                                    scalar $cgi->param('ctype'));
 
+Bugzilla::Hook::process("query_format", {'vars' => $vars, 'format' => $format});
+
 print $cgi->header($format->{'ctype'});
 
 $template->process($format->{'template'}, $vars)

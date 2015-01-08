@@ -533,6 +533,33 @@ table should be joined with the C<bugs> table. If omitted, LEFT is used.
 
 =back
 
+=head2 buglist_format
+
+This happens in F<buglist.cgi>, used to change the template variables before
+processing the associated template hook.
+
+Params:
+
+=over
+
+=item C<vars>
+
+This is the entire set of variables that the current template
+can see.
+
+=item C<file>
+
+The name of the template file being processed. This is
+relative to the main template directory for the language (i.e. for
+F<template/en/default/list/list.html.tmpl>, this variable will contain
+C<list/list.html.tmpl>).
+
+=item C<params>
+
+A hashref. The set of named parameters extracted from cgi.
+
+=back
+
 =head2 search_operator_field_override
 
 This allows you to modify L<Bugzilla::Search/OPERATOR_FIELD_OVERRIDE>,
@@ -1414,6 +1441,45 @@ Params:
 =over
 
 =item C<product> - The new L<Bugzilla::Product> object that was just created.
+
+=back
+
+=head2 query_default_list
+
+This happens in F<query.cgi>, used to include additional cgi params to be
+searched for in order to create the set of default values.
+
+Params:
+
+=over
+
+=item C<list>
+
+The current list of cgi params to search for.
+
+=back
+
+=head2 query_format
+
+This happens in F<query.cgi>, used to to add/modify $vars before
+processing the template.  For example, one could supply or modify the
+default values for a custom query format.
+
+Params:
+
+=over
+
+=item C<vars>
+
+This is the entire set of variables that the current template
+can see.
+
+=item C<file>
+
+The name of the template file being processed. This is
+relative to the main template directory for the language (i.e. for
+F<template/en/default/list/list.html.tmpl>, this variable will contain
+C<list/list.html.tmpl>).
 
 =back
 

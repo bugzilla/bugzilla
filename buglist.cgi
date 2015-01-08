@@ -25,6 +25,7 @@ use Bugzilla::Product;
 use Bugzilla::Field;
 use Bugzilla::Status;
 use Bugzilla::Token;
+use Bugzilla::Hook;
 
 use Date::Parse;
 
@@ -447,8 +448,8 @@ if (!$params->param('query_format')) {
 # Determine the format in which the user would like to receive the output.
 # Uses the default format if the user did not specify an output format;
 # otherwise validates the user's choice against the list of available formats.
-my $format = $template->get_format("list/list", scalar $cgi->param('format'),
-                                   scalar $cgi->param('ctype'));
+my $format = $template->get_format("list/list", scalar $params->param('format'),
+                                   scalar $params->param('ctype'));
 
 # Use server push to display a "Please wait..." message for the user while
 # executing their query if their browser supports it and they are viewing
@@ -1123,6 +1124,10 @@ $cgi->close_standby_message($contenttype, $disposition, $disp_prefix, $format->{
 ################################################################################
 # Content Generation
 ################################################################################
+
+Bugzilla::Hook::process("buglist_format", {'vars' => $vars,
+                                           'format' => $format,
+                                           'params' => $params});
 
 # Generate and return the UI (HTML page) from the appropriate template.
 $template->process($format->{'template'}, $vars)

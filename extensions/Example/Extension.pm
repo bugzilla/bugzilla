@@ -304,6 +304,17 @@ sub buglist_column_joins {
     };
 }
 
+sub buglist_format {
+    my ($self, $args) = @_;
+    my $vars = $args->{'vars'};
+    my $format = $args->{'format'};
+    my $params = $args->{'params'};
+
+    if ($format->{'template'} eq "list/list-example.html.tmpl") {
+        $vars->{'example'} = $params->param('example');
+    }
+}
+
 sub search_operator_field_override {
     my ($self, $args) = @_;
     
@@ -853,6 +864,18 @@ sub product_end_of_create {
 #              description      => 'Select this component if one does not ' . 
 #                                  'exist in the current list of components',
 #              initialowner     => $default_assignee });
+    }
+}
+
+sub query_format {
+    my ($self, $args) = @_;
+    my $vars = $args->{'vars'};
+    my $default = $vars->{'default'};
+    my $format = $args->{'format'};
+
+    # change some default values
+    if ($format->{'template'} eq "search/search-example.html.tmpl") {
+        $default->{'example'}[0] = $default->{'example'}[0] || "example";
     }
 }
 

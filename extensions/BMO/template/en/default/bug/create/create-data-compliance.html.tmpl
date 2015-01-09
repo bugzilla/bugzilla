@@ -1,0 +1,222 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% PROCESS global/variables.none.tmpl %]
+
+[% inline_css = BLOCK %]
+#data_comp_form {
+  width: 60%;
+}
+#data_comp_form .required:after {
+  content: " *";
+  color: red;
+}
+#data_comp_form .field_label {
+  text-align: left;
+  font-weight: bold;
+}
+#data_comp_form .field_desc,
+#data_comp_form .head_desc {
+  word-wrap: normal;
+}
+#data_comp_form .head_desc {
+  font-size: 1.25em;
+  padding-bottom: .5em;
+}
+#data_comp_form .form_section {
+  margin-bottom: 1em;
+  padding-left: 2em;
+}
+.yui-calcontainer {
+  z-index: 2;
+}
+[% END %]
+
+[% inline_javascript = BLOCK %]
+  function validateAndSubmit() {
+    var alert_text = '';
+    var required_labels = YAHOO.util.Selector.query('label.required');
+    if (required_labels.length) {
+      required_labels.forEach(function (label) {
+        var id = label.getAttribute('for');
+        if (id && !isFilledOut(id)) {
+          var desc = label.textContent || id;
+          alert_text += "Please select or enter a value for" +
+                        desc.replace(/[\r\n]+/, "").replace(/\s+/g, " ") +
+                        "\n";
+        }
+      });
+    }
+    if (alert_text != '') {
+      alert(alert_text);
+      return false;
+    }
+    return true;
+  }
+[% END %]
+
+[% PROCESS global/header.html.tmpl
+   title = "Data Compliance Form"
+   style = inline_css
+   style_urls = [ 'skins/standard/enter_bug.css' ]
+   javascript = inline_javascript
+   javascript_urls = [ 'js/field.js',
+                       'js/util.js',
+                       'extensions/BMO/web/js/form_validate.js' ]
+   yui = [ 'calendar', 'selector' ]
+%]
+
+<h2>Data Compliance Form</h2>
+
+<form method="post" action="post_bug.cgi" id="data_comp_form"
+      class="enter_bug_form" enctype="multipart/form-data"
+      onSubmit="return validateAndSubmit();">
+<input type="hidden" name="format" value="data-compliance">
+<input type="hidden" name="product" value="Data Compliance">
+<input type="hidden" name="component" value="General">
+<input type="hidden" name="rep_platform" value="All">
+<input type="hidden" name="op_sys" value="All">
+<input type="hidden" name="priority" value="--">
+<input type="hidden" name="version" value="unspecified">
+<input type="hidden" name="comment" id="comment" value="">
+<input type="hidden" name="status_whiteboard" id="status_whiteboard" value="">
+<input type="hidden" name="bug_file_loc" id="bug_file_loc" value="">
+<input type="hidden" name="groups" id="groups" value="mozilla-employee-confidential">
+<input type="hidden" name="token" value="[% token FILTER html %]">
+
+<div class="head_desc">
+  Looking to make changes to your data collection and handling, request changes
+  to your business unit's data practices or request & document exceptions to
+  those practices, or raise broader data collection issues with the data
+  compliance team? Please fill out this form.
+</div>
+
+<div class="form_section">
+  <label for="request_type" class="field_label required">
+    Type of request
+  </label>
+  <br>
+  <select id="request_type" name="request_type">
+    <option value="">-- Select --</option>
+    <option value="General">General</option>
+    <option value="Data Compliance">Data Compliance</option>
+    <option value="Vendor Review">Vendor Review</option>
+    <option value="Privacy Policy">Privacy Policy</option>
+    <option value="Other">Other</option>
+  </select>
+</div>
+
+<div class="form_section">
+  <label for="area" class="field_label required">
+    Area
+  </label>
+  <br>
+  <select id="area" name="area">
+    <option value="">-- Select --</option>
+    <option value="Firefox">Firefox</option>
+    <option value="Cloud Services">Cloud Services</option>
+    <option value="FxOS">FxOS</option>
+    <option value="Foundation">Foundation</option>
+    <option value="Engagement">Engagement</option>
+    <option value="IT">IT</option>
+    <option value="Content Services">Content Services</option>
+    <option value="Platform">Platform</option>
+    <option value="Other">Other</option>
+  </select>
+</div>
+
+<div class="form_section">
+  <label for="short_desc" class="field_label required">
+    Summary
+  </label>
+  <div class="field_desc">
+    Describe the issue in one sentence.
+  </div>
+  <input type="text" name="short_desc" id="short_desc" size="40" class="wide">
+</div>
+
+<div class="form_section">
+  <label for="desc" class="field_label required">
+    Description
+  </label>
+  <div class="field_desc">
+    Describe the data compliance issue.
+  </div>
+  <textarea name="desc" id="desc" rows="10" cols="60" class="wide"></textarea>
+</div>
+
+<div class="form_section">
+  <label for="cf_due_date" class="field_label required">
+    When
+  </label>
+  <div class="field_desc">
+    Describe the timeline or due date.
+  </div>
+  [% INCLUDE bug/field.html.tmpl
+     bug      = default
+     field    = bug_fields.cf_due_date
+     editable = 1
+     no_tds   = 1
+     value    = default.cf_due_date
+   %]
+</div>
+
+<div class="form_section">
+  <label for="bug_severity" class="field_label required">
+    Urgency
+  </label>
+  <br>
+  [% INCLUDE bug/field.html.tmpl
+     bug      = default
+     field    = bug_fields.bug_severity
+     editable = 1
+     no_tds   = 1
+     value    = default.bug_severity
+   %]
+</div>
+
+<div class="form_section">
+  <label for="handling_change" class="field_label required">
+    Does this request involve a change in data collection or handling?
+  </label>
+  <br>
+  <select id="handling_change" name="handling_change">
+    <option value="">-- Select --</option>
+    <option value="Yes">Yes</option>
+    <option value="No">No</option>
+  </select>
+</div>
+
+<div class="form_section">
+  <label for="practice_change" class="field_label required">
+    Does this request involve a change in to the business unit's data practices?
+  </label>
+  <br>
+  <select id="practice_change" name="practice_change">
+    <option value="">-- Select --</option>
+    <option value="Yes">Yes</option>
+    <option value="No">No</option>
+  </select>
+</div>
+
+<div class="form_section">
+  <label for="other" class="field_label">
+    Other
+  </label>
+  <div class="field_desc">
+    Please include any additional information, including links to relevant
+    material, details regarding user benefit, etc.
+  </div>
+  <textarea name="other" id="other" rows="10" cols="60" class="wide"></textarea>
+</div>
+
+<input type="submit" id="commit" value="Submit Request">
+
+</form>
+
+[% PROCESS global/footer.html.tmpl %]

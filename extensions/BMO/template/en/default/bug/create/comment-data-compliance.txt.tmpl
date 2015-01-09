@@ -1,0 +1,28 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% USE Bugzilla %]
+[% cgi = Bugzilla.cgi %]
+
+> Request Type
+[%+ cgi.param('request_type') %]
+
+> Area
+[%+ cgi.param('area') %]
+
+> Description
+[%+ cgi.param('desc') %]
+
+> Does this request involve a change in data collection or handling?
+[%+ cgi.param('handling_change') %]
+
+> Does this request involve a change in to the business unit's data practices?
+[%+ cgi.param('practice_change') %]
+
+> Other Information
+[%+ cgi.param('other') || "None" %]

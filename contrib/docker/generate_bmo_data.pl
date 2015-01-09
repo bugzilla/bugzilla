@@ -20,6 +20,7 @@ use Bugzilla::Constants;
 use Bugzilla::Keyword;
 use Bugzilla::Config qw(:admin);
 use Bugzilla::User::Setting;
+use Bugzilla::Status;
 
 my $dbh = Bugzilla->dbh;
 
@@ -543,6 +544,98 @@ foreach my $flag (@flagtypes) {
         $dbh->do('INSERT INTO flaginclusions (type_id, product_id, component_id)
                   VALUES (?, ?, ?)',
                  undef, ($type_id, $prod_id, $comp_id));
+    }
+}
+
+###########################################################
+# Create bug status
+###########################################################
+
+my @statuses = (
+    {
+        value       => undef,
+        transitions => [['UNCONFIRMED', 0], ['NEW', 0], ['ASSIGNED', 0]],
+    },
+    {
+        value       => 'UNCONFIRMED',
+        sortkey     => 100,
+        isactive    => 1,
+        isopen      => 1,
+        transitions => [['NEW', 0], ['ASSIGNED', 0], ['RESOLVED', 0]],
+    },
+    {
+        value       => 'NEW',
+        sortkey     => 200,
+        isactive    => 1,
+        isopen      => 1,
+        transitions => [['UNCONFIRMED', 0], ['ASSIGNED', 0], ['RESOLVED', 0]],
+    },
+    {
+        value       => 'ASSIGNED',
+        sortkey     => 300,
+        isactive    => 1,
+        isopen      => 1,
+        transitions => [['UNCONFIRMED', 0], ['NEW', 0], ['RESOLVED', 0]],
+    },
+    {
+        value       => 'REOPENED',
+        sortkey     => 400,
+        isactive    => 1,
+        isopen      => 1,
+        transitions => [['UNCONFIRMED', 0], ['NEW', 0], ['ASSIGNED', 0], ['RESOLVED', 0]],
+    },
+    {
+        value       => 'RESOLVED',
+        sortkey     => 500,
+        isactive    => 1,
+        isopen      => 0,
+        transitions => [['UNCONFIRMED', 0], ['REOPENED', 0], ['VERIFIED', 0]],
+    },
+    {
+        value       => 'VERIFIED',
+        sortkey     => 600,
+        isactive    => 1,
+        isopen      => 0,
+        transitions => [['UNCONFIRMED', 0], ['REOPENED', 0], ['RESOLVED', 0]],
+    },
+    {
+        value       => 'CLOSED',
+        sortkey     => 700,
+        isactive    => 1,
+        isopen      => 0,
+        transitions => [['UNCONFIRMED', 0], ['REOPENED', 0], ['RESOLVED', 0]],
+    },
+);
+
+if (!$dbh->selectrow_array("SELECT 1 FROM bug_status WHERE value = 'ASSIGNED'")) {
+    $dbh->do('DELETE FROM bug_status');
+    $dbh->do('DELETE FROM status_workflow');
+
+    print "creating status workflow...\n";
+
+    # One pass to add the status entries.
+    foreach my $status (@statuses) {
+        next if !$status->{value};
+        $dbh->do('INSERT INTO bug_status (value, sortkey, isactive, is_open) VALUES (?, ?, ?, ?)',
+            undef, ( $status->{value}, $status->{sortkey}, $status->{isactive}, $status->{isopen} ));
+    }
+
+    # Another pass to add the transitions.
+    foreach my $status (@statuses) {
+        my $old_id;
+        if ($status->{value}) {
+            my $from_status = new Bugzilla::Status({ name => $status->{value} });
+            $old_id = $from_status->{id};
+        } else {
+            $old_id = undef;
+        }
+
+        foreach my $transition (@{$status->{transitions}}) {
+            my $to_status = new Bugzilla::Status({ name => $transition->[0] });
+
+            $dbh->do('INSERT INTO status_workflow (old_status, new_status, require_comment) VALUES (?, ?, ?)',
+                undef, ( $old_id, $to_status->{id}, $transition->[1] ));
+        }
     }
 }
 

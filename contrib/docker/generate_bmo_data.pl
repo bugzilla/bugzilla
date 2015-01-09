@@ -640,6 +640,73 @@ if (!$dbh->selectrow_array("SELECT 1 FROM bug_status WHERE value = 'ASSIGNED'"))
 }
 
 ###########################################################
+# Creating resolutions
+###########################################################
+
+my @resolutions = (
+    {
+        value    => '',
+        sortkey  => 100,
+        isactive => 1,
+    },
+    {
+        value    => 'FIXED',
+        sortkey  => 200,
+        isactive => 1,
+    },
+    {
+        value    => 'INVALID',
+        sortkey  => 300,
+        isactive => 1,
+    },
+    {
+        value    => 'WONTFIX',
+        sortkey  => 400,
+        isactive => 1,
+    },
+    {
+        value    => 'DUPLICATE',
+        sortkey  => 700,
+        isactive => 1,
+    },
+    {
+        value    => 'WORKSFORME',
+        sortkey  => 800,
+        isactive => 1,
+    },
+    {
+        value    => 'EXPIRED',
+        sortkey  => 900,
+        isactive => 1,
+    },
+    {
+        value    => 'MOVED',
+        sortkey  => 1000,
+        isactive => 0,
+    },
+    {
+        value    => 'INCOMPLETE',
+        sortkey  => 850,
+        isactive => 1,
+    },
+    {
+        value    => 'SUPPORT',
+        sortkey  => 875,
+        isactive => 0,
+    },
+);
+
+if (!$dbh->selectrow_array("SELECT 1 FROM resolution WHERE value = 'INCOMPLETE'")) {
+    $dbh->do('DELETE FROM resolution');
+    print "creating resolutions...\n";
+    foreach my $resolution (@resolutions) {
+        next if !$resolution->{value};
+        $dbh->do('INSERT INTO resolution (value, sortkey, isactive) VALUES (?, ?, ?)',
+            undef, ($resolution->{value}, $resolution->{sortkey}, $resolution->{isactive}));
+    }
+}
+
+###########################################################
 # Create Keywords
 ###########################################################
 

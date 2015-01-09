@@ -318,6 +318,13 @@ sub mailer_before_send {
                     "SELECT isprivate FROM longdescs WHERE bug_id=? ORDER BY bug_when",
                     undef, $bug_id);
                 # Encrypt if there are private comments on an otherwise public bug
+                if (scalar $email->parts > 1) {
+                    $email->walk_parts(sub {
+                        my $part = shift;
+                        my $content_type = $part->content_type;
+                        $body = $part->body if $content_type && $content_type =~ /^text\/plain/;
+                    });
+                }
                 while ($body =~ /[\r\n]--- Comment #(\d+)/g) {
                     my $comment_number = $1;
                     if ($comment_number && $comment_is_private->[$comment_number]) {

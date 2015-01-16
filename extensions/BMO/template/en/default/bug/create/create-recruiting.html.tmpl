@@ -1,0 +1,234 @@
+[%# 1.0@bugzilla.org %]
+[%# The contents of this file are subject to the Mozilla Public
+  # License Version 1.1 (the "License"); you may not use this file
+  # except in compliance with the License. You may obtain a copy of
+  # the License at http://www.mozilla.org/MPL/
+  #
+  # Software distributed under the License is distributed on an "AS
+  # IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
+  # implied. See the License for the specific language governing
+  # rights and limitations under the License.
+  #
+  # The Original Code is the Bugzilla Bug Tracking System.
+  #
+  # The Initial Developer of the Original Code is Mozilla Corporation.
+  # Portions created by Mozilla are Copyright (C) 2008 Mozilla
+  # Corporation. All Rights Reserved.
+  #
+  # Contributor(s): Mark Smith <mark@mozilla.com>
+  #                 Reed Loden <reed@mozilla.com>
+  #%]
+
+[% PROCESS global/variables.none.tmpl %]
+
+[% inline_style = BLOCK %]
+#heading {
+  text-align:  center;
+  width:       98%;
+  font-size:   2em;
+  font-weight: bold;
+  margin:      10px;
+}
+p {
+   max-width: 40%;
+}
+label.required:after {
+  content: " *";
+  color: red;
+}
+.required_star {
+  color: red;
+}
+[% END %]
+
+[% PROCESS global/header.html.tmpl
+   title           = "Mozilla Corporation HR and Recruiting Requests"
+   style_urls      = [ 'skins/standard/attachment.css' ]
+   javascript_urls = [ 'js/attachment.js', 'js/field.js' ]
+   style           = inline_style
+   yui             = [ 'autocomplete' ]
+%]
+
+[% IF user.in_group("mozilla-employee-confidential")
+   OR user.in_group("mozilla-messaging-confidential")
+   OR user.in_group("mozilla-foundation-confidential") %]
+  <div id="heading">Recruiting</div>
+
+  <p>
+    Recruiting [% terms.Bugs %] are visible only to the Reporter, members of the People
+    Team, and those on the CC list. Please do not add non-employees to the CC list.
+    This form is to request a new open requisition only, and is not for
+    communication about existing open requisitions in Jobvite.
+  </p>
+
+  <p>
+    <strong>Do not put information about backfills or replacements directly into
+      this [% terms.bug %].</strong>
+  </p>
+
+  <form method="post" action="post_bug.cgi" id="recruitingForm" enctype="multipart/form-data">
+    <input type="hidden" name="product" value="Recruiting">
+    <input type="hidden" name="component" value="General">
+    <input type="hidden" name="rep_platform" value="All">
+    <input type="hidden" name="op_sys" value="Other">
+    <input type="hidden" name="version" value="unspecified">
+    <input type="hidden" name="priority" value="--">
+    <input type="hidden" name="bug_severity" value="normal">
+    <input type="hidden" name="format" value="recruiting">
+    <input type="hidden" name="created-format" value="recruiting">
+    <input type="hidden" name="token" value="[% token FILTER html %]">
+    [% IF user.in_group('canconfirm') %]
+      <input type="hidden" name="bug_status" value="NEW">
+    [% END %]
+
+    <table>
+      <tr>
+        <th align="right" valign="top">
+          <label class="required" for="short_desc">Position Title:</label>
+        </th>
+        <td>
+          <input required name="short_desc" id="short_desc" size="60" value="[% short_desc FILTER html %]">
+        </td>
+      </tr>
+
+      <tr>
+        <th align="right">
+          <label class="required" for="cost_center">Cost Center:</label>
+        </th>
+        <td>
+          <select required id="cost_center" name="cost_center">
+            <option value="">Select..</option>
+            [% INCLUDE "bug/create/cost-centers.html.tmpl" %]
+          </select>
+        </td>
+      </tr>
+
+      <tr>
+        <th align="right" valign="top">
+          <label class="required" for="hiring_manager_name">Hiring Manager Name:</label>
+        </th>
+        <td>
+          <input required name="hiring_manager_name" id="hiring_manager_name" size="60" value="[% hiring_manager_name FILTER html %]">
+        </td>
+      </tr>
+
+      <tr>
+        <th align="right">
+          <label class="required" for="vp_authority">VP Authority</label>
+        </th>
+        <td>
+          <select required id="vp_authority" name="vp_authority">
+            <option value="">Select..</option>
+            <option value="Andreas Gal">Andreas Gal</option>
+            <option value="Chris Beard">Chris Beard</option>
+            <option value="Darren Herman">Darren Herman</option>
+            <option value="David Slater">David Slater</option>
+            <option value="Denelle Dixon Thayer">Denelle Dixon Thayer</option>
+            <option value="Douglas Turner / Johnny Stenbäck">Douglas Turner / Johnny Stenbäck</option>
+            <option value="Jim Cook">Jim Cook</option>
+            <option value="Johnath Nightingale">Johnath Nightingale</option>
+            <option value="Li Gong">Li Gong</option>
+            <option value="Mark Mayo">Mark Mayo</option>
+            <option value="Mary Ellen Muckerman">Mary Ellen Muckerman</option>
+            <option value="Pete Scanlon">Pete Scanlon</option>
+            <option value="Rick Fant">Rick Fant</option>
+            <option value="Sylvie Veilleux">Sylvie Veilleux</option>
+          </select>
+        </td>
+      </tr>
+
+      <tr>
+        <th align="right">
+          <label class="required" for="hrbp_name">HRBP Name</label>
+        </th>
+        <td>
+          <select required id="hrbp_name" name="hrbp_name">
+            <option value="">Select...</option>
+            <option value="Joanne Nguyen">Joanne Nguyen</option>
+            <option value="Jess Amann">Jess Amann</option>
+            <option value="Michael Auckland">Michael Auckland</option>
+          </select>
+        </td>
+      </tr>
+
+      <tr>
+        <th align="right">
+          <label class="required" for="ft_or_seasonal">Full time or Seasonal?</label>
+        </th>
+        <td>
+          <select required id="ft_or_seasonal" name="ft_or_seasonal">
+            <option value="">Select...</option>
+            <option value="Full Time">Full Time</option>
+            <option value="Seasonal">Seasonal</option>
+          </select>
+        </td>
+      </tr>
+
+      <tr>
+        <th align="right">
+          <label class="required" for="desired_location">Desired Location</label>
+        </th>
+        <td>
+          <select required id="desired_location" name="desired_location">
+            <option value="">Select...</option>
+            <option value="any">Any Location</option>
+            <option value="remote">Remote</option>
+            <option value="europe">Europe</option>
+            <option value="latinamerica">Latin America</option>
+            <option value="northamerica">North America</option>
+            <option value="bayarea">Bay Area</option>
+            <option value="berlin">Berlin</option>
+            <option value="boston">Boston</option>
+            <option value="london">London</option>
+            <option value="mountainview">Mountain View</option>
+            <option value="newzealand">New Zealand</option>
+            <option value="paris">Paris</option>
+            <option value="portland">Portland</option>
+            <option value="sanfrancisco">San Francisco</option>
+            <option value="toronto">Toronto</option>
+            <option value="vancouver">Vancouver</option>
+          </select>
+        </td>
+      </tr>
+
+      <tr>
+        <th align="right" valign="top">
+          <label class="required" for="comp_grade">Comp Grade:</label>
+        </th>
+        <td>
+          <input required name="comp_grade" id="comp_grade" size="60" value="[% comp_grade FILTER html %]">
+        </td>
+      </tr>
+
+      <tr>
+        <th align="right">
+          <label for="cc">CC:</label>
+        </th>
+        <td colspan="3">
+          [% INCLUDE global/userselect.html.tmpl
+             id       => "cc"
+             name     => "cc"
+             value    => cc
+             size     => 60
+             multiple => 5
+             %]
+        </td>
+      </tr>
+    </table>
+
+    <br>
+
+    <input type="submit" id="commit" value="Submit Request">
+    <p>
+      [ <span class="required_star">*</span> <span class="required_explanation">
+      Required Field</span> ]
+    </p>
+  </form>
+
+  <p>Thanks for contacting us. You will be notified by email of any progress made in resolving your request.</p>
+
+[% ELSE %]
+  <p>Sorry, you do not have access to this page.</p>
+[% END %]
+
+[% PROCESS global/footer.html.tmpl %]

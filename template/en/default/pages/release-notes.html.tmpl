@@ -325,7 +325,7 @@
 
 [% BLOCK db_req %]
   [% SET m = DB_MODULE.$db %]
-  <h3 id="v40_req_[% db FILTER html %]">For [% m.name FILTER html %] Users</h3>
+  <h3 id="req_[% db FILTER html %]">For [% m.name FILTER html %] Users</h3>
 
   <ul>
     <li>[% m.name FILTER html %]

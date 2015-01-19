@@ -45,6 +45,25 @@
 
 <h2 id="v44_point">Updates in this 4.4.x Release</h2>
 
+<h3>4.4.7</h3>
+
+<p>This release contains fixes for a couple of security issues.
+  See the <a href="https://www.bugzilla.org/security/4.0.15/">
+  Security Advisory</a> for details.</p>
+
+<p>In addition, the following important fixes have been made in the release:</p>
+
+<ul>
+  <li>The <kbd>B[%%]ug.add_comment</kbd> WebService method now returns the correct
+    ID for the newly created [% terms.bug %] comment.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1111043">[% terms.Bug %] 1111043</a>)</li>
+  <li>Fixing a regression caused by CVE-2014-1571
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1064140">[% terms.bug %] 1064140</a>),
+    comments made while setting a flag from the attachment details page are again
+    included in the flag notification email.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1082887">[% terms.Bug %] 1082887</a>)</li>
+</ul>
+
 <h3>4.4.6</h3>
 
 <p>This release fixes several security issues. See the

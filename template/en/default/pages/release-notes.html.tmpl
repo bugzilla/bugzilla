@@ -83,7 +83,7 @@
 
 [% INCLUDE req_table reqs = OPTIONAL_MODULES
                      new  = ['Cache-Memcached','File-Copy-Recursive']
-                     updated = ['Test-Taint']
+                     updated = ['Chart', 'Test-Taint']
                      include_feature = 1 %]
 
 <h3 id="req_apache">Optional Apache Modules</h3>
@@ -325,7 +325,7 @@
 
 [% BLOCK db_req %]
   [% SET m = DB_MODULE.$db %]
-  <h3 id="v40_req_[% db FILTER html %]">For [% m.name FILTER html %] Users</h3>
+  <h3 id="req_[% db FILTER html %]">For [% m.name FILTER html %] Users</h3>
 
   <ul>
     <li>[% m.name FILTER html %]
@@ -334,7 +334,7 @@
        </li>
     <li><strong>perl module:</strong>
       [%+ m.dbd.module FILTER html %]
-      [% '<span class="req_new">' IF dbd_new %]v[% m.dbd.version FILTER html %]
+      [%+ '<span class="req_new">' IF dbd_new %]v[% m.dbd.version FILTER html %]
       [% '</span>' IF dbd_new %]</li>
   </ul>
 [% END %]

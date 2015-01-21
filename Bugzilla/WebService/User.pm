@@ -40,6 +40,14 @@ use constant READ_ONLY => qw(
     get
 );
 
+use constant PUBLIC_METHODS => qw(
+    create
+    get
+    login
+    logout
+    offer_account_by_email
+);
+
 ##############
 # User Login #
 ##############

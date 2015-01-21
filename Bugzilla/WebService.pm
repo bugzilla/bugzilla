@@ -35,6 +35,10 @@ use constant LOGIN_EXEMPT => { };
 # Methods that can modify data MUST not be listed here.
 use constant READ_ONLY => ();
 
+# Whitelist of methods that a client is allowed to access when making
+# an API call.
+use constant PUBLIC_METHODS => ();
+
 sub login_exempt {
     my ($class, $method) = @_;
     return $class->LOGIN_EXEMPT->{$method};

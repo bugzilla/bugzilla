@@ -38,6 +38,13 @@ use constant READ_ONLY => qw(
     version
 );
 
+use constant PUBLIC_METHODS => qw(
+    extensions
+    time
+    timezone
+    version
+);
+
 sub version {
     my $self = shift;
     return { version => $self->type('string', BUGZILLA_VERSION) };

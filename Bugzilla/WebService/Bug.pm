@@ -64,6 +64,22 @@ use constant READ_ONLY => qw(
     search
 );
 
+use constant PUBLIC_METHODS => qw(
+    add_attachment
+    add_comment
+    attachments
+    comments
+    create
+    fields
+    get
+    history
+    legal_values
+    possible_duplicates
+    search
+    update
+    update_see_also
+);
+
 ######################################################
 # Add aliases here for old method name compatibility #
 ######################################################

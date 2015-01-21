@@ -19,6 +19,10 @@ use constant READ_ONLY => qw(
     get
 );
 
+use constant PUBLIC_METHODS => qw(
+    get
+);
+
 sub get {
     my ($self, $params) = validate(@_, 'names', 'ids');
 

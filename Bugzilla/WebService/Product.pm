@@ -23,6 +23,15 @@ use constant READ_ONLY => qw(
     get_selectable_products
 );
 
+use constant PUBLIC_METHODS => qw(
+    create
+    get
+    get_accessible_products
+    get_enterable_products
+    get_selectable_products
+    update
+);
+
 use constant MAPPED_FIELDS => {
     has_unconfirmed => 'allows_unconfirmed',
     is_open => 'is_active',

@@ -31,6 +31,15 @@ use constant READ_ONLY => qw(
     version
 );
 
+use constant PUBLIC_METHODS => qw(
+    extensions
+    last_audit_time
+    parameters
+    time
+    timezone
+    version
+);
+
 # Logged-out users do not need to know more than that.
 use constant PARAMETERS_LOGGED_OUT => qw(
     maintainer

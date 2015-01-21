@@ -38,8 +38,9 @@
 
     <tr>
       <th class="field_label"><label for="version">Version:</label></th>
-      <td><input id="version" size="64" maxlength="64" name="version" value="
-      [%- version.name FILTER html %]"></td>
+      <td><input id="version" size="64" maxlength="64" name="version"
+                 value="[% version.name FILTER html %]" required autofocus>
+
     </tr>
     <tr>
       <th class="field_label"><label for="isactive">Enabled For [% terms.Bugs %]:</label></th>

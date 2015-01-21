@@ -19,6 +19,10 @@ use Bugzilla::Error;
 use Bugzilla::WebService::Constants;
 use Bugzilla::WebService::Util qw(translate params_to_objects validate);
 
+use constant PUBLIC_METHODS => qw(                                                                                                                                                                                                            
+    create
+);
+
 use constant MAPPED_FIELDS => {
     default_assignee   => 'initialowner',
     default_qa_contact => 'initialqacontact',

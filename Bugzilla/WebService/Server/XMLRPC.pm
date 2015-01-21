@@ -20,7 +20,10 @@ if ($ENV{MOD_PERL}) {
 }
 
 use Bugzilla::WebService::Constants;
+use Bugzilla::Error;
 use Bugzilla::Util;
+
+use List::MoreUtils qw(none);
 
 BEGIN {
     # Allow WebService methods to call XMLRPC::Lite's type method directly
@@ -96,6 +99,14 @@ sub handle_login {
     my ($self, $classes, $action, $uri, $method) = @_;
     my $class = $classes->{$uri};
     my $full_method = $uri . "." . $method;
+    # Only allowed methods to be used from the module's whitelist
+    my $file = $class;
+    $file =~ s{::}{/}g;
+    $file .= ".pm";
+    require $file;
+    if (none { $_ eq $method } $class->PUBLIC_METHODS) {
+        ThrowCodeError('unknown_method', { method => $full_method });
+    }
     $self->SUPER::handle_login($class, $method, $full_method);
     return;
 }

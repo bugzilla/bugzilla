@@ -18,6 +18,11 @@ use Bugzilla::Error;
 use Bugzilla::WebService::Util qw( validate filter );
 use Bugzilla::Constants;
 
+use constant PUBLIC_METHODS => qw(
+    get
+    update
+);
+
 sub update {
     my ($self, $params) = validate(@_, 'ids');
     my $user = Bugzilla->user;

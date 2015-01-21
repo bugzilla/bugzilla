@@ -22,6 +22,10 @@ use base qw(Bugzilla::WebService);
 use Bugzilla::Constants;
 use Bugzilla::Error;
 
+use constant PUBLIC_METHODS => qw(
+    create
+);
+
 sub create {
     my ($self, $params) = @_;
 

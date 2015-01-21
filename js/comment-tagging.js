@@ -233,8 +233,10 @@ YAHOO.bugzilla.commentTagging = {
 
     buildTagHtml : function(comment_id, comment_no, tag) {
         var el = document.createElement('span');
+        var c_el =Dom.get('c' + comment_no);
         Dom.setAttribute(el, 'id', 'ct_' + comment_no + '_' + tag);
         Dom.addClass(el, 'bz_comment_tag');
+        Dom.addClass(c_el, 'bz_comment_tag_' + tag);
         if (this.can_edit) {
             var a = document.createElement('a');
             Dom.setAttribute(a, 'href', '#');
@@ -282,6 +284,8 @@ YAHOO.bugzilla.commentTagging = {
 
     remove : function(comment_id, comment_no, tag) {
         var el = Dom.get('ct_' + comment_no + '_' + tag);
+        var c_el =Dom.get('c' + comment_no);
+        Dom.removeClass(c_el, 'bz_comment_tag_' + tag);
         if (el) {
             el.parentNode.removeChild(el);
             this.rpcUpdate(comment_id, comment_no, undefined, [ tag ]);

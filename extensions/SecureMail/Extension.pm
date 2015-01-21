@@ -557,10 +557,12 @@ sub _make_secure {
         # No encryption key provided; send a generic, safe email.
         my $template = Bugzilla->template;
         my $message;
+        my $email_type = $email->header('X-Bugzilla-Type');
         my $vars = {
           'urlbase'    => correct_urlbase(),
           'bug_id'     => $bug_id,
-          'maintainer' => Bugzilla->params->{'maintainer'}
+          'maintainer' => Bugzilla->params->{'maintainer'},
+          'email_type' => $email_type
         };
 
         $template->process('account/email/encryption-required.txt.tmpl',

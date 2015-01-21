@@ -74,7 +74,7 @@ sub _throw_error {
             $val = "*****" if $val =~ /password|http_pass/i;
             $mesg .= "[$$] " . Data::Dumper->Dump([$val],["env($var)"]);
         }
-        open(ERRORLOGFID, ">>$datadir/errorlog");
+        open(ERRORLOGFID, ">>", "$datadir/errorlog");
         print ERRORLOGFID "$mesg\n";
         close ERRORLOGFID;
     }

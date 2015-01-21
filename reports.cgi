@@ -138,7 +138,7 @@ sub generate_chart {
     my ($dir, $image_file, $product, $datasets) = @_;
     my $data_file = $dir . '/' . $product->id;
 
-    if (! open FILE, $data_file) {
+    if (!open(FILE, '<', $data_file)) {
         ThrowCodeError('chart_data_not_generated', {'product' => $product});
     }
 

@@ -309,7 +309,7 @@ sub regenerate_stats {
         return;
     }
 
-    if (open DATA, ">$file") {
+    if (open DATA, ">", $file) {
         my $fields = join('|', ('DATE', @statuses, @resolutions));
         my $product_name = $product->name;
         print DATA <<FIN;

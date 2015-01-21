@@ -203,14 +203,14 @@ function set_assign_to(use_qa_contact) {
                 params: {
                     Bugzilla_api_token: BUGZILLA.api_token,
                     ids: bug_id
-                },
+                }
             });
             var callbacks = {
                 failure: function(res) {
                     if (console)
                         console.log("failed to update last visited: "
                             + res.responseText);
-                },
+                }
             };
 
             YAHOO.util.Connect.setDefaultPostHeader('application/json', true);
@@ -224,7 +224,7 @@ function set_assign_to(use_qa_contact) {
                 method: 'BugUserLastVisit.get',
                 params: {
                     Bugzilla_api_token: BUGZILLA.api_token
-                },
+                }
             });
             var callbacks = {
                 success: function(res) { done(JSON.parse(res.responseText)) },
@@ -232,12 +232,12 @@ function set_assign_to(use_qa_contact) {
                     if (console)
                         console.log("failed to get last visited: "
                                 + res.responseText);
-                },
+                }
             };
 
             YAHOO.util.Connect.setDefaultPostHeader('application/json', true);
             YAHOO.util.Connect.asyncRequest('POST', 'jsonrpc.cgi', callbacks,
                     args)
-        },
+        }
     };
 })();

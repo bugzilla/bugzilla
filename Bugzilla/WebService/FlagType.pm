@@ -21,6 +21,12 @@ use Bugzilla::Util qw(trim);
 
 use List::MoreUtils qw(uniq);
 
+use constant PUBLIC_METHODS => qw(
+    create
+    get
+    update
+);
+
 sub get {
     my ($self, $params) = @_;
     my $dbh  = Bugzilla->switch_to_shadow_db();

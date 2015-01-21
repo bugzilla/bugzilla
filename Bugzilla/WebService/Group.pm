@@ -16,6 +16,12 @@ use Bugzilla::Constants;
 use Bugzilla::Error;
 use Bugzilla::WebService::Util qw(validate translate params_to_objects);
 
+use constant PUBLIC_METHODS => qw(
+    create
+    get
+    update
+);
+
 use constant MAPPED_RETURNS => {
     userregexp => 'user_regexp',
     isactive => 'is_active'

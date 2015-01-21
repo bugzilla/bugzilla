@@ -31,6 +31,7 @@ use Bugzilla::Util;
 
 use HTTP::Message;
 use MIME::Base64 qw(decode_base64 encode_base64);
+use List::MoreUtils qw(none);
 
 #####################################
 # Public JSON::RPC Method Overrides #
@@ -402,6 +403,11 @@ sub _argument_type_check {
             ThrowUserError('json_rpc_post_only', 
                            { method => $self->_bz_method_name });
         }
+    }
+
+    # Only allowed methods to be used from our whitelist
+    if (none { $_ eq $method} $pkg->PUBLIC_METHODS) {
+        ThrowUserError('unknown_method', { method => $self->bz_method_name });
     }
 
     # This is the best time to do login checks.

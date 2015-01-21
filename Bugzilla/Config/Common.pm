@@ -256,7 +256,7 @@ sub check_webdotbase {
         # Check .htaccess allows access to generated images
         my $webdotdir = bz_locations()->{'webdotdir'};
         if(-e "$webdotdir/.htaccess") {
-            open HTACCESS, "$webdotdir/.htaccess";
+            open HTACCESS, "<", "$webdotdir/.htaccess";
             if(! grep(/ \\\.png\$/,<HTACCESS>)) {
                 return "Dependency graph images are not accessible.\nAssuming that you have not modified the file, delete $webdotdir/.htaccess and re-run checksetup.pl to rectify.\n";
             }

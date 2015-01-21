@@ -578,7 +578,7 @@ sub _update_old_charts {
                  ($in_file =~ /\.orig$/i));
 
         rename("$in_file", "$in_file.orig") or next;
-        open(IN, "$in_file.orig") or next;
+        open(IN, "<", "$in_file.orig") or next;
         open(OUT, '>', $in_file) or next;
 
         # Fields in the header

@@ -61,7 +61,7 @@ sub CreateImagemap {
     my $map = "<map name=\"imagemap\">\n";
     my $default = "";
 
-    open MAP, "<$mapfilename";
+    open MAP, "<", $mapfilename;
     while(my $line = <MAP>) {
         if($line =~ /^default ([^ ]*)(.*)$/) {
             $default = qq{<area alt="" shape="default" href="$1">\n};
@@ -271,7 +271,7 @@ if ($webdotbase =~ /^https?:/) {
                                                  error => $! });
 
     binmode $pngfh;
-    open(DOT, "\"$webdotbase\" -Tpng $filename|");
+    open(DOT, '-|', "\"$webdotbase\" -Tpng $filename");
     binmode DOT;
     print $pngfh $_ while <DOT>;
     close DOT;
@@ -300,7 +300,7 @@ if ($webdotbase =~ /^https?:/) {
                                                  error => $! });
 
     binmode $mapfh;
-    open(DOT, "\"$webdotbase\" -Tismap $filename|");
+    open(DOT, '-|', "\"$webdotbase\" -Tismap $filename");
     binmode DOT;
     print $mapfh $_ while <DOT>;
     close DOT;

@@ -366,7 +366,7 @@ EOT
     # Move any custom or old variables into a separate file.
     if (scalar @old_vars) {
         my $filename_old = "$filename.old";
-        open(my $old_file, ">>$filename_old") || die "$filename_old: $!";
+        open(my $old_file, ">>", $filename_old) || die "$filename_old: $!";
         local $Data::Dumper::Purity = 1;
         foreach my $var (@old_vars) {
             print $old_file Data::Dumper->Dump([$localconfig->{$var}], 
@@ -383,7 +383,7 @@ EOT
     }
 
     # Re-write localconfig
-    open(my $fh, ">$filename") || die "$filename: $!";
+    open(my $fh, ">", $filename) || die "$filename: $!";
     foreach my $var (LOCALCONFIG_VARS) {
         print $fh "\n", $var->{desc},
                   Data::Dumper->Dump([$localconfig->{$var->{name}}],

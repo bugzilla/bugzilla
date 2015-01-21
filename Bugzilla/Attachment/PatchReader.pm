@@ -110,7 +110,7 @@ sub process_interdiff {
     # Send through interdiff, send output directly to template.
     # Must hack path so that interdiff will work.
     $ENV{'PATH'} = $lc->{diffpath};
-    open my $interdiff_fh, "$lc->{interdiffbin} $old_filename $new_filename|";
+    open my $interdiff_fh, '-|', "$lc->{interdiffbin} $old_filename $new_filename";
     binmode $interdiff_fh;
     my ($reader, $last_reader) = setup_patch_readers("", $context);
 

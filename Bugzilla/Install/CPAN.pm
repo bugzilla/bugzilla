@@ -214,8 +214,8 @@ sub set_cpan_config {
     # Calling a senseless autoload that does nothing makes us
     # automatically load any existing configuration.
     # We want to avoid the "invalid command" message.
-    open(my $saveout, ">&STDOUT");
-    open(STDOUT, '>/dev/null');
+    open(my $saveout, ">&", "STDOUT");
+    open(STDOUT, '>', '/dev/null');
     eval { CPAN->ignore_this_error_message_from_bugzilla; };
     undef $@;
     close(STDOUT);

@@ -371,7 +371,7 @@ sub data {
     # If there's no attachment data in the database, the attachment is stored
     # in a local file, so retrieve it from there.
     if (length($self->{data}) == 0) {
-        if (open(AH, $self->_get_local_filename())) {
+        if (open(AH, '<', $self->_get_local_filename())) {
             local $/;
             binmode AH;
             $self->{data} = <AH>;
@@ -417,7 +417,7 @@ sub datasize {
     # is stored in a local file, and so retrieve its size from the file,
     # or the attachment has been deleted.
     unless ($self->{datasize}) {
-        if (open(AH, $self->_get_local_filename())) {
+        if (open(AH, '<', $self->_get_local_filename())) {
             binmode AH;
             $self->{datasize} = (stat(AH))[7];
             close(AH);

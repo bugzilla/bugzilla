@@ -349,7 +349,7 @@ sub regenerate_stats {
         return;
     }
 
-    if (open DATA, ">$file") {
+    if (open DATA, ">", $file) {
         my $fields = join('|', ('DATE', @statuses, @resolutions));
         print DATA <<FIN;
 # Bugzilla Daily Bug Stats

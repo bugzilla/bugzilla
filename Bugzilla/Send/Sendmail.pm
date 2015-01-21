@@ -29,7 +29,7 @@ sub send {
 
     my $pipe = gensym;
 
-    open($pipe, "| $mailer -t -oi @args")
+    open($pipe, "|-", "$mailer -t -oi @args")
         || return failure "Error executing $mailer: $!";
     print($pipe $message->as_string)
         || return failure "Error printing via pipe to $mailer: $!";

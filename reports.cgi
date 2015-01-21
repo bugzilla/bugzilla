@@ -136,7 +136,7 @@ sub generate_chart {
     $data_file =~ s/\//-/gs;
     $data_file = $dir . '/' . $data_file;
 
-    if (! open FILE, $data_file) {
+    if (!open(FILE, '<', $data_file)) {
         if ($product eq '-All-') {
             $product = '';
         }

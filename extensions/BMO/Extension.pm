@@ -1390,6 +1390,7 @@ sub _post_dev_engagement {
     Bugzilla->error_mode(ERROR_MODE_DIE);
 
     my $discussion_bug;
+    my @warnings;
     eval {
         # Add attachment containing tab delimited field values for
         # spreadsheet import.
@@ -1485,6 +1486,12 @@ EOF
         foreach my $type (@{ $discussion_bug->flag_types }) {
             next if $type->name ne 'needinfo';
             foreach my $requestee (DEV_ENGAGE_DISCUSS_NEEDINFO()) {
+                # needinfo'ing a disable account throws an error - warn instead
+                my $requestee_object = Bugzilla::User->new({ name => $requestee, cache => 1 });
+                if (!$requestee_object || !$requestee_object->is_enabled) {
+                    push @warnings, "Failed to needinfo $requestee on dev-engagement bug (does not exist or disabled)";
+                    next;
+                }
                 my $needinfo_flag = {
                     type_id   => $type->id,
                     status    => '?',
@@ -1507,6 +1514,10 @@ EOF
 
     Bugzilla->set_user($old_user);
     Bugzilla->error_mode($error_mode_cache);
+
+    foreach my $warning (@warnings) {
+        warn $warning . "\n";
+    }
 
     # No matter what happened, ensure the parent bug gets marked as updated
     # There's no need to send mail for parent bug

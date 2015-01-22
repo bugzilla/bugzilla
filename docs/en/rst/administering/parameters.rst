@@ -218,6 +218,25 @@ allow_attachment_deletion
     of attachments (i.e. replace the attached file with a 0 byte file),
     leaving only the metadata.
 
+xsendfile_header
+    By default, attachments are served by Bugzilla. If you enable filesystem
+    file storage for large files using the :param:`maxlocalattachment`
+    parameter then you can have those files served directly by the webserver,
+    which avoids copying them entirely into memory, and this may result in a
+    performance improvement. To do this, configure your webserver appropriately
+    and then set the correct header, as follows:
+
+    * Apache: ``X-Sendfile`` header; see `webserver documentation
+      <https://tn123.org/mod_xsendfile/>`_ for configuration instructions
+    * nginx: ``X-Accel-Redirect`` header; see `webserver documentation
+      <http://wiki.nginx.org/X-accel>`_ for configuration instructions
+    * lighttpd: ``X-LIGHTTPD-send-file`` header; see `webserver documentation
+      <http://redmine.lighttpd.net/projects/1/wiki/X-LIGHTTPD-send-file>`_  for
+      configuration instructions
+
+    Please note that attachments stored in the database cannot be offloaded in
+    this way.
+
 maxattachmentsize
     The maximum size (in kilobytes) of attachments to be stored in the database. If a file larger than this size is attached to a bug, Bugzilla will look at the :param:`maxlocalattachment` parameter to determine if the file can be stored locally on the web server. If the file size exceeds both limits, then the attachment is rejected. Setting both parameters to 0 will prevent attaching files to bugs.
 

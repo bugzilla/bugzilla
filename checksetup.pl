@@ -17,12 +17,13 @@ use strict;
 use warnings;
 
 use File::Basename;
+BEGIN { chdir dirname($0); }
+use lib qw(. lib);
+
 use Getopt::Long qw(:config bundling);
 use Pod::Usage;
 use Safe;
 
-BEGIN { chdir dirname($0); }
-use lib qw(. lib);
 use Bugzilla::Constants;
 use Bugzilla::Install::Requirements;
 use Bugzilla::Install::Util qw(install_string get_version_and_os 

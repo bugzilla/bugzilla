@@ -512,11 +512,15 @@ sub bug_check_can_change_field {
         {
             push (@$priv_results, PRIVILEGES_REQUIRED_NONE);
         }
-        elsif ($field eq 'resolution' && 
+        elsif ($field eq 'resolution' &&
                ($new_value eq 'DUPLICATE' ||
                 $new_value eq 'WORKSFORME' ||
-                $new_value eq 'INCOMPLETE'))
+                $new_value eq 'INCOMPLETE' ||
+                ($old_value eq '' && $new_value eq '1')))
         {
+            push (@$priv_results, PRIVILEGES_REQUIRED_NONE);
+        }
+        elsif ($field eq 'dup_id') {
             push (@$priv_results, PRIVILEGES_REQUIRED_NONE);
         }
 

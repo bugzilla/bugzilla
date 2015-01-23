@@ -138,7 +138,7 @@
               [% r = legal_value.name %]
               [% IF bug.user.canconfirm &&
                     !(bug.user.canedit || bug.user.isreporter) %]
-                [% NEXT IF r != "WORKSFORME" && r != "INCOMPLETE" %]
+                [% NEXT IF r != "WORKSFORME" && r != "INCOMPLETE" && r != "DUPLICATE" %]
               [% END %]
               [% IF bug.user.isreporter &&
                     !(bug.user.canconfirm || bug.user.canedit) %]

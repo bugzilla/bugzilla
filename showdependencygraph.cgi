@@ -204,6 +204,7 @@ foreach my $k (keys(%seen)) {
         if (Bugzilla->params->{'utf8'}) {
             utf8::encode($summary) if utf8::is_utf8($summary);
         }
+        $summary = wrap_comment($summary);
         $summary =~ s/([\\\"])/\\$1/g;
         push(@params, qq{label="$k\\n$summary"});
     }

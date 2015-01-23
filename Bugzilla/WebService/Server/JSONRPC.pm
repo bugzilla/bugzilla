@@ -390,7 +390,7 @@ sub _argument_type_check {
 
     # Only allowed methods to be used from our whitelist
     if (none { $_ eq $method} $pkg->PUBLIC_METHODS) {
-        ThrowUserError('unknown_method', { method => $self->bz_method_name });
+        ThrowCodeError('unknown_method', { method => $self->_bz_method_name });
     }
 
     # This is the best time to do login checks.

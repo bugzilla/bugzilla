@@ -187,10 +187,9 @@ sub sql_date_math {
 
 sub sql_string_concat {
     my ($self, @params) = @_;
-    
-    # Postgres 7.3 does not support concatenating of different types, so we
-    # need to cast both parameters to text. Version 7.4 seems to handle this
-    # properly, so when we stop support 7.3, this can be removed.
+
+    # PostgreSQL 8.3 and newer require an explicit coercion to text
+    # to support concatenation of different data types.
     return '(CAST(' . join(' AS text) || CAST(', @params) . ' AS text))';
 }
 

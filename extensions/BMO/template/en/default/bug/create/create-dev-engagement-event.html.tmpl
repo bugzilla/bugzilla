@@ -288,6 +288,17 @@
 
 <div class="form_section">
   <div class="field_label required">
+    Who is the primary audience for this event? [% mandatory FILTER none %]
+  </div>
+  <div class="field_desc">
+    Developers (specify coding language and platform), business development,
+    marketing associates, corporate executives, etc.
+  </div>
+  <input type="text" name="audience" id="audience" size="40" class="wide">
+</div>
+
+<div class="form_section">
+  <div class="field_label required">
     Please give a [short] description of the event.
   </div>
   <div class="field_desc">
@@ -353,6 +364,28 @@
   </select>
 </div>
 
+<div class="form_section">
+  <div class="field_label">
+    How would the conference/event support <a href="https://www.mozilla.org/mission/">
+    Mozilla's mission and goals</a>?
+  </div>
+  <div class="field_desc">
+    Are there specific portions of the conference/event that can be described to be
+    specifically beneficial to our mission?
+  </div>
+  <textarea name="support_mission" id="support_mission" rows="10" cols="40" class="wide"></textarea>
+</div>
+
+<div class="form_section">
+  <div class="field_label">
+    How would we receive feedback to evaluate the success of the conference/event?
+  </div>
+  <div class="field_desc">
+    Please be specific in measurements or feedback process.
+  </div>
+  <textarea name="feedback_method" id="feedback_method" rows="10" cols="40" class="wide"></textarea>
+</div>
+
 <div id="speaker_needed_detail_section" class="form_section bz_default_hidden">
   <div class="field_label required">
     What topic do you want someone to speak about?
@@ -363,19 +396,6 @@
   </div>
   <input type="text" name="speaker_needed_topic"
          id="speaker_needed_topic" size="40" class="wide">
-</div>
-
-<div class="form_section">
-  <div class="field_label required">
-    Will this event include a session about developing with HTML, CSS, or
-    JavaScript?
-  </div>
-  <select id="development_session" name="development_session">
-    <option value="">Select</option>
-    <option value="Yes">Yes</option>
-    <option value="No">No</option>
-    <option value="To be determined">To be determined</option>
-  </select>
 </div>
 
 <div class="head_desc">

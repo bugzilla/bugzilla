@@ -81,6 +81,7 @@ var DE = {
       'end_date' : 'Please enter the event end date.',
       'location' : 'Please enter a location description for the event.',
       'attendees' : 'Please enter number of expected attendees.',
+      'audience' : 'Please enter the intended audience for the event.',
       'desc' : 'Please enter a description of the event.',
     };
 
@@ -91,7 +92,6 @@ var DE = {
       'code_of_conduct' : 'Please select if the event has a code of conduct.',
       'event_location' : 'Please a location for the event.',
       'previous_event' : 'Please select if Mozilla has sponsored this event before.',
-      'development_session' : 'Please select if this event includes a development session.',
     };
 
     if (fieldValue('vouched_mozillian') == 'Yes')
@@ -223,13 +223,6 @@ var DE = {
     wb += '[needs-speaker:' + needs_speaker + '] ';
     var sponsor_booth = fieldValue('sponsor_booth') == 'Yes' ? 'true' : 'false';
     wb += '[option-to-sponsor-booth:' + sponsor_booth + '] ';
-    var dev_session_map = {
-     'Yes' : 'true',
-     'No' : 'false',
-     'To be determined' : 'tbd',
-    };
-    wb += '[open-web-session-at-event:' +
-           dev_session_map[fieldValue('development_session')] + '] ';
     wb += '[expected-attendees:' + fieldValue('attendees') + '] ';
     var prospectus = fieldValue('data') ? 'true' : 'false';
     wb += '[prospectus:' + prospectus + '] ';

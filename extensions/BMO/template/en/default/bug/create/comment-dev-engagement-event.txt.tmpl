@@ -71,6 +71,9 @@ Weblink:
 Expected Attendees:
 [%+ cgi.param('attendees') || "-" %]
 
+Primary Audience:
+[%+ cgi.param('audience') %]
+
 Event Description:
 [%+ cgi.param('desc') || "-" %]
 
@@ -98,9 +101,6 @@ Speaker Needed Topic:
 [%+ cgi.param('speaker_needed_topic') %]
 [% END %]
 
-Development Session?:
-[%+ cgi.param('development_session') %]
-
 ::
 
 Requests:
@@ -123,6 +123,12 @@ Previous Event Name:
 
 Suggested sponsorship amount/level:
 [%+ cgi.param('sponsorship_suggestion') || "-" %]
+
+How would the conference/event support Mozilla's mission and goals?:
+[%+ cgi.param('support_mission') || "-" %]
+
+How would we receive feedback to evaluate the success of the conference/event?:
+[%+ cgi.param('feedback_method') || "-" %]
 
 Anything Else:
 [%+ cgi.param('else') || "-" %]

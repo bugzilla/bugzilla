@@ -30,12 +30,12 @@ use constant READ_ONLY => qw(
     get_selectable_products
 );
 
-+use constant PUBLIC_METHODS => qw(
-+    get
-+    get_accessible_products
-+    get_enterable_products
-+    get_selectable_products
-+);
+use constant PUBLIC_METHODS => qw(
+    get
+    get_accessible_products
+    get_enterable_products
+    get_selectable_products
+);
 
 ##################################################
 # Add aliases here for method name compatibility #

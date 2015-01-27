@@ -88,6 +88,26 @@ use constant READ_ONLY => qw(
     search
 );
 
+use constant PUBLIC_METHODS => qw(
+    add_attachment
+    add_comment
+    attachments
+    comments
+    create
+    fields
+    get
+    history
+    legal_values
+    possible_duplicates
+    render_comment
+    search
+    search_comment_tags
+    update
+    update_attachment
+    update_comment_tags
+    update_see_also
+);
+
 use constant ATTACHMENT_MAPPED_SETTERS => {
     file_name => 'filename',
     summary   => 'description',

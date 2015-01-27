@@ -25,6 +25,11 @@ use URI;
 use URI::Escape;
 use URI::QueryParam;
 
+use constant PUBLIC_METHODS => qw(
+    list
+    shorten
+);
+
 sub _validate_uri {
     my ($self, $params) = @_;
 

@@ -28,6 +28,14 @@ use Bugzilla::Extension::Ember::FakeBug;
 use Scalar::Util qw(blessed);
 use Storable qw(dclone);
 
+use constant PUBLIC_METHODS => qw(
+    bug
+    create
+    get_attachments
+    search
+    show
+);
+
 use constant DATE_FIELDS => {
     show => ['last_updated'],
 };

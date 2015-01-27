@@ -30,6 +30,11 @@ use Bugzilla::Util qw(detaint_natural trick_taint);
 use Bugzilla::WebService::Util qw(validate);
 use Bugzilla::Field;
 
+use constant PUBLIC_METHODS => qw(
+    getBugsConfirmer
+    getBugsVerifier
+);
+
 sub getBugsConfirmer {
     my ($self, $params) = validate(@_, 'names');
     my $dbh = Bugzilla->dbh;

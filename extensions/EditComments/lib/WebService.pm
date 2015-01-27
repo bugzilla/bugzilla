@@ -16,6 +16,10 @@ use Bugzilla::Error;
 use Bugzilla::Util qw(trim);
 use Bugzilla::WebService::Util qw(validate);
 
+use constant PUBLIC_METHODS => qw(
+    comments
+);
+
 sub comments {
     my ($self, $params) = validate(@_, 'comment_ids');
     my $dbh  = Bugzilla->switch_to_shadow_db();

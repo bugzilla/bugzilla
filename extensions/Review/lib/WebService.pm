@@ -18,6 +18,11 @@ use Bugzilla::Error;
 use Bugzilla::Util qw(detaint_natural trick_taint);
 use Bugzilla::WebService::Util 'filter';
 
+use constant PUBLIC_METHODS => qw(
+    flag_activity
+    suggestions
+);
+
 sub suggestions {
     my ($self, $params) = @_;
     my $dbh = Bugzilla->switch_to_shadow_db();
@@ -55,7 +60,7 @@ sub suggestions {
     if ($component) {
         push @reviewers, @{ $component->reviewers_objs };
     }
-    if (!@{ $component->reviewers_objs }) {
+    if (!$component || !@{ $component->reviewers_objs }) {
         push @reviewers, @{ $product->reviewers_objs };
     }
 

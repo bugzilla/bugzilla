@@ -15,6 +15,10 @@ use base qw(Bugzilla::WebService);
 use Bugzilla::Error;
 use Bugzilla::Util qw(detaint_natural trick_taint trim);
 
+use constant PUBLIC_METHODS => qw(
+    prod_comp_search
+);
+
 sub prod_comp_search {
     my ($self, $params) = @_;
     my $user = Bugzilla->user;

@@ -24,6 +24,13 @@ use constant READ_ONLY => qw(
     run_flag_query
 );
 
+use constant PUBLIC_METHODS => qw(
+    bug_interest_unmark
+    run_bug_query
+    run_flag_query
+    run_last_changes
+);
+
 sub run_last_changes {
     my ($self, $params) = @_;
 

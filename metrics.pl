@@ -35,9 +35,9 @@ eval "use $reporter_class";
 
 # detach
 if ($reporter_class->DETACH) {
-    open(STDIN, '</dev/null');
-    open(STDOUT, '>/dev/null');
-    open(STDERR, '>/dev/null');
+    open(STDIN, '<', '/dev/null');
+    open(STDOUT, '>', '/dev/null');
+    open(STDERR, '>', '/dev/null');
     setsid();
 }
 

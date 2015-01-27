@@ -190,7 +190,7 @@ sub push_context_lines {
     if (Bugzilla::PatchReader::CVSClient::cvs_co_rev($this->{CVSROOT}, $this->{REVISION}, $this->{FILENAME})) {
       die "Could not check out $this->{FILENAME} r$this->{REVISION} from $this->{CVSROOT}";
     }
-    open my $fh, $this->{FILENAME} or die "Could not open $this->{FILENAME}";
+    open(my $fh, '<', $this->{FILENAME}) or die "Could not open $this->{FILENAME}";
     $this->{FILE} = $fh;
     $this->{NEXT_FILE_LINE} = 1;
     trick_taint($olddir); # $olddir comes from getcwd()

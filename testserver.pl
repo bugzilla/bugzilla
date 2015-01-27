@@ -44,7 +44,7 @@ my @pscmds = ('ps -eo comm,gid', 'ps -acxo command,gid', 'ps -acxo command,rgid'
 my $sgid = 0;
 if (!ON_WINDOWS) {
     foreach my $pscmd (@pscmds) {
-        open PH, "$pscmd 2>/dev/null |";
+        open PH, '-|', "$pscmd 2>/dev/null";
         while (my $line = <PH>) {
             if ($line =~ /^(?:\S*\/)?(?:httpd|apache)2?\s+(\d+)$/) {
                 $sgid = $1 if $1 > $sgid;
@@ -271,7 +271,7 @@ sub check_image {
 
 sub create_file {
     my ($filename, $content) = @_;
-    open(FH, ">$filename")
+    open(FH, ">", $filename)
         or die "Failed to create $filename: $!\n";
     binmode FH;
     print FH $content;
@@ -280,7 +280,7 @@ sub create_file {
 
 sub read_file {
     my ($filename) = @_;
-    open(FH, $filename)
+    open(FH, "<", $filename)
         or die "Failed to open $filename: $!\n";
     binmode FH;
     my $content = <FH>;

@@ -234,7 +234,7 @@ sub iterate_file {
   my $this = shift;
   my ($filename) = @_;
 
-  open FILE, $filename or die "Could not open $filename: $!";
+  open(FILE, '<', $filename) or die "Could not open $filename: $!";
   $this->start_lines($filename);
   while (<FILE>) {
     $this->next_line($_);

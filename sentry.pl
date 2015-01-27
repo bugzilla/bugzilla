@@ -40,9 +40,9 @@ Bugzilla->usage_mode(USAGE_MODE_CMDLINE);
 nice(19);
 
 # detach
-open(STDIN, '</dev/null');
-open(STDOUT, '>/dev/null');
-open(STDERR, '>/dev/null');
+open(STDIN, '<', '/dev/null');
+open(STDOUT, '>', '/dev/null');
+open(STDERR, '>', '/dev/null');
 setsid();
 
 # grab sentry server url

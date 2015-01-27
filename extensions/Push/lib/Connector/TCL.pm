@@ -267,7 +267,7 @@ sub _get_bug_data {
 
 sub _write_file {
     my ($filename, $content) = @_;
-    open(my $fh, ">$filename") or die "Failed to write to $filename: $!\n";
+    open(my $fh, ">", $filename) or die "Failed to write to $filename: $!\n";
     binmode($fh);
     print $fh $content;
     close($fh) or die "Failed to write to $filename: $!\n";

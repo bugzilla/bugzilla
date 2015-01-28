@@ -1,4 +1,4 @@
-#!/usr/bin/perl -wT
+#!/usr/bin/perl -w
 # -*- Mode: perl; indent-tabs-mode: nil -*-
 #
 # The contents of this file are subject to the Mozilla Public
@@ -24,16 +24,17 @@
 
 use strict;
 
-use lib qw(.);
+use FindBin '$RealBin';
+use lib "$RealBin/..", "$RealBin/lib";
 
 use Bugzilla;
 use Bugzilla::Bug;
 use Bugzilla::Constants;
 use Bugzilla::Hook;
 use Bugzilla::Util;
-use List::MoreUtils qw(uniq);
-
 use Getopt::Long;
+use List::MoreUtils qw(uniq);
+$| = 1;
 
 my $dbh = Bugzilla->dbh;
 
@@ -41,26 +42,41 @@ my $dbh = Bugzilla->dbh;
 # doesn't contain any information that can't be viewed from a web browser by
 # a user who is not logged in.
 
-# Last validated against Bugzilla version 4.0
+my ($dry_run, $from_cron, $keep_attachments, $keep_group_bugs, $keep_groups, $execute,
+    $keep_passwords, $keep_insider, $trace, $enable_email) = (0, 0, 0, '', 0, 0, 0, 0, 0, 0);
+my $keep_group_bugs_sql = '';
 
-my ($dry_run, $from_cron, $keep_attachments, $keep_groups,
-    $keep_passwords, $keep_insider, $trace, $enable_email) = (0, 0, 0, '', 0, 0, 0, 0);
-my $keep_groups_sql = '';
-
+my $syntax = <<EOF;
+options:
+--execute          perform database sanitization
+--keep-attachments disable removal of attachment content
+--keep-passwords   disable resetting of passwords
+--keep-insider     disable removal of insider comments and attachments
+--keep-group-bugs  disable removal of the specified groups and associated bugs
+--keep-groups      disable removal of group definitions
+--enable-email     do not disable email for all users
+--dry-run          do not update the database, just output what will be deleted
+--from-cron        quite mode - suppress non-warning/error output
+--trace            output sql statements
+EOF
 GetOptions(
+    "execute" => \$execute,
     "dry-run" => \$dry_run,
     "from-cron" => \$from_cron,
     "keep-attachments" => \$keep_attachments,
     "keep-passwords" => \$keep_passwords,
     "keep-insider" => \$keep_insider,
-    "keep-groups:s" => \$keep_groups,
+    "keep-group-bugs:s" => \$keep_group_bugs,
+    "keep-groups" => \$keep_groups,
     "trace" => \$trace,
     "enable-email" => \$enable_email,
-) or exit;
+) or die $syntax;
+die "--execute switch required to perform database sanitization.\n\n$syntax"
+    unless $execute or $dry_run;
 
-if ($keep_groups ne '') {
+if ($keep_group_bugs ne '') {
     my @groups;
-    foreach my $group_id (split(/\s*,\s*/, $keep_groups)) {
+    foreach my $group_id (split(/\s*,\s*/, $keep_group_bugs)) {
         my $group;
         if ($group_id =~ /\D/) {
             $group = Bugzilla::Group->new({ name => $group_id });
@@ -70,7 +86,7 @@ if ($keep_groups ne '') {
         die "Invalid group '$group_id'\n" unless $group;
         push @groups, $group->id;
     }
-    $keep_groups_sql = "NOT IN (" . join(",", @groups) . ")";
+    $keep_group_bugs_sql = "NOT IN (" . join(",", @groups) . ")";
 }
 
 $dbh->{TraceLevel} = 1 if $trace;
@@ -84,7 +100,7 @@ eval {
     delete_secure_bugs();
     delete_deleted_comments();
     delete_insider_comments() unless $keep_insider;
-    delete_security_groups();
+    delete_security_groups() unless $keep_groups;
     delete_sensitive_user_data();
     delete_attachment_data() unless $keep_attachments;
     delete_bug_user_last_visit();
@@ -117,14 +133,13 @@ sub delete_non_public_products {
 sub delete_secure_bugs {
     # Delete all data for bugs in security groups.
     my $buglist = $dbh->selectall_arrayref(
-        $keep_groups
-        ? "SELECT DISTINCT bug_id FROM bug_group_map  WHERE group_id $keep_groups_sql"
+        $keep_group_bugs
+        ? "SELECT DISTINCT bug_id FROM bug_group_map WHERE group_id $keep_group_bugs_sql"
         : "SELECT DISTINCT bug_id FROM bug_group_map"
     );
-    $|=1; # disable buffering so the bug progress counter works
     my $numbugs = scalar(@$buglist);
     my $bugnum = 0;
-    print "Deleting $numbugs bugs in " . ($keep_groups ? 'non-' : '') . "security groups...\n";
+    print "Deleting $numbugs bugs in " . ($keep_group_bugs ? 'non-' : '') . "security groups...\n";
     foreach my $row (@$buglist) {
         my $bug_id = $row->[0];
         $bugnum++;
@@ -160,14 +175,14 @@ sub delete_insider_comments {
 
 sub delete_security_groups {
     # Delete all security groups.
-    print "Deleting " . ($keep_groups ? 'non-' : '') . "security groups...\n";
+    print "Deleting " . ($keep_group_bugs ? 'non-' : '') . "security groups...\n";
     $dbh->do("DELETE user_group_map FROM groups JOIN user_group_map ON groups.id = user_group_map.group_id WHERE groups.isbuggroup = 1");
     $dbh->do("DELETE group_group_map FROM groups JOIN group_group_map ON (groups.id = group_group_map.member_id OR groups.id = group_group_map.grantor_id) WHERE groups.isbuggroup = 1");
     $dbh->do("DELETE group_control_map FROM groups JOIN group_control_map ON groups.id = group_control_map.group_id WHERE groups.isbuggroup = 1");
     $dbh->do("UPDATE flagtypes LEFT JOIN groups ON flagtypes.grant_group_id = groups.id SET grant_group_id = NULL WHERE groups.isbuggroup = 1");
     $dbh->do("UPDATE flagtypes LEFT JOIN groups ON flagtypes.request_group_id = groups.id SET request_group_id = NULL WHERE groups.isbuggroup = 1");
-    if ($keep_groups) {
-        $dbh->do("DELETE FROM groups WHERE isbuggroup = 1 AND id $keep_groups_sql");
+    if ($keep_group_bugs) {
+        $dbh->do("DELETE FROM groups WHERE isbuggroup = 1 AND id $keep_group_bugs_sql");
     } else {
         $dbh->do("DELETE FROM groups WHERE isbuggroup = 1");
     }

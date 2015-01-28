@@ -1,3 +1,11 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
 [% IF !javascript_urls %]
   [% javascript_urls = [] %]
 [% END %]
@@ -35,7 +43,7 @@
 
 [%# BMO - add user context menu %]
 [% IF user.id %]
-  [% yui.push('container', 'menu') %]
-  [% style_urls.push('js/yui/assets/skins/sam/menu.css') %]
+  [% jquery.push('contextMenu') %]
+  [% style_urls.push('js/jquery/plugins/contextMenu/contextMenu.css') %]
   [% javascript_urls.push('extensions/BMO/web/js/edituser_menu.js') %]
 [% END %]

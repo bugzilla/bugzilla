@@ -1,33 +1,48 @@
-var usermenu_widget;
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this file,
+ * You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * This Source Code Form is "Incompatible With Secondary Licenses", as
+ * defined by the Mozilla Public License, v. 2.0. */
 
-YAHOO.util.Event.onDOMReady(function() {
-  usermenu_widget = new YAHOO.widget.Menu('usermenu_widget', { position : 'dynamic' });
-  usermenu_widget.addItems([
-    { text: 'Profile',  url: '#', target: '_blank' },
-    { text: 'Activity', url: '#', target: '_blank' },
-    { text: 'Mail',     url: '#', target: '_blank' },
-    { text: 'Edit',     url: '#', target: '_blank' }
-  ]);
-  usermenu_widget.render(document.body);
-});
-
-function show_usermenu(event, id, email, show_edit) {
-  if (!usermenu_widget)
-    return true;
-  if (event.ctrlKey || event.shiftKey || event.altKey || event.metaKey)
-    return true;
-  usermenu_widget.getItem(0).cfg.setProperty('url',
-    'user_profile?login=' + encodeURIComponent(email));
-  usermenu_widget.getItem(1).cfg.setProperty('url',
-    'page.cgi?id=user_activity.html&action=run&from=-14d&who=' + encodeURIComponent(email));
-  usermenu_widget.getItem(2).cfg.setProperty('url', 'mailto:' + encodeURIComponent(email));
+function show_usermenu(id, email, show_edit) {
+  var items = {
+    profile: {
+      name: "Profile",
+      callback: function () {
+        var href = "user_profile?login=" + encodeURIComponent(email);
+        window.open(href, "_blank");
+      }
+    },
+    activity: {
+      name: "Activity",
+      callback: function () {
+        var href = "page.cgi?id=user_activity.html&action=run&from=-14d&who="
+                   + encodeURIComponent(email);
+        window.open(href, "_blank");
+      }
+    },
+    mail: {
+      name: "Mail",
+      callback: function () {
+        var href = "mailto:" + encodeURIComponent(email);
+        window.open(href, "_blank");
+      }
+    },
+  };
   if (show_edit) {
-    usermenu_widget.getItem(3).cfg.setProperty('url', 'editusers.cgi?action=edit&userid=' + id);
-  } else {
-    usermenu_widget.removeItem(3);
+    items.edit = {
+      name: "Edit",
+      callback: function () {
+        var href = "editusers.cgi?action=edit&userid=" + id;
+        window.open(href, "_blank");
+      }
+    };
   }
-  usermenu_widget.cfg.setProperty('xy', YAHOO.util.Event.getXY(event));
-  usermenu_widget.show();
-  return false;
+  $.contextMenu({
+    selector: ".vcard_" + id,
+    trigger: "left",
+    items: items
+  });
 }
 

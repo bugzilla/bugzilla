@@ -48,6 +48,7 @@ use constant MAPPINGS => {
     # People: AssignedTo, Reporter, QA Contact, CC, etc.
     "assignee" => "assigned_to",
     "owner"    => "assigned_to",
+    "mentor"   => "bug_mentor",
 
     # Product, Version, Component, Target Milestone
     "milestone" => "target_milestone",

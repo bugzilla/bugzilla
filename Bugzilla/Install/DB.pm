@@ -711,6 +711,13 @@ sub update_table_definitions {
                        'bug_user_last_visit_last_visit_ts_idx',
                        ['last_visit_ts']);
 
+    # 2014-07-14 sgreen@redhat.com - Bug 726696
+    $dbh->bz_alter_column('tokens', 'tokentype',
+                          {TYPE => 'varchar(16)', NOTNULL => 1});
+
+    # 2014-07-27 LpSolit@gmail.com - Bug 1044561
+    _fix_user_api_keys_indexes();
+
     # 2014-10-?? dkl@mozilla.com - Bug 1062940
     $dbh->bz_alter_column('bugs', 'alias', { TYPE => 'varchar(40)' });
 
@@ -3796,6 +3803,20 @@ sub _fix_flagclusions_indexes {
                 { FIELDS => [qw(type_id product_id component_id)],
                   TYPE   => 'UNIQUE' });
         }
+    }
+}
+
+sub _fix_user_api_keys_indexes {
+    my $dbh = Bugzilla->dbh;
+
+    if ($dbh->bz_index_info('user_api_keys', 'user_api_keys_key')) {
+        $dbh->bz_drop_index('user_api_keys', 'user_api_keys_key');
+        $dbh->bz_add_index('user_api_keys', 'user_api_keys_api_key_idx',
+                           { FIELDS => ['api_key'], TYPE => 'UNIQUE' });
+    }
+    if ($dbh->bz_index_info('user_api_keys', 'user_api_keys_user_id')) {
+        $dbh->bz_drop_index('user_api_keys', 'user_api_keys_user_id');
+        $dbh->bz_add_index('user_api_keys', 'user_api_keys_user_id_idx', ['user_id']);
     }
 }
 

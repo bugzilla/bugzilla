@@ -380,6 +380,38 @@ table#flags td {
     text-align: left;
 }
 
+#email_prefs, #saved_search_prefs, #shared_search_prefs,
+#bug_activity {
+    border: 1px solid black;
+    border-collapse: collapse;
+}
+
+#email_prefs th,
+#shared_search_prefs th,
+#saved_search_prefs th {
+    text-align: center;
+}
+
+#email_prefs th, #email_prefs td,
+#shared_search_prefs th, #shared_search_prefs td,
+#saved_search_prefs th, #saved_search_prefs td,
+#bug_activity td {
+    border: 1px solid;
+    padding: 0.3em;
+}
+
+#email_prefs th.role_header {
+    width: 10%;
+}
+
+.column_header {
+    background-color: #66f;
+}
+
+.column_header th {
+    text-align: center;
+}
+
 .flag_select {
     min-width: 3em;
 }

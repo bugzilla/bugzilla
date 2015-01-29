@@ -709,6 +709,7 @@ YAHOO.bugzilla.userAutocomplete = {
           method : "User.get",
           id : YAHOO.bugzilla.userAutocomplete.counter,
           params : [ { 
+            Bugzilla_api_token: BUGZILLA.api_token,
             match : [ decodeURIComponent(enteredText) ],
             include_fields : [ "name", "real_name" ]
           } ]
@@ -917,6 +918,7 @@ function show_comment_preview(bug_id) {
         version: "1.1",
         method: 'Bug.render_comment',
         params: {
+            Bugzilla_api_token: BUGZILLA.api_token,
             id: bug_id,
             text: comment.value
         }

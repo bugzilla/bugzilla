@@ -145,16 +145,27 @@ how this is implemented for those frontends.
 
 =head1 LOGGING IN
 
-There are various ways to log in:
+Some methods do not require you to log in. An example of this is Bug.get.
+However, authenticating yourself allows you to see non public information. For
+example, a bug that is not publicly visible.
+
+There are two ways to authenticate yourself:
 
 =over
 
 =item C<User.login>
 
 You can use L<Bugzilla::WebService::User/login> to log in as a Bugzilla
-user. This issues standard HTTP cookies that you must then use in future
-calls, so your client must be capable of receiving and transmitting
-cookies.
+user. This issues a token that you must then use in future calls.
+
+=item C<Bugzilla_api_key>
+
+B<Added in Bugzilla 5.0>
+
+You can specify C<Bugzilla_api_key> as an argument to any WebService method, and
+you will be logged in as that user if the key is correct, and has not been
+revoked. You can set up an API key by using the 'API Key' tab in the
+Preferences pages.
 
 =item C<Bugzilla_login> and C<Bugzilla_password>
 
@@ -182,17 +193,31 @@ not expire.
 
 The C<Bugzilla_restrictlogin> and C<Bugzilla_rememberlogin> options
 are only used when you have also specified C<Bugzilla_login> and
-C<Bugzilla_password>.
+C<Bugzilla_password>. This value will be deprecated in the release
+after Bugzilla 5.0 and you will be required to pass the Bugzilla_login
+and Bugzilla_password for every call.
 
 Note that Bugzilla will return HTTP cookies along with the method
 response when you use these arguments (just like the C<User.login> method
 above).
 
-For REST, you may also use the C<username> and C<password> variable
+For REST, you may also use the C<login> and C<password> variable
 names instead of C<Bugzilla_login> and C<Bugzilla_password> as a
 convenience.
 
-=item B<Added in Bugzilla 5.0>
+=back
+
+There are also two deprecreated methods of authentications. This will be
+removed in the version after Bugzilla 5.0.
+
+=over
+
+=item C<User.login>
+
+You can use L<Bugzilla::WebService::User/login> to log in as a Bugzilla
+user. This issues a token that you must then use in future calls.
+
+=item B<Added in Bugzilla 4.4.3>
 
 An error is now thrown if you pass invalid cookies or an invalid token.
 You will need to log in again to get new cookies or a new token. Previous

@@ -54,7 +54,11 @@ YAHOO.bugzilla.commentTagging = {
             return YAHOO.lang.JSON.stringify({
                 method : "Bug.search_comment_tags",
                 id : YAHOO.bugzilla.commentTagging.counter,
-                params : [ { query : query, limit : 10 } ]
+                params : {
+                    Bugzilla_api_token: BUGZILLA.api_token,
+                    query : query,
+                    limit : 10
+                }
             });
         };
         ac.minQueryLength = this.min_len;
@@ -340,6 +344,7 @@ YAHOO.bugzilla.commentTagging = {
             version: "1.1",
             method: 'Bug.comments',
             params: {
+                Bugzilla_api_token: BUGZILLA.api_token,
                 comment_ids: [ comment_id ],
                 include_fields: [ 'tags' ]
             }
@@ -372,6 +377,7 @@ YAHOO.bugzilla.commentTagging = {
             version: "1.1",
             method: 'Bug.update_comment_tags',
             params: {
+                Bugzilla_api_token: BUGZILLA.api_token,
                 comment_id: comment_id,
                 add: add,
                 remove: remove

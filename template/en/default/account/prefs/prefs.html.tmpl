@@ -40,7 +40,7 @@
    title = "User Preferences"
    subheader = filtered_login
    style_urls = ['skins/standard/admin.css']
-   javascript_urls = ['js/util.js', 'js/field.js']
+   javascript_urls = ['js/util.js', 'js/field.js', 'js/TUI.js']
    doc_section = "userpreferences.html"
    yui = ['autocomplete']
  %]
@@ -53,6 +53,9 @@
               link => "userprefs.cgi?tab=saved-searches", saveable => "1" },
             { name => "account", label => "Account Information",
               link => "userprefs.cgi?tab=account", saveable => "1" },
+            { name => "apikey", label => "API Keys",
+              link => "userprefs.cgi?tab=apikey", saveable => "1",
+              doc_section => "using.html#apikey" },
             { name => "permissions", label => "Permissions", 
               link => "userprefs.cgi?tab=permissions", saveable => "0" } ] %]
 

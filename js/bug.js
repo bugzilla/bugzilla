@@ -33,6 +33,7 @@ YAHOO.bugzilla.dupTable = {
             method : "Bug.possible_duplicates",
             id : YAHOO.bugzilla.dupTable.counter,
             params : {
+                Bugzilla_api_token: BUGZILLA.api_token,
                 product : product_name,
                 summary : summary_field.value,
                 limit : 7,
@@ -139,7 +140,10 @@ YAHOO.bugzilla.dupTable = {
             var args = JSON.stringify({
                 version: "1.1",
                 method: 'BugUserLastVisit.update',
-                params: { ids: bug_ids },
+                params: {
+                    Bugzilla_api_token: BUGZILLA.api_token,
+                    ids: bug_ids
+                }
             });
             var callbacks = {
                 failure: function(res) {
@@ -158,7 +162,9 @@ YAHOO.bugzilla.dupTable = {
             var args = JSON.stringify({
                 version: "1.1",
                 method: 'BugUserLastVisit.get',
-                params: { },
+                params: {
+                    Bugzilla_api_token: BUGZILLA.api_token
+                }
             });
             var callbacks = {
                 success: function(res) { done(JSON.parse(res.responseText)) },

@@ -279,6 +279,11 @@ sub fix_credentials {
         $params->{'Bugzilla_login'}    = delete $params->{'login'};
         $params->{'Bugzilla_password'} = delete $params->{'password'};
     }
+    # Allow user to pass api_key=12345678 as a convenience which becomes
+    # "Bugzilla_api_key" which is what the auth code looks for.
+    if (exists $params->{api_key}) {
+        $params->{Bugzilla_api_key} = delete $params->{api_key};
+    }
     # Allow user to pass token=12345678 as a convenience which becomes
     # "Bugzilla_token" which is what the auth code looks for.
     if (exists $params->{'token'}) {

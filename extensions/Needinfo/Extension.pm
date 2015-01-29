@@ -121,6 +121,12 @@ sub bug_start_of_update {
                     $requestees{$requestee_obj->login} = 1;
                 }
             }
+            # Requestee is a mentor
+            elsif ($needinfo_role
+                   && Bugzilla::User->check({ name => $needinfo_role, cache => 1 }))
+            {
+                $requestees{$needinfo_role} = 1;
+            }
 
             # Find out if the requestee has already been used and skip if so
             my $requestee_found;

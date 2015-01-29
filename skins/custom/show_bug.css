@@ -83,3 +83,7 @@ table#flags {
     border-collapse: collapse;
     border-spacing: 0px;
 }
+
+div[class="bz_comment"]:target {
+    border: 2px solid #0095DD;
+}

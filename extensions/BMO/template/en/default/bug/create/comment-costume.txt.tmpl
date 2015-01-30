@@ -1,0 +1,85 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[%+ USE Bugzilla %]
+[%+ cgi = Bugzilla.cgi +%]
+[%+ PROCESS global/variables.none.tmpl +%]
+:: Requester's Information
+
+Name:
+[%+ cgi.param("requester_name") %]
+
+Email:
+[%+ cgi.param("requester_email") %]
+
+Mozillian Profile:
+[%+ cgi.param("requester_profile") %]
+
+Responsibile for the Costume:
+[%+ cgi.param("responsible") == "Yes" ? "Requester" : cgi.param("responsible_other") %]
+
+:: Event Information
+
+Number of Events:
+[%+ cgi.param("event_count") %]
+
+Event Dates:
+[%+ cgi.param("event_dates") %]
+
+Type of Event and estimated attendance:
+[%+ cgi.param("event_type") %]
+
+Mozilla Goal:
+[%+ cgi.param("goal") %]
+
+Main Audience:
+[%+ cgi.param("event_audience") %]
+
+Event Name:
+[%+ cgi.param("event_name") || "-" %]
+
+Event website/wiki page:
+[%+ cgi.param("event_page") || "-" %]
+
+:: Shipping Information
+
+First name:
+[%+ cgi.param("ship_firstname") %]
+
+Last name:
+[%+ cgi.param("ship_lastname") %]
+
+Address 1:
+[%+ cgi.param("ship_address1") %]
+
+Address 2:
+[%+ cgi.param("ship_address2") %]
+
+City:
+[%+ cgi.param("ship_city") %]
+
+State:
+[%+ cgi.param("ship_state") %]
+
+Country:
+[%+ cgi.param("ship_country") %]
+
+Postal Code:
+[%+ cgi.param("ship_postcode") %]
+
+Personal tax ID:
+[%+ cgi.param("ship_taxid") %]
+
+Phone number:
+[%+ cgi.param("ship_phone") %]
+
+Email:
+[%+ cgi.param("ship_email") %]
+
+Additional Notes:
+[%+ cgi.param("notes") || "-" %]

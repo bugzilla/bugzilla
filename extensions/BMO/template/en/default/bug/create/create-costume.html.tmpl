@@ -1,0 +1,367 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% PROCESS global/variables.none.tmpl %]
+
+[% inline_style = BLOCK %]
+#custom_form .field_name {
+  margin-bottom: 2px;
+}
+
+#custom_form .field_input {
+  margin-bottom: 0.5em;
+}
+
+
+#custom_form th {
+  text-align: right;
+  font-weight: normal;
+  white-space: nowrap;
+}
+
+#custom_form .heading {
+  text-align: left;
+  font-weight: bold;
+  border-top: 2px dotted #969696;
+}
+
+#custom_form input[type="text"], #custom_form textarea {
+  width: 300px;
+  font-family: "Fira Sans","Open Sans","Helvetica Neue",Arial,Helvetica,sans-serif;
+  font-size: 1em;
+}
+
+#custom_form input.short {
+  width: 100px;
+}
+
+#custom_form .field_input p {
+  margin: 2px 0;
+}
+
+.mandatory:after {
+  content: " *";
+  color: red;
+}
+[% END %]
+
+[% inline_javascript = BLOCK %]
+function validateAndSubmit() {
+  var Dom = YAHOO.util.Dom;
+  var alert_text = '';
+
+  if (!isFilledOut('requester_name'))
+    alert_text += "Please enter your name\n";
+  if (!isFilledOut('requester_email'))
+    alert_text += "Please enter your Email address\n";
+  if (!isFilledOut('requester_profile'))
+    alert_text += "Please provide your Mozillian Profile\n";
+  if (!isFilledOut('responsible')) {
+    alert_text += "Please provide your Mozillian Profile\n";
+  } else {
+    if (Dom.get('responsible').value == 'No' && !isFilledOut('responsible_other')) {
+      alert_text += "Please provide the person responsible for the costume\n";
+    }
+  }
+
+  if (!isFilledOut('event_count'))
+    alert_text += "Please enter the number of events\n";
+  if (!isFilledOut('event_dates'))
+    alert_text += "Please enter date(s) of the event\n";
+  if (!isFilledOut('event_type'))
+    alert_text += "Please enter the type of event and attendance\n";
+  if (!isFilledOut('goal'))
+    alert_text += "Please select the Mozilla Goal\n";
+  if (!isFilledOut('event_audience'))
+    alert_text += "Please enter event's main audience\n";
+
+  if (!isFilledOut('ship_firstname'))
+    alert_text += "Please enter the shipping First name\n";
+  if (!isFilledOut('ship_lastname'))
+    alert_text += "Please enter the shipping Last name\n";
+  if (!isFilledOut('ship_address1'))
+    alert_text += "Please enter the shipping Address 1\n";
+  if (!isFilledOut('ship_city'))
+    alert_text += "Please enter the shipping City\n";
+  if (!isFilledOut('ship_country'))
+    alert_text += "Please enter the shipping Country\n";
+  if (!isFilledOut('ship_phone'))
+    alert_text += "Please enter the shipping Phone number\n";
+  if (!isFilledOut('ship_email'))
+    alert_text += "Please enter the shipping Email address\n";
+
+  if (isFilledOut('requester_email') && !isValidEmail(Dom.get('requester_email').value))
+    alert_text += "Please enter a valid Email address.\n";
+  if (isFilledOut('ship_email') && !isValidEmail(Dom.get('ship_email').value))
+    alert_text += "Please enter a valid shipping Email address.\n";
+
+  if (alert_text != '') {
+    alert(alert_text);
+    return false;
+  }
+
+  Dom.get('short_desc').value = 'Firefox Costume Request - ' + YAHOO.util.Dom.get('requester_name').value;
+  return true;
+}
+
+function on_responsible_change() {
+  if (YAHOO.util.Dom.get('responsible').value == 'No') {
+    YAHOO.util.Dom.removeClass('responsible_who', 'bz_default_hidden');
+  }
+  else {
+    YAHOO.util.Dom.addClass('responsible_who', 'bz_default_hidden');
+  }
+}
+
+YAHOO.util.Event.onDOMReady(function() {
+  YAHOO.util.Event.addListener('responsible', 'change', on_responsible_change);
+  on_responsible_change();
+});
+[% END %]
+
+[% PROCESS global/header.html.tmpl
+   title = "Firefox Costume Request Form"
+   style = inline_style
+   javascript = inline_javascript
+   javascript_urls = [ 'extensions/BMO/web/js/form_validate.js',
+                       'js/field.js', 'js/util.js' ]
+%]
+
+<h1>Firefox Costume Request Form</h1>
+
+<p>
+  Looking to get a Firefox Costume for your upcoming event(s)? Please use this
+  form to tell us about your event(s). Filling out this form does not guarantee
+  that you will receive the Fox costume. Requests are reviewed weekly. We will
+  get back to you with next steps after we have reviewed.
+</p>
+
+<p>
+  Before submitting your request, please make sure to review the
+  <a href="https://wiki.mozilla.org/FirefoxCostume" target="_blank">Firefox Costume wiki pages</a>.
+  You’ll find all the information you ever imagined needing, including details
+  about what we’re looking for in your request, how it’s decided where a
+  costume will be sent, and details about the actual costumes.
+</p>
+
+<form method="post" action="post_bug.cgi" enctype="multipart/form-data"
+      onSubmit="return validateAndSubmit();">
+  <input type="hidden" name="format" value="costume">
+  <input type="hidden" name="product" value="Marketing">
+  <input type="hidden" name="component" value="General">
+  <input type="hidden" name="rep_platform" value="All">
+  <input type="hidden" name="op_sys" value="Other">
+  <input type="hidden" name="priority" value="--">
+  <input type="hidden" name="version" value="unspecified">
+  <input type="hidden" name="bug_severity" id="bug_severity" value="normal">
+  <input type="hidden" name="short_desc" id="short_desc" value="">
+  <input type="hidden" name="groups" value="mozilla-engagement">
+  <input type="hidden" name="token" value="[% token FILTER html %]">
+
+<div id="custom_form">
+
+  <h2>Requester's Information</h2>
+
+  <div class="field_name mandatory">
+    Name
+  </div>
+  <div class="field_input">
+    <input type="text" name="requester_name" id="requester_name">
+  </div>
+
+  <div class="field_name mandatory">
+    Email
+  </div>
+  <div class="field_input">
+    <input type="text" name="requester_email" id="requester_email">
+  </div>
+
+  <div class="field_name mandatory">
+    Mozillian Profile
+  </div>
+  <div class="field_input">
+    <input type="text" name="requester_profile" id="requester_profile">
+  </div>
+
+  <div class="field_name mandatory">
+    Will you be responsible for the costume at its destination?
+  </div>
+  <div class="field_input">
+    <select id="responsible" name="responsible">
+      <option></option>
+      <option>Yes</option>
+      <option>No</option>
+    </select>
+    <div id="responsible_who" class="bz_default_hidden mandatory">
+      Who will be responsible for the costume?<br>
+      <input type="text" name="responsible_other" id="responsible_other">
+    </div>
+  </div>
+
+  <h2>Event Information</h2>
+
+  <div class="field_name mandatory">
+    Number of events Foxy will support
+  </div>
+  <div class="field_input">
+    <input type="text" name="event_count" id="event_count" class="short">
+  </div>
+
+  <div class="field_name mandatory">
+    Event date(s)
+  </div>
+  <div class="field_input">
+    <input type="text" name="event_dates" id="event_dates">
+  </div>
+
+  <div class="field_name mandatory">
+    Type of event(s) and estimated attendance at each
+  </div>
+  <div class="field_input">
+    <textarea name="event_type" id="event_type" rows="5" cols="50"
+              placeholder="Examples: Firefox OS in store launch event, Mozilla
+                           [%~ %] company event, Conference, Press Conference,
+                           [%~ %] Hack-a-thon."></textarea>
+  </div>
+
+  <div class="field_name mandatory">
+    Mozilla Goal
+  </div>
+  <div class="field_input">
+    <select name="goal" id="goal">
+      <option></option>
+      <option>Firefox OS</option>
+      <option>Firefox Browser</option>
+      <option>Services</option>
+      <option>Org Support</option>
+      <option>Million Mozillians</option>
+      <option>Other</option>
+    </select>
+  </div>
+
+  <div class="field_name mandatory">
+    Main audience at the event
+  </div>
+  <div class="field_input">
+    <textarea name="event_audience" id="event_audience" rows="5" cols="50"
+              placeholder="Examples: Developers, Students, Mozillians, General
+                           [%~ %] Public, Other."></textarea>
+  </div>
+
+  <div class="field_name">
+    Event name (if applicable)
+  </div>
+  <div class="field_input">
+    <input type="text" name="event_name" id="event_name">
+  </div>
+
+  <div class="field_name">
+    Event website/wiki page (if applicable)
+  </div>
+  <div class="field_input">
+    <input type="text" name="event_page" id="event_page">
+  </div>
+
+  <h2>Shipping Information</h2>
+
+  <div class="field_name mandatory">
+    First name
+  </div>
+  <div class="field_input">
+    <input type="text" name="ship_firstname" id="ship_firstname">
+  </div>
+
+  <div class="field_name mandatory">
+    Last name
+  </div>
+  <div class="field_input">
+    <input type="text" name="ship_lastname" id="ship_lastname">
+  </div>
+
+  <div class="field_name mandatory">
+    Address 1
+  </div>
+  <div class="field_input">
+    <input type="text" name="ship_address1" id="ship_address1">
+  </div>
+
+  <div class="field_name">
+    Address 2
+  </div>
+  <div class="field_input">
+    <input type="text" name="ship_address2" id="ship_address2">
+  </div>
+
+  <div class="field_name mandatory">
+    City
+  </div>
+  <div class="field_input">
+    <input type="text" name="ship_city" id="ship_city">
+  </div>
+
+  <div class="field_name">
+    State
+  </div>
+  <div class="field_input">
+    <input type="text" name="ship_state" id="ship_state">
+  </div>
+
+  <div class="field_name mandatory">
+    Country
+  </div>
+  <div class="field_input">
+    <input type="text" name="ship_country" id="ship_country">
+  </div>
+
+  <div class="field_name">
+    Postal Code
+  </div>
+  <div class="field_input">
+    <input type="text" name="ship_postcode" id="ship_postcode" class="short">
+  </div>
+
+  <div class="field_name">
+    Personal tax ID (if required)
+  </div>
+  <div class="field_input">
+    <input type="text" name="ship_taxid" id="ship_taxid">
+  </div>
+
+  <div class="field_name mandatory">
+    Phone number
+  </div>
+  <div class="field_input">
+    <input type="text" name="ship_phone" id="ship_phone">
+  </div>
+
+  <div class="field_name mandatory">
+    Email
+  </div>
+  <div class="field_input">
+    <input type="text" name="ship_email" id="ship_email">
+  </div>
+
+  <div class="field_name">
+    More Information
+  </div>
+  <div class="field_input">
+    <textarea name="notes" id="notes" rows="5" cols="50"
+              placeholder="Additional notes, comments, etc."></textarea>
+  </div>
+  <h2></h2>
+
+  <input type="submit" id="commit" value="Submit Request">
+
+</div>
+</form>
+
+<p>
+  <span class="mandatory"></span> Required Field
+</p>
+
+[% PROCESS global/footer.html.tmpl %]

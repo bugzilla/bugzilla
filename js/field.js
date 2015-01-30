@@ -11,7 +11,7 @@
 
 var bz_no_validate_enter_bug = false;
 function validateEnterBug(theform) {
-    // This is for the "bookmarkable templates" button.
+    // This is for the "Make Template" button.
     if (bz_no_validate_enter_bug) {
         // Set it back to false for people who hit the "back" button
         bz_no_validate_enter_bug = false;

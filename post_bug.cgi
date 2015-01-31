@@ -56,8 +56,7 @@ Bugzilla::User::match_field ({
 
 if (defined $cgi->param('maketemplate')) {
     $vars->{'url'} = $cgi->canonicalise_query('token');
-    $vars->{'short_desc'} = $cgi->param('short_desc');
-    
+
     print $cgi->header();
     $template->process("bug/create/make-template.html.tmpl", $vars)
       || ThrowTemplateError($template->error());

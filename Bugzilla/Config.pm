@@ -335,7 +335,9 @@ sub read_param_file {
             die "Error parsing $file: $error_msg";
         }
         # JSON::XS doesn't detaint data for us.
-        trick_taint($params{$_}) foreach keys %params;
+        foreach my $key (keys %params) {
+            trick_taint($params{$key}) if defined $params{$key};
+        }
     }
     elsif ($ENV{'SERVER_SOFTWARE'}) {
        # We're in a CGI, but the params file doesn't exist. We can't

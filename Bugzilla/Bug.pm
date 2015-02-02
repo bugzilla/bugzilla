@@ -179,6 +179,9 @@ sub VALIDATORS {
         elsif ($field->type == FIELD_TYPE_BUG_ID) {
             $validator = \&_check_bugid_field;
         }
+        elsif ($field->type == FIELD_TYPE_INTEGER) {
+            $validator = \&_check_integer_field;
+        }
         else {
             $validator = \&_check_default_field;
         }
@@ -2249,6 +2252,28 @@ sub _check_bugid_field {
     }
 
     return $checked_id;
+}
+
+sub _check_integer_field {
+    my ($invocant, $value, $field) = @_;
+    $value = defined($value) ? trim($value) : '';
+
+    # BMO - allow empty values
+    if ($value eq '') {
+        return undef;
+    }
+
+    my $orig_value = $value;
+    if (!detaint_signed($value)) {
+        ThrowUserError("number_not_integer",
+                       {field => $field, num => $orig_value});
+    }
+    elsif ($value > MAX_INT_32) {
+        ThrowUserError("number_too_large",
+                       {field => $field, num => $orig_value, max_num => MAX_INT_32});
+    }
+
+    return $value;
 }
 
 sub _check_relationship_loop {

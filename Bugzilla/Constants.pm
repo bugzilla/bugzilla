@@ -135,6 +135,7 @@ use Memoize;
     FIELD_TYPE_BUG_ID
     FIELD_TYPE_BUG_URLS
     FIELD_TYPE_KEYWORDS
+    FIELD_TYPE_INTEGER
     FIELD_TYPE_EXTENSION
 
     FIELD_TYPE_HIGHEST_PLUS_ONE
@@ -437,6 +438,7 @@ use constant FIELD_TYPE_BUG_ID  => 6;
 use constant FIELD_TYPE_BUG_URLS => 7;
 use constant FIELD_TYPE_KEYWORDS => 8;
 use constant FIELD_TYPE_DATE => 9;
+use constant FIELD_TYPE_INTEGER => 10;
 use constant FIELD_TYPE_EXTENSION => 99;
 
 # Add new field types above this line, and change the below value in the

@@ -834,6 +834,19 @@ sub install_update_db {
     # remove tables from the old TryAutoLand extension
     $dbh->bz_drop_table('autoland_branches');
     $dbh->bz_drop_table('autoland_attachments');
+
+    unless (Bugzilla::Field->new({ name => 'cf_rank' })) {
+        Bugzilla::Field->create({
+            name        => 'cf_rank',
+            description => 'Rank',
+            type        => FIELD_TYPE_INTEGER,
+            mailhead    => 0,
+            enter_bug   => 0,
+            obsolete    => 0,
+            custom      => 1,
+            buglist     => 1,
+        });
+    }
 }
 
 sub _last_closed_date {

@@ -49,7 +49,7 @@ tie(%$cf_visible_in_products, "Tie::IxHash",
             "DCOps",
         ],
     },
-    qw/^cf_office$/ => {
+    qr/^cf_office$/ => {
         "mozilla.org" => ["Server Operations: Desktop Issues"],
     },
     qr/^cf_crash_signature$/ => {
@@ -86,7 +86,7 @@ tie(%$cf_visible_in_products, "Tie::IxHash",
         "Thunderbird"                 => [],
         "Toolkit"                     => [],
     },
-    qw/^cf_due_date$/ => {
+    qr/^cf_due_date$/ => {
         "bugzilla.mozilla.org"        => [],
         "Community Building"          => [],
         "Data & BI Services Team"     => [],
@@ -98,15 +98,19 @@ tie(%$cf_visible_in_products, "Tie::IxHash",
         "Mozilla PR"                  => [],
         "Mozilla Reps"                => [],
     },
-    qw/^cf_locale$/ => {
+    qr/^cf_locale$/ => {
         "Mozilla Localizations" => ['Other'],
         "www.mozilla.org"       => [],
     },
-    qw/^cf_mozilla_project$/ => {
+    qr/^cf_mozilla_project$/ => {
         "Data & BI Services Team" => [],
     },
-    qw/^cf_machine_state$/ => {
+    qr/^cf_machine_state$/ => {
         "Release Engineering" => ["Buildduty"],
+    },
+    qr/^cf_rank$/ => {
+        "Loop"    => [],
+        "Firefox" => [],
     },
 );
 
@@ -124,7 +128,8 @@ our %group_change_notification = (
 
 # Who can set custom flags (use full field names only, not regex's)
 our $cf_setters = {
-    'cf_colo_site'  => ['infra', 'build'],
+    'cf_colo_site'  => [ 'infra', 'build' ],
+    'cf_rank'       => [ 'rank-setters' ],
 };
 
 # Groups in which you can always file a bug, regardless of product or user.

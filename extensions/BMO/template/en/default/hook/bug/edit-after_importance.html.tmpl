@@ -74,3 +74,13 @@
     }
   });
 </script>
+
+[% UNLESS cf_hidden_in_product('cf_rank', bug.product, bug.component) %]
+  [% IF bug.check_can_change_field('cf_rank', 0, 1) %]
+    <label class="field_label" id="rank_label" for="cf_rank">Rank:</label>
+    <input type="number" id="cf_rank" name="cf_rank" size="3" value="[% bug.cf_rank FILTER html %]">
+  [% ELSIF bug.cf_rank != '' %]
+    <label class="field_label" id="rank_label" for="cf_rank">Rank:</label>
+    <span id="cf_rank">[% bug.cf_rank FILTER html %]</span>
+  [% END %]
+[% END %]

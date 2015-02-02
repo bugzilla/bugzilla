@@ -722,10 +722,6 @@ button[disabled], input[type=submit][disabled], input[type=button][disabled], bu
     padding: 5px 10px;
 }
 
-.arrow_down {
-    border-top-color: #0095dd;
-}
-
 /* Attachments */
 
 #viewFrame {

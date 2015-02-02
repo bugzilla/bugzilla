@@ -75,3 +75,8 @@ a.controller {
 .highlighted {
     background: lightyellow;
 }
+
+/* user dropdown menu down-arrow */
+.vcard a .fn:after, .vcard a .ln:after {
+    content: ' \25BE';
+}

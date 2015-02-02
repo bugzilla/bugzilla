@@ -47,7 +47,17 @@ our @EXPORT = qw(
 use constant HT_DEFAULT_DENY => <<EOT;
 # nothing in this directory is retrievable unless overridden by an .htaccess
 # in a subdirectory
-deny from all
+<IfModule mod_version.c>
+  <IfVersion <= 2.2>
+    Deny from all
+  </IfVersion>
+  <IfVersion > 2.2>
+    Require all denied
+  </IfVersion>
+</IfModule>
+<IfModule !mod_version.c>
+  Deny from all
+</IfModule>
 EOT
 
 ###############
@@ -339,11 +349,31 @@ EOT
         "$graphsdir/.htaccess" => { perms => WS_SERVE, contents => <<EOT
 # Allow access to .png and .gif files.
 <FilesMatch (\\.gif|\\.png)\$>
-  Allow from all
+  <IfModule mod_version.c>
+    <IfVersion <= 2.2>
+      Allow from all
+    </IfVersion>
+    <IfVersion > 2.2>
+      Require all granted
+    </IfVersion>
+  </IfModule>
+  <IfModule !mod_version.c>
+    Allow from all
+  </IfModule>
 </FilesMatch>
 
 # And no directory listings, either.
-Deny from all
+<IfModule mod_version.c>
+  <IfVersion <= 2.2>
+    Deny from all
+  </IfVersion>
+  <IfVersion > 2.2>
+    Require all denied
+  </IfVersion>
+</IfModule>
+<IfModule !mod_version.c>
+  Deny from all
+</IfModule>
 EOT
         },
 
@@ -352,28 +382,80 @@ EOT
 # if research.att.com ever changes their IP, or if you use a different
 # webdot server, you'll need to edit this
 <FilesMatch \\.dot\$>
-  Allow from 192.20.225.0/24
-  Deny from all
+  <IfModule mod_version.c>
+    <IfVersion <= 2.2>
+      Allow from 192.20.225.0/24
+      Deny from all
+    </IfVersion>
+    <IfVersion > 2.2>
+      Require ip 192.20.225.0/24
+      Require all denied
+   </IfVersion>
+  </IfModule>
+  <IfModule !mod_version.c>
+    Allow from 192.20.225.0/24
+    Deny from all
+  </IfModule>
 </FilesMatch>
 
-# Allow access to .png files created by a local copy of 'dot'
-<FilesMatch \\.png\$>
-  Allow from all
+ # Allow access to .png files created by a local copy of 'dot'
+ <FilesMatch \\.png\$>
+  <IfModule mod_version.c>
+    <IfVersion <= 2.2>
+      Allow from all
+    </IfVersion>
+    <IfVersion > 2.2>
+      Require all granted
+    </IfVersion>
+  </IfModule>
+  <IfModule !mod_version.c>
+    Allow from all
+  </IfModule>
 </FilesMatch>
 
 # And no directory listings, either.
-Deny from all
+<IfModule mod_version.c>
+  <IfVersion <= 2.2>
+    Deny from all
+  </IfVersion>
+  <IfVersion > 2.2>
+    Require all denied
+  </IfVersion>
+</IfModule>
+<IfModule !mod_version.c>
+  Deny from all
+</IfModule>
 EOT
         },
 
         "$assetsdir/.htaccess" => { perms => WS_SERVE, contents => <<EOT
 # Allow access to .css files
 <FilesMatch \\.(css|js)\$>
-  Allow from all
+  <IfModule mod_version.c>
+    <IfVersion <= 2.2>
+      Allow from all
+    </IfVersion>
+    <IfVersion > 2.2>
+      Require all granted
+    </IfVersion>
+  </IfModule>
+  <IfModule !mod_version.c>
+     Allow from all
+  </IfModule>
 </FilesMatch>
 
 # And no directory listings, either.
-Deny from all
+<IfModule mod_version.c>
+  <IfVersion <= 2.2>
+    Deny from all
+  </IfVersion>
+  <IfVersion > 2.2>
+    Require all denied
+  </IfVersion>
+</IfModule>
+<IfModule !mod_version.c>
+  Deny from all
+</IfModule>
 EOT
         },
 

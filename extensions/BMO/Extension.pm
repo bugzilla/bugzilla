@@ -892,8 +892,8 @@ sub field_end_of_create {
 
     my $bug_data = {
         short_desc   => "Custom field '$name' added to bugzilla.mozilla.org",
-        product      => 'mozilla.org',
-        component    => 'Server Operations: Database',
+        product      => 'Data & BI Services Team',
+        component    => 'Database Operations',
         bug_severity => 'normal',
         op_sys       => 'All',
         rep_platform => 'All',

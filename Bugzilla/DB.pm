@@ -171,15 +171,15 @@ sub _handle_error {
     # $_[0] = Carp::longmess($_[0]);
 
     # BMO: catch long running query timeouts and translate into a sane message
-    if ($_[0] =~ /Lost connection to MySQL server during query/) {
-        warn(Carp::longmess($_[0]));
-        $_[0] = "The database query took too long to complete and has been canceled.\n"
-                . "(Lost connection to MySQL server during query)";
-    }
+    #if ($_[0] =~ /Lost connection to MySQL server during query/) {
+    #    warn(Carp::longmess($_[0]));
+    #    $_[0] = "The database query took too long to complete and has been canceled.\n"
+    #            . "(Lost connection to MySQL server during query)";
+    #}
 
-    if (Bugzilla->usage_mode == USAGE_MODE_BROWSER) {
-        ThrowCodeError("db_error", { err_message => $_[0] });
-    }
+    #if (Bugzilla->usage_mode == USAGE_MODE_BROWSER) {
+    #    ThrowCodeError("db_error", { err_message => $_[0] });
+    #}
 
     return 0; # Now let DBI handle raising the error
 }

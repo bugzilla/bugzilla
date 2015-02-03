@@ -574,6 +574,11 @@ sub switch_to_main_db {
     return $class->dbh_main;
 }
 
+sub is_shadow_db {
+    my $class = shift;
+    return $class->request_cache->{dbh} != $class->dbh_main;
+}
+
 sub fields {
     my ($class, $criteria) = @_;
     $criteria ||= {};

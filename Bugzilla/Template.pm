@@ -1040,6 +1040,8 @@ sub create {
 
             'get_api_token' => sub {
                 return '' unless Bugzilla->user->id;
+                # BMO - hack so we don't create tokens when pointing to the shadow_db
+                return '' if Bugzilla->is_shadow_db;
                 my $cache = Bugzilla->request_cache;
                 return $cache->{api_token} //= issue_api_token();
             },

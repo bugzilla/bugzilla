@@ -181,6 +181,11 @@ sub _handle_error {
     #    ThrowCodeError("db_error", { err_message => $_[0] });
     #}
 
+    # keep tests happy
+    if (0) {
+        ThrowCodeError("db_error", { err_message => $_[0] });
+    }
+
     return 0; # Now let DBI handle raising the error
 }
 

@@ -95,7 +95,7 @@ var inline_history = {
       var time = item[1];
 
       var reachedEnd = false;
-      var start_index = ih_activity_sort_order == 'newest_to_oldest_desc_first' ? 1 : 0;
+      var start_index = (ih_activity_sort_order == 'newest_to_oldest_desc_first' && commentTimes.length > 1) ? 1 : 0;
       for (var j = start_index, jl = commentTimes.length; j < jl; j++) {
         var commentHead = commentTimes[j].parentNode;
         var mainUser = Dom.getElementsByClassName('email', 'a', commentHead)[0].href.substr(7);
@@ -137,7 +137,11 @@ var inline_history = {
             if (previous && previous.className.indexOf("ih_history") >= 0) {
               currentDiv = this.previousElementSibling(parentDiv);
             } else {
-              parentDiv.parentNode.insertBefore(currentDiv, parentDiv);
+              if (commentTimes.length == 1) {
+                parentDiv.parentNode.insertBefore(currentDiv, parentDiv.nextSibling);
+              } else {
+                parentDiv.parentNode.insertBefore(currentDiv, parentDiv);
+              }
             }
           } else {
             var parentDiv = commentHead.parentNode;

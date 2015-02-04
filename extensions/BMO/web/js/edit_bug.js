@@ -5,24 +5,30 @@
  * This Source Code Form is "Incompatible With Secondary Licenses", as
  * defined by the Mozilla Public License, v. 2.0. */
 
-function init_clone_bug_menu(el, bug_id, product, component) {
-  var diff_url = 'enter_bug.cgi?format=__default__&cloned_bug_id=' + bug_id;
-  var cur_url = diff_url +
-    '&product=' + encodeURIComponent(product) +
-    '&component=' + encodeURIComponent(component);
-  var menu = new YAHOO.widget.Menu('clone_bug_menu', { position : 'dynamic' });
-  menu.addItems([
-    { text: 'Clone to the current product', url: cur_url },
-    { text: 'Clone to a different product', url: diff_url }
-  ]);
-  menu.render(document.body);
-  YAHOO.util.Event.addListener(el, 'click', show_clone_bug_menu, menu);
-}
-
-function show_clone_bug_menu(event, menu) {
-  menu.cfg.setProperty('xy', YAHOO.util.Event.getXY(event));
-  menu.show();
-  event.preventDefault();
+function show_clone_menu(el, bug_id, product, component) {
+  var base_url = 'enter_bug.cgi?format=__default__&cloned_bug_id=' + bug_id;
+  var items = {
+    curr_prod : {
+      name: 'Clone to the current product',
+      callback: function () {
+        var curr_url = base_url +
+          '&product=' + encodeURIComponent(product) +
+          '&component=' + encodeURIComponent(component);
+        window.open(curr_url, '_blank');
+      }
+    },
+    diff_prod: {
+      name: 'Clone to a new product',
+      callback: function () {
+        window.open(base_url, '_blank');
+      }
+    }
+  };
+  $.contextMenu({
+    selector: '#' + el.id,
+    trigger: 'left',
+    items: items
+  });
 }
 
 // -- make attachment table, comments, new comment textarea equal widths

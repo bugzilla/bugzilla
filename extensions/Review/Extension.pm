@@ -139,7 +139,9 @@ sub object_validators {
 
 sub _bug_check_bug_mentors {
     my ($self, $value) = @_;
+    my %seen;
     return [
+        grep { !$seen{$_->id}++ }
         map { Bugzilla::User->check({ name => $_, cache => 1 }) }
         ref($value) ? @$value : ($value)
     ];
@@ -267,7 +269,9 @@ sub _new_users_from_input {
     return [] unless $input_params->{$field};
     Bugzilla::User::match_field({ $field => {'type' => 'multi'} });;
     my $value = $input_params->{$field};
+    my %seen;
     return [
+        grep { !$seen{$_->id}++ }
         map { Bugzilla::User->check({ name => $_, cache => 1 }) }
         ref($value) ? @$value : ($value)
     ];

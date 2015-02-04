@@ -148,7 +148,8 @@ OLDATTACH2NEW = {
             [%- ',' UNLESS loop.first %][% flag_type.id FILTER json %]
           [% END %]],
 [% END %]
-          "description": "[% component.description FILTER json %]"
+          "description": "[% component.description FILTER json %]",
+          "is_active": [% component.is_active ? "true" : "false" %]
         } [% ',' UNLESS loop.last() %]
       [% END %]
       },
@@ -157,12 +158,31 @@ OLDATTACH2NEW = {
         "[% version.name FILTER json %]"[% ',' UNLESS loop.last() %]
       [% END %]
       ],
+      "version_detail": [
+      [% FOREACH version = product.versions %]
+        {
+          "id": [% version.id FILTER json %],
+          "name": "[% version.name FILTER json %]",
+          "is_active": [% version.is_active ? "true" : "false" %]
+        }[% ',' UNLESS loop.last() %]
+      [% END %]
+      ],
 
 [% IF Param('usetargetmilestone') %]
       "default_target_milestone": "[% product.defaultmilestone FILTER json %]",
       "target_milestone": [
       [% FOREACH milestone = product.milestones %]
         "[% milestone.name FILTER json %]"[% ',' UNLESS loop.last() %]
+      [% END %]
+      ],
+      "target_milestone_detail": [
+      [% FOREACH milestone = product.milestones %]
+        {
+          "id": [% milestone.id FILTER json %],
+          "name": "[% milestone.name FILTER json %]",
+          "sortkey": [% milestone.sortkey FILTER json %],
+          "is_active": [% milestone.is_active ? "true" : "false" %]
+        }[% ',' UNLESS loop.last() %]
       [% END %]
       ],
 [% END %]

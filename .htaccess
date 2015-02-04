@@ -62,7 +62,8 @@ RewriteRule ^form[\.:]privacy[\.\-:]data$ enter_bug.cgi?product=Privacy&format=p
 RewriteRule ^form[\.:]moz[\.\-:]project[\.\-:]review$ enter_bug.cgi?product=mozilla.org&format=moz-project-review
 RewriteRule ^form[\.:]docs?$ enter_bug.cgi?product=Developer+Documentation&format=doc [QSA]
 RewriteRule ^form[\.:]mdn?$ enter_bug.cgi?product=Mozilla+Developer+Network&format=mdn
-RewriteRule ^form[\.:](swag|gear|costume)$ enter_bug.cgi?product=Marketing&format=$1
+RewriteRule ^form[\.:](swag|gear)$ enter_bug.cgi?product=Marketing&format=swag
+RewriteRule ^form[\.:]costume$ enter_bug.cgi?product=Marketing&format=costume
 RewriteRule ^form[\.:](b2g|fxos)[\.\-:](partner|betaprogram|feature) enter_bug.cgi?product=Firefox+OS&format=fxos-$2 [QSA]
 RewriteRule ^form[\.:]ipp$ enter_bug.cgi?product=Internet+Public+Policy&format=ipp
 RewriteRule ^form[\.:]creative$ enter_bug.cgi?product=Marketing&format=creative

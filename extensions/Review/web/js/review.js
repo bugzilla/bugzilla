@@ -5,9 +5,6 @@
  * This Source Code Form is "Incompatible With Secondary Licenses", as
  * defined by the Mozilla Public License, v. 2.0. */
 
-var Dom = YAHOO.util.Dom;
-var Event = YAHOO.util.Event;
-
 var REVIEW = {
     widget: false,
     target: false,
@@ -15,56 +12,57 @@ var REVIEW = {
     use_error_for: false,
     ispatch_override: false,
     description_override: false,
+    ignore_patch_event: true,
 
     init_review_flag: function(fid, flag_name) {
         var idx = this.fields.push({ 'fid': fid, 'flag_name': flag_name, 'component': '' }) - 1;
-        this.flag_change(false, idx);
-        Event.addListener(fid, 'change', this.flag_change, idx);
+        this.flag_change({ data: idx });
+        $('#' + fid).on('change', null, idx, this.flag_change);
     },
 
     init_mandatory: function() {
         var form = this.find_form();
         if (!form) return;
-        Event.addListener(form, 'submit', this.check_mandatory);
+        $(form).on('submit', this.check_mandatory);
         for (var i = 0; i < this.fields.length; i++) {
             var field = this.fields[i];
             // existing reviews that have empty requestee shouldn't force a
             // reviewer to be selected
-            field.old_empty_review = Dom.get(field.fid).value == '?'
-                && Dom.get(field.flag_name).value == '';
+            field.old_empty_review = $('#' + field.fid).val() == '?'
+                && $('#' + field.flag_name).val() == '';
             if (!field.old_empty_review)
-                Dom.addClass(field.flag_name, 'required');
+                $('#' + field.flag_name).addClass('required');
         }
     },
 
     init_enter_bug: function() {
-        Event.addListener('component', 'change', REVIEW.component_change);
+        $('#component').on('change', REVIEW.component_change);
         BUGZILLA.string['reviewer_required'] = 'A reviewer is required.';
         this.use_error_for = true;
         this.init_create_attachment();
     },
 
     init_create_attachment: function() {
-        Event.addListener('data', 'change', REVIEW.attachment_change);
-        Event.addListener('description', 'change', REVIEW.description_change);
-        Event.addListener('ispatch', 'change', REVIEW.ispatch_change);
+        $('#data').on('change', REVIEW.attachment_change);
+        $('#description').on('change', REVIEW.description_change);
+        $('#ispatch').on('change', REVIEW.ispatch_change);
     },
 
     component_change: function() {
         for (var i = 0; i < REVIEW.fields.length; i++) {
-            REVIEW.flag_change(false, i);
+            REVIEW.flag_change({ data: i });
         }
     },
 
     attachment_change: function() {
-        var filename = Dom.get('data').value.split('/').pop().split('\\').pop();
-        var description = Dom.get('description');
-        if (description.value == '' || !REVIEW.description_override) {
-            description.value = filename;
+        var filename = $('#data').val().split('/').pop().split('\\').pop();
+        var description = $('#description').first();
+        if (description.val() == '' || !REVIEW.description_override) {
+            description.val(filename);
         }
         if (!REVIEW.ispatch_override) {
-            Dom.get('ispatch').checked =
-                REVIEW.endsWith(filename, '.diff') || REVIEW.endsWith(filename, '.patch');
+            $('#ispatch').prop('checked',
+                REVIEW.endsWith(filename, '.diff') || REVIEW.endsWith(filename, '.patch'));
         }
         setContentTypeDisabledState(this.form);
         description.select();
@@ -76,76 +74,86 @@ var REVIEW = {
     },
 
     ispatch_change: function() {
+        // the attachment template triggers this change event onload
+        // as we only want to set ispatch_override when the user clicks on the
+        // checkbox, we ignore this first event
+        if (REVIEW.ignore_patch_event) {
+            REVIEW.ignore_patch_event = false;
+            return;
+        }
         REVIEW.ispatch_override = true;
     },
 
-    flag_change: function(e, field_idx) {
-        var field = REVIEW.fields[field_idx];
-        var suggestions_span = Dom.get(field.fid + '_suggestions');
+    flag_change: function(e) {
+        var field = REVIEW.fields[e.data];
+        var suggestions_span = $('#' + field.fid + '_suggestions');
 
         // for requests only
-        if (Dom.get(field.fid).value != '?') {
-            Dom.addClass(suggestions_span, 'bz_default_hidden');
+        if ($('#' + field.fid).val() != '?') {
+            suggestions_span.hide();
             return;
         }
 
         // find selected component
-        var component = static_component || Dom.get('component').value;
+        var component = static_component || $('#component').val();
         if (!component) {
-            Dom.addClass(suggestions_span, 'bz_default_hidden');
+            suggestions_span.hide();
             return;
         }
 
-        // init menu and events
-        if (!field.menu) {
-            field.menu = new YAHOO.widget.Menu(field.fid + '_menu');
-            field.menu.render(document.body);
-            field.menu.subscribe('click', REVIEW.suggestion_click);
-            Event.addListener(field.fid + '_suggestions_link', 'click', REVIEW.suggestions_click, field_idx)
-        }
-
-        // build review list
+        // add the menu
         if (field.component != component) {
-            field.menu.clearContent();
+            var items = [];
             for (var i = 0, il = review_suggestions._mentors.length; i < il; i++) {
-                REVIEW.add_menu_item(field_idx, review_suggestions._mentors[i], true);
+                REVIEW.add_menu_item(items, review_suggestions._mentors[i], true);
             }
             if (review_suggestions[component] && review_suggestions[component].length) {
-                REVIEW.add_menu_items(field_idx, review_suggestions[component]);
-            } else if (review_suggestions._product) {
-                REVIEW.add_menu_items(field_idx, review_suggestions._product);
+                REVIEW.add_menu_items(items, review_suggestions[component]);
             }
-            field.menu.render();
-            field.component = component;
-        }
-
-        // show (or hide) the menu
-        if (field.menu.getItem(0)) {
-            Dom.removeClass(suggestions_span, 'bz_default_hidden');
-        } else {
-            Dom.addClass(suggestions_span, 'bz_default_hidden');
+            else if (review_suggestions._product) {
+                REVIEW.add_menu_items(items, review_suggestions._product);
+            }
+            if (items.length) {
+                suggestions_span.show();
+                $.contextMenu('destroy', '#' + field.fid + '_suggestions');
+                $.contextMenu({
+                    selector: '#' + field.fid + '_suggestions',
+                    trigger: 'left',
+                    events: {
+                        show: function() {
+                            REVIEW.target = $('#' + field.flag_name);
+                        }
+                    },
+                    items: items
+                });
+            }
+            else {
+                suggestions_span.hide();
+            }
         }
     },
 
-    add_menu_item: function(field_idx, user, is_mentor) {
-        var menu = REVIEW.fields[field_idx].menu;
-        var items = menu.getItems();
+    add_menu_item: function(items, user, is_mentor) {
         for (var i = 0, il = items.length; i < il; i++) {
-            if (items[i].cfg.config.url.value == '#' + user.login) {
+            if (items[i].login == user.login)
                 return;
-            }
         }
+
         var queue = '';
         if (user.review_count == 0) {
             queue = 'empty queue';
         } else {
             queue = user.review_count + ' review' + (user.review_count == 1 ? '' : 's') + ' in queue';
         }
-        var item = menu.addItem(
-            { text: user.identity + ' (' + queue + ')', url: '#' + user.login }
-        );
-        if (is_mentor)
-            item.cfg.setProperty('classname', 'mentor');
+
+        items.push({
+            name: user.identity + ' (' + queue + ')',
+            login: user.login,
+            className: (is_mentor ? 'mentor' : ''),
+            callback: function() {
+                REVIEW.target.val(user.login);
+            }
+        });
     },
 
     add_menu_items: function(field_idx, users) {
@@ -158,39 +166,24 @@ var REVIEW = {
         }
     },
 
-    suggestions_click: function(e, field_idx) {
-        var field = REVIEW.fields[field_idx];
-        field.menu.cfg.setProperty('xy', Event.getXY(e));
-        field.menu.show();
-        Event.stopEvent(e);
-        REVIEW.target = field.flag_name;
-    },
-
-    suggestion_click: function(type, args) {
-        if (args[1]) {
-            Dom.get(REVIEW.target).value = decodeURIComponent(args[1].cfg.getProperty('url')).substr(1);
-        }
-        Event.stopEvent(args[0]);
-    },
-
     check_mandatory: function(e) {
-        if (Dom.get('data') && !Dom.get('data').value
-            && Dom.get('attach_text') && !Dom.get('attach_text').value)
+        if ($('#data').length && !$('#data').val()
+            && $('#attach_text').length && !$('#attach_text').val())
         {
             return;
         }
         for (var i = 0; i < REVIEW.fields.length; i++) {
             var field = REVIEW.fields[i];
             if (!field.old_empty_review
-                && Dom.get(field.fid).value == '?'
-                && Dom.get(field.flag_name).value == '')
+                && $('#' + field.fid).val() == '?'
+                && $('#' + field.flag_name).val() == '')
             {
                 if (REVIEW.use_error_for) {
-                    _errorFor(Dom.get(REVIEW.fields[i].flag_name), 'reviewer');
+                    _errorFor($('#' + REVIEW.fields[i].flag_name)[0], 'reviewer');
                 } else {
                     alert('You must provide a reviewer for review requests.');
                 }
-                Event.stopEvent(e);
+                e.preventDefault();
             }
         }
     },

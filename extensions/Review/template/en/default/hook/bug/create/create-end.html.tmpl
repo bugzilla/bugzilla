@@ -7,7 +7,7 @@
   #%]
 
 <script>
-  YAHOO.util.Event.onDOMReady(function() {
+  $(function() {
     [% IF product.reviewer_required %]
       REVIEW.init_mandatory();
     [% END %]

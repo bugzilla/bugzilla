@@ -11,7 +11,7 @@
 [% END %]
 
 <script>
-  YAHOO.util.Event.onDOMReady(function() {
+  $(function() {
     [% IF bug.product_obj.reviewer_required %]
       REVIEW.init_mandatory();
     [% END %]

@@ -106,6 +106,7 @@ sub template_before_process {
             my $field_obj;
             if ($change->{fieldname} =~ /^cf_/) {
                 $field_obj = Bugzilla::Field->new({ name => $change->{fieldname}, cache => 1 });
+                $change->{fieldtype} = $field_obj->type;
             }
 
             # identify buglist changes

@@ -157,6 +157,8 @@
            change.fieldname == 'cc' ||
            change.fieldname == 'flagtypes.name' %]
     [% value FILTER email FILTER js %]
+  [% ELSIF change.fieldtype == constants.FIELD_TYPE_DATETIME %]
+    [% value FILTER time FILTER js %]
   [% ELSE %]
     [% value FILTER ih_short_value FILTER html FILTER js %]
   [% END %]

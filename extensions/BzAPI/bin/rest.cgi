@@ -26,6 +26,15 @@ BEGIN {
 # BzAPI extension functionality
 Bugzilla->request_cache->{bzapi} = 1;
 
+# Strip trailing slash before attempting match
+# otherwise native REST will complain
+my $path_info = Bugzilla->cgi->path_info;
+if ($path_info =~ s'/$'') {
+    # Remove first slash as cgi->path_info expects it to
+    # not be there when setting a new path.
+    Bugzilla->cgi->path_info(substr($path_info, 1));
+}
+
 use Bugzilla::WebService::Server::REST;
 Bugzilla->usage_mode(USAGE_MODE_REST);
 local @INC = (bz_locations()->{extensionsdir}, @INC);

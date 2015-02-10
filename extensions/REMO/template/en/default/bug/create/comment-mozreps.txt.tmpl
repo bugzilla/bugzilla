@@ -27,8 +27,8 @@ Last Name:
 Under 18 years old:
 [%+ IF cgi.param('underage') %]Yes[% ELSE %]No[% END %]
 
-Sex:
-[%+ cgi.param('sex') %]
+Gender:
+[%+ cgi.param('gender') %]
 
 City:
 [%+ cgi.param('city') %]
@@ -50,7 +50,7 @@ IM:
 -
 [% END %]
 
-Mozillians.org Account:
+Mozillians.org Account URL:
 [% IF cgi.param('mozillian') %]
 [%+ cgi.param('mozillian') %]
 [% ELSE %]
@@ -58,17 +58,13 @@ Mozillians.org Account:
 [% END %]
 
 References:
-[% IF cgi.param('references') %]
-[%+ cgi.param('references') %]
-[% ELSE %]
--
+[% IF cgi.param('cc') %]
+[%+ cgi.param('cc').join(", ") %]
 [% END %]
 
-Currently Involved with Mozilla:
+What are you currently doing at Mozilla?
 [% IF cgi.param('involved') %]
 [%+ cgi.param('involved') %]
-[% ELSE %]
--
 [% END %]
 
 When First Contributed:

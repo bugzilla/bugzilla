@@ -20,228 +20,216 @@
 [% PROCESS global/variables.none.tmpl %]
 
 [% PROCESS global/header.html.tmpl
-   title = "Mozilla Reps - Application Form"
-   style_urls = [ "extensions/REMO/web/styles/moz_reps.css" ]
+   title           = "Mozilla Reps - Application Form"
+   style_urls      = [ "extensions/REMO/web/styles/moz_reps.css" ]
+   yui             = [ "autocomplete" ]
+   jquery          = []
+   javascript_urls = [ "extensions/REMO/web/js/moz_reps.js", "js/field.js", "js/util.js"]
 %]
 
-[% USE Bugzilla %]
-[% mandatory = '<span class="mandatory" title="Required">*</span>' %]
-
-<script type="text/javascript">
-var Dom = YAHOO.util.Dom;
-
-function mandatory(ids) {
-  result = true;
-  for (i in ids) {
-    id = ids[i];
-    el = Dom.get(id);
-
-    if (el.type.toString() == "checkbox") {
-      value = el.checked;
-    } else {
-      value = el.value.replace(/^\s\s*/, '').replace(/\s\s*$/, '');
-      el.value = value;
-    }
-
-    if (value == '') {
-      Dom.addClass(id, 'missing');
-      result = false;
-    } else {
-      Dom.removeClass(id, 'missing');
-    }
-  }
-  return result;
-}
-
-function underageWarning (el) {
-  if (el.checked) {
-    Dom.removeClass('underage_warning', 'bz_default_hidden');
-    Dom.get('submit').disabled = true;
-  }
-  else {
-    Dom.addClass('underage_warning', 'bz_default_hidden');
-    Dom.get('submit').disabled = false;
-  }
-}
-
-function submitForm() {
-  if (!mandatory([ 'first_name', 'last_name', 'sex', 'city', 'country',
-                   'mozillian', 'languages', 'learn', 'motivation', 'privacy' ])
-  ) {
-    alert('Please enter all the required fields.');
-    return false;
-  }
-
-  Dom.get('short_desc').value =
-    "Application Form: " + Dom.get('first_name').value + ' ' + Dom.get('last_name').value;
-
-  return true;
-}
-
-</script>
-
 <noscript>
-<h1>Javascript is required to use this form.</h1>
+  <h1>Javascript is required to use this form.</h1>
 </noscript>
 
 <h1>Mozilla Reps - Application Form</h1>
 
 <p>
   If you have questions while completing this form, please contact the
-  <a href="mailto:reps-council@lists.mozilla.org">Reps Council</a> for
-  assistance.
+  <a href="mailto:reps-council@mozilla.org">Reps Council</a> for assistance.
 </p>
 
 <form method="post" action="post_bug.cgi" id="tmRequestForm">
-<input type="hidden" name="product" value="Mozilla Reps">
-<input type="hidden" name="component" value="Mentorship">
-<input type="hidden" name="bug_severity" value="normal">
-<input type="hidden" name="rep_platform" value="All">
-<input type="hidden" name="priority" value="--">
-<input type="hidden" name="op_sys" value="Other">
-<input type="hidden" name="version" value="unspecified">
-<input type="hidden" name="groups" value="mozilla-reps">
-<input type="hidden" name="format" value="[% format FILTER html %]">
-<input type="hidden" name="created-format" value="[% format FILTER html %]">
-<input type="hidden" name="comment" id="comment" value="">
-<input type="hidden" name="short_desc" id="short_desc" value="">
-<input type="hidden" name="token" value="[% token FILTER html %]">
+  <input type="hidden" name="product" value="Mozilla Reps">
+  <input type="hidden" name="component" value="Mentorship">
+  <input type="hidden" name="bug_severity" value="normal">
+  <input type="hidden" name="rep_platform" value="All">
+  <input type="hidden" name="priority" value="--">
+  <input type="hidden" name="op_sys" value="Other">
+  <input type="hidden" name="version" value="unspecified">
+  <input type="hidden" name="groups" value="mozilla-reps">
+  <input type="hidden" name="format" value="[% format FILTER html %]">
+  <input type="hidden" name="created-format" value="[% format FILTER html %]">
+  <input type="hidden" name="comment" id="comment" value="">
+  <input type="hidden" name="short_desc" id="short_desc" value="">
+  <input type="hidden" name="token" value="[% token FILTER html %]">
 
-<table id="reps-form">
+  <table id="reps-form">
+    <tr class="odd">
+      <th><label class="required" for="first_name">First Name:</label></th>
+      <td><input requuired id="first_name" name="first_name" size="40" placeholder="John"></td>
+    </tr>
 
-<tr class="odd">
-  <th>First Name:[% mandatory FILTER none %]</th>
-  <td><input id="first_name" name="first_name" size="40" placeholder="John"></td>
-</tr>
+    <tr class="even">
+      <th><label class="required" for="last_name">Last Name:</label></th>
+      <td><input id="last_name" name="last_name" size="40" placeholder="Doe"></td>
+    </tr>
 
-<tr class="even">
-  <th>Last Name:[% mandatory FILTER none %]</th>
-  <td><input id="last_name" name="last_name" size="40" placeholder="Doe"></td>
-</tr>
+    <tr class="odd">
+      <th><label for="underage">Are you under 18 years old?:</label></th>
+      <td>
+        <input type="checkbox" id="underage" name="underage" value="1"><br>
+      </td>
+    </tr>
 
-<tr class="odd">
-  <th>Are you under 18 years old?:</th>
-  <td>
-    <input type="checkbox" id="underage" name="underage" 
-           value="1" onclick="underageWarning(this);"><br>
-  </td>
-</tr>
+    <tr id="underage_warning" class="odd" style="display: none">
+      <td colspan="2">
+        Mozilla Reps program is not currently accepting people under 18 years old.
+        Sorry for the inconvenience. In the meantime please check with your local Mozilla
+        group for other contribution opportunities
+      </td>
+    </tr>
 
-<tr id="underage_warning" class="odd bz_default_hidden">
-  <td colspan="2">
-    Mozilla Reps program is not currently accepting people under 18 years old.
-    Sorry for the inconvenience. In the meantime please check with your local Mozilla
-    group for other contribution opportunities
-  </td>
-</tr>
+    <tr class="even">
+      <th><label class="required" for="gender">Gender:</label></th>
+      <td>
+        <select id="gender" name="gender">
+          <option value=""></option>
+          <option value="Male">Male</option>
+          <option value="Female">Female</option>
+          <option value="Other">Other</option>
+        </select>
+      </td>
+    </tr>
 
-<tr class="even">
-  <th>Sex:[% mandatory FILTER none %]</th>
-  <td>
-    <select id="sex" name="sex">
-      <option value="Male">Male</option>
-      <option value="Female">Female</option>
-      <option value="Other">Other</option>
-    </select>
-  </td>
-</tr>
+    <tr class="odd">
+      <th><label class="required" for="city">City:</label></th>
+      <td><input id="city" name="city" size="40" placeholder="Your city"></td>
+    </tr>
 
-<tr class="odd">
-  <th>City:[% mandatory FILTER none %]</th>
-  <td><input id="city" name="city" size="40" placeholder="Your city"></td>
-</tr>
+    <tr class="even">
+      <th><label class="required" for="country">Country:</label></th>
+      <td><input id="country" name="country" size="40" placeholder="Your country"></td>
+    </tr>
 
-<tr class="even">
-  <th>Country:[% mandatory FILTER none %]</th>
-  <td><input id="country" name="country" size="40" placeholder="Your country"></td>
-</tr>
+    <tr class="odd">
+      <th><label for="community">Local Community you participate in:</label></th>
+      <td><input id="community" name="community" size="40" placeholder="Name of your community"></td>
+    </tr>
 
-<tr class="odd">
-  <th>Local Community you participate in:</th>
-  <td><input id="community" name="community" size="40" placeholder="Name of your community"></td>
-</tr>
+    <tr class="even">
+      <th><label for="im">IM (specify service):</label></th>
+      <td><input id="im" name="im" size="40"></td>
+    </tr>
 
-<tr class="even">
-  <th>IM (specify service):</th>
-  <td><input id="im" name="im" size="40"></td>
-</tr>
+    <tr class="odd">
+      <th><label class="required" for="mozillian">Mozillians.org Account URL:</label></th>
+      <td>
+        <input type="url" id="mozillian" name="mozillian" size="40" placeholder="https://mozillians.org/u/name">
+      </td>
+    </tr>
 
-<tr class="odd">
-  <th>Mozillians.org Account:[% mandatory FILTER none %]</th>
-  <td><input id="mozillian" name="mozillian" size="40"></td>
-</tr>
+    <tr class="even">
+      <th colspan="2">
+        <label class="required" for="cc">
+          Mozilla contributors who vouch your application:
+        </label>
+      </th>
+    </tr>
 
-<tr class="even">
-  <th colspan="2">
-    References:
-  </th>
-</tr>
-<tr class="even">
-  <td colspan="2">
-    <textarea id="references" name="references" rows="4"
-              placeholder="Add contact info of people referencing you."></textarea>
-  </td>
-</tr>
+    <tr class="even">
+      <td colspan="2">
+        [% INCLUDE global/userselect.html.tmpl
+           id       => "cc"
+           name     => "cc"
+           value    => cc
+           size     => 60
+           classes  => ["bz_userfield"]
+           multiple => 5
+        %]
+      </td>
+    </tr>
 
-<tr class="odd">
-  <th colspan="2">
-    How are you involved with Mozilla?
-  </th>
-</tr>
-<tr class="odd">
-  <td colspan="2">
-    <textarea id="involved" name="involved" rows="4" placeholder="Add-ons,  l10n,  SUMO,  QA,  ..."></textarea>
-  </td>
-</tr>
+    <tr class="odd">
+      <th colspan="2">
+        <label class="required" for="involved">
+          What are you currently doing at Mozilla?
+        </label>
+      </th>
+    </tr>
 
-<tr class="even">
-  <th>
-    When did you first start contributing to Mozilla?
-  </th>
-  <td><input id="firstcontribute" name="firstcontribute" size="40"></td>
-</tr>
+    <tr class="odd">
+      <td colspan="2">
+        <textarea id="involved" name="involved" rows="4" placeholder="Add-ons,  l10n,  SUMO,  QA,  ..."></textarea>
+      </td>
+    </tr>
 
-<tr class="odd">
-  <th>Languages Spoken:[% mandatory FILTER none %]</th>
-  <td><input id="languages" name="languages" size="40"></td>
-</tr>
+    <tr class="even">
+      <th>
+        <label class="required" for="firstcontribute">
+          When did you first start contributing to Mozilla?
+        </label>
+      </th>
+      <td><input id="firstcontribute" name="firstcontribute" size="40"></td>
+    </tr>
 
-<tr class="even">
-  <th>How did you learn about Mozilla Reps?[% mandatory FILTER none %]</th>
-  <td><input id="learn" name="learn" size="40"></td>
-</tr>
+    <tr class="odd">
+      <th><label class="required" for="languages">Languages Spoken:</label></th>
+      <td><input id="languages" name="languages" size="40"></td>
+    </tr>
 
-<tr class="odd">
-  <th colspan="2">What motivates you most about joining Mozilla Reps?[% mandatory FILTER none %]</th>
-</tr>
-<tr class="odd">
-  <td colspan="2"><textarea id="motivation" name="motivation" rows="4"></textarea></td>
-</tr>
+    <tr class="even">
+      <th><label class="required" for="learn">How did you learn about Mozilla Reps?</label></th>
+      <td><input id="learn" name="learn" size="40"></td>
+    </tr>
 
-<tr class="even">
-  <th colspan="2">Comments:</th>
-</tr>
-<tr class="even">
-  <td colspan="2"><textarea id="comments" name="comments" rows="4"></textarea></td>
-</tr>
+    <tr class="odd">
+      <th><label for="first_time">Is this the first time you have applied for Reps?</label></th>
+      <td><input type="checkbox" id="first_time" name="first_time" value="1" checked></td>
+    </tr>
 
-<tr class="odd">
-  <th>
-    I have read the
-    <a href="http://www.mozilla.com/en-US/privacy-policy" target="_blank">Mozilla Privacy Policy</a>:[% mandatory FILTER none %]
-  </th>
-  <td><input id="privacy" type="checkbox"></td>
-</tr>
+    <tr id="prior_bug" class="odd" style="display: none">
+      <th><label for="dependson">If you have already applied to the program in the past, please reference the [% terms.bug %] number: </label></th>
+      <td><input id="dependson" name="dependson" type="text" value=""></td>
+    </tr>
 
-<tr class="even">
-  <td>&nbsp;</td>
-  <td align="right">
-    <input id="submit" type="submit" value="Submit" onclick="return submitForm()">
-  </td>
-</tr>
+    <tr class="even">
+      <th colspan="2">
+        <label class="required" for="motivation">
+          What motivates you most about joining Mozilla Reps?
+        </label>
+      </th>
+    </tr>
 
-</table>
+    <tr class="even">
+      <td colspan="2">
+        <textarea id="motivation" name="motivation" rows="4"
+                  placeholder="[% INCLUDE motivation_placeholder FILTER html %]"></textarea>
+      </td>
+    </tr>
 
+    [% BLOCK motivation_placeholder -%]
+      Tell us your goals and what you would be able to do as a Rep that you can't do right now
+    [%- END %]
+
+    <tr class="odd">
+      <th colspan="2">
+        <label for="comments">
+          Comments:
+        </label>
+      </th>
+    </tr>
+
+    <tr class="odd">
+      <td colspan="2"><textarea id="comments" name="comments" rows="4"></textarea></td>
+    </tr>
+
+    <tr class="even">
+      <th>
+        <label class="required" for="privacy">
+          I have read the
+          <a href="http://www.mozilla.com/en-US/privacy-policy" target="_blank">Mozilla Privacy Policy</a>:
+        </label>
+      </th>
+      <td><input id="privacy" name="privacy" type="checkbox" value="1"></td>
+    </tr>
+
+    <tr class="odd">
+      <td>&nbsp;</td>
+      <td align="right">
+        <button id="submit">Submit</button>
+      </td>
+    </tr>
+  </table>
 </form>
 
 [% PROCESS global/footer.html.tmpl %]

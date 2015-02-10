@@ -124,7 +124,7 @@ a:hover, #header a:hover, #footer a:hover {
 }
 
 select[multiple], textarea, input[type=text], input[type=password],
-input[type=email], input:not([type]), .text_input, .yui-ac-input {
+input[type=email], input[type=url], input:not([type]), .text_input, .yui-ac-input {
     -moz-box-sizing: border-box;
     -webkit-box-sizing: border-box;
     box-sizing: border-box;

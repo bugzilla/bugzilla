@@ -32,6 +32,11 @@
   font-size: 80%;
 }
 
+label.required:before {
+  content: "* ";
+  color: red;
+}
+
 #reps-form .missing {
   box-shadow: #FF0000 0 0 1.5px 1px;
 }

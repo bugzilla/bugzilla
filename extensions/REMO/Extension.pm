@@ -28,6 +28,7 @@ use Bugzilla::Constants;
 use Bugzilla::Util qw(trick_taint trim detaint_natural);
 use Bugzilla::Token;
 use Bugzilla::Error;
+use List::Util qw(first);
 
 our $VERSION = '0.01';
 
@@ -243,9 +244,11 @@ sub post_bug_after_creation {
     my $bug = $vars->{bug};
     my $template = Bugzilla->template;
 
-    if (Bugzilla->input_params->{format}
-        && Bugzilla->input_params->{format} eq 'remo-swag')
-    {
+    my $format = Bugzilla->input_params->{format};
+
+    return unless defined $format;
+
+    if ($format eq 'remo-swag') {
         # If the attachment cannot be successfully added to the bug,
         # we notify the user, but we don't interrupt the bug creation process.
         my $error_mode_cache = Bugzilla->error_mode;
@@ -303,6 +306,27 @@ sub post_bug_after_creation {
         }
 
         Bugzilla->error_mode($error_mode_cache);
+    }
+
+    elsif ($format eq 'mozreps') {
+        my $needinfo_type = first { $_->name eq 'needinfo' } @{$bug->flag_types};
+        return unless $needinfo_type;
+        my %original_cc = map { $_ => 1 } Bugzilla->cgi->param('cc');
+        my @cc_users    = grep { $_->is_enabled && $original_cc{$_->login}} @{$bug->cc_users};
+        my @new_flags   = map {
+            { type_id   => $needinfo_type->id,
+              status    => '?',
+              requestee => $_->login }
+        } @cc_users;
+
+        $bug->set_flags(\@new_flags, []) if @new_flags;
+        $bug->add_comment(
+            join(", ", map { $_->realname || $_->login_name } @cc_users) .
+            ": You have been added as supporter to this Reps application, please comment why do you endorse their application. Thanks!"
+        );
+
+        $bug->update($bug->creation_ts);
+        Bugzilla::BugMail::Send($bug->id, { changer => Bugzilla->user });
     }
 }
 

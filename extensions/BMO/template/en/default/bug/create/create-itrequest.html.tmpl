@@ -27,45 +27,47 @@
   [% FOREACH comp IN product.components %]
   compdesc['[% comp.name FILTER js %]'] = '[% comp.description FILTER js %]';
   [% END %]
-  compdesc['Server Operations'] = 'System administration for the mozilla.org servers. ' +
-                                  'Requests for Server Ops that don\'t fit in any of the ' +
-                                  'other Server Ops components can go here.';
-
   var serviceNowText = 'Use <a href="https://mozilla.service-now.com/">Service Now</a> to:<br>' +
                        'Request an LDAP/E-mail/etc. account<br>' +
                        'Desktop/Laptop/Printer/Phone/Tablet/License problem/order/request';
 
+  compdesc['MOC: Service Requests'] = 'System administration for the mozilla.org servers. ' +
+                                      'Requests for Server Ops that don\'t fit in any of the ' +
+                                      'other Server Ops components can go here.<br><br>' +
+                                      serviceNowText;
+
+  compdesc['Mailing List'] = 'Mailing list requests should be filed ' +
+                             '<a href="enter_bug.cgi?product=mozilla.org&amp;format=mozlist">here</a> instead.';
+
   function setcompdesc(theRadio) {
     if (theRadio.id == 'component_service_desk') {
-      [%# helpdesk issue/request %]
       document.getElementById('main_form').style.display = 'none';
       document.getElementById('service_now_form').style.display = '';
+      document.getElementById('list_form').style.display = 'none';
       document.getElementById('compdescription').innerHTML = serviceNowText;
+    } else if (theRadio.id == 'component_list') {
+      document.getElementById('main_form').style.display = 'none';
+      document.getElementById('service_now_form').style.display = 'none';
+      document.getElementById('list_form').style.display = '';
+      document.getElementById('compdescription').innerHTML = compdesc[theRadio.value];
     } else {
       document.getElementById('main_form').style.display = '';
       document.getElementById('service_now_form').style.display = 'none';
-      var theValue = theRadio.value;
-      var compDescText = compdesc[theValue];
-      // If 'Server Operations', product must be changed to 'mozilla.org'
-      // otherwise set to 'Infrastructure & Operations'
-      if (theRadio.id == 'component_server_ops') {
-        compDescText = compDescText + '<br><br>' + serviceNowText;
-        document.getElementById('product').value = 'mozilla.org';
-      }
-      else {
-        document.getElementById('product').value = 'Infrastructure & Operations';
-      }
-      document.getElementById('compdescription').innerHTML = compDescText;
+      document.getElementById('list_form').style.display = 'none';
+      document.getElementById('compdescription').innerHTML = compdesc[theRadio.value];
     }
   }
 
   function on_submit() {
-    if (document.getElementById('componentsd').checked) {
-      [%# redirect desktop issues to service-now #%]
+    if (document.getElementById('component_service_desk').checked) {
       document.location.href = 'https://mozilla.service-now.com/';
       return false;
+    } else if (document.getElementById('component_list').checked) {
+      document.location.href = '[% ulrbase FILTER none %]enter_bug.cgi?product=mozilla.org&format=mozlist';
+      return false;
+    } else {
+      return true;
     }
-    return true;
   }
 
   YAHOO.util.Event.onDOMReady(function() {
@@ -124,25 +126,26 @@
 
     </tr>
     <tr>
-      <td align="right"><strong>Request Type:</strong></td>
-      <td style="white-space: nowrap;">
+      <td style="white-space: nowrap; vertical-align: top" align="right"><strong>Request Type:</strong></td>
+      <td style="white-space: nowrap; vertical-align: top">
         <input type="radio" name="component" id="component_service_desk" onclick="setcompdesc(this)" value="Desktop Issues">
         <label for="component_service_desk">Service Desk issue/request</label><br>
         <input type="radio" name="component" id="component_relops" onclick="setcompdesc(this)" value="RelOps">
-        <label for="component_relops">Report a problem with a tinderbox machine</label><br>
+        <label for="component_relops">Report a problem with a build/testing machine</label><br>
         <input type="radio" name="component" id="component_webops_other" onclick="setcompdesc(this)" value="WebOps: Other">
         <label for="component_webops_other">Report a problem with a Mozilla website, or to request a change or push</label><br>
         <input type="radio" name="component" id="component_netops_acl" onclick="setcompdesc(this)" value="NetOps: DC Other">
         <label for="component_netops_acl">Request a firewall change</label><br>
-        <input type="radio" name="component" id="component_server_ops" onclick="setcompdesc(this)" value="Server Operations">
-        <label for="component_server_ops">Any other issue</label><br>
-        Mailing list requests should be filed <a href="[% ulrbase FILTER none %]enter_bug.cgi?product=mozilla.org&amp;format=mozlist">here</a> instead.
+        <input type="radio" name="component" id="component_list" onclick="setcompdesc(this)" value="Mailing List">
+        <label for="component_list">Mailing list request</label><br>
+        <input type="radio" name="component" id="component_moc" onclick="setcompdesc(this)" value="MOC: Service Requests">
+        <label for="component_moc">Any other issue</label><br>
       </td>
-      <td id="compdescription" align="left" style="color: green; padding-left: 1em">
+      <td id="compdescription" align="left" style="color: green; padding-left: 1em; vertical-align: top">
       </td>
     </tr>
 
-    <tbody id="main_form">
+    <tbody id="main_form" style="display:none">
 
       <tr>
         <td align="right"><strong>Summary:</strong></td>
@@ -231,6 +234,17 @@
         </td>
       </tr>
     </tbody>
+
+    <tbody id="list_form" style="display:none">
+      <tr>
+        <td>&nbsp;</td>
+        <td>
+          <br>
+          <input type="submit" value="Go to Mailing List form">
+        </td>
+      </tr>
+    </tbody>
+
   </table>
 </form>
 

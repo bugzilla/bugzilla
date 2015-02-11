@@ -318,12 +318,15 @@ EOT
 ***********************************************************************
 * APACHE MODULES                                                      *
 ***********************************************************************
-* Normally, when Bugzilla is upgraded, all Bugzilla users have to     *
-* clear their browser cache or Bugzilla will break. If you enable     *
-* certain modules in your Apache configuration (usually called        *
-* httpd.conf or apache2.conf) then your users will not have to clear  *
-* their caches when you upgrade Bugzilla. The modules you need to     *
-* enable are:                                                         *
+* Some Apache modules allow to extend Bugzilla functionalities.       *
+* These modules can be enabled in the Apache configuration file       *
+* (usually called httpd.conf or apache2.conf).                        *
+* - mod_headers, mod_env and mod_expires permit to automatically      *
+*   refresh the browser cache of your users when upgrading Bugzilla.  *
+* - mod_rewrite permits to write shorter URLs used by the REST API.   *
+* - mod_version permits to write rules in .htaccess specific to       *
+*   Apache 2.2 or 2.4.                                                *
+* The modules you need to enable are:                                 *
 *                                                                     *
 END
     modules_message_db => <<EOT,

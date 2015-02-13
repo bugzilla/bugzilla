@@ -343,6 +343,10 @@ hr {
     width: 99%;
 }
 
+#bugzilla-body th {
+    white-space: nowrap;
+}
+
 /* Home */
 
 #page-index {

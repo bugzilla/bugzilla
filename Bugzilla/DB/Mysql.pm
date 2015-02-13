@@ -187,6 +187,10 @@ sub sql_fulltext_search {
             if ($word =~ /\w\W+\w/ && $word !~ m/"/) {
                 $word = '"' . $word . '"';
             }
+            # match words that contain only boolean operators
+            elsif ($word =~ /^[\+\-\<\>\~\*]+$/) {
+                $word = '"' . $word . '"';
+            }
         }
         $text = join('', @words);
     }

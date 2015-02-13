@@ -46,13 +46,11 @@ sub post_bug_after_creation {
         'legal_cc' => { 'type' => 'multi' }
     });
 
-    my ($do_sec_review, $do_legal, $do_finance, $do_privacy_vendor,
-        $do_privacy_tech, $do_privacy_policy);
+    my ($do_sec_review, $do_legal, $do_finance, $do_data_compliance);
 
     if ($params->{'mozilla_data'} eq 'Yes') {
         $do_legal = 1;
-        $do_privacy_policy = 1;
-        $do_privacy_tech = 1;
+        $do_data_compliance = 1;
         $do_sec_review = 1;
     }
 
@@ -62,7 +60,7 @@ sub post_bug_after_creation {
         }
 
         if ($params->{'data_access'} eq 'Yes') {
-            $do_privacy_policy = 1;
+            $do_data_compliance = 1;
             $do_legal = 1;
             $do_sec_review = 1;
         }
@@ -70,7 +68,7 @@ sub post_bug_after_creation {
         if ($params->{'data_access'} eq 'Yes'
             && $params->{'privacy_policy_vendor_user_data'} eq 'Yes')
         {
-            $do_privacy_vendor = 1;
+            $do_data_compliance = 1;
         }
 
         if ($params->{'vendor_cost'} eq '> $25,000' 
@@ -81,9 +79,8 @@ sub post_bug_after_creation {
         }
     }
 
-    my ($sec_review_bug, $legal_bug, $finance_bug, $privacy_vendor_bug,
-        $privacy_tech_bug, $privacy_policy_bug, $error, @dep_comment,
-        @dep_errors, @send_mail);
+    my ($sec_review_bug, $legal_bug, $finance_bug, $data_compliance_bug,
+        $error, @dep_comment, @dep_errors, @send_mail);
 
     # Common parameters always passed to _file_child_bug
     # bug_data and template_suffix will be different for each bug
@@ -161,55 +158,22 @@ sub post_bug_after_creation {
         _file_child_bug($child_params);
     }
 
-    if ($do_privacy_tech) {
+    if ($do_data_compliance) {
         $child_params->{'bug_data'} = {
-            short_desc   => 'Privacy-Technical Review: ' . $bug->short_desc,
-            product      => 'mozilla.org',
-            component    => 'Security Assurance: Review Request',
+            short_desc   => 'Data Compliance Review: ' . $bug->short_desc,
+            product      => 'Data Compliance',
+            component    => 'General',
             bug_severity => 'normal',
             priority     => '--',
-            keywords     => 'privacy-review-needed',
-            groups       => [ 'mozilla-employee-confidential' ],
-            op_sys       => 'All',
-            rep_platform => 'All',
-            version      => 'other',
-            blocked      => $bug->bug_id,
-        };
-        $child_params->{'template_suffix'} = 'privacy-tech';
-        _file_child_bug($child_params);
-    }
-
-    if ($do_privacy_policy) {
-        $child_params->{'bug_data'} = {
-            short_desc   => 'Privacy-Policy Review: ' . $bug->short_desc,
-            product      => 'Privacy',
-            component    => 'Product Review',
-            bug_severity => 'normal',
-            priority     => '--',
+            bug_severity => $params->{data_comp_urgency},
             groups       => [ 'mozilla-employee-confidential' ],
             op_sys       => 'All',
             rep_platform => 'All',
             version      => 'unspecified',
+            cf_due_date  => $params->{release_date},
             blocked      => $bug->bug_id,
         };
-        $child_params->{'template_suffix'} = 'privacy-policy';
-        _file_child_bug($child_params);
-    }
-
-    if ($do_privacy_vendor) {
-        $child_params->{'bug_data'} = {
-            short_desc   => 'Privacy / Vendor Review: ' . $bug->short_desc,
-            product      => 'Privacy',
-            component    => 'Vendor Review',
-            bug_severity => 'normal',
-            priority     => '--',
-            groups       => [ 'mozilla-employee-confidential' ],
-            op_sys       => 'All',
-            rep_platform => 'All',
-            version      => 'unspecified',
-            blocked      => $bug->bug_id,
-        };
-        $child_params->{'template_suffix'} = 'privacy-vendor';
+        $child_params->{'template_suffix'} = 'data-compliance';
         _file_child_bug($child_params);
     }
 

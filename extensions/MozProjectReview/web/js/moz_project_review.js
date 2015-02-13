@@ -52,9 +52,12 @@ var MPR = {
             "legal_sow_vendor_total_max": "Please enter a value for SOW vendor maximum total to be paid",
             "legal_sow_vendor_product_line": "Please enter a value for SOW vendor product line"
         },
-        "privacy_policy_project_questions": {
-            "privacy_policy_project_assistance": "Please enter a value for any assistance needed in the privacy policy project questions section",
-            "privacy_policy_project_link": "Please enter a value for project link in the privacy policy project questions section"
+        "data_compliance_questions": {
+            "data_comp_request_type": "Please select a value for the data compliance request type",
+            "data_comp_area": "Please select a value for the data compliance area",
+            "data_comp_desc": "Please enter a value for the data compliance description",
+            "data_comp_handling_change": "Please select a value for the data compliance handling change",
+            "data_comp_practice_change": "Please select a value for the data compliance practice change"
         }
     },
 
@@ -68,8 +71,6 @@ var MPR = {
         'vendor_cost',
         'po_needed',
         'sec_affects_products',
-        'privacy_policy_vendor_user_data',
-        'privacy_policy_vendor_questionnaire',
         'legal_priority',
         'legal_sow_vendor_product_line',
         'legal_vendor_services_where',
@@ -109,9 +110,7 @@ var MPR = {
             legal_vendor_single_country: false,
             legal_vendor_services_where_row: false,
             sec_review_questions: false,
-            privacy_policy_project_questions: false,
-            privacy_policy_vendor_questions: false,
-            privacy_policy_vendor_extra: false
+            data_compliance_questions: false,
         };
 
         if (MPR.fieldValue('key_initiative') == 'Other') {
@@ -120,7 +119,7 @@ var MPR = {
 
         if (MPR.fieldValue('mozilla_data') == 'Yes') {
             page_sections.legal_questions = true;
-            page_sections.privacy_policy_project_questions = true;
+            page_sections.data_compliance_questions = true;
             page_sections.sec_review_questions = true;
         }
 
@@ -147,7 +146,7 @@ var MPR = {
             if (MPR.fieldValue('data_access') == 'Yes') {
                 page_sections.legal_questions = true;
                 page_sections.sec_review_questions = true;
-                page_sections.privacy_policy_vendor_questions = true;
+                page_sections.data_compliance_questions = true;
             }
 
             if (MPR.fieldValue('vendor_cost') == '<= $25,000') {
@@ -167,10 +166,6 @@ var MPR = {
             page_sections.legal_vendor_single_country = true;
         }
 
-        if (MPR.fieldValue('privacy_policy_vendor_user_data') == 'Yes') {
-            page_sections.privacy_policy_vendor_extra = true;
-        }
-
         // Toggle the individual page_sections
         for (section in page_sections) {
             MPR.toggleShowSection(section, page_sections[section]);
@@ -181,7 +176,7 @@ var MPR = {
         if (show) {
             Dom.removeClass(section, 'bz_default_hidden');
         }
-        else { 
+        else {
             Dom.addClass(section ,'bz_default_hidden');
         }
     },
@@ -199,7 +194,7 @@ var MPR = {
                 }
             }
         }
- 
+
         // Special case checks
         if (MPR.fieldValue('relationship_type') == 'Vendor/Services'
             && MPR.fieldValue('legal_vendor_services_where') == '')

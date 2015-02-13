@@ -86,7 +86,7 @@
 <input type="hidden" name="comment" id="comment" value="">
 <input type="hidden" name="status_whiteboard" id="status_whiteboard" value="">
 <input type="hidden" name="bug_file_loc" id="bug_file_loc" value="">
-<input type="hidden" name="groups" id="groups" value="mozilla-employee-confidential">
+<input type="hidden" name="groups" id="groups" value="mozilla-confidential">
 <input type="hidden" name="token" value="[% token FILTER html %]">
 
 <div class="head_desc">
@@ -145,7 +145,10 @@
     Description
   </label>
   <div class="field_desc">
-    Describe the data compliance issue.
+    Describe the data compliance issue: If your request involves changes or
+    additional data collection, please describe that collection, including
+    specific fields, where the data will be stored, how long it will be stored,
+    and who will have access to the data.
   </div>
   <textarea name="desc" id="desc" rows="10" cols="60" class="wide"></textarea>
 </div>

@@ -226,6 +226,10 @@ our %group_auto_cc = (
 # Force create-bug template by product
 # Users in 'include' group will be forced into using the form.
 our %create_bug_formats = (
+    'Data Compliance' => {
+        'format'  => 'data-compliance',
+        'include' => 'everyone',
+    },
     'Mozilla Developer Network' => {
         'format'  => 'mdn',
         'include' => 'everyone',

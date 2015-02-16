@@ -28,7 +28,6 @@ use Bugzilla::Group;
 use DateTime::TimeZone;
 use List::Util qw(max);
 use Scalar::Util qw(blessed);
-use Storable qw(dclone);
 use URI;
 use URI::QueryParam;
 
@@ -123,7 +122,7 @@ sub new {
     my $class = ref($invocant) || $invocant;
     my ($param) = @_;
 
-    my $user = DEFAULT_USER;
+    my $user = { %{ DEFAULT_USER() } };
     bless ($user, $class);
     return $user unless $param;
 
@@ -141,7 +140,7 @@ sub super_user {
     my $class = ref($invocant) || $invocant;
     my ($param) = @_;
 
-    my $user = dclone(DEFAULT_USER);
+    my $user = { %{ DEFAULT_USER() } };
     $user->{groups} = [Bugzilla::Group->get_all];
     $user->{bless_groups} = [Bugzilla::Group->get_all];
     bless $user, $class;

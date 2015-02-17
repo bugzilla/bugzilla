@@ -22,6 +22,7 @@ use constant MORE_SUB_CLASSES => qw(
     Bugzilla::Extension::MoreBugUrl::PHP
     Bugzilla::Extension::MoreBugUrl::Redmine
     Bugzilla::Extension::MoreBugUrl::Savane
+    Bugzilla::Extension::MoreBugUrl::Phabricator
 );
 
 # We need to update bug_see_also table because both

@@ -64,6 +64,9 @@ elsif ($action eq 'prepare-sudo') {
                           -httponly => 1,
                           %args);
 
+        # The user ID must not be set when generating the token, because
+        # that information will not be available when validating it.
+        local Bugzilla->user->{userid} = 0;
         $vars->{'login_request_token'} = issue_hash_token(['login_request', $value]);
     }
 

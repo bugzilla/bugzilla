@@ -569,11 +569,13 @@ sub bug_format_comment {
 
     # link to svn.m.o
     push (@$regexes, {
-        match => qr/\br(\d{4,})\b/,
+        match => qr/(^|\s)r(\d{4,})\b/,
         replace => sub {
             my $args = shift;
-            my $match = html_quote($args->{matches}->[0]);
-            return qq{<a href="https://viewvc.svn.mozilla.org/vc?view=rev&amp;revision=$match">r$match</a>};
+            my $match = $args->{matches}->[1];
+            return
+                $args->{matches}->[0] .
+                qq{<a href="https://viewvc.svn.mozilla.org/vc?view=rev&amp;revision=$match">r$match</a>};
         }
     });
 

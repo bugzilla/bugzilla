@@ -34,7 +34,7 @@ use Date::Format;
 use Date::Parse;
 use Scalar::Util qw(blessed);
 use List::MoreUtils qw(all firstidx part uniq);
-use POSIX qw(INT_MAX);
+use POSIX qw(INT_MAX floor);
 use Storable qw(dclone);
 use Time::HiRes qw(gettimeofday tv_interval);
 
@@ -2245,7 +2245,8 @@ sub SqlifyDate {
         }
         elsif ($unit eq 'm') {
             $month -= $amount;
-            while ($month<0) { $year--; $month += 12; }
+            $year += floor($month/12);
+            $month %= 12;
             if ($startof) {
                 return sprintf("%4d-%02d-01 00:00:00", $year+1900, $month+1);
             }

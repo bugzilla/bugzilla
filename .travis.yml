@@ -1,4 +1,8 @@
 language: perl
+
+addons:
+  postgresql: "9.1"
+
 perl:
   - 5.10
   - 5.12
@@ -28,6 +32,10 @@ before_install:
   - git clone https://github.com/bugzilla/qa.git -b 4.0 qa
 
 install: true
+
+before_script:
+  - mysql -u root mysql -e "GRANT ALL PRIVILEGES ON *.* TO bugs@localhost IDENTIFIED BY 'bugs'; FLUSH PRIVILEGES;"
+  - psql -c "CREATE USER bugs WITH PASSWORD 'bugs' CREATEDB;" -U postgres
 
 script: ./qa/travis.sh
 

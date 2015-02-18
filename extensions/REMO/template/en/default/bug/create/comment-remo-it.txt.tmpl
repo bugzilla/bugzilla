@@ -55,18 +55,6 @@ Hosting data:
 Domain Name:
 [%+ cgi.param('domain_name') %]
 
-[% ELSIF item == "discourse" %]
-:: Discourse Category
-
-Category Names:
-[%+ cgi.param('discourse_names') %]
-
-Moderators:
-[%+ cgi.param('discourse_mods') %]
-
-Background Hex Code:
-[%+ cgi.param('discourse_bg') || "-" %]
-
 [% ELSIF item == "other" %]
 :: Other
 

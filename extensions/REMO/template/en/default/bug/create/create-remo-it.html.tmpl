@@ -67,10 +67,6 @@ function submitForm() {
   ) {
     fields.push('domain_name');
   }
-  if (Dom.get('item_discourse').checked) {
-    fields.push('discourse_names');
-    fields.push('discourse_mods');
-  }
   if (Dom.get('item_other').checked) {
     fields.push('other_value');
   }
@@ -106,11 +102,6 @@ function setItemVisibility() {
     Dom.removeClass('domain', 'bz_default_hidden');
   } else {
     Dom.addClass('domain', 'bz_default_hidden');
-  }
-  if (Dom.get('item_discourse').checked) {
-    Dom.removeClass('discourse', 'bz_default_hidden');
-  } else {
-    Dom.addClass('discourse', 'bz_default_hidden');
   }
   if (Dom.get('item_other').checked) {
     Dom.removeClass('other', 'bz_default_hidden');
@@ -190,10 +181,6 @@ function init() {
         <label for="item_domain">Domain</label>
       </div>
       <div>
-        <input type="checkbox" name="items" value="discourse" id="item_discourse">
-        <label for="item_discourse">Discourse Category</label>
-      </div>
-      <div>
         <input type="checkbox" name="items" value="ssl" id="item_ssl">
         <label for="item_ssl">SSL</label>
       </div>
@@ -233,24 +220,6 @@ function init() {
 <tr class="odd">
   <th>Domain Name:[% mandatory FILTER none %]</th>
   <td><input id="domain_name" name="domain_name" size="40"></td>
-</tr>
-</tbody>
-
-<tbody id="discourse">
-<tr class="even">
-  <th colspan="2">Discourse Category</th>
-</tr>
-<tr class="odd">
-  <th>Discourse Category Names:[% mandatory FILTER none %]</th>
-  <td><input id="discourse_names" name="discourse_names" size="40"></td>
-</tr>
-<tr class="odd">
-  <th>Moderators:[% mandatory FILTER none %]</th>
-  <td><input id="discourse_mods" name="discourse_mods" size="40"></td>
-</tr>
-<tr class="odd">
-  <th>Hex code of background of category tag:</th>
-  <td><input id="discourse_bg" name="discourse_bg" size="40"></td>
 </tr>
 </tbody>
 

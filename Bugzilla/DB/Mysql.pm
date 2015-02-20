@@ -184,15 +184,19 @@ sub sql_fulltext_search {
     if ($text =~ /(?:^|\W)[+\-<>~"()]/ || $text =~ /[()"*](?:$|\W)/) {
         $mode = 'IN BOOLEAN MODE';
 
-        # quote un-quoted compound words
-        my @words = quotewords('[\s()]+', 'delimiters', $text);
-        foreach my $word (@words) {
-            # match words that have non-word chars in the middle of them
-            if ($word =~ /\w\W+\w/ && $word !~ m/"/) {
-                $word = '"' . $word . '"';
+        my @terms = split(quotemeta(FULLTEXT_OR), $text);
+        foreach my $term (@terms) {
+            # quote un-quoted compound words
+            my @words = quotewords('[\s()]+', 'delimiters', $term);
+            foreach my $word (@words) {
+                # match words that have non-word chars in the middle of them
+                if ($word =~ /\w\W+\w/ && $word !~ m/"/) {
+                    $word = '"' . $word . '"';
+                }
             }
+            $term = join('', @words);
         }
-        $text = join('', @words);
+        $text = join(FULLTEXT_OR, @terms);
     }
 
     # quote the text for use in the MATCH AGAINST expression

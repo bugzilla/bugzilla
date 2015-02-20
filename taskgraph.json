@@ -22,10 +22,9 @@
             "TEST_SUITE": "sanity"
           },
           "artifacts": {
-            "pubic/runtests_log": {
+            "public/runtests_log": {
               "type": "file",
-              "path": "/runtests.log",
-              "expires": "2016-02-17T17:33:38.806Z"
+              "path": "/runtests.log"
             }
           }
         },
@@ -55,10 +54,9 @@
             "TEST_SUITE": "docs"
           },
           "artifacts": {
-            "pubic/runtests_log": {
+            "public/runtests_log": {
               "type": "file",
-              "path": "/runtests.log",
-              "expires": "2016-02-17T17:33:38.806Z"
+              "path": "/runtests.log"
             }
           }
         },
@@ -88,15 +86,13 @@
             "TEST_SUITE": "webservices"
           },
           "artifacts": {
-            "pubic/runtests_log": {
+            "public/runtests_log": {
               "type": "file",
-              "path": "/runtests.log",
-              "expires": "2016-02-17T17:33:38.806Z"
+              "path": "/runtests.log"
             },
             "public/httpd_error_log": {
               "type": "file",
-              "path": "/var/log/httpd/error_log",
-              "expires": "2016-02-17T17:33:38.806Z"
+              "path": "/var/log/httpd/error_log"
             }
           }
         },
@@ -126,15 +122,13 @@
             "TEST_SUITE": "selenium"
           },
           "artifacts": {
-            "pubic/runtests_log": {
+            "public/runtests_log": {
               "type": "file",
-              "path": "/runtests.log",
-              "expires": "2016-02-17T17:33:38.806Z"
+              "path": "/runtests.log"
             },
             "public/httpd_error_log": {
               "type": "file",
-              "path": "/var/log/httpd/error_log",
-              "expires": "2016-02-17T17:33:38.806Z"
+              "path": "/var/log/httpd/error_log"
             }
           }
         },
@@ -164,15 +158,13 @@
             "TEST_SUITE": "webservices"
           },
           "artifacts": {
-            "pubic/runtests_log": {
+            "public/runtests_log": {
               "type": "file",
-              "path": "/runtests.log",
-              "expires": "2016-02-17T17:33:38.806Z"
+              "path": "/runtests.log"
             },
             "public/httpd_error_log": {
               "type": "file",
-              "path": "/var/log/httpd/error_log",
-              "expires": "2016-02-17T17:33:38.806Z"
+              "path": "/var/log/httpd/error_log"
             }
           }
         },
@@ -202,15 +194,13 @@
             "TEST_SUITE": "selenium"
           },
           "artifacts": {
-            "pubic/runtests_log": {
+            "public/runtests_log": {
               "type": "file",
-              "path": "/runtests.log",
-              "expires": "2016-02-17T17:33:38.806Z"
+              "path": "/runtests.log"
             },
             "public/httpd_error_log": {
               "type": "file",
-              "path": "/var/log/httpd/error_log",
-              "expires": "2016-02-17T17:33:38.806Z"
+              "path": "/var/log/httpd/error_log"
             }
           }
         },

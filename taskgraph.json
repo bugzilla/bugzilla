@@ -22,7 +22,7 @@
             "TEST_SUITE": "sanity"
           },
           "artifacts": {
-            "pubic/runtests.log": {
+            "pubic/runtests_log": {
               "type": "file",
               "path": "/runtests.log",
               "expires": "2016-02-17T17:33:38.806Z"
@@ -55,7 +55,7 @@
             "TEST_SUITE": "docs"
           },
           "artifacts": {
-            "pubic/runtests.log": {
+            "pubic/runtests_log": {
               "type": "file",
               "path": "/runtests.log",
               "expires": "2016-02-17T17:33:38.806Z"
@@ -88,9 +88,14 @@
             "TEST_SUITE": "webservices"
           },
           "artifacts": {
-            "pubic/runtests.log": {
+            "pubic/runtests_log": {
               "type": "file",
               "path": "/runtests.log",
+              "expires": "2016-02-17T17:33:38.806Z"
+            },
+            "public/httpd_error_log": {
+              "type": "file",
+              "path": "/var/log/httpd/error_log",
               "expires": "2016-02-17T17:33:38.806Z"
             }
           }
@@ -121,9 +126,14 @@
             "TEST_SUITE": "selenium"
           },
           "artifacts": {
-            "pubic/runtests.log": {
+            "pubic/runtests_log": {
               "type": "file",
               "path": "/runtests.log",
+              "expires": "2016-02-17T17:33:38.806Z"
+            },
+            "public/httpd_error_log": {
+              "type": "file",
+              "path": "/var/log/httpd/error_log",
               "expires": "2016-02-17T17:33:38.806Z"
             }
           }
@@ -154,9 +164,14 @@
             "TEST_SUITE": "webservices"
           },
           "artifacts": {
-            "pubic/runtests.log": {
+            "pubic/runtests_log": {
               "type": "file",
               "path": "/runtests.log",
+              "expires": "2016-02-17T17:33:38.806Z"
+            },
+            "public/httpd_error_log": {
+              "type": "file",
+              "path": "/var/log/httpd/error_log",
               "expires": "2016-02-17T17:33:38.806Z"
             }
           }
@@ -187,9 +202,14 @@
             "TEST_SUITE": "selenium"
           },
           "artifacts": {
-            "pubic/runtests.log": {
+            "pubic/runtests_log": {
               "type": "file",
               "path": "/runtests.log",
+              "expires": "2016-02-17T17:33:38.806Z"
+            },
+            "public/httpd_error_log": {
+              "type": "file",
+              "path": "/var/log/httpd/error_log",
               "expires": "2016-02-17T17:33:38.806Z"
             }
           }

@@ -17,9 +17,11 @@
       [% Hook.process('start') %]
       [% PROCESS generate_diffs %]
       <p>
+      [% SET comment_anchor = '' %]
       [% FOREACH comment = new_comments.reverse %]
         <div>
           [% IF comment.count %]
+            [% comment_anchor = "#c$comment.count" %]
             <b>[% "Comment # ${comment.count}" FILTER bug_link(bug,
               {comment_num => comment.count, full_url => 1, user => to_user}) FILTER none %]
               on [% "$terms.bug $bug.id" FILTER bug_link(bug, { full_url => 1, user => to_user }) FILTER none %]
@@ -61,6 +63,13 @@
         [% END %]
       [% END %]
       </ul>
+      <div itemscope itemtype="http://schema.org/EmailMessage">
+        <div itemprop="action" itemscope itemtype="http://schema.org/ViewAction">
+          <link itemprop="url" href="[% urlbase FILTER html %]show_bug.cgi?id=[% "$bug.id$comment_anchor" FILTER uri %]"/>
+          <meta itemprop="name" content="View [% terms.bug %]"/>
+        </div>
+        <meta itemprop="description" content="[% terms.Bugzilla %] [%+ terms.bug %] update notification"/>
+      </div>
     </body>
 </html>
 

@@ -352,6 +352,7 @@ sub SPECIAL_PARSING {
     my $map = {
         # Pronoun Fields (Ones that can accept %user%, etc.)
         assigned_to => \&_contact_pronoun,
+        'attachments.submitter' => \&_contact_pronoun,
         cc          => \&_contact_pronoun,
         commenter   => \&_contact_pronoun,
         qa_contact  => \&_contact_pronoun,

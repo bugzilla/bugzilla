@@ -1,0 +1,228 @@
+{
+  "metadata": {
+    "name": "Bugzilla Task Graph",
+    "description": "A suite of tests to check the quality of the Bugzilla codebase.",
+    "owner": "dlawrence@mozilla.com",
+    "source": "https://raw.githubusercontent.com/bugzilla/bugzilla/4.0/taskgraph.json"
+  },
+  "tasks": [
+    {
+      "reruns": 3,
+      "maxRunTime": 3000,
+      "task": {
+        "metadata": {
+          "name": "Basic Sanity Tests"
+        },
+        "provisionerId": "aws-provisioner",
+        "workerType": "gaia",
+        "payload": {
+          "image": "dklawren/docker-bugzilla",
+          "command": ["/runtests.sh"],
+          "env": {
+            "TEST_SUITE": "sanity"
+          },
+          "artifacts": {
+            "public/runtests_log": {
+              "type": "file",
+              "path": "/runtests.log",
+              "expires": "2016-02-17T17:33:38.806Z"
+            }
+          }
+        },
+        "extra": {
+          "treeherder": {
+            "machine": {
+              "platform": "4.0"
+            },
+            "symbol": "San"
+          }
+        }
+      }
+    },
+    {
+      "reruns": 3,
+      "maxRunTime": 3000,
+      "task": {
+        "metadata": {
+          "name": "Documentation Build Test"
+        },
+        "provisionerId": "aws-provisioner",
+        "workerType": "gaia",
+        "payload": {
+          "image": "dklawren/docker-bugzilla",
+          "command": ["/runtests.sh"],
+          "env": {
+            "TEST_SUITE": "docs"
+          },
+          "artifacts": {
+            "public/runtests_log": {
+              "type": "file",
+              "path": "/runtests.log",
+              "expires": "2016-02-17T17:33:38.806Z"
+            }
+          }
+        },
+        "extra": {
+          "treeherder": {
+            "machine": {
+              "platform": "4.0"
+            },
+            "symbol": "Doc"
+          }
+        }
+      }
+    },
+    {
+      "reruns": 3,
+      "maxRunTime": 7200,
+      "task": {
+        "metadata": {
+          "name": "WebService API Tests (MySQL)"
+        },
+        "provisionerId": "aws-provisioner",
+        "workerType": "gaia",
+        "payload": {
+          "image": "dklawren/docker-bugzilla",
+          "command": ["/runtests.sh"],
+          "env": {
+            "TEST_SUITE": "webservices"
+          },
+          "artifacts": {
+            "public/runtests_log": {
+              "type": "file",
+              "path": "/runtests.log",
+              "expires": "2016-02-17T17:33:38.806Z"
+            },
+            "public/httpd_error_log": {
+              "type": "file",
+              "path": "/var/log/httpd/error_log",
+              "expires": "2016-02-17T17:33:38.806Z"
+            }
+          }
+        },
+        "extra": {
+          "treeherder": {
+            "machine": {
+              "platform": "4.0"
+            },
+            "symbol": "API"
+          }
+        }
+      }
+    },
+    {
+      "reruns": 3,
+      "maxRunTime": 7200,
+      "task": {
+        "metadata": {
+          "name": "Selenium Tests (MySQL)"
+        },
+        "provisionerId": "aws-provisioner",
+        "workerType": "gaia",
+        "payload": {
+          "image": "dklawren/docker-bugzilla",
+          "command": ["/runtests.sh"],
+          "env": {
+            "TEST_SUITE": "selenium"
+          },
+          "artifacts": {
+            "public/runtests_log": {
+              "type": "file",
+              "path": "/runtests.log",
+              "expires": "2016-02-17T17:33:38.806Z"
+            },
+            "public/httpd_error_log": {
+              "type": "file",
+              "path": "/var/log/httpd/error_log",
+              "expires": "2016-02-17T17:33:38.806Z"
+            }
+          }
+        },
+        "extra": {
+          "treeherder": {
+            "machine": {
+              "platform": "4.0"
+            },
+            "symbol": "Sel"
+          }
+        }
+      }
+    },
+    {
+      "reruns": 3,
+      "maxRunTime": 7200,
+      "task": {
+        "metadata": {
+          "name": "WebService API Tests (Pg)"
+        },
+        "provisionerId": "aws-provisioner",
+        "workerType": "gaia",
+        "payload": {
+          "image": "dklawren/docker-bugzilla:pgsql",
+          "command": ["/runtests.sh"],
+          "env": {
+            "TEST_SUITE": "webservices"
+          },
+          "artifacts": {
+            "public/runtests_log": {
+              "type": "file",
+              "path": "/runtests.log",
+              "expires": "2016-02-17T17:33:38.806Z"
+            },
+            "public/httpd_error_log": {
+              "type": "file",
+              "path": "/var/log/httpd/error_log",
+              "expires": "2016-02-17T17:33:38.806Z"
+            }
+          }
+        },
+        "extra": {
+          "treeherder": {
+            "machine": {
+              "platform": "4.0"
+            },
+            "symbol": "API-Pg"
+          }
+        }
+      }
+    },
+    {
+      "reruns": 3,
+      "maxRunTime": 7200,
+      "task": {
+        "metadata": {
+          "name": "Selenium Tests (Pg)"
+        },
+        "provisionerId": "aws-provisioner",
+        "workerType": "gaia",
+        "payload": {
+          "image": "dklawren/docker-bugzilla:pgsql",
+          "command": ["/runtests.sh"],
+          "env": {
+            "TEST_SUITE": "selenium"
+          },
+          "artifacts": {
+            "public/runtests_log": {
+              "type": "file",
+              "path": "/runtests.log",
+              "expires": "2016-02-17T17:33:38.806Z"
+            },
+            "public/httpd_error_log": {
+              "type": "file",
+              "path": "/var/log/httpd/error_log",
+              "expires": "2016-02-17T17:33:38.806Z"
+            }
+          }
+        },
+        "extra": {
+          "treeherder": {
+            "machine": {
+              "platform": "4.0"
+            },
+            "symbol": "Sel-Pg"
+          }
+        }
+      }
+    }
+  ]
+}

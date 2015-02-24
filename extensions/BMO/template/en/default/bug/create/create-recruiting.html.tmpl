@@ -165,19 +165,19 @@ function jobDescToggle(what) {
             <option value="">Select...</option>
             <option value="Joanne Nguyen">Joanne Nguyen</option>
             <option value="Jess Amann">Jess Amann</option>
-            <option value="Michael Auckland">Michael Auckland</option>
+            <option value="Michael Aukland">Michael Aukland</option>
           </select>
         </td>
       </tr>
 
       <tr>
         <th align="right">
-          <label class="required" for="ft_or_seasonal">Full time or Seasonal?</label>
+          <label class="required" for="reg_or_seasonal">Regular or Seasonal?</label>
         </th>
         <td>
-          <select required id="ft_or_seasonal" name="ft_or_seasonal">
+          <select required id="reg_or_seasonal" name="reg_or_seasonal">
             <option value="">Select...</option>
-            <option value="Full Time">Full Time</option>
+            <option value="Regular">Regular</option>
             <option value="Seasonal">Seasonal</option>
           </select>
         </td>
@@ -229,6 +229,32 @@ function jobDescToggle(what) {
             <option value="new">New</option>
             <option value="backfill">Backfill</option>
           </select>
+        </td>
+      </tr>
+
+      <tr>
+        <th align="right" valign="top">
+          <label class="required" for="multiple">
+            Are you hiring multiple of this position this year?
+          </label>
+        </th>
+        <td>
+          <select required name="multiple" id="multiple">
+            <option value="">Select...</option>
+            <option value="Yes">Yes</option>
+            <option value="No">No</option>
+          </select>
+        </td>
+      </tr>
+
+      <tr>
+        <th align="right" valign="top">
+          <label class="required" for="job_family">
+            Please include Job Family<br>(if you know what it is)
+          </label>
+        </th>
+        <td>
+          <input required name="job_family" id="job_family" size="60">
         </td>
       </tr>
 

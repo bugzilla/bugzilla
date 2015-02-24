@@ -32,8 +32,8 @@ VP Authority:
 HRBP:
 [%+ cgi.param('hrbp_name') %]
 
-Full Time or Seasonal?
-[%+ cgi.param('ft_or_seasonal') %]
+Regular or Seasonal?
+[%+ cgi.param('reg_or_seasonal') %]
 
 Desired Location:
 [%+ cgi.param("desired_location") %]
@@ -43,6 +43,12 @@ Comp Grade:
 
 Is this new headcount or backfill?
 [%+ cgi.param("new_or_backfill") %]
+
+Are you hiring multiple of this position this year?
+[%+ cgi.param("multiple") %]
+
+Please include Job Family:
+[%+ cgi.param("job_family") %]
 
 What part of your strategic plan does this role impact?
 [%+ cgi.param("plan_impact") %]

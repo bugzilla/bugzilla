@@ -766,6 +766,8 @@ sub create {
                 $var =~ s/([\\\'\"\/])/\\$1/g;
                 $var =~ s/\n/\\n/g;
                 $var =~ s/\r/\\r/g;
+                $var =~ s/\x{2028}/\\u2028/g; # unicode line separator
+                $var =~ s/\x{2029}/\\u2029/g; # unicode paragraph separator
                 $var =~ s/\@/\\x40/g; # anti-spam for email addresses
                 $var =~ s/</\\x3c/g;
                 $var =~ s/>/\\x3e/g;

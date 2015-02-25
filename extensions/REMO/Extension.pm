@@ -321,7 +321,7 @@ sub post_bug_after_creation {
 
         $bug->set_flags(\@new_flags, []) if @new_flags;
         $bug->add_comment(
-            join(", ", map { $_->realname || $_->login_name } @cc_users) .
+            join(", ", map { $_->name || $_->login } @cc_users) .
             ": You have been added as supporter to this Reps application, please comment why do you endorse their application. Thanks!"
         );
 

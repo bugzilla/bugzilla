@@ -109,8 +109,9 @@ tie(%$cf_visible_in_products, "Tie::IxHash",
         "Release Engineering" => ["Buildduty"],
     },
     qr/^cf_rank$/ => {
-        "Loop"    => [],
+        "Core"    => ["WebRTC", "WebRTC: Audio/Video", "WebRTC: Networking", "WebRTC: Signaling"],
         "Firefox" => [],
+        "Loop"    => [],
     },
 );
 

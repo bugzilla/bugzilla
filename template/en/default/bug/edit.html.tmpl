@@ -227,7 +227,7 @@
     [%#############%]
     [%#  PRODUCT  #%]
     [%#############%]
-    <tr>
+    <tr id="field_tablerow_product">
       [% INCLUDE "bug/field-label.html.tmpl"
          field = bug_fields.product
          desc_url = 'describecomponents.cgi'
@@ -249,7 +249,7 @@
       # it uses some javascript that depends on the existence of the
       # product field.
       #%]
-    <tr class="bz_default_hidden">
+    <tr id="field_tablerow_classification" class="bz_default_hidden">
        [% INCLUDE bug/field.html.tmpl
             bug = bug field = bug_fields.classification
             override_legal_values = bug.choices.classification
@@ -259,7 +259,7 @@
     [%###############%]    
     [%#  Component  #%]
     [%###############%]
-    <tr>
+    <tr id="field_tablerow_component">
       [% INCLUDE bug/field.html.tmpl
           bug = bug, field = bug_fields.component, value = bug.component
           override_legal_values = bug.choices.component
@@ -267,7 +267,7 @@
           editable = bug.check_can_change_field('component', 0, 1)
       %]
     </tr>
-    <tr>
+    <tr id="field_tablerow_version">
       [% INCLUDE "bug/field-label.html.tmpl"
         field = bug_fields.version editable = 1 %]
         
@@ -276,7 +276,7 @@
     [%############%]    
     [%# PLATFORM #%]
     [%############%]    
-    <tr>
+    <tr id="field_tablerow_rep_platform">
       [% INCLUDE "bug/field-label.html.tmpl"
            field = bug_fields.rep_platform, editable = 1, accesskey = "h" %]
       <td class="field_value">
@@ -300,7 +300,7 @@
 [%############################################################################%]
 
 [% BLOCK section_status %]
-  <tr>
+  <tr id="field_tablerow_status">
     <th class="field_label">
       <a href="page.cgi?id=fields.html#bug_status">Status</a>:
     </th>
@@ -331,7 +331,7 @@
  [%###############################################################%]
  [%# Importance (priority and severity) #%]
  [%###############################################################%]
-    <tr>
+    <tr id="field_tablerow_importance">
       <th class="field_label">
         <label for="priority" accesskey="i">
           <a href="page.cgi?id=fields.html#importance"><u>I</u>mportance</a></label>:
@@ -350,7 +350,7 @@
     </tr>
 
     [% IF Param("usetargetmilestone") && bug.target_milestone %]
-      <tr>
+      <tr id="field_tablerow_target_milestone">
         [% INCLUDE "bug/field-label.html.tmpl"
           field = bug_fields.target_milestone
           editable = 1
@@ -370,7 +370,7 @@
 
 [% BLOCK section_people %]
 
-    <tr>
+    <tr id="field_tablerow_assigned_to">
       <th class="field_label">
         <a href="page.cgi?id=fields.html#assigned_to">Assigned To</a>:
       </th>
@@ -419,7 +419,7 @@
     </tr>
 
     [% IF Param('useqacontact') %]
-    <tr>
+    <tr id="field_tablerow_qa_contact">
       [% INCLUDE "bug/field-label.html.tmpl"
         field = bug_fields.qa_contact
         editable = 1
@@ -481,7 +481,7 @@
 [%# Block for URL Keyword and Whiteboard                                     #%]
 [%############################################################################%]
 [% BLOCK section_url_keyword_whiteboard %]
-  <tr>
+  <tr id="field_tablerow_bug_file_loc">
     [% INCLUDE "bug/field-label.html.tmpl"
       field = bug_fields.bug_file_loc
       editable = 1
@@ -522,7 +522,7 @@
   </tr>
   
   [% IF Param('usestatuswhiteboard') %]
-    <tr>
+    <tr id="field_tablerow_status_whiteboard">
       [% INCLUDE "bug/field-label.html.tmpl"
         field = bug_fields.status_whiteboard
         editable = 1
@@ -533,7 +533,7 @@
   [% END %]
   
   [% IF use_keywords %]
-    <tr>
+    <tr id="field_tablerow_keywords">
         [% INCLUDE bug/field.html.tmpl
           bug = bug, field = bug_fields.keywords, value = bug.keywords
           editable = bug.check_can_change_field("keywords", 0, 1),
@@ -543,7 +543,7 @@
   [% END %]
 
   [% IF user.id %]
-    <tr>
+    <tr id="field_tablerow_tag">
       [% INCLUDE bug/field.html.tmpl
          bug = bug, field = bug_fields.tag, value = bug.tags.join(", "),
          editable = 1, possible_values = user.tags.keys
@@ -558,7 +558,7 @@
 
 [% BLOCK section_duplicates %]
   [% RETURN UNLESS bug.duplicates.size %]
-  <tr>
+  <tr id="field_tablerow_duplicates">
     <th class="field_label">
       <label for="duplicates">Duplicates ([% bug.duplicates.size %])</label>:
     </th>
@@ -579,7 +579,7 @@
 [%############################################################################%]
 
 [% BLOCK section_dependson_blocks %]
-  <tr>
+  <tr id="field_tablerow_dependson">
     [% INCLUDE dependencies 
          field = bug_fields.dependson deps = bug.depends_on_obj %]
   </tr>
@@ -590,7 +590,7 @@
   </tr>
 
   [% IF bug.dependson.size || bug.blocked.size %]
-    <tr>
+    <tr id="field_tablerow_blocked">
       <th>&nbsp;</th>
 
       <td colspan="2" id="show_dependency_tree_or_graph">
@@ -708,7 +708,7 @@
 [%############################################################################%]
 
 [% BLOCK section_dates %]
-  <tr>
+  <tr id="field_tablerow_reported">
     <th class="field_label">
       Reported:
     </th>
@@ -717,7 +717,7 @@
     </td>
   </tr>
   
-  <tr>
+  <tr id="field_tablerow_modified">
     <th class="field_label">
       Modified:
     </th>
@@ -733,7 +733,7 @@
 [%# Block for CC LIST                                                        #%]
 [%############################################################################%]
 [% BLOCK section_cclist %]
-    <tr>
+    <tr id="field_tablerow_cclist">
       <th class="field_label">
         <label for="newcc" accesskey="a">CC List:</label>
       </th>
@@ -823,7 +823,7 @@
 [%############################################################################%]
 [% BLOCK section_bug_ignored %]
   [% IF user.id %]
-    <tr>
+    <tr id="field_tablerow_bug_ignored">
       <th class="field_label">
         <label for="bug_ignored" title="Ignore all email for this [% terms.bug %]">
           Ignore [% terms.Bug %] Mail:
@@ -846,7 +846,7 @@
 [%############################################################################%]
 [% BLOCK section_see_also %]
   [% IF Param('use_see_also') || bug.see_also.size %]
-    <tr>
+    <tr id="field_tablerow_see_also">
       [% INCLUDE bug/field.html.tmpl 
            field    = bug_fields.see_also
            value    = bug.see_also
@@ -857,7 +857,7 @@
 [% END %]
 
 [% BLOCK section_aliases %]
-  <tr>
+  <tr id="field_tablerow_alias">
     [% INCLUDE "bug/field-label.html.tmpl"
        field = bug_fields.alias, editable = 1
     %]
@@ -928,7 +928,7 @@
     [% LAST IF show_bug_flags && show_more_flags && bug_flags_set %]
   [% END %]
   [% IF show_bug_flags %]
-    <tr>
+    <tr id="field_tablerow_flags">
       <th class="field_label">
         <label>Flags:</label>
       </th>

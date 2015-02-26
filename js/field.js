@@ -42,7 +42,7 @@ function validateEnterBug(theform) {
 
     // These are checked in the reverse order that they appear on the page,
     // so that the one closest to the top of the form will be focused.
-    if (attach_data.value && YAHOO.lang.trim(attach_desc.value) == '') {
+    if (attach_data && attach_data.value && YAHOO.lang.trim(attach_desc.value) == '') {
         _errorFor(attach_desc, 'attach_desc');
         focus_me = attach_desc;
     }

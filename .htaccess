@@ -59,7 +59,6 @@ RewriteRule ^form[\.:]csa[\.:]discourse$ enter_bug.cgi?product=Infrastructure+\%
 RewriteRule ^form[\.:]employee[\.\-:]incident$ enter_bug.cgi?product=mozilla.org&format=employee-incident
 RewriteRule ^form[\.:]brownbag$ https://air.mozilla.org/requests
 RewriteRule ^form[\.:]finance$ enter_bug.cgi?product=Finance&format=finance
-RewriteRule ^form[\.:]privacy[\.\-:]data$ enter_bug.cgi?product=Privacy&format=privacy-data
 RewriteRule ^form[\.:]moz[\.\-:]project[\.\-:]review$ enter_bug.cgi?product=mozilla.org&format=moz-project-review
 RewriteRule ^form[\.:]docs?$ enter_bug.cgi?product=Developer+Documentation&format=doc [QSA]
 RewriteRule ^form[\.:]mdn?$ enter_bug.cgi?product=Mozilla+Developer+Network&format=mdn

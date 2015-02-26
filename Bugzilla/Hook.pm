@@ -1592,6 +1592,24 @@ name), you can get it from here.
 
 =back
 
+=head2 user_check_account_creation
+
+This hook permits you to do extra checks before the creation of a new user
+account. This hook is called after email address validation has been done.
+Note that this hook can also access the IP address of the requester thanks
+to the C<remote_ip()> subroutine exported by C<Bugzilla::Util>.
+
+Params:
+
+=over
+
+=item C<login>
+
+The login of the new account. This is usually an email address, unless the
+C<emailsuffix> parameter is not empty.
+
+=back
+
 =head2 user_preferences
 
 This hook allows you to add additional panels to the User Preferences page,

@@ -21,6 +21,7 @@ use Bugzilla::Classification;
 use Bugzilla::Field;
 use Bugzilla::Group;
 use Bugzilla::BugUserLastVisit;
+use Bugzilla::Hook;
 
 use DateTime::TimeZone;
 use List::Util qw(max);
@@ -2416,6 +2417,9 @@ sub check_and_send_account_creation_confirmation {
     if ($login !~ /$creation_regexp/i) {
         ThrowUserError('account_creation_restricted');
     }
+
+    # Allow extensions to do extra checks.
+    Bugzilla::Hook::process('user_check_account_creation', { login => $login });
 
     # Create and send a token for this new account.
     require Bugzilla::Token;

@@ -18,7 +18,7 @@ use Bugzilla::Error;
 use Bugzilla::Group;
 use Bugzilla::User;
 use Bugzilla::User::Setting;
-use Bugzilla::Util qw(diff_arrays html_quote);
+use Bugzilla::Util qw(diff_arrays html_quote remote_ip);
 use Bugzilla::Status qw(is_open_state);
 use Bugzilla::Install::Filesystem;
 use Bugzilla::WebService::Constants;
@@ -950,6 +950,26 @@ sub template_before_process {
 
     if ($file eq 'bug/edit.html.tmpl') {
         $vars->{'viewing_the_bug_form'} = 1;
+    }
+}
+
+sub user_check_account_creation {
+    my ($self, $args) = @_;
+
+    my $login = $args->{login};
+    my $ip = remote_ip();
+
+    # Log all requests.
+    warn "USER ACCOUNT CREATION REQUEST FOR $login ($ip)";
+
+    # Reject requests based on their email address.
+    if ($login =~ /\@evil\.com$/) {
+        ThrowUserError('account_creation_restricted');
+    }
+
+    # Reject requests based on their IP address.
+    if ($ip =~ /^192\.168\./) {
+        ThrowUserError('account_creation_restricted');
     }
 }
 

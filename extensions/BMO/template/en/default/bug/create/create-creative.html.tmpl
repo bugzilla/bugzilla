@@ -56,7 +56,7 @@ function validateAndSubmit() {
   if (!isFilledOut('short_desc')) alert_text += 'Please enter a value for Request Title.\n';
   if (!isFilledOut('specs')) alert_text += 'Please enter a value for Creative Specs.\n';
   if (!isFilledOut('cta_design')) alert_text += 'Please enter a value for CTA Design.\n';
-  if (!isFilledOut('cf_due_date')) alert_text += 'Please enter a value for the creative due date.\n';
+  if (!isFilledOut('launch_date')) alert_text += 'Please enter a value for the expected launch date.\n';
   if (!isFilledOut('goal')) alert_text += 'Please select a value for Mozilla Goal.\n';
   if (YAHOO.util.Dom.get('goal').value == 'Other') {
     if (!isFilledOut('goal_other')) alert_text += 'Please select a value for Mozilla Goal Other.\n';
@@ -195,27 +195,12 @@ function toggleTypeOther(element) {
 </div>
 
 <div class="form_section">
-  <label for="cf_due_date" class="field_label required">Creative Due Date</label>
+  <label for="launch_date" class="field_label required">
+    Expected Launch Date
+  </label>
   <div class="field_desc">
-    Working backwards from your launch/go-live date, when do you need final assets?
-  </div>
-  <input name="cf_due_date" size="20" id="cf_due_date" value=""
-         onchange="updateCalendarFromField(this)">
-  <button type="button" class="calendar_button"
-          id="button_calendar_cf_due_date"
-          onclick="showCalendar('cf_due_date')">
-    <span>Calendar</span>
-  </button>
-  <div id="con_calendar_cf_due_date"></div>
-  <script type="text/javascript">
-    createCalendar('cf_due_date')
-  </script>
-</div>
-
-<div class="form_section">
-  <label for="launch_date" class="field_label">Launch Date</label>
-  <div class="field_desc">
-    When will your project go forth into the world?
+    When do you anticipate your project launching? We will determine a creative
+    due date with you based on this to ensure that it works for everyone.
   </div>
   <input name="launch_date" size="20" id="launch_date" value=""
          onchange="updateCalendarFromField(this)">

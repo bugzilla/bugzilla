@@ -26,10 +26,7 @@ Other:  [% IF cgi.param('type_other')  %][% cgi.param('type_other_text') %][% EL
 >>CTA and Design:
 [%+ cgi.param('cta_design') %]
 
->>Creative Due Date:
-[%+ cgi.param("cf_due_date") || 'Not provided' %]
-
->>Launch Date:
+>>Expected Launch Date:
 [%+ cgi.param("launch_date") || 'Not provided' %]
 
 >>Mozilla Goal:

@@ -6,6 +6,57 @@
   # defined by the Mozilla Public License, v. 2.0.
   #%]
 
-[% IF field.name == 'cf_rank' %]
-  [% field.hidden = 1 %]
-[% END %]
+[%
+  IF field.name == 'cf_rank';
+    field.hidden = 1;
+    RETURN;
+  END;
+%]
+
+[%
+  IF field.name == 'cf_crash_signature';
+    field.hidden = 1;
+    value = bug.cf_crash_signature;
+%]
+  [%# lifted from bug/field.html.tmpl %]
+  <tr>
+    [% PROCESS "bug/field-label.html.tmpl" %]
+    <td class="field_value" id="field_container_[% field.name FILTER html %]" colspan="2">
+      <div id="[% field.name FILTER html %]_edit_container" class="bz_default_hidden">
+        <div>
+          (<a href="#" id="[% field.name FILTER html %]_edit_action">edit</a>)
+        </div>
+        [% IF split_cf_crash_signature.size %]
+          [% FOREACH sig = split_cf_crash_signature %]
+            [% IF sig.match('^\[\@\s*') && sig.match('\s*\]$') %]
+              [% sig = sig.replace('(^\[\@\s*|\s*\]$)', '') %]
+              <a href="https://crash-stats.mozilla.com/report/list?signature=[% sig FILTER uri %]"
+               target="_blank">[@ [% sig FILTER html %] ]</a><br>
+            [% ELSE %]
+              [% sig FILTER html %]<br>
+            [% END %]
+          [% END %]
+        [% ELSIF value %]
+          <pre class="field_textarea_readonly">[% value FILTER html %]</pre>
+        [% END %]
+      </div>
+      <div id="[% field.name FILTER html %]_input">
+        [% INCLUDE global/textarea.html.tmpl
+            id = field.name name = field.name minrows = 4 maxrows = 8
+            cols = 60 defaultcontent = value %]
+      </div>
+      <script type="text/javascript">
+        hideEditableField('[% field.name FILTER js %]_edit_container',
+                          '[% field.name FILTER js %]_input',
+                          '[% field.name FILTER js %]_edit_action',
+                          '[% field.name FILTER js %]',
+                          '[% value FILTER js %]',
+                          '',
+                          true);
+      </script>
+    </td>
+  </tr>
+[%
+    RETURN;
+  END;
+%]

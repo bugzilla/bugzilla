@@ -45,9 +45,10 @@ use Email::MIME::ContentType qw(parse_content_type);
 use Encode qw(find_encoding encode_utf8);
 use File::MimeInfo::Magic;
 use List::MoreUtils qw(natatime);
-use Scalar::Util qw(blessed);
 use List::Util qw(first);
+use Scalar::Util qw(blessed);
 use Sys::Syslog qw(:DEFAULT setlogsock);
+use Text::Balanced qw( extract_bracketed extract_multiple );
 
 use Bugzilla::Extension::BMO::Constants;
 use Bugzilla::Extension::BMO::FakeBug;
@@ -129,6 +130,9 @@ sub template_before_process {
             my $versions = Bugzilla::Product->new({ name => 'Core' })->versions;
             $vars->{'versions'} = [ reverse @$versions ];
         }
+    }
+    elsif ($file eq 'bug/edit.html.tmpl') {
+        $vars->{split_cf_crash_signature} = $self->_split_crash_signature($vars);
     }
 
 
@@ -1858,6 +1862,16 @@ sub bug_comments {
             }
         }
     }
+}
+
+sub _split_crash_signature {
+    my ($self, $vars) = @_;
+    my $bug = $vars->{bug} // return;
+    my $crash_signature = $bug->cf_crash_signature // return;
+    return [
+        grep { /\S/ }
+        extract_multiple($crash_signature, [ sub { extract_bracketed($_[0], '[]') } ])
+    ];
 }
 
 __PACKAGE__->NAME;

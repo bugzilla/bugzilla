@@ -135,6 +135,11 @@
               "type": "file",
               "path": "/var/log/httpd/error_log",
               "expires": "2016-02-17T17:33:38.806Z"
+            },
+            "public/selenium_log": {
+              "type": "file",
+              "path": "/selenium.log",
+              "expires": "2016-02-17T17:33:38.806Z"
             }
           }
         },
@@ -210,6 +215,11 @@
             "public/httpd_error_log": {
               "type": "file",
               "path": "/var/log/httpd/error_log",
+              "expires": "2016-02-17T17:33:38.806Z"
+            },
+            "public/selenium_log": {
+              "type": "file",
+              "path": "/selenium.log",
               "expires": "2016-02-17T17:33:38.806Z"
             }
           }

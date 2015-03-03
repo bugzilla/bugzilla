@@ -60,6 +60,7 @@ use constant CONFIG => {
         qr/Lost connection to MySQL server during query/,
         qr/Call me again when you have some data to chart/,
         qr/relative paths are not allowed/,
+        qr/Illegal mix of collations for operation/,
     ],
 
     # (ab)use the logger to classify error/warning types

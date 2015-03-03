@@ -59,5 +59,12 @@
       </strong> - TheSchwartz queue
     </li>
   [% END %]
+  [% IF user.in_group('hr') %]
+    <li>
+      <strong>
+        <a href="[% urlbase FILTER none %]page.cgi?id=recruiting_dashboard.html">Recruiting Dashboard</a>
+      </strong> - Dashboard for open requested requisitions.
+    </li>
+  [% END %]
 </ul>
 

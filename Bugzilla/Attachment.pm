@@ -732,9 +732,18 @@ sub validate_can_edit {
     my $user = Bugzilla->user;
 
     # The submitter can edit their attachments.
-    return ($self->attacher->id == $user->id
-            || ((!$self->isprivate || $user->is_insider)
-                 && $user->in_group('editbugs', $self->bug->product_id))) ? 1 : 0;
+    return 1 if $self->attacher->id == $user->id;
+
+    # Private attachments
+    return 0 if $self->isprivate && !$user->is_insider;
+
+    # BMO: if you can edit the bug, then you can also edit any of its attachments
+    return 1 if $self->bug->user->{canedit};
+
+    # If you are in editbugs for this product
+    return 1 if $user->in_group('editbugs', $self->bug->product_id);
+
+    return 0;
 }
 
 =item C<validate_obsolete($bug, $attach_ids)>

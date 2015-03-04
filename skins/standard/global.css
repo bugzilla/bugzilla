@@ -325,7 +325,6 @@ div#docslinks {
     white-space: pre;
     overflow: auto;
     display: block;
-    margin-bottom: -1em;
 }
 
 .bz_comment_user, .bz_comment_time, .bz_comment_number, 

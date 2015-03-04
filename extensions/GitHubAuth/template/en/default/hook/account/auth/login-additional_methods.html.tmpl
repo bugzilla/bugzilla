@@ -1,0 +1,18 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% IF Param('user_info_class').split(',').contains('GitHubAuth') %]
+  <p>
+    <a href="[% github_auth.login FILTER html %]">
+      <img src="extensions/GitHubAuth/web/images/github_sign_in.png"
+           alt="Sign in with GitHub"
+           title="Sign in with GitHub"
+           width="185" height="25">
+    </a>
+  </p>
+[% END %]

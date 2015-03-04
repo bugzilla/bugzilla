@@ -1,0 +1,26 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% IF Param('user_info_class').split(',').contains('GitHubAuth') %]
+  <script type="text/javascript">
+   YAHOO.util.Event.addListener('login_link[% qs_suffix FILTER js %]','click', function () {
+     var login_link = YAHOO.util.Dom.get('github_mini_login[% qs_suffix FILTER js %]');
+     YAHOO.util.Dom.removeClass(login_link, 'bz_default_hidden');
+   });
+   YAHOO.util.Event.addListener('hide_mini_login[% qs_suffix FILTER js %]','click', function () {
+     var login_link = YAHOO.util.Dom.get('github_mini_login[% qs_suffix FILTER js %]');
+     YAHOO.util.Dom.addClass(login_link, 'bz_default_hidden');
+   });
+  </script>
+  <span id="github_mini_login[% qs_suffix FILTER html %]" class="bz_default_hidden">
+    <a href="[% github_auth.login FILTER html %]">
+      <img src="extensions/GitHubAuth/web/images/sign_in.png" height="22" width="75" align="absmiddle"
+           alt="Sign in with GitHub"
+           title="Sign in with GitHub"></a> or
+  </span>
+[% END %]

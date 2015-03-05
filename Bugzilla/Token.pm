@@ -432,6 +432,9 @@ sub _create_token {
     trick_taint($tokentype);
     trick_taint($eventdata);
 
+    my $is_shadow = Bugzilla->is_shadow_db;
+    $dbh = Bugzilla->switch_to_main_db() if $is_shadow;
+
     $dbh->bz_start_transaction();
 
     my $token = GenerateUniqueToken();
@@ -444,8 +447,10 @@ sub _create_token {
     if (wantarray) {
         my (undef, $token_ts, undef) = GetTokenData($token);
         $token_ts = str2time($token_ts);
+        Bugzilla->switch_to_shadow_db() if $is_shadow;
         return ($token, $token_ts);
     } else {
+        Bugzilla->switch_to_shadow_db() if $is_shadow;
         return $token;
     }
 }

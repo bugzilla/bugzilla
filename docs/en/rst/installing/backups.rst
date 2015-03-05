@@ -15,9 +15,11 @@ setup.
 MySQL
 -----
 
-:command:`mysqldump --opt -u $USERNAME -p $DATABASENAME > backup.sql`
+:command:`mysqldump --max-allowed-packet=32M -u $USERNAME -p $DATABASENAME > backup.sql`
 
-See the
+The value for :command:`max-allowed-packet` should be the value you've set in
+your :ref:`MySQL configuration file <mysql>`, and should be larger than the
+largest attachment in your database. See the
 `mysqldump documentation <http://dev.mysql.com/doc/mysql/en/mysqldump.html>`_
 for more information on :file:`mysqldump`.
 

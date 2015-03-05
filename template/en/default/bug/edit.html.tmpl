@@ -187,6 +187,9 @@
 
   <table id="bz_big_form_parts" cellspacing="0" cellpadding="0"><tr>
   <td>
+    [%# BMO hook for adding MozReview table %]
+    [% Hook.process("after_bug_data") %]
+
     [% IF user.is_timetracker %]
       [% PROCESS section_timetracking %]
     [% END %]

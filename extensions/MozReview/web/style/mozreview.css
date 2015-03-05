@@ -1,0 +1,54 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this file,
+ * You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * This Source Code Form is "Incompatible With Secondary Licenses", as
+ * defined by the Mozilla Public License, v. 2.0. */
+
+.mozreview-table {
+    background: #fff;
+    border: none;
+    border-collapse: collapse;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.2);
+    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
+}
+
+.mozreview-table th {
+    text-align: left;
+    padding: 4px;
+}
+
+.mozreview-table td {
+    padding: 4px;
+}
+
+.mozreview-table thead, .mozreview-table tfoot {
+    background-color: #eee;
+    color: #404040;
+}
+
+.mozreview-requests {
+    background: #fff;
+    border: none;
+    border-collapse: collapse;
+}
+
+.mozreview-requests th {
+    padding: 2px;
+}
+
+.mozreview-requests td {
+    padding: 2px;
+}
+
+.mozreview-requests .mozreview-summary {
+    text-align: left;
+}
+
+.mozreview-requests .mozreview-open-issues {
+    text-align: center;
+}
+
+.mozreview-child-request-summary {
+    text-indent: 1em;
+}

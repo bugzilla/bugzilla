@@ -11,6 +11,7 @@
 
 [% PROCESS global/header.html.tmpl
   title="Request Queue"
+  generate_api_token = 1
   onload="var f = document.request_form; selectProduct(f.product, f.component, null, null, 'Any');"
   javascript_urls=["js/productform.js", "js/field.js"]
   style_urls = ['skins/standard/buglist.css']

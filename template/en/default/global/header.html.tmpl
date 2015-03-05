@@ -20,6 +20,7 @@
   # style_urls: list. List of URLs to CSS style sheets.
   # message: string. A message to display to the user. May contain HTML.
   # atomlink: Atom link URL, May contain HTML
+  # generate_api_token: generate a token which can be used to make authenticated webservice calls
   #%]
 
 [% IF message %]
@@ -37,6 +38,7 @@
   no_yui = 0
   jquery = []
   jquery_css = []
+  generate_api_token = 0
 %]
 
 [% IF NOT no_yui %]
@@ -206,7 +208,7 @@
                 version_required:
                     "You must select a Version for this [% terms.bug %]."
             }
-            [% IF javascript_urls.containsany(['js/bug.js', 'js/field.js', 'js/comment-tagging.js']) %]
+            [% IF generate_api_token %]
               , api_token: '[% get_api_token FILTER js FILTER html %]'
             [% END %]
         };

@@ -23,6 +23,7 @@
   [% title = title _ "($filtered_alias) " %]
 [% END %]
 [% title = title _ filtered_desc %]
+[% generate_api_token = 1 %]
 [% yui = ['autocomplete', 'calendar'] %]
 [% yui.push('container') IF user.can_tag_comments %]
 [% javascript_urls = [ "js/util.js", "js/field.js", "js/comments.js" ] %]

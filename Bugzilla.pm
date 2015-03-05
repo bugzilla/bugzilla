@@ -537,6 +537,11 @@ sub switch_to_main_db {
     return $class->dbh_main;
 }
 
+sub is_shadow_db {
+    my $class = shift;
+    return $class->request_cache->{dbh} != $class->dbh_main;
+}
+
 sub fields {
     my ($class, $criteria) = @_;
     $criteria ||= {};
@@ -941,6 +946,12 @@ Switch from using the main database to using the shadow database.
 =item C<switch_to_main_db>
 
 Change the database object to refer to the main database.
+
+=item C<is_shadow_db>
+
+Returns true if the currently active database is the shadow database.
+Returns false if a the currently active database is the man database, or if a
+shadow database is not configured or enabled.
 
 =item C<params>
 

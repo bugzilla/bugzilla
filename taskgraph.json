@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "name": "BMO Task Graph",
+    "description": "A suite of tests to check the quality of the BMO codebase.",
+    "owner": "dlawrence@mozilla.com",
+    "source": "https://raw.githubusercontent.com/mozilla/webtools-bmo-bugzilla/master/taskgraph.json"
+  },
+  "tasks": [
+    {
+      "reruns": 3,
+      "maxRunTime": 3000,
+      "task": {
+        "metadata": {
+          "name": "Basic Sanity Tests"
+        },
+        "provisionerId": "aws-provisioner",
+        "workerType": "gaia",
+        "payload": {
+          "image": "dklawren/docker-bugzilla:bmo",
+          "command": ["/runtests.sh"],
+          "env": {
+            "TEST_SUITE": "sanity"
+          },
+          "artifacts": {
+            "public/runtests_log": {
+              "type": "file",
+              "path": "/runtests.log",
+              "expires": "2016-02-17T17:33:38.806Z"
+            }
+          }
+        },
+        "extra": {
+          "treeherder": {
+            "machine": {
+              "platform": "master"
+            },
+            "symbol": "San"
+          }
+        }
+      }
+    }
+  ]
+}

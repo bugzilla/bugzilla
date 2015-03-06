@@ -22,25 +22,33 @@ sub template_before_process {
     my $vars = $args->{'vars'};
 
     return unless (($file eq 'bug/show-header.html.tmpl' ||
-                    $file eq 'bug/edit.html.tmpl') &&
+                    $file eq 'bug/edit.html.tmpl' ||
+                    $file eq 'attachment/create.html.tmpl') &&
                    Bugzilla->params->{mozreview_base_url});
 
     my $bug = exists $vars->{'bugs'} ? $vars->{'bugs'}[0] : $vars->{'bug'};
 
     if ($bug) {
-        my @rrids;
-        my $attachments = Bugzilla::Attachment->get_attachments_by_bug($bug);
-
-        foreach my $attachment (@$attachments) {
-            if ($attachment->contenttype eq 'text/x-review-board-request' &&
-                !$attachment->isobsolete) {
-                push @rrids, ($attachment->data =~ m#/r/(\d+)/?$#);
+        if ($file eq 'attachment/create.html.tmpl') {
+            if ($bug->product eq 'Core' || $bug->product eq 'Firefox' ||
+                $bug->product eq 'Firefox for Android') {
+                $vars->{'mozreview_enabled'} = 1;
             }
-        }
+        } else {
+            my @rrids;
+            my $attachments = Bugzilla::Attachment->get_attachments_by_bug($bug);
 
-        if (scalar @rrids) {
-            $vars->{'mozreview'} = 1;
-            $vars->{'review_request_ids'} = \@rrids;
+            foreach my $attachment (@$attachments) {
+                if ($attachment->contenttype eq 'text/x-review-board-request'
+                    && !$attachment->isobsolete) {
+                    push @rrids, ($attachment->data =~ m#/r/(\d+)/?$#);
+                }
+            }
+
+            if (scalar @rrids) {
+                $vars->{'mozreview'} = 1;
+                $vars->{'review_request_ids'} = \@rrids;
+            }
         }
     }
 }

@@ -45,6 +45,9 @@ TUI_hide_default('attachment_text_field');
 -->
 </script>
 
+[%# BMO hook for displaying MozReview message %]
+[% Hook.process('before_form') %]
+
 <form name="entryform" method="post" action="attachment.cgi"
       enctype="multipart/form-data"
       onsubmit="return validateAttachmentForm(this)">

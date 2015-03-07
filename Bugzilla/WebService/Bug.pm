@@ -3611,7 +3611,7 @@ C<boolean> Set to true if you specifically want a new flag to be created.
 
 =item B<Returns>
 
-A C<hash> with a single field, "attachment". This points to an array of hashes
+A C<hash> with a single field, "attachments". This points to an array of hashes
 with the following fields:
 
 =over

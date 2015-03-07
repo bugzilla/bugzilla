@@ -117,7 +117,6 @@ installed:
 * File-MimeInfo
 * IO-stringy
 * Cache-Memcached
-* Text-Markdown
 * File-Copy-Recursive
 * GraphViz
 

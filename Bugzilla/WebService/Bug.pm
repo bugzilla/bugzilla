@@ -3296,7 +3296,7 @@ Bugzilla B<4.4>.
 
 =item REST API call added in Bugzilla B<5.0>.
 
-=item C<is_markdown> option added in Bugzilla B<5.0>.
+=item C<is_markdown> option added in Bugzilla B<6.0>.
 
 =back
 
@@ -3488,7 +3488,7 @@ You set the "data" field to an empty string.
 
 =item REST API call added in Bugzilla B<5.0>.
 
-=item C<is_markdown> added in Bugzilla B<5.0>.
+=item C<is_markdown> added in Bugzilla B<6.0>.
 
 =back
 
@@ -3835,7 +3835,7 @@ code of 32000.
 
 =item REST API call added in Bugzilla B<5.0>.
 
-=item C<is_markdown> option added in Bugzilla B<5.0>.
+=item C<is_markdown> option added in Bugzilla B<6.0>.
 
 =back
 

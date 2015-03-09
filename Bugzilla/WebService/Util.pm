@@ -275,7 +275,7 @@ sub fix_credentials {
     # This allows callers to keep credentials out of GET request query-strings
     if ($cgi) {
         foreach my $field (keys %{ X_HEADERS() }) {
-            next if exists $params->{X_HEADERS->{$field}} || $cgi->http($field) eq '';
+            next if exists $params->{X_HEADERS->{$field}} || $cgi->http($field) // '' eq '';
             $params->{X_HEADERS->{$field}} = uri_unescape($cgi->http($field));
         }
     }

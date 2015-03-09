@@ -16,6 +16,7 @@ use Bugzilla::FlagType;
 use Bugzilla::Error;
 
 use Storable qw(dclone);
+use URI::Escape qw(uri_unescape);
 
 use parent qw(Exporter);
 
@@ -260,8 +261,25 @@ sub params_to_objects {
     return \@objects;
 }
 
+use constant X_HEADERS => {
+    X_BUGZILLA_LOGIN    => 'Bugzilla_login',
+    X_BUGZILLA_PASSWORD => 'Bugzilla_password',
+    X_BUGZILLA_API_KEY  => 'Bugzilla_api_key',
+    X_BUGZILLA_TOKEN    => 'Bugzilla_token',
+};
+
 sub fix_credentials {
-    my ($params) = @_;
+    my ($params, $cgi) = @_;
+
+    # Allow user to pass in authentication details in X-Headers
+    # This allows callers to keep credentials out of GET request query-strings
+    if ($cgi) {
+        foreach my $field (keys %{ X_HEADERS() }) {
+            next if exists $params->{X_HEADERS->{$field}} || $cgi->http($field) eq '';
+            $params->{X_HEADERS->{$field}} = uri_unescape($cgi->http($field));
+        }
+    }
+
     # Allow user to pass in login=foo&password=bar as a convenience
     # even if not calling GET /login. We also do not delete them as
     # GET /login requires "login" and "password".

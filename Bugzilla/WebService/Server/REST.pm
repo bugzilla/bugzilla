@@ -76,7 +76,7 @@ sub handle {
 
     my $params = $self->_retrieve_json_params;
 
-    fix_credentials($params);
+    fix_credentials($params, $self->cgi);
 
     # Fix includes/excludes for each call
     rest_include_exclude($params);

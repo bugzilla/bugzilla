@@ -379,7 +379,7 @@ sub _argument_type_check {
 
     # Update the params to allow for several convenience key/values
     # use for authentication
-    fix_credentials($params);
+    fix_credentials($params, $self->cgi);
 
     Bugzilla->input_params($params);
 

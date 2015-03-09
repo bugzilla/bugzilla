@@ -54,15 +54,25 @@ sub get_login_info {
 
         # If the call is for a web service, and an api token is provided, check
         # it is valid.
-        if (i_am_webservice() && Bugzilla->input_params->{Bugzilla_api_token}) {
-            my $api_token = Bugzilla->input_params->{Bugzilla_api_token};
-            my ($token_user_id, undef, undef, $token_type)
-                = Bugzilla::Token::GetTokenData($api_token);
-            if (!defined $token_type
-                || $token_type ne 'api_token'
-                || $user_id != $token_user_id)
+        if (i_am_webservice()) {
+            if ($login_cookie
+                && Bugzilla->usage_mode == USAGE_MODE_REST
+                && !exists Bugzilla->input_params->{Bugzilla_api_token})
             {
-                ThrowUserError('auth_invalid_token', { token => $api_token });
+                # REST requires an api-token when using cookie authentication
+                # fall back to a non-authenticated request
+                $login_cookie = '';
+
+            } elsif (Bugzilla->input_params->{Bugzilla_api_token}) {
+                my $api_token = Bugzilla->input_params->{Bugzilla_api_token};
+                my ($token_user_id, undef, undef, $token_type)
+                    = Bugzilla::Token::GetTokenData($api_token);
+                if (!defined $token_type
+                    || $token_type ne 'api_token'
+                    || $user_id != $token_user_id)
+                {
+                    ThrowUserError('auth_invalid_token', { token => $api_token });
+                }
             }
         }
     }

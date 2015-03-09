@@ -110,11 +110,17 @@ sub flag_activity {
         $match_criteria{type_id} = [map { $_->id } @$flag_types];
     }
 
-    for my $user_field (qw( requestee setter )) {
+    foreach my $user_field (qw( requestee setter )) {
         if (my $user_name = $params->{$user_field}) {
             my $user = Bugzilla::User->check({ name => $user_name, cache => 1, _error => 'invalid_username' });
 
             $match_criteria{ $user_field . "_id" } = $user->id;
+        }
+    }
+
+    foreach my $field (qw( bug_id status )) {
+        if (exists $params->{$field}) {
+           $match_criteria{$field} = $params->{$field};
         }
     }
 
@@ -397,6 +403,10 @@ Note that searching by C<flag_id> is not reliable because when flags are removed
 =item C<type_id> (int) - The flag type id of a change
 
 =item C<type_name> (string) - the flag type name of a change
+
+=item C<status> (string) - The flag's current status
+
+=item C<bug_id> (int) - The flag's bug id
 
 =back
 

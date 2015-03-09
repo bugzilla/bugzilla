@@ -25,6 +25,8 @@
     <li><a href="#code">Code</a></li>
     <li><a href="#strikethroughs">Strikethroughs</a></li>
     <li><a href="#links">Links</a></li>
+    <li><a href="#tables">Tables</a></li>
+    <li><a href="#definitions">Definitions</a></li>
   </ul>
 
 <h2 id="headers">Headers</h2>
@@ -261,5 +263,126 @@
       </code>
     </pre>
   </p>
+
+<h2 id="tables">Tables</h2>
+
+Tables can be defined using these special syntax:
+
+<pre><code>
+        |             |          Grouping           ||
+        First Header  | Second Header | Third Header |
+         ------------ | :-----------: | -----------: |
+        Content       |          *Long Cell*        ||
+        Content       |   **Cell**    |         Cell |
+
+        New section   |     More      |         Data |
+        And more      |     More      |     **Data** |
+</code></pre>
+
+<p>which gets converted into:</p>
+
+<div class="bz_comment_text">
+  <table style="margin-left: 5em">
+    <colgroup>
+      <col style="text-align:left;"/>
+      <col style="text-align:center;"/>
+      <col style="text-align:right;"/>
+    </colgroup>
+
+    <thead>
+      <tr>
+       <th style="text-align:left;"></th>
+       <th style="text-align:center;" colspan="2">Grouping</th>
+      </tr>
+      <tr>
+       <th style="text-align:left;">First Header</th>
+       <th style="text-align:center;">Second Header</th>
+       <th style="text-align:right;">Third Header</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+       <td style="text-align:left;">Content</td>
+       <td style="text-align:center;" colspan="2"><em>Long Cell</em></td>
+      </tr>
+      <tr>
+       <td style="text-align:left;">Content</td>
+       <td style="text-align:center;"><strong>Cell</strong></td>
+       <td style="text-align:right;">Cell</td>
+      </tr>
+    </tbody>
+    <tbody>
+      <tr>
+       <td style="text-align:left;">New section</td>
+       <td style="text-align:center;">More</td>
+       <td style="text-align:right;">Data</td>
+      </tr>
+      <tr>
+       <td style="text-align:left;">And more</td>
+       <td style="text-align:center;">More</td>
+       <td style="text-align:right;"><strong>Data</strong></td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<p>The table rules are:</p>
+
+<ul>
+  <li>There must be at least one <code>|</code> per line</li>
+  <li>The &#8220;separator&#8221; line between headers and table content must contain only <code>|</code>,<code>-</code>, <code>=</code>, <code>:</code>,<code>.</code>, <code>+</code>, or spaces</li>
+  <li>Cell content must be on one line only</li>
+  <li>Columns are separated by <code>|</code></li>
+  <li>The first line of the table, and the alignment/divider line, must start at
+    the beginning of the line</li>
+</ul>
+
+<p>Other notes:</p>
+
+<ul>
+  <li>It is optional whether you have <code>|</code> characters at the beginning and end of lines.</li>
+  <li>The &#8220;separator&#8221; line uses <code>----</code> or <code>====</code> to indicate the line between a header and cell. The length of the line doesn&#8217;t matter, but must have at least one character per cell.</li>
+  <li>To set alignment, you can use a colon to designate left or right alignment, or a colon at each end to designate center alignment, as above. If no colon is present, the default alignment of your system is selected (left in most cases). </li>
+  <li>To indicate that a cell should span multiple columns, then simply add additional pipes (<code>|</code>) at the end of the cell, as shown in the example. If the cell in question is at the end of the row, then of course that means that pipes are not optional at the end of that row&#8230;. The number of pipes equals the number of columns the cell should span.</li>
+  <li>You can use Markdown markup within the table cells.</li>
+  <li>Cells can be empty.</li>
+</ul>
+
+<h2 id="definitions">Definition Lists</h2>
+
+Definition lists uses this syntax:
+
+<pre><code>
+        Apple
+        :   Pomaceous fruit of plants of the genus Malus in
+            the family Rosaceae.
+        :   An american computer company.
+
+        Orange
+        :   The fruit of an evergreen tree of the genus Citrus.
+</code></pre>
+
+<p>becomes:</p>
+
+<div class="bz_comment_text">
+  <dl style="margin-left: 5em">
+    <dt>Apple</dt>
+    <dd>Pomaceous fruit of plants of the genus Malus in
+      the family Rosaceae.</dd>
+
+    <dd>An american computer company.</dd>
+
+    <dt>Orange</dt>
+    <dd>The fruit of an evergreen tree of the genus Citrus.</dd>
+  </dl>
+</div>
+
+<p>You can have more than one term per definition by placing each term on a
+  separate line. Each definition starts with a colon, and you can have more than
+  one definition per term. You may optionally have a blank line between the last
+  term and the first definition.</p>
+
+<p>Definitions may contain other block level elements, such as lists,
+  blockquotes, or other definition lists.</p>
 
 [% PROCESS global/footer.html.tmpl %]

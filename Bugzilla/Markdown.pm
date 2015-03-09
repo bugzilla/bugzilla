@@ -16,7 +16,7 @@ use Bugzilla::Template;
 
 use Digest::MD5 qw(md5_hex);
 
-use parent qw(Text::Markdown);
+use parent qw(Text::MultiMarkdown);
 
 @Bugzilla::Markdown::EXPORT = qw(new);
 
@@ -489,7 +489,7 @@ Bugzilla::Markdown - Generates HTML output from structured plain-text input.
 Bugzilla::Markdown implements a Markdown engine that produces
 an HTML-based output from a given plain-text input.
 
-The majority of the implementation is done by C<Text::Markdown>
+The majority of the implementation is done by C<Text::MultiMarkdown>
 CPAN module. It also applies the linkifications done in L<Bugzilla::Template>
 to the input resulting in an output which is a combination of both Markdown
 structures and those defined by Bugzilla itself.

@@ -336,6 +336,20 @@ pre.bz_comment_text, .uneditable_textarea, tbody.file pre {
     display: block;
 }
 
+.bz_comment_text table {
+    border-collapse:collapse;
+}
+
+.bz_comment_text table, .bz_comment_text th, .bz_comment_text td {
+    border: 1px solid #969696;
+    padding: 2px;
+}
+
+.bz_comment_text thead, .bz_comment_text tbody {
+     border-top: 2px solid black;
+     border-bottom: 2px solid black;
+}
+
 .bz_comment_user, .bz_comment_time, .bz_comment_number, 
 .bz_private_checkbox, .bz_comment_actions
 {

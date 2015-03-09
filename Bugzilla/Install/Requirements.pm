@@ -404,9 +404,9 @@ sub OPTIONAL_MODULES {
 
     # Markdown
     {
-        package => 'Text-Markdown',
-        module  => 'Text::Markdown',
-        version => '1.0.26',
+        package => 'Text-MultiMarkdown',
+        module  => 'Text::MultiMarkdown',
+        version => '1.000035',
         feature => ['markdown'],
     },
 

@@ -233,15 +233,12 @@ sub user_preferences {
         && $args->{save_changes};
 
     my $input = Bugzilla->input_params;
-    my $dbh = Bugzilla->dbh;
     my $settings = Bugzilla->user->settings;
 
-    $dbh->bz_start_transaction();
     my $value = $input->{block_needinfo} ? 'on' : 'off';
-    my $setting = Bugzilla::User::Setting->new('block_needinfo');
-    $setting->validate_value($value);
-    $settings->{'block_needinfo'}->set($value);
-    $dbh->bz_commit_transaction();
+    $settings->{block_needinfo}->validate_value($value);
+    $settings->{block_needinfo}->set($value);
+    clear_settings_cache(Bugzilla->user->id);
 }
 
 __PACKAGE__->NAME;

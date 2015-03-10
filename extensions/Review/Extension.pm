@@ -639,15 +639,12 @@ sub user_preferences {
         && $args->{save_changes};
 
     my $input = Bugzilla->input_params;
-    my $dbh = Bugzilla->dbh;
     my $settings = Bugzilla->user->settings;
 
-    $dbh->bz_start_transaction();
     my $value = $input->{block_reviews} ? 'on' : 'off';
-    my $setting = Bugzilla::User::Setting->new('block_reviews');
-    $setting->validate_value($value);
-    $settings->{'block_reviews'}->set($value);
-    $dbh->bz_commit_transaction();
+    $settings->{block_reviews}->validate_value($value);
+    $settings->{block_reviews}->set($value);
+    clear_settings_cache(Bugzilla->user->id);
 }
 
 sub page_before_template {

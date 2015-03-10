@@ -42,6 +42,7 @@ function remove_token() {
 
 [% PROCESS global/header.html.tmpl
   title = "Search for $terms.bugs"
+  generate_api_token = 1
   onload = "doOnSelectProduct(0);"
   javascript = js_data
   yui = [ 'autocomplete', 'calendar' ]

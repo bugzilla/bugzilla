@@ -45,6 +45,7 @@
 [% url_filtered_title = title FILTER uri %]
 [% PROCESS global/header.html.tmpl
   title = title
+  generate_api_token = dotweak
   style = style
   atomlink = "buglist.cgi?$urlquerypart&title=$url_filtered_title&ctype=atom" 
   yui = [ 'autocomplete', 'calendar' ]

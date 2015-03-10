@@ -31,6 +31,7 @@ var queryform = "reportform"
 
 [% PROCESS global/header.html.tmpl
   title = "Generate Graphical Report"
+  generate_api_token = 1
   onload = "doOnSelectProduct(0); chartTypeChanged()"
   yui = [ 'autocomplete', 'calendar' ]
   javascript = js_data

@@ -33,6 +33,7 @@
 [% filtered_product = product.name FILTER html %]
 [% PROCESS global/header.html.tmpl
   title = "Product Dashboard: $filtered_product"
+  generate_api_token = 1
   style_urls = [ "skins/standard/buglist.css",
                  "js/yui/assets/skins/sam/paginator.css",
                  "extensions/ProductDashboard/web/styles/productdashboard.css" ]

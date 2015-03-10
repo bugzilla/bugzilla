@@ -161,7 +161,10 @@ sub webservice_rest_response {
 
     # Add a Location header if a newly created resource
     # such as a bug or comment.
-    if ($rpc->bz_success_code == STATUS_CREATED && $$result->{ref}) {
+    if ($rpc->bz_success_code
+        && $rpc->bz_success_code == STATUS_CREATED
+        && $$result->{ref})
+    {
         $response->header("Location", $$result->{ref});
     }
 }

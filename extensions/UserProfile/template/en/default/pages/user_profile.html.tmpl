@@ -100,6 +100,18 @@
   </td>
 </tr>
 
+[% IF target.in_group("canconfirm") %]
+  <tr>
+    <th>Permissions</th>
+    <td colspan="2">
+      Can confirm [% terms.bugs %]
+      [% IF target.in_group("editbugs") ~%]
+        , can edit any [% terms.bug %]
+      [% END %]
+    </td>
+  </tr>
+[% END %]
+
 <tr>
   <td>&nbsp;</td>
 </tr>

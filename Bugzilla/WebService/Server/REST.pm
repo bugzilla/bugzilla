@@ -141,8 +141,18 @@ sub response {
         { rpc => $self, result => \$result, response => $response });
 
     # Access Control
+    my @allowed_headers = qw(
+        accept
+        content-type
+        origin
+        x-bugzilla-api-key
+        x-bugzilla-login
+        x-bugzilla-password
+        x-bugzilla-token
+        x-requested-with
+    );
     $response->header("Access-Control-Allow-Origin", "*");
-    $response->header("Access-Control-Allow-Headers", "origin, content-type, accept, x-requested-with");
+    $response->header("Access-Control-Allow-Headers", join(', ', @allowed_headers));
 
     # ETag support
     my $etag = $self->bz_etag;

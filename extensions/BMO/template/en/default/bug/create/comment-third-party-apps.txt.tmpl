@@ -1,0 +1,22 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% USE Bugzilla %]
+[% cgi = Bugzilla.cgi %]
+
+> Detailed description of the issue or enhancement request
+[%+ cgi.param('desc') %]
+
+> Is this issue reproducible?
+[%+ cgi.param('reproducible') %]
+
+> Device Information
+[%+ cgi.param('device_info') %]
+
+> Mozilla Reference Device
+[%+ cgi.param('reference_device') %]

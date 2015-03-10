@@ -78,6 +78,7 @@ RewriteRule ^form[\.:]comm[\.:]newsletter$ enter_bug.cgi?product=Marketing&forma
 RewriteRule ^form[\.:]screen[\.:]share[\.:]whitelist$ enter_bug.cgi?product=Firefox&format=screen-share-whitelist
 RewriteRule ^form[\.:]webops[\.\-:]request$ enter_bug.cgi?product=Infrastructure+\%26+Operations&format=webops-request
 RewriteRule ^form[\.:]data[\.\-:]compliance$ enter_bug.cgi?product=Data+Compliance&format=data-compliance
+RewriteRule ^form[\.:]third[\.\-:]party$ enter_bug.cgi?product=Marketing&format=third-party-apps
 RewriteRule ^rest/(.*)$ rest.cgi/$1 [NE]
 RewriteRule ^(?:latest|1\.2|1\.3)/(.*)$ extensions/BzAPI/bin/rest.cgi/$1 [NE]
 RewriteRule ^bzapi/(.*)$ extensions/BzAPI/bin/rest.cgi/$1 [NE]

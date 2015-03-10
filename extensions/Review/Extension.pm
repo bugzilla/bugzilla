@@ -20,7 +20,8 @@ use Bugzilla::Extension::Review::Util;
 use Bugzilla::Install::Filesystem;
 use Bugzilla::Search;
 use Bugzilla::User;
-use Bugzilla::Util qw(clean_text diff_arrays);
+use Bugzilla::User::Setting;
+use Bugzilla::Util qw(clean_text);
 
 use constant UNAVAILABLE_RE => qr/\b(?:unavailable|pto|away)\b/i;
 
@@ -40,14 +41,15 @@ BEGIN {
     *Bugzilla::Bug::is_mentor             = \&_bug_is_mentor;
     *Bugzilla::Bug::set_bug_mentors       = \&_bug_set_bug_mentors;
     *Bugzilla::User::review_count         = \&_user_review_count;
+    *Bugzilla::User::reviews_blocked      = \&_user_reviews_blocked;
 }
 
 #
 # monkey-patched methods
 #
 
-sub _product_reviewers         { _reviewers($_[0],      'product',   $_[1])   }
-sub _product_reviewers_objs    { _reviewers_objs($_[0], 'product',   $_[1])   }
+sub _product_reviewers         { _reviewers($_[0],      'product',   $_[1]) }
+sub _product_reviewers_objs    { _reviewers_objs($_[0], 'product',   $_[1]) }
 sub _component_reviewers       { _reviewers($_[0],      'component', $_[1]) }
 sub _component_reviewers_objs  { _reviewers_objs($_[0], 'component', $_[1]) }
 
@@ -71,8 +73,11 @@ sub _reviewers_objs {
         my %user_map = map { $_->id => $_ } @$users;
         my @reviewers = map { $user_map{$_} } @$user_ids;
         if (!$include_disabled) {
-            @reviewers = grep { $_->is_enabled
-                                && $_->name !~ UNAVAILABLE_RE } @reviewers;
+            @reviewers = grep {
+                            $_->is_enabled
+                            && $_->name !~ UNAVAILABLE_RE
+                            && !$_->reviews_blocked
+                        } @reviewers;
         }
         $object->{reviewers} = \@reviewers;
     }
@@ -96,12 +101,17 @@ sub _user_review_count {
     return $self->{review_count};
 }
 
+sub _user_reviews_blocked {
+    return $_[0]->settings->{block_reviews}->{value} eq 'on';
+}
+
 #
 # mentor
 #
 
 sub _bug_mentors {
-    my ($self) = @_;
+    my ($self, $options) = @_;
+    $options //= {};
     my $dbh = Bugzilla->dbh;
     if (!$self->{bug_mentors}) {
         my $mentor_ids = $dbh->selectcol_arrayref("
@@ -110,14 +120,20 @@ sub _bug_mentors {
             $self->id);
         $self->{bug_mentors} = [];
         foreach my $mentor_id (@$mentor_ids) {
-            push(@{ $self->{bug_mentors} },
-                 Bugzilla::User->new({ id => $mentor_id, cache => 1 }));
+            push(@{ $self->{bug_mentors} }, Bugzilla::User->new({ id => $mentor_id, cache => 1 }));
         }
         $self->{bug_mentors} = [
             sort { $a->login cmp $b->login } @{ $self->{bug_mentors} }
         ];
     }
-    return $self->{bug_mentors};
+    my @result = @{ $self->{bug_mentors} };
+    if ($options->{exclude_needinfo_blocked}) {
+        @result = grep { !$_->needinfo_blocked } @result;
+    }
+    if ($options->{exclude_review_blocked}) {
+        @result = grep { !$_->reviews_blocked } @result;
+    }
+    return \@result;
 }
 
 sub _bug_is_mentor {
@@ -322,6 +338,7 @@ sub object_end_of_create {
         });
     }
     elsif (_is_countable_flag($object) && $object->requestee_id && $object->status eq '?') {
+        _check_requestee($object);
         _adjust_request_count($object, +1);
     }
     if (_is_countable_flag($object)) {
@@ -373,6 +390,9 @@ sub object_end_of_update {
         if ($old_status ne '?' && $new_status eq '?') {
             # setting flag to ?
             _adjust_request_count($object, +1);
+            if ($object->requestee_id) {
+                _check_requestee($object);
+            }
         }
         elsif ($old_status eq '?' && $new_status ne '?') {
             # setting flag from ?
@@ -384,12 +404,14 @@ sub object_end_of_update {
         }
         elsif (!$old_object->requestee_id && $object->requestee_id) {
             # setting requestee
+            _check_requestee($object);
             _adjust_request_count($object, +1);
         }
         elsif ($old_object->requestee_id && $object->requestee_id
                && $old_object->requestee_id != $object->requestee_id)
         {
             # changing requestee
+            _check_requestee($object);
             _adjust_request_count($old_object, -1);
             _adjust_request_count($object, +1);
         }
@@ -427,6 +449,15 @@ sub _is_countable_flag {
     return unless $object->isa('Bugzilla::Flag');
     my $type_name = $object->type->name;
     return $type_name eq 'review' || $type_name eq 'feedback' || $type_name eq 'needinfo';
+}
+
+sub _check_requestee {
+    my ($flag) = @_;
+    return unless $flag->type->name eq 'review' || $flag->type->name eq 'feedback';
+    if ($flag->requestee->reviews_blocked) {
+        ThrowUserError('reviews_blocked',
+                       { user => $flag->requestee, flagtype => $flag->type->name });
+    }
 }
 
 sub _log_flag_state_activity {
@@ -599,6 +630,24 @@ sub webservice {
     my ($self,  $args) = @_;
     my $dispatch = $args->{dispatch};
     $dispatch->{Review} = "Bugzilla::Extension::Review::WebService";
+}
+
+sub user_preferences {
+    my ($self, $args) = @_;
+    return unless
+        $args->{current_tab} eq 'account'
+        && $args->{save_changes};
+
+    my $input = Bugzilla->input_params;
+    my $dbh = Bugzilla->dbh;
+    my $settings = Bugzilla->user->settings;
+
+    $dbh->bz_start_transaction();
+    my $value = $input->{block_reviews} ? 'on' : 'off';
+    my $setting = Bugzilla::User::Setting->new('block_reviews');
+    $setting->validate_value($value);
+    $settings->{'block_reviews'}->set($value);
+    $dbh->bz_commit_transaction();
 }
 
 sub page_before_template {
@@ -945,5 +994,9 @@ sub install_filesystem {
     };
 }
 
+sub install_before_final_checks {
+    my ($self, $args) = @_;
+    add_setting('block_reviews', ['on', 'off'], 'off');
+}
 
 __PACKAGE__->NAME;

@@ -24,83 +24,98 @@
   # new_login_name:    string. The user's new Bugzilla login whilst not confirmed. (optional)
   #%]
 
+[%# BMO - add hook for displaying user-profile link %]
+[% Hook.process('start') %]
+
 <table>
   <tr>
-    <td colspan="3">
-      Please enter your existing password to confirm account changes.
-    </td>
-  </tr>
-  <tr>
-    <th align="right">Password:</th>
-    <td>
-      <input type="hidden" name="old_login" value="[% user.login FILTER html %]">
-      <input type="password" name="old_password">
-    </td>
-  </tr>
-  <tr>
-    <td colspan="2"><hr></td>
-  </tr>
-  [% IF user.authorizer.can_change_password %]
-    <tr>
-      <th align="right">New password:</th>
-      <td>
-        <input type="password" name="new_password1">
-      </td>
-    </tr>
-
-    <tr>
-      <th align="right">Confirm new password:</th>
-      <td>
-        <input type="password" name="new_password2">
-      </td>
-    </tr>
-  [% END %]
-
-  <tr>
-    <th align="right">Your real name (optional, but encouraged):</th>
+    <th align="right">Your real name:</th>
     <td>
       <input size="35" name="realname" value="[% realname FILTER html %]">
+      <i>optional, but encouraged</i>
     </td>
   </tr>
 
+  [%# BMO - moved field hook from end of file to here to group with other account fields %]
+  [% Hook.process('field') %]
+
+  [% SET can_change = [] %]
+  [% IF user.authorizer.can_change_password %]
+    [% can_change.push('password') %]
+  [% END %]
   [% IF user.authorizer.can_change_email && Param('allowemailchange') %]
-    [% IF login_change_date %]
-      [% IF new_login_name %]
-        <tr>
-          <th align="right">Pending email address:</th>
-          <td>[% new_login_name FILTER html %]</td>
-        </tr>
-        <tr>
-          <th align="right">Change request expires:</th>
-          <td>[% login_change_date FILTER time %]</td>
-        </tr>
-      [% ELSE %]
-        <tr>
-          <th align="right">Confirmed email address:</th>
-          <td>[% user.login FILTER html %]</td>
-        </tr>
-        <tr>
-          <th align="right">Completion date:</th>
-          <td>[% login_change_date FILTER time %]</td>
-        </tr>
-      [% END %]
-    [% ELSE %]
+    [% can_change.push('email address') %]
+  [% END %]
+
+  [% IF can_change.size %]
+    <tr>
+      <td></td>
+      <td><hr></td>
+    </tr>
+    <tr>
+      <td colspan="3">
+        Your current password is required to
+        confirm [% can_change.join(' or ') FILTER html %]
+        changes.
+      </td>
+    </tr>
+    <tr>
+      <th align="right">Current password:</th>
+      <td>
+        <input type="hidden" name="old_login" value="[% user.login FILTER html %]">
+        <input type="password" name="old_password">
+      </td>
+    </tr>
+    [% IF user.authorizer.can_change_password %]
       <tr>
-        <th>
-          [% IF Param('emailsuffix') %]
-            New login:
-          [% ELSE %]
-            New email address:
-          [% END %]
-        </th>
+        <th align="right">New password:</th>
         <td>
-          <input size="35" id="new_login_name" name="new_login_name"
-                 [%- ' type="email"' UNLESS Param('emailsuffix') %]>
+          <input type="password" name="new_password1">
+        </td>
+      </tr>
+
+      <tr>
+        <th align="right">Confirm new password:</th>
+        <td>
+          <input type="password" name="new_password2">
         </td>
       </tr>
     [% END %]
-  [% END %]
 
-  [% Hook.process('field') %]
+    [% IF user.authorizer.can_change_email && Param('allowemailchange') %]
+      [% IF login_change_date %]
+        [% IF new_login_name %]
+          <tr>
+            <th align="right">Pending email address:</th>
+            <td>[% new_login_name FILTER html %]</td>
+          </tr>
+          <tr>
+            <th align="right">Change request expires:</th>
+            <td>[% login_change_date FILTER time %]</td>
+          </tr>
+        [% ELSE %]
+          <tr>
+            <th align="right">Confirmed email address:</th>
+            <td>[% user.login FILTER html %]</td>
+          </tr>
+          <tr>
+            <th align="right">Completion date:</th>
+            <td>[% login_change_date FILTER time %]</td>
+          </tr>
+        [% END %]
+      [% ELSE %]
+        <tr>
+          <th align="right">New email address:</th>
+          <td>
+            <input size="35" name="new_login_name">
+          </td>
+        </tr>
+      [% END %]
+    [% END %]
+    <tr>
+      <td></td>
+      <td><hr></td>
+    </tr>
+  [% END %]
 
 </table>

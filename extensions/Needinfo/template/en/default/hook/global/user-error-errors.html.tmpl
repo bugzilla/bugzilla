@@ -10,4 +10,8 @@
   [% title = 'Needinfo Illegal Change' %]
   Only the requestee or a user with the required permissions can clear a
   needinfo flag.
+[% ELSIF error == "needinfo_blocked" %]
+  [% title = "Needinfo Request Blocked" %]
+  [% user.identity FILTER html %] is not currently accepting "needinfo"
+  requests.
 [% END %]

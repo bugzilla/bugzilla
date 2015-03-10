@@ -1,0 +1,25 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+<tr>
+  [%# this section is shared by both the needinfo and review extensions %]
+  [%# only show the label once %]
+  [% IF request_blocked_header %]
+    <td></td>
+  [% ELSE %]
+    [% request_blocked_header = 1 %]
+    <th align="right" valign="top">Request blocking:</th>
+  [% END %]
+  <td>
+    <input type="checkbox" id="block_needinfo" name="block_needinfo" value="1"
+            [% " checked" IF user.settings.block_needinfo.value == "on" %]>
+    <label for="block_needinfo">
+      Block needinfo requests
+    </label>
+  </td>
+</tr>

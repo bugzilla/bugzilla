@@ -6,22 +6,24 @@
   # defined by the Mozilla Public License, v. 2.0.
   #%]
 
-[% needinfo_flagtype   = "" %]
-[% needinfo_flags      = [] %]
-
-[% FOREACH type = bug.flag_types %]
-  [% IF type.name == 'needinfo' %]
-    [% needinfo_flagtype = type %]
-    [% FOREACH flag = type.flags %]
-      [% IF flag.status == '?' %]
-        [% needinfo_flags.push(flag) %]
-      [% END %]
-    [% END %]
-    [% LAST IF needinfo_flagtype %]
-  [% END %]
-[% END %]
-
 [%
+  needinfo_flagtype   = "";
+  needinfo_flags      = [];
+
+  FOREACH type = bug.flag_types;
+    IF type.name == 'needinfo';
+      needinfo_flagtype = type;
+      FOREACH flag = type.flags;
+        IF flag.status == '?';
+          needinfo_flags.push(flag);
+        END;
+      END;
+      LAST IF needinfo_flagtype;
+    END;
+  END;
+
+  available_mentors = bug.mentors( exclude_needinfo_blocked => 1 );
+
   BLOCK needinfo_comment_div;
     match = needinfo_flags.last.creation_date.match('^(\d{4})\.(\d{2})\.(\d{2})(.+)$');
     date  = "$match.0-$match.1-$match.2$match.3";
@@ -131,9 +133,9 @@
                   identity = '[% bug.qa_contact.realname || bug.qa_contact.login FILTER html FILTER js %]';
                 } else if (role == 'user') {
                   identity = '[% user.realname || user.login FILTER html FILTER js %]';
-                [% FOREACH mentor = bug.mentors %]
+                [% FOREACH mentor = available_mentors %]
                   } else if (role == '[% mentor.login FILTER js %]') {
-                    identity = '[% mentor.realname || mentor.login FILTER html FILTER js +%] [%+ IF bug.mentors.size > 1 %](mentor)[% END %]';
+                    identity = '[% mentor.realname || mentor.login FILTER html FILTER js +%] [%+ IF available_mentors.size > 1 %](mentor)[% END %]';
                 [% END %]
                 }
                 YAHOO.util.Dom.get('needinfo_role_identity').innerHTML = identity;
@@ -167,15 +169,21 @@
           <label for="needinfo">Need more information from</label>
           <select name="needinfo_role" id="needinfo_role" onchange="needinfo_role_changed()">
             <option value="other">other</option>
-            <option value="reporter">reporter</option>
-            <option value="assigned_to">assignee</option>
-            [% IF Param('useqacontact') && bug.qa_contact.login != "" %]
+            [% IF NOT bug.reporter.needinfo_blocked %]
+              <option value="reporter">reporter</option>
+            [% END %]
+            [% IF NOT bug.assigned_to.needinfo_blocked %]
+              <option value="assigned_to">assignee</option>
+            [% END %]
+            [% IF Param('useqacontact') && bug.qa_contact.login != "" && !bug.qa_contact.needinfo_blocked %]
               <option value="qa_contact">qa contact</option>
             [% END %]
-            <option value="user">myself</option>
-            [% FOREACH mentor = bug.mentors %]
-              <option [% IF bug.mentors.size > 1 %]title="mentor"[% END %] value="[% mentor.login FILTER html %]">
-                [% bug.mentors.size == 1 ? "mentor" : mentor.login FILTER html %]
+            [% IF NOT user.needinfo_blocked %]
+              <option value="user">myself</option>
+            [% END %]
+            [% FOREACH mentor = available_mentors %]
+              <option [% IF available_mentors.size > 1 %]title="mentor"[% END %] value="[% mentor.login FILTER html %]">
+                [% available_mentors.size == 1 ? "mentor" : mentor.login FILTER html %]
               </option>
             [% END %]
           </select>

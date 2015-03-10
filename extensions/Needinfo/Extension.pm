@@ -14,8 +14,17 @@ use Bugzilla::Error;
 use Bugzilla::Flag;
 use Bugzilla::FlagType;
 use Bugzilla::User;
+use Bugzilla::User::Setting;
 
 our $VERSION = '0.01';
+
+BEGIN {
+    *Bugzilla::User::needinfo_blocked = \&_user_needinfo_blocked;
+}
+
+sub _user_needinfo_blocked {
+    return $_[0]->settings->{block_needinfo}->{value} eq 'on';
+}
 
 sub install_update_db {
     my ($self, $args) = @_;
@@ -45,6 +54,11 @@ sub install_update_db {
         inclusions       => [],
         exclusions       => ['0:0'],
     });
+}
+
+sub install_before_final_checks {
+    my ($self, $args) = @_;
+    add_setting('block_needinfo', ['on', 'off'], 'off');
 }
 
 # Clear the needinfo? flag if comment is being given by
@@ -142,6 +156,7 @@ sub bug_start_of_update {
             foreach my $requestee (keys %requestees) {
                 my $needinfo_flag = { type_id => $type->id, status => '?' };
                 if ($requestee ne 'anyone') {
+                    _check_requestee($requestee);
                     $needinfo_flag->{requestee} = $requestee;
                 }
                 push(@new_flags, $needinfo_flag);
@@ -166,6 +181,34 @@ sub bug_start_of_update {
     }
 }
 
+sub _check_requestee {
+    my ($requestee) = @_;
+    my $user = ref($requestee)
+        ? $requestee
+        : Bugzilla::User->new({ name => $requestee, cache => 1 });
+    if ($user->needinfo_blocked) {
+        ThrowUserError('needinfo_blocked', { user => $user });
+    }
+}
+
+sub object_end_of_create {
+    my ($self, $args) = @_;
+    my $object = $args->{object};
+    return unless $object->isa('Bugzilla::Flag')
+        && $object->type->name eq 'needinfo'
+        && $object->requestee;
+    _check_requestee($object->requestee);
+}
+
+sub object_end_of_update {
+    my ($self, $args) = @_;
+    my $object = $args->{object};
+    return unless $object->isa('Bugzilla::Flag')
+        && $object->type->name eq 'needinfo'
+        && $object->requestee;
+    _check_requestee($object->requestee);
+}
+
 sub object_before_delete {
     my ($self, $args) = @_;
     my $object = $args->{object};
@@ -181,6 +224,24 @@ sub object_before_delete {
     {
         ThrowUserError('needinfo_illegal_change');
     }
+}
+
+sub user_preferences {
+    my ($self, $args) = @_;
+    return unless
+        $args->{current_tab} eq 'account'
+        && $args->{save_changes};
+
+    my $input = Bugzilla->input_params;
+    my $dbh = Bugzilla->dbh;
+    my $settings = Bugzilla->user->settings;
+
+    $dbh->bz_start_transaction();
+    my $value = $input->{block_needinfo} ? 'on' : 'off';
+    my $setting = Bugzilla::User::Setting->new('block_needinfo');
+    $setting->validate_value($value);
+    $settings->{'block_needinfo'}->set($value);
+    $dbh->bz_commit_transaction();
 }
 
 __PACKAGE__->NAME;

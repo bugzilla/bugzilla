@@ -23,4 +23,9 @@
   [% title = "Parameters Required" %]
   You may not search flag state activity without any search terms.
 
+[% ELSIF error == "reviews_blocked" %]
+  [% title = "Request Blocked" %]
+  [% user.identity FILTER html %] is not currently accepting
+  '[% flagtype FILTER html %]' requests.
+
 [% END %]

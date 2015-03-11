@@ -316,9 +316,9 @@ The returned data format is the same as below.
 
 =item B<Params>
 
-Query by Bug:
-
 =over
+
+=item Query by Bug:
 
 =over
 
@@ -326,11 +326,7 @@ Query by Bug:
 
 =back
 
-=back
-
-Query by Product or Component:
-
-=over
+=item Query by Product or Component:
 
 =over
 

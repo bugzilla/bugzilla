@@ -145,11 +145,7 @@ You pass a field called C<names> that is a list of Bugzilla login names to find 
 
 =item B<Returns>
 
-=over
-
 A hash of Bugzilla login names. Each name points to an array of bug ids that the user has confirmed.
-
-=back
 
 =item B<Errors>
 
@@ -186,11 +182,7 @@ You pass a field called C<names> that is a list of Bugzilla login names to find 
 
 =item B<Returns>
 
-=over
-
 A hash of Bugzilla login names. Each name points to an array of bug ids that the user has verified.
-
-=back
 
 =item B<Errors>
 

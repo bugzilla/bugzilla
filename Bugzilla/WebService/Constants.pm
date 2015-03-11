@@ -33,6 +33,8 @@ our @EXPORT = qw(
     REST_CONTENT_TYPE_WHITELIST
 
     WS_DISPATCH
+
+    API_AUTH_HEADERS
 );
 
 # This maps the error names in global/*-error.html.tmpl to numbers.
@@ -311,6 +313,16 @@ sub WS_DISPATCH {
         %hook_dispatch
     };
     return $dispatch;
+};
+
+# Custom HTTP headers that can be used for API authentication rather than
+# passing as URL parameters. This is useful if you do not want sensitive
+# information to show up in webserver log files.
+use constant API_AUTH_HEADERS => {
+    X_BUGZILLA_LOGIN    => 'Bugzilla_login',
+    X_BUGZILLA_PASSWORD => 'Bugzilla_password',
+    X_BUGZILLA_API_KEY  => 'Bugzilla_api_key',
+    X_BUGZILLA_TOKEN    => 'Bugzilla_token',
 };
 
 1;

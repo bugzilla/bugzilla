@@ -14,6 +14,7 @@ use warnings;
 use Bugzilla::Flag;
 use Bugzilla::FlagType;
 use Bugzilla::Error;
+use Bugzilla::WebService::Constants;
 
 use Storable qw(dclone);
 use URI::Escape qw(uri_unescape);
@@ -261,22 +262,15 @@ sub params_to_objects {
     return \@objects;
 }
 
-use constant X_HEADERS => {
-    X_BUGZILLA_LOGIN    => 'Bugzilla_login',
-    X_BUGZILLA_PASSWORD => 'Bugzilla_password',
-    X_BUGZILLA_API_KEY  => 'Bugzilla_api_key',
-    X_BUGZILLA_TOKEN    => 'Bugzilla_token',
-};
-
 sub fix_credentials {
     my ($params, $cgi) = @_;
 
     # Allow user to pass in authentication details in X-Headers
     # This allows callers to keep credentials out of GET request query-strings
     if ($cgi) {
-        foreach my $field (keys %{ X_HEADERS() }) {
-            next if exists $params->{X_HEADERS->{$field}} || $cgi->http($field) // '' eq '';
-            $params->{X_HEADERS->{$field}} = uri_unescape($cgi->http($field));
+        foreach my $field (keys %{ API_AUTH_HEADERS() }) {
+            next if exists $params->{API_AUTH_HEADERS->{$field}} || ($cgi->http($field) // '') eq '';
+            $params->{API_AUTH_HEADERS->{$field}} = uri_unescape($cgi->http($field));
         }
     }
 

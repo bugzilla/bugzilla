@@ -135,7 +135,7 @@ sub response {
 
     # Access Control
     my @allowed_headers = qw(accept content-type origin x-requested-with);
-    foreach my $header (keys API_AUTH_HEADERS()) {
+    foreach my $header (keys %{ API_AUTH_HEADERS() }) {
         # We want to lowercase and replace _ with -
         my $translated_header = $header;
         $translated_header =~ tr/A-Z_/a-z\-/;

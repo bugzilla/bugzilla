@@ -48,7 +48,12 @@ use constant HT_DEFAULT_DENY => <<EOT;
     Deny from all
   </IfVersion>
   <IfVersion >= 2.4>
-    Require all denied
+    <IfModule mod_perl.c>
+      Deny from all
+    </IfModule>
+    <IfModule !mod_perl.c>
+      Require all denied
+    </IfModule>
   </IfVersion>
 </IfModule>
 <IfModule !mod_version.c>
@@ -344,7 +349,12 @@ EOT
       Allow from all
     </IfVersion>
     <IfVersion >= 2.4>
-      Require all granted
+      <IfModule mod_perl.c>
+        Allow from all
+      </IfModule>
+      <IfModule !mod_perl.c>
+        Require all granted
+      </IfModule>
     </IfVersion>
   </IfModule>
   <IfModule !mod_version.c>
@@ -358,7 +368,12 @@ EOT
     Deny from all
   </IfVersion>
   <IfVersion >= 2.4>
-    Require all denied
+    <IfModule mod_perl.c>
+      Deny from all
+    </IfModule>
+    <IfModule !mod_perl.c>
+      Require all denied
+    </IfModule>
   </IfVersion>
 </IfModule>
 <IfModule !mod_version.c>
@@ -378,8 +393,14 @@ EOT
       Deny from all
     </IfVersion>
     <IfVersion >= 2.4>
-      Require ip 192.20.225.0/24
-      Require all denied
+      <IfModule mod_perl.c>
+        Allow from 192.20.225.0/24
+        Deny from all
+      </IfModule>
+      <IfModule !mod_perl.c>
+        Require ip 192.20.225.0/24
+        Require all denied
+      </IfModule>
     </IfVersion>
   </IfModule>
   <IfModule !mod_version.c>
@@ -395,7 +416,12 @@ EOT
       Allow from all
     </IfVersion>
     <IfVersion >= 2.4>
-      Require all granted
+      <IfModule mod_perl.c>
+        Allow from all
+      </IfModule>
+      <IfModule !mod_perl.c>
+        Require all granted
+      </IfModule>
     </IfVersion>
   </IfModule>
   <IfModule !mod_version.c>
@@ -409,7 +435,12 @@ EOT
     Deny from all
   </IfVersion>
   <IfVersion >= 2.4>
-    Require all denied
+    <IfModule mod_perl.c>
+      Deny from all
+    </IfModule>
+    <IfModule !mod_perl.c>
+      Require all denied
+    </IfModule>
   </IfVersion>
 </IfModule>
 <IfModule !mod_version.c>

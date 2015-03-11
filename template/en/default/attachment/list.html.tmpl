@@ -122,7 +122,7 @@ function toggle_display(link) {
                 [% ELSE %]
                   [% flag.setter.nick FILTER html %]:
                 [% END %]
-                [%+ flag.type.name FILTER html FILTER no_break %][% flag.status %]
+                [%+ flag.type.name FILTER html %][% flag.status %]
                 [%+ IF flag.status == "?" && flag.requestee %]
                   [% IF user.id %]
                     (<span title="[% flag.requestee.identity FILTER html %]">[% flag.requestee.nick FILTER html %]</span>)

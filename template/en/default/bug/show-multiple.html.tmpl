@@ -263,7 +263,7 @@
                     [% ELSE %]
                       [% FOREACH flag = attachment.flags %]
                         [% flag.setter.nick FILTER html %]:
-                        [%+ flag.type.name FILTER html FILTER no_break %][% flag.status %]
+                        <span class="nowrap">[%+ flag.type.name FILTER html %][% flag.status %]</span>
                         [% IF flag.status == "?" && flag.requestee %]
                           ([% flag.requestee.nick FILTER html %])
                         [% END %][% ", " IF not loop.last() %]
@@ -352,7 +352,7 @@
           [% FOREACH type = bug.flag_types %]
             [% FOREACH flag = type.flags %]
                 [% flag.setter.nick FILTER html %]:
-                [%+ flag.type.name FILTER html FILTER no_break %][% flag.status %]
+                <span class="nowrap">[%+ flag.type.name FILTER html %][% flag.status %]</span>
                 [%+ IF flag.status == "?" && flag.requestee %]
                   ([% flag.requestee.nick FILTER html %])
                 [% END %]<br>

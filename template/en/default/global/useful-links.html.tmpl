@@ -46,7 +46,7 @@
             <a href="buglist.cgi?cmdtype=dorem&amp;remaction=run&amp;namedcmd=
                      [%- q.name FILTER uri %]&amp;sharer_id=[% q.user.id FILTER uri %]"
                class="shared" title="Shared by [% q.user.identity FILTER html %]">
-              [%- q.name FILTER html FILTER no_break %]</a>
+              [%- q.name FILTER html %]</a>
           </li>
         [% END %]
       </ul>

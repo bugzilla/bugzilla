@@ -80,7 +80,7 @@
       [% ELSE %]
         [% flag.setter.nick FILTER html %]:
       [% END %]
-      [%+ type.name FILTER html FILTER no_break %][% flag.status %]
+      <span class="nowrap">[%+ type.name FILTER html %][% flag.status %]</span>
       [% IF flag.requestee %]
         [% IF flag.requestee.name %]
           (<span title="[% flag.requestee.name FILTER html %]">[% flag.requestee.nick FILTER html %]</span>)
@@ -107,9 +107,9 @@
           [% addl_text FILTER html %]
         [% END %]
       </td>
-      <td>
+      <td class="nowrap">
         <label title="[% type.description FILTER html %]" for="[% fid FILTER html %]">
-          [%- type.name FILTER html FILTER no_break -%]</label>
+          [%- type.name FILTER html %]</label>
       </td>
       <td>
         <input type="hidden" id="[% fid FILTER html %]_dirty">

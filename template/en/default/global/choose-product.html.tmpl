@@ -45,10 +45,10 @@
 
   [% FOREACH p = c.products %]
     <tr>
-      <th class="right">
+      <th class="right nowrap">
         <a href="[% target %]?product=[% p.name FILTER uri -%]
               [%- IF previous_params %]&amp;[% previous_params FILTER none %][% END -%]">
-        [% p.name FILTER html FILTER no_break %]</a>:&nbsp;
+        [% p.name FILTER html %]</a>:
       </th>
 
       <td>[% p.description FILTER html_light %]</td>

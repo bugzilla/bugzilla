@@ -5,7 +5,12 @@
       Deny from all
     </IfVersion>
     <IfVersion >= 2.4>
-      Require all denied
+      <IfModule mod_perl.c>
+        Deny from all
+      </IfModule>
+      <IfModule !mod_perl.c>
+        Require all denied
+      </IfModule>
     </IfVersion>
   </IfModule>
   <IfModule !mod_version.c>

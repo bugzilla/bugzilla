@@ -20,12 +20,12 @@
 
 [% USE Bugzilla %]
 
-<p>
-  [% terms.Bugzilla %] needs a legitimate login and password to continue.
-</p>
+<h2 class="center">
+  [% terms.Bugzilla %] needs a legitimate login and password to continue
+</h2>
 
-<form name="login" action="[% urlbase FILTER html %][% target FILTER html %]" method="POST"
-[%- IF Bugzilla.cgi.param("data") %] enctype="multipart/form-data"[% END %]>
+<form id="login_form" name="login" action="[% urlbase FILTER html %][% target FILTER html %]"
+      method="POST" [% IF Bugzilla.cgi.param("data") %] enctype="multipart/form-data"[% END %]>
   <table>
     <tr>
       <th>
@@ -33,42 +33,52 @@
           [% IF Param('emailsuffix') %]
             Login:
           [% ELSE %]
-            Your Email Address:
+            Email&nbsp;Address:
           [% END %]
         </label>
       </th>
       <td>
-        <input size="35" id="Bugzilla_login" name="Bugzilla_login"
+        <input id="Bugzilla_login" name="Bugzilla_login"
                [%- ' type="email"' UNLESS Param('emailsuffix') %] autofocus required>
         [% Param('emailsuffix') FILTER html %]
       </td>
     </tr>
+
     <tr>
       <th><label for="Bugzilla_password">Password:</label></th>
       <td>
-        <input type="password" size="35" id="Bugzilla_password" name="Bugzilla_password" required>
+        <input type="password" id="Bugzilla_password" name="Bugzilla_password" required>
       </td>
     </tr>
 
     [% IF Param('rememberlogin') == 'defaulton' || 
           Param('rememberlogin') == 'defaultoff' %]
       <tr>
-        <th>&nbsp;</th>
-        <td>
+        <th>
           <input type="checkbox" id="Bugzilla_remember" name="Bugzilla_remember" value="on"
                  [%+ "checked" IF Param('rememberlogin') == "defaulton" %]>
-          <label for="Bugzilla_remember">Remember my Login</label>
+        </th>
+        <td>
+          <label for="Bugzilla_remember">Remember my login</label>
         </td>
       </tr>
     [% END %]
 
     <tr>
-      <th>&nbsp;</th>
-      <td>
+      <th>
         <input type="checkbox" id="Bugzilla_restrictlogin" name="Bugzilla_restrictlogin"
                checked="checked">
+      </th>
+      <td>
         <label for="Bugzilla_restrictlogin">Restrict this session to this IP address
         (using this option improves security)</label>
+      </td>
+    </tr>
+
+    <tr>
+      <th>&nbsp;</th>
+      <td>
+        <input type="submit" name="GoAheadAndLogIn" value="Log In" id="log_in">
       </td>
     </tr>
   </table>
@@ -78,49 +88,42 @@
 
   <input type="hidden" name="Bugzilla_login_token"
          value="[% get_login_request_token() FILTER html %]">
-  <input type="submit" name="GoAheadAndLogIn" value="Log in" id="log_in">
 
-  <p>
-    (Note: you should make sure cookies are enabled for this site. 
-    Otherwise, you will be required to log in frequently.)
-  </p>
-</form>
+  [% Hook.process('additional_methods') %]
 
-[% Hook.process('additional_methods') %]
+  <div class="links">
+    [% can_create_account = 0 %]
+    [% IF Param("createemailregexp") && user.authorizer.user_can_create_account %]
+      <span><a href="createaccount.cgi">Create a New Account</a></span>
+      [% can_create_account = 1 %]
+    [% END %]
 
-[%# Allow the user to create a new account, or request a token to change
-  # their password, assuming that our auth method allows that.
-  #%]
+    [% IF user.authorizer.can_change_password %]
+      [% "|" IF can_create_account %]
+      <span><a href="createaccount.cgi?request_new_password=1">Forgot Password</a></span>
+    [% END %]
+  </div>
 
-  [% IF Param("createemailregexp") && user.authorizer.user_can_create_account %]
-    <hr>
-
+  <hr>
+  <div class="info">
     <p>
-      If you don't have a [% terms.Bugzilla %] account, you can
-      <a href="createaccount.cgi">create a new account</a>.
-      [% IF Param("requirelogin") %]
-        A user account is required because this Bugzilla
-        installation is only accessible to authenticated users.
-      [% ELSIF target.match("_bug\.cgi$") %]
-        A user account is required to file a new [% terms.bug %] or to comment
-        into existing ones so that you can be contacted if more information is
-        needed.
-      [% END %]
+      Note: you should make sure cookies are enabled for this site. 
+      Otherwise, you will be required to log in frequently.
     </p>
-  [% END %]
 
-  [% IF user.authorizer.can_change_password %]
-    <hr>
-
-    <form id="forgot" method="get" action="token.cgi">
-      <input type="hidden" name="a" value="reqpw">
-      If you have an account, but have forgotten your password,
-      enter your login name below and submit a request
-      to change your password.<br>
-      <input size="35" name="loginname" required>
-      <input type="hidden" id="token" name="token" value="[% issue_hash_token(['reqpw']) FILTER html %]">
-      <input type="submit" id="request" value="Reset Password">
-    </form>
-  [% END %]
+    [% IF can_create_account %]
+      <p>
+        [% IF Param("requirelogin") %]
+          A user account is required because this Bugzilla
+          installation is only accessible to authenticated users.
+        [% ELSIF target.match("_bug\.cgi$") %]
+          A user account is required to file a new [% terms.bug %] or to comment
+          into existing ones so that you can be contacted if more information is
+          needed.
+        [% END %]
+      </p>
+    [% END %]
+  </div>
+</form>
 
 [% PROCESS global/footer.html.tmpl %]

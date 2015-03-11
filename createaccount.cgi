@@ -27,10 +27,15 @@ my $vars = { doc_section => 'using/creating-an-account.html' };
 
 print $cgi->header();
 
-$user->check_account_creation_enabled;
 my $login = $cgi->param('login');
+my $request_new_password = $cgi->param('request_new_password');
 
-if (defined($login)) {
+if ($request_new_password) {
+    $template->process('account/request-new-password.html.tmpl', $vars)
+      || ThrowTemplateError($template->error());
+}
+elsif (defined($login)) {
+    $user->check_account_creation_enabled;
     # Check the hash token to make sure this user actually submitted
     # the create account form.
     my $token = $cgi->param('token');
@@ -41,9 +46,9 @@ if (defined($login)) {
 
     $template->process("account/created.html.tmpl", $vars)
       || ThrowTemplateError($template->error());
-    exit;
 }
-
-# Show the standard "would you like to create an account?" form.
-$template->process("account/create.html.tmpl", $vars)
-  || ThrowTemplateError($template->error());
+else {
+    # Show the standard "would you like to create an account?" form.
+    $template->process('account/create.html.tmpl', $vars)
+      || ThrowTemplateError($template->error());
+}

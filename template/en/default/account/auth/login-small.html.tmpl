@@ -58,7 +58,7 @@
 </li>
 <li id="forgot_container[% qs_suffix %]">
   <span class="separator">| </span>
-  <a id="forgot_link[% qs_suffix %]" href="[% script_url FILTER html %]#forgot"
+  <a id="forgot_link[% qs_suffix %]" href="createaccount.cgi?request_new_password=1"
      onclick="return show_forgot_form('[% qs_suffix %]')">Forgot Password</a>
   <form action="token.cgi" method="post" id="forgot_form[% qs_suffix %]"
         class="mini_forgot bz_default_hidden">

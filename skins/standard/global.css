@@ -254,6 +254,23 @@
     }
 /* generic (end) */
 
+#login_form {
+    border: solid;
+    margin: 2em auto;
+    padding: 1em;
+    width: 35em;
+}
+
+#login_form #Bugzilla_login, #login_form #Bugzilla_password,
+#forgot_password #loginname {
+    width: 25em;
+}
+
+#login_form .links {
+    text-align: center;
+    padding: 1em;
+}
+
 /* Links that control whether or not something is visible. */
 a.controller {
     font-size: 115%;

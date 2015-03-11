@@ -406,7 +406,8 @@ sub OPTIONAL_MODULES {
     {
         package => 'Text-MultiMarkdown',
         module  => 'Text::MultiMarkdown',
-        version => '1.000035',
+        # 1.0.34 supports definition lists.
+        version => '1.000034',
         feature => ['markdown'],
     },
 

@@ -2037,7 +2037,8 @@ our %names_to_events = (
 # Note: the "+" signs before the constants suppress bareword quoting.
 sub wants_bug_mail {
     my $self = shift;
-    my ($bug, $relationship, $fieldDiffs, $comments, $dep_mail, $changer) = @_;
+    my ($bug, $relationship, $fieldDiffs, $comments, $dep_mail, $changer,
+        $minor_update) = @_;
 
     # Make a list of the events which have happened during this bug change,
     # from the point of view of this user.    
@@ -2114,6 +2115,10 @@ sub wants_bug_mail {
     
     if ($wants_mail && $bug->bug_status eq 'UNCONFIRMED') {
         $wants_mail &= $self->wants_mail([EVT_UNCONFIRMED], $relationship);
+    }
+
+    if ($wants_mail && $minor_update) {
+        $wants_mail &= $self->wants_mail([EVT_MINOR_UPDATE], $relationship);
     }
     
     return $wants_mail;

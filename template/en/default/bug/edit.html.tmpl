@@ -1240,6 +1240,13 @@
     <div class="knob-buttons">
       <input type="submit" value="Save Changes" 
              id="commit[% id FILTER css_class_quote %]">
+      [% IF Param('minor_update_group') && user.in_group(Param('minor_update_group')) %]
+        <br>
+        <label class="" for="minor_update">
+          This is a minor update (do not send email)
+        </label>
+        <input type="checkbox" name="minor_update" value="1">
+      [% END %]
     </div>
   [% END %]
 [% END %]

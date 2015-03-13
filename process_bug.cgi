@@ -373,7 +373,9 @@ else {
 ##############################
 # Do Actual Database Updates #
 ##############################
+my $req_minor_update = $cgi->param('minor_update') ? 1 : 0;
 foreach my $bug (@bug_objects) {
+    my $minor_update = $bug->has_unsent_changes ? 0 : $req_minor_update;
     my $changes = $bug->update();
 
     if ($changes->{'bug_status'}) {
@@ -386,7 +388,7 @@ foreach my $bug (@bug_objects) {
         }
     }
 
-    $bug->send_changes($changes, $vars);
+    $bug->send_changes($changes, $vars, $minor_update);
 }
 
 # Delete the session token used for the mass-change.

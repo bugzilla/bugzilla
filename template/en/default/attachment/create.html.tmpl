@@ -119,6 +119,17 @@ TUI_hide_default('attachment_text_field');
 
     [% Hook.process('form_before_submit') %]
 
+    [% IF Param('minor_update_group') && user.in_group(Param('minor_update_group')) %]
+      <tr>
+        <th>&nbsp;</th>
+        <td>
+          <input type="checkbox" name="minor_update" value="1">
+          <label class="" for="minor_update">
+            This is a minor update (do not send email)
+          </label>
+        </td>
+      </tr>
+    [% END %]
     <tr>
       <th>&nbsp;</th>
       <td><input type="submit" id="create" value="Submit"></td>

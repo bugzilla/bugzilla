@@ -395,6 +395,13 @@
 [%+ Hook.process('after_groups') %]
 
 <input type="submit" id="commit" value="Commit">
+[% IF Param('minor_update_group') && user.in_group(Param('minor_update_group')) %]
+  <br>
+  <input type="checkbox" name="minor_update" value="1">
+  <label for="minor_update">
+    This is a minor update (do not send email)
+  </label>
+[% END %]
 
 [%############################################################################%]
 [%# Select Menu Block                                                        #%]

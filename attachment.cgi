@@ -511,6 +511,9 @@ sub insert {
         @obsolete_attachments = Bugzilla::Attachment->validate_obsolete($bug, \@obsolete);
     }
 
+    my $minor_update = $cgi->param('minor_update') ? 1 : 0;
+    $minor_update = $bug->has_unsent_changes ? 0 : $minor_update;
+
     # Must be called before create() as it may alter $cgi->param('ispatch').
     my $content_type = Bugzilla::Attachment::get_content_type();
 
@@ -586,7 +589,8 @@ sub insert {
     $vars->{'contenttypemethod'} = $cgi->param('contenttypemethod');
 
     my $recipients = { 'changer' => $user, 'owner' => $owner };
-    $vars->{'sent_bugmail'} = Bugzilla::BugMail::Send($bugid, $recipients);
+    my $params = { 'minor_update' => $minor_update };
+    $vars->{'sent_bugmail'} = Bugzilla::BugMail::Send($bugid, $recipients, $params);
 
     print $cgi->header();
     # Generate and return the UI (HTML page) from the appropriate template.
@@ -677,6 +681,9 @@ sub update {
     my $token = $cgi->param('token');
     check_hash_token($token, [$attachment->id, $attachment->modification_time]);
 
+    my $minor_update = $cgi->param('minor_update') ? 1 : 0;
+    $minor_update = $bug->has_unsent_changes ? 0 : $minor_update;
+
     # If the user submitted a comment while editing the attachment,
     # add the comment to the bug. Do this after having validated isprivate!
     my $comment = $cgi->param('comment');
@@ -739,7 +746,8 @@ sub update {
     $vars->{'bugs'} = [$bug];
     $vars->{'header_done'} = 1;
     $vars->{'sent_bugmail'} = 
-        Bugzilla::BugMail::Send($bug->id, { 'changer' => $user });
+        Bugzilla::BugMail::Send($bug->id, { 'changer' => $user },
+            {'minor_update' => $minor_update });
 
     print $cgi->header();
 

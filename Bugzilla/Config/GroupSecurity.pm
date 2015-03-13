@@ -67,6 +67,14 @@ sub get_param_list {
   },
 
   {
+   name => 'minor_update_group',
+   type => 's',
+   choices => \&_get_all_group_names,
+   default => '',
+   checker => \&check_group
+  },
+
+  {
    name => 'debug_group',
    type => 's',
    choices => \&_get_all_group_names,

@@ -644,6 +644,7 @@ sub update {
 
     my @bugs = map { Bugzilla::Bug->check_for_edit($_) } @$ids;
 
+    my $minor_update = delete $params->{minor_update} ? 1 : 0;
     my %values = %$params;
     $values{other_bugs} = \@bugs;
 
@@ -677,14 +678,16 @@ sub update {
     }
 
     my %all_changes;
+    my %minor_updates;
     $dbh->bz_start_transaction();
     foreach my $bug (@bugs) {
+        $minor_updates{$bug->id} = $bug->has_unsent_changes ? 0 : $minor_update;
         $all_changes{$bug->id} = $bug->update();
     }
     $dbh->bz_commit_transaction();
 
     foreach my $bug (@bugs) {
-        $bug->send_changes($all_changes{$bug->id});
+        $bug->send_changes($all_changes{$bug->id}, undef, $minor_updates{$bug->id});
     }
 
     my %api_name = reverse %{ Bugzilla::Bug::FIELD_MAP() };
@@ -820,6 +823,7 @@ sub add_attachment {
         || ThrowCodeError('param_required', { param => 'data' });
 
     my @bugs = map { Bugzilla::Bug->check_for_edit($_) } @{ $params->{ids} };
+    my $minor_update = delete $params->{minor_update} ? 1 : 0;
 
     my @created;
     $dbh->bz_start_transaction();
@@ -863,10 +867,17 @@ sub add_attachment {
               extra_data  => $attachment->id });
         push(@created, $attachment);
     }
-    $_->bug->update($timestamp) foreach @created;
+    my %minor_updates;
+    foreach my $attachment (@created) {
+        my $bug = $attachment->bug;
+        $minor_updates{$bug->id} = $bug->has_unsent_changes ? 0 : $minor_update;
+        $bug->update($timestamp);
+    }
     $dbh->bz_commit_transaction();
 
-    $_->send_changes() foreach @bugs;
+    foreach my $bug (@bugs) {
+        $bug->send_changes(undef, undef, $minor_updates{$bug->id});
+    }
 
     my @created_ids = map { $_->id } @created;
 
@@ -882,6 +893,7 @@ sub update_attachment {
     my $ids = delete $params->{ids};
     defined $ids || ThrowCodeError('param_required', { param => 'ids' });
 
+    my $req_minor_update = delete $params->{minor_update} ? 1 : 0;
     # Some fields cannot be sent to set_all
     foreach my $key (qw(login password token)) {
         delete $params->{$key};
@@ -967,8 +979,9 @@ sub update_attachment {
 
     # Email users about the change
     foreach my $bug (values %bugs) {
+        my $minor_update = $bug->has_unsent_changes ? 0 : $req_minor_update;
         $bug->update();
-        $bug->send_changes();
+        $bug->send_changes(undef, undef, $minor_update);
     }
 
     # Return the information to the user
@@ -989,6 +1002,8 @@ sub add_comment {
         || ThrowCodeError('param_required', { param => 'comment' });
     
     my $bug = Bugzilla::Bug->check_for_edit($params->{id});
+    my $minor_update = delete $params->{minor_update} ? 1 : 0;
+    $minor_update = $bug->has_unsent_changes ? 0 : $minor_update;
 
     # Backwards-compatibility for versions before 3.6    
     if (defined $params->{private}) {
@@ -1007,7 +1022,8 @@ sub add_comment {
     my $new_comment_id = $bug->{added_comments}[0]->id;
 
     # Send mail.
-    Bugzilla::BugMail::Send($bug->bug_id, { changer => $user });
+    Bugzilla::BugMail::Send($bug->bug_id, { changer => $user },
+            { minor_update => $minor_update });
 
     return { id => $self->type('int', $new_comment_id) };
 }
@@ -1023,6 +1039,7 @@ sub update_see_also {
     my ($add, $remove) = @$params{qw(add remove)};
     ($add || $remove)
         or ThrowCodeError('params_required', { params => ['add', 'remove'] });
+    my $req_minor_update = delete $params->{minor_update} ? 1 : 0;
 
     my @bugs;
     foreach my $id (@{ $params->{ids} }) {
@@ -1038,6 +1055,7 @@ sub update_see_also {
     
     my %changes;
     foreach my $bug (@bugs) {
+        my $minor_update = $bug->has_unsent_changes ? 0 : $req_minor_update;
         my $change = $bug->update();
         if (my $see_also = $change->{see_also}) {
             $changes{$bug->id}->{see_also} = {
@@ -1050,7 +1068,8 @@ sub update_see_also {
             $changes{$bug->id}->{see_also} = { added => [], removed => [] };
         }
 
-        Bugzilla::BugMail::Send($bug->id, { changer => $user });
+        Bugzilla::BugMail::Send($bug->id, { changer => $user },
+                { minor_update => $minor_update });
     }
 
     return { changes => \%changes };
@@ -3414,6 +3433,12 @@ C<string> The login of the requestee if the flag type is requestable to a specif
 
 =back
 
+=item C<minor_update>
+
+C<boolean> If set to true, this is considered a minor update and no mail is sent
+to users who do not want minor update emails. If current user is not in the
+minor_update_group, this parameter is simply ignored.
+
 =back
 
 =item B<Returns>
@@ -3609,6 +3634,14 @@ C<boolean> Set to true if you specifically want a new flag to be created.
 
 =back
 
+=item C<minor_update>
+
+C<boolean> If set to true, this is considered a minor update and no mail is sent
+to users who do not want minor update emails. If current user is not in the
+minor_update_group, this parameter is simply ignored.
+
+=back
+
 =item B<Returns>
 
 A C<hash> with a single field, "attachments". This points to an array of hashes
@@ -3729,8 +3762,6 @@ You did not specify a value for the C<summary> argument.
 
 =back
 
-=back
-
 =head2 add_comment
 
 B<STABLE>
@@ -3771,6 +3802,9 @@ structures, otherwise it is a normal text.
 on the bug. If you are not in the time tracking group, this value will
 be ignored.
 
+=item C<minor_update> (boolean) - If set to true, this is considered a minor update
+and no mail is sent to users who do not want minor update emails. If current user
+is not in the minor_update_group, this parameter is simply ignored.
 
 =back
 
@@ -3871,6 +3905,12 @@ pulled from the URL path.
 
 Array of C<int>s or C<string>s. The ids or aliases of the bugs that
 you want to modify.
+
+=item C<minor_update>
+
+C<boolean> If set to true, this is considered a minor update and no mail is sent
+to users who do not want minor update emails. If current user is not in the
+minor_update_group, this parameter is simply ignored.
 
 =back
 
@@ -4441,6 +4481,12 @@ exact case, if you don't want to.
 If you specify a URL that is not in the See Also field of a particular bug,
 it will just be silently ignored. Invaild URLs are currently silently ignored,
 though this may change in some future version of Bugzilla.
+
+=item C<minor_update>
+
+C<boolean> If set to true, this is considered a minor update and no mail is sent
+to users who do not want minor update emails. If current user is not in the
+minor_update_group, this parameter is simply ignored.
 
 =back
 

@@ -1265,7 +1265,7 @@ sub remove_from_db {
 #####################################################################
 
 sub send_changes {
-    my ($self, $changes, $vars) = @_;
+    my ($self, $changes, $vars, $minor_update) = @_;
 
     my $user = Bugzilla->user;
 
@@ -1283,15 +1283,15 @@ sub send_changes {
         changer   => $user,
     );
 
-    _send_bugmail({ id => $self->id, type => 'bug', forced => \%forced }, 
-                  $vars);
+    _send_bugmail({ id => $self->id, type => 'bug', forced => \%forced,
+                    minor_update => $minor_update }, $vars);
 
     # If the bug was marked as a duplicate, we need to notify users on the
     # other bug of any changes to that bug.
     my $new_dup_id = $changes->{'dup_id'} ? $changes->{'dup_id'}->[1] : undef;
     if ($new_dup_id) {
         _send_bugmail({ forced => { changer => $user }, type => "dupe",
-                        id => $new_dup_id }, $vars);
+                        id => $new_dup_id, minor_update => $minor_update }, $vars);
     }
 
     # If there were changes in dependencies, we need to notify those
@@ -1306,7 +1306,8 @@ sub send_changes {
                            type     => 'dep',
                            dep_only => 1,
                            blocker  => $self,
-                           changes  => $changes };
+                           changes  => $changes,
+                           minor_update => $minor_update };
 
             foreach my $id (@{ $self->blocked }) {
                 $params->{id} = $id;
@@ -1329,13 +1330,13 @@ sub send_changes {
 
     foreach my $id (sort { $a <=> $b } (keys %changed_deps)) {
         _send_bugmail({ forced => { changer => $user }, type => "dep",
-                         id => $id }, $vars);
+                         id => $id, minor_update => $minor_update }, $vars);
     }
 
     # Sending emails for the referenced bugs.
     foreach my $ref_bug_id (uniq @{ $self->{see_also_changes} || [] }) {
         _send_bugmail({ forced => { changer => $user },
-                        id => $ref_bug_id }, $vars);
+                        id => $ref_bug_id, minor_update => $minor_update }, $vars);
     }
 }
 
@@ -4221,6 +4222,12 @@ sub get_activity {
     return(\@operations, $incomplete_data);
 }
 
+sub has_unsent_changes {
+    my $self = shift;
+    return 1 if !defined $self->lastdiffed;
+    return datetime_from($self->lastdiffed) < datetime_from($self->delta_ts) ? 1 : 0;
+}
+
 # Update the bugs_activity table to reflect changes made in bugs.
 sub LogActivityEntry {
     my ($bug_id, $field, $removed, $added, $user_id, $timestamp, $comment_id,
@@ -4624,6 +4631,10 @@ call L<update> to make the changes permanent.
 
 Creates or updates a L<Bugzilla::BugUserLastVisit> for this bug and the supplied
 $user, the timestamp given as $last_visit.
+
+=item C<has_unsent_changes()>
+
+Checks if this bug has changes for which bug mail has not been sent.
 
 =back
 

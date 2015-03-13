@@ -94,7 +94,7 @@ use Memoize;
     EVT_BUG_CREATED EVT_COMPONENT
 
     NEG_EVENTS
-    EVT_UNCONFIRMED EVT_CHANGED_BY_ME 
+    EVT_UNCONFIRMED EVT_CHANGED_BY_ME EVT_MINOR_UPDATE
         
     GLOBAL_EVENTS
     EVT_FLAG_REQUESTED EVT_REQUESTED_FLAG
@@ -384,8 +384,9 @@ use constant POS_EVENTS => EVT_OTHER, EVT_ADDED_REMOVED, EVT_COMMENT,
 
 use constant EVT_UNCONFIRMED        => 50;
 use constant EVT_CHANGED_BY_ME      => 51;
+use constant EVT_MINOR_UPDATE       => 52;
 
-use constant NEG_EVENTS => EVT_UNCONFIRMED, EVT_CHANGED_BY_ME;
+use constant NEG_EVENTS => EVT_UNCONFIRMED, EVT_CHANGED_BY_ME, EVT_MINOR_UPDATE;
 
 # These are the "global" flags, which aren't tied to a particular relationship.
 # and so use REL_ANY.

@@ -226,6 +226,9 @@ table#flags {
 
 .knob-buttons {
     float: right;
+    text-align: right;
+    font-size: small;
+    font-weight: normal;
 }
 
 .text_input, .bz_userfield, #keywords_container, #tag_container {

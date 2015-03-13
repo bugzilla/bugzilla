@@ -225,6 +225,9 @@ sub Send {
     my $date = $params->{dep_only} ? $end : $bug->delta_ts;
     $date = format_time($date, '%a, %d %b %Y %T %z', 'UTC');
 
+    my $minor_update = $changer->in_group(Bugzilla->params->{minor_update_group})
+                     && $params->{minor_update};
+
     foreach my $user_id (keys %recipients) {
         my %rels_which_want;
         my $user = $user_cache{$user_id} ||= new Bugzilla::User($user_id);
@@ -244,7 +247,8 @@ sub Send {
                                           $start ? \@diffs : [],
                                           $comments,
                                           $params->{dep_only},
-                                          $changer))
+                                          $changer,
+                                          $minor_update))
                 {
                     $rels_which_want{$relationship} = 
                         $recipients{$user_id}->{$relationship};

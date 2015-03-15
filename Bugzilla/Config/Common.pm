@@ -25,7 +25,7 @@ use parent qw(Exporter);
     qw(check_multi check_numeric check_regexp check_group
        check_sslbase check_priority check_severity check_platform
        check_opsys check_shadowdb check_urlbase check_user_verify_class
-       check_ip check_mail_delivery_method check_notification check_utf8
+       check_ip check_mail_delivery_method check_notification
        check_bug_status check_smtp_auth check_theschwartz_available
        check_maxattachmentsize check_email check_smtp_ssl
        check_comment_taggers_group check_smtp_server
@@ -111,18 +111,6 @@ sub check_ip {
     my @proxies = split(/[\s,]+/, $inbound_proxies);
     foreach my $proxy (@proxies) {
         validate_ip($proxy) || return "$proxy is not a valid IPv4 or IPv6 address";
-    }
-    return "";
-}
-
-sub check_utf8 {
-    my $utf8 = shift;
-    # You cannot turn off the UTF-8 parameter if you've already converted
-    # your tables to utf-8.
-    my $dbh = Bugzilla->dbh;
-    if ($dbh->isa('Bugzilla::DB::Mysql') && $dbh->bz_db_is_utf8 && !$utf8) {
-        return "You cannot disable UTF-8 support, because your MySQL database"
-               . " is encoded in UTF-8";
     }
     return "";
 }
@@ -489,8 +477,6 @@ valid group is provided.
 =item get_param_list
 
 =item check_maxattachmentsize
-
-=item check_utf8
 
 =item check_group
 

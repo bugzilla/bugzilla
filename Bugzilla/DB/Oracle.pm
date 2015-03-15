@@ -55,7 +55,7 @@ sub new {
     $dbname ||= Bugzilla->localconfig->{db_name};
 
     # Set the language enviroment
-    $ENV{'NLS_LANG'} = '.AL32UTF8' if Bugzilla->params->{'utf8'};
+    $ENV{'NLS_LANG'} = '.AL32UTF8';
 
     # construct the DSN from the parameters we got
     my $dsn = "dbi:Oracle:host=$host;sid=$dbname";
@@ -74,8 +74,7 @@ sub new {
     # Set the session's default date format to match MySQL
     $self->do("ALTER SESSION SET NLS_DATE_FORMAT='YYYY-MM-DD HH24:MI:SS'");
     $self->do("ALTER SESSION SET NLS_TIMESTAMP_FORMAT='YYYY-MM-DD HH24:MI:SS'");
-    $self->do("ALTER SESSION SET NLS_LENGTH_SEMANTICS='CHAR'") 
-        if Bugzilla->params->{'utf8'};
+    $self->do("ALTER SESSION SET NLS_LENGTH_SEMANTICS='CHAR'");
     # To allow case insensitive query.
     $self->do("ALTER SESSION SET NLS_COMP='ANSI'");
     $self->do("ALTER SESSION SET NLS_SORT='BINARY_AI'");

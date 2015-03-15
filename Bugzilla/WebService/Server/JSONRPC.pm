@@ -54,7 +54,7 @@ sub create_json_coder {
     # This may seem a little backwards, but what this really means is
     # "don't convert our utf8 into byte strings, just leave it as a
     # utf8 string."
-    $json->utf8(0) if Bugzilla->params->{'utf8'};
+    $json->utf8(0);
     return $json;
 }
 

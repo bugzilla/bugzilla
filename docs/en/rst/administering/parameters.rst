@@ -59,16 +59,6 @@ maintainer
     responsible for maintaining this Bugzilla installation.
     The address need not be that of a valid Bugzilla account.
 
-utf8
-    Use UTF-8 (Unicode) encoding for all text in Bugzilla. Installations where
-    this parameter is set to :paramval:`off` should set it to :paramval:`on` only
-    after the data has been converted from existing legacy character
-    encodings to UTF-8, using the
-    :file:`contrib/recode.pl` script.
-
-    .. note:: If you turn this parameter from :paramval:`off` to :paramval:`on`,
-              you must re-run :file:`checksetup.pl` immediately afterward.
-
 shutdownhtml
     If there is any text in this field, this Bugzilla installation will
     be completely disabled and this text will appear instead of all

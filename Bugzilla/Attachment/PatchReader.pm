@@ -73,12 +73,10 @@ sub process_diff {
         $vars->{'other_patches'} = \@other_patches;
 
         setup_template_patch_reader($reader, $vars);
-        # The patch is going to be displayed in a HTML page and if the utf8
-        # param is enabled, we have to encode attachment data as utf8.
-        if (Bugzilla->params->{'utf8'}) {
-            $attachment->data; # Populate ->{data}
-            utf8::decode($attachment->{data});
-        }
+        # The patch is going to be displayed in a HTML page, so we have
+        # to encode attachment data as utf8.
+        $attachment->data; # Populate ->{data}
+        utf8::decode($attachment->{data});
         $reader->iterate_string('Attachment ' . $attachment->id, $attachment->data);
     }
 }
@@ -91,9 +89,8 @@ sub process_interdiff {
 
     require PatchReader::Raw;
 
-    # Encode attachment data as utf8 if it's going to be displayed in a HTML
-    # page using the UTF-8 encoding.
-    if ($format ne 'raw' && Bugzilla->params->{'utf8'}) {
+    # Encode attachment data as utf8 if it's going to be displayed in a HTML page.
+    if ($format ne 'raw') {
         $old_attachment->data; # Populate ->{data}
         utf8::decode($old_attachment->{data});
         $new_attachment->data; # Populate ->{data}
@@ -130,7 +127,7 @@ sub process_interdiff {
         $use_select = 1;
     }
 
-    if ($format ne 'raw' && Bugzilla->params->{'utf8'}) {
+    if ($format ne 'raw') {
         binmode $interdiff_stdout, ':utf8';
         binmode $interdiff_stderr, ':utf8';
     } else {
@@ -230,7 +227,7 @@ sub get_unified_diff {
 
     # Prints out to temporary file.
     my ($fh, $filename) = File::Temp::tempfile();
-    if ($format ne 'raw' && Bugzilla->params->{'utf8'}) {
+    if ($format ne 'raw') {
         # The HTML page will be displayed with the UTF-8 encoding.
         binmode $fh, ':utf8';
     }

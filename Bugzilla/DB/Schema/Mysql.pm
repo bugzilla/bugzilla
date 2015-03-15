@@ -148,12 +148,7 @@ sub _get_create_index_ddl {
 
 sub get_create_database_sql {
     my ($self, $name) = @_;
-    # We only create as utf8 if we have no params (meaning we're doing
-    # a new installation) or if the utf8 param is on.
-    my $create_utf8 = Bugzilla->params->{'utf8'} 
-                      || !defined Bugzilla->params->{'utf8'};
-    my $charset = $create_utf8 ? "CHARACTER SET utf8" : '';
-    return ("CREATE DATABASE `$name` $charset");
+    return ("CREATE DATABASE `$name` CHARACTER SET utf8");
 }
 
 # MySQL has a simpler ALTER TABLE syntax than ANSI.

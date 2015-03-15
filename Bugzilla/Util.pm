@@ -73,36 +73,31 @@ sub html_quote {
     # Obscure '@'.
     $var =~ s/\@/\&#64;/g;
 
-    state $use_utf8 = Bugzilla->params->{'utf8'};
+    # Remove control characters.
+    $var =~ s/(?![\t\r\n])[[:cntrl:]]//g;
 
-    if ($use_utf8) {
-        # Remove control characters if the encoding is utf8.
-        # Other multibyte encodings may be using this range; so ignore if not utf8.
-        $var =~ s/(?![\t\r\n])[[:cntrl:]]//g;
-
-        # Remove the following characters because they're
-        # influencing BiDi:
-        # --------------------------------------------------------
-        # |Code  |Name                      |UTF-8 representation|
-        # |------|--------------------------|--------------------|
-        # |U+202a|Left-To-Right Embedding   |0xe2 0x80 0xaa      |
-        # |U+202b|Right-To-Left Embedding   |0xe2 0x80 0xab      |
-        # |U+202c|Pop Directional Formatting|0xe2 0x80 0xac      |
-        # |U+202d|Left-To-Right Override    |0xe2 0x80 0xad      |
-        # |U+202e|Right-To-Left Override    |0xe2 0x80 0xae      |
-        # --------------------------------------------------------
-        #
-        # The following are characters influencing BiDi, too, but
-        # they can be spared from filtering because they don't
-        # influence more than one character right or left:
-        # --------------------------------------------------------
-        # |Code  |Name                      |UTF-8 representation|
-        # |------|--------------------------|--------------------|
-        # |U+200e|Left-To-Right Mark        |0xe2 0x80 0x8e      |
-        # |U+200f|Right-To-Left Mark        |0xe2 0x80 0x8f      |
-        # --------------------------------------------------------
-        $var =~ tr/\x{202a}-\x{202e}//d;
-    }
+    # Remove the following characters because they're
+    # influencing BiDi:
+    # --------------------------------------------------------
+    # |Code  |Name                      |UTF-8 representation|
+    # |------|--------------------------|--------------------|
+    # |U+202a|Left-To-Right Embedding   |0xe2 0x80 0xaa      |
+    # |U+202b|Right-To-Left Embedding   |0xe2 0x80 0xab      |
+    # |U+202c|Pop Directional Formatting|0xe2 0x80 0xac      |
+    # |U+202d|Left-To-Right Override    |0xe2 0x80 0xad      |
+    # |U+202e|Right-To-Left Override    |0xe2 0x80 0xae      |
+    # --------------------------------------------------------
+    #
+    # The following are characters influencing BiDi, too, but
+    # they can be spared from filtering because they don't
+    # influence more than one character right or left:
+    # --------------------------------------------------------
+    # |Code  |Name                      |UTF-8 representation|
+    # |------|--------------------------|--------------------|
+    # |U+200e|Left-To-Right Mark        |0xe2 0x80 0x8e      |
+    # |U+200f|Right-To-Left Mark        |0xe2 0x80 0x8f      |
+    # --------------------------------------------------------
+    $var =~ tr/\x{202a}-\x{202e}//d;
     return $var;
 }
 
@@ -203,8 +198,8 @@ sub email_filter {
 # This originally came from CGI.pm, by Lincoln D. Stein
 sub url_quote {
     my ($toencode) = (@_);
-    utf8::encode($toencode) # The below regex works only on bytes
-        if Bugzilla->params->{'utf8'} && utf8::is_utf8($toencode);
+    # The below regex works only on bytes
+    utf8::encode($toencode) if utf8::is_utf8($toencode);
     $toencode =~ s/([^a-zA-Z0-9_\-.])/uc sprintf("%%%02x",ord($1))/eg;
     return $toencode;
 }
@@ -635,9 +630,7 @@ sub bz_crypt {
     }
 
     # Wide characters cause crypt and Digest to die.
-    if (Bugzilla->params->{'utf8'}) {
-        utf8::encode($password) if utf8::is_utf8($password);
-    }
+    utf8::encode($password) if utf8::is_utf8($password);
 
     my $crypted_password;
     if (!$algorithm) {
@@ -785,9 +778,8 @@ sub display_value {
 }
 
 sub disable_utf8 {
-    if (Bugzilla->params->{'utf8'}) {
-        binmode STDOUT, ':bytes'; # Turn off UTF8 encoding.
-    }
+    # Turn off UTF8 encoding.
+    binmode STDOUT, ':bytes';
 }
 
 use constant UTF8_ACCIDENTAL => qw(shiftjis big5-eten euc-kr euc-jp);

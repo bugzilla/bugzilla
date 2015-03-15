@@ -398,10 +398,7 @@ sub get_text_alternative {
 
 sub _decode_body {
     my ($charset, $body) = @_;
-    if (Bugzilla->params->{'utf8'} && !utf8::is_utf8($body)) {
-        return Encode::decode($charset, $body);
-    }
-    return $body;
+    return utf8::is_utf8($body) ? $body : Encode::decode($charset, $body);
 }
 
 sub remove_leading_blank_lines {

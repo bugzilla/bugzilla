@@ -103,10 +103,7 @@
   <head>
     [% Hook.process("start") %]
     <title>[% title %]</title>
-
-    [% IF Param('utf8') %]
-      <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    [% END %]
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
     [% IF NOT no_yui %]
       [% SET yui = yui_resolve_deps(yui, yui_deps) %]

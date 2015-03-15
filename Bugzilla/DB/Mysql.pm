@@ -54,7 +54,7 @@ sub new {
     $dsn .= ";mysql_socket=$sock" if $sock;
 
     my %attrs = (
-        mysql_enable_utf8 => Bugzilla->params->{'utf8'},
+        mysql_enable_utf8 => 1,
         # Needs to be explicitly specified for command-line processes.
         mysql_auto_reconnect => 1,
     );
@@ -74,9 +74,8 @@ sub new {
     my $self = $class->db_new({ dsn => $dsn, user => $user, 
                                 pass => $pass, attrs => \%attrs });
 
-    # This makes sure that if the tables are encoded as UTF-8, we
-    # return their data correctly.
-    $self->do("SET NAMES utf8") if Bugzilla->params->{'utf8'};
+    # This makes sure that we return table names correctly.
+    $self->do("SET NAMES utf8");
 
     # all class local variables stored in DBI derived class needs to have
     # a prefix 'private_'. See DBI documentation.
@@ -543,13 +542,11 @@ sub bz_setup_database {
 
     # If there are no tables, but the DB isn't utf8 and it should be,
     # then we should alter the database to be utf8. We know it should be
-    # if the utf8 parameter is true or there are no params at all.
+    # if there are no params at all.
     # This kind of situation happens when people create the database
     # themselves, and if we don't do this they will get the big
     # scary WARNING statement about conversion to UTF8.
-    if ( !$self->bz_db_is_utf8 && !@tables 
-         && (Bugzilla->params->{'utf8'} || !scalar keys %{Bugzilla->params}) )
-    {
+    if (!$self->bz_db_is_utf8 && !@tables) {
         $self->_alter_db_charset_to_utf8();
     }
 
@@ -653,7 +650,7 @@ sub bz_setup_database {
                    MAX_ROWS=100000");
     }
 
-    # Convert the database to UTF-8 if the utf8 parameter is on.
+    # Convert the database to UTF-8.
     # We check if any table isn't utf8, because lots of crazy
     # partial-conversion situations can happen, and this handles anything
     # that could come up (including having the DB charset be utf8 but not
@@ -665,8 +662,8 @@ sub bz_setup_database {
           WHERE TABLE_SCHEMA = ? AND TABLE_COLLATION IS NOT NULL 
                 AND TABLE_COLLATION NOT LIKE 'utf8%' 
           LIMIT 1", undef, $db_name);
-    
-    if (Bugzilla->params->{'utf8'} && $non_utf8_tables) {
+
+    if ($non_utf8_tables) {
         print "\n", install_string('mysql_utf8_conversion');
 
         if (!Bugzilla->installation_answers->{NO_PAUSE}) {
@@ -681,8 +678,7 @@ sub bz_setup_database {
             }
         }
 
-        print "Converting table storage format to UTF-8. This may take a",
-              " while.\n";
+        say 'Converting table storage format to UTF-8. This may take a while.';
         foreach my $table ($self->bz_table_list_real) {
             my $info_sth = $self->prepare("SHOW FULL COLUMNS FROM $table");
             $info_sth->execute();
@@ -699,7 +695,7 @@ sub bz_setup_database {
                 {
                     my $name = $column->{Field};
 
-                    print "$table.$name needs to be converted to UTF-8...\n";
+                    say "$table.$name needs to be converted to UTF-8...";
 
                     # These will be automatically re-created at the end
                     # of checksetup.
@@ -737,7 +733,7 @@ sub bz_setup_database {
                     }
                 }
 
-                print "Converting the $table table to UTF-8...\n";
+                say "Converting the $table table to UTF-8...";
                 my $bin = "ALTER TABLE $table " . join(', ', @binary_sql);
                 my $utf = "ALTER TABLE $table " . join(', ', @utf8_sql,
                           'DEFAULT CHARACTER SET utf8');
@@ -761,11 +757,9 @@ sub bz_setup_database {
     # a mysqldump.) So we have this change outside of the above block,
     # so that it just happens silently if no actual *table* conversion
     # needs to happen.
-    if (Bugzilla->params->{'utf8'} && !$self->bz_db_is_utf8) {
-        $self->_alter_db_charset_to_utf8();
-    }
+    $self->_alter_db_charset_to_utf8() unless $self->bz_db_is_utf8;
 
-     $self->_fix_defaults();
+    $self->_fix_defaults();
 
     # Bug 451735 highlighted a bug in bz_drop_index() which didn't
     # check for FKs before trying to delete an index. Consequently,

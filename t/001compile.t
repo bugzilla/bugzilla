@@ -49,12 +49,12 @@ sub compile_file {
         $T = "T";
     }
 
-    my $libs = '';
+    my $libs = '-It ';
     if ($ENV{PERL5LIB}) {
-       $libs = join " ", map { "-I\"$_\"" } split /$Config{path_sep}/, $ENV{PERL5LIB};
+       $libs .= join " ", map { "-I\"$_\"" } split /$Config{path_sep}/, $ENV{PERL5LIB};
     }
     my $perl = qq{"$^X"};
-    my $output = `$perl $libs -c$T $file 2>&1`;
+    my $output = `$perl $libs -c$T -MSupport::Systemexec $file 2>&1`;
     chomp($output);
     my $return_val = $?;
     $output =~ s/^\Q$file\E syntax OK$//ms;

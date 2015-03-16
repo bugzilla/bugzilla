@@ -1058,8 +1058,8 @@ Splinter.Review.Review.prototype = {
                 for (i = 0; i < rawlines.length; i++) {
                     var line = rawlines[i];
                     var count = 1;
-                    if (i < rawlines.length - 1 && rawlines[i + 1].match(/^... \d+\s+/)) {
-                        var m3 = /^\.\.\.\s+(\d+)\s+/.exec(rawlines[i + 1]);
+                    if (i < rawlines.length - 1 && rawlines[i + 1].match(/^\.\.\. \d+\s+/)) {
+                        var m3 = /^\.\.\. (\d+)\s+/.exec(rawlines[i + 1]);
                         count += parseInt(m3[1], 10);
                         i += 1;
                     }

@@ -52,7 +52,16 @@ my $perlapp = "\"$^X\"";
 foreach my $file (@testitems) {
     $file =~ s/\s.*$//; # nuke everything after the first space (#comment)
     next if (!$file); # skip null entries
-    my $command = "$perlapp -c -It -MSupport::Systemexec $file 2>&1";
+
+    open(my $fh2, '<', $file);
+    my $bang = <$fh2>;
+    close $fh2;
+
+    my $T = "";
+    if ($bang =~ m/#!\S*perl\s+-.*T/) {
+        $T = "T";
+    }
+    my $command = "$perlapp -c$T -It -MSupport::Systemexec $file 2>&1";
     my $loginfo=`$command`;
     if ($loginfo =~ /arguments for Support::Systemexec::(system|exec)/im) {
         ok(0,"$file DOES NOT use proper system or exec calls");

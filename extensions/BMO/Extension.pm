@@ -45,7 +45,7 @@ use Email::MIME::ContentType qw(parse_content_type);
 use Encode qw(find_encoding encode_utf8);
 use File::MimeInfo::Magic;
 use List::MoreUtils qw(natatime);
-use List::Util qw(first any);
+use List::Util qw(first);
 use Scalar::Util qw(blessed);
 use Sys::Syslog qw(:DEFAULT setlogsock);
 use Text::Balanced qw( extract_bracketed extract_multiple );
@@ -786,7 +786,7 @@ sub attachment_view {
 
     # must be our supported content-type
     return unless
-        any { $attachment->contenttype eq $autodetect_attach_urls{$_}->{content_type} }
+        grep { $attachment->contenttype eq $autodetect_attach_urls{$_}->{content_type} }
         keys %autodetect_attach_urls;
 
     # must still be a valid url

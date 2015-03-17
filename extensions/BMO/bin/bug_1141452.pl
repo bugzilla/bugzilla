@@ -56,7 +56,7 @@ my $when   = $dbh->selectrow_array('SELECT LOCALTIMESTAMP(0)');
 $dbh->bz_start_transaction();
 foreach my $flag (@$flags) {
     if (!$flag->{value}) {
-        print $flag->{id}, ": changing blocking_b2g:backlog -> tracking_b2g:backlog\n";
+        print $flag->{bug_id}, ": changing blocking_b2g:backlog -> tracking_b2g:backlog\n";
         # no tracking_b2g value, change blocking_b2g:backlog -> tracking_b2g:backlog
         $dbh->do(
             "UPDATE tracking_flags_bugs SET tracking_flag_id = ? WHERE id = ?",
@@ -80,7 +80,7 @@ foreach my $flag (@$flags) {
         );
     }
     elsif ($flag->{value}) {
-        print $flag->{id}, ": deleting blocking_b2g:backlog\n";
+        print $flag->{bug_id}, ": deleting blocking_b2g:backlog\n";
         # tracking_b2g already has a value, just delete blocking_b2g:backlog
         $dbh->do(
             "DELETE FROM tracking_flags_bugs WHERE id = ?",

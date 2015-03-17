@@ -77,13 +77,10 @@ sub _page_dashboard {
 
     return if !$product_name;
 
-    # Do not use Bugzilla::Product::check_product() here, else the user
-    # could know whether the product doesn't exist or is not accessible.
-    my $product = new Bugzilla::Product({'name' => $product_name});
-
     # We need to check and make sure that the user has permission
-    # to enter a bug against this product.
-    if (!$product || !$user->can_enter_product($product->name)) {
+    # to see this product.
+    my $product = Bugzilla::Product->new({ name => $product_name, cache => 1 });
+    if (!$product || !$user->can_see_product($product->name)) {
         return;
     }
 

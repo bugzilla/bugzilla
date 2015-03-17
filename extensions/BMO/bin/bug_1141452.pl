@@ -31,15 +31,19 @@ die "tracking-b2g does not have a 'backlog' value\n"
     unless grep { $_->value eq 'backlog' } @{ $tracking_b2g->values };
 
 print "Searching for bugs..\n";
-my $flags = $dbh->selectall_arrayref(<<EOF, { Slice => {} }, $blocking_b2g->flag_id);
+my $flags = $dbh->selectall_arrayref(<<EOF, { Slice => {} }, $blocking_b2g->flag_id, $tracking_b2g->flag_id);
     SELECT
-        id,
-        bug_id
+        bugs.bug_id,
+        blocking_b2g.id id,
+        tracking_b2g.value value
     FROM
-        tracking_flags_bugs
+        bugs
+        INNER JOIN tracking_flags_bugs blocking_b2g
+            ON blocking_b2g.bug_id = bugs.bug_id AND blocking_b2g.tracking_flag_id = ?
+        LEFT JOIN tracking_flags_bugs tracking_b2g
+            ON tracking_b2g.bug_id = bugs.bug_id AND tracking_b2g.tracking_flag_id = ?
     WHERE
-        tracking_flag_id = ?
-        AND value = 'backlog'
+        blocking_b2g.value = 'backlog'
 EOF
 die "No suitable bugs found\n" unless @$flags;
 printf "About to fix %s bugs\n", scalar(@$flags);
@@ -51,26 +55,49 @@ my $when   = $dbh->selectrow_array('SELECT LOCALTIMESTAMP(0)');
 
 $dbh->bz_start_transaction();
 foreach my $flag (@$flags) {
-    $dbh->do(
-        "UPDATE tracking_flags_bugs SET tracking_flag_id = ? WHERE id = ?",
-        undef,
-        $tracking_b2g->flag_id, $flag->{id},
-    );
-    $dbh->do(
-        "UPDATE bugs SET delta_ts = ?, lastdiffed = ? WHERE bug_id = ?",
-        undef,
-        $when, $when, $flag->{bug_id},
-    );
-    $dbh->do(
-        "INSERT INTO bugs_activity(bug_id, who, bug_when, fieldid, removed, added) VALUES (?, ?, ?, ?, ?, ?)",
-        undef,
-        $flag->{bug_id}, $nobody->id, $when, $blocking_b2g->id, 'backlog', '---',
-    );
-    $dbh->do(
-        "INSERT INTO bugs_activity(bug_id, who, bug_when, fieldid, removed, added) VALUES (?, ?, ?, ?, ?, ?)",
-        undef,
-        $flag->{bug_id}, $nobody->id, $when, $tracking_b2g->id, '---', 'backlog',
-    );
+    if (!$flag->{value}) {
+        print $flag->{id}, ": changing blocking_b2g:backlog -> tracking_b2g:backlog\n";
+        # no tracking_b2g value, change blocking_b2g:backlog -> tracking_b2g:backlog
+        $dbh->do(
+            "UPDATE tracking_flags_bugs SET tracking_flag_id = ? WHERE id = ?",
+            undef,
+            $tracking_b2g->flag_id, $flag->{id},
+        );
+        $dbh->do(
+            "UPDATE bugs SET delta_ts = ?, lastdiffed = ? WHERE bug_id = ?",
+            undef,
+            $when, $when, $flag->{bug_id},
+        );
+        $dbh->do(
+            "INSERT INTO bugs_activity(bug_id, who, bug_when, fieldid, removed, added) VALUES (?, ?, ?, ?, ?, ?)",
+            undef,
+            $flag->{bug_id}, $nobody->id, $when, $blocking_b2g->id, 'backlog', '---',
+        );
+        $dbh->do(
+            "INSERT INTO bugs_activity(bug_id, who, bug_when, fieldid, removed, added) VALUES (?, ?, ?, ?, ?, ?)",
+            undef,
+            $flag->{bug_id}, $nobody->id, $when, $tracking_b2g->id, '---', 'backlog',
+        );
+    }
+    elsif ($flag->{value}) {
+        print $flag->{id}, ": deleting blocking_b2g:backlog\n";
+        # tracking_b2g already has a value, just delete blocking_b2g:backlog
+        $dbh->do(
+            "DELETE FROM tracking_flags_bugs WHERE id = ?",
+            undef,
+            $flag->{id},
+        );
+        $dbh->do(
+            "UPDATE bugs SET delta_ts = ?, lastdiffed = ? WHERE bug_id = ?",
+            undef,
+            $when, $when, $flag->{bug_id},
+        );
+        $dbh->do(
+            "INSERT INTO bugs_activity(bug_id, who, bug_when, fieldid, removed, added) VALUES (?, ?, ?, ?, ?, ?)",
+            undef,
+            $flag->{bug_id}, $nobody->id, $when, $blocking_b2g->id, 'backlog', '---',
+        );
+    }
 }
 $dbh->bz_commit_transaction();
 

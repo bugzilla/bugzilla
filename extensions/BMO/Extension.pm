@@ -45,7 +45,7 @@ use Email::MIME::ContentType qw(parse_content_type);
 use Encode qw(find_encoding encode_utf8);
 use File::MimeInfo::Magic;
 use List::MoreUtils qw(natatime);
-use List::Util qw(first);
+use List::Util qw(first any);
 use Scalar::Util qw(blessed);
 use Sys::Syslog qw(:DEFAULT setlogsock);
 use Text::Balanced qw( extract_bracketed extract_multiple );
@@ -751,13 +751,13 @@ sub attachment_process_data {
         $url = $data;
     }
 
-    if (my $content_type = _get_review_content_type($url)) {
+    if (my $content_type = _detect_attached_url($url)) {
         $attributes->{mimetype} = $content_type;
         $attributes->{ispatch}  = 0;
     }
 }
 
-sub _get_review_content_type {
+sub _detect_attached_url {
     my ($url) = @_;
 
     # trim and check for the pull request url
@@ -766,13 +766,13 @@ sub _get_review_content_type {
     $url = trim($url);
     return if $url =~ /\s/;
 
-    if ($url =~ m#^https://github\.com/[^/]+/[^/]+/pull/\d+/?$#i) {
-        return GITHUB_PR_CONTENT_TYPE;
+    foreach my $key (keys %autodetect_attach_urls) {
+        if ($url =~ $autodetect_attach_urls{$key}->{regex}) {
+            return $autodetect_attach_urls{$key}->{content_type};
+        }
     }
-    if ($url =~ m#^https?://reviewboard(?:-dev)?\.(?:allizom|mozilla)\.org/r/\d+/?#i) {
-        return RB_REQUEST_CONTENT_TYPE;
-    }
-    return;
+
+    return undef;
 }
 
 # redirect automatically to github urls
@@ -784,13 +784,13 @@ sub attachment_view {
     # don't redirect if the content-type is specified explicitly
     return if defined $cgi->param('content_type');
 
-    # must be our github/reviewboard content-type
+    # must be our supported content-type
     return unless
-        $attachment->contenttype eq GITHUB_PR_CONTENT_TYPE
-        or $attachment->contenttype eq RB_REQUEST_CONTENT_TYPE;
+        any { $attachment->contenttype eq $autodetect_attach_urls{$_}->{content_type} }
+        keys %autodetect_attach_urls;
 
     # must still be a valid url
-    return unless _get_review_content_type($attachment->data);
+    return unless _detect_attached_url($attachment->data);
 
     # redirect
     print $cgi->redirect(trim($attachment->data));

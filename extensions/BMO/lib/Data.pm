@@ -19,11 +19,25 @@ our @EXPORT = qw( $cf_visible_in_products
                   %product_sec_groups
                   %create_bug_formats
                   @default_named_queries
-                  GITHUB_PR_CONTENT_TYPE
-                  RB_REQUEST_CONTENT_TYPE );
+                  %autodetect_attach_urls );
 
-use constant GITHUB_PR_CONTENT_TYPE  => 'text/x-github-pull-request';
-use constant RB_REQUEST_CONTENT_TYPE => 'text/x-review-board-request';
+# Creating an attachment whose contents is a URL matching one of these regexes
+# will result in the user being redirected to that URL when viewing the
+# attachment.
+our %autodetect_attach_urls = (
+    github_pr => {
+        regex        => qr#^https://github\.com/[^/]+/[^/]+/pull/\d+/?$#i,
+        content_type => 'text/x-github-pull-request',
+    },
+    reviewboard => {
+        regex        => qr#^https?://reviewboard(?:-dev)?\.(?:allizom|mozilla)\.org/r/\d+/?#i,
+        content_type => 'text/x-review-board-request',
+    },
+    google_docs => {
+        regex        => qr#^https://docs\.google\.com/(?:document|spreadsheets|presentation)/d/#i,
+        content_type => 'text/x-google-doc',
+    },
+);
 
 # Which custom fields are visible in which products and components.
 #

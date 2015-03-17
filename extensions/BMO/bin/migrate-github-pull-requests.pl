@@ -65,7 +65,7 @@ foreach my $attachment (@$attachments) {
     $dbh->do(
         "UPDATE attachments SET mimetype = ? WHERE attach_id = ?",
         undef,
-        GITHUB_PR_CONTENT_TYPE, $attachment->{attach_id}
+        'text/x-github-pull-request', $attachment->{attach_id}
     );
 
     # insert into bugs_activity
@@ -75,7 +75,7 @@ foreach my $attachment (@$attachments) {
                      VALUES (?, ?, ?, ?, ?, ?)",
         undef,
         $attachment->{bug_id}, $nobody->id, $timestamp, $field->id,
-        $attachment->{mimetype}, GITHUB_PR_CONTENT_TYPE
+        $attachment->{mimetype}, 'text/x-github-pull-request'
     );
     $dbh->do(
         "UPDATE bugs SET delta_ts = ?, lastdiffed = ? WHERE bug_id = ?",

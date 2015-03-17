@@ -98,6 +98,9 @@ sub make_response {
 sub handle_login {
     my ($self, $classes, $action, $uri, $method) = @_;
     my $class = $classes->{$uri};
+    if (!$class) {
+        ThrowCodeError('unknown_method', { method => $method eq 'methodName' ? '' : '.' . $method });
+    }
     my $full_method = $uri . "." . $method;
     # Only allowed methods to be used from the module's whitelist
     my $file = $class;

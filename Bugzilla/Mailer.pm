@@ -12,11 +12,12 @@ use strict;
 use warnings;
 
 use parent qw(Exporter);
-@Bugzilla::Mailer::EXPORT = qw(MessageToMTA build_thread_marker);
+@Bugzilla::Mailer::EXPORT = qw(MessageToMTA build_thread_marker generate_email);
 
 use Bugzilla::Constants;
 use Bugzilla::Error;
 use Bugzilla::Hook;
+use Bugzilla::User;
 use Bugzilla::Util;
 
 use Date::Format qw(time2str);
@@ -27,6 +28,63 @@ use Email::MIME;
 use Email::Sender::Simple qw(sendmail);
 use Email::Sender::Transport::SMTP::Persistent;
 use Bugzilla::Sender::Transport::Sendmail;
+
+sub generate_email {
+    my ($vars, $templates) = @_;
+    my ($lang, $email_format, $msg_text, $msg_html, $msg_header);
+
+    if ($vars->{to_user}) {
+      $lang = $vars->{to_user}->setting('lang');
+      $email_format = $vars->{to_user}->setting('email_format');
+    } else {
+      # If there are users in the CC list who don't have an account,
+      # use the default language for email notifications.
+      $lang = Bugzilla::User->new()->setting('lang');
+      # However we cannot fall back to the default email_format, since
+      # it may be HTML, and many of the includes used in the HTML
+      # template require a valid user object. Instead we fall back to
+      # the plaintext template.
+      $email_format = 'text_only';
+    }
+
+    my $template = Bugzilla->template_inner($lang);
+
+    $template->process($templates->{header}, $vars, \$msg_header)
+        || ThrowTemplateError($template->error());
+    $template->process($templates->{text}, $vars, \$msg_text)
+        || ThrowTemplateError($template->error());
+
+    my @parts = (
+        Email::MIME->create(
+            attributes => {
+                content_type => "text/plain",
+            },
+            body => $msg_text,
+        )
+    );
+    if ($templates->{html} && $email_format eq 'html') {
+        $template->process($templates->{html}, $vars, \$msg_html)
+            || ThrowTemplateError($template->error());
+        push @parts, Email::MIME->create(
+            attributes => {
+                content_type => "text/html",
+            },
+            body => $msg_html,
+        );
+    }
+
+    # TT trims the trailing newline, and threadingmarker may be ignored.
+    my $email = new Email::MIME("$msg_header\n");
+    if (scalar(@parts) == 1) {
+        $email->content_type_set($parts[0]->content_type);
+    } else {
+        $email->content_type_set('multipart/alternative');
+        # Some mail clients need same encoding for each part, even empty ones.
+        $email->charset_set('UTF-8') if Bugzilla->params->{'utf8'};
+    }
+    $email->parts_set(\@parts);
+    return $email;
+}
 
 sub MessageToMTA {
     my ($msg, $send_now) = (@_);
@@ -284,6 +342,10 @@ Bugzilla::Mailer - Provides methods for sending email
 =head1 METHODS
 
 =over
+
+=item C<generate_email>
+
+Generates a multi-part email message, using the supplied list of templates.
 
 =item C<MessageToMTA>
 

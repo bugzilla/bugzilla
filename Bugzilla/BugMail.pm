@@ -437,45 +437,12 @@ sub _flatten_object {
 
 sub _generate_bugmail {
     my ($vars) = @_;
-    my $user = $vars->{to_user};
-    my $template = Bugzilla->template_inner($user->setting('lang'));
-    my ($msg_text, $msg_html, $msg_header);
-
-    $template->process("email/bugmail-header.txt.tmpl", $vars, \$msg_header)
-        || ThrowTemplateError($template->error());
-    $template->process("email/bugmail.txt.tmpl", $vars, \$msg_text)
-        || ThrowTemplateError($template->error());
-
-    my @parts = (
-        Email::MIME->create(
-            attributes => {
-                content_type => "text/plain",
-            },
-            body => $msg_text,
-        )
-    );
-    if ($user->setting('email_format') eq 'html') {
-        $template->process("email/bugmail.html.tmpl", $vars, \$msg_html)
-            || ThrowTemplateError($template->error());
-        push @parts, Email::MIME->create(
-            attributes => {
-                content_type => "text/html",         
-            },
-            body => $msg_html,
-        );
-    }
-
-    # TT trims the trailing newline, and threadingmarker may be ignored.
-    my $email = new Email::MIME("$msg_header\n");
-    if (scalar(@parts) == 1) {
-        $email->content_type_set($parts[0]->content_type);
-    } else {
-        $email->content_type_set('multipart/alternative');
-        # Some mail clients need same encoding for each part, even empty ones.
-        $email->charset_set('UTF-8');
-    }
-    $email->parts_set(\@parts);
-    return $email;
+    my $templates = {
+        header => "email/bugmail-header.txt.tmpl",
+        text   => "email/bugmail.txt.tmpl",
+        html   => "email/bugmail.html.tmpl",
+    };
+    return generate_email($vars, $templates);
 }
 
 sub _get_diffs {

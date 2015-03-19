@@ -1116,13 +1116,6 @@ sub notify {
     if ($addressee && $addressee->email_enabled) {
         $recipients{$addressee->email} = $addressee;
     }
-    # Process and send notification for each recipient.
-    # If there are users in the CC list who don't have an account,
-    # use the default language for email notifications.
-    my $default_lang;
-    if (grep { !$_ } values %recipients) {
-        $default_lang = Bugzilla::User->new()->setting('lang');
-    }
 
     # Get comments on the bug
     my $all_comments = $bug->comments({ after => $bug->lastdiffed });
@@ -1132,18 +1125,20 @@ sub notify {
     my $public_comments = [ grep { !$_->is_private } @$all_comments ];
 
     foreach my $to (keys %recipients) {
+        my $user = $recipients{$to};
         # Add threadingmarker to allow flag notification emails to be the
         # threaded similar to normal bug change emails.
-        my $thread_user_id = $recipients{$to} ? $recipients{$to}->id : 0;
+        my $thread_user_id = $user ? $user->id : 0;
 
         # We only want to show private comments to users in the is_insider group
-        my $comments = $recipients{$to} && $recipients{$to}->is_insider
+        my $comments = $user && $user->is_insider
             ? $all_comments : $public_comments;
 
         my $vars = {
             flag            => $flag,
             old_flag        => $old_flag,
             to              => $to,
+            to_user         => $user,
             date            => $timestamp,
             bug             => $bug,
             attachment      => $attachment,
@@ -1151,15 +1146,13 @@ sub notify {
             new_comments    => $comments,
         };
 
-        my $lang = $recipients{$to} ?
-          $recipients{$to}->setting('lang') : $default_lang;
+        my $templates = {
+            header => "email/flagmail-header.txt.tmpl",
+            text   => "email/flagmail.txt.tmpl",
+            html   => "email/flagmail.html.tmpl",
+        };
 
-        my $template = Bugzilla->template_inner($lang);
-        my $message;
-        $template->process("email/flagmail.txt.tmpl", $vars, \$message)
-          || ThrowTemplateError($template->error());
-
-        MessageToMTA($message);
+        MessageToMTA(generate_email($vars, $templates));
     }
 }
 

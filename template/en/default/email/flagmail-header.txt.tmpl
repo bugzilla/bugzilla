@@ -1,0 +1,28 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% flagtype_name = flag ? flag.type.name : old_flag.type.name %]
+[% statuses = { '+' => "granted" , '-' => 'denied' , 'X' => "canceled" ,
+                '?' => "asked" } %]
+
+[% action = flag.status || 'X' %]
+
+[% IF flag && flag.status == '?' %]
+  [% subject_status = "requested" %]
+[% ELSE %]
+  [% subject_status = statuses.$action %]
+[% END %]
+From: [% Param('mailfrom') %]
+To: [% to %]
+Subject: [% flagtype_name %] [%+ subject_status %]: [[% terms.Bug %] [%+ bug.bug_id %]] [% bug.short_desc %]
+[%- IF attachment %] :
+  [Attachment [% attachment.id %]] [% attachment.description FILTER clean_text %][% END %]
+Date: [% date %]
+X-Bugzilla-Type: request
+[%+ INCLUDE "email/header-common.txt.tmpl" %]
+[%+ threadingmarker %]

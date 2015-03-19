@@ -127,6 +127,10 @@ TUI_hide_default('information_query');
     { field => bug_fields.keywords, accesskey => 'k', 
       qtypes => ['allwords', 'anywords', 'nowords', 'regexp', 'notregexp'] }   
   ] %]
+  [% FOREACH field = custom_fields %]
+    [% freetext_fields.push({ field => field }) IF field.type == constants.FIELD_TYPE_FREETEXT or field.type == constants.FIELD_TYPE_TEXTAREA %]
+  [% END %]
+
   [% Hook.process('before_freetext_fields') %]
   
   [%# loop through a bunch of free text fields and print out their text stuff %]
@@ -215,6 +219,15 @@ TUI_hide_default('information_query');
         accesskey =>"o"
         value => default.op_sys
     %]               
+    [% FOREACH field = custom_fields %]
+      [% IF field.type == constants.FIELD_TYPE_SINGLE_SELECT or
+         field.type == constants.FIELD_TYPE_MULTI_SELECT %]
+        [% INCLUDE "search/field.html.tmpl"
+           field => field
+           value => default.${field.name}
+        %]
+      [% END %]
+    [% END %]
     [% Hook.process('after_selects_bottom') %]
   </div>
 </div>

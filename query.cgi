@@ -208,6 +208,15 @@ $vars->{'priority'} = Bugzilla::Field->new({name => 'priority'})->legal_values;
 $vars->{'bug_severity'} = Bugzilla::Field->new({name => 'bug_severity'})->legal_values;
 $vars->{'resolution'} = Bugzilla::Field->new({name => 'resolution'})->legal_values;
 
+# grab custom fields
+my @custom_fields = Bugzilla->active_custom_fields;
+$vars->{'custom_fields'} = \@custom_fields;
+foreach my $cf (@custom_fields) {
+    if ($cf->type == FIELD_TYPE_SINGLE_SELECT || $cf->type == FIELD_TYPE_MULTI_SELECT) {
+        $vars->{$cf->name} = $cf->legal_values;
+    }
+}
+
 # Boolean charts
 my @fields = @{ Bugzilla->fields({ obsolete => 0 }) };
 

@@ -409,7 +409,7 @@ sub _DoBlockQuotes {
                         $pre =~ s/^  //mg;
                         $pre;
                     }egs;
-            "<blockquote>\n$bq\n</blockquote>\n\n";
+            "<blockquote class=\"markdown\">\n$bq\n</blockquote>\n\n";
         }egmx;
 
     return $text;

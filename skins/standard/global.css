@@ -418,6 +418,17 @@ pre.bz_comment_text, .uneditable_textarea, tbody.file pre {
 
 /** End Comments **/
 
+/** Markdown **/
+blockquote.markdown {
+    border-left: 0.2em solid #CCC;
+    color: #65379C;
+    padding: 0 1em;
+    margin-left: 0.5em;
+    margin-bottom: 0em;
+    white-space: normal;
+}
+/** End Markdown **/
+
 .bz_default_hidden, .bz_tui_hidden, .bz_hidden_field, .bz_hidden_option {
     /* We have !important because we want elements with these classes to always
      * be hidden, even if there is some CSS that overrides it (we use these

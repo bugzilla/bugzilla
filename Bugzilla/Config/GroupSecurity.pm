@@ -21,12 +21,6 @@ sub get_param_list {
 
   my @param_list = (
   {
-   name => 'makeproductgroups',
-   type => 'b',
-   default => 0
-  },
-
-  {
    name => 'chartgroup',
    type => 's',
    choices => \&_get_all_group_names,

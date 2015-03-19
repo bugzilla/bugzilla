@@ -96,7 +96,6 @@ sub create {
                                   product => $product });
 
     # Create groups and series for the new product, if requested.
-    $product->_create_bug_group() if Bugzilla->params->{'makeproductgroups'};
     $product->_create_series() if $create_series;
 
     Bugzilla::Hook::process('product_end_of_create', { product => $product });
@@ -429,27 +428,6 @@ use constant is_default => 0;
 ###############################
 ####       Methods         ####
 ###############################
-
-sub _create_bug_group {
-    my $self = shift;
-    my $dbh = Bugzilla->dbh;
-
-    my $group_name = $self->name;
-    while (new Bugzilla::Group({name => $group_name})) {
-        $group_name .= '_';
-    }
-    my $group_description = get_text('bug_group_description', {product => $self});
-
-    my $group = Bugzilla::Group->create({name        => $group_name,
-                                         description => $group_description,
-                                         isbuggroup  => 1});
-
-    # Associate the new group and new product.
-    $dbh->do('INSERT INTO group_control_map
-              (group_id, product_id, membercontrol, othercontrol)
-              VALUES (?, ?, ?, ?)',
-              undef, ($group->id, $self->id, CONTROLMAPDEFAULT, CONTROLMAPNA));
-}
 
 sub _create_series {
     my $self = shift;

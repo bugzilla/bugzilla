@@ -144,15 +144,7 @@ fields:
 
 - *<productname>*:
   This allows an administrator to specify the products
-  in which a user can see bugs. If you turn on the
-  :param:`makeproductgroups` parameter in
-  the Group Security Panel in the Parameters page,
-  then Bugzilla creates one group per product (at the time you create
-  the product), and this group has exactly the same name as the
-  product itself. Note that for products that already exist when
-  the parameter is turned on, the corresponding group will not be
-  created. The user must still have the :group:`editbugs`
-  privilege to edit bugs in these products.
+  in which a user can see bugs.
 
 .. _createnewusers:
 

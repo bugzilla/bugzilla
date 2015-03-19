@@ -151,14 +151,6 @@ sub update_params {
         $new_params{'enablequips'} = $param->{'usequip'} ? 'on' : 'off';
     }
 
-    # Change from old product groups to controls for group_control_map
-    # 2002-10-14 bug 147275 bugreport@peshkin.net
-    if (exists $param->{'usebuggroups'} && 
-        !exists $param->{'makeproductgroups'}) 
-    {
-        $new_params{'makeproductgroups'} = $param->{'usebuggroups'};
-    }
-
     # Modularise auth code
     if (exists $param->{'useLDAP'} && !exists $param->{'loginmethod'}) {
         $new_params{'loginmethod'} = $param->{'useLDAP'} ? "LDAP" : "DB";

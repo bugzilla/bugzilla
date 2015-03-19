@@ -360,11 +360,6 @@ The options on this page control global default behavior.
 For more information on Groups and Group Security, see
 :ref:`groups`.
 
-makeproductgroups
-    Determines whether or not to automatically create groups
-    when new products are created. If this is on, the groups will be
-    used for querying bugs.
-
 chartgroup
     The name of the group of users who can use the 'New Charts' feature. Administrators should ensure that the public categories and series definitions do not divulge confidential information before enabling this for an untrusted population. If left blank, no users will be able to use New Charts.
 

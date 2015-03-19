@@ -196,7 +196,7 @@ if ($action eq 'new') {
         isbuggroup  => 1,
     });
 
-    # Permit all existing products to use the new group if makeproductgroups.
+    # Permit all existing products to use the new group if requested.
     if ($cgi->param('insertnew')) {
         $dbh->do('INSERT INTO group_control_map
                   (group_id, product_id, membercontrol, othercontrol)

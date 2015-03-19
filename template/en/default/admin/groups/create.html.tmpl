@@ -42,8 +42,7 @@
     [% Hook.process('field') %]
   </table>
 
-  <input type="checkbox" id="insertnew" name="insertnew" value="1"
-    [% IF Param("makeproductgroups") %] checked[% END %]>
+  <input type="checkbox" id="insertnew" name="insertnew" value="1">
   <label for="insertnew">Insert new group into all existing products.</label>
   <p>
   <input type="submit" id="create" value="Add">
@@ -82,17 +81,10 @@ than deleting the group would be. <b>Note: If you are creating
 a group, you probably want it to be usable for [% terms.bugs %], in which
 case you should leave this checked.</b></p>
 
-[% IF Param("makeproductgroups") %]
-  <p>By default, the new group will be associated with existing products.
-  Unchecking the "Insert new group into all existing products" option will
-  prevent this and make the group become visible only when its controls have
-  been added to a product.</p>
-[% ELSE %]
-  <p>Checking the "Insert new group into all existing products" option will
-  make the new group be associated with existing products. Leaving it unchecked
-  will make the group become visible only when its controls have been added to
-  a product.</p>
-[% END %]
+<p>Checking the "Insert new group into all existing products" option will
+make the new group available to be set on [% terms.bugs %] in all existing
+products. Leaving it unchecked means you need to specifically add the group to
+any product where you want it to be available for use.</p>
 
 <p>Back to the <a href="editgroups.cgi">group list</a>.</p>
 

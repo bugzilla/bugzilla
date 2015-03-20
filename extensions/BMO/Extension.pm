@@ -857,6 +857,18 @@ sub install_update_db {
             buglist     => 1,
         });
     }
+    unless (Bugzilla::Field->new({ name => 'cf_crash_signature' })) {
+        Bugzilla::Field->create({
+            name        => 'cf_crash_signature',
+            description => 'Crash Signature',
+            type        => FIELD_TYPE_TEXTAREA,
+            mailhead    => 0,
+            enter_bug   => 1,
+            obsolete    => 0,
+            custom      => 1,
+            buglist     => 0,
+        });
+    }
 }
 
 sub _last_closed_date {

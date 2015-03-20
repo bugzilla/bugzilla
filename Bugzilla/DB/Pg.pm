@@ -107,7 +107,7 @@ sub sql_group_concat {
         return "ARRAY_TO_STRING(ARRAY_AGG($text$order_by), $separator)";
     }
 
-    return "STRING_AGG($text, $separator$order_by)";
+    return "STRING_AGG(${text}::text, $separator${order_by}::text)"
 }
 
 sub sql_istring {

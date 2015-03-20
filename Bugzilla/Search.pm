@@ -713,6 +713,7 @@ use constant GROUP_BY_SKIP => qw(
     longdescs.count
     percentage_complete
     tag
+    alias
 );
 
 ###############

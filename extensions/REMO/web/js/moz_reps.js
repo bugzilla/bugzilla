@@ -49,9 +49,10 @@ $(document).ready(function() {
         $('label.required').each(function (index) {
             var id = $(this).attr("for");
             var input = $("#" + id);
+            var value = input.val().trim();
 
             if (id == 'mozillian') {
-                if (!input.val().match(mozillian_re)) {
+                if (!value.match(mozillian_re)) {
                     input.addClass("missing");
                     errors.push("The Mozillian Account URL is invalid");
                     event.preventDefault();
@@ -61,7 +62,7 @@ $(document).ready(function() {
                 }
             }
             else {
-                if (input.val() == "") {
+                if (value == "") {
                     input.addClass("missing");
                     missing = true;
                     event.preventDefault();

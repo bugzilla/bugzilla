@@ -318,11 +318,14 @@ sub post_bug_after_creation {
               status    => '?',
               requestee => $_->login }
         } @cc_users;
+        ThrowUserError('remo_missing_voucher') unless @cc_users;
 
         $bug->set_flags(\@new_flags, []) if @new_flags;
         $bug->add_comment(
             join(", ", map { $_->name || $_->login } @cc_users) .
-            ": You have been added as supporter to this Reps application, please comment why do you endorse their application. Thanks!"
+            ": You have been added as a voucher to this Reps application.\n" .
+            "Please provide a comment describing why you endorse this application.\n" .
+            "Thanks!"
         );
 
         $bug->update($bug->creation_ts);

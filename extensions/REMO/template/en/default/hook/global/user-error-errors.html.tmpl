@@ -37,4 +37,8 @@
    You can either <a href="[% urlbase FILTER html %]page.cgi?id=remo-form-payment.html">
    create a new payment request</a> or [% "go back to $terms.bug $bugid" FILTER bug_link(bugid) FILTER none %].
 
+[% ELSIF error == "remo_missing_voucher" %]
+  [% title = "Missing Vouchers" %]
+  You did not provide anyone to vouch for your application.
+
 [% END %]

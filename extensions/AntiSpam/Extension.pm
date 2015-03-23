@@ -132,7 +132,7 @@ sub _ip_blocking {
 sub comment_after_add_tag {
     my ($self, $args) = @_;
     my $tag = lc($args->{tag});
-    return unless $tag eq 'spam' or $tag eq 'abusive';
+    return unless $tag eq 'spam' or $tag eq 'abusive' or $tag eq 'abuse';
     my $comment = $args->{comment};
     my $author = $comment->author;
 

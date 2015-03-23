@@ -133,7 +133,7 @@ var MPR = {
             }
 
             if (MPR.fieldValue('relationship_type') == 'Vendor/Services'
-                || MPR.fieldValue('relationship_type') == 'Distribution/Bundling')
+                || MPR.fieldValue('relationship_type') == 'Firefox Distribution/Bundling')
             {
                 page_sections.legal_sow_questions = true;
                 page_sections.legal_vendor_services_where_row = true;

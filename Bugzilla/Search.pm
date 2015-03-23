@@ -706,6 +706,7 @@ sub REPORT_COLUMNS {
 # is here because it *always* goes into the GROUP BY as the first item,
 # so it should be skipped when determining extra GROUP BY columns.
 use constant GROUP_BY_SKIP => qw(
+    alias
     blocked
     bug_id
     dependson
@@ -714,7 +715,6 @@ use constant GROUP_BY_SKIP => qw(
     longdescs.count
     percentage_complete
     tag
-    alias
 );
 
 ###############

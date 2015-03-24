@@ -1,0 +1,918 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[%
+  USE Bugzilla;
+
+  # only edit one bug
+  UNLESS bug.defined;
+    bug = bugs.0;
+  END;
+  bugid = bug.id;
+
+  # this is used in a few places
+  is_cced = bug.cc.contains(user.login);
+
+  # custom fields that have custom rendering, or should not be rendered
+  rendered_custom_fields = [
+    'cf_user_story',
+    'cf_last_resolved',
+  ];
+
+  # all custom fields
+  custom_fields = Bugzilla.active_custom_fields(product => bug.product_obj, component => bug.component_obj, bug_id => bug.id);
+
+  # extract needinfo flags
+  needinfo = [];
+  FOREACH flag_type IN bug.flag_types;
+    IF flag_type.name == 'needinfo';
+    needinfo_flag_type = flag_type;
+      FOREACH flag IN flag_type.flags;
+        IF flag.status == '?';
+          needinfo.push(flag);
+        END;
+      END;
+    END;
+  END;
+
+  # count attachments
+  active_attachments = 0;
+  obsolete_attachments = 0;
+  FOREACH attachment IN bug.attachments;
+    NEXT IF attachment.isprivate && !(user.is_insider || attachment.attacher.id == user.id);
+    IF attachment.isobsolete;
+      obsolete_attachments = obsolete_attachments + 1;
+    ELSE;
+      active_attachments = active_attachments + 1;
+    END;
+  END;
+
+  # count set bug flags (excluding needinfo)
+  has_bug_flags = 0;
+  FOREACH flag IN bug.flags;
+    NEXT IF flag.name == 'needinfo';
+    has_bug_flags = 1;
+    LAST;
+  END;
+
+  # count set project/tracking flags
+  set_project_flags = [];
+  set_tracking_flags = [];
+  FOREACH flag IN tracking_flags;
+    NEXT IF flag.bug_flag(bug.id).value == "---";
+    IF flag.flag_type == "project";
+      set_project_flags.push(flag);
+    END;
+    IF flag.flag_type == "tracking";
+      set_tracking_flags.push(flag);
+    END;
+  END;
+
+  # build firefox flags subtitle
+  firefox_flags = [];
+  firefox_fixed_version = "";
+  tracking_flags_title = "Firefox Tracking Flags";
+  # project flags
+  FOREACH row IN tracking_flags_table;
+    NEXT UNLESS row.type == "project";
+    status_value = row.status.bug_flag(bug.id).value;
+    NEXT IF status_value == "---";
+    firefox_flags.push(row.name _ ":" _ status_value);
+  END;
+  # tracking flags title and subtitle
+  FOREACH row IN tracking_flags_table;
+    NEXT UNLESS row.type == "tracking";
+    tracking_value = row.tracking ? row.tracking.bug_flag(bug.id).value : "---";
+    status_value = row.status.bug_flag(bug.id).value || "---";
+    NEXT IF tracking_value == "---" && status_value == "---";
+    blurb = row.name;
+    IF tracking_value != "---";
+      blurb = blurb _ tracking_value;
+    END;
+    IF status_value != "---";
+      blurb = blurb _ " " _ status_value;
+      IF firefox_fixed_version == "" && status_value == "fixed";
+        firefox_fixed_version = row.name.ucfirst.replace('^(\D+)(\d)', '$1 $2');
+      END;
+    END;
+    firefox_flags.push(blurb);
+    IF row.name.search("^thunderbird");
+      tracking_flags_title = "Thunderbird Tracking Flags";
+    ELSIF row.name.search("^seamonkey");
+      tracking_flags_title = "SeaMonkey Tracking Flags";
+    END;
+  END;
+  IF firefox_flags.size;
+    firefox_flags_subtitle = firefox_flags.join(", ");
+  ELSE;
+    firefox_flags_subtitle = "Not tracked";
+  END;
+%]
+
+[% IF user.id %]
+  <form name="changeform" id="changeform" method="post" action="process_bug.cgi">
+  <input type="hidden" name="delta_ts" value="[% bug.delta_ts FILTER html %]">
+  <input type="hidden" name="longdesclength" value="[% bug.comments.size FILTER html %]">
+  <input type="hidden" name="id" id="bug_id" value="[% bug.bug_id FILTER html %]">
+  <input type="hidden" name="token" value="[% issue_hash_token([bug.id, bug.delta_ts]) FILTER html %]">
+[% END %]
+
+[%# === header === %]
+
+<div id="xhr-error" style="display:none"></div>
+
+[% WRAPPER bug_modal/module.html.tmpl
+    title = ""
+%]
+  <div id="summary-container">
+    [%# bug id, alias, and summary %]
+    [% WRAPPER bug_modal/field.html.tmpl
+        container = 1
+        no_label = 1
+        view_only = 1
+    %]
+      <div id="field-value-bug_id">
+        <a id="this-bug" href="show_bug.cgi?id=[% bug.id FILTER none %]
+                [%~ '&amp;format=' _ cgi.param("format") IF cgi.param("format") %]"
+        >
+          [%~ terms.Bug _ " " _ bug.id FILTER none ~%]
+        </a>
+        [% IF bug.alias %]
+          <span class="edit-hide">
+            ([% bug.alias FILTER html %])
+          </span>
+        [% END %]
+      </div>
+    [% END %]
+    [% WRAPPER bug_modal/field.html.tmpl
+        container = 1
+        no_label = 1
+        hide_on_edit = 1
+    %]
+      <div id="field-value-short_desc">[% bug.short_desc FILTER html %]</div>
+    [% END %]
+
+    [%# alias %]
+    [% INCLUDE bug_modal/field.html.tmpl
+        field = bug_fields.alias
+        field_type = constants.FIELD_TYPE_FREETEXT
+        hide_on_view = 1
+        short_width = 1
+    %]
+
+    [%# summary %]
+    [% INCLUDE bug_modal/field.html.tmpl
+        field = bug_fields.short_desc
+        field_type = constants.FIELD_TYPE_FREETEXT
+        hide_on_view = 1
+    %]
+
+    [%# status summary %]
+    [% WRAPPER bug_modal/field.html.tmpl
+        name = "status_summary"
+        no_label = 1
+        hide_on_edit = 1
+    %]
+      <b>
+        [% bug.bug_status FILTER html %]
+        [%+ bug.resolution FILTER html IF bug.resolution %]
+      </b>
+      [% IF bug.resolution == "FIXED"
+            && bug.target_milestone
+            && bug.target_milestone != "---"
+      %]
+        in [% firefox_fixed_version || bug.target_milestone FILTER html %]
+      [% ELSIF bug.dup_id %]
+        of [% terms.bug _ " $bug.dup_id" FILTER bug_link(bug.dup_id) FILTER none %]
+      [% END %]
+      [% IF needinfo.size %]
+        <div id="status-needinfo">
+          (NeedInfo from
+          [%+
+            IF needinfo.size == 1;
+              INCLUDE bug_modal/user.html.tmpl u=needinfo.0.requestee nick_only=1;
+            ELSE;
+              " " _ needinfo.size _ " people";
+            END;
+          ~%]
+          )
+        </div>
+      [% END %]
+    [% END %]
+  </div>
+
+  [%# buttons %]
+
+  <div id="mode-container">
+    [% IF user.id %]
+      <div>
+        <button type="button" class="minor" id="cc-btn" data-is-cced="[% is_cced ? 1 : 0 %]">
+          [% is_cced ? "Stop following" : "Follow" %]
+        </button>
+        <button type="button" id="cancel-btn" class="minor" style="display:none">Cancel</button>
+        <button type="button" id="mode-btn">
+          <span id="mode-btn-readonly">Edit</span>
+          <span id="mode-btn-loading">
+            <img id="edit-throbber" src="extensions/BugModal/web/throbber.gif" width="16" height="11">
+            Fetching
+          </span>
+        </button>
+        <button type="submit" id="commit-btn" style="display:none">Save Changes</button>
+      </div>
+    [% END %]
+    <div class="button-row">
+      [% IF user.id %]
+        <button type="button" class="comment-btn in-page">Add Comment</button>
+      [% END %]
+      <button type="button" id="last-comment-btn" class="in-page">Last Comment &darr;</button>
+    </div>
+    <div class="button-row">
+      [% IF bug.assigned_to.id == user.id || user.in_group("editbugs") %]
+        <button type="button" id="copy-summary" class="in-page"
+          title="Copy [% terms.bug %] number and summary to your clipboard">Copy Summary</button>
+      [% END %]
+      <button type="button" id="expand-all-btn" class="in-page">Expand All</button>
+    </div>
+  </div>
+[% END %]
+
+[%# === status === %]
+
+[% WRAPPER bug_modal/module.html.tmpl
+    title = "Status"
+%]
+  [% WRAPPER fields_lhs %]
+
+    [%# product %]
+    [% WRAPPER bug_modal/field.html.tmpl
+        field = bug_fields.product
+        field_type = constants.FIELD_TYPE_SINGLE_SELECT
+    %]
+      <div class="spin-toggle" data-latch="#product-latch" data-for="#product-info">
+        <span class="spin-latch" id="product-latch">&#9656;</span>
+        [% bug.product FILTER html %]
+      </div>
+      <div id="product-info" style="display:none">
+        [% bug.product_obj.description FILTER html_light %]
+      </div>
+    [% END %]
+
+    [%# component %]
+    [% WRAPPER bug_modal/field.html.tmpl
+        field = bug_fields.component
+        field_type = constants.FIELD_TYPE_SINGLE_SELECT
+    %]
+      <div class="spin-toggle" data-latch="#component-latch" data-for="#component-info">
+        <span class="spin-latch" id="component-latch">&#9656;</span>
+        [% bug.component FILTER html %]
+      </div>
+      <div id="component-info" style="display:none">
+        <div>[% bug.component_obj.description FILTER html_light %]</div>
+        <a href="buglist.cgi?component=[% bug.component FILTER uri %]&amp;
+                [%~ %]product=[% bug.product FILTER uri %]&amp;
+                [%~ %]bug_status=__open__" target="_blank">Other [% terms.Bugs %]</a>
+      </div>
+    [% END %]
+
+    [%# importance %]
+    [% WRAPPER bug_modal/field.html.tmpl
+        label = "Importance"
+        container = 1
+        hide_on_view = bug.priority == "--" && bug.bug_severity == "normal"
+    %]
+      [% INCLUDE bug_modal/field.html.tmpl
+          field = bug_fields.priority
+          field_type = constants.FIELD_TYPE_SINGLE_SELECT
+          no_indent = 1
+          inline = 1
+      %]
+      [% INCLUDE bug_modal/field.html.tmpl
+          field = bug_fields.bug_severity
+          field_type = constants.FIELD_TYPE_SINGLE_SELECT
+          inline = 1
+      %]
+      [% UNLESS cf_hidden_in_product('cf_rank', bug.product, bug.component) %]
+        [% rendered_custom_fields.push('cf_rank') %]
+        [% INCLUDE bug_modal/field.html.tmpl
+            field = bug_fields.cf_rank
+            field_type = constants.FIELD_TYPE_INTEGER
+            inline = 1
+            label = "Rank"
+            hide_on_view = bug.cf_rank == ""
+        %]
+      [% END %]
+    [% END %]
+
+    [%# status, resolution %]
+    [% IF bug.assigned_to.id != user.id %]
+      [% WRAPPER bug_modal/field.html.tmpl
+          name = "status-view"
+          container = 1
+          label = "Status"
+          hide_on_edit = 1
+      %]
+        [% bug.bug_status FILTER html %]
+        [%+ bug.resolution FILTER html IF bug.resolution %]
+        [% IF bug.dup_id %]
+          of [% terms.bug _ " $bug.dup_id" FILTER bug_link(bug.dup_id) FILTER none %]
+        [% END %]
+      [% END %]
+    [% END %]
+
+  [% END %]
+  [% WRAPPER fields_rhs %]
+
+    [%# creation time %]
+    [% WRAPPER bug_modal/field.html.tmpl
+        field = bug_fields.creation_ts
+        label = "Reported"
+        view_only = 1
+    %]
+      [% INCLUDE bug_modal/rel_time.html.tmpl ts=bug.creation_ts %]
+    [% END %]
+
+    [%# last modified %]
+    [% WRAPPER bug_modal/field.html.tmpl
+      field = bug_fields.delta_ts
+      label = "Modified"
+      view_only = 1
+    %]
+      [% INCLUDE bug_modal/rel_time.html.tmpl ts=bug.delta_ts %]
+    [% END %]
+
+  [% END %]
+
+  [%# status/resolution knob %]
+  [% WRAPPER bug_modal/field.html.tmpl
+      name = "status-edit"
+      container = 1
+      label = "Status"
+      hide_on_view = bug.assigned_to.id != user.id
+  %]
+    [% INCLUDE bug_modal/field.html.tmpl
+        field  = bug_fields.bug_status
+        field_type = constants.FIELD_TYPE_SINGLE_SELECT
+        values = bug.choices.bug_status
+        inline = 1
+        no_indent = 1
+        edit_only = 1
+    %]
+    [% INCLUDE bug_modal/field.html.tmpl
+        field  = bug_fields.resolution
+        field_type = constants.FIELD_TYPE_SINGLE_SELECT
+        values = bug.choices.resolution
+        inline = 1
+        edit_only = 1
+    %]
+    [% IF bug.choices.resolution.only("name", "DUPLICATE").size %]
+      <div id="duplicate-container">
+        of
+        <input id="dup_id" name="dup_id" size="6" value="[% bug.dup_id FILTER html %]">
+      </div>
+      <div id="duplicate-actions">
+        <button type="button" class="in-page" id="mark-as-dup-btn">
+          Mark as Duplicate
+        </button>
+      </div>
+    [% END %]
+  [% END %]
+[% END %]
+
+[%# === people === %]
+
+[%
+  unassigned = (bug.assigned_to.login == "nobody@mozilla.org")
+               || (bug.assigned_to.login.search("\.bugs$"));
+  sub =
+    "Reporter: " _ bug.reporter.moz_nick
+    _ (unassigned ? ", Unassigned" : ", Assigned: " _ bug.assigned_to.moz_nick)
+    _ (bug.mentors.size ? ", Mentored" : "")
+    _ (needinfo.size ? ", NeedInfo" : "")
+%]
+[% WRAPPER bug_modal/module.html.tmpl
+    title = "People"
+    subtitle = sub
+    collapsed = 1
+%]
+  [% WRAPPER fields_lhs %]
+
+    [%# assignee %]
+    [% WRAPPER bug_modal/field.html.tmpl
+        field = bug_fields.assigned_to
+        field_type = constants.FIELD_TYPE_USER
+    %]
+      [% IF unassigned %]
+        <i>Unassigned</i>
+        [% IF bug.check_can_change_field("assigned_to", 0, 1) %]
+          <button type="button" id="take-btn" class="in-page">Take</button>
+        [% END %]
+      [% ELSE %]
+        [% INCLUDE bug_modal/user.html.tmpl u=bug.assigned_to %]
+      [% END %]
+    [% END %]
+
+    [%# mentors %]
+    [% WRAPPER bug_modal/field.html.tmpl
+        field = bug_fields.bug_mentor
+        field_type = constants.FIELD_TYPE_USERS
+        label = "Mentors"
+        value = bug.mentors.pluck("login")
+        hide_on_view = bug.mentors.size == 0
+    %]
+      [%
+        FOREACH mentor IN bug.mentors;
+          INCLUDE bug_modal/user.html.tmpl u=mentor;
+        END;
+      %]
+    [% END %]
+
+    [%# qa contact %]
+    [% WRAPPER bug_modal/field.html.tmpl
+        field = bug_fields.qa_contact
+        field_type = constants.FIELD_TYPE_USER
+        hide_on_view = bug.qa_contact == ""
+    %]
+      [% INCLUDE bug_modal/user.html.tmpl u=bug.qa_contact %]
+    [% END %]
+
+  [% END %]
+  [% WRAPPER fields_rhs %]
+
+    [%# reporter %]
+    [% INCLUDE bug_modal/field.html.tmpl
+        field = bug_fields.reporter
+        field_type = constants.FIELD_TYPE_USER
+        view_only = 1
+    %]
+
+    [%# needinfo %]
+    [% WRAPPER bug_modal/field.html.tmpl
+        container = 1
+        label = "NeedInfo"
+        hide_on_view = needinfo.size == 0
+        hide_on_edit = 1
+    %]
+      [% INCLUDE bug_modal/flags.html.tmpl
+          types = bug.flag_types.only("name", "needinfo")
+          no_label = 1
+          view_only = 1
+      %]
+    [% END %]
+    [% IF needinfo.size %]
+      [% WRAPPER bug_modal/field.html.tmpl
+          container = 1
+          label = "NeedInfo"
+          hide_on_view = 1
+      %]
+        <button type="button" id="needinfo-scroll" class="in-page">Update</button>
+      [% END %]
+    [% END %]
+
+    [%# cc %]
+    [% WRAPPER bug_modal/field.html.tmpl
+        container = 1
+        label = "CC"
+        hide_on_view = bug.cc.size == 0
+    %]
+      [% IF bug.cc && bug.cc.size %]
+        <span id="cc-latch">&#9656;</span>
+        <span id="cc-summary">
+          [%
+            IF bug.cc.size == 1;
+              is_cced ? "Just you" : "1 person";
+            ELSE;
+              bug.cc.size _ " people";
+            END;
+          %]
+        </span>
+        <div id="cc-list" style="display:none"></div>
+      [% ELSE %]
+        <i>Nobody</i>
+      [% END %]
+    [% END %]
+
+  [% END %]
+[% END %]
+
+[%# === tracking === %]
+
+[%
+  col =
+    (bug.version.lower == "unspecified" || bug.version.lower == "other")
+    && bug.target_milestone == "---"
+    && !has_bug_flags
+    && !set_project_flags.size
+    && !set_tracking_flags.size;
+  sub = [];
+  IF col;
+    sub.push("Not tracked");
+  END;
+  open_deps = bug.depends_on_obj.only("resolution", "").size;
+  IF open_deps;
+    sub.push("Depends on: " _ open_deps _ " bug" _ (open_deps == 1 ? "" : "s"));
+  END;
+  open_deps = bug.blocks_obj.only("resolution", "").size;
+  IF open_deps;
+    sub.push("Blocks: " _ open_deps _ " bug" _ (open_deps == 1 ? "" : "s"));
+  END;
+%]
+[% WRAPPER bug_modal/module.html.tmpl
+  title = "Tracking"
+  subtitle = sub.join(", ")
+  collapsed = col
+%]
+  [% WRAPPER fields_lhs %]
+
+    [%# version %]
+    [% INCLUDE bug_modal/field.html.tmpl
+        field = bug_fields.version
+        field_type = constants.FIELD_TYPE_SINGLE_SELECT
+    %]
+
+    [%# milestone %]
+    [% INCLUDE bug_modal/field.html.tmpl
+        field = bug_fields.target_milestone
+        field_type = constants.FIELD_TYPE_SINGLE_SELECT
+        label = "Target"
+    %]
+
+    [%# platform, op-sys %]
+    [% WRAPPER bug_modal/field.html.tmpl
+        container = 1
+        label = "Platform"
+        hide_on_view = bug.rep_platform == 'All' && bug.op_sys == 'All'
+    %]
+      [% INCLUDE bug_modal/field.html.tmpl
+          field = bug_fields.rep_platform
+          field_type = constants.FIELD_TYPE_SINGLE_SELECT
+          inline = 1
+          no_indent = 1
+      %]
+      [% INCLUDE bug_modal/field.html.tmpl
+          field = bug_fields.op_sys
+          field_type = constants.FIELD_TYPE_SINGLE_SELECT
+          inline = 1
+      %]
+    [% END %]
+
+    [%# keywords %]
+    [% WRAPPER bug_modal/field.html.tmpl
+        field = bug_fields.keywords
+        field_type = constants.FIELD_TYPE_KEYWORDS
+        hide_on_view = bug.keyword_objects.size == 0
+    %]
+      [% bug.keyword_objects.pluck("name").join(", ") FILTER html %]
+    [% END %]
+
+    [% UNLESS cf_hidden_in_product('cf_fx_iteration', bug.product, bug.component) %]
+      [% rendered_custom_fields.push('cf_fx_iteration') %]
+      [% INCLUDE bug_modal/field.html.tmpl
+          field = bug_fields.cf_fx_iteration
+          field_type = bug_fields.cf_fx_iteration.type
+          hide_on_view = bug.cf_iteration == ""
+      %]
+    [% END %]
+
+    [% UNLESS cf_hidden_in_product('cf_fx_points', bug.product, bug.component) %]
+      [% rendered_custom_fields.push('cf_fx_points') %]
+      [% INCLUDE bug_modal/field.html.tmpl
+          field = bug_fields.cf_fx_points
+          field_type = bug_fields.cf_fx_points.type
+          hide_on_view = bug.cf_points == ""
+      %]
+    [% END %]
+
+  [% END %]
+  [% WRAPPER fields_rhs %]
+
+    [%# depends on %]
+    [% INCLUDE bug_modal/field.html.tmpl
+        field = bug_fields.dependson
+        field_type = constants.FIELD_TYPE_BUG_LIST
+        values = bug.depends_on_obj
+        hide_on_view = bug.dependson.size == 0
+    %]
+
+    [%# blocks %]
+    [% INCLUDE bug_modal/field.html.tmpl
+        field = bug_fields.blocked
+        field_type = constants.FIELD_TYPE_BUG_LIST
+        values = bug.blocks_obj
+        hide_on_view = bug.blocked.size == 0
+    %]
+
+    [% IF bug.dependson.size + bug.blocked.size > 1 %]
+      [% WRAPPER bug_modal/field.html.tmpl
+          container = 1
+          label = ""
+          hide_on_edit = 1
+      %]
+        Dependency <a href="showdependencytree.cgi?id=[% bug.bug_id FILTER none %]&amp;hide_resolved=1">tree</a>
+        / <a href="showdependencygraph.cgi?id=[% bug.bug_id FILTER none %]">graph</a>
+      [% END %]
+    [% END %]
+
+    [%# duplicates %]
+    [% IF bug.duplicates.size %]
+      [% INCLUDE bug_modal/field.html.tmpl
+          label = "Duplicates"
+          values = bug.duplicates
+          field_type = constants.FIELD_TYPE_BUG_LIST
+          view_only = 1
+      %]
+    [% END %]
+
+    [%# flags %]
+    [% WRAPPER bug_modal/field.html.tmpl
+        name = "bug_flags"
+        container = 1
+        label = terms.Bug _ " Flags"
+        hide_on_view = !has_bug_flags
+    %]
+      [% INCLUDE bug_modal/flags.html.tmpl
+          types = bug.flag_types.skip("name", "needinfo")
+      %]
+    [% END %]
+
+  [% END %]
+[% END %]
+
+[% IF tracking_flags.size %]
+
+  [%# === tracking flags === %]
+
+  [% WRAPPER bug_modal/module.html.tmpl
+      title = tracking_flags_title
+      collapsed = 1
+      subtitle = firefox_flags_subtitle
+  %]
+    [% WRAPPER fields_lhs %]
+
+      [% UNLESS set_tracking_flags.size || set_project_flags.size %]
+        <p class="edit-hide">
+          This [% terms.bug %] is not currently tracked.
+        </p>
+      [% END %]
+
+      [%# tracking flags %]
+      [% WRAPPER bug_modal/field.html.tmpl
+          container = 1
+          label = "Tracking Flags"
+          hide_on_view = set_tracking_flags.size == 0
+      %]
+        [% INCLUDE bug_modal/tracking_flags.html.tmpl
+            type = "tracking"
+        %]
+      [% END %]
+
+    [% END %]
+    [% WRAPPER fields_rhs %]
+
+      [%# project flags %]
+      [% WRAPPER bug_modal/field.html.tmpl
+          container = 1
+          label = "Project Flags"
+          hide_on_view = set_project_flags.size == 0
+      %]
+        [% INCLUDE bug_modal/tracking_flags.html.tmpl
+            type = "project"
+        %]
+      [% END %]
+
+    [% END %]
+  [% END %]
+
+[% END %]
+
+[%# === details === %]
+
+[%
+  sub = [];
+  IF bug.status_whiteboard != "";
+    sub.push(bug.status_whiteboard.truncate(256, '&hellip;'));
+  END;
+  IF bug.cf_crash_signature != "";
+    sub.push("crash signature");
+  END;
+%]
+[% WRAPPER bug_modal/module.html.tmpl
+  title = "Details"
+  collapsed = 1
+  subtitle = sub.join(", ")
+%]
+  [% WRAPPER fields_lhs %]
+
+    [%# whiteboard %]
+    [% WRAPPER bug_modal/field.html.tmpl
+        field = bug_fields.status_whiteboard
+        field_type = constants.FIELD_TYPE_FREETEXT
+    %]
+      [% bug.status_whiteboard == "" ? "---" : bug.status_whiteboard FILTER html %]
+    [% END %]
+
+    [%# votes %]
+    [% IF bug.product_obj.votesperuser %]
+      [% WRAPPER bug_modal/field.html.tmpl
+          container = 1
+          label = "Votes"
+      %]
+        [% bug.votes FILTER html %]
+        vote[% "s" IF bug.votes != 1 %]
+        [% IF user.id %]
+          <button type="button" class="minor" id="vote-btn">
+            [% bug.user_votes ? "Remove vote" : "Vote" %]
+          </button>
+        [% END %]
+      [% END %]
+    [% END %]
+
+    [%# custom fields (except textarea) %]
+    [%
+      FOREACH field = custom_fields;
+        NEXT IF field.type == constants.FIELD_TYPE_EXTENSION || field.type == constants.FIELD_TYPE_TEXTAREA;
+        NEXT IF rendered_custom_fields.exists(field.name);
+        NEXT IF cf_hidden_in_product(field.name, bug.product, bug.component);
+        cf_value = bug.${field.name};
+        IF field.type == constants.FIELD_TYPE_SINGLE_SELECT;
+          has_value = cf_value != "---";
+        ELSIF field.type == constants.FIELD_TYPE_MULTI_SELECT;
+          has_value = cf_value.size != 0;
+        ELSE;
+          has_value = cf_value != "";
+        END;
+        INCLUDE bug_modal/field.html.tmpl
+          field = field
+          field_type = field.type
+          hide_on_view = !has_value;
+      END;
+    %]
+
+  [% END %]
+  [% WRAPPER fields_rhs %]
+
+    [%# url %]
+    [% WRAPPER bug_modal/field.html.tmpl
+        field = bug_fields.bug_file_loc
+        field_type = constants.FIELD_TYPE_FREETEXT
+        hide_on_view = bug.bug_file_loc == ""
+    %]
+      <a href="[% bug.bug_file_loc FILTER html %]" target="_blank"
+         rel="noreferrer" title="[% bug.bug_file_loc FILTER html %]"
+         [% UNLESS is_safe_url(bug.bug_file_loc) +%] class="unsafe-url"[% END %]
+      >[% bug.bug_file_loc FILTER truncate(40) FILTER html %]</a>
+    [% END %]
+
+    [%# see also %]
+    [% INCLUDE bug_modal/field.html.tmpl
+        field = bug_fields.see_also
+        field_type = constants.FIELD_TYPE_BUG_URLS
+        values = bug.see_also
+        hide_on_view = bug.see_also.size == 0
+    %]
+
+  [% END %]
+
+  [%# custom fields (textarea) %]
+  [%
+    FOREACH field IN custom_fields;
+      NEXT IF field.type != constants.FIELD_TYPE_TEXTAREA;
+      NEXT IF rendered_custom_fields.exists(field.name);
+      INCLUDE bug_modal/field.html.tmpl
+        field = field
+        field_type = field.type
+        hide_on_view = bug.${field.name} == "" || bug.${field.name} == "---";
+    END;
+  %]
+[% END %]
+
+[%# === groups === %]
+
+[% WRAPPER bug_modal/module.html.tmpl
+  title = "Security"
+  collapsed = 1
+  subtitle = bug.groups_in.size ? bug.groups_in.pluck("description").join(", ") : "public"
+  hide_on_view = bug.groups_in.size == 0
+  hide_on_edit = bug.groups.size == 0
+%]
+  [% INCLUDE bug_modal/groups.html.tmpl %]
+[% END %]
+
+[%# === user story === %]
+
+[% IF bug.user_story_visible.0 %]
+  [% WRAPPER bug_modal/module.html.tmpl
+    title = "User Story"
+    hide_on_view = bug.cf_user_story == ""
+    collapsed = bug.cf_user_story == ""
+  %]
+    [% IF user.id %]
+      <div id="user-story-actions">
+        [% IF bug.check_can_change_field('cf_user_story', 0, 1) %]
+          <button type="button" class="in-page" id="user-story-edit-btn">Edit</button>
+        [% END %]
+        [% IF bug.cf_user_story != "" && bug.check_can_change_field('longdesc', 0, 1) %]
+          <button type="button" class="in-page" id="user-story-reply-btn">Reply</button>
+        [% END %]
+      </div>
+    [% END %]
+    <pre id="user-story">[% bug.cf_user_story FILTER html %]</pre>
+    [% IF user.id %]
+      <textarea id="cf_user_story" name="cf_user_story" style="display:none" rows="10" cols="80">
+        [%~ bug.cf_user_story FILTER html ~%]
+      </textarea>
+    [% END %]
+  [% END %]
+[% END %]
+
+[%# === attachments === %]
+
+[% IF active_attachments || obsolete_attachments %]
+  [%
+    sub = [];
+    IF active_attachments;
+      sub.push(active_attachments _ " attachment" _ (active_attachments == 1 ? "" : "s"));
+    END;
+    IF obsolete_attachments;
+      sub.push(obsolete_attachments _ " obsolete attachment" _ (obsolete_attachments == 1 ? "" : "s"));
+    END;
+  %]
+  [% WRAPPER bug_modal/module.html.tmpl
+      title = "Attachments"
+      subtitle = sub.join(", ")
+      collapsed = active_attachments == 0
+  %]
+    [% INCLUDE bug_modal/attachments.html.tmpl %]
+    [% IF obsolete_attachments %]
+      <div id="attachments-actions">
+        <button type="button" id="attachments-obsolete-btn" class="in-page">Show Obsolete Attachments</button>
+      </div>
+    [% END %]
+  [% END %]
+[% END %]
+
+[%# === top (between modules and comments) actions === %]
+
+[% IF user.id %]
+  <div id="top-actions">
+    <button type="button" id="attachments-add-btn" class="minor">Attach File</button>
+    <button type="button" class="comment-btn in-page">Add Comment</button>
+    <button type="submit" class="save-btn" id="top-save-btn" style="display:none">Save Changes</button>
+  </div>
+[% END %]
+
+[%# === comments === %]
+
+[%
+  INCLUDE bug_modal/activity_stream.html.tmpl stream=bug.activity_stream;
+  IF user.id;
+    INCLUDE bug_modal/new_comment.html.tmpl;
+  END;
+%]
+
+[%# === bottom actions === %]
+
+[% IF user.id %]
+  <div id="bottom-actions">
+    <button type="submit" class="save-btn" id="bottom-save-btn">Save Changes</button>
+    [%
+      IF bug.resolution == "";
+        seen_header = 0;
+        FOREACH resolution IN ["FIXED", "INVALID", "DUPLICATE"];
+          NEXT UNLESS bug.choices.resolution.only("name", resolution).size;
+          IF NOT seen_header;
+            seen_header = 1;
+            " Resolve as ";
+          END;
+          %] <button type="button" class="in-page resolution-btn">[% resolution FILTER html %]</button> [%
+        END;
+      ELSIF bug.choices.bug_status.only("name", "REOPENED").size;
+          %] <button type="button" class="in-page status-btn" data-status="REOPENED">REOPEN</button> [%
+      END;
+    %]
+    <div id="bottom-right-actions">
+      <button type="button" id="top-btn" class="in-page">Top &uarr;</button>
+      <button type="button" id="new-bug-btn" class="minor">New [% terms.Bug %] &#9662;</button>
+    </div>
+  </div>
+  </form>
+[% ELSE %]
+  <div id="login-required">
+    You need to <a href="show_bug.cgi?id=[% bug.bug_id FILTER none %]&amp;GoAheadAndLogIn=1">log in</a>
+    before you can comment on or make changes to this [% terms.bug %].
+  </div>
+[% END %]
+
+[%# === blocks === %]
+
+[% BLOCK fields_lhs %]
+  <div class="fields-lhs">[% content FILTER none %]</div>
+[% END %]
+
+[% BLOCK fields_rhs %]
+  <div class="fields-rhs">[% content FILTER none %]</div>
+[% END %]

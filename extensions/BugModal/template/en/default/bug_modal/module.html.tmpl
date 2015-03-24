@@ -1,0 +1,38 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[%#
+  # title: (string, optional) main title of module
+  # collapse: (boolean) if true, show as collapsed by default (default false)
+  # subtitle: (string, optional) sub-title
+  # content: (string, required) module's content (use WRAPPER module..)
+  # hide_on_view: (boolean) if true, the module won't be visible in view mode
+  # hide_on_edit: (boolean) if true, the module won't be visible in edit mode
+  #%]
+
+<div class="module
+    [%~ " edit-hide" IF hide_on_edit %]
+    [%~ " edit-show" IF hide_on_view && !hide_on_edit %]"
+    [% IF hide_on_view +%] style="display:none"[% END %]
+    [% IF title %] id="module-[% title.replace FILTER id %]"[% END %]
+>
+  [% IF title %]
+    <div class="module-header">
+      <div class="module-latch">
+        <div class="module-spinner">[% collapsed ? "&#9656;" : "&#9662;" %]</div>
+        <div class="module-title">[% title FILTER html %]</div>
+        [% IF subtitle %]
+          <div class="module-subtitle">([% subtitle FILTER html %])</div>
+        [% END %]
+      </div>
+    </div>
+  [% END %]
+  <div class="module-content" [% ' style="display:none"' IF collapsed %] >
+    [% content FILTER none %]
+  </div>
+</div>

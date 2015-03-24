@@ -1,0 +1,29 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[%#
+  # comment: comment object
+  # bug: bug object
+  #%]
+
+<div id="add-comment">
+  <div id="add-comment-label">Add Comment:</div>
+  [% IF user.is_insider && bug.check_can_change_field('longdesc', 0, 1) %]
+    <div id="add-comment-private"
+      title="Make comment visible only to members of the '[% Param('insidergroup') FILTER html %]' group"
+    >
+      <input type="checkbox" name="comment_is_private" id="add-comment-private-cb"
+          value="1" comment_id="[% comment.count FILTER none %]">
+      <label for="add-comment-private-cb">Private</label>
+    </div>
+  [% END %]
+  <textarea rows="5" cols="80" name="comment" id="comment"></textarea>
+  <div id="after-comment-commit-button">
+    [% Hook.process("after_comment_commit_button", 'bug/edit.html.tmpl') %]
+  </div>
+</div>

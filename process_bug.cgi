@@ -446,7 +446,17 @@ elsif ($action eq 'next_bug' or $action eq 'same_bug') {
         if ($action eq 'next_bug') {
             $vars->{'nextbug'} = $bug->id;
         }
-        $template->process("bug/show.html.tmpl", $vars)
+
+        # BMO: add show_bug_format hook for experimental UI work
+        my $format_params = {
+            format => scalar $cgi->param('format'),
+            ctype  => scalar $cgi->param('ctype'),
+        };
+        Bugzilla::Hook::process('show_bug_format', $format_params);
+        my $format = $template->get_format("bug/show",
+                                           $format_params->{format},
+                                           $format_params->{ctype});
+        $template->process($format->{template}, $vars)
           || ThrowTemplateError($template->error());
         exit;
     }

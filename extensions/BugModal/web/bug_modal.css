@@ -1,0 +1,666 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this file,
+ * You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * This Source Code Form is "Incompatible With Secondary Licenses", as
+ * defined by the Mozilla Public License, v. 2.0. */
+
+/* generic */
+
+.container {
+    display: table-cell;
+    width: 100%;
+}
+
+.layout-table {
+    border-spacing: 0;
+}
+
+.layout-table td {
+    padding: 0;
+}
+
+.inline {
+    display: table-cell;
+}
+
+.gravatar {
+    vertical-align: middle;
+    margin-right: 5px;
+}
+
+.flag .vcard {
+    display: inline;
+}
+
+.group-padlock {
+    vertical-align: middle;
+    margin-right: 5px;
+}
+
+button.minor {
+    background-color: #888;
+    background-image: linear-gradient(#aaa, #888);
+    font-size: 11px;
+    padding: 0.25em 0.5em;
+}
+
+button.minor:hover {
+    -webkit-box-shadow: 0 1px 0 0 rgba(0,0,0,0.2), inset 0 -1px 0 0 rgba(0,0,0,0.3), inset 0 12px 24px 2px #bbb;
+    -moz-box-shadow: 0 1px 0 0 rgba(0,0,0,0.2), inset 0 -1px 0 0 rgba(0,0,0,0.3), inset 0 12px 24px 2px #bbb;
+    box-shadow: 0 1px 0 0 rgba(0,0,0,0.2), inset 0 -1px 0 0 rgba(0,0,0,0.3), inset 0 12px 24px 2px #bbb;
+}
+
+button.in-page {
+    background-color: #fff;
+    background-image: linear-gradient(#fff, #fff);
+    color: #000;
+    border: 1px solid #ccc;
+    -webkit-box-shadow: none;
+    -moz-box-shadow: none;
+    box-shadow: none;
+    font-size: 11px;
+    padding: 0.25em 0.5em;
+}
+
+button.in-page:hover {
+    -webkit-box-shadow: inset 0 12px 24px 2px #eee;
+    -moz-box-shadow: inset 0 12px 24px 2px #eee;
+    box-shadow: inset 0 12px 24px 2px #eee;
+    -moz-transition: all linear 100ms;
+    -webkit-transition: all linear 100ms;
+    transition: all linear 100ms;
+}
+
+select[multiple], .text_input, .yui-ac-input, input {
+    font-size: 12px !important;
+}
+
+.spin-toggle {
+    cursor: pointer;
+}
+
+.spin-toggle:hover {
+    text-decoration: underline;
+}
+
+.spin-latch {
+    color: #999;
+    padding-right: 5px;
+}
+
+/* modules */
+
+.module {
+    color: #000;
+    border-radius: 2px;
+    margin-top: 5px;
+    font-size: 13px;
+}
+
+.module.module-collapsed .module-content {
+    border: 1px solid red;
+}
+
+.module-header {
+    background: #eee;
+    padding: 2px 5px;
+    cursor: pointer;
+}
+
+.module-header:hover {
+    outline: 1px solid #ccc;
+}
+
+.module-latch {
+    display: table-cell;
+    padding-left: 5px;
+    padding-right: 5px;
+}
+
+.module-spinner {
+    color: #999;
+    display: table-cell;
+    width: 10px;
+}
+
+.module-title, .module-subtitle {
+    display: table-cell;
+    padding-left: 5px;
+}
+
+.module-subtitle {
+    padding-right: 5px;
+    color: #666;
+    font-size: 12px;
+}
+
+.module .fields-lhs {
+    min-width: 450px;
+    display: table-cell;
+    vertical-align: top;
+}
+
+.module .fields-rhs {
+    min-width: 450px;
+    display: table-cell;
+    vertical-align: top;
+    width: 100%;
+}
+
+.module-content {
+    padding: 2px 5px;
+    background: #fff;
+}
+
+.module .field {
+    margin-top: 4px;
+    vertical-align: top;
+}
+
+.module .field.right {
+}
+
+.module .field .name {
+    display: table-cell;
+    width: 100px;
+    min-width: 100px;
+    text-align: right;
+    vertical-align: top;
+    padding-right: 10px;
+    color: #666;
+}
+
+.module .field.inline .name {
+    min-width: 0px;
+    width: auto;
+    padding-left: 10px;
+}
+
+.module .indent {
+    padding-left: 10px;
+}
+
+.module .field .value {
+    display: table-cell;
+}
+
+.module .field .value.wide {
+    display: block;
+}
+
+.module .field .value.edit {
+    width: 100%;
+}
+
+.module .field .value input {
+    width: 100%;
+}
+
+.module .field .value input[type="checkbox"] {
+    width: auto;
+}
+
+.module .field .value.short input {
+    width: 170px;
+}
+
+/* field types */
+
+input[type="number"] {
+    text-align: right;
+    width: 5em !important;
+}
+
+.cf_date-img, .cf_datetime-img {
+    vertical-align: middle;
+}
+
+/* specific fields */
+
+#field-value-bug_id {
+    font-weight: bold;
+}
+
+#field-value-short_desc {
+    font-weight: bold;
+    font-size: 120%;
+}
+
+#status-needinfo, #status-needinfo .vcard {
+    display: inline;
+}
+
+#duplicate-container, #duplicate-actions {
+    display: table-cell;
+    vertical-align: top;
+    padding-left: 8px;
+}
+
+#dup_id {
+    margin-left: 4px;
+}
+
+#duplicate-container #dup_up {
+    padding-left: 5px;
+}
+
+#after-comment-commit-button {
+    margin-left: -8px;
+}
+
+#needinfo_from_autocomplete {
+    width: auto;
+}
+
+#needinfo_role_identity {
+    margin-left: 5px;
+}
+
+#user-story {
+    margin: 0;
+}
+
+#user-story-actions {
+    float: right;
+}
+
+#login-required {
+    padding: 20px 8px;
+    margin-bottom: 50px;
+}
+
+#product-info, #component-info {
+    color: #484;
+}
+
+#cc-latch {
+    color: #999;
+}
+
+#cc-latch, #cc-summary {
+    cursor: pointer;
+}
+
+#cc-summary:hover {
+    text-decoration: underline;
+}
+
+#cc-list {
+    max-height: 150px;
+    overflow-y: scroll;
+}
+
+/* actions */
+
+#copy-summary {
+    margin-left: 20px;
+}
+
+#top-actions {
+    margin-top: 5px;
+    padding-bottom: 20px;
+}
+
+#top-actions .save-btn {
+    float: right;
+}
+
+#bottom-actions {
+    margin-bottom: 50px;
+}
+
+#bottom-right-actions {
+    float: right;
+}
+
+.edit-textarea-set-btn {
+    float: right;
+}
+
+/* attachments */
+
+#attachments {
+    width: 100%;
+}
+
+#attachments tr:hover {
+    background-image: linear-gradient(to right, #666, rgba(0, 0, 0, 0) 1px);
+}
+
+#attachments td {
+    padding: 4px 8px;
+    vertical-align: top;
+    font-size: 13px;
+    border-bottom: 1px dotted silver;
+}
+
+#attachments .attach-desc-td {
+    width: 100%;
+}
+
+#attachments .attach-desc {
+    font-weight: bold;
+}
+
+#attachments .attach-desc a {
+    color: #000;
+}
+
+#attachments .attach-info {
+    font-size: 11px;
+}
+
+#attachments .attach-time {
+    font-size: 11px;
+}
+
+#attachments .attach-actions {
+    white-space: nowrap;
+}
+
+#attachments .attach-flag {
+    white-space: nowrap;
+}
+
+#attachments .flag-name-status {
+    font-weight: bold;
+}
+
+#attachments .attach-obsolete .attach-desc {
+    text-decoration: line-through;
+}
+
+#attachments .attach-patch {
+    background: #ffc;
+    background-image: linear-gradient(to right, #ffc, #fff);
+}
+
+#attachments .vcard {
+    display: inline;
+}
+
+#attachments-actions {
+    padding: 2px;
+}
+
+#attachments .attach-flag .vcard {
+    white-space: nowrap;
+}
+
+/* flags */
+
+.flags td {
+    font-size: 13px !important;
+}
+
+.flag-name {
+    text-align: right;
+}
+
+td.flag-name, td.flag-requestee {
+    padding-left: 5px;
+}
+
+td.flag-value select {
+    margin-left: 5px;
+}
+
+td.flag-requestee {
+    width: 100%;
+}
+
+.flags .vcard {
+    white-space: nowrap;
+}
+
+.tracking-flags td, .tracking-flags th {
+    padding: 0 5px;
+}
+
+.tracking-flags th {
+    font-weight: normal;
+    text-align: left;
+    color: #666;
+}
+
+.tracking-flag-name, .tracking-flag-tracking {
+    text-align: right;
+    white-space: nowrap;
+}
+
+/* comments and activity */
+
+.change-set {
+    clear: both;
+    -webkit-box-shadow: 1px 1px 5px rgba(0, 0, 0, 0.1);
+    -moz-box-shadow: 1px 1px 5px rgba(0, 0, 0, 0.1);
+    box-shadow: 1px 1px 5px rgba(0, 0, 0, 0.1);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.2);
+    margin-top: 20px;
+    border: 1px solid #ddd;
+}
+
+.change-set:target {
+    outline: 2px solid #0095dd;
+}
+
+.change-head {
+    width: 100%;
+    background: #eee;
+}
+
+.change-gravatar {
+    padding-left: 8px !important;
+}
+
+.change-author {
+    width: 100%;
+    vertical-align: top;
+    padding-top: 4px !important;
+}
+
+.change-author .vcard {
+    display: inline;
+    font-weight: bold;
+}
+
+.change-author .user-role {
+    margin-left: 1em;
+    color: #448844;
+}
+
+
+.change-name, .change-time, .comment-private {
+    display: inline;
+}
+
+.comment-actions {
+    white-space: nowrap;
+    padding: 2px 2px 0 0 !important;
+}
+
+.comment-spinner {
+    font-family: monospace;
+    white-space: nowrap;
+    vertical-align: bottom;
+}
+
+.comment-text {
+    white-space: pre-wrap;
+    font: 13px/1.2 "Droid Sans Mono",Menlo,Monaco,"Courier New",Courier,monospace;
+    background: #fff;
+    margin: 1px 0 0 0;
+    overflow: auto;
+    padding: 8px;
+    border-top: 1px solid #ddd;
+}
+
+.comment-text span.quote, .comment-text span.quote_wrapped {
+    background: #eee !important;
+    color: #444 !important;
+    display: block !important;
+    padding: 5px !important;
+    display: inline-block !important;
+    width: 99% !important;
+}
+
+.comment-tags {
+    padding: 0 8px 2px 8px !important;
+}
+
+.comment-tag {
+    border: 1px solid #ccc;
+    padding: 2px 4px;
+    margin-right: 2px;
+    border-radius: 0.5em;
+    background-color: #fff;
+    color: #000;
+    font-size: 12px;
+}
+
+.comment-collapse-reason {
+    padding: 5px 7px !important;
+    width: 100%;
+}
+
+.default-collapsed {
+    background: inherit;
+    color: #888;
+}
+
+.default-collapsed .comment-actions {
+    padding: 2px;
+}
+
+.private-comment {
+    color: #8b0000;
+    background: #f3eeee;
+}
+
+.activity {
+    padding: 5px 8px;
+    background: #eee;
+    border-top: 1px solid #ddd;
+}
+
+.activity-deleted {
+    text-decoration: line-through;
+}
+
+.change-set .reporter {
+    background-image: linear-gradient(to right, #feb, rgba(0, 0, 0, 0) 150px);
+}
+
+.change-set .assignee {
+    background-image: linear-gradient(to right, #ffc, rgba(0, 0, 0, 0) 150px);
+}
+
+/* add comment */
+
+#add-comment {
+    margin-top: 20px;
+}
+
+#add-comment-label {
+    display: inline;
+    font-weight: bold;
+}
+
+#add-comment-private {
+    float: right;
+}
+
+#comment {
+    width: 100%;
+    box-sizing: border-box !important;
+}
+
+/* controls */
+
+#summary-container {
+    display: table-cell;
+    width: 100%;
+    vertical-align: top;
+}
+
+#xhr-error {
+    background: #fff;
+    color: #000;
+    border-radius: 2px;
+    border: 1px solid maroon;
+    margin: 5px 0px;
+    padding: 5px;
+}
+
+#mode-container {
+    display: table-cell;
+    white-space: nowrap;
+    text-align: right;
+    padding: 5px;
+    margin: 5px;
+}
+
+#mode-btn, #commit-btn {
+    margin: 0 0 5px 0;
+}
+
+#mode-btn-loading, #mode-btn-editing {
+    display: none;
+}
+
+#edit-throbber {
+    margin-right: 5px;
+}
+
+#commit {
+    margin: 5px;
+}
+
+#mode-container .button-row {
+    margin-top: 1px;
+}
+
+/* theme */
+
+#bugzilla-body {
+    margin: 5px !important;
+    max-width: 1024px !important;
+    min-width: 800px !important;
+    width: 100% !important;
+}
+
+#footer {
+    max-width: 1024px !important;
+    min-width: 800px !important;
+}
+
+.vcard {
+    white-space: normal;
+}
+
+.vcard a.disabled {
+    color: #888;
+}
+
+.xdsoft_datetimepicker button, .xdsoft_datetimepicker button:hover {
+    -webkit-box-shadow: none;
+    -moz-box-shadow: none;
+    box-shadow: none;
+}
+
+div.ui-widget-content {
+    background: #fff;
+}
+
+div.ui-tooltip {
+    padding: 4px;
+    font-size: 13px;
+    font-family: inherit;
+    max-width: 500px;
+}
+
+.yui-ac {
+    width: 100%;
+}
+

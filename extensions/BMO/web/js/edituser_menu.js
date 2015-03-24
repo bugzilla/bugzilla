@@ -6,43 +6,42 @@
  * defined by the Mozilla Public License, v. 2.0. */
 
 function show_usermenu(id, email, show_edit) {
-  var items = {
-    profile: {
-      name: "Profile",
-      callback: function () {
-        var href = "user_profile?login=" + encodeURIComponent(email);
-        window.open(href, "_blank");
-      }
-    },
-    activity: {
-      name: "Activity",
-      callback: function () {
-        var href = "page.cgi?id=user_activity.html&action=run&from=-14d&who="
-                   + encodeURIComponent(email);
-        window.open(href, "_blank");
-      }
-    },
-    mail: {
-      name: "Mail",
-      callback: function () {
-        var href = "mailto:" + encodeURIComponent(email);
-        window.open(href, "_blank");
-      }
-    },
-  };
-  if (show_edit) {
-    items.edit = {
-      name: "Edit",
-      callback: function () {
-        var href = "editusers.cgi?action=edit&userid=" + id;
-        window.open(href, "_blank");
-      }
-    };
-  }
-  $.contextMenu({
-    selector: ".vcard_" + id,
-    trigger: "left",
-    items: items
-  });
+    var items = [
+        {
+            name: "Profile",
+            callback: function () {
+                var href = "user_profile?login=" + encodeURIComponent(email);
+                window.open(href, "_blank");
+            }
+        },
+        {
+            name: "Activity",
+            callback: function () {
+                var href = "page.cgi?id=user_activity.html&action=run&from=-14d&who=" + encodeURIComponent(email);
+                window.open(href, "_blank");
+            }
+        },
+        {
+            name: "Mail",
+            callback: function () {
+                var href = "mailto:" + encodeURIComponent(email);
+                window.open(href, "_blank");
+            }
+        }
+    ];
+    if (show_edit) {
+        items.push({
+            name: "Edit",
+            callback: function () {
+                var href = "editusers.cgi?action=edit&userid=" + id;
+                window.open(href, "_blank");
+            }
+        });
+    }
+    $.contextMenu({
+        selector: ".vcard_" + id,
+        trigger: "left",
+        items: items
+    });
 }
 

@@ -26,7 +26,13 @@
 [% PROCESS global/variables.none.tmpl %]
 [% bug = bugs.0 %]
 
-[% PROCESS "bug/show-header.html.tmpl" %]
+[%# BMO: allow experimental UIs to replace show-header %]
+[% IF alt_ui_header %]
+  [% PROCESS $alt_ui_header %]
+[% ELSE %]
+  [% PROCESS "bug/show-header.html.tmpl" %]
+[% END %]
+
 [% PROCESS global/header.html.tmpl
   title = "Changes Submitted to Attachment $attachment.id of $terms.Bug $attachment.bug_id"
 %]
@@ -43,4 +49,9 @@
   </dd>
 </dl>
 
-[% PROCESS bug/show.html.tmpl %]
+[%# BMO: allow experimental UIs to replace show-bug %]
+[% IF alt_ui_show %]
+  [% PROCESS $alt_ui_show %]
+[% ELSE %]
+  [% PROCESS "bug/show.html.tmpl" %]
+[% END %]

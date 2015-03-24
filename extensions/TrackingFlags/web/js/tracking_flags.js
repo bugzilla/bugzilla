@@ -55,16 +55,18 @@ function tracking_flag_change(e) {
         // create "comment required"
         var span = document.createElement('span');
         span.id = 'cr_' + e.id;
-        span.appendChild(document.createTextNode('('));
+        span.appendChild(document.createTextNode(' ('));
         var a = document.createElement('a');
         a.appendChild(document.createTextNode('comment required'));
         a.href = '#';
-        a.onclick = function() {
+        a.onclick = function(event) {
+            event.preventDefault();
             var c = document.getElementById('comment');
             c.focus();
             c.select();
-            document.getElementById('add_comment').scrollIntoView();
-            return false;
+            var btn = document.getElementById('add_comment') || document.getElementById('add-comment');
+            if (btn)
+                btn.scrollIntoView();
         };
         span.appendChild(a);
         span.appendChild(document.createTextNode(')'));

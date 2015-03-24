@@ -1,0 +1,275 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[%#
+  # field: (field object) bug_fields.$field_name object
+  # field_type: (const) constants.FIELD_TYPE_*
+  # no_label: (boolean) don't output label
+  # label: (string) field label text (default: field_descs.${$field.name}
+  # view_only: (boolean) don't allow editing (default: determined from bug.check_can_change_field)
+  # edit_only: (boolean) always render the edit ui
+  # container: (boolean) output just a label and the content (eg. for multiple fields next to one label)
+  # value: (string) visible value (default: bug.$name)
+  # values: (array of string) list of value objects (FIELD_TYPE_SINGLE_SELECT and _BUG_URLS only) (default: lazy-load on edit)
+  # inline: (boolean) output field as a table-cell instead of as a stand-alone div (default: false)
+  # no_indent: (boolean) don't indent the field (left-padding) (default: false)
+  # full_width: (boolean) the field takes up the complete page width (default: false)
+  # short_width: (boolean) the field shouldn't take up much space at all (default: false)
+  # hide_on_view: (boolean) hide field from read-only view (default: false)
+  # hide_on_edit: (boolean) hide content when in edit mode (default: false)
+  #%]
+
+[%
+IF field_type.defined && !field;
+  RETURN;
+END;
+IF !name.defined;
+  name = field.name;
+END;
+IF !value.defined;
+  value = bug.$name;
+END;
+IF hide_on_edit;
+  view_only = 1;
+END;
+IF view_only || container;
+  editable = 0;
+END;
+IF !editable.defined;
+  editable = bug.check_can_change_field(name, 0, 1);
+END;
+IF inline && !label.defined;
+  no_label = 1;
+END;
+IF !no_label && !label.defined;
+  label = field_descs.${field.name};
+END;
+IF field_type == "";
+  field_type = -1;
+END;
+IF field_type == constants.FIELD_TYPE_DATE
+    || field_type == constants.FIELD_TYPE_DATETIME;
+  short_width = 1;
+END;
+%]
+
+<div class="field
+            [%~ " indent" IF no_label && !no_indent %]
+            [%~ " inline" IF inline %]
+            [%~ " edit-hide" IF hide_on_edit %]
+            [%~ " edit-show" IF hide_on_view && !hide_on_edit %]"
+  [% IF name %] id="field-[% name FILTER html %]"[% END %]
+  [% IF hide_on_view %] style="display:none"[% END %]
+>
+  [% IF label.defined && !no_label %]
+    <div class="name">[% label _ ":" FILTER html IF label %]</div>
+  [% END %]
+
+  [%# read-only html %]
+  [% UNLESS edit_only %]
+    <div class="[% "value" IF !container %][% " edit-hide" IF editable %][% " container" IF container %]">
+      [% IF name %]
+        <span id="field-value-[% name FILTER html %]">
+      [% END %]
+      [% IF content.defined %]
+        [% content FILTER none %]
+      [% ELSE %]
+        [% SWITCH field_type %]
+
+          [% CASE constants.FIELD_TYPE_USER %]
+            [%# users %]
+            [% INCLUDE bug_modal/user.html.tmpl u=value %]
+
+          [% CASE constants.FIELD_TYPE_BUG_URLS %]
+            [%# see also %]
+            [% INCLUDE bug_urls values=values edit=0 %]
+
+          [% CASE constants.FIELD_TYPE_BUG_LIST %]
+            [%# bug lists (generally dependancies) %]
+            [% INCLUDE bug_list values=values edit=0 %]
+
+          [% CASE constants.FIELD_TYPE_TEXTAREA %]
+            [%# text areas %]
+            <span class="multiline-value">[% value FILTER html FILTER html_line_break %]</span>
+
+          [% CASE constants.FIELD_TYPE_MULTI_SELECT %]
+            [%# multi-select %]
+            [% value.join(", ") FILTER html %]
+
+          [% CASE constants.FIELD_TYPE_DATETIME %]
+            [%# datetime %]
+            [% value FILTER time %]
+
+          [% CASE constants.FIELD_TYPE_DATE %]
+            [%# date %]
+            [% value FILTER time("%Y-%m-%d") %]
+
+          [% CASE constants.FIELD_TYPE_BUG_ID %]
+            [%# bug id %]
+            [% value FILTER bug_link(value, use_alias => 1) FILTER none %]
+
+          [% CASE %]
+            [%# every else %]
+            [% value FILTER html %]
+
+        [% END %]
+      [% END %]
+      [% IF name %]
+        </span>
+      [% END %]
+    </div>
+  [% END %]
+
+  [%# edit html %]
+  [% IF editable %]
+    [% "MISSING NAME" UNLESS name %]
+    <div class="value edit edit-show [% " wide" IF full_width %][% " short" IF short_width %]"
+      [% UNLESS edit_only +%] style="display:none"[% END %]>
+      [% SWITCH field_type %]
+
+        [% CASE constants.FIELD_TYPE_SINGLE_SELECT %]
+          [%# single value select %]
+          <select name="[% name FILTER html %]" id="[% name FILTER html %]">
+            [% IF values.defined %]
+              [% FOREACH v IN values %]
+                [% NEXT IF NOT v.is_active AND NOT value.contains(v.name).size %]
+                <option value="[% v.name FILTER html %]"
+                        id="v[% v.id FILTER html %]_[% name FILTER html %]"
+                        [% " selected" IF value.contains(v.name).size %]
+                >[% v.name FILTER html %]</option>
+              [% END %]
+            [% ELSE %]
+              <option value="[% value FILTER html %]" selected>[% value FILTER html %]</option>
+            [% END %]
+          </select>
+
+        [% CASE constants.FIELD_TYPE_MULTI_SELECT %]
+          [%# multi value select %]
+          <select name="[% name FILTER html %]" id="[% name FILTER html %]" multiple size="5">
+            [% IF values.defined %]
+              [%# not implemented %]
+            [% ELSE %]
+              [% FOREACH v IN value %]
+                <option value="[% v FILTER html %]" selected>[% v FILTER html %]</option>
+              [% END %]
+            [% END %]
+          </select>
+
+        [% CASE constants.FIELD_TYPE_FREETEXT %]
+          [%# normal input field %]
+          <input name="[% name FILTER html %]" id="[% name FILTER html %]" value="[% value FILTER html %]">
+
+        [% CASE constants.FIELD_TYPE_USER %]
+          [%# single user %]
+          [% INCLUDE global/userselect.html.tmpl
+              id = name
+              name = name
+              value = value.login
+              classes = [ "bz_userfield" ]
+            %]
+
+        [% CASE constants.FIELD_TYPE_USERS %]
+          [%# multiple users %]
+          [% INCLUDE global/userselect.html.tmpl
+              id = name
+              name = name
+              value = value.join(", ")
+              classes = [ "bz_userfield" ]
+              multiple = 5
+            %]
+
+        [% CASE constants.FIELD_TYPE_KEYWORDS %]
+          [%# keywords %]
+          <input type="text" id="[% name FILTER html %]" name="[% name FILTER html %]"
+            value="[% value FILTER html %]">
+
+        [% CASE constants.FIELD_TYPE_BUG_URLS %]
+          [%# see also %]
+          [% INCLUDE bug_urls values=values edit=1 %]
+
+        [% CASE constants.FIELD_TYPE_BUG_LIST %]
+          [%# bug lists %]
+          [% INCLUDE bug_list values=values edit=1 %]
+
+        [% CASE constants.FIELD_TYPE_TEXTAREA %]
+          [%# text area %]
+            <button type="button" class="in-page edit-textarea-btn [%= "edit-textarea-set-btn" IF value != "" %]"
+              id="[% name FILTER html %]-edit">Edit</button>
+            <span class="multiline-value" id="[% name FILTER html %]-view">[% value FILTER html FILTER html_line_break %]</span>
+            <textarea id="[% name FILTER html %]" name="[% name FILTER html %]"
+              rows="10" cols="10" style="display:none">[% value FILTER html %]</textarea>
+
+        [% CASE constants.FIELD_TYPE_DATETIME %]
+          [%# datetime %]
+          <input class="cf_datetime" name="[% name FILTER html %]" id="[% name FILTER html %]"
+            value="[% value FILTER html %]">
+          <img class="cf_datetime-img" id="[% name FILTER html %]-img"
+            src="extensions/BugModal/web/calendar.png" width="16" height="16">
+
+        [% CASE constants.FIELD_TYPE_DATE %]
+          [%# date %]
+          <input class="cf_date" name="[% name FILTER html %]" id="[% name FILTER html %]"
+            value="[% value FILTER html %]">
+          <img class="cf_date-img" id="[% name FILTER html %]-img"
+            src="extensions/BugModal/web/calendar.png" width="16" height="16">
+
+        [% CASE constants.FIELD_TYPE_INTEGER %]
+          [%# integer %]
+          <input type="number" name="[% name FILTER html %]" id="[% name FILTER html %]"
+            value="[% value FILTER html %]">
+
+        [% CASE constants.FIELD_TYPE_BUG_ID %]
+          [%# bug id %]
+          <input type="text" name="[% name FILTER html %]" id="[% name FILTER html %]"
+            value="[% value FILTER html %]">
+
+        [% CASE %]
+          [%# error %]
+          ('[% name FILTER html %]' [[% field_type FILTER html %])] not supported)
+
+      [% END %]
+    </div>
+  [% END %]
+</div>
+
+[%# bug-urls, currently just see-also %]
+[% BLOCK bug_urls %]
+  [% FOREACH url IN values %]
+    <div>
+      [% IF url.isa('Bugzilla::BugUrl::Bugzilla::Local') %]
+        [% url.target_bug_id FILTER bug_link(url.target_bug_id, use_alias => 1) FILTER none %]
+      [% ELSE %]
+        <a href="[% url.name FILTER html %]">[% url.name FILTER html %]</a>
+      [% END %]
+      [% IF edit %]
+          <label>
+            <input type="checkbox" name="remove_see_also" value="[% url.name FILTER html %]">
+            Remove
+          </label>
+      [% END %]
+    </div>
+  [% END %]
+
+  [% IF edit %]
+    <button id="[% name FILTER html %]-btn" class="bug-urls-btn in-page">Add</button>
+    <input id="[% name FILTER html %]" name="[% name FILTER html %]" style="display:none">
+  [% END %]
+[% END %]
+
+[%# bug lists, depencancies, blockers %]
+[% BLOCK bug_list %]
+  [% IF NOT edit %]
+    [% FOREACH b IN values %]
+      [% INCLUDE bug/link.html.tmpl bug=b link_text=b.id use_alias=1  %]
+      [% ", " UNLESS loop.last %]
+    [% END %]
+  [% ELSE %]
+    <input type="text" id="[% name FILTER html %]" name="[% name FILTER html %]"
+           value="[% values.pluck('id').join(", ") FILTER html %]">
+  [% END %]
+[% END %]

@@ -30,7 +30,13 @@
 
 [% PROCESS global/variables.none.tmpl %]
 
-[% PROCESS "bug/show-header.html.tmpl" %]
+[%# BMO: allow experimental UIs to replace show-header %]
+[% IF alt_ui_header %]
+  [% PROCESS $alt_ui_header %]
+[% ELSE %]
+  [% PROCESS "bug/show-header.html.tmpl" %]
+[% END %]
+
 [% PROCESS global/header.html.tmpl
   title = "$terms.Bug $id Submitted &ndash; $filtered_desc"
   header = "$terms.Bug&nbsp;$id Submitted"
@@ -39,7 +45,7 @@
 [% header_done = 1 %]
 
 [% FOREACH item = sentmail %]
-  [% PROCESS bug/process/results.html.tmpl
+  [% INCLUDE bug/process/results.html.tmpl
      type = item.type
      id = item.id
      sent_bugmail = item
@@ -50,12 +56,14 @@
 
 <hr>
 
-[% PROCESS bug/edit.html.tmpl %]
-
-<hr>
-
-[% PROCESS bug/navigate.html.tmpl bottom_navigator => 1 %]
-
-<br>
+[%# BMO: allow experimental UIs to replace show-header %]
+[% IF alt_ui_edit %]
+  [% PROCESS $alt_ui_edit %]
+[% ELSE %]
+  [% PROCESS "bug/edit.html.tmpl" %]
+  <hr>
+  [% PROCESS bug/navigate.html.tmpl bottom_navigator => 1 %]
+  <br>
+[% END %]
 
 [% PROCESS global/footer.html.tmpl %]

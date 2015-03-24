@@ -664,6 +664,11 @@ sub get_attachments_by_bug {
         push(@values, $user->id);
     }
 
+    # BMO - allow loading of just non-obsolete attachments
+    if ($vars->{exclude_obsolete}) {
+        $and_restriction .= ' AND (isobsolete = 0)';
+    }
+
     my $attach_ids = $dbh->selectcol_arrayref("SELECT attach_id FROM attachments
                                                WHERE bug_id = ? $and_restriction",
                                                undef, @values);

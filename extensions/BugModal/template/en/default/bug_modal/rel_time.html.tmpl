@@ -1,0 +1,21 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[%#
+  # ts: timestamp
+  #%]
+
+<span class="rel-time" title="[% ts FILTER time("%Y-%m-%d %H:%M %Z") %]">
+  [%~
+    IF content.defined;
+      content;
+    ELSE;
+      ts FILTER time_duration FILTER html;
+    END;
+  ~%]
+</span>

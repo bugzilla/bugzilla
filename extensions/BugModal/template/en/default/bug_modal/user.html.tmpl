@@ -1,0 +1,53 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[%#
+  # u : user object
+  # simple : boolean, if true an unadorned name will be displayed (no gravatar, no menu) (default: false)
+  # gravatar_size : size of the gravator icon (default 0, which disables the gravatar)
+  # gravatar_only : boolean, if true output just the gravatar (not-simple only)
+  # nick_only : boolean, if true, the nickname will be used instead of the full name
+  #%]
+
+[%
+RETURN UNLESS u.id;
+DEFAULT gravatar_size = 0;
+%]
+<div class="vcard vcard_[% u.id FILTER none %]">
+  [% FILTER collapse %]
+
+    [% IF simple %]
+      [% IF user.id %]
+        <span class="fn" title="[% u.identity FILTER html %]">[% u.moz_nick FILTER html %]</span>
+      [% ELSE %]
+        <span class="fn">[% u.moz_nick FILTER html %]</span>
+      [% END %]
+
+    [% ELSE %]
+      [% IF gravatar_size %]
+        <img src="[% u.gravatar(gravatar_size * 2) FILTER none %]" class="gravatar"
+          width="[% gravatar_size FILTER none %]" height="[% gravatar_size FILTER none %]">
+      [% END %]
+      [% UNLESS gravatar_only %]
+        <a class="email [%= "disabled" UNLESS u.is_enabled %]"
+          [% IF user.id %]
+            href="mailto:[% u.email FILTER html %]"
+            onclick="return show_usermenu([% u.id FILTER none %], '[% u.email FILTER js %]', true,
+              [% user.in_group('editusers') || user.bless_groups.size > 0 ? "true" : "false" %])"
+            title="[% u.identity FILTER html %]"
+          [% ELSE %]
+            href="user_profile?user_id=[% u.id FILTER none %]"
+          [% END %]
+          >
+          <span class="[% user.id ? 'fn' : 'fna' %]">[% nick_only ? u.moz_nick : (u.name || u.nick) FILTER html %]</span>
+          [%~~%]
+        </a>
+      [% END %]
+    [% END %]
+  [% END %]
+</div>

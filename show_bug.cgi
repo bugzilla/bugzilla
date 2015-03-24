@@ -30,6 +30,7 @@ use Bugzilla::Error;
 use Bugzilla::User;
 use Bugzilla::Keyword;
 use Bugzilla::Bug;
+use Bugzilla::Hook;
 
 my $cgi = Bugzilla->cgi;
 my $template = Bugzilla->template;
@@ -37,11 +38,19 @@ my $vars = {};
 
 my $user = Bugzilla->login();
 
-my $format = $template->get_format("bug/show", scalar $cgi->param('format'),
-                                   scalar $cgi->param('ctype'));
+# BMO: add show_bug_format for experimental UI work
+my $format_params = {
+    format => scalar $cgi->param('format'),
+    ctype  => scalar $cgi->param('ctype'),
+};
+Bugzilla::Hook::process('show_bug_format', $format_params);
+my $format = $template->get_format("bug/show",
+                                   $format_params->{format},
+                                   $format_params->{ctype});
 
 # Editable, 'single' HTML bugs are treated slightly specially in a few places
-my $single = !$format->{format} && $format->{extension} eq 'html';
+my $single = (!$format->{format} || $format->{format} ne 'multiple')
+             && $format->{extension} eq 'html';
 
 # If we don't have an ID, _AND_ we're only doing a single bug, then prompt
 if (!$cgi->param('id') && $single) {

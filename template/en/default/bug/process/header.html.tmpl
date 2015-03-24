@@ -26,7 +26,12 @@
 
 [% USE Bugzilla %]
 
-[% PROCESS "bug/show-header.html.tmpl" %]
+[%# BMO: allow experimental UIs to replace show-header %]
+[% IF alt_ui_header %]
+  [% PROCESS $alt_ui_header %]
+[% ELSE %]
+  [% PROCESS "bug/show-header.html.tmpl" %]
+[% END %]
 
 [% IF    title_tag == "bug_processed" %]
   [% title = BLOCK %]

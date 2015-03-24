@@ -1,0 +1,162 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[%#
+  # types: array of flag_type objects
+  # no_label: if set to a true value, flag name and status will not be outputted (default: false)
+  # read_only: if true, don't output edit ui (default: false)
+  #%]
+
+[% IF read_only %]
+  <div class="flags edit-hide">
+    [% FOREACH type IN types %]
+      [% FOREACH flag IN type.flags %]
+        <div class="flag">
+          [% UNLESS no_label %]
+            [% INCLUDE bug_modal/user.html.tmpl u=flag.setter nick_only=1 %]
+            [%+ flag.type.name FILTER html %][% flag.status FILTER none %]
+          [% END %]
+          [% IF flag.requestee %]
+            [%+ INCLUDE bug_modal/user.html.tmpl u=flag.requestee nick_only=1 %]
+          [% END %]
+        </div>
+      [% END %]
+    [% END %]
+  </div>
+  [% RETURN %]
+[% END %]
+
+<div id="bug-flags" class="flags">
+  <table class="layout-table">
+  [%
+    FOREACH type IN types;
+      FOREACH flag IN type.flags;
+        IF flag.requestee && flag.requestee.id == user.id;
+          INCLUDE edit_flag t=type f=flag;
+        ELSE;
+        %]
+          <tbody class="edit-hide">
+            [% INCLUDE view_flag t=type f=flag %]
+          </tbody>
+          <tbody class="edit-show" style="display:none">
+            [% INCLUDE edit_flag t=type f=flag %]
+          </tbody>
+        [%
+        END;
+      END;
+    END;
+  %]
+    <tbody class="edit-show" style="display:none">
+    [%
+      FOREACH type IN types;
+        NEXT IF !type.is_active || type.flags.size;
+        INCLUDE edit_flag t=type;
+      END;
+
+      FOREACH type IN types;
+        NEXT IF !type.is_active || !type.is_multiplicable;
+        INCLUDE edit_flag t=type;
+      END;
+    %]
+    </tbody>
+  </table>
+</div>
+
+[% BLOCK view_flag %]
+  <tr>
+    <td class="flag-setter">
+      [% INCLUDE bug_modal/user.html.tmpl u=f.setter nick_only=1 %]
+    </td>
+
+    <td class="flag-name">
+      <span class="rel-time" title="[% f.creation_date FILTER time_duration FILTER html %]">
+        [% f.type.name FILTER html %]
+      </span>
+    </td>
+
+    <td class="flag-value">
+      [% f.status FILTER html %]
+    </td>
+
+    [% IF f.requestee %]
+      <td class="flag-requestee">
+        [% INCLUDE bug_modal/user.html.tmpl u=f.requestee nick_only=1 %]
+      </td>
+    [% END %]
+  </tr>
+[% END %]
+
+[% BLOCK edit_flag %]
+[%
+  can_edit  = !f || (f.setter_id == user.id || (f.requestee_id && f.requestee_id == user.id))
+  flag_id   = f ? "flag-$f.id" : "flag_type-$t.id";
+%]
+  <tr>
+    <td class="flag-setter">
+      [% IF f %]
+        [% INCLUDE bug_modal/user.html.tmpl u=flag.setter nick_only=1 %]
+      [% ELSIF t.flags.size %]
+        addl.
+      [% END %]
+    </td>
+
+    <td class="flag-name">
+      <label title="[% t.description FILTER html %]" for="[% flag_id FILTER html %]">
+        [%~ t.name FILTER html FILTER no_break ~%]
+      </label>
+    </td>
+
+    <td class="flag-value">
+      <select id="[% flag_id FILTER html %]" name="[% flag_id FILTER html %]"
+        title="[% t.description FILTER html %]"
+        [% UNLESS (t.is_requestable && user.can_request_flag(t)) || user.can_set_flag(t) %]
+          disabled
+        [% END %]
+        class="bug-flag">
+        [% IF !f || (can_edit && user.can_request_flag(t)) || f.setter_id == user.id %]
+          <option value="X"></option>
+        [% END %]
+        [% IF t.is_active && can_edit %]
+          [% IF (t.is_requestable && user.can_request_flag(t)) || (f && f.status == "?") %]
+            <option value="?" [% "selected" IF f && f.status == "?" %]>?</option>
+          [% END %]
+          [% IF user.can_set_flag(t) || (f && f.status == "+") %]
+            <option value="+" [% "selected" IF f && f.status == "+" %]>+</option>
+          [% END %]
+          [% IF user.can_set_flag(t) || (f && f.status == "-") %]
+            <option value="-" [% "selected" IF f && f.status == "-" %]>-</option>
+          [% END %]
+        [% ELSE %]
+          <option value="[% f.status FILTER html %]" selected>[% f.status FILTER html %]</option>
+        [% END %]
+      </select>
+    </td>
+
+    [% IF (t.is_requestable && t.is_requesteeble) || (f && f.requestee) %]
+      <td class="flag-requestee">
+        [% flag_name = f ? "requestee-$f.id" : "requestee_type-$t.id" %]
+        <div id="[% flag_name FILTER none %]-container"
+            [% UNLESS f && f.requestee +%] style="display:none"[% END %]>
+          [%
+            flag_requestee = (f && f.requestee) ? f.requestee.login : '';
+            flag_multiple  = f ? 0 : t.is_multiplicable * 3;
+            flag_empty_ok  = f ? 1 : !t.is_multiplicable;
+            INCLUDE global/userselect.html.tmpl
+              name     = flag_name
+              id       = flag_name
+              value    = flag_requestee
+              emptyok  = flag_empty_ok
+              classes  = [ "requestee" ]
+              disabled = !can_edit
+          %]
+        </div>
+      <td>
+    [% END %]
+
+  </tr>
+[% END %]

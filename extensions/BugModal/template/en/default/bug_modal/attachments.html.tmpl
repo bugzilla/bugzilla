@@ -1,0 +1,60 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[%#
+  # bug: (bug object) the main bug object
+  #%]
+
+<table class="layout-table" id="attachments">
+  [% FOREACH attachment IN bug.attachments %]
+    [% NEXT IF attachment.isprivate && !(user.is_insider || attachment.attacher.id == user.id) %]
+    <tr class="
+        [%~ " bz_private" IF attachment.isprivate %]
+        [%~ " attach-obsolete" IF attachment.isobsolete %]
+        [%~ " attach-patch" IF attachment.ispatch %]
+    " [% IF attachment.isobsolete %]style="display:none"[% END %]>
+      <td class="attach-desc-td">
+        <div class="attach-desc">
+          <a href="attachment.cgi?id=[% attachment.id FILTER none %]">
+            [%~ attachment.description FILTER html %]</a>
+        </div>
+        <div>
+          <span class="attach-time">[% INCLUDE bug_modal/rel_time.html.tmpl ts=attachment.attached %]</span>
+          <span class="attach-author">[% INCLUDE bug_modal/user.html.tmpl u=attachment.attacher %]</span>
+        </div>
+        <div class="attach-info">
+          [% IF attachment.datasize %]
+            [%- attachment.datasize FILTER unitconvert %]
+          [% ELSE %]
+            (deleted)
+          [% END %],
+          [%+ attachment.ispatch ? "patch" : attachment.contenttype FILTER html -%]
+        </div>
+      </td>
+      <td>
+        [% FOREACH flag IN attachment.flags %]
+          <div class="attach-flag">
+            [% INCLUDE bug_modal/user.html.tmpl u=flag.setter simple=1 %]:
+            <span class="flag-name-status">
+              [%+ flag.type.name FILTER html %][% flag.status FILTER none %]
+            </span>
+            [% IF flag.requestee %]
+              [%+ INCLUDE bug_modal/user.html.tmpl u=flag.requestee simple=1 %]
+            [% END %]
+          </div>
+        [% END %]
+      </td>
+      <td class="attach-actions">
+        <a href="attachment.cgi?id=[% attachment.id FILTER none %]&amp;action=edit">Details</a>
+        [% IF attachment.ispatch %]
+          | <a href="attachment.cgi?id=[% attachment.id FILTER none %]&amp;action=diff">Diff</a>
+        [% END %]
+        [% Hook.process("action", "attachment/list.html.tmpl") %]
+    </tr>
+  [% END %]
+</table>

@@ -1125,6 +1125,9 @@ sub create {
     my $template = $class->new($config) 
         || die("Template creation failed: " . $class->error());
 
+    # BMO - hook for defining new vmethods, etc
+    Bugzilla::Hook::process('template_after_create', { template => $template });
+
     # Pass on our current language to any template hooks or inner templates
     # called by this Template object.
     $template->context->{bz_language} = $opts{language} || '';

@@ -1,0 +1,68 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[%#
+  # bug: bug object
+  #%]
+
+[%
+  PROCESS global/variables.none.tmpl;
+
+  in_all_groups = 1;
+  in_a_group = 0;
+  FOREACH group IN bug.groups;
+    IF NOT group.ingroup;
+      in_all_groups = 0;
+    END;
+    IF group.ison;
+      in_a_group = 1;
+    END;
+  END
+%]
+
+<div class="groups edit-hide">
+  [% IF in_a_group %]
+    <div id="groups-description">
+      Only users in all of the following groups can view this [% terms.bug %]:
+    </div>
+    <ul>
+      [% FOREACH group IN bug.groups %]
+        [% NEXT UNLESS group.ison || group.mandatory %]
+        <li>[% group.description FILTER html %]</li>
+      [% END %]
+    </ul>
+  [% ELSE %]
+    This [% terms.bug %] is publicaly visible.
+  [% END %]
+</div>
+
+<div class="groups edit-show" style="display:none">
+  [% emitted_description = 0 %]
+  [% FOREACH group IN bug.groups %]
+    [% IF NOT emitted_description %]
+      [% emitted_description = 1 %]
+      <div id="groups-description">
+        Only users in all of the selected groups can view this [% terms.bug %]:
+      </div>
+    [% END %]
+
+    [% IF group.ingroup %]
+      <input type="hidden" name="defined_groups" value="[% group.name FILTER html %]">
+    [% END %]
+
+    <div class="group">
+      <input type="checkbox" value="[% group.name FILTER html %]"
+        name="groups" id="group_[% group.bit FILTER html %]"
+        [% " checked" IF group.ison %]
+        [% " disabled" IF NOT group.ingroup || group.mandatory %]>
+      <label for="group_[% group.bit FILTER html %]">
+        [%~ group.description FILTER html_light ~%]
+      </label>
+    </div>
+  [% END %]
+</div>

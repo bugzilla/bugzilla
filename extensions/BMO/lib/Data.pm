@@ -169,7 +169,6 @@ our @always_fileable_groups = qw(
     tamarin-security
     websites-security
     webtools-security
-    winqual-data
 );
 
 # Mapping of products to their security bits

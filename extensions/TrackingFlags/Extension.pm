@@ -70,9 +70,7 @@ sub template_before_process {
     my $file = $args->{'file'};
     my $vars = $args->{'vars'};
 
-    if ($file eq 'bug/create/create.html.tmpl'
-        || $file eq 'bug/create/create-winqual.html.tmpl')
-    {
+    if ($file eq 'bug/create/create.html.tmpl') {
         my $flags = Bugzilla::Extension::TrackingFlags::Flag->match({
             product   => $vars->{'product'}->name,
             enter_bug => 1,

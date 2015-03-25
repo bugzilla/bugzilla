@@ -20,11 +20,45 @@ use Bugzilla;
 
 sub _notify {
     my ($bug_id, $delta_ts) = @_;
-    Bugzilla->dbh->do(
-        "REPLACE INTO push_notify(bug_id, delta_ts) VALUES(?, ?)",
-        undef,
-        $bug_id, $delta_ts
-    );
+    # beacuse the push_notify table is hot, we defer updating it until the
+    # request has completed.  this ensures we are outside the scope of any
+    # transaction blocks.
+
+    my $stash = Bugzilla->request_cache->{ZPushNotify_stash} ||= [];
+    push @$stash, { bug_id => $bug_id, delta_ts => $delta_ts };
+}
+
+sub request_cleanup {
+    my $stash = Bugzilla->request_cache->{ZPushNotify_stash}
+        || return;
+
+    my $dbh = Bugzilla->dbh;
+    foreach my $rh (@$stash) {
+        # using REPLACE INTO or INSERT .. ON DUPLICATE KEY UPDATE results in a
+        # lock on the bugs table due to the FK.  this way is more verbose but
+        # only locks the push_notify table.
+        $dbh->bz_start_transaction();
+        my ($id) = $dbh->selectrow_array(
+            "SELECT id FROM push_notify WHERE bug_id=?",
+            undef,
+            $rh->{bug_id}
+        );
+        if ($id) {
+            $dbh->do(
+                "UPDATE push_notify SET delta_ts=? WHERE id=?",
+                undef,
+                $rh->{delta_ts}, $id
+            );
+        }
+        else {
+            $dbh->do(
+                "INSERT INTO push_notify (bug_id, delta_ts) VALUES (?, ?)",
+                undef,
+                $rh->{bug_id}, $rh->{delta_ts}
+            );
+        }
+        $dbh->bz_commit_transaction();
+    }
 }
 
 #

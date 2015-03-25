@@ -741,6 +741,9 @@ sub _cleanup {
         Bugzilla->metrics->finish();
     }
 
+    # BMO - allow "end of request" processing
+    Bugzilla::Hook::process('request_cleanup');
+
     my $main   = Bugzilla->request_cache->{dbh_main};
     my $shadow = Bugzilla->request_cache->{dbh_shadow};
     foreach my $dbh ($main, $shadow) {

@@ -296,7 +296,7 @@
           field_type = constants.FIELD_TYPE_SINGLE_SELECT
           inline = 1
       %]
-      [% UNLESS cf_hidden_in_product('cf_rank', bug.product, bug.component) %]
+      [% UNLESS cf_hidden_in_product('cf_rank', bug.product, bug.component, bug) %]
         [% rendered_custom_fields.push('cf_rank') %]
         [% INCLUDE bug_modal/field.html.tmpl
             field = bug_fields.cf_rank
@@ -569,7 +569,7 @@
       [% bug.keyword_objects.pluck("name").join(", ") FILTER html %]
     [% END %]
 
-    [% UNLESS cf_hidden_in_product('cf_fx_iteration', bug.product, bug.component) %]
+    [% UNLESS cf_hidden_in_product('cf_fx_iteration', bug.product, bug.component, bug) %]
       [% rendered_custom_fields.push('cf_fx_iteration') %]
       [% INCLUDE bug_modal/field.html.tmpl
           field = bug_fields.cf_fx_iteration
@@ -578,7 +578,7 @@
       %]
     [% END %]
 
-    [% UNLESS cf_hidden_in_product('cf_fx_points', bug.product, bug.component) %]
+    [% UNLESS cf_hidden_in_product('cf_fx_points', bug.product, bug.component, bug) %]
       [% rendered_custom_fields.push('cf_fx_points') %]
       [% INCLUDE bug_modal/field.html.tmpl
           field = bug_fields.cf_fx_points
@@ -736,7 +736,7 @@
       FOREACH field = custom_fields;
         NEXT IF field.type == constants.FIELD_TYPE_EXTENSION || field.type == constants.FIELD_TYPE_TEXTAREA;
         NEXT IF rendered_custom_fields.exists(field.name);
-        NEXT IF cf_hidden_in_product(field.name, bug.product, bug.component);
+        NEXT IF cf_hidden_in_product(field.name, bug.product, bug.component, bug);
         cf_value = bug.${field.name};
         IF field.type == constants.FIELD_TYPE_SINGLE_SELECT;
           has_value = cf_value != "---";

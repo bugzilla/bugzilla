@@ -45,7 +45,7 @@
     to [% "$terms.bug $attachment.bug_id" FILTER bug_link(attachment.bug_id) FILTER none %] created
   </dt>
   <dd>
-    [% PROCESS "bug/process/bugmail.html.tmpl" mailing_bugid = attachment.bug_id %]
+    [% INCLUDE "bug/process/bugmail.html.tmpl" mailing_bugid = attachment.bug_id %]
     [% IF convertedbmp %]
       <p>
         <b>Note:</b> [% terms.Bugzilla %] automatically converted your BMP image file to a

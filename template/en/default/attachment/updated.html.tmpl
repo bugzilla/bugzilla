@@ -43,7 +43,7 @@
     of [% "$terms.bug $attachment.bug_id" FILTER bug_link(attachment.bug_id) FILTER none %] submitted
   </dt>
   <dd>
-    [% PROCESS "bug/process/bugmail.html.tmpl" mailing_bugid = attachment.bug_id %]
+    [% INCLUDE "bug/process/bugmail.html.tmpl" mailing_bugid = attachment.bug_id %]
     [%# Links to more information about the changed bug. %]
     [% Hook.process("links") %]
   </dd>

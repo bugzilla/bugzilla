@@ -45,7 +45,7 @@ sub edit_bug_format {
 sub _alternative_show_bug_format {
     my $user = Bugzilla->user;
     if (my $format = Bugzilla->cgi->param('format')) {
-        return uc($format) eq '__DEFAULT__' ? undef : $format;
+        return ($format eq '__default__' || $format eq 'default') ? undef : $format;
     }
     return $user->setting('ui_experiments') eq 'on' ? 'modal' : undef;
 }

@@ -535,14 +535,6 @@ td.flag-requestee {
     text-decoration: line-through;
 }
 
-.change-set .reporter {
-    background-image: linear-gradient(to right, #feb, rgba(0, 0, 0, 0) 150px);
-}
-
-.change-set .assignee {
-    background-image: linear-gradient(to right, #ffc, rgba(0, 0, 0, 0) 150px);
-}
-
 /* add comment */
 
 #add-comment {

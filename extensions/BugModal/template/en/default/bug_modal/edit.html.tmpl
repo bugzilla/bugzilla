@@ -306,6 +306,7 @@
             inline = 1
             label = "Rank"
             hide_on_view = bug.cf_rank == ""
+            hide_on_edit = !user.in_group('rank-setters')
         %]
       [% END %]
     [% END %]

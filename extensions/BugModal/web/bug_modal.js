@@ -330,7 +330,7 @@ $(function() {
             else {
                 cc_change = { add: [ BUGZILLA.user.login ] };
                 $('#cc-btn')
-                    .text('Stop following')
+                    .text('Stop Following')
                     .data('is-cced', '1')
                     .prop('disabled', true);
             }
@@ -347,7 +347,7 @@ $(function() {
                         return;
                     if (data.bugs[0].changes.cc.added == BUGZILLA.user.login) {
                         $('#cc-btn')
-                            .text('Stop following')
+                            .text('Stop Following')
                             .data('is-cced', '1');
                     }
                     else if (data.bugs[0].changes.cc.removed == BUGZILLA.user.login) {

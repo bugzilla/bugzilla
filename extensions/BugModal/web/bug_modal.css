@@ -38,38 +38,28 @@
     margin-right: 5px;
 }
 
-button.minor {
-    background-color: #888;
-    background-image: linear-gradient(#aaa, #888);
+button.major {
     font-size: 11px;
-    padding: 0.25em 0.5em;
+    padding: 4px 8px;
+}
+
+button.minor {
+    background-color: #eee;
+    background-image: linear-gradient(#fcfcfc, #eee);
+    color: #000;
+    font-size: 11px;
+    font-weight: 500;
+    padding: 4px 8px;
+    text-shadow: none;
+    -web-kit-box-shadow: 0 1px 0 0 rgba(0,0,0,0.1), inset 0 -1px 0 0 rgba(0,0,0,0.1);
+    -moz-box-shadow: 0 1px 0 0 rgba(0,0,0,0.1), inset 0 -1px 0 0 rgba(0,0,0,0.1);
+    box-shadow: 0 1px 0 0 rgba(0,0,0,0.1), inset 0 -1px 0 0 rgba(0,0,0,0.1);
 }
 
 button.minor:hover {
-    -webkit-box-shadow: 0 1px 0 0 rgba(0,0,0,0.2), inset 0 -1px 0 0 rgba(0,0,0,0.3), inset 0 12px 24px 2px #bbb;
-    -moz-box-shadow: 0 1px 0 0 rgba(0,0,0,0.2), inset 0 -1px 0 0 rgba(0,0,0,0.3), inset 0 12px 24px 2px #bbb;
-    box-shadow: 0 1px 0 0 rgba(0,0,0,0.2), inset 0 -1px 0 0 rgba(0,0,0,0.3), inset 0 12px 24px 2px #bbb;
-}
-
-button.in-page {
-    background-color: #fff;
-    background-image: linear-gradient(#fff, #fff);
-    color: #000;
-    border: 1px solid #ccc;
-    -webkit-box-shadow: none;
-    -moz-box-shadow: none;
-    box-shadow: none;
-    font-size: 11px;
-    padding: 0.25em 0.5em;
-}
-
-button.in-page:hover {
-    -webkit-box-shadow: inset 0 12px 24px 2px #eee;
-    -moz-box-shadow: inset 0 12px 24px 2px #eee;
-    box-shadow: inset 0 12px 24px 2px #eee;
-    -moz-transition: all linear 100ms;
-    -webkit-transition: all linear 100ms;
-    transition: all linear 100ms;
+    -webkit-box-shadow: 0 1px 0 0 rgba(0,0,0,0.2), inset 0 -1px 0 0 rgba(0,0,0,0.3), inset 0 12px 24px 2px #ddd;
+    -moz-box-shadow: 0 1px 0 0 rgba(0,0,0,0.2), inset 0 -1px 0 0 rgba(0,0,0,0.3), inset 0 12px 24px 2px #ddd;
+    box-shadow: 0 1px 0 0 rgba(0,0,0,0.1), inset 0 -1px 0 0 rgba(0,0,0,0.1), inset 0 12px 24px 2px #ddd;
 }
 
 select[multiple], .text_input, .yui-ac-input, input {
@@ -292,10 +282,6 @@ input[type="number"] {
 }
 
 /* actions */
-
-#copy-summary {
-    margin-left: 20px;
-}
 
 #top-actions {
     margin-top: 5px;

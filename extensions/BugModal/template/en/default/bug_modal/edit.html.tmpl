@@ -211,32 +211,34 @@
   <div id="mode-container">
     [% IF user.id %]
       <div>
-        <button type="button" class="minor" id="cc-btn" data-is-cced="[% is_cced ? 1 : 0 %]">
-          [% is_cced ? "Stop following" : "Follow" %]
-        </button>
         <button type="button" id="cancel-btn" class="minor" style="display:none">Cancel</button>
-        <button type="button" id="mode-btn">
+        <button type="button" id="mode-btn" class="major">
           <span id="mode-btn-readonly">Edit</span>
           <span id="mode-btn-loading">
             <img id="edit-throbber" src="extensions/BugModal/web/throbber.gif" width="16" height="11">
             Fetching
           </span>
         </button>
-        <button type="submit" id="commit-btn" style="display:none">Save Changes</button>
+        <button type="submit" id="commit-btn" class="major" style="display:none">Save Changes</button>
       </div>
     [% END %]
     <div class="button-row">
       [% IF user.id %]
-        <button type="button" class="comment-btn in-page">Add Comment</button>
+        <button type="button" class="comment-btn minor">Add Comment</button>
       [% END %]
-      <button type="button" id="last-comment-btn" class="in-page">Last Comment &darr;</button>
+      <button type="button" id="last-comment-btn" class="minor">Last Comment &darr;</button>
     </div>
     <div class="button-row">
       [% IF bug.assigned_to.id == user.id || user.in_group("editbugs") %]
-        <button type="button" id="copy-summary" class="in-page"
+        <button type="button" id="copy-summary" class="minor"
           title="Copy [% terms.bug %] number and summary to your clipboard">Copy Summary</button>
       [% END %]
-      <button type="button" id="expand-all-btn" class="in-page">Expand All</button>
+      [% IF user.id %]
+        <button type="button" class="minor" id="cc-btn" data-is-cced="[% is_cced ? 1 : 0 %]">
+          [% is_cced ? "Stop Following" : "Follow" %]
+        </button>
+      [% END %]
+      <button type="button" id="expand-all-btn" class="minor">Expand All</button>
     </div>
   </div>
 [% END %]
@@ -375,7 +377,7 @@
         <input id="dup_id" name="dup_id" size="6" value="[% bug.dup_id FILTER html %]">
       </div>
       <div id="duplicate-actions">
-        <button type="button" class="in-page" id="mark-as-dup-btn">
+        <button type="button" class="minor" id="mark-as-dup-btn">
           Mark as Duplicate
         </button>
       </div>
@@ -409,7 +411,7 @@
       [% IF unassigned %]
         <i>Unassigned</i>
         [% IF bug.check_can_change_field("assigned_to", 0, 1) %]
-          <button type="button" id="take-btn" class="in-page">Take</button>
+          <button type="button" id="take-btn" class="minor">Take</button>
         [% END %]
       [% ELSE %]
         [% INCLUDE bug_modal/user.html.tmpl u=bug.assigned_to %]
@@ -469,7 +471,7 @@
           label = "NeedInfo"
           hide_on_view = 1
       %]
-        <button type="button" id="needinfo-scroll" class="in-page">Update</button>
+        <button type="button" id="needinfo-scroll" class="minor">Update</button>
       [% END %]
     [% END %]
 
@@ -813,10 +815,10 @@
     [% IF user.id %]
       <div id="user-story-actions">
         [% IF bug.check_can_change_field('cf_user_story', 0, 1) %]
-          <button type="button" class="in-page" id="user-story-edit-btn">Edit</button>
+          <button type="button" class="minor" id="user-story-edit-btn">Edit</button>
         [% END %]
         [% IF bug.cf_user_story != "" && bug.check_can_change_field('longdesc', 0, 1) %]
-          <button type="button" class="in-page" id="user-story-reply-btn">Reply</button>
+          <button type="button" class="minor" id="user-story-reply-btn">Reply</button>
         [% END %]
       </div>
     [% END %]
@@ -849,7 +851,7 @@
     [% INCLUDE bug_modal/attachments.html.tmpl %]
     [% IF obsolete_attachments %]
       <div id="attachments-actions">
-        <button type="button" id="attachments-obsolete-btn" class="in-page">Show Obsolete Attachments</button>
+        <button type="button" id="attachments-obsolete-btn" class="minor">Show Obsolete Attachments</button>
       </div>
     [% END %]
   [% END %]
@@ -860,8 +862,8 @@
 [% IF user.id %]
   <div id="top-actions">
     <button type="button" id="attachments-add-btn" class="minor">Attach File</button>
-    <button type="button" class="comment-btn in-page">Add Comment</button>
-    <button type="submit" class="save-btn" id="top-save-btn" style="display:none">Save Changes</button>
+    <button type="button" class="comment-btn minor">Add Comment</button>
+    <button type="submit" class="save-btn major" id="top-save-btn" style="display:none">Save Changes</button>
   </div>
 [% END %]
 
@@ -878,7 +880,7 @@
 
 [% IF user.id %]
   <div id="bottom-actions">
-    <button type="submit" class="save-btn" id="bottom-save-btn">Save Changes</button>
+    <button type="submit" class="save-btn major" id="bottom-save-btn">Save Changes</button>
     [%
       IF bug.resolution == "";
         seen_header = 0;
@@ -888,14 +890,14 @@
             seen_header = 1;
             " Resolve as ";
           END;
-          %] <button type="button" class="in-page resolution-btn">[% resolution FILTER html %]</button> [%
+          %] <button type="button" class="minor resolution-btn">[% resolution FILTER html %]</button> [%
         END;
       ELSIF bug.choices.bug_status.only("name", "REOPENED").size;
-          %] <button type="button" class="in-page status-btn" data-status="REOPENED">REOPEN</button> [%
+          %] <button type="button" class="minor status-btn" data-status="REOPENED">REOPEN</button> [%
       END;
     %]
     <div id="bottom-right-actions">
-      <button type="button" id="top-btn" class="in-page">Top &uarr;</button>
+      <button type="button" id="top-btn" class="minor">Top &uarr;</button>
       <button type="button" id="new-bug-btn" class="minor">New [% terms.Bug %] &#9662;</button>
     </div>
   </div>

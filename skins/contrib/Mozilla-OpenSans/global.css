@@ -657,7 +657,7 @@ table.edit_form hr {
     margin-left: 6px;
 }
 
-#links-actions {
+#links-actions, #links-saved {
     margin-left: -10px;
 }
 

@@ -17,6 +17,9 @@
 [%
 RETURN UNLESS u.id;
 DEFAULT gravatar_size = 0;
+IF user.settings.show_gravatars.value != 'On';
+  gravatar_size = 0;
+END;
 %]
 <div class="vcard vcard_[% u.id FILTER none %]">
   [% FILTER collapse %]

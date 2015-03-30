@@ -235,4 +235,14 @@ sub bug_end_of_update {
     }
 }
 
+sub merge_users_before {
+    my ($self, $args) = @_;
+    my $old_id = $args->{old_id};
+    my $dbh    = Bugzilla->dbh;
+
+    # If the bug_interest table has both the source user
+    # and destination user, then we remove the old user entry.
+    $dbh->do("DELETE FROM bug_interest WHERE user_id = ?", undef, $old_id);
+}
+
 __PACKAGE__->NAME;

@@ -578,7 +578,7 @@ sub insert {
     }
 
     # BMO - allow pre-processing of attachment flags
-    Bugzilla::Hook::process('create_attachment_flags', { bug => $bug });
+    Bugzilla::Hook::process('create_attachment_flags', { bug => $bug, attachment => $attachment });
     my ($flags, $new_flags) = Bugzilla::Flag->extract_flags_from_cgi(
                                   $bug, $attachment, $vars, SKIP_REQUESTEE_ON_ERROR);
     $attachment->set_flags($flags, $new_flags);

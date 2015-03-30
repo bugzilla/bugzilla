@@ -514,7 +514,7 @@ sub create_attachment_flags {
 
 sub _check_review_flag {
     my ($self, $args) = @_;
-    my $bug = $args->{bug};
+    my ($bug, $attachment) = @$args{qw( bug attachment )};
     my $cgi = Bugzilla->cgi;
 
     # extract the set flag-types
@@ -552,6 +552,22 @@ sub _check_review_flag {
             if (scalar(@$users) > 1) {
                 ThrowUserError('user_match_too_many', { fields => [ 'review' ] });
             }
+
+            # we want to throw an error if the requestee does not have access
+            # to the bug.  bugzilla's default behaviour is to sliently drop the
+            # requestee, which results in a confusing 'reviewer required'
+            # error.
+            # fake it by creating a flag and try to set the requestee.
+            # bugzilla's flags don't have a normal constructor or property
+            # setters, so we have to bless it directly then call the internal
+            # check_requestee method.  urgh.
+            my $flag = bless({
+                type_id   => $flag_type->id,
+                status    => '?',
+                bug_id    => $bug->id,
+                attach_id => $attachment->id
+            }, 'Bugzilla::Flag');
+            $flag->_check_requestee($reviewer, $bug, $attachment);
         }
     }
 }

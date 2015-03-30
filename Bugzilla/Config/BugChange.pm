@@ -31,6 +31,10 @@ sub get_param_list {
       @closed_bug_statuses = @current_closed_states if scalar(@current_closed_states);
   };
 
+  my $resolution_field = Bugzilla::Field->new({ name => 'resolution', cache => 1 });
+  # The empty resolution is included - it represents "no value"
+  my @resolutions = map {$_->name} @{ $resolution_field->legal_values };
+
   my @param_list = (
   {
    name => 'duplicate_or_move_bug_status',
@@ -71,10 +75,13 @@ sub get_param_list {
   },
 
   {
-   name    => 'noresolveonopenblockers',
-   type    => 'b',
-   default => 0,
+   name => 'resolution_forbidden_with_open_blockers',
+   type => 's',
+   choices => \@resolutions,
+   default => '',
+   checker => \&check_resolution,
   } );
+
   return @param_list;
 }
 

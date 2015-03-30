@@ -1937,11 +1937,12 @@ sub _check_resolution {
     # Don't allow open bugs to have resolutions.
     ThrowUserError('resolution_not_allowed') if $is_open;
     
-    # Check noresolveonopenblockers.
+    # Check if resolution_forbidden_with_open_blockers.
     my $dependson = ref($invocant) ? $invocant->dependson
                                    : ($params->{dependson} || []);
-    if (Bugzilla->params->{"noresolveonopenblockers"}
-        && $resolution eq 'FIXED'
+    if (Bugzilla->params->{"resolution_forbidden_with_open_blockers"}
+        && $resolution eq
+                  Bugzilla->params->{"resolution_forbidden_with_open_blockers"}
         && (!ref $invocant or !$invocant->resolution 
             or $resolution ne $invocant->resolution)
         && scalar @$dependson)

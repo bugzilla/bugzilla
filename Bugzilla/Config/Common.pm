@@ -28,7 +28,7 @@ use parent qw(Exporter);
        check_ip check_mail_delivery_method check_notification
        check_bug_status check_smtp_auth check_theschwartz_available
        check_maxattachmentsize check_email check_smtp_ssl
-       check_comment_taggers_group check_smtp_server
+       check_comment_taggers_group check_smtp_server check_resolution
 );
 
 # Checking functions for the various values
@@ -160,6 +160,18 @@ sub check_bug_status {
     my @closed_bug_statuses = map {$_->name} closed_bug_statuses();
     if (!grep($_ eq $bug_status, @closed_bug_statuses)) {
         return "Must be a valid closed status: one of " . join(', ', @closed_bug_statuses);
+    }
+    return "";
+}
+
+sub check_resolution {
+    my $resolution = shift;
+    my $resolution_field = Bugzilla::Field->new({ name => 'resolution', cache => 1 });
+    # The empty resolution is included - it represents "no value"
+    my @resolutions = map {$_->name} @{ $resolution_field->legal_values };
+
+    if (!grep($_ eq $resolution, @resolutions)) {
+        return "Must be blank or a valid resolution: one of " . join(', ', @resolutions);
     }
     return "";
 }
@@ -463,6 +475,8 @@ valid group is provided.
 =item check_user_verify_class
 
 =item check_bug_status
+
+=item check_resolution
 
 =item check_shadowdb
 

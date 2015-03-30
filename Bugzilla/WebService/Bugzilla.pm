@@ -71,10 +71,10 @@ use constant PARAMETERS_LOGGED_IN => qw(
     maxattachmentsize
     maxlocalattachment
     musthavemilestoneonaccept
-    noresolveonopenblockers
     password_complexity
     rememberlogin
     requirelogin
+    resolution_forbidden_with_open_blockers
     search_allow_no_criteria
     urlbase
     use_see_also
@@ -428,10 +428,10 @@ A logged-in user can access the following parameters (listed alphabetically):
     C<maxattachmentsize>,
     C<maxlocalattachment>,
     C<musthavemilestoneonaccept>,
-    C<noresolveonopenblockers>,
     C<password_complexity>,
     C<rememberlogin>,
     C<requirelogin>,
+    C<resolution_forbidden_with_open_blockers>,
     C<search_allow_no_criteria>,
     C<urlbase>,
     C<use_see_also>,

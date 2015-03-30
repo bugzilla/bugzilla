@@ -88,8 +88,7 @@ sub is_static {
     # If we need to special-case Resolution for *anything* else, it should
     # get its own subclass.
     if ($self->field->name eq 'resolution') {
-        return grep($_ eq $self->name, ('', 'FIXED', 'DUPLICATE'))
-               ? 1 : 0;
+        return $self->name eq '' || $self->name eq 'DUPLICATE';
     }
     elsif ($self->field->custom) {
         return $self->name eq '---' ? 1 : 0;

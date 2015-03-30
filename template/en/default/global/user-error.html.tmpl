@@ -1748,7 +1748,8 @@
     [% END %].
     They must either be resolved or removed from the
     "[% field_descs.dependson FILTER html %]" field before you can resolve
-    this [% terms.bug %] as [% display_value("resolution", "FIXED") FILTER html %].
+    this [% terms.bug %] as [% display_value("resolution",
+              Param('resolution_forbidden_with_open_blockers')) FILTER html %].
 
   [% ELSIF error == "sudo_invalid_cookie" %]
     [% title = "Invalid Sudo Cookie" %]

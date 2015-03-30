@@ -280,12 +280,14 @@ commenton*
        any comment as to what the fix was (or even that it was truly
        fixed!)
 
-noresolveonopenblockers
-    This option will prevent users from resolving bugs as FIXED if
-    they have unresolved dependencies. Only the FIXED resolution
-    is affected. Users will be still able to resolve bugs to
-    resolutions other than FIXED if they have unresolved dependent
-    bugs.
+resolution_forbidden_with_open_blockers
+    This option will prevent users from resolving bugs as the chosen resolution
+    if they have unresolved dependencies. If using Bugzilla's default
+    resolutions, the most common value to choose is FIXED, because if a bug
+    is fixed, either is dependencies are actually fixed (and should be marked
+    as such) or the dependency is mistaken and should be removed. Only the
+    chosen resolution is affected; users will be still able to resolve bugs to
+    other resolutions even if they have unresolved dependent bugs.
 
 .. _param-bugfields:
 

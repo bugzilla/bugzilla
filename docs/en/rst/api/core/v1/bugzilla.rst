@@ -187,10 +187,10 @@ Example response for authenticated user:
           "maxattachmentsize" : "1000",
           "maxlocalattachment" : "0",
           "musthavemilestoneonaccept" : "0",
-          "noresolveonopenblockers" : "0",
           "password_complexity" : "no_constraints",
           "rememberlogin" : "on",
           "requirelogin" : "0",
+          "resolution_forbidden_with_open_blockers" : "FIXED",
           "urlbase" : "http://bugzilla.example.com/",
           "use_see_also" : "1",
           "useclassification" : "1",
@@ -225,10 +225,10 @@ A logged-in user can access the following parameters (listed alphabetically):
 * maxattachmentsize
 * maxlocalattachment
 * musthavemilestoneonaccept
-* noresolveonopenblockers
 * password_complexity
 * rememberlogin
 * requirelogin
+* resolution_forbidden_with_open_blockers
 * search_allow_no_criteria
 * urlbase
 * use_see_also

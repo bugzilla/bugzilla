@@ -204,6 +204,10 @@ sub update_params {
         $new_params{'search_allow_no_criteria'} = $param->{'specific_search_allow_empty_words'};
     }
 
+    if (exists $param->{'noresolveonopenblockers'}) {
+        $new_params{'resolution_forbidden_with_open_blockers'} = $param->{'noresolveonopenblockers'} ? 'FIXED' : "";
+    }
+
     # --- DEFAULTS FOR NEW PARAMS ---
 
     _load_params unless %params;

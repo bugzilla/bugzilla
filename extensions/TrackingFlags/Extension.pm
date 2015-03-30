@@ -77,9 +77,11 @@ sub template_before_process {
             is_active => 1,
         });
 
-        $vars->{tracking_flags}      = $flags;
-        $vars->{tracking_flags_json} = _flags_to_json($flags);
-        $vars->{tracking_flag_types} = FLAG_TYPES;
+        $vars->{tracking_flags}           = $flags;
+        $vars->{tracking_flags_json}      = _flags_to_json($flags);
+        $vars->{tracking_flag_types}      = FLAG_TYPES;
+        $vars->{tracking_flag_components} = _flags_to_components($flags, $vars->{product});
+        $vars->{highest_status_firefox}   = _get_highest_status_firefox($flags);
     }
     elsif ($file eq 'bug/edit.html.tmpl'|| $file eq 'bug/show.xml.tmpl'
            || $file eq 'email/bugmail.html.tmpl' || $file eq 'email/bugmail.txt.tmpl')
@@ -138,6 +140,38 @@ sub _flags_to_json {
     }
 
     return encode_json($json);
+}
+
+sub _flags_to_components {
+    my ($flags, $product) = @_;
+
+    # for each component, generate a list of visible tracking flags
+    my $json = {};
+    foreach my $component (@{ $product->components }) {
+        next unless $component->is_active;
+        foreach my $flag (@$flags) {
+            foreach my $visibility (@{ $flag->visibility }) {
+                if ($visibility->product_id == $product->id
+                    && (!$visibility->component_id || $visibility->component_id == $component->id))
+                {
+                    $json->{$component->name} //= [];
+                    push @{ $json->{$component->name} }, $flag->name;
+                }
+            }
+        }
+    }
+    return encode_json($json);
+}
+
+sub _get_highest_status_firefox {
+    my ($flags) = @_;
+
+    my @status_flags =
+        sort { $b <=> $a }
+        map  { $_->name =~ /(\d+)$/; $1 }
+        grep { $_->is_active && $_->name =~ /^cf_status_firefox\d/ }
+        @$flags;
+    return @status_flags ? $status_flags[0] : undef;
 }
 
 sub db_schema_abstract_schema {

@@ -6,58 +6,43 @@
   # defined by the Mozilla Public License, v. 2.0.
   #%]
 
-[% IF tracking_flags.size %]
-  [% tracking_flag_names = [] %]
-  [% FOREACH flag = tracking_flags %]
-    [% tracking_flag_names.push(flag.name) %]
+[% RETURN UNLESS tracking_flag_components %]
+
+<script type="text/javascript">
+  $(function() {
+    var tracking_flag_components = [% tracking_flag_components FILTER none %];
+    var highest_status_firefox = '[% highest_status_firefox FILTER js %]';
+
+    $('#component')
+      .click(function() {
+        // First, we disable all flags.
+        $('table.tracking_flags select').attr('disabled', true);
+        // Now enable flags available for the selected component.
+        var component = $('#component').val();
+        if (!component || !tracking_flag_components[component])
+          return;
+        $.each(tracking_flag_components[component], function(i, v) {
+          $('#' + v).attr('disabled', false);
+        });
+      }).click();
+
+  [% IF highest_status_firefox %]
+    $('#version, #bug_status')
+      .change(function() {
+        var version = $('#version').val();
+        if ($('#bug_status').val() != 'UNCONFIRMED'
+            && (
+              version.toLowerCase() == 'trunk'
+              || version == highest_status_firefox + ' Branch'
+              || version == 'Firefox ' + highest_status_firefox
+            ))
+        {
+          $('#cf_status_firefox' + highest_status_firefox).val('affected');
+        }
+        else {
+          $('#cf_status_firefox' + highest_status_firefox).val('---');
+        }
+      }).change();
   [% END %]
-
-  <script type="text/javascript">
-    [% js_filtered_names = [] %]
-    [% FOREACH flag = tracking_flag_names %]
-      [% js_filtered = flag FILTER js %]
-      [% js_filtered_names.push(js_filtered) %]
-    [% END %]
-    var tracking_flag_names = ['[% js_filtered_names.join("','") FILTER none %]'];
-    var tracking_flags = new Array([% product.components.size %]);
-
-    [% count = 0 %]
-    [% FOREACH c = product.components %]
-      [% NEXT IF NOT c.is_active %]
-      [% tracking_flag_list = [] %]
-      [% FOREACH flag = tracking_flags %]
-        [% FOREACH v = flag.visibility %]
-          [% IF v.product_id == product.id
-                && (!v.component_id.defined || v.component_id == c.id) %]
-            [% tracking_flag_list.push(flag.name) %]
-          [% END %]
-        [% END %]
-      [% END %]
-      [% js_filtered_flags = [] %]
-      [% FOREACH flag = tracking_flag_list %]
-        [% js_filtered = flag FILTER js %]
-        [% js_filtered_flags.push(js_filtered) %]
-      [% END %]
-      tracking_flags[[% count %]] = ['[% js_filtered_flags.join("','") FILTER none %]'];
-      [% count = count + 1 %]
-    [% END %]
-
-    function update_tracking_flags () {
-      var component = document.getElementById('component');
-      // First, we disable all flags.
-      for (var i = 0; i < tracking_flag_names.length; i++) {
-        var flagField = document.getElementById(tracking_flag_names[i]);
-        flagField.disabled = true;
-      }
-      // Now enable flags available for the selected component.
-      var index = component.selectedIndex;
-      for (var i = 0; i < tracking_flags[index].length; i++) {
-        var flagField = document.getElementById(tracking_flags[index][i]);
-        flagField.disabled = false;
-      }
-    }
-
-    YAHOO.util.Event.onDOMReady(update_tracking_flags);
-    YAHOO.util.Event.addListener("component", "change", update_tracking_flags);
-  </script>
-[% END %]
+  });
+</script>

@@ -469,6 +469,7 @@ td.flag-requestee {
 
 .comment-actions {
     white-space: nowrap;
+    vertical-align: top;
     padding: 2px 2px 0 0 !important;
 }
 

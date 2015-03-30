@@ -218,6 +218,11 @@ input[type="number"] {
     font-size: 120%;
 }
 
+#field-status_summary {
+    border-top: 1px dotted silver;
+    padding-top: 4px;
+}
+
 #status-needinfo, #status-needinfo .vcard {
     display: inline;
 }

@@ -623,10 +623,11 @@
     [%# duplicates %]
     [% IF bug.duplicates.size %]
       [% INCLUDE bug_modal/field.html.tmpl
+          field = "duplicates"
+          field_type = constants.FIELD_TYPE_BUG_LIST
           label = "Duplicates"
           values = bug.duplicates
-          field_type = constants.FIELD_TYPE_BUG_LIST
-          view_only = 1
+          hide_on_edit = 1
       %]
     [% END %]
 

@@ -162,6 +162,9 @@ sub update {
         $cache->{'tracking_flags'}->{$self->flag_id} = $self;
     }
 
+    # fielddefs has been changed so we need to clear global config
+    Bugzilla->memcached->clear_config();
+
     return $changes;
 }
 

@@ -243,6 +243,7 @@ input[type="number"] {
 
 #after-comment-commit-button {
     margin-left: -8px;
+    margin-bottom: 4px;
 }
 
 #needinfo_from_autocomplete {

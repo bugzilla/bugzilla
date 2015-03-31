@@ -25,5 +25,34 @@
   <textarea rows="5" cols="80" name="comment" id="comment"></textarea>
   <div id="after-comment-commit-button">
     [% Hook.process("after_comment_commit_button", 'bug/edit.html.tmpl') %]
+
+    [% IF NOT bug.cc || NOT bug.cc.contains(user.login) %]
+      [%
+        IF user.settings.state_addselfcc.value == 'always';
+          check_add_self = 1;
+        ELSIF user.settings.state_addselfcc.value == 'cc_unless_role';
+          check_add_self = !(
+              bug.user.isreporter
+              || bug.assigned_to.id == user.id
+              || (bug.qa_contact && bug.qa_contact.id == user.id)
+            );
+        ELSE;
+          check_add_self = 0;
+        END;
+      %]
+      [%# this is in a table to match the alignment of the added-by-extensions
+          checkboxes (needinfo, restrict-comments) %]
+      <table>
+        <tr>
+          <td>
+            <input type="checkbox" name="addselfcc" id="add-self-cc"
+              [%~ " checked" IF check_add_self %]>
+          </td>
+          <td>
+            <label for="add-self-cc">Add me to CC list (follow this [% terms.bug %])</label>
+          </td>
+        </tr>
+      </table>
+    [% END %]
   </div>
 </div>

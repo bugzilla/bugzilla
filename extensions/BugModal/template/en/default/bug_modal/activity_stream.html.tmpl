@@ -7,6 +7,8 @@
   #%]
 
 [%
+  PROCESS bug/time.html.tmpl;
+
   FOREACH change_set IN bug.activity_stream;
     '<div class="change-set" id="' _ change_set.id _ '">';
 

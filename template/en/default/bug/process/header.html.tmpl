@@ -27,7 +27,8 @@
 [% USE Bugzilla %]
 
 [%# BMO: allow experimental UIs to replace show-header %]
-[% IF alt_ui_header %]
+[%# if there isn't a bug to display, we need fall back to the default header %]
+[% IF bug && alt_ui_header %]
   [% PROCESS $alt_ui_header %]
 [% ELSE %]
   [% PROCESS "bug/show-header.html.tmpl" %]

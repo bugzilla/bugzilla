@@ -235,19 +235,23 @@
         ><img title="Feed Format" alt="Feed" src="images/rss.png" height="24" width="24"></a>
         <a href="buglist.cgi?[% urlquerypart FILTER html %]&amp;ctype=ics"
         ><img title="iCal Format" alt="iCal" src="images/ical.png" height="24" width="24"></a>
-        <a href="colchange.cgi?[% urlquerypart FILTER html %]&amp;query_based_on=
-           [% defaultsavename OR searchname FILTER uri %]"
-        ><button>Change Columns</button></a>
+        <button type="button"
+                onclick="document.location='colchange.cgi?[% urlquerypart FILTER html %]&amp;query_based_on=
+                         [%~ defaultsavename OR searchname FILTER uri %]'">
+            Change Columns</button>
+
 
         [% IF bugs.size > 1 && caneditbugs && !dotweak %]
-          <a href="buglist.cgi?[% urlquerypart FILTER html %]
-            [%- "&order=$qorder" FILTER html IF order %]&amp;tweak=1"
-          ><button>Change Several [% terms.Bugs %] at Once</button></a>
+          <button type="button"
+                  onclick="document.location='buglist.cgi?[% urlquerypart FILTER html %]
+                           [%- "&order=$qorder" FILTER html IF order %]&amp;tweak=1'">
+            Change Several [% terms.Bugs %] at Once</button>
         [% END %]
 
         [% IF bugowners && user.id %]
-          <a href="mailto:[% bugowners FILTER html %]"
-          ><button>Send Mail to [% terms.Bug %] Assignees</button></a>
+          <button type="button"
+                  onclick="document.location='mailto:[% bugowners FILTER html %]'">
+            Send Mail to [% terms.Bug %] Assignees</button>
         [% END %]
 
         [%# Links to more things users can do with this bug list. %]
@@ -256,15 +260,18 @@
       <br>
     [% END %]
     <div class="bz_query_edit">
-        <a href="[% PROCESS edit_search_url %]"><button>Edit Search</button></a>
+      <button type="button"
+              onclick="document.location='[% PROCESS edit_search_url %]'">
+          Edit Search</button>
     </div>
 
     [% IF searchtype == "saved" %]
       <div class="bz_query_forget">
-         <a href="buglist.cgi?cmdtype=dorem&amp;remaction=forget&amp;namedcmd=
-              [% searchname FILTER uri %]&amp;token=
-              [% issue_hash_token([search_id, searchname]) FILTER uri %]"
-         ><button>Forget Search '[% searchname FILTER html %]'</button></a>
+        <button type="button"
+                onclick="document.location='buglist.cgi?cmdtype=dorem&amp;remaction=forget&amp;namedcmd=
+                         [%- searchname FILTER uri %]&amp;token=
+                         [%- issue_hash_token([search_id, searchname]) FILTER uri %]'">
+          Forget Search '[% searchname FILTER html %]'</button>
       </div>
     [% ELSE %]
       <div class="bz_query_remember">

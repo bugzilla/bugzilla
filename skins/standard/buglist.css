@@ -58,6 +58,7 @@
 
 .bz_query_links a img {
     vertical-align: bottom;
+    border: 0;
 }
 
 .bz_query_links a {

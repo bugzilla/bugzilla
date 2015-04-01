@@ -367,6 +367,8 @@ sub get_bug_link {
     my $linkified;
     $template->process('bug/link.html.tmpl', 
         { bug => $bug, link_text => $link_text, %$options }, \$linkified);
+    $linkified =~ s/\n//g;        # strip newlines to prevent markdown conflicts
+    $linkified =~ s/\|/&#124;/g;  # escape '|', it confuses markdown tables
     return $linkified;
 }
 

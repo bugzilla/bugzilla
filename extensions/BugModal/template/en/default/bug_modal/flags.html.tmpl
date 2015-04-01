@@ -98,7 +98,7 @@
   <tr>
     <td class="flag-setter">
       [% IF f %]
-        [% INCLUDE bug_modal/user.html.tmpl u=flag.setter nick_only=1 %]
+        [% INCLUDE bug_modal/user.html.tmpl u=f.setter nick_only=1 %]
       [% ELSIF t.flags.size %]
         addl.
       [% END %]
@@ -151,7 +151,6 @@
               value    = flag_requestee
               emptyok  = flag_empty_ok
               classes  = [ "requestee" ]
-              disabled = !can_edit
           %]
         </div>
       <td>

@@ -195,7 +195,11 @@
           (NeedInfo from
           [%+
             IF needinfo.size == 1;
-              INCLUDE bug_modal/user.html.tmpl u=needinfo.0.requestee nick_only=1;
+              IF needinfo.0.requestee;
+                INCLUDE bug_modal/user.html.tmpl u=needinfo.0.requestee nick_only=1;
+              ELSE;
+                "anyone";
+              END;
             ELSE;
               " " _ needinfo.size _ " people";
             END;

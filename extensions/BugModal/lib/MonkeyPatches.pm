@@ -36,3 +36,14 @@ sub moz_nick {
 }
 
 1;
+
+package Bugzilla::Attachment;
+use strict;
+use warnings;
+
+sub is_image {
+    my ($self) = @_;
+    return substr($self->contenttype, 0, 6) eq 'image/';
+}
+
+1;

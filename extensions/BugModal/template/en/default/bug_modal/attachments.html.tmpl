@@ -20,8 +20,17 @@
     " [% IF attachment.isobsolete %]style="display:none"[% END %]>
       <td class="attach-desc-td">
         <div class="attach-desc">
-          <a href="attachment.cgi?id=[% attachment.id FILTER none %]">
-            [%~ attachment.description FILTER html %]</a>
+          [% IF attachment.is_image %]
+            <a href="attachment.cgi?id=[% attachment.id FILTER none %]"
+              title="[% attachment.description FILTER html %]"
+              class="lightbox">
+              <img src="extensions/BugModal/web/image.png" width="16" height="16">
+              [%~ attachment.description FILTER html %]
+            </a>
+          [% ELSE %]
+            <a href="attachment.cgi?id=[% attachment.id FILTER none %]">
+              [%~ attachment.description FILTER html %]</a>
+          [% END %]
         </div>
         <div>
           <span class="attach-time">[% INCLUDE bug_modal/rel_time.html.tmpl ts=attachment.attached %]</span>

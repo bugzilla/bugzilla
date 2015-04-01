@@ -200,6 +200,15 @@ $(function() {
         });
     }
 
+    // lightboxes
+    $('.lightbox, .comment-text .lightbox + span:first-of-type a:first-of-type')
+        .click(function(event) {
+            if (event.metaKey)
+                return;
+            event.preventDefault();
+            lb_show(this);
+        });
+
     //
     // anything after this point is only executed for logged in users
     //
@@ -723,6 +732,53 @@ function bugzilla_ajax(request, done_fn, error_fn) {
             if (error_fn)
                 error_fn(data.responseJSON.message);
         });
+}
+
+// lightbox
+
+function lb_show(el) {
+    $(window).trigger('close');
+    $(document).bind('keyup.lb', function(event) {
+        if (event.keyCode == 27) {
+            lb_close(event);
+        }
+    });
+    var overlay = $('<div>')
+        .prop('id', 'lb_overlay')
+        .css({ opacity: 0 })
+        .appendTo('body');
+    var overlay2 = $('<div>')
+        .prop('id', 'lb_overlay2')
+        .css({ top: $(window).scrollTop() + 5 })
+        .appendTo('body');
+    var title = $('<div>')
+        .prop('id', 'lb_text')
+        .appendTo(overlay2);
+    var img = $('<img>')
+        .prop('id', 'lb_img')
+        .prop('src', el.href)
+        .prop('alt', 'Loading...')
+        .css({ opacity: 0 })
+        .appendTo(overlay2)
+        .click(function(event) {
+            event.stopPropagation();
+            window.location.href = el.href;
+        });
+    var close_btn = $('<button>')
+        .prop('id', 'lb_close_btn')
+        .prop('type', 'button')
+        .addClass('minor')
+        .text('Close')
+        .appendTo(overlay2);
+    title.append(el.title);
+    overlay.add(overlay2).click(lb_close);
+    img.add(overlay).animate({ opacity: 1 }, 200);
+}
+
+function lb_close(event) {
+    event.preventDefault();
+    $(document).unbind('keyup.lb');
+    $('#lb_overlay, #lb_overlay2, #lb_close_btn, #lb_img, #lb_text').remove();
 }
 
 // no-ops

@@ -535,7 +535,6 @@ sub insert {
     # Detect if the user already used the same form to submit an attachment
     my $token = trim($cgi->param('token'));
     check_token_data($token, 'create_attachment', 'index.cgi');
-    print STDERR "here\n";
 
     # Check attachments the user tries to mark as obsolete.
     my @obsolete_attachments;

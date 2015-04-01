@@ -93,8 +93,7 @@
 
 [% BLOCK edit_flag %]
 [%
-  can_edit  = !f || (f.setter_id == user.id || (f.requestee_id && f.requestee_id == user.id))
-  flag_id   = f ? "flag-$f.id" : "flag_type-$t.id";
+  flag_id = f ? "flag-$f.id" : "flag_type-$t.id";
 %]
   <tr>
     <td class="flag-setter">
@@ -118,10 +117,10 @@
           disabled
         [% END %]
         class="bug-flag">
-        [% IF !f || (can_edit && user.can_request_flag(t)) || f.setter_id == user.id %]
+        [% IF !f || (user.can_request_flag(t)) || f.setter_id == user.id %]
           <option value="X"></option>
         [% END %]
-        [% IF t.is_active && can_edit %]
+        [% IF t.is_active %]
           [% IF (t.is_requestable && user.can_request_flag(t)) || (f && f.status == "?") %]
             <option value="?" [% "selected" IF f && f.status == "?" %]>?</option>
           [% END %]

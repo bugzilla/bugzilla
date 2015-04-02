@@ -237,7 +237,7 @@ sub _DoAnchors {
     }xsge;
 
     #
-    # Last, handle reference-style shortcuts: [link text]
+    # Handle reference-style shortcuts: [link text]
     # These must come last in case you've also got [link test][1]
     # or [link test](/foo)
     #
@@ -254,6 +254,22 @@ sub _DoAnchors {
         (my $link_id = lc $2) =~ s{[ ]*\n}{ }g; # lower-case and turn embedded newlines into spaces
 
         $self->_GenerateAnchor($whole_match, $link_text, $link_id);
+    }xsge;
+
+    # Last, handle "naked" references
+    # Caveat, does not handle ;http://amazon.com
+    my $safe_url_regexp = Bugzilla::Template::SAFE_URL_REGEXP();
+    $text =~ s{
+        (
+          (^|(?<![;^"'<>]))  # negative lookbehind, including ';' in '&lt;'
+          (                  # wrap url in $3
+             (?:https?|ftp):[^'">\s]+\w
+          )
+        )
+    }{
+        my $whole_match = $3;
+        my $url = $whole_match;
+        $self->_GenerateAnchor($whole_match, $url, undef, $url, undef);
     }xsge;
 
     return $text;

@@ -41,12 +41,18 @@ Bugzilla::Install::Util::no_checksetup_from_cgi() if $ENV{'SERVER_SOFTWARE'};
 init_console();
 
 my %switch;
-GetOptions(\%switch, 'help|h|?', 'check-modules', 'no-templates|t',
-                     'verbose|v|no-silent', 'make-admin=s', 
-                     'reset-password=s', 'version|V');
+GetOptions(\%switch, 'help|h|?', 'check-modules', 'cpanfile',
+                     'no-templates|t', 'verbose|v|no-silent',
+                     'make-admin=s', 'reset-password=s', 'version|V');
 
 # Print the help message if that switch was selected.
 pod2usage({-verbose => 1, -exitval => 1}) if $switch{'help'};
+
+# Export cpanfile and exit
+if ($switch{cpanfile}) {
+    export_cpanfile();
+    exit;
+}
 
 # Read in the "answers" file if it exists, for running in 
 # non-interactive mode.
@@ -258,6 +264,12 @@ the L</"RUNNING CHECKSETUP NON-INTERACTIVELY"> section.
 =item B<--help>
 
 Display this help text
+
+=item B<--cpanfile>
+
+Outputs a cpanfile in the document root listing the current and optional
+modules with their respective versions. This file can be used by <cpanm>
+and other utilities used to install Perl dependencies.
 
 =item B<--check-modules>
 

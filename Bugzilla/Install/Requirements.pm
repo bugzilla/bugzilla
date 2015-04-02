@@ -20,6 +20,7 @@ use warnings;
 use Bugzilla::Constants;
 use Bugzilla::Install::Util qw(install_string bin_loc
                                extension_requirement_packages);
+use File::Slurp;
 use List::Util qw(max);
 use Term::ANSIColor;
 
@@ -32,6 +33,7 @@ our @EXPORT = qw(
     check_requirements
     check_webdotbase
     check_font_file
+    export_cpanfile
     have_vers
     install_command
     map_files_to_features
@@ -841,6 +843,48 @@ sub map_files_to_features {
     return \%files;
 }
 
+sub export_cpanfile {
+    my $cpanfile;
+    # Required modules
+    foreach my $module (@{ REQUIRED_MODULES() }) {
+        my $requires = "requires '" . $module->{module} . "'";
+        $requires .= ", '" . $module->{version} . "'" if $module->{version};
+        $requires .= ";\n";
+        $cpanfile .= $requires;
+    }
+    # Recommended modules
+    foreach my $module (@{ OPTIONAL_MODULES() }) {
+        my $recommends = "";
+        if (exists $module->{feature}) {
+            foreach my $feature (@{ $module->{feature} }) {
+                $recommends .= "feature '" . $feature . "', '" . $module->{package} . "' => sub {\n";
+                $recommends .= "  recommends '" . $module->{module} . "'";
+                $recommends .= ", '" . $module->{version} . "'" if $module->{version};
+                $recommends .= ";\n};\n";
+            }
+        }
+        else {
+            $recommends .= "recommends '" . $module->{module} . "'";
+            $recommends .= ", '" . $module->{version} . "'" if $module->{version};
+            $recommends .= ";\n";
+        }
+        $cpanfile .= $recommends;
+    }
+    # Database modules
+    foreach my $db (keys %{ DB_MODULE() }) {
+        next if !exists DB_MODULE->{$db}->{dbd};
+        my $dbd = DB_MODULE->{$db}->{dbd};
+        my $recommends .= "feature '$db', '" . $dbd->{package} . "' => sub {\n";
+        $recommends .= "  recommends '" . $dbd->{module} . "'";
+        $recommends .= ", '" . $dbd->{version} . "'" if $dbd->{version};
+        $recommends .= ";\n};\n";
+        $cpanfile .= $recommends;
+    }
+
+    # Write out the cpanfile to the document root
+    write_file(bz_locations()->{'libpath'} . '/cpanfile', \$cpanfile);
+}
+
 1;
 
 __END__
@@ -960,6 +1004,18 @@ Params:      C<$output> - C<$true> if you want the function to
                  print out information about what it's doing.
 
 Returns:     C<1> if the check was successful, C<0> otherwise.
+
+=item C<export_cpanfile>
+
+ Description: Based on C<REQUIRED_MODULES> and C<OPTIONAL_MODULES>,
+              the function outputs text useful for writing to a
+              C<cpanfile>. C<cpanfile> can be used by utilities
+              such as C<cpanm> for installing the Perl dependencies
+              needed by an application.
+
+ Params:      None
+
+ Returns:     Text output for writing to a C<cpanfile>.
 
 =item C<have_vers($module, $output)>
 

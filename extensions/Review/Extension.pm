@@ -567,7 +567,7 @@ sub _check_review_flag {
                 bug_id    => $bug->id,
                 attach_id => $attachment->id
             }, 'Bugzilla::Flag');
-            $flag->_check_requestee($reviewer, $bug, $attachment);
+            $flag->_check_requestee($users->[0]->login, $bug, $attachment);
         }
     }
 }

@@ -32,8 +32,13 @@ sub get_param_list {
   };
 
   my $resolution_field = Bugzilla::Field->new({ name => 'resolution', cache => 1 });
-  # The empty resolution is included - it represents "no value"
-  my @resolutions = map {$_->name} @{ $resolution_field->legal_values };
+  my @resolutions = ();
+  # The 'fielddefs' table is not yet populated when running checksetup.pl
+  # for the first time.
+  if ($resolution_field) {
+      # The empty resolution is included - it represents "no value"
+      @resolutions = map {$_->name} @{ $resolution_field->legal_values };
+  }
 
   my @param_list = (
   {

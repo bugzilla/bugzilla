@@ -412,6 +412,10 @@ elsif ($action eq 'next_bug' or $action eq 'same_bug') {
         if ($action eq 'next_bug') {
             $vars->{'nextbug'} = $bug->id;
         }
+        # For performance reasons, preload visibility of dependencies
+        # and duplicates related to this bug.
+        Bugzilla::Bug->preload([$bug]);
+
         $template->process("bug/show.html.tmpl", $vars)
           || ThrowTemplateError($template->error());
         exit;

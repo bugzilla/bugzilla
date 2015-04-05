@@ -148,10 +148,9 @@ sub get_format {
 # If you want to modify this routine, read the comments carefully
 
 sub quoteUrls {
-    my ($text, $bug, $comment, $user, $bug_link_func, $for_markdown) = @_;
+    my ($text, $bug, $comment, $user, $for_markdown) = @_;
     return $text unless $text;
     $user ||= Bugzilla->user;
-    $bug_link_func ||= \&get_bug_link;
     $for_markdown ||= 0;
 
     # We use /g for speed, but uris can have other things inside them
@@ -206,7 +205,7 @@ sub quoteUrls {
         map { qr/$_/ } grep($_, Bugzilla->params->{'urlbase'}, 
                             Bugzilla->params->{'sslbase'})) . ')';
     $text =~ s~\b(${urlbase_re}\Qshow_bug.cgi?id=\E([0-9]+)(\#c([0-9]+))?)\b
-              ~($things[$count++] = $bug_link_func->($3, $1, { comment_num => $5, user => $user })) &&
+              ~($things[$count++] = get_bug_link($3, $1, { comment_num => $5, user => $user })) &&
                ("\x{FDD2}" . ($count-1) . "\x{FDD3}")
               ~egox;
 
@@ -254,7 +253,7 @@ sub quoteUrls {
     $text =~ s~\b($bug_re(?:$s*,?$s*$comment_re)?|$comment_re)
               ~ # We have several choices. $1 here is the link, and $2-4 are set
                 # depending on which part matched
-               (defined($2) ? $bug_link_func->($2, $1, { comment_num => $3, user => $user }) :
+               (defined($2) ? get_bug_link($2, $1, { comment_num => $3, user => $user }) :
                               "<a href=\"$current_bugurl#c$4\">$1</a>")
               ~egx;
 
@@ -268,7 +267,7 @@ sub quoteUrls {
 
     $text =~ s{($bugs_re)}{
         my $match = $1;
-        $match =~ s/((?:#$s*)?(\d+))/$bug_link_func->($2, $1);/eg;
+        $match =~ s/((?:#$s*)?(\d+))/get_bug_link($2, $1);/eg;
         $match;
     }eg;
 
@@ -288,7 +287,7 @@ sub quoteUrls {
     $text =~ s~(?<=^\*\*\*\ This\ bug\ has\ been\ marked\ as\ a\ duplicate\ of\ )
                (\d+)
                (?=\ \*\*\*\Z)
-              ~$bug_link_func->($1, $1, { user => $user })
+              ~get_bug_link($1, $1, { user => $user })
               ~egmx;
 
     # Now remove the encoding hacks in reverse order
@@ -302,7 +301,6 @@ sub quoteUrls {
 # Creates a link to an attachment, including its title.
 sub get_attachment_link {
     my ($attachid, $link_text, $user) = @_;
-    my $dbh = Bugzilla->dbh;
     $user ||= Bugzilla->user;
 
     my $attachment = new Bugzilla::Attachment({ id => $attachid, cache => 1 });
@@ -353,7 +351,6 @@ sub get_bug_link {
     my ($bug, $link_text, $options) = @_;
     $options ||= {};
     $options->{user} ||= Bugzilla->user;
-    my $dbh = Bugzilla->dbh;
 
     if (defined $bug && $bug ne '') {
         if (!blessed($bug)) {

@@ -505,59 +505,68 @@ sub preload {
     # to the more complex method.
     my @all_dep_ids;
     foreach my $bug (@$bugs) {
-        push(@all_dep_ids, @{ $bug->blocked }, @{ $bug->dependson });
-        push(@all_dep_ids, @{ $bug->duplicate_ids });
+        push @all_dep_ids, @{ $bug->blocked }, @{ $bug->dependson };
+        push @all_dep_ids, @{ $bug->duplicate_ids };
+        push @all_dep_ids, @{ $bug->_preload_referenced_bugs };
     }
     @all_dep_ids = uniq @all_dep_ids;
     # If we don't do this, can_see_bug will do one call per bug in
     # the dependency and duplicate lists, in Bugzilla::Template::get_bug_link.
     $user->visible_bugs(\@all_dep_ids);
-
-    foreach my $bug (@$bugs) {
-        $bug->_preload_referenced_bugs();
-    }
 }
 
 # Helps load up bugs referenced in comments by retrieving them with a single
 # query from the database and injecting bug objects into the object-cache.
 sub _preload_referenced_bugs {
     my $self = shift;
-    my @referenced_bug_ids;
 
     # inject current duplicates into the object-cache first
     foreach my $bug (@{ $self->duplicates }) {
-        $bug->object_cache_set()
-            unless Bugzilla::Bug->object_cache_get($bug->id);
+        $bug->object_cache_set() unless Bugzilla::Bug->object_cache_get($bug->id);
     }
 
     # preload bugs from comments
-    require Bugzilla::Template;
-    foreach my $comment (@{ $self->comments }) {
-        if ($comment->type == CMT_HAS_DUPE || $comment->type == CMT_DUPE_OF) {
-            # duplicate bugs that aren't currently in $self->duplicates
-            push @referenced_bug_ids, $comment->extra_data
-                unless Bugzilla::Bug->object_cache_get($comment->extra_data);
-        }
-        else {
-            # bugs referenced in comments
-            Bugzilla::Template::quoteUrls($comment->body, undef, undef, undef,
-                sub {
-                    my $bug_id = $_[0];
-                    push @referenced_bug_ids, $bug_id
-                        unless Bugzilla::Bug->object_cache_get($bug_id);
-                });
-        }
-    }
+    my $referenced_bug_ids = _extract_bug_ids($self->comments);
+    my @ref_bug_ids = grep { !Bugzilla::Bug->object_cache_get($_) } @$referenced_bug_ids;
 
     # inject into object-cache
-    my $referenced_bugs = Bugzilla::Bug->new_from_list(
-        [ uniq @referenced_bug_ids ]);
-    foreach my $bug (@$referenced_bugs) {
-        $bug->object_cache_set();
-    }
+    my $referenced_bugs = Bugzilla::Bug->new_from_list(\@ref_bug_ids);
+    $_->object_cache_set() foreach @$referenced_bugs;
 
-    # preload bug visibility
-    Bugzilla->user->visible_bugs(\@referenced_bug_ids);
+    return $referenced_bug_ids
+}
+
+# Extract bug IDs mentioned in comments. This is much faster than calling quoteUrls().
+sub _extract_bug_ids {
+    my $comments = shift;
+    my @bug_ids;
+
+    my $params = Bugzilla->params;
+    my @urlbases = ($params->{'urlbase'});
+    push(@urlbases, $params->{'sslbase'}) if $params->{'sslbase'};
+    my $urlbase_re = '(?:' . join('|', map { qr/$_/ } @urlbases) . ')';
+    my $bug_word = template_var('terms')->{bug};
+    my $bugs_word = template_var('terms')->{bugs};
+
+    foreach my $comment (@$comments) {
+        if ($comment->type == CMT_HAS_DUPE || $comment->type == CMT_DUPE_OF) {
+            push @bug_ids, $comment->extra_data;
+            next;
+        }
+        my $s = $comment->already_wrapped ? qr/\s/ : qr/\h/;
+        my $text = $comment->body;
+        # Full bug links
+        push @bug_ids, $text =~ /\b$urlbase_re\Qshow_bug.cgi?id=\E(\d+)(?:\#c\d+)?/g;
+        # bug X
+        my $bug_re = qr/\Q$bug_word\E$s*\#?$s*(\d+)/i;
+        push @bug_ids, $text =~ /\b$bug_re/g;
+        # bugs X, Y, Z
+        my $bugs_re = qr/\Q$bugs_word\E$s*\#?$s*(\d+)(?:$s*,$s*\#?$s*(\d+))+/i;
+        push @bug_ids, $text =~ /\b$bugs_re/g;
+        # Old duplicate markers
+        push @bug_ids, $text =~ /(?<=^\*\*\*\ This\ bug\ has\ been\ marked\ as\ a\ duplicate\ of\ )(\d+)(?=\ \*\*\*\Z)/;
+    }
+    return [uniq @bug_ids];
 }
 
 sub possible_duplicates {
@@ -3381,13 +3390,8 @@ sub alias {
 
     my $dbh = Bugzilla->dbh;
     $self->{'alias'} = $dbh->selectcol_arrayref(
-        q{SELECT alias
-            FROM bugs_aliases
-           WHERE bug_id = ?
-        ORDER BY alias},
-      undef, $self->bug_id);
-
-    $self->{'alias'} = [] if !scalar(@{$self->{'alias'}});
+        q{SELECT alias FROM bugs_aliases WHERE bug_id = ? ORDER BY alias},
+        undef, $self->bug_id);
 
     return $self->{'alias'};
 }
@@ -3415,6 +3419,7 @@ sub attachments {
 
     $self->{'attachments'} =
         Bugzilla::Attachment->get_attachments_by_bug($self, {preload => 1});
+    $_->object_cache_set() foreach @{ $self->{'attachments'} };
     return $self->{'attachments'};
 }
 
@@ -4046,7 +4051,11 @@ sub EmitDependList {
 # Creates a lot of bug objects in the same order as the input array.
 sub _bugs_in_order {
     my ($self, $bug_ids) = @_;
+    return [] unless @$bug_ids;
+
     my %bug_map;
+    my $dbh = Bugzilla->dbh;
+
     # there's no need to load bugs from the database if they are already in the
     # object-cache
     my @missing_ids;
@@ -4058,10 +4067,25 @@ sub _bugs_in_order {
             push @missing_ids, $bug_id;
         }
     }
-    my $bugs = $self->new_from_list(\@missing_ids);
-    foreach my $bug (@$bugs) {
-        $bug_map{$bug->id} = $bug;
+    if (@missing_ids) {
+        my $bugs = Bugzilla::Bug->new_from_list(\@missing_ids);
+        $bug_map{$_->id} = $_ foreach @$bugs;
     }
+
+    # Dependencies are often displayed using their aliases instead of their
+    # bug ID. Load them all at once.
+    my $rows = $dbh->selectall_arrayref(
+        'SELECT bug_id, alias FROM bugs_aliases WHERE ' .
+        $dbh->sql_in('bug_id', $bug_ids) . ' ORDER BY alias');
+
+    foreach my $row (@$rows) {
+        my ($bug_id, $alias) = @$row;
+        $bug_map{$bug_id}->{alias} ||= [];
+        push @{ $bug_map{$bug_id}->{alias} }, $alias;
+    }
+    # Make sure all bugs have their alias attribute set.
+    $bug_map{$_}->{alias} ||= [] foreach @$bug_ids;
+
     return [ map { $bug_map{$_} } @$bug_ids ];
 }
 
@@ -4510,6 +4534,10 @@ sub ValidateDependencies {
     my $dbh = Bugzilla->dbh;
     my %deps;
     my %deptree;
+    my %sth;
+    $sth{dependson} = $dbh->prepare('SELECT dependson FROM dependencies WHERE blocked   = ?');
+    $sth{blocked}   = $dbh->prepare('SELECT blocked   FROM dependencies WHERE dependson = ?');
+
     foreach my $pair (["blocked", "dependson"], ["dependson", "blocked"]) {
         my ($me, $target) = @{$pair};
         $deptree{$target} = [];
@@ -4534,10 +4562,7 @@ sub ValidateDependencies {
         my @stack = @{$deps{$target}};
         while (@stack) {
             my $i = shift @stack;
-            my $dep_list =
-                $dbh->selectcol_arrayref("SELECT $target
-                                          FROM dependencies
-                                          WHERE $me = ?", undef, $i);
+            my $dep_list = $dbh->selectcol_arrayref($sth{$target}, undef, $i);
             foreach my $t (@$dep_list) {
                 # ignore any _current_ dependencies involving this bug,
                 # as they will be overwritten with data from the form.

@@ -75,7 +75,7 @@ sub _Markdown {
     my $self = shift;
     my $text = shift;
 
-    $text = Bugzilla::Template::quoteUrls($text, undef, undef, undef, undef, 1);
+    $text = Bugzilla::Template::quoteUrls($text, undef, undef, undef, 1);
 
     return $self->SUPER::_Markdown($text, @_);
 }

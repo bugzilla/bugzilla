@@ -69,10 +69,10 @@
       [% END %]
       </tr><tr class="bz_feed_creation_date">
         <td>[% columns.opendate.title FILTER html %]</td>
-        <td>[% bug.opendate FILTER html %]</td>
+        <td>[% bug.opentime FILTER time("%Y-%m-%dT%H:%M:%SZ", "UTC") %]</td>
       </tr><tr class="bz_feed_changed_date">
         <td>[% columns.changeddate.title FILTER html %]</td>
-        <td>[% bug.changeddate FILTER html -%]</td>
+        <td>[% bug.changedtime FILTER time("%Y-%m-%dT%H:%M:%SZ", "UTC") -%]</td>
       </tr>
       </table>
       [% END %]

@@ -228,6 +228,16 @@
       [% PROCESS format_js_link %]
     [% END %]
 
+    [%# IE8 doesn't understand these HTML5 elements. So we have to declare them here. %]
+    <!--[if lt IE 9]>
+      <script>
+        document.createElement('header');
+        document.createElement('nav');
+        document.createElement('main');
+        document.createElement('footer');
+      </script>
+    <![endif]-->
+
     [%# this puts the live bookmark up on firefox for the Atom feed %]
     [% IF atomlink %]
        <link rel="alternate" 
@@ -248,7 +258,7 @@
                  [%+ class FILTER css_class_quote %]
                [% END %] yui-skin-sam">
 
-  <div id="header">
+  <header id="header">
     [% INCLUDE global/banner.html.tmpl %]
 
     <div id="titles">
@@ -263,9 +273,9 @@
       [% END %]
     </div>
 
-    <div id="common_links">
+    <nav id="common_links">
       [% PROCESS "global/common-links.html.tmpl" qs_suffix = "_top" %]
-    </div>
+    </nav>
 
     [% IF Bugzilla.languages.size > 1 %]
       <div id="lang_links_container" class="bz_default_hidden">
@@ -284,9 +294,9 @@
         </ul>
       </div>
     [% END %]
-  </div>
+  </header>
 
-  <div id="bugzilla-body">
+  <main role="main" id="bugzilla-body">
     [% IF Param('announcehtml') %]
       [% Param('announcehtml') FILTER none %]
     [% END %]

@@ -16,6 +16,14 @@
         font-family: Verdana, sans-serif;
         font-size: small;
     }
+
+    /* header and footer are required for IE8. IE9+ support them natively.
+     * main is required for all IE versions and KHTML-based browsers.
+     * Other browsers support them natively already. */
+    header, main, footer {
+        display: block;
+    }
+
     /* monospace is much smaller than Verdana by default, so we make it a bit bigger. */
     pre, code, kbd {
         font-size: medium;

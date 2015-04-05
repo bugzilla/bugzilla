@@ -63,8 +63,6 @@ if (defined $cgi->param('maketemplate')) {
     exit;
 }
 
-umask 0;
-
 # The format of the initial comment can be structured by adding fields to the
 # enter_bug template and then referencing them in the comment template.
 my $comment;

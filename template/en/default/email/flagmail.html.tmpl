@@ -47,7 +47,7 @@
     </p>
 
     <p>
-      [% "$terms.Bug $bug.bug_id" FILTER bug_link(bug, {full_url => 1, user => to_user}) FILTER none %]:
+      [% INCLUDE bug/link.html.tmpl bug = bug, link_text = "$terms.Bug $bug.id", full_url = 1, user = to_user %]:
       [%= bug.short_desc FILTER html %]
     </p>
 

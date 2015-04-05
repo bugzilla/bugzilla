@@ -565,7 +565,7 @@
     <td class="field_value" colspan="2">
       <span id="duplicates">
         [% FOREACH dupe = bug.duplicates %]
-          [% dupe.id FILTER bug_link(dupe, use_alias => 1) FILTER none %][% " " %]
+          [% INCLUDE bug/link.html.tmpl bug = dupe, link_text = dupe.id, use_alias = 1 %][% " " %]
         [% END %]
       </span>
       (<a href="buglist.cgi?bug_id=[% bug.duplicate_ids.join(",") FILTER html %]">
@@ -1014,10 +1014,9 @@
                value="[% bug.${field.name}.join(', ') FILTER html %]">
       [% END %]
     </span>
-    
+
     [% FOREACH dep_bug = deps %]
-      [% dep_bug.id FILTER bug_link(dep_bug, use_alias => 1)
-                    FILTER none %][% " " %]
+      [% INCLUDE bug/link.html.tmpl bug = dep_bug, link_text = dep_bug.id, use_alias = 1 %][% " " %]
     [% END %]
     [% IF bug.check_can_change_field(field.name, 0, 1) %]
       <span id="[% field.name FILTER html %]_edit_container" 

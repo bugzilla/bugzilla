@@ -38,9 +38,6 @@ sub relationships {
     return %relationships;
 }
 
-# This is a bit of a hack, basically keeping the old system()
-# cmd line interface. Should clean this up at some point.
-#
 # args: bug_id, and an optional hash ref which may have keys for:
 # changer, owner, qa, reporter, cc
 # Optional hash contains values of people which will be forced to those
@@ -88,6 +85,8 @@ sub Send {
         @diffs = _get_new_bugmail_fields($bug);
     }
 
+    my $comments = [];
+
     if ($params->{dep_only}) {
         push(@diffs, { field_name => 'bug_status',
                        old        => $params->{changes}->{bug_status}->[0],
@@ -104,14 +103,14 @@ sub Send {
     }
     else {
         push(@diffs, _get_diffs($bug, $end, \%user_cache));
+
+        $comments = $bug->comments({ after => $start, to => $end });
+        # Skip empty comments.
+        @$comments = grep { $_->type || $_->body =~ /\S/ } @$comments;
+
+        # If no changes have been made, there is no need to process further.
+        return {'sent' => []} unless scalar(@diffs) || scalar(@$comments);
     }
-
-    my $comments = $bug->comments({ after => $start, to => $end });
-    # Skip empty comments.
-    @$comments = grep { $_->type || $_->body =~ /\S/ } @$comments;
-
-    # If no changes have been made, there is no need to process further.
-    return {'sent' => []} unless scalar(@diffs) || scalar(@$comments);
 
     ###########################################################################
     # Start of email filtering code

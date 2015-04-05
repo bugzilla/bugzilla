@@ -19,6 +19,7 @@
 [% DEFAULT mode = "show" %]
 [% user_cache = template_cache.users %]
 [% markdown_enabled = feature_enabled('jsonrpc') AND user.settings.use_markdown.value == "on" %]
+[% can_edit_comments = bug.check_can_change_field('longdesc', 0, 1) %]
 
 <!-- This auto-sizes the comments and positions the collapse/expand links 
      to the right. -->
@@ -26,9 +27,7 @@
 <tr>
 <td>
 
-[% FOREACH comment = comments %]
-  [% PROCESS a_comment %]
-[% END %]
+[% PROCESS display_comments %]
 
 [% IF mode == "edit" && user.id
       && user.settings.comment_box_position.value == "before_comments" %]
@@ -69,10 +68,11 @@
 [%# Block for individual comments                                            #%]
 [%############################################################################%]
 
-[% BLOCK a_comment %]
-  [% RETURN IF comment.is_private AND NOT (user.is_insider || user.id == comment.author.id) %]
-  [% comment_text = comment.body_full %]
-  [% RETURN IF comment_text == '' AND (comment.work_time - 0) != 0 AND !user.is_timetracker %]
+[% BLOCK display_comments %]
+  [% FOREACH comment = comments %]
+    [% NEXT IF comment.is_private AND NOT (user.is_insider || user.id == comment.author.id) %]
+    [% comment_text = comment.body_full %]
+    [% NEXT IF comment_text == '' AND (comment.work_time - 0) != 0 AND !user.is_timetracker %]
 
     <div id="c[% comment.count %]" class="bz_comment[% " bz_private" IF comment.is_private %]
                 [% " bz_default_collapsed" IF comment.collapsed %]
@@ -92,7 +92,7 @@
             [% IF comment.collapsed %]
               <span class="bz_collapsed_actions">
             [% END %]
-            [% IF bug.check_can_change_field('longdesc', 0, 1) %]
+            [% IF can_edit_comments %]
               [% IF user.can_tag_comments %]
                 [<a href="#"
                     onclick="YAHOO.bugzilla.commentTagging.toggle([% comment.id %], [% comment.count %]);return false">tag</a>]
@@ -125,7 +125,7 @@
           </span>
         [% END %]
 
-        [% IF mode == "edit" && user.is_insider && bug.check_can_change_field('longdesc', 0, 1) %]
+        [% IF mode == "edit" && can_edit_comments && user.is_insider %]
           <div class="bz_private_checkbox">
             <input type="hidden" value="1"
                    name="defined_isprivate_[% comment.id %]">
@@ -214,4 +214,5 @@
 </[% user.use_markdown(comment) ? "div" : "pre" %]>
     [% Hook.process('a_comment-end', 'bug/comments.html.tmpl') %]
     </div>
+  [% END %]
 [% END %]

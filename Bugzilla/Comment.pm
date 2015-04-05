@@ -162,11 +162,15 @@ sub preload {
         my $rows = $dbh->selectall_arrayref(
             "SELECT comment_id, " . $dbh->sql_group_concat('tag', "','") . "
                FROM longdescs_tags
-              WHERE " . $dbh->sql_in('comment_id', \@comment_ids) . "
-              GROUP BY comment_id");
+              WHERE " . $dbh->sql_in('comment_id', \@comment_ids) . ' ' .
+              $dbh->sql_group_by('comment_id'));
         foreach my $row (@$rows) {
             $comment_map{$row->[0]}->{tags} = [ split(/,/, $row->[1]) ];
         }
+        # Also sets the 'tags' attribute for comments which have no entry
+        # in the longdescs_tags table, else calling $comment->tags will
+        # trigger another SQL query again.
+        $comment_map{$_}->{tags} ||= [] foreach @comment_ids;
     }
 }
 
@@ -190,7 +194,8 @@ sub extra_data  { return $_[0]->{'extra_data'} }
 
 sub tags {
     my ($self) = @_;
-    return [] unless Bugzilla->params->{'comment_taggers_group'};
+    state $comment_taggers_group = Bugzilla->params->{'comment_taggers_group'};
+    return [] unless $comment_taggers_group;
     $self->{'tags'} ||= Bugzilla->dbh->selectcol_arrayref(
         "SELECT tag
            FROM longdescs_tags
@@ -202,11 +207,14 @@ sub tags {
 
 sub collapsed {
     my ($self) = @_;
-    return 0 unless Bugzilla->params->{'comment_taggers_group'};
+    state $comment_taggers_group = Bugzilla->params->{'comment_taggers_group'};
+    return 0 unless $comment_taggers_group;
     return $self->{collapsed} if exists $self->{collapsed};
+
+    state $collapsed_comment_tags = Bugzilla->params->{'collapsed_comment_tags'};
     $self->{collapsed} = 0;
     Bugzilla->request_cache->{comment_tags_collapsed}
-            ||= [ split(/\s*,\s*/, Bugzilla->params->{'collapsed_comment_tags'}) ];
+            ||= [ split(/\s*,\s*/, $collapsed_comment_tags) ];
     my @collapsed_tags = @{ Bugzilla->request_cache->{comment_tags_collapsed} };
     foreach my $my_tag (@{ $self->tags }) {
         $my_tag = lc($my_tag);

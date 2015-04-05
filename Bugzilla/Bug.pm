@@ -2505,29 +2505,34 @@ sub reset_assigned_to {
 }
 sub set_bug_ignored       { $_[0]->set('bug_ignored',       $_[1]); }
 sub set_cclist_accessible { $_[0]->set('cclist_accessible', $_[1]); }
+
 sub set_comment_is_private {
-    my ($self, $comment_id, $isprivate) = @_;
+    my ($self, $comments, $isprivate) = @_;
+    $self->{comment_isprivate} ||= [];
+    my $is_insider = Bugzilla->user->is_insider;
 
-    # We also allow people to pass in a hash of comment ids to update.
-    if (ref $comment_id) {
-        while (my ($id, $is) = each %$comment_id) {
-            $self->set_comment_is_private($id, $is);
+    $comments = { $comments => $isprivate } unless ref $comments;
+
+    foreach my $comment (@{$self->comments}) {
+        # Skip unmodified comment privacy.
+        next unless exists $comments->{$comment->id};
+
+        my $isprivate = delete $comments->{$comment->id} ? 1 : 0;
+        if ($isprivate != $comment->is_private) {
+            ThrowUserError('user_not_insider') unless $is_insider;
+            $comment->set_is_private($isprivate);
+            push @{$self->{comment_isprivate}}, $comment;
         }
-        return;
     }
 
-    my ($comment) = grep($comment_id == $_->id, @{ $self->comments });
-    ThrowUserError('comment_invalid_isprivate', { id => $comment_id }) 
-        if !$comment;
+    # If there are still entries in $comments, then they are illegal.
+    ThrowUserError('comment_invalid_isprivate', { id => join(', ', keys %$comments) })
+      if scalar keys %$comments;
 
-    $isprivate = $isprivate ? 1 : 0;
-    if ($isprivate != $comment->is_private) {
-        ThrowUserError('user_not_insider') if !Bugzilla->user->is_insider;
-        $self->{comment_isprivate} ||= [];
-        $comment->set_is_private($isprivate);
-        push @{$self->{comment_isprivate}}, $comment;
-    }
+    # If no comment privacy has been modified, remove this key.
+    delete $self->{comment_isprivate} unless scalar @{$self->{comment_isprivate}};
 }
+
 sub set_component  {
     my ($self, $name) = @_;
     my $old_comp  = $self->component_obj;
@@ -3586,7 +3591,10 @@ sub flags {
 
 sub isopened {
     my $self = shift;
-    return is_open_state($self->{bug_status}) ? 1 : 0;
+    unless (exists $self->{isopened}) {
+        $self->{isopened} = is_open_state($self->{bug_status}) ? 1 : 0;
+    }
+    return $self->{isopened};
 }
 
 sub keywords {

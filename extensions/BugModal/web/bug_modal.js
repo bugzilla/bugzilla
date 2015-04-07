@@ -713,6 +713,18 @@ $(function() {
             }
         })
         .change();
+
+    // hotkeys
+    $('body').hotkey('e', function() {
+        if ($('#cancel-btn:visible').length == 0) {
+            $('#mode-btn').click();
+        }
+    } );
+    $('body').hotkey('escape', function() {
+        if ($('#cancel-btn:visible').length != 0) {
+            $('#cancel-btn').click();
+        }
+    } );
 });
 
 function confirmUnsafeURL(url) {

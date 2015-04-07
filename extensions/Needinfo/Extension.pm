@@ -203,7 +203,8 @@ sub object_end_of_create {
 sub object_end_of_update {
     my ($self, $args) = @_;
     my $object = $args->{object};
-    return unless $object->isa('Bugzilla::Flag')
+    return unless exists $args->{changes}->{requestee_id}
+        && $object->isa('Bugzilla::Flag')
         && $object->type->name eq 'needinfo'
         && $object->requestee;
     _check_requestee($object->requestee);

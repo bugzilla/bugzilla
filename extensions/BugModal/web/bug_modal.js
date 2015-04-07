@@ -413,7 +413,8 @@ $(function() {
         .change();
     $('#resolution')
         .change(function(event) {
-            if (event.target.value == "DUPLICATE") {
+            var bug_status = $('#bug_status').val();
+            if ((bug_status == "RESOLVED" || bug_status == "VERIFIED") && event.target.value == "DUPLICATE") {
                 $('#duplicate-container').show();
                 $('#mark-as-dup-btn').hide();
                 $('#dup_id').focus();

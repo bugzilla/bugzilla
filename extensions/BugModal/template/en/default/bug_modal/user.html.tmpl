@@ -15,7 +15,10 @@
   #%]
 
 [%
-RETURN UNLESS u.id;
+IF !u.id;
+  "---";
+  RETURN;
+END;
 DEFAULT gravatar_size = 0;
 IF user.settings.show_gravatars.value != 'On';
   gravatar_size = 0;

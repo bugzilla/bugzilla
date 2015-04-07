@@ -175,8 +175,20 @@ sub template_before_process {
     foreach my $r (@{ Bugzilla::Field->new({ name => 'resolution', cache => 1 })->legal_values }) {
         my $resolution = $r->name;
         next unless $resolution;
-        next unless $r->is_active || $resolution eq $bug->resolution;
 
+        # always allow the current value
+        if ($resolution eq $bug->resolution) {
+            push @resolutions, $r;
+            next;
+        }
+
+        # never allow inactive values
+        next unless $r->is_active;
+
+        # ensure the user has basic rights to change this field
+        next unless $bug->check_can_change_field('resolution', '---', $resolution);
+
+        # canconfirm users can only set the resolution to WFM, INCOMPLETE or DUPE
         if ($perms->{canconfirm}
             && !($perms->{canedit} || $perms->{isreporter}))
         {
@@ -185,11 +197,15 @@ sub template_before_process {
                 && $resolution ne 'INCOMPLETE'
                 && $resolution ne 'DUPLICATE';
         }
+
+        # reporters can set it to anything, except INCOMPELTE
         if ($perms->{isreporter}
             && !($perms->{canconfirm} || $perms->{canedit}))
         {
             next if $resolution eq 'INCOMPLETE';
         }
+
+        # expired has, uh, expired
         next if $resolution eq 'EXPIRED';
 
         push @resolutions, $r;

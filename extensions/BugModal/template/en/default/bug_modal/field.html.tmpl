@@ -52,9 +52,22 @@ END;
 IF field_type == "";
   field_type = -1;
 END;
+# date picker fields should always be short
 IF field_type == constants.FIELD_TYPE_DATE
     || field_type == constants.FIELD_TYPE_DATETIME;
   short_width = 1;
+END;
+# determine if a field is set
+IF field_type == constants.FIELD_TYPE_BUG_URLS || field_type == constants.FIELD_TYPE_BUG_LIST;
+  has_value = values.size > 0;
+ELSIF field_type == constants.FIELD_TYPE_MULTI_SELECT || field_type == constants.FIELD_TYPE_USERS;
+  has_value = value.size > 0;
+ELSE;
+  has_value = value != "";
+END;
+# switch to view mode if edit-only and the current user cannot edit
+IF !editable && edit_only;
+  edit_only = 0;
 END;
 %]
 
@@ -78,6 +91,8 @@ END;
       [% END %]
       [% IF content.defined %]
         [% content FILTER none %]
+      [% ELSIF !editable && !has_value %]
+        ---
       [% ELSE %]
         [% SWITCH field_type %]
 

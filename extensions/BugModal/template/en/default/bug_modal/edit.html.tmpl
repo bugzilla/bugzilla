@@ -364,6 +364,7 @@
     [% INCLUDE bug_modal/field.html.tmpl
         field  = bug_fields.bug_status
         field_type = constants.FIELD_TYPE_SINGLE_SELECT
+        editable = bug.choices.bug_status.size > 1
         values = bug.choices.bug_status
         inline = 1
         no_indent = 1
@@ -372,6 +373,7 @@
     [% INCLUDE bug_modal/field.html.tmpl
         field  = bug_fields.resolution
         field_type = constants.FIELD_TYPE_SINGLE_SELECT
+        editable = bug.choices.resolution.size > (bug.resolution == "" ? 0 : 1)
         values = bug.choices.resolution
         inline = 1
         edit_only = 1
@@ -432,8 +434,12 @@
         hide_on_view = bug.mentors.size == 0
     %]
       [%
-        FOREACH mentor IN bug.mentors;
-          INCLUDE bug_modal/user.html.tmpl u=mentor;
+        IF bug.mentors.size;
+          FOREACH mentor IN bug.mentors;
+            INCLUDE bug_modal/user.html.tmpl u=mentor;
+          END;
+        ELSE;
+          "---";
         END;
       %]
     [% END %]
@@ -573,7 +579,7 @@
         field_type = constants.FIELD_TYPE_KEYWORDS
         hide_on_view = bug.keyword_objects.size == 0
     %]
-      [% bug.keyword_objects.pluck("name").join(", ") FILTER html %]
+      [% bug.keyword_objects.pluck("name").join(", ") || "---" FILTER html %]
     [% END %]
 
     [% UNLESS cf_hidden_in_product('cf_fx_iteration', bug.product, bug.component, bug) %]
@@ -828,7 +834,11 @@
         [% END %]
       </div>
     [% END %]
-    <pre id="user-story">[% bug.cf_user_story FILTER html %]</pre>
+    [% IF bug.cf_user_story == "" %]
+      ---
+    [% ELSE %]
+      <pre id="user-story">[% bug.cf_user_story FILTER html %]</pre>
+    [% END %]
     [% IF user.id %]
       <textarea id="cf_user_story" name="cf_user_story" style="display:none" rows="10" cols="80">
         [%~ bug.cf_user_story FILTER html ~%]

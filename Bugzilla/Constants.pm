@@ -222,7 +222,12 @@ use Memoize;
 # CONSTANTS
 #
 # Bugzilla version
-use constant BUGZILLA_VERSION => "4.2.11+";
+# BMO: we don't map exactly to a specific bugzilla version, so override our
+# reported version with a parameter.
+sub BUGZILLA_VERSION {
+    require Bugzilla;
+    return Bugzilla->params->{bugzilla_version} || '4.2+';
+}
 
 # A base link to the current REST Documentation. We place it here
 # as it will need to be updated to whatever the current release is.

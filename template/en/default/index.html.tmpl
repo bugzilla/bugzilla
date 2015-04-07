@@ -28,11 +28,11 @@
 
 [% PROCESS global/variables.none.tmpl %]
 
-
+[% USE Bugzilla %]
 [% PROCESS global/header.html.tmpl
    title = "$terms.Bugzilla Main Page"
    header = "Main Page" 
-   header_addl_info = "version $constants.BUGZILLA_VERSION"
+   header_addl_info = "version " _ (Bugzilla.params.bugzilla_version || constants.BUGZILLA_VERSION)
    style_urls = [ 'skins/standard/index.css' ]
 %]
 

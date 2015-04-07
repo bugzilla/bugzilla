@@ -46,6 +46,12 @@ use constant get_param_list => (
   },
 
   {
+   name => 'bugzilla_version',
+   type => 't',
+   default => '',
+  },
+
+  {
    name => 'ssl_redirect',
    type => 'b',
    default => 0

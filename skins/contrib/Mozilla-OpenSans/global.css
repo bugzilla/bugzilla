@@ -157,7 +157,7 @@ hr {
     visibility: hidden;
 }
 
-#bugzilla_version {
+#header #bugzilla_version {
     float: right;
     color: #888;
     padding: 5px 20px;

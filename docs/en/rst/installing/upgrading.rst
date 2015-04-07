@@ -3,9 +3,8 @@
 Upgrading
 #########
 
-You can upgrade Bugzilla from any version to any later version in one go -
-there is no need to pass through intermediate versions unless you are changing
-the method by which you obtain the code along the way.
+You can upgrade Bugzilla from any version to any later version in one go—there
+is no need to pass through intermediate versions.
 
 .. warning:: Upgrading is a one-way process. You cannot "downgrade" an
    upgraded Bugzilla. If you wish to revert to the old Bugzilla
@@ -21,11 +20,10 @@ already true of your installation, see :ref:`upgrading-with-git`.
 
 Before Git, we used to use Bazaar and, before that, CVS. If your installation
 of Bugzilla consists of a checkout from one of those two systems, you need to
-upgrade in three steps:
+upgrade in two steps:
 
-1. Upgrade to the latest point release of your current Bugzilla version.
-2. Move to Git while staying on exactly the same release.
-3. Upgrade to the latest Bugzilla using the instructions for :ref:`upgrading-with-git`.
+1. Move to running from a Git checkout, while staying on exactly the same release.
+2. Upgrade to the latest Bugzilla using the instructions for :ref:`upgrading-with-git`.
 
 See :ref:`migrating-from-bazaar` or :ref:`migrating-from-cvs` as appropriate.
 

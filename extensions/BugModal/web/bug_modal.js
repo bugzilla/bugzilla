@@ -331,7 +331,7 @@ $(function() {
         });
     $('#mode-btn').prop('disabled', false);
 
-    // cc add/remove
+    // cc toggle (follow/stop following)
     $('#cc-btn')
         .click(function(event) {
             event.preventDefault();
@@ -725,6 +725,16 @@ $(function() {
             $('#cancel-btn').click();
         }
     } );
+
+    // add cc button
+    $('#add-cc-btn')
+        .click(function(event) {
+            event.preventDefault();
+            $('#add-cc-btn').hide();
+            $('#add-cc-container').show();
+            $('#top-save-btn').show();
+            $('#add-cc').focus();
+        });
 });
 
 function confirmUnsafeURL(url) {

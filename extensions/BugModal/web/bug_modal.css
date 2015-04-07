@@ -285,7 +285,12 @@ input[type="number"] {
 
 #cc-list {
     max-height: 150px;
-    overflow-y: scroll;
+    overflow-y: auto;
+    clear: both;
+}
+
+#add-cc-btn {
+    float: right;
 }
 
 /* actions */

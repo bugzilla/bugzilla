@@ -715,7 +715,7 @@ $(function() {
         .change();
 
     // hotkeys
-    $('body').hotkey('e', function() {
+    $('body').hotkey('ctrl+e', function() {
         if ($('#cancel-btn:visible').length == 0) {
             $('#mode-btn').click();
         }

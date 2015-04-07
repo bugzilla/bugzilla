@@ -629,6 +629,10 @@ td.flag-requestee {
     color: #888;
 }
 
+input[type=text][disabled], input:not([type])[disabled] {
+    color: #888 !important;
+}
+
 .xdsoft_datetimepicker button, .xdsoft_datetimepicker button:hover {
     -webkit-box-shadow: none;
     -moz-box-shadow: none;

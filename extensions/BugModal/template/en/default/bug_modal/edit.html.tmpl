@@ -414,6 +414,7 @@
     [% WRAPPER bug_modal/field.html.tmpl
         field = bug_fields.assigned_to
         field_type = constants.FIELD_TYPE_USER
+        hide_on_edit = 1
     %]
       [% IF unassigned %]
         <i>Unassigned</i>
@@ -423,6 +424,18 @@
       [% ELSE %]
         [% INCLUDE bug_modal/user.html.tmpl u=bug.assigned_to %]
       [% END %]
+    [% END %]
+    [% WRAPPER bug_modal/field.html.tmpl
+        field = bug_fields.assigned_to
+        field_type = constants.FIELD_TYPE_USER
+        hide_on_view = 1
+        append_content = 1
+    %]
+      <div class="set-default-container" style="display:none">
+        <input type="checkbox" id="set-default-assignee" name="set_default_assignee" class="set-default"
+          value="1" data-for="assigned_to">
+        <label for="set-default-assignee">Reset Assignee to default</label>
+      </div>
     [% END %]
 
     [%# mentors %]
@@ -449,8 +462,21 @@
         field = bug_fields.qa_contact
         field_type = constants.FIELD_TYPE_USER
         hide_on_view = bug.qa_contact == ""
+        hide_on_edit = 1
     %]
       [% INCLUDE bug_modal/user.html.tmpl u=bug.qa_contact %]
+    [% END %]
+    [% WRAPPER bug_modal/field.html.tmpl
+        field = bug_fields.qa_contact
+        field_type = constants.FIELD_TYPE_USER
+        hide_on_view = 1
+        append_content = 1
+    %]
+      <div class="set-default-container" style="display:none">
+        <input type="checkbox" id="set-default-qa-contact" name="set_default_qa_contact" class="set-default"
+          value="1" data-for="qa_contact">
+        <label for="set-default-qa-contact">Reset QA Contact to default</label>
+      </div>
     [% END %]
 
   [% END %]

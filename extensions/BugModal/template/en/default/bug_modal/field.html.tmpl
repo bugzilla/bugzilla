@@ -22,6 +22,8 @@
   # short_width: (boolean) the field shouldn't take up much space at all (default: false)
   # hide_on_view: (boolean) hide field from read-only view (default: false)
   # hide_on_edit: (boolean) hide content when in edit mode (default: false)
+  # append_content: (boolean) when called as a WRAPPER, the content will be appended to the
+  #                 edit html instead of replacing it.  forces edit_only (default: false);
   #%]
 
 [%
@@ -42,6 +44,9 @@ IF view_only || container;
 END;
 IF !editable.defined;
   editable = bug.check_can_change_field(name, 0, 1);
+END;
+IF append_content;
+  edit_only = 1;
 END;
 IF inline && !label.defined;
   no_label = 1;
@@ -247,6 +252,10 @@ END;
           [%# error %]
           ('[% name FILTER html %]' [[% field_type FILTER html %])] not supported)
 
+      [% END %]
+
+      [% IF append_content && content.defined %]
+        [% content FILTER none %]
       [% END %]
     </div>
   [% END %]

@@ -29,6 +29,18 @@ use constant REL_COMPONENT_WATCHER => 15;
 
 sub db_schema_abstract_schema {
     my ($self, $args) = @_;
+    my $dbh = Bugzilla->dbh;
+
+    # Bugzilla 5.0+, the components.id type
+    # is INT3, while earlier versions used INT2
+    my $component_id_type = 'INT2';
+    my $len = scalar @{ $args->{schema}->{components}->{FIELDS} };
+    for (my $i = 0; $i < $len - 1; $i+=2) {
+        next if $args->{schema}->{components}->{FIELDS}->[$i] ne 'id';
+        $component_id_type = 'INT3'
+            if $args->{schema}->{components}->{FIELDS}->[$i+1]->{TYPE} eq 'MEDIUMSERIAL';
+        last;
+    }
     $args->{'schema'}->{'component_watch'} = {
         FIELDS => [
             id => {
@@ -46,7 +58,7 @@ sub db_schema_abstract_schema {
                 }
             },
             component_id => {
-                TYPE    => 'INT2',
+                TYPE    => $component_id_type,
                 NOTNULL => 0,
                 REFERENCES => {
                     TABLE  => 'components',

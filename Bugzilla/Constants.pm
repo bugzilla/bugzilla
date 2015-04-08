@@ -225,8 +225,9 @@ use Memoize;
 # BMO: we don't map exactly to a specific bugzilla version, so override our
 # reported version with a parameter.
 sub BUGZILLA_VERSION {
-    require Bugzilla;
-    return Bugzilla->params->{bugzilla_version} || '4.2+';
+    my $bugzilla_version = '4.2+';
+    eval { require Bugzilla } || return $bugzilla_version;
+    return Bugzilla->params->{bugzilla_version} || $bugzilla_version;
 }
 
 # A base link to the current REST Documentation. We place it here

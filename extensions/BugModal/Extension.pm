@@ -160,6 +160,7 @@ sub template_before_process {
         && ref($vars->{bugs}) eq 'ARRAY'
         && scalar(@{ $vars->{bugs} }) == 1;
     my $bug = $vars->{bugs}->[0];
+    return if exists $bug->{error};
 
     # trigger loading of tracking flags
     Bugzilla::Extension::TrackingFlags->template_before_process({

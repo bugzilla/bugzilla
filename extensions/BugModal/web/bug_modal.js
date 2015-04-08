@@ -482,8 +482,8 @@ $(function() {
     $('#take-btn')
         .click(function(event) {
             event.preventDefault();
-            $('#field-assigned_to .edit-hide').hide();
-            $('#field-assigned_to .edit-show').show();
+            $('#field-assigned_to.edit-hide').hide();
+            $('#field-assigned_to.edit-show').show();
             $('#assigned_to').val(BUGZILLA.user.login).focus().select();
             $('#top-save-btn').show();
         });
@@ -547,8 +547,6 @@ $(function() {
         .click(function(event) {
             event.preventDefault();
             $('#field-status-view').hide();
-            $('#field-status-edit .edit-hide').hide();
-            $('#field-status-edit .edit-show').show();
             $('#field-status-edit').show();
             $('#bug_status').val('RESOLVED').change();
             $('#resolution').val($(event.target).text()).change();
@@ -564,8 +562,6 @@ $(function() {
         .click(function(event) {
             event.preventDefault();
             $('#field-status-view').hide();
-            $('#field-status-edit .edit-hide').hide();
-            $('#field-status-edit .edit-show').show();
             $('#field-status-edit').show();
             $('#bug_status').val($(event.target).data('status')).change();
             $('#top-save-btn').show();

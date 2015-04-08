@@ -104,10 +104,6 @@
   [% ELSIF error == "comment_type_invalid" %]
     '[% type FILTER html %]' is not a valid comment type.
 
-  [% ELSIF error == "db_error" %]
-    An error occurred while performing a database operation:
-    <pre>[% err_message FILTER html %]</pre>
-
   [% ELSIF error == "db_rename_conflict" %]
     Name conflict: Cannot rename [% old FILTER html %] to
     [%+ new FILTER html %] because [% new FILTER html %] already exists.

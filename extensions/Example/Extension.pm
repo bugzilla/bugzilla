@@ -1058,28 +1058,33 @@ sub webservice_rest_resources {
     my $resources = $args->{'resources'};
     # Add a new resource that allows for /rest/example/hello
     # to call Example.hello
-    $resources->{'Bugzilla::Extension::Example::WebService'} = [
-        qr{^/example/hello$}, {
-            GET => {
-                method => 'hello',
-            }
-        }
-    ];
+    #$resources->{'Bugzilla::Extension::Example::WebService'} = [
+    #    qr{^/example/hello$}, {
+    #        GET => {
+    #            method => 'hello',
+    #        }
+    #    }
+    #];
 }
 
-sub webservice_rest_response {
+sub webservice_rest_result {
     my ($self, $args) = @_;
-    my $rpc      = $args->{'rpc'};
-    my $result   = $args->{'result'};
-    my $response = $args->{'response'};
+    my $result = $args->{'result'};
     # Convert a list of bug hashes to a single bug hash if only one is
     # being returned.
     if (ref $$result eq 'HASH'
         && exists $$result->{'bugs'}
+        && ref $$result->{'bugs'} eq 'ARRAY'
         && scalar @{ $$result->{'bugs'} } == 1)
     {
         $$result = $$result->{'bugs'}->[0];
     }
+}
+
+sub webservice_rest_response {
+    my ($self, $args) = @_;
+    my $response = $args->{'response'};
+    $response->header('X-Example-Header', 'This is an example header');
 }
 
 # This must be the last line of your extension.

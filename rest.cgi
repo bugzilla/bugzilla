@@ -15,17 +15,10 @@ use lib qw(. lib);
 use Bugzilla;
 use Bugzilla::Constants;
 use Bugzilla::Error;
-use Bugzilla::WebService::Constants;
 BEGIN {
-    if (!Bugzilla->feature('rest')
-        || !Bugzilla->feature('jsonrpc'))
-    {
+    if (!Bugzilla->feature('rest')) {
         ThrowUserError('feature_disabled', { feature => 'rest' });
     }
 }
-use Bugzilla::WebService::Server::REST;
 Bugzilla->usage_mode(USAGE_MODE_REST);
-local @INC = (bz_locations()->{extensionsdir}, @INC);
-my $server = new Bugzilla::WebService::Server::REST;
-$server->version('1.1');
-$server->handle();
+Bugzilla->api_server->handle();

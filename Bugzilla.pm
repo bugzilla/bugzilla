@@ -209,6 +209,20 @@ sub extensions {
     return $cache->{extensions};
 }
 
+sub api_server {
+    my $class = shift;
+    my $cache = $class->request_cache;
+    return $cache->{api_server} if defined $cache->{api_server};
+    require Bugzilla::API::Server;
+    $cache->{api_server} = Bugzilla::API::Server->server;
+    if (my $load_error = $cache->{api_server}->load_error) {
+        my @error_params = ($load_error->{error}, $load_error->{vars});
+        ThrowCodeError(@error_params) if $load_error->{type} eq 'code';
+        ThrowUserError(@error_params) if $load_error->{type} eq 'user';
+    }
+    return $cache->{api_server};
+}
+
 sub feature {
     my ($class, $feature) = @_;
     my $cache = $class->request_cache;
@@ -979,6 +993,11 @@ this Bugzilla installation.
 
 Tells you whether or not a specific feature is enabled. For names
 of features, see C<OPTIONAL_MODULES> in C<Bugzilla::Install::Requirements>.
+
+=item C<api_server>
+
+Returns a cached instance of the WebService API server object used for
+manipulating Bugzilla resources.
 
 =back
 

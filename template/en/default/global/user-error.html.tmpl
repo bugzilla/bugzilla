@@ -1150,6 +1150,13 @@
   [% ELSIF error == "rest_invalid_resource" %]
     A REST API resource was not found for '[% method FILTER html +%] [%+ path FILTER html %]'.
 
+  [% ELSIF error == "unknown_api_version" %]
+    A REST API version was not found for '[% api_version FILTER html +%]'
+    [%- IF api_namespace %] in namespace '[% api_namespace FILTER html %]'[% END %].
+
+  [% ELSIF error == "unknown_api_namespace" %]
+    A REST API namespace was not found for '[% api_namespace FILTER html +%]'.
+
   [% ELSIF error == "get_products_invalid_type" %]
     The product type '[% type FILTER html %]' is invalid. Valid choices
     are 'accessible', 'selectable', and 'enterable'.

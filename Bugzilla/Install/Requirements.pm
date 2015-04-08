@@ -301,7 +301,7 @@ sub OPTIONAL_MODULES {
         package => 'JSON-RPC',
         module  => 'JSON::RPC',
         version => 0,
-        feature => ['jsonrpc', 'rest'],
+        feature => ['jsonrpc'],
     },
     {
         package => 'Test-Taint',
@@ -309,6 +309,36 @@ sub OPTIONAL_MODULES {
         # 1.06 no longer throws warnings with Perl 5.10+.
         version => 1.06,
         feature => ['jsonrpc', 'xmlrpc', 'rest'],
+    },
+    {
+        package => 'Moo',
+        module  => 'Moo',
+        version => 2,
+        feature => ['rest']
+    },
+    {
+        package => 'Module-Runtime',
+        module  => 'Module::Runtime',
+        version => 0,
+        feature => ['rest']
+    },
+    {
+        package => 'HTTP-Request',
+        module  => 'HTTP::Request',
+        version => 0,
+        feature => ['rest']
+    },
+    {
+        package => 'HTTP-Response',
+        module  => 'HTTP::Response',
+        version => 0,
+        feature => ['rest']
+    },
+    {
+        package => 'URI-Escape',
+        module  => 'URI::Escape',
+        version => 0,
+        feature => ['rest']
     },
     {
         # We need the 'utf8_mode' method of HTML::Parser, for HTML::Scrubber.

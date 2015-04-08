@@ -123,19 +123,13 @@ sub _throw_error {
         if (Bugzilla->error_mode == ERROR_MODE_DIE_SOAP_FAULT) {
             die SOAP::Fault->faultcode($code)->faultstring($message);
         }
-        else {
+        elsif (Bugzilla->error_mode == ERROR_MODE_JSON_RPC) {
             my $server = Bugzilla->_json_server;
 
-            my $status_code = 0;
-            if (Bugzilla->error_mode == ERROR_MODE_REST) {
-                my %status_code_map = %{ REST_STATUS_CODE_MAP() };
-                $status_code = $status_code_map{$code} || $status_code_map{'_default'};
-            }
             # Technically JSON-RPC isn't allowed to have error numbers
             # higher than 999, but we do this to avoid conflicts with
             # the internal JSON::RPC error codes.
             $server->raise_error(code        => 100000 + $code,
-                                 status_code => $status_code,
                                  message     => $message,
                                  id          => $server->{_bz_request_id},
                                  version     => $server->version);
@@ -145,6 +139,13 @@ sub _throw_error {
             # it checks $@, so it returns the proper error.
             die if _in_eval();
             $server->response($server->error_response_header);
+        }
+        else {
+            my $server = Bugzilla->api_server;
+            my %status_code_map = %{ $server->constants->{REST_STATUS_CODE_MAP} };
+            my $status_code = $status_code_map{$code} || $status_code_map{'_default'};
+            $server->return_error($status_code, $message, $code);
+            $server->response;
         }
     }
     exit;

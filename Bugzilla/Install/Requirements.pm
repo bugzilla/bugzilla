@@ -335,12 +335,6 @@ sub OPTIONAL_MODULES {
         feature => ['rest']
     },
     {
-        package => 'URI-Escape',
-        module  => 'URI::Escape',
-        version => 0,
-        feature => ['rest']
-    },
-    {
         # We need the 'utf8_mode' method of HTML::Parser, for HTML::Scrubber.
         package => 'HTML-Parser',
         module  => 'HTML::Parser',

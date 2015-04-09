@@ -85,6 +85,15 @@ sub sql_group_concat {
     $sort = 1 if !defined $sort;
     $separator = $self->quote(', ') if !defined $separator;
 
+    # PostgreSQL 8.x doesn't support STRING_AGG
+    if (vers_cmp($self->bz_server_version, 9) < 0) {
+        my $sql = "ARRAY_ACCUM($text)";
+        if ($sort) {
+            $sql = "ARRAY_SORT($sql)";
+        }
+        return "ARRAY_TO_STRING($sql, $separator)";
+    }
+
     if ($order_by && $text =~ /^DISTINCT\s*(.+)$/i) {
         # Since Postgres (quite rightly) doesn't support "SELECT DISTINCT x
         # ORDER BY y", we need to sort the list, and then get the unique
@@ -100,11 +109,6 @@ sub sql_group_concat {
         # We don't include the DISTINCT keyword in an order by
         $text =~ /^(?:DISTINCT\s*)?(.+)$/i;
         $order_by = " ORDER BY $1";
-    }
-
-    if (vers_cmp($self->bz_server_version, 9) < 0) {
-        # PostgreSQL 8.x doesn't support STRING_AGG
-        return "ARRAY_TO_STRING(ARRAY_AGG($text$order_by), $separator)";
     }
 
     return "STRING_AGG(${text}::text, $separator${order_by}::text)"
@@ -234,54 +238,85 @@ sub bz_setup_database {
     my ($has_plpgsql) = $self->selectrow_array("SELECT COUNT(*) FROM pg_language WHERE lanname = 'plpgsql'");
     $self->do('CREATE LANGUAGE plpgsql') unless $has_plpgsql;
 
-    # Custom Functions
+    if (vers_cmp($self->bz_server_version, 9) < 0) {
+        # Custom Functions for Postgres 8
+        my $function = 'array_accum';
+        my $array_accum = $self->selectrow_array(
+            'SELECT 1 FROM pg_proc WHERE proname = ?', undef, $function);
+        if (!$array_accum) {
+            print "Creating function $function...\n";
+            $self->do("CREATE AGGREGATE array_accum (
+                           SFUNC = array_append,
+                           BASETYPE = anyelement,
+                           STYPE = anyarray,
+                           INITCOND = '{}' 
+                       )");
+        }
 
-    # -Copyright © 2013 Joshua D. Burns (JDBurnZ) and Message In Action LLC
-    # JDBurnZ: https://github.com/JDBurnZ
-    # Message In Action: https://www.messageinaction.com
-    #
-    #Permission is hereby granted, free of charge, to any person obtaining a copy of
-    #this software and associated documentation files (the "Software"), to deal in
-    #the Software without restriction, including without limitation the rights to
-    #use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
-    #the Software, and to permit persons to whom the Software is furnished to do so,
-    #subject to the following conditions:
-    #
-    #The above copyright notice and this permission notice shall be included in all
-    #copies or substantial portions of the Software.
-    #
-    #THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-    #IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
-    #FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
-    #COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
-    #IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
-    #CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-    $self->do(q|
-        DROP FUNCTION IF EXISTS anyarray_uniq(anyarray);
-        CREATE OR REPLACE FUNCTION anyarray_uniq(with_array anyarray)
-        RETURNS anyarray AS $BODY$
-        DECLARE
-            -- The variable used to track iteration over "with_array".
-            loop_offset integer;
+       $self->do(<<'END');
+CREATE OR REPLACE FUNCTION array_sort(ANYARRAY)
+RETURNS ANYARRAY LANGUAGE SQL
+IMMUTABLE STRICT
+AS $$
+SELECT ARRAY(
+    SELECT $1[s.i] AS each_item
+    FROM
+        generate_series(array_lower($1,1), array_upper($1,1)) AS s(i)
+    ORDER BY each_item
+);
+$$;
+END
+    }
+    else {
+        # Custom functions for Postgres 9.0+
 
-            -- The array to be returned by this function.
-            return_array with_array%TYPE := '{}';
-        BEGIN
-            IF with_array IS NULL THEN
-                return NULL;
-            END IF;
+        # -Copyright © 2013 Joshua D. Burns (JDBurnZ) and Message In Action LLC
+        # JDBurnZ: https://github.com/JDBurnZ
+        # Message In Action: https://www.messageinaction.com
+        #
+        #Permission is hereby granted, free of charge, to any person obtaining a copy of
+        #this software and associated documentation files (the "Software"), to deal in
+        #the Software without restriction, including without limitation the rights to
+        #use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+        #the Software, and to permit persons to whom the Software is furnished to do so,
+        #subject to the following conditions:
+        #
+        #The above copyright notice and this permission notice shall be included in all
+        #copies or substantial portions of the Software.
+        #
+        #THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+        #IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+        #FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+        #COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+        #IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+        #CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+        $self->do(q|
+            DROP FUNCTION IF EXISTS anyarray_uniq(anyarray);
+            CREATE OR REPLACE FUNCTION anyarray_uniq(with_array anyarray)
+            RETURNS anyarray AS $BODY$
+            DECLARE
+                -- The variable used to track iteration over "with_array".
+                loop_offset integer;
 
-            -- Iterate over each element in "concat_array".
-            FOR loop_offset IN ARRAY_LOWER(with_array, 1)..ARRAY_UPPER(with_array, 1) LOOP
-                IF NOT with_array[loop_offset] = ANY(return_array) THEN
-                    return_array = ARRAY_APPEND(return_array, with_array[loop_offset]);
+                -- The array to be returned by this function.
+                return_array with_array%TYPE := '{}';
+            BEGIN
+                IF with_array IS NULL THEN
+                    return NULL;
                 END IF;
-            END LOOP;
 
-            RETURN return_array;
-        END;
-        $BODY$ LANGUAGE plpgsql;
-    |);
+                -- Iterate over each element in "concat_array".
+                FOR loop_offset IN ARRAY_LOWER(with_array, 1)..ARRAY_UPPER(with_array, 1) LOOP
+                    IF NOT with_array[loop_offset] = ANY(return_array) THEN
+                        return_array = ARRAY_APPEND(return_array, with_array[loop_offset]);
+                    END IF;
+                END LOOP;
+
+                RETURN return_array;
+            END;
+            $BODY$ LANGUAGE plpgsql;
+        |);
+    }
 
     # PostgreSQL doesn't like having *any* index on the thetext
     # field, because it can't have index data longer than 2770

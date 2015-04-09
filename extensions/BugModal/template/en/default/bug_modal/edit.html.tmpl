@@ -874,11 +874,7 @@
         [% END %]
       </div>
     [% END %]
-    [% IF bug.cf_user_story == "" %]
-      ---
-    [% ELSE %]
-      <pre id="user-story">[% bug.cf_user_story FILTER html %]</pre>
-    [% END %]
+    <pre id="user-story">[% bug.cf_user_story FILTER html %]</pre>
     [% IF user.id %]
       <textarea id="cf_user_story" name="cf_user_story" style="display:none" rows="10" cols="80">
         [%~ bug.cf_user_story FILTER html ~%]

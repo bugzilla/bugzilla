@@ -121,8 +121,8 @@ sub response_header {
     # The HTTP body needs to be bytes (not a utf8 string) for recent
     # versions of HTTP::Message, but JSON::RPC::Server doesn't handle this
     # properly. $_[1] is the HTTP body content we're going to be sending.
-    if (utf8::is_utf8($_[2])) {
-        utf8::encode($_[2]);
+    if (utf8::is_utf8($result)) {
+        utf8::encode($result);
         # Since we're going to just be sending raw bytes, we need to
         # set STDOUT to not expect utf8.
         disable_utf8();

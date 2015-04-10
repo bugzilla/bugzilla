@@ -37,6 +37,10 @@
   commentonduplicate => "If this option is on, the user needs to enter a short comment " _
                         "if the $terms.bug is marked as duplicate.",
 
-  resolution_forbidden_with_open_blockers => "Don't allow $terms.bugs to be resolved with " _
-                             "this resolution if they have unresolved dependencies." }
+  resolution_forbidden_with_open_blockers =>
+    "Set this parameter to a particular resolution, to prevent $terms.bugs " _
+    "from being resolved with this resolution if they have unresolved " _
+    "dependencies. FIXED, or its equivalent, is the most usual choice. " _
+    "Leaving this parameter empty disables this feature.",
+  }
 %]

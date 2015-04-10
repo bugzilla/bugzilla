@@ -260,7 +260,8 @@ sub _params_check {
         }
     }
 
-    if ($self->request->method eq 'POST') {
+    if ($self->request->method eq 'POST'
+        || $self->request->method eq 'PUT') {
         # CSRF is possible via XMLHttpRequest when the Content-Type header
         # is not application/json (for example: text/plain or
         # application/x-www-form-urlencoded).

@@ -102,11 +102,6 @@ sub sql_group_concat {
         $order_by = " ORDER BY $1";
     }
 
-    if (vers_cmp($self->bz_server_version, 9) < 0) {
-        # PostgreSQL 8.x doesn't support STRING_AGG
-        return "ARRAY_TO_STRING(ARRAY_AGG($text$order_by), $separator)";
-    }
-
     return "STRING_AGG(${text}::text, $separator${order_by}::text)"
 }
 
@@ -211,20 +206,6 @@ sub bz_explain {
 #####################################################################
 # Custom Database Setup
 #####################################################################
-
-sub bz_check_server_version {
-    my $self = shift;
-    my ($db) = @_;
-    my $server_version = $self->SUPER::bz_check_server_version(@_);
-    my ($major_version, $minor_version) = $server_version =~ /^0*(\d+)\.0*(\d+)/;
-    # Pg 9.0 requires DBD::Pg 2.17.2 in order to properly read bytea values.
-    # Pg 9.2 requires DBD::Pg 2.19.3 as spclocation no longer exists.
-    if ($major_version >= 9) {
-        local $db->{dbd}->{version} = ($minor_version >= 2) ? '2.19.3' : '2.17.2';
-        local $db->{name} = $db->{name} . " ${major_version}.$minor_version";
-        Bugzilla::DB::_bz_check_dbd(@_);
-    }
-}
 
 sub bz_setup_database {
     my $self = shift;
@@ -435,8 +416,6 @@ sub bz_table_list_real {
 =item sql_date_math
 
 =item sql_to_days
-
-=item bz_check_server_version
 
 =item sql_from_days
 

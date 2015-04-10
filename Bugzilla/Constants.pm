@@ -527,15 +527,12 @@ use constant DB_MODULE => {
                     version => '4.001',
                 },
                 name => 'MySQL'},
-    # Also see Bugzilla::DB::Pg::bz_check_server_version, which has special
-    # code to require DBD::Pg 2.17.2 for PostgreSQL 9 and above.
-    'pg'    => {db => 'Bugzilla::DB::Pg', db_version => '8.03.0000',
+    'pg'    => {db => 'Bugzilla::DB::Pg', db_version => '9.00.0000',
                 dbd => {
                     package => 'DBD-Pg',
                     module  => 'DBD::Pg',
-                    # 2.7.0 fixes a problem with quoting strings
-                    # containing backslashes in them.
-                    version => '2.7.0',
+                    # Pg 9.2 requires 2.19.3 as spclocation no longer exists.
+                    version => '2.19.3',
                 },
                 name => 'PostgreSQL'},
      'oracle'=> {db => 'Bugzilla::DB::Oracle', db_version => '10.02.0',

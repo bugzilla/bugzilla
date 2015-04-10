@@ -202,9 +202,9 @@ sub OPTIONAL_MODULES {
     {
         package => 'Chart',
         module  => 'Chart::Lines',
-        # Versions below 2.4.1 cannot be compared accurately, see
-        # https://rt.cpan.org/Public/Bug/Display.html?id=28218.
-        version => '2.4.1',
+        # Versions below 2.4.10 throw deprecation warnings, and will crash in
+        # Perl 2.21 and above.
+        version => '2.4.10',
         feature => [qw(new_charts old_charts)],
     },
     {

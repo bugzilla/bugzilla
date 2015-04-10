@@ -259,7 +259,8 @@
   <li><strong>Database:</strong> For version 8.x of PostgreSQL, <kbd>plpgsql</kbd>
     was not always installed by default and <kbd>checksetup.pl</kbd> would
     generate an error. This has been fixed.</li>
-  <li><strong>Development:</strong> Bugzilla is now HTML5 compliant.</li>
+  <li><strong>Development:</strong> Bugzilla is now HTML5 compliant. As a
+    consequence, Internet Explorer 6 and 7 are no longer supported.</li>
   <li><strong>Email:</strong> Email generation originally was done before the
     jobqueue job was inserted. This is now delayed and done by
     <kbd>jobqueue.pl</kbd> right before sending the email which can improve
@@ -288,28 +289,39 @@
     happens in the web UI.</li>
   <li>WebService calls now support use of API keys for authentication.
     Usernames and passwords remain supported.</li>
+  <li>Invalid or expired authentication cookies and tokens now throw
+    errors instead of being silently ignored. <kbd>User.valid_login</kbd>
+    can be used to determine if they are still valid or not.</li>
   <li>WebService calls that are used to create and update [% terms.bugs %]
     and attachments now support setting and updating of flags.</li>
   <li><kbd>B[%%]ug.update_attachment</kbd> can update an attachment's
     metadata as well as its flags.</li>
-  <li>Invalid or expired authentication cookies and tokens now throw
-    errors instead of being silently ignored.</li>
   <li>The <kbd>product</kbd> parameter for <kbd>B[%%]ug.possible_duplicates</kbd>
     has been renamed to <kbd>products</kbd>.</li>
   <li>Some compatibility fields included in returned data that were marked
     to be removed in this release are now gone.</li>
   <li><kbd>Group.get</kbd> has been added to get information about a group and
     its members.</li>
+  <li><kbd>FlagType.get</kbd> has been added to get information about valid
+    flag types for a given product and component.</li>
 </ul>
 
 <h2 id="code_changes">Code Changes Which May Affect Customizations and Extensions</h2>
 
 <ul>
+  <li>Support for CVS, Bonsai and LXR has been removed entirely when viewing
+    attachments. This means that the <kbd>cvsroot</kbd>, <kbd>cvsroot_get</kbd>,
+    <kbd>bonsai_url</kbd>, <kbd>lxr_url</kbd> and <kbd>lxr_root</kbd> parameters
+    are all gone, as well as <kbd>cvsbin</kbd> from the <kbd>localconfig</kbd>
+    file.</li>
   <li>The <kbd>docs_urlbase</kbd> parameter has been removed. If documentation
     has not been compiled locally, the "Help" links and other documentation links
     will redirect to <a href="https://bugzilla.readthedocs.org">bugzilla.readthedocs.org</a>
     automatically.</li>
   <li>The <kbd>mostfreqthreshold</kbd> parameter has also been removed.</li>
+  <li>All extensions which define new public WebService methods must list them
+    in a <kbd>PUBLIC_METHODS</kbd> constant. Methods which are not listed there
+    will not be accessible remotely.</li>
   <li><kbd>JSON::XS</kbd> is now used instead of <kbd>Data::Dumper</kbd> for
     storage on configuration values in <kbd>data/params</kbd>. This should
     improve performance when loading the file.</li>
@@ -319,6 +331,8 @@
     in all places applicable.</li>
   <li>A new hook called <kbd>cgi_headers</kbd> has been added to allow
     customization of the HTTP headers returned.</kbd>
+  <li>A new hook called <kbd>user_check_account_creation</kbd> has been added
+    to add extra checks before accepting the creation of a new user account.</li>
 </ul>
 
 [% INCLUDE global/footer.html.tmpl %]

@@ -89,6 +89,16 @@ sub handle {
     # Execute the handler
     my $result = $self->_handle;
 
+    # The result needs to be a valid JSON data structure
+    # and not a undefined or scalar value.
+    if (!ref $result
+        || blessed($result)
+        || ref $result ne 'HASH'
+        || ref $result ne 'ARRAY')
+    {
+        $result = { result => $result };
+    }
+
     $self->response($result);
 }
 

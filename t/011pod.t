@@ -24,7 +24,7 @@ use Test::More tests => scalar(@Support::Files::testitems)
                         + scalar(@Support::Files::module_files);
 
 # These methods do not need to be documented by default.
-use constant DEFAULT_WHITELIST => qr/^(?:new|new_from_list|check|run_create_validators)$/;
+use constant DEFAULT_WHITELIST => qr/^(?:new|new_from_list|check|run_create_validators|[A-Z_]+)$/;
 
 # These subroutines do not need to be documented, generally because
 # you shouldn't call them yourself. No need to include subroutines

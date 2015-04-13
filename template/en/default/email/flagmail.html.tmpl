@@ -73,7 +73,8 @@
             <b>Description:</b>
           [% END %]
           [% comment_div = comment.is_markdown ? "div" : "pre" %]
-          <[% comment_div FILTER none %] class="bz_comment_text">[% comment.body_full({ wrap => 1 }) FILTER markdown(bug, comment, to_user) %]</[% comment_div FILTER none %]>
+          [% wrap = comment.is_markdown ? 0 : 1 %]
+          <[% comment_div FILTER none %] class="bz_comment_text">[% comment.body_full({ wrap => wrap }) FILTER markdown(bug, comment, to_user) %]</[% comment_div FILTER none %]>
         </div>
       [% END %]
     </p>

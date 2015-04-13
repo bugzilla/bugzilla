@@ -732,16 +732,17 @@ $(function() {
         .change();
 
     // hotkeys
-    $('body').hotkey('ctrl+e', function() {
-        if ($('#cancel-btn:visible').length == 0) {
-            $('#mode-btn').click();
-        }
-    } );
-    $('body').hotkey('escape', function() {
-        if ($('#cancel-btn:visible').length != 0) {
-            $('#cancel-btn').click();
-        }
-    } );
+    $(window)
+        .keydown(function(event) {
+            if (!(event.ctrlKey || event.metaKey))
+                return;
+            if (String.fromCharCode(event.which).toLowerCase() == 'e') {
+                if ($('#cancel-btn:visible').length == 0) {
+                    event.preventDefault();
+                    $('#mode-btn').click();
+                }
+            }
+        });
 
     // add cc button
     $('#add-cc-btn')

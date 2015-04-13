@@ -31,7 +31,7 @@ use Bugzilla::Extension;
 use Bugzilla::Field;
 use Bugzilla::Flag;
 use Bugzilla::Install::Localconfig qw(read_localconfig);
-use Bugzilla::Install::Requirements qw(OPTIONAL_MODULES);
+use Bugzilla::Install::Requirements qw(OPTIONAL_MODULES have_vers);
 use Bugzilla::Install::Util qw(init_console include_languages);
 use Bugzilla::Memcached;
 use Bugzilla::Template;
@@ -234,7 +234,7 @@ sub feature {
         foreach my $package (@{ OPTIONAL_MODULES() }) {
             foreach my $f (@{ $package->{feature} }) {
                 $feature_map->{$f} ||= [];
-                push(@{ $feature_map->{$f} }, $package->{module});
+                push(@{ $feature_map->{$f} }, $package);
             }
         }
         $cache->{feature_map} = $feature_map;
@@ -245,8 +245,8 @@ sub feature {
     }
 
     my $success = 1;
-    foreach my $module (@{ $feature_map->{$feature} }) {
-        eval "require $module" or $success = 0;
+    foreach my $package (@{ $feature_map->{$feature} }) {
+        have_vers($package) or $success = 0;
     }
     $cache->{feature}->{$feature} = $success;
     return $success;

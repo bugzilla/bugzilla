@@ -2520,11 +2520,17 @@ sub _user_nonchanged {
 sub _long_desc_changedby {
     my ($self, $args) = @_;
     my ($chart_id, $joins, $value) = @$args{qw(chart_id joins value)};
-    
+
     my $table = "longdescs_$chart_id";
     push(@$joins, { table => 'longdescs', as => $table });
     my $user_id = $self->_get_user_id($value);
     $args->{term} = "$table.who = $user_id";
+
+    # If the user is not part of the insiders group, they cannot see
+    # private comments
+    if (!$self->_user->is_insider) {
+        $args->{term} .= " AND $table.isprivate = 0";
+    }
 }
 
 sub _long_desc_changedbefore_after {
@@ -2532,7 +2538,7 @@ sub _long_desc_changedbefore_after {
     my ($chart_id, $operator, $value, $joins) =
         @$args{qw(chart_id operator value joins)};
     my $dbh = Bugzilla->dbh;
-    
+
     my $sql_operator = ($operator =~ /before/) ? '<=' : '>=';
     my $table = "longdescs_$chart_id";
     my $sql_date = $dbh->quote(SqlifyDate($value));

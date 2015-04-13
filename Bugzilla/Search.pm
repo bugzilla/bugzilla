@@ -1597,12 +1597,18 @@ sub _long_desc_changedby {
     my %func_args = @_;
     my ($chartid, $supptables, $term, $v) =
         @func_args{qw(chartid supptables term v)};
-    
+
     my $table = "longdescs_$$chartid";
     push(@$supptables, "LEFT JOIN longdescs AS $table " .
                        "ON $table.bug_id = bugs.bug_id");
     my $id = login_to_id($$v, THROW_ERROR);
     $$term = "$table.who = $id";
+
+    # If the user is not part of the insiders group, they cannot see
+    # private comments
+    if (!$self->{user}->is_insider) {
+        $$term .= " AND $table.isprivate = 0";
+    }
 }
 
 sub _long_desc_changedbefore_after {
@@ -1611,7 +1617,7 @@ sub _long_desc_changedbefore_after {
     my ($chartid, $t, $v, $supptables, $term) =
         @func_args{qw(chartid t v supptables term)};
     my $dbh = Bugzilla->dbh;
-    
+
     my $operator = ($$t =~ /before/) ? '<' : '>';
     my $table = "longdescs_$$chartid";
     push(@$supptables, "LEFT JOIN longdescs AS $table " .
@@ -1619,6 +1625,12 @@ sub _long_desc_changedbefore_after {
                                  "AND $table.bug_when $operator " .
                                   $dbh->quote(SqlifyDate($$v)) );
     $$term = "($table.bug_when IS NOT NULL)";
+
+    # If the user is not part of the insiders group, they cannot see
+    # private comments
+    if (!$self->{user}->is_insider) {
+        $$term .= " AND $table.isprivate = 0";
+    }
 }
 
 sub _content_matches {

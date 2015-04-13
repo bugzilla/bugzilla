@@ -1275,6 +1275,9 @@ my $twig = XML::Twig->new(
     },
     start_tag_handlers => { bugzilla => \&init }
 );
+# Prevent DoS using the billion laughs attack.
+$twig->{NoExpand} = 1;
+
 $twig->parse($xml);
 my $root       = $twig->root;
 my $maintainer = $root->{'att'}->{'maintainer'};

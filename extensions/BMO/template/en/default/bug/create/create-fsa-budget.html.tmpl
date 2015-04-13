@@ -1,0 +1,249 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% PROCESS global/variables.none.tmpl %]
+
+[% inline_style = BLOCK %]
+#fsa_form {
+  width: 60%;
+}
+#fsa_form .required:after {
+  content: " *";
+  color: red;
+}
+#fsa_form .field_label {
+  text-align: left;
+  font-weight: bold;
+}
+#fsa_form .field_desc,
+#fsa_form .head_desc {
+  word-wrap: normal;
+}
+#fsa_form .head_desc {
+  font-size: 1.5em;
+  padding-bottom: .5em;
+}
+#fsa_form .form_section {
+  margin-bottom: 1em;
+}
+.yui-calcontainer {
+  z-index: 2;
+}
+[% END %]
+
+[% inline_javascript = BLOCK %]
+function trySubmit() {
+  var firstname = document.getElementById('firstname').value;
+  var lastname = document.getElementById('lastname').value;
+  var eventpage = document.getElementById('eventpage').value;
+  var shortdesc = 'Budget Request - ' + firstname + ' ' + lastname + ' - ' + eventpage;
+  document.getElementById('short_desc').value = shortdesc;
+  return true;
+}
+
+function validateAndSubmit() {
+  var alert_text = '';
+  if (!isFilledOut('firstname')) alert_text += "Please enter your first name\n";
+  if (!isFilledOut('lastname')) alert_text += "Please enter your last name\n";
+  if (!isFilledOut('profilepage')) alert_text += "Please enter your profile page.\n";
+  if (!isFilledOut('eventpage')) alert_text += "Please enter an event page address.\n";
+  if (!isFilledOut('cf_due_date')) alert_text += "Please enter an event date.\n";
+  if (!isFilledOut('position')) alert_text += "Please enter a value for position.\n";
+  if (!isFilledOut('country')) alert_text += "Please enter a valid value for country.\n";
+  if (!isFilledOut('budgettotal')) alert_text += "Please enter the total budget for the event.\n";
+  if (!isFilledOut('service1') || !isFilledOut('cost1')) alert_text += "Please enter at least one service and cost value.\n";
+
+  //Everything required is filled out..try to submit the form!
+  if (alert_text == '') {
+    return trySubmit();
+  }
+
+  //alert text, stay here on the pagee
+  alert(alert_text);
+  return false;
+}
+[% END %]
+
+[% PROCESS global/header.html.tmpl
+   title = "FSA Budget Request Form"
+   generate_api_token = 1
+   style = inline_style
+   style_urls = [ 'skins/standard/enter_bug.css' ]
+   javascript = inline_javascript
+   javascript_urls = [ 'extensions/BMO/web/js/form_validate.js',
+                       'js/util.js',
+                       'js/field.js' ]
+   yui = [ 'calendar' ]
+%]
+
+<h1>FSA Budget Request Form</h1>
+
+<p>
+  <span class="required_star">*</span> - <span class="required_explanation">Required Fields</span>
+</p>
+
+<form method="post" action="post_bug.cgi" id="fsa_form" enctype="multipart/form-data"
+      onSubmit="return validateAndSubmit();">
+  <input type="hidden" name="format" value="fsa-budget">
+  <input type="hidden" name="product" value="FSA">
+  <input type="hidden" name="component" value="Budget Requests">
+  <input type="hidden" name="rep_platform" value="All">
+  <input type="hidden" name="op_sys" value="Other">
+  <input type="hidden" name="priority" value="--">
+  <input type="hidden" name="version" value="unspecified">
+  <input type="hidden" name="bug_severity" id="bug_severity" value="normal">
+  <input type="hidden" name="short_desc" id="short_desc" value="">
+  <input type="hidden" name="cc" id="cc" value="">
+  <input type="hidden" name="token" value="[% token FILTER html %]">
+
+<div class="form_section">
+  <div class="field_label required">
+    First Name
+  </div>
+  <input type="text" name="firstname" id="firstname" value="" size="40" placeholder="John">
+</div>
+
+<div class="form_section">
+  <div class="field_label required">
+    Last Name
+  </div>
+  <input type="text" name="lastname" id="lastname" value="" size="40" placeholder="Doe">
+</div>
+
+<div class="form_section">
+  <div class="field_label required">
+    Mozillians Profile Page
+  </div>
+  <input type="text" name="profilepage" id="profilepage"
+         value="" size="40" placeholder="https://mozillians.org/u/JohnDoe">
+</div>
+
+<div class="form_section">
+  <div class="field_label required">
+    Event Page
+  </div>
+  <input type="text" name="eventpage" id="eventpage" value="" size="40">
+</div>
+
+<div class="form_section">
+  <div class="field_label required">
+    Event Date
+  </div>
+  <input name="cf_due_date" size="20" id="cf_due_date" value=""
+         onchange="updateCalendarFromField(this)">
+  <button type="button" class="calendar_button"
+          id="button_calendar_cf_due_date"
+          onclick="showCalendar('cf_due_date')">
+    <span>Calendar</span>
+  </button>
+  <div id="con_calendar_cf_due_date"></div>
+  <script type="text/javascript">
+    createCalendar('cf_due_date')
+  </script>
+</div>
+
+<div class="form_section">
+  <div class="field_label required">
+    What is your position?
+  </div>
+  <select id="position" name="position">
+    <option value="">Select One</option>
+    <option value="E-Board Member">E-Board Member</option>
+    <option value="Regional Ambassador Lead">Regional Ambassador Lead</option>
+    <option value="Mozilla Rep">Mozilla Rep</option>
+    <option value="Firefox Club Lead">Firefox Club Lead</option>
+  </select>
+</div>
+
+<div class="form_section">
+  <div class="field_label required">
+    Country You Reside:
+  </div>
+  <input type="text" name="country" id="country"
+         value="" size="40" placeholder="USA">
+</div>
+
+<div class="form_section">
+  <div class="field_label required">
+    Is advance payment needed?
+    <input type="checkbox" name="advancepayment" id="advancepayment" value="1">
+  </div>
+</div>
+
+<div class="head_desc">Budget Request</div>
+
+<div class="form_section">
+  <div class="field_label required">
+    Total amount requested in $USD
+  </div>
+  <input type="text" name="budgettotal" id="budgettotal" value="" size="40">
+</div>
+
+<div class="form_section">
+  <div class="field_label required">
+    Costs per service:
+  </div>
+  <table>
+  <tr>
+    <td class="required">Service 1:</td>
+    <td><input type="text" id="service1" name="service1" size="30"></td>
+    <td class="required">Cost 1:</td>
+    <td><input type="text" id="cost1" name="cost1" size="30"></td>
+  </tr>
+  <tr>
+    <td>Service 2:</td>
+    <td><input type="text" id="service2" name="service2" size="30"></td>
+    <td>Cost 2:</td>
+    <td><input type="text" id="cost2" name="cost2" size="30"></td>
+  </tr>
+  <tr>
+    <td>Service 3:</td>
+    <td><input type="text" id="service3" name="service3" size="30"></td>
+    <td>Cost 3:</td>
+    <td><input type="text" id="cost3" name="cost3" size="30"></td>
+  </tr>
+  <tr>
+    <td>Service 4:</td>
+    <td><input type="text" id="service4" name="service4" size="30"></td>
+    <td>Cost 4:</td>
+    <td><input type="text" id="cost4" name="cost4" size="30"></td>
+  </tr>
+  <tr>
+    <td>Service 5:</td>
+    <td><input type="text" id="service5" name="service5" size="30"></td>
+    <td>Cost 5:</td>
+    <td><input type="text" id="cost5" name="cost5" size="30"></td>
+  </tr>
+  </table>
+</div>
+
+<div class="form_section">
+  <div class="field_label">
+    Additional costs:
+  </div>
+  <textarea id="costadditional" name="costadditional" rows="5" cols="50"></textarea>
+</div>
+
+<div class="form_section">
+  <div class="field_label">
+    Additional comments:
+  </div>
+  <textarea id="comment" name="comment" rows="5" cols="50"></textarea>
+</div>
+
+<p>
+  <input type="submit" id="commit" value="Submit Request">
+</p>
+
+</form>
+
+<p>
+  Thanks for contacting us.
+</p>
+
+[% PROCESS global/footer.html.tmpl %]

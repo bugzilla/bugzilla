@@ -1,0 +1,35 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% USE Bugzilla %]
+[% cgi = Bugzilla.cgi %]
+
+Requester info:
+
+Requester: [% cgi.param('firstname') %] [%+ cgi.param('lastname') %]
+Profile page: [% cgi.param('profilepage') %]
+Event page: [% cgi.param('eventpage') %]
+Position: [% cgi.param('position') %]
+Country You Reside: [% cgi.param('country') %]
+Advance payment needed: [% IF cgi.param('advancepayment') %]Yes[% ELSE %]No[% END %]
+
+Budget breakdown:
+
+Total amount requested in $USD: [% cgi.param('budgettotal') %]
+Costs per service:
+Service 1: [% cgi.param('service1') %]  Cost: [% cgi.param('cost1') %]
+Service 2: [% cgi.param('service2') %]  Cost: [% cgi.param('cost2') %]
+Service 3: [% cgi.param('service3') %]  Cost: [% cgi.param('cost3') %]
+Service 4: [% cgi.param('service4') %]  Cost: [% cgi.param('cost4') %]
+Service 5: [% cgi.param('service5') %]  Cost: [% cgi.param('cost5') %]
+
+Additional costs:
+[%+ cgi.param('costadditional') %]
+
+[%+ cgi.param("comment") IF cgi.param("comment") %]
+

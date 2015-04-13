@@ -9,6 +9,7 @@
 [%# INTERFACE:
   #   field: a Bugzilla::Field object
   #   value: The value of the field for this bug.
+  #   field_hidden (optional): boolean; if true, the field is hidden by default.
   #   override_legal_values (optional): The list of legal values, for select fields.
   #   editable: Whether the field should be displayed as an editable
   #             <input> or as just the plain text of its value.
@@ -202,7 +203,7 @@
                 value="[% value FILTER html %]">
          <div id="[% field.name FILTER html %]_autocomplete"></div>
        </div>
-       <script type="text/javascript" defer="defer">
+       <script type="text/javascript">
          if (typeof YAHOO.bugzilla.field_array === "undefined")
            YAHOO.bugzilla.field_array = [];
          YAHOO.bugzilla.field_array["[% field.name FILTER js %]"] = [

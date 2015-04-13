@@ -29,6 +29,7 @@ use version;
 use Bugzilla::Constants;
 use Bugzilla::Install::Util qw(vers_cmp install_string bin_loc 
                                extension_requirement_packages);
+use File::Slurp;
 use List::Util qw(max);
 use Safe;
 use Term::ANSIColor;
@@ -48,6 +49,7 @@ our @EXPORT = qw(
 
     check_requirements
     check_graphviz
+    export_cpanfile
     have_vers
     install_command
     map_files_to_features
@@ -788,6 +790,48 @@ sub map_files_to_features {
         }
     }
     return \%files;
+}
+
+sub export_cpanfile {
+    my $cpanfile;
+    # Required modules
+    foreach my $module (@{ REQUIRED_MODULES() }) {
+        my $requires = "requires '" . $module->{module} . "'";
+        $requires .= ", '" . $module->{version} . "'" if $module->{version};
+        $requires .= ";\n";
+        $cpanfile .= $requires;
+    }
+    # Recommended modules
+    foreach my $module (@{ OPTIONAL_MODULES() }) {
+        my $recommends = "";
+        if (exists $module->{feature}) {
+            foreach my $feature (@{ $module->{feature} }) {
+                $recommends .= "feature '" . $feature . "', '" . $module->{package} . "' => sub {\n";
+                $recommends .= "  recommends '" . $module->{module} . "'";
+                $recommends .= ", '" . $module->{version} . "'" if $module->{version};
+                $recommends .= ";\n};\n";
+            }
+        }
+        else {
+            $recommends .= "recommends '" . $module->{module} . "'";
+            $recommends .= ", '" . $module->{version} . "'" if $module->{version};
+            $recommends .= ";\n";
+        }
+        $cpanfile .= $recommends;
+    }
+    # Database modules
+    foreach my $db (keys %{ DB_MODULE() }) {
+        next if !exists DB_MODULE->{$db}->{dbd};
+        my $dbd = DB_MODULE->{$db}->{dbd};
+        my $recommends .= "feature '$db', '" . $dbd->{package} . "' => sub {\n";
+        $recommends .= "  recommends '" . $dbd->{module} . "'";
+        $recommends .= ", '" . $dbd->{version} . "'" if $dbd->{version};
+        $recommends .= ";\n};\n";
+        $cpanfile .= $recommends;
+    }
+
+    # Write out the cpanfile to the document root
+    write_file(bz_locations()->{'libpath'} . '/cpanfile', \$cpanfile);
 }
 
 1;

@@ -61,15 +61,23 @@
   END;
 
   # count set project/tracking flags
-  set_project_flags = [];
-  set_tracking_flags = [];
+  tracking_flags_has = 0;
+  tracking_flags_set = 0;
+  project_flags_has = 0;
+  project_flags_set = 0;
   FOREACH flag IN tracking_flags;
-    NEXT IF flag.bug_flag(bug.id).value == "---";
-    IF flag.flag_type == "project";
-      set_project_flags.push(flag);
-    END;
+    is_set = flag.bug_flag(bug.id).value != "---";
     IF flag.flag_type == "tracking";
-      set_tracking_flags.push(flag);
+      tracking_flags_has = 1;
+      IF is_set;
+        tracking_flags_set = 1;
+      END;
+    END;
+    IF flag.flag_type == "project";
+      project_flags_has = 1;
+      IF is_set;
+        project_flags_set = 1;
+      END;
     END;
   END;
 
@@ -559,8 +567,8 @@
     (bug.version.lower == "unspecified" || bug.version.lower == "other")
     && bug.target_milestone == "---"
     && !has_bug_flags
-    && !set_project_flags.size
-    && !set_tracking_flags.size;
+    && !project_flags_set
+    && !tracking_flags_set;
   sub = [];
   IF col;
     sub.push("Not tracked");
@@ -707,35 +715,39 @@
   %]
     [% WRAPPER fields_lhs %]
 
-      [% UNLESS set_tracking_flags.size || set_project_flags.size %]
+      [% UNLESS tracking_flags_set || project_flags_set %]
         <p class="edit-hide">
           This [% terms.bug %] is not currently tracked.
         </p>
       [% END %]
 
-      [%# tracking flags %]
-      [% WRAPPER bug_modal/field.html.tmpl
-          container = 1
-          label = "Tracking Flags"
-          hide_on_view = set_tracking_flags.size == 0
-      %]
-        [% INCLUDE bug_modal/tracking_flags.html.tmpl
-            type = "tracking"
+      [% IF tracking_flags_has %]
+        [%# tracking flags %]
+        [% WRAPPER bug_modal/field.html.tmpl
+            container = 1
+            label = "Tracking Flags"
+            hide_on_view = !tracking_flags_set
         %]
+          [% INCLUDE bug_modal/tracking_flags.html.tmpl
+              type = "tracking"
+          %]
+        [% END %]
       [% END %]
 
     [% END %]
     [% WRAPPER fields_rhs %]
 
-      [%# project flags %]
-      [% WRAPPER bug_modal/field.html.tmpl
-          container = 1
-          label = "Project Flags"
-          hide_on_view = set_project_flags.size == 0
-      %]
-        [% INCLUDE bug_modal/tracking_flags.html.tmpl
-            type = "project"
+      [% IF project_flags_has %]
+        [%# project flags %]
+        [% WRAPPER bug_modal/field.html.tmpl
+            container = 1
+            label = "Project Flags"
+            hide_on_view = !project_flags_set
         %]
+          [% INCLUDE bug_modal/tracking_flags.html.tmpl
+              type = "project"
+          %]
+        [% END %]
       [% END %]
 
     [% END %]

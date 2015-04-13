@@ -735,6 +735,43 @@ sub bug_end_of_create {
     }
 }
 
+# bugs in an ASSIGNED state must be assigned to a real person
+# reset bugs to NEW if the assignee is nobody/.bugs$
+sub object_start_of_update {
+    my ($self, $args) = @_;
+    my ($new_bug, $old_bug) = @$args{qw( object old_object )};
+    return unless $new_bug->isa('Bugzilla::Bug');
+
+    # if either the assignee or status has changed
+    return unless
+        $old_bug->assigned_to->id != $new_bug->assigned_to->id
+        || $old_bug->bug_status ne $new_bug->bug_status;
+
+    # and the bug is now ASSIGNED
+    return unless
+        $new_bug->bug_status eq 'ASSIGNED';
+
+    # and the assignee isn't a real person
+    return unless
+        $new_bug->assigned_to->login eq 'nobody@mozilla.org'
+        || $new_bug->assigned_to->login =~ /\.bugs$/;
+
+    # and the user can set the status to NEW
+    return unless
+        $old_bug->check_can_change_field('bug_status', $old_bug->bug_status, 'NEW');
+
+    # if the user is changing the assignee, silently change the bug's status to new
+    if ($old_bug->assigned_to->id != $new_bug->assigned_to->id) {
+        $new_bug->set_bug_status('NEW');
+    }
+
+    # otherwise the user is trying to set the bug's status to ASSIGNED without
+    # assigning a real person.  throw an error.
+    else {
+        ThrowUserError('bug_status_unassigned');
+    }
+}
+
 # detect github pull requests and reviewboard reviews, set the content-type
 sub attachment_process_data {
     my ($self, $args) = @_;

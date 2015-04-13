@@ -41,4 +41,9 @@
   [% title = "Missing Reporter" %]
   You must provide an email address for a bounty attachment.
 
+[% ELSIF error == "bug_status_unassigned" %]
+  [% title = "Invalid Bug Status" %]
+  You cannot set this [% terms.bug %]'s status to ASSIGNED because the
+  [%+ terms.bug %] is not assigned to a person.
+
 [% END %]

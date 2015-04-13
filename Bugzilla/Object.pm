@@ -520,7 +520,11 @@ sub update {
     $dbh->bz_start_transaction();
 
     my $old_self = $self->new($self->id);
-   
+
+    # BMO - allow altering values in a sane way
+    Bugzilla::Hook::process('object_start_of_update',
+                            { object => $self, old_object => $old_self });
+
     my @all_columns = $self->UPDATE_COLUMNS;
     my @hook_columns;
     Bugzilla::Hook::process('object_update_columns',

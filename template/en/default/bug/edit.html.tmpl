@@ -982,7 +982,9 @@
 [%# *** Custom Fields *** %]
   [% FOREACH field = Bugzilla.active_custom_fields %]
     <tr>
-      [% INCLUDE bug/field.html.tmpl value = bug.${field.name}
+      [%# Use PROCESS instead of INCLUDE, because extra_field_item is defined
+        # in the template and must be returned back. INCLUDE cannot do that. %]
+      [% PROCESS bug/field.html.tmpl value = bug.${field.name}
                                      editable = bug.check_can_change_field(field.name, 0, 1) %]
     </tr>
     [% IF extra_field_item %]

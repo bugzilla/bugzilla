@@ -11,7 +11,7 @@ use 5.10.1;
 use strict;
 use warnings;
 
-use Bugzilla::API::1_0::Constants;
+use Bugzilla::API::1_0::Constants qw(API_AUTH_HEADERS);
 use Bugzilla::Error;
 use Bugzilla::Flag;
 use Bugzilla::FlagType;

@@ -11,7 +11,7 @@ use 5.10.1;
 use strict;
 use warnings;
 
-use Bugzilla::API::1_0::Constants;
+use Bugzilla::API::1_0::Constants qw(STATUS_CREATED);
 use Bugzilla::API::1_0::Util;
 
 use Bugzilla::Product;

@@ -95,25 +95,26 @@ sub server {
 
 sub constants {
     my ($self) = @_;
-    my $api_version = $self->api_version;
+    return $self->{_constants} if defined $self->{_constants};
 
     no strict 'refs';
 
+    my $api_version = $self->api_version;
     my $class = "Bugzilla::API::${api_version}::Constants";
     require_module($class);
 
-    my %constants;
-    foreach my $constant (@{$class . "::EXPORT"}, @{$class . "::EXPORT_OK"}) {
+    $self->{_constants} = {};
+    foreach my $constant (@{$class . "::EXPORT_OK"}) {
         if (ref $class->$constant) {
-            $constants{$constant} = $class->$constant;
+            $self->{_constants}->{$constant} = $class->$constant;
         }
         else {
             my @list = ($class->$constant);
-            $constants{$constant} = (scalar(@list) == 1) ? $list[0] : \@list;
+            $self->{_constants}->{$constant} = (scalar(@list) == 1) ? $list[0] : \@list;
         }
     }
 
-    return \%constants;
+    return $self->{_constants};
 }
 
 sub response_header {

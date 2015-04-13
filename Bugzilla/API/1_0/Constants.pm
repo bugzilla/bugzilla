@@ -15,7 +15,7 @@ use Bugzilla::Hook;
 
 use parent qw(Exporter);
 
-our @EXPORT = qw(
+our @EXPORT_OK = qw(
     WS_ERROR_CODE
 
     STATUS_OK

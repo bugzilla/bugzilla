@@ -193,7 +193,8 @@
         (<span id="alias_nonedit_display">[% bug.alias.join(', ') FILTER html %]</span>)
       [% END %]
       - <span id="short_desc_nonedit_display">[% bug.short_desc FILTER quoteUrls(bug) %]</span>
-      [% IF bug.check_can_change_field('short_desc', 0, 1) %]
+      [% can_edit_short_desc = bug.check_can_change_field('short_desc', 0, 1) %]
+      [% IF can_edit_short_desc %]
         <small>(<a href="#" id="summary_edit_action">edit</a>)</small>
       [% END %]
      </span>
@@ -201,7 +202,7 @@
     <div id="summary_input">
       [% INCLUDE "bug/field-label.html.tmpl"
         field = bug_fields.short_desc
-        editable = 1
+        editable = can_edit_short_desc
         accesskey = "s"
         tag_name = 'span'
       %]
@@ -269,22 +270,26 @@
     </tr>
     <tr id="field_tablerow_version">
       [% INCLUDE "bug/field-label.html.tmpl"
-        field = bug_fields.version editable = 1 %]
-        
+          field = bug_fields.version
+          editable = bug.check_can_change_field('version', 0, 1) %]
+
       [% PROCESS select selname => "version" %]
     </tr>
     [%############%]    
     [%# PLATFORM #%]
     [%############%]    
     <tr id="field_tablerow_rep_platform">
+      [% can_edit_rep_platform = bug.check_can_change_field('rep_platform', 0, 1) %]
       [% INCLUDE "bug/field-label.html.tmpl"
-           field = bug_fields.rep_platform, editable = 1, accesskey = "h" %]
+           field = bug_fields.rep_platform,
+           editable = can_edit_rep_platform,
+           accesskey = "h" %]
       <td class="field_value">
-       [% INCLUDE bug/field.html.tmpl
+        [% INCLUDE bug/field.html.tmpl
             bug = bug, field = bug_fields.rep_platform,
             no_tds = 1, value = bug.rep_platform
-            editable = bug.check_can_change_field('rep_platform', 0, 1) %]
-       [%+ INCLUDE bug/field.html.tmpl 
+            editable = can_edit_rep_platform %]
+        [%+ INCLUDE bug/field.html.tmpl
             bug = bug, field = bug_fields.op_sys, 
             no_tds = 1, value = bug.op_sys
             editable = bug.check_can_change_field('op_sys', 0, 1) %]
@@ -333,14 +338,15 @@
  [%###############################################################%]
     <tr id="field_tablerow_importance">
       <th class="field_label">
-        <label for="priority" accesskey="i">
+        [% can_edit_priority = bug.check_can_change_field('priority', 0, 1) %]
+        <label [% IF can_edit_priority %]for="priority"[% END %] accesskey="i">
           <a href="page.cgi?id=fields.html#importance"><u>I</u>mportance</a></label>:
       </th>
       <td>
        [% INCLUDE bug/field.html.tmpl
             bug = bug, field = bug_fields.priority,
             no_tds = 1, value = bug.priority
-            editable = bug.check_can_change_field('priority', 0, 1) %]
+            editable = can_edit_priority %]
        [%+ INCLUDE bug/field.html.tmpl
             bug = bug, field = bug_fields.bug_severity,
             no_tds = 1, value = bug.bug_severity
@@ -353,14 +359,19 @@
       <tr id="field_tablerow_target_milestone">
         [% INCLUDE "bug/field-label.html.tmpl"
           field = bug_fields.target_milestone
-          editable = 1
+          editable = bug.check_can_change_field('target_milestone', 0, 1)
         %]
         [% PROCESS select selname = "target_milestone" %]
       </tr>
     [% END %]
 
     [% IF Param("timetrackinggroup") && bug.deadline %]
-      [% INCLUDE bug/field.html.tmpl field = bug_fields.deadline, value = bug.deadline, editable = 0 %]
+      <tr>
+        <th class="field_label">
+          <a href="page.cgi?id=fields.html#deadline">Deadline</a>:
+        </th>
+        <td>[% bug.deadline FILTER html %]</td>
+      </tr>
     [% END %]
 [% END %]
 
@@ -371,11 +382,13 @@
 [% BLOCK section_people %]
 
     <tr id="field_tablerow_assigned_to">
-      <th class="field_label">
-        <a href="page.cgi?id=fields.html#assigned_to">Assigned To</a>:
-      </th>
+      [% can_edit_assigned_to = bug.check_can_change_field("assigned_to", 0, 1) %]
+      [% INCLUDE "bug/field-label.html.tmpl"
+          field = bug_fields.assigned_to
+          editable = can_edit_assigned_to
+      %]
       <td>
-        [% IF bug.check_can_change_field("assigned_to", 0, 1) %]
+        [% IF can_edit_assigned_to %]
           <div id="bz_assignee_edit_container" class="bz_default_hidden">
             <span>
               [% INCLUDE global/user.html.tmpl who = bug.assigned_to %]
@@ -420,13 +433,14 @@
 
     [% IF Param('useqacontact') %]
     <tr id="field_tablerow_qa_contact">
+      [% can_edit_qa_contact = bug.check_can_change_field("qa_contact", 0, 1) %]
       [% INCLUDE "bug/field-label.html.tmpl"
         field = bug_fields.qa_contact
-        editable = 1
+        editable = can_edit_qa_contact
         accesskey = "q"
       %]
       <td>
-        [% IF bug.check_can_change_field("qa_contact", 0, 1) %]
+        [% IF can_edit_qa_contact %]
           <div id="bz_qa_contact_edit_container" class="bz_default_hidden">
             <span>
               [% INCLUDE global/user.html.tmpl who = bug.qa_contact %]
@@ -482,13 +496,14 @@
 [%############################################################################%]
 [% BLOCK section_url_keyword_whiteboard %]
   <tr id="field_tablerow_bug_file_loc">
+    [% can_edit_bug_file_loc = bug.check_can_change_field("bug_file_loc", 0, 1) %]
     [% INCLUDE "bug/field-label.html.tmpl"
       field = bug_fields.bug_file_loc
-      editable = 1
+      editable = can_edit_bug_file_loc
       accesskey = "u"
     %]
     <td>
-      [% IF bug.check_can_change_field("bug_file_loc", 0, 1) %]
+      [% IF can_edit_bug_file_loc %]
         <span id="bz_url_edit_container" class="bz_default_hidden"> 
         [% IF is_safe_url(bug.bug_file_loc) %]
            <a href="[% bug.bug_file_loc FILTER html %]" target="_blank"
@@ -500,7 +515,7 @@
         (<a href="#" id="bz_url_edit_action">edit</a>)</span>
       [% END %]
       <span id="bz_url_input_area">
-        [% url_output =  INCLUDE input no_td=1 inputname => "bug_file_loc" size => "40" colspan => 2 %]
+        [% url_output = INCLUDE input no_td = 1 inputname = "bug_file_loc" size = 40 %]
         [% IF NOT bug.check_can_change_field("bug_file_loc", 0, 1)
               AND is_safe_url(bug.bug_file_loc) %]
           <a href="[% bug.bug_file_loc FILTER html %]"
@@ -520,18 +535,18 @@
       [% END %]
     </td>
   </tr>
-  
+
   [% IF Param('usestatuswhiteboard') %]
     <tr id="field_tablerow_status_whiteboard">
       [% INCLUDE "bug/field-label.html.tmpl"
         field = bug_fields.status_whiteboard
-        editable = 1
+        editable = bug.check_can_change_field("status_whiteboard", 0, 1)
         accesskey = "w"
       %]
-      [% INCLUDE input inputname => "status_whiteboard" size => "40" colspan => 2 %]
+      [% INCLUDE input inputname = "status_whiteboard" size = 40 %]
     </tr>
   [% END %]
-  
+
   [% IF use_keywords %]
     <tr id="field_tablerow_keywords">
         [% INCLUDE bug/field.html.tmpl
@@ -560,9 +575,9 @@
   [% RETURN UNLESS bug.duplicates.size %]
   <tr id="field_tablerow_duplicates">
     <th class="field_label">
-      <label for="duplicates">Duplicates ([% bug.duplicates.size %])</label>:
+      <label>Duplicates ([% bug.duplicates.size %])</label>:
     </th>
-    <td class="field_value" colspan="2">
+    <td class="field_value">
       <span id="duplicates">
         [% FOREACH dupe = bug.duplicates %]
           [% INCLUDE bug/link.html.tmpl bug = dupe, link_text = dupe.id, use_alias = 1 %][% " " %]
@@ -593,7 +608,7 @@
     <tr id="field_tablerow_blocked">
       <th>&nbsp;</th>
 
-      <td colspan="2" id="show_dependency_tree_or_graph">
+      <td id="show_dependency_tree_or_graph">
         Show dependency <a href="showdependencytree.cgi?id=[% bug.bug_id %]&amp;hide_resolved=1">tree</a>
 
         [% USE Bugzilla %]
@@ -735,7 +750,9 @@
 [% BLOCK section_cclist %]
     <tr id="field_tablerow_cclist">
       <th class="field_label">
-        <label for="newcc" accesskey="a">CC List:</label>
+        <label [% IF user.id %]for="newcc"[% END %] accesskey="a">
+          CC List:
+        </label>
       </th>
       <td>
         [% IF user.id %]
@@ -781,8 +798,7 @@
             </div>
           [% END %]
           [% IF bug.cc.size %]
-            <select id="cc" multiple="multiple" size="5"
-              [% IF bug.user.canedit %]name="cc"[% END %]>
+            <select id="cc" multiple="multiple" size="5" [% 'name="cc"' IF bug.user.canedit %]>
               [% FOREACH c = bug.cc %]
                 <option value="[% c FILTER email FILTER html %]">
                   [% c FILTER email FILTER html %]</option>
@@ -858,9 +874,7 @@
 
 [% BLOCK section_aliases %]
   <tr id="field_tablerow_alias">
-    [% INCLUDE "bug/field-label.html.tmpl"
-       field = bug_fields.alias, editable = 1
-    %]
+    [% INCLUDE "bug/field-label.html.tmpl" field = bug_fields.alias %]
     <td>
       [% IF bug.alias.size %]
         [% bug.alias.join(', ') FILTER html %]
@@ -874,12 +888,9 @@
         <br>
         <div id="alias_edit_area">
           <div>
-            <div>
-              <label for="aliases">
-                <b>Add</b>
-              </label>
-            </div>
-              <input name="newalias" id="newalias" size="20">
+            <label for="newalias" class="field_label">Add</label>
+            <br>
+            <input name="newalias" id="newalias" size="20">
           </div>
           [% IF bug.alias.size %]
             <select id="alias" name="alias" multiple="multiple" size="5">
@@ -891,7 +902,6 @@
 
             <input type="checkbox" id="removealias" name="removealias">
             <label for="removealias">Remove selected aliases</label>
-
           [% END %]
         </div>
         <script type="text/javascript">
@@ -972,9 +982,8 @@
 [%# *** Custom Fields *** %]
   [% FOREACH field = Bugzilla.active_custom_fields %]
     <tr>
-      [% PROCESS bug/field.html.tmpl value = bug.${field.name}
-                                     editable = bug.check_can_change_field(field.name, 0, 1)
-                                     value_span = 2 %]
+      [% INCLUDE bug/field.html.tmpl value = bug.${field.name}
+                                     editable = bug.check_can_change_field(field.name, 0, 1) %]
     </tr>
     [% IF extra_field_item %]
       <tr>
@@ -1055,7 +1064,7 @@
          field = bug_fields.remaining_time, editable = 1
       %]
       [% INCLUDE "bug/field-label.html.tmpl"
-         field = bug_fields.percentage_complete, editable = 1
+         field = bug_fields.percentage_complete
       %]
       <th>
         Gain:

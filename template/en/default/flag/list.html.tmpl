@@ -23,13 +23,12 @@
 <table id="[% flag_table_id FILTER html %]">
   [% UNLESS flag_no_header %]
     <tr>
-      <th colspan="3">
-        Flags:
-      </th>
+      <th colspan="3">Flags:</th>
       [% IF any_flags_requesteeble %]
-        <th>
-          Requestee:
-        </th>
+        <th>Requestee:</th>
+      [% END %]
+      [% IF edit_multiple_bugs %]
+        <th>&nbsp;</th>
       [% END %]
     </tr>
   [% END %]
@@ -57,7 +56,10 @@
       [% NEXT UNLESS type.flags && type.flags.size > 0 && type.is_multiplicable && type.is_active %]
       [% IF !separator_displayed %]
         <tbody class="bz_flag_type">
-          <tr><td colspan="3"><hr></td></tr>
+          [% sep_length = 3 + (any_flags_requesteeble ? 1 : 0) + (edit_multiple_bugs ? 1 : 0) %]
+          <tr>
+            <td colspan="[% sep_length FILTER html %]"><hr></td>
+          </tr>
         </tbody>
         [% separator_displayed = 1 %]
       [% END %]
@@ -123,7 +125,7 @@
           <option value="--do_not_change--">--do_not_change--</option>
         [% END %]
         [% IF !flag || (can_edit_flag && user.can_request_flag(type)) || flag.setter_id == user.id %]
-          <option value="X"></option>
+          <option value="X" label="X"></option>
         [% END %]
         [% IF type.is_active && can_edit_flag %]
           [% IF (type.is_requestable && user.can_request_flag(type)) || (flag && flag.status == "?") %]
@@ -171,16 +173,19 @@
           [% END %]
         </td>
       [% END %]
-      <td>
-        [% IF type.is_multiplicable && edit_multiple_bugs %]
+      [% IF edit_multiple_bugs %]
+        <td>
+        [% IF type.is_multiplicable %]
           <input type="checkbox" name="flags_add-[% type.id %]"
                  id="flags_add-[% type.id %]" value="1">
           <label for="flags_add-[% type.id %]"
-                 title="If ticked, always create a new flag. Leaving it unchecked will update existing flag(s) and add a new flag if it does not exist">
+                 title="If ticked, always create a new flag. Leaving it unchecked will
+                        update existing flag(s) and add a new flag if it does not exist">
             Always add
           </label>
         [% END %]
-      </td>
+        </td>
+      [% END %]
     </tr>
   </tbody>
 [% END %]

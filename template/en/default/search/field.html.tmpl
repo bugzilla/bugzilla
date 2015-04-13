@@ -42,7 +42,7 @@
               value="[% value FILTER html %]" [% 'autofocus' IF focus %]>
        <div id="[% field.name FILTER html %]_autocomplete"></div>
     </div>
-    <script type="text/javascript" defer="defer">
+    <script type="text/javascript">
       if (typeof YAHOO.bugzilla.field_array === "undefined")
         YAHOO.bugzilla.field_array = [];
       YAHOO.bugzilla.field_array["[% field.name FILTER js %]"] = [

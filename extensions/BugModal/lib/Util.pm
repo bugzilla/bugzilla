@@ -25,7 +25,13 @@ sub date_str_to_time {
         return timelocal($6, $5, $4, $3, $2 - 1, $1 - 1900);
     }
     state $tz //= DateTime::TimeZone->new( name => 'local' );
-    return datetime_from($date, $tz)->epoch;
+    my $dt = datetime_from($date, $tz);
+    if (!$dt) {
+        # this should never happen
+        warn("invalid datetime '$date'");
+        return undef;
+    }
+    return $dt->epoch;
 }
 
 1;

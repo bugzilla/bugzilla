@@ -243,17 +243,6 @@ sub REST_RESOURCES {
     return $rest_resources;
 }
 
-######################################################
-# Add aliases here for old method name compatibility #
-######################################################
-
-BEGIN {
-  # In 3.0, get was called get_bugs
-  *get_bugs = \&get;
-  # Before 3.4rc1, "history" was get_history.
-  *get_history = \&history;
-}
-
 ###########
 # Methods #
 ###########
@@ -2295,8 +2284,6 @@ C<creator>.
 =item B<Description>
 
 Gets information about particular bugs in the database.
-
-Note: Can also be called as "get_bugs" for compatibilty with Bugzilla 3.0 API.
 
 =item B<REST>
 
@@ -4873,9 +4860,5 @@ This method can throw all of the errors that L</get> throws.
 =over
 
 =item REST_RESOURCES
-
-=item get_bugs
-
-=item get_history
 
 =back

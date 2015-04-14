@@ -259,8 +259,6 @@ if ($fetch_extension_info) {
 Call C<Bug.get> with the ID of the bug you want to know more of.
 The call will return a C<Bugzilla::Bug> object.
 
-Note: You can also use "Bug.get_bugs" for compatibility with Bugzilla 3.0 API.
-
 =cut
 
 if ($bug_id) {

@@ -12,9 +12,9 @@ package Bugzilla::Bug;
 use strict;
 use warnings;
 
+use Bugzilla::Extension::BugModal::Util qw(date_str_to_time);
 use Bugzilla::User;
 use Bugzilla::Constants;
-use Time::Local;
 
 # returns an arrayref containing all changes to the bug - comments, field
 # changes, and duplicates
@@ -51,7 +51,7 @@ sub activity_stream {
         _add_activities_to_stream($self, $stream);
         _add_duplicates_to_stream($self, $stream);
 
-        my $base_time = _sql_date_to_time($self->creation_ts);
+        my $base_time = date_str_to_time($self->creation_ts);
         foreach my $change_set (@$stream) {
             $change_set->{id} = $change_set->{comment}
                 ? 'c' . $change_set->{comment}->count
@@ -101,7 +101,7 @@ sub _add_comments_to_stream {
         next if $comment->type == CMT_HAS_DUPE;
         next if $comment->is_private && !($user->is_insider || $user->id == $comment->author->id);
         next if $comment->body eq '' && ($comment->work_time - 0) != 0 && !$user->is_timetracker;
-        _add_comment_to_stream($stream, _sql_date_to_time($comment->creation_ts), $comment->author->id, $comment);
+        _add_comment_to_stream($stream, date_str_to_time($comment->creation_ts), $comment->author->id, $comment);
     }
 }
 
@@ -237,7 +237,7 @@ sub _add_activities_to_stream {
             }
         }
 
-        _add_activity_to_stream($stream, _sql_date_to_time($operation->{when}), $operation->{who}->id, $operation);
+        _add_activity_to_stream($stream, date_str_to_time($operation->{when}), $operation->{who}->id, $operation);
     }
 
     # prime the visible-bugs cache
@@ -272,13 +272,6 @@ sub _add_duplicates_to_stream {
             }],
         });
     }
-}
-
-sub _sql_date_to_time {
-    my ($date) = @_;
-    $date =~ /^(\d{4})[\.\-](\d{2})[\.\-](\d{2}) (\d{2}):(\d{2}):(\d{2})$/
-        or die "internal error: invalid date '$date'";
-    return timelocal($6, $5, $4, $3, $2 - 1, $1 - 1900);
 }
 
 1;

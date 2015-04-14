@@ -10,7 +10,7 @@
   # ts: timestamp
   #%]
 
-<span class="rel-time" title="[% ts FILTER time("%Y-%m-%d %H:%M %Z") %]">
+<span class="rel-time" title="[% ts FILTER time("%Y-%m-%d %H:%M %Z") %]" data-time="[% ts FILTER epoch FILTER none %]">
   [%~
     IF content.defined;
       content;

@@ -74,7 +74,8 @@
     </td>
 
     <td class="flag-name">
-      <span class="rel-time" title="[% f.creation_date FILTER time_duration FILTER html %]">
+      <span class="rel-time-title" title="[% f.creation_date FILTER time_duration FILTER html %]"
+        data-time="[% f.creation_date FILTER epoch FILTER none %]">
         [% f.type.name FILTER html %]
       </span>
     </td>

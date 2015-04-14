@@ -134,7 +134,7 @@ $(function() {
         });
 
     // use non-native tooltips for relative times and bug summaries
-    $('.rel-time, .bz_bug_link').tooltip({
+    $('.rel-time, .rel-time-title, .bz_bug_link').tooltip({
         position: { my: "left top+8", at: "left bottom", collision: "flipfit" },
         show: { effect: 'none' },
         hide: { effect: 'none' }

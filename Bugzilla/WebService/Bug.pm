@@ -72,6 +72,8 @@ use constant PUBLIC_METHODS => qw(
     create
     fields
     get
+    get_bugs
+    get_history
     history
     legal_values
     possible_duplicates

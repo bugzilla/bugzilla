@@ -6,10 +6,9 @@
   # defined by the Mozilla Public License, v. 2.0.
   #%]
 
-[% INCLUDE bug/legal_disclaimer.html.tmpl %]
+[% RETURN UNLESS bug.product == "Legal" %]
 
-[%# Needed for collapsing TinderboxPushlog comments %]
-[% has_tbpl_comment = 0 %]
-<script>
-  var tbpl_comment_ids = new Array();
-</script>
+<div id="legal_disclaimer">
+  The material and information contained herein is Confidential and subject to
+  Attorney-Client Privilege and Work Product Doctrine.
+</div>

@@ -103,3 +103,5 @@
     BUGZILLA.default_qa_contact = '[% bug.component_obj.default_qa_contact.login FILTER js %]';
   [% END %]
 [% END %]
+
+[% Hook.process("end") %]

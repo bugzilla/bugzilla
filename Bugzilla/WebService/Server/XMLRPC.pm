@@ -138,7 +138,8 @@ sub new {
     my $self = shift->SUPER::new(@_);
     # Initialise XML::Parser to not expand references to entities, to prevent DoS
     require XML::Parser;
-    $self->{_parser}->parser(parser => XML::Parser->new( NoExpand => 1, Handlers => { Default => sub {} } ));
+    my $parser = XML::Parser->new( NoExpand => 1, Handlers => { Default => sub {} } );
+    $self->{_parser}->parser($parser, $parser);
     return $self;
 }
 

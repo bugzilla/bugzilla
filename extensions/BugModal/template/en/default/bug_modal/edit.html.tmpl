@@ -450,6 +450,7 @@
     [% WRAPPER bug_modal/field.html.tmpl
         field = bug_fields.bug_mentor
         field_type = constants.FIELD_TYPE_USERS
+        name = "bug_mentors"
         label = "Mentors"
         value = bug.mentors.pluck("login")
         hide_on_view = bug.mentors.size == 0

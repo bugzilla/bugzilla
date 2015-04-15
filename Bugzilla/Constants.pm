@@ -200,7 +200,7 @@ use Memoize;
 # CONSTANTS
 #
 # Bugzilla version
-use constant BUGZILLA_VERSION => "5.0rc3";
+use constant BUGZILLA_VERSION => "5.0rc3+";
 
 # A base link to the current REST Documentation. We place it here
 # as it will need to be updated to whatever the current release is.
@@ -213,7 +213,7 @@ use constant LOCAL_FILE  => 'bugzilla-update.xml'; # Relative to datadir.
 # When true CSS and JavaScript assets will be concatanted and minified at
 # run-time, to reduce the number of requests required to render a page.
 # Setting this to a false value can help debugging.
-use constant CONCATENATE_ASSETS => 1;
+use constant CONCATENATE_ASSETS => 0;
 
 # These are unique values that are unlikely to match a string or a number,
 # to be used in criteria for match() functions and other things. They start

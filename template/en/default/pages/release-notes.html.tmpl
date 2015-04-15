@@ -45,9 +45,28 @@
 
 <h2 id="v44_point">Updates in this 4.4.x Release</h2>
 
+<h3>4.4.9</h3>
+
+<p>This release contains the following [% terms.bug %] fixes:</p>
+
+<ul>
+  <li>Users who are not in the insidergroup were able to determine if some
+    specific user made a private comment in [% terms.bugs %].
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1151290">[% terms.Bug %] 1151290</a>)</li>
+  <li>Due to a regression caused by <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1090275">
+    [% terms.bug %] 1090275</a>, the WebService methods <kbd>B[%%]ug.get_bugs</kbd> and
+    <kbd>B[%%]ug.get_history</kbd> were no longer allowed.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1154099">[% terms.Bug %] 1154099</a>)</li>
+  <li>[% terms.Bugzilla %] now supports the new <kbd>.htaccess</kbd> format from Apache 2.4.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1121477">[% terms.Bug %] 1121477</a>)</li>
+  <li>A regression in [% terms.Bugzilla %] 4.4.3 due to CVE-2014-1517 caused the admin's password
+    to be ignored when starting a sudo session.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1132887">[% terms.Bug %] 1132887</a>)</li>
+</ul>
+
 <h3>4.4.8</h3>
 
-<p>This releases contains the following [% terms.bug %] fix:</p>
+<p>This release contains the following [% terms.bug %] fix:</p>
 
 <ul>
   <li>Fixing a regression caused by <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1090275">

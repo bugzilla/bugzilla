@@ -9,7 +9,7 @@
 [% USE Bugzilla %]
 [% cgi = Bugzilla.cgi +%]
 
-[% IF cgi.param('request_type') == 'Bug' %]
+[% IF cgi.param('request_type') == 'bug' %]
 What did you do?
 ================
 [%+ cgi.param('bug_actions') %]
@@ -22,24 +22,32 @@ What should have happened?
 ==========================
 [%+ cgi.param('bug_expected_results') %]
 
-[% ELSIF cgi.param('request_type') == 'Feature' %]
-What problems would this solve?
-===============================
-[%+ cgi.param('feature_problem_solving') %]
+[% ELSIF cgi.param('request_type') == 'feature' %]
+What problem would this feature solve?
+======================================
+[%+ cgi.param('feature_problem') %]
 
-Who would use this?
-===================
-[%+ cgi.param('feature_audience') %]
-
-What would users see?
+Who has this problem?
 =====================
-[%+ cgi.param('feature_interface') %]
+[% IF cgi.param('feature_audience') == 'Other' %]
+[%+ cgi.param('feature_audience_other_text') %]
+[% ELSE %]
+[%+ cgi.param('feature_audience') %]
+[% END %]
 
-What would users do? What would happen as a result?
-===================================================
-[%+ cgi.param('feature_process') %]
+How do you know that the users identified above have this problem?
+==================================================================
+[%+ cgi.param('feature_identification') %]
 
-[% ELSIF cgi.param('request_type') == 'Change' %]
+How are the users identified above solving this problem now?
+============================================================
+[%+ cgi.param('feature_solution') %]
+
+Do you have any suggestions for solving the problem? Please explain in detail.
+==============================================================================
+[%+ cgi.param('feature_suggestions') %]
+
+[% ELSIF cgi.param('request_type') == 'change' %]
 What feature should be changed? Please provide the URL of the feature if possible.
 ==================================================================================
 [%+ cgi.param('change_feature') %]

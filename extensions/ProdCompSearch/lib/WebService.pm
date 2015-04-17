@@ -15,9 +15,30 @@ use base qw(Bugzilla::WebService);
 use Bugzilla::Error;
 use Bugzilla::Util qw(detaint_natural trick_taint trim);
 
+#############
+# Constants #
+#############
+
 use constant PUBLIC_METHODS => qw(
     prod_comp_search
 );
+
+sub rest_resources {
+    return [
+        qr{^/prod_comp_search/(.*)$}, {
+            GET => {
+                method => 'prod_comp_search',
+                params => sub {
+                    return { search => $_[0] }
+                }
+            }
+        }
+    ]
+}
+
+##################
+# Public Methods #
+##################
 
 sub prod_comp_search {
     my ($self, $params) = @_;
@@ -103,6 +124,10 @@ sub prod_comp_search {
 
     return { products => $products };
 }
+
+###################
+# Private Methods #
+###################
 
 sub _build_terms {
     my ($query, $product, $component) = @_;

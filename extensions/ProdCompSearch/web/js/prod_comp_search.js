@@ -7,138 +7,100 @@
 
 // Product and component search to file a new bug
 
-var ProdCompSearch = {
-    script_name: 'enter_bug.cgi',
-    script_choices: ['enter_bug.cgi', 'describecomponents.cgi'],
-    format: null,
-    cloned_bug_id: null,
-    new_tab: null,
-    max_results: 100
-};
-
-YUI({
-    base: 'js/yui3/',
-    combine: false
-}).use("node", "json-stringify", "autocomplete", "escape",
-       "datasource-io", "datasource-jsonschema", function(Y) {
-    Y.on("domready", function() {
-        var counter      = 0,
-            dataSource   = null,
-            autoComplete = null;
-
-        var resultListFormat = function(query, results) {
-            return Y.Array.map(results, function(result) {
-                var data = result.raw;
-                result.text = data.product + ' :: ' + data.component;
-                return Y.Escape.html(result.text);
+$(function() {
+    'use strict';
+    $('.prod_comp_search').autocomplete({
+        minLength: 3,
+        delay: 500,
+        source: function(request, response) {
+            var el = this.element;
+            var id = '#' + el.prop('id');
+            $(id + '-throbber').show();
+            $(id + '-no_components').hide();
+            $(id + '-too_many_components').hide();
+            $(id + '-error').hide();
+            var url = 'rest/prod_comp_search/' + encodeURIComponent(request.term) +
+                     '?limit=' + (el.data('max_results') + 1);
+            if (BUGZILLA.api_token) {
+                url += '&Bugzilla_api_token=' + encodeURIComponent(BUGZILLA.api_token);
+            }
+            $.ajax({
+                url: url,
+                contentType: 'application/json'
+            })
+            .done(function(data) {
+                $(id + '-throbber').hide();
+                if (data.error) {
+                    $(id + '-error').show();
+                    console.log(data.message);
+                    return false;
+                }
+                if (data.products.length === 0) {
+                    $(id + '-no_components').show();
+                }
+                else if (data.products.length > el.data('max_results')) {
+                    $(id + '-too_many_components').show();
+                }
+                var current_product = "";
+                var prod_comp_array = [];
+                var base_params = [];
+                if (el.data('format')) {
+                    base_params.push('format=' + encodeURIComponent(el.data('format')));
+                }
+                if (el.data('cloned_bug_id')) {
+                    base_params.push('cloned_bug_id=' + encodeURIComponent(el.data('cloned_bug_id')));
+                }
+                $.each(data.products, function() {
+                    var params = base_params.slice();
+                    params.push('product=' + encodeURIComponent(this.product));
+                    if (this.product != current_product) {
+                        prod_comp_array.push({
+                            label: this.product,
+                            url: el.data('script_name') + '?' + params.join('&')
+                        });
+                        current_product = this.product;
+                    }
+                    params.push('component=' + encodeURIComponent(this.component));
+                    var url = el.data('script_name') + '?' + params.join('&');
+                    if (el.data('anchor_component')) {
+                        url += "#" + encodeURIComponent(this.component);
+                    }
+                    prod_comp_array.push({
+                        label: this.product + ' :: ' + this.component,
+                        url: url
+                    });
+                });
+                response(prod_comp_array);
+            })
+            .fail(function(xhr, error_text) {
+                if (xhr.responseJSON.error) {
+                    error_text = xhr.responseJSON.message;
+                }
+                $(id + '-throbber').hide();
+                $(id + '-comp_error').show();
+                console.log(error_text);
             });
-        };
-
-        var requestTemplate = function(query) {
-            counter = counter + 1;
-            var json_object = {
-                version: "1.1",
-                method : "PCS.prod_comp_search",
-                id : counter,
-                params : { search: query, limit: ProdCompSearch.max_results }
-            };
-            return Y.JSON.stringify(json_object);
-        };
-
-        var dataSource = new Y.DataSource.IO({
-            source: 'jsonrpc.cgi',
-            ioConfig: {
-                method: "POST",
-                headers: { 'Content-Type': 'application/json' }
-            },
-            on: {
-                error: function(e) {
-                    if (console.error && e.response.meta.error) {
-                        console.error(e.response.meta.error.message);
-                    }
-                    Y.one("#prod_comp_throbber").addClass('bz_default_hidden');
-                    Y.one("#prod_comp_error").removeClass('bz_default_hidden');
-                }
+        },
+        focus: function(event, ui) {
+            event.preventDefault();
+        },
+        select: function(event, ui) {
+            event.preventDefault();
+            var el = $(this);
+            el.val(ui.item.label);
+            if (el.data('new_tab')) {
+                window.open(ui.item.url, '_blank');
             }
-        });
-
-        dataSource.plug(Y.Plugin.DataSourceJSONSchema, {
-            schema: {
-                resultListLocator : "result.products",
-                resultFields : [ "product", "component" ],
-                metaFields : { error : 'error' }
+            else {
+                window.location.href = ui.item.url;
             }
-        });
-
-        var input = Y.one('#prod_comp_search');
-
-        input.plug(Y.Plugin.AutoComplete, {
-            activateFirstItem: false,
-            enableCache: true,
-            source: dataSource,
-            minQueryLength: 3,
-            queryDelay: 0.05,
-            resultFormatter: resultListFormat,
-            suppressInputUpdate: true,
-            maxResults: ProdCompSearch.max_results,
-            scrollIntoView: true,
-            requestTemplate: requestTemplate,
-            on: {
-                query: function(e) {
-                    Y.one("#prod_comp_throbber").removeClass('bz_default_hidden');
-                    Y.one("#prod_comp_no_components").addClass('bz_default_hidden');
-                    Y.one("#prod_comp_too_many_components").addClass('bz_default_hidden');
-                    Y.one("#prod_comp_error").addClass('bz_default_hidden');
-                },
-                results: function(e) {
-                    Y.one("#prod_comp_throbber").addClass('bz_default_hidden');
-                    input.ac.set('activateFirstItem', e.results.length == 1);
-                    if (e.results.length == 0) {
-                        Y.one("#prod_comp_no_components").removeClass('bz_default_hidden');
-                    }
-                    else if (e.results.length + 1 > ProdCompSearch.max_results) {
-                        Y.one("#prod_comp_too_many_components").removeClass('bz_default_hidden');
-                    }
-                },
-                select: function(e) {
-                    // Only redirect if the script_name is a valid choice
-                    if (Y.Array.indexOf(ProdCompSearch.script_choices, ProdCompSearch.script_name) == -1)
-                        return;
-
-                    var data = e.result.raw;
-                    var url = ProdCompSearch.script_name + 
-                            "?product=" + encodeURIComponent(data.product) +
-                            "&component=" +  encodeURIComponent(data.component);
-                    if (ProdCompSearch.script_name == 'enter_bug.cgi') {
-                        if (ProdCompSearch.format)
-                            url += "&format=" + encodeURIComponent(ProdCompSearch.format);
-                        if (ProdCompSearch.cloned_bug_id)
-                            url += "&cloned_bug_id=" + encodeURIComponent(ProdCompSearch.cloned_bug_id);
-                    }
-                    if (ProdCompSearch.script_name == 'describecomponents.cgi') {
-                        url += "#" + encodeURIComponent(data.component);
-                    }
-                    if (ProdCompSearch.new_tab) {
-                        window.open(url, '_blank');
-                    }
-                    else {
-                        window.location.href = url;
-                    }
-                }
-            },
-            after: {
-                select: function(e) {
-                    if (ProdCompSearch.new_tab) {
-                        input.set('value','');
-                    }
-                }
-            }
-        });
-
-        input.on('focus', function (e) {
-            if (e.target.value && e.target.value.length > 3) {
-                dataSource.load(e.target.value);
-            }
-        });
+        }
+    })
+    .focus(function(event) {
+        var el = $(event.target);
+        if (el.val().length >= el.autocomplete('option', 'minLength')) {
+            el.autocomplete('search');
+        }
     });
+    $('.prod_comp_search:focus').select();
 });

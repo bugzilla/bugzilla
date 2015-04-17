@@ -667,3 +667,25 @@ input.required, select.required, span.required_explanation {
     border: 2px solid #B70000;
     background-color: #FFEBEB;
 }
+
+/* jquery-ui overrides */
+
+.ui-autocomplete {
+    /* set a max height for autocomplete lists */
+    overflow-y: auto;
+    overflow-x: hidden;
+    max-height: 500px;
+    /* hovering over the bottom item increases the height by 1px, resulting in a scrollbar */
+    padding-bottom: 1px !important;
+}
+
+/* always use our font and size */
+.ui-widget {
+    font-family: inherit !important;
+    font-size: small !important;
+}
+
+/* menu items shouldn't be bold */
+.ui-menu .ui-menu-item {
+    font-weight: normal !important;
+}

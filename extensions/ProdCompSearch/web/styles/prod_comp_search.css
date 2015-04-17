@@ -5,23 +5,11 @@
  * This Source Code Form is "Incompatible With Secondary Licenses", as
  * defined by the Mozilla Public License, v. 2.0. */
 
+.pcs-message {
+    color: red;
+}
+
 #prod_comp_search_main {
     width: 400px;
-    margin-right: auto;
-    margin-left: auto;
-}
-
-#prod_comp_search_form .yui3-aclist-input {
-    width: 360px;
-}
-
-#prod_comp_search_form .yui3-aclist-content {
-    max-height: 500px;
-    overflow: auto;
-}
-
-#prod_comp_no_components,
-#prod_comp_error,
-#prod_comp_too_many_components {
-    color: red;
+    margin: 0 auto;
 }

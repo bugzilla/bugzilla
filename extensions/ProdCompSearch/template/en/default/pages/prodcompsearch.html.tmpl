@@ -10,15 +10,15 @@
 
 [% PROCESS global/header.html.tmpl
    title = "File a $terms.Bug"
-   javascript_urls = [ "js/yui3/yui/yui-min.js",
-                       "extensions/ProdCompSearch/web/js/prod_comp_search.js" ]
+   javascript_urls = [ "extensions/ProdCompSearch/web/js/prod_comp_search.js" ]
    style_urls = [ "extensions/ProdCompSearch/web/styles/prod_comp_search.css" ]
 %]
 
 <div id="prod_comp_search_main">
   [% PROCESS prodcompsearch/form.html.tmpl
-     query_header = "File a $terms.Bug:"
-     script_name  = "enter_bug.cgi"
+     input_label = "File a $terms.Bug:"
+     script_name = "enter_bug.cgi"
+     auto_focus  = 1
   %]
 </div>
 

@@ -6,35 +6,48 @@
   # defined by the Mozilla Public License, v. 2.0.
   #%]
 
-[% DEFAULT max_results = 100 %]
-<script type="text/javascript">
-  [% IF script_name %]
-    ProdCompSearch.script_name = '[% script_name FILTER js %]';
-  [% END %]
-  [% IF format %]
-    ProdCompSearch.format = '[% format FILTER js %]';
-  [% END %]
-  [% IF cloned_bug_id %]
-    ProdCompSearch.cloned_bug_id = '[% cloned_bug_id FILTER js %]';
-  [% END %]
-  [% IF new_tab %]
-    ProdCompSearch.new_tab = true;
-  [% END %]
-  ProdCompSearch.max_results = [% max_results FILTER js %];
-</script>
+[%#
+  # parameters (all are optional, defaults below)
+  # id               : id and prefix of elements
+  # script_name      : .cgi to redirect to
+  # max_results      : maximum results displayed
+  # input_label      : input field label
+  # auto_focus       : focus the search form on page load
+  # format           : format parameter passed to cgi
+  # cloned_bug_id    : cloned_bug_id parameter
+  # new_tab          : open in a new tab
+  # anchor_component : append #component to url
+  #%]
 
-<div id="prod_comp_search_form" class="yui3-skin-sam">
-  <div id="prod_comp_search_header">
+[%
+  DEFAULT id = "pcs";
+  DEFAULT max_results = 100;
+  DEFAULT script_name = "enter_bug.cgi";
+%]
+
+<div class="pcs-form">
+  <div class="pcs-header">
     [% input_label FILTER none %]&nbsp;
-    <img id="prod_comp_throbber" src="extensions/ProdCompSearch/web/images/throbber.gif"
-         class="bz_default_hidden" width="16" height="11">
-    <span id="prod_comp_no_components" class="bz_default_hidden">
-      No components found</span>
-    <span id="prod_comp_too_many_components" class="bz_default_hidden">
+    <img id="[% id FILTER html %]-throbber"
+      src="extensions/ProdCompSearch/web/images/throbber.gif"
+      style="display:none" width="16" height="11">
+    <span class="pcs-message" id="[% id FILTER html %]-no_components" style="display:none">
+      No components found
+    </span>
+    <span class="pcs-message" id="[% id FILTER html %]-too_many_components" style="display:none">
       Result limited to [% max_results FILTER html %] components
-    <span id="prod_comp_error" class="bz_default_hidden">
-      An error occured</span>
+    </span>
+    <span class="pcs-message" id="[% id FILTER html %]-error" style="display:none">
+      An error occured
+    </span>
   </div>
-  <input id="prod_comp_search" type="text" size="50"
-         placeholder="Search by product and component keywords">
+  <input type="text" class="prod_comp_search" id="[% id FILTER html %]" size="50"
+    placeholder="Search by product and component keywords"
+    data-script_name="[% script_name FILTER html %]"
+    data-format="[% format FILTER html %]"
+    data-cloned_bug_id="[% cloned_bug_id FILTER html %]"
+    data-new_tab="[% new_tab ? "1" : "0" %]"
+    data-anchor_component="[% anchor_component ? "1" : "0" %]"
+    data-max_results="[% max_results FILTER html %]"
+    [% "autofocus" IF auto_focus %]>
 </div>

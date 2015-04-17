@@ -1,21 +1,9 @@
-[%# The contents of this file are subject to the Mozilla Public
-  # License Version 1.1 (the "License"); you may not use this file
-  # except in compliance with the License. You may obtain a copy of
-  # the License at http://www.mozilla.org/MPL/
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
   #
-  # Software distributed under the License is distributed on an "AS
-  # IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
-  # implied. See the License for the specific language governing
-  # rights and limitations under the License.
-  #
-  # The Original Code is the Bugzilla Bug Tracking System.
-  #
-  # The Initial Developer of the Original Code is Netscape Communications
-  # Corporation. Portions created by Netscape are
-  # Copyright (C) 1998 Netscape Communications Corporation. All
-  # Rights Reserved.
-  #
-  # Contributor(s): Gervase Markham <gerv@gerv.net>
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
   #%]
 
 [%# INTERFACE:
@@ -27,26 +15,35 @@
   # format:   the desired format to display the target.
   #%]
 
-[% PROCESS global/variables.none.tmpl %]
+[%
+  USE Bugzilla;
+  PROCESS global/variables.none.tmpl;
 
-[% style_urls = [ "extensions/BMO/web/styles/choose_product.css" ] %]
+  IF target == "enter_bug.cgi";
+    title       = "Enter $terms.Bug";
+    h2          = "Which product is affected by the problem you would like to report?";
+    is_describe = 0;
+  ELSIF target == "describecomponents.cgi";
+    title       = "Browse";
+    h2          = "Which product and component would you like to have described?";
+    is_describe = 1;
+  ELSE;
+    title       = "Choose a Product";
+    is_describe = 0;
+  END;
 
-[% IF target == "enter_bug.cgi" %]
-  [% title = "Enter $terms.Bug" %]
-  [% h2 = "Which product is affected by the problem you would like to report?" %]
-[% ELSIF target == "describecomponents.cgi" %]
-  [% title = "Browse" %]
-  [% h2 = "Which product would you like to have described?" %]
-[% END %]
+  style_urls = [
+    "extensions/BMO/web/styles/choose_product.css",
+    "extensions/ProdCompSearch/web/styles/prod_comp_search.css",
+  ];
+  javascript_urls = [ "extensions/ProdCompSearch/web/js/prod_comp_search.js" ];
 
-[% javascript_urls = [ "js/yui3/yui/yui-min.js",
-                       "extensions/ProdCompSearch/web/js/prod_comp_search.js" ]
+  cgi = Bugzilla.cgi;
+  classification = cgi.param('classification');
+
+  PROCESS global/header.html.tmpl
+    generate_api_token = 1;
 %]
-[% onload = "document.getElementById('prod_comp_search').focus();" %]
-[% style_urls.push("extensions/ProdCompSearch/web/styles/prod_comp_search.css") %]
-
-[% DEFAULT title = "Choose a Product" %]
-[% PROCESS global/header.html.tmpl %]
 
 <div id="choose_product">
 
@@ -62,135 +59,131 @@
 
 <div id="prod_comp_search_main">
   [% PROCESS prodcompsearch/form.html.tmpl
-     input_label   = "Find product:"
-     format        = format
-     cloned_bug_id = cloned_bug_id
-     script_name   = target %]
+     input_label      = "Find product and component:"
+     format           = format
+     cloned_bug_id    = cloned_bug_id
+     script_name      = target
+     anchor_component = is_describe
+     auto_focus       = 1
+  %]
 </div>
 
 <h2>or choose from the following selections</h2>
 
-[% USE Bugzilla %]
-[% cgi = Bugzilla.cgi %]
-[% SET classification = cgi.param('classification') %]
 [% IF NOT ((cgi.param("full")) OR (user.settings.product_chooser.value == 'full_product_chooser')) %]
 
-<table align="center" border="0" width="600" cellpadding="5" cellspacing="0">
-[% INCLUDE easyproduct
-   name="Core"
-   icon="component.png"
-%]
-[% INCLUDE easyproduct
-   name="Firefox"
-   icon="firefox.png"
-%]
-[% INCLUDE easyproduct
-   name="Firefox OS"
-   icon="firefox_os.png"
-%]
-[% INCLUDE easyproduct
-   name="Firefox for Android"
-   icon="firefox_android.png"
-%]
-[% INCLUDE easyproduct
-   name="Firefox for iOS"
-   icon="firefox_ios.png"
-%]
-[% INCLUDE easyproduct
-   name="Marketplace"
-   icon="marketplace.png"
-%]
-[% INCLUDE easyproduct
-   name="Webmaker"
-   icon="webmaker.png"
-%]
-[% INCLUDE easyproduct
-   name="Toolkit"
-   icon="component.png"
-%]
-[% INCLUDE easyproduct
-   name="Thunderbird"
-   icon="thunderbird.png"
-%]
-[% INCLUDE easyproduct
-   name="SeaMonkey"
-   icon="seamonkey.png"
-%]
-[% INCLUDE easyproduct
-   name="Mozilla Localizations"
-   icon="localization.png"
-%]
-[% INCLUDE easyproduct
-   name="Mozilla Services"
-   icon="sync.png"
-%]
-<tr>
-   <td><a href="[% target FILTER uri %]?full=1
-             [%- IF cloned_bug_id %]&amp;cloned_bug_id=[% cloned_bug_id FILTER uri %][% END -%]
-             [%- IF classification %]&amp;classification=[% classification FILTER uri %][% END -%]
-             [%- IF format %]&amp;format=[% format FILTER uri %][% END %]">
-             <img src="extensions/BMO/web/producticons/other.png" height="64" width="64" border="0"></a></td>
-   <td><h2 align="left" style="margin-bottom: 0px;"><a href="[% target FILTER uri %]?full=1
-             [%- IF cloned_bug_id %]&amp;cloned_bug_id=[% cloned_bug_id FILTER uri %][% END -%]
-             [%- IF classification %]&amp;classification=[% classification FILTER uri %][% END -%]
-             [%- IF format %]&amp;format=[% format FILTER uri %][% END %]">
-             Other Products</a></h2>
-       <p style="margin-top: 0px;">Other Mozilla products which aren't listed here</p>
-   </td>
-</tr>
-</table>
+  <table align="center" border="0" width="600" cellpadding="5" cellspacing="0">
+    [% INCLUDE easyproduct
+      name="Core"
+      icon="component.png"
+    %]
+    [% INCLUDE easyproduct
+      name="Firefox"
+      icon="firefox.png"
+    %]
+    [% INCLUDE easyproduct
+      name="Firefox OS"
+      icon="firefox_os.png"
+    %]
+    [% INCLUDE easyproduct
+      name="Firefox for Android"
+      icon="firefox_android.png"
+    %]
+    [% INCLUDE easyproduct
+      name="Firefox for iOS"
+      icon="firefox_ios.png"
+    %]
+    [% INCLUDE easyproduct
+      name="Marketplace"
+      icon="marketplace.png"
+    %]
+    [% INCLUDE easyproduct
+      name="Webmaker"
+      icon="webmaker.png"
+    %]
+    [% INCLUDE easyproduct
+      name="Toolkit"
+      icon="component.png"
+    %]
+    [% INCLUDE easyproduct
+      name="Thunderbird"
+      icon="thunderbird.png"
+    %]
+    [% INCLUDE easyproduct
+      name="SeaMonkey"
+      icon="seamonkey.png"
+    %]
+    [% INCLUDE easyproduct
+      name="Mozilla Localizations"
+      icon="localization.png"
+    %]
+    [% INCLUDE easyproduct
+      name="Mozilla Services"
+      icon="sync.png"
+    %]
+    <tr>
+      <td><a href="[% target FILTER uri %]?full=1
+                [%- IF cloned_bug_id %]&amp;cloned_bug_id=[% cloned_bug_id FILTER uri %][% END -%]
+                [%- IF classification %]&amp;classification=[% classification FILTER uri %][% END -%]
+                [%- IF format %]&amp;format=[% format FILTER uri %][% END %]">
+                <img src="extensions/BMO/web/producticons/other.png" height="64" width="64" border="0"></a></td>
+      <td><h2 align="left" style="margin-bottom: 0px;"><a href="[% target FILTER uri %]?full=1
+                [%- IF cloned_bug_id %]&amp;cloned_bug_id=[% cloned_bug_id FILTER uri %][% END -%]
+                [%- IF classification %]&amp;classification=[% classification FILTER uri %][% END -%]
+                [%- IF format %]&amp;format=[% format FILTER uri %][% END %]">
+                Other Products</a></h2>
+          <p style="margin-top: 0px;">Other Mozilla products which aren't listed here</p>
+      </td>
+    </tr>
+  </table>
+
 [% ELSE %]
 
-<table>
+  <table>
+    [% FOREACH c = classifications %]
+      [% IF c.object %]
+        <tr>
+          <td align="right"><h2>[% c.object.name FILTER html %]</h2></td>
+          <td><strong>[%+ c.object.description FILTER html_light %]</strong></td>
+        </tr>
+      [% END %]
 
-[% FOREACH c = classifications %]
-  [% IF c.object %]
-    <tr>
-      <td align="right"><h2>[% c.object.name FILTER html %]</h2></td>
-      <td><strong>[%+ c.object.description FILTER html_light %]</strong></td>
-    </tr>
-  [% END %]
-
-  [% FOREACH p = c.products %]
-    [% class = "" %]
-    [% has_entry_groups = 0 %]
-    [% FOREACH gid = p.group_controls.keys %]
-      [% IF p.group_controls.$gid.entry %]
-        [% has_entry_groups = 1 %]
-        [% class = class _ " group_$gid" %]
+      [% FOREACH p = c.products %]
+        [% class = "" %]
+        [% has_entry_groups = 0 %]
+        [% FOREACH gid = p.group_controls.keys %]
+          [% IF p.group_controls.$gid.entry %]
+            [% has_entry_groups = 1 %]
+            [% class = class _ " group_$gid" %]
+          [% END %]
+        [% END %]
+        <tr class="[% "group_secure" IF has_entry_groups +%] [% class FILTER html %]"
+        [%- IF has_entry_groups %] title="This product requires one or more group memberships in order to enter [% terms.bugs %] in it. You have them,  but be aware not everyone else does."[% END %]>
+          <th align="right" valign="top">
+          [% IF p.name == "Mozilla PR" AND target == "enter_bug.cgi" AND NOT format AND NOT cgi.param("debug") %]
+            <a href="[% target FILTER uri %]?product=[% p.name FILTER uri -%]
+                  [%- IF cloned_bug_id %]&amp;cloned_bug_id=[% cloned_bug_id FILTER uri %][% END %]&amp;format=mozpr">
+            [% p.name FILTER html FILTER no_break %]</a>:&nbsp;
+          [% ELSE %]
+            <a href="[% target FILTER uri %]?product=[% p.name FILTER uri -%]
+                  [%- IF cloned_bug_id %]&amp;cloned_bug_id=[% cloned_bug_id FILTER uri %][% END -%]
+                  [%- IF format %]&amp;format=[% format FILTER uri %][% END %]">
+            [% p.name FILTER html FILTER no_break %]</a>:&nbsp;
+          [% END %]
+          </th>
+          <td valign="top">[% p.description FILTER html_light %]</td>
+        </tr>
       [% END %]
     [% END %]
-    <tr class="[% "group_secure" IF has_entry_groups +%] [% class FILTER html %]"
-    [%- IF has_entry_groups %] title="This product requires one or more
- group memberships in order to enter [% terms.bugs %] in it. You have them,  but be
- aware not everyone else does."[% END %]>
-      <th align="right" valign="top">
-      [% IF p.name == "Mozilla PR" AND target == "enter_bug.cgi" AND NOT format AND NOT cgi.param("debug") %]
-        <a href="[% target FILTER uri %]?product=[% p.name FILTER uri -%]
-              [%- IF cloned_bug_id %]&amp;cloned_bug_id=[% cloned_bug_id FILTER uri %][% END %]&amp;format=mozpr">
-        [% p.name FILTER html FILTER no_break %]</a>:&nbsp;
-      [% ELSE %]
-        <a href="[% target FILTER uri %]?product=[% p.name FILTER uri -%]
-              [%- IF cloned_bug_id %]&amp;cloned_bug_id=[% cloned_bug_id FILTER uri %][% END -%]
-              [%- IF format %]&amp;format=[% format FILTER uri %][% END %]">
-        [% p.name FILTER html FILTER no_break %]</a>:&nbsp;
-      [% END %]
-      </th>
-      <td valign="top">[% p.description FILTER html_light %]</td>
-    </tr>
+  </table>
+  <br>
+  [% IF target == "enter_bug.cgi" AND user.settings.product_chooser.value != 'full_product_chooser' %]
+    <p>You can choose to get this screen by default when you click "New [% terms.Bug %]"
+    by changing your <a href="userprefs.cgi?tab=settings">preferences</a>.</p>
   [% END %]
 [% END %]
 
-</table>
-
 <br>
-[% IF target == "enter_bug.cgi" AND user.settings.product_chooser.value != 'full_product_chooser' %]
-<p>You can choose to get this screen by default when you click "New [% terms.Bug %]"
-by changing your <a href="userprefs.cgi?tab=settings">preferences</a>.</p>
-[% END %]
-[% END %]
-<br>
-
 </div>
 
 <div id="guided">

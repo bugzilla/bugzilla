@@ -29,6 +29,7 @@ use Bugzilla::BugMail;
 use Bugzilla::Constants;
 use Bugzilla::Error;
 use Bugzilla::Field;
+use Bugzilla::Field::Choice;
 use Bugzilla::Group;
 use Bugzilla::Mailer;
 use Bugzilla::Product;
@@ -873,8 +874,68 @@ sub install_before_final_checks {
     }
 }
 
+sub db_schema_abstract_schema {
+    my ($self, $args) = @_;
+    $args->{schema}->{bug_user_agent} = {
+        FIELDS => [
+            id => {
+                TYPE       => 'MEDIUMSERIAL',
+                NOTNULL    => 1,
+                PRIMARYKEY => 1,
+            },
+            bug_id => {
+                TYPE       => 'INT3',
+                NOTNULL    => 1,
+                REFERENCES => {
+                    TABLE  => 'bugs',
+                    COLUMN => 'bug_id',
+                    DELETE => 'cascade',
+                },
+            },
+            user_agent => {
+                TYPE    => 'MEDIUMTEXT',
+                NOTNULL => 1,
+            },
+        ],
+        INDEXES => [
+            bug_user_agent_idx => {
+                FIELDS => [ 'bug_id' ],
+                TYPE   => 'UNIQUE',
+            },
+        ],
+    };
+}
+
 sub install_update_db {
     my $dbh = Bugzilla->dbh;
+
+    # per-product hw/os defaults
+    my $op_sys_default = _field_value('op_sys', 'Unspecified', 50);
+    $dbh->bz_add_column(
+        'products',
+        'default_op_sys_id' => {
+            TYPE       => 'INT2',
+            DEFAULT    => $op_sys_default->id,
+            REFERENCES => {
+                TABLE  => 'op_sys',
+                COLUMN => 'id',
+                DELETE => 'SET NULL',
+            },
+        }
+    );
+    my $platform_default = _field_value('rep_platform', 'Unspecified', 50);
+    $dbh->bz_add_column(
+        'products',
+        'default_platform_id' => {
+            TYPE       => 'INT2',
+            DEFAULT    => $platform_default->id,
+            REFERENCES => {
+                TABLE  => 'rep_platform',
+                COLUMN => 'id',
+                DELETE => 'SET NULL',
+            },
+        }
+    );
 
     # Migrate old is_active stuff to new patch (is in core in 4.2), The old
     # column name was 'is_active', the new one is 'isactive' (no underscore).
@@ -912,6 +973,20 @@ sub install_update_db {
             buglist     => 0,
         });
     }
+}
+
+# return the Bugzilla::Field::Choice object for the specified field and value.
+# if the value doesn't exist it will be created.
+sub _field_value {
+    my ($field_name, $value_name, $sort_key) = @_;
+    my $field = Bugzilla::Field->check({ name => $field_name });
+    my $existing = Bugzilla::Field::Choice->type($field)->match({ value => $value_name });
+    return $existing->[0] if $existing && @$existing;
+    return Bugzilla::Field::Choice->type($field)->create({
+        value    => $value_name,
+        sortkey  => $sort_key,
+        isactive => 1,
+    });
 }
 
 sub _last_closed_date {

@@ -63,6 +63,7 @@
 
     #lang_links_container {
         float: right;
+        white-space: nowrap;
     }
 
     #lang_links_container .links {

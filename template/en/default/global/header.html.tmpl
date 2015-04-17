@@ -232,10 +232,7 @@
       [% END %]
     </div>
 
-    <div id="common_links">
-      [% PROCESS "global/common-links.html.tmpl" qs_suffix = "_top" %]
-    </div>
-
+    [% USE Bugzilla %]
     [% IF Bugzilla.languages.size > 1 %]
       <div id="lang_links_container" class="bz_default_hidden">
         <ul class="links">
@@ -253,6 +250,10 @@
         </ul>
       </div>
     [% END %]
+
+    <div id="common_links">
+      [% PROCESS "global/common-links.html.tmpl" qs_suffix = "_top" %]
+    </div>
   </div>
 
   <div id="bugzilla-body">

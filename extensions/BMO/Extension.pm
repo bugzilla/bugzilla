@@ -594,23 +594,6 @@ sub bug_format_comment {
         }
     });
 
-    # link bzr commit messages
-    push (@$regexes, {
-        match => qr/\b(Committing\s+to:\sbzr\+ssh:\/\/
-                    (?:[^\@]+\@)?(bzr\.mozilla\.org[^\n]+)\n.*?\bCommitted\s)
-                    (revision\s(\d+))/sx,
-        replace => sub {
-            my $args = shift;
-            my $preamble = html_quote($args->{matches}->[0]);
-            my $url = html_quote($args->{matches}->[1]);
-            my $text = html_quote($args->{matches}->[2]);
-            my $id = html_quote($args->{matches}->[3]);
-            $url =~ s/\s+$//;
-            $url =~ s/\/$//;
-            return qq{$preamble<a href="https://$url/revision/$id">$text</a>};
-        }
-    });
-
     # link git.mozilla.org commit messages
     push (@$regexes, {
         match => qr#^(To\s(?:ssh://)?(?:[^\@]+\@)?git\.mozilla\.org[:/](.+?\.git)\n

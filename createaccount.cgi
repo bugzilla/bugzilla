@@ -48,6 +48,7 @@ elsif (defined($login)) {
       || ThrowTemplateError($template->error());
 }
 else {
+    $user->check_account_creation_enabled;
     # Show the standard "would you like to create an account?" form.
     $template->process('account/create.html.tmpl', $vars)
       || ThrowTemplateError($template->error());

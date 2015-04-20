@@ -91,14 +91,9 @@ if (!$dbh->selectrow_array("SELECT 1 FROM priority WHERE value = 'P1'")) {
 my @platforms = qw(
     All
     ARM
-    DEC
-    HP
-    PowerPC
     x86
     x86_64
-    SGI
-    Sun
-    XScale
+    Unspecified
     Other
 );
 
@@ -113,63 +108,28 @@ if (!$dbh->selectrow_array("SELECT 1 FROM rep_platform WHERE value = 'ARM'")) {
 
 my @oses= (
     'All',
-    'Windows 95',
-    'Windows 98',
-    'Windows ME',
-    'Windows NT',
-    'Windows 2000',
+    'Windows',
     'Windows XP',
-    'Windows Server 2003',
     'Windows Server 2008',
     'Windows Vista',
     'Windows 7',
     'Windows 8',
-    'Windows 8 Metro',
     'Windows 8.1',
     'Windows 10',
-    'Windows CE',
-    'Windows Mobile 6 Standard',
-    'Windows Mobile 6 Professional',
-    'Windows Phone 7',
-    'Windows Phone 7.5',
-    'Windows Phone 7.8',
-    'Windows Phone 8',
-    'Mac System 7',
-    'Mac System 7.5',
-    'Mac System 7.6.1',
-    'Mac System 8.0',
-    'Mac System 8.5',
-    'Mac System 8.6',
-    'Mac System 9.x',
+    'Windows Phone',
     'Mac OS X',
     'Linux',
     'Gonk (Firefox OS)',
     'Android',
-    'Maemo',
-    'MeeGo',
-    'Mer',
-    'iOS 3',
-    'iOS 4',
-    'iOS 5',
-    'iOS 6',
+    'iOS',
     'iOS 7',
+    'iOS 8',
     'BSDI',
     'FreeBSD',
     'NetBSD',
     'OpenBSD',
-    'AIX',
-    'BeOS',
-    'HP-UX',
-    'IRIX',
-    'Neutrino',
-    'OpenVMS',
-    'OS/2',
-    'OSF/1',
-    'SunOS',
-    'Solaris',
-    'OpenSolaris',
-    'Symbian',
-    'Other',
+    'Unspecified',
+    'Other'
 );
 
 if (!$dbh->selectrow_array("SELECT 1 FROM op_sys WHERE value = 'AIX'")) {
@@ -295,6 +255,11 @@ my @products = (
     },
 );
 
+my $default_op_sys_id
+    = $dbh->selectrow_array("SELECT id FROM op_sys WHERE value = 'Unspecified'");
+my $default_platform_id
+    = $dbh->selectrow_array("SELECT id FROM rep_platform WHERE value = 'Unspecified'");
+
 print "creating products...\n";
 for my $product (@products) {
     my $new_product =
@@ -304,8 +269,11 @@ for my $product (@products) {
         if ($product->{classification}) {
             $class_id = Bugzilla::Classification->new({ name => $product->{classification} })->id;
         }
-        $dbh->do('INSERT INTO products (name, description, classification_id) VALUES (?, ?, ?)',
-            undef, ( $product->{product_name}, $product->{description}, $class_id ));
+        $dbh->do('INSERT INTO products (name, description, classification_id,
+                                        default_op_sys_id, default_platform_id)
+                  VALUES (?, ?, ?, ?, ?)',
+            undef, ( $product->{product_name}, $product->{description},
+                     $class_id, $default_op_sys_id, $default_platform_id ));
 
         $new_product
             = new Bugzilla::Product( { name => $product->{product_name} } );

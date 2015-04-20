@@ -69,7 +69,7 @@ RUN $CPANM Email::MIME::Attachment::Stripper \
     && $CPANM JSON::RPC \
     && $CPANM MIME::Parser \
     && $CPANM Template::Plugin::GD::Image \
-    && $CPANM Test::WWW::Selenium
+    && $CPANM Test::WWW::Selenium \
     && $CPANM TheSchwartz \
     && $CPANM XMLRPC::Lite
 RUN cd $BUGZILLA_HOME \

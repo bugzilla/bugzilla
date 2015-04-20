@@ -736,6 +736,9 @@ $(function() {
         .keydown(function(event) {
             if (!(event.ctrlKey || event.metaKey))
                 return;
+            // don't conflict with text input shortcut
+            if (document.activeElement.nodeNode == 'INPUT' || document.activeElement.nodeName == 'TEXTAREA')
+                return;
             if (String.fromCharCode(event.which).toLowerCase() == 'e') {
                 if ($('#cancel-btn:visible').length == 0) {
                     event.preventDefault();

@@ -9,7 +9,7 @@ Configure a running Bugzilla system using Docker
 * Preconfigured with initial data and test product
 * Running Apache2 and MySQL Community Server 5.6
 * Openssh server so you can ssh in to the system to make changes
-* Code resides in `/home/bugzilla/devel/htdocs/bugzilla` and can be updated,
+* Code resides in `/home/bugzilla/devel/htdocs/bmo` and can be updated,
   diffed, and branched using standard git commands
 
 ## How to install Docker and Fig
@@ -137,9 +137,9 @@ $ boot2docker ip
 
 So would then point your browser to `http://192.168.59.103:8080/bmo`.
 
-The Administrator username is `admin@mozilla.bugs` and the
-password is `password`. You can use the Administrator account to creat other
-users, add products or components, etc.
+The Administrator username is `admin@mozilla.bugs` and the password is `password`.
+You can use the Administrator account to creat other users, add products or
+components, etc.
 
 You can also ssh into the container using `ssh bugzilla@localhost -p2222` command.
 The password  is `bugzilla`. You can run multiple containers but you will need

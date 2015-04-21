@@ -66,7 +66,7 @@ Get it from our Git repository:
 
 :command:`rm -rf html`
 
-:command:`git clone --branch bugzilla-X.X-stable https://git.mozilla.org/bugzilla/bugzilla html`
+:command:`git clone --branch release-X.X-stable https://git.mozilla.org/bugzilla/bugzilla html`
 
 (where "X.X" is the 2-digit version number of the stable release of Bugzilla
 that you want - e.g. 4.4)

@@ -54,7 +54,7 @@ you can get the latest point release of your current version by simply doing:
 If you want to upgrade to a newer release of Bugzilla, then you will
 additionally need to do:
 
-:command:`git checkout bugzilla-X.X-stable`
+:command:`git checkout release-X.X-stable`
 
 where "X.X" is the 2-digit version number of the stable version you want to
 upgrade to (e.g. "4.4").

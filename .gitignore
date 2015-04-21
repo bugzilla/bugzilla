@@ -12,3 +12,4 @@
 /index.html
 /template_cache
 .DS_Store
+cpanfile

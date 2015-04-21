@@ -313,10 +313,12 @@ else {
     $default{'component_'}    = formvalue('component');
     $default{'priority'}      = formvalue('priority', Bugzilla->params->{'defaultpriority'});
     $default{'bug_severity'}  = formvalue('bug_severity', Bugzilla->params->{'defaultseverity'});
-    $default{'rep_platform'}  = formvalue('rep_platform', 
-                                          Bugzilla->params->{'defaultplatform'} || detect_platform());
-    $default{'op_sys'}        = formvalue('op_sys', 
-                                          Bugzilla->params->{'defaultopsys'} || detect_op_sys());
+
+    # BMO - use per-product default hw/os
+    $default{'rep_platform'}  = formvalue('rep_platform', $product->default_platform // detect_platform());
+    $default{'op_sys'}        = formvalue('op_sys', $product->default_op_sys // detect_op_sys());
+    $vars->{'rep_platform'}   = detect_platform();
+    $vars->{'rep_op_sys'}     = detect_op_sys();
 
     $vars->{'alias'}          = formvalue('alias');
     $vars->{'short_desc'}     = formvalue('short_desc');

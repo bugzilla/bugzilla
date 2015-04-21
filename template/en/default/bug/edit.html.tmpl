@@ -368,6 +368,8 @@
             bug = bug, field = bug_fields.op_sys, 
             no_tds = 1, value = bug.op_sys
             editable = bug.check_can_change_field('op_sys', 0, 1) %]
+        [%# BMO - hook for hw/os detection from reporter %]
+        [% Hook.process('after_op_sys', 'bug/edit.html.tmpl') %]
       </td>
     </tr>
 

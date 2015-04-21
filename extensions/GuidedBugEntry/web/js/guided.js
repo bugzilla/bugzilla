@@ -14,8 +14,6 @@ var History = YAHOO.util.History;
 var guided = {
   _currentStep: '',
   _defaultStep: 'product',
-  detectedPlatform: '',
-  detectedOpSys: '',
   currentUser: '',
   openStates: [],
   updateStep: true,
@@ -196,15 +194,6 @@ var product = {
       Dom.get('groups').value = products[productName].secgroup;
     } else {
       Dom.get('groups').value = products['_default'].secgroup;
-    }
-
-    // use the correct platform & op_sys
-    if (products[productName] && products[productName].detectPlatform) {
-      Dom.get('rep_platform').value = guided.detectedPlatform;
-      Dom.get('op_sys').value = guided.detectedOpSys;
-    } else {
-      Dom.get('rep_platform').value = 'All';
-      Dom.get('op_sys').value = 'All';
     }
 
     // show support message
@@ -834,6 +823,10 @@ var bugForm = {
       elVersions.value = '';
     }
     bugForm.onVersionChange(elVersions.value);
+
+    // set default hw/os
+    Dom.get('rep_platform').value = product.details.default_platform;
+    Dom.get('op_sys').value = product.details.default_op_sys;
   },
 
   onComponentChange: function(componentName) {

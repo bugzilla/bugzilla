@@ -9,6 +9,8 @@
 [%
   USE Bugzilla;
 
+  bug_modal = 1;
+
   # only edit one bug
   UNLESS bug.defined;
     bug = bugs.0;
@@ -620,6 +622,12 @@
           field_type = constants.FIELD_TYPE_SINGLE_SELECT
           inline = 1
       %]
+      [% WRAPPER bug_modal/field.html.tmpl
+          container = 1
+          inline = 1
+      %]
+        [% Hook.process("after_op_sys", 'bug/edit.html.tmpl') %]
+      [% END %]
     [% END %]
 
     [%# keywords %]

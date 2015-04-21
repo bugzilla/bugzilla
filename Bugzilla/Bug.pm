@@ -702,10 +702,15 @@ sub create {
       unless defined $params->{bug_severity};
     $params->{priority} = Bugzilla->params->{defaultpriority}
       unless defined $params->{priority};
-    $params->{op_sys} = Bugzilla->params->{defaultopsys}
-      unless defined $params->{op_sys};
-    $params->{rep_platform} = Bugzilla->params->{defaultplatform}
-      unless defined $params->{rep_platform};
+
+    # BMO - per-product hw/os defaults
+    if (!defined $params->{rep_platform} || !defined $params->{op_sys}) {
+        if (my $product = Bugzilla::Product->new({ name => $params->{product}, cache => 1 })) {
+            $params->{rep_platform} //= $product->default_product;
+            $params->{op_sys}       //= $product->default_op_sys;
+        }
+    }
+
     # Make sure a comment is always defined.
     $params->{comment} = '' unless defined $params->{comment};
 

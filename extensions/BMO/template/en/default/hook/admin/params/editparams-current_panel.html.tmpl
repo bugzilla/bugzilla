@@ -6,8 +6,14 @@
   # defined by the Mozilla Public License, v. 2.0.
   #%]
 
-[% IF panel.name == "groupsecurity" %]
-  [% panel.param_descs.delete_comments_group =
-    'The name of the group of users who can delete comments by using the "deleted" comment tag.'
-  %]
-[% END -%]
+[%
+IF panel.name == "groupsecurity";
+  panel.param_descs.delete_comments_group =
+    'The name of the group of users who can delete comments by using the "deleted" comment tag.';
+
+ELSIF panel.name == "bugfields";
+  panel.param_descs.defaultplatform = "This parameter is ignored on BMO, use per-product defaults instead.";
+  panel.param_descs.defaultopsys = "This parameter is ignored on BMO, use per-product defaults instead.";
+
+END;
+%]

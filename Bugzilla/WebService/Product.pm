@@ -202,6 +202,9 @@ sub _product_to_hash {
             $self->_milestone_to_hash($_, $params)
         } @{$product->milestones}];
     }
+    # BMO - add default hw/os
+    $field_data->{default_platform} = $self->type('string', $product->default_platform);
+    $field_data->{default_op_sys}   = $self->type('string', $product->default_op_sys);
     return filter($params, $field_data);
 }
 

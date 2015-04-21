@@ -31,12 +31,13 @@ use Bugzilla::Error;
 use Bugzilla::Field;
 use Bugzilla::Field::Choice;
 use Bugzilla::Group;
+use Bugzilla::Install::Filesystem;
 use Bugzilla::Mailer;
 use Bugzilla::Product;
 use Bugzilla::Status;
 use Bugzilla::Token;
-use Bugzilla::Install::Filesystem;
 use Bugzilla::User;
+use Bugzilla::UserAgent qw(detect_platform detect_op_sys);
 use Bugzilla::User::Setting;
 use Bugzilla::Util;
 
@@ -62,12 +63,17 @@ our $VERSION = '0.1';
 #
 
 BEGIN {
-    *Bugzilla::Bug::last_closed_date = \&_last_closed_date;
-    *Bugzilla::Product::default_security_group = \&_default_security_group;
-    *Bugzilla::Product::default_security_group_obj = \&_default_security_group_obj;
-    *Bugzilla::Product::group_always_settable = \&_group_always_settable;
+    *Bugzilla::Bug::last_closed_date                = \&_last_closed_date;
+    *Bugzilla::Bug::reporters_hw_os                 = \&_bug_reporters_hw_os;
+    *Bugzilla::Product::default_security_group      = \&_default_security_group;
+    *Bugzilla::Product::default_security_group_obj  = \&_default_security_group_obj;
+    *Bugzilla::Product::group_always_settable       = \&_group_always_settable;
+    *Bugzilla::Product::default_platform_id         = \&_product_default_platform_id;
+    *Bugzilla::Product::default_op_sys_id           = \&_product_default_op_sys_id;
+    *Bugzilla::Product::default_platform            = \&_product_default_platform;
+    *Bugzilla::Product::default_op_sys              = \&_product_default_op_sys;
     *Bugzilla::check_default_product_security_group = \&_check_default_product_security_group;
-    *Bugzilla::Attachment::is_bounty_attachment = \&_is_bounty_attachment;
+    *Bugzilla::Attachment::is_bounty_attachment     = \&_is_bounty_attachment;
 }
 
 sub template_before_process {
@@ -641,6 +647,43 @@ sub quicksearch_map {
     }
 }
 
+sub object_columns {
+    my ($self, $args) = @_;
+    return unless $args->{class}->isa('Bugzilla::Product');
+    push @{ $args->{columns} }, qw( default_platform_id default_op_sys_id );
+}
+
+sub object_update_columns {
+    my ($self, $args) = @_;
+    return unless $args->{object}->isa('Bugzilla::Product');
+    push @{ $args->{columns} }, qw( default_platform_id default_op_sys_id );
+}
+
+sub object_before_create {
+    my ($self, $args) = @_;
+    return unless $args->{class}->isa('Bugzilla::Product');
+
+    my $cgi = Bugzilla->cgi;
+    my $params = $args->{params};
+    foreach my $field (qw( default_platform_id default_op_sys_id )) {
+        $params->{$field} = $cgi->param($field);
+    }
+}
+
+sub object_end_of_set_all {
+    my ($self, $args) = @_;
+    my $object = $args->{object};
+    return unless $object->isa('Bugzilla::Product');
+
+    my $cgi = Bugzilla->cgi;
+    my $params = $args->{params};
+    foreach my $field (qw( default_platform_id default_op_sys_id )) {
+        my $value = $cgi->param($field);
+        detaint_natural($value);
+        $object->set($field, $value);
+    }
+}
+
 sub object_end_of_create {
     my ($self, $args) = @_;
     my $class = $args->{class};
@@ -675,6 +718,52 @@ sub object_end_of_create {
     }
 }
 
+sub _bug_reporters_hw_os {
+    my ($self) = @_;
+    return $self->{ua_hw_os} if exists $self->{ua_hw_os};
+    my $memcached = Bugzilla->memcached;
+    my $hw_os = $memcached->get({ key => 'bug.ua.' . $self->id });
+    if (!$hw_os) {
+        (my $ua) = Bugzilla->dbh->selectrow_array(
+            "SELECT user_agent FROM bug_user_agent WHERE bug_id = ?",
+            undef,
+            $self->id);
+        $hw_os = $ua
+            ? [ detect_platform($ua), detect_op_sys($ua) ]
+            : [];
+        $memcached->set({ key => 'bug.ua.' . $self->id, value => $hw_os });
+    }
+    return $self->{ua_hw_os} = $hw_os;
+}
+
+sub _product_default_platform_id { $_[0]->{default_platform_id} }
+sub _product_default_op_sys_id   { $_[0]->{default_op_sys_id}   }
+
+sub _product_default_platform {
+    my ($self) = @_;
+    if (!exists $self->{default_platform}) {
+        $self->{default_platform} = $self->default_platform_id
+            ? Bugzilla::Field::Choice
+                ->type('rep_platform')
+                ->new($_[0]->{default_platform_id})
+                ->name
+            : undef;
+    }
+    return $self->{default_platform};
+}
+sub _product_default_op_sys {
+    my ($self) = @_;
+    if (!exists $self->{default_op_sys}) {
+        $self->{default_op_sys} = $self->default_op_sys_id
+            ? Bugzilla::Field::Choice
+                ->type('op_sys')
+                ->new($_[0]->{default_op_sys_id})
+                ->name
+            : undef;
+    }
+    return $self->{default_op_sys};
+}
+
 sub _get_named_query {
     my ($sharer_id, $group_id, $definition) = @_;
     my $dbh = Bugzilla->dbh;
@@ -701,11 +790,11 @@ sub _get_named_query {
     return $namedquery_id;
 }
 
-# Automatically CC users to bugs based on group & product
 sub bug_end_of_create {
     my ($self, $args) = @_;
     my $bug = $args->{'bug'};
 
+    # automatically CC users to bugs based on group & product
     foreach my $group_name (keys %group_auto_cc) {
         my $group_obj = Bugzilla::Group->new({ name => $group_name });
         if ($group_obj && $bug->in_group($group_obj)) {
@@ -717,6 +806,21 @@ sub bug_end_of_create {
             }
         }
     }
+
+    # store user-agent
+    if (my $ua = Bugzilla->cgi->user_agent) {
+        trick_taint($ua);
+        Bugzilla->dbh->do(
+            "INSERT INTO bug_user_agent (bug_id, user_agent) VALUES (?, ?)",
+            undef,
+            $bug->id, $ua
+        );
+    }
+}
+
+sub db_sanitize {
+    print "deleting reporter's user-agents...\n";
+    Bugzilla->dbh->do("TRUNCATE TABLE bug_user_agent");
 }
 
 # bugs in an ASSIGNED state must be assigned to a real person
@@ -872,7 +976,7 @@ sub db_schema_abstract_schema {
                 REFERENCES => {
                     TABLE  => 'bugs',
                     COLUMN => 'bug_id',
-                    DELETE => 'cascade',
+                    DELETE => 'CASCADE',
                 },
             },
             user_agent => {

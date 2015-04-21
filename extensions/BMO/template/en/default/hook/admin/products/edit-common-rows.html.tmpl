@@ -1,0 +1,35 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+<tr>
+  <th align="right">Default Platform</th>
+  <td>
+    [% INCLUDE default_select
+        field_name   = 'default_platform_id'
+        field_value  = product.default_platform_id
+        field_values = bug_fields.rep_platform.legal_values
+    %]
+    [%= INCLUDE default_select
+        field_name   = 'default_op_sys_id'
+        field_value  = product.default_op_sys_id
+        field_values = bug_fields.op_sys.legal_values
+    %]
+  </td>
+</tr>
+
+[% BLOCK default_select %]
+  <select name="[% field_name FILTER html %]">
+    <option value="" [% " selected" IF field_value == "" %]>Detect</option>
+    [% FOREACH v IN field_values %]
+      [% NEXT UNLESS v.is_active %]
+      <option value="[% v.id FILTER html %]" [% " selected" IF field_value == v.id %]>
+        [% v.value FILTER html %]
+      </option>
+    [% END %]
+  </select>
+[% END %]

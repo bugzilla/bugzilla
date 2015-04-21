@@ -55,8 +55,6 @@ YAHOO.util.Dom.removeClass('loading', 'hidden');
 <script type="text/javascript">
 YAHOO.util.Dom.addClass('loading', 'hidden');
 guided.init({ webdev: [% webdev ? "true" : "false" %] });
-guided.detectedPlatform = '[% platform FILTER js %]';
-guided.detectedOpSys = '[% op_sys FILTER js %]';
 guided.currentUser = '[% user.login FILTER js %]';
 guided.openStates = [
 [% FOREACH state = open_states %]

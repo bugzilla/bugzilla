@@ -1,0 +1,45 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[%# because the "from reporter" button adds likely unnecessary noise to a bug,
+  # we only show it on unconfirmed or untriaged bugs %]
+[%
+  RETURN UNLESS
+    (bug.status.value == "UNCONFIRMED" || bug.component == "Untriaged")
+    && bug.check_can_change_field('op_sys', 0, 1);
+  hw_os = bug.reporters_hw_os;
+  RETURN UNLESS hw_os.size;
+  RETURN IF bug.rep_platform == hw_os.0 && bug.op_sys == hw_os.1;
+
+  title = "Set platform to reporter's: " _ hw_os.0 _ " / " _ hw_os.1;
+%]
+
+[% onclick = BLOCK %]
+      $('#rep_platform').val('[% hw_os.0 FILTER js FILTER html %]');
+      $('#op_sys').val('[% hw_os.1 FILTER js FILTER html %]');
+      $('#rep_hw_os').hide();
+[% END %]
+[%
+  IF bug_modal;
+    INCLUDE modal;
+  ELSE;
+    INCLUDE classic;
+  END;
+%]
+
+[% BLOCK classic %]
+  <span id="rep_hw_os">
+    (<a href="javascript:void(0)" title="[% title FILTER html %]" onclick="[% onclick FILTER none %]">from reporter</a>)
+  </span>
+[% END %]
+
+[% BLOCK modal %]
+  <button id="rep_hw_os" type="button" class="minor" title="[% title FILTER html %]" onclick="[% onclick FILTER none %]">
+    From&nbsp;Reporter
+  </button>
+[% END %]

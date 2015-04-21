@@ -321,31 +321,42 @@ TUI_hide_default('attachment_text_field');
       value = default.bug_severity %]
   </tr>
 
+  [% needs_extra_tr = 1 %]
   <tr>
-    [% INCLUDE bug/field.html.tmpl
-      bug = default, field = bug_fields.rep_platform, editable = 1,
-      value = default.rep_platform %]
+    <th>
+      Platform:
+    </th>
+    <td>
+      <div>
+        <span title="Hardware">
+          [% INCLUDE bug/field.html.tmpl
+            no_tds = 1, bug = default, field = bug_fields.rep_platform, editable = 1,
+            value = default.rep_platform %]
+        </span>
+        <span title="Operating System">
+          [% INCLUDE bug/field.html.tmpl
+            no_tds = 1, bug = default, field = bug_fields.op_sys, editable = 1,
+            value = default.op_sys %]
+        </span>
+      </div>
+      [% IF !cloned_bug_id %]
+        <div class="comment">
+          Update the <i>platform</i> field if this [% terms.bug %] is applicable to specific platforms.<br>
+          <span id="rep_hw_os">
+            (<a href="javascript:void(0)"
+                onclick="$('#rep_platform').val('[% rep_platform FILTER js FILTER html %]');
+                         $('#op_sys').val('[% rep_op_sys FILTER js FILTER html %]');
+                         $('#rep_hw_os').css('visibility', 'hidden')">use my platform</a>)
+          </span>
+        </div>
+        [% needs_extra_tr = 0 %]
+      [% END %]
+    </td>
   </tr>
 
-  <tr>
-    [% INCLUDE bug/field.html.tmpl 
-       bug = default, field = bug_fields.op_sys, editable = 1, 
-       value = default.op_sys %]
-  </tr>
-  [% IF (!Param('defaultplatform') || !Param('defaultopsys')) && !cloned_bug_id %]
+  [% IF needs_extra_tr %]
     <tr>
-      <th colspan="3">&nbsp;</th>
-      <td id="os_guess_note" class="comment">
-        <div>We've made a guess at your
-        [% IF Param('defaultplatform') %]
-          operating system. Please check it
-        [% ELSIF Param('defaultopsys') %]
-          platform. Please check it
-        [% ELSE %]
-          operating system and platform. Please check them
-        [% END %]
-        and make any corrections if necessary.</div>
-      </td>
+      <td>&nbsp;</td>
     </tr>
   [% END %]
 </tbody>

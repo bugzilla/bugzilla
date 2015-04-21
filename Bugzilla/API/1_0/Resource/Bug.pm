@@ -1425,7 +1425,7 @@ sub _bug_to_hash {
         }
     }
     if (filter_wants $params, 'see_also') {
-        $item{'see_also'} = as_string_array($bug->see_also);
+        $item{'see_also'} = as_name_array($bug->see_also);
     }
     if (filter_wants $params, 'flags') {
         $item{'flags'} = [ map { $self->_flag_to_hash($_) } @{$bug->flags} ];

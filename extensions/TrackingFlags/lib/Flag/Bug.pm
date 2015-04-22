@@ -26,7 +26,7 @@ use Scalar::Util qw(blessed);
 use constant DEFAULT_FLAG_BUG => {
     'id'               => 0,
     'tracking_flag_id' => 0,
-    'bug_id'           => '',
+    'bug_id'           => 0,
     'value'            => '---',
 };
 

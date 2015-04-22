@@ -174,6 +174,14 @@ sub sentry_handle_error {
         }
     }
 
+    # invalid boolean search errors need special handling
+    if ($message =~ /selectcol_arrayref failed: syntax error/
+        && $message =~ /IN BOOLEAN MODE/
+        && $message =~ /at Bugzilla\/Search\.pm/)
+    {
+        $send_to_sentry = 0;
+    }
+
     # for now, don't send patchreader errors to sentry
     $send_to_sentry = 0
         if $logger eq 'patchreader';

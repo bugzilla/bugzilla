@@ -609,7 +609,8 @@
     [% WRAPPER bug_modal/field.html.tmpl
         container = 1
         label = "Platform"
-        hide_on_view = bug.rep_platform == 'All' && bug.op_sys == 'All'
+        hide_on_view = (bug.rep_platform == 'All' && bug.op_sys == 'All')
+          || (bug.rep_platform == 'Unspecified' && bug.op_sys == 'Unspecified')
     %]
       [% INCLUDE bug_modal/field.html.tmpl
           field = bug_fields.rep_platform

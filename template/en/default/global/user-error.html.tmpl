@@ -244,6 +244,15 @@
 
     [% Hook.process("auth_failure") %]
 
+  [% ELSIF error == "auth_untrusted_request" %]
+    [% title = "Untrusted Authentication Request" %]
+    You tried to log in using the <em>[% login FILTER html %]</em> account,
+    but [% terms.Bugzilla %] is unable to trust your request. Make sure
+    your web browser accepts cookies and that you haven't been redirected
+    here from an external web site.
+    <a href="index.cgi?GoAheadAndLogIn=1">Click here</a> if you really want
+    to log in.
+
   [% ELSIF error == "auth_invalid_token" %]
     [% title = 'A token error occurred' %]
     The token is not valid. It could be because you loaded this page more than

@@ -58,7 +58,7 @@ elsif ($action eq 'prepare-sudo') {
                                          object => 'sudo_session' }
         );
     }
-    
+
     # Do not try to start a new session if one is already in progress!
     if (defined(Bugzilla->sudoer)) {
         ThrowUserError('sudo_in_progress', { target => $user->login });
@@ -66,6 +66,22 @@ elsif ($action eq 'prepare-sudo') {
 
     # Keep a temporary record of the user visiting this page
     $vars->{'token'} = issue_session_token('sudo_prepared');
+
+    if ($user->authorizer->can_login) {
+        my $value = generate_random_password();
+        my %args;
+        $args{'-secure'} = 1 if Bugzilla->params->{ssl_redirect};
+
+        $cgi->send_cookie(-name => 'Bugzilla_login_request_cookie',
+                          -value => $value,
+                          -httponly => 1,
+                          %args);
+
+        # The user ID must not be set when generating the token, because
+        # that information will not be available when validating it.
+        local Bugzilla->user->{userid} = 0;
+        $vars->{'login_request_token'} = issue_hash_token(['login_request', $value]);
+    }
 
     # Show the sudo page
     $vars->{'target_login_default'} = $cgi->param('target_login');

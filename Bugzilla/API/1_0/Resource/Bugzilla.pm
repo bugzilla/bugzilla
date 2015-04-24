@@ -14,8 +14,7 @@ use warnings;
 use Bugzilla::API::1_0::Util;
 
 use Bugzilla::Constants;
-use Bugzilla::Util qw(datetime_from);
-use Bugzilla::Util qw(trick_taint);
+use Bugzilla::Util qw(datetime_from trick_taint);
 
 use DateTime;
 use Moo;
@@ -200,7 +199,7 @@ sub last_audit_time {
 
 sub parameters {
     my ($self, $args) = @_;
-    my $user = Bugzilla->login();
+    my $user = Bugzilla->login(LOGIN_OPTIONAL);
     my $params = Bugzilla->params;
     $args ||= {};
 

@@ -154,7 +154,7 @@ sub last_audit_time {
 
 sub parameters {
     my ($self, $args) = @_;
-    my $user = Bugzilla->login();
+    my $user = Bugzilla->login(LOGIN_OPTIONAL);
     my $params = Bugzilla->params;
     $args ||= {};
 

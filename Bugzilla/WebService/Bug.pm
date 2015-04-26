@@ -4780,9 +4780,3 @@ This method can throw all of the errors that L</get> throws.
 =back
 
 =back
-
-=head1 B<Methods in need of POD>
-
-=over
-
-=back

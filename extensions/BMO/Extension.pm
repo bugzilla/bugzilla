@@ -264,6 +264,18 @@ sub bounty_attachment {
     if ($attachment) {
         $vars->{form} = $attachment->bounty_details;
     }
+    else {
+        my $now = $dbh->selectrow_array('SELECT LOCALTIMESTAMP(0)');
+        $vars->{form} = {
+            reporter_email => $bug->reporter->email,
+            reported_date  => format_time($bug->creation_ts, "%Y-%m-%d"),
+            awarded_date   => format_time($now, "%Y-%m-%d"),
+            publish        => 1
+        };
+        if ($bug->cf_last_resolved) {
+            $vars->{form}{fixed_date} = format_time($bug->cf_last_resolved, "%Y-%m-%d"),
+        }
+    }
 }
 
 sub _attachment_is_bounty_attachment {

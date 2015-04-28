@@ -1,0 +1,22 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[%
+  RETURN IF !user.in_group("bounty-team");
+  has_bounty_attachment = 0;
+  FOREACH attachment IN bug.attachments;
+    IF attachment.is_bounty_attachment;
+      has_bounty_attachment = 1;
+      LAST;
+    END;
+  END;
+%]
+<button type="button" class="minor"
+  onclick="document.location='page.cgi?id=attachment_bounty_form.html&amp;bug_id=[% bug.id FILTER none %]'">
+  [% has_bounty_attachment ? "Edit" : "Add" %] Bounty Tracking Attachment
+</button>

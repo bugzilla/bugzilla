@@ -936,6 +936,7 @@
   <div id="top-actions">
     <button type="button" id="attachments-add-btn" class="minor">Attach File</button>
     <button type="button" class="comment-btn minor">Add Comment</button>
+    [%+ Hook.process('top_actions') %]
     <button type="submit" class="save-btn major" id="top-save-btn" style="display:none">Save Changes</button>
   </div>
 [% END %]

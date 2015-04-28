@@ -127,6 +127,7 @@ tie(%$cf_visible_in_products, "Tie::IxHash",
         "Core"    => ["WebRTC", "WebRTC: Audio/Video", "WebRTC: Networking", "WebRTC: Signaling"],
         "Firefox" => [],
         "Loop"    => [],
+        "Toolkit" => [],
     },
 );
 

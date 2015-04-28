@@ -187,7 +187,7 @@ sub _check_requestee {
         ? $requestee
         : Bugzilla::User->new({ name => $requestee, cache => 1 });
     if ($user->needinfo_blocked) {
-        ThrowUserError('needinfo_blocked', { user => $user });
+        ThrowUserError('needinfo_blocked', { requestee => $user });
     }
 }
 

@@ -25,7 +25,7 @@
 
 [% ELSIF error == "reviews_blocked" %]
   [% title = "Request Blocked" %]
-  [% user.identity FILTER html %] is not currently accepting
+  [% requestee.identity FILTER html %] is not currently accepting
   '[% flagtype FILTER html %]' requests.
 
 [% END %]

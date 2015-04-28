@@ -12,6 +12,6 @@
   needinfo flag.
 [% ELSIF error == "needinfo_blocked" %]
   [% title = "Needinfo Request Blocked" %]
-  [% user.identity FILTER html %] is not currently accepting "needinfo"
+  [% requestee.identity FILTER html %] is not currently accepting "needinfo"
   requests.
 [% END %]

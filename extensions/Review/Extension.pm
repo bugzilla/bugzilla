@@ -456,7 +456,7 @@ sub _check_requestee {
     return unless $flag->type->name eq 'review' || $flag->type->name eq 'feedback';
     if ($flag->requestee->reviews_blocked) {
         ThrowUserError('reviews_blocked',
-                       { user => $flag->requestee, flagtype => $flag->type->name });
+                       { requestee => $flag->requestee, flagtype => $flag->type->name });
     }
 }
 

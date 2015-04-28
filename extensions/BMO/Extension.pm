@@ -73,7 +73,8 @@ BEGIN {
     *Bugzilla::Product::default_platform            = \&_product_default_platform;
     *Bugzilla::Product::default_op_sys              = \&_product_default_op_sys;
     *Bugzilla::check_default_product_security_group = \&_check_default_product_security_group;
-    *Bugzilla::Attachment::is_bounty_attachment     = \&_is_bounty_attachment;
+    *Bugzilla::Attachment::is_bounty_attachment     = \&_attachment_is_bounty_attachment;
+    *Bugzilla::Attachment::bounty_details           = \&_attachment_bounty_details;
 }
 
 sub template_before_process {
@@ -224,7 +225,7 @@ sub bounty_attachment {
     my $input      = Bugzilla->input_params;
     my $dbh        = Bugzilla->dbh;
     my $bug        = Bugzilla::Bug->check({ id => $input->{bug_id}, cache => 1 });
-    my $attachment = first { $_ && _is_bounty_attachment($_) } @{$bug->attachments};
+    my $attachment = first { $_ && _attachment_is_bounty_attachment($_) } @{$bug->attachments};
     $vars->{bug}   = $bug;
 
     if ($input->{submit}) {
@@ -261,18 +262,30 @@ sub bounty_attachment {
     }
 
     if ($attachment) {
-        my $form = parse_bounty_attachment_description($attachment->description);
-        $vars->{form} = $form;
+        $vars->{form} = $attachment->bounty_details;
     }
 }
 
-sub _is_bounty_attachment {
+sub _attachment_is_bounty_attachment {
     my ($attachment) = @_;
 
     return 0 unless $attachment->filename eq 'bugbounty.data';
     return 0 unless $attachment->contenttype eq 'text/plain';
     return 0 unless $attachment->isprivate;
     return $attachment->description =~ /^(?:[^,]*,)+[^,]*$/;
+}
+
+sub _attachment_bounty_details {
+    my ($attachment) = @_;
+    if (!exists $attachment->{bounty_details}) {
+        if ($attachment->is_bounty_attachment) {
+            $attachment->{bounty_details} = parse_bounty_attachment_description($attachment->description);
+        }
+        else {
+            $attachment->{bounty_details} = undef;
+        }
+    }
+    return $attachment->{bounty_details};
 }
 
 sub format_bounty_attachment_description {

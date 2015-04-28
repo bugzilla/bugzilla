@@ -319,6 +319,10 @@ input[type="number"] {
 
 /* attachments */
 
+#module-attachments .module-content {
+    padding: 0;
+}
+
 #attachments {
     width: 100%;
 }
@@ -379,8 +383,8 @@ input[type="number"] {
     display: inline;
 }
 
-#attachments-actions {
-    padding: 2px;
+#attachments-actions button {
+    margin: 2px;
 }
 
 #attachments .attach-flag .vcard {

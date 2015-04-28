@@ -8,11 +8,18 @@
 
 [%#
   # bug: (bug object) the main bug object
+  # active_attachments: array of active attachment objects
+  # obsolete_attachments: array of obsolete attachment objects
   #%]
 
 <table class="layout-table" id="attachments">
   [% FOREACH attachment IN bug.attachments %]
-    [% NEXT IF attachment.isprivate && !(user.is_insider || attachment.attacher.id == user.id) %]
+    [%
+      NEXT IF attachment.isprivate && !(user.is_insider || attachment.attacher.id == user.id);
+      attachment_rendered = 0;
+      Hook.process("row");
+      NEXT IF attachment_rendered;
+    %]
     <tr class="
         [%~ " bz_private" IF attachment.isprivate %]
         [%~ " attach-obsolete" IF attachment.isobsolete %]
@@ -67,3 +74,10 @@
     </tr>
   [% END %]
 </table>
+
+<div id="attachments-actions">
+  [% IF obsolete_attachments %]
+    <button type="button" id="attachments-obsolete-btn" class="minor">Show Obsolete Attachments</button>
+  [% END %]
+  [% Hook.process('actions') %]
+</div>

@@ -922,12 +922,10 @@
       subtitle = sub.join(", ")
       collapsed = active_attachments == 0
   %]
-    [% INCLUDE bug_modal/attachments.html.tmpl %]
-    [% IF obsolete_attachments %]
-      <div id="attachments-actions">
-        <button type="button" id="attachments-obsolete-btn" class="minor">Show Obsolete Attachments</button>
-      </div>
-    [% END %]
+    [% INCLUDE bug_modal/attachments.html.tmpl
+        active_attachments = active_attachments
+        obsolete_attachments = obsolete_attachments
+    %]
   [% END %]
 [% END %]
 

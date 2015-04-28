@@ -1,0 +1,32 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[%
+  RETURN UNLESS attachment.is_bounty_attachment;
+  has_bounty_attachment = 1;
+  attachment_rendered = 1;
+  bounty = attachment.bounty_details;
+%]
+<tr class="bz_private">
+  <td colspan="2">
+    Bounty: [% bounty.reporter_email FILTER html %]
+    $[% bounty.amount_paid || '-' FILTER html %]<br>
+    Reported: [% bounty.reported_date || '-' FILTER html %]
+    Fixed: [% bounty.fixed_date || '-' FILTER html %]
+    Awarded: [% bounty.awarded_date || '-' FILTER html %]
+    Publish: [% bounty.publish ? "Yes" : "No" FILTER none %]<br>
+    [% IF bounty.credit.size %]
+      Credit: [% bounty.credit.join(", ") FILTER html %]
+    [% END %]
+  </td>
+  <td class="attach-actions">
+    <a href="page.cgi?id=attachment_bounty_form.html&bug_id=[% bug.id FILTER none %]">
+      Edit Bounty
+    </a>
+  </td>
+</tr>

@@ -220,7 +220,11 @@ END;
           [%# text area %]
             <button type="button" class="minor edit-textarea-btn [%= "edit-textarea-set-btn" IF value != "" %]"
               id="[% name FILTER html %]-edit">Edit</button>
-            <span class="multiline-value" id="[% name FILTER html %]-view">[% value FILTER html FILTER html_line_break %]</span>
+            [% IF content.defined && !append_content %]
+              <span id="[% name FILTER html %]-view">[% content FILTER none %]</span>
+            [% ELSE %]
+              <span class="multiline-value" id="[% name FILTER html %]-view">[% value FILTER html FILTER html_line_break %]</span>
+            [% END %]
             <textarea id="[% name FILTER html %]" name="[% name FILTER html %]"
               rows="10" cols="10" style="display:none">[% value FILTER html %]</textarea>
 

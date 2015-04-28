@@ -857,6 +857,7 @@
   [%
     FOREACH field IN custom_fields;
       NEXT IF field.type != constants.FIELD_TYPE_TEXTAREA;
+      Hook.process('custom_field-' _ field.name);
       NEXT IF rendered_custom_fields.exists(field.name);
       INCLUDE bug_modal/field.html.tmpl
         field = field

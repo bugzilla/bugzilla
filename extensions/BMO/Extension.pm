@@ -139,7 +139,7 @@ sub template_before_process {
             $vars->{'versions'} = [ reverse @$versions ];
         }
     }
-    elsif ($file eq 'bug/edit.html.tmpl') {
+    elsif ($file eq 'bug/edit.html.tmpl' || $file eq 'bug_modal/edit.html.tmpl') {
         $vars->{split_cf_crash_signature} = $self->_split_crash_signature($vars);
     }
 

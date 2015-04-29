@@ -541,9 +541,8 @@ sub _check_content_type {
 
     # If we have autodetected application/octet-stream from the Content-Type
     # header, let's have a better go using a sniffer if available.
-    if (defined Bugzilla->input_params->{contenttypemethod}
-        && Bugzilla->input_params->{contenttypemethod} eq 'autodetect'
-        && $content_type eq 'application/octet-stream'
+    if ((Bugzilla->input_params->{contenttypemethod} // '') eq 'autodetect'
+        && ($content_type eq 'application/octet-stream' || $content_type =~ m{text/x-})
         && Bugzilla->feature('typesniffer'))
     {
         import File::MimeInfo::Magic qw(mimetype);
@@ -574,8 +573,7 @@ sub _check_content_type {
 
     # Make sure patches are viewable in the browser
     if (!ref($invocant)
-        && defined Bugzilla->input_params->{contenttypemethod}
-        && Bugzilla->input_params->{contenttypemethod} eq 'autodetect'
+        && (Bugzilla->input_params->{contenttypemethod} // '') eq 'autodetect'
         && $content_type =~ m{text/x-(?:diff|patch)})
     {
         $params->{ispatch} = 1;

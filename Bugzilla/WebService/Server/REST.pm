@@ -134,8 +134,7 @@ sub response {
     # and not a undefined or scalar value.
     if (!ref $result
         || blessed($result)
-        || ref $result ne 'HASH'
-        || ref $result ne 'ARRAY')
+        || (ref $result ne 'HASH' && ref $result ne 'ARRAY'))
     {
         $result = { result => $result };
     }

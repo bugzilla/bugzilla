@@ -858,7 +858,7 @@ sub update {
 }
 
 sub create {
-    my ($self, $api, $params) = @_;
+    my ($self, $params) = @_;
     my $dbh = Bugzilla->dbh;
 
     Bugzilla->login(LOGIN_REQUIRED);

@@ -1,4 +1,4 @@
-#!/usr/bin/perl -w
+#!/usr/bin/perl
 # This Source Code Form is subject to the terms of the Mozilla Public
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
@@ -25,36 +25,23 @@
 
 use 5.10.1;
 use strict;
+use warnings;
 
-use Cwd;
-use File::Find;
 use File::Basename;
-use File::Copy::Recursive qw(rcopy);
-
-# We need to be in this directory to use our libraries.
-BEGIN {
-    require File::Basename;
-    import File::Basename qw(dirname);
-    chdir dirname($0);
-}
+BEGIN { chdir dirname($0); }
 
 use lib qw(.. ../lib lib);
 
-# We only compile our POD if Pod::Simple is installed. We do the checks
-# this way so that if there's a compile error in Pod::Simple::HTML::Bugzilla,
-# makedocs doesn't just silently fail, but instead actually tells us there's
-# a compile error.
-my $pod_simple;
-if (eval { require Pod::Simple }) {
-    require Pod::Simple::HTMLBatch::Bugzilla;
-    require Pod::Simple::HTML::Bugzilla;
-    $pod_simple = 1;
-};
-
-use Bugzilla::Constants qw(BUGZILLA_VERSION bz_locations);
-
+use Cwd;
+use File::Copy::Recursive qw(rcopy);
+use File::Find;
 use File::Path qw(rmtree);
 use File::Which qw(which);
+use Pod::Simple;
+
+use Bugzilla::Constants qw(BUGZILLA_VERSION bz_locations);
+use Pod::Simple::HTMLBatch::Bugzilla;
+use Pod::Simple::HTML::Bugzilla;
 
 ###############################################################################
 # Subs
@@ -65,8 +52,8 @@ sub MakeDocs {
     my ($name, $cmdline) = @_;
 
     say "Creating $name documentation ..." if defined $name;
-    say "$cmdline\n";
-    system($cmdline) == 0
+    say "make $cmdline\n";
+    system('make', $cmdline) == 0
         or $error_found = 1;
     print "\n";
 }
@@ -125,7 +112,7 @@ my $docparent = getcwd();
 foreach my $lang (@langs) {
     chdir "$docparent/$lang";
 
-    make_pod() if $pod_simple;
+    make_pod();
 
     next if grep { $_ eq '--pod-only' } @ARGV;
 
@@ -144,10 +131,7 @@ foreach my $lang (@langs) {
     }
 
     # Collect up local extension documentation into the extensions/ dir.
-    # Clear out old extensions docs
-    # For the life of me, I cannot get rmtree() to work here. It just returns
-    # silently without deleting anything - no errors.
-    system("rm -rf $lang/rst/extensions/*");
+    rmtree("$lang/rst/extensions", 0, 1);
 
     foreach my $ext_name (keys %extensions) {
         my $src = $extensions{$ext_name} . "/*";
@@ -158,16 +142,16 @@ foreach my $lang (@langs) {
 
     chdir "$docparent/$lang";
 
-    MakeDocs('HTML', 'make html');
-    MakeDocs('TXT', 'make text');
+    MakeDocs('HTML', 'html');
+    MakeDocs('TXT', 'text');
 
     if (grep { $_ eq '--with-pdf' } @ARGV) {
         if (which('pdflatex')) {
-            MakeDocs('PDF', 'make latexpdf');
+            MakeDocs('PDF', 'latexpdf');
         }
         elsif (which('rst2pdf')) {
             rmtree('pdf', 0, 1);
-            MakeDocs('PDF', 'make pdf');
+            MakeDocs('PDF', 'pdf');
         }
         else {
             say 'pdflatex or rst2pdf not found. Skipping PDF file creation';

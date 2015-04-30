@@ -9,6 +9,7 @@ package Pod::Simple::HTMLBatch::Bugzilla;
 
 use 5.10.1;
 use strict;
+use warnings;
 
 use parent qw(Pod::Simple::HTMLBatch);
 

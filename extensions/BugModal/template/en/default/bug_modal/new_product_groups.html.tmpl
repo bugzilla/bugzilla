@@ -1,0 +1,59 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[%#
+  # product: product object
+  # groups:
+  #   invalid   => [{ id, name, description, checked }...]
+  #   mandatory => "
+  #   optional  => "
+  #%]
+
+[% PROCESS group_list
+    group_set = groups.invalid
+    label     = "Groups that are not valid for the '" _ product.name _ "' product:"
+    enabled   = 0
+    disabled  = 1
+%]
+[% PROCESS group_list
+    group_set = groups.mandatory
+    label     = "Mandatory '" _ product.name _ "' groups:"
+    enabled   = 1
+    disabled  = 1
+%]
+[% PROCESS group_list
+    group_set = groups.optional
+    label     = "Optional '" _ product.name _ "' groups:"
+    enabled   = 1
+    disabled  = 0
+%]
+<input type="hidden" name="group_verified" value="1">
+
+[% BLOCK group_list %]
+  [% RETURN UNLESS group_set.size %]
+  [% FILTER collapse %]
+    <div>
+      <div>
+        [% label FILTER html %]
+      </div>
+
+      [% FOREACH g = group_set %]
+        <div>
+          <input type="checkbox" value="[% g.name FILTER html %]"
+            id="group_[% g.id FILTER none %]"
+            [%= IF enabled %]name="groups"[% END %]
+            [%= "checked" IF g.checked %]
+            [%= "disabled" IF disabled %]>
+          <label for="group_[% g.id FILTER none %]" [%= IF disabled %]class="group-disabled"[% END %]>
+            [% g.description FILTER html %]
+          </label>
+        </div>
+      [% END %]
+    </div>
+  [% END %]
+[% END %]

@@ -8,24 +8,28 @@
 
 [%#
   # parameters (all are optional, defaults below)
-  # id               : id and prefix of elements
-  # script_name      : .cgi to redirect to
-  # max_results      : maximum results displayed
-  # input_label      : input field label
-  # auto_focus       : focus the search form on page load
-  # format           : format parameter passed to cgi
-  # cloned_bug_id    : cloned_bug_id parameter
-  # new_tab          : open in a new tab
-  # anchor_component : append #component to url
+  # id:               id and prefix of elements
+  # script_name:      .cgi to redirect to
+  # max_results:      maximum results displayed
+  # input_label:      input field label
+  # auto_focus:       focus the search form on page load
+  # format:           format parameter passed to cgi
+  # cloned_bug_id:    cloned_bug_id parameter
+  # new_tab:          open in a new tab
+  # anchor_component: append #component to url
+  # custom_select:    when true don't manage menu-item selects
+  # hidden:           initialise container as display:none
+  # throbber:         id of the throbber element
   #%]
 
 [%
-  DEFAULT id = "pcs";
+  DEFAULT id          = "pcs";
   DEFAULT max_results = 100;
   DEFAULT script_name = "enter_bug.cgi";
+  DEFAULT throbber    = id _ "-throbber";
 %]
 
-<div class="pcs-form">
+<div class="pcs-form" [%= 'style="display:none"' IF hidden %]>
   <div class="pcs-header">
     [% input_label FILTER none %]&nbsp;
     <img id="[% id FILTER html %]-throbber"
@@ -42,12 +46,14 @@
     </span>
   </div>
   <input type="text" class="prod_comp_search" id="[% id FILTER html %]" size="50"
-    placeholder="Search by product and component keywords"
+    placeholder="Search by product and component"
     data-script_name="[% script_name FILTER html %]"
     data-format="[% format FILTER html %]"
     data-cloned_bug_id="[% cloned_bug_id FILTER html %]"
     data-new_tab="[% new_tab ? "1" : "0" %]"
     data-anchor_component="[% anchor_component ? "1" : "0" %]"
     data-max_results="[% max_results FILTER html %]"
+    data-ignore-select="[% custom_select ? "1" : "0" %]"
+    data-throbber="[% throbber FILTER html %]"
     [% "autofocus" IF auto_focus %]>
 </div>

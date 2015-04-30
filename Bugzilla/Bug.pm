@@ -52,7 +52,7 @@ use Bugzilla::Comment;
 use Bugzilla::BugUrl;
 use Bugzilla::BugUserLastVisit;
 
-use List::MoreUtils qw(firstidx uniq part);
+use List::MoreUtils qw(firstidx uniq part any);
 use List::Util qw(min max first);
 use Storable qw(dclone);
 use URI;
@@ -2689,7 +2689,32 @@ sub _set_product {
         # other part of Bugzilla that checks $@.
         undef $@;
         Bugzilla->error_mode($old_error_mode);
-        
+
+        my $invalid_groups;
+        my @idlist = ($self->id);
+        push(@idlist, map { $_->id } @{ $params->{other_bugs} })
+            if $params->{other_bugs};
+        @idlist = uniq @idlist;
+
+        # BMO - if everything is ok then we can skip the verfication page
+        if ($component_ok && $version_ok && $milestone_ok) {
+            $invalid_groups = $self->get_invalid_groups({ bug_ids => \@idlist, product => $product });
+            my $has_invalid_group = 0;
+            foreach my $group (@$invalid_groups) {
+                if (any { $_ eq $group->name } @{ $params->{groups}->{add} }) {
+                    $has_invalid_group = 1;
+                    last;
+                }
+            }
+            $params->{product_change_confirmed} =
+                # always check for invalid groups
+                !$has_invalid_group
+                # never skip verification when changing multiple bugs
+                && scalar(@idlist) == 1
+                # ensure the user has seen the group ui for private bugs
+                && (!@{ $self->groups_in } || Bugzilla->input_params->{group_verified});
+        }
+
         my $verified = $params->{product_change_confirmed};
         my %vars;
         if (!$verified || !$component_ok || !$version_ok || !$milestone_ok) {
@@ -2709,27 +2734,9 @@ sub _set_product {
 
         if (!$verified) {
             $vars{verify_bug_groups} = 1;
-            my $dbh = Bugzilla->dbh;
-            my @idlist = ($self->id);
-            push(@idlist, map {$_->id} @{ $params->{other_bugs} })
-                if $params->{other_bugs};
-            # Get the ID of groups which are no longer valid in the new product.
-            my $gids = $dbh->selectcol_arrayref(
-                'SELECT bgm.group_id
-                   FROM bug_group_map AS bgm
-                  WHERE bgm.bug_id IN (' . join(',', ('?') x @idlist) . ')
-                    AND bgm.group_id NOT IN
-                        (SELECT gcm.group_id
-                           FROM group_control_map AS gcm
-                           WHERE gcm.product_id = ?
-                                 AND ( (gcm.membercontrol != ?
-                                        AND gcm.group_id IN ('
-                                        . Bugzilla->user->groups_as_string . '))
-                                       OR gcm.othercontrol != ?) )',
-                undef, (@idlist, $product->id, CONTROLMAPNA, CONTROLMAPNA));
-            $vars{'old_groups'} = Bugzilla::Group->new_from_list($gids);            
+            $vars{old_groups} = $invalid_groups || $self->get_invalid_groups({ bug_ids => \@idlist, product => $product });
         }
-        
+
         if (%vars) {
             $vars{product} = $product;
             $vars{bug} = $self;
@@ -4299,6 +4306,27 @@ sub map_fields {
         $field_values{$field_name} = $params->{$field};
     }
     return \%field_values;
+}
+
+# Return the groups which are no longer valid in the specified product
+sub get_invalid_groups {
+    my ($invocant, $params) = @_;
+    my @idlist  = @{ $params->{bug_ids} };
+    my $product = $params->{product};
+    my $gids = Bugzilla->dbh->selectcol_arrayref(
+        'SELECT bgm.group_id
+           FROM bug_group_map AS bgm
+          WHERE bgm.bug_id IN (' . join(',', ('?') x @idlist) . ')
+            AND bgm.group_id NOT IN
+                (SELECT gcm.group_id
+                   FROM group_control_map AS gcm
+                   WHERE gcm.product_id = ?
+                         AND ( (gcm.membercontrol != ?
+                                AND gcm.group_id IN ('
+                                . Bugzilla->user->groups_as_string . '))
+                               OR gcm.othercontrol != ?) )',
+        undef, (@idlist, $product->id, CONTROLMAPNA, CONTROLMAPNA));
+    return Bugzilla::Group->new_from_list($gids);
 }
 
 ################################################################################

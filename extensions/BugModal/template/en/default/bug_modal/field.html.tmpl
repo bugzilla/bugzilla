@@ -74,6 +74,9 @@ END;
 IF !editable && edit_only;
   edit_only = 0;
 END;
+IF hide_on_view && hide_on_edit;
+  RETURN;
+END;
 %]
 
 <div class="field

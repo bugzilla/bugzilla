@@ -14,8 +14,10 @@ $(function() {
         delay: 500,
         source: function(request, response) {
             var el = this.element;
+            $(document).trigger('pcs:search', [ el ]);
             var id = '#' + el.prop('id');
-            $(id + '-throbber').show();
+            var throbber = $('#' + $(el).data('throbber'));
+            throbber.show();
             $(id + '-no_components').hide();
             $(id + '-too_many_components').hide();
             $(id + '-error').hide();
@@ -29,17 +31,22 @@ $(function() {
                 contentType: 'application/json'
             })
             .done(function(data) {
-                $(id + '-throbber').hide();
+                throbber.hide();
                 if (data.error) {
                     $(id + '-error').show();
                     console.log(data.message);
                     return false;
                 }
                 if (data.products.length === 0) {
-                    $(id + '-no_components').show();
+                    $(id + '-no_results').show();
+                    $(document).trigger('pcs:no_results', [ el ]);
                 }
                 else if (data.products.length > el.data('max_results')) {
-                    $(id + '-too_many_components').show();
+                    $(id + '-too_many_results').show();
+                    $(document).trigger('pcs:too_many_results', [ el ]);
+                }
+                else {
+                    $(document).trigger('pcs:results', [ el, data ]);
                 }
                 var current_product = "";
                 var prod_comp_array = [];
@@ -55,8 +62,9 @@ $(function() {
                     params.push('product=' + encodeURIComponent(this.product));
                     if (this.product != current_product) {
                         prod_comp_array.push({
-                            label: this.product,
-                            url: el.data('script_name') + '?' + params.join('&')
+                            label:   this.product,
+                            product: this.product,
+                            url:     el.data('script_name') + '?' + params.join('&')
                         });
                         current_product = this.product;
                     }
@@ -66,18 +74,21 @@ $(function() {
                         url += "#" + encodeURIComponent(this.component);
                     }
                     prod_comp_array.push({
-                        label: this.product + ' :: ' + this.component,
-                        url: url
+                        label:     this.product + ' :: ' + this.component,
+                        product:   this.product,
+                        component: this.component,
+                        url:       url
                     });
                 });
                 response(prod_comp_array);
             })
             .fail(function(xhr, error_text) {
-                if (xhr.responseJSON.error) {
+                if (xhr.responseJSON && xhr.responseJSON.error) {
                     error_text = xhr.responseJSON.message;
                 }
-                $(id + '-throbber').hide();
+                throbber.hide();
                 $(id + '-comp_error').show();
+                $(document).trigger('pcs:error', [ el, error_text ]);
                 console.log(error_text);
             });
         },
@@ -88,6 +99,9 @@ $(function() {
             event.preventDefault();
             var el = $(this);
             el.val(ui.item.label);
+            if (el.data('ignore-select')) {
+                return;
+            }
             if (el.data('new_tab')) {
                 window.open(ui.item.url, '_blank');
             }

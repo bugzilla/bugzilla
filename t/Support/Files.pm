@@ -17,8 +17,8 @@ use File::Find;
 our @additional_files = ();
 
 our @files = glob('*');
-find(sub { push(@files, $File::Find::name) if $_ =~ /\.pm$/;}, 'Bugzilla');
-push(@files, 'extensions/create.pl');
+find(sub { push(@files, $File::Find::name) if $_ =~ /\.pm$/;}, qw(Bugzilla docs));
+push(@files, 'extensions/create.pl', 'docs/makedocs.pl');
 
 our @extensions =
     grep { $_ ne 'extensions/create.pl' && ! -e "$_/disabled" }

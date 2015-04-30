@@ -462,6 +462,7 @@ use constant FEATURE_FILES => (
     moving        => ['importxml.pl'],
     auth_ldap     => ['Bugzilla/Auth/Verify/LDAP.pm'],
     auth_radius   => ['Bugzilla/Auth/Verify/RADIUS.pm'],
+    documentation => ['docs/makedocs.pl'],
     inbound_email => ['email_in.pl'],
     jobqueue      => ['Bugzilla/Job/*', 'Bugzilla/JobQueue.pm',
                       'Bugzilla/JobQueue/*', 'jobqueue.pl'],

@@ -49,6 +49,7 @@ use constant MODULE_WHITELIST => qw(
     Bugzilla::Extension::
     Bugzilla::Job::
     Bugzilla::Migrate::
+    docs::lib::Pod::Simple::
 );
 
 # Capture the TESTOUT from Test::More or Test::Builder for printing errors.

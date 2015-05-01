@@ -10,5 +10,5 @@ must be fixed by the next release—this keyword can make tracking those
 bugs much easier. Keywords are global, rather than per product. 
 
 Keywords can be created, edited, deactivated, or deleted by clicking the "Keywords"
-link in the admin page. There are two fields for each keyword—the keyword
-itself and a brief description.
+link in the admin page. There are three fields for each keyword—the keyword
+itself, a brief description, and if the keyword is active or not.

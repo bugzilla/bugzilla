@@ -18,36 +18,67 @@
   title = "$terms.Bugzilla Keyword Descriptions"
   style_urls = ['skins/standard/admin.css']
 %]
+[% cgi = Bugzilla.cgi %]
+[% show_inactive_keywords = cgi.param("show_inactive_keywords") %]
 
-<table id="admin_table">
+<script>
+ $(document).ready(function () {
+     var show_inactive_keywords = [% show_inactive_keywords ? "true" : "false" FILTER none %];
+         link = $("#keywords_show_hide"),
+         rows = $("tr.keyword_inactive");
+
+     link.click(function (event) {
+         if (show_inactive_keywords) {
+             show_inactive_keywords = false;
+             rows.show();
+             link.html("Hide inactive keywords");
+         }
+         else {
+             show_inactive_keywords = true;
+             rows.hide();
+             link.html("Show inactive keywords");
+         }
+         event.preventDefault();
+     }).click();
+ });
+</script>
+
+<p>
+  <a href="[% urlbase FILTER html %]?show_inactive_keywords=[% show_inactive_keywords ? "1" : "0" FILTER none %]"
+     id="keywords_show_hide">[% show_inactive_keywords ? "Show" : "Hide" FILTER html %] inactive keywords</a>
+</p>
+
+<table id="admin_table" class="describe_keywords">
   <tr class="column_header">
     <th>Name</th>
     <th>Description</th>
+    <th>Active</th>
     <th>Open [% terms.Bugs %]</th>
     <th>Total [% terms.Bugs %]</th>
   </tr>
 
   [% FOREACH keyword = keywords %]
-  <tr id="[% keyword.name FILTER html %]">
-    <td>[% keyword.name FILTER html %]</td>
-    <td>[% keyword.description FILTER html_light %]</td>
-    <td class="center">
-      [% IF keyword.bug_count > 0 %]
-        <a href="buglist.cgi?keywords=[% keyword.name FILTER uri %]&amp;resolution=---">
-          Search</a>
-      [% ELSE %]
-        none
-      [% END %]
-    </td>
-    <td class="right">
-      [% IF keyword.bug_count > 0 %]
-        <a href="buglist.cgi?keywords=[% keyword.name FILTER uri %]">
-          [% keyword.bug_count %]</a>
-      [% ELSE %]
-        none
-      [% END %]
-    </td>
-  </tr>
+    <tr id="[% keyword.name FILTER html %]" class="[% keyword.is_active ? "keyword_active" : "keyword_inactive" FILTER html %]">
+      <td>[% keyword.name FILTER html %]</td>
+      <td>[% keyword.description FILTER html_light %]</td>
+      <td>[% keyword.is_active ? "Yes" : "No" FILTER html %]</td>
+      <td class="center">
+        [% IF keyword.bug_count > 0 %]
+          <a href="buglist.cgi?keywords=[% keyword.name FILTER uri %]&amp;resolution=---">
+            Search</a>
+        [% ELSE %]
+          none
+        [% END %]
+      </td>
+      <td class="right">
+        [% IF keyword.bug_count > 0 %]
+          <a href="buglist.cgi?keywords=[% keyword.name FILTER uri %]">
+            [% keyword.bug_count %]</a>
+        [% ELSE %]
+          none
+        [% END %]
+      </td>
+    </tr>
   [% END %]
 </table>
 

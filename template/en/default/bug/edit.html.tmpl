@@ -552,7 +552,7 @@
         [% INCLUDE bug/field.html.tmpl
           bug = bug, field = bug_fields.keywords, value = bug.keywords
           editable = bug.check_can_change_field("keywords", 0, 1),
-          desc_url = "describekeywords.cgi", possible_values = all_keywords
+          desc_url = "describekeywords.cgi", possible_values = active_keywords
         %]
     </tr>
   [% END %]

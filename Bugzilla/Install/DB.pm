@@ -730,6 +730,10 @@ sub update_table_definitions {
     $dbh->bz_add_column('longdescs', 'is_markdown',
                         {TYPE => 'BOOLEAN', NOTNULL => 1, DEFAULT => 'FALSE'});
 
+    # 2014-11-18 dylan@mozilla.com - Bug 69267
+    $dbh->bz_add_column('keyworddefs', 'is_active',
+                        {TYPE => 'BOOLEAN', NOTNULL => 1, DEFAULT => 'TRUE'});
+
     ################################################################
     # New --TABLE-- changes should go *** A B O V E *** this point #
     ################################################################

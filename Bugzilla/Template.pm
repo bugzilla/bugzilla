@@ -1106,9 +1106,14 @@ sub create {
             # Whether or not keywords are enabled, in this Bugzilla.
             'use_keywords' => sub { return Bugzilla::Keyword->any_exist; },
 
-            # All the keywords.
+            # All the keywords
             'all_keywords' => sub {
                 return [map { $_->name } Bugzilla::Keyword->get_all()];
+            },
+
+            # All the active keywords
+            'active_keywords' => sub {
+                return [map { $_->name } grep { $_->is_active } Bugzilla::Keyword->get_all()];
             },
 
             'feature_enabled' => sub { return Bugzilla->feature(@_); },

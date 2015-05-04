@@ -930,6 +930,10 @@
   [% END %]
 [% END %]
 
+[%# === extensions which are modules === %]
+
+[% Hook.process('module') %]
+
 [%# === attachments === %]
 
 [% IF active_attachments || obsolete_attachments %]

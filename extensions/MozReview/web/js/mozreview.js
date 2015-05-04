@@ -46,7 +46,7 @@ MozReview.elapsedTime = function(d) {
 };
 
 MozReview.getReviewRequest = function() {
-    var hostUrl = $('.mozreview-table').data('mozreviewUrl');
+    var hostUrl = $('.mozreview-requests').data('mozreviewUrl');
     var tr = $('<tr/>');
     var td = $('<td/>');
 
@@ -93,7 +93,8 @@ MozReview.getReviewRequest = function() {
         return trCommit;
     }
 
-    $('.mozreview-hide-discarded-link').click(function() {
+    $('.mozreview-hide-discarded-link').click(function(event) {
+        event.preventDefault();
         if ($('.bz_default_hidden.mozreview-discarded-request').length) {
             $('.mozreview-discarded-request').removeClass('bz_default_hidden');
             $('.mozreview-discarded-action').text('Hide');
@@ -101,7 +102,6 @@ MozReview.getReviewRequest = function() {
             $('.mozreview-discarded-request').addClass('bz_default_hidden');
             $('.mozreview-discarded-action').text('Show');
         }
-        return false;
     });
 
     $('.mozreview-request').each(function() {

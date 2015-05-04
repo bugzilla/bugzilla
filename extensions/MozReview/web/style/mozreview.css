@@ -52,3 +52,26 @@
 .mozreview-child-request-summary {
     text-indent: 1em;
 }
+
+/* bug-modal specific */
+
+#module-mozreview-requests .module-content {
+    padding: 0;
+}
+
+.bug_modal .mozreview-table {
+    width: 100%;
+}
+
+.bug_modal .mozreview-request td {
+    padding-left: 8px;
+}
+
+.bug_modal .mozreview-requests th {
+    text-align: left;
+    padding-left: 8px;
+}
+
+.bug_modal .mozreview-hide-discarded-row {
+    padding: 4px;
+}

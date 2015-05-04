@@ -1,0 +1,21 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% RETURN UNLESS mozreview %]
+
+[% WRAPPER bug_modal/module.html.tmpl
+    title = "MozReview Requests"
+    collapsed = 0
+%]
+  [% INCLUDE moz_review/table.html.tmpl %]
+  <div class="mozreview-hide-discarded-row bz_default_hidden">
+    <button type="button" class="minor mozreview-hide-discarded-link">
+      <span class="mozreview-discarded-action">Show</span> discarded requests
+    </button>
+  </div>
+[% END %]

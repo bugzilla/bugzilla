@@ -6,15 +6,9 @@
   # defined by the Mozilla Public License, v. 2.0.
   #%]
 
-[% USE Bugzilla %]
-[% cgi = Bugzilla.cgi %]
-
 [% RETURN UNLESS mozreview %]
 
-<br>
-<table
-   class="mozreview-table"
-   data-mozreview-url="[% Bugzilla.params.mozreview_base_url FILTER html %]">
+<table class="mozreview-table">
   <thead>
     <tr>
       <th>MozReview Requests</th>
@@ -24,28 +18,7 @@
   <tbody>
     <tr>
       <td>
-        <table class="mozreview-requests">
-          <thead>
-            <th>Commit</th>
-            <th>Status</th>
-            <th>Open Issues</th>
-            <th>Last Updated</th>
-          </thead>
-          [% FOREACH rrid IN review_request_ids %]
-            [%# rrid is guaranteed to be an integer %]
-            <tbody class="mozreview-request"
-                   data-rrid="[% rrid FILTER none %]">
-              <tr class="mozreview-loading-row">
-                <td colspan="4">Loading...</td>
-              </tr>
-              <tr class="mozreview-loading-error-row bz_default_hidden">
-                <td colspan="4">Error loading review
-                  request <span class="mozreview-load-error-rrid"></span>:
-                  <span class="mozreview-load-error-string"></span></td>
-              </tr>
-            </tbody>
-          [% END %]
-        </table>
+        [% INCLUDE moz_review/table.html.tmpl %]
       </td>
     </tr>
   </tbody>

@@ -9,6 +9,7 @@ package Bugzilla::Extension::MozReview;
 
 use 5.10.1;
 use strict;
+use warnings;
 use parent qw(Bugzilla::Extension);
 
 use Bugzilla::Attachment;
@@ -22,7 +23,7 @@ sub template_before_process {
     my $vars = $args->{'vars'};
 
     return unless (($file eq 'bug/show-header.html.tmpl' ||
-                    $file eq 'bug/edit.html.tmpl' ||
+                    $file eq 'bug_modal/header.html.tmpl' ||
                     $file eq 'attachment/create.html.tmpl') &&
                    Bugzilla->params->{mozreview_base_url});
 

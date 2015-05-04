@@ -6,8 +6,5 @@
   # defined by the Mozilla Public License, v. 2.0.
   #%]
 
-[%
-  IF mozreview;
-    PROCESS moz_review/header.html.tmpl;
-  END;
-%]
+[% style_urls.push('extensions/MozReview/web/style/mozreview.css') %]
+[% javascript_urls.push('extensions/MozReview/web/js/mozreview.js') %]

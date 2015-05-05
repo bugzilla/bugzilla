@@ -8,23 +8,20 @@
 
 <table class="mozreview-requests" data-mozreview-url="[% Bugzilla.params.mozreview_base_url FILTER html %]">
   <thead>
-    <th>Commit</th>
-    <th>Status</th>
-    <th>Open Issues</th>
-    <th>Last Updated</th>
+    <tr>
+      <th>Commit</th>
+      <th>Status</th>
+      <th>Open Issues</th>
+      <th>Last Updated</th>
+    </tr>
   </thead>
-  [% FOREACH rrid IN review_request_ids %]
-    [%# rrid is guaranteed to be an integer %]
-    <tbody class="mozreview-request"
-            data-rrid="[% rrid FILTER none %]">
-      <tr class="mozreview-loading-row">
-        <td colspan="4">Loading...</td>
-      </tr>
-      <tr class="mozreview-loading-error-row bz_default_hidden">
-        <td colspan="4">Error loading review
-          request <span class="mozreview-load-error-rrid"></span>:
-          <span class="mozreview-load-error-string"></span></td>
-      </tr>
-    </tbody>
-  [% END %]
+  <tbody class="mozreview-request">
+    <tr class="mozreview-loading-row">
+      <td colspan="4">Loading...</td>
+    </tr>
+    <tr class="mozreview-loading-error-row bz_default_hidden">
+      <td colspan="4">Error loading review requests:
+        <span class="mozreview-load-error-string"></span></td>
+    </tr>
+  </tbody>
 </table>

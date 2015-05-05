@@ -36,19 +36,19 @@ sub template_before_process {
                 $vars->{'mozreview_enabled'} = 1;
             }
         } else {
-            my @rrids;
+            my $has_mozreview = 0;
             my $attachments = Bugzilla::Attachment->get_attachments_by_bug($bug);
 
             foreach my $attachment (@$attachments) {
                 if ($attachment->contenttype eq 'text/x-review-board-request'
                     && !$attachment->isobsolete) {
-                    push @rrids, ($attachment->data =~ m#/r/(\d+)/?$#);
+                    $has_mozreview = 1;
+                    last;
                 }
             }
 
-            if (scalar @rrids) {
+            if ($has_mozreview) {
                 $vars->{'mozreview'} = 1;
-                $vars->{'review_request_ids'} = \@rrids;
             }
         }
     }

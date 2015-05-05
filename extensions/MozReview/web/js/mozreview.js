@@ -50,8 +50,9 @@ MozReview.getReviewRequest = function() {
     var tr = $('<tr/>');
     var td = $('<td/>');
 
-    var rrApiBaseUrl = hostUrl +
-            'api/extensions/mozreview.extension.MozReviewExtension/summary/';
+    var rrSummaryApiUrl = hostUrl +
+        'api/extensions/mozreview.extension.MozReviewExtension/summary/?bug=' +
+        BUGZILLA.bug_id;
     var rrUiBaseUrl = hostUrl + 'r/';
 
     function rrUrl(rrId) {
@@ -104,35 +105,43 @@ MozReview.getReviewRequest = function() {
         }
     });
 
-    $('.mozreview-request').each(function() {
-        var tbody = $(this);
-        var rrId = tbody.data('rrid');
-        var url = rrApiBaseUrl + rrId + '/';
-        var i;
+    var tbody = $('tbody.mozreview-request');
 
-        $.getJSON(url, function(data) {
-            var parent = data.parent;
-            tbody.append(rrRow(parent, true));
-            for (i = 0; i < data.children.length; i++) {
-                tbody.append(rrRow(data.children[i], false));
+    function displayLoadError(errStr) {
+        var errRow = tbody.find('.mozreview-loading-error-row');
+        errRow.find('.mozreview-load-error-string').text(errStr);
+        errRow.removeClass('bz_default_hidden');
+    }
+
+    $.getJSON(rrSummaryApiUrl, function(data) {
+        var family, parent, i, j;
+
+        if (data.review_request_summaries.length === 0) {
+            displayLoadError('none returned from server');
+        } else {
+            for (i = 0; i < data.review_request_summaries.length; i++) {
+                family = data.review_request_summaries[i];
+                parent = family.parent;
+                tbody.append(rrRow(parent, true));
+                for (j = 0; j < family.children.length; j++) {
+                    tbody.append(rrRow(family.children[j], false));
+                }
             }
-            tbody.find('.mozreview-loading-row').addClass('bz_default_hidden');
-        }).fail(function(jqXHR, textStatus, errorThrown) {
-            tbody.find('.mozreview-loading-row').addClass('bz_default_hidden');
-            tbody.find('.mozreview-load-error-rrid').text(rrId);
-            var errRow = tbody.find('.mozreview-loading-error-row');
-            var errStr;
-            if (jqXHR.responseJSON && jqXHR.responseJSON.err &&
-                jqXHR.responseJSON.err.msg) {
-                errStr = jqXHR.responseJSON.err.msg;
-            } else if (errorThrown) {
-                errStr = errorThrown;
-            } else {
-                errStr = 'unknown';
-            }
-            errRow.find('.mozreview-load-error-string').text(errStr);
-            errRow.removeClass('bz_default_hidden');
-        });
+        }
+
+        tbody.find('.mozreview-loading-row').addClass('bz_default_hidden');
+    }).fail(function(jqXHR, textStatus, errorThrown) {
+        var errStr;
+        if (jqXHR.responseJSON && jqXHR.responseJSON.err &&
+            jqXHR.responseJSON.err.msg) {
+            errStr = jqXHR.responseJSON.err.msg;
+        } else if (errorThrown) {
+            errStr = errorThrown;
+        } else {
+            errStr = 'unknown';
+        }
+        displayLoadError(errStr);
+        tbody.find('.mozreview-loading-row').addClass('bz_default_hidden');
     });
 };
 

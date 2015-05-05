@@ -1658,8 +1658,6 @@ sub _post_dev_engagement {
     my $error_mode_cache = Bugzilla->error_mode;
     Bugzilla->error_mode(ERROR_MODE_DIE);
 
-    my $discussion_bug;
-    my @warnings;
     eval {
         # Add attachment containing tab delimited field values for
         # spreadsheet import.
@@ -1721,81 +1719,9 @@ EOF
             filename    => 'dev_engagement_submission.html',
             mimetype    => 'text/html',
         });
-
-        # File discussion bug
-        Bugzilla->set_user(Bugzilla::User->new({ name => 'nobody@mozilla.org' }));
-        my $new_user = Bugzilla->user;
-
-        # HACK: User needs to be in the editbugs and primary bug's group to allow
-        # setting of dependencies.
-        $new_user->{'groups'} = [
-            Bugzilla::Group->new({ name => 'editbugs' }),
-            Bugzilla::Group->new({ name => 'mozilla-employee-confidential' })
-        ];
-
-        my $recipients = { changer => $new_user };
-        $vars->{original_reporter} = $old_user;
-
-        $discussion_bug = Bugzilla::Bug->create({
-            short_desc        => '[discussion] ' . $parent_bug->short_desc,
-            product           => 'Developer Engagement',
-            component         => 'Events Request Discussion',
-            keywords          => ['event-discussion-needs-review'],
-            bug_severity      => 'normal',
-            groups            => ['mozilla-employee-confidential'],
-            comment           => 'This is the discussion for the request ' .
-                                 'described in bug ' . $parent_bug->id . '.',
-            op_sys            => 'All',
-            rep_platform      => 'All',
-            version           => 'unspecified'
-        });
-
-        # Set the needinfo flag on the discussion bug
-        my @new_flags;
-        foreach my $type (@{ $discussion_bug->flag_types }) {
-            next if $type->name ne 'needinfo';
-            foreach my $requestee (DEV_ENGAGE_DISCUSS_NEEDINFO()) {
-                # needinfo'ing a disable account throws an error - warn instead
-                my $requestee_object = Bugzilla::User->new({ name => $requestee, cache => 1 });
-                if (!$requestee_object || !$requestee_object->is_enabled) {
-                    push @warnings, "Failed to needinfo $requestee on dev-engagement bug (does not exist or disabled)";
-                    next;
-                }
-                my $needinfo_flag = {
-                    type_id   => $type->id,
-                    status    => '?',
-                    requestee => $requestee,
-                };
-                push(@new_flags, $needinfo_flag);
-            }
-        }
-        $discussion_bug->set_flags(\@new_flags, []) if @new_flags;
-        $discussion_bug->update($discussion_bug->creation_ts);
-        Bugzilla::BugMail::Send($discussion_bug->id, $recipients);
-
-        # Add discussion comment to the parent bug pointing to new bug
-        # and dependency link
-        $parent_bug->set_all({ dependson => { add => [ $discussion_bug->id ] } });
-        $parent_bug->add_comment('This request is being discussed in bug ' .
-                                 $discussion_bug->id);
     };
-    my $error = $@;
 
-    Bugzilla->set_user($old_user);
-    Bugzilla->error_mode($error_mode_cache);
-
-    foreach my $warning (@warnings) {
-        warn $warning . "\n";
-    }
-
-    # No matter what happened, ensure the parent bug gets marked as updated
-    # There's no need to send mail for parent bug
     $parent_bug->update($parent_bug->creation_ts);
-
-    if ($error || !$discussion_bug) {
-        warn "Failed to create additional dev-engagement bug: $error\n" if $error;
-        $vars->{'message'} = 'dev_engagement_creation_failed';
-    }
 }
 
 sub _add_attachment {

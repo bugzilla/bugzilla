@@ -19,14 +19,30 @@
       <p>
       [% SET comment_anchor = '' %]
       [% FOREACH comment = new_comments.reverse %]
-        <div>
+        <div class="bz_comment_block">
           [% IF comment.count %]
             [% comment_anchor = "#c$comment.count" %]
-            <b>[% INCLUDE bug/link.html.tmpl bug = bug, link_text = "Comment # ${comment.count}",
-                                             comment_num = comment.count, full_url = 1, user = to_user %]
-              on [% INCLUDE bug/link.html.tmpl bug = bug, link_text = "$terms.bug $bug.id",
-                                               full_url = 1, user = to_user %]
-              from [% INCLUDE global/user.html.tmpl user = to_user, who = comment.author %]</b>
+            <b class="bz_comment_head">
+              [% INCLUDE bug/link.html.tmpl
+                  bug = bug,
+                  link_text = "Comment # ${comment.count}",
+                  comment_num = comment.count,
+                  full_url = 1,
+                  user = to_user
+              %]
+              on
+              [%= INCLUDE bug/link.html.tmpl
+                  bug = bug,
+                  link_text = "$terms.bug $bug.id",
+                  full_url = 1,
+                  user = to_user
+              %]
+              from
+              [%= INCLUDE global/user.html.tmpl
+                  user = to_user,
+                  who = comment.author
+              %]
+            </b>
           [% END %]
           [% comment_div = comment.is_markdown ? "div" : "pre" %]
           [% wrap = comment.is_markdown ? 0 : 1 %]
@@ -81,6 +97,7 @@
 
 [% BLOCK generate_diffs %]
   [% SET in_table = 0 %]
+  [% class_name = isnew ? "bz_new_table" : "bz_diff_table" %]
   [% last_changer = 0 %]
     [% FOREACH change = diffs %]
       [% IF !isnew && change.who.id != last_changer %]
@@ -101,7 +118,7 @@
         [% END %]
           <br>
           [% IF in_table == 0 %]
-             <table border="1" cellspacing="0" cellpadding="8">
+             <table border="1" cellspacing="0" cellpadding="8" class="[% class_name FILTER none %]">
              [% SET in_table = 1 %]
           [% END %]
           <tr>
@@ -113,7 +130,7 @@
 
       [% PROCESS "email/bugmail-common.txt.tmpl" %]
       [% IF in_table == 0 %]
-         <table border="1" cellspacing="0" cellpadding="8">
+         <table border="1" cellspacing="0" cellpadding="8" class="[% class_name FILTER none %]">
          [% SET in_table = 1 %]
       [% END %]
       [% IF isnew %]

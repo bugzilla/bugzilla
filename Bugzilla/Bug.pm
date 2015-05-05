@@ -2696,8 +2696,10 @@ sub _set_product {
             if $params->{other_bugs};
         @idlist = uniq @idlist;
 
+        my $verified = $params->{product_change_confirmed};
+
         # BMO - if everything is ok then we can skip the verfication page
-        if ($component_ok && $version_ok && $milestone_ok) {
+        if (!$verified && $component_ok && $version_ok && $milestone_ok) {
             $invalid_groups = $self->get_invalid_groups({ bug_ids => \@idlist, product => $product });
             my $has_invalid_group = 0;
             foreach my $group (@$invalid_groups) {
@@ -2706,7 +2708,7 @@ sub _set_product {
                     last;
                 }
             }
-            $params->{product_change_confirmed} =
+            $verified =
                 # always check for invalid groups
                 !$has_invalid_group
                 # never skip verification when changing multiple bugs
@@ -2715,7 +2717,6 @@ sub _set_product {
                 && (!@{ $self->groups_in } || Bugzilla->input_params->{group_verified});
         }
 
-        my $verified = $params->{product_change_confirmed};
         my %vars;
         if (!$verified || !$component_ok || !$version_ok || !$milestone_ok) {
             $vars{defaults} = {

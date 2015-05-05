@@ -539,7 +539,7 @@ sub _css_url_rewrite {
     if (substr($url, 0, 1) eq '/' || substr($url, 0, 5) eq 'data:') {
         return 'url(' . $url . ')';
     }
-    return 'url(../../' . dirname($source) . '/' . $url . ')';
+    return 'url(../../' . ($ENV{'PROJECT'} ? '../' : '') . dirname($source) . '/' . $url . ')';
 }
 
 sub _concatenate_js {

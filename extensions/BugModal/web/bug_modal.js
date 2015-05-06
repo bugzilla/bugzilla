@@ -506,7 +506,7 @@ $(function() {
     $('#attachments-add-btn')
         .click(function(event) {
             event.preventDefault();
-            window.location.replace('attachment.cgi?bugid=' + BUGZILLA.bug_id + '&action=enter');
+            window.location.href = 'attachment.cgi?bugid=' + BUGZILLA.bug_id + '&action=enter';
         });
 
     // take button
@@ -605,7 +605,7 @@ $(function() {
     $('#vote-btn')
         .click(function(event) {
             event.preventDefault();
-            window.location.replace('page.cgi?id=voting/user.html&bug_id=' + BUGZILLA.bug_id + '#vote_' + BUGZILLA.bug_id);
+            window.location.href = 'page.cgi?id=voting/user.html&bug_id=' + BUGZILLA.bug_id + '#vote_' + BUGZILLA.bug_id;
         });
 
     // user-story

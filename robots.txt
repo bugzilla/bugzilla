@@ -7,6 +7,7 @@ Allow: /index.cgi
 Allow: /page.cgi
 Disallow: /page.cgi*id=voting*
 Disallow: /page.cgi*id=productdashboard*
+Disallow: /page.cgi*id=user_activity*
 
 Allow: /show_bug.cgi
 Disallow: /show_bug.cgi*ctype=*

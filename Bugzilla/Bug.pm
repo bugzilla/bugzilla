@@ -2698,8 +2698,13 @@ sub _set_product {
 
         my $verified = $params->{product_change_confirmed};
 
-        # BMO - if everything is ok then we can skip the verfication page
-        if (!$verified && $component_ok && $version_ok && $milestone_ok) {
+        # BMO - if everything is ok then we can skip the verfication page when using bug_modal
+        if (Bugzilla->input_params->{format} // '' eq 'modal'
+            && !$verified
+            && $component_ok
+            && $version_ok
+            && $milestone_ok
+        ) {
             $invalid_groups = $self->get_invalid_groups({ bug_ids => \@idlist, product => $product });
             my $has_invalid_group = 0;
             foreach my $group (@$invalid_groups) {

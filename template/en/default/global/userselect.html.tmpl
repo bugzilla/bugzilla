@@ -71,10 +71,14 @@
   [% END %]
 </select>
 [% ELSE %]
-  [% IF feature_enabled('jsonrpc') && Param('ajax_user_autocompletion') && id %]
-    <div id="[% id FILTER html %]_autocomplete" 
-         [% IF classes %] class="[% classes.join(' ') FILTER html %]" [% END %]>
-  [% END %]  
+  [%
+    IF id && feature_enabled('jsonrpc') && Param('ajax_user_autocompletion');
+      IF !classes.defined;
+        classes = [];
+      END;
+      classes.push("bz_autocomplete_user");
+    END;
+  %]
   <input
     name="[% name FILTER html %]"
     value="[% value FILTER html %]"
@@ -86,17 +90,6 @@
     [% IF size %] size="[% size FILTER html %]" [% END %]
     [% IF id %] id="[% id FILTER html %]" [% END %]
     [% IF mandatory %] required [% END %]
+    [% IF multiple %] data-multiple="1" [% END %]
   >
-  [% IF feature_enabled('jsonrpc') && Param('ajax_user_autocompletion') && id %]
-    <div id="[% id FILTER html %]_autocomplete_container"></div>
-    </div>  
-    <script type="text/javascript">
-      if( typeof(YAHOO.bugzilla.userAutocomplete) !== 'undefined' 
-          && YAHOO.bugzilla.userAutocomplete != null){
-        YAHOO.bugzilla.userAutocomplete.init( "[% id FILTER js %]", 
-                    "[% id FILTER js %]_autocomplete_container"
-                    [% IF multiple %], true[% END%]);        
-      }
-    </script>
-  [% END %]
 [% END %]

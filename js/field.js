@@ -805,117 +805,95 @@ function browserCanHideOptions(aSelect) {
 /* (end) option hiding code */
 
 /**
- * The Autoselect
+ * Autocompletion
  */
-YAHOO.bugzilla.userAutocomplete = {
-    counter : 0,
-    dataSource : null,
-    generateRequest : function ( enteredText ){ 
-      YAHOO.bugzilla.userAutocomplete.counter = 
-                                   YAHOO.bugzilla.userAutocomplete.counter + 1;
-      YAHOO.util.Connect.setDefaultPostHeader('application/json', true);
-      var json_object = {
-          method : "User.get",
-          id : YAHOO.bugzilla.userAutocomplete.counter,
-          params : [ { 
-            Bugzilla_api_token: BUGZILLA.api_token,
-            match : [ decodeURIComponent(enteredText) ],
-            include_fields : [ "name", "real_name" ]
-          } ]
-      };
-      var stringified =  YAHOO.lang.JSON.stringify(json_object);
-      var debug = { msg: "json-rpc obj debug info", "json obj": json_object, 
-                    "param" : stringified}
-      YAHOO.bugzilla.userAutocomplete.debug_helper( debug );
-      return stringified;
-    },
-    resultListFormat : function(oResultData, enteredText, sResultMatch) {
-        return ( YAHOO.lang.escapeHTML(oResultData.real_name) + " ("
-                 + YAHOO.lang.escapeHTML(oResultData.name) + ")");
-    },
-    debug_helper : function ( ){
-        /* used to help debug any errors that might happen */
-        if( typeof(console) !== 'undefined' && console != null && arguments.length > 0 ){
-            console.log("debug helper info:", arguments);
-        }
-        return true;
-    },    
-    init_ds : function(){
-        this.dataSource = new YAHOO.util.XHRDataSource("jsonrpc.cgi");
-        this.dataSource.connTimeout = 30000;
-        this.dataSource.connMethodPost = true;
-        this.dataSource.connXhrMode = "cancelStaleRequests";
-        this.dataSource.maxCacheEntries = 5;
-        this.dataSource.responseSchema = {
-            resultsList : "result.users",
-            metaFields : { error: "error", jsonRpcId: "id"},
-            fields : [
-                { key : "name" },
-                { key : "real_name"}
-            ]
-        };
-    },
-    init : function( field, container, multiple ) {
-        if( this.dataSource == null ){
-            this.init_ds();  
-        }            
-        var userAutoComp = new YAHOO.widget.AutoComplete( field, container, 
-                                this.dataSource );
-        // other stuff we might want to do with the autocomplete goes here
-        userAutoComp.maxResultsDisplayed = BUGZILLA.param.maxusermatches;
-        userAutoComp.generateRequest = this.generateRequest;
-        userAutoComp.formatResult = this.resultListFormat;
-        userAutoComp.doBeforeLoadData = this.debug_helper;
-        userAutoComp.minQueryLength = 3;
-        userAutoComp.autoHighlight = false;
-        // this is a throttle to determine the delay of the query from typing
-        // set this higher to cause fewer calls to the server
-        userAutoComp.queryDelay = 0.05;
-        userAutoComp.useIFrame = true;
-        userAutoComp.resultTypeList = false;
-        if( multiple == true ){
-            userAutoComp.delimChar = [","];
-        }
-        
-    }
-};
 
-YAHOO.bugzilla.fieldAutocomplete = {
-    dataSource : [],
-    init_ds : function( field ) {
-        this.dataSource[field] =
-          new YAHOO.util.LocalDataSource( YAHOO.bugzilla.field_array[field] );
-    },
-    init : function( field, container ) {
-        if( this.dataSource[field] == null ) {
-            this.init_ds( field );
-        }
-        var fieldAutoComp =
-          new YAHOO.widget.AutoComplete(field, container, this.dataSource[field]);
-        fieldAutoComp.maxResultsDisplayed = YAHOO.bugzilla.field_array[field].length;
-        fieldAutoComp.formatResult = fieldAutoComp.formatEscapedResult;
-        fieldAutoComp.minQueryLength = 0;
-        fieldAutoComp.useIFrame = true;
-        fieldAutoComp.delimChar = [","," "];
-        fieldAutoComp.resultTypeList = false;
-        fieldAutoComp.queryDelay = 0;
-        /*  Causes all the possibilities in the field to appear when a user
-         *  focuses on the textbox 
-         */
-        fieldAutoComp.textboxFocusEvent.subscribe( function(){
-            var sInputValue = YAHOO.util.Dom.get(field).value;
-            if( sInputValue.length === 0
-                && YAHOO.bugzilla.field_array[field].length > 0 ){
-                this.sendQuery(sInputValue);
-                this.collapseContainer();
-                this.expandContainer();
+$(function() {
+
+    // single user
+
+    function searchComplete() {
+        var that = $(this);
+        that.data('counter', that.data('counter') - 1);
+        if (that.data('counter') === 0)
+            that.removeClass('autocomplete-running');
+        if (document.activeElement != this)
+            that.autocomplete('hide');
+    };
+
+    var options_user = {
+        serviceUrl: 'rest/user',
+        params: {
+            Bugzilla_api_token: BUGZILLA.api_token,
+            include_fields: 'name,real_name',
+            limit: 100
+        },
+        paramName: 'match',
+        deferRequestBy: 250,
+        minChars: 3,
+        tabDisabled: true,
+        transformResult: function(response) {
+            response = $.parseJSON(response);
+            return {
+                suggestions: $.map(response.users, function(dataItem) {
+                    return {
+                        value: dataItem.name,
+                        data : { login: dataItem.name, name: dataItem.real_name }
+                    };
+                })
+            };
+        },
+        formatResult: function(suggestion, currentValue) {
+            return suggestion.data.name === '' ?
+                suggestion.data.login : suggestion.data.name + ' (' + suggestion.data.login + ')';
+        },
+        onSearchStart: function(params) {
+            var that = $(this);
+            params.match = $.trim(params.match);
+            that.addClass('autocomplete-running');
+            that.data('counter', that.data('counter') + 1);
+        },
+        onSearchComplete: searchComplete,
+        onSearchError: searchComplete
+    };
+
+    // multiple users (based on single user)
+    var options_users = {
+        delimiter: /,\s*/,
+        onSelect: function() {
+            this.focus();
+        },
+    };
+    $.extend(options_users, options_user);
+
+    // init user autocomplete fields
+    $('.bz_autocomplete_user')
+        .each(function() {
+            var that = $(this);
+            that.data('counter', 0);
+            if (that.data('multiple')) {
+                that.devbridgeAutocomplete(options_users);
+            }
+            else {
+                that.devbridgeAutocomplete(options_user);
             }
         });
-        fieldAutoComp.dataRequestEvent.subscribe( function(type, args) {
-            args[0].autoHighlight = args[1] != '';
+
+    // init autocomplete fields with array of values
+    $('.bz_autocomplete_values')
+        .each(function() {
+            var that = $(this);
+            that.devbridgeAutocomplete({
+                lookup: BUGZILLA.autocomplete_values[that.data('values')],
+                tabDisabled: true,
+                delimiter: /,\s*/,
+                minChars: 0,
+                onSelect: function() {
+                    this.focus();
+                }
+            });
         });
-    }
-};
+});
 
 /**
  * Set the disable email checkbox to true if the user has disabled text

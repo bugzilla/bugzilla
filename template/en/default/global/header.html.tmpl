@@ -43,7 +43,6 @@
 
 [% IF NOT no_yui %]
   [% SET yui_css = {
-    autocomplete => 1,
     calendar     => 1,
     datatable    => 1,
     button       => 1,
@@ -54,8 +53,7 @@
     # if that module is going to be specified in "yui".
     #%]
   [% SET yui_deps = {
-    autocomplete => ['json', 'connection', 'datasource'],
-    datatable    => ['json', 'connection', 'datasource', 'element'],
+    datatable => ['json', 'connection', 'datasource', 'element'],
   } %]
 
   [%# When using certain YUI modules, we need to process certain
@@ -86,8 +84,8 @@
 ] %]
 [% style_urls.import(jquery_css, jq_css_urls) FILTER null %]
 
-[%# Add jQuery cookie support %]
-[% jquery.push("cookie") %]
+[%# Add our required jQuery plugins %]
+[% jquery.push("cookie", "devbridgeAutocomplete") %]
 
 [%# We should be able to set the default value of the header variable
   # to the value of the title variable using the DEFAULT directive,

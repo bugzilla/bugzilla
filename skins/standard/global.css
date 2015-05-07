@@ -1069,3 +1069,31 @@ table.field_value_explanation {
 }
 
 /* duplicates.cgi (end) */
+
+
+/* autocomplete */
+
+.autocomplete-suggestions {
+    border: 1px solid #999;
+    background: #fff;
+    color: #000;
+    overflow: auto;
+    cursor: pointer;
+}
+
+.autocomplete-suggestion {
+    padding: 2px 5px;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+.autocomplete-selected {
+    background: #426fd9;
+    color: #FFF
+}
+
+.autocomplete-running {
+    background-image: url("throbber.gif") !important;
+    background-repeat: no-repeat !important;
+    background-position: right 8px center !important;
+}

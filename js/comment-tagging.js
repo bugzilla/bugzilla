@@ -34,40 +34,27 @@ YAHOO.bugzilla.commentTagging = {
         });
         if (!can_edit) return;
 
-        var ds = new YAHOO.util.XHRDataSource("jsonrpc.cgi");
-        ds.connTimeout = 30000;
-        ds.connMethodPost = true;
-        ds.connXhrMode = "cancelStaleRequests";
-        ds.maxCacheEntries = 5;
-        ds.responseSchema = {
-            metaFields : { error: "error", jsonRpcId: "id"},
-            resultsList : "result"
-        };
-
-        var ac = new YAHOO.widget.AutoComplete('bz_ctag_add', 'bz_ctag_autocomp', ds);
-        ac.maxResultsDisplayed = 7;
-        ac.generateRequest = function(query) {
-            query = YAHOO.lang.trim(query);
-            YAHOO.bugzilla.commentTagging.last_query = query;
-            YAHOO.bugzilla.commentTagging.counter = YAHOO.bugzilla.commentTagging.counter + 1;
-            YAHOO.util.Connect.setDefaultPostHeader('application/json', true);
-            return YAHOO.lang.JSON.stringify({
-                version: "1.1",
-                method : "Bug.search_comment_tags",
-                id : YAHOO.bugzilla.commentTagging.counter,
-                params : {
-                    Bugzilla_api_token: BUGZILLA.api_token,
-                    query : query,
-                    limit : 10
-                }
-            });
-        };
-        ac.minQueryLength = this.min_len;
-        ac.autoHighlight = false;
-        ac.typeAhead = true;
-        ac.queryDelay = 0.5;
-        ac.dataReturnEvent.subscribe(function(type, args) {
-            args[0].autoHighlight = args[2].length == 1;
+        $('#bz_ctag_add').devbridgeAutocomplete({
+            serviceUrl: function(query) {
+                return 'rest/bug/comment/tags/' + encodeURIComponent(query);
+            },
+            params: {
+                Bugzilla_api_token: BUGZILLA.api_token
+            },
+            deferRequestBy: 250,
+            minChars: 1,
+            tabDisabled: true,
+            transformResult: function(response) {
+                response = $.parseJSON(response);
+                return {
+                    suggestions: $.map(response, function(dataItem) {
+                        return {
+                            value: dataItem,
+                            data : null
+                        };
+                    })
+                };
+            }
         });
     },
 

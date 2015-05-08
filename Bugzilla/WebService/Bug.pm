@@ -953,8 +953,6 @@ sub update_attachment {
           || ThrowUserError("invalid_attach_id", { attach_id => $id });
         my $bug = $attachment->bug;
         $attachment->_check_bug;
-        $attachment->validate_can_edit
-          || ThrowUserError("illegal_attachment_edit", { attach_id => $id });
 
         push @attachments, $attachment;
         $bugs{$bug->id} = $bug;
@@ -965,10 +963,33 @@ sub update_attachment {
 
     # Update the values
     foreach my $attachment (@attachments) {
-        $attachment->set_all($params);
-        if ($flags) {
-            my ($old_flags, $new_flags) = extract_flags($flags, $attachment->bug, $attachment);
-            $attachment->set_flags($old_flags, $new_flags);
+        my ($update_flags, $new_flags) = $flags
+            ? extract_flags($flags, $attachment->bug, $attachment)
+            : ([], []);
+        if ($attachment->validate_can_edit) {
+            $attachment->set_all($params);
+            $attachment->set_flags($update_flags, $new_flags) if $flags;
+        }
+        elsif (scalar @$update_flags && !scalar(@$new_flags) && !scalar keys %$params) {
+            # Requestees can set flags targetted to them, even if they cannot
+            # edit the attachment. Flag setters can edit their own flags too.
+            my %flag_list = map { $_->{id} => $_ } @$update_flags;
+            my $flag_objs = Bugzilla::Flag->new_from_list([ keys %flag_list ]);
+            my @editable_flags;
+            foreach my $flag_obj (@$flag_objs) {
+                if ($flag_obj->setter_id == $user->id
+                    || ($flag_obj->requestee_id && $flag_obj->requestee_id == $user->id))
+                {
+                    push(@editable_flags, $flag_list{$flag_obj->id});
+                }
+            }
+            if (!scalar @editable_flags) {
+                ThrowUserError("illegal_attachment_edit", { attach_id => $attachment->id });
+            }
+            $attachment->set_flags(\@editable_flags, []);
+        }
+        else {
+            ThrowUserError("illegal_attachment_edit", { attach_id => $attachment->id });
         }
     }
 

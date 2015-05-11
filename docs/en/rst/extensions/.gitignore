@@ -1,0 +1,6 @@
+# Git doesn't like having empty directories in the repo.
+# So we have this file.
+# It says to ignore everything in this directory.
+*
+# Except this file, of course.
+!.gitignore

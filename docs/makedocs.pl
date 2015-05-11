@@ -34,7 +34,6 @@ use lib qw(.. ../lib lib);
 
 use Cwd;
 use File::Copy::Recursive qw(rcopy);
-use File::Find;
 use File::Path qw(rmtree);
 use File::Which qw(which);
 use Pod::Simple;
@@ -115,32 +114,6 @@ foreach my $lang (@langs) {
     make_pod();
 
     next if grep { $_ eq '--pod-only' } @ARGV;
-
-    chdir $docparent;
-
-    # Generate extension documentation, both normal and API
-    my $ext_dir = bz_locations()->{'extensionsdir'};
-    my @ext_paths = grep { $_ !~ /\/create\.pl$/ && ! -e "$_/disabled" }
-                    glob("$ext_dir/*");
-    my %extensions;
-    foreach my $item (@ext_paths) {
-        my $basename = basename($item);
-        if (-d "$item/docs/$lang/rst") {
-            $extensions{$basename} = "$item/docs/$lang/rst";
-        }
-    }
-
-    # Collect up local extension documentation into the extensions/ dir.
-    rmtree("$lang/rst/extensions", 0, 1);
-
-    foreach my $ext_name (keys %extensions) {
-        my $src = $extensions{$ext_name} . "/*";
-        my $dst = "$docparent/$lang/rst/extensions/$ext_name";
-        mkdir($dst) unless -d $dst;
-        rcopy($src, $dst);
-    }
-
-    chdir "$docparent/$lang";
 
     MakeDocs('HTML', 'html');
     MakeDocs('TXT', 'text');

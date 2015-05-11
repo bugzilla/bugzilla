@@ -142,9 +142,9 @@ sub _get_login_info_from_email {
 
     my $key = Bugzilla::Extension::GitHubAuth::Client->get_email_key($github_email);
     unless ($github_email_key eq $key) {
-        return { failure => AUTH_ERROR,
+        return { failure    => AUTH_ERROR,
                  user_error => 'github_invalid_email',
-                 { email => $github_email }};
+                 details    => { email => $github_email }};
     }
 
     my $user = Bugzilla::User->new({name => $github_email, cache => 1});

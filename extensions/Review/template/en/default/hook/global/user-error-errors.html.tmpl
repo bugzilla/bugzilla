@@ -10,6 +10,12 @@
   [% title = "Reviewer Required" %]
   You must provide a reviewer for review requests.
 
+[% ELSIF error == "reviewer_inactive" %]
+  [% title = "Reviewer Is Inactive" %]
+  You can't ask <em>[% reviewer.identity FILTER html %]</em> for a review
+  because they have not logged in to [% terms.Bugzilla %] within the last
+  [%+ timeout FILTER none %] days.
+
 [% ELSIF error == "reviewer_suggestions_param_required" %]
   [% title = "Parameter Required" %]
   You must provide either a bug_id, or a product (and optionally a

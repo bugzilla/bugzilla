@@ -43,6 +43,7 @@
   review_suggestions = {
     _mentors: [
       [% FOREACH u = mentors %]
+        [% NEXT IF NOT u.is_active %]
         [% PROCESS reviewer %][% "," UNLESS loop.last %]
       [% END %]
     ],

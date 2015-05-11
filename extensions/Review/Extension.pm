@@ -21,9 +21,14 @@ use Bugzilla::Install::Filesystem;
 use Bugzilla::Search;
 use Bugzilla::User;
 use Bugzilla::User::Setting;
-use Bugzilla::Util qw(clean_text);
+use Bugzilla::Util qw(clean_text datetime_from);
 
 use constant UNAVAILABLE_RE => qr/\b(?:unavailable|pto|away)\b/i;
+
+# This extension prevents you from assigning reviews to inactive reviewers,
+# with this constant defining 'inactive'. Set the value to 0 to disable this
+# prevention.
+use constant MAX_REVIEWER_LAST_SEEN_DAYS_AGO => 60;
 
 #
 # monkey-patched methods
@@ -42,6 +47,7 @@ BEGIN {
     *Bugzilla::Bug::set_bug_mentors       = \&_bug_set_bug_mentors;
     *Bugzilla::User::review_count         = \&_user_review_count;
     *Bugzilla::User::reviews_blocked      = \&_user_reviews_blocked;
+    *Bugzilla::User::is_active            = \&_user_is_active;
 }
 
 #
@@ -54,12 +60,12 @@ sub _component_reviewers       { _reviewers($_[0],      'component', $_[1]) }
 sub _component_reviewers_objs  { _reviewers_objs($_[0], 'component', $_[1]) }
 
 sub _reviewers {
-    my ($object, $type, $include_disabled) = @_;
-    return join(', ', map { $_->login } @{ _reviewers_objs($object, $type, $include_disabled) });
+    my ($object, $type, $unfiltered) = @_;
+    return join(', ', map { $_->login } @{ _reviewers_objs($object, $type, $unfiltered) });
 }
 
 sub _reviewers_objs {
-    my ($object, $type, $include_disabled) = @_;
+    my ($object, $type, $unfiltered) = @_;
     if (!$object->{reviewers}) {
         my $dbh = Bugzilla->dbh;
         my $user_ids = $dbh->selectcol_arrayref(
@@ -72,9 +78,10 @@ sub _reviewers_objs {
         my $users = Bugzilla::User->new_from_list($user_ids);
         my %user_map = map { $_->id => $_ } @$users;
         my @reviewers = map { $user_map{$_} } @$user_ids;
-        if (!$include_disabled) {
+        if (!$unfiltered) {
             @reviewers = grep {
                             $_->is_enabled
+                            && $_->is_active
                             && $_->name !~ UNAVAILABLE_RE
                             && !$_->reviews_blocked
                         } @reviewers;
@@ -82,6 +89,18 @@ sub _reviewers_objs {
         $object->{reviewers} = \@reviewers;
     }
     return $object->{reviewers};
+}
+
+sub _user_is_active {
+    my ($self) = @_;
+
+    return 0 if !defined($self->last_seen_date);
+    return 1 if MAX_REVIEWER_LAST_SEEN_DAYS_AGO == 0; # feature disabled
+
+    my $dt = datetime_from($self->last_seen_date);
+    my $days_ago = $dt->delta_days(DateTime->now())->in_units('days');
+
+    return $days_ago <= MAX_REVIEWER_LAST_SEEN_DAYS_AGO;
 }
 
 sub _user_review_count {
@@ -576,7 +595,6 @@ sub flag_end_of_update {
     my ($self, $args) = @_;
     my ($object, $new_flags) = @$args{qw(object new_flags)};
     my $bug = $object->isa('Bugzilla::Attachment') ? $object->bug : $object;
-    return unless $bug->product_obj->reviewer_required;
 
     foreach my $orig_change (@$new_flags) {
         my $change = $orig_change; # work on a copy
@@ -587,8 +605,22 @@ sub flag_end_of_update {
         }
         my ($name, $value) = $change =~ /^(.+)(.)$/;
 
-        if ($name eq 'review' && $value eq '?' && $reviewer eq '') {
-            ThrowUserError('reviewer_required');
+        if ($name eq 'review' && $value eq '?') {
+            if ($reviewer eq '' && $bug->product_obj->reviewer_required) {
+                ThrowUserError('reviewer_required');
+            }
+
+            my $reviewer_obj = Bugzilla::User->new({
+                name => $reviewer,
+                cache => 1
+            });
+
+            if (!$reviewer_obj->is_active) {
+                ThrowUserError('reviewer_inactive', {
+                    reviewer => $reviewer_obj,
+                    timeout  => MAX_REVIEWER_LAST_SEEN_DAYS_AGO
+                });
+            }
         }
     }
 }

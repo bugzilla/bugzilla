@@ -706,7 +706,7 @@ sub create {
     # BMO - per-product hw/os defaults
     if (!defined $params->{rep_platform} || !defined $params->{op_sys}) {
         if (my $product = Bugzilla::Product->new({ name => $params->{product}, cache => 1 })) {
-            $params->{rep_platform} //= $product->default_product;
+            $params->{rep_platform} //= $product->default_platform;
             $params->{op_sys}       //= $product->default_op_sys;
         }
     }

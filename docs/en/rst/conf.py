@@ -400,6 +400,10 @@ ext_dir = "../../../extensions"
 if (os.path.isdir(ext_dir)):
     # Clear out old extensions docs
     for dir in os.listdir("extensions"):
+        # A .gitignore file is required as git doesn't like empty directories
+        if dir == ".gitignore":
+            continue
+
         shutil.rmtree(os.path.join("extensions", dir))
 
     # Copy in new copies

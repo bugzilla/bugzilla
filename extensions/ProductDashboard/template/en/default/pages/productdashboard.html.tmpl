@@ -30,17 +30,7 @@
   [% javascript_urls.push("extensions/ProductDashboard/web/js/roadmap.js") %]
 [% END %]
 
-[% filtered_product = product.name FILTER html %]
-[% PROCESS global/header.html.tmpl
-  title = "Product Dashboard: $filtered_product"
-  generate_api_token = 1
-  style_urls = [ "skins/standard/buglist.css",
-                 "js/yui/assets/skins/sam/paginator.css",
-                 "extensions/ProductDashboard/web/styles/productdashboard.css" ]
-%]
-
-<script type="text/javascript">
-<!--
+[% js = BLOCK %]
   PD = {};
   [%# Set up severities list for proper sorting %]
   PD.severities = new Array();
@@ -49,8 +39,17 @@
     PD.severities['[% s FILTER js %]'] = [% sort_count FILTER js %];
     [% sort_count = sort_count + 1 %]
   [% END %]
--->
-</script>
+[% END %]
+
+[% filtered_product = product.name FILTER html %]
+[% PROCESS global/header.html.tmpl
+  title = "Product Dashboard: $filtered_product"
+  generate_api_token = 1
+  javascript = js
+  style_urls = [ "skins/standard/buglist.css",
+                 "js/yui/assets/skins/sam/paginator.css",
+                 "extensions/ProductDashboard/web/styles/productdashboard.css" ]
+%]
 
 [% url_filtered_product = product.name FILTER uri %]
 [% url_filtered_status  = bug_status FILTER uri %]

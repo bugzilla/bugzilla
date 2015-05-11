@@ -593,6 +593,8 @@ assigned_to         string   A user to assign this bug to, if you don't want it
 cc                  array    An array of usernames to CC on this bug.
 comment_is_private  boolean  If set to ``true``, the description is private,
                              otherwise it is assumed to be public.
+comment_tags        array    An array of strings to add as comment tags for the
+                             description.
 is_markdown         boolean  If set to ``true``, the description has Markdown
                              structures; otherwise it is normal text.
 groups              array    An array of group names to put this bug into. You
@@ -780,6 +782,8 @@ comment_is_private     object   This is how you update the privacy of comments
                                 updated. Thus, it is not practical to use this
                                 while updating multiple bugs at once, as a single
                                 comment ID will never be valid on multiple bugs.
+comment_tags           array    An array of strings to add as comment tags for
+                                the new comment.
 component              string   The Component the bug is in.
 deadline               date     The Deadline field is a date specifying when the
                                 bug must be completed by, in the format

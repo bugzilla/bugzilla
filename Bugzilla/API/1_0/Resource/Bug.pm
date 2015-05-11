@@ -1154,6 +1154,11 @@ sub add_comment {
     $bug->add_comment($comment, { isprivate   => $params->{is_private},
                                   is_markdown => $params->{is_markdown},
                                   work_time   => $params->{work_time} });
+
+    # Add comment tags
+    $bug->set_all({ comment_tags => $params->{comment_tags} })
+        if defined $params->{comment_tags};
+
     $bug->update();
 
     my $new_comment_id = $bug->{added_comments}[0]->id;

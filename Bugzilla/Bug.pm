@@ -720,6 +720,7 @@ sub create {
     my $creation_comment = delete $params->{comment};
     my $is_markdown      = delete $params->{is_markdown};
     my $see_also         = delete $params->{see_also};
+    my $comment_tags     = delete $params->{comment_tags};
 
     # We don't want the bug to appear in the system until it's correctly
     # protected by groups.
@@ -810,7 +811,16 @@ sub create {
 
     # Insert the comment. We always insert a comment on bug creation,
     # but sometimes it's blank.
-    Bugzilla::Comment->insert_create_data($creation_comment);
+    my $comment = Bugzilla::Comment->insert_create_data($creation_comment);
+
+    # Add comment tags
+    if (defined $comment_tags && Bugzilla->user->can_tag_comments) {
+        $comment_tags = ref $comment_tags ? $comment_tags : [ $comment_tags ];
+        foreach my $tag (@{$comment_tags}) {
+            $comment->add_tag($tag) if defined $tag;
+        }
+        $comment->update();
+    }
 
     # Set up aliases
     my $sth_aliases = $dbh->prepare('INSERT INTO bugs_aliases (alias, bug_id) VALUES (?, ?)');
@@ -1039,7 +1049,7 @@ sub update {
                                    join(', ', @added_names)];
     }
 
-    # Comments
+    # Comments and comment tags
     foreach my $comment (@{$self->{added_comments} || []}) {
         # Override the Comment's timestamp to be identical to the update
         # timestamp.
@@ -1049,6 +1059,10 @@ sub update {
             LogActivityEntry($self->id, "work_time", "", $comment->work_time,
                              $user->id, $delta_ts);
         }
+        foreach my $tag (@{$self->{added_comment_tags} || []}) {
+            $comment->add_tag($tag) if defined $tag;
+        }
+        $comment->update() if @{$self->{added_comment_tags} || []};
     }
 
     # Comment Privacy 
@@ -2457,6 +2471,12 @@ sub set_all {
             { isprivate => $params->{'comment'}->{'is_private'},
               work_time => $params->{'work_time'},
               is_markdown => $params->{'comment'}->{'is_markdown'} });
+    }
+
+    if (defined $params->{comment_tags} && Bugzilla->user->can_tag_comments()) {
+        $self->{added_comment_tags} = ref $params->{comment_tags}
+                                      ? $params->{comment_tags}
+                                      : [ $params->{comment_tags} ];
     }
 
     if (exists $params->{alias} && $params->{alias}{set}) {

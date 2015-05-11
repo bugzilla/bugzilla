@@ -105,6 +105,7 @@ is_private     boolean   ``true`` if this comment is private (only visible to a
                          otherwise.
 is_markdown    boolean   ``true`` if this comment needs Markdown processing;
                          ``false`` otherwise.
+tags           array     An array of comment tags currently set for the comment.
 =============  ========  ========================================================
 
 .. _rest_add_comment:
@@ -134,22 +135,24 @@ To create a comment on a current bug.
 ``ids`` is optional in the data example above and can be used to specify adding
 a comment to more than one bug at the same time.
 
-===========  =======  ===========================================================
-name         type     description
-===========  =======  ===========================================================
-**id**       int      The ID or alias of the bug to append a comment to.
-ids          array    List of integer bug IDs to add the comment to.
-**comment**  string   The comment to append to the bug. If this is empty
-                      or all whitespace, an error will be thrown saying that you
-                      did not set the ``comment`` parameter.
-is_private   boolean  If set to ``true``, the comment is private, otherwise it is
-                      assumed to be public.
-is_markdown  boolean  If set to ``true``, the comment has Markdown structures;
-                      otherwise it is normal text.
-work_time    double   Adds this many hours to the "Hours Worked" on the bug.
-                      If you are not in the time tracking group, this value will
-                      be ignored.
-===========  =======  ===========================================================
+============  =======  ===========================================================
+name          type     description
+============  =======  ===========================================================
+**id**        int      The ID or alias of the bug to append a comment to.
+ids           array    List of integer bug IDs to add the comment to.
+**comment**   string   The comment to append to the bug. If this is empty
+                       or all whitespace, an error will be thrown saying that you
+                       did not set the ``comment`` parameter.
+comment_tags  array    An array of strings to add as comment tags for the new
+                       comment.
+is_private    boolean  If set to ``true``, the comment is private, otherwise it is
+                       assumed to be public.
+is_markdown   boolean  If set to ``true``, the comment has Markdown structures;
+                       otherwise it is normal text.
+work_time     double   Adds this many hours to the "Hours Worked" on the bug.
+                       If you are not in the time tracking group, this value will
+                       be ignored.
+============  =======  ===========================================================
 
 **Response**
 

@@ -42,7 +42,7 @@ $(document).ready(function() {
     }).change();
 
     $('#tmRequestForm').submit(function (event) {
-        var mozillian_re = /^https?:\/\/(www\.)?mozillians.org\/([^\/]+\/)?u\/[^\/]+$/i;
+        var mozillian_re = /^https?:\/\/(www\.)?mozillians.org\/([^\/]+\/)?u\/[^\/]+\/?$/i;
         var errors = [];
         var missing = false;
 

@@ -462,7 +462,7 @@ table.edit_form hr {
     margin: 0 0 20px;
 }
 
-.bz_comment pre, #comment {
+.bz_comment pre, #comment, #comment-preview {
     font: 13px/1.2 "Droid Sans Mono", Menlo, Monaco, "Courier New", Courier, monospace;
 }
 

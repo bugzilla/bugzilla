@@ -270,7 +270,7 @@ input[type="number"] {
     float: right;
 }
 
-#login-required {
+#new-comment-notice {
     padding: 20px 8px;
     margin-bottom: 50px;
 }
@@ -576,18 +576,56 @@ td.flag-requestee {
     margin-top: 20px;
 }
 
-#add-comment-label {
-    display: inline;
-    font-weight: bold;
-}
-
 #add-comment-private {
     float: right;
 }
 
 #comment {
+    border: 1px solid #ccc;
+}
+
+#comment, #comment-preview {
+    clear: both;
     width: 100%;
     box-sizing: border-box !important;
+    margin: 0 0 1em;
+}
+
+#comment-preview {
+    border: 1px solid #fff;
+    -moz-box-shadow: none;
+    -webkit-box-shadow: none;
+    box-shadow: none;
+    padding: 4px 3px 5px;
+}
+
+#preview-throbber {
+    margin-left: 8px;
+}
+
+#comment-tabs {
+    margin: 0px;
+    padding: 0px;
+    list-style: none;
+}
+
+#comment-tabs li {
+    display: inline-block;
+    padding: 4px 8px;
+    cursor: pointer;
+    border: 1px solid silver;
+    border-top-left-radius: 2px;
+    border-top-right-radius: 2px;
+}
+
+#comment-tabs li.current {
+    background: #fff;
+    border-bottom: 1px solid #fff;
+}
+
+.preview-error {
+    color: #666;
+    font-style: italic;
 }
 
 /* controls */

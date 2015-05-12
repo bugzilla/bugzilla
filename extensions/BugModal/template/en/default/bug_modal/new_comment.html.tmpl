@@ -12,8 +12,15 @@
   #%]
 
 <div id="add-comment">
-  <div id="add-comment-label">Add Comment:</div>
-  [% IF user.is_insider && bug.check_can_change_field('longdesc', 0, 1) %]
+
+  [% IF !bug.check_can_change_field('longdesc', 0, 1) %]
+    <div id="new-comment-notice">
+      You are not allowed to make an additional comment on this [% terms.bug %].
+    </div>
+    [% RETURN %]
+  [% END %]
+
+  [% IF user.is_insider %]
     <div id="add-comment-private"
       title="Make comment visible only to members of the '[% Param('insidergroup') FILTER html %]' group"
     >
@@ -22,7 +29,26 @@
       <label for="add-comment-private-cb">Private</label>
     </div>
   [% END %]
-  <textarea rows="5" cols="80" name="comment" id="comment"></textarea>
+
+  <ul id="comment-tabs">
+    <li id="comment-edit-tab" data-tab="comment-tab-add" data-focus="comment" class="current">
+      Add Comment
+    </li>
+    [%~ ~%]
+    <li id="comment-preview-tab" data-tab="comment-tab-preview" data-focus="">
+      Preview
+      <img id="preview-throbber" src="extensions/BugModal/web/throbber.gif" width="16" height="11" style="display:none">
+    </li>
+  </ul>
+
+  <div id="comment-tab-add" class="comment-tab">
+    <textarea rows="5" cols="80" name="comment" id="comment"></textarea>
+  </div>
+  <div id="comment-tab-preview" class="comment-tab" style="display:none">
+    <pre id="comment-preview" class="comment-text"></pre>
+    </div>
+  </div>
+
   <div id="after-comment-commit-button">
     [% Hook.process("after_comment_commit_button", 'bug/edit.html.tmpl') %]
 

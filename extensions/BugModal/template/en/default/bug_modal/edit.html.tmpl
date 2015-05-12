@@ -978,6 +978,13 @@
   INCLUDE bug_modal/activity_stream.html.tmpl stream=bug.activity_stream;
   IF user.id;
     INCLUDE bug_modal/new_comment.html.tmpl;
+  ELSE;
+    %]
+      <div id="new-comment-notice">
+        You need to <a href="show_bug.cgi?id=[% bug.bug_id FILTER none %]&amp;GoAheadAndLogIn=1">log in</a>
+        before you can comment on or make changes to this [% terms.bug %].
+      </div>
+    [%
   END;
 %]
 
@@ -1007,11 +1014,6 @@
     </div>
   </div>
   </form>
-[% ELSE %]
-  <div id="login-required">
-    You need to <a href="show_bug.cgi?id=[% bug.bug_id FILTER none %]&amp;GoAheadAndLogIn=1">log in</a>
-    before you can comment on or make changes to this [% terms.bug %].
-  </div>
 [% END %]
 
 [%# === blocks === %]

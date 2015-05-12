@@ -62,7 +62,7 @@ sub _rest_resources {
                 success_code => STATUS_CREATED
             }
         },
-        qr{^/bug/comment/([^/]+)$}, {
+        qr{^/bug/comment/(\d+)$}, {
             GET => {
                 method => 'comments',
                 params => sub {
@@ -84,6 +84,11 @@ sub _rest_resources {
                 params => sub {
                     return { comment_id => $_[0] };
                 },
+            },
+        },
+        qr{^/bug/comment/render$}, {
+            POST => {
+                method => 'render_comment',
             },
         },
         qr{^/bug/([^/]+)/history$}, {

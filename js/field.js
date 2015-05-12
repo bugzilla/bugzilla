@@ -844,8 +844,12 @@ $(function() {
             };
         },
         formatResult: function(suggestion, currentValue) {
-            return suggestion.data.name === '' ?
-                suggestion.data.login : suggestion.data.name + ' (' + suggestion.data.login + ')';
+            return (suggestion.data.name === '' ?
+                suggestion.data.login : suggestion.data.name + ' (' + suggestion.data.login + ')')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;');
         },
         onSearchStart: function(params) {
             var that = $(this);

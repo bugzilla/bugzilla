@@ -4,8 +4,7 @@ Microsoft IIS
 #############
 
 Bugzilla works with IIS as a normal CGI application. These instructions assume
-that you are using Windows 7 Ultimate x64. Procedures for other versions are
-probably similar.
+that you are using Windows 7. Procedures for other versions are probably similar.
 
 Begin by starting Internet Information Services (IIS) Manager.
 :guilabel:`Start` --> :guilabel:`Administrators Tools` -->
@@ -53,27 +52,23 @@ double-click :guilabel:`Handler Mappings`. Under :guilabel:`Actions`, click
 For the first one, set the following values (replacing paths if necessary):
 
 * :guilabel:`Request Path`: ``*.pl``
-* :guilabel:`Executable`: ``C:\Perl\bin\perl.exe "%s% %s%``
+* :guilabel:`Executable`: ``C:\Perl\bin\perl.exe "%s" %s``
 * :guilabel:`Name`: ``Perl Script Map``
 
-At the prompt select :guilabel:`No`.
+At the prompt select :guilabel:`Yes`.
 
 .. note:: The ActiveState Perl installer may have already created an entry for
    .pl files that is limited to ``GET,HEAD,POST``. If so, this mapping should
    be removed, as Bugzilla's .pl files are not designed to be run via a web
    server.
 
-.. todo:: My `source <https://wiki.mozilla.org/Installing_under_IIS_7.5>`_ says
-   to add a mapping for .pl, but that's sort of contradicted by the note above
-   from a different source. Which is right?
-
 For the second one, set the following values (replacing paths if necessary):
 
 * :guilabel:`Request Path`: ``*.cgi``
-* :guilabel:`Executable`: ``C:\Perl\bin\perl.exe "%s% %s%``
+* :guilabel:`Executable`: ``C:\Perl\bin\perl.exe "%s" %s``
 * :guilabel:`Name`: ``CGI Script Map``
 
-At the prompt select :guilabel:`No`.
+At the prompt select :guilabel:`Yes`.
 
 Bugzilla Application
 ====================
@@ -88,13 +83,13 @@ Set the following values (replacing paths if necessary):
 * :guilabel:`Executable`: ``C:\Perl\bin\perl.exe -x"C:\Bugzilla" -wT "%s" %s``
 * :guilabel:`Name`: ``Bugzilla``
 
-At the prompt select :guilabel:`No`.
+At the prompt select :guilabel:`Yes`.
 
-.. todo:: The Executable lines in the three things above are weirdly
-   inconsistent. Is this intentional? My source is `this page <https://wiki.mozilla.org/Installing_under_IIS_7.5>`_.
+Now it's time to restart the IIS server to take these changes into account.
+From the top-level menu, which contains the name of your machine, click
+:guilabel:`Restart` under :guilabel:`Manage Server`. Or run the command:
 
-.. todo:: `LpSolit <http://lpsolit.wordpress.com/2010/10/22/make-bugzilla-work-with-iis7-easy/>`_
-   suggests there's a step to do with authorizing CGI modules. Where does that fit?
+:command:`iisreset`
 
 Common Problems
 ===============

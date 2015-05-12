@@ -165,7 +165,7 @@
         no_label = 1
         hide_on_edit = 1
     %]
-      <div id="field-value-short_desc">[% bug.short_desc FILTER html %]</div>
+      <div id="field-value-short_desc">[% bug.short_desc FILTER quoteUrls(bug) %]</div>
     [% END %]
 
     [%# alias %]

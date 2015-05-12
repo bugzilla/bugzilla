@@ -29,6 +29,7 @@ use strict;
 use lib 't';
 
 use Support::Files;
+use File::Slurp;
 
 use Test::More tests => scalar(@Support::Files::testitems);
 
@@ -46,12 +47,19 @@ my $fh;
     }
 }
 
-my @testitems = @Support::Files::testitems; 
+my @testitems = @Support::Files::testitems;
 my $perlapp = "\"$^X\"";
 
 foreach my $file (@testitems) {
     $file =~ s/\s.*$//; # nuke everything after the first space (#comment)
     next if (!$file); # skip null entries
+
+    my $contents = read_file($file);
+    if ($contents !~ /\b(system|exec)\b/) {
+        ok(1,"$file does not contain any system or exec calls");
+        next;
+    }
+
     my $command = "$perlapp -c -It -MSupport::Systemexec $file 2>&1";
     my $loginfo=`$command`;
     if ($loginfo =~ /arguments for Support::Systemexec::(system|exec)/im) {

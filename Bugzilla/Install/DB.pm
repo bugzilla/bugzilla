@@ -721,6 +721,10 @@ sub update_table_definitions {
     # 2014-10-?? dkl@mozilla.com - Bug 1062940
     $dbh->bz_alter_column('bugs', 'alias', { TYPE => 'varchar(40)' });
 
+    # 2015-05-13 dylan@mozilla.com - Bug 1160430
+    $dbh->bz_add_column('keyworddefs', 'is_active',
+                        {TYPE => 'BOOLEAN', NOTNULL => 1, DEFAULT => 'TRUE'});
+
     ################################################################
     # New --TABLE-- changes should go *** A B O V E *** this point #
     ################################################################

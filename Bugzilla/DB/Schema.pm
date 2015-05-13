@@ -593,6 +593,8 @@ use constant ABSTRACT_SCHEMA => {
                             PRIMARYKEY => 1},
             name        => {TYPE => 'varchar(64)', NOTNULL => 1},
             description => {TYPE => 'MEDIUMTEXT', NOTNULL => 1},
+            is_active   => {TYPE => 'BOOLEAN', NOTNULL => 1,
+                            DEFAULT => 'TRUE'},
         ],
         INDEXES => [
             keyworddefs_name_idx   => {FIELDS => ['name'],

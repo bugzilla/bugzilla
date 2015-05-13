@@ -157,6 +157,7 @@ END;
 
         [% CASE constants.FIELD_TYPE_SINGLE_SELECT %]
           [%# single value select %]
+          <input type="hidden" id="[% name FILTER html %]-dirty">
           <select name="[% name FILTER html %]" id="[% name FILTER html %]">
             [% IF values.defined %]
               [% FOREACH v IN values %]
@@ -173,6 +174,7 @@ END;
 
         [% CASE constants.FIELD_TYPE_MULTI_SELECT %]
           [%# multi value select %]
+          <input type="hidden" id="[% name FILTER html %]-dirty">
           <select name="[% name FILTER html %]" id="[% name FILTER html %]" multiple size="5">
             [% IF values.defined %]
               [%# not implemented %]

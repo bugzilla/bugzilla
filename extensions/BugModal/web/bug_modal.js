@@ -246,6 +246,26 @@ $(function() {
 
     if (BUGZILLA.user.id === 0) return;
 
+    // dirty field tracking
+    $('#changeform select').each(function() {
+        var that = $(this);
+        var dirty = $('#' + that.attr('id') + '-dirty');
+        if (!dirty) return;
+        var isMultiple = that.attr('multiple');
+
+        // store the option that had the selected attribute when we
+        // initially loaded
+        var value = that.find('option[selected]').map(function() { return this.value; }).toArray();
+        if (value.length === 0 && !that.attr('multiple'))
+            value = that.find('option:first').map(function() { return this.value; }).toArray();
+        that.data('preselected', value);
+
+        // if the user hasn't touched a field, override the browser's choice
+        // with bugzilla's
+        if (!dirty.val())
+            that.val(value);
+    });
+
     // edit/save mode button
     $('#mode-btn')
         .click(function(event) {
@@ -963,6 +983,31 @@ $(function() {
         );
         last_comment_text = comment.val();
     });
+
+    // dirty field tracking
+    $('#changeform select')
+        .change(function() {
+            var that = $(this);
+            var dirty = $('#' + that.attr('id') + '-dirty');
+            if (!dirty) return;
+            if (that.attr('multiple')) {
+                var preselected = that.data('preselected');
+                var selected = that.val();
+                var isDirty = preselected.length != selected.length;
+                if (!isDirty) {
+                    for (var i = 0, l = preselected.length; i < l; i++) {
+                        if (selected[i] != preselected[i]) {
+                            isDirty = true;
+                            break;
+                        }
+                    }
+                }
+                dirty.val(isDirty ? '1' : '');
+            }
+            else {
+                dirty.val(that.val() === that.data('preselected')[0] ? '' : '1');
+            }
+        });
 });
 
 function confirmUnsafeURL(url) {

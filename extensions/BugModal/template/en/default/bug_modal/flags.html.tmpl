@@ -112,6 +112,7 @@
     </td>
 
     <td class="flag-value">
+      <input type="hidden" id="[% flag_id FILTER html %]-dirty">
       <select id="[% flag_id FILTER html %]" name="[% flag_id FILTER html %]"
         title="[% t.description FILTER html %]"
         [% UNLESS (t.is_requestable && user.can_request_flag(t)) || user.can_set_flag(t) %]

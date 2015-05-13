@@ -77,6 +77,7 @@
 
 [% BLOCK tf_select %]
   [% RETURN UNLESS flag %]
+  <input type="hidden" id="[% flag.name FILTER html %]-dirty">
   <select id="[% flag.name FILTER html %]" name="[% flag.name FILTER html %]">
     [%
       flag_bug_value = flag.bug_flag(bug_id).value;

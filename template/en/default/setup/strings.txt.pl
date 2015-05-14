@@ -62,6 +62,7 @@ EOT
 Re-run checksetup.pl in interactive mode (without an 'answers' file)
 to continue.
 END
+    cpanfile_created => "##file## created",
     cpan_bugzilla_home => 
         "WARNING: Using the Bugzilla directory as the CPAN home.",
     db_enum_setup  => "Setting up choices for standard drop-down fields:",

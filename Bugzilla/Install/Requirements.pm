@@ -18,13 +18,14 @@ use strict;
 use warnings;
 
 use Bugzilla::Constants;
-use Bugzilla::Install::Util qw(install_string bin_loc
+use Bugzilla::Install::Util qw(install_string bin_loc success
                                extension_requirement_packages);
-use File::Slurp;
 use List::Util qw(max);
 use Term::ANSIColor;
 
 use parent qw(Exporter);
+use autodie;
+
 our @EXPORT = qw(
     REQUIRED_MODULES
     OPTIONAL_MODULES
@@ -907,7 +908,11 @@ sub export_cpanfile {
     }
 
     # Write out the cpanfile to the document root
-    write_file(bz_locations()->{'libpath'} . '/cpanfile', \$cpanfile);
+    my $file = bz_locations()->{'libpath'} . '/cpanfile';
+    open(my $fh, '>', $file);
+    print $fh $cpanfile;
+    close $fh;
+    success(install_string('cpanfile_created', { file => $file }));
 }
 
 1;

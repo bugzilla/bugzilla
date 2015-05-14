@@ -147,7 +147,7 @@
 
   [% SET exclude_these = ['Bugzilla_login', 'Bugzilla_password'] %]
   [% FOREACH key IN matches.keys %]
-    [% exclude_these.push(key) IF cgi.param(key) == '' %]
+    [% exclude_these.push(key) IF Bugzilla.cgi.param(key) == '' %]
   [% END %]
   [% SET exclude = '^' _ exclude_these.join('|') _ '$' %]
   [% PROCESS "global/hidden-fields.html.tmpl" exclude = exclude %]

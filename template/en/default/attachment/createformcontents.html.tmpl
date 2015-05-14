@@ -68,6 +68,9 @@
       <label for="manual">enter manually</label>:
       <input type="text" name="contenttypeentry" id="contenttypeentry"
              size="30" maxlength="200"
+             pattern="([% constants.LEGAL_CONTENT_TYPES.join('|') FILTER html %])/.+"
+             title="The content type must be of the form 'type/subtype', where 'type'
+                    is one of: [% constants.LEGAL_CONTENT_TYPES.join(', ') FILTER html %]"
              onchange="if (this.value) this.form.contenttypemethod[2].checked = true;">
   </td>
 </tr>

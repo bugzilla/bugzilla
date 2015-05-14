@@ -94,9 +94,12 @@
             <label for="contenttypeentry">MIME Type:</label>
             <input type="text" size="20" class="text block[% editable_or_hide %]"
                    id="contenttypeentry" name="contenttypeentry"
-                   value="[% attachment.contenttype FILTER html %]">                   
+                   pattern="([% constants.LEGAL_CONTENT_TYPES.join('|') FILTER html %])/.+"
+                   title="The content type must be of the form 'type/subtype', where 'type'
+                          is one of: [% constants.LEGAL_CONTENT_TYPES.join(', ') FILTER html %]"
+                   value="[% attachment.contenttype FILTER html %]">
           </div>
-          
+
           <div id="attachment_creator">
             <span class="label">Creator:</span>
             [%+ INCLUDE global/user.html.tmpl who = attachment.attacher %]

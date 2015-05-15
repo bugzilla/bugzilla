@@ -92,12 +92,14 @@ sub prod_comp_search {
         push @terms, _build_terms($component, 0, 1);
         push @order, "products.name != " . $dbh->quote($product) if $product ne '';
         push @order, "components.name != " . $dbh->quote($component) if $component ne '';
+        push @order, _build_like_order($product . ' ' . $component);
         push @order, "products.name";
         push @order, "components.name";
     } else {
         push @terms, _build_terms($search, 1, 1);
         push @order, "products.name != " . $dbh->quote($search);
         push @order, "components.name != " . $dbh->quote($search);
+        push @order, _build_like_order($search);
         push @order, "products.name";
         push @order, "components.name";
     }
@@ -145,6 +147,19 @@ sub _build_terms {
             if $word ne '';
     }
     return @terms;
+}
+
+sub _build_like_order {
+    my ($query) = @_;
+    my $dbh = Bugzilla->dbh;
+
+    my @terms;
+    foreach my $word (split(/[\s,]+/, $query)) {
+        push @terms, "CONCAT(products.name, components.name) LIKE " . $dbh->quote('%' . $word . '%')
+            if $word ne '';
+    }
+
+    return 'NOT(' . join(' AND ', @terms) . ')';
 }
 
 1;

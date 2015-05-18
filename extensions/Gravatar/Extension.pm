@@ -12,6 +12,7 @@ use warnings;
 
 use base qw(Bugzilla::Extension);
 
+use Bugzilla::Extension::Gravatar::Data qw( %gravatar_user_map );
 use Bugzilla::User::Setting;
 use Digest::MD5 qw(md5_hex);
 
@@ -27,11 +28,12 @@ sub _user_gravatar {
         return DEFAULT_URL;
     }
     if (!$self->{gravatar}) {
-        $self->{gravatar} = 'https://secure.gravatar.com/avatar/' .
-                            md5_hex(lc($self->email)) . '?d=mm';
+        my $email = $self->email;
+        $email = $gravatar_user_map{$self->email} if exists $gravatar_user_map{$self->email};
+        $self->{gravatar} = 'https://secure.gravatar.com/avatar/' .  md5_hex(lc($email)) . '?d=mm';
     }
     $size ||= 64;
-    return $self->{gravatar} . "&amp;size=$size";
+    return $self->{gravatar} . '&amp;size=' . $size;
 }
 
 sub install_before_final_checks {

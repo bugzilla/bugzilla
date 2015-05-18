@@ -6,7 +6,9 @@
   # defined by the Mozilla Public License, v. 2.0.
   #%]
 
-[% IF user.id && comment.author.login_name == 'tbplbot@gmail.com' %]
+[% IF user.id
+      && (comment.author.login_name == 'tbplbot@gmail.com' || comment.author.login_name == 'treeherder@bots.tld')
+%]
   [% has_tbpl_comment = 1 %]
   <script>
     var id = [% count FILTER none %];

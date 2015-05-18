@@ -154,7 +154,7 @@ foreach my $product (@selectable_products) {
     $milestones{$_->name} = 1 foreach (@{$product->milestones});
 }
 
-my @components = sort(keys %components);
+my @components = sort { lc($a) cmp lc($b) } keys %components;
 my @versions = sort { vers_cmp (lc($a), lc($b)) } keys %versions;
 my @milestones = sort(keys %milestones);
 

@@ -246,8 +246,9 @@ sub _check_is_enabled {
 # Mutators
 ################################################################################
 
-sub set_disable_mail { $_[0]->set('disable_mail', $_[1]); }
-sub set_extern_id    { $_[0]->set('extern_id', $_[1]); }
+sub set_disable_mail  { $_[0]->set('disable_mail', $_[1]); }
+sub set_email_enabled { $_[0]->set('disable_mail', !$_[1]); }
+sub set_extern_id     { $_[0]->set('extern_id', $_[1]); }
 
 sub set_login {
     my ($self, $login) = @_;
@@ -2599,6 +2600,10 @@ i.e. if the 'insidergroup' parameter is set and the user belongs to this group.
 
 Returns true if the user is a global watcher,
 i.e. if the 'globalwatchers' parameter contains the user.
+
+=item C<set_email_enabled>
+
+C<bool> - Sets C<disable_mail> to the inverse of the boolean provided.
 
 =back
 

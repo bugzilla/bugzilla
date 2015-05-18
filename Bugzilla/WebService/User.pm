@@ -45,14 +45,12 @@ use constant MAPPED_FIELDS => {
     email => 'login',
     full_name => 'name',
     login_denied_text => 'disabledtext',
-    email_enabled => 'disable_mail'
 };
 
 use constant MAPPED_RETURNS => {
     login_name => 'email',
     realname => 'full_name',
     disabledtext => 'login_denied_text',
-    disable_mail => 'email_enabled'
 };
 
 ##############

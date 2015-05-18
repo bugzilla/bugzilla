@@ -314,8 +314,9 @@ sub _check_is_enabled {
 # Mutators
 ################################################################################
 
-sub set_disable_mail { $_[0]->set('disable_mail', $_[1]); }
-sub set_extern_id    { $_[0]->set('extern_id', $_[1]); }
+sub set_disable_mail  { $_[0]->set('disable_mail', $_[1]); }
+sub set_email_enabled { $_[0]->set('disable_mail', !$_[1]); }
+sub set_extern_id     { $_[0]->set('extern_id', $_[1]); }
 
 sub set_login {
     my ($self, $login) = @_;
@@ -3097,6 +3098,10 @@ user making the change does not have bless rights will generate an error.
 C<hash> - This is the same as set_groups, but affects what groups a user
 has direct membership to bless that group. It takes the same inputs as
 set_groups.
+
+=item C<set_email_enabled>
+
+C<bool> - Sets C<disable_mail> to the inverse of the boolean provided.
 
 =back
 

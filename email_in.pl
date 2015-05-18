@@ -469,7 +469,7 @@ sub die_handler {
 
     # If this is inside an eval, then we should just act like...we're
     # in an eval (instead of printing the error and exiting).
-    die(@_) if $^S;
+    die @_ if ($^S // Bugzilla::Error::_in_eval());
 
     # We can't depend on the MTA to send an error message, so we have
     # to generate one properly.

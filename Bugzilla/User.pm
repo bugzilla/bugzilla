@@ -343,8 +343,9 @@ sub _check_is_enabled {
 # Mutators
 ################################################################################
 
-sub set_disable_mail { $_[0]->set('disable_mail', $_[1]); }
-sub set_extern_id    { $_[0]->set('extern_id', $_[1]); }
+sub set_disable_mail  { $_[0]->set('disable_mail', $_[1]); }
+sub set_email_enabled { $_[0]->set('disable_mail', !$_[1]); }
+sub set_extern_id     { $_[0]->set('extern_id', $_[1]); }
 
 sub set_login {
     my ($self, $login) = @_;
@@ -2601,6 +2602,10 @@ The hashes contain C<ip_addr>, C<login_time>, and C<user_id>.
 This notes that this account has failed to log in, and stores the fact
 in the database. The storing happens immediately, it does not wait for
 you to call C<update>.
+
+=item C<set_email_enabled>
+
+C<bool> - Sets C<disable_mail> to the inverse of the boolean provided.
 
 =back
 

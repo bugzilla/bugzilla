@@ -319,6 +319,7 @@ input[type="number"] {
 
 #bottom-actions {
     margin-bottom: 50px;
+    max-width: 1024px;
 }
 
 #bottom-right-actions {

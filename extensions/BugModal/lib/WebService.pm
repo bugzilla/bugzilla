@@ -99,7 +99,7 @@ sub edit {
     }
 
     # keywords
-    my @keywords = Bugzilla::Keyword->get_all();
+    my @keywords = grep { $_->is_active } Bugzilla::Keyword->get_all();
 
     # results
     return {

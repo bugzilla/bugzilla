@@ -243,7 +243,7 @@
        </div>
        <script type="text/javascript" defer="defer">
          YAHOO.bugzilla.keyword_array = [
-           [%- FOREACH keyword = all_keywords %]
+           [%- FOREACH keyword = active_keywords %]
              [%-# %]"[% keyword.name FILTER js %]"
              [%- "," IF NOT loop.last %][% END %]];
          YAHOO.bugzilla.keywordAutocomplete.init('[% field.name FILTER js %]', 

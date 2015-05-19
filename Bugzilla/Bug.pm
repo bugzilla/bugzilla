@@ -1894,6 +1894,19 @@ sub _check_keywords {
         my $obj = Bugzilla::Keyword->check($keyword);
         $keywords{$obj->id} = $obj;
     }
+
+    my %old_kw_id;
+    if (blessed $invocant) {
+        my @old_keywords = @{$invocant->keyword_objects};
+        %old_kw_id  = map { $_->id => 1 } @old_keywords;
+    }
+
+    foreach my $keyword (values %keywords) {
+        next if $keyword->is_active || exists $old_kw_id{$keyword->id};
+        ThrowUserError('value_inactive',
+                       { value  => $keyword->name, class => ref $keyword });
+    }
+
     return [values %keywords];
 }
 

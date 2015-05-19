@@ -275,6 +275,7 @@ sub _legal_field_values {
     elsif ($field_name eq 'keywords') {
         my @legal_keywords = Bugzilla::Keyword->get_all;
         foreach my $value (@legal_keywords) {
+            next unless $value->is_active;
             push (@result, {
                name     => $self->type('string', $value->name),
                description => $self->type('string', $value->description),

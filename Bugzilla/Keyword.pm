@@ -33,6 +33,7 @@ use constant DB_COLUMNS => qw(
    keyworddefs.id
    keyworddefs.name
    keyworddefs.description
+   keyworddefs.is_active
 );
 
 use constant DB_TABLE => 'keyworddefs';
@@ -40,11 +41,13 @@ use constant DB_TABLE => 'keyworddefs';
 use constant VALIDATORS => {
     name        => \&_check_name,
     description => \&_check_description,
+    is_active   => \&_check_is_active,
 };
 
 use constant UPDATE_COLUMNS => qw(
     name
     description
+    is_active
 );
 
 ###############################
@@ -69,6 +72,7 @@ sub bug_count {
 
 sub set_name        { $_[0]->set('name', $_[1]); }
 sub set_description { $_[0]->set('description', $_[1]); }
+sub set_is_active   { $_[0]->set('is_active', $_[1]); }
 
 ###############################
 ####      Subroutines    ######
@@ -132,6 +136,10 @@ sub _check_description {
     return $desc;
 }
 
+sub _check_is_active { return $_[1] ? 1 : 0 }
+
+sub is_active { return $_[0]->{is_active} }
+
 1;
 
 __END__
@@ -155,10 +163,10 @@ Bugzilla::Keyword represents a keyword that can be added to a bug.
 This implements all standard C<Bugzilla::Object> methods. See 
 L<Bugzilla::Object> for more details.
 
-=head1 SUBROUTINES
+=head1 METHODS
 
-This is only a list of subroutines specific to C<Bugzilla::Keyword>.
-See L<Bugzilla::Object> for more subroutines that this object 
+This is only a list of methods specific to C<Bugzilla::Keyword>.
+See L<Bugzilla::Object> for more methods that this object
 implements.
 
 =over
@@ -172,6 +180,18 @@ implements.
  Params:      none
  Returns:     A reference to an array of Keyword objects, or an empty
               arrayref if there are no keywords.
+
+=item C<is_active>
+
+ Description: Indicates if the keyword may be used on a bug
+ Params:      none
+ Returns:     a boolean value that is true if the keyword can be applied to bugs.
+
+=item C<set_is_active($is_active)>
+
+ Description: Set the is_active property to a boolean value
+ Params:      the new value of the is_active property.
+ Returns:     nothing
 
 =back
 

@@ -6,10 +6,12 @@
   # defined by the Mozilla Public License, v. 2.0.
   #%]
 
-[% PROCESS "global/field-descs.none.tmpl" %]
-[% PROCESS "global/reason-descs.none.tmpl" %]
+[%
+  PROCESS "global/field-descs.none.tmpl";
+  PROCESS "global/reason-descs.none.tmpl";
+%]
 From: [% Param('mailfrom') %]
 To: [% recipient.email %]
-Subject: [[% terms.Bugzilla %]] Overdue Requests Report
+Subject: [[% terms.Bugzilla %]] Overdue Requests
 Date: [% date %]
 X-Bugzilla-Type: nag-watch

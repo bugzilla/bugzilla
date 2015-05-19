@@ -6,14 +6,20 @@
   # defined by the Mozilla Public License, v. 2.0.
   #%]
 
-[% PROCESS "global/field-descs.none.tmpl" %]
-[% PROCESS "global/reason-descs.none.tmpl" %]
+[%
+  PROCESS "global/field-descs.none.tmpl";
+  PROCESS "global/reason-descs.none.tmpl";
+  summary = requests.item(recipient.login).summary;
+%]
+
 From: [% Param('mailfrom') %]
 To: [% recipient.email %]
-Subject: [[% terms.Bugzilla %]] Your Overdue Requests
-  ([% FOREACH type = requests.item(recipient.email).typelist %]
-      [%- requests.item(recipient.email).types.item(type).size %] [%+ type %]
-      [% ", " UNLESS loop.last %]
-    [% END %])
+Subject: [[% terms.Bugzilla %]] Overdue Requests
+  [% IF summary.requestee %]
+    (Of you: [% summary.requestee %])
+  [% END %]
+  [% IF summary.setter %]
+    (By you: [% summary.setter %])
+  [% END %]
 Date: [% date %]
 X-Bugzilla-Type: nag

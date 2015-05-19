@@ -6,31 +6,58 @@
   # defined by the Mozilla Public License, v. 2.0.
   #%]
 
-[% PROCESS "global/field-descs.none.tmpl" %]
+[%
+  PROCESS "global/field-descs.none.tmpl";
+  requestee = requests.item(recipient.login).requestee;
+  setter    = requests.item(recipient.login).setter;
+  summary   = requests.item(recipient.login).summary;
+  types     = requests.item(recipient.login).types;
+%]
 
-The following is a list of requests people have made of you, which are
-currently overdue. To avoid disappointing others, please deal with them as
-quickly as possible.
+[% IF requestee.size %]
+Overdue requests requiring action from you:
+[%+ summary.requestee %]
 
-[% requests = requests.item(recipient.login) %]
-[% FOREACH type = requests.typelist %]
+[%+ PROCESS requests report="requestee" request_list=requestee %]
+[% END %]
+
+[% IF requestee.size && setter.size %]
+-
+[% END %]
+
+[% IF setter.size %]
+Overdue requests you have requested:
+[%+ summary.setter %]
+
+[%+ PROCESS requests report="setter" request_list=setter %]
+[% END %]
+
+[% BLOCK requests %]
+[% FOREACH type IN types.item(report) %]
 :: [% type FILTER upper FILTER html %] requests
 
-[% FOREACH request = requests.types.$type %]
+[% FOREACH request IN request_list.item(type) %]
 [[% terms.Bug %] [%+ request.bug.id %]] [% request.bug.short_desc %]
-  [%+ request.flag.age %] from [% request.requester.identity %]
+  [% IF report == "requestee" %]
+  [%+ request.flag.age %] from [% request.setter.realname || request.setter.login %]
+  [% ELSE %]
+  [%+ request.flag.age %] to [% request.requestee.realname || request.requestee.login %]
+  [% END %]
   [%+ urlbase %]show_bug.cgi?id=[% request.bug.id +%]
   [% IF request.attachment && request.attachment.ispatch %]
   Review: [% urlbase %]review?bug=[% request.bug.id %]&attachment=[% request.attachment.id %]
   [% END %]
+  [% IF report == "requestee" %]
   Defer: [% urlbase %]request_defer?flag=[% request.flag.id %]
+  [% END %]
 
+[% END %]
 [% END %]
 [% END %]
 
 ::
 
-[% IF requests.types.item('review').size || requests.types.item('feedback').size %]
+[% IF requestee.item('review').size || requestee.item('feedback').size %]
 Guidance on handling requests:
   https://wiki.mozilla.org/BMO/Handling_Requests
 [% END %]

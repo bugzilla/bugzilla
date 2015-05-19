@@ -1,0 +1,115 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[%
+  PROCESS "global/field-descs.none.tmpl";
+  requestee = requests.item(recipient.login).requestee;
+  setter    = requests.item(recipient.login).setter;
+  summary   = requests.item(recipient.login).summary;
+  types     = requests.item(recipient.login).types;
+%]
+
+<!doctype html>
+<html>
+
+<head>
+  <title>[[% terms.Bugzilla %]] Your Overdue Requests</title>
+</head>
+
+<body bgcolor="#ffffff">
+
+[% IF requestee.size %]
+  <h3>Overdue requests requiring action from you:</h3>
+  <div>[% summary.requestee FILTER html %]</div>
+  [% PROCESS requests report="requestee" requests=requestee %]
+[% END %]
+
+[% IF requestee.size && setter.size %]
+  <hr>
+[% END %]
+
+[% IF setter.size %]
+  <h3>Overdue requests you have requested:</h3>
+  <div>[% summary.setter FILTER html %]</div>
+  [% PROCESS requests report="setter" requests=setter %]
+[% END %]
+
+[% BLOCK requests %]
+  [% FOREACH type IN types.item(report) %]
+    <h3>
+      [% type FILTER upper FILTER html %] requests
+      <span style="font-size: x-small; font-weight: normal">
+        (<a href="[% urlbase FILTER none %]buglist.cgi?bug_id=
+          [% FOREACH request IN requests.item(type) %]
+            [% request.bug.id FILTER none %]
+            [% "%2C" UNLESS loop.last %]
+          [% END %]">buglist</a>)
+      </span>
+    </h3>
+
+    <ul>
+      [% FOREACH request IN requests.item(type) %]
+        <li>
+          <a href="[% urlbase FILTER none %]show_bug.cgi?id=[% request.bug.id FILTER none %]"
+            title="[% request.bug.tooltip FILTER html %]">
+            [% request.bug.id FILTER none %] - [% request.bug.short_desc FILTER html %]
+          </a><br>
+          <b>[%+ request.flag.age FILTER html %]</b>
+            [% IF report == "requestee" %]
+              from [% request.setter.realname || request.setter.login FILTER html %]
+            [% ELSIF request.requestee %]
+              to [% request.requestee.realname || request.setter.login FILTER html %]
+            [% ELSE %]
+              to <i>anyone</i>
+            [% END %]
+            <br>
+          [% IF report == "requestee" %]
+            <div style="font-size: x-small">
+              [% IF request.attachment %]
+                <a href="[% urlbase FILTER none %]attachment.cgi?id=[% request.attachment.id FILTER none %]&amp;action=edit">Details</a>
+                [% IF request.attachment.ispatch %]
+                  | <a href="[% urlbase FILTER none %]attachment.cgi?id=[% request.attachment.id FILTER none %]&amp;action=diff">Diff</a>
+                  | <a href="[% urlbase FILTER none %]review?bug=[% request.bug.id FILTER none %]&amp;attachment=[% request.attachment.id FILTER none %]">Review</a>
+                [% END %]
+                |
+              [% END %]
+              <a href="[% urlbase FILTER none %]request_defer?flag=[% request.flag.id FILTER none %]">Defer</a>
+            </div>
+          [% END %]
+          <br>
+        </li>
+      [% END %]
+    </ul>
+  [% END %]
+[% END %]
+
+<div>
+  <hr style="border: 1px dashed #969696">
+  [% IF requestee.item('review').size || requestee.item('feedback').size %]
+    <a href="https://wiki.mozilla.org/BMO/Handling_Requests">
+      Guidance on handling requests
+    </a><br>
+  [% END %]
+  <a href="[% urlbase FILTER none %]request.cgi?action=queue&amp;requestee=[% recipient.login FILTER uri %]&amp;group=type">
+    See all your overdue requests
+  </a><br>
+  <a href="[% urlbase FILTER none %]userprefs.cgi#request_nagging">
+    Opt out of these emails
+  </a><br>
+</div>
+
+<div style="font-size: 90%; color: #666666">
+  <hr style="border: 1px dashed #969696">
+  <b>You are receiving this mail because:</b>
+  <ul>
+    <li>You have overdue requests.</li>
+  </ul>
+</div>
+@@body-headers@@
+</body>
+</html>

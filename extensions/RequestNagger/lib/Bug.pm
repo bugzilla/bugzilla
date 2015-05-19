@@ -9,10 +9,22 @@ package Bugzilla::Extension::RequestNagger::Bug;
 
 use strict;
 use parent qw(Bugzilla::Bug);
+use feature 'state';
+
+use Bugzilla::User;
 
 sub short_desc {
     my ($self) = @_;
-    return $self->{secure_bug} ? '(Secure bug)' : $self->SUPER::short_desc;
+    return $self->{sanitise_bug} ? '(Secure bug)' : $self->SUPER::short_desc;
+}
+
+sub is_private {
+    my ($self) = @_;
+    if (!exists $self->{is_private}) {
+        state $default_user //= Bugzilla::User->new();
+        $self->{is_private} = !$default_user->can_see_bug($self);
+    }
+    return $self->{is_private};
 }
 
 sub tooltip {
@@ -21,7 +33,7 @@ sub tooltip {
     if ($self->bug_status eq 'RESOLVED') {
         $tooltip .= '/' . $self->resolution;
     }
-    if (!$self->{secure_bug}) {
+    if (!$self->{sanitise_bug}) {
         $tooltip .= ' ' . $self->product . ' :: ' . $self->component;
     }
     return $tooltip;

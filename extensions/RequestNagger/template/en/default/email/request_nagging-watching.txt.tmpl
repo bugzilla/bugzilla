@@ -8,32 +8,28 @@
 
 [% PROCESS "global/field-descs.none.tmpl" %]
 
-The following is a list of people who you are watching that have overdue
-requests.
+[% FOREACH login IN requests.keys.sort %]
+[%
+  target    = requests.item(login).target;
+  requestee = requests.item(login).requestee;
+  setter    = requests.item(login).setter;
+  summary   = requests.item(login).summary;
+  types     = requests.item(login).types;
+%]
 
-[% FOREACH login = requests.keys.sort %]
-[% requestee = requests.$login.requestee %]
 ::
-:: [% requestee.identity %]
-:: [% FOREACH type = requests.$login.typelist %]
-      [%- requests.$login.types.item(type).size %] [%+ type %]
-      [% ", " UNLESS loop.last %]
-   [% END %]
+:: [% target.identity %]
+[% IF requestee.size %]
+:: Requested of: [% summary.requestee %]
+[% END %]
+[% IF setter.size %]
+:: Waiting on: [% summary.setter %]
+[% END %]
 ::
 
-[% FOREACH type = requests.$login.typelist %]
-:: [% type FILTER upper FILTER html %] requests
+[%+ PROCESS requests report="requestee" request_list=requestee %]
 
-[% FOREACH request = requests.$login.types.$type %]
-[[% terms.Bug %] [%+ request.bug.id %]] [% request.bug.short_desc %]
-  [%+ request.flag.age %] from [% request.requester.identity %]
-  [%+ urlbase %]show_bug.cgi?id=[% request.bug.id +%]
-  [% IF request.flag.deferred %]
-  Deferred until [%+ request.flag.deferred.ymd %]
-  [% END %]
-
-[% END %]
-[% END %]
+[%+ PROCESS requests report="setter" request_list=setter %]
 
 [% END %]
 
@@ -47,3 +43,26 @@ You are receiving this mail because: you are watching someone with overdue
 requests.
 
 @@body-headers@@
+
+[% BLOCK requests %]
+[% RETURN UNLESS request_list.size %]
+
+[% FOREACH type IN types.item(report) %]
+:: [% type FILTER upper %] [%= report == "requestee" ? "requested of" : "waiting on" %]
+
+[% FOREACH request IN request_list.item(type) %]
+[[% terms.Bug %] [%+ request.bug.id %]] [% request.bug.short_desc %]
+  [% IF report == "requestee" %]
+  [%+ request.flag.age %] from [% request.setter.realname || request.setter.login %]
+  [% ELSE %]
+  [%+ request.flag.age %] to [% request.requestee.realname || request.requestee.login %]
+  [% END %]
+  [%+ urlbase %]show_bug.cgi?id=[% request.bug.id +%]
+  [% IF request.flag.deferred %]
+  Deferred until [%+ request.flag.deferred.ymd %]
+  [% END %]
+
+[% END %]
+[% END %]
+
+[% END %]

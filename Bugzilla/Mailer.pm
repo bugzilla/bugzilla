@@ -260,7 +260,7 @@ sub MessageToMTA {
 
     if ($method eq "Test") {
         my $filename = bz_locations()->{'datadir'} . '/mailer.testfile';
-        open TESTFILE, '>>', $filename;
+        open TESTFILE, '>>:encoding(UTF-8)', $filename;
         # From - <date> is required to be a valid mbox file.
         print TESTFILE "\n\nFrom - " . $email->header('Date') . "\n" . $email->as_string;
         close TESTFILE;

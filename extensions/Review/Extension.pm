@@ -94,8 +94,8 @@ sub _reviewers_objs {
 sub _user_is_active {
     my ($self) = @_;
 
-    return 0 if !defined($self->last_seen_date);
     return 1 if MAX_REVIEWER_LAST_SEEN_DAYS_AGO == 0; # feature disabled
+    return 0 if !defined($self->last_seen_date);
 
     my $dt = datetime_from($self->last_seen_date);
     my $days_ago = $dt->delta_days(DateTime->now())->in_units('days');

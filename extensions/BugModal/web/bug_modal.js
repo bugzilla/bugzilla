@@ -376,9 +376,11 @@ $(function() {
     // disable the save buttons while posting
     $('.save-btn')
         .click(function(event) {
+            event.preventDefault();
             if (document.changeform.checkValidity && !document.changeform.checkValidity())
                 return;
             $('.save-btn').attr('disabled', true);
+            this.form.submit();
         })
         .attr('disabled', false);
 

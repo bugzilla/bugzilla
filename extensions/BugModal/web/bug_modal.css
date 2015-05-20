@@ -21,7 +21,8 @@
 }
 
 .inline {
-    display: table-cell;
+    display: table-cell !important;
+    width: auto !important;
 }
 
 .gravatar {
@@ -154,6 +155,8 @@ select[multiple], .text_input, .yui-ac-input, input {
 .module .field {
     margin-top: 4px;
     vertical-align: top;
+    display: table;
+    width: 100%;
 }
 
 .module .field.right {
@@ -340,10 +343,6 @@ input[type="number"] {
     width: 100%;
 }
 
-#attachments tr:hover {
-    background-image: linear-gradient(to right, #666, rgba(0, 0, 0, 0) 1px);
-}
-
 #attachments td {
     padding: 4px 8px;
     vertical-align: top;
@@ -387,7 +386,7 @@ input[type="number"] {
     text-decoration: line-through;
 }
 
-#attachments .attach-patch {
+#attachments .attach-desc-td {
     background: #ffc;
     background-image: linear-gradient(to right, #ffc, #fff);
 }
@@ -781,6 +780,10 @@ div.ui-tooltip {
 }
 
 /* product search */
+
+#field-product {
+    white-space: nowrap;
+}
 
 #product-search-container {
     white-space: nowrap;

@@ -110,8 +110,10 @@ There are two ways to authenticate yourself:
 
 You can specify ``Bugzilla_api_key`` or simply ``api_key`` as an argument to
 any call, and you will be logged in as that user if the key is correct and has
-not been revoked. You can set up an API key by using the 'API Key' tab in the
+not been revoked. You can set up an API key by using the :ref:`API Keys tab <api-keys>` in the
 Preferences pages.
+
+API keys may also be requested via :ref:`Authentication Delegation <auth-delegation>`.
 
 **Login and Password**
 

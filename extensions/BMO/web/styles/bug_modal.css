@@ -12,3 +12,11 @@
     border: 1px solid #ddd;
     border-radius: 4px;
 }
+
+#unassigned_with_patches {
+    padding-left: 4px;
+}
+
+#unassigned_with_patches img {
+    vertical-align: sub;
+}

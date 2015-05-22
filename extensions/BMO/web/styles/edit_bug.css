@@ -39,3 +39,11 @@ input#cf_rank {
     text-align: right;
     width: 3em;
 }
+
+#unassigned_with_patches {
+    font-weight: normal;
+}
+
+#unassigned_with_patches img {
+    vertical-align: sub;
+}

@@ -174,5 +174,8 @@ function toggle_display(link) {
       [% END %]
     </td>
   </tr>
+
+  [%# BMO - attachment related warnings %]
+  [% Hook.process("warnings") %]
 </table>
 <br>

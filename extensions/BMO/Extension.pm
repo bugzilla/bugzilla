@@ -65,6 +65,8 @@ our $VERSION = '0.1';
 BEGIN {
     *Bugzilla::Bug::last_closed_date                = \&_last_closed_date;
     *Bugzilla::Bug::reporters_hw_os                 = \&_bug_reporters_hw_os;
+    *Bugzilla::Bug::is_unassigned                   = \&_bug_is_unassigned;
+    *Bugzilla::Bug::has_patch                       = \&_bug_has_patch;
     *Bugzilla::Product::default_security_group      = \&_default_security_group;
     *Bugzilla::Product::default_security_group_obj  = \&_default_security_group_obj;
     *Bugzilla::Product::group_always_settable       = \&_group_always_settable;
@@ -759,6 +761,23 @@ sub _bug_reporters_hw_os {
         $memcached->set({ key => 'bug.ua.' . $self->id, value => $hw_os });
     }
     return $self->{ua_hw_os} = $hw_os;
+}
+
+sub _bug_is_unassigned {
+    my ($self) = @_;
+    my $assignee = $self->assigned_to->login;
+    return $assignee eq 'nobody@mozilla.org' || $assignee =~ /\.bugs$/;
+}
+
+sub _bug_has_patch {
+    my ($self) = @_;
+    foreach my $attachment (@{ $self->attachments }) {
+        return 1 if
+            $attachment->ispatch
+            || $attachment->contenttype eq 'text/x-github-pull-request'
+            || $attachment->contenttype eq 'text/x-review-board-request';
+    }
+    return 0;
 }
 
 sub _product_default_platform_id { $_[0]->{default_platform_id} }

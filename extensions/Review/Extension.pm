@@ -13,6 +13,7 @@ use base qw(Bugzilla::Extension);
 our $VERSION = '1';
 
 use Bugzilla;
+use Bugzilla::Config::Common qw(check_numeric);
 use Bugzilla::Constants;
 use Bugzilla::Error;
 use Bugzilla::Extension::Review::FlagStateActivity;
@@ -24,11 +25,6 @@ use Bugzilla::User::Setting;
 use Bugzilla::Util qw(clean_text datetime_from);
 
 use constant UNAVAILABLE_RE => qr/\b(?:unavailable|pto|away)\b/i;
-
-# This extension prevents you from assigning reviews to inactive reviewers,
-# with this constant defining 'inactive'. Set the value to 0 to disable this
-# prevention.
-use constant MAX_REVIEWER_LAST_SEEN_DAYS_AGO => 60;
 
 #
 # monkey-patched methods
@@ -94,13 +90,13 @@ sub _reviewers_objs {
 sub _user_is_active {
     my ($self) = @_;
 
-    return 1 if MAX_REVIEWER_LAST_SEEN_DAYS_AGO == 0; # feature disabled
+    return 1 unless Bugzilla->params->{max_reviewer_last_seen};
     return 0 if !defined($self->last_seen_date);
 
     my $dt = datetime_from($self->last_seen_date);
     my $days_ago = $dt->delta_days(DateTime->now())->in_units('days');
 
-    return $days_ago <= MAX_REVIEWER_LAST_SEEN_DAYS_AGO;
+    return $days_ago <= Bugzilla->params->{max_reviewer_last_seen};
 }
 
 sub _user_review_count {
@@ -618,7 +614,7 @@ sub flag_end_of_update {
             if (!$reviewer_obj->is_active) {
                 ThrowUserError('reviewer_inactive', {
                     reviewer => $reviewer_obj,
-                    timeout  => MAX_REVIEWER_LAST_SEEN_DAYS_AGO
+                    timeout  => Bugzilla->params->{max_reviewer_last_seen}
                 });
             }
         }
@@ -1042,6 +1038,17 @@ sub install_filesystem {
 sub install_before_final_checks {
     my ($self, $args) = @_;
     add_setting('block_reviews', ['on', 'off'], 'off');
+}
+
+sub config_modify_panels {
+    my ($self, $args) = @_;
+    push @{ $args->{panels}->{advanced}->{params} }, {
+        name    => 'max_reviewer_last_seen',
+        type    => 't',
+        default => '',
+        default => 0,
+        checker => \&check_numeric,
+    };
 }
 
 __PACKAGE__->NAME;

@@ -27,7 +27,7 @@ my $dbh = Bugzilla->dbh;
 # set Bugzilla usage mode to USAGE_MODE_CMDLINE
 Bugzilla->usage_mode(USAGE_MODE_CMDLINE);
 
-Bugzilla->set_user(Bugzilla::User->new({ name => 'admin@mozilla.bugs' }));
+Bugzilla->set_user(Bugzilla::User->check({ name => 'admin@mozilla.bugs' }));
 
 ##########################################################################
 #  Set Default User Preferences

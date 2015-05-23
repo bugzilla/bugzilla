@@ -80,7 +80,7 @@ sub generate_email {
     } else {
         $email->content_type_set('multipart/alternative');
         # Some mail clients need same encoding for each part, even empty ones.
-        $email->charset_set('UTF-8') if Bugzilla->params->{'utf8'};
+        $email->charset_set('UTF-8');
     }
     $email->parts_set(\@parts);
     return $email;

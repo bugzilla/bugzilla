@@ -191,6 +191,7 @@ END;
 
         [% CASE constants.FIELD_TYPE_USER %]
           [%# single user %]
+          <input type="hidden" name="defined_[% name FILTER html %]" value="[% value FILTER html %]">
           [% INCLUDE global/userselect.html.tmpl
               id = name
               name = name
@@ -200,6 +201,7 @@ END;
 
         [% CASE constants.FIELD_TYPE_USERS %]
           [%# multiple users %]
+          <input type="hidden" name="defined_[% name FILTER html %]" value="[% value.join(", ") FILTER html %]">
           [% INCLUDE global/userselect.html.tmpl
               id = name
               name = name

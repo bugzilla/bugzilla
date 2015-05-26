@@ -309,6 +309,10 @@ input[type="number"] {
     float: right;
 }
 
+#add-cc {
+    width: 100%;
+}
+
 /* actions */
 
 #top-actions {

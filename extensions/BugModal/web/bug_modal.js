@@ -324,32 +324,24 @@ $(function() {
                     });
 
                     // keywords is a multi-value autocomplete
-                    // (this should probably be a simple jquery plugin)
                     keywords = data.keywords;
                     $('#keywords')
-                        .bind('keydown', function(event) {
-                            if (event.keyCode == $.ui.keyCode.TAB && $(this).autocomplete('instance').menu.active)
-                            {
-                                event.preventDefault();
-                            }
-                        })
-                        .blur(function() {
-                            $(this).val($(this).val().replace(/,\s*$/, ''));
-                        })
-                        .autocomplete({
-                            source: function(request, response) {
-                                response($.ui.autocomplete.filter(keywords, request.term.split(/,\s*/).pop()));
+                        .devbridgeAutocomplete({
+                            lookup: keywords,
+                            tabDisabled: true,
+                            delimiter: /,\s*/,
+                            minChars: 0,
+                            autoSelectFirst: true,
+                            formatResult: function(suggestion, currentValue) {
+                                // disable <b> wrapping of matched substring
+                                return suggestion.value
+                                    .replace(/&/g, '&amp;')
+                                    .replace(/</g, '&lt;')
+                                    .replace(/>/g, '&gt;')
+                                    .replace(/"/g, '&quot;');
                             },
-                            focus: function() {
-                                return false;
-                            },
-                            select: function(event, ui) {
-                                var terms = this.value.split(/,\s*/);
-                                terms.pop();
-                                terms.push(ui.item.value);
-                                terms.push('');
-                                this.value = terms.join(', ');
-                                return false;
+                            onSelect: function() {
+                                this.focus();
                             }
                         });
 
@@ -886,27 +878,20 @@ $(function() {
             $('#product-search').show();
         });
     $('#pcs')
-        .on('autocompleteselect', function(event, ui) {
-            $('#product-search-error').hide();
-            $('.pcs-form').hide();
-            $('#product-search-cancel').hide();
-            $('#product-search').show();
-            if ($('#product').val() != ui.item.product) {
-                $('#component').data('preselect', ui.item.component);
-                $('#product').val(ui.item.product).change();
-            }
-            else {
-                $('#component').val(ui.item.component);
-            }
-            $('#product').show();
-        })
-        .autocomplete('option', 'autoFocus', true)
-        .keydown(function(event) {
-            if (event.which == 13) {
-                event.preventDefault();
-                var enterKeyEvent = $.Event("keydown");
-                enterKeyEvent.keyCode = $.ui.keyCode.ENTER;
-                $('#pcs').trigger(enterKeyEvent);
+        .devbridgeAutocomplete('setOptions', {
+            onSelect: function(suggestion) {
+                $('#product-search-error').hide();
+                $('.pcs-form').hide();
+                $('#product-search-cancel').hide();
+                $('#product-search').show();
+                if ($('#product').val() != suggestion.data.product) {
+                    $('#component').data('preselect', suggestion.data.component);
+                    $('#product').val(suggestion.data.product).change();
+                }
+                else {
+                    $('#component').val(suggestion.data.component);
+                }
+                $('#product').show();
             }
         });
     $(document)

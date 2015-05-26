@@ -34,11 +34,11 @@
   [% IF user.can_tag_comments %]
     <div id="bz_ctag_div" class="bz_default_hidden">
       <a href="javascript:void(0)" onclick="YAHOO.bugzilla.commentTagging.hideInput()">x</a>
-      <div>
+      <span>
         <input id="bz_ctag_add" size="10" placeholder="add tag"
               maxlength="[% constants.MAX_COMMENT_TAG_LENGTH FILTER html %]">
         <span id="bz_ctag_autocomp"></span>
-      </div>
+      </span>
       [<a href="https://wiki.mozilla.org/BMO/comment_tagging"
           target="_blank" title="About Comment Tagging">help</a>]
       &nbsp;

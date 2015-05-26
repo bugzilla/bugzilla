@@ -27,7 +27,7 @@ use Bugzilla::Constants;
 use Bugzilla::Error;
 use Bugzilla::Group;
 use Bugzilla::User;
-use Bugzilla::Util qw(trim);
+use Bugzilla::Util qw(trim detaint_natural);
 use Bugzilla::WebService::Util qw(filter filter_wants validate
                                   translate params_to_objects);
 use Bugzilla::Hook;
@@ -207,11 +207,14 @@ sub get {
                                             userid => $obj->id});
         }
     }
-    
+
     # User Matching
     my $limit;
-    if ($params->{'maxusermatches'}) {
-        $limit = $params->{'maxusermatches'} + 1;
+    if ($params->{limit}) {
+        detaint_natural($params->{limit})
+            || ThrowCodeError('param_must_be_numeric',
+                              { function => 'User.match', param => 'limit' });
+        $limit = $limit ? min($params->{limit}, $limit) : $params->{limit};
     }
     my $exclude_disabled = $params->{'include_disabled'} ? 0 : 1;
     foreach my $match_string (@{ $params->{'match'} || [] }) {

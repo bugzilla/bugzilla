@@ -668,17 +668,6 @@ input.required, select.required, span.required_explanation {
     background-color: #FFEBEB;
 }
 
-/* jquery-ui overrides */
-
-.ui-autocomplete {
-    /* set a max height for autocomplete lists */
-    overflow-y: auto;
-    overflow-x: hidden;
-    max-height: 500px;
-    /* hovering over the bottom item increases the height by 1px, resulting in a scrollbar */
-    padding-bottom: 1px !important;
-}
-
 /* always use our font and size */
 .ui-widget {
     font-family: inherit !important;
@@ -688,4 +677,34 @@ input.required, select.required, span.required_explanation {
 /* menu items shouldn't be bold */
 .ui-menu .ui-menu-item {
     font-weight: normal !important;
+}
+
+/* autocomplete */
+
+.autocomplete-suggestions {
+    border: 1px solid #999;
+    background: #fff;
+    color: #000;
+    overflow-x: hidden;
+    overflow-y: auto;
+    cursor: pointer;
+}
+
+.autocomplete-suggestion {
+    padding: 2px 5px;
+    white-space: nowrap;
+    overflow: hidden;
+    width: 100%;
+    margin-right: 1.5em;
+}
+
+.autocomplete-selected {
+    background: #426fd9;
+    color: #FFF
+}
+
+.autocomplete-running {
+    background-image: url("throbber.gif") !important;
+    background-repeat: no-repeat !important;
+    background-position: right 8px center !important;
 }

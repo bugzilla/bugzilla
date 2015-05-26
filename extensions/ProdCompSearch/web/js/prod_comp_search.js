@@ -9,112 +9,142 @@
 
 $(function() {
     'use strict';
-    $('.prod_comp_search').autocomplete({
-        minLength: 3,
-        delay: 500,
-        source: function(request, response) {
-            var el = this.element;
-            $(document).trigger('pcs:search', [ el ]);
-            var id = '#' + el.prop('id');
-            var throbber = $('#' + $(el).data('throbber'));
-            throbber.show();
-            $(id + '-no_components').hide();
-            $(id + '-too_many_components').hide();
-            $(id + '-error').hide();
-            var url = 'rest/prod_comp_search/' + encodeURIComponent(request.term) +
-                     '?limit=' + (el.data('max_results') + 1);
-            if (BUGZILLA.api_token) {
-                url += '&Bugzilla_api_token=' + encodeURIComponent(BUGZILLA.api_token);
-            }
-            $.ajax({
-                url: url,
-                contentType: 'application/json'
-            })
-            .done(function(data) {
-                throbber.hide();
-                if (data.error) {
-                    $(id + '-error').show();
-                    console.log(data.message);
-                    return false;
-                }
-                if (data.products.length === 0) {
-                    $(id + '-no_results').show();
-                    $(document).trigger('pcs:no_results', [ el ]);
-                }
-                else if (data.products.length > el.data('max_results')) {
-                    $(id + '-too_many_results').show();
-                    $(document).trigger('pcs:too_many_results', [ el ]);
-                }
-                else {
-                    $(document).trigger('pcs:results', [ el, data ]);
-                }
-                var current_product = "";
-                var prod_comp_array = [];
-                var base_params = [];
-                if (el.data('format')) {
-                    base_params.push('format=' + encodeURIComponent(el.data('format')));
-                }
-                if (el.data('cloned_bug_id')) {
-                    base_params.push('cloned_bug_id=' + encodeURIComponent(el.data('cloned_bug_id')));
-                }
-                $.each(data.products, function() {
-                    var params = base_params.slice();
-                    params.push('product=' + encodeURIComponent(this.product));
-                    if (this.product != current_product) {
-                        prod_comp_array.push({
-                            label:   this.product,
-                            product: this.product,
-                            url:     el.data('script_name') + '?' + params.join('&')
-                        });
-                        current_product = this.product;
+
+    function hideNotifications(target) {
+        var id = '#' + $(target).prop('id');
+        var that = $(id);
+        if (that.data('counter') === 0)
+            that.removeClass('autocomplete-running');
+        $(id + '-no_results').hide();
+        $(id + '-too_many_results').hide();
+        $(id + '-error').hide();
+    }
+
+    function searchComplete(query, suggestions) {
+        var that = $(this);
+        var id = '#' + that.prop('id');
+
+        that.data('counter', that.data('counter') - 1);
+        hideNotifications(this);
+        if (document.activeElement != this)
+            that.devbridgeAutocomplete('hide');
+        if (that.data('error')) {
+            searchError.call(that[0], null, null, null, that.data('error'));
+            that.data('error', '');
+        }
+
+        if (suggestions.length === 0) {
+            $(id + '-no_results').show();
+            $(document).trigger('pcs:no_results', [ that ]);
+        }
+        else if (suggestions.length > that.data('max_results')) {
+            $(id + '-too_many_results').show();
+            $(document).trigger('pcs:too_many_results', [ that ]);
+        }
+        else {
+            $(document).trigger('pcs:results', [ that, suggestions ]);
+        }
+    }
+
+    function searchError(q, jqXHR, textStatus, errorThrown) {
+        var that = $(this);
+        that.data('counter', that.data('counter') - 1);
+        hideNotifications(this);
+        if (errorThrown !== 'abort') {
+            $('#' + that.attr('id') + '-error').show();
+            console.log(errorThrown);
+        }
+    }
+
+    $('.prod_comp_search')
+        .each(function() {
+            var that = $(this);
+            that.devbridgeAutocomplete({
+                serviceUrl: function(query) {
+                    return 'rest/prod_comp_search/' + encodeURIComponent(query);
+                },
+                params: {
+                    Bugzilla_api_token: (BUGZILLA.api_token ? BUGZILLA.api_token : ''),
+                    limit: (that.data('max_results') + 1)
+                },
+                deferRequestBy: 250,
+                minChars: 3,
+                maxHeight: 500,
+                tabDisabled: true,
+                autoSelectFirst: true,
+                triggerSelectOnValidInput: false,
+                width: '',
+                transformResult: function(response) {
+                    response = $.parseJSON(response);
+                    if (response.error) {
+                        that.data('error', response.message);
+                        return { suggestions: [] };
                     }
-                    params.push('component=' + encodeURIComponent(this.component));
-                    var url = el.data('script_name') + '?' + params.join('&');
-                    if (el.data('anchor_component')) {
-                        url += "#" + encodeURIComponent(this.component);
+                    return {
+                        suggestions: $.map(response.products, function(dataItem) {
+                            if (dataItem.component) {
+                                return {
+                                    value: dataItem.product + ' :: ' + dataItem.component,
+                                    data : dataItem
+                                };
+                            }
+                            else {
+                                return {
+                                    value: dataItem.product,
+                                    data : dataItem
+                                };
+                            }
+                        })
+                    };
+                },
+                formatResult: function(suggestion, currentValue) {
+                    var value = (suggestion.data.component ? suggestion.data.component : suggestion.data.product);
+                    var escaped = value
+                        .replace(/&/g, '&amp;')
+                        .replace(/</g, '&lt;')
+                        .replace(/>/g, '&gt;')
+                        .replace(/"/g, '&quot;');
+                    if (suggestion.data.component) {
+                        return '-&nbsp;' + escaped;
                     }
-                    prod_comp_array.push({
-                        label:     this.product + ' :: ' + this.component,
-                        product:   this.product,
-                        component: this.component,
-                        url:       url
-                    });
-                });
-                response(prod_comp_array);
-            })
-            .fail(function(xhr, error_text) {
-                if (xhr.responseJSON && xhr.responseJSON.error) {
-                    error_text = xhr.responseJSON.message;
+                    else {
+                        return '<b>' + escaped + '</b>';
+                    }
+                    return suggestion.data.component ? '-&nbsp;' + escaped : escaped;
+                },
+                beforeRender: function(container) {
+                    container.css('min-width', that.outerWidth() - 2 + 'px');
+                },
+                onSearchStart: function(params) {
+                    var that = $(this);
+                    params.match = $.trim(params.match);
+                    that.addClass('autocomplete-running');
+                    that.data('counter', that.data('counter') + 1);
+                    that.data('error', '');
+                    hideNotifications(this);
+                },
+                onSearchComplete: searchComplete,
+                onSearchError: searchError,
+                onSelect: function(suggestion) {
+                    var that = $(this);
+                    if (that.data('ignore-select'))
+                        return;
+
+                    var params = [];
+                    if (that.data('format'))
+                        params.push('format=' + encodeURIComponent(that.data('format')));
+                    if (that.data('cloned_bug_id'))
+                        params.push('cloned_bug_id=' + encodeURIComponent(that.data('cloned_bug_id')));
+                    params.push('product=' + encodeURIComponent(suggestion.data.product));
+                    if (suggestion.data.component)
+                        params.push('component=' + encodeURIComponent(suggestion.data.component));
+
+                    var url = that.data('script_name') + '?' + params.join('&');
+                    if (that.data('anchor_component') && suggestion.data.component)
+                        url += "#" + encodeURIComponent(suggestion.data.component);
+                    document.location.href = url;
                 }
-                throbber.hide();
-                $(id + '-comp_error').show();
-                $(document).trigger('pcs:error', [ el, error_text ]);
-                console.log(error_text);
             });
-        },
-        focus: function(event, ui) {
-            event.preventDefault();
-        },
-        select: function(event, ui) {
-            event.preventDefault();
-            var el = $(this);
-            el.val(ui.item.label);
-            if (el.data('ignore-select')) {
-                return;
-            }
-            if (el.data('new_tab')) {
-                window.open(ui.item.url, '_blank');
-            }
-            else {
-                window.location.href = ui.item.url;
-            }
-        }
-    })
-    .focus(function(event) {
-        var el = $(event.target);
-        if (el.val().length >= el.autocomplete('option', 'minLength')) {
-            el.autocomplete('search');
-        }
-    });
-    $('.prod_comp_search:focus').select();
+        })
+        .data('counter', 0);
 });

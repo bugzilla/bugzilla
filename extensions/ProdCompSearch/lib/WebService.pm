@@ -113,7 +113,7 @@ sub prod_comp_search {
         unshift @order, "products.name != 'bugzilla.mozilla.org'";
     }
 
-    my $products = $dbh->selectall_arrayref("
+    my $components = $dbh->selectall_arrayref("
         SELECT products.name AS product,
                components.name AS component
           FROM products
@@ -124,6 +124,15 @@ sub prod_comp_search {
       ORDER BY " . join(", ", @order) . " $limit",
         { Slice => {} });
 
+    my $products = [];
+    my $current_product;
+    foreach my $component (@$components) {
+        if (!$current_product || $component->{product} ne $current_product) {
+            $current_product = $component->{product};
+            push @$products, { product => $current_product };
+        }
+        push @$products, $component;
+    }
     return { products => $products };
 }
 

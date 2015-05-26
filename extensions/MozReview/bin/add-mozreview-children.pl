@@ -31,7 +31,7 @@ use JSON;
 use LWP::Simple qw( get $ua );
 
 if (my $proxy = Bugzilla->params->{proxy_url}) {
-    $ua->proxy($proxy);
+    $ua->proxy('https', $proxy);
 }
 
 # Disable the "cannot ask for review" so we can reassign their flags to

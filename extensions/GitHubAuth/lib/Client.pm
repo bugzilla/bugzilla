@@ -56,9 +56,11 @@ sub login_uri {
 sub get_email_key {
     my ($class, $email) = @_;
 
+    my $cgi    = Bugzilla->cgi;
     my $digest = Digest->new(DIGEST_HASH);
     $digest->add($email);
     $digest->add(remote_ip());
+    $digest->add($cgi->cookie('Bugzilla_github_token') // '');
     $digest->add(Bugzilla->localconfig->{site_wide_secret});
     return $digest->hexdigest;
 }
@@ -79,9 +81,11 @@ sub get_state {
     $sorted_target->query_param_delete('GoAheadAndLogIn');
     $sorted_target->query_param_delete('github_login');
 
+    my $cgi    = Bugzilla->cgi;
     my $digest = Digest->new(DIGEST_HASH);
     $digest->add($sorted_target->as_string);
     $digest->add(remote_ip());
+    $digest->add($cgi->cookie('Bugzilla_github_token') // '');
     $digest->add(Bugzilla->localconfig->{site_wide_secret});
     return $digest->hexdigest;
 }

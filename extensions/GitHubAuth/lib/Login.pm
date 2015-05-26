@@ -14,7 +14,7 @@ use fields qw(github_failure);
 use Scalar::Util qw(blessed);
 
 use Bugzilla::Constants qw(AUTH_NODATA AUTH_ERROR USAGE_MODE_BROWSER );
-use Bugzilla::Util qw(trick_taint correct_urlbase);
+use Bugzilla::Util qw(trick_taint correct_urlbase generate_random_password);
 use Bugzilla::Extension::GitHubAuth::Client;
 use Bugzilla::Extension::GitHubAuth::Client::Error ();
 use Bugzilla::Extension::GitHubAuth::Util qw(target_uri);
@@ -30,6 +30,14 @@ sub get_login_info {
     my $github_login     = $cgi->param('github_login');
     my $github_email     = $cgi->param('github_email');
     my $github_email_key = $cgi->param('github_email_key');
+
+    my $cookie = $cgi->cookie('Bugzilla_github_token');
+    unless ($cookie) {
+        $cgi->send_cookie(-name     => 'Bugzilla_github_token',
+                          -value    => generate_random_password(),
+                          Bugzilla->params->{'ssl_redirect'} ? ( -secure => 1 ) : (),
+                          -httponly => 1);
+    }
 
     return { failure => AUTH_NODATA } unless $github_login;
 
@@ -105,6 +113,7 @@ sub _get_login_info_from_github {
 
     if (@allowed_bugzilla_users == 1) {
         my ($user) = @allowed_bugzilla_users;
+        $cgi->remove_cookie('Bugzilla_github_token');
         return { username => $user->login, user_id => $user->id, github_auth => 1 };
     }
     elsif (@allowed_bugzilla_users > 1) {
@@ -151,6 +160,7 @@ sub _get_login_info_from_email {
     return { failure    => AUTH_ERROR,
              user_error => 'github_auth_account_too_powerful' } if $user && $user->in_group('no-github-auth');
 
+    $cgi->remove_cookie('Bugzilla_github_token');
     return { username => $github_email, github_auth => 1 };
 }
 

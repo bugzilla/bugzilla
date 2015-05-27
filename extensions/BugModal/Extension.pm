@@ -256,6 +256,22 @@ sub template_before_process {
     $vars->{tracking_flags_table} = \@tracking_table;
 }
 
+sub bug_start_of_set_all {
+    my ($self, $args) = @_;
+    my $bug = $args->{bug};
+    my $params = $args->{params};
+
+    # reset to the component defaults if not supplied
+    if (exists $params->{assigned_to} && (!defined $params->{assigned_to} || $params->{assigned_to} eq '')) {
+        $params->{assigned_to} = $bug->component_obj->default_assignee->login;
+    }
+    if (exists $params->{qa_contact} && (!defined $params->{qa_contact} || $params->{qa_contact} eq '')
+        && $bug->component_obj->default_qa_contact->id)
+    {
+        $params->{qa_contact} = $bug->component_obj->default_qa_contact->login;
+    }
+}
+
 sub webservice {
     my ($self,  $args) = @_;
     my $dispatch = $args->{dispatch};

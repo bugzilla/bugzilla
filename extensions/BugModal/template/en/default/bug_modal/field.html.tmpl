@@ -24,6 +24,7 @@
   # hide_on_edit: (boolean) hide content when in edit mode (default: false)
   # append_content: (boolean) when called as a WRAPPER, the content will be appended to the
   #                 edit html instead of replacing it.  forces edit_only (default: false);
+  # default: (string) default value (eg. used as a placeholder in user fields)
   #%]
 
 [%
@@ -197,6 +198,7 @@ END;
               name = name
               value = value.login
               classes = [ "bz_userfield" ]
+              placeholder = default
             %]
 
         [% CASE constants.FIELD_TYPE_USERS %]
@@ -207,6 +209,7 @@ END;
               name = name
               value = value.join(", ")
               classes = [ "bz_userfield" ]
+              placeholder = default
               multiple = 5
             %]
 

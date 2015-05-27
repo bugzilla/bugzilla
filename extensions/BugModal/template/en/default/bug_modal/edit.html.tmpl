@@ -466,6 +466,7 @@
         field_type = constants.FIELD_TYPE_USER
         hide_on_view = 1
         append_content = 1
+        default = bug.component_obj.default_assignee.login
     %]
       <div class="set-default-container" style="display:none">
         <input type="checkbox" id="set-default-assignee" name="set_default_assignee" class="set-default"
@@ -508,6 +509,7 @@
         field_type = constants.FIELD_TYPE_USER
         hide_on_view = 1
         append_content = 1
+        default = (bug.component_obj.default_qa_contact.id ? bug.component_obj.default_qa_contact.login : '')
     %]
       <div class="set-default-container" style="display:none">
         <input type="checkbox" id="set-default-qa-contact" name="set_default_qa_contact" class="set-default"

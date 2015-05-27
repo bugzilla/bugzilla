@@ -2415,6 +2415,9 @@ sub set_all {
     my $params = {};
     %$params = %$input_params;
 
+    # BMO - allow extensions to morph params
+    Bugzilla::Hook::process('bug_start_of_set_all', { bug => $self, params => $params });
+
     # You cannot mark bugs as duplicate when changing several bugs at once
     # (because currently there is no way to check for duplicate loops in that
     # situation). You also cannot set the alias of several bugs at once.

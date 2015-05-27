@@ -40,12 +40,13 @@ use base qw(Exporter);
                              validate_ip do_ssl_redirect_if_required use_attachbase
                              diff_arrays on_main_db
                              trim wrap_hard wrap_comment find_wrap_point
-                             format_time validate_date validate_time datetime_from
+                             format_time validate_date validate_time datetime_from time_ago
                              file_mod_time is_7bit_clean
                              bz_crypt generate_random_password
                              validate_email_syntax clean_text
                              get_text template_var disable_utf8
-                             enable_utf8 detect_encoding email_filter);
+                             enable_utf8 detect_encoding email_filter
+                             round);
 
 use Bugzilla::Constants;
 use Bugzilla::RNG qw(irand);
@@ -61,6 +62,7 @@ use Scalar::Util qw(tainted blessed);
 use Text::Wrap;
 use Encode qw(encode decode resolve_alias);
 use Encode::Guess;
+use POSIX qw(floor ceil);
 
 sub trick_taint {
     require Carp;
@@ -603,6 +605,30 @@ sub datetime_from {
     return $dt;
 }
 
+sub time_ago {
+    my ($param) = @_;
+    # DateTime object or seconds
+    my $ss = ref($param) ? time() - $param->epoch : $param;
+    my $mm = round($ss / 60);
+    my $hh = round($mm / 60);
+    my $dd = round($hh / 24);
+    my $mo = round($dd / 30);
+    my $yy = round($mo / 12);
+
+    return 'just now'           if $ss < 10;
+    return $ss . ' seconds ago' if $ss < 45;
+    return 'a minute ago'       if $ss < 90;
+    return $mm . ' minutes ago' if $mm < 45;
+    return 'an hour ago'        if $mm < 90;
+    return $hh . ' hours ago'   if $hh < 24;
+    return 'a day ago'          if $hh < 36;
+    return $dd . ' days ago'    if $dd < 30;
+    return 'a month ago'        if $dd < 45;
+    return $mo . ' months ago'  if $mo < 12;
+    return 'a year ago'         if $mo < 18;
+    return $yy . ' years ago';
+}
+
 sub file_mod_time {
     my ($filename) = (@_);
     my ($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,
@@ -848,6 +874,17 @@ sub _guess_iso {
         }
     }
     return $encoding;
+}
+
+# From Math::Round
+use constant ROUND_HALF => 0.50000000000008;
+sub round {
+    my @res = map {
+        $_ >= 0
+            ? floor($_ + ROUND_HALF)
+            : ceil($_ - ROUND_HALF);
+    } @_;
+    return (wantarray) ? @res : $res[0];
 }
 
 1;
@@ -1161,8 +1198,15 @@ You can optionally specify a timezone for the returned date. If not
 specified, defaults to the currently-logged-in user's timezone, or
 the Bugzilla server's local timezone if there isn't a logged-in user.
 
-=back
+=item C<time_ago($datetime_object)>, C<time_ago($seconds)>
 
+Returns a concise representation of the time passed.  eg. "11 months ago".
+
+Accepts either a DateTime object, which is assumed to be in the past, or
+seconds.
+
+
+=back
 
 =head2 Files
 
@@ -1237,5 +1281,25 @@ if Bugzilla is currently using the shadowdb or not. Used like:
      my $dbh = Bugzilla->dbh;
      $dbh->do("INSERT ...");
  }
+
+=back
+
+=head2 Math and Numbers
+
+=over
+
+=item C<round(@list)>
+
+Rounds the number(s) to the nearest integer. In scalar context, returns a
+single value; in list context, returns a list of values. Numbers that are
+halfway between two integers are rounded "to infinity"; i.e., positive values
+are rounded up (e.g., 2.5 becomes 3) and negative values down (e.g., -2.5
+becomes -3).
+
+=begin undocumented
+
+Lifted directly from Math::Round to avoid a new dependency for trivial code.
+
+=end undocumented
 
 =back

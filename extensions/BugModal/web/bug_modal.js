@@ -8,6 +8,17 @@
 $(function() {
     'use strict';
 
+    // update relative dates
+    window.setInterval(function() {
+        var now = Math.floor(new Date().getTime() / 1000);
+        $('.rel-time').each(function() {
+            $(this).text(timeAgo(now - $(this).data('time')));
+        });
+        $('.rel-time-title').each(function() {
+            $(this).attr('title', timeAgo(now - $(this).data('time')));
+        });
+    }, 60000);
+
     // all keywords for autocompletion (lazy-loaded on edit)
     var keywords = [];
 

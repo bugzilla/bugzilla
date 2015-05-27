@@ -17,10 +17,9 @@ use Bugzilla::Extension::BugModal::MonkeyPatches;
 use Bugzilla::Extension::BugModal::Util qw(date_str_to_time);
 use Bugzilla::Constants;
 use Bugzilla::User::Setting;
-use Bugzilla::Util qw(trick_taint datetime_from html_quote);
+use Bugzilla::Util qw(trick_taint datetime_from html_quote time_ago);
 use List::MoreUtils qw(any);
 use Template::Stash;
-use Time::Duration qw(ago);
 
 our $VERSION = '1';
 
@@ -55,7 +54,7 @@ sub template_after_create {
     my ($self, $args) = @_;
     my $context = $args->{template}->context;
 
-    # wrapper around Time::Duration::ago()
+    # wrapper around time_ago()
     $context->define_filter(
         time_duration => sub {
             my ($context) = @_;
@@ -63,7 +62,7 @@ sub template_after_create {
                 my ($timestamp) = @_;
                 my $datetime = datetime_from($timestamp)
                     // return $timestamp;
-                return ago(abs(time() - $datetime->epoch));
+                return time_ago($datetime);
             };
         }, 1
     );

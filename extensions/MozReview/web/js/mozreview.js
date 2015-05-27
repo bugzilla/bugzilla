@@ -8,43 +8,6 @@
 
 var MozReview = {};
 
-MozReview.formatElapsedTime = function(s, val) {
-    val = Math.floor(val);
-    return val + ' ' + s + (val == 1 ? '' : 's') + ' ago';
-};
-
-MozReview.elapsedTime = function(d) {
-    var ms = Date.now() - d;
-
-    var seconds = ms / 1000;
-    if (seconds < 60) {
-        return MozReview.formatElapsedTime('second', seconds);
-    }
-
-    var minutes = seconds / 60;
-    if (minutes < 60) {
-        return MozReview.formatElapsedTime('minute', minutes);
-    }
-
-    var hours = minutes / 60;
-    if (hours < 24) {
-        return MozReview.formatElapsedTime('hour', hours);
-    }
-
-    var days = hours / 24;
-    if (days < 30) {
-        return MozReview.formatElapsedTime("day", days);
-    }
-
-    var months = days / 30;  // enh fudge it
-    if (months < 12) {
-        return MozReview.formatElapsedTime("month", months);
-    }
-
-    var years = months / 12;
-    return MozReview.formatElapsedTime("year", years);
-};
-
 MozReview.getReviewRequest = function() {
     var hostUrl = $('.mozreview-requests').data('mozreviewUrl');
     var tr = $('<tr/>');
@@ -83,7 +46,7 @@ MozReview.getReviewRequest = function() {
             td.clone().text(rr.status),
             td.clone().text(rr.issue_open_count)
                       .addClass('mozreview-open-issues'),
-            td.clone().text(MozReview.elapsedTime(new Date(rr.last_updated)))
+            td.clone().text(timeAgo(new Date(rr.last_updated)))
         );
 
         if (rr.status == "discarded") {

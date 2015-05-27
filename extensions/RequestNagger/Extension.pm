@@ -14,11 +14,10 @@ use base qw(Bugzilla::Extension);
 
 use Bugzilla::Constants;
 use Bugzilla::Error;
-use Bugzilla::Extension::RequestNagger::TimeAgo qw(time_ago);
 use Bugzilla::Flag;
 use Bugzilla::Install::Filesystem;
 use Bugzilla::User::Setting;
-use Bugzilla::Util qw(datetime_from detaint_natural);
+use Bugzilla::Util qw(datetime_from detaint_natural time_ago);
 use DateTime;
 
 our $VERSION = '1';

@@ -9,13 +9,7 @@ package Bugzilla::Extension::BugModal;
 use strict;
 
 use constant NAME => 'BugModal';
-use constant REQUIRED_MODULES => [
-    {
-        package => 'Time-Duration',
-        module  => 'Time::Duration',
-        version => 0
-    },
-];
+use constant REQUIRED_MODULES => [ ];
 use constant OPTIONAL_MODULES => [ ];
 
 __PACKAGE__->NAME;

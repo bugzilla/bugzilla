@@ -341,3 +341,30 @@ function bz_toggleClass(anElement, aClass) {
         YAHOO.util.Dom.addClass(anElement, aClass);
     }
 }
+
+/* Retruns a string representation of a duration.
+ *
+ * @param ss   Duration in seconds
+ * or
+ * @param date Date object
+ */
+function timeAgo(param) {
+    var ss = param.constructor === Date ? Math.round((new Date() - param) / 1000) : param;
+    var mm = Math.round(ss / 60),
+        hh = Math.round(mm / 60),
+        dd = Math.round(hh / 24),
+        mo = Math.round(dd / 30),
+        yy = Math.round(mo / 12);
+    if (ss < 10) return 'just now';
+    if (ss < 45) return ss + ' seconds ago';
+    if (ss < 90) return 'a minute ago';
+    if (mm < 45) return mm + ' minutes ago';
+    if (mm < 90) return 'an hour ago';
+    if (hh < 24) return hh + ' hours ago';
+    if (hh < 36) return 'a day ago';
+    if (dd < 30) return dd + ' days ago';
+    if (dd < 45) return 'a month ago';
+    if (mo < 12) return mo + ' months ago';
+    if (mo < 18) return 'a year ago';
+    return yy + ' years ago';
+}

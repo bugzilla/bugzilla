@@ -174,14 +174,14 @@ sub _send_email {
     my @reports         = qw( requestee setter );
     my $recipient_id    = $params->{recipient_id};
     my $requests        = $params->{requests};
-    my $watching        = $params{template} eq 'watching';
+    my $watching        = $params->{template} eq 'watching';
     my $recipient       = Bugzilla::User->new({ id => $recipient_id, cache => 1 });
     my $securemail      = Bugzilla::User->can('public_key');
     my $has_key         = $securemail && $recipient->public_key;
     my $has_private_bug = 0;
 
-    my $settings = Bugzilla::Extension::RequestNagger::Setting->new($recipient_id);
-    if ($watching && $setting->no_encryption) {
+    my $settings = Bugzilla::Extension::RequestNagger::Settings->new($recipient_id);
+    if ($watching && $settings->no_encryption) {
         $has_key = 0;
     }
 

@@ -14,6 +14,7 @@ use base qw(Bugzilla::Extension);
 
 use Bugzilla::Constants;
 use Bugzilla::Error;
+use Bugzilla::Extension::RequestNagger::Settings;
 use Bugzilla::Flag;
 use Bugzilla::Install::Filesystem;
 use Bugzilla::User::Setting;
@@ -163,10 +164,6 @@ sub _defer_until {
     $dbh->bz_commit_transaction();
 }
 
-#
-# hooks
-#
-
 sub object_end_of_update {
     my ($self, $args) = @_;
     if ($args->{object}->isa("Bugzilla::Flag") && exists $args->{changes}) {
@@ -197,6 +194,8 @@ sub user_preferences {
             undef,
             $user->id
         ) };
+
+    my $nag_settings = Bugzilla::Extension::RequestNagger::Settings->new($user->id);
 
     if ($save) {
         my $input = Bugzilla->input_params;
@@ -247,10 +246,16 @@ sub user_preferences {
             }
         }
 
+        # watching settings
+        foreach my $field (Bugzilla::Extension::RequestNagger::Settings::FIELDS()) {
+            $nag_settings->set($field, $input->{$field});
+        }
+
         $dbh->bz_commit_transaction();
     }
 
     $vars->{watching} = [ sort keys %watching ];
+    $vars->{settings} = $nag_settings;
 
     my $handled = $args->{'handled'};
     $$handled = 1;

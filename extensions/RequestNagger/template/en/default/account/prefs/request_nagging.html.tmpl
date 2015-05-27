@@ -54,3 +54,18 @@
      multiple => 5
   %]
 </p>
+
+<h4>User Request Reminder Watching Preferences</h4>
+
+<input type="checkbox" id="reviews_only" name="reviews_only" value="1"
+  [%= "checked" IF settings.reviews_only %]>
+<label for="reviews_only">Report on review requests only</label><br>
+
+<input type="checkbox" id="extended_period" name="extended_period" value="1"
+  [%= "checked" IF settings.extended_period %]>
+<label for="extended_period">Extend overdue period by one day</label><br>
+
+<input type="checkbox" id="no_encryption" name="no_encryption" value="1"
+  [%= "checked" IF settings.no_encryption %]>
+<label for="no_encryption">Don't encrypt email (sensitive information will be sanitised)</label><br>
+<br>

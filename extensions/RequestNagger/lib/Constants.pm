@@ -147,12 +147,22 @@ sub WATCHING_REQUESTEE_NAG_SQL {
         LEFT JOIN nag_defer ON nag_defer.flag_id = flags.id
         INNER JOIN nag_watch ON nag_watch.nagged_id = flags.requestee_id
         INNER JOIN profiles AS watcher ON watcher.userid = nag_watch.watcher_id
+        LEFT JOIN nag_settings AS reviews_only ON reviews_only.user_id = nag_watch.watcher_id
+            AND reviews_only.setting_name = 'reviews_only'
+        LEFT JOIN nag_settings AS extended_period ON extended_period.user_id = nag_watch.watcher_id
+            AND extended_period.setting_name = 'extended_period'
     WHERE
-        " . $dbh->sql_in('flagtypes.name', \@flag_types_sql) . "
-        AND flags.status = '?'
+        flags.status = '?'
         AND products.nag_interval != 0
-        AND TIMESTAMPDIFF(HOUR, flags.modification_date, CURRENT_DATE()) >= products.nag_interval
         AND watcher.disable_mail = 0
+        AND CASE WHEN COALESCE(reviews_only.setting_value, 0) = 1
+            THEN flagtypes.name = 'review'
+            ELSE " . $dbh->sql_in('flagtypes.name', \@flag_types_sql) . "
+        END
+        AND CASE WHEN COALESCE(extended_period.setting_value, 0) = 1
+            THEN TIMESTAMPDIFF(HOUR, flags.modification_date, CURRENT_DATE()) >= products.nag_interval + 24
+            ELSE TIMESTAMPDIFF(HOUR, flags.modification_date, CURRENT_DATE()) >= products.nag_interval
+        END
     ORDER BY
         nag_watch.watcher_id,
         flags.requestee_id,
@@ -187,18 +197,27 @@ sub WATCHING_SETTER_NAG_SQL {
         LEFT JOIN nag_defer ON nag_defer.flag_id = flags.id
         INNER JOIN nag_watch ON nag_watch.nagged_id = flags.setter_id
         INNER JOIN profiles AS watcher ON watcher.userid = nag_watch.watcher_id
+        LEFT JOIN nag_settings AS reviews_only ON reviews_only.user_id = nag_watch.watcher_id
+            AND reviews_only.setting_name = 'reviews_only'
+        LEFT JOIN nag_settings AS extended_period ON extended_period.user_id = nag_watch.watcher_id
+            AND extended_period.setting_name = 'extended_period'
     WHERE
-        " . $dbh->sql_in('flagtypes.name', \@flag_types_sql) . "
-        AND flags.status = '?'
+        flags.status = '?'
         AND products.nag_interval != 0
-        AND TIMESTAMPDIFF(HOUR, flags.modification_date, CURRENT_DATE()) >= products.nag_interval
         AND watcher.disable_mail = 0
+        AND CASE WHEN COALESCE(reviews_only.setting_value, 0) = 1
+            THEN flagtypes.name = 'review'
+            ELSE " . $dbh->sql_in('flagtypes.name', \@flag_types_sql) . "
+        END
+        AND CASE WHEN COALESCE(extended_period.setting_value, 0) = 1
+            THEN TIMESTAMPDIFF(HOUR, flags.modification_date, CURRENT_DATE()) >= products.nag_interval + 24
+            ELSE TIMESTAMPDIFF(HOUR, flags.modification_date, CURRENT_DATE()) >= products.nag_interval
+        END
     ORDER BY
         nag_watch.watcher_id,
         flags.requestee_id,
         flags.modification_date
     ";
 }
-
 
 1;

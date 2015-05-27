@@ -22,7 +22,7 @@ use Bugzilla::Install::Filesystem;
 use Bugzilla::Search;
 use Bugzilla::User;
 use Bugzilla::User::Setting;
-use Bugzilla::Util qw(clean_text datetime_from);
+use Bugzilla::Util qw(clean_text datetime_from diff_arrays);
 
 use constant UNAVAILABLE_RE => qr/\b(?:unavailable|pto|away)\b/i;
 
@@ -589,11 +589,11 @@ sub _check_review_flag {
 
 sub flag_end_of_update {
     my ($self, $args) = @_;
-    my ($object, $new_flags) = @$args{qw(object new_flags)};
+    my ($object, $old_flags, $new_flags) = @$args{qw(object old_flags new_flags)};
     my $bug = $object->isa('Bugzilla::Attachment') ? $object->bug : $object;
 
-    foreach my $orig_change (@$new_flags) {
-        my $change = $orig_change; # work on a copy
+    my (undef, $added) = diff_arrays($old_flags, $new_flags);
+    foreach my $change (@$added) {
         $change =~ s/^[^:]+://;
         my $reviewer = '';
         if ($change =~ s/\(([^\)]+)\)$//) {

@@ -27,11 +27,20 @@ use Bugzilla::Mailer;
 use Bugzilla::User;
 use Bugzilla::Util qw(format_time);
 use Email::MIME;
+use File::Slurp qw(read_file);
+use File::Temp qw(tempfile);
+use JSON qw(encode_json decode_json);
 use Sys::Hostname qw(hostname);
 
 Bugzilla->usage_mode(USAGE_MODE_CMDLINE);
 
 my $DO_NOT_NAG = grep { $_ eq '-d' } @ARGV;
+@ARGV = grep { !/^-/ } @ARGV;
+
+if (my $filename = shift @ARGV) {
+    _send_email(decode_json(scalar read_file($filename)));
+    exit;
+}
 
 my $dbh = Bugzilla->dbh;
 my $date = $dbh->selectrow_array('SELECT LOCALTIMESTAMP(0)');
@@ -58,11 +67,9 @@ send_nags(
 );
 
 sub send_nags {
-    my (%args) = @_;
-
-    my @reports    = qw( requestee setter );
-    my $securemail = Bugzilla::User->can('public_key');
-    my $requests   = {};
+    my (%args)   = @_;
+    my @reports  = qw( requestee setter );
+    my $requests = {};
 
     # get requests
 
@@ -114,93 +121,21 @@ sub send_nags {
     # send emails
 
     foreach my $recipient_id (sort keys %$requests) {
-        my $recipient = Bugzilla::User->new({ id => $recipient_id, cache => 1 });
-        my $has_key = $securemail && $recipient->public_key;
-        my $has_private_bug = 0;
-
-        foreach my $target_login (keys %{ $requests->{$recipient_id} }) {
-            my $rh = $requests->{$recipient_id}->{$target_login};
-            $rh->{target} = Bugzilla::User->new({ name => $target_login, cache => 1 });
-            foreach my $report (@reports) {
-                foreach my $type (keys %{ $rh->{$report} }) {
-                    foreach my $request (@{ $rh->{$report}->{$type} }) {
-
-                        _create_objects($request);
-
-                        # we need to encrypt or censor emails which contain
-                        # non-public bugs
-                        if ($request->{bug}->is_private) {
-                            $has_private_bug = 1;
-                            $request->{bug}->{sanitise_bug} = !$securemail || !$has_key;
-                        }
-                        else {
-                            $request->{bug}->{sanitise_bug} = 0;
-                        }
-                    }
-                }
-            }
-        }
-        my $encrypt = $securemail && $has_private_bug && $has_key;
-
-        # generate email
-        my $template = Bugzilla->template_inner($recipient->setting('lang'));
-        my $template_file = $args{template};
-        my $vars = {
-            recipient => $recipient,
-            requests  => $requests->{$recipient_id},
-            date      => $args{date},
+        # send the email in a separate process to avoid excessive memory usage
+        my $params = {
+            recipient_id => $recipient_id,
+            template     => $args{template},
+            date         => $args{date},
+            requests     => $requests->{$recipient_id},
         };
+        my ($fh, $filename) = tempfile();
+        print $fh encode_json($params);
+        close($fh);
 
-        my ($header, $text);
-        $template->process("email/request_nagging-$template_file-header.txt.tmpl", $vars, \$header)
-            || ThrowTemplateError($template->error());
-        $header .= "\n";
-        $template->process("email/request_nagging-$template_file.txt.tmpl", $vars, \$text)
-            || ThrowTemplateError($template->error());
-
-        my @parts = (
-            Email::MIME->create(
-                attributes => { content_type => "text/plain" },
-                body => $text,
-            )
-        );
-        if ($recipient->setting('email_format') eq 'html') {
-            my $html;
-            $template->process("email/request_nagging-$template_file.html.tmpl", $vars, \$html)
-                || ThrowTemplateError($template->error());
-            push @parts, Email::MIME->create(
-                attributes => { content_type => "text/html" },
-                body => $html,
-            );
-        }
-
-        my $email = Email::MIME->new($header);
-        $email->header_set('X-Generated-By' => hostname());
-        if (scalar(@parts) == 1) {
-            $email->content_type_set($parts[0]->content_type);
-        }
-        else {
-            $email->content_type_set('multipart/alternative');
-        }
-        $email->parts_set(\@parts);
-        if ($encrypt) {
-            $email->header_set('X-Bugzilla-Encrypt' => '1');
-        }
-
-        # send
-        if ($DO_NOT_NAG) {
-            # uncomment the following line to enable other extensions to
-            # process this email, including encryption
-            # Bugzilla::Hook::process('mailer_before_send', { email => $email });
-            print $email->as_string, "\n";
-        }
-        else {
-            MessageToMTA($email);
-        }
-
-        # nuke objects to avoid excessive memory usage
-        $requests->{$recipient_id} = undef;
-        Bugzilla->clear_request_cache();
+        my @command = ($0, $filename);
+        push @command, '-d' if $DO_NOT_NAG;
+        system(@command);
+        unlink($filename);
     }
 }
 
@@ -230,6 +165,106 @@ sub _include_request {
     }
 
     return 1;
+}
+
+sub _send_email {
+    my ($params) = @_;
+
+    my @reports         = qw( requestee setter );
+    my $recipient_id    = $params->{recipient_id};
+    my $requests        = $params->{requests};
+    my $recipient       = Bugzilla::User->new({ id => $recipient_id, cache => 1 });
+    my $securemail      = Bugzilla::User->can('public_key');
+    my $has_key         = $securemail && $recipient->public_key;
+    my $has_private_bug = 0;
+
+    foreach my $target_login (keys %$requests) {
+        my $rh = $requests->{$target_login};
+        $rh->{target} = Bugzilla::User->new({ name => $target_login, cache => 1 });
+        foreach my $report (@reports) {
+            foreach my $type (keys %{ $rh->{$report} }) {
+                foreach my $request (@{ $rh->{$report}->{$type} }) {
+
+                    _create_objects($request);
+
+                    # we need to encrypt or censor emails which contain
+                    # non-public bugs
+                    if ($request->{bug}->is_private) {
+                        $has_private_bug = 1;
+                        $request->{bug}->{sanitise_bug} = !$securemail || !$has_key;
+                    }
+                    else {
+                        $request->{bug}->{sanitise_bug} = 0;
+                    }
+                }
+            }
+        }
+    }
+    my $encrypt = $securemail && $has_private_bug && $has_key;
+
+    # generate email
+    my $template = Bugzilla->template_inner($recipient->setting('lang'));
+    my $template_file = $params->{template};
+    my $vars = {
+        recipient => $recipient,
+        requests  => $requests,
+        date      => $params->{date},
+    };
+
+    my ($header, $text);
+    $template->process("email/request_nagging-$template_file-header.txt.tmpl", $vars, \$header)
+        || ThrowTemplateError($template->error());
+    $header .= "\n";
+    $template->process("email/request_nagging-$template_file.txt.tmpl", $vars, \$text)
+        || ThrowTemplateError($template->error());
+
+    my @parts = (
+        Email::MIME->create(
+            attributes => {
+                content_type => 'text/plain',
+                charset      => 'UTF-8',
+                encoding     => 'quoted-printable',
+            },
+            body_str => $text,
+        )
+    );
+    if ($recipient->setting('email_format') eq 'html') {
+        my $html;
+        $template->process("email/request_nagging-$template_file.html.tmpl", $vars, \$html)
+            || ThrowTemplateError($template->error());
+        push @parts, Email::MIME->create(
+            attributes => {
+                content_type => 'text/html',
+                charset      => 'UTF-8',
+                encoding     => 'quoted-printable',
+            },
+            body_str => $html,
+        );
+    }
+
+    my $email = Email::MIME->new($header);
+    $email->header_set('X-Generated-By' => hostname());
+    if (scalar(@parts) == 1) {
+        $email->content_type_set($parts[0]->content_type);
+    }
+    else {
+        $email->content_type_set('multipart/alternative');
+    }
+    $email->parts_set(\@parts);
+    if ($encrypt) {
+        $email->header_set('X-Bugzilla-Encrypt' => '1');
+    }
+
+    # send
+    if ($DO_NOT_NAG) {
+        # uncomment the following line to enable other extensions to
+        # process this email, including encryption
+        # Bugzilla::Hook::process('mailer_before_send', { email => $email });
+        print $email->as_string, "\n";
+    }
+    else {
+        MessageToMTA($email);
+    }
 }
 
 sub _create_objects {

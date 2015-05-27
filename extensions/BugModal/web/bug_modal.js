@@ -39,22 +39,25 @@ $(function() {
     }
 
     // expand/collapse module
-    function slide_module(module, action) {
+    function slide_module(module, action, fast) {
+        if (!module.attr('id'))
+            return;
         var latch = module.find('.module-latch');
         var spinner = $(latch.children('.module-spinner')[0]);
         var content = $(module.children('.module-content')[0]);
+        var duration = fast ? 0 : 200;
 
         function slide_done() {
             spinner.html(content.is(':visible') ? '&#9662;' : '&#9656;');
         }
         if (action == 'show') {
-            content.slideDown(200, 'swing', slide_done);
+            content.slideDown(duration, 'swing', slide_done);
         }
         else if (action == 'hide') {
-            content.slideUp(200, 'swing', slide_done);
+            content.slideUp(duration, 'swing', slide_done);
         }
         else {
-            content.slideToggle(200, 'swing', slide_done);
+            content.slideToggle(duration, 'swing', slide_done);
         }
     }
 
@@ -289,12 +292,9 @@ $(function() {
             $('.edit-hide').hide();
             $('.edit-show').show();
 
-            // expand specific modules
-            $('#module-details .module-header').each(function() {
-                if ($(this.parentNode).find('.module-content:visible').length === 0) {
-                    $(this).click();
-                }
-            });
+            // expand specific modules during the initial edit
+            if (!$('#editing').val())
+                slide_module($('#module-details'), 'show');
 
             // if there's no current user-story, it's a better experience if it's editable by default
             if ($('#cf_user_story').val() === '') {
@@ -384,6 +384,15 @@ $(function() {
                 return;
             $('.save-btn').attr('disabled', true);
             this.form.submit();
+
+            // remember expanded modules
+            $('#editing').val(
+                $('.module .module-content:visible')
+                    .parent()
+                    .map(function(el) { return $(this).attr('id'); })
+                    .toArray()
+                    .join(' ')
+            );
         })
         .attr('disabled', false);
 
@@ -639,8 +648,11 @@ $(function() {
             event.preventDefault();
             $('#user-story').hide();
             $('#user-story-edit-btn').hide();
-            $('#cf_user_story').show().focus().select();
             $('#top-save-btn').show();
+            $('#cf_user_story').show();
+            // don't focus the user-story field when restoring edit mode after navigation
+            if ($('#editing').val() === '')
+                $('#cf_user_story').focus().select();
         });
     $('#user-story-reply-btn')
         .click(function(event) {
@@ -1006,6 +1018,20 @@ $(function() {
                 dirty.val(that.val() === that.data('preselected')[0] ? '' : '1');
             }
         });
+
+    // finally switch to edit mode if we navigate back to a page that was editing
+    if ($('#editing').val()) {
+        $('.module')
+            .each(function() {
+                slide_module($(this), 'hide', true);
+            });
+        $($('#editing').val().split(' '))
+            .each(function() {
+                slide_module($('#' + this), 'show', true);
+            });
+        $('#mode-btn').click();
+        $('#editing').val('');
+    }
 });
 
 function confirmUnsafeURL(url) {

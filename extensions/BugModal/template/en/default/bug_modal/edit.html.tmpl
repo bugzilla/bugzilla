@@ -130,6 +130,7 @@
   <input type="hidden" name="longdesclength" value="[% bug.comments.size FILTER html %]">
   <input type="hidden" name="id" id="bug_id" value="[% bug.bug_id FILTER html %]">
   <input type="hidden" name="format" value="modal">
+  <input type="hidden" name="editing" id="editing" value="">
   <input type="hidden" name="token" value="[% issue_hash_token([bug.id, bug.delta_ts]) FILTER html %]">
 [% END %]
 

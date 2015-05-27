@@ -323,6 +323,38 @@ sub db_schema_abstract_schema {
             },
         ],
     };
+    $args->{'schema'}->{'nag_settings'} = {
+        FIELDS => [
+            id => {
+                TYPE       => 'MEDIUMSERIAL',
+                NOTNULL    => 1,
+                PRIMARYKEY => 1,
+            },
+            user_id => {
+                TYPE    => 'INT3',
+                NOTNULL => 1,
+                REFERENCES => {
+                    TABLE  => 'profiles',
+                    COLUMN => 'userid',
+                    DELETE => 'CASCADE',
+                }
+            },
+            setting_name => {
+                TYPE    => 'VARCHAR(16)',
+                NOTNULL => 1,
+            },
+            setting_value => {
+                TYPE    => 'VARCHAR(16)',
+                NOTNULL => 1,
+            },
+        ],
+        INDEXES => [
+            nag_watch_idx => {
+                FIELDS => [ 'user_id', 'setting_name' ],
+                TYPE => 'UNIQUE',
+            },
+        ],
+    };
 }
 
 sub install_update_db {

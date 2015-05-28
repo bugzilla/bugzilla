@@ -57,6 +57,7 @@ Bugzilla->switch_to_shadow_db();
 
 # send nags to requestees
 send_nags(
+    reports       => [ 'requestee' ],
     requestee_sql => REQUESTEE_NAG_SQL,
     setter_sql    => SETTER_NAG_SQL,
     template      => 'user',
@@ -65,6 +66,7 @@ send_nags(
 
 # send nags to watchers
 send_nags(
+    reports       => [ 'requestee', 'setter' ],
     requestee_sql => WATCHING_REQUESTEE_NAG_SQL,
     setter_sql    => WATCHING_SETTER_NAG_SQL,
     template      => 'watching',
@@ -73,12 +75,11 @@ send_nags(
 
 sub send_nags {
     my (%args)   = @_;
-    my @reports  = qw( requestee setter );
     my $requests = {};
 
     # get requests
 
-    foreach my $report (@reports) {
+    foreach my $report (@{ $args{reports} }) {
 
         # collate requests
         my $rows = $dbh->selectall_arrayref($args{$report . '_sql'}, { Slice => {} });
@@ -140,6 +141,7 @@ sub send_nags {
             recipient_id => $recipient_id,
             template     => $args{template},
             date         => $args{date},
+            reports      => $args{reports},
             requests     => $requests->{$recipient_id},
         };
         my ($fh, $filename) = tempfile();
@@ -184,7 +186,7 @@ sub _include_request {
 sub _send_email {
     my ($params) = @_;
 
-    my @reports         = qw( requestee setter );
+    my @reports         = @{ $params->{reports} };
     my $recipient_id    = $params->{recipient_id};
     my $requests        = $params->{requests};
     my $watching        = $params->{template} eq 'watching';

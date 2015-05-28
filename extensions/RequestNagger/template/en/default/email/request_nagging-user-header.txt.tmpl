@@ -14,12 +14,6 @@
 
 From: [% Param('mailfrom') %]
 To: [% recipient.email %]
-Subject: [[% terms.Bugzilla %]] Overdue Requests
-  [% IF summary.requestee %]
-    (Of you: [% summary.requestee %])
-  [% END %]
-  [% IF summary.setter %]
-    (By you: [% summary.setter %])
-  [% END %]
+Subject: [[% terms.Bugzilla %]] Overdue Requests ([% summary.requestee %])
 Date: [% date %]
 X-Bugzilla-Type: nag

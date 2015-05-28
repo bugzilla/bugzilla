@@ -9,7 +9,6 @@
 [%
   PROCESS "global/field-descs.none.tmpl";
   requestee = requests.item(recipient.login).requestee;
-  setter    = requests.item(recipient.login).setter;
   summary   = requests.item(recipient.login).summary;
   types     = requests.item(recipient.login).types;
 %]
@@ -23,21 +22,9 @@
 
 <body bgcolor="#ffffff">
 
-[% IF requestee.size %]
-  <h3>Overdue requests requiring action from you:</h3>
-  <div>[% summary.requestee FILTER html %]</div>
-  [% PROCESS requests report="requestee" requests=requestee %]
-[% END %]
-
-[% IF requestee.size && setter.size %]
-  <hr>
-[% END %]
-
-[% IF setter.size %]
-  <h3>Overdue requests you have requested:</h3>
-  <div>[% summary.setter FILTER html %]</div>
-  [% PROCESS requests report="setter" requests=setter %]
-[% END %]
+<h3>Overdue requests requiring action from you:</h3>
+<div>[% summary.requestee FILTER html %]</div>
+[% PROCESS requests report="requestee" requests=requestee %]
 
 [% BLOCK requests %]
   [% FOREACH type IN types.item(report) %]

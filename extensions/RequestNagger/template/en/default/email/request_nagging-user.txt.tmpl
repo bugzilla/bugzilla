@@ -9,28 +9,14 @@
 [%
   PROCESS "global/field-descs.none.tmpl";
   requestee = requests.item(recipient.login).requestee;
-  setter    = requests.item(recipient.login).setter;
   summary   = requests.item(recipient.login).summary;
   types     = requests.item(recipient.login).types;
 %]
 
-[% IF requestee.size %]
 Overdue requests requiring action from you:
 [%+ summary.requestee %]
 
 [%+ PROCESS requests report="requestee" request_list=requestee %]
-[% END %]
-
-[% IF requestee.size && setter.size %]
--
-[% END %]
-
-[% IF setter.size %]
-Overdue requests you have requested:
-[%+ summary.setter %]
-
-[%+ PROCESS requests report="setter" request_list=setter %]
-[% END %]
 
 [% BLOCK requests %]
 [% FOREACH type IN types.item(report) %]

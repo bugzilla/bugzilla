@@ -25,6 +25,11 @@
   # append_content: (boolean) when called as a WRAPPER, the content will be appended to the
   #                 edit html instead of replacing it.  forces edit_only (default: false);
   # default: (string) default value (eg. used as a placeholder in user fields)
+  # action: (hash) show a button to the right of the edit field (user fields only currently).  keys:
+  #   id: (string) optional button id
+  #   class: (string) optional button class
+  #   caption: (string) button caption
+  #   hidden: (boolean) don't show the button (default: false)
   #%]
 
 [%
@@ -191,6 +196,14 @@ END;
           <input name="[% name FILTER html %]" id="[% name FILTER html %]" value="[% value FILTER html %]">
 
         [% CASE constants.FIELD_TYPE_USER %]
+          [% IF action && !action.hidden %]
+            <button class="field-button minor [%= action.class FILTER html IF action.class %]"
+              data-field="[% name FILTER html %]"
+              [% IF action.id %]id="[% action.id FILTER html %]"[% END %]>
+              [% action.caption FILTER html %]
+            </button>
+            <div class="field-edit-container">
+          [% END %]
           [%# single user %]
           [% INCLUDE global/userselect.html.tmpl
               id = name
@@ -199,6 +212,9 @@ END;
               classes = [ "bz_userfield" ]
               placeholder = default
             %]
+          [% IF action && !action.hidden %]
+            </div>
+          [% END %]
 
         [% CASE constants.FIELD_TYPE_USERS %]
           [%# multiple users %]

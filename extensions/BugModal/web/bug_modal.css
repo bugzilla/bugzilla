@@ -206,6 +206,15 @@ select[multiple], .text_input, .yui-ac-input, input {
     width: 170px;
 }
 
+.field-button {
+    float: right;
+    margin-left: 8px;
+}
+
+.field-edit-container {
+    overflow-y: hidden;
+}
+
 /* field types */
 
 input[type="number"] {

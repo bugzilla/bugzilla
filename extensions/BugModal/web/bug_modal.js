@@ -544,12 +544,13 @@ $(function() {
         });
 
     // take button
-    $('#take-btn')
+    $('.take-btn')
         .click(function(event) {
             event.preventDefault();
-            $('#field-assigned_to.edit-hide').hide();
-            $('#field-assigned_to.edit-show').show();
-            $('#assigned_to').val(BUGZILLA.user.login).focus().select();
+            var field = $(this).data('field');
+            $('#field-' + field + '.edit-hide').hide();
+            $('#field-' + field + '.edit-show').show();
+            $('#' + field).val(BUGZILLA.user.login).focus().select();
             $('#top-save-btn').show();
         });
 

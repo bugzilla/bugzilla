@@ -455,7 +455,7 @@
       [% IF unassigned %]
         <i>Unassigned</i>
         [% IF bug.check_can_change_field("assigned_to", 0, 1) %]
-          <button type="button" id="take-btn" class="minor">Take</button>
+          <button type="button" class="take-btn minor" data-field="assigned_to">Take</button>
         [% END %]
       [% ELSE %]
         [% INCLUDE bug_modal/user.html.tmpl u=bug.assigned_to %]
@@ -465,6 +465,11 @@
         field = bug_fields.assigned_to
         field_type = constants.FIELD_TYPE_USER
         hide_on_view = 1
+        action = {
+          class   = "take-btn"
+          caption = "Take"
+          hidden  = bug.assigned_to.id == user.id || !user.in_group("editbugs")
+        }
         append_content = 1
         default = bug.component_obj.default_assignee.login
     %]

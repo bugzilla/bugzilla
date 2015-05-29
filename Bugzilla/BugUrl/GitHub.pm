@@ -18,8 +18,10 @@ sub should_handle {
 
     # GitHub issue URLs have only one form:
     #  https://github.com/USER_OR_TEAM_OR_ORGANIZATION_NAME/REPOSITORY_NAME/issues/111
-    return ($uri->authority =~ /^github.com$/i
-            and $uri->path =~ m|^/[^/]+/[^/]+/issues/\d+$|) ? 1 : 0;
+    # GitHub pull request URLs have only one form:
+    #  https://github.com/USER_OR_TEAM_OR_ORGANIZATION_NAME/REPOSITORY_NAME/pull/111
+    return (lc($uri->authority) eq 'github.com'
+            and $uri->path =~ m!^/[^/]+/[^/]+/(?:issues|pull)/\d+$!) ? 1 : 0;
 }
 
 sub _check_value {

@@ -43,7 +43,7 @@ END;
         <a class="email [%= "disabled" UNLESS u.is_enabled %]"
           [% IF user.id %]
             href="mailto:[% u.email FILTER html %]"
-            onclick="return show_usermenu([% u.id FILTER none %], '[% u.email FILTER js %]', true,
+            onclick="return show_usermenu([% u.id FILTER none %], '[% u.email FILTER js %]',
               [% user.in_group('editusers') || user.bless_groups.size > 0 ? "true" : "false" %])"
             title="[% u.identity FILTER html %]"
           [% ELSE %]

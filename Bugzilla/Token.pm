@@ -40,10 +40,12 @@ use Date::Format;
 use Date::Parse;
 use File::Basename;
 use Digest::MD5 qw(md5_hex);
+use Digest::SHA qw(hmac_sha256_base64);
 
 use base qw(Exporter);
 
 @Bugzilla::Token::EXPORT = qw(issue_api_token issue_session_token
+                              issue_auth_delegation_token check_auth_delegation_token
                               check_token_data delete_token
                               issue_hash_token check_hash_token);
 
@@ -63,6 +65,37 @@ sub issue_api_token {
                AND (" . $dbh->sql_date_math('issuedate', '+', (MAX_TOKEN_AGE * 24 - 12), 'HOUR') . ") > NOW()",
         undef, $user->id);
     return $token // _create_token($user->id, 'api_token', '');
+}
+
+sub issue_auth_delegation_token {
+    my ($uri) = @_;
+    my $dbh  = Bugzilla->dbh;
+    my $user = Bugzilla->user;
+    my $checksum = hmac_sha256_base64($user->id, $uri, Bugzilla->localconfig->{'site_wide_secret'});
+
+    return _create_token($user->id, 'auth_delegation', $checksum);
+}
+
+sub check_auth_delegation_token {
+    my ($token, $uri) = @_;
+    my $dbh  = Bugzilla->dbh;
+    my $user = Bugzilla->user;
+
+    my ($eventdata) = $dbh->selectrow_array("
+        SELECT eventdata FROM tokens
+         WHERE token = ? AND tokentype = 'auth_delegation'
+               AND (" . $dbh->sql_date_math('issuedate', '+', (MAX_TOKEN_AGE * 24 - 12), 'HOUR') . ") > NOW()",
+        undef, $token);
+
+    if ($eventdata) {
+        my $checksum = hmac_sha256_base64($user->id, $uri, Bugzilla->localconfig->{'site_wide_secret'});
+        if ($eventdata eq $checksum) {
+            delete_token($token);
+            return 1;
+        }
+    }
+
+    return 0;
 }
 
 # Creates and sends a token to create a new user account.
@@ -627,6 +660,23 @@ although they can be used separately.
                        reference/checks.
 
  Returns:     A unique token.
+
+=item C<issue_auth_delegation_token($uri)>
+
+ Description: Creates and returns a token used to validate auth delegation confirmations.
+
+ Params:      $uri - The uri that auth will be delegated to.
+
+ Returns:     A unique token.
+
+=item C<check_auth_delegation_token($token, $uri)>
+
+ Description: Checks if a token $token is a confirmation token for $uri.
+
+ Params:      $token - The token returned by issue_auth_delegation_token()
+              $uri - The uri that auth will be delegated to.
+
+ Returns:     a boolean value
 
 =item C<check_token_data($token, $event)>
 

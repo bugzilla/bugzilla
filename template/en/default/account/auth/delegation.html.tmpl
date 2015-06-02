@@ -1,0 +1,37 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% PROCESS global/header.html.tmpl
+   title = "Auth Delegation Request" %]
+
+<h1>[% title FILTER html %] </h1>
+<p>
+  A third-party website (<a href="[% callback_base FILTER html %]">[% callback_base FILTER html %]</a>)
+    would like to have <strong>complete</strong> access to your [% terms.Bugzilla %] account.
+</p>
+
+<p>The description of the site reads:
+  <blockquote>
+    [% description FILTER html %]
+  </blockquote>
+</p>
+
+<p>Do you want this website to have <strong>complete</strong> access to your [% terms.Bugzilla %]
+  account?</p>
+
+<div>
+  <form action="auth.cgi" method="post">
+    <input type="hidden" name="confirm"     value="1">
+    <input type="hidden" name="callback"    value="[% callback FILTER html %]">
+    <input type="hidden" name="description" value="[% description FILTER html %]">
+    <input type="hidden" name="token"       value="[% token FILTER html %]">
+    <input type="submit" name="submit"      value="Accept">
+  </form>
+</div>
+
+[% PROCESS global/footer.html.tmpl %]

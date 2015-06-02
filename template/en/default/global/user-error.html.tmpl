@@ -129,6 +129,29 @@
     account creation. Please contact an administrator to get a new account
     created.
 
+  [% ELSIF error == "auth_delegation_disabled" %]
+    [% title = "Can't use auth delegation" %]
+    This site does not have auth delegation enabled.
+    Please contact an administrator if you require this functionality.
+
+  [% ELSIF error == "auth_delegation_missing_callback" %]
+    [% title = "Auth delegation impossible without callback URI" %]
+    It looks like auth delegation was attempted, but no callback URI was passed.
+    You were sent here by some other site; please contact them for support.
+
+  [% ELSIF error == "auth_delegation_missing_description" %]
+    [% title = "Auth delegation impossible without description" %]
+    It looks like auth delegation was attempted, but no description was passed.
+    You were sent here by some other site; please contact them for support.
+
+  [% ELSIF error == "auth_delegation_missing_token" %]
+    [% title = "Auth delegation can't be confirmed" %]
+    Auth delegation cannot be confirmed due to missing or invalid token.
+
+  [% ELSIF error == "auth_delegation_invalid_token" %]
+    [% title = "Auth delegation can't be confirmed" %]
+    Auth delegation cannot be confirmed due to missing or invalid token.
+
   [% ELSIF error == "auth_failure" %]
     [% title = "Authorization Required" %]
     [% admindocslinks = {'groups.html' => 'Group Security'} %]

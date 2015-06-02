@@ -165,10 +165,12 @@ sub object_update_columns {
 
     push(@$columns, 'watch_user');
 
+    # add the user if not yet exists and user chooses 'automatic'
+    $self->_create_watch_user();
+
     # editcomponents.cgi doesn't call set_all, so we have to do this here
     my $input = Bugzilla->input_params;
     $object->set('watch_user', $input->{watch_user});
-    $self->_create_watch_user();
 }
 
 sub object_validators {

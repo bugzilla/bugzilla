@@ -600,7 +600,7 @@
 
 [%
   col =
-    (bug.version.lower == "unspecified" || bug.version.lower == "other")
+    (bug.version.lower == "unspecified" || bug.version.lower == "other" || bug.version == "---")
     && bug.target_milestone == "---"
     && !has_bug_flags
     && !project_flags_set

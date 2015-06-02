@@ -11,12 +11,22 @@ use strict;
 use base qw(Exporter);
 
 our @EXPORT = qw(
+    MAX_SETTER_COUNT
+    MAX_REQUEST_AGE
     FLAG_TYPES
     REQUESTEE_NAG_SQL
     SETTER_NAG_SQL
     WATCHING_REQUESTEE_NAG_SQL
     WATCHING_SETTER_NAG_SQL
 );
+
+# if there are more than this many requests that a user is waiting on, show a
+# summary and a link instead
+use constant MAX_SETTER_COUNT => 7;
+
+# ignore any request older than this many days in the requestee emails
+# massively overdue requests will still be included in the 'watching' emails
+use constant MAX_REQUEST_AGE => 90; # about three months
 
 # the order of this array determines the order used in email
 use constant FLAG_TYPES => (
@@ -69,6 +79,7 @@ sub REQUESTEE_NAG_SQL {
         AND flags.status = '?'
         AND products.nag_interval != 0
         AND TIMESTAMPDIFF(HOUR, flags.modification_date, CURRENT_DATE()) >= products.nag_interval
+        AND TIMESTAMPDIFF(DAY, flags.modification_date, CURRENT_DATE()) <= " . MAX_REQUEST_AGE . "
         AND (profile_setting.setting_value IS NULL OR profile_setting.setting_value = 'on')
         AND requestee.disable_mail = 0
         AND nag_defer.id IS NULL
@@ -110,6 +121,7 @@ sub SETTER_NAG_SQL {
         AND flags.status = '?'
         AND products.nag_interval != 0
         AND TIMESTAMPDIFF(HOUR, flags.modification_date, CURRENT_DATE()) >= products.nag_interval
+        AND TIMESTAMPDIFF(DAY, flags.modification_date, CURRENT_DATE()) <= " . MAX_REQUEST_AGE . "
         AND (profile_setting.setting_value IS NULL OR profile_setting.setting_value = 'on')
         AND setter.disable_mail = 0
         AND nag_defer.id IS NULL

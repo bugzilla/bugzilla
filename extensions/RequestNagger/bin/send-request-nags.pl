@@ -13,10 +13,6 @@ use warnings;
 use FindBin qw($RealBin);
 use lib "$RealBin/../../..";
 
-# if there are more than this many requests that a user is waiting on, show a
-# summary and a link instead.
-use constant MAX_SETTER_COUNT => 7;
-
 use Bugzilla;
 BEGIN { Bugzilla->extensions() }
 

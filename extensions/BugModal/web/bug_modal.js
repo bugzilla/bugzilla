@@ -111,7 +111,7 @@ $(function() {
                 $('#cc-' + id).hide();
                 $('#ch-' + id).show();
             }
-            $('#ct-' + id).slideToggle('fast', function() {
+            $('#ct-' + id + ', #ctag-' + id).slideToggle('fast', function() {
                 $('#c' + id).find('.activity').toggle();
                 spinner.text($('#ct-' + id + ':visible').length ? '-' : '+');
             });
@@ -345,11 +345,7 @@ $(function() {
                             autoSelectFirst: true,
                             formatResult: function(suggestion, currentValue) {
                                 // disable <b> wrapping of matched substring
-                                return suggestion.value
-                                    .replace(/&/g, '&amp;')
-                                    .replace(/</g, '&lt;')
-                                    .replace(/>/g, '&gt;')
-                                    .replace(/"/g, '&quot;');
+                                return suggestion.value.htmlEncode();
                             },
                             onSelect: function() {
                                 this.focus();
@@ -1067,7 +1063,7 @@ function bugzilla_ajax(request, done_fn, error_fn) {
             request.data = JSON.stringify(request.data);
         }
     }
-    $.ajax(request)
+    return $.ajax(request)
         .done(function(data) {
             if (data.error) {
                 $('#xhr-error').html(data.message);
@@ -1080,6 +1076,8 @@ function bugzilla_ajax(request, done_fn, error_fn) {
             }
         })
         .error(function(data) {
+            if (data.statusText === 'abort')
+                return;
             var message = data.responseJSON ? data.responseJSON.message : 'Unexpected Error'; // all errors are unexpected :)
             if (!request.hideError) {
                 $('#xhr-error').html(message);
@@ -1136,6 +1134,41 @@ function lb_close(event) {
     $(document).unbind('keyup.lb');
     $('#lb_overlay, #lb_overlay2, #lb_close_btn, #lb_img, #lb_text').remove();
 }
+
+// extensions
+
+(function($) {
+    $.extend({
+        // Case insensative $.inArray (http://api.jquery.com/jquery.inarray/)
+        // $.inArrayIn(value, array [, fromIndex])
+        //  value (type: String)
+        //    The value to search for
+        //  array (type: Array)
+        //    An array through which to search.
+        //  fromIndex (type: Number)
+        //    The index of the array at which to begin the search.
+        //    The default is 0, which will search the whole array.
+        inArrayIn: function(elem, arr, i) {
+            // not looking for a string anyways, use default method
+            if (typeof elem !== 'string') {
+                return $.inArray.apply(this, arguments);
+            }
+            // confirm array is populated
+            if (arr) {
+                var len = arr.length;
+                i = i ? (i < 0 ? Math.max(0, len + i) : i) : 0;
+                elem = elem.toLowerCase();
+                for (; i < len; i++) {
+                    if (i in arr && arr[i].toLowerCase() == elem) {
+                        return i;
+                    }
+                }
+            }
+            // stick with inArray/indexOf and return -1 on no match
+            return -1;
+        }
+    });
+})(jQuery);
 
 // no-ops
 function initHidingOptionsForIE() {}

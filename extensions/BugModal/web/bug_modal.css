@@ -545,13 +545,37 @@ td.flag-requestee {
 }
 
 .comment-tag {
-    border: 1px solid #ccc;
-    padding: 2px 4px;
+    border: 1px solid #eee;
+    padding: 2px 6px 2px 4px;
     margin-right: 2px;
-    border-radius: 0.5em;
+    border-radius: 4px;
     background-color: #fff;
     color: #000;
-    font-size: 12px;
+}
+
+.comment-tag a {
+    padding-right: 4px;
+    cursor: pointer;
+}
+
+#ctag {
+    margin-bottom: 4px;
+}
+
+#ctag button {
+    margin-top: 2px;
+}
+
+#ctag a {
+    margin-left: 8px;
+}
+
+#ctag-error {
+    padding-left: 5px;
+    background-color: #faa;
+    color: #444;
+    border-radius: 2px;
+    margin-top: 2px;
 }
 
 .comment-collapse-reason {

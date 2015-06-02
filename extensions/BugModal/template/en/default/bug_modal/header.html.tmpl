@@ -50,6 +50,7 @@
   javascript_urls.push(
     "extensions/ProdCompSearch/web/js/prod_comp_search.js",
     "extensions/BugModal/web/bug_modal.js",
+    "extensions/BugModal/web/comments.js",
     "extensions/BugModal/web/ZeroClipboard/ZeroClipboard.min.js",
     "js/field.js",
     "js/comments.js",
@@ -93,6 +94,7 @@
     id: [% user.id FILTER none %],
     login: '[% user.login FILTER js %]',
     is_insider: [% user.is_insider ? "true" : "false" %],
+    can_tag: [% user.can_tag_comments ? "true" : "false" %],
     settings: {
       quote_replies: '[% user.settings.quote_replies.value FILTER js %]',
       zoom_textareas: [% user.settings.zoom_textareas.value == "on" ? "true" : "false" %]
@@ -101,6 +103,8 @@
   [% IF user.id %]
     BUGZILLA.default_assignee   = '[% bug.component_obj.default_assignee.login FILTER js %]';
     BUGZILLA.default_qa_contact = '[% bug.component_obj.default_qa_contact.login FILTER js %]';
+    BUGZILLA.constant.min_comment_tag_length = [% constants.MIN_COMMENT_TAG_LENGTH FILTER none %];
+    BUGZILLA.constant.max_comment_tag_length = [% constants.MAX_COMMENT_TAG_LENGTH FILTER none %];
   [% END %]
 [% END %]
 

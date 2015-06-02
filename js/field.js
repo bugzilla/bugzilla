@@ -738,10 +738,7 @@ $(function() {
         formatResult: function(suggestion, currentValue) {
             return (suggestion.data.name === '' ?
                 suggestion.data.login : suggestion.data.name + ' (' + suggestion.data.login + ')')
-                .replace(/&/g, '&amp;')
-                .replace(/</g, '&lt;')
-                .replace(/>/g, '&gt;')
-                .replace(/"/g, '&quot;');
+                .htmlEncode();
         },
         onSearchStart: function(params) {
             var that = $(this);
@@ -800,11 +797,7 @@ $(function() {
                 autoSelectFirst: true,
                 formatResult: function(suggestion, currentValue) {
                     // disable <b> wrapping of matched substring
-                    return suggestion.value
-                        .replace(/&/g, '&amp;')
-                        .replace(/</g, '&lt;')
-                        .replace(/>/g, '&gt;')
-                        .replace(/"/g, '&quot;');
+                    return suggestion.value.htmlEncode();
                 },
                 onSelect: function() {
                     this.focus();

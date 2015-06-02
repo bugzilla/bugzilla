@@ -99,11 +99,7 @@ $(function() {
                 },
                 formatResult: function(suggestion, currentValue) {
                     var value = (suggestion.data.component ? suggestion.data.component : suggestion.data.product);
-                    var escaped = value
-                        .replace(/&/g, '&amp;')
-                        .replace(/</g, '&lt;')
-                        .replace(/>/g, '&gt;')
-                        .replace(/"/g, '&quot;');
+                    var escaped = value.htmlEncode();
                     if (suggestion.data.component) {
                         return '-&nbsp;' + escaped;
                     }

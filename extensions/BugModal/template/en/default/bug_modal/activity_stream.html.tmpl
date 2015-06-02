@@ -36,8 +36,21 @@
   END;
 %]
 
+[% IF user.can_tag_comments %]
+  <div id="ctag" style="display:none">
+    <input id="ctag-add" size="10" placeholder="add tag"
+      maxlength="[% constants.MAX_COMMENT_TAG_LENGTH FILTER html %]">
+    <button type="button" id="ctag-close" class="minor">X</button>
+    <a href="https://wiki.mozilla.org/BMO/comment_tagging" target="_blank" title="About Comment Tagging">Help</a>
+  </div>
+  <div id="ctag-error" style="display:none">
+    <a href="#" class="close-btn" data-for="ctag-error">x</a>
+    <span id="ctag-error-message"></span>
+  </div>
+[% END %]
+
 [% BLOCK comment_header %]
-  <div class="comment">
+  <div class="comment" data-id="[% comment.id FILTER none %]" data-no="[% comment.count FILTER none %]">
     [%# normal comment header %]
     <table class="layout-table change-head [% extra_class FILTER none %]" id="ch-[% comment.count FILTER none %]"
       [% IF comment.collapsed +%] style="display:none"[% END %]>
@@ -49,6 +62,7 @@
               gravatar_only = 1
           %]
         </td>
+
         <td class="change-author">
           [% INCLUDE bug_modal/user.html.tmpl
               u = comment.author
@@ -58,6 +72,7 @@
           [% END %]
           [% Hook.process('user', 'bug/comments.html.tmpl') %]
         </td>
+
         <td class="comment-actions">
           [% IF user.is_insider && bug.check_can_change_field('longdesc', 0, 1) %]
             [% IF comment.is_private %]
@@ -74,7 +89,13 @@
             </div>
           [% END %]
           [% IF user.id %]
-            <button class="reply-btn minor"
+            [% IF user.can_tag_comments %]
+              <button class="tag-btn minor" type="button"
+                data-id="[% comment.id FILTER none %]"
+                data-no="[% comment.count FILTER none %]"
+              >Tag</button>
+            [% END %]
+            <button class="reply-btn minor" type="button"
               data-reply-id="[% comment.count FILTER none %]"
               data-reply-name="[% comment.author.name || comment.author.moz_nick FILTER html %]"
               >Reply</button>
@@ -82,6 +103,7 @@
           <button class="comment-spinner minor" id="cs-[% comment.count FILTER none%]">-</button>
         </td>
       </tr>
+
       <tr>
         <td colspan="2">
           <div class="change-name">
@@ -95,15 +117,16 @@
           </div>
         </td>
       </tr>
-      [% IF comment.tags.size %]
-        <tr>
-          <td colspan="2" class="comment-tags">
-            [% FOREACH tag IN comment.tags %]
-              <span class="comment-tag">[% tag FILTER html %]</span>
-            [% END %]
-          </td>
-        </tr>
-      [% END %]
+
+      <tr id="ctag-[% comment.count FILTER none %]">
+        <td colspan="2" class="comment-tags">
+          [% FOREACH tag IN comment.tags ~%]
+            <span class="comment-tag">
+              [%~ "<a>x</a>" IF user.can_tag_comments %][% tag FILTER html ~%]
+            </span>
+          [%~ END %]
+        </td>
+      </tr>
     </table>
 
     [%# default-collapsed comment header %]

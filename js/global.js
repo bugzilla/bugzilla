@@ -87,3 +87,26 @@ function display_value(field, value) {
     if (translated) return translated;
     return value;
 }
+
+// polyfill .trim
+if (!String.prototype.trim) {
+    (function() {
+        // Make sure we trim BOM and NBSP
+        var rtrim = /^[\s\uFEFF\xA0]+|[\s\uFEFF\xA0]+$/g;
+        String.prototype.trim = function() {
+            return this.replace(rtrim, '');
+        };
+    })();
+}
+
+// html encoding
+if (!String.prototype.htmlEncode) {
+    (function() {
+        String.prototype.htmlEncode = function() {
+            return this.replace(/&/g, '&amp;')
+                       .replace(/</g, '&lt;')
+                       .replace(/>/g, '&gt;')
+                       .replace(/"/g, '&quot;');
+        };
+    })();
+}

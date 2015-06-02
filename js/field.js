@@ -710,7 +710,7 @@ $(function() {
             that.removeClass('autocomplete-running');
         if (document.activeElement != this)
             that.devbridgeAutocomplete('hide');
-    };
+    }
 
     var options_user = {
         serviceUrl: 'rest/user',
@@ -724,6 +724,7 @@ $(function() {
         minChars: 3,
         tabDisabled: true,
         autoSelectFirst: true,
+        triggerSelectOnValidInput: false,
         transformResult: function(response) {
             response = $.parseJSON(response);
             return {
@@ -757,6 +758,7 @@ $(function() {
 
             that.addClass('autocomplete-running');
             that.data('counter', that.data('counter') + 1);
+            return true;
         },
         onSearchComplete: searchComplete,
         onSearchError: searchComplete
@@ -795,11 +797,20 @@ $(function() {
                 delimiter: /,\s*/,
                 minChars: 0,
                 autoSelectFirst: true,
+                triggerSelectOnValidInput: false,
                 formatResult: function(suggestion, currentValue) {
                     // disable <b> wrapping of matched substring
                     return suggestion.value.htmlEncode();
                 },
+                onSearchStart: function(params) {
+                    var that = $(this);
+                    // adding spaces shouldn't initiate a new search
+                    var parts = that.val().split(/,\s*/);
+                    var query = parts[parts.length - 1];
+                    return query === $.trim(query);
+                },
                 onSelect: function() {
+                    this.value = this.value + ', ';
                     this.focus();
                 }
             });

@@ -602,20 +602,19 @@ sub flag_end_of_update {
         my ($name, $value) = $change =~ /^(.+)(.)$/;
 
         if ($name eq 'review' && $value eq '?') {
-            if ($reviewer eq '' && $bug->product_obj->reviewer_required) {
-                ThrowUserError('reviewer_required');
+            if ($reviewer eq '') {
+                ThrowUserError('reviewer_required') if $bug->product_obj->reviewer_required;
             }
+            else {
+                my $reviewer_obj = Bugzilla::User->check({
+                    name => $reviewer,
+                    cache => 1
+                });
 
-            my $reviewer_obj = Bugzilla::User->new({
-                name => $reviewer,
-                cache => 1
-            });
-
-            if (!$reviewer_obj->is_active) {
                 ThrowUserError('reviewer_inactive', {
                     reviewer => $reviewer_obj,
                     timeout  => Bugzilla->params->{max_reviewer_last_seen}
-                });
+                }) unless $reviewer_obj->is_active;
             }
         }
     }

@@ -77,11 +77,15 @@ sub new {
     # Moreover, it causes unexpected behaviors, such as totally breaking
     # the rendering of pages.
     my $script = basename($0);
-    if ($self->path_info) {
+    if (my $path = $self->path_info) {
         my @whitelist = ("rest.cgi");
         Bugzilla::Hook::process('path_info_whitelist', { whitelist => \@whitelist });
         if (!grep($_ eq $script, @whitelist)) {
+            # apache collapses // to / in $ENV{PATH_INFO} but not in $self->path_info.
+            # url() requires the full path in ENV in order to generate the correct url.
+            $ENV{PATH_INFO} = $path;
             print $self->redirect($self->url(-path => 0, -query => 1));
+            exit;
         }
     }
 

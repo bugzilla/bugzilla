@@ -846,3 +846,26 @@ div.ui-tooltip {
 #pcs {
     width: 235px;
 }
+
+/* search navigation */
+
+#search-nav {
+    background: rgba(255, 255, 255, 0.3);
+    padding: 4px 8px;
+}
+
+#search-nav-label {
+    font-weight: bold;
+}
+
+.search-nav-link, .search-nav-disabled {
+    margin-left: 4px;
+}
+
+#search-nav-reget {
+    margin-left: 8px;
+}
+
+.search-nav-disabled {
+    color: #777;
+}

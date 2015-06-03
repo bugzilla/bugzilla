@@ -124,10 +124,14 @@ tie(%$cf_visible_in_products, "Tie::IxHash",
         "Release Engineering" => ["Buildduty"],
     },
     qr/^cf_rank$/ => {
-        "Core"    => ["WebRTC", "WebRTC: Audio/Video", "WebRTC: Networking", "WebRTC: Signaling"],
-        "Firefox" => [],
-        "Loop"    => [],
-        "Toolkit" => [],
+        "Core"                => ["WebRTC", "WebRTC: Audio/Video", "WebRTC: Networking",
+                                  "WebRTC: Signaling"],
+        "Firefox for Android" => [],
+        "Firefox for iOS"     => [],
+        "Firefox"             => [],
+        "Loop"                => [],
+        "Mozilla Services"    => [],
+        "Toolkit"             => [],
     },
 );
 

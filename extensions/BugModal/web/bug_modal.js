@@ -100,23 +100,6 @@ $(function() {
             $('#attachments tr.attach-obsolete').toggle();
         });
 
-    // comment collapse/expand
-    $('.comment-spinner')
-        .click(function(event) {
-            event.preventDefault();
-            var spinner = $(event.target);
-            var id = spinner.attr('id').match(/\d+$/)[0];
-            // switch to full header for initially collapsed comments
-            if (spinner.attr('id').match(/^ccs-/)) {
-                $('#cc-' + id).hide();
-                $('#ch-' + id).show();
-            }
-            $('#ct-' + id + ', #ctag-' + id).slideToggle('fast', function() {
-                $('#c' + id).find('.activity').toggle();
-                spinner.text($('#ct-' + id + ':visible').length ? '-' : '+');
-            });
-        });
-
     // url --> unsafe warning
     $('.unsafe-url')
         .click(function(event) {

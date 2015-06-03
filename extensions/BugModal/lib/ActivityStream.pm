@@ -61,7 +61,17 @@ sub activity_stream {
                 @{ $change_set->{activity} }
             ];
         }
-        $self->{activity_stream} = [ sort { $a->{time} <=> $b->{time} } @$stream ];
+        my $order = Bugzilla->user->setting('comment_sort_order');
+        if ($order eq 'oldest_to_newest') {
+            $self->{activity_stream} = [ sort { $a->{time} <=> $b->{time} } @$stream ];
+        }
+        elsif ($order eq 'newest_to_oldest') {
+            $self->{activity_stream} = [ sort { $b->{time} <=> $a->{time} } @$stream ];
+        }
+        elsif ($order eq 'newest_to_oldest_desc_first') {
+            my $desc = shift @$stream;
+            $self->{activity_stream} = [ $desc, sort { $b->{time} <=> $a->{time} } @$stream ];
+        }
     }
     return $self->{activity_stream};
 }

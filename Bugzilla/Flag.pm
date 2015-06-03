@@ -81,6 +81,8 @@ use constant AUDIT_REMOVES => 0;
 
 use constant SKIP_REQUESTEE_ON_ERROR => 1;
 
+our $disable_flagmail = 0;
+
 sub DB_COLUMNS {
     my $dbh = Bugzilla->dbh;
     return qw(
@@ -977,6 +979,10 @@ or deleted.
 sub notify {
     my ($class, $flag, $old_flag, $obj, $timestamp) = @_;
 
+    if ($disable_flagmail) {
+        return;
+    }
+
     my ($bug, $attachment);
     if (blessed($obj) && $obj->isa('Bugzilla::Attachment')) {
         $attachment = $obj;
@@ -1124,6 +1130,10 @@ sub _flag_types {
     return $flag_types;
 }
 
+1;
+
+__END__
+
 =head1 B<Methods in need of POD>
 
 =over
@@ -1149,5 +1159,3 @@ sub _flag_types {
 =item update
 
 =back
-
-1;

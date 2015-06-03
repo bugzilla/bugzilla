@@ -52,6 +52,8 @@
   <div id="after-comment-commit-button">
     [% Hook.process("after_comment_commit_button", 'bug/edit.html.tmpl') %]
 
+    [%# this checkboxes are in tables to match the alignment of the
+        added-by-extensions checkboxes (needinfo, restrict-comments) %]
     [% IF NOT bug.cc || NOT bug.cc.contains(user.login) %]
       [%
         IF user.settings.state_addselfcc.value == 'always';
@@ -66,16 +68,30 @@
           check_add_self = 0;
         END;
       %]
-      [%# this is in a table to match the alignment of the added-by-extensions
-          checkboxes (needinfo, restrict-comments) %]
       <table>
         <tr>
           <td>
             <input type="checkbox" name="addselfcc" id="add-self-cc"
-              [%~ " checked" IF check_add_self %]>
+              [%= "checked" IF check_add_self %]>
           </td>
           <td>
             <label for="add-self-cc">Add me to CC list (follow this [% terms.bug %])</label>
+          </td>
+        </tr>
+      </table>
+    [% END %]
+
+    [% IF user.is_involved_in_bug(bug) %]
+      <table class="edit-show" style="display:none">
+        <tr>
+          <td>
+            <input type="checkbox" name="bug_ignored" id="bug-ignored"
+              [%= "checked" IF user.is_bug_ignored(bug.id) %]>
+          </td>
+          <td>
+            <label for="bug-ignored" title="You will still receive emails for flag requests directed at you">
+              Never email me about this [% terms.bug %]
+            </label>
           </td>
         </tr>
       </table>

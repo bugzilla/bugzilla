@@ -10,7 +10,7 @@
 [% RETURN UNLESS user.in_group(Param('restrict_comments_enable_group')) %]
 
 [%# using a table to match alignment of the needinfo checkboxes %]
-<table>
+<table [%= IF bug_modal %]class="edit-show" style="display:none"[% END %]>
 <tr>
   <td>
     <input type="checkbox" name="restrict_comments" id="restrict_comments"
@@ -24,3 +24,12 @@
   </td>
 </tr>
 </table>
+[% IF bug_modal && bug.restrict_comments %]
+  <table class="edit-hide">
+  <tr>
+    <td>
+      <i>Commenting restricted to members of the <b>[% Param('restrict_comments_group') FILTER html %]</b> group.</i>
+    </td>
+  </tr>
+  </table>
+[% END %]

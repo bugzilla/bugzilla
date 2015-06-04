@@ -52,6 +52,24 @@ sub rr_url {
     return $rb_host . "/r/" . $rrid . "/";
 }
 
+sub set_review_flag {
+    my ($child_attach, $flag_type, $flag_status, $reviewer, $setter) = @_;
+
+    my %params = (
+        type_id => $flag_type->id,
+        status  => $flag_status
+    );
+
+    if ($flag_status eq "?") {
+        $params{'requestee'} = $reviewer->login;
+        $params{'setter'} = $setter;
+    } else {
+        $params{'setter'} = $reviewer;
+    }
+
+    return Bugzilla::Flag->set_flag($child_attach, \%params);
+}
+
 my $dbh = Bugzilla->dbh;
 
 my $bugs_query = "SELECT distinct bug_id FROM attachments WHERE mimetype='text/x-review-board-request' AND isobsolete=0";
@@ -138,9 +156,9 @@ foreach my $bug_id (@$bug_ids) {
             foreach my $flag (@{ $parent_attach->flags }) {
                 if ($flag->type->name eq "review") {
                     if ($flag->status eq "?") {
-                        $parent_flags{$flag->requestee->id} = $flag->status;
+                        $parent_flags{$flag->requestee->id} = $flag;
                     } else {
-                        $parent_flags{$flag->setter->id} = $flag->status;
+                        $parent_flags{$flag->setter->id} = $flag;
                     }
                 }
             }
@@ -181,40 +199,48 @@ foreach my $bug_id (@$bug_ids) {
             # Set flags.  If there was a parent, check it for flags by the
             # requestee.  Otherwise, set an r? flag.
 
+            # Preserve the original flag hash since we need to modify it for
+            # every child to find extra reviewers (see below the 'foreach').
+            my %tmp_parent_flags = %parent_flags;
+
             foreach my $reviewer_id (@{ $child->{"reviewers_bmo_ids"} }) {
                 my $reviewer = Bugzilla::User->new({ id => $reviewer_id,
                                                      cache => 1 });
                 print "      Reviewer " . $reviewer->login . " (" . $reviewer->id . ")\n";
                 $reviewer->settings->{block_reviews}->{value} = 'off';
-                my $flag_status = $parent_flags{$reviewer->id};
-                if (defined($flag_status)) {
-                    print "      Flag for reviewer " . $reviewer->id . ": " . $flag_status . "\n";
-                    my %params = (
-                        type_id => $flag_type->id,
-                        status  => $flag_status
-                    );
+                my $flag = $tmp_parent_flags{$reviewer->id};
+                if (defined($flag)) {
+                    print "      Flag for reviewer " . $reviewer->id . ": " . $flag->status . "\n";
 
-                    if ($flag_status eq "?") {
-                        $params{'requestee'} = $reviewer->login;
-                        $params{'setter'} = $attacher;
-                    } else {
-                        $params{'setter'} = $reviewer;
-                    }
-
-                    my $child_flag = Bugzilla::Flag->set_flag($child_attach, \%params);
+                    set_review_flag($child_attach, $flag_type, $flag->status,
+                                    $reviewer, $attacher);
+                    delete $tmp_parent_flags{$reviewer->id};
                 } else {
                     # No flag on the parent; this probably means the reviewer
                     # cancelled the review, so don't set r?.
                     print "      No review flag for reviewer " . $reviewer->id . "\n";
                 }
-
-                $child_attach->update($timestamp);
-                print "      Posting comment.\n";
-                $bug->add_comment('',
-                    { isprivate  => 0,
-                      type       => CMT_ATTACHMENT_CREATED,
-                      extra_data => $child_attach->id });
             }
+
+            # Preserve flags that were set directly on the attachment
+            # from reviewers not listed in the review request.
+            foreach my $extra_reviewer_id (keys %tmp_parent_flags) {
+                my $extra_reviewer = Bugzilla::User->new({
+                    id => $extra_reviewer_id,
+                    cache => 1
+                });
+                my $flag = $tmp_parent_flags{$extra_reviewer_id};
+                print "     Extra flag set for reviewer " . $extra_reviewer->login . "\n";
+                set_review_flag($child_attach, $flag->type, $flag->status,
+                                $extra_reviewer, $flag->setter);
+            }
+
+            $child_attach->update($timestamp);
+            print "      Posting comment.\n";
+            $bug->add_comment('',
+                              { isprivate  => 0,
+                                type       => CMT_ATTACHMENT_CREATED,
+                                extra_data => $child_attach->id });
         }
     }
 

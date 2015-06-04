@@ -985,6 +985,9 @@ sub remove_from_db {
             $dbh->bz_drop_field_tables($self);
         }
 
+        Bugzilla->memcached->clear({ table => 'fielddefs', id => $self->id });
+        Bugzilla->memcached->clear_config();
+
         $dbh->bz_commit_transaction();
     };
     my $error = "$@";

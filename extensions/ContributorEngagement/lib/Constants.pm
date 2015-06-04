@@ -19,11 +19,11 @@ our @EXPORT = qw(
 use constant EMAIL_FROM => 'bugzilla-daemon@mozilla.org';
 
 use constant ENABLED_PRODUCTS => (
+    "Cloud Services",
     "Core",
-    "Firefox",
     "Firefox for Android",
     "Firefox for Metro",
-    "Mozilla Services",
+    "Firefox",
     "Testing",
     "Toolkit",
 );

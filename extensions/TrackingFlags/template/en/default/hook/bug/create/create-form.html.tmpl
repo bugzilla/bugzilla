@@ -6,7 +6,27 @@
   # defined by the Mozilla Public License, v. 2.0.
   #%]
 
-[% RETURN UNLESS tracking_flag_components %]
+[%
+  RETURN UNLESS tracking_flag_components;
+
+  # A list of products that will automatically set cf_status_firefox to
+  # "affected" when filing bugs with nightly.  An empty component list
+  # denotes all components.
+  auto_affected = {
+    "Firefox"               = [],
+    "Firefox for Android"   = [],
+    "Firefox OS"            = [],
+    "Core"                  = [],
+    "Toolkit"               = [],
+    "Firefox Health Report" = [ "Client: Desktop", "Client: Android" ],
+  };
+
+  # map product names to lowercase
+  FOREACH key IN auto_affected.keys;
+    key_lc = key.lower;
+    auto_affected.$key_lc = auto_affected.item(key);
+  END;
+%]
 
 <script type="text/javascript">
   $(function() {
@@ -26,16 +46,27 @@
         });
       }).click();
 
-  [% IF highest_status_firefox %]
-    $('#version, #bug_status')
+  [% IF highest_status_firefox && auto_affected.exists(product.name.lower) %]
+    $('#version, #bug_status, #component')
       .change(function() {
         var version = $('#version').val();
+        var component = $('#component').val() || '';
         if ($('#bug_status').val() != 'UNCONFIRMED'
             && (
               version.toLowerCase() == 'trunk'
               || version == highest_status_firefox + ' Branch'
               || version == 'Firefox ' + highest_status_firefox
-            ))
+            )
+            [% auto_components = auto_affected.item(product.name.lower) %]
+            [% IF auto_components.size %]
+              && (
+                [% FOREACH auto_component IN auto_components %]
+                  [% " || " UNLESS loop.first %]
+                  component.toLowerCase() === '[% auto_component.lower FILTER js %]'
+                [% END %]
+              )
+            [% END %]
+            )
         {
           $('#cf_status_firefox' + highest_status_firefox).val('affected');
         }

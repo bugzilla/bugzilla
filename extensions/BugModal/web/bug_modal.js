@@ -48,6 +48,23 @@ $(function() {
         }
     }
 
+    // restore edit mode after navigating back
+    function restoreEditMode() {
+        if (!$('#editing').val())
+            return;
+        $('.module')
+            .each(function() {
+                slide_module($(this), 'hide', true);
+            });
+        $($('#editing').val().split(' '))
+            .each(function() {
+                slide_module($('#' + this), 'show', true);
+            });
+        $('#mode-btn').click();
+        $('.save-btn').prop('disabled', false);
+        $('#editing').val('');
+    }
+
     // expand all modules
     $('#expand-all-btn')
         .click(function(event) {
@@ -996,18 +1013,8 @@ $(function() {
         });
 
     // finally switch to edit mode if we navigate back to a page that was editing
-    if ($('#editing').val()) {
-        $('.module')
-            .each(function() {
-                slide_module($(this), 'hide', true);
-            });
-        $($('#editing').val().split(' '))
-            .each(function() {
-                slide_module($('#' + this), 'show', true);
-            });
-        $('#mode-btn').click();
-        $('#editing').val('');
-    }
+    $(window).on('pageshow', restoreEditMode);
+    restoreEditMode();
 });
 
 function confirmUnsafeURL(url) {

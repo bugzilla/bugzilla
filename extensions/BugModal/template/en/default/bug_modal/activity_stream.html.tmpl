@@ -6,9 +6,25 @@
   # defined by the Mozilla Public License, v. 2.0.
   #%]
 
+<div id="comment-actions">
+  <button type="button" id="comment-tags-btn" style="display:none" class="minor">Tags &#9662;</button>
+  <button type="button" id="comment-toggle-btn" class="minor">Comments &#9662;</button>
+</div>
+
+<menu id="comment-toggle-menu" type="context" style="display:none">
+  <menuitem id="comment-reset" label="Reset"></menuitem>
+  <hr>
+  <menuitem id="comment-collapse-all" label="Collapse All"></menuitem>
+  <menuitem id="comment-expand-all" label="Expand All"></menuitem>
+  <hr>
+  <menuitem id="comments-only" label="Comments Only"></menuitem>
+  [% Hook.process('comments-toggle-menu') %]
+</menu>
+
 [%
   PROCESS bug/time.html.tmpl;
 
+  activity_counter = 0;
   FOREACH change_set IN bug.activity_stream;
     '<div class="change-set" id="' _ change_set.id _ '">';
 
@@ -22,7 +38,8 @@
     IF change_set.comment;
       PROCESS comment_header comment=change_set.comment;
     ELSE;
-      PROCESS activity_header activities=change_set.activity id=change_set.id;
+      activity_counter = activity_counter + 1;
+      PROCESS activity_header activities=change_set.activity id=activity_counter;
     END;
 
     IF change_set.comment;
@@ -95,16 +112,16 @@
                 data-no="[% comment.count FILTER none %]"
               >Tag</button>
             [% END %]
-            <button class="reply-btn minor" type="button"
+            <button type="button" class="reply-btn minor"
               data-reply-id="[% comment.count FILTER none %]"
               data-reply-name="[% comment.author.name || comment.author.moz_nick FILTER html %]"
               >Reply</button>
           [% END %]
-          <button class="comment-spinner minor" id="cs-[% comment.count FILTER none%]">-</button>
+          <button type="button" class="change-spinner minor" id="cs-[% comment.count FILTER none %]">-</button>
         </td>
       </tr>
 
-      <tr>
+      <tr id="cr-[% comment.count FILTER none %]" [%= IF comment.collapsed %]style="display:none"[% END %]>
         <td colspan="2">
           <div class="change-name">
             <a href="show_bug.cgi?id=[% bug.bug_id FILTER none %]#c[% comment.count FILTER none %]">
@@ -138,7 +155,7 @@
             Comment hidden ([% comment.tags.join(', ') FILTER html %])
         </td>
         <td class="comment-actions">
-          <button class="comment-spinner minor" id="ccs-[% comment.count FILTER none%]">
+          <button type="button" class="change-spinner minor" id="ccs-[% comment.count FILTER none %]">
             [%~ comment.collapsed ? "+" : "-" ~%]
           </button>
         </td>
@@ -150,7 +167,7 @@
 
 [% BLOCK activity_header %]
   [% action = activities.0 %]
-  <div id="[% id FILTER none %]" class="change">
+  <div class="change" id="a[% id FILTER none %]">
     <table class="layout-table change-head [% extra_class FILTER none %]">
       <tr>
         <td rowspan="2" class="change-gravatar">
@@ -168,8 +185,11 @@
             <span class="user-role">([% extra_class.ucfirst FILTER none %])</span>
           [% END %]
         </td>
+        <td class="comment-actions">
+          <button type="button" class="change-spinner minor" id="as-[% id FILTER none %]">-</button>
+        </td>
       </tr>
-      <tr>
+      <tr id="ar-[% id FILTER none %]">
         <td colspan="2">
           <div class="change-name">
             <a href="show_bug.cgi?id=[% bug.bug_id FILTER none %]#[% id FILTER none %]">Updated</a>

@@ -130,7 +130,7 @@
       [% SET yui = yui_resolve_deps(yui, yui_deps) %]
     [% END %]
 
-    [% SET css_sets = css_files(style_urls, yui, yui_css) %]
+    [% SET css_sets = css_files(style_urls.unique, yui, yui_css) %]
     [% IF constants.CONCATENATE_ASSETS %]
       [% PROCESS format_css_link asset_url = css_sets.unified_standard_skin %]
     [% ELSE %]
@@ -166,7 +166,7 @@
     [% END %]
 
     [%# jQuery Plugins %]
-    [% FOREACH jq_name = jquery %]
+    [% FOREACH jq_name = jquery.unique %]
       [% starting_js_urls.push("js/jquery/plugins/$jq_name/${jq_name}-min.js") %]
     [% END %]
     [% starting_js_urls.push('js/global.js') %]

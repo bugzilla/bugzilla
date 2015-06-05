@@ -9,21 +9,219 @@ $(function() {
     'use strict';
 
     // comment collapse/expand
-    $('.comment-spinner')
-        .click(function(event) {
-            event.preventDefault();
-            var spinner = $(event.target);
-            var id = spinner.attr('id').match(/\d+$/)[0];
-            // switch to full header for initially collapsed comments
-            if (spinner.attr('id').match(/^ccs-/)) {
+
+    function toggleChange(spinner, forced) {
+        // find and cache the id
+        var id = spinner.data('cid');
+        if (!id) {
+            id = spinner.attr('id').match(/\d+$/)[0];
+            spinner.data('cid', id);
+        }
+
+        // non-comment toggle
+        if (spinner.attr('id').substr(0, 1) == 'a') {
+            var changeSet = spinner.parents('.change-set');
+            if (forced == 'hide') {
+                changeSet.find('.activity').hide();
+                changeSet.find('.gravatar').css('width', '16px').css('height', '16px');
+                $('#ar-' + id).hide();
+                spinner.text('+');
+            }
+            else if (forced == 'show' || forced == 'reset') {
+                changeSet.find('.activity').show();
+                changeSet.find('.gravatar').css('width', '32px').css('height', '32px');
+                $('#ar-' + id).show();
+                spinner.text('-');
+            }
+            else {
+                changeSet.find('.activity').slideToggle('fast', function() {
+                    $('#ar-' + id).toggle();
+                    if (changeSet.find('.activity:visible').length) {
+                        changeSet.find('.gravatar').css('width', '32px').css('height', '32px');
+                        spinner.text('-');
+                    }
+                    else {
+                        changeSet.find('.gravatar').css('width', '16px').css('height', '16px');
+                        spinner.text('+');
+                    }
+                });
+            }
+            return;
+        }
+
+        // find the "real spinner", which is the one on the non-default-collapsed block
+        var realSpinner = $('#cs-' + id);
+        var defaultCollapsed = realSpinner.data('ch');
+        if (defaultCollapsed === undefined) {
+            defaultCollapsed = spinner.attr('id').substring(0, 4) === 'ccs-';
+            realSpinner.data('ch', defaultCollapsed);
+        }
+        if (forced === 'reset') {
+            forced = defaultCollapsed ? 'hide' : 'show';
+        }
+
+        // comment toggle
+        if (forced === 'hide') {
+            if (defaultCollapsed) {
+                $('#ch-' + id).hide();
+                $('#cc-' + id).show();
+            }
+            $('#ct-' + id).hide();
+            if (BUGZILLA.user.id !== 0)
+                $('#ctag-' + id).hide();
+            $('#c' + id).find('.activity').hide();
+            $('#c' + id).find('.comment-tags').hide();
+            $('#c' + id).find('.comment-tags').hide();
+            $('#c' + id).find('.gravatar').css('width', '16px').css('height', '16px');
+            $('#cr-' + id).hide();
+            spinner.text('+');
+        }
+        else if (forced == 'show') {
+            if (defaultCollapsed) {
                 $('#cc-' + id).hide();
                 $('#ch-' + id).show();
             }
-            $('#ct-' + id + ', #ctag-' + id).slideToggle('fast', function() {
+            $('#ct-' + id).show();
+            if (BUGZILLA.user.id !== 0)
+                $('#ctag-' + id).show();
+            $('#c' + id).find('.activity').show();
+            $('#c' + id).find('.comment-tags').show();
+            $('#c' + id).find('.comment-tags').show();
+            $('#c' + id).find('.gravatar').css('width', '32px').css('height', '32px');
+            $('#cr-' + id).show();
+            spinner.text('-');
+        }
+        else {
+            $('#ct-' + id).slideToggle('fast', function() {
                 $('#c' + id).find('.activity').toggle();
-                spinner.text($('#ct-' + id + ':visible').length ? '-' : '+');
+                $('#c' + id).find('.comment-tags').toggle();
+                if ($('#ct-' + id + ':visible').length) {
+                    spinner.text('-');
+                    $('#cr-' + id).show();
+                    if (BUGZILLA.user.id !== 0)
+                        $('#ctag-' + id).show();
+                    $('#c' + id).find('.gravatar').css('width', '32px').css('height', '32px');
+                    if (defaultCollapsed) {
+                        $('#cc-' + id).hide();
+                        $('#ch-' + id).show();
+                    }
+                }
+                else {
+                    spinner.text('+');
+                    $('#cr-' + id).hide();
+                    if (BUGZILLA.user.id !== 0)
+                        $('#ctag-' + id).hide();
+                    $('#c' + id).find('.gravatar').css('width', '16px').css('height', '16px');
+                    if (defaultCollapsed) {
+                        $('#ch-' + id).hide();
+                        $('#cc-' + id).show();
+                    }
+                }
+            });
+        }
+    }
+
+    $('.change-spinner')
+        .click(function(event) {
+            event.preventDefault();
+            toggleChange($(this));
+        });
+
+    // comment and tag menus
+
+    $('#comment-reset')
+        .click(function() {
+            $('.change-spinner:visible').each(function() {
+                toggleChange($(this), 'reset');
             });
         });
+
+    $('#comment-collapse-all')
+        .click(function() {
+            $('.change-spinner:visible').each(function() {
+                toggleChange($(this), 'hide');
+            });
+        });
+
+    $('#comment-expand-all')
+        .click(function() {
+            $('.change-spinner:visible').each(function() {
+                toggleChange($(this), 'show');
+            });
+        });
+
+    $('#comments-only')
+        .click(function() {
+            $('.change-spinner:visible').each(function() {
+                toggleChange($(this), this.id.substr(0, 3) === 'cs-' ? 'show' : 'hide');
+            });
+        });
+
+    $.contextMenu({
+        selector: '#comment-toggle-btn',
+        trigger: 'left',
+        items: $.contextMenu.fromMenu($('#comment-toggle-menu'))
+    });
+
+    function updateTagsMenu() {
+        var tags = [];
+        $('.comment-tags').each(function() {
+            $.each(tagsFromDom($(this)), function() {
+                var tag = this.toLowerCase();
+                if (tag in tags) {
+                    tags[tag]++;
+                }
+                else {
+                    tags[tag] = 1;
+                }
+            });
+        });
+        var tagNames = Object.keys(tags);
+        tagNames.sort();
+
+        var btn = $('#comment-tags-btn');
+        if (tagNames.length === 0) {
+            btn.hide();
+            return;
+        }
+        btn.show();
+
+        var menuItems = [
+            { name: 'Reset', tag: '' },
+            "--"
+        ];
+        $.each(tagNames, function(key, value) {
+            menuItems.push({ name: value + ' (' + tags[value] + ')', tag: value });
+        });
+
+        $.contextMenu('destroy', '#comment-tags-btn');
+        $.contextMenu({
+            selector: '#comment-tags-btn',
+            trigger: 'left',
+            items: menuItems,
+            callback: function(key, opt) {
+                var tag = opt.commands[key].tag;
+                if (tag === '') {
+                    $('.change-spinner:visible').each(function() {
+                        toggleChange($(this), 'reset');
+                    });
+                    return;
+                }
+                var firstComment = false;
+                $('.change-spinner:visible').each(function() {
+                    var that = $(this);
+                    var commentTags = tagsFromDom(that.parents('.comment').find('.comment-tags'));
+                    var hasTag = $.inArrayIn(tag, commentTags) >= 0;
+                    toggleChange(that, hasTag ? 'show' : 'hide');
+                    if (hasTag && !firstComment) {
+                        firstComment = that;
+                    }
+                });
+                if (firstComment)
+                    $.scrollTo(firstComment);
+            }
+        });
+    }
 
     //
     // anything after this point is only executed for logged in users
@@ -259,4 +457,6 @@ $(function() {
             event.preventDefault();
             $('#' + $(this).data('for')).hide();
         });
+
+    updateTagsMenu();
 });

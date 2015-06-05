@@ -25,19 +25,6 @@ $(function() {
     // products with descriptions (also lazy-loaded)
     var products = [];
 
-    // scroll to an element
-    function scroll_to(el, complete) {
-        var offset = el.offset();
-        $('html, body')
-            .animate({
-                    scrollTop: offset.top - 20,
-                    scrollLeft: offset.left = 20
-                },
-                200,
-                complete
-            );
-    }
-
     // expand/collapse module
     function slide_module(module, action, fast) {
         if (!module.attr('id'))
@@ -120,7 +107,7 @@ $(function() {
         .click(function(event) {
             event.preventDefault();
             var id = $('.comment:last')[0].parentNode.id;
-            scroll_to($('#' + id));
+            $.scrollTo($('#' + id));
             window.location.hash = id;
         });
 
@@ -128,7 +115,7 @@ $(function() {
     $('#top-btn')
         .click(function(event) {
             event.preventDefault();
-            scroll_to($('body'));
+            $.scrollTo($('body'));
         });
 
     // use non-native tooltips for relative times and bug summaries
@@ -450,14 +437,14 @@ $(function() {
             event.preventDefault();
             // focus first to grow the textarea, so we scroll to the correct location
             $('#comment').focus();
-            scroll_to($('#bottom-save-btn'));
+            $.scrollTo($('#bottom-save-btn'));
         });
 
     // needinfo in people section -> scroll to near-comment ui
     $('#needinfo-scroll')
         .click(function(event) {
             event.preventDefault();
-            scroll_to($('#needinfo_role'), function() { $('#needinfo_role').focus(); });
+            $.scrollTo($('#needinfo_role'), function() { $('#needinfo_role').focus(); });
         });
 
     // knob
@@ -569,7 +556,7 @@ $(function() {
             if ($('#comment').val() != reply_text) {
                 $('#comment').val($('#comment').val() + reply_text);
             }
-            scroll_to($('#comment'), function() { $('#comment').focus(); });
+            $.scrollTo($('#comment'), function() { $('#comment').focus(); });
         });
 
     // add comment --> enlarge on focus
@@ -606,10 +593,10 @@ $(function() {
             $('#resolution').val($(event.target).text()).change();
             $('#top-save-btn').show();
             if ($(event.target).text() == "DUPLICATE") {
-                scroll_to($('body'));
+                $.scrollTo($('body'));
             }
             else {
-                scroll_to($('body'), function() { $('#resolution').focus(); });
+                $.scrollTo($('body'), function() { $('#resolution').focus(); });
             }
         });
     $('.status-btn')
@@ -619,7 +606,7 @@ $(function() {
             $('#field-status-edit').show();
             $('#bug_status').val($(event.target).data('status')).change();
             $('#top-save-btn').show();
-            scroll_to($('body'), function() { $('#bug_status').focus(); });
+            $.scrollTo($('body'), function() { $('#bug_status').focus(); });
         });
 
     // vote button
@@ -651,7 +638,7 @@ $(function() {
             if (current != text) {
                 $('#comment').val(current + text);
                 $('#comment').focus();
-                scroll_to($('#bottom-save-btn'));
+                $.scrollTo($('#bottom-save-btn'));
             }
         });
 
@@ -1158,7 +1145,21 @@ function lb_close(event) {
             }
             // stick with inArray/indexOf and return -1 on no match
             return -1;
+        },
+
+        // Animated scroll to bring an element into view
+        scrollTo: function(el, complete) {
+            var offset = el.offset();
+            $('html, body')
+                .animate({
+                        scrollTop: offset.top - 20,
+                        scrollLeft: offset.left = 20
+                    },
+                    200,
+                    complete
+                );
         }
+
     });
 })(jQuery);
 

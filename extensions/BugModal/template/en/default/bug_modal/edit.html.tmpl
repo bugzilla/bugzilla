@@ -274,6 +274,7 @@
         field = bug_fields.product
         field_type = constants.FIELD_TYPE_SINGLE_SELECT
         hide_on_edit = can_edit_product
+        help = "describecomponents.cgi"
     %]
       <span class="spin-latch" id="product-latch" data-latch="#product-latch" data-for="#product-info">&#9656;</span>
       <div class="spin-toggle" data-latch="#product-latch" data-for="#product-info">
@@ -289,6 +290,7 @@
         hide_on_view = 1
         hide_on_edit = !can_edit_product
         append_content = 1
+        help = "describecomponents.cgi"
     %]
       <span id="product-search-container">
         [% PROCESS prodcompsearch/form.html.tmpl
@@ -310,6 +312,7 @@
     [% WRAPPER bug_modal/field.html.tmpl
         field = bug_fields.component
         field_type = constants.FIELD_TYPE_SINGLE_SELECT
+        help = "describecomponents.cgi"
     %]
       <span class="spin-latch" id="component-latch" data-latch="#component-latch" data-for="#component-info">&#9656;</span>
       <div class="spin-toggle" data-latch="#component-latch" data-for="#component-info">
@@ -671,6 +674,7 @@
         field = bug_fields.keywords
         field_type = constants.FIELD_TYPE_KEYWORDS
         hide_on_view = bug.keyword_objects.size == 0
+        help = "describekeywords.cgi"
     %]
       [% bug.keyword_objects.pluck("name").join(", ") || "---" FILTER html %]
     [% END %]
@@ -822,6 +826,7 @@
     [% WRAPPER bug_modal/field.html.tmpl
         field = bug_fields.status_whiteboard
         field_type = constants.FIELD_TYPE_FREETEXT
+        help = "https://wiki.mozilla.org/BMO/Whiteboard"
     %]
       [% bug.status_whiteboard == "" ? "---" : bug.status_whiteboard FILTER html %]
     [% END %]

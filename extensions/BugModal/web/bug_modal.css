@@ -172,6 +172,11 @@ select[multiple], .text_input, .yui-ac-input, input {
     color: #666;
 }
 
+.module .field .name .help {
+    color: #666;
+    cursor: help;
+}
+
 .module .field.inline .name {
     min-width: 0px;
     width: auto;

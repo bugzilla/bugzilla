@@ -25,6 +25,7 @@
   # append_content: (boolean) when called as a WRAPPER, the content will be appended to the
   #                 edit html instead of replacing it.  forces edit_only (default: false);
   # default: (string) default value (eg. used as a placeholder in user fields)
+  # help: (string) optional url that describes the field (requires a label to be defined and visible)
   # action: (hash) show a button to the right of the edit field (user fields only currently).  keys:
   #   id: (string) optional button id
   #   class: (string) optional button class
@@ -94,7 +95,11 @@ END;
   [% IF hide_on_view %] style="display:none"[% END %]
 >
   [% IF label.defined && !no_label %]
-    <div class="name">[% label _ ":" FILTER html IF label %]</div>
+    <div class="name">
+      [%~ IF help.defined %]<a href="[% help FILTER none %]" class="help">[% END %]
+      [%~ label _ ":" FILTER html IF label %]
+      [%~ IF help.defined %]</a>[% END ~%]
+    </div>
   [% END %]
 
   [%# read-only html %]

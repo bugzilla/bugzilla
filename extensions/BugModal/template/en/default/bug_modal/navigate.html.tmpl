@@ -10,7 +10,7 @@
 [%
   search = user.recent_search_for(bug);
   RETURN UNLESS search;
-  last_bug_list = my_search.bug_list;
+  last_bug_list = search.bug_list;
   this_bug_idx = lsearch(last_bug_list, bug.id);
 %]
 

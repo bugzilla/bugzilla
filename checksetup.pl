@@ -43,7 +43,8 @@ init_console();
 my %switch;
 GetOptions(\%switch, 'help|h|?', 'check-modules', 'cpanfile',
                      'no-templates|t', 'verbose|v|no-silent',
-                     'make-admin=s', 'reset-password=s', 'version|V');
+                     'make-admin=s', 'reset-password=s', 'version|V',
+                     'no-permissions|p');
 
 # Print the help message if that switch was selected.
 pod2usage({-verbose => 1, -exitval => 1}) if $switch{'help'};
@@ -150,7 +151,7 @@ Bugzilla::Template::precompile_templates(!$silent)
 # Set proper rights (--CHMOD--)
 ###########################################################################
 
-fix_all_file_permissions(!$silent);
+fix_all_file_permissions(!$silent) unless $switch{'no-permissions'};
 
 ###########################################################################
 # Check GraphViz setup
@@ -300,6 +301,12 @@ Output results of SCRIPT being processed.
 
 Display the version of Bugzilla, Perl, and some info about the
 system that Bugzilla is being installed on, and then exit.
+
+=item B<--no-permissions> (B<-p>)
+
+Don't update file permissions. Owner, group, and mode of files and
+directories will not be changed. Use this if your installation is
+managed by a software packaging system such as RPM or APT.
 
 =back
 

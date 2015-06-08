@@ -395,6 +395,7 @@ sub OPTIONAL_MODULES {
         package => 'ElasticSearch',
         module  => 'ElasticSearch',
         version => '0',
+        feature => ['elasticsearch'],
     },
     );
 

@@ -325,7 +325,23 @@ $(function() {
                     keywords = data.keywords;
                     $('#keywords')
                         .devbridgeAutocomplete({
-                            lookup: keywords,
+                            lookup: function(query, done) {
+                                query = query.toLowerCase();
+                                var matchStart =
+                                    $.grep(keywords, function(keyword) {
+                                        return keyword.toLowerCase().substr(0, query.length) === query;
+                                    });
+                                var matchSub =
+                                    $.grep(keywords, function(keyword) {
+                                        return keyword.toLowerCase().indexOf(query) !== -1 &&
+                                            $.inArray(keyword, matchStart) === -1;
+                                    });
+                                var suggestions =
+                                    $.map($.merge(matchStart, matchSub), function(suggestion) {
+                                        return { value: suggestion };
+                                    });
+                                done({ suggestions: suggestions });
+                            },
                             tabDisabled: true,
                             delimiter: /,\s*/,
                             minChars: 0,

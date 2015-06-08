@@ -792,7 +792,24 @@ $(function() {
         .each(function() {
             var that = $(this);
             that.devbridgeAutocomplete({
-                lookup: BUGZILLA.autocomplete_values[that.data('values')],
+                lookup: function(query, done) {
+                    var values = BUGZILLA.autocomplete_values[that.data('values')];
+                    query = query.toLowerCase();
+                    var matchStart =
+                        $.grep(values, function(value) {
+                            return value.toLowerCase().substr(0, query.length) === query;
+                        });
+                    var matchSub =
+                        $.grep(values, function(value) {
+                            return value.toLowerCase().indexOf(query) !== -1 &&
+                                $.inArray(value, matchStart) === -1;
+                        });
+                    var suggestions =
+                        $.map($.merge(matchStart, matchSub), function(suggestion) {
+                            return { value: suggestion };
+                        });
+                    done({ suggestions: suggestions });
+                },
                 tabDisabled: true,
                 delimiter: /,\s*/,
                 minChars: 0,

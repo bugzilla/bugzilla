@@ -3,6 +3,7 @@ asciidoc
 aspell-devel
 bzip2
 dblatex
+dbus-x11
 docbook-style-dsssl
 firefox
 gcc
@@ -26,9 +27,9 @@ openssh-server
 openssl-devel
 passwd
 patch
-perl-core
 perl-App-cpanminus
 perl-CPAN
+perl-core
 postfix
 python-sphinx
 sudo
@@ -43,8 +44,8 @@ texlive-tex4ht
 texlive-threeparttable
 texlive-ucs
 texlive-wrapfig
+tigervnc-server-minimal
 unzip
 vim-enhanced
 wget
 xmlto
-xorg-x11-server-Xvfb

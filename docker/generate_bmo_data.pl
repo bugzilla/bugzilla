@@ -27,7 +27,7 @@ my $dbh = Bugzilla->dbh;
 # set Bugzilla usage mode to USAGE_MODE_CMDLINE
 Bugzilla->usage_mode(USAGE_MODE_CMDLINE);
 
-Bugzilla->set_user(Bugzilla::User->check({ name => 'admin@mozilla.bugs' }));
+Bugzilla->set_user(Bugzilla::User->new({ name => 'admin@mozilla.bugs' }));
 
 ##########################################################################
 #  Set Default User Preferences
@@ -247,7 +247,7 @@ my @products = (
                 description    => 'For bugs in Firefox which do not fit into ' .
                                   'other more specific Firefox components',
                 initialowner   => 'nobody@mozilla.org',
-		initialqaowner => '',
+                initialqaowner => '',
                 initial_cc     => [],
                 watch_user     => 'general@firefox.bugs'
             }
@@ -286,12 +286,12 @@ for my $product (@products) {
 
         foreach my $component (@{ $product->{components} }) {
             if (!Bugzilla::User->new({ name => $component->{watch_user} })) {
-		        Bugzilla::User->create({
+                Bugzilla::User->create({
                     login_name    => $component->{watch_user},
-               	    cryptpassword => '*',
-            	});
-	        }
-	        Bugzilla->input_params({ watch_user => $component->{watch_user} });
+                    cryptpassword => '*',
+                });
+            }
+            Bugzilla->input_params({ watch_user => $component->{watch_user} });
             Bugzilla::Component->create({
                 name             => $component->{name},
                 product          => $new_product,

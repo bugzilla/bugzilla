@@ -80,7 +80,7 @@ docker@boot2docker:~$ echo 'EXTRA_ARGS="--storage-driver=devicemapper"' | sudo t
 docker@boot2docker:~$ sudo /etc/init.d/docker restart
 ```
 
-Also before building, you will need to change value in the 
+Also before building, you will need to change value in the
 `checksetup_answers.txt` file to match the IP address of the boot2docker VM.
 You can find the IP address by running `boot2docker ip`.
 

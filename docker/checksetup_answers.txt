@@ -3,6 +3,7 @@ $answer{'ADMIN_OK'} = 'Y';
 $answer{'ADMIN_PASSWORD'} = 'password';
 $answer{'ADMIN_REALNAME'} = 'Admin';
 $answer{'NO_PAUSE'} = 1;
+$answer{'bugzilla_version'} = '4.2';
 $answer{'create_htaccess'} = '';
 $answer{'cvsbin'} = '/usr/bin/cvs';
 $answer{'db_check'} = 1;

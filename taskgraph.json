@@ -16,7 +16,7 @@
         "provisionerId": "aws-provisioner",
         "workerType": "gaia",
         "payload": {
-          "image": "dklawren/docker-bugzilla:bmo",
+          "image": "dklawren/webtools-bmo-bugzilla",
           "command": ["/runtests.sh"],
           "env": {
             "TEST_SUITE": "sanity"
@@ -31,9 +31,6 @@
         },
         "extra": {
           "treeherder": {
-            "machine": {
-              "platform": "master"
-            },
             "symbol": "San"
           }
         }

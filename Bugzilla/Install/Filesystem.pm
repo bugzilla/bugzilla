@@ -177,8 +177,7 @@ sub FILESYSTEM {
         'contrib/README'       => { perms => OWNER_WRITE },
         'contrib/*/README'     => { perms => OWNER_WRITE },
         'contrib/sendunsentbugmail.pl' => { perms => WS_EXECUTE },
-        'contrib/docker/*'     => { perms => OWNER_WRITE },
-        'contrib/docker/*.pl'  => { perms => OWNER_EXECUTE },
+        'docker/*'             => { perms => OWNER_WRITE },
         'docs/bugzilla.ent'    => { perms => OWNER_WRITE },
         'docs/makedocs.pl'     => { perms => OWNER_EXECUTE },
         'docs/style.css'       => { perms => WS_SERVE },
@@ -257,7 +256,7 @@ sub FILESYSTEM {
                                      dirs => DIR_WS_SERVE },
          "$extensionsdir/*/web" => { files => WS_SERVE,
                                      dirs => DIR_WS_SERVE },
-                                     
+
          # Purpose: allow webserver to read .bzr so we execute bzr commands
          # in backticks and look at the result over the web. Used to show
          # bzr history.
@@ -273,6 +272,8 @@ sub FILESYSTEM {
          'docs/*/xml'          => { files => OWNER_WRITE,
                                      dirs => DIR_OWNER_WRITE },
          'contrib'             => { files => OWNER_EXECUTE,
+                                     dirs => DIR_OWNER_WRITE, },
+         'docker'              => { files => OWNER_EXECUTE,
                                      dirs => DIR_OWNER_WRITE, },
     );
 
@@ -346,6 +347,8 @@ EOT
         "$templatedir/.htaccess"     => { perms    => WS_SERVE,
                                           contents => HT_DEFAULT_DENY },
         'contrib/.htaccess'          => { perms    => WS_SERVE,
+                                          contents => HT_DEFAULT_DENY },
+        'docker/.htaccess'           => { perms    => WS_SERVE,
                                           contents => HT_DEFAULT_DENY },
         't/.htaccess'                => { perms    => WS_SERVE,
                                           contents => HT_DEFAULT_DENY },

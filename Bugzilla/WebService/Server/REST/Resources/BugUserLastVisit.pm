@@ -22,13 +22,13 @@ sub _rest_resources {
             GET => {
                 method => 'get',
                 params => sub {
-                    return { ids => $_[0] };
+                    return { ids => [$_[0]] };
                 },
             },
             POST => {
                 method => 'update',
                 params => sub {
-                    return { ids => $_[0] };
+                    return { ids => [$_[0]] };
                 },
             },
         },

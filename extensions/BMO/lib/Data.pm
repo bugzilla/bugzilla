@@ -191,6 +191,7 @@ our %product_sec_groups = (
     "Developer Documentation"      => 'websites-security',
     "Developer Ecosystem"          => 'client-services-security',
     "Finance"                      => 'finance',
+    "Firefox Friends"              => 'mozilla-employee-confidential',
     "Firefox Health Report"        => 'cloud-services-security',
     "Infrastructure & Operations"  => 'mozilla-employee-confidential',
     "Input"                        => 'websites-security',

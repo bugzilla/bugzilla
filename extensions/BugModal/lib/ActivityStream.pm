@@ -24,10 +24,12 @@ use Bugzilla::Constants;
 #       user_id => actor user-id
 #       comment => optional, comment added
 #       id      => unique identifier for this change-set
+#       cc_only => boolean
 #       activty => [
 #           {
 #               who     => user object
 #               when    => time (string)
+#               cc_only => boolean
 #               changes => [
 #                   {
 #                       fieldname   => field name :)
@@ -55,7 +57,7 @@ sub activity_stream {
         foreach my $change_set (@$stream) {
             $change_set->{id} = $change_set->{comment}
                 ? 'c' . $change_set->{comment}->count
-                : 'a' . ($change_set->{time} - $base_time) . '.' . $change_set->{user_id};
+                : 'a' . ($change_set->{time} - $base_time) . '_' . $change_set->{user_id};
             $change_set->{activity} = [
                 sort { $a->{fieldname} cmp $b->{fieldname} }
                 @{ $change_set->{activity} }
@@ -91,6 +93,7 @@ sub _add_activity_to_stream {
     my ($stream, $time, $user_id, $data) = @_;
     foreach my $entry (@$stream) {
         next unless $entry->{time} == $time && $entry->{user_id} == $user_id;
+        $entry->{cc_only} = $entry->{cc_only} && $data->{cc_only};
         push @{ $entry->{activity} }, $data;
         return;
     }
@@ -98,6 +101,7 @@ sub _add_activity_to_stream {
         time     => $time,
         user_id  => $user_id,
         comment  => undef,
+        cc_only  => $data->{cc_only},
         activity => [ $data ],
     };
 }
@@ -138,12 +142,12 @@ sub _add_activities_to_stream {
 
     # envelope, augment and tweak
     foreach my $operation (@$raw_activity) {
-        # until we can toggle their visibility, skip CC changes
-        $operation->{changes} = [ grep { $_->{fieldname} ne 'cc' } @{ $operation->{changes} } ];
-        next unless @{ $operation->{changes} };
 
         # make operation.who an object
         $operation->{who} = Bugzilla::User->new({ name => $operation->{who}, cache => 1 });
+
+        # we need to track operations which are just cc changes
+        $operation->{cc_only} = 1;
 
         for (my $i = 0; $i < scalar(@{$operation->{changes}}); $i++) {
             my $change = $operation->{changes}->[$i];
@@ -244,6 +248,11 @@ sub _add_activities_to_stream {
                     splice(@{$operation->{changes}}, $i, 0, $flag_change);
                 }
                 $i--;
+            }
+
+            # track cc-only
+            if ($change->{fieldname} ne 'cc') {
+                $operation->{cc_only} = 0;
             }
         }
 

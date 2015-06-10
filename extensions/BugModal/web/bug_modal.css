@@ -488,6 +488,10 @@ td.flag-requestee {
     outline: 2px solid #0095dd;
 }
 
+.change-set .comment, .change-set .change {
+    padding-bottom: 1px;
+}
+
 .change-head {
     width: 100%;
     background: #eee;
@@ -529,10 +533,8 @@ td.flag-requestee {
     padding: 2px 2px 0 0 !important;
 }
 
-.comment-spinner {
-    font-family: monospace;
-    white-space: nowrap;
-    vertical-align: bottom;
+.change-spinner {
+    width: 29px;
 }
 
 .comment-text {

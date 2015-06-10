@@ -8,25 +8,29 @@
 
 <div id="comment-actions">
   <button type="button" id="comment-tags-btn" style="display:none" class="minor">Tags &#9662;</button>
-  <button type="button" id="comment-toggle-btn" class="minor">Comments &#9662;</button>
+  <button type="button" id="view-menu-btn" class="minor">View &#9662;</button>
 </div>
 
-<menu id="comment-toggle-menu" type="context" style="display:none">
-  <menuitem id="comment-reset" label="Reset"></menuitem>
+<menu id="view-menu" type="context" style="display:none">
+  <menuitem id="view-reset" label="Reset"></menuitem>
   <hr>
-  <menuitem id="comment-collapse-all" label="Collapse All"></menuitem>
-  <menuitem id="comment-expand-all" label="Expand All"></menuitem>
+  <menuitem id="view-collapse-all" label="Collapse All"></menuitem>
+  <menuitem id="view-expand-all" label="Expand All"></menuitem>
+  <menuitem id="view-comments-only" label="Comments Only"></menuitem>
   <hr>
-  <menuitem id="comments-only" label="Comments Only"></menuitem>
+  <menuitem id="view-toggle-cc" label="Show CC Changes"></menuitem>
   [% Hook.process('comments-toggle-menu') %]
 </menu>
 
 [%
   PROCESS bug/time.html.tmpl;
 
-  activity_counter = 0;
   FOREACH change_set IN bug.activity_stream;
-    '<div class="change-set" id="' _ change_set.id _ '">';
+    IF change_set.cc_only;
+      '<div class="change-set cc-only" id="' _ change_set.id _ '" style="display:none">';
+    ELSE;
+      '<div class="change-set" id="' _ change_set.id _ '">';
+    END;
 
     extra_class = "";
     IF change_set.user_id == bug.assigned_to.id;
@@ -38,15 +42,14 @@
     IF change_set.comment;
       PROCESS comment_header comment=change_set.comment;
     ELSE;
-      activity_counter = activity_counter + 1;
-      PROCESS activity_header activities=change_set.activity id=activity_counter;
+      PROCESS activity_header activities=change_set.activity id=change_set.id;
     END;
 
     IF change_set.comment;
       PROCESS comment_body comment=change_set.comment;
     END;
     FOREACH activity IN change_set.activity;
-      PROCESS activity_body activity=activity;
+      PROCESS activity_body activity=activity change_set=change_set;
     END;
 
     '</div>';
@@ -219,16 +222,17 @@
 
 [%
   BLOCK activity_body;
-    '<div class="activity">';
-    has_cc = 0;
+    IF activity.cc_only && !change_set.cc_only;
+      '<div class="activity cc-only" style="display:none">';
+    ELSE;
+      '<div class="activity">';
+    END;
 
     FOREACH change IN activity.changes;
-      '<div class="change">';
-      class = "";
-
-      IF change.fieldname == 'cc';
-        has_cc = 1;
-        class = "activity-cc";
+      IF change.fieldname == 'cc' && !activity.cc_only && !change_set.cc_only;
+        '<div class="change cc-only" style="display:none">';
+      ELSE;
+        '<div class="change">';
       END;
 
       IF change.attachid;

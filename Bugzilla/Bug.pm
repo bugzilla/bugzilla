@@ -2439,9 +2439,11 @@ sub set_all {
     }
 
     if (exists $params->{alias} && $params->{alias}{set}) {
+        my ($removed_aliases, $added_aliases) = diff_arrays(
+            $self->alias, $params->{alias}{set});
         $params->{alias} = {
-            add    => $params->{alias}{set},
-            remove => $self->alias,
+            add    => $added_aliases,
+            remove => $removed_aliases,
         };
     }
 

@@ -66,7 +66,7 @@ body.bz_group_bugzilla-security {
 }
 
 body.bz_group_client-services-security,
-body.bz_group_mozilla-services-security {
+body.bz_group_cloud-services-security {
     background-image: url(noise.png), -moz-linear-gradient(#ffffa3, #ffffe3 400px);
     background-image: url(noise.png), -webkit-linear-gradient(#ffffa3, #ffffe3 400px);
     background-image: url(noise.png), linear-gradient(#ffffa3, #ffffe3 400px);

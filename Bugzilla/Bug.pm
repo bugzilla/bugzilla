@@ -3913,6 +3913,7 @@ sub groups_in {
 
 sub in_group {
     my ($self, $group) = @_;
+    print STDERR 'bug ' . $self->id . " (" . $group->name . ")\n";
     return grep($_->id == $group->id, @{$self->groups_in}) ? 1 : 0;
 }
 

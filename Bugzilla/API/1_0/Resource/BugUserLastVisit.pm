@@ -41,13 +41,13 @@ sub REST_RESOURCES {
             GET => {
                 method => 'get',
                 params => sub {
-                    return { ids => $_[0] };
+                    return { ids => [$_[0]] };
                 },
             },
             POST => {
                 method => 'update',
                 params => sub {
-                    return { ids => $_[0] };
+                    return { ids => [$_[0]] };
                 },
             },
         },

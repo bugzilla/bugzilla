@@ -1978,12 +1978,6 @@ sub install_filesystem {
     $files->{"$extensions_dir/BMO/bin/migrate-github-pull-requests.pl"} = {
         perms => Bugzilla::Install::Filesystem::OWNER_EXECUTE
     };
-    $files->{"contrib/docker/runtests.sh"} = {
-        perms => Bugzilla::Install::Filesystem::OWNER_EXECUTE
-    };
-    $files->{"contrib/docker/generate_bmo_data.pl"} = {
-        perms => Bugzilla::Install::Filesystem::OWNER_EXECUTE
-    };
 }
 
 # "deleted" comment tag

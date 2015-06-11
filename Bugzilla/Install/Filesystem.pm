@@ -178,6 +178,8 @@ sub FILESYSTEM {
         'contrib/*/README'     => { perms => OWNER_WRITE },
         'contrib/sendunsentbugmail.pl' => { perms => WS_EXECUTE },
         'docker/*'             => { perms => OWNER_WRITE },
+        'docker/*.pl'          => { perms => OWNER_EXECUTE },
+        'docker/*.sh'          => { perms => OWNER_EXECUTE },
         'docs/bugzilla.ent'    => { perms => OWNER_WRITE },
         'docs/makedocs.pl'     => { perms => OWNER_EXECUTE },
         'docs/style.css'       => { perms => WS_SERVE },

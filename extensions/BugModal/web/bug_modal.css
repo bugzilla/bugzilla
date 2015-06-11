@@ -294,6 +294,7 @@ input[type="number"] {
 
 #product-info, #component-info {
     color: #484;
+    white-space: normal;
 }
 
 #product-latch, #component-latch {

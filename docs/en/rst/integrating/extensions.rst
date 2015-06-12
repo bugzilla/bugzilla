@@ -12,8 +12,8 @@ written by other people on our wiki. You would need to
 make sure that the extension in question works with your version of Bugzilla.
 
 Or, you can write your own extension. See the `Bugzilla Extension
-documentation <../html/api/Bugzilla/Extension.html>`_ for the core
-documentation on how to do that. It would make sense to read
+documentation <http://www.bugzilla.org/docs/tip/en/html/api/Bugzilla/Extension.html>`_
+for the core documentation on how to do that. It would make sense to read
 the section on :ref:`templates`. There is also a sample extension in
 :file:`$BUGZILLA_HOME/extensions/Example/` which gives examples of how to
 use all the code hooks.

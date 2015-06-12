@@ -122,6 +122,11 @@ sub update_fielddefs_definition {
     $dbh->bz_add_column('fielddefs', 'long_desc',
                         {TYPE => 'varchar(255)', NOTNULL => 1, DEFAULT => "''"}, '');
 
+    $dbh->bz_add_column('user_api_keys', 'app_id',
+                        {TYPE => 'varchar(64)'});
+    $dbh->bz_add_index('user_api_keys', 'user_api_keys_user_id_app_id_idx',
+                       [qw(user_id app_id)]);
+
     Bugzilla::Hook::process('install_update_db_fielddefs');
 
     # Remember, this is not the function for adding general table changes.

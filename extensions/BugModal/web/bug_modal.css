@@ -729,6 +729,7 @@ td.flag-requestee {
 
 #mode-container .button-row {
     margin-top: 1px;
+    border-left: 5px solid white;
 }
 
 /* theme */

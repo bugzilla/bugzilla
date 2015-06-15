@@ -65,30 +65,6 @@ $(function() {
         $('#editing').val('');
     }
 
-    // expand all modules
-    $('#expand-all-btn')
-        .click(function(event) {
-            event.preventDefault();
-            var btn = $(event.target);
-            var modules;
-            if (btn.data('expanded-modules')) {
-                modules = btn.data('expanded-modules');
-                btn.data('expanded-modules', false);
-                modules.each(function() {
-                    slide_module($(this).parent('.module'));
-                });
-                btn.text('Expand All');
-            }
-            else {
-                modules = $('.module-content:hidden');
-                btn.data('expanded-modules', modules);
-                modules.each(function() {
-                    slide_module($(this).parent('.module'));
-                });
-                btn.text('Collapse');
-            }
-        });
-
     // expand/colapse module
     $('.module-header')
         .click(function(event) {
@@ -117,15 +93,6 @@ $(function() {
                     alert('Malformed URL');
                 }
             }
-        });
-
-    // last comment btn
-    $('#last-comment-btn')
-        .click(function(event) {
-            event.preventDefault();
-            var id = $('.comment:last')[0].parentNode.id;
-            $.scrollTo($('#' + id));
-            window.location.hash = id;
         });
 
     // top btn
@@ -239,6 +206,71 @@ $(function() {
                 }
                 event.preventDefault();
             }
+        });
+
+    // action button menu
+
+    $.contextMenu({
+        selector: '#action-menu-btn',
+        trigger: 'left',
+        items: $.contextMenu.fromMenu($('#action-menu'))
+    });
+
+    // reset
+    $('#action-reset')
+        .click(function(event) {
+            event.preventDefault();
+            var visible = $(this).data('modules');
+            $('.module-content').each(function() {
+                var content = $(this);
+                var moduleID = content.parent('.module').attr('id');
+                var isDefault = $.inArray(moduleID, visible) !== -1;
+                if (content.is(':visible') && !isDefault) {
+                    slide_module($('#' + moduleID), 'hide');
+                }
+                else if (content.is(':hidden') && isDefault) {
+                    slide_module($('#' + moduleID), 'show');
+                }
+            });
+        })
+        .data('modules', $('.module-content:visible').map(function() {
+            return $(this).parent('.module').attr('id');
+        }));
+
+    // expand all modules
+    $('#action-expand-all')
+        .click(function(event) {
+            event.preventDefault();
+            $('.module-content:hidden').each(function() {
+                slide_module($(this).parent('.module'));
+            });
+        });
+
+    // collapse all modules
+    $('#action-collapse-all')
+        .click(function(event) {
+            event.preventDefault();
+            $('.module-content:visible').each(function() {
+                slide_module($(this).parent('.module'));
+            });
+        });
+
+    // add comment menuitem, scroll the textarea into view
+    $('#action-add-comment')
+        .click(function(event) {
+            event.preventDefault();
+            // focus first to grow the textarea, so we scroll to the correct location
+            $('#comment').focus();
+            $.scrollTo($('#bottom-save-btn'));
+        });
+
+    // last comment menuitem
+    $('#action-last-comment')
+        .click(function(event) {
+            event.preventDefault();
+            var id = $('.comment:last')[0].parentNode.id;
+            $.scrollTo($('#' + id));
+            window.location.hash = id;
         });
 
     //
@@ -462,15 +494,6 @@ $(function() {
         .click(function(event) {
             event.preventDefault();
             window.location.replace($('#this-bug').val());
-        });
-
-    // top comment button, scroll the textarea into view
-    $('.comment-btn')
-        .click(function(event) {
-            event.preventDefault();
-            // focus first to grow the textarea, so we scroll to the correct location
-            $('#comment').focus();
-            $.scrollTo($('#bottom-save-btn'));
         });
 
     // needinfo in people section -> scroll to near-comment ui

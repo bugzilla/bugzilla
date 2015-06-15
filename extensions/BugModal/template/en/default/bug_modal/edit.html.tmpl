@@ -241,12 +241,6 @@
       </div>
     [% END %]
     <div class="button-row">
-      [% IF user.id %]
-        <button type="button" class="comment-btn minor">Add Comment</button>
-      [% END %]
-      <button type="button" id="last-comment-btn" class="minor">Last Comment &darr;</button>
-    </div>
-    <div class="button-row">
       [% IF bug.assigned_to.id == user.id || user.in_group("editbugs") %]
         <button type="button" id="copy-summary" class="minor"
           title="Copy [% terms.bug %] number and summary to your clipboard">Copy Summary</button>
@@ -256,7 +250,18 @@
           [% is_cced ? "Stop Following" : "Follow" %]
         </button>
       [% END %]
-      <button type="button" id="expand-all-btn" class="minor">Expand All</button>
+      <button type="button" id="action-menu-btn" class="minor">&#9662;</button>
+      <menu id="action-menu" type="context" style="display:none">
+        <menuitem id="action-reset" label="Reset Sections"></menuitem>
+        <menuitem id="action-expand-all" label="Expand All Sections"></menuitem>
+        <menuitem id="action-collapse-all" label="Collapse All Sections"></menuitem>
+        <hr>
+        [% IF user.id %]
+          <menuitem id="action-add-comment" label="Add Comment"></menuitem>
+        [% END %]
+        <menuitem id="action-last-comment" label="Last Comment"></menuitem>
+      </menu>
+
     </div>
   </div>
 [% END %]

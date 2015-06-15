@@ -72,7 +72,7 @@ $(function() {
             $('#c' + id).find('.comment-tags').hide();
             $('#c' + id).find('.gravatar').css('width', '16px').css('height', '16px');
             $('#cr-' + id).hide();
-            spinner.text('+');
+            realSpinner.text('+');
         }
         else if (forced == 'show') {
             if (defaultCollapsed) {
@@ -87,14 +87,14 @@ $(function() {
             $('#c' + id).find('.comment-tags').show();
             $('#c' + id).find('.gravatar').css('width', '32px').css('height', '32px');
             $('#cr-' + id).show();
-            spinner.text('-');
+            realSpinner.text('-');
         }
         else {
             $('#ct-' + id).slideToggle('fast', function() {
                 $('#c' + id).find(activitySelector).toggle();
-                $('#c' + id).find('.comment-tags').toggle();
                 if ($('#ct-' + id + ':visible').length) {
-                    spinner.text('-');
+                    $('#c' + id).find('.comment-tags').show();
+                    realSpinner.text('-');
                     $('#cr-' + id).show();
                     if (BUGZILLA.user.id !== 0)
                         $('#ctag-' + id).show();
@@ -105,7 +105,8 @@ $(function() {
                     }
                 }
                 else {
-                    spinner.text('+');
+                    $('#c' + id).find('.comment-tags').hide();
+                    realSpinner.text('+');
                     $('#cr-' + id).hide();
                     if (BUGZILLA.user.id !== 0)
                         $('#ctag-' + id).hide();
@@ -168,6 +169,23 @@ $(function() {
                 that.data('shown', '1');
                 item.text('Hide CC Changes');
                 $('.cc-only').show();
+            }
+        });
+
+    $('#view-toggle-treeherder')
+        .click(function() {
+            var that = $(this);
+            console.log(that.data('userid'));
+            var item = $('.context-menu-item.hover');
+            if (that.data('hidden') === '1') {
+                that.data('hidden', '0');
+                item.text('Hide Treeherder Comments');
+                $('.ca-' + that.data('userid')).show();
+            }
+            else {
+                that.data('hidden', '1');
+                item.text('Show Treeherder Comments');
+                $('.ca-' + that.data('userid')).hide();
             }
         });
 

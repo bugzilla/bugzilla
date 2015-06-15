@@ -254,6 +254,9 @@ sub template_before_process {
         }
     }
     $vars->{tracking_flags_table} = \@tracking_table;
+
+    # for the "view -> hide treeherder comments" menu item
+    $vars->{treeherder} = Bugzilla->treeherder_user;
 }
 
 sub bug_start_of_set_all {

@@ -213,23 +213,29 @@ sub tags {
 
 sub collapsed {
     my ($self) = @_;
-    return 0 unless Bugzilla->params->{'comment_taggers_group'};
     return $self->{collapsed} if exists $self->{collapsed};
+    return 0 unless Bugzilla->params->{'comment_taggers_group'};
     $self->{collapsed} = 0;
     Bugzilla->request_cache->{comment_tags_collapsed}
-            ||= [ split(/\s*,\s*/, Bugzilla->params->{'collapsed_comment_tags'}) ];
+            ||= [ split(/\s*,\s*/, lc(Bugzilla->params->{'collapsed_comment_tags'})) ];
     my @collapsed_tags = @{ Bugzilla->request_cache->{comment_tags_collapsed} };
-    foreach my $my_tag (@{ $self->tags }) {
-        $my_tag = lc($my_tag);
+    my @reason;
+    foreach my $my_tag (map { lc } @{ $self->tags }) {
         foreach my $collapsed_tag (@collapsed_tags) {
-            if ($my_tag eq lc($collapsed_tag)) {
-                $self->{collapsed} = 1;
-                last;
-            }
+            push @reason, $my_tag if $my_tag eq $collapsed_tag;
         }
-        last if $self->{collapsed};
+    }
+    if (@reason) {
+        $self->{collapsed} = 1;
+        $self->{collapsed_reason} = join(', ', sort @reason);
     }
     return $self->{collapsed};
+}
+
+sub collapsed_reason {
+    my ($self) = @_;
+    return 0 unless $self->collapsed;
+    return $self->{collapsed_reason};
 }
 
 sub bug {

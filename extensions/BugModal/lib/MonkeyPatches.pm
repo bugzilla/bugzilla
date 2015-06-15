@@ -8,6 +8,19 @@
 package Bugzilla::Extension::BugModal::MonkeyPatches;
 1;
 
+package Bugzilla;
+use strict;
+use warnings;
+
+use Bugzilla::User;
+
+sub treeherder_user {
+    return Bugzilla->process_cache->{treeherder_user} //=
+        Bugzilla::User->new({ name => 'tbplbot@gmail.com', cache => 1 })
+        || Bugzilla::User->new({ name => 'treeherder@bots.tld', cache => 1 })
+        || Bugzilla::User->new();
+}
+
 package Bugzilla::Bug;
 use strict;
 use warnings;

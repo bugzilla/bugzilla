@@ -5,18 +5,15 @@
  * This Source Code Form is "Incompatible With Secondary Licenses", as
  * defined by the Mozilla Public License, v. 2.0. */
 
-#bitly_overlay {
-    position: absolute;
+#bitly-overlay {
+    display: none;
     background: #eee;
-    border: 1px solid black;
+    border: 1px solid #000;
     padding: 5px;
-    margin: 10px;
-    visibility: collapse;
-    box-shadow: 3px 3px 6px #888;
-    -moz-box-shadow: 3px 3px 6px #888;
+    width: 400px;
 }
 
-#bitly_url {
+#bitly-url {
     margin: 2px 0;
     display: block;
     width: 100%;

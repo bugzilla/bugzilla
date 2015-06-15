@@ -6,8 +6,10 @@
   # defined by the Mozilla Public License, v. 2.0.
   #%]
 
-[% RETURN UNLESS template.name == 'list/list.html.tmpl' %]
-
-[% style_urls.push('extensions/Bitly/web/styles/bitly.css') %]
-[% javascript_urls.push('extensions/Bitly/web/js/bitly.js') %]
-[% yui.push('container', 'connection', 'json') %]
+[%
+  RETURN UNLESS template.name == 'list/list.html.tmpl';
+  jquery.push('bPopup');
+  style_urls.push('extensions/Bitly/web/styles/bitly.css');
+  javascript_urls.push('extensions/Bitly/web/js/bitly.js');
+  generate_api_token = 1;
+%]

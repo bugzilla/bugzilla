@@ -616,9 +616,6 @@
     && !project_flags_set
     && !tracking_flags_set;
   sub = [];
-  IF col;
-    sub.push("Not tracked");
-  END;
   open_deps = bug.depends_on_obj.only("resolution", "").size;
   IF open_deps;
     sub.push("Depends on: " _ open_deps _ " bug" _ (open_deps == 1 ? "" : "s"));
@@ -626,6 +623,13 @@
   open_deps = bug.blocks_obj.only("resolution", "").size;
   IF open_deps;
     sub.push("Blocks: " _ open_deps _ " bug" _ (open_deps == 1 ? "" : "s"));
+  END;
+  IF bug.keyword_objects.size;
+    IF bug.keyword_objects.size <= 3;
+      sub.push("[" _ bug.keyword_objects.pluck("name").join("][") _ "]");
+    ELSE;
+      sub.push(bug.keyword_objects.size _ " keywords");
+    END;
   END;
 %]
 [% WRAPPER bug_modal/module.html.tmpl

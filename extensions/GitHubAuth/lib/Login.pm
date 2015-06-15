@@ -87,7 +87,8 @@ sub _get_login_info_from_github {
         die $e;
     }
 
-    my @emails = map { $_->{email} } grep { $_->{verified} } @$emails;
+    my @emails = map { $_->{email} }
+                 grep { $_->{verified} && $_->{email} !~ /\@users\.noreply\.github\.com$/ } @$emails;
 
     my $choose_email = sub {
         my ($email) = @_;

@@ -279,7 +279,7 @@
   [% ELSIF error == "auth_invalid_token" %]
     [% title = 'A token error occurred' %]
     The token is not valid. It could be because you loaded this page more than
-    [% constants.MAX_TOKEN_AGE FILTER html %] days ago.
+    [%= constants.MAX_TOKEN_AGE FILTER html %] days ago.
 
   [% ELSIF error == "attachment_deletion_disabled" %]
     [% title = "Attachment Deletion Disabled" %]

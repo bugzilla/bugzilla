@@ -58,10 +58,12 @@ sub activity_stream {
             $change_set->{id} = $change_set->{comment}
                 ? 'c' . $change_set->{comment}->count
                 : 'a' . ($change_set->{time} - $base_time) . '_' . $change_set->{user_id};
-            $change_set->{activity} = [
-                sort { $a->{fieldname} cmp $b->{fieldname} }
-                @{ $change_set->{activity} }
-            ];
+            foreach my $activity (@{ $change_set->{activity} }) {
+                $activity->{changes} = [
+                    sort { $a->{fieldname} cmp $b->{fieldname} }
+                    @{ $activity->{changes} }
+                ];
+            }
         }
         my $order = Bugzilla->user->setting('comment_sort_order');
         if ($order eq 'oldest_to_newest') {

@@ -26,6 +26,7 @@ use Bugzilla::Install::Filesystem;
 use Bugzilla::Product;
 
 use JSON;
+use List::MoreUtils qw(none);
 
 our $VERSION = '1';
 
@@ -637,11 +638,27 @@ sub bug_end_of_update {
         is_active => 1,
     });
 
+    my $product_id   = $bug->product_id;
+    my $component_id = $bug->component_id;
+    my $is_visible   = sub {
+        $_->product_id == $product_id && (!$_->component_id || $_->component_id == $component_id);
+    };
+
     my (@flag_changes);
     foreach my $flag (@$tracking_flags) {
         my $flag_name = $flag->name;
         my $new_value = $bug->$flag_name;
         my $old_value = $old_bug->$flag_name;
+
+        if ($flag->bug_flag->id) {
+            my $visibility = $flag->visibility;
+            if (none { $is_visible->() } @$visibility) {
+                push(@flag_changes, { flag    => $flag,
+                                      added   => '---',
+                                      removed => $new_value });
+                next;
+            }
+        }
 
         if ($new_value ne $old_value) {
             # Do not allow if the user cannot set the old value or the new value

@@ -19,7 +19,9 @@
   <menuitem id="view-comments-only" label="Comments Only"></menuitem>
   <hr>
   <menuitem id="view-toggle-cc" label="Show CC Changes"></menuitem>
-  <menuitem id="view-toggle-treeherder" label="Hide Treeherder Comments" data-userid="[% treeherder.id FILTER none %]"></menuitem>
+  [% IF treeherder %]
+    <menuitem id="view-toggle-treeherder" label="Hide Treeherder Comments" data-userid="[% treeherder.id FILTER none %]"></menuitem>
+  [% END %]
 </menu>
 
 [%

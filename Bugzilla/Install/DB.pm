@@ -725,6 +725,11 @@ sub update_table_definitions {
     $dbh->bz_add_column('keyworddefs', 'is_active',
                         {TYPE => 'BOOLEAN', NOTNULL => 1, DEFAULT => 'TRUE'});
 
+    $dbh->bz_add_column('user_api_keys', 'app_id',
+                        {TYPE => 'varchar(64)'});
+    $dbh->bz_add_index('user_api_keys', 'user_api_keys_user_id_app_id_idx',
+                       [qw(user_id app_id)]);
+
     ################################################################
     # New --TABLE-- changes should go *** A B O V E *** this point #
     ################################################################

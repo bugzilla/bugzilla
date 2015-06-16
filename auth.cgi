@@ -22,6 +22,7 @@ use Bugzilla::Mailer qw(MessageToMTA);
 
 use URI;
 use URI::QueryParam;
+use Digest::SHA qw(sha256_hex);
 
 Bugzilla->login(LOGIN_REQUIRED);
 
@@ -61,20 +62,33 @@ if ($confirmed || $skip_confirmation) {
                            { token => $token, callback => $callback });
         }
     }
-
-    my $new_key = Bugzilla::User::APIKey->create({
-        user_id     => $user->id,
-        description => $description,
+    my $app_id = sha256_hex($callback_uri, $description);
+    my $keys = Bugzilla::User::APIKey->match({
+        user_id => $user->id,
+        app_id  => $app_id,
+        revoked => 0,
     });
-    my $template = Bugzilla->template_inner($user->setting('lang'));
-    my $vars = { user => $user, new_key => $new_key };
-    my $message;
-    $template->process('email/new-api-key.txt.tmpl', $vars, \$message)
-      or ThrowTemplateError($template->error());
 
-    MessageToMTA($message);
+    my $api_key;
+    if (@$keys) {
+        $api_key = $keys->[0];
+    }
+    else {
+        $api_key = Bugzilla::User::APIKey->create({
+            user_id     => $user->id,
+            description => $description,
+            app_id      => $app_id,
+        });
+        my $template = Bugzilla->template_inner($user->setting('lang'));
+        my $vars = { user => $user, new_key => $api_key };
+        my $message;
+        $template->process('email/new-api-key.txt.tmpl', $vars, \$message)
+          or ThrowTemplateError($template->error());
 
-    $callback_uri->query_param(client_api_key   => $new_key->api_key);
+        MessageToMTA($message);
+    }
+
+    $callback_uri->query_param(client_api_key   => $api_key->api_key);
     $callback_uri->query_param(client_api_login => $user->login);
 
     print $cgi->redirect($callback_uri);

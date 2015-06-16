@@ -54,6 +54,17 @@ sub template_before_process {
     }
 }
 
+sub auth_delegation_confirm {
+    my ($self, $args) = @_;
+    my $mozreview_callback_url = Bugzilla->params->{mozreview_auth_callback_url};
+
+    return unless $mozreview_callback_url;
+
+    if (index($args->{callback}, $mozreview_callback_url) == 0) {
+        ${$args->{skip_confirmation}} = 1;
+    }
+}
+
 sub config_modify_panels {
     my ($self, $args) = @_;
     push @{ $args->{panels}->{advanced}->{params} }, {
@@ -61,6 +72,17 @@ sub config_modify_panels {
         type    => 't',
         default => '',
         checker => \&check_urlbase
+    };
+    push @{ $args->{panels}->{advanced}->{params} }, {
+        name    => 'mozreview_auth_callback_url',
+        type    => 't',
+        default => '',
+        checker => sub {
+            my ($url) = (@_);
+
+            return 'must be an HTTP/HTTPS absolute URL' unless $url =~ m{^https?://};
+            return '';
+        }
     };
 }
 

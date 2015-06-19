@@ -229,6 +229,11 @@ sub _add_activities_to_stream {
                 }
             }
 
+            # track cc-only
+            if ($change->{fieldname} ne 'cc') {
+                $operation->{cc_only} = 0;
+            }
+
             # split multiple flag changes (must be processed last)
             if ($change->{fieldname} eq 'flagtypes.name') {
                 my @added = split(/, /, $change->{added});
@@ -259,11 +264,6 @@ sub _add_activities_to_stream {
                     splice(@{$operation->{changes}}, $i, 0, $flag_change);
                 }
                 $i--;
-            }
-
-            # track cc-only
-            if ($change->{fieldname} ne 'cc') {
-                $operation->{cc_only} = 0;
             }
         }
 

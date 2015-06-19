@@ -639,7 +639,7 @@ sub _update_votes {
         $sth_getVotes->execute($id);
         my $v = $sth_getVotes->fetchrow_array || 0;
         $sth_updateVotes->execute($v, $id);
-        $bugs{$id}->{votes} = $v;
+        $bugs{$id}->{votes} = $v if $bugs{$id};
         my $confirmed = _confirm_if_vote_confirmed($bugs{$id} || $id);
         push (@updated_bugs, $id) if $confirmed;
     }
@@ -750,7 +750,7 @@ sub _modify_bug_votes {
 
     my @updated_bugs;
     foreach my $bug_id (@$bug_list) {
-        my $confirmed = _confirm_if_vote_confirmed($bug_id);
+        my $confirmed = _confirm_if_vote_confirmed($bug_id, $product);
         push (@updated_bugs, $bug_id) if $confirmed;
     }
     $changes->{'_confirmed_bugs'} = \@updated_bugs;
@@ -856,13 +856,14 @@ sub _remove_votes {
 # If a user votes for a bug, or the number of votes required to
 # confirm a bug has been reduced, check if the bug is now confirmed.
 sub _confirm_if_vote_confirmed {
-    my $id = shift;
+    my ($id, $product) = @_;
     my $bug = ref $id ? $id : new Bugzilla::Bug({ id => $id, cache => 1 });
+    $product ||= $bug->product_obj;
 
     my $ret = 0;
     if (!$bug->everconfirmed
-        and $bug->product_obj->{votestoconfirm}
-        and $bug->votes >= $bug->product_obj->{votestoconfirm})
+        and $product->{votestoconfirm}
+        and $bug->votes >= $product->{votestoconfirm})
     {
         $bug->add_comment('', { type => CMT_POPULAR_VOTES });
 

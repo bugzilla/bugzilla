@@ -803,28 +803,43 @@ sub export_cpanfile {
         $cpanfile .= $requires;
     }
     # Recommended modules
+    $cpanfile .= "\n# Optional\n";
+    my %features;
     foreach my $module (@{ OPTIONAL_MODULES() }) {
-        my $recommends = "";
         if (exists $module->{feature}) {
             foreach my $feature (@{ $module->{feature} }) {
-                $recommends .= "feature '" . $feature . "', '" . $module->{package} . "' => sub {\n";
-                $recommends .= "  recommends '" . $module->{module} . "'";
-                $recommends .= ", '" . $module->{version} . "'" if $module->{version};
-                $recommends .= ";\n};\n";
+                # cpanm requires that each feature only be defined in the cpanfile
+                # once, so we use an intermediate hash to consolidate/de-dupe the
+                # modules associated with each feature.
+                $features{$feature}{$module->{module}} = $module->{version};
             }
         }
         else {
+            my $recommends = "";
             $recommends .= "recommends '" . $module->{module} . "'";
             $recommends .= ", '" . $module->{version} . "'" if $module->{version};
             $recommends .= ";\n";
+            $cpanfile .= $recommends;
         }
+    }
+    foreach my $feature (sort keys %features) {
+        my $recommends = "";
+        $recommends .= "feature '" . $feature . "' => sub {\n";
+        foreach my $module (sort keys %{ $features{$feature} }) {
+            my $version = $features{$feature}{$module};
+            $recommends .= "  recommends '" . $module . "'";
+            $recommends .= ", '$version'" if $version;
+            $recommends .= ";\n";
+        }
+        $recommends .= "};\n";
         $cpanfile .= $recommends;
     }
     # Database modules
+    $cpanfile .= "\n# Database support\n";
     foreach my $db (keys %{ DB_MODULE() }) {
         next if !exists DB_MODULE->{$db}->{dbd};
         my $dbd = DB_MODULE->{$db}->{dbd};
-        my $recommends .= "feature '$db', '" . $dbd->{package} . "' => sub {\n";
+        my $recommends .= "feature '$db' => sub {\n";
         $recommends .= "  recommends '" . $dbd->{module} . "'";
         $recommends .= ", '" . $dbd->{version} . "'" if $dbd->{version};
         $recommends .= ";\n};\n";

@@ -162,37 +162,65 @@ $(function() {
         });
 
     // copy summary to clipboard
+
+    function clipboardSummary() {
+        return 'Bug ' + BUGZILLA.bug_id + ' - ' + $('#field-value-short_desc').text();
+    }
+
     if ($('#copy-summary').length) {
 
-        // we don't know if flash is enabled without waiting for load to timeout
-        // remember the flash enabled state between pages
-        var hasFlash = true;
-        if (localStorage.getItem('hasFlash') === null) {
-            $('#copy-summary').hide();
+        // probe for document.execCommand("copy") support
+        var hasExecCopy = false;
+        try {
+            // on page load nothing will be selected, so we don't smash the
+            // clipboard doing this
+            document.execCommand("copy");
+            hasExecCopy = true;
+        } catch(ex) {
+            // ignore
+        }
+
+        if (hasExecCopy) {
+            $('#copy-summary')
+                .click(function() {
+                    // execCommand("copy") only works on selected text
+                    $('#clip-container').show();
+                    $('#clip').val(clipboardSummary()).select();
+                    document.execCommand("copy");
+                    $('#clip-container').hide();
+                });
         }
         else {
-            hasFlash = localStorage.getItem('hasFlash');
-        }
-        if (hasFlash) {
-            ZeroClipboard.config({ flashLoadTimeout: 5000 });
-            var zero = new ZeroClipboard($('#copy-summary'));
-            zero.on({
-                'ready': function(event) {
-                    $('#copy-summary').show();
-                    localStorage.setItem('hasFlash', true);
-                },
-                'error': function(event) {
-                    console.log(event.message);
-                    zero.destroy();
-                    $('#global-zeroclipboard-html-bridge').remove();
-                    $('#copy-summary').hide();
-                    localStorage.removeItem('hasFlash');
-                },
-                'copy': function(event) {
-                    var clipboard = event.clipboardData;
-                    clipboard.setData('text/plain', 'Bug ' + BUGZILLA.bug_id + ' - ' + $('#field-value-short_desc').text());
-                }
-            });
+            // we don't know if flash is enabled without waiting for load to timeout
+            // remember the flash enabled state between pages
+            var hasFlash = true;
+            if (localStorage.getItem('hasFlash') === null) {
+                $('#copy-summary').hide();
+            }
+            else {
+                hasFlash = localStorage.getItem('hasFlash');
+            }
+            if (hasFlash) {
+                ZeroClipboard.config({ flashLoadTimeout: 5000 });
+                var zero = new ZeroClipboard($('#copy-summary'));
+                zero.on({
+                    'ready': function(event) {
+                        $('#copy-summary').show();
+                        localStorage.setItem('hasFlash', true);
+                    },
+                    'error': function(event) {
+                        console.log(event.message);
+                        zero.destroy();
+                        $('#global-zeroclipboard-html-bridge').remove();
+                        $('#copy-summary').hide();
+                        localStorage.removeItem('hasFlash');
+                    },
+                    'copy': function(event) {
+                        var clipboard = event.clipboardData;
+                        clipboard.setData('text/plain', clipboardSummary());
+                    }
+                });
+            }
         }
     }
 

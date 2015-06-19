@@ -887,3 +887,15 @@ div.ui-tooltip {
 .search-nav-disabled {
     color: #777;
 }
+
+/* clipboard shenanigans */
+
+#clip-container {
+    position: fixed;
+    top: 0px;
+    left: 0px;
+    width: 0px;
+    height: 0px;
+    z-index: 100;
+    opacity: 0;
+}

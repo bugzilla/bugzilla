@@ -244,6 +244,7 @@
       [% IF bug.assigned_to.id == user.id || user.in_group("editbugs") %]
         <button type="button" id="copy-summary" class="minor"
           title="Copy [% terms.bug %] number and summary to your clipboard">Copy Summary</button>
+        <div id="clip-container" style="display:none"><input type="text" id="clip"></div>
       [% END %]
       [% IF user.id %]
         <button type="button" class="minor" id="cc-btn" data-is-cced="[% is_cced ? 1 : 0 %]">

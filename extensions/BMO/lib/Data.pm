@@ -225,6 +225,7 @@ our %product_sec_groups = (
     "support.mozilla.org"          => 'websites-security',
     "Talkback"                     => 'talkback-private',
     "Tamarin"                      => 'tamarin-security',
+    "Taskcluster"                  => 'taskcluster-security',
     "Testopia"                     => 'bugzilla-security',
     "Tree Management"              => 'mozilla-employee-confidential',
     "Web Apps"                     => 'client-services-security',

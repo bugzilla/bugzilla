@@ -39,11 +39,6 @@ if [ "$TEST_SUITE" = "docs" ]; then
     exit $?
 fi
 
-echo -e "\n== Cloning QA test suite"
-cd $BUGZILLA_ROOT
-echo "Cloning git repo $GITHUB_QA_GIT branch $GITHUB_BASE_BRANCH ..."
-git clone $GITHUB_QA_GIT -b $GITHUB_BASE_BRANCH qa
-
 echo -e "\n== Starting database"
 /usr/bin/mysqld_safe &
 sleep 3
@@ -54,10 +49,10 @@ sleep 3
 
 echo -e "\n== Updating configuration"
 mysql -u root mysql -e "CREATE DATABASE bugs_test CHARACTER SET = 'utf8';"
-sed -e "s?%DB%?$BUGS_DB_DRIVER?g" --in-place qa/config/checksetup_answers.txt
-sed -e "s?%DB_NAME%?bugs_test?g" --in-place qa/config/checksetup_answers.txt
-sed -e "s?%USER%?$BUGZILLA_USER?g" --in-place qa/config/checksetup_answers.txt
-echo "\$answer{'memcached_servers'} = 'localhost:11211';" >> qa/config/checksetup_answers.txt
+sed -e "s?%DB%?$BUGS_DB_DRIVER?g" --in-place $BUGZILLA_ROOT/qa/config/checksetup_answers.txt
+sed -e "s?%DB_NAME%?bugs_test?g" --in-place $BUGZILLA_ROOT/qa/config/checksetup_answers.txt
+sed -e "s?%USER%?$BUGZILLA_USER?g" --in-place $BUGZILLA_ROOT/qa/config/checksetup_answers.txt
+echo "\$answer{'memcached_servers'} = 'localhost:11211';" >> $BUGZILLA_ROOT/qa/config/checksetup_answers.txt
 
 if [ "$TEST_SUITE" == "checksetup" ]; then
     cd $BUGZILLA_ROOT/qa

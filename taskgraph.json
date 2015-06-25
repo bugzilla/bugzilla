@@ -13,8 +13,8 @@
         "metadata": {
           "name": "Basic Sanity Tests"
         },
-        "provisionerId": "aws-provisioner",
-        "workerType": "gaia",
+        "provisionerId": "aws-provisioner-v1",
+        "workerType": "b2gtest",
         "payload": {
           "image": "dklawren/webtools-bmo-bugzilla",
           "command": ["/runtests.sh"],
@@ -32,6 +32,81 @@
         "extra": {
           "treeherder": {
             "symbol": "San"
+          }
+        }
+      }
+    },
+    {
+      "reruns": 3,
+      "maxRunTime": 7200,
+      "task": {
+        "metadata": {
+          "name": "WebService API Tests"
+        },
+        "provisionerId": "aws-provisioner-v1",
+        "workerType": "b2gtest",
+        "payload": {
+          "image": "dklawren/webtools-bmo-bugzilla",
+          "command": ["/runtests.sh"],
+          "env": {
+            "TEST_SUITE": "webservices"
+          },
+          "artifacts": {
+            "public/runtests_log": {
+              "type": "file",
+              "path": "/runtests.log",
+              "expires": "2016-02-17T17:33:38.806Z"
+            },
+            "public/httpd_error_log": {
+              "type": "file",
+              "path": "/var/log/httpd/error_log",
+              "expires": "2016-02-17T17:33:38.806Z"
+            }
+          }
+        },
+        "extra": {
+          "treeherder": {
+            "symbol": "API"
+          }
+        }
+      }
+    },
+    {
+      "reruns": 3,
+      "maxRunTime": 7200,
+      "task": {
+        "metadata": {
+          "name": "Selenium Tests"
+        },
+        "provisionerId": "aws-provisioner-v1",
+        "workerType": "b2gtest",
+        "payload": {
+          "image": "dklawren/webtools-bmo-bugzilla",
+          "command": ["/runtests.sh"],
+          "env": {
+            "TEST_SUITE": "selenium"
+          },
+          "artifacts": {
+            "public/runtests_log": {
+              "type": "file",
+              "path": "/runtests.log",
+              "expires": "2016-02-17T17:33:38.806Z"
+            },
+            "public/httpd_error_log": {
+              "type": "file",
+              "path": "/var/log/httpd/error_log",
+              "expires": "2016-02-17T17:33:38.806Z"
+            },
+            "public/selenium_log": {
+              "type": "file",
+              "path": "/selenium.log",
+              "expires": "2016-02-17T17:33:38.806Z"
+            }
+          }
+        },
+        "extra": {
+          "treeherder": {
+            "symbol": "Sel"
           }
         }
       }

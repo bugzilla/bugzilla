@@ -1,0 +1,18 @@
+Index: Bugzilla/Config/MTA.pm
+===================================================================
+RCS file: /cvsroot/mozilla/webtools/bugzilla/Bugzilla/Config/MTA.pm,v
+retrieving revision 1.13
+diff -3 -p -u -r1.13 MTA.pm
+--- Bugzilla/Config/MTA.pm  13 Nov 2006 23:32:28 -0000  1.13
++++ Bugzilla/Config/MTA.pm  9 Dec 2006 12:19:44 -0000
+@@ -44,7 +44,9 @@ sub get_param_list {
+   {
+    name => 'mail_delivery_method',
+    type => 's',
+-   choices => [Email::Send->new()->all_mailers(), 'None'],
++   # Bugzilla is not ready yet to send mails to newsgroups, and 'IO'
++   # is of no use for now as we already have our own 'Test' mode.
++   choices => [grep {$_ ne 'NNTP' && $_ ne 'IO'} Email::Send->new()->all_mailers(), 'None'],
+    default => 'Sendmail',
+    checker => \&check_mail_delivery_method
+   },

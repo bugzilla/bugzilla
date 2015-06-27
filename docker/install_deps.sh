@@ -22,6 +22,7 @@ $CPANM TheSchwartz
 $CPANM XMLRPC::Lite
 
 # For testing support
+$CPANM File::Copy::Recursive
 $CPANM Test::WWW::Selenium
 $CPANM Pod::Coverage
 $CPANM Pod::Checker

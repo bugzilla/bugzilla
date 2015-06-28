@@ -72,19 +72,19 @@ if ($urlbase =~ /^https/) {
 # BMO uses P1-P5 which is different from upstream
 my $field = Bugzilla::Field->new({ name => 'priority' });
 foreach my $value (qw(Highest High Normal Low Lowest)) {
-#    Bugzilla::Field::Choice->type($field)->create({
-#        value   => $value,
-#        sortkey => 0
-#    });
+    Bugzilla::Field::Choice->type($field)->create({
+        value   => $value,
+        sortkey => 0
+    });
 }
 
 # Add missing platforms
 $field = Bugzilla::Field->new({ name => 'rep_platform' });
 foreach my $value (qw(PC)) {
-#    Bugzilla::Field::Choice->type($field)->create({
-#        value   => $value,
-#        sortkey => 0
-#    });
+    Bugzilla::Field::Choice->type($field)->create({
+        value   => $value,
+        sortkey => 0
+    });
 }
 
 my %set_params = (

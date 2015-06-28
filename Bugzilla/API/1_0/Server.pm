@@ -449,6 +449,10 @@ L<Bugzilla::API::Server>
 
 =over
 
+=item api_namespace
+
+=item api_version
+
 =item handle
 
 =item response

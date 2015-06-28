@@ -514,6 +514,11 @@ version of the API is being used to access the constant values.
 
 Returns a L<JSON> encode/decoder object.
 
+=item load_error
+
+Method that stores error data if a API module fails to load and ThrowUserError
+or ThrowCodeError needs to send a proper error to the client.
+
 =item cgi
 
 Returns a L<Bugzilla::CGI> object.

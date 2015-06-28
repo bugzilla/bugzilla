@@ -71,12 +71,11 @@ if ($action eq 'add') {
 #
 if ($action eq 'new') {
     check_token_data($token, 'add_keyword');
-    my $name      = $cgi->param('name') || '';
-    my $is_active = $cgi->param('is_active');
-    my $desc      = $cgi->param('description')  || '';
+    my $name = $cgi->param('name') || '';
+    my $desc = $cgi->param('description')  || '';
 
     my $keyword = Bugzilla::Keyword->create(
-        { name => $name, is_active => $is_active, description => $desc });
+        { name => $name, description => $desc });
 
     delete_token($token);
 

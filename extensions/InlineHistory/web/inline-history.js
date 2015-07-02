@@ -379,9 +379,13 @@ var inline_history = {
   },
 
   confirmUnsafeUrl: function(url) {
-    return confirm(
-      'This is considered an unsafe URL and could possibly be harmful.\n'
-      + 'The full URL is:\n\n' + url + '\n\nContinue?');
+    try {
+        return confirm(
+        'This is considered an unsafe URL and could possibly be harmful.\n'
+        + 'The full URL is:\n\n' + url + '\n\nContinue?');
+    } catch(e) {
+        return false;
+    }
   },
 
   previousElementSibling: function(el) {

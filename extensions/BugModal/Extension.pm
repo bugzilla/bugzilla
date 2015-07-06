@@ -43,8 +43,12 @@ sub edit_bug_format {
 }
 
 sub _alternative_show_bug_format {
+    my $cgi = Bugzilla->cgi;
     my $user = Bugzilla->user;
-    if (my $format = Bugzilla->cgi->param('format')) {
+    if (my $ctype = $cgi->param('ctype')) {
+        return undef if $ctype ne 'html';
+    }
+    if (my $format = $cgi->param('format')) {
         return ($format eq '__default__' || $format eq 'default') ? undef : $format;
     }
     return $user->setting('ui_experiments') eq 'on' ? 'modal' : undef;

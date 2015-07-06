@@ -155,6 +155,7 @@ use constant WS_ERROR_CODE => {
     api_key_not_valid            => 306,
     api_key_revoked              => 306,
     auth_invalid_token           => 307,
+    invalid_cookies_or_token     => 307,
 
     # Except, historically, AUTH_NODATA, which is 410.
     login_required               => 410,

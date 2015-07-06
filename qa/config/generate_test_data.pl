@@ -816,7 +816,7 @@ dircopy("$conf_path/qa/extensions/QA", "$conf_path/extensions/QA");
 
 my $cwd = cwd();
 chdir($conf_path);
-system("perl", "contrib/fixperms.pl");
+system("perl", "scripts/fixperms.pl");
 chdir($cwd);
 
 print "installation and configuration complete!\n";

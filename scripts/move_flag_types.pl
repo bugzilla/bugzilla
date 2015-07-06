@@ -1,17 +1,17 @@
-#!/usr/bin/perl 
+#!/usr/bin/perl
 # -*- Mode: perl; indent-tabs-mode: nil -*-
 #
 # The contents of this file are subject to the Mozilla Public
 # License Version 1.1 (the "License"); you may not use this file
 # except in compliance with the License. You may obtain a copy of
 # the License at http://www.mozilla.org/MPL/
-# 
+#
 # Software distributed under the License is distributed on an "AS
 # IS" basis,  WITHOUT WARRANTY OF ANY KIND,  either express or
 # implied. See the License for the specific language governing
 # rights and limitations under the License.
-# 
-# The Initial Developer of the Original Code is Mozilla Foundation 
+#
+# The Initial Developer of the Original Code is Mozilla Foundation
 # Portions created by the Initial Developer are Copyright (C) 2011 the
 # Initial Developer. All Rights Reserved.
 #
@@ -19,7 +19,7 @@
 #
 #         FILE:  move_flag_types.pl
 #
-#        USAGE:  ./move_flag_types.pl  
+#        USAGE:  ./move_flag_types.pl
 #
 #  DESCRIPTION:  Move current set flag from one type_id to another
 #                based on product and optionally component.
@@ -63,7 +63,7 @@ Old flag type id. Use editflagtypes.cgi to determine the type id from the URL.
 
 New flag type id. Use editflagtypes.cgi to determine the type id from the URL.
 
-=item B<--product|-p> 
+=item B<--product|-p>
 
 The product that the bugs most be assigned to.
 
@@ -94,7 +94,7 @@ GetOptions(\%params, 'help|h|?', 'oldid|o=s', 'newid|n=s',
 
 if ($params{'help'} || !$params{'oldid'}
     || !$params{'newid'} || !$params{'product'}) {
-    pod2usage({ -message => "Missing required argument", 
+    pod2usage({ -message => "Missing required argument",
                 -exitval => 1 });
 }
 
@@ -106,29 +106,29 @@ my $dbh = Bugzilla->dbh;
 
 # Get the flag names
 my $old_flag_name = $dbh->selectrow_array(
-    "SELECT name FROM flagtypes WHERE id = ?", 
+    "SELECT name FROM flagtypes WHERE id = ?",
     undef,  $params{'oldid'});
 my $new_flag_name = $dbh->selectrow_array(
-    "SELECT name FROM flagtypes WHERE id = ?",   
+    "SELECT name FROM flagtypes WHERE id = ?",
     undef,   $params{'newid'});
 
 # Find the product id
 my $product_id = $dbh->selectrow_array(
-    "SELECT id FROM products WHERE name = ?", 
+    "SELECT id FROM products WHERE name = ?",
     undef, $params{'product'});
 
 # Find the component id if not __ANY__
 my $component_id;
 if ($params{'component'}) {
     $component_id = $dbh->selectrow_array(
-        "SELECT id FROM components WHERE name = ? AND product_id = ?", 
+        "SELECT id FROM components WHERE name = ? AND product_id = ?",
         undef, $params{'component'}, $product_id);
 }
 
 my @query_args = ($params{'oldid'});
 
 my $flag_query = "SELECT flags.id AS flag_id, flags.bug_id AS bug_id
-                    FROM flags JOIN bugs ON flags.bug_id = bugs.bug_id 
+                    FROM flags JOIN bugs ON flags.bug_id = bugs.bug_id
                    WHERE flags.type_id = ? ";
 
 if ($component_id) {
@@ -146,13 +146,13 @@ else {
 my $flags = $dbh->selectall_arrayref($flag_query, undef, @query_args);
 
 if (@$flags) {
-    print "Moving '" . scalar @$flags . "' flags " . 
+    print "Moving '" . scalar @$flags . "' flags " .
           "from $old_flag_name (" . $params{'oldid'} . ") " .
           "to $new_flag_name (" . $params{'newid'} . ")...\n";
 
     if (!$params{'doit'}) {
         print "Pass the argument --doit or -d to permanently make changes to the database.\n";
-    }  
+    }
     else {
         my $flag_update_sth = $dbh->prepare("UPDATE flags SET type_id = ? WHERE id = ?");
 

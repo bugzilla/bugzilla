@@ -35,7 +35,7 @@ Usage: syncflags.pl <srcproduct> <tgtproduct>
 
 E.g.: syncflags.pl FoodReplicator SeaMonkey
 will copy any flag inclusions (only) for the product "FoodReplicator"
-so matching inclusions exist for the product "SeaMonkey". This script is 
+so matching inclusions exist for the product "SeaMonkey". This script is
 normally used prior to moving components from srcproduct to tgtproduct.
 USAGE
 
@@ -73,12 +73,12 @@ if (!$tgtprodid) {
     exit(1);
 }
 
-$dbh->do("INSERT INTO flaginclusions(component_id, type_id, product_id) 
-               SELECT fi1.component_id, fi1.type_id, ? FROM flaginclusions fi1 
-            LEFT JOIN flaginclusions fi2 
+$dbh->do("INSERT INTO flaginclusions(component_id, type_id, product_id)
+               SELECT fi1.component_id, fi1.type_id, ? FROM flaginclusions fi1
+            LEFT JOIN flaginclusions fi2
                       ON fi1.type_id = fi2.type_id
-                      AND fi2.product_id = ? 
-                WHERE fi1.product_id = ? 
+                      AND fi2.product_id = ?
+                WHERE fi1.product_id = ?
                       AND fi2.type_id IS NULL",
         undef,
         $tgtprodid, $tgtprodid, $srcprodid);

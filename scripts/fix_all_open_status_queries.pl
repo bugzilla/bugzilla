@@ -105,7 +105,7 @@ sub all_open_states {
 sub validate_status {
     my ($status) = @_;
     my $dbh = Bugzilla->dbh;
-    my $exists = $dbh->selectrow_array("SELECT 1 FROM bug_status 
+    my $exists = $dbh->selectrow_array("SELECT 1 FROM bug_status
                                         WHERE value = ?",
                                        undef, $status);
     return $exists ? 1 : 0;

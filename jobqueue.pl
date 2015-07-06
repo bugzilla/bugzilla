@@ -76,7 +76,7 @@ See L<Bugzilla::JobQueue> and L<Bugzilla::JobQueue::Runner>.
 =head1 Running jobqueue.pl as a System Service
 
 For systems that use Upstart or SysV Init, there is a SysV/Upstart init
-script included with Bugzilla for jobqueue.pl: F<contrib/bugzilla-queue>.
+script included with Bugzilla for jobqueue.pl: F<scripts/bugzilla-queue>.
 It should work out-of-the-box on RHEL, Fedora, CentOS etc.
 
 You can install it by doing C<./jobqueue.pl install> as root, after
@@ -84,5 +84,5 @@ already having run L<checksetup> at least once to completion
 on this Bugzilla installation.
 
 If you are using a system that isn't RHEL, Fedora, CentOS, etc., then you
-may have to modify F<contrib/bugzilla-queue> and install it yourself
+may have to modify F<scripts/bugzilla-queue.*> and install it yourself
 manually in order to get C<jobqueue.pl> running as a system service.

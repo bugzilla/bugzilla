@@ -1,4 +1,12 @@
 #!/usr/bin/perl -w
+
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
+#
+# This Source Code Form is "Incompatible With Secondary Licenses", as
+# defined by the Mozilla Public License, v. 2.0.
+
 use strict;
 
 use Cwd 'abs_path';
@@ -153,18 +161,18 @@ $dbh->do(
     "UPDATE bugs SET product_id=?, component_id=? WHERE $where_sql",
     undef, $new_product_id, $new_component_id);
 
-# touch bugs 
+# touch bugs
 $dbh->do("UPDATE bugs SET delta_ts=NOW() WHERE $where_sql");
 $dbh->do("UPDATE bugs SET lastdiffed=NOW() WHERE $where_sql");
 
 # update bugs_activity
 $dbh->do(
-    "INSERT INTO bugs_activity(bug_id, who, bug_when, fieldid, removed, added) 
+    "INSERT INTO bugs_activity(bug_id, who, bug_when, fieldid, removed, added)
           SELECT bug_id, ?, delta_ts, ?, ?, ?  FROM bugs WHERE $where_sql",
     undef,
     $user_id, $product_field_id, $old_product, $new_product);
 $dbh->do(
-    "INSERT INTO bugs_activity(bug_id, who, bug_when, fieldid, removed, added) 
+    "INSERT INTO bugs_activity(bug_id, who, bug_when, fieldid, removed, added)
           SELECT bug_id, ?, delta_ts, ?, ?, ?  FROM bugs WHERE $where_sql",
     undef,
     $user_id, $component_field_id, $old_component, $new_component);

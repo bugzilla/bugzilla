@@ -203,7 +203,7 @@ foreach my $table (keys %changes) {
             my $cols_to_query = join(', ', @columns);
 
             # Get existing entries for the old user account.
-            my $old_entries = 
+            my $old_entries =
                 $dbh->selectall_arrayref("SELECT $cols_to_query
                                             FROM $table
                                            WHERE $col_to_update = ?",

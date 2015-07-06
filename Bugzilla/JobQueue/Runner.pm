@@ -103,14 +103,9 @@ sub gd_usage {
 sub gd_can_install {
     my $self = shift;
 
-    my $source_file;
-    if ( -e "/etc/SuSE-release" ) {
-        $source_file = "contrib/$initscript.suse";
-    } else {
-        $source_file = "contrib/$initscript.rhel";
-    }
-    my $dest_file = "$initd/$initscript";
-    my $sysconfig = '/etc/sysconfig';
+    my $source_file = "scripts/$initscript.rhel";
+    my $dest_file   = "$initd/$initscript";
+    my $sysconfig   = '/etc/sysconfig';
     my $config_file = "$sysconfig/$initscript";
 
     if (!-x $chkconfig  or !-d $initd) {

@@ -33,9 +33,9 @@ sub usage() {
 Usage: fixgroupqueries.pl <oldvalue> <newvalue>
 
 E.g.: fixgroupqueries.pl w-security webtools-security
-will change all occurrences of "w-security" to "webtools-security" in the 
+will change all occurrences of "w-security" to "webtools-security" in the
 appropriate places in the namedqueries.
- 
+
 Note that all parameters are case-sensitive.
 USAGE
 }
@@ -50,9 +50,9 @@ sub do_namedqueries($$) {
     my $replace_count = 0;
     my $query = $dbh->selectall_arrayref("SELECT id, query FROM namedqueries");
     if ($query) {
-        my $sth = $dbh->prepare("UPDATE namedqueries SET query = ? 
+        my $sth = $dbh->prepare("UPDATE namedqueries SET query = ?
                                                      WHERE id = ?");
-        
+
         foreach my $row (@$query) {
             my ($id, $query) = @$row;
             if (($query =~ /field\d+-\d+-\d+=bug_group/) &&

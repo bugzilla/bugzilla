@@ -59,7 +59,7 @@ Then all you need to do on later occasions is:
 boot2docker start && boot2docker ssh
 ```
 
-2. cd `/c/Users/Username/src/bmo/contrib/docker` (paths under c:\Users are
+2. cd `/c/Users/Username/src/bmo/docker` (paths under c:\Users are
    automatically mapped by boot2docker from the client into the VM)
 3. `fig build` (and so on)`
 

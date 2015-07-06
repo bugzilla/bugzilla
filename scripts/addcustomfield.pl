@@ -37,7 +37,7 @@ my %types = (
   'keywords' => FIELD_TYPE_KEYWORDS,
 );
 
-my $syntax = 
+my $syntax =
     "syntax: addcustomfield.pl <field name> [field type]\n\n" .
     "valid field types:\n  " . join("\n  ", sort keys %types) . "\n\n" .
     "the default field type is single_select\n";

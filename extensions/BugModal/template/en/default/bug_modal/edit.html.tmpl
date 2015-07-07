@@ -85,7 +85,7 @@
 
   # build firefox flags subtitle
   firefox_flags = [];
-  firefox_fixed_version = "";
+  firefox_fixed_versions = [];
   tracking_flags_title = "Firefox Tracking Flags";
   # project flags
   FOREACH row IN tracking_flags_table;
@@ -106,8 +106,17 @@
     END;
     IF status_value != "---";
       blurb = blurb _ " " _ status_value;
-      IF firefox_fixed_version == "" && status_value == "fixed";
-        firefox_fixed_version = row.name.ucfirst.replace('^(\D+)(\d)', '$1 $2');
+      IF status_value == "fixed";
+        flag_name = row.name;
+        IF flag_name.substr(0, 7) == "firefox";
+          IF firefox_fixed_versions.0 == "";
+            firefox_fixed_versions.0 = "Firefox " _ flag_name.substr(7);
+          END;
+        ELSIF flag_name.substr(0, 4) == "b2g-";
+          IF firefox_fixed_versions.1 == "";
+            firefox_fixed_versions.1 = "Firefox OS " _ flag_name.substr(4);
+          END;
+        END;
       END;
     END;
     firefox_flags.push(blurb);
@@ -117,6 +126,7 @@
       tracking_flags_title = "SeaMonkey Tracking Flags";
     END;
   END;
+  firefox_fixed_version = firefox_fixed_versions.join(", ");
   IF firefox_flags.size;
     firefox_flags_subtitle = firefox_flags.join(", ");
   ELSE;

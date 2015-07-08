@@ -248,6 +248,7 @@ div#docslinks {
     border: 1px solid black;
     padding: 1ex;
     font-size: 80%;
+    margin-top: 2px;
 }
 
 #docslinks h2 {
@@ -429,11 +430,12 @@ input.requestee {
 }
 
 .throw_error {
-    background-color: #ff6666;
-    color: black;
+    background-color: #fff;
+    color: #444;
     font-size: large;
     margin: 1em;
     padding: 0.5em 1em;
+    border: 2px solid #f66;
 }
 
 dt {

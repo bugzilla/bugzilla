@@ -292,12 +292,12 @@
   [% ELSIF error == "bug_access_denied" %]
     [% title = "Access Denied" %]
     [% admindocslinks = {'groups.html' => 'Group Security'} %]
-    You are not authorized to access [% terms.bug %] #[% bug_id FILTER html %].
+    You are not authorized to access [% terms.bug %] [%= bug_id FILTER html %].
 
   [% ELSIF error == "bug_access_query" %]
     [% title = "Access Denied" %]
     [% docslinks = {'myaccount.html' => 'Creating an account'} %]
-    You are not authorized to access [% terms.bug %] #[% bug_id FILTER html %].
+    You are not authorized to access [% terms.bug %] [%= bug_id FILTER html %].
     To see this [% terms.bug %], you must
     first <a href="show_bug.cgi?id=
                    [% bug_id FILTER uri %]&amp;GoAheadAndLogIn=1">log
@@ -1005,7 +1005,7 @@
 
   [% ELSIF error == "bug_id_does_not_exist" %]
     [% title = BLOCK %]Invalid [% terms.Bug %] ID[% END %]
-    [% terms.Bug %] #[% bug_id FILTER html %] does not exist.
+    [% terms.Bug %] [%= bug_id FILTER html %] does not exist.
     
   [% ELSIF error == "improper_bug_id_field_value" %]
     [% title = BLOCK %]

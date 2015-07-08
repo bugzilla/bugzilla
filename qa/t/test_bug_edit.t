@@ -164,7 +164,7 @@ $sel->type_ok("quicksearch_top", $bug1_id);
 $sel->click_ok("find_top");
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_is("Access Denied");
-$sel->is_text_present_ok("You are not authorized to access bug #$bug1_id");
+$sel->is_text_present_ok("You are not authorized to access bug $bug1_id");
 logout($sel);
 
 # Move the bug back to TestProduct, which has no group restrictions.

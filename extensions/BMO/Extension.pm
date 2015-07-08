@@ -46,7 +46,7 @@ use DateTime;
 use Email::MIME::ContentType qw(parse_content_type);
 use Encode qw(find_encoding encode_utf8);
 use File::MimeInfo::Magic;
-use List::MoreUtils qw(natatime);
+use List::MoreUtils qw(natatime any);
 use List::Util qw(first);
 use Scalar::Util qw(blessed);
 use Sys::Syslog qw(:DEFAULT setlogsock);
@@ -77,6 +77,7 @@ BEGIN {
     *Bugzilla::check_default_product_security_group = \&_check_default_product_security_group;
     *Bugzilla::Attachment::is_bounty_attachment     = \&_attachment_is_bounty_attachment;
     *Bugzilla::Attachment::bounty_details           = \&_attachment_bounty_details;
+    *Bugzilla::Attachment::external_redirect        = \&_attachment_external_redirect;
 }
 
 sub template_before_process {
@@ -926,7 +927,7 @@ sub attachment_process_data {
         $url = $data;
     }
 
-    if (my $content_type = _detect_attached_url($url)) {
+    if (my $content_type = _detect_attached_url($url)->{content_type}) {
         $attributes->{mimetype} = $content_type;
         $attributes->{ispatch}  = 0;
     }
@@ -943,11 +944,23 @@ sub _detect_attached_url {
 
     foreach my $key (keys %autodetect_attach_urls) {
         if ($url =~ $autodetect_attach_urls{$key}->{regex}) {
-            return $autodetect_attach_urls{$key}->{content_type};
+            return $autodetect_attach_urls{$key};
         }
     }
 
     return undef;
+}
+
+sub _attachment_external_redirect {
+    my ($self) = @_;
+
+    # must be our supported content-type
+    return undef unless
+        any { $self->contenttype eq $autodetect_attach_urls{$_}->{content_type} }
+        keys %autodetect_attach_urls;
+
+    # must still be a valid url
+    return _detect_attached_url($self->data)
 }
 
 # redirect automatically to github urls
@@ -959,13 +972,8 @@ sub attachment_view {
     # don't redirect if the content-type is specified explicitly
     return if defined $cgi->param('content_type');
 
-    # must be our supported content-type
-    return unless
-        grep { $attachment->contenttype eq $autodetect_attach_urls{$_}->{content_type} }
-        keys %autodetect_attach_urls;
-
-    # must still be a valid url
-    return unless _detect_attached_url($attachment->data);
+    # must be a valid redirection url
+    return unless defined $attachment->external_redirect;
 
     # redirect
     print $cgi->redirect(trim($attachment->data));

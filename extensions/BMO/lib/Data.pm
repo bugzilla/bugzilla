@@ -26,14 +26,17 @@ our @EXPORT = qw( $cf_visible_in_products
 # attachment.
 our %autodetect_attach_urls = (
     github_pr => {
+        title        => 'GitHub Pull Request',
         regex        => qr#^https://github\.com/[^/]+/[^/]+/pull/\d+/?$#i,
         content_type => 'text/x-github-pull-request',
     },
     reviewboard => {
+        title        => 'MozReview',
         regex        => qr#^https?://reviewboard(?:-dev)?\.(?:allizom|mozilla)\.org/r/\d+/?#i,
         content_type => 'text/x-review-board-request',
     },
     google_docs => {
+        title        => 'Google Doc',
         regex        => qr#^https://docs\.google\.com/(?:document|spreadsheets|presentation)/d/#i,
         content_type => 'text/x-google-doc',
     },

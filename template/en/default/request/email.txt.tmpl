@@ -25,13 +25,16 @@
 [% bugidsummary = bug.bug_id _ ': ' _ bug.short_desc %]
 [% attidsummary = attachment.id _ ': ' _ attachment.description %]
 [% flagtype_name = flag ? flag.type.name : old_flag.type.name %]
-[%# Upstreaming: denied (bug 621883) %]
-[% statuses = { '+' => "granted" , '-' => 'not granted' , 'X' => "canceled" ,
-                '?' => "asked" } %]
+[% statuses = { '+' => "granted" , '-' => 'not granted' , 'X' => "canceled" , '?' => "asked" } %]
 
 [% to_identity = "" %]
 [% on_behalf_of = 0 %]
 [% action = flag.status || 'X' %]
+
+[%
+  attach_url = { title => "", href => "" };
+  Hook.process("start");
+%]
 
 [% IF flag && flag.status == '?' %]
   [% subject_status = "requested" %]
@@ -77,6 +80,9 @@ X-Bugzilla-Flag-Requestee: [% flag.requestee.email %]
 
 [% FILTER bullet = wrap(80) %]
 Attachment [% attidsummary %]
+[%- END %]
+[% IF attach_url.href %]
+[%+ attach_url.title _ ": " _ attach_url.href %]
 [%- END %]
 [%+ urlbase %]attachment.cgi?id=[% attachment.id %]&action=edit
 [%- END %]

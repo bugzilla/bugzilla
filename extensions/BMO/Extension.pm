@@ -927,8 +927,8 @@ sub attachment_process_data {
         $url = $data;
     }
 
-    if (my $content_type = _detect_attached_url($url)->{content_type}) {
-        $attributes->{mimetype} = $content_type;
+    if (my $detected = _detect_attached_url($url)) {
+        $attributes->{mimetype} = $detected->{content_type};
         $attributes->{ispatch}  = 0;
     }
 }

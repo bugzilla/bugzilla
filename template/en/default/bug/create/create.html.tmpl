@@ -345,8 +345,10 @@ TUI_hide_default('attachment_text_field');
           <span id="rep_hw_os">
             (<a href="javascript:void(0)"
                 onclick="$('#rep_platform').val('[% rep_platform FILTER js FILTER html %]');
-                         $('#op_sys').val('[% rep_op_sys FILTER js FILTER html %]');
-                         $('#rep_hw_os').css('visibility', 'hidden')">use my platform</a>)
+                         $('#op_sys').val('[% rep_op_sys FILTER js FILTER html %]')">use my platform</a>)
+            (<a href="javascript:void(0)"
+                onclick="$('#rep_platform').val('All');
+                         $('#op_sys').val('All')">applies to all platforms</a>)
           </span>
         </div>
         [% needs_extra_tr = 0 %]

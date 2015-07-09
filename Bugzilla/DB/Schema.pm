@@ -512,6 +512,8 @@ use constant ABSTRACT_SCHEMA => {
                              DEFAULT => 'FALSE'},
             isprivate    => {TYPE => 'BOOLEAN', NOTNULL => 1,
                              DEFAULT => 'FALSE'},
+            attach_size  => {TYPE => 'INT4', NOTNULL => 1,
+                             DEFAULT => 0},
         ],
         INDEXES => [
             attachments_bug_id_idx => ['bug_id'],

@@ -730,6 +730,8 @@ sub update_table_definitions {
     $dbh->bz_add_index('user_api_keys', 'user_api_keys_user_id_app_id_idx',
                        [qw(user_id app_id)]);
 
+    _add_attach_size();
+
     ################################################################
     # New --TABLE-- changes should go *** A B O V E *** this point #
     ################################################################
@@ -3827,6 +3829,22 @@ sub _fix_user_api_keys_indexes {
         $dbh->bz_drop_index('user_api_keys', 'user_api_keys_user_id');
         $dbh->bz_add_index('user_api_keys', 'user_api_keys_user_id_idx', ['user_id']);
     }
+}
+
+sub _add_attach_size {
+    my $dbh = Bugzilla->dbh;
+
+    return if $dbh->bz_column_info('attachments', 'attach_size');
+
+    $dbh->bz_add_column('attachments', 'attach_size',
+                        {TYPE => 'INT4', NOTNULL => 1, DEFAULT => 0});
+
+    print "Setting attach_size...\n";
+    $dbh->do("
+        UPDATE attachments
+               INNER JOIN attach_data ON attach_data.id = attachments.attach_id
+           SET attachments.attach_size = LENGTH(attach_data.thedata)
+    ");
 }
 
 1;

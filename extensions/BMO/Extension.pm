@@ -1112,6 +1112,38 @@ sub install_update_db {
             buglist     => 0,
         });
     }
+
+    # Add default security group id column
+    if (!$dbh->bz_column_info('products', 'security_group_id')) {
+        $dbh->bz_add_column(
+            'products',
+            'security_group_id' => {
+                TYPE    => 'INT3',
+                REFERENCES => {
+                    TABLE  => 'groups',
+                    COLUMN => 'id',
+                    DELETE => 'SET NULL',
+                },
+            }
+        );
+        # Migrate values in Data.pm
+        # 1. Set all to core-security by default
+        my $core_sec_group = Bugzilla::Group->new({ name => 'core-security' });
+        $dbh->do("UPDATE products SET security_group_id = ?",
+                 undef, $core_sec_group->id);
+        # 2. Update the ones that have explicit security groups
+        foreach my $prod_name (keys %product_sec_groups) {
+            my $group_name = $product_sec_groups{$prod_name};
+            next if $group_name eq 'core-security'; # already done
+            my $group = Bugzilla::Group->new({ name => $group_name, cache => 1 });
+            if (!$group) {
+                print "Security group $group_name not found. Using core-security instead.\n";
+                next;
+            }
+            $dbh->do("UPDATE products SET security_group_id = ? WHERE name = ?",
+                     undef, $group->id, $prod_name);
+        }
+    }
 }
 
 # return the Bugzilla::Field::Choice object for the specified field and value.

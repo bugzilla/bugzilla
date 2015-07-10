@@ -24,6 +24,7 @@ package Bugzilla::WebService::Bug;
 
 use strict;
 use base qw(Bugzilla::WebService);
+use feature 'state';
 
 use Bugzilla::Comment;
 use Bugzilla::Comment::TagWeights;
@@ -1321,6 +1322,11 @@ sub _bug_to_hash {
         version          => $self->type('string', $bug->version),
         whiteboard       => $self->type('string', $bug->status_whiteboard),
     } };
+
+    state $voting_enabled //= $bug->can('votes') ? 1 : 0;
+    if ($voting_enabled && filter_wants $params, 'votes') {
+        $item{votes} = $self->type('int', $bug->votes);
+    }
 
     # First we handle any fields that require extra work (such as date parsing
     # or SQL calls).

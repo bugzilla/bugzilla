@@ -44,6 +44,9 @@
 
       [% FOREACH g = group_set %]
         <div>
+          [% IF g.checked %]
+            <input type="hidden" name="defined_groups" value="[% g.name FILTER html %]">
+          [% END %]
           <input type="checkbox" value="[% g.name FILTER html %]"
             id="group_[% g.id FILTER none %]"
             [%= IF enabled %]name="groups"[% END %]

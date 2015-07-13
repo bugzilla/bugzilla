@@ -952,9 +952,20 @@ $(function() {
                     });
 
                     // update groups
+                    var dirtyGroups = [];
+                    $('#module-security').find('input[name=groups]').each(function() {
+                        var that = $(this);
+                        var defaultChecked = !!that.attr('checked');
+                        if (defaultChecked !== that.is(':checked')) {
+                            dirtyGroups.push({ name: that.val(), value: that.is(':checked') });
+                        }
+                    });
                     $('#module-security .module-content')
                         .html(data.groups)
                         .addClass('attention');
+                    $.each(dirtyGroups, function() {
+                        $('#module-security').find('input[value=' + this.name + ']').prop('checked', this.value);
+                    });
                 },
                 function() {
                     $('#product-throbber').hide();

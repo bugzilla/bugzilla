@@ -26,7 +26,7 @@ use Bugzilla::Extension::RequestNagger::Bug;
 use Bugzilla::Extension::RequestNagger::Settings;
 use Bugzilla::Mailer;
 use Bugzilla::User;
-use Bugzilla::Util qw(format_time);
+use Bugzilla::Util qw(format_time datetime_from);
 use Email::MIME;
 use File::Slurp qw(read_file);
 use File::Temp qw(tempfile);
@@ -45,6 +45,7 @@ if (my $filename = shift @ARGV) {
 
 my $dbh = Bugzilla->dbh;
 my $date = $dbh->selectrow_array('SELECT LOCALTIMESTAMP(0)');
+my $now = datetime_from($date)->truncate( to => 'day' );
 $date = format_time($date, '%a, %d %b %Y %T %z', 'UTC');
 
 # delete expired defers
@@ -178,6 +179,17 @@ sub _include_request {
         my $attachment = Bugzilla::Attachment->new({ id => $request->{attach_id}, cache => 1 });
         return 0 if $attachment->isprivate && !$recipient->is_insider;
     }
+
+    # exclude weekends and re-check nag-interval
+    my $date = datetime_from($request->{modification_date});
+    my $hours = 0;
+    $hours += 24 - $date->hour if $date->day_of_week <= 5;
+    $date->add( days => 1 )->truncate( to => 'day' );
+    while ($date < $now) {
+        $hours += 24 if $date->day_of_week <= 5;
+        $date->add( days => 1 );
+    }
+    return 0 if $hours < ($request->{extended_period} ? $request->{nag_interval} + 24 : $request->{nag_interval});
 
     return 1;
 }

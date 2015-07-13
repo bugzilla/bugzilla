@@ -62,7 +62,9 @@ sub REQUESTEE_NAG_SQL {
         setter.userid AS setter_id,
         requestee.userid AS requestee_id,
         flags.requestee_id AS recipient_id,
-        flags.requestee_id AS target_id
+        flags.requestee_id AS target_id,
+        products.nag_interval,
+        0 AS extended_period
     FROM
         flags
         INNER JOIN flagtypes ON flagtypes.id = flags.type_id
@@ -104,7 +106,9 @@ sub SETTER_NAG_SQL {
         setter.userid AS setter_id,
         requestee.userid AS requestee_id,
         flags.setter_id AS recipient_id,
-        flags.setter_id AS target_id
+        flags.setter_id AS target_id,
+        products.nag_interval,
+        0 AS extended_period
     FROM
         flags
         INNER JOIN flagtypes ON flagtypes.id = flags.type_id
@@ -147,7 +151,9 @@ sub WATCHING_REQUESTEE_NAG_SQL {
         setter.userid AS setter_id,
         requestee.userid AS requestee_id,
         nag_watch.watcher_id AS recipient_id,
-        requestee.userid AS target_id
+        requestee.userid AS target_id,
+        products.nag_interval,
+        COALESCE(extended_period.setting_value, 0) AS extended_period
     FROM
         flags
         INNER JOIN flagtypes ON flagtypes.id = flags.type_id
@@ -197,7 +203,9 @@ sub WATCHING_SETTER_NAG_SQL {
         setter.userid AS setter_id,
         requestee.userid AS requestee_id,
         nag_watch.watcher_id AS recipient_id,
-        setter.userid AS target_id
+        setter.userid AS target_id,
+        products.nag_interval,
+        COALESCE(extended_period.setting_value, 0) AS extended_period
     FROM
         flags
         INNER JOIN flagtypes ON flagtypes.id = flags.type_id

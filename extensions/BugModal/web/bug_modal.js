@@ -81,16 +81,20 @@ $(function() {
         });
 
     // url --> unsafe warning
-    $('.unsafe-url')
+    $('.bug-url')
         .click(function(event) {
-            event.preventDefault();
-            if (confirm('This is considered an unsafe URL and could possibly be harmful. ' +
-                        'The full URL is:\n\n' + $(event.target).attr('title') + '\n\nContinue?'))
-            {
-                try {
-                    window.open($(event.target).attr('title'));
-                } catch(ex) {
-                    alert('Malformed URL');
+            var that = $(this);
+            event.stopPropagation();
+            if (!that.data('safe')) {
+                event.preventDefault();
+                if (confirm('This is considered an unsafe URL and could possibly be harmful. ' +
+                            'The full URL is:\n\n' + that.attr('href') + '\n\nContinue?'))
+                {
+                    try {
+                        window.open(that.attr('href'));
+                    } catch(ex) {
+                        alert('Malformed URL');
+                    }
                 }
             }
         });

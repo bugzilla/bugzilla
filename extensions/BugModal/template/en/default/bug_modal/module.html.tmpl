@@ -9,7 +9,11 @@
 [%#
   # title: (string, optional) main title of module
   # collapse: (boolean) if true, show as collapsed by default (default false)
-  # subtitle: (string, optional) sub-title
+  # subtitle: (optional) any of:
+  #   a string
+  #   an array of: (will be joined with ", ")
+  #     string (will be filtered)
+  #     { unfiltered: html } (will not be filtered)
   # content: (string, required) module's content (use WRAPPER module..)
   # hide_on_view: (boolean) if true, the module won't be visible in view mode
   # hide_on_edit: (boolean) if true, the module won't be visible in edit mode
@@ -26,8 +30,17 @@
       <div class="module-latch">
         <div class="module-spinner">[% collapsed ? "&#9656;" : "&#9662;" %]</div>
         <div class="module-title">[% title FILTER html %]</div>
-        [% IF subtitle %]
-          <div class="module-subtitle">([% subtitle FILTER html %])</div>
+        [% IF subtitle != "" && subtitle.size %]
+          <div class="module-subtitle">
+            ([% FOREACH st IN subtitle.list %]
+              [% IF st.unfiltered.defined %]
+                [% st.unfiltered FILTER none %]
+              [% ELSE %]
+                [% st FILTER html %]
+              [% END %]
+              [% ", " UNLESS loop.last %]
+            [% END %])
+          </div>
         [% END %]
       </div>
     </div>

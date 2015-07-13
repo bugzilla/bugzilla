@@ -306,10 +306,8 @@
       CASE 'bug_file_loc';
         %]
         <a href="[% value FILTER html %]" target="_blank" rel="noreferrer"
-        [% UNLESS is_safe_url(value) %]
-          onclick="return confirmUnsafeURL(this.href)"
-        [% END %]
-        >[% value FILTER truncate(256, '&hellip;') FILTER html %]</a>
+           class="bug-url" data-safe="[% is_safe_url(value) ? 1 : 0 %]"
+        >[% value FILTER truncate(40) FILTER html %]</a>
         [%
 
       CASE 'see_also';

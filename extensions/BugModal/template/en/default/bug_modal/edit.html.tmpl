@@ -454,11 +454,15 @@
 [%
   unassigned = (bug.assigned_to.login == "nobody@mozilla.org")
                || (bug.assigned_to.login.search('\.bugs$'));
-  sub =
-    "Reporter: " _ bug.reporter.moz_nick
-    _ (unassigned ? ", Unassigned" : ", Assigned: " _ bug.assigned_to.moz_nick)
-    _ (bug.mentors.size ? ", Mentored" : "")
-    _ (needinfo.size ? ", NeedInfo" : "")
+  sub = [];
+  sub.push("Reporter: " _ bug.reporter.moz_nick);
+  sub.push(unassigned ? "Unassigned" : "Assigned: " _ bug.assigned_to.moz_nick);
+  IF bug.mentors.size;
+    sub.push("Mentored");
+  END;
+  IF needinfo.size;
+    sub.push("NeedInfo");
+  END;
 %]
 [% WRAPPER bug_modal/module.html.tmpl
     title = "People"
@@ -645,7 +649,7 @@
 %]
 [% WRAPPER bug_modal/module.html.tmpl
   title = "Tracking"
-  subtitle = sub.join(", ")
+  subtitle = sub
   collapsed = col
 %]
   [% WRAPPER fields_lhs %]
@@ -834,11 +838,15 @@
   IF bug.cf_crash_signature != "";
     sub.push("crash signature");
   END;
+  IF bug.bug_file_loc != "";
+    loc_html = INCLUDE bug_url_link link_text="URL";
+    sub.push({ unfiltered => loc_html });
+  END;
 %]
 [% WRAPPER bug_modal/module.html.tmpl
   title = "Details"
   collapsed = 1
-  subtitle = sub.join(", ")
+  subtitle = sub
 %]
   [% WRAPPER fields_lhs %]
 
@@ -897,10 +905,7 @@
         field_type = constants.FIELD_TYPE_FREETEXT
         hide_on_view = bug.bug_file_loc == ""
     %]
-      <a href="[% bug.bug_file_loc FILTER html %]" target="_blank"
-         rel="noreferrer" title="[% bug.bug_file_loc FILTER html %]"
-         [% UNLESS is_safe_url(bug.bug_file_loc) +%] class="unsafe-url"[% END %]
-      >[% bug.bug_file_loc FILTER truncate(40) FILTER html %]</a>
+      [% INCLUDE bug_url_link %]
     [% END %]
 
     [%# see also %]
@@ -984,7 +989,7 @@
   %]
   [% WRAPPER bug_modal/module.html.tmpl
       title = "Attachments"
-      subtitle = sub.join(", ")
+      subtitle = sub
       collapsed = active_attachments == 0
   %]
     [% INCLUDE bug_modal/attachments.html.tmpl
@@ -1059,4 +1064,16 @@
 
 [% BLOCK fields_rhs %]
   <div class="fields-rhs">[% content FILTER none %]</div>
+[% END %]
+
+[% BLOCK bug_url_link %]
+[%
+  IF !link_text.defined;
+    link_text = bug.bug_file_loc FILTER truncate(40);
+  END;
+%]
+  <a href="[% bug.bug_file_loc FILTER html %]" target="_blank"
+     rel="noreferrer" title="[% bug.bug_file_loc FILTER truncate(256) FILTER html %]"
+     class="bug-url" data-safe="[% is_safe_url(bug.bug_file_loc) ? 1 : 0 %]"
+  >[% link_text FILTER html %]</a>
 [% END %]

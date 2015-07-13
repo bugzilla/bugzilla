@@ -53,6 +53,10 @@
     text-indent: 1em;
 }
 
+.mozreview-diff-link {
+    font-family: monospace;
+}
+
 /* bug-modal specific */
 
 #module-mozreview-requests .module-content {

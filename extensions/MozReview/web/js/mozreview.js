@@ -22,18 +22,28 @@ MozReview.getReviewRequest = function() {
         return rrUiBaseUrl + rrId + '/';
     }
 
+    function rrDiffUrl(rrId) {
+        return rrUrl(rrId) + 'diff/#index_header';
+    }
+
     function rrRow(rr, isParent) {
         var tdSummary = td.clone();
         var trCommit = tr.clone();
-        var a = $('<a/>');
+        var reviewLink = $('<a/>');
+        var diffLink = reviewLink.clone();
 
         if (!isParent) {
             tdSummary.addClass('mozreview-child-request-summary');
+            diffLink.attr('href', rrDiffUrl(rr.id));
+            diffLink.text(rr.commit.substr(0, 12));
+            diffLink.addClass('mozreview-diff-link');
+            tdSummary.append(diffLink);
+            tdSummary.append(' ');
         }
 
-        a.attr('href', rrUrl(rr.id));
-        a.text(rr.summary);
-        tdSummary.append(a);
+        reviewLink.attr('href', rrUrl(rr.id));
+        reviewLink.text(rr.summary);
+        tdSummary.append(reviewLink);
 
         if (isParent) {
             tdSummary.append($('<span/>').text(' (' + rr.submitter + ')'));

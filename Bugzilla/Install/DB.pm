@@ -730,7 +730,7 @@ sub update_table_definitions {
     $dbh->bz_add_index('user_api_keys', 'user_api_keys_user_id_app_id_idx',
                        [qw(user_id app_id)]);
 
-    # _add_attach_size();
+    _add_attach_size();
 
     ################################################################
     # New --TABLE-- changes should go *** A B O V E *** this point #

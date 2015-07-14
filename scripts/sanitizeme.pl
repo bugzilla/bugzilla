@@ -210,8 +210,9 @@ sub delete_sensitive_user_data {
 
 sub delete_attachment_data {
     # Delete unnecessary attachment data.
-    print "Removing attachment data to preserve disk space...\n";
+    print "Removing attachment data...\n";
     $dbh->do("UPDATE attach_data SET thedata = ''");
+    $dbh->do("UPDATE attachments SET attach_size = 0");
 }
 
 sub delete_bug_user_last_visit {

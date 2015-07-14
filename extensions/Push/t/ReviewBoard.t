@@ -95,15 +95,17 @@ my $dbh = Bugzilla->dbh;
 $dbh->bz_start_transaction;
 my $timestamp = $dbh->selectrow_array('SELECT LOCALTIMESTAMP(0)');
 my $bug = Bugzilla::Bug->new({id => 9000});
-my $attachment = Bugzilla::Attachment->create(
-                                { bug         => $bug,
-                                    creation_ts => $timestamp,
-                                    data        => $data,
-                                    filesize    => length $data,
-                                    description => "rblink.txt",
-                                    filename => "rblink.txt",
-                                    isprivate => 1, ispatch => 0,
-                                    mimetype    => 'text/x-review-board-request'});
+my $attachment = Bugzilla::Attachment->create({
+    bug         => $bug,
+    creation_ts => $timestamp,
+    data        => $data,
+    attach_size => length($data),
+    description => "rblink.txt",
+    filename    => "rblink.txt",
+    isprivate   => 1,
+    ispatch     => 0,
+    mimetype    => 'text/x-review-board-request'
+});
 diag "".$attachment->id;
 $dbh->bz_commit_transaction;
 

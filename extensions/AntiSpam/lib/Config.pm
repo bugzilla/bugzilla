@@ -61,6 +61,18 @@ sub get_param_list {
                 "reactivated in order to interact within our etiquette " .
                 "guidelines."
         },
+        {
+            name => 'antispam_cc_limit_age',
+            type => 't',
+            default => '2',
+            checker => \&check_numeric,
+        },
+        {
+            name => 'antispam_cc_limit_count',
+            type => 't',
+            default => '5',
+            checker => \&check_numeric,
+        },
     );
 
     return @param_list;

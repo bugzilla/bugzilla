@@ -126,6 +126,38 @@ sub _ip_blocking {
 }
 
 #
+# cc count restrictions
+#
+
+sub bug_before_create {
+    my ($self, $args) = @_;
+    $self->_cc_limit($args->{params}, 'cc');
+}
+
+sub bug_start_of_set_all {
+    my ($self, $args) = @_;
+    $self->_cc_limit($args->{params}, 'newcc');
+}
+
+sub _cc_limit {
+    my ($self, $params, $cc_field) = @_;
+    return unless exists $params->{$cc_field};
+
+    my $user = Bugzilla->user;
+    my $cc_count = ref($params->{$cc_field}) ? scalar(@{ $params->{$cc_field} }) : 1;
+    my $limit_count = Bugzilla->params->{antispam_cc_limit_count};
+    my $limit_age = Bugzilla->params->{antispam_cc_limit_age};
+
+    if ($cc_count > $limit_count && $user->creation_age < $limit_age) {
+        _syslog(sprintf("[audit] blocked <%s> from CC'ing %s users", $user->login, $cc_count));
+        delete $params->{$cc_field};
+        if (exists $params->{cc} && exists $params->{cc}->{add}) {
+            delete $params->{cc}->{add};
+        }
+    }
+}
+
+#
 # spam user disabling
 #
 

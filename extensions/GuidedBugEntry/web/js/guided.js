@@ -189,13 +189,6 @@ var product = {
       return;
     }
 
-    // use the correct security group
-    if (products[productName] && products[productName].secgroup) {
-      Dom.get('groups').value = products[productName].secgroup;
-    } else {
-      Dom.get('groups').value = products['_default'].secgroup;
-    }
-
     // show support message
     if (products[productName] && products[productName].support) {
       Dom.get("product_support_message").innerHTML = products[productName].support;
@@ -824,9 +817,10 @@ var bugForm = {
     }
     bugForm.onVersionChange(elVersions.value);
 
-    // set default hw/os
+    // set default hw/os/group
     Dom.get('rep_platform').value = product.details.default_platform;
     Dom.get('op_sys').value = product.details.default_op_sys;
+    Dom.get('groups').value = product.details.default_security_group;
   },
 
   onComponentChange: function(componentName) {

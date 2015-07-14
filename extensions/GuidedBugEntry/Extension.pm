@@ -107,10 +107,6 @@ sub page_before_template {
 
     return unless $page eq 'guided_products.js';
 
-    # import data from the BMO ext
-
-    $vars->{'product_sec_groups'} = \%product_sec_groups;
-
     my %bug_formats;
     foreach my $product (keys %create_bug_formats) {
         if (my $format = Bugzilla::Extension::BMO::forced_format($product)) {

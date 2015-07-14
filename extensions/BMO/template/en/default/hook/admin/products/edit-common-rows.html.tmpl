@@ -6,8 +6,53 @@
   # defined by the Mozilla Public License, v. 2.0.
   #%]
 
+[%
+  group_correct_visibility = {};
+  FOREACH g = product.group_controls.values;
+    IF (g.membercontrol == constants.CONTROLMAPSHOWN)
+        && (g.othercontrol == constants.CONTROLMAPSHOWN);
+      group_correct_visibility.${g.name} = 1;
+    ELSE;
+      group_correct_visibility.${g.name} = 0;
+    END;
+  END;
+%]
+
 <tr>
-  <th align="right">Default Platform</th>
+  <th align="right">Default Security Group:</th>
+  <td>
+    <select required name="security_group_id" id="security_group_id">
+      <option value=""></option>
+      [% FOREACH g IN security_groups  %]
+        <option value="[% g.id FILTER html %]"
+                data-group-correct-visibility="[% group_correct_visibility.${g.name} FILTER none %]"
+                [% " selected" IF product.default_security_group_obj.id == g.id %]>
+          [% g.name FILTER html %]
+        </option>
+      [% END %]
+    </select>
+    <span id="security_group_warning" style="color:red; display:none;">
+      The chosen security group needs to be set to SHOWN/SHOWN for this product
+    </span>
+    <script type="text/javascript">
+      var toggleGroupWarning = function() {
+        var correct_shown = $('#security_group_id option:selected')
+          .data('group-correct-visibility');
+        if (correct_shown) {
+          $('#security_group_warning').hide();
+        }
+        else {
+          $('#security_group_warning').show();
+        }
+      };
+      $('#security_group_id').change(toggleGroupWarning);
+      $(document).ready(toggleGroupWarning);
+    </script>
+  </td>
+</tr>
+
+<tr>
+  <th align="right">Default Platform:</th>
   <td>
     [% INCLUDE default_select
         field_name   = 'default_platform_id'

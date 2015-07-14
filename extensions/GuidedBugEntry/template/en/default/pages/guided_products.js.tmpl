@@ -15,12 +15,3 @@
     products['[% product.key FILTER js %]'].format = '[% product.value FILTER js %]';
   [% END %]
 [% END %]
-
-[% IF product_sec_groups %]
-  [% FOREACH product = product_sec_groups %]
-    if (!products['[% product.key FILTER js %]']) [% ~%]
-      products['[% product.key FILTER js %]'] = {};
-    products['[% product.key FILTER js %]'].secgroup = '[% product.value FILTER js %]';
-  [% END %]
-[% END %]
-

@@ -158,6 +158,17 @@ sub template_before_process {
         $vars->{attachment} = Bugzilla::Attachment->new({ id => $attachid, cache => 1 })
             if $attachid;
     }
+
+    if ($file =~ /^admin\/products\/(create|edit)\./) {
+        my $product = $vars->{product};
+        my $security_groups = Bugzilla::Group->match({ isbuggroup => 1, isactive => 1 });
+        # If set group is not active currently, we add it into the list
+        if (!grep($_->name eq $product->default_security_group, @$security_groups)) {
+            push(@$security_groups, $product->default_security_group_obj);
+            @$security_groups = sort { $a->name cmp $b->name } @$security_groups;
+        }
+        $vars->{security_groups} = $security_groups;
+    }
 }
 
 sub page_before_template {
@@ -678,13 +689,21 @@ sub quicksearch_map {
 sub object_columns {
     my ($self, $args) = @_;
     return unless $args->{class}->isa('Bugzilla::Product');
-    push @{ $args->{columns} }, qw( default_platform_id default_op_sys_id );
+    push @{ $args->{columns} }, qw(
+        default_platform_id
+        default_op_sys_id
+        security_group_id
+    );
 }
 
 sub object_update_columns {
     my ($self, $args) = @_;
     return unless $args->{object}->isa('Bugzilla::Product');
-    push @{ $args->{columns} }, qw( default_platform_id default_op_sys_id );
+    push @{ $args->{columns} }, qw(
+        default_platform_id
+        default_op_sys_id
+        security_group_id
+    );
 }
 
 sub object_before_create {
@@ -693,7 +712,7 @@ sub object_before_create {
 
     my $cgi = Bugzilla->cgi;
     my $params = $args->{params};
-    foreach my $field (qw( default_platform_id default_op_sys_id )) {
+    foreach my $field (qw( default_platform_id default_op_sys_id security_group_id )) {
         $params->{$field} = $cgi->param($field);
     }
 }
@@ -705,7 +724,7 @@ sub object_end_of_set_all {
 
     my $cgi = Bugzilla->cgi;
     my $params = $args->{params};
-    foreach my $field (qw( default_platform_id default_op_sys_id )) {
+    foreach my $field (qw( default_platform_id default_op_sys_id security_group_id )) {
         my $value = $cgi->param($field);
         detaint_natural($value);
         $object->set($field, $value);
@@ -1989,16 +2008,15 @@ sub _group_always_settable {
 }
 
 sub _default_security_group {
-    my ($self) = @_;
-    return exists $product_sec_groups{$self->name}
-        ? $product_sec_groups{$self->name}
-        : $product_sec_groups{_default};
+    return $_[0]->default_security_group_obj->name;
 }
 
 sub _default_security_group_obj {
-    my ($self) = @_;
-    return unless my $group_name = $self->default_security_group;
-    return Bugzilla::Group->new({ name => $group_name, cache => 1 })
+    my $group_id = $_[0]->{security_group_id};
+    if (!$group_id) {
+        return Bugzilla::Group->new({ name => Bugzilla->params->{insidergroup}, cache => 1 });
+    }
+    return Bugzilla::Group->new({ id => $group_id, cache => 1 });
 }
 
 # called from the verify version, component, and group page.

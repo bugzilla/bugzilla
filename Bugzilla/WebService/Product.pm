@@ -205,6 +205,8 @@ sub _product_to_hash {
     # BMO - add default hw/os
     $field_data->{default_platform} = $self->type('string', $product->default_platform);
     $field_data->{default_op_sys}   = $self->type('string', $product->default_op_sys);
+    # BMO - add default security group
+    $field_data->{default_security_group} = $self->type('string', $product->default_security_group);
     return filter($params, $field_data);
 }
 

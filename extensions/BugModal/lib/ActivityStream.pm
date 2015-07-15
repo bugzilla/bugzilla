@@ -245,11 +245,13 @@ sub _add_activities_to_stream {
                 my %flags;
                 foreach my $added (@added) {
                     my ($value, $name) = $added =~ /^((.+).)$/;
+                    next unless defined $name;
                     $flags{$name}{added} = $value;
                     $flags{$name}{removed} |= '';
                 }
                 foreach my $removed (@removed) {
                     my ($value, $name) = $removed =~ /^((.+).)$/;
+                    next unless defined $name;
                     $flags{$name}{added} |= '';
                     $flags{$name}{removed} = $value;
                 }

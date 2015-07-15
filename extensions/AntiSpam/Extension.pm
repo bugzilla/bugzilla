@@ -126,8 +126,12 @@ sub _ip_blocking {
 }
 
 #
-# cc count restrictions
+# cc/flag/etc count restrictions
 #
+
+sub _is_limited_user {
+    return Bugzilla->user->creation_age < Bugzilla->params->{antispam_multi_user_limit_age};
+}
 
 sub bug_before_create {
     my ($self, $args) = @_;
@@ -141,19 +145,28 @@ sub bug_start_of_set_all {
 
 sub _cc_limit {
     my ($self, $params, $cc_field) = @_;
+    return unless _is_limited_user();
     return unless exists $params->{$cc_field};
 
-    my $user = Bugzilla->user;
     my $cc_count = ref($params->{$cc_field}) ? scalar(@{ $params->{$cc_field} }) : 1;
-    my $limit_count = Bugzilla->params->{antispam_cc_limit_count};
-    my $limit_age = Bugzilla->params->{antispam_cc_limit_age};
-
-    if ($cc_count > $limit_count && $user->creation_age < $limit_age) {
-        _syslog(sprintf("[audit] blocked <%s> from CC'ing %s users", $user->login, $cc_count));
+    if ($cc_count > Bugzilla->params->{antispam_multi_user_limit_count}) {
+        _syslog(sprintf("[audit] blocked <%s> from CC'ing %s users", Bugzilla->user->login, $cc_count));
         delete $params->{$cc_field};
         if (exists $params->{cc} && exists $params->{cc}->{add}) {
             delete $params->{cc}->{add};
         }
+    }
+}
+
+sub bug_set_flags {
+    my ($self, $args) = @_;
+    return unless _is_limited_user();
+
+    my $flag_count = @{ $args->{new_flags} };
+    if ($flag_count > Bugzilla->params->{antispam_multi_user_limit_count}) {
+        _syslog(sprintf("[audit] blocked <%s> from flaging %s users", Bugzilla->user->login, $flag_count));
+        # empty the arrayref
+        $#{ $args->{new_flags} } = -1;
     }
 }
 

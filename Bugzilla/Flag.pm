@@ -1014,6 +1014,7 @@ sub notify {
     }
 
     my $cc_list = $flag ? $flag->type->cc_list : $old_flag->type->cc_list;
+    $cc_list //= '';
     # Is there someone to notify?
     return unless ($addressee || $cc_list);
 

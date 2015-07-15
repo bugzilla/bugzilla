@@ -2665,7 +2665,7 @@ sub set_estimated_time { $_[0]->set('estimated_time', $_[1]); }
 sub _set_everconfirmed { $_[0]->set('everconfirmed', $_[1]); }
 sub set_flags {
     my ($self, $flags, $new_flags) = @_;
-
+    Bugzilla::Hook::process('bug_set_flags', { bug => $self, flags => $flags, new_flags => $new_flags });
     Bugzilla::Flag->set_flag($self, $_) foreach (@$flags, @$new_flags);
 }
 sub set_op_sys         { $_[0]->set('op_sys',        $_[1]); }

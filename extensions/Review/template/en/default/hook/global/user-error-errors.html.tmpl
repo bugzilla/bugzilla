@@ -34,4 +34,8 @@
   [% requestee.identity FILTER html %] is not currently accepting
   '[% flagtype FILTER html %]' requests.
 
+[% ELSIF error == "mentor_limit_exceeded" %]
+  [% title = "Too Many Mentors" %]
+  You cannot add more than [% limit FILTER html %] mentors to a [% terms.bug %].
+
 [% END %]

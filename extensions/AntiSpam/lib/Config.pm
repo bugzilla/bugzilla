@@ -62,13 +62,13 @@ sub get_param_list {
                 "guidelines."
         },
         {
-            name => 'antispam_cc_limit_age',
+            name => 'antispam_multi_user_limit_age',
             type => 't',
             default => '2',
             checker => \&check_numeric,
         },
         {
-            name => 'antispam_cc_limit_count',
+            name => 'antispam_multi_user_limit_count',
             type => 't',
             default => '5',
             checker => \&check_numeric,

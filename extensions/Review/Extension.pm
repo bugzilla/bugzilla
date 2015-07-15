@@ -25,6 +25,7 @@ use Bugzilla::User::Setting;
 use Bugzilla::Util qw(clean_text datetime_from diff_arrays);
 
 use constant UNAVAILABLE_RE => qr/\b(?:unavailable|pto|away)\b/i;
+use constant MENTOR_LIMIT   => 10;
 
 #
 # monkey-patched methods
@@ -171,11 +172,14 @@ sub object_validators {
 sub _bug_check_bug_mentors {
     my ($self, $value) = @_;
     my %seen;
-    return [
+    my $mentors = [
         grep { !$seen{$_->id}++ }
         map { Bugzilla::User->check({ name => $_, cache => 1 }) }
         ref($value) ? @$value : ($value)
     ];
+    if (scalar(@$mentors) > MENTOR_LIMIT) {
+        ThrowUserError('mentor_limit_exceeded', { limit => MENTOR_LIMIT });
+    }
 }
 
 sub bug_user_match_fields {

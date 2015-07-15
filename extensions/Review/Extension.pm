@@ -180,6 +180,7 @@ sub _bug_check_bug_mentors {
     if (scalar(@$mentors) > MENTOR_LIMIT) {
         ThrowUserError('mentor_limit_exceeded', { limit => MENTOR_LIMIT });
     }
+    return $mentors;
 }
 
 sub bug_user_match_fields {

@@ -7,7 +7,7 @@ Test which version of PostgreSQL you have installed with:
 
 :command:`psql -V`
 
-You need PostgreSQL version 8.03.0000 or higher.
+You need PostgreSQL version 9.0 or higher.
 
 If you install PostgreSQL manually rather than from a package, make sure the
 server is started when the machine boots.

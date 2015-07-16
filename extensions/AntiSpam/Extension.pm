@@ -63,19 +63,8 @@ sub config_modify_panels {
 
 sub _comment_blocking {
     my ($self, $params) = @_;
-
-    # as we want to use this sparingly, we only block comments on bugs which
-    # the user didn't report, and skip it completely if the user is in the
-    # editbugs group.
     my $user = Bugzilla->user;
     return if $user->in_group('editbugs');
-    # new bug
-    return unless $params->{bug_id};
-    # existing bug
-    my $bug = ref($params->{bug_id})
-              ? $params->{bug_id}
-              : Bugzilla::Bug->new($params->{bug_id});
-    return if $bug->reporter->id == $user->id;
 
     my $blocklist = Bugzilla->dbh->selectcol_arrayref(
         'SELECT word FROM antispam_comment_blocklist'

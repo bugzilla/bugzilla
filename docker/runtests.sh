@@ -15,7 +15,7 @@ exec > >(tee /runtests.log) 2>&1
 echo "== Retrieving Bugzilla code"
 echo "Checking out $GITHUB_BASE_GIT $GITHUB_BASE_BRANCH ..."
 mv $BUGZILLA_ROOT "${BUGZILLA_ROOT}.back"
-git clone $GITHUB_BASE_GIT --single-branch --depth 1 --branch $GITHUB_BASE_BRANCH $BUGZILLA_ROOT
+git clone $GITHUB_BASE_GIT --branch $GITHUB_BASE_BRANCH $BUGZILLA_ROOT
 cd $BUGZILLA_ROOT
 if [ "$GITHUB_BASE_REV" != "" ]; then
     echo "Switching to revision $GITHUB_BASE_REV ..."

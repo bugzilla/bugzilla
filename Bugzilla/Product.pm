@@ -94,6 +94,11 @@ sub create {
     my $version = delete $params->{version};
     my $create_series = delete $params->{create_series};
 
+    # Some fields can be NULLs
+    foreach my $field (qw( default_op_sys_id default_platform_id )) {
+        $params->{$field} = undef if $params->{$field} eq '';
+    }
+
     my $product = $class->insert_create_data($params);
     Bugzilla->user->clear_product_cache();
 

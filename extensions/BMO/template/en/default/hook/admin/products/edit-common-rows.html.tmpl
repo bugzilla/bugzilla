@@ -9,12 +9,8 @@
 [%
   group_correct_visibility = {};
   FOREACH g = product.group_controls.values;
-    IF (g.membercontrol == constants.CONTROLMAPSHOWN)
-        && (g.othercontrol == constants.CONTROLMAPSHOWN);
-      group_correct_visibility.${g.name} = 1;
-    ELSE;
-      group_correct_visibility.${g.name} = 0;
-    END;
+    group_correct_visibility.${g.name} =
+      (g.membercontrol == constants.CONTROLMAPNA) || (g.othercontrol == constants.CONTROLMAPNA) ? 0 : 1;
   END;
 %]
 
@@ -32,13 +28,12 @@
       [% END %]
     </select>
     <span id="security_group_warning" style="color:red; display:none;">
-      The chosen security group needs to be set to SHOWN/SHOWN for this product
+      This security group needs to be set to SHOWN/SHOWN
     </span>
     <script type="text/javascript">
       var toggleGroupWarning = function() {
-        var correct_shown = $('#security_group_id option:selected')
-          .data('group-correct-visibility');
-        if (correct_shown) {
+        var correct_shown = $('#security_group_id option:selected').data('group-correct-visibility');
+        if ($('#security_group_id').val() === '' || correct_shown) {
           $('#security_group_warning').hide();
         }
         else {

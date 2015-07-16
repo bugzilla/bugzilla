@@ -9,9 +9,6 @@
 [% PROCESS global/variables.none.tmpl %]
 
 [% inline_style = BLOCK %]
-#fsa_form {
-  width: 60%;
-}
 #fsa_form .required:after {
   content: " *";
   color: red;
@@ -99,6 +96,7 @@ function validateAndSubmit() {
   <input type="hidden" name="bug_severity" id="bug_severity" value="normal">
   <input type="hidden" name="short_desc" id="short_desc" value="">
   <input type="hidden" name="cc" id="cc" value="">
+  <input type="hidden" name="groups" value="mozilla-employee-confidential">
   <input type="hidden" name="token" value="[% token FILTER html %]">
 
 <div class="form_section">

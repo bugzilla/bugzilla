@@ -38,6 +38,36 @@
     },
     {
       "reruns": 3,
+      "maxRunTime": 3000,
+      "task": {
+        "metadata": {
+          "name": "Documentation Build Test"
+        },
+        "provisionerId": "aws-provisioner-v1",
+        "workerType": "b2gtest",
+        "payload": {
+          "image": "dklawren/webtools-bmo-bugzilla",
+          "command": ["/runtests.sh"],
+          "env": {
+            "TEST_SUITE": "docs"
+          },
+          "artifacts": {
+            "public/runtests_log": {
+              "type": "file",
+              "path": "/runtests.log",
+              "expires": "2016-02-17T17:33:38.806Z"
+            }
+          }
+        },
+        "extra": {
+          "treeherder": {
+            "symbol": "Doc"
+          }
+        }
+      }
+    },
+    {
+      "reruns": 3,
       "maxRunTime": 7200,
       "task": {
         "metadata": {

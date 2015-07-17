@@ -208,16 +208,9 @@ $vars->{'bug_severity'} = Bugzilla::Field->new({name => 'bug_severity'})->legal_
 $vars->{'resolution'} = Bugzilla::Field->new({name => 'resolution'})->legal_values;
 
 # Boolean charts
-my @fields = @{ Bugzilla->fields({ obsolete => 0 }) };
-
-# If we're not in the time-tracking group, exclude time-tracking fields.
-if (!Bugzilla->user->is_timetracker) {
-    foreach my $tt_field (TIMETRACKING_FIELDS) {
-        @fields = grep($_->name ne $tt_field, @fields);
-    }
-}
-
-@fields = sort {lc($a->description) cmp lc($b->description)} @fields;
+my @fields =
+    sort { lc($a->description) cmp lc($b->description) }
+    values %{ Bugzilla::Search::search_fields({ obsolete => 0 }) };
 unshift(@fields, { name => "noop", description => "---" });
 $vars->{'fields'} = \@fields;
 

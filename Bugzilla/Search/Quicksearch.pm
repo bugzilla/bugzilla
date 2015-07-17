@@ -72,8 +72,6 @@ use constant MAPPINGS => {
     "attachment"     => "attachments.description",
     "attachmentdesc" => "attachments.description",
     "attachdesc"     => "attachments.description",
-    "attachmentdata" => "attach_data.thedata",
-    "attachdata"     => "attach_data.thedata",
     "attachmentmimetype" => "attachments.mimetype",
     "attachmimetype" => "attachments.mimetype"
 };

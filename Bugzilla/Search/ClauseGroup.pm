@@ -17,7 +17,6 @@ use Bugzilla::Util qw(trick_taint);
 use List::MoreUtils qw(uniq);
 
 use constant UNSUPPORTED_FIELDS => qw(
-    attach_data.thedata
     classification
     commenter
     component

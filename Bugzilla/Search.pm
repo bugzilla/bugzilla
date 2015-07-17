@@ -285,7 +285,6 @@ use constant OPERATOR_FIELD_OVERRIDE => {
     
     # General Bug Fields
     alias        => { _non_changed => \&_nullable },
-    'attach_data.thedata' => MULTI_SELECT_OVERRIDE,
     # We check all attachment fields against this.
     attachments  => MULTI_SELECT_OVERRIDE,
     assignee_last_login => {
@@ -446,7 +445,6 @@ use constant USER_FIELDS => {
 # Backwards compatibility for times that we changed the names of fields
 # or URL parameters.
 use constant FIELD_MAP => {
-    'attachments.thedata' => 'attach_data.thedata',
     bugidtype => 'bug_id_type',
     changedin => 'days_elapsed',
     long_desc => 'longdesc',
@@ -1019,18 +1017,7 @@ sub order {
 # Fields that are legal for boolean charts of any kind.
 sub _chart_fields {
     my ($self) = @_;
-
-    if (!$self->{chart_fields}) {
-        my $chart_fields = Bugzilla->fields({ by_name => 1 });
-
-        if (!$self->_user->is_timetracker) {
-            foreach my $tt_field (TIMETRACKING_FIELDS) {
-                delete $chart_fields->{$tt_field};
-            }
-        }
-        $self->{chart_fields} = $chart_fields;
-    }
-    return $self->{chart_fields};
+    return $self->{chart_fields} //= search_fields({ user => $self->_user });
 }
 
 # There are various places in Search.pm that we need to know the list of
@@ -2144,13 +2131,6 @@ sub _quote_unless_numeric {
 
 sub build_subselect {
     my ($outer, $inner, $table, $cond, $negate) = @_;
-    if ($table =~ /\battach_data\b/) {
-        # It takes a long time to scan the whole attach_data table
-        # unconditionally, so we return the subselect and let the DB optimizer
-        # restrict the search based on other search criteria.
-        my $not = $negate ? "NOT" : "";
-        return "$outer $not IN (SELECT DISTINCT $inner FROM $table WHERE $cond)";
-    }
     # Execute subselects immediately to avoid dependent subqueries, which are
     # large performance hits on MySql
     my $q = "SELECT DISTINCT $inner FROM $table WHERE $cond";
@@ -3114,12 +3094,6 @@ sub _multiselect_table {
         $args->{full_field} = $1;
         return "attachments";
     }
-    elsif ($field eq 'attach_data.thedata') {
-        $args->{_extra_where} = " AND attachments.isprivate = 0"
-            if !$self->_user->is_insider;
-        return "attachments INNER JOIN attach_data "
-               . " ON attachments.attach_id = attach_data.id"
-    }
     elsif ($field eq 'flagtypes.name') {
         $args->{full_field} = $dbh->sql_string_concat("flagtypes.name",
                                                       "flags.status");
@@ -3226,22 +3200,6 @@ sub _multiselect_isempty {
             ThrowUserError('search_field_operator_invalid', { field => $field,
                                                               operator => $operator });
         }
-    }
-    elsif ($field eq 'attach_data.thedata') {
-        push @$joins, {
-            table => 'attachments',
-            as    => "attachments_$chart_id",
-            from  => 'bug_id',
-            to    => 'bug_id',
-            extra => [ $self->_user->is_insider ? '' : "attachments_$chart_id.isprivate = 0" ],
-        };
-        push @$joins, {
-            table => 'attach_data',
-            as    => "attach_data_$chart_id",
-            from  => "attachments_$chart_id.attach_id",
-            to    => 'id',
-        };
-        return "attach_data_$chart_id.thedata IS $not NULL";
     }
     elsif ($field eq 'tag') {
         push @$joins, {
@@ -3544,6 +3502,28 @@ sub _translate_old_column {
     }
 
     return $column;
+}
+
+# Returns an hashref of Bugzilla::Field objects the current user can search
+sub search_fields {
+    my ($params) = @_;
+
+    $params //= {};
+    $params->{by_name} = 1;
+    my $user = delete $params->{user} // Bugzilla->user;
+    my $fields = Bugzilla->fields($params);
+
+    # if we're not in the time-tracking group, exclude time-tracking fields
+    if (!$user->is_timetracker) {
+        foreach my $field (TIMETRACKING_FIELDS) {
+            delete $fields->{$field};
+        }
+    }
+
+    # always exclude attachment data searching
+    delete $fields->{'attach_data.thedata'};
+
+    return $fields;
 }
 
 # BMO - make product aliases lowercase

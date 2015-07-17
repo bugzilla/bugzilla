@@ -33,6 +33,7 @@ $sel->type_ok("description", "A great new product");
 $sel->type_ok("votesperuser", 10);
 $sel->type_ok("maxvotesperbug", 5);
 $sel->type_ok("votestoconfirm", 3);
+$sel->select_ok("security_group_id", "label=core-security");
 $sel->select_ok("default_op_sys_id", "Unspecified");
 $sel->select_ok("default_platform_id", "Unspecified");
 $sel->click_ok('//input[@type="submit" and @value="Add"]');

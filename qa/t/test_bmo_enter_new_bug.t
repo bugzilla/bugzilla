@@ -270,6 +270,7 @@ sub _check_product {
     $sel->type_ok("product", $product);
     $sel->type_ok("description", $product_description);
     $sel->type_ok("version", $version) if $version;
+    $sel->select_ok("security_group_id", "label=core-security");
     $sel->select_ok("default_op_sys_id", "Unspecified");
     $sel->select_ok("default_platform_id", "Unspecified");
     $sel->click_ok('//input[@type="submit" and @value="Add"]');

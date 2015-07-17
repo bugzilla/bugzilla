@@ -566,9 +566,9 @@ $dbh->do('INSERT INTO group_group_map VALUES (?, ?, 0)',
 # BMO: Update default security group settings for new products
 my $default_security_group = Bugzilla::Group->new({ name => 'core-security' });
 $default_security_group ||= Bugzilla::Group->new({ name => 'Master' });
-foreach my $product (@products) {
-    $dbh->do('UPDATE products SET security_group_id = ? WHERE name = ?',
-             undef, $default_security_group->id, $product->{product_name});
+if ($default_security_group) {
+    $dbh->do('UPDATE products SET security_group_id = ? WHERE security_group_id IS NULL',
+             undef, $default_security_group->id);
 }
 
 ##########################################################################

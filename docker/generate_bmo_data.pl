@@ -386,6 +386,10 @@ foreach my $group (@groups) {
     }
 }
 
+# Update default security group settings for new products
+my $default_security_group = Bugzilla::Group->new({ name => 'core-security' });
+$dbh->do('UPDATE products SET security_group_id = ?', undef, $default_security_group->id);
+
 ##########################################################################
 # Set Parameters
 ##########################################################################

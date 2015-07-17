@@ -350,6 +350,7 @@ foreach my $class (@classifications) {
                  undef, ( $class->{name}, $class->{description} ));
     }
 }
+
 ##########################################################################
 # Create Products
 ##########################################################################
@@ -561,6 +562,14 @@ my $editbugs   = Bugzilla::Group->new({ name => 'editbugs' });
 my $canconfirm = Bugzilla::Group->new({ name => 'canconfirm' });
 $dbh->do('INSERT INTO group_group_map VALUES (?, ?, 0)',
          undef, $editbugs->id, $canconfirm->id);
+
+# BMO: Update default security group settings for new products
+my $default_security_group = Bugzilla::Group->new({ name => 'core-security' });
+$default_security_group ||= Bugzilla::Group->new({ name => 'Master' });
+foreach my $product (@products) {
+    $dbh->do('UPDATE products SET security_group_id = ? WHERE name = ?',
+             undef, $default_security_group->id, $product->{product_name});
+}
 
 ##########################################################################
 # Add Users to Groups

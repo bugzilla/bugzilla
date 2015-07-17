@@ -806,6 +806,7 @@ sub export_cpanfile {
     $cpanfile .= "\n# Optional\n";
     my %features;
     foreach my $module (@{ OPTIONAL_MODULES() }) {
+        next if $module->{package} eq 'mod_perl'; # Skip mod_perl since this would be installed by distro
         if (exists $module->{feature}) {
             foreach my $feature (@{ $module->{feature} }) {
                 # cpanm requires that each feature only be defined in the cpanfile

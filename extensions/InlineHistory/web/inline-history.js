@@ -265,7 +265,7 @@ var inline_history = {
         var match = attachFlags[j].match(/^\s*(<span.+\/span>):([^\?\-\+]+[\?\-\+])([\s\S]*)/);
         if (!match) continue;
         var setterSpan = match[1];
-        var flag = this.trim(match[2].replace('\u2011', '-', 'g'));
+        var flag = this.trim(match[2].replace(/\u2011/g, '-'));
         var requestee = this.trim(match[3]);
         var requesteeLogin = '';
 
@@ -330,7 +330,7 @@ var inline_history = {
       var flagLabel = cells[1].getElementsByTagName('label');
       if (!flagLabel.length) continue;
       flagLabel = flagLabel[0];
-      var flagName = this.trim(flagLabel.innerHTML).replace('\u2011', '-', 'g');
+      var flagName = this.trim(flagLabel.innerHTML).replace(/\u2011/g, '-');
 
       for (var j = 0, jl = ih_activity_flags.length; j < jl; j++) {
         flagItem = ih_activity_flags[j];

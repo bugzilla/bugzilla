@@ -225,11 +225,16 @@
 
 [%
   BLOCK activity_body;
+    classes = "activity";
+    style = "";
     IF activity.cc_only && !change_set.cc_only;
-      '<div class="activity cc-only" style="display:none">';
-    ELSE;
-      '<div class="activity">';
+      classes = classes _ " cc-only";
+      style = ' style="display:none"';
     END;
+    IF change_set.comment && change_set.comment.collapsed;
+      style = ' style="display:none"';
+    END;
+    '<div class="' _ classes _ '"' _ style _ '>';
 
     FOREACH change IN activity.changes;
       IF change.fieldname == 'cc' && !activity.cc_only && !change_set.cc_only;

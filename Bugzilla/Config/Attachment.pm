@@ -66,19 +66,12 @@ sub get_param_list {
    checker => \&check_maxattachmentsize
   },
 
-  # The maximum size (in bytes) for patches and non-patch attachments.
-  # The default limit is 1000KB, which is 24KB less than mysql's default
-  # maximum packet size (which determines how much data can be sent in a
-  # single mysql packet and thus how much data can be inserted into the
-  # database) to provide breathing space for the data in other fields of
-  # the attachment record as well as any mysql packet overhead (I don't
-  # know of any, but I suspect there may be some.)
-
   {
-   name => 'maxlocalattachment',
-   type => 't',
-   default => '0',
-   checker => \&check_numeric
+   name => 'attachment_storage',
+   type => 's',
+   choices => ['database', 'filesystem'],
+   default => 'database',
+   checker => \&check_multi
   } );
   return @param_list;
 }

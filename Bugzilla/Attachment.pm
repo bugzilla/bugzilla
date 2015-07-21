@@ -333,27 +333,7 @@ the content of the attachment
 
 sub data {
     my $self = shift;
-    return $self->{data} if exists $self->{data};
-
-    # First try to get the attachment data from the database.
-    ($self->{data}) = Bugzilla->dbh->selectrow_array("SELECT thedata
-                                                      FROM attach_data
-                                                      WHERE id = ?",
-                                                     undef,
-                                                     $self->id);
-
-    # If there's no attachment data in the database, the attachment is stored
-    # in a local file, so retrieve it from there.
-    if (length($self->{data}) == 0) {
-        if (open(AH, '<', $self->_get_local_filename())) {
-            local $/;
-            binmode AH;
-            $self->{data} = <AH>;
-            close(AH);
-        }
-    }
-
-    return $self->{data};
+    return $self->{data} //= current_storage()->retrieve($self->id);
 }
 
 =over
@@ -368,60 +348,6 @@ the length (in bytes) of the attachment content
 
 sub datasize {
     return $_[0]->{attach_size};
-}
-
-=over
-
-=item C<linecount>
-
-the number of lines of the attachment content
-
-=back
-
-=cut
-
-# linecount allows for getting the number of lines of an attachment
-# from the database directly if the data has not yet been loaded for
-# performance reasons.
-
-sub linecount {
-    my ($self) = @_;
-
-    return $self->{linecount} if exists $self->{linecount};
-
-    # Limit this to just text/* attachments as this could
-    # cause strange results for binary attachments.
-    return if $self->contenttype !~ /^text\//;
-
-    # If the data has already been loaded, we can just determine
-    # line count from the data directly. 
-    if ($self->{data}) {
-        $self->{linecount} = $self->{data} =~ tr/\n/\n/;
-    }
-    else {
-        $self->{linecount} = 
-            int(Bugzilla->dbh->selectrow_array("
-                SELECT LENGTH(attach_data.thedata)-LENGTH(REPLACE(attach_data.thedata,'\n',''))/LENGTH('\n') 
-                FROM attach_data WHERE id = ?", undef, $self->id));
-    
-    }
-
-    # If we still do not have a linecount either the attachment
-    # is stored in a local file or has been deleted. If the former,
-    # we call self->data to force a load from the filesystem and
-    # then do a split on newlines and count again.
-    unless ($self->{linecount}) {
-        $self->{linecount} = $self->data =~ tr/\n/\n/;
-    }
-
-    return $self->{linecount};
-}
-
-sub _get_local_filename {
-    my $self = shift;
-    my $hash = ($self->id % 100) + 100;
-    $hash =~ s/.*(\d\d)$/group.$1/;
-    return bz_locations()->{'attachdir'} . "/$hash/attachment." . $self->id;
 }
 
 =over
@@ -543,13 +469,10 @@ sub _check_data {
 
     $params->{attach_size} || ThrowUserError('zero_length_file');
     # Make sure the attachment does not exceed the maximum permitted size.
-    my $max_size = max(Bugzilla->params->{'maxlocalattachment'} * 1048576,
-                       Bugzilla->params->{'maxattachmentsize'} * 1024);
-
-    if ($params->{attach_size} > $max_size) {
-        my $vars = { filesize => sprintf("%.0f", $params->{attach_size}/1024) };
-        ThrowUserError('file_too_large', $vars);
+    if ($params->{attach_size} > Bugzilla->params->{'maxattachmentsize'} * 1024) {
+        ThrowUserError('file_too_large', { filesize => sprintf("%.0f", $params->{attach_size}/1024) });
     }
+
     return $data;
 }
 
@@ -804,46 +727,18 @@ sub create {
     my $data = delete $params->{data};
 
     my $attachment = $class->insert_create_data($params);
-    my $attachid = $attachment->id;
-
-    # The file is too large to be stored in the DB, so we store it locally.
-    if ($params->{attach_size} > Bugzilla->params->{'maxattachmentsize'} * 1024) {
-        my $attachdir = bz_locations()->{'attachdir'};
-        my $hash = ($attachid % 100) + 100;
-        $hash =~ s/.*(\d\d)$/group.$1/;
-        mkdir "$attachdir/$hash", 0770;
-        chmod 0770, "$attachdir/$hash";
-        if (ref $data) {
-            copy($data, "$attachdir/$hash/attachment.$attachid");
-            close $data;
-        }
-        else {
-            open(AH, '>', "$attachdir/$hash/attachment.$attachid");
-            binmode AH;
-            print AH $data;
-            close AH;
-        }
-        $data = ''; # Will be stored in the DB.
-    }
-    # If we have a filehandle, we need its content to store it in the DB.
-    elsif (ref $data) {
-        local $/;
-        # Store the content in a temp variable while we close the FH.
-        my $tmp = <$data>;
-        close $data;
-        $data = $tmp;
-    }
-
-    my $sth = $dbh->prepare("INSERT INTO attach_data
-                             (id, thedata) VALUES ($attachid, ?)");
-
-    trick_taint($data);
-    $sth->bind_param(1, $data, $dbh->BLOB_TYPE);
-    $sth->execute();
-
     $attachment->{bug} = $bug;
 
-    # Return the new attachment object.
+    # store attachment data
+    if (ref($data)) {
+        local $/;
+        my $tmp = <$data>;
+        close($data);
+        $data = $tmp;
+    }
+    current_storage()->store($attachment->id, $data);
+
+    # Return the new attachment object
     return $attachment;
 }
 
@@ -924,10 +819,10 @@ sub remove_from_db {
         'SELECT id FROM flags WHERE attach_id = ?', undef, $self->id);
     $dbh->do('DELETE FROM flags WHERE ' . $dbh->sql_in('id', $flag_ids))
         if @$flag_ids;
-    $dbh->do('DELETE FROM attach_data WHERE id = ?', undef, $self->id);
     $dbh->do('UPDATE attachments SET mimetype = ?, ispatch = ?, isobsolete = ?, attach_size = ?
               WHERE attach_id = ?', undef, ('text/plain', 0, 1, 0, $self->id));
     $dbh->bz_commit_transaction();
+    current_storage->remove($self->id);
 
     # As we don't call SUPER->remove_from_db we need to manually clear
     # memcached here.
@@ -989,5 +884,33 @@ sub get_content_type {
     return $content_type;
 }
 
+sub current_storage {
+    return state $storage //= get_storage_by_name(Bugzilla->params->{attachment_storage});
+}
+
+sub get_storage_names {
+    require Bugzilla::Config::Attachment;
+    foreach my $param (Bugzilla::Config::Attachment->get_param_list) {
+        next unless $param->{name} eq 'attachment_storage';
+        return @{ $param->{choices} };
+    }
+    return [];
+}
+
+sub get_storage_by_name {
+    my ($name) = @_;
+    # all options for attachment_storage need to be handled here
+    if ($name eq 'database') {
+        require Bugzilla::Attachment::Database;
+        return Bugzilla::Attachment::Database->new();
+    }
+    elsif ($name eq 'filesystem') {
+        require Bugzilla::Attachment::FileSystem;
+        return Bugzilla::Attachment::FileSystem->new();
+    }
+    else {
+        return undef;
+    }
+}
 
 1;

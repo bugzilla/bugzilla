@@ -688,13 +688,9 @@
 
   [% ELSIF error == "file_too_large" %]
     [% title = "File Too Large" %]
-    [%# Convert maxlocalattachment from Mb to Kb %]
-    [% max_local = Param('maxlocalattachment') * 1024 %]
-    [% max_limit = [Param('maxattachmentsize'), max_local] %]
     The file you are trying to attach is [% filesize FILTER html %] 
     kilobytes (KB) in size. Attachments cannot be more than
-    [%# Hack to get the max value between both limits %]
-    [%+ max_limit.nsort.last FILTER html %] KB. <br>
+    [%+ Param('maxattachmentsize') FILTER html %] KB. <br>
     We recommend that you store your attachment elsewhere
     and then paste the URL to this file on the attachment
     creation page in the appropriate text field.

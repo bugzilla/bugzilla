@@ -54,6 +54,15 @@ sub template_before_create {
     };
 }
 
+sub attachment_should_redirect_login {
+    my ($self, $args) = @_;
+    my $cgi = Bugzilla->cgi;
+
+    if ($cgi->param('github_state') || $cgi->param('github_email')) {
+        ${$args->{do_redirect}} = 1;
+    }
+}
+
 sub auth_login_methods {
     my ($self, $args) = @_;
     my $modules = $args->{'modules'};

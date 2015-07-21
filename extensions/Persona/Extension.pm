@@ -64,6 +64,15 @@ sub config_modify_panels {
     }
 }
 
+sub attachment_should_redirect_login {
+    my ($self, $args) = @_;
+    my $cgi = Bugzilla->cgi;
+
+    if ($cgi->param("persona_assertion")) {
+        ${$args->{do_redirect}} = 1;
+    }
+}
+
 sub config_add_panels {
     my ($self, $args) = @_;
     my $modules = $args->{panel_modules};

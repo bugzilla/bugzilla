@@ -822,7 +822,7 @@ sub remove_from_db {
     $dbh->do('UPDATE attachments SET mimetype = ?, ispatch = ?, isobsolete = ?, attach_size = ?
               WHERE attach_id = ?', undef, ('text/plain', 0, 1, 0, $self->id));
     $dbh->bz_commit_transaction();
-    current_storage->remove($self->id);
+    current_storage()->remove($self->id);
 
     # As we don't call SUPER->remove_from_db we need to manually clear
     # memcached here.

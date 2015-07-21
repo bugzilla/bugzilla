@@ -18,14 +18,15 @@ use warnings;
 
 BEGIN {
     delete $ENV{SERVER_SOFTWARE};
+
+    # exit early if there's nothing to send
+    use FindBin qw($Bin);
+    use lib $Bin, "$Bin/lib";
+    use Bugzilla::Constants;
+    exit(0) unless glob(bz_locations()->{error_reports} . '/*.dump');
 }
 
-use FindBin qw($Bin);
-use lib $Bin;
-use lib "$Bin/lib";
-
 use Bugzilla;
-use Bugzilla::Constants;
 use Fcntl qw(:flock);
 use File::Slurp qw(read_file);
 use HTTP::Request::Common;

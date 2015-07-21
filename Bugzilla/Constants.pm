@@ -697,28 +697,30 @@ sub _bz_locations {
     # We have to return absolute paths for mod_perl. 
     # That means that if you modify these paths, they must be absolute paths.
     return {
-        'libpath'     => $libpath,
-        'ext_libpath' => "$libpath/lib",
+        'libpath'        => $libpath,
+        'ext_libpath'    => "$libpath/lib",
         # If you put the libraries in a different location than the CGIs,
         # make sure this still points to the CGIs.
-        'cgi_path'    => $libpath,
-        'templatedir' => "$libpath/template",
+        'cgi_path'       => $libpath,
+        'templatedir'    => "$libpath/template",
         'template_cache' => "$libpath/template_cache",
-        'project'     => $project,
-        'localconfig' => "$libpath/$localconfig",
-        'datadir'     => $datadir,
-        'attachdir'   => "$datadir/attachments",
-        'skinsdir'    => "$libpath/skins",
-        'graphsdir'   => "$libpath/graphs",
-        # $webdotdir must be in the web server's tree somewhere. Even if you use a 
-        # local dot, we output images to there. Also, if $webdotdir is 
-        # not relative to the bugzilla root directory, you'll need to 
-        # change showdependencygraph.cgi to set image_url to the correct 
+        'project'        => $project,
+        'localconfig'    => "$libpath/$localconfig",
+        'datadir'        => $datadir,
+        'attachdir'      => "$datadir/attachments",
+        'skinsdir'       => "$libpath/skins",
+        'graphsdir'      => "$libpath/graphs",
+        # $webdotdir must be in the web server's tree somewhere. Even if you use a
+        # local dot, we output images to there. Also, if $webdotdir is
+        # not relative to the bugzilla root directory, you'll need to
+        # change showdependencygraph.cgi to set image_url to the correct
         # location.
         # The script should really generate these graphs directly...
-        'webdotdir'   => "$datadir/webdot",
-        'extensionsdir' => "$libpath/extensions",
-        'assetsdir'   => "$datadir/assets",
+        'webdotdir'      => "$datadir/webdot",
+        'extensionsdir'  => "$libpath/extensions",
+        'assetsdir'      => "$datadir/assets",
+        # error_reports store error/warnings destined for sentry
+        'error_reports'  => "$libpath/error_reports",
     };
 }
 

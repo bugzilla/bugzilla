@@ -17,9 +17,9 @@ our @EXPORT = qw(
 );
 
 use Carp;
-use Data::Dumper;
 use DateTime;
 use File::Temp;
+use JSON ();
 use LWP::UserAgent;
 use Sys::Hostname;
 use URI;
@@ -215,10 +215,11 @@ sub sentry_handle_error {
             if exists $ENV{$field};
     }
 
+    my $now = DateTime->now();
     my $data = {
         event_id    => $id,
         message     => $message,
-        timestamp   => DateTime->now->iso8601(),
+        timestamp   => $now->iso8601(),
         level       => $level,
         platform    => 'Other',
         logger      => $logger,
@@ -235,17 +236,19 @@ sub sentry_handle_error {
         },
     };
 
-    my $fh = File::Temp->new( UNLINK => 0 );
+    my $fh = File::Temp->new(
+        DIR      => bz_locations()->{error_reports},
+        TEMPLATE => $now->ymd('') . $now->hms('') . '-XXXX',
+        SUFFIX   => '.dump',
+        UNLINK   => 0,
+
+    );
     if (!$fh) {
-        warn "Failed to create temp file: $!\n";
+        warn "Failed to create dump file: $!\n";
         return;
     }
-    print $fh Dumper($data);
-    close($fh) or die $!;
-    my $filename = $fh->filename;
-
-    my $command = bz_locations()->{'cgi_path'} . "/sentry.pl '$filename' &";
-    system($command);
+    print $fh JSON->new->utf8(1)->pretty(0)->allow_nonref(1)->encode($data);
+    close($fh);
     return 1;
 }
 
@@ -259,7 +262,7 @@ sub _write_to_error_log {
             Apache2::ServerRec::warn($message);
         }
     } else {
-        print STDERR "$message\n";
+        print STDERR $message, "\n";
     }
 }
 

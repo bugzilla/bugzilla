@@ -115,18 +115,19 @@ sub DIR_ALSO_WS_SERVE { _suexec() ? 0001 : 0 };
 # by this group. Otherwise someone may find it possible to change the cgis
 # when exploiting some security flaw somewhere (not necessarily in Bugzilla!)
 sub FILESYSTEM {
-    my $datadir       = bz_locations()->{'datadir'};
-    my $attachdir     = bz_locations()->{'attachdir'};
-    my $extensionsdir = bz_locations()->{'extensionsdir'};
-    my $webdotdir     = bz_locations()->{'webdotdir'};
-    my $templatedir   = bz_locations()->{'templatedir'};
-    my $libdir        = bz_locations()->{'libpath'};
-    my $extlib        = bz_locations()->{'ext_libpath'};
-    my $skinsdir      = bz_locations()->{'skinsdir'};
-    my $localconfig   = bz_locations()->{'localconfig'};
+    my $datadir        = bz_locations()->{'datadir'};
+    my $attachdir      = bz_locations()->{'attachdir'};
+    my $extensionsdir  = bz_locations()->{'extensionsdir'};
+    my $webdotdir      = bz_locations()->{'webdotdir'};
+    my $templatedir    = bz_locations()->{'templatedir'};
+    my $libdir         = bz_locations()->{'libpath'};
+    my $extlib         = bz_locations()->{'ext_libpath'};
+    my $skinsdir       = bz_locations()->{'skinsdir'};
+    my $localconfig    = bz_locations()->{'localconfig'};
     my $template_cache = bz_locations()->{'template_cache'};
-    my $graphsdir     = bz_locations()->{'graphsdir'};
-    my $assetsdir     = bz_locations()->{'assetsdir'};
+    my $graphsdir      = bz_locations()->{'graphsdir'};
+    my $assetsdir      = bz_locations()->{'assetsdir'};
+    my $error_reports  = bz_locations()->{'error_reports'};
 
     # We want to set the permissions the same for all localconfig files
     # across all PROJECTs, so we do something special with $localconfig,
@@ -207,6 +208,8 @@ sub FILESYSTEM {
         # Writeable directories
          $template_cache    => { files => CGI_READ,
                                   dirs => DIR_CGI_OVERWRITE },
+         $error_reports     => { files => CGI_READ,
+                                  dirs => DIR_CGI_WRITE },
          $attachdir         => { files => CGI_WRITE,
                                   dirs => DIR_CGI_WRITE },
          $webdotdir         => { files => WS_SERVE,
@@ -296,6 +299,8 @@ sub FILESYSTEM {
         $graphsdir              => DIR_CGI_WRITE | DIR_ALSO_WS_SERVE,
         $webdotdir              => DIR_CGI_WRITE | DIR_ALSO_WS_SERVE,
         $assetsdir              => DIR_CGI_WRITE | DIR_ALSO_WS_SERVE,
+        $template_cache         => DIR_CGI_WRITE,
+        $error_reports          => DIR_CGI_WRITE,
         # Directories that contain content served directly by the web server.
         "$skinsdir/custom"      => DIR_WS_SERVE,
         "$skinsdir/contrib"     => DIR_WS_SERVE,
@@ -358,6 +363,8 @@ EOT
         'xt/.htaccess'               => { perms    => WS_SERVE,
                                           contents => HT_DEFAULT_DENY },
         "$datadir/.htaccess"         => { perms    => WS_SERVE,
+                                          contents => HT_DEFAULT_DENY },
+        "$error_reports/.htaccess"   => { perms    => WS_SERVE,
                                           contents => HT_DEFAULT_DENY },
 
         "$graphsdir/.htaccess" => { perms => WS_SERVE, contents => <<EOT

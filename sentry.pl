@@ -26,67 +26,63 @@ use lib "$Bin/lib";
 
 use Bugzilla;
 use Bugzilla::Constants;
-use Bugzilla::RNG qw(irand);
 use Fcntl qw(:flock);
-use File::Slurp;
+use File::Slurp qw(read_file);
 use HTTP::Request::Common;
-use JSON ();
 use LWP::UserAgent;
-use POSIX qw(setsid nice);
-use Safe;
+use POSIX qw(nice);
 use URI;
 
 Bugzilla->usage_mode(USAGE_MODE_CMDLINE);
 nice(19);
 
-# detach
-open(STDIN, '<', '/dev/null');
-open(STDOUT, '>', '/dev/null');
-open(STDERR, '>', '/dev/null');
-setsid();
+exit(1) unless Bugzilla->params->{sentry_uri};
+my $uri = URI->new(Bugzilla->params->{sentry_uri});
+my $header = build_header($uri);
+exit(1) unless $header;
 
-# grab sentry server url
-my $sentry_uri = Bugzilla->params->{sentry_uri} || '';
-exit(1) unless $sentry_uri;
-
-# read data dump
-exit(1) unless my $filename = shift;
-my $dump = read_file($filename);
-unlink($filename);
-
-# deserialise
-my $cpt = new Safe;
-$cpt->reval($dump) || exit(1);
-my $data = ${$cpt->varglob('VAR1')};
-
-# split the sentry uri
-my $uri = URI->new($sentry_uri);
-my ($public_key, $secret_key) = split(/:/, $uri->userinfo);
-$uri->userinfo(undef);
-my $project_id = $uri->path;
-$project_id =~ s/^\///;
-$uri->path("/api/$project_id/store/");
-
-# build the message
-my $message = JSON->new->utf8(1)->pretty(0)->allow_nonref(1)->encode($data);
-my %header = (
-    'X-Sentry-Auth' => sprintf(
-        "Sentry sentry_version=%s, sentry_timestamp=%s, sentry_key=%s, sentry_client=%s, sentry_secret=%s",
-        '2.0',
-        (time),
-        $public_key,
-        'bugzilla/4.2',
-        $secret_key,
-    ),
-    'Content-Type' => 'application/json'
-);
-
-# ensure we send warnings one at a time per webhead
 flock(DATA, LOCK_EX);
+foreach my $file (glob(bz_locations()->{error_reports} . '/*.dump')) {
+    eval {
+        send_file($uri, $header, $file);
+    };
+}
 
-# and post to sentry
-my $request = POST $uri->canonical, %header, Content => $message;
-my $response = LWP::UserAgent->new(timeout => 10)->request($request);
+sub build_header {
+    my ($uri) = @_;
+
+    # split the sentry uri
+    return undef unless $uri->userinfo && $uri->path;
+    my ($public_key, $secret_key) = split(/:/, $uri->userinfo);
+    $uri->userinfo(undef);
+    my $project_id = $uri->path;
+    $project_id =~ s/^\///;
+    $uri->path("/api/$project_id/store/");
+
+    # build the header
+    return {
+        'X-Sentry-Auth' => sprintf(
+            "Sentry sentry_version=%s, sentry_timestamp=%s, sentry_key=%s, sentry_client=%s, sentry_secret=%s",
+            '2.0',
+            (time),
+            $public_key,
+            'bmo/' . BUGZILLA_VERSION,
+            $secret_key,
+        ),
+        'Content-Type' => 'application/json'
+    };
+}
+
+sub send_file {
+    my ($uri, $header, $filename) = @_;
+    # read data dump
+    my $message = read_file($filename);
+    unlink($filename);
+
+    # and post to sentry
+    my $request = POST $uri->canonical, %$header, Content => $message;
+    my $response = LWP::UserAgent->new(timeout => 10)->request($request);
+}
 
 __DATA__
 this exists so the flock() code works.

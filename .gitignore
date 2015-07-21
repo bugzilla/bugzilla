@@ -11,5 +11,6 @@
 /localconfig
 /index.html
 /template_cache
+/error_reports
 .DS_Store
 cpanfile

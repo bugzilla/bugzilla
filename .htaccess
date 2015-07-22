@@ -54,6 +54,7 @@ RewriteRule ^form[\.:]itrequest$ enter_bug.cgi?product=Infrastructure+\%26+Opera
 RewriteRule ^form[\.:](mozlist|poweredby|presentation|trademark|recoverykey)$ enter_bug.cgi?product=mozilla.org&format=$1 [QSA]
 RewriteRule ^form[\.:]legal$ enter_bug.cgi?product=Legal&format=legal [QSA]
 RewriteRule ^form[\.:]recruiting$ enter_bug.cgi?product=Recruiting&format=recruiting [QSA]
+RewriteRule ^form[\.:]intern$ enter_bug.cgi?product=Recruiting&format=intern [QSA]
 RewriteRule ^form[\.:]mozpr$ enter_bug.cgi?product=Mozilla+PR&format=mozpr [QSA]
 RewriteRule ^form[\.:]reps[\.:]mentorship$ enter_bug.cgi?product=Mozilla+Reps&format=mozreps [QSA]
 RewriteRule ^form[\.:]reps[\.:]budget$ enter_bug.cgi?product=Mozilla+Reps&format=remo-budget [QSA]

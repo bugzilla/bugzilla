@@ -1,0 +1,301 @@
+[%# 1.0@bugzilla.org %]
+[%# The contents of this file are subject to the Mozilla Public
+  # License Version 1.1 (the "License"); you may not use this file
+  # except in compliance with the License. You may obtain a copy of
+  # the License at http://www.mozilla.org/MPL/
+
+  #
+  # Software distributed under the License is distributed on an "AS
+  # IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
+  # implied. See the License for the specific language governing
+  # rights and limitations under the License.
+  #
+  # The Original Code is the Bugzilla Bug Tracking System.
+  #
+  # The Initial Developer of the Original Code is Mozilla Corporation.
+  # Portions created by Mozilla are Copyright (C) 2008 Mozilla
+  # Corporation. All Rights Reserved.
+  #
+  # Contributor(s): Mark Smith <mark@mozilla.com>
+  #                 Reed Loden <reed@mozilla.com>
+  #%]
+
+[% PROCESS global/variables.none.tmpl %]
+
+[% inline_style = BLOCK %]
+#heading {
+  width:       98%;
+  font-size:   2em;
+  font-weight: bold;
+  margin:      10px;
+}
+p {
+  max-width: 40%;
+}
+label.required:before {
+    w
+  content: "* ";
+  color: red;
+}
+.required_star {
+  color: red;
+}
+.row label {
+  display: block;
+}
+.row {
+  padding-bottom: 10px;
+}
+[% END %]
+
+[% inline_javascript = BLOCK %]
+$(document).ready(function() {
+  $("#calironto").change(function() {
+    var v = $(this).val();
+    if (v == "" || v == "Yes") {
+      $("#other_location").removeAttr("required");
+      $("label[for='other_location']").removeClass("required");
+      $("#other_location_row").hide();
+    }
+    else {
+      $("#other_location").attr("required", true);
+      $("label[for='other_location']").addClass("required");
+      $("#other_location_row").show();
+    }
+  }).change();
+  $("#business_need").change(function() {
+    var v = $(this).val();
+    if (v === "Other") {
+      $("#business_need_elaborate").prop("disabled", false).show();
+    }
+    else {
+      $("#business_need_elaborate").prop("disabled", true).hide();
+    }
+  });
+  $("#internForm").on("submit", function() {
+    var name = $("#name").val();
+    $("#short_desc").val("Intern Request: " + encodeURIComponent(name));
+  });
+});
+[% END %]
+
+[% PROCESS global/header.html.tmpl
+   title              = "Mozilla Corporation Intern Requests"
+   generate_api_token = 1
+   style_urls         = [ 'skins/standard/attachment.css' ]
+   javascript_urls    = []
+   style              = inline_style
+   javascript         = inline_javascript
+%]
+
+[% IF !user.in_group("mozilla-employee-confidential")
+      && !user.in_group("mozilla-messaging-confidential")
+      && !user.in_group("mozilla-foundation-confidential") %]
+  <p>Sorry, you do not have access to this page.</p>
+  [% RETURN %]
+[% END %]
+
+<div id="heading">Intern Requests</div>
+<div>
+  <p>
+    Applications for 2016 Interns are now being accepted. If you would
+    like to request an intern for 2016 the application deadline is August
+    28, 2015, as recruiting begins September 2015. <em>Please submit a [% terms.bug %] for
+    each individual intern you would like even if the descriptions are the same</em>.
+    Applying for an intern is not a guarantee that you will be granted an intern
+    this time around. All applications will be considered and reviewed by the
+    University Team, your Human Resource Business Partner, and ultimately approved
+    at the VP level.
+  </p>
+
+  <p>
+    Interns are charged back to your department and cost approximately 30K (USD)
+    for a 12 week period and includes salary, housing, relocation, equipment and
+    visa if needed. Costs for Interns outside of the US and Canada will be researched
+    and determined on a case by case basis as they do not follow the same conventions
+    as US and CAD.
+  </p>
+
+  <p>
+    Interns will be allotted based on the need for level 1 and 2 growth on your
+    team, business need, and location support.
+  </p>
+
+  <form method="post" action="post_bug.cgi" id="internForm">
+    <input type="hidden" id="short_desc" name="short_desc" value="">
+    <input type="hidden" name="product" value="Recruiting">
+    <input type="hidden" name="component" value="Intern">
+    <input type="hidden" name="rep_platform" value="All">
+    <input type="hidden" name="op_sys" value="Other">
+    <input type="hidden" name="version" value="unspecified">
+    <input type="hidden" name="priority" value="--">
+    <input type="hidden" name="bug_severity" value="normal">
+    <input type="hidden" name="format" value="intern">
+    <input type="hidden" name="created-format" value="intern">
+    <input type="hidden" name="token" value="[% token FILTER html %]">
+    <input type="hidden" id="description" name="description" value="Job Description">
+    <input type="hidden" name="contenttypemethod" value="autodetect" />
+    [% IF user.in_group('canconfirm') %]
+      <input type="hidden" name="bug_status" value="NEW">
+    [% END %]
+
+    <div class="row">
+      <label class="required" for="hiring_manager_name">Hiring Manager Name:</label>
+      <input required name="hiring_manager_name" id="hiring_manager_name" size="60" >
+    </div>
+
+    <div class="row">
+      <label class="required" for="team_name">Team:</label>
+      <input required name="team_name" id="team_name" size="60" >
+    </div>
+
+    <div class="row">
+      <label class="required" for="cost_center">Cost Center:</label>
+      <select required id="cost_center" name="cost_center">
+        <option value="">Select..</option>
+        [% INCLUDE "bug/create/cost-centers.html.tmpl" %]
+      </select>
+    </div>
+
+    <div class="row">
+      <label class="required" for="vp_authority">VP Authority</label>
+      <select required id="vp_authority" name="vp_authority">
+        <option value="">Select..</option>
+        [% INCLUDE "bug/create/vp-authority.html.tmpl" %]
+      </select>
+    </div>
+
+    <div class="row">
+      <label class="required" for="product_line">Product Line</label>
+      <select required id="product_line" name="product_line">
+        <option value="">Select..</option>
+        <option value="Firefox">Firefox</option>
+        <option value="Firefox OS">Firefox OS</option>
+        <option value="Firefox for Android">Firefox for Android</option>
+        <option value="Content Services">Content Services</option>
+        <option value="Cloud Services">Cloud Services</option>
+        <option value="Legal">Legal</option>
+        <option value="Engagement">Engagement</option>
+        <option value="IT">IT</option>
+        <option value="Office of the CTO">Office of The CTO</option>
+        <option value="Platform">Platform</option>
+        <option value="Product Management">Product Management</option>
+        <option value="Marketplace">Marketplace</option>
+        <option value="Other">Other</option>
+      </select>
+    </div>
+
+    <div class="row">
+      <label class="required" for="level_1_or_2">
+        Do you have a need for a level 1 or level 2 hire (entry level/new grad/JR role) to your team in the next year?
+      </label>
+      [% INCLUDE yesno name = "level_1_or_2" %]
+    </div>
+
+    <div class="row">
+      <label class="required" for="calironto">
+        Are you located in a California or Toronto office?
+      </label>
+      [% INCLUDE yesno name = "calironto" %]
+    </div>
+
+    <div class="row" id="other_location_row">
+      <label class="required" for="other_location">
+        If not where are you located?
+      </label>
+      <input required name="other_location" id="other_location" size="60">
+    </div>
+
+    <div class="row">
+      <label class="required" for="onsite">
+        Will you have onsite Mentorship for your intern in 2016?
+      </label>
+      [% INCLUDE yesno name = "onsite" %]
+    </div>
+    <div class="row">
+      <label class="required" for="possible_mentor">
+        Possible Mentor?
+      </label>
+      <input required name="possible_mentor" id="possible_mentor" size="60">
+    </div>
+
+    <div class="row">
+      <label class="required" for="business_need">
+        Business Need?
+      </label>
+      <select required id="business_need" name="business_need">
+        <option value="">Select..</option>
+        <option value="I have a need for a level 1 or 2 hire in the next year">I have a need for a level 1 or 2 hire in the next year</option>
+        <option value="I have a short term project-based need that can wait until next Summer">I have a short term project-based need that can wait until next Summer</option>
+        <option value="Other">Neither of these fit and I can elaborate</option>
+      </select>
+      <br>
+      <textarea required disabled name="business_need_elaborate"
+                id="business_need_elaborate" cols="80" rows="10"
+                style="display:none;" placeholder="Elaborate on your business need"></textarea>
+    </div>
+
+    <div class="row">
+      <label class="required" for="potential_project">
+        Please describe your potential project
+      </label>
+      <input required name="potential_project" id="potential_project" size="60">
+    </div>
+
+    <div class="row">
+      <label class="required" for="job_description">
+        Job Description
+        (<a target="_blank" href="https://mana.mozilla.org/wiki/display/globalstaffing/Intern+Job+Descriptions">more info</a>)
+      </label>
+      <textarea required name="job_description"
+                id="job_description" cols="80"  rows="10"
+                placeholder="Please add link to Mana or copy and paste a JD. (if you are looking for multiple types interns please include a job description for each)"></textarea>
+    </div>
+
+    <div class="row">
+      <label class="required" for="would_hire">
+        If my intern does exceptional work I would be willing to use headcount to hire them
+      </label>
+      [% INCLUDE yesno name = "would_hire" %]
+    </div>
+
+    <div class="row">
+      <label class="required" for="would_reintern">
+        I would like my past intern to return for another internship
+      </label>
+      [% INCLUDE yesno name = "would_reintern" %]
+    </div>
+
+    <div class="row">
+      <label class="required" for="name">
+        Name:
+      </label>
+      <input required name="name" id="name" size="60">
+    </div>
+
+    <div class="row">
+      <label class="required" for="duration">
+        Duration:
+      </label>
+      <input required name="duration" id="duration" size="60">
+    </div>
+
+    <input type="submit" id="commit" value="Submit Request">
+    <p>
+      [ <span class="required_star">*</span> <span class="required_explanation">
+      Required Field</span> ]
+    </p>
+  </form>
+
+  <p>Thanks for contacting us. You will be notified by email of any progress made in resolving your request.</p>
+</div>
+
+[% PROCESS global/footer.html.tmpl %]
+
+[% BLOCK yesno %]
+    <select required id="[% name FILTER html %]" name="[% name FILTER html %]">
+      <option value="">Select..</option>
+      <option value="Yes">Yes</option>
+      <option value="No">No</option>
+    </select>
+[% END %]

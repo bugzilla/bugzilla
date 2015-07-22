@@ -12,6 +12,7 @@ use warnings;
 use Bugzilla::Error;
 use Bugzilla::Bug;
 use Bugzilla::Product;
+use Bugzilla::Component;
 
 sub report {
     my ($vars) = @_;
@@ -22,18 +23,20 @@ sub report {
                                             action => 'run',
                                             object => 'recruiting_dashboard' });
 
-    my $product = Bugzilla::Product->check({ name => 'Recruiting', cache => 1 });
+    my $product   = Bugzilla::Product->check({ name => 'Recruiting', cache => 1 });
+    my $component = Bugzilla::Component->new({ product => $product, name => 'General', cache => 1 });
 
     # find all open recruiting bugs
     my $bugs = Bugzilla::Bug->match({
-        product_id => $product->id,
-        resolution => '',
+        product_id   => $product->id,
+        component_id => $component->id,
+        resolution   => '',
     });
 
     # filter bugs based on visibility and re-bless
     $user->visible_bugs($bugs);
     $bugs = [
-        map  { bless($_, 'RecuritingBug') }
+        map  { bless($_, 'RecruitingBug') }
         grep { $user->can_see_bug($_->id) }
         @$bugs
     ];
@@ -43,7 +46,7 @@ sub report {
 
 1;
 
-package RecuritingBug;
+package RecruitingBug;
 use strict;
 use warnings;
 

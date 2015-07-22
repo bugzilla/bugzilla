@@ -1,0 +1,27 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% PROCESS global/variables.none.tmpl %]
+
+[% PROCESS global/header.html.tmpl
+   title = "Intern Request Submission"
+%]
+
+<h1>Thank you!</h1>
+
+<p>
+  Thank you for submitting your intern request! It will be
+  reviewed by the VPs and prioritized according to needs across the
+  organization.
+</p>
+
+<p style="font-size: x-small">
+  Reference: <a href="show_bug.cgi?id=[% id FILTER uri %]">#[% id FILTER html %]</a>
+</p>
+
+[% PROCESS global/footer.html.tmpl %]

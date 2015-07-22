@@ -1,0 +1,63 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% USE Bugzilla %]
+[% cgi = Bugzilla.cgi %]
+
+Hiring Manager:
+[%+ cgi.param('hiring_manager_name') %]
+
+Team:
+[%+ cgi.param('team_name') %]
+
+Cost Center:
+[%+ cgi.param('cost_center') %]
+
+VP Authority:
+[%+ cgi.param('vp_authority') %]
+
+Level 1/Level 2:
+[%+ cgi.param("level_1_or_2") %]
+
+California or Toronto:
+[%+ cgi.param("calironto") %]
+
+[% IF cgi.param("other_location") %]
+Other Location:
+[%+ cgi.param("other_location") %]
+[% END  %]
+
+Possible Mentor:
+[%+ cgi.param("possible_mentor") %]
+
+Business Need:
+[%+
+  IF cgi.param("business_need") == "Other";
+    cgi.param("business_need_elaborate");
+  ELSE;
+    cgi.param("business_need");
+  END;
+%]
+
+Potential Project:
+[%+ cgi.param("potential_project") %]
+
+Job Description:
+[%+ cgi.param("job_description") %]
+
+Would Hire:
+[%+ cgi.param("would_hire") %]
+
+Would like to intern again:
+[%+ cgi.param("would_reintern") %]
+
+Name:
+[%+ cgi.param("name") %]
+
+Duration:
+[%+ cgi.param("duration") %]

@@ -209,7 +209,7 @@ sub _update_groups {
         }
         foreach my $group (@$added) {
             $sth_add_mapping->execute($self->id, $group->id, $is_bless, GRANT_DIRECT);
-            Bugzilla->audit(sprintf('%s <%s> added group %s from %s', $user->login, remote_ip(), $group->name, $self->login));
+            Bugzilla->audit(sprintf('%s <%s> added group %s to %s', $user->login, remote_ip(), $group->name, $self->login));
         }
 
         if (! $is_bless) {

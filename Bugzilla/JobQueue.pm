@@ -45,7 +45,7 @@ use constant DRIVER_CACHE_TIME => 300; # 5 minutes
 
 # To avoid memory leak/fragmentation, a worker process won't process more than
 # MAX_MESSAGES messages.
-use constant MAX_MESSAGES => 100;
+use constant MAX_MESSAGES => 75;
 
 sub job_map {
     if (!defined(Bugzilla->request_cache->{job_map})) {

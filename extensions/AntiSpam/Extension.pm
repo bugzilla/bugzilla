@@ -16,9 +16,7 @@ use Bugzilla::Error;
 use Bugzilla::Group;
 use Bugzilla::Util qw(remote_ip trick_taint);
 use Email::Address;
-use Encode;
 use Socket;
-use Sys::Syslog qw(:DEFAULT setlogsock);
 
 our $VERSION = '1';
 
@@ -39,7 +37,7 @@ sub _project_honeypot_blocking {
     return if $status != 127
               || $threat < Bugzilla->params->{honeypot_threat_threshold};
 
-    _syslog(sprintf("[audit] blocked <%s> from creating %s, honeypot %s", $ip, $login, $honeypot));
+    Bugzilla->audit(sprintf("blocked <%s> from creating %s, honeypot %s", $ip, $login, $honeypot));
     ThrowUserError('account_creation_restricted');
 }
 
@@ -73,6 +71,7 @@ sub _comment_blocking {
 
     my $regex = '\b(?:' . join('|', map { quotemeta } @$blocklist) . ')\b';
     if ($params->{thetext} =~ /$regex/i) {
+        Bugzilla->audit(sprintf("blocked <%s> %s from commenting, blacklisted phrase", remote_ip(), $user->login));
         ThrowUserError('antispam_comment_blocked');
     }
 }
@@ -90,7 +89,7 @@ sub _domain_blocking {
         $address->host
     );
     if ($blocked) {
-        _syslog(sprintf("[audit] blocked <%s> from creating %s, blacklisted domain", remote_ip(), $login));
+        Bugzilla->audit(sprintf("blocked <%s> from creating %s, blacklisted domain", remote_ip(), $login));
         ThrowUserError('account_creation_restricted');
     }
 }
@@ -109,7 +108,7 @@ sub _ip_blocking {
         $ip
     );
     if ($blocked) {
-        _syslog(sprintf("[audit] blocked <%s> from creating %s, blacklisted IP", $ip, $login));
+        Bugzilla->audit(sprintf("blocked <%s> from creating %s, blacklisted IP", $ip, $login));
         ThrowUserError('account_creation_restricted');
     }
 }
@@ -139,7 +138,7 @@ sub _cc_limit {
 
     my $cc_count = ref($params->{$cc_field}) ? scalar(@{ $params->{$cc_field} }) : 1;
     if ($cc_count > Bugzilla->params->{antispam_multi_user_limit_count}) {
-        _syslog(sprintf("[audit] blocked <%s> from CC'ing %s users", Bugzilla->user->login, $cc_count));
+        Bugzilla->audit(sprintf("blocked <%s> from CC'ing %s users", Bugzilla->user->login, $cc_count));
         delete $params->{$cc_field};
         if (exists $params->{cc} && exists $params->{cc}->{add}) {
             delete $params->{cc}->{add};
@@ -153,7 +152,7 @@ sub bug_set_flags {
 
     my $flag_count = @{ $args->{new_flags} };
     if ($flag_count > Bugzilla->params->{antispam_multi_user_limit_count}) {
-        _syslog(sprintf("[audit] blocked <%s> from flaging %s users", Bugzilla->user->login, $flag_count));
+        Bugzilla->audit(sprintf("blocked <%s> from flaging %s users", Bugzilla->user->login, $flag_count));
         # empty the arrayref
         $#{ $args->{new_flags} } = -1;
     }
@@ -230,7 +229,7 @@ sub comment_after_add_tag {
         );
         $author->set_disable_mail(1);
         $author->update();
-        _syslog(sprintf("[audit] antispam disabled <%s>: %s", $author->login, $reason));
+        Bugzilla->audit(sprintf("antispam disabled <%s>: %s", $author->login, $reason));
     }
 }
 
@@ -367,17 +366,6 @@ sub db_schema_abstract_schema {
             },
         ],
     };
-}
-
-#
-# utilities
-#
-
-sub _syslog {
-    my $message = shift;
-    openlog('apache', 'cons,pid', 'local4');
-    syslog('notice', encode_utf8($message));
-    closelog();
 }
 
 __PACKAGE__->NAME;

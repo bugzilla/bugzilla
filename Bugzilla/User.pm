@@ -182,6 +182,7 @@ sub _update_groups {
     my $group_changes = shift;
     my $changes = shift;
     my $dbh = Bugzilla->dbh;
+    my $user = Bugzilla->user;
 
     # Update group settings.
     my $sth_add_mapping = $dbh->prepare(
@@ -203,14 +204,12 @@ sub _update_groups {
         my ($removed, $added) = @{$group_changes->{$is_bless}};
 
         foreach my $group (@$removed) {
-            $sth_remove_mapping->execute(
-                $self->id, $group->id, $is_bless, GRANT_DIRECT
-             );
+            $sth_remove_mapping->execute($self->id, $group->id, $is_bless, GRANT_DIRECT);
+            Bugzilla->audit(sprintf('%s <%s> removed group %s from %s', $user->login, remote_ip(), $group->name, $self->login));
         }
         foreach my $group (@$added) {
-            $sth_add_mapping->execute(
-                $self->id, $group->id, $is_bless, GRANT_DIRECT
-             );
+            $sth_add_mapping->execute($self->id, $group->id, $is_bless, GRANT_DIRECT);
+            Bugzilla->audit(sprintf('%s <%s> added group %s from %s', $user->login, remote_ip(), $group->name, $self->login));
         }
 
         if (! $is_bless) {
@@ -222,7 +221,7 @@ sub _update_groups {
 
             $dbh->do(
                 $query, undef,
-                $self->id, Bugzilla->user->id,
+                $self->id, $user->id,
                 get_field_id('bug_group'),
                 join(', ', map { $_->name } @$removed),
                 join(', ', map { $_->name } @$added)

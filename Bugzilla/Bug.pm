@@ -1028,6 +1028,12 @@ sub update {
         my @added_names   = map { $new_groups{$_}->name } @$added_gr;
         $changes->{'bug_group'} = [join(', ', @removed_names),
                                    join(', ', @added_names)];
+
+        # we only audit when bugs protected with a secure-mail enabled group
+        # are made public
+        if (!scalar @{ $self->groups_in } && any { $old_groups{$_}->secure_mail } @$removed_gr) {
+            Bugzilla->audit(sprintf('%s made Bug %s public (%s)', $user->login, $self->id, $self->short_desc));
+        }
     }
 
     # Comments and comment tags

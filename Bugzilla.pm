@@ -59,11 +59,13 @@ use Bugzilla::Metrics::Collector;
 use Bugzilla::Metrics::Template;
 use Bugzilla::Metrics::Memcached;
 
+use Date::Parse;
+use DateTime::TimeZone;
+use Encode;
 use File::Basename;
 use File::Spec::Functions;
-use DateTime::TimeZone;
-use Date::Parse;
 use Safe;
+use Sys::Syslog qw(:DEFAULT);
 
 #####################################################################
 # Constants
@@ -659,6 +661,14 @@ sub local_timezone {
              ||= DateTime::TimeZone->new(name => 'local');
 }
 
+# Send messages to syslog for the auditing systems (eg. mozdef) to pick up.
+sub audit {
+    my ($class, $message) = @_;
+    openlog('apache', 'cons,pid', 'local4');
+    syslog('notice', '[audit] ' . encode_utf8($message));
+    closelog();
+}
+
 # This creates the request cache for non-mod_perl installations.
 # This is identical to Install::Util::_cache so that things loaded
 # into Install::Util::_cache during installation can be read out
@@ -1047,6 +1057,10 @@ this Bugzilla installation.
 Tells you whether or not a specific feature is enabled. For names
 of features, see C<OPTIONAL_MODULES> in C<Bugzilla::Install::Requirements>.
 
+=item C<audit>
+
+Feeds the provided message into our centralised auditing system.
+
 =back
 
 =head1 B<CACHING>
@@ -1126,4 +1140,3 @@ information.
 =back
 
 =back
-

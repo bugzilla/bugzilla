@@ -49,7 +49,7 @@ use File::MimeInfo::Magic;
 use List::MoreUtils qw(natatime any);
 use List::Util qw(first);
 use Scalar::Util qw(blessed);
-use Sys::Syslog qw(:DEFAULT setlogsock);
+use Sys::Syslog qw(:DEFAULT);
 use Text::Balanced qw( extract_bracketed extract_multiple );
 
 use Bugzilla::Extension::BMO::Constants;
@@ -741,7 +741,7 @@ sub object_end_of_create {
         my $user = $args->{object};
 
         # Log real IP addresses for auditing
-        _syslog(sprintf('[audit] <%s> created user %s', remote_ip(), $user->login));
+        Bugzilla->audit(sprintf('<%s> created user %s', remote_ip(), $user->login));
 
         # Add default searches to new user's footer
         my $dbh = Bugzilla->dbh;
@@ -762,8 +762,7 @@ sub object_end_of_create {
 
     } elsif ($class eq 'Bugzilla::Bug') {
         # Log real IP addresses for auditing
-        _syslog(sprintf('[audit] %s <%s> created bug %s',
-            Bugzilla->user->login, remote_ip(), $args->{object}->id));
+        Bugzilla->audit(sprintf('%s <%s> created bug %s', Bugzilla->user->login, remote_ip(), $args->{object}->id));
     }
 }
 

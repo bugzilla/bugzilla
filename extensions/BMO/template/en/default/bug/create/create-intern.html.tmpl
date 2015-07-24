@@ -151,9 +151,12 @@ $(document).ready(function() {
 
     <div class="row">
       <label class="required" for="cost_center">Cost Center:</label>
+      [% PROCESS "bug/create/cost-centers.none.tmpl" %]
       <select required id="cost_center" name="cost_center">
         <option value="">Select..</option>
-        [% INCLUDE "bug/create/cost-centers.html.tmpl" %]
+        [% FOREACH cost_center IN cost_centers %]
+          <option value="[% cost_center FILTER html %]">[% cost_center FILTER html %]</option>
+        [% END %]
       </select>
     </div>
 

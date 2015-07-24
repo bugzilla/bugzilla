@@ -681,29 +681,18 @@ my @order_columns;
 if ($order) {
     # Convert the value of the "order" form field into a list of columns
     # by which to sort the results.
-    ORDER: for ($order) {
-        /^Bug Number$/ && do {
-            @order_columns = ("bug_id");
-            last ORDER;
-        };
-        /^Importance$/ && do {
-            @order_columns = ("priority", "bug_severity");
-            last ORDER;
-        };
-        /^Assignee$/ && do {
-            @order_columns = ("assigned_to", "bug_status", "priority",
-                              "bug_id");
-            last ORDER;
-        };
-        /^Last Changed$/ && do {
-            @order_columns = ("changeddate", "bug_status", "priority",
-                              "assigned_to", "bug_id");
-            last ORDER;
-        };
-        do {
-            # A custom list of columns. Bugzilla::Search will validate items.
-            @order_columns = split(/\s*,\s*/, $order);
-        };
+    my %order_types = (
+        "Bug Number"   => [ "bug_id" ],
+        "Importance"   => [ "priority", "bug_severity" ],
+        "Assignee"     => [ "assigned_to", "bug_status", "priority", "bug_id" ],
+        "Last Changed" => [ "changeddate", "bug_status", "priority",
+                            "assigned_to", "bug_id" ],
+    );
+    if ($order_types{$order}) {
+        @order_columns = @{ $order_types{$order} };
+    }
+    else {
+        @order_columns = split(/\s*,\s*/, $order);
     }
 }
 

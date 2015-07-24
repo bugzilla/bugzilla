@@ -611,7 +611,25 @@ sub search {
         ThrowUserError('buglist_parameters_required');
     }
 
-    $options{order}  = [ split(/\s*,\s*/, delete $match_params->{order}) ] if $match_params->{order};
+    # Allow the use of order shortcuts similar to web UI
+    if ($match_params->{order}) {
+        # Convert the value of the "order" form field into a list of columns
+        # by which to sort the results.
+        my %order_types = (
+            "Bug Number"   => [ "bug_id" ],
+            "Importance"   => [ "priority", "bug_severity" ],
+            "Assignee"     => [ "assigned_to", "bug_status", "priority", "bug_id" ],
+            "Last Changed" => [ "changeddate", "bug_status", "priority",
+                                "assigned_to", "bug_id" ],
+        );
+        if ($order_types{$match_params->{order}}) {
+            $options{order} = $order_types{$match_params->{order}};
+        }
+        else {
+            $options{order} = [ split(/\s*,\s*/, $match_params->{order}) ];
+        }
+    }
+
     $options{params} = $match_params;
 
     my $search = new Bugzilla::Search(%options);

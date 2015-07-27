@@ -16,7 +16,6 @@ our @EXPORT = qw( $cf_visible_in_products
                   $cf_setters
                   @always_fileable_groups
                   %group_auto_cc
-                  %product_sec_groups
                   %create_bug_formats
                   @default_named_queries
                   %autodetect_attach_urls );
@@ -177,66 +176,6 @@ our @always_fileable_groups = qw(
     tamarin-security
     websites-security
     webtools-security
-);
-
-# Mapping of products to their security bits
-our %product_sec_groups = (
-    "addons.mozilla.org"           => 'client-services-security',
-    "Air Mozilla"                  => 'mozilla-employee-confidential',
-    "Android Background Services"  => 'cloud-services-security',
-    "Audio/Visual Infrastructure"  => 'mozilla-employee-confidential',
-    "AUS"                          => 'client-services-security',
-    "Bugzilla"                     => 'bugzilla-security',
-    "bugzilla.mozilla.org"         => 'bugzilla-security',
-    "Community Tools"              => 'websites-security',
-    "Data & BI Services Team"      => 'metrics-private',
-    "Developer Documentation"      => 'websites-security',
-    "Developer Ecosystem"          => 'client-services-security',
-    "Finance"                      => 'finance',
-    "Firefox Friends"              => 'mozilla-employee-confidential',
-    "Firefox Health Report"        => 'cloud-services-security',
-    "Infrastructure & Operations"  => 'mozilla-employee-confidential',
-    "Input"                        => 'websites-security',
-    "Intellego"                    => 'intellego-team',
-    "Internet Public Policy"       => 'mozilla-employee-confidential',
-    "L20n"                         => 'l20n-security',
-    "Legal"                        => 'legal',
-    "Recruiting"                   => 'hr',
-    "Marketing"                    => 'marketing-private',
-    "Marketplace"                  => 'client-services-security',
-    "Mozilla Communities"          => 'mozilla-communities-security',
-    "Mozilla Corporation"          => 'mozilla-employee-confidential',
-    "Mozilla Developer Network"    => 'websites-security',
-    "Mozilla Foundation"           => 'mozilla-employee-confidential',
-    "Mozilla Grants"               => 'grants',
-    "mozillaignite"                => 'websites-security',
-    "Mozilla Messaging"            => 'mozilla-messaging-confidential',
-    "Mozilla Metrics"              => 'metrics-private',
-    "mozilla.org"                  => 'mozilla-employee-confidential',
-    "Mozilla PR"                   => 'pr-private',
-    "Mozilla QA"                   => 'mozilla-employee-confidential',
-    "Mozilla Reps"                 => 'mozilla-reps',
-    "Cloud Services"               => 'cloud-services-security',
-    "Popcorn"                      => 'websites-security',
-    "Privacy"                      => 'privacy',
-    "quality.mozilla.org"          => 'websites-security',
-    "Release Engineering"          => 'mozilla-employee-confidential',
-    "Snippets"                     => 'websites-security',
-    "Socorro"                      => 'client-services-security',
-    "support.mozillamessaging.com" => 'websites-security',
-    "support.mozilla.org"          => 'websites-security',
-    "Talkback"                     => 'talkback-private',
-    "Tamarin"                      => 'tamarin-security',
-    "Taskcluster"                  => 'taskcluster-security',
-    "Testopia"                     => 'bugzilla-security',
-    "Tree Management"              => 'mozilla-employee-confidential',
-    "Web Apps"                     => 'client-services-security',
-    "Webmaker"                     => 'websites-security',
-    "Websites"                     => 'websites-security',
-    "Webtools"                     => 'webtools-security',
-    "www.mozilla.org"              => 'websites-security',
-    "Mozilla Foundation Operations" => 'mozilla-foundation-operations',
-    "_default"                     => 'core-security'
 );
 
 # Automatically CC users to bugs filed into configured groups and products

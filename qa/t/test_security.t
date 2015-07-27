@@ -88,7 +88,7 @@ my $editbugs_cookie = $sel->get_value("token");
 
 # Using our own unused token is fine.
 
-$sel->open_ok("/$urlbase/userprefs.cgi?dosave=1&display_quips=off&token=$editbugs_cookie");
+$sel->open_ok("/$urlbase/userprefs.cgi?tab=settings&dosave=1&display_quips=off&token=$editbugs_cookie");
 $sel->title_is("User Preferences");
 $sel->is_text_present_ok("The changes to your general preferences have been saved");
 
@@ -97,7 +97,7 @@ $sel->is_text_present_ok("The changes to your general preferences have been save
 my @args = ("", "token=", "token=i123x", "token=$admin_cookie", "token=$editbugs_cookie");
 
 foreach my $arg (@args) {
-    $sel->open_ok("/$urlbase/userprefs.cgi?dosave=1&display_quips=off&$arg");
+    $sel->open_ok("/$urlbase/userprefs.cgi?tab=settings&dosave=1&display_quips=off&$arg");
     $sel->title_is("Suspicious Action");
 
     if ($arg eq "token=$admin_cookie") {

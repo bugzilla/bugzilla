@@ -175,6 +175,7 @@ sub logout {
 # Display the bug form to enter a bug in the given product.
 sub file_bug_in_product {
     my ($sel, $product, $classification) = @_;
+    my $config = get_config();
 
     $classification ||= "Unclassified";
     $sel->click_ok("link=New", undef, "Go create a new bug");
@@ -194,7 +195,7 @@ sub file_bug_in_product {
     }
     if ($sel->is_text_present($product)) {
         ok(1, "Display the list of enterable products");
-        $sel->open_ok("/bmo/enter_bug.cgi?product=$product&format=__default__", undef, "Choose product $product");
+        $sel->open_ok("/" . $config->{bugzilla_installation} . "/enter_bug.cgi?product=$product&format=__default__", undef, "Choose product $product");
         $sel->wait_for_page_to_load(WAIT_TIME);
     }
     else {

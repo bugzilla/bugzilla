@@ -1864,6 +1864,17 @@ EOF
     $parent_bug->update($parent_bug->creation_ts);
 }
 
+sub _pre_fxos_feature {
+    my ($self, $args) = @_;
+    my $cgi = Bugzilla->cgi;
+    my $user = Bugzilla->user;
+    my $params = $args->{params};
+
+    $params->{keywords} = 'foxfood';
+    $params->{keywords} .= ',feature' if ($cgi->param('feature_type') // '') eq 'new';
+    $params->{bug_status} = $user->in_group('canconfirm') ? 'NEW' : 'UNCONFIRMED';
+}
+
 sub _add_attachment {
     my ($self, $args, $attachment_args) = @_;
 
@@ -1963,6 +1974,9 @@ sub bug_before_create {
     if (exists $params->{groups}) {
         # map renamed groups
         $params->{groups} = [ _map_groups($params->{groups}) ];
+    }
+    if ((Bugzilla->cgi->param('format') // '') eq 'fxos-feature') {
+        $self->_pre_fxos_feature($args);
     }
 }
 

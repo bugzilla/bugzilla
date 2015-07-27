@@ -7,18 +7,14 @@
   #%]
 
 [% USE Bugzilla %]
-[% cgi = Bugzilla.cgi +%]
->> Feature Request Title:
+[% cgi = Bugzilla.cgi %]
+
+>> Feature Request Summary:
 [%+ cgi.param('short_desc') %]
 
 >> Description of feature, or problem to be solved
-[%+ cgi.param("description") %]
+[%+ cgi.param("description") || "-" %]
 
->> Impact of implementing the feature/solution
-[%+ cgi.param("implement_impact") %]
-
->> Impact of NOT implementing the feature/solution
-[%+ cgi.param("not_implement_impact") %]
-
->> Date required
-[%+ cgi.param("date_required") %]
+[% RETURN IF cgi.param("discussion") != "yes" %]
+>> Mailing list thread
+[%+ cgi.param("bug_file_loc") %]

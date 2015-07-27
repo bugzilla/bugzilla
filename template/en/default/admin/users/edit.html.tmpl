@@ -26,9 +26,25 @@
 
 [% title = BLOCK %]Edit user [% otheruser.identity FILTER html %][% END %]
 
+[% js = BLOCK %]
+$(function() {
+  $('#disabledtext')
+    .keyup(function() {
+      if ($(this).val().trim() !== '') {
+        $('#disable_mail').prop('checked', true).prop('disabled', true);
+      }
+      else {
+        $('#disable_mail').prop('disabled', false);
+      }
+    })
+    .keyup();
+});
+[% END %]
+
 [% PROCESS global/header.html.tmpl
   title = title
   message = message
+  javascript = js
   style_urls = ['skins/standard/admin.css', 'skins/standard/editusers.css']
   doc_section = "useradmin.html#modifyusers"
 %]

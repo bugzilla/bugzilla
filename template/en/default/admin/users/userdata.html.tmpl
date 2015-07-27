@@ -25,10 +25,10 @@
   <td>
     [% IF editusers %]
       <input size="64" maxlength="255" name="login" 
-             id="login" value="[% otheruser.login FILTER html %]" />
+             id="login" value="[% otheruser.login FILTER html %]">
       [% IF editform %]
         [% IF !otheruser.in_group('bz_sudo_protect') %]
-          <br />
+          <br>
           <a href="relogin.cgi?action=prepare-sudo&amp;target_login=
           [%- otheruser.login FILTER uri %]">Impersonate this user</a>
         [% END %]
@@ -57,7 +57,7 @@
     [% IF editusers %]
       <input size="64" maxlength="255" name="name"
              autocomplete="off"
-             id="name" value="[% otheruser.name FILTER html %]" />
+             id="name" value="[% otheruser.name FILTER html %]">
     [% ELSE %]
       [% otheruser.name FILTER html %]
     [% END %]
@@ -75,8 +75,8 @@
     <th><label for="password">Password:</label></th>
     <td>
       <input type="password" size="16" name="password" id="password"
-             value="" autocomplete="off" />
-      [% IF editform %]<br />
+             value="" autocomplete="off">
+      [% IF editform %]<br>
         (Enter new password to change.)
       [% END %]
     </td>
@@ -85,10 +85,12 @@
   <tr>
     <th><label for="disable_mail">[% terms.Bug %]mail Disabled:</label></th>
     <td>
-      <input type="checkbox" name="disable_mail" id="disable_mail" value="1" 
-      [% IF otheruser.email_disabled %] checked="checked" [% END %] />
-      (This affects [% terms.bug %]mail and whinemail, not password-reset or other 
-      non-[% terms.bug %]-related emails)
+      <input type="checkbox" name="disable_mail" id="disable_mail" value="1"
+      [% IF otheruser.email_disabled %] checked="checked" [% END %]>
+      <label for="disable_mail">
+        (This affects [% terms.bug %]mail and whinemail, not password-reset or other
+        non-[% terms.bug %]-related emails)
+      </label>
     </td>
   </tr>
   <tr>

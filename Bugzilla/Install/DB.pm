@@ -732,6 +732,8 @@ sub update_table_definitions {
 
     _add_attach_size();
 
+    _fix_disable_mail();
+
     ################################################################
     # New --TABLE-- changes should go *** A B O V E *** this point #
     ################################################################
@@ -3845,6 +3847,11 @@ sub _add_attach_size {
                INNER JOIN attach_data ON attach_data.id = attachments.attach_id
            SET attachments.attach_size = LENGTH(attach_data.thedata)
     ");
+}
+
+sub _fix_disable_mail {
+    # you can no longer have disabled accounts with enabled mail
+    Bugzilla->dbh->do("UPDATE profiles SET disable_mail = 1 WHERE is_enabled = 0");
 }
 
 1;

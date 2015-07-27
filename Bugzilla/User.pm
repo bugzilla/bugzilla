@@ -276,7 +276,11 @@ sub update {
 # Validators
 ################################################################################
 
-sub _check_disable_mail { return $_[1] ? 1 : 0; }
+sub _check_disable_mail {
+    return 1 unless $_[0]->is_enabled;
+    return $_[1] ? 1 : 0;
+}
+
 sub _check_disabledtext { return trim($_[1]) || ''; }
 
 # Check whether the extern_id is unique.
@@ -362,8 +366,10 @@ sub set_name {
 sub set_password { $_[0]->set('cryptpassword', $_[1]); }
 
 sub set_disabledtext {
-    $_[0]->set('disabledtext', $_[1]);
-    $_[0]->set('is_enabled', $_[1] ? 0 : 1);
+    my ($self, $text) = @_;
+    $self->set('disabledtext', $text);
+    $self->set('is_enabled', trim($text) eq '' ? 0 : 1);
+    $self->set('disable_mail', 1) if !$self->is_enabled;
 }
 
 sub set_groups {
@@ -504,8 +510,8 @@ sub email { $_[0]->login . Bugzilla->params->{'emailsuffix'}; }
 sub disabledtext { $_[0]->{'disabledtext'}; }
 sub is_enabled { $_[0]->{'is_enabled'} ? 1 : 0; }
 sub showmybugslink { $_[0]->{showmybugslink}; }
-sub email_disabled { $_[0]->{disable_mail}; }
-sub email_enabled { !($_[0]->{disable_mail}); }
+sub email_disabled { $_[0]->{disable_mail} || !$_[0]->{is_enabled}; }
+sub email_enabled { !$_[0]->email_disabled; }
 sub last_seen_date { $_[0]->{last_seen_date}; }
 sub cryptpassword {
     my $self = shift;
@@ -2973,11 +2979,12 @@ Params: login_name - B<Required> The login name for the new user.
             Even though the name says "crypt", you should just specify
             a plain-text password. If you specify '*', the user will not
             be able to log in using DB authentication.
-        disabledtext - The disable-text for the new user. If given, the user 
+        disabledtext - The disable-text for the new user. If given, the user
             will be disabled, meaning he cannot log in. Defaults to an
             empty string.
-        disable_mail - If 1, bug-related mail will not be  sent to this user; 
+        disable_mail - If 1, bug-related mail will not be  sent to this user;
             if 0, mail will be sent depending on the user's  email preferences.
+            disable_mail is always 1 for disabled users.
 
 =item C<check>
 

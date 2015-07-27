@@ -277,8 +277,9 @@ sub update {
 ################################################################################
 
 sub _check_disable_mail {
-    return 1 unless $_[0]->is_enabled;
-    return $_[1] ? 1 : 0;
+    my ($invocant, $value) = @_;
+    return 1 if ref($invocant) && !$invocant->is_enabled;
+    return $value ? 1 : 0;
 }
 
 sub _check_disabledtext { return trim($_[1]) || ''; }
@@ -2217,6 +2218,15 @@ sub create {
 
     # Return the newly created user account.
     return $user;
+}
+
+sub check_required_create_fields {
+    my ($invocant, $params) = @_;
+    # ensure disabled users also have their email disabled
+    $params->{disable_mail} = 1 if
+        exists $params->{disabledtext}
+        && defined($params->{disabledtext})
+        && trim($params->{disabledtext}) ne '';
 }
 
 ###########################

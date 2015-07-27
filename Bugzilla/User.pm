@@ -2222,11 +2222,13 @@ sub create {
 
 sub check_required_create_fields {
     my ($invocant, $params) = @_;
+    my $class = ref($invocant) || $invocant;
     # ensure disabled users also have their email disabled
     $params->{disable_mail} = 1 if
         exists $params->{disabledtext}
         && defined($params->{disabledtext})
         && trim($params->{disabledtext}) ne '';
+    $class->SUPER::check_required_create_fields($params);
 }
 
 ###########################

@@ -29,7 +29,7 @@
 
 <table>
   <tr>
-    <th align="right">Your real name:</th>
+    <th align="right" width="150">Your real name:</th>
     <td>
       <input size="35" name="realname" value="[% realname FILTER html %]">
       <i>optional, but encouraged</i>
@@ -117,5 +117,33 @@
       <td><hr></td>
     </tr>
   [% END %]
+
+  <tr>
+    <td></td>
+    <td>
+      <a href="#" id="account-disable-toggle"><span id="account-disable-spinner">&#9656;</span> Disable My Account</a>
+    </td>
+  </tr>
+  <tr id="account-disable" style="display:none">
+    <td></td>
+    <td>
+      <p>
+        Your contributions on bugzilla.mozilla.org will still be visible;
+        however, your email address and name will be removed in most locations.
+        We are not able to remove your details that are part of comment text.
+      </p>
+      <p>
+        <input type="checkbox" id="account-disable-confirm">
+        I acknowledge that my account will not be functional after it has been
+        disabled.
+      </p>
+      <input type="hidden" name="account_disable" id="account_disable">
+      <button type="button" id="account-disable-button" disabled>Disable Account</button>
+    </td>
+  </tr>
+  <tr>
+    <td></td>
+    <td><hr></td>
+  </tr>
 
 </table>

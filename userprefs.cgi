@@ -143,6 +143,24 @@ sub SaveAccount {
     $dbh->bz_commit_transaction;
 }
 
+sub DisableAccount {
+    my $user = Bugzilla->user;
+
+    my $new_login = 'u' . $user->id . '@disabled.tld';
+
+    Bugzilla->audit(sprintf('<%s> self-disabled %s (now %s)', remote_ip(), $user->login, $new_login));
+
+    $user->set_login($new_login);
+    $user->set_name('');
+    $user->set_disabledtext('Disabled by account owner.');
+    $user->set_disable_mail(1);
+    $user->set_password('*');
+    $user->update();
+
+    Bugzilla->logout();
+    print Bugzilla->cgi->redirect(correct_urlbase());
+    exit;
+}
 
 sub DoSettings {
     my $user = Bugzilla->user;
@@ -598,7 +616,7 @@ Bugzilla->login(LOGIN_REQUIRED);
 my $save_changes = $cgi->param('dosave');
 $vars->{'changes_saved'} = $save_changes;
 
-my $current_tab_name = $cgi->param('tab') || "settings";
+my $current_tab_name = $cgi->param('tab') || "account";
 
 # The SWITCH below makes sure that this is valid
 trick_taint($current_tab_name);
@@ -621,6 +639,7 @@ SWITCH: for ($current_tab_name) {
     last SWITCH if $handled;
 
     /^account$/ && do {
+        DisableAccount() if $cgi->param('account_disable');
         SaveAccount() if $save_changes;
         DoAccount();
         last SWITCH;

@@ -160,3 +160,22 @@ th.title {
 .report_information {
     font-style: italic;
 }
+
+#account-disable-button {
+    background-color: #a91300;
+    background-image: linear-gradient(#da5132, #a91300);
+    color: #fff;
+}
+
+#account-disable-button:hover {
+    color: #fff;
+    -webkit-box-shadow: 0 1px 0 0 rgba(0,0,0,0.2),inset 0 -1px 0 0 rgba(0,0,0,0.3),inset 0 12px 24px 2px #e64926;
+    -moz-box-shadow: 0 1px 0 0 rgba(0,0,0,0.2),inset 0 -1px 0 0 rgba(0,0,0,0.3),inset 0 12px 24px 2px #e64926;
+    box-shadow: 0 1px 0 0 rgba(0,0,0,0.2),inset 0 -1px 0 0 rgba(0,0,0,0.3),inset 0 12px 24px 2px #e64926;
+}
+
+#account-disable-button[disabled] {
+    opacity: 0.2;
+    cursor: default;
+}
+

@@ -44,7 +44,7 @@
           <th>Enabled</th>
         </tr>
 
-        [% FOREACH name = settings.keys %]
+        [% FOREACH name = settings.keys.sort %]
           [% checkbox_name = name _ '-enabled' %]
           <tr>
             <td>

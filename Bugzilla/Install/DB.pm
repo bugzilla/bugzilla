@@ -739,6 +739,12 @@ sub update_table_definitions {
     $dbh->bz_add_column('keyworddefs', 'is_active',
                         {TYPE => 'BOOLEAN', NOTNULL => 1, DEFAULT => 'TRUE'});
 
+    # 2015-07-25 dylan@mozilla.com - Bug 1179856
+    $dbh->bz_alter_column('tokens', 'token',
+                          {TYPE => 'varchar(22)', NOTNULL => 1, PRIMARYKEY => 1});
+    $dbh->bz_alter_column('logincookies', 'cookie',
+                          {TYPE => 'varchar(22)', NOTNULL => 1, PRIMARYKEY => 1});
+
     ################################################################
     # New --TABLE-- changes should go *** A B O V E *** this point #
     ################################################################

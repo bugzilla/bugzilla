@@ -106,7 +106,7 @@
     END;
     IF status_value != "---";
       blurb = blurb _ " " _ status_value;
-      IF status_value == "fixed";
+      IF status_value == "fixed" || status_value == "verified";
         flag_name = row.name;
         IF flag_name.substr(0, 7) == "firefox";
           IF firefox_fixed_versions.0 == "";

@@ -122,7 +122,10 @@ sub MessageToMTA {
         # The e-mail string may contain tainted values.
         my $string = $email->as_string;
         trick_taint($string);
-        $dbh->do("INSERT INTO mail_staging (message) VALUES(?)", undef, $string);
+
+        my $sth = $dbh->prepare("INSERT INTO mail_staging (message) VALUES (?)");
+        $sth->bind_param(1, $string, $dbh->BLOB_TYPE);
+        $sth->execute;
         return;
     }
 

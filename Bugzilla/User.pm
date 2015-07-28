@@ -1431,10 +1431,10 @@ sub get_enterable_products {
               WHERE ' . $dbh->sql_in('products.id', $enterable_ids) .
               ' AND products.id IN (SELECT DISTINCT components.product_id
                                       FROM components
-                                     WHERE components.isactive = 1)
+                                     WHERE components.isactive = 1 AND products.id = components.product_id)
                 AND products.id IN (SELECT DISTINCT versions.product_id
                                       FROM versions
-                                     WHERE versions.isactive = 1)');
+                                     WHERE versions.isactive = 1 AND products.id = versions.product_id)');
     }
 
     $self->{enterable_products} =

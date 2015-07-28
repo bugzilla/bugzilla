@@ -188,6 +188,9 @@ sub FILESYSTEM {
         "$extensionsdir/create.pl" => { perms => OWNER_EXECUTE },
         "$extensionsdir/*/*.pl"    => { perms => WS_EXECUTE },
         "$extensionsdir/*/bin/*"   => { perms => WS_EXECUTE },
+
+        # google webmaster tools verification files
+        'google*.html' => { perms => WS_SERVE },
     );
 
     # Directories that we want to set the perms on, but not

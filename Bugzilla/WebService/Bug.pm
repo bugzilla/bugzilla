@@ -2639,7 +2639,7 @@ from the Bugzilla database to fetch. If it contains any non-numeric
 characters, it is considered to be a bug alias instead, and the data bug 
 with that alias will be loaded.
 
-item C<new_since>
+=item C<new_since>
 
 C<dateTime> If specified, the method will only return changes I<newer>
 than this time.

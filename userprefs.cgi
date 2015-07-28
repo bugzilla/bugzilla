@@ -639,7 +639,7 @@ SWITCH: for ($current_tab_name) {
     last SWITCH if $handled;
 
     /^account$/ && do {
-        DisableAccount() if $cgi->param('account_disable');
+        # XXX DisableAccount() if $cgi->param('account_disable');
         SaveAccount() if $save_changes;
         DoAccount();
         last SWITCH;

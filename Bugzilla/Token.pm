@@ -37,8 +37,9 @@ use parent qw(Exporter);
 sub issue_api_token {
     # Generates a random token, adds it to the tokens table if one does not
     # already exist, and returns the token to the caller.
-    my $dbh  = Bugzilla->dbh;
-    my $user = Bugzilla->user;
+    my $dbh = Bugzilla->dbh;
+    # Allow certain UI components to work if impersonating another user.
+    my $user = Bugzilla->sudoer || Bugzilla->user;
     my ($token) = $dbh->selectrow_array("
         SELECT token FROM tokens
          WHERE userid = ? AND tokentype = 'api_token'

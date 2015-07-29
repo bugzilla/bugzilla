@@ -268,6 +268,7 @@ use constant DEFAULT_FIELDS => (
     {name => 'last_visit_ts',         desc => 'Last Visit', buglist => 1,
      type => FIELD_TYPE_DATETIME},
     {name => 'comment_tag',           desc => 'Comment Tag'},
+    {name => 'dupe_of',               desc => 'Duplicate of'},
 );
 
 ################

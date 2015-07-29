@@ -287,6 +287,14 @@ use constant OPERATOR_FIELD_OVERRIDE => {
         _default => \&_days_elapsed,
     },
     dependson        => MULTI_SELECT_OVERRIDE,
+    dupe_of          => {
+        %{ &MULTI_SELECT_OVERRIDE },
+        changedby     => \&_dupe_of_changedby,
+        changedbefore => \&_dupe_of_changedbefore_after,
+        changedafter  => \&_dupe_of_changedbefore_after,
+        changedfrom   => \&_invalid_combination,
+        changedto     => \&_invalid_combination,
+    },
     keywords         => MULTI_SELECT_OVERRIDE,
     'flagtypes.name' => {
         _non_changed => \&_flagtypes_nonchanged,
@@ -2516,6 +2524,48 @@ sub _user_nonchanged {
     }
 }
 
+# Changes to duplicates are stored in the longdesc table
+sub _dupe_of_changedby {
+    my ($self, $args) = @_;
+    my ($chart_id, $joins, $value) = @$args{qw(chart_id joins value)};
+
+    my $table = "longdescs_$chart_id";
+    push(@$joins, { table => 'longdescs', as => $table });
+    my $user_id = $self->_get_user_id($value);
+    $args->{term} = "$table.who = $user_id AND $table.type = " . CMT_DUPE_OF;
+
+    # If the user is not part of the insiders group, they cannot see
+    # private comments
+    if (!$self->_user->is_insider) {
+        $args->{term} .= " AND $table.isprivate = 0";
+    }
+}
+
+sub _dupe_of_changedbefore_after {
+    my ($self, $args) = @_;
+    my ($chart_id, $operator, $value, $joins) =
+        @$args{qw(chart_id operator value joins)};
+    my $dbh = Bugzilla->dbh;
+
+    my $sql_operator = ($operator =~ /before/) ? '<=' : '>=';
+    my $table = "longdescs_$chart_id";
+    my $sql_date = $dbh->quote(SqlifyDate($value));
+    my $join = {
+        table => 'longdescs',
+        as    => $table,
+        extra => ["$table.bug_when $sql_operator $sql_date AND $table.type = " . CMT_DUPE_OF ],
+    };
+    push(@$joins, $join);
+    $args->{term} = "$table.bug_when IS NOT NULL";
+
+    # If the user is not part of the insiders group, they cannot see
+    # private comments
+    if (!$self->_user->is_insider) {
+        $args->{term} .= " AND $table.isprivate = 0";
+    }
+}
+
+
 # XXX This duplicates having Commenter as a search field.
 sub _long_desc_changedby {
     my ($self, $args) = @_;
@@ -2972,6 +3022,11 @@ sub _multiselect_table {
         $args->{full_field} = $field;
         return "dependencies";
     }
+    elsif ($field eq 'dupe_of') {
+        $args->{_select_field} = 'dupe';
+        $args->{full_field} = 'dupe_of';
+        return "duplicates";
+    }
     elsif ($field eq 'longdesc') {
         $args->{_extra_where} = " AND isprivate = 0"
             if !$self->_user->is_insider;
@@ -3071,6 +3126,15 @@ sub _multiselect_isempty {
             to    => $to,
         };
         return "dependencies_$chart_id.$to IS $not NULL";
+    }
+    elsif ($field eq 'dupe_of') {
+        push @$joins, {
+            table => 'duplicates',
+            as    => "duplicates_$chart_id",
+            from  => 'bug_id',
+            to    => 'dupe',
+        };
+        return "duplicates_$chart_id.dupe IS $not NULL";
     }
     elsif ($field eq 'longdesc') {
         my @extra = ( "longdescs_$chart_id.type != " . CMT_HAS_DUPE );

@@ -243,7 +243,10 @@ sub _handle_login_result {
             $template->process('email/lockout.txt.tmpl', $vars, \$message)
                 || ThrowTemplateError($template->error);
             MessageToMTA($message);
-            Bugzilla->audit(sprintf('<%s> triggered lockout of %s after %s attempts', $address, $user, $attempts));
+            Bugzilla->audit(sprintf(
+                '<%s> triggered lockout of %s after %s attempts',
+                $address, $user->login, scalar(@$attempts)
+            ));
         }
 
         $unlock_at->set_time_zone($user->timezone);

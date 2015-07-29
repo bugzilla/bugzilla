@@ -430,7 +430,8 @@ sub send_cookie {
     ThrowCodeError('cookies_need_value') unless $paramhash{'-value'};
 
     # Add the default path and the domain in.
-    $paramhash{'-path'} = Bugzilla->params->{'cookiepath'};
+    my $uri = URI->new(Bugzilla->params->{urlbase});
+    $paramhash{'-path'} = $uri->path;
     $paramhash{'-domain'} = Bugzilla->params->{'cookiedomain'}
         if Bugzilla->params->{'cookiedomain'};
 

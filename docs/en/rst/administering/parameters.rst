@@ -40,15 +40,6 @@ sslbase
     the :param:`sslbase` should be set
     to :paramval:`https://www.foo.com/bugzilla/`.
 
-cookiepath
-    Defines a path, relative to the web document root, that Bugzilla
-    cookies will be restricted to. For example, if the
-    :param:`urlbase` is set to
-    :file:`http://www.foo.com/bugzilla/`, the
-    :param:`cookiepath` should be set to
-    :paramval:`/bugzilla/`. Setting it to :paramval:`/` will allow all sites
-    served by this web server or virtual host to read Bugzilla cookies.
-
 .. _param-general:
 
 General

@@ -62,7 +62,6 @@ use constant PARAMETERS_LOGGED_IN => qw(
     attachment_base
     commentonchange_resolution
     commentonduplicate
-    cookiepath
     defaultopsys
     defaultplatform
     defaultpriority
@@ -443,7 +442,6 @@ A logged-in user can access the following parameters (listed alphabetically):
     C<attachment_base>,
     C<commentonchange_resolution>,
     C<commentonduplicate>,
-    C<cookiepath>,
     C<defaultopsys>,
     C<defaultplatform>,
     C<defaultpriority>,

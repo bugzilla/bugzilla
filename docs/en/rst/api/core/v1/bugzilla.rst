@@ -171,7 +171,6 @@ Example response for authenticated user:
           "attachment_base" : "http://bugzilla.example.com/",
           "commentonchange_resolution" : "0",
           "commentonduplicate" : "0",
-          "cookiepath" : "/",
           "createemailregexp" : ".*",
           "defaultopsys" : "",
           "defaultplatform" : "",
@@ -209,7 +208,6 @@ A logged-in user can access the following parameters (listed alphabetically):
 * attachment_base
 * commentonchange_resolution
 * commentonduplicate
-* cookiepath
 * defaultopsys
 * defaultplatform
 * defaultpriority

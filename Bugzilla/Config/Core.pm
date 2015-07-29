@@ -35,12 +35,6 @@ use constant get_param_list => (
    default => '',
    checker => \&check_sslbase
   },
-
-  {
-   name => 'cookiepath',
-   type => 't',
-   default => '/'
-  },
 );
 
 1;

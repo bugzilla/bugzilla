@@ -1510,7 +1510,7 @@ __END__
 
 =head1 NAME
 
-Bugzilla::DB - Database access routines, using L<DBI>
+Bugzilla::DB - Database access routines, using L<DBI|https://metacpan.org/pod/DBI>
 
 =head1 SYNOPSIS
 
@@ -1771,7 +1771,7 @@ The constructor should create a DSN from the parameters provided and
 then call C<db_new()> method of its super class to create a new
 class instance. See L<db_new> description in this module. As per
 DBI documentation, all class variables must be prefixed with
-"private_". See L<DBI>.
+"private_". See L<DBI|https://metacpan.org/pod/DBI>.
 
 =back
 
@@ -2242,7 +2242,8 @@ These methods return information about data in the database.
 Returns the last serial number, usually from a previous INSERT.
 
 Must be executed directly following the relevant INSERT.
-This base implementation uses L<DBI/last_insert_id>. If the
+This base implementation uses DBI's
+L<last_insert_id|https://metacpan.org/pod/DBI#last_insert_id>. If the
 DBD supports it, it is the preffered way to obtain the last
 serial index. If it is not supported, the DB-specific code
 needs to override this function.
@@ -2692,7 +2693,7 @@ our check for implementation of C<new> by derived class useless.
 
 =head1 SEE ALSO
 
-L<DBI>
+L<DBI|https://metacpan.org/pod/DBI>
 
 L<Bugzilla::Constants/DB_MODULE>
 

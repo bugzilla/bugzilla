@@ -54,12 +54,6 @@ sub get_param_list {
   },
 
   {
-   name => 'musthavemilestoneonaccept',
-   type => 'b',
-   default => 0
-  },
-
-  {
    name => 'commentonchange_resolution',
    type => 'b',
    default => 0

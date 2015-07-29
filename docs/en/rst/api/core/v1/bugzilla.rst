@@ -186,7 +186,6 @@ Example response for authenticated user:
           "maintainer" : "admin@example.com",
           "maxattachmentsize" : "1000",
           "maxlocalattachment" : "0",
-          "musthavemilestoneonaccept" : "0",
           "password_complexity" : "no_constraints",
           "rememberlogin" : "on",
           "requirelogin" : "0",
@@ -224,7 +223,6 @@ A logged-in user can access the following parameters (listed alphabetically):
 * maintainer
 * maxattachmentsize
 * maxlocalattachment
-* musthavemilestoneonaccept
 * password_complexity
 * rememberlogin
 * requirelogin

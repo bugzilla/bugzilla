@@ -1529,20 +1529,6 @@ sub _check_bug_status {
           { old => $old_status ? $old_status->name : undef,
             new => $new_status->name, field => 'bug_status' });
     }
-    
-    if (ref $invocant 
-        && ($new_status->name eq 'IN_PROGRESS'
-            # Backwards-compat for the old default workflow.
-            or $new_status->name eq 'ASSIGNED')
-        && Bugzilla->params->{"usetargetmilestone"}
-        && Bugzilla->params->{"musthavemilestoneonaccept"}
-        # musthavemilestoneonaccept applies only if at least two
-        # target milestones are defined for the product.
-        && scalar(@{ $product->milestones }) > 1
-        && $invocant->target_milestone eq $product->default_milestone)
-    {
-        ThrowUserError("milestone_required", { bug => $invocant });
-    }
 
     if (!blessed $invocant) {
         $params->{everconfirmed} = $new_status->name eq 'UNCONFIRMED' ? 0 : 1;

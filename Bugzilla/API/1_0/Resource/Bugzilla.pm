@@ -76,7 +76,6 @@ use constant PARAMETERS_LOGGED_IN => qw(
     maintainer
     maxattachmentsize
     maxlocalattachment
-    musthavemilestoneonaccept
     noresolveonopenblockers
     password_complexity
     rememberlogin
@@ -458,7 +457,6 @@ A logged-in user can access the following parameters (listed alphabetically):
     C<maintainer>,
     C<maxattachmentsize>,
     C<maxlocalattachment>,
-    C<musthavemilestoneonaccept>,
     C<noresolveonopenblockers>,
     C<password_complexity>,
     C<rememberlogin>,

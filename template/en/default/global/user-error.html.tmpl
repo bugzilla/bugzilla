@@ -1249,13 +1249,6 @@
     The name of a milestone is limited to [% constants.MAX_MILESTONE_SIZE FILTER html %]
     characters. '[% name FILTER html %]' is too long ([% name.length %] characters).
 
-  [% ELSIF error == "milestone_required" %]
-    [% title = "Milestone Required" %]
-    You must select a target milestone for [% terms.bug %]
-    [%+ bug.id FILTER html %]
-    if you are going to accept it.  Part of accepting 
-    [%+ terms.abug %] is giving an estimate of when it will be fixed.
-
   [% ELSIF error == "milestone_sortkey_invalid" %]
     [% title = "Invalid Milestone Sortkey" %]
     The sortkey '[% sortkey FILTER html %]' is not in the range

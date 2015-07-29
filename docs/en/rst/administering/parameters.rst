@@ -262,9 +262,6 @@ letsubmitterchoosepriority
 letsubmitterchoosemilestone
     If this is on, then people submitting bugs can choose the Target Milestone for that bug. If off, then all bugs initially have the default milestone for the product being filed in.
 
-musthavemilestoneonaccept
-    If you are using Target Milestone, do you want to require that the milestone be set in order for a user to set a bug's status to IN_PROGRESS?
-
 commenton*
     All these fields allow you to dictate what changes can pass
     without comment and which must have a comment from the

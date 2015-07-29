@@ -615,6 +615,7 @@ Bugzilla->login(LOGIN_REQUIRED);
 
 my $save_changes = $cgi->param('dosave');
 $vars->{'changes_saved'} = $save_changes;
+my $disable_account = $cgi->param('account_disable');
 
 my $current_tab_name = $cgi->param('tab') || "account";
 
@@ -624,7 +625,7 @@ trick_taint($current_tab_name);
 $vars->{'current_tab_name'} = $current_tab_name;
 
 my $token = $cgi->param('token');
-check_token_data($token, 'edit_user_prefs') if $save_changes;
+check_token_data($token, 'edit_user_prefs') if $save_changes || $disable_account;
 
 # Do any saving, and then display the current tab.
 SWITCH: for ($current_tab_name) {
@@ -639,7 +640,7 @@ SWITCH: for ($current_tab_name) {
     last SWITCH if $handled;
 
     /^account$/ && do {
-        # XXX DisableAccount() if $cgi->param('account_disable');
+        DisableAccount() if $disable_account;
         SaveAccount() if $save_changes;
         DoAccount();
         last SWITCH;

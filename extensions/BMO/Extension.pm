@@ -2199,4 +2199,16 @@ sub _split_crash_signature {
     ];
 }
 
+sub enter_bug_entrydefaultvars {
+    my ($self, $args) = @_;
+    my $vars = $args->{vars};
+    my $cgi  = Bugzilla->cgi;
+
+    if ($cgi->param('format') eq 'fxos-feature') {
+        $vars->{feature_type} = $cgi->param('feature_type');
+        $vars->{description}  = $cgi->param('description');
+        $vars->{discussion}   = $cgi->param('discussion');
+    }
+}
+
 __PACKAGE__->NAME;

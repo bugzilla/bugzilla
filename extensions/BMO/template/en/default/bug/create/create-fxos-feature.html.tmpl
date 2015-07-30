@@ -149,8 +149,10 @@ $(function() {
     Is this a defect with existing functionality or a new feature request?
   </div>
   <select id="feature_type" name="feature_type">
-    <option value="new">New Feature Request</option>
-    <option value="existing">Existing Feature Defect</option>
+    <option value="new" [%= "selected" IF feature_type == 'new' %]>
+      New Feature Request</option>
+    <option value="existing" [%= "selected" IF feature_type == 'existing' %]>
+      Existing Feature Defect</option>
   </select>
 </div>
 
@@ -160,7 +162,8 @@ $(function() {
     Please enter a title for your feature request that is brief and self explanatory.
     (Example: "Memory dialing using keypad numbers")
   </div>
-  <input type="text" name="short_desc" id="short_desc" size="80">
+  <input type="text" name="short_desc" id="short_desc"
+         size="80" value="[% short_desc FILTER html %]">
 </div>
 
 <div class="form_section">
@@ -171,7 +174,8 @@ $(function() {
     Instead the user must search for an find the contact in their contact list.").
     If the described feature only applies to certain device types (eg. tablet vs. smartphone), please make note of it.
   </div>
-  <textarea id="description" name="description" cols="80" rows="5"></textarea>
+  <textarea id="description" name="description" cols="80" rows="5">
+    [% description FILTER html %]</textarea>
 </div>
 
 <div class="form_section">
@@ -179,8 +183,8 @@ $(function() {
   <div class="field_desc">
   </div>
   <select id="discussion" name="discussion">
-    <option value="no">No</option>
-    <option value="yes">Yes</option>
+    <option value="no" [%= "selected" IF discussion == 'no' %]>No</option>
+    <option value="yes" [%= "selected" IF discussion == 'yes' %]>Yes</option>
   </select>
 </div>
 
@@ -190,7 +194,8 @@ $(function() {
     The mailing list post where this was discussed.<br>
     e.g. https://groups.google.com/a/mozilla.com/forum/#!topic/foxfood-feedback/eCg6KaVD4FE
   </div>
-  <input type="text" name="bug_file_loc" id="bug_file_loc" size="80" disabled>
+  <input type="text" name="bug_file_loc" id="bug_file_loc" size="80"
+         value="[% bug_file_loc FILTER html %]" disabled>
 </div>
 
 <div class="form_section thread hidden">
@@ -202,7 +207,7 @@ $(function() {
   [% INCLUDE global/userselect.html.tmpl
      id       => "cc"
      name     => "cc"
-     value    => ""
+     value    => cc
      size     => 80
      classes  => ["bz_userfield"]
      multiple => 5

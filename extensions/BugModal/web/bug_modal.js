@@ -864,6 +864,8 @@ $(function() {
             switch(String.fromCharCode(event.which).toLowerCase()) {
                 // ctrl+e or meta+e = enter edit mode
                 case 'e':
+                    if (event.shiftKey)
+                        return;
                     // don't conflict with text input shortcut
                     if (document.activeElement.nodeNode == 'INPUT' || document.activeElement.nodeName == 'TEXTAREA')
                         return;

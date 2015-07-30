@@ -1138,7 +1138,7 @@ use constant ABSTRACT_SCHEMA => {
 
     logincookies => {
         FIELDS => [
-            cookie   => {TYPE => 'varchar(16)', NOTNULL => 1,
+            cookie   => {TYPE => 'varchar(22)', NOTNULL => 1,
                          PRIMARYKEY => 1},
             userid   => {TYPE => 'INT3', NOTNULL => 1,
                          REFERENCES => {TABLE  => 'profiles',
@@ -1180,7 +1180,7 @@ use constant ABSTRACT_SCHEMA => {
                                                          COLUMN => 'userid',
                                                          DELETE => 'CASCADE'}},
             issuedate => {TYPE => 'DATETIME', NOTNULL => 1} ,
-            token     => {TYPE => 'varchar(16)', NOTNULL => 1,
+            token     => {TYPE => 'varchar(22)', NOTNULL => 1,
                           PRIMARYKEY => 1},
             tokentype => {TYPE => 'varchar(16)', NOTNULL => 1} ,
             eventdata => {TYPE => 'TINYTEXT'},

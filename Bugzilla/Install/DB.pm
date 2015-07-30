@@ -447,10 +447,6 @@ sub update_table_definitions {
     $dbh->bz_alter_column('groups', 'userregexp',
                           {TYPE => 'TINYTEXT', NOTNULL => 1, DEFAULT => "''"});
 
-    # 2005-09-26 - olav@bkor.dhs.org - Bug 119524
-    $dbh->bz_alter_column('logincookies', 'cookie',
-        {TYPE => 'varchar(16)', PRIMARYKEY => 1, NOTNULL => 1}); 
-
     _clean_control_characters_from_short_desc();
     
     # 2005-12-07 altlst@sonic.net -- Bug 225221
@@ -733,6 +729,12 @@ sub update_table_definitions {
     _add_attach_size();
 
     _fix_disable_mail();
+
+    # 2015-07-25 dylan@mozilla.com - Bug 1179856
+    $dbh->bz_alter_column('tokens', 'token',
+                          {TYPE => 'varchar(22)', NOTNULL => 1, PRIMARYKEY => 1});
+    $dbh->bz_alter_column('logincookies', 'cookie',
+                          {TYPE => 'varchar(22)', NOTNULL => 1, PRIMARYKEY => 1});
 
     ################################################################
     # New --TABLE-- changes should go *** A B O V E *** this point #

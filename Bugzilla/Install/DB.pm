@@ -436,12 +436,8 @@ sub update_table_definitions {
     $dbh->bz_alter_column('groups', 'userregexp',
                           {TYPE => 'TINYTEXT', NOTNULL => 1, DEFAULT => "''"});
 
-    # 2005-09-26 - olav@bkor.dhs.org - Bug 119524
-    $dbh->bz_alter_column('logincookies', 'cookie',
-        {TYPE => 'varchar(16)', PRIMARYKEY => 1, NOTNULL => 1}); 
-
     _clean_control_characters_from_short_desc();
-    
+
     # 2005-12-07 altlst@sonic.net -- Bug 225221
     $dbh->bz_add_column('longdescs', 'comment_id',
         {TYPE => 'INTSERIAL', NOTNULL => 1, PRIMARYKEY => 1});

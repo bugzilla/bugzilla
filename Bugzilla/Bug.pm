@@ -57,7 +57,7 @@ use List::Util qw(min max first);
 use Storable qw(dclone);
 use URI;
 use URI::QueryParam;
-use Scalar::Util qw(blessed);
+use Scalar::Util qw(blessed weaken);
 
 use base qw(Bugzilla::Object Exporter);
 @Bugzilla::Bug::EXPORT = qw(
@@ -3628,6 +3628,7 @@ sub comments {
         foreach my $comment (@{ $self->{'comments'} }) {
             $comment->{count} = $count++;
             $comment->{bug} = $self;
+            weaken($comment->{bug});
         }
         # Some bugs may have no comments when upgrading old installations.
         Bugzilla::Comment->preload($self->{'comments'}) if @{ $self->{'comments'} };

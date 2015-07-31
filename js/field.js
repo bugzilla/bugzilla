@@ -813,7 +813,7 @@ $(function() {
                 tabDisabled: true,
                 delimiter: /,\s*/,
                 minChars: 0,
-                autoSelectFirst: true,
+                autoSelectFirst: false,
                 triggerSelectOnValidInput: false,
                 formatResult: function(suggestion, currentValue) {
                     // disable <b> wrapping of matched substring

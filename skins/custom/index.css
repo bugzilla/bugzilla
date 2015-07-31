@@ -8,7 +8,7 @@
  * So we change to inline to make it display a single row. */
 #page-index .intro { display: inline; }
 
-#get_help { background: url(../standard/index/help.png) no-repeat; }
+#docs { background: url(../standard/index/help.png) no-repeat; }
 
 .bz_common_actions {
     display: block;

@@ -46,12 +46,12 @@ sub _alternative_show_bug_format {
     my $cgi = Bugzilla->cgi;
     my $user = Bugzilla->user;
     if (my $ctype = $cgi->param('ctype')) {
-        return undef if $ctype ne 'html';
+        return '' if $ctype ne 'html';
     }
     if (my $format = $cgi->param('format')) {
-        return ($format eq '__default__' || $format eq 'default') ? undef : $format;
+        return ($format eq '__default__' || $format eq 'default') ? '' : $format;
     }
-    return $user->setting('ui_experiments') eq 'on' ? 'modal' : undef;
+    return $user->setting('ui_experiments') eq 'on' ? 'modal' : '';
 }
 
 sub template_after_create {
@@ -157,7 +157,7 @@ sub template_before_process {
         || $file eq 'attachment/created.html.tmpl'
         || $file eq 'attachment/updated.html.tmpl')
     {
-        if (_alternative_show_bug_format()) {
+        if (_alternative_show_bug_format() eq 'modal') {
             $vars->{alt_ui_header} = 'bug_modal/header.html.tmpl';
             $vars->{alt_ui_show}   = 'bug/show-modal.html.tmpl';
             $vars->{alt_ui_edit}   = 'bug_modal/edit.html.tmpl';
@@ -167,8 +167,7 @@ sub template_before_process {
 
     return unless $file =~ m#^bug/show-([^\.]+)\.html\.tmpl$#;
     my $format = $1;
-    my $alt = _alternative_show_bug_format() // return;
-    return unless $alt eq $format;
+    return unless _alternative_show_bug_format() eq $format;
 
     return unless
         $vars->{bugs}

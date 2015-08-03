@@ -275,6 +275,10 @@ $vars->{sentmail} = \@all_mail_results;
 $format = $template->get_format("bug/create/created",
                                  scalar($cgi->param('created-format')),
                                  "html");
+
+# don't leak the enter_bug format param to show_bug
+$cgi->delete('format');
+
 print $cgi->header();
 $template->process($format->{'template'}, $vars)
     || ThrowTemplateError($template->error());

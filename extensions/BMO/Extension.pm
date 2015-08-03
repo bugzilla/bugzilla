@@ -2203,8 +2203,9 @@ sub enter_bug_entrydefaultvars {
     my ($self, $args) = @_;
     my $vars = $args->{vars};
     my $cgi  = Bugzilla->cgi;
+    return unless my $format = $cgi->param('format');
 
-    if ($cgi->param('format') eq 'fxos-feature') {
+    if ($format eq 'fxos-feature') {
         $vars->{feature_type} = $cgi->param('feature_type');
         $vars->{description}  = $cgi->param('description');
         $vars->{discussion}   = $cgi->param('discussion');

@@ -85,7 +85,7 @@ Set the following values, which increase the maximum attachment size and
 make it possible to search for short words and terms:
 
 * Alter on Line 52: ``max_allowed_packet=100M``
-* Add as new line 31, in the ``[mysqld]`` section: ``ft_min_word_len=2``
+* Add as new line 32, in the ``[mysqld]`` section: ``ft_min_word_len=2``
 
 Save and exit.
 

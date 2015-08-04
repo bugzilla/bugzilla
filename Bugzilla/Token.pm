@@ -49,6 +49,11 @@ use base qw(Exporter);
                               check_token_data delete_token
                               issue_hash_token check_hash_token);
 
+# 128 bits password:
+# 128 * log10(2) / log10(62) = 21.49, round up to 22.
+# 62 = 0-9, a-z, A-Z.
+use constant TOKEN_LENGTH => 22;
+
 ################################################################################
 # Public Functions
 ################################################################################
@@ -307,7 +312,7 @@ sub GenerateUniqueToken {
         if ($tries > 100) {
             ThrowCodeError("token_generation_error");
         }
-        $token = generate_random_password();
+        $token = generate_random_password(TOKEN_LENGTH);
         $sth->execute($token);
         $duplicate = $sth->fetchrow_array;
     }

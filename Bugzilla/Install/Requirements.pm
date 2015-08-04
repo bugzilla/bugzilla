@@ -415,7 +415,13 @@ sub OPTIONAL_MODULES {
         module  => 'File::Copy::Recursive',
         version => 0,
         feature => ['documentation'],
-    }
+    },
+    {
+        package => 'File-Which',
+        module  => 'File::Which',
+        version => 0,
+        feature => ['documentation'],
+    },
     );
 
     my $extra_modules = _get_extension_requirements('OPTIONAL_MODULES');

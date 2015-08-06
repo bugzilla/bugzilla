@@ -348,7 +348,7 @@ if (defined $cgi->param('id')) {
 
     # Tags can only be set to one bug at once.
     if (should_set('tag')) {
-        my @new_tags = split(/[\s,]+/, $cgi->param('tag'));
+        my @new_tags = grep { trim($_) } split(/,/, $cgi->param('tag'));
         my ($tags_removed, $tags_added) = diff_arrays($first_bug->tags, \@new_tags);
         $first_bug->remove_tag($_) foreach @$tags_removed;
         $first_bug->add_tag($_) foreach @$tags_added;

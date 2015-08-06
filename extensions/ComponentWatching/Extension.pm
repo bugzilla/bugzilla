@@ -14,7 +14,7 @@ use Bugzilla::Error;
 use Bugzilla::Group;
 use Bugzilla::User;
 use Bugzilla::User::Setting;
-use Bugzilla::Util qw(trim trick_taint);
+use Bugzilla::Util qw(detaint_natural trim trick_taint);
 
 our $VERSION = '2';
 
@@ -611,8 +611,9 @@ sub _deleteWatch {
     my ($user, $id) = @_;
     my $dbh = Bugzilla->dbh;
 
-    trick_taint($id);
-    $dbh->do("DELETE FROM component_watch WHERE id=?", undef, $id);
+    detaint_natural($id) || ThrowCodeError("component_watch_invalid_id");
+    $dbh->do("DELETE FROM component_watch WHERE id=? AND user_id=?",
+             undef, $id, $user->id);
 }
 
 sub _addDefaultSettings {

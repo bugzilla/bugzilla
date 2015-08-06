@@ -1158,6 +1158,17 @@ sub create {
                 return \@optional;
             },
             'default_authorizer' => sub { return Bugzilla::Auth->new() },
+
+            'login_not_email' => sub {
+                my $params = Bugzilla->params;
+                my $cache = Bugzilla->request_cache;
+
+                return $cache->{login_not_email} //=
+                  ($params->{emailsuffix}
+                     || ($params->{user_verify_class} =~ /LDAP/ && $params->{LDAPmailattribute})
+                     || ($params->{user_verify_class} =~ /RADIUS/ && $params->{RADIUS_email_suffix}))
+                  ? 1 : 0;
+            },
         },
     };
     # Use a per-process provider to cache compiled templates in memory across

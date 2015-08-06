@@ -506,7 +506,8 @@ function handleVisControllerValueChange(e, args) {
     var controller = args[1];
     var values = args[2];
 
-    var label_container = 
+    var field = document.getElementById(controlled_id);
+    var label_container =
         document.getElementById('field_label_' + controlled_id);
     var field_container =
         document.getElementById('field_container_' + controlled_id);
@@ -521,10 +522,20 @@ function handleVisControllerValueChange(e, args) {
     if (selected) {
         YAHOO.util.Dom.removeClass(label_container, 'bz_hidden_field');
         YAHOO.util.Dom.removeClass(field_container, 'bz_hidden_field');
+        // Restore the 'required' attribute for mandatory fields.
+        if (field.getAttribute('data-required') == "true") {
+            field.setAttribute('required', 'true');
+            field.setAttribute('aria-required', 'true');
+        }
     }
     else {
         YAHOO.util.Dom.addClass(label_container, 'bz_hidden_field');
         YAHOO.util.Dom.addClass(field_container, 'bz_hidden_field');
+        // A hidden field must never be required, because the user cannot set it.
+        if (field.getAttribute('data-required') == "true") {
+            field.removeAttribute('required');
+            field.removeAttribute('aria-required');
+        }
     }
 }
 

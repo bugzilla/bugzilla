@@ -47,6 +47,7 @@
 [% DEFAULT mode = "show" %]
 [% user_cache = template_cache.users %]
 [% can_edit_comments = bug.check_can_change_field('longdesc', 0, 1) %]
+[% can_tag_comments = feature_enabled('jsonrpc') AND user.can_tag_comments %]
 
 <!-- This auto-sizes the comments and positions the collapse/expand links 
      to the right. -->
@@ -120,7 +121,7 @@
               <span class="bz_collapsed_actions">
             [% END %]
             [% IF can_edit_comments %]
-              [% IF user.can_tag_comments %]
+              [% IF can_tag_comments %]
                 [<a href="#"
                     onclick="YAHOO.bugzilla.commentTagging.toggle([% comment.id %], [% comment.count %]);return false">tag</a>]
               [% END %]

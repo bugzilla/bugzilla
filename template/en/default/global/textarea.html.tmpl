@@ -27,6 +27,8 @@
   # defaultcontent: (optional) Default content for the textarea.
   # mandatory:      (optional) Boolean specifying whether or not the textarea
   #                 is mandatory.
+  # field_hidden:   (optional) True if the field is hidden. Only useful if
+  #                 the field is mandatory.
   #%]
 
 <textarea [% IF name %]name="[% name FILTER html %]"[% END %]
@@ -46,7 +48,7 @@
             onFocus="this.rows=[% maxrows FILTER html %]"
           [% END %]
           [% IF mandatory %]
-            aria-required="true" required
+            data-required="true" [% 'aria-required="true" required' UNLESS field_hidden %]
           [% END %]
           [% IF onchange %]
             onchange="[% onchange FILTER html %]"

@@ -33,7 +33,6 @@ p {
   max-width: 40%;
 }
 label.required:before {
-    w
   content: "* ";
   color: red;
 }
@@ -109,16 +108,8 @@ $(document).ready(function() {
   </p>
 
   <p>
-    Interns are charged back to your department and cost approximately 30K (USD)
-    for a 12 week period and includes salary, housing, relocation, equipment and
-    visa if needed. Costs for Interns outside of the US and Canada will be researched
-    and determined on a case by case basis as they do not follow the same conventions
-    as US and CAD.
-  </p>
-
-  <p>
     Interns will be allotted based on the need for level 1 and 2 growth on your
-    team, business need, and location support.
+    team, business need, budget, and location support.
   </p>
 
   <form method="post" action="post_bug.cgi" id="internForm">
@@ -140,17 +131,17 @@ $(document).ready(function() {
     [% END %]
 
     <div class="row">
-      <label class="required" for="hiring_manager_name">Hiring Manager Name:</label>
+      <label class="required" for="hiring_manager_name">Hiring Manager Name</label>
       <input required name="hiring_manager_name" id="hiring_manager_name" size="60" >
     </div>
 
     <div class="row">
-      <label class="required" for="team_name">Team:</label>
+      <label class="required" for="team_name">Team</label>
       <input required name="team_name" id="team_name" size="60" >
     </div>
 
     <div class="row">
-      <label class="required" for="cost_center">Cost Center:</label>
+      <label class="required" for="cost_center">Cost Center</label>
       [% PROCESS "bug/create/cost-centers.none.tmpl" %]
       <select required id="cost_center" name="cost_center">
         <option value="">Select..</option>
@@ -190,7 +181,8 @@ $(document).ready(function() {
 
     <div class="row">
       <label class="required" for="level_1_or_2">
-        Do you have a need for a level 1 or level 2 hire (entry level/new grad/JR role) to your team in the next year?
+        Do you have a need for a level 1 or level 2 hire (entry level/new grad/JR
+        role) to your team in the next year?
       </label>
       [% INCLUDE yesno name = "level_1_or_2" %]
     </div>
@@ -228,8 +220,10 @@ $(document).ready(function() {
       </label>
       <select required id="business_need" name="business_need">
         <option value="">Select..</option>
-        <option value="I have a need for a level 1 or 2 hire in the next year">I have a need for a level 1 or 2 hire in the next year</option>
-        <option value="I have a short term project-based need that can wait until next Summer">I have a short term project-based need that can wait until next Summer</option>
+        <option value="I have a need for a level 1 or 2 hire in the next year">
+          I have a need for a level 1 or 2 hire in the next year</option>
+        <option value="I have a short term project-based need that can wait until next Summer">
+          I have a short term project-based need that can wait until next Summer</option>
         <option value="Other">Neither of these fit and I can elaborate</option>
       </select>
       <br>
@@ -246,13 +240,28 @@ $(document).ready(function() {
     </div>
 
     <div class="row">
+      <label class="required" for="duration">
+        What is the duration of the internship?
+      </label>
+      <select required id="duration" name="duration">
+        <option value="">Select..</option>
+        <option value="3 months">3 months</option>
+        <option value="6 months">6 months</option>
+        <option value="> 6 months">&gt; 6 months</option>
+      </select>
+    </div>
+
+    <div class="row">
       <label class="required" for="job_description">
         Job Description
         (<a target="_blank" href="https://mana.mozilla.org/wiki/display/globalstaffing/Intern+Job+Descriptions">more info</a>)
       </label>
       <textarea required name="job_description"
                 id="job_description" cols="80"  rows="10"
-                placeholder="Please add link to Mana or copy and paste a JD. (if you are looking for multiple types interns please include a job description for each)"></textarea>
+                placeholder="Please add link to Mana or copy and paste a JD.
+                             (if you are looking for multiple types interns please
+                              include a job description for each)">
+      </textarea>
     </div>
 
     <div class="row">
@@ -271,16 +280,9 @@ $(document).ready(function() {
 
     <div class="row">
       <label class="required" for="name">
-        Name:
+        Name
       </label>
       <input required name="name" id="name" size="60">
-    </div>
-
-    <div class="row">
-      <label class="required" for="duration">
-        Duration:
-      </label>
-      <input required name="duration" id="duration" size="60">
     </div>
 
     <input type="submit" id="commit" value="Submit Request">
@@ -290,7 +292,8 @@ $(document).ready(function() {
     </p>
   </form>
 
-  <p>Thanks for contacting us. You will be notified by email of any progress made in resolving your request.</p>
+  <p>Thanks for contacting us. You will be notified by email of any progress
+    made in resolving your request.</p>
 </div>
 
 [% PROCESS global/footer.html.tmpl %]

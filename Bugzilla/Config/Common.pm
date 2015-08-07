@@ -252,7 +252,7 @@ sub check_mail_delivery_method {
     my $check = check_multi(@_);
     return $check if $check;
     my $mailer = shift;
-    if ($mailer eq 'sendmail' and ON_WINDOWS) {
+    if ($mailer eq 'Sendmail' and ON_WINDOWS) {
         # look for sendmail.exe 
         return "Failed to locate " . SENDMAIL_EXE
             unless -e SENDMAIL_EXE;
@@ -298,6 +298,8 @@ sub check_notification {
 sub check_smtp_server {
     my $host = shift;
     my $port;
+
+    return '' unless $host;
 
     if ($host =~ /:/) {
         ($host, $port) = split(/:/, $host, 2);

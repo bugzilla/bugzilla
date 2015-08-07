@@ -266,27 +266,6 @@ sub update_params {
         $op_file->close;
     }
 
-    if (ON_WINDOWS && !-e SENDMAIL_EXE
-        && $param->{'mail_delivery_method'} eq 'Sendmail')
-    {
-        my $smtp = $answer->{'SMTP_SERVER'};
-        if (!$smtp) {
-            print "\nBugzilla requires an SMTP server to function on",
-                  " Windows.\nPlease enter your SMTP server's hostname: ";
-            $smtp = <STDIN>;
-            chomp $smtp;
-            if ($smtp) {
-                $param->{'smtpserver'} = $smtp;
-             }
-             else {
-                print "\nWarning: No SMTP Server provided, defaulting to",
-                      " localhost\n";
-            }
-        }
-
-        $param->{'mail_delivery_method'} = 'SMTP';
-    }
-
     write_params($param);
 
     if (-e $old_file) {

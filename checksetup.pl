@@ -458,8 +458,6 @@ The format of that file is as follows:
  $answer{'ADMIN_PASSWORD'} = 'fooey';
  $answer{'ADMIN_REALNAME'} = 'Joel Peshkin';
 
- $answer{'SMTP_SERVER'} = 'mail.mydomain.net';
-
  $answer{'NO_PAUSE'} = 1
 
 C<NO_PAUSE> means "never stop and prompt the user to hit Enter to continue,

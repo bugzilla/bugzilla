@@ -227,6 +227,9 @@ sub page_before_template {
     elsif ($page eq 'attachment_bounty_form.html') {
         bounty_attachment($vars);
     }
+    elsif ($page eq 'triage_request.html') {
+        triage_request($vars);
+    }
 }
 
 sub bounty_attachment {
@@ -353,6 +356,18 @@ sub parse_bounty_attachment_description {
         publish        => $map{ $+{publish} // 'false' },
         credit         => [grep { $_ } split(/\s*,\s*/, $+{credits}) ]
     };
+}
+
+sub triage_request {
+    my ($vars) = @_;
+    my $user = Bugzilla->login(LOGIN_REQUIRED);
+    if (Bugzilla->input_params->{update}) {
+        Bugzilla->set_user(Bugzilla::User->super_user);
+        $user->set_groups({ add => [ 'canconfirm' ] });
+        Bugzilla->set_user($user);
+        $user->update();
+        $vars->{updated} = 1;
+    }
 }
 
 sub _get_field_values_sort_key {

@@ -1,0 +1,76 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% inline_style = BLOCK %]
+#triage-request {
+  padding: 0 6px;
+}
+#blurb {
+  background: #fff;
+  color: #000;
+  border-radius: 10px;
+  padding: 10px 20px 20px 20px;
+  max-width: 800px;
+}
+[% END %]
+
+[% inline_javascript = BLOCK %]
+[% END %]
+
+[% PROCESS global/header.html.tmpl
+   title = terms.Bug _ " Triage Request"
+   style = inline_style
+   javascript = inline_javascript
+%]
+
+<div id="triage-request">
+
+  <h1>[% terms.Bug %] Triage Request</h1>
+
+  <div id="blurb">
+
+  [% IF user.in_group('canconfirm') %]
+
+    [% UNLESS updated %]
+      <h3>Awesome - You can already triage [% terms.bugs %]</h3>
+    [% END %]
+
+    <p>
+      Thank you.
+    </p>
+    <p>
+      With your help sorting and triaging [% terms.bugs %] Mozilla will be able
+      to ship a better product to hundreds of millions of users that much
+      faster.
+    </p>
+
+  [% ELSE %]
+
+    <p>
+      Triage is the first step in a [% terms.bug %]'s road to resolution; having
+      'canconfirm' rights gives you the access you'll need to help move that [%
+      terms.bug %] it into the right component, narrow it down and confirm it as
+      "new". This helps Mozilla's engineers learn about it sooner and fix it
+      faster.
+    </p>
+
+    <p>
+      Would you like to add "canconfirm" permissions to your account?
+    </p>
+
+    <form method="post" action="page.cgi">
+      <input type="hidden" name="id" value="triage_request.html">
+      <input type="hidden" name="update" value="1">
+      <input type="submit" value="Yes, I want to help">
+    </form>
+
+  [% END %]
+
+</div>
+
+[% PROCESS global/footer.html.tmpl %]

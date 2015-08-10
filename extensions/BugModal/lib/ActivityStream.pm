@@ -32,9 +32,10 @@ use Bugzilla::Constants;
 #               cc_only => boolean
 #               changes => [
 #                   {
-#                       fieldname   => field name :)
-#                       added       => string
-#                       removed     => string
+#                       fieldname     => field name :)
+#                       added         => string
+#                       removed       => string
+#                       flagtype_name => string (optional, name of flag if fieldname is 'flagtypes.name')
 #                   }
 #                   ...
 #               ]
@@ -80,15 +81,63 @@ sub activity_stream {
     return $self->{activity_stream};
 }
 
+sub find_activity_id_for_attachment {
+    my ($self, $attachment) = @_;
+    my $attach_id = $attachment->id;
+    my $stream = $self->activity_stream;
+    foreach my $change_set (@$stream) {
+        next unless exists $change_set->{attach_id};
+        return $change_set->{id} if $change_set->{attach_id} == $attach_id;
+    }
+    return undef;
+}
+
+sub find_activity_id_for_flag {
+    my ($self, $flag) = @_;
+    my $flagtype_name = $flag->type->name;
+    my $date = $flag->modification_date;
+    my $setter_id = $flag->setter->id;
+    my $stream = $self->activity_stream;
+
+    # unfortunately bugs_activity treats all flag changes as the same field, so
+    # we don't have an object_id to match on
+
+    if (!exists $self->{activity_cache}->{flag}->{$flag->id}) {
+        foreach my $change_set (@$stream) {
+            foreach my $activity (@{ $change_set->{activity} }) {
+                # match by user, timestamp, and flag-type name
+                next unless
+                    $activity->{who}->id == $setter_id
+                    && $activity->{when} eq $date;
+                foreach my $change (@{ $activity->{changes} }) {
+                    next unless
+                        $change->{fieldname} eq 'flagtypes.name'
+                        && $change->{flagtype_name} eq $flagtype_name;
+                    $self->{activity_cache}->{flag}->{$flag->id} = $change_set->{id};
+                    return $change_set->{id};
+                }
+            }
+        }
+        # if we couldn't find the flag in bugs_activity it means it was set
+        # during bug creation
+        $self->{activity_cache}->{flag}->{$flag->id} = 'c0';
+    }
+    return $self->{activity_cache}->{flag}->{$flag->id};
+}
+
 # comments are processed first, so there's no need to merge into existing entries
 sub _add_comment_to_stream {
     my ($stream, $time, $user_id, $comment) = @_;
-    push @$stream, {
+    my $rh = {
         time     => $time,
         user_id  => $user_id,
         comment  => $comment,
         activity => [],
     };
+    if ($comment->type == CMT_ATTACHMENT_CREATED || $comment->type == CMT_ATTACHMENT_UPDATED) {
+        $rh->{attach_id} = $comment->extra_data;
+    }
+    push @$stream, $rh;
 }
 
 sub _add_activity_to_stream {
@@ -235,25 +284,26 @@ sub _add_activities_to_stream {
             }
 
             # split multiple flag changes (must be processed last)
+            # set $change->{flagtype_name} to make searching the activity
+            # stream for flag changes easier and quicker
             if ($change->{fieldname} eq 'flagtypes.name') {
                 my @added = split(/, /, $change->{added});
                 my @removed = split(/, /, $change->{removed});
-                next if scalar(@added) <= 1 && scalar(@removed) <= 1;
+                if (scalar(@added) <= 1 && scalar(@removed) <= 1) {
+                    $change->{flagtype_name} = _extract_flagtype($added[0] || $removed[0]);
+                    next;
+                }
                 # remove current change
                 splice(@{$operation->{changes}}, $i, 1);
                 # restructure into added/removed for each flag
                 my %flags;
-                foreach my $added (@added) {
-                    my ($value, $name) = $added =~ /^((.+).)$/;
-                    next unless defined $name;
-                    $flags{$name}{added} = $value;
-                    $flags{$name}{removed} |= '';
+                foreach my $flag (@added) {
+                    $flags{$flag}{added} = $flag;
+                    $flags{$flag}{removed} = '';
                 }
-                foreach my $removed (@removed) {
-                    my ($value, $name) = $removed =~ /^((.+).)$/;
-                    next unless defined $name;
-                    $flags{$name}{added} |= '';
-                    $flags{$name}{removed} = $value;
+                foreach my $flag (@removed) {
+                    $flags{$flag}{added} = '';
+                    $flags{$flag}{removed} = $flag;
                 }
                 # clone current change, modify and insert
                 foreach my $flag (sort keys %flags) {
@@ -263,6 +313,7 @@ sub _add_activities_to_stream {
                     }
                     $flag_change->{removed} = $flags{$flag}{removed};
                     $flag_change->{added} = $flags{$flag}{added};
+                    $flag_change->{flagtype_name} = _extract_flagtype($flag);
                     splice(@{$operation->{changes}}, $i, 0, $flag_change);
                 }
                 $i--;
@@ -274,6 +325,11 @@ sub _add_activities_to_stream {
 
     # prime the visible-bugs cache
     $user->visible_bugs([keys %visible_bug_ids]);
+}
+
+sub _extract_flagtype {
+    my ($value) = @_;
+    return $value =~ /^(.+)[\?\-\+]/ ? $1 : undef;
 }
 
 # display 'duplicate of this bug' as an activity entry, not a comment

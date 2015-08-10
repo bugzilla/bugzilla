@@ -74,10 +74,18 @@
     </td>
 
     <td class="flag-name">
-      <span class="rel-time-title" title="[% f.creation_date FILTER time_duration FILTER html %]"
-        data-time="[% f.creation_date FILTER epoch FILTER none %]">
+      [% activity_id = bug.find_activity_id_for_flag(f) %]
+      [% IF activity_id %]
+        <a href="#[% activity_id FILTER none %]"
+      [% ELSE %]
+        <span
+      [% END %]
+        class="rel-time-title[% " activity-ref" IF activity_id %]"
+        title="[% f.creation_date FILTER time_duration FILTER html %]"
+        data-time="[% f.creation_date FILTER epoch FILTER none %]"
+      >
         [% f.type.name FILTER html %]
-      </span>
+      [% activity_id ? "</a>" : "</span>" %]
     </td>
 
     <td class="flag-value">

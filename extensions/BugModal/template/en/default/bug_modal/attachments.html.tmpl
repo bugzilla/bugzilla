@@ -40,7 +40,13 @@
           [% END %]
         </div>
         <div>
-          <span class="attach-time">[% INCLUDE bug_modal/rel_time.html.tmpl ts=attachment.attached %]</span>
+          [% activity_id = bug.find_activity_id_for_attachment(attachment) %]
+          [% IF activity_id %]
+            <a href="#[% activity_id FILTER none %]" class="attach-time activity-ref">
+              [% INCLUDE bug_modal/rel_time.html.tmpl ts=attachment.attached %]</a>
+          [% ELSE %]
+            <span class="attach-time">[% INCLUDE bug_modal/rel_time.html.tmpl ts=attachment.attached %]</span>
+          [% END %]
           <span class="attach-author">[% INCLUDE bug_modal/user.html.tmpl u=attachment.attacher %]</span>
         </div>
         <div class="attach-info">
@@ -56,9 +62,18 @@
         [% FOREACH flag IN attachment.flags %]
           <div class="attach-flag">
             [% INCLUDE bug_modal/user.html.tmpl u=flag.setter simple=1 %]:
-            <span class="flag-name-status">
+            [% activity_id = bug.find_activity_id_for_flag(flag) %]
+            [% IF activity_id %]
+              <a href="#[% activity_id FILTER none %]"
+            [% ELSE %]
+              <span
+            [% END %]
+              class="flag-name-status rel-time-title[% " activity-ref" IF activity_id %]"
+              title="[% flag.creation_date FILTER time_duration FILTER html %]"
+              data-time="[% flag.creation_date FILTER epoch FILTER none %]"
+            >
               [%+ flag.type.name FILTER html %][% flag.status FILTER none %]
-            </span>
+            [% activity_id ? "</a>" : "</span>" %]
             [% IF flag.requestee %]
               [%+ INCLUDE bug_modal/user.html.tmpl u=flag.requestee simple=1 %]
             [% END %]

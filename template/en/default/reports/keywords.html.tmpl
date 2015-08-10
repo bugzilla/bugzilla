@@ -61,22 +61,16 @@
      id="keywords_show_hide">[% show_inactive_keywords ? "Show" : "Hide" FILTER html %] inactive keywords</a>
 </p>
 
+<table border="1" cellpadding="4" cellspacing="0">
+  <tr bgcolor="#6666FF">
+    <th align="left">Name</th>
+    <th align="left">Description</th>
+    <th>Active</th>
+    <th align="left">Open [% terms.Bugs %]</th>
+    <th align="left">Total [% terms.Bugs %]</th>
+  </tr>
+
 [% FOREACH keyword = keywords %]
-  [% IF loop.index % 50 == 0 %]
-    [% IF loop.index != 0 %]
-       </table>
-    [% END %]
-
-    <table border="1" cellpadding="4" cellspacing="0">
-      <tr bgcolor="#6666FF">
-        <th align="left">Name</th>
-        <th align="left">Description</th>
-        <th>Active</th>
-        <th align="left">Open [% terms.Bugs %]</th>
-        <th align="left">Total [% terms.Bugs %]</th>
-      </tr>
-  [% END %]
-
   <tr id="[% keyword.name FILTER html %]"
       class="[% keyword.is_active ? "keyword_active" : "keyword_inactive" FILTER html %]">
     <th>
@@ -103,9 +97,7 @@
   </tr>
 [% END %]
 
-[% IF keywords.size > 0 %]
-  </table>
-[% END %]
+</table>
 
 [% IF caneditkeywords %]
   <p>

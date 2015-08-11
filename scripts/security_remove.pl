@@ -59,7 +59,7 @@ my $timestamp = $dbh->selectrow_array('SELECT LOCALTIMESTAMP(0)');
 
 # Gather bug ids
 my $reporter_bugs = $dbh->selectcol_arrayref(
-    q{SELECT bugs.bug_id
+    q{SELECT DISTINCT bugs.bug_id
         FROM bugs, bug_group_map
        WHERE bugs.bug_id = bug_group_map.bug_id
              AND bugs.reporter_accessible = 1
@@ -67,21 +67,21 @@ my $reporter_bugs = $dbh->selectcol_arrayref(
     undef, $target_user->id) || [];
 
 my $assignee_bugs = $dbh->selectcol_arrayref(
-    q{SELECT bugs.bug_id
+    q{SELECT DISTINCT bugs.bug_id
         FROM bugs, bug_group_map
        WHERE bugs.bug_id = bug_group_map.bug_id
              AND bugs.assigned_to = ?},
     undef, $target_user->id) || [];
 
 my $qa_bugs = $dbh->selectcol_arrayref(
-    q{SELECT bugs.bug_id
+    q{SELECT DISTINCT bugs.bug_id
         FROM bugs, bug_group_map
        WHERE bugs.bug_id = bug_group_map.bug_id
              AND bugs.qa_contact = ?},
     undef, $target_user->id) || [];
 
 my $cc_bugs = $dbh->selectcol_arrayref(
-    q{SELECT cc.bug_id
+    q{SELECT DISTINCT cc.bug_id
         FROM cc, bug_group_map
        WHERE cc.bug_id = bug_group_map.bug_id
              AND cc.who = ?},

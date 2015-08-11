@@ -31,9 +31,6 @@
         },
         "extra": {
           "treeherder": {
-            "machine": {
-              "platform": "master"
-            },
             "symbol": "San"
           }
         }
@@ -64,9 +61,6 @@
         },
         "extra": {
           "treeherder": {
-            "machine": {
-              "platform": "master"
-            },
             "symbol": "Doc"
           }
         }
@@ -102,9 +96,6 @@
         },
         "extra": {
           "treeherder": {
-            "machine": {
-              "platform": "master"
-            },
             "symbol": "API"
           }
         }
@@ -145,9 +136,6 @@
         },
         "extra": {
           "treeherder": {
-            "machine": {
-              "platform": "master"
-            },
             "symbol": "Sel"
           }
         }
@@ -183,9 +171,6 @@
         },
         "extra": {
           "treeherder": {
-            "machine": {
-              "platform": "master"
-            },
             "symbol": "API-Pg"
           }
         }
@@ -226,9 +211,6 @@
         },
         "extra": {
           "treeherder": {
-            "machine": {
-              "platform": "master"
-            },
             "symbol": "Sel-Pg"
           }
         }

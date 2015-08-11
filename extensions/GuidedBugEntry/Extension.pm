@@ -38,7 +38,7 @@ sub enter_bug_start {
         $format eq 'guided' ||
         (
             $format eq '' &&
-            !$user->in_group('canconfirm')
+            !$user->in_group('editbugs')
         )
     ) {
         # skip the first step if a product is provided

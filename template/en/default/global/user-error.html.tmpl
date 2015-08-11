@@ -152,6 +152,15 @@
     [% title = "Auth delegation can't be confirmed" %]
     Auth delegation cannot be confirmed due to missing or invalid token.
 
+  [% ELSIF error == "auth_delegation_json_error" %]
+    [% title = "Auth delegation received invalid JSON" %]
+    Auth delegation received an invalid JSON response from auth consumer:
+    <pre>[% json_text FILTER html %]</pre>
+
+  [% ELSIF error == "auth_delegation_post_error" %]
+    [% title = "Auth delegation received invalid status code" %]
+    Auth delegation received an HTTP response other than 200 OK from auth consumer. Code: [% code FILTER html %]
+
   [% ELSIF error == "auth_failure" %]
     [% title = "Authorization Required" %]
     [% admindocslinks = {'groups.html' => 'Group Security'} %]

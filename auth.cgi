@@ -23,6 +23,8 @@ use Bugzilla::Mailer qw(MessageToMTA);
 use URI;
 use URI::QueryParam;
 use Digest::SHA qw(sha256_hex);
+use LWP::UserAgent ();
+use JSON qw(decode_json encode_json);
 
 Bugzilla->login(LOGIN_REQUIRED);
 
@@ -88,10 +90,35 @@ if ($confirmed || $skip_confirmation) {
         MessageToMTA($message);
     }
 
-    $callback_uri->query_param(client_api_key   => $api_key->api_key);
-    $callback_uri->query_param(client_api_login => $user->login);
+    my $ua = LWP::UserAgent->new();
+    $ua->timeout(2);
+    $ua->protocols_allowed(['http', 'https']);
+    # If the URL of the proxy is given, use it, else get this information
+    # from the environment variable.
+    if (my $proxy_url = Bugzilla->params->{'proxy_url'}) {
+        $ua->proxy(['http', 'https'], $proxy_url);
+    }
+    else {
+        $ua->env_proxy;
+    }
+    my $content = encode_json({ client_api_key => $api_key->api_key,
+                                client_api_login => $user->login });
+    my $resp = $ua->post($callback_uri,
+                         'Content-Type' => 'application/json',
+                         Content => $content);
+    if ($resp->code == 200) {
+        $callback_uri->query_param(client_api_login => $user->login);
+        eval {
+            my $data = decode_json($resp->content);
+            $callback_uri->query_param(callback_result => $data->{result});
+        };
+        ThrowUserError('auth_delegation_json_error', { json_text => $resp->content }) if $@;
 
-    print $cgi->redirect($callback_uri);
+        print $cgi->redirect($callback_uri);
+    }
+    else {
+        ThrowUserError('auth_delegation_post_error', { code => $resp->code });
+    }
 }
 else {
     $args{token} = issue_auth_delegation_token($callback);

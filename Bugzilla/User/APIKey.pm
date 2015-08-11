@@ -14,6 +14,7 @@ use parent qw(Bugzilla::Object);
 
 use Bugzilla::User;
 use Bugzilla::Util qw(generate_random_password trim);
+use Bugzilla::Error;
 
 #####################################################################
 # Overriden Constants that are used as methods
@@ -24,6 +25,7 @@ use constant DB_COLUMNS     => qw(
     id
     user_id
     api_key
+    app_id
     description
     revoked
     last_used
@@ -32,6 +34,7 @@ use constant DB_COLUMNS     => qw(
 use constant UPDATE_COLUMNS => qw(description revoked last_used);
 use constant VALIDATORS     => {
     api_key     => \&_check_api_key,
+    app_id      => \&_check_app_id,
     description => \&_check_description,
     revoked     => \&Bugzilla::Object::check_boolean,
 };
@@ -48,6 +51,7 @@ use constant { AUDIT_CREATES => 0,
 sub id            { return $_[0]->{id}          }
 sub user_id       { return $_[0]->{user_id}     }
 sub api_key       { return $_[0]->{api_key}     }
+sub app_id        { return $_[0]->{app_id}      }
 sub description   { return $_[0]->{description} }
 sub revoked       { return $_[0]->{revoked}     }
 sub last_used     { return $_[0]->{last_used}   }
@@ -74,6 +78,13 @@ sub set_revoked     { $_[0]->set('revoked',     $_[1]); }
 # Validators
 sub _check_api_key     { return generate_random_password(40); }
 sub _check_description { return trim($_[1]) || '';   }
+sub _check_app_id {
+    my ($invocant, $app_id) = @_;
+
+    ThrowCodeError("invalid_app_id", { app_id => $app_id }) unless $app_id =~ /^[[:xdigit:]]+$/;
+
+    return $app_id;
+}
 1;
 
 __END__

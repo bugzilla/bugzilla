@@ -96,6 +96,12 @@ sub login {
     return $self->_handle_login_result($login_info, $type);
 }
 
+sub successful_info_getter {
+    my ($self) = @_;
+
+    return $self->{_info_getter}->{successful};
+}
+
 sub can_change_password {
     my ($self) = @_;
     my $verifier = $self->{_verifier}->{successful};

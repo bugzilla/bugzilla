@@ -13,9 +13,21 @@ use warnings;
 use parent qw(Bugzilla::Extension);
 
 use Bugzilla::Attachment;
-use Bugzilla::Config::Common;
+use Bugzilla::Error;
+use List::MoreUtils qw( any );
 
 our $VERSION = '0.01';
+
+my @METHOD_WHITELIST = (
+    'User.get',
+    'User.login',
+    'User.valid_login',
+    'Bug.add_comment',
+    'Bug.add_attachment',
+    'Bug.attachments',
+    'Bug.get',
+    'Bug.update_attachment',
+);
 
 sub template_before_process {
     my ($self, $args) = @_;
@@ -65,25 +77,32 @@ sub auth_delegation_confirm {
     }
 }
 
-sub config_modify_panels {
+sub config_add_panels {
     my ($self, $args) = @_;
-    push @{ $args->{panels}->{advanced}->{params} }, {
-        name    => 'mozreview_base_url',
-        type    => 't',
-        default => '',
-        checker => \&check_urlbase
-    };
-    push @{ $args->{panels}->{advanced}->{params} }, {
-        name    => 'mozreview_auth_callback_url',
-        type    => 't',
-        default => '',
-        checker => sub {
-            my ($url) = (@_);
+    my $modules = $args->{panel_modules};
+    $modules->{MozReview} = "Bugzilla::Extension::MozReview::Config";
+}
 
-            return 'must be an HTTP/HTTPS absolute URL' unless $url =~ m{^https?://};
-            return '';
+sub webservice_before_call {
+    my ($self, $args) = @_;
+    my ($method, $full_method) = ($args->{method}, $args->{full_method});
+    my $mozreview_app_id = Bugzilla->params->{mozreview_app_id};
+    my $user             = Bugzilla->user;
+
+    return unless $mozreview_app_id;
+    return unless $user->authorizer;
+
+    my $getter = $user->authorizer->successful_info_getter()
+      or return;
+
+    return unless $getter->can("app_id") && $getter->app_id;
+
+    my $app_id = $getter->app_id;
+    if ($app_id eq $mozreview_app_id) {
+        unless (any { $full_method eq $_ } @METHOD_WHITELIST) {
+            ThrowCodeError('unknown_method', { method => $full_method });
         }
-    };
+    }
 }
 
 __PACKAGE__->NAME;

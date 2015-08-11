@@ -207,6 +207,9 @@
   [% ELSIF error == "illegal_field" %]
     A legal [% field FILTER html %] was not set.
 
+  [% ELSIF error == "invalid_app_id" %]
+    The app_id generated was invalid. [% app_id FILTER html %] is not a hexadecimal string.
+
   [% ELSIF error == "invalid_attach_id_to_obsolete" %]
      The attachment number of one of the attachments you wanted to obsolete,
      [%+ attach_id FILTER html %], is invalid.

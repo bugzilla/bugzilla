@@ -187,6 +187,7 @@ sub handle_login {
     my $class = $self->bz_class_name;
     my $method = $self->bz_method_name;
     my $full_method = $class . "." . $method;
+    $full_method =~ s/^Bugzilla::WebService:://;
 
     # Bypass JSONRPC::handle_login
     Bugzilla::WebService::Server->handle_login($class, $method, $full_method);

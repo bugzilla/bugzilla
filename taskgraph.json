@@ -13,8 +13,8 @@
         "metadata": {
           "name": "Basic Sanity Tests"
         },
-        "provisionerId": "aws-provisioner",
-        "workerType": "gaia",
+        "provisionerId": "aws-provisioner-v1",
+        "workerType": "b2gtest",
         "payload": {
           "image": "dklawren/docker-bugzilla",
           "command": ["/runtests.sh"],
@@ -31,9 +31,6 @@
         },
         "extra": {
           "treeherder": {
-            "machine": {
-              "platform": "4.4"
-            },
             "symbol": "San"
           }
         }
@@ -46,8 +43,8 @@
         "metadata": {
           "name": "Documentation Build Test"
         },
-        "provisionerId": "aws-provisioner",
-        "workerType": "gaia",
+        "provisionerId": "aws-provisioner-v1",
+        "workerType": "b2gtest",
         "payload": {
           "image": "dklawren/docker-bugzilla",
           "command": ["/runtests.sh"],
@@ -64,9 +61,6 @@
         },
         "extra": {
           "treeherder": {
-            "machine": {
-              "platform": "4.4"
-            },
             "symbol": "Doc"
           }
         }
@@ -79,8 +73,8 @@
         "metadata": {
           "name": "WebService API Tests (MySQL)"
         },
-        "provisionerId": "aws-provisioner",
-        "workerType": "gaia",
+        "provisionerId": "aws-provisioner-v1",
+        "workerType": "b2gtest",
         "payload": {
           "image": "dklawren/docker-bugzilla",
           "command": ["/runtests.sh"],
@@ -102,9 +96,6 @@
         },
         "extra": {
           "treeherder": {
-            "machine": {
-              "platform": "4.4"
-            },
             "symbol": "API"
           }
         }
@@ -117,8 +108,8 @@
         "metadata": {
           "name": "Selenium Tests (MySQL)"
         },
-        "provisionerId": "aws-provisioner",
-        "workerType": "gaia",
+        "provisionerId": "aws-provisioner-v1",
+        "workerType": "b2gtest",
         "payload": {
           "image": "dklawren/docker-bugzilla",
           "command": ["/runtests.sh"],
@@ -145,9 +136,6 @@
         },
         "extra": {
           "treeherder": {
-            "machine": {
-              "platform": "4.4"
-            },
             "symbol": "Sel"
           }
         }
@@ -160,8 +148,8 @@
         "metadata": {
           "name": "WebService API Tests (Pg)"
         },
-        "provisionerId": "aws-provisioner",
-        "workerType": "gaia",
+        "provisionerId": "aws-provisioner-v1",
+        "workerType": "b2gtest",
         "payload": {
           "image": "dklawren/docker-bugzilla:pgsql",
           "command": ["/runtests.sh"],
@@ -183,9 +171,6 @@
         },
         "extra": {
           "treeherder": {
-            "machine": {
-              "platform": "4.4"
-            },
             "symbol": "API-Pg"
           }
         }
@@ -198,8 +183,8 @@
         "metadata": {
           "name": "Selenium Tests (Pg)"
         },
-        "provisionerId": "aws-provisioner",
-        "workerType": "gaia",
+        "provisionerId": "aws-provisioner-v1",
+        "workerType": "b2gtest",
         "payload": {
           "image": "dklawren/docker-bugzilla:pgsql",
           "command": ["/runtests.sh"],
@@ -226,9 +211,6 @@
         },
         "extra": {
           "treeherder": {
-            "machine": {
-              "platform": "4.4"
-            },
             "symbol": "Sel-Pg"
           }
         }

@@ -736,6 +736,9 @@ sub update_table_definitions {
     $dbh->bz_alter_column('logincookies', 'cookie',
                           {TYPE => 'varchar(22)', NOTNULL => 1, PRIMARYKEY => 1});
 
+    $dbh->bz_add_column('user_api_keys', 'last_used_ip',
+                        {TYPE => 'varchar(40)'});
+
     ################################################################
     # New --TABLE-- changes should go *** A B O V E *** this point #
     ################################################################

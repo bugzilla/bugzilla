@@ -1764,6 +1764,7 @@ use constant ABSTRACT_SCHEMA => {
             revoked       => {TYPE => 'BOOLEAN', NOTNULL => 1,
                               DEFAULT => 'FALSE'},
             last_used     => {TYPE => 'DATETIME'},
+            last_used_ip  => {TYPE => 'varchar(40)'},
             app_id        => {TYPE => 'varchar(64)'},
         ],
         INDEXES => [

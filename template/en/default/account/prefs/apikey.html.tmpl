@@ -41,7 +41,9 @@ here.</p>
           value="[% api_key.description FILTER html %]">
       </td>
       [% IF api_key.last_used %]
-        <td>[% api_key.last_used FILTER time %]</td>
+        <td>[% api_key.last_used FILTER time %]
+          [% IF api_key.last_used_ip %] ([% api_key.last_used_ip FILTER html %]) [% END %]
+        </td>
       [% ELSE %]
         <td class="center"><i>never used</i></td>
       [% END %]

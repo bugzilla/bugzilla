@@ -908,6 +908,10 @@ sub get_storage_by_name {
         require Bugzilla::Attachment::FileSystem;
         return Bugzilla::Attachment::FileSystem->new();
     }
+    elsif ($name eq 's3') {
+        require Bugzilla::Attachment::S3;
+        return Bugzilla::Attachment::S3->new();
+    }
     else {
         return undef;
     }

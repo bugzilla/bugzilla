@@ -415,6 +415,14 @@
     [%+ ELSIF fld == "z" %]the multiple tables/images
     [%+ ELSE %]a report axis[% END %] field.
 
+  [% ELSIF error == "s3_add_failed" %]
+    Failed to add attachment ID [% attach_id FILTER html %] to S3:
+    [%+ reason FILTER html %]
+
+  [% ELSIF error == "s3_get_failed" %]
+    Failed to fetch attachment ID [% attach_id FILTER html %] from S3:
+    [%+ reason FILTER html %]
+
   [% ELSIF error == "search_cp_without_op" %]
     Search argument f[% id FILTER html %] is "CP" but there is no
     matching "OP" before it.

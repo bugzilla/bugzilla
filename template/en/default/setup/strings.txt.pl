@@ -109,6 +109,7 @@ END
     feature_moving            => 'Move Bugs Between Installations',
     feature_patch_viewer      => 'Patch Viewer',
     feature_rest              => 'REST Interface',
+    feature_s3                => 'Attachment S3 Storage',
     feature_smtp_auth         => 'SMTP Authentication',
     feature_updates           => 'Automatic Update Notifications',
     feature_xmlrpc            => 'XML-RPC Interface',

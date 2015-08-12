@@ -1,0 +1,30 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[%# INTERFACE:
+  # tabs: List of hashes. Must have at least one item.  Each hash has:
+  #   name: string. Name of the tab.
+  #   link: string. relative URL to the tab's resource on this installation.
+  #   label: string. text displayed in the tab.
+  # current_tab_name: string. name of the currently selected tab
+  #%]
+
+<div id="prefmain">
+  <div id="prefnav">
+    <ul>
+      [% FOREACH tab = tabs %]
+        <li [%= IF tab.name == current_tab_name %]class="selected"[% END %]>
+          <a href="[% tab.link FILTER html %]">[% tab.label FILTER html %]</a>
+        </li>
+      [% END %]
+    </ul>
+  </div>
+  <div id="prefcontent">
+    [% content FILTER none %]
+  </div>
+</div>

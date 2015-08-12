@@ -179,3 +179,49 @@ th.title {
     cursor: default;
 }
 
+/* User Preferences Page */
+
+#prefmain {
+    margin: 1em 0;
+}
+
+#prefnav {
+    width: 14em;
+    float: left;
+}
+
+#prefcontent {
+    margin-left: 15em;
+    padding: .2em 1.5em 1.5em 1.5em;
+    box-shadow: 1px 1px 5px rgba(0, 0, 0, 0.1);
+    background: #FFF none repeat scroll 0% 0%;
+}
+
+#prefnav, #prefcontent {
+    box-shadow: 1px 1px 5px rgba(0, 0, 0, 0.1);
+}
+
+#prefnav ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+#prefnav li {
+    padding: .6em 1em;
+    background: rgba(255, 255, 255, 0.5);
+}
+
+#prefnav li a {
+    display: block;
+    text-decoration: none;
+}
+
+#prefnav li a:hover {
+    text-decoration: underline;
+}
+
+#prefnav li.selected {
+    font-weight: bold;
+    background: #fff;
+}

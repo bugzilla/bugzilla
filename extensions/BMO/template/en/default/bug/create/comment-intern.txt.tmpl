@@ -32,8 +32,10 @@ Other Location:
 [%+ cgi.param("other_location") %]
 [% END  %]
 
+[% IF cgi.param("possible_mentor") %]
 Possible Mentor:
 [%+ cgi.param("possible_mentor") %]
+[% END %]
 
 Business Need:
 [%+
@@ -59,5 +61,7 @@ Would Hire:
 Would like to intern again:
 [%+ cgi.param("would_reintern") %]
 
+[% IF cgi.param("name") %]
 Name:
 [%+ cgi.param("name") %]
+[% END %]

@@ -24,6 +24,7 @@ use Bugzilla::Product;
 use Bugzilla::User;
 use Bugzilla::Util qw(template_var);
 use Encode;
+use List::MoreUtils qw(uniq);
 use Sys::Syslog qw(:DEFAULT);
 
 #
@@ -217,11 +218,18 @@ sub user_preferences {
 
 sub user_wants_mail {
     my ($self, $args) = @_;
-
     my ($user, $wants_mail, $diffs, $comments)
         = @$args{qw( user wants_mail fieldDiffs comments )};
 
+    # already filtered by email prefs
     return unless $$wants_mail;
+
+    # avoid recursion
+    my $depth = 0;
+    for (my $stack = 1; my $sub = (caller($stack))[3]; $stack++) {
+        $depth++ if $sub eq 'Bugzilla::User::wants_bug_mail';
+    }
+    return if $depth > 1;
 
     my $cache = Bugzilla->request_cache->{bugmail_filters} //= {};
     my $filters = $cache->{$user->id} //=
@@ -241,6 +249,30 @@ sub user_wants_mail {
         }
         @$diffs
     ];
+
+    # if more than one field was changed we need to check if the normal email
+    # preferences would have excluded the field.
+    if (@$fields > 1) {
+        # check each field individually and create filter objects if required
+        my @arg_list = @$args{qw( bug relationship fieldDiffs comments dep_mail changer )};
+        foreach my $field (@$fields) {
+            # just a single diff
+            foreach my $diff (@$diffs) {
+                next unless $diff->{field_name} eq $field->{field_name};
+                $arg_list[2] = [ $diff ];
+                last;
+            }
+            if (!$user->wants_bug_mail(@arg_list)) {
+                # changes to just this field would have been dropped by email
+                # preferences.  build a corresponding filter object so we
+                # interact with email preferences correctly.
+                push @$filters, Bugzilla::Extension::BugmailFilter::Filter->new_from_hash({
+                    field_name => $field->{field_name},
+                    action     => 1,
+                });
+            }
+        }
+    }
 
     # insert fake fields for new attachments and comments
     if (@$comments) {

@@ -8,7 +8,7 @@
 
 [%
   RETURN UNLESS user.in_group('editbugs');
-  RETURN UNLESS bug.attachments.size && bug.is_unassigned && bug.has_patch;
+  RETURN UNLESS bug.attachments.size && bug.is_unassigned && bug.has_current_patch;
 %]
 <tr class="bz_attach_footer">
   <td colspan="[% show_attachment_flags ? 3 : 2 %]" id="unassigned_with_patches">

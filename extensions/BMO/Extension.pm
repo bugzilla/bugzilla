@@ -66,7 +66,7 @@ BEGIN {
     *Bugzilla::Bug::last_closed_date                = \&_last_closed_date;
     *Bugzilla::Bug::reporters_hw_os                 = \&_bug_reporters_hw_os;
     *Bugzilla::Bug::is_unassigned                   = \&_bug_is_unassigned;
-    *Bugzilla::Bug::has_patch                       = \&_bug_has_patch;
+    *Bugzilla::Bug::has_current_patch               = \&_bug_has_current_patch;
     *Bugzilla::Product::default_security_group      = \&_default_security_group;
     *Bugzilla::Product::default_security_group_obj  = \&_default_security_group_obj;
     *Bugzilla::Product::group_always_settable       = \&_group_always_settable;
@@ -805,9 +805,10 @@ sub _bug_is_unassigned {
     return $assignee eq 'nobody@mozilla.org' || $assignee =~ /\.bugs$/;
 }
 
-sub _bug_has_patch {
+sub _bug_has_current_patch {
     my ($self) = @_;
     foreach my $attachment (@{ $self->attachments }) {
+        next if $attachment->isobsolete;
         return 1 if
             $attachment->ispatch
             || $attachment->contenttype eq 'text/x-github-pull-request'

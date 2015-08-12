@@ -8,7 +8,7 @@
 
 [%
   RETURN UNLESS user.in_group('editbugs');
-  RETURN UNLESS bug.attachments.size && bug.is_unassigned && bug.has_patch;
+  RETURN UNLESS bug.attachments.size && bug.is_unassigned && bug.has_current_patch;
 %]
 <div id="unassigned_with_patches">
   <img src="extensions/BMO/web/images/sign_warning.png" width="16" height="16">

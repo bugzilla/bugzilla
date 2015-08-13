@@ -13,7 +13,7 @@ use strict;
 use parent qw(Bugzilla::Object);
 
 use Bugzilla::User;
-use Bugzilla::Util qw(generate_random_password trim remote_ip);
+use Bugzilla::Util qw(generate_random_password trim);
 use Bugzilla::Error;
 
 #####################################################################
@@ -29,10 +29,9 @@ use constant DB_COLUMNS     => qw(
     description
     revoked
     last_used
-    last_used_ip
 );
 
-use constant UPDATE_COLUMNS => qw(description revoked last_used last_used_ip);
+use constant UPDATE_COLUMNS => qw(description revoked last_used);
 use constant VALIDATORS     => {
     api_key     => \&_check_api_key,
     app_id      => \&_check_app_id,
@@ -56,7 +55,6 @@ sub app_id        { return $_[0]->{app_id}      }
 sub description   { return $_[0]->{description} }
 sub revoked       { return $_[0]->{revoked}     }
 sub last_used     { return $_[0]->{last_used}   }
-sub last_used_ip  { return $_[0]->{last_used_ip}   }
 
 # Helpers
 sub user {
@@ -70,7 +68,6 @@ sub update_last_used {
     my $timestamp = shift
         || Bugzilla->dbh->selectrow_array('SELECT LOCALTIMESTAMP(0)');
     $self->set('last_used', $timestamp);
-    $self->set('last_used_ip', remote_ip());
     $self->update;
 }
 

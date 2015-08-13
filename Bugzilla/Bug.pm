@@ -533,7 +533,7 @@ sub _preload_referenced_bugs {
     my $referenced_bugs = Bugzilla::Bug->new_from_list(\@ref_bug_ids);
     $_->object_cache_set() foreach @$referenced_bugs;
 
-    return $referenced_bug_ids
+    return $referenced_bug_ids;
 }
 
 # Extract bug IDs mentioned in comments. This is much faster than calling quoteUrls().
@@ -566,6 +566,8 @@ sub _extract_bug_ids {
         # Old duplicate markers
         push @bug_ids, $text =~ /(?<=^\*\*\*\ This\ bug\ has\ been\ marked\ as\ a\ duplicate\ of\ )(\d+)(?=\ \*\*\*\Z)/;
     }
+    # Make sure to filter invalid bug IDs.
+    @bug_ids = grep { $_ < MAX_INT_32 } @bug_ids;
     return [uniq @bug_ids];
 }
 

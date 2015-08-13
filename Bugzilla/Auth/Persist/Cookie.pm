@@ -100,6 +100,8 @@ sub logout {
     if ($type == LOGOUT_ALL) {
         $dbh->do("DELETE FROM logincookies WHERE userid = ?",
                  undef, $user->id);
+        $dbh->do("DELETE FROM tokens WHERE userid = ? AND tokentype = 'sudo'",
+                 undef, $user->id);
         return;
     }
 
@@ -144,6 +146,8 @@ sub logout {
                  $dbh->sql_in('cookie', \@login_cookies) .
                  " AND userid = ?",
                  undef, $user->id);
+        my $token = $cgi->cookie('sudo');
+        delete_token($token);
     } else {
         die("Invalid type $type supplied to logout()");
     }

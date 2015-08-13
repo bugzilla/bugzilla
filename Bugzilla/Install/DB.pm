@@ -741,6 +741,10 @@ sub update_table_definitions {
     $dbh->bz_alter_column('logincookies', 'cookie',
                           {TYPE => 'varchar(22)', NOTNULL => 1, PRIMARYKEY => 1});
 
+    # 2015-07-16 LpSolit@gmail.com - Bug 946780
+    $dbh->bz_add_index('bz_schema', 'bz_schema_version_idx',
+                       {FIELDS => ['version'], TYPE => 'UNIQUE'});
+
     ################################################################
     # New --TABLE-- changes should go *** A B O V E *** this point #
     ################################################################

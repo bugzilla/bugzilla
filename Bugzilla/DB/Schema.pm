@@ -1748,6 +1748,9 @@ use constant ABSTRACT_SCHEMA => {
             schema_data => {TYPE => 'LONGBLOB', NOTNULL => 1},
             version     => {TYPE => 'decimal(3,2)', NOTNULL => 1},
         ],
+        INDEXES => [
+            bz_schema_version_idx => {FIELDS => ['version'], TYPE => 'UNIQUE'},
+        ],
     },
 
     bug_user_last_visit => {

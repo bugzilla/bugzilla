@@ -106,6 +106,13 @@ $(function() {
             $.scrollTo($('body'));
         });
 
+    // bottom btn
+    $('#bottom-btn')
+        .click(function(event) {
+            event.preventDefault();
+            $.scrollTo($('#bottom-actions'));
+        });
+
     // use non-native tooltips for relative times and bug summaries
     $('.rel-time, .rel-time-title, .bz_bug_link, .tt').tooltip({
         position: { my: "left top+8", at: "left bottom", collision: "flipfit" },
@@ -306,7 +313,7 @@ $(function() {
         });
 
     // add comment menuitem, scroll the textarea into view
-    $('#action-add-comment')
+    $('#action-add-comment, #add-comment-btn')
         .click(function(event) {
             event.preventDefault();
             // focus first to grow the textarea, so we scroll to the correct location

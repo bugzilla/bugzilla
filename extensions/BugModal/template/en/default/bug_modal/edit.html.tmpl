@@ -1017,7 +1017,11 @@
 [% IF user.id %]
   <div id="top-actions">
     <button type="button" id="attachments-add-btn" class="minor">Attach File</button>
-    <button type="button" class="comment-btn minor">Add Comment</button>
+    [% IF user.settings.comment_box_position.value == 'after_comments' %]
+      <button type="button" id="add-comment-btn" class="minor">Add Comment &darr;</button>
+    [% ELSE %]
+      <button type="button" id="bottom-btn" class="minor">Bottom &darr;</button>
+    [% END %]
     [%+ Hook.process('top_actions') %]
     <button type="submit" class="save-btn major" id="top-save-btn" style="display:none">Save Changes</button>
   </div>
@@ -1028,48 +1032,68 @@
 [%# === comments === %]
 
 [%
+  IF user.settings.comment_box_position.value == 'before_comments';
+    INCLUDE new_comment;
+  END;
   INCLUDE bug_modal/activity_stream.html.tmpl stream=bug.activity_stream;
-  IF user.id;
-    INCLUDE bug_modal/new_comment.html.tmpl;
-  ELSE;
-    %]
-      <div id="new-comment-notice">
-        You need to <a href="show_bug.cgi?id=[% bug.bug_id FILTER none %]&amp;GoAheadAndLogIn=1">log in</a>
-        before you can comment on or make changes to this [% terms.bug %].
-      </div>
-    [%
+  IF user.settings.comment_box_position.value == 'after_comments';
+    INCLUDE new_comment;
   END;
 %]
 
 [%# === bottom actions === %]
 
-[% IF user.id %]
-  <div id="bottom-actions">
-    <button type="submit" class="save-btn major" id="bottom-save-btn">Save Changes</button>
-    [%
-      IF bug.resolution == "";
-        seen_header = 0;
-        FOREACH resolution IN ["FIXED", "INVALID", "DUPLICATE"];
-          NEXT UNLESS bug.choices.resolution.only("name", resolution).size;
-          IF NOT seen_header;
-            seen_header = 1;
-            " Resolve as ";
-          END;
-          %] <button type="button" class="minor resolution-btn">[% resolution FILTER html %]</button> [%
-        END;
-      ELSIF bug.choices.bug_status.only("name", "REOPENED").size;
-          %] <button type="button" class="minor status-btn" data-status="REOPENED">REOPEN</button> [%
-      END;
-    %]
-    <div id="bottom-right-actions">
-      <button type="button" id="top-btn" class="minor">Top &uarr;</button>
+<div id="bottom-actions">
+  <div id="bottom-right-actions">
+    <button type="button" id="top-btn" class="minor">Top &uarr;</button>
+    [% IF user.id %]
       <button type="button" id="new-bug-btn" class="minor">New [% terms.Bug %] &#9662;</button>
-    </div>
+    [% END %]
   </div>
+</div>
+
+[% IF user.id %]
   </form>
 [% END %]
 
 [%# === blocks === %]
+
+[% BLOCK new_comment %]
+  [%# === new comment === %]
+  [%
+    IF user.id;
+      INCLUDE bug_modal/new_comment.html.tmpl;
+    ELSE;
+      %]
+        <div id="new-comment-notice">
+          You need to <a href="show_bug.cgi?id=[% bug.bug_id FILTER none %]&amp;GoAheadAndLogIn=1">log in</a>
+          before you can comment on or make changes to this [% terms.bug %].
+        </div>
+      [%
+    END;
+  %]
+  [%# === comment actions === %]
+  [% IF user.id %]
+    <div id="new-comment-actions">
+      <button type="submit" class="save-btn major" id="bottom-save-btn">Save Changes</button>
+      [%
+        IF bug.resolution == "";
+          seen_header = 0;
+          FOREACH resolution IN ["FIXED", "INVALID", "DUPLICATE"];
+            NEXT UNLESS bug.choices.resolution.only("name", resolution).size;
+            IF NOT seen_header;
+              seen_header = 1;
+              " Resolve as ";
+            END;
+            %] <button type="button" class="minor resolution-btn">[% resolution FILTER html %]</button> [%
+          END;
+        ELSIF bug.choices.bug_status.only("name", "REOPENED").size;
+            %] <button type="button" class="minor status-btn" data-status="REOPENED">REOPEN</button> [%
+        END;
+      %]
+    </div>
+  [% END %]
+[% END %]
 
 [% BLOCK fields_lhs %]
   <div class="fields-lhs">[% content FILTER none %]</div>

@@ -44,6 +44,8 @@ $g_nested_parens = qr{
 }x;
 
 our %g_escape_table;
+my @code_blocks;
+
 foreach my $char (split //, '\\`*_{}[]()>#+-.!~') {
     $g_escape_table{$char} = md5_hex($char);
 }
@@ -104,13 +106,37 @@ sub _RunSpanGamut {
     return $text;
 }
 
+# We first replace all fenced code blocks with just their
+# surrounding backticks and an empty body to know where
+# they are exactly for later processing. The bodies of
+# blocks will be in an array. This measure is taken to not
+# interpret fenced code blocks contents as possible markdown
+# structures. The contents of the body will be processed after
+# processing markdown structures.
+sub _removeFencedCodeBlocks {
+    my ($self, $text) = @_;
+    $text =~ s{
+        ^ `{3,} [\s\t]* \n
+        (                # $1 = the entire code block
+          (?: .* \n+)+?
+        )
+        `{3,} [\s\t]* $
+        }{
+            push @code_blocks, $1;
+            "%%%FENCED_BLOCK%%%";
+        }egmx;
+    return $text;
+}
+
 # Override to check for HTML-escaped <>" chars.
 sub _StripLinkDefinitions {
-#
-# Strips link definitions from text, stores the URLs and titles in
-# hash references.
-#
     my ($self, $text) = @_;
+
+    $text = $self->_removeFencedCodeBlocks($text);
+    #
+    # Strips link definitions from text, stores the URLs and titles in
+    # hash references.
+    #
     my $less_than_tab = $self->{tab_width} - 1;
 
     # Link defs are in the form: ^[id]: url "optional title"
@@ -377,14 +403,14 @@ sub _DoCodeSpans {
 sub _DoCodeBlocks {
     my ($self, $text) = @_;
 
+    # First, do the standard code blocks to avoid generating nested code blocks
+    # if the block is both indented and is surrounded by backticks.
+    $text = $self->SUPER::_DoCodeBlocks($text);
+
     $text =~ s{
-        ^ `{3,} [\s\t]* \n
-        (                # $1 = the entire code block
-          (?: .* \n+)+?
-        )
-        `{3,} [\s\t]* $
+        ^ %%%FENCED_BLOCK%%%
         }{
-            my $codeblock = $1;
+            my $codeblock = shift @code_blocks;
             my $result;
 
             $codeblock = $self->_EncodeCode($codeblock);
@@ -394,9 +420,6 @@ sub _DoCodeBlocks {
             $result = "\n\n<pre><code>" . $codeblock . "</code></pre>\n\n";
             $result;
         }egmx;
-
-    # And now do the standard code blocks
-    $text = $self->SUPER::_DoCodeBlocks($text);
 
     return $text;
 }
@@ -417,6 +440,7 @@ sub _DoBlockQuotes {
             my $bq = $1;
             $bq =~ s/^[ \t]*&gt;[ \t]?//gm; # trim one level of quoting
             $bq =~ s/^[ \t]+$//mg;          # trim whitespace-only lines
+            $bq = $self->_removeFencedCodeBlocks($bq);
             $bq = $self->_RunBlockGamut($bq, {wrap_in_p_tags => 1});      # recurse
             $bq =~ s/^/  /mg;
             # These leading spaces screw with <pre> content, so we need to fix that:

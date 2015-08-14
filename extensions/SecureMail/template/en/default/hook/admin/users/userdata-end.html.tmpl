@@ -6,24 +6,28 @@
   # defined by the Mozilla Public License, v. 2.0.
   #%]
 
+[% RETURN UNLESS otheruser.id %]
+
 <tr>
   <th>Has Secure Mail Key/Cert:</th>
   <td>
-    [% IF user.public_key %]Yes[% ELSE %]No[% END %]
+    [% otheruser.public_key ? "Yes" : "No" %]
   </td>
 </tr>
 
 <tr>
   <th>Member of Secure Mail Group:</th>
   <td>
-    [% securemail_member = 0 %]
-    [% FOREACH group = user.groups %]
-      [% IF group.secure_mail %]
-        [% securemail_member = 1 %]
-        [% LAST %]
-      [% END %]
-    [% END %]
-    [% IF securemail_member %]Yes[% ELSE %]No[% END %]
+    [%
+      securemail_member = 0;
+      FOREACH group IN otheruser.groups;
+        IF group.securemail;
+          securemail_member = 1;
+          LAST;
+        END;
+      END;
+      securemail_member ? "Yes" : "No";
+    %]
   </td>
 </tr>
 

@@ -96,6 +96,7 @@ sub create {
 
     # Some fields can be NULLs
     foreach my $field (qw( default_op_sys_id default_platform_id )) {
+        next unless exists $params->{$field} && defined $params->{$field};
         $params->{$field} = undef if $params->{$field} eq '';
     }
 

@@ -21,8 +21,8 @@ use warnings;
 
 # This sets up our libpath without having to specify it in the mod_perl
 # configuration.
-use File::Basename;
-use lib dirname(__FILE__);
+use File::Basename ();
+use lib File::Basename::dirname(__FILE__);
 use Bugzilla::Constants ();
 use lib Bugzilla::Constants::bz_locations()->{'ext_libpath'};
 
@@ -38,17 +38,11 @@ use lib Bugzilla::Constants::bz_locations()->{'ext_libpath'};
 use Apache2::Log ();
 use Apache2::ServerUtil;
 use ModPerl::RegistryLoader ();
-use File::Basename ();
+use File::Slurp ();
 
 # This loads most of our modules.
 use Bugzilla ();
-# Loading Bugzilla.pm doesn't load this, though, and we want it preloaded.
-use Bugzilla::BugMail ();
-use Bugzilla::CGI ();
 use Bugzilla::Extension ();
-use Bugzilla::Install::Requirements ();
-use Bugzilla::Util ();
-use Bugzilla::RNG ();
 
 # Make warnings go to the virtual host's log and not the main
 # server log.
@@ -56,6 +50,25 @@ BEGIN { *CORE::GLOBAL::warn = \&Apache2::ServerRec::warn; }
 
 # Pre-compile the CGI.pm methods that we're going to use.
 Bugzilla::CGI->compile(qw(:cgi :push));
+
+# Preload all other packages
+# This works by detecting which packages were loaded at run-time within our
+# CleanupHandler and writing that list to data/mod_perl_preload.
+# This ensures that even conditional packages (such as the database handler)
+# will be pre-loaded.
+$Bugzilla::extension_packages = Bugzilla::Extension->load_all();
+my $data_path = Bugzilla::Constants::bz_locations()->{datadir};
+my $preload_file = "$data_path/mod_perl_preload";
+my %preloaded_files;
+if (-e $preload_file) {
+    my @files = File::Slurp::read_file($preload_file, { err_mode => 'carp' });
+    chomp(@files);
+    foreach my $file (@files) {
+        $preloaded_files{$file} = 1;
+        Bugzilla::Util::trick_taint($file);
+        eval { require $file };
+    }
+}
 
 use Apache2::SizeLimit;
 # This means that every httpd child will die after processing a request if it
@@ -91,32 +104,6 @@ PerlChildInitHandler "sub { Bugzilla::RNG::srand(); srand(); }"
 EOT
 
 $server->add_config([split("\n", $conf)]);
-
-# Pre-load all extensions
-$Bugzilla::extension_packages = Bugzilla::Extension->load_all();
-
-# Have ModPerl::RegistryLoader pre-compile all CGI scripts.
-my $rl = new ModPerl::RegistryLoader();
-# If we try to do this in "new" it fails because it looks for a 
-# Bugzilla/ModPerl/ResponseHandler.pm
-$rl->{package} = 'Bugzilla::ModPerl::ResponseHandler';
-my $feature_files = Bugzilla::Install::Requirements::map_files_to_features();
-
-# Prevent "use lib" from doing anything when the .cgi files are compiled.
-# This is important to prevent the current directory from getting into
-# @INC and messing things up. (See bug 630750.)
-no warnings 'redefine';
-local *lib::import = sub {};
-use warnings;
-
-foreach my $file (glob "$cgi_path/*.cgi") {
-    my $base_filename = File::Basename::basename($file);
-    if (my $feature = $feature_files->{$base_filename}) {
-        next if !Bugzilla->feature($feature);
-    }
-    Bugzilla::Util::trick_taint($file);
-    $rl->handler($file, $file);
-}
 
 package Bugzilla::ModPerl::ResponseHandler;
 use strict;
@@ -154,6 +141,7 @@ sub handler : method {
 package Bugzilla::ModPerl::CleanupHandler;
 use strict;
 use Apache2::Const -compile => qw(OK);
+use File::Slurp;
 
 sub handler {
     my $r = shift;
@@ -163,6 +151,20 @@ sub handler {
     # the objects in pnotes()
     foreach my $key (keys %{$r->pnotes}) {
         delete $r->pnotes->{$key};
+    }
+
+    # Look for modules loaded post-startup
+    my $dirty = 0;
+    foreach my $file (keys %INC) {
+        next unless $file =~ /\.pm$/;
+        if (not exists $preloaded_files{$file}) {
+            $preloaded_files{$file} = 1;
+            $dirty = 1;
+        }
+    }
+    if ($dirty) {
+        write_file($preload_file, { atomic => 1, err_mode => 'carp' },
+            join("\n", keys %preloaded_files) . "\n");
     }
 
     return Apache2::Const::OK;

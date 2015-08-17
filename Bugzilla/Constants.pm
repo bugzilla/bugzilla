@@ -535,8 +535,8 @@ use constant INSTALLATION_MODE_NON_INTERACTIVE => 1;
 
 # Data about what we require for different databases.
 use constant DB_MODULE => {
-    # MySQL 5.0.15 was the first production 5.0.x release.
-    'mysql' => {db => 'Bugzilla::DB::Mysql', db_version => '5.0.15',
+    # Require MySQL 5.6.x for innodb's fulltext support
+    'mysql' => {db => 'Bugzilla::DB::Mysql', db_version => '5.6.12',
                 dbd => { 
                     package => 'DBD-mysql',
                     module  => 'DBD::mysql',

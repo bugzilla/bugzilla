@@ -89,7 +89,7 @@ use constant REVERSE_MAPPING => {
     # as in their db-specific version, so no reverse mapping is needed.
 };
 
-use constant MYISAM_TABLES => qw(bugs_fulltext);
+use constant MYISAM_TABLES => qw();
 
 #------------------------------------------------------------------------------
 sub _initialize {

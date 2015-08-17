@@ -154,7 +154,7 @@
           <a href="[% link_uri %]">
         [% END %]
         
-        [% IF content_use_field %]
+        [% IF content_use_field && field_descs.exists(row.${c.name}) %]
            [% colname = row.${c.name} %]
            [% field_descs.${colname} FILTER html %]
         [% ELSIF content %]

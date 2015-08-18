@@ -98,11 +98,12 @@ sub user_preferences {
 
             my $ids = ref($input->{remove}) ? $input->{remove} : [ $input->{remove} ];
             my $dbh = Bugzilla->dbh;
+            my $user = Bugzilla->user;
+
+            my $filters = Bugzilla::Extension::BugmailFilter::Filter->match({ id => $ids, user_id => $user->id });
             $dbh->bz_start_transaction;
-            foreach my $id (@$ids) {
-                if (my $filter = Bugzilla::Extension::BugmailFilter::Filter->new($id)) {
-                    $filter->remove_from_db();
-                }
+            foreach my $filter (@$filters) {
+                $filter->remove_from_db();
             }
             $dbh->bz_commit_transaction;
         }

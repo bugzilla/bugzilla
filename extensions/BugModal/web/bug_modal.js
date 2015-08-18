@@ -646,6 +646,9 @@ $(function() {
             $('#field-' + field + '.edit-show').show();
             $('#' + field).val(BUGZILLA.user.login).focus().select();
             $('#top-save-btn').show();
+            if ($('#set-default-assignee').is(':checked')) {
+                $('#set-default-assignee').click();
+            }
         });
 
     // reply button

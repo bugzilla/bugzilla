@@ -20,9 +20,11 @@ use Carp;
 use DateTime;
 use File::Temp;
 use JSON ();
+use List::MoreUtils qw( any );
 use LWP::UserAgent;
 use Sys::Hostname;
 use URI;
+use URI::QueryParam;
 
 use Bugzilla::Constants;
 use Bugzilla::RNG qw(irand);
@@ -210,9 +212,40 @@ sub sentry_handle_error {
     my $uri = URI->new(Bugzilla->cgi->self_url);
     $uri->query(undef);
 
-    foreach my $field (qw( QUERY_STRING REQUEST_URI HTTP_REFERER )) {
-        $ENV{$field} =~ s/\b((?:Bugzilla_password|password)=)[^ &]+/$1*/gi
-            if exists $ENV{$field};
+    # sanitise
+
+    # sanitise these query-string params
+    # names are checked as-is as well as prefixed by BUGZILLA_
+    my @sanitise_params = qw( PASSWORD TOKEN API_KEY );
+
+    # remove these ENV vars
+    my @sanitise_vars = qw( HTTP_COOKIE HTTP_X_BUGZILLA_PASSWORD HTTP_X_BUGZILLA_API_KEY HTTP_X_BUGZILLA_TOKEN );
+
+    foreach my $var (qw( QUERY_STRING REDIRECT_QUERY_STRING )) {
+        next unless exists $ENV{$var};
+        my @pairs = split('&', $ENV{$var});
+        foreach my $pair (@pairs) {
+            next unless $pair =~ /^([^=]+)=(.+)$/;
+            my ($param, $value) = ($1, $2);
+            if (any { uc($param) eq $_ || uc($param) eq "BUGZILLA_$_" } @sanitise_params) {
+                $value = '*';
+            }
+            $pair = $param . '=' . $value;
+        }
+        $ENV{$var} = join('&', @pairs);
+    }
+    foreach my $var (qw( REQUEST_URI HTTP_REFERER )) {
+        next unless exists $ENV{$var};
+        my $uri = URI->new($ENV{$var});
+        foreach my $param ($uri->query_param) {
+            if (any { uc($param) eq $_ || uc($param) eq "BUGZILLA_$_" } @sanitise_params) {
+                $uri->query_param($param, '*');
+            }
+        }
+        $ENV{$var} = $uri->as_string;
+    }
+    foreach my $var (@sanitise_vars) {
+        delete $ENV{$var};
     }
 
     my $now = DateTime->now();

@@ -21,7 +21,7 @@
     [%
       securemail_member = 0;
       FOREACH group IN otheruser.groups;
-        IF group.securemail;
+        IF group.secure_mail;
           securemail_member = 1;
           LAST;
         END;

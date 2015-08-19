@@ -177,6 +177,7 @@ sub VALIDATOR_DEPENDENCIES {
         if $cache->{bug_validator_dependencies};
 
     my %deps = (
+        alias            => ['product'],
         assigned_to      => ['component'],
         blocked          => ['product'],
         bug_status       => ['product', 'comment', 'target_milestone'],
@@ -1388,11 +1389,23 @@ sub _send_bugmail {
 #####################################################################
 
 sub _check_alias {
-    my ($invocant, $aliases) = @_;
+    my ($invocant, $aliases, undef, $params) = @_;
     $aliases = ref $aliases ? $aliases : [split(/[\s,]+/, $aliases)];
 
     # Remove empty aliases
     @$aliases = grep { $_ } @$aliases;
+
+    my $product = blessed($invocant) ? $invocant->product_obj
+                                     : $params->{product};
+
+    # You need editbugs to edit these fields
+    unless (Bugzilla->user->in_group('editbugs', $product->id)) {
+        if (scalar @$aliases) {
+            ThrowUserError('illegal_change', { field  => 'alias',
+                                               action => 'set',
+                                               privs  => PRIVILEGES_REQUIRED_EMPOWERED });
+        }
+    }
 
     foreach my $alias (@$aliases) {
         $alias = trim($alias);
@@ -2967,6 +2980,16 @@ sub add_alias {
 
 sub remove_alias {
     my ($self, $alias) = @_;
+
+    my $privs;
+    my $can = $self->check_can_change_field('alias', '', $alias, \$privs);
+    if (!$can) {
+        ThrowUserError('illegal_change', { field    => 'alias',
+                                           action   => 'unset',
+                                           oldvalue => $alias,
+                                           privs    => $privs });
+    }
+
     my $bug_aliases = $self->alias;
     @$bug_aliases = grep { $_ ne $alias } @$bug_aliases;
 }
@@ -4440,6 +4463,12 @@ sub check_can_change_field {
     # Allow anyone with (product-specific) "editbugs" privs to change anything.
     if ($user->in_group('editbugs', $self->{'product_id'})) {
         return 1;
+    }
+
+    # You need editbugs in order to change the alias
+    if ($field eq 'alias') {
+       $$PrivilegesRequired = PRIVILEGES_REQUIRED_EMPOWERED;
+       return 0;
     }
 
     # *Only* users with (product-specific) "canconfirm" privs can confirm bugs.

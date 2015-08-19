@@ -121,8 +121,8 @@
                 class="flag_select flag_type-[% type.id %]"
                 [% IF !can_edit_flag %] disabled="disabled"[% END %]>
         [%# Only display statuses the user is allowed to set. %]
-        [% IF edit_multiple_bugs %]
-          <option value="--do_not_change--">--do_not_change--</option>
+        [% IF edit_multiple_bugs && dontchange %]
+          <option value="[% dontchange FILTER html %]">[% dontchange FILTER html %]</option>
         [% END %]
         [% IF !flag || (can_edit_flag && user.can_request_flag(type)) || flag.setter_id == user.id %]
           <option value="X" label="X"></option>

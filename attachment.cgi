@@ -315,6 +315,8 @@ sub get_attachment {
             # Replace %bugid% by the ID of the bug the attachment 
             # belongs to, if present.
             $attachbase =~ s/\%bugid\%/$bug_id/;
+            # To avoid leaking information we redirect using the attachment ID only
+            $path = 'attachment.cgi?' . join('&', map { 'id=' . $attachments{$_}->id } keys %attachments);
             if (all_attachments_are_public(\%attachments)) {
                 # No need for a token; redirect to attachment base.
                 print $cgi->redirect(-location => $attachbase . $path);

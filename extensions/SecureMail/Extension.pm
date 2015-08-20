@@ -380,7 +380,7 @@ sub mailer_before_send {
 
         if ($make_secure == SECURE_NONE) {
             # Filter the bug_links in HTML email in case the bugs the links
-            # point are "secured" bugs and the user may not be able to see 
+            # point are "secured" bugs and the user may not be able to see
             # the summaries.
             _filter_bug_links($email);
         }
@@ -466,9 +466,9 @@ sub _make_secure {
             my $old_boundary = $email->{ct}{attributes}{boundary};
             my $to_encrypt = "Content-Type: " . $email->content_type . "\n\n";
 
-            # We need to do some fix up of each part for proper encoding and then 
-            # stringify all parts for encrypting. We have to retain the old 
-            # boundaries as well so that the email client can reconstruct the 
+            # We need to do some fix up of each part for proper encoding and then
+            # stringify all parts for encrypting. We have to retain the old
+            # boundaries as well so that the email client can reconstruct the
             # original message properly.
             $email->walk_parts(\&_fix_encoding);
 
@@ -482,13 +482,13 @@ sub _make_secure {
             });
             $to_encrypt .= "--$old_boundary--";
 
-            # Now create the new properly formatted PGP parts containing the 
-            # encrypted original message 
+            # Now create the new properly formatted PGP parts containing the
+            # encrypted original message
             my @new_parts = (
                 Email::MIME->create(
                     attributes => {
                         content_type => 'application/pgp-encrypted',
-                        encoding     => '7bit', 
+                        encoding     => '7bit',
                     },
                     body => "Version: 1\n",
                 ),
@@ -497,18 +497,18 @@ sub _make_secure {
                         content_type => 'application/octet-stream',
                         filename     => 'encrypted.asc',
                         disposition  => 'inline',
-                        encoding     => '7bit', 
+                        encoding     => '7bit',
                     },
-                    body => _pgp_encrypt($pgp, $to_encrypt)
+                    body => _pgp_encrypt($pgp, $to_encrypt, $bug_id)
                 ),
             );
             $email->parts_set(\@new_parts);
             my $new_boundary = $email->{ct}{attributes}{boundary};
             # Redo the old content type header with the new boundaries
             # and other information needed for PGP
-            $email->header_set("Content-Type", 
+            $email->header_set("Content-Type",
                                "multipart/encrypted; " .
-                               "protocol=\"application/pgp-encrypted\"; " . 
+                               "protocol=\"application/pgp-encrypted\"; " .
                                "boundary=\"$new_boundary\"");
         }
         else {
@@ -516,7 +516,7 @@ sub _make_secure {
             if ($sanitise_subject) {
                 _insert_subject($email, $subject);
             }
-            $email->body_set(_pgp_encrypt($pgp, $email->body));
+            $email->body_set(_pgp_encrypt($pgp, $email->body, $bug_id));
         }
     }
 
@@ -593,20 +593,32 @@ sub _make_secure {
 }
 
 sub _pgp_encrypt {
-    my ($pgp, $text) = @_;
+    my ($pgp, $text, $bug_id) = @_;
     # "@" matches every key in the public key ring, which is fine,
     # because there's only one key in our keyring.
     #
     # We use the CAST5 cipher because the Rijndael (AES) module doesn't
     # like us for some reason I don't have time to debug fully.
     # ("key must be an untainted string scalar")
-    my $encrypted = $pgp->encrypt(Data       => $text,
-                                  Recipients => "@",
-                                  Cipher     => 'CAST5',
-                                  Armour     => 1);
+    my $encrypted = $pgp->encrypt(
+        Data       => $text,
+        Recipients => "@",
+        Cipher     => 'CAST5',
+        Armour     => 0
+    );
     if (!defined $encrypted) {
         return 'Error during Encryption: ' . $pgp->errstr;
     }
+    $encrypted = Crypt::OpenPGP::Armour->armour(
+        Data => $encrypted,
+        Object => 'MESSAGE',
+        Headers => {
+            Comment => correct_urlbase() . ($bug_id ? 'show_bug.cgi?id=' . $bug_id : ''),
+        },
+    );
+    # until Crypt::OpenPGP makes the Version header optional we have to strip
+    # it out manually (bug 1181406).
+    $encrypted =~ s/\nVersion:[^\n]+//;
     return $encrypted;
 }
 

@@ -172,8 +172,11 @@ sub _handle_login_result {
         # because the persistance information can't be re-used again.
         # (See Bugzilla::WebService::Server::JSONRPC for more info.)
         if ($self->{_info_getter}->{successful}->requires_persistence
-            and !Bugzilla->request_cache->{auth_no_automatic_login}) 
-        {
+            and !(
+                Bugzilla->request_cache->{auth_no_automatic_login}
+                || Bugzilla->request_cache->{dont_persist_session}
+            )
+        ) {
             $user->{_login_token} = $self->{_persister}->persist_login($user);
         }
     }

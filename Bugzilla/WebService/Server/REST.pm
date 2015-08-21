@@ -189,6 +189,13 @@ sub handle_login {
     my $full_method = $class . "." . $method;
     $full_method =~ s/^Bugzilla::WebService:://;
 
+    # We never want to create a new session unless the user is calling the
+    # login method.  Setting dont_persist_session makes
+    # Bugzilla::Auth::_handle_login_result() skip calling persist_login().
+    if ($full_method ne 'User.login') {
+        Bugzilla->request_cache->{dont_persist_session} = 1;
+    }
+
     # Bypass JSONRPC::handle_login
     Bugzilla::WebService::Server->handle_login($class, $method, $full_method);
 }

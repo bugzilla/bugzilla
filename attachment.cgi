@@ -346,7 +346,8 @@ sub view {
     local $Encode::Encoding{'MIME-Q'}->{'bpl'} = 10000;
     $filename = encode('MIME-Q', $filename);
 
-    my $disposition = Bugzilla->params->{'allow_attachment_display'} ? 'inline' : 'attachment';
+    my $disposition = (Bugzilla->params->{'allow_attachment_display'}
+                       && $attachment->is_viewable) ? 'inline' : 'attachment';
 
     # Don't send a charset header with attachments--they might not be UTF-8.
     # However, we do allow people to explicitly specify a charset if they

@@ -2357,6 +2357,19 @@ sub account_ip_login_failures {
     return $self->{account_ip_login_failures};
 }
 
+sub check_current_password {
+    my $self = shift;
+    my $password = shift || ThrowUserError("current_password_required");
+
+    my $cryptpwd
+        = $self->cryptpassword || ThrowCodeError("unable_to_retrieve_password");
+
+    if (bz_crypt($password, $cryptpwd) ne $cryptpwd) {
+        ThrowUserError("current_password_incorrect");
+    }
+
+}
+
 ###############
 # Subroutines #
 ###############
@@ -3102,6 +3115,11 @@ set_groups.
 =item C<set_email_enabled>
 
 C<bool> - Sets C<disable_mail> to the inverse of the boolean provided.
+
+=item C<check_current_password>
+
+C<string> - Throws an error if the supplied password does not match the
+user's current password.
 
 =back
 

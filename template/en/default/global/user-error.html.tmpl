@@ -1478,11 +1478,11 @@
       See the list of available <a href="describekeywords.cgi?show_inactive_keywords=1">keywords</a>.
     [% END %]
 
-  [% ELSIF error == "old_password_incorrect" %]
+  [% ELSIF error == "current_password_incorrect" %]
     [% title = "Incorrect Password" %]
     You did not enter your current password correctly.
 
-  [% ELSIF error == "old_password_required" %]
+  [% ELSIF error == "current_password_required" %]
     [% title = "Old Password Required" %]
     You must enter your old password to change your email address.
 

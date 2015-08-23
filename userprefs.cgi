@@ -74,29 +74,24 @@ sub SaveAccount {
     my $user = Bugzilla->user;
 
     my $oldpassword = $cgi->param('old_password');
+    my $verified_password;
     my $pwd1 = $cgi->param('new_password1');
     my $pwd2 = $cgi->param('new_password2');
     my $new_login_name = trim($cgi->param('new_login_name'));
 
     if ($user->authorizer->can_change_password
-        && ($oldpassword ne "" || $pwd1 ne "" || $pwd2 ne ""))
+        && ($pwd1 ne "" || $pwd2 ne ""))
     {
-        my $oldcryptedpwd = $user->cryptpassword;
-        $oldcryptedpwd || ThrowCodeError("unable_to_retrieve_password");
+        $user->check_current_password($oldpassword);
+        $verified_password = 1;
 
-        if (bz_crypt($oldpassword, $oldcryptedpwd) ne $oldcryptedpwd) {
-            ThrowUserError("old_password_incorrect");
-        }
+        $pwd1 || ThrowUserError("new_password_missing");
+        validate_password($pwd1, $pwd2);
 
-        if ($pwd1 ne "" || $pwd2 ne "") {
-            $pwd1 || ThrowUserError("new_password_missing");
-            validate_password($pwd1, $pwd2);
-
-            if ($oldpassword ne $pwd1) {
-                $user->set_password($pwd1);
-                # Invalidate all logins except for the current one
-                Bugzilla->logout(LOGOUT_KEEP_CURRENT);
-            }
+        if ($oldpassword ne $pwd1) {
+            $user->set_password($pwd1);
+            # Invalidate all logins except for the current one
+            Bugzilla->logout(LOGOUT_KEEP_CURRENT);
         }
     }
 
@@ -105,7 +100,7 @@ sub SaveAccount {
         && $new_login_name)
     {
         if ($user->login ne $new_login_name) {
-            $oldpassword || ThrowUserError("old_password_required");
+            $verified_password || $user->check_current_password($oldpassword);
 
             # Block multiple email changes for the same user.
             if (Bugzilla::Token::HasEmailChangeToken($user->id)) {

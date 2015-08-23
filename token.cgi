@@ -210,14 +210,11 @@ sub changeEmail {
     $dbh->bz_start_transaction();
     
     my $user = Bugzilla::User->check({ id => $userid });
-    my $realpassword = $user->cryptpassword;
     my $cgipassword  = $cgi->param('password');
 
     # Make sure the user who wants to change the email address
     # is the real account owner.
-    if (bz_crypt($cgipassword, $realpassword) ne $realpassword) {
-        ThrowUserError("old_password_incorrect");
-    }
+    $user->check_current_password($cgipassword);
 
     # The new email address should be available as this was 
     # confirmed initially so cancel token if it is not still available

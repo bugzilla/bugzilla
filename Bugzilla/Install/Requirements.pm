@@ -784,7 +784,7 @@ sub install_command {
         $package = $module->{package};
     }
     else {
-        $command = "$^X install-module.pl \%s";
+        $command = 'cpanm %s';
         # Non-Windows installations need to use module names, because
         # CPAN doesn't understand package names.
         $package = $module->{module};

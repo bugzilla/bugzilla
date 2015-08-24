@@ -124,8 +124,10 @@ END
 To attempt an automatic install of every required and optional module
 with one command, do:
 
-  ##perl## install-module.pl --all
-
+  ##perl## checksetup.pl --cpanfile
+  cpanm --installdeps --with-recommends --with-all-features \\
+        --without-feature oracle --without-feature sqlite \\
+        --without-feature pg.
 EOT
     install_data_too_long => <<EOT,
 WARNING: Some of the data in the ##table##.##column## column is longer than

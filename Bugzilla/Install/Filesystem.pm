@@ -164,7 +164,6 @@ sub FILESYSTEM {
         'migrate.pl'      => { perms => OWNER_EXECUTE },
         'sentry.pl'       => { perms => WS_EXECUTE },
         'metrics.pl'      => { perms => WS_EXECUTE },
-        'install-module.pl' => { perms => OWNER_EXECUTE },
         'clean-bug-user-last-visit.pl' => { perms => WS_EXECUTE },
 
         'Bugzilla.pm'    => { perms => CGI_READ },

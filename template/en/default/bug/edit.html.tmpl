@@ -6,6 +6,7 @@
   # defined by the Mozilla Public License, v. 2.0.
   #%]
 
+[% USE Bugzilla %]
 [% PROCESS bug/time.html.tmpl %]
 
 [% IF Param('comment_taggers_group') %]
@@ -611,7 +612,6 @@
       <td id="show_dependency_tree_or_graph">
         Show dependency <a href="showdependencytree.cgi?id=[% bug.bug_id %]&amp;hide_resolved=1">tree</a>
 
-        [% USE Bugzilla %]
         [% IF Bugzilla.localconfig.webdotbase %]
           /&nbsp;<a href="showdependencygraph.cgi?id=[% bug.bug_id %]">graph</a>
         [% END %]

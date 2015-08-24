@@ -1138,17 +1138,18 @@ use constant ABSTRACT_SCHEMA => {
 
     logincookies => {
         FIELDS => [
-            cookie   => {TYPE => 'varchar(22)', NOTNULL => 1,
-                         PRIMARYKEY => 1},
+            cookie   => {TYPE => 'varchar(22)', NOTNULL => 1},
             userid   => {TYPE => 'INT3', NOTNULL => 1,
                          REFERENCES => {TABLE  => 'profiles',
                                         COLUMN => 'userid',
                                         DELETE => 'CASCADE'}},
             ipaddr   => {TYPE => 'varchar(40)'},
             lastused => {TYPE => 'DATETIME', NOTNULL => 1},
+            id       => {TYPE => 'INTSERIAL', NOTNULL => 1, PRIMARYKEY => 1},
         ],
         INDEXES => [
             logincookies_lastused_idx => ['lastused'],
+            logincookies_cookie_idx => {FIELDS => ['cookie'], TYPE => 'UNIQUE'},
         ],
     },
 

@@ -733,8 +733,14 @@ sub update_table_definitions {
     # 2015-07-25 dylan@mozilla.com - Bug 1179856
     $dbh->bz_alter_column('tokens', 'token',
                           {TYPE => 'varchar(22)', NOTNULL => 1, PRIMARYKEY => 1});
+
+    # 2015-08-20 dylan@mozilla.com - Bug 1196092
     $dbh->bz_alter_column('logincookies', 'cookie',
-                          {TYPE => 'varchar(22)', NOTNULL => 1, PRIMARYKEY => 1});
+                          {TYPE => 'varchar(22)', NOTNULL => 1});
+    $dbh->bz_add_index('logincookies', 'logincookies_cookie_idx',
+                       {TYPE => 'UNIQUE', FIELDS => ['cookie']});
+    $dbh->bz_add_column('logincookies', 'id',
+                        {TYPE => 'INTSERIAL', NOTNULL => 1, PRIMARYKEY => 1});
 
     $dbh->bz_add_column('user_api_keys', 'last_used_ip',
                         {TYPE => 'varchar(40)'});

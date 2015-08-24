@@ -237,7 +237,7 @@
         ><img title="iCal Format" alt="iCal" src="images/ical.png" height="24" width="24"></a>
         <button type="button" id="change_columns"
                 onclick="document.location='colchange.cgi?[% urlquerypart FILTER html %]&amp;query_based_on=
-                         [%~ defaultsavename OR searchname FILTER uri %]'">
+                         [%~ defaultsavename OR searchname FILTER uri FILTER js %]'">
             Change Columns</button>
 
 
@@ -261,7 +261,7 @@
     [% END %]
     <div class="bz_query_edit">
       <button type="button" id="edit_search"
-              onclick="document.location='[% PROCESS edit_search_url %]'">
+              onclick="document.location='[% PROCESS edit_search_url FILTER js %]'">
           Edit Search</button>
     </div>
 
@@ -269,7 +269,7 @@
       <div class="bz_query_forget">
         <button type="button" id="forget_search"
                 onclick="document.location='buglist.cgi?cmdtype=dorem&amp;remaction=forget&amp;namedcmd=
-                         [%- searchname FILTER uri %]&amp;token=
+                         [%- searchname FILTER uri FILTER js %]&amp;token=
                          [%- issue_hash_token([search_id, searchname]) FILTER uri %]'">
           Forget Search '[% searchname FILTER html %]'</button>
       </div>

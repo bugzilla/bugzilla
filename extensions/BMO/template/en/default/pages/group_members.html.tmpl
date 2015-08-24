@@ -41,7 +41,7 @@
 [% IF group != '' %]
 
   <p>
-    Members of the <b>[% group FILTER html %]</b> group:
+    [% count FILTER none %] member[% count == 1 ? '' : 's' %] of the <b>[% group FILTER html %]</b> group:
   </p>
 
   [% IF types.size > 0 %]
@@ -58,14 +58,18 @@
       [% FOREACH type = types %]
         [% count = loop.count() %]
         <tr class="report_item [% count % 2 == 1 ? "report_row_odd" : "report_row_even" %]">
-          <td valign="top">
+          <td valign="top" nowrap>
             [% IF type.name == 'direct' %]
               direct
             [% ELSE %]
-              via&nbsp;
+              via
               [% IF privileged %]
-                [% type.name FILTER html %]
-              [% ELSE %]another&nbsp;group[% END %]
+                <a href="page.cgi?id=group_members.html&group=[% type.name FILTER uri %]">
+                  [% type.name FILTER html %]
+                </a>
+              [% ELSE %]
+                another group
+              [% END %]
             [% END %]
           </td>
           <td valign="top" align="right">

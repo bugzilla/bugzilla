@@ -196,7 +196,7 @@ sub page_before_template {
     }
     elsif ($page eq 'group_members.html' or $page eq 'group_members.json') {
         require Bugzilla::Extension::BMO::Reports::Groups;
-        Bugzilla::Extension::BMO::Reports::Groups::members_report($vars);
+        Bugzilla::Extension::BMO::Reports::Groups::members_report($page, $vars);
     }
     elsif ($page eq 'recruiting_dashboard.html') {
         require Bugzilla::Extension::BMO::Reports::Recruiting;

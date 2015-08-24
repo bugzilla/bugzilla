@@ -107,6 +107,27 @@ sub members_non_inherited {
     return $self->{members_non_inherited};
 }
 
+# returns all possible members of groups, keyed by the group name or _direct
+# a user present in multiple groups will be returned multiple times
+sub members_complete {
+    my ($self) = @_;
+    my $dbh = Bugzilla->dbh;
+    require Bugzilla::User;
+
+    my $sth = $dbh->prepare(
+        "SELECT DISTINCT user_id FROM user_group_map WHERE isbless = 0 AND group_id = ?"
+    );
+
+    my $result = { _direct => $self->members_direct() };
+    foreach my $group_id (@{ $self->flatten_group_membership($self->id) }) {
+        next if $group_id == $self->id;
+        my $group_name = Bugzilla::Group->new({ id => $group_id, cache => 1 })->name;
+        my $user_ids = $dbh->selectcol_arrayref($sth, undef, $group_id);
+        $result->{$group_name} = Bugzilla::User->new_from_list($user_ids);
+    }
+    return $result;
+}
+
 # A helper for members_direct and members_non_inherited
 sub _get_members {
     my ($self, $grant_type) = @_;

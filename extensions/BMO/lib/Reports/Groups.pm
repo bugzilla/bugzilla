@@ -14,6 +14,7 @@ use Bugzilla::Error;
 use Bugzilla::Group;
 use Bugzilla::User;
 use Bugzilla::Util qw(trim);
+use JSON qw(encode_json);
 
 sub admins_report {
     my ($vars) = @_;
@@ -163,7 +164,7 @@ sub membership_report {
 }
 
 sub members_report {
-    my ($vars) = @_;
+    my ($page, $vars) = @_;
     my $dbh = Bugzilla->dbh;
     my $user = Bugzilla->user;
     my $cgi = Bugzilla->cgi;
@@ -196,20 +197,13 @@ sub members_report {
     my $group_obj = Bugzilla::Group->new({ name => $group });
     $vars->{'group'} = $group;
 
-    # direct members
-    my @types = (
-        {
-            name    => 'direct',
-            members => _filter_userlist($group_obj->members_direct, $include_disabled),
-        },
-    );
-
-    # indirect members, by group
-    foreach my $member_group (sort @{ $group_obj->grant_direct(GROUP_MEMBERSHIP) }) {
+    my @types;
+    my $members = $group_obj->members_complete();
+    foreach my $name (sort keys %$members) {
         push @types, {
-            name    => $member_group->name,
-            members => _filter_userlist($member_group->members_direct, $include_disabled),
-        },
+            name    => ($name eq '_direct' ? 'direct' : $name),
+            members => _filter_userlist($members->{$name}),
+        }
     }
 
     # make it easy for the template to detect an empty group
@@ -243,7 +237,38 @@ sub members_report {
         }
     }
 
-    $vars->{'types'} = \@types;
+    if ($page eq 'group_members.json') {
+        my %users;
+        foreach my $rh (@types) {
+            my $group_name = $rh->{name} eq '_direct' ? 'direct' : $rh->{name};
+            foreach my $member (@{ $rh->{members} }) {
+                my $login = $member->login;
+                if (exists $users{$login}) {
+                    push @{ $users{$login}->{groups} }, $group_name;
+                }
+                else {
+                    $users{$login} = {
+                        login      => $login,
+                        membership => $rh->{name} eq '_direct' ? 'direct' : 'indirect',
+                        group      => $group_name,
+                        groups     => [ $group_name ],
+                        lastseen   => $member->{lastseen},
+                    };
+                }
+            }
+        }
+        $vars->{types_json} = JSON->new->pretty->canonical->utf8->encode([ values %users ]);
+    }
+    else {
+        my %users;
+        foreach my $rh (@types) {
+            foreach my $member (@{ $rh->{members} }) {
+                $users{$member->login} = 1 unless exists $users{$member->login};
+            }
+        }
+        $vars->{types} = \@types;
+        $vars->{count} = scalar(keys %users);
+    }
 }
 
 sub _filter_userlist {

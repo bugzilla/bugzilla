@@ -170,10 +170,11 @@ if ($action eq 'changeform') {
     # Check that an existing group ID is given
     my $group_id = CheckGroupID($cgi->param('group'));
     my $group = new Bugzilla::Group($group_id);
+    check_for_restricted_groups([ $group ]);
 
     get_current_and_available($group, $vars);
     $vars->{'group'} = $group;
-    $vars->{'token'}       = issue_session_token('edit_group');
+    $vars->{'token'} = issue_session_token('edit_group');
 
     print $cgi->header();
     $template->process("admin/groups/edit.html.tmpl", $vars)
@@ -243,6 +244,7 @@ if ($action eq 'new') {
 if ($action eq 'del') {
     # Check that an existing group ID is given
     my $group = Bugzilla::Group->check({ id => scalar $cgi->param('group') });
+    check_for_restricted_groups([ $group ]);
     $group->check_remove({ test_only => 1 });
     $vars->{'shared_queries'} =
         $dbh->selectrow_array('SELECT COUNT(*)
@@ -267,6 +269,7 @@ if ($action eq 'delete') {
     check_token_data($token, 'delete_group');
     # Check that an existing group ID is given
     my $group = Bugzilla::Group->check({ id => scalar $cgi->param('group') });
+    check_for_restricted_groups([ $group ]);
     $vars->{'name'} = $group->name;
     $group->remove_from_db({
         remove_from_users => scalar $cgi->param('removeusers'),
@@ -309,6 +312,7 @@ if ($action eq 'postchanges') {
 
 if ($action eq 'confirm_remove') {
     my $group = new Bugzilla::Group(CheckGroupID($cgi->param('group_id')));
+    check_for_restricted_groups([ $group ]);
     $vars->{'group'} = $group;
     $vars->{'regexp'} = CheckGroupRegexp($cgi->param('regexp'));
     $vars->{'token'} = issue_session_token('remove_group_members');
@@ -324,6 +328,7 @@ if ($action eq 'remove_regexp') {
     # stored in the DB for that group or all of them period
 
     my $group  = new Bugzilla::Group(CheckGroupID($cgi->param('group_id')));
+    check_for_restricted_groups([ $group ]);
     my $regexp = CheckGroupRegexp($cgi->param('regexp'));
 
     $dbh->bz_start_transaction();
@@ -369,6 +374,7 @@ sub doGroupChanges {
 
     # Check that the given group ID is valid and make a Group.
     my $group = new Bugzilla::Group(CheckGroupID($cgi->param('group_id')));
+    check_for_restricted_groups([ $group ]);
 
     if (defined $cgi->param('regexp')) {
         $group->set_user_regexp($cgi->param('regexp'));
@@ -438,6 +444,7 @@ sub _do_add {
     }
 
     my $add_items = Bugzilla::Group->new_from_list([$cgi->param($field)]);
+    check_for_restricted_groups($add_items);
 
     foreach my $add (@$add_items) {
         next if grep($_->id == $add->id, @$current);
@@ -458,6 +465,7 @@ sub _do_remove {
     my ($group, $changes, $sth_delete, $field, $type, $reverse) = @_;
     my $cgi = Bugzilla->cgi;
     my $remove_items = Bugzilla::Group->new_from_list([$cgi->param($field)]);
+    check_for_restricted_groups($remove_items);
 
     foreach my $remove (@$remove_items) {
         my @ids = ($remove->id, $group->id);
@@ -468,5 +476,36 @@ sub _do_remove {
         $sth_delete->execute(@ids, $type);
         $changes->{$field} ||= [];
         push(@{$changes->{$field}}, $remove->name);
+    }
+}
+
+# ensure non-admins cannot edit the admin group
+# likewise you must be a member of the insider group in order to update it
+sub check_for_restricted_groups {
+    my ($groups) = @_;
+
+    my $user = Bugzilla->user;
+    return if $user->in_group('admin');
+
+    # check for admin changes
+    foreach my $group (@$groups) {
+        if ($group->name eq 'admin') {
+            ThrowUserError('auth_failure', {
+                action => 'edit',
+                object => 'admin_group',
+            });
+        }
+    }
+
+    # check for insider group changes
+    my $insider_group = Bugzilla->params->{insidergroup};
+    return if $user->in_group($insider_group);
+    foreach my $group (@$groups) {
+        if ($group->name eq $insider_group) {
+            ThrowUserError('auth_failure', {
+                action => 'edit',
+                object => 'insider_group',
+            });
+        }
     }
 }

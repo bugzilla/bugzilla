@@ -761,6 +761,18 @@ sub check_user {
     }
     ($otherUser && $otherUser->id) || ThrowCodeError('invalid_user', $vars);
 
+    if (!$user->in_group('admin')) {
+        my $insider_group = Bugzilla->params->{insidergroup};
+        if ($otherUser->in_group('admin')
+            || ($otherUser->in_group($insider_group) && !$user->in_group($insider_group))
+        ) {
+            ThrowUserError('auth_failure', {
+                action => 'modify',
+                object => 'user'
+            });
+        }
+    }
+
     return $otherUser;
 }
 

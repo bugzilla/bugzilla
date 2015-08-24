@@ -209,6 +209,8 @@
 
     [% IF object == "administrative_pages" %]
       administrative pages
+    [% ELSIF object == "admin_group" %]
+      the admin group
     [% ELSIF object == "attachment" %]
       [% IF attach_id %]
         attachment #[% attach_id FILTER html %]
@@ -237,6 +239,8 @@
       group access
     [% ELSIF object == "groups" %]
       groups
+    [% ELSIF object == "insider_group" %]
+      the insider group
     [% ELSIF object == "job_queue" %]
       the job queue
     [% ELSIF object == "keywords" %]

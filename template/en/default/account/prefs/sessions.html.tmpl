@@ -1,0 +1,56 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[%# INTERFACE:
+  # sessions: array. Array of sessions this user has.
+  # session_max: int. Number of sessions that can be displayed at once.
+  # session_count: int. Total of number of sessions for the user.
+  # too_many_sessions: boolean. True if there are more than 20 sessions.
+   #%]
+
+<p>Here you can see your active [% terms.Bugzilla %] sessions.
+  You can logout these sessions, which means when you use [% terms.Bugzilla %]
+  from that location again you will have to log back in.</p>
+
+<p>Note that you may not logout your current session from this page.
+  You can use the "Logout" link from the top right menu for that.</p>
+
+<h3>Active Sessions</h3>
+
+[% IF too_many_sessions %]
+  <p>You have [% session_count FILTER html %] sessions. Display limited to most
+  recent [% session_max FILTER html %].</p>
+[% END %]
+
+<p>
+  <input type="submit" name="session_logout_all" value="Log out all other sessions">
+</p>
+
+<table id="email_prefs">
+  <tr class="column_header">
+    <th>Last used</th>
+    <th>IP Address</th>
+    <th>IP Restriction</th>
+    <th>Logout</th>
+  </tr>
+
+  [% FOREACH session IN sessions %]
+    <tr>
+      <td>[% session.lastused FILTER time %]</td>
+      <td>[% session.ipaddr OR "Unknown" FILTER html %]</td>
+      <td>[% session.restrict_ipaddr ? "Restricted" : "Unrestricted" FILTER html %]
+      <td>
+        [% IF session.current %]
+          <b>(current)</b>
+        [% ELSE %]
+          <input type="checkbox" name="session_logout_id"
+                 value="[% session.id FILTER html %]"></td>
+        [% END %]
+    </tr>
+  [% END %]
+</table>

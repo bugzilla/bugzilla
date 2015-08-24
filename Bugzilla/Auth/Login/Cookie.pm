@@ -19,7 +19,7 @@ package Bugzilla::Auth::Login::Cookie;
 use strict;
 
 use base qw(Bugzilla::Auth::Login);
-use fields qw(_login_token);
+use fields qw(_login_token _cookie);
 
 use Bugzilla::Constants;
 use Bugzilla::Error;
@@ -58,6 +58,8 @@ sub get_login_info {
                                 @{$cgi->{'Bugzilla_cookie_list'}};
             $user_id = $cookie->value if $cookie;
         }
+        trick_taint($login_cookie) if $login_cookie;
+        $self->cookie($login_cookie);
 
         # If the call is for a web service, and an api token is provided, check
         # it is valid.
@@ -153,6 +155,13 @@ sub login_token {
         user_id     => $user_id,
         login_token => $login_token
     };
+}
+
+sub cookie {
+    my ($self, $val) = @_;
+    $self->{_cookie} = $val if @_ > 1;
+
+    return $self->{_cookie};
 }
 
 1;

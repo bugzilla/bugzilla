@@ -950,6 +950,8 @@ use constant ABSTRACT_SCHEMA => {
             is_enabled     => {TYPE => 'BOOLEAN', NOTNULL => 1, 
                                DEFAULT => 'TRUE'}, 
             last_seen_date => {TYPE => 'DATETIME'},
+            password_change_required => { TYPE => 'BOOLEAN', NOTNULL => 1, DEFAULT => 'FALSE' },
+            password_change_reason   => { TYPE => 'varchar(64)' },
         ],
         INDEXES => [
             profiles_login_name_idx => {FIELDS => ['login_name'],

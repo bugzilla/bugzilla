@@ -747,6 +747,11 @@ sub update_table_definitions {
 
     _add_restrict_ipaddr();
 
+    $dbh->bz_add_column('profiles', 'password_change_required',
+                        { TYPE => 'BOOLEAN', NOTNULL => 1, DEFAULT => 'FALSE' });
+    $dbh->bz_add_column('profiles', 'password_change_reason',
+                        { TYPE => 'varchar(64)' });
+
     ################################################################
     # New --TABLE-- changes should go *** A B O V E *** this point #
     ################################################################

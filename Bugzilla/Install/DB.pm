@@ -745,6 +745,8 @@ sub update_table_definitions {
     $dbh->bz_add_column('user_api_keys', 'last_used_ip',
                         {TYPE => 'varchar(40)'});
 
+    _add_restrict_ipaddr();
+
     ################################################################
     # New --TABLE-- changes should go *** A B O V E *** this point #
     ################################################################
@@ -3863,6 +3865,15 @@ sub _add_attach_size {
 sub _fix_disable_mail {
     # you can no longer have disabled accounts with enabled mail
     Bugzilla->dbh->do("UPDATE profiles SET disable_mail = 1 WHERE is_enabled = 0");
+}
+
+sub _add_restrict_ipaddr {
+    my $dbh = Bugzilla->dbh;
+    return if $dbh->bz_column_info('logincookies', 'restrict_ipaddr');
+
+    $dbh->bz_add_column('logincookies', 'restrict_ipaddr',
+                        {TYPE => 'BOOLEAN', NOTNULL => 1, DEFAULT => 0});
+    $dbh->do("UPDATE logincookies SET restrict_ipaddr = 1 WHERE ipaddr IS NOT NULL");
 }
 
 1;

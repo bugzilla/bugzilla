@@ -50,22 +50,18 @@ sub persist_login {
     my $cgi = Bugzilla->cgi;
     my $input_params = Bugzilla->input_params;
 
-    my $ip_addr;
-    if ($input_params->{'Bugzilla_restrictlogin'}) {
-        $ip_addr = remote_ip();
-        # The IP address is valid, at least for comparing with itself in a
-        # subsequent login
-        trick_taint($ip_addr);
-    }
-
     $dbh->bz_start_transaction();
 
     my $login_cookie = 
         Bugzilla::Token::GenerateUniqueToken('logincookies', 'cookie');
 
-    $dbh->do("INSERT INTO logincookies (cookie, userid, ipaddr, lastused)
-              VALUES (?, ?, ?, NOW())",
-              undef, $login_cookie, $user->id, $ip_addr);
+    my $ip_addr = remote_ip();
+    trick_taint($ip_addr);
+    my $restrict = $input_params->{Bugzilla_restrictlogin} ? 1 : 0;
+
+    $dbh->do("INSERT INTO logincookies (cookie, userid, ipaddr, lastused, restrict_ipaddr)
+              VALUES (?, ?, ?, NOW(), ?)",
+              undef, $login_cookie, $user->id, $ip_addr, $restrict);
 
     # Issuing a new cookie is a good time to clean up the old
     # cookies.

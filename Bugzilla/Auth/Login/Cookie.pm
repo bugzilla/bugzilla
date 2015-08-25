@@ -107,7 +107,7 @@ sub get_login_info {
                                    FROM logincookies
                                   WHERE cookie = ?
                                         AND userid = ?
-                                        AND (ipaddr = ? OR ipaddr IS NULL)',
+                                        AND (restrict_ipaddr = 0 OR ipaddr = ?)',
                                  undef, ($login_cookie, $user_id, $ip_addr));
 
         # If the cookie is valid, return a valid username.

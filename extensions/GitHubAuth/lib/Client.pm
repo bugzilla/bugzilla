@@ -60,7 +60,7 @@ sub get_email_key {
     my $digest = Digest->new(DIGEST_HASH);
     $digest->add($email);
     $digest->add(remote_ip());
-    $digest->add($cgi->cookie('Bugzilla_github_token') // '');
+    $digest->add($cgi->cookie('Bugzilla_github_token') // Bugzilla->request_cache->{github_token} // '');
     $digest->add(Bugzilla->localconfig->{site_wide_secret});
     return $digest->hexdigest;
 }
@@ -85,7 +85,7 @@ sub get_state {
     my $digest = Digest->new(DIGEST_HASH);
     $digest->add($sorted_target->as_string);
     $digest->add(remote_ip());
-    $digest->add($cgi->cookie('Bugzilla_github_token') // '');
+    $digest->add($cgi->cookie('Bugzilla_github_token') // Bugzilla->request_cache->{github_token} // '');
     $digest->add(Bugzilla->localconfig->{site_wide_secret});
     return $digest->hexdigest;
 }

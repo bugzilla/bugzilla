@@ -33,10 +33,12 @@ sub get_login_info {
 
     my $cookie = $cgi->cookie('Bugzilla_github_token');
     unless ($cookie) {
+        my $token = generate_random_password();
         $cgi->send_cookie(-name     => 'Bugzilla_github_token',
-                          -value    => generate_random_password(),
+                          -value    => $token,
                           Bugzilla->params->{'ssl_redirect'} ? ( -secure => 1 ) : (),
                           -httponly => 1);
+        Bugzilla->request_cache->{github_token} = $token;
     }
 
     return { failure => AUTH_NODATA } unless $github_login;

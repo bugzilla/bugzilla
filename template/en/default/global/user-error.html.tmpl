@@ -1352,6 +1352,10 @@
     [% title = "New Password Missing" %]
     You must enter a new password.
 
+  [% ELSIF error == "new_password_same" %]
+    [% title = "Password Unchanged" %]
+    Your new password cannot be the same as your old password.
+
   [% ELSIF error == "no_axes_defined" %]
     [% title = "No Axes Defined" %]
     [% docslinks = {'reporting.html' => 'Reporting'} %]

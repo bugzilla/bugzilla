@@ -70,6 +70,10 @@
               [% ELSE %]
                 [% terms.Bug %]mail has been enabled.
               [% END %]
+            [% ELSIF field == 'password_change_required' %]
+              The user [% otheruser.password_change_required ? "must" : "no longer needs to" %] update their password.
+            [% ELSIF field == 'password_change_reason' %]
+              The password change reason has been modified.
             [% END %]
           </li>
         [% END %]

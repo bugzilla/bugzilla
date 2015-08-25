@@ -264,6 +264,12 @@ if ($action eq 'search') {
         $otherUser->set_disable_mail($cgi->param('disable_mail'));
         $otherUser->set_extern_id($cgi->param('extern_id'))
             if defined($cgi->param('extern_id'));
+        $otherUser->set_password_change_required($cgi->param('password_change_required'));
+        $otherUser->set_password_change_reason(
+            $otherUser->password_change_required
+            ? $cgi->param('password_change_reason')
+            : ''
+        );
         $changes = $otherUser->update();
     }
 

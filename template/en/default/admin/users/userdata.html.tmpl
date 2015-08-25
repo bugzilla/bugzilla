@@ -64,24 +64,37 @@
   </td>
 </tr>
 
-[%# XXX This condition (can_change_password) will cause a problem
-  # if we ever have a login system that can create accounts through
-  # createaccount.cgi but can't change passwords.
-  #%]
-  
 [% IF editusers %]
-  [% IF user.authorizer.can_change_password %]
   <tr>
-    <th><label for="password">Password:</label></th>
+    <th>
+      <label for="password">
+        [% IF editform %]
+          [% otheruser.cryptpassword == '*' ? "Set" : "Update" =%]
+        [% END %]
+        Password:
+      </label>
+    </th>
     <td>
-      <input type="password" size="16" name="password" id="password"
-             value="" autocomplete="off">
-      [% IF editform %]<br>
-        (Enter new password to change.)
+      <input type="password" size="16" name="password" id="password" value="" autocomplete="off">
+      [%# if a user's cryptpassword is '*' it means they use an auth provider
+        # such as github, or you can't log in with that account.  in either case
+        # forcing a password reset isn't valid %]
+      [% IF otheruser.cryptpassword != '*' && editform %]
+        <br>
+        <input type="checkbox" name="password_change_required" id="password_change_required" maxlength="64"
+          [% " checked" IF otheruser.password_change_required %]>
+        <label for="password_change_required">User must change their password immediately</label>
+        <div id="password_change_reason_container">
+          Password change reason (will be displayed to the user):<br>
+          <input type="text" size="64"
+                 name="password_change_reason" id="password_change_reason"
+                 value="[% otheruser.password_change_reason || "You are required to change your password." FILTER html %]"
+          >
+        </div>
       [% END %]
     </td>
   </tr>
-  [% END %]
+
   <tr>
     <th><label for="disable_mail">[% terms.Bug %]mail Disabled:</label></th>
     <td>

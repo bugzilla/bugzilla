@@ -38,6 +38,18 @@ $(function() {
       }
     })
     .keyup();
+
+  $('#password_change_required')
+    .change(function() {
+      $('#password').prop('disabled', $(this).is(':checked'));
+      if ($(this).is(':checked')) {
+        $('#password_change_reason_container').show();
+      }
+      else {
+        $('#password_change_reason_container').hide();
+      }
+    })
+    .change();
 });
 [% END %]
 

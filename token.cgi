@@ -212,25 +212,14 @@ sub changePassword {
     my ($token, $password) = @_;
     my $dbh = Bugzilla->dbh;
 
-    # Create a crypted version of the new password
-    my $cryptedpassword = bz_crypt($password);
+    my ($user_id) = $dbh->selectrow_array('SELECT userid FROM tokens WHERE token = ?', undef, $token);
+    my $user = Bugzilla::User->check({ id => $user_id });
+    $user->set_password($password);
+    $user->update();
+    delete_token($token);
+    $dbh->do("DELETE FROM tokens WHERE userid = ? AND tokentype = 'password'", undef, $user_id);
 
-    # Get the user's ID from the tokens table.
-    my ($userid) = $dbh->selectrow_array('SELECT userid FROM tokens
-                                          WHERE token = ?', undef, $token);
-    
-    # Update the user's password in the profiles table and delete the token
-    # from the tokens table.
-    $dbh->bz_start_transaction();
-    $dbh->do(q{UPDATE   profiles
-               SET      cryptpassword = ?
-               WHERE    userid = ?},
-             undef, ($cryptedpassword, $userid) );
-    Bugzilla->memcached->clear({ table => 'profiles', id => $userid });
-    $dbh->do('DELETE FROM tokens WHERE token = ?', undef, $token);
-    $dbh->bz_commit_transaction();
-
-    Bugzilla->logout_user_by_id($userid);
+    Bugzilla->logout_user_by_id($user_id);
 
     $vars->{'message'} = "password_changed";
 

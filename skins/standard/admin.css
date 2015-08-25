@@ -179,6 +179,10 @@ th.title {
     cursor: default;
 }
 
+input[disabled] {
+    background-color: transparent !important;
+}
+
 /* User Preferences Page */
 
 #prefmain {

@@ -106,6 +106,8 @@ sub DB_COLUMNS {
         'profiles.extern_id',
         'profiles.is_enabled',
         $dbh->sql_date_format('last_seen_date', '%Y-%m-%d') . ' AS last_seen_date',
+        'profiles.password_change_required',
+        'profiles.password_change_reason',
     ),
 }
 
@@ -114,13 +116,15 @@ use constant ID_FIELD   => 'userid';
 use constant LIST_ORDER => NAME_FIELD;
 
 use constant VALIDATORS => {
-    cryptpassword => \&_check_password,
-    disable_mail  => \&_check_disable_mail,
-    disabledtext  => \&_check_disabledtext,
-    login_name    => \&check_login_name_for_creation,
-    realname      => \&_check_realname,
-    extern_id     => \&_check_extern_id,
-    is_enabled    => \&_check_is_enabled, 
+    cryptpassword            => \&_check_password,
+    disable_mail             => \&_check_disable_mail,
+    disabledtext             => \&_check_disabledtext,
+    login_name               => \&check_login_name_for_creation,
+    realname                 => \&_check_realname,
+    extern_id                => \&_check_extern_id,
+    is_enabled               => \&_check_is_enabled,
+    password_change_required => \&Bugzilla::Object::check_boolean,
+    password_change_reason   => \&_check_password_change_reason,
 };
 
 sub UPDATE_COLUMNS {
@@ -132,13 +136,16 @@ sub UPDATE_COLUMNS {
         realname
         extern_id
         is_enabled
+        password_change_required
+        password_change_reason
     );
     push(@cols, 'cryptpassword') if exists $self->{cryptpassword};
     return @cols;
 };
 
 use constant VALIDATOR_DEPENDENCIES => {
-    is_enabled => ['disabledtext'], 
+    is_enabled             => [ 'disabledtext' ],
+    password_change_reason => [ 'password_change_required' ],
 };
 
 use constant EXTRA_REQUIRED_FIELDS => qw(is_enabled);
@@ -343,13 +350,22 @@ sub _check_is_enabled {
     return $disabledtext ? 0 : 1;
 }
 
+sub _check_password_change_reason {
+    my ($self, $value) = @_;
+    return $self->password_change_required
+        ? trim($_[1]) || ''
+        : '';
+}
+
 ################################################################################
 # Mutators
 ################################################################################
 
-sub set_disable_mail  { $_[0]->set('disable_mail', $_[1]); }
-sub set_email_enabled { $_[0]->set('disable_mail', !$_[1]); }
-sub set_extern_id     { $_[0]->set('extern_id', $_[1]); }
+sub set_disable_mail             { $_[0]->set('disable_mail', $_[1]);             }
+sub set_email_enabled            { $_[0]->set('disable_mail', !$_[1]);            }
+sub set_extern_id                { $_[0]->set('extern_id', $_[1]);                }
+sub set_password_change_required { $_[0]->set('password_change_required', $_[1]); }
+sub set_password_change_reason   { $_[0]->set('password_change_reason', $_[1]);   }
 
 sub set_login {
     my ($self, $login) = @_;
@@ -364,7 +380,12 @@ sub set_name {
     delete $self->{identity};
 }
 
-sub set_password { $_[0]->set('cryptpassword', $_[1]); }
+sub set_password {
+    my ($self, $password) = @_;
+    $self->set('cryptpassword', $password);
+    $self->set('password_change_required', 0);
+    $self->set('password_change_reason', '');
+}
 
 sub set_disabledtext {
     my ($self, $text) = @_;
@@ -514,6 +535,9 @@ sub showmybugslink { $_[0]->{showmybugslink}; }
 sub email_disabled { $_[0]->{disable_mail} || !$_[0]->{is_enabled}; }
 sub email_enabled { !$_[0]->email_disabled; }
 sub last_seen_date { $_[0]->{last_seen_date}; }
+sub password_change_required { $_[0]->{password_change_required}; }
+sub password_change_reason { $_[0]->{password_change_reason}; }
+
 sub cryptpassword {
     my $self = shift;
     # We don't store it because we never want it in the object (we

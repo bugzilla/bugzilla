@@ -367,8 +367,26 @@ sub login {
     }
 
     my $authenticated_user = $authorizer->login($type);
-    
+
     # At this point, we now know if a real person is logged in.
+
+    # Check if a password reset is required
+    if ($authenticated_user->password_change_required) {
+        # We cannot show the password reset UI for API calls, so treat those as
+        # a disabled account.
+        if (i_am_webservice()) {
+            ThrowUserError("account_disabled", { disabled_reason => $authenticated_user->password_change_reason });
+        }
+
+        # only allow the reset-password and token pages to handle requests
+        # (tokens handles the 'forgot password' process)
+        # otherwise redirect user to the reset-password page.
+        if ($ENV{SCRIPT_NAME} !~ m#/(?:reset_password|token)\.cgi$#) {
+            print Bugzilla->cgi->redirect('reset_password.cgi');
+            exit;
+        }
+    }
+
     # We must now check to see if an sudo session is in progress.
     # For a session to be in progress, the following must be true:
     # 1: There must be a logged in user

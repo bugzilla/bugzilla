@@ -229,20 +229,12 @@
     [%#  PRODUCT  #%]
     [%#############%]
     <tr>
-      [% INCLUDE "bug/field-label.html.tmpl"
-         field = bug_fields.product
-         desc_url = 'describecomponents.cgi'
-         value = bug.product
-        %]
-      <td class="field_value" id="field_container_product">
-        [% INCLUDE "global/product-select.html.tmpl"
-           id    => "product"
-           name  => "product"
-           value => bug.product
-           products => bug.choices.product
-           isselect => bug.check_can_change_field('product', 0, 1)
-         %]
-       </td>
+      [% INCLUDE bug/field.html.tmpl
+          bug = bug, field = bug_fields.product, value = bug.product
+          override_legal_values = bug.choices.product
+          desc_url = "describecomponents.cgi"
+          editable = bug.check_can_change_field('product', 0, 1)
+      %]
     </tr>
 
     [%# Classification is here so that it can be used in value controllers

@@ -91,6 +91,12 @@
         </script>
     [% CASE [ constants.FIELD_TYPE_SINGLE_SELECT 
               constants.FIELD_TYPE_MULTI_SELECT ] %]
+      [%# The 'product' field needs its own template if classifications are enabled. %]
+      [% IF field.name == "product" AND Param('useclassification') %]
+        [% INCLUDE "global/product-select.html.tmpl"
+                   id = "product", name = "product", value = value
+                   products = override_legal_values %]
+      [% ELSE %]
         <input type="hidden" id="[% field.name FILTER html %]_dirty">
         <select id="[% field.name FILTER html %]" 
                 name="[% field.name FILTER html %]" 
@@ -141,22 +147,24 @@
         [% IF field.type == constants.FIELD_TYPE_MULTI_SELECT %]
           <input type="hidden" name="defined_[% field.name FILTER html %]">
         [% END %]
+      [% END %]
 
-        <script type="text/javascript">
+      <script type="text/javascript">
         <!--
           initHidingOptionsForIE('[% field.name FILTER js %]');
           [%+ INCLUDE "bug/field-events.js.tmpl"
                       field = field, product = bug.product_obj %]
         //-->
-        </script>
+      </script>
 
-     [% CASE constants.FIELD_TYPE_TEXTAREA %]
+    [% CASE constants.FIELD_TYPE_TEXTAREA %]
        <div id="[% field.name FILTER html %]_edit_container" class="bz_default_hidden">
          <div>
              (<a href="#" id="[% field.name FILTER html %]_edit_action">edit</a>)
          </div>
          [% IF value %]
-           <pre class="field_textarea_readonly">[% value FILTER html %]</pre>
+           <pre id="[% field.name FILTER html %]_readonly"
+                class="field_textarea_readonly">[% value FILTER html %]</pre>
          [% END %]
        </div>
        <div id="[% field.name FILTER html %]_input">
@@ -173,7 +181,7 @@
                            '',
                            true);
        </script>
-     [% CASE constants.FIELD_TYPE_BUG_URLS %]
+    [% CASE constants.FIELD_TYPE_BUG_URLS %]
        [% IF bug.id && value.size %]
          <ul class="bug_urls">
          [% FOREACH bug_url = value %]

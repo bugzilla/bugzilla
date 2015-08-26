@@ -42,7 +42,10 @@
                name="[% field.name FILTER html %]"
                value="[% value FILTER html %]" size="40"
                maxlength="[% constants.MAX_FREETEXT_LENGTH FILTER none %]"
-               [% IF field.type == constants.FIELD_TYPE_INTEGER %] pattern="\d+[% IF dontchange %]|[% dontchange FILTER html %][% END %]" [% END %]
+               [% IF field.type == constants.FIELD_TYPE_INTEGER %]
+                 pattern="-?\d+[% IF dontchange %]|[% dontchange FILTER html %][% END %]"
+                 title="The value must be a valid positive or negative integer"
+               [% END %]
                [% IF field.is_mandatory %]
                  data-required="true" [% 'aria-required="true" required' UNLESS field_hidden %]
                [% END %]>

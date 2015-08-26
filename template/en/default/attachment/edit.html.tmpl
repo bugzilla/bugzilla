@@ -46,9 +46,9 @@
     <div id="attachment_attributes">
       <div id="attachment_information_read_only" class="[% "bz_private" IF attachment.isprivate %]">
         <div class="title">
-          [% "[patch]" IF attachment.ispatch%] 
-          <span class="[% "bz_obsolete" IF attachment.isobsolete %]" title="[% "obsolete" IF attachment.isobsolete %]">              
-            [% attachment.description FILTER html %]
+          [% IF attachment.ispatch %][patch][% END %]
+          <span [% IF attachment.isobsolete %]class="bz_obsolete" title="obsolete"[% END %]>
+            [%~ attachment.description FILTER html ~%]
           </span>
           [% IF can_edit %]
             <span class="bz_edit">(<a href="javascript:toggle_attachment_details_visibility()">edit details</a>)</span>
@@ -293,25 +293,27 @@
             [% END %]
             <input type="submit" value="Submit" id="update">
           </div>
-        [% END %]        
-      </div>        
+        [% END %]
+      </div>
     </div>
   </div>
 </form>
 
-<div id="attachment_actions">
-  <span class="label">Actions:</span>
-  <a href="attachment.cgi?id=[% attachment.id %]">View</a>
-  [% IF use_patchviewer %]
-    | <a href="attachment.cgi?id=[% attachment.id %]&amp;action=diff">Diff</a>
-  [% END %]
-  [% IF Param("allow_attachment_deletion")
-        && user.in_group('admin')
-        && attachment.datasize > 0 %]
-    | <a href="attachment.cgi?id=[% attachment.id %]&amp;action=delete">Delete</a>
-  [% END %]
-  [% Hook.process('action') %]
-</div>
+[% IF attachment.datasize %]
+  <div id="attachment_actions">
+    <span class="label">Actions:</span>
+    <a href="attachment.cgi?id=[% attachment.id %]">
+      [% IF attachment.is_viewable %]View[% ELSE %]Download[% END %]
+    </a>
+    [% IF use_patchviewer %]
+      | <a href="attachment.cgi?id=[% attachment.id %]&amp;action=diff">Diff</a>
+    [% END %]
+    [% IF Param("allow_attachment_deletion") && user.in_group('admin') %]
+      | <a href="attachment.cgi?id=[% attachment.id %]&amp;action=delete">Delete</a>
+    [% END %]
+    [% Hook.process('action') %]
+  </div>
+[% END %]
 
 <div id="attachment_list">
   Attachments on [% "$terms.bug ${attachment.bug_id}" FILTER bug_link(attachment.bug_id) FILTER none %]:

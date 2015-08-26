@@ -2259,7 +2259,7 @@ sub _check_integer_field {
         ThrowUserError("number_not_integer",
                        {field => $field, num => $orig_value});
     }
-    elsif ($value > MAX_INT_32) {
+    elsif (abs($value) > MAX_INT_32) {
         ThrowUserError("number_too_large",
                        {field => $field, num => $orig_value, max_num => MAX_INT_32});
     }

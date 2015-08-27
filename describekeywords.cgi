@@ -40,7 +40,7 @@ Bugzilla->switch_to_shadow_db;
 
 # Hide bug counts for security keywords from users who aren't a member of the
 # security group
-my $can_see_security = Bugzilla->user->in_group('security-group');
+my $can_see_security = Bugzilla->user->in_group('core-security');
 my $keywords = Bugzilla::Keyword->get_all_with_bug_count();
 foreach my $keyword (@$keywords) {
     $keyword->{'bug_count'} = 0

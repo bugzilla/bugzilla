@@ -165,10 +165,12 @@ sub quicksearch {
         # If parse_line() returns no data, this means strings are badly quoted.
         # Rather than trying to guess what the user wanted to do, we throw an error.
         scalar(@words)
-          || ThrowUserError('quicksearch_unbalanced_quotes', {string => $searchstring});
+          || ThrowUserError('quicksearch_unbalanced_quotes',
+                            { string => $searchstring, quicksearch => $searchstring });
 
         # A query cannot start with AND or OR, nor can it end with AND, OR or NOT.
-        ThrowUserError('quicksearch_invalid_query')
+        ThrowUserError('quicksearch_invalid_query',
+                       { quicksearch => $searchstring })
           if ($words[0] =~ /^(?:AND|OR)$/ || $words[$#words] =~ /^(?:AND|OR|NOT)$/);
 
         $fulltext = Bugzilla->user->setting('quicksearch_fulltext') eq 'on' ? 1 : 0;
@@ -179,13 +181,15 @@ sub quicksearch {
             # AND is the default word separator, similar to a whitespace,
             # but |a AND OR b| is not a valid combination.
             if ($word eq 'AND') {
-                ThrowUserError('quicksearch_invalid_query', {operators => ['AND', 'OR']})
+                ThrowUserError('quicksearch_invalid_query',
+                               { operators => ['AND', 'OR'], quicksearch => $searchstring })
                   if $words[0] eq 'OR';
             }
             # |a OR AND b| is not a valid combination.
             # |a OR OR b| is equivalent to |a OR b| and so is harmless.
             elsif ($word eq 'OR') {
-                ThrowUserError('quicksearch_invalid_query', {operators => ['OR', 'AND']})
+                ThrowUserError('quicksearch_invalid_query',
+                               { operators => ['OR', 'AND'], quicksearch => $searchstring })
                   if $words[0] eq 'AND';
             }
             # NOT negates the following word.
@@ -195,7 +199,8 @@ sub quicksearch {
                 $word = shift @words;
                 next if $word eq 'NOT';
                 if ($word eq 'AND' || $word eq 'OR') {
-                    ThrowUserError('quicksearch_invalid_query', {operators => ['NOT', $word]});
+                    ThrowUserError('quicksearch_invalid_query',
+                                   { operators => ['NOT', $word], quicksearch => $searchstring });
                 }
                 unshift(@words, "-$word");
             }
@@ -259,8 +264,9 @@ sub quicksearch {
         # Inform user about any unknown fields
         if (scalar(@unknownFields) || scalar(keys %ambiguous_fields)) {
             ThrowUserError("quicksearch_unknown_field",
-                           { unknown   => \@unknownFields,
-                             ambiguous => \%ambiguous_fields });
+                           { unknown     => \@unknownFields,
+                             ambiguous   => \%ambiguous_fields,
+                             quicksearch => $searchstring });
         }
 
         # Make sure we have some query terms left

@@ -64,7 +64,7 @@ if ($confirmed || $skip_confirmation) {
                            { token => $token, callback => $callback });
         }
     }
-    my $app_id = sha256_hex($callback_uri, $description);
+    my $app_id = sha256_hex($callback_base, $description);
     my $keys = Bugzilla::User::APIKey->match({
         user_id => $user->id,
         app_id  => $app_id,

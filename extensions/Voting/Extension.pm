@@ -610,7 +610,7 @@ sub _update_votes {
         $sth_getVotes->execute($id);
         my $v = $sth_getVotes->fetchrow_array || 0;
         $sth_updateVotes->execute($v, $id);
-
+        $bugs{$id}->{votes} = $v if $bugs{$id};
         my $confirmed = _confirm_if_vote_confirmed($bugs{$id} || $id);
         push (@updated_bugs, $id) if $confirmed;
     }

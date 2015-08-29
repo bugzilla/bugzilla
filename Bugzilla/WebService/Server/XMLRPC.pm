@@ -96,6 +96,15 @@ use Bugzilla::WebService::Constants qw(XMLRPC_CONTENT_TYPE_WHITELIST);
 use Bugzilla::WebService::Util qw(fix_credentials);
 use Scalar::Util qw(tainted);
 
+sub new {
+    my $self = shift->SUPER::new(@_);
+    # Initialise XML::Parser to not expand references to entities, to prevent DoS
+    require XML::Parser;
+    my $parser = XML::Parser->new( NoExpand => 1, Handlers => { Default => sub {} } );
+    $self->{_parser}->parser($parser, $parser);
+    return $self;
+}
+
 sub deserialize {
     my $self = shift;
 

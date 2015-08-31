@@ -952,6 +952,7 @@ use constant ABSTRACT_SCHEMA => {
             last_seen_date => {TYPE => 'DATETIME'},
             password_change_required => { TYPE => 'BOOLEAN', NOTNULL => 1, DEFAULT => 'FALSE' },
             password_change_reason   => { TYPE => 'varchar(64)' },
+            mfa            => {TYPE => 'varchar(8)', DEFAULT => "''" },
         ],
         INDEXES => [
             profiles_login_name_idx => {FIELDS => ['login_name'],
@@ -998,6 +999,19 @@ use constant ABSTRACT_SCHEMA => {
             profiles_activity_userid_idx  => ['userid'],
             profiles_activity_profiles_when_idx => ['profiles_when'],
             profiles_activity_fieldid_idx => ['fieldid'],
+        ],
+    },
+
+    profile_mfa => {
+        FIELDS => [
+            id      => { TYPE => 'INTSERIAL', NOTNULL => 1, PRIMARYKEY => 1 },
+            user_id => { TYPE => 'INT3', NOTNULL => 1,
+                REFERENCES => { TABLE => 'profiles', COLUMN => 'userid', DELETE => 'CASCADE' } },
+            name    => { TYPE => 'varchar(16)', NOTNULL => 1 },
+            value   => { TYPE => 'varchar(255)' },
+        ],
+        INDEXES => [
+            profile_mfa_userid_name_idx => { FIELDS => [ 'user_id', 'name' ], TYPE   => 'UNIQUE' },
         ],
     },
 

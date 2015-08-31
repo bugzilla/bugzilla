@@ -752,6 +752,8 @@ sub update_table_definitions {
     $dbh->bz_add_column('profiles', 'password_change_reason',
                         { TYPE => 'varchar(64)' });
 
+    $dbh->bz_add_column('profiles', 'mfa', { TYPE => 'varchar(8)', , DEFAULT => "''" });
+
     ################################################################
     # New --TABLE-- changes should go *** A B O V E *** this point #
     ################################################################

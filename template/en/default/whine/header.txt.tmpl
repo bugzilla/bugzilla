@@ -8,10 +8,6 @@
 
 [%# INTERFACE:
   # subject: subject line of message
-  # alternatives: array of hashes containing:
-  #     type: MIME type
-  #     content: verbatim content
-  # boundary: a string that has been generated to be a unique boundary
   # recipient: user object for the intended recipient of the message
   # from: Bugzilla system email address
   #%]
@@ -19,21 +15,5 @@
 From: [% from %]
 To: [% recipient.email %]
 Subject: [[% terms.Bugzilla %]] [% subject %]
-MIME-Version: 1.0
-Content-Type: multipart/alternative; boundary="[% boundary %]"
 X-Bugzilla-Type: whine
 
-
-This is a MIME multipart message.  It is possible that your mail program
-doesn't quite handle these properly.  Some or all of the information in this
-message may be unreadable.
-
-
-[% FOREACH part=alternatives %]
-
---[% boundary %]
-Content-type: [% part.type +%]
-
-[%+ part.content %]
-[%+ END %]
---[% boundary %]--

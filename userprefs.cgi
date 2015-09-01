@@ -143,7 +143,6 @@ sub SaveAccount {
     }
 
     $user->set_name($cgi->param('realname'));
-    $user->set_mfa($cgi->param('mfa'));
     $user->update({ keep_session => 1, keep_tokens => 1 });
     $dbh->bz_commit_transaction;
 }

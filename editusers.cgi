@@ -270,7 +270,7 @@ if ($action eq 'search') {
             ? $cgi->param('password_change_reason')
             : ''
         );
-        if ($user->in_group('admin') && $cgi->param('mfa') eq '') {
+        if ($user->in_group('admin') && $otherUser->mfa && $cgi->param('mfa') eq '') {
             $otherUser->set_mfa('');
             Bugzilla->audit(sprintf('%s disabled 2FA for %s', $user->login, $otherUser->login));
         }

@@ -53,6 +53,7 @@ sub check_credentials {
     }
 
     my $password = $login_data->{password};
+    return { failure => AUTH_NODATA } unless defined $login_data->{password};
     my $real_password_crypted = $user->cryptpassword;
 
     # Using the internal crypted password as the salt,
@@ -103,6 +104,16 @@ sub check_credentials {
         # complexity rules to apply here.
         $user->{cryptpassword} = bz_crypt($password);
         $user->update();
+    }
+
+    if (i_am_webservice() && $user->settings->{api_key_only}->{value} eq 'on') {
+        # api-key verification happens in Auth/Login/APIKey
+        # token verification happens in Auth/Login/Cookie
+        # if we get here from an api call then we must be using user/pass
+        return {
+            failure    => AUTH_ERROR,
+            user_error => 'invalid_auth_method',
+        };
     }
 
     return $login_data;

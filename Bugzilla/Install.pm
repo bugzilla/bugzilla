@@ -99,6 +99,7 @@ sub SETTINGS {
     possible_duplicates => { options => ['on', 'off'], default => 'on' },
     # 2011-10-11 glob@mozilla.com -- Bug 301656
     requestee_cc       => { options => ['on', 'off'], default => 'on' },
+    api_key_only       => { options => ['on', 'off'], default => 'off' },
     }
 };
 

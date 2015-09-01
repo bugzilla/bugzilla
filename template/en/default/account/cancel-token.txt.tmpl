@@ -93,6 +93,9 @@ Canceled Because: [% PROCESS cancelactionmessage %]
   [% ELSIF cancelaction == 'wrong_token_for_creating_account' %]
     You have tried to use the token to create a user account.
 
+  [% ELSIF cancelaction == 'wrong_token_for_mfa' %]
+    You have tried to use the token for MFA.
+
   [% ELSE %]
     [%# Give sensible error if the cancel-token function is used incorrectly.
       #%]

@@ -43,14 +43,30 @@ sub get_login_info {
 
     return { failure => AUTH_NODATA } unless $github_login;
 
+    my $response;
     if ($github_email_key && $github_email) {
         trick_taint($github_email);
         trick_taint($github_email_key);
-        return $self->_get_login_info_from_email($github_email, $github_email_key);
+        $response = $self->_get_login_info_from_email($github_email, $github_email_key);
     }
     else {
-       return $self->_get_login_info_from_github();
+       $response = $self->_get_login_info_from_github();
     }
+
+    if (!exists $response->{failure}) {
+        my $user = $response->{user};
+        return { failure    => AUTH_ERROR,
+                 user_error => 'github_auth_account_too_powerful' } if $user->in_group('no-github-auth');
+        return { failure    => AUTH_ERROR,
+                 user_error => 'mfa_prevents_login',
+                 details    => { provider => 'GitHub' } } if $user->mfa;
+        $response = {
+            username    => $user->login,
+            user_id     => $user->id,
+            github_auth => 1,
+        };
+    }
+    return $response;
 }
 
 sub _get_login_info_from_github {
@@ -117,7 +133,7 @@ sub _get_login_info_from_github {
     if (@allowed_bugzilla_users == 1) {
         my ($user) = @allowed_bugzilla_users;
         $cgi->remove_cookie('Bugzilla_github_token');
-        return { username => $user->login, user_id => $user->id, github_auth => 1 };
+        return { user => $user };
     }
     elsif (@allowed_bugzilla_users > 1) {
         $self->{github_failure} = {
@@ -160,11 +176,8 @@ sub _get_login_info_from_email {
     }
 
     my $user = Bugzilla::User->new({name => $github_email, cache => 1});
-    return { failure    => AUTH_ERROR,
-             user_error => 'github_auth_account_too_powerful' } if $user && $user->in_group('no-github-auth');
-
     $cgi->remove_cookie('Bugzilla_github_token');
-    return { username => $github_email, github_auth => 1 };
+    return { user => $user };
 }
 
 sub fail_nodata {

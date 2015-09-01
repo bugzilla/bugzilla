@@ -105,6 +105,7 @@ END
     feature_new_charts        => 'New Charts',
     feature_old_charts        => 'Old Charts',
     feature_memcached         => 'Memcached Support',
+    feature_mfa               => 'Two-Factor Authentication',
     feature_mod_perl          => 'mod_perl',
     feature_moving            => 'Move Bugs Between Installations',
     feature_patch_viewer      => 'Patch Viewer',

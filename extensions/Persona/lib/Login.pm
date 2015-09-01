@@ -98,6 +98,12 @@ sub get_login_info {
                      user_error => 'persona_account_too_powerful' };
         }
 
+        if ($user->mfa) {
+            return { failure    => AUTH_ERROR,
+                     user_error => 'mfa_prevents_login',
+                     details    => { provider => 'Persona' } };
+        }
+
         $login_data->{'user'} = $user;
         $login_data->{'user_id'} = $user->id;
 

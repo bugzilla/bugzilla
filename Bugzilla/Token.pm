@@ -219,11 +219,12 @@ sub IssuePasswordToken {
 }
 
 sub issue_session_token {
+    my ($data, $user) = @_;
     # Generates a random token, adds it to the tokens table, and returns
     # the token to the caller.
 
-    my $data = shift;
-    return _create_token(Bugzilla->user->id, 'session', $data);
+    $user //= Bugzilla->user;
+    return _create_token($user->id, 'session', $data);
 }
 
 sub issue_hash_token {
@@ -657,12 +658,14 @@ although they can be used separately.
 
 =over
 
-=item C<issue_session_token($event)>
+=item C<issue_session_token($event [, $user])>
 
  Description: Creates and returns a token used internally.
 
  Params:      $event - The event which needs to be stored in the DB for future
                        reference/checks.
+              $user - The user to bind the token with.  Uses the current user
+              if not provided.
 
  Returns:     A unique token.
 

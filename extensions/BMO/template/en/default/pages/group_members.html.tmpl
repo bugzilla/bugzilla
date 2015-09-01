@@ -11,8 +11,6 @@
   style_urls = [ "extensions/BMO/web/styles/reports.css" ]
 %]
 
-[% SET privileged = (user.in_group('editusers') || user.in_group('infrasec')) %]
-
 <form method="GET" action="page.cgi">
   <input type="hidden" name="id" value="group_members.html">
 
@@ -51,7 +49,7 @@
         <th>Count</th>
         <th>Members</th>
         [% IF privileged %]
-          <th class="right">Last Seen (days ago)</th>
+          <th class="right">2FA, Last Seen (days ago)</th>
         [% END %]
       </tr>
 
@@ -93,6 +91,14 @@
                     </a>
                   </td>
                   [% IF privileged %]
+                    <td nowrap>
+                      [% IF member.mfa %]
+                        [% member.mfa FILTER html %]
+                        [% " (weakened)" IF member.settings.api_key_only.value == "off" %]
+                      [% ELSE %]
+                        -
+                      [% END %]
+                    </td>
                     <td align="right" nowrap>
                       [% member.lastseen FILTER html %]
                     </td>

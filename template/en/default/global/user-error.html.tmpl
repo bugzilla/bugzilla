@@ -1012,6 +1012,10 @@
     [% title = "Invalid Attachment ID" %]
     The attachment id [% attach_id FILTER html %] is invalid.
 
+  [% ELSIF error == "invalid_auth_method" %]
+    [% title = "Invalid Authentication Method" %]
+    API-Key authentication is required.
+
   [% ELSIF error == "bug_id_does_not_exist" %]
     [% title = BLOCK %]Invalid [% terms.Bug %] ID[% END %]
     [% terms.Bug %] [%= bug_id FILTER html %] does not exist.
@@ -1197,6 +1201,15 @@
   [% ELSIF error == "login_required" %]
     [%# Used for non-web-based LOGIN_REQUIRED situations. %]
     You must log in before using this part of [% terms.Bugzilla %].
+
+  [% ELSIF error == "mfa_prevents_login" %]
+    Unable to log in with [% provider FILTER html %] because two-factor
+    authentication is enabled on your account.<br>
+    <br>
+    Please log in using your username and password.
+
+  [% ELSIF error == "mfa_totp_bad_code" %]
+    Invalid verification code.
 
   [% ELSIF error == "migrate_config_created" %]
     The file <kbd>[% file FILTER html %]</kbd> contains configuration
@@ -1461,6 +1474,10 @@
   [% ELSIF error == "passwords_dont_match" %]
     [% title = "Passwords Don't Match" %]
     The two passwords you entered did not match.
+
+  [% ELSIF error == "password_incorrect" %]
+    [% title = "Incorrect Password" %]
+    You did not enter your password correctly.
 
   [% ELSIF error == "password_too_short" %]
     [% title = "Password Too Short" %]
@@ -1920,6 +1937,10 @@
   [% ELSIF error == "wrong_token_for_creating_account" %]
     [% title = "Wrong Token" %]
     That token cannot be used to create a user account.
+
+  [% ELSIF error == "wrong_token_for_mfa" %]
+    [% title = "Wrong Token" %]
+    That token cannot be used for MFA.
 
   [% ELSIF error == "xmlrpc_invalid_value" %]
     "[% value FILTER html %]" is not a valid value for a

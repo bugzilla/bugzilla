@@ -108,6 +108,7 @@ sub DB_COLUMNS {
         $dbh->sql_date_format('last_seen_date', '%Y-%m-%d') . ' AS last_seen_date',
         'profiles.password_change_required',
         'profiles.password_change_reason',
+        'profiles.mfa',
     ),
 }
 
@@ -125,6 +126,7 @@ use constant VALIDATORS => {
     is_enabled               => \&_check_is_enabled,
     password_change_required => \&Bugzilla::Object::check_boolean,
     password_change_reason   => \&_check_password_change_reason,
+    mfa                      => \&_check_mfa,
 };
 
 sub UPDATE_COLUMNS {
@@ -138,6 +140,7 @@ sub UPDATE_COLUMNS {
         is_enabled
         password_change_required
         password_change_reason
+        mfa
     );
     push(@cols, 'cryptpassword') if exists $self->{cryptpassword};
     return @cols;
@@ -266,6 +269,10 @@ sub update {
         $self->derive_regexp_groups();
     }
 
+    if (exists $changes->{mfa} && $self->mfa eq '') {
+        $dbh->do("DELETE FROM profile_mfa WHERE user_id = ?", undef, $self->id);
+    }
+
     # Logout the user if necessary.
     Bugzilla->logout_user($self)
         if (!$options->{keep_session}
@@ -357,6 +364,13 @@ sub _check_password_change_reason {
         : '';
 }
 
+sub _check_mfa {
+    my ($self, $provider) = @_;
+    $provider = lc($provider // '');
+    return 'TOTP' if $provider eq 'totp';
+    return '';
+}
+
 ################################################################################
 # Mutators
 ################################################################################
@@ -392,6 +406,15 @@ sub set_disabledtext {
     $self->set('disabledtext', $text);
     $self->set('is_enabled', trim($text) eq '' ? 0 : 1);
     $self->set('disable_mail', 1) if !$self->is_enabled;
+}
+
+sub set_mfa {
+    my ($self, $value) = @_;
+    if ($value eq '' && $self->mfa) {
+        $self->mfa_provider->property_delete_all();
+    }
+    $self->set('mfa', $value);
+    delete $self->{mfa_provider};
 }
 
 sub set_groups {
@@ -559,6 +582,21 @@ sub authorizer {
         $self->{authorizer} = new Bugzilla::Auth();
     }
     return $self->{authorizer};
+}
+
+sub mfa { $_[0]->{mfa} }
+sub mfa_provider {
+    my ($self) = @_;
+    my $mfa = $self->{mfa} || return undef;
+    return $self->{mfa_provider} if exists $self->{mfa_provider};
+    if ($mfa eq 'TOTP') {
+        require Bugzilla::MFA::TOTP;
+        $self->{mfa_provider} = Bugzilla::MFA::TOTP->new($self);
+    }
+    else {
+        $self->{mfa_provider} = undef;
+    }
+    return $self->{mfa_provider};
 }
 
 # Generate a string to identify the user by name + login if the user

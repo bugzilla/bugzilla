@@ -1,0 +1,134 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% IF NOT Bugzilla.feature('mfa') %]
+  <input type="hidden" name="mfa_action" id="mfa-action" value="">
+  <p>
+    Two-factor Authentication is not available.
+  </p>
+  [% RETURN %]
+[% END %]
+[% IF user.cryptpassword == '*' %]
+  <input type="hidden" name="mfa_action" id="mfa-action" value="">
+  <p>
+    Two-factor Authentication is not available on your account because you are
+    using an external authentication provider.
+  </p>
+  [% RETURN %]
+[% END %]
+
+<div id="mfa-container">
+  [% IF user.mfa %]
+    <p>
+      Two-factor authentication is currently <b>enabled</b> using
+      <b>[% SWITCH user.mfa %]
+        [% CASE "TOTP" %]TOTP
+      [% END %]</b>.
+    </p>
+    <input type="hidden" name="mfa_action" id="mfa-action" value="disable">
+
+    <button type="button" id="mfa-disable">Disable Two-factor Authentication</button>
+
+    <div id="mfa-disable-container" style="display:none">
+
+      [% IF user.mfa == "TOTP" %]
+        A verification code is required to confirm this change.<br><br>
+        <b>Code:</b>
+        <input type="text" name="mfa_disable_code" id="mfa-totp-disable-code"
+               placeholder="123456" maxlength="6" pattern="\d{6}" size="10"
+               autocomplete="off" required autofocus>
+      [% END %]
+
+    </div>
+
+  [% ELSE %]
+    <p>
+      Two-factor authentication is currently <b>disabled</b>.
+    </p>
+    <input type="hidden" name="mfa_action" id="mfa-action" value="enable">
+
+    <button type="button" id="mfa-enable">Enable Two-factor Authentication</button>
+
+    <div id="mfa-enable-container" style="display:none">
+      <b>System:</b>
+      <select name="mfa" id="mfa">
+        <option value="" selected></option>
+        <option value="TOTP">Time-based One-Time Password (TOTP)</option>
+      </select>
+
+      [%# TOTP %]
+      <div id="mfa-enable-totp" class="mfa-provider" style="display:none">
+
+        <div id="mfa-totp-throbber">
+          Working.. <img src="skins/standard/throbber.gif" width="16" height="11">
+        </div>
+
+        <div id="mfa-totp-issued" style="display:none">
+          <iframe id="mfa-enable-totp-frame" src="userprefs.cgi?tab=mfa&frame=totp"></iframe>
+          <div id="mfa-totp-blurb">
+            Scan this QR code with your <a href="#" id="mfa-totp-apps">TOTP App</a>,
+            then enter the six digit code the app generates.<br>
+            <br>
+            <b>Code:</b>
+            <input type="text" name="mfa_enable_code" id="mfa-totp-enable-code"
+                   placeholder="123456" maxlength="6" pattern="\d{6}" size="10"
+                   autocomplete="off" required autofocus>
+          </div>
+        </div>
+
+        <div id="mfa-totp-apps-popup" class="mfa-totp-popup" style="display:none">
+          Example TOTP Applications:<br>
+          <ul>
+            <li>Android and iOS:
+              <a href="http://guide.duosecurity.com/third-party-accounts" target="_blank">Duo Mobile</a>,
+              <a href="https://support.google.com/accounts/answer/1066447" target="_blank">Google Authenticator</a>
+            </li>
+            <li>Firefox OS:
+              <a href="https://marketplace.firefox.com/app/gauth/" target="_blank">GAuth</a>
+            </li>
+            <li>Windows Phone:
+              <a href="http://www.windowsphone.com/en-us/store/app/authenticator/021dd79f-0598-e011-986b-78e7d1fa76f8"
+                 target="_blank">Authenticator</a>
+            </li>
+          </ul>
+          <button type="button" class="mfa-totp-popup-close">Close</button>
+        </div>
+
+        <div id="mfa-totp-text-popup" class="mfa-totp-popup" style="display:none">
+          Your two-factor secret:
+          <div id="mfa-totp-secret"></div>
+          <button type="button" class="mfa-totp-popup-close">Close</button>
+        </div>
+
+      </div>
+
+    </div>
+
+  [% END %]
+
+  <div id="mfa-confirm" style="display:none">
+    <p>
+      Two-factor authentication settings will not be updated until you provide
+      your current password and <b>Submit Changes</b>.
+    </p>
+
+    <p>
+      <b>Current Password:</b>
+      <input type="password" name="password" required>
+    </p>
+
+    <p id="mfa-api-blurb" style="display:none">
+      Enabling two-factor authentication will also require systems that
+      interface with [% terms.Bugzilla %]'s API to use <a href="userprefs.cgi?tab=apikey">API-Keys</a>
+      for authentication.<br>
+      While not recommended, this limitation can be lifted by changing the
+      <a href="userprefs.cgi?tab=settings#api_key_only">Require API-Key authentication for API requests</a>
+      preference after 2FA is enabled.
+  </div>
+
+</div>

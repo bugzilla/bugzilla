@@ -6,6 +6,9 @@
  * defined by the Mozilla Public License, v. 2.0. */
 
 $(function() {
+
+    // account disabling
+
     $('#account-disable-toggle')
         .click(function(event) {
             event.preventDefault();
@@ -38,4 +41,91 @@ $(function() {
     $(window).on('pageshow', function() {
         $('#account_disable').val('');
     });
+
+    // mfa
+
+    $('#mfa-enable')
+        .click(function(event) {
+            event.preventDefault();
+            $('#mfa-enable-container').show();
+            $('#mfa-api-blurb').show();
+            $(this).hide();
+        });
+
+    $('#mfa')
+        .change(function(event) {
+            var mfa = $(this).val();
+
+            $('.mfa-provider').hide();
+            $('#update').attr('disabled', true);
+            if (mfa === '') {
+                $('#mfa-confirm').hide();
+            }
+            else {
+                $('#mfa-confirm').show();
+                if (mfa === 'TOTP') {
+                    $('#mfa-enable-totp').show();
+                    $('#mfa-totp-throbber').show();
+                    $('#mfa-totp-issued').hide();
+                    var url = 'rest/user/mfa/totp/enroll' +
+                        '?Bugzilla_api_token=' + encodeURIComponent(BUGZILLA.api_token);
+                    $.ajax({
+                        "url": url,
+                        "contentType": "application/json",
+                        "processData": false
+                    })
+                    .done(function(data) {
+                        $('#mfa-totp-throbber').hide();
+                        var iframe = $('#mfa-enable-totp-frame').contents();
+                        iframe.find('#qr').attr('src', 'data:image/png;base64,' + data.png);
+                        iframe.find('#secret').text(data.secret32);
+                        $('#mfa-totp-issued').show();
+                        $('#mfa-totp-enable-code').focus();
+                        $('#update').attr('disabled', false);
+                    })
+                    .error(function(data) {
+                        $('#mfa-totp-throbber').hide();
+                        if (data.statusText === 'abort')
+                            return;
+                        var message = data.responseJSON ? data.responseJSON.message : 'Unexpected Error';
+                        console.log(message);
+                    });
+                }
+            }
+        })
+        .change();
+
+    $('#mfa-disable')
+        .click(function(event) {
+            event.preventDefault();
+            $('#mfa-disable-container').show();
+            $('#mfa-confirm').show();
+            $('#mfa-api-blurb').hide();
+            $('#mfa-totp-disable-code').focus();
+            $('#update').attr('disabled', false);
+            $(this).hide();
+        });
+
+    var totp_popup;
+    $('#mfa-totp-apps, #mfa-totp-text')
+        .click(function(event) {
+            event.preventDefault();
+            totp_popup = $('#' + $(this).attr('id') + '-popup').bPopup({
+                speed: 100,
+                followSpeed: 100,
+                modalColor: '#444'
+            });
+        });
+    $('.mfa-totp-popup-close')
+        .click(function(event) {
+            event.preventDefault();
+            totp_popup.close();
+        });
+
+    if ($('#mfa-action').length) {
+        $('#update').attr('disabled', true);
+        $(window).on('pageshow', function() {
+            $('#mfa').val('').change();
+        });
+    }
 });

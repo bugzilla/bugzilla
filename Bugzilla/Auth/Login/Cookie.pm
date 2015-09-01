@@ -40,7 +40,7 @@ sub get_login_info {
     my ($self) = @_;
     my $cgi = Bugzilla->cgi;
     my $dbh = Bugzilla->dbh;
-    my ($user_id, $login_cookie);
+    my ($user_id, $login_cookie, $is_internal);
 
     if (!Bugzilla->request_cache->{auth_no_automatic_login}) {
         $login_cookie = $cgi->cookie("Bugzilla_logincookie");
@@ -82,6 +82,7 @@ sub get_login_info {
                 {
                     ThrowUserError('auth_invalid_token', { token => $api_token });
                 }
+                $is_internal = 1;
             }
         }
     }
@@ -112,6 +113,15 @@ sub get_login_info {
 
         # If the cookie is valid, return a valid username.
         if (defined $db_cookie && $login_cookie eq $db_cookie) {
+
+            # forbid logging in with a cookie if only api-keys are allowed
+            if (i_am_webservice() && !$is_internal) {
+                my $user = Bugzilla::User->new({ id => $user_id, cache => 1 });
+                if ($user->settings->{api_key_only}->{value} eq 'on') {
+                    ThrowUserError('invalid_cookies_or_token');
+                }
+            }
+
             # If we logged in successfully, then update the lastused 
             # time on the login cookie
             $dbh->do("UPDATE logincookies SET lastused = NOW() 

@@ -36,6 +36,7 @@
   # message: string. A message to display to the user. May contain HTML.
   # atomlink: Atom link URL, May contain HTML
   # generate_api_token: generate a token which can be used to make authenticated webservice calls
+  # no_body: if true the body element will not be generated
   #%]
 
 [% IF message %]
@@ -261,6 +262,8 @@
                        title="[% terms.BugzillaTitle %]" href="./search_plugin.cgi">
     [% Hook.process("additional_header") %]
   </head>
+
+[% RETURN IF no_body %]
 
 [%# Migration note: contents of the old Param 'bodyhtml' go in the body tag,
   # but set the onload attribute in the DEFAULT directive above.

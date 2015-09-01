@@ -190,12 +190,12 @@ input[disabled] {
 }
 
 #prefnav {
-    width: 14em;
+    width: 15em;
     float: left;
 }
 
 #prefcontent {
-    margin-left: 15em;
+    margin-left: 16em;
     padding: .2em 1.5em 1.5em 1.5em;
     box-shadow: 1px 1px 5px rgba(0, 0, 0, 0.1);
     background: #FFF none repeat scroll 0% 0%;
@@ -228,4 +228,48 @@ input[disabled] {
 #prefnav li.selected {
     font-weight: bold;
     background: #fff;
+}
+
+/* mfa */
+
+#mfa {
+    margin-bottom: 1em;
+}
+
+#mfa-confirm {
+    margin-top: 2em;
+}
+
+#mfa-container {
+    margin-bottom: 2em;
+}
+
+#mfa-totp-throbber {
+    width: 300px;
+    height: 280px;
+}
+
+.mfa-totp-popup {
+    background: #fff;
+    padding: 10px 30px;
+    box-shadow: 1px 1px 5px rgba(0, 0, 0, 0.1);
+}
+
+.mfa-totp-popup ul {
+    padding: 0 0 0 2em;
+}
+
+.mfa-totp-popup-close {
+    float: right;
+}
+
+#mfa-enable-totp-frame {
+    border: none;
+    width: 300px;
+    height: 220px;
+}
+
+#mfa-enroll-embedded {
+    background: none;
+    padding: 0;
 }

@@ -93,6 +93,10 @@ if ($token) {
       Bugzilla::Token::Cancel($token, 'wrong_token_for_creating_account');
       ThrowUserError('wrong_token_for_creating_account');
   }
+  if ($action eq 'mfa' && $tokentype ne 'session') {
+      Bugzilla::Token::Cancel($token, 'wrong_token_for_mfa');
+      ThrowUserError('wrong_token_for_mfa');
+  }
 }
 
 
@@ -168,6 +172,8 @@ if ($action eq 'reqpw') {
     confirm_create_account($token);
 } elsif ($action eq 'cancel_new_account') {
     cancel_create_account($token);
+} elsif ($action eq 'mfa') {
+    verify_mfa($token);
 } else { 
     ThrowUserError('unknown_action', {action => $action});
 }
@@ -407,4 +413,17 @@ sub cancel_create_account {
     print $cgi->header();
     $template->process('global/message.html.tmpl', $vars)
       || ThrowTemplateError($template->error());
+}
+
+sub verify_mfa {
+    my $token = shift;
+    my ($user_id) = Bugzilla::Token::GetTokenData($token);
+    my $user = Bugzilla::User->check({ id => $user_id, cache => 1 });
+    if (!$user->mfa) {
+        delete_token($token);
+        print Bugzilla->cgi->redirect('index.cgi');
+        exit;
+    }
+    $user->mfa_provider->check_login($user);
+    delete_token($token);
 }

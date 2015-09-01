@@ -122,6 +122,28 @@
       explain why.)
     </td>
   </tr>
+  [% IF editform %]
+    <tr>
+      <th><label for="mfa">Two-factor Auth:</label></th>
+      <td>
+        [% IF user.in_group('admin') %]
+          [% IF otheruser.mfa %]
+            <select name="mfa" value="mfa">
+              <option value="">Disable</option>
+              [% SWITCH otheruser.mfa %]
+                [% CASE "TOTP" %]
+                  <option value="TOTP" selected>Enabled - TOTP</option>
+              [% END %]
+            </select>
+          [% ELSE %]
+            Disabled
+          [% END %]
+        [% ELSE %]
+          [% user.mfa ? "Enabled - " _ user.mfa : "Disabled" FILTER html %]
+        [% END %]
+      </td>
+    </tr>
+  [% END %]
 [% END %]
 
 [% Hook.process('end') %]

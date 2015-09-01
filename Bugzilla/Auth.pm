@@ -33,7 +33,7 @@ use fields qw(
 use Bugzilla::Constants;
 use Bugzilla::Error;
 use Bugzilla::Mailer;
-use Bugzilla::Util qw(datetime_from);
+use Bugzilla::Util qw(datetime_from i_am_webservice);
 use Bugzilla::User::Setting ();
 use Bugzilla::Auth::Login::Stack;
 use Bugzilla::Auth::Verify::Stack;
@@ -93,7 +93,26 @@ sub login {
     }
     $user->set_authorizer($self);
 
+    # trigger multi-factor auth.  once verified the provider calls mfa_verified()
+    if ($self->{_info_getter}->{successful}->requires_verification
+        && $user->mfa
+        && !Bugzilla->sudoer
+        && !i_am_webservice()
+    ) {
+        $user->mfa_provider->prompt({ user => $user, type => $type });
+        exit;
+    }
+
     return $self->_handle_login_result($login_info, $type);
+}
+
+sub mfa_verified {
+    my ($self, $user, $type) = @_;
+    require Bugzilla::Auth::Login::CGI;
+    $self->{_info_getter}->{successful} = Bugzilla::Auth::Login::CGI->new();
+    $self->_handle_login_result({ user => $user }, $type);
+    print Bugzilla->cgi->redirect('index.cgi');
+    exit;
 }
 
 sub successful_info_getter {

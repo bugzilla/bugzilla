@@ -1,0 +1,59 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% js = BLOCK %]
+
+$(function() {
+
+  $('#show-text')
+    .click(function(event) {
+      event.preventDefault();
+      $('#qr, #show-text').hide();
+      $('#secret, #show-qr').show();
+    });
+
+  $('#show-qr')
+    .click(function(event) {
+      event.preventDefault();
+      $('#secret, #show-qr').hide();
+      $('#qr, #show-text').show();
+    });
+
+});
+
+[% END %]
+
+[% css = BLOCK %]
+
+#secret {
+  font-size: 120%;
+  padding: 12px;
+}
+
+#show-text, #show-qr {
+  padding-left: 12px;
+}
+
+[% END %]
+
+[%
+  PROCESS global/header.html.tmpl
+    style_urls = ['skins/standard/admin.css']
+    no_body    = 1
+    javascript = js
+    style      = css
+%]
+<body id="mfa-enroll-embedded">
+  <div id="toggle">
+    <a href="#" id="show-text">Show as text</a>
+    <a href="#" id="show-qr" style="display:none">Show as QR code</a>
+  </div>
+  <img id="qr" width="195" height="195">
+  <div id="secret" style="display:none"></div>
+</body>
+</html>

@@ -58,7 +58,15 @@ sub _rest_resources {
                     return { $param => [ $_[0] ] };
                 }
             }
-        }
+        },
+        qr{^/user/mfa/([^/]+)/enroll$}, {
+            GET => {
+                method => 'mfa_enroll',
+                params => sub {
+                    return { provider => $_[0] };
+                }
+            },
+        },
     ];
     return $rest_resources;
 }

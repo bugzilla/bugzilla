@@ -38,6 +38,7 @@ use Bugzilla::User::Setting qw(clear_settings_cache);
 use Bugzilla::User::Session;
 use Bugzilla::User::APIKey;
 use Bugzilla::Token;
+use DateTime;
 
 use constant SESSION_MAX => 20;
 
@@ -142,6 +143,7 @@ sub SaveAccount {
     }
 
     $user->set_name($cgi->param('realname'));
+    $user->set_mfa($cgi->param('mfa'));
     $user->update({ keep_session => 1, keep_tokens => 1 });
     $dbh->bz_commit_transaction;
 }
@@ -542,6 +544,55 @@ sub SaveSavedSearches {
     Bugzilla->memcached->clear({ table => 'profiles', id => $user->id });
 }
 
+sub SaveMFA {
+    my $cgi  = Bugzilla->cgi;
+    my $dbh  = Bugzilla->dbh;
+    my $user = Bugzilla->user;
+    my $action = $cgi->param('mfa_action') // '';
+    return unless $action eq 'enable' || $action eq 'disable';
+
+    my $crypt_password = $user->cryptpassword;
+    if (bz_crypt($cgi->param('password'), $crypt_password) ne $crypt_password) {
+        ThrowUserError('password_incorrect');
+    }
+
+    $dbh->bz_start_transaction;
+    if ($action eq 'enable') {
+        $user->set_mfa($cgi->param('mfa'));
+        $user->mfa_provider->check($cgi->param('mfa_enable_code') // '');
+        $user->mfa_provider->enrolled();
+    }
+    else {
+        $user->mfa_provider->check($cgi->param('mfa_disable_code') // '');
+        $user->set_mfa('');
+    }
+
+    $user->update({ keep_session => 1, keep_tokens => 1 });
+
+    my $settings = Bugzilla->user->settings;
+    $settings->{api_key_only}->set('on');
+    clear_settings_cache(Bugzilla->user->id);
+
+    $dbh->bz_commit_transaction;
+}
+
+sub DoMFA {
+    my $cgi = Bugzilla->cgi;
+    return unless my $provider = $cgi->param('frame');
+
+    print $cgi->header(
+        -Cache_Control => 'no-cache, no-store, must-revalidate',
+        -Expires       => 'Thu, 01 Dec 1994 16:00:00 GMT',
+        -Pragma        => 'no-cache',
+    );
+    if ($provider =~ /^[a-z]+$/) {
+        trick_taint($provider);
+        $template->process("mfa/$provider/enroll.html.tmpl", $vars)
+            || ThrowTemplateError($template->error());
+    }
+    exit;
+}
+
 sub SaveSessions {
     my $cgi = Bugzilla->cgi;
     my $dbh = Bugzilla->dbh;
@@ -574,7 +625,7 @@ sub DoSessions {
     my $info_getter = $user->authorizer && $user->authorizer->successful_info_getter();
 
     if ($info_getter) {
-        foreach my $session (@$sessions) { 
+        foreach my $session (@$sessions) {
             $session->{current} = $info_getter->cookie eq $session->{cookie};
         }
     }
@@ -720,6 +771,11 @@ SWITCH: for ($current_tab_name) {
     /^sessions$/ && do {
         SaveSessions() if $save_changes;
         DoSessions();
+        last SWITCH;
+    };
+    /^mfa$/ && do {
+        SaveMFA() if $save_changes;
+        DoMFA();
         last SWITCH;
     };
 

@@ -411,6 +411,20 @@ sub OPTIONAL_MODULES {
         version => '0',
         feature => ['elasticsearch'],
     },
+
+    # multi factor auth - totp
+    {
+        package => 'Auth-GoogleAuth',
+        module  => 'Auth::GoogleAuth',
+        version => '1.01',
+        feature => ['mfa'],
+    },
+    {
+        package => 'GD-Barcode-QRcode',
+        module  => 'GD::Barcode::QRcode',
+        version => '0',
+        feature => ['mfa'],
+    },
     );
 
     my $extra_modules = _get_extension_requirements('OPTIONAL_MODULES');
@@ -434,6 +448,7 @@ use constant FEATURE_FILES => (
     patch_viewer  => ['Bugzilla/Attachment/PatchReader.pm'],
     updates       => ['Bugzilla/Update.pm'],
     memcached     => ['Bugzilla/Memcache.pm'],
+    mfa           => ['Bugzilla/MFA/TOTP.pm'],
 );
 
 # This implements the REQUIRED_MODULES and OPTIONAL_MODULES stuff

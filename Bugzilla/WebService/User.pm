@@ -416,6 +416,20 @@ sub _login_to_hash {
     return $item;
 }
 
+#
+# MFA
+#
+
+sub mfa_enroll {
+    my ($self, $params) = @_;
+    my $provider_name = lc($params->{provider});
+
+    my $user = Bugzilla->login(LOGIN_REQUIRED);
+    $user->set_mfa($provider_name);
+    my $provider = $user->mfa_provider // die "Unknown MTA provider\n";
+    return $provider->enroll();
+}
+
 1;
 
 __END__

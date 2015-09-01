@@ -195,6 +195,7 @@ sub delete_sensitive_user_data {
     $dbh->do("DELETE FROM user_api_keys");
     $dbh->do("DELETE FROM profiles_activity");
     $dbh->do("DELETE FROM profile_search");
+    $dbh->do("DELETE FROM profile_mfa");
     $dbh->do("DELETE FROM namedqueries");
     $dbh->do("DELETE FROM tokens");
     $dbh->do("DELETE FROM logincookies");

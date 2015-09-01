@@ -174,10 +174,12 @@ sub members_report {
                                             action => 'run',
                                             object => 'group_admins' });
 
-    my @grouplist =
-                  ($user->in_group('editusers') || $user->in_group('infrasec'))
-                  ? map { lc($_->name) } Bugzilla::Group->get_all
-                  : _get_public_membership_groups();
+    my $privileged = $user->in_group('editusers') || $user->in_group('infrasec');
+    $vars->{privileged} = $privileged;
+
+    my @grouplist = $privileged
+        ? map { lc($_->name) } Bugzilla::Group->get_all
+        : _get_public_membership_groups();
 
     my $include_disabled = $cgi->param('include_disabled') ? 1 : 0;
     $vars->{'include_disabled'} = $include_disabled;
@@ -240,20 +242,26 @@ sub members_report {
     if ($page eq 'group_members.json') {
         my %users;
         foreach my $rh (@types) {
-            my $group_name = $rh->{name} eq '_direct' ? 'direct' : $rh->{name};
             foreach my $member (@{ $rh->{members} }) {
                 my $login = $member->login;
                 if (exists $users{$login}) {
-                    push @{ $users{$login}->{groups} }, $group_name;
+                    push @{ $users{$login}->{groups} }, $rh->{name} if $privileged;
                 }
                 else {
-                    $users{$login} = {
+                    my $rh_user = {
                         login      => $login,
-                        membership => $rh->{name} eq '_direct' ? 'direct' : 'indirect',
-                        group      => $group_name,
-                        groups     => [ $group_name ],
-                        lastseen   => $member->{lastseen},
+                        membership => $rh->{name} eq 'direct' ? 'direct' : 'indirect',
+                        rh_name => $rh->{name},
                     };
+                    if ($privileged) {
+                        $rh_user->{group}        = $rh->{name};
+                        $rh_user->{groups}       = [ $rh->{name} ];
+                        $rh_user->{lastseeon}    = $member->{lastseen};
+                        $rh_user->{mfa}          = $member->mfa;
+                        $rh_user->{api_key_only} = $member->settings->{api_key_only}->{value} eq 'on'
+                                                   ? JSON::true : JSON::false;
+                    }
+                    $users{$login} = $rh_user;
                 }
             }
         }

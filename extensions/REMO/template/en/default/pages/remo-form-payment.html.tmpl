@@ -125,7 +125,8 @@ function getBugInfo (e, div) {
       id: bug_id,
       params: {
         ids: [ bug_id ], 
-        include_fields: [ 'product', 'component', 'status',  'summary' ]
+        include_fields: [ 'product', 'component', 'status',  'summary' ],
+        Bugzilla_api_token : (BUGZILLA.api_token ? BUGZILLA.api_token : '')
       }
     })
   );    

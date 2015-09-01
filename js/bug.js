@@ -184,7 +184,10 @@ YAHOO.bugzilla.dupTable = {
             var args = JSON.stringify({
                 version: "1.1",
                 method: 'MyDashboard.bug_interest_unmark',
-                params: { bug_ids: bug_ids },
+                params: {
+                    bug_ids: bug_ids,
+                    Bugzilla_api_token: (BUGZILLA.api_token ? BUGZILLA.api_token : '')
+                },
             });
             var callbacks = {
                 failure: function(res) {

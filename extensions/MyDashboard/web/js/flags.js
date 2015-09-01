@@ -50,7 +50,9 @@ YUI({
             version: "1.1",
             method:  "MyDashboard.run_flag_query",
             id:      counter,
-            params:  { type : type }
+            params:  { type : type,
+                       Bugzilla_api_token : (BUGZILLA.api_token ? BUGZILLA.api_token : '')
+            }
         };
 
         var stringified = Y.JSON.stringify(json_object);

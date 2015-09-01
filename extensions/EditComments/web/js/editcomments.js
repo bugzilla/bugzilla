@@ -47,7 +47,9 @@ function editComment(comment_count, comment_id) {
             version: "1.1",
             method: "EditComments.comments",
             id: comment_id,
-            params: { comment_ids: [ comment_id ] }
+            params: { comment_ids: [ comment_id ],
+                      Bugzilla_api_token : (BUGZILLA.api_token ? BUGZILLA.api_token : '')
+            }
         })
     );
 }

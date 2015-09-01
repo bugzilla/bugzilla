@@ -122,7 +122,9 @@ YUI({
             version: "1.1",
             method:  "MyDashboard.run_bug_query",
             id:      counter,
-            params:  { query : query_name }
+            params:  { query : query_name,
+                       Bugzilla_api_token : (BUGZILLA.api_token ? BUGZILLA.api_token : '')
+            }
         };
 
         bugQuery.sendRequest({
@@ -206,7 +208,11 @@ YUI({
                 var lastChangesParams = {
                     version: "1.1",
                     method:  "MyDashboard.run_last_changes",
-                    params:  { bug_id: data.bug_id, changeddate_api: data.changeddate_api  }
+                    params:  {
+                        bug_id: data.bug_id,
+                        changeddate_api: data.changeddate_api,
+                        Bugzilla_api_token : (BUGZILLA.api_token ? BUGZILLA.api_token : '')
+                    }
                 };
 
                 lastChangesQuery.sendRequest({

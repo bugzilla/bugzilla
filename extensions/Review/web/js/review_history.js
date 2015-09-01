@@ -127,7 +127,8 @@
                         params: {
                             type_name: 'review',
                             requestee: user,
-                            include_fields: ['flag_id', 'status']
+                            include_fields: ['flag_id', 'status'],
+                            Bugzilla_api_token : (BUGZILLA.api_token ? BUGZILLA.api_token : '')
                         }
                     }),
                     cfg: {
@@ -145,7 +146,10 @@
                     request: Y.JSON.stringify({
                         version: '1.1',
                         method: 'Review.flag_activity',
-                        params: { flag_ids: flag_ids }
+                        params: {
+                            flag_ids: flag_ids,
+                            Bugzilla_api_token: (BUGZILLA.api_token ? BUGZILLA.api_token : '')
+                        }
                     }),
                     cfg: {
                         method: 'POST',
@@ -181,7 +185,11 @@
                     request: Y.JSON.stringify({
                         version: '1.1',
                         method: 'Bug.get',
-                        params: { ids: bug_ids, include_fields: ['summary', 'id'] }
+                        params: {
+                            ids: bug_ids,
+                            include_fields: ['summary', 'id'],
+                            Bugzilla_api_token: (BUGZILLA.api_token ? BUGZILLA.api_token : '')
+                        }
                     }),
                     cfg: {
                         method: 'POST',
@@ -220,7 +228,8 @@
                         method: 'Bug.attachments',
                         params: {
                             attachment_ids: attachment_ids,
-                            include_fields: ['id', 'description']
+                            include_fields: ['id', 'description'],
+                            Bugzilla_api_token : (BUGZILLA.api_token ? BUGZILLA.api_token : '')
                         }
                     }),
                     cfg: {

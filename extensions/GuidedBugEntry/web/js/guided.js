@@ -257,7 +257,8 @@ var product = {
         id: ++this._counter,
         params: {
           names: [productName],
-          exclude_fields: ['internals', 'milestones']
+          exclude_fields: ['internals', 'milestones'],
+          Bugzilla_api_token : (BUGZILLA.api_token ? BUGZILLA.api_token : '')
         }
       }
       )
@@ -445,7 +446,8 @@ var dupes = {
         id: ++this._counter,
         params: {
           ids: [ bugID ],
-          cc : ccObject
+          cc : ccObject,
+          Bugzilla_api_token: (BUGZILLA.api_token ? BUGZILLA.api_token : '')
         }
       })
     );
@@ -556,7 +558,8 @@ var dupes = {
               summary: dupes.getSummary(),
               limit: 12,
               include_fields: [ "id", "summary", "status", "resolution",
-                "update_token", "cc", "component" ]
+                "update_token", "cc", "component" ],
+              Bugzilla_api_token: (BUGZILLA.api_token ? BUGZILLA.api_token : '')
           }
       };
 

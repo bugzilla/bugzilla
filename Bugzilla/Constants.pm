@@ -470,7 +470,7 @@ use constant TIMETRACKING_FIELDS =>
 # The maximum number of days a token will remain valid.
 use constant MAX_TOKEN_AGE => 3;
 # How many days a logincookie will remain valid if not used.
-use constant MAX_LOGINCOOKIE_AGE => 30;
+use constant MAX_LOGINCOOKIE_AGE => 7;
 # How many seconds (default is 6 hours) a sudo cookie remains valid.
 use constant MAX_SUDO_TOKEN_AGE => 21600;
 

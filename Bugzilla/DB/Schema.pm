@@ -1223,6 +1223,10 @@ use constant ABSTRACT_SCHEMA => {
             isactive     => {TYPE => 'BOOLEAN', NOTNULL => 1,
                              DEFAULT => 'TRUE'},
             icon_url     => {TYPE => 'TINYTEXT'},
+            owner_user_id => {TYPE       => 'INT3',
+                              REFERENCES => {
+                                  TABLE  => 'profiles',
+                                  COLUMN => 'userid'}},
         ],
         INDEXES => [
             groups_name_idx => {FIELDS => ['name'], TYPE => 'UNIQUE'},

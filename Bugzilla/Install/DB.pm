@@ -754,6 +754,8 @@ sub update_table_definitions {
 
     $dbh->bz_add_column('profiles', 'mfa', { TYPE => 'varchar(8)', , DEFAULT => "''" });
 
+    _migrate_group_owners();
+
     ################################################################
     # New --TABLE-- changes should go *** A B O V E *** this point #
     ################################################################
@@ -3881,6 +3883,14 @@ sub _add_restrict_ipaddr {
     $dbh->bz_add_column('logincookies', 'restrict_ipaddr',
                         {TYPE => 'BOOLEAN', NOTNULL => 1, DEFAULT => 0});
     $dbh->do("UPDATE logincookies SET restrict_ipaddr = 1 WHERE ipaddr IS NOT NULL");
+}
+
+sub _migrate_group_owners {
+    my $dbh = Bugzilla->dbh;
+    return if $dbh->bz_column_info('groups', 'owner_user_id');
+    $dbh->bz_add_column('groups', 'owner_user_id', {TYPE => 'INT3'});
+    my $nobody = Bugzilla::User->check('nobody@mozilla.org');
+    $dbh->do('UPDATE groups SET owner_user_id = ?', undef, $nobody->id);
 }
 
 1;

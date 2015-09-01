@@ -54,17 +54,28 @@ sub get_login_info {
     }
 
     if (!exists $response->{failure}) {
-        my $user = $response->{user};
-        return { failure    => AUTH_ERROR,
-                 user_error => 'github_auth_account_too_powerful' } if $user->in_group('no-github-auth');
-        return { failure    => AUTH_ERROR,
-                 user_error => 'mfa_prevents_login',
-                 details    => { provider => 'GitHub' } } if $user->mfa;
-        $response = {
-            username    => $user->login,
-            user_id     => $user->id,
-            github_auth => 1,
-        };
+        if (exists $response->{user}) {
+            # existing account
+            my $user = $response->{user};
+            return { failure    => AUTH_ERROR,
+                    user_error => 'github_auth_account_too_powerful' } if $user->in_group('no-github-auth');
+            return { failure    => AUTH_ERROR,
+                    user_error => 'mfa_prevents_login',
+                    details    => { provider => 'GitHub' } } if $user->mfa;
+            $response = {
+                username    => $user->login,
+                user_id     => $user->id,
+                github_auth => 1,
+            };
+        }
+        else {
+            # new account
+            my $email = $response->{email};
+            $response = {
+                username    => $email,
+                github_auth => 1,
+            };
+        }
     }
     return $response;
 }
@@ -177,7 +188,7 @@ sub _get_login_info_from_email {
 
     my $user = Bugzilla::User->new({name => $github_email, cache => 1});
     $cgi->remove_cookie('Bugzilla_github_token');
-    return { user => $user };
+    return $user ? { user => $user } : { email => $github_email };
 }
 
 sub fail_nodata {

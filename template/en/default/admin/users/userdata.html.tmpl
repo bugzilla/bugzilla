@@ -139,7 +139,7 @@
             Disabled
           [% END %]
         [% ELSE %]
-          [% user.mfa ? "Enabled - " _ user.mfa : "Disabled" FILTER html %]
+          [% otheruser.mfa ? "Enabled - " _ otheruser.mfa : "Disabled" FILTER html %]
         [% END %]
       </td>
     </tr>

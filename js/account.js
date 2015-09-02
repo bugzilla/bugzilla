@@ -80,7 +80,7 @@ $(function() {
                         iframe.find('#qr').attr('src', 'data:image/png;base64,' + data.png);
                         iframe.find('#secret').text(data.secret32);
                         $('#mfa-totp-issued').show();
-                        $('#mfa-totp-enable-code').focus();
+                        $('#mfa-password').focus();
                         $('#update').attr('disabled', false);
                     })
                     .error(function(data) {
@@ -100,8 +100,8 @@ $(function() {
             event.preventDefault();
             $('#mfa-disable-container').show();
             $('#mfa-confirm').show();
-            $('#mfa-api-blurb').hide();
-            $('#mfa-totp-disable-code').focus();
+            $('.mfa-api-blurb').hide();
+            $('#mfa-password').focus();
             $('#update').attr('disabled', false);
             $(this).hide();
         });

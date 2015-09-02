@@ -36,9 +36,20 @@
 
     <div id="mfa-disable-container" style="display:none">
 
+      <p>
+        Your current password and
+        [% IF user.mfa == "TOTP" %]
+          a TOTP verification code
+        [% END %]
+        is required to enable two-factor authentication.
+      </p>
+      <p>
+        <label class="mfa-totp">Current Password:</label>
+        <input type="password" name="password" id="mfa-password" required>
+      </p>
+
       [% IF user.mfa == "TOTP" %]
-        A verification code is required to confirm this change.<br><br>
-        <b>Code:</b>
+        <label class="mfa-totp">Code:</label>
         <input type="text" name="mfa_disable_code" id="mfa-totp-disable-code"
                placeholder="123456" maxlength="6" pattern="\d{6}" size="10"
                autocomplete="off" required autofocus>
@@ -46,7 +57,7 @@
 
     </div>
 
-    <p>
+    <p class="mfa-api-blurb">
       [% INCLUDE api_key_pref_blurb %]
     </p>
 
@@ -68,17 +79,25 @@
       [%# TOTP %]
       <div id="mfa-enable-totp" class="mfa-provider" style="display:none">
 
+        <p>
+          Your current password is required to enable two-factor authentication.
+        </p>
+        <p>
+          <label class="mfa-totp">Current Password:</label>
+          <input type="password" name="password" id="mfa-password" required>
+        </p>
+
         <div id="mfa-totp-throbber">
-          Working.. <img src="skins/standard/throbber.gif" width="16" height="11">
+          Generating new QR code.. <img src="skins/standard/throbber.gif" width="16" height="11">
         </div>
 
         <div id="mfa-totp-issued" style="display:none">
-          <iframe id="mfa-enable-totp-frame" src="userprefs.cgi?tab=mfa&frame=totp"></iframe>
+          <iframe id="mfa-enable-totp-frame" src="userprefs.cgi?tab=mfa&frame=totp" tabindex="-1"></iframe>
           <div id="mfa-totp-blurb">
             Scan this QR code with your <a href="#" id="mfa-totp-apps">TOTP App</a>,
             then enter the six digit code the app generates.<br>
             <br>
-            <b>Code:</b>
+            <label class="mfa-totp">Code:</label>
             <input type="text" name="mfa_enable_code" id="mfa-totp-enable-code"
                    placeholder="123456" maxlength="6" pattern="\d{6}" size="10"
                    autocomplete="off" required autofocus>
@@ -117,16 +136,11 @@
 
   <div id="mfa-confirm" style="display:none">
     <p>
-      Two-factor authentication settings will not be updated until you provide
-      your current password and <b>Submit Changes</b>.
+      Two-factor authentication settings will not be updated until you
+      <b>Submit Changes</b>.
     </p>
 
-    <p>
-      <b>Current Password:</b>
-      <input type="password" name="password" required>
-    </p>
-
-    <p id="mfa-api-blurb" style="display:none">
+    <p class="mfa-api-blurb" style="display:none">
       [% INCLUDE api_key_pref_blurb %]
     </p>
   </div>

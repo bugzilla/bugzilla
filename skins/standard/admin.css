@@ -273,3 +273,10 @@ input[disabled] {
     background: none;
     padding: 0;
 }
+
+label.mfa-totp {
+    display: inline-block;
+    width: 155px;
+    text-align: right;
+    font-weight: bold;
+}

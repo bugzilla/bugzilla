@@ -355,6 +355,7 @@ sub _check_group {
     $sel->title_is("Add group");
     $sel->type_ok("name", $group);
     $sel->type_ok("desc", $group_description);
+    $sel->type_ok("owner", $config->{'admin_user_login'});
     $sel->check_ok("isactive");
     $sel->check_ok("insertnew");
     $sel->click_ok("create");

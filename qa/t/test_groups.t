@@ -27,6 +27,7 @@ $sel->wait_for_page_to_load(WAIT_TIME);
 $sel->title_is("Add group");
 $sel->type_ok("name", "Selenium-test");
 $sel->type_ok("desc", "Test group for Selenium");
+$sel->type_ok("owner", $config->{'admin_user_login'});
 $sel->check_ok("isactive");
 $sel->uncheck_ok("insertnew");
 $sel->click_ok("create");

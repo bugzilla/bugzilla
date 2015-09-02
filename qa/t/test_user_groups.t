@@ -44,6 +44,7 @@ $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_is("Add group");
 $sel->type_ok("name", "Slave");
 $sel->type_ok("desc", "Members of the Master group are also members of this group");
+$sel->type_ok("owner", $config->{'admin_user_login'});
 $sel->uncheck_ok("isactive");
 ok(!$sel->is_checked("insertnew"), "Group not added to products by default");
 $sel->click_ok("create");

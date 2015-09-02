@@ -276,6 +276,16 @@ sub object_cache_key {
     }
 }
 
+sub object_cache_clearall {
+    my $class = shift;
+    my $cache = Bugzilla->request_cache;
+    $class = blessed($class) if blessed($class);
+    my $prefix = $class . ',';
+    foreach my $key (grep { substr($_, 0, length($prefix)) eq $prefix } keys %$cache) {
+        delete $cache->{$key};
+    }
+}
+
 # To support serialisation, we need to capture the keys in an object's default
 # hashref.
 sub _serialisation_keys {
@@ -1523,6 +1533,28 @@ object's C<id> as the key.
 =item B<Example>
 
 $bug->object_cache_set();
+
+=back
+
+=item C<object_cache_clearall>
+
+=over
+
+=item B<Description>
+
+Removes all objects for the specified class from the cache.
+
+=item B<Params>
+
+(none)
+
+=item B<Returns>
+
+(nothing)
+
+=item B<Example>
+
+Bugzilla::User->object_cache_clearall();
 
 =back
 

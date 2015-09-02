@@ -75,10 +75,9 @@ print "Query matched $count bug(s)\nPress <Ctrl-C> to stop or <Enter> to continu
 getc();
 
 my $dbh = Bugzilla->dbh;
-$dbh->bz_start_transaction;
-
 my $updated = 0;
 foreach my $ra (@$bugs) {
+    $dbh->bz_start_transaction;
     my ($bug_id, $summary) = @$ra;
     print "$bug_id - $summary\n";
     my $bug = Bugzilla::Bug->check($bug_id);
@@ -89,8 +88,10 @@ foreach my $ra (@$bugs) {
         $dbh->do("UPDATE bugs SET lastdiffed = delta_ts WHERE bug_id = ?", undef, $bug->id);
         $updated++;
     }
-}
+    $dbh->bz_commit_transaction;
 
-$dbh->bz_commit_transaction;
+    # drop cached user objects to avoid excessive memory usage
+    Bugzilla::User->object_cache_clearall();
+}
 
 print "\nUpdated $updated bugs(s)\n";

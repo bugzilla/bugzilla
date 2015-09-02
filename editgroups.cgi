@@ -213,6 +213,7 @@ if ($action eq 'new') {
         isactive    => scalar $cgi->param('isactive'),
         icon_url    => scalar $cgi->param('icon_url'),
         isbuggroup  => 1,
+        owner_user_id => scalar $cgi->param('owner'),
     });
 
     # Permit all existing products to use the new group if makeproductgroups.
@@ -395,6 +396,10 @@ sub doGroupChanges {
 
     if (defined $cgi->param('icon_url')) {
         $group->set_icon_url($cgi->param('icon_url'));
+    }
+
+    if (defined $cgi->param('owner')) {
+        $group->set_owner($cgi->param('owner'));
     }
 
     my $changes = $group->update();

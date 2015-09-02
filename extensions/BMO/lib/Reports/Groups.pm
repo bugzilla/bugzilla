@@ -34,8 +34,8 @@ sub admins_report {
     my $groups = join(',', map { $dbh->quote($_) } @grouplist);
 
     my $query = "
-        SELECT groups.name, " .
-               $dbh->sql_group_concat('profiles.login_name', "','", 1) . "
+        SELECT groups.id, " .
+               $dbh->sql_group_concat('profiles.userid', "','", 1) . "
           FROM groups
                LEFT JOIN user_group_map
                     ON user_group_map.group_id = groups.id
@@ -48,14 +48,18 @@ sub admins_report {
       GROUP BY groups.name";
 
     my @groups;
-    foreach my $group (@{ $dbh->selectall_arrayref($query) }) {
+    foreach my $row (@{ $dbh->selectall_arrayref($query) }) {
+        my $group = Bugzilla::Group->new({ id => shift @$row, cache => 1});
         my @admins;
-        if ($group->[1]) {
-            foreach my $admin (split(/,/, $group->[1])) {
-                push(@admins, Bugzilla::User->new({ name => $admin }));
+        if (my $admin_ids = shift @$row) {
+            foreach my $uid (split(/,/, $admin_ids)) {
+                push(@admins, Bugzilla::User->new({ id => $uid, cache => 1 }));
             }
         }
-        push(@groups, { name => $group->[0], admins => \@admins });
+        push(@groups, { name        => $group->name,
+                        description => $group->description,
+                        owner       => $group->owner,
+                        admins      => \@admins });
     }
 
     $vars->{'groups'} = \@groups;
@@ -197,7 +201,7 @@ sub members_report {
     $group = '' unless grep { $_ eq $group } @group_names;
     return if $group eq '';
     my $group_obj = Bugzilla::Group->new({ name => $group });
-    $vars->{'group'} = $group;
+    $vars->{'group'} = $group_obj;
 
     my @types;
     my $members = $group_obj->members_complete();

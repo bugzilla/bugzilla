@@ -28,14 +28,23 @@
   <table border="0" cellspacing="0" id="report" class="hover" width="100%">
     <tr id="report-header">
       <th align="left">Name</th>
+      <th align="left">Owner</th>
       <th align="left">Admins</th>
     </tr>
 
     [% FOREACH group = groups %]
       [% count = loop.count() %]
       <tr class="report_item [% count % 2 == 1 ? "report_row_odd" : "report_row_even" %]">
-        <td>
-          [% group.name FILTER html %]
+        <td nowrap>
+          <span title="[% group.description FILTER html %]">
+            [% group.name FILTER html %]</span>
+        </td>
+        <td nowrap>
+          [% IF group.owner.login == 'nobody@mozilla.org' %]
+            &ndash;
+          [% ELSE %]
+            [% INCLUDE global/user.html.tmpl who = group.owner %]
+          [% END %]
         </td>
         <td>
           [% FOREACH admin = group.admins %]

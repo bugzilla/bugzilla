@@ -33,6 +33,8 @@ use Bugzilla::Util;
 use Bugzilla::Error;
 use Bugzilla::Config qw(:admin);
 
+use Scalar::Util qw(blessed);
+
 ###############################
 ##### Module Initialization ###
 ###############################
@@ -47,6 +49,7 @@ use constant DB_COLUMNS => qw(
     groups.userregexp
     groups.isactive
     groups.icon_url
+    groups.owner_user_id
 );
 
 use constant DB_TABLE => 'groups';
@@ -60,6 +63,7 @@ use constant VALIDATORS => {
     isactive    => \&_check_is_active,
     isbuggroup  => \&_check_is_bug_group,
     icon_url    => \&_check_icon_url,
+    owner_user_id => \&_check_owner,
 };
 
 use constant UPDATE_COLUMNS => qw(
@@ -68,6 +72,7 @@ use constant UPDATE_COLUMNS => qw(
     userregexp
     isactive
     icon_url
+    owner_user_id
 );
 
 # Parameters that are lists of groups.
@@ -205,6 +210,15 @@ sub products {
     return $self->{products};
 }
 
+sub owner {
+    my $self = shift;
+    return $self->{owner} if exists $self->{owner};
+    if ($self->{owner_user_id}) {
+        $self->{owner} = Bugzilla::User->check({ id => $self->{owner_user_id}, cache => 1 });
+    }
+    return $self->{owner} || undef;
+}
+
 ###############################
 ####        Methods        ####
 ###############################
@@ -226,6 +240,13 @@ sub set_is_active   { $_[0]->set('isactive', $_[1]);    }
 sub set_name        { $_[0]->set('name', $_[1]);        }
 sub set_user_regexp { $_[0]->set('userregexp', $_[1]);  }
 sub set_icon_url    { $_[0]->set('icon_url', $_[1]);    }
+
+sub set_owner {
+    my ($self, $owner_id) = @_;
+    $self->set('owner_user_id', $owner_id);
+    # Reset the default owner object.
+    delete $self->{owner};
+}
 
 sub update {
     my $self = shift;
@@ -519,6 +540,16 @@ sub _check_is_bug_group {
 
 sub _check_icon_url { return $_[1] ? clean_text($_[1]) : undef; }
 
+sub _check_owner {
+    my ($invocant, $owner, undef, $params) = @_;
+    return Bugzilla::User->check({ name => $owner, cache => 1 })->id if $owner;
+    # We require an owner if the group is a not a system group
+    if (blessed($invocant) && !$invocant->is_bug_group) {
+        return undef;
+    }
+    ThrowUserError('group_needs_owner');
+}
+
 1;
 
 __END__
@@ -541,6 +572,7 @@ Bugzilla::Group - Bugzilla group class.
     my $is_active    = $group->is_active;
     my $icon_url     = $group->icon_url;
     my $is_active_bug_group = $group->is_active_bug_group;
+    my $owner        = $group->owner;
 
     my $group_id = Bugzilla::Group::ValidateGroupName('admin', @users);
     my @groups   = Bugzilla::Group->get_all;

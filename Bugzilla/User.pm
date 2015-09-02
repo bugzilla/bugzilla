@@ -1051,6 +1051,11 @@ sub groups_in_sql {
     return Bugzilla->dbh->sql_in($field, $ids);
 }
 
+sub groups_owned {
+    my $self = shift;
+    return $self->{groups_owned} //= Bugzilla::Group->match({ owner_user_id => $self->id });
+}
+
 sub bless_groups {
     my $self = shift;
 

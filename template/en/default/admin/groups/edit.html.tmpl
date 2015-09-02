@@ -45,6 +45,8 @@
         padding-right: .5em;
     }
   "
+  generate_api_token = 1
+  javascript_urls = [ "js/field.js" ]
 %]
 
 <form method="post" action="editgroups.cgi">
@@ -94,6 +96,18 @@
       <td>
         <input type="text" name="icon_url" size="70" maxlength="255"
                value="[% group.icon_url FILTER html %]">
+      </td>
+    </tr>
+
+    <tr>
+      <th>Owner:</th>
+      <td>
+        [% INCLUDE global/userselect.html.tmpl
+           id      => "owner"
+           name    => "owner"
+           value   => group.owner.login
+           size    => 30
+         %]
       </td>
     </tr>
 

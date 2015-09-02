@@ -136,6 +136,22 @@ $(function() {
     </td>
   </tr>
 
+  [% IF otheruser.groups_owned.size %]
+    <tr>
+      <th>Groups Owned:</th>
+      <td>
+        [% can_edit_groups = user.in_group('creategroups') %]
+        [% FOREACH group = otheruser.groups_owned %]
+          [% IF can_edit_groups %]
+            <a href="[% urlbase FILTER none %]editgroups.cgi?action=changeform&amp;group=[% group.id FILTER none %]">
+          [% END %]
+          [% group.name FILTER html %]
+          [% '</a>' IF can_edit_groups %]<br>
+        [% END %]
+      </td>
+    </tr>
+  [% END %]
+
   <tr>
     <th>Last Login:</th>
     <td>

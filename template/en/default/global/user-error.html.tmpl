@@ -541,7 +541,11 @@
   [% ELSIF error == "empty_group_name" %]
     [% title = "The group name can not be empty" %]
     You must enter a name for the group.
-  
+
+  [% ELSIF error == "group_needs_owner" %]
+    [% title = "Non-System Groups Require Default Owner" %]
+    You must enter a default owner login for non-system groups.
+
   [% ELSIF error == "entry_access_denied" %]
     [% title = "Permission Denied" %]
     [% admindocslinks = {'groups.html' => 'Group Security'} %]

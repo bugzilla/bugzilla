@@ -54,11 +54,4 @@ sub property_delete {
         undef, $self->{user}->id, $name);
 }
 
-sub property_delete_all {
-    my ($self) = @_;
-    Bugzilla->dbh->do(
-        "DELETE FROM profile_mfa WHERE user_id",
-        undef, $self->{user}->id);
-}
-
 1;

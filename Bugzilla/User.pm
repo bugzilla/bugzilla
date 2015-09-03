@@ -410,9 +410,6 @@ sub set_disabledtext {
 
 sub set_mfa {
     my ($self, $value) = @_;
-    if ($value eq '' && $self->mfa) {
-        $self->mfa_provider->property_delete_all();
-    }
     $self->set('mfa', $value);
     delete $self->{mfa_provider};
 }

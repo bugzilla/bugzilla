@@ -21,6 +21,9 @@ Cost Center:
 VP Authority:
 [%+ cgi.param('vp_authority') %]
 
+Product Line:
+[%+ cgi.param('product_line') %]
+
 Level 1/Level 2:
 [%+ cgi.param("level_1_or_2") %]
 
@@ -31,6 +34,9 @@ California or Toronto:
 Other Location:
 [%+ cgi.param("other_location") %]
 [% END  %]
+
+Onsite Mentorship:
+[%+ cgi.param('onsite') %]
 
 [% IF cgi.param("possible_mentor") %]
 Possible Mentor:

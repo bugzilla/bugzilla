@@ -8,38 +8,42 @@
 
 [% PROCESS global/variables.none.tmpl %]
 [% INCLUDE global/header.html.tmpl
-    title = "Recruiting Dashboard"
+    title = "Internship Dashboard"
     style_urls = [ "extensions/BMO/web/styles/reports.css" ]
     style = "#report td { vertical-align: top; }"
 %]
 
-<h1>Recruiting Dashboard</h1>
+<h1>Internship Dashboard</h1>
 
 [% IF bugs.size %]
   <table border="0" cellspacing="0" id="report" class="hover" width="100%">
     <tr id="report-header">
       <th>[% terms.Bug %]</th>
       <th>Summary</th>
+      <th>Status</th>
       <th>Hiring Manager</th>
       <th>SCVP</th>
-      <th>Part of Strategic Plan</th>
-      <th>Why is this critical for success</th>
+      <th>Product Line</th>
+      <th>Business Need</th>
+      <th>Name</th>
     </tr>
 
     [% FOREACH bug = bugs %]
       <tr class="report_item [% loop.count % 2 == 1 ? "report_row_odd" : "report_row_even" %]">
         <td>[% bug.id FILTER bug_link(bug) FILTER none %]</td>
         <td>[% bug.short_desc FILTER html %]</td>
+        <td>[% bug.bug_status FILTER html %]</td>
         <td>[% bug.hiring_manager FILTER html %]</td>
         <td>[% bug.scvp FILTER html %]</td>
-        <td>[% bug.strategic_plan FILTER html FILTER html_line_break %]</td>
-        <td>[% bug.why_critical FILTER html FILTER html_line_break %]</td>
+        <td>[% bug.product_line FILTER html FILTER html %]</td>
+        <td>[% bug.business_need FILTER html FILTER html_line_break %]</td>
+        <td>[% bug.intern_name FILTER html FILTER html %]</td>
       </tr>
     [% END %]
   </table>
 [% ELSE %]
   <p>
-    No open recruiting requisitions.
+    No open intern requisitions.
   </p>
 [% END %]
 

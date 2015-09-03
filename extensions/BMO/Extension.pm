@@ -202,6 +202,10 @@ sub page_before_template {
         require Bugzilla::Extension::BMO::Reports::Recruiting;
         Bugzilla::Extension::BMO::Reports::Recruiting::report($vars);
     }
+    elsif ($page eq 'internship_dashboard.html') {
+        require Bugzilla::Extension::BMO::Reports::Internship;
+        Bugzilla::Extension::BMO::Reports::Internship::report($vars);
+    }
     elsif ($page eq 'email_queue.html') {
         print Bugzilla->cgi->redirect('view_job_queue.cgi');
     }

@@ -209,6 +209,9 @@ sub SaveSettings {
             $settings->{$name}->set($value);
         }
     }
+
+    Bugzilla::Hook::process('settings_after_update');
+
     $vars->{'settings'} = $user->settings(1);
     clear_settings_cache($user->id);
 }

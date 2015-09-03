@@ -64,7 +64,7 @@ sub prompt {
 
 sub check {
     my ($self, $code) = @_;
-    $self->_auth()->verify($code)
+    $self->_auth()->verify($code, 1)
         || ThrowUserError('mfa_totp_bad_code');
 }
 

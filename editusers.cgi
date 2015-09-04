@@ -70,7 +70,8 @@ if ($action eq 'search') {
     my $matchstr      = trim($cgi->param('matchstr'));
     my $matchtype     = $cgi->param('matchtype');
     my $grouprestrict = $cgi->param('grouprestrict') || '0';
-    my $is_enabled    = scalar $cgi->param('is_enabled');
+    # 0 = disabled only, 1 = enabled only, 2 = everyone
+    my $is_enabled    = $cgi->param('is_enabled') // 2;
     my $query = 'SELECT DISTINCT userid, login_name, realname, is_enabled, ' .
                 $dbh->sql_date_format('last_seen_date', '%Y-%m-%d') . ' AS last_seen_date ' .
                 'FROM profiles';
@@ -163,11 +164,12 @@ if ($action eq 'search') {
         }
 
         detaint_natural($is_enabled);
-        if ($is_enabled == 0 || $is_enabled == 1) {
+        if ($is_enabled && ($is_enabled == 0 || $is_enabled == 1)) {
             $query .= " $nextCondition profiles.is_enabled = ?";
             $nextCondition = 'AND';
             push(@bindValues, $is_enabled);
         }
+
         $query .= ' ORDER BY profiles.login_name';
 
         $vars->{'users'} = $dbh->selectall_arrayref($query,

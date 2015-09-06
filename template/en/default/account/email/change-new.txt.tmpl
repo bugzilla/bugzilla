@@ -7,12 +7,12 @@
   #%]
 
 From: [% Param('mailfrom') %]
-To: [% emailaddress %]
+To: [% newemailaddress %]
 Subject: [% terms.Bugzilla %] Change Email Address Request
 X-Bugzilla-Type: admin
 
 [%+ terms.Bugzilla %] has received a request to change the email address
-for the account [% oldemailaddress %] to your address.
+for the account [% user.email %] to your address.
 
 To confirm the change, visit the following link:
 

@@ -219,17 +219,14 @@ sub build_thread_marker {
 
 sub send_staged_mail {
     my $dbh = Bugzilla->dbh;
-    my @ids;
-    my $emails
-        = $dbh->selectall_arrayref("SELECT id, message FROM mail_staging");
 
-    foreach my $row (@$emails) {
-        MessageToMTA($row->[1]);
-        push(@ids, $row->[0]);
-    }
+    my $emails = $dbh->selectall_arrayref('SELECT id, message FROM mail_staging');
+    my $sth = $dbh->prepare('DELETE FROM mail_staging WHERE id = ?');
 
-    if (@ids) {
-        $dbh->do("DELETE FROM mail_staging WHERE " . $dbh->sql_in('id', \@ids));
+    foreach my $email (@$emails) {
+        my ($id, $message) = @$email;
+        MessageToMTA($message);
+        $sth->execute($id);
     }
 }
 

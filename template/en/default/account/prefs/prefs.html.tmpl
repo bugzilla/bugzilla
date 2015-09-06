@@ -76,6 +76,10 @@
         In order to confirm your request, we have sent an email to your
         new email address. As a precaution, an email has also been sent
         to your old address allowing you to cancel this change if needed.
+        If you don't receive the email, you can
+        <a href="token.cgi?t=[% email_token FILTER uri %]&amp;a=cxlem">
+        cancel the email address change</a> from here if you wish (especially
+        if you mistyped the new email address).
       </p>
     [% END %]
   </div>

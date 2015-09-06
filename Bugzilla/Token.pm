@@ -28,6 +28,8 @@ use parent qw(Exporter);
                               check_token_data delete_token
                               issue_hash_token check_hash_token);
 
+use constant SEND_NOW => 1;
+
 ################################################################################
 # Public Functions
 ################################################################################
@@ -84,43 +86,49 @@ sub issue_new_user_account_token {
     # who made the request, and so it is reasonable to send the email in the same
     # language used to view the "Create a New Account" page (we cannot use their
     # user prefs as the user has no account yet!).
-    MessageToMTA($message);
+    MessageToMTA($message, SEND_NOW);
 }
 
 sub IssueEmailChangeToken {
-    my ($user, $new_email) = @_;
-    my $email_suffix = Bugzilla->params->{'emailsuffix'};
-    my $old_email = $user->login;
+    my $new_email = shift;
+    my $user = Bugzilla->user;
 
-    my ($token, $token_ts) = _create_token($user->id, 'emailold', $old_email . ":" . $new_email);
-
-    my $newtoken = _create_token($user->id, 'emailnew', $old_email . ":" . $new_email);
+    my ($token, $token_ts) = _create_token($user->id, 'emailold', $user->login . ":$new_email");
+    my $newtoken = _create_token($user->id, 'emailnew', $user->login . ":$new_email");
 
     # Mail the user the token along with instructions for using it.
 
     my $template = Bugzilla->template_inner($user->setting('lang'));
     my $vars = {};
 
-    $vars->{'oldemailaddress'} = $old_email . $email_suffix;
-    $vars->{'newemailaddress'} = $new_email . $email_suffix;
+    $vars->{'newemailaddress'} = $new_email . Bugzilla->params->{'emailsuffix'};
     $vars->{'expiration_ts'} = ctime($token_ts + MAX_TOKEN_AGE * 86400);
-    $vars->{'token'} = $token;
-    $vars->{'emailaddress'} = $old_email . $email_suffix;
+
+    # First send an email to the new address. If this one doesn't exist,
+    # then the whole process must stop immediately. This means the email must
+    # be sent immediately and must not be stored in the queue.
+    $vars->{'token'} = $newtoken;
 
     my $message;
-    $template->process("account/email/change-old.txt.tmpl", $vars, \$message)
+    $template->process('account/email/change-new.txt.tmpl', $vars, \$message)
       || ThrowTemplateError($template->error());
 
-    MessageToMTA($message);
+    MessageToMTA($message, SEND_NOW);
 
-    $vars->{'token'} = $newtoken;
-    $vars->{'emailaddress'} = $new_email . $email_suffix;
+    # If we come here, then the new address exists. We now email the current
+    # address, but we don't want to stop the process if it no longer exists,
+    # to give a chance to the user to confirm the email address change.
+    $vars->{'token'} = $token;
 
-    $message = "";
-    $template->process("account/email/change-new.txt.tmpl", $vars, \$message)
+    $message = '';
+    $template->process('account/email/change-old.txt.tmpl', $vars, \$message)
       || ThrowTemplateError($template->error());
 
-    MessageToMTA($message);
+    eval { MessageToMTA($message, SEND_NOW); };
+
+    # Give the user a chance to cancel the process even if he never got
+    # the email above. The token is required.
+    return $token;
 }
 
 # Generates a random token, adds it to the tokens table, and sends it
@@ -507,17 +515,15 @@ Bugzilla::Token - Provides different routines to manage tokens.
  Returns:     Nothing. It throws an error if the same user made the same
               request in the last few minutes.
 
-=item C<sub IssueEmailChangeToken($user, $new_email)>
+=item C<sub IssueEmailChangeToken($new_email)>
 
  Description: Sends two distinct tokens per email to the old and new email
               addresses to confirm the email address change for the given
               user. These tokens remain valid for the next MAX_TOKEN_AGE days.
 
- Params:      $user      - User object of the user requesting a new
-                           email address.
-              $new_email - The new email address of the user.
+ Params:      $new_email - The new email address of the user.
 
- Returns:     Nothing.
+ Returns:     The token to cancel the request.
 
 =item C<IssuePasswordToken($user)>
 

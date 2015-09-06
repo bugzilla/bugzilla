@@ -117,8 +117,7 @@ sub SaveAccount {
             is_available_username($new_login_name)
               || ThrowUserError("account_exists", {email => $new_login_name});
 
-            Bugzilla::Token::IssueEmailChangeToken($user, $new_login_name);
-
+            $vars->{'email_token'} = Bugzilla::Token::IssueEmailChangeToken($new_login_name);
             $vars->{'email_changes_saved'} = 1;
         }
     }

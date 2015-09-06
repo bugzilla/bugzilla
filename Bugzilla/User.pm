@@ -2403,6 +2403,9 @@ sub check_account_creation_enabled {
 
 sub check_and_send_account_creation_confirmation {
     my ($self, $login) = @_;
+    my $dbh = Bugzilla->dbh;
+
+    $dbh->bz_start_transaction;
 
     $login = $self->check_login_name($login);
     my $creation_regexp = Bugzilla->params->{'createemailregexp'};
@@ -2417,6 +2420,8 @@ sub check_and_send_account_creation_confirmation {
     # Create and send a token for this new account.
     require Bugzilla::Token;
     Bugzilla::Token::issue_new_user_account_token($login);
+
+    $dbh->bz_commit_transaction;
 }
 
 # This is used in a few performance-critical areas where we don't want to

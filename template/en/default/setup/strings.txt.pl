@@ -27,8 +27,8 @@ END
 The file ##file## cannot be found. Make sure you typed the full path to the file
 END
     bad_font_file_name => <<'END',
-The file ##file## must point to a TrueType font file (its extension must be
-.ttf)
+The file ##file## must point to a TrueType or OpenType font file
+(its extension must be .ttf or .otf).
 END
     blacklisted => '(blacklisted)',
     bz_schema_exists_before_220 => <<'END',
@@ -224,9 +224,9 @@ what directory the "diff" bin is in. (You only need to set this if you
 are using that feature of the Patch Viewer.)
 END
     localconfig_font_file => <<'END',
-You can specify the full path to a TrueType font file, which will be used to
-display text (labels, legends, ...) in charts and graphical reports. To support
-as many languages as possible, we recommend to specify a TrueType font such as
+You can specify the full path to a TrueType or OpenType font file, which will
+be used to display text (labels, legends, ...) in charts and graphical reports.
+To support as many languages as possible, we recommend to specify a font such as
 Unifont (http://unifoundry.com/unifont.html), which supports all printable
 characters in the Basic Multilingual Plane. If you leave this parameter empty,
 a default font will be used, but its support is limited to English characters

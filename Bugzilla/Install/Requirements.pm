@@ -744,7 +744,7 @@ sub check_font_file {
     $readable = 1 if -r $font_file;
 
     my $ttf;
-    $ttf = 1 if $font_file =~ /\.ttf$/;
+    $ttf = 1 if $font_file =~ /\.(ttf|otf)$/;
 
     if ($output) {
         _checking_for({ package => 'Font file', ok => $readable && $ttf});

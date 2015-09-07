@@ -249,8 +249,8 @@ sub check_font_file {
     $font = trim($font);
     return '' unless $font;
 
-    if ($font !~ /\.ttf$/) {
-        return "The file must point to a TrueType font file (its extension must be .ttf)"
+    if ($font !~ /\.(ttf|otf)$/) {
+        return "The file must point to a TrueType or OpenType font file (its extension must be .ttf or .otf)"
     }
     if (! -f $font) {
         return "The file '$font' cannot be found. Make sure you typed the full path to the file"

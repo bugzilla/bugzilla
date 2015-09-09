@@ -58,7 +58,20 @@
     </div>
 
     <p class="mfa-api-blurb">
-      [% INCLUDE api_key_pref_blurb %]
+      [% IF user.settings.api_key_only.value == 'on' %]
+        Enabling two-factor authentication has also required systems that
+        interface with [% terms.Bugzilla %]'s API to use <a href="userprefs.cgi?tab=apikey">API keys</a>
+        for authentication.<br>
+        <br>
+        While not recommended, this limitation can be lifted by changing the
+        <a href="userprefs.cgi?tab=settings#api_key_only">Require API key authentication for API requests</a>
+        preference.
+      [% ELSE %]
+        Systems that interface with [% terms.Bugzilla %]'s API are not required to use API keys.<br>
+        Change the
+        <a href="userprefs.cgi?tab=settings#api_key_only">Require API key authentication for API requests</a>
+        preference to enforce API key usage.
+      [% END %]
     </p>
 
   [% ELSE %]
@@ -142,18 +155,12 @@
     </p>
 
     <p class="mfa-api-blurb" style="display:none">
-      [% INCLUDE api_key_pref_blurb %]
+      Enabling two-factor authentication will also require systems that
+      interface with [% terms.Bugzilla %]'s API to use <a href="userprefs.cgi?tab=apikey">API keys</a>
+      for authentication.  While not recommended, this limitation can be lifted by changing the
+      <a href="userprefs.cgi?tab=settings#api_key_only">Require API key authentication for API requests</a>
+      preference after 2FA is enabled.
     </p>
   </div>
 
 </div>
-
-[% BLOCK api_key_pref_blurb %]
-  Enabling two-factor authentication will also require systems that
-  interface with [% terms.Bugzilla %]'s API to use <a href="userprefs.cgi?tab=apikey">API keys</a>
-  for authentication.<br>
-  <br>
-  While not recommended, this limitation can be lifted by changing the
-  <a href="userprefs.cgi?tab=settings#api_key_only">Require API key authentication for API requests</a>
-  preference after 2FA is enabled.
-[% END %]

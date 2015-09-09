@@ -56,7 +56,6 @@ $(function() {
         .click(function(event) {
             event.preventDefault();
             $('#mfa-enable-container').show();
-            $('#mfa-api-blurb').show();
             $(this).hide();
         });
 
@@ -71,6 +70,7 @@ $(function() {
             }
             else {
                 $('#mfa-confirm').show();
+                $('.mfa-api-blurb').show();
                 if (mfa === 'TOTP') {
                     $('#mfa-enable-totp').show();
                     $('#mfa-totp-throbber').show();

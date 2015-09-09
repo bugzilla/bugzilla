@@ -41,6 +41,49 @@
   your version and this one, <strong>particularly the Upgrading section of each
   version's release notes</strong>.</p>
 
+<h2 id="point">Updates in this 5.0.x Release</h2>
+
+<h3>5.0.1</h3>
+
+<p>This release fixes one security issue. See the
+  <a href="https://www.bugzilla.org/security/4.2.14/">Security Advisory</a>
+  for details.</p>
+
+<p>This release also contains the following [% terms.bug %] fixes:</p>
+
+<ul>
+  <li>Users whose login name is not an email address could not log in on
+    installations which use LDAP to authenticate users.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1179160">[% terms.Bug %] 1179160</a>)</li>
+  <li>If a mandatory custom field was hidden, it was not possible to create
+    a new [% terms.bug %] or to edit existing ones.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1183398">[% terms.Bug %] 1183398</a>
+    and <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1196969">[% terms.bug %] 1196969</a>)</li>
+  <li>A user editing his login name to point to a non-existent email address
+    could cause Bugzilla to stop working, causing a denial of service.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1194987">[% terms.Bug %] 1194987</a>)</li>
+  <li>Emails generated during a transaction made PostgreSQL stop working.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1186700">[% terms.Bug %] 1186700</a>)</li>
+  <li>[% terms.Bugs %] containing a comment with a reference to a [% terms.bug %]
+    ID larger than 2^31 could not be displayed anymore using PostgreSQL.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1191937">[% terms.Bug %] 1191937</a>)</li>
+  <li>Emails sent by [% terms.Bugzilla %] are now correctly encoded as UTF-8.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=714724">[% terms.Bug %] 714724</a>)</li>
+  <li>The date picker in the "Time Summary" page was broken.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1181649">[% terms.Bug %] 1181649</a>)</li>
+  <li>If <kbd>Test::Taint</kbd> or any other Perl module required to use the
+    JSON-RPC API was not installed or was too old, the UI to tag comments was
+    displayed anyway, you could tag comments, but tags were not persistent
+    (they were lost on page reload). Now the UI to tag comments is not displayed
+    at all until the missing Perl modules are installed and up-to-date.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1183227">[% terms.Bug %] 1183227</a>)</li>
+  <li>Custom fields of type <kbd>INTEGER</kbd> now accept negative integers.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1198659">[% terms.Bug %] 1198659</a>)</li>
+  <li>On Windows, the <kbd>checksetup.pl</kbd> installation script no longer
+    asks for a SMTP server. It can be set after the installation is complete.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1191255">[% terms.Bug %] 1191255</a>)</li>
+</ul>
+
 <h2 id="req">Minimum Requirements</h2>
 
 <p>Any requirements that are new since 4.4 will look like

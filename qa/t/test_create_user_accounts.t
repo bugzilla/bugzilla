@@ -18,7 +18,7 @@ my ($sel, $config) = get_selenium();
 # Set the email regexp for new bugzilla accounts to end with @bugzilla.test.
 
 log_in($sel, $config, 'admin');
-set_parameters($sel, { "User Authentication" => {"createemailregexp" => {type => "text", value => '[^@]+@bugzilla\.test'}} });
+set_parameters($sel, { "User Authentication" => {"createemailregexp" => {type => "text", value => '[^@]+@bugzilla\.test$'}} });
 logout($sel);
 
 # Create a valid account. We need to randomize the login address, because a request
@@ -51,7 +51,7 @@ my $error_msg = trim($sel->get_text("error_msg"));
 ok($error_msg =~ /Please wait a while and try again/, "Too soon for this account");
 
 # These accounts do not pass the regexp.
-my @accounts = ('test@yahoo.com', 'test@bugzilla.net', 'test@bugzilla..test');
+my @accounts = ('test@yahoo.com', 'test@bugzilla.net', 'test@bugzilla.test.com');
 foreach my $account (@accounts) {
     $sel->click_ok("link=New Account");
     $sel->wait_for_page_to_load_ok(WAIT_TIME);
@@ -63,16 +63,8 @@ foreach my $account (@accounts) {
     $sel->is_text_present_ok("User account creation has been restricted.");
 }
 
-# These accounts are illegal and should cause a javascript alert.
-@accounts = qw(
-    test\bugzilla@bugzilla.test
-    testbugzilla.test
-    test@bugzilla
-    test@bugzilla.
-    'test'@bugzilla.test
-    test&test@bugzilla.test
-    [test]@bugzilla.test
-);
+# These accounts are illegal.
+@accounts = ('test\bugzilla@bugzilla.test', 'test@bugzilla.org@bugzilla.test', 'test@bugzilla..test');
 foreach my $account (@accounts) {
     $sel->click_ok("link=New Account");
     $sel->wait_for_page_to_load_ok(WAIT_TIME);

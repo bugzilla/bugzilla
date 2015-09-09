@@ -717,15 +717,6 @@ my $search = new Bugzilla::Search('fields' => \@selectcolumns,
 
 $order = join(',', $search->order);
 
-if (scalar @{$search->invalid_order_columns}) {
-    $vars->{'message'} = 'invalid_column_name';
-    $vars->{'invalid_fragments'} = $search->invalid_order_columns;
-}
-
-if ($fulltext and grep { /^relevance/ } $search->order) {
-    $vars->{'message'} = 'buglist_sorted_by_relevance'
-}
-
 # We don't want saved searches and other buglist things to save
 # our default limit.
 $params->delete('limit') if $vars->{'default_limited'};
@@ -787,6 +778,15 @@ if ($cgi->param('debug')
             $query->{explain} = $dbh->bz_explain($query->{sql});
         }
     }
+}
+
+if (scalar @{$search->invalid_order_columns}) {
+    $vars->{'message'} = 'invalid_column_name';
+    $vars->{'invalid_fragments'} = $search->invalid_order_columns;
+}
+
+if ($fulltext and grep { /^relevance/ } $search->order) {
+    $vars->{'message'} = 'buglist_sorted_by_relevance'
 }
 
 ################################################################################

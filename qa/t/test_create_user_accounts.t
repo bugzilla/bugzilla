@@ -71,8 +71,10 @@ foreach my $account (@accounts) {
     $sel->title_is("Create a new Bugzilla account");
     $sel->type_ok("login", $account);
     $sel->click_ok('//input[@value="Create Account"]');
-    ok($sel->get_alert() =~ /The e-mail address doesn't pass our syntax checking for a legal email address/,
-        'Invalid email address detected');
+    $sel->wait_for_page_to_load_ok(WAIT_TIME);
+    $sel->title_is("Invalid Email Address");
+    my $error_msg = trim($sel->get_text("error_msg"));
+    ok($error_msg =~ /^The e-mail address you entered (\S+) didn't pass our syntax checking/, "Invalid email address detected");
 }
 
 # This account already exists.

@@ -153,6 +153,12 @@
   </form>
 [% END %]
 
+[%
+  IF tab_footer;
+    tab_footer FILTER none;
+  END;
+%]
+
 [% END %]
 
 [% PROCESS global/footer.html.tmpl %]

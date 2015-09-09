@@ -42,6 +42,14 @@ $(function() {
         $('#account_disable').val('');
     });
 
+    // forgot password
+
+    $('#forgot-password')
+        .click(function(event) {
+            event.preventDefault();
+            $('#forgot-form').submit();
+        });
+
     // mfa
 
     $('#mfa-enable')

@@ -64,6 +64,7 @@
       <td>
         <input type="hidden" name="old_login" value="[% user.login FILTER html %]">
         <input type="password" name="old_password">
+        <a href="#" id="forgot-password">I forgot my password</a>
       </td>
     </tr>
     [% IF user.authorizer.can_change_password %]
@@ -147,3 +148,11 @@
   </tr>
 
 </table>
+
+[% tab_footer = BLOCK %]
+  <form action="token.cgi" method="post" id="forgot-form">
+    <input type="hidden" name="loginname" value="[% user.login FILTER html %]">
+    <input type="hidden" name="a" value="reqpw">
+    <input type="hidden" name="token" value="[% issue_hash_token(['reqpw']) FILTER html %]">
+  </form>
+[% END %]

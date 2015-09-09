@@ -156,6 +156,7 @@ function jobDescToggle(what) {
             <option value="Joanne Nguyen">Joanne Nguyen</option>
             <option value="Jess Amann">Jess Amann</option>
             <option value="Michael Aukland">Michael Aukland</option>
+            <option value="Josh Kruse">Josh Kruse</option>
           </select>
         </td>
       </tr>
@@ -253,7 +254,16 @@ function jobDescToggle(what) {
           <label for="data">Job Description:</label>
         </th>
         <td>
-          <em>Please upload a draft of the Job Description you would like to be associated with this requisition
+          <em>
+            All job descriptions must be run through Textio (the tool Mozilla
+            uses to help de-bias our hiring process/job descriptions) and score
+            at least a 90 out of 100 before being posted to the Mozilla Careers
+            page. Please run your description through Textio before uploading
+            it to your headcount request [% terms.bug %]. To learn more about
+            Textio and learn how to create a Textio account,
+            <a href="https://mana.mozilla.org/wiki/display/globalstaffing/Diversity+Recruiting+Initiatives">
+              visit this mana page</a>.<br><br>
+            Please upload a draft of the Job Description you would like to be associated with this requisition
             (or <a href="javascript:jobDescToggle('text')">paste text as attachment</a>).</em><br>
           <input type="file" id="data" name="data" size="60"><br>
           <em>For job description formatting guidelines and help writing your job description please read the

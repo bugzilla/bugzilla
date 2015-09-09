@@ -45,6 +45,26 @@
 
 <h2 id="v44_point">Updates in this 4.4.x Release</h2>
 
+<h3>4.4.10</h3>
+
+<p>This release fixes one security issue. See the
+  <a href="https://www.bugzilla.org/security/4.2.14/">Security Advisory</a>
+  for details.</p>
+
+<p>This release also contains the following [% terms.bug %] fixes:</p>
+
+<ul>
+  <li>The <kbd>email_enabled</kbd> attribute passed to the <kbd>User.update</kbd>
+    WebService method was incorrectly taken into account. Its logic was reversed.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1162334">[% terms.Bug %] 1162334</a>)</li>
+  <li>The <kbd>DateTime::TimeZone::Local::Win32</kbd> Perl module is now required
+    on Windows to correctly determine the local timezone.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1124401">[% terms.Bug %] 1124401</a>)</li>
+  <li>[% terms.Bugzilla %] is now protected against the billion laughs attack
+    which could cause a denial of service when using the XML-RPC API.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1031035">[% terms.Bug %] 1031035</a>)</li>
+</ul>
+
 <h3>4.4.9</h3>
 
 <p>This release contains the following [% terms.bug %] fixes:</p>

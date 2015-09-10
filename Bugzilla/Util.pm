@@ -681,12 +681,18 @@ sub validate_email_syntax {
     # RFC 2822 section 2.1 specifies that email addresses must
     # be made of US-ASCII characters only.
     # Email::Address::addr_spec doesn't enforce this.
-    my $ret = ($addr =~ /$match/ && $email !~ /\P{ASCII}/ && $email =~ /^$addr_spec$/);
-    if ($ret) {
+    # We set the max length to 127 to ensure addresses aren't truncated when
+    # inserted into the tokens.eventdata field.
+    if ($addr =~ /$match/
+        && $email !~ /\P{ASCII}/
+        && $email =~ /^$addr_spec$/
+        && length($email) <= 127)
+    {
         # We assume these checks to suffice to consider the address untainted.
         trick_taint($_[0]);
+        return 1;
     }
-    return $ret ? 1 : 0;
+    return 0;
 }
 
 sub check_email_syntax {

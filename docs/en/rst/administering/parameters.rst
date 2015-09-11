@@ -190,6 +190,9 @@ password_complexity
 password_check_on_login
     If set, Bugzilla will check that the password meets the current complexity rules and minimum length requirements when the user logs into the Bugzilla web interface. If it doesn't, the user would not be able to log in, and will receive a message to reset their password.
 
+auth_delegation
+    If set, Bugzilla will allow other websites to request API keys from its own users. See :ref:`auth-delegation`.
+
 .. _param-attachments:
 
 Attachments

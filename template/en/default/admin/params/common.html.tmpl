@@ -32,7 +32,7 @@
         <label for="[% param.name FILTER html %]-off">Off</label>
       [% ELSIF param.type == "m" %]
         [% boxSize = 5 %]
-        [% boxSize = param.choices.size IF param.choices.size < 5 %]
+        [% SET boxSize = param.choices.size IF param.choices.size < 5 %]
 
         <select multiple="multiple" size="[% boxSize FILTER html %]"
                 name="[% param.name FILTER html %]" id="[% param.name FILTER html %]">
@@ -48,7 +48,7 @@
                name="[% param.name FILTER html %]"
                value="[% Param(param.name) FILTER html %]"><br>
         [% boxSize = 7 %]
-        [% boxSize = 3 + param.choices.size IF param.choices.size < 7 %]
+        [% SET boxSize = 3 + param.choices.size IF param.choices.size < 7 %]
         [% plist = Param(param.name).split(',') %]
 
         <table id="table_[% param.name FILTER html %]" class="bz_default_hidden">

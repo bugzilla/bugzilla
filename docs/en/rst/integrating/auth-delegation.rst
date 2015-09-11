@@ -16,14 +16,14 @@ and the Bugzilla site is `http://bugs.example.org`.
 
 1. Provide a link or redirect the user to `http://bugs.example.org/auth.cgi?callback=http://app.example.org/callback&description=app%description`
 2. Assuming the user is agreeable, the following will happen:
-   1. Bugzilla will issue a POST request to `http://app.example.org/callback`
-      with a the request body data being a JSON object with keys `client_api_key` and `client_api_login`.
-   2. The callback, when responding to the POST request must return a JSON object with a key `result`. This result
-      is intended to be a unique token used to identify this transaction.
-   3. Bugzilla will then cause the useragent to redirect (using a GET request) to `http://app.example.org/callback`
-      with additional query string parameters `client_api_login` and `callback_result`.
-   4. At this point, the consumer now has the api key and login information. Be sure to compare the `callback_result` to whatever result was initially sent back
-      to Bugzilla.
+  1. Bugzilla will issue a POST request to `http://app.example.org/callback`
+     with a the request body data being a JSON object with keys `client_api_key` and `client_api_login`.
+  2. The callback, when responding to the POST request must return a JSON object with a key `result`. This result
+     is intended to be a unique token used to identify this transaction.
+  3. Bugzilla will then cause the useragent to redirect (using a GET request) to `http://app.example.org/callback`
+     with additional query string parameters `client_api_login` and `callback_result`.
+  4. At this point, the consumer now has the api key and login information. Be sure to compare the `callback_result` to whatever result was initially sent back
+     to Bugzilla.
 3. Finally, you should check that the API key and login are valid, using the :ref:`rest_user_valid_login` REST
    resource.
 

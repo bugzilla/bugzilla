@@ -54,22 +54,6 @@ elsif ($action eq 'prepare-sudo') {
     # Keep a temporary record of the user visiting this page
     $vars->{'token'} = issue_session_token('sudo_prepared');
 
-    if ($user->authorizer->can_login) {
-        my $value = generate_random_password();
-        my %args;
-        $args{'-secure'} = 1 if Bugzilla->params->{ssl_redirect};
-
-        $cgi->send_cookie(-name => 'Bugzilla_login_request_cookie',
-                          -value => $value,
-                          -httponly => 1,
-                          %args);
-
-        # The user ID must not be set when generating the token, because
-        # that information will not be available when validating it.
-        local Bugzilla->user->{userid} = 0;
-        $vars->{'login_request_token'} = issue_hash_token(['login_request', $value]);
-    }
-
     # Show the sudo page
     $vars->{'target_login_default'} = $cgi->param('target_login');
     $vars->{'reason_default'} = $cgi->param('reason');
@@ -77,32 +61,16 @@ elsif ($action eq 'prepare-sudo') {
 }
 # begin-sudo: Confirm login and start sudo session
 elsif ($action eq 'begin-sudo') {
-    # We must be sure that the user is authenticating by providing a login
-    # and password.
-    # We only need to do this for authentication methods that involve Bugzilla 
-    # directly obtaining a login (i.e. normal CGI login), as opposed to other 
-    # methods (like Environment vars login). 
-
-    # First, record if Bugzilla_login and Bugzilla_password were provided
-    my $credentials_provided;
-    if (defined($cgi->param('Bugzilla_login'))
-        && defined($cgi->param('Bugzilla_password')))
-    {
-        $credentials_provided = 1;
-    }
-
-    # Next, log in the user
     my $user = Bugzilla->login(LOGIN_REQUIRED);
 
     my $target_login = $cgi->param('target_login');
     my $reason = $cgi->param('reason') || '';
 
-    # At this point, the user is logged in.  However, if they used a method
-    # where they could have provided a username/password (i.e. CGI), but they 
-    # did not provide a username/password, then throw an error.
-    if ($user->authorizer->can_login && !$credentials_provided) {
-        ThrowUserError('sudo_password_required',
-                       { target_login => $target_login, reason => $reason });
+    if ($user->authorizer->can_login) {
+        my $password = $cgi->param('password')
+          or ThrowUserError('sudo_password_required',
+                            { target_login => $target_login, reason => $reason });
+        $user->check_current_password($password);
     }
 
     # The user must be in the 'bz_sudoers' group
@@ -112,10 +80,23 @@ elsif ($action eq 'begin-sudo') {
                                          object => 'sudo_session' }
         );
     }
-    
+
     # Do not try to start a new session if one is already in progress!
     if (defined(Bugzilla->sudoer)) {
         ThrowUserError('sudo_in_progress', { target => $user->login });
+    }
+
+    # Get & verify the target user (the user who we will be impersonating)
+    my $target_user = new Bugzilla::User({ name => $target_login });
+    unless (defined($target_user)
+            && $target_user->id
+            && $user->can_see_user($target_user))
+    {
+        ThrowUserError('user_match_failed', { name => $target_login });
+    }
+
+    if ($target_user->in_group('bz_sudo_protect')) {
+        ThrowUserError('sudo_protected', { login => $target_user->login });
     }
 
     # Did the user actually go trough the 'sudo-prepare' action?  Do some 
@@ -131,18 +112,6 @@ elsif ($action eq 'begin-sudo') {
                        { target_login => $target_login, reason => $reason });
     }
     delete_token($cgi->param('token'));
-
-    # Get & verify the target user (the user who we will be impersonating)
-    my $target_user = new Bugzilla::User({ name => $target_login });
-    unless (defined($target_user)
-            && $target_user->id
-            && $user->can_see_user($target_user))
-    {
-        ThrowUserError('user_match_failed', { name => $target_login });
-    }
-    if ($target_user->in_group('bz_sudo_protect')) {
-        ThrowUserError('sudo_protected', { login => $target_user->login });
-    }
 
     # Calculate the session expiry time (T + 6 hours)
     my $time_string = time2str('%a, %d-%b-%Y %T %Z', time + MAX_SUDO_TOKEN_AGE, 'GMT');

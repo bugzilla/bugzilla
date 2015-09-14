@@ -94,7 +94,7 @@ sub logout {
     my $cgi = Bugzilla->cgi;
     my $input = Bugzilla->input_params;
     $param = {} unless $param;
-    my $user = $param->{user} || Bugzilla->user;
+    my $user = $param->{user} || Bugzilla->sudoer || Bugzilla->user;
     my $type = $param->{type} || LOGOUT_ALL;
 
     if ($type == LOGOUT_ALL) {

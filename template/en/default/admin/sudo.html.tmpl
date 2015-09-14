@@ -17,9 +17,9 @@
 
 <p>
   The <b>sudo</b> feature of Bugzilla allows you to impersonate a
-  user for a short time  While an sudo session is in progress, every action you 
-  perform will be taking place as if you had logged in as the user whom will be 
-  impersonating.
+  user for a short time. While a sudo session is in progress, every action you
+  perform will be taking place as if you had logged in as the user who will be
+  impersonated.
 </p>
 
 <p class="areyoureallyreallysure">
@@ -67,12 +67,8 @@
   
   [% IF user.authorizer.can_login %]
     <p>
-      Finally, enter <label for="Bugzilla_password">your [% terms.Bugzilla %]
-      password</label>:
-      <input type="hidden" name="Bugzilla_login" value="[% user.login FILTER html %]">
-      <input type="password" id="Bugzilla_password" name="Bugzilla_password" size="20" required>
-      <input type="hidden" name="Bugzilla_login_token"
-             value="[% login_request_token FILTER html %]">
+      Finally, enter <label for="password">your [% terms.Bugzilla %] password</label>:
+      <input type="password" id="password" name="password" size="20" required>
       <br>
       This is done for two reasons.  First of all, it is done to reduce 
       the chances of someone doing large amounts of damage using your 
@@ -80,9 +76,8 @@
       time to consider if you really need to use this feature.
     </p>
   [% END %]
-  
+
   <p>
-    Click the button to begin the session:
     <input type="submit" id="begin_sudo" value="Begin Session">
     <input type="hidden" name="action" value="begin-sudo">
     <input type="hidden" name="token" value="[% token FILTER html %]">

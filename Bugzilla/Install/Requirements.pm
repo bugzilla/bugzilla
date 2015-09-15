@@ -431,8 +431,8 @@ sub OPTIONAL_MODULES {
 
     # memcached
     {
-        package => 'Cache-Memcached',
-        module  => 'Cache::Memcached',
+        package => 'Cache-Memcached-Fast',
+        module  => 'Cache::Memcached::Fast',
         version => '0',
         feature => ['memcached'],
     },

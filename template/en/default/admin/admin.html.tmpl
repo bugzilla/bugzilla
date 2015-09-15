@@ -118,12 +118,6 @@
         and time, and get the result of these queries directly per email. This is a
         good way to create reminders and to keep track of the activity in your installation.</dd>
 
-        [% IF Param('use_mailer_queue') %]
-          [% class = user.in_group('admin') ? "" : "forbidden" %]
-          <dt id="view_job_queue" class="[% class %]"><a href="view_job_queue.cgi">Job Queue</a></dt>
-          <dd class="[% class %]">View the queue of undelivered/deferred jobs/emails.</dd>
-        [% END %]
-
         <dt id="release_notes">
           <a href="page.cgi?id=release-notes.html">Release Notes</a></dt>
         <dd>Detailed information related to this release of Bugzilla.</dd>

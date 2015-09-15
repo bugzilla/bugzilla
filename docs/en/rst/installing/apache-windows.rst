@@ -82,7 +82,15 @@ Add the following stanza:
        Options +ExecCGI +FollowSymLinks
        DirectoryIndex index.cgi index.html
        AllowOverride Limit FileInfo Indexes Options
+       Require all granted
    </Directory>
+
+.. warning:: The above block takes a simple approach to access control
+             and is correct for Apache 2.4. For Apache 2.2, replace
+             ``Require all granted`` with ``Allow from all``. If you
+             have other applications on the server or other access
+             control requirements, you may need to make further
+             modifications.
 
 In order for ``ScriptInterpreterSource Registry-Strict`` to work, you also
 need to add an entry to the Registry so Apache will use Perl to execute .cgi

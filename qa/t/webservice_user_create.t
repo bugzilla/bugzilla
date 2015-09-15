@@ -13,7 +13,7 @@ use strict;
 use warnings;
 use lib qw(lib);
 use QA::Util;
-use Test::More tests => 69;
+use Test::More tests => 75;
 my ($config, $xmlrpc, $jsonrpc, $jsonrpc_get) = get_rpc_clients();
 
 use constant NEW_PASSWORD => 'password';
@@ -25,7 +25,7 @@ use constant PASSWORD_TOO_SHORT => 'a';
 use constant INVALID_EMAIL => '()[]\;:,<>@webservice.test';
 
 sub new_login {
-    return 'created_' . random_string() . '@webservice.test';
+    return 'created_' . random_string(@_) . '@webservice.test';
 }
 
 sub post_success {
@@ -74,6 +74,12 @@ foreach my $rpc ($jsonrpc, $xmlrpc) {
                      password => NEW_PASSWORD },
           error =>  "didn't pass our syntax checking",
           test  => 'Invalid email address fails',
+        },
+        { user  => 'admin',
+          args  => { email    => new_login(128), full_name => NEW_FULLNAME,
+          password => NEW_PASSWORD },
+          error =>  "didn't pass our syntax checking",
+          test  => 'Too long (> 127 chars) email address fails',
         },
         { user  => 'admin',
           args  => { email     => $config->{unprivileged_user_login},

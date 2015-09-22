@@ -134,6 +134,16 @@ tie(%$cf_visible_in_products, "Tie::IxHash",
         "Cloud Services"      => [],
         "Toolkit"             => [],
     },
+    qr/^cf_has_regression_range$/ => {
+        "Core"    => [],
+        "Firefox" => [],
+        "Toolkit" => [],
+    },
+    qr/^cf_has_str$/ => {
+        "Core"    => [],
+        "Firefox" => [],
+        "Toolkit" => [],
+    },
 );
 
 # Who to CC on particular bugmails when certain groups are added or removed.

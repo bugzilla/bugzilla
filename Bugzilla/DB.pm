@@ -363,6 +363,31 @@ sub sql_position {
     return "POSITION($fragment IN $text)";
 }
 
+sub sql_like {
+    my ($self, $fragment, $column) = @_;
+
+    my $quoted = $self->quote($fragment);
+
+    return $self->sql_position($quoted, $column) . " > 0";
+}
+
+sub sql_ilike {
+    my ($self, $fragment, $column) = @_;
+
+    my $quoted = $self->quote($fragment);
+
+    return $self->sql_iposition($quoted, $column) . " > 0";
+}
+
+sub sql_not_ilike {
+    my ($self, $fragment, $column) = @_;
+
+    my $quoted = $self->quote($fragment);
+
+    return $self->sql_iposition($quoted, $column) . " = 0";
+}
+
+
 sub sql_group_by {
     my ($self, $needed_columns, $optional_columns) = @_;
 
@@ -2013,6 +2038,73 @@ Formatted SQL for substring search (scalar)
 =item C<sql_iposition>
 
 Just like L</sql_position>, but case-insensitive.
+
+=item C<sql_like>
+
+=over
+
+=item B<Description>
+
+Outputs SQL to search for an instance of a string (fragment)
+in a table column (column).
+
+Note that the fragment must not be quoted. L</sql_like> will
+quote the fragment itself.
+
+This is a case sensitive search.
+
+Note: This does not necessarily generate an ANSI LIKE statement, but
+could be overridden to do so in a database subclass if required.
+
+=item B<Params>
+
+=over
+
+=item C<$fragment> - the string fragment that we are searching for (scalar)
+
+=item C<$column> - the column to search
+
+=back
+
+=item B<Returns>
+
+Formatted SQL to return results from columns that contain the fragment.
+
+=back
+
+=item C<sql_ilike>
+
+Just like L</sql_like>, but case-insensitive.
+
+=item C<sql_not_ilike>
+
+=over
+
+=item B<Description>
+
+Outputs SQL to search for columns (column) that I<do not> contain
+instances of the string (fragment).
+
+Note that the fragment must not be quoted. L</sql_not_ilike> will
+quote the fragment itself.
+
+This is a case insensitive search.
+
+=item B<Params>
+
+=over
+
+=item C<$fragment> - the string fragment that we are searching for (scalar)
+
+=item C<$column> - the column to search
+
+=back
+
+=item B<Returns>
+
+Formated sql to return results from columns that do not contain the fragment
+
+=back
 
 =item C<sql_group_by>
 

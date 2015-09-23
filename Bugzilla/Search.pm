@@ -2126,9 +2126,7 @@ sub _substring_terms {
     # split each term on spaces and commas anyway.
     my @words = split(/[\s,]+/, $args->{value});
     @words = grep { defined $_ and $_ ne '' } @words;
-    @words = map { $dbh->quote($_) } @words;
-    my @terms = map { $dbh->sql_iposition($_, $args->{full_field}) . " > 0" }
-                    @words;
+    my @terms = map { $dbh->sql_ilike($_, $args->{full_field}) } @words;
     return @terms;
 }
 
@@ -3154,28 +3152,26 @@ sub _simple_operator {
 
 sub _casesubstring {
     my ($self, $args) = @_;
-    my ($full_field, $quoted) = @$args{qw(full_field quoted)};
+    my ($full_field, $value) = @$args{qw(full_field value)};
     my $dbh = Bugzilla->dbh;
-    
-    $args->{term} = $dbh->sql_position($quoted, $full_field) . " > 0";
+
+    $args->{term} = $dbh->sql_like($value, $full_field);
 }
 
 sub _substring {
     my ($self, $args) = @_;
-    my ($full_field, $quoted) = @$args{qw(full_field quoted)};
+    my ($full_field, $value) = @$args{qw(full_field value)};
     my $dbh = Bugzilla->dbh;
-    
-    # XXX This should probably be changed to just use LIKE
-    $args->{term} = $dbh->sql_iposition($quoted, $full_field) . " > 0";
+
+    $args->{term} = $dbh->sql_ilike($value, $full_field);
 }
 
 sub _notsubstring {
     my ($self, $args) = @_;
-    my ($full_field, $quoted) = @$args{qw(full_field quoted)};
+    my ($full_field, $value) = @$args{qw(full_field value)};
     my $dbh = Bugzilla->dbh;
-    
-    # XXX This should probably be changed to just use NOT LIKE
-    $args->{term} = $dbh->sql_iposition($quoted, $full_field) . " = 0";
+
+    $args->{term} = $dbh->sql_not_ilike($value, $full_field);
 }
 
 sub _regexp {

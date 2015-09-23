@@ -266,7 +266,7 @@ sub _filter_userlist {
     my $now = DateTime->now();
     my $never = DateTime->from_epoch( epoch => 0 );
     foreach my $user (@$list) {
-        my $last_seen = datetime_from($user->last_seen_date) // $never;
+        my $last_seen = $user->last_seen_date ? datetime_from($user->last_seen_date) : $never;
         $user->{last_seen_days} = sprintf(
             '%.0f',
             $now->subtract_datetime_absolute($last_seen)->delta_seconds / (28 * 60 * 60));

@@ -13,7 +13,7 @@ use Bugzilla::Constants;
 use Bugzilla::Error;
 use Bugzilla::Group;
 use Bugzilla::User;
-use Bugzilla::Util qw(trim);
+use Bugzilla::Util qw(trim datetime_from);
 use JSON qw(encode_json);
 
 sub admins_report {
@@ -220,29 +220,6 @@ sub members_report {
     }
     @types = () unless $has_members;
 
-    if (@types) {
-        # add last-login
-        my $user_ids = join(',', map { map { $_->id } @{ $_->{members} } } @types);
-        my $tokens = $dbh->selectall_hashref("
-            SELECT profiles.userid,
-                (SELECT DATEDIFF(curdate(), logincookies.lastused) lastseen
-                   FROM logincookies
-                  WHERE logincookies.userid = profiles.userid
-                  ORDER BY lastused DESC
-                  LIMIT 1) lastseen
-            FROM profiles
-            WHERE userid IN ($user_ids)",
-            'userid');
-        foreach my $type (@types) {
-            foreach my $member (@{ $type->{members} }) {
-                $member->{lastseen} =
-                    defined $tokens->{$member->id}->{lastseen}
-                    ? $tokens->{$member->id}->{lastseen}
-                    : '>' . MAX_LOGINCOOKIE_AGE;
-            }
-        }
-    }
-
     if ($page eq 'group_members.json') {
         my %users;
         foreach my $rh (@types) {
@@ -260,7 +237,7 @@ sub members_report {
                     if ($privileged) {
                         $rh_user->{group}        = $rh->{name};
                         $rh_user->{groups}       = [ $rh->{name} ];
-                        $rh_user->{lastseeon}    = $member->{lastseen};
+                        $rh_user->{lastseeon}    = $member->last_seen_date;
                         $rh_user->{mfa}          = $member->mfa;
                         $rh_user->{api_key_only} = $member->settings->{api_key_only}->{value} eq 'on'
                                                    ? JSON::true : JSON::false;
@@ -286,6 +263,13 @@ sub members_report {
 sub _filter_userlist {
     my ($list, $include_disabled) = @_;
     $list = [ grep { $_->is_enabled } @$list ] unless $include_disabled;
+    my $now = DateTime->now();
+    foreach my $user (@$list) {
+        my $last_seen = datetime_from($user->last_seen_date);
+        $user->{last_seen_days} = sprintf(
+            '%.0f',
+            $now->subtract_datetime_absolute($last_seen)->delta_seconds / (28 * 60 * 60));
+    }
     return [ sort { lc($a->identity) cmp lc($b->identity) } @$list ];
 }
 

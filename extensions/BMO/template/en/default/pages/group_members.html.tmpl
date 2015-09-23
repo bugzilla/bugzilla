@@ -100,7 +100,7 @@
                       [% END %]
                     </td>
                     <td align="right" nowrap>
-                      [% member.lastseen FILTER html %]
+                      [% member.last_seen_days > 30 ? ">30" : member.last_seen_days FILTER html %]
                     </td>
                   [% END %]
                 </tr>

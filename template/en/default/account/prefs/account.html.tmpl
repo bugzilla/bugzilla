@@ -72,6 +72,7 @@
         <th align="right">New password:</th>
         <td>
           <input type="password" name="new_password1">
+          [% INCLUDE "mfa/protected.html.tmpl" %]
         </td>
       </tr>
 
@@ -109,6 +110,7 @@
           <th align="right">New email address:</th>
           <td>
             <input size="35" name="new_login_name">
+            [% INCLUDE "mfa/protected.html.tmpl" %]
           </td>
         </tr>
       [% END %]

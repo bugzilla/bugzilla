@@ -39,6 +39,7 @@ use Bugzilla::User;
 
 use Date::Format;
 use Date::Parse;
+use JSON qw( decode_json );
 
 my $dbh = Bugzilla->dbh;
 local our $cgi = Bugzilla->cgi;
@@ -93,7 +94,7 @@ if ($token) {
       Bugzilla::Token::Cancel($token, 'wrong_token_for_creating_account');
       ThrowUserError('wrong_token_for_creating_account');
   }
-  if ($action eq 'mfa' && $tokentype ne 'session') {
+  if (substr($action, 0, 4) eq 'mfa_' && $tokentype ne 'session.short') {
       Bugzilla::Token::Cancel($token, 'wrong_token_for_mfa');
       ThrowUserError('wrong_token_for_mfa');
   }
@@ -172,8 +173,10 @@ if ($action eq 'reqpw') {
     confirm_create_account($token);
 } elsif ($action eq 'cancel_new_account') {
     cancel_create_account($token);
-} elsif ($action eq 'mfa') {
-    verify_mfa($token);
+} elsif ($action eq 'mfa_l') {
+    verify_mfa_login($token);
+} elsif ($action eq 'mfa_p') {
+    verify_mfa_password($token);
 } else { 
     ThrowUserError('unknown_action', {action => $action});
 }
@@ -199,6 +202,9 @@ sub confirmChangePassword {
     my $token = shift;
     $vars->{'token'} = $token;
 
+    my ($user_id) = Bugzilla::Token::GetTokenData($token);
+    $vars->{token_user} = Bugzilla::User->check({ id => $user_id, cache => 1 });
+
     print $cgi->header();
     $template->process("account/password/set-forgotten-password.html.tmpl", $vars)
       || ThrowTemplateError($template->error());
@@ -218,14 +224,44 @@ sub changePassword {
     my ($token, $password) = @_;
     my $dbh = Bugzilla->dbh;
 
-    my ($user_id) = $dbh->selectrow_array('SELECT userid FROM tokens WHERE token = ?', undef, $token);
+    my ($user_id) = Bugzilla::Token::GetTokenData($token);
     my $user = Bugzilla::User->check({ id => $user_id });
+
+    if ($user->mfa) {
+        $user->mfa_provider->verify_prompt({
+            user     => $user,
+            reason   => 'Setting your password',
+            password => $password,
+            token    => $token,
+            postback => {
+                action      => 'token.cgi',
+                token_field => 't',
+                fields      => {
+                    a => 'mfa_p',
+                },
+            },
+        });
+    }
+    else {
+        set_user_password($token, $user, $password);
+    }
+}
+
+sub verify_mfa_password {
+    my $token = shift;
+    my ($user, $event) = mfa_event_from_token($token);
+    set_user_password($event->{token}, $user, $event->{password});
+}
+
+sub set_user_password {
+    my ($token, $user, $password) = @_;
+
     $user->set_password($password);
     $user->update();
     delete_token($token);
-    $dbh->do("DELETE FROM tokens WHERE userid = ? AND tokentype = 'password'", undef, $user_id);
+    $dbh->do("DELETE FROM tokens WHERE userid = ? AND tokentype = 'password'", undef, $user->id);
 
-    Bugzilla->logout_user_by_id($user_id);
+    Bugzilla->logout_user_by_id($user->id);
 
     $vars->{'message'} = "password_changed";
 
@@ -415,15 +451,29 @@ sub cancel_create_account {
       || ThrowTemplateError($template->error());
 }
 
-sub verify_mfa {
+sub verify_mfa_login {
     my $token = shift;
+    my ($user, $event) = mfa_event_from_token($token);
+    $user->authorizer->mfa_verified($user, $event);
+    print Bugzilla->cgi->redirect($event->{url} // 'index.cgi');
+    exit;
+}
+
+sub mfa_event_from_token {
+    my $token = shift;
+
+    # create user from token
     my ($user_id) = Bugzilla::Token::GetTokenData($token);
     my $user = Bugzilla::User->check({ id => $user_id, cache => 1 });
+
+    # sanity check
     if (!$user->mfa) {
         delete_token($token);
         print Bugzilla->cgi->redirect('index.cgi');
         exit;
     }
-    $user->mfa_provider->check_login($user);
-    delete_token($token);
+
+    # verify
+    my $event = $user->mfa_provider->verify_check($token);
+    return ($user, $event);
 }

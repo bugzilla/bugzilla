@@ -8,6 +8,8 @@
 package Bugzilla::MFA;
 use strict;
 
+use Bugzilla::Token qw( issue_short_lived_session_token set_token_extra_data get_token_extra_data delete_token );
+
 sub new {
     my ($class, $user) = @_;
     return bless({ user => $user }, $class);
@@ -27,9 +29,42 @@ sub prompt {}
 # throws errors if code is invalid
 sub check {}
 
-# during-login verification
-sub check_login {}
+# verification
 
+sub verify_prompt {
+    my ($self, $event) = @_;
+    my $user = delete $event->{user} // Bugzilla->user;
+
+    # generate token and attach mfa data
+    my $token = issue_short_lived_session_token('mfa', $user);
+    set_token_extra_data($token, $event);
+
+    # trigger provider verification
+    my $token_field = $event->{postback}->{token_field} // 'mfa_token';
+    $event->{postback}->{fields}->{$token_field} = $token;
+    $self->prompt($event);
+    exit;
+}
+
+sub verify_check {
+    my ($self, $token) = @_;
+
+    # check token
+    my ($user_id) = Bugzilla::Token::GetTokenData($token);
+    my $user = Bugzilla::User->check({ id => $user_id, cache => 1 });
+
+    # mfa verification
+    $self->check(Bugzilla->input_params);
+
+    # return event data
+    my $event = get_token_extra_data($token);
+    delete_token($token);
+    if (!$event) {
+        print Bugzilla->cgi->redirect('index.cgi');
+        exit;
+    }
+    return $event;
+}
 
 # helpers
 

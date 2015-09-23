@@ -255,6 +255,11 @@ div#docslinks {
     margin: 0;
 }
 
+.mfa-protected {
+    vertical-align: middle;
+    margin: 0 4px;
+}
+
 /**************************/
 /* Bug links and statuses */
 /**************************/
@@ -406,7 +411,7 @@ table#flags td {
 }
 
 .column_header {
-    background-color: #66f;
+    background-color: #ddeef9;
 }
 
 .column_header th {

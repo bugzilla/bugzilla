@@ -453,6 +453,9 @@
   [% ELSIF error == "token_generation_error" %]
     Something is seriously wrong with the token generation system.
 
+  [% ELSIF error == "token_data_too_big" %]
+    The data is too large to store in a token.
+
   [% ELSIF error == "cancel_token_does_not_exist" %]
     The token to be cancelled does not exist.
 

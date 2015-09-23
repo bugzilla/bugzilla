@@ -91,10 +91,11 @@ sub SaveAccount {
 
     my $user = Bugzilla->user;
 
-    my $oldpassword = $cgi->param('old_password');
-    my $pwd1 = $cgi->param('new_password1');
-    my $pwd2 = $cgi->param('new_password2');
+    my $oldpassword    = $cgi->param('old_password');
+    my $pwd1           = $cgi->param('new_password1');
+    my $pwd2           = $cgi->param('new_password2');
     my $new_login_name = trim($cgi->param('new_login_name'));
+    my @mfa_events;
 
     if ($user->authorizer->can_change_password
         && ($oldpassword ne "" || $pwd1 ne "" || $pwd2 ne ""))
@@ -111,9 +112,18 @@ sub SaveAccount {
             validate_password($pwd1, $pwd2);
 
             if ($oldpassword ne $pwd1) {
-                $user->set_password($pwd1);
-                # Invalidate all logins except for the current one
-                Bugzilla->logout(LOGOUT_KEEP_CURRENT);
+                if ($user->mfa) {
+                    push @mfa_events, {
+                        type     => 'set_password',
+                        reason   => 'changing your password',
+                        password => $pwd1,
+                    };
+                }
+                else {
+                    $user->set_password($pwd1);
+                    # Invalidate all logins except for the current one
+                    Bugzilla->logout(LOGOUT_KEEP_CURRENT);
+                }
             }
         }
     }
@@ -136,15 +146,63 @@ sub SaveAccount {
             is_available_username($new_login_name)
               || ThrowUserError("account_exists", {email => $new_login_name});
 
-            Bugzilla::Token::IssueEmailChangeToken($user, $new_login_name);
-
-            $vars->{'email_changes_saved'} = 1;
+            if ($user->mfa) {
+                push @mfa_events, {
+                    type   => 'set_login',
+                    reason => 'changing your email address',
+                    login  => $new_login_name,
+                };
+            }
+            else {
+                Bugzilla::Token::IssueEmailChangeToken($user, $new_login_name);
+                $vars->{email_changes_saved} = 1;
+            }
         }
     }
 
     $user->set_name($cgi->param('realname'));
     $user->update({ keep_session => 1, keep_tokens => 1 });
     $dbh->bz_commit_transaction;
+
+    if (@mfa_events) {
+        # build the fields for the postback
+        my $mfa_event = {
+            postback => {
+                action => 'userprefs.cgi',
+                fields => {
+                    tab => 'account',
+                },
+            },
+            reason => ucfirst(join(' and ', map { $_->{reason} } @mfa_events)),
+            actions => \@mfa_events,
+        };
+        # display 2fa verification
+        $user->mfa_provider->verify_prompt($mfa_event);
+    }
+}
+
+sub MfaAccount {
+    my $cgi = Bugzilla->cgi;
+    my $user = Bugzilla->user;
+    my $dbh = Bugzilla->dbh;
+    return unless $user->mfa;
+
+    my $event = $user->mfa_provider->verify_check($cgi->param('mfa_token'));
+
+    foreach my $action (@{ $event->{actions} }) {
+        if ($action->{type} eq 'set_login') {
+            Bugzilla::Token::IssueEmailChangeToken($user, $action->{login});
+            $vars->{email_changes_saved} = 1;
+        }
+
+        elsif ($action->{type} eq 'set_password') {
+            $dbh->bz_begin_transaction;
+            $user->set_password($action->{password});
+            Bugzilla->logout(LOGOUT_KEEP_CURRENT);
+            $user->update({ keep_session => 1, keep_tokens => 1 });
+            $dbh->bz_commit_transaction;
+        }
+    }
 }
 
 sub DisableAccount {
@@ -190,8 +248,9 @@ sub SaveSettings {
     my $cgi = Bugzilla->cgi;
     my $user = Bugzilla->user;
 
-    my $settings = $user->settings;
+    my $settings     = $user->settings;
     my @setting_list = keys %$settings;
+    my $mfa_event    = undef;
 
     foreach my $name (@setting_list) {
         next if ! ($settings->{$name}->{'is_enabled'});
@@ -199,20 +258,67 @@ sub SaveSettings {
         next unless defined $value;
         my $setting = new Bugzilla::User::Setting($name);
 
+        if ($name eq 'api_key_only' && $user->mfa
+            && ($value eq 'off'
+                || ($value eq 'api_key_only-isdefault' && $setting->{default_value} eq 'off'))
+        ) {
+            $mfa_event = {};
+        }
+
         if ($value eq "${name}-isdefault" ) {
             if (! $settings->{$name}->{'is_default'}) {
-                $settings->{$name}->reset_to_default;
+                if ($mfa_event) {
+                    $mfa_event->{reset} = 1;
+                }
+                else {
+                    $settings->{$name}->reset_to_default;
+                }
             }
         }
         else {
             $setting->validate_value($value);
-            $settings->{$name}->set($value);
+            if ($mfa_event) {
+                $mfa_event->{set} = $value;
+            }
+            else {
+                $settings->{$name}->set($value);
+            }
         }
     }
 
     Bugzilla::Hook::process('settings_after_update');
 
     $vars->{'settings'} = $user->settings(1);
+    clear_settings_cache($user->id);
+
+    if ($mfa_event) {
+        $mfa_event->{reason}   = 'Disabling API key authentication requirements';
+        $mfa_event->{postback} = {
+            action => 'userprefs.cgi',
+            fields => {
+                tab => 'settings',
+            },
+        };
+        $user->mfa_provider->verify_prompt($mfa_event);
+    }
+}
+
+sub MfaSettings {
+    my $cgi = Bugzilla->cgi;
+    my $user = Bugzilla->user;
+    return unless $user->mfa;
+
+    my $event = $user->mfa_provider->verify_check($cgi->param('mfa_token'));
+
+    my $settings = $user->settings;
+    if ($event->{reset}) {
+        $settings->{api_key_only}->reset_to_default();
+    }
+    elsif (my $value = $event->{set}) {
+        $settings->{api_key_only}->set($value);
+    }
+
+    $vars->{settings} = $user->settings(1);
     clear_settings_cache($user->id);
 }
 
@@ -561,20 +667,19 @@ sub SaveMFA {
     $dbh->bz_start_transaction;
     if ($action eq 'enable') {
         $user->set_mfa($cgi->param('mfa'));
-        $user->mfa_provider->check($cgi->param('mfa_enable_code') // '');
+        $user->mfa_provider->check(Bugzilla->input_params);
         $user->mfa_provider->enrolled();
+
+        my $settings = Bugzilla->user->settings;
+        $settings->{api_key_only}->set('on');
+        clear_settings_cache(Bugzilla->user->id);
     }
     else {
-        $user->mfa_provider->check($cgi->param('mfa_disable_code') // '');
+        $user->mfa_provider->check(Bugzilla->input_params);
         $user->set_mfa('');
     }
 
     $user->update({ keep_session => 1, keep_tokens => 1 });
-
-    my $settings = Bugzilla->user->settings;
-    $settings->{api_key_only}->set('on');
-    clear_settings_cache(Bugzilla->user->id);
-
     $dbh->bz_commit_transaction;
 }
 
@@ -653,6 +758,7 @@ sub SaveApiKey {
     my $cgi = Bugzilla->cgi;
     my $dbh = Bugzilla->dbh;
     my $user = Bugzilla->user;
+    my @mfa_events;
 
     # Do it in a transaction.
     $dbh->bz_start_transaction;
@@ -661,37 +767,106 @@ sub SaveApiKey {
     my $api_keys = Bugzilla::User::APIKey->match({ user_id => $user->id });
     foreach my $api_key (@$api_keys) {
         my $description = $cgi->param('description_' . $api_key->id);
-        my $revoked = $cgi->param('revoked_' . $api_key->id);
+        my $revoked = !!$cgi->param('revoked_' . $api_key->id);
 
-        if ($description ne $api_key->description
-            || $revoked != $api_key->revoked)
-        {
-            $api_key->set_all({
-                description => $description,
-                revoked     => $revoked,
-            });
-            $api_key->update();
+        if ($description ne $api_key->description || $revoked != $api_key->revoked) {
+            if ($user->mfa && !$revoked && $api_key->revoked) {
+                push @mfa_events, {
+                    type        => 'update',
+                    reason      => 'enabling an API key',
+                    id          => $api_key->id,
+                    description => $description,
+                };
+            }
+            else {
+                $api_key->set_all({
+                    description => $description,
+                    revoked     => $revoked,
+                });
+                $api_key->update();
+            }
         }
     }
 
     # Create a new API key if requested.
     if ($cgi->param('new_key')) {
-        $vars->{new_key} = Bugzilla::User::APIKey->create({
-            user_id     => $user->id,
-            description => scalar $cgi->param('new_description'),
-        });
-
-        # As a security precaution, we always sent out an e-mail when
-        # an API key is created
-        my $template = Bugzilla->template_inner($user->setting('lang'));
-        my $message;
-        $template->process('email/new-api-key.txt.tmpl', $vars, \$message)
-          || ThrowTemplateError($template->error());
-
-        MessageToMTA($message);
+        my $description = $cgi->param('new_description');
+        if ($user->mfa) {
+            push @mfa_events, {
+                type        => 'create',
+                reason      => 'creating an API key',
+                description => $description,
+            };
+        }
+        else {
+            $vars->{new_key} = _create_api_key($description);
+        }
     }
 
     $dbh->bz_commit_transaction;
+
+    if (@mfa_events) {
+        # build the fields for the postback
+        my $mfa_event = {
+            postback => {
+                action => 'userprefs.cgi',
+                fields => {
+                    tab => 'apikey',
+                },
+            },
+            reason => ucfirst(join(' and ', map { $_->{reason} } @mfa_events)),
+            actions => \@mfa_events,
+        };
+        # display 2fa verification
+        $user->mfa_provider->verify_prompt($mfa_event);
+    }
+}
+
+sub MfaApiKey {
+    my $cgi = Bugzilla->cgi;
+    my $user = Bugzilla->user;
+    my $dbh = Bugzilla->dbh;
+    return unless $user->mfa;
+
+    my $event = $user->mfa_provider->verify_check($cgi->param('mfa_token'));
+
+    foreach my $action (@{ $event->{actions} }) {
+        if ($action->{type} eq 'create') {
+            $vars->{new_key} = _create_api_key($action->{description});
+        }
+
+        elsif ($action->{type} eq 'update') {
+            $dbh->bz_start_transaction;
+            my $api_key = Bugzilla::User::APIKey->check({ id => $action->{id} });
+            $api_key->set_all({
+                description => $action->{description},
+                revoked     => 0,
+            });
+            $api_key->update();
+            $dbh->bz_commit_transaction;
+        }
+    }
+}
+
+sub _create_api_key {
+    my ($description) = @_;
+    my $user = Bugzilla->user;
+
+    my $key = Bugzilla::User::APIKey->create({
+        user_id     => $user->id,
+        description => $description,
+    });
+
+    # As a security precaution, we always sent out an e-mail when
+    # an API key is created
+    my $template = Bugzilla->template_inner($user->setting('lang'));
+    my $message;
+    $template->process('email/new-api-key.txt.tmpl', $vars, \$message)
+        || ThrowTemplateError($template->error());
+
+    MessageToMTA($message);
+
+    return $key;
 }
 
 ###############################################################################
@@ -715,8 +890,9 @@ if (!Bugzilla->user->id) {
 Bugzilla->login(LOGIN_REQUIRED);
 
 my $save_changes = $cgi->param('dosave');
-$vars->{'changes_saved'} = $save_changes;
 my $disable_account = $cgi->param('account_disable');
+my $mfa_token = $cgi->param('mfa_token');
+$vars->{'changes_saved'} = $save_changes || $mfa_token;
 
 my $current_tab_name = $cgi->param('tab') || "account";
 
@@ -741,12 +917,14 @@ SWITCH: for ($current_tab_name) {
     last SWITCH if $handled;
 
     /^account$/ && do {
+        MfaAccount() if $mfa_token;
         DisableAccount() if $disable_account;
         SaveAccount() if $save_changes;
         DoAccount();
         last SWITCH;
     };
     /^settings$/ && do {
+        MfaSettings() if $mfa_token;
         SaveSettings() if $save_changes;
         DoSettings();
         last SWITCH;
@@ -766,6 +944,7 @@ SWITCH: for ($current_tab_name) {
         last SWITCH;
     };
     /^apikey$/ && do {
+        MfaApiKey() if $mfa_token;
         SaveApiKey() if $save_changes;
         DoApiKey();
         last SWITCH;

@@ -14,8 +14,10 @@
 <p>
   API keys are used to authenticate WebService API calls. You can create more than
   one API key if required. Each API key has an optional description which can help
-  you record what each key is used for. Documentation on how to log in is available from
-  <a href="https://bugzilla.readthedocs.org/en/latest/api/core/v1/general.html#authentication">
+  you record what each key is used for.<br>
+  <br>
+  Documentation on how to log in is available
+  <a href="https://bmo.readthedocs.org/en/latest/api/core/v1/general.html#authentication">
     here</a>.
 </p>
 
@@ -33,7 +35,7 @@ here.</p>
   </tr>
 
   [% FOREACH api_key IN api_keys %]
-    <tr[% IF api_key.revoked %] class="apikey_revoked"[% END %]>
+    <tr[% IF api_key.revoked %] class="apikey_revoked bz_tui_hidden" style="display:none"[% END %]>
       <td>[% api_key.api_key FILTER html %]</td>
       <td>
         <input name="description_[% api_key.id FILTER html %]"
@@ -52,6 +54,9 @@ here.</p>
           name="revoked_[% api_key.id FILTER html %]"
           id="revoked_[% api_key.id FILTER html %]"
           [% IF api_key.revoked %] checked="checked" [% END %]>
+        [% IF api_key.revoked %]
+          [% INCLUDE "mfa/protected.html.tmpl" %]
+        [% END %]
       </td>
     </tr>
   [% END %]
@@ -61,15 +66,7 @@ here.</p>
 </table>
 
 [% IF any_revoked %]
-  <a id="apikey_revoked_controller" class="bz_default_hidden"
-     href="javascript:TUI_toggle_class('apikey_revoked')">Hide Revoked Keys</a>
-  [%# Show the link if the browser supports JS %]
-  <script type="text/javascript">
-    TUI_hide_default('apikey_revoked');
-    TUI_alternates['apikey_revoked'] = 'Show Revoked Keys';
-    YAHOO.util.Dom.removeClass('apikey_revoked_controller',
-                               'bz_default_hidden');
-  </script>
+  <a href="#" id="apikey-toggle-revoked">Show Revoked Keys</a>
 [% END %]
 
 <h3>New API key</h3>
@@ -79,10 +76,10 @@ providing a description for the API key. The API key will be randomly
 generated for you.</p>
 
 <p>
-  <input type="checkbox" name="new_key" id="new_key"
-         onchange="if (this.checked) YAHOO.util.Dom.get('new_description').focus();">
+  <input type="checkbox" name="new_key" id="new_key">
   <label for="new_key">
     Generate a new API key with optional description</label>
   <input name="new_description" id="new_description">
+  [% INCLUDE "mfa/protected.html.tmpl" %]
 </p>
 

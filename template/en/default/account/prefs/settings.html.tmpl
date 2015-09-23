@@ -62,6 +62,9 @@
                 </option>
               [% END %]
             </select>
+            [% IF name == "api_key_only" %]
+              [% INCLUDE "mfa/protected.html.tmpl" %]
+            [% END %]
           [% ELSE %]
             <select name="[% name FILTER html %]" id="[% name FILTER html %]" disabled="disabled">
               <option value="[% default_name FILTER html %]">

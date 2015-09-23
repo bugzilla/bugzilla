@@ -39,6 +39,8 @@ use Bugzilla::Auth::Login::Stack;
 use Bugzilla::Auth::Verify::Stack;
 use Bugzilla::Auth::Persist::Cookie;
 use Socket;
+use URI;
+use URI::QueryParam;
 
 sub new {
     my ($class, $params) = @_;
@@ -93,26 +95,48 @@ sub login {
     }
     $user->set_authorizer($self);
 
-    # trigger multi-factor auth.  once verified the provider calls mfa_verified()
+    # trigger multi-factor auth
     if ($self->{_info_getter}->{successful}->requires_verification
         && $user->mfa
         && !Bugzilla->sudoer
         && !i_am_webservice()
     ) {
-        $user->mfa_provider->prompt({ user => $user, type => $type });
-        exit;
+        my $params = Bugzilla->input_params;
+        my $cgi = Bugzilla->cgi;
+        my $uri = URI->new($cgi->self_url);
+        foreach my $param (qw( Bugzilla_remember Bugzilla_restrictlogin GoAheadAndLogIn )) {
+            $uri->query_param_delete($param);
+        }
+        $user->mfa_provider->verify_prompt({
+            user          => $user,
+            type          => $type,
+            reason        => 'Logging in as ' . $user->identity,
+            restrictlogin => $params->{Bugzilla_restrictlogin},
+            remember      => $params->{Bugzilla_remember},
+            url           => $uri->as_string,
+            postback      => {
+                action      => 'token.cgi',
+                token_field => 't',
+                fields      => {
+                    a => 'mfa_l',
+                },
+            }
+        });
     }
 
     return $self->_handle_login_result($login_info, $type);
 }
 
 sub mfa_verified {
-    my ($self, $user, $type) = @_;
+    my ($self, $user, $event) = @_;
     require Bugzilla::Auth::Login::CGI;
+
+    my $params = Bugzilla->input_params;
     $self->{_info_getter}->{successful} = Bugzilla::Auth::Login::CGI->new();
-    $self->_handle_login_result({ user => $user }, $type);
-    print Bugzilla->cgi->redirect('index.cgi');
-    exit;
+    $params->{Bugzilla_restrictlogin}   = $event->{restrictlogin};
+    $params->{Bugzilla_remember}        = $event->{remember};
+
+    $self->_handle_login_result({ user => $user }, $event->{type});
 }
 
 sub successful_info_getter {

@@ -1215,6 +1215,11 @@
   [% ELSIF error == "mfa_totp_bad_code" %]
     Invalid verification code.
 
+  [% ELSIF error == "mfa_totp_bad_enrolment_code" %]
+    Invalid verification code.<br>
+    <br>
+    The QR code has been deleted - please generate and scan a new code.
+
   [% ELSIF error == "migrate_config_created" %]
     The file <kbd>[% file FILTER html %]</kbd> contains configuration
     variables that must be set before continuing with the migration.
@@ -1468,8 +1473,8 @@
     You did not enter your old password correctly.
 
   [% ELSIF error == "old_password_required" %]
-    [% title = "Old Password Required" %]
-    You must enter your old password to change your email address.
+    [% title = "Password Required" %]
+    You must enter your current password to change your email address.
 
   [% ELSIF error == "password_change_requests_not_allowed" %]
     [% title = "Password Change Requests Not Allowed" %]

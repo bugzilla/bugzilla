@@ -52,56 +52,43 @@ $(function() {
 
     // mfa
 
-    $('#mfa-enable')
+    $('#mfa-select-totp')
         .click(function(event) {
             event.preventDefault();
-            $('#mfa-enable-container').show();
-            $(this).hide();
-        });
+            $('#mfa').val('TOTP');
 
-    $('#mfa')
-        .change(function(event) {
-            var mfa = $(this).val();
-
-            $('.mfa-provider').hide();
+            $('#mfa-select').hide();
             $('#update').attr('disabled', true);
-            if (mfa === '') {
-                $('#mfa-confirm').hide();
-            }
-            else {
-                $('#mfa-confirm').show();
-                $('.mfa-api-blurb').show();
-                if (mfa === 'TOTP') {
-                    $('#mfa-enable-totp').show();
-                    $('#mfa-totp-throbber').show();
-                    $('#mfa-totp-issued').hide();
-                    var url = 'rest/user/mfa/totp/enroll' +
-                        '?Bugzilla_api_token=' + encodeURIComponent(BUGZILLA.api_token);
-                    $.ajax({
-                        "url": url,
-                        "contentType": "application/json",
-                        "processData": false
-                    })
-                    .done(function(data) {
-                        $('#mfa-totp-throbber').hide();
-                        var iframe = $('#mfa-enable-totp-frame').contents();
-                        iframe.find('#qr').attr('src', 'data:image/png;base64,' + data.png);
-                        iframe.find('#secret').text(data.secret32);
-                        $('#mfa-totp-issued').show();
-                        $('#mfa-password').focus();
-                        $('#update').attr('disabled', false);
-                    })
-                    .error(function(data) {
-                        $('#mfa-totp-throbber').hide();
-                        if (data.statusText === 'abort')
-                            return;
-                        var message = data.responseJSON ? data.responseJSON.message : 'Unexpected Error';
-                        console.log(message);
-                    });
-                }
-            }
-        })
-        .change();
+            $('#mfa-confirm').show();
+            $('.mfa-api-blurb').show();
+            $('#mfa-enable-totp').show();
+            $('#mfa-totp-throbber').show();
+            $('#mfa-totp-issued').hide();
+
+            var url = 'rest/user/mfa/totp/enroll' +
+                '?Bugzilla_api_token=' + encodeURIComponent(BUGZILLA.api_token);
+            $.ajax({
+                "url": url,
+                "contentType": "application/json",
+                "processData": false
+            })
+            .done(function(data) {
+                $('#mfa-totp-throbber').hide();
+                var iframe = $('#mfa-enable-totp-frame').contents();
+                iframe.find('#qr').attr('src', 'data:image/png;base64,' + data.png);
+                iframe.find('#secret').text(data.secret32);
+                $('#mfa-totp-issued').show();
+                $('#mfa-password').focus();
+                $('#update').attr('disabled', false);
+            })
+            .error(function(data) {
+                $('#mfa-totp-throbber').hide();
+                if (data.statusText === 'abort')
+                    return;
+                var message = data.responseJSON ? data.responseJSON.message : 'Unexpected Error';
+                console.log(message);
+            });
+        });
 
     $('#mfa-disable')
         .click(function(event) {
@@ -111,6 +98,7 @@ $(function() {
             $('.mfa-api-blurb').hide();
             $('#mfa-password').focus();
             $('#update').attr('disabled', false);
+            $('.mfa-protected').hide();
             $(this).hide();
         });
 
@@ -132,8 +120,28 @@ $(function() {
 
     if ($('#mfa-action').length) {
         $('#update').attr('disabled', true);
-        $(window).on('pageshow', function() {
-            $('#mfa').val('').change();
-        });
     }
+
+    // api-key
+
+    $('#apikey-toggle-revoked')
+        .click(function(event) {
+            event.preventDefault();
+            $('.apikey_revoked.bz_tui_hidden').removeClass('bz_tui_hidden');
+            if ($('.apikey_revoked').is(':visible')) {
+                $('.apikey_revoked').hide();
+                $(this).text('Show Revoked Keys');
+            }
+            else {
+                $('.apikey_revoked').show();
+                $(this).text('Hide Revoked Keys');
+            }
+        });
+
+    $('#new_key')
+        .change(function(event) {
+            if ($(this).is(':checked')) {
+                $('#new_description').focus();
+            }
+        });
 });

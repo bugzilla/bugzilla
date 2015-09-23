@@ -33,6 +33,7 @@
     <input type="hidden" name="mfa_action" id="mfa-action" value="disable">
 
     <button type="button" id="mfa-disable">Disable Two-factor Authentication</button>
+    [% INCLUDE "mfa/protected.html.tmpl" %]
 
     <div id="mfa-disable-container" style="display:none">
 
@@ -50,7 +51,7 @@
 
       [% IF user.mfa == "TOTP" %]
         <label class="mfa-totp">Code:</label>
-        <input type="text" name="mfa_disable_code" id="mfa-totp-disable-code"
+        <input type="text" name="code" id="mfa-totp-disable-code"
                placeholder="123456" maxlength="6" pattern="\d{6}" size="10"
                autocomplete="off" required autofocus>
       [% END %]
@@ -79,70 +80,67 @@
       Two-factor authentication is currently <b>disabled</b>.
     </p>
     <input type="hidden" name="mfa_action" id="mfa-action" value="enable">
+    <input type="hidden" name="mfa" id="mfa">
 
-    <button type="button" id="mfa-enable">Enable Two-factor Authentication</button>
+    <div id="mfa-select">
+      <p>
+        Select the two-factor system you want to use:
+      </p>
+      <button type="button" id="mfa-select-totp">Time-based One-Time Password (TOTP)</button>
+    </div>
 
-    <div id="mfa-enable-container" style="display:none">
-      <b>System:</b>
-      <select name="mfa" id="mfa">
-        <option value="" selected></option>
-        <option value="TOTP">Time-based One-Time Password (TOTP)</option>
-      </select>
+    [%# TOTP %]
+    <div id="mfa-enable-totp" class="mfa-provider" style="display:none">
 
-      [%# TOTP %]
-      <div id="mfa-enable-totp" class="mfa-provider" style="display:none">
+      <p>
+        Your current password is required to enable two-factor authentication.
+      </p>
+      <p>
+        <label class="mfa-totp">Current Password:</label>
+        <input type="password" name="password" id="mfa-password" required>
+      </p>
 
-        <p>
-          Your current password is required to enable two-factor authentication.
-        </p>
-        <p>
-          <label class="mfa-totp">Current Password:</label>
-          <input type="password" name="password" id="mfa-password" required>
-        </p>
+      <div id="mfa-totp-throbber">
+        Generating new QR code.. <img src="skins/standard/throbber.gif" width="16" height="11">
+      </div>
 
-        <div id="mfa-totp-throbber">
-          Generating new QR code.. <img src="skins/standard/throbber.gif" width="16" height="11">
+      <div id="mfa-totp-issued" style="display:none">
+        <iframe id="mfa-enable-totp-frame" src="userprefs.cgi?tab=mfa&frame=totp" tabindex="-1"></iframe>
+        <div id="mfa-totp-blurb">
+          Scan this QR code with your <a href="#" id="mfa-totp-apps">TOTP App</a>,
+          then enter the six digit code the app generates.<br>
+          <br>
+          <label class="mfa-totp">Code:</label>
+          <input type="text" name="code" id="mfa-totp-enable-code"
+                  placeholder="123456" maxlength="6" pattern="\d{6}" size="10"
+                  autocomplete="off" required autofocus>
         </div>
+      </div>
 
-        <div id="mfa-totp-issued" style="display:none">
-          <iframe id="mfa-enable-totp-frame" src="userprefs.cgi?tab=mfa&frame=totp" tabindex="-1"></iframe>
-          <div id="mfa-totp-blurb">
-            Scan this QR code with your <a href="#" id="mfa-totp-apps">TOTP App</a>,
-            then enter the six digit code the app generates.<br>
-            <br>
-            <label class="mfa-totp">Code:</label>
-            <input type="text" name="mfa_enable_code" id="mfa-totp-enable-code"
-                   placeholder="123456" maxlength="6" pattern="\d{6}" size="10"
-                   autocomplete="off" required autofocus>
-          </div>
-        </div>
+      <p>
+        If you have problems enrolling, this may be due to an inaccurate time on your device.<br>
+        Please check that the time on your device is accurate by visiting <b>http://time.is/</b>.
+      </p>
 
-        <p>
-          If you have problems enrolling, this may be due to an inaccurate time on your device.<br>
-          Please check that the time on your device is accurate by visiting <b>http://time.is/</b>.
-        </p>
-
-        <div id="mfa-totp-apps-popup" class="mfa-totp-popup" style="display:none">
-          Example TOTP Applications:<br>
-          <ul>
-            <li>Android and iOS:
-              <a href="https://support.google.com/accounts/answer/1066447" target="_blank">Google Authenticator</a>,
-              <a href="https://fedorahosted.org/freeotp/" target="_blank">Red Hat FreeOTP</a>
-            </li>
-            <li>Firefox OS:
-              <a href="https://marketplace.firefox.com/app/firekey/" target="_blank">Firekey</a>
-            </li>
-            <li>Windows Phone:
-              <a href="http://www.windowsphone.com/en-us/store/app/authenticator/021dd79f-0598-e011-986b-78e7d1fa76f8"
-                 target="_blank">Authenticator</a>
-            </li>
-          </ul>
-          <a href="https://en.wikipedia.org/wiki/Time-based_One-time_Password_Algorithm#Client_implementations" target="_blank">
-            Other clients
-          </a>
-          <button type="button" class="mfa-totp-popup-close">Close</button>
-        </div>
-
+      <div id="mfa-totp-apps-popup" class="mfa-totp-popup" style="display:none">
+        Example TOTP Applications:<br>
+        <ul>
+          <li>Android and iOS:
+            <a href="https://support.google.com/accounts/answer/1066447" target="_blank">Google Authenticator</a>,
+            <a href="https://fedorahosted.org/freeotp/" target="_blank">Red Hat FreeOTP</a>
+          </li>
+          <li>Firefox OS:
+            <a href="https://marketplace.firefox.com/app/firekey/" target="_blank">Firekey</a>
+          </li>
+          <li>Windows Phone:
+            <a href="http://www.windowsphone.com/en-us/store/app/authenticator/021dd79f-0598-e011-986b-78e7d1fa76f8"
+                target="_blank">Authenticator</a>
+          </li>
+        </ul>
+        <a href="https://en.wikipedia.org/wiki/Time-based_One-time_Password_Algorithm#Client_implementations" target="_blank">
+          Other clients
+        </a>
+        <button type="button" class="mfa-totp-popup-close">Close</button>
       </div>
 
     </div>

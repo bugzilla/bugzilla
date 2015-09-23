@@ -63,6 +63,12 @@ sub make_response {
     my $self = shift;
     my $cgi = Bugzilla->cgi;
 
+    # Fix various problems with IIS.
+    if ($ENV{'SERVER_SOFTWARE'} =~ /IIS/) {
+        $ENV{CONTENT_LENGTH} = 0;
+        binmode(STDOUT, ':bytes');
+    }
+
     $self->SUPER::make_response(@_);
 
     # XMLRPC::Transport::HTTP::CGI doesn't know about Bugzilla carrying around
@@ -107,6 +113,8 @@ sub handle_login {
     if (none { $_ eq $method } $class->PUBLIC_METHODS) {
         ThrowCodeError('unknown_method', { method => $full_method });
     }
+
+    $ENV{CONTENT_LENGTH} = 0 if $ENV{'SERVER_SOFTWARE'} =~ /IIS/;
     $self->SUPER::handle_login($class, $method, $full_method);
     return;
 }

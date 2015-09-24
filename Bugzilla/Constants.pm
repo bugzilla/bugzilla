@@ -682,7 +682,7 @@ sub _bz_locations {
     $libpath = $1;
 
     my ($localconfig, $datadir);
-    if ($project && $project =~ /^(\w+)$/) {
+    if ($project && $project =~ /^([\w-]+)$/) {
         $project = $1;
         $localconfig = "localconfig.$project";
         $datadir = "data/$project";

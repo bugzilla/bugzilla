@@ -19,7 +19,8 @@ this is :file:`template/en/default` so ``PROJECT``'s templates
 would be located at :file:`template/en/PROJECT`.
 
 To set up an alternate installation, just export ``PROJECT=foo`` before
-running :command:`checksetup.pl` for the first time. It will
+running :command:`checksetup.pl` for the first time. Project names may
+contain only letters, numbers, underscores, and hyphens. It will
 result in a file called :file:`localconfig.foo` instead of
 :file:`localconfig`. Edit this file as described above, with
 reference to a new database, and re-run :command:`checksetup.pl`

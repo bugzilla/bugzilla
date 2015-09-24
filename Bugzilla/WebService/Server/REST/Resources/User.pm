@@ -67,6 +67,11 @@ sub _rest_resources {
                 }
             },
         },
+        qr{^/whoami$}, {
+            GET => {
+                method => 'whoami'
+            }
+        }
     ];
     return $rest_resources;
 }

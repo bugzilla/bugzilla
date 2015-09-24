@@ -378,3 +378,38 @@ and not in 'editusers' group, you will only be returned the ``id``, ``name``,
 returned are filtered based on your permission to bless each group. The
 ``saved_searches`` and ``saved_reports`` items are only returned if you are
 querying your own account, even if you are in the editusers group.
+
+.. _rest_user_whoami:
+
+Who Am I
+--------
+
+Allows for validating a user's API key, token, or username and password.
+If sucessfully authenticated, it returns simple information about the
+logged in user.
+
+**Request**
+
+.. code-block:: text
+
+   GET /rest/whoami
+
+**Response**
+
+.. code-block:: js
+
+   {
+     "id" : "1234",
+     "name" : "user@bugzulla.org",
+     "real_name" : "Test User",
+   }
+
+========== ======  =====================================================
+name       type    description
+========== ======  =====================================================
+id         int     The unique integer ID that Bugzilla uses to represent
+                   this user. Even if the user's login name changes,
+                   this will not change.
+real_name  string  The actual name of the user. May be blank.
+name       string  string  The login name of the user.
+========== ======  =====================================================

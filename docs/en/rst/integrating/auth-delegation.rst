@@ -12,9 +12,9 @@ Authentication Flow
 
 The authentication process begins by directing the user to th the Bugzilla site's auth.cgi.
 For the sake of this example, our application's URL is `http://app.example.org`
-and the Bugzilla site is `http://bugs.example.org`.
+and the Bugzilla site is `http://bugzilla.mozilla.org`.
 
-1. Provide a link or redirect the user to `http://bugs.example.org/auth.cgi?callback=http://app.example.org/callback&description=app%description`
+1. Provide a link or redirect the user to `http://bugzilla.mozilla.org/auth.cgi?callback=http://app.example.org/callback&description=app%description`
 2. Assuming the user is agreeable, the following will happen:
   1. Bugzilla will issue a POST request to `http://app.example.org/callback`
      with a the request body data being a JSON object with keys `client_api_key` and `client_api_login`.
@@ -24,7 +24,7 @@ and the Bugzilla site is `http://bugs.example.org`.
      with additional query string parameters `client_api_login` and `callback_result`.
   4. At this point, the consumer now has the api key and login information. Be sure to compare the `callback_result` to whatever result was initially sent back
      to Bugzilla.
-3. Finally, you should check that the API key and login are valid, using the :ref:`rest_user_valid_login` REST
+3. Finally, you should check that the API key and login are valid, using the :ref:`rest_user_whoami` REST
    resource.
 
 Your application should take measures to ensure when receiving a user at your

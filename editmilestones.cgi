@@ -196,9 +196,11 @@ if ($action eq 'update') {
     my $milestone = Bugzilla::Milestone->check({ product => $product,
                                                  name    => $milestone_old_name });
 
-    $milestone->set_name($milestone_name);
-    $milestone->set_sortkey($sortkey);
-    $milestone->set_is_active($isactive);
+    $milestone->set_all({
+        name      => $milestone_name,
+        sortkey   => $sortkey,
+        is_active => $isactive,
+    });
     my $changes = $milestone->update();
     # Reloading the product since the default milestone name
     # could have been changed.

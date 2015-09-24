@@ -127,7 +127,7 @@ sub add_setting {
     my $exists = _setting_exists($name);
     return if ($exists && !$force_check);
 
-    ($name && $default_value)
+    ($name && length( $default_value // '' ))
       ||  ThrowCodeError("setting_info_invalid");
 
     if ($exists) {

@@ -87,6 +87,14 @@ sub init_page {
         # Some modules throw undefined errors (notably File::Spec::Win32) if
         # PATH is undefined.
         $ENV{'PATH'} = '';
+        # On Windows, these paths are tainted, preventing File::Spec::Win32->tmpdir
+        # from using them. But we need a place to temporary store attachments
+        # which are uploaded.
+        if (ON_WINDOWS) {
+            foreach my $temp (qw(TMPDIR TMP TEMP)) {
+                trick_taint($ENV{$temp}) if $ENV{$temp};
+            }
+        }
     }
 
     # Because this function is run live from perl "use" commands of

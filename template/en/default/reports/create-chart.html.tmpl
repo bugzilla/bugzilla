@@ -215,12 +215,10 @@ function subcatSelected() {
         <td></td>
         <td>
           <label for="datefrom"><b>Date Range</b></label>:
-          <input type="text" size="12" name="datefrom" id="datefrom"
-            placeholder="YYYY-MM-DD"
-            value="[% time2str("%Y-%m-%d", chart.datefrom) IF chart.datefrom%]">
+          <input size="12" name="datefrom" id="datefrom" placeholder="YYYY-MM-DD"
+            value="[% time2str("%Y-%m-%d", chart.datefrom) IF chart.datefrom %]">
           <label for="dateto"><b>to</b></label>
-          <input type="text" size="12" name="dateto" id="dateto"
-            placeholder="YYYY-MM-DD"
+          <input size="12" name="dateto" id="dateto" placeholder="YYYY-MM-DD"
             value="[% time2str("%Y-%m-%d", chart.dateto) IF chart.dateto %]">
         </td>
 
@@ -230,6 +228,12 @@ function subcatSelected() {
         </td>
       </tr>
     </table>
+    <script type="text/javascript">
+      $(function() {
+        $("#datefrom").datepicker();
+        $("#dateto").datepicker();
+      });
+    </script>
   [% ELSE %]
   <p><i>None</i></p>
   [% END %]  

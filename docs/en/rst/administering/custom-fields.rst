@@ -68,8 +68,7 @@ The following attributes must be set for each new custom field:
       :ref:`edit-values-list` for information about
       editing legal values.
   Date/Time:
-      A date field. This field appears with a
-      calendar widget for choosing the date.
+      A date field.
 
 - *Sortkey:*
   Integer that determines in which order Custom Fields are

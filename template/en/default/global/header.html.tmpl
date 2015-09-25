@@ -44,7 +44,6 @@
 
 [% IF NOT no_yui %]
   [% SET yui_css = {
-    calendar     => 1,
     datatable    => 1,
     button       => 1,
   } %]
@@ -181,6 +180,16 @@
             $('#lang_links_container').removeClass('bz_default_hidden');
         } 
         $(document).ready(unhide_language_selector);
+
+        // This sets the default parameters for all calendar fields.
+        $.datepicker.setDefaults({
+            dateFormat: "yy-mm-dd", // this is the YYYY-MM-DD format
+            showButtonPanel: true,  // permits to easily select "Today"
+            // These 3 parameters are useful for localization.
+            firstDay: 0,            // 0 = Sunday, 1 = Monday, etc...
+            dayNamesMin: [ "Su", "Mo", "Tu", "We", "Th", "Fr", "Sa" ],
+            monthNames: [ "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December" ]
+        });
 
         [%# Make some Bugzilla information available to all scripts. 
           # We don't import every parameter and constant because we

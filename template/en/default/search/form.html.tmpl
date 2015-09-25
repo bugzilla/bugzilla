@@ -307,26 +307,18 @@ TUI_hide_default('information_query');
   <li>
     <label for="chfieldfrom">between:</label>
     <input name="chfieldfrom" id="chfieldfrom" size="10" 
-           value="[% default.chfieldfrom.0 FILTER html %]" onchange="updateCalendarFromField(this)"> 
-           <button type="button" class="calendar_button"
-                          id="button_calendar_chfieldfrom"
-                          onclick="showCalendar('chfieldfrom')"><span>Calendar</span></button>
-           and 
-           <div id="con_calendar_chfieldfrom"></div>
-          <input name="chfieldto" size="10" id="chfieldto" 
-                 value="[% default.chfieldto.0 || "Now" FILTER html %]" 
-                 onchange="updateCalendarFromField(this)">
-          <button type="button" class="calendar_button"
-                         id="button_calendar_chfieldto"
-                         onclick="showCalendar('chfieldto')"><span>Calendar</span></button>
-          <div id="con_calendar_chfieldto"></div>
+           value="[% default.chfieldfrom.0 FILTER html %]">
+    and
+    <input name="chfieldto" size="10" id="chfieldto"
+           value="[% default.chfieldto.0 || "Now" FILTER html %]">
     (YYYY-MM-DD or relative dates)
     <script type="text/javascript">
-      <!--
-        [%+ PROCESS "global/calendar.js.tmpl" id = 'chfieldfrom' %]
-        [% PROCESS "global/calendar.js.tmpl" id = 'chfieldto' %]
-      //--></script>
-  </li>    
+      $(function() {
+        $("#chfieldfrom").datepicker();
+        $("#chfieldto").datepicker();
+      });
+    </script>
+  </li>
 </ul>
 
 [%############################################################################%]

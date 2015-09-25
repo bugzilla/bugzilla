@@ -18,7 +18,6 @@ var queryform = "reportform"
 [% PROCESS global/header.html.tmpl
   title = "Generate Graphical Report"
   onload = "doOnSelectProduct(0); chartTypeChanged()"
-  yui = [ 'calendar' ]
   javascript = js_data
   javascript_urls = [ "js/util.js", "js/TUI.js", "js/field.js" ]
   style_urls = ['skins/standard/buglist.css']

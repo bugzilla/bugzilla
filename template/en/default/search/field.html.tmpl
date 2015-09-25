@@ -55,34 +55,21 @@
       tag_name = "span"
       editable = 1
     %]
-    from <input name="[% field.name FILTER html %]from" 
-                id="[% field.name FILTER html %]" 
-                size="10" maxlength="10"
-                value="[% value.0 FILTER html %]" 
-                onchange="updateCalendarFromField(this);[% onchange FILTER html %]">
-         <button type="button" class="calendar_button"
-                        id="button_calendar_[% field.name FILTER html %]"
-                        onclick="showCalendar('[% field.name FILTER js %]')">
-           <span>Calendar</span>
-         </button>
-         <span id="con_calendar_[% field.name FILTER html %]"></span>               
-    to <input name="[% field.name FILTER html %]to" 
+    from <input name="[% field.name FILTER html %]from"
+                id="[% field.name FILTER html %]"
+                size="10" maxlength="10" value="[% value.0 FILTER html %]">
+    to <input name="[% field.name FILTER html %]to"
               id="[% field.name FILTER html %]to" size="10" maxlength="10"
-              value="[% value.1 FILTER html %]" 
-              onchange="updateCalendarFromField(this);[% onchange FILTER html %]">
-       <button type="button" class="calendar_button"
-                      id="button_calendar_[% field.name FILTER html %]to"
-                      onclick="showCalendar('[% field.name FILTER js %]to')">
-         <span>Calendar</span>
-       </button>
+              value="[% value.1 FILTER html %]">
     <small>(YYYY-MM-DD or relative dates)</small>
-    
-    <span id="con_calendar_[% field.name FILTER html %]to"></span>
+
     <script type="text/javascript">
-      <!--
-        [%+ PROCESS "global/calendar.js.tmpl" id = field.name %]
-        [% PROCESS "global/calendar.js.tmpl" id = field.name _ 'to' %]
-      //--></script>
+      $(function() {
+        // do not check user input as relative dates are allowed
+        $("#[% field.name FILTER html FILTER js %]").datepicker({constrainInput: false});
+        $("#[% field.name FILTER html FILTER js %]to").datepicker({constrainInput: false});
+      });
+    </script>
   [% CASE [ constants.FIELD_TYPE_SINGLE_SELECT, 
             constants.FIELD_TYPE_MULTI_SELECT ] %]
     <div id="container_[% field.name FILTER html %]" class="search_field_grid">      

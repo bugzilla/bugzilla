@@ -83,7 +83,11 @@
   "js/jquery/ui/jquery-ui-structure-min.css",
   "js/jquery/ui/jquery-ui-theme-min.css",
 ] %]
-[% style_urls.import(jquery_css, jq_css_urls) FILTER null %]
+
+[% FOREACH jq_name = jquery_css %]
+  [% style_urls.push("js/jquery/plugins/$jq_name/${jq_name}-min.css") %]
+[% END %]
+[% style_urls.import(jq_css_urls) FILTER null %]
 
 [%# Add our required jQuery plugins %]
 [% jquery.push("cookie", "devbridgeAutocomplete") %]

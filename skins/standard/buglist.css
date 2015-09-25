@@ -383,42 +383,16 @@ div.bz_section_title span {
 
 /* Series & reports (start) */
 
-.t1 {
-    background-color: #ffffff; /* white */
-}
-
-.t2 {
-    background-color: #dfefff;  /* light blue */
-}
-
-.t3 {
-    background-color: #dddddd;  /* grey */
-}
-
-.t4 {
-    background-color: #c3d3ed; /* darker blue */
-}
-
 .ttotal, .ttotal td {
-    background-color: #cfffdf; /* light green */
+    /* !important overrides jQuery DataTables default color */
+    background-color: #cfffdf !important; /* light green */
 }
 
-.tabular_report_container {
+.tabular_report {
   /* Force tables to be horizontally centered */
     margin-left: auto;
     margin-right: auto;
     text-align: center;
-}
-
-.tabular_report {
-    border: 1px dotted black;
-    border-collapse: collapse;
-    text-align: center;
-}
-
-.tabular_report th, .tabular_report td {
-    border: 1px dotted;
-    padding: 0.2em;
 }
 
 #graphical_report {

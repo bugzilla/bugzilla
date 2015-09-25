@@ -75,7 +75,6 @@
 'reports/report-table.html.tmpl' => [
   '"&amp;$col_vals" IF col_vals', 
   '"&amp;$row_vals" IF row_vals', 
-  'classes.$row_idx.$col_idx', 
   'urlbase', 
   'data.$tbl.$col.$row', 
 ],

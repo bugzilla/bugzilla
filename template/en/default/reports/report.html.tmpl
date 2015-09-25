@@ -57,7 +57,8 @@
 [% PROCESS global/header.html.tmpl 
   header_addl_info = time
   style_urls = ['skins/standard/buglist.css']
-  yui = ['datatable']
+  jquery = ['datatables']
+  jquery_css = ['datatables']
 %]
 
 [% IF debug %]
@@ -75,7 +76,7 @@
     [% END %]
 
     [% IF format == "table" %]
-      [% PROCESS "reports/report-table.html.tmpl" %]
+      [% PROCESS "reports/report-table.html.tmpl" table_id = loop.count %]
     [% ELSE %]
       [% IF tbl %]
         <h2>[% tbl_disp FILTER email FILTER html %]</h2>

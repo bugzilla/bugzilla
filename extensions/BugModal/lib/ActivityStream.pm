@@ -103,7 +103,7 @@ sub find_activity_id_for_flag {
     # we don't have an object_id to match on
 
     if (!exists $self->{activity_cache}->{flag}->{$flag->id}) {
-        foreach my $change_set (@$stream) {
+        foreach my $change_set (reverse @$stream) {
             foreach my $activity (@{ $change_set->{activity} }) {
                 # match by user, timestamp, and flag-type name
                 next unless

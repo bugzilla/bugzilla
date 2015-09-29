@@ -474,6 +474,6 @@ sub mfa_event_from_token {
     }
 
     # verify
-    my $event = $user->mfa_provider->verify_check($token);
+    my $event = $user->mfa_provider->verify_token($token);
     return ($user, $event);
 }

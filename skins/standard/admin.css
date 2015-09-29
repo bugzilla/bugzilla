@@ -270,9 +270,22 @@ input[disabled] {
     height: 220px;
 }
 
-#mfa-enroll-embedded {
+#mfa-enroll-embedded, #mfa-recovery-embedded {
     background: none;
     padding: 0;
+}
+
+#mfa-recovery {
+    margin-top: 4px;
+}
+
+#mfa-recovery-frame {
+    display: block;
+    margin-top: 8px;
+    margin-left: 2em;
+    border: none;
+    width: 300px;
+    height: 200px;
 }
 
 label.mfa-totp {

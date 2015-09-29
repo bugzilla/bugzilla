@@ -517,7 +517,7 @@ div.user_match {
 
 /* Rules specific for printing */
 @media print {
-    #header, #footer {
+    #header, #footer, #privacy-policy {
         display: none;
     }
 
@@ -528,6 +528,15 @@ div.user_match {
     body {
         background-image: none;
         background-color: #fff;
+    }
+
+    #prefnav, #prefcontent #update, #prefcontent #message {
+        display: none;
+    }
+
+    #prefcontent {
+        margin-left: 0 !important;
+        box-shadow: none !important;
     }
 }
 

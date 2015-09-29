@@ -93,12 +93,23 @@ $(function() {
     $('#mfa-disable')
         .click(function(event) {
             event.preventDefault();
-            $('#mfa-disable-container').show();
+            $('.mfa-api-blurb, #mfa-buttons').hide();
+            $('#mfa-disable-container, #mfa-auth-container').show();
             $('#mfa-confirm').show();
-            $('.mfa-api-blurb').hide();
             $('#mfa-password').focus();
             $('#update').attr('disabled', false);
             $('.mfa-protected').hide();
+            $(this).hide();
+        });
+
+    $('#mfa-recovery')
+        .click(function(event) {
+            event.preventDefault();
+            $('.mfa-api-blurb, #mfa-buttons').hide();
+            $('#mfa-recovery-container, #mfa-auth-container').show();
+            $('#mfa-password').focus();
+            $('#update').attr('disabled', false).val('Generate Printable Recovery Codes');
+            $('#mfa-action').val('recovery');
             $(this).hide();
         });
 

@@ -1,0 +1,35 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% css = BLOCK %]
+
+#codes {
+  font-size: 100%;
+  font-family: monospace;
+}
+
+[% END %]
+
+[%
+  PROCESS global/header.html.tmpl
+    style_urls = ['skins/standard/admin.css']
+    no_body    = 1
+    style      = css
+%]
+<body id="mfa-recovery-embedded">
+  [% IF codes.size %]
+    <div id="codes">
+      [% FOREACH code IN codes %]
+        [% code FILTER html %]<br>
+      [% END %]
+    </div>
+  [% ELSE %]
+    <i>Codes already generated</i>
+  [% END %]
+</body>
+</html>

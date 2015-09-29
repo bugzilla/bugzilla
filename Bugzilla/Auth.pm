@@ -133,8 +133,8 @@ sub mfa_verified {
 
     my $params = Bugzilla->input_params;
     $self->{_info_getter}->{successful} = Bugzilla::Auth::Login::CGI->new();
-    $params->{Bugzilla_restrictlogin}   = $event->{restrictlogin};
-    $params->{Bugzilla_remember}        = $event->{remember};
+    $params->{Bugzilla_restrictlogin}   = !!$event->{restrictlogin};
+    $params->{Bugzilla_remember}        = !!$event->{remember};
 
     $self->_handle_login_result({ user => $user }, $event->{type});
 }

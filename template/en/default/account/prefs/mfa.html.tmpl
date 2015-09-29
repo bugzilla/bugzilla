@@ -23,7 +23,19 @@
 [% END %]
 
 <div id="mfa-container">
-  [% IF user.mfa %]
+  [% IF mfa_recovery_token %]
+    <input type="hidden" name="mfa_action" id="mfa-action" value="">
+
+    <p>
+      Here are your recovery codes.
+    </p>
+
+    [% INCLUDE recovery_blurb %]
+    <iframe id="mfa-recovery-frame" tabindex="-1"
+            src="userprefs.cgi?tab=mfa&frame=recovery&t=[% mfa_recovery_token FILTER uri %]">
+    </iframe>
+
+  [% ELSIF user.mfa %]
     <p>
       Two-factor authentication is currently <b>enabled</b> using
       <b>[% SWITCH user.mfa %]
@@ -32,30 +44,15 @@
     </p>
     <input type="hidden" name="mfa_action" id="mfa-action" value="disable">
 
-    <button type="button" id="mfa-disable">Disable Two-factor Authentication</button>
-    [% INCLUDE "mfa/protected.html.tmpl" %]
-
-    <div id="mfa-disable-container" style="display:none">
-
-      <p>
-        Your current password and
-        [% IF user.mfa == "TOTP" %]
-          a TOTP verification code
-        [% END %]
-        is required to disable two-factor authentication.
-      </p>
-      <p>
-        <label class="mfa-totp">Current Password:</label>
-        <input type="password" name="password" id="mfa-password" required>
-      </p>
-
-      [% IF user.mfa == "TOTP" %]
-        <label class="mfa-totp">Code:</label>
-        <input type="text" name="code" id="mfa-totp-disable-code"
-               placeholder="123456" maxlength="6" pattern="\d{6}" size="10"
-               autocomplete="off" required autofocus>
-      [% END %]
-
+    <div id="mfa-buttons">
+      <div>
+        <button type="button" id="mfa-disable">Disable Two-factor Authentication</button>
+        [% INCLUDE "mfa/protected.html.tmpl" %]
+      </div>
+      <div>
+        <button type="button" id="mfa-recovery">Generate Printable Recovery Codes</button>
+        [% INCLUDE "mfa/protected.html.tmpl" %]
+      </div>
     </div>
 
     <p class="mfa-api-blurb">
@@ -74,6 +71,38 @@
         preference to enforce API key usage.
       [% END %]
     </p>
+
+    <div id="mfa-recovery-container" style="display:none">
+      <p>
+        Your current password and verification code is required to generate
+        recovery codes.
+      </p>
+      <ul>
+        <li><b>Generating recovery codes obsoletes previously generated ones</b></li>
+      </ul>
+      [% INCLUDE recovery_blurb %]
+    </div>
+
+    <div id="mfa-disable-container" style="display:none">
+      <p>
+        Your current password and verification code is required to disable
+        two-factor authentication.
+      </p>
+    </div>
+
+    <div id="mfa-auth-container" style="display:none">
+      <p>
+        <label class="mfa-totp">Current Password:</label>
+        <input type="password" name="password" id="mfa-password" required>
+      </p>
+
+      [% IF user.mfa == "TOTP" %]
+        <label class="mfa-totp">Code:</label>
+        <input type="text" name="code"
+               placeholder="123456" maxlength="9" pattern="\d{6,9}" size="10"
+               autocomplete="off" required autofocus>
+      [% END %]
+    </div>
 
   [% ELSE %]
     <p>
@@ -163,3 +192,12 @@
   </div>
 
 </div>
+
+[% BLOCK recovery_blurb %]
+  <ul>
+    <li>These codes can be used in case you lose your second factor</li>
+    <li>Please store them safely in a locked cabinet at home</li>
+    <li>If in doubt, generate and print new recovery codes</li>
+    <li><b>Do not store these codes electronically</b></li>
+  </ul>
+[% END %]

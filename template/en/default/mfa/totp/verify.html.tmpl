@@ -22,7 +22,7 @@
     <input type="hidden" name="[% field FILTER html %]" value="[% postback.fields.item(field) FILTER html %]">
   [% END %]
   <input type="text" name="code" id="code"
-        placeholder="123456" maxlength="6" pattern="\d{6}" size="10"
+        placeholder="123456" maxlength="9" pattern="\d{6,9}" size="10"
         autocomplete="off" required autofocus><br>
   <br>
   <input type="submit" value="Submit">

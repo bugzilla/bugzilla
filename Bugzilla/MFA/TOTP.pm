@@ -58,10 +58,10 @@ sub prompt {
 
 sub check {
     my ($self, $params) = @_;
-    my $code = $params->{code} // '';
+    my $code = $params->{code};
     return if $self->_auth()->verify($code, 1);
 
-    if (exists $params->{mfa_action}) {
+    if ($params->{mfa_action} && $params->{mfa_action} eq 'enable') {
         ThrowUserError('mfa_totp_bad_enrolment_code');
     }
     else {

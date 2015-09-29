@@ -187,7 +187,7 @@ sub MfaAccount {
     my $dbh = Bugzilla->dbh;
     return unless $user->mfa;
 
-    my $event = $user->mfa_provider->verify_check($cgi->param('mfa_token'));
+    my $event = $user->mfa_provider->verify_token($cgi->param('mfa_token'));
 
     foreach my $action (@{ $event->{actions} }) {
         if ($action->{type} eq 'set_login') {
@@ -308,7 +308,7 @@ sub MfaSettings {
     my $user = Bugzilla->user;
     return unless $user->mfa;
 
-    my $event = $user->mfa_provider->verify_check($cgi->param('mfa_token'));
+    my $event = $user->mfa_provider->verify_token($cgi->param('mfa_token'));
 
     my $settings = $user->settings;
     if ($event->{reset}) {
@@ -657,7 +657,7 @@ sub SaveMFA {
     my $dbh  = Bugzilla->dbh;
     my $user = Bugzilla->user;
     my $action = $cgi->param('mfa_action') // '';
-    return unless $action eq 'enable' || $action eq 'disable';
+    return unless $action eq 'enable' || $action eq 'recovery' || $action eq 'disable';
 
     my $crypt_password = $user->cryptpassword;
     if (bz_crypt($cgi->param('password'), $crypt_password) ne $crypt_password) {
@@ -674,8 +674,17 @@ sub SaveMFA {
         $settings->{api_key_only}->set('on');
         clear_settings_cache(Bugzilla->user->id);
     }
+
+    elsif ($action eq 'recovery') {
+        $user->mfa_provider->verify_check(Bugzilla->input_params);
+        my $codes = $user->mfa_provider->generate_recovery_codes();
+        my $token = issue_short_lived_session_token('mfa-recovery');
+        set_token_extra_data($token, $codes);
+        $vars->{mfa_recovery_token} = $token;
+    }
+
     else {
-        $user->mfa_provider->check(Bugzilla->input_params);
+        $user->mfa_provider->verify_check(Bugzilla->input_params);
         $user->set_mfa('');
     }
 
@@ -692,7 +701,14 @@ sub DoMFA {
         -Expires       => 'Thu, 01 Dec 1994 16:00:00 GMT',
         -Pragma        => 'no-cache',
     );
-    if ($provider =~ /^[a-z]+$/) {
+    if ($provider eq 'recovery') {
+        my $token = $cgi->param('t');
+        $vars->{codes} = get_token_extra_data($token);
+        delete_token($token);
+        $template->process("mfa/recovery.html.tmpl", $vars)
+            || ThrowTemplateError($template->error());
+    }
+    elsif ($provider =~ /^[a-z]+$/) {
         trick_taint($provider);
         $template->process("mfa/$provider/enroll.html.tmpl", $vars)
             || ThrowTemplateError($template->error());
@@ -828,7 +844,7 @@ sub MfaApiKey {
     my $dbh = Bugzilla->dbh;
     return unless $user->mfa;
 
-    my $event = $user->mfa_provider->verify_check($cgi->param('mfa_token'));
+    my $event = $user->mfa_provider->verify_token($cgi->param('mfa_token'));
 
     foreach my $action (@{ $event->{actions} }) {
         if ($action->{type} eq 'create') {

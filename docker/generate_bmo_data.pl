@@ -340,6 +340,13 @@ my @groups = (
         all_products => 1,
     },
     {
+        name         => 'core-security-release',
+        description  => 'Release-track Client Security Bug',
+        no_admin     => 1,
+        bug_group    => 1,
+        all_products => 1,
+    },
+    {
         name         => 'can_edit_comments',
         description  => 'Members of this group will be able to edit comments',
         no_admin     => 0,
@@ -420,7 +427,7 @@ my %set_params = (
                                  '&long_desc_type=substring',
     defaultseverity           => 'normal',
     edit_comments_group       => 'can_edit_comments',
-    insidergroup              => 'core-security-release',
+    insidergroup              => 'core-security',
     last_visit_keep_days      => '28',
     lxr_url                   => 'http://mxr.mozilla.org/mozilla',
     lxr_root                  => 'mozilla/',

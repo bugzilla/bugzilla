@@ -45,7 +45,7 @@ If you want to install a version of Bugzilla from the Bugzilla project, you
 will instead need:
 
 :command:`yum install httpd mysql-server mod_perl mod_perl-devel httpd-devel
-gd-devel mysql-devel
+gd-devel mysql-devel rst2pdf
 graphviz patchutils gcc 'perl(Apache2::SizeLimit)' 'perl(Authen::Radius)'
 'perl(Authen::SASL)' 'perl(Cache::Memcached)' 'perl(CGI)' 'perl(Chart::Lines)'
 'perl(Daemon::Generic)' 'perl(Date::Format)' 'perl(DateTime)'
@@ -57,7 +57,7 @@ graphviz patchutils gcc 'perl(Apache2::SizeLimit)' 'perl(Authen::Radius)'
 'perl(HTML::Scrubber)' 'perl(IO::Scalar)' 'perl(JSON::RPC)' 'perl(JSON::XS)'
 'perl(List::MoreUtils)' 'perl(LWP::UserAgent)' 'perl(Math::Random::ISAAC)'
 'perl(MIME::Parser)' 'perl(mod_perl2)' 'perl(Net::LDAP)' 'perl(Net::SMTP::SSL)'
-'perl(PatchReader)' 'perl(SOAP::Lite)' 'perl(Template)'
+'perl(PatchReader)' 'perl(SOAP::Lite)' 'perl(Template)' 'perl(File::Which)'
 'perl(Template::Plugin::GD::Image)' 'perl(Test::Taint)' 'perl(TheSchwartz)'
 'perl(URI)' 'perl(XMLRPC::Lite)' 'perl(XML::Twig)'`
 
@@ -82,10 +82,10 @@ libchart-perl libxml-perl libxml-twig-perl perlmagick libgd-graph-perl
 libtemplate-plugin-gd-perl libsoap-lite-perl libhtml-scrubber-perl
 libjson-rpc-perl libdaemon-generic-perl libtheschwartz-perl
 libtest-taint-perl libauthen-radius-perl libfile-slurp-perl
-libencode-detect-perl libmodule-build-perl libnet-ldap-perl
+libencode-detect-perl libmodule-build-perl libnet-ldap-perl libfile-which-perl
 libauthen-sasl-perl libtemplate-perl-doc libfile-mimeinfo-perl
 libhtml-formattext-withlinks-perl libgd-dev libmysqlclient-dev lynx-cur
-graphviz python-sphinx`
+graphviz python-sphinx rst2pdf`
 
 If you plan to use a database other than MySQL, you will need to also install
 the appropriate packages for that.

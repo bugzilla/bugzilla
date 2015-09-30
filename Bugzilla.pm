@@ -82,19 +82,27 @@ sub init_page {
     }
 
     if (${^TAINT}) {
+        my $path = '';
+        if (ON_WINDOWS) {
+            # On Windows, these paths are tainted, preventing
+            # File::Spec::Win32->tmpdir from using them. But we need
+            # a place to temporary store attachments which are uploaded.
+            foreach my $temp (qw(TMPDIR TMP TEMP)) {
+                trick_taint($ENV{$temp}) if $ENV{$temp};
+            }
+            # Some DLLs used by Strawberry Perl are also in c\bin,
+            # see https://rt.cpan.org/Public/Bug/Display.html?id=99104
+            if (!ON_ACTIVESTATE) {
+                my $c_path = $path = dirname($^X);
+                $c_path =~ s/\bperl\b(?=\\bin)/c/;
+                $path .= ";$c_path";
+            }
+        }
         # Some environment variables are not taint safe
         delete @::ENV{'PATH', 'IFS', 'CDPATH', 'ENV', 'BASH_ENV'};
         # Some modules throw undefined errors (notably File::Spec::Win32) if
         # PATH is undefined.
-        $ENV{'PATH'} = '';
-        # On Windows, these paths are tainted, preventing File::Spec::Win32->tmpdir
-        # from using them. But we need a place to temporary store attachments
-        # which are uploaded.
-        if (ON_WINDOWS) {
-            foreach my $temp (qw(TMPDIR TMP TEMP)) {
-                trick_taint($ENV{$temp}) if $ENV{$temp};
-            }
-        }
+        $ENV{'PATH'} = $path;
     }
 
     # Because this function is run live from perl "use" commands of

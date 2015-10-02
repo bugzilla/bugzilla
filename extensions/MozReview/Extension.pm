@@ -34,8 +34,8 @@ sub template_before_process {
     my $file = $args->{'file'};
     my $vars = $args->{'vars'};
 
-    return unless (($file eq 'bug/show-header.html.tmpl' ||
-                    $file eq 'bug_modal/header.html.tmpl' ||
+    return unless (($file =~ /bug\/(show-header|edit).html.tmpl$/ ||
+                    $file =~ /bug_modal\/(header|edit).html.tmpl$/ ||
                     $file eq 'attachment/create.html.tmpl') &&
                    Bugzilla->params->{mozreview_base_url});
 

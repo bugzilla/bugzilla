@@ -29,7 +29,7 @@ sub admins_report {
     my @grouplist =
                   ($user->in_group('editusers') || $user->in_group('infrasec'))
                   ? map { lc($_->name) } Bugzilla::Group->get_all
-                  : _get_public_membership_groups();
+                  : _get_permitted_membership_groups();
 
     my $groups = join(',', map { $dbh->quote($_) } @grouplist);
 
@@ -183,7 +183,7 @@ sub members_report {
 
     my @grouplist = $privileged
         ? map { lc($_->name) } Bugzilla::Group->get_all
-        : _get_public_membership_groups();
+        : _get_permitted_membership_groups();
 
     my $include_disabled = $cgi->param('include_disabled') ? 1 : 0;
     $vars->{'include_disabled'} = $include_disabled;
@@ -202,6 +202,8 @@ sub members_report {
     return if $group eq '';
     my $group_obj = Bugzilla::Group->new({ name => $group });
     $vars->{'group'} = $group_obj;
+
+    $vars->{'privileged'} = 1 if ($group_obj->owner && $group_obj->owner->id == $user->id);
 
     my @types;
     my $members = $group_obj->members_complete();
@@ -276,10 +278,11 @@ sub _filter_userlist {
 
 # Groups that any user with editbugs can see the membership or admin lists for.
 # Transparency FTW.
-sub _get_public_membership_groups {
-    my @all_groups = map { lc($_->name) } Bugzilla::Group->get_all;
+sub _get_permitted_membership_groups {
+    my $user = Bugzilla->user;
 
-    my %hardcoded_groups = map { $_ => 1 } qw(
+    # Default publicly viewable groups
+    my %default_public_groups = map { $_ => 1 } qw(
         bugzilla-approvers
         bugzilla-reviewers
         can_restrict_comments
@@ -290,9 +293,25 @@ sub _get_public_membership_groups {
         qa-approvers
     );
 
-    # We also automatically include all drivers groups - this gives us a little
-    # future-proofing
-    return grep { /-drivers$/ || exists $hardcoded_groups{$_} } @all_groups;
+    # We add the group to the permitted list if:
+    # 1. it is a drivers group - this gives us a little
+    #    future-proofing
+    # 2. it is a one of the default public groups
+    # 3. the user is the group's owner
+    # 4. or the user can bless others into the group
+    my @permitted_groups;
+    foreach my $group (Bugzilla::Group->get_all) {
+        my $name = $group->name;
+        if ($name =~ /-drivers$/
+            || exists $default_public_groups{$name}
+            || ($group->owner && $group->owner->id == $user->id)
+            || $user->can_bless($group->id))
+        {
+            push(@permitted_groups, $name);
+        }
+    }
+
+    return @permitted_groups;
 }
 
 1;

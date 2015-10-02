@@ -48,7 +48,7 @@
         <th>Type</th>
         <th>Count</th>
         <th>Members</th>
-        [% IF privileged || (user.id == group.owner.id) %]
+        [% IF privileged %]
           <th class="right">2FA, Last Seen (days ago)</th>
         [% END %]
       </tr>

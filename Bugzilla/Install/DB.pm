@@ -756,6 +756,9 @@ sub update_table_definitions {
 
     _migrate_group_owners();
 
+    $dbh->bz_add_column('groups', 'idle_member_removal',
+                        {TYPE => 'INT2', NOTNULL => 1, DEFAULT => '0'});
+
     ################################################################
     # New --TABLE-- changes should go *** A B O V E *** this point #
     ################################################################

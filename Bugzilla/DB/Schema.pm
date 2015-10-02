@@ -1239,6 +1239,7 @@ use constant ABSTRACT_SCHEMA => {
                               REFERENCES => {
                                   TABLE  => 'profiles',
                                   COLUMN => 'userid'}},
+            idle_member_removal => {TYPE => 'INT2', NOTNULL => 1, DEFAULT => '0'}
         ],
         INDEXES => [
             groups_name_idx => {FIELDS => ['name'], TYPE => 'UNIQUE'},

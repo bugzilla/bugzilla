@@ -21,7 +21,7 @@
           </span>
       </div>
       <div id="user_story_edit_container" class="bz_default_hidden">
-        [% user_story_default = cloned_bug ? cloned_bug.cf_user_story : "" %]
+        [% user_story_default = cloned_bug ? cloned_bug.cf_user_story : default.cf_user_story %]
         [% INCLUDE global/textarea.html.tmpl
             name     = 'cf_user_story'
             id       = 'user_story'

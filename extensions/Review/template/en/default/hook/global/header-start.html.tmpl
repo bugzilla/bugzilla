@@ -44,6 +44,7 @@
     _mentors: [
       [% FOREACH u = mentors %]
         [% NEXT IF NOT u.is_active %]
+        [% NEXT IF u.id == user.id %]
         [% PROCESS reviewer %][% "," UNLESS loop.last %]
       [% END %]
     ],
@@ -51,6 +52,7 @@
     [% IF product_obj.reviewers %]
       _product: [
         [% FOREACH u = product_obj.reviewers_objs %]
+          [% NEXT IF u.id == user.id %]
           [% PROCESS reviewer %][% "," UNLESS loop.last %]
         [% END %]
       ],
@@ -60,6 +62,7 @@
       [%# single component (create/edit attachment) %]
       '[% component_obj.name FILTER js %]': [
         [% FOREACH u = component_obj.reviewers_objs %]
+          [% NEXT IF u.id == user.id %]
           [% PROCESS reviewer %][% "," UNLESS loop.last %]
         [% END %]
       ],
@@ -69,6 +72,7 @@
         [% NEXT UNLESS c.reviewers %]
         '[% c.name FILTER js %]': [
           [% FOREACH u = c.reviewers_objs %]
+            [% NEXT IF u.id == user.id %]
             [% PROCESS reviewer %][% "," UNLESS loop.last %]
           [% END %]
         ],

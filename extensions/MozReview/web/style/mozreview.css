@@ -19,7 +19,8 @@
 }
 
 .mozreview-table td {
-    padding: 4px;
+    vertical-align: middle !important;
+    padding: 4px !important;
 }
 
 .mozreview-table thead, .mozreview-table tfoot {
@@ -47,10 +48,6 @@
 
 .mozreview-requests .mozreview-open-issues {
     text-align: center;
-}
-
-.mozreview-child-request-summary {
-    text-indent: 1em;
 }
 
 .mozreview-diff-link {

@@ -12,6 +12,7 @@ MozReview.getReviewRequest = function() {
     var hostUrl = $('.mozreview-requests').data('mozreviewUrl');
     var tr = $('<tr/>');
     var td = $('<td/>');
+    var link = $('<a/>');
 
     var rrSummaryApiUrl = hostUrl +
         'api/extensions/mozreview.extension.MozReviewExtension/summary/?bug=' +
@@ -26,34 +27,32 @@ MozReview.getReviewRequest = function() {
         return rrUrl(rrId) + 'diff/#index_header';
     }
 
-    function rrRow(rr, isParent) {
-        var tdSummary = td.clone();
+    function rrCommitRow(rr, firstCommit) {
         var trCommit = tr.clone();
-        var reviewLink = $('<a/>');
-        var diffLink = reviewLink.clone();
+        var tdSubmitter = td.clone();
+        var tdRev = td.clone();
+        var tdSummary = td.clone();
+        var diffLink = link.clone();
+        var reviewLink = link.clone();
 
-        if (!isParent) {
-            tdSummary.addClass('mozreview-child-request-summary');
-            diffLink.attr('href', rrDiffUrl(rr.id));
-            diffLink.text(rr.commit.substr(0, 12));
-            diffLink.addClass('mozreview-diff-link');
-            tdSummary.append(diffLink);
-            tdSummary.append(' ');
+        if (firstCommit) {
+            tdSubmitter.text(rr.submitter);
         }
 
+        diffLink.attr('href', rrDiffUrl(rr.id));
+        diffLink.text(rr.commit.substr(0, 12));
+        diffLink.addClass('mozreview-diff-link');
+        tdRev.append(diffLink);
+
+        tdSummary.addClass('mozreview-summary');
         reviewLink.attr('href', rrUrl(rr.id));
         reviewLink.text(rr.summary);
         tdSummary.append(reviewLink);
 
-        if (isParent) {
-            tdSummary.append($('<span/>').text(' (' + rr.submitter + ')'));
-        }
-
-        tdSummary.addClass('mozreview-summary');
-
         trCommit.append(
+            tdSubmitter,
+            tdRev,
             tdSummary,
-            td.clone().text(rr.status),
             td.clone().text(rr.issue_open_count)
                       .addClass('mozreview-open-issues'),
             td.clone().text(timeAgo(new Date(rr.last_updated)))
@@ -94,10 +93,8 @@ MozReview.getReviewRequest = function() {
         } else {
             for (i = 0; i < data.review_request_summaries.length; i++) {
                 family = data.review_request_summaries[i];
-                parent = family.parent;
-                tbody.append(rrRow(parent, true));
                 for (j = 0; j < family.children.length; j++) {
-                    tbody.append(rrRow(family.children[j], false));
+                    tbody.append(rrCommitRow(family.children[j], j==0));
                 }
             }
         }

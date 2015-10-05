@@ -3621,6 +3621,12 @@ sub keyword_objects {
     return $self->{'keyword_objects'};
 }
 
+sub has_keyword {
+    my ($self, $keyword) = @_;
+    $keyword = lc($keyword);
+    return any { lc($_->name) eq $keyword } @{ $self->keyword_objects };
+}
+
 sub comments {
     my ($self, $params) = @_;
     return [] if $self->{'error'};

@@ -40,10 +40,14 @@ input#cf_rank {
     width: 3em;
 }
 
-#unassigned_with_patches {
+.attachment-warning {
     font-weight: normal;
 }
 
-#unassigned_with_patches img {
+.attachment-warning img {
     vertical-align: sub;
+}
+
+#sec-approval-warning a {
+    color: #b70000;
 }

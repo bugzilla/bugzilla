@@ -46,7 +46,7 @@ use DateTime;
 use Email::MIME::ContentType qw(parse_content_type);
 use Encode qw(find_encoding encode_utf8);
 use File::MimeInfo::Magic;
-use List::MoreUtils qw(natatime any);
+use List::MoreUtils qw(natatime any last_value);
 use List::Util qw(first);
 use Scalar::Util qw(blessed);
 use Sys::Syslog qw(:DEFAULT);
@@ -67,6 +67,7 @@ BEGIN {
     *Bugzilla::Bug::reporters_hw_os                 = \&_bug_reporters_hw_os;
     *Bugzilla::Bug::is_unassigned                   = \&_bug_is_unassigned;
     *Bugzilla::Bug::has_current_patch               = \&_bug_has_current_patch;
+    *Bugzilla::Bug::missing_sec_approval            = \&_bug_missing_sec_approval;
     *Bugzilla::Product::default_security_group      = \&_default_security_group;
     *Bugzilla::Product::default_security_group_obj  = \&_default_security_group_obj;
     *Bugzilla::Product::group_always_settable       = \&_group_always_settable;
@@ -819,6 +820,54 @@ sub _bug_has_current_patch {
             || $attachment->contenttype eq 'text/x-review-board-request';
     }
     return 0;
+}
+
+sub _bug_missing_sec_approval {
+    my ($self) = @_;
+    # see https://wiki.mozilla.org/Security/Bug_Approval_Process for the rules
+
+    # no need to alert once a bug is closed
+    return 0 if $self->resolution;
+
+    # only bugs with sec-high or sec-critical keywords need sec-approval
+    return 0 unless $self->has_keyword('sec-high') || $self->has_keyword('sec-critical');
+
+    # look for patches with sec-approval set to any value
+    foreach my $attachment (@{ $self->attachments }) {
+        next if $attachment->isobsolete || !$attachment->ispatch;
+        foreach my $flag (@{ $attachment->flags }) {
+            # only one patch needs sec-approval
+            return 0 if $flag->name eq 'sec-approval';
+        }
+    }
+
+    # tracking flags
+    require Bugzilla::Extension::TrackingFlags::Flag;
+    my $flags = Bugzilla::Extension::TrackingFlags::Flag->match({
+        product     => $self->product,
+        component   => $self->component,
+        bug_id      => $self->id,
+        is_active   => 1,
+        WHERE       => {
+            'name like ?' => 'cf_status_firefox%',
+        },
+    });
+    # set flags are added after the sql query, filter those out
+    $flags = [ grep { $_->name =~ /^cf_status_firefox/ } @$flags ];
+    return 0 unless @$flags;
+
+    my $nightly = last_value { $_->name !~ /_esr\d+$/ } @$flags;
+    my $set = 0;
+    foreach my $flag (@$flags) {
+        my $value = $flag->bug_flag($self->id)->value;
+        next if $value eq '---';
+        $set++;
+        # sec-approval is required if any of the current status-firefox
+        # tracking flags that aren't the latest are set to 'affected'
+        return 1 if $flag->name ne $nightly->name && $value eq 'affected';
+    }
+    # sec-approval is required if no tracking flags are set
+    return $set == 0;
 }
 
 sub _product_default_platform_id { $_[0]->{default_platform_id} }

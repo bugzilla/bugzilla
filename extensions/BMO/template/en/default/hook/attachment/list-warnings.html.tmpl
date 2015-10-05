@@ -7,12 +7,26 @@
   #%]
 
 [%
-  RETURN UNLESS user.in_group('editbugs');
-  RETURN UNLESS bug.attachments.size && bug.is_unassigned && bug.has_current_patch;
+  RETURN UNLESS user.in_group('editbugs') || bug.assigned_to.id == user.id;
+  RETURN UNLESS bug.attachments.size && bug.has_current_patch;
 %]
-<tr class="bz_attach_footer">
-  <td colspan="[% show_attachment_flags ? 3 : 2 %]" id="unassigned_with_patches">
-    <img src="extensions/BMO/web/images/sign_warning.png" width="16" height="16">
-    Unassigned [% terms.bug %] with patches attached
-  </td>
-</tr>
+
+[% IF bug.is_unassigned %]
+  <tr class="bz_attach_footer">
+    <td colspan="[% show_attachment_flags ? 3 : 2 %]" class="attachment-warning">
+      <img src="extensions/BMO/web/images/sign_warning.png" width="16" height="16">
+      Unassigned [% terms.bug %] with patches attached
+    </td>
+  </tr>
+[% END %]
+
+[% IF bug.missing_sec_approval %]
+  <tr class="bz_attach_footer">
+    <td colspan="[% show_attachment_flags ? 3 : 2 %]" id="sec-approval-warning" class="attachment-warning">
+      <img src="extensions/BMO/web/images/sign_warning.png" width="16" height="16">
+      <a href="https://wiki.mozilla.org/Security/Bug_Approval_Process" target="_blank">
+        sec-approval required on patches before landing
+      </a>
+    </td>
+  </tr>
+[% END %]

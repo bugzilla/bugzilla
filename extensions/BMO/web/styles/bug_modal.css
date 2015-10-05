@@ -13,10 +13,14 @@
     border-radius: 4px;
 }
 
-#unassigned_with_patches {
+.attachment-warning {
     padding-left: 4px;
 }
 
-#unassigned_with_patches img {
+.attachment-warning img {
     vertical-align: sub;
+}
+
+#sec-approval-warning a {
+    color: #b70000;
 }

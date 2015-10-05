@@ -94,7 +94,7 @@ MozReview.getReviewRequest = function() {
             for (i = 0; i < data.review_request_summaries.length; i++) {
                 family = data.review_request_summaries[i];
                 for (j = 0; j < family.children.length; j++) {
-                    tbody.append(rrCommitRow(family.children[j], j==0));
+                    tbody.append(rrCommitRow(family.children[j], j == 0));
                 }
             }
         }

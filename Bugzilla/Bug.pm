@@ -1718,17 +1718,27 @@ sub _check_dependencies {
         @bug_ids = grep {$_} @bug_ids;
         # We do this up here to make sure all aliases are converted to IDs.
         @bug_ids = map { $invocant->check($_, $type)->id } @bug_ids;
-       
+
+        my $user = Bugzilla->user;
         my @check_access = @bug_ids;
         # When we're updating a bug, only added or removed bug_ids are 
         # checked for whether or not we can see/edit those bugs.
         if (ref $invocant) {
             my $old = $invocant->$type;
             my ($removed, $added) = diff_arrays($old, \@bug_ids);
-            @check_access = (@$added, @$removed);
-            
+
+            # If a user has editbugs they are allowed to add dependencies on
+            # bugs that they cannot see -- only check access for bugs that are
+            # removed.
+            if ($user->in_group('editbugs')) {
+                @check_access = @$removed;
+            }
+            else {
+                @check_access = (@$added, @$removed);
+            }
+
             # Check field permissions if we've changed anything.
-            if (@check_access) {
+            if (@$added || @$removed) {
                 my $privs;
                 if (!$invocant->check_can_change_field($type, 0, 1, \$privs)) {
                     ThrowUserError('illegal_change', { field => $type,
@@ -1737,8 +1747,8 @@ sub _check_dependencies {
             }
         }
 
-        my $user = Bugzilla->user;
         foreach my $modified_id (@check_access) {
+            # Check that the user has access to the other bug.
             my $delta_bug = $invocant->check($modified_id);
             # Under strict isolation, you can't modify a bug if you can't
             # edit it, even if you can see it.

@@ -329,6 +329,13 @@ $(function() {
             $.scrollTo(id);
         });
 
+    // show bug history
+    $('#action-history')
+        .click(function(event) {
+            event.preventDefault();
+            document.location.href = 'show_activity.cgi?id=' + BUGZILLA.bug_id;
+        });
+
     // use scrollTo for in-page activity links
     $('.activity-ref')
         .click(function(event) {

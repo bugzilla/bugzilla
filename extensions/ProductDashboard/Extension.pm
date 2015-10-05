@@ -44,9 +44,6 @@ sub _page_dashboard {
     # Switch to shadow db since we are just reading information
     Bugzilla->switch_to_shadow_db();
 
-    # All pages point to the same part of the documentation.
-    $vars->{'doc_section'} = 'bugreports.html';
-
     # Forget any previously selected product
     $cgi->send_cookie(-name => 'PRODUCT_DASHBOARD',
                       -value => 'X',

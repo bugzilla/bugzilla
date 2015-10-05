@@ -67,7 +67,7 @@ my $vars = {};
 Bugzilla::Hook::process('enter_bug_start', { vars => $vars });
 
 # All pages point to the same part of the documentation.
-$vars->{'doc_section'} = 'bugreports.html';
+$vars->{'doc_section'} = 'using/filing.html';
 
 if (!$vars->{'disable_guided'}) {
     # Purpose: force guided format for newbies

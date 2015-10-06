@@ -1,0 +1,26 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% PROCESS global/variables.none.tmpl %]
+
+Idle Group Member Removal Notification
+
+This email is to notify you, as the group owner for the
+'[% group.name %]' group, that the following accounts are no
+longer members of the group. Accounts who have not logged in
+to [% terms.BugzillaTitle %] in '[% group.idle_member_removal %]' days
+are automatically removed.
+
+[% FOREACH user = users %]
+* [% user.identity %]
+[% END %]
+
+--
+You are receiving this mail because: you are a group owner.
+
+@@body-headers@@

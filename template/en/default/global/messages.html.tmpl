@@ -411,6 +411,8 @@
             <li>The group icon URL has been updated.</li>
           [% CASE 'owner_user_id' %]
             <li>The group owner was updated.</li>
+          [% CASE 'idle_member_removal' %]
+            <li>The idle member removal value has been updated.</li>
           [% CASE 'members_add' %]
             <li>The following groups are now members of this group:
               [%+ changes.members_add.join(', ') FILTER html %]</li>

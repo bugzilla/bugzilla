@@ -111,6 +111,17 @@
       </td>
     </tr>
 
+    <tr>
+      <th>
+        Idle Member Removal:
+      </th>
+      <td>
+        <input type="text" size="5" maxlength="5" id="idle_member_removal"
+               name="idle_member_removal" value="[% group.idle_member_removal FILTER html %]">
+        days (setting to 0 disables this feature)
+      </td>
+    </tr>
+
     [% IF group.is_bug_group %]
       <tr>
         <th>Use For [% terms.Bugs %]:</th>

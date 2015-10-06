@@ -50,6 +50,7 @@ use constant DB_COLUMNS => qw(
     groups.isactive
     groups.icon_url
     groups.owner_user_id
+    groups.idle_member_removal
 );
 
 use constant DB_TABLE => 'groups';
@@ -64,6 +65,7 @@ use constant VALIDATORS => {
     isbuggroup  => \&_check_is_bug_group,
     icon_url    => \&_check_icon_url,
     owner_user_id => \&_check_owner,
+    idle_member_removal => \&_check_idle_member_removal
 };
 
 use constant UPDATE_COLUMNS => qw(
@@ -73,6 +75,7 @@ use constant UPDATE_COLUMNS => qw(
     isactive
     icon_url
     owner_user_id
+    idle_member_removal
 );
 
 # Parameters that are lists of groups.
@@ -88,6 +91,7 @@ sub is_bug_group { return $_[0]->{'isbuggroup'};   }
 sub user_regexp  { return $_[0]->{'userregexp'};   }
 sub is_active    { return $_[0]->{'isactive'};     }
 sub icon_url     { return $_[0]->{'icon_url'};     }
+sub idle_member_removal { return $_[0]->{'idle_member_removal'}; }
 
 sub bugs {
     my $self = shift;
@@ -240,6 +244,7 @@ sub set_is_active   { $_[0]->set('isactive', $_[1]);    }
 sub set_name        { $_[0]->set('name', $_[1]);        }
 sub set_user_regexp { $_[0]->set('userregexp', $_[1]);  }
 sub set_icon_url    { $_[0]->set('icon_url', $_[1]);    }
+sub set_idle_member_removal { $_[0]->set('idle_member_removal', $_[1]); }
 
 sub set_owner {
     my ($self, $owner_id) = @_;
@@ -548,6 +553,13 @@ sub _check_owner {
         return undef;
     }
     ThrowUserError('group_needs_owner');
+}
+
+sub _check_idle_member_removal {
+    my ($invocant, $value) = @_;
+    detaint_natural($value)
+        || ThrowUserError('invalid_parameter', { name => 'idle member removal', err => 'must be numeric' });
+    return $value <= 0 ? 0 : $value ;
 }
 
 1;

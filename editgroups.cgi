@@ -212,6 +212,7 @@ if ($action eq 'new') {
         userregexp  => scalar $cgi->param('regexp'),
         isactive    => scalar $cgi->param('isactive'),
         icon_url    => scalar $cgi->param('icon_url'),
+        idle_member_removal => scalar $cgi->param('idle_member_removal'),
         isbuggroup  => 1,
         owner_user_id => scalar $cgi->param('owner'),
     });
@@ -400,6 +401,10 @@ sub doGroupChanges {
 
     if (defined $cgi->param('owner')) {
         $group->set_owner($cgi->param('owner'));
+    }
+
+    if (defined $cgi->param('idle_member_removal')) {
+        $group->set_idle_member_removal($cgi->param('idle_member_removal'));
     }
 
     my $changes = $group->update();

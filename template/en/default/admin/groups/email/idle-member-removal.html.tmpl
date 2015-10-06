@@ -1,0 +1,42 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% PROCESS global/variables.none.tmpl %]
+
+<!doctype html>
+<html>
+
+<head>
+  <title>[[% terms.Bugzilla %]] Ilde Group Member Removal Notification</title>
+</head>
+
+<body bgcolor="#ffffff">
+
+<h3>Idle Group Member Removal Notification</h3>
+
+<p> This email is to notify you, as the group owner for the <strong>[% group.name FILTER html %]</strong>
+group, that the following accounts are no longer members of the group. Accounts who have not logged
+in to [% terms.Bugzilla %] in <strong>[% group.idle_member_removal FILTER html %]</strong> days are
+automatically removed.</p>
+
+<ul>
+[% FOREACH user = users %]
+  <li>[% user.identity FILTER html %]</li>
+[% END %]
+</ul>
+
+<div style="font-size: 90%; color: #666666">
+  <hr style="border: 1px dashed #969696">
+  <b>You are receiving this mail because:</b>
+  <ul>
+    <li>You are a group owner.</li>
+  </ul>
+</div>
+@@body-headers@@
+</body>
+</html>

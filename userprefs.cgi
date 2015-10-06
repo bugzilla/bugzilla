@@ -196,7 +196,7 @@ sub MfaAccount {
         }
 
         elsif ($action->{type} eq 'set_password') {
-            $dbh->bz_begin_transaction;
+            $dbh->bz_start_transaction;
             $user->set_password($action->{password});
             Bugzilla->logout(LOGOUT_KEEP_CURRENT);
             $user->update({ keep_session => 1, keep_tokens => 1 });

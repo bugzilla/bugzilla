@@ -464,7 +464,8 @@ $(function() {
                                 this.value = this.value + ', ';
                                 this.focus();
                             }
-                        });
+                        })
+                        .addClass('bz_autocomplete');
 
                     $('#cancel-btn').prop('disabled', false);
                     $('#top-save-btn').show();

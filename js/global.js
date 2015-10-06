@@ -110,3 +110,16 @@ if (!String.prototype.htmlEncode) {
         };
     })();
 }
+
+// our auto-completion disables browser native autocompletion, however this
+// excludes it from being restored by bf-cache.  trick the browser into
+// restoring by changing the autocomplete attribute when a page is hidden and
+// shown.
+$().ready(function() {
+    $(window).on('pagehide', function() {
+        $('.bz_autocomplete').attr('autocomplete', 'on');
+    });
+    $(window).on('pageshow', function(event) {
+        $('.bz_autocomplete').attr('autocomplete', 'off');
+    });
+});

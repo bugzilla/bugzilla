@@ -785,6 +785,7 @@ $(function() {
             else {
                 that.devbridgeAutocomplete(options_user);
             }
+            that.addClass('bz_autocomplete');
         });
 
     // init autocomplete fields with array of values
@@ -831,6 +832,7 @@ $(function() {
                     this.focus();
                 }
             });
+            that.addClass('bz_autocomplete');
         });
 });
 

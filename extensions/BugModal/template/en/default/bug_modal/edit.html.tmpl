@@ -977,7 +977,7 @@
         [% END %]
       </div>
     [% END %]
-    <pre id="user-story">[% bug.cf_user_story FILTER html %]</pre>
+    <pre id="user-story">[% bug.cf_user_story FILTER quoteUrls(bug) %]</pre>
     [% IF user.id %]
       <textarea id="cf_user_story" name="cf_user_story" style="display:none" rows="10" cols="80">
         [%~ bug.cf_user_story FILTER html ~%]

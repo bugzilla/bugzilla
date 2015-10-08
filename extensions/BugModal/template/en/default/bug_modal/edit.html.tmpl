@@ -324,7 +324,7 @@
         help = "describecomponents.cgi"
     %]
       <span id="product-search-container">
-        [% PROCESS prodcompsearch/form.html.tmpl
+        [% INCLUDE prodcompsearch/form.html.tmpl
             id            = "pcs"
             custom_select = 1
             hidden        = 1

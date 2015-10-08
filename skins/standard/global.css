@@ -724,3 +724,21 @@ input.required, select.required, span.required_explanation {
     background-repeat: no-repeat !important;
     background-position: right 8px center !important;
 }
+
+#login .field-login, #login .field-password {
+    line-height: 32px;
+    display: block;
+    padding-top: 2px;
+    padding-bottom: 2px;
+}
+
+#login .field-login label, #login .field-password label {
+    clear: left;
+    width: 7em;
+    display: inline-block;
+    font-weight: bold;
+}
+
+#login .field-restrict, #login .field-remember {
+    margin-left: 7em;
+}

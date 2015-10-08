@@ -37,6 +37,7 @@
   # atomlink: Atom link URL, May contain HTML
   # generate_api_token: generate a token which can be used to make authenticated webservice calls
   # no_body: if true the body element will not be generated
+  # allow_mobile: allow special CSS and viewport for detected mobile useragents
   #%]
 
 [% IF message %]
@@ -102,6 +103,10 @@
 
 [%# Add our required jQuery plugins %]
 [% jquery.push("cookie", "devbridgeAutocomplete") %]
+
+[% IF allow_mobile && is_mobile_browser %]
+  [% style_urls.push("skins/standard/mobile.css") %]
+[% END %]
 
 [%# We should be able to set the default value of the header variable
   # to the value of the title variable using the DEFAULT directive,
@@ -260,6 +265,9 @@
     [%# Required for the 'Autodiscovery' feature in Firefox 2 and IE 7. %]
     <link rel="search" type="application/opensearchdescription+xml"
                        title="[% terms.BugzillaTitle %]" href="./search_plugin.cgi">
+    [% IF allow_mobile && is_mobile_browser %]
+      <meta name="viewport" content="width=device-width, initial-scale=1">
+    [% END %]
     [% Hook.process("additional_header") %]
   </head>
 

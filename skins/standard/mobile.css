@@ -1,0 +1,66 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * This Source Code Form is "Incompatible With Secondary Licenses", as
+ * defined by the Mozilla Public License, v. 2.0.
+ */
+
+@media
+only screen and (max-device-width : 720px) {
+    #header, #footer {
+        display: none;
+    }
+    .cookie-notify {
+        display: none;
+    }
+
+    #login .field-login label, #login .field-password label {
+        display: block;
+    }
+
+    #login .field-login, #login .field-password {
+        line-height: auto;
+        padding-top: 0px;
+        padding-bottom: 0px;
+    }
+
+    #login .field-restrict, #login .field-remember {
+        margin-left: 0px;
+    }
+    #login .field-submit {
+        padding-top: 4px;
+    }
+
+    h1 {
+        font-size: 1.5em;
+    }
+
+    .verify-totp input[type="text"] {
+        font-size: 28px;
+    }
+
+    .verify-totp input[type="submit"] {
+        font-size: 1em;
+    }
+}
+
+@media
+only screen and (-webkit-min-device-pixel-ratio: 2),
+only screen and (min--moz-device-pixel-ratio: 2),
+only screen and (-o-min-device-pixel-ratio: 2/1),
+only screen and (min-device-pixel-ratio: 2),
+only screen and (min-resolution: 192dpi),
+only screen and (min-resolution: 2dppx) {
+    #privacy_policy {
+        font-size: small;
+    }
+
+    body {
+        font-size: medium;
+    }
+
+    label.checkbox-note {
+        font-size: small;
+    }
+}

@@ -8,6 +8,7 @@
 
 [% INCLUDE global/header.html.tmpl
   title = "Account Verification"
+  allow_mobile = 1
 %]
 
 <h1>Account Verification</h1>
@@ -16,16 +17,17 @@
   <b>[% reason FILTER html %]</b> requires verification.<br>
   Please enter your verification code from your TOTP application:
 </p>
-
-<form method="POST" action="[% postback.action FILTER none %]">
-  [% FOREACH field IN postback.fields.keys %]
-    <input type="hidden" name="[% field FILTER html %]" value="[% postback.fields.item(field) FILTER html %]">
-  [% END %]
-  <input type="text" name="code" id="code"
-        placeholder="123456" maxlength="9" pattern="\d{6,9}" size="10"
-        autocomplete="off" required autofocus><br>
-  <br>
-  <input type="submit" value="Submit">
-</form>
+<div class="verify-totp">
+  <form method="POST" action="[% postback.action FILTER none %]">
+    [% FOREACH field IN postback.fields.keys %]
+      <input type="hidden" name="[% field FILTER html %]" value="[% postback.fields.item(field) FILTER html %]">
+    [% END %]
+    <input type="text" name="code" id="code"
+           placeholder="123456" maxlength="9" pattern="\d{6,9}" size="10"
+           autocomplete="off" required autofocus><br>
+    <br>
+    <input type="submit" value="Submit">
+  </form>
+</div>
 
 [% INCLUDE global/footer.html.tmpl %]

@@ -5,7 +5,6 @@
  * This Source Code Form is "Incompatible With Secondary Licenses", as
  * defined by the Mozilla Public License, v. 2.0. */
 
-var Dom = YAHOO.util.Dom;
 var flagEl;
 var productEl;
 var trackingEl;
@@ -15,13 +14,13 @@ var selectedFields;
 
 function onFieldToggle(cbEl, id) {
   if (cbEl.checked) {
-    Dom.removeClass('field_' + id + '_td', 'disabled');
+    $('#field_' + id + '_td').removeClass('disabled');
     selectedFields['field_' + id] = id;
   } else {
-    Dom.addClass('field_' + id + '_td', 'disabled');
+    $('#field_' + id + '_td').addClass('disabled');
     selectedFields['field_' + id] = false;
   }
-  Dom.get('field_' + id + '_select').disabled = !cbEl.checked;
+  $('#field_' + id + '_select').attr('disabled', !cbEl.checked);
   serialiseForm();
 }
 
@@ -29,7 +28,7 @@ function onProductChange() {
   var product = productEl.value;
   var productData = product == '0' ? getFlagByName(flagEl.value) : getProductById(product);
   var html = '';
-  selectedFields = new Array();
+  selectedFields = [];
 
   if (productData) {
     // update status fields
@@ -44,10 +43,11 @@ function onProductChange() {
               '</td>' +
               '<td class="disabled" id="field_' + field.id + '_td">' + 
                 '<label for="field_' + field.id + '_cb">' +
-                YAHOO.lang.escapeHTML(field.name) + ':</label>' +
+                field.desc.htmlEncode() + ':</label>' +
               '</td>' +
               '<td>' +
-                '<select disabled id="field_' + field.id + '_select">' +
+                '<select disabled id="field_' + field.id + '_select" ' +
+                        'onChange="onFieldToggle($(\'#field_' + field.id + '_cb\')[0],' + field.id + ')">' +
                   '<option value="+">fixed</option>' +
                   '<option value="-">not fixed</option>' +
                 '</select>' +
@@ -83,7 +83,8 @@ function onFlagChange() {
 
 function selectAllFields() {
   for(var i = 0, l = fields_data.length; i < l; i++) {
-    var cb = Dom.get('field_' + fields_data[i].id + '_cb');
+    var cb = $('#field_' + fields_data[i].id + '_cb')[0];
+    if (!cb) continue;
     cb.checked = true;
     onFieldToggle(cb, fields_data[i].id);
   }
@@ -92,7 +93,8 @@ function selectAllFields() {
 
 function selectNoFields() {
   for(var i = 0, l = fields_data.length; i < l; i++) {
-    var cb = Dom.get('field_' + fields_data[i].id + '_cb');
+    var cb = $('#field_' + fields_data[i].id + '_cb')[0];
+    if (!cb) continue;
     cb.checked = false;
     onFieldToggle(cb, fields_data[i].id);
   }
@@ -101,7 +103,8 @@ function selectNoFields() {
 
 function invertFields() {
   for(var i = 0, l = fields_data.length; i < l; i++) {
-    var el = Dom.get('field_' + fields_data[i].id + '_select');
+    var el = $('#field_' + fields_data[i].id + '_select')[0];
+    if (!el) continue;
     if (el.value == '+') {
       el.options[1].selected = true;
     } else {
@@ -122,40 +125,39 @@ function onFormReset() {
 
 function serialiseForm() {
   var q = flagEl.value + ':' +
-          Dom.get('flag_value').value + ':' +
-          Dom.get('range').value + ':' +
+          $('#flag_value').val() + ':' +
+          $('#range').val() + ':' +
           productEl.value + ':' +
-          Dom.get('op').value + ':';
+          $('#op').val() + ':';
 
   for(var id in selectedFields) {
     if (selectedFields[id]) {
-      q += selectedFields[id] + Dom.get(id + '_select').value + ':';
+      q += selectedFields[id] + $('#' + id + '_select').val() + ':';
     }
   }
 
-  Dom.get('q').value = q;
-  Dom.get('bookmark').href = 'page.cgi?id=release_tracking_report.html&q=' +
-                             encodeURIComponent(q);
+  $('#q').val(q);
+  $('#bookmark').attr('href', 'page.cgi?id=release_tracking_report.html&q=' + encodeURIComponent(q));
 }
 
 function deserialiseForm(q) {
   var parts = q.split(/:/);
   selectValue(flagEl, parts[0]);
   onFlagChange();
-  selectValue(Dom.get('flag_value'), parts[1]);
-  selectValue(Dom.get('range'), parts[2]);
+  selectValue($('#flag_value')[0], parts[1]);
+  selectValue($('#range')[0], parts[2]);
   selectValue(productEl, parts[3]);
   onProductChange();
-  selectValue(Dom.get('op'), parts[4]);
+  selectValue($('#op')[0], parts[4]);
   for(var i = 5, l = parts.length; i < l; i++) {
     var part = parts[i];
     if (part.length) {
       var value = part.substr(part.length - 1, 1);
       var id = part.substr(0, part.length - 1);
-      var cb = Dom.get('field_' + id + '_cb');
+      var cb = $('#field_' + id + '_cb')[0];
       cb.checked = true;
       onFieldToggle(cb, id);
-      selectValue(Dom.get('field_' + id + '_select'), value);
+      selectValue($('#field_' + id + '_select')[0], value);
     }
   }
   serialiseForm();
@@ -163,10 +165,10 @@ function deserialiseForm(q) {
 
 // utils
 
-YAHOO.util.Event.onDOMReady(function() {
-  flagEl = Dom.get('flag');
-  productEl = Dom.get('product');
-  trackingEl = Dom.get('tracking_span');
+$().ready(function() {
+  flagEl = $('#flag')[0];
+  productEl = $('#product')[0];
+  trackingEl = $('#tracking_span')[0];
   onFlagChange();
   deserialiseForm(default_query);
 });

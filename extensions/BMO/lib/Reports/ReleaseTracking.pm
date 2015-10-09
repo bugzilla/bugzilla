@@ -122,6 +122,7 @@ sub report {
     my @unlink_products;
     foreach my $product (@usable_products) {
         my @fields =
+            sort { $a->sortkey <=> $b->sortkey }
             grep { is_active_status_field($_) }
             Bugzilla->active_custom_fields({ product => $product });
         my @field_ids = map { $_->id } @fields;
@@ -156,6 +157,7 @@ sub report {
             if (!$existing) {
                 push @fields_json, {
                     name => $field->name,
+                    desc => $field->description,
                     id => $field->id,
                 };
             }
@@ -239,15 +241,10 @@ sub report {
         my $query = "
             SELECT DISTINCT b.bug_id
               FROM bugs b
-                   INNER JOIN flags f ON f.bug_id = b.bug_id ";
+                   INNER JOIN flags f ON f.bug_id = b.bug_id\n";
 
         if ($q->{start_date}) {
-            $query .= "INNER JOIN bugs_activity a ON a.bug_id = b.bug_id ";
-        }
-
-        if (grep($_ == FIELD_TYPE_EXTENSION, map { $_->{type} } @{ $q->{fields} })) {
-            $query .= "LEFT JOIN tracking_flags_bugs AS tfb ON tfb.bug_id = b.bug_id " .
-                      "LEFT JOIN tracking_flags AS tf ON tfb.tracking_flag_id = tf.id ";
+            $query .= "INNER JOIN bugs_activity a ON a.bug_id = b.bug_id\n";
         }
 
         $query .= "WHERE ";
@@ -286,7 +283,15 @@ sub report {
             foreach my $field (@{$q->{fields}}) {
                 my $field_sql = "(";
                 if ($field->{type} == FIELD_TYPE_EXTENSION) {
-                    $field_sql .= "tf.name = " . $dbh->quote($field->{name}) . " AND COALESCE(tfb.value, '')";
+                    $field_sql .= "
+                        COALESCE(
+                            (SELECT tracking_flags_bugs.value
+                               FROM tracking_flags_bugs
+                                    LEFT JOIN tracking_flags
+                                         ON tracking_flags.id = tracking_flags_bugs.tracking_flag_id
+                              WHERE tracking_flags_bugs.bug_id = b.bug_id
+                                    AND tracking_flags.name = " . $dbh->quote($field->{name}) . ")
+                        , '') ";
                 }
                 else {
                     $field_sql .= "b." . $field->{name};
@@ -325,21 +330,10 @@ sub report {
     # set template vars
     #
 
-    my $json = JSON->new();
-    if (0) {
-        # debugging
-        $json->shrink(0);
-        $json->canonical(1);
-        $vars->{flags_json} = $json->pretty->encode(\@flags_json);
-        $vars->{products_json} = $json->pretty->encode(\@products_json);
-        $vars->{fields_json} = $json->pretty->encode(\@fields_json);
-    } else {
-        $json->shrink(1);
-        $vars->{flags_json} = $json->encode(\@flags_json);
-        $vars->{products_json} = $json->encode(\@products_json);
-        $vars->{fields_json} = $json->encode(\@fields_json);
-    }
-
+    my $json = JSON->new()->shrink(1);
+    $vars->{flags_json} = $json->encode(\@flags_json);
+    $vars->{products_json} = $json->encode(\@products_json);
+    $vars->{fields_json} = $json->encode(\@fields_json);
     $vars->{flag_names} = \@flag_names;
     $vars->{ranges} = \@ranges;
     $vars->{default_query} = $input->{q};

@@ -133,6 +133,8 @@
               [% SWITCH otheruser.mfa %]
                 [% CASE "TOTP" %]
                   <option value="TOTP" selected>Enabled - TOTP</option>
+                [% CASE "Duo" %]
+                  <option value="Duo" selected>Enabled - Duo Security</option>
               [% END %]
             </select>
           [% ELSE %]

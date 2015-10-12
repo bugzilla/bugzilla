@@ -1,0 +1,95 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% is_enrolment = action == "enable" %]
+
+[% js = BLOCK %]
+$(function() {
+
+  $('#recovery-toggle')
+    .click(function(event) {
+      event.preventDefault();
+
+      if ($('#duo_container').is(':visible')) {
+        $('#duo_container').hide();
+        $('#recovery').show();
+        $('#code').attr('required', true).focus();
+        $('#recovery-submit').attr('disabled', false);
+        $(this).text('Verify using Duo Security');
+      }
+      else {
+        $('#duo_container').show();
+        $('#recovery').hide();
+        $('#code').attr('required', false);
+        $('#recovery-submit').attr('disabled', true);
+        $(this).text('Verify using a recovery code');
+      }
+    });
+
+});
+[% END %]
+
+[% css = BLOCK %]
+
+  #duo_container {
+    background: #fff url(skins/standard/throbber.gif) 10px 10px no-repeat;
+    width: 620px;
+    height: 330px;
+    border: 1px solid #000;
+  }
+
+[% END %]
+
+[%
+  INCLUDE global/header.html.tmpl
+    title           = "Account Verification"
+    javascript_urls = ['js/duo-min.js']
+    javascript      = js
+    style           = css
+%]
+
+<h1>Account Verification</h1>
+
+<p>
+  <b>[% reason FILTER html %]</b> requires verification.<br>
+  [% UNLESS is_enrolment %]
+    <a href="#" id="recovery-toggle">Verify using a recovery code</a>.
+  [% END %]
+</p>
+
+<div id="duo_container">
+  <iframe id="duo_iframe" width="620" height="330" frameborder="0"></iframe>
+</div>
+
+<form method="POST" id="duo_form" action="[% postback.action FILTER none %]">
+  [% FOREACH field IN postback.fields.keys %]
+    <input type="hidden" name="[% field FILTER html %]" value="[% postback.fields.item(field) FILTER html %]">
+  [% END %]
+  [% UNLESS is_enrolment %]
+    <div id="recovery" style="display:none">
+      <p>
+        Provide a two-factor recovery code:
+      </p>
+      <input type="text" name="code" id="code"
+            placeholder="123456789" maxlength="9" pattern="\d{9}" size="10"
+            autocomplete="off"><br>
+      <br>
+      <input type="submit" value="Submit" id="recovery-submit" disabled>
+    </div>
+  [% END %]
+</form>
+
+<script>
+  Duo.init({
+    'host': '[% Param('duo_host') FILTER js %]',
+    'sig_request': '[% sig_request FILTER js %]',
+    'post_action': '[% postback.action FILTER js %]'
+  });
+</script>
+
+[% INCLUDE global/footer.html.tmpl %]

@@ -10,17 +10,37 @@ use strict;
 
 use Bugzilla::RNG qw( irand );
 use Bugzilla::Token qw( issue_short_lived_session_token set_token_extra_data get_token_extra_data delete_token );
-use Bugzilla::Util qw( trick_taint);
+use Bugzilla::Util qw( trick_taint );
 
 sub new {
     my ($class, $user) = @_;
     return bless({ user => $user }, $class);
 }
 
+sub new_from {
+    my ($class, $user, $mfa) = @_;
+    $mfa //= '';
+    if ($mfa eq 'TOTP') {
+        require Bugzilla::MFA::TOTP;
+        return Bugzilla::MFA::TOTP->new($user);
+    }
+    elsif ($mfa eq 'Duo' && Bugzilla->params->{duo_host}) {
+        require Bugzilla::MFA::Duo;
+        return Bugzilla::MFA::Duo->new($user);
+    }
+    else {
+        require Bugzilla::MFA::Dummy;
+        return Bugzilla::MFA::Dummy->new($user);
+    }
+}
+
 # abstract methods
 
-# api call, returns required data to user-prefs enrollment page
+# called during enrollment
 sub enroll {}
+
+# api call, returns required data to user-prefs enrollment page
+sub enroll_api {}
 
 # called after the user has confirmed enrollment
 sub enrolled {}
@@ -30,6 +50,10 @@ sub prompt {}
 
 # throws errors if code is invalid
 sub check {}
+
+# if true verifcation can happen inline (during enrollment/pref changes)
+# if false then the mfa provider requires an intermediate verification page
+sub can_verify_inline { 0 }
 
 # verification
 

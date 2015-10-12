@@ -16,6 +16,10 @@ use Bugzilla::Util qw( template_var generate_random_password );
 use GD::Barcode::QRcode;
 use MIME::Base64 qw( encode_base64 );
 
+sub can_verify_inline {
+    return 1;
+}
+
 sub _auth {
     my ($self) = @_;
     return Auth::GoogleAuth->new({
@@ -25,7 +29,7 @@ sub _auth {
     });
 }
 
-sub enroll {
+sub enroll_api {
     my ($self) = @_;
 
     # create a new secret for the user
@@ -65,7 +69,7 @@ sub check {
         ThrowUserError('mfa_totp_bad_enrolment_code');
     }
     else {
-        ThrowUserError('mfa_totp_bad_code');
+        ThrowUserError('mfa_bad_code');
     }
 }
 

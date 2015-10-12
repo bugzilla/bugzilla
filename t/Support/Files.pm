@@ -27,6 +27,10 @@ use Bugzilla;
 
 use File::Find;
 
+use constant IGNORE => qw(
+    Bugzilla/DuoWeb.pm
+);
+
 @additional_files = ();
 
 @files = glob('*');
@@ -45,6 +49,10 @@ foreach my $extension (@extensions) {
 sub isTestingFile {
     my ($file) = @_;
     my $exclude;
+
+    foreach my $ignore (IGNORE) {
+        return undef if $ignore eq $file;
+    }
 
     if ($file =~ /\.cgi$|\.pl$|\.pm$/) {
         return 1;

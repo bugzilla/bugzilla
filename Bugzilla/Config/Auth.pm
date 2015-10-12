@@ -148,6 +148,27 @@ sub get_param_list {
    type => 'b',
    default => 0,
   },
+
+  {
+   name => 'duo_host',
+   type => 't',
+   default => '',
+  },
+  {
+   name => 'duo_akey',
+   type => 't',
+   default => '',
+  },
+  {
+   name => 'duo_ikey',
+   type => 't',
+   default => '',
+  },
+  {
+   name => 'duo_skey',
+   type => 't',
+   default => '',
+  },
   );
   return @param_list;
 }

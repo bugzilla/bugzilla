@@ -38,6 +38,7 @@ use Bugzilla::User::Setting qw(clear_settings_cache);
 use Bugzilla::User::Session;
 use Bugzilla::User::APIKey;
 use Bugzilla::Token;
+use Bugzilla::MFA;
 use DateTime;
 
 use constant SESSION_MAX => 20;
@@ -277,7 +278,7 @@ sub SaveSettings {
         }
         else {
             $setting->validate_value($value);
-            if ($mfa_event) {
+            if ($name eq 'api_key_only' && $mfa_event) {
                 $mfa_event->{set} = $value;
             }
             else {
@@ -653,43 +654,95 @@ sub SaveSavedSearches {
 }
 
 sub SaveMFA {
-    my $cgi  = Bugzilla->cgi;
-    my $dbh  = Bugzilla->dbh;
-    my $user = Bugzilla->user;
+    my $cgi    = Bugzilla->cgi;
+    my $user   = Bugzilla->user;
     my $action = $cgi->param('mfa_action') // '';
-    return unless $action eq 'enable' || $action eq 'recovery' || $action eq 'disable';
+    my $params = Bugzilla->input_params;
 
     my $crypt_password = $user->cryptpassword;
-    if (bz_crypt($cgi->param('password'), $crypt_password) ne $crypt_password) {
+    if (bz_crypt(delete $params->{password}, $crypt_password) ne $crypt_password) {
         ThrowUserError('password_incorrect');
     }
 
-    $dbh->bz_start_transaction;
+    my $mfa = $cgi->param('mfa') // $user->mfa;
+    my $provider = Bugzilla::MFA->new_from($user, $mfa) // return;
+
+    my $reason;
     if ($action eq 'enable') {
-        $user->set_mfa($cgi->param('mfa'));
-        $user->mfa_provider->check(Bugzilla->input_params);
+        $provider->enroll(Bugzilla->input_params);
+        $reason = 'Two-factor enrolment';
+    }
+    elsif ($action eq 'recovery') {
+        $reason = 'Recovery code generation';
+    }
+    elsif ($action eq 'disable') {
+        $reason = 'Disabling two-factor authentication';
+    }
+
+    if ($provider->can_verify_inline) {
+        $provider->verify_check($params);
+        SaveMFAupdate($cgi->param('mfa_action'), $mfa);
+    }
+    else {
+        my $mfa_event = {
+            postback => {
+                action => 'userprefs.cgi',
+                fields => {
+                    tab => 'mfa',
+                    mfa => $mfa,
+                },
+            },
+            reason => $reason,
+            action => $action,
+        };
+        $provider->verify_prompt($mfa_event);
+    }
+}
+
+sub SaveMFAupdate {
+    my ($action, $mfa) = @_;
+    my $user = Bugzilla->user;
+    my $dbh  = Bugzilla->dbh;
+    $action //= '';
+
+    if ($action eq 'enable') {
+        $dbh->bz_start_transaction;
+
+        $user->set_mfa($mfa);
         $user->mfa_provider->enrolled();
 
         my $settings = Bugzilla->user->settings;
         $settings->{api_key_only}->set('on');
         clear_settings_cache(Bugzilla->user->id);
+
+        $user->update({ keep_session => 1, keep_tokens => 1 });
+        $dbh->bz_commit_transaction;
     }
 
     elsif ($action eq 'recovery') {
-        $user->mfa_provider->verify_check(Bugzilla->input_params);
         my $codes = $user->mfa_provider->generate_recovery_codes();
         my $token = issue_short_lived_session_token('mfa-recovery');
         set_token_extra_data($token, $codes);
         $vars->{mfa_recovery_token} = $token;
+
     }
 
-    else {
-        $user->mfa_provider->verify_check(Bugzilla->input_params);
+    elsif ($action eq 'disable') {
         $user->set_mfa('');
-    }
+        $user->update({ keep_session => 1, keep_tokens => 1 });
 
-    $user->update({ keep_session => 1, keep_tokens => 1 });
-    $dbh->bz_commit_transaction;
+    }
+}
+
+sub SaveMFAcallback {
+    my $cgi = Bugzilla->cgi;
+    my $user = Bugzilla->user;
+
+    my $mfa = $cgi->param('mfa');
+    my $provider = Bugzilla::MFA->new_from($user, $mfa) // return;
+    my $event = $provider->verify_token($cgi->param('mfa_token'));
+
+    SaveMFAupdate($event->{action}, $mfa);
 }
 
 sub DoMFA {
@@ -971,6 +1024,7 @@ SWITCH: for ($current_tab_name) {
         last SWITCH;
     };
     /^mfa$/ && do {
+        SaveMFAcallback() if $mfa_token;
         SaveMFA() if $save_changes;
         DoMFA();
         last SWITCH;

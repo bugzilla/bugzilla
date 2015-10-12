@@ -275,8 +275,13 @@ input[disabled] {
     padding: 0;
 }
 
-#mfa-recovery {
+.mfa-buttons button {
     margin-top: 4px;
+}
+
+.mfa-buttons blockquote {
+    margin-top: 4px;
+    font-style: italic;
 }
 
 #mfa-recovery-frame {
@@ -288,9 +293,14 @@ input[disabled] {
     height: 200px;
 }
 
-label.mfa-totp {
+#mfa-container label {
     display: inline-block;
     width: 155px;
     text-align: right;
     font-weight: bold;
+}
+
+#mfa-container #duo-logo {
+    float: left;
+    margin-right: 1em;
 }

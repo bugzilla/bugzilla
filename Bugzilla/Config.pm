@@ -216,6 +216,12 @@ sub update_params {
         }
     }
 
+    # Generate unique Duo integration secret key
+    if ($param->{duo_akey} eq '') {
+        require Bugzilla::Util;
+        $param->{duo_akey} = Bugzilla::Util::generate_random_password(40);
+    }
+
     $param->{'utf8'} = 1 if $new_install;
 
     # --- REMOVE OLD PARAMS ---

@@ -59,8 +59,10 @@ $(function() {
 
             $('#mfa-select').hide();
             $('#update').attr('disabled', true);
+            $('#mfa-totp-enable-code').attr('required', true);
             $('#mfa-confirm').show();
             $('.mfa-api-blurb').show();
+            $('#mfa-enable-shared').show();
             $('#mfa-enable-totp').show();
             $('#mfa-totp-throbber').show();
             $('#mfa-totp-issued').hide();
@@ -90,10 +92,25 @@ $(function() {
             });
         });
 
+    $('#mfa-select-duo')
+        .click(function(event) {
+            event.preventDefault();
+            $('#mfa').val('Duo');
+
+            $('#mfa-select').hide();
+            $('#update').attr('disabled', false);
+            $('#mfa-duo-user').attr('required', true);
+            $('#mfa-confirm').show();
+            $('.mfa-api-blurb').show();
+            $('#mfa-enable-shared').show();
+            $('#mfa-enable-duo').show();
+            $('#mfa-password').focus();
+        });
+
     $('#mfa-disable')
         .click(function(event) {
             event.preventDefault();
-            $('.mfa-api-blurb, #mfa-buttons').hide();
+            $('.mfa-api-blurb, .mfa-buttons').hide();
             $('#mfa-disable-container, #mfa-auth-container').show();
             $('#mfa-confirm').show();
             $('#mfa-password').focus();
@@ -105,7 +122,7 @@ $(function() {
     $('#mfa-recovery')
         .click(function(event) {
             event.preventDefault();
-            $('.mfa-api-blurb, #mfa-buttons').hide();
+            $('.mfa-api-blurb, .mfa-buttons').hide();
             $('#mfa-recovery-container, #mfa-auth-container').show();
             $('#mfa-password').focus();
             $('#update').attr('disabled', false).val('Generate Printable Recovery Codes');

@@ -1,0 +1,28 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[%
+  INCLUDE global/header.html.tmpl
+    title = "Account Verification"
+%]
+
+<h1>Account Verification</h1>
+
+<p>
+  <b>[% reason FILTER html %]</b> requires verification, and your configured
+  two-factor provider is no longer available.
+</p>
+
+<form method="POST" id="duo_form" action="[% postback.action FILTER none %]">
+  [% FOREACH field IN postback.fields.keys %]
+    <input type="hidden" name="[% field FILTER html %]" value="[% postback.fields.item(field) FILTER html %]">
+  [% END %]
+  <input type="submit" value="Verify">
+</form>
+
+[% INCLUDE global/footer.html.tmpl %]

@@ -428,7 +428,7 @@ sub mfa_enroll {
     my $user = Bugzilla->login(LOGIN_REQUIRED);
     $user->set_mfa($provider_name);
     my $provider = $user->mfa_provider // die "Unknown MTA provider\n";
-    return $provider->enroll();
+    return $provider->enroll_api();
 }
 
 sub whoami {

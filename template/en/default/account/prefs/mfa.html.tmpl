@@ -40,11 +40,12 @@
       Two-factor authentication is currently <b>enabled</b> using
       <b>[% SWITCH user.mfa %]
         [% CASE "TOTP" %]TOTP
+        [% CASE "Duo" %]Duo Security
       [% END %]</b>.
     </p>
     <input type="hidden" name="mfa_action" id="mfa-action" value="disable">
 
-    <div id="mfa-buttons">
+    <div class="mfa-buttons">
       <div>
         <button type="button" id="mfa-disable">Disable Two-factor Authentication</button>
         [% INCLUDE "mfa/protected.html.tmpl" %]
@@ -92,15 +93,26 @@
 
     <div id="mfa-auth-container" style="display:none">
       <p>
-        <label class="mfa-totp">Current Password:</label>
+        <label>Current Password:</label>
         <input type="password" name="password" id="mfa-password" required>
       </p>
 
+      [%# disable/recovery - totp %]
       [% IF user.mfa == "TOTP" %]
-        <label class="mfa-totp">Code:</label>
+
+        <label>Code:</label>
         <input type="text" name="code"
                placeholder="123456" maxlength="9" pattern="\d{6,9}" size="10"
-               autocomplete="off" required autofocus>
+               autocomplete="off" required>
+
+      [%# disable/recovery - duo %]
+      [% ELSIF user.mfa == "Duo" %]
+
+        <p>
+          <img src="images/duo.png" id="duo-logo" width="32" height="32">
+          Verification with Duo Security will be performed before your account is updated.
+        </p>
+
       [% END %]
     </div>
 
@@ -111,23 +123,39 @@
     <input type="hidden" name="mfa_action" id="mfa-action" value="enable">
     <input type="hidden" name="mfa" id="mfa">
 
-    <div id="mfa-select">
+    <div id="mfa-select" class="mfa-buttons">
       <p>
         Select the two-factor system you want to use:
       </p>
-      <button type="button" id="mfa-select-totp">Time-based One-Time Password (TOTP)</button>
+
+      <button type="button" id="mfa-select-totp">Time-based One-Time Password (TOTP)</button><br>
+      <blockquote>
+        Requires a smartphone and a TOTP app (such as
+        <a href="https://support.google.com/accounts/answer/1066447" target="_blank">Google Authenticator</a>
+        or <a href="https://fedorahosted.org/freeotp/" target="_blank">Red Hat FreeOTP</a>).
+      </blockquote>
+
+      [% IF Param("duo_host") && user.in_group("mozilla-employee-confidential") %]
+        <button type="button" id="mfa-select-duo">Duo Security</button><br>
+        <blockquote>
+          Requires a smartphone and a <a href="https://www.duosecurity.com/" target="_blank">Duo Security</a>
+          account (recommended for Mozilla employees).
+        </blockquote>
+      [% END %]
     </div>
 
-    [%# TOTP %]
-    <div id="mfa-enable-totp" class="mfa-provider" style="display:none">
-
+    <div id="mfa-enable-shared" style="display:none">
       <p>
         Your current password is required to enable two-factor authentication.
       </p>
       <p>
-        <label class="mfa-totp">Current Password:</label>
+        <label>Current Password:</label>
         <input type="password" name="password" id="mfa-password" required>
       </p>
+    </div>
+
+    [%# enable - TOTP %]
+    <div id="mfa-enable-totp" style="display:none">
 
       <div id="mfa-totp-throbber">
         Generating new QR code.. <img src="skins/standard/throbber.gif" width="16" height="11">
@@ -139,10 +167,10 @@
           Scan this QR code with your <a href="#" id="mfa-totp-apps">TOTP App</a>,
           then enter the six digit code the app generates.<br>
           <br>
-          <label class="mfa-totp">Code:</label>
+          <label>Code:</label>
           <input type="text" name="code" id="mfa-totp-enable-code"
                   placeholder="123456" maxlength="6" pattern="\d{6}" size="10"
-                  autocomplete="off" required autofocus>
+                  autocomplete="off">
         </div>
       </div>
 
@@ -171,6 +199,26 @@
         </a>
         <button type="button" class="mfa-totp-popup-close">Close</button>
       </div>
+
+    </div>
+
+    [%# enable - duo %]
+    <div id="mfa-enable-duo" style="display:none">
+
+      <p>
+        <label>Duo Username:</label>
+        <input type="text" name="username" id="mfa-duo-user">
+      </p>
+
+      <p>
+        <img src="images/duo.png" id="duo-logo" width="32" height="32">
+        Verification with Duo Security will be performed before your account is updated.<br>
+
+        [% IF user.in_group("mozilla-employee-confidential") %]
+          You must <a href="https://login.mozilla.com/duo_enrollments/" target="_blank">
+          sign up for Duo Security via login.mozilla.com</a> before you can use Duo 2FA.
+        [% END %]
+      </p>
 
     </div>
 

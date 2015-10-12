@@ -368,6 +368,7 @@ sub _check_mfa {
     my ($self, $provider) = @_;
     $provider = lc($provider // '');
     return 'TOTP' if $provider eq 'totp';
+    return 'Duo' if $provider eq 'duo';
     return '';
 }
 
@@ -586,13 +587,8 @@ sub mfa_provider {
     my ($self) = @_;
     my $mfa = $self->{mfa} || return undef;
     return $self->{mfa_provider} if exists $self->{mfa_provider};
-    if ($mfa eq 'TOTP') {
-        require Bugzilla::MFA::TOTP;
-        $self->{mfa_provider} = Bugzilla::MFA::TOTP->new($self);
-    }
-    else {
-        $self->{mfa_provider} = undef;
-    }
+    require Bugzilla::MFA;
+    $self->{mfa_provider} = Bugzilla::MFA->new_from($self, $mfa);
     return $self->{mfa_provider};
 }
 

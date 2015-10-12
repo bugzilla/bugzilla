@@ -80,20 +80,18 @@
       </table>
     [% END %]
 
-    [% IF user.is_involved_in_bug(bug) %]
-      <table class="edit-show" style="display:none">
-        <tr>
-          <td>
-            <input type="checkbox" name="bug_ignored" id="bug-ignored"
-              [%= "checked" IF user.is_bug_ignored(bug.id) %]>
-          </td>
-          <td>
-            <label for="bug-ignored" title="You will still receive emails for flag requests directed at you">
-              Never email me about this [% terms.bug %]
-            </label>
-          </td>
-        </tr>
-      </table>
-    [% END %]
+    <table class="edit-show" style="display:none">
+      <tr>
+        <td>
+          <input type="checkbox" name="bug_ignored" id="bug-ignored"
+            [%= "checked" IF user.is_bug_ignored(bug.id) %]>
+        </td>
+        <td>
+          <label for="bug-ignored" title="You will still receive emails for flag requests directed at you">
+            Never email me about this [% terms.bug %]
+          </label>
+        </td>
+      </tr>
+    </table>
   </div>
 </div>

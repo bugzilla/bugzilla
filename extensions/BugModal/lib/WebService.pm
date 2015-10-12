@@ -127,8 +127,9 @@ sub cc {
     my $template = Bugzilla->template;
     my $bug = Bugzilla::Bug->check({ id => $params->{id} });
     my $vars = {
+        bug     => $bug,
         cc_list => [
-            sort { lc($a->moz_nick) cmp lc($b->moz_nick) }
+            sort { lc($a->identity) cmp lc($b->identity) }
             @{ $bug->cc_users }
         ]
     };

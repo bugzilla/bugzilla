@@ -323,6 +323,23 @@ input[type="number"] {
     max-height: 150px;
     overflow-y: auto;
     clear: both;
+    white-space: nowrap;
+}
+
+#cc-list .vcard {
+    display: inline-block;
+}
+
+#cc-list button {
+    padding: 2px 4px;
+}
+
+.cc-remove {
+    font-size: 120%;
+}
+
+.cc-removed {
+    text-decoration: line-through;
 }
 
 #add-cc-btn {

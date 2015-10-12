@@ -166,6 +166,35 @@ $(function() {
                         function(data) {
                             $('#cc-list').html(data.html);
                             latch.data('fetched', true);
+                            $('#cc-list .cc-user').hover(
+                                function() {
+                                    $('#ccr-' + $(this).data('n')).css('visibility', 'visible');
+                                },
+                                function() {
+                                    $('#ccr-' + $(this).data('n')).css('visibility', 'hidden');
+                                }
+                            );
+                            $('#cc-list .cc-remove')
+                                .click(function(event) {
+                                    event.preventDefault();
+                                    $('#top-save-btn').show();
+                                    var n = $(this).data('n');
+                                    var ccu = $('#ccu-' + n);
+                                    if (ccu.hasClass('cc-removed')) {
+                                        ccu.removeClass('cc-removed');
+                                        $('#cc-' + n).remove();
+                                    }
+                                    else {
+                                        $('#removecc').val('on');
+                                        ccu.addClass('cc-removed');
+                                        $('<input>').attr({
+                                            type: 'hidden',
+                                            id: 'cc-' + n,
+                                            value: $('#ccr-' + n).data('login'),
+                                            name: 'cc'
+                                        }).appendTo('#changeform');
+                                    }
+                                });
                         }
                     );
                 }

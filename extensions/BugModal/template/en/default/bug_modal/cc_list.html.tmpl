@@ -9,8 +9,20 @@
 [%
   UNLESS cc_list.size;
     'None';
-  END;
-  FOREACH cc IN cc_list;
-    INCLUDE bug_modal/user.html.tmpl u=cc;
+    RETURN;
   END;
 %]
+
+[% FOREACH cc IN cc_list %]
+  <div class="cc-user" data-n="[% loop.count FILTER none %]">
+    [% IF bug.user.canedit %]
+      <a href="#" id="ccr-[% loop.count FILTER none %]" class="cc-remove"
+        data-n="[% loop.count FILTER none %]" data-login="[% cc.login FILTER html %]"
+        title="Remove" style="visibility:hidden">&nbsp;&#x2716;&nbsp;</a>
+    [% END %]
+    [% INCLUDE bug_modal/user.html.tmpl
+          u  = cc
+          id = "ccu-" _ loop.count
+    %]
+  </div>
+[% END %]

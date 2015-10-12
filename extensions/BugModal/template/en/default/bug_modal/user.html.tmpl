@@ -12,6 +12,7 @@
   # gravatar_size : size of the gravator icon (default 0, which disables the gravatar)
   # gravatar_only : boolean, if true output just the gravatar (not-simple only)
   # nick_only : boolean, if true, the nickname will be used instead of the full name
+  # id : string, if provided the id of the vcard div
   #%]
 
 [%
@@ -24,7 +25,7 @@ IF user.settings.show_gravatars.value != 'On';
   gravatar_size = 0;
 END;
 %]
-<div class="vcard vcard_[% u.id FILTER none %]">
+<div class="vcard vcard_[% u.id FILTER none %]" [% IF id %]id="[% id FILTER html %]"[% END %]>
   [% FILTER collapse %]
 
     [% IF simple %]

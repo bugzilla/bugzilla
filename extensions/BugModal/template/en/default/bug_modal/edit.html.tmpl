@@ -617,6 +617,7 @@
       [% END %]
 
       [% IF bug.cc && bug.cc.size %]
+        <input type="hidden" name="removecc" id="removecc">
         <span id="cc-latch">&#9656;</span>
         <span id="cc-summary">
           [%

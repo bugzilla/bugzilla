@@ -99,7 +99,8 @@
     can_tag: [% user.can_tag_comments ? "true" : "false" %],
     settings: {
       quote_replies: '[% user.settings.quote_replies.value FILTER js %]',
-      zoom_textareas: [% user.settings.zoom_textareas.value == "on" ? "true" : "false" %]
+      zoom_textareas: [% user.settings.zoom_textareas.value == "on" ? "true" : "false" %],
+      remember_collapsed: [% user.settings.ui_remember_collapsed.value == "on" ? "true" : "false" %]
     }
   };
   [% IF user.id %]

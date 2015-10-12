@@ -9,21 +9,25 @@
 [%#
   # types: array of flag_type objects
   # no_label: if set to a true value, flag name and status will not be outputted (default: false)
-  # read_only: if true, don't output edit ui (default: false)
+  # view_only: if true, don't output edit ui (default: false)
   #%]
 
-[% IF read_only %]
+[% IF view_only %]
   <div class="flags edit-hide">
     [% FOREACH type IN types %]
       [% FOREACH flag IN type.flags %]
         <div class="flag">
-          [% UNLESS no_label %]
-            [% INCLUDE bug_modal/user.html.tmpl u=flag.setter nick_only=1 %]
-            [%+ flag.type.name FILTER html %][% flag.status FILTER none %]
+          [% INCLUDE bug_modal/user.html.tmpl u=flag.requestee nick_only=1 %]
+          [% activity_id = bug.find_activity_id_for_flag(flag) %]
+          [% IF activity_id %]
+            <a href="#[% activity_id FILTER none %]"
+          [% ELSE %]
+            <span
           [% END %]
-          [% IF flag.requestee %]
-            [%+ INCLUDE bug_modal/user.html.tmpl u=flag.requestee nick_only=1 %]
-          [% END %]
+            class="[% " activity-ref" IF activity_id %]"
+          >
+            [% INCLUDE bug_modal/rel_time.html.tmpl ts=flag.creation_date %]
+          [% activity_id ? "</a>" : "</span>" %]
         </div>
       [% END %]
     [% END %]

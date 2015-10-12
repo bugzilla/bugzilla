@@ -576,13 +576,12 @@
     [%# needinfo %]
     [% WRAPPER bug_modal/field.html.tmpl
         container = 1
-        label = "NeedInfo"
+        label = "NeedInfo From"
         hide_on_view = needinfo.size == 0
         hide_on_edit = 1
     %]
       [% INCLUDE bug_modal/flags.html.tmpl
           types = bug.flag_types.only("name", "needinfo")
-          no_label = 1
           view_only = 1
       %]
     [% END %]

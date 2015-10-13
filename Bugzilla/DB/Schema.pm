@@ -1808,6 +1808,26 @@ use constant ABSTRACT_SCHEMA => {
             user_api_keys_user_id_app_id_idx  => ['user_id', 'app_id'],
         ],
     },
+
+    user_request_log => {
+        FIELDS => [
+            id          => {TYPE => 'INTSERIAL', NOTNULL => 1,
+                            PRIMARYKEY => 1},
+            user_id     => {TYPE => 'INT3', NOTNULL => 1 },
+            ip_address  => {TYPE => 'varchar(40)', NOTNULL => 1},
+            user_agent  => {TYPE => 'TINYTEXT', NOTNULL => 1},
+            timestamp   => {TYPE => 'DATETIME', NOTNULL => 1},
+            bug_id      => {TYPE => 'INT3', NOTNULL => 0},
+            attach_id   => {TYPE => 'INT4', NOTNULL => 0},
+            request_url => {TYPE => 'TINYTEXT', NOTNULL => 1},
+            method      => {TYPE => 'TINYTEXT', NOTNULL => 1},
+            action      => {TYPE => 'varchar(20)', NOTNULL => 1},
+            server      => {TYPE => 'varchar(7)', NOTNULL => 1},
+        ],
+        INDEXES => [
+            user_user_request_log_user_id_idx => ['user_id'],
+        ],
+    },
 };
 
 # Foreign Keys are added in Bugzilla::DB::bz_add_field_tables

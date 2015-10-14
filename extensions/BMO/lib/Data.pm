@@ -144,6 +144,11 @@ tie(%$cf_visible_in_products, "Tie::IxHash",
         "Firefox" => [],
         "Toolkit" => [],
     },
+    qr/^cf_cab_review$/ => {
+        "Developer Services"                    => [],
+        "Infrastructure & Operations Graveyard" => [],
+        "Infrastructure & Operations"           => [],
+    }
 );
 
 # Who to CC on particular bugmails when certain groups are added or removed.

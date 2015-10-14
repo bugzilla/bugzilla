@@ -549,8 +549,18 @@ sub bug_check_can_change_field {
     my $user = Bugzilla->user;
 
     if ($field =~ /^cf/ && !@$priv_results && $new_value ne '---') {
+        # Cannot use the standard %cf_setter mapping as we want anyone
+        # to be able to set ?, just not the other values.
+        if ($field eq 'cf_cab_review') {
+            if ($new_value ne '1'
+                && $new_value ne '?'
+                && !$user->in_group('infra', $bug->product_id))
+            {
+                push (@$priv_results, PRIVILEGES_REQUIRED_EMPOWERED);
+            }
+        }
         # "other" custom field setters restrictions
-        if (exists $cf_setters->{$field}) {
+        elsif (exists $cf_setters->{$field}) {
             my $in_group = 0;
             foreach my $group (@{$cf_setters->{$field}}) {
                 if ($user->in_group($group, $bug->product_id)) {

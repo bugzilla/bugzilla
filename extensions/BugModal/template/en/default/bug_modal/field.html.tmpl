@@ -173,6 +173,7 @@ END;
             [% IF values.defined %]
               [% FOREACH v IN values %]
                 [% NEXT IF NOT v.is_active AND NOT value.contains(v.name).size %]
+                [% NEXT IF NOT bug.check_can_change_field(name, bug.${name}, v.name) %]
                 <option value="[% v.name FILTER html %]"
                         id="v[% v.id FILTER html %]_[% name FILTER html %]"
                         [% " selected" IF value.contains(v.name).size %]

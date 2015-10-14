@@ -130,6 +130,7 @@
             [% IF field.name.match("^cf_blocking_") OR
                   field.name.match("^cf_status_") OR
                   field.name.match("^cf_tracking_") OR
+                  field.name == "cf_cab_review" OR
                   field.name == "resolution" %]
               [% NEXT UNLESS bug.check_can_change_field(field.name, '---', legal_value.name) OR
                              value.contains(legal_value.name).size %]

@@ -736,6 +736,15 @@
       %]
     [% END %]
 
+    [% UNLESS cf_hidden_in_product('cf_cab_review', bug.product, bug.component, bug) %]
+      [% rendered_custom_fields.push('cf_cab_review') %]
+      [% INCLUDE bug_modal/field.html.tmpl
+          field = bug_fields.cf_cab_review
+          field_type = bug_fields.cf_cab_review.type
+          hide_on_view = bug.cf_cab_review == "---"
+      %]
+    [% END %]
+
   [% END %]
   [% WRAPPER fields_rhs %]
 

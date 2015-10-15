@@ -56,51 +56,133 @@ use constant STATUS_WORKFLOW => (
 );
 
 sub SETTINGS {
-    return {
+    return [
     # 2005-03-03 travis@sedsystems.ca -- Bug 41972
-    display_quips      => { options => ["on", "off"], default => "on" },
+    {
+        name     => 'display_quips',
+        options  => ["on", "off"],
+        default  => "on",
+        category => 'Searching'
+    },
     # 2005-03-10 travis@sedsystems.ca -- Bug 199048
-    comment_sort_order => { options => ["oldest_to_newest", "newest_to_oldest",
-                                        "newest_to_oldest_desc_first"],
-                            default => "oldest_to_newest" },
+    {
+        name     => 'comment_sort_order',
+        options  => ["oldest_to_newest", "newest_to_oldest", "newest_to_oldest_desc_first"],
+        default  => "oldest_to_newest",
+        category => 'Bug Editing'
+    },
     # 2005-05-12 bugzilla@glob.com.au -- Bug 63536
-    post_bug_submit_action => { options => ["next_bug", "same_bug", "nothing"],
-                                default => "next_bug" },
+    {
+        name     => 'post_bug_submit_action',
+        options  => ["next_bug", "same_bug", "nothing"],
+        default  => "next_bug",
+        category => 'Bug Editing'
+    },
     # 2005-06-29 wurblzap@gmail.com -- Bug 257767
-    csv_colsepchar     => { options => [',',';'], default => ',' },
+    {
+        name     => 'csv_colsepchar',
+        options  => [',',';'],
+        default  => ',',
+        category => 'Searching'
+    },
     # 2005-10-26 wurblzap@gmail.com -- Bug 291459
-    zoom_textareas     => { options => ["on", "off"], default => "on" },
+    {
+        name     => 'zoom_textareas',
+        options  => ["on", "off"],
+        default  => "on",
+        category => 'Bug Editing'
+    },
     # 2005-10-21 LpSolit@gmail.com -- Bug 313020
-    per_bug_queries    => { options => ['on', 'off'], default => 'off' },
+    {
+        name     => 'per_bug_queries',
+        options  => ['on', 'off'],
+        default  => 'off',
+        category => 'Searching'
+    },
     # 2006-05-01 olav@bkor.dhs.org -- Bug 7710
-    state_addselfcc    => { options => ['always', 'never',  'cc_unless_role'],
-                            default => 'cc_unless_role' },
+    {
+        name     => 'state_addselfcc',
+        options  => ['always', 'never', 'cc_unless_role'],
+        default  => 'cc_unless_role',
+        category => 'Bug Editing'
+    },
     # 2006-08-04 wurblzap@gmail.com -- Bug 322693
-    skin               => { subclass => 'Skin', default => 'Dusk' },
+    {
+        name     => 'skin',
+        subclass => 'Skin',
+        default  => 'Dusk',
+        category => 'User Interface'
+    },
     # 2006-12-10 LpSolit@gmail.com -- Bug 297186
-    lang               => { subclass => 'Lang',
-                            default => ${Bugzilla->languages}[0] },
+    {
+        name     => 'lang',
+        subclass => 'Lang',
+        default  => ${Bugzilla->languages}[0],
+        category => 'User Interface'
+    },
     # 2007-07-02 altlist@gmail.com -- Bug 225731
-    quote_replies      => { options => ['quoted_reply', 'simple_reply', 'off'],
-                            default => "quoted_reply" },
+    {
+        name     => 'quote_replies',
+        options  => ['quoted_reply', 'simple_reply', 'off'],
+        default  => "quoted_reply",
+        category => 'Bug Editing'
+    },
     # 2009-02-01 mozilla@matt.mchenryfamily.org -- Bug 398473
-    comment_box_position => { options => ['before_comments', 'after_comments'],
-                              default => 'before_comments' },
+    {
+        name     => 'comment_box_position',
+        options  => ['before_comments', 'after_comments'],
+        default  => 'before_comments',
+        category => 'Bug Editing'
+    },
     # 2008-08-27 LpSolit@gmail.com -- Bug 182238
-    timezone           => { subclass => 'Timezone', default => 'local' },
+    {
+        name => 'timezone',
+        subclass => 'Timezone',
+        default => 'local',
+        category => 'User Interface'
+    },
     # 2011-02-07 dkl@mozilla.com -- Bug 580490
-    quicksearch_fulltext => { options => ['on', 'off'], default => 'on' },
+    {
+        name     => 'quicksearch_fulltext',
+        options  => ['on', 'off'],
+        default  => 'on',
+        category => 'Searching'
+    },
     # 2011-06-21 glob@mozilla.com -- Bug 589128
-    email_format       => { options => ['html', 'text_only'],
-                            default => 'html' },
+    {
+        name     => 'email_format',
+        options  => ['html', 'text_only'],
+        default  => 'html',
+        category => 'Email Notifications'
+    },
     # 2011-06-16 glob@mozilla.com -- Bug 663747
-    bugmail_new_prefix => { options => ['on', 'off'], default => 'on' },
+    {
+        name     => 'bugmail_new_prefix',
+        options  => ['on', 'off'],
+        default  => 'on',
+        category => 'Email Notifications'
+    },
     # 2013-07-26 joshi_sunil@in.com -- Bug 669535
-    possible_duplicates => { options => ['on', 'off'], default => 'on' },
+    {
+        name     => 'possible_duplicates',
+        options  => ['on', 'off'],
+        default  => 'on',
+        category => 'User Interface'
+    },
     # 2011-10-11 glob@mozilla.com -- Bug 301656
-    requestee_cc       => { options => ['on', 'off'], default => 'on' },
-    api_key_only       => { options => ['on', 'off'], default => 'off' },
-    }
+    {
+        name     => 'requestee_cc',
+        options  => ['on', 'off'],
+        default  => 'on',
+        category => 'Reviews and Needinfo'
+    },
+    {
+        name => 'api_key_only',
+        options => ['on', 'off'],
+        default => 'off',
+        category => 'API'
+    },
+    ];
 };
 
 use constant SYSTEM_GROUPS => (
@@ -198,12 +280,13 @@ sub update_settings {
         print get_text('install_setting_setup'), "\n";
     }
 
-    my %settings = %{SETTINGS()};
-    foreach my $setting (keys %settings) {
-        add_setting($setting,
-                    $settings{$setting}->{options}, 
-                    $settings{$setting}->{default},
-                    $settings{$setting}->{subclass}, undef,
+    my @settings = @{SETTINGS()};
+    foreach my $setting (@settings) {
+        add_setting($setting->{name},
+                    $setting->{options},
+                    $setting->{default},
+                    $setting->{subclass},
+                    undef,
                     !$any_settings);
     }
 }

@@ -759,6 +759,8 @@ sub update_table_definitions {
     $dbh->bz_add_column('groups', 'idle_member_removal',
                         {TYPE => 'INT2', NOTNULL => 1, DEFAULT => '0'});
 
+    _migrate_preference_categories();
+
     ################################################################
     # New --TABLE-- changes should go *** A B O V E *** this point #
     ################################################################
@@ -3894,6 +3896,18 @@ sub _migrate_group_owners {
     $dbh->bz_add_column('groups', 'owner_user_id', {TYPE => 'INT3'});
     my $nobody = Bugzilla::User->check('nobody@mozilla.org');
     $dbh->do('UPDATE groups SET owner_user_id = ?', undef, $nobody->id);
+}
+
+sub _migrate_preference_categories {
+    my $dbh = Bugzilla->dbh;
+    return if $dbh->bz_column_info('setting', 'category');
+    $dbh->bz_add_column('setting', 'category',
+                        {TYPE => 'varchar(64)', NOTNULL => 1, DEFAULT => "'General'"});
+    my @settings = @{ Bugzilla::Install::SETTINGS() };
+    foreach my $params (@settings) {
+        $dbh->do('UPDATE setting SET category = ? WHERE name = ?',
+                 undef, $params->{category}, $params->{name});
+    }
 }
 
 1;

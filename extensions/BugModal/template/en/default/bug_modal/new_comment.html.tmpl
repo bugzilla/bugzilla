@@ -53,32 +53,36 @@
 
     [%# this checkboxes are in tables to match the alignment of the
         added-by-extensions checkboxes (needinfo, restrict-comments) %]
-    [% IF NOT bug.cc || NOT bug.cc.contains(user.login) %]
-      [%
-        IF user.settings.state_addselfcc.value == 'always';
-          check_add_self = 1;
-        ELSIF user.settings.state_addselfcc.value == 'cc_unless_role';
-          check_add_self = !(
-              bug.user.isreporter
-              || bug.assigned_to.id == user.id
-              || (bug.qa_contact && bug.qa_contact.id == user.id)
-            );
-        ELSE;
-          check_add_self = 0;
-        END;
-      %]
-      <table>
-        <tr>
-          <td>
-            <input type="checkbox" name="addselfcc" id="add-self-cc"
-              [%= "checked" IF check_add_self %]>
-          </td>
-          <td>
-            <label for="add-self-cc">Add me to CC list (follow this [% terms.bug %])</label>
-          </td>
-        </tr>
-      </table>
-    [% END %]
+    [%
+      IF NOT bug.cc || NOT bug.cc.contains(user.login);
+        hide_add_self = 0;
+      ELSE;
+        hide_add_self = 1;
+      END;
+      IF user.settings.state_addselfcc.value == 'always';
+        check_add_self = 1;
+      ELSIF user.settings.state_addselfcc.value == 'cc_unless_role';
+        check_add_self = !(
+            bug.user.isreporter
+            || bug.assigned_to.id == user.id
+            || (bug.qa_contact && bug.qa_contact.id == user.id)
+          );
+      ELSE;
+        check_add_self = 0;
+      END;
+    %]
+    <table id="add-self-cc-container" [%= 'style="display:none"' IF hide_add_self %]>
+      <tr>
+        <td>
+          <input type="checkbox" name="addselfcc" id="add-self-cc"
+            [%= "disabled" IF hide_add_self %]
+            [%= "checked" IF check_add_self %]>
+        </td>
+        <td>
+          <label for="add-self-cc">Add me to CC list (follow this [% terms.bug %])</label>
+        </td>
+      </tr>
+    </table>
 
     <table class="edit-show" style="display:none">
       <tr>

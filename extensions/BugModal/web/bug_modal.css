@@ -722,6 +722,23 @@ td.flag-requestee {
     padding: 5px;
 }
 
+#floating-message {
+    position: absolute;
+    left: 50%;
+    margin: 4px;
+}
+
+#floating-message-text {
+    position: relative;
+    left: -50%;
+    cursor: default;
+    background: #fff9db;
+    color: #666458;
+    box-shadow: 1px 1px 4px rgba(0, 0, 0, 0.5), inset 0 0 1px #000;
+    border-radius: 4px;
+    padding: 4px 8px;
+}
+
 #mode-container {
     display: table-cell;
     white-space: nowrap;

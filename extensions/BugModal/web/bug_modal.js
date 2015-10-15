@@ -131,6 +131,13 @@ $(function() {
             $.scrollTo($('#bottom-actions'));
         });
 
+    // hide floating message when clicked
+    $('#floating-message')
+        .click(function(event) {
+            event.preventDefault();
+            $(this).hide();
+        });
+
     // use non-native tooltips for relative times and bug summaries
     $('.rel-time, .rel-time-title, .bz_bug_link, .tt').tooltip({
         position: { my: "left top+8", at: "left bottom", collision: "flipfit" },
@@ -161,6 +168,54 @@ $(function() {
         });
 
     // cc list
+
+    function ccListLoading() {
+        $('#cc-list').html(
+            '<img src="extensions/BugModal/web/throbber.gif" width="16" height="11"> Loading...'
+        );
+    }
+
+    function ccListUpdate() {
+        bugzilla_ajax(
+            {
+                url: 'rest/bug_modal/cc/' + BUGZILLA.bug_id
+            },
+            function(data) {
+                $('#cc-list').html(data.html);
+                $('#cc-latch').data('fetched', true);
+                $('#cc-list .cc-user').hover(
+                    function() {
+                        $('#ccr-' + $(this).data('n')).css('visibility', 'visible');
+                    },
+                    function() {
+                        $('#ccr-' + $(this).data('n')).css('visibility', 'hidden');
+                    }
+                );
+                $('#cc-list .cc-remove')
+                    .click(function(event) {
+                        event.preventDefault();
+                        $('#top-save-btn').show();
+                        var n = $(this).data('n');
+                        var ccu = $('#ccu-' + n);
+                        if (ccu.hasClass('cc-removed')) {
+                            ccu.removeClass('cc-removed');
+                            $('#cc-' + n).remove();
+                        }
+                        else {
+                            $('#removecc').val('on');
+                            ccu.addClass('cc-removed');
+                            $('<input>').attr({
+                                type: 'hidden',
+                                id: 'cc-' + n,
+                                value: $('#ccr-' + n).data('login'),
+                                name: 'cc'
+                            }).appendTo('#changeform');
+                        }
+                    });
+            }
+        );
+    }
+
     $('#cc-latch, #cc-summary')
         .click(function(event) {
             event.preventDefault();
@@ -174,47 +229,8 @@ $(function() {
                 latch.data('expanded', true).html('&#9662;');
                 $('#cc-list').show();
                 if (!latch.data('fetched')) {
-                    $('#cc-list').html(
-                        '<img src="extensions/BugModal/web/throbber.gif" width="16" height="11"> Loading...'
-                    );
-                    bugzilla_ajax(
-                        {
-                            url: 'rest/bug_modal/cc/' + BUGZILLA.bug_id
-                        },
-                        function(data) {
-                            $('#cc-list').html(data.html);
-                            latch.data('fetched', true);
-                            $('#cc-list .cc-user').hover(
-                                function() {
-                                    $('#ccr-' + $(this).data('n')).css('visibility', 'visible');
-                                },
-                                function() {
-                                    $('#ccr-' + $(this).data('n')).css('visibility', 'hidden');
-                                }
-                            );
-                            $('#cc-list .cc-remove')
-                                .click(function(event) {
-                                    event.preventDefault();
-                                    $('#top-save-btn').show();
-                                    var n = $(this).data('n');
-                                    var ccu = $('#ccu-' + n);
-                                    if (ccu.hasClass('cc-removed')) {
-                                        ccu.removeClass('cc-removed');
-                                        $('#cc-' + n).remove();
-                                    }
-                                    else {
-                                        $('#removecc').val('on');
-                                        ccu.addClass('cc-removed');
-                                        $('<input>').attr({
-                                            type: 'hidden',
-                                            id: 'cc-' + n,
-                                            value: $('#ccr-' + n).data('login'),
-                                            name: 'cc'
-                                        }).appendTo('#changeform');
-                                    }
-                                });
-                        }
-                    );
+                    ccListLoading();
+                    ccListUpdate();
                 }
             }
         });
@@ -561,8 +577,10 @@ $(function() {
             var is_cced = $(event.target).data('is-cced') == '1';
 
             var cc_change;
+            var cc_count = $('#cc-summary').data('count');
             if (is_cced) {
                 cc_change = { remove: [ BUGZILLA.user.login ] };
+                cc_count--;
                 $('#cc-btn')
                     .text('Follow')
                     .data('is-cced', '0')
@@ -570,10 +588,44 @@ $(function() {
             }
             else {
                 cc_change = { add: [ BUGZILLA.user.login ] };
+                cc_count++;
                 $('#cc-btn')
                     .text('Stop Following')
                     .data('is-cced', '1')
                     .prop('disabled', true);
+            }
+            is_cced = !is_cced;
+
+            // update visible count
+            $('#cc-summary').data('count', cc_count);
+            if (cc_count == 1) {
+                $('#cc-summary').text(is_cced ? 'Just you' : '1 person');
+            }
+            else {
+                $('#cc-summary').text(cc_count + ' people');
+            }
+
+            // clear/update user list
+            $('#cc-latch').data('fetched', false);
+            if ($('#cc-latch').data('expanded'))
+                ccListLoading();
+
+            // show message
+            $('#floating-message-text')
+                .text(is_cced ? 'You are now following this bug' : 'You are no longer following this bug');
+            $('#floating-message')
+                .fadeIn(250)
+                .delay(2500)
+                .fadeOut();
+
+            // show/hide "add me to the cc list"
+            if (is_cced) {
+                $('#add-self-cc-container').hide();
+                $('#add-self-cc').attr('disabled', true);
+            }
+            else {
+                $('#add-self-cc-container').show();
+                $('#add-self-cc').attr('disabled', false);
             }
 
             bugzilla_ajax(
@@ -596,9 +648,13 @@ $(function() {
                             .text('Follow')
                             .data('is-cced', '0');
                     }
+                    if ($('#cc-latch').data('expanded'))
+                        ccListUpdate();
                 },
                 function(message) {
                     $('#cc-btn').prop('disabled', false);
+                    if ($('#cc-latch').data('expanded'))
+                        ccListUpdate();
                 }
             );
 

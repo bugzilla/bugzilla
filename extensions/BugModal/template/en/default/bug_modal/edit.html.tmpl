@@ -149,6 +149,9 @@
 [%# === header === %]
 
 <div id="xhr-error" style="display:none"></div>
+<div id="floating-message" style="display:none">
+  <div id="floating-message-text"></div>
+</div>
 
 [% WRAPPER bug_modal/module.html.tmpl
     title = ""
@@ -618,7 +621,7 @@
       [% IF bug.cc && bug.cc.size %]
         <input type="hidden" name="removecc" id="removecc">
         <span id="cc-latch">&#9656;</span>
-        <span id="cc-summary">
+        <span id="cc-summary" data-count="[% bug.cc.size FILTER none %]">
           [%
             IF bug.cc.size == 1;
               is_cced ? "Just you" : "1 person";

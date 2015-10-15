@@ -458,6 +458,11 @@ sub get {
 
     $self->_add_update_tokens($params, \@bugs, \@hashes);
 
+    if (Bugzilla->user->id) {
+        foreach my $bug (@bugs) {
+            Bugzilla->log_user_request($bug->id, undef, 'bug-get');
+        }
+    }
     return { bugs => \@hashes, faults => \@faults };
 }
 
@@ -1196,6 +1201,7 @@ sub attachments {
     }
 
     my %attachments;
+    my @log_attachments;
     foreach my $attach (@{Bugzilla::Attachment->new_from_list($attach_ids)}) {
         Bugzilla::Bug->check($attach->bug_id);
         if ($attach->isprivate && !Bugzilla->user->is_insider) {
@@ -1203,8 +1209,16 @@ sub attachments {
                                             object    => 'attachment',
                                             attach_id => $attach->id});
         }
+        push @log_attachments, $attach;
+
         $attachments{$attach->id} =
             $self->_attachment_to_hash($attach, $params);
+    }
+
+    if (Bugzilla->user->id) {
+        foreach my $attachment (@log_attachments) {
+            Bugzilla->log_user_request($attachment->bug_id, $attachment->id, "attachment-get");
+        }
     }
 
     return { bugs => \%bugs, attachments => \%attachments };

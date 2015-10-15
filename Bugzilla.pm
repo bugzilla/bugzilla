@@ -594,6 +594,45 @@ sub switch_to_main_db {
     return $class->dbh_main;
 }
 
+sub log_user_request {
+    my ($class, $bug_id, $attach_id, $action) = @_;
+
+    return unless Bugzilla->params->{log_user_requests};
+
+    my $cgi         = $class->cgi;
+    my $user_id     = $class->user->id;
+    my $request_url = $cgi->request_uri // '';
+    my $method      = $cgi->request_method;
+    my $user_agent  = $cgi->user_agent // '';
+    my $script_name = $cgi->script_name;
+    my $server      = "web";
+
+    if ($script_name =~ /rest\.cgi/) {
+        $server = $script_name =~ /BzAPI/ ? "bzapi" : "rest";
+    }
+    elsif ($script_name =~ /xmlrpc\.cgi/) {
+        $server = "xmlrpc";
+    }
+    elsif ($script_name =~ /jsonrpc\.cgi/) {
+        $server = "jsonrpc";
+    }
+
+    my @params = ($user_id, remote_ip(), $user_agent, $request_url, $method, $bug_id, $attach_id, $action, $server);
+    foreach my $param (@params) {
+        trick_taint($param) if defined $param;
+    }
+
+    eval {
+        local $class->request_cache->{dbh};
+        $class->switch_to_main_db();
+        $class->dbh->do("INSERT INTO user_request_log
+                         (user_id, ip_address, user_agent, request_url,
+                         method, timestamp, bug_id, attach_id, action, server)
+                         VALUES (?, ?, ?, ?, ?, NOW(), ?, ?, ?, ?)", undef, @params);
+    };
+    warn $@ if $@;
+}
+
 sub is_shadow_db {
     my $class = shift;
     return $class->request_cache->{dbh} != $class->dbh_main;

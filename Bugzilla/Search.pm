@@ -787,6 +787,7 @@ sub data {
     return $self->{data} if $self->{data};
     my $dbh = Bugzilla->dbh;
 
+    Bugzilla->log_user_request(undef, undef, "search") if Bugzilla->user->id;
     # If all fields belong to the 'bugs' table, there is no need to split
     # the original query into two pieces. Else we override the 'fields'
     # argument to first get bug IDs based on the search criteria defined

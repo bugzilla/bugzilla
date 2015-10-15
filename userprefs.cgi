@@ -853,6 +853,12 @@ sub SaveApiKey {
                     revoked     => $revoked,
                 });
                 $api_key->update();
+                if ($revoked) {
+                    Bugzilla->log_user_request(undef, undef, 'api-key-revoke')
+                }
+                else {
+                    Bugzilla->log_user_request(undef, undef, 'api-key-unrevoke')
+                }
             }
         }
     }
@@ -912,6 +918,7 @@ sub MfaApiKey {
                 revoked     => 0,
             });
             $api_key->update();
+            Bugzilla->log_user_request(undef, undef, 'api-key-unrevoke');
             $dbh->bz_commit_transaction;
         }
     }
@@ -925,6 +932,8 @@ sub _create_api_key {
         user_id     => $user->id,
         description => $description,
     });
+
+    Bugzilla->log_user_request(undef, undef, 'api-key-create');
 
     # As a security precaution, we always sent out an e-mail when
     # an API key is created

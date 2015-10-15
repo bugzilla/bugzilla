@@ -133,6 +133,11 @@ foreach ($cgi->param("excludefield")) {
 
 $vars->{'displayfields'} = \%displayfields;
 
+if ($user->id) {
+    foreach my $bug_id (@bugids) {
+        Bugzilla->log_user_request($bug_id, undef, 'bug-get');
+    }
+}
 print $cgi->header($format->{'ctype'});
 
 $template->process($format->{'template'}, $vars)

@@ -38,6 +38,9 @@ sub process_diff {
     if ($format eq 'raw') {
         require Bugzilla::PatchReader::DiffPrinter::raw;
         $last_reader->sends_data_to(new Bugzilla::PatchReader::DiffPrinter::raw());
+
+        Bugzilla->log_user_request($attachment->bug_id, $attachment->id, "attachment-get")
+          if Bugzilla->user->id;
         # Actually print out the patch.
         print $cgi->header(-type => 'text/plain',
                            -expires => '+3M');
@@ -92,6 +95,12 @@ sub process_interdiff {
     my $cgi = Bugzilla->cgi;
     my $lc  = Bugzilla->localconfig;
     my $vars = {};
+
+    if (Bugzilla->user->id) {
+        foreach my $attachment ($old_attachment, $new_attachment) {
+            Bugzilla->log_user_request($attachment->bug_id, $attachment->id, "attachment-get");
+        }
+    }
 
     # Encode attachment data as utf8 if it's going to be displayed in a HTML
     # page using the UTF-8 encoding.

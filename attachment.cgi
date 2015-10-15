@@ -435,6 +435,8 @@ sub view {
             }
         }
     }
+    Bugzilla->log_user_request($attachment->bug_id, $attachment->id, "attachment-get")
+      if Bugzilla->user->id;
     print $cgi->header(-type=>"$contenttype; name=\"$filename\"",
                        -content_disposition=> "$disposition; filename=\"$filename\"",
                        -content_length => $attachment->datasize);
@@ -669,6 +671,8 @@ sub edit {
   $vars->{'attachment'} = $attachment;
   $vars->{'attachments'} = $bugattachments;
 
+  Bugzilla->log_user_request($attachment->bug_id, $attachment->id, "attachment-get")
+    if Bugzilla->user->id;
   print $cgi->header();
 
   # Generate and return the UI (HTML page) from the appropriate template.

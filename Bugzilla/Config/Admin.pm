@@ -63,6 +63,12 @@ sub get_param_list {
    type => 't',
    default => 10,
    checker => \&check_numeric
+  },
+
+  {
+    name => 'log_user_requests',
+    type => 'b',
+    default => 0,
   });
   return @param_list;
 }

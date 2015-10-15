@@ -1281,8 +1281,10 @@ function bugzilla_ajax(request, done_fn, error_fn) {
     return $.ajax(request)
         .done(function(data) {
             if (data.error) {
-                $('#xhr-error').html(data.message);
-                $('#xhr-error').show('fast');
+                if (!request.hideError) {
+                    $('#xhr-error').html(data.message);
+                    $('#xhr-error').show('fast');
+                }
                 if (error_fn)
                     error_fn(data.message);
             }

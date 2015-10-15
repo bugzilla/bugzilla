@@ -6,7 +6,9 @@
   # defined by the Mozilla Public License, v. 2.0.
   #%]
 
-[% IF Param('edit_comments_group') && user.in_group(Param('edit_comments_group')) %]
-  [% style_urls.push('extensions/EditComments/web/styles/editcomments.css') %]
-  [% javascript_urls.push('extensions/EditComments/web/js/editcomments.js') %]
-[% END %]
+[%
+  IF Param('edit_comments_group') && user.in_group(Param('edit_comments_group'));
+    style_urls.push('extensions/EditComments/web/styles/editcomments.css');
+    javascript_urls.push('extensions/EditComments/web/js/editcomments.js');
+  END;
+%]

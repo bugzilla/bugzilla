@@ -1,0 +1,26 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[%
+  RETURN IF comment.body == '';
+  RETURN UNLESS Param('edit_comments_group') && user.in_group(Param('edit_comments_group'));
+  RETURN UNLESS
+    comment.type == constants.CMT_NORMAL
+    || comment.type == constants.CMT_DUPE_OF
+    || comment.type == constants.CMT_ATTACHMENT_CREATED
+    || comment.type == constants.CMT_ATTACHMENT_UPDATED;
+%]
+
+[% IF comment.edit_count %]
+  <a href="page.cgi?id=editcomments.html&bug_id=[% bug.id FILTER none %]&amp;comment_id=[% comment.id FILTER none %]"
+     title="[% comment.edit_count FILTER none %] edit[% "s" UNLESS comment.edit_count == 1 %]">(Edited)</a>
+[% END %]
+
+<button class="edit-comment-btn minor edit-show" type="button" style="display:none"
+  data-id="[% comment.id FILTER none %]"
+  data-no="[% comment.count FILTER none %]">Edit</button>

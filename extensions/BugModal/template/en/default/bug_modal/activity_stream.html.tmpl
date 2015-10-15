@@ -111,6 +111,7 @@
               <label for="is-private-[% comment.id FILTER none %]">Private</label>
             </div>
           [% END %]
+          [% Hook.process('comment_action', 'bug_modal/activity_stream.html.tmpl') %]
           [% IF user.id %]
             [% IF user.can_tag_comments %]
               <button class="tag-btn minor" type="button"

@@ -3,28 +3,34 @@
 Windows
 #######
 
-Making Bugzilla work on Windows is more difficult than making it work on Unix,
-fewer Bugzilla developers use it and so it's less well supported. We would
-particularly recommend against doing it for a large site. However, if
-you are still determined to go ahead, here's how.
+Making Bugzilla work on Windows is not more difficult than making it work on
+Linux. However, fewer developers use Windows to test Bugzilla and so we would
+still recommend using Linux for large sites to get better support.
 
 .. windows-install-perl:
 
-ActiveState Perl
-================
+Perl
+====
 
-ActiveState make a popular distribution of Perl for Windows.
+You have two main choices to install Perl on Windows: ActivePerl and Strawberry
+Perl.
 
-Download the ActiveState Perl 5.12.4 or higher MSI installer from the
+The ActivePerl Windows Installer can be downloaded from the
 `ActiveState website <http://www.activestate.com/activeperl/downloads>`_.
-
-ActiveState Perl uses a standard Windows Installer. Install, sticking with
-the defaults, which will install Perl into :file:`C:\\Perl`. It is not
+Perl will be installed by default into :file:`C:\\Perl`. It is not
 recommended to install Perl into a directory containing a space, such as
-:file:`C:\\Program Files`.
+:file:`C:\\Program Files`. Once the install has completed, log out and log in
+again to pick up the changes to the ``PATH`` environment variable.
 
-Once the install has completed, log out and log in again to pick up the
-changes to the ``PATH`` environment variable.
+The Strawberry Perl Windows Installer can be downloaded from the
+`Strawberry Perl website <http://strawberryperl.com>`_. Perl will be installed
+by default into :file:`C:\\Strawberry`.
+
+One big advantage of Strawberry Perl over ActivePerl is that with Strawberry
+Perl, you can use the usual tools available on other OSes to install missing
+Perl modules directly from CPAN, whereas ActivePerl requires you to use its own
+:file:`ppm` tool to download pre-compiled Perl modules from ActiveState.
+The modules in the ActivePerl repository may be a bit older than those on CPAN.
 
 .. _windows-install-bzfiles:
 
@@ -37,7 +43,7 @@ git from the `git website <http://git-scm.com/download>`_, and then run:
 :command:`git clone --branch release-X.X-stable https://git.mozilla.org/bugzilla/bugzilla C:\\bugzilla`
 
 where "X.X" is the 2-digit version number of the stable release of Bugzilla
-that you want (e.g. 4.4).
+that you want (e.g. 5.0).
 
 The rest of this documentation assumes you have installed Bugzilla into
 :file:`C:\\bugzilla`. Adjust paths appropriately if not.
@@ -53,16 +59,17 @@ which any competent Windows archiving tool should be able to open.
 Perl Modules
 ============
 
-Bugzilla requires a number of perl modules to be installed. They are
-available in the ActiveState repository, and are installed with the
-:file:`ppm` tool. You can either use it on the command line, as below,
-or just type :command:`ppm`, and you will get a GUI.
+Bugzilla requires a number of Perl modules to be installed. Some of them are
+mandatory, and some others, which enable additional features, are optional.
 
+If you are using ActivePerl, these modules are available in the ActiveState
+repository, and are installed with the :file:`ppm` tool. You can either use it
+on the command line as below, or just type :command:`ppm`, and you will get a GUI.
 If you use a proxy server or a firewall you may have trouble running PPM.
 This is covered in the
 `ActivePerl FAQ <http://aspn.activestate.com/ASPN/docs/ActivePerl/faq/ActivePerl-faq2.html#ppm_and_proxies>`_.
 
-Install the following modules with:
+Install the following mandatory modules with:
 
 :command:`ppm install <modulename>`
 
@@ -120,12 +127,15 @@ installed:
 * File-Copy-Recursive
 * GraphViz
 
-.. warning:: These lists have been extracted from Bugzilla's source code and
-             have not been tested. Please let us know if you find errors in it
-             of any sort.
+If you are using Strawberry Perl, you should use the :file:`install-module.pl`
+script to install modules, which is the same script used for Linux. Some of
+the required modules are already installed by default. The remaining ones can
+be installed using the command:
 
-.. note:: The :file:`install-module.pl` script doesn't work with ActivePerl
-   on Windows.
+:command:`perl install-module.pl <modulename>`
+
+The list of modules to install will be displayed by :file:`checksetup.pl`; see
+below.
 
 .. _windows-config-webserver:
 

@@ -51,3 +51,15 @@ function display_value(field, value) {
     if (translated) return translated;
     return value;
 }
+
+// jQuery auto-completion disables browser native autocompletion, however this
+// excludes it from being restored by bfcache. Trick the browser into restoring
+// it by changing the autocomplete attribute when a page is hidden and shown.
+$().ready(function() {
+  $(window).on('pagehide', function() {
+    $('.bz_autocomplete').attr('autocomplete', 'on');
+  });
+  $(window).on('pageshow', function() {
+    $('.bz_autocomplete').attr('autocomplete', 'off');
+  });
+});

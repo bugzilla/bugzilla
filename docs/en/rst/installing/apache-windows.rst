@@ -3,29 +3,54 @@
 Apache
 ######
 
-These instructions require editing the Apache configuration file, which is
-at :file:`C:\\Program Files\\Apache Group\\Apache2\\conf\\httpd.conf`.
+Bugzilla supports all versions of Apache 2.2.x and 2.4.x.
 
 Installing
 ==========
 
-Download the Apache HTTP Server, version 2.2.x or higher, from
-`the Apache website <http://httpd.apache.org/download.cgi>`_.
+Download the Apache HTTP Server as a :file:`.zip` archive either from the
+`Apache Lounge website <http://www.apachelounge.com/download>`_ or from the
+`Apache Haus website <http://www.apachehaus.com/cgi-bin/download.plx>`_.
 
-Apache uses a standard Windows installer. Just follow the prompts, making sure
-you "Install for All Users". Be aware the Apache will always install itself
-into an :file:`Apache2` directory under what ever path you specify. The
-default install path will be displayed as
-:file:`C:\\Program Files\\Apache Group`, which will result in Apache being
-installed to :file:`C:\\Program Files\\Apache Group\\Apache2`.
+Unzip the archive into :file:`C:\\Apache24`. If you move it elsewhere, then
+you must edit several variables in :file:`httpd.conf`, including ``ServerRoot``
+and ``DocumentRoot``.
 
-If you are already running IIS on your machine, you must configure Apache to
-run on a port other than 80, which IIS is using. However you aren't asked the
-port to listen on at install time. Choose "All Users" (which says port 80),
-and we'll change the port later.
+You must now edit the Apache configuration file :file:`C:\\Apache24\\conf\\httpd.conf`
+and do the following steps:
 
-The remainder of this document assumes you have installed Apache into
-the default location, :file:`C:\\Program Files\\Apache Group\\Apache2`.
+#. Uncomment ``LoadModule cgi_module modules/mod_cgi.so`` at the beginning of the
+   file to enable CGI support.
+#. Uncomment ``AddHandler cgi-script .cgi`` to register :file:`.cgi` files
+   as CGI scripts. For this handler to work, you must create a key in the
+   Windows registry named ``HKEY_CLASSES_ROOT\.cgi\Shell\ExecCGI\Command`` with
+   the default value pointing to the full path of :file:`perl.exe` with a ``-T``
+   parameter. For example :file:`C:\\Perl\\bin\\perl.exe -T` if you use ActivePerl,
+   or :file:`C:\\Strawberry\\perl\\bin\\perl.exe -T` if you use Strawberry Perl.
+#. Add an Alias and a Directory for Bugzilla:
+
+.. code-block:: apache
+
+    Alias "/bugzilla/" "C:/bugzilla/"
+    <Directory "C:/bugzilla">
+        ScriptInterpreterSource Registry-Strict
+        Options +ExecCGI +FollowSymLinks
+        DirectoryIndex index.cgi index.html
+        AllowOverride Limit FileInfo Indexes Options
+        Require all granted
+    </Directory>
+
+.. warning:: The above block takes a simple approach to access control and is
+             correct for Apache 2.4. For Apache 2.2, replace ``Require all granted``
+             with ``Allow from all``. If you have other access control
+             requirements, you may need to make further modifications.
+
+You now save your changes and start Apache as a service. From the Windows
+command line (:file:`cmd.exe`):
+
+:command:`C:\\Apache24\\bin>httpd.exe -k install`
+
+That's it! Bugzilla is now accessible from http://localhost/bugzilla.
 
 Apache Account Permissions
 ==========================
@@ -40,65 +65,11 @@ and modify access to the following directories and all their subdirectories.
 Depending on your version of Windows, this access may already be granted.
 
 * :file:`C:\\Bugzilla\\data`
-* :file:`C:\\Program Files\\Apache Group\\Apache2\\logs`
-* :file:`C:\\Temp`
+* :file:`C:\\Apache24\\logs`
 * :file:`C:\\Windows\\Temp`
 
 Note that :file:`C:\\Bugzilla\\data` is created the first time you run
 :file:`checksetup.pl`.
-
-Port and DocumentRoot
-=====================
-
-Edit the Apache configuration file (see above).
-
-If you need to change the port that Apache runs on (listens on, or binds to),
-for example because another web server such as IIS is running on the same
-machine, edit the ``Listen`` option and change the value after the colon.
-
-Change the ``DocumentRoot`` setting to point to :file:`C:/Bugzilla`. There
-are two locations in :file:`httpd.conf` that need to be updated (search for
-``DocumentRoot``). You need to use ``/`` instead of ``\`` as a path separator.
-
-Enable CGI Support
-==================
-
-Edit the Apache configuration file (see above).
-
-To enable CGI support in Apache, you need to enable the CGI handler, by
-uncommenting the ``AddHandler cgi-script .cgi`` line.
-
-Teach Apache About Bugzilla
-===========================
-
-Edit the Apache configuration file (see above).
-
-Add the following stanza:
-
-.. code-block:: apache
-
-   <Directory "C:/Bugzilla">
-       ScriptInterpreterSource Registry-Strict
-       Options +ExecCGI +FollowSymLinks
-       DirectoryIndex index.cgi index.html
-       AllowOverride Limit FileInfo Indexes Options
-       Require all granted
-   </Directory>
-
-.. warning:: The above block takes a simple approach to access control
-             and is correct for Apache 2.4. For Apache 2.2, replace
-             ``Require all granted`` with ``Allow from all``. If you
-             have other applications on the server or other access
-             control requirements, you may need to make further
-             modifications.
-
-In order for ``ScriptInterpreterSource Registry-Strict`` to work, you also
-need to add an entry to the Registry so Apache will use Perl to execute .cgi
-files.
-
-Create a key ``HKEY_CLASSES_ROOT\.cgi\Shell\ExecCGI\Command`` with the
-default value of the full path of :file:`perl.exe` with a ``-T`` parameter.
-For example :file:`C:\\Perl\\bin\\perl.exe -T`.
 
 Logging
 =======
@@ -126,11 +97,39 @@ in its log files.
 (If you have configured Apache differently, a different log line might apply.
 Adjust these instructions accordingly.)
 
+Using Apache with SSL
+=====================
+
+If you want to enable SSL with Apache, i.e. access Bugzilla from
+https://localhost/bugzilla, you need to do some extra steps:
+
+#. Edit :file:`C:\\Apache24\\conf\\httpd.conf` and uncomment these two lines:
+
+   * ``LoadModule ssl_module modules/mod_ssl.so``
+   * ``LoadModule socache_shmcb_module modules/mod_socache_shmcb.so``
+
+#. Create your :file:`.key` and :file:`.crt` files using :file:`openssl.exe`
+   provided with Apache:
+
+   :command:`C:\\Apache24\\bin>openssl.exe req -x509 -nodes -days 730 -newkey rsa:2048 -keyout server.key -out server.crt`
+
+   :file:`openssl.exe` will ask you a few questions about your location and
+   your company name to populate fields of the certificate.
+
+#. Once the key and the certificate for your server are generated, move them
+   into :file:`C:\\Apache24\\conf` so that their location matches the
+   ``SSLCertificateFile`` and ``SSLCertificateKeyFile`` variables defined in
+   :file:`C:\\Apache24\\conf\\extra\\httpd-ssl.conf` (which you don't need to
+   edit).
+
+.. note:: This process leads to a self-signed certificate which will generate
+         browser warnings on first visit. If your Bugzilla has a public DNS
+         name, you can get a cert from a CA which will not have this problem.
+
 Restart Apache
 ==============
 
-Finally, restart Apache to get it pick up the changes:
+Finally, restart Apache to pick up the changes, either from the Services
+console or from the command line:
 
-:command:`net stop apache2`
-
-:command:`net start apache2`
+:command:`C:\\Apache24\\bin>httpd.exe -k restart`

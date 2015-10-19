@@ -427,7 +427,7 @@ input[type="number"] {
     text-decoration: line-through;
 }
 
-#attachments .attach-desc-td {
+#attachments .attach-patch .attach-desc-td {
     background: #ffc;
     background-image: linear-gradient(to right, #ffc, #fff);
 }

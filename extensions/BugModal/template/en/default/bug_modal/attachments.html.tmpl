@@ -23,7 +23,7 @@
     <tr class="
         [%~ " bz_private" IF attachment.isprivate %]
         [%~ " attach-obsolete" IF attachment.isobsolete %]
-        [%~ " attach-patch" IF attachment.ispatch %]
+        [%~ " attach-patch" IF attachment.can_review %]
     " [% IF attachment.isobsolete %]style="display:none"[% END %]>
       <td class="attach-desc-td">
         <div class="attach-desc">

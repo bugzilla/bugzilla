@@ -28,16 +28,19 @@ our %autodetect_attach_urls = (
         title        => 'GitHub Pull Request',
         regex        => qr#^https://github\.com/[^/]+/[^/]+/pull/\d+/?$#i,
         content_type => 'text/x-github-pull-request',
+        can_review   => 1,
     },
     reviewboard => {
         title        => 'MozReview',
         regex        => qr#^https?://reviewboard(?:-dev)?\.(?:allizom|mozilla)\.org/r/\d+/?#i,
         content_type => 'text/x-review-board-request',
+        can_review   => 1,
     },
     google_docs => {
         title        => 'Google Doc',
         regex        => qr#^https://docs\.google\.com/(?:document|spreadsheets|presentation)/d/#i,
         content_type => 'text/x-google-doc',
+        can_review   => 0,
     },
 );
 

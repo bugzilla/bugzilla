@@ -6,7 +6,11 @@
   # defined by the Mozilla Public License, v. 2.0.
   #%]
 
-[% RETURN UNLESS user.in_group("bounty-team")
-                 && attachment.is_bounty_attachment %]
+[% IF user.in_group("bounty-team") && attachment.is_bounty_attachment %]
+  <span id="bounty_attachment"></span>
+[% END %]
 
-<span id="bounty_attachment"></span>
+[% IF !attachment.ispatch && attachment.can_review %]
+  &#x0020; |
+  <a href="attachment.cgi?id=[% attachment.id FILTER none %]">Review</a>
+[% END %]

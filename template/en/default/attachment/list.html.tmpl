@@ -72,7 +72,7 @@ function toggle_display(link) {
       [% END %]
       <tr id="a[% count %]" class="[% "bz_contenttype_" _ attachment.contenttype
                      FILTER css_class_quote %]
-                 [% " bz_patch" IF attachment.ispatch %]
+                 [% " bz_patch" IF attachment.can_review %]
                  [% " bz_private" IF attachment.isprivate %]
                  [% " bz_tr_obsolete bz_default_hidden" 
                      IF attachment.isobsolete %]">

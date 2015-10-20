@@ -95,13 +95,13 @@ sub post_bug_after_creation {
     if ($do_sec_review) {
         $child_params->{'bug_data'} = {
             short_desc   => 'Security Review: ' . $bug->short_desc,
-            product      => 'mozilla.org',
-            component    => 'Security Assurance: Review Request',
+            product      => 'Enterprise Information Security',
+            component    => 'Review',
             bug_severity => 'normal',
             groups       => [ 'mozilla-employee-confidential' ],
             op_sys       => 'All',
             rep_platform => 'All',
-            version      => 'other',
+            version      => 'unspecified',
             blocked      => $bug->bug_id,
         };
         $child_params->{'template_suffix'} = 'sec-review';

@@ -37,7 +37,9 @@ sub handle_login {
     }
 
     eval "require $class";
-    ThrowCodeError('unknown_method', {method => $full_method}) if $@;
+    my $error = $@;
+    warn "$error" if $error;
+    ThrowCodeError('unknown_method', {method => $full_method}) if $error;
     return if ($class->login_exempt($method) 
                and !defined Bugzilla->input_params->{Bugzilla_login});
     Bugzilla->login();

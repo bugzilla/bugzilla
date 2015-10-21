@@ -37,7 +37,12 @@ sub template_before_process {
 
 sub install_before_final_checks {
     my ($self, $args) = @_;
-    add_setting('orange_factor', ['on', 'off'], 'off');
+    add_setting({
+        name     => 'orange_factor',
+        options  => ['on', 'off'],
+        default  => 'off',
+        category => 'User Interface'
+    });
 }
 
 __PACKAGE__->NAME;

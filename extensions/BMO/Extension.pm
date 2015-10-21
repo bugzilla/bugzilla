@@ -1089,13 +1089,21 @@ sub install_before_final_checks {
     my ($self, $args) = @_;
 
     # Add product chooser setting
-    add_setting('product_chooser',
-                ['pretty_product_chooser', 'full_product_chooser'],
-                'pretty_product_chooser');
+    add_setting({
+        name     => 'product_chooser',
+        options  => ['pretty_product_chooser', 'full_product_chooser'],
+        default  => 'pretty_product_chooser',
+        category => 'User Interface'
+    });
 
     # Add option to inject x-bugzilla headers into the message body to work
     # around gmail filtering limitations
-    add_setting('headers_in_body', ['on', 'off'], 'off');
+    add_setting({
+        name     => 'headers_in_body',
+        options  => ['on', 'off'],
+        default  => 'off',
+        category => 'Email Notifications'
+    });
 
     # Migrate from 'gmail_threading' setting to 'bugmail_new_prefix'
     my $dbh = Bugzilla->dbh;

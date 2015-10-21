@@ -228,21 +228,20 @@ sub DisableAccount {
 sub DoSettings {
     my $user = Bugzilla->user;
 
-    my $settings = $user->settings;
-    $vars->{'settings'} = $settings;
-
-    my @setting_list = sort keys %$settings;
-    $vars->{'setting_names'} = \@setting_list;
-
-    $vars->{'has_settings_enabled'} = 0;
-    # Is there at least one user setting enabled?
-    foreach my $setting_name (@setting_list) {
-        if ($settings->{"$setting_name"}->{'is_enabled'}) {
-            $vars->{'has_settings_enabled'} = 1;
-            last;
-        }
+    my %settings;
+    my $has_settings_enabled = 0;
+    foreach my $name (sort keys %{ $user->settings }) {
+        my $setting = $user->settings->{$name};
+        next if !$setting->{is_enabled};
+        my $category = $setting->{category};
+        $settings{$category} ||= [];
+        push(@{ $settings{$category} }, $setting);
+        $has_settings_enabled = 1 if $setting->{is_enabled};
     }
-    $vars->{'dont_show_button'} = !$vars->{'has_settings_enabled'};
+
+    $vars->{settings}             = \%settings;
+    $vars->{has_settings_enabled} = $has_settings_enabled;
+    $vars->{dont_show_button}     = !$has_settings_enabled;
 }
 
 sub SaveSettings {

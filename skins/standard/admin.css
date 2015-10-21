@@ -231,6 +231,16 @@ input[disabled] {
     background: #fff;
 }
 
+.category_header {
+    text-align: left;
+    font-weight: bold;
+    font-size: larger;
+}
+
+.setting_label {
+    text-align: right;
+}
+
 /* mfa */
 
 #mfa {

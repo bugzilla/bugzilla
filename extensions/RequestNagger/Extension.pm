@@ -379,7 +379,12 @@ sub install_filesystem {
 
 sub install_before_final_checks {
     my ($self, $args) = @_;
-    add_setting('request_nagging', ['on', 'off'], 'on');
+    add_setting({
+        name     => 'request_nagging',
+        options  => ['on', 'off'],
+        default  => 'on',
+        category => 'Reviews and Needinfo'
+    });
 }
 
 __PACKAGE__->NAME;

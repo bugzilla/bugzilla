@@ -1041,7 +1041,12 @@ sub install_filesystem {
 
 sub install_before_final_checks {
     my ($self, $args) = @_;
-    add_setting('block_reviews', ['on', 'off'], 'off');
+    add_setting({
+        name     => 'block_reviews',
+        options  => ['on', 'off'],
+        default  => 'off',
+        category => 'Reviews and Needinfo'
+    });
 }
 
 sub config_modify_panels {

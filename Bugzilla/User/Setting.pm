@@ -66,10 +66,10 @@ sub new {
     # to retrieve the information for this setting ourselves.
     if (scalar @_ == 0) {
 
-        my ($default, $is_enabled, $value);
-        ($default, $is_enabled, $value, $subclass) = 
+        my ($default, $is_enabled, $value, $category);
+        ($default, $is_enabled, $value, $subclass, $category) =
           $dbh->selectrow_array(
-             q{SELECT default_value, is_enabled, setting_value, subclass
+             q{SELECT default_value, is_enabled, setting_value, subclass, category
                  FROM setting
             LEFT JOIN profile_setting
                    ON setting.name = profile_setting.setting_name
@@ -80,17 +80,18 @@ sub new {
 
         # if not defined, then grab the default value
         if (! defined $value) {
-            ($default, $is_enabled, $subclass) =
+            ($default, $is_enabled, $subclass, $category) =
               $dbh->selectrow_array(
-                 q{SELECT default_value, is_enabled, subclass
+                 q{SELECT default_value, is_enabled, subclass, category
                    FROM setting
                    WHERE name = ?},
               undef,
               $setting_name);
         }
 
-        $self->{'is_enabled'} = $is_enabled;
+        $self->{'is_enabled'}    = $is_enabled;
         $self->{'default_value'} = $default;
+        $self->{'category'}      = $category;
 
         # IF the setting is enabled, AND the user has chosen a setting
         # THEN return that value
@@ -109,6 +110,7 @@ sub new {
         $self->{'value'}         = shift;
         $self->{'is_default'}    = shift;
         $subclass                = shift;
+        $self->{'category'}      = shift;
     }
     if ($subclass) {
         eval('require ' . $class . '::' . $subclass);
@@ -129,14 +131,27 @@ sub new {
 ###############################
 
 sub add_setting {
-    my ($name, $values, $default_value, $subclass, $force_check,
-        $silently) = @_;
+    my ($params) = @_;
+    my ($name, $options, $default, $subclass, $force_check, $silently, $category)
+        = @$params{qw( name options default subclass force_check silently category )};
     my $dbh = Bugzilla->dbh;
 
+    # Categories were added later, so we need to check if the old
+    # setting has the correct category if provided
     my $exists = _setting_exists($name);
+    if ($exists && $category) {
+        my $old_category = $dbh->selectrow_arrayref(
+            "SELECT category FROM setting WHERE name = ?", undef, $name);
+        if ($old_category ne $category) {
+            $dbh->do('UPDATE setting SET category = ? WHERE name = ?',
+                     undef, $category, $name);
+            Bugzilla->memcached->clear_config();
+        }
+    }
+
     return if ($exists && !$force_check);
 
-    ($name && $default_value)
+    ($name && $default)
       ||  ThrowCodeError("setting_info_invalid");
 
     if ($exists) {
@@ -144,8 +159,8 @@ sub add_setting {
         $dbh->do('DELETE FROM setting_value WHERE name = ?', undef, $name);
         $dbh->do('DELETE FROM setting WHERE name = ?', undef, $name);
         # Remove obsolete user preferences for this setting.
-        if (defined $values && scalar(@$values)) {
-            my $list = join(', ', map {$dbh->quote($_)} @$values);
+        if (defined $options && scalar(@$options)) {
+            my $list = join(', ', map {$dbh->quote($_)} @$options);
             $dbh->do("DELETE FROM profile_setting
                       WHERE setting_name = ? AND setting_value NOT IN ($list)",
                       undef, $name);
@@ -154,15 +169,15 @@ sub add_setting {
     elsif (!$silently) {
         print get_text('install_setting_new', { name => $name }) . "\n";
     }
-    $dbh->do(q{INSERT INTO setting (name, default_value, is_enabled, subclass)
-                    VALUES (?, ?, 1, ?)},
-             undef, ($name, $default_value, $subclass));
+    $dbh->do(q{INSERT INTO setting (name, default_value, is_enabled, subclass, category)
+                    VALUES (?, ?, 1, ?, ?)},
+             undef, ($name, $default, $subclass, $category));
 
     my $sth = $dbh->prepare(q{INSERT INTO setting_value (name, value, sortindex)
                                     VALUES (?, ?, ?)});
 
     my $sortindex = 5;
-    foreach my $key (@$values){
+    foreach my $key (@$options){
         $sth->execute($name, $key, $sortindex);
         $sortindex += 5;
     }
@@ -177,7 +192,7 @@ sub get_all_settings {
     my $rows = Bugzilla->memcached->get_config({ key => $cache_key });
     if (!$rows) {
         $rows = $dbh->selectall_arrayref(
-            q{SELECT name, default_value, is_enabled, setting_value, subclass
+            q{SELECT name, default_value, is_enabled, setting_value, subclass, category
                 FROM setting
            LEFT JOIN profile_setting
                      ON setting.name = profile_setting.setting_name
@@ -186,7 +201,7 @@ sub get_all_settings {
     }
 
     foreach my $row (@$rows) {
-        my ($name, $default_value, $is_enabled, $value, $subclass) = @$row;
+        my ($name, $default_value, $is_enabled, $value, $subclass, $category) = @$row;
 
         my $is_default;
 
@@ -199,7 +214,8 @@ sub get_all_settings {
 
         $settings->{$name} = new Bugzilla::User::Setting(
            $name, $user_id, $is_enabled,
-           $default_value, $value, $is_default, $subclass);
+           $default_value, $value, $is_default,
+           $subclass, $category);
     }
 
     return $settings;
@@ -217,15 +233,15 @@ sub get_defaults {
 
     $user_id ||= 0;
 
-    my $rows = $dbh->selectall_arrayref(q{SELECT name, default_value, is_enabled, subclass
+    my $rows = $dbh->selectall_arrayref(q{SELECT name, default_value, is_enabled, subclass, category
                                             FROM setting});
 
     foreach my $row (@$rows) {
-        my ($name, $default_value, $is_enabled, $subclass) = @$row;
+        my ($name, $default_value, $is_enabled, $subclass, $category) = @$row;
 
         $default_settings->{$name} = new Bugzilla::User::Setting(
             $name, $user_id, $is_enabled, $default_value, $default_value, 1,
-            $subclass);
+            $subclass, $category);
     }
 
     return $default_settings;
@@ -347,7 +363,7 @@ $settings->{$setting_name} = new Bugzilla::User::Setting(
 
 =over 4
 
-=item C<add_setting($name, \@values, $default_value, $subclass, $force_check)>
+=item C<add_setting($name, \@values, $default_value, $subclass, $force_check, $category)>
 
 Description: Checks for the existence of a setting, and adds it 
              to the database if it does not yet exist.
@@ -361,6 +377,8 @@ Params:      C<$name> - string - the name of the new setting
                not stored in the DB.
              C<$force_check> - boolean - when true, the existing setting
                and all its values are deleted and replaced by new data.
+             C<$category> - string - Category the setting should be
+               grouped by.
 
 Returns:     a pointer to a hash of settings
 

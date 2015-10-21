@@ -231,7 +231,12 @@ sub _add_duplicates {
 
 sub install_before_final_checks {
     my ($self, $args) = @_;
-    add_setting('inline_history', ['on', 'off'], 'off');
+    add_setting({
+        name     => 'inline_history',
+        options  => ['on', 'off'],
+        default  => 'off',
+        category => 'Bug Editing'
+    });
 }
 
 __PACKAGE__->NAME;

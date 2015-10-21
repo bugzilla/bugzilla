@@ -543,10 +543,11 @@ sub install_before_final_checks {
     
     # Add a new user setting like this:
     #
-    # add_setting('product_chooser',           # setting name
-    #             ['pretty', 'full', 'small'], # options
-    #             'pretty');                   # default
-    #
+    # add_setting({
+    #     name     => 'product_chooser',           # setting name
+    #     options  => ['pretty', 'full', 'small'], # options
+    #     category => 'pretty'                     # default
+    # });
     # To add descriptions for the setting and choices, add extra values to 
     # the hash defined in global/setting-descs.none.tmpl. Do this in a hook: 
     # hook/global/setting-descs-settings.none.tmpl .

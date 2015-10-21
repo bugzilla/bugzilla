@@ -51,6 +51,7 @@ page, and the Default Value will automatically apply to everyone.
       <table border="1" cellpadding="4">
       <tr>
         <th>Preference Text</th>
+        <th>Category</th>
         <th>Default Value</th>
         <th>Enabled</th>
       </tr>
@@ -60,6 +61,9 @@ page, and the Default Value will automatically apply to everyone.
           <tr>
             <td align="right">
               [% setting_descs.$name OR name FILTER html %]
+            </td>
+            <td align="left">
+              [% settings.$name.category FILTER html %]
             </td>
             <td>
               <select name="[% name FILTER html %]" id="[% name FILTER html %]">

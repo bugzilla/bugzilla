@@ -38,8 +38,18 @@ sub _user_gravatar {
 
 sub install_before_final_checks {
     my ($self, $args) = @_;
-    add_setting('show_gravatars', ['On', 'Off'], 'Off');
-    add_setting('show_my_gravatar', ['On', 'Off'], 'On');
+    add_setting({
+        name     => 'show_gravatars',
+        options  => ['On', 'Off'],
+        default  => 'Off',
+        category => 'Bug Editing'
+    });
+    add_setting({
+        name     => 'show_my_gravatar',
+        options  => ['On', 'Off'],
+        default  => 'On',
+        category => 'Bug Editing'
+    });
 }
 
 __PACKAGE__->NAME;

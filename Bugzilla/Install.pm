@@ -281,13 +281,8 @@ sub update_settings {
     }
 
     my @settings = @{SETTINGS()};
-    foreach my $setting (@settings) {
-        add_setting($setting->{name},
-                    $setting->{options},
-                    $setting->{default},
-                    $setting->{subclass},
-                    undef,
-                    !$any_settings);
+    foreach my $params (@settings) {
+        add_setting($params);
     }
 }
 

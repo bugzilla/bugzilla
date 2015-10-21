@@ -292,8 +292,18 @@ sub webservice {
 
 sub install_before_final_checks {
     my ($self, $args) = @_;
-    add_setting('ui_experiments', ['on', 'off'], 'off');
-    add_setting('ui_remember_collapsed', ['on', 'off'], 'off');
+    add_setting({
+        name     => 'ui_experiments',
+        options  => ['on', 'off'],
+        default  => 'off',
+        category => 'User Interface'
+    });
+    add_setting({
+        name     => 'ui_remember_collapsed',
+        options  => ['on', 'off'],
+        default  => 'off',
+        category => 'User Interface'
+    });
 
     # ensure the correct skin is being used
     my $dbh = Bugzilla->dbh;

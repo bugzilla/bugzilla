@@ -16,9 +16,9 @@
   #%]
 
 [%# INTERFACE:
-  # setting_names: an array of strings
-  # settings:      a hash of hashes, keyed by setting_name.
-  #                Each hash contains:
+  # settings:      a hash of hashes, keyed by category ame.
+  #                Each hash value is a list of hashes containing:
+  #                 name          - string (name of the setting)
   #                 is_enabled    - boolean
   #                 default_value - string (global default for this setting)
   #                 value         - string (user-defined preference)
@@ -29,7 +29,9 @@
 
 [% PROCESS "global/setting-descs.none.tmpl" %]
 
-[% IF settings.size %]
+[% SET category_names = settings.keys.sort %]
+
+[% IF category_names.size %]
   [% UNLESS has_settings_enabled %]
     <p class="criticalmessages">
       All user preferences have been disabled by the
@@ -39,49 +41,48 @@
   [% END %]
 
   <table border="0" cellpadding="8">
-    [% FOREACH name = setting_names %]
-      [% default_name = name _ '-isdefault' %]
-      [% default_val = settings.${name}.default_value %]
-      <tr id="[% name FILTER html %]_row">
-        <td align="right">
-          [% setting_descs.$name OR name FILTER html %]
+  [% FOREACH category = category_names %]
+    <tr>
+      <td class="category_header">
+        [% category FILTER html %]
+      </td>
+    </tr>
+    [% FOREACH setting = settings.$category %]
+      [% setting_name = setting._setting_name %]
+      [% default_name = setting_name _ '-isdefault' %]
+      [% default_val  = setting.default_value %]
+      <tr id="[% setting_name FILTER html %]_row">
+        <td class="setting_label">
+          [% setting_descs.$setting_name OR setting_name FILTER html %]
         </td>
-        <td>
-          [% IF settings.${name}.is_enabled %]
-            <select name="[% name FILTER html %]" id="[% name FILTER html %]">
-              <option value="[% default_name FILTER html %]"
-                [% ' selected="selected"' IF settings.${name}.is_default %]>
-                Site Default ([% setting_descs.${default_val} OR default_val FILTER html %])
+        <td class="setting_choice">
+          <select name="[% setting_name FILTER html %]" id="[% setting_name FILTER html %]">
+            <option value="[% default_name FILTER html %]"
+              [% ' selected="selected"' IF setting.is_default %]>
+              Site Default ([% setting_descs.${default_val} OR default_val FILTER html %])
+            </option>
+            [% FOREACH x = setting.legal_values %]
+              <option value="[% x FILTER html %]"
+                [% ' selected="selected"'
+                  IF x == setting.value
+                    AND NOT setting.is_default %]>
+                [% setting_descs.${x} OR x FILTER html %]
               </option>
-              [% FOREACH x = settings.${name}.legal_values %]
-                <option value="[% x FILTER html %]"
-                  [% ' selected="selected"' 
-                    IF x == settings.${name}.value
-                    AND NOT settings.${name}.is_default %]>
-                  [% setting_descs.${x} OR x FILTER html %]
-                </option>
-              [% END %]
-            </select>
-            [% IF name == "api_key_only" %]
-              [% INCLUDE "mfa/protected.html.tmpl" %]
             [% END %]
-          [% ELSE %]
-            <select name="[% name FILTER html %]" id="[% name FILTER html %]" disabled="disabled">
-              <option value="[% default_name FILTER html %]">
-                Site Default ([% setting_descs.${default_val} OR default_val FILTER html %])
-              </option>
-            </select>
+          </select>
+          [% IF setting_name == "api_key_only" %]
+            [% INCLUDE "mfa/protected.html.tmpl" %]
           [% END %]
         </td>
       </tr>
     [% END %]
+  [% END %]
   </table>
 [% END %]
-<br>
 
 <script>
-YAHOO.util.Event.onDOMReady(function() {
+$().ready(function() {
   var id = document.location.hash.substring(1) + '_row';
-  YAHOO.util.Dom.addClass(id, 'highlighted');
+  $('#' + id).addClass('highlighted');
 });
 </script>

@@ -58,7 +58,12 @@ sub install_update_db {
 
 sub install_before_final_checks {
     my ($self, $args) = @_;
-    add_setting('block_needinfo', ['on', 'off'], 'off');
+    add_setting({
+        name     => 'block_needinfo',
+        options  => ['on', 'off'],
+        default  => 'off',
+        category => 'Reviews and Needinfo'
+    });
 }
 
 # Clear the needinfo? flag if comment is being given by

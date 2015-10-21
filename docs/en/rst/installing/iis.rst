@@ -91,6 +91,29 @@ From the top-level menu, which contains the name of your machine, click
 
 :command:`iisreset`
 
+Enable Rewrite Rules for REST
+=============================
+
+REST URLs are usually of the form http://.../bugzilla/rest/version instead of
+http://.../bugzilla/rest.cgi/version. To let IIS redirect rest/ URLs to rest.cgi,
+you need to download and install the
+`URL Rewrite extension for IIS <http://www.iis.net/downloads/microsoft/url-rewrite>`_.
+Direct download links are available at the bottom of the page for both x86 and
+x64 Windows.
+
+Once installed, you open the IIS Manager again and go to your Bugzilla
+Application. From here, double-click :guilabel:`URL Rewrite`. Then click
+:guilabel:`Add Rule(s)` under the :guilabel:`Actions` menu and click
+:guilabel:`Blank rule` in the :guilabel:`Inbound rules` section.
+
+Fill the fields as follows. Other fields do not need to be edited.
+
+* :guilabel:`Name`: ``REST``
+* :guilabel:`Pattern`: ``^rest/(.*)$``
+* :guilabel:`Rewrite URL`: ``rest.cgi/{R:1}``
+
+There is no need to restart IIS. Changes take effect immediately.
+
 Common Problems
 ===============
 

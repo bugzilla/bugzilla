@@ -25,9 +25,9 @@ The first set of these are in the :guilabel:`Required Settings` section.
   this is the SSL URL by which people should access Bugzilla's front page.
 * :param:`ssl_redirect`: Set this if you want everyone to be redirected
   to use the SSL version. Recommended if you have set up SSL.
-* :param:`cookiebase`: Bugzilla uses cookies to remember who each user is.
+* :param:`cookiepath`: Bugzilla uses cookies to remember who each user is.
   In order to set those cookies in the correct scope, you may need to set a
-  cookiebase. If your Bugzilla is at the root of your domain, you don't need
+  cookiepath. If your Bugzilla is at the root of your domain, you don't need
   to change the default value.
 
 You may want to put your email address in the :param:`maintainer`

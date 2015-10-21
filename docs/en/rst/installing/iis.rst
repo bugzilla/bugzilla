@@ -104,6 +104,3 @@ Bugzilla runs but it's not possible to log in
 IIS returns HTTP 502 errors
   You probably forgot the ``-T`` argument to :file:`perl` when configuring the
   executable in IIS.
-
-XMLRPC interface not working with IIS
-  This is a known issue. See :bug:`708252`.

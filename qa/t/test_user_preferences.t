@@ -36,7 +36,7 @@ $sel->click_ok("update");
 $sel->wait_for_page_to_load(WAIT_TIME);
 $sel->title_is("Default Preferences");
 
-# Update own user preferences. Some of them are not editable.
+# Update own user preferences. Some of them should no longer be present.
 
 $sel->click_ok("link=Preferences");
 $sel->wait_for_page_to_load(WAIT_TIME);
@@ -44,11 +44,11 @@ $sel->title_is("User Preferences");
 $sel->click_ok("link=General Preferences");
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_is("User Preferences");
-ok(!$sel->is_editable("skin"), "The 'skin' user preference is not editable");
+ok(!$sel->is_element_present("skin"), "The 'skin' user preference is not present");
 $sel->select_ok("state_addselfcc", "label=Site Default (Never)");
 $sel->select_ok("post_bug_submit_action", "label=Site Default (Show the updated bug)");
 $sel->select_ok("per_bug_queries", "label=Site Default (On)");
-ok(!$sel->is_editable("zoom_textareas"), "The 'zoom_textareas' user preference is not editable");
+ok(!$sel->is_element_present("zoom_textareas"), "The 'zoom_textareas' user preference is not present");
 $sel->click_ok("update");
 $sel->wait_for_page_to_load(WAIT_TIME);
 $sel->title_is("User Preferences");
@@ -174,11 +174,11 @@ $sel->title_is("User Preferences");
 $sel->click_ok("link=General Preferences");
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_is("User Preferences");
-ok(!$sel->is_editable("skin"), "The 'skin' user preference is not editable");
+ok(!$sel->is_element_present("skin"), "The 'skin' user preference is not present");
 $sel->select_ok("state_addselfcc", "label=Always");
 $sel->select_ok("post_bug_submit_action", "label=Show next bug in my list");
 $sel->select_ok("per_bug_queries", "label=Off");
-ok(!$sel->is_editable("zoom_textareas"), "The 'zoom_textareas' user preference is not editable");
+ok(!$sel->is_element_present("zoom_textareas"), "The 'zoom_textareas' user preference is not present");
 $sel->click_ok("update");
 $sel->wait_for_page_to_load(WAIT_TIME);
 $sel->title_is("User Preferences");

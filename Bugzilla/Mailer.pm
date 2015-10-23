@@ -17,13 +17,11 @@ use parent qw(Exporter);
 use Bugzilla::Constants;
 use Bugzilla::Error;
 use Bugzilla::Hook;
+use Bugzilla::MIME;
 use Bugzilla::Util;
 
 use Date::Format qw(time2str);
 
-use Encode qw(encode);
-use Encode::MIME::Header;
-use Email::MIME;
 use Email::Sender::Simple qw(sendmail);
 use Email::Sender::Transport::SMTP::Persistent;
 use Bugzilla::Sender::Transport::Sendmail;
@@ -43,18 +41,7 @@ sub MessageToMTA {
 
     my $dbh = Bugzilla->dbh;
 
-    my $email;
-    if (ref $msg) {
-        $email = $msg;
-    }
-    else {
-        # RFC 2822 requires us to have CRLF for our line endings and
-        # Email::MIME doesn't do this for us. We use \015 (CR) and \012 (LF)
-        # directly because Perl translates "\n" depending on what platform
-        # you're running on. See http://perldoc.perl.org/perlport.html#Newlines
-        $msg =~ s/(?:\015+)?\012/\015\012/msg;
-        $email = new Email::MIME($msg);
-    }
+    my $email = ref($msg) ? $msg : Bugzilla::MIME->new($msg);
 
     # If we're called from within a transaction, we don't want to send the
     # email immediately, in case the transaction is rolled back. Instead we
@@ -69,39 +56,6 @@ sub MessageToMTA {
         $sth->bind_param(1, $string, $dbh->BLOB_TYPE);
         $sth->execute;
         return;
-    }
-
-    # We add this header to uniquely identify all email that we
-    # send as coming from this Bugzilla installation.
-    #
-    # We don't use correct_urlbase, because we want this URL to
-    # *always* be the same for this Bugzilla, in every email,
-    # even if the admin changes the "ssl_redirect" parameter some day.
-    $email->header_set('X-Bugzilla-URL', Bugzilla->params->{'urlbase'});
-
-    # We add this header to mark the mail as "auto-generated" and
-    # thus to hopefully avoid auto replies.
-    $email->header_set('Auto-Submitted', 'auto-generated');
-
-    # MIME-Version must be set otherwise some mailsystems ignore the charset
-    $email->header_set('MIME-Version', '1.0') if !$email->header('MIME-Version');
-
-    # Encode the headers correctly in quoted-printable
-    foreach my $header ($email->header_names) {
-        my @values = $email->header($header);
-        # We don't recode headers that happen multiple times.
-        next if scalar(@values) > 1;
-        if (my $value = $values[0]) {
-            if (Bugzilla->params->{'utf8'} && !utf8::is_utf8($value)) {
-                utf8::decode($value);
-            }
-
-            # avoid excessive line wrapping done by Encode.
-            local $Encode::Encoding{'MIME-Q'}->{'bpl'} = 998;
-
-            my $encoded = encode('MIME-Q', $value);
-            $email->header_set($header, $encoded);
-        }
     }
 
     my $from = $email->header('From');
@@ -147,29 +101,6 @@ sub MessageToMTA {
     Bugzilla::Hook::process('mailer_before_send', { email => $email });
 
     return if $email->header('to') eq '';
-
-    $email->walk_parts(sub {
-        my ($part) = @_;
-        return if $part->parts > 1; # Top-level
-        my $content_type = $part->content_type || '';
-        $content_type =~ /charset=['"](.+)['"]/;
-        # If no charset is defined or is the default us-ascii,
-        # then we encode the email to UTF-8 if Bugzilla has utf8 enabled.
-        # XXX - This is a hack to workaround bug 723944.
-        if (!$1 || $1 eq 'us-ascii') {
-            my $body = $part->body;
-            if (Bugzilla->params->{'utf8'}) {
-                $part->charset_set('UTF-8');
-                # encoding_set works only with bytes, not with utf8 strings.
-                my $raw = $part->body_raw;
-                if (utf8::is_utf8($raw)) {
-                    utf8::encode($raw);
-                    $part->body_set($raw);
-                }
-            }
-            $part->encoding_set('quoted-printable') if !is_7bit_clean($body);
-        }
-    });
 
     if ($method eq "Test") {
         my $filename = bz_locations()->{'datadir'} . '/mailer.testfile';

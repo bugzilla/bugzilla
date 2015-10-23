@@ -19,6 +19,7 @@ use Bugzilla::Bug;
 use Bugzilla::Comment;
 use Bugzilla::Mailer;
 use Bugzilla::Hook;
+use Bugzilla::MIME;
 
 use Date::Parse;
 use Date::Format;
@@ -435,6 +436,7 @@ sub _generate_bugmail {
     my $user = $vars->{to_user};
     my $template = Bugzilla->template_inner($user->setting('lang'));
     my ($msg_text, $msg_html, $msg_header);
+    state $use_utf8 = Bugzilla->params->{'utf8'};
 
     $template->process("email/bugmail-header.txt.tmpl", $vars, \$msg_header)
         || ThrowTemplateError($template->error());
@@ -442,32 +444,35 @@ sub _generate_bugmail {
         || ThrowTemplateError($template->error());
 
     my @parts = (
-        Email::MIME->create(
+        Bugzilla::MIME->create(
             attributes => {
-                content_type => "text/plain",
+                content_type => 'text/plain',
+                charset      => $use_utf8 ? 'UTF-8' : 'iso-8859-1',
+                encoding     => 'quoted-printable',
             },
-            body => $msg_text,
+            body_str => $msg_text,
         )
     );
     if ($user->setting('email_format') eq 'html') {
         $template->process("email/bugmail.html.tmpl", $vars, \$msg_html)
             || ThrowTemplateError($template->error());
-        push @parts, Email::MIME->create(
+        push @parts, Bugzilla::MIME->create(
             attributes => {
-                content_type => "text/html",         
+                content_type => 'text/html',
+                charset      => $use_utf8 ? 'UTF-8' : 'iso-8859-1',
+                encoding     => 'quoted-printable',
             },
-            body => $msg_html,
+            body_str => $msg_html,
         );
     }
 
-    # TT trims the trailing newline, and threadingmarker may be ignored.
-    my $email = new Email::MIME("$msg_header\n");
+    my $email = Bugzilla::MIME->new($msg_header);
     if (scalar(@parts) == 1) {
         $email->content_type_set($parts[0]->content_type);
     } else {
         $email->content_type_set('multipart/alternative');
         # Some mail clients need same encoding for each part, even empty ones.
-        $email->charset_set('UTF-8') if Bugzilla->params->{'utf8'};
+        $email->charset_set('UTF-8') if $use_utf8;
     }
     $email->parts_set(\@parts);
     return $email;

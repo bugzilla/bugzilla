@@ -346,53 +346,20 @@ while (my $event = get_next_event) {
 #  - subject        Subject line for the message
 #  - recipient      user object for the recipient
 #  - author         user object of the person who created the whine event
-#
-# In addition, mail adds two more fields to $args:
-#  - alternatives   array of hashes defining mime multipart types and contents
-#  - boundary       a MIME boundary generated using the process id and time
-#
 sub mail {
     my $args = shift;
-    my $addressee = $args->{recipient};
     # Don't send mail to someone whose bugmail notification is disabled.
-    return if $addressee->email_disabled;
+    return if $args->{recipient}->email_disabled;
 
-    my $template = Bugzilla->template_inner($addressee->setting('lang'));
-    my $msg = ''; # it's a temporary variable to hold the template output
-    $args->{'alternatives'} ||= [];
-
-    # put together the different multipart mime segments
-
-    $template->process("whine/mail.txt.tmpl", $args, \$msg)
-        or die($template->error());
-    push @{$args->{'alternatives'}},
+    $args->{to_user} = $args->{recipient};
+    MessageToMTA(generate_email(
+        $args,
         {
-            'content' => $msg,
-            'type'    => 'text/plain',
-        };
-    $msg = '';
-
-    $template->process("whine/mail.html.tmpl", $args, \$msg)
-        or die($template->error());
-    push @{$args->{'alternatives'}},
-        {
-            'content' => $msg,
-            'type'    => 'text/html',
-        };
-    $msg = '';
-
-    # now produce a ready-to-mail mime-encoded message
-
-    $args->{'boundary'} = "----------" . $$ . "--" . time() . "-----";
-
-    $template->process("whine/multipart-mime.txt.tmpl", $args, \$msg)
-        or die($template->error());
-
-    MessageToMTA($msg);
-
-    delete $args->{'boundary'};
-    delete $args->{'alternatives'};
-
+            header => 'whine/header.txt.tmpl',
+            text   => 'whine/mail.txt.tmpl',
+            html   => 'whine/mail.html.tmpl',
+        }
+    ));
 }
 
 # run_queries runs all of the queries associated with a schedule ID, adding

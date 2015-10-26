@@ -148,7 +148,6 @@ tie(%$cf_visible_in_products, "Tie::IxHash",
         "Toolkit" => [],
     },
     qr/^cf_cab_review$/ => {
-        "Developer Services"                    => [],
         "Infrastructure & Operations Graveyard" => [],
         "Infrastructure & Operations"           => [],
     }

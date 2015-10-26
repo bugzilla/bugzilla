@@ -18,8 +18,6 @@ use Digest::MD5 qw(md5_hex);
 
 use parent qw(Text::MultiMarkdown);
 
-@Bugzilla::Markdown::EXPORT = qw(new);
-
 # Regex to match balanced [brackets]. See Friedl's
 # "Mastering Regular Expressions", 2nd Ed., pp. 328-331.
 our ($g_nested_brackets, $g_nested_parens);
@@ -44,7 +42,6 @@ $g_nested_parens = qr{
 }x;
 
 our %g_escape_table;
-my @code_blocks;
 
 foreach my $char (split //, '\\`*_{}[]()>#+-.!~') {
     $g_escape_table{$char} = md5_hex($char);
@@ -80,6 +77,12 @@ sub _Markdown {
     $text = Bugzilla::Template::quoteUrls($text, undef, undef, undef, 1);
 
     return $self->SUPER::_Markdown($text, @_);
+}
+
+sub _code_blocks {
+    my ($self) = @_;
+    $self->{code_blocks} = $self->{params}->{code_blocks} ||= [];
+    return $self->{code_blocks};
 }
 
 sub _RunSpanGamut {
@@ -122,7 +125,7 @@ sub _removeFencedCodeBlocks {
         )
         `{3,} [\s\t]* $
         }{
-            push @code_blocks, $1;
+            push @{$self->_code_blocks}, $1;
             "%%%FENCED_BLOCK%%%";
         }egmx;
     return $text;
@@ -410,7 +413,7 @@ sub _DoCodeBlocks {
     $text =~ s{
         ^ %%%FENCED_BLOCK%%%
         }{
-            my $codeblock = shift @code_blocks;
+            my $codeblock = shift @{$self->_code_blocks};
             my $result;
 
             $codeblock = $self->_EncodeCode($codeblock);

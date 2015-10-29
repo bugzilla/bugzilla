@@ -126,7 +126,7 @@
     <tr>
       <th><label for="mfa">Two-factor Auth:</label></th>
       <td>
-        [% IF user.in_group('admin') %]
+        [% IF user.in_group('bz_can_disable_mfa') %]
           [% IF otheruser.mfa %]
             <select name="mfa" value="mfa">
               <option value="">Disable</option>

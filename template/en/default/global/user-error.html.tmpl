@@ -1220,6 +1220,10 @@
     <br>
     The QR code has been deleted - please generate and scan a new code.
 
+  [% ELSIF error == "mfa_disable_denied" %]
+    [% title = "Change Denied" %]
+    You do not have permission to disable MFA for other users.
+
   [% ELSIF error == "migrate_config_created" %]
     The file <kbd>[% file FILTER html %]</kbd> contains configuration
     variables that must be set before continuing with the migration.

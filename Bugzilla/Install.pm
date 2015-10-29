@@ -247,6 +247,10 @@ use constant SYSTEM_GROUPS => (
         name         => 'bz_quip_moderators',
         description  => 'Can moderate quips',
     },
+    {
+        name         => 'bz_can_disable_mfa',
+        description  => 'Can disable MFA when editing users',
+    },
 );
 
 use constant DEFAULT_CLASSIFICATION => {

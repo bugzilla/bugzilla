@@ -270,6 +270,9 @@ sub update {
     }
 
     if (exists $changes->{mfa} && $self->mfa eq '') {
+        if (Bugzilla->user->id != $self->id) {
+            Bugzilla->audit(sprintf('%s disabled 2FA for %s', Bugzilla->user->login, $self->login));
+        }
         $dbh->do("DELETE FROM profile_mfa WHERE user_id = ?", undef, $self->id);
     }
 
@@ -369,6 +372,16 @@ sub _check_mfa {
     $provider = lc($provider // '');
     return 'TOTP' if $provider eq 'totp';
     return 'Duo' if $provider eq 'duo';
+
+    # you must be member of the bz_can_disable_mfa group to disable mfa for
+    # other accounts.
+    if ($provider eq '') {
+        my $user = Bugzilla->user;
+        if ($user->id != $self->id && !$user->in_group('bz_can_disable_mfa')) {
+            ThrowUserError('mfa_disable_denied');
+        }
+    }
+
     return '';
 }
 

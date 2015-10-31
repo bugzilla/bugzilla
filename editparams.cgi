@@ -58,6 +58,7 @@ $current_panel = $1;
 my $current_module;
 my @panels = ();
 my $param_panels = Bugzilla::Config::param_panels();
+my $override = Bugzilla->localconfig->{param_override};
 foreach my $panel (keys %$param_panels) {
     my $module = $param_panels->{$panel};
     eval("require $module") || die $@;
@@ -66,6 +67,7 @@ foreach my $panel (keys %$param_panels) {
         name       => lc($panel),
         current    => ($current_panel eq lc($panel)) ? 1 : 0,
         param_list => \@module_param_list,
+        param_override => { map { $_->{name} => $override->{$_->{name}} } @module_param_list },
         sortkey    => eval "\$${module}::sortkey;",
         module     => $module,
     };

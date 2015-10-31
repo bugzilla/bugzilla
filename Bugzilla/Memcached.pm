@@ -28,14 +28,13 @@ sub _new {
 
     # always return an object to simplify calling code when memcached is
     # disabled.
-    if (Bugzilla->feature('memcached')
-        && Bugzilla->params->{memcached_servers})
-    {
+    my $servers = Bugzilla->get_param_with_override('memcached_servers');
+    if (Bugzilla->feature('memcached') && $servers) {
         require Cache::Memcached;
-        $self->{namespace} = Bugzilla->params->{memcached_namespace} || '';
+        $self->{namespace} = Bugzilla->get_param_with_override('memcached_namespace');
         $self->{memcached} =
             Cache::Memcached->new({
-                servers   => [ split(/[, ]+/, Bugzilla->params->{memcached_servers}) ],
+                servers   => [ split(/[, ]+/, $servers) ],
                 namespace => $self->{namespace},
             });
     }

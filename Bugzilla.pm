@@ -324,6 +324,11 @@ sub params {
     return $_[0]->request_cache->{params} ||= Bugzilla::Config::read_param_file();
 }
 
+sub get_param_with_override {
+    my ($class, $name) = @_;
+    return $class->localconfig->{param_override}{$name} // $class->params->{$name};
+}
+
 sub user {
     return $_[0]->request_cache->{user} ||= new Bugzilla::User;
 }

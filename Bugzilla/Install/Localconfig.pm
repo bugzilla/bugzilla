@@ -114,6 +114,18 @@ use constant LOCALCONFIG_VARS => (
         # is larger than anybody would ever be able to brute-force.
         default => sub { generate_random_password(64) },
     },
+    {
+        name    => 'param_override',
+        default => {
+            inbound_proxies     => undef,
+            memcached_servers   => undef,
+            memcached_namespace => undef,
+            shadowdb            => undef,
+            shadowdbhost        => undef,
+            shadowdbport        => undef,
+            shadowdbsock        => undef,
+        },
+    },
 );
 
 sub read_localconfig {

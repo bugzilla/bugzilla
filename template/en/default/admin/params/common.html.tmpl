@@ -28,9 +28,19 @@
 
 <dl>
   [% FOREACH param = panel.param_list %]
-    <dt id="[% param.name FILTER html %]_desc">[% param.name FILTER html %]</dt>
+    <dt id="[% param.name FILTER html %]_desc">[% param.name FILTER html %]
+      [% IF panel.param_override.${param.name}.defined %]
+        (localconfig override)
+      [% END %]
+    </dt>
     <dd>[% panel.param_descs.${param.name} FILTER none %]
       <p>
+      [% IF panel.param_override.${param.name}.defined %]
+        <input type="hidden" name="[% param.name FILTER html %] value="[% Param(param.name) FILTER html %]">
+        <input type="text" size="80" readonly
+               id="[% param.name FILTER html %]" value="[% panel.param_override.${param.name} FILTER html %]">
+        [% NEXT %]
+      [% END %]
       [% IF param.type == "t" %]
         <input type="text" size="80" name="[% param.name FILTER html %]"
                id="[% param.name FILTER html %]" value="[% Param(param.name) FILTER html %]">

@@ -13,6 +13,7 @@ use Bugzilla;
 use Bugzilla::Util qw(remote_ip);
 
 my $params = Bugzilla->params;
+local Bugzilla->localconfig->{param_override}{inbound_proxies} = undef;
 
 {
     local $params->{inbound_proxies} = '10.0.0.1,10.0.0.2';

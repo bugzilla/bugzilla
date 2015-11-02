@@ -564,7 +564,7 @@ $dbh->do('INSERT INTO group_group_map VALUES (?, ?, 0)',
          undef, $editbugs->id, $canconfirm->id);
 
 # BMO: Update default security group settings for new products
-my $default_security_group = Bugzilla::Group->new({ name => 'core-security' });
+my $default_security_group = Bugzilla::Group->new({ name => 'core-security-release' });
 $default_security_group ||= Bugzilla::Group->new({ name => 'Master' });
 if ($default_security_group) {
     $dbh->do('UPDATE products SET security_group_id = ? WHERE security_group_id IS NULL',

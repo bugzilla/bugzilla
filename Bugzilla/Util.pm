@@ -312,7 +312,7 @@ sub remote_ip {
     my @x_forwarded_for = split(/[\s,]+/, $ENV{HTTP_X_FORWARDED_FOR} // '');
 
     return $remote_ip unless @x_forwarded_for;
-    return $x_forwarded_for[0] if $proxies[0] eq '*';
+    return $x_forwarded_for[0] if @proxies && $proxies[0] eq '*';
     return $remote_ip if none { $_ eq $remote_ip } @proxies;
 
     foreach my $ip (reverse @x_forwarded_for) {

@@ -58,14 +58,19 @@ BEGIN { *CORE::GLOBAL::warn = \&Apache2::ServerRec::warn; }
 Bugzilla::CGI->compile(qw(:cgi :push));
 
 use Apache2::SizeLimit;
+
 # This means that every httpd child will die after processing a request if it
-# is taking up more than 700MB of RAM all by itself, not counting RAM it is
+# is taking up more than $apache_size_limit of RAM all by itself, not counting RAM it is
 # sharing with the other httpd processes.
-if (Bugzilla->params->{'urlbase'} eq 'https://bugzilla.mozilla.org/') {
-    Apache2::SizeLimit->set_max_unshared_size(700_000);
-} else {
-    Apache2::SizeLimit->set_max_unshared_size(250_000);
+my $apache_size_limit = 250_000;
+if (Bugzilla->localconfig->{apache_size_limit}) {
+    $apache_size_limit = Bugzilla->localconfig->{apache_size_limit};
 }
+elsif (Bugzilla->params->{'urlbase'} eq 'https://bugzilla.mozilla.org/') {
+    $apache_size_limit = 700_000;
+}
+else
+Apache2::SizeLimit->set_max_unshared_size($apache_size_limit);
 
 my $cgi_path = Bugzilla::Constants::bz_locations()->{'cgi_path'};
 

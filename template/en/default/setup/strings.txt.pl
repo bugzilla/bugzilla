@@ -280,6 +280,10 @@ and you cannot set this up any other way. YOU HAVE BEEN WARNED!
 If you set this to anything other than "", you will need to run checksetup.pl
 as ##root## or as a user who is a member of the specified group.
 END
+    localconfig_apache_size_limit => <<EOT,
+This is the max amount of unshared memory the apache process is allowed to use
+before Apache::SizeLimit kills it. This is only applicable when run under mod_perl.
+EOT
     max_allowed_packet => <<EOT,
 WARNING: You need to set the max_allowed_packet parameter in your MySQL
 configuration to at least ##needed##. Currently it is set to ##current##.

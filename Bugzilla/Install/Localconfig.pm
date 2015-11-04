@@ -126,6 +126,10 @@ use constant LOCALCONFIG_VARS => (
             shadowdbsock        => undef,
         },
     },
+    {
+        name    => 'apache_size_limit',
+        default => 250000,
+    },
 );
 
 sub read_localconfig {

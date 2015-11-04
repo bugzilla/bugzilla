@@ -69,7 +69,7 @@ if (Bugzilla->localconfig->{apache_size_limit}) {
 elsif (Bugzilla->params->{'urlbase'} eq 'https://bugzilla.mozilla.org/') {
     $apache_size_limit = 700_000;
 }
-else
+
 Apache2::SizeLimit->set_max_unshared_size($apache_size_limit);
 
 my $cgi_path = Bugzilla::Constants::bz_locations()->{'cgi_path'};

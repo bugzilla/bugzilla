@@ -1503,58 +1503,18 @@
 
   [% ELSIF error == "password_not_complex" %]
     [% title = "Password Fails Requirements" %]
-    [% passregex = Param('password_complexity') %]
-    The password must contain at least one:
+    The Password must meet three of the following requirements
     <ul>
-      [% IF passregex == 'letters_numbers_specialchars' %]
-        <li>letter</li>
-        <li>special character</li>
-      [% ELSIF passregex.search('letters') %]
-        <li>UPPERCASE letter</li>
-        <li>lowercase letter</li>
-      [% END %]
-      [% IF passregex.search('numbers') %]
-        <li>digit</li>
-      [% END %]
+      <li>uppercase letters</li>
+      <li>lowercase letters</li>
+      <li>numbers</li>
+      <li>symbols</li>
+      <li>longer than 12 characters</li>
     </ul>
     [% IF locked_user %]
       You must <a href="token.cgi?a=reqpw&amp;loginname=[% locked_user.email FILTER uri %]&amp;token=[% issue_hash_token(['reqpw']) FILTER uri %]">
       request a new password</a> in order to log in again.
     [% END %]
-
-  [% ELSIF error == "password_not_complex" %]
-     [% title = "Password Fails Requirements" %]
-     [% passregex = Param('password_complexity') %]
-     Password must contain at least one:
-     <ul>
-       [% IF passregex.search('letters') %]
-         <li>UPPERCASE letter</li>
-         <li>lowercase letter</li>
-       [% END %]
-       [% IF passregex.search('numbers') %]
-         <li>digit</li>
-       [% END %]
-       [% IF passregex.search('specialchars') %]
-         <li>special character</li>
-       [% END %]
-     </ul>
-
-  [% ELSIF error == "password_not_complex" %]
-     [% title = "Password Fails Requirements" %]
-     [% passregex = Param('password_complexity') %]
-     Password must contain at least one:
-     <ul>
-       [% IF passregex.search('letters') %]
-         <li>UPPERCASE letter</li>
-         <li>lowercase letter</li>
-       [% END %]
-       [% IF passregex.search('numbers') %]
-         <li>digit</li>
-       [% END %]
-       [% IF passregex.search('specialchars') %]
-         <li>special character</li>
-       [% END %]
-     </ul>
 
   [% ELSIF error == "product_access_denied" %]
     [% title = "Product Access Denied" %]

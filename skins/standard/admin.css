@@ -314,3 +314,82 @@ input[disabled] {
     float: left;
     margin-right: 1em;
 }
+
+.flex {
+    display: flex;
+    flex-flow: row;
+}
+
+.flex-left {
+    flex: 1;
+    min-width: 500px;
+}
+
+.flex-right {
+    flex: 2;
+}
+
+.meter {
+    width: 25px;
+    height: 1em;
+    display: inline-block;
+}
+
+.meter-bad {
+    background-color: #DD514C;
+    background-image: linear-gradient(to bottom, #EE5F5B, #C43C35);
+    background-repeat: repeat-x;
+}
+
+.meter-ok {
+    background-color: #FAA732;
+    background-image: linear-gradient(to bottom, #FBB450, #F89406);
+    background-repeat: repeat-x;
+}
+
+.meter-good {
+    background-color: #5EB95E;
+    background-image: linear-gradient(to bottom, #62C462, #57A957);
+    background-repeat: repeat-x;
+}
+
+.password-bad {
+    color: #DD514C;
+}
+
+.password-ok {
+    color: #FAA732;
+}
+
+.password-good {
+    color: #5EB95E;
+}
+
+#password-features {
+    display: none;
+}
+
+#password-features li.feature-ok:before {
+    font-size: normal;
+    content: "\2611";
+    margin-left: -13px;
+    margin-right: 2px;
+}
+
+#password-features li.feature-ok {
+    color: #5EB95E;
+}
+
+#password-features li:before {
+    font-size: normal;
+    content: "\2610";
+    margin-left: -13px;
+    margin-right: 2px;
+}
+
+#password-features ul {
+   padding-left: 20px;
+   text-indent: 2px;
+   list-style: none;
+   list-style-position: outside;
+}

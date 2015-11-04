@@ -27,129 +27,133 @@
 [%# BMO - add hook for displaying user-profile link %]
 [% Hook.process('start') %]
 
-<table>
-  <tr>
-    <th align="right" width="150">Your real name:</th>
-    <td>
-      <input size="35" name="realname" value="[% realname FILTER html %]">
-      <i>optional, but encouraged</i>
-    </td>
-  </tr>
-
-  [%# BMO - moved field hook from end of file to here to group with other account fields %]
-  [% Hook.process('field') %]
-
-  [% SET can_change = [] %]
-  [% IF user.authorizer.can_change_password %]
-    [% can_change.push('password') %]
-  [% END %]
-  [% IF user.authorizer.can_change_email && Param('allowemailchange') %]
-    [% can_change.push('email address') %]
-  [% END %]
-
-  [% IF can_change.size %]
-    <tr>
-      <td></td>
-      <td><hr></td>
-    </tr>
-    <tr>
-      <td colspan="3">
-        Your current password is required to
-        confirm [% can_change.join(' or ') FILTER html %]
-        changes.
-      </td>
-    </tr>
-    <tr>
-      <th align="right">Current password:</th>
-      <td>
-        <input type="hidden" name="old_login" value="[% user.login FILTER html %]">
-        <input type="password" name="old_password">
-        <a href="#" id="forgot-password">I forgot my password</a>
-      </td>
-    </tr>
-    [% IF user.authorizer.can_change_password %]
+<div class="flex">
+  <div class="flex-left">
+    <table>
       <tr>
-        <th align="right">New password:</th>
+        <th align="right" width="150">Your real name:</th>
         <td>
-          <input type="password" name="new_password1">
-          [% INCLUDE "mfa/protected.html.tmpl" %]
+          <input size="35" name="realname" value="[% realname FILTER html %]"
+                 placeholder="optional, but encouraged">
         </td>
       </tr>
 
-      <tr>
-        <th align="right">Confirm new password:</th>
-        <td>
-          <input type="password" name="new_password2">
-        </td>
-      </tr>
-    [% END %]
+      [%# BMO - moved field hook from end of file to here to group with other account fields %]
+      [% Hook.process('field') %]
 
-    [% IF user.authorizer.can_change_email && Param('allowemailchange') %]
-      [% IF login_change_date %]
-        [% IF new_login_name %]
-          <tr>
-            <th align="right">Pending email address:</th>
-            <td>[% new_login_name FILTER html %]</td>
-          </tr>
-          <tr>
-            <th align="right">Change request expires:</th>
-            <td>[% login_change_date FILTER time %]</td>
-          </tr>
-        [% ELSE %]
-          <tr>
-            <th align="right">Confirmed email address:</th>
-            <td>[% user.login FILTER html %]</td>
-          </tr>
-          <tr>
-            <th align="right">Completion date:</th>
-            <td>[% login_change_date FILTER time %]</td>
-          </tr>
-        [% END %]
-      [% ELSE %]
+      [% SET can_change = [] %]
+      [% IF user.authorizer.can_change_password %]
+        [% can_change.push('password') %]
+      [% END %]
+      [% IF user.authorizer.can_change_email && Param('allowemailchange') %]
+        [% can_change.push('email address') %]
+      [% END %]
+
+      [% IF can_change.size %]
         <tr>
-          <th align="right">New email address:</th>
-          <td>
-            <input size="35" name="new_login_name">
-            [% INCLUDE "mfa/protected.html.tmpl" %]
+          <td></td>
+          <td><hr></td>
+        </tr>
+        <tr>
+          <td colspan="3">
+            Your current password is required to
+            confirm [% can_change.join(' or ') FILTER html %]
+            changes.
           </td>
         </tr>
+        <tr>
+          <th align="right">Current password:</th>
+          <td>
+            <input type="hidden" name="old_login" value="[% user.login FILTER html %]">
+            <input type="password" name="old_password" id="old_password">
+            <a href="#" id="forgot-password">I forgot my password</a>
+          </td>
+        </tr>
+        [% IF user.authorizer.can_change_password %]
+          <tr>
+            <th align="right">New password:</th>
+            <td>
+              <input type="password" name="new_password1" id="new_password1">
+              [% INCLUDE "mfa/protected.html.tmpl" %]
+            </td>
+          </tr>
+          <tr>
+            <th align="right">Confirm new password:</th>
+            <td>
+              <input type="password" name="new_password2" id="new_password2">
+            </td>
+          </tr>
+        [% END %]
+
+        [% IF user.authorizer.can_change_email && Param('allowemailchange') %]
+          [% IF login_change_date %]
+            [% IF new_login_name %]
+              <tr>
+                <th align="right">Pending email address:</th>
+                <td>[% new_login_name FILTER html %]</td>
+              </tr>
+              <tr>
+                <th align="right">Change request expires:</th>
+                <td>[% login_change_date FILTER time %]</td>
+              </tr>
+            [% ELSE %]
+              <tr>
+                <th align="right">Confirmed email address:</th>
+                <td>[% user.login FILTER html %]</td>
+              </tr>
+              <tr>
+                <th align="right">Completion date:</th>
+                <td>[% login_change_date FILTER time %]</td>
+              </tr>
+            [% END %]
+          [% ELSE %]
+            <tr>
+              <th align="right">New email address:</th>
+              <td>
+                <input size="35" name="new_login_name" id="new_login_name">
+                [% INCLUDE "mfa/protected.html.tmpl" %]
+              </td>
+            </tr>
+          [% END %]
+        [% END %]
+        <tr>
+          <td></td>
+          <td><hr></td>
+        </tr>
       [% END %]
-    [% END %]
-    <tr>
-      <td></td>
-      <td><hr></td>
-    </tr>
-  [% END %]
 
-  <tr>
-    <td></td>
-    <td>
-      <a href="#" id="account-disable-toggle"><span id="account-disable-spinner">&#9656;</span> Disable My Account</a>
-    </td>
-  </tr>
-  <tr id="account-disable" style="display:none">
-    <td></td>
-    <td>
-      <p>
-        Your contributions on bugzilla.mozilla.org will still be visible;
-        however, your email address and name will be removed in most locations.
-        We are not able to remove your details that are part of comment text.
-      </p>
-      <p>
-        <input type="checkbox" id="account-disable-confirm">
-        I acknowledge that my account will not be functional after it has been
-        disabled.
-      </p>
-      <input type="hidden" name="account_disable" id="account_disable">
-      <button type="button" id="account-disable-button" disabled>Disable Account</button>
-    </td>
-  </tr>
-  <tr>
-    <td></td>
-    <td><hr></td>
-  </tr>
+      <tr>
+        <td></td>
+        <td>
+          <a href="#" id="account-disable-toggle"><span id="account-disable-spinner">&#9656;</span> Disable My Account</a>
+        </td>
+      </tr>
+      <tr id="account-disable" style="display:none">
+        <td></td>
+        <td>
+          <p>
+            Your contributions on bugzilla.mozilla.org will still be visible;
+            however, your email address and name will be removed in most locations.
+            We are not able to remove your details that are part of comment text.
+          </p>
+          <p>
+            <input type="checkbox" id="account-disable-confirm">
+            I acknowledge that my account will not be functional after it has been
+            disabled.
+          </p>
+          <input type="hidden" name="account_disable" id="account_disable">
+          <button type="button" id="account-disable-button" disabled>Disable Account</button>
+        </td>
+      </tr>
+      <tr>
+        <td></td>
+        <td><hr></td>
+      </tr>
+    </table>
+  </div>
 
-</table>
+  [% INCLUDE "global/password-features.html.tmpl" class="flex-right" password_page="account" %]
+</div>
 
 [% tab_footer = BLOCK %]
   <form action="token.cgi" method="post" id="forgot-form">

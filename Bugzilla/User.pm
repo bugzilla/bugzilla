@@ -2482,15 +2482,16 @@ sub validate_password_check {
     }
 
     my $complexity_level = Bugzilla->params->{password_complexity};
-    if ($complexity_level eq 'letters_numbers_specialchars') {
-        return 'password_not_complex'
-          if ($password !~ /[[:alpha:]]/ || $password !~ /\d/ || $password !~ /[[:punct:]]/);
-    } elsif ($complexity_level eq 'letters_numbers') {
-        return 'password_not_complex'
-          if ($password !~ /[[:lower:]]/ || $password !~ /[[:upper:]]/ || $password !~ /\d/);
-    } elsif ($complexity_level eq 'mixed_letters') {
-        return 'password_not_complex'
-          if ($password !~ /[[:lower:]]/ || $password !~ /[[:upper:]]/);
+    if ($complexity_level eq 'bmo') {
+        my $features = 0;
+
+        $features++ if $password =~ /[a-z]/;
+        $features++ if $password =~ /[A-Z]/;
+        $features++ if $password =~ /[0-9]/;
+        $features++ if $password =~ /[^A-Za-z0-9]/;
+        $features++ if length($password) > 12;
+
+        return 'password_not_complex' if $features < 3;
     }
 
     # Having done these checks makes us consider the password untainted.

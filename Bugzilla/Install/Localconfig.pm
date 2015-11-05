@@ -259,6 +259,9 @@ sub update_localconfig {
 
     my $filename = bz_locations->{'localconfig'};
 
+    # Ensure output is sorted and deterministic
+    local $Data::Dumper::Sortkeys = 1;
+
     # Move any custom or old variables into a separate file.
     if (scalar @old_vars) {
         my $filename_old = "$filename.old";

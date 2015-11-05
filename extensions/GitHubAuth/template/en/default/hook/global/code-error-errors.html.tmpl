@@ -6,11 +6,7 @@
   # defined by the Mozilla Public License, v. 2.0.
   #%]
 
-[% IF error == "github_invalid_state" %]
-  [% title = "Invalid State Parameter" %]
-  An invalid <em>state</em> parameter was passed to the GitHub OAuth2 callback.
-
-[% ELSIF error == "github_missing_code" %]
+[% IF error == "github_missing_code" %]
   [% title = "Missing GitHub Auth Code" %]
   Expected a <em>code</em> parameter in the GitHub OAuth2 callback.
 
@@ -21,5 +17,11 @@
 [% ELSIF error == "github_error" %]
   [% title = "GitHub Error" %]
   GitHub returned an error: [% response.message FILTER html %]
+
+[% ELSIF error == "github_invalid_target" %]
+  [% terms.Bugzilla %] cannot log you into an external site via GitHub.
+
+[% ELSIF error == "github_invalid_request" %]
+  Invalid GitHub log in attempt (reason: [% reason FILTER html %])
 
 [% END %]

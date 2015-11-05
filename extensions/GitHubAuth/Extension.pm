@@ -12,7 +12,6 @@ use strict;
 use parent qw(Bugzilla::Extension);
 
 use Bugzilla::Extension::GitHubAuth::Client;
-use Bugzilla::Extension::GitHubAuth::Util qw(target_uri);
 
 use Bugzilla::Error;
 use Bugzilla::Util qw(trick_taint);
@@ -30,7 +29,7 @@ BEGIN {
         my ($stack, $method) = @_;
 
         return undef if $method eq 'fail_nodata';
-        return $stack->UNIVERSAL::can($method);
+        return $stack->SUPER::can($method);
     };
 }
 
@@ -40,18 +39,6 @@ sub install_before_final_checks {
         description => 'Group containing groups whose members may not use GitHubAuth to log in',
         isbuggroup  => 0,
     }) unless Bugzilla::Group->new({ name => 'no-github-auth' });
-}
-
-sub template_before_create {
-    my ($self, $args) = @_;
-
-    return if Bugzilla->user->id && !Bugzilla->cgi->param('logout');
-
-    $args->{config}{VARIABLES}{github_auth} = {
-        login => sub {
-            return Bugzilla::Extension::GitHubAuth::Client->login_uri(target_uri());
-        },
-    };
 }
 
 sub attachment_should_redirect_login {

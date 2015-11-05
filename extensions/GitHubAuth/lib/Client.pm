@@ -15,7 +15,7 @@ use URI::QueryParam;
 use Digest;
 
 use Bugzilla::Extension::GitHubAuth::Client::Error qw(ThrowUserError ThrowCodeError);
-use Bugzilla::Util qw(remote_ip);
+use Bugzilla::Util qw(remote_ip correct_urlbase);
 
 use constant DIGEST_HASH => 'SHA1';
 
@@ -35,19 +35,22 @@ sub new {
 }
 
 sub login_uri {
-    my ($self, $target) = @_;
+    my ($class, $target_uri) = @_;
 
-    $target->query_param(GoAheadAndLogIn => 1);
-    $target->query_param(github_login => 1);
-    $target->query_param_delete('logout');
+    my $uri = URI->new(correct_urlbase() . "github.cgi");
+    $uri->query_form(target_uri => $target_uri);
+    return $uri;
+}
+
+sub authorize_uri {
+    my ($class, $state) = @_;
 
     my $uri = URI->new(GH_AUTHORIZE_URI);
-
     $uri->query_form(
         client_id    => Bugzilla->params->{github_client_id},
         scope        => 'user:email',
-        state        => $self->get_state($target),
-        redirect_uri => $target,
+        state        => $state,
+        redirect_uri => correct_urlbase() . "github.cgi",
     );
 
     return $uri;
@@ -59,31 +62,6 @@ sub get_email_key {
     my $cgi    = Bugzilla->cgi;
     my $digest = Digest->new(DIGEST_HASH);
     $digest->add($email);
-    $digest->add(remote_ip());
-    $digest->add($cgi->cookie('Bugzilla_github_token') // Bugzilla->request_cache->{github_token} // '');
-    $digest->add(Bugzilla->localconfig->{site_wide_secret});
-    return $digest->hexdigest;
-}
-
-sub get_state {
-    my ($class, $target) = @_;
-    my $sorted_target = $target->clone;
-    $sorted_target->query_form({});
-
-    foreach my $key (sort $target->query_param) {
-        $sorted_target->query_param($key, $target->query_param($key));
-    }
-
-    $sorted_target->query_param_delete("code");
-    $sorted_target->query_param_delete("state");
-    $sorted_target->query_param_delete('github_email_key');
-    $sorted_target->query_param_delete('github_email');
-    $sorted_target->query_param_delete('GoAheadAndLogIn');
-    $sorted_target->query_param_delete('github_login');
-
-    my $cgi    = Bugzilla->cgi;
-    my $digest = Digest->new(DIGEST_HASH);
-    $digest->add($sorted_target->as_string);
     $digest->add(remote_ip());
     $digest->add($cgi->cookie('Bugzilla_github_token') // Bugzilla->request_cache->{github_token} // '');
     $digest->add(Bugzilla->localconfig->{site_wide_secret});

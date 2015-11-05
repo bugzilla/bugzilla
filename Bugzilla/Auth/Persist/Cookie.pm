@@ -90,6 +90,8 @@ sub persist_login {
         $cookieargs{'-secure'} = 1;
     }
 
+    $cgi->remove_cookie('github_secret');
+    $cgi->remove_cookie('Bugzilla_login_request_cookie');
     $cgi->send_cookie(-name => 'Bugzilla_login',
                       -value => $user->id,
                       %cookieargs);

@@ -237,7 +237,7 @@ sub issue_short_lived_session_token {
     # the token to the caller.
 
     $user //= Bugzilla->user;
-    return _create_token($user->id, 'session.short', $data);
+    return _create_token($user->id ? $user->id : undef, 'session.short', $data);
 }
 
 sub issue_hash_token {

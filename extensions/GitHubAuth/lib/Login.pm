@@ -13,11 +13,12 @@ use fields qw(github_failure);
 
 use Scalar::Util qw(blessed);
 
-use Bugzilla::Constants qw(AUTH_NODATA AUTH_ERROR USAGE_MODE_BROWSER );
+use Bugzilla::Constants qw(AUTH_NODATA AUTH_ERROR USAGE_MODE_BROWSER);
 use Bugzilla::Util qw(trick_taint correct_urlbase generate_random_password);
+use Bugzilla::Token qw(issue_short_lived_session_token set_token_extra_data);
+use List::MoreUtils qw(any);
 use Bugzilla::Extension::GitHubAuth::Client;
 use Bugzilla::Extension::GitHubAuth::Client::Error ();
-use Bugzilla::Extension::GitHubAuth::Util qw(target_uri);
 use Bugzilla::Error;
 
 use constant { requires_verification   => 1,
@@ -27,30 +28,16 @@ use constant { requires_verification   => 1,
 sub get_login_info {
     my ($self) = @_;
     my $cgi              = Bugzilla->cgi;
-    my $github_login     = $cgi->param('github_login');
-    my $github_email     = $cgi->param('github_email');
-    my $github_email_key = $cgi->param('github_email_key');
+    my $github_action    = Bugzilla->request_cache->{github_action};
 
-    my $cookie = $cgi->cookie('Bugzilla_github_token');
-    unless ($cookie) {
-        my $token = generate_random_password();
-        $cgi->send_cookie(-name     => 'Bugzilla_github_token',
-                          -value    => $token,
-                          Bugzilla->params->{'ssl_redirect'} ? ( -secure => 1 ) : (),
-                          -httponly => 1);
-        Bugzilla->request_cache->{github_token} = $token;
-    }
-
-    return { failure => AUTH_NODATA } unless $github_login;
+    return { failure => AUTH_NODATA } unless $github_action;
 
     my $response;
-    if ($github_email_key && $github_email) {
-        trick_taint($github_email);
-        trick_taint($github_email_key);
-        $response = $self->_get_login_info_from_email($github_email, $github_email_key);
+    if ($github_action eq 'login') {
+        $response = $self->_get_login_info_from_github();
     }
-    else {
-       $response = $self->_get_login_info_from_github();
+    elsif ($github_action eq 'email') {
+        $response = $self->_get_login_info_from_email();
     }
 
     if (!exists $response->{failure}) {
@@ -84,20 +71,13 @@ sub _get_login_info_from_github {
     my ($self) = @_;
     my $cgi      = Bugzilla->cgi;
     my $template = Bugzilla->template;
-    my $state    = $cgi->param('state');
     my $code     = $cgi->param('code');
 
     return { failure => AUTH_ERROR, error => 'github_missing_code' } unless $code;
-    return { failure => AUTH_ERROR, error => 'github_invalid_state' } unless $state;
 
     trick_taint($code);
-    trick_taint($state);
 
-    my $target = target_uri();
     my $client = Bugzilla::Extension::GitHubAuth::Client->new;
-    if ($state ne $client->get_state($target)) {
-        return { failure => AUTH_ERROR, error => 'github_invalid_state' };
-    }
 
     my ($access_token, $emails);
     eval {
@@ -119,15 +99,6 @@ sub _get_login_info_from_github {
     my @emails = map { $_->{email} }
                  grep { $_->{verified} && $_->{email} !~ /\@users\.noreply\.github\.com$/ } @$emails;
 
-    my $choose_email = sub {
-        my ($email) = @_;
-        my $uri  = $target->clone;
-        my $key = Bugzilla::Extension::GitHubAuth::Client->get_email_key($email);
-        $uri->query_param(github_email => $email);
-        $uri->query_param(github_email_key => $key);
-        return $uri;
-    };
-
     my @bugzilla_users;
     my @github_emails;
     foreach my $email (@emails) {
@@ -143,7 +114,6 @@ sub _get_login_info_from_github {
 
     if (@allowed_bugzilla_users == 1) {
         my ($user) = @allowed_bugzilla_users;
-        $cgi->remove_cookie('Bugzilla_github_token');
         return { user => $user };
     }
     elsif (@allowed_bugzilla_users > 1) {
@@ -151,7 +121,7 @@ sub _get_login_info_from_github {
             template => 'account/auth/github-verify-account.html.tmpl',
             vars     => {
                 bugzilla_users => \@allowed_bugzilla_users,
-                choose_email   => $choose_email,
+                choose_email   => _mk_choose_email(\@emails),
             },
         };
         return { failure => AUTH_NODATA };
@@ -165,7 +135,7 @@ sub _get_login_info_from_github {
             template => 'account/auth/github-verify-account.html.tmpl',
             vars     => {
                 github_emails => \@github_emails,
-                choose_email  => $choose_email,
+                choose_email   => _mk_choose_email(\@emails),
             },
         };
         return { failure => AUTH_NODATA };
@@ -176,19 +146,22 @@ sub _get_login_info_from_github {
 }
 
 sub _get_login_info_from_email {
-    my ($self, $github_email, $github_email_key) = @_;
+    my ($self) = @_;
     my $cgi = Bugzilla->cgi;
+    my $email = $cgi->param('email') or return { failure => AUTH_ERROR,
+                                                 user_error => 'github_invalid_email',
+                                                 details => { email => '' } };
+    trick_taint($email);
 
-    my $key = Bugzilla::Extension::GitHubAuth::Client->get_email_key($github_email);
-    unless ($github_email_key eq $key) {
+    unless (any { $_ eq $email } @{ Bugzilla->request_cache->{github_emails} }) {
         return { failure    => AUTH_ERROR,
                  user_error => 'github_invalid_email',
-                 details    => { email => $github_email }};
+                 details    => { email => $email }};
     }
 
-    my $user = Bugzilla::User->new({name => $github_email, cache => 1});
+    my $user = Bugzilla::User->new({name => $email, cache => 1});
     $cgi->remove_cookie('Bugzilla_github_token');
-    return $user ? { user => $user } : { email => $github_email };
+    return $user ? { user => $user } : { email => $email };
 }
 
 sub fail_nodata {
@@ -206,5 +179,29 @@ sub fail_nodata {
     exit;
 }
 
+sub _store_emails {
+    my ($emails) = @_;
+    my $state = issue_short_lived_session_token("github_email");
+    set_token_extra_data($state, { type       => 'github_email',
+                                   emails     => $emails,
+                                   target_uri => Bugzilla->request_cache->{github_target_uri} });
+
+    Bugzilla->cgi->send_cookie(-name     => 'github_state',
+                               -value    => $state,
+                               -httponly => 1);
+    return $state;
+}
+
+sub _mk_choose_email {
+    my ($emails) = @_;
+    my $state = _store_emails($emails);
+
+    return sub {
+        my $email = shift;
+        my $uri = URI->new(correct_urlbase() . "github.cgi");
+        $uri->query_form( state => $state, email => $email );
+        return $uri;
+    };
+}
 
 1;

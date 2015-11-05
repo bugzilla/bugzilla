@@ -31,6 +31,7 @@ use Bugzilla::Util;
 use Bugzilla::Search::Recent;
 
 use File::Basename;
+use URI;
 
 BEGIN {
     if (ON_WINDOWS) {
@@ -123,6 +124,21 @@ sub new {
     }
 
     return $self;
+}
+
+sub target_uri {
+    my ($self) = @_;
+
+    my $base = correct_urlbase();
+    if (my $request_uri = $self->request_uri) {
+        my $base_uri = URI->new($base);
+        $base_uri->path('');
+        $base_uri->query(undef);
+        return $base_uri . $request_uri;
+    }
+    else {
+        return $base . ($self->url(-relative => 1, -query => 1) || 'index.cgi');
+    }
 }
 
 # We want this sorted plus the ability to exclude certain params
@@ -355,6 +371,16 @@ sub header {
                            %args);
     }
 
+    # We generate a cookie and store it in the request cache
+    # To initiate github login, a form POSTs to github.cgi with the
+    # github_secret as a parameter. It must match the github_secret cookie.
+    # this prevents some types of redirection attacks.
+    unless ($user->id) {
+        $self->send_cookie(-name     => 'github_secret',
+                           -value    => Bugzilla->github_secret,
+                           -httponly => 1);
+    }
+
     # Add the cookies in if we have any
     if (scalar(@{$self->{Bugzilla_cookie_list}})) {
         unshift(@_, '-cookie' => $self->{Bugzilla_cookie_list});
@@ -475,6 +501,8 @@ sub send_cookie {
     $paramhash{'-path'} = Bugzilla->params->{'cookiepath'};
     $paramhash{'-domain'} = Bugzilla->params->{'cookiedomain'}
         if Bugzilla->params->{'cookiedomain'};
+    $paramhash{'-secure'} = 1
+        if Bugzilla->params->{'ssl_redirect'};
 
     # Move the param list back into an array for the call to cookie().
     foreach (keys(%paramhash)) {

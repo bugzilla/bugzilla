@@ -137,12 +137,15 @@
     "Set the complexity required for passwords. In all cases must the passwords " _
     "be at least ${constants.USER_PASSWORD_MIN_LENGTH} characters long." _
     "<ul><li>no_constraints - No complexity required.</li>" _
-    "<li>mixed_letters - Passwords must contain at least one UPPER and one lower " _
-    "case letter.</li>" _
-    "<li>letters_numbers - Passwords must contain at least one UPPER and one " _
-    "lower case letter and a number.</li>" _
-    "<li>letters_numbers_specialchars - Passwords must contain at least one " _
-    "UPPER or one lower case letter, a number and a special character.</li></ul>",
+    "<li>bmo - Passwords must meet at least three of the following conditions: " _
+    "<ul>" _
+    "<li>uppercase letters</li>" _
+    "<li>lowercase letters</li>" _
+    "<li>numbers</li>" _
+    "<li>symbols</li>" _
+    "<li>longer than 12 characters</li>" _
+    "</ul></li>" _
+    "</ul>",
 
   password_check_on_login =>
     "If set, $terms.Bugzilla will check that the password meets the current " _

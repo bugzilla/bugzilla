@@ -3,6 +3,8 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+BUILDBOT=$BUGZILLA_ROOT/docker/scripts/buildbot_step
+
 if [ -z "$TEST_SUITE" ]; then
     TEST_SUITE=sanity
 fi
@@ -23,11 +25,10 @@ if [ "$GITHUB_BASE_REV" != "" ]; then
 fi
 
 echo -e "\n== Checking dependencies for changes"
-/install_deps.sh
+$BUGZILLA_ROOT/docker/scripts/install_deps.sh
 
 if [ "$TEST_SUITE" = "sanity" ]; then
-    cd $BUGZILLA_ROOT
-    /buildbot_step "Sanity" prove -f -v t/*.t
+    $BUILDBOT "Sanity" prove -f -v t/*.t
     exit $?
 fi
 
@@ -35,38 +36,25 @@ if [ "$TEST_SUITE" = "docs" ]; then
     export JADE_PUB=/usr/share/sgml
     export LDP_HOME=/usr/share/sgml/docbook/dsssl-stylesheets-1.79/dtds/decls
     cd $BUGZILLA_ROOT/docs
-    /buildbot_step "Documentation" perl makedocs.pl --with-pdf
+    $BUILDBOT "Documentation" perl makedocs.pl --with-pdf
     exit $?
 fi
 
 echo -e "\n== Starting database"
 /usr/bin/mysqld_safe &
 sleep 3
+mysql -u root mysql -e "CREATE DATABASE bugs_test CHARACTER SET = 'utf8';"
 
 echo -e "\n== Starting memcached"
 /usr/bin/memcached -u memcached -d
 sleep 3
 
-echo -e "\n== Updating configuration"
-mysql -u root mysql -e "CREATE DATABASE bugs_test CHARACTER SET = 'utf8';"
-sed -e "s?%DB%?$BUGS_DB_DRIVER?g" --in-place $BUGZILLA_ROOT/qa/config/checksetup_answers.txt
-sed -e "s?%DB_NAME%?bugs_test?g" --in-place $BUGZILLA_ROOT/qa/config/checksetup_answers.txt
-sed -e "s?%USER%?$BUGZILLA_USER?g" --in-place $BUGZILLA_ROOT/qa/config/checksetup_answers.txt
-echo "\$answer{'memcached_servers'} = 'localhost:11211';" >> $BUGZILLA_ROOT/qa/config/checksetup_answers.txt
-
-if [ "$TEST_SUITE" == "checksetup" ]; then
-    cd $BUGZILLA_ROOT/qa
-    /buildbot_step "Checksetup" ./test_checksetup.pl config/config-checksetup-$BUGS_DB_DRIVER
-    exit $?
-fi
-
 echo -e "\n== Running checksetup"
-cd $BUGZILLA_ROOT
-./checksetup.pl qa/config/checksetup_answers.txt
-./checksetup.pl qa/config/checksetup_answers.txt
+perl checksetup.pl $BUGZILLA_ROOT/qa/config/checksetup_answers.txt
+perl checksetup.pl $BUGZILLA_ROOT/qa/config/checksetup_answers.txt
 
 echo -e "\n== Generating bmo data"
-perl /generate_bmo_data.pl
+perl $BUGZILLA_ROOT/docker/scripts/generate_bmo_data.pl
 
 echo -e "\n== Generating test data"
 cd $BUGZILLA_ROOT/qa/config
@@ -97,12 +85,12 @@ if [ "$TEST_SUITE" = "selenium" ]; then
     [ $NO_TESTS ] && exit 0
 
     cd $BUGZILLA_ROOT/qa/t
-    /buildbot_step "Selenium" prove -f -v -I$BUGZILLA_ROOT/lib test_*.t
+    $BUILDBOT "Selenium" prove -f -v -I$BUGZILLA_ROOT/lib test_*.t
     exit $?
 fi
 
 if [ "$TEST_SUITE" = "webservices" ]; then
     cd $BUGZILLA_ROOT/qa/t
-    /buildbot_step "Webservices" prove -f -v -I$BUGZILLA_ROOT/lib webservice_*.t
+    $BUILDBOT "Webservices" prove -f -v -I$BUGZILLA_ROOT/lib webservice_*.t
     exit $?
 fi

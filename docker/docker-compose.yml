@@ -2,5 +2,6 @@ bugzilla:
   build: .
   ports:
     - "8080:80"
-    - "2222:22"
     - "5900:5900"
+  environment:
+    - "TEST_SUITE=sanity"

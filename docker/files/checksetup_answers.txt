@@ -1,7 +1,7 @@
-$answer{'ADMIN_EMAIL'} = 'admin@mozilla.bugs';
+$answer{'ADMIN_EMAIL'} = 'admin@mozilla.test';
 $answer{'ADMIN_OK'} = 'Y';
 $answer{'ADMIN_PASSWORD'} = 'password';
-$answer{'ADMIN_REALNAME'} = 'Admin';
+$answer{'ADMIN_REALNAME'} = 'QA Admin';
 $answer{'NO_PAUSE'} = 1;
 $answer{'bugzilla_version'} = '4.2';
 $answer{'create_htaccess'} = '';
@@ -22,6 +22,6 @@ $answer{'diffpath'} = '/usr/bin';
 $answer{'index_html'} = 0;
 $answer{'interdiffbin'} = '/usr/bin/interdiff';
 $answer{'memcached_servers'} = "localhost:11211";
-$answer{'urlbase'} = 'http://localhost:8080/bmo/';
+$answer{'urlbase'} = 'http://localhost/bmo/';
 $answer{'use_suexec'} = '';
 $answer{'webservergroup'} = 'bugzilla';

@@ -69,7 +69,7 @@
   <tr class="column_header">
     [% FOREACH c = columns %]
       [%# Default to align left for headers %]
-      <th class="[% (c.align || 'left') FILTER css_class_quote %]">
+      <th class="[% (c.class || 'left') FILTER css_class_quote %]">
         [% c.heading FILTER html %]
       </th>
     [% END %]

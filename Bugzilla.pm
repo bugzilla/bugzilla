@@ -368,6 +368,9 @@ sub login {
 
     return $class->user if $class->user->id;
 
+    # Load all extensions here if not running under mod_perl
+    $class->extensions unless $ENV{MOD_PERL};
+
     my $authorizer = new Bugzilla::Auth();
     $type = LOGIN_REQUIRED if $class->cgi->param('GoAheadAndLogIn');
 

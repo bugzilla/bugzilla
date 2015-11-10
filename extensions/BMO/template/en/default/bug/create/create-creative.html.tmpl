@@ -78,8 +78,7 @@ function validateAndSubmit() {
 
   document.getElementById('cc').value = document.getElementById('poc').value;
   if (document.getElementById('collective').checked) {
-    document.getElementById('cc').value = document.getElementById('cc').value
-      + 'smartell@mozilla.com, enoonan@mozilla.com';
+    document.getElementById('cc').value = document.getElementById('cc').value + ', smartell@mozilla.com, enoonan@mozilla.com';
     document.getElementById('status_whiteboard').value = 'Creative Collective Project';
   } else {
     document.getElementById('status_whiteboard').value = '';

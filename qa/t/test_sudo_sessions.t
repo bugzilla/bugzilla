@@ -39,7 +39,7 @@ $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_is("Begin sudo session");
 $sel->value_is("target_login", $config->{unprivileged_user_login});
 $sel->type_ok("reason", "Selenium test about sudo sessions");
-$sel->type_ok("Bugzilla_password", $config->{admin_user_passwd}, "Enter admin password");
+$sel->type_ok("current_password", $config->{admin_user_passwd}, "Enter admin password");
 $sel->click_ok('//input[@value="Begin Session"]');
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_is("Match Failed");
@@ -67,7 +67,7 @@ $sel->click_ok("link=Impersonate this user");
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_is("Begin sudo session");
 $sel->value_is("target_login", $config->{unprivileged_user_login});
-$sel->type_ok("Bugzilla_password", $config->{admin_user_passwd}, "Enter admin password");
+$sel->type_ok("current_password", $config->{admin_user_passwd}, "Enter admin password");
 $sel->click_ok('//input[@value="Begin Session"]');
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_is("Sudo session started");
@@ -96,23 +96,18 @@ $sel->is_text_present_ok("The sudo session has been ended");
 
 # Try to access the sudo page directly, with no credentials.
 
-$sel->open_ok("/$config->{bugzilla_installation}/relogin.cgi?action=begin-sudo");
+$sel->open_ok("/$config->{bugzilla_installation}/relogin.cgi?action=begin-sudo&target_login=$config->{admin_user_login}");
 $sel->title_is("Password Required");
-
-# Now try to start a sudo session directly, with all required credentials.
-
-$sel->open_ok("/$config->{bugzilla_installation}/relogin.cgi?action=begin-sudo&Bugzilla_login=$config->{admin_user_login}&Bugzilla_password=$config->{admin_user_passwd}&target_login=$config->{admin_user_login}", undef, "Impersonate a user directly by providing all required data");
-$sel->title_is("Preparation Required");
 
 # The link should populate the target_login field correctly.
 # Note that we are trying to sudo an admin, which is not allowed.
 
-$sel->click_ok("link=start your session normally");
+$sel->click_ok("link=go back");
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_is("Begin sudo session");
 $sel->value_is("target_login", $config->{admin_user_login});
 $sel->type_ok("reason", "Selenium hack");
-$sel->type_ok("Bugzilla_password", $config->{admin_user_passwd}, "Enter admin password");
+$sel->type_ok("current_password", $config->{admin_user_passwd}, "Enter admin password");
 $sel->click_ok('//input[@value="Begin Session"]');
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_is("User Protected");
@@ -127,14 +122,14 @@ $sel->title_is("Begin sudo session");
 $sel->type_ok("target_login", 'foo@bar.com');
 $sel->click_ok('//input[@value="Begin Session"]');
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
-$sel->title_is("Invalid Username Or Password");
+$sel->title_is("Password Required");
 
 # Same as above, but with your password.
 
 $sel->open_ok("/$config->{bugzilla_installation}/relogin.cgi?action=prepare-sudo&target_login=foo\@bar.com");
 $sel->title_is("Begin sudo session");
 $sel->value_is("target_login", 'foo@bar.com');
-$sel->type_ok("Bugzilla_password", $config->{admin_user_passwd}, "Enter admin password");
+$sel->type_ok("current_password", $config->{admin_user_passwd}, "Enter admin password");
 $sel->click_ok('//input[@value="Begin Session"]');
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_is("Match Failed");

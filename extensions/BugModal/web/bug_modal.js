@@ -678,38 +678,52 @@ $(function() {
         });
 
     // knob
-    $('#bug_status')
+    $('#bug_status, #bottom-bug_status')
         .change(function(event) {
-            if (event.target.value == "RESOLVED" || event.target.value == "VERIFIED") {
-                $('#resolution').change().show();
+            var that = $(this);
+            var val = that.val();
+            var other = $(that.attr('id') == 'bug_status' ? '#bottom-bug_status' : '#bug_status');
+            other.val(val);
+            if (val == "RESOLVED" || val == "VERIFIED") {
+                $('#resolution, #bottom-resolution').change().show();
             }
             else {
-                $('#resolution').hide();
-                $('#duplicate-container').hide();
-                $('#mark-as-dup-btn').show();
+                $('#resolution, #bottom-resolution').hide();
+                $('#duplicate-container, #bottom-duplicate-container').hide();
+                $('#mark-as-dup-btn, #bottom-mark-as-dup-btn').show();
             }
         })
         .change();
-    $('#resolution')
+    $('#resolution, #bottom-resolution')
         .change(function(event) {
+            var that = $(this);
+            var val = that.val();
+            var other = $(that.attr('id') == 'resolution' ? '#bottom-resolution' : '#resolution');
+            other.val(val);
             var bug_status = $('#bug_status').val();
-            if ((bug_status == "RESOLVED" || bug_status == "VERIFIED") && event.target.value == "DUPLICATE") {
-                $('#duplicate-container').show();
-                $('#mark-as-dup-btn').hide();
-                $('#dup_id').focus();
+            if ((bug_status == "RESOLVED" || bug_status == "VERIFIED") && val == "DUPLICATE") {
+                $('#duplicate-container, #bottom-duplicate-container').show();
+                $('#mark-as-dup-btn, #bottom-mark-as-dup-btn').hide();
+                $(that.attr('id') == 'resolution' ? '#dup_id' : '#bottom-dup_id').focus();
             }
             else {
-                $('#duplicate-container').hide();
-                $('#mark-as-dup-btn').show();
+                $('#duplicate-container, #bottom-duplicate-container').hide();
+                $('#mark-as-dup-btn, #bottom-mark-as-dup-btn').show();
             }
         })
         .change();
-    $('#mark-as-dup-btn')
+    $('#mark-as-dup-btn, #bottom-mark-as-dup-btn')
         .click(function(event) {
             event.preventDefault();
             $('#bug_status').val('RESOLVED').change();
             $('#resolution').val('DUPLICATE').change();
-            $('#dup_id').focus();
+            $($(this).attr('id') == 'mark-as-dup-btn' ? '#dup_id' : '#bottom-dup_id').focus();
+        });
+    $('#dup_id, #bottom-dup_id')
+        .change(function(event) {
+            var that = $(this);
+            var other = $(that.attr('id') == 'dup_id' ? '#bottom-dup_id' : '#dup_id');
+            other.val(that.val());
         });
 
     // add see-also button
@@ -825,12 +839,8 @@ $(function() {
             $('#bug_status').val('RESOLVED').change();
             $('#resolution').val($(event.target).text()).change();
             $('#top-save-btn').show();
-            if ($(event.target).text() == "DUPLICATE") {
-                $.scrollTo($('body'));
-            }
-            else {
-                $.scrollTo($('body'), function() { $('#resolution').focus(); });
-            }
+            $('#resolve-as').hide();
+            $('#bottom-status').show();
         });
     $('.status-btn')
         .click(function(event) {
@@ -839,7 +849,8 @@ $(function() {
             $('#field-status-edit').show();
             $('#bug_status').val($(event.target).data('status')).change();
             $('#top-save-btn').show();
-            $.scrollTo($('body'), function() { $('#bug_status').focus(); });
+            $('#resolve-as').hide();
+            $('#bottom-status').show();
         });
 
     // vote button

@@ -255,7 +255,8 @@ input[type="number"] {
     display: inline;
 }
 
-#duplicate-container, #duplicate-actions {
+#duplicate-container, #duplicate-actions,
+#bottom-duplicate-container, #bottom-duplicate-actions {
     display: table-cell;
     vertical-align: top;
     padding-left: 8px;
@@ -265,8 +266,8 @@ input[type="number"] {
     margin-left: 4px;
 }
 
-#duplicate-container #dup_up {
-    padding-left: 5px;
+#resolve-as, #bottom-status {
+    display: inline;
 }
 
 #after-comment-commit-button {

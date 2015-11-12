@@ -436,34 +436,41 @@
       label = "Status"
       hide_on_view = bug.assigned_to.id != user.id
   %]
-    [% INCLUDE bug_modal/field.html.tmpl
-        field  = bug_fields.bug_status
-        field_type = constants.FIELD_TYPE_SINGLE_SELECT
-        editable = bug.choices.bug_status.size > 1
-        values = bug.choices.bug_status
-        inline = 1
-        no_indent = 1
-        edit_only = 1
-    %]
-    [% INCLUDE bug_modal/field.html.tmpl
-        field  = bug_fields.resolution
-        field_type = constants.FIELD_TYPE_SINGLE_SELECT
-        editable = bug.choices.resolution.size > (bug.resolution == "" ? 0 : 1)
-        values = bug.choices.resolution
-        inline = 1
-        edit_only = 1
-    %]
-    [% IF bug.choices.resolution.only("name", "DUPLICATE").size %]
-      <div id="duplicate-container">
-        of
-        <input id="dup_id" name="dup_id" size="6" value="[% bug.dup_id FILTER html %]">
-      </div>
-      <div id="duplicate-actions">
-        <button type="button" class="minor" id="mark-as-dup-btn">
-          Mark as Duplicate
-        </button>
-      </div>
-    [% END %]
+    [% INCLUDE status_block %]
+  [% END %]
+[% END %]
+
+[% BLOCK status_block %]
+  [% INCLUDE bug_modal/field.html.tmpl
+      prefix = prefix
+      field  = bug_fields.bug_status
+      field_type = constants.FIELD_TYPE_SINGLE_SELECT
+      editable = bug.choices.bug_status.size > 1
+      values = bug.choices.bug_status
+      inline = 1
+      no_indent = 1
+      edit_only = 1
+  %]
+  [% INCLUDE bug_modal/field.html.tmpl
+      prefix = prefix
+      field  = bug_fields.resolution
+      field_type = constants.FIELD_TYPE_SINGLE_SELECT
+      editable = bug.choices.resolution.size > (bug.resolution == "" ? 0 : 1)
+      values = bug.choices.resolution
+      inline = 1
+      edit_only = 1
+  %]
+  [% IF bug.choices.resolution.only("name", "DUPLICATE").size %]
+    <div id="[% prefix FILTER none %]duplicate-container">
+      of
+      <input id="[% prefix FILTER none %]dup_id" name="[% prefix FILTER none %]dup_id"
+        size="6" value="[% bug.dup_id FILTER html %]">
+    </div>
+    <div id="[% prefix FILTER none %]duplicate-actions">
+      <button type="button" class="minor" id="[% prefix FILTER none %]mark-as-dup-btn">
+        Mark as Duplicate
+      </button>
+    </div>
   [% END %]
 [% END %]
 
@@ -1096,21 +1103,31 @@
   [% IF user.id %]
     <div id="new-comment-actions">
       <button type="submit" class="save-btn major" id="bottom-save-btn">Save Changes</button>
-      [%
-        IF bug.resolution == "";
-          seen_header = 0;
-          FOREACH resolution IN ["FIXED", "INVALID", "DUPLICATE"];
-            NEXT UNLESS bug.choices.resolution.only("name", resolution).size;
-            IF NOT seen_header;
-              seen_header = 1;
-              " Resolve as ";
+      <div id="resolve-as">
+        [%
+          IF bug.resolution == "";
+            seen_header = 0;
+            FOREACH resolution IN ["FIXED", "INVALID", "DUPLICATE"];
+              NEXT UNLESS bug.choices.resolution.only("name", resolution).size;
+              IF NOT seen_header;
+                seen_header = 1;
+                " Resolve as ";
+              END;
+              %] <button type="button" class="minor resolution-btn">[% resolution FILTER html %]</button> [%
             END;
-            %] <button type="button" class="minor resolution-btn">[% resolution FILTER html %]</button> [%
+          ELSE;
+            IF bug.choices.bug_status.only("name", "VERIFIED").size && bug.bug_status != "VERIFIED";
+              %] <button type="button" class="minor status-btn" data-status="VERIFIED">VERIFY</button> [%
+            END;
+            IF bug.choices.bug_status.only("name", "REOPENED").size;
+              %] <button type="button" class="minor status-btn" data-status="REOPENED">REOPEN</button> [%
+            END;
           END;
-        ELSIF bug.choices.bug_status.only("name", "REOPENED").size;
-            %] <button type="button" class="minor status-btn" data-status="REOPENED">REOPEN</button> [%
-        END;
-      %]
+        %]
+      </div>
+      <div id="bottom-status" style="display:none">
+        [% INCLUDE status_block prefix="bottom-" %]
+      </div>
     </div>
   [% END %]
 [% END %]

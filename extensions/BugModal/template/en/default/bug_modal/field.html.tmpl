@@ -14,6 +14,8 @@
   # view_only: (boolean) don't allow editing (default: determined from bug.check_can_change_field)
   # edit_only: (boolean) always render the edit ui
   # container: (boolean) output just a label and the content (eg. for multiple fields next to one label)
+  # name: (string) field name (default: field.name)
+  # prefix: (string) string to prepend to 'name' and 'id' attributes (default: empty)
   # value: (string) visible value (default: bug.$name)
   # values: (array of string) list of value objects (FIELD_TYPE_SINGLE_SELECT and _BUG_URLS only) (default: lazy-load on edit)
   # inline: (boolean) output field as a table-cell instead of as a stand-alone div (default: false)
@@ -63,6 +65,9 @@ IF !no_label && !label.defined;
 END;
 IF field_type == "";
   field_type = -1;
+END;
+IF prefix.defined;
+  name = prefix _ name;
 END;
 # date picker fields should always be short
 IF field_type == constants.FIELD_TYPE_DATE

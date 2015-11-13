@@ -61,7 +61,7 @@ elsif (lc($cgi->request_method) eq 'get') {
 
     # If the state or params are missing, or the github_state cookie is missing
     # we just redirect to index.cgi.
-    unless ($state_param && $state_cookie && $cgi->param('code')) {
+    unless ($state_param && $state_cookie && ($cgi->param('code') || $cgi->param('email'))) {
         print $cgi->redirect($urlbase . "index.cgi");
         exit;
     }

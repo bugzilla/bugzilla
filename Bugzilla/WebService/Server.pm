@@ -22,10 +22,8 @@ use Bugzilla::Error;
 use Bugzilla::Util qw(datetime_from);
 
 use Digest::MD5 qw(md5_base64);
-use Encode;
 use Scalar::Util qw(blessed);
 use Storable qw(freeze);
-use Sys::Syslog qw(:DEFAULT);
 
 sub handle_login {
     my ($self, $class, $method, $full_method) = @_;
@@ -38,13 +36,7 @@ sub handle_login {
     }
 
     eval "require $class";
-    my $error = $@;
-    if ($error) {
-        openlog('apache', 'cons,pid', 'local4');
-        syslog('notice', '[rpc_error] ' . encode_utf8($error));
-        closelog();
-    }
-    ThrowCodeError('unknown_method', {method => $full_method}) if $error;
+    ThrowCodeError('unknown_method', {method => $full_method}) if $@;
     return if ($class->login_exempt($method) 
                and !defined Bugzilla->input_params->{Bugzilla_login});
     Bugzilla->login();

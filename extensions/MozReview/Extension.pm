@@ -100,7 +100,7 @@ sub webservice_before_call {
     my $app_id = $getter->app_id;
     if ($app_id eq $mozreview_app_id) {
         unless (any { $full_method eq $_ } @METHOD_WHITELIST) {
-            ThrowCodeError('unknown_method', { method => $full_method });
+            ThrowUserError('forbidden_method', { method => $full_method });
         }
     }
 }

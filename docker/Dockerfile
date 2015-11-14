@@ -1,3 +1,10 @@
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
+#
+# This Source Code Form is "Incompatible With Secondary Licenses", as
+# defined by the Mozilla Public License, v. 2.0.
+
 FROM centos:centos7
 MAINTAINER David Lawrence <dkl@mozilla.com>
 
@@ -8,9 +15,8 @@ ENV BUGZILLA_ROOT $HOME/devel/htdocs/bmo
 ENV GITHUB_BASE_GIT https://github.com/mozilla/webtools-bmo-bugzilla
 ENV GITHUB_BASE_BRANCH master
 
-# Copy over all files and scripts
+# Copy over configuration files
 COPY files /files
-COPY scripts /scripts
 
 # Distribution package installation
 RUN yum -y -q install https://dev.mysql.com/get/mysql-community-release-el7-5.noarch.rpm epel-release \
@@ -42,6 +48,7 @@ RUN cp /files/sudoers /etc/sudoers \
 RUN su $BUGZILLA_USER -c "git clone $GITHUB_BASE_GIT -b $GITHUB_BASE_BRANCH $BUGZILLA_ROOT"
 
 # Bugzilla dependencies and setup
+COPY scripts /scripts
 RUN chmod a+x /scripts/*
 RUN /scripts/install_deps.sh
 RUN /scripts/bugzilla_config.sh

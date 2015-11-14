@@ -17,7 +17,7 @@
         "workerType": "b2gtest",
         "payload": {
           "image": "dklawren/webtools-bmo-bugzilla",
-          "command": ["/runtests.sh"],
+          "command": ["/scripts/runtests.sh"],
           "env": {
             "TEST_SUITE": "sanity"
           },
@@ -47,7 +47,7 @@
         "workerType": "b2gtest",
         "payload": {
           "image": "dklawren/webtools-bmo-bugzilla",
-          "command": ["/runtests.sh"],
+          "command": ["/scripts/runtests.sh"],
           "env": {
             "TEST_SUITE": "docs"
           },
@@ -77,7 +77,7 @@
         "workerType": "b2gtest",
         "payload": {
           "image": "dklawren/webtools-bmo-bugzilla",
-          "command": ["/runtests.sh"],
+          "command": ["/scripts/runtests.sh"],
           "env": {
             "TEST_SUITE": "webservices"
           },
@@ -112,7 +112,7 @@
         "workerType": "b2gtest",
         "payload": {
           "image": "dklawren/webtools-bmo-bugzilla",
-          "command": ["/runtests.sh"],
+          "command": ["/scripts/runtests.sh"],
           "env": {
             "TEST_SUITE": "selenium"
           },

@@ -82,7 +82,6 @@ RewriteRule ^form[\.:]fxos[\.\-:]preload[\.\-:]app$ enter_bug.cgi?product=Market
 RewriteRule ^form[\.:]fxos[\.\-:]mcts[\.\-:]waiver$ enter_bug.cgi?product=Firefox+OS&format=fxos-mcts-waiver [QSA]
 RewriteRule ^form[\.:]comm[\.:]newsletter$ enter_bug.cgi?product=Marketing&format=comm-newsletter [QSA]
 RewriteRule ^form[\.:]screen[\.:]share[\.:]whitelist$ enter_bug.cgi?product=Firefox&format=screen-share-whitelist [QSA]
-RewriteRule ^form[\.:]webops[\.\-:]request$ enter_bug.cgi?product=Infrastructure+\%26+Operations&format=webops-request [QSA]
 RewriteRule ^form[\.:]data[\.\-:]compliance$ enter_bug.cgi?product=Data+Compliance&format=data-compliance [QSA]
 RewriteRule ^form[\.:]third[\.\-:]party$ enter_bug.cgi?product=Marketing&format=third-party-apps [QSA]
 RewriteRule ^form[\.:]fsa[\.:]budget$ enter_bug.cgi?product=FSA&format=fsa-budget [QSA]

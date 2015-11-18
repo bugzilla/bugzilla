@@ -60,4 +60,3 @@ then
   buildbot_step "$@"
   exit $?
 fi
-

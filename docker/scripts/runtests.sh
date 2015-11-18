@@ -1,13 +1,9 @@
 #!/bin/bash
-
 # This Source Code Form is subject to the terms of the Mozilla Public
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
-#
-# This Source Code Form is "Incompatible With Secondary Licenses", as
-# defined by the Mozilla Public License, v. 2.0.
 
-BUILDBOT=/scripts/buildbot_step
+BUILDBOT=$BUGZILLA_ROOT/docker/scripts/buildbot_step
 
 if [ -z "$TEST_SUITE" ]; then
     TEST_SUITE=sanity
@@ -29,7 +25,7 @@ if [ "$GITHUB_BASE_REV" != "" ]; then
 fi
 
 echo -e "\n== Checking dependencies for changes"
-bash /scripts/install_deps.sh
+$BUGZILLA_ROOT/docker/scripts/install_deps.sh
 
 if [ "$TEST_SUITE" = "sanity" ]; then
     $BUILDBOT "Sanity" prove -f -v t/*.t
@@ -54,13 +50,11 @@ echo -e "\n== Starting memcached"
 sleep 3
 
 echo -e "\n== Running checksetup"
-export DB_ENV_MYSQL_DATABASE="bugs_test"
-bash /scripts/checksetup_answers.sh > checksetup_answers.txt
-perl checksetup.pl checksetup_answers.txt
-perl checksetup.pl checksetup_answers.txt
+perl checksetup.pl $BUGZILLA_ROOT/qa/config/checksetup_answers.txt
+perl checksetup.pl $BUGZILLA_ROOT/qa/config/checksetup_answers.txt
 
 echo -e "\n== Generating bmo data"
-perl /scripts/generate_bmo_data.pl
+perl $BUGZILLA_ROOT/docker/scripts/generate_bmo_data.pl
 
 echo -e "\n== Generating test data"
 cd $BUGZILLA_ROOT/qa/config

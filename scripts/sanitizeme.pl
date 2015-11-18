@@ -104,6 +104,7 @@ eval {
     delete_sensitive_user_data();
     delete_attachment_data() unless $keep_attachments;
     delete_bug_user_last_visit();
+    delete_user_request_log();
     Bugzilla::Hook::process('db_sanitize');
     disable_email_delivery() unless $enable_email;
     print "All done!\n";
@@ -219,6 +220,11 @@ sub delete_attachment_data {
 sub delete_bug_user_last_visit {
     print "Removing all entries from bug_user_last_visit...\n";
     $dbh->do('TRUNCATE TABLE bug_user_last_visit');
+}
+
+sub delete_user_request_log {
+    print "Removing all entries from user_request_log...\n";
+    $dbh->do('TRUNCATE TABLE user_request_log');
 }
 
 sub disable_email_delivery {

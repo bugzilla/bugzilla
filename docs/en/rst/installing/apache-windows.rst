@@ -36,7 +36,7 @@ and do the following steps:
         ScriptInterpreterSource Registry-Strict
         Options +ExecCGI +FollowSymLinks
         DirectoryIndex index.cgi index.html
-        AllowOverride Limit FileInfo Indexes Options
+        AllowOverride All
         Require all granted
     </Directory>
 

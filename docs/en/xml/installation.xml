@@ -1058,7 +1058,7 @@ SetEnv LD_LIBRARY_PATH /u01/app/oracle/product/10.2.0/lib/
 AddHandler cgi-script .cgi
 Options +ExecCGI
 DirectoryIndex index.cgi index.html
-AllowOverride Limit FileInfo Indexes Options
+AllowOverride All
 &lt;/Directory&gt;
                 </programlisting>
     

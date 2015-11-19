@@ -68,7 +68,7 @@ mod_cgi, do the following:
      AddHandler cgi-script .cgi
      Options +ExecCGI +FollowSymLinks
      DirectoryIndex index.cgi index.html
-     AllowOverride Limit FileInfo Indexes Options
+     AllowOverride All
    </Directory>
 
 These instructions allow Apache to run .cgi files found within the Bugzilla

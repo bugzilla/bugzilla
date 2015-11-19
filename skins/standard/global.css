@@ -655,7 +655,7 @@ input.required, select.required, span.required_explanation {
     list-style-type: none;
 }
 
-.field_textarea_readonly {
+pre.field_textarea_readonly {
     margin: 2px;
     padding: 4px;
     overflow: auto;
@@ -663,9 +663,6 @@ input.required, select.required, span.required_explanation {
     max-width: 30em;
     max-height: 7em;
     border: 1px solid #CCC;
-}
-
-.field_textarea_readonly pre {
     font-family: monospace;
     white-space: pre-wrap;
 }

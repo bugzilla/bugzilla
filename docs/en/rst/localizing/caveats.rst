@@ -164,21 +164,21 @@ Let's say we have the following:
     [% IF !Param("allowbugdeletion") %]
     <p>
       Sorry, there
-  
-      [% IF comp.bug_count &gt; 1 %] 
-        are [% comp.bug_count %] [%+ terms.bugs %] 
+
+      [% IF comp.bug_count &gt; 1 %]
+        are [% comp.bug_count %] [%+ terms.bugs %]
       [% ELSE %]
-         is [% comp.bug_count %] [%+ terms.bug %] 
+         is [% comp.bug_count %] [%+ terms.bug %]
       [% END %]
-  
+
       pending for this component. You should reassign
-  
+
       [% IF comp.bug_count &gt; 1 %]
          these [% terms.bugs %]
       [% ELSE %]
          this [% terms.bug %]
       [% END %]
-  
+
       to another component before deleting this component.
     </p>
     [% ELSE %]
@@ -189,7 +189,7 @@ for a component. ``IF comp.bug_count > 1`` means "if there are more than one bug
 Let's say your language has to deal with three plural forms and that the terms "bug" and
 "pending" should be declensed as well.
 
-First, you'll have to populate the :file:`/template/en/default/global/variables.none.tmp`
+First, you'll have to populate the :file:`/template/en/default/global/variables.none.tmpl`
 file with the declensions for "bug", which would give something like:
 
 .. code-block:: text
@@ -200,7 +200,7 @@ file with the declensions for "bug", which would give something like:
     "bug2" => "declension for two bugs",
     "bug3" => "declension for three bugs",
     "bugs" => "declension for more than three bugs",
-  
+
 
 Then, the previous code should look like:
 
@@ -209,31 +209,31 @@ Then, the previous code should look like:
     [% IF !Param("allowbugdeletion") %]
     <p>
       Sorry, there
-  
-      [% IF comp.bug_count > 3 %] 
-        are [% comp.bug_count %] pending [% terms.bugs %] 
+
+      [% IF comp.bug_count > 3 %]
+        are [% comp.bug_count %] pending [% terms.bugs %]
       [% ELSE %]
-        [% IF comp.bug_count == 0 %] 
-         is [% comp.bug_count %] pending [% terms.bug0 %] 
+        [% IF comp.bug_count == 0 %]
+         is [% comp.bug_count %] pending [% terms.bug0 %]
       [% ELSE %]
-        [% IF comp.bug_count == 1 %] 
+        [% IF comp.bug_count == 1 %]
          is [% comp.bug_count %] pending [% terms.bug %]
       [% ELSE %]
-        [% IF comp.bug_count == 2 %] 
+        [% IF comp.bug_count == 2 %]
          are [% comp.bug_count %] pending [% terms.bug2 %]
       [% ELSE %]
-        [% IF comp.bug_count == 3 %] 
-         are [% comp.bug_count %] pending [% terms.bug3 %] 
+        [% IF comp.bug_count == 3 %]
+         are [% comp.bug_count %] pending [% terms.bug3 %]
       [% END %]
-  
+
       for this component. You should reassign
-  
+
       [% IF comp.bug_count &gt; 1 %]
          these [% terms.bugs %]
       [% ELSE %]
          this [% terms.bug %]
       [% END %]
-  
+
       to another component before deleting this component.
     </p>
     [% ELSE %]

@@ -49,7 +49,8 @@ also use a four-letter locale code, e.g. ``pt-BR`` for Brazilian Portuguese or
 ``zh-CN`` for Chinese (Simplified). In the rest of this guide, your locale
 code will be represented by ``ab-CD``.
 
-Then, run:
+Open a terminal and go to your Bugzilla installation's top-level directory
+and then run:
 
 :command:`contrib/new-locale.pl ab-CD`
 

@@ -10,4 +10,7 @@ Bugzilla administrator will untar in their ``$BUGZILLA_HOME`` directory.
 This command will find all of the files you've localized and put them into
 an appropriate tarball. Don't forget to replace both instances of ``ab-CD``:
 
+Open a terminal and go to your Bugzilla installation's top-level directory
+and then run:
+
 :command:`find -name "ab-CD" -print0 -o -path "./data" -prune | tar -cjvf ../bugzilla-ab-CD.tar.bz2 --null -T -`

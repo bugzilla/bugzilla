@@ -23,8 +23,8 @@ Though I recommend that you read the documents stated above, here are a few rule
 
   <ul>
     <li>In <code>index.rst</code> files, never localize what is under the <code>.. toctree::</code> directive: these are file names.</li>
-    <li>Never localize a term surrounded with a double dot and two colons. For instance: <code><mark>.. warning::</mark> <span class="green">This is a warning.</span></code>. This
-    will be automatically localized if necessary at compilation time. You can localize what is located after, in green in this example.</li>
+    <li>Never localize a term surrounded with a double dot and two colons. For instance: <code><mark>.. warning::</mark> This is a warning</code>. This
+    will be automatically localized if necessary at compilation time. You can localize any text that comes after ("This is a warning" in this example).</li>
     <li>Exception: do not localize what is located after the directive <code>.. highlight:: console</code>. The word console here is for formatting purpose.</li>
     <li>Do not localize a term surrounded with two colons or with the signs lesser than and greater than:
     <code>:<mark>ref</mark>:`<span class="green">Démarrage rapide</span>&lt;<mark>quick-start</mark>&gt;`</code>. "ref" is a reserved word and "quick-start" is a file name. In the following syntax example, do not localize "using"

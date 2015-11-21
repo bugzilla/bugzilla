@@ -29,14 +29,14 @@
 [% END %]
 
 [% IF user.authorizer.can_change_email && Param('allowemailchange') %]
-  <p>
+  <p id="change_email">
     If you want to change your e-mail address
     <b>[% user.email FILTER html %]</b> to which [% terms.Bugzilla %] sends
     notifications, click the "Account Information" tab above.
   </p>
 [% END %]
 
-<p>
+<p id="trivial_email">
   If you don't like getting a notification for "trivial"
   changes to [% terms.bugs %], you can use the settings below to
   filter some or all notifications.
@@ -68,6 +68,7 @@ function SetCheckboxes(setting) {
 
 <hr>
 
+<div id="global_options">
 <h3>Global options</h3>
 
 [% prefname = "email-$constants.REL_ANY-$constants.EVT_FLAG_REQUESTED" %]
@@ -88,7 +89,9 @@ function SetCheckboxes(setting) {
 [% END %]
 
 <hr>
+</div>
 
+<div id="field_recipient_options">
 <h3>Field/recipient specific options</h3>
 
 [% events = [
@@ -137,7 +140,7 @@ function SetCheckboxes(setting) {
 ] %]
 
 [% IF Param('useqacontact') %]
-  [% relationships.push({ id = constants.REL_QA, 
+  [% relationships.push({ id = constants.REL_QA,
                           description = "QA Contact" }) %]
 [% END %]
 
@@ -163,7 +166,7 @@ function SetCheckboxes(setting) {
     [% END %]
   </tr>
 
-  [% FOREACH event = events %]  
+  [% FOREACH event = events %]
     [% count = loop.count() %]
     <tr class="bz_row_[% count % 2 == 1 ? "odd" : "even" %]">
       [% FOREACH relationship = relationships %]
@@ -190,7 +193,7 @@ function SetCheckboxes(setting) {
     <th>but not when (overrides above):</th>
   </tr>
 
-  [% FOREACH event = neg_events %]  
+  [% FOREACH event = neg_events %]
     [% count = loop.count() %]
     <tr class="bz_row_[% count % 2 == 1 ? "odd" : "even" %]">
       [% FOREACH relationship = relationships %]
@@ -206,11 +209,13 @@ function SetCheckboxes(setting) {
 </table>
 
 <hr>
+</div>
 
+<div id="user_watching">
 <h3>User Watching</h3>
 
 <p>
-If you watch a user, it is as if you are standing in their shoes for the 
+If you watch a user, it is as if you are standing in their shoes for the
 purposes of getting email. Email is sent or not according to <em>your</em>
 preferences for <em>their</em> relationship to the [% terms.bug %]
 (e.g. Assignee).
@@ -254,13 +259,15 @@ preferences for <em>their</em> relationship to the [% terms.bug %]
 </p>
 
 <hr>
+</div>
 
+<div id="ignore_bugs">
 <h3>Ignore [% terms.Bugs %]</h3>
 
 <p>
   You can specify a list of [% terms.bugs %] from which you never want to get
   any email notification of any kind by adding their ID(s) as a comma-separated
-  list. Removing [% terms.abug %] by selecting it from the current ignored list 
+  list. Removing [% terms.abug %] by selecting it from the current ignored list
   will re-enable email notifications for the [% terms.bug %].
 </p>
 [% IF user.bugs_ignored.size %]
@@ -291,6 +298,7 @@ preferences for <em>their</em> relationship to the [% terms.bug %]
 
 <p>
   Add [% terms.bugs %]:<br>
-  <input type="text" id="add_ignored_bugs" 
+  <input type="text" id="add_ignored_bugs"
          name="add_ignored_bugs" size="60">
 </p>
+</div>

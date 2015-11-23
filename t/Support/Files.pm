@@ -28,6 +28,7 @@ use Bugzilla;
 use File::Find;
 
 use constant IGNORE => qw(
+    Bugzilla/DuoAPI.pm
     Bugzilla/DuoWeb.pm
 );
 

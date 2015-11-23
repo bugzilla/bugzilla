@@ -1,0 +1,60 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% js = BLOCK %]
+
+  $(function() {
+    $('#return')
+      .click(function(event) {
+        event.preventDefault();
+        window.history.back();
+      });
+  });
+
+[% END %]
+
+[% css = BLOCK %]
+
+  #duo_container {
+    background: #fff;
+    padding: 10px;
+    margin-bottom: 1em;
+  }
+
+[% END %]
+
+[%
+  INCLUDE global/header.html.tmpl
+    title      = "Duo Security Not Available"
+    style      = css
+    javascript = js
+%]
+
+<h1>You have not enrolled in Duo Security</h1>
+
+<div id="duo_container">
+  <p>
+    The email address <b>[% email FILTER html %]</b> is not enrolled in Duo Security on
+    <a href="https://login.mozilla.com/" target="_blank">login.mozilla.com</a>.
+  </p>
+
+  <p>
+    Please ensure you are using your Mozilla LDAP username, and that you have
+    completed the <a href="https://mana.mozilla.org/wiki/display/SD/DuoSecurity" target="_blank">
+      Duo Security enrollment process</a>.
+  </p>
+
+  <p>
+    Duo Security MFA may not yet be available for your Mozilla account.<br>
+    Contact End User Services / ServiceDesk for more information.
+  </p>
+</div>
+
+<button type="button" id="return">Return</button>
+
+[% INCLUDE global/footer.html.tmpl %]

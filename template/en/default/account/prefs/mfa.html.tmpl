@@ -138,7 +138,7 @@
       [% IF Param("duo_host") && user.in_group("mozilla-employee-confidential") %]
         <button type="button" id="mfa-select-duo">Duo Security</button><br>
         <blockquote>
-          Requires a smartphone and a <a href="https://www.duosecurity.com/" target="_blank">Duo Security</a>
+          Requires a <a href="https://mana.mozilla.org/wiki/display/SD/DuoSecurity" target="_blank">Duo Security</a>
           account (recommended for Mozilla employees).
         </blockquote>
       [% END %]
@@ -202,25 +202,25 @@
 
     </div>
 
-    [%# enable - duo %]
-    <div id="mfa-enable-duo" style="display:none">
+    [% IF Param("duo_host") && user.in_group("mozilla-employee-confidential") %]
+      [%# enable - duo %]
+      <div id="mfa-enable-duo" style="display:none">
 
-      <p>
-        <label>Duo Username:</label>
-        <input type="text" name="username" id="mfa-duo-user">
-      </p>
+        <p>
+          <label>Duo Username:</label>
+          <input type="text" name="username" id="mfa-duo-user">
+        </p>
 
-      <p>
-        <img src="images/duo.png" id="duo-logo" width="32" height="32">
-        Verification with Duo Security will be performed before your account is updated.<br>
+        <p>
+          <img src="images/duo.png" id="duo-logo" width="32" height="32">
+          Verification with Duo Security will be performed before your account is updated.<br>
 
-        [% IF user.in_group("mozilla-employee-confidential") %]
-          You must <a href="https://login.mozilla.com/duo_enrollments/" target="_blank">
-          sign up for Duo Security via login.mozilla.com</a> before you can use Duo 2FA.
-        [% END %]
-      </p>
+          You must be <a href="https://mana.mozilla.org/wiki/display/SD/DuoSecurity" target="_blank">
+          enrolled with Duo Security via login.mozilla.com</a> before you can use Duo 2FA.
+        </p>
 
-    </div>
+      </div>
+    [% END %]
 
   [% END %]
 

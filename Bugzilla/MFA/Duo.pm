@@ -9,6 +9,7 @@ package Bugzilla::MFA::Duo;
 use strict;
 use parent 'Bugzilla::MFA';
 
+use Bugzilla::DuoAPI;
 use Bugzilla::DuoWeb;
 use Bugzilla::Error;
 
@@ -18,6 +19,23 @@ sub can_verify_inline {
 
 sub enroll {
     my ($self, $params) = @_;
+
+    # verify that the user is enrolled with duo
+    my $client = Bugzilla::DuoAPI->new(
+        Bugzilla->params->{duo_ikey},
+        Bugzilla->params->{duo_skey},
+        Bugzilla->params->{duo_host}
+    );
+    my $response = $client->json_api_call('POST', '/auth/v2/preauth', { username => $params->{username} });
+
+    # not enrolled - show a nice error page instead of just throwing
+    unless ($response->{result} eq 'auth' || $response->{result} eq 'allow') {
+        print Bugzilla->cgi->header();
+        my $template = Bugzilla->template;
+        $template->process('mfa/duo/not_enrolled.html.tmpl', { email => $params->{username} })
+            || ThrowTemplateError($template->error());
+        exit;
+    }
 
     $self->property_set('user', $params->{username});
 }

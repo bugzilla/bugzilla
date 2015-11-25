@@ -45,7 +45,10 @@ sub check_multi {
         return "";
     }
     elsif ($param->{'type'} eq 'm' || $param->{'type'} eq 'o') {
-        foreach my $chkParam (split(',', $value)) {
+        if (ref($value) ne "ARRAY") {
+            $value = [split(',', $value)]
+        }
+        foreach my $chkParam (@$value) {
             unless (scalar(grep {$_ eq $chkParam} (@{$param->{'choices'}}))) {
                 return "Invalid choice '$chkParam' for multi-select list param '$param->{'name'}'";
             }

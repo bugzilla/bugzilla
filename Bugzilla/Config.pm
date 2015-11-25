@@ -315,7 +315,13 @@ sub read_param_file {
         }
         # JSON::XS doesn't detaint data for us.
         foreach my $key (keys %params) {
-            trick_taint($params{$key}) if defined $params{$key};
+            if (ref($params{$key}) eq "ARRAY") {
+                foreach my $item (@{$params{$key}}) {
+                    trick_taint($item);
+                }
+            } else {
+                trick_taint($params{$key}) if defined $params{$key};
+            }
         }
     }
     elsif ($ENV{'SERVER_SOFTWARE'}) {

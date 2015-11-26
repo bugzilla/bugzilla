@@ -613,7 +613,6 @@
     %]
 
       [% IF user.id %]
-        <button type="button" id="add-cc-btn" class="minor">Add</button>
         <div id="add-cc-container" style="display:none">
           [% INCLUDE global/userselect.html.tmpl
               id = "add-cc"
@@ -637,9 +636,16 @@
             END;
           %]
         </span>
-        <div id="cc-list" style="display:none"></div>
       [% ELSE %]
         <i>Nobody</i>
+      [% END %]
+
+      [% IF user.id %]
+        <button type="button" id="add-cc-btn" class="minor">Add</button>
+      [% END %]
+
+      [% IF bug.cc && bug.cc.size %]
+        <div id="cc-list" style="display:none"></div>
       [% END %]
     [% END %]
 

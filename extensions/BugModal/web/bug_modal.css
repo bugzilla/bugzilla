@@ -343,7 +343,7 @@ input[type="number"] {
 }
 
 #add-cc-btn {
-    float: right;
+    margin-left: 8px;
 }
 
 #add-cc {

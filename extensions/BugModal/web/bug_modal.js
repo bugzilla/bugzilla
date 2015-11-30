@@ -301,7 +301,7 @@ $(function() {
     // lightboxes
     $('.lightbox, .comment-text .lightbox + span:first-of-type a:first-of-type')
         .click(function(event) {
-            if (event.metaKey)
+            if (event.metaKey || event.ctrlKey || event.altKey || event.shiftKey)
                 return;
             event.preventDefault();
             lb_show(this);

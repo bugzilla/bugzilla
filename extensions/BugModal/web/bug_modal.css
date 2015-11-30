@@ -250,8 +250,12 @@ input[type="number"] {
     padding-top: 4px;
 }
 
-#status-needinfo, #status-needinfo .vcard {
+#status-assignee, #status-assignee .vcard, #status-needinfo, #status-needinfo .vcard {
     display: inline;
+}
+
+#status-assignee, #status-needinfo {
+    margin-left: 8px;
 }
 
 #duplicate-container, #duplicate-actions,

@@ -17,8 +17,10 @@
   END;
   bugid = bug.id;
 
-  # this is used in a few places
+  # these are used in a few places
   is_cced = bug.cc.contains(user.login);
+  unassigned = (bug.assigned_to.login == "nobody@mozilla.org")
+               || (bug.assigned_to.login.search('\.bugs$'));
 
   # custom fields that have custom rendering, or should not be rendered
   rendered_custom_fields = [
@@ -216,6 +218,17 @@
         in [% firefox_fixed_version || bug.target_milestone FILTER html %]
       [% ELSIF bug.dup_id %]
         of [% terms.bug _ " $bug.dup_id" FILTER bug_link(bug.dup_id) FILTER none %]
+      [% ELSIF bug.resolution == "" %]
+        <div id="status-assignee">
+          [%
+            IF unassigned;
+              "Unassigned";
+            ELSE;
+              "Assigned to ";
+              INCLUDE bug_modal/user.html.tmpl u=bug.assigned_to nick_only=1;
+            END;
+          %]
+        </div>
       [% END %]
       [% IF needinfo.size %]
         <div id="status-needinfo">
@@ -477,8 +490,6 @@
 [%# === people === %]
 
 [%
-  unassigned = (bug.assigned_to.login == "nobody@mozilla.org")
-               || (bug.assigned_to.login.search('\.bugs$'));
   sub = [];
   sub.push("Reporter: " _ bug.reporter.moz_nick);
   sub.push(unassigned ? "Unassigned" : "Assigned: " _ bug.assigned_to.moz_nick);

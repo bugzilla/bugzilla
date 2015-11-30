@@ -42,6 +42,11 @@ my $uri = URI->new(Bugzilla->params->{sentry_uri});
 my $header = build_header($uri);
 exit(1) unless $header;
 
+my $ua = LWP::UserAgent->new(timeout => 10);
+if (my $proxy_url = Bugzilla->params->{proxy_url}) {
+    $ua->proxy(['http', 'https'], $proxy_url);
+}
+
 flock(DATA, LOCK_EX);
 foreach my $file (glob(bz_locations()->{error_reports} . '/*.dump')) {
     eval {
@@ -82,7 +87,7 @@ sub send_file {
 
     # and post to sentry
     my $request = POST $uri->canonical, %$header, Content => $message;
-    my $response = LWP::UserAgent->new(timeout => 10)->request($request);
+    my $response = $ua->request($request);
 }
 
 __DATA__

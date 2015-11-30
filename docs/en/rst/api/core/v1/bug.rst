@@ -616,6 +616,9 @@ resolution          string   If you are filing a closed bug, then you will have
 target_milestone    string   A valid target milestone for this product.
 flags               array    Flags objects to add to the bug. The object format
                              is described in the Flag object below.
+keywords            array    One or more valid keywords to add to this bug.
+dependson           array    One or more valid bug ids that this bug depends on.
+blocked             array    One or more valid bug ids that this bug blocks.
 ==================  =======  ====================================================
 
 Flag object:

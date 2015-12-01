@@ -118,7 +118,7 @@ sub _throw_error {
         }
 
         my $cgi = Bugzilla->cgi;
-        $cgi->close_standby_message('text/html', 'inline');
+        $cgi->close_standby_message('text/html', 'inline', 'error', 'html');
         $template->process($name, $vars)
           || ThrowTemplateError($template->error());
         print $cgi->multipart_final() if $cgi->{_multipart_in_progress};

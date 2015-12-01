@@ -213,7 +213,8 @@
         [% Hook.process("links") %]
 
         <a href="buglist.cgi?
-        [% urlquerypart FILTER html %]&amp;ctype=csv&amp;human=1">CSV</a> |
+        [% urlquerypart FILTER html %]&amp;ctype=csv&amp;human=1
+          [%~ IF searchname %]&amp;namedcmd=[% searchname FILTER uri %][% END %]">CSV</a> |
         <a href="buglist.cgi?
         [% urlquerypart FILTER html %]&amp;title=
         [%- title FILTER uri %]&amp;ctype=atom">Feed</a> |

@@ -344,7 +344,7 @@ $params ||= new Bugzilla::CGI($cgi);
 # at the end, because the fact that there is a remembered query gets 
 # forgotten in the process of retrieving it.
 my $disp_prefix = "bugs";
-if ($cmdtype eq "dorem" && $remaction =~ /^run/) {
+if (($cmdtype eq "dorem" && $remaction =~ /^run/) || ($format->{extension} ne 'html' && defined $cgi->param('namedcmd'))) {
     $disp_prefix = $cgi->param('namedcmd');
 }
 
@@ -1087,7 +1087,7 @@ if ($format->{'extension'} eq "csv") {
     $vars->{'human'} = $cgi->param('human');
 }
 
-$cgi->close_standby_message($contenttype, $disposition);
+$cgi->close_standby_message($contenttype, $disposition, $disp_prefix, $format->{'extension'});
 
 ################################################################################
 # Content Generation

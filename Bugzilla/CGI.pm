@@ -335,16 +335,15 @@ sub multipart_start {
 }
 
 sub close_standby_message {
-    my ($self, $contenttype, $disposition) = @_;
+    my ($self, $contenttype, $disp, $disp_prefix, $extension) = @_;
+    $self->set_dated_content_disp($disp, $disp_prefix, $extension);
 
     if ($self->{_multipart_in_progress}) {
         print $self->multipart_end();
-        print $self->multipart_start(-type                => $contenttype,
-                                     -content_disposition => $disposition);
+        print $self->multipart_start(-type => $contenttype);
     }
     else {
-        print $self->header(-type                => $contenttype,
-                            -content_disposition => $disposition);
+        print $self->header($contenttype);
     }
 }
 

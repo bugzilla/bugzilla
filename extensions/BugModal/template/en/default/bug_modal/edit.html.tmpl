@@ -473,6 +473,13 @@
       inline = 1
       edit_only = 1
   %]
+  [% UNLESS prefix %]
+    <div id="assigned-container" style="display:none">
+      <button type="button" class="minor" id="mark-as-assigned-btn">
+        Mark as Assigned
+      </button>
+    </div>
+  [% END %]
   [% IF bug.choices.resolution.only("name", "DUPLICATE").size %]
     <div id="[% prefix FILTER none %]duplicate-container">
       of

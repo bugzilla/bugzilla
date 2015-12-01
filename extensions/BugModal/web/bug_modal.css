@@ -258,7 +258,7 @@ input[type="number"] {
     margin-left: 8px;
 }
 
-#duplicate-container, #duplicate-actions,
+#duplicate-container, #duplicate-actions, #assigned-container,
 #bottom-duplicate-container, #bottom-duplicate-actions {
     display: table-cell;
     vertical-align: top;

@@ -194,15 +194,9 @@ if ($action eq 'new') {
         isactive    => scalar $cgi->param('isactive'),
         icon_url    => scalar $cgi->param('icon_url'),
         isbuggroup  => 1,
+        use_in_all_products => scalar $cgi->param('insertnew'),
     });
 
-    # Permit all existing products to use the new group if makeproductgroups.
-    if ($cgi->param('insertnew')) {
-        $dbh->do('INSERT INTO group_control_map
-                  (group_id, product_id, membercontrol, othercontrol)
-                  SELECT ?, products.id, ?, ? FROM products',
-                  undef, ($group->id, CONTROLMAPSHOWN, CONTROLMAPNA));
-    }
     delete_token($token);
 
     $vars->{'message'} = 'group_created';

@@ -383,6 +383,7 @@ sub create {
     my $dbh = Bugzilla->dbh;
 
     my $silently = delete $params->{silently};
+    my $use_in_all_products = delete $params->{use_in_all_products};
     if (Bugzilla->usage_mode == USAGE_MODE_CMDLINE and !$silently) {
         print get_text('install_group_create', { name => $params->{name} }),
               "\n";
@@ -404,6 +405,14 @@ sub create {
         $sth->execute($admin->id, $group->id, GROUP_MEMBERSHIP);
         $sth->execute($admin->id, $group->id, GROUP_BLESS);
         $sth->execute($admin->id, $group->id, GROUP_VISIBLE);
+    }
+
+    # Permit all existing products to use the new group if requested.
+    if ($use_in_all_products) {
+        $dbh->do('INSERT INTO group_control_map
+                  (group_id, product_id, membercontrol, othercontrol)
+                  SELECT ?, products.id, ?, ? FROM products',
+                  undef, ($group->id, CONTROLMAPSHOWN, CONTROLMAPNA));
     }
 
     $group->_rederive_regexp() if $group->user_regexp;
@@ -524,8 +533,11 @@ provides, in addition to any methods documented below.
 
 Note that in addition to what L<Bugzilla::Object/create($params)>
 normally does, this function also makes the new group be inherited
-by the C<admin> group. That is, the C<admin> group will automatically
-be a member of this group.
+by the C<admin> group and optionally inserts access controls for
+this group into all existing products. That is, the C<admin> group
+will automatically be a member of this group and bugs for all
+products may optionally be restricted to this group by group
+members.
 
 =item C<ValidateGroupName($name, @users)>
 

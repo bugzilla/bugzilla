@@ -222,7 +222,9 @@ preferences for <em>their</em> relationship to the [% terms.bug %]
 </p>
 
 [% IF watchedusers.size %]
-  <p>You are watching everyone in the following list:</p>
+  <p>
+    <label for="watched_by_you">You are watching everyone in the following list:</label>
+  </p>
   <p>
     <select id="watched_by_you" name="watched_by_you" multiple="multiple" size="5">
         [% FOREACH w = watchedusers %]
@@ -238,7 +240,8 @@ preferences for <em>their</em> relationship to the [% terms.bug %]
 [% END %]
 
 
-<p id="new_watched_by_you">Add users to my watch list (comma separated list):
+<p id="new_watched_by_you">
+  <label for="new_watchedusers">Add users to my watch list (comma separated list):</label>
   [% INCLUDE global/userselect.html.tmpl
      id => "new_watchedusers"
      name => "new_watchedusers"
@@ -279,7 +282,8 @@ preferences for <em>their</em> relationship to the [% terms.bug %]
         <td>
           <input type="checkbox" name="remove_ignored_bug_[% bug.id FILTER html %]" value="1">
         </td>
-        <td><a href="[% urlbase FILTER html %]show_bug.cgi?id=[% bug.id FILTER uri %]">
+        <td>
+          <a href="[% urlbase FILTER html %]show_bug.cgi?id=[% bug.id FILTER uri %]">
           [% bug.id FILTER html %]</a>
         </td>
         <td>[% bug.status FILTER html %]</td>
@@ -297,7 +301,7 @@ preferences for <em>their</em> relationship to the [% terms.bug %]
 [% END %]
 
 <p>
-  Add [% terms.bugs %]:<br>
+  <label for="add_ignored_bugs">Add [% terms.bugs %]:</label>
   <input type="text" id="add_ignored_bugs"
          name="add_ignored_bugs" size="60">
 </p>

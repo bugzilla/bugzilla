@@ -21,10 +21,10 @@
       </td>
     </tr>
     <tr>
-      <th>Password:</th>
+      <th><label for="old_password">Password:</label></th>
       <td>
         <input type="hidden" name="old_login" value="[% user.login FILTER html %]">
-        <input type="password" name="old_password">
+        <input type="password" name="old_password" id="old_password">
       </td>
     </tr>
     <tr>
@@ -34,24 +34,26 @@
 
   [% IF user.authorizer.can_change_password %]
     <tr>
-      <th>New password:</th>
+      <th><label for="new_password1">New password:</label></th>
       <td>
-        <input type="password" name="new_password1">
+        <input type="password" name="new_password1" id="new_password1">
       </td>
     </tr>
 
     <tr>
-      <th>Confirm new password:</th>
+      <th><label for="new_password2">Confirm new password:</label></th>
       <td>
-        <input type="password" name="new_password2">
+        <input type="password" name="new_password2" id="new_password2">
       </td>
     </tr>
   [% END %]
 
   <tr>
-    <th>Your real name (optional, but encouraged):</th>
+    <th>
+      <label for="realname">Your real name (optional, but encouraged):</label>
+    </th>
     <td>
-      <input size="35" name="realname" value="[% realname FILTER html %]">
+      <input size="35" name="realname" id="realname" value="[% realname FILTER html %]">
     </td>
   </tr>  
 
@@ -79,11 +81,13 @@
     [% ELSE %]
       <tr>
         <th>
-          [% IF Param('emailsuffix') %]
-            New login:
-          [% ELSE %]
-            New email address:
-          [% END %]
+          <label for="new_login_name">
+            [% IF Param('emailsuffix') %]
+              New login:
+            [% ELSE %]
+              New email address:
+            [% END %]
+          </label>
         </th>
         <td>
           <input size="35" id="new_login_name" name="new_login_name"

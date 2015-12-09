@@ -93,15 +93,15 @@
 
     <div id="mfa-auth-container" style="display:none">
       <p>
-        <label>Current Password:</label>
+        <label for="mfa-password">Current Password:</label>
         <input type="password" name="password" id="mfa-password" required>
       </p>
 
       [%# disable/recovery - totp %]
       [% IF user.mfa == "TOTP" %]
 
-        <label>Code:</label>
-        <input type="text" name="code"
+        <label for="code">Code:</label>
+        <input type="text" name="code" id="code"
                placeholder="123456" maxlength="9" pattern="\d{6,9}" size="10"
                autocomplete="off" required>
 
@@ -149,7 +149,7 @@
         Your current password is required to enable two-factor authentication.
       </p>
       <p>
-        <label>Current Password:</label>
+        <label for="mfa-password">Current Password:</label>
         <input type="password" name="password" id="mfa-password" required>
       </p>
     </div>
@@ -167,7 +167,7 @@
           Scan this QR code with your <a href="#" id="mfa-totp-apps">TOTP App</a>,
           then enter the six digit code the app generates.<br>
           <br>
-          <label>Code:</label>
+          <label id="mfa-totp-enable-code">Code:</label>
           <input type="text" name="code" id="mfa-totp-enable-code"
                   placeholder="123456" maxlength="6" pattern="\d{6}" size="10"
                   autocomplete="off">
@@ -207,7 +207,7 @@
       <div id="mfa-enable-duo" style="display:none">
 
         <p>
-          <label>Duo Username:</label>
+          <label title="This is generally your Mozilla LDAP Username" id="mfa-duo-user-label" for="mfa-duo-user">Duo Username:</label>
           <input type="text" name="username" id="mfa-duo-user">
         </p>
 

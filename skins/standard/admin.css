@@ -315,6 +315,10 @@ input[disabled] {
     margin-right: 1em;
 }
 
+#mfa-duo-user-label {
+    cursor: help;
+}
+
 .flex {
     display: flex;
     flex-flow: row;

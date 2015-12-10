@@ -35,11 +35,9 @@ The following command will install Red Hat's packaged version of Bugzilla:
 
 :command:`yum install bugzilla httpd mysql-server`
 
-However, if you go this route, you need to read :bug:`415605`, which details
-some problems with the Email::Send package. Then, you can skip to
-:ref:`configuring your database <linux-config-database>`. It may be useful to
-know that Fedora stores the Bugzilla files in :file:`/usr/share/bugzilla`, so
-that's where you'll run :file:`checksetup.pl`.
+Then, you can skip to :ref:`configuring your database <linux-config-database>`.
+It may be useful to know that Fedora stores the Bugzilla files in
+:file:`/usr/share/bugzilla`, so that's where you'll run :file:`checksetup.pl`.
 
 If you want to install a version of Bugzilla from the Bugzilla project, you
 will instead need:

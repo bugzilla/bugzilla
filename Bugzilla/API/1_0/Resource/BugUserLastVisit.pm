@@ -86,7 +86,7 @@ sub update {
 
         push(
             @results,
-            $self->_bug_user_last_visit_to_hash(
+            _bug_user_last_visit_to_hash(
                 $bug, $last_visit_ts, $params
             ));
     }
@@ -102,31 +102,27 @@ sub get {
 
     $user->login(LOGIN_REQUIRED);
 
+    my @last_visits;
     if ($ids) {
         # Cache permissions for bugs. This highly reduces the number of calls to
         # the DB.  visible_bugs() is only able to handle bug IDs, so we have to
         # skip aliases.
         $user->visible_bugs([grep /^[0-9]$/, @$ids]);
+
+        my %last_visit  = map { $_->bug_id => $_->last_visit_ts } @{ $user->last_visited($ids) };
+        @last_visits = map { _bug_user_last_visit_to_hash($_, $last_visit{$_}, $params) } @$ids;
+    }
+    else {
+        @last_visits = map {
+            _bug_user_last_visit_to_hash($_->bug_id, $_->last_visit_ts, $params)
+        } @{ $user->last_visited };
     }
 
-    my @last_visits = @{ $user->last_visited };
-
-    if ($ids) {
-        # remove bugs that we are not interested in if ids is passed in.
-        my %id_set = map { ($_ => 1) } @$ids;
-        @last_visits = grep { $id_set{ $_->bug_id } } @last_visits;
-    }
-
-    return [
-        map {
-            $self->_bug_user_last_visit_to_hash($_->bug_id, $_->last_visit_ts,
-                $params)
-        } @last_visits
-    ];
+    return \@last_visits;
 }
 
 sub _bug_user_last_visit_to_hash {
-    my ($self, $bug_id, $last_visit_ts, $params) = @_;
+    my ($bug_id, $last_visit_ts, $params) = @_;
 
     my %result = (id            => as_int($bug_id),
                   last_visit_ts => as_datetime($last_visit_ts));

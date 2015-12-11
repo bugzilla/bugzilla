@@ -43,6 +43,33 @@
 
 <h2 id="point">Updates in this 5.0.x Release</h2>
 
+<h3>5.0.2</h3>
+
+<p>This release fixes one security issue. See the
+  <a href="https://www.bugzilla.org/security/4.2.15/">Security Advisory</a>
+  for details.</p>
+
+<p>This release also contains the following [% terms.bug %] fixes:</p>
+
+<ul>
+  <li>mod_perl now works correctly with mod_access_compat turned off on
+    Apache 2.4. To regenerate the <kbd>.htaccess</kbd> files, you must first
+    delete all existing ones in subdirectories:
+    <pre>find . -mindepth 2 -name .htaccess -exec rm -f {} \;</pre>
+    You must then run <kbd>checksetup.pl</kbd> again to recreate them with
+    the correct syntax.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1223790">[% terms.Bug %] 1223790</a>)</li>
+  <li>Emails sent by [% terms.Bugzilla %] are now correctly encoded as UTF-8.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=714724">[% terms.Bug %] 714724</a>)</li>
+  <li>Strawberry Perl is now fully supported on Windows.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1089448">[% terms.Bug %] 1089448</a>
+    and <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=987742">[% terms.bug %] 987742</a>)</li>
+  <li>The XML-RPC API now works with IIS on Windows.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=708252">[% terms.Bug %] 708252</a>)</li>
+  <li>Some queries should now be faster on PostgreSQL.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1184431">[% terms.Bug %] 1184431</a>)</li>
+</ul>
+
 <h3>5.0.1</h3>
 
 <p>This release fixes one security issue. See the

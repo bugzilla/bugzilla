@@ -71,7 +71,7 @@ sub update {
     # Cache permissions for bugs. This highly reduces the number of calls to the
     # DB.  visible_bugs() is only able to handle bug IDs, so we have to skip
     # aliases.
-    $user->visible_bugs([grep /^[0-9]$/, @$ids]);
+    $user->visible_bugs([grep /^[0-9]+$/, @$ids]);
 
     $dbh->bz_start_transaction();
     my @results;
@@ -107,7 +107,7 @@ sub get {
         # Cache permissions for bugs. This highly reduces the number of calls to
         # the DB.  visible_bugs() is only able to handle bug IDs, so we have to
         # skip aliases.
-        $user->visible_bugs([grep /^[0-9]$/, @$ids]);
+        $user->visible_bugs([grep /^[0-9]+$/, @$ids]);
 
         my %last_visit  = map { $_->bug_id => $_->last_visit_ts } @{ $user->last_visited($ids) };
         @last_visits = map { _bug_user_last_visit_to_hash($_, $last_visit{$_}, $params) } @$ids;

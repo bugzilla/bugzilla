@@ -922,9 +922,10 @@ sub groups {
 }
 
 sub last_visited {
-    my ($self) = @_;
+    my ($self, $ids) = @_;
 
-    return Bugzilla::BugUserLastVisit->match({ user_id => $self->id });
+    return Bugzilla::BugUserLastVisit->match({ user_id => $self->id,
+                                               $ids ? ( bug_id => $ids ) : () });
 }
 
 sub is_involved_in_bug {

@@ -55,8 +55,6 @@ use constant FIELD_MAP => {
 # Add aliases here for method name compatibility #
 ##################################################
 
-BEGIN { *get_products = \&get }
-
 # Get the ids of the products the user can search
 sub get_selectable_products {
     Bugzilla->switch_to_shadow_db();
@@ -497,8 +495,6 @@ B<EXPERIMENTAL>
 Returns a list of information about the products passed to it.
 
 B<Note>: You must at least specify one of C<ids> or C<names>.
-
-B<Note>: Can also be called as "get_products" for compatibilty with Bugzilla 3.0 API.
 
 =item B<REST>
 
@@ -990,13 +986,5 @@ You must define a default milestone.
 =item REST API call added in Bugzilla B<5.0>.
 
 =back
-
-=back
-
-=head1 B<Methods in need of POD>
-
-=over
-
-=item get_products
 
 =back

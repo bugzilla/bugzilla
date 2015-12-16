@@ -109,8 +109,6 @@ sub REST_RESOURCES {
 # Methods  #
 ############
 
-BEGIN { *get_products = \&get }
-
 # Get the ids of the products the user can search
 sub get_selectable_products {
     Bugzilla->switch_to_shadow_db();
@@ -510,8 +508,6 @@ ids.
 Returns a list of information about the products passed to it.
 
 B<Note>: You must at least specify one of C<ids> or C<names>.
-
-B<Note>: Can also be called as "get_products" for compatibilty with Bugzilla 3.0 API.
 
 =item B<REST>
 
@@ -1007,7 +1003,5 @@ You must define a default milestone.
 =over
 
 =item REST_RESOURCES
-
-=item get_products
 
 =back

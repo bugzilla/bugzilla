@@ -599,9 +599,27 @@ sub audit_log {
     foreach my $field (keys %$changes) {
         # Skip private changes.
         next if $field =~ /^_/;
-        my ($from, $to) = @{ $changes->{$field} };
+        my ($from, $to) = $self->_sanitize_audit_log($field, $changes->{$field});
         $sth->execute($user_id, $class, $self->id, $field, $from, $to);
     }
+}
+
+sub _sanitize_audit_log {
+    my ($self, $field, $changes) = @_;
+    my $class = ref($self) || $self;
+
+    # Do not store hashed passwords. Only record the algorithm used to encode them.
+    if ($class eq 'Bugzilla::User' && $field eq 'cryptpassword') {
+        foreach my $passwd (@$changes) {
+            next unless $passwd;
+            my $algorithm = 'unknown_algorithm';
+            if ($passwd =~ /{([^}]+)}$/) {
+                $algorithm = $1;
+            }
+            $passwd = "hashed_with_$algorithm";
+        }
+    }
+    return @$changes;
 }
 
 sub flatten_to_hash {

@@ -745,6 +745,9 @@ sub update_table_definitions {
     $dbh->bz_add_index('bz_schema', 'bz_schema_version_idx',
                        {FIELDS => ['version'], TYPE => 'UNIQUE'});
 
+    # 2015-12-16 LpSolit@gmail.com - Bug 1232578
+    _sanitize_audit_log_table();
+
     ################################################################
     # New --TABLE-- changes should go *** A B O V E *** this point #
     ################################################################
@@ -3928,6 +3931,30 @@ sub _update_alias {
     });
 
     $dbh->bz_drop_column('bugs', 'alias');
+}
+
+sub _sanitize_audit_log_table {
+    my $dbh = Bugzilla->dbh;
+
+    # Replace hashed passwords by a generic comment.
+    my $class = 'Bugzilla::User';
+    my $field = 'cryptpassword';
+
+    my $hashed_passwd =
+      $dbh->selectcol_arrayref('SELECT added FROM audit_log WHERE class = ? AND field = ?
+                                AND ' . $dbh->sql_not_ilike('hashed_with_', 'added'),
+                                undef, ($class, $field));
+    if (@$hashed_passwd) {
+        say "Sanitizing hashed passwords stored in the 'audit_log' table...";
+        my $sth = $dbh->prepare('UPDATE audit_log SET added = ?
+                                 WHERE class = ? AND field = ? AND added = ?');
+
+        foreach my $passwd (@$hashed_passwd) {
+            my (undef, $sanitized_passwd) =
+              Bugzilla::Object::_sanitize_audit_log($class, $field, [undef, $passwd]);
+            $sth->execute($sanitized_passwd, $class, $field, $passwd);
+        }
+    }
 }
 
 1;

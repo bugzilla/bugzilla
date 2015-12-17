@@ -73,6 +73,15 @@
       [% END %]
     </p>
 
+    [% IF user.mfa && user.in_group("mozilla-employee-confidential") %]
+      <p class="mfa-disable-blurb">
+        You will need to disable your two-factor authentication in order to change to a different method.
+        There will be a small amount of time when your account will not be as secure, so you may use the
+        <a href="userprefs.cgi?tab=sessions">sessions</a> page to log out all other sessions other
+        than the current one after setting up the new method.
+      </p>
+    [% END %]
+
     <div id="mfa-recovery-container" style="display:none">
       <p>
         Your current password and verification code is required to generate

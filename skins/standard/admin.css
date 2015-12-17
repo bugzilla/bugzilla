@@ -319,6 +319,11 @@ input[disabled] {
     cursor: help;
 }
 
+.mfa-api-blurb,
+.mfa-disable-blurb {
+    width: 70%;
+}
+
 .flex {
     display: flex;
     flex-flow: row;

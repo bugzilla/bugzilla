@@ -21,6 +21,8 @@ use Bugzilla::WebService::Util qw(translate params_to_objects validate);
 
 use constant PUBLIC_METHODS => qw(
     create
+    delete
+    update
 );
 
 use constant CREATE_MAPPED_FIELDS => {
@@ -78,7 +80,7 @@ sub _component_params_to_objects {
         # To get the component objects for product/component combination
         # first obtain the product object from the passed product name
         foreach my $name_hash (@{$params->{names}}) {
-            my $product = $user->can_admin_product($name_hash->{product});
+            my $product = $user->check_can_admin_product($name_hash->{product});
             push @components, @{ Bugzilla::Component->match({
                 product_id => $product->id,
                 name       => $name_hash->{component}
@@ -106,9 +108,8 @@ sub _component_params_to_objects {
 sub update {
     my ($self, $params) = @_;
     my $dbh  = Bugzilla->dbh;
-    my $user = Bugzilla->user;
+    my $user = Bugzilla->login(LOGIN_REQUIRED);
 
-    Bugzilla->login(LOGIN_REQUIRED);
     $user->in_group('editcomponents')
         || scalar @{ $user->get_products_by_permission('editcomponents') }
         || ThrowUserError("auth_failure", { group  => "editcomponents",
@@ -197,11 +198,9 @@ sub update {
 
 sub delete {
     my ($self, $params) = @_;
-
     my $dbh  = Bugzilla->dbh;
-    my $user = Bugzilla->user;
+    my $user = Bugzilla->login(LOGIN_REQUIRED);
 
-    Bugzilla->login(LOGIN_REQUIRED);
     $user->in_group('editcomponents')
         || scalar @{ $user->get_products_by_permission('editcomponents') }
         || ThrowUserError("auth_failure", { group  => "editcomponents",

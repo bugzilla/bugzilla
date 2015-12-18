@@ -61,11 +61,9 @@ sub get {
 
 sub create {
     my ($self, $params) = @_;
+    my $user = Bugzilla->login(LOGIN_REQUIRED);
 
-    my $dbh = Bugzilla->dbh;
-    my $user = Bugzilla->user;
-
-    Bugzilla->user->in_group('editcomponents')
+    $user->in_group('editcomponents')
         || scalar(@{$user->get_products_by_permission('editcomponents')})
         || ThrowUserError("auth_failure", { group => "editcomponents",
                                          action => "add",
@@ -121,11 +119,9 @@ sub create {
 
 sub update {
     my ($self, $params) = @_;
-
     my $dbh = Bugzilla->dbh;
-    my $user = Bugzilla->user;
+    my $user = Bugzilla->login(LOGIN_REQUIRED);
 
-    Bugzilla->login(LOGIN_REQUIRED);
     $user->in_group('editcomponents')
         || scalar(@{$user->get_products_by_permission('editcomponents')})
         || ThrowUserError("auth_failure", { group  => "editcomponents",

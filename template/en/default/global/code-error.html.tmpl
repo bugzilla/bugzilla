@@ -375,6 +375,13 @@
     a <code>[% param FILTER html %]</code> argument, and that
     argument was not set.
 
+  [% ELSIF error == "param_integer_required" %]
+    The function <code>[% function FILTER html %]</code> requires
+    that <code>[% param FILTER html %]</code> be an integer.
+
+  [% ELSIF error == "param_integer_array_required" %]
+    The <code>[% param FILTER html %]</code> parameter must be an array of integers.
+
   [% ELSIF error == "params_required" %]
     [% title = "Missing Parameter" %]
     The function <code>[% function FILTER html %]</code> requires

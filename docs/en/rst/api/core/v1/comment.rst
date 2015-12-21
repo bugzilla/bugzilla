@@ -122,19 +122,14 @@ To create a comment on a current bug.
 .. code-block:: js
 
    {
-     "ids" : [123,..],
      "comment" : "This is an additional comment",
      "is_private" : false
    }
-
-``ids`` is optional in the data example above and can be used to specify adding
-a comment to more than one bug at the same time.
 
 ===========  =======  ===========================================================
 name         type     description
 ===========  =======  ===========================================================
 **id**       int      The ID or alias of the bug to append a comment to.
-ids          array    List of integer bug IDs to add the comment to.
 **comment**  string   The comment to append to the bug. If this is empty
                       or all whitespace, an error will be thrown saying that you
                       did not set the ``comment`` parameter.

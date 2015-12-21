@@ -103,10 +103,11 @@ Using Apache with SSL
 If you want to enable SSL with Apache, i.e. access Bugzilla from
 https://localhost/bugzilla, you need to do some extra steps:
 
-#. Edit :file:`C:\\Apache24\\conf\\httpd.conf` and uncomment these two lines:
+#. Edit :file:`C:\\Apache24\\conf\\httpd.conf` and uncomment these lines:
 
    * ``LoadModule ssl_module modules/mod_ssl.so``
    * ``LoadModule socache_shmcb_module modules/mod_socache_shmcb.so``
+   * ``Include conf/extra/httpd-ssl.conf``
 
 #. Create your :file:`.key` and :file:`.crt` files using :file:`openssl.exe`
    provided with Apache:

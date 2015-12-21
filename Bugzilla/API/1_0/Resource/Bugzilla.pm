@@ -34,6 +34,7 @@ use constant LOGIN_EXEMPT => {
 
 use constant READ_ONLY => qw(
     extensions
+    last_audit_time
     parameters
     timezone
     time

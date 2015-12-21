@@ -104,14 +104,14 @@ Some methods do not require you to log in. An example of this is
 :ref:`rest_single_bug`. However, authenticating yourself allows you to see
 non-public information, for example, a bug that is not publicly visible.
 
-There are two ways to authenticate yourself:
+There are several ways to authenticate yourself:
 
 **API Keys**
 
 You can specify ``Bugzilla_api_key`` or simply ``api_key`` as an argument to
 any call, and you will be logged in as that user if the key is correct and has
-not been revoked. You can set up an API key by using the :ref:`API Keys tab <api-keys>` in the
-Preferences pages.
+not been revoked. You can set up an API key by using the :ref:`API Keys tab <api-keys>`
+in the Preferences pages.
 
 API keys may also be requested via :ref:`Authentication Delegation <auth-delegation>`.
 
@@ -158,6 +158,15 @@ to get a new token.
 
 Also starting with Bugzilla 5.0, login cookies are no longer returned by
 :ref:`rest_user_login` due to security concerns.
+
+Alternatively, authentication credentials can be provided via one of the following headers:
+
+* X-BUGZILLA-LOGIN
+* X-BUGZILLA-PASSWORD
+* X-BUGZILLA-API-KEY
+* X-BUGZILLA-TOKEN
+
+Credentials passed as part of the query string take precedence over the header credentials.
 
 Useful Parameters
 -----------------

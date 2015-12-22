@@ -22,7 +22,6 @@ use MIME::Base64 qw(decode_base64 encode_base64);
 use Storable qw(dclone);
 use Test::Taint ();
 use URI::Escape qw(uri_unescape);
-use Bugzilla::WebService::Util qw(validate);
 
 use parent qw(Exporter);
 
@@ -240,6 +239,28 @@ sub api_include_exclude {
     }
 
     return $params;
+}
+
+sub validate  {
+    my ($self, $params, @keys) = @_;
+
+    # If $params is defined but not a reference, then we weren't
+    # sent any parameters at all, and we're getting @keys where
+    # $params should be.
+    return ($self, undef) if (defined $params and !ref $params);
+
+    # If @keys is not empty then we convert any named
+    # parameters that have scalar values to arrayrefs
+    # that match.
+    foreach my $key (@keys) {
+        if (exists $params->{$key}) {
+            $params->{$key} = ref $params->{$key}
+                              ? $params->{$key}
+                              : [ $params->{$key} ];
+        }
+    }
+
+    return ($self, $params);
 }
 
 sub translate {

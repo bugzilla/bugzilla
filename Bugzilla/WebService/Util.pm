@@ -16,7 +16,6 @@ use Bugzilla::FlagType;
 use Bugzilla::Error;
 
 use Storable qw(dclone);
-use List::MoreUtils qw(any all);
 
 use parent qw(Exporter);
 

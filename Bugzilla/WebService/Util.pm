@@ -9,6 +9,9 @@ package Bugzilla::WebService::Util;
 use strict;
 use base qw(Exporter);
 
+use List::MoreUtils qw(all any);
+use Bugzilla::Error;
+
 # We have to "require", not "use" this, because otherwise it tries to
 # use features of Test::More during import().
 require Test::Taint;
@@ -103,7 +106,8 @@ sub validate  {
     # sent any parameters at all, and we're getting @keys where
     # $params should be.
     return ($self, undef) if (defined $params and !ref $params);
-    
+
+    my @id_params = qw( ids comment_ids );
     # If @keys is not empty then we convert any named 
     # parameters that have scalar values to arrayrefs
     # that match.
@@ -112,6 +116,12 @@ sub validate  {
             $params->{$key} = ref $params->{$key} 
                               ? $params->{$key} 
                               : [ $params->{$key} ];
+
+            if (any { $key eq $_ } @id_params) {
+                my $ids = $params->{$key};
+                ThrowCodeError('param_integer_array_required', { param => $key })
+                  unless ref($ids) eq 'ARRAY' && all { /^[0-9]+$/ } @$ids;
+            }
         }
     }
 

@@ -58,7 +58,7 @@ sub CreateImagemap {
             # Pick up bugid from the mapdata label field. Getting the title from
             # bugtitle hash instead of mapdata allows us to get the summary even
             # when showsummary is off, and also gives us status and resolution.
-            my $bugtitle = html_quote(clean_text($bugtitles{$bugid}));
+            my $bugtitle = $bugtitles{$bugid};
             $map .= qq{<area alt="bug $bugid" name="bug$bugid" shape="rect" } .
                     qq{title="$bugtitle" href="$url" } .
                     qq{coords="$leftx,$topy,$rightx,$bottomy">\n};
@@ -176,12 +176,15 @@ foreach my $k (@bug_ids) {
     # Retrieve bug information from the database
     my ($stat, $resolution, $summary) = $dbh->selectrow_array($sth, undef, $k);
 
+    $vars->{'short_desc'} = $summary if ($k eq $cgi->param('id'));
+
     # Resolution and summary are shown only if user can see the bug
-    if (!$user->can_see_bug($k)) {
+    if ($user->can_see_bug($k)) {
+        $summary = html_quote(clean_text($summary));
+    }
+    else {
         $resolution = $summary = '';
     }
-
-    $vars->{'short_desc'} = $summary if ($k eq $cgi->param('id'));
 
     my @params;
 

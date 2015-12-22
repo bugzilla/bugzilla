@@ -719,6 +719,9 @@ sub create {
             {
                 my ($var) = @_;
                 $var = ' ' . $var if substr($var, 0, 1) eq '=';
+                # backslash is not special to CSV, but it can be used to confuse some browsers...
+                # so we do not allow it to happen. We only do this for logged-in users.
+                $var =~ s/\\/\x{FF3C}/g if Bugzilla->user->id;
                 $var =~ s/\"/\"\"/g;
                 if ($var !~ /^-?(\d+\.)?\d*$/) {
                     $var = "\"$var\"";

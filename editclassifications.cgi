@@ -38,7 +38,6 @@ sub LoadTemplate {
 
     $action =~ /(\w+)/;
     $action = $1;
-    print $cgi->header();
     $template->process("admin/classifications/$action.html.tmpl", $vars)
       || ThrowTemplateError($template->error());
     exit;

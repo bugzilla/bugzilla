@@ -40,7 +40,7 @@ foreach my $file (@testitems) {
         ok(1,"$file does not have a shebang");
     } else {
         my $flags;
-        if (!defined $ext || $ext eq "pl") {
+        if (!defined $ext || $ext eq 'pl' || $ext eq 'psgi') {
             # standalone programs aren't taint checked yet
             if (grep { $file eq $_ } @require_taint) {
                 $flags = 'T';

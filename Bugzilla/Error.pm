@@ -28,8 +28,9 @@ use Date::Format;
 sub _in_eval {
     my $in_eval = 0;
     for (my $stack = 1; my $sub = (caller($stack))[3]; $stack++) {
-        last if $sub =~ /^ModPerl/;
-        $in_eval = 1 if $sub =~ /^\(eval\)/;
+        last if $sub =~ /^(?:ModPerl|Plack|CGI::Compile)/;
+        # An eval followed by CGI::Compile is not a "real" eval.
+        $in_eval = 1 if $sub =~ /^\(eval\)/ && (caller($stack + 1))[3] !~ /^CGI::Compile/;
     }
     return $in_eval;
 }

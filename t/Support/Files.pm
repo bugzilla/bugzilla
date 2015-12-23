@@ -34,7 +34,7 @@ sub isTestingFile {
     my ($file) = @_;
     my $exclude;
 
-    if ($file =~ /\.cgi$|\.pl$|\.pm$/) {
+    if ($file =~ /\.psgi$|\.cgi$|\.pl$|\.pm$/) {
         return 1;
     }
     my $additional;

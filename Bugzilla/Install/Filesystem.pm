@@ -167,6 +167,7 @@ sub FILESYSTEM {
         'install-module.pl' => { perms => OWNER_EXECUTE },
         'clean-bug-user-last-visit.pl' => { perms => WS_EXECUTE },
 
+        'app.psgi'      => { perms => CGI_READ },
         'Bugzilla.pm'   => { perms => CGI_READ },
         "$localconfig*" => { perms => CGI_READ },
         'bugzilla.dtd'  => { perms => WS_SERVE },

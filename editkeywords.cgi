@@ -24,10 +24,6 @@ my $dbh = Bugzilla->dbh;
 my $template = Bugzilla->template;
 my $vars = {};
 
-#
-# Preliminary checks:
-#
-
 my $user = Bugzilla->login(LOGIN_REQUIRED);
 
 print $cgi->header();
@@ -47,22 +43,16 @@ $vars->{'action'} = $action;
 if ($action eq "") {
     $vars->{'keywords'} = Bugzilla::Keyword->get_all_with_bug_count();
 
-    print $cgi->header();
     $template->process("admin/keywords/list.html.tmpl", $vars)
       || ThrowTemplateError($template->error());
-
     exit;
 }
-    
 
 if ($action eq 'add') {
     $vars->{'token'} = issue_session_token('add_keyword');
 
-    print $cgi->header();
-
     $template->process("admin/keywords/create.html.tmpl", $vars)
       || ThrowTemplateError($template->error());
-
     exit;
 }
 
@@ -79,8 +69,6 @@ if ($action eq 'new') {
 
     delete_token($token);
 
-    print $cgi->header();
-
     $vars->{'message'} = 'keyword_created';
     $vars->{'name'} = $keyword->name;
     $vars->{'keywords'} = Bugzilla::Keyword->get_all_with_bug_count();
@@ -89,7 +77,6 @@ if ($action eq 'new') {
       || ThrowTemplateError($template->error());
     exit;
 }
-
 
 #
 # action='edit' -> present the edit keywords from
@@ -104,12 +91,10 @@ if ($action eq 'edit') {
     $vars->{'keyword'} = $keyword;
     $vars->{'token'} = issue_session_token('edit_keyword');
 
-    print $cgi->header();
     $template->process("admin/keywords/edit.html.tmpl", $vars)
       || ThrowTemplateError($template->error());
     exit;
 }
-
 
 #
 # action='update' -> update the keyword
@@ -129,8 +114,6 @@ if ($action eq 'update') {
 
     delete_token($token);
 
-    print $cgi->header();
-
     $vars->{'message'} = 'keyword_updated';
     $vars->{'keyword'} = $keyword;
     $vars->{'changes'} = $changes;
@@ -148,7 +131,6 @@ if ($action eq 'del') {
     $vars->{'keyword'} = $keyword;
     $vars->{'token'} = issue_session_token('delete_keyword');
 
-    print $cgi->header();
     $template->process("admin/keywords/confirm-delete.html.tmpl", $vars)
       || ThrowTemplateError($template->error());
     exit;
@@ -162,8 +144,6 @@ if ($action eq 'delete') {
     $keyword->remove_from_db();
 
     delete_token($token);
-
-    print $cgi->header();
 
     $vars->{'message'} = 'keyword_deleted';
     $vars->{'keyword'} = $keyword;

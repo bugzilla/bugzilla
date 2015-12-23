@@ -16,6 +16,7 @@ use autodie qw(:default);
 
 use Bugzilla::Constants;
 use Bugzilla::Hook;
+use Bugzilla::Install::Util qw(i_am_persistent);
 use Bugzilla::Util qw(trick_taint);
 
 use JSON::XS;
@@ -319,15 +320,17 @@ sub read_param_file {
         }
     }
     elsif ($ENV{'SERVER_SOFTWARE'}) {
-       # We're in a CGI, but the params file doesn't exist. We can't
-       # Template Toolkit, or even install_string, since checksetup
-       # might not have thrown an error. Bugzilla::CGI->new
-       # hasn't even been called yet, so we manually use CGI::Carp here
-       # so that the user sees the error.
-       require CGI::Carp;
-       CGI::Carp->import('fatalsToBrowser');
-       die "The $file file does not exist."
-           . ' You probably need to run checksetup.pl.',
+        # We're in a CGI, but the params file doesn't exist. We can't
+        # Template Toolkit, or even install_string, since checksetup
+        # might not have thrown an error. Bugzilla::CGI->new
+        # hasn't even been called yet, so we manually use CGI::Carp here
+        # so that the user sees the error.
+        unless (i_am_persistent()) {
+            require CGI::Carp;
+            CGI::Carp->import('fatalsToBrowser');
+        }
+        die "The $file file does not exist."
+            . ' You probably need to run checksetup.pl.',
     }
     return \%params;
 }

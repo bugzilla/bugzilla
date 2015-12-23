@@ -313,6 +313,26 @@ sub OPTIONAL_MODULES {
         feature => ['jsonrpc'],
     },
     {
+        package => 'Plack',
+        module  => 'Plack',
+        # 1.0031 contains a security fix which would affect us.
+        # It also fixes warnings thrown in Perl 5.20 and newer.
+        version => 1.0031,
+        feature => ['psgi'],
+    },
+    {
+        package => 'CGI-Compile',
+        module  => 'CGI::Compile',
+        version => 0,
+        feature => ['psgi'],
+    },
+    {
+        package => 'CGI-Emulate-PSGI',
+        module  => 'CGI::Emulate::PSGI',
+        version => 0,
+        feature => ['psgi'],
+    },
+    {
         package => 'Test-Taint',
         module  => 'Test::Taint',
         # 1.06 no longer throws warnings with Perl 5.10+.
@@ -474,6 +494,7 @@ use constant FEATURE_FILES => (
                       'Bugzilla/WebService.pm', 'Bugzilla/WebService/*.pm'],
     rest          => ['Bugzilla/WebService/Server/REST.pm', 'rest.cgi',
                       'Bugzilla/WebService/Server/REST/Resources/*.pm'],
+    psgi          => ['app.psgi'],
     moving        => ['importxml.pl'],
     auth_ldap     => ['Bugzilla/Auth/Verify/LDAP.pm'],
     auth_radius   => ['Bugzilla/Auth/Verify/RADIUS.pm'],

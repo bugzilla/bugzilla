@@ -13,8 +13,11 @@ use warnings;
 
 # We want any compile errors to get to the browser, if possible.
 BEGIN {
-    # This makes sure we're in a CGI.
-    if ($ENV{SERVER_SOFTWARE} && !$ENV{MOD_PERL}) {
+    # This makes sure we're in a CGI. mod_perl doesn't support Carp
+    # and Plack reports errors elsewhere.
+    # We cannot call i_am_persistent() from here as its module is
+    # not loaded yet.
+    if ($ENV{SERVER_SOFTWARE} && !($ENV{MOD_PERL} || $ENV{BZ_PLACK})) {
         require CGI::Carp;
         CGI::Carp->import('fatalsToBrowser');
     }
@@ -32,7 +35,7 @@ use Bugzilla::Field;
 use Bugzilla::Flag;
 use Bugzilla::Install::Localconfig qw(read_localconfig);
 use Bugzilla::Install::Requirements qw(OPTIONAL_MODULES have_vers);
-use Bugzilla::Install::Util qw(init_console include_languages);
+use Bugzilla::Install::Util qw(init_console include_languages i_am_persistent);
 use Bugzilla::Memcached;
 use Bugzilla::Template;
 use Bugzilla::Token;
@@ -149,43 +152,46 @@ sub init_page {
         {
             exit;
         }
+        # Plack requires to exit differently.
+        return -1 if $ENV{BZ_PLACK};
+        _shutdown();
+    }
+}
 
-        # For security reasons, log out users when Bugzilla is down.
-        # Bugzilla->login() is required to catch the logincookie, if any.
-        my $user;
-        eval { $user = Bugzilla->login(LOGIN_OPTIONAL); };
-        if ($@) {
-            # The DB is not accessible. Use the default user object.
-            $user = Bugzilla->user;
-            $user->{settings} = {};
-        }
-        my $userid = $user->id;
-        Bugzilla->logout();
+sub _shutdown {
+    # For security reasons, log out users when Bugzilla is down.
+    # Bugzilla->login() is required to catch the logincookie, if any.
+    my $user = eval { Bugzilla->login(LOGIN_OPTIONAL); };
+    if ($@) {
+        # The DB is not accessible. Use the default user object.
+        $user = Bugzilla->user;
+        $user->{settings} = {};
+    }
+    my $userid = $user->id;
+    Bugzilla->logout();
 
-        my $template = Bugzilla->template;
-        my $vars = {};
-        $vars->{'message'} = 'shutdown';
-        $vars->{'userid'} = $userid;
-        # Generate and return a message about the downtime, appropriately
-        # for if we're a command-line script or a CGI script.
-        my $extension;
-        if (i_am_cgi() && (!Bugzilla->cgi->param('ctype')
-                           || Bugzilla->cgi->param('ctype') eq 'html')) {
+    # Generate and return a message about the downtime, appropriately
+    # for if we're a command-line script or a CGI script.
+    my $cgi = Bugzilla->cgi;
+    my $extension = 'txt';
+
+    if (i_am_cgi()) {
+        # Set the HTTP status to 503 when Bugzilla is down to avoid pages
+        # being indexed by search engines.
+        print $cgi->header(-status => 503,
+                           -retry_after => SHUTDOWNHTML_RETRY_AFTER);
+
+        if (!$cgi->param('ctype') || $cgi->param('ctype') eq 'html') {
             $extension = 'html';
         }
-        else {
-            $extension = 'txt';
-        }
-        if (i_am_cgi()) {
-            # Set the HTTP status to 503 when Bugzilla is down to avoid pages
-            # being indexed by search engines.
-            print Bugzilla->cgi->header(-status => 503, 
-                -retry_after => SHUTDOWNHTML_RETRY_AFTER);
-        }
-        $template->process("global/message.$extension.tmpl", $vars)
-            || ThrowTemplateError($template->error);
-        exit;
     }
+
+    my $template = Bugzilla->template;
+    my $vars = { message => 'shutdown', userid => $userid };
+
+    $template->process("global/message.$extension.tmpl", $vars)
+      or ThrowTemplateError($template->error);
+    exit;
 }
 
 #####################################################################
@@ -714,11 +720,13 @@ sub _cleanup {
 }
 
 sub END {
-    # Bugzilla.pm cannot compile in mod_perl.pl if this runs.
-    _cleanup() unless $ENV{MOD_PERL};
+    # This is managed in mod_perl.pl and app.psgi when running
+    # in a persistent environment.
+    _cleanup() unless i_am_persistent();
 }
 
-init_page() if !$ENV{MOD_PERL};
+# Also managed in mod_perl.pl and app.psgi.
+init_page() unless i_am_persistent();
 
 1;
 

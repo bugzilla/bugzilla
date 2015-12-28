@@ -117,7 +117,7 @@ Paste in the following and save:
    AddHandler cgi-script .cgi
    Options +ExecCGI
    DirectoryIndex index.cgi index.html
-   AllowOverride Limit FileInfo Indexes Options
+   AllowOverride All
  </Directory>
 
 :command:`a2ensite bugzilla`

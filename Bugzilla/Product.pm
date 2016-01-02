@@ -22,7 +22,6 @@ use Bugzilla::Milestone;
 use Bugzilla::Field;
 use Bugzilla::Status;
 use Bugzilla::Install::Requirements;
-use Bugzilla::Mailer;
 use Bugzilla::Series;
 use Bugzilla::Hook;
 use Bugzilla::FlagType;

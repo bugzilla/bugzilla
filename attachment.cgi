@@ -548,9 +548,12 @@ sub insert {
     # Insert a comment about the new attachment into the database.
     my $comment = $cgi->param('comment');
     $comment = '' unless defined $comment;
+    my $is_markdown = ($user->use_markdown
+                       && $cgi->param('use_markdown')) ? 1 : 0;
     $bug->add_comment($comment, { isprivate => $attachment->isprivate,
                                   type => CMT_ATTACHMENT_CREATED,
-                                  extra_data => $attachment->id });
+                                  extra_data => $attachment->id,
+                                  is_markdown => $is_markdown});
 
     # Assign the bug to the user, if they are allowed to take it
     my $owner = "";

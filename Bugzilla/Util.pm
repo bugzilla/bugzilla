@@ -18,7 +18,7 @@ use parent qw(Exporter);
                              i_am_cgi i_am_webservice correct_urlbase remote_ip
                              validate_ip do_ssl_redirect_if_required use_attachbase
                              diff_arrays on_main_db
-                             trim wrap_hard wrap_comment find_wrap_point
+                             trim wrap_hard wrap_comment find_wrap_point wrap_cite
                              format_time validate_date validate_time datetime_from
                              is_7bit_clean bz_crypt generate_random_password
                              validate_email_syntax check_email_syntax clean_text
@@ -453,6 +453,27 @@ sub wrap_comment {
     }
 
     chomp($wrappedcomment); # Text::Wrap adds an extra newline at the end.
+    return $wrappedcomment;
+}
+
+sub wrap_cite {
+    my ($comment, $cols) = @_;
+    my $wrappedcomment = "";
+
+    # Use 'local', as recommended by Text::Wrap's perldoc.
+    local $Text::Wrap::columns = $cols || COMMENT_COLS;
+    # Make words that are longer than COMMENT_COLS not wrap.
+    local $Text::Wrap::huge    = 'overflow';
+    # Don't mess with tabs.
+    local $Text::Wrap::unexpand = 0;
+
+    foreach my $line (split(/\r\n|\r|\n/, $comment)) {
+      if ($line =~ /^(>+ *)/) {
+        $wrappedcomment .= wrap('', $1, $line) . "\n";
+      } else {
+        $wrappedcomment .= $line . "\n";
+      }
+    }
     return $wrappedcomment;
 }
 
@@ -1243,5 +1264,7 @@ if Bugzilla is currently using the shadowdb or not. Used like:
 =item is_ipv6
 
 =item display_value
+
+=item wrap_cite
 
 =back

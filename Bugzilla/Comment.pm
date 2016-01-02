@@ -272,6 +272,9 @@ sub body_full {
     else {
         $body = $self->body;
     }
+    if (!$self->is_markdown and !$self->already_wrapped) {
+        $body = wrap_cite($body);
+    }
     if ($params->{wrap} and !$self->already_wrapped) {
         $body = wrap_comment($body);
     }

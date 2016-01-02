@@ -972,6 +972,13 @@ sub create {
                     return sub { wrap_comment($_[0], $cols) }
                 }, 1],
 
+            # Wrap cited text
+            wrap_cite => [
+                sub {
+                    my ($context, $cols) = @_;
+                    return sub { wrap_cite($_[0], $cols) }
+                }, 1],
+
             # We force filtering of every variable in key security-critical
             # places; we have a none filter for people to use when they 
             # really, really don't want a variable to be changed.

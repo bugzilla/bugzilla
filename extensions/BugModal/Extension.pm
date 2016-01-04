@@ -165,9 +165,17 @@ sub template_before_process {
         return;
     }
 
-    return unless $file =~ m#^bug/show-([^\.]+)\.html\.tmpl$#;
-    my $format = $1;
-    return unless _alternative_show_bug_format() eq $format;
+    if ($file =~ m#^bug/show-([^\.]+)\.html\.tmpl$#) {
+        my $format = $1;
+        return unless _alternative_show_bug_format() eq $format;
+    }
+    elsif ($file ne 'bug_modal/edit.html.tmpl') {
+        return;
+    }
+
+    if ($vars->{bug} && !$vars->{bugs}) {
+        $vars->{bugs} = [$vars->{bug}];
+    }
 
     return unless
         $vars->{bugs}

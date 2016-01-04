@@ -23,7 +23,7 @@
   title = title
   style_urls = ['skins/standard/admin.css']
   onload="var f = document.forms['flagtype_properties'];
-          selectProduct(f.product, f.component, null, null, '__Any__');"
+          selectProduct(f.product, f.component, '__Any__');"
   javascript_urls=["js/productform.js"]
   doc_section = "administering/flags.html"
 %]
@@ -92,7 +92,7 @@
                 id       => "product"
                 name     => "product"
                 add      => "__Any__"
-                onchange => "selectProduct(this, this.form.component, null, null, '__Any__');"
+                onchange => "selectProduct(this, this.form.component, '__Any__');"
                 products => products
               %]<br>
               <select name="component">

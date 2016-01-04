@@ -305,13 +305,22 @@ sub queue {
     $vars->{'requests'} = \@requests;
     $vars->{'types'} = \@types;
 
-    my %components;
-    foreach my $prod (@{$user->get_selectable_products}) {
-        foreach my $comp (@{$prod->components}) {
-            $components{$comp->name} = 1;
+    # This code is needed to populate the Product and Component select fields.
+    my ($products, %components);
+    if (Bugzilla->params->{useclassification}) {
+        foreach my $class (@{$user->get_selectable_classifications}) {
+            push @$products, @{$user->get_selectable_products($class->id)};
         }
     }
-    $vars->{'components'} = [ sort { $a cmp $b } keys %components ];
+    else {
+        $products = $user->get_selectable_products;
+    }
+
+    foreach my $product (@$products) {
+        $components{$_->name} = 1 foreach @{$product->components};
+    }
+    $vars->{'products'} = $products;
+    $vars->{'components'} = [ sort keys %components ];
 
     $vars->{'urlquerypart'} = $cgi->canonicalise_query('ctype');
 

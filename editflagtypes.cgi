@@ -436,17 +436,30 @@ sub get_products_and_components {
 
     my @products;
     if ($user->in_group('editcomponents')) {
-        @products = Bugzilla::Product->get_all;
+        if (Bugzilla->params->{useclassification}) {
+            # We want products grouped by classifications.
+            @products = map { @{ $_->products } } Bugzilla::Classification->get_all;
+        }
+        else {
+            @products = Bugzilla::Product->get_all;
+        }
     }
     else {
         @products = @{$user->get_products_by_permission('editcomponents')};
+
+        if (Bugzilla->params->{useclassification}) {
+            my %class;
+            push(@{$class{$_->classification_id}}, $_) foreach @products;
+
+            # Let's sort the list by classifications.
+            @products = ();
+            push(@products, @{$class{$_->id}}) foreach Bugzilla::Classification->get_all;
+        }
     }
-    # We require all unique component names.
+
     my %components;
     foreach my $product (@products) {
-        foreach my $component (@{$product->components}) {
-            $components{$component->name} = 1;
-        }
+        $components{$_->name} = 1 foreach @{$product->components};
     }
     $vars->{'products'} = \@products;
     $vars->{'components'} = [sort(keys %components)];

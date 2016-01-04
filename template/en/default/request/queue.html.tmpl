@@ -9,39 +9,16 @@
 [% USE Bugzilla %]
 [% cgi = Bugzilla.cgi %]
 
+[% PROCESS "global/js-products.html.tmpl" %]
+
 [% PROCESS global/header.html.tmpl
   title="Request Queue"
   generate_api_token = 1
-  onload="var f = document.request_form; selectProduct(f.product, f.component, null, null, 'Any');"
+  onload="var f = document.request_form; selectProduct(f.product, f.component, 'Any');"
   javascript_urls=["js/productform.js", "js/field.js"]
   style_urls = ['skins/standard/buglist.css']
   yui = ['autocomplete']
 %]
-
-<script type="text/javascript">
-  var useclassification = false; // No classification level in use
-  var first_load = true; // Is this the first time we load the page?
-  var last_sel = []; // Caches last selection
-  var cpts = new Array();
-  [% n = 1 %]
-  [% IF Param('useclassification') %]
-    [% FOREACH clas = user.get_selectable_classifications %]
-      [% FOREACH prod = user.get_selectable_products(clas.id) %]
-        [%+ PROCESS js_comp %]
-      [% END %]
-    [% END %]
-  [% ELSE %]
-    [% FOREACH prod = user.get_selectable_products %]
-      [%+ PROCESS js_comp %]
-    [% END %]
-  [% END %]
-</script>
-
-[% BLOCK js_comp %]
-  cpts['[% n %]'] = [
-    [%- FOREACH comp = prod.components %]'[% comp.name FILTER js %]'[% ", " UNLESS loop.last %] [%- END -%]];
-  [% n = n+1 %]
-[% END %]
 
 <p>
 When you are logged in, only requests made by you or addressed to you
@@ -72,7 +49,7 @@ to some group are shown by default.
            id       => "product"
            name     => "product"
            add      => "Any"
-           onchange => "selectProduct(this, this.form.component, null, null, 'Any');"
+           onchange => "selectProduct(this, this.form.component, 'Any');"
         %]
       </td>
       <th>Flag:</th>

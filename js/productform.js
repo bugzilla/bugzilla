@@ -10,16 +10,10 @@
 // collection of javascript arrays containing strings.
 
 /**
- * Reads the selected products and updates component, version and milestone
- * lists accordingly.
+ * Reads the selected products and updates the component list accordingly.
  *
  * @param  product    Select element that contains products.
- * @param  component  Select element that contains components. Can be null if
- *                    there is no such element to update.
- * @param  version    Select element that contains versions. Can be null if
- *                    there is no such element to update.
- * @param  milestone  Select element that contains milestones. Can be null if
- *                    there is no such element to update.
+ * @param  component  Select element that contains components.
  * @param  anyval     Value to use for a special "Any" list item. Can be null
  *                    to not use any. If used must and will be first item in
  *                    the select element.
@@ -27,21 +21,15 @@
  * @global cpts       Array of arrays, indexed by product name. The subarrays
  *                    contain a list of components to be fed to the respective
  *                    select element.
- * @global vers       Array of arrays, indexed by product name. The subarrays
- *                    contain a list of versions to be fed to the respective
- *                    select element.
- * @global tms        Array of arrays, indexed by product name. The subarrays
- *                    contain a list of milestones to be fed to the respective
- *                    select element.
  * @global first_load Boolean; true if this is the first time this page loads
  *                    or false if not.
  * @global last_sel   Array that contains last list of products so we know what
  *                    has changed, and optimize for additions.
  */
-function selectProduct(product, component, version, milestone, anyval) {
+function selectProduct(product, component, anyval) {
     // This is to avoid handling events that occur before the form
     // itself is ready, which could happen in buggy browsers.
-    if (!product)
+    if (!product || !component)
         return;
 
     // Do nothing if no products are defined. This is to avoid the
@@ -78,15 +66,8 @@ function selectProduct(product, component, version, milestone, anyval) {
     var findall = (product.selectedIndex == -1
                    || (anyval != null && product.options[0].selected));
 
-    if (useclassification) {
-        // Update index based on the complete product array.
-        sel = get_selection(product, findall, true, anyval);
-        for (var i=0; i<sel.length; i++)
-           sel[i] = prods[sel[i]];
-    }
-    else {
-        sel = get_selection(product, findall, false, anyval);
-    }
+    sel = get_selection(product, findall, false, anyval);
+
     if (!findall) {
         // Save sel for the next invocation of selectProduct().
         var tmp = sel;
@@ -103,23 +84,9 @@ function selectProduct(product, component, version, milestone, anyval) {
     }
 
     // Do the actual fill/update.
-    if (component) {
-        var saved_cpts = get_selection(component, false, true, null);
-        updateSelect(cpts, sel, component, merging, anyval);
-        restoreSelection(component, saved_cpts);
-    }
-
-    if (version) {
-        var saved_vers = get_selection(version, false, true, null);
-        updateSelect(vers, sel, version, merging, anyval);
-        restoreSelection(version, saved_vers);
-    }
-
-    if (milestone) {
-        var saved_tms = get_selection(milestone, false, true, null);
-        updateSelect(tms, sel, milestone, merging, anyval);
-        restoreSelection(milestone, saved_tms);
-    }
+    var saved_cpts = get_selection(component, false, true, null);
+    updateSelect(cpts, sel, component, merging, anyval);
+    restoreSelection(component, saved_cpts);
 }
 
 /**

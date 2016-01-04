@@ -11,7 +11,7 @@
 [% PROCESS global/header.html.tmpl
   title = 'Administer Flag Types'
   style_urls = ['skins/standard/admin.css']
-  onload="var f = document.flagtype_form; selectProduct(f.product, f.component, null, null, '__All__');"
+  onload="var f = document.flagtype_form; selectProduct(f.product, f.component, '__All__');"
   javascript_urls=["js/productform.js"]
   doc_section = "administering/flags.html"
 %]
@@ -43,7 +43,7 @@
       id       => "product"
       name     => "product"
       add      => "__Any__"
-      onchange => "selectProduct(this, this.form.component, null, null, '__Any__');"
+      onchange => "selectProduct(this, this.form.component, '__Any__');"
       products => products
     %]
   </div>

@@ -95,6 +95,7 @@ strong.required:before {
     validateAndSubmit: function() {
       var alert_text = '';
       var request_type = this._current_type;
+      if (!isFilledOut('component')) alert_text += 'Please select a "Component".\n';
       if (!isFilledOut('short_desc')) alert_text += 'Please enter a "Summary".\n';
       for (require_type in this._required_fields) {
         if (require_type == request_type) {
@@ -182,7 +183,6 @@ strong.required:before {
       onSubmit="return mdn.validateAndSubmit();">
   <input type="hidden" name="format" value="mdn">
   <input type="hidden" name="product" value="Mozilla Developer Network">
-  <input type="hidden" name="component" value="General">
   <input type="hidden" name="rep_platform" value="All">
   <input type="hidden" name="op_sys" value="Other">
   <input type="hidden" name="version" value="unspecified">
@@ -231,8 +231,23 @@ strong.required:before {
     </div>
 
     <p>
-        <strong class="required">Summary</strong><br>
-        <input type="text" name="short_desc" id="short_desc" size="60">
+      <strong class="required">Component</strong><br>
+      <select name="component" id="component" size="7" aria-required="true" class="required">
+        [% FOREACH c = product.components %]
+          [% NEXT IF NOT c.is_active %]
+          <option value="[% c.name FILTER html %]" title="[% c.description FILTER html %]"
+            [%- IF c.name == default.component_ %]
+              selected="selected"
+            [% END %]>
+            [% c.name FILTER html -%]
+          </option>
+        [%- END %]
+      </select>
+    </p>
+
+    <p>
+      <strong class="required">Summary</strong><br>
+      <input type="text" name="short_desc" id="short_desc" size="60">
     </p>
 
     <div id="detail_bug" class="bz_default_hidden">

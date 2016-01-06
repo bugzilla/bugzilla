@@ -308,7 +308,9 @@ END;
       [% IF url.isa('Bugzilla::BugUrl::Bugzilla::Local') %]
         [% url.target_bug_id FILTER bug_link(url.target_bug_id, use_alias => 1) FILTER none %]
       [% ELSE %]
-        <a href="[% url.name FILTER html %]">[% url.name FILTER html %]</a>
+        <a href="[% url.name FILTER html %]"
+           title="[% url.name FILTER truncate(256) FILTER html %]"
+        >[% url.name FILTER truncate(40) FILTER html %]</a>
       [% END %]
       [% IF edit %]
           <label>

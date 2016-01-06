@@ -60,7 +60,6 @@ use constant VALIDATORS => {
 # pick the first one that should handle the url. New
 # subclasses should be added at the end of the list.
 use constant SUB_CLASSES => qw(
-    Bugzilla::BugUrl::Aha
     Bugzilla::BugUrl::Bugzilla::Local
     Bugzilla::BugUrl::Bugzilla
     Bugzilla::BugUrl::Launchpad
@@ -72,7 +71,9 @@ use constant SUB_CLASSES => qw(
     Bugzilla::BugUrl::SourceForge
     Bugzilla::BugUrl::GitHub
     Bugzilla::BugUrl::MozSupport
+    Bugzilla::BugUrl::Aha
     Bugzilla::BugUrl::WebCompat
+    Bugzilla::BugUrl::ServiceNow
 );
 
 ###############################

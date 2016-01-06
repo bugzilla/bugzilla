@@ -24,7 +24,8 @@
 [% END %]
 [% title = title _ filtered_desc %]
 [% generate_api_token = 1 %]
-[% yui.push('json', 'connection', 'container') IF user.can_tag_comments %]
+[% DEFAULT yui = [] %]
+[% yui.push('json', 'connection', 'container') %]
 [% javascript_urls = [ "js/util.js", "js/field.js", "js/comments.js" ] %]
 [% javascript_urls.push("js/bug.js") IF user.id  %]
 [% javascript_urls.push('js/comment-tagging.js')

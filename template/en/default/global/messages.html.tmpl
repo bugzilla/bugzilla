@@ -879,9 +879,16 @@
     [% title = "$terms.Bugzilla is Down" %]
     [% Param("shutdownhtml") %]
     [% IF userid %]
-      <p>For security reasons, you have been logged out automatically.
-      The cookie that was remembering your login is now gone.
+      <p>
+        For security reasons, you have been logged out automatically.
+        The cookie that was remembering your login is now gone.
+      </p>
     [% END %]
+    <p>
+      If you are an administrator, you can
+      <a href="editparams.cgi?section=general">reactivate [% terms.Bugzilla %]</a>
+      by clearing the <kbd>shutdownhtml</kbd> parameter.
+    </p>
 
   [% ELSIF message_tag == "term" %]
     [% terms.$term FILTER html %]

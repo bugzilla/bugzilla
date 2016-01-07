@@ -305,15 +305,14 @@ sub plot {
     $vars->{'chart'} = new Bugzilla::Chart($cgi);
 
     my $format = $template->get_format("reports/chart", "", scalar($cgi->param('ctype')));
+    $format->{'ctype'} = 'text/html' if $cgi->param('debug');
 
-    # Debugging PNGs is a pain; we need to be able to see the error messages
-    if ($cgi->param('debug')) {
-        print $cgi->header();
-        $vars->{'chart'}->dump();
-    }
-
+    $cgi->set_dated_content_disp('inline', 'chart', $format->{extension});
     print $cgi->header($format->{'ctype'});
     disable_utf8() if ($format->{'ctype'} =~ /^image\//);
+
+    # Debugging PNGs is a pain; we need to be able to see the error messages
+    $vars->{'chart'}->dump() if $cgi->param('debug');
 
     $template->process($format->{'template'}, $vars)
       || ThrowTemplateError($template->error());

@@ -37,18 +37,21 @@
 [% total_key = '-total-' %]
 [%# Most of these classes are defined in the DataTables plugin itself. %]
 <table id="tabular_report_[% table_id FILTER html %]" class="tabular_report display cell-border compact">
-  [% IF col_field %]
-    <thead>
+  <thead>
     <tr>
-      <th>&darr;&nbsp;[% row_field_disp FILTER html %] \ [% col_field_disp FILTER html %]&nbsp;&rarr;</th>
+      <th>
+        [% IF col_field %]
+          &darr;&nbsp;[% row_field_disp FILTER html %] \ [% col_field_disp FILTER html %]&nbsp;&rarr;
+        [% ELSE %]
+          [% row_field_disp FILTER html %]
+        [% END %]
+      </th>
       [% FOREACH col = col_names %]
-        [% NEXT IF col == "" %]
         <th>[% PROCESS value_display value = col field = col_field %]</th>
       [% END %]
       <th class="ttotal">Total</th>
     </tr>
-    </thead>
-  [% END %]
+  </thead>
   <tbody>
   [% FOREACH row = row_names %]
     <tr>

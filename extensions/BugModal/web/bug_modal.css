@@ -403,10 +403,6 @@ input[type="number"] {
     font-weight: bold;
 }
 
-#attachments .attach-desc a {
-    color: #000;
-}
-
 #attachments .attach-info {
     font-size: 11px;
 }

@@ -772,11 +772,32 @@
 
     [% UNLESS cf_hidden_in_product('cf_cab_review', bug.product, bug.component, bug) %]
       [% rendered_custom_fields.push('cf_cab_review') %]
-      [% INCLUDE bug_modal/field.html.tmpl
-          field = bug_fields.cf_cab_review
-          field_type = bug_fields.cf_cab_review.type
-          hide_on_view = bug.cf_cab_review == "---"
-      %]
+      [% IF bug.cf_cab_review == "---" %]
+        [% WRAPPER bug_modal/field.html.tmpl
+            field = bug_fields.cf_cab_review
+            field_type = bug_fields.cf_cab_review.type
+            container = 1
+            hide_on_view = 1
+        %]
+          <span id="cab-review-gate">
+            <a href="https://mozilla.service-now.com/change_request.do?sysparm_stack=change_request_list.do&amp;sys_id=-1&amp;sysparm_query=active=true" target="_blank">ServiceNow Change Request</a>
+            <button id="cab-review-gate-close" type="button" class="minor">Use Flag</button>
+          </span>
+          <span id="cab-review-edit" style="display:none">
+            [% INCLUDE bug_modal/field.html.tmpl
+                field = bug_fields.cf_cab_review
+                field_type = bug_fields.cf_cab_review.type
+                inline = 1
+                no_indent = 1
+            %]
+          </span>
+        [% END %]
+      [% ELSE %]
+        [% INCLUDE bug_modal/field.html.tmpl
+            field = bug_fields.cf_cab_review
+            field_type = bug_fields.cf_cab_review.type
+        %]
+      [% END %]
     [% END %]
 
   [% END %]

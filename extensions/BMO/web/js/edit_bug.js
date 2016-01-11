@@ -45,3 +45,12 @@ YAHOO.util.Event.onDOMReady(function() {
       new_comment.style.width = comment_width;
   }
 });
+
+$(function() {
+  $('#cab-review-gate-close')
+    .click(function(event) {
+      event.preventDefault();
+      $('#cab-review-gate').hide();
+      $('#cab-review-edit').show();
+    });
+})(jQuery);

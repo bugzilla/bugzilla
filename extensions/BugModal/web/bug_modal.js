@@ -898,6 +898,14 @@ $(function() {
             }
         });
 
+    // cab review 'gate'
+    $('#cab-review-gate-close')
+        .click(function(event) {
+            event.preventDefault();
+            $('#cab-review-gate').hide();
+            $('#cab-review-edit').show();
+        });
+
     // custom textarea fields
     $('.edit-textarea-btn')
         .click(function(event) {

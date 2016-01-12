@@ -474,6 +474,7 @@ sub wrap_cite {
         $wrappedcomment .= $line . "\n";
       }
     }
+    chomp($wrappedcomment); # remove extra newline at the end
     return $wrappedcomment;
 }
 

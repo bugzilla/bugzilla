@@ -20,7 +20,7 @@ use Bugzilla::Hook;
 use Bugzilla::Util qw(datetime_from trick_taint);
 
 use File::Basename qw(basename);
-use File::Glob qw(bsd_glob);
+use File::Glob qw(:bsd_glob);
 use List::MoreUtils qw(none uniq);
 use MIME::Base64 qw(decode_base64 encode_base64);
 use Moo;
@@ -359,8 +359,8 @@ sub _find_resource {
             $api_namespace, 'API', $api_ext_version, 'Resource', '*.pm');
     }
     else {
-        $resource_modules = File::Spec->catdir('Bugzilla','API', $api_version,
-            'Resource', '*.pm');
+        $resource_modules = File::Spec->catdir(bz_locations()->{cgi_path},
+            'Bugzilla','API', $api_version, 'Resource', '*.pm');
     }
 
     # Load in the WebService modules from the appropriate version directory

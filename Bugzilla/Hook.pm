@@ -1097,7 +1097,7 @@ This hashref contains the path and prefix for the modules to be used.
 
 =over
 
-=item C<path> - Path to where the modules are kept, on a typical extension this
+=item C<path> - Path to where the modules are kept; on a typical extension this
 would be the lib folder of the extension.
 
 =item C<prefix> - Package prefix of the module to be loaded

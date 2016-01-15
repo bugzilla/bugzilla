@@ -638,7 +638,7 @@ sub mailer_before_send {
 sub migrate_modules {
     my ($self, $args) = @_;
     $args->{path} = bz_locations->{'extensionsdir'} . "/Example/lib/Migrate";
-    $args->{prefix} = "Bugzilla::Extension::Example:Migrate";
+    $args->{prefix} = "Bugzilla::Extension::Example::Migrate";
 }
 
 sub object_before_create {

@@ -795,18 +795,40 @@ sub _check_status {
 
 =over
 
-=item C<extract_flags_from_cgi($bug, $attachment, $hr_vars)>
+=item C<extract_flags_from_cgi($bug, $hr_vars, $skip, $args)>
 
-Checks whether or not there are new flags to create and returns an
-array of hashes. This array is then passed to Flag::create().
+Checks if are new flags to create and returns an array of hashes.
+This array is then passed to Flag::create().
+
+$args is a hash that can be one of two things.
+
+It can contain a bug object, and optionally an attachment object.
+
+OR
+
+It can contain both a product_id AND a component id.
 
 =back
 
 =cut
 
 sub extract_flags_from_cgi {
-    my ($class, $bug, $attachment, $vars, $skip) = @_;
+    my ($class, $vars, $skip, $args) = @_;
+
     my $cgi = Bugzilla->cgi;
+
+    my ($bug, $attachment, $component_id, $product_id);
+
+    if (defined($args->{bug})) {
+        $bug = $args->{bug};
+        $component_id = $bug->component_id;
+        $product_id = $bug->product_id;
+        $attachment = $args->{attachment} if defined $args->{attachment};
+    }
+    elsif (defined($args->{product_id})) {
+        $product_id = $args->{product_id};
+        $component_id = $args->{component_id};
+    }
 
     my $match_status = Bugzilla::User::match_field({
         '^requestee(_type)?-(\d+)$' => { 'type' => 'multi' },
@@ -873,8 +895,8 @@ sub extract_flags_from_cgi {
 
     # Get a list of active flag types available for this product/component.
     my $flag_types = Bugzilla::FlagType::match(
-        { 'product_id'   => $bug->{'product_id'},
-          'component_id' => $bug->{'component_id'},
+        { 'product_id'   => $product_id,
+          'component_id' => $component_id,
           'is_active'    => 1 });
 
     foreach my $flagtype_id (@flagtype_ids) {
@@ -895,16 +917,20 @@ sub extract_flags_from_cgi {
         # We are only interested in flags the user tries to create.
         next unless scalar(grep { $_ == $type_id } @flagtype_ids);
 
-        # Get the number of flags of this type already set for this target.
-        my $has_flags = $class->count(
-            { 'type_id'     => $type_id,
-              'target_type' => $attachment ? 'attachment' : 'bug',
-              'bug_id'      => $bug->bug_id,
-              'attach_id'   => $attachment ? $attachment->id : undef });
+        # If $bug is not defined, then we are creating a flag for an as
+        # yet uncreated bug.
+        if (defined $bug) {
+            # Get the number of flags of this type already set for this target.
+            my $has_flags = $class->count({
+                'type_id'     => $type_id,
+                'target_type' => $attachment ? 'attachment' : 'bug',
+                'bug_id'      => $bug->bug_id,
+                'attach_id'   => $attachment ? $attachment->id : undef });
 
-        # Do not create a new flag of this type if this flag type is
-        # not multiplicable and already has a flag set.
-        next if (!$flag_type->is_multiplicable && $has_flags);
+            # Do not create a new flag of this type if this flag type is
+            # not multiplicable and already has a flag set.
+            next if (!$flag_type->is_multiplicable && $has_flags);
+        }
 
         my $status = $cgi->param("flag_type-$type_id");
         trick_taint($status);

@@ -51,11 +51,10 @@ our @EXPORT = qw(
 );
 
 sub extract_flags {
-    my ($flags, $bug, $attachment) = @_;
+    my ($flags, $flag_types, $current_flags) = @_;
     my (@new_flags, @old_flags);
 
-    my $flag_types    = $attachment ? $attachment->flag_types : $bug->flag_types;
-    my $current_flags = $attachment ? $attachment->flags : $bug->flags;
+    $current_flags //= [];
 
     # Copy the user provided $flags as we may call extract_flags more than
     # once when editing multiple bugs or attachments.

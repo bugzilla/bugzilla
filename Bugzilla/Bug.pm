@@ -689,6 +689,7 @@ sub possible_duplicates {
 #                     user is not a member of the timetrackinggroup.
 # C<deadline>       - For time-tracking. Will be ignored for the same
 #                     reasons as C<estimated_time>.
+# C<flags>        - An array of flags that will be applied to the bug.
 sub create {
     my ($class, $params) = @_;
     my $dbh = Bugzilla->dbh;
@@ -724,6 +725,7 @@ sub create {
     my $is_markdown      = delete $params->{is_markdown};
     my $see_also         = delete $params->{see_also};
     my $comment_tags     = delete $params->{comment_tags};
+    my $flags            = delete $params->{flags};
 
     # We don't want the bug to appear in the system until it's correctly
     # protected by groups.
@@ -804,6 +806,14 @@ sub create {
             $ref_bug->update();
         }
         delete $bug->{_update_ref_bugs};
+    }
+
+    # Apply any flags.
+    if (defined $flags) {
+        $bug->set_flags($flags);
+        foreach my $flag (@{$bug->flags}) {
+            Bugzilla::Flag->create($flag);
+        }
     }
 
     # Comment #0 handling...

@@ -542,7 +542,8 @@ sub insert {
     }
 
     my ($flags, $new_flags) = Bugzilla::Flag->extract_flags_from_cgi(
-                                  $bug, $attachment, $vars, SKIP_REQUESTEE_ON_ERROR);
+                                  $vars, SKIP_REQUESTEE_ON_ERROR,
+                                  { bug => $bug, attachment => $attachment });
     $attachment->set_flags($flags, $new_flags);
 
     # Insert a comment about the new attachment into the database.
@@ -700,7 +701,7 @@ sub update {
     $bug->add_cc($user) if $cgi->param('addselfcc');
 
     my ($flags, $new_flags) =
-      Bugzilla::Flag->extract_flags_from_cgi($bug, $attachment, $vars);
+      Bugzilla::Flag->extract_flags_from_cgi($vars, undef, { bug => $bug, attachment => $attachment });
 
     if ($can_edit) {
         $attachment->set_flags($flags, $new_flags);

@@ -347,7 +347,7 @@ if (defined $cgi->param('id')) {
     # product/component. The structure of flags code doesn't currently
     # allow them to be set using set_all.
     my ($flags, $new_flags) = Bugzilla::Flag->extract_flags_from_cgi(
-        $first_bug, undef, $vars);
+        $vars, undef, { bug => $first_bug } );
     $first_bug->set_flags($flags, $new_flags);
 
     # Tags can only be set to one bug at once.

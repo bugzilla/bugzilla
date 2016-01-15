@@ -820,7 +820,7 @@ sub update {
     foreach my $bug (@bugs) {
         $bug->set_all(\%values);
         if ($flags) {
-            my ($old_flags, $new_flags) = extract_flags($flags, $bug);
+            my ($old_flags, $new_flags) = extract_flags($flags, $bug->flag_types, $bug->flags);
             $bug->set_flags($old_flags, $new_flags);
         }
     }
@@ -885,18 +885,28 @@ sub create {
 
     my $flags = delete $params->{flags};
 
+    if ($flags) {
+        my $product = Bugzilla::Product->check($params->{product});
+        my $component = Bugzilla::Component->check({
+            product => $product,
+            name => $params->{component}
+        });
+        my $flag_types = Bugzilla::FlagType::match({
+            product_id => $product->id,
+            component_id => $component->id,
+            is_active => 1,
+        });
+
+        my(undef, $new_flags) =  extract_flags($flags, $flag_types);
+
+        $params->{flags} = $new_flags;
+    }
+
     # We start a nested transaction in case flag setting fails
     # we want the bug creation to roll back as well.
     $dbh->bz_start_transaction();
 
     my $bug = Bugzilla::Bug->create($params);
-
-    # Set bug flags
-    if ($flags) {
-        my ($flags, $new_flags) = extract_flags($flags, $bug);
-        $bug->set_flags($flags, $new_flags);
-        $bug->update($bug->creation_ts);
-    }
 
     $dbh->bz_commit_transaction();
 
@@ -989,7 +999,7 @@ sub add_attachment {
         });
 
         if ($flags) {
-            my ($old_flags, $new_flags) = extract_flags($flags, $bug, $attachment);
+            my ($old_flags, $new_flags) = extract_flags($flags, $attachment->flag_types, $attachment->flags);
             $attachment->set_flags($old_flags, $new_flags);
         }
 
@@ -1066,7 +1076,7 @@ sub update_attachment {
     # Update the values
     foreach my $attachment (@attachments) {
         my ($update_flags, $new_flags) = $flags
-            ? extract_flags($flags, $attachment->bug, $attachment)
+            ? extract_flags($flags, $attachment->flag_types, $attachment->flags)
             : ([], []);
         if ($attachment->validate_can_edit) {
             $attachment->set_all($params);

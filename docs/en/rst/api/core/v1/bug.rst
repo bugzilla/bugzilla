@@ -785,7 +785,7 @@ deadline               date     The Deadline field is a date specifying when the
 dupe_of                int      The bug that this bug is a duplicate of. If you
                                 want to mark a bug as a duplicate, the safest
                                 thing to do is to set this value and *not* set
-                                the ``status`` or ``resolutio`` fields. They will
+                                the ``status`` or ``resolution`` fields. They will
                                 automatically be set by Bugzilla to the
                                 appropriate values for duplicate bugs.
 estimated_time         double   The total estimate of time required to fix the

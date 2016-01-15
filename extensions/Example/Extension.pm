@@ -635,6 +635,12 @@ sub mailer_before_send {
     $email->header_set('X-Bugzilla-Example-Header', 'Example');
 }
 
+sub migrate_modules {
+    my ($self, $args) = @_;
+    $args->{path} = bz_locations->{'extensionsdir'} . "/Example/lib/Migrate";
+    $args->{prefix} = "Bugzilla::Extension::Example:Migrate";
+}
+
 sub object_before_create {
     my ($self, $args) = @_;
     

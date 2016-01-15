@@ -1083,6 +1083,34 @@ A hashref. The set of named parameters passed to C<create>.
 =back
 
 
+=head2 migrate_modules
+
+This hook allows you to add modules to Migrate to support additional systems 
+to be imported into Bugzilla
+
+Params:
+
+=over
+
+=item C<modules> - An hashref containing data to be returned to L<Bugzilla::Migrate>.
+This hashref contains the path and prefix for the modules to be used.
+
+=over
+
+=item C<path> - Path to where the modules are kept, on a typical extension this
+would be the lib folder of the extension.
+
+=item C<prefix> - Package prefix of the module to be loaded
+
+=back
+
+The definition is structured as:
+ $modules = { path => $path, prefix => $prefix };
+
+
+=back
+
+
 =head2 object_before_delete
 
 This happens in L<Bugzilla::Object/remove_from_db>, after we've confirmed

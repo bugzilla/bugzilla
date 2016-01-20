@@ -23,29 +23,13 @@ use Carp;
 use Data::Dumper;
 use Date::Format;
 
-# We cannot use $^S to detect if we are in an eval(), because mod_perl
-# already eval'uates everything, so $^S = 1 in all cases under mod_perl!
-sub _in_eval {
-    my $in_eval = 0;
-    for (my $stack = 1; my $sub = (caller($stack))[3]; $stack++) {
-        last if $sub =~ /^(?:ModPerl|Plack|CGI::Compile)/;
-        # An eval followed by CGI::Compile is not a "real" eval.
-        $in_eval = 1 if $sub =~ /^\(eval\)/ && (caller($stack + 1))[3] !~ /^CGI::Compile/;
-    }
-    return $in_eval;
-}
-
 sub _throw_error {
     my ($name, $error, $vars) = @_;
     my $dbh = Bugzilla->dbh;
+    my $cache = Bugzilla->request_cache;
     $vars ||= {};
 
     $vars->{error} = $error;
-
-    # Make sure any transaction is rolled back (if supported).
-    # If we are within an eval(), do not roll back transactions as we are
-    # eval'uating some test on purpose.
-    $dbh->bz_rollback_transaction() if ($dbh->bz_in_transaction() && !_in_eval());
 
     my $datadir = bz_locations()->{'datadir'};
     # If a writable $datadir/errorlog exists, log error details there.
@@ -138,7 +122,7 @@ sub _throw_error {
             # of JSON::RPC. So, in that circumstance, instead of exiting,
             # we die with no message. JSON::RPC checks raise_error before
             # it checks $@, so it returns the proper error.
-            die if _in_eval();
+            die if $cache->{in_eval};
             $server->response($server->error_response_header);
         }
         else {
@@ -146,6 +130,7 @@ sub _throw_error {
             my %status_code_map = %{ $server->constants->{REST_STATUS_CODE_MAP} };
             my $status_code = $status_code_map{$code} || $status_code_map{'_default'};
             $server->return_error($status_code, $message, $code);
+            die if $cache->{in_eval};
             $server->response;
         }
     }

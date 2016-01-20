@@ -211,12 +211,18 @@ sub _handle {
     my $method     = $self->method_name;
     my $controller = $self->controller;
     my $params     = Bugzilla->input_params;
+    my $cache      = Bugzilla->request_cache;
 
     unless ($controller->can($method)) {
         return $self->return_error(302, "No such a method : '$method'.");
     }
 
-    my $result = eval q| $controller->$method($params) |;
+    # Let Bugzilla::Error know we are inside an eval() for exceptions
+    $cache->{in_eval} = 1;
+    my $result = eval { $controller->$method($params) };
+    $cache->{in_eval} = 0;
+
+    return $self->return_error if $self->return_error;
 
     if ($@) {
         return $self->return_error(500, "Procedure error: $@");

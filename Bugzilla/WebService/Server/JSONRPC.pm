@@ -273,6 +273,9 @@ sub _handle {
 
     my $result = $self->SUPER::_handle(@_);
 
+    # Reset in_eval to so we get normal exceptions from here
+    Bugzilla->request_cache->{in_eval} = 0;
+
     # Set the ETag if not already set in the webservice methods.
     my $etag = $self->bz_etag;
     if (!$etag && ref $result) {
@@ -424,6 +427,9 @@ sub _argument_type_check {
     if ($params_is_array) {
         $params = [$params];
     }
+
+    # Let Bugzilla::Error know we are inside an eval() after this point
+    Bugzilla->request_cache->{in_eval} = 1;
 
     return $params;
 }

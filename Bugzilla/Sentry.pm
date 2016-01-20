@@ -332,7 +332,12 @@ sub _sentry_die_handler {
     # if we are called via CGI::Carp::die chances are something is seriously
     # wrong, so skip trying to use ThrowTemplateError
     if (!$in_cgi_carp_die && !$is_compilation_failure) {
-        eval { Bugzilla::Error::ThrowTemplateError($message) };
+        eval {
+            my $cgi = Bugzilla->cgi;
+            $cgi->close_standby_message('text/html', 'inline', 'error', 'html');
+            Bugzilla::Error::ThrowTemplateError($message);
+            print $cgi->multipart_final() if $cgi->{_multipart_in_progress};
+        };
         $nested_error = $@ if $@;
     }
 

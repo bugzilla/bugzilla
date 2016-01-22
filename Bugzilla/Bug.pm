@@ -814,6 +814,7 @@ sub create {
         foreach my $flag (@{$bug->flags}) {
             Bugzilla::Flag->create($flag);
         }
+        delete $bug->{flag_types}; # cause flag_types to be reloaded with newly created flags
     }
 
     # Comment #0 handling...

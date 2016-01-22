@@ -33,8 +33,13 @@ Requester info:
 Requester: [% cgi.param('firstname') %] [%+ cgi.param('lastname') %] 
 Profile page: [% cgi.param('profilepage') %]
 Event page: [% cgi.param('eventpage') %]
-Event hosted by a Firefox Student Ambassador(s)?: [% cgi.param('ambassador_hosted') %]
-Main audience of the event are Firefox Student Ambassadors: [% cgi.param('ambassador_audience') %]
+Funtional Goals:
+[%+ cgi.param('functional_goals') %]
+Event Goals:
+[%+ cgi.param('event_goals') %]
+Why is budget needed:
+[%+ cgi.param('budget_reason') %]
+Agenda Link: [% cgi.param('agenda_link') %]
 Mentor Email: [% cgi.param('mentoremail') %]
 Paypal Account: [% cgi.param('paypal') %]
 Country You Reside: [% cgi.param('country') %]
@@ -44,14 +49,15 @@ Budget breakdown:
 
 Total amount requested in $USD: [% cgi.param('budgettotal') %]
 Costs per service:
-Service 1: [% cgi.param('service1') %]  Cost: [% cgi.param('cost1') %]
-Service 2: [% cgi.param('service2') %]  Cost: [% cgi.param('cost2') %]
-Service 3: [% cgi.param('service3') %]  Cost: [% cgi.param('cost3') %]
-Service 4: [% cgi.param('service4') %]  Cost: [% cgi.param('cost4') %]
-Service 5: [% cgi.param('service5') %]  Cost: [% cgi.param('cost5') %]
+Service 1: [% cgi.param('service1') %]  Cost: [% cgi.param('cost1') %]  Optional: [% cgi.param('service1_optional') ? 'YES' : 'NO' %]
+Service 2: [% cgi.param('service2') %]  Cost: [% cgi.param('cost2') %]  Optional: [% cgi.param('service2_optional') ? 'YES' : 'NO' %]
+Service 3: [% cgi.param('service3') %]  Cost: [% cgi.param('cost3') %]  Optional: [% cgi.param('service3_optional') ? 'YES' : 'NO' %]
+Service 4: [% cgi.param('service4') %]  Cost: [% cgi.param('cost4') %]  Optional: [% cgi.param('service4_optional') ? 'YES' : 'NO' %]
+Service 5: [% cgi.param('service5') %]  Cost: [% cgi.param('cost5') %]  Optional: [% cgi.param('service5_optional') ? 'YES' : 'NO' %]
+
 
 Additional costs: (add comment box)
-[% cgi.param('costadditional') %]
+[%+ cgi.param('costadditional') %]
 
 [%+ cgi.param("comment") IF cgi.param("comment") %]
 

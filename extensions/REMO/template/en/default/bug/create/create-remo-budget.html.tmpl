@@ -42,8 +42,10 @@ function validateAndSubmit() {
   if(!isFilledOut('profilepage')) alert_text += "Please enter a Mozilla Reps profile page.\n";
   if(!isFilledOut('eventpage')) alert_text += "Please enter an event page address.\n";
   if(!isFilledOut('cf_due_date')) alert_text += "Please enter an event date.\n";
-  if(!isFilledOut('ambassador_hosted')) alert_text += "Please select whether this event is hosted by ambassadors.\n";
-  if(!isFilledOut('ambassador_audience')) alert_text += "Please select whether this event's main audience is ambassadors.\n";
+  if(!isFilledOut('functional_goals')) alert_text += "Please list functional goals the event will be supporting.\n";
+  if(!isFilledOut('event_goals')) alert_text += "Please list event goals and how it will be measured.\n";
+  if(!isFilledOut('budget_reason')) alert_text += "Please enter a reason the budget is needed.\n";
+  if(!isFilledOut('agenda_link')) alert_text += "Please enter a link to the agenda describing what you are doing.\n";
   if(!isFilledOut('mentoremail')) alert_text += "Please enter a valid [% terms.Bugzilla %] email for mentor.\n";
   if(!isFilledOut('country')) alert_text += "Please enter a valid value for country.\n";
   if(!isFilledOut('budgettotal')) alert_text += "Please enter the total budget for the event.\n";
@@ -62,8 +64,11 @@ function validateAndSubmit() {
 
 <h1>Mozilla Reps - Budget Request Form</h1>
 
+<h3>IMPORTANT: Please make sure you read and comply with the <a href="https://wiki.mozilla.org/ReMo/SOPs/Budget">Budget SOP</a>
+  before filling this form. Requests not following the procedure will be automatically rejected.</h3>
+
 <p>
-  If your request is Community IT related please file it 
+  If your request is Community IT related please file it
   <a href="https://bugzilla.mozilla.org/enter_bug.cgi?product=Mozilla%20Reps;component=Community%20IT%20Requests">here</a>.
 </p>
 
@@ -107,7 +112,7 @@ function validateAndSubmit() {
 <tr class="odd">
   <th class="field_label required">Mozilla Reps Profile Page:</th>
   <td>
-    <input type="text" name="profilepage" id="profilepage" 
+    <input type="text" name="profilepage" id="profilepage"
            value="" size="40" placeholder="https://reps.mozilla.org/u/JohnDoe">
   </td>
 </tr>
@@ -115,7 +120,7 @@ function validateAndSubmit() {
 <tr class="even">
   <th class="field_label required">Event Page:</th>
   <td>
-    <input type="text" name="eventpage" id="eventpage" 
+    <input type="text" name="eventpage" id="eventpage"
            value="" size="40" placeholder="https://reps.mozilla.org/e/TestEvent">
   </td>
 </tr>
@@ -139,27 +144,43 @@ function validateAndSubmit() {
 
 <tr class="even">
   <th class="field_label required">
-    Is this event being hosted by a<br>Firefox Student Ambassador(s)?:
+    Which functional area goals is this supporting and how?
   </th>
   <td>
-    <select id="ambassador_hosted" name="ambassador_hosted">
-      <option value="">Select One</option>
-      <option value="Yes">Yes</option>
-      <option value="No">No</option>
-    </select>
+    <textarea id="functional_goals" name="functional_goals" rows="5" cols="50"
+              placeholder="Describe what specific goals from the functional area are you supporting and how this budget is helping them be successful. Contact functional area responsible if needed."></textarea>
   </td>
 </tr>
 
 <tr class="odd">
   <th class="field_label required">
-    Is the main audience of this event<br>Firefox Student Ambassadors?:
+    What are the event/initiative goals? What's success?<br>
+    How are you going to measure it?
   </th>
   <td>
-    <select id="ambassador_audience" name="ambassador_audience">
-      <option value="">Select One</option>
-      <option value="Yes">Yes</option>
-      <option value="No">No</option>
-    </select>
+    <textarea id="event_goals" name="event_goals" rows="5" cols="50"
+              placeholder="Please, detail what are the goals for this initiative and how are you going to measure their success once the initiative/event is over."></textarea>
+  </td>
+</tr>
+
+<tr class="even">
+  <th class="field_label required">
+    Why this budget is needed for the success of the<br>initiative/event?
+  </th>
+  <td>
+    <textarea id="budget_reason" name="budget_reason" rows="5" cols="50"
+              placeholder="Explain why this specific budget is a need in order to accomplish the goals you have previously described"></textarea>
+  </td>
+</tr>
+
+<tr class="odd">
+  <th class="field_label required">
+    Link to the detailed agenda describing what are you<br>
+    doing (activities to support the goals and schedule)
+  </th>
+  <td>
+    <input type="text" id="agenda_link" name="agenda_link" size="40"
+           placeholder="https://public.etherpad.mozilla.org/p/my-event">
   </td>
 </tr>
 
@@ -217,41 +238,59 @@ function validateAndSubmit() {
  </tr>
 
 <tr class="odd">
-  <th colspan="2" class="field_label">Costs per service:</th>
+  <th colspan="2" class="field_label">
+    Costs per service:</th>
+</tr>
+<tr class="odd">
+  <td colspan="2">
+    Please identify which costs are optional for the success of the event by checking <strong>Optional</strong>.
+  </td>
 </tr>
 
 <tr class="odd">
   <td colspan="2">
     <table>
     <tr>
-      <th class="field_label required">Service 1:</th>
+      <td></td>
+      <td></td>
+      <th>Service</th>
+      <th>Cost</th>
+      <th>Optional</th>
+    </tr>
+    <tr>
+      <th class="required">&nbsp;</th>
+      <th class="field_label">1:</th>
       <td><input type="text" id="service1" name="service1" size="30"></td>
-      <th class="field_label required">Cost 1:</th>
       <td><input type="text" id="cost1" name="cost1" size="30"></td>
+      <td><input type="checkbox" id="service1_optional" name="service1_optional"></td>
     </tr>
     <tr>
-      <th class="field_lable">Service 2:</th>
+      <td></td>
+      <th class="field_label">2:</th>
       <td><input type="text" id="service2" name="service2" size="30"></td>
-      <th class="field_lable">Cost 2:</th>
       <td><input type="text" id="cost2" name="cost2" size="30"></td>
+      <td><input type="checkbox" id="service2_optional" name="service2_optional"></td>
     </tr>
     <tr>
-      <th class="field_lable">Service 3:</th>
+      <td></td>
+      <th class="field_label">3:</th>
       <td><input type="text" id="service3" name="service3" size="30"></td>
-      <th class="field_lable">Cost 3:</th>
       <td><input type="text" id="cost3" name="cost3" size="30"></td>
+      <td><input type="checkbox" id="service3_optional" name="service3_optional"></td>
     </tr>
     <tr>
-      <th class="field_lable">Service 4:</th>
+      <td></td>
+      <th class="field_lable">4:</th>
       <td><input type="text" id="service4" name="service4" size="30"></td>
-      <th class="field_lable">Cost 4:</th>
       <td><input type="text" id="cost4" name="cost4" size="30"></td>
+      <td><input type="checkbox" id="service4_optional" name="service4_optional"></td>
     </tr>
     <tr>
-      <th class="field_lable">Service 5:</th>
+      <td></td>
+      <th class="field_lable">5:</th>
       <td><input type="text" id="service5" name="service5" size="30"></td>
-      <th class="field_lable">Cost 5:</th>
       <td><input type="text" id="cost5" name="cost5" size="30"></td>
+      <td><input type="checkbox" id="service5_optional" name="service5_optional"></td>
     </tr>
     </table>
   </td>
@@ -263,7 +302,9 @@ function validateAndSubmit() {
 
 <tr class="odd">
   <td colspan="2">
-    <textarea id="costadditional" name="costadditional" rows="5" cols="50"></textarea>
+    <textarea id="costadditional" name="costadditional" rows="5" cols="50"></textarea><br>
+    Use the <a href="https://docs.google.com/spreadsheets/u/1/d/12FDeW3Qd5M2Mfpr8e7edCfXcUtqHP3lh3xwSln8w4G4/edit?usp=drive_web">breakdown template doc</a>
+    and attach/link it from this [% terms.bug  %] in order to identify all individual costs and who is this budget covering.
   </td>
 </tr>
 

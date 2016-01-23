@@ -8,4 +8,8 @@
 
 [% IF error == "forbidden_method" %]
   The requested method '[% method FILTER html %]' is not allowed to be called using the current API Key.
+[% ELSIF error == "mozreview_attachment_bug_mismatch" %]
+  You tried to update attachment [% attachment.id FILTER html %]
+  as part of adding or updating attachments on [% bug.id FILTER html %].
+  That attachment actually belongs to [% terms.bug %] [% attachment.bug_id FILTER html %].
 [% END %]

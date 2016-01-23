@@ -14,6 +14,7 @@ use parent qw(Bugzilla::Extension);
 
 use Bugzilla::Attachment;
 use Bugzilla::Error;
+use Bugzilla::Extension::MozReview::WebService;
 use List::MoreUtils qw( any );
 
 our $VERSION = '0.01';
@@ -83,22 +84,31 @@ sub config_add_panels {
     $modules->{MozReview} = "Bugzilla::Extension::MozReview::Config";
 }
 
+sub webservice {
+    my ($self,  $args) = @_;
+    my $dispatch = $args->{dispatch};
+    $dispatch->{MozReview} = "Bugzilla::Extension::MozReview::WebService";
+}
+
 sub webservice_before_call {
     my ($self, $args) = @_;
     my ($method, $full_method) = ($args->{method}, $args->{full_method});
-    my $mozreview_app_id = Bugzilla->params->{mozreview_app_id};
+    my $mozreview_app_id = Bugzilla->params->{mozreview_app_id} // '';
     my $user             = Bugzilla->user;
+    my $getter           = eval { $user->authorizer->successful_info_getter() } or return;
+    my $app_id           = $getter->can("app_id") ? $getter->app_id // '' : '';
 
-    return unless $mozreview_app_id;
-    return unless $user->authorizer;
+    $full_method =~ s/^Bugzilla::Extension::(\w+)::WebService\./$1./;
 
-    my $getter = $user->authorizer->successful_info_getter()
-      or return;
+    my $is_mozreview_method = $full_method =~ /^MozReview\./;
 
-    return unless $getter->can("app_id") && $getter->app_id;
+    if ($is_mozreview_method && (!$mozreview_app_id || !$app_id || $mozreview_app_id ne $app_id)) {
+        ThrowUserError('forbidden_method', { method => $full_method });
+    }
 
-    my $app_id = $getter->app_id;
-    if ($app_id eq $mozreview_app_id) {
+    return unless $mozreview_app_id && $app_id;
+
+    if ($app_id eq $mozreview_app_id && !$is_mozreview_method) {
         unless (any { $full_method eq $_ } @METHOD_WHITELIST) {
             ThrowUserError('forbidden_method', { method => $full_method });
         }

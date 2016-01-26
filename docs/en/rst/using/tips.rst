@@ -76,7 +76,7 @@ Bugzilla supports most of the structures defined by
 `standard Markdown <http://daringfireball.net/projects/markdown/basics>`_,
 but does **not** support inline images and inline HTML. For a complete
 reference on supported Markdown structures, please see the
-`syntax help <https://bugzilla.mozilla.org/page.cgi?id=markdown.html>`_ link
+`syntax help <https://landfill.bugzilla.org/bugzilla-tip/page.cgi?id=markdown.html>`_ link
 next to the Markdown checkbox for new comments.
 
 To use the Markdown feature, make sure that :guilabel:`Enable Markdown

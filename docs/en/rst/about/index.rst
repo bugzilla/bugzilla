@@ -18,8 +18,8 @@ Evaluating Bugzilla
 ###################
 
 If you want to try out Bugzilla to see if it meets your needs, you can do so
-on `Landfill <https://landfill.bugzilla.org/bugzilla-4.4-branch/>`_, our test
-server. The `Bugzilla FAQ <https://wiki.mozilla.org/Bugzilla:FAQ>`_ may also
+on `Landfill <https://landfill.bugzilla.org>`_, our test server.
+The `Bugzilla FAQ <https://wiki.mozilla.org/Bugzilla:FAQ>`_ may also
 be helpful, as it answers a number of questions people sometimes have about
 whether Bugzilla is for them.
 

@@ -15,9 +15,7 @@ The status referred to by the :param:`duplicate_or_move_bug_status` parameter, i
 set, is also undeletable. To make it deletable,
 simply set the value of that parameter to a different status.
 
-Aside from the empty value, two resolutions, DUPLICATE and FIXED, cannot be
-renamed or deleted. (FIXED could be if we fixed
-`bug 1007605 <https://bugzilla.mozilla.org/show_bug.cgi?id=1007605>`_.)
+Aside from the empty value, one resolution, DUPLICATE, cannot be renamed or deleted.
 
 Once you have defined your statuses, you can configure the workflow of
 how a bug moves between them. The workflow configuration

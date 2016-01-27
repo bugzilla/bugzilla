@@ -139,7 +139,7 @@ To create attachment on a current bug:
      "comment" : "This is a new attachment comment",
      "summary" : "Test Attachment",
      "content_type" : "text/plain",
-     "data" : "(Some patch content)",
+     "data" : "(Some base64 encoded content)",
      "file_name" : "test_attachment.patch",
      "obsoletes" : [],
      "is_private" : false,
@@ -164,9 +164,7 @@ name              type     description
 **ids**           array    The IDs or aliases of bugs that you want to add this
                            attachment to. The same attachment and comment will be
                            added to all these bugs.
-**data**          string   The content of the attachment. If the content of the
-                           attachment is not ASCII text such as
-                           ``application/octet-stream`` you must encode it in
+**data**          base64   The content of the attachment. You must encode it in
                            base64 using an appropriate client library such as
                            ``MIME::Base64`` for Perl.
 **file_name**     string   The "file name" that will be displayed in the UI for

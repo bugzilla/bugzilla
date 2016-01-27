@@ -25,6 +25,8 @@ use Bugzilla::Util qw(generate_random_password wrap_hard);
 
 use Data::Dumper;
 use File::Basename qw(dirname);
+use English qw($EGID);
+use List::Util qw(first);
 use Safe;
 use Term::ANSIColor;
 
@@ -35,6 +37,14 @@ our @EXPORT_OK = qw(
     update_localconfig
 );
 
+sub _sensible_group {
+    return '' if ON_WINDOWS;
+    my @groups     = qw( apache www-data _www );
+    my $sensible_group = first { return getgrnam($_) } @groups;
+
+    return $sensible_group // getgrgid($EGID) // '';
+}
+
 use constant LOCALCONFIG_VARS => (
     {
         name    => 'create_htaccess',
@@ -42,7 +52,7 @@ use constant LOCALCONFIG_VARS => (
     },
     {
         name    => 'webservergroup',
-        default => ON_WINDOWS ? '' : 'apache',
+        default => _sensible_group(),
     },
     {
         name    => 'use_suexec',
@@ -123,6 +133,7 @@ use constant LOCALCONFIG_VARS => (
         default => sub { generate_random_password(64) },
     },
 );
+
 
 sub read_localconfig {
     my ($include_deprecated) = @_;

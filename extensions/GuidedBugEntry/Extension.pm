@@ -43,12 +43,17 @@ sub enter_bug_start {
     ) {
         # skip the first step if a product is provided
         if ($cgi->param('product')) {
-            print $cgi->redirect('enter_bug.cgi?format=guided#h=dupes' .
+            print $cgi->redirect('enter_bug.cgi?format=guided' .
+                ($cgi->param('format_forced') ? '&format_forced=1' : '') .
+                '#h=dupes' .
                 '|' . url_quote($cgi->param('product')) .
                 '|' . url_quote($cgi->param('component') || '')
                 );
             exit;
         }
+
+        # Do not redirect to product forms if we came from there already
+        $vars->{'format_forced'} = 1 if $cgi->param('format_forced');
 
         $self->_init_vars($vars);
         print $cgi->header();
@@ -104,17 +109,21 @@ sub page_before_template {
     my ($self, $args) = @_;
     my $page = $args->{'page_id'};
     my $vars = $args->{'vars'};
+    my $cgi  = Bugzilla->cgi;
 
     return unless $page eq 'guided_products.js';
 
-    my %bug_formats;
-    foreach my $product (keys %create_bug_formats) {
-        if (my $format = Bugzilla::Extension::BMO::forced_format($product)) {
-            $bug_formats{$product} = $format;
+    if (!$cgi->param('format_forced')) {
+        my %bug_formats;
+        foreach my $product (keys %create_bug_formats) {
+            if (my $format = Bugzilla::Extension::BMO::forced_format($product)) {
+                $bug_formats{$product} = $format;
+            }
         }
+        $vars->{'create_bug_formats'} = \%bug_formats;
     }
-    $vars->{'create_bug_formats'} = \%bug_formats;
-    $vars->{'webdev'} = Bugzilla->cgi->param('webdev');
+
+    $vars->{'webdev'} = $cgi->param('webdev');
 }
 
 __PACKAGE__->NAME;

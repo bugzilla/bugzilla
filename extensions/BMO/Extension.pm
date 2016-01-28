@@ -2044,7 +2044,10 @@ sub enter_bug_start {
     # format (can be overridden with a __standard__ format)
     my $cgi = Bugzilla->cgi;
     if ($cgi->param('format')) {
-        $cgi->delete('format') if $cgi->param('format') eq '__standard__';
+        if ($cgi->param('format') eq '__standard__') {
+            $cgi->delete('format');
+            $cgi->param('format_forced', 1);
+        }
     } elsif (my $format = forced_format($cgi->param('product'))) {
         $cgi->param('format', $format);
     }

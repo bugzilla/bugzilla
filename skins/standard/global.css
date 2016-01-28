@@ -704,6 +704,7 @@ input.required, select.required, span.required_explanation {
     overflow-x: hidden;
     overflow-y: auto;
     cursor: pointer;
+    width: auto !important;
 }
 
 .autocomplete-suggestion {

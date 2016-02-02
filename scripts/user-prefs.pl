@@ -16,7 +16,6 @@ use lib ("$RealBin/..", "$RealBin/../lib");
 use Bugzilla;
 use Bugzilla::Constants;
 use Bugzilla::User;
-use Bugzilla::User::APIKey;
 
 Bugzilla->usage_mode(USAGE_MODE_CMDLINE);
 

@@ -275,6 +275,7 @@ sub update {
 
     # Reject access if there is no sense in continuing.
     $user->in_group('editusers')
+        || $user->can_bless()
         || ThrowUserError("auth_failure", {group  => "editusers",
                                            action => "edit",
                                            object => "users"});
@@ -292,6 +293,8 @@ sub update {
     delete $values->{ids};
 
     $dbh->bz_start_transaction();
+
+    $values = { groups => $values->{groups} } unless $user->in_group('editusers');
     foreach my $user (@$user_objects){
         $user->set_all($values);
     }
@@ -709,7 +712,12 @@ B<EXPERIMENTAL>
 
 =item B<Description>
 
-Updates user accounts in Bugzilla.
+Updates user accounts in Bugzilla. To use this method, you must be a member
+of the C<editusers> group.
+
+If you are not in the C<editusers> group, you may
+add or remove users from groups if you have bless permissions for the groups
+you wish to modify. All other changes will be ignored.
 
 =item B<REST>
 

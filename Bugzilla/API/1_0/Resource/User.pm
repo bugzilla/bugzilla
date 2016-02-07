@@ -326,6 +326,7 @@ sub update {
 
     # Reject access if there is no sense in continuing.
     $user->in_group('editusers')
+        || $user->can_bless()
         || ThrowUserError("auth_failure", {group  => "editusers",
                                            action => "edit",
                                            object => "users"});
@@ -343,6 +344,8 @@ sub update {
     delete $values->{ids};
 
     $dbh->bz_start_transaction();
+
+    $values = { groups => $values->{groups} } unless $user->in_group('editusers');
     foreach my $user (@$user_objects){
         $user->set_all($values);
     }

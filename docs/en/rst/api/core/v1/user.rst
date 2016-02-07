@@ -162,6 +162,10 @@ Update User
 Updates an existing user account in Bugzilla. You must be authenticated and be
 in the *editusers* group to perform this action.
 
+If you are not in the *editusers* group, you may add or remove users from groups
+if you have bless permissions for the groups you wish to modify. All other changes
+will be ignored.
+
 **Request**
 
 .. code-block:: text

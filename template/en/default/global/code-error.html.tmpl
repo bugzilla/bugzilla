@@ -49,7 +49,7 @@
     the error [% bug.error FILTER html %].
     
   [% ELSIF error == "chart_data_not_generated" %]
-    [% admindocslinks = {'extraconfig.html' => 'Setting up Charting'} %]
+    [% docslinks = {'using/reports-and-charts.html' => 'Setting up Charting'} %]
     [% IF product.id %]
       Charts for the <em>[% product.name FILTER html %]</em> product are not
       available yet because no charting data has been collected for it since it

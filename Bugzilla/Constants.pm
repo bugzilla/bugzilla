@@ -204,7 +204,7 @@ use constant BUGZILLA_VERSION => "5.0.2+";
 
 # A base link to the current REST Documentation. We place it here
 # as it will need to be updated to whatever the current release is.
-use constant REST_DOC => "http://www.bugzilla.org/docs/tip/en/html/api/";
+use constant REST_DOC => 'https://bugzilla.readthedocs.org/en/5.0/api/';
 
 # Location of the remote and local XML files to track new releases.
 use constant REMOTE_FILE => 'http://updates.bugzilla.org/bugzilla-update.xml';

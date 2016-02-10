@@ -19,6 +19,7 @@ use Bugzilla::User;
 use Bugzilla::Util qw(datetime_from time_ago);
 use Email::Address;
 use Scalar::Util qw(blessed);
+use List::MoreUtils qw(any);
 
 our $VERSION = '1';
 
@@ -36,7 +37,12 @@ BEGIN {
 
 sub _user_last_activity_ts         { $_[0]->{last_activity_ts}                }
 sub _user_last_statistics_ts       { $_[0]->{last_statistics_ts}              }
-sub _user_address                  { Email::Address->new(undef, $_[0]->email) }
+sub _user_address {
+    my $mode = Bugzilla->usage_mode;
+
+    Email::Address->disable_cache if any { $mode == $_ } USAGE_MODE_CMDLINE, USAGE_MODE_TEST, USAGE_MODE_EMAIL;
+    return Email::Address->new(undef, $_[0]->email);
+}
 
 sub _user_set_last_activity_ts     {
     my ($self, $value) = @_;
@@ -65,6 +71,8 @@ sub _user_clear_last_statistics_ts {
 #
 # hooks
 #
+
+sub request_cleanup { Email::Address->purge_cache }
 
 sub bug_after_create {
     my ($self, $args) = @_;

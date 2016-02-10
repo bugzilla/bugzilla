@@ -60,7 +60,7 @@ use constant LOCALCONFIG_VARS => (
     },
     {
         name    => 'db_driver',
-        default => 'mysql',
+        default => 'sqlite',
     },
     {
         name    => 'db_host',

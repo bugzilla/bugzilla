@@ -17,6 +17,8 @@
   # content: (string, required) module's content (use WRAPPER module..)
   # hide_on_view: (boolean) if true, the module won't be visible in view mode
   # hide_on_edit: (boolean) if true, the module won't be visible in edit mode
+  # no_collapse_persist: (boolean) if true, the module's collapsed state will
+  #   not be remembered between page loads
   #%]
 
 <div class="module
@@ -24,6 +26,7 @@
     [%~ " edit-show" IF hide_on_view && !hide_on_edit %]"
     [% IF hide_on_view +%] style="display:none"[% END %]
     [% IF title %] id="module-[% title.replace FILTER id %]"[% END %]
+    [%~ ' data-non-stick="1"' IF no_collapse_persist %]
 >
   [% IF title %]
     <div class="module-header">

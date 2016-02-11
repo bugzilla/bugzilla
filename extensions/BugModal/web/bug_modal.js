@@ -39,6 +39,7 @@ function init_module_visibility() {
         var that = $(this);
         var id = that.attr('id');
         if (!id) return;
+        if (that.data('non-stick')) return;
         var stored = localStorage.getItem(id + '.visibility');
         if (stored) {
             slide_module(that, stored, true);

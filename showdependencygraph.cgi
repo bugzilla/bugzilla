@@ -148,8 +148,9 @@ if ($display eq 'web') {
 # This is the default: a tree instead of a spider web.
 else {
     my @blocker_stack = @stack;
+	my $hide_resolved = $cgi->param('hide_resolved');
     foreach my $id (@blocker_stack) {
-        my $blocker_ids = Bugzilla::Bug::EmitDependList('blocked', 'dependson', $id);
+        my $blocker_ids = Bugzilla::Bug::EmitDependList('blocked', 'dependson', $id, $hide_resolved);
         foreach my $blocker_id (@$blocker_ids) {
             push(@blocker_stack, $blocker_id) unless $seen{$blocker_id};
             AddLink($id, $blocker_id, $fh);
@@ -157,7 +158,7 @@ else {
     }
     my @dependent_stack = @stack;
     foreach my $id (@dependent_stack) {
-        my $dep_bug_ids = Bugzilla::Bug::EmitDependList('dependson', 'blocked', $id);
+        my $dep_bug_ids = Bugzilla::Bug::EmitDependList('dependson', 'blocked', $id, $hide_resolved);
         foreach my $dep_bug_id (@$dep_bug_ids) {
             push(@dependent_stack, $dep_bug_id) unless $seen{$dep_bug_id};
             AddLink($dep_bug_id, $id, $fh);
@@ -325,6 +326,7 @@ $vars->{'multiple_bugs'} = ($cgi->param('id') =~ /[ ,]/);
 $vars->{'display'} = $display;
 $vars->{'rankdir'} = $rankdir;
 $vars->{'showsummary'} = $cgi->param('showsummary');
+$vars->{'hide_resolved'} = $cgi->param('hide_resolved');
 
 # Generate and return the UI (HTML page) from the appropriate template.
 print $cgi->header();

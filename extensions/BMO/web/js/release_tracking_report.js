@@ -115,6 +115,10 @@ function invertFields() {
 }
 
 function onFormSubmit() {
+  if ($('#is_custom').is(':checked') && (!$('#from').val() || !$('#to').val())) {
+    alert('You must enter both the start and end dates.');
+    return false;
+  }
   serialiseForm();
   return true;
 }
@@ -123,13 +127,32 @@ function onFormReset() {
   deserialiseForm('');
 }
 
+function selectRangeType() {
+  if ($('#is_custom').is(':checked')) {
+    $('#custom_range').show();
+    $('#fixed_range').hide();
+  }
+  else {
+    $('#custom_range').hide();
+    $('#fixed_range').show();
+  }
+  serialiseForm();
+}
+
 function serialiseForm() {
   var q = flagEl.value + ':' +
-          $('#flag_value').val() + ':' +
-          $('#range').val() + ':' +
-          productEl.value + ':' +
-          $('#op').val() + ':';
-
+          $('#flag_value').val() + ':';
+  if ($('#is_custom').is(':checked')) {
+    var from = $('#from').val();
+    var to = $('#to').val();
+    q = q + from.replace(/-/g, '') +
+            '-' + to.replace(/-/g, '');
+  }
+  else {
+    q = q + $('#range').val();
+  }
+  q = q + ':' + productEl.value + ':' +
+      $('#op').val() + ':';
   for(var id in selectedFields) {
     if (selectedFields[id]) {
       q += selectedFields[id] + $('#' + id + '_select').val() + ':';
@@ -137,7 +160,9 @@ function serialiseForm() {
   }
 
   $('#q').val(q);
-  $('#bookmark').attr('href', 'page.cgi?id=release_tracking_report.html&q=' + encodeURIComponent(q));
+  var is_custom = $('#is_custom').is(':checked') ? 1 : 0;
+  $('#bookmark').attr('href', 'page.cgi?id=release_tracking_report.html&is_custom=' +
+                               is_custom + '&q=' + encodeURIComponent(q));
 }
 
 function deserialiseForm(q) {
@@ -145,7 +170,13 @@ function deserialiseForm(q) {
   selectValue(flagEl, parts[0]);
   onFlagChange();
   selectValue($('#flag_value')[0], parts[1]);
-  selectValue($('#range')[0], parts[2]);
+  if (!selectValue($('#range')[0], parts[2]) && parts[2]) {
+    var match = parts[2].match(/^(\d\d\d\d)(\d\d)(\d\d)-(\d\d\d\d)(\d\d)(\d\d)$/);
+    if (match) {
+      $('#from').val(match[1] + '-' + match[2] + '-' + match[3]);
+      $('#to').val(match[4] + '-' + match[5] + '-' + match[6]);
+    }
+  }
   selectValue(productEl, parts[3]);
   onProductChange();
   selectValue($('#op')[0], parts[4]);
@@ -171,6 +202,23 @@ $().ready(function() {
   trackingEl = $('#tracking_span')[0];
   onFlagChange();
   deserialiseForm(default_query);
+  selectRangeType();
+});
+
+$(function() {
+  $('.date_field').datetimepicker({
+    format: 'Y-m-d',
+    datepicker: true,
+    timepicker: false,
+    scrollInput: false,
+    lazyInit: false,
+    closeOnDateSelect: true
+  });
+  $('.date_field-img')
+    .click(function(event) {
+      var id = $(event.target).attr('id').replace(/-img$/, '');
+      $('#' + id).datetimepicker('show');
+    });
 });
 
 function getFlagByName(name) {
@@ -198,8 +246,9 @@ function selectValue(el, value) {
   for(var i = 0, l = el.options.length; i < l; i++) {
     if (el.options[i].value == value) {
       el.options[i].selected = true;
-      return;
+      return true;
     }
   }
   el.options[0].selected = true;
+  return false;
 }

@@ -8,8 +8,10 @@
 
 [% INCLUDE global/header.html.tmpl
   title = "Release Tracking Report"
-  style_urls = [ "extensions/BMO/web/styles/reports.css" ]
+  style_urls = [ "extensions/BMO/web/styles/reports.css",
+                 "js/jquery/plugins/datetimepicker/datetimepicker.css" ]
   javascript_urls = [ "extensions/BMO/web/js/release_tracking_report.js" ]
+  jquery = [ "datetimepicker" ]
 %]
 
 <noscript>
@@ -39,20 +41,31 @@ var default_query = '[% default_query FILTER js %]';
     </select>
 
     was changed to (and is currently)
-    <select id="flag_value">
+    <select id="flag_value" onchange="serialiseForm()">
       <option value="?">?</option>
       <option value="-">-</option>
       <option value="+">+</option>
     </select>
 
     between
-    <select id="range" onChange="serialiseForm()">
-      [% FOREACH range = ranges %]
-        <option value="[% range.value FILTER html %]">
-          [% range.label FILTER html %]
-        </option>
-      [% END %]
-    </select>
+    <span id="fixed_range">
+      <select id="range" onChange="serialiseForm()">
+        [% FOREACH range = ranges %]
+          <option value="[% range.value FILTER html %]">
+            [% range.label FILTER html %]
+          </option>
+        [% END %]
+      </select>
+    </span>
+    <span id="custom_range" style="display:none;">
+      <input class="date_field" name="from" id="from" onChange="serialiseForm()">
+      <img class="date_field-img" id="from-img" src="extensions/BugModal/web/calendar.png" width="16" height="16">
+      and
+      <input class="date_field" name="to" id="to" onChange="serialiseForm()">
+      <img class="date_field-img" id="to-img" src="extensions/BugModal/web/calendar.png" width="16" height="16">
+    </span>
+    <input type="checkbox" id="is_custom" onchange="selectRangeType()" [% "checked" IF is_custom %]>
+    <label for="is_custom">Custom</label>
   </td>
 </tr>
 

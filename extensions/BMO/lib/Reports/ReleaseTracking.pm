@@ -14,9 +14,172 @@ use Bugzilla::Error;
 use Bugzilla::Extension::BMO::Util;
 use Bugzilla::Field;
 use Bugzilla::FlagType;
-use Bugzilla::Util qw(correct_urlbase trick_taint);
+use Bugzilla::Util qw(correct_urlbase trick_taint validate_date);
 use JSON qw(-convert_blessed_universally);
 use List::MoreUtils qw(uniq);
+
+use constant DATE_RANGES => [
+    {
+        value => '20160126-20160307',
+        label => '2016-01-26 and 2016-03-07'
+    },
+    {
+        value => '20151215-20160125',
+        label => '2015-12-15 and 2016-01-25'
+    },
+    {
+        value => '20151103-20151214',
+        label => '2015-11-03 and 2015-12-14'
+    },
+    {
+        value => '20150922-20151102',
+        label => '2015-09-22 and 2015-11-02'
+    },
+    {
+        value => '20150811-20150921',
+        label => '2015-08-11 and 2015-09-21'
+    },
+    {
+        value => '20150630-20150810',
+        label => '2015-06-30 and 2015-08-10'
+    },
+    {
+        value => '20150512-20150629',
+        label => '2015-05-12 and 2015-06-29'
+    },
+    {
+        value => '20150331-20150511',
+        label => '2015-03-31 and 2015-05-11'
+    },
+    {
+        value => '20150224-20150330',
+        label => '2015-02-24 and 2015-03-30'
+    },
+    {
+        value => '20150113-20150223',
+        label => '2015-01-13 and 2015-02-23'
+    },
+    {
+        value => '20141111-20141222',
+        label => '2014-11-11 and 2014-12-22'
+    },
+    {
+        value => '20140930-20141110',
+        label => '2014-09-30 and 2014-11-10'
+    },
+    {
+        value => '20140819-20140929',
+        label => '2014-08-19 and 2014-09-29'
+    },
+    {
+        value => '20140708-20140818',
+        label => '2014-07-08 and 2014-08-18'
+    },
+    {
+        value => '20140527-20140707',
+        label => '2014-05-27 and 2014-07-07'
+    },
+    {
+        value => '20140415-20140526',
+        label => '2014-04-15 and 2014-05-26'
+    },
+    {
+        value => '20140304-20140414',
+        label => '2014-03-04 and 2014-04-14'
+    },
+    {
+        value => '20140121-20140303',
+        label => '2014-01-21 and 2014-03-03'
+    },
+    {
+        value => '20131210-20140120',
+        label => '2013-12-10 and 2014-01-20'
+    },
+    {
+        value => '20131029-20131209',
+        label => '2013-10-29 and 2013-12-09'
+    },
+    {
+        value => '20130917-20131028',
+        label => '2013-09-17 and 2013-10-28'
+    },
+    {
+        value => '20130806-20130916',
+        label => '2013-08-06 and 2013-09-16'
+    },
+    {
+        value => '20130625-20130805',
+        label => '2013-06-25 and 2013-08-05'
+    },
+    {
+        value => '20130514-20130624',
+        label => '2013-05-14 and 2013-06-24'
+    },
+    {
+        value => '20130402-20130513',
+        label => '2013-04-02 and 2013-05-13'
+    },
+    {
+        value => '20130219-20130401',
+        label => '2013-02-19 and 2013-04-01'
+    },
+    {
+        value => '20130108-20130218',
+        label => '2013-01-08 and 2013-02-18'
+    },
+    {
+        value => '20121120-20130107',
+        label => '2012-11-20 and 2013-01-07'
+    },
+    {
+        value => '20121009-20121119',
+        label => '2012-10-09 and 2012-11-19'
+    },
+    {
+        value => '20120828-20121008',
+        label => '2012-08-28 and 2012-10-08'
+    },
+    {
+        value => '20120717-20120827',
+        label => '2012-07-17 and 2012-08-27'
+    },
+    {
+        value => '20120605-20120716',
+        label => '2012-06-05 and 2012-07-16'
+    },
+    {
+        value => '20120424-20120604',
+        label => '2012-04-24 and 2012-06-04'
+    },
+    {
+        value => '20120313-20120423',
+        label => '2012-03-13 and 2012-04-23'
+    },
+    {
+        value => '20120131-20120312',
+        label => '2012-01-31 and 2012-03-12'
+    },
+    {
+        value => '20111220-20120130',
+        label => '2011-12-20 and 2012-01-30'
+    },
+    {
+        value => '20111108-20111219',
+        label => '2011-11-08 and 2011-12-19'
+    },
+    {
+        value => '20110927-20111107',
+        label => '2011-09-27 and 2011-11-07'
+    },
+    {
+        value => '20110816-20110926',
+        label => '2011-08-16 and 2011-09-26'
+    },
+    {
+        value => '*',
+        label => 'Anytime'
+    }
+];
 
 sub report {
     my ($vars) = @_;
@@ -181,55 +344,6 @@ sub report {
     }
 
     #
-    # rapid release dates
-    #
-
-    my @ranges;
-    my $start_date = string_to_datetime('2011-08-16');
-    my $end_date = $start_date->clone->add(weeks => 6)->add(days => -1);
-    my $now_date = string_to_datetime('2012-11-19');
-
-    while ($start_date <= $now_date) {
-        unshift @ranges, {
-            value => sprintf("%s-%s", $start_date->ymd(''), $end_date->ymd('')),
-            label => sprintf("%s and %s", $start_date->ymd('-'), $end_date->ymd('-')),
-        };
-
-        $start_date = $end_date->clone;;
-        $start_date->add(days => 1);
-        $end_date->add(weeks => 6);
-    }
-
-    # 2012-11-20 - 2013-01-06 was a 7 week release cycle instead of 6
-    $start_date = string_to_datetime('2012-11-20');
-    $end_date = $start_date->clone->add(weeks => 7)->add(days => -1);
-    unshift @ranges, {
-        value => sprintf("%s-%s", $start_date->ymd(''), $end_date->ymd('')),
-        label => sprintf("%s and %s", $start_date->ymd('-'), $end_date->ymd('-')),
-    };
-
-    # Back on track with 6 week releases
-    $start_date = string_to_datetime('2013-01-08');
-    $end_date = $start_date->clone->add(weeks => 6)->add(days => -1);
-    $now_date = time_to_datetime((time));
-
-    while ($start_date <= $now_date) {
-        unshift @ranges, {
-            value => sprintf("%s-%s", $start_date->ymd(''), $end_date->ymd('')),
-            label => sprintf("%s and %s", $start_date->ymd('-'), $end_date->ymd('-')),
-        };
-
-        $start_date = $end_date->clone;;
-        $start_date->add(days => 1);
-        $end_date->add(weeks => 6);
-    }
-
-    push @ranges, {
-        value => '*',
-        label => 'Anytime',
-    };
-
-    #
     # run report
     #
 
@@ -335,8 +449,9 @@ sub report {
     $vars->{products_json} = $json->encode(\@products_json);
     $vars->{fields_json} = $json->encode(\@fields_json);
     $vars->{flag_names} = \@flag_names;
-    $vars->{ranges} = \@ranges;
+    $vars->{ranges} = DATE_RANGES;
     $vars->{default_query} = $input->{q};
+    $vars->{is_custom} = $input->{is_custom};
     foreach my $field (qw(product flags range)) {
         $vars->{$field} = $input->{$field};
     }
@@ -370,6 +485,12 @@ sub _parse_query {
             or ThrowUserError('report_invalid_parameter', { name => 'date_range' });
         $query->{start_date} = "$1-$2-$3";
         $query->{end_date} = "$4-$5-$6";
+        validate_date($query->{start_date})
+          || ThrowUserError('illegal_date', { date   => $query->{start_date},
+                                              format => 'YYYY-MM-DD' });
+        validate_date($query->{end_date})
+          || ThrowUserError('illegal_date', { date   => $query->{end_date},
+                                              format => 'YYYY-MM-DD' });
     }
 
     # product_id

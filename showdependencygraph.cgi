@@ -148,7 +148,8 @@ if ($display eq 'web') {
 # This is the default: a tree instead of a spider web.
 else {
     my @blocker_stack = @stack;
-	my $hide_resolved = $cgi->param('hide_resolved');
+    my $hide_resolved = $cgi->param('hide_resolved');
+
     foreach my $id (@blocker_stack) {
         my $blocker_ids = Bugzilla::Bug::EmitDependList('blocked', 'dependson', $id, $hide_resolved);
         foreach my $blocker_id (@$blocker_ids) {

@@ -180,6 +180,7 @@ Any web server that is capable of running CGI scripts can be made to work.
 We have specific configuration instructions for the following:
 
 * :ref:`apache`
+* :ref:`nginx`
 
 .. _linux-config-database:
 

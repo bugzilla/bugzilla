@@ -13,18 +13,3 @@ Bugzilla Documentation
    integrating/index
    api/index
    localizing/index
-   
-.. toctree::
-   :hidden:
-
-   installing/mysql
-   installing/postgresql
-   installing/oracle
-   installing/sqlite
-
-.. toctree::
-   :hidden:
-
-   installing/apache
-   installing/apache-windows
-   installing/iis

@@ -25,6 +25,8 @@ case, you may want to read the :ref:`Quick Start instructions <quick-start>`.
    linux
    windows
    mac-os-x
+   web_server
+   db_server
    essential-post-install-config
    optional-post-install-config
    migrating

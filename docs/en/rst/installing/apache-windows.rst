@@ -1,7 +1,7 @@
 .. _apache-windows:
 
-Apache
-######
+Apache on Windows
+#################
 
 Bugzilla supports all versions of Apache 2.2.x and 2.4.x.
 

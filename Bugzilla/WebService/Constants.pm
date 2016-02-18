@@ -218,6 +218,9 @@ use constant WS_ERROR_CODE => {
     multiple_components_update_not_allowed => 1212,
     component_need_initialowner            => 1213,
 
+    # BugUserLastVisited errors
+    user_not_involved => 1300,
+
     # Errors thrown by the WebService itself. The ones that are negative 
     # conform to http://xmlrpc-epi.sourceforge.net/specs/rfc.fault_codes.php
     xmlrpc_invalid_value => -32600,

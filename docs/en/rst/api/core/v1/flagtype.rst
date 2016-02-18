@@ -125,6 +125,15 @@ is_multiplicable  boolean  Multiple flags of this type can be set for the same
                            bug or attachment.
 ================  =======  ======================================================
 
+**Errors**
+
+* 106 (Product Access Denied)
+  Either the product does not exist or you don't have access to it.
+* 51 (Invalid Component)
+  The component provided does not exist in the product.
+
+.. _rest_flagtype_create:
+
 Create Flag Type
 ----------------
 
@@ -227,6 +236,32 @@ name     type  description
 =======  ====  ==============================================
 flag_id  int   ID of the new FlagType object is returned.
 =======  ====  ==============================================
+
+**Errors**
+
+* 51 (Group Does Not Exist)
+  The group name you entered does not exist, or you do not have access to it.
+* 105 (Unknown component)
+  The component does not exist for this product.
+* 106 (Product Access Denied)
+  Either the product does not exist or you don't have editcomponents privileges
+  to it.
+* 501 (Illegal Email Address)
+  One of the e-mail address in the CC list is invalid. An e-mail in the CC
+  list does NOT need to be a valid Bugzilla user.
+* 1101 (Flag Type Name invalid)
+  You must specify a non-blank name for this flag type. It must
+  no contain spaces or commas, and must be 50 characters or less.
+* 1102 (Flag type must have description)
+  You must specify a description for this flag type.
+* 1103 (Flag type CC list is invalid
+  The CC list must be 200 characters or less.
+* 1104 (Flag Type Sort Key Not Valid)
+  The sort key is not a valid number.
+* 1105 (Flag Type Not Editable)
+  This flag type is not available for the products you can administer. Therefore
+  you can not edit attributes of the flag type, other than the inclusion and
+  exclusion list.
 
 .. _rest_flagtype_update:
 
@@ -371,3 +406,29 @@ changes  object  The changes that were actually done on this flag type.
 =======  ======  ================================================================
 
 Booleans changes will be represented with the strings '1' and '0'.
+
+**Errors**
+
+* 51 (Group Does Not Exist)
+  The group name you entered does not exist, or you do not have access to it.
+* 105 (Unknown component)
+  The component does not exist for this product.
+* 106 (Product Access Denied)
+  Either the product does not exist or you don't have editcomponents privileges
+  to it.
+* 501 (Illegal Email Address)
+  One of the e-mail address in the CC list is invalid. An e-mail in the CC
+  list does NOT need to be a valid Bugzilla user.
+* 1101 (Flag Type Name invalid)
+  You must specify a non-blank name for this flag type. It must
+  no contain spaces or commas, and must be 50 characters or less.
+* 1102 (Flag type must have description)
+  You must specify a description for this flag type.
+* 1103 (Flag type CC list is invalid
+  The CC list must be 200 characters or less.
+* 1104 (Flag Type Sort Key Not Valid)
+  The sort key is not a valid number.
+* 1105 (Flag Type Not Editable)
+  This flag type is not available for the products you can administer. Therefore
+  you can not edit attributes of the flag type, other than the inclusion and
+  exclusion list.

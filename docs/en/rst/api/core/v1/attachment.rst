@@ -116,6 +116,16 @@ requestee          string    The login name of the user this flag has been
                              is only returned if a requestee is set.
 =================  ========  ====================================================
 
+**Errors**
+
+This method can throw all the same errors as :ref:`rest_single_bug`. In addition,
+it can also throw the following error:
+
+* 304 (Auth Failure, Attachment is Private)
+  You specified the id of a private attachment in the "attachment_ids"
+  argument, and you are not in the "insider group" that can see
+  private attachments.
+
 .. _rest_add_attachment:
 
 Create Attachment
@@ -222,6 +232,36 @@ name  type   description
 ====  =====  =========================
 ids   array  Attachment IDs created.
 ====  =====  =========================
+
+**Errors**
+
+This method can throw all the same errors as :ref:`rest_single_bug`, plus:
+
+* 129 (Flag Status Invalid)
+  The flag status is invalid.
+* 130 (Flag Modification Denied)
+  You tried to request, grant, or deny a flag but only a user with the required
+  permissions may make the change.
+* 131 (Flag not Requestable from Specific Person)
+  You can't ask a specific person for the flag.
+* 133 (Flag Type not Unique)
+  The flag type specified matches several flag types. You must specify
+  the type id value to update or add a flag.
+* 134 (Inactive Flag Type)
+  The flag type is inactive and cannot be used to create new flags.
+* 140 (Markdown Disabled)
+  You tried to set the "is_markdown" flag of the comment to true but the Markdown feature is not enabled.
+* 600 (Attachment Too Large)
+  You tried to attach a file that was larger than Bugzilla will accept.
+* 601 (Invalid MIME Type)
+  You specified a "content_type" argument that was blank, not a valid
+  MIME type, or not a MIME type that Bugzilla accepts for attachments.
+* 603 (File Name Not Specified)
+  You did not specify a valid for the "file_name" argument.
+* 604 (Summary Required)
+  You did not specify a value for the "summary" argument.
+* 606 (Empty Data)
+  You set the "data" field to an empty string.
 
 .. _rest_update_attachment:
 
@@ -353,3 +393,33 @@ changes           object    The changes that were actually done on this
                             * removed: (string) The values that were removed from
                               this field.
 ================  ========  =====================================================
+
+**Errors**
+
+This method can throw all the same errors as :ref:`rest_single_bug`, plus:
+
+* 129 (Flag Status Invalid)
+  The flag status is invalid.
+* 130 (Flag Modification Denied)
+  You tried to request, grant, or deny a flag but only a user with the required
+  permissions may make the change.
+* 131 (Flag not Requestable from Specific Person)
+  You can't ask a specific person for the flag.
+* 132 (Flag not Unique)
+  The flag specified has been set multiple times. You must specify the id
+  value to update the flag.
+* 133 (Flag Type not Unique)
+  The flag type specified matches several flag types. You must specify
+  the type id value to update or add a flag.
+* 134 (Inactive Flag Type)
+  The flag type is inactive and cannot be used to create new flags.
+* 140 (Markdown Disabled)
+  You tried to set the "is_markdown" flag of the "comment" to true but Markdown feature is
+  not enabled.
+* 601 (Invalid MIME Type)
+  You specified a "content_type" argument that was blank, not a valid
+  MIME type, or not a MIME type that Bugzilla accepts for attachments.
+* 603 (File Name Not Specified)
+  You did not specify a valid for the "file_name" argument.
+* 604 (Summary Required)
+  You did not specify a value for the "summary" argument.

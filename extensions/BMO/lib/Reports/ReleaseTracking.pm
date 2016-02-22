@@ -369,8 +369,8 @@ sub report {
 
             push @where, "(a.bug_when >= ?)";
             push @params, $q->{start_date} . ' 00:00:00';
-            push @where, "(a.bug_when < ?)";
-            push @params, $q->{end_date} . ' 00:00:00';
+            push @where, "(a.bug_when <= ?)";
+            push @params, $q->{end_date} . ' 23:59:59';
 
             push @where, "(a.added LIKE ?)";
             push @params, '%' . $q->{flag_name} . $q->{flag_status} . '%';

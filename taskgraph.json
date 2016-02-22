@@ -10,6 +10,7 @@
       "reruns": 3,
       "maxRunTime": 3000,
       "task": {
+        "expires": "2018-02-18T17:33:38.806Z",
         "metadata": {
           "name": "Basic Sanity Tests"
         },
@@ -40,6 +41,7 @@
       "reruns": 3,
       "maxRunTime": 3000,
       "task": {
+        "expires": "2018-02-18T17:33:38.806Z",
         "metadata": {
           "name": "Documentation Build Test"
         },
@@ -70,6 +72,7 @@
       "reruns": 3,
       "maxRunTime": 7200,
       "task": {
+        "expires": "2018-02-18T17:33:38.806Z",
         "metadata": {
           "name": "WebService API Tests"
         },
@@ -105,6 +108,7 @@
       "reruns": 3,
       "maxRunTime": 7200,
       "task": {
+        "expires": "2018-02-18T17:33:38.806Z",
         "metadata": {
           "name": "Selenium Tests"
         },

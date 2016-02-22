@@ -35,6 +35,7 @@
   javascript_urls = []
   yui = []
   generate_api_token = 0
+  favicon_url = "images/favicon.ico"
 %]
 
 [% SET yui_css = {
@@ -208,7 +209,7 @@
     [%# Required for the 'Autodiscovery' feature in Firefox 2 and IE 7. %]
     <link rel="search" type="application/opensearchdescription+xml"
                        title="[% terms.Bugzilla %]" href="./search_plugin.cgi">
-    <link rel="shortcut icon" href="images/favicon.ico" >
+    <link rel="shortcut icon" href="[% favicon_url FILTER html %]">
     [% Hook.process("additional_header") %]
   </head>
 

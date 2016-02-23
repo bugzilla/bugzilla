@@ -27,8 +27,6 @@
   <a id="login_link[% qs_suffix %]" href="[% script_url FILTER html %]"
      onclick="return show_mini_login_form('[% qs_suffix %]')">Log In</a>
 
-  [% Hook.process('additional_methods') %]
-
   <form action="[% login_target FILTER html %]" method="POST"
         class="mini_login bz_default_hidden"
         id="mini_login[% qs_suffix FILTER html %]">
@@ -56,24 +54,28 @@
     <a href="#" onclick="return hide_mini_login_form('[% qs_suffix %]')">[x]</a>
   </form>
 </li>
-<li id="forgot_container[% qs_suffix %]">
-  <span class="separator">| </span>
-  <a id="forgot_link[% qs_suffix %]" href="[% script_url FILTER html %]#forgot"
-     onclick="return show_forgot_form('[% qs_suffix %]')">Forgot Password</a>
-  <form action="token.cgi" method="post" id="forgot_form[% qs_suffix %]"
-        class="mini_forgot bz_default_hidden">
-    <label for="login[% qs_suffix FILTER html %]">Login:</label>
-    <input name="loginname" size="20" id="login[% qs_suffix FILTER html %]" required
-      [% IF login_not_email %]
-        placeholder="Your Login"
-      [% ELSE %]
-        type="email" placeholder="Your Email Address"
-      [% END %]>
-    <input id="forgot_button[% qs_suffix %]" value="Reset Password" 
-           type="submit">
-    <input type="hidden" name="a" value="reqpw">
-    <input type="hidden" id="token[% qs_suffix FILTER html %]" name="token"
-           value="[% issue_hash_token(['reqpw']) FILTER html %]">
-    <a href="#" onclick="return hide_forgot_form('[% qs_suffix %]')">[x]</a>
-  </form>
-</li>
+
+[% Hook.process('additional_methods') %]
+
+[% IF user.authorizer.can_change_password %]
+  <li id="forgot_container[% qs_suffix %]">
+    <span class="separator">| </span>
+    <a id="forgot_link[% qs_suffix %]" href="[% script_url FILTER html %]#forgot"
+       onclick="return show_forgot_form('[% qs_suffix %]')">Forgot Password</a>
+    <form action="token.cgi" method="post" id="forgot_form[% qs_suffix %]"
+          class="mini_forgot bz_default_hidden">
+      <label for="login[% qs_suffix FILTER html %]">Login:</label>
+      <input name="loginname" size="20" id="login[% qs_suffix FILTER html %]" required
+        [% IF login_not_email %]
+          placeholder="Your Login"
+        [% ELSE %]
+          type="email" placeholder="Your Email Address"
+        [% END %]>
+      <input id="forgot_button[% qs_suffix %]" value="Reset Password" type="submit">
+      <input type="hidden" name="a" value="reqpw">
+      <input type="hidden" id="token[% qs_suffix FILTER html %]" name="token"
+             value="[% issue_hash_token(['reqpw']) FILTER html %]">
+      <a href="#" onclick="return hide_forgot_form('[% qs_suffix %]')">[x]</a>
+    </form>
+  </li>
+[% END %]

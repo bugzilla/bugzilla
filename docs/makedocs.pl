@@ -30,7 +30,7 @@ use warnings;
 use File::Basename;
 BEGIN { chdir dirname($0); }
 
-use lib qw(.. ../lib lib);
+use lib qw(.. ../lib lib ../local/lib/perl5);
 
 use Cwd;
 use File::Copy::Recursive qw(rcopy);

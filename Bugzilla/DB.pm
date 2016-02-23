@@ -165,10 +165,6 @@ sub bz_check_requirements {
             . bz_locations()->{'localconfig'};
     }
 
-    # Check the existence and version of the DBD that we need.
-    my $dbd = $db->{dbd};
-    _bz_check_dbd($db, $output);
-
     # We don't try to connect to the actual database if $db_check is
     # disabled.
     unless ($lc->{db_check}) {
@@ -181,27 +177,6 @@ sub bz_check_requirements {
     $dbh->bz_check_server_version($db, $output);
 
     print "\n" if $output;
-}
-
-sub _bz_check_dbd {
-    my ($db, $output) = @_;
-
-    my $dbd = $db->{dbd};
-    unless (have_vers($dbd, $output)) {
-        my $sql_server = $db->{name};
-        my $command = install_command($dbd);
-        my $root    = ROOT_USER;
-        my $dbd_mod = $dbd->{module};
-        my $dbd_ver = $dbd->{version};
-        die <<EOT;
-
-For $sql_server, Bugzilla requires that perl's $dbd_mod $dbd_ver or later be
-installed. To install this module, run the following command (as $root):
-
-    $command
-
-EOT
-    }
 }
 
 sub bz_check_server_version {

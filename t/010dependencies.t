@@ -14,7 +14,7 @@ use 5.10.1;
 use strict;
 use warnings;
 
-use lib qw(. lib t);
+use lib qw(. lib local/lib/perl5 t);
 
 use Support::Files;
 use Test::More qw(no_plan);

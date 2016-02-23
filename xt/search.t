@@ -11,7 +11,7 @@
 
 use strict;
 use warnings;
-use lib qw(. xt/lib lib);
+use lib qw(. xt/lib lib local/lib/perl5);
 use Bugzilla;
 use Bugzilla::Constants;
 use Bugzilla::Test::Search;

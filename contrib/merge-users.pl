@@ -31,7 +31,7 @@ merge-users.pl - Merge two user accounts.
 
 =cut
 
-use lib qw(. lib);
+use lib qw(. lib local/lib/perl5);
 
 use Bugzilla;
 use Bugzilla::Constants;

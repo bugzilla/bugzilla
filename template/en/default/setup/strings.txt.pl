@@ -89,42 +89,10 @@ END
 Extensions must return their name, not <code>1</code> or a number. See
 the documentation of Bugzilla::Extension for details.
 END
-    feature_auth_ldap         => 'LDAP Authentication',
-    feature_auth_radius       => 'RADIUS Authentication',
-    feature_documentation     => 'Documentation',
-    feature_graphical_reports => 'Graphical Reports',
-    feature_html_desc         => 'More HTML in Product/Group Descriptions',
-    feature_inbound_email     => 'Inbound Email',
-    feature_jobqueue          => 'Mail Queueing',
-    feature_jsonrpc           => 'JSON-RPC Interface',
-    feature_new_charts        => 'New Charts',
-    feature_old_charts        => 'Old Charts',
-    feature_memcached         => 'Memcached Support',
-    feature_mod_perl          => 'mod_perl',
-    feature_moving            => 'Move Bugs Between Installations',
-    feature_patch_viewer      => 'Patch Viewer',
-    feature_psgi              => 'PSGI Support',
-    feature_rest              => 'REST Interface',
-    feature_smtp_auth         => 'SMTP Authentication',
-    feature_smtp_ssl          => 'SSL Support for SMTP',
-    feature_updates           => 'Automatic Update Notifications',
-    feature_xmlrpc            => 'XML-RPC Interface',
-    feature_detect_charset    => 'Automatic charset detection for text attachments',
-    feature_typesniffer       => 'Sniff MIME type of attachments',
-    feature_markdown          => 'Markdown syntax support for comments',
-
     file_remove => 'Removing ##name##...',
     file_rename => 'Renaming ##from## to ##to##...',
     header => "* This is Bugzilla ##bz_ver## on perl ##perl_ver##\n"
             . "* Running on ##os_name## ##os_ver##",
-    install_all => <<EOT,
-
-To attempt an automatic install of every required and optional module
-with one command, do:
-
-  ##perl## install-module.pl --all
-
-EOT
     install_data_too_long => <<EOT,
 WARNING: Some of the data in the ##table##.##column## column is longer than
 its new length limit of ##max_length## characters. The data that needs to be
@@ -132,15 +100,6 @@ fixed is printed below with the value of the ##id_column## column first and
 then the value of the ##column## column that needs to be fixed:
 
 EOT
-    install_module => 'Installing ##module## version ##version##...',
-    installation_failed => '*** Installation aborted. Read the messages above. ***',
-    install_no_compiler => <<END,
-ERROR: Using install-module.pl requires that you install a compiler, such as
-gcc.
-END
-    install_no_make => <<END,
-ERROR: Using install-module.pl requires that you install "make".
-END
     lc_new_vars => <<'END',
 This version of Bugzilla contains some variables that you may want to
 change and adapt to your local settings. The following variables are

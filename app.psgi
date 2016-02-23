@@ -11,9 +11,14 @@ use strict;
 use warnings;
 
 use File::Basename;
-use lib dirname(__FILE__);
+use File::Spec;
+BEGIN {
+    require lib;
+    my $dir = dirname(__FILE__);
+    lib->import($dir, File::Spec->catdir($dir, "lib"), File::Spec->catdir($dir, qw(local lib perl5)));
+}
+
 use Bugzilla::Constants ();
-use lib Bugzilla::Constants::bz_locations()->{ext_libpath};
 
 use Plack;
 use Plack::Builder;

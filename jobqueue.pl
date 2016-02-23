@@ -18,7 +18,7 @@ BEGIN {
     chdir dirname($a);
 }
 
-use lib qw(. lib);
+use lib qw(. lib local/lib/perl5);
 use Bugzilla;
 use Bugzilla::JobQueue::Runner;
 

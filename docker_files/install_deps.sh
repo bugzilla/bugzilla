@@ -11,7 +11,6 @@ cd $BUGZILLA_ROOT
 # Install Perl dependencies
 CPANM="cpanm --quiet --notest --skip-satisfied"
 
-perl checksetup.pl --cpanfile
 $CPANM --installdeps --with-recommends --with-all-features \
        --without-feature oracle --without-feature sqlite --without-feature pg .
 

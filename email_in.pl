@@ -20,7 +20,7 @@ BEGIN {
     chdir dirname($a);
 }
 
-use lib qw(. lib);
+use lib qw(. lib local/lib/perl5);
 
 use Data::Dumper;
 use Email::Address;

@@ -34,7 +34,6 @@ use Bugzilla::Extension;
 use Bugzilla::Field;
 use Bugzilla::Flag;
 use Bugzilla::Install::Localconfig qw(read_localconfig);
-use Bugzilla::Install::Requirements qw(OPTIONAL_MODULES have_vers);
 use Bugzilla::Install::Util qw(init_console include_languages i_am_persistent);
 use Bugzilla::Memcached;
 use Bugzilla::Template;
@@ -47,6 +46,7 @@ use File::Spec::Functions;
 use DateTime::TimeZone;
 use Date::Parse;
 use Safe;
+use List::Util qw(first);
 
 #####################################################################
 # Constants
@@ -245,32 +245,66 @@ sub api_server {
     return $cache->{api_server};
 }
 
-sub feature {
-    my ($class, $feature) = @_;
-    my $cache = $class->request_cache;
-    return $cache->{feature}->{$feature}
-        if exists $cache->{feature}->{$feature};
+use constant _CAN_HAS_FEATURE => eval {
+        require CPAN::Meta;
+        require Module::Runtime;
+        require CPAN::Meta::Check;
+        Module::Runtime->import(qw(require_module));
+        CPAN::Meta::Check->import(qw(verify_dependencies));
+        1;
+    };
 
-    my $feature_map = $cache->{feature_map};
-    if (!$feature_map) {
-        foreach my $package (@{ OPTIONAL_MODULES() }) {
-            foreach my $f (@{ $package->{feature} }) {
-                $feature_map->{$f} ||= [];
-                push(@{ $feature_map->{$f} }, $package);
+sub feature {
+    my ($class, $feature_name) = @_;
+    return 0 unless _CAN_HAS_FEATURE;
+    return unless $class->has_feature($feature_name);
+
+    my $cache = $class->request_cache;
+    my $feature = $cache->{feature_map}{$feature_name};
+    # Bugzilla expects this will also load all the modules.. so we have to do that.
+    # Later we should put a deprecation warning here, and favor calling has_feature().
+
+    return 1 if $cache->{feature_loaded}{$feature_name};
+    my @modules = $feature->requirements_for('runtime', 'requires')->required_modules;
+    require_module($_) foreach @modules;
+    $cache->{feature_loaded}{$feature_name} = 1;
+    return 1;
+}
+
+sub has_feature {
+    my ($class, $feature_name) = @_;
+
+    return 0 unless _CAN_HAS_FEATURE;
+
+    my $cache = $class->request_cache;
+    return $cache->{feature}->{$feature_name}
+        if exists $cache->{feature}->{$feature_name};
+
+    my $dir = bz_locations()->{libpath};
+    my $feature_map = $cache->{feature_map} //= do {
+        my @meta_json = map { File::Spec->catfile($dir, $_) } qw( MYMETA.json META.json );
+        my $file = first { -f $_ } @meta_json;
+        my %map;
+        if ($file) {
+            open my $meta_fh, '<', $file or die "unable to open $file: $!";
+            my $str = do { local $/ = undef; scalar <$meta_fh> };
+            trick_taint($str);
+            close $meta_fh;
+
+            my $meta = CPAN::Meta->load_json_string($str);
+
+            foreach my $feature ($meta->features) {
+                $map{$feature->identifier} = $feature->prereqs;
             }
         }
-        $cache->{feature_map} = $feature_map;
-    }
 
-    if (!$feature_map->{$feature}) {
-        ThrowCodeError('invalid_feature', { feature => $feature });
-    }
+        \%map;
+    };
 
-    my $success = 1;
-    foreach my $package (@{ $feature_map->{$feature} }) {
-        have_vers($package) or $success = 0;
-    }
-    $cache->{feature}->{$feature} = $success;
+    ThrowCodeError('invalid_feature', { feature => $feature_name }) if !$feature_map->{$feature_name};
+    my $success = !verify_dependencies($feature_map->{$feature_name}, 'runtime', 'requires');
+
+    $cache->{feature}{$feature_name} = $success;
     return $success;
 }
 
@@ -1015,8 +1049,12 @@ this Bugzilla installation.
 
 =item C<feature>
 
-Tells you whether or not a specific feature is enabled. For names
-of features, see C<OPTIONAL_MODULES> in C<Bugzilla::Install::Requirements>.
+Wrapper around C<has_feature()> that also loads all of required modules into the runtime.
+
+=item C<has_feature>
+
+Consults F<MYMETA.yml> for optional Bugzilla features and returns true if all the requirements
+are installed.
 
 =item C<api_server>
 

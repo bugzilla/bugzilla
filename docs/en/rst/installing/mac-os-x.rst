@@ -71,22 +71,16 @@ will need to agree to this.
 Perl Modules
 ============
 
-Bugzilla requires a number of Perl modules. On Mac OS X, the easiest thing to
-do is to install local copies (rather than system-wide copies) of any ones
-that you don't already have. However, if you do want to install them
-system-wide, run the below commands as root with the :command:`--global`
-option.
+Bugzilla requires a number of Perl modules. Generally, the best way to install
+these is with the cpanm command.
 
-To check whether you have all the required modules and what is still missing,
-run:
+Generally, the best way to install these is with cpanm:
 
-:command:`perl checksetup.pl --check-modules`
+:command:`curl -L http://cpanmin.us | perl - --installdeps -l local .`
 
-You can run this command as many times as necessary.
+If you want a more full-featured Bugzilla:
 
-Install all missing modules locally like this:
-
-:command:`perl install-module.pl --all`
+:command:`curl -L http://cpanmin.us | perl - --installdeps -l local --with-all-features --without-feature oracle --without-feature mysql --without-feature pg`
 
 .. _macosx-config-webserver:
 

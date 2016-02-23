@@ -20,7 +20,7 @@ use Bugzilla::Hook;
 use Bugzilla::Util qw(datetime_from trick_taint);
 
 use File::Basename qw(basename);
-use File::Glob qw(:bsd_glob);
+use File::Glob qw(:glob);
 use List::MoreUtils qw(none uniq);
 use MIME::Base64 qw(decode_base64 encode_base64);
 use Moo;

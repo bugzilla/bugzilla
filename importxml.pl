@@ -46,7 +46,7 @@ BEGIN {
     chdir(File::Basename::dirname($dir));
 }
 
-use lib qw(. lib);
+use lib qw(. lib local/lib/perl5);
 # Data dumber is used for debugging, I got tired of copying it back in 
 # and then removing it. 
 #use Data::Dumper;

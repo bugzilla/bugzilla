@@ -149,27 +149,18 @@ times, Bugzilla may require a version of a Perl module newer than the one
 your distribution packages, in which case you will need to install a
 Bugzilla-only copy of the newer version.
 
-At this point you probably need to become ``root``, e.g. by using
-:command:`su`. You should remain as root until the end of the install. This
-can be avoided in some circumstances if you are a member of your webserver's
-group, but being root is easier and will always work.
+To make sure you have all the core requirements to run Bugzilla, you should run the following command:
 
-To check whether you have all the required modules, run:
+:command:`perl Makefile.PL`
 
-:command:`./checksetup.pl --check-modules`
+Should this command warn about missing prerequisites -- or prerequisites that are too old,
+you may use cpanm to install these.
 
-You can run this command as many times as necessary.
+:command:`curl -L http://cpanmin.us | perl - --installdeps -l local .`
 
-If you have not already installed the necessary modules, and want to do it
-system-wide, invoke your package manager appropriately at this point.
-Alternatively, you can install all missing modules locally (i.e. just for
-Bugzilla) like this:
+If you want a more full-featured Bugzilla, use the following command:
 
-:command:`./install-module.pl --all`
-
-Or, you can pass an individual module name:
-
-:command:`./install-module.pl <modulename>`
+:command:`curl -L http://cpanmin.us | perl - --installdeps -l local --with-all-features --without-feature mod_perl --without-feature oracle --without-feature mysql --without-feature pg .`
 
 .. _linux-config-webserver:
 

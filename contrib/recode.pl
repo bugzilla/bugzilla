@@ -10,7 +10,7 @@ use 5.10.1;
 use strict;
 use warnings;
 
-use lib qw(. lib);
+use lib qw(. lib local/lib/perl5);
 
 use Bugzilla;
 use Bugzilla::Constants;
@@ -88,17 +88,18 @@ if (exists $switch{'charset'}) {
 }
 
 if ($switch{'guess'}) {
-    if (!eval { require Encode::Detect::Detector }) {
+    if (!Bugzilla->has_feature('detect_charset')) {
         my $root = ROOT_USER;
         print STDERR <<EOT;
 Using --guess requires that Encode::Detect be installed. To install
 Encode::Detect, run the following command:
 
-  $^X install-module.pl Encode::Detect
+   cpanm --installdeps --with-feature=detect_charset -l local .
 
 EOT
         exit;
     }
+    require Encode::Detect;
 }
 
 my %overrides;

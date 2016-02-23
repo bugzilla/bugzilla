@@ -506,9 +506,9 @@ sub _UnescapeSpecialChars {
 # are bound together with underscores, the string has the desired form.
 sub _has_multiple_underscores {
     my $string = shift;
-    return 0 unless defined($string) && length($string);
-    return 0 if $string =~ /[\t\s]+/;
-    return 1 if scalar (split /_/, $string) > 1;
+    return 0 unless $string;
+    return 0 if $string =~ /\s/;
+    return 1 if $string =~ /_/;
     return 0;
 }
 

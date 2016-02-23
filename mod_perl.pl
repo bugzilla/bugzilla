@@ -15,9 +15,14 @@ use warnings;
 # This sets up our libpath without having to specify it in the mod_perl
 # configuration.
 use File::Basename;
-use lib dirname(__FILE__);
+use File::Spec;
+BEGIN {
+    require lib;
+    my $dir = dirname(__FILE__);
+    lib->import($dir, File::Spec->catdir($dir, "lib"), File::Spec->catdir($dir, qw(local lib perl5)));
+}
+
 use Bugzilla::Constants ();
-use lib Bugzilla::Constants::bz_locations()->{'ext_libpath'};
 
 # If you have an Apache2::Status handler in your Apache configuration,
 # you need to load Apache2::Status *here*, so that any later-loaded modules

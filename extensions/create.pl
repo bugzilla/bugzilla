@@ -13,7 +13,7 @@ use warnings;
 use File::Basename;
 BEGIN { chdir dirname($0); }
 
-use lib qw(.. ../lib);
+use lib qw(.. ../lib ../local/lib/perl5);
 
 use Bugzilla;
 use Bugzilla::Constants;

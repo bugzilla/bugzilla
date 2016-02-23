@@ -19,7 +19,7 @@ use 5.10.1;
 use strict;
 use warnings;
 
-use lib 't';
+use lib qw(. lib local/lib/perl5 t);
 
 use Support::Files;
 use Support::Templates;

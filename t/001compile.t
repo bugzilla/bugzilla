@@ -14,7 +14,7 @@ use 5.10.1;
 use strict;
 use warnings;
 
-use lib qw(. lib t);
+use lib qw(. lib local/lib/perl5 t);
 use Config;
 use Support::Files;
 use Test::More tests => scalar(@Support::Files::testitems)
@@ -86,8 +86,7 @@ foreach my $file (@testitems) {
             and $file ne "Bugzilla/DB/Schema.pm") 
         {
             my $module = lc($1);
-            my $dbd = DB_MODULE->{$module}->{dbd}->{module};
-            eval("use $dbd; 1") or skip "$file: $dbd not installed", 1;
+            Bugzilla->feature($module) or skip "$file: Driver for $module not installed", 1;
         }
 
         compile_file($file);

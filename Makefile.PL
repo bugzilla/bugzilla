@@ -238,9 +238,8 @@ WriteMakefile(
     PREREQ_PM          => \%requires,
     TEST_REQUIRES => { 'Test::More' => 0, 'Pod::Coverage' => 0, 'Test::Perl::Critic' => 0, },
     META_MERGE    => {
-        "meta-spec"    => { url => "http://search.cpan.org/perldoc?CPAN::Meta::Spec", version => "2" },
-        dynamic_config => 1,
-        dog => 1,
+        "meta-spec"       => { url => "http://search.cpan.org/perldoc?CPAN::Meta::Spec", version => "2" },
+        dynamic_config    => 1,
         optional_features => \%optional_features,
     },
 );

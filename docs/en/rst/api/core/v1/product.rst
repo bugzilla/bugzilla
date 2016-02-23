@@ -320,6 +320,23 @@ name  type  description
 id    int   ID of the newly-filed product.
 ====  ====  =====================================
 
+**Errors**
+
+* 51 (Classification does not exist)
+  You must specify an existing classification name.
+* 700 (Product blank name)
+  You must specify a non-blank name for this product.
+* 701 (Product name too long)
+  The name specified for this product was longer than the maximum
+  allowed length.
+* 702 (Product name already exists)
+  You specified the name of a product that already exists.
+  (Product names must be globally unique in Bugzilla.)
+* 703 (Product must have description)
+  You must specify a description for this product.
+* 704 (Product must have version)
+  You must specify a version for this product.
+
 .. _rest_product_update:
 
 Update Product
@@ -414,3 +431,18 @@ changes  object  The changes that were actually done on this product. The
 
 Booleans will be represented with the strings '1' and '0' for changed values
 as they are stored as strings in the database currently.
+
+**Errors**
+
+* 700 (Product blank name)
+  You must specify a non-blank name for this product.
+* 701 (Product name too long)
+  The name specified for this product was longer than the maximum
+  allowed length.
+* 702 (Product name already exists)
+  You specified the name of a product that already exists.
+  (Product names must be globally unique in Bugzilla.)
+* 703 (Product must have description)
+  You must specify a description for this product.
+* 705 (Product must define a default milestone)
+  You must define a default milestone.

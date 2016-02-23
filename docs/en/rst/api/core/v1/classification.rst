@@ -64,9 +64,8 @@ name         string  The name of the classification.
 description  string  The description of the classificaion.
 sort_key     int     The value which determines the order the classification is
                      sorted.
-products     array   Products the user is authorized to
-                     access within the classification. Each hash has the
-                     following keys:
+products     array   Products the user is authorized to access within the
+                     classification. The product object keys are described below.
 ===========  ======  ============================================================
 
 Product object:

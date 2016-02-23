@@ -201,8 +201,8 @@ would return something like:
 
 **Excluding Fields**
 
-``exclude_fields``: The (case-sensitive) names of fields in the return value. The\
-fields specified will not be included in the returned hashes. Fields should
+``exclude_fields``: The (case-sensitive) names of fields in the return value. The
+fields specified will not be included in the returned objects. Fields should
 be comma delimited.
 
 Invalid field names are ignored.

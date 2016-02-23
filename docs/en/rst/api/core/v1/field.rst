@@ -185,6 +185,11 @@ can_change_to      array    For ``bug_status`` values, this is an array of
                               using this transition.
 =================  =======  =====================================================
 
+**Errors**
+
+* 51 (Invalid Field Name or Id)
+  You specified an invalid field name or id.
+
 .. _rest_legal_values:
 
 Legal Values
@@ -238,3 +243,11 @@ name        type    description
 values      array   The legal values for this field. The values will be sorted
                     as they normally would be in Bugzilla.
 ==========  ======  =============================================================
+
+**Errors**
+
+* 106 (Invalid Product)
+  You were required to specify a product, and either you didn't, or you
+  specified an invalid product (or a product that you can't access).
+* 108 (Invalid Field Name)
+  You specified a field that doesn't exist or isn't a drop-down field.

@@ -104,6 +104,20 @@ is_private     boolean   ``true`` if this comment is private (only visible to a
                          otherwise.
 =============  ========  ========================================================
 
+**Errors**
+
+This method can throw all the same errors as :ref:`rest_single_bug`. In addition,
+it can also throw the following errors:
+
+* 110 (Comment Is Private)
+  You specified the id of a private comment in the "comment_ids"
+  argument, and you are not in the "insider group" that can see
+  private comments.
+* 111 (Invalid Comment ID)
+  You specified an id in the "comment_ids" argument that is invalid--either
+  you specified something that wasn't a number, or there is no comment with
+  that id.
+
 .. _rest_add_comment:
 
 Create Comments
@@ -159,6 +173,26 @@ name  type  description
 id    int   ID of the newly-created comment.
 ====  ====  =================================
 
+**Errors**
+
+* 54 (Hours Worked Too Large)
+  You specified a "work_time" larger than the maximum allowed value of
+  "99999.99".
+* 100 (Invalid Bug Alias)
+  If you specified an alias and there is no bug with that alias.
+* 101 (Invalid Bug ID)
+  The id you specified doesn't exist in the database.
+* 109 (Bug Edit Denied)
+  You did not have the necessary rights to edit the bug.
+* 113 (Can't Make Private Comments)
+  You tried to add a private comment, but don't have the necessary rights.
+* 114 (Comment Too Long)
+  You tried to add a comment longer than the maximum allowed length
+  (65,535 characters).
+* 140 (Markdown Disabled)
+  You tried to set the "is_markdown" flag to true but the Markdown feature
+  is not enabled.
+
 .. _rest_search_comment_tags:
 
 Search Comment Tags
@@ -197,6 +231,13 @@ limit      int     If provided will return no more than ``limit`` tags.
    ]
 
 An array of matching tags.
+
+**Errors**
+
+This method can throw all of the errors that :ref:`rest_single_bug` throws, plus:
+
+* 125 (Comment Tagging Disabled)
+  Comment tagging support is not available or enabled.
 
 .. _rest_update_comment_tags:
 
@@ -240,3 +281,16 @@ remove          array  The tags to detach from the comment.
    ]
 
 An array of strings containing the comment's updated tags.
+
+**Errors**
+
+This method can throw all of the errors that :ref:`rest_single_bug` throws, plus:
+
+* 125 (Comment Tagging Disabled)
+  Comment tagging support is not available or enabled.
+* 126 (Invalid Comment Tag)
+  The comment tag provided was not valid (eg. contains invalid characters).
+* 127 (Comment Tag Too Short)
+  The comment tag provided is shorter than the minimum length.
+* 128 (Comment Tag Too Long)
+  The comment tag provided is longer than the maximum length.

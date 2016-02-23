@@ -62,6 +62,17 @@ name  type  description
 id    int   ID of the newly-created group.
 ====  ====  ==============================
 
+**Errors**
+
+* 800 (Empty Group Name)
+  You must specify a value for the "name" field.
+* 801 (Group Exists)
+  There is already another group with the same "name".
+* 802 (Group Missing Description)
+  You must specify a value for the "description" field.
+* 803 (Group Regexp Invalid)
+  You specified an invalid regular expression in the "user_regexp" field.
+
 .. _rest_group_update:
 
 Update Group
@@ -160,6 +171,10 @@ changes  object  The changes that were actually done on this group. The
                    field, possibly a comma-and-space-separated list if multiple
                    values were removed.
 =======  ======  ================================================================
+
+**Errors**
+
+The same as :ref:`rest_group_create`.
 
 .. _rest_group_get:
 
@@ -276,3 +291,14 @@ disabled_text  string   A text field that holds the reason for disabling a user
                         from logging into Bugzilla. If empty, then the user
                         account is enabled; otherwise it is disabled/closed.
 =============  =======  =========================================================
+
+**Errors**
+
+* 51 (Invalid Object)
+  A non existing group name was passed to the function, as a result no
+  group object existed for that invalid name.
+* 805 (Cannot view groups)
+  Logged-in users are not authorized to edit bugzilla groups as they are not
+  members of the creategroups group in bugzilla, or they are not authorized to
+  access group member's information as they are not members of the "editusers"
+  group or can bless the group.

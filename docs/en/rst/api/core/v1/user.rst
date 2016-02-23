@@ -52,6 +52,19 @@ token     string  Token which can be passed in the parameters as
                   of the session, i.e. til :ref:`rest_user_logout` is called.
 ========  ======  ===============================================================
 
+**Errors**
+
+* 300 (Invalid Username or Password)
+  The username does not exist, or the password is wrong.
+* 301 (Login Disabled)
+  The ability to login with this account has been disabled.  A reason may be
+  specified with the error.
+* 305 (New Password Required)
+  The current password is correct, but the user is asked to change
+  their password.
+* 50 (Param Required)
+  A login or password parameter was not provided.
+
 .. _rest_user_logout:
 
 Logout
@@ -154,6 +167,12 @@ name  type  desciption
 id    int   The numeric ID of the user that was created.
 ====  ====  ============================================
 
+**Errors**
+
+* 502 (Password Too Short)
+  The password specified is too short. (Usually, this means the
+  password is under three characters.)
+
 .. _rest_user_update:
 
 Update User
@@ -237,6 +256,13 @@ changes  object  The changes that were actually done on this user. The keys
                    field, possibly a comma-and-space-separated list if multiple
                    values were removed.
 =======  ======  ================================================================
+
+**Errors**
+
+* 51 (Bad Login Name)
+  You passed an invalid login name in the "names" array.
+* 304 (Authorization Required)
+  Logged-in users are not authorized to edit other users.
 
 .. _rest_user_get:
 
@@ -378,6 +404,23 @@ and not in 'editusers' group, you will only be returned the ``id``, ``name``,
 returned are filtered based on your permission to bless each group. The
 ``saved_searches`` and ``saved_reports`` items are only returned if you are
 querying your own account, even if you are in the editusers group.
+
+**Errors**
+
+* 51 (Bad Login Name or Group ID)
+  You passed an invalid login name in the "names" array or a bad
+  group ID in the "group_ids" argument.
+* 52 (Invalid Parameter)
+  The value used must be an integer greater than zero.
+* 304 (Authorization Required)
+  You are logged in, but you are not authorized to see one of the users you
+  wanted to get information about by user id.
+* 505 (User Access By Id or User-Matching Denied)
+  Logged-out users cannot use the "ids" or "match" arguments to this
+  function.
+* 804 (Invalid Group Name)
+  You passed a group name in the "groups" argument which either does not
+  exist or you do not belong to it.
 
 .. _rest_user_whoami:
 

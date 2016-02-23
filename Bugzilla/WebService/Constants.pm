@@ -204,6 +204,9 @@ use constant WS_ERROR_CODE => {
     # Search errors are 1000-1100
     buglist_parameters_required => 1000,
 
+    # BugUserLastVisited errors
+    user_not_involved => 1300,
+
     # Errors thrown by the WebService itself. The ones that are negative 
     # conform to http://xmlrpc-epi.sourceforge.net/specs/rfc.fault_codes.php
     xmlrpc_invalid_value => -32600,

@@ -281,6 +281,15 @@ field name in ``include_fields``.
 * Multiple-Selection Fields: (array of strings)
 * Date/Time Fields: (datetime)
 
+**Errors**
+
+* 100 (Invalid Bug Alias)
+  If you specified an alias and there is no bug with that alias.
+* 101 (Invalid Bug ID)
+  The bug_id you specified doesn't exist in the database.
+* 102 (Access Denied)
+  You do not have access to the bug_id you specified.
+
 .. _rest_history:
 
 Bug History
@@ -388,6 +397,10 @@ attachment_id  int     The ID of the attachment that was changed.
                        otherwise ``attachment_id`` will not be present in this
                        object.
 =============  ======  ==========================================================
+
+**Errors**
+
+Same as :ref:`rest_single_bug`.
 
 .. _rest_search_bugs:
 
@@ -514,6 +527,14 @@ quicksearch       string    Search for bugs using quicksearch syntax.
 **Response**
 
 The same as :ref:`rest_single_bug`.
+
+**Errors**
+
+If you specify an invalid value for a particular field, you just won't
+get any results for that value.
+
+* 1000 (Parameters Required)
+  You may not search without any search terms.
 
 .. _rest_create_bug:
 
@@ -655,6 +676,46 @@ name  type  description
 id    int   This is the ID of the newly-filed bug.
 ====  ====  ======================================
 
+**Errors**
+
+* 51 (Invalid Object)
+  You specified a field value that is invalid. The error message will have
+  more details.
+* 103 (Invalid Alias)
+  The alias you specified is invalid for some reason. See the error message
+  for more details.
+* 104 (Invalid Field)
+  One of the drop-down fields has an invalid value, or a value entered in a
+  text field is too long. The error message will have more detail.
+* 105 (Invalid Component)
+  You didn't specify a component.
+* 106 (Invalid Product)
+  Either you didn't specify a product, this product doesn't exist, or
+  you don't have permission to enter bugs in this product.
+* 107 (Invalid Summary)
+  You didn't specify a summary for the bug.
+* 116 (Dependency Loop)
+  You specified values in the "blocks" or "depends_on" fields
+  that would cause a circular dependency between bugs.
+* 120 (Group Restriction Denied)
+  You tried to restrict the bug to a group which does not exist, or which
+  you cannot use with this product.
+* 129 (Flag Status Invalid)
+  The flag status is invalid.
+* 130 (Flag Modification Denied)
+  You tried to request, grant, or deny a flag but only a user with the required
+  permissions may make the change.
+* 131 (Flag not Requestable from Specific Person)
+  You can't ask a specific person for the flag.
+* 133 (Flag Type not Unique)
+  The flag type specified matches several flag types. You must specify
+  the type id value to update or add a flag.
+* 134 (Inactive Flag Type)
+  The flag type is inactive and cannot be used to create new flags.
+* 504 (Invalid User)
+  Either the QA Contact, Assignee, or CC lists have some invalid user
+  in them. The error message will have more details.
+
 .. _rest_update_bug:
 
 Update Bug
@@ -701,8 +762,8 @@ name                   type     description
 =====================  =======  =================================================
 alias                  object   These specify the aliases of a bug that can be
                                 used instead of a bug number when acessing this
-                                bug. To set these, you should pass a hash as the
-                                value. The object may contain the following
+                                bug. To set these, you should pass an object as
+                                the value. The object may contain the following
                                 items:
 
                                 * ``add`` (array) Aliases to add to this field.
@@ -987,3 +1048,33 @@ Currently, some fields are not tracked in changes: ``comment``,
 ``comment_is_private``, and ``work_time``. This means that they will not
 show up in the return value even if they were successfully updated.
 This may change in a future version of Bugzilla.
+
+**Errors**
+
+This method can throw all the same errors as :ref:`rest_single_bug`, plus:
+
+* 129 (Flag Status Invalid)
+  The flag status is invalid.
+* 130 (Flag Modification Denied)
+  You tried to request, grant, or deny a flag but only a user with the required
+  permissions may make the change.
+* 131 (Flag not Requestable from Specific Person)
+  You can't ask a specific person for the flag.
+* 132 (Flag not Unique)
+  The flag specified has been set multiple times. You must specify the id
+  value to update the flag.
+* 133 (Flag Type not Unique)
+  The flag type specified matches several flag types. You must specify
+  the type id value to update or add a flag.
+* 134 (Inactive Flag Type)
+  The flag type is inactive and cannot be used to create new flags.
+* 140 (Markdown Disabled)
+  You tried to set the "is_markdown" flag of the "comment" to true but Markdown feature is
+  not enabled.
+* 601 (Invalid MIME Type)
+  You specified a "content_type" argument that was blank, not a valid
+  MIME type, or not a MIME type that Bugzilla accepts for attachments.
+* 603 (File Name Not Specified)
+  You did not specify a valid for the "file_name" argument.
+* 604 (Summary Required)
+  You did not specify a value for the "summary" argument.

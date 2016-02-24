@@ -460,6 +460,9 @@ component         string    The name of the Component that the bug is in. Note
                             name, and you search for that name, bugs in *all*
                             those Components will be returned. If you don't want
                             this, be sure to also specify the ``product`` argument.
+count_only        boolean   If set to true, an object with a single key called
+                            "bug_count" will be returned which is the number of
+                            bugs that matched the search.
 creation_time     datetime  Searches for bugs that were created at this time or
                             later. May not be an array.
 creator           string    The login name of the user who created the bug. You
@@ -485,6 +488,7 @@ platform          string    The Platform (sometimes called "Hardware") field of
                             a bug.
 priority          string    The Priority field on a bug.
 product           string    The name of the Product that the bug is in.
+quicksearch       string    Search for bugs using quicksearch syntax.
 resolution        string    The current resolution--only set if a bug is closed.
                             You can find open bugs by searching for bugs with an
                             empty resolution.
@@ -521,7 +525,6 @@ whiteboard        string    Search the "Status Whiteboard" field on bugs for a
                             substring. Works the same as the ``summary`` field
                             described above, but searches the Status Whiteboard
                             field.
-quicksearch       string    Search for bugs using quicksearch syntax.
 ================  ========  =====================================================
 
 **Response**

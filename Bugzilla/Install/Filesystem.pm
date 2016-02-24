@@ -163,7 +163,7 @@ sub FILESYSTEM {
         'checksetup.pl'   => { perms => OWNER_EXECUTE },
         'jobqueue.pl'     => { perms => OWNER_EXECUTE },
         'migrate.pl'      => { perms => OWNER_EXECUTE },
-        'Makefile.PL'     => { perms => OWNER_EXECUTE },
+        'Makefile.PL'     => { perms => OWNER_WRITE },
         'gen-cpanfile.pl' => { perms => OWNER_EXECUTE },
         'clean-bug-user-last-visit.pl' => { perms => WS_EXECUTE },
 

@@ -25,7 +25,6 @@ use Date::Format;
 
 sub _throw_error {
     my ($name, $error, $vars) = @_;
-    my $dbh = Bugzilla->dbh;
     my $cache = Bugzilla->request_cache;
     $vars ||= {};
 

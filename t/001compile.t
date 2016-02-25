@@ -25,6 +25,7 @@ BEGIN {
     use_ok('Bugzilla::Install::Requirements');
     use_ok('Bugzilla');
 }
+Bugzilla->usage_mode(USAGE_MODE_TEST);
 
 sub compile_file {
     my ($file) = @_;

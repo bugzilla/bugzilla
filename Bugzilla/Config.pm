@@ -292,31 +292,22 @@ sub write_params {
 }
 
 sub read_param_file {
-    my %params;
+    my $params;
     my $file = bz_locations()->{'datadir'} . '/params.json';
 
     if (-e $file) {
         my $data;
         read_file($file, binmode => ':utf8', buf_ref => \$data);
+        trick_taint($data);
 
         # If params.json has been manually edited and e.g. some quotes are
         # missing, we don't want JSON::XS to leak the content of the file
         # to all users in its error message, so we have to eval'uate it.
-        %params = eval { %{JSON::XS->new->decode($data)} };
+        $params = eval { JSON::XS->new->decode($data) };
         if ($@) {
             my $error_msg = (basename($0) eq 'checksetup.pl') ?
                 $@ : 'run checksetup.pl to see the details.';
             die "Error parsing $file: $error_msg";
-        }
-        # JSON::XS doesn't detaint data for us.
-        foreach my $key (keys %params) {
-            if (ref($params{$key}) eq "ARRAY") {
-                foreach my $item (@{$params{$key}}) {
-                    trick_taint($item);
-                }
-            } else {
-                trick_taint($params{$key}) if defined $params{$key};
-            }
         }
     }
     elsif ($ENV{'SERVER_SOFTWARE'}) {
@@ -332,7 +323,7 @@ sub read_param_file {
         die "The $file file does not exist."
             . ' You probably need to run checksetup.pl.',
     }
-    return \%params;
+    return $params // {};
 }
 
 1;

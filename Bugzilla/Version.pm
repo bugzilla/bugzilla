@@ -167,7 +167,7 @@ sub product {
     my $self = shift;
 
     require Bugzilla::Product;
-    $self->{'product'} ||= new Bugzilla::Product($self->product_id);
+    $self->{'product'} ||= Bugzilla::Product->new({ id => $self->product_id, cache => 1 });
     return $self->{'product'};
 }
 

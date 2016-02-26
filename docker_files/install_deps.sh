@@ -9,25 +9,18 @@
 cd $BUGZILLA_ROOT
 
 # Install Perl dependencies
-CPANM="cpanm --quiet --notest --skip-satisfied"
+CPANM="cpanm -l local --quiet --skip-satisfied"
 
-$CPANM --installdeps --with-recommends --with-all-features \
+$CPANM --installdeps --with-all-features \
        --without-feature oracle --without-feature sqlite --without-feature pg .
-
-# FIXME: These cause error when being installed using cpanfile
-$CPANM HTML::Formatter
-$CPANM HTML::FormatText::WithLinks
 
 # Building PDF documentation
 if [ ! -x "/usr/bin/rst2pdf" ]; then
     pip install rst2pdf
 fi
 
-# For testing support
-$CPANM JSON::XS
-$CPANM Test::WWW::Selenium
-$CPANM Pod::Coverage
-$CPANM Pod::Checker
+# For UI testing support (--notest because it tries to connect to a running server)
+$CPANM --notest Test::WWW::Selenium
 
 # Remove CPAN build files to minimize disk usage
 rm -rf ~/.cpanm

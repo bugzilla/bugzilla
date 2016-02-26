@@ -5,7 +5,7 @@
 # This Source Code Form is "Incompatible With Secondary Licenses", as
 # defined by the Mozilla Public License, v. 2.0.
 
-FROM centos
+FROM centos:7
 MAINTAINER David Lawrence <dkl@mozilla.com>
 
 # Environment configuration
@@ -21,6 +21,7 @@ ENV GITHUB_QA_GIT https://github.com/bugzilla/qa
 COPY docker_files /docker_files
 RUN yum -y -q update \
     && yum -y -q install https://dev.mysql.com/get/mysql-community-release-el7-5.noarch.rpm epel-release \
+    && yum -y -q groupinstall "Development Tools" \
     && yum -y -q install `cat /docker_files/rpm_list` \
     && yum clean all
 
@@ -51,6 +52,8 @@ RUN cp /docker_files/sudoers /etc/sudoers \
 RUN su $USER -c "git clone $GITHUB_BASE_GIT -b $GITHUB_BASE_BRANCH $BUGZILLA_ROOT"
 
 # Bugzilla dependencies and setup
+ADD https://raw.githubusercontent.com/miyagawa/cpanminus/master/cpanm /usr/local/bin/cpanm
+RUN chmod 755 /usr/local/bin/cpanm
 RUN /bin/bash /docker_files/install_deps.sh
 RUN /bin/bash /docker_files/bugzilla_config.sh
 RUN /bin/bash /docker_files/my_config.sh

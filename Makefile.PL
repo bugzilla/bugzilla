@@ -236,7 +236,12 @@ WriteMakefile(
     MIN_PERL_VERSION   => '5.10.1',
     CONFIGURE_REQUIRES => { 'ExtUtils::MakeMaker' => '6.55' },
     PREREQ_PM          => \%requires,
-    TEST_REQUIRES => { 'Test::More' => 0, 'Pod::Coverage' => 0, 'Test::Perl::Critic' => 0, },
+    TEST_REQUIRES => {
+        'Test::More'         => 0,
+        'Pod::Checker'       => 0,
+        'Pod::Coverage'      => 0,
+        'Test::Perl::Critic' => 0
+    },
     META_MERGE    => {
         "meta-spec"       => { url => "http://search.cpan.org/perldoc?CPAN::Meta::Spec", version => "2" },
         dynamic_config    => 1,

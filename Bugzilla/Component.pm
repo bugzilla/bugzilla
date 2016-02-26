@@ -405,10 +405,9 @@ sub initial_cc {
 
 sub product {
     my $self = shift;
-    if (!defined $self->{'product'}) {
-        require Bugzilla::Product; # We cannot |use| it.
-        $self->{'product'} = new Bugzilla::Product($self->product_id);
-    }
+
+    require Bugzilla::Product;
+    $self->{'product'} ||= Bugzilla::Product->new({ id => $self->product_id, cache => 1 });
     return $self->{'product'};
 }
 

@@ -190,6 +190,7 @@ sub FILESYSTEM {
         "$datadir/old-params.txt"  => { perms => OWNER_WRITE },
         "$extensionsdir/create.pl" => { perms => OWNER_EXECUTE },
         "$extensionsdir/*/*.pl"    => { perms => WS_EXECUTE },
+        'xt/config/generate_test_data.pl' => { perms => OWNER_EXECUTE },
     );
 
     # Directories that we want to set the perms on, but not

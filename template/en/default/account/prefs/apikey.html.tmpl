@@ -34,13 +34,25 @@ here.</p>
     <th>Revoked</th>
   </tr>
 
+  [%# because mozreview api-keys only work for the mozreview api, we hide the
+    # key and prevent renaming #%]
   [% FOREACH api_key IN api_keys %]
     <tr[% IF api_key.revoked %] class="apikey_revoked bz_tui_hidden" style="display:none"[% END %]>
-      <td>[% api_key.api_key FILTER html %]</td>
       <td>
-        <input name="description_[% api_key.id FILTER html %]"
-          id="description_[% api_key.id FILTER html %]"
-          value="[% api_key.description FILTER html %]">
+        [% IF api_key.is_mozreview %]
+          <i>hidden</i>
+        [% ELSE %]
+          [% api_key.api_key FILTER html %]
+        [% END %]
+      </td>
+      <td>
+        [% IF api_key.is_mozreview %]
+            MozReview
+        [% ELSE %]
+          <input name="description_[% api_key.id FILTER html %]"
+            id="description_[% api_key.id FILTER html %]"
+            value="[% api_key.description FILTER html %]">
+        [% END %]
       </td>
       [% IF api_key.last_used %]
         <td>[% api_key.last_used FILTER time %]

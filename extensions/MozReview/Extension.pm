@@ -30,6 +30,18 @@ my @METHOD_WHITELIST = (
     'Bug.update_attachment',
 );
 
+BEGIN {
+    package Bugzilla::User::APIKey;
+
+    sub is_mozreview {
+        my ($self) = @_;
+        my $mozreview_app_id = Bugzilla->params->{mozreview_app_id};
+        return 0 unless $mozreview_app_id;
+
+        return 1 if $self->app_id && $self->app_id eq $mozreview_app_id;
+    }
+}
+
 sub template_before_process {
     my ($self, $args) = @_;
     my $file = $args->{'file'};

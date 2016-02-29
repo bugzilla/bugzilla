@@ -25,114 +25,13 @@
    generate_api_token = 1
    style_urls = [ 'extensions/REMO/web/styles/moz_reps.css' ]
    javascript_urls = [ 'extensions/REMO/web/js/form_validate.js',
+                       'extensions/REMO/web/js/payment.js',
                        'js/util.js',
                        'js/field.js' ]
    yui = ['connection', 'json'] 
 %]
 
-<script language="javascript" type="text/javascript">
-
-var bug_cache = {};
-
-function validateAndSubmit() {
-  var alert_text = '';
-  if(!isFilledOut('firstname')) alert_text += "Please enter your first name\n";
-  if(!isFilledOut('lastname')) alert_text += "Please enter your last name\n";
-  if(!isFilledOut('wikiprofile')) alert_text += "Please enter a wiki user profile.\n";
-  if(!isFilledOut('wikipage')) alert_text += "Please enter a wiki page address.\n";
-  if(!isFilledOut('bug_id')) alert_text += "Please enter a valid [% terms.bug %] id to attach this additional information to.\n";
-  if(!isFilledOut('expenseform')) alert_text += "Please enter an expense form to upload.\n";
-  if(!isFilledOut('receipts')) alert_text += "Please enter a receipts file to upload.\n";
-
-  if (alert_text) {
-    alert(alert_text);
-    return false;
-  }
-
-  return true;
-}
-
-function togglePaymentInfo (e) {
-  var div = document.getElementById('paymentinfo');
-  if (e.checked == false) {
-    div.style.display = 'block';
-  }
-  else {
-    div.style.display = 'none';
-  }
-}
-
-function getBugInfo (e, div) {
-  var bug_id = e.value;
-  div = document.getElementById(div);
-
-  if (!bug_id) {
-    div.innerHTML = "";
-    return true;
-  }
-
-  div.style.display = 'block';
-
-  if (bug_cache[bug_id]) {
-    div.innerHTML = bug_cache[bug_id];
-    e.disabled = false;
-    return true;    
-  }
-
-  e.disabled = true;
-  div.innerHTML = 'Getting [% terms.bug %] info...';
-
-  YAHOO.util.Connect.setDefaultPostHeader('application/json', true); 
-  YAHOO.util.Connect.asyncRequest(
-    'POST',
-    'jsonrpc.cgi',
-    {
-      success: function(res) {
-        var bug_message = "";
-        data = YAHOO.lang.JSON.parse(res.responseText);
-        if (data.error) {
-          bug_message = "Get [% terms.bug %] failed: " + data.error.message;
-        }
-        else if (data.result) {
-          if (data.result.bugs[0].product !== 'Mozilla Reps'
-              || data.result.bugs[0].component !== 'Budget Requests') 
-          {
-            bug_message = "You can only attach budget payment " +
-                          "information to [% terms.bugs %] under the product " + 
-                          "'Mozilla Reps' and component 'Budget Requests'.";
-          }
-          else {
-            bug_message = "[% terms.Bug %] " + bug_id + " - " + data.result.bugs[0].status +
-                          " - " + data.result.bugs[0].summary;
-          }
-        }
-        else {
-          bug_message = "Get [% terms.bug %] failed: " + res.responseText; 
-        }
-        div.innerHTML = bug_message;
-        bug_cache[bug_id] = bug_message;
-        e.disabled = false;
-      },
-      failure: function(res) {
-        if (res.responseText) {
-          div.innerHTML = "Get [% terms.bug %] failed: " + res.responseText;
-        }
-      }
-    },
-    YAHOO.lang.JSON.stringify({
-      version: "1.1",
-      method: "Bug.get",
-      id: bug_id,
-      params: {
-        ids: [ bug_id ], 
-        include_fields: [ 'product', 'component', 'status',  'summary' ],
-        Bugzilla_api_token : (BUGZILLA.api_token ? BUGZILLA.api_token : '')
-      }
-    })
-  );    
-}
-
-</script>
+<script language="javascript" type="text/javascript"></script>
 
 <h1>Mozilla Reps - Payment Form</h1>
 
@@ -175,8 +74,7 @@ function getBugInfo (e, div) {
 <tr class="odd">
   <td><strong>Budget request [% terms.bug %]: <span style="color: red;">*</span></strong></td>
   <td>
-    <input type="text" name="bug_id" id="bug_id" value="" size="40"
-           onblur="getBugInfo(this,'bug_info');")>
+    <input type="text" name="bug_id" id="bug_id" value="" size="40">
   </td>
 </tr>
 
@@ -189,8 +87,7 @@ function getBugInfo (e, div) {
 <tr class="even">
   <td colspan="2">
     <strong>Have you already received payment for this event?</strong>
-    <input type="checkbox" name="receivedpayment" id="receivedpayment" value="1"
-           onchange="togglePaymentInfo(this);" checked="true">
+    <input type="checkbox" name="receivedpayment" id="receivedpayment" value="1" checked="true">
     <div id="paymentinfo" style="display:none;">
       Please send an email to William at mozilla.com with all the information below:<br>
       <br>

@@ -9,7 +9,7 @@
 # Test for xmlrpc call to Bug.comments() #
 ##########################################
 
-use 5.10.1;
+use 5.14.0;
 use strict;
 use warnings;
 

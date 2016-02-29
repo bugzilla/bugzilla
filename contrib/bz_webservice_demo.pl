@@ -18,7 +18,7 @@ C<bz_webservice_demo.pl --help> for detailed help
 
 =cut
 
-use 5.10.1;
+use 5.14.0;
 use strict;
 use warnings;
 

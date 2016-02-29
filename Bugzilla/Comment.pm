@@ -7,7 +7,7 @@
 
 package Bugzilla::Comment;
 
-use 5.10.1;
+use 5.14.0;
 use strict;
 use warnings;
 
@@ -447,8 +447,6 @@ sub _check_thetext {
     # XXX - Once we use utf8mb4 for comments, this hack for MySQL can go away.
     state $is_mysql = Bugzilla->dbh->isa('Bugzilla::DB::Mysql') ? 1 : 0;
     if ($is_mysql) {
-        # Perl 5.13.8 and older complain about non-characters.
-        no warnings 'utf8';
         $thetext =~ s/([\x{10000}-\x{10FFFF}])/"\x{FDD0}[" . uc(sprintf('U+%04x', ord($1))) . "]\x{FDD1}"/eg;
     }
 

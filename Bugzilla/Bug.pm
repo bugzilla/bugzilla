@@ -7,7 +7,7 @@
 
 package Bugzilla::Bug;
 
-use 5.10.1;
+use 5.14.0;
 use strict;
 use warnings;
 
@@ -305,6 +305,9 @@ sub new {
     my $class = ref($invocant) || $invocant;
     my $param = shift;
 
+    # Let's not be abused by pseudo-numbers.
+    use re '/a';
+
     # Remove leading "#" mark if we've just been passed an id.
     if (!ref $param && $param =~ /^#(\d+)$/) {
         $param = $1;
@@ -541,6 +544,9 @@ sub _preload_referenced_bugs {
 sub _extract_bug_ids {
     my $comments = shift;
     my @bug_ids;
+
+    # Let's not be abused by pseudo-numbers.
+    use re '/a';
 
     my $params = Bugzilla->params;
     my @urlbases = ($params->{'urlbase'});
@@ -1735,7 +1741,7 @@ sub _check_dependencies {
             }
         }
         # Replace all aliases by their corresponding bug ID.
-        @bug_ids = map { $_ =~ /^(\d+)$/ ? $1 : $invocant->check($_, $type)->id } @bug_ids;
+        @bug_ids = map { $_ =~ /^(\d+)$/a ? $1 : $invocant->check($_, $type)->id } @bug_ids;
         $deps_in{$type} = \@bug_ids;
     }
 
@@ -3694,8 +3700,6 @@ sub comments {
             # equivalent for characters above U+FFFF as MySQL older than 5.5.3
             # cannot store them, see Bugzilla::Comment::_check_thetext().
             if ($is_mysql) {
-                # Perl 5.13.8 and older complain about non-characters.
-                no warnings 'utf8';
                 $comment->{thetext} =~ s/\x{FDD0}\[U\+((?:[1-9A-F]|10)[0-9A-F]{4})\]\x{FDD1}/chr(hex $1)/eg
             }
         }

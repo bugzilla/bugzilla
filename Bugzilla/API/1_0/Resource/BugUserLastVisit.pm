@@ -7,7 +7,7 @@
 
 package Bugzilla::API::1_0::Resource::BugUserLastVisit;
 
-use 5.10.1;
+use 5.14.0;
 use strict;
 use warnings;
 
@@ -35,6 +35,7 @@ use constant PUBLIC_METHODS => qw(
 );
 
 sub REST_RESOURCES {
+    use re '/a';
     return [
         # bug-id
         qr{^/bug_user_last_visit/(\d+)$}, {

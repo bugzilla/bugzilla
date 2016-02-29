@@ -6,7 +6,7 @@
 # This Source Code Form is "Incompatible With Secondary Licenses", as
 # defined by the Mozilla Public License, v. 2.0.
 
-use 5.10.1;
+use 5.14.0;
 use strict;
 use warnings;
 
@@ -309,9 +309,10 @@ if (defined $cgi->param('id')) {
 
 my %is_private;
 foreach my $field (grep(/^defined_isprivate/, $cgi->param())) {
-    $field =~ /(\d+)$/;
-    my $comment_id = $1;
-    $is_private{$comment_id} = $cgi->param("isprivate_$comment_id");
+    if ($field =~ /(\d+)$/a) {
+        my $comment_id = $1;
+        $is_private{$comment_id} = $cgi->param("isprivate_$comment_id");
+    }
 }
 $set_all_fields{comment_is_private} = \%is_private;
 

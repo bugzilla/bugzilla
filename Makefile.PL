@@ -12,9 +12,10 @@
 # Initialization
 ######################################################################
 
-use 5.10.1;
+use 5.14.0;
 use strict;
 use warnings;
+
 use lib qw(. lib local/lib/perl5);
 
 use ExtUtils::MakeMaker 6.55;
@@ -233,7 +234,7 @@ WriteMakefile(
     VERSION            => BUGZILLA_VERSION,
     ABSTRACT           => 'Bugzilla Bug Tracking System',
     LICENSE            => 'Mozilla_2_0',
-    MIN_PERL_VERSION   => '5.10.1',
+    MIN_PERL_VERSION   => '5.14.0',
     CONFIGURE_REQUIRES => { 'ExtUtils::MakeMaker' => '6.55' },
     PREREQ_PM          => \%requires,
     TEST_REQUIRES => {

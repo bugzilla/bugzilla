@@ -7,9 +7,12 @@
 
 # Enforce high standards against code that will be installed
 
-use 5.10.1;
+use 5.14.0;
 use strict;
 use warnings;
+
+use lib qw(. lib local/lib/perl5 t);
+
 use Test::More;
 use File::Spec::Functions ':ALL';
 

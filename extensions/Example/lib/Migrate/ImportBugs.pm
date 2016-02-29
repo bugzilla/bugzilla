@@ -18,8 +18,12 @@ implementation see L<Bugzilla::Migrate::Gnats>.
 =cut
 
 package Bugzilla::Extension::Example::Migrate::ImportBugs;
+
+use 5.14.0
 use strict;
-use base qw(Bugzilla::Migrate);
+use warnings;
+
+use parent qw(Bugzilla::Migrate);
 
 use Bugzilla::Constants;
 use Bugzilla::Install::Util qw(indicate_progress);

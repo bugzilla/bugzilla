@@ -27,7 +27,7 @@
 # Bonus:
 # Offer subscription when you get a "series already exists" error?
 
-use 5.10.1;
+use 5.14.0;
 use strict;
 use warnings;
 
@@ -231,7 +231,7 @@ sub getAndValidateSeriesIDs {
 
 # Return a list of IDs of all the lines selected in the UI.
 sub getSelectedLines {
-    my @ids = map { /^select(\d+)$/ ? $1 : () } $cgi->param();
+    my @ids = map { /^select(\d+)$/a ? $1 : () } $cgi->param();
 
     return @ids;
 }

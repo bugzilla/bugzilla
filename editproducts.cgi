@@ -6,7 +6,7 @@
 # This Source Code Form is "Incompatible With Secondary Licenses", as
 # defined by the Mozilla Public License, v. 2.0.
 
-use 5.10.1;
+use 5.14.0;
 use strict;
 use warnings;
 
@@ -343,7 +343,7 @@ if ($action eq 'updategroupcontrols') {
     my @now_na = ();
     my @now_mandatory = ();
     foreach my $f ($cgi->param()) {
-        if ($f =~ /^membercontrol_(\d+)$/) {
+        if ($f =~ /^membercontrol_(\d+)$/a) {
             my $id = $1;
             if ($cgi->param($f) == CONTROLMAPNA) {
                 push @now_na,$id;

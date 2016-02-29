@@ -7,7 +7,7 @@
 
 package Bugzilla::Flag;
 
-use 5.10.1;
+use 5.14.0;
 use strict;
 use warnings;
 
@@ -843,11 +843,11 @@ sub extract_flags_from_cgi {
     }
 
     # Extract a list of flag type IDs from field names.
-    my @flagtype_ids = map(/^flag_type-(\d+)$/ ? $1 : (), $cgi->param());
+    my @flagtype_ids = map(/^flag_type-(\d+)$/a ? $1 : (), $cgi->param());
     @flagtype_ids = grep($cgi->param("flag_type-$_") ne 'X', @flagtype_ids);
 
     # Extract a list of existing flag IDs.
-    my @flag_ids = map(/^flag-(\d+)$/ ? $1 : (), $cgi->param());
+    my @flag_ids = map(/^flag-(\d+)$/a ? $1 : (), $cgi->param());
 
     return ([], []) unless (scalar(@flagtype_ids) || scalar(@flag_ids));
 
@@ -986,7 +986,7 @@ sub multi_extract_flags_from_cgi {
     }
 
     # Extract a list of flag type IDs from field names.
-    my @flagtype_ids = map(/^flag_type-(\d+)$/ ? $1 : (), $cgi->param());
+    my @flagtype_ids = map(/^flag_type-(\d+)$/a ? $1 : (), $cgi->param());
 
     my (@new_flags, @flags);
 

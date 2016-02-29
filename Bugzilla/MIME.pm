@@ -9,7 +9,7 @@ package Bugzilla::MIME;
 use strict;
 use warnings;
 
-use 5.10.1;
+use 5.14.0;
 use parent qw(Email::MIME);
 
 use Encode qw(encode);

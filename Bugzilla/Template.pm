@@ -8,7 +8,7 @@
 
 package Bugzilla::Template;
 
-use 5.10.1;
+use 5.14.0;
 use strict;
 use warnings;
 
@@ -159,9 +159,7 @@ sub quoteUrls {
     # mailto can't contain space or #, so we don't have to bother for that
     # Do this by replacing matches with \x{FDD2}$count\x{FDD3}
     # \x{FDDx} is used because it's unlikely to occur in the text
-    # and are reserved unicode characters. We disable warnings for now
-    # until we require Perl 5.13.9 or newer.
-    no warnings 'utf8';
+    # and are reserved unicode characters.
 
     # If the comment is already wrapped, we should ignore newlines when
     # looking for matching regexps. Else we should take them into account.
@@ -247,9 +245,9 @@ sub quoteUrls {
     # Also, we can't use $bug_re?$comment_re? because that will match the
     # empty string
     my $bug_word = template_var('terms')->{bug};
-    my $bug_re = qr/\Q$bug_word\E$s*\#?$s*(\d+)/i;
+    my $bug_re = qr/\Q$bug_word\E$s*\#?$s*(\d+)/ai;
     my $comment_word = template_var('terms')->{comment};
-    my $comment_re = qr/(?:\Q$comment_word\E|comment)$s*\#?$s*(\d+)/i;
+    my $comment_re = qr/(?:\Q$comment_word\E|comment)$s*\#?$s*(\d+)/ai;
     $text =~ s~\b($bug_re(?:$s*,?$s*$comment_re)?|$comment_re)
               ~ # We have several choices. $1 here is the link, and $2-4 are set
                 # depending on which part matched

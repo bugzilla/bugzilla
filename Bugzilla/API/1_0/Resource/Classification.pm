@@ -7,7 +7,7 @@
 
 package Bugzilla::API::1_0::Resource::Classification;
 
-use 5.10.1;
+use 5.14.0;
 use strict;
 use warnings;
 

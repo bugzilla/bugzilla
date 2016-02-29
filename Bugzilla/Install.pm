@@ -15,7 +15,7 @@ package Bugzilla::Install;
 # make those assumptions, then it should go into one of the
 # packages under the Bugzilla::Install namespace.
 
-use 5.10.1;
+use 5.14.0;
 use strict;
 use warnings;
 

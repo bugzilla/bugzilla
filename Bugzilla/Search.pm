@@ -7,7 +7,7 @@
 
 package Bugzilla::Search;
 
-use 5.10.1;
+use 5.14.0;
 use strict;
 use warnings;
 
@@ -1628,11 +1628,11 @@ sub _special_parse_email {
     my ($self) = @_;
     my $params = $self->_params;
     
-    my @email_params = grep { $_ =~ /^email\d+$/ } keys %$params;
+    my @email_params = grep { $_ =~ /^email\d+$/a } keys %$params;
     
     my $clause = new Bugzilla::Search::Clause();
     foreach my $param (@email_params) {
-        $param =~ /(\d+)$/;
+        $param =~ /(\d+)$/a;
         my $id = $1;
         my $email = trim($params->{"email$id"});
         next if !$email;
@@ -1728,26 +1728,28 @@ sub _params_to_data_structure {
 
 sub _boolean_charts {
     my ($self) = @_;
-    
+
+    use re '/a';
+
     my $params = $self->_params;
     my @param_list = keys %$params;
-    
+
     my @all_field_params = grep { /^field-?\d+/ } @param_list;
     my @chart_ids = map { /^field(-?\d+)/; $1 } @all_field_params;
     @chart_ids = sort { $a <=> $b } uniq @chart_ids;
-    
+
     my $clause = new Bugzilla::Search::Clause();
     foreach my $chart_id (@chart_ids) {
         my @all_and = grep { /^field$chart_id-\d+/ } @param_list;
         my @and_ids = map { /^field$chart_id-(\d+)/; $1 } @all_and;
         @and_ids = sort { $a <=> $b } uniq @and_ids;
-        
+
         my $and_clause = new Bugzilla::Search::Clause();
         foreach my $and_id (@and_ids) {
             my @all_or = grep { /^field$chart_id-$and_id-\d+/ } @param_list;
             my @or_ids = map { /^field$chart_id-$and_id-(\d+)/; $1 } @all_or;
             @or_ids = sort { $a <=> $b } uniq @or_ids;
-            
+
             my $or_clause = new Bugzilla::Search::Clause('OR');
             foreach my $or_id (@or_ids) {
                 my $identifier = "$chart_id-$and_id-$or_id";
@@ -1819,9 +1821,9 @@ sub _field_ids {
     my ($self) = @_;
     my $params = $self->_params;
     my @param_list = keys %$params;
-    
-    my @field_params = grep { /^f\d+$/ } @param_list;
-    my @field_ids = map { /(\d+)/; $1 } @field_params;
+
+    my @field_params = grep { /^f\d+$/a } @param_list;
+    my @field_ids = map { /(\d+)/a; $1 } @field_params;
     @field_ids = sort { $a <=> $b } @field_ids;
     return @field_ids;
 }
@@ -1916,9 +1918,6 @@ sub _handle_chart {
 # once we require MySQL 5.5.3 and use utf8mb4.
 sub _convert_unicode_characters {
     my $string = shift;
-
-    # Perl 5.13.8 and older complain about non-characters.
-    no warnings 'utf8';
     $string =~ s/([\x{10000}-\x{10FFFF}])/"\x{FDD0}[" . uc(sprintf('U+%04x', ord($1))) . "]\x{FDD1}"/eg;
     return $string;
 }
@@ -2224,7 +2223,7 @@ sub SqlifyDate {
         return sprintf("%4d-%02d-%02d %02d:%02d:%02d", $year+1900, $month+1, $mday, $hour, $min, $sec);
     }
 
-    if ($str =~ /^(-|\+)?(\d+)([hdwmy])(s?)$/i) {   # relative date
+    if ($str =~ /^(-|\+)?(\d+)([hdwmy])(s?)$/ai) {   # relative date
         my ($sign, $amount, $unit, $startof, $date) = ($1, $2, lc $3, lc $4, time);
         my ($sec, $min, $hour, $mday, $month, $year, $wday)  = localtime($date);
         if ($sign && $sign eq '+') { $amount = -$amount; }

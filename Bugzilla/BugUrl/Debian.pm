@@ -7,7 +7,7 @@
 
 package Bugzilla::BugUrl::Debian;
 
-use 5.10.1;
+use 5.14.0;
 use strict;
 use warnings;
 
@@ -28,8 +28,8 @@ sub should_handle {
     return ((lc($uri->authority) eq 'bugs.debian.org'
              or lc($uri->authority) eq 'debbugs.gnu.org')
             and (($uri->path =~ /bugreport\.cgi$/
-                  and $uri->query_param('bug') =~ m|^\d+$|)
-                 or $uri->path =~ m|^/\d+$|)) ? 1 : 0;
+                  and $uri->query_param('bug') =~ m|^\d+$|a)
+                 or $uri->path =~ m|^/\d+$|a)) ? 1 : 0;
 }
 
 sub _check_value {
@@ -39,7 +39,7 @@ sub _check_value {
 
     # This is the shortest standard URL form for Debian BTS URLs,
     # and so we reduce all URLs to this.
-    $uri->path =~ m|^/(\d+)$| || $uri->query_param('bug') =~ m|^(\d+)$|;
+    $uri->path =~ m|^/(\d+)$|a || $uri->query_param('bug') =~ m|^(\d+)$|a;
     $uri = new URI('https://' . $uri->authority . '/' . $1);
 
     return $uri;

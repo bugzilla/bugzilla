@@ -14,7 +14,7 @@
 # param. (We have NEW and REOPENED in there to keep compatibility with old
 # Bugzillas.)
 
-use 5.10.1;
+use 5.14.0;
 use strict;
 use warnings;
 

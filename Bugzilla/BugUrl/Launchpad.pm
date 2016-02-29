@@ -7,7 +7,7 @@
 
 package Bugzilla::BugUrl::Launchpad;
 
-use 5.10.1;
+use 5.14.0;
 use strict;
 use warnings;
 
@@ -25,7 +25,7 @@ sub should_handle {
     #   https://launchpad.net/bugs/1234
     # All variations end with either "/bugs/1234" or "/+bug/1234"
     return ($uri->authority =~ /launchpad\.net$/
-            and $uri->path =~ m|bugs?/\d+$|) ? 1 : 0;
+            and $uri->path =~ m|bugs?/\d+$|a) ? 1 : 0;
 }
 
 sub _check_value {
@@ -35,7 +35,7 @@ sub _check_value {
 
     # This is the shortest standard URL form for Launchpad bugs,
     # and so we reduce all URLs to this.
-    $uri->path =~ m|bugs?/(\d+)$|;
+    $uri->path =~ m|bugs?/(\d+)$|a;
     $uri = new URI("https://launchpad.net/bugs/$1");
 
     return $uri;

@@ -736,7 +736,6 @@ sub local_timezone {
              ||= DateTime::TimeZone->new(name => 'local');
 }
 
-# Send messages to syslog for the auditing systems (eg. mozdef) to pick up.
 sub audit {
     my ($class, $message) = @_;
     openlog('apache', 'cons,pid', 'local4');
@@ -744,43 +743,21 @@ sub audit {
     closelog();
 }
 
-# This creates the request cache for non-mod_perl installations.
-# This is identical to Install::Util::_cache so that things loaded
-# into Install::Util::_cache during installation can be read out
-# of request_cache later in installation.
-our $_request_cache = $Bugzilla::Install::Util::_cache;
+my $request_cache = {};
 
-sub request_cache {
-    if ($ENV{MOD_PERL}) {
-        require Apache2::RequestUtil;
-        # Sometimes (for example, during mod_perl.pl), the request
-        # object isn't available, and we should use $_request_cache instead.
-        my $request = eval { Apache2::RequestUtil->request };
-        return $_request_cache if !$request;
-        return $request->pnotes();
-    }
-    return $_request_cache;
-}
+sub request_cache { return $request_cache }
 
 sub clear_request_cache {
-    $_request_cache = {};
-    if ($ENV{MOD_PERL}) {
-        require Apache2::RequestUtil;
-        my $request = eval { Apache2::RequestUtil->request };
-        if ($request) {
-            my $pnotes = $request->pnotes;
-            delete @$pnotes{(keys %$pnotes)};
-        }
-    }
+    %$request_cache = ();
 }
 
 # This is a per-process cache.  Under mod_cgi it's identical to the
 # request_cache.  When using mod_perl, items in this cache live until the
 # worker process is terminated.
-our $_process_cache = {};
+my $process_cache = {};
 
 sub process_cache {
-    return $_process_cache;
+    return $process_cache;
 }
 
 # BMO - Instrumentation

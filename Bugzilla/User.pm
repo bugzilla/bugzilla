@@ -55,7 +55,7 @@ use Bugzilla::BugUserLastVisit;
 
 use DateTime::TimeZone;
 use List::Util qw(max);
-use List::MoreUtils qw(any);
+use List::MoreUtils qw(any bsearch);
 use Scalar::Util qw(blessed);
 use Storable qw(dclone);
 use URI;
@@ -1302,7 +1302,7 @@ sub clear_product_cache {
 sub can_see_product {
     my ($self, $product_name) = @_;
 
-    return scalar(grep {$_->name eq $product_name} @{$self->get_selectable_products});
+    return bsearch { $_->name cmp $product_name } @{$self->get_selectable_products};
 }
 
 sub get_selectable_products {

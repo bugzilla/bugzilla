@@ -1456,7 +1456,7 @@ Splinter.saveDraft = function () {
     Splinter.saveDraftTimeoutId = null;
 
     Splinter.savingDraft = true;
-    Dom.get('saveDraftNotice').innerHTML = "Saving Draft...";
+    Splinter.replaceText(Dom.get('saveDraftNotice'), "Saving Draft...");
     Dom.setStyle('saveDraftNotice', 'display', 'block');
     clearTimeout(Splinter.saveDraftNoticeTimeoutId);
     setTimeout(Splinter.hideSaveDraftNotice, 3000);
@@ -1495,11 +1495,16 @@ Splinter.saveDraft = function () {
 
     Splinter.savingDraft = false;
     if (draftSaved) {
-        Dom.get('saveDraftNotice').innerHTML = "Saved Draft";
+        Splinter.replaceText(Dom.get('saveDraftNotice'), "Saved Draft");
     } else {
         Splinter.hideSaveDraftNotice();
     }
 };
+
+Splinter.replaceText = function (el, text) {
+    while(el.firstChild) el.removeChild(el.firstChild);
+    el.appendChild(document.createTextNode(text));
+}
 
 Splinter.queueSaveDraft = function () {
     if (Splinter.saveDraftTimeoutId == null) {
@@ -2183,7 +2188,7 @@ Splinter.appendReviewComments = function (review, parentDiv) {
 
 Splinter.updateMyPatchComments = function () {
     var myPatchComments = Dom.get("myPatchComments");
-    myPatchComments.innerHTML = '';
+    Splinter.replaceText(myPatchComments, '');
     Splinter.appendReviewComments(Splinter.theReview, myPatchComments);
     if (Dom.getChildren(myPatchComments).length > 0) {
         Dom.setStyle(myPatchComments, 'display', 'block');
@@ -2270,7 +2275,7 @@ Splinter.toggleCollapsed = function (filename, display) {
             }
             Dom.setStyle(fileTableContainer, 'display', display);
             Dom.setStyle(fileExtraContainer, 'display', display);
-            fileCollapseLink.innerHTML = display == 'block' ? '[-]' : '[+]';
+            Splinter.replaceText(fileCollapseLink, (display == 'block' ? '[-]' : '[+]'));
         }
     }
 }
@@ -2418,7 +2423,7 @@ Splinter.start = function () {
                 if (storedReviews[i].bugId == Splinter.theBug.id &&
                     storedReviews[i].attachmentId == Splinter.theAttachment.id) 
                 {
-                    Dom.get("restoredLastModified").innerHTML = Splinter.Utils.formatDate(new Date(storedReviews[i].modificationTime));
+                    Splinter.replaceText(Dom.get("restoredLastModified"), Splinter.Utils.formatDate(new Date(storedReviews[i].modificationTime)));
                     // Restore file reviewed checkboxes
                     if (storedReviews[i].filesReviewed) {
                         for (var j = 0; j < Splinter.thePatch.files.length; j++) {
@@ -2487,7 +2492,7 @@ Splinter.newPageUrl = function (newBugId, newAttachmentId) {
 Splinter.showNote = function () {
     var noteDiv = Dom.get("note");
     if (noteDiv && Splinter.configNote) {
-        noteDiv.innerHTML = Splinter.configNote;
+        Splinter.replaceText(noteDiv, Splinter.configNote);
         Dom.setStyle(noteDiv, 'display', 'block');
     }
 };
@@ -2519,17 +2524,18 @@ Splinter.showEnterBug = function () {
         var extra = reviewInfo.isDraft ? "(draft)" : "";
 
         reviewData.push([
-            reviewInfo.bugId, 
-            reviewInfo.bugId + ":" + reviewInfo.attachmentId + ":" + reviewInfo.attachmentDescription, 
-            modificationDate, 
+            reviewInfo.bugId,
+            reviewInfo.bugId + ":" + reviewInfo.attachmentId,
+            reviewInfo.attachmentDescription,
+            modificationDate,
             extra
         ]);
     }
 
     var attachLink = function (elLiner, oRecord, oColumn, oData) {
-    var splitResult = oData.split(':', 3);
+        var splitResult = oData.split(':', 2);
         elLiner.innerHTML = "<a href=\"" + Splinter.newPageUrl(splitResult[0], splitResult[1]) +
-                            "\">" + splitResult[1] + " - " + splitResult[2] + "</a>";
+                            "\">" + splitResult[1] + "</a>";
     };
 
     var bugLink = function (elLiner, oRecord, oColumn, oData) {
@@ -2537,14 +2543,19 @@ Splinter.showEnterBug = function () {
                             "\">" + oData + "</a>";
     };
 
+    var attachDesc = function (elLiner, oRecord, oColumn, oData) {
+        Splinter.replaceText(elLiner, oData);
+    };
+
     dsConfig = {
         responseType: YAHOO.util.DataSource.TYPE_JSARRAY,
-        responseSchema: { fields:["bug_id","attachment", "date", "extra"] }
+        responseSchema: { fields:["bug_id","attachment_id", "description", "date", "extra"] }
     };
 
     var columnDefs = [
         { key: "bug_id", label: "Bug", formatter: bugLink },
-        { key: "attachment", label: "Attachment", formatter: attachLink },
+        { key: "attachment_id", label: "Attachment", formatter: attachLink },
+        { key: "description", label: "Description", formatter: attachDesc },
         { key: "date", label: "Date" },
         { key: "extra", label: "Extra" }
     ];
@@ -2598,19 +2609,23 @@ Splinter.showChooseAttachment = function () {
         attachData.push([ attachment.id, attachment.description, attachment.date, extra ]);
     }
 
-    var attachLink = function (elLiner, oRecord, oColumn, oData) { 
-    elLiner.innerHTML = "<a href=\"" + Splinter.newPageUrl(Splinter.theBug.id, oData) + 
-        "\">" + oData + "</a>";
+    var attachLink = function (elLiner, oRecord, oColumn, oData) {
+        elLiner.innerHTML = "<a href=\"" + Splinter.newPageUrl(Splinter.theBug.id, oData) +
+            "\">" + oData + "</a>";
+    };
+
+    var attachDesc = function (elLiner, oRecord, oColumn, oData) {
+        Splinter.replaceText(elLiner, oData);
     };
 
     dsConfig = {
         responseType: YAHOO.util.DataSource.TYPE_JSARRAY,
         responseSchema: { fields:["id","description","date", "extra"] }
     };
-
+ 
     var columnDefs = [
         { key: "id", label: "ID", formatter: attachLink },
-        { key: "description", label: "Description" },
+        { key: "description", label: "Description", formatter: attachDesc },
         { key: "date", label: "Date" },
         { key: "extra", label: "Extra" }
     ];
@@ -2647,11 +2662,11 @@ Splinter.init = function () {
         return;
     }
 
-    Dom.get("bugId").innerHTML = Splinter.theBug.id;
+    Splinter.replaceText(Dom.get("bugId"), Splinter.theBug.id);
     Dom.get("bugLink").setAttribute('href', Splinter.configBugUrl + "show_bug.cgi?id=" + Splinter.theBug.id);
-    Dom.get("bugShortDesc").innerHTML = YAHOO.lang.escapeHTML(Splinter.theBug.shortDesc);
-    Dom.get("bugReporter").appendChild(document.createTextNode(Splinter.theBug.getReporter()));
-    Dom.get("bugCreationDate").innerHTML = Splinter.Utils.formatDate(Splinter.theBug.creationDate);
+    Splinter.replaceText(Dom.get("bugShortDesc"), Splinter.theBug.shortDesc);
+    Splinter.replaceText(Dom.get("bugReporter"), Splinter.theBug.getReporter());
+    Splinter.replaceText(Dom.get("bugCreationDate"), Splinter.Utils.formatDate(Splinter.theBug.creationDate));
     Dom.setStyle('bugInfo', 'display', 'block');
 
     if (Splinter.attachmentId) {
@@ -2670,19 +2685,18 @@ Splinter.init = function () {
         Splinter.showChooseAttachment();
 
     } else {
-        Dom.get("attachId").innerHTML = Splinter.theAttachment.id;
+        Splinter.replaceText(Dom.get("attachId"), Splinter.theAttachment.id);
         Dom.get("attachLink").setAttribute('href', Splinter.configBugUrl + "attachment.cgi?id=" + Splinter.theAttachment.id);
-        Dom.get("attachDesc").innerHTML = YAHOO.lang.escapeHTML(Splinter.theAttachment.description);
-        Dom.get("attachCreator").appendChild(document.createTextNode(Splinter.Bug._formatWho(Splinter.theAttachment.whoName, 
-                                                                                             Splinter.theAttachment.whoEmail)));
-        Dom.get("attachDate").innerHTML = Splinter.Utils.formatDate(Splinter.theAttachment.date);
+        Splinter.replaceText(Dom.get("attachDesc"), Splinter.theAttachment.description);
+        Splinter.replaceText(Dom.get("attachCreator"), Splinter.Bug._formatWho(Splinter.theAttachment.whoName, Splinter.theAttachment.whoEmail));
+        Splinter.replaceText(Dom.get("attachDate"), Splinter.Utils.formatDate(Splinter.theAttachment.date));
         var warnings = [];
         if (Splinter.theAttachment.isObsolete)
             warnings.push('OBSOLETE');
         if (Splinter.theAttachment.isCRLF)
             warnings.push('WINDOWS PATCH');
         if (warnings.length > 0)
-            Dom.get("attachWarning").innerHTML = warnings.join(', ');
+            Splinter.replaceText(Dom.get("attachWarning"), warnings.join(', '));
         Dom.setStyle('attachInfo', 'display', 'block');
 
         Dom.setStyle('quickHelpShow', 'display', 'block');

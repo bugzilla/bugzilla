@@ -102,7 +102,7 @@
       attachment.isPatch = [% attachment.ispatch ? 1 : 0 %];
       attachment.isObsolete = [% attachment.isobsolete ? 1 : 0 %];
       attachment.isPrivate = [% attachment.isprivate ? 1 : 0 %];
-      attachment.isCRLF = [% attach_is_crlf FILTER none %];
+      attachment.isCRLF = [% attach_is_crlf ? 1 : 0 %];
       theBug.attachments.push(attachment);
     [% END %]
 

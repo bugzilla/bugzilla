@@ -15,7 +15,8 @@
   END;
   title = "$bug.bug_id - ";
   IF bug.alias;
-    title = title _ "($bug.alias) ";
+    filtered_alias = bug.alias FILTER html;
+    title = title _ "($filtered_alias) ";
   END;
   unfiltered_title = title _ bug.short_desc;
   filtered_desc = bug.short_desc FILTER html;

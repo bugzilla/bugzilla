@@ -31,6 +31,7 @@ var push_defaults = new Array();
 <form method="POST" action="page.cgi">
 <input type="hidden" name="id" value="push_config.html">
 <input type="hidden" name="save" value="1">
+<input type="hidden" id="token" name="token" value="[% issue_hash_token(['push_config']) FILTER html %]">
 
 <table border="0" cellspacing="0" cellpadding="5" width="100%">
 

@@ -34,6 +34,8 @@ sub options {
                 my $filename = shift;
                 $filename =~ m#^/#
                     && die "Absolute paths are not permitted\n";
+                $filename =~ m#\.\.#
+                    && die "Relative paths are not permitted\n";
             },
         },
     );

@@ -30,12 +30,14 @@
       onsubmit="editTable.to_json('table_data')">
 <input type="hidden" name="id" value="edit_table.html">
 <input type="hidden" name="table" value="[% table_name FILTER html %]">
+<input type="hidden" name="token" value="[% token FILTER html %]">
 <input type="hidden" name="table_data" id="table_data">
 <input type="submit" value="Commit Changes" id="commit_btn" class="bz_default_hidden">
 </form>
 
 <script>
-  var table_data = [% table_data FILTER none %];
+  var table_data_str = "[% table_data FILTER js %]";
+  var table_data = $.parseJSON(table_data_str);
   var editTable = new EditTable('edit_table', table_data);
   editTable.render();
 </script>

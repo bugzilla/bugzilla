@@ -14,7 +14,8 @@
 [% END %]
 [% title = "$bug.bug_id &ndash; " %]
 [% IF bug.alias != '' %]
-  [% title = title _ "($bug.alias) " %]
+  [% filtered_alias = bug.alias FILTER html %]
+  [% title = title _ "($filtered_alias) " %]
 [% END %]
 [% title = title _ filtered_desc %]
 [% javascript = javascript _ 

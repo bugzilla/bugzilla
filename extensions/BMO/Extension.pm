@@ -257,6 +257,9 @@ sub bounty_attachment {
         ThrowUserError('bounty_attachment_missing_reporter')
             unless $input->{reporter_email};
 
+        check_hash_token($input->{token}, ['bounty', $bug->id]);
+        delete_token($input->{token});
+
         my @fields = qw( reporter_email amount_paid reported_date fixed_date awarded_date publish );
         my %form =  map { $_ => $input->{$_} } @fields;
         $form{credit} = [ grep { defined } map { $input->{"credit_$_"} } 1..3 ];
@@ -301,6 +304,7 @@ sub bounty_attachment {
             $vars->{form}{fixed_date} = format_time($bug->cf_last_resolved, "%Y-%m-%d"),
         }
     }
+    $vars->{form}{token} = issue_hash_token(['bounty', $bug->id]);
 }
 
 sub _attachment_is_bounty_attachment {
@@ -309,6 +313,8 @@ sub _attachment_is_bounty_attachment {
     return 0 unless $attachment->filename eq 'bugbounty.data';
     return 0 unless $attachment->contenttype eq 'text/plain';
     return 0 unless $attachment->isprivate;
+    return 0 unless $attachment->attacher->in_group('bounty-team');
+
     return $attachment->description =~ /^(?:[^,]*,)+[^,]*$/;
 }
 

@@ -133,8 +133,9 @@ function validateAndSubmit() {
 <form id="bounty_form" method="post" action="page.cgi"
   enctype="multipart/form-data" onSubmit="return validateAndSubmit();">
 
-  <input type="hidden" name="bug_id" value="[% bug.id FILTER none %]">
+  <input type="hidden" name="bug_id" value="[% bug.id FILTER html %]">
   <input type="hidden" name="id" value="attachment_bounty_form.html">
+  <input type="hidden" name="token" value="[% form.token FILTER html %]">
   <input type="hidden" name="submit" value="1">
 
   <div class="head_desc">
@@ -144,17 +145,17 @@ function validateAndSubmit() {
   <div class="form_section">
     <label for="reporter_email" class="field_label required">Reporter's Email</label>
     <input type="text" name="reporter_email" id="reporter_email" size="80"
-      value="[% form.reporter_email FILTER none %]">
+      value="[% form.reporter_email FILTER html %]">
   </div>
 
   <div class="form_section">
     <label for="amount_paid" class="field_label">Amount Paid</label>
-    <input type="text" name="amount_paid" id="amount_paid" size="80" value="[% form.amount_paid FILTER none %]">
+    <input type="text" name="amount_paid" id="amount_paid" size="80" value="[% form.amount_paid FILTER html %]">
   </div>
 
   <div class="form_section">
     <label for="reported_date" class="field_label">Reported Date</label>
-    <input name="reported_date" size="20" id="reported_date" value="[% form.reported_date FILTER none %]"
+    <input name="reported_date" size="20" id="reported_date" value="[% form.reported_date FILTER html %]"
       onchange="updateCalendarFromField(this)">
     <button type="button" class="calendar_button"
       id="button_calendar_reported_date"
@@ -169,7 +170,7 @@ function validateAndSubmit() {
 
   <div class="form_section">
     <label for="fixed_date" class="field_label">Fixed Date</label>
-    <input name="fixed_date" size="20" id="fixed_date" value="[% form.fixed_date FILTER none %]"
+    <input name="fixed_date" size="20" id="fixed_date" value="[% form.fixed_date FILTER html %]"
       onchange="updateCalendarFromField(this)">
     <button type="button" class="calendar_button"
       id="button_calendar_fixed_date"
@@ -184,7 +185,7 @@ function validateAndSubmit() {
 
   <div class="form_section">
     <label for="awarded_date" class="field_label">Awarded Date</label>
-    <input name="awarded_date" size="20" id="awarded_date" value="[% form.awarded_date FILTER none %]"
+    <input name="awarded_date" size="20" id="awarded_date" value="[% form.awarded_date FILTER html %]"
       onchange="updateCalendarFromField(this)">
     <button type="button" class="calendar_button"
       id="button_calendar_awarded_date"
@@ -207,17 +208,17 @@ function validateAndSubmit() {
 
   <div class="form_section">
     <label for="credit_1" class="field_label">Credit</label>
-    <input type="text" name="credit_1" id="credit_1" size="80" value="[% form.credit.0 FILTER none %]">
+    <input type="text" name="credit_1" id="credit_1" size="80" value="[% form.credit.0 FILTER html %]">
   </div>
 
   <div class="form_section">
     <label for="credit_2" class="field_label">Credit</label>
-    <input type="text" name="credit_2" id="credit_2" size="80" value="[% form.credit.1 FILTER none %]">
+    <input type="text" name="credit_2" id="credit_2" size="80" value="[% form.credit.1 FILTER html %]">
   </div>
 
   <div class="form_section">
     <label for="credit_3" class="field_label">Credit</label>
-    <input type="text" name="credit_3" id="credit_3" size="80" value="[% form.credit.2 FILTER none %]">
+    <input type="text" name="credit_3" id="credit_3" size="80" value="[% form.credit.2 FILTER html %]">
   </div>
 
   <input type="submit" id="commit" value="Submit">

@@ -121,7 +121,7 @@ my %user_prefs = (post_bug_submit_action => 'nothing');
 
 foreach my $pref (keys %user_prefs) {
     my $value = $user_prefs{$pref};
-    Bugzilla::User::Setting::set_default($pref, $value, 0);
+    Bugzilla::User::Setting::set_default($pref, $value, 1);
 }
 
 ##########################################################################

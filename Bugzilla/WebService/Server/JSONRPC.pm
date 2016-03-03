@@ -62,6 +62,7 @@ sub create_json_coder {
     my $json = $self->SUPER::create_json_coder(@_);
     $json->allow_blessed(1);
     $json->convert_blessed(1);
+    $json->allow_nonref(1);
     # This may seem a little backwards, but what this really means is
     # "don't convert our utf8 into byte strings, just leave it as a
     # utf8 string."

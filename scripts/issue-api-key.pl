@@ -26,8 +26,15 @@ my $login = shift
 my $description = shift;
 
 my $user = Bugzilla::User->check({ name => $login });
-my $api_key = Bugzilla::User::APIKey->create({
+
+my $params = {
     user_id     => $user->id,
     description => $description,
-});
+};
+
+if ($description && $description eq 'mozreview') {
+    $params->{app_id} = Bugzilla->params->{mozreview_app_id} // '';
+}
+
+my $api_key = Bugzilla::User::APIKey->create($params);
 say $api_key->api_key;

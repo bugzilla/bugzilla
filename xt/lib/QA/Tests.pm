@@ -16,7 +16,8 @@ use warnings;
 use FindBin qw($RealBin);
 use lib "$RealBin/../../lib", "$RealBin/../../../local/lib/perl5";
 
-use base qw(Exporter);
+use parent qw(Exporter);
+
 our @EXPORT_OK = qw(
     PRIVATE_BUG_USER
     STANDARD_BUG_TESTS

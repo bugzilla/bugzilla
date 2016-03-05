@@ -126,7 +126,10 @@ sub _get {
 1;
 
 package QA::RPC::JSONRPC::ReturnObject;
+
+use 5.14.0;
 use strict;
+use warnings;
 
 BEGIN {
     if (eval { require JSON::RPC::Client }) {
@@ -149,8 +152,12 @@ sub fault { $_[0]->is_error }
 1;
 
 package QA::RPC::UserAgent;
+
+use 5.14.0;
 use strict;
-use base qw(LWP::UserAgent);
+use warnings;
+
+use parent  qw(LWP::UserAgent);
 
 ########################################
 # Consistency with XMLRPC::Lite's ->ua #
@@ -172,3 +179,5 @@ sub http_response {
     if (@_) { $self->{'_http_response'} = shift; return $self }
     return $self->{'_http_response'};
 }
+
+1;

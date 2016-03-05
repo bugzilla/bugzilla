@@ -63,3 +63,5 @@ sub call {
         die 'error ' . $res->{code} . ': ' . $res->{message} . "\n";
     }
 }
+
+1;

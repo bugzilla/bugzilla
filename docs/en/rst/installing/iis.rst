@@ -4,7 +4,8 @@ Microsoft IIS
 #############
 
 Bugzilla works with IIS as a normal CGI application. These instructions assume
-that you are using Windows 7. Procedures for other versions are probably similar.
+that you are using Windows 7 or Windows 10. Procedures for other versions are
+probably similar.
 
 Begin by starting Internet Information Services (IIS) Manager.
 :guilabel:`Start` --> :guilabel:`Administrators Tools` -->

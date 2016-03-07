@@ -153,14 +153,18 @@ To make sure you have all the core requirements to run Bugzilla, you should run 
 
 :command:`perl Makefile.PL`
 
-Should this command warn about missing prerequisites -- or prerequisites that are too old,
-you may use cpanm to install these.
+Should this command warn about missing prerequisites -- or prerequisites that
+are too old, you may use :file:`cpanm` to install these.
 
-:command:`curl -L http://cpanmin.us | perl - --installdeps -l local .`
+:command:`cpanm --installdeps -l local .`
 
 If you want a more full-featured Bugzilla, use the following command:
 
-:command:`curl -L http://cpanmin.us | perl - --installdeps -l local --with-all-features --without-feature mod_perl --without-feature oracle --without-feature mysql --without-feature pg .`
+:command:`cpanm --installdeps -l local --with-all-features --without-feature mod_perl --without-feature oracle --without-feature mysql --without-feature pg .`
+
+If you don't have :file:`cpanm` installed, you can either find it in your
+:file:`cpanminus` or :file:`perl-App-cpanminus` package, or
+`download it <http://cpanmin.us>`_  from cpanmin.us.
 
 .. _linux-config-webserver:
 

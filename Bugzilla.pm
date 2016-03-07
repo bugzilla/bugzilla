@@ -615,7 +615,8 @@ sub switch_to_main_db {
 sub log_user_request {
     my ($class, $bug_id, $attach_id, $action) = @_;
 
-    return unless Bugzilla->params->{log_user_requests};
+    return unless (i_am_cgi() || i_am_webservice())
+                  && Bugzilla->params->{log_user_requests};
 
     my $cgi         = $class->cgi;
     my $user_id     = $class->user->id;

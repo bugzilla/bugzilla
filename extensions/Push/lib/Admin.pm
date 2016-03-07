@@ -13,7 +13,7 @@ use warnings;
 use Bugzilla;
 use Bugzilla::Error;
 use Bugzilla::Extension::Push::Util;
-use Bugzilla::Token qw(check_hash_token delete_token);
+use Bugzilla::Token qw(check_hash_token);
 use Bugzilla::Util qw(trim detaint_natural trick_taint);
 
 use base qw(Exporter);
@@ -31,7 +31,6 @@ sub admin_config {
     if ($input->{save}) {
         my $token = $input->{token};
         check_hash_token($token, ['push_config']);
-        delete_token($token);
         my $dbh = Bugzilla->dbh;
         $dbh->bz_start_transaction();
         _update_config_from_form('global', $push->config);

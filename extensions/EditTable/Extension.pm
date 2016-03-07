@@ -88,7 +88,6 @@ sub page_before_template {
     my $edits = [];
     if ($data) {
         check_hash_token($input->{token}, [$table_name]);
-        delete_token($input->{token});
 
         $data = from_json($data)->{data};
         $edits = dclone($data);

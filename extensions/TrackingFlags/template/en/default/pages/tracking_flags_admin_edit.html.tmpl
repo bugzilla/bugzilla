@@ -30,9 +30,12 @@ var selected_components = [
 %]
 
 <script>
-  var groups = [% groups || '[]' FILTER none %];
-  var flag_values = [% values || '[]' FILTER none %];
-  var flag_visibility = [% visibility || '[]' FILTER none %];
+  var groups_str = "[% groups || '[]' FILTER js %]";
+  var groups = $.parseJSON(groups_str);
+  var flag_values_str = "[% values || '[]' FILTER js %]";
+  var flag_values = $.parseJSON(flag_values_str);
+  var flag_visibility_str = "[% visibility || '[]' FILTER js %]";
+  var flag_visibility = $.parseJSON(flag_visibility_str);
 </script>
 
 <div id="edit_mode">
@@ -50,6 +53,7 @@ var selected_components = [
 <input type="hidden" name="values" id="values" value="">
 <input type="hidden" name="visibility" id="visibility" value="">
 <input type="hidden" name="save" value="1">
+<input type="hidden" name="token" value="[% issue_hash_token(['tracking_flags_edit']) FILTER html %]">
 
 [%# name/desc/etc %]
 

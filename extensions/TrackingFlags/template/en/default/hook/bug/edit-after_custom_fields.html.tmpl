@@ -41,6 +41,7 @@
 [% END %]
 
 <script type="text/javascript">
-  TrackingFlags = [% tracking_flags_json FILTER none %];
+  var tracking_flags_str = "[% tracking_flags_json FILTER js %]";
+  var TrackingFlags = $.parseJSON(tracking_flags_str);
   hide_tracking_flags();
 </script>

@@ -77,7 +77,8 @@
   [%# add tracking flags json if available %]
   [% IF tracking_flags %]
     [% javascript_urls.push("extensions/TrackingFlags/web/js/tracking_flags.js") %]
-    TrackingFlags = [% tracking_flags_json FILTER none %];
+    var tracking_flags_str = "[% tracking_flags_json FILTER js %]";
+    var TrackingFlags = $.parseJSON(tracking_flags_str);
   [% END %]
 
   [%# update last-visited %]

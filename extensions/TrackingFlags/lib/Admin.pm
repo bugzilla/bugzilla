@@ -1,4 +1,4 @@
-# This Source Code Form is subject to the terms of the Mozilla Public
+#d This Source Code Form is subject to the terms of the Mozilla Public
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 #
@@ -15,6 +15,7 @@ use Bugzilla::Component;
 use Bugzilla::Error;
 use Bugzilla::Group;
 use Bugzilla::Product;
+use Bugzilla::Token qw(check_hash_token delete_token);
 use Bugzilla::Util qw(trim detaint_natural);
 
 use Bugzilla::Extension::TrackingFlags::Constants;
@@ -52,6 +53,10 @@ sub admin_edit {
     $vars->{tracking_flag_types} = FLAG_TYPES;
 
     if ($input->{delete}) {
+        my $token = $input->{token};
+        check_hash_token($token, ['tracking_flags_edit']);
+        delete_token($token);
+
         my $flag = Bugzilla::Extension::TrackingFlags::Flag->new($vars->{flag_id})
             || ThrowCodeError('tracking_flags_invalid_item_id', { item => 'flag', id => $vars->{flag_id} });
         $flag->remove_from_db();
@@ -67,7 +72,9 @@ sub admin_edit {
         exit;
 
     } elsif ($input->{save}) {
-        # save
+        my $token = $input->{token};
+        check_hash_token($token, ['tracking_flags_edit']);
+        delete_token($token);
 
         my ($flag, $values, $visibilities) = _load_from_input($input, $vars);
         _validate($flag, $values, $visibilities);

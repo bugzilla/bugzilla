@@ -20,7 +20,7 @@
 <li id="mini_login_container[% qs_suffix %]">
   <span class="separator">| </span>
   [% connector = "?" %]
-  [% IF cgi.request_method == "GET" AND cgi.query_string %]
+  [% IF cgi.query_string %]
     [% connector = "&" %]
   [% END %]
   [% script_url = login_target _ connector _ "GoAheadAndLogIn=1" %]

@@ -19,9 +19,9 @@
 </noscript>
 
 <script>
-var flags_data = [% flags_json FILTER none %];
-var products_data = [% products_json FILTER none %];
-var fields_data = [% fields_json FILTER none %];
+var flags_data = $.parseJSON("[% flags_json FILTER js %]");
+var products_data = $.parseJSON("[% products_json FILTER js %]");
+var fields_data = $.parseJSON("[% fields_json FILTER js %]");
 var default_query = '[% default_query FILTER js %]';
 </script>
 

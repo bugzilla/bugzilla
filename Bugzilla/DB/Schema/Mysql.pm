@@ -316,7 +316,7 @@ sub column_info_to_column {
             $default = 0 if $default =~ /^0\.0+$/;
             # If we're not a number, we're a string and need to be
             # quoted.
-            $default = $dbh->quote($default) if !($default =~ /^(-)?(\d+)(.\d+)?$/);
+            $default = $dbh->quote($default) if !($default =~ /^(-)?([0-9]+)(\.[0-9]+)?$/);
             $column->{DEFAULT} = $default;
         }
     }

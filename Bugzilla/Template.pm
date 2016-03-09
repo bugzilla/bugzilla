@@ -232,7 +232,7 @@ sub quoteUrls {
               ~<a href=\"mailto:$2\">$1$2</a>~igx;
 
     # attachment links
-    $text =~ s~\b(attachment$s*\#?$s*(\d+)(?:$s+\[details\])?)
+    $text =~ s~\b(attachment$s*\#?$s*([0-9]+)(?:$s+\[details\])?)
               ~($things[$count++] = get_attachment_link($2, $1, $user)) &&
                ("\x{FDD2}" . ($count-1) . "\x{FDD3}")
               ~egmxi;
@@ -245,9 +245,9 @@ sub quoteUrls {
     # Also, we can't use $bug_re?$comment_re? because that will match the
     # empty string
     my $bug_word = template_var('terms')->{bug};
-    my $bug_re = qr/\Q$bug_word\E$s*\#?$s*(\d+)/i;
+    my $bug_re = qr/\Q$bug_word\E$s*\#?$s*([0-9]+)/i;
     my $comment_word = template_var('terms')->{comment};
-    my $comment_re = qr/(?:\Q$comment_word\E|comment)$s*\#?$s*(\d+)/i;
+    my $comment_re = qr/(?:\Q$comment_word\E|comment)$s*\#?$s*([0-9]+)/i;
     $text =~ s~\b($bug_re(?:$s*,?$s*$comment_re)?|$comment_re)
               ~ # We have several choices. $1 here is the link, and $2-4 are set
                 # depending on which part matched
@@ -261,29 +261,29 @@ sub quoteUrls {
     my $bugs_word = template_var('terms')->{bugs};
 
     my $bugs_re = qr/\Q$bugs_word\E$s*\#?$s*
-                     \d+(?:$s*,$s*\#?$s*\d+)+/ix;
+                     [0-9]+(?:$s*,$s*\#?$s*[0-9]+)+/ix;
 
     $text =~ s{($bugs_re)}{
         my $match = $1;
-        $match =~ s/((?:#$s*)?(\d+))/get_bug_link($2, $1);/eg;
+        $match =~ s/((?:#$s*)?([0-9]+))/get_bug_link($2, $1);/eg;
         $match;
     }eg;
 
     my $comments_word = template_var('terms')->{comments};
 
     my $comments_re = qr/(?:comments|\Q$comments_word\E)$s*\#?$s*
-                         \d+(?:$s*,$s*\#?$s*\d+)+/ix;
+                         [0-9]+(?:$s*,$s*\#?$s*[0-9]+)+/ix;
 
     $text =~ s{($comments_re)}{
         my $match = $1;
-        $match =~ s|((?:#$s*)?(\d+))|<a href="$current_bugurl#c$2">$1</a>|g;
+        $match =~ s|((?:#$s*)?([0-9]+))|<a href="$current_bugurl#c$2">$1</a>|g;
         $match;
     }eg;
 
     # Old duplicate markers. These don't use $bug_word because they are old
     # and were never customizable.
     $text =~ s~(?<=^\*\*\*\ This\ bug\ has\ been\ marked\ as\ a\ duplicate\ of\ )
-               (\d+)
+               ([0-9]+)
                (?=\ \*\*\*\Z)
               ~get_bug_link($1, $1, { user => $user })
               ~egmx;

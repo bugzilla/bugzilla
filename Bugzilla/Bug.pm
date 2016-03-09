@@ -305,15 +305,15 @@ sub new {
     my $param = shift;
 
     # Remove leading "#" mark if we've just been passed an id.
-    if (!ref $param && $param =~ /^#(\d+)$/) {
+    if (!ref $param && $param =~ /^#([0-9]+)$/) {
         $param = $1;
     }
 
     # If we get something that looks like a word (not a number),
     # make it the "name" param.
     if (!defined $param
-        || (!ref($param) && $param !~ /^\d+$/)
-        || (ref($param) && $param->{id} !~ /^\d+$/))
+        || (!ref($param) && $param !~ /^[0-9]+$/)
+        || (ref($param) && $param->{id} !~ /^[0-9]+$/))
     {
         if ($param) {
             my $alias = ref($param) ? $param->{id} : $param;
@@ -556,15 +556,15 @@ sub _extract_bug_ids {
         my $s = $comment->already_wrapped ? qr/\s/ : qr/\h/;
         my $text = $comment->body;
         # Full bug links
-        push @bug_ids, $text =~ /\b$urlbase_re\Qshow_bug.cgi?id=\E(\d+)(?:\#c\d+)?/g;
+        push @bug_ids, $text =~ /\b$urlbase_re\Qshow_bug.cgi?id=\E([0-9]+)(?:\#c[0-9]+)?/g;
         # bug X
-        my $bug_re = qr/\Q$bug_word\E$s*\#?$s*(\d+)/i;
+        my $bug_re = qr/\Q$bug_word\E$s*\#?$s*([0-9]+)/i;
         push @bug_ids, $text =~ /\b$bug_re/g;
         # bugs X, Y, Z
-        my $bugs_re = qr/\Q$bugs_word\E$s*\#?$s*(\d+)(?:$s*,$s*\#?$s*(\d+))+/i;
+        my $bugs_re = qr/\Q$bugs_word\E$s*\#?$s*([0-9]+)(?:$s*,$s*\#?$s*([0-9]+))+/i;
         push @bug_ids, $text =~ /\b$bugs_re/g;
         # Old duplicate markers
-        push @bug_ids, $text =~ /(?<=^\*\*\*\ This\ bug\ has\ been\ marked\ as\ a\ duplicate\ of\ )(\d+)(?=\ \*\*\*\Z)/;
+        push @bug_ids, $text =~ /(?<=^\*\*\*\ This\ bug\ has\ been\ marked\ as\ a\ duplicate\ of\ )([0-9]+)(?=\ \*\*\*\Z)/;
     }
     # Make sure to filter invalid bug IDs.
     @bug_ids = grep { $_ < MAX_INT_32 } @bug_ids;

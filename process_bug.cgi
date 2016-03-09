@@ -305,9 +305,10 @@ if (defined $cgi->param('id')) {
 
 my %is_private;
 foreach my $field (grep(/^defined_isprivate/, $cgi->param())) {
-    $field =~ /(\d+)$/;
-    my $comment_id = $1;
-    $is_private{$comment_id} = $cgi->param("isprivate_$comment_id");
+    if ($field =~ /(\d+)$/) {
+        my $comment_id = $1;
+        $is_private{$comment_id} = $cgi->param("isprivate_$comment_id");
+    }
 }
 $set_all_fields{comment_is_private} = \%is_private;
 

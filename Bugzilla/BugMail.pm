@@ -169,8 +169,8 @@ sub Send {
         }
 
         if ($change->{field_name} eq 'dependson' || $change->{field_name} eq 'blocked') {
-            push @referenced_bug_ids, split(/[\s,]+/, $change->{old});
-            push @referenced_bug_ids, split(/[\s,]+/, $change->{new});
+            push @referenced_bug_ids, split(/[\s,]+/, $change->{old} // '');
+            push @referenced_bug_ids, split(/[\s,]+/, $change->{new} // '');
         }
     }
 

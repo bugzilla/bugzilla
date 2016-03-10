@@ -21,6 +21,9 @@
 [% ELSIF error == "github_invalid_target" %]
   [% terms.Bugzilla %] cannot log you into an external site via GitHub.
 
+[% ELSIF error == "github_insecure_referer" %]
+  [% terms.Bugzilla %] prevented you from logging in from a page containing private information.
+
 [% ELSIF error == "github_invalid_request" %]
   Invalid GitHub log in attempt (reason: [% reason FILTER html %])
 

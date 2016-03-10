@@ -41,6 +41,9 @@ if (lc($cgi->request_method) eq 'post') {
     ThrowCodeError("github_invalid_target", { target_uri => $target_uri })
       unless $target_uri =~ /^\Q$urlbase\E/;
 
+    ThrowCodeError("github_insecure_referer", { target_uri => $target_uri })
+      if $cgi->referer && $cgi->referer =~ /(reset_password\.cgi|token\.cgi|t=|token=|api_key=)/;
+
     if ($user->id) {
         print $cgi->redirect($target_uri);
         exit;

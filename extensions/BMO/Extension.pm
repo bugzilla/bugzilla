@@ -2133,6 +2133,7 @@ sub query_database {
     $vars->{query} = $query;
 
     if ($query) {
+        check_hash_token($input->{token}, ['query_database']);
         trick_taint($query);
         $vars->{executed} = 1;
 

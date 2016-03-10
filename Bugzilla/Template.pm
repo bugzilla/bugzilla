@@ -144,7 +144,7 @@ sub get_format {
         'template'    => $template,
         'format'      => $format,
         'extension'   => $ctype,
-        'ctype'       => Bugzilla::Constants::contenttypes->{$ctype}
+        'ctype'       => Bugzilla::Constants::contenttypes->{$ctype} // 'application/octet-stream',
     };
 }
 

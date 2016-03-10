@@ -508,6 +508,7 @@ use constant contenttypes =>
    "csv"  => "text/csv" ,
    "png"  => "image/png" ,
    "ics"  => "text/calendar" ,
+   "txt"  => "text/plain",
   };
 
 # Usage modes. Default USAGE_MODE_BROWSER. Use with Bugzilla->usage_mode.

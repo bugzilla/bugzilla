@@ -167,7 +167,7 @@
     %]
       <div id="field-value-bug_id">
         <a id="this-bug" href="show_bug.cgi?id=[% bug.id FILTER none %]
-                [%~ '&amp;format=' _ cgi.param("format") IF cgi.param("format") %]"
+                [%~ '&amp;format=' _ cgi.param("format") FILTER uri IF cgi.param("format") %]"
         >
           [%~ terms.Bug _ " " _ bug.id FILTER none ~%]
         </a>

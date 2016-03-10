@@ -148,6 +148,12 @@
     [% title = "Auth delegation can't be confirmed" %]
     Auth delegation cannot be confirmed due to missing or invalid token.
 
+  [% ELSIF error == "auth_delegation_invalid_description" %]
+    [% title = "Auth delegation suspicious description" %]
+    It looks like auth delegation was attempted with a suspicious description!
+    Auth Delegation descriptions should consist only of words, with no other punctuation.
+    You were sent here by some other site; please contact them for support.
+
   [% ELSIF error == "auth_delegation_invalid_token" %]
     [% title = "Auth delegation can't be confirmed" %]
     Auth delegation cannot be confirmed due to missing or invalid token.

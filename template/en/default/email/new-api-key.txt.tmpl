@@ -21,7 +21,7 @@ X-Bugzilla-Type: admin
 [This e-mail has been automatically generated]
 
 A new [% terms.Bugzilla %] API key[% IF new_key.description %], with the
-description '[% new_key.description %]'[% END %] has been created. You can view
+description '[% new_key.description FILTER truncate(10) %]'[% END %] has been created. You can view
 or update the key at the following URL:
 
 [%+ urlbase %]userprefs.cgi?tab=apikey

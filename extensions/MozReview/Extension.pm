@@ -82,10 +82,12 @@ sub template_before_process {
 sub auth_delegation_confirm {
     my ($self, $args) = @_;
     my $mozreview_callback_url = Bugzilla->params->{mozreview_auth_callback_url};
+    my $mozreview_app_id       = Bugzilla->params->{mozreview_app_id};
 
     return unless $mozreview_callback_url;
+    return unless $mozreview_app_id;
 
-    if (index($args->{callback}, $mozreview_callback_url) == 0) {
+    if (index($args->{callback}, $mozreview_callback_url) == 0 && $args->{app_id} eq $mozreview_app_id) {
         ${$args->{skip_confirmation}} = 1;
     }
 }

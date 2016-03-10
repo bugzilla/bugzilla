@@ -39,14 +39,19 @@ my $description = $cgi->param('description') or ThrowUserError("auth_delegation_
 trick_taint($callback);
 trick_taint($description);
 
+ThrowUserError("auth_delegation_invalid_description")
+  unless $description =~ /^[\w\s]{3,255}$/;
+
 my $callback_uri  = URI->new($callback);
 my $callback_base = $callback_uri->clone;
 $callback_base->query(undef);
 
+my $app_id = sha256_hex($callback_base, $description);
 my $skip_confirmation = 0;
 my %args = ( skip_confirmation => \$skip_confirmation,
              callback          => $callback_uri,
              description       => $description,
+             app_id            => $app_id,
              callback_base     => $callback_base );
 
 Bugzilla::Hook::process('auth_delegation_confirm', \%args);
@@ -64,7 +69,6 @@ if ($confirmed || $skip_confirmation) {
                            { token => $token, callback => $callback });
         }
     }
-    my $app_id = sha256_hex($callback_base, $description);
     my $keys = Bugzilla::User::APIKey->match({
         user_id => $user->id,
         app_id  => $app_id,

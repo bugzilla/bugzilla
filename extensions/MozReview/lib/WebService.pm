@@ -81,6 +81,9 @@ sub attachments {
             ThrowUserError("mozreview_attachment_bug_mismatch", { bug => $bug, attachment => $attachment_obj })
               if $attachment_obj->bug_id != $bug->id;
 
+            # HACK: preload same bug object.
+            $attachment_obj->{bug} = $bug;
+
             $attachment = translate($attachment, Bugzilla::WebService::Bug::ATTACHMENT_MAPPED_SETTERS);
 
             my ($update_flags, $new_flags) = $flags

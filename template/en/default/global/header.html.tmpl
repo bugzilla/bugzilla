@@ -268,7 +268,7 @@
     [% IF allow_mobile && is_mobile_browser %]
       <meta name="viewport" content="width=device-width, initial-scale=1">
     [% END %]
-    <meta name="referrer" content="origin">
+    <meta name="referrer" content="origin-when-crossorigin">
     [% Hook.process("additional_header") %]
   </head>
 

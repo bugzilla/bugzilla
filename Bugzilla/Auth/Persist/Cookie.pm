@@ -37,6 +37,7 @@ use Bugzilla::Util;
 use Bugzilla::Token;
 
 use List::Util qw(first);
+use List::MoreUtils qw(any);
 
 sub new {
     my ($class) = @_;
@@ -99,6 +100,15 @@ sub persist_login {
                       -value => $login_cookie,
                       %cookieargs);
 
+    my $securemail_groups = Bugzilla->can('securemail_groups') ? Bugzilla->securemail_groups : [ 'admin' ];
+
+    if (any { $user->in_group($_) } 'mozilla-employee-confidential', @$securemail_groups) {
+        my $auth_method = eval { ref($user->authorizer->successful_info_getter) } // 'unknown';
+
+        Bugzilla->audit(sprintf "successful login of %s from %s using \"%s\", authenticated by %s",
+                        $user->login, $ip_addr, $cgi->user_agent // '', $auth_method);
+    }
+    
     return $login_cookie;
 }
 

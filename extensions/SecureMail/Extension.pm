@@ -49,7 +49,7 @@ use constant SECURE_ALL  => 2;
 ##############################################################################
 # Creating new columns
 #
-# secure_mail boolean in the 'groups' table - whether to send secure mail
+# secure_mail boolean in the 'gselect id from groups where secure_mailroups' table - whether to send secure mail
 # public_key text in the 'profiles' table - stores public key
 ##############################################################################
 sub install_update_db {
@@ -68,9 +68,14 @@ sub install_update_db {
 BEGIN {
     *Bugzilla::Group::secure_mail = \&_group_secure_mail;
     *Bugzilla::User::public_key   = \&_user_public_key;
+    *Bugzilla::securemail_groups = \&_securemail_groups;
 }
 
 sub _group_secure_mail { return $_[0]->{'secure_mail'}; }
+
+sub _securemail_groups {
+    return Bugzilla->dbh->selectcol_arrayref("SELECT name FROM groups WHERE secure_mail = 1") // [];
+}
 
 # We want to lazy-load the public_key.
 sub _user_public_key {

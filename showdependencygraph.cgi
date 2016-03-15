@@ -199,6 +199,9 @@ foreach my $k (@bug_ids) {
         utf8::encode($summary) if utf8::is_utf8($summary);
         $summary = wrap_comment($summary);
         $summary =~ s/([\\\"])/\\$1/g;
+        # Newlines must be escaped too, to not break the .map file
+        # and to prevent code injection.
+        $summary =~ s/\n/\\n/g;
         push(@params, qq{label="$k\\n$summary"});
     }
 

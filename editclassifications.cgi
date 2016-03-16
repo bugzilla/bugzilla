@@ -27,7 +27,6 @@ local our $vars = {};
 
 sub LoadTemplate {
     my $action = shift;
-    my $cgi = Bugzilla->cgi;
     my $template = Bugzilla->template;
 
     $vars->{'classifications'} = [Bugzilla::Classification->get_all]

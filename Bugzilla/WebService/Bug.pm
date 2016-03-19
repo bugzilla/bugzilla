@@ -1133,6 +1133,10 @@ sub update_comment_tags {
                           { function => 'Bug.update_comment_tags',
                             param    => 'comment_id' });
 
+    ThrowCodeError('param_integer_required', { function => 'Bug.update_comment_tags',
+                                               param => 'comment_id' })
+      unless $comment_id =~ /^[0-9]+$/;
+
     my $comment = Bugzilla::Comment->new($comment_id)
         || return [];
     $comment->bug->check_is_visible();

@@ -502,10 +502,8 @@ sub redirect_search_url {
 
     # GET requests that lacked a list_id are always redirected. POST requests
     # are only redirected if they're under the CGI_URI_LIMIT though.
-    my $self_url = $self->self_url();
-    if ($self->request_method() ne 'POST' or length($self_url) < CGI_URI_LIMIT) {
-        print $self->redirect(-url => $self_url);
-        exit;
+    if ($self->request_method() ne 'POST' or length($self->self_url) < CGI_URI_LIMIT) {
+        $self->redirect_to_urlbase();
     }
 }
 

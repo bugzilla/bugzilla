@@ -122,6 +122,11 @@
     This site does not have auth delegation enabled.
     Please contact an administrator if you require this functionality.
 
+  [% ELSIF error == "auth_delegation_illegal_protocol" %]
+    [% title = "Invalid Protocol" %]
+    The callback URI uses an illegal protocol: <em>[% protocol FILTER html %]</em>.
+    Only <em>http</em> and <em>https</em> are allowed.
+
   [% ELSIF error == "auth_delegation_missing_callback" %]
     [% title = "Auth delegation impossible without callback URI" %]
     It looks like auth delegation was attempted, but no callback URI was passed.

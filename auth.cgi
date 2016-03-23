@@ -40,6 +40,8 @@ trick_taint($callback);
 trick_taint($description);
 
 my $callback_uri  = URI->new($callback);
+$callback_uri->scheme =~ /^https?$/
+  or ThrowUserError('auth_delegation_illegal_protocol', { protocol => $callback_uri->scheme });
 my $callback_base = $callback_uri->clone;
 $callback_base->query(undef);
 

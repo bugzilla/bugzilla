@@ -432,6 +432,14 @@ input[type="number"] {
     background-image: linear-gradient(to right, #ffc, #fff);
 }
 
+#attachments .bz_private {
+    background: #fff;
+}
+
+#attachments .bz_private .attach-desc-td {
+    border-left: 4px solid darkred;
+}
+
 #attachments .vcard {
     display: inline;
 }

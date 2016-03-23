@@ -495,6 +495,10 @@ table.edit_form hr {
     white-space: nowrap;
 }
 
+#attachment_table .bz_private .bz_attach_desc {
+    border-left: 4px solid darkred;
+}
+
 /* background for diff views */
 .file_table, .file-table {
     background: #ffffff;

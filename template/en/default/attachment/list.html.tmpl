@@ -36,7 +36,7 @@ function toggle_display(link) {
 
     if (YAHOO.util.Dom.hasClass(rows[0], 'bz_default_hidden')) {
         link.innerHTML = "Show Obsolete";
-        view_all.href = view_all.href + hide_obsolete_url_parameter 
+        view_all.href = view_all.href + hide_obsolete_url_parameter
     }
     else {
         link.innerHTML = "Hide Obsolete";
@@ -74,9 +74,9 @@ function toggle_display(link) {
                      FILTER css_class_quote %]
                  [% " bz_patch" IF attachment.can_review %]
                  [% " bz_private" IF attachment.isprivate %]
-                 [% " bz_tr_obsolete bz_default_hidden" 
+                 [% " bz_tr_obsolete bz_default_hidden"
                      IF attachment.isobsolete %]">
-        <td valign="top">
+        <td class="bz_attach_desc" valign="top">
           [% IF attachment.datasize %]
             <a href="attachment.cgi?id=[% attachment.id %]"
                title="View the content of the attachment">

@@ -61,6 +61,13 @@ my %requires = (
     'URI'                 => '1.55',
 );
 
+# Windows requires some additional modules.
+if ($^O eq 'MSWin32') {
+    $requires{'Win32'}      = '0.35';
+    $requires{'Win32::API'} = '0.55';
+    $requires{'DateTime::TimeZone::Local::Win32'} = '1.64';
+}
+
 my %optional_features = (
     features => {
         prereqs => { runtime => { requires => { 'CPAN::Meta::Check' => 0, 'Module::Runtime' => 0, 'CPAN::Meta' => 0, }, }, },

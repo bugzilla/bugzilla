@@ -1,0 +1,306 @@
+[%# 1.0@bugzilla.org %]
+[%# The contents of this file are subject to the Mozilla Public
+  # License Version 1.1 (the "License"); you may not use this file
+  # except in compliance with the License. You may obtain a copy of
+  # the License at http://www.mozilla.org/MPL/
+
+  #
+  # Software distributed under the License is distributed on an "AS
+  # IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
+  # implied. See the License for the specific language governing
+  # rights and limitations under the License.
+  #
+  # The Original Code is the Bugzilla Bug Tracking System.
+  #
+  # The Initial Developer of the Original Code is Mozilla Corporation.
+  # Portions created by Mozilla are Copyright (C) 2008 Mozilla
+  # Corporation. All Rights Reserved.
+  #
+  # Contributor(s): Mark Smith <mark@mozilla.com>
+  #                 Reed Loden <reed@mozilla.com>
+  #%]
+
+[% PROCESS global/variables.none.tmpl %]
+
+[% inline_style = BLOCK %]
+#heading {
+  width:       98%;
+  font-size:   2em;
+  font-weight: bold;
+  margin:      12px;
+}
+.required:before {
+  content: "* ";
+  color: red;
+}
+.required_star {
+  color: red;
+}
+p {
+  max-width: 40%;
+}
+.row {
+  padding-bottom: 10px;
+}
+[% END %]
+
+[% inline_javascript = BLOCK %]
+$(document).ready(function() {
+  $('.date_field').datetimepicker({
+    format: 'Y-m-d',
+    datepicker: true,
+    timepicker: false,
+    scrollInput: false,
+    lazyInit: false,
+    closeOnDateSelect: true
+  });
+  $('.date_field-img')
+    .click(function(event) {
+      var id = $(event.target).attr('id').replace(/-img$/, '');
+      $('#' + id).datetimepicker('show');
+  });
+  $('#crmForm').submit(function() {
+    $('#short_desc').val($('#short_desc').val() + ': ' + $('#program_name').val());
+  });
+  $('#new_email_request').on('change', function() {
+    if ($('#new_email_request').val() == 'Yes') {
+      $('#email_cadence_row').show();
+      $('input[name="email_cadence"]').each(function() {
+        $(this).attr('required', true);
+      });
+    }
+    else {
+      $('#email_cadence_row').hide();
+      $('input[name="email_cadence"]').each(function() {
+        $(this).removeProp('required');
+      });
+    }
+  });
+});
+[% END %]
+
+[% PROCESS global/header.html.tmpl
+   title              = "CRM/Email Marketing Request"
+   generate_api_token = 1
+   style_urls         = [ "skins/standard/attachment.css",
+                          "js/jquery/plugins/datetimepicker/datetimepicker.css" ]
+   style              = inline_style
+   javascript         = inline_javascript
+   javascript_urls    = [ "js/field.js", "js/util.js" ]
+   jquery             = [ "datetimepicker" ]
+%]
+
+<div id="heading">CRM/Email Marketing Requests</div>
+<div>
+  <p>
+    Mozilla has set goals to build our core, grow our influence, and prototype the future. To do so at scale, we need
+    to enable people to join up with Mozilla.  Making connections and cultivating relationships will be critical to
+    helping people know and understand our brands, programs and products, and take action with us.
+  </p>
+  <p>
+    Do you have <b>C</b>onsitutents, <b>C</b>ontributors, or <b>C</b>ustomers whose <b>R</b>elationships you want to
+    help nuture and <b>M</b>anage? Want some <b>CRM</b> or email software to help enable you to do exactly that?
+  </p>
+  <p>
+    Tell us more (all fields are required):
+  </p>
+
+  <form method="post" action="post_bug.cgi" id="crmForm">
+    <input type="hidden" id="short_desc" name="short_desc" value="New CRM/Email Marketing Request">
+    <input type="hidden" name="product" value="Marketing">
+    <input type="hidden" name="component" value="Email">
+    <input type="hidden" name="rep_platform" value="All">
+    <input type="hidden" name="op_sys" value="Other">
+    <input type="hidden" name="version" value="unspecified">
+    <input type="hidden" name="priority" value="--">
+    <input type="hidden" name="bug_severity" value="normal">
+    <input type="hidden" name="format" value="crm">
+    <input type="hidden" name="token" value="[% token FILTER html %]">
+    [% IF user.in_group('canconfirm') %]
+      <input type="hidden" name="bug_status" value="NEW">
+    [% END %]
+
+    <div class="row">
+      <div class="row_desc">
+        <label class="required" for="program_name">
+          <strong>Program Name:</strong>
+        </label>
+      </div>
+      <input type="text" required name="program_name" id="program_name" size="80">
+    </div>
+
+    <div class="row">
+      <div class="row_desc">
+        <label class="required" for="relationship_development">
+          <strong>What kind of relationships are you looking to develop?</strong>
+        </label>
+      </div>
+      <textarea required name="relationship_development" id="business_need_elaborate" cols="80" rows="10"></textarea>
+    </div>
+
+    <div class="row">
+      <div class="row_desc">
+        <label class="required" for="relationship_goal">
+          <strong>What will you do with these relationships?</strong>
+        </label>
+      </div>
+      <textarea required name="relationship_goal" id="relationship_goal" cols="80" rows="10"></textarea>
+    </div>
+
+     <div class="row">
+      <div class="row_desc">
+        <label class="required" for="new_email_request">
+          <strong>Is this a new email program request?</strong>
+        </label>
+      </div>
+      <select reuired name="new_email_request" id="new_email_request">
+        <option value="">-- Select --</option>
+        <option value="Yes">Yes</option>
+        <option value="No">No</option>
+      </select>
+    </div>
+
+    <div class="row" id="email_cadence_row" style="display:none;">
+      <div class="row_desc">
+        <label class="required" for="email_cadence">
+          <strong>Cadence of planned email engagement</strong>
+        </label>
+      </div>
+      <input type="radio" name="email_cadence" id="cadence_one_time" value="One Time">
+      <label for="cadence_one_time">One Time</label><br>
+      <input type="radio" name="email_cadence" id="cadence_weekly" value="Weekly">
+      <label for="cadence_weekly">Weekly</label><br>
+      <input type="radio" name="email_cadence" id="cadence_monthly" value="Monthly">
+      <label for="cadence_monthly">Monthly</label><br>
+      <input type="radio" name="email_cadence" id="cadence_random" value="Random">
+      <label for="cadence_random">Random</label><br>
+    </div>
+
+    <div class="row">
+      <div class="required row_desc">
+        <strong>What initiative does this support?</strong>
+      </div>
+      <input required type="radio" name="support_initiative" id="firefox_desktop_retention" value="Firefox desktop retention">
+      <label for="firefox_desktop_retention">Firefox desktop retention</label><br>
+      <input required type="radio" name="support_initiative" id="firefox_desktop_acquisition" value="Firefox desktop acquisition">
+      <label for="firefox_desktop_acquisition">Firefox desktop acquisition</label><br>
+      <input required type="radio" name="support_initiative" id="firefox_mobile_retention" value="Firefox mobile retention">
+      <label for="firefox_mobile_retention">Firefox mobile retention</label><br>
+      <input required type="radio" name="support_initiative" id="firefox_mobile_acquisition" value="Firefox mobile acquisition">
+      <label for="firefox_mobile_acquisition">Firefox mobile acquisition</label><br>
+      <input required type="radio" name="support_initiative" id="firefox_product_testing" value="Firefox product testing">
+      <label for="firefox_product_testing">Firefox product testing</label><br>
+      <input required type="radio" name="support_initiative" id="mozilla_mission_engagement" value="Mozilla mission engagement">
+      <label for="mozilla_mission_engagement">Mozilla mission engagement</label><br>
+      <input required type="radio" name="support_initiative" id="mozilla_community_cultivation" value="Mozilla community cultivation">
+      <label for="mozilla_community_cultivation">Mozilla community cultivation</label><br>
+    </div>
+
+    <div class="row">
+      <div class="row_desc">
+        <label class="required" for="solution">
+          <strong>Do you currently have a way to solve for this?</strong><br>
+          If so, what are the steps that you take in order to complete the task today?
+        </label>
+      </div>
+      <textarea required  name="solution" id="solution" cols="80" rows="10"></textarea>
+    </div>
+
+    <div class="row">
+      <div class="row_desc">
+        <label class="required" for="pain_points">
+          <strong>What are the pain points in the current process?</strong>
+        </label>
+      </div>
+      <textarea required name="pain_points" id="pain_points" cols="80" rows="10"></textarea>
+     </div>
+
+    <div class="row">
+      <div class="row_desc">
+        <label class="required" for="benefits">
+          <strong>What are the perceived benefits to changing the process?</strong>
+        </label>
+      </div>
+      <textarea required name="benefits" id="benefits" cols="80" rows="10"></textarea>
+    </div>
+
+    <div class="row">
+      <div class="row_desc">
+        <label class="required" for="kpis">
+          <strong>How will success be measured?</strong> (KPIs)
+        </label>
+      </div>
+      <textarea required name="kpis" id="kpis" cols="80" rows="10"></textarea>
+    </div>
+
+    <div class="row">
+      <div class="row_desc">
+        <label class="required" for="risk">
+          <strong>What is the risk to not doing this?</strong>
+        </label>
+      </div>
+      <textarea required name="risk" id="risk" cols="80" rows="10"></textarea>
+    </div>
+
+    <div class="row">
+      <div class="row_desc">
+      <label class="required" for="success_outcome">
+        <strong>What does success look like?</strong> (Major milestones, KPI goals)
+      </label>
+      </div>
+      <textarea required name="success_outcome" id="success_outcome" cols="80" rows="10"></textarea>
+    </div>
+
+    <div class="row">
+      <div class="row_desc">
+        <label class="required" for="access_amount">
+          <strong>How many people will need access to the CRM platform?</strong><br>
+          Who are they & what are their roles?
+        </label>
+      </div>
+      <textarea required name="access_amount" id="access_amount" cols="80" rows="10"></textarea>
+    </div>
+
+    <div class="row">
+      <div class="row_desc">
+        <label class="required" for="data_size">
+          <strong>How large is the data set?</strong> (# of contacts, fields, etc.)
+        </label>
+      </div>
+      <input required type="text" name="data_size" id="data_size" size="80">
+    </div>
+
+    <div class="row">
+      <div class="row_desc">
+        <label class="required" for="cf_due_date">
+          <strong>When is this program needed?</strong>
+        </label>
+      </div>
+      <input required class="date_field" name="cf_due_date" id="cf_due_date">
+      <img class="date_field-img" id="cf_due_date-img" src="extensions/BugModal/web/calendar.png" width="16" height="16">
+    </div>
+
+    <div class="row">
+      <div class="row_desc">
+        <label for="cc">
+          <strong>Points of Contact:</strong><br>
+          Who should be cc'ed on this [% terms.bug %] and kept informed of updates?
+        </label>
+      </div>
+      [% INCLUDE global/userselect.html.tmpl
+         id       => "cc"
+         name     => "cc"
+         value    => ""
+         size     => 80
+         classes  => ["bz_userfield"]
+         multiple => 5
+       %]
+    </div>
+    <input type="submit" id="commit" value="Submit Request">
+    <p>
+      [ <span class="required_star">*</span> <span class="required_explanation">Required Field</span> ]
+    </p>
+  </form>
+</div>
+
+[% PROCESS global/footer.html.tmpl %]

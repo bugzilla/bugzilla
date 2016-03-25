@@ -1,0 +1,55 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% USE Bugzilla %]
+[% cgi = Bugzilla.cgi %]
+
+>> What kind of relationships are you looking to develop?
+[%+ cgi.param("relationship_development") %]
+
+>> What will you do with these relationships?
+[%+ cgi.param("relationship_goal") %]
+
+>> In this a new email program request?
+[%+ cgi.param("new_email_request") %]
+
+[% IF cgi.param("email_cadence") %]
+>> Cadence of planned email engagement
+[%+ cgi.param("email_cadence") %]
+
+[% END -%]
+
+>> What initiative does this support?
+[%+ cgi.param("support_initiative") %]
+
+>> Do you currently have a way to solve for this?
+[%+ cgi.param("solution") %]
+
+>> What are the pain points in the current process?
+[%+ cgi.param("pain_points") %]
+
+>> What are the perceived benefits to changing the process?
+[%+ cgi.param("benefits") %]
+
+>> How will success be measured?
+[%+ cgi.param("kpis") %]
+
+>> What is the risk to not doing this?
+[%+ cgi.param("risk") %]
+
+>> What does success look like?
+[%+ cgi.param("success_outcome") %]
+
+>> How many people will need access to the CRM platform?
+[%+ cgi.param("access_amount") %]
+
+>> How large is the data set?
+[%+ cgi.param("data_size") %]
+
+>> When is this program needed?
+[%+ cgi.param("cf_due_date") %]

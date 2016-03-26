@@ -96,6 +96,7 @@ sub init_page {
                 my $c_path = $path = dirname($^X);
                 $c_path =~ s/\bperl\b(?=\\bin)/c/;
                 $path .= ";$c_path";
+                trick_taint($path);
             }
         }
         # Some environment variables are not taint safe

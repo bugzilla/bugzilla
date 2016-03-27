@@ -18,6 +18,10 @@ use Digest::MD5 qw(md5_hex);
 
 use parent qw(Text::MultiMarkdown);
 
+# use private code points
+use constant FENCED_BLOCK => "\N{U+F111}";
+use constant INDENTED_FENCED_BLOCK => "\N{U+F222}";
+
 # Regex to match balanced [brackets]. See Friedl's
 # "Mastering Regular Expressions", 2nd Ed., pp. 328-331.
 our ($g_nested_brackets, $g_nested_parens);
@@ -74,6 +78,7 @@ sub _Markdown {
     my $self = shift;
     my $text = shift;
 
+    $text = $self->_removeFencedCodeBlocks($text);
     $text = Bugzilla::Template::quoteUrls($text, undef, undef, undef, 1);
 
     return $self->SUPER::_Markdown($text, @_);
@@ -83,6 +88,12 @@ sub _code_blocks {
     my ($self) = @_;
     $self->{code_blocks} = $self->{params}->{code_blocks} ||= [];
     return $self->{code_blocks};
+}
+
+sub _indented_code_blocks {
+    my ($self) = @_;
+    $self->{indented_code_blocks} = $self->{params}->{indented_code_blocks} ||= [];
+    return $self->{indented_code_blocks};
 }
 
 sub _RunSpanGamut {
@@ -126,7 +137,21 @@ sub _removeFencedCodeBlocks {
         `{3,} [\s\t]* $
         }{
             push @{$self->_code_blocks}, $1;
-            "%%%FENCED_BLOCK%%%";
+            "${\FENCED_BLOCK}\n";
+        }egmx;
+
+    $text =~ s{
+        (?:\n\n|\A)
+        (                # $1 = the code block -- one or more lines, starting with a space/tab
+          (?:
+            (?:[ ]{$self->{tab_width}} | \t)   # Lines must start with a tab or a tab-width of spaces
+            .*\n+
+          )+
+        )
+        ((?=^[ ]{0,$self->{tab_width}}\S)|\Z)    # Lookahead for non-space at line-start, or end of doc
+        }{
+            push @{$self->_indented_code_blocks}, $1;
+            "\n${\INDENTED_FENCED_BLOCK}\n";
         }egmx;
     return $text;
 }
@@ -135,7 +160,6 @@ sub _removeFencedCodeBlocks {
 sub _StripLinkDefinitions {
     my ($self, $text) = @_;
 
-    $text = $self->_removeFencedCodeBlocks($text);
     #
     # Strips link definitions from text, stores the URLs and titles in
     # hash references.
@@ -406,14 +430,11 @@ sub _DoCodeSpans {
 sub _DoCodeBlocks {
     my ($self, $text) = @_;
 
-    # First, do the standard code blocks to avoid generating nested code blocks
-    # if the block is both indented and is surrounded by backticks.
-    $text = $self->SUPER::_DoCodeBlocks($text);
-
     $text =~ s{
-        ^ %%%FENCED_BLOCK%%%
+        ^ (${\FENCED_BLOCK}|${\INDENTED_FENCED_BLOCK})
         }{
-            my $codeblock = shift @{$self->_code_blocks};
+            my $aref = ($1 eq FENCED_BLOCK) ? $self->_code_blocks : $self->_indented_code_blocks;
+            my $codeblock = shift @$aref;
             my $result;
 
             $codeblock = $self->_EncodeCode($codeblock);
@@ -443,7 +464,6 @@ sub _DoBlockQuotes {
             my $bq = $1;
             $bq =~ s/^[ \t]*&gt;[ \t]?//gm; # trim one level of quoting
             $bq =~ s/^[ \t]+$//mg;          # trim whitespace-only lines
-            $bq = $self->_removeFencedCodeBlocks($bq);
             $bq = $self->_RunBlockGamut($bq, {wrap_in_p_tags => 1});      # recurse
             $bq =~ s/^/  /mg;
             # These leading spaces screw with <pre> content, so we need to fix that:

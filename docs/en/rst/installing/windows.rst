@@ -89,6 +89,7 @@ Install the following mandatory modules with:
 * JSON-XS
 * Win32
 * Win32-API
+* DateTime-TimeZone-Local-Win32
 
 The following modules enable various optional Bugzilla features; try and
 install them, but don't worry too much to begin with if you can't get them
@@ -126,17 +127,19 @@ installed:
 * Cache-Memcached
 * Text-Markdown
 * File-Copy-Recursive
-* GraphViz
 
-If you are using Strawberry Perl, you should use the :file:`install-module.pl`
+If you are using Strawberry Perl, you should use the :file:`cpanm`
 script to install modules, which is the same script used for Linux. Some of
 the required modules are already installed by default. The remaining ones can
 be installed using the command:
 
-:command:`perl install-module.pl <modulename>`
+:command:`cpanm -l local <modulename>`
 
 The list of modules to install will be displayed by :file:`checksetup.pl`; see
 below.
+
+.. warning:: In master, :file:`checksetup.pl` no longer lists these modules.
+   This will be fixed in :bug:`1251100`.
 
 .. _windows-config-webserver:
 

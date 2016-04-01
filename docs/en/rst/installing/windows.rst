@@ -89,6 +89,7 @@ Install the following mandatory modules with:
 * JSON-XS
 * Win32
 * Win32-API
+* DateTime-TimeZone-Local-Win32
 
 The following modules enable various optional Bugzilla features; try and
 install them, but don't worry too much to begin with if you can't get them
@@ -125,7 +126,6 @@ installed:
 * IO-stringy
 * Cache-Memcached
 * File-Copy-Recursive
-* GraphViz
 
 If you are using Strawberry Perl, you should use the :file:`install-module.pl`
 script to install modules, which is the same script used for Linux. Some of

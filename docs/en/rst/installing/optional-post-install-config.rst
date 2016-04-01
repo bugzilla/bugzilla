@@ -115,7 +115,7 @@ Dependency Graphs
 =================
 
 Bugzilla can draw graphs of the dependencies (depends on/blocks relationships)
-between bugs, if you install a package called :file:`dot`.
+between bugs, if you install a package called :file:`graphviz`.
 
 Linux
 -----
@@ -129,8 +129,7 @@ Windows
 Download and install Graphviz from
 `the Graphviz website <http://www.graphviz.org/Download_windows.php>`_. Put
 the complete path to :file:`dot.exe` in the :param:`webdotbase` parameter,
-using forward slashes as path separators. E.g.
-:paramval:`C:/Program Files/ATT/Graphviz/bin/dot.exe`.
+e.g. :paramval:`C:\\Program Files (x86)\\Graphviz2.38\\bin\\dot.exe`.
 
 Documentation
 =============
@@ -139,16 +138,37 @@ Bugzilla has extensive documentation and help, written in
 `reStructured Text <http://sphinx-doc.org/rest.html>`_
 format. A generic compiled copy exists on
 `bugzilla.readthedocs.org <https://bugzilla.readthedocs.org/>`_, and
-:guilabel:`Help` links point to it by default. If you want to build and use a
-local copy of the documentation, perhaps because you have added Bugzilla
+:guilabel:`Help` links point to it by default. You can also build and use
+a local copy of the documentation, for instance because you have added Bugzilla
 extensions which come with documentation, or because your users don't have
-Internet access from their machines, then:
-
-* Install `Sphinx <http://sphinx-doc.org/>`_
-  (:file:`python-sphinx` package on Debian/Ubuntu)
-
-Then run :command:`docs/makedocs.pl` in your Bugzilla directory.
+Internet access from their machines.
 
 Bugzilla will automatically detect that you've compiled the documentation
 and link to it in preference to the copy on the Internet. Don't forget to
 recompile it when you upgrade Bugzilla or install new extensions.
+
+Linux
+-----
+
+* Install `Sphinx <http://sphinx-doc.org/>`_. Most Linux distros have it in
+  a package named :file:`python-sphinx`.
+
+* Then go to your Bugzilla directory and run:
+
+  :command:`docs/makedocs.pl`
+
+Windows
+-------
+
+* Download and install `Python <https://www.python.org/downloads/>`_.
+  Both Python 2.7 and 3.x will work. Adding :file:`python` to the :param:`PATH`
+  environment variable, as suggested by the Python installer, will make your
+  life easier.
+
+* Install `Sphinx <http://sphinx-doc.org/>`_. Run :command:`cmd.exe` and type:
+
+  :command:`pip install sphinx`
+
+* Then go to your :file:`C:\\bugzilla\\docs` directory and run:
+
+  :command:`makedocs.pl`

@@ -133,11 +133,14 @@
                 class="flag_select flag_type-[% type.id %]"
                 [% IF !can_edit_flag %] disabled="disabled"[% END %]>
         [%# Only display statuses the user is allowed to set. %]
-        [% IF !flag || (can_edit_flag && user.can_request_flag(type)) || flag.setter_id == user.id %]
+        [% IF !flag
+              || (can_edit_flag && user.can_unset_flag(type, flag.status) && user.can_request_flag(type))
+              || flag.setter_id == user.id %]
           <option value="X"></option>
         [% END %]
         [% IF type.is_active && can_edit_flag %]
-          [% IF (type.is_requestable && user.can_request_flag(type)) || (flag && flag.status == "?") %]
+          [% IF (!flag && type.is_requestable && user.can_request_flag(type))
+                 || (flag && user.can_unset_flag(type, flag.status) && flag.status == "?") %]
             <option value="?" [% "selected" IF flag && flag.status == "?" %]>?</option>
           [% END %]
           [% IF user.can_set_flag(type) || (flag && flag.status == "+") %]

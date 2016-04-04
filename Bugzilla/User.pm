@@ -1529,6 +1529,13 @@ sub can_set_flag {
             || $self->in_group_id($flag_type->grant_group_id)) ? 1 : 0;
 }
 
+sub can_unset_flag {
+    my ($self, $flag_type, $flag_status) = @_;
+    return 1 if !$flag_type->grant_group_id;
+    return 1 if ($flag_status ne '+' && $flag_status ne '-');
+    return $self->in_group_id($flag_type->grant_group_id) ? 1 : 0;
+}
+
 # visible_groups_inherited returns a reference to a list of all the groups
 # whose members are visible to this user.
 sub visible_groups_inherited {

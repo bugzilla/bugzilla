@@ -127,15 +127,17 @@
       <input type="hidden" id="[% flag_id FILTER html %]-dirty">
       <select id="[% flag_id FILTER html %]" name="[% flag_id FILTER html %]"
         title="[% t.description FILTER html %]"
-        [% UNLESS (t.is_requestable && user.can_request_flag(t)) || user.can_set_flag(t) %]
+        [% UNLESS (t.is_requestable && user.can_request_flag(t))
+                   || user.can_set_flag(t)
+                   || (f && user.can_unset_flag(t, f.status)) %]
           disabled
         [% END %]
         class="bug-flag">
-        [% IF !f || (user.can_request_flag(t)) || f.setter_id == user.id %]
+        [% IF !f || (user.can_unset_flag(t, f.status) && user.can_request_flag(t)) || f.setter_id == user.id %]
           <option value="X"></option>
         [% END %]
         [% IF t.is_active %]
-          [% IF (t.is_requestable && user.can_request_flag(t)) || (f && f.status == "?") %]
+          [% IF (!f && t.is_requestable && user.can_request_flag(t)) || (f && user.can_unset_flag(t, f.status) && f.status == "?") %]
             <option value="?" [% "selected" IF f && f.status == "?" %]>?</option>
           [% END %]
           [% IF user.can_set_flag(t) || (f && f.status == "+") %]

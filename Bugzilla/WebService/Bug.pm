@@ -1377,6 +1377,9 @@ sub _bug_to_hash {
     if (filter_wants $params, 'tags', 'extra') {
         $item{'tags'} = $bug->tags;
     }
+    if (filter_wants $params, 'duplicates', 'extra') {
+        $item{'duplicates'} = [ map { $self->type('int', $_->id) } @{ $bug->duplicates } ];
+    }
 
     # And now custom fields
     my @custom_fields = Bugzilla->active_custom_fields;
@@ -2589,6 +2592,10 @@ These fields are returned only by specifying "_extra" or the field name in "incl
 C<array> of C<string>s.  Each array item is a tag name.
 
 Note that tags are personal to the currently logged in user.
+
+=item C<duplicates>
+
+C<array> of C<integers>. Each array item is a bug ID that is a duplicate of this bug.
 
 =back
 

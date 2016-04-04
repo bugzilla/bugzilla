@@ -1491,6 +1491,9 @@ sub _bug_to_hash {
     if (filter_wants $params, 'tags', 'extra') {
         $item{'tags'} = $bug->tags;
     }
+    if (filter_wants $params, 'duplicates', 'extra') {
+        $item{'duplicates'} = [ map { as_int($_->id) } @{ $bug->duplicates } ];
+    }
 
     # And now custom fields
     my @custom_fields = Bugzilla->active_custom_fields;

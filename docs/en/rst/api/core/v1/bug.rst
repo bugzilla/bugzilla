@@ -234,13 +234,14 @@ Extra fields:
 These fields are returned only by specifying ``_extra`` or the field name in
 ``include_fields``.
 
-====  =====  ====================================================================
-name  type   description
-====  =====  ====================================================================
-tags  array  Each array item is a tag name. Note that tags are
-             personal to the currently logged in user and are not the same as
-             comment tags.
-====  =====  ====================================================================
+==========  =====  ====================================================================
+name        type   description
+==========  =====  ====================================================================
+tags        array  Each array item is a tag name. Note that tags are
+                   personal to the currently logged in user and are not the same as
+                   comment tags.
+duplicates  array  Each array item is a bug ID that is a duplicate of this bug.
+==========  =====  ====================================================================
 
 User object:
 

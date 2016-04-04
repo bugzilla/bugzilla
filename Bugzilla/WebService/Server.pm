@@ -35,6 +35,13 @@ sub handle_login {
         Bugzilla->metrics->name("$class $method");
     }
 
+    # We never want to create a new session unless the user is calling the
+    # login method.  Setting dont_persist_session makes
+    # Bugzilla::Auth::_handle_login_result() skip calling persist_login().
+    if ($full_method ne 'User.login') {
+        Bugzilla->request_cache->{dont_persist_session} = 1;
+    }
+
     eval "require $class";
     ThrowCodeError('unknown_method', {method => $full_method}) if $@;
     return if ($class->login_exempt($method) 

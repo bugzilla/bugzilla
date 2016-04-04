@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this file,
+ * You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * This Source Code Form is "Incompatible With Secondary Licenses", as
+ * defined by the Mozilla Public License, v. 2.0. */
+
 /* 
  * Custom rules for skins/standard/global.css.
  * The rules you put here override rules in that stylesheet.
@@ -53,12 +60,6 @@ a.controller {
     padding: 3px;
 }
 
-#footer .outro {
-    text-align:left;
-    padding-left:1ex;
-    padding-bottom:1ex;
-}
-
 .group_secure > th > a {
     background-image: url("../../images/padlock.png");
     background-position: center left;
@@ -66,10 +67,13 @@ a.controller {
     padding-left: 18px;
 }
 
-#privacy-policy {
-    font-size: x-small;
-    width: 100%;
+#policy_links {
+    padding-right: 5px;
     text-align: right;
+}
+
+#policy_links li {
+    display: inline;
 }
 
 .highlighted {

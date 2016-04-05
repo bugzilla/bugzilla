@@ -148,7 +148,8 @@ sub remove_from_db {
     $dbh->bz_start_transaction();
 
     # Products must have at least one component.
-    if (scalar(@{$self->product->components}) == 1) {
+    my @components = @{ $self->product->components };
+    if (scalar(@components) == 1) {
         ThrowUserError('component_is_last', { comp => $self });
     }
 
@@ -165,6 +166,8 @@ sub remove_from_db {
             ThrowUserError('component_has_bugs', {nb => $self->bug_count});
         }
     }
+    # Update the list of components in the product object.
+    $self->product->{components} = [grep { $_->id != $self->id } @components];
     $self->SUPER::remove_from_db();
 
     $dbh->bz_commit_transaction();

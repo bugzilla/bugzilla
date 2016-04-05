@@ -13,9 +13,6 @@ use warnings;
 
 use parent qw(Email::MIME);
 
-use Encode qw(encode);
-use Encode::MIME::Header;
-
 sub new {
     my ($class, $msg) = @_;
     state $use_utf8 = Bugzilla->params->{'utf8'};
@@ -79,20 +76,12 @@ sub as_string {
     # MIME-Version must be set otherwise some mailsystems ignore the charset
     $self->header_set('MIME-Version', '1.0') if !$self->header('MIME-Version');
 
-    # Encode the headers correctly in quoted-printable
+    # Encode the headers correctly.
     foreach my $header ($self->header_names) {
         my @values = $self->header($header);
-        # We don't recode headers that happen multiple times.
-        next if scalar(@values) > 1;
-        if (my $value = $values[0]) {
-            utf8::decode($value) unless $use_utf8 && utf8::is_utf8($value);
+        map { utf8::decode($_) if defined($_) && !utf8::is_utf8($_) } @values;
 
-            # avoid excessive line wrapping done by Encode.
-            local $Encode::Encoding{'MIME-Q'}->{'bpl'} = 998;
-
-            my $encoded = encode('MIME-Q', $value);
-            $self->header_set($header, $encoded);
-        }
+        $self->header_str_set($header, @values);
     }
 
     # Ensure the character-set and encoding is set correctly on single part

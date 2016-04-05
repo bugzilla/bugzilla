@@ -26,6 +26,7 @@ use Bugzilla::Attachment::PatchReader;
 use Bugzilla::Token;
 
 use Encode qw(encode find_encoding);
+use Encode::MIME::Header; # Required to alter Encode::Encoding{'MIME-Q'}.
 use Cwd qw(realpath);
 
 # For most scripts we don't make $cgi and $template global variables. But

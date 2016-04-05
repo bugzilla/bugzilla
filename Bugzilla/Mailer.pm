@@ -23,8 +23,6 @@ use Bugzilla::Util;
 
 use Date::Format qw(time2str);
 
-use Encode qw(encode);
-use Encode::MIME::Header;
 use Email::Sender::Simple qw(sendmail);
 use Email::Sender::Transport::SMTP::Persistent;
 use Bugzilla::Sender::Transport::Sendmail;

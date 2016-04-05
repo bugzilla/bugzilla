@@ -12,8 +12,6 @@ use warnings;
 use 5.14.0;
 use parent qw(Email::MIME);
 
-use Encode qw(encode);
-
 sub new {
     my ($class, $msg) = @_;
 
@@ -78,17 +76,9 @@ sub as_string {
     # Encode the headers correctly in quoted-printable
     foreach my $header ($self->header_names) {
         my @values = $self->header($header);
-        # We don't recode headers that happen multiple times.
-        next if scalar(@values) > 1;
-        if (my $value = $values[0]) {
-            utf8::decode($value) unless utf8::is_utf8($value);
+        map { utf8::decode($_) if defined($_) && !utf8::is_utf8($_) } @values;
 
-            # avoid excessive line wrapping done by Encode.
-            local $Encode::Encoding{'MIME-Q'}->{'bpl'} = 998;
-
-            my $encoded = encode('MIME-Q', $value);
-            $self->header_set($header, $encoded);
-        }
+        $self->header_str_set($header, @values);
     }
 
     # Ensure the character-set and encoding is set correctly on single part

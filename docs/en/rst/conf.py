@@ -383,4 +383,13 @@ pdf_fit_background_mode = 'scale'
 # Temporary highlighting of TODO items
 todo_include_todos = False
 
-extlinks = {'bug': ('https://bugzilla.mozilla.org/show_bug.cgi?id=%s', 'bug  ')}
+# The readthedocs.org website cannot access POD.
+on_rtd = os.environ.get('READTHEDOCS', None) == 'True'
+
+if on_rtd:
+    base_api_url = 'https://www.bugzilla.org/docs/tip/en/html/api/'
+else:
+    base_api_url = '../integrating/api/'
+
+extlinks = {'bug': ('https://bugzilla.mozilla.org/show_bug.cgi?id=%s', 'bug  '),
+            'api': (base_api_url + '%s', '')}

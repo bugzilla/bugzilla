@@ -12,6 +12,13 @@ coming soon.
 
 The APIs currently available are as follows:
 
+Core Module API
+===============
+
+Most of the core Bugzilla modules have extensive documentation inside the modules
+themselves. You can view the :api:`POD documentation <index.html>` to help with
+using the core modules in your extensions.
+
 Ad-Hoc APIs
 ===========
 
@@ -23,8 +30,7 @@ to alternate data formats where they are available.
 XML-RPC
 =======
 
-Bugzilla has an `XML-RPC API
-<http://www.bugzilla.org/docs/tip/en/html/api/Bugzilla/WebService/Server/XMLRPC.html>`_.
+Bugzilla has an :api:`XML-RPC API <Bugzilla/WebService/Server/XMLRPC.html>`.
 This will receive no further updates and will be removed in a future version
 of Bugzilla.
 
@@ -33,8 +39,7 @@ Endpoint: :file:`/xmlrpc.cgi`
 JSON-RPC
 ========
 
-Bugzilla has a `JSON-RPC API
-<http://www.bugzilla.org/docs/tip/en/html/api/Bugzilla/WebService/Server/JSONRPC.html>`_.
+Bugzilla has a :api:`JSON-RPC API <Bugzilla/WebService/Server/JSONRPC.html>`.
 This will receive no further updates and will be removed in a future version
 of Bugzilla.
 

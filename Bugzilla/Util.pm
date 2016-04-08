@@ -250,29 +250,36 @@ sub i_am_webservice {
 sub do_ssl_redirect_if_required {
     return if !i_am_cgi();
     return if !Bugzilla->params->{'ssl_redirect'};
+    return if !Bugzilla->params->{'sslbase'};
 
-    my $sslbase = Bugzilla->params->{'sslbase'};
-    
     # If we're already running under SSL, never redirect.
+    if (Bugzilla->params->{'inbound_proxies'}
+        && uc($ENV{HTTP_X_FORWARDED_PROTO} || '') eq 'HTTPS') {
+        return;
+    }
     return if uc($ENV{HTTPS} || '') eq 'ON';
-    # Never redirect if there isn't an sslbase.
-    return if !$sslbase;
-    Bugzilla->cgi->redirect_to_https();
+
+    # If called from Bugzilla::CGI->new itself, use the newly created
+    # CGI object, to avoid deep recursions.
+    my $cgi = shift || Bugzilla->cgi;
+    $cgi->redirect_to_https();
 }
 
 sub correct_urlbase {
-    my $ssl = Bugzilla->params->{'ssl_redirect'};
     my $urlbase = Bugzilla->params->{'urlbase'};
     my $sslbase = Bugzilla->params->{'sslbase'};
 
     if (!$sslbase) {
         return $urlbase;
     }
-    elsif ($ssl) {
+    elsif (Bugzilla->params->{'ssl_redirect'}) {
         return $sslbase;
     }
+    # Return what the user currently uses.
+    elsif (Bugzilla->params->{'inbound_proxies'}) {
+        return (uc($ENV{HTTP_X_FORWARDED_PROTO} || '') eq 'HTTPS') ? $sslbase : $urlbase;
+    }
     else {
-        # Return what the user currently uses.
         return (uc($ENV{HTTPS} || '') eq 'ON') ? $sslbase : $urlbase;
     }
 }

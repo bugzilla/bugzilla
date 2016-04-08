@@ -53,10 +53,18 @@ sub new {
     # Make sure our outgoing cookie list is empty on each invocation
     $self->{Bugzilla_cookie_list} = [];
 
+    my $script = basename($0);
+
+    # attachment.cgi handles this itself.
+    if ($script ne 'attachment.cgi') {
+        $self->do_ssl_redirect_if_required();
+        $self->redirect_to_urlbase if $self->url_is_attachment_base;
+    }
+
+
     # Path-Info is of no use for Bugzilla and interacts badly with IIS.
     # Moreover, it causes unexpected behaviors, such as totally breaking
     # the rendering of pages.
-    my $script = basename($0);
     if (my $path_info = $self->path_info) {
         my @whitelist = ("rest.cgi");
         Bugzilla::Hook::process('path_info_whitelist', { whitelist => \@whitelist });
@@ -74,11 +82,6 @@ sub new {
 
     # Send appropriate charset
     $self->charset('UTF-8');
-
-    # Redirect to urlbase/sslbase if we are not viewing an attachment.
-    if ($self->url_is_attachment_base and $script ne 'attachment.cgi') {
-        $self->redirect_to_urlbase();
-    }
 
     # Check for errors
     # All of the Bugzilla code wants to do this, so do it here instead of
@@ -539,7 +542,7 @@ sub redirect_to_urlbase {
 
 sub url_is_attachment_base {
     my ($self, $id) = @_;
-    return 0 if !use_attachbase() or !i_am_cgi();
+    return 0 unless use_attachbase() && i_am_cgi();
     my $attach_base = Bugzilla->params->{'attachment_base'};
     # If we're passed an id, we only want one specific attachment base
     # for a particular bug. If we're not passed an ID, we just want to
@@ -556,7 +559,20 @@ sub url_is_attachment_base {
         $regex =~ s/\\\%bugid\\\%/\\d+/;
     }
     $regex = "^$regex";
-    return ($self->url =~ $regex) ? 1 : 0;
+
+    my $url = $self->url;
+
+    # If we are behind a reverse proxy, we need to determine the original
+    # URL, else the comparison with the attachment_base URL will fail.
+    if (Bugzilla->params->{'inbound_proxies'}) {
+        # X-Forwarded-Proto is defined in RFC 7239.
+        my $protocol = $ENV{HTTP_X_FORWARDED_PROTO} || $self->protocol;
+        my $host = $self->virtual_host;
+        # X-Forwarded-URI is not standard.
+        my $uri = $ENV{HTTP_X_FORWARDED_URI} || $self->request_uri || '';
+        $url = "$protocol://$host$uri";
+    }
+    return ($url =~ $regex) ? 1 : 0;
 }
 
 sub set_dated_content_disp {

@@ -131,11 +131,6 @@ sub init_page {
 
     my $script = basename($0);
 
-    # Because of attachment_base, attachment.cgi handles this itself.
-    if ($script ne 'attachment.cgi') {
-        do_ssl_redirect_if_required();
-    }
-
     # If Bugzilla is shut down, do not allow anything to run, just display a
     # message to the user about the downtime and log out.  Scripts listed in 
     # SHUTDOWNHTML_EXEMPT are exempt from this message.

@@ -34,7 +34,7 @@ use lib qw(.. ../lib lib ../local/lib/perl5);
 
 use Cwd;
 use File::Copy::Recursive qw(rcopy);
-use File::Path qw(rmtree);
+use File::Path qw(rmtree make_path);
 use File::Which qw(which);
 use Pod::Simple;
 
@@ -51,7 +51,6 @@ sub MakeDocs {
     my ($name, $cmdline) = @_;
 
     say "Creating $name documentation ..." if defined $name;
-    say "make $cmdline\n";
     system('make', $cmdline) == 0
         or $error_found = 1;
     print "\n";
@@ -82,12 +81,11 @@ END_HTML
 
     $converter->contents_page_start($contents_start);
     $converter->contents_page_end("</body></html>");
-    $converter->add_css('./../../../style.css');
+    $converter->add_css('./../../../../style.css');
     $converter->javascript_flurry(0);
     $converter->css_flurry(0);
-    mkdir("html");
-    mkdir("html/api");
-    $converter->batch_convert(['../../'], 'html/api/');
+    make_path('html/integrating/api');
+    $converter->batch_convert(['../../'], 'html/integrating/api');
 
     print "\n";
 }

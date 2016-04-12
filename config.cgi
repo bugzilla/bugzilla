@@ -139,6 +139,9 @@ sub display_data {
     $template->process($format->{'template'}, $vars, \$output)
       || ThrowTemplateError($template->error());
 
+    # Remove leading whitespaces, to save some bandwidth.
+    $output =~ s/^\s+(?=<)//gm if $format->{'ctype'} =~ /rdf/;
+
     # Wide characters cause md5_base64() to die.
     my $digest_data = $output;
     utf8::encode($digest_data) if utf8::is_utf8($digest_data);

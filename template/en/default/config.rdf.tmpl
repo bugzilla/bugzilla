@@ -130,10 +130,11 @@
   <bz:products>
     <Seq>
       [% FOREACH product = products %]
+        [% uri_product_name = product.name FILTER uri %]
         <li>
-          <bz:product rdf:about="[% escaped_urlbase %]product.cgi?name=[% product.name FILTER uri %]">
+          <bz:product rdf:about="[% escaped_urlbase %]product.cgi?name=[% uri_product_name %]">
             <bz:name>[% product.name FILTER html %]</bz:name>
-            <bz:allows_unconfirmed>[% product.allows_unconfirmed FILTER html %]</bz:allows_unconfirmed>
+            <bz:allows_unconfirmed>[% product.allows_unconfirmed FILTER none %]</bz:allows_unconfirmed>
             [% IF Param('useclassification') %]
               <bz:classification>[% class_names.${product.classification_id}.name FILTER html %]</bz:classification>
             [% END %]
@@ -141,7 +142,7 @@
               <Seq>
                 [% FOREACH comp = product.components %]
                   <li resource="[% escaped_urlbase %]component.cgi?name=[% comp.name FILTER uri
-                      %]&amp;product=[% product.name FILTER uri %]"/>
+                      %]&amp;product=[% uri_product_name %]"/>
                 [% END %]
               </Seq>
             </bz:components>
@@ -150,7 +151,7 @@
               <Seq>
                 [% FOREACH version = product.versions %]
                   <li resource="[% escaped_urlbase %]version.cgi?name=[% version.name FILTER uri
-                      %]&amp;product=[% product.name FILTER uri %]"/>
+                      %]&amp;product=[% uri_product_name %]"/>
                 [% END %]
               </Seq>
             </bz:versions>
@@ -160,12 +161,11 @@
                 <Seq>
                   [% FOREACH milestone = product.milestones %]
                     <li resource="[% escaped_urlbase %]milestone.cgi?name=[% milestone.name FILTER uri
-                        %]&amp;product=[% product.name FILTER uri %]"/>
+                        %]&amp;product=[% uri_product_name %]"/>
                   [% END %]
                 </Seq>
               </bz:target_milestones>
             [% END %]
-
           </bz:product>
         </li>
       [% END %]
@@ -176,12 +176,13 @@
   <bz:components>
     <Seq>
       [% FOREACH product = products %]
+        [% uri_product_name = product.name FILTER uri %]
         [% FOREACH comp = product.components %]
           <li>
             <bz:component rdf:about="[% escaped_urlbase %]component.cgi?name=[% comp.name FILTER uri
-                          %]&amp;product=[% product.name FILTER uri %]">
+                          %]&amp;product=[% uri_product_name %]">
               <bz:name>[% comp.name FILTER html %]</bz:name>
-              <bz:is_active>[% comp.is_active FILTER html %]</bz:is_active>
+              <bz:is_active>[% comp.is_active FILTER none %]</bz:is_active>
               [% IF show_flags %]
                 <bz:flag_types>
                   <Seq>
@@ -189,7 +190,7 @@
                     [% FOREACH flag_type = flag_types %]
                       [% NEXT UNLESS flag_type.is_active %]
                       [% all_visible_flag_types.${flag_type.id} = flag_type %]
-                      <li resource="[% escaped_urlbase %]flag.cgi?id=[% flag_type.id FILTER uri
+                      <li resource="[% escaped_urlbase %]flag.cgi?id=[% flag_type.id
                           %]&amp;name=[% flag_type.name FILTER uri %]" />
                     [% END %]
                   </Seq>
@@ -205,12 +206,13 @@
   <bz:versions>
     <Seq>
       [% FOREACH product = products %]
+        [% uri_product_name = product.name FILTER uri %]
         [% FOREACH version = product.versions %]
           <li>
             <bz:version rdf:about="[% escaped_urlbase %]version.cgi?name=[% version.name FILTER uri
-                        %]&amp;product=[% product.name FILTER uri %]">
+                        %]&amp;product=[% uri_product_name %]">
               <bz:name>[% version.name FILTER html %]</bz:name>
-              <bz:is_active>[% version.is_active FILTER html %]</bz:is_active>
+              <bz:is_active>[% version.is_active FILTER none %]</bz:is_active>
             </bz:version>
           </li>
         [% END %]
@@ -222,12 +224,13 @@
     <bz:target_milestones>
       <Seq>
         [% FOREACH product = products %]
+          [% uri_product_name = product.name FILTER uri %]
           [% FOREACH milestone = product.milestones %]
             <li>
               <bz:target_milestone rdf:about="[% escaped_urlbase %]milestone.cgi?name=[% milestone.name FILTER uri
-                                   %]&amp;product=[% product.name FILTER uri %]">
+                                   %]&amp;product=[% uri_product_name %]">
                 <bz:name>[% milestone.name FILTER html %]</bz:name>
-                <bz:is_active>[% milestone.is_active FILTER html %]</bz:is_active>
+                <bz:is_active>[% milestone.is_active FILTER none %]</bz:is_active>
               </bz:target_milestone>
             </li>
           [% END %]
@@ -241,15 +244,15 @@
       <Seq>
         [% FOREACH flag_type = all_visible_flag_types.values.sort('name') %]
           <li>
-            <bz:flag_type rdf:about="[% escaped_urlbase %]flag.cgi?id=[% flag_type.id FILTER uri
+            <bz:flag_type rdf:about="[% escaped_urlbase %]flag.cgi?id=[% flag_type.id
                           %]&amp;name=[% flag_type.name FILTER uri %]">
-              <bz:id>[% flag_type.id FILTER html %]</bz:id>
+              <bz:id>[% flag_type.id %]</bz:id>
               <bz:name>[% flag_type.name FILTER html %]</bz:name>
               <bz:description>[% flag_type.description FILTER html %]</bz:description>
               <bz:type>[% flag_type.target_type FILTER html %]</bz:type>
-              <bz:requestable>[% flag_type.is_requestable FILTER html %]</bz:requestable>
-              <bz:specifically_requestable>[% flag_type.is_requesteeble FILTER html %]</bz:specifically_requestable>
-              <bz:multiplicable>[% flag_type.is_multiplicable FILTER html %]</bz:multiplicable>
+              <bz:requestable>[% flag_type.is_requestable FILTER none %]</bz:requestable>
+              <bz:specifically_requestable>[% flag_type.is_requesteeble FILTER none %]</bz:specifically_requestable>
+              <bz:multiplicable>[% flag_type.is_multiplicable FILTER none %]</bz:multiplicable>
               [% IF user.in_group("editcomponents") %]
                 <bz:grant_group>[% flag_type.grant_group.name FILTER html %]</bz:grant_group>
                 <bz:request_group>[% flag_type.request_group.name FILTER html %]</bz:request_group>
@@ -271,12 +274,12 @@
             <bz:description>[% (field_descs.${item.name} OR item.description) FILTER html %]</bz:description>
             [%-# These values are meaningful for custom fields only. %]
             [% IF item.custom %]
-              <bz:type>[% item.type FILTER html %]</bz:type>
+              <bz:type>[% item.type FILTER none %]</bz:type>
               <bz:type_desc>[% field_types.${item.type} FILTER html %]</bz:type_desc>
-              <bz:enter_bug>[% item.enter_bug FILTER html %]</bz:enter_bug>
+              <bz:enter_bug>[% item.enter_bug FILTER none %]</bz:enter_bug>
             [% END %]
             [% IF item.is_active.defined %]
-              <bz:is_active>[% item.is_active FILTER html %]</bz:is_active>
+              <bz:is_active>[% item.is_active FILTER none %]</bz:is_active>
             [% END %]
           </bz:field>
         </li>

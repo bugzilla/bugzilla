@@ -42,3 +42,9 @@ Options -Indexes
   RewriteOptions inherit
   RewriteRule ^rest/(.*)$ rest.cgi/$1 [NE]
 </IfModule>
+
+# config.cgi using the RDF format can generate a pretty large file (several MB).
+# The XML format of bug reports can be quite large too.
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/xml application/rdf+xml
+</IfModule>

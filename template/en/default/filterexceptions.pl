@@ -448,6 +448,8 @@
 
 'config.rdf.tmpl' => [
   'escaped_urlbase',
+  'uri_product_name',
+  'flag_type.id'
 ],
 
 );

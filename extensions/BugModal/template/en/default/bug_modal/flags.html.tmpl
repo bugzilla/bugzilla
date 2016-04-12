@@ -137,7 +137,7 @@
           <option value="X"></option>
         [% END %]
         [% IF t.is_active %]
-          [% IF (!f && t.is_requestable && user.can_request_flag(t)) || (f && user.can_unset_flag(t, f.status) && f.status == "?") %]
+          [% IF (!f && t.is_requestable && user.can_request_flag(t)) || (f && (user.can_unset_flag(t, f.status) || f.status == "?")) %]
             <option value="?" [% "selected" IF f && f.status == "?" %]>?</option>
           [% END %]
           [% IF user.can_set_flag(t) || (f && f.status == "+") %]

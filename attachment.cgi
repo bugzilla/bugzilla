@@ -25,8 +25,8 @@ use Bugzilla::Attachment;
 use Bugzilla::Attachment::PatchReader;
 use Bugzilla::Token;
 
-use Encode qw(encode find_encoding);
-use Encode::MIME::Header; # Required to alter Encode::Encoding{'MIME-Q'}.
+use Encode qw(find_encoding);
+use URI::Escape qw(uri_escape_utf8);
 use Cwd qw(realpath);
 
 # For most scripts we don't make $cgi and $template global variables. But
@@ -341,11 +341,8 @@ sub view {
     # escape quotes and backslashes in the filename, per RFCs 2045/822
     $filename =~ s/\\/\\\\/g; # escape backslashes
     $filename =~ s/"/\\"/g; # escape quotes
-
-    # Avoid line wrapping done by Encode, which we don't need for HTTP
-    # headers. See discussion in bug 328628 for details.
-    local $Encode::Encoding{'MIME-Q'}->{'bpl'} = 10000;
-    $filename = encode('MIME-Q', $filename);
+    # Follow RFC 6266 section 4.1 (which itself points to RFC 5987 section 3.2)
+    $filename = uri_escape_utf8($filename);
 
     my $disposition = (Bugzilla->params->{'allow_attachment_display'}
                        && $attachment->is_viewable) ? 'inline' : 'attachment';
@@ -373,8 +370,11 @@ sub view {
         my $attachment_path = realpath($attachment->_get_local_filename());
         $sendfile_header->{$sendfile_param} = $attachment_path;
     }
-    print $cgi->header(-type=>"$contenttype; name=\"$filename\"",
-                       -content_disposition=> "$disposition; filename=\"$filename\"",
+    # IE8 and older do not support RFC 6266. So for these old browsers
+    # we still pass the old 'filename' attribute. Modern browsers will
+    # automatically pick the new 'filename*' attribute.
+    print $cgi->header(-type=> $contenttype,
+                       -content_disposition=> "$disposition; filename=\"$filename\"; filename*=UTF-8''$filename",
                        -content_length => $attachment->datasize,
                        %$sendfile_header);
     if ($attachment->is_on_filesystem && $sendfile_param ne 'off') {

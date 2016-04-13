@@ -518,6 +518,9 @@ sub error_mode {
     if (defined $newval) {
         $class->request_cache->{error_mode} = $newval;
     }
+    if ($class->template->in_process) {
+        return ERROR_MODE_DIE;
+    }
     return $class->request_cache->{error_mode}
         || (i_am_cgi() ? ERROR_MODE_WEBPAGE : ERROR_MODE_DIE);
 }

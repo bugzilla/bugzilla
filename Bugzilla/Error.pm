@@ -99,8 +99,13 @@ sub _throw_error {
     # and calling $template->process over and over for those errors
     # is too slow. So instead, we just "die" with a dump of the arguments.
     if (Bugzilla->error_mode != ERROR_MODE_TEST) {
-        $template->process($name, $vars, \$message)
-          || ThrowTemplateError($template->error());
+        if (Bugzilla->template->in_process) {
+            $message = "error inside Bugzilla->template->process: $error";
+        }
+        else {
+            $template->process($name, $vars, \$message)
+              || ThrowTemplateError($template->error());
+        }
     }
 
     # Let's call the hook first, so that extensions can override

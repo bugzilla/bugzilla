@@ -75,6 +75,7 @@ use constant SUB_CLASSES => qw(
     Bugzilla::BugUrl::Aha
     Bugzilla::BugUrl::WebCompat
     Bugzilla::BugUrl::ServiceNow
+    Bugzilla::BugUrl::Splat
 );
 
 ###############################

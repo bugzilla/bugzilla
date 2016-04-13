@@ -478,6 +478,17 @@ sub _DoBlockQuotes {
     return $text;
 }
 
+sub _DoLists {
+    my ($self, $text) = @_;
+
+    $text = $self->SUPER::_DoLists($text);
+
+    # strip trailing newlines created by DoLists
+    $text =~ s/\n</</g;
+
+    return $text;
+}
+
 sub _EncodeCode {
     my ($self, $text) = @_;
 

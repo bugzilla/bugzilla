@@ -1013,6 +1013,10 @@ sub create {
             # If an sudo session is in progress, this is the user we're faking
             'user' => sub { return Bugzilla->user; },
 
+            # TT directives are evaluated in list context, conflicting
+            # with CGI checks about using $cgi->param() in list context.
+            'cgi_param' => sub { return scalar Bugzilla->cgi->param($_[0]) },
+
             # Currenly active language
             'current_language' => sub { return Bugzilla->current_language; },
 

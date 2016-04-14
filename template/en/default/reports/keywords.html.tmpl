@@ -18,8 +18,8 @@
   title = "$terms.Bugzilla Keyword Descriptions"
   style_urls = ['skins/standard/admin.css']
 %]
-[% cgi = Bugzilla.cgi %]
-[% show_inactive_keywords = cgi.param("show_inactive_keywords") %]
+
+[% show_inactive_keywords = cgi_param("show_inactive_keywords") %]
 
 <script>
  $(document).ready(function () {

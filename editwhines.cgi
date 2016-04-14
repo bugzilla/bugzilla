@@ -125,8 +125,8 @@ if ($cgi->param('update')) {
             }
             else {
                 # check the subject, body and mailifnobugs for changes
-                my $subject = ($cgi->param("event_${eventid}_subject") or '');
-                my $body    = ($cgi->param("event_${eventid}_body")    or '');
+                my $subject = $cgi->param("event_${eventid}_subject") // '';
+                my $body = $cgi->param("event_${eventid}_body") // '';
                 my $mailifnobugs = $cgi->param("event_${eventid}_mailifnobugs") ? 1 : 0;
 
                 trick_taint($subject) if $subject;

@@ -264,7 +264,7 @@ my $detailed = $cgi->param('detailed');
 my $do_report = $cgi->param('do_report');
 my $inactive = $cgi->param('inactive');
 my $do_depends = $cgi->param('do_depends');
-my $ctype = scalar($cgi->param("ctype"));
+my $ctype = $cgi->param('ctype');
 
 my ($start_date, $end_date);
 if ($do_report) {
@@ -280,8 +280,8 @@ if ($do_report) {
         @bugs = @{ $user->visible_bugs(\@bugs) };
     }
 
-    $start_date = trim $cgi->param('start_date');
-    $end_date = trim $cgi->param('end_date');
+    $start_date = trim(scalar $cgi->param('start_date'));
+    $end_date = trim(scalar $cgi->param('end_date'));
 
     foreach my $date ($start_date, $end_date) {
         next unless $date;

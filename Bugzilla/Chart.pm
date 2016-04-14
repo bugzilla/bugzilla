@@ -57,10 +57,10 @@ sub init {
     # &select0=1&select3=1...    
     # &cumulate=1&datefrom=2002-02-03&dateto=2002-04-04&ctype=html...
     # &gt=1&labelgt=Grand+Total    
-    foreach my $param ($cgi->param()) {
+    foreach my $param ($cgi->multi_param()) {
         # Store all the lines
         if ($param =~ /^line(\d+)$/a) {
-            foreach my $series_id ($cgi->param($param)) {
+            foreach my $series_id ($cgi->multi_param($param)) {
                 detaint_natural($series_id) 
                                      || ThrowCodeError("invalid_series_id");
                 my $series = new Bugzilla::Series($series_id);

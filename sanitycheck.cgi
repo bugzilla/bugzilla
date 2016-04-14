@@ -69,7 +69,7 @@ else {
     # web browser and a parameter is passed to the script.
     # XXX - Maybe these two parameters should be deleted once logged in?
     $cgi->delete('GoAheadAndLogIn', 'Bugzilla_restrictlogin');
-    if (scalar($cgi->param())) {
+    if (scalar $cgi->multi_param()) {
         my $token = $cgi->param('token');
         check_hash_token($token, ['sanitycheck']);
     }

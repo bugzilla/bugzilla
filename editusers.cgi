@@ -67,7 +67,7 @@ if ($action eq 'search') {
 ###########################################################################
 } elsif ($action eq 'list') {
     my $matchvalue    = $cgi->param('matchvalue') || '';
-    my $matchstr      = trim($cgi->param('matchstr'));
+    my $matchstr      = trim(scalar $cgi->param('matchstr'));
     my $matchtype     = $cgi->param('matchtype');
     my $grouprestrict = $cgi->param('grouprestrict') || '0';
     # 0 = disabled only, 1 = enabled only, 2 = everyone
@@ -268,14 +268,14 @@ if ($action eq 'search') {
     # is not authorized.
     my $changes = {};
     if ($editusers) {
-        $otherUser->set_login($cgi->param('login'));
-        $otherUser->set_name($cgi->param('name'));
-        $otherUser->set_password($cgi->param('password'))
+        $otherUser->set_login(scalar $cgi->param('login'));
+        $otherUser->set_name(scalar $cgi->param('name'));
+        $otherUser->set_password(scalar $cgi->param('password'))
             if $cgi->param('password');
-        $otherUser->set_disabledtext($cgi->param('disabledtext'));
-        $otherUser->set_disable_mail($cgi->param('disable_mail'));
-        $otherUser->set_extern_id($cgi->param('extern_id'))
-            if defined($cgi->param('extern_id'));
+        $otherUser->set_disabledtext(scalar $cgi->param('disabledtext'));
+        $otherUser->set_disable_mail(scalar $cgi->param('disable_mail'));
+        $otherUser->set_extern_id(scalar $cgi->param('extern_id'))
+            if defined $cgi->param('extern_id');
 
         # Update bless groups
         my @bless_ids = grep { s/bless_// } keys %{ Bugzilla->cgi->Vars };

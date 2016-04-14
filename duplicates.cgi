@@ -127,7 +127,7 @@ if (!defined $reverse) {
         $reverse = 0;
     }
 }
-my @query_products = $cgi->param('product');
+my @query_products = $cgi->multi_param('product');
 my $sortvisible = formvalue("sortvisible");
 my @bugs;
 if ($sortvisible) {

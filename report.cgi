@@ -28,7 +28,7 @@ my $template = Bugzilla->template;
 my $vars = {};
 
 # Go straight back to query.cgi if we are adding a boolean chart.
-if (grep(/^cmd-/, $cgi->param())) {
+if (grep(/^cmd-/, $cgi->multi_param())) {
     my $params = $cgi->canonicalise_query("format", "ctype");
     my $location = "query.cgi?format=" . $cgi->param('query_format') . 
       ($params ? "&$params" : "");
@@ -53,7 +53,7 @@ elsif ($action eq 'add') {
     my $user = Bugzilla->login(LOGIN_REQUIRED);
     check_hash_token($token, ['save_report']);
 
-    my $name = clean_text($cgi->param('name'));
+    my $name = clean_text(scalar $cgi->param('name'));
     my $query = $cgi->param('query');
 
     if (my ($report) = grep{ lc($_->name) eq lc($name) } @{$user->reports}) {
@@ -444,5 +444,5 @@ sub get_field_restrictions {
     my $field = shift;
     my $cgi = Bugzilla->cgi;
 
-    return join('&amp;', map {url_quote($field) . '=' . url_quote($_)} $cgi->param($field));
+    return join('&amp;', map {url_quote($field) . '=' . url_quote($_)} $cgi->multi_param($field));
 }

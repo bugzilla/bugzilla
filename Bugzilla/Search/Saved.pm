@@ -220,10 +220,10 @@ sub edit_link {
     my ($self) = @_;
     return $self->{edit_link} if defined $self->{edit_link};
     my $cgi = new Bugzilla::CGI($self->url);
-    if (!$cgi->param('query_type') 
-        || !IsValidQueryType($cgi->param('query_type')))
+    if (!$cgi->param('query_format')
+        || !IsValidQueryType(scalar $cgi->param('query_format')))
     {
-        $cgi->param('query_type', 'advanced');
+        $cgi->param('query_format', 'advanced');
     }
     $self->{edit_link} = $cgi->canonicalise_query;
     return $self->{edit_link};

@@ -71,10 +71,10 @@ if (!$user->is_timetracker) {
 $vars->{'columns'} = $columns;
 
 my @collist;
-if (defined $cgi->param('rememberedquery')) {
+if (my $rememberedquery = $cgi->param('rememberedquery')) {
     my $search;
-    if (defined $cgi->param('saved_search')) {
-        $search = new Bugzilla::Search::Saved($cgi->param('saved_search'));
+    if (my $saved_search = $cgi->param('saved_search')) {
+        $search = new Bugzilla::Search::Saved($saved_search);
     }
 
     my $token = $cgi->param('token');
@@ -91,7 +91,7 @@ if (defined $cgi->param('rememberedquery')) {
     } else {
         if (defined $cgi->param("selected_columns")) {
             @collist = grep { exists $columns->{$_} } 
-                            $cgi->param("selected_columns");
+                            $cgi->multi_param("selected_columns");
         }
         if (defined $cgi->param('splitheader')) {
             $splitheader = $cgi->param('splitheader')? 1: 0;
@@ -131,7 +131,8 @@ if (defined $cgi->param('rememberedquery')) {
         $search->update();
     }
 
-    my $params = new Bugzilla::CGI($cgi->param('rememberedquery'));
+    utf8::decode($rememberedquery);
+    my $params = new Bugzilla::CGI($rememberedquery);
     $params->param('columnlist', join(",", @collist));
     $vars->{'redirect_url'} = "buglist.cgi?".$params->query_string();
 

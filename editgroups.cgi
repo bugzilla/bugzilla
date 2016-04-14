@@ -149,7 +149,7 @@ unless ($action) {
 
 if ($action eq 'changeform') {
     # Check that an existing group ID is given
-    my $group_id = CheckGroupID($cgi->param('group'));
+    my $group_id = CheckGroupID(scalar $cgi->param('group'));
     my $group = new Bugzilla::Group($group_id);
 
     get_current_and_available($group, $vars);
@@ -262,7 +262,7 @@ if ($action eq 'postchanges') {
     my $changes = doGroupChanges();
     delete_token($token);
 
-    my $group = new Bugzilla::Group($cgi->param('group_id'));
+    my $group = new Bugzilla::Group(scalar $cgi->param('group_id'));
     get_current_and_available($group, $vars);
     $vars->{'message'} = 'group_updated';
     $vars->{'group'}   = $group;
@@ -275,9 +275,9 @@ if ($action eq 'postchanges') {
 }
 
 if ($action eq 'confirm_remove') {
-    my $group = new Bugzilla::Group(CheckGroupID($cgi->param('group_id')));
+    my $group = new Bugzilla::Group(CheckGroupID(scalar $cgi->param('group_id')));
     $vars->{'group'} = $group;
-    $vars->{'regexp'} = CheckGroupRegexp($cgi->param('regexp'));
+    $vars->{'regexp'} = CheckGroupRegexp(scalar $cgi->param('regexp'));
     $vars->{'token'} = issue_session_token('remove_group_members');
 
     $template->process('admin/groups/confirm-remove.html.tmpl', $vars)
@@ -291,8 +291,8 @@ if ($action eq 'remove_regexp') {
     # gid = $cgi->param('group') that match the regular expression
     # stored in the DB for that group or all of them period
 
-    my $group  = new Bugzilla::Group(CheckGroupID($cgi->param('group_id')));
-    my $regexp = CheckGroupRegexp($cgi->param('regexp'));
+    my $group  = new Bugzilla::Group(CheckGroupID(scalar $cgi->param('group_id')));
+    my $regexp = CheckGroupRegexp(scalar $cgi->param('regexp'));
 
     $dbh->bz_start_transaction();
 
@@ -334,27 +334,27 @@ sub doGroupChanges {
     $dbh->bz_start_transaction();
 
     # Check that the given group ID is valid and make a Group.
-    my $group = new Bugzilla::Group(CheckGroupID($cgi->param('group_id')));
+    my $group = new Bugzilla::Group(CheckGroupID(scalar $cgi->param('group_id')));
 
     if (defined $cgi->param('regexp')) {
-        $group->set_user_regexp($cgi->param('regexp'));
+        $group->set_user_regexp(scalar $cgi->param('regexp'));
     }
 
     if ($group->is_bug_group) {
         if (defined $cgi->param('name')) {
-            $group->set_name($cgi->param('name'));
+            $group->set_name(scalar $cgi->param('name'));
         }
         if (defined $cgi->param('desc')) {
-            $group->set_description($cgi->param('desc'));
+            $group->set_description(scalar $cgi->param('desc'));
         }
         # Only set isactive if we came from the right form.
         if (defined $cgi->param('regexp')) {
-            $group->set_is_active($cgi->param('isactive'));
+            $group->set_is_active(scalar $cgi->param('isactive'));
         }
     }
 
     if (defined $cgi->param('icon_url')) {
-        $group->set_icon_url($cgi->param('icon_url'));
+        $group->set_icon_url(scalar $cgi->param('icon_url'));
     }
 
     my $changes = $group->update();
@@ -403,7 +403,7 @@ sub _do_add {
         $current = $group->grant_direct($type);
     }
 
-    my $add_items = Bugzilla::Group->new_from_list([$cgi->param($field)]);
+    my $add_items = Bugzilla::Group->new_from_list([$cgi->multi_param($field)]);
 
     foreach my $add (@$add_items) {
         next if grep($_->id == $add->id, @$current);
@@ -423,7 +423,7 @@ sub _do_add {
 sub _do_remove {
     my ($group, $changes, $sth_delete, $field, $type, $reverse) = @_;
     my $cgi = Bugzilla->cgi;
-    my $remove_items = Bugzilla::Group->new_from_list([$cgi->param($field)]);
+    my $remove_items = Bugzilla::Group->new_from_list([$cgi->multi_param($field)]);
 
     foreach my $remove (@$remove_items) {
         my @ids = ($remove->id, $group->id);

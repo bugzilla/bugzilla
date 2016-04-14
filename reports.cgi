@@ -83,7 +83,7 @@ else {
     }
 
     # Make sure there is something to plot.
-    my @datasets = $cgi->param('datasets');
+    my @datasets = $cgi->multi_param('datasets');
     scalar(@datasets) || ThrowUserError('missing_datasets');
 
     if (grep { $_ !~ /^[A-Za-z0-9:_-]+$/ } @datasets) {

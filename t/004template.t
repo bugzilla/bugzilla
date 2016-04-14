@@ -22,7 +22,7 @@ use CGI qw(-no_debug);
 
 use File::Spec;
 use Template;
-use Test::More tests => ( scalar(@referenced_files) + 2 * $num_actual_files );
+use Test::More tests => ( scalar(@referenced_files) + 3 * $num_actual_files );
 
 # Capture the TESTOUT from Test::More or Test::Builder for printing errors.
 # This will handle verbosity for us automatically.
@@ -116,6 +116,14 @@ foreach my $include_path (@include_paths) {
         }
         else {
             ok(1, "$path contains no blacklisted constructs");
+        }
+
+        # Forbid cgi.param(). cgi_param() must be used instead.
+        if ($data =~ /cgi\.param/) {
+            ok(0, "$path calls cgi.param() instead of cgi_param()");
+        }
+        else {
+            ok(1, "$path correctly calls CGI parameters");
         }
     }
 }

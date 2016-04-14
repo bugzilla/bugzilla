@@ -76,7 +76,7 @@ if (!$cgi->param('field')) {
 }
 
 # At this point, the field must be defined.
-my $field = Bugzilla::Field->check($cgi->param('field'));
+my $field = Bugzilla::Field->check(scalar $cgi->param('field'));
 if (!$field->is_select || $field->is_abnormal) {
     ThrowUserError('fieldname_invalid', { field => $field });
 }
@@ -119,7 +119,7 @@ if ($action eq 'new') {
 }
 
 # After this, we always have a value
-my $value = Bugzilla::Field::Choice->type($field)->check($cgi->param('value'));
+my $value = Bugzilla::Field::Choice->type($field)->check(scalar $cgi->param('value'));
 $vars->{'value'} = $value;
 
 #

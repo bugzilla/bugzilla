@@ -16,12 +16,9 @@
 [% cgi = Bugzilla.cgi %]
 
 [%# Generate hidden form fields for non-excluded fields. %]
-[% FOREACH field = cgi.param() %]
+[% FOREACH field = cgi.multi_param() %]
   [% NEXT IF exclude && field.search(exclude) %]
-  [%# The '.slice(0)' bit is here to force the 'param(field)' to be evaluated
-      in a list context, so we can avoid extra code checking for single valued or
-      empty fields %]
-  [% IF field == "data" && cgi.param("data") %]
+  [% IF field == "data" && cgi_param("data") %]
     <div class="box">
       <p>
         We were unable to store the file you uploaded because of incomplete information
@@ -30,7 +27,7 @@
         remaining missing information above.
       </p>
       <p>
-        Please re-attach the file <b>[% cgi.param(field) FILTER html %]</b> in
+        Please re-attach the file <b>[% cgi_param(field) FILTER html %]</b> in
         the field below:
       </p>
       <p>
@@ -38,7 +35,7 @@
       </p>
     </div>
   [% ELSE %]
-    [% FOREACH mvalue = cgi.param(field).slice(0) %]
+    [% FOREACH mvalue = cgi.multi_param(field) %]
       <input type="hidden" name="[% field FILTER html %]"
              value="[% mvalue FILTER html_linebreak %]">
     [% END %]

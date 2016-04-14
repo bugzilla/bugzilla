@@ -6,9 +6,6 @@
   # defined by the Mozilla Public License, v. 2.0.
   #%]
 
-[% USE Bugzilla %]
-[% cgi = Bugzilla.cgi %]
-
 [% PROCESS "global/js-products.html.tmpl" %]
 
 [% PROCESS global/header.html.tmpl
@@ -36,7 +33,7 @@ to some group are shown by default.
         [% INCLUDE global/userselect.html.tmpl
            id => "requester"
            name => "requester"
-           value => cgi.param('requester')
+           value => cgi_param('requester')
            size => 20
            emptyok => 1
            field_title => "Requester's email address"
@@ -56,7 +53,7 @@ to some group are shown by default.
         [% PROCESS "global/select-menu.html.tmpl"
                     name="type"
                     options=types
-                    default=cgi.param('type') %]
+                    default=cgi_param('type') %]
       </td>
 
       [%# We could let people see a "queue" of non-pending requests. %]
@@ -66,7 +63,7 @@ to some group are shown by default.
         [%# PROCESS "global/select-menu.html.tmpl"
                     name="status"
                     options=["all", "?", "+-", "+", "-"]
-                    default=cgi.param('status') %]
+                    default=cgi_param('status') %]
       </td>
       -->
 
@@ -77,7 +74,7 @@ to some group are shown by default.
         [% INCLUDE global/userselect.html.tmpl
            id => "requestee"
            name => "requestee"
-           value => cgi.param('requestee')
+           value => cgi_param('requestee')
            size => 20
            emptyok => 1
            hyphenok => 1
@@ -89,7 +86,7 @@ to some group are shown by default.
         <select name="component">
           <option value="">Any</option>
           [% FOREACH comp = components %]
-            <option value="[% comp FILTER html %]" [% "selected" IF cgi.param('component') == comp %]>
+            <option value="[% comp FILTER html %]" [% "selected" IF cgi_param('component') == comp %]>
               [% comp FILTER html %]</option>
           [% END %]
         </select>
@@ -102,7 +99,8 @@ to some group are shown by default.
             "Flag" => 'type' ,
             "Product/Component" => 'category'
           } %]
-        [% PROCESS "global/select-menu.html.tmpl" name="group" options=groups default=cgi.param('group') %]
+        [% PROCESS "global/select-menu.html.tmpl"
+                   name = "group", options = groups, default = cgi_param('group') %]
       </td>
     </tr>
     <tr>
@@ -110,7 +108,7 @@ to some group are shown by default.
       <td>
         <select id="do_union" name="do_union">
           <option value="0">Match the requester AND requestee</option>
-          <option value="1" [% 'selected="selected"' IF cgi.param('do_union') %]>
+          <option value="1" [% 'selected="selected"' IF cgi_param('do_union') %]>
             Match the requester OR requestee</option>
         </select>
       </td>

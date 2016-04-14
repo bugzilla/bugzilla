@@ -196,7 +196,7 @@ if ($action eq 'reclassify') {
     if (defined $cgi->param('add_products')) {
         check_token_data($token, 'reclassify_classifications');
         if (defined $cgi->param('prodlist')) {
-            foreach my $prod ($cgi->param("prodlist")) {
+            foreach my $prod ($cgi->multi_param("prodlist")) {
                 trick_taint($prod);
                 $sth->execute($classification->id, $prod);
                 push @names, $prod;
@@ -206,7 +206,7 @@ if ($action eq 'reclassify') {
     } elsif (defined $cgi->param('remove_products')) {
         check_token_data($token, 'reclassify_classifications');
         if (defined $cgi->param('myprodlist')) {
-            foreach my $prod ($cgi->param("myprodlist")) {
+            foreach my $prod ($cgi->multi_param('myprodlist')) {
                 trick_taint($prod);
                 $sth->execute(1, $prod);
                 push @names, $prod;

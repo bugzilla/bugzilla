@@ -41,13 +41,11 @@
 [% IF matchsuccess == 1 %]
   [% PROCESS global/header.html.tmpl title="Confirm Match" %]
 
-  [% USE Bugzilla %]
-
   <form method="post" 
   [% IF script -%]
     action="[% script %]"
   [%- END -%]
-  [% IF Bugzilla.cgi.param("data") %]
+  [% IF cgi_param("data") %]
     enctype="multipart/form-data"
   [% END %]
   >
@@ -147,7 +145,7 @@
 
   [% SET exclude_these = ['Bugzilla_login', 'Bugzilla_password'] %]
   [% FOREACH key IN matches.keys %]
-    [% exclude_these.push(key) IF Bugzilla.cgi.param(key) == '' %]
+    [% exclude_these.push(key) IF cgi_param(key) == '' %]
   [% END %]
   [% SET exclude = '^' _ exclude_these.join('|') _ '$' %]
   [% PROCESS "global/hidden-fields.html.tmpl" exclude = exclude %]

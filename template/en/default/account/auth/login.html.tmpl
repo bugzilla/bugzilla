@@ -25,7 +25,7 @@
 </h2>
 
 <form id="login_form" name="login" action="[% urlbase FILTER html %][% target FILTER html %]"
-      method="POST" [% IF Bugzilla.cgi.param("data") %] enctype="multipart/form-data"[% END %]>
+      method="POST" [% IF cgi_param("data") %] enctype="multipart/form-data"[% END %]>
   <table>
     <tr>
       <th>

@@ -330,8 +330,8 @@ sub view {
 
     # Bug 111522: allow overriding content-type manually in the posted form
     # params.
-    if (defined $cgi->param('content_type')) {
-        $contenttype = $attachment->_check_content_type($cgi->param('content_type'));
+    if (my $content_type = $cgi->param('content_type')) {
+        $contenttype = $attachment->_check_content_type($content_type);
     }
 
     # Return the appropriate HTTP response headers.
@@ -503,13 +503,13 @@ sub insert {
     my ($timestamp) = $dbh->selectrow_array("SELECT NOW()");
 
     # Detect if the user already used the same form to submit an attachment
-    my $token = trim($cgi->param('token'));
+    my $token = trim(scalar $cgi->param('token'));
     check_token_data($token, 'create_attachment', 'index.cgi');
 
     # Check attachments the user tries to mark as obsolete.
     my @obsolete_attachments;
     if ($cgi->param('obsolete')) {
-        my @obsolete = $cgi->param('obsolete');
+        my @obsolete = $cgi->multi_param('obsolete');
         @obsolete_attachments = Bugzilla::Attachment->validate_obsolete($bug, \@obsolete);
     }
 
@@ -784,7 +784,7 @@ sub delete_attachment {
     $attachment->datasize || ThrowUserError('attachment_removed');
 
     # We don't want to let a malicious URL accidentally delete an attachment.
-    my $token = trim($cgi->param('token'));
+    my $token = trim(scalar $cgi->param('token'));
     if ($token) {
         my ($creator_id, $date, $event) = Bugzilla::Token::GetTokenData($token);
         unless ($creator_id

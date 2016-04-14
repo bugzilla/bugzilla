@@ -18,6 +18,7 @@ use Bugzilla::Error;
 use Bugzilla::Util;
 use Bugzilla::Hook;
 use Bugzilla::Search::Recent;
+use Bugzilla::Install::Util qw(i_am_persistent);
 
 use File::Basename;
 
@@ -34,8 +35,7 @@ sub _init_bz_cgi_globals {
 
     # We don't precompile any functions here, that's done specially in
     # mod_perl code.
-    $invocant->_setup_symbols(qw(:no_xhtml :oldstyle_urls :private_tempfiles
-                                 :unique_headers));
+    $invocant->_setup_symbols(qw(:no_xhtml :oldstyle_urls :unique_headers :utf8));
 }
 
 BEGIN { __PACKAGE__->_init_bz_cgi_globals() if i_am_cgi(); }
@@ -44,9 +44,7 @@ sub new {
     my ($invocant, @args) = @_;
     my $class = ref($invocant) || $invocant;
 
-    # Under mod_perl, CGI's global variables get reset on each request,
-    # so we need to set them up again every time.
-    $class->_init_bz_cgi_globals() if $ENV{MOD_PERL};
+    $class->_init_bz_cgi_globals() if i_am_persistent();
 
     my $self = $class->SUPER::new(@args);
 
@@ -65,18 +63,11 @@ sub new {
     # Path-Info is of no use for Bugzilla and interacts badly with IIS.
     # Moreover, it causes unexpected behaviors, such as totally breaking
     # the rendering of pages.
-    if (my $path_info = $self->path_info) {
+    if ($self->script_name && $self->path_info) {
         my @whitelist = ("rest.cgi");
         Bugzilla::Hook::process('path_info_whitelist', { whitelist => \@whitelist });
         if (!grep($_ eq $script, @whitelist)) {
-            # IIS includes the full path to the script in PATH_INFO,
-            # so we have to extract the real PATH_INFO from it,
-            # else we will be redirected outside Bugzilla.
-            my $script_name = $self->script_name;
-            $path_info =~ s/^\Q$script_name\E//;
-            if ($script_name && $path_info) {
-                print $self->redirect($self->url(-path => 0, -query => 1));
-            }
+            print $self->redirect($self->url(-path => 0, -query => 1));
         }
     }
 
@@ -117,7 +108,7 @@ sub canonicalise_query {
 
     # Reconstruct the URL by concatenating the sorted param=value pairs
     my @parameters;
-    foreach my $key (sort($self->param())) {
+    foreach my $key (sort($self->multi_param())) {
         # Leave this key out if it's in the exclude list
         next if grep { $_ eq $key } @exclude;
 
@@ -127,7 +118,7 @@ sub canonicalise_query {
 
         my $esc_key = url_quote($key);
 
-        foreach my $value ($self->param($key)) {
+        foreach my $value ($self->multi_param($key)) {
             # Omit params with an empty value
             if (defined($value) && $value ne '') {
                 my $esc_value = url_quote($value);
@@ -143,7 +134,7 @@ sub canonicalise_query {
 sub clean_search_url {
     my $self = shift;
     # Delete any empty URL parameter.
-    my @cgi_params = $self->param;
+    my @cgi_params = $self->multi_param();
 
     foreach my $param (@cgi_params) {
         if (defined $self->param($param) && $self->param($param) eq '') {
@@ -252,23 +243,12 @@ sub check_etag {
 # Have to add the cookies in.
 sub multipart_start {
     my $self = shift;
-    
-    my %args = @_;
-
-    # CGI.pm::multipart_start doesn't honour its own charset information, so
-    # we do it ourselves here
-    if (defined $self->charset() && defined $args{-type}) {
-        # Remove any existing charset specifier
-        $args{-type} =~ s/;.*$//;
-        # and add the specified one
-        $args{-type} .= '; charset=' . $self->charset();
-    }
-        
-    my $headers = $self->SUPER::multipart_start(%args);
+    # We have to explicitly pass the charset.
+    my $headers = $self->SUPER::multipart_start(@_, -charset => $self->charset());
     # Eliminate the one extra CRLF at the end.
     $headers =~ s/$CGI::CRLF$//;
     # Add the cookies. We have to do it this way instead of
-    # passing them to multpart_start, because CGI.pm's multipart_start
+    # passing them to multipart_start, because CGI.pm's multipart_start
     # doesn't understand a '-cookie' argument pointing to an arrayref.
     foreach my $cookie (@{$self->{Bugzilla_cookie_list}}) {
         $headers .= "Set-Cookie: ${cookie}${CGI::CRLF}";
@@ -366,11 +346,15 @@ sub header {
 
 sub param {
     my $self = shift;
-    local $CGI::LIST_CONTEXT_WARN = 0;
+
+    my @caller = caller(0);
+    if (wantarray && $caller[0] ne 'CGI') {
+        warn 'Illegal call to $cgi->param in list context from ' . $caller[0];
+    }
 
     # When we are just requesting the value of a parameter...
     if (scalar(@_) == 1) {
-        my @result = $self->SUPER::param(@_); 
+        my @result = $self->SUPER::multi_param(@_);
 
         # Also look at the URL parameters, after we look at the POST 
         # parameters. This is to allow things like login-form submissions
@@ -381,9 +365,6 @@ sub param {
             @result = $self->url_param(@_);
         }
 
-        # Fix UTF-8-ness of input parameters.
-        @result = map { _fix_utf8($_) } @result;
-
         return wantarray ? @result : $result[0];
     }
     # And for various other functions in CGI.pm, we need to correctly
@@ -392,13 +373,13 @@ sub param {
     elsif (!scalar(@_) && $self->request_method 
            && $self->request_method eq 'POST') 
     {
-        my @post_params = $self->SUPER::param;
+        my @post_params = $self->SUPER::multi_param();
         my @url_params  = $self->url_param;
         my %params = map { $_ => 1 } (@post_params, @url_params);
         return keys %params;
     }
 
-    return $self->SUPER::param(@_);
+    return $self->SUPER::multi_param(@_);
 }
 
 sub url_param {
@@ -407,13 +388,6 @@ sub url_param {
     # causes undef issues
     $ENV{'QUERY_STRING'} //= '';
     return $self->SUPER::url_param(@_);
-}
-
-sub _fix_utf8 {
-    my $input = shift;
-    # The is_utf8 is here in case CGI gets smart about utf8 someday.
-    utf8::decode($input) if defined $input && !ref $input && !utf8::is_utf8($input);
-    return $input;
 }
 
 sub should_set {
@@ -609,19 +583,10 @@ sub STORE {
 sub FETCH {
     my ($self, $param) = @_;
     return $self if $param eq 'CGI'; # CGI.pm did this, so we do too.
-    my @result = $self->param($param);
+    my @result = $self->multi_param($param);
     return undef if !scalar(@result);
     return $result[0] if scalar(@result) == 1;
     return \@result;
-}
-
-# For the Vars TIEHASH interface: the normal CGI.pm DELETE doesn't return 
-# the value deleted, but Perl's "delete" expects that value.
-sub DELETE {
-    my ($self, $param) = @_;
-    my $value = $self->FETCH($param);
-    $self->delete($param);
-    return $value;
 }
 
 1;

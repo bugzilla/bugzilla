@@ -178,7 +178,7 @@ if ($action eq 'new') {
     $dbh->bz_start_transaction();
     my $product = Bugzilla::Product->create(\%product_create_params);
 
-    my @initial_cc = $cgi->param('initialcc');
+    my @initial_cc = $cgi->multi_param('initialcc');
     my %component_create_params = (
         product          => $product,
         name             => trim($cgi->param('component') || ''),
@@ -342,7 +342,7 @@ if ($action eq 'updategroupcontrols') {
 
     my @now_na = ();
     my @now_mandatory = ();
-    foreach my $f ($cgi->param()) {
+    foreach my $f ($cgi->multi_param()) {
         if ($f =~ /^membercontrol_(\d+)$/a) {
             my $id = $1;
             if ($cgi->param($f) == CONTROLMAPNA) {

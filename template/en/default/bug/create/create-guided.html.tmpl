@@ -10,9 +10,6 @@
   # This template has the same interface as create.html.tmpl
   #%]
 
-[% USE Bugzilla %]
-[% cgi = Bugzilla.cgi %]
-
 [% PROCESS global/header.html.tmpl
    title = "Enter $terms.ABug"
    onload = "PutDescription()"
@@ -165,8 +162,8 @@ function PutDescription() {
   </tr>
 
   [%# Accept URL parameter build ID for non-browser products %]
-  [% IF cgi.param("buildid") %]
-    [% buildid = cgi.param("buildid") %]
+  [% IF cgi_param("buildid") %]
+    [% buildid = cgi_param("buildid") %]
   [% END %]
 
   <tr class="guided_form_field">

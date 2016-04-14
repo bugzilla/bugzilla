@@ -77,7 +77,7 @@ sub SaveAccount {
     my $verified_password;
     my $pwd1 = $cgi->param('new_password1');
     my $pwd2 = $cgi->param('new_password2');
-    my $new_login_name = trim($cgi->param('new_login_name'));
+    my $new_login_name = trim(scalar $cgi->param('new_login_name'));
 
     if ($user->authorizer->can_change_password
         && ($pwd1 ne "" || $pwd2 ne ""))
@@ -117,7 +117,7 @@ sub SaveAccount {
         }
     }
 
-    $user->set_name($cgi->param('realname'));
+    $user->set_name(scalar $cgi->param('realname'));
     $user->update({ keep_session => 1, keep_tokens => 1 });
     $dbh->bz_commit_transaction;
 }
@@ -301,7 +301,7 @@ sub SaveEmail {
         }
 
         if (defined $cgi->param('remove_watched_users')) {
-            my @removed = $cgi->param('watched_by_you');
+            my @removed = $cgi->multi_param('watched_by_you');
             # Remove people who were removed.
             my $delete_sth = $dbh->prepare('DELETE FROM watch WHERE watched = ?'
                                          . ' AND watcher = ?');
@@ -331,7 +331,7 @@ sub SaveEmail {
     map { $ignored_bugs{$_} = 1 } @add_ignored;
 
     # Remove any bug ids the user no longer wants to ignore
-    foreach my $key (grep(/^remove_ignored_bug_/, $cgi->param)) {
+    foreach my $key (grep(/^remove_ignored_bug_/, $cgi->multi_param())) {
         my ($bug_id) = $key =~ /(\d+)$/a;
         delete $ignored_bugs{$bug_id};
     }

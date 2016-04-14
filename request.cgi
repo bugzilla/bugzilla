@@ -84,8 +84,8 @@ sub queue {
     my $userid = $user->id;
     my $vars = {};
 
-    my $status = validateStatus($cgi->param('status'));
-    my $form_group = validateGroup($cgi->param('group'));
+    my $status = validateStatus(scalar $cgi->param('status'));
+    my $form_group = validateGroup(scalar $cgi->param('group'));
 
     my $query = 
     # Select columns describing each flag, the bug/attachment on which
@@ -167,15 +167,15 @@ sub queue {
     my $do_union = $cgi->param('do_union');
 
     # Filter results by exact email address of requester or requestee.
-    if (defined $cgi->param('requester') && $cgi->param('requester') ne "") {
-        my $requester = $dbh->quote($cgi->param('requester'));
+    if (my $requester = $cgi->param('requester')) {
+        $requester = $dbh->quote($requester);
         trick_taint($requester); # Quoted above
         push(@criteria, $dbh->sql_istrcmp('requesters.login_name', $requester));
         push(@excluded_columns, 'requester') unless $do_union;
     }
-    if (defined $cgi->param('requestee') && $cgi->param('requestee') ne "") {
-        if ($cgi->param('requestee') ne "-") {
-            my $requestee = $dbh->quote($cgi->param('requestee'));
+    if (my $requestee = $cgi->param('requestee')) {
+        if ($requestee ne '-') {
+            $requestee = $dbh->quote($requestee);
             trick_taint($requestee); # Quoted above
             push(@criteria, $dbh->sql_istrcmp('requestees.login_name', $requestee));
         }

@@ -843,11 +843,11 @@ sub extract_flags_from_cgi {
     }
 
     # Extract a list of flag type IDs from field names.
-    my @flagtype_ids = map(/^flag_type-(\d+)$/a ? $1 : (), $cgi->param());
+    my @flagtype_ids = map { /^flag_type-(\d+)$/a ? $1 : () } $cgi->multi_param();
     @flagtype_ids = grep($cgi->param("flag_type-$_") ne 'X', @flagtype_ids);
 
     # Extract a list of existing flag IDs.
-    my @flag_ids = map(/^flag-(\d+)$/a ? $1 : (), $cgi->param());
+    my @flag_ids = map { /^flag-(\d+)$/a ? $1 : () } $cgi->multi_param();
 
     return ([], []) unless (scalar(@flagtype_ids) || scalar(@flag_ids));
 
@@ -863,7 +863,7 @@ sub extract_flags_from_cgi {
         # (i.e. they want more than one person to set the flag) we can reuse
         # the existing flag for the first person (who may well be the existing
         # requestee), but we have to create new flags for each additional requestee.
-        my @requestees = $cgi->param("requestee-$flag_id");
+        my @requestees = $cgi->multi_param("requestee-$flag_id");
         my $requestee_email;
         if ($status eq "?"
             && scalar(@requestees) > 1
@@ -935,7 +935,7 @@ sub extract_flags_from_cgi {
         my $status = $cgi->param("flag_type-$type_id");
         trick_taint($status);
 
-        my @logins = $cgi->param("requestee_type-$type_id");
+        my @logins = $cgi->multi_param("requestee_type-$type_id");
         if ($status eq "?" && scalar(@logins)) {
             foreach my $login (@logins) {
                 push (@new_flags, { type_id   => $type_id,
@@ -986,7 +986,7 @@ sub multi_extract_flags_from_cgi {
     }
 
     # Extract a list of flag type IDs from field names.
-    my @flagtype_ids = map(/^flag_type-(\d+)$/a ? $1 : (), $cgi->param());
+    my @flagtype_ids = map { /^flag_type-(\d+)$/a ? $1 : () } $cgi->multi_param();
 
     my (@new_flags, @flags);
 
@@ -1027,7 +1027,7 @@ sub multi_extract_flags_from_cgi {
         my $status = $cgi->param("flag_type-$type_id");
         trick_taint($status);
 
-        my @logins = $cgi->param("requestee_type-$type_id");
+        my @logins = $cgi->multi_param("requestee_type-$type_id");
         if ($status eq "?" && scalar(@logins)) {
             foreach my $login (@logins) {
                 if ($update) {

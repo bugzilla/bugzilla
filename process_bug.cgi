@@ -63,7 +63,7 @@ if (defined $cgi->param('id')) {
   $cgi->param('id', $bug->id);
   push(@bug_objects, $bug);
 } else {
-    foreach my $i ($cgi->param()) {
+    foreach my $i ($cgi->multi_param()) {
         if ($i =~ /^id_([1-9][0-9]*)/) {
             my $id = $1;
             push(@bug_objects, Bugzilla::Bug->check_for_edit($id));
@@ -78,7 +78,7 @@ my $first_bug = $bug_objects[0]; # Used when we're only updating a single bug.
 
 # Delete any parameter set to 'dontchange'.
 if (defined $cgi->param('dontchange')) {
-    foreach my $name ($cgi->param) {
+    foreach my $name ($cgi->multi_param()) {
         next if $name eq 'dontchange'; # But don't delete dontchange itself!
         # Skip ones we've already deleted (such as "defined_$name").
         next if !defined $cgi->param($name);
@@ -247,7 +247,7 @@ if (should_set('see_also')) {
         [split(/[\s]+/, $cgi->param('see_also'))];
 }
 if (should_set('remove_see_also')) {
-    $set_all_fields{'see_also'}->{remove} = [$cgi->param('remove_see_also')];
+    $set_all_fields{'see_also'}->{remove} = [$cgi->multi_param('remove_see_also')];
 }
 foreach my $dep_field (qw(dependson blocked)) {
     if (should_set($dep_field)) {
@@ -271,18 +271,18 @@ if (defined $cgi->param('newcc')
     # remove cc's... otherwise, we came from show_bug and may need to do both.
     if (defined $cgi->param('masscc')) {
         if ($cgi->param('ccaction') eq 'add') {
-            @cc_add = $cgi->param('masscc');
+            @cc_add = $cgi->multi_param('masscc');
         } elsif ($cgi->param('ccaction') eq 'remove') {
-            @cc_remove = $cgi->param('masscc');
+            @cc_remove = $cgi->multi_param('masscc');
         }
     } else {
-        @cc_add = $cgi->param('newcc');
+        @cc_add = $cgi->multi_param('newcc');
         push(@cc_add, $user) if $cgi->param('addselfcc');
 
         # We came from show_bug which uses a select box to determine what cc's
         # need to be removed...
         if ($cgi->param('removecc') && $cgi->param('cc')) {
-            @cc_remove = $cgi->param('cc');
+            @cc_remove = $cgi->multi_param('cc');
         }
     }
 
@@ -300,7 +300,7 @@ if (defined $cgi->param('id')) {
         # aliases need to be removed...
         my @alias_remove = ();
         if ($cgi->param('removealias') && $cgi->param('alias')) {
-            @alias_remove = $cgi->param('alias');
+            @alias_remove = $cgi->multi_param('alias');
         }
 
         $set_all_fields{alias} = { add => \@alias_add, remove => \@alias_remove };
@@ -308,7 +308,7 @@ if (defined $cgi->param('id')) {
 }
 
 my %is_private;
-foreach my $field (grep(/^defined_isprivate/, $cgi->param())) {
+foreach my $field (grep(/^defined_isprivate/, $cgi->multi_param())) {
     if ($field =~ /(\d+)$/a) {
         my $comment_id = $1;
         $is_private{$comment_id} = $cgi->param("isprivate_$comment_id");
@@ -316,8 +316,8 @@ foreach my $field (grep(/^defined_isprivate/, $cgi->param())) {
 }
 $set_all_fields{comment_is_private} = \%is_private;
 
-my @check_groups = $cgi->param('defined_groups');
-my @set_groups = $cgi->param('groups');
+my @check_groups = $cgi->multi_param('defined_groups');
+my @set_groups = $cgi->multi_param('groups');
 my ($removed_groups) = diff_arrays(\@check_groups, \@set_groups);
 $set_all_fields{groups} = { add => \@set_groups, remove => $removed_groups };
 
@@ -325,7 +325,7 @@ my @custom_fields = Bugzilla->active_custom_fields;
 foreach my $field (@custom_fields) {
     my $fname = $field->name;
     if (should_set($fname, 1)) {
-        $set_all_fields{$fname} = [$cgi->param($fname)];
+        $set_all_fields{$fname} = [$cgi->multi_param($fname)];
     }
 }
 

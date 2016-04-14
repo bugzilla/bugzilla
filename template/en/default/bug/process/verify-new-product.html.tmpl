@@ -17,6 +17,9 @@
   # verify_bug_groups: If groups need to be confirmed in addition to fields.
   #%]
 
+[% USE Bugzilla %]
+[% cgi = Bugzilla.cgi %]
+
 [% PROCESS global/header.html.tmpl
   title = 'Verify New Product Details...'
   style_urls = ['skins/standard/buglist.css']
@@ -165,14 +168,14 @@
             <input type="checkbox" name="defined_groups"
                    id="defined_group_[% group.group.id FILTER html %]"
                    value="[% group.group.name FILTER html %]"
-                   [% IF cgi.param("defined_groups").contains(group.group.name) %] checked="checked"[% END %]
+                   [% IF cgi.multi_param("defined_groups").contains(group.group.name) %] checked="checked"[% END %]
                    onchange="turn_off(this, 'group_[% group.group.id FILTER html %]')">
           </td>
           <td class="center">
             <input type="checkbox" name="groups"
                    id="group_[% group.group.id FILTER html %]"
                    value="[% group.group.name FILTER html %]"
-                   [% IF cgi.param("groups").contains(group.group.name) %] checked="checked"[% END %]
+                   [% IF cgi.multi_param("groups").contains(group.group.name) %] checked="checked"[% END %]
                    onchange="turn_off(this, 'defined_group_[% group.group.id FILTER html %]')">
           </td>
           <td>
@@ -189,7 +192,7 @@
                name="groups"
                [% ' checked="checked"' IF ((group.membercontrol == constants.CONTROLMAPDEFAULT && user.in_group(group.group.name))
                    || (group.othercontrol == constants.CONTROLMAPDEFAULT && !user.in_group(group.group.name))
-                   || cgi.param("groups").contains(group.group.name)) %]
+                   || cgi.multi_param("groups").contains(group.group.name)) %]
                value="[% group.group.name FILTER html %]">
         <label for="group_[% group.group.id FILTER html %]">
           [% group.group.name FILTER html %]: [% group.group.description FILTER html %]
@@ -224,8 +227,8 @@
 [%# If 'id' is defined, then we are editing a single bug.
   # Else we are editing several bugs at once. %]
 
-[% IF cgi.param('id') AND cgi.param('id').match('^\d+$') %]
-  [% id = cgi.param('id') %]
+[% IF cgi_param('id') AND cgi_param('id').match('^\d+$') %]
+  [% id = cgi_param('id') %]
   Cancel and Return to [% "$terms.bug $id" FILTER bug_link(id) FILTER none %]
 [% ELSE %]
   Cancel and Return to <a href="buglist.cgi?regetlastlist=1">the last search results</a>

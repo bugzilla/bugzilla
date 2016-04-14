@@ -62,11 +62,11 @@ if ($comp_name) {
 }
 
 # If 'categoryAction' is set, it has priority over 'action'.
-if (my ($category_action) = grep { $_ =~ /^categoryAction-(?:\w+)$/ } $cgi->param()) {
+if (my ($category_action) = grep { $_ =~ /^categoryAction-(?:\w+)$/ } $cgi->multi_param()) {
     $category_action =~ s/^categoryAction-//;
 
-    my @inclusions = $cgi->param('inclusions');
-    my @exclusions = $cgi->param('exclusions');
+    my @inclusions = $cgi->multi_param('inclusions');
+    my @exclusions = $cgi->multi_param('exclusions');
     my @categories;
     if ($category_action =~ /^(in|ex)clude$/) {
         if (!$user->in_group('editcomponents') && !$product) {
@@ -93,13 +93,13 @@ if (my ($category_action) = grep { $_ =~ /^categoryAction-(?:\w+)$/ } $cgi->para
         }
     }
     elsif ($category_action eq 'removeInclusion') {
-        my @inclusion_to_remove = $cgi->param('inclusion_to_remove');
+        my @inclusion_to_remove = $cgi->multi_param('inclusion_to_remove');
         foreach my $remove (@inclusion_to_remove) {
             @inclusions = grep { $_ ne $remove } @inclusions;
         }
     }
     elsif ($category_action eq 'removeExclusion') {
-        my @exclusion_to_remove = $cgi->param('exclusion_to_remove');
+        my @exclusion_to_remove = $cgi->multi_param('exclusion_to_remove');
         foreach my $remove (@exclusion_to_remove) {
             @exclusions = grep { $_ ne $remove } @exclusions;
         }
@@ -265,8 +265,8 @@ if ($action eq 'insert') {
     my $is_multiplicable = $cgi->param('is_multiplicable');
     my $grant_group      = $cgi->param('grant_group');
     my $request_group    = $cgi->param('request_group');
-    my @inclusions       = $cgi->param('inclusions');
-    my @exclusions       = $cgi->param('exclusions');
+    my @inclusions       = $cgi->multi_param('inclusions');
+    my @exclusions       = $cgi->multi_param('exclusions');
 
     # Filter inclusion and exclusion lists to products the user can see.
     unless ($user->in_group('editcomponents')) {
@@ -317,8 +317,8 @@ if ($action eq 'update') {
     my $is_multiplicable = $cgi->param('is_multiplicable');
     my $grant_group      = $cgi->param('grant_group');
     my $request_group    = $cgi->param('request_group');
-    my @inclusions       = $cgi->param('inclusions');
-    my @exclusions       = $cgi->param('exclusions');
+    my @inclusions       = $cgi->multi_param('inclusions');
+    my @exclusions       = $cgi->multi_param('exclusions');
 
     my ($flagtype, $can_fully_edit) = $user->check_can_admin_flagtype($flag_id);
     if ($cgi->param('check_clusions') && !$user->in_group('editcomponents')) {

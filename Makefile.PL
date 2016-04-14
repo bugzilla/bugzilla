@@ -45,7 +45,7 @@ END {
 
 # PREREQ_PM
 my %requires = (
-    'CGI'                 => '3.51',
+    'CGI'                 => '4.09',
     'DBI'                 => '1.614',
     'Date::Format'        => '2.23',
     'DateTime'            => '0.75',

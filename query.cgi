@@ -114,7 +114,7 @@ sub PrefillForm {
     # search or from an old link on the web somewhere) then convert them
     # to the new "custom search" format so that the form is populated
     # properly.
-    my $any_boolean_charts = grep { /^field-?\d+/ } $buf->param();
+    my $any_boolean_charts = grep { /^field-?\d+/ } $buf->multi_param();
     if ($any_boolean_charts) {
         my $search = new Bugzilla::Search(params => scalar $buf->Vars);
         $search->boolean_charts_to_custom_search($buf);
@@ -124,10 +124,10 @@ sub PrefillForm {
     my @skip = qw(format query_format list_id columnlist);
 
     # Iterate over the URL parameters
-    foreach my $name ($buf->param()) {
+    foreach my $name ($buf->multi_param()) {
         next if grep { $_ eq $name } @skip;
         $foundone = 1;
-        my @values = $buf->param($name);
+        my @values = $buf->multi_param($name);
 
         # If the name is a single letter followed by numbers, it's part
         # of Custom Search. We store these as an array of hashes.

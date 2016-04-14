@@ -49,7 +49,7 @@ $vars->{'custom_fields'} =
 
 # Include a list of product objects.
 if ($cgi->param('product')) {
-    my @products = $cgi->param('product');
+    my @products = $cgi->multi_param('product');
     foreach my $product_name (@products) {
         # We don't use check() because config.cgi outputs mostly
         # in XML and JS and we don't want to display an HTML error

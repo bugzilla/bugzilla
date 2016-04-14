@@ -31,7 +31,7 @@ sub page_before_template {
     print $cgi->header;
 
     # Needed to make sure he can access and edit bugs.
-    my $user = Bugzilla::User->check($cgi->param('sender'));
+    my $user = Bugzilla::User->check(scalar $cgi->param('sender'));
     Bugzilla->set_user($user);
 
     my ($output, $tmpl_file);
@@ -47,7 +47,7 @@ sub page_before_template {
     elsif ($action =~ /^update(_with_headers)?$/) {
         my $f = $1 || '';
         $tmpl_file = "qa/update_bug$f.txt.tmpl";
-        my $bug = Bugzilla::Bug->check($cgi->param('bug_id'));
+        my $bug = Bugzilla::Bug->check(scalar $cgi->param('bug_id'));
         $vars->{bug_id} = $bug->id;
     }
     else {

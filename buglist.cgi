@@ -123,7 +123,7 @@ if (my $last_list = $cgi->param('regetlastlist')) {
 # and order by, since relevance only exists when doing a fulltext search.
 my $fulltext = 0;
 if ($cgi->param('content')) { $fulltext = 1 }
-my @charts = map(/^field(\d-\d-\d)$/ ? $1 : (), $cgi->param());
+my @charts = map { /^field(\d-\d-\d)$/ ? $1 : () } $cgi->multi_param();
 foreach my $chart (@charts) {
     if ($cgi->param("field$chart") eq 'content' && $cgi->param("value$chart")) {
         $fulltext = 1;
@@ -934,7 +934,7 @@ if (scalar(@products) == 1) {
     $one_product = Bugzilla::Product->new({ name => $products[0], cache => 1 });
 }
 # This is used in the "Zarroo Boogs" case.
-elsif (my @product_input = $cgi->param('product')) {
+elsif (my @product_input = $cgi->multi_param('product')) {
     if (scalar(@product_input) == 1 and $product_input[0] ne '') {
         $one_product = Bugzilla::Product->new({ name => $product_input[0], cache => 1 });
     }
@@ -953,7 +953,7 @@ if (scalar(@components) == 1) {
     $vars->{one_component} = $components[0];
 }
 # This is used in the "Zarroo Boogs" case.
-elsif (my @component_input = $cgi->param('component')) {
+elsif (my @component_input = $cgi->multi_param('component')) {
     if (scalar(@component_input) == 1 and $component_input[0] ne '') {
         $vars->{one_component}= $cgi->param('component');
     }
@@ -1121,7 +1121,6 @@ Bugzilla::Hook::process("buglist_format", {'vars' => $vars,
 # Generate and return the UI (HTML page) from the appropriate template.
 $template->process($format->{'template'}, $vars)
   || ThrowTemplateError($template->error());
-
 
 ################################################################################
 # Script Conclusion

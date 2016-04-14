@@ -44,7 +44,7 @@ unless ($cgi->param()) {
 }
 
 # Detect if the user already used the same form to submit a bug
-my $token = trim($cgi->param('token'));
+my $token = trim(scalar $cgi->param('token'));
 check_token_data($token, 'create_bug', 'index.cgi');
 
 # do a match on the fields if applicable
@@ -112,7 +112,7 @@ foreach my $field (@bug_fields) {
 }
 foreach my $field (qw(cc groups)) {
     next if !$cgi->should_set($field);
-    $bug_params{$field} = [$cgi->param($field)];
+    $bug_params{$field} = [$cgi->multi_param($field)];
 }
 $bug_params{'comment'} = $comment;
 $bug_params{'is_markdown'} = $cgi->param('use_markdown');
@@ -122,7 +122,7 @@ my @multi_selects = grep {$_->type == FIELD_TYPE_MULTI_SELECT && $_->enter_bug}
 
 foreach my $field (@multi_selects) {
     next if !$cgi->should_set($field->name);
-    $bug_params{$field->name} = [$cgi->param($field->name)];
+    $bug_params{$field->name} = [$cgi->multi_param($field->name)];
 }
 
 
@@ -165,7 +165,7 @@ my $data_fh = $cgi->upload('data');
 my $attach_text = $cgi->param('attach_text');
 
 if ($data_fh || $attach_text) {
-    $cgi->param('isprivate', $cgi->param('comment_is_private'));
+    $cgi->param('isprivate', scalar $cgi->param('comment_is_private'));
 
     # Must be called before create() as it may alter $cgi->param('ispatch').
     my $content_type = Bugzilla::Attachment::get_content_type();

@@ -101,8 +101,9 @@ elsif ($action eq 'begin-sudo') {
 
     # Did the user actually go trough the 'sudo-prepare' action?  Do some 
     # checks on the token the action should have left.
+    my $token = $cgi->param('token');
     my ($token_user, $token_timestamp, $token_data) =
-        Bugzilla::Token::GetTokenData($cgi->param('token'));
+        Bugzilla::Token::GetTokenData($token);
     unless (defined($token_user)
             && defined($token_data)
             && ($token_user == $user->id)
@@ -111,13 +112,13 @@ elsif ($action eq 'begin-sudo') {
         ThrowUserError('sudo_preparation_required', 
                        { target_login => $target_login, reason => $reason });
     }
-    delete_token($cgi->param('token'));
+    delete_token($token);
 
     # Calculate the session expiry time (T + 6 hours)
     my $time_string = time2str('%a, %d-%b-%Y %T %Z', time + MAX_SUDO_TOKEN_AGE, 'GMT');
 
     # For future sessions, store the unique ID of the target user
-    my $token = Bugzilla::Token::_create_token($user->id, 'sudo', $target_user->id);
+    $token = Bugzilla::Token::_create_token($user->id, 'sudo', $target_user->id);
 
     my %args;
     if (Bugzilla->params->{ssl_redirect}) {

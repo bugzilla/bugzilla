@@ -248,7 +248,7 @@ sub quicksearch {
         }
 
         # Make sure we have some query terms left
-        scalar($cgi->param())>0 || ThrowUserError("buglist_parameters_required");
+        scalar $cgi->multi_param() or ThrowUserError("buglist_parameters_required");
     }
 
     # List of quicksearch-specific CGI parameters to get rid of.

@@ -61,7 +61,7 @@ if ($single) {
         }
     }
 } else {
-    foreach my $id ($cgi->param('id')) {
+    foreach my $id ($cgi->multi_param('id')) {
         # Be kind enough and accept URLs of the form: id=1,2,3.
         my @ids = split(/,/, $id);
         my @check_bugs;
@@ -108,7 +108,7 @@ my @fieldlist = (Bugzilla::Bug->fields, 'flag', 'group', 'long_desc',
 my %displayfields;
 
 if ($cgi->param("field")) {
-    @fieldlist = $cgi->param("field");
+    @fieldlist = $cgi->multi_param("field");
 }
 
 unless ($user->is_timetracker) {
@@ -119,8 +119,8 @@ foreach (@fieldlist) {
     $displayfields{$_} = 1;
 }
 
-foreach ($cgi->param("excludefield")) {
-    $displayfields{$_} = undef;    
+foreach ($cgi->multi_param("excludefield")) {
+    $displayfields{$_} = undef;
 }
 
 $vars->{'displayfields'} = \%displayfields;

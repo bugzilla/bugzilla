@@ -186,7 +186,7 @@ foreach my $field (@enter_bug_fields) {
     my $cf_value = $cgi->param($cf_name);
     if (defined $cf_value) {
         if ($field->type == FIELD_TYPE_MULTI_SELECT) {
-            $cf_value = [$cgi->param($cf_name)];
+            $cf_value = [$cgi->multi_param($cf_name)];
         }
         $default{$cf_name} = $vars->{$cf_name} = $cf_value;
     }
@@ -270,7 +270,7 @@ else {
     $vars->{'estimated_time'} = formvalue('estimated_time');
     $vars->{'see_also'}       = formvalue('see_also');
 
-    $vars->{'cc'}             = join(', ', $cgi->param('cc'));
+    $vars->{'cc'}             = join(', ', $cgi->multi_param('cc'));
 
     $vars->{'comment'}        = formvalue('comment');
     $vars->{'comment_is_private'} = formvalue('comment_is_private');
@@ -341,7 +341,7 @@ if ($picked_status and grep($_->name eq $picked_status, @statuses)) {
     $default{'bug_status'} = Bugzilla::Bug->default_bug_status(@statuses);
 }
 
-my @groups = $cgi->param('groups');
+my @groups = $cgi->multi_param('groups');
 if ($cloned_bug) {
     my @clone_groups = map { $_->name } @{ $cloned_bug->groups_in };
     # It doesn't matter if there are duplicate names, since all we check

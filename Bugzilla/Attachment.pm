@@ -1020,7 +1020,7 @@ sub get_content_type {
         # The user asked us to auto-detect the content type, so use the type
         # specified in the HTTP request headers.
         $content_type =
-            $cgi->uploadInfo($cgi->param('data'))->{'Content-Type'};
+            $cgi->uploadInfo(scalar $cgi->param('data'))->{'Content-Type'};
         $content_type || ThrowUserError("missing_content_type");
 
         # Internet Explorer sends image/x-png for PNG images,

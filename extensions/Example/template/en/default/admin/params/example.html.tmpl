@@ -11,6 +11,16 @@
 %]
 
 [% param_descs = {
-  example_string => "Example string",
+  example_string        => "This parameter accepts any text. (type t)",
+  example_constrained_string => "This parameter accepts only a text of the form " _
+                                "NN-XXXX-N, where N is a digit and X a letter.",
+  example_number        => "This parameter accepts only a positive integer.",
+  example_password      => "Text with all characters replaced by asterisks for " _
+                           "security purposes. (type p)",
+  example_multi_lines   => "Text field permitting multiple lines of text. (type l)",
+  example_boolean       => "You have only two choices: On (1) or Off (0). (type b)",
+  example_single_select => "Select a single value from a list. (type s)",
+  example_multi_select  => "Select none, one or several values from a list. (type m)",
+  example_multi_ordered => "Several values can be selected and ordered. (type o)",
 }
 %]

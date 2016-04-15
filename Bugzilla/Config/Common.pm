@@ -401,11 +401,6 @@ sub check_comment_taggers_group {
 #      &check_multi should always be used as the param verification function
 #      for list (single and multiple) parameter types.
 #
-# o -- A list of values, orderable, and with many selectable (shows up as a
-#      JavaScript-enhanced select box if JavaScript is enabled, and a text
-#      entry field if not)
-#      Set up in the same way as type m.
-#
 # s -- A list of values, with one selectable (shows up as a select box)
 #      To specify the list of values, make the 'choices' key be an array
 #      reference of the valid choices. The 'default' key should be one of
@@ -424,6 +419,13 @@ sub check_comment_taggers_group {
 #
 #      &check_multi should always be used as the param verification function
 #      for list (single and multiple) parameter types.
+#
+# o -- A list of values, orderable, and with many selectable (shows up as a
+#      JavaScript-enhanced select box if JavaScript is enabled, and a text
+#      entry field if not)
+#      Set up in the same way as type s. If the default has multiple values,
+#      then they must be concatenated, separated by a comma.
+#      For instance: default => 'a,c'.
 
 sub get_param_list {
     return;

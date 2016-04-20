@@ -29,7 +29,7 @@ multiple images or tables.
 
 So, for example, you could use the search form to choose "all
 bugs in the WorldControl product" and then plot their severity
-against their component to see which component had had the largest
+against their component to see which component has had the largest
 number of bad bugs reported against it.
 
 Once you've defined your parameters and hit :guilabel:`Generate Report`,

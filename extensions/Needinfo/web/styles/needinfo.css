@@ -8,3 +8,12 @@
 #needinfo_container label {
     font-weight: normal !important;
 }
+
+.needinfo-cb-td {
+    text-align: center;
+    vertical-align: baseline;
+}
+
+#needinfo_role_identity {
+    margin-left: 1em;
+}

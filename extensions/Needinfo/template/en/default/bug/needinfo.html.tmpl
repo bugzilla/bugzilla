@@ -35,173 +35,203 @@
       END;
     END;
   END;
+
+  RETURN UNLESS needinfo_flagtype;
 %]
 
-[% IF needinfo_flagtype %]
-  <div id="needinfo_container">
-    [% IF needinfo_flags.size > 0 %]
-      [%# Displays NEEDINFO tag in bug header %]
-      <script>
-        var summary_container = document.getElementById('static_bug_status');
-        if (summary_container) {
-          var needinfo_comment_div = '[% INCLUDE needinfo_comment_div FILTER js %]';
-          if (document.getElementById('inline-history-ext')) {
-            needinfo_comment_div = inline_history.getNeedinfoDiv();
-          }
+<script>
+[% IF needinfo_flags.size > 0 %]
+$(function() {
+  [%# Displays NEEDINFO tag in bug header %]
+  var summary_container = document.getElementById('static_bug_status');
+  if (summary_container) {
+    var needinfo_comment_div = '[% INCLUDE needinfo_comment_div FILTER js %]';
+    if (document.getElementById('inline-history-ext')) {
+      needinfo_comment_div = inline_history.getNeedinfoDiv();
+    }
 
-          if (needinfo_comment_div) {
-            var a = document.createElement('a');
-            a.id = 'needinfo-lnk';
-            a.href = "#" + needinfo_comment_div;
-            a.appendChild(document.createTextNode('NEEDINFO'));
-            summary_container.appendChild(document.createTextNode('['));
-            summary_container.appendChild(a);
-            summary_container.appendChild(document.createTextNode(']'));
-          }
-          else {
-            summary_container.appendChild(document.createTextNode('[NEEDINFO]'));
-          }
-        }
-      </script>
-    [% END %]
-    <table>
+    if (needinfo_comment_div) {
+      var a = document.createElement('a');
+      a.id = 'needinfo-lnk';
+      a.href = "#" + needinfo_comment_div;
+      a.appendChild(document.createTextNode('NEEDINFO'));
+      summary_container.appendChild(document.createTextNode('['));
+      summary_container.appendChild(a);
+      summary_container.appendChild(document.createTextNode(']'));
+    }
+    else {
+      summary_container.appendChild(document.createTextNode('[NEEDINFO]'));
+    }
+  }
+});
+[% END %]
+
+[% IF needinfo_flags.size == 0 || needinfo_flagtype.is_multiplicable %]
+  function needinfo_init() {
+    $('#needinfo')
+      .on('change', new_needinfo_changed)
+    $('.needinfo-override')
+      .on('change', existing_needinfo_changed)
+      .change();
+    $('#needinfo_role, #needinfo_redirect_role')
+      .on('change', needinfo_role_changed);
+    needinfo_visibility('needinfo');
+
     [% FOREACH flag = needinfo_flags %]
-      <tr>
-        [% IF !flag.requestee || flag.requestee.id == user.id %]
-          [%# needinfo targetted at the current user, or anyone %]
-          <td align="center">
-            <input type="checkbox" id="needinfo_override_[% flag.id FILTER html %]"
-                   name="needinfo_override_[% flag.id FILTER html %]" value="1"
-                   [% " checked" IF flag.requestee || user.in_group("canconfirm") %]>
-          </td>
-          <td>
-            <label for="needinfo_override_[% flag.id FILTER html %]">
-              Clear the needinfo request for
-              <em>[% IF !flag.requestee %]anyone[% ELSE %][% flag.requestee.login FILTER html %][% END %]</em>.
-            </label>
-          </td>
-        [% ELSIF user.in_group("canconfirm") || flag.setter_id == user.id %]
-          [%# needinfo targetted at someone else, but the user can clear %]
-          <td align="center">
-            <input type="checkbox" id="needinfo_override_[% flag.id FILTER html %]"
-                   name="needinfo_override_[% flag.id FILTER html %]" value="1">
-          </td>
-          <td>
-            <label for="needinfo_override_[% flag.id FILTER html %]">
-              I am providing the requested information for <em>[% flag.requestee.login FILTER html %]</em>
-              (clears the needinfo request).
-            </label>
-          </td>
-        [% ELSE %]
-          [%# current user does not have permissions to clear needinfo %]
-          <td>&nbsp;</td>
-          <td>
-            Needinfo requested from <em>[% flag.requestee.login FILTER html %]</em>.
-          </td>
-        [% END %]
-      </tr>
+      $('#requestee-[% flag.id FILTER none %]')
+        .blur(function() {
+          $('#needinfo_override_[% flag.id FILTER none %]')
+            .prop('checked', $(this).val() === '[% flag.requestee.login FILTER js %]')
+        });
     [% END %]
-    [% IF needinfo_flags.size == 0 || needinfo_flagtype.is_multiplicable %]
-      <tr>
+  }
+
+  function needinfo_visibility() {
+    var role = $('#needinfo_role').val();
+    if (role == 'other') {
+      $('#needinfo_from_container').removeClass('bz_default_hidden');
+      $('#needinfo_from').prop('disabled', false);
+      $('#needinfo_role_identity').text('');
+    } else {
+      $('#needinfo_from_container').addClass('bz_default_hidden');
+      $('#needinfo_from').prop('disabled', true);
+      var identity = '';
+      if (role == 'reporter') {
+        identity = '[% bug.reporter.realname || bug.reporter.login FILTER js %]';
+      } else if (role == 'assigned_to') {
+        identity = '[% bug.assigned_to.realname || bug.assigned_to.login FILTER js %]';
+      } else if (role == 'qa_contact') {
+        identity = '[% bug.qa_contact.realname || bug.qa_contact.login FILTER js %]';
+      } else if (role == 'user') {
+        identity = '[% user.realname || user.login FILTER js %]';
+      [% FOREACH mentor = available_mentors %]
+        } else if (role == '[% mentor.login FILTER js %]') {
+          identity = '[% mentor.realname || mentor.login FILTER js +%] [%+ IF available_mentors.size > 1 %](mentor)[% END %]';
+      [% END %]
+      }
+      $('#needinfo_role_identity').text(identity);
+    }
+  }
+
+  function new_needinfo_changed(event) {
+    if ($('#needinfo').is(':checked') && $('#needinfo_role').val() === 'other') {
+      $('#needinfo_from').focus().select();
+    }
+  }
+
+  function existing_needinfo_changed(event) {
+    var $target = $(event.target);
+    var is_redirect = !$target.is(':checked') && $target.data('is-self');
+    $('#needinfo_from_label').text(is_redirect
+      ? 'Redirect my needinfo request to'
+      : 'Need more information from'
+    );
+    $('#needinfo_redirect').val(is_redirect ? '1' : '');
+  }
+
+  function needinfo_role_changed() {
+    $('#needinfo').prop('checked', true);
+    needinfo_visibility();
+    $('#needinfo').change();
+  }
+
+  function needinfo_from_changed() {
+    $('#needinfo').prop('checked', $('#needinfo_from').val !== '');
+  }
+
+  $(function() {
+    needinfo_init();
+  });
+[% END %]
+</script>
+
+<div id="needinfo_container">
+  <table>
+  [% FOREACH flag = needinfo_flags %]
+    <tr>
+      [% IF !flag.requestee || flag.requestee.id == user.id%]
+        [%# needinfo from anyone or the current user %]
         <td align="center">
-          <script>
-            function needinfo_init() {
-              needinfo_visibility();
-              [% FOREACH flag = needinfo_flags %]
-                YAHOO.util.Event.on('requestee-[% flag.id FILTER none %]', 'blur', function(e) {
-                  YAHOO.util.Dom.get('needinfo_override_[% flag.id FILTER none %]').checked =
-                    e.target.value == '[% flag.requestee.login FILTER js %]';
-                });
-              [% END %]
-            }
-
-            function needinfo_visibility() {
-              var role = YAHOO.util.Dom.get('needinfo_role').value;
-              if (role == 'other') {
-                YAHOO.util.Dom.removeClass('needinfo_from_container', 'bz_default_hidden');
-                YAHOO.util.Dom.get('needinfo_from').disabled = false;
-                YAHOO.util.Dom.get('needinfo_role_identity').innerHTML = '';
-              } else {
-                YAHOO.util.Dom.addClass('needinfo_from_container', 'bz_default_hidden');
-                YAHOO.util.Dom.get('needinfo_from').disabled = true;
-                var identity = '';
-                if (role == 'reporter') {
-                  identity = '[% bug.reporter.realname || bug.reporter.login FILTER html FILTER js %]';
-                } else if (role == 'assigned_to') {
-                  identity = '[% bug.assigned_to.realname || bug.assigned_to.login FILTER html FILTER js %]';
-                } else if (role == 'qa_contact') {
-                  identity = '[% bug.qa_contact.realname || bug.qa_contact.login FILTER html FILTER js %]';
-                } else if (role == 'user') {
-                  identity = '[% user.realname || user.login FILTER html FILTER js %]';
-                [% FOREACH mentor = available_mentors %]
-                  } else if (role == '[% mentor.login FILTER js %]') {
-                    identity = '[% mentor.realname || mentor.login FILTER html FILTER js +%] [%+ IF available_mentors.size > 1 %](mentor)[% END %]';
-                [% END %]
-                }
-                YAHOO.util.Dom.get('needinfo_role_identity').innerHTML = identity;
-              }
-            }
-
-            function needinfo_focus() {
-              if (YAHOO.util.Dom.get('needinfo').checked
-                  && YAHOO.util.Dom.get('needinfo_role').value == 'other')
-              {
-                YAHOO.util.Dom.get('needinfo_from').focus();
-                YAHOO.util.Dom.get('needinfo_from').select();
-              }
-            }
-
-            function needinfo_role_changed() {
-              YAHOO.util.Dom.get('needinfo').checked = true;
-              needinfo_visibility();
-              needinfo_focus();
-            }
-
-            function needinfo_other_changed() {
-              YAHOO.util.Dom.get('needinfo').checked = YAHOO.util.Dom.get('needinfo_from').value != '';
-            }
-
-            YAHOO.util.Event.onDOMReady(needinfo_init);
-          </script>
-          <input type="checkbox" name="needinfo" value="1" id="needinfo" onchange="needinfo_focus()">
+          <input type="checkbox" id="needinfo_override_[% flag.id FILTER html %]"
+            name="needinfo_override_[% flag.id FILTER html %]" value="1" class="needinfo-override"
+            [% 'data-is-self="1"' IF flag.requestee %]
+            [% " checked" IF user.in_group("canconfirm") %]>
         </td>
         <td>
-          <label for="needinfo">Need more information from</label>
-          <select name="needinfo_role" id="needinfo_role" onchange="needinfo_role_changed()">
-            <option value="other">other</option>
-            [% IF NOT bug.reporter.needinfo_blocked %]
-              <option value="reporter">reporter</option>
-            [% END %]
-            [% IF NOT bug.assigned_to.needinfo_blocked %]
-              <option value="assigned_to">assignee</option>
-            [% END %]
-            [% IF Param('useqacontact') && bug.qa_contact.login != "" && !bug.qa_contact.needinfo_blocked %]
-              <option value="qa_contact">qa contact</option>
-            [% END %]
-            [% IF NOT user.needinfo_blocked %]
-              <option value="user">myself</option>
-            [% END %]
-            [% FOREACH mentor = available_mentors %]
-              <option [% IF available_mentors.size > 1 %]title="mentor"[% END %] value="[% mentor.login FILTER html %]">
-                [% available_mentors.size == 1 ? "mentor" : mentor.login FILTER html %]
-              </option>
-            [% END %]
-          </select>
-          <span id="needinfo_from_container">
-            [% INCLUDE global/userselect.html.tmpl
-               id          => "needinfo_from"
-               name        => "needinfo_from"
-               value       => ""
-               size        => 30
-               multiple    => 5
-               onchange    => "needinfo_other_changed()"
-               field_title => "Enter one or more comma separated users to request more information from"
-            %]
-          </span>
-          <span id="needinfo_role_identity"></span>
+          <label for="needinfo_override_[% flag.id FILTER html %]">
+            Clear the needinfo request for <em>[% flag.requestee ? flag.requestee.login : "anyone" FILTER html %]</em>.
+          </label>
         </td>
-      </tr>
-    [% END %]
-    </table>
-  </div>
-[% END %]
+      [% ELSIF user.in_group("canconfirm") || flag.setter_id == user.id %]
+        [%# needinfo targetted at someone else, but the user can clear %]
+        <td align="center">
+          <input type="checkbox" id="needinfo_override_[% flag.id FILTER html %]"
+                  name="needinfo_override_[% flag.id FILTER html %]" value="1">
+        </td>
+        <td>
+          <label for="needinfo_override_[% flag.id FILTER html %]">
+            I am providing the requested information for <em>[% flag.requestee.login FILTER html %]</em>
+            (clears the needinfo request).
+          </label>
+        </td>
+      [% ELSE %]
+        [%# current user does not have permissions to clear needinfo %]
+        <td>&nbsp;</td>
+        <td>
+          Needinfo requested from <em>[% flag.requestee.login FILTER html %]</em>.
+        </td>
+      [% END %]
+    </tr>
+  [% END %]
+  [% IF needinfo_flags.size == 0 || needinfo_flagtype.is_multiplicable %]
+    <tr>
+      <td class="needinfo-cb-td">
+        <input
+          type="checkbox"
+          name="needinfo"
+          id="needinfo"
+          value="1"
+        >
+      </td>
+      <td>
+        <input type="hidden" name="needinfo_redirect" id="needinfo_redirect" value="">
+        <label for="needinfo" id="needinfo_from_label">
+          Need more information from
+        </label>
+        <select name="needinfo_role" id="needinfo_role">
+          <option value="other">other</option>
+          [% IF NOT bug.reporter.needinfo_blocked %]
+            <option value="reporter">reporter</option>
+          [% END %]
+          [% IF NOT bug.assigned_to.needinfo_blocked %]
+            <option value="assigned_to">assignee</option>
+          [% END %]
+          [% IF Param('useqacontact') && bug.qa_contact.login != "" && !bug.qa_contact.needinfo_blocked %]
+            <option value="qa_contact">qa contact</option>
+          [% END %]
+          [% IF !is_redirect && NOT user.needinfo_blocked %]
+            <option value="user">myself</option>
+          [% END %]
+          [% FOREACH mentor = available_mentors %]
+            <option [% IF available_mentors.size > 1 %]title="mentor"[% END %] value="[% mentor.login FILTER html %]">
+              [% available_mentors.size == 1 ? "mentor" : mentor.login FILTER html %]
+            </option>
+          [% END %]
+        </select>
+        <span id="needinfo_from_container">
+          [% INCLUDE global/userselect.html.tmpl
+              id          => "needinfo_from"
+              name        => "needinfo_from"
+              value       => ""
+              size        => 30
+              multiple    => 5
+              onchange    => "needinfo_from_changed()"
+              field_title => "Enter one or more comma separated users to request more information from"
+          %]
+        </span>
+        <span id="needinfo_role_identity"></span>
+      </td>
+    </tr>
+  [% END %]
+  </table>
+</div>

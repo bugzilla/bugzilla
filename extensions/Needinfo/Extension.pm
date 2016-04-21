@@ -92,6 +92,7 @@ sub bug_start_of_update {
     my $add_needinfo  = delete $params->{needinfo};
     my $needinfo_from = delete $params->{needinfo_from};
     my $needinfo_role = delete $params->{needinfo_role};
+    my $is_redirect   = delete $params->{needinfo_redirect};
     my $is_private    = $params->{'comment_is_private'};
 
     my @needinfo_overrides;
@@ -178,6 +179,19 @@ sub bug_start_of_update {
             or grep { $_ == $flag->id } @needinfo_overrides)
         {
             push(@flags, { id => $flag->id, status => 'X' });
+        }
+    }
+
+    if ($is_redirect && scalar(@new_flags) == 1) {
+        # Find the current user's needinfo request
+        foreach my $flag (@{ $bug->flags }) {
+            next unless $flag->type->name eq 'needinfo'
+                && $flag->requestee
+                && $flag->requestee->id == $user->id;
+            # Setting the id on new_flag updates the existing flag instead of
+            # creating a new one.
+            $new_flags[0]->{id} = $flag->id;
+            last;
         }
     }
 

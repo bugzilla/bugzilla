@@ -36,6 +36,7 @@ use Bugzilla::Util;
 use Carp;
 use Data::Dumper;
 use Date::Format;
+use Scalar::Util qw(blessed);
 
 # We cannot use $^S to detect if we are in an eval(), because mod_perl
 # already eval'uates everything, so $^S = 1 in all cases under mod_perl!
@@ -98,7 +99,7 @@ sub _throw_error {
     # There are some tests that throw and catch a lot of errors,
     # and calling $template->process over and over for those errors
     # is too slow. So instead, we just "die" with a dump of the arguments.
-    if (Bugzilla->error_mode != ERROR_MODE_TEST) {
+    if (Bugzilla->error_mode != ERROR_MODE_TEST && !$Bugzilla::Template::is_processing) {
         $template->process($name, $vars, \$message)
           || ThrowTemplateError($template->error());
     }
@@ -109,6 +110,12 @@ sub _throw_error {
     Bugzilla::Hook::process('error_catch', { error => $error, vars => $vars,
                                              message => \$message });
 
+    if ($Bugzilla::Template::is_processing) {
+        $name =~ /^global\/(user|code)-error/;
+        my $type = $1 // 'unknown';
+        die Template::Exception->new("bugzilla.$type.$error", $vars);
+    }
+    
     if (Bugzilla->error_mode == ERROR_MODE_WEBPAGE) {
         if (sentry_should_notify($vars->{error})) {
             $vars->{maintainers_notified} = 1;
@@ -174,9 +181,9 @@ sub _throw_error {
             $server->response($server->error_response_header);
         }
     }
+
     exit;
 }
-
 sub ThrowUserError {
     _throw_error("global/user-error.html.tmpl", @_);
 }
@@ -190,7 +197,7 @@ sub ThrowCodeError {
     # Don't show the error as coming from Bugzilla::Error, show it
     # as coming from the caller.
     local $Carp::CarpInternal{'Bugzilla::Error'} = 1;
-    $vars->{traceback} = Carp::longmess();
+    $vars->{traceback} //= Carp::longmess();
 
     _throw_error("global/code-error.html.tmpl", @_);
 }
@@ -201,6 +208,14 @@ sub ThrowTemplateError {
 
     # Make sure the transaction is rolled back (if supported).
     $dbh->bz_rollback_transaction() if $dbh->bz_in_transaction();
+
+    if (blessed($template_err) && $template_err->isa('Template::Exception')) {
+        my $type = $template_err->type;
+        if ($type =~ /^bugzilla\.(code|user)\.(.+)/) {
+            _throw_error("global/$1-error.html.tmpl", $2, $template_err->info);
+            return;
+        }
+    }
 
     my $vars = {};
     if (Bugzilla->error_mode == ERROR_MODE_DIE) {

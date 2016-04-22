@@ -665,12 +665,15 @@ $Template::Stash::SCALAR_OPS->{ truncate } =
 
 ###############################################################################
 
+our $is_processing = 0;
+
 sub process {
     my $self = shift;
     # All of this current_langs stuff allows template_inner to correctly
     # determine what-language Template object it should instantiate.
     my $current_langs = Bugzilla->request_cache->{template_current_lang} ||= [];
     unshift(@$current_langs, $self->context->{bz_language});
+    local $is_processing = 1;
     my $retval = $self->SUPER::process(@_);
     shift @$current_langs;
     return $retval;

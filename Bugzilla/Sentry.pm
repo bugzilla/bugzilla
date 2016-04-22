@@ -321,6 +321,7 @@ sub _sentry_die_handler {
         $in_cgi_carp_die = 1 if $sub =~ /CGI::Carp::die$/;
     }
 
+    return if $Bugzilla::Template::is_processing;
     return if _in_eval();
 
     # mod_perl overrides exit to call die with this string

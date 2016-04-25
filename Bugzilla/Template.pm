@@ -713,12 +713,13 @@ sub create {
             },
 
             # In CSV, quotes are doubled, and any value containing a quote or a
-            # comma is enclosed in quotes. If a field starts with an equals
-            # sign, it is proceed by a space.
+            # comma is enclosed in quotes.
+            # If a field starts with either "=", "+", "-" or "@", it is preceded
+            # by a space to prevent stupid formula execution from Excel & co.
             csv => sub
             {
                 my ($var) = @_;
-                $var = ' ' . $var if substr($var, 0, 1) eq '=';
+                $var = ' ' . $var if $var =~ /^[+=@-]/;
                 # backslash is not special to CSV, but it can be used to confuse some browsers...
                 # so we do not allow it to happen. We only do this for logged-in users.
                 $var =~ s/\\/\x{FF3C}/g if Bugzilla->user->id;

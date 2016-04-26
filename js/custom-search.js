@@ -41,7 +41,7 @@ function custom_search_new_row() {
     _remove_any_all(clone);
 
     // Always make sure there's only one row with this id.
-    row.id = null;
+    row.removeAttribute('id');
     row.parentNode.appendChild(clone);
     cs_reconfigure(row);
     fix_query_string(row);

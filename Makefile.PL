@@ -118,7 +118,7 @@ my %optional_features = (
         description => 'Documentation',
     },
     xmlrpc => {
-        description => 'XML-RPC Interfaze',
+        description => 'XML-RPC Interface',
         prereqs     => {
             runtime =>
                 { requires => { 'XMLRPC::Lite' => '0.712', 'SOAP::Lite' => '0.712', 'Test::Taint' => '1.06' } }

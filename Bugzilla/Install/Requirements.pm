@@ -22,6 +22,10 @@ use Bugzilla::Install::Util qw(install_string bin_loc success
                                extension_requirement_packages);
 use List::Util qw(max);
 use Term::ANSIColor;
+use CPAN::Meta;
+use CPAN::Meta::Prereqs;
+use CPAN::Meta::Requirements;
+use Module::Metadata;
 
 use parent qw(Exporter);
 use autodie;
@@ -29,11 +33,16 @@ use autodie;
 our @EXPORT = qw(
     FEATURE_FILES
 
-    check_requirements
+    load_cpan_meta
+    check_cpan_requirements
+    check_cpan_feature
+    check_all_cpan_features
     check_webdotbase
     check_font_file
     map_files_to_features
 );
+
+our $checking_for_indent = 0;
 
 # This is how many *'s are in the top of each "box" message printed
 # by checksetup.pl.
@@ -44,7 +53,7 @@ use constant TABLE_WIDTH => 71;
 #
 # The keys are the names of the modules, the values are what the module
 # is called in the output of "apachectl -t -D DUMP_MODULES".
-use constant APACHE_MODULES => { 
+use constant APACHE_MODULES => {
     mod_headers => 'headers_module',
     mod_env     => 'env_module',
     mod_expires => 'expires_module',
@@ -63,7 +72,7 @@ use constant APACHE => qw(apachectl httpd apache2 apache);
 # If we don't find any of the above binaries in the normal PATH,
 # these are extra places we look.
 use constant APACHE_PATH => [qw(
-    /usr/sbin 
+    /usr/sbin
     /usr/local/sbin
     /usr/libexec
     /usr/local/libexec
@@ -92,40 +101,109 @@ use constant FEATURE_FILES => (
     auth_delegation => ['auth.cgi'],
 );
 
-sub check_requirements {
-    my ($output) = @_;
+sub load_cpan_meta {
+    my $dir = bz_locations()->{libpath};
+    my @meta_json = map { File::Spec->catfile($dir, $_) } qw( MYMETA.json META.json );
+    my ($file) = grep { -f $_ } @meta_json;
 
-    my $missing_apache = _missing_apache_modules(APACHE_MODULES, $output);
+    if ($file) {
+        open my $meta_fh, '<', $file or die "unable to open $file: $!";
+        my $str = do { local $/ = undef; scalar <$meta_fh> };
+        # detaint
+        $str =~ /^(.+)$/s; $str = $1;
+        close $meta_fh;
 
-    # If we're running on Windows, reset the input line terminator so that
-    # console input works properly - loading CGI tends to mess it up
-    $/ = "\015\012" if ON_WINDOWS;
-
-    return { apache  => $missing_apache };
+        return CPAN::Meta->load_json_string($str);
+    }
+    else {
+        ThrowCodeError('cpan_meta_missing');
+    }
 }
 
-sub _missing_apache_modules {
-    my ($modules, $output) = @_;
-    my $apachectl = _get_apachectl();
-    return [] if !$apachectl;
-    my $command = "$apachectl -t -D DUMP_MODULES";
-    my $cmd_info = `$command 2>&1`;
-    # If apachectl returned a value greater than 0, then there was an
-    # error parsing Apache's configuration, and we can't check modules.
-    my $retval = $?;
-    if ($retval > 0) {
-        print STDERR install_string('apachectl_failed', 
-            { command => $command, root => ROOT_USER }), "\n";
-        return [];
+sub check_all_cpan_features {
+    my ($meta, $dirs, $output) = @_;
+    my %report;
+
+    local $checking_for_indent = 2;
+
+    print "\nOptional features:\n" if $output;
+    my @features = sort { $a->identifier cmp $b->identifier } $meta->features;
+    foreach my $feature (@features) {
+        next if $feature->identifier eq 'features';
+        printf "Feature '%s': %s\n", $feature->identifier, $feature->description if $output;
+        my $result = check_cpan_feature($feature, $dirs, $output);
+        print "\n" if $output;
+
+        $report{$feature->identifier} = {
+            description => $feature->description,
+            result => $result,
+        };
     }
+
+    print install_string('all_optional_features_require'), "\n" if $output;
+    my $features = check_cpan_feature($meta->feature('features'), $dirs, $output);
+    print "\n" if $output;
+
+    $report{features} = {
+        description => $meta->feature('features')->description,
+        result => $features,
+    };
+
+    return \%report;
+}
+
+sub check_cpan_feature {
+    my ($feature, $dirs, $output) = @_;
+
+    return _check_prereqs($feature->prereqs, $dirs, $output);
+}
+
+sub check_cpan_requirements {
+    my ($meta, $dirs, $output) = @_;
+
+    my $result = _check_prereqs($meta->effective_prereqs, $dirs, $output);
+    print colored(install_string('installation_failed'), COLOR_ERROR), "\n" if !$result->{ok} && $output;
+    return $result;
+}
+
+sub _check_prereqs {
+    my ($prereqs, $dirs, $output) = @_;
+    $dirs //= \@INC;
+    my $reqs = $prereqs->merged_requirements(['configure', 'runtime'], ['requires']);
+    my @found;
     my @missing;
-    foreach my $module (sort keys %$modules) {
-        my $ok = _check_apache_module($module, $modules->{$module}, 
-                                      $cmd_info, $output);
-        push(@missing, $module) if !$ok;
+
+    foreach my $module (sort $reqs->required_modules) {
+        my $ok = _check_module($reqs, $module, $dirs, $output);
+        if ($ok) {
+            push @found, $module;
+        }
+        else {
+            push @missing, $module;
+        }
     }
-    return \@missing;
+
+    return { ok => (@missing == 0), found => \@found, missing => \@missing };
 }
+
+sub _check_module {
+    my ($reqs, $module, $dirs, $output) = @_;
+    my $required_version = $reqs->requirements_for_module($module);
+
+    if ($module eq 'perl') {
+        my $ok = $reqs->accepts_module($module, $]);
+        _checking_for({package => "perl", found => $], wanted => $required_version, ok => $ok}) if $output;
+        return $ok;
+    } else {
+        my $metadata = Module::Metadata->new_from_module($module, inc => $dirs);
+        my $version = eval { $metadata->version };
+        my $ok = $metadata && $version && $reqs->accepts_module($module, $version || 0);
+        _checking_for({package => $module, $version ? ( found => $version ) : (), wanted => $required_version, ok => $ok}) if $output;
+
+        return $ok;
+    }
+}
+
 
 sub _get_apachectl {
     foreach my $bin_name (APACHE) {
@@ -138,18 +216,6 @@ sub _get_apachectl {
         return $bin if $bin;
     }
     return undef;
-}
-
-sub _check_apache_module {
-    my ($module, $config_name, $mod_info, $output) = @_;
-    my $ok;
-    if ($mod_info =~ /^\s+\Q$config_name\E\b/m) {
-        $ok = 1;
-    }
-    if ($output) {
-        _checking_for({ package => $module, ok => $ok });
-    }
-    return $ok;
 }
 
 sub check_webdotbase {
@@ -172,7 +238,7 @@ sub check_webdotbase {
     my $webdotdir = bz_locations()->{'webdotdir'};
     # Check .htaccess allows access to generated images
     if (-e "$webdotdir/.htaccess") {
-        my $htaccess = new IO::File("$webdotdir/.htaccess", 'r') 
+        my $htaccess = new IO::File("$webdotdir/.htaccess", 'r')
             || die "$webdotdir/.htaccess: " . $!;
         if (!grep(/ \\\.png\$/, $htaccess->getlines)) {
             print STDERR install_string('webdot_bad_htaccess',
@@ -211,13 +277,13 @@ sub check_font_file {
 
 sub _checking_for {
     my ($params) = @_;
-    my ($package, $ok, $wanted, $blacklisted, $found) = 
+    my ($package, $ok, $wanted, $blacklisted, $found) =
         @$params{qw(package ok wanted blacklisted found)};
 
     my $ok_string = $ok ? install_string('module_ok') : '';
 
     # If we're actually checking versions (like for Perl modules), then
-    # we have some rather complex logic to determine what we want to 
+    # we have some rather complex logic to determine what we want to
     # show. If we're not checking versions (like for GraphViz) we just
     # show "ok" or "not found".
     if (exists $params->{found}) {
@@ -240,10 +306,11 @@ sub _checking_for {
     }
 
     my $black_string = $blacklisted ? install_string('blacklisted') : '';
-    my $want_string  = $wanted ? "v$wanted" : install_string('any');
+    my $want_string  = $wanted ? "$wanted" : install_string('any');
 
     my $str = sprintf "%s %20s %-11s $ok_string $black_string\n",
-                install_string('checking_for'), $package, "($want_string)";
+      ( ' ' x $checking_for_indent ) . install_string('checking_for'),
+      $package, "($want_string)";
     print $ok ? $str : colored($str, COLOR_ERROR);
 }
 
@@ -289,23 +356,26 @@ of file names (which are passed to C<glob>, so shell patterns work).
 
 =back
 
-
 =head1 SUBROUTINES
 
 =over 4
 
-=item C<check_requirements>
+=item C<check_cpan_requirements>
 
 =over
 
 =item B<Description>
 
-This checks what optional or required perl modules are installed, like
+This checks what required perl modules are installed, like
 C<checksetup.pl> does.
 
 =item B<Params>
 
 =over
+
+=item C<$meta> - A C<CPAN::Meta> object.
+
+=item C<$dirs> - the include dirs to search for modules, defaults to @INC.
 
 =item C<$output> - C<true> if you want the function to print out information
 about what it's doing, and the versions of everything installed.
@@ -318,15 +388,86 @@ A hashref containing these values:
 
 =over
 
-=item C<apache> - The name of each optional Apache module that is missing.
+=item C<ok> - if all the requirements are met, this is true.
+
+=item C<found> - an arrayref of found modules
+
+=item C<missing> - an arrayref of missing modules
 
 =back
+
+=back
+
+=item C<check_cpan_feature>
+
+=over
+
+=item B<Description>
+
+This checks that the optional Perl modules required for a feature are installed.
+
+=item B<Params>
+
+=over
+
+=item C<$feature> - A C<CPAN::Meta::Feature> object.
+
+=item C<$dirs> - the include dirs to search for modules, defaults to @INC.
+
+=item C<$output> - C<true> if you want the function to print out information about what it's doing, and the versions of everything installed.
+
+=back
+
+=item B<Returns>
+
+A hashref containing these values:
+
+=over
+
+=item C<ok> - if all the requirements are met, this is true.
+
+=item C<found> - an arrayref of found modules
+
+=item C<missing> - an arrayref of missing modules
+
+=back
+
+=item C<check_all_cpan_features>
+
+=over
+
+=item B<Description>
+
+This checks which optional Perl modules are currently installed which can enable optional features.
+
+=item B<Params>
+
+=over
+
+=item C<$meta> - A C<CPAN::Meta> object.
+
+=item C<$dirs> - the include dirs to search for modules, defaults to @INC.
+
+=item C<$output> - C<true> if you want the function to print out information
+about what it's doing, and the versions of everything installed.
+
+=back
+
+=item B<Returns>
+
+A hashref keyed on the feature name. The values
+are hashrefs containing C<description> and C<result> keys.
+
+C<description> is the English description of the feature.
+
+C<result> is a hashref in the same format as the return value of C<check_cpan_requirements()>,
+described previously.
 
 =back
 
 =item C<check_webdotbase($output)>
 
-Description: Checks if the graphviz binary specified in the 
+Description: Checks if the graphviz binary specified in the
   C<webdotbase> parameter is a valid binary, or a valid URL.
 
 Params:      C<$output> - C<$true> if you want the function to
@@ -348,6 +489,12 @@ Returns:     C<1> if the check was successful, C<0> otherwise.
 
 Returns a hashref where file names are the keys and the value is the feature
 that must be enabled in order to compile that file.
+
+=item C<load_cpan_meta>
+
+Load MYMETA.json or META.json from the bugzilla directory, and a return a L<CPAN::Meta> object.
+
+=back
 
 =back
 

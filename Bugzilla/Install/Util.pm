@@ -269,6 +269,15 @@ sub indicate_progress {
     }
 }
 
+sub feature_description {
+    my ($feature_name) = @_;
+    eval {
+        my $meta = _cache()->{cpan_meta} //= Bugzilla::Install::Requirements::load_cpan_meta();
+
+        return $meta->feature($feature_name)->description
+    } or warn $@;
+}
+
 sub install_string {
     my ($string_id, $vars) = @_;
     _cache()->{install_string_path} ||= template_include_path();
@@ -853,6 +862,10 @@ in their browser, usually), and extensions are sorted alphabetically.
 Used by L<Bugzilla::Template> to determine the languages' list which 
 are compiled with the browser's I<Accept-Language> and the languages 
 of installed templates.
+
+=item C<feature_description>
+
+Return the English-language description of a feature from the (MY)META.json files.
 
 =back
 

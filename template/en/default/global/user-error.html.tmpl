@@ -565,12 +565,10 @@
     (You specified '[% name FILTER html %]'.)
 
   [% ELSIF error == "feature_disabled" %]
-    The [% install_string("feature_$feature") FILTER html %] feature is not
-    available in this Bugzilla.
+    The [% feature_description(feature) FILTER html %] feature is not available in this Bugzilla.
     [% IF user.in_group('admin') %]
       If you would like to enable this feature, please run
-      <kbd>checksetup.pl</kbd> to see how to install the necessary
-      requirements for this feature.
+      <kbd>cpanm -l local --installdeps --with-feature [% feature FILTER html %] "."</kbd>
     [% END %]
 
   [% ELSIF error == "field_already_exists" %]

@@ -4,7 +4,7 @@
       "Bugzilla Developers <developers@bugzilla.org>"
    ],
    "dynamic_config" : 1,
-   "generated_by" : "ExtUtils::MakeMaker version 7.1, CPAN::Meta::Converter version 2.150005",
+   "generated_by" : "ExtUtils::MakeMaker version 7.1, CPAN::Meta::Converter version 2.150001",
    "license" : [
       "unknown"
    ],
@@ -73,12 +73,13 @@
          }
       },
       "features" : {
-         "description" : "Base support for Features",
+         "description" : "Modules required to enable any feature",
          "prereqs" : {
             "runtime" : {
                "requires" : {
-                  "CPAN::Meta" : "0",
-                  "CPAN::Meta::Check" : "0",
+                  "CPAN::Meta::Prereqs" : "2.132830",
+                  "CPAN::Meta::Requirements" : "2.121",
+                  "Module::Metadata" : "1.000019",
                   "Module::Runtime" : "0"
                }
             }
@@ -125,7 +126,7 @@
             "runtime" : {
                "requires" : {
                   "Daemon::Generic" : "0",
-                  "TheSchwartz" : "1.1"
+                  "TheSchwartz" : "1.10"
                }
             }
          }
@@ -166,7 +167,8 @@
          "prereqs" : {
             "runtime" : {
                "requires" : {
-                  "mod_perl2" : "0"
+                  "Apache::SizeLimit" : "0.96",
+                  "mod_perl2" : "1.999022"
                }
             }
          }
@@ -338,7 +340,7 @@
    "prereqs" : {
       "build" : {
          "requires" : {
-            "ExtUtils::MakeMaker" : "0"
+            "ExtUtils::MakeMaker" : "6.55"
          }
       },
       "configure" : {
@@ -347,6 +349,13 @@
          }
       },
       "runtime" : {
+         "recommends" : {
+            "CPAN::Meta::Prereqs" : "2.132830",
+            "CPAN::Meta::Requirements" : "2.121",
+            "Module::Metadata" : "1.000019",
+            "Module::Runtime" : "0",
+            "Safe" : "2.30"
+         },
          "requires" : {
             "CGI" : "4.09",
             "DBI" : "1.614",
@@ -375,6 +384,5 @@
       }
    },
    "release_status" : "stable",
-   "version" : "5.1",
-   "x_serialization_backend" : "JSON::PP version 2.27203"
+   "version" : "5.1"
 }

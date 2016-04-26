@@ -16,6 +16,7 @@
 # Please keep the strings in alphabetical order by their name.
 
 %strings = (
+    all_optional_features_require => 'All optional features above require the following modules to be found:',
     any  => 'any',
     apachectl_failed => <<END,
 WARNING: We could not check the configuration of Apache. This sometimes
@@ -44,9 +45,6 @@ can connect to your MySQL database and drop the bz_schema table, as a last
 resort.
 END
     checking_for => 'Checking for',
-    checking_dbd      => 'Checking available perl DBD modules...',
-    checking_optional => 'The following Perl modules are optional:',
-    checking_modules  => 'Checking perl modules...',
     chmod_failed      => '##path##: Failed to change permissions: ##error##',
     chown_failed      => '##path##: Failed to change ownership: ##error##',
     commands_dbd      => <<EOT,
@@ -93,6 +91,7 @@ END
     file_rename => 'Renaming ##from## to ##to##...',
     header => "* This is Bugzilla ##bz_ver## on perl ##perl_ver##\n"
             . "* Running on ##os_name## ##os_ver##",
+    installation_failed => '*** Installation aborted. Read the messages above. ***',
     install_data_too_long => <<EOT,
 WARNING: Some of the data in the ##table##.##column## column is longer than
 its new length limit of ##max_length## characters. The data that needs to be

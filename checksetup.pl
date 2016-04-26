@@ -18,7 +18,10 @@ use warnings;
 
 use File::Basename;
 BEGIN { chdir dirname($0); }
-use lib qw(. lib local/lib/perl5);
+use lib qw(. lib local/lib/perl5 .checksetup_lib/lib/perl5);
+
+# the @INC which checksetup needs to operate against.
+our @BUGZILLA_INC = grep { !/checksetup_lib/ } @INC;
 
 use Getopt::Long qw(:config bundling);
 use Pod::Usage;
@@ -58,9 +61,13 @@ my $silent = $answers_file && !$switch{'verbose'};
 
 print(install_string('header', get_version_and_os()) . "\n") unless $silent;
 exit 0 if $switch{'version'};
-# Check required --MODULES--
-my $module_results = check_requirements(!$silent);
-# Break out if checking the modules is all we have been asked to do.
+my $meta = load_cpan_meta();
+my $requirements = check_cpan_requirements($meta, \@BUGZILLA_INC, !$silent);
+
+exit 1 unless $requirements->{ok};
+
+check_all_cpan_features($meta, \@BUGZILLA_INC, !$silent);
+
 
 ###########################################################################
 # Load Bugzilla Modules

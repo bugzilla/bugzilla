@@ -1146,6 +1146,8 @@ sub create {
 
             'install_string' => \&Bugzilla::Install::Util::install_string,
 
+            'feature_description' => \&Bugzilla::Install::Util::feature_description,
+
             'report_columns' => \&Bugzilla::Search::REPORT_COLUMNS,
 
             # These don't work as normal constants.

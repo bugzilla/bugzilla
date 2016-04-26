@@ -27,21 +27,23 @@ use File::Spec;
 # installs where cpanm can't get the optional features out of Makefile.PL
 # Unfortunately having META.json and META.yml commited to the repo is weird
 # and MakeMaker always prefers their content to the internal data (unless CPAN::META
-# is not installed). 
+# is not installed).
 # Since we (Bugzilla) require this cludge, we hide the files from MakeMaker.
 BEGIN {
     warn "Hiding META.{json,yml} from MakeMaker...\n";
-    rename('META.json', 'META.json.hide') || unlink("META.json");
-    rename('META.yml', 'META.yml.hide') || unlink("META.yml");
+    rename( 'META.json', 'META.json.hide' ) || unlink("META.json");
+    rename( 'META.yml',  'META.yml.hide' )  || unlink("META.yml");
+
+    if (!eval { ExtUtils::MakeMaker->VERSION('6.57_07') }) {
+        warn "WARNING: ExtUtils::MakeMaker should be at least 6.57_07 in order to support updating META.json files\n";
+    }
 }
 
 END {
     warn "Unhiding META.{json,yml}...\n";
-    rename('META.json.hide', 'META.json');
-    rename('META.yml.hide', 'META.yml');
+    rename( 'META.json.hide', 'META.json' );
+    rename( 'META.yml.hide',  'META.yml' );
 }
-
-
 
 # PREREQ_PM
 my %requires = (
@@ -60,105 +62,165 @@ my %requires = (
     'Template'            => '2.24',
     'URI'                 => '1.55',
 );
+my %build_requires = (
+    'ExtUtils::MakeMaker' => '6.55',
+);
+my %test_requires = (
+    'Test::More'         => 0,
+    'Pod::Checker'       => 0,
+    'Pod::Coverage'      => 0,
+    'Test::Perl::Critic' => 0
+);
+my %recommends = ( Safe => '2.30' );
+my %all_features = (
+    'CPAN::Meta::Prereqs'      => '2.132830',
+    'CPAN::Meta::Requirements' => '2.121',
+    'Module::Metadata'         => '1.000019',
+    'Module::Runtime'          => 0,
+);
 
 # Windows requires some additional modules.
-if ($^O eq 'MSWin32') {
-    $requires{'Win32'}      = '0.35';
-    $requires{'Win32::API'} = '0.55';
+if ( $^O eq 'MSWin32' ) {
+    $requires{'Win32'}                            = '0.35';
+    $requires{'Win32::API'}                       = '0.55';
     $requires{'DateTime::TimeZone::Local::Win32'} = '1.64';
 }
 
 my %optional_features = (
     features => {
-        prereqs => { runtime => { requires => { 'CPAN::Meta::Check' => 0, 'Module::Runtime' => 0, 'CPAN::Meta' => 0, }, }, },
-        description => "Base support for Features"
+        prereqs => { runtime => { requires => \%all_features, } },
+        description => 'Modules required to enable any feature',
     },
     smtp_auth => {
-        prereqs     => { runtime => { requires => { 'Authen::SASL' => 0 } } },
+        prereqs => { runtime => { requires => { 'Authen::SASL' => 0 } } },
         description => 'SMTP Authentication'
     },
     detect_charset => {
-        prereqs => { runtime => { requires => { 'Encode::Detect' => 0, Encode => '2.21' } } },
+        prereqs => {
+            runtime =>
+                { requires => { 'Encode::Detect' => 0, Encode => '2.21' } }
+        },
         description => 'Automatic charset detection for text attachments'
     },
     new_charts => {
         description => 'New Charts',
-        prereqs     => { runtime => { requires => { 'Chart::Lines' => 'v2.4.10', GD => '1.20' } } }
+        prereqs     => {
+            runtime =>
+                { requires => { 'Chart::Lines' => 'v2.4.10', GD => '1.20' } }
+        }
     },
     html_desc => {
         description => 'More HTML in Product/Group Descriptions',
-        prereqs     => { runtime => { requires => { 'HTML::Parser' => '3.67', 'HTML::Scrubber' => 0 } } }
+        prereqs     => {
+            runtime => {
+                requires =>
+                    { 'HTML::Parser' => '3.67', 'HTML::Scrubber' => 0 }
+            }
+        }
     },
     markdown => {
         description => 'Markdown syntax support for comments',
-        prereqs     => { runtime => { requires => { 'Text::MultiMarkdown' => '1.000034' } } }
+        prereqs     => {
+            runtime => { requires => { 'Text::MultiMarkdown' => '1.000034' } }
+        }
     },
     pg => {
-        prereqs     => { runtime => { requires => { 'DBD::Pg' => 'v2.19.3' } } },
+        prereqs => { runtime => { requires => { 'DBD::Pg' => 'v2.19.3' } } },
         description => 'Postgres database support'
     },
     memcached => {
         description => 'Memcached Support',
-        prereqs     => { runtime => { requires => { 'Cache::Memcached::Fast' => '0.17' } } }
+        prereqs     => {
+            runtime => { requires => { 'Cache::Memcached::Fast' => '0.17' } }
+        }
     },
     auth_delegation => {
         description => 'Auth Delegation',
-        prereqs     => { runtime => { requires => { 'LWP::UserAgent' => 0 } } }
+        prereqs => { runtime => { requires => { 'LWP::UserAgent' => 0 } } }
     },
     updates => {
         description => 'Automatic Update Notifications',
-        prereqs     => { runtime => { requires => { 'LWP::UserAgent' => 0, 'XML::Twig' => 0 } } }
+        prereqs     => {
+            runtime =>
+                { requires => { 'LWP::UserAgent' => 0, 'XML::Twig' => 0 } }
+        }
     },
     auth_radius => {
         description => 'RADIUS Authentication',
-        prereqs     => { runtime => { requires => { 'Authen::Radius' => 0 } } }
+        prereqs => { runtime => { requires => { 'Authen::Radius' => 0 } } }
     },
     documentation => {
-        prereqs => { runtime => { requires => { 'File::Which' => 0, 'File::Copy::Recursive' => 0 } } },
+        prereqs => {
+            runtime => {
+                requires =>
+                    { 'File::Which' => 0, 'File::Copy::Recursive' => 0 }
+            }
+        },
         description => 'Documentation',
     },
     xmlrpc => {
         description => 'XML-RPC Interface',
         prereqs     => {
-            runtime =>
-                { requires => { 'XMLRPC::Lite' => '0.712', 'SOAP::Lite' => '0.712', 'Test::Taint' => '1.06' } }
+            runtime => {
+                requires => {
+                    'XMLRPC::Lite' => '0.712',
+                    'SOAP::Lite'   => '0.712',
+                    'Test::Taint'  => '1.06'
+                }
+            }
         }
     },
     auth_ldap => {
-        prereqs     => { runtime => { requires => { 'Net::LDAP' => 0 } } },
+        prereqs => { runtime => { requires => { 'Net::LDAP' => 0 } } },
         description => 'LDAP Authentication'
     },
     old_charts => {
-        prereqs     => { runtime => { requires => { GD => '1.20', 'Chart::Lines' => 'v2.4.10' } } },
+        prereqs => {
+            runtime =>
+                { requires => { GD => '1.20', 'Chart::Lines' => 'v2.4.10' } }
+        },
         description => 'Old Charts'
     },
     moving => {
-        prereqs => { runtime => { requires => { 'MIME::Parser' => '5.406', 'XML::Twig' => 0 } } },
+        prereqs => {
+            runtime => {
+                requires => { 'MIME::Parser' => '5.406', 'XML::Twig' => 0 }
+            }
+        },
         description => 'Move Bugs Between Installations'
     },
     oracle => {
         description => 'Oracle database support',
-        prereqs     => { runtime => { requires => { 'DBD::Oracle' => '1.19' } } }
+        prereqs => { runtime => { requires => { 'DBD::Oracle' => '1.19' } } }
     },
     typesniffer => {
-        prereqs => { runtime => { requires => { 'IO::Scalar' => 0, 'File::MimeInfo::Magic' => 0 } } },
+        prereqs => {
+            runtime => {
+                requires =>
+                    { 'IO::Scalar' => 0, 'File::MimeInfo::Magic' => 0 }
+            }
+        },
         description => 'Sniff MIME type of attachments'
     },
     sqlite => {
-        prereqs     => { runtime => { requires => { 'DBD::SQLite' => '1.29' } } },
+        prereqs => { runtime => { requires => { 'DBD::SQLite' => '1.29' } } },
         description => 'SQLite database support'
     },
     smtp_ssl => {
-        prereqs     => { runtime => { requires => { 'Net::SMTP::SSL' => '1.01' } } },
+        prereqs =>
+            { runtime => { requires => { 'Net::SMTP::SSL' => '1.01' } } },
         description => 'SSL Support for SMTP'
     },
     mysql => {
         description => 'MySQL database support',
-        prereqs     => { runtime => { requires => { 'DBD::mysql' => '4.001' } } }
+        prereqs => { runtime => { requires => { 'DBD::mysql' => '4.001' } } }
     },
     jsonrpc => {
         description => 'JSON-RPC Interface',
-        prereqs     => { runtime => { requires => { 'JSON::RPC' => 0, 'Test::Taint' => '1.06' } } }
+        prereqs     => {
+            runtime =>
+                { requires => { 'JSON::RPC' => 0, 'Test::Taint' => '1.06' } }
+        }
     },
     graphical_reports => {
         description => 'Graphical Reports',
@@ -175,15 +237,29 @@ my %optional_features = (
     },
     mod_perl => {
         description => 'mod_perl support under Apache',
-        prereqs     => { runtime => { requires => { 'mod_perl2' => '0' } } }
+        prereqs     => {
+            runtime => {
+                requires => {
+                    'mod_perl2'         => '1.999022',
+                    'Apache::SizeLimit' => '0.96',
+                }
+            }
+        }
     },
     inbound_email => {
-        prereqs     => { runtime => { requires => { 'Email::Reply' => 0, 'HTML::FormatText::WithLinks' => '0.13' } } },
+        prereqs => {
+            runtime => {
+                requires => {
+                    'Email::Reply'                => 0,
+                    'HTML::FormatText::WithLinks' => '0.13'
+                }
+            }
+        },
         description => 'Inbound Email'
     },
     patch_viewer => {
         description => 'Patch Viewer',
-        prereqs     => { runtime => { requires => { PatchReader => 'v0.9.6' } } }
+        prereqs => { runtime => { requires => { PatchReader => '0.9.6' } } }
     },
     rest => {
         description => 'REST Interface',
@@ -201,58 +277,75 @@ my %optional_features = (
     },
     jobqueue => {
         description => 'Mail Queueing',
-        prereqs     => { runtime => { requires => { TheSchwartz => '1.1', 'Daemon::Generic' => 0 } } }
+        prereqs     => {
+            runtime => {
+                requires => { TheSchwartz => '1.10', 'Daemon::Generic' => 0 }
+            }
+        }
     },
     psgi => {
         description => 'Plack/PSGI support',
         prereqs     => {
-            runtime => { requires => { Plack => '1.0031', 'CGI::Compile' => 0, 'CGI::Emulate::PSGI' => 0 } }
+            runtime => {
+                requires => {
+                    Plack                => '1.0031',
+                    'CGI::Compile'       => 0,
+                    'CGI::Emulate::PSGI' => 0
+                }
+            }
         }
     },
 );
 
-for my $file (glob("extensions/*/Config.pm")) {
-    my $dir = dirname($file);
+for my $file ( glob("extensions/*/Config.pm") ) {
+    my $dir  = dirname($file);
     my $name = basename($dir);
 
-    next if -f File::Spec->catfile($dir, "disabled");
+    next if -f File::Spec->catfile( $dir, "disabled" );
     require $file;
     my $class = "Bugzilla::Extension::$name";
-    if ($class->can("REQUIRED_MODULES")) {
-        foreach my $required_module (@{ $class->REQUIRED_MODULES() }) {
-            $requires{$required_module->{module}} = $required_module->{version};
+    if ( $class->can("REQUIRED_MODULES") ) {
+        foreach my $required_module ( @{ $class->REQUIRED_MODULES() } ) {
+            $requires{ $required_module->{module} }
+                = $required_module->{version};
         }
     }
 
-    if ($class->can('OPTIONAL_MODULES')) {
+    if ( $class->can('OPTIONAL_MODULES') ) {
         my $default_feature = 'extension_' . lc($name) . '_optional';
-        foreach my $mod (@{ $class->OPTIONAL_MODULES }) {
-            my @features    = $mod->{feature} ? @{$mod->{feature}} : ($default_feature);
+        foreach my $mod ( @{ $class->OPTIONAL_MODULES } ) {
+            my @features
+                = $mod->{feature} ? @{ $mod->{feature} } : ($default_feature);
             foreach my $feature (@features) {
-                $optional_features{$feature}{prereqs}{runtime}{requires}{$mod->{module}} = $mod->{version} // 0;
+                $optional_features{$feature}{prereqs}{runtime}{requires}
+                    { $mod->{module} } = $mod->{version} // 0;
             }
         }
     }
 }
 
 WriteMakefile(
-    NAME               => 'Bugzilla',
-    AUTHOR             => q{Bugzilla Developers <developers@bugzilla.org>},
-    VERSION            => BUGZILLA_VERSION,
-    ABSTRACT           => 'Bugzilla Bug Tracking System',
-    LICENSE            => 'Mozilla_2_0',
-    MIN_PERL_VERSION   => '5.14.0',
-    CONFIGURE_REQUIRES => { 'ExtUtils::MakeMaker' => '6.55' },
-    PREREQ_PM          => \%requires,
-    TEST_REQUIRES => {
-        'Test::More'         => 0,
-        'Pod::Checker'       => 0,
-        'Pod::Coverage'      => 0,
-        'Test::Perl::Critic' => 0
-    },
-    META_MERGE    => {
-        "meta-spec"       => { url => "http://search.cpan.org/perldoc?CPAN::Meta::Spec", version => "2" },
-        dynamic_config    => 1,
+    NAME             => 'Bugzilla',
+    AUTHOR           => q{Bugzilla Developers <developers@bugzilla.org>},
+    VERSION          => BUGZILLA_VERSION,
+    ABSTRACT         => 'Bugzilla Bug Tracking System',
+    LICENSE          => 'Mozilla_2_0',
+    MIN_PERL_VERSION => '5.14.0',
+    CONFIGURE_REQUIRES => { 'ExtUtils::MakeMaker' => $build_requires{'ExtUtils::MakeMaker'} },
+    PREREQ_PM          => { %requires },
+    BUILD_REQUIRES     => { %build_requires },
+    TEST_REQUIRES      => { %test_requires },
+    META_MERGE => {
+        "meta-spec" => {
+            url     => "http://search.cpan.org/perldoc?CPAN::Meta::Spec",
+            version => "2"
+        },
+        dynamic_config => 1,
+        prereqs        => {
+            build   => { requires => { %build_requires } },
+            runtime => { requires => { %requires }, recommends => { %all_features, %recommends } },
+            test    => { requires => { %test_requires } },
+        },
         optional_features => \%optional_features,
     },
 );
@@ -262,5 +355,19 @@ sub MY::postamble {
 GEN_CPANFILE_ARGS = -A -U mod_perl -U oracle
 cpanfile: MYMETA.json
 \t\$(PERLRUN) gen-cpanfile.pl \$(GEN_CPANFILE_ARGS)
+
+checksetup_lib: Makefile.PL
+\tcpanm -l .checksetup_lib CPAN::Meta Module::Metadata\@$all_features{'Module::Metadata'}
+\t-rm -fr .checksetup_lib/man
+\t-rm -fr .checksetup_lib/lib/perl5/*/.meta
+\t-rm -fr .checksetup_lib/lib/perl5/Test
+\t-rm -fr .checksetup_lib/lib/perl5/ok.pm
+\t-find .checksetup_lib '(' -name '*.pod' -or -name .packlist ')' -print0 | xargs -0 rm -f
+
+META.json: Makefile.PL
+\tmake distmeta 2>&1 /dev/null; mv */META.json .
+
+META.yml: Makefile.PL
+\tmake distmeta 2>&1 /dev/null; mv */META.yml .
 MAKE
 }

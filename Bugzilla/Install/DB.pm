@@ -3962,9 +3962,11 @@ sub _sanitize_audit_log_table {
 }
 
 sub _split_login_and_email {
-    my ($old_params) = (@_);
-
+    my ($old_params) = @_;
     my $dbh = Bugzilla->dbh;
+
+    return if $dbh->bz_column_info('profiles', 'email');
+
     $dbh->bz_add_column('profiles', 'email',
                         {TYPE => 'varchar(255)', NOTNULL => 1}, '');
     $dbh->do('UPDATE profiles SET email = login_name');

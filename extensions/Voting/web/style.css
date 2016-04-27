@@ -23,6 +23,10 @@ tr.bz_bug_being_voted_on td {
     border-width: thin;
 }
 
-#votes_container { 
-    white-space: nowrap; 
+#votes_container {
+    white-space: nowrap;
+}
+
+p.votes_change_saved {
+    color: green;
 }

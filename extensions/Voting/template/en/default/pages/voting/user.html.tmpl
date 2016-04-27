@@ -22,7 +22,7 @@
   # voting_user: hash containing a 'login' field
   #
   # products: list of hashes containing details of products relating to
-  #           voting: 
+  #           voting:
   #            name: name of product
   #            bugs: list of bugs the user has voted for
   #            bug_ids: list of bug ids the user has voted for
@@ -33,7 +33,7 @@
   #
   # this_bug: Bugzilla::Bug; if the user is voting for a bug, this is the bug
   #
-  # canedit: boolean; Should the votes be presented in a form, or readonly? 
+  # canedit: boolean; Should the votes be presented in a form, or readonly?
   #
   # all_bug_ids: List of all bug ids the user has voted for, across all products
   #%]
@@ -45,7 +45,7 @@
   [% IF canedit %]
     [% title = "Change Votes" %]
     [% IF this_bug %]
-      [%# We .select and .focus the input so it works for textbox and 
+      [%# We .select and .focus the input so it works for textbox and
           checkbox %]
       [% onload = "document.forms['voting_form'].bug_" _ this_bug.id _
                   ".select();document.forms['voting_form'].bug_" _ this_bug.id _
@@ -55,17 +55,15 @@
     [% title = "Show Votes" %]
   [% END %]
   [% PROCESS global/header.html.tmpl
-             style_urls = [ "extensions/Voting/web/style.css" ] 
+             style_urls = [ "extensions/Voting/web/style.css" ]
   %]
 [% ELSE %]
   <hr>
 [% END %]
 
 [% IF votes_recorded %]
-  <p>
-    <font color="red">
+  <p class="votes_change_saved">
       The changes to your votes have been saved.
-    </font>
   </p>
 [% ELSE %]
   <br>
@@ -155,7 +153,7 @@
     </table>
 
     [% IF canedit %]
-      <input type="submit" value="Change My Votes" id="change"> or 
+      <input type="submit" value="Change My Votes" id="change"> or
       <a href="buglist.cgi?bug_id=[% all_bug_ids.join(",") FILTER uri %]">view all
         as [% terms.bug %] list</a>
       <br>

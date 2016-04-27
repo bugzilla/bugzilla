@@ -119,6 +119,7 @@ use strict;
 use base qw(ModPerl::Registry);
 use Bugzilla;
 use Bugzilla::Constants qw(USAGE_MODE_REST);
+use Time::HiRes;
 
 sub handler : method {
     my $class = shift;
@@ -136,7 +137,9 @@ sub handler : method {
     use warnings;
 
     Bugzilla::init_page();
+    my $start = Time::HiRes::time();
     my $result = $class->SUPER::handler(@_);
+    warn "[request_time] ", Bugzilla->cgi->request_uri, " took ", Time::HiRes::time() - $start, " seconds to execute";
 
     # When returning data from the REST api we must only return 200 or 304,
     # which tells Apache not to append its error html documents to the

@@ -21,7 +21,7 @@ use Bugzilla::WebService::Constants;
 use Bugzilla::WebService::Util qw(extract_flags validate translate);
 use Bugzilla::Util qw(trim);
 
-use List::MoreUtils qw(uniq);
+use List::MoreUtils qw(uniq all);
 use List::Util qw(max);
 use Storable qw(dclone);
 
@@ -62,12 +62,19 @@ sub attachments {
     if ($comment_tags) {
         ThrowUserError('comment_tag_disabled')
           unless Bugzilla->params->{comment_taggers_group};
-        ThrowUserError('auth_failure',
-                       { group  => Bugzilla->params->{comment_taggers_group},
-                         action => 'update',
-                         object => 'comment_tags' })
-          unless $user->can_tag_comments;
-        $bug->set_all({ comment_tags => $comment_tags });
+
+        my $all_mozreview_tags = all { /^mozreview-?/i } @$comment_tags;
+        if ($all_mozreview_tags || $user->can_tag_comments) {
+            # there should be a method of User that does this.
+            local $user->{can_tag_comments} = 1;
+            $bug->set_all({ comment_tags => $comment_tags });
+        }
+        else {
+            ThrowUserError('auth_failure',
+                           { group  => Bugzilla->params->{comment_taggers_group},
+                             action => 'update',
+                             object => 'comment_tags' })
+        }
     }
 
     foreach my $attachment (@$attachments) {

@@ -909,11 +909,11 @@ if (!$user->in_group('editbugs')) {
 }
 
 my @bugowners = keys %$bugowners;
-if (scalar(@bugowners) > 1 && $user->in_group('editbugs')) {
-    my $suffix = Bugzilla->params->{'emailsuffix'};
-    map(s/$/$suffix/, @bugowners) if $suffix;
-    my $bugowners = join(",", @bugowners);
-    $vars->{'bugowners'} = $bugowners;
+if (scalar(@bugowners) > 1
+    && $user->in_group('editbugs')
+    && Bugzilla->params->{'use_email_as_login'})
+{
+    $vars->{'bugowners'} = join(",", @bugowners);
 }
 
 # Whether or not to split the column titles across two rows to make

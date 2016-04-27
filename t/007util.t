@@ -66,7 +66,6 @@ foreach my $input (keys %email_strings) {
 # validate_email_syntax. We need to override some parameters.
 my $params = Bugzilla->params;
 $params->{emailregexp} = '.*';
-$params->{emailsuffix} = '';
 my $ascii_email = 'admin@company.com';
 # U+0430 returns the Cyrillic "а", which looks similar to the ASCII "a".
 my $utf8_email = "\N{U+0430}dmin\@company.com";

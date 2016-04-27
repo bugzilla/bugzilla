@@ -46,8 +46,10 @@ sub check_credentials {
                        Bugzilla->params->{'RADIUS_NAS_IP'} || undef)
         || return { failure => AUTH_LOGINFAILED };
 
+    $params->{bz_username} = $username;
+
     # Build the user account's e-mail address.
-    $params->{bz_username} = $username . $address_suffix;
+    $params->{email} = $username . $address_suffix;
 
     return $params;
 }

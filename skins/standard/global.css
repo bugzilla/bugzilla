@@ -530,6 +530,24 @@ input.requestee {
     font-weight: bold;
 }
 
+form.table_layout div {
+    margin-bottom: 0.4em;
+}
+
+form.table_layout label {
+    font-weight: bold;
+    width: 8em;
+    display: inline-block;
+    float: left;
+    text-align: right;
+    padding-right: 0.5em;
+}
+
+.flex {
+    display: flex;
+    flex-wrap: wrap;
+}
+
 .throw_error a:visited {
     color: darkblue ;
 }

@@ -20,8 +20,7 @@ my ($sel, $config) = get_selenium();
 log_in($sel, $config, 'admin');
 
 set_parameters($sel, {"Administrative Policies" => {"allowuserdeletion-on" => undef},
-                      "User Authentication"     => {"createemailregexp" => {type => "text", value => '.*'},
-                                                    "emailsuffix" => {type => "text", value => ''}} });
+                      "User Authentication"     => {"createemailregexp" => {type => "text", value => '.*'}} });
 
 # Set the password complexity to MIXED LETTERS.
 # Password must contain at least one UPPER and one lowercase letter.

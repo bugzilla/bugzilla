@@ -6,25 +6,16 @@
   # defined by the Mozilla Public License, v. 2.0.
   #%]
 
-[%# INTERFACE
-  # none
-  # 
-  # Param("maintainer") is used to display the maintainer's email.
-  # Param("emailsuffix") is used to pre-fill the email field.
-  #%]
-
 [% PROCESS global/header.html.tmpl
            title = "Create a new $terms.Bugzilla account"
 %]
 
 <p>
   To create a [% terms.Bugzilla %] account, all you need to do is to enter
-[% IF Param('emailsuffix') == '' %]
+  [% IF !Param('use_email_as_login') %]
+    a login name of your choice and
+  [% END %]
   a legitimate email address.
-[% ELSE %]
-  an account name which when combined with [% Param('emailsuffix') %]
-  corresponds to an address where you receive email.
-[% END %]
   You will receive an email at this address to confirm the creation of your
   account. <b>You will not be able to log in until you receive the email.</b>
   If it doesn't arrive within a reasonable amount of time, you may contact
@@ -32,50 +23,66 @@
   at <a href="mailto:[% Param("maintainer") %]">[% Param("maintainer") %]</a>.
 </p>
 
-[% IF Param('allowemailchange') %]
 <p>
   If you already have an account and want to change your
-  [% IF Param('emailsuffix') == '' %]
-    email address,
-  [% ELSE %]
-    login name,
+  [% IF Param('allowemailchange') %]
+    email address or
   [% END %]
-  you can change it from the Preferences page after logging in.
+  login name, you can change it from the Preferences page after logging in.
 </p>
-[% END %]
 
 <p>
   A user account is required to report new [% terms.bugs %] or to comment into
   existing ones, as you may be contacted for more information if needed.
   This also lets other users clearly identify who is the author of comments
   or changes made into [% terms.bugs %]. <b>Note that your email address will
-  <em>never</em> be displayed to logged out users. Only registered users will be
-  able to see it.</b>
+  <em>never</em> be displayed to
+  [% IF Param('use_email_as_login') %]
+    logged out users. Only registered users will be able to see it.</b>
+  [% ELSE %]
+    other users, unless you decide to use your email address as login. Only
+    your login is visible to other users.</b>
+  [% END %]
 </p>
 
-[% IF Param('createemailregexp') == '.*' && Param('emailsuffix') == '' %]
+[% IF Param('createemailregexp') == '.*' %]
 <p>
   <b>PRIVACY NOTICE:</b> [% terms.Bugzilla %] is an open [% terms.bug %]
-  tracking system. Activity on most [% terms.bugs %], including email
-  addresses, will be visible to registered users. We <b>recommend</b> using a
-  secondary account or free web email service (such as Gmail, Yahoo,
-  Hotmail, or similar) to avoid receiving spam at your primary email address.
+  tracking system. Activity on most [% terms.bugs %] will be visible to
+  registered users.
+  [% IF Param('use_email_as_login') %]
+    That includes email addresses. We <b>recommend</b> using a
+    secondary account or free web email service (such as Gmail, Yahoo,
+    Hotmail, or similar) to avoid receiving spam at your primary email address.
+  [% END %]
 </p>
 [% END %]
 
-<form id="account_creation_form" method="get" action="createaccount.cgi">
-  <span class="label">
-    [% IF Param('emailsuffix') %]
-      Login:
-    [% ELSE %]
-      Email address:
-    [% END %]
-  </span>
-  <input size="35" id="login" name="login" autofocus
-         [%- ' type="email"' UNLESS Param('emailsuffix') %] required>
-  [% Param('emailsuffix') FILTER html %]
-  <input type="hidden" id="token" name="token" value="[% issue_hash_token(['create_account']) FILTER html %]">
-  <input type="submit" id="send" value="Send">
+<form id="account_creation_form" action="createaccount.cgi" class="table_layout">
+  [% IF !Param('use_email_as_login') %]
+    <div>
+      <label for="login">Login</label>
+      <div class="flex">
+        <input size="35" id="login" name="login" autofocus required>
+        <span class="bz_info">
+          (no whitespaces and no @ character, unless it matches your email address)
+        </span>
+      </div>
+    </div>
+  [% END %]
+
+  <div>
+    <label for="email">Email Address</label>
+    <input size="35" id="email" name="email" type="email"
+           [%~ " autofocus" IF Param('use_email_as_login') %] required>
+  </div>
+
+  <div>
+    <label>&nbsp;</label>
+    <input type="hidden" id="token" name="token"
+           value="[% issue_hash_token(['create_account']) FILTER html %]">
+    <input type="submit" id="send" value="Send">
+  </div>
 </form>
 
 [% PROCESS global/footer.html.tmpl %]

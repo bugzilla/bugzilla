@@ -136,6 +136,10 @@ sub extern_id_used {
            ||  $self->{_verifier}->extern_id_used;
 }
 
+sub can_change_login {
+    return $_[0]->user_can_create_account;
+}
+
 sub can_change_email {
     return $_[0]->user_can_create_account;
 }
@@ -411,6 +415,14 @@ Returns:     C<true> if users are allowed to create new Bugzilla accounts,
 =item C<extern_id_used>
 
 Description: Whether or not current login system uses extern_id.
+
+=item C<can_change_login>
+
+Description: Whether or not the current login system allows users to
+             change their own login.
+Params:      None
+Returns:     C<true> if users can change their own login,
+             C<false> otherwise.
 
 =item C<can_change_email>
 

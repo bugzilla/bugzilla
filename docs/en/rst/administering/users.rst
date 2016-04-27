@@ -27,9 +27,7 @@ will appear in the Administration page.
 
 The first screen is a search form to search for existing user
 accounts. You can run searches based either on the user ID, real
-name or login name (i.e. the email address, or just the first part
-of the email address if the :param:`emailsuffix` parameter is set).
-The search can be conducted
+name, login name or email address. The search can be conducted
 in different ways using the listbox to the right of the text entry
 box. You can match by case-insensitive substring (the default),
 regular expression, a *reverse* regular expression
@@ -55,12 +53,14 @@ Modifying Users
 Once you have found your user, you can change the following
 fields:
 
-- *Login Name*:
-  This is generally the user's full email address. However, if you
-  have are using the :param:`emailsuffix` parameter, this may
-  just be the user's login name. Unless you turn off the
+- *Email Address*:
+  This is the user's full email address. Unless you turn off the
   :param:`allowemailchange` parameter, users can change their
   login names themselves (to any valid email address).
+
+- *Login Name*:
+  This is the user's login name, if it is (or can be) different from their email
+  address (i.e. if the "use_email_as_login" parameter is switched off).
 
 - *Real Name*: The user's real name. Note that
   Bugzilla does not require this to create an account.

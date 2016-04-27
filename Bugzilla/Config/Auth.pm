@@ -75,12 +75,6 @@ sub get_param_list {
   },
 
   {
-   name => 'webservice_email_filter',
-   type => 'b',
-   default => 0
-  },
-
-  {
    name => 'emailregexp',
    type => 't',
    default => q:^[\\w\\.\\+\\-=']+@[\\w\\.\\-]+\\.[\\w\\-]+$:,
@@ -95,9 +89,10 @@ sub get_param_list {
   },
 
   {
-   name => 'emailsuffix',
-   type => 't',
-   default => ''
+   name => 'use_email_as_login',
+   type => 'b',
+   default => '1',
+   onchange => \&change_use_email_as_login
   },
 
   {

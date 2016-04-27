@@ -12,15 +12,19 @@
 
 <span class="vcard">
   [% FILTER collapse %]
-    [% IF user.id %]
-      <a class="email" href="mailto:[% who.email FILTER html %]"
-         title="[% who.identity FILTER html %]">
-    [%- END -%]
-    [% IF who.name %]
-       <span class="fn">[% who.name FILTER html %]</span>
+    [% IF Param("use_email_as_login") %]
+      [% IF user.id %]
+        <a class="email" href="mailto:[% who.email FILTER html %]"
+           title="[% who.identity FILTER html %]">
+      [%- END -%]
+      [% IF who.name %]
+         <span class="fn">[% who.name FILTER html %]</span>
+      [% ELSE %]
+        [% who.login FILTER email FILTER html %]
+      [% END %]
+      [% '</a>' IF user.id %]
     [% ELSE %]
-      [% who.login FILTER email FILTER html %]
+      [% who.identity FILTER html %]
     [% END %]
-    [% '</a>' IF user.id %]
   [% END %]
 </span>

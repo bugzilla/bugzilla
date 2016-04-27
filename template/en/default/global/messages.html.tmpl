@@ -22,7 +22,7 @@
 
   [% ELSIF message_tag == "account_creation_canceled" %]
     [% title = "User Account Creation Canceled" %]
-    The creation of the user account [% account FILTER html %] has been
+    The creation of the user account '[% login FILTER html %]' has been
     canceled.
 
   [% ELSIF message_tag == "account_updated" %]
@@ -35,6 +35,8 @@
           <li>
             [% IF    field == 'login_name' %]
               The login is now [% otheruser.login FILTER html %].
+            [% ELSIF field == 'email' %]
+              The email is now [% otheruser.email FILTER html %].
             [% ELSIF field == 'realname' %]
               The real name has been updated.
             [% ELSIF field == 'cryptpassword' %]
@@ -89,8 +91,8 @@
     successfully.
 
   [% ELSIF message_tag == "account_disabled" %]
-    Logging in with this user account [% account FILTER html %] is disabled, so
-    you cannot change its password.
+    Logging in with the user account with email address [% email FILTER html %]
+    is disabled, so you cannot change its password.
 
   [% ELSIF message_tag == "attachment_creation_failed" %]
     The [% terms.bug %] was created successfully, but attachment creation
@@ -496,7 +498,7 @@
     [%+ terms.Bugzilla %]...
 
   [% ELSIF message_tag == "migrate_user_created" %]
-    User created: [% created.email FILTER html %]
+    User created: [% created.login FILTER html %]
     [% IF password %] Password: [% password FILTER html %][% END %]
 
   [% ELSIF message_tag == "migrate_value_created" %]
@@ -505,6 +507,10 @@
     [% END %]
     [%+ field_descs.${field.name} FILTER html %] value
     created: [% value FILTER html %]
+
+  [% ELSIF message_tag == "email_changed" %]
+    [% title = "Email Changed" %]
+    Your email address has been updated.
 
   [% ELSIF message_tag == "milestone_created" %]
     [% title = "Milestone Created" %]
@@ -561,7 +567,7 @@
   [% ELSIF message_tag == "password_change_request" %]
     [% title = "Request to Change Password" %]
     A token for changing your password has been emailed to
-    <em>[% login_name FILTER html %]</em>.
+    <em>[% email FILTER html %]</em>.
     Follow the instructions in that email to change your password.
 
   [% ELSIF message_tag == "password_changed" %]
@@ -638,6 +644,9 @@
   [% ELSIF message_tag == "flag_type_deactivated" %]
     [% title = BLOCK %]Flag Type '[% flag_type.name FILTER html %]' Deactivated[% END %]
     The flag type <em>[% flag_type.name FILTER html %]</em> has been deactivated.
+
+  [% ELSIF message_tag == "install_admin_get_login" %]
+    Enter the login name the administrator will log in with:
 
   [% ELSIF message_tag == "install_admin_get_email" %]
     Enter the e-mail address of the administrator:

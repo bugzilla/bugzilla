@@ -51,9 +51,15 @@
     <th>Field</th>
     <th>Value</th>
   </tr>
+  [% IF !Param('use_email_as_login') %]
+    <tr>
+      <th>Login:</th>
+      <td>[% otheruser.login FILTER html %]</td>
+    </tr>
+  [% END %]
   <tr>
-    <th>Login name:</th>
-    <td>[% otheruser.login FILTER html %]</td>
+    <th>Email address:</th>
+    <td>[% otheruser.email FILTER html %]</td>
   </tr>
   <tr>
     <th>Real name:</th>

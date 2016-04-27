@@ -161,7 +161,7 @@ sub directive_ok {
 
     # Directives
     return 1 if $directive =~ /^(IF|END|UNLESS|FOREACH|PROCESS|INCLUDE|
-                                 BLOCK|USE|ELSE|NEXT|LAST|DEFAULT|
+                                 BLOCK|USE|ELSE|NEXT|LAST|DEFAULT|CALL|
                                  ELSIF|SET|SWITCH|CASE|WHILE|RETURN|STOP|
                                  TRY|CATCH|FINAL|THROW|CLEAR|MACRO|FILTER)/x;
 

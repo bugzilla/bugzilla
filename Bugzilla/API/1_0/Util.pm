@@ -33,9 +33,10 @@ our @EXPORT = qw(
     as_datetime
     as_double
     as_email
-    as_email_array
     as_int
     as_int_array
+    as_login
+    as_login_array
     as_name_array
     as_string
     as_string_array
@@ -367,8 +368,8 @@ sub as_string   { defined $_[0] ? $_[0] . ''  : JSON::null }
 
 # array types
 
-sub as_email_array  { [ map { as_email($_) }        @{ $_[0] // [] } ] }
 sub as_int_array    { [ map { as_int($_) }          @{ $_[0] // [] } ] }
+sub as_login_array  { [ map { as_login($_) }        @{ $_[0] // [] } ] }
 sub as_name_array   { [ map { as_string($_->name) } @{ $_[0] // [] } ] }
 sub as_string_array { [ map { as_string($_) }       @{ $_[0] // [] } ] }
 
@@ -380,10 +381,14 @@ sub as_datetime {
         : JSON::null;
 }
 
-sub as_email    {
+sub as_login    {
     defined $_[0]
-        ? ( Bugzilla->params->{webservice_email_filter} ? email_filter($_[0]) : $_[0] . '' )
-        : JSON::null
+        ? ( Bugzilla->params->{use_email_as_login} ? email_filter($_[0]) : $_[0] . '' )
+        : JSON::null;
+}
+
+sub as_email    {
+    defined($_[0]) && Bugzilla->user->in_group('editusers') ? $_[0] . '' : JSON::null;
 }
 
 sub as_base64   {
@@ -496,13 +501,9 @@ double value. If parameter is undefined, returns JSON::null.
 
 =head2 as_email
 
-Takes an email address as a parameter if filters it if C<webservice_email_filter> is
-enabled in the system settings. If parameter is undefined, returns JSON::null.
-
-=head2 as_email_array
-
-Similar to C<as_email>, but takes an array reference to a list of values and
-returns an array reference with the converted values.
+Takes an email address as a parameter. If the user is in the editusers group,
+it returns the email address, unchanged. If the parameter is undefined or the
+user is not in the editusers group, it returns JSON::null.
 
 =head2 as_int
 
@@ -512,6 +513,18 @@ value. If parameter is undefined, returns JSON::null.
 =head2 as_int_array
 
 Similar to C<as_int>, but takes an array reference to a list of values and
+returns an array reference with the converted values.
+
+=head2 as_login
+
+Takes a login name as a parameter. If C<use_email_as_login> is enabled and the
+user is logged out, it returns the local part of the email address (the part
+before '@'). Else it returns the full login name. If parameter is undefined,
+returns JSON::null.
+
+=head2 as_login_array
+
+Similar to C<as_login>, but takes an array reference to a list of values and
 returns an array reference with the converted values.
 
 =head2 as_name_array

@@ -178,7 +178,6 @@ Example response for authenticated user:
           "defaultseverity" : "normal",
           "duplicate_or_move_bug_status" : "RESOLVED",
           "emailregexp" : "^[\\w\\.\\+\\-=']+@[\\w\\.\\-]+\\.[\\w\\-]+$",
-          "emailsuffix" : "",
           "letsubmitterchoosemilestone" : "1",
           "letsubmitterchoosepriority" : "1",
           "mailfrom" : "bugzilla-daemon@example.com",
@@ -214,7 +213,6 @@ A logged-in user can access the following parameters (listed alphabetically):
 * defaultseverity
 * duplicate_or_move_bug_status
 * emailregexpdesc
-* emailsuffix
 * letsubmitterchoosemilestone
 * letsubmitterchoosepriority
 * mailfrom

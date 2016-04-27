@@ -69,7 +69,6 @@ use constant PARAMETERS_LOGGED_IN => qw(
     defaultseverity
     duplicate_or_move_bug_status
     emailregexpdesc
-    emailsuffix
     letsubmitterchoosemilestone
     letsubmitterchoosepriority
     mailfrom
@@ -82,6 +81,7 @@ use constant PARAMETERS_LOGGED_IN => qw(
     requirelogin
     search_allow_no_criteria
     urlbase
+    use_email_as_login
     use_see_also
     useclassification
     usemenuforusers
@@ -449,7 +449,6 @@ A logged-in user can access the following parameters (listed alphabetically):
     C<defaultseverity>,
     C<duplicate_or_move_bug_status>,
     C<emailregexpdesc>,
-    C<emailsuffix>,
     C<letsubmitterchoosemilestone>,
     C<letsubmitterchoosepriority>,
     C<mailfrom>,
@@ -462,6 +461,7 @@ A logged-in user can access the following parameters (listed alphabetically):
     C<requirelogin>,
     C<search_allow_no_criteria>,
     C<urlbase>,
+    C<use_email_as_login>,
     C<use_see_also>,
     C<useclassification>,
     C<usemenuforusers>,

@@ -35,11 +35,13 @@ BEGIN {
             $value = Bugzilla::WebService::Server->datetime_format_outbound($value);
             $value =~ s/-//g;
         }
+        elsif ($type eq 'login') {
+            $type = 'string';
+            $value = email_filter($value) if Bugzilla->params->{'use_email_as_login'};
+        }
         elsif ($type eq 'email') {
             $type = 'string';
-            if (Bugzilla->params->{'webservice_email_filter'}) {
-                $value = email_filter($value);
-            }
+            $value = '' unless Bugzilla->user->in_group('editusers');
         }
         return XMLRPC::Data->type($type)->value($value);
     };

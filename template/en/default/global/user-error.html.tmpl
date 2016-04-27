@@ -55,10 +55,12 @@
   [% ELSIF error == "account_exists" %]
     [% title = "Account Already Exists" %]
     There is already an account with
-    [% IF email %]
-      the login name [% email FILTER html %].
+    [% IF login %]
+      the login name [% login FILTER html %].
+    [% ELSIF email %]
+      the email address [% email FILTER html %].
     [% ELSE %]
-      that login name.
+      that login name or email address.
     [% END %]
 
   [% ELSIF error == "account_locked" %]
@@ -523,8 +525,17 @@
     [% title = "Email Change Already In Progress" %]
     Email change already in progress; please check your email.
 
+  [% ELSIF error == "email_needed_for_password_change" %]
+    [% title = "Email Address Required" %]
+    You must enter an email address when requesting to change your password.
+
   [% ELSIF error == "email_no_body" %]
     Your message did not contain any text, as far as we could tell.
+
+  [% ELSIF error == "email_required" %]
+    [% title = "Email Address Required" %]
+    [% admindocslinks = {'useradmin.html' => 'User administration'} %]
+    You must enter an email address for the new user.
 
   [% ELSIF error == "empty_group_description" %]
     [% title = "The group description cannot be empty" %]
@@ -969,10 +980,10 @@
     [% IF format %]
       Please use the format '<code>[% format FILTER html %]</code>'.
     [% END %]
-    
+
   [% ELSIF error == "illegal_email_address" %]
     [% title = "Invalid Email Address" %]
-    The e-mail address you entered (<b>[% addr FILTER html %]</b>) 
+    The e-mail address you entered (<b>[% email FILTER html %]</b>)
     didn't pass our syntax checking for a legal email address.
     [% IF default %]
       A legal address must contain exactly one '@',
@@ -1075,6 +1086,12 @@
   [% ELSIF error == "invalid_dimensions" %]
     [% title = "Invalid Dimensions" %]
     The width or height specified is not a positive integer.
+
+  [% ELSIF error == "invalid_email" %]
+    [% title = "Invalid Email Address" %]
+    The address <tt>[% email FILTER html %]</tt> is not a valid email address.
+    Either you misspelled it, or the person has not
+    registered for a [% terms.Bugzilla %] account.
 
   [% ELSIF error == "invalid_format" %]
     [% title = "Invalid Format" %]
@@ -1208,18 +1225,28 @@
   [% ELSIF error == "keyword_blank_description" %]
     [% title = "Blank Keyword Description Not Allowed" %]
     You must enter a non-blank description for the keyword.
-     
+
   [% ELSIF error == "keyword_blank_name" %]
     [% title = "Blank Keyword Name Not Allowed" %]
     You must enter a non-blank name for the keyword.
-     
+
   [% ELSIF error == "keyword_invalid_name" %]
     [% title = "Invalid Keyword Name" %]
     You may not use commas or whitespace in a keyword name.
-     
-  [% ELSIF error == "login_needed_for_password_change" %]
-    [% title = "Login Name Required" %]
-    You must enter a login name when requesting to change your password.
+
+  [% ELSIF error == "login_at_sign_disallowed" %]
+    [% title = "Illegal Character in Login" %]
+    Login names may not contain the "@" sign unless you are setting your
+    login name to be identical to your email address.
+
+  [% ELSIF error == "login_change_during_email_change" %]
+    [% title = "Login Change Not Permitted" %]
+    You may not change your login name while you are in the middle of the
+    process of changing your email address.
+
+  [% ELSIF error == "login_illegal_character" %]
+    [% title = "Illegal Character In Login" %]
+    Login names are not allowed to contain space characters.
 
   [% ELSIF error == "login_required_for_pronoun" %]
     [% title = "Login Name Required" %]
@@ -1229,6 +1256,10 @@
   [% ELSIF error == "login_required" %]
     [%# Used for non-web-based LOGIN_REQUIRED situations. %]
     You must log in before using this part of [% terms.Bugzilla %].
+
+  [% ELSIF error == "login_too_long" %]
+    [% title = "Login Too Long" %]
+    Your login name is too long. It cannot exceed 127 characters.
 
   [% ELSIF error == "markdown_disabled" %]
     Markdown feature is not enabled.
@@ -1495,8 +1526,8 @@
     You did not enter your current password correctly.
 
   [% ELSIF error == "current_password_required" %]
-    [% title = "Old Password Required" %]
-    You must enter your old password to change your email address.
+    [% title = "Current Password Required" %]
+    You must enter your current password to edit your account.
 
   [% ELSIF error == "password_change_requests_not_allowed" %]
     [% title = "Password Change Requests Not Allowed" %]
@@ -1511,7 +1542,7 @@
     The password must be at least
     [%+ constants.USER_PASSWORD_MIN_LENGTH FILTER html %] characters long.
     [% IF locked_user %]
-      You must <a href="token.cgi?a=reqpw&amp;loginname=[% locked_user.email FILTER uri %]&amp;token=[% issue_hash_token(['reqpw']) FILTER uri %]">
+      You must <a href="token.cgi?a=reqpw&amp;email=[% locked_user.email FILTER uri %]&amp;token=[% issue_hash_token(['reqpw']) FILTER uri %]">
       request a new password</a> in order to log in again.
     [% END %]
 
@@ -1532,7 +1563,7 @@
       [% END %]
     </ul>
     [% IF locked_user %]
-      You must <a href="token.cgi?a=reqpw&amp;loginname=[% locked_user.email FILTER uri %]&amp;token=[% issue_hash_token(['reqpw']) FILTER uri %]">
+      You must <a href="token.cgi?a=reqpw&amp;email=[% locked_user.email FILTER uri %]&amp;token=[% issue_hash_token(['reqpw']) FILTER uri %]">
       request a new password</a> in order to log in again.
     [% END %]
 

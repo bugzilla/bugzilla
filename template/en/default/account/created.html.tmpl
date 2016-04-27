@@ -7,7 +7,8 @@
   #%]
 
 [%# INTERFACE:
-  # login: string. The user's Bugzilla login email address.
+  # login: string. The user's Bugzilla login.
+  # email: string. The user's Bugzilla email address.
   #%]
 
 [% title = BLOCK %]
@@ -17,9 +18,9 @@
 [% PROCESS global/header.html.tmpl title = title %]
 
 <p>
-  A confirmation email has been sent containing a link to continue
-  creating an account. The link will expire if an account is not
-  created within [% constants.MAX_TOKEN_AGE FILTER html %] days.
+  A confirmation email has been sent to <em>[% email FILTER html %]</em> containing
+  a link to continue creating an account. The link will expire if an account is
+  not created within [% constants.MAX_TOKEN_AGE FILTER html %] days.
 </p>
 
 [% PROCESS global/footer.html.tmpl %] 

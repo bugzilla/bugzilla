@@ -765,7 +765,7 @@
           users
         [% END %]
         [% IF user.id %]
-          [% IF bug.cc.contains( user.email ) %]
+          [% IF bug.cc.contains( user.login ) %]
             including you
           [% END %]
         [% END %]

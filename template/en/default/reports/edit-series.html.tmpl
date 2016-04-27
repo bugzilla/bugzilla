@@ -33,8 +33,7 @@
 <p>
   <b>Creator</b>: 
   [% IF default.creator %]
-    <a href="mailto:[% default.creator.email FILTER html %]">
-    [% default.creator.email FILTER html %]</a>
+    [% default.creator.login FILTER html %]
   [% ELSE %]
     (automatically created by Bugzilla)
   [% END %]

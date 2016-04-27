@@ -29,6 +29,8 @@ use parent qw(Exporter);
        check_bug_status check_smtp_auth check_theschwartz_available
        check_maxattachmentsize check_email check_smtp_ssl
        check_comment_taggers_group check_smtp_server check_resolution
+
+       change_use_email_as_login change_duplicate_or_move_bug_status
 );
 
 # Checking functions for the various values
@@ -362,18 +364,36 @@ sub check_comment_taggers_group {
     return check_group($group_name);
 }
 
+# Change handler functions for various parameters
+
+# If use_email_as_login is turned on, update all login names to be email
+# addresses.
+sub change_use_email_as_login {
+    my $newvalue = shift;
+    if ($newvalue) {
+        Bugzilla->dbh->do('UPDATE profiles SET login_name = email');
+    }
+}
+
+sub change_duplicate_or_move_bug_status {
+    my $newvalue = shift;
+    Bugzilla::Status::add_missing_bug_status_transitions($newvalue);
+}
+
 # OK, here are the parameter definitions themselves.
 #
 # Each definition is a hash with keys:
 #
-# name    - name of the param
-# desc    - description of the param (for editparams.cgi)
-# type    - see below
-# choices - (optional) see below
-# default - default value for the param
-# checker - (optional) checking function for validating parameter entry
-#           It is called with the value of the param as the first arg and a
-#           reference to the param's hash as the second argument
+# name     - name of the param
+# desc     - description of the param (for editparams.cgi)
+# type     - see below
+# choices  - (optional) see below
+# default  - default value for the param
+# checker  - (optional) checking function for validating parameter entry.
+#            It is called with the value of the param as the first arg
+#            and a reference to the param's hash as the second argument.
+# onchange - (optional) handling function for parameter changes.
+#            The argument is the new value of the param.
 #
 # The type value can be one of the following:
 #
@@ -466,6 +486,17 @@ Checks that the value is a valid regexp
 
 Checks that the required modules for comment tagging are installed, and that a
 valid group is provided.
+
+=item C<change_use_email_as_login>
+
+Change handler for "use_email_as_login" parameter - if param is changed to
+true, updates login_name field to be the value of the email field for all
+users.
+
+=item C<change_duplicate_or_move_bug_status>
+
+Change handler for "duplicate_or_move_bug_status" parameter - if param is
+changed, insert all missing transitions to the new bug status.
 
 =back
 

@@ -99,23 +99,21 @@ sub check_credentials {
         my @emails = $user_entry->get_value($mail_attr);
 
         # Default to the first email address returned.
-        $params->{bz_username} = $emails[0];
+        $params->{email} = $emails[0];
 
         if (@emails > 1) {
             # Cycle through the adresses and check if they're Bugzilla logins.
             # Use the first one that returns a valid id. 
             foreach my $email (@emails) {
-                if ( login_to_id($email) ) {
-                    $params->{bz_username} = $email;
+                if ( email_to_id($email) ) {
+                    $params->{email} = $email;
                     last;
                 }
             }
         }
-
-    } else {
-        $params->{bz_username} = $username;
     }
 
+    $params->{bz_username} = $username;
     $params->{realname}  ||= $user_entry->get_value("displayName");
     $params->{realname}  ||= $user_entry->get_value("cn");
 

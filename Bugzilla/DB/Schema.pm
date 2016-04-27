@@ -930,6 +930,7 @@ use constant ABSTRACT_SCHEMA => {
             userid         => {TYPE => 'MEDIUMSERIAL', NOTNULL => 1,
                                PRIMARYKEY => 1},
             login_name     => {TYPE => 'varchar(255)', NOTNULL => 1},
+            email          => {TYPE => 'varchar(255)', NOTNULL => 1},
             cryptpassword  => {TYPE => 'varchar(128)'},
             realname       => {TYPE => 'varchar(255)', NOTNULL => 1,
                                DEFAULT => "''"},
@@ -948,7 +949,9 @@ use constant ABSTRACT_SCHEMA => {
             profiles_login_name_idx => {FIELDS => ['login_name'],
                                         TYPE => 'UNIQUE'},
             profiles_extern_id_idx => {FIELDS => ['extern_id'],
-                                       TYPE   => 'UNIQUE'}
+                                       TYPE   => 'UNIQUE'},
+            profiles_email_idx => {FIELDS => ['email'],
+                                   TYPE => 'UNIQUE'}
         ],
     },
 

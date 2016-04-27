@@ -645,7 +645,7 @@ DoubleCrossCheck("milestones", "product_id", "value",
 
 Status('profile_login_start');
 
-my $sth = $dbh->prepare(q{SELECT userid, login_name FROM profiles});
+my $sth = $dbh->prepare(q{SELECT userid, email FROM profiles});
 $sth->execute;
 
 while (my ($id, $email) = $sth->fetchrow_array) {

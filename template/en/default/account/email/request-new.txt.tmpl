@@ -10,6 +10,7 @@
   # token: random string used to authenticate the transaction.
   # expiration_ts: expiration date of the token.
   # email: email address of the new account.
+  # login: login name of the new account.
   #%]
 
 From: [% Param('mailfrom') %]
@@ -18,7 +19,7 @@ Subject: [% terms.Bugzilla %]: confirm account creation
 X-Bugzilla-Type: admin
 
 [%+ terms.Bugzilla %] has received a request to create a user account
-using your email address ([% email %]).
+[%+ "($login)" IF !Param('use_email_as_login') %] using your email address ([% email %]).
 
 To continue creating an account using this email address, visit the 
 following link by [% expiration_ts FILTER time("%B %e, %Y at %H:%M %Z") %]:
@@ -31,11 +32,14 @@ again by going to:
 
 [%+ urlbase %]createaccount.cgi
 
-[% IF Param('createemailregexp') == '.*' && Param('emailsuffix') == '' %]
-PRIVACY NOTICE: [% terms.Bugzilla %] is an open [% terms.bug %] tracking system. Activity on most
-[%+ terms.bugs %], including email addresses, will be visible to the public. We recommend
-using a secondary account or free web email service (such as Gmail, Yahoo,
-Hotmail, or similar) to avoid receiving spam at your primary email address.
+[% IF Param('createemailregexp') == '.*' %]
+PRIVACY NOTICE: [% terms.Bugzilla %] is an open [% terms.bug %] tracking
+system. Activity on most [%+ terms.bugs %] will be visible to the public.
+[% IF Param('use_email_as_login') %]
+This includes email addresses. We recommend using a secondary account or free
+web email service (such as Gmail, Yahoo, Hotmail, or similar) to avoid
+receiving spam at your primary email address.
+[% END %]
 [% END %]
 
 If you do not wish to create an account, or if this request was made in

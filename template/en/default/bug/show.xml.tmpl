@@ -18,7 +18,7 @@
           %]
           maintainer="[% Param('maintainer') FILTER xml %]"
 [% IF user.id %]
-          exporter="[% user.email FILTER email FILTER xml %]"
+          exporter="[% user.login FILTER email FILTER xml %]"
 [% END %]
 >
 
@@ -76,7 +76,7 @@
             <type>[% a.contenttype FILTER xml %]</type>
             <size>[% a.datasize FILTER xml %]</size>
             <attacher[% IF a.attacher.name != '' %] name="[% a.attacher.name FILTER xml %]"[% END -%]>
-            [% a.attacher.email FILTER email FILTER xml %]</attacher>
+            [% a.attacher.login FILTER email FILTER xml %]</attacher>
             [%# This is here so automated clients can still use attachment.cgi %]
             [% IF displayfields.token && user.id %]
               <token>[% issue_hash_token([a.id, a.modification_time]) FILTER xml %]</token>
@@ -113,7 +113,7 @@
     [% IF field == 'reporter' OR field == 'assigned_to' OR
           field == 'qa_contact' %]
       [% name = val.name %]
-      [% val = val.email FILTER email %]
+      [% val = val.login FILTER email %]
     [% ELSIF field == 'cc' %]
         [% val = val FILTER email %]
     [% ELSIF field == 'creation_ts' OR field == 'delta_ts' %]
@@ -134,9 +134,9 @@
           id="[% flag.id FILTER xml %]"
           type_id="[% flag.type_id FILTER xml %]"
           status="[% flag.status FILTER xml %]"
-          setter="[% flag.setter.email FILTER email FILTER xml %]"
+          setter="[% flag.setter.login FILTER email FILTER xml %]"
       [% IF flag.status == "?" && flag.requestee %]
-          requestee="[% flag.requestee.email FILTER email FILTER xml %]"
+          requestee="[% flag.requestee.login FILTER email FILTER xml %]"
       [% END %]
     />
   [% END %]
@@ -150,7 +150,7 @@
     [% IF c.is_about_attachment %]
       <attachid>[% c.extra_data FILTER xml %]</attachid>
     [% END %]
-    <who name="[% c.author.name FILTER xml %]">[% c.author.email FILTER email FILTER xml %]</who>
+    <who name="[% c.author.name FILTER xml %]">[% c.author.login FILTER email FILTER xml %]</who>
     <bug_when>[% c.creation_ts FILTER time("%Y-%m-%d %T %z") FILTER xml %]</bug_when>
     [% IF user.is_timetracker && (c.work_time - 0 != 0) %]
       <work_time>[% PROCESS formattimeunit time_unit = c.work_time FILTER xml %]</work_time>

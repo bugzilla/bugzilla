@@ -27,22 +27,25 @@ my $vars = { doc_section => 'using/creating-an-account.html' };
 
 print $cgi->header();
 
-my $login = $cgi->param('login');
+my $email = $cgi->param('email');
+my $login = Bugzilla->params->{'use_email_as_login'} ? $email : $cgi->param('login');
+
 my $request_new_password = $cgi->param('request_new_password');
 
 if ($request_new_password) {
     $template->process('account/request-new-password.html.tmpl', $vars)
       || ThrowTemplateError($template->error());
 }
-elsif (defined($login)) {
+elsif ($email && $login) {
     $user->check_account_creation_enabled;
     # Check the hash token to make sure this user actually submitted
     # the create account form.
     my $token = $cgi->param('token');
     check_hash_token($token, ['create_account']);
 
-    $user->check_and_send_account_creation_confirmation($login);
+    $user->check_and_send_account_creation_confirmation($login, $email);
     $vars->{'login'} = $login;
+    $vars->{'email'} = $email;
 
     $template->process("account/created.html.tmpl", $vars)
       || ThrowTemplateError($template->error());

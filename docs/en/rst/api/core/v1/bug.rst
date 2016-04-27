@@ -251,8 +251,6 @@ name       type    description
 id         int     The user ID for this user.
 real_name  string  The 'real' name for this user, if any.
 name       string  The user's Bugzilla login.
-email      string  The user's email address. Currently this is the same value as
-                   the name.
 =========  ======  ==============================================================
 
 Flag object:
@@ -290,6 +288,11 @@ field name in ``include_fields``.
   The bug_id you specified doesn't exist in the database.
 * 102 (Access Denied)
   You do not have access to the bug_id you specified.
+
+**History**
+
+Since Bugzilla 6.0, the email address of users is private and is no longer
+returned as part of the user object.
 
 .. _rest_history:
 

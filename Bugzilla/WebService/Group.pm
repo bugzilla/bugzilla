@@ -210,8 +210,8 @@ sub _get_group_membership {
         map {{
             id                => $self->type('int', $_->id),
             real_name         => $self->type('string', $_->name),
-            name              => $self->type('string', $_->login),
-            email             => $self->type('string', $_->email),
+            name              => $self->type('login', $_->login),
+            email             => $self->type('email', $_->email),
             can_login         => $self->type('boolean', $_->is_enabled),
             email_enabled     => $self->type('boolean', $_->email_enabled),
             login_denied_text => $self->type('string', $_->disabledtext),
@@ -282,7 +282,7 @@ name of the group.
 
 =item C<user_regexp>
 
-C<string> A regular expression. Any user whose Bugzilla username matches
+C<string> A regular expression. Any user whose Bugzilla email address matches
 this regular expression will automatically be granted membership in this group.
 
 =item C<is_active>
@@ -553,8 +553,7 @@ C<string> The email address of the user.
 
 =item name
 
-C<string> The login name of the user. Note that in some situations this is
-different than their email.
+C<string> The login name of the user.
 
 =item can_login
 

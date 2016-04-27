@@ -38,7 +38,8 @@ sub get_param_list {
    type => 's',
    choices => \@closed_bug_statuses,
    default => $closed_bug_statuses[0],
-   checker => \&check_bug_status
+   checker => \&check_bug_status,
+   onchange => \&change_duplicate_or_move_bug_status
   },
 
   {

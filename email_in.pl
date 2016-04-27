@@ -508,10 +508,6 @@ Bugzilla::Hook::process('email_in_after_parse', { fields => $mail_fields });
 my $attachments = delete $mail_fields->{'attachments'};
 
 my $username = $mail_fields->{'reporter'};
-# If emailsuffix is in use, we have to remove it from the email address.
-if (my $suffix = Bugzilla->params->{'emailsuffix'}) {
-    $username =~ s/\Q$suffix\E$//i;
-}
 
 my $user = Bugzilla::User->check($username);
 Bugzilla->set_user($user);

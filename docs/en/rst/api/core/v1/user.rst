@@ -142,6 +142,8 @@ to perform this action.
 ==========  ======  =============================================================
 name        type    description
 ==========  ======  =============================================================
+**login**   string  The login name for the new user. Ignored if the
+                    *use_email_as_login* parameter is true.
 **email**   string  The email address for the new user.
 full_name   string  The user's full name. Will be set to empty if not specified.
 password    string  The password for the new user account, in plain text. It
@@ -173,6 +175,10 @@ id    int   The numeric ID of the user that was created.
   The password specified is too short. (Usually, this means the
   password is under three characters.)
 
+**History**
+
+The *login* parameter has been added in Bugzilla 6.0.
+
 .. _rest_user_update:
 
 Update User
@@ -203,8 +209,7 @@ login names using the ``ids`` or ``names`` parameters respectively.
 **ids**            array    Additional IDs of users to update.
 **names**          array    Additional login names of users to update.
 full_name          string   The new name of the user.
-email              string   The email of the user. Note that email used to
-                            login to bugzilla. Also note that you can only
+email              string   The email of the user. Also note that you can only
                             update one user at a time when changing the login
                             name / email. (An error will be thrown if you try to
                             update this field for multiple users at once.)
@@ -357,8 +362,7 @@ id                 int      The unique integer ID that Bugzilla uses to represen
                             this will not change.
 real_name          string   The actual name of the user. May be blank.
 email              string   The email address of the user.
-name               string   The login name of the user. Note that in some
-                            situations this is different than their email.
+name               string   The login name of the user.
 can_login          boolean  A boolean value to indicate if the user can login
                             into bugzilla.
 email_enabled      boolean  A boolean value to indicate if bug-related mail will
@@ -404,7 +408,7 @@ query  string  The CGI parameters for the saved report.
 If you are not authenticated when you call this function, you will only be
 returned the ``id``, ``name``, and ``real_name`` items. If you are authenticated
 and not in 'editusers' group, you will only be returned the ``id``, ``name``,
-``real_name``, ``email``, ``can_login``, and ``groups`` items. The groups
+``real_name``, ``can_login``, and ``groups`` items. The groups
 returned are filtered based on your permission to bless each group. The
 ``saved_searches`` and ``saved_reports`` items are only returned if you are
 querying your own account, even if you are in the editusers group.

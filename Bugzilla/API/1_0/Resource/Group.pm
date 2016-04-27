@@ -247,8 +247,8 @@ sub _get_group_membership {
         map {{
             id                => as_int($_->id),
             real_name         => as_string($_->name),
-            name              => as_string($_->login),
-            email             => as_string($_->email),
+            name              => as_login($_->login),
+            email             => as_email($_->email),
             can_login         => as_boolean($_->is_enabled),
             email_enabled     => as_boolean($_->email_enabled),
             login_denied_text => as_string($_->disabledtext),
@@ -571,12 +571,12 @@ C<string> The actual name of the user.
 
 =item email
 
-C<string> The email address of the user.
+C<string> If you are in the editusers group, returns the email address of the
+user, else returns nothing.
 
 =item name
 
-C<string> The login name of the user. Note that in some situations this is
-different than their email.
+C<string> The login name of the user.
 
 =item can_login
 

@@ -72,7 +72,7 @@ if ($action eq 'search') {
     my $grouprestrict = $cgi->param('grouprestrict') || '0';
     # 0 = disabled only, 1 = enabled only, 2 = everyone
     my $is_enabled    = $cgi->param('is_enabled') // 2;
-    my $query = 'SELECT DISTINCT userid, login_name, realname, is_enabled, ' .
+    my $query = 'SELECT DISTINCT userid, login_name, email, realname, is_enabled, ' .
                 $dbh->sql_date_format('last_seen_date', '%Y-%m-%d') . ' AS last_seen_date ' .
                 'FROM profiles';
     my @bindValues;
@@ -98,7 +98,8 @@ if ($action eq 'search') {
                         };
             $nextCondition = 'AND';
         }
-    } else {
+    }
+    else {
         $visibleGroups = 1;
         if ($grouprestrict eq '1') {
             $query .= qq{, user_group_map AS ugm
@@ -116,10 +117,10 @@ if ($action eq 'search') {
         $vars->{'users'} = {};
     }
     else {
-        # Handle selection by login name, real name, or userid.
+        # Handle selection by login name, email, real name, or userid.
         if (defined($matchtype)) {
             $query .= " $nextCondition ";
-            my $expr = "";
+            my $expr = '';
             if ($matchvalue eq 'userid') {
                 if ($matchstr) {
                     my $stored_matchstr = $matchstr;
@@ -127,6 +128,8 @@ if ($action eq 'search') {
                         || ThrowUserError('illegal_user_id', {userid => $stored_matchstr});
                 }
                 $expr = "profiles.userid";
+            } elsif ($matchvalue eq 'email') {
+                $expr = 'profiles.email';
             } elsif ($matchvalue eq 'realname') {
                 $expr = "profiles.realname";
             } else {
@@ -182,7 +185,8 @@ if ($action eq 'search') {
         my $match_user_id = $vars->{'users'}[0]->{'userid'};
         my $match_user = check_user($match_user_id);
         edit_processing($match_user);
-    } else {
+    }
+    else {
         $template->process('admin/users/list.html.tmpl', $vars)
             || ThrowTemplateError($template->error());
     }
@@ -211,8 +215,14 @@ if ($action eq 'search') {
     my $password = $cgi->param('password');
     $password = '*' if !defined $password;
 
+    my $login_name = $cgi->param('login');
+    my $email      = $cgi->param('email');
+
+    $login_name = $email if Bugzilla->params->{use_email_as_login};
+
     my $new_user = Bugzilla::User->create({
-        login_name    => scalar $cgi->param('login'),
+        login_name    => $login_name,
+        email         => $email,
         cryptpassword => $password,
         realname      => scalar $cgi->param('name'),
         disabledtext  => scalar $cgi->param('disabledtext'),
@@ -268,7 +278,9 @@ if ($action eq 'search') {
     # is not authorized.
     my $changes = {};
     if ($editusers) {
-        $otherUser->set_login(scalar $cgi->param('login'));
+        $otherUser->set_login(scalar $cgi->param('login'))
+            unless Bugzilla->params->{use_email_as_login};
+        $otherUser->set_email(scalar $cgi->param('email'));
         $otherUser->set_name(scalar $cgi->param('name'));
         $otherUser->set_password(scalar $cgi->param('password'))
             if $cgi->param('password');

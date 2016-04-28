@@ -215,6 +215,11 @@ sub get_add_column_ddl {
     return @sql;
 }
 
+sub get_drop_default_ddl {
+    my ($self, $table, $column) = @_;
+    return "ALTER TABLE $table MODIFY $column DEFAULT NULL";
+}
+
 sub get_alter_column_ddl {
     my ($self, $table, $column, $new_def, $set_nulls_to) = @_;
 
@@ -240,8 +245,7 @@ sub get_alter_column_ddl {
     }
     # If we went from having a default to not having one
     elsif (!defined $default && defined $default_old) {
-        push(@statements, "ALTER TABLE $table MODIFY $column"
-                        . " DEFAULT NULL");
+        push(@statements, $self->get_drop_default_ddl($table, $column));
     }
     # If we went from no default to a default, or we changed the default.
     elsif ( (defined $default && !defined $default_old) || 
@@ -523,6 +527,8 @@ sub get_set_serial_sql {
 =item get_set_serial_sql
 
 =item get_drop_column_ddl
+
+=item get_drop_default_ddl
 
 =item get_drop_table_ddl
 

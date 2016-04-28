@@ -2336,13 +2336,21 @@ sub get_add_column_ddl {
 
     my ($self, $table, $column, $definition, $init_value) = @_;
     my @statements;
+    # If DEFAULT is undefined and the column is enforced to be NOT NULL,
+    # then we use the init value as a temporary default value.
+    my $temp_default = 0;
+    if ($definition->{NOTNULL} && !exists $definition->{DEFAULT} && defined $init_value) {
+        $temp_default = 1;
+        $definition->{DEFAULT} = $init_value;
+    }
+
     push(@statements, "ALTER TABLE $table ". $self->ADD_COLUMN ." $column " .
         $self->get_type_ddl($definition));
 
-    # XXX - Note that although this works for MySQL, most databases will fail
-    # before this point, if we haven't set a default.
-    (push(@statements, "UPDATE $table SET $column = $init_value"))
-        if defined $init_value;
+    if ($temp_default) {
+        push(@statements, $self->get_drop_default_ddl($table, $column));
+        delete $definition->{DEFAULT};
+    }
 
     if (defined $definition->{REFERENCES}) {
         push(@statements, $self->get_add_fks_sql($table, { $column =>
@@ -2350,6 +2358,21 @@ sub get_add_column_ddl {
     }
 
     return (@statements);
+}
+
+sub get_drop_default_ddl {
+
+=item C<get_drop_default_ddl>
+
+ Description: Gets SQL to drop the default value of a column.
+ Params:      $table  - The table containing the column.
+              $column - The name of the column whose default value must be dropped.
+ Returns:     A string containing the SQL to drop the default value.
+
+=cut
+
+    my ($self, $table, $column) = @_;
+    return "ALTER TABLE $table ALTER COLUMN $column DROP DEFAULT";
 }
 
 sub get_add_index_ddl {
@@ -2431,8 +2454,7 @@ sub get_alter_column_ddl {
     }
     # If we went from having a default to not having one
     elsif (!defined $default && defined $default_old) {
-        push(@statements, "ALTER TABLE $table ALTER COLUMN $column"
-                        . " DROP DEFAULT");
+        push(@statements, $self->get_drop_default_ddl($table, $column));
     }
     # If we went from no default to a default, or we changed the default.
     elsif ( (defined $default && !defined $default_old) || 

@@ -32,7 +32,13 @@
         },
         "extra": {
           "treeherder": {
-            "symbol": "San"
+            "symbol": "San",
+            "machine": {
+                "platform": "linux64"
+            },
+            "build": {
+                "platform": "linux64"
+            }
           }
         }
       }
@@ -63,7 +69,13 @@
         },
         "extra": {
           "treeherder": {
-            "symbol": "Doc"
+            "symbol": "Doc",
+            "machine": {
+                "platform": "linux64"
+            },
+            "build": {
+                "platform": "linux64"
+            }
           }
         }
       }
@@ -99,7 +111,13 @@
         },
         "extra": {
           "treeherder": {
-            "symbol": "API"
+            "symbol": "API",
+            "machine": {
+                "platform": "linux64"
+            },
+            "build": {
+                "platform": "linux64"
+            }
           }
         }
       }
@@ -140,7 +158,13 @@
         },
         "extra": {
           "treeherder": {
-            "symbol": "Sel"
+            "symbol": "Sel",
+            "machine": {
+                "platform": "linux64"
+            },
+            "build": {
+                "platform": "linux64"
+            }
           }
         }
       }

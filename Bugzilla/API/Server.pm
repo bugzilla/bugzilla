@@ -41,7 +41,7 @@ has api_options     => (is => 'rw', default => sub { [] });
 has api_params      => (is => 'rw', default => sub { {} });
 has api_path        => (is => 'rw', default => '');
 has cgi             => (is => 'lazy');
-has content_type    => (is => 'lazy');
+has content_type    => (is => 'rw', default => 'application/json');
 has controller      => (is => 'rw', default => undef);
 has json            => (is => 'lazy');
 has load_error      => (is => 'rw', default => undef);
@@ -220,10 +220,6 @@ sub ThrowCodeError {
 
 sub _build_cgi {
     return Bugzilla->cgi;
-}
-
-sub _build_content_type {
-    return 'application/json';
 }
 
 sub _build_json {

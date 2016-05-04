@@ -660,6 +660,12 @@ $Template::Stash::SCALAR_OPS->{ truncate } =
       return $newstr;
   };
 
+# Override the built in .lower() vmethod
+$Template::Stash::SCALAR_OPS->{ lower } =
+  sub {
+      return lc($_[0]);
+  };
+
 # Create the template object that processes templates and specify
 # configuration parameters that apply to all templates.
 

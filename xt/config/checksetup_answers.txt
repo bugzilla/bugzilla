@@ -20,6 +20,7 @@
  $answer{'webservergroup'} = 'bugzilla';
  $answer{'ADMIN_OK'} = 'Y';
  $answer{'ADMIN_EMAIL'} = 'admin@bugzilla.org';
+ $answer{'ADMIN_LOGIN'} = 'admin';
  $answer{'ADMIN_PASSWORD'} = 'password';
  $answer{'ADMIN_REALNAME'} = 'QA Admin';
  $answer{'NO_PAUSE'} = 1;

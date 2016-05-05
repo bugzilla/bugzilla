@@ -5,10 +5,11 @@
 Apache
 ######
 
-You have two options for running Bugzilla under Apache - mod_cgi (the
-default) and mod_perl. mod_perl is faster but takes more resources. You
-should probably only consider mod_perl if your Bugzilla is going to be heavily
-used.
+You have three options for running Bugzilla under Apache -
+:ref:`mod_cgi <apache-mod_cgi>` (the default), :ref:`mod_perl <apache-mod_perl>`
+and :ref:`mod_proxy <apache-mod_proxy>` (to run Bugzilla as a PSGI application).
+mod_perl and mod_proxy are faster but take more resources. You should
+probably only consider them if your Bugzilla is going to be heavily used.
 
 These instructions require editing the Apache configuration file, which is:
 
@@ -143,3 +144,49 @@ under mod_perl:
 
 * It is recommended that you have one Bugzilla instance running under mod_perl
   on your server. Bugzilla has not been tested with more than one instance running.
+
+.. _apache-mod_proxy:
+
+Apache with mod_proxy
+=====================
+
+Bugzilla can run as a PSGI application, which greatly improves performance
+compared to mod_cgi.
+
+#. Install the `Plack <http://search.cpan.org/~miyagawa/Plack/script/plackup>`_
+   module. This will install the :file:`plackup` script used below.
+
+#. Run :file:`plackup` from the :file:`bugzilla/` root directory:
+
+   :command:`plackup -s Gazelle --port 5000 -E production -a app.psgi`
+
+   This command starts :file:`plackup` using the
+   `Gazelle <http://search.cpan.org/~kazeburo/Gazelle/lib/Gazelle.pm>`_ handler.
+   Other PSGI handlers can be used, such as
+   `Starman <http://search.cpan.org/~miyagawa/Starman/lib/Starman.pm>`_.
+
+#. Edit the Apache configuration file (see above).
+
+#. Add the following lines:
+
+   .. code-block:: apache
+
+      <Location /bugzilla/>
+          ProxyPreserveHost On
+          ProxyPass "http://localhost:5000/"
+          ProxyPassReverse "http://localhost:5000/"
+          # Will pass either 'https' or 'http' (without quotes).
+          RequestHeader set X-Forwarded-Proto %{REQUEST_SCHEME}s
+          # Will pass the original path to the script, required to determine
+          # if we are on the attachment host.
+          RequestHeader set X-Forwarded-URI %{REQUEST_URI}s
+      </Location>
+
+      # Do not redirect requests for images and static CSS and JS files.
+      <LocationMatch "^/bugzilla/(data/(assets|webdot)|graphs|images)/">
+          ProxyPass "!"
+      </LocationMatch>
+
+#. Restart Apache.
+
+#. Set the :param:`inbound_proxies` parameter to :paramval:`127.0.0.1`.

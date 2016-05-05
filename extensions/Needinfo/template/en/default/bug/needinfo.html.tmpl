@@ -136,7 +136,7 @@ $(function() {
   }
 
   function needinfo_from_changed() {
-    $('#needinfo').prop('checked', $('#needinfo_from').val !== '');
+    $('#needinfo').prop('checked', $('#needinfo_from').val() !== '');
   }
 
   $(function() {

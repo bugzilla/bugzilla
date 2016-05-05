@@ -294,3 +294,51 @@ This method can throw all of the errors that :ref:`rest_single_bug` throws, plus
   The comment tag provided is shorter than the minimum length.
 * 128 (Comment Tag Too Long)
   The comment tag provided is longer than the maximum length.
+
+.. _rest_render_comment:
+
+Render Comment
+--------------
+
+Returns the HTML rendering of the provided comment text.
+
+**Request**
+
+.. code-block:: text
+
+   POST /rest/bug/comment/render
+
+Example:
+
+.. code-block:: js
+
+   {
+     "id" : 2345,
+     "text" : "This issue has been fixed in bug 1234."
+   }
+
+==============  ======  ================================================
+name            type    description
+==============  ======  ================================================
+**text**        string  Comment text to render.
+id              int     The ID of the bug to render the comment against.
+==============  ======  =================================================
+
+**Response**
+
+.. code-block:: js
+
+   {
+     "html" : "This issue has been fixed in <a class=\"bz_bug_link
+          bz_status_RESOLVED  bz_closed\" title=\"RESOLVED FIXED - some issue that was fixed\" href=\"show_bug.cgi?id=1234\">bug 1234</a>."
+   ]
+
+====  ======  ===================================
+name  type    description
+====  ======  ===================================
+html  string  Text containing the HTML rendering.
+====  ======  ===================================
+
+**Errors**
+
+This method can throw all of the errors that :ref:`rest_single_bug` throws.

@@ -48,6 +48,7 @@ init_console();
 my %switch;
 GetOptions(\%switch, 'help|h|?',
                      'no-templates|t', 'verbose|v|no-silent',
+                     'cpanm:s',
                      'make-admin=s', 'reset-password=s', 'version|V',
                      'no-permissions|p');
 
@@ -58,9 +59,35 @@ pod2usage({-verbose => 1, -exitval => 1}) if $switch{'help'};
 # non-interactive mode.
 my $answers_file = $ARGV[0];
 my $silent = $answers_file && !$switch{'verbose'};
-
 print(install_string('header', get_version_and_os()) . "\n") unless $silent;
 exit 0 if $switch{'version'};
+
+if (defined $switch{cpanm}) {
+    my $default = 'all notest -oracle -mysql -pg -mod_perl -old_charts -new_charts -graphical_reports -detect_charset';
+    my @features = split(/\s+/, $switch{cpanm} || $default);
+    my @cpanm_args = ('-l', 'local', '--installdeps');
+    while (my $feature = shift @features) {
+        if ($feature eq 'all') {
+            push @cpanm_args, '--with-all-features';
+        }
+        elsif ($feature eq 'default') {
+            unshift @features, split(/\s+/, $default);
+        }
+        elsif ($feature eq 'notest') {
+            push @cpanm_args, '--notest';
+        }
+        elsif ($feature =~ /^-(.+)$/) {
+            push @cpanm_args, "--without-feature=$1";
+        }
+        else {
+            push @cpanm_args, "--with-feature=$feature";
+        }
+    }
+    print "cpanm @cpanm_args \".\"\n" if !$silent;
+    my $rv = system('cpanm', @cpanm_args, '.');
+    exit 1 if $rv != 0;
+}
+
 my $meta = load_cpan_meta();
 my $requirements = check_cpan_requirements($meta, \@BUGZILLA_INC, !$silent);
 

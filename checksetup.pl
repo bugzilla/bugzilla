@@ -22,6 +22,8 @@ use lib qw(. lib local/lib/perl5);
 
 use Getopt::Long qw(:config bundling);
 use Pod::Usage;
+# Bug 1270550 - Tie::Hash::NamedCapture must be loaded before Safe.
+use Tie::Hash::NamedCapture;
 use Safe;
 
 use Bugzilla::Constants;

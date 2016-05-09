@@ -28,6 +28,8 @@ use Carp qw(confess);
 use Digest::MD5 qw(md5_hex);
 use Hash::Util qw(lock_value unlock_hash lock_keys unlock_keys);
 use List::MoreUtils qw(firstidx natatime);
+# Bug 1270550 - Tie::Hash::NamedCapture must be loaded before Safe.
+use Tie::Hash::NamedCapture;
 use Safe;
 # Historical, needed for SCHEMA_VERSION = '1.00'
 use Storable qw(dclone freeze thaw);

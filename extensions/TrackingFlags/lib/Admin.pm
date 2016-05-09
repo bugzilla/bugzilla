@@ -113,8 +113,18 @@ sub admin_edit {
             if ($flag->name =~ /^(\D+)(\d+)$/) {
                 $flag->set_name("$1" . ($2 + 1));
             }
-            if ($flag->description =~ /^(\D+)(\d+)$/) {
-                $flag->set_description("$1" . ($2 + 1));
+            if ($flag->description =~ /^(\D+)([\d\.]+)$/) {
+                my $description = $1;
+                my $version = $2;
+                if ($version =~ /\./) {
+                    my ($major, $minor) = split(/\./, $version);
+                    $minor++;
+                    $version = "$major.$minor";
+                }
+                else {
+                    $version++;
+                }
+                $flag->set_description($description . $version);
             }
             $flag->set_sortkey(_next_unique_sortkey($flag->sortkey));
             $flag->set_type($flag->flag_type);

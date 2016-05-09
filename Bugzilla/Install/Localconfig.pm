@@ -27,6 +27,7 @@ use Data::Dumper;
 use File::Basename qw(dirname);
 use English qw($EGID);
 use List::Util qw(first);
+use Tie::Hash::NamedCapture;
 use Safe;
 use Term::ANSIColor;
 

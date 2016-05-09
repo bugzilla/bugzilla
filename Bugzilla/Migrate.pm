@@ -30,6 +30,8 @@ use DateTime;
 use Fcntl qw(SEEK_SET);
 use File::Basename;
 use List::Util qw(first);
+# Bug 1270550 - Tie::Hash::NamedCapture must be loaded before Safe.
+use Tie::Hash::NamedCapture;
 use Safe;
 
 use constant CUSTOM_FIELDS      => {};

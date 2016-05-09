@@ -45,6 +45,8 @@ use File::Basename;
 use File::Spec::Functions;
 use DateTime::TimeZone;
 use Date::Parse;
+# Bug 1270550 - Tie::Hash::NamedCapture must be loaded before Safe.
+use Tie::Hash::NamedCapture;
 use Safe;
 use List::Util qw(first);
 

@@ -73,8 +73,8 @@ if (defined $switch{cpanm}) {
         elsif ($feature eq 'default') {
             unshift @features, split(/\s+/, $default);
         }
-        elsif ($feature eq 'notest') {
-            push @cpanm_args, '--notest';
+        elsif ($feature eq 'notest' || $feature eq 'skip-satisfied' || $feature eq 'quiet') {
+            push @cpanm_args, "--$feature";
         }
         elsif ($feature =~ /^-(.+)$/) {
             push @cpanm_args, "--without-feature=$1";

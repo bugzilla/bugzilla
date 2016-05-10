@@ -1373,7 +1373,7 @@ function lb_show(el) {
         .addClass('minor')
         .text('Close')
         .appendTo(overlay2);
-    title.append(el.title);
+    title.text(el.title);
     overlay.add(overlay2).click(lb_close);
     img.add(overlay).animate({ opacity: 1 }, 200);
 }

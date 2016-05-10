@@ -48,7 +48,7 @@ init_console();
 my %switch;
 GetOptions(\%switch, 'help|h|?',
                      'no-templates|t', 'verbose|v|no-silent',
-                     'cpanm:s',
+                     'cpanm:s', 'check-modules',
                      'make-admin=s', 'reset-password=s', 'version|V',
                      'no-permissions|p');
 
@@ -95,7 +95,7 @@ exit 1 unless $requirements->{ok};
 
 check_all_cpan_features($meta, \@BUGZILLA_INC, !$silent);
 
-
+exit 0 if $switch{'check-modules'};
 ###########################################################################
 # Load Bugzilla Modules
 ###########################################################################

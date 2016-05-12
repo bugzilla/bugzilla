@@ -297,11 +297,15 @@ sub update_localconfig {
     open(my $fh, ">:utf8", $filename) or die "$filename: $!";
     foreach my $var (LOCALCONFIG_VARS) {
         my $name = $var->{name};
-        my $desc = install_string("localconfig_$name", { root => ROOT_USER });
-        chomp($desc);
-        # Make the description into a comment.
-        $desc =~ s/^/# /mg;
-        print $fh $desc, "\n",
+        my $desc = $var->{desc};
+        if(!length $desc){
+            $desc = install_string("localconfig_$name", { root => ROOT_USER });
+            chomp($desc);
+            # Make the description into a comment.
+            $desc =~ s/^/# /mg;
+            $desc .= "\n";
+        }
+        print $fh $desc,
                   Data::Dumper->Dump([$localconfig->{$name}],
                                      ["*$name"]), "\n";
    }
@@ -347,15 +351,16 @@ to access localconfig variables.
 
 =item C<LOCALCONFIG_VARS>
 
-An array of hashrefs. These hashrefs contain three keys:
+An array of hashrefs. These hashrefs contain two or three keys:
 
  name    - The name of the variable.
  default - The default value for the variable. Should always be
            something that can fit in a scalar.
- desc    - Additional text to put in localconfig before the variable
+ desc    - If present, additional text to put in localconfig before the variable
            definition. Must end in a newline. Each line should start
            with "#" unless you have some REALLY good reason not
-           to do that.
+           to do that.  If not present, the description is taken from
+           F<template/en/default/setup/strings.txt>.
 
 =item C<OLD_LOCALCONFIG_VARS>
 

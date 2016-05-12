@@ -306,6 +306,7 @@ sub _parse_line {
 
     # only treat ' at the start or end of words as quotes
     # it's easier to do this in reverse with regexes
+    $line =~ s/(\w+[:=<>!])(\s+)/'$1'$2/g;
     $line =~ s/(^|\s|:)'/$1\001/g;
     $line =~ s/'($|\s)/\001$1/g;
     $line =~ s/\\?'/\000/g;

@@ -55,33 +55,27 @@ $g_escape_table{'&lt;'} = md5_hex('&lt;');
 sub new {
     my $invocant = shift;
     my $class = ref $invocant || $invocant;
-    return $class->SUPER::new(tab_width => MARKDOWN_TAB_WIDTH,
+    my $obj = $class->SUPER::new(tab_width => MARKDOWN_TAB_WIDTH,
                               # Bugzilla uses HTML not XHTML
                               empty_element_suffix => '>');
+    $obj->{tab_width} = MARKDOWN_TAB_WIDTH;
+    $obj->{empty_element_suffix} = '>';
+    return $obj;
 }
 
 sub markdown {
-    my $self = shift;
-    my $text = shift;
+    my ($self, $text, $bug, $comment) = @_;
     my $user = Bugzilla->user;
 
     if ($user->settings->{use_markdown}->{is_enabled}
         && $user->setting('use_markdown') eq 'on')
     {
-        return $self->SUPER::markdown($text, @_);
+        $text = $self->_removeFencedCodeBlocks($text);
+        $text = Bugzilla::Template::quoteUrls($text, $bug, $comment, $user, 1);
+        return $self->SUPER::markdown($text);
     }
 
-    return Bugzilla::Template::quoteUrls($text);
-}
-
-sub _Markdown {
-    my $self = shift;
-    my $text = shift;
-
-    $text = $self->_removeFencedCodeBlocks($text);
-    $text = Bugzilla::Template::quoteUrls($text, undef, undef, undef, 1);
-
-    return $self->SUPER::_Markdown($text, @_);
+    return Bugzilla::Template::quoteUrls($text, $bug, $comment, $user);
 }
 
 sub _code_blocks {

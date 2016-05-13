@@ -163,7 +163,8 @@ sub quoteUrls {
 
     # If the comment is already wrapped, we should ignore newlines when
     # looking for matching regexps. Else we should take them into account.
-    my $s = ($comment && $comment->already_wrapped) ? qr/\s/ : qr/\h/;
+    # And confirm comment is an object, it could be a hash from WebService::Bug::render_comment
+    my $s = ($comment && ref($comment) eq 'Bugzilla::Comment' && $comment->already_wrapped) ? qr/\s/ : qr/\h/;
 
     # However, note that adding the title (for buglinks) can affect things
     # In particular, attachment matches go before bug titles, so that titles
@@ -827,7 +828,7 @@ sub create {
                                       && ((ref($comment) eq 'HASH' && $comment->{is_markdown})
                                          || (ref($comment) eq 'Bugzilla::Comment' && $comment->is_markdown)))
                                   {
-                                      return Bugzilla->markdown->markdown($text);
+                                      return Bugzilla->markdown->markdown($text, $bug, $comment);
                                   }
                                   return quoteUrls($text, $bug, $comment, $user);
                               };

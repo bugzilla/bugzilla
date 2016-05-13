@@ -56,11 +56,12 @@ fields:
 - *Email Address*:
   This is the user's full email address. Unless you turn off the
   :param:`allowemailchange` parameter, users can change their
-  login names themselves (to any valid email address).
+  email address to any other valid email address they control.
 
 - *Login Name*:
-  This is the user's login name, if it is (or can be) different from their email
-  address (i.e. if the "use_email_as_login" parameter is switched off).
+  If the "use_email_as_login" parameter is switched off, the user also has
+  a separate login name, which is (or can be) different from their email
+  address.
 
 - *Real Name*: The user's real name. Note that
   Bugzilla does not require this to create an account.
@@ -71,9 +72,9 @@ fields:
   If you want to disable an account, see Disable Text below.
 
 - *Bugmail Disabled*:
-  Mark this checkbox to disable bugmail and whinemail completely
-  for this account. This checkbox replaces the data/nomail file
-  which existed in older versions of Bugzilla.
+  Check this checkbox to disable bugmail and whinemail completely
+  for this account. Note that this does not prevent the user logging in or
+  taking any other action.
 
 - *Disable Text*:
   If you type anything in this box, including just a space, the
@@ -97,54 +98,15 @@ fields:
   .. warning:: Don't disable all the administrator accounts!
 
 - *<groupname>*:
-  If you have created some groups, e.g. "securitysensitive", then
-  checkboxes will appear here to allow you to add users to, or
-  remove them from, these groups. The first checkbox gives the
+  Checkboxes will appear here to allow you to add users to, or
+  remove them from, permission groups. The first checkbox gives the
   user the ability to add and remove other users as members of
-  this group. The second checkbox adds the user himself as a member
+  this group. The second checkbox makes the user himself a member
   of the group.
 
-- *canconfirm*:
-  This field is only used if you have enabled the "unconfirmed"
-  status. If you enable this for a user,
-  that user can then move bugs from "Unconfirmed" to a "Confirmed"
-  status (e.g.: "New" status).
-
-- *creategroups*:
-  This option will allow a user to create and destroy groups in
-  Bugzilla.
-
-- *editbugs*:
-  Unless a user has this bit set, they can only edit those bugs
-  for which they are the assignee or the reporter. Even if this
-  option is unchecked, users can still add comments to bugs.
-
-- *editcomponents*:
-  This flag allows a user to create new products and components,
-  modify existing products and components, and destroy those that have
-  no bugs associated with them. If a product or component has bugs
-  associated with it, those bugs must be moved to a different product
-  or component before Bugzilla will allow them to be destroyed.
-
-- *editkeywords*:
-  If you use Bugzilla's keyword functionality, enabling this
-  feature allows a user to create and destroy keywords. A keyword
-  must be removed from any bugs upon which it is currently set
-  before it can be destroyed.
-
-- *editusers*:
-  This flag allows a user to do what you're doing right now: edit
-  other users. This will allow those with the right to do so to
-  remove administrator privileges from other users or grant them to
-  themselves. Enable with care.
-
-- *tweakparams*:
-  This flag allows a user to change Bugzilla's Params
-  (using :file:`editparams.cgi`.)
-
-- *<productname>*:
-  This allows an administrator to specify the products
-  in which a user can see bugs.
+  Bugzilla has a number of built-in groups. For the full set of groups and their
+  capabilities, see :ref:`permissions`. This list will also contain any groups
+  you have created.
 
 .. _createnewusers:
 

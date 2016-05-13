@@ -144,52 +144,71 @@ API key' section of the page.
 Permissions
 ===========
 
-This is a purely informative page which outlines your current
+This is an informational page which outlines your current
 permissions on this installation of Bugzilla.
 
-A complete list of permissions in a default install of Bugzilla is below.
-Your administrator may have defined other permissions. Only users with
-*editusers* privileges can change the permissions of other users.
+A complete list of available permissions in a default install of Bugzilla is
+below. Your administrator may have defined other permissions. Only users with
+the *editusers* permission can change the permissions of other users.
 
 admin
-    Indicates user is an Administrator.
-
-bz_canusewhineatothers
-    Indicates user can configure whine reports for other users.
-
-bz_canusewhines
-    Indicates user can configure whine reports for self.
-
-bz_quip_moderators
-    Indicates user can moderate quips.
-
-bz_sudoers
-    Indicates user can perform actions as other users.
-
-bz_sudo_protect
-    Indicates user cannot be impersonated by other users.
-
-canconfirm
-    Indicates user can confirm a bug or mark it a duplicate.
-
-creategroups
-    Indicates user can create and destroy groups.
-
-editbugs
-    Indicates user can edit all bug fields.
-
-editclassifications
-    Indicates user can create, destroy and edit classifications.
-
-editcomponents
-    Indicates user can create, destroy and edit products, components,
-    versions, milestones and flag types.
-
-editkeywords
-    Indicates user can create, destroy and edit keywords.
-
-editusers
-    Indicates user can create, disable and edit users.
+    User is an administrator, which (in normal circumstances) means they can
+    do anything.
 
 tweakparams
-    Indicates user can change :ref:`Parameters <parameters>`.
+    Permits user to change administration :ref:`Parameters <parameters>`, and
+    to enable, disable and change the default value of
+    :ref:`General Preferences <generalpreferences>`.
+
+bz_sudoers
+    Permits user to impersonate and perform actions as other users. This is
+    useful for admins to reproduce problems with Bugzilla, such as permissions
+    problems, that other users see.
+
+bz_sudo_protect
+    Indicates user cannot be impersonated by other users who have the
+    *bz_sudoers* permission.
+
+creategroups
+    Permits user to create, delete and edit permission groups.
+
+editclassifications
+    Permits user to create, delete and edit classifications.
+
+editcomponents
+    Permits user to create, delete and edit products, components,
+    versions, milestones and flag types.
+
+    This capability can also be given on a per-product basis.
+
+editkeywords
+    Permits user to create, delete and edit keywords.
+
+editusers
+    Permits user to create, disable and edit users.
+
+canconfirm
+    Permits user to confirm a bug (move it from UNCONFIRMED to
+    another status).
+
+    This permission is only used if you are using the UNCONFIRMED status in
+    any products. The *editbugs* permission implies this permission.
+
+    This capability can also be given on a per-product basis.
+
+editbugs
+    Permits user to edit all fields on a bug. Without this permission, users
+    can only edit bugs where they are the reporter or the assignee, or add
+    comments.
+
+    This capability can also be given on a per-product basis.
+
+bz_canusewhines
+    Permits user to configure whine reports to be sent to themselves.
+
+bz_canusewhineatothers
+    Permits user to configure whine reports to be sent to other users.
+
+bz_quip_moderators
+    Permits user to moderate the list of quips (pithy sayings at the top of
+    bug lists).

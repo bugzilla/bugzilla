@@ -135,7 +135,6 @@ sub formvalue {
 ##############################################################################
 
 my $has_editbugs = $user->in_group('editbugs', $product->id);
-my $has_canconfirm = $user->in_group('canconfirm', $product->id);
 
 # If a user is trying to clone a bug
 #   Check that the user has authorization to view the parent bug

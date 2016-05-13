@@ -31,6 +31,7 @@ use Bugzilla::Token;
 use Bugzilla::Keyword;
 
 use Encode qw(encode find_encoding);
+use Encode::MIME::Header; # Required to alter Encode::Encoding{'MIME-Q'}.
 
 # For most scripts we don't make $cgi and $template global variables. But
 # when preparing Bugzilla for mod_perl, this script used these

@@ -19,8 +19,6 @@ use Bugzilla::Util;
 
 use Date::Format qw(time2str);
 
-use Encode qw(encode);
-use Encode::MIME::Header;
 use Email::Address;
 use Email::MIME;
 # Return::Value 1.666002 pollutes the error log with warnings about this
@@ -71,22 +69,12 @@ sub MessageToMTA {
     # MIME-Version must be set otherwise some mailsystems ignore the charset
     $email->header_set('MIME-Version', '1.0') if !$email->header('MIME-Version');
 
-    # Encode the headers correctly in quoted-printable
+    # Encode the headers correctly.
     foreach my $header ($email->header_names) {
         my @values = $email->header($header);
-        # We don't recode headers that happen multiple times.
-        next if scalar(@values) > 1;
-        if (my $value = $values[0]) {
-            if (Bugzilla->params->{'utf8'} && !utf8::is_utf8($value)) {
-                utf8::decode($value);
-            }
+        map { utf8::decode($_) if defined($_) && !utf8::is_utf8($_) } @values;
 
-            # avoid excessive line wrapping done by Encode.
-            local $Encode::Encoding{'MIME-Q'}->{'bpl'} = 998;
-
-            my $encoded = encode('MIME-Q', $value);
-            $email->header_set($header, $encoded);
-        }
+        $email->header_str_set($header, @values);
     }
 
     my $from = $email->header('From');

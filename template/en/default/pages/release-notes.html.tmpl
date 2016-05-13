@@ -43,6 +43,40 @@
 
 <h2 id="point">Updates in this 5.0.x Release</h2>
 
+<h3>5.0.3</h3>
+
+<p>This release fixes one security issue. See the
+  <a href="https://www.bugzilla.org/security/4.4.11/">Security Advisory</a>
+  for details.</p>
+
+<p>This release also contains the following [% terms.bug %] fixes:</p>
+
+<ul>
+  <li>A regression in Bugzilla 5.0.2 caused <kbd>whine.pl</kbd> to be unable
+    to send emails due to a missing subroutine.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1235395">[% terms.Bug %] 1235395</a>)</li>
+  <li>The <kbd>Encode</kbd> module changed the way it encodes strings, causing
+    email addresses in emails sent by [%terms.Bugzilla %] to be encoded,
+    preventing emails from being correctly delivered to recipients.
+    We now encode email headers correctly.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1246228">[% terms.Bug %] 1246228</a>)</li>
+  <li>Fix additional taint issues with Strawberry Perl.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=987742">[% terms.Bug %] 987742</a> and
+    <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1089448">[% terms.bug %] 1089448</a>)</li>
+  <li>When exporting a buglist as a CSV file, fields starting with either
+    "=", "+", "-" or "@" are preceded by a space to not trigger formula
+    execution in Excel.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1259881">[% terms.Bug %] 1259881</a>)</li>
+  <li>An extension which allows user-controlled data to be used as a link in
+    tabs could trigger XSS if the data is not correctly sanitized.
+    [%+ terms. Bugzilla %] no longer relies on the extension to do the sanity
+    check. A vanilla installation is not affected as no tab is user-controlled.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1250114">[% terms.Bug %] 1250114</a>)</li>
+  <li>Extensions can now easily override the favicon used for the
+    [%+ terms.Bugzilla %] website.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1250264">[% terms.Bug %] 1250264</a>)</li>
+</ul>
+
 <h3>5.0.2</h3>
 
 <p>This release fixes two security issues. See the

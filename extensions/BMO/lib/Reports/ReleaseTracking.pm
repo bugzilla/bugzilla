@@ -367,9 +367,9 @@ sub report {
             push @where, "(a.fieldid = ?)";
             push @params, $q->{field_id};
 
-            push @where, "(a.bug_when >= ?)";
+            push @where, "(CONVERT_TZ(a.bug_when, 'UTC', 'America/Los_Angeles') >= ?)";
             push @params, $q->{start_date} . ' 00:00:00';
-            push @where, "(a.bug_when <= ?)";
+            push @where, "(CONVERT_TZ(a.bug_when, 'UTC', 'America/Los_Angeles') <= ?)";
             push @params, $q->{end_date} . ' 23:59:59';
 
             push @where, "(a.added LIKE ?)";

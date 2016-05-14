@@ -126,7 +126,8 @@ sub report {
         INNER JOIN profiles
                 ON profiles.userid = bugs_activity.who
              WHERE profiles.login_name IN ($who_bits)
-                   AND bugs_activity.bug_when >= ? AND bugs_activity.bug_when <= ?
+                   AND CONVERT_TZ(bugs_activity.bug_when, 'UTC', 'America/Los_Angeles') >= ?
+                   AND CONVERT_TZ(bugs_activity.bug_when, 'UTC', 'America/Los_Angeles') <= ?
                    $activity_where
 
         UNION ALL
@@ -147,8 +148,8 @@ sub report {
         INNER JOIN profiles
                 ON profiles.userid = longdescs_tags_activity.who
              WHERE profiles.login_name IN ($who_bits)
-                   AND longdescs_tags_activity.bug_when >= ?
-                   AND longdescs_tags_activity.bug_when <= ?
+                   AND CONVERT_TZ(longdescs_tags_activity.bug_when, 'UTC', 'America/Los_Angeles') >= ?
+                   AND CONVERT_TZ(longdescs_tags_activity.bug_when, 'UTC', 'America/Los_Angeles') <= ?
                   $tags_activity_where
 
         UNION ALL
@@ -167,7 +168,8 @@ sub report {
         INNER JOIN profiles
                 ON profiles.userid = bugs.reporter
              WHERE profiles.login_name IN ($who_bits)
-                   AND bugs.creation_ts >= ? AND bugs.creation_ts <= ?
+                   AND CONVERT_TZ(bugs.creation_ts, 'UTC', 'America/Los_Angeles') >= ?
+                   AND CONVERT_TZ(bugs.creation_ts, 'UTC', 'America/Los_Angeles') <= ?
 
         UNION ALL
 
@@ -185,7 +187,8 @@ sub report {
         INNER JOIN profiles
                 ON profiles.userid = longdescs.who
              WHERE profiles.login_name IN ($who_bits)
-                   AND longdescs.bug_when >= ? AND longdescs.bug_when <= ?
+                   AND CONVERT_TZ(longdescs.bug_when, 'UTC', 'America/Los_Angeles') >= ?
+                   AND CONVERT_TZ(longdescs.bug_when, 'UTC', 'America/Los_Angeles') <= ?
                    $comment_filter
 
         UNION ALL
@@ -204,7 +207,8 @@ sub report {
         INNER JOIN profiles
                 ON profiles.userid = attachments.submitter_id
              WHERE profiles.login_name IN ($who_bits)
-                   AND attachments.creation_ts >= ? AND attachments.creation_ts <= ?
+                   AND CONVERT_TZ(attachments.creation_ts, 'UTC', 'America/Los_Angeles') >= ?
+                   AND CONVERT_TZ(attachments.creation_ts, 'UTC', 'America/Los_Angeles') <= ?
                    $attachments_where
 
           ORDER BY $order ";

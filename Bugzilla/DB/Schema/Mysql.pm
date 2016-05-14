@@ -119,7 +119,7 @@ sub _initialize {
 
         LONGBLOB =>     'longblob',
 
-        DATETIME =>     'datetime',
+        DATETIME =>     'timestamp',
         DATE     =>     'date',
     };
 
@@ -394,6 +394,27 @@ sub get_rename_column_ddl {
     # MySQL doesn't like having the PRIMARY KEY statement in a rename.
     $def =~ s/PRIMARY KEY//i;
     return ("ALTER TABLE $table CHANGE COLUMN $old_name $new_name $def");
+}
+
+sub get_type_ddl {
+    my $self = shift;
+    my $type_ddl = $self->SUPER::get_type_ddl(@_);
+
+    # TIMESTAMPS as of 5.6.6 still default to
+    # 'NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'
+    # unless explicitly setup in the table definition. This will change in future releases
+    # and can be disabled by using 'explicit_defaults_for_timestamp = 1' in my.cnf.
+    # So instead, we explicitly setup TIMESTAMP types to not be automatic.
+    if ($type_ddl =~ /^timestamp/i) {
+        if ($type_ddl !~ /NOT NULL/) {
+            $type_ddl .= ' NULL DEFAULT NULL';
+        }
+        if ($type_ddl =~ /NOT NULL/ && $type_ddl !~ /DEFAULT/) {
+            $type_ddl .= ' DEFAULT CURRENT_TIMESTAMP';
+        }
+    }
+
+    return $type_ddl;
 }
 
 1;

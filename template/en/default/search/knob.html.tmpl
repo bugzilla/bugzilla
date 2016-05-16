@@ -36,6 +36,8 @@
          [% ordersdesc.$order FILTER html %]</option>
   [% END %]
   </select>
+  <input type="checkbox" id="descending" name="descending" [% IF default.descending %]checked[% END %]>
+  <label for="descending">Descending</label>
 </p>
 
 <p>  

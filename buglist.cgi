@@ -645,11 +645,12 @@ my @order_columns;
 if ($order) {
     # Convert the value of the "order" form field into a list of columns
     # by which to sort the results.
+    my $descending = $params->param('descending') ? " DESC" : "";
     my %order_types = (
-        "Bug Number"   => [ "bug_id" ],
-        "Importance"   => [ "priority", "bug_severity" ],
-        "Assignee"     => [ "assigned_to", "bug_status", "priority", "bug_id" ],
-        "Last Changed" => [ "changeddate", "bug_status", "priority",
+        "Bug Number"   => [ "bug_id$descending" ],
+        "Importance"   => [ "priority$descending", "bug_severity" ],
+        "Assignee"     => [ "assigned_to$descending", "bug_status", "priority", "bug_id" ],
+        "Last Changed" => [ "changeddate$descending", "bug_status", "priority",
                             "assigned_to", "bug_id" ],
     );
     if ($order_types{$order}) {

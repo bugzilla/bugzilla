@@ -30,7 +30,7 @@
                  value="[% value.name FILTER html %]">
             [%- value.name FILTER html %]
         [% ELSE %]
-          <input id="value_new" name="value_new" size="20"
+          <input id="value_new" name="value_new" size="30"
                  maxlength="[% constants.MAX_FIELD_VALUE_SIZE FILTER none %]"
                  value="[% value.name FILTER html %]" required>
         [% END %]

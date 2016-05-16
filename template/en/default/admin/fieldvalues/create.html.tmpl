@@ -26,7 +26,7 @@
 <form method="post" action="editvalues.cgi">
   <table id="admin_table_edit">
     <tr>
-      <th><label for="value">Value:</label></th>
+      <th><label for="value">Field Value:</label></th>
       <td>
         <input id="value" name="value" size="30"
                maxlength="[% constants.MAX_FIELD_VALUE_SIZE FILTER none %]" required>
@@ -82,7 +82,7 @@
   </table>
   <input type="submit" id="create" value="Add">
   <input type="hidden" name="action" value="new">
-  <input type="hidden" name='field' value="[% field.name FILTER html %]">
+  <input type="hidden" name="field" value="[% field.name FILTER html %]">
   <input type="hidden" name="token" value="[% token FILTER html %]">
 </form>
 

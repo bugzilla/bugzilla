@@ -161,22 +161,26 @@
 
 <h3 id="req_perl">Perl</h3>
 
-<p>Perl <span class="req_new">v5.10.1</span></p>
+<p>Perl <span class="req_new">v5.14.1</span></p>
 
-[% INCLUDE db_req db='mysql' %]
+[% INCLUDE db_req db = 'mysql'
+                  module = 'DBD::mysql' %]
 
-[% INCLUDE db_req db='pg' %]
+[% INCLUDE db_req db = 'pg'
+                  module = 'DBD::Pg' %]
 
-[% INCLUDE db_req db='oracle' %]
+[% INCLUDE db_req db ='oracle'
+                  module = 'DBD::Oracle' %]
 
-[% INCLUDE db_req db='sqlite' %]
+[% INCLUDE db_req db = 'sqlite'
+                  module = 'DBD::SQLite' %]
 
 <h3 id="req_modules">Required Perl Modules</h3>
 
 [% INCLUDE req_table reqs = REQUIRED_MODULES
-                     new = ['File-Slurp','JSON-XS', 'Email-Sender']
-                     updated = ['DateTime', 'DateTime-TimeZone',
-                                'Template-Toolkit', 'URI'] %]
+                     new = ['File::Slurp','JSON::XS', 'Email::Sender']
+                     updated = ['DateTime', 'DateTime::TimeZone',
+                                'Template', 'URI'] %]
 
 <h3 id="req_optional_mod">Optional Perl Modules</h3>
 
@@ -184,8 +188,8 @@
   features of Bugzilla:</p>
 
 [% INCLUDE req_table reqs = OPTIONAL_MODULES
-                     new  = ['Cache-Memcached','File-Copy-Recursive']
-                     updated = ['Chart', 'Test-Taint']
+                     new  = ['Cache::Memcached::Fast','File::Copy::Recursive']
+                     updated = ['Chart::Lines', 'Test::Taint']
                      include_feature = 1 %]
 
 <h3 id="req_apache">Optional Apache Modules</h3>
@@ -454,7 +458,7 @@
        </li>
     <li><strong>perl module:</strong>
       [%+ m.dbd.module FILTER html %]
-      [%+ '<span class="req_new">' IF dbd_new %]v[% m.dbd.version FILTER html %]
+      [%+ '<span class="req_new">' IF dbd_new %]v[% OPTIONAL_MODULES.$module.version FILTER html %]
       [% '</span>' IF dbd_new %]</li>
   </ul>
 [% END %]
@@ -468,20 +472,22 @@
         <th>Enables Feature</th>
       [% END %]
     </tr>
-    [% FOREACH req = reqs %]
+    [% FOREACH module = reqs.keys.sort %]
+      [% NEXT IF module.match('^DBD') %]
+      [% version = reqs.$module.version %]
       <tr>
-        <td [% ' class="req_new"' IF new.contains(req.package) %]>
-          [%- req.module FILTER html %]</td>
-        <td [% ' class="req_new"' IF updated.contains(req.package)
-                                     OR new.contains(req.package) %]>
-          [%- IF req.version == 0 %]
+        <td [% ' class="req_new"' IF new.contains(module) %]>
+          [%- module FILTER html %]</td>
+        <td [% ' class="req_new"' IF updated.contains(module)
+                                     OR new.contains(module) %]>
+          [%- IF version == 0 %]
             (Any)
           [% ELSE %]
-            [%- req.version FILTER html %]
+            [%- version FILTER html %]
           [% END %]
         </td>
         [% IF include_feature %]
-          <td>[% req.feature.join(', ') FILTER html %]</td>
+          <td>[% reqs.$module.features.join(', ') FILTER html %]</td>
         [% END %]
       </tr>
     [% END %]

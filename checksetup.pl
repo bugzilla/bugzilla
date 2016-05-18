@@ -271,10 +271,11 @@ checksetup.pl - A do-it-all upgrade and installation script for Bugzilla.
 
 =head1 SYNOPSIS
 
- ./checksetup.pl [--help|--version]
- ./checksetup.pl [SCRIPT [--verbose]] [--no-templates|-t]
+ ./checksetup.pl [--help|--version|--check-modules]
+ ./checksetup.pl [SCRIPT [--verbose]] [--no-templates|-t] [--no-permissions|-p]
                  [--make-admin=user@domain.com]
                  [--reset-password=user@domain.com]
+                 [--cpanm[=OPTIONS]]
 
 =head1 OPTIONS
 
@@ -324,6 +325,14 @@ Don't update file permissions. Owner, group, and mode of files and
 directories will not be changed. Use this if your installation is
 managed by a software packaging system such as RPM or APT.
 
+=item B<--check-modules>
+
+Only check for correct module dependencies and quit afterward.
+
+=item B<--cpanm[=OPTIONS]>
+
+Use F<cpanm> to install all missing modules or as directed by the OPTIONS.
+
 =back
 
 =head1 DESCRIPTION
@@ -365,7 +374,8 @@ F<checksetup.pl> runs through several stages during installation:
 =item 1
 
 Checks if the required and optional perl modules are installed,
-using L<Bugzilla::Install::Requirements/check_requirements>.
+using L<Bugzilla::Install::Requirements/check_cpan_requirements>
+and L<Bugzilla::Install::Requirements/check_all_cpan_features>.
 
 =item 2
 

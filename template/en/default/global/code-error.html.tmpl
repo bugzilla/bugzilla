@@ -316,7 +316,7 @@
     Failed to bind to the LDAP server. The error message was: 
     <code>[% errstr FILTER html %]</code>
 
-  [% ELSIF error == "ldap_cannot_retreive_attr" %]
+  [% ELSIF error == "ldap_cannot_retrieve_attr" %]
     The specified LDAP attribute [% attr FILTER html %] was not found.
 
   [% ELSIF error == "ldap_connect_failed" %]

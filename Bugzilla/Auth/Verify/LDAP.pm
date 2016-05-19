@@ -111,7 +111,7 @@ sub check_credentials {
     if ($mail_attr) {
         if (!$user_entry->exists($mail_attr)) {
             return { failure => AUTH_ERROR,
-                     error   => "ldap_cannot_retreive_attr",
+                     error   => "ldap_cannot_retrieve_attr",
                      details => {attr => $mail_attr} };
         }
 

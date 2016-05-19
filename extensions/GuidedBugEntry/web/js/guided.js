@@ -232,7 +232,7 @@ var product = {
             product.details = false;
             bugForm.onProductUpdated();
             if (err) {
-              alert('Failed to retreive components for product "' +
+              alert('Failed to retrieve components for product "' +
                 productName + '":' + "\n\n" + err);
               if (console)
                 console.error(err);
@@ -244,7 +244,7 @@ var product = {
           product.details = false;
           bugForm.onProductUpdated();
           if (res.responseText) {
-            alert('Failed to retreive components for product "' +
+            alert('Failed to retrieve components for product "' +
               productName + '":' + "\n\n" + res.responseText);
             if (console)
               console.error(res);

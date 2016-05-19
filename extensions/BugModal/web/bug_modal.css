@@ -127,12 +127,17 @@ a.activity-ref {
     width: 10px;
 }
 
+.module-title {
+    font-weight: bold;
+}
+
 .module-title, .module-subtitle {
     display: table-cell;
     padding-left: 5px;
 }
 
 .module-subtitle {
+    font-weight: normal;
     padding-right: 5px;
     color: #666;
 }

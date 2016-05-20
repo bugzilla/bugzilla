@@ -1054,6 +1054,90 @@
   [% END %]
 [% END %]
 
+[%# === timetracking === %]
+[% IF user.is_timetracker %]
+  [%
+    PROCESS bug/time.html.tmpl;
+    sub = [];
+    IF bug.estimated_time > 0;
+      estimated_time = PROCESS formattimeunit time_unit = bug.estimated_time;
+      sub.push("Estimated: $estimated_time");
+    END;
+    IF bug.remaining_time > 0;
+      remaining_time = PROCESS formattimeunit time_unit = bug.remaining_time;
+      sub.push("Remaining: $remaining_time");
+    END;
+    IF bug.deadline;
+      sub.push("Deadline: " _ bug.deadline);
+    END;
+  %]
+  [% WRAPPER bug_modal/module.html.tmpl
+    title     = "Time Tracking"
+    collapsed = 1
+    no_collapse_persist = 1
+    subtitle = sub
+  %]
+    [% WRAPPER fields_lhs %]
+      [% estimated_time = PROCESS formattimeunit time_unit = bug.estimated_time %]
+      [% INCLUDE bug_modal/field.html.tmpl
+         field        = bug_fields.estimated_time
+         field_type   = constants.FIELD_TYPE_FREETEXT
+         value        = estimated_time
+         hide_on_view = 0
+         short_width  = 1
+      %]
+      [% current_estimate = PROCESS formattimeunit time_unit = (bug.actual_time + bug.remaining_time) %]
+      [% INCLUDE bug_modal/field.html.tmpl
+         label = "Current Est"
+         value = current_estimate
+         view_only = 1
+      %]
+      [% hours_worked = PROCESS formattimeunit time_unit = bug.actual_time %]
+      [% WRAPPER bug_modal/field.html.tmpl
+         field_type  = constants.FIELD_TYPE_FREETEXT
+         label       = "Hours Worked"
+         name        = "work_time"
+         value       = '0.0'
+         short_width = 1
+      %]
+        [% PROCESS formattimeunit time_unity = bug.actual_time %]
+      [% END %]
+      [% hours_left = PROCESS formattimeunit time_unit = bug.remaining_time %]
+      [% INCLUDE bug_modal/field.html.tmpl
+         field       = bug_fields.remaining_time
+         field_type  = constants.FIELD_TYPE_FREETEXT
+         value       = hours_left
+         short_width = 1
+      %]
+    [% END %]
+
+    [% WRAPPER fields_rhs %]
+      [% percentage_complete = PROCESS calculatepercentage act = bug.actual_time rem = bug.remaining_time %]
+      [% INCLUDE bug_modal/field.html.tmpl
+         label     = "% Complete"
+         value     = percentage_complete
+         view_only = 1
+      %]
+      [% time_gain = PROCESS formattimeunit  time_unit = bug.estimated_time - (bug.actual_time + bug.remaining_time) %]
+      [% INCLUDE bug_modal/field.html.tmpl
+         label = "Gain"
+         value = time_gain
+         view_only = 1
+      %]
+      [% INCLUDE bug_modal/field.html.tmpl
+         field      = bug_fields.deadline
+         field_type = constants.FIELD_TYPE_DATE
+         value      = bug.deadline
+      %]
+      <div>
+        <a href="summarize_time.cgi?id=[% bug.bug_id FILTER none %]&amp;do_depends=1">
+          Summarize time (including time for [% terms.bugs %]
+          blocking this [% terms.bug %])</a>
+      </div>
+    [% END %]
+  [% END %]
+[% END %]
+
 [%# === extensions which are modules === %]
 
 [% Hook.process('module') %]

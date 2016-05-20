@@ -48,7 +48,7 @@
       PROCESS activity_header activities=change_set.activity id=change_set.id;
     END;
 
-    IF change_set.comment;
+    IF change_set.comment != "";
       PROCESS comment_body comment=change_set.comment;
     END;
     FOREACH activity IN change_set.activity;

@@ -109,6 +109,9 @@ a.activity-ref {
     background: #eee;
     padding: 2px 5px;
     cursor: pointer;
+    -webkit-box-shadow: 1px 1px 5px rgba(0, 0, 0, 0.1);
+    -moz-box-shadow: 1px 1px 5px rgba(0, 0, 0, 0.1);
+    box-shadow: 1px 1px 5px rgba(0, 0, 0, 0.1);
 }
 
 .module-header:hover {
@@ -158,6 +161,9 @@ a.activity-ref {
 .module-content {
     padding: 2px 5px;
     background: #fff;
+    -webkit-box-shadow: 1px 1px 5px rgba(0, 0, 0, 0.1);
+    -moz-box-shadow: 1px 1px 5px rgba(0, 0, 0, 0.1);
+    box-shadow: 1px 1px 5px rgba(0, 0, 0, 0.1);
 }
 
 .module .field {

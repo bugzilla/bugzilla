@@ -67,6 +67,7 @@ my %build_requires = (
 );
 my %test_requires = (
     'Test::More'         => 0,
+    'Test2::Suite'       => 0,
     'Pod::Checker'       => 0,
     'Pod::Coverage'      => 0,
     'Test::Perl::Critic' => 0

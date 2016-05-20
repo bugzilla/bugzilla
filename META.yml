@@ -6,12 +6,13 @@ build_requires:
   ExtUtils::MakeMaker: '6.55'
   Pod::Checker: '0'
   Pod::Coverage: '0'
+  Test2::Suite: '0'
   Test::More: '0'
   Test::Perl::Critic: '0'
 configure_requires:
   ExtUtils::MakeMaker: '6.55'
 dynamic_config: 1
-generated_by: 'ExtUtils::MakeMaker version 7.1, CPAN::Meta::Converter version 2.150001'
+generated_by: 'ExtUtils::MakeMaker version 7.04, CPAN::Meta::Converter version 2.150005'
 license: unknown
 meta-spec:
   url: http://module-build.sourceforge.net/META-spec-v1.4.html
@@ -186,4 +187,5 @@ requires:
   Template: '2.24'
   URI: '1.55'
   perl: '5.014000'
-version: '5.1'
+version: v5.1.1+
+x_serialization_backend: 'CPAN::Meta::YAML version 0.016'

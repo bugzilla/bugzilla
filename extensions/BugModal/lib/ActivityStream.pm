@@ -174,6 +174,10 @@ sub _add_comments_to_stream {
             $comment->{collapsed} = 1;
             $comment->{collapsed_reason} = $comment->author->name;
         }
+        if ($comment->type != CMT_ATTACHMENT_CREATED && $comment->count == 0 && length($comment->body) == 0) {
+            $comment->{collapsed} = 1;
+            $comment->{collapsed_reason} = 'empty';
+        }
 
         _add_comment_to_stream($stream, date_str_to_time($comment->creation_ts), $comment->author->id, $comment);
     }

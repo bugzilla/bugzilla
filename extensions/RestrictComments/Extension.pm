@@ -13,6 +13,7 @@ use warnings;
 use base qw(Bugzilla::Extension);
 
 use Bugzilla::Constants;
+use Bugzilla::Util qw(i_am_webservice);
 
 BEGIN {
     *Bugzilla::Bug::restrict_comments = \&_bug_restrict_comments;
@@ -47,8 +48,9 @@ sub _can_restrict_comments {
 sub object_end_of_set_all {
     my ($self, $args) = @_;
     my $object = $args->{object};
-    if ($self->_can_restrict_comments($object)) {
-        my $input = Bugzilla->input_params;
+    my $input = Bugzilla->input_params;
+    my $update_restrict_comments = !i_am_webservice() || exists $input->{restrict_comments};
+    if ($update_restrict_comments && $self->_can_restrict_comments($object)) {
         $object->set('restrict_comments', $input->{restrict_comments} ? 1 : undef);
     }
 }

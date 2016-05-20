@@ -420,8 +420,15 @@ sub _DoCodeSpans {
     return $text;
 }
 
-# Override to add GFM Fenced Code Blocks
+# Override to delay after DoBlockQuotes
 sub _DoCodeBlocks {
+    my ($self, $text) = @_;
+
+    return $text;
+}
+
+# add GFM Fenced Code Blocks
+sub _DoDelayCodeBlocks {
     my ($self, $text) = @_;
 
     $text =~ s{
@@ -469,6 +476,7 @@ sub _DoBlockQuotes {
             "<blockquote class=\"markdown\">\n$bq\n</blockquote>\n\n";
         }egmx;
 
+    $text = $self->_DoDelayCodeBlocks($text);
     return $text;
 }
 

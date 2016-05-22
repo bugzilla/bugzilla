@@ -27,15 +27,21 @@
 
 <div class="groups edit-hide">
   [% IF in_a_group %]
-    <div id="groups-description">
-      Only users in all of the following groups can view this [% terms.bug %]:
-    </div>
+    <b>Only users in all of the following groups can view this [% terms.bug %]:</b>
     <ul>
       [% FOREACH group IN bug.groups %]
         [% NEXT UNLESS group.ison || group.mandatory %]
         <li>[% group.description FILTER html %]</li>
       [% END %]
     </ul>
+
+    [% IF bug.reporter_accessible || bug.cclist_accessible %]
+      <b>Users in the roles below can always view this [% terms.bug %]:</b>
+      <ul>
+        [% IF bug.reporter_accessible %]<li>Reporter</li>[% END %]
+        [% IF bug.cclist_accessible %]<li>CC List</li>[% END %]
+      </ul>
+    [% END %]
   [% ELSE %]
     This [% terms.bug %] is publicaly visible.
   [% END %]
@@ -46,9 +52,7 @@
   [% FOREACH group IN bug.groups %]
     [% IF NOT emitted_description %]
       [% emitted_description = 1 %]
-      <div id="groups-description">
-        Only users in all of the selected groups can view this [% terms.bug %]:
-      </div>
+      <b>Only users in all of the selected groups can view this [% terms.bug %]:</b>
     [% END %]
 
     [% IF group.ingroup %]
@@ -64,5 +68,34 @@
         [%~ group.description FILTER html_light ~%]
       </label>
     </div>
+  [% END %]
+
+  [% IF in_a_group %]
+    <b>Users in the roles selected below can always view this [% terms.bug %]:</b>
+    <div>
+      [% user_can_edit_accessible = bug.check_can_change_field("reporter_accessible", 0, 1) %]
+      [% IF user_can_edit_accessible %]
+        <input type="hidden" name="defined_reporter_accessible" value="1">
+      [% END %]
+      <input type="checkbox" value="1"
+             name="reporter_accessible" id="reporter_accessible"
+             [% " checked" IF bug.reporter_accessible %]
+             [% " disabled=\"disabled\"" UNLESS user_can_edit_accessible %]>
+      <label for="reporter_accessible">Reporter</label>
+    </div>
+    <div>
+      [% user_can_edit_accessible = bug.check_can_change_field("cclist_accessible", 0, 1) %]
+      [% IF user_can_edit_accessible %]
+        <input type="hidden" name="defined_cclist_accessible" value="1">
+      [% END %]
+      <input type="checkbox" value="1"
+             name="cclist_accessible" id="cclist_accessible"
+             [% " checked" IF bug.cclist_accessible %]
+             [% " disabled=\"disabled\"" UNLESS user_can_edit_accessible %]>
+      <label for="cclist_accessible">CC List</label>
+    </div>
+    The assignee [% IF (Param('useqacontact')) %]and QA contact[% END %]
+    can always see [% terms.abug %], and this section does not take effect
+    unless the [% terms.bug %] is restricted to at least one group.
   [% END %]
 </div>

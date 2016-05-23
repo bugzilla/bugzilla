@@ -511,7 +511,8 @@ sub bz_table_list_real {
     my ($self) = @_;
     my $tables = $self->selectcol_arrayref(
         "SELECT LOWER(TABLE_NAME) FROM USER_TABLES WHERE 
-        TABLE_NAME NOT LIKE ?  ORDER BY TABLE_NAME", undef, 'DR$%');
+        TABLE_NAME NOT LIKE ? AND TABLE_NAME NOT LIKE ?
+        ORDER BY TABLE_NAME", undef, 'DR$%', 'APEX$%');
     return @$tables;
 }
 

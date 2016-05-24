@@ -735,6 +735,9 @@ $(function() {
             var other = $(that.attr('id') == 'dup_id' ? '#bottom-dup_id' : '#dup_id');
             other.val(that.val());
         });
+    var rbs = $("#readable-bug-status");
+    var rbs_text = bugzillaReadableStatus.readable(rbs.data('readable-bug-status'));
+    rbs.text(rbs_text);
 
     // add see-also button
     $('.bug-urls-btn')

@@ -312,6 +312,13 @@
 [% END %]
 
 [%# === status === %]
+[% IF readable_bug_status_json %]
+    [% readable_bug_status_span = BLOCK -%]
+        [%- %]<span id="readable-bug-status" data-readable-bug-status="[% readable_bug_status_json FILTER html %]"></span>
+    [% END %]
+
+    [% subtitle = [{ unfiltered = readable_bug_status_span }] %]
+[% END %]
 
 [% WRAPPER bug_modal/module.html.tmpl
     title = "Status"
@@ -321,10 +328,10 @@
     [%# product %]
     [% can_edit_product = bug.check_can_change_field("product", 0, 1) %]
     [% WRAPPER bug_modal/field.html.tmpl
-        field = bug_fields.product
-        field_type = constants.FIELD_TYPE_SINGLE_SELECT
+        field        = bug_fields.product
+        field_type   = constants.FIELD_TYPE_SINGLE_SELECT
         hide_on_edit = can_edit_product
-        help = "describecomponents.cgi"
+        help         = "describecomponents.cgi"
     %]
       <span class="spin-latch" id="product-latch" data-latch="#product-latch" data-for="#product-info">&#9656;</span>
       <div class="spin-toggle" data-latch="#product-latch" data-for="#product-info">

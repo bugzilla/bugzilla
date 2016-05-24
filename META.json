@@ -167,7 +167,7 @@
          "prereqs" : {
             "runtime" : {
                "requires" : {
-                  "Apache::SizeLimit" : "0.96",
+                  "Apache2::SizeLimit" : "0.96",
                   "mod_perl2" : "1.999022"
                }
             }

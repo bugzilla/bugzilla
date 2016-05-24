@@ -21,7 +21,6 @@ use Bugzilla::Util qw(trick_taint datetime_from html_quote time_ago);
 use List::MoreUtils qw(any);
 use Template::Stash;
 use JSON::XS qw(encode_json);
-use Scalar::Util qw(blessed);
 
 our $VERSION = '1';
 

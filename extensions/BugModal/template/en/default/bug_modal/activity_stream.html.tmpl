@@ -295,7 +295,11 @@
             ' &rarr; ';
           END;
         END;
-        PROCESS add_change value=change.added;
+        IF change.fieldname == 'cf_user_story';
+          %](updated)[%
+        ELSE;
+          PROCESS add_change value=change.added;
+        END;
       END;
 
       '</div>';

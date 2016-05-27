@@ -43,7 +43,7 @@ use warnings;
 sub moz_nick {
     my ($self) = @_;
     if (!exists $self->{moz_nick}) {
-        if ($self->name =~ /:?:(.+?)\b/) {
+        if ($self->name =~ /:?:(\S+?)\b/) {
             $self->{moz_nick} = $1;
         }
         elsif ($self->name) {

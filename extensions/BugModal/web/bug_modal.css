@@ -326,12 +326,8 @@ input[type="number"] {
     color: #999;
 }
 
-#cc-latch, #cc-summary {
+#cc-latch {
     cursor: pointer;
-}
-
-#cc-summary:hover {
-    text-decoration: underline;
 }
 
 #cc-list {
@@ -363,6 +359,14 @@ input[type="number"] {
 
 #add-cc {
     width: 100%;
+}
+
+.cc-loadable {
+    cursor: pointer;
+}
+
+.cc-loadable:hover {
+    text-decoration: underline;
 }
 
 /* actions */

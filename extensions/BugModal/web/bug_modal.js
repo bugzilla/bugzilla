@@ -226,24 +226,27 @@ $(function() {
         );
     }
 
-    $('#cc-latch, #cc-summary')
-        .click(function(event) {
-            event.preventDefault();
-            var latch = $('#cc-latch');
+    if (BUGZILLA.user.id) {
+        $('#cc-summary').addClass('cc-loadable');
+        $('#cc-latch, #cc-summary')
+            .click(function(event) {
+                event.preventDefault();
+                var latch = $('#cc-latch');
 
-            if (latch.data('expanded')) {
-                latch.data('expanded', false).html('&#9656;');
-                $('#cc-list').hide();
-            }
-            else {
-                latch.data('expanded', true).html('&#9662;');
-                $('#cc-list').show();
-                if (!latch.data('fetched')) {
-                    ccListLoading();
-                    ccListUpdate();
+                if (latch.data('expanded')) {
+                    latch.data('expanded', false).html('&#9656;');
+                    $('#cc-list').hide();
                 }
-            }
-        });
+                else {
+                    latch.data('expanded', true).html('&#9662;');
+                    $('#cc-list').show();
+                    if (!latch.data('fetched')) {
+                        ccListLoading();
+                        ccListUpdate();
+                    }
+                }
+            });
+    }
 
     // copy summary to clipboard
 

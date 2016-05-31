@@ -178,6 +178,12 @@ sub _add_comments_to_stream {
             $comment->{collapsed} = 1;
             $comment->{collapsed_reason} = 'empty';
         }
+        # If comment type is resolved as duplicate, do not add '...marked as duplicate...' string to comment body
+        if ($comment->type == CMT_DUPE_OF) {
+            $comment->set_type(0);
+            # Skip if user did not supply comment also
+            next if $comment->body eq '';
+        }
 
         _add_comment_to_stream($stream, date_str_to_time($comment->creation_ts), $comment->author->id, $comment);
     }
@@ -345,20 +351,21 @@ sub _add_duplicates_to_stream {
         SELECT longdescs.who,
                UNIX_TIMESTAMP(bug_when), " .
                $dbh->sql_date_format('bug_when') . ",
+               type,
                extra_data
           FROM longdescs
                INNER JOIN profiles ON profiles.userid = longdescs.who
-         WHERE bug_id = ? AND type = ?
+         WHERE bug_id = ? AND (type = ? OR type = ?)
          ORDER BY bug_when
     ");
-    $sth->execute($bug->id, CMT_HAS_DUPE);
+    $sth->execute($bug->id, CMT_HAS_DUPE, CMT_DUPE_OF);
 
-    while (my($who, $time, $when, $dupe_id) = $sth->fetchrow_array) {
+    while (my($who, $time, $when, $type, $dupe_id) = $sth->fetchrow_array) {
         _add_activity_to_stream($stream, $time, $who, {
             who     => Bugzilla::User->new({ id => $who, cache => 1 }),
             when    => $when,
             changes => [{
-                fieldname   => 'duplicate',
+                fieldname   => ($type == CMT_HAS_DUPE ? 'has_dupe' : 'dupe_of'),
                 added       => $dupe_id,
                 buglist     => 1,
             }],

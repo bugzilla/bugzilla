@@ -987,6 +987,7 @@
       END;
     %]
 
+    [% Hook.process('details_lhs') %]
   [% END %]
   [% WRAPPER fields_rhs %]
 
@@ -1007,6 +1008,7 @@
         hide_on_view = bug.see_also.size == 0
     %]
 
+    [% Hook.process('details_rhs') %]
   [% END %]
 
   [%# custom fields (textarea) %]

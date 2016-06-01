@@ -23,7 +23,9 @@ sub template_before_process {
     my $user = Bugzilla->user;
 
     return unless ($file eq 'bug/show-header.html.tmpl'
-                   || $file eq 'bug/edit.html.tmpl');
+                   || $file eq 'bug/edit.html.tmpl'
+                   || $file eq 'bug_modal/header.html.tmpl'
+                   || $file eq 'bug_modal/edit.html.tmpl');
     return unless ($user->id
                    && $user->settings->{'orange_factor'}->{'value'} eq 'on');
 

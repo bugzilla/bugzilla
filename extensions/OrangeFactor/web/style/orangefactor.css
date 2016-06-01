@@ -11,3 +11,7 @@
     height: 38px;
     margin: 0 .5em .5em 0;
 }
+
+#orange-count, #orange-link {
+    color: #666;
+}

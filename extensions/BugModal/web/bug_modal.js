@@ -1026,6 +1026,30 @@ $(function() {
             },
         ]
     });
+    $.contextMenu({
+        selector: '#format-btn',
+        trigger: 'left',
+        items: [
+            {
+                name: 'For Printing',
+                callback: function() {
+                    window.location.href = 'show_bug.cgi?format=multiple&id=' + BUGZILLA.bug_id;
+                }
+            },
+            {
+                name: 'XML',
+                callback: function() {
+                    window.location.href = 'show_bug.cgi?ctype=xml&id=' + BUGZILLA.bug_id;
+                }
+            },
+            {
+                name: 'Legacy',
+                callback: function() {
+                    window.location.href = 'show_bug.cgi?format=default&id=' + BUGZILLA.bug_id;
+                }
+            }
+        ]
+    });
 
     // "reset to default" checkboxes
     $('#product, #component')

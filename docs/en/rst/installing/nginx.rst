@@ -16,7 +16,7 @@ If using fcgiwrap, configure that in the normal way.
 If using Plack, install that, then arrange for the following command to be run
 on startup:
 
-    plackup -s FCGI --listen /run/bugzilla.sock /srv/bugzilla/app.psgi
+:command:`plackup -s FCGI --listen /run/bugzilla.sock /var/www/html/bugzilla/app.psgi`
 
 For any configuration:
 
@@ -28,10 +28,12 @@ Bugzilla.
 Use the following server block, adjusting to taste. Angle brackets are placed
 around the strings that must be changed.
 
+.. code-block:: nginx
+
     server {
         server_name <bugs.example.com>;
 
-        root </srv/bugzilla>;
+        root </var/www/html/bugzilla>;
 
         # optional if you don't have the autoindex module or have it off already
         autoindex off;

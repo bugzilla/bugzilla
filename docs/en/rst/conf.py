@@ -389,7 +389,7 @@ todo_include_todos = True
 on_rtd = os.environ.get('READTHEDOCS', None) == 'True'
 
 if on_rtd:
-    base_api_url = 'https://www.bugzilla.org/docs/tip/en/html/api/'
+    base_api_url = 'https://www.bugzilla.org/docs/tip/en/html/integrating/api/'
 else:
     base_api_url = '../integrating/api/'
 

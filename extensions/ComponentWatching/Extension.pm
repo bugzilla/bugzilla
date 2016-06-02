@@ -408,11 +408,13 @@ sub bugmail_recipients {
          WHERE component_prefix IS NOT NULL
                AND (component_watch.product_id = ? OR component_watch.product_id = ?)
                AND components.name LIKE CONCAT(component_prefix, '%')
+               AND (components.id = ? OR components.id = ?)
     ");
     $sth->execute(
         $oldProductId, $newProductId,
         $oldComponentId, $newComponentId,
-        $oldProductId, $newProductId
+        $oldProductId, $newProductId,
+        $oldComponentId, $newComponentId,
     );
     while (my ($uid) = $sth->fetchrow_array) {
         if (!exists $recipients->{$uid}) {

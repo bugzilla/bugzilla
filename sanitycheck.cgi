@@ -72,6 +72,7 @@ my $user = Bugzilla->login(LOGIN_REQUIRED);
 
 my $cgi = Bugzilla->cgi;
 my $dbh = Bugzilla->dbh;
+my $hooks_only = $cgi->param('hooks_only');
 # If the result of the sanity check is sent per email, then we have to
 # take the user prefs into account rather than querying the web browser.
 my $template;
@@ -84,7 +85,7 @@ else {
     # Only check the token if we are running this script from the
     # web browser and a parameter is passed to the script.
     # XXX - Maybe these two parameters should be deleted once logged in?
-    $cgi->delete('GoAheadAndLogIn', 'Bugzilla_restrictlogin');
+    $cgi->delete('GoAheadAndLogIn', 'Bugzilla_restrictlogin', 'hooks_only');
     if (scalar($cgi->param())) {
         my $token = $cgi->param('token');
         check_hash_token($token, ['sanitycheck']);
@@ -107,6 +108,8 @@ unless (Bugzilla->usage_mode == USAGE_MODE_CMDLINE) {
     $template->process('admin/sanitycheck/list.html.tmpl', $vars)
       || ThrowTemplateError($template->error());
 }
+
+goto REPAIR_HOOKS if $hooks_only;
 
 ###########################################################################
 # Create missing group_control_map entries
@@ -379,8 +382,11 @@ Bugzilla->memcached->clear_all() if $clear_memcached;
 # Repair hook
 ###########################################################################
 
+REPAIR_HOOKS:
+
 Bugzilla::Hook::process('sanitycheck_repair', { status => \&Status });
 
+goto CHECK_HOOKS if $hooks_only;
 ###########################################################################
 # Checks
 ###########################################################################
@@ -924,7 +930,7 @@ Status('whines_obsolete_target_fix') if $display_repair_whines_link;
 ###########################################################################
 # Check hook
 ###########################################################################
-
+CHECK_HOOKS:
 Bugzilla::Hook::process('sanitycheck_check', { status => \&Status });
 
 ###########################################################################

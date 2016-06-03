@@ -965,6 +965,22 @@ sub bug_end_of_create {
     }
 }
 
+sub sanitycheck_check {
+    my ($self, $args) = @_;
+
+    my $dbh = Bugzilla->dbh;
+    my $status = $args->{'status'};
+    $status->('bmo_check_cf_visible_in_products');
+
+    my $products = $dbh->selectcol_arrayref('SELECT name FROM products');
+    my %product = map { $_ => 1 } @$products;
+    my @cf_products = map { keys %$_ } values %$cf_visible_in_products;
+    foreach my $cf_product (@cf_products) {
+        $status->('bmo_check_cf_visible_in_products_missing',
+                  { cf_product => $cf_product }, 'alert') unless $product{$cf_product};
+    }
+}
+
 sub db_sanitize {
     print "deleting reporter's user-agents...\n";
     Bugzilla->dbh->do("TRUNCATE TABLE bug_user_agent");

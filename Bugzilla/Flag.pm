@@ -397,7 +397,8 @@ sub set_flag {
     if ($obj_flag
         && $requestee_changed
         && $obj_flag->requestee_id
-        && $obj_flag->requestee->setting('requestee_cc') eq 'on')
+        && $obj_flag->requestee->setting('requestee_cc') eq 'on'
+        && $bug->reporter->id != $obj_flag->requestee->id)
     {
         $bug->add_cc($obj_flag->requestee);
     }

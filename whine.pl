@@ -608,7 +608,7 @@ sub reset_timer {
         my $next_run = $dbh->selectrow_array(
             'SELECT ' . $dbh->sql_date_math('NOW()', '+', '?', 'MINUTE'),
             undef, $minute_offset);
-        $next_run = format_time($next_run, "%Y-%m-%d %R");
+        $next_run = format_time($next_run, "%Y-%m-%d %R", "UTC");
 
         $sth = $dbh->prepare("UPDATE whine_schedules " .
                              "SET run_next = ? WHERE id = ?");

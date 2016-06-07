@@ -30,7 +30,7 @@
           [% FOREACH sig = split_cf_crash_signature %]
             [% IF sig.match('^\[\@\s*') && sig.match('\s*\]$') %]
               [% sig = sig.replace('(^\[\@\s*|\s*\]$)', '') %]
-              <a href="https://crash-stats.mozilla.com/report/list?signature=[% sig FILTER uri %]"
+              <a href="https://crash-stats.mozilla.com/signature/?signature=[% sig FILTER uri %]"
                target="_blank">[@ [% sig FILTER html %] ]</a><br>
             [% ELSE %]
               [% sig FILTER html %]<br>

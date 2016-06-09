@@ -9,13 +9,12 @@
 [%#
   # ts: timestamp
   #%]
-
-<span class="rel-time" title="[% ts FILTER time("%Y-%m-%d %H:%M %Z") %]" data-time="[% ts FILTER epoch FILTER none %]">
-  [%~
-    IF content.defined;
-      content;
-    ELSE;
-      ts FILTER time_duration FILTER html;
-    END;
-  ~%]
+[% IF user.setting("ui_use_absolute_time") == "on" -%]
+<span class="rel-time-title" title="[% ts FILTER time_duration FILTER html %]" data-time="[% ts FILTER epoch FILTER none %]">
+  [%~ ts FILTER time("%Y-%m-%d %H:%M %Z"); ~%]
 </span>
+[% ELSE -%]
+<span class="rel-time" title="[% ts FILTER time("%Y-%m-%d %H:%M %Z") %]" data-time="[% ts FILTER epoch FILTER none %]">
+  [%~ ts FILTER time_duration FILTER html; ~%]
+</span>
+[% END -%]

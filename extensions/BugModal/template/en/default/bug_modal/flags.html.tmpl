@@ -84,8 +84,13 @@
       [% ELSE %]
         <span
       [% END %]
-        class="rel-time-title[% " activity-ref" IF activity_id %]"
-        title="[% f.creation_date FILTER time_duration FILTER html %]"
+        [% IF user.setting("ui_use_absolute_time") == "on"  %]
+            class="abs-time-title[% " activity-ref" IF activity_id %]"
+            title="[% f.creation_date FILTER time('%Y-%m-%d %H:%M %Z') %]"
+        [% ELSE %]
+            class="rel-time-title[% " activity-ref" IF activity_id %]"
+            title="[% f.creation_date FILTER time_duration FILTER html %]"
+        [% END %]
         data-time="[% f.creation_date FILTER epoch FILTER none %]"
       >
         [% f.type.name FILTER html %]

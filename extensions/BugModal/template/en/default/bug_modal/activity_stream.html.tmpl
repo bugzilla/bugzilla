@@ -158,7 +158,11 @@
       <table class="layout-table change-head default-collapsed" id="cc-[% comment.count FILTER none %]">
       <tr>
         <td class="comment-collapse-reason"
+            [% IF user.setting("ui_use_absolute_time") == "on" %]
+            title="[% comment.author.moz_nick FILTER html %] [[% comment.creation_ts FILTER time("%Y-%m-%d %H:%M %Z") FILTER html %]]">
+            [% ELSE %]
             title="[% comment.author.moz_nick FILTER html %] [[% comment.creation_ts FILTER time_duration FILTER html %]]">
+            [% END %]
             Comment hidden ([% comment.collapsed_reason FILTER html %])
         </td>
         <td class="comment-actions">

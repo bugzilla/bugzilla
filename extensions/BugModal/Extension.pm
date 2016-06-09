@@ -342,6 +342,12 @@ sub install_before_final_checks {
         default  => 'off',
         category => 'User Interface'
     });
+    add_setting({
+        name     => 'ui_use_absolute_time',
+        options  => ['on', 'off'],
+        default  => 'off',
+        category => 'User Interface',
+    });
 
     # ensure the correct skin is being used
     my $dbh = Bugzilla->dbh;

@@ -864,6 +864,7 @@ $(function() {
             event.preventDefault();
             $('#field-status-view').hide();
             $('#field-status-edit').show();
+            $('#field-status-edit .name').show();
             $('#bug_status').val('RESOLVED').change();
             $('#resolution').val($(event.target).text()).change();
             $('#top-save-btn').show();

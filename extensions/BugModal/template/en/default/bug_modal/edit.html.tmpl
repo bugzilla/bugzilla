@@ -245,14 +245,13 @@
             [% ELSE %]
               (<span
             [% END %]
-                   <!-- time("%Y-%m-%d %H:%M %Z") -->
-              [% IF user.setting("ui_use_absolute_time") == "on" %]
-                class="flag-name-status abs-time-title[% " activity-ref" IF activity_id %]"
-                title="[% ni.creation_date FILTER time("%Y-%m-%d %H:%M %Z") FILTER html %]"
-              [% ELSE %]
-                class="flag-name-status rel-time-title[% " activity-ref" IF activity_id %]"
-                title="[% ni.creation_date FILTER time_duration FILTER html %]"
-              [% END %]
+            [% IF user.setting("ui_use_absolute_time") == "on" %]
+              class="flag-name-status abs-time-title[% " activity-ref" IF activity_id %]"
+              title="[% ni.creation_date FILTER time("%Y-%m-%d %H:%M %Z") FILTER html %]"
+            [% ELSE %]
+              class="flag-name-status rel-time-title[% " activity-ref" IF activity_id %]"
+              title="[% ni.creation_date FILTER time_duration FILTER html %]"
+            [% END %]
               data-time="[% ni.creation_date FILTER epoch FILTER none %]"
             >NeedInfo
             [% activity_id ? "</a>" : "</span>" %]

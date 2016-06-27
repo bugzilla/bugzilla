@@ -427,7 +427,7 @@ sub view {
     if ($contenttype !~ /\bcharset=/i) {
         # In order to prevent Apache from adding a charset, we have to send a
         # charset that's a single space.
-        $cgi->charset(' ');
+        $cgi->charset("''");
         if (Bugzilla->feature('detect_charset') && $contenttype =~ /^text\//) {
             my $encoding = detect_encoding($attachment->data);
             if ($encoding) {
@@ -437,8 +437,11 @@ sub view {
     }
     Bugzilla->log_user_request($attachment->bug_id, $attachment->id, "attachment-get")
       if Bugzilla->user->id;
-    print $cgi->header(-type=>"$contenttype; name=\"$filename\"",
-                       -content_disposition=> "$disposition; filename=\"$filename\"",
+    # IE8 and older do not support RFC 6266. So for these old browsers
+    # we still pass the old 'filename' attribute. Modern browsers will
+    # automatically pick the new 'filename*' attribute.
+    print $cgi->header(-type=> $contenttype,
+                       -content_disposition=> "$disposition; filename=\"$filename\"; filename*=UTF-8''$filename",
                        -content_length => $attachment->datasize);
     disable_utf8();
     print $attachment->data;

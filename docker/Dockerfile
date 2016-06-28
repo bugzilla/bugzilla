@@ -12,9 +12,8 @@ ENV BUGZILLA_HOME /home/$BUGZILLA_USER
 ENV BUGZILLA_ROOT $BUGZILLA_HOME/devel/htdocs/bmo
 ENV BUGZILLA_URL http://localhost/bmo
 
-ENV GITHUB_BASE_GIT https://github.com/mozilla/webtools-bmo-bugzilla
+ENV GITHUB_BASE_GIT https://github.com/mozilla-bteam/bmo
 ENV GITHUB_BASE_BRANCH master
-ENV GITHUB_QA_GIT https://github.com/mozilla/webtools-bmo-qa
 
 ENV ADMIN_EMAIL admin@mozilla.bugs
 ENV ADMIN_PASS password
@@ -75,7 +74,7 @@ EXPOSE 22
 EXPOSE 5900
 
 # Testing scripts for CI
-ADD https://selenium-release.storage.googleapis.com/2.45/selenium-server-standalone-2.45.0.jar /selenium-server.jar
+ADD https://selenium-release.storage.googleapis.com/2.53/selenium-server-standalone-2.53.0.jar /selenium-server.jar
 
 # Supervisor
 COPY supervisord.conf /etc/supervisord.conf

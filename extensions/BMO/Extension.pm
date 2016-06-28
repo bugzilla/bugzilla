@@ -677,7 +677,7 @@ sub bug_format_comment {
         }
     });
 
-    # link git.mozilla.org commit messages
+    # link old git.mozilla.org commit messages to github
     push (@$regexes, {
         match => qr#^(To\s(?:ssh://)?(?:[^\@]+\@)?git\.mozilla\.org[:/](.+?\.git)\n
                     \s+)([0-9a-z]+\.\.([0-9a-z]+)\s+\S+\s->\s\S+)#mx,
@@ -687,7 +687,24 @@ sub bug_format_comment {
             my $repo = html_quote($args->{matches}->[1]);
             my $text = $args->{matches}->[2];
             my $revision = $args->{matches}->[3];
-            return qq#$preamble<a href="https://git.mozilla.org/?p=$repo;a=commitdiff;h=$revision">$text</a>#;
+            $repo = 'mozilla/webtools-bmo-bugzilla' if $repo =~ /^webtools\/bmo\/bugzilla/;
+            $repo = 'bugzilla/bugzilla' if $repo =~ /^bugzilla\/bugzilla\.git/;
+            $repo = 'bugzilla/bugzilla.org' if $repo =~ /^www\/bugzilla\.org/;
+            return qq#$preamble<a href="https://github.com/$repo/commit/$revision">$text</a>#;
+        }
+    });
+
+    # link github commit messages
+    push (@$regexes, {
+        match => qr#^(To\s(?:https://)?github\.com/(.+?)\.git\n
+                    \s+)([0-9a-z]+\.\.([0-9a-z]+)\s+\S+\s->\s\S+)#mx,
+        replace => sub {
+            my $args = shift;
+            my $preamble = html_quote($args->{matches}->[0]);
+            my $repo = html_quote($args->{matches}->[1]);
+            my $text = $args->{matches}->[2];
+            my $revision = $args->{matches}->[3];
+            return qq#$preamble<a href="https://github.com/$repo/commit/$revision">$text</a>#;
         }
     });
 

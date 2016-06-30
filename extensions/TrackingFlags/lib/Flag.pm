@@ -132,6 +132,9 @@ sub create {
     write_params();
     die $error if $error;
 
+    # fielddefs has been changed so we need to clear global config
+    Bugzilla->memcached->clear_config();
+
     return $flag;
 }
 

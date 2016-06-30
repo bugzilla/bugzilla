@@ -1027,29 +1027,39 @@ $(function() {
             },
         ]
     });
+
+    var format_items = [
+        {
+        name: 'For Printing',
+            callback: function() {
+                window.location.href = 'show_bug.cgi?format=multiple&id=' + BUGZILLA.bug_id;
+            }
+        },
+        {
+            name: 'XML',
+            callback: function() {
+                window.location.href = 'show_bug.cgi?ctype=xml&id=' + BUGZILLA.bug_id;
+            }
+        },
+        {
+            name: 'Legacy',
+            callback: function() {
+                window.location.href = 'show_bug.cgi?format=default&id=' + BUGZILLA.bug_id;
+            }
+        }
+    ];
+    if (!BUGZILLA.bug_secure) {
+        format_items.push({
+            name: 'JSON',
+            callback: function() {
+                window.location.href = 'rest/bug/' + BUGZILLA.bug_id;
+            }
+        });
+    }
     $.contextMenu({
         selector: '#format-btn',
         trigger: 'left',
-        items: [
-            {
-                name: 'For Printing',
-                callback: function() {
-                    window.location.href = 'show_bug.cgi?format=multiple&id=' + BUGZILLA.bug_id;
-                }
-            },
-            {
-                name: 'XML',
-                callback: function() {
-                    window.location.href = 'show_bug.cgi?ctype=xml&id=' + BUGZILLA.bug_id;
-                }
-            },
-            {
-                name: 'Legacy',
-                callback: function() {
-                    window.location.href = 'show_bug.cgi?format=default&id=' + BUGZILLA.bug_id;
-                }
-            }
-        ]
+        items: format_items
     });
 
     // "reset to default" checkboxes

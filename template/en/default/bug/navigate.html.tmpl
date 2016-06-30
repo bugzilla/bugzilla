@@ -28,6 +28,9 @@
                 [% bug.bug_id FILTER uri %]">Format For Printing</a></li>
     <li>&nbsp;-&nbsp;<a href="show_bug.cgi?ctype=xml&amp;id=
                         [% bug.bug_id  FILTER uri %]">XML</a></li>
+    [% IF NOT bug.groups_in.size %]
+      <li>&nbsp;-&nbsp;<a href="rest/bug/[% bug.bug_id  FILTER uri %]">JSON</a></li>
+    [% END %]
     <li>&nbsp;-&nbsp;
       <a href="enter_bug.cgi?format=__default__&amp;cloned_bug_id=[% bug.bug_id  FILTER uri %]"
          id="clone_bug"

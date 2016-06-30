@@ -143,7 +143,7 @@ sub modify_inc {
     # directory. We don't want Bugzilla's base lib/CGI.pm being loaded as 
     # Bugzilla::Extension::Foo::CGI or any other confusing thing like that.
     return if $package_dir eq bz_locations->{'extensionsdir'};
-    unshift(@INC, sub { __do_call($class, 'my_inc', @_) });
+    push(@INC, sub { __do_call($class, 'my_inc', @_) });
 }
 
 # This is what gets put into @INC by modify_inc.

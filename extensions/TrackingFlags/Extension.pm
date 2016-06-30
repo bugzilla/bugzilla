@@ -409,6 +409,7 @@ sub active_custom_fields {
     my $product   = $params->{'product'};
     my $component = $params->{'component'};
 
+    return if $params->{skip_extensions};
     # Create a hash of current fields based on field names
     my %field_hash = map { $_->name => $_ } @$$fields;
 

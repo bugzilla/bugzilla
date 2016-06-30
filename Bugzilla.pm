@@ -710,10 +710,10 @@ sub active_custom_fields {
     if ($params) {
         $cache_id .= ($params->{product} ? '_p' . $params->{product}->id : '') .
                      ($params->{component} ? '_c' . $params->{component}->id : '');
+        $cache_id .= ':noext' if $params->{skip_extensions};
     }
     if (!exists $class->request_cache->{$cache_id}) {
-        my $fields = Bugzilla::Field->match({ custom => 1, obsolete => 0});
-        @$fields = grep($_->type ne FIELD_TYPE_EXTENSION, @$fields);
+        my $fields = Bugzilla::Field->match({ custom => 1, obsolete => 0, skip_extensions => 1 });
         Bugzilla::Hook::process('active_custom_fields',
                                 { fields => \$fields, params => $params });
         $class->request_cache->{$cache_id} = $fields;

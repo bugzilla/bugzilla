@@ -288,6 +288,9 @@ sub match {
     if (delete $params->{is_select}) {
         $params->{type} = [FIELD_TYPE_SINGLE_SELECT, FIELD_TYPE_MULTI_SELECT];
     }
+    if (delete $params->{skip_extensions}) {
+        $params->{WHERE}{'type != ?'} = FIELD_TYPE_EXTENSION;
+    }
     return $self->SUPER::match(@_);
 }
 

@@ -6,8 +6,11 @@
 # defined by the Mozilla Public License, v. 2.0.
 
 package Bugzilla::Extension::GitHubAuth::Verify;
+
+use 5.10.1;
 use strict;
 use warnings;
+
 use base qw(Bugzilla::Auth::Verify);
 
 use Bugzilla::Constants qw( AUTH_NO_SUCH_USER );

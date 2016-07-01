@@ -9,11 +9,10 @@ package Bugzilla::Extension::EditComments;
 
 use 5.10.1;
 use strict;
+use warnings;
 
 use constant NAME => 'EditComments';
-
 use constant REQUIRED_MODULES => [];
-
 use constant OPTIONAL_MODULES => [];
 
 __PACKAGE__->NAME;

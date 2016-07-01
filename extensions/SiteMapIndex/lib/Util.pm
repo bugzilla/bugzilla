@@ -21,7 +21,11 @@
 #   Dave Lawrence <dkl@mozilla.com>
 
 package Bugzilla::Extension::SiteMapIndex::Util;
+
+use 5.10.1;
 use strict;
+use warnings;
+
 use base qw(Exporter);
 our @EXPORT = qw(
     generate_sitemap 

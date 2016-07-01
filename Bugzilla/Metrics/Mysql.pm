@@ -11,7 +11,7 @@ use 5.10.1;
 use strict;
 use warnings;
 
-use parent 'Bugzilla::DB::Mysql';
+use base 'Bugzilla::DB::Mysql';
 
 sub do {
     my ($self, @args) = @_;

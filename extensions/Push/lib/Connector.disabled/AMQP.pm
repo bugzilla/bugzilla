@@ -7,6 +7,7 @@
 
 package Bugzilla::Extension::Push::Connector::AMQP;
 
+use 5.10.1;
 use strict;
 use warnings;
 

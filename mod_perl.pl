@@ -1,30 +1,28 @@
-#!/usr/bin/perl -wT
-# -*- Mode: perl; indent-tabs-mode: nil -*-
+#!/usr/bin/perl -T
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
 #
-# The contents of this file are subject to the Mozilla Public
-# License Version 1.1 (the "License"); you may not use this file
-# except in compliance with the License. You may obtain a copy of
-# the License at http://www.mozilla.org/MPL/
-#
-# Software distributed under the License is distributed on an "AS
-# IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
-# implied. See the License for the specific language governing
-# rights and limitations under the License.
-#
-# The Original Code is the Bugzilla Bug Tracking System.
-#
-# Contributor(s): Max Kanat-Alexander <mkanat@bugzilla.org>
+# This Source Code Form is "Incompatible With Secondary Licenses", as
+# defined by the Mozilla Public License, v. 2.0.
 
 package Bugzilla::ModPerl;
+
+use 5.10.1;
 use strict;
 use warnings;
 
 # This sets up our libpath without having to specify it in the mod_perl
 # configuration.
 use File::Basename;
-use lib dirname(__FILE__);
+use File::Spec;
+BEGIN {
+    require lib;
+    my $dir = dirname(__FILE__);
+    lib->import($dir, File::Spec->catdir($dir, "lib"), File::Spec->catdir($dir, qw(local lib perl5)));
+}
+
 use Bugzilla::Constants ();
-use lib Bugzilla::Constants::bz_locations()->{'ext_libpath'};
 
 # If you have an Apache2::Status handler in your Apache configuration,
 # you need to load Apache2::Status *here*, so that any later-loaded modules

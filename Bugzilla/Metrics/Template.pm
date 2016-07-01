@@ -7,10 +7,11 @@
 
 package Bugzilla::Metrics::Template;
 
+use 5.10.1;
 use strict;
 use warnings;
 
-use parent 'Bugzilla::Template';
+use base 'Bugzilla::Template';
 
 sub process {
     my $self = shift;

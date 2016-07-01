@@ -7,6 +7,7 @@
 
 package Bugzilla::Extension::TrackingFlags::Admin;
 
+use 5.10.1;
 use strict;
 use warnings;
 

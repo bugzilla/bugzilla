@@ -7,7 +7,9 @@
 
 package Bugzilla::Extension::OpenGraph;
 
+use 5.10.1;
 use strict;
+use warnings;
 
 use constant NAME => 'OpenGraph';
 use constant REQUIRED_MODULES => [ ];

@@ -21,7 +21,8 @@
 
 use strict;
 use warnings;
-use lib qw(. lib);
+use FindBin qw($RealBin);
+use lib ("$RealBin/..", "$RealBin/../lib", "$RealBin/../local/lib/perl5");
 
 use Bugzilla;
 use Bugzilla::Install::Filesystem qw(fix_all_file_permissions);

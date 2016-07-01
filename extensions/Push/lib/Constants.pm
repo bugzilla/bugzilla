@@ -7,7 +7,10 @@
 
 package Bugzilla::Extension::Push::Constants;
 
+use 5.10.1;
 use strict;
+use warnings;
+
 use base 'Exporter';
 
 our @EXPORT = qw(

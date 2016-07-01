@@ -20,7 +20,10 @@
 #   Gervase Markham <gerv@gerv.net>
 
 package Bugzilla::Extension::BMO;
+
+use 5.10.1;
 use strict;
+use warnings;
 
 use constant NAME => 'BMO';
 

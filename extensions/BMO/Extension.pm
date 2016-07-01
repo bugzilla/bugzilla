@@ -22,7 +22,11 @@
 #   Byron Jones <glob@mozilla.com>
 
 package Bugzilla::Extension::BMO;
+
+use 5.10.1;
 use strict;
+use warnings;
+
 use base qw(Bugzilla::Extension);
 
 use Bugzilla::BugMail;

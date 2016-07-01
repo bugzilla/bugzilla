@@ -1,4 +1,4 @@
-#!/usr/bin/perl -wT
+#!/usr/bin/perl -T
 # -*- Mode: perl; indent-tabs-mode: nil -*-
 #
 # The contents of this file are subject to the Mozilla Public
@@ -21,9 +21,11 @@
 # Contributor(s): Terry Weissman <terry@mozilla.org>
 #                 Jacob Steenhagen <jake@bugzilla.org>
 
+use 5.10.1;
 use strict;
+use warnings;
 
-use lib qw(. lib);
+use lib qw(. lib local/lib/perl5);
 
 use Bugzilla;
 use Bugzilla::Util;

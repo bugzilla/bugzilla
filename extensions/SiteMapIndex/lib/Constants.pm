@@ -20,7 +20,11 @@
 #   Max Kanat-Alexander <mkanat@bugzilla.org>
 
 package Bugzilla::Extension::SiteMapIndex::Constants;
+
+use 5.10.1;
 use strict;
+use warnings;
+
 use base qw(Exporter);
 our @EXPORT = qw(
     SITEMAP_AGE

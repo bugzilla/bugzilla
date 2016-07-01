@@ -21,7 +21,9 @@
 
 package Bugzilla::Extension::Splinter::Util;
 
+use 5.10.1;
 use strict;
+use warnings;
 
 use Bugzilla;
 use Bugzilla::Util;

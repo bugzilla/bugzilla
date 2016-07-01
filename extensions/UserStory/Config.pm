@@ -6,7 +6,10 @@
 # defined by the Mozilla Public License, v. 2.0.
 
 package Bugzilla::Extension::UserStory;
+
+use 5.10.1;
 use strict;
+use warnings;
 
 use constant NAME => 'UserStory';
 use constant REQUIRED_MODULES => [

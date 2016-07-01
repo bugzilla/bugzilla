@@ -7,10 +7,11 @@
 
 package Bugzilla::Metrics::Reporter::STDERR;
 
+use 5.10.1;
 use strict;
 use warnings;
 
-use parent 'Bugzilla::Metrics::Reporter';
+use base 'Bugzilla::Metrics::Reporter';
 
 use Data::Dumper;
 

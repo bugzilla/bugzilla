@@ -7,6 +7,7 @@
 
 package Bugzilla::Extension::AntiSpam::Config;
 
+use 5.10.1;
 use strict;
 use warnings;
 

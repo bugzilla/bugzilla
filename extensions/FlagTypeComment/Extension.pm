@@ -19,7 +19,11 @@
 #   byron jones <glob@mozilla.com>
 
 package Bugzilla::Extension::FlagTypeComment;
+
+use 5.10.1;
 use strict;
+use warnings;
+
 use base qw(Bugzilla::Extension);
 
 use Bugzilla::Extension::FlagTypeComment::Constants;

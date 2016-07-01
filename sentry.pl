@@ -1,4 +1,4 @@
-#!/usr/bin/perl -w
+#!/usr/bin/perl
 
 # This Source Code Form is subject to the terms of the Mozilla Public
 # License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -13,15 +13,17 @@
 # called by Bugzilla::Sentry
 #
 
+use 5.10.1;
 use strict;
 use warnings;
+
+# exit early if there's nothing to send
+use FindBin qw($RealBin);
+use lib ("$RealBin/.", "$RealBin/lib", "$RealBin/local/lib/perl5");
 
 BEGIN {
     delete $ENV{SERVER_SOFTWARE};
 
-    # exit early if there's nothing to send
-    use FindBin qw($Bin);
-    use lib $Bin, "$Bin/lib";
     use Bugzilla::Constants;
     exit(0) unless glob(bz_locations()->{error_reports} . '/*.dump');
 }

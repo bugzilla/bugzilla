@@ -6,8 +6,11 @@
 # defined by the Mozilla Public License, v. 2.0.
 
 package Bugzilla::MFA::Dummy;
+
+use 5.10.1;
 use strict;
-use parent 'Bugzilla::MFA';
+use warnings;
+use base 'Bugzilla::MFA';
 
 # if a user is configured to use a disabled or invalid mfa provider, we return
 # this dummy provider.

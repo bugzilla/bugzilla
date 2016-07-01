@@ -7,7 +7,10 @@
 
 package Bugzilla::Extension::LimitedEmail;
 
+use 5.10.1;
 use strict;
+use warnings;
+
 use constant NAME => 'LimitedEmail';
 use constant REQUIRED_MODULES => [ ];
 use constant OPTIONAL_MODULES => [ ];

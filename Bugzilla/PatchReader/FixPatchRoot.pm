@@ -1,9 +1,11 @@
 package Bugzilla::PatchReader::FixPatchRoot;
 
+use 5.10.1;
+use strict;
+use warnings;
+
 use Bugzilla::PatchReader::FilterPatch;
 use Bugzilla::PatchReader::CVSClient;
-
-use strict;
 
 @Bugzilla::PatchReader::FixPatchRoot::ISA = qw(Bugzilla::PatchReader::FilterPatch);
 

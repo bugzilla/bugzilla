@@ -12,8 +12,8 @@ use strict;
 use Cwd 'abs_path';
 use File::Basename;
 use FindBin;
-use lib "$FindBin::Bin/../..";
-use lib "$FindBin::Bin/../../lib";
+use FindBin qw($RealBin);
+use lib ("$RealBin/..", "$RealBin/../lib", "$RealBin/../local/lib/perl5");
 
 use Bugzilla;
 use Bugzilla::Constants;

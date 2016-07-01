@@ -31,7 +31,9 @@
 
 package Bugzilla::Config::MTA;
 
+use 5.10.1;
 use strict;
+use warnings;
 
 use Bugzilla::Config::Common;
 # Return::Value 1.666002 pollutes the error log with warnings about this

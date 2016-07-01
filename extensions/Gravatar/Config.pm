@@ -7,7 +7,9 @@
 
 package Bugzilla::Extension::Gravatar;
 
+use 5.10.1;
 use strict;
+use warnings;
 
 use constant NAME => 'Gravatar';
 use constant REQUIRED_MODULES => [];

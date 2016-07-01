@@ -1,36 +1,16 @@
-# -*- Mode: perl; indent-tabs-mode: nil -*-
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
 #
-# The contents of this file are subject to the Mozilla Public
-# License Version 1.1 (the "License"); you may not use this file
-# except in compliance with the License. You may obtain a copy of
-# the License at http://www.mozilla.org/MPL/
-#
-# Software distributed under the License is distributed on an "AS
-# IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
-# implied. See the License for the specific language governing
-# rights and limitations under the License.
-#
-# The Original Code is the Bugzilla Bug Tracking System.
-#
-# The Initial Developer of the Original Code is Netscape Communications
-# Corporation. Portions created by Netscape are
-# Copyright (C) 1998 Netscape Communications Corporation. All
-# Rights Reserved.
-#
-# Contributor(s): Terry Weissman <terry@mozilla.org>
-#                 Dawn Endico <endico@mozilla.org>
-#                 Dan Mosedale <dmose@mozilla.org>
-#                 Joe Robins <jmrobins@tgix.com>
-#                 Jake <jake@bugzilla.org>
-#                 J. Paul Reed <preed@sigkill.com>
-#                 Bradley Baetz <bbaetz@student.usyd.edu.au>
-#                 Christopher Aillon <christopher@aillon.com>
-#                 Shane H. W. Travis <travis@sedsystems.ca>
-#                 Max Kanat-Alexander <mkanat@bugzilla.org>
-#                 Marc Schumann <wurblzap@gmail.com>
+# This Source Code Form is "Incompatible With Secondary Licenses", as
+# defined by the Mozilla Public License, v. 2.0.
 
 package Bugzilla::Constants;
+
+use 5.10.1;
 use strict;
+use warnings;
+
 use base qw(Exporter);
 
 # For bz_locations
@@ -45,6 +25,8 @@ use Memoize;
     LOCAL_FILE
 
     bz_locations
+
+    CAN_HAS_FEATURE
 
     CONCATENATE_ASSETS
 
@@ -238,6 +220,17 @@ use constant REST_DOC => "http://www.bugzilla.org/docs/tip/en/html/api/";
 # Location of the remote and local XML files to track new releases.
 use constant REMOTE_FILE => 'http://updates.bugzilla.org/bugzilla-update.xml';
 use constant LOCAL_FILE  => 'bugzilla-update.xml'; # Relative to datadir.
+
+use constant CAN_HAS_FEATURE => eval {
+    require CPAN::Meta::Prereqs;
+    require CPAN::Meta::Requirements;
+    require Module::Metadata;
+    require Module::Runtime;
+    CPAN::Meta::Prereqs->VERSION('2.132830');
+    CPAN::Meta::Requirements->VERSION('2.121');
+    Module::Metadata->VERSION('1.000019');
+    1;
+};
 
 # When true CSS and JavaScript assets will be concatanted and minified at
 # run-time, to reduce the number of requests required to render a page.

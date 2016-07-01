@@ -1,41 +1,31 @@
-# -*- Mode: perl; indent-tabs-mode: nil -*-
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
 #
-# The contents of this file are subject to the Mozilla Public
-# License Version 1.1 (the "License"); you may not use this file
-# except in compliance with the License. You may obtain a copy of
-# the License at http://www.mozilla.org/MPL/
-# 
-# Software distributed under the License is distributed on an "AS
-# IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
-# implied. See the License for the specific language governing
-# rights and limitations under the License.
-# 
-# The Original Code are the Bugzilla Tests.
-# 
-# The Initial Developer of the Original Code is Zach Lipton
-# Portions created by Zach Lipton are Copyright (C) 2001 Zach Lipton.
-# All Rights Reserved.
-# 
-# Contributor(s): Zach Lipton <zach@zachlipton.com>
-#                 Max Kanat-Alexander <mkanat@bugzilla.org>
+# This Source Code Form is "Incompatible With Secondary Licenses", as
+# defined by the Mozilla Public License, v. 2.0.
 
 
 #################
 #Bugzilla Test 1#
 ###Compilation###
 
+use 5.10.1;
 use strict;
-use 5.008001;
-use lib qw(. lib t);
+use warnings;
+
+use lib qw(. lib local/lib/perl5 t);
 use Config;
 use Support::Files;
-use Test::More tests => scalar(@Support::Files::testitems);
+use Test::More tests => scalar(@Support::Files::testitems)
+                        + scalar(@Support::Files::test_files);
 
 BEGIN { 
     use_ok('Bugzilla::Constants');
     use_ok('Bugzilla::Install::Requirements');
     use_ok('Bugzilla');
 }
+Bugzilla->usage_mode(USAGE_MODE_TEST);
 
 sub compile_file {
     my ($file) = @_;
@@ -65,12 +55,12 @@ sub compile_file {
         $T = "T";
     }
 
-    my $libs = '';
+    my $libs = '-It ';
     if ($ENV{PERL5LIB}) {
-       $libs = join " ", map { "-I\"$_\"" } split /$Config{path_sep}/, $ENV{PERL5LIB};
+       $libs .= join " ", map { "-I\"$_\"" } split /$Config{path_sep}/, $ENV{PERL5LIB};
     }
     my $perl = qq{"$^X"};
-    my $output = `$perl $libs -wc$T $file 2>&1`;
+    my $output = `$perl $libs -c$T -MSupport::Systemexec $file 2>&1`;
     chomp($output);
     my $return_val = $?;
     $output =~ s/^\Q$file\E syntax OK$//ms;
@@ -78,7 +68,7 @@ sub compile_file {
     ok(!$return_val, $file) or diag('--ERROR');
 }
 
-my @testitems = @Support::Files::testitems;
+my @testitems = (@Support::Files::testitems, @Support::Files::test_files);
 my $file_features = map_files_to_features();
 
 # Test the scripts by compiling them
@@ -102,8 +92,7 @@ foreach my $file (@testitems) {
             and $file ne "Bugzilla/DB/Schema.pm") 
         {
             my $module = lc($1);
-            my $dbd = DB_MODULE->{$module}->{dbd}->{module};
-            eval("use $dbd; 1") or skip "$file: $dbd not installed", 1;
+            Bugzilla->feature($module) or skip "$file: Driver for $module not installed", 1;
         }
 
         compile_file($file);

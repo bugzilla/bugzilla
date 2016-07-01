@@ -1,34 +1,15 @@
-# -*- Mode: perl; indent-tabs-mode: nil -*-
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
 #
-# The contents of this file are subject to the Mozilla Public
-# License Version 1.1 (the "License"); you may not use this file
-# except in compliance with the License. You may obtain a copy of
-# the License at http://www.mozilla.org/MPL/
-#
-# Software distributed under the License is distributed on an "AS
-# IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
-# implied. See the License for the specific language governing
-# rights and limitations under the License.
-#
-# The Original Code is the Bugzilla Bug Tracking System.
-#
-# The Initial Developer of the Original Code is Netscape Communications
-# Corporation. Portions created by Netscape are
-# Copyright (C) 1998 Netscape Communications Corporation. All
-# Rights Reserved.
-#
-# Contributor(s): Terry Weissman <terry@mozilla.org>
-#                 Dan Mosedale <dmose@mozilla.org>
-#                 Jacob Steenhagen <jake@bugzilla.org>
-#                 Bradley Baetz <bbaetz@student.usyd.edu.au>
-#                 Christopher Aillon <christopher@aillon.com>
-#                 Tomas Kopal <Tomas.Kopal@altap.cz>
-#                 Max Kanat-Alexander <mkanat@bugzilla.org>
-#                 Lance Larsh <lance.larsh@oracle.com>
+# This Source Code Form is "Incompatible With Secondary Licenses", as
+# defined by the Mozilla Public License, v. 2.0.
 
 package Bugzilla::DB;
 
+use 5.10.1;
 use strict;
+use warnings;
 
 use DBI;
 
@@ -37,11 +18,14 @@ use base qw(DBI::db);
 
 use Bugzilla::Constants;
 use Bugzilla::Install::Requirements;
-use Bugzilla::Install::Util qw(vers_cmp install_string);
+use Bugzilla::Install::Util qw(install_string);
+use Bugzilla::Version qw(vers_cmp);
+use Bugzilla::Install::Util qw(install_string);
 use Bugzilla::Install::Localconfig;
 use Bugzilla::Util;
 use Bugzilla::Error;
 use Bugzilla::DB::Schema;
+use Bugzilla::Version;
 
 use Bugzilla::Metrics::Mysql;
 
@@ -201,10 +185,6 @@ sub bz_check_requirements {
             . bz_locations()->{'localconfig'};
     }
 
-    # Check the existence and version of the DBD that we need.
-    my $dbd = $db->{dbd};
-    _bz_check_dbd($db, $output);
-
     # We don't try to connect to the actual database if $db_check is
     # disabled.
     unless ($lc->{db_check}) {
@@ -217,27 +197,6 @@ sub bz_check_requirements {
     $dbh->bz_check_server_version($db, $output);
 
     print "\n" if $output;
-}
-
-sub _bz_check_dbd {
-    my ($db, $output) = @_;
-
-    my $dbd = $db->{dbd};
-    unless (have_vers($dbd, $output)) {
-        my $sql_server = $db->{name};
-        my $command = install_command($dbd);
-        my $root    = ROOT_USER;
-        my $dbd_mod = $dbd->{module};
-        my $dbd_ver = $dbd->{version};
-        die <<EOT;
-
-For $sql_server, Bugzilla requires that perl's $dbd_mod $dbd_ver or later be
-installed. To install this module, run the following command (as $root):
-
-    $command
-
-EOT
-    }
 }
 
 sub bz_check_server_version {

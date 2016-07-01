@@ -1,40 +1,10 @@
-#!/usr/bin/perl -w
-# -*- Mode: perl; indent-tabs-mode: nil -*-
+#!/usr/bin/perl
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
 #
-# The contents of this file are subject to the Mozilla Public
-# License Version 1.1 (the "License"); you may not use this file
-# except in compliance with the License. You may obtain a copy of
-# the License at http://www.mozilla.org/MPL/
-#
-# Software distributed under the License is distributed on an "AS
-# IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
-# implied. See the License for the specific language governing
-# rights and limitations under the License.
-#
-# The Original Code is mozilla.org code.
-#
-# The Initial Developer of the Original Code is Holger
-# Schurig. Portions created by Holger Schurig are
-# Copyright (C) 1999 Holger Schurig. All
-# Rights Reserved.
-#
-# Contributor(s): Holger Schurig <holgerschurig@nikocity.de>
-#                 Terry Weissman <terry@mozilla.org>
-#                 Dan Mosedale <dmose@mozilla.org>
-#                 Dave Miller <justdave@syndicomm.com>
-#                 Zach Lipton  <zach@zachlipton.com>
-#                 Jacob Steenhagen <jake@bugzilla.org>
-#                 Bradley Baetz <bbaetz@student.usyd.edu.au>
-#                 Tobias Burnus <burnus@net-b.de>
-#                 Shane H. W. Travis <travis@sedsystems.ca>
-#                 Gervase Markham <gerv@gerv.net>
-#                 Erik Stambaugh <erik@dasbistro.com>
-#                 Dave Lawrence <dkl@redhat.com>
-#                 Max Kanat-Alexander <mkanat@bugzilla.org>
-#                 Joel Peshkin <bugreport@peshkin.net>
-#                 Lance Larsh <lance.larsh@oracle.com>
-#                 A. Karl Kornel <karl@kornel.name>
-#                 Marc Schumann <wurblzap@gmail.com>
+# This Source Code Form is "Incompatible With Secondary Licenses", as
+# defined by the Mozilla Public License, v. 2.0.
 
 # This file has detailed POD docs, do "perldoc checksetup.pl" to see them.
 
@@ -42,15 +12,23 @@
 # Initialization
 ######################################################################
 
+use 5.10.1;
 use strict;
-use 5.008001;
+use warnings;
+
 use File::Basename;
+BEGIN { chdir dirname($0); }
+use lib qw(. lib local/lib/perl5 .checksetup_lib/lib/perl5);
+
+# the @INC which checksetup needs to operate against.
+our @BUGZILLA_INC = grep { !/checksetup_lib/ } @INC;
+
 use Getopt::Long qw(:config bundling);
 use Pod::Usage;
+# Bug 1270550 - Tie::Hash::NamedCapture must be loaded before Safe.
+use Tie::Hash::NamedCapture;
 use Safe;
 
-BEGIN { chdir dirname($0); }
-use lib qw(. lib);
 use Bugzilla::Constants;
 use Bugzilla::Install::Requirements;
 use Bugzilla::Install::Util qw(install_string get_version_and_os 
@@ -68,34 +46,56 @@ Bugzilla::Install::Util::no_checksetup_from_cgi() if $ENV{'SERVER_SOFTWARE'};
 init_console();
 
 my %switch;
-GetOptions(\%switch, 'help|h|?', 'check-modules', 'cpanfile',
+GetOptions(\%switch, 'help|h|?',
                      'no-templates|t', 'verbose|v|no-silent',
-                     'make-admin=s', 'reset-password=s', 'version|V');
+                     'cpanm:s', 'check-modules',
+                     'make-admin=s', 'reset-password=s', 'version|V',
+                     'no-permissions|p');
 
 # Print the help message if that switch was selected.
 pod2usage({-verbose => 1, -exitval => 1}) if $switch{'help'};
-
-# Export cpanfile and exit
-if ($switch{cpanfile}) {
-    export_cpanfile();
-    exit;
-}
 
 # Read in the "answers" file if it exists, for running in 
 # non-interactive mode.
 my $answers_file = $ARGV[0];
 my $silent = $answers_file && !$switch{'verbose'};
-
 print(install_string('header', get_version_and_os()) . "\n") unless $silent;
-exit if $switch{'version'};
-# Check required --MODULES--
-my $module_results = check_requirements(!$silent);
-Bugzilla::Install::Requirements::print_module_instructions(
-    $module_results, !$silent);
-exit if !$module_results->{pass};
-# Break out if checking the modules is all we have been asked to do.
-exit if $switch{'check-modules'};
+exit 0 if $switch{'version'};
 
+if (defined $switch{cpanm}) {
+    my $default = 'all notest -oracle -mysql -pg -mod_perl -old_charts -new_charts -graphical_reports -detect_charset';
+    my @features = split(/\s+/, $switch{cpanm} || $default);
+    my @cpanm_args = ('-l', 'local', '--installdeps');
+    while (my $feature = shift @features) {
+        if ($feature eq 'all') {
+            push @cpanm_args, '--with-all-features';
+        }
+        elsif ($feature eq 'default') {
+            unshift @features, split(/\s+/, $default);
+        }
+        elsif ($feature eq 'notest' || $feature eq 'skip-satisfied' || $feature eq 'quiet') {
+            push @cpanm_args, "--$feature";
+        }
+        elsif ($feature =~ /^-(.+)$/) {
+            push @cpanm_args, "--without-feature=$1";
+        }
+        else {
+            push @cpanm_args, "--with-feature=$feature";
+        }
+    }
+    print "cpanm @cpanm_args \".\"\n" if !$silent;
+    my $rv = system('cpanm', @cpanm_args, '.');
+    exit 1 if $rv != 0;
+}
+
+my $meta = load_cpan_meta();
+my $requirements = check_cpan_requirements($meta, \@BUGZILLA_INC, !$silent);
+
+exit 1 unless $requirements->{ok};
+
+check_all_cpan_features($meta, \@BUGZILLA_INC, !$silent);
+
+exit 0 if $switch{'check-modules'};
 ###########################################################################
 # Load Bugzilla Modules
 ###########################################################################
@@ -143,7 +143,7 @@ my $lc_hash = Bugzilla->localconfig;
 
 # At this point, localconfig is defined and is readable. So we know
 # everything we need to create the DB. We have to create it early,
-# because some data required to populate data/params is stored in the DB.
+# because some data required to populate data/params.json is stored in the DB.
 
 Bugzilla::DB::bz_check_requirements(!$silent);
 Bugzilla::DB::bz_create_database() if $lc_hash->{'db_check'};
@@ -179,7 +179,7 @@ Bugzilla::Template::precompile_templates(!$silent)
 # Set proper rights (--CHMOD--)
 ###########################################################################
 
-fix_all_file_permissions(!$silent);
+fix_all_file_permissions(!$silent) unless $switch{'no-permissions'};
 
 ###########################################################################
 # Check GraphViz setup
@@ -187,7 +187,15 @@ fix_all_file_permissions(!$silent);
 
 # If we are using a local 'dot' binary, verify the specified binary exists
 # and that the generated images are accessible.
-check_graphviz(!$silent) if Bugzilla->params->{'webdotbase'};
+check_webdotbase(!$silent) if $lc_hash->{'webdotbase'};
+
+###########################################################################
+# Check font file setup
+###########################################################################
+
+# If we are using a local font file, verify the specified file exists and
+# that it has the correct extension.
+check_font_file(!$silent) if $lc_hash->{'font_file'};
 
 ###########################################################################
 # Changes to the fielddefs --TABLE--
@@ -268,7 +276,7 @@ checksetup.pl - A do-it-all upgrade and installation script for Bugzilla.
 
 =head1 SYNOPSIS
 
- ./checksetup.pl [--help|--check-modules|--version]
+ ./checksetup.pl [--help|--version]
  ./checksetup.pl [SCRIPT [--verbose]] [--no-templates|-t]
                  [--make-admin=user@domain.com]
                  [--reset-password=user@domain.com]
@@ -288,16 +296,6 @@ the L</"RUNNING CHECKSETUP NON-INTERACTIVELY"> section.
 =item B<--help>
 
 Display this help text
-
-=item B<--cpanfile>
-
-Outputs a cpanfile in the document root listing the current and optional
-modules with their respective versions. This file can be used by <cpanm>
-and other utilities used to install Perl dependencies.
-
-=item B<--check-modules>
-
-Only check for correct module dependencies and quit afterward.
 
 =item B<--make-admin>=username@domain.com
 
@@ -324,6 +322,12 @@ Output results of SCRIPT being processed.
 
 Display the version of Bugzilla, Perl, and some info about the
 system that Bugzilla is being installed on, and then exit.
+
+=item B<--no-permissions> (B<-p>)
+
+Don't update file permissions. Owner, group, and mode of files and
+directories will not be changed. Use this if your installation is
+managed by a software packaging system such as RPM or APT.
 
 =back
 
@@ -409,7 +413,7 @@ L<Bugzilla::Install::Filesystem/create_htaccess>.
 
 =item 9
 
-Updates the system parameters (stored in F<data/params>), using
+Updates the system parameters (stored in F<data/params.json>), using
 L<Bugzilla::Config/update_params>.
 
 =item 10
@@ -502,8 +506,6 @@ The format of that file is as follows:
  $answer{'ADMIN_PASSWORD'} = 'fooey';
  $answer{'ADMIN_REALNAME'} = 'Joel Peshkin';
 
- $answer{'SMTP_SERVER'} = 'mail.mydomain.net';
-
  $answer{'NO_PAUSE'} = 1
 
 C<NO_PAUSE> means "never stop and prompt the user to hit Enter to continue,
@@ -543,4 +545,3 @@ L<Bugzilla::Config/update_params>
 L<Bugzilla::DB/CONNECTION>
 
 =back
-

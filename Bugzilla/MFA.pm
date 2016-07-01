@@ -6,7 +6,10 @@
 # defined by the Mozilla Public License, v. 2.0.
 
 package Bugzilla::MFA;
+
+use 5.10.1;
 use strict;
+use warnings;
 
 use Bugzilla::RNG qw( irand );
 use Bugzilla::Token qw( issue_short_lived_session_token set_token_extra_data get_token_extra_data delete_token );

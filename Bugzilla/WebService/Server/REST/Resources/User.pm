@@ -9,6 +9,7 @@ package Bugzilla::WebService::Server::REST::Resources::User;
 
 use 5.10.1;
 use strict;
+use warnings;
 
 use Bugzilla::WebService::Constants;
 use Bugzilla::WebService::User;

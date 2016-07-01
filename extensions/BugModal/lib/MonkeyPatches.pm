@@ -9,6 +9,8 @@ package Bugzilla::Extension::BugModal::MonkeyPatches;
 1;
 
 package Bugzilla;
+
+use 5.10.1;
 use strict;
 use warnings;
 
@@ -22,6 +24,8 @@ sub treeherder_user {
 }
 
 package Bugzilla::Bug;
+
+use 5.10.1;
 use strict;
 use warnings;
 
@@ -37,6 +41,8 @@ sub active_attachments {
 1;
 
 package Bugzilla::User;
+
+use 5.10.1;
 use strict;
 use warnings;
 
@@ -60,6 +66,8 @@ sub moz_nick {
 1;
 
 package Bugzilla::Attachment;
+
+use 5.10.1;
 use strict;
 use warnings;
 

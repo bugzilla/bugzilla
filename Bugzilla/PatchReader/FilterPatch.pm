@@ -1,6 +1,8 @@
 package Bugzilla::PatchReader::FilterPatch;
 
+use 5.10.1;
 use strict;
+use warnings;
 
 use Bugzilla::PatchReader::Base;
 

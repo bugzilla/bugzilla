@@ -7,7 +7,9 @@
 
 package Bugzilla::Extension::RestrictComments;
 
+use 5.10.1;
 use strict;
+use warnings;
 
 use constant NAME => 'RestrictComments';
 use constant REQUIRED_MODULES => [];

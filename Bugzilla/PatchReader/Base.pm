@@ -1,6 +1,8 @@
 package Bugzilla::PatchReader::Base;
 
+use 5.10.1;
 use strict;
+use warnings;
 
 sub new {
   my $class = shift;

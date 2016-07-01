@@ -7,7 +7,9 @@
 
 package Bugzilla::Extension::MyDashboard::Queries;
 
+use 5.10.1;
 use strict;
+use warnings;
 
 use Bugzilla;
 use Bugzilla::Bug;

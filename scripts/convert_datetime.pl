@@ -10,6 +10,9 @@ use 5.10.1;
 use strict;
 use warnings;
 
+use FindBin;
+use lib "$FindBin::Bin/..", "$FindBin::Bin/../lib", "$FindBin::Bin/../local/lib/perl5";
+
 use Bugzilla;
 use Bugzilla::Constants;
 use Bugzilla::DB;

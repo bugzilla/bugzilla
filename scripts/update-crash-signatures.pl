@@ -12,7 +12,7 @@ use warnings;
 $| = 1;
 
 use FindBin qw($RealBin);
-use lib "$RealBin/..", "$RealBin/../lib";
+use lib ("$RealBin/..", "$RealBin/../lib", "$RealBin/../local/lib/perl5");
 
 use constant BATCH_SIZE => 100;
 

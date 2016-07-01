@@ -9,6 +9,7 @@ package Bugzilla::Extension::BugmailFilter::Filter;
 
 use base qw(Bugzilla::Object);
 
+use 5.10.1;
 use strict;
 use warnings;
 

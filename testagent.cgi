@@ -1,4 +1,4 @@
-#!/usr/bin/perl -wT
+#!/usr/bin/perl -T
 # -*- Mode: perl; indent-tabs-mode: nil -*-
 #
 # The contents of this file are subject to the Mozilla Public
@@ -17,7 +17,9 @@
 # are being run instead of shown. This script does not rely on database access
 # or correct params.
 
+use 5.10.1;
 use strict;
+use warnings;
 print "content-type:text/plain\n\n";
 print "OK " . ($::ENV{MOD_PERL} || "mod_cgi") . "\n";
 exit;

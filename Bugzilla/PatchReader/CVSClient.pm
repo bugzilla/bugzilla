@@ -9,7 +9,9 @@
 
 package Bugzilla::PatchReader::CVSClient;
 
+use 5.10.1;
 use strict;
+use warnings;
 
 sub parse_cvsroot {
     my $cvsroot = $_[0];

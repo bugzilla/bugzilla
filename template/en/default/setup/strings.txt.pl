@@ -1,20 +1,9 @@
-# The contents of this file are subject to the Mozilla Public
-# License Version 1.1 (the "License"); you may not use this file
-# except in compliance with the License. You may obtain a copy of
-# the License at http://www.mozilla.org/MPL/
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
 #
-# Software distributed under the License is distributed on an "AS
-# IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
-# implied. See the License for the specific language governing
-# rights and limitations under the License.
-#
-# The Initial Developer of the Original Code is Everything Solved.
-# Portions created by Everything Solved are Copyright (C) 2007
-# Everything Solved. All Rights Reserved.
-#
-# The Original Code is the Bugzilla Bug Tracking System.
-#
-# Contributor(s): Max Kanat-Alexander <mkanat@bugzilla.org>
+# This Source Code Form is "Incompatible With Secondary Licenses", as
+# defined by the Mozilla Public License, v. 2.0.
 
 # This file contains a single hash named %strings, which is used by the
 # installation code to display strings before Template-Toolkit can safely
@@ -27,6 +16,7 @@
 # Please keep the strings in alphabetical order by their name.
 
 %strings = (
+    all_optional_features_require => 'All optional features above require the following modules to be found:',
     any  => 'any',
     apachectl_failed => <<END,
 WARNING: We could not check the configuration of Apache. This sometimes
@@ -48,9 +38,6 @@ can connect to your MySQL database and drop the bz_schema table, as a last
 resort.
 END
     checking_for => 'Checking for',
-    checking_dbd      => 'Checking available perl DBD modules...',
-    checking_optional => 'The following Perl modules are optional:',
-    checking_modules  => 'Checking perl modules...',
     chmod_failed      => '##path##: Failed to change permissions: ##error##',
     chown_failed      => '##path##: Failed to change ownership: ##error##',
     commands_dbd      => <<EOT,
@@ -93,44 +80,11 @@ END
 Extensions must return their name, not <code>1</code> or a number. See
 the documentation of Bugzilla::Extension for details.
 END
-    feature_auth_ldap         => 'LDAP Authentication',
-    feature_auth_radius       => 'RADIUS Authentication',
-    feature_documentation     => 'Documentation',
-    feature_elasticsearch     => 'ElasticSearch Support',
-    feature_graphical_reports => 'Graphical Reports',
-    feature_html_desc         => 'More HTML in Product/Group Descriptions',
-    feature_inbound_email     => 'Inbound Email',
-    feature_jobqueue          => 'Mail Queueing',
-    feature_jsonrpc           => 'JSON-RPC Interface',
-    feature_jsonrpc_faster    => 'Make JSON-RPC Faster',
-    feature_new_charts        => 'New Charts',
-    feature_old_charts        => 'Old Charts',
-    feature_memcached         => 'Memcached Support',
-    feature_mfa               => 'Two-Factor Authentication',
-    feature_mod_perl          => 'mod_perl',
-    feature_moving            => 'Move Bugs Between Installations',
-    feature_patch_viewer      => 'Patch Viewer',
-    feature_rest              => 'REST Interface',
-    feature_s3                => 'Attachment S3 Storage',
-    feature_smtp_auth         => 'SMTP Authentication',
-    feature_updates           => 'Automatic Update Notifications',
-    feature_xmlrpc            => 'XML-RPC Interface',
-    feature_detect_charset    => 'Automatic charset detection for text attachments',
-
     file_remove => 'Removing ##name##...',
     file_rename => 'Renaming ##from## to ##to##...',
     header => "* This is Bugzilla ##bz_ver## on perl ##perl_ver##\n"
             . "* Running on ##os_name## ##os_ver##",
-    install_all => <<EOT,
-
-To attempt an automatic install of every required and optional module
-with one command, do:
-
-  ##perl## checksetup.pl --cpanfile
-  cpanm --installdeps --with-recommends --with-all-features \\
-        --without-feature oracle --without-feature sqlite \\
-        --without-feature pg.
-EOT
+    installation_failed => '*** Installation aborted. Read the messages above. ***',
     install_data_too_long => <<EOT,
 WARNING: Some of the data in the ##table##.##column## column is longer than
 its new length limit of ##max_length## characters. The data that needs to be
@@ -138,15 +92,6 @@ fixed is printed below with the value of the ##id_column## column first and
 then the value of the ##column## column that needs to be fixed:
 
 EOT
-    install_module => 'Installing ##module## version ##version##...',
-    installation_failed => '*** Installation aborted. Read the messages above. ***',
-    install_no_compiler => <<END,
-ERROR: Using install-module.pl requires that you install a compiler, such as
-gcc.
-END
-    install_no_make => <<END,
-ERROR: Using install-module.pl requires that you install "make".
-END
     lc_new_vars => <<'END',
 This version of Bugzilla contains some variables that you may want to
 change and adapt to your local settings. The following variables are
@@ -299,12 +244,15 @@ EOT
 ***********************************************************************
 * APACHE MODULES                                                      *
 ***********************************************************************
-* Normally, when Bugzilla is upgraded, all Bugzilla users have to     *
-* clear their browser cache or Bugzilla will break. If you enable     *
-* certain modules in your Apache configuration (usually called        *
-* httpd.conf or apache2.conf) then your users will not have to clear  *
-* their caches when you upgrade Bugzilla. The modules you need to     *
-* enable are:                                                         *
+* Some Apache modules allow to extend Bugzilla functionalities.       *
+* These modules can be enabled in the Apache configuration file       *
+* (usually called httpd.conf or apache2.conf).                        *
+* - mod_headers, mod_env and mod_expires permit to automatically      *
+*   refresh the browser cache of your users when upgrading Bugzilla.  *
+* - mod_rewrite permits to write shorter URLs used by the REST API.   *
+* - mod_version permits to write rules in .htaccess specific to       *
+*   Apache 2.2 or 2.4.                                                *
+* The modules you need to enable are:                                 *
 *                                                                     *
 END
     modules_message_db => <<EOT,

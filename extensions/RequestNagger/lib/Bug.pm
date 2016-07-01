@@ -7,7 +7,10 @@
 
 package Bugzilla::Extension::RequestNagger::Bug;
 
+use 5.10.1;
 use strict;
+use warnings;
+
 use parent qw(Bugzilla::Bug);
 use feature 'state';
 

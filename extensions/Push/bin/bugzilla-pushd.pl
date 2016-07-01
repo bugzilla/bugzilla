@@ -10,10 +10,8 @@
 use strict;
 use warnings;
 
-use FindBin '$RealBin';
-use lib "$RealBin/../../..";
-use lib "$RealBin/../../../lib";
-use lib "$RealBin/../lib";
+use FindBin qw($RealBin);
+use lib ("$RealBin/../../..", "$RealBin/../../../lib", "$RealBin/../../../local/lib/perl5");
 
 BEGIN {
     use Bugzilla;

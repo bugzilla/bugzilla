@@ -1,35 +1,19 @@
-# -*- Mode: perl; indent-tabs-mode: nil -*-
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
 #
-# The contents of this file are subject to the Mozilla Public
-# License Version 1.1 (the "License"); you may not use this file
-# except in compliance with the License. You may obtain a copy of
-# the License at http://www.mozilla.org/MPL/
-#
-# Software distributed under the License is distributed on an "AS
-# IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
-# implied. See the License for the specific language governing
-# rights and limitations under the License.
-#
-# The Original Code are the Bugzilla tests.
-#
-# The Initial Developer of the Original Code is Jacob Steenhagen.
-# Portions created by Jacob Steenhagen are
-# Copyright (C) 2001 Jacob Steenhagen. All
-# Rights Reserved.
-#
-# Contributor(s): Jacob Steenhagen <jake@bugzilla.org>
-#                 Zach Lipton <zach@zachlipton.com>
-#                 David D. Kilzer <ddkilzer@kilzer.net>
-#                 Tobias Burnus <burnus@net-b.de>
-#
+# This Source Code Form is "Incompatible With Secondary Licenses", as
+# defined by the Mozilla Public License, v. 2.0.
 
 #################
 #Bugzilla Test 4#
 ####Templates####
 
+use 5.10.1;
 use strict;
+use warnings;
 
-use lib 't';
+use lib qw(. lib local/lib/perl5 t);
 
 use Support::Templates;
 
@@ -44,7 +28,7 @@ use Test::More tests => ( scalar(@referenced_files) + 2 * $num_actual_files );
 # This will handle verbosity for us automatically.
 my $fh;
 {
-    local $^W = 0;  # Don't complain about non-existent filehandles
+    no warnings qw(unopened);  # Don't complain about non-existent filehandles
     if (-e \*Test::More::TESTOUT) {
         $fh = \*Test::More::TESTOUT;
     } elsif (-e \*Test::Builder::TESTOUT) {
@@ -55,22 +39,21 @@ my $fh;
 }
 
 # Check to make sure all templates that are referenced in Bugzilla
-# exist in the proper place in the English template directory.
+# exist in the proper place in the English template or extension directory.
 # All other languages may or may not include any template as Bugzilla will
 # fall back to English if necessary.
 
 foreach my $file (@referenced_files) {
-    my @path = map(File::Spec->catfile($_, $file), @include_paths);
-    push(@path, File::Spec->catfile($english_default_include_path, $file));
-    my $found;
-    foreach my $path (@path) {
-        $found = $path if -e $path;
+    my $found = 0;
+    foreach my $path (@english_default_include_paths) {
+        my $pathfile = File::Spec->catfile($path, $file);
+        if (-e $pathfile) {
+            $found = 1;
+            last;
+        }
     }
-    if ($found) {
-        ok(1, "$file exists");
-    } else {
-        ok(0, "$file cannot be located --ERROR");
-    }
+
+    ok($found, "$file found");
 }
 
 foreach my $include_path (@include_paths) {
@@ -83,17 +66,13 @@ foreach my $include_path (@include_paths) {
         # See Template.pm for the actual codebase definitions.
 
         # Initialize templates (f.e. by loading plugins like Hook).
-        PRE_PROCESS => "global/initialize.none.tmpl",
+        PRE_PROCESS => "global/variables.none.tmpl",
 
         FILTERS =>
         {
             html_linebreak => sub { return $_; },
-            no_break => sub { return $_; } ,
             js        => sub { return $_ } ,
             base64   => sub { return $_ } ,
-            inactive => [ sub { return sub { return $_; } }, 1] ,
-            closed => [ sub { return sub { return $_; } }, 1] ,
-            obsolete => [ sub { return sub { return $_; } }, 1] ,
             url_quote => sub { return $_ } ,
             css_class_quote => sub { return $_ } ,
             xml       => sub { return $_ } ,
@@ -105,6 +84,7 @@ foreach my $include_path (@include_paths) {
             wrap_comment => sub { return $_ },
             none      => sub { return $_ } ,
             ics       => [ sub { return sub { return $_; } }, 1] ,
+            markdown => sub { return $_ } ,
         },
     }
     );

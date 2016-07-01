@@ -6,7 +6,11 @@
 # defined by the Mozilla Public License, v. 2.0.
 
 package Bugzilla::Extension::Persona::Login;
+
+use 5.10.1;
 use strict;
+use warnings;
+
 use base qw(Bugzilla::Auth::Login);
 
 use Bugzilla::Constants;

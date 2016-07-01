@@ -6,12 +6,18 @@
 # defined by the Mozilla Public License, v. 2.0.
 
 package Bugzilla::Extension::TagNewUsers;
+
+use 5.10.1;
 use strict;
+use warnings;
+
 use base qw(Bugzilla::Extension);
+
 use Bugzilla::Field;
 use Bugzilla::User;
 use Bugzilla::Install::Util qw(indicate_progress);
 use Bugzilla::WebService::Util qw(filter_wants);
+
 use Date::Parse;
 use Scalar::Util qw(blessed);
 

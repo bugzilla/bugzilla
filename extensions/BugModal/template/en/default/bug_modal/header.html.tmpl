@@ -118,7 +118,7 @@
   [% IF user.is_timetracker %]
     BUGZILLA.remaining_time = [% bug.remaining_time FILTER js %]; // holds the original value
   [% END %]
-  BUGZILLA.bug_secure = [% bug.groups_in.size ? '1' : '0' %];
+  BUGZILLA.bug_secure = [% bug.groups_in.size ? 'true' : 'false' %];
 [% END %]
 
 [% Hook.process("end") %]

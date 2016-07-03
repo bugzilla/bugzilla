@@ -7,7 +7,7 @@
 
 package Bugzilla::Install;
 
-# Functions in this this package can assume that the database 
+# Functions in this this package can assume that the database
 # has been set up, params are available, localconfig is
 # available, and any module can be used.
 #
@@ -195,7 +195,7 @@ sub update_settings {
     my %settings = %{SETTINGS()};
     foreach my $setting (keys %settings) {
         add_setting($setting,
-                    $settings{$setting}->{options}, 
+                    $settings{$setting}->{options},
                     $settings{$setting}->{default},
                     $settings{$setting}->{subclass}, undef,
                     !$any_settings);
@@ -230,7 +230,7 @@ sub update_system_groups {
             if ($inherited_by) {
                 foreach my $name (@$inherited_by) {
                     my $member = Bugzilla::Group->check($name);
-                    $dbh->do('INSERT INTO group_group_map (grantor_id, 
+                    $dbh->do('INSERT INTO group_group_map (grantor_id,
                                           member_id) VALUES (?,?)',
                              undef, $created->id, $member->id);
                 }
@@ -262,7 +262,7 @@ sub create_default_product {
 
     # And same for the default product/component.
     if (!$dbh->selectrow_array('SELECT 1 FROM products')) {
-        print get_text('install_default_product', 
+        print get_text('install_default_product',
                        { name => DEFAULT_PRODUCT->{name} }) . "\n";
 
         my $product = Bugzilla::Product->create(DEFAULT_PRODUCT);
@@ -330,35 +330,25 @@ sub create_admin {
     {
         say "\n" . get_text('install_admin_setup') . "\n";
     }
-
-    while (!$email) {
+    if (!$email) {
         print get_text('install_admin_get_email') . ' ';
         $email = <STDIN>;
         chomp $email;
-        eval { Bugzilla::User->check_email($email); };
-        if ($@) {
-            say $@;
-            undef $email;
-        }
     }
-
+    Bugzilla::User->check_email($email);
     # Make sure the email address is used as login when required.
     if (Bugzilla->params->{'use_email_as_login'}) {
         $login = $email;
     }
 
-    while (!$login) {
+    if (!$login) {
         print get_text('install_admin_get_login') . ' ';
         $login = <STDIN>;
         chomp $login;
-        eval { Bugzilla::User->check_login_name($login); };
-        if ($@) {
-            say $@;
-            undef $login;
-        }
     }
+    Bugzilla::User->check_login_name($login);
 
-    while (!defined $full_name) {
+    if (!defined $full_name) {
         print get_text('install_admin_get_name') . ' ';
         $full_name = <STDIN>;
         chomp($full_name);
@@ -380,7 +370,7 @@ sub make_admin {
     my ($user) = @_;
     my $dbh = Bugzilla->dbh;
 
-    $user = ref($user) ? $user 
+    $user = ref($user) ? $user
             : new Bugzilla::User(login_to_id($user, THROW_ERROR));
 
     my $group_insert = $dbh->prepare(
@@ -391,8 +381,8 @@ sub make_admin {
     my $admin_group = new Bugzilla::Group({ name => 'admin' });
     # These are run in an eval so that we can ignore the error of somebody
     # already being granted these things.
-    eval { 
-        $group_insert->execute($user->id, $admin_group->id, 0, GRANT_DIRECT); 
+    eval {
+        $group_insert->execute($user->id, $admin_group->id, 0, GRANT_DIRECT);
     };
     eval {
         $group_insert->execute($user->id, $admin_group->id, 1, GRANT_DIRECT);
@@ -401,8 +391,8 @@ sub make_admin {
     # Admins should also have editusers directly, even though they'll usually
     # inherit it. People could have changed their inheritance structure.
     my $editusers = new Bugzilla::Group({ name => 'editusers' });
-    eval { 
-        $group_insert->execute($user->id, $editusers->id, 0, GRANT_DIRECT); 
+    eval {
+        $group_insert->execute($user->id, $editusers->id, 0, GRANT_DIRECT);
     };
 
     # If there is no maintainer set, make this user the maintainer.

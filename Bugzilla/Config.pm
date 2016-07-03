@@ -296,6 +296,36 @@ sub update_params {
 }
 
 sub write_params {
+    my ($params) = @_;
+    $params //= Bugzilla->params;
+
+    state $read_only_fs = Bugzilla->localconfig->{read_only_fs};
+    if ($read_only_fs) {
+        my $dbh = Bugzilla->dbh_main;
+        $dbh->bz_start_transaction();
+        local $SIG{__DIE__} = undef;
+        my $ok = eval {
+            $dbh->do("DELETE FROM params");
+            my $sth = $dbh->prepare("INSERT INTO params (param_key, param_val) VALUES (?, ?)");
+            $sth->execute($_, $params->{$_}) foreach keys %$params;
+            $dbh->bz_commit_transaction();
+            1;
+        };
+        if (not $ok) {
+            $dbh->bz_rollback_transaction;
+            die "Failed to write params to database!";
+        }
+    }
+    else {
+        write_param_file($params);
+    }
+
+    # And now we have to reset the params cache so that Bugzilla will re-read
+    # them.
+    delete Bugzilla->request_cache->{params};
+}
+
+sub write_param_file {
     my ($param_data) = @_;
     $param_data ||= Bugzilla->params;
     my $param_file = bz_locations()->{'datadir'} . '/params.json';
@@ -307,10 +337,22 @@ sub write_params {
     # Bugzilla::Install::Filesystem is slow.
     require Bugzilla::Install::Filesystem;
     Bugzilla::Install::Filesystem::fix_file_permissions($param_file);
+}
 
-    # And now we have to reset the params cache so that Bugzilla will re-read
-    # them.
-    delete Bugzilla->request_cache->{params};
+
+sub read_params {
+    state $read_only_fs = Bugzilla->localconfig->{read_only_fs};
+    if ($read_only_fs) {
+        my $dbh = Bugzilla->dbh_main;
+        local $SIG{__DIE__} = undef;
+        my $params = eval {
+             $dbh->selectall_hashref("SELECT param_key, param_value FROM params", "param_key");
+        };
+        return $params // read_param_file();
+    }
+    else {
+        return read_param_file();
+    }
 }
 
 sub read_param_file {

@@ -273,6 +273,10 @@ END
 This is the max amount of unshared memory the apache process is allowed to use
 before Apache::SizeLimit kills it. This is only applicable when run under mod_perl.
 EOT
+    localconfig_read_only_fs => <<EOT,
+This option lets the application operate with a read-only file system,
+or one where the fs is not guranteed to persist.
+EOT
     max_allowed_packet => <<EOT,
 WARNING: You need to set the max_allowed_packet parameter in your MySQL
 configuration to at least ##needed##. Currently it is set to ##current##.

@@ -302,7 +302,7 @@ sub localconfig {
 }
 
 sub params {
-    return $_[0]->request_cache->{params} ||= Bugzilla::Config::read_param_file();
+    return $_[0]->request_cache->{params} ||= Bugzilla::Config::read_params();
 }
 
 sub user {

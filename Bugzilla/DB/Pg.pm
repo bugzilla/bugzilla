@@ -36,13 +36,8 @@ use constant BLOB_TYPE => { pg_type => DBD::Pg::PG_BYTEA };
 
 sub new {
     my ($class, $params) = @_;
-    my ($user, $pass, $host, $dbname, $port) = 
+    my ($user, $pass, $host, $dbname, $port) =
         @$params{qw(db_user db_pass db_host db_name db_port)};
-
-    # The default database name for PostgreSQL. We have
-    # to connect to SOME database, even if we have
-    # no $dbname parameter.
-    $dbname ||= 'template1';
 
     # construct the DSN from the parameters we got
     my $dsn = "dbi:Pg:dbname=$dbname";

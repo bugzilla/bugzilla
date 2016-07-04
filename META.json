@@ -50,6 +50,16 @@
             }
          }
       },
+      "db_from_env" : {
+         "description" : "Support for using $ENV{DATABASE_URL}",
+         "prereqs" : {
+            "runtime" : {
+               "requires" : {
+                  "URI::db" : "0.17"
+               }
+            }
+         }
+      },
       "detect_charset" : {
          "description" : "Automatic charset detection for text attachments",
          "prereqs" : {

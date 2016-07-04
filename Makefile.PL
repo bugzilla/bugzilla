@@ -296,6 +296,14 @@ my %optional_features = (
             }
         }
     },
+    db_from_env => {
+        description => 'Support for using $ENV{DATABASE_URL}',
+        prereqs => {
+            runtime => {
+                requires => { 'URI::db' => '0.17' },
+            },
+        },
+    },
 );
 
 for my $file ( glob("extensions/*/Config.pm") ) {

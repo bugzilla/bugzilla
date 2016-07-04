@@ -129,6 +129,11 @@ With some combinations of database servers/Perl modules/moonphase this
 doesn't work, and so you can try setting this to 0 to make checksetup.pl
 run.
 END
+    localconfig_db_from_env => <<'END',
+If this is set, the other db_* values will be ignored and instead the $DATABASE_URL
+will be used to provide the database connection information.
+Note this requires the 'heroku' feature to be enabled.
+END
     localconfig_db_driver => <<'END',
 What SQL database to use. Default is mysql. List of supported databases
 can be obtained by listing Bugzilla/DB directory - every module corresponds

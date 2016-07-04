@@ -63,6 +63,13 @@ builder {
             my $ret = Bugzilla::init_page();
             my $res = ($ret eq '-1' && $cgi_script ne 'editparams.cgi') ? $shutdown_app->(@_) : $app->(@_);
             Bugzilla::_cleanup();
+            if (ref $res && ref $res eq 'ARRAY') {
+                warn "res: $res->[0]";
+            }
+            else {
+                warn "wtf: $res";
+            }
+
             return $res;
         };
 

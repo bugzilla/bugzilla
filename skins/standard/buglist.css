@@ -216,6 +216,10 @@ table.requests th {
     white-space: nowrap;
 }
 
+#summary_field.search_field_row input {
+    padding-bottom: 6px;
+}
+
 #bug_id_container {
     display: inline-block;
     vertical-align: middle;

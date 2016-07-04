@@ -72,6 +72,9 @@ sub _sqlite_position_ci {
 sub new {
     my ($class, $params) = @_;
     my $db_name = $params->{db_name};
+
+    state $read_only_fs = Bugzilla->localconfig->{read_only_fs};
+    die "sqlite cannot be used on read only filesystems" if $read_only_fs;
     
     # Let people specify paths intead of data/ for the DB.
     if ($db_name and $db_name !~ m{[\\/]}) {

@@ -144,7 +144,7 @@ use constant LOCALCONFIG_VARS => (
     {
         name => 'read_only_fs',
         default => 0,
-    }
+    },
 );
 
 

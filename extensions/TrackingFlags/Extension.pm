@@ -29,6 +29,7 @@ use JSON;
 use List::MoreUtils qw(none);
 
 our $VERSION = '1';
+our @FLAG_CACHE;
 
 BEGIN {
     *Bugzilla::tracking_flags      = \&_tracking_flags;
@@ -550,6 +551,20 @@ sub _tracking_flags_search_nonchanged {
     else {
         $args->{'full_field'} = "COALESCE($bugs_alias.value, '---')";
     }
+}
+
+sub request_cleanup {
+    foreach my $flag (@FLAG_CACHE) {
+        my $bug_flag = delete $flag->{bug_flag};
+        if ($bug_flag) {
+            delete $bug_flag->{bug};
+            delete $bug_flag->{tracking_flag};
+        }
+        foreach my $value (@{ $flag->{values} }) {
+            delete $value->{tracking_flag};
+        }
+    }
+    @FLAG_CACHE = ();
 }
 
 sub bug_end_of_create {

@@ -15,7 +15,7 @@ use warnings;
 use Bugzilla::Error;
 use Bugzilla::Group;
 use Bugzilla::Util qw(detaint_natural trim);
-use Scalar::Util qw(blessed);
+use Scalar::Util qw(blessed weaken);
 
 ###############################
 ####    Initialization     ####
@@ -118,9 +118,12 @@ sub is_active        { return $_[0]->{'is_active'};        }
 sub comment          { return $_[0]->{'comment'};          }
 
 sub tracking_flag {
-    return $_[0]->{'tracking_flag'} ||= Bugzilla::Extension::TrackingFlags::Flag->new({
+    return $_[0]->{'tracking_flag'} if $_[0]->{'tracking_flag'};
+    my $tf = $_[0]->{'tracking_flag'} = Bugzilla::Extension::TrackingFlags::Flag->new({
         id => $_[0]->tracking_flag_id, cache => 1
     });
+    weaken($_[0]->{'tracking_flag'});
+    return $tf;
 }
 
 sub setter_group {

@@ -62,6 +62,7 @@ use Bugzilla::Hook;
 
 use File::Copy;
 use List::Util qw(max);
+use Scalar::Util qw(weaken);
 use Storable qw(dclone);
 
 use base qw(Bugzilla::Object);
@@ -157,8 +158,12 @@ the bug object to which the attachment is attached
 =cut
 
 sub bug {
+    my ($self) = @_;
     require Bugzilla::Bug;
-    return $_[0]->{bug} //= Bugzilla::Bug->new({ id => $_[0]->bug_id, cache => 1 });
+    return $self->{bug} if defined $self->{bug};
+    my $bug = $self->{bug} = Bugzilla::Bug->new({ id => $_[0]->bug_id, cache => 1 });
+    weaken($self->{bug});
+    return $bug;
 }
 
 =over

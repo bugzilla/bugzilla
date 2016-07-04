@@ -87,6 +87,16 @@ sub new {
     return $class->SUPER::new($param);
 }
 
+sub new_from_hash {
+    my $class = shift;
+    my $cache = Bugzilla->request_cache->{'tracking_flags'} //= {};
+    my $flag = $class->SUPER::new_from_hash(@_);
+    if ($flag) {
+        push @Bugzilla::Extension::TrackingFlags::FLAG_CACHE, $flag;
+    }
+    return $flag;
+}
+
 sub create {
     my $class = shift;
     my $params = shift;

@@ -12,7 +12,7 @@ build_requires:
 configure_requires:
   ExtUtils::MakeMaker: '6.55'
 dynamic_config: 1
-generated_by: 'ExtUtils::MakeMaker version 7.18, CPAN::Meta::Converter version 2.143240'
+generated_by: 'ExtUtils::MakeMaker version 7.24, CPAN::Meta::Converter version 2.150005'
 license: unknown
 meta-spec:
   url: http://module-build.sourceforge.net/META-spec-v1.4.html
@@ -40,6 +40,10 @@ optional_features:
     requires:
       MooX::StrictConstructor: '0.008'
       Type::Tiny: '1'
+  db_from_env:
+    description: 'Support for using $ENV{DATABASE_URL}'
+    requires:
+      URI::db: '0.17'
   detect_charset:
     description: 'Automatic charset detection for text attachments'
     requires:
@@ -190,3 +194,4 @@ requires:
   URI: '1.55'
   perl: '5.014000'
 version: v5.1.1+
+x_serialization_backend: 'CPAN::Meta::YAML version 0.018'

@@ -4,7 +4,7 @@
       "Bugzilla Developers <developers@bugzilla.org>"
    ],
    "dynamic_config" : 1,
-   "generated_by" : "ExtUtils::MakeMaker version 7.18, CPAN::Meta::Converter version 2.143240",
+   "generated_by" : "ExtUtils::MakeMaker version 7.24, CPAN::Meta::Converter version 2.150005",
    "license" : [
       "unknown"
    ],
@@ -57,6 +57,16 @@
                "requires" : {
                   "MooX::StrictConstructor" : "0.008",
                   "Type::Tiny" : "1"
+               }
+            }
+         }
+      },
+      "db_from_env" : {
+         "description" : "Support for using $ENV{DATABASE_URL}",
+         "prereqs" : {
+            "runtime" : {
+               "requires" : {
+                  "URI::db" : "0.17"
                }
             }
          }
@@ -387,5 +397,6 @@
       }
    },
    "release_status" : "stable",
-   "version" : "v5.1.1+"
+   "version" : "v5.1.1+",
+   "x_serialization_backend" : "JSON::PP version 2.27300"
 }

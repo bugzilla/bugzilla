@@ -60,6 +60,10 @@ use constant LOCALCONFIG_VARS => (
         default => 0,
     },
     {
+        name => 'db_from_env',
+        default => 0,
+    },
+    {
         name    => 'db_driver',
         default => 'sqlite',
     },
@@ -198,6 +202,25 @@ sub read_localconfig {
             }
         }
     }
+    require Bugzilla::Error;
+    if ($localconfig{db_from_env}) {
+        if (Bugzilla->has_feature('db_from_env')) {
+            require URI::db;
+            unless ($ENV{DATABASE_URL}) {
+                Bugzilla::Error::ThrowUserError('missing_database_url');
+            }
+            my $uri = URI::db->new($ENV{DATABASE_URL});
+            $localconfig{db_driver} = $uri->canonical_engine;
+            $localconfig{db_name}   = $uri->dbname;
+            $localconfig{db_host}   = $uri->host;
+            $localconfig{db_user}   = $uri->user;
+            $localconfig{db_pass}   = $uri->password;
+            $localconfig{db_port}   = $uri->port // 0;
+        }
+        else {
+            Bugzilla::Error::ThrowUserError('feature_disabled', { feature => 'db_from_env' });
+        }
+    }
 
     return \%localconfig;
 }
@@ -233,6 +256,7 @@ sub update_localconfig {
     my $output      = $params->{output} || 0;
     my $answer      = Bugzilla->installation_answers;
     my $localconfig = read_localconfig('include deprecated');
+    my $db_from_env = Bugzilla->localconfig->{db_from_env};
 
     my @new_vars;
     foreach my $var (LOCALCONFIG_VARS) {
@@ -258,7 +282,7 @@ sub update_localconfig {
                 # an answer file, then we don't notify about site_wide_secret
                 # because we assume the intent was to auto-generate it anyway.
                 if (!scalar(keys %$answer) || $name ne 'site_wide_secret') {
-                    push(@new_vars, $name);
+                    push(@new_vars, $name) unless $db_from_env && $name =~ /^db_(?!from_env)/;
                 }
                 $localconfig->{$name} = $var->{default};
             }
@@ -298,6 +322,9 @@ sub update_localconfig {
     foreach my $var (LOCALCONFIG_VARS) {
         my $name = $var->{name};
         my $desc = $var->{desc};
+
+        next if $db_from_env && $name =~ /^db_(?!from_env)/;
+
         if(!length $desc){
             $desc = install_string("localconfig_$name", { root => ROOT_USER });
             chomp($desc);

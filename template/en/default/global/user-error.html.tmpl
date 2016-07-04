@@ -566,7 +566,7 @@
 
   [% ELSIF error == "feature_disabled" %]
     The [% feature_description(feature) FILTER html %] feature is not available in this Bugzilla.
-    [% IF user.in_group('admin') %]
+    [% IF user.in_group('admin') || Bugzilla.usage_mode != constants.USAGE_MODE_BROWSER %]
       If you would like to enable this feature, please run
       <kbd>cpanm -l local --installdeps --with-feature [% feature FILTER html %] "."</kbd>
     [% END %]
@@ -1349,6 +1349,10 @@
     Sorry, I seem to have lost the cookie that recorded
     the results of your last search. I'm afraid you will have to start
     again from the <a href="query.cgi">search page</a>.
+
+  [% ELSIF error == "missing_database_url" %]
+    [% title = "Missing \$DATABASE_URL" %]
+    $DATABASE_URL must be defined when localconfig "db_from_env" option is enabled.
 
   [% ELSIF error == "missing_datasets" %]
     [% title = "No Datasets Selected" %]

@@ -330,10 +330,10 @@ sub create_admin {
     {
         say "\n" . get_text('install_admin_setup') . "\n";
     }
-    if (!$email) {
+    if (not $email) {
         print get_text('install_admin_get_email') . ' ';
         $email = <STDIN>;
-        chomp $email;
+        chomp $email if defined $email;
     }
     Bugzilla::User->check_email($email);
     # Make sure the email address is used as login when required.
@@ -341,20 +341,20 @@ sub create_admin {
         $login = $email;
     }
 
-    if (!$login) {
+    if (not $login) {
         print get_text('install_admin_get_login') . ' ';
         $login = <STDIN>;
-        chomp $login;
+        chomp $login if defined $login;
     }
     Bugzilla::User->check_login_name($login);
 
-    if (!defined $full_name) {
+    if (not defined $full_name) {
         print get_text('install_admin_get_name') . ' ';
         $full_name = <STDIN>;
-        chomp($full_name);
+        chomp $full_name if defined $full_name;
     }
 
-    if (!$password) {
+    if (not $password) {
         $password = _prompt_for_password(
             get_text('install_admin_get_password'));
     }

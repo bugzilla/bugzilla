@@ -73,6 +73,9 @@
 
     [% FOREACH comment = bug.comments %]
       [% NEXT IF comment.is_private && !user.is_insider %]
+      [% IF comment.type == constants.CMT_ATTACHMENT_CREATED && comment.extra_data == attach_id %]
+        Splinter.attachmentComment = '[% comment.body FILTER html FILTER js %]';
+      [% END %]
       [% NEXT UNLESS comment.thetext.match('(?i)^\s*review\s+of\s+attachment\s+\d+\s*:') %]
       var comment = new Splinter.Bug.Comment();
       comment.whoName = Splinter.Utils.strip('[% comment.author.name FILTER js %]');
@@ -146,6 +149,10 @@
   [% END %]
   <a href="[% urlbase FILTER none %]attachment.cgi?id=[% attach_id FILTER uri %]&amp;action=edit"
      target="_blank">[details]</a>
+  <p>
+    <b>Comment:</b><br>
+    <span id="attachComment"></span>
+  </p>
 </div>
 
 <div id="error" style="display: none;"> </div>

@@ -2690,6 +2690,7 @@ Splinter.init = function () {
         Splinter.replaceText(Dom.get("attachDesc"), Splinter.theAttachment.description);
         Splinter.replaceText(Dom.get("attachCreator"), Splinter.Bug._formatWho(Splinter.theAttachment.whoName, Splinter.theAttachment.whoEmail));
         Splinter.replaceText(Dom.get("attachDate"), Splinter.Utils.formatDate(Splinter.theAttachment.date));
+        Splinter.replaceText(Dom.get("attachComment"), Splinter.attachmentComment);
         var warnings = [];
         if (Splinter.theAttachment.isObsolete)
             warnings.push('OBSOLETE');

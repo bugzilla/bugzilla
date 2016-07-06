@@ -949,6 +949,14 @@ function show_comment_preview(bug_id, refresh) {
                 last_comment_text = comment.value;
                 last_markdown_cb_value = markdown_cb.checked;
             }
+            if (markdown_cb.checked) {
+                var pres = document.getElementById('comment_preview_text').getElementsByTagName("pre");
+                for (var i = 0, l = pres.length; i < l; i++) {
+                    if (pres[i].firstChild && pres[i].firstChild.tagName == "CODE") {
+                        hljs.highlightBlock(pres[i].firstChild);
+                    }
+                }
+            }
         },
         failure: function(res) {
             Dom.addClass('comment_preview_loading', 'bz_default_hidden');

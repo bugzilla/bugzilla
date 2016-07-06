@@ -9,13 +9,19 @@
 [% title = BLOCK %]Enter [% terms.Bug %]: [% product.name FILTER html %][% END %]
 [% use_qa_contact = Param("useqacontact") %]
 
+[% style_urls = ['skins/standard/bug.css'] %]
+[% javascript_urls = [ "js/attachment.js", "js/util.js", "js/field.js", "js/TUI.js", "js/bug.js" ] %]
+
+[% markdown_enabled = feature_enabled('jsonrpc') AND user.settings.use_markdown.value == "on" %]
+[% IF markdown_enabled %]
+  [% javascript_urls.push("js/highlight.js/highlight.pack.js") %]
+  [% style_urls.push("js/highlight.js/styles/github.css") %]
+[% END %]
+
 [% PROCESS global/header.html.tmpl
   title = title
   generate_api_token = 1
   yui = ['datatable', 'button']
-  style_urls = ['skins/standard/bug.css']
-  javascript_urls = [ "js/attachment.js", "js/util.js",
-                      "js/field.js", "js/TUI.js", "js/bug.js" ]
   onload = "set_assign_to($use_qa_contact); hideElementById('attachment_true');
             showElementById('attachment_false'); showElementById('btn_no_attachment');"
 %]

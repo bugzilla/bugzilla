@@ -22,6 +22,11 @@
 [% can_edit_comments = bug.check_can_change_field('longdesc', 0, 1) %]
 [% can_tag_comments = feature_enabled('jsonrpc') AND user.can_tag_comments %]
 
+[% markdown_enabled = feature_enabled('jsonrpc') AND user.settings.use_markdown.value == "on" %]
+[% IF markdown_enabled %]
+  <script>hljs.initHighlightingOnLoad();</script>
+[% END %]
+
 <!-- This auto-sizes the comments and positions the collapse/expand links 
      to the right. -->
 <table class="bz_comment_table">

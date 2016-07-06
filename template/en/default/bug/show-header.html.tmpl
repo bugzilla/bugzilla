@@ -70,6 +70,12 @@
                   "bz_component_$bug.component",
                   "bz_bug_$bug.bug_id",
                   ] %]
+[% markdown_enabled = feature_enabled('jsonrpc') AND user.settings.use_markdown.value == "on" %]
+[% IF markdown_enabled %]
+  [% javascript_urls.push("js/highlight.js/highlight.pack.js") %]
+  [% style_urls.push("js/highlight.js/styles/github.css") %]
+[% END %]
+
 [% FOREACH group = bug.groups_in %]
   [% bodyclasses.push("bz_group_$group.name") %]
 [% END %]

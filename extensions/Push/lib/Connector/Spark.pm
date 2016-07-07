@@ -62,7 +62,7 @@ sub should_send {
 
     # Send if bug has cisco-spark keyword
     my $bug = Bugzilla::Bug->new({ id => $bug_data->{id}, cache => 1 });
-    return 0 if none { $_->name eq 'cisco-spark' } @{ $bug->keyword_objects };
+    return 0 unless $bug->has_keyword('cisco-spark');
 
     if ($message->routing_key eq 'bug.create') {
         return 1;

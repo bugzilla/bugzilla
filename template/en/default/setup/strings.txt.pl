@@ -141,6 +141,7 @@ END
     localconfig_db_name => <<'END',
 The name of the database. For Oracle, this is the database's SID. For
 SQLite, this is a name (or path) for the DB file.
+For postgres, this database must already exist and be writable by $db_user.
 END
     localconfig_db_pass => <<'END',
 Enter your database password here. It's normally advisable to specify

@@ -14,8 +14,8 @@ server is started when the machine boots.
 
 .. _posgresql-add-user:
 
-Add a User
-==========
+Add a User and Create a DB
+==========================
 
 You need to add a new user to PostgreSQL for the Bugzilla
 application to use when accessing the database. The following instructions
@@ -29,12 +29,18 @@ then switch to being the postgres (Unix) user:
 
 As the postgres user, you then need to create a new user:
 
-:command:`createuser -U postgres -dRSP bugs`
+:command:`createuser -U postgres -DRSP bugs`
 
 When asked for a password, provide one and write it down for later reference.
 
 The created user will not be a superuser (-S) and will not be able to create
-new users (-R). He will only have the ability to create databases (-d).
+new users (-R) or create databases (-D).
+
+Next we will create a database for bugzilla to use
+
+:command:`createdb -U postgress -O bugs bugs`
+
+This will create a database named `bugs` that is owned (-O) by the `bugs` user.
 
 .. _postgresql-access:
 

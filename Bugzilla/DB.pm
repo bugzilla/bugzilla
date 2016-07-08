@@ -247,7 +247,6 @@ sub _get_no_db_connection {
     my ($sql_server) = @_;
     my $dbh;
     my %connect_params = %{ Bugzilla->localconfig };
-    $connect_params{db_name} = '';
     my $conn_success = eval {
         $dbh = _connect(\%connect_params);
     };

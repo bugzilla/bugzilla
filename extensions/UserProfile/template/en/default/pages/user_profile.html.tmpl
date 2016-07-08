@@ -46,7 +46,8 @@
 [% END %]
 
 <tr>
-  <td rowspan="[% user.id ? 6 : 5 %]" id="gravatar-container">
+  [% offset = user.id == target.id ? 2 : 0 %]
+  <td rowspan="[% user.id ? 6 + offset : 5 + offset %]" id="gravatar-container">
     [% IF user.gravatar %]
       <img id="gravatar" src="[% target.gravatar(256) FILTER none %]" width="128" height="128"><br>
       [% IF target.id == user.id %]
@@ -59,9 +60,6 @@
   <th>Name</th>
   <td colspan="2">
     [% target.name || target.address.user FILTER html %]
-    [% IF target.id == user.id %]
-      <span style="font-size: x-small;">(<a href="userprefs.cgi?tab=account">change</a>)</span>
-    [% END %]
   </td>
 </tr>
 
@@ -73,11 +71,11 @@
       [% " (disabled)" UNLESS target.is_enabled %]
     </td>
   </tr>
+  <tr>
+    <td>&nbsp;
+    </td>
+  </tr>
 [% END %]
-
-<tr>
-  <td>&nbsp;</td>
-</tr>
 
 [%# user.creation_ts is added by the TagNewUsers extension %]
 [% IF target.can('creation_ts') %]
@@ -115,6 +113,17 @@
 <tr>
   <td>&nbsp;</td>
 </tr>
+
+[% IF user.id %]
+<tr>
+    <th></th>
+    <td colspan="2">
+      [% IF target.id == user.id %]
+        <a href="userprefs.cgi?tab=account"><input type="button" value = "Edit Profile & Preferences"></a>
+      [% END %]
+    </td>
+  </tr>
+[% END %]
 
 [%# request counters provided by the Review extension %]
 [% IF target.can("review_count")
@@ -309,4 +318,3 @@
 </table>
 
 [% PROCESS global/footer.html.tmpl %]
-

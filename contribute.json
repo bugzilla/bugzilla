@@ -1,0 +1,39 @@
+{
+    "name": "bugzilla.mozilla.org (BMO)",
+    "description": "Bugzilla based bug tracking system used by various Mozilla projects.",
+    "repository": {
+        "url": "https://github.com/mozilla-bteam/bmo",
+        "license": "MPL2",
+        "type": "git",
+        "clone": "https://github.com/mozilla-bteam/bmo.git",
+        "tests": "https://treeherder.mozilla.org/#/jobs?repo=bmo-master"
+    },
+    "keywords": [
+        "CSS",
+        "HTML",
+        "JSON",
+        "Javascript",
+        "Perl",
+        "jQuery"
+    ],
+    "participate": {
+        "home": "https://wiki.mozilla.org/BMO",
+        "docs": "https://bmo.readthedocs.org",
+        "irc": "irc://irc.mozilla.org/#bmo",
+        "irc-contacts": [
+            "dkl",
+            "dylan",
+            "mcote"
+        ]
+    },
+    "bugs": {
+        "list": "https://bugzilla.mozilla.org/buglist.cgi?bug_status=NEW&product=bugzilla.mozilla.org",
+        "report": "https://bugzilla.mozilla.org/enter_bug.cgi?product=bugzilla.mozilla.org",
+        "mentored": "https://bugzilla.mozilla.org/buglist.cgi?f1=bug_mentor&o1=isnotempty&bug_status=NEW&product=bugzilla.mozilla.org"
+    },
+    "urls": {
+        "prod": "https://bugzilla.mozilla.org",
+        "stage": "https://bugzilla.allizom.org",
+        "dev": "https://bugzilla-dev.allizom.org"
+    }
+}

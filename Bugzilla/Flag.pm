@@ -531,6 +531,8 @@ sub update_flags {
             # This is a new flag.
             my $flag = $class->create($new_flag, $timestamp);
             $new_flag->{id} = $flag->id;
+            $new_flag->{creation_date} = format_time($timestamp, '%Y.%m.%d %H:%i:%s');
+            $new_flag->{modification_date} = format_time($timestamp, '%Y.%m.%d %H:%i:%s');
             $class->notify($new_flag, undef, $self, $timestamp);
         }
         else {

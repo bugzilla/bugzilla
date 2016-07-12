@@ -221,6 +221,7 @@ div#update_container {
     height: 400px; 
     width: 95%;
     margin-left: 2%;
+    overflow: auto;
 }
 
 .viewall_frame {

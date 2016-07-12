@@ -78,8 +78,9 @@ sub attachment_is_visible {
 sub attachment_id_is_patch {
     my $attach_id = shift;
     my $attachment = attachment_id_is_valid($attach_id);
-
-    return ($attachment && $attachment->ispatch);
+    return ($attachment
+            && ($attachment->ispatch
+                || ($attachment->contenttype eq "text/x-github-pull-request" && $attachment->external_redirect)));
 }
 
 sub get_review_base {
@@ -103,7 +104,7 @@ sub get_review_link {
 
     my $attachment = attachment_id_is_valid($attach_id);
 
-    if ($attachment && $attachment->ispatch) {
+    if (attachment_id_is_patch($attach_id)) {
         return "<a href='" . html_quote(get_review_url($attachment->bug, $attach_id)) . 
                "'>$link_text</a>";
     }

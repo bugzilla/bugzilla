@@ -80,6 +80,7 @@ BEGIN {
     *Bugzilla::Attachment::bounty_details           = \&_attachment_bounty_details;
     *Bugzilla::Attachment::external_redirect        = \&_attachment_external_redirect;
     *Bugzilla::Attachment::can_review               = \&_attachment_can_review;
+    *Bugzilla::Attachment::fetch_github_pr_diff     = \&_attachment_fetch_github_pr_diff;
 }
 
 sub template_before_process {
@@ -1104,6 +1105,27 @@ sub _attachment_can_review {
     return 1 if $self->ispatch;
     my $external = $self->external_redirect // return;
     return $external->{can_review};
+}
+
+sub _attachment_fetch_github_pr_diff {
+    my ($self) = @_;
+
+    # must be our supported content-type
+    return undef unless
+        any { $self->contenttype eq $autodetect_attach_urls{$_}->{content_type} }
+        keys %autodetect_attach_urls;
+
+    # must still be a valid url
+    return undef unless _detect_attached_url($self->data);
+
+    my $ua = LWP::UserAgent->new( timeout => 10 );
+    if (Bugzilla->params->{proxy_url}) {
+        $ua->proxy('https', Bugzilla->params->{proxy_url});
+    }
+
+    my $response = $ua->get($self->data . ".diff");
+    return "Error retrieving Github pull request diff" if $response->is_error;
+    return $response->content;
 }
 
 # redirect automatically to github urls

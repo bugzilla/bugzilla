@@ -1,0 +1,51 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[%
+  RETURN UNLESS attachment.mimetype == "text/x-github-pull-request" && attachment.can_review;
+  custom_attachment_viewer = 1;
+%]
+
+[% IF NOT user.id %]
+  <div>
+    <b>Display of Github pull requests only available to logged in users.</b>
+  </div>
+  [% RETURN %]
+[% END %]
+
+[% attachment_data = attachment.fetch_github_pr_diff %]
+
+<div>
+  [% INCLUDE global/textarea.html.tmpl
+    id       = 'editFrame'
+    name     = 'comment'
+    classes  = 'bz_default_hidden'
+    minrows  = 10
+    cols     = 80
+    wrap     = 'soft'
+    disabled = 'disabled'
+    defaultcontent = attachment_data.replace('(.*\n|.+)', '>$1');
+  %]
+  <pre id="viewFrame">
+    [% attachment_data FILTER html %]
+  </pre>
+  [% IF user.id %]
+    <script type="text/javascript">
+    <!--
+      var patchviewerinstalled = 0;
+      document.write('<button type="button" id="editButton" onclick="editAsComment(patchviewerinstalled);">Edit Attachment As Comment<\/button>');
+      document.write('<button type="button" id="undoEditButton" onclick="undoEditAsComment(patchviewerinstalled);" class="bz_default_hidden">Undo Edit As Comment<\/button>');
+      document.write('<button type="button" id="redoEditButton" onclick="redoEditAsComment(patchviewerinstalled);" class="bz_default_hidden">Redo Edit As Comment<\/button>');
+      var editFrame = document.getElementById('editFrame');
+      if (editFrame) {
+        editFrame.disabled = false;
+      }
+    //-->
+    </script>
+  [% END %]
+<div>

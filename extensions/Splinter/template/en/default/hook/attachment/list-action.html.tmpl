@@ -19,7 +19,8 @@
   #                 David Lawrence <dkl@mozilla.com>
   #%]
 
-[% IF attachment.ispatch %]
+[% IF attachment.ispatch
+   || (attachment.mimetype == "text/x-github-pull-request" && attachment.can_review) %]
   &#x0020; |
-  <a href="[% Bugzilla.splinter_review_url(bugid, attachment.id) FILTER none %]">Review</a>
+  <a href="[% Bugzilla.splinter_review_url(bugid, attachment.id) FILTER none %]">Splinter Review</a>
 [% END %]

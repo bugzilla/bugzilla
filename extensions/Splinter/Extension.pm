@@ -1,3 +1,10 @@
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
+#
+# This Source Code Form is "Incompatible With Secondary Licenses", as
+# defined by the Mozilla Public License, v. 2.0.
+
 package Bugzilla::Extension::Splinter;
 
 use strict;
@@ -75,8 +82,13 @@ sub page_before_template {
             }
 
             $vars->{'attach_id'} = $attachment->id;
-            $vars->{'attach_data'} = $attachment->data;
-            $vars->{'attach_is_crlf'} = $attachment->{data} =~ /\012\015/ ? 1 : 0;
+            if ($user->id && $attachment->contenttype eq "text/x-github-pull-request" && $attachment->can_review) {
+                $vars->{'attach_data'} = $attachment->fetch_github_pr_diff;
+            }
+            else {
+                $vars->{'attach_data'} = $attachment->data;
+            }
+            $vars->{'attach_is_crlf'} = $vars->{'attach_data'} =~ /\012\015/ ? 1 : 0;
         }
 
         my $field_object = new Bugzilla::Field({ name => 'attachments.status' });

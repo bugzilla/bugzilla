@@ -34,7 +34,7 @@ use Bugzilla::User;
 use Bugzilla::Util;
 
 use List::Util qw(first);
-use Scalar::Util qw(blessed weaken);
+use Scalar::Util qw(blessed weaken isweak);
 
 ###############################
 ####    Initialization     ####
@@ -242,7 +242,7 @@ sub bug {
     my $self = shift;
     require Bugzilla::Bug;
     my $bug = $self->{bug} ||= new Bugzilla::Bug($self->bug_id);
-    weaken($self->{bug});
+    weaken($self->{bug}) unless isweak($self->{bug});
     return $bug;
 }
 

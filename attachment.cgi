@@ -54,9 +54,11 @@ use Bugzilla::Token;
 use Bugzilla::Keyword;
 use Bugzilla::Hook;
 
-use Encode qw(encode find_encoding);
+use Encode qw(encode find_encoding from_to);
 use URI;
 use URI::QueryParam;
+use URI::Escape qw(uri_escape_utf8);
+use File::Basename qw(basename);
 
 # For most scripts we don't make $cgi and $template global variables. But
 # when preparing Bugzilla for mod_perl, this script used these
@@ -381,7 +383,7 @@ sub view {
 
     # At this point, Bugzilla->login has been called if it had to.
     my $contenttype = $attachment->contenttype;
-    my $filename    = $attachment->filename;
+    my $filename    = basename($attachment->filename);
     my $contenttype_override = 0;
 
     # Bug 111522: allow overriding content-type manually in the posted form
@@ -396,18 +398,6 @@ sub view {
 
     # BMO add a hook for github url redirection
     Bugzilla::Hook::process('attachment_view', { attachment => $attachment });
-
-    $filename =~ s/^.*[\/\\]//;
-    # escape quotes and backslashes in the filename, per RFCs 2045/822
-    $filename =~ s/\\/\\\\/g; # escape backslashes
-    $filename =~ s/"/\\"/g; # escape quotes
-
-    # Avoid line wrapping done by Encode, which we don't need for HTTP
-    # headers. See discussion in bug 328628 for details.
-    local $Encode::Encoding{'MIME-Q'}->{'bpl'} = 10000;
-    $filename = encode('MIME-Q', $filename);
-
-    my $disposition = Bugzilla->params->{'allow_attachment_display'} ? 'inline' : 'attachment';
 
     my $do_redirect = 0;
     Bugzilla::Hook::process('attachment_should_redirect_login', { do_redirect => \$do_redirect });
@@ -437,11 +427,26 @@ sub view {
     }
     Bugzilla->log_user_request($attachment->bug_id, $attachment->id, "attachment-get")
       if Bugzilla->user->id;
+
+    my $disposition = Bugzilla->params->{'allow_attachment_display'} ? 'inline' : 'attachment';
+
+    my $ascii_filename = $filename;
+    utf8::encode($ascii_filename);
+    from_to($ascii_filename, 'UTF-8', 'ascii');
+    $ascii_filename =~ s/(["\\])/\\$1/g;
+    my $qfilename = qq{"$filename"};
+    my $ufilename = qq{UTF-8''} . uri_escape_utf8($filename);
+
+    my $filenames = "filename=$qfilename";
+    if ($ascii_filename ne $filename) {
+        $filenames .= "; filename*=$ufilename";
+    }
+
     # IE8 and older do not support RFC 6266. So for these old browsers
     # we still pass the old 'filename' attribute. Modern browsers will
     # automatically pick the new 'filename*' attribute.
     print $cgi->header(-type=> $contenttype,
-                       -content_disposition=> "$disposition; filename=\"$filename\"; filename*=UTF-8''$filename",
+                       -content_disposition=> "$disposition; $filenames",
                        -content_length => $attachment->datasize);
     disable_utf8();
     print $attachment->data;

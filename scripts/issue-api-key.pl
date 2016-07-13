@@ -22,19 +22,26 @@ use Bugzilla::User::APIKey;
 Bugzilla->usage_mode(USAGE_MODE_CMDLINE);
 
 my $login = shift
-    or die "syntax: $0 bugzilla-login [description]\n";
+    or die "syntax: $0 bugzilla-login [description] [api key]\n";
 my $description = shift;
+my $given_api_key = shift;
+my $api_key;
 
 my $user = Bugzilla::User->check({ name => $login });
 
 my $params = {
     user_id     => $user->id,
     description => $description,
+    api_key     => $given_api_key,
 };
 
 if ($description && $description eq 'mozreview') {
     $params->{app_id} = Bugzilla->params->{mozreview_app_id} // '';
 }
 
-my $api_key = Bugzilla::User::APIKey->create($params);
+if ($given_api_key) {
+    $api_key = Bugzilla::User::APIKey->create_special($params);
+} else {
+    $api_key = Bugzilla::User::APIKey->create($params);
+}
 say $api_key->api_key;

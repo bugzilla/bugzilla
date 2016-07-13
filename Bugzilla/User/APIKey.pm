@@ -88,6 +88,12 @@ sub _check_app_id {
 
     return $app_id;
 }
+
+sub create_special {
+    my ($class, @args) = @_;
+    local VALIDATORS->{api_key} = sub { return $_[1] };
+    return $class->create(@args);
+}
 1;
 
 __END__

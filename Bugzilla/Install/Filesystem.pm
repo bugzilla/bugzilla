@@ -190,6 +190,7 @@ sub FILESYSTEM {
 
         # google webmaster tools verification files
         'google*.html' => { perms => WS_SERVE },
+        'contribute.json' => { perms => WS_SERVE },
     );
 
     # Directories that we want to set the perms on, but not

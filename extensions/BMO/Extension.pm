@@ -697,7 +697,7 @@ sub bug_format_comment {
 
     # link github commit messages
     push (@$regexes, {
-        match => qr#^(To\s(?:https://)?github\.com/(.+?)\.git\n
+        match => qr#^(To\s(?:https://|git@)?github\.com[:/](.+?)\.git\n
                     \s+)([0-9a-z]+\.\.([0-9a-z]+)\s+\S+\s->\s\S+)#mx,
         replace => sub {
             my $args = shift;

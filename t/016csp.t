@@ -19,7 +19,7 @@ use Test::More;
 use File::Find;
 use Support::Templates;
 use List::MoreUtils qw(any);
-use Text::Balanced qw(gen_extract_tagged extract_multiple extract_delimited);
+use Text::Balanced qw(gen_extract_tagged extract_multiple);
 
 unless ( $ENV{CSP_TESTING} ) {
     plan( skip_all => "CSP tests not yet default" );

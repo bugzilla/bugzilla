@@ -86,7 +86,10 @@ sub wanted {
         }
     }
 
-    my $found_problems = $found_tt_javascript || $found_tt_onload || @found_event_attr || $found_script_content;
+    my $found_javascript_link = $data =~ /javascript:\S/;
+    $score{$name}++ if $found_javascript_link;
+
+    my $found_problems = $found_tt_javascript || $found_tt_onload || @found_event_attr || $found_script_content || $found_javascript_link;
     ok(!$found_problems, "checking $name");
     if ($found_problems) {
         my $msg = "problems:\n";
@@ -94,6 +97,7 @@ sub wanted {
         $msg .= "  found onload tt var\n" if $found_tt_onload;
         $msg .= "  found event attributes: " . join(", ", @found_event_attr) . "\n" if @found_event_attr;
         $msg .= "  found script content\n" if $found_script_content;
+        $msg .= "  found javascript: link\n" if $found_javascript_link;
         diag $msg;
     }
 }

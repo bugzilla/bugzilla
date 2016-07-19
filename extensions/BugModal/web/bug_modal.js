@@ -255,14 +255,9 @@ $(function() {
     }
 
     if ($('#copy-summary').length) {
-
-        // probe for document.execCommand("copy") support
         var hasExecCopy = false;
         try {
-            // on page load nothing will be selected, so we don't smash the
-            // clipboard doing this
-            document.execCommand("copy");
-            hasExecCopy = true;
+            hasExecCopy = document.queryCommandSupported("copy");
         } catch(ex) {
             // ignore
         }

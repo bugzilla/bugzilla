@@ -1216,6 +1216,29 @@ sub db_schema_abstract_schema {
             },
         ],
     };
+    $args->{schema}->{job_last_run} = {
+        FIELDS => [
+            id => {
+                TYPE       => 'INTSERIAL',
+                NOTNULL    => 1,
+                PRIMARYKEY => 1,
+            },
+            name => {
+                TYPE => 'VARCHAR(100)',
+                NOTNULL => 1,
+            },
+            last_run => {
+                TYPE => 'DATETIME',
+                NOTNULL => 1,
+            },
+        ],
+        INDEXES => [
+            job_last_run_name_idx => {
+                FIELDS => [ 'name' ],
+                TYPE   => 'UNIQUE',
+            },
+        ],
+    };
 }
 
 sub install_update_db {

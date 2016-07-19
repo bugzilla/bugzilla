@@ -1311,7 +1311,7 @@ use constant ABSTRACT_SCHEMA => {
     # group, given the ability to bless another group, or given
     # visibility to another groups existence and membership
     # grant_type:
-    # if GROUP_MEMBERSHIP - member groups are made members of grantor
+   # if GROUP_MEMBERSHIP - member groups are made members of grantor
     # if GROUP_BLESS - member groups may grant membership in grantor
     # if GROUP_VISIBLE - member groups may see grantor group
     group_group_map => {

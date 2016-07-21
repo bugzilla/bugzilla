@@ -5,7 +5,10 @@
 # This Source Code Form is "Incompatible With Secondary Licenses", as
 # defined by the Mozilla Public License, v. 2.0.
 
+use 5.14.0;
 use strict;
+use warnings;
+
 use lib qw(. lib t);
 use Test::More qw(no_plan);
 use Bugzilla;

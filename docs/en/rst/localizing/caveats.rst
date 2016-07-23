@@ -54,7 +54,7 @@ lines of template code:
             <li>
               The account has been added to the
               [% groups_added_to.join(', ') FILTER html %]
-              group[% 's' IF groups_added_to.size &gt; 1 %].
+              group[% 's' IF groups_added_to.size > 1 %].
             </li>
           [% END %]
 
@@ -73,7 +73,7 @@ Again, insert a "+" sign:
             &lt;li&gt;
               The account has been added to the
               [%<mark>+</mark> groups_added_to.join(', ') FILTER html %]
-              group[% 's' IF groups_added_to.size &gt; 1 %].
+              group[% 's' IF groups_added_to.size > 1 %].
             &lt;/li&gt;
           [% END %]
   </pre>
@@ -101,7 +101,7 @@ would give for instance the following:
           [% IF groups_added_to.size %]
             <li>
               Le compte a été ajouté
-              [% IF groups_added_to.size &gt; 1 %]
+              [% IF groups_added_to.size > 1 %]
               aux groupes[% ELSE %]au groupe[% END %][%+ groups_added_to.join(', ') FILTER html %].
             </li>
           [% END %]
@@ -165,7 +165,7 @@ Let's say we have the following:
     <p>
       Sorry, there
 
-      [% IF comp.bug_count &gt; 1 %]
+      [% IF comp.bug_count > 1 %]
         are [% comp.bug_count %] [%+ terms.bugs %]
       [% ELSE %]
          is [% comp.bug_count %] [%+ terms.bug %]
@@ -173,7 +173,7 @@ Let's say we have the following:
 
       pending for this component. You should reassign
 
-      [% IF comp.bug_count &gt; 1 %]
+      [% IF comp.bug_count > 1 %]
          these [% terms.bugs %]
       [% ELSE %]
          this [% terms.bug %]
@@ -228,7 +228,7 @@ Then, the previous code should look like:
 
       for this component. You should reassign
 
-      [% IF comp.bug_count &gt; 1 %]
+      [% IF comp.bug_count > 1 %]
          these [% terms.bugs %]
       [% ELSE %]
          this [% terms.bug %]

@@ -118,14 +118,6 @@ rst_prolog = """
 .. |min-perl-ver| replace:: 5.14.0
 """
 
-rst_epilog = """
-
-----------
-
-This documentation undoubtedly has bugs; if you find some, please file
-them `here <https://bugzilla.mozilla.org/enter_bug.cgi?product=Bugzilla&component=Documentation>`_.
-"""
-
 # -- Options for HTML output ---------------------------------------------------
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for

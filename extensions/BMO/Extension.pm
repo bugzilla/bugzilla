@@ -709,6 +709,59 @@ sub bug_format_comment {
         }
     });
 
+    # Update certain links to git.mozilla.org to go to github.com instead
+    # https://git.mozilla.org/?p=webtools/bmo/bugzilla.git;a=blob;f=Bugzilla/WebService/Bug.pm;h=d7a1d8f9bb5fdee524f2bb342a4573a63d890f2e;hb=HEAD#l657
+    push(@$regexes, {
+        match => qr#\b(https?://git\.mozilla\.org\S+)\b#mx,
+        replace => sub {
+            my $args  = shift;
+            my $match = $args->{matches}->[0];
+            my $uri   = URI->new($match);
+
+            # Only work on BMO and Bugzilla repos
+            my $repo = $uri->query_param_delete("p")  || '';
+            if ($repo !~ /(webtools\/bmo|bugzilla)\//) {
+                return qq#<a href="$match">$match</a>#;
+            }
+
+            my $text     = html_quote($match);
+            my $action   = $uri->query_param_delete("a")  || '';
+            my $file     = $uri->query_param_delete("f")  || '';
+            my $frag     = $uri->fragment                 || '';
+            my $from_rev = $uri->query_param_delete("h")  || '';
+            my $to_rev   = $uri->query_param_delete("hb") || '';
+
+            if ($frag) {
+               $frag =~ tr/l/L/;
+               $frag = "#$frag";
+            }
+
+            $to_rev = $from_rev if !$to_rev;
+            $to_rev = 'master' if $to_rev eq 'HEAD';
+            $to_rev =~ s#refs/heads/(.*)$#$1#;
+
+            $repo = 'mozilla-bteam/bmo' if $repo =~ /^webtools\/bmo\/bugzilla\.git$/;
+            $repo = 'bugzilla/bugzilla' if $repo =~ /^bugzilla\/bugzilla\.git$/;
+            $repo = 'bugzilla/bugzilla.org' if $repo =~ /^www\/bugzilla\.org\.git$/;
+
+            if ($action eq 'tree') {
+                return $to_rev eq 'HEAD'
+                       ? qq#<a href="https://github.com/$repo">$text [github]</a>#
+                       : qq#<a href="https://github.com/$repo/tree/$to_rev">$text [github]</a>#;
+            }
+            if ($action eq 'blob') {
+                return qq#<a href="https://github.com/$repo/blob/$to_rev/$file$frag">$text [github]</a>#;
+            }
+            if ($action eq 'shortlog' || $action eq 'log') {
+                return qq#<a href="https://github.com/$repo/commits/$to_rev">$text [github]</a>#;
+            }
+            if ($action eq 'commit' || $action eq 'commitdiff') {
+                return qq#<a href="https://github.com/$repo/commit/$to_rev">$text [github]</a>#;
+            }
+            return qq#<a href="$text">$text</a>#;
+        }
+    });
+
     # link to hg.m.o
     # Note: for grouping in this regexp, always use non-capturing parentheses.
     my $hgrepos = join('|', qw!(?:releases/)?comm-[\w.]+ 

@@ -21,7 +21,7 @@ use Bugzilla::Util qw(correct_urlbase);
 
 use JSON qw(decode_json encode_json);
 use LWP::UserAgent;
-use List::MoreUtils qw(none);
+use List::MoreUtils qw(any);
 
 sub options {
     return (
@@ -68,10 +68,14 @@ sub should_send {
         return 1;
     }
     else {
-        # send status and resolution updates
         foreach my $change (@{ $data->{event}->{changes} }) {
-            return 1 if $change->{field} eq 'bug_status'
-                || $change->{field} eq 'resolution';
+            # send status and resolution updates
+            return 1 if $change->{field} eq 'bug_status' || $change->{field} eq 'resolution';
+            # also send if the right keyword has been added to this bug
+            if ($change->{field} eq 'keywords' && $change->{added}) {
+                my @added = split(/, /, $change->{added});
+                return 1 if any { $_ eq 'cisco-spark' } @added;
+            }
         }
     }
 

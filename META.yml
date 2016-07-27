@@ -35,6 +35,10 @@ optional_features:
     description: 'RADIUS Authentication'
     requires:
       Authen::Radius: '0'
+  db_from_env:
+    description: 'Support for using $ENV{DATABASE_URL}'
+    requires:
+      URI::db: '0.17'
   detect_charset:
     description: 'Automatic charset detection for text attachments'
     requires:

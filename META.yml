@@ -12,7 +12,7 @@ build_requires:
 configure_requires:
   ExtUtils::MakeMaker: '6.55'
 dynamic_config: 1
-generated_by: 'ExtUtils::MakeMaker version 7.04, CPAN::Meta::Converter version 2.150005'
+generated_by: 'ExtUtils::MakeMaker version 7.18, CPAN::Meta::Converter version 2.143240'
 license: unknown
 meta-spec:
   url: http://module-build.sourceforge.net/META-spec-v1.4.html
@@ -38,7 +38,6 @@ optional_features:
   csp:
     description: 'Content-Security-Policy support'
     requires:
-      Moo: '2'
       MooX::StrictConstructor: '0.008'
       Type::Tiny: '1'
   detect_charset:
@@ -135,14 +134,6 @@ optional_features:
       CGI::Compile: '0'
       CGI::Emulate::PSGI: '0'
       Plack: '1.0031'
-  rest:
-    description: 'REST Interface'
-    requires:
-      HTTP::Request: '0'
-      HTTP::Response: '0'
-      Module::Runtime: '0'
-      Moo: '2'
-      Test::Taint: '1.06'
   smtp_auth:
     description: 'SMTP Authentication'
     requires:
@@ -187,11 +178,15 @@ requires:
   Email::MIME: '1.904'
   Email::Sender: '1.300011'
   File::Slurp: '9999.13'
+  HTTP::Request: '0'
+  HTTP::Response: '0'
   JSON::XS: '2.01'
   List::MoreUtils: '0.32'
   Math::Random::ISAAC: v1.0.1
+  Module::Runtime: '0'
+  Moo: '2'
   Template: '2.24'
+  Test::Taint: '1.06'
   URI: '1.55'
   perl: '5.014000'
 version: v5.1.1+
-x_serialization_backend: 'CPAN::Meta::YAML version 0.016'

@@ -56,10 +56,15 @@ my %requires = (
     'Email::MIME'         => '1.904',
     'Email::Sender'       => '1.300011',
     'File::Slurp'         => '9999.13',
+    'HTTP::Request'       => 0,
+    'HTTP::Response'      => 0,
     'JSON::XS'            => '2.01',
     'List::MoreUtils'     => '0.32',
     'Math::Random::ISAAC' => '1.0.1',
+    'Moo'                 => 2,
+    'Module::Runtime'     => 0,
     'Template'            => '2.24',
+    'Test::Taint'         => '1.06',
     'URI'                 => '1.55',
 );
 my %build_requires = (
@@ -262,20 +267,6 @@ my %optional_features = (
         description => 'Patch Viewer',
         prereqs => { runtime => { requires => { PatchReader => '0.9.6' } } }
     },
-    rest => {
-        description => 'REST Interface',
-        prereqs     => {
-            runtime => {
-                requires => {
-                    'Test::Taint'     => '1.06',
-                    'HTTP::Request'   => 0,
-                    'HTTP::Response'  => 0,
-                    Moo               => 2,
-                    'Module::Runtime' => 0
-                }
-            }
-        }
-    },
     jobqueue => {
         description => 'Mail Queueing',
         prereqs     => {
@@ -301,7 +292,6 @@ my %optional_features = (
         prereqs     => {
             runtime => {
                 requires => {
-                    Moo          => 2,
                     'Type::Tiny' => 1,
                     'MooX::StrictConstructor' => 0.008,
                 }

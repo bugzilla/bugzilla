@@ -14,11 +14,6 @@ use lib qw(. lib local/lib/perl5);
 
 use Bugzilla;
 use Bugzilla::Constants;
-use Bugzilla::Error;
-BEGIN {
-    if (!Bugzilla->feature('rest')) {
-        ThrowUserError('feature_disabled', { feature => 'rest' });
-    }
-}
+
 Bugzilla->usage_mode(USAGE_MODE_REST);
 Bugzilla->api_server->handle();

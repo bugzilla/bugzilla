@@ -97,7 +97,7 @@ use constant FEATURE_FILES => (
                       'Bugzilla/JobQueue/*', 'jobqueue.pl'],
     patch_viewer  => ['Bugzilla/Attachment/PatchReader.pm'],
     updates       => ['Bugzilla/Update.pm'],
-    markdown      => ['Bugzilla/Markdown.pm'],
+    markdown      => ['Bugzilla/Markdown.pm', 't/100markdown.t'],
     memcached     => ['Bugzilla/Memcache.pm'],
     auth_delegation => ['auth.cgi'],
 );

@@ -304,7 +304,7 @@ rewritten.
 
 =head1 METHODS
 
-=head2 headers()
+=head2 header_names()
 
 This returns a list of header names. This will typically be
 C<Content-Security-Policy>, C<X-Content-Security-Policy>, and C<X-WebKit-CSP>.

@@ -50,6 +50,18 @@
             }
          }
       },
+      "csp" : {
+         "description" : "Content-Security-Policy support",
+         "prereqs" : {
+            "runtime" : {
+               "requires" : {
+                  "Moo" : "2",
+                  "MooX::StrictConstructor" : "0.008",
+                  "Type::Tiny" : "1"
+               }
+            }
+         }
+      },
       "detect_charset" : {
          "description" : "Automatic charset detection for text attachments",
          "prereqs" : {

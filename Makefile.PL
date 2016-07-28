@@ -296,6 +296,18 @@ my %optional_features = (
             }
         }
     },
+    csp => {
+        description => 'Content-Security-Policy support',
+        prereqs     => {
+            runtime => {
+                requires => {
+                    Moo          => 2,
+                    'Type::Tiny' => 1,
+                    'MooX::StrictConstructor' => 0.008,
+                }
+            }
+        }
+    },
 );
 
 for my $file ( glob("extensions/*/Config.pm") ) {

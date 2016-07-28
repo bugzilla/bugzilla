@@ -35,6 +35,12 @@ optional_features:
     description: 'RADIUS Authentication'
     requires:
       Authen::Radius: '0'
+  csp:
+    description: 'Content-Security-Policy support'
+    requires:
+      Moo: '2'
+      MooX::StrictConstructor: '0.008'
+      Type::Tiny: '1'
   detect_charset:
     description: 'Automatic charset detection for text attachments'
     requires:

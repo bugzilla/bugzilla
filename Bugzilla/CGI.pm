@@ -22,6 +22,12 @@ use Bugzilla::Install::Util qw(i_am_persistent);
 
 use File::Basename;
 
+use constant DEFAULT_CSP => (
+    default_src => [ 'self' ],
+    script_src  => [ 'self', 'unsafe-inline', 'unsafe-eval' ],
+    style_src   => [ 'self', 'unsafe-inline' ],
+);
+
 sub _init_bz_cgi_globals {
     my $invocant = shift;
     # We need to disable output buffering - see bug 179174
@@ -100,6 +106,39 @@ sub new {
     }
 
     return $self;
+}
+
+sub content_security_policy {
+    my ($self) = @_;
+    if (Bugzilla->has_feature('csp')) {
+        require Bugzilla::CGI::ContentSecurityPolicy;
+        return $self->{Bugzilla_csp} if $self->{Bugzilla_csp};
+        my %params = DEFAULT_CSP;
+        if (@_) {
+            my %add_params = @_;
+            foreach my $key (keys %add_params) {
+                if (defined $add_params{$key}) {
+                    $params{$key} = $add_params{$key};
+                }
+                else {
+                    delete $params{$key};
+                }
+            }
+        }
+        return $self->{Bugzilla_csp} = Bugzilla::CGI::ContentSecurityPolicy->new(%params);
+    }
+    return undef;
+}
+
+sub csp_nonce {
+    my ($self) = @_;
+
+    if (Bugzilla->has_feature('csp')) {
+        my $csp = $self->content_security_policy;
+        return $csp->nonce if $csp->has_nonce;
+    }
+
+    return '';
 }
 
 # We want this sorted plus the ability to exclude certain params
@@ -335,6 +374,9 @@ sub header {
     # Add X-Content-Type-Options header to prevent browsers sniffing
     # the MIME type away from the declared Content-Type.
     $headers{'-x_content_type_options'} = 'nosniff';
+
+    my $csp = $self->content_security_policy;
+    $csp->add_cgi_headers(\%headers) if defined $csp;
 
     Bugzilla::Hook::process('cgi_headers',
         { cgi => $self, headers => \%headers }
@@ -645,6 +687,18 @@ argument to C<header>), so that under mod_perl the headers can be sent
 correctly, using C<print> or the mod_perl APIs as appropriate.
 
 To remove (expire) a cookie, use C<remove_cookie>.
+
+=item C<content_security_policy>
+
+Set a Content Security Policy for the current request. This is a no-op if the 'csp' feature
+is not available. The arguments to this method are passed to the constructor of L<Bugzilla::CGI::ContentSecurityPolicy>,
+consult that module for a list of what directives are supported.
+
+=item C<csp_nonce>
+
+Returns a CSP nonce value if CSP is available and 'nonce' is listed as a source in a CSP *_src directive.
+
+If there is no nonce used, or CSP is not available, this returns the empty string.
 
 =item C<remove_cookie>
 

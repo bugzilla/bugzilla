@@ -86,6 +86,7 @@ use constant FEATURE_FILES => (
                       'Bugzilla/WebService.pm', 'Bugzilla/WebService/*.pm'],
     rest          => ['Bugzilla/API/Server.pm', 'rest.cgi', 'Bugzilla/API/*/*.pm',
                       'Bugzilla/API/*/Server.pm', 'Bugzilla/API/*/Resource/*.pm'],
+    csp           => ['Bugzilla/CGI/ContentSecurityPolicy.pm'],
     psgi          => ['app.psgi'],
     moving        => ['importxml.pl'],
     auth_ldap     => ['Bugzilla/Auth/Verify/LDAP.pm'],

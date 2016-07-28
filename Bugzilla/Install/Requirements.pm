@@ -84,8 +84,6 @@ use constant FEATURE_FILES => (
     jsonrpc       => ['Bugzilla/WebService/Server/JSONRPC.pm', 'jsonrpc.cgi'],
     xmlrpc        => ['Bugzilla/WebService/Server/XMLRPC.pm', 'xmlrpc.cgi',
                       'Bugzilla/WebService.pm', 'Bugzilla/WebService/*.pm'],
-    rest          => ['Bugzilla/API/Server.pm', 'rest.cgi', 'Bugzilla/API/*/*.pm',
-                      'Bugzilla/API/*/Server.pm', 'Bugzilla/API/*/Resource/*.pm'],
     csp           => ['Bugzilla/CGI/ContentSecurityPolicy.pm'],
     psgi          => ['app.psgi'],
     moving        => ['importxml.pl'],

@@ -3,7 +3,7 @@
     "name": "BMO Task Graph",
     "description": "A suite of tests to check the quality of the BMO codebase.",
     "owner": "dlawrence@mozilla.com",
-    "source": "https://raw.githubusercontent.com/mozilla/webtools-bmo-bugzilla/master/taskgraph.json"
+    "source": "https://raw.githubusercontent.com/mozilla-bteam/bmo/master/taskgraph.json"
   },
   "tasks": [
     {
@@ -17,15 +17,15 @@
         "provisionerId": "aws-provisioner-v1",
         "workerType": "b2gtest",
         "payload": {
-          "image": "dklawren/webtools-bmo-bugzilla",
-          "command": ["/runtests.sh"],
+          "image": "mozillabteam/bmo-ci",
+          "command": ["runtests.sh"],
           "env": {
             "TEST_SUITE": "sanity"
           },
           "artifacts": {
             "public/runtests_log": {
               "type": "file",
-              "path": "/runtests.log",
+              "path": "/var/log/runtests.log",
               "expires": "2018-02-17T17:33:38.806Z"
             }
           }
@@ -54,15 +54,15 @@
         "provisionerId": "aws-provisioner-v1",
         "workerType": "b2gtest",
         "payload": {
-          "image": "dklawren/webtools-bmo-bugzilla",
-          "command": ["/runtests.sh"],
+          "image": "mozillabteam/bmo-ci",
+          "command": ["runtests.sh"],
           "env": {
             "TEST_SUITE": "docs"
           },
           "artifacts": {
             "public/runtests_log": {
               "type": "file",
-              "path": "/runtests.log",
+              "path": "/var/log/runtests.log",
               "expires": "2018-02-17T17:33:38.806Z"
             }
           }
@@ -91,15 +91,15 @@
         "provisionerId": "aws-provisioner-v1",
         "workerType": "b2gtest",
         "payload": {
-          "image": "dklawren/webtools-bmo-bugzilla",
-          "command": ["/runtests.sh"],
+          "image": "mozillabteam/bmo-ci",
+          "command": ["runtests.sh"],
           "env": {
             "TEST_SUITE": "webservices"
           },
           "artifacts": {
             "public/runtests_log": {
               "type": "file",
-              "path": "/runtests.log",
+              "path": "/var/log/runtests.log",
               "expires": "2018-02-17T17:33:38.806Z"
             },
             "public/httpd_error_log": {
@@ -133,15 +133,15 @@
         "provisionerId": "aws-provisioner-v1",
         "workerType": "b2gtest",
         "payload": {
-          "image": "dklawren/webtools-bmo-bugzilla",
-          "command": ["/runtests.sh"],
+          "image": "mozillabteam/bmo-ci",
+          "command": ["runtests.sh"],
           "env": {
             "TEST_SUITE": "selenium"
           },
           "artifacts": {
             "public/runtests_log": {
               "type": "file",
-              "path": "/runtests.log",
+              "path": "/var/log/runtests.log",
               "expires": "2018-02-17T17:33:38.806Z"
             },
             "public/httpd_error_log": {

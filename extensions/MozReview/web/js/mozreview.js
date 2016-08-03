@@ -27,32 +27,46 @@ MozReview.getReviewRequest = function() {
         return rrUrl(rrId) + 'diff/#index_header';
     }
 
+    function humanizedInt(i) {
+        if (i > 1000) {
+            return (i / 1000).toFixed(1) + 'k';
+        } else {
+            return '' + i;
+        }
+    }
+
     function rrCommitRow(rr, firstCommit) {
         var trCommit = tr.clone();
         var tdSubmitter = td.clone();
-        var tdRev = td.clone();
         var tdSummary = td.clone();
         var diffLink = link.clone();
-        var reviewLink = link.clone();
+        var diffStat = '';
 
         if (firstCommit) {
             tdSubmitter.text(rr.submitter);
         }
 
-        diffLink.attr('href', rrDiffUrl(rr.id));
-        diffLink.text(rr.commit.substr(0, 12));
-        diffLink.addClass('mozreview-diff-link');
-        tdRev.append(diffLink);
-
         tdSummary.addClass('mozreview-summary');
-        reviewLink.attr('href', rrUrl(rr.id));
-        reviewLink.text(rr.summary);
-        tdSummary.append(reviewLink);
+        diffLink.attr('href', rrDiffUrl(rr.id));
+        diffLink.text(rr.summary);
+        tdSummary.append(diffLink);
+
+        if (rr.diff.insert > 0) {
+            diffStat = '+' + humanizedInt(rr.diff.insert);
+        }
+
+        if (rr.diff.delete > 0) {
+            if (diffStat.length > 0) {
+                diffStat += ' / ';
+            }
+            diffStat += '-' + humanizedInt(rr.diff.delete);
+        }
 
         trCommit.append(
             tdSubmitter,
-            tdRev,
             tdSummary,
+            td.clone().text(diffStat)
+                      .addClass('mozreview-diffstat'),
             td.clone().text(rr.issue_open_count)
                       .addClass('mozreview-open-issues'),
             td.clone().text(timeAgo(new Date(rr.last_updated)))

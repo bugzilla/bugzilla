@@ -50,8 +50,9 @@
     text-align: center;
 }
 
-.mozreview-diff-link {
-    font-family: monospace;
+.mozreview-requests .mozreview-diffstat {
+    text-align: center;
+    white-space: nowrap;
 }
 
 /* bug-modal specific */

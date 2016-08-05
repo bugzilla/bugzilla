@@ -10,11 +10,11 @@ repositories to catch the changes in the files.
 
 To do so, you can subscribe to the Atom or RSS feeds that log every commit in the repositories.
 
-Different development branches of Bugzilla are referred to by the Git source control
-system in this context as ``heads``. The list of heads can be found
-on `the bottom of this page <http://git.mozilla.org/?p=bugzilla/bugzilla.git;a=summary>`_ in the
-"heads" section. The head named "master" is the current focus of Bugzilla development,
+The list of commits can be found
+on `this page <https://github.com/bugzilla/bugzilla/commits/master>`_.
+The branch named "master" is the current focus of Bugzilla development,
 and the place from which the next release will come.
-Click on the link of the version you want to watch. At the bottom right corner of the page that is
-then displayed, you will find the RSS or Atom link to subscribe to. An so, you will be noticed for each commit
-that happens on this head.
+If you want to watch a different branch, select it from the dropdown "Branch:"
+widget in the top left. Once you have your branch, add ".atom" to the end of
+the URL in the URL bar to get a feed you can subscribe to.
+You will be notified about each commit that happens on this branch.

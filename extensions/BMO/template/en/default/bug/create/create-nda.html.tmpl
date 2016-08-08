@@ -1,0 +1,160 @@
+[%# 1.0@bugzilla.org %]
+[%# The contents of this file are subject to the Mozilla Public
+  # License Version 1.1 (the "License"); you may not use this file
+  # except in compliance with the License. You may obtain a copy of
+  # the License at http://www.mozilla.org/MPL/
+
+  #
+  # Software distributed under the License is distributed on an "AS
+  # IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
+  # implied. See the License for the specific language governing
+  # rights and limitations under the License.
+  #
+  # The Original Code is the Bugzilla Bug Tracking System.
+  #
+  # The Initial Developer of the Original Code is Mozilla Corporation.
+  # Portions created by Mozilla are Copyright (C) 2008 Mozilla
+  # Corporation. All Rights Reserved.
+  #
+  # Contributor(s): Mark Smith <mark@mozilla.com>
+  #                 Reed Loden <reed@mozilla.com>
+  #%]
+
+[% PROCESS global/variables.none.tmpl %]
+
+[% inline_style = BLOCK %]
+#heading {
+  font-size:   2em;
+  font-weight: bold;
+}
+.row {
+  padding-bottom: 10px;
+}
+[% END %]
+
+[% inline_javascript = BLOCK %]
+$(function() {
+  $('#nda_needed').on('change', function() {
+    if ($('#nda_needed').val() == 'Yes')
+      $('#nda_needed_reason_row').show();
+    else
+      $('#nda_needed_reason_row').hide();
+  });
+});
+[% END %]
+
+[% PROCESS global/header.html.tmpl
+   title              = "NDA Request Form"
+   generate_api_token = 1
+   style              = inline_style
+   javascript         = inline_javascript
+%]
+
+<div id="heading">NDA Request Form</div>
+
+<p><b>Note:</b> Do NOT add non-employees to this bug. To maintain attorney-client privilege and confidentiality,
+  legal bugs are only visible to the reporter, the legal team, and the cc list.</p>
+
+<form method="post" action="post_bug.cgi" id="ndaForm">
+  <input type="hidden" id="short_desc" name="short_desc" value="New NDA Request">
+  <input type="hidden" name="product" value="Legal">
+  <input type="hidden" name="component" value="NDA">
+  <input type="hidden" name="rep_platform" value="All">
+  <input type="hidden" name="op_sys" value="Other">
+  <input type="hidden" name="version" value="unspecified">
+  <input type="hidden" name="priority" value="--">
+  <input type="hidden" name="bug_severity" value="normal">
+  <input type="hidden" name="format" value="nda">
+  <input type="hidden" name="token" value="[% token FILTER html %]">
+  [% IF user.in_group('canconfirm') %]
+    <input type="hidden" name="bug_status" value="NEW">
+  [% END %]
+
+  <div class="row">
+    <div class="row_desc">
+      <label for="nda_needed">
+        <strong>Do we really need to receive confidential information from the other
+        party or provide them with ours at this stage of the relationship?</strong>
+      </label>
+    </div>
+    <select required name="nda_needed" id="nda_needed">
+      <option value="">-- Select --</option>
+      <option value="Yes">Yes</option>
+      <option value="No">No</option>
+    </select>
+  </div>
+
+  <div id="nda_needed_reason_row" class="row" style="display:none;">
+    <div class="row_desc">
+      <label for="nda_needed_reason">
+        <strong>If yes, please explain.</strong>
+      </label>
+    </div>
+    <textarea required  name="nda_needed_reason" id="nda_needed_reason" cols="80" rows="10"></textarea>
+  </div>
+
+  <div class="row">
+    <div class="row_desc">
+      <label for="nda_purpose">
+        <strong>What is the purpose of exchanging confidential information with the other party?</strong>
+      </label>
+    </div>
+    <textarea required name="nda_purpose" id="nda_purpose" cols="80" rows="10"></textarea>
+  </div>
+
+  <div class="row">
+    <div class="row_desc">
+      <label for="mozilla_sharing">
+        <strong>What confidential information will Mozilla be sharing?</strong>
+      </label>
+    </div>
+    <textarea required name="mozilla_sharing" id="mozilla_sharing" cols="80" rows="10"></textarea>
+  </div>
+
+  <div class="row">
+    <div class="row_desc">
+      <label for="other_sharing">
+        <strong>What confidential information will the other party be sharing?</strong>
+      </label>
+    </div>
+    <textarea required name="other_sharing" id="other_sharing" cols="80" rows="10"></textarea>
+  </div>
+
+  <div class="row">
+    <div class="row_desc">
+      <strong>Other Party Information</strong>
+    </div>
+    <table>
+    <tr>
+      <td>
+        <label for="party_name">Party Name</label>
+      </td>
+      <td><input type="text" name="party_name" id="party_name" size="60" required></td>
+    </tr>
+    <tr>
+      <td>
+        <label for="party_address">Business Address</label>
+      </td>
+      <td><input type="text" name="party_address" id="party_address" size="60" required></td>
+    </tr>
+    <tr>
+      <td>
+        <label for="party_contact_name">Name of Contact Person</label>
+      </td>
+      <td><input type="text" name="party_contact_name" id="party_contact_name" size="60" required></td>
+    <tr>
+      <td>
+        <label for="party_contact_email">Email of Contact Person</label>
+      </td>
+      <td><input type="text" name="party_contact_email" id="party_contact_email" size="60" required></td>
+    </tr>
+    </table>
+  </div>
+
+  <input type="submit" id="commit" value="Submit Request">
+  <p>
+    [ <span class="required_star">*</span> <span class="required_explanation">Required Field</span> ]
+  </p>
+</form>
+
+[% PROCESS global/footer.html.tmpl %]

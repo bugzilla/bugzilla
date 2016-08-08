@@ -87,6 +87,7 @@ RewriteRule ^form[\.:]third[\.\-:]party$ enter_bug.cgi?product=Marketing&format=
 RewriteRule ^form[\.:]fsa[\.:]budget$ enter_bug.cgi?product=FSA&format=fsa-budget [QSA]
 RewriteRule ^form[\.:]triage[\.\-]request$ page.cgi?id=triage_request.html [QSA]
 RewriteRule ^form[\.:](crm|CRM)$ enter_bug.cgi?product=Marketing&format=crm [QSA]
+RewriteRule ^form[\.:]nda$ enter_bug.cgi?product=Legal&format=nda [QSA]
 RewriteRule ^rest/(.*)$ rest.cgi/$1 [NE]
 RewriteRule ^(?:latest|1\.2|1\.3)/(.*)$ extensions/BzAPI/bin/rest.cgi/$1 [NE]
 RewriteRule ^bzapi/(.*)$ extensions/BzAPI/bin/rest.cgi/$1 [NE]

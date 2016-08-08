@@ -1,0 +1,34 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% USE Bugzilla %]
+[% cgi = Bugzilla.cgi %]
+
+>> Do we really need to receive confidential information from the other party or
+>> provide them with ours at this stage of the relationship?
+[%+ cgi.param("nda_needed") %]
+
+[% IF cgi.param("nda_needed") == "Yes" %]
+>> If yes, please explain
+[%+ cgi.param("nda_needed_reason") %]
+
+[% END %]
+>> What is the purpose of exchanging confidential information with the other party?
+[%+ cgi.param("nda_purpose") %]
+
+>> What confidential information will Mozilla be sharing?
+[%+ cgi.param("mozilla_sharing") %]
+
+>> What confidential information will the other party be sharing?
+[%+ cgi.param("other_sharing") %]
+
+>> Other party information
+Party name:           [%+ cgi.param("party_name") %]
+Party address:        [%+ cgi.param("party_address") %]
+Party contact person: [%+ cgi.param("party_contact_name") %]
+Party contact email:  [%+ cgi.param("party_contact_email") %]

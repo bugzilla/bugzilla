@@ -1176,8 +1176,12 @@ sub _attachment_fetch_github_pr_diff {
         $ua->proxy('https', Bugzilla->params->{proxy_url});
     }
 
-    my $response = $ua->get($self->data . ".diff");
-    return "Error retrieving Github pull request diff" if $response->is_error;
+    my $pr_diff = $self->data . ".diff";
+    my $response = $ua->get($pr_diff);
+    if ($response->is_error) {
+        warn "Github fetch error: $pr_diff, " . $response->status_line;
+        return "Error retrieving Github pull request diff for " . $self->data;
+    }
     return $response->content;
 }
 

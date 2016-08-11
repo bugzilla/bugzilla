@@ -1,0 +1,178 @@
+[%# 1.0@bugzilla.org %]
+[%# The contents of this file are subject to the Mozilla Public
+  # License Version 1.1 (the "License"); you may not use this file
+  # except in compliance with the License. You may obtain a copy of
+  # the License at http://www.mozilla.org/MPL/
+
+  #
+  # Software distributed under the License is distributed on an "AS
+  # IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
+  # implied. See the License for the specific language governing
+  # rights and limitations under the License.
+  #
+  # The Original Code is the Bugzilla Bug Tracking System.
+  #
+  # The Initial Developer of the Original Code is Mozilla Corporation.
+  # Portions created by Mozilla are Copyright (C) 2008 Mozilla
+  # Corporation. All Rights Reserved.
+  #
+  # Contributor(s): Mark Smith <mark@mozilla.com>
+  #                 Reed Loden <reed@mozilla.com>
+  #%]
+
+[% PROCESS global/variables.none.tmpl %]
+
+[% inline_style = BLOCK %]
+#heading {
+  font-size:   2em;
+  font-weight: bold;
+}
+.row {
+  padding-bottom: 10px;
+}
+label.required:before {
+  content: "* ";
+  color: red;
+}
+.required_star {
+  color: red;
+}
+[% END %]
+
+[% inline_javascript = BLOCK %]
+$(function() {
+  $('#other_company_name').on('change', function() {
+    if ($('#other_company_name').val() == 'Yes') {
+      $('#other_companies_row').show();
+      $('#other_companies').attr('disabled', false);
+    } else {
+      $('#other_companies_row').hide();
+      $('#other_companies').attr('disabled', true);
+    }
+  });
+});
+[% END %]
+
+[% PROCESS global/header.html.tmpl
+   title              = "Name Clearance"
+   generate_api_token = 1
+   style              = inline_style
+   javascript         = inline_javascript
+%]
+
+<div id="heading">Name Clearance</div>
+
+<p><b>Note:</b> Do NOT add non-employees to this [% terms.bug %]. To maintain attorney-client privilege
+  and confidentiality, legal [% terms.bugs %] are only visible to the reporter, the legal team, and the
+  cc list.</p>
+
+<p>[ <span class="required_star">*</span> <span class="required_explanation">Required Field</span> ]</p>
+
+<form method="post" action="post_bug.cgi" id="nameForm">
+  <input type="hidden" id="short_desc" name="short_desc" value="New Name Clearance Request">
+  <input type="hidden" name="product" value="Legal">
+  <input type="hidden" name="component" value="Name Clearance (Trademark Search)">
+  <input type="hidden" name="rep_platform" value="All">
+  <input type="hidden" name="op_sys" value="Other">
+  <input type="hidden" name="version" value="unspecified">
+  <input type="hidden" name="priority" value="--">
+  <input type="hidden" name="bug_severity" value="normal">
+  <input type="hidden" name="format" value="name-clearance">
+  <input type="hidden" name="token" value="[% token FILTER html %]">
+  [% IF user.in_group('canconfirm') %]
+    <input type="hidden" name="bug_status" value="NEW">
+  [% END %]
+
+  <div class="row">
+    <div class="row_desc">
+      <label class="required" for="business_unit">
+        <strong>Business unit requesting the search</strong>
+      </label>
+    </div>
+    <input type="text" name="business_unit" id="business_unit" size="60" required>
+  </div>
+
+  <div class="row">
+    <div class="row_desc">
+      <label class="required" for="description">
+        <strong>Describe the thing you are naming</strong>
+      </label>
+    </div>
+    <textarea required  name="description" id="description" cols="80" rows="10"></textarea>
+  </div>
+
+  <div class="row">
+    <div class="row_desc">
+      <label for="more_info_link">
+        <strong>If available, link to more info (Google doc, wiki page, etc)</strong>
+      </label>
+    </div>
+    <input name="more_info_link" id="more_info_link" size="60">
+  </div>
+
+  <div class="row">
+    <div class="row_desc">
+      <label class="required" for="name_choice">
+        <strong>What is your first choice for the name?</strong>
+      </label>
+    </div>
+    <input required="true" name="name_choice" id="name_choice" size="60">
+  </div>
+
+  <div class="row">
+    <div class="row_desc">
+      <label class="required" for="other_choices">
+        <strong>What are your 2nd & 3rd choices if #1 isn’t available?</strong>
+      </label>
+    </div>
+    <textarea required="true" name="other_choices" id="other_choices" cols="80" rows="10"></textarea>
+  </div>
+
+  <div class="row">
+    <div class="row_desc">
+      <label class="required" for="brand_team_involved">
+        <strong>Has the brand team been involved in the naming process?</strong>
+      </label>
+    </div>
+    <select required="true" name="brand_team_involved" id="branch_team_involved">
+      <option value="">-- Select --</option>
+      <option value="Yes">Yes</option>
+      <option value="No">No</option>
+    </select>
+  </div>
+
+  <div class="row">
+    <div class="row_desc">
+      <label class="required" for="other_company_name">
+        <strong>Are other companies using the name?</strong>
+      </label>
+    </div>
+    <select required="true" name="other_company_name" id="other_company_name">
+      <option value="">-- Select --</option>
+      <option value="Yes">Yes</option>
+      <option value="No">No</option>
+    </select>
+  </div>
+
+  <div id="other_companies_row" class="row" style="display:none;">
+    <div class="row_desc">
+      <label class="required" for="other_companies">
+        <strong>If yes, tell us which companies and how their use of the name is different from yours.</strong>
+      </label>
+    </div>
+    <textarea required="true" name="other_companies" id="other_companies" cols="80" rows="10"></textarea>
+  </div>
+
+  <div class="row">
+    <div class="row_desc">
+      <label class="required" for="extra_info">
+        <strong>Anything else you want us to know?</strong>
+      </label>
+    </div>
+    <textarea required="true" name="extra_info" id="extra_info" cols="80" rows="10"></textarea>
+  </div>
+
+  <input type="submit" id="commit" value="Submit Request">
+</form>
+
+[% PROCESS global/footer.html.tmpl %]

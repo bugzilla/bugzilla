@@ -37,10 +37,8 @@ $(function() {
   $('#nda_needed').on('change', function() {
     if ($('#nda_needed').val() == 'Yes')
       $('#nda_needed_reason_row').show();
-      $('#nda_needed_reason').attr('disabled', false);
     else
       $('#nda_needed_reason_row').hide();
-      $('#nda_needed_reason').attr('disabled', true);
   });
 });
 [% END %]
@@ -80,7 +78,7 @@ $(function() {
         party or provide them with ours at this stage of the relationship?</strong>
       </label>
     </div>
-    <select required="true" name="nda_needed" id="nda_needed">
+    <select required name="nda_needed" id="nda_needed">
       <option value="">-- Select --</option>
       <option value="Yes">Yes</option>
       <option value="No">No</option>
@@ -93,7 +91,7 @@ $(function() {
         <strong>If yes, please explain.</strong>
       </label>
     </div>
-    <textarea required="true"  name="nda_needed_reason" id="nda_needed_reason" cols="80" rows="10"></textarea>
+    <textarea required  name="nda_needed_reason" id="nda_needed_reason" cols="80" rows="10"></textarea>
   </div>
 
   <div class="row">
@@ -102,7 +100,7 @@ $(function() {
         <strong>What is the purpose of exchanging confidential information with the other party?</strong>
       </label>
     </div>
-    <textarea required="true" name="nda_purpose" id="nda_purpose" cols="80" rows="10"></textarea>
+    <textarea required name="nda_purpose" id="nda_purpose" cols="80" rows="10"></textarea>
   </div>
 
   <div class="row">
@@ -111,7 +109,7 @@ $(function() {
         <strong>What confidential information will Mozilla be sharing?</strong>
       </label>
     </div>
-    <textarea required="true" name="mozilla_sharing" id="mozilla_sharing" cols="80" rows="10"></textarea>
+    <textarea required name="mozilla_sharing" id="mozilla_sharing" cols="80" rows="10"></textarea>
   </div>
 
   <div class="row">
@@ -120,7 +118,7 @@ $(function() {
         <strong>What confidential information will the other party be sharing?</strong>
       </label>
     </div>
-    <textarea required="true" name="other_sharing" id="other_sharing" cols="80" rows="10"></textarea>
+    <textarea required name="other_sharing" id="other_sharing" cols="80" rows="10"></textarea>
   </div>
 
   <div class="row">
@@ -132,29 +130,32 @@ $(function() {
       <td>
         <label for="party_name">Party Name</label>
       </td>
-      <td><input type="text" name="party_name" id="party_name" size="60" required="true"></td>
+      <td><input type="text" name="party_name" id="party_name" size="60" required></td>
     </tr>
     <tr>
       <td>
         <label for="party_address">Business Address</label>
       </td>
-      <td><input type="text" name="party_address" id="party_address" size="60" required="true"></td>
+      <td><input type="text" name="party_address" id="party_address" size="60" required></td>
     </tr>
     <tr>
       <td>
         <label for="party_contact_name">Name of Contact Person</label>
       </td>
-      <td><input type="text" name="party_contact_name" id="party_contact_name" size="60" required="true"></td>
+      <td><input type="text" name="party_contact_name" id="party_contact_name" size="60" required></td>
     <tr>
       <td>
         <label for="party_contact_email">Email of Contact Person</label>
       </td>
-      <td><input type="text" name="party_contact_email" id="party_contact_email" size="60" required="true"></td>
+      <td><input type="text" name="party_contact_email" id="party_contact_email" size="60" required></td>
     </tr>
     </table>
   </div>
 
   <input type="submit" id="commit" value="Submit Request">
+  <p>
+    [ <span class="required_star">*</span> <span class="required_explanation">Required Field</span> ]
+  </p>
 </form>
 
 [% PROCESS global/footer.html.tmpl %]

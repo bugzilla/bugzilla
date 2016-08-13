@@ -24,7 +24,8 @@
 [% PROCESS global/header.html.tmpl
    title = "Mozilla Corporation Legal Requests"
    generate_api_token = 1
-   style_urls = [ 'skins/standard/attachment.css' ]
+   style_urls = [ 'skins/standard/attachment.css',
+                  'skins/custom/create_bug.css' ]
    javascript_urls = [ 'js/attachment.js', 'js/field.js' ]
 %]
 
@@ -33,6 +34,8 @@
    OR user.in_group("mozilla-foundation-confidential") %]
 
 <div style='text-align: center; width: 98%; font-size: 2em; font-weight: bold; margin: 10px;'>MoLegal</div>
+
+[% PROCESS 'bug/create/user-message.html.tmpl' no_bug_guidelines = 1, no_guided_bug_link = 1 %]
 
 <p><strong>Welcome to MoLegal.</strong> For legal help please fill in the form below completely.</p>
 

@@ -1,0 +1,39 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% USE Bugzilla %]
+[% cgi = Bugzilla.cgi %]
+
+>>Business unit requesting the search
+[%+ cgi.param("business_unit") %]
+
+>>Describe the thing you are naming
+[%+ cgi.param("description") %]
+
+>>If available, link to more info (Google doc, wiki page, etc)
+[%+ cgi.param("more_info_link") || 'None' %]
+
+>>What is your first choice for the name?
+[%+ cgi.param("name_choice") %]
+
+>>What are your 2nd & 3rd choices if #1 isn’t available?
+[%+ cgi.param("other_choices") %]
+
+>>Has the brand team been involved in the naming process?
+[%+ cgi.param("brand_team_involved") %]
+
+>>Are other companies using this name?
+[%+ cgi.param("other_company_name") %]
+
+[% IF cgi.param("other_company_name") == "Yes" %]
+>> If yes, tell us which companies and how their use of the name is different from yours.
+[%+ cgi.param("other_companies") %]
+
+[% END %]
+>>Anything else you want us to know?
+[%+ cgi.param("extra_info") %]

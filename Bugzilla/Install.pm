@@ -346,7 +346,7 @@ sub create_admin {
         $login = <STDIN>;
         chomp $login if defined $login;
     }
-    Bugzilla::User->check_login_name($login);
+    Bugzilla::User->check_login_name($login, undef, {email => $email});
 
     if (not defined $full_name) {
         print get_text('install_admin_get_name') . ' ';

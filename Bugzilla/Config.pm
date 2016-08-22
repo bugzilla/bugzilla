@@ -246,7 +246,7 @@ sub update_params {
 
     if ($new_install) {
         $param->{'or_groups'} = 1;
-        $param->{'use_email_as_login'} = 0;
+        $param->{'use_email_as_login'} = 0 unless exists $param->{'use_email_as_login'};
     }
 
     # --- REMOVE OLD PARAMS ---

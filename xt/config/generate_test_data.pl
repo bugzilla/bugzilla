@@ -137,7 +137,7 @@ foreach my $username (@usernames) {
     $login ||= $config->{"${prefix}_user_login"};
     my $api_key = $config->{"${prefix}_user_api_key"};
 
-    if (is_available_username($login)) {
+    if (is_available_email($login)) {
         my %extra_args;
         if ($username eq 'disabled') {
             $extra_args{disabledtext} = '!!This is the text!!';

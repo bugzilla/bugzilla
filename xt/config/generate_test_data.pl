@@ -145,6 +145,7 @@ foreach my $username (@usernames) {
 
         my $user = Bugzilla::User->create(
             { login_name    => $login,
+              email         => $login,
               realname      => $username,
               cryptpassword => $password,
               %extra_args,

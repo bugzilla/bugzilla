@@ -36,6 +36,12 @@ use File::Basename;
   );
 Exporter::export_ok_tags('admin');
 
+# new installs get these set of defaults (unless overriden by the answers file)
+my %NEW_INSTALL_DEFAULT = (
+    or_groups          => 1,
+    use_email_as_login => 0,
+);
+
 # INITIALISATION CODE
 # Perl throws a warning if we use bz_locations() directly after do.
 our %params;
@@ -238,15 +244,13 @@ sub update_params {
             elsif (exists $answer->{$name}) {
                 $param->{$name} = $answer->{$name};
             }
+            elsif ($new_install and exists $NEW_INSTALL_DEFAULT{$name}) {
+                $param->{$name} = $NEW_INSTALL_DEFAULT{$name};
+            }
             else {
                 $param->{$name} = $item->{'default'};
             }
         }
-    }
-
-    if ($new_install) {
-        $param->{'or_groups'} = 1;
-        $param->{'use_email_as_login'} = 0;
     }
 
     # --- REMOVE OLD PARAMS ---

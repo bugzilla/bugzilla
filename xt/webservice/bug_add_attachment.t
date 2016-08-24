@@ -10,7 +10,7 @@ use strict;
 use warnings;
 
 use FindBin qw($RealBin);
-use lib "$RealBin/../lib";
+use lib "$RealBin/../lib", "$RealBin/../../local/lib/perl5";
 
 use QA::Util;
 use MIME::Base64 qw(encode_base64 decode_base64);

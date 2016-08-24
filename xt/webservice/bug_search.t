@@ -14,7 +14,7 @@ use strict;
 use warnings;
 
 use FindBin qw($RealBin);
-use lib "$RealBin/../lib";
+use lib "$RealBin/../lib", "$RealBin/../../local/lib/perl5";
 
 use QA::Util;
 use QA::Tests qw(PRIVATE_BUG_USER);

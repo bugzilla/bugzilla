@@ -31,7 +31,7 @@ BEGIN {
     *Bugzilla::User::APIKey::_check_api_key = sub { return $_[1]; };
 }
 
-use lib $conf_path;
+use lib $conf_path, "$conf_path/local/lib/perl5";
 
 use Bugzilla;
 use Bugzilla::Attachment;

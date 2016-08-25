@@ -762,6 +762,19 @@ input.requestee {
     font-size: x-large;
 }
 
+#error_msg a {
+    color: #6070cf;
+    text-decoration: underline;
+}
+
+#error_msg a:visited {
+    color: #636;
+}
+
+#error_msg a:hover {
+    color: #8090ef;
+}
+
 #post_err_msg, form#check {
     clear: both;
 }

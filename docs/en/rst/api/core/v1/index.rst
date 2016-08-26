@@ -10,9 +10,7 @@ Core API v1
    bugzilla
    classification
    comment
-   component
    field
-   flagtype
    group
    product
    user

@@ -111,12 +111,12 @@ var DE = {
     }
 
     var relevant_products = [
-      'product_fxos',
       'product_fx',
-      'product_webmaker',
-      'product_persona',
-      'product_marketplace',
-      'product_tb',
+      'product_encryption',
+      'product_web_asm',
+      'product_rust',
+      'product_servo',
+      'product_webvr',
       'product_fow',
       'product_devtools',
       'product_other',
@@ -189,18 +189,18 @@ var DE = {
     wb += '[requesting:' + request_items.join(',') + '] ';
 
     var product_items = [];
-    if (document.getElementById('product_fxos').checked)
-      product_items.push('firefox-os');
     if (document.getElementById('product_fx').checked)
       product_items.push('firefox-web-browser');
-    if (document.getElementById('product_webmaker').checked)
-      product_items.push('webmaker');
-    if (document.getElementById('product_persona').checked)
-      product_items.push('persona');
-    if (document.getElementById('product_marketplace').checked)
-      product_items.push('marketplace');
-    if (document.getElementById('product_tb').checked)
-      product_items.push('thunderbird');
+    if (document.getElementById('product_encryption').checked)
+      product_items.push('encryption');
+    if (document.getElementById('product_web_asm').checked)
+      product_items.push('web-assembly-or-platform');
+    if (document.getElementById('product_rust').checked)
+      product_items.push('servo');
+    if (document.getElementById('product_servo').checked)
+      product_items.push('rust');
+    if (document.getElementById('product_webvr').checked)
+      product_items.push('webvr');
     if (document.getElementById('product_fow').checked)
       product_items.push('open-web');
     if (document.getElementById('product_devtools').checked)

@@ -63,43 +63,17 @@ function initCrashSignatureField() {
                       'cf_crash_signature_action', 'cf_crash_signature');
   [% END %]
 }
-
-var initialowners = new Array([% product.components.size %]);
+var data = JSON.parse('[% data FILTER js %]');
+var initialowners = data["initialowners"];
 var last_initialowner;
-var initialccs = new Array([% product.components.size %]);
-var components = new Array([% product.components.size %]);
-var comp_desc = new Array([% product.components.size %]);
-var flags = new Array([% product.components.size %]);
+var initialccs = data["initialccs"];
+var components = data["components"];
+var comp_desc = data["comp_desc"];
+var flags = data["flags"];
 [% IF Param("useqacontact") %]
-    var initialqacontacts = new Array([% product.components.size %]);
+    var initialqacontacts = data["initialqacontacts"];
     var last_initialqacontact;
 [% END %]
-[% count = 0 %]
-[%- FOREACH c = product.components %]
-    [% NEXT IF NOT c.is_active %]
-    components[[% count %]] = "[% c.name FILTER js %]";
-    comp_desc[[% count %]] = "[% c.description FILTER html_light FILTER js %]";
-    initialowners[[% count %]] = "[% c.default_assignee.login FILTER js %]";
-    [% flag_list = [] %]
-    [% FOREACH f = c.flag_types.bug %]
-      [% flag_list.push(f.id) %]
-    [% END %]
-    [% FOREACH f = c.flag_types.attachment %]
-      [% flag_list.push(f.id) %]
-    [% END %]
-    flags[[% count %]] = [[% flag_list.join(",") FILTER js %]];
-    [% IF Param("useqacontact") %]
-        initialqacontacts[[% count %]] = "[% c.default_qa_contact.login FILTER js %]";
-    [% END %]
-
-    [% SET initial_cc_list = [] %]
-    [% FOREACH cc_user = c.initial_cc %]
-      [% initial_cc_list.push(cc_user.login) %]
-    [% END %]
-    initialccs[[% count %]] = "[% initial_cc_list.join(', ') FILTER js %]";
-
-    [% count = count + 1 %]
-[%- END %]
 
 function set_assign_to() {
     // Based on the selected component, fill the "Assign To:" field

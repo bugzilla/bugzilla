@@ -9,7 +9,8 @@ use 5.14.0;
 use strict;
 use warnings;
 
-use lib qw(. lib t);
+use lib qw(. lib t local/lib/perl5);
+
 use Test::More qw(no_plan);
 use Bugzilla;
 use Bugzilla::Util qw(remote_ip);

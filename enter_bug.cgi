@@ -453,7 +453,7 @@ foreach my $c (@{ $product->components }) {
     foreach my $f (@{ $c->flag_types->{attachment} }) {
         push @flag_list, $f->id;
     }
-    $data{flags}[$count] = join(',', @flag_list);
+    $data{flags}[$count] = \@flag_list;
     $count++;
     if (Bugzilla->params->{'useqacontact'}) {
         $data{initialqacontacts}[$count] = $c->default_qa_contact->login;

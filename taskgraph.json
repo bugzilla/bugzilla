@@ -18,7 +18,7 @@
         "workerType": "b2gtest",
         "payload": {
           "image": "bugzilla/bugzilla-ci",
-          "command": ["/docker/runtests.sh"],
+          "command": ["runtests.sh"],
           "env": {
             "TEST_SUITE": "sanity"
           },
@@ -55,7 +55,7 @@
         "workerType": "b2gtest",
         "payload": {
           "image": "bugzilla/bugzilla-ci",
-          "command": ["/docker/runtests.sh"],
+          "command": ["runtests.sh"],
           "env": {
             "TEST_SUITE": "docs"
           },
@@ -92,7 +92,7 @@
         "workerType": "b2gtest",
         "payload": {
           "image": "bugzilla/bugzilla-ci",
-          "command": ["/docker/runtests.sh"],
+          "command": ["runtests.sh"],
           "env": {
             "TEST_SUITE": "webservices"
           },
@@ -134,7 +134,7 @@
         "workerType": "b2gtest",
         "payload": {
           "image": "bugzilla/bugzilla-ci",
-          "command": ["/docker/runtests.sh"],
+          "command": ["runtests.sh"],
           "env": {
             "TEST_SUITE": "selenium"
           },

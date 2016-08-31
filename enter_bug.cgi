@@ -52,7 +52,6 @@ use Bugzilla::Token;
 use Bugzilla::Field;
 use Bugzilla::Status;
 use Bugzilla::UserAgent;
-use JSON::XS qw(encode_json);
 
 my $user = Bugzilla->login(LOGIN_REQUIRED);
 
@@ -439,33 +438,7 @@ my $format = $template->get_format("bug/create/create",
                                    scalar $cgi->param('format'), 
                                    scalar $cgi->param('ctype'));
 
-my %data;
-my $count = 0;
-foreach my $c (@{ $product->components }) {
-    next if not $c->is_active;
-    $data{components}[$count]    = $c->name;
-    $data{comp_desc}[$count]     = $c->description;
-    $data{initialowners}[$count] = $c->default_assignee->login;
-    my @flag_list;
-    foreach my $f (@{ $c->flag_types->{bug} }) {
-        push @flag_list, $f->id;
-    }
-    foreach my $f (@{ $c->flag_types->{attachment} }) {
-        push @flag_list, $f->id;
-    }
-    $data{flags}[$count] = \@flag_list;
-    $count++;
-    if (Bugzilla->params->{'useqacontact'}) {
-        $data{initialqacontacts}[$count] = $c->default_qa_contact->login;
-    }
-    my @initial_cc_list;
-    foreach my $cc_user (@{ $c->initial_cc }) {
-        push @initial_cc_list, $cc_user->login;
-    }
-    $data{initialccs}[$count] = join(', ', @initial_cc_list);
-}
-$vars->{data} = encode_json(\%data);
 print $cgi->header($format->{'ctype'});
 $template->process($format->{'template'}, $vars)
-  || ThrowTemplateError($template->error());
+  || ThrowTemplateError($template->error());          
 

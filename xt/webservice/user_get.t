@@ -137,8 +137,8 @@ sub post_success {
            'Admin correctly gets all user fields');
     }
     elsif ($user) {
-        ok(exists $item->{email} && exists $item->{can_login},
-           'Logged-in user correctly gets email and can_login');
+        ok(exists $item->{can_login},
+           'Logged-in user correctly gets can_login');
         ok(!exists $item->{email_enabled}
            && !exists $item->{login_denied_text},
            "Non-admin user doesn't get email_enabled and login_denied_text");

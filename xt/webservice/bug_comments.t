@@ -47,6 +47,7 @@ sub test_comments {
         is($comment->{text}, $expected_text, "comment has the correct text");
 
         my $priv_login = $rpc->bz_config->{PRIVATE_BUG_USER . '_user_login'};
+        $priv_login = $t->{user} ? $priv_login : email_filter($priv_login);
         is($comment->{creator}, $priv_login, "comment creator is correct");
 
         my $creation_day;

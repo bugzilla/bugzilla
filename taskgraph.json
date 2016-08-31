@@ -180,15 +180,16 @@
         "provisionerId": "aws-provisioner-v1",
         "workerType": "b2gtest",
         "payload": {
-          "image": "dklawren/docker-bugzilla:pgsql",
-          "command": ["/runtests.sh"],
+          "image": "bugzilla/bugzilla-ci",
+          "command": ["runtests.sh"],
           "env": {
+            "BUGS_DB_DRIVER": "pg",
             "TEST_SUITE": "webservices"
           },
           "artifacts": {
             "public/runtests_log": {
               "type": "file",
-              "path": "/runtests.log",
+              "path": "/tmp/runtests.log",
               "expires": "2018-02-17T17:33:38.806Z"
             },
             "public/httpd_error_log": {
@@ -222,15 +223,16 @@
         "provisionerId": "aws-provisioner-v1",
         "workerType": "b2gtest",
         "payload": {
-          "image": "dklawren/docker-bugzilla:pgsql",
-          "command": ["/runtests.sh"],
+          "image": "bugzilla/bugzilla-ci",
+          "command": ["runtests.sh"],
           "env": {
+            "BUGS_DB_DRIVER": "pg",
             "TEST_SUITE": "selenium"
           },
           "artifacts": {
             "public/runtests_log": {
               "type": "file",
-              "path": "/runtests.log",
+              "path": "/tmp/runtests.log",
               "expires": "2018-02-17T17:33:38.806Z"
             },
             "public/httpd_error_log": {
@@ -240,7 +242,7 @@
             },
             "public/selenium_log": {
               "type": "file",
-              "path": "/selenium.log",
+              "path": "/tmp/selenium.log",
               "expires": "2018-02-17T17:33:38.806Z"
             }
           }
@@ -248,6 +250,97 @@
         "extra": {
           "treeherder": {
             "symbol": "Sel-Pg",
+            "machine": {
+                "platform": "linux64"
+            },
+            "build": {
+                "platform": "linux64"
+            }
+          }
+        }
+      }
+    },
+    {
+      "reruns": 3,
+      "maxRunTime": 7200,
+      "task": {
+        "expires": "2018-02-18T17:33:38.806Z",
+        "metadata": {
+          "name": "WebService API Tests (Sqlite)"
+        },
+        "provisionerId": "aws-provisioner-v1",
+        "workerType": "b2gtest",
+        "payload": {
+          "image": "bugzilla/bugzilla-ci",
+          "command": ["runtests.sh"],
+          "env": {
+            "BUGS_DB_DRIVER": "sqlite",
+            "TEST_SUITE": "webservices"
+          },
+          "artifacts": {
+            "public/runtests_log": {
+              "type": "file",
+              "path": "/tmp/runtests.log",
+              "expires": "2018-02-17T17:33:38.806Z"
+            },
+            "public/httpd_error_log": {
+              "type": "file",
+              "path": "/var/log/httpd/error_log",
+              "expires": "2018-02-17T17:33:38.806Z"
+            }
+          }
+        },
+        "extra": {
+          "treeherder": {
+            "symbol": "API-Sqlite",
+            "machine": {
+                "platform": "linux64"
+            },
+            "build": {
+                "platform": "linux64"
+            }
+          }
+        }
+      }
+    },
+    {
+      "reruns": 3,
+      "maxRunTime": 7200,
+      "task": {
+        "expires": "2018-02-18T17:33:38.806Z",
+        "metadata": {
+          "name": "Selenium Tests (Sqlite)"
+        },
+        "provisionerId": "aws-provisioner-v1",
+        "workerType": "b2gtest",
+        "payload": {
+          "image": "bugzilla/bugzilla-ci",
+          "command": ["runtests.sh"],
+          "env": {
+            "BUGS_DB_DRIVER": "sqlite",
+            "TEST_SUITE": "selenium"
+          },
+          "artifacts": {
+            "public/runtests_log": {
+              "type": "file",
+              "path": "/tmp/runtests.log",
+              "expires": "2018-02-17T17:33:38.806Z"
+            },
+            "public/httpd_error_log": {
+              "type": "file",
+              "path": "/var/log/httpd/error_log",
+              "expires": "2018-02-17T17:33:38.806Z"
+            },
+            "public/selenium_log": {
+              "type": "file",
+              "path": "/tmp/selenium.log",
+              "expires": "2018-02-17T17:33:38.806Z"
+            }
+          }
+        },
+        "extra": {
+          "treeherder": {
+            "symbol": "Sel-Sqlite",
             "machine": {
                 "platform": "linux64"
             },

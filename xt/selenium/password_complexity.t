@@ -60,7 +60,7 @@ sub check_passwords {
     $sel->click_ok('link=add a new user');
     $sel->wait_for_page_to_load_ok(WAIT_TIME);
     $sel->title_is('Add user');
-    $sel->type_ok('login', $new_user);
+    $sel->type_ok('email', $new_user);
 
     foreach my $password (@$invalid_passwords) {
         $sel->type_ok('password', $password, 'Enter password');

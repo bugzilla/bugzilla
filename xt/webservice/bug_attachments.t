@@ -142,7 +142,7 @@ sub post_success {
     cmp_ok($attachment->{file_name}, '=~', qr/^\w+\.pl$/,
            "filename is in the expected format");
     is($attachment->{creator}, ($t->{user} ? $config->{QA_Selenium_TEST_user_login} : email_filter($config->{QA_Selenium_TEST_user_login})),
-       	   "creator is the correct user");
+       "creator is the correct user");
     my $data = $attachment->{data};
     $data = decode_base64($data) if $rpc->isa('QA::RPC::JSONRPC');
     is($data, $content, 'data is correct');

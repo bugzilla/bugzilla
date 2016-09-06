@@ -73,7 +73,7 @@ $sel->type_ok('password', 'selenium', 'Enter password');
 $sel->type_ok('disabledtext', 'Not for common usage');
 $sel->click_ok('add');
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
-$sel->title_is('Edit user master-user <master@selenium.bugzilla.org>');
+$sel->title_is('Edit user master-user (master@selenium.bugzilla.org)');
 $sel->check_ok("//input[\@name='group_$master_gid']");
 $sel->click_ok('update');
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
@@ -89,7 +89,7 @@ $sel->type_ok('password', 'selenium', 'Enter password');
 $sel->type_ok('disabledtext', 'Not for common usage');
 $sel->click_ok('add');
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
-$sel->title_is('Edit user slave-user <slave@selenium.bugzilla.org>');
+$sel->title_is('Edit user slave-user (slave@selenium.bugzilla.org)');
 $sel->check_ok("//input[\@name='group_$slave_gid']");
 $sel->click_ok('update');
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
@@ -105,7 +105,7 @@ $sel->type_ok('password', 'selenium', 'Enter password');
 $sel->type_ok('disabledtext', 'Not for common usage');
 $sel->click_ok('add');
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
-$sel->title_is('Edit user reg-user <reg@selenium.bugzilla.org>');
+$sel->title_is('Edit user reg-user (reg@selenium.bugzilla.org)');
 
 # Disabled accounts are not listed by default.
 

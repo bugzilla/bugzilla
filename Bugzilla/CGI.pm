@@ -109,13 +109,12 @@ sub new {
 }
 
 sub content_security_policy {
-    my ($self) = @_;
+    my ($self, %add_params) = @_;
     if (Bugzilla->has_feature('csp')) {
         require Bugzilla::CGI::ContentSecurityPolicy;
         return $self->{Bugzilla_csp} if $self->{Bugzilla_csp};
         my %params = DEFAULT_CSP;
-        if (@_) {
-            my %add_params = @_;
+        if (%add_params) {
             foreach my $key (keys %add_params) {
                 if (defined $add_params{$key}) {
                     $params{$key} = $add_params{$key};

@@ -21,36 +21,48 @@
 
 [% PROCESS global/variables.none.tmpl %]
 
+[% inline_style = BLOCK %]
+.field_label {
+  width: 170px;
+  padding-top: 10px;
+}
+label.required:before {
+  content: "* ";
+  color: red;
+}
+.required_star {
+  color: red;
+}
+[% END %]
+
 [% PROCESS global/header.html.tmpl
    title = "Mozilla Corporation Legal Requests"
    generate_api_token = 1
+   style = inline_style
    style_urls = [ 'skins/standard/attachment.css',
                   'skins/custom/create_bug.css' ]
    javascript_urls = [ 'js/attachment.js', 'js/field.js' ]
 %]
 
-[% IF user.in_group("mozilla-employee-confidential")
-   OR user.in_group("mozilla-messaging-confidential")
-   OR user.in_group("mozilla-foundation-confidential") %]
-
-<div style='text-align: center; width: 98%; font-size: 2em; font-weight: bold; margin: 10px;'>MoLegal</div>
+[% IF NOT user.in_group("mozilla-employee-confidential")
+   AND NOT user.in_group("mozilla-messaging-confidential")
+   AND NOT user.in_group("mozilla-foundation-confidential") %]
+  <p>Sorry, you do not have access to this page.</p>
+  [% PROCESS global/footer.html.tmpl %]
+  [% RETURN %]
+[% END %]
 
 [% PROCESS 'bug/create/user-message.html.tmpl' no_bug_guidelines = 1, no_guided_bug_link = 1 %]
 
-<p><strong>Welcome to MoLegal.</strong> For legal help please fill in the form below completely.</p>
+<h2>Mozilla Legal</h2>
 
-<p>Legal [% terms.bugs %] are only visible to the reporter,  members of the legal team,  and those on the
-CC list. This is necessary to maintain attorney-client privilege. Please do not add non-
-employees to the cc list.</p>
+<p>All submissions, and information provided in response to this request, are confidential and
+  subject to the Attorney-Client Privilege and Work Product Doctrine.</p>
 
-<p><strong>All Submissions, And Information Provided In Response To This Request,
-Are Confidential And Subject To The Attorney-Client Privilege And Work Product Doctrine.</strong></p>
+<p>Legal [% terms.bugs %] are only available to the reporter, the cc list, and members of the legal team.
+  This is to maintain confidentiality and privilege.  Non-employees should not be included on legal [% terms.bugs %].
 
-<p>If you are requesting legal review of a new product or service, a new feature of an existing product
-  or service, or any type of contract, please go
-  <a href="[% urlbase FILTER none %]enter_bug.cgi?product=mozilla.org&format=moz-project-review">here</a>
-  to kick-off review of your project. If you are requesting another type of legal action, e.g patent analysis,
-  trademark misuse investigation, HR issue, or standards work, please use this form.</p>
+<p>[ <span class="required_star">*</span> Required Field ]</p>
 
 <form method="post" action="post_bug.cgi" id="legalRequestForm" enctype="multipart/form-data">
   <input type="hidden" name="product" value="Legal">
@@ -60,170 +72,154 @@ Are Confidential And Subject To The Attorney-Client Privilege And Work Product D
   <input type="hidden" name="priority" value="--">
   <input type="hidden" name="bug_severity" value="normal">
   <input type="hidden" name="format" value="legal">
+  <input type="hidden" name="contenttypemethod" value="autodetect" />
   <input type="hidden" name="token" value="[% token FILTER html %]">
   [% IF user.in_group('canconfirm') %]
     <input type="hidden" name="bug_status" value="NEW">
   [% END %]
 
-<table>
+  <table>
+  <tr>
+    <th class="field_label">
+      <label for="component" class="required">Request Type:</label>
+    </th>
+    <td>
+      <select id="component" name="component" required="required">
+        <option value="">Select One</option>
+        [%- FOREACH c = product.components %]
+          [% NEXT IF NOT c.is_active %]
+          <option value="[% c.name FILTER html %]"
+            [% ' selected="selected"' IF c.name == "General" %]>
+            [% c.name FILTER html -%]
+          </option>
+        [%- END %]
+      </select>
+    </td>
+  </tr>
 
-<tr>
-  <td align="right" width="170px"><strong>Request Type:</strong></td>
-  <td>
-    <select name="component">
-      [%- FOREACH c = product.components %]
-        [% NEXT IF NOT c.is_active %]
-        <option value="[% c.name FILTER html %]"
-          [% " selected=\"selected\"" IF c.name == "General" %]>
-          [% c.name FILTER html -%]
-        </option>
-      [%- END %]
-    </select>
-  </td>
-</tr>
+  <tr>
+    <th class="field_label">
+      <label for="business_unit" class="required">Business Unit:</label>
+    </th>
+    <td>
+      <select id="business_unit" name="business_unit" required="required">
+        <option value="">Select One</option>
+        <option value="Connected Devices">Connected Devices</option>
+        <option value="Firefox">Firefox</option>
+        <option value="Foundation">Foundation</option>
+        <option value="Innovation">Innovation</option>
+        <option value="Marketing">Marketing</option>
+        <option value="Operations">Operations</option>
+        <option value="Participation">Participation</option>
+        <option value="Platform">Platform</option>
+      </select>
+    </td>
+  </tr>
 
-<tr>
-  <td align="right" valign="top">
-    <strong>Goal:</strong>
-  </td>
-  <td colspan="3">
-    <em>Identify the company goal this request maps to.</em><br>
-    <input name="goal" id="goal" size="60" value="[% goal FILTER html %]">
-  </td>
-</tr>
+  <tr>
+    <th class="field_label">
+      <label for="short_desc" class="required">Summary:</label>
+    </th>
+    <td>
+      <input type="text" id="short_desc" name="short_desc" size="60" required="required">
+    </td>
+  </tr>
 
-<tr>
-  <td align="right">
-    <strong>Priority to your Team:</strong>
-  </td>
-  <td>
-    <select id="teampriority" name="teampriority">
-      <option value="High">High</option>
-      <option value="Medium">Medium</option>
-      <option value="Low" selected="selected">Low</option>
-    </select>
-  </td>
-</tr>
+  <tr>
+    <th class="field_label" valign="top">
+      <label for="comment">Description:</label>
+    </th>
+    <td>
+      <textarea id="comment" name="comment" rows="10" cols="80"></textarea>
+    </td>
+  </tr>
 
-<tr>
-  <td align="right">
-    <strong>Timeframe for Completion:</strong>
-  </td>
-  <td>
-    <select id="timeframe" name="timeframe">
-      <option value="2 days">2 days</option>
-      <option value="a week">a week</option>
-      <option value="2-4 weeks">2-4 weeks</option>
-      <option value="this will take a while, but please get started soon">
-        this will take a while, but please get started soon</option>
-      <option value="no rush" selected="selected">no rush</option>
-    </select>
-  </td>
-</tr>
+  <tr>
+    <th class="field_label">
+      <label for="cc">Cc:</label>
+    </th>
+    <td>
+      [% INCLUDE global/userselect.html.tmpl
+         id       => "cc"
+         name     => "cc"
+         size     => 60
+         classes  => ["bz_userfield"]
+         multiple => 5
+      %]
+    </td>
+  </tr>
 
-<tr>
-  <td align="right" valign="top">
-    <strong>Summary:</strong>
-  </td>
-  <td colspan="3">
-    <em>Include the name of the vendor, partner, product, or other identifier.</em><br>
-    <input name="short_desc" size="60" value="[% short_desc FILTER html %]">
-  </td>
-</tr>
+  <tr>
+    <th class="field_label">
+      <label for="important_dates">Important Dates:</label>
+    </th>
+    <td>
+      <input type="text" id="important_dates" name="important_dates" size="60">
+    </td>
+  </tr>
 
-<tr>
-  <td align="right">
-    <strong>CC&nbsp;(optional):</strong>
-  </td>
-  <td colspan="3">
-    [% INCLUDE global/userselect.html.tmpl
-       id       => "cc"
-       name     => "cc"
-       value    => cc
-       size     => 60
-       multiple => 5
-    %]
-  </td>
-</tr>
+  <tr>
+    <th class="field_label">
+      <label for="bug_file_loc">URL:</label>
+    </th>
+    <td>
+      <input type="text" name="bug_file_loc" id="bug_file_loc" size="60">
+    </td>
+  </tr>
 
-<tr>
-  <td align="right" valign="top">
-    <strong>Name of Other Party:</strong>
-  </td>
-  <td>
-    <em>If applicable, include full legal entity name, address, and any other relevant contact information.</em><br>
-    <textarea id="otherparty" name="otherparty" rows="3" cols="80"></textarea>
-  </td>
-</tr>
+  [% IF user.in_group('editbugs', product.id) %]
+    <tr>
+      <th class="field_label">
+        <label for="dependson">Depends on:</label>
+      </th>
+      <td>
+        <input type="text" id="dependson" name="dependson" size="30">
+      </td>
+    </tr>
 
-<tr>
-  <td align="right">
-    <strong>Business Objective:</strong>
-  </td>
-  <td>
-    <input type="text" name="busobj" id="busobj" value="" size="60" />
-  </td>
-</tr>
+    </tr>
+      <th class="field_label">
+        <label for="blocked">Blocks:</label>
+      </th>
+      <td>
+        <input type="text" id="blocked" name="blocked" size="30">
+      </td>
+    </tr>
+  [% END %]
 
-<tr>
-  <td align="right" valign="top">
-    <strong>Description:</strong>
-  </td>
-  <td colspan="3">
-    <em>Describe your question, what you want and/or provide any relevant deal terms, restrictions,<br> 
-    or provisions that are applicable. Also provide context and background.</em><br>
-    <textarea id="comment" name="comment" rows="10" cols="80">
-      [% comment FILTER html %]</textarea>
-  </td>
-</tr>
+  <tr>
+    <td></td>
+    <td>
+      Please attach any additional information needed for this request.
+    <td>
+  </tr>
 
-<tr>
-  <td align="right"><strong>URL&nbsp;(optional):</strong></td>
-  <td colspan="3">
-    <input name="bug_file_loc" size="60"
-           value="[% bug_file_loc FILTER html %]">
-  </td>
-</tr>
+  <tr>
+    <th class="field_label">
+      <label for="description">Attachment Description</label>
+    </th>
+    <td>
+      <input type="text" name="description" id="description" size="60">
+    </td>
+  </tr>
 
-<tr>
-  <td></td>
-  <td colspan=2><strong>Attachment (this is optional)</strong></td>
-</tr>
+  <tr>
+    <th class="field_label">
+      <label for="data">Attachment Filename:</label>
+    </th>
+    <td>
+      <input type="file" id="data" name="data" size="60">
+    </td>
+  </tr>
 
-<tr>
-  <td align="right" valign="top">
-    <strong><label for="data">File:</label></strong>
-  </td>
-  <td>
-    <em>Enter the path to the file on your computer.</em><br>
-    <input type="file" id="data" name="data" size="50">
-    <input type="hidden" name="contenttypemethod" value="autodetect" />
-  </td>
-</tr>
-
-<tr>
-  <td align="right" valign="top">
-    <strong><label for="description">Description:</label></strong>
-  </td>
-  <td>
-    <em>Describe the attachment briefly.</em><br>
-    <input type="text" id="description" name="description" size="60" maxlength="200">
-  </td>
-</tr>
-
+  <tr>
+    <td></td>
+    <td><input type="submit" id="commit" value="Submit Request"></td>
+  </tr>
 </table>
 
-<br>
-
-  <input type="submit" id="commit" value="Submit Request">
 </form>
 
 <p>Thanks for contacting us. You will be notified by email of any progress made in resolving your request.</p>
-
-[% ELSE %]
-
-<p>Sorry, you do not have access to this page.</p>
-
-[% END %]
 
 [% PROCESS global/footer.html.tmpl %]

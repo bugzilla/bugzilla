@@ -861,10 +861,11 @@ $(function() {
             $('#field-status-edit').show();
             $('#field-status-edit .name').show();
             $('#bug_status').val('RESOLVED').change();
-            $('#resolution').val($(event.target).text()).change();
+            $('#bottom-resolution').val($(event.target).text()).change();
             $('#top-save-btn').show();
             $('#resolve-as').hide();
             $('#bottom-status').show();
+	    $('#bottom-dup_id').focus();
         });
     $('.status-btn')
         .click(function(event) {

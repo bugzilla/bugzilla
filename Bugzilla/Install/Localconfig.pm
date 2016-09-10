@@ -42,11 +42,12 @@ sub _sensible_group {
     return '' if ON_WINDOWS;
     my @groups     = qw( apache www-data _www );
     my $sensible_group = first { return getgrnam($_) } @groups;
+    my $effective_group = getgrgid($EGID);
 
-    if ($EUID == 0) {
-        return $sensible_group // getgrgid($EGID) // '';
+    if ($EUID == 0 || $EGID == 0) {
+        return $sensible_group // $effective_group // '';
     } else {
-        return getgrgid($EGID) // '';
+        return $effective_group // '';
     }
 }
 

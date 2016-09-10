@@ -17,7 +17,7 @@ use Bugzilla::Flag;
 use Bugzilla::FlagType;
 use Bugzilla::Util qw(datetime_from email_filter);
 
-use JSON;
+use JSON::MaybeXS;
 use MIME::Base64 qw(decode_base64 encode_base64);
 use Storable qw(dclone);
 use Test::Taint ();
@@ -361,7 +361,7 @@ sub datetime_format_outbound {
 
 # simple types
 
-sub as_boolean  { $_[0] ? JSON::true : JSON::false }
+sub as_boolean  { $_[0] ? JSON->true : JSON->false }
 sub as_double   { defined $_[0] ? $_[0] + 0.0 : JSON::null }
 sub as_int      { defined $_[0] ? int($_[0])  : JSON::null }
 sub as_string   { defined $_[0] ? $_[0] . ''  : JSON::null }

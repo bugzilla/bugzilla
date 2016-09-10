@@ -18,7 +18,7 @@ use Digest::MD5 qw(md5_base64);
 use File::Spec qw(catfile);
 use HTTP::Request;
 use HTTP::Response;
-use JSON;
+use JSON::MaybeXS;
 use Moo;
 use Module::Runtime qw(require_module);
 use Scalar::Util qw(blessed);
@@ -151,7 +151,7 @@ sub return_error {
     if ($status_code && $message) {
         $self->{_return_error} = {
             status_code => $status_code,
-            error       => JSON::true,
+            error       => JSON->true,
             message     => $message
         };
         $self->{_return_error}->{code} = $error_code if $error_code;

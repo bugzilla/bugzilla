@@ -19,7 +19,7 @@ use Bugzilla::Hook;
 use Bugzilla::Install::Util qw(i_am_persistent);
 use Bugzilla::Util qw(trick_taint read_text write_text);
 
-use JSON::XS;
+use JSON::MaybeXS;
 use File::Temp;
 use File::Basename;
 
@@ -56,7 +56,7 @@ sub _load_params {
     }
     # This hook is also called in editparams.cgi. This call here is required
     # to make SetParam work.
-    Bugzilla::Hook::process('config_modify_panels', 
+    Bugzilla::Hook::process('config_modify_panels',
                             { panels => \%hook_panels });
 
     foreach my $panel (keys %hook_panels) {
@@ -78,7 +78,7 @@ sub param_panels {
         $param_panels->{$module} = "Bugzilla::Config::$module" unless $module eq 'Common';
     }
     # Now check for any hooked params
-    Bugzilla::Hook::process('config_add_panels', 
+    Bugzilla::Hook::process('config_add_panels',
                             { panel_modules => $param_panels });
     return $param_panels;
 }
@@ -175,16 +175,16 @@ sub update_params {
     }
 
     # set verify method to whatever loginmethod was
-    if (exists $param->{'loginmethod'} 
-        && !exists $param->{'user_verify_class'}) 
+    if (exists $param->{'loginmethod'}
+        && !exists $param->{'user_verify_class'})
     {
         $new_params{'user_verify_class'} = $param->{'loginmethod'};
     }
 
     # Remove quip-display control from parameters
     # and give it to users via User Settings (Bug 41972)
-    if ( exists $param->{'enablequips'} 
-         && !exists $param->{'quip_list_entry_control'}) 
+    if ( exists $param->{'enablequips'}
+         && !exists $param->{'quip_list_entry_control'})
     {
         my $new_value;
         ($param->{'enablequips'} eq 'on')       && do {$new_value = 'open';};
@@ -295,9 +295,8 @@ sub write_params {
     $param_data ||= Bugzilla->params;
     my $param_file = bz_locations()->{'datadir'} . '/params.json';
 
-    my $json_data = JSON::XS->new->canonical->pretty->encode($param_data);
+    my $json_data = JSON()->new->canonical->pretty->encode($param_data);
     write_text($param_file, $json_data);
-
     # It's not common to edit parameters and loading
     # Bugzilla::Install::Filesystem is slow.
     require Bugzilla::Install::Filesystem;
@@ -317,9 +316,9 @@ sub read_param_file {
         trick_taint($data);
 
         # If params.json has been manually edited and e.g. some quotes are
-        # missing, we don't want JSON::XS to leak the content of the file
+        # missing, we don't want JSON::MaybeXS to leak the content of the file
         # to all users in its error message, so we have to eval'uate it.
-        $params = eval { JSON::XS->new->decode($data) };
+        $params = eval { JSON()->new->decode($data) };
         if ($@) {
             my $error_msg = (basename($0) eq 'checksetup.pl') ?
                 $@ : 'run checksetup.pl to see the details.';

@@ -24,7 +24,7 @@ use URI;
 use URI::QueryParam;
 use Digest::SHA qw(sha256_hex);
 use LWP::UserAgent ();
-use JSON qw(decode_json encode_json);
+use JSON::MaybeXS qw(decode_json encode_json);
 
 Bugzilla->login(LOGIN_REQUIRED);
 

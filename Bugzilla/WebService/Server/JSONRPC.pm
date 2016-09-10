@@ -166,8 +166,8 @@ sub retrieve_json_from_get {
     my $params;
     if (defined $cgi->param('params')) {
         local $@;
-        $params = eval { 
-            $self->json->decode(scalar $cgi->param('params')) 
+        $params = eval {
+            $self->json->decode(scalar $cgi->param('params'))
         };
         if ($@) {
             ThrowUserError('json_rpc_invalid_params',
@@ -194,12 +194,12 @@ sub retrieve_json_from_get {
 
 sub type {
     my ($self, $type, $value) = @_;
-    
+
     # This is the only type that does something special with undef.
     if ($type eq 'boolean') {
-        return $value ? JSON::true : JSON::false;
+        return $value ? JSON->true : JSON->false;
     }
-    
+
     return JSON::null if !defined $value;
 
     my $retval = $value;
@@ -368,7 +368,7 @@ sub _argument_type_check {
         if (defined $params->{$field}) {
             my $value = $params->{$field};
             if (ref $value eq 'ARRAY') {
-                $params->{$field} = 
+                $params->{$field} =
                     [ map { $self->datetime_format_inbound($_) } @$value ];
             }
             else {
@@ -406,7 +406,7 @@ sub _argument_type_check {
         # methods that can change data. This protects us against cross-site
         # request forgeries.
         if (!grep($_ eq $method, $pkg->READ_ONLY)) {
-            ThrowUserError('json_rpc_post_only', 
+            ThrowUserError('json_rpc_post_only',
                            { method => $self->_bz_method_name });
         }
     }
@@ -420,7 +420,7 @@ sub _argument_type_check {
     $self->handle_login();
 
     # Bugzilla::WebService packages call internal methods like
-    # $self->_some_private_method. So we have to inherit from 
+    # $self->_some_private_method. So we have to inherit from
     # that class as well as this Server class.
     my $new_class = ref($self) . '::' . $pkg;
     my $isa_string = 'our @ISA = qw(' . ref($self) . " $pkg)";
@@ -443,7 +443,7 @@ sub _argument_type_check {
 
 # _bz_method_name is stored by _find_procedure for later use.
 sub _bz_method_name {
-    return $_[0]->{_bz_method_name}; 
+    return $_[0]->{_bz_method_name};
 }
 
 sub _bz_callback {
@@ -510,7 +510,7 @@ L<Bugzilla::WebService/LOGGING IN>.
 
 To connect over GET, simply send the values that you'd normally send for
 each JSON-RPC argument as URL parameters, with the C<params> item being
-a JSON string. 
+a JSON string.
 
 The simplest example is a call to C<Bugzilla.time>:
 
@@ -539,10 +539,10 @@ L<http://bob.pythonmac.org/archives/2005/12/05/remote-json-jsonp/>.
 
 To use JSONP with Bugzilla's JSON-RPC WebService, simply specify a
 C<callback> parameter to jsonrpc.cgi when using it via GET as described above.
-For example, here's some HTML you could use to get the data from 
+For example, here's some HTML you could use to get the data from
 C<Bugzilla.time> on a remote website, using JSONP:
 
- <script type="text/javascript" 
+ <script type="text/javascript"
          src="http://bugzilla.example.com/jsonrpc.cgi?method=Bugzilla.time&amp;callback=foo">
 
 That would call the C<Bugzilla.time> method and pass its value to a function
@@ -599,9 +599,9 @@ throw an error. In Bugzilla, the error contents look like:
 
 So, for example, in JSON-RPC 1.0, an error response would look like:
 
- { 
-   result: null, 
-   error: { message: 'Some message here', code: 123 }, 
+ {
+   result: null,
+   error: { message: 'Some message here', code: 123 },
    id: 1
  }
 

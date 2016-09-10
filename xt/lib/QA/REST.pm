@@ -17,7 +17,7 @@ use lib "$RealBin/../../lib", "$RealBin/../../../local/lib/perl5";
 use autodie;
 
 use LWP::UserAgent;
-use JSON;
+use JSON::MaybeXS;
 use QA::Util;
 
 use parent qw(LWP::UserAgent Exporter);

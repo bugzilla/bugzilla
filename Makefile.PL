@@ -87,8 +87,11 @@ my %all_features = (
 
 # Windows requires some additional modules.
 if ( $^O eq 'MSWin32' ) {
-    $requires{'Win32'}                            = '0.35';
-    $requires{'Win32::API'}                       = '0.55';
+    # 0.45 implements the GetConsoleOutputCP() method.
+    # It also supports Windows 7. Set this to 0.52 to support Windows 10.
+    $requires{'Win32'}      = '0.45';
+    # 0.63 fixes a problem with Strawberry Perl 5.14.1.
+    $requires{'Win32::API'} = '0.63';
     $requires{'DateTime::TimeZone::Local::Win32'} = '1.64';
 }
 

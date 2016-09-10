@@ -24,6 +24,8 @@ use POSIX qw(setlocale LC_CTYPE);
 use Scalar::Util qw(tainted);
 use Term::ANSIColor qw(colored);
 use PerlIO;
+use if ON_WINDOWS, 'Win32';
+use if ON_WINDOWS, 'Win32::API';
 
 use parent qw(Exporter);
 our @EXPORT_OK = qw(
@@ -73,10 +75,8 @@ sub get_version_and_os {
     my @os_details = POSIX::uname;
     # 0 is the name of the OS, 2 is the major version,
     my $os_name = $os_details[0] . ' ' . $os_details[2];
-    if (ON_WINDOWS) {
-        require Win32;
-        $os_name = Win32::GetOSName();
-    }
+    $os_name = Win32::GetOSName() if ON_WINDOWS;
+
     # $os_details[3] is the minor version.
     return { bz_ver   => BUGZILLA_VERSION,
              perl_ver => sprintf('%vd', $^V),
@@ -582,11 +582,10 @@ sub set_output_encoding {
     return if grep(/^encoding/, @stdout_layers);
 
     my $encoding;
-    if (ON_WINDOWS and eval { require Win32::Console }) {
+    if (ON_WINDOWS) {
         # Although setlocale() works on Windows, it doesn't always return
-        # the current *console's* encoding. So we use OutputCP here instead,
-        # when we can.
-        $encoding = Win32::Console::OutputCP();
+        # the current *console's* encoding.
+        $encoding = Win32::GetConsoleOutputCP();
     }
     else {
         my $locale = setlocale(LC_CTYPE);
@@ -643,9 +642,7 @@ sub prevent_windows_dialog_boxes {
     # during checksetup (since loading DBD::Oracle during checksetup when
     # Oracle isn't installed causes a scary popup and pauses checksetup).
     #
-    # Win32::API ships with ActiveState by default, though there could 
-    # theoretically be a Windows installation without it, I suppose.
-    if (ON_WINDOWS and eval { require Win32::API }) {
+    if (ON_WINDOWS) {
         # Call kernel32.SetErrorMode with arguments that mean:
         # "The system does not display the critical-error-handler message box.
         # Instead, the system sends the error to the calling process." and

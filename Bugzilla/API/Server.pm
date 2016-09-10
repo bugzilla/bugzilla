@@ -18,7 +18,7 @@ use Digest::MD5 qw(md5_base64);
 use File::Spec qw(catfile);
 use HTTP::Request;
 use HTTP::Response;
-use JSON;
+use JSON::MaybeXS;
 use Moo;
 use Module::Runtime qw(require_module);
 use Scalar::Util qw(blessed);

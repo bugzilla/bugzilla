@@ -17,7 +17,7 @@ use Bugzilla::Flag;
 use Bugzilla::FlagType;
 use Bugzilla::Util qw(datetime_from email_filter);
 
-use JSON;
+use JSON::MaybeXS;
 use MIME::Base64 qw(decode_base64 encode_base64);
 use Storable qw(dclone);
 use Test::Taint ();

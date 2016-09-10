@@ -16,8 +16,20 @@ body {
 /* page title */
 
 #titles {
+    width: 100%;
+    background-color: #404D6C;
+    color: #fff;
     border-top-left-radius: 5px;
     border-top-right-radius: 5px;
+    padding: 0px;
+}
+
+#header .links {
+    border-left: 1px solid #747E93;
+    border-right: 1px solid #747E93;
+    border-bottom: 1px solid #747E93;
+    border-bottom-left-radius: 5px;
+    border-bottom-right-radius: 5px;
 }
 
 #header .links, #footer {
@@ -36,7 +48,12 @@ body {
     text-decoration: none;
 }
 #header a:hover, #footer a:hover {
+    color: white;
     text-decoration: underline;
+}
+#header a:visited, #footer a:visited {
+    color: white;
+    text-decoration: none;
 }
 
 /* body */
@@ -53,6 +70,7 @@ body {
 a {
     color: #6070cf;
 }
+
 a:hover {
     color: #8090ef;
 }
@@ -68,6 +86,10 @@ hr {
 
 #bug-form td {
     padding-top: 2px;
+}
+
+.field_label a, .field_label b {
+    color: #6070cf;
 }
 
 /* attachments */
@@ -140,6 +162,10 @@ hr {
     margin-left: 0;
 }
 
+.bz_comment_user a {
+    color: #6070cf;
+}
+
 .bz_comment.bz_private {
     background-color: #f0e8e8;
     border-color: #f8c8ba;
@@ -174,6 +200,9 @@ hr {
 }
 
 /* tabs */
+table.tabs {
+    border-collapse: collapse;
+}
 
 .tabbed .tabbody {
     background: #f8f8f8;
@@ -189,9 +218,15 @@ hr {
     border-collapse: collapse;
 }
 
+.tabs a {
+    color: #6070cf;
+}
+
 .tabs td {
     background: #c8c8c8;
+    border-style: solid;
     border-width: 1px;
+    text-transform: none;
 }
 
 .tabs td.selected {
@@ -215,6 +250,15 @@ hr {
 #page-index .outro {
     clear:both;
 }
+
+.column_header {
+    background-color: #66f;
+}
+
+#enter_bug      { background: url(../../standard/index/file-a-bug.png) no-repeat; }
+#query          { background: url(../../standard/index/search.png) no-repeat; }
+#account        { background: url(../../standard/index/new-account.png) no-repeat; }
+#help           { background: url(../../standard/index/help.png) no-repeat; }
 
 /* Rules specific for printing */
 @media print {

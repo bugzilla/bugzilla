@@ -13,11 +13,41 @@ use warnings;
 
 use lib qw(. lib local/lib/perl5 t);
 use Test2::Bundle::Extended;
+use Bugzilla::Util;
+BEGIN {
+    my $terms = {
+        "bug"               => "bug",
+        "Bug"               => "Bug",
+        "abug"              => "a bug",
+        "Abug"              => "A bug",
+        "aBug"              => "a Bug",
+        "ABug"              => "A Bug",
+        "bugs"              => "bugs",
+        "Bugs"              => "Bugs",
+        "comment"           => "comment",
+        "comments"          => "comments",
+        "zeroSearchResults" => "Zarro Boogs found",
+        "Bugzilla"          => "Bugzilla"
+    };
+    no warnings 'redefine', 'once';
+    *Bugzilla::Util::template_var = sub {
+        my $name = shift;
+        if ($name eq 'terms') {
+            return $terms;
+        } else {
+            die "sorry!";
+        }
+    };
+}
 use Bugzilla;
+use Bugzilla::Constants;
 use Bugzilla::Bug;
 use Bugzilla::Comment;
 use Bugzilla::User;
 use Bugzilla::Markdown;
+
+Bugzilla->usage_mode(USAGE_MODE_TEST);
+Bugzilla->error_mode(ERROR_MODE_DIE);
 
 my $user_mock = mock 'Bugzilla::User' => (
     override_constructor => ['new', 'hash'],

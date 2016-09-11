@@ -31,7 +31,7 @@ use Bugzilla::Comment;
 use Bugzilla::BugUrl;
 use Bugzilla::BugUserLastVisit;
 
-use List::MoreUtils qw(firstidx uniq part);
+use List::MoreUtils qw(firstidx uniq part any);
 use List::Util qw(min max first);
 use Storable qw(dclone);
 use Scalar::Util qw(blessed);
@@ -1534,7 +1534,7 @@ sub _check_bug_status {
             # A user with no privs cannot choose the initial status.
             # If UNCONFIRMED is valid for this product, use it; else
             # use the first bug status available.
-            if (grep {$_->name eq 'UNCONFIRMED'} @valid_statuses) {
+            if (any {$_->name eq 'UNCONFIRMED'} @valid_statuses) {
                 $new_status = 'UNCONFIRMED';
             }
             else {
@@ -1547,7 +1547,7 @@ sub _check_bug_status {
     $new_status = Bugzilla::Status->check($new_status) unless ref($new_status);
     # We skip this check if we are changing from a status to itself.
     if ( (!$old_status || $old_status->id != $new_status->id)
-          && !grep {$_->name eq $new_status->name} @valid_statuses) 
+          && !any {$_->name eq $new_status->name} @valid_statuses) 
     {
         ThrowUserError('illegal_bug_status_transition',
                        { old => $old_status, new => $new_status });
@@ -3049,7 +3049,7 @@ sub add_comment {
 sub modify_keywords {
     my ($self, $keywords, $action) = @_;
 
-    if (!$action || !grep { $action eq $_ } qw(add remove set)) {
+    if (!$action || !any { $action eq $_ } qw(add remove set)) {
         $action = 'set';
     }
 
@@ -3195,7 +3195,7 @@ sub add_see_also {
     # We only add the new URI if it hasn't been added yet. URIs are
     # case-sensitive, but most of our DBs are case-insensitive, so we do
     # this check case-insensitively.
-    if (!grep { lc($_->name) eq lc($value) } @{ $self->see_also }) {
+    if (!any { lc($_->name) eq lc($value) } @{ $self->see_also }) {
         my $privs;
         my $can = $self->check_can_change_field('see_also', '', $value, \$privs);
         if (!$can) {
@@ -3278,7 +3278,7 @@ sub add_tag {
         delete $user->{tags};
     }
     # Do nothing if this tag is already set for this bug.
-    return if grep { $_ eq $tag } @{$self->tags};
+    return if any { $_ eq $tag } @{$self->tags};
 
     # Increment the counter. Do it before the SQL call below,
     # to not count the tag twice.
@@ -3298,7 +3298,7 @@ sub remove_tag {
 
     my $tag_id = exists $user->tags->{$tag} ? $user->tags->{$tag}->{id} : undef;
     # Do nothing if the user doesn't use this tag, or didn't set it for this bug.
-    return unless ($tag_id && grep { $_ eq $tag } @{$self->tags});
+    return unless ($tag_id && any { $_ eq $tag } @{$self->tags});
 
     $dbh->do('DELETE FROM bug_tag WHERE bug_id = ? AND tag_id = ?',
               undef, ($self->id, $tag_id));
@@ -3868,7 +3868,7 @@ sub _refine_available_statuses {
     }
 
     # If this bug has an inactive status set, it should still be in the list.
-    if (!grep($_->name eq $self->status->name, @available)) {
+    if (!any { $_->name eq $self->status->name } @available) {
         unshift(@available, $self->status);
     }
     
@@ -4018,7 +4018,7 @@ sub choices {
     my @products = @{ $user->get_enterable_products };
     # The current product is part of the popup, even if new bugs are no longer
     # allowed for that product
-    if (!grep($_->name eq $self->product_obj->name, @products)) {
+    if (!any {$_->name eq $self->product_obj->name} @products) {
         unshift(@products, $self->product_obj);
     }
     my %class_ids = map { $_->classification_id => 1 } @products;
@@ -4247,7 +4247,7 @@ sub get_activity {
         my $activity_visible = 1;
 
         # check if the user should see this field's activity
-        if (grep { $fieldname eq $_ } TIMETRACKING_FIELDS) {
+        if (any { $fieldname eq $_ } TIMETRACKING_FIELDS) {
             $activity_visible = $user->is_timetracker;
         }
         elsif ($fieldname eq 'longdescs.isprivate'
@@ -4468,7 +4468,7 @@ sub check_can_change_field {
 
     # Only users in the time-tracking group can change time-tracking fields,
     # including the deadline.
-    if (grep { $_ eq $field } (TIMETRACKING_FIELDS, 'deadline')) {
+    if (any { $_ eq $field } (TIMETRACKING_FIELDS, 'deadline')) {
         if (!$user->is_timetracker) {
             $$PrivilegesRequired = PRIVILEGES_REQUIRED_EMPOWERED;
             return 0;

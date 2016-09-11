@@ -63,7 +63,10 @@ print(install_string('header', get_version_and_os()) . "\n") unless $silent;
 exit 0 if $switch{'version'};
 
 if (defined $switch{cpanm}) {
-    my $default = 'all notest -oracle -mysql -pg -mod_perl -old_charts -new_charts -graphical_reports -detect_charset';
+    my $default = join(' ', qw(
+        all notest -oracle -mysql -pg -mod_perl -old_charts -new_charts
+        -graphical_reports -detect_charset -auth_radius -auth_ldap
+    ));
     my @features = split(/\s+/, $switch{cpanm} || $default);
     my @cpanm_args = ('-l', 'local', '--installdeps');
     while (my $feature = shift @features) {

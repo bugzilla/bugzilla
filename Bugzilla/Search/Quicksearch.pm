@@ -19,7 +19,7 @@ use Bugzilla::Field;
 use Bugzilla::Util;
 
 use List::Util qw(min max);
-use List::MoreUtils qw(firstidx);
+use List::MoreUtils qw(firstidx any);
 use Text::ParseWords qw(parse_line);
 
 use parent qw(Exporter);
@@ -571,16 +571,16 @@ sub _special_field_syntax {
 sub _default_quicksearch_word {
     my ($word, $negate) = @_;
     
-    if (!grep { lc($word) eq $_ } PRODUCT_EXCEPTIONS and length($word) > 2) {
+    if (!any { lc($word) eq $_ } PRODUCT_EXCEPTIONS and length($word) > 2) {
         addChart('product', 'substring', $word, $negate);
     }
     
-    if (!grep { lc($word) eq $_ } COMPONENT_EXCEPTIONS and length($word) > 2) {
+    if (!any { lc($word) eq $_ } COMPONENT_EXCEPTIONS and length($word) > 2) {
         addChart('component', 'substring', $word, $negate);
     }
     
     my @legal_keywords = map($_->name, Bugzilla::Keyword->get_all);
-    if (grep { lc($word) eq lc($_) } @legal_keywords) {
+    if (any { lc($word) eq lc($_) } @legal_keywords) {
         addChart('keywords', 'substring', $word, $negate);
     }
     

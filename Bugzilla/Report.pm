@@ -17,6 +17,7 @@ use Bugzilla::CGI;
 use Bugzilla::Constants;
 use Bugzilla::Error;
 use Bugzilla::Util;
+use List::MoreUtils qw(any);
 
 use constant DB_TABLE => 'reports';
 
@@ -93,7 +94,7 @@ sub check {
     my $class = shift;
     my $report = $class->SUPER::check(@_);
     my $user = Bugzilla->user;
-    if ( grep($_->id eq $report->id, @{$user->reports})) {
+    if (any {$_->id eq $report->id} @{$user->reports}) {
         return $report;
     } else {
         ThrowUserError('report_access_denied');

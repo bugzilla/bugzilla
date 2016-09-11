@@ -21,7 +21,7 @@ use Bugzilla::Util qw(datetime_from trick_taint);
 
 use File::Basename qw(basename);
 use File::Glob qw(:glob);
-use List::MoreUtils qw(none uniq);
+use List::MoreUtils qw(none uniq any);
 use MIME::Base64 qw(decode_base64 encode_base64);
 use Moo;
 use Scalar::Util qw(blessed);
@@ -282,7 +282,7 @@ sub _params_check {
         # When being called using GET, we don't allow calling
         # methods that can change data. This protects us against cross-site
         # request forgeries.
-        if (!grep($_ eq $method, $controller->READ_ONLY)) {
+        if (!any { $_ eq $method } $controller->READ_ONLY) {
             ThrowUserError('json_rpc_post_only',
                            { method => $self->method_name });
         }

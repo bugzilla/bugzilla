@@ -21,7 +21,7 @@ use Bugzilla::FlagType;
 use Bugzilla::Product;
 use Bugzilla::Util qw(trim);
 
-use List::MoreUtils qw(uniq);
+use List::MoreUtils qw(uniq any);
 use Moo;
 
 extends 'Bugzilla::API::1_0::Resource';
@@ -226,7 +226,7 @@ sub update {
                 # Bring back the products the user cannot edit.
                 foreach my $item (values %{$flagtype->$type}) {
                     my ($prod_id, $comp_id) = split(':', $item);
-                    push(@extra_clusions, $item) unless grep { $_->id == $prod_id } @$products;
+                    push(@extra_clusions, $item) unless any { $_->id == $prod_id } @$products;
                 }
             }
 
@@ -334,7 +334,7 @@ sub _process_lists {
         if(ref($item) eq 'HASH') {
             while (my ($product_name, $component_names) = each %$item) {
                 my $product = Bugzilla::Product->check({name => $product_name});
-                unless (grep { $product->name eq $_->name } @products) {
+                unless (any { $product->name eq $_->name } @products) {
                     ThrowUserError('product_access_denied', { name => $product_name });
                 }
                 my @component_ids;
@@ -349,7 +349,7 @@ sub _process_lists {
         elsif(!ref($item)) {
             # These are whole products
             my $product = Bugzilla::Product->check({name => $item});
-            unless (grep { $product->name eq $_->name } @products) {
+            unless (any { $product->name eq $_->name } @products) {
                 ThrowUserError('product_access_denied', { name => $item });
             }
             push @component_list, $product->id . ':0';

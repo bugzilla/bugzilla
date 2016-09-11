@@ -33,7 +33,7 @@ use Bugzilla::Search::Quicksearch;
 
 use Moo;
 use List::Util qw(max);
-use List::MoreUtils qw(uniq);
+use List::MoreUtils qw(uniq any);
 use Storable qw(dclone);
 
 extends 'Bugzilla::API::1_0::Resource';
@@ -267,7 +267,7 @@ sub fields {
             my $loop_field = Bugzilla::Field->check($field_name);
             # Don't push in duplicate fields if we also asked for this field
             # in "ids".
-            if (!grep($_->id == $loop_field->id, @fields)) {
+            if (!any { $_->id == $loop_field->id } @fields) {
                 push(@fields, $loop_field);
             }
         }
@@ -287,14 +287,14 @@ sub fields {
 
         my (@values, $has_values);
         if ( ($field->is_select and $field->name ne 'product')
-             or grep($_ eq $field->name, PRODUCT_SPECIFIC_FIELDS)
+             or (any { $_ eq $field->name } PRODUCT_SPECIFIC_FIELDS)
              or $field->name eq 'keywords')
         {
              $has_values = 1;
              @values = @{ $self->_legal_field_values({ field => $field }) };
         }
 
-        if (grep($_ eq $field->name, PRODUCT_SPECIFIC_FIELDS)) {
+        if (any {$_ eq $field->name} PRODUCT_SPECIFIC_FIELDS) {
              $value_field = 'product';
         }
 
@@ -326,7 +326,7 @@ sub _legal_field_values {
     my $user = Bugzilla->user;
 
     my @result;
-    if (grep($_ eq $field_name, PRODUCT_SPECIFIC_FIELDS)) {
+    if (any { $_ eq $field_name } PRODUCT_SPECIFIC_FIELDS) {
         my @list;
         if ($field_name eq 'version') {
             @list = Bugzilla::Version->get_all;
@@ -710,7 +710,7 @@ sub search {
 
     # If no other parameters have been passed other than limit and offset
     # then we throw error if system is configured to do so.
-    if (!grep(!/^(limit|offset)$/, keys %$match_params)
+    if (!any { !/^(limit|offset)$/ } keys %$match_params
         && !Bugzilla->params->{search_allow_no_criteria})
     {
         ThrowUserError('buglist_parameters_required');
@@ -930,16 +930,16 @@ sub legal_values {
         @{ Bugzilla->fields({ is_select => 1, is_abnormal => 0 }) };
 
     my $values;
-    if (grep($_->name eq $field, @global_selects)) {
+    if (any { $_->name eq $field } @global_selects) {
         # The field is a valid one.
         trick_taint($field);
         $values = get_legal_field_values($field);
     }
-    elsif (grep($_ eq $field, PRODUCT_SPECIFIC_FIELDS)) {
+    elsif (any { $_ eq $field } PRODUCT_SPECIFIC_FIELDS) {
         my $id = $params->{product_id};
         defined $id || ThrowCodeError('param_required',
             { function => 'Bug.legal_values', param => 'product_id' });
-        grep($_->id eq $id, @{Bugzilla->user->get_accessible_products})
+        any { $_->id eq $id } @{Bugzilla->user->get_accessible_products}
             || ThrowUserError('product_access_denied', { id => $id });
 
         my $product = new Bugzilla::Product($id);

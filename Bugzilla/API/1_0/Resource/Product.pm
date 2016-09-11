@@ -19,6 +19,8 @@ use Bugzilla::User;
 use Bugzilla::Error;
 use Bugzilla::Constants;
 
+use List::MoreUtils qw(any);
+
 use Moo;
 
 extends 'Bugzilla::API::1_0::Resource';
@@ -183,7 +185,7 @@ sub get {
         # avoid duplicates
         foreach my $product (grep { $names{lc $_->name} }
                                   @$products) {
-            next if grep { $_->id == $product->id }
+            next if any { $_->id == $product->id }
                          @requested_products;
             push @requested_products, $product;
         }

@@ -22,6 +22,7 @@ use Bugzilla::Util;
 
 use List::Util qw(first);
 use Scalar::Util qw(blessed);
+use List::MoreUtils qw(any);
 
 ###############################
 ####    Initialization     ####
@@ -295,7 +296,7 @@ sub add_tag {
     $tag = $self->_check_tag($tag);
 
     my $tags = $self->tags;
-    return if grep { lc($tag) eq lc($_) } @$tags;
+    return if any { lc($tag) eq lc($_) } @$tags;
     push @$tags, $tag;
     $self->{'tags'} = [ sort @$tags ];
 }

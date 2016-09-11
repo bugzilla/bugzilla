@@ -33,18 +33,6 @@ use constant SEED_SIZE => 16; # 128 bits.
 # Windows Stuff #
 #################
 
-# The type of cryptographic service provider we want to use.
-# This doesn't really matter for our purposes, so we just pick
-# PROV_RSA_FULL, which seems reasonable. For more info, see
-# http://msdn.microsoft.com/en-us/library/aa380244(v=VS.85).aspx
-use constant PROV_RSA_FULL => 1;
-
-# Flags for CryptGenRandom:
-# Don't ever display a UI to the user, just fail if one would be needed.
-use constant CRYPT_SILENT => 64;
-# Don't require existing public/private keypairs.
-use constant CRYPT_VERIFYCONTEXT => 0xF0000000;
-
 # For some reason, BOOLEAN doesn't work properly as a return type with 
 # Win32::API.
 use constant RTLGENRANDOM_PROTO => <<END;
@@ -158,13 +146,8 @@ sub _read_seed_from {
 
 sub _windows_seed {
     my ($major, $minor) = (Win32::GetOSVersion())[1,2];
-    if ($major < 5) {
-        die "Bugzilla does not support versions of Windows before"
-            . " Windows 2000";
-    }
-    # This means Windows 2000.
-    if ($major == 5 and $minor == 0) {
-        return _win2k_seed();
+    if ($major < 5 || ($major == 5 and $minor == 0)) {
+        die 'Bugzilla does not support versions of Windows before Windows XP';
     }
 
     my $rtlgenrand = Win32::API->new('advapi32', RTLGENRANDOM_PROTO);
@@ -175,46 +158,6 @@ sub _windows_seed {
     my $result = $rtlgenrand->Call($buffer, SEED_SIZE);
     if (!$result) {
         die "RtlGenRand failed: $^E";
-    }
-    return $buffer;
-}
-
-sub _win2k_seed {
-    my $crypt_acquire = Win32::API->new(
-        "advapi32", 'CryptAcquireContext', 'PPPNN', 'I');
-    if (!defined $crypt_acquire) {
-        die "Could not import CryptAcquireContext: $^E";
-    }
-
-    my $crypt_release = Win32::API->new(
-        "advapi32", 'CryptReleaseContext', 'NN', 'I');
-    if (!defined $crypt_release) {
-        die "Could not import CryptReleaseContext: $^E";
-    }
-
-    my $crypt_gen_random = Win32::API->new(
-        "advapi32", 'CryptGenRandom', 'NNP', 'I');
-    if (!defined $crypt_gen_random) {
-        die "Could not import CryptGenRandom: $^E";
-    }
-
-    my $context = chr(0) x Win32::API::Type->sizeof('PULONG');
-    my $acquire_result = $crypt_acquire->Call(
-        $context, 0, 0, PROV_RSA_FULL, CRYPT_SILENT | CRYPT_VERIFYCONTEXT);
-    if (!defined $acquire_result) {
-        die "CryptAcquireContext failed: $^E";
-    }
-
-    my $pack_type = Win32::API::Type::packing('PULONG');
-    $context = unpack($pack_type, $context);
-
-    my $buffer = chr(0) x SEED_SIZE;
-    my $rand_result = $crypt_gen_random->Call($context, SEED_SIZE, $buffer);
-    my $rand_error = $^E;
-    # We don't check this if it fails, we don't care.
-    $crypt_release->Call($context, 0);
-    if (!defined $rand_result) {
-        die "CryptGenRandom failed: $rand_error";
     }
     return $buffer;
 }

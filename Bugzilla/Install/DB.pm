@@ -27,7 +27,7 @@ use Date::Parse;
 use Date::Format;
 use Digest;
 use IO::File;
-use List::MoreUtils qw(uniq);
+use List::MoreUtils qw(uniq any);
 use URI;
 use URI::QueryParam;
 
@@ -1293,7 +1293,7 @@ sub _update_bugs_activity_to_only_record_changes {
             $oldvalue ||= "";
             $newvalue ||= "";
             my ($added, $removed) = "";
-            if (grep ($_ eq $fieldid, @multi)) {
+            if (any {$_ eq $fieldid} @multi) {
                 $oldvalue =~ s/[\s,]+/ /g;
                 $newvalue =~ s/[\s,]+/ /g;
                 my @old = split(" ", $oldvalue);
@@ -1301,13 +1301,13 @@ sub _update_bugs_activity_to_only_record_changes {
                 my (@add, @remove) = ();
                 # Find values that were "added"
                 foreach my $value(@new) {
-                    if (! grep ($_ eq $value, @old)) {
+                    if (! any {$_ eq $value} @old) {
                         push (@add, $value);
                     }
                 }
                 # Find values that were removed
                 foreach my $value(@old) {
-                    if (! grep ($_ eq $value, @new)) {
+                    if (! any {$_ eq $value} @new) {
                         push (@remove, $value);
                     }
                 }
@@ -1780,7 +1780,7 @@ sub _convert_groups_system_from_groupset {
             # existing administrators are made members of group "admin"
             print "\nWARNING - $login_name IS AN ADMIN IN SPITE OF BUG",
                   " 157704\n\n" if (!$iscomplete);
-            push(@admins, $userid) unless grep($_ eq $userid, @admins);
+            push(@admins, $userid) unless any {$_ eq $userid} @admins;
         }
         # Now make all those users admins directly. They were already
         # added to every other group, above, because of their groupset.
@@ -2175,7 +2175,7 @@ sub _copy_old_charts_into_database {
                         $data{$fields[$i]}{$numbers[0]} = $numbers[$i + 1];
 
                         # Keep a total of the number of open bugs for this day
-                        if (grep { $_ eq $fields[$i] } @openedstatuses) {
+                        if (any { $_ eq $fields[$i] } @openedstatuses) {
                             $data{$open_name}{$numbers[0]} += $numbers[$i + 1];
                         }
                     }

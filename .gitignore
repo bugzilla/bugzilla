@@ -17,6 +17,7 @@
 /MYMETA.*
 /pm_to_blib
 /blib
+/.perl-version
 /Bugzilla-*.*/
 
 /skins/contrib/Dusk/admin.css

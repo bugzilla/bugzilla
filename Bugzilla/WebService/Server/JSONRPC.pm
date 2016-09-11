@@ -31,7 +31,7 @@ use Bugzilla::Util;
 
 use HTTP::Message;
 use MIME::Base64 qw(decode_base64 encode_base64);
-use List::MoreUtils qw(none);
+use List::MoreUtils qw(none any);
 
 #####################################
 # Public JSON::RPC Method Overrides #
@@ -405,7 +405,7 @@ sub _argument_type_check {
         # When being called using GET, we don't allow calling
         # methods that can change data. This protects us against cross-site
         # request forgeries.
-        if (!grep($_ eq $method, $pkg->READ_ONLY)) {
+        if (!any {$_ eq $method} $pkg->READ_ONLY) {
             ThrowUserError('json_rpc_post_only', 
                            { method => $self->_bz_method_name });
         }

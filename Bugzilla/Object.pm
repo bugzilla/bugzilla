@@ -17,7 +17,7 @@ use Bugzilla::Util;
 use Bugzilla::Error;
 
 use Date::Parse;
-use List::MoreUtils qw(part);
+use List::MoreUtils qw(part any);
 use Scalar::Util qw(blessed);
 
 use constant NAME_FIELD => 'name';
@@ -828,7 +828,7 @@ sub _sort_by_dep {
     # sorted properly. We go through $has_deps in sorted order to be
     # sure that fields always validate in a consistent order.
     foreach my $field (sort @{ $has_deps || [] }) {
-        if (!grep { $_ eq $field } @result) {
+        if (!any { $_ eq $field } @result) {
             _insert_dep_field($field, $has_deps, $dependencies, \@result);
         }
     }
@@ -849,11 +849,11 @@ sub _insert_dep_field {
     # Imagine Field A requires field B...
     foreach my $required_field (@$required_fields) {
         # If our dependency is already satisfied, we're good.
-        next if grep { $_ eq $required_field } @$result;
+        next if any { $_ eq $required_field } @$result;
 
         # If our dependency is not in the remaining fields to insert,
         # then we're also OK.
-        next if !grep { $_ eq $required_field } @$insert_me;
+        next if !any { $_ eq $required_field } @$insert_me;
 
         # So, at this point, we know that Field B is in $insert_me.
         # So let's put the required field into the result.

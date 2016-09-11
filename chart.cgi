@@ -41,6 +41,7 @@ use Bugzilla::Util;
 use Bugzilla::Chart;
 use Bugzilla::Series;
 use Bugzilla::Token;
+use List::MoreUtils qw(any);
 
 # For most scripts we don't make $cgi and $template global variables. But
 # when preparing Bugzilla for mod_perl, this script used these
@@ -58,7 +59,7 @@ if (!Bugzilla->feature('new_charts')) {
 }
 
 # Go back to query.cgi if we are adding a boolean chart parameter.
-if (grep(/^cmd-/, $cgi->multi_param())) {
+if (any { /^cmd-/ } $cgi->multi_param()) {
     my $params = $cgi->canonicalise_query("format", "ctype", "action");
     print $cgi->redirect("query.cgi?format=" . $cgi->param('query_format') .
                                                ($params ? "&$params" : ""));

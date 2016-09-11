@@ -28,6 +28,7 @@ use Bugzilla::Token;
 use Bugzilla::Hook;
 
 use Date::Parse;
+use List::MoreUtils qw(any firstval);
 
 my $cgi = Bugzilla->cgi;
 my $dbh = Bugzilla->dbh;
@@ -189,7 +190,7 @@ sub InsertNamedQuery {
     my $dbh = Bugzilla->dbh;
 
     $query_name = trim($query_name);
-    my ($query_obj) = grep {lc($_->name) eq lc($query_name)} @{Bugzilla->user->queries};
+    my $query_obj = firstval {lc($_->name) eq lc($query_name)} @{Bugzilla->user->queries};
 
     if ($query_obj) {
         $query_obj->set_name($query_name);
@@ -285,7 +286,7 @@ sub _get_common_flag_types {
     # We only show flags that a user can request.
     my @show_flag_types
         = grep { $user->can_request_flag($_) } values %common_flag_types;
-    my $any_flags_requesteeble = grep { $_->is_requesteeble } @show_flag_types;
+    my $any_flags_requesteeble = any { $_->is_requesteeble } @show_flag_types;
 
     return(\@show_flag_types, $any_flags_requesteeble);
 }
@@ -539,8 +540,8 @@ if (!$user->is_timetracker) {
 }
 
 # Remove the relevance column if the user is not doing a fulltext search.
-if (grep('relevance', @displaycolumns) && !$fulltext) {
-    @displaycolumns = grep($_ ne 'relevance', @displaycolumns);
+if ((any { $_ eq 'relevance' } @displaycolumns) && !$fulltext) {
+    @displaycolumns = grep { $_ ne 'relevance' } @displaycolumns;
 }
 
 ################################################################################
@@ -556,7 +557,7 @@ my @selectcolumns = ("bug_id", "bug_severity", "priority", "bug_status",
                      "resolution", "product");
 
 # remaining and actual_time are required for percentage_complete calculation:
-if (grep { $_ eq "percentage_complete" } @displaycolumns) {
+if (any { $_ eq "percentage_complete" } @displaycolumns) {
     push (@selectcolumns, "remaining_time");
     push (@selectcolumns, "actual_time");
 }
@@ -564,32 +565,32 @@ if (grep { $_ eq "percentage_complete" } @displaycolumns) {
 # Make sure that the login_name version of a field is always also
 # requested if the realname version is requested, so that we can
 # display the login name when the realname is empty.
-my @realname_fields = grep(/_realname$/, @displaycolumns);
+my @realname_fields = grep { /_realname$/ } @displaycolumns;
 foreach my $item (@realname_fields) {
     my $login_field = $item;
     $login_field =~ s/_realname$//;
-    if (!grep($_ eq $login_field, @selectcolumns)) {
+    if (!any { $_ eq $login_field } @selectcolumns) {
         push(@selectcolumns, $login_field);
     }
 }
 
 # Display columns are selected because otherwise we could not display them.
 foreach my $col (@displaycolumns) {
-    push (@selectcolumns, $col) if !grep($_ eq $col, @selectcolumns);
+    push (@selectcolumns, $col) if !any {$_ eq $col} @selectcolumns;
 }
 
 # If the user is editing multiple bugs, we also make sure to select the
 # status, because the values of that field determines what options the user
 # has for modifying the bugs.
 if ($dotweak) {
-    push(@selectcolumns, "bug_status") if !grep($_ eq 'bug_status', @selectcolumns);
+    push(@selectcolumns, "bug_status") if !any { $_ eq 'bug_status' } @selectcolumns;
     push(@selectcolumns, "bugs.component_id");
 }
 
 if ($format->{'extension'} eq 'ics') {
-    push(@selectcolumns, "opendate") if !grep($_ eq 'opendate', @selectcolumns);
+    push(@selectcolumns, "opendate") if !any {$_ eq 'opendate'} @selectcolumns;
     if (Bugzilla->params->{'timetrackinggroup'}) {
-        push(@selectcolumns, "deadline") if !grep($_ eq 'deadline', @selectcolumns);
+        push(@selectcolumns, "deadline") if !any {$_ eq 'deadline'} @selectcolumns;
     }
 }
 
@@ -616,7 +617,7 @@ if ($format->{'extension'} eq 'atom') {
     push(@required_atom_columns, 'target_milestone') if Bugzilla->params->{'usetargetmilestone'};
 
     foreach my $required (@required_atom_columns) {
-        push(@selectcolumns, $required) if !grep($_ eq $required,@selectcolumns);
+        push(@selectcolumns, $required) if !any { $_ eq $required } @selectcolumns;
     }
 }
 
@@ -687,7 +688,7 @@ if (scalar @{$search->invalid_order_columns}) {
     $vars->{'invalid_fragments'} = $search->invalid_order_columns;
 }
 
-if ($fulltext and grep { /^relevance/ } $search->order) {
+if ($fulltext and any { /^relevance/ } $search->order) {
     $vars->{'message'} = 'buglist_sorted_by_relevance'
 }
 
@@ -762,12 +763,12 @@ if ($cgi->param('debug')
 # of Perl records.
 
 # If we're doing time tracking, then keep totals for all bugs.
-my $percentage_complete = grep($_ eq 'percentage_complete', @displaycolumns);
-my $estimated_time      = grep($_ eq 'estimated_time', @displaycolumns);
-my $remaining_time      = grep($_ eq 'remaining_time', @displaycolumns)
-                            || $percentage_complete;
-my $actual_time         = grep($_ eq 'actual_time', @displaycolumns)
-                            || $percentage_complete;
+my $percentage_complete = any { $_ eq 'percentage_complete' } @displaycolumns;
+my $estimated_time      = any { $_ eq 'estimated_time'      } @displaycolumns;
+my $remaining_time = $percentage_complete
+    || any { $_ eq 'remaining_time' } @displaycolumns;
+my $actual_time = $percentage_complete
+    || any { $_ eq 'actual_time' } @displaycolumns;
 
 my $time_info = { 'estimated_time' => 0,
                   'remaining_time' => 0,

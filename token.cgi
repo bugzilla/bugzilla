@@ -21,6 +21,7 @@ use Bugzilla::User;
 
 use Date::Format;
 use Date::Parse;
+use List::MoreUtils qw(any);
 
 local our $cgi = Bugzilla->cgi;
 local our $template = Bugzilla->template;
@@ -46,7 +47,7 @@ unless ($action eq 'reqpw') {
     # Make sure the token is the correct type for the action being taken.
     # The { user_error => 'wrong_token_for_*' } trick is to make 012throwables.t happy.
     my $error = {};
-    if (grep($action eq $_ , qw(cfmpw cxlpw chgpw)) && $tokentype ne 'password') {
+    if ((any {$action eq $_} qw(cfmpw cxlpw chgpw)) && $tokentype ne 'password') {
         $error = { user_error => 'wrong_token_for_changing_passwd' };
     }
     elsif ($action eq 'cxlem'
@@ -54,7 +55,7 @@ unless ($action eq 'reqpw') {
     {
         $error = { user_error => 'wrong_token_for_cancelling_email_change' };
     }
-    elsif (grep($action eq $_ , qw(cfmem chgem)) && $tokentype ne 'emailnew') {
+    elsif ((any {$action eq $_} qw(cfmem chgem)) && $tokentype ne 'emailnew') {
         $error = { user_error => 'wrong_token_for_confirming_email_change' };
     }
     elsif ($action =~ /^(request|confirm|cancel)_new_account$/

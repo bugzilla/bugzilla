@@ -17,6 +17,7 @@ use Bugzilla::Error;
 use Bugzilla::Bug;
 
 use List::Util qw(max);
+use List::MoreUtils qw(any);
 
 my $user = Bugzilla->login();
 
@@ -129,7 +130,7 @@ sub _generate_tree {
         if (!Bugzilla->user->can_see_bug($dep_id)) {
             delete $ids->{$dep_id};
         }
-        elsif (!grep { $_ == $dep_id } @{ $bugs->{dependencies}->{$bug_id} }) {
+        elsif (!any { $_ == $dep_id } @{ $bugs->{dependencies}->{$bug_id} }) {
             push @{ $bugs->{dependencies}->{$bug_id} }, $dep_id;
         }
     }

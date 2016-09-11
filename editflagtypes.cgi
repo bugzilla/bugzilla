@@ -21,6 +21,7 @@ use Bugzilla::Util;
 use Bugzilla::Error;
 use Bugzilla::Product;
 use Bugzilla::Token;
+use List::MoreUtils qw(any firstval);
 
 # Make sure the user is logged in and has the right privileges.
 my $user = Bugzilla->login(LOGIN_REQUIRED);
@@ -50,19 +51,19 @@ my ($product, $component);
 if ($prod_name) {
     # Make sure the user is allowed to view this product name.
     # Users with global editcomponents privs can see all product names.
-    ($product) = grep { lc($_->name) eq lc($prod_name) } @products;
+    ($product) = firstval { lc($_->name) eq lc($prod_name) } @products;
     $product || ThrowUserError('product_access_denied', { name => $prod_name });
 }
 
 if ($comp_name) {
     $product || ThrowUserError('flag_type_component_without_product');
-    ($component) = grep { lc($_->name) eq lc($comp_name) } @{$product->components};
+    ($component) = firstval { lc($_->name) eq lc($comp_name) } @{$product->components};
     $component || ThrowUserError('product_unknown_component', { product => $product->name,
                                                                 comp => $comp_name });
 }
 
 # If 'categoryAction' is set, it has priority over 'action'.
-if (my ($category_action) = grep { $_ =~ /^categoryAction-(?:\w+)$/ } $cgi->multi_param()) {
+if (my ($category_action) = firstval { $_ =~ /^categoryAction-(?:\w+)$/ } $cgi->multi_param()) {
     $category_action =~ s/^categoryAction-//;
 
     my @inclusions = $cgi->multi_param('inclusions');
@@ -84,12 +85,12 @@ if (my ($category_action) = grep { $_ =~ /^categoryAction-(?:\w+)$/ } $cgi->mult
 
     if ($category_action eq 'include') {
         foreach my $category (@categories) {
-            push(@inclusions, $category) unless grep($_ eq $category, @inclusions);
+            push(@inclusions, $category) unless any {$_ eq $category} @inclusions;
         }
     }
     elsif ($category_action eq 'exclude') {
         foreach my $category (@categories) {
-            push(@exclusions, $category) unless grep($_ eq $category, @exclusions);
+            push(@exclusions, $category) unless any {$_ eq $category} @exclusions;
         }
     }
     elsif ($category_action eq 'removeInclusion') {
@@ -328,11 +329,11 @@ if ($action eq 'update') {
         # Bring back the products the user cannot edit.
         foreach my $item (values %{$flagtype->inclusions}) {
             my ($prod_id, $comp_id) = split(':', $item);
-            push(@inclusions, $item) unless grep { $_->id == $prod_id } @products;
+            push(@inclusions, $item) unless any { $_->id == $prod_id } @products;
         }
         foreach my $item (values %{$flagtype->exclusions}) {
             my ($prod_id, $comp_id) = split(':', $item);
-            push(@exclusions, $item) unless grep { $_->id == $prod_id } @products;
+            push(@exclusions, $item) unless any { $_->id == $prod_id } @products;
         }
     }
 

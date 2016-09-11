@@ -20,6 +20,7 @@ use Bugzilla::Status;
 
 use File::Basename;
 use Digest::SHA qw(hmac_sha256_base64);
+use List::MoreUtils qw(any);
 
 # If we're using bug groups for products, we should apply those restrictions
 # to viewing reports, as well.  Time to check the login in that case.
@@ -86,7 +87,7 @@ else {
     my @datasets = $cgi->multi_param('datasets');
     scalar(@datasets) || ThrowUserError('missing_datasets');
 
-    if (grep { $_ !~ /^[A-Za-z0-9:_-]+$/ } @datasets) {
+    if (any { $_ !~ /^[A-Za-z0-9:_-]+$/ } @datasets) {
         ThrowUserError('invalid_datasets', {'datasets' => \@datasets});
     }
 

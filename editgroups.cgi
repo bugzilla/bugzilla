@@ -21,6 +21,7 @@ use Bugzilla::Group;
 use Bugzilla::Product;
 use Bugzilla::User;
 use Bugzilla::Token;
+use List::MoreUtils qw(any);
 
 my $cgi = Bugzilla->cgi;
 my $dbh = Bugzilla->dbh;
@@ -90,13 +91,13 @@ sub get_current_and_available {
     foreach my $group_option (@all_groups) {
         if (Bugzilla->params->{'usevisibilitygroups'}) {
             push(@visible_from_available, $group_option)
-                if !grep($_->id == $group_option->id, @visible_from_current);
+                if !any {$_->id == $group_option->id} @visible_from_current;
             push(@visible_to_me_available, $group_option)
-                if !grep($_->id == $group_option->id, @visible_to_me_current);
+                if !any {$_->id == $group_option->id} @visible_to_me_current;
         }
 
         push(@bless_from_available, $group_option)
-            if !grep($_->id == $group_option->id, @bless_from_current);
+            if !any {$_->id == $group_option->id} @bless_from_current;
 
         # The group itself should never show up in the membership lists,
         # and should show up in only one of the bless lists (otherwise
@@ -105,11 +106,11 @@ sub get_current_and_available {
         next if $group_option->id == $group->id;
 
         push(@members_available, $group_option)
-            if !grep($_->id == $group_option->id, @members_current);
+            if !any {$_->id == $group_option->id} @members_current;
         push(@member_of_available, $group_option)
-            if !grep($_->id == $group_option->id, @member_of_current);
+            if !any {$_->id == $group_option->id} @member_of_current;
         push(@bless_to_available, $group_option)
-           if !grep($_->id == $group_option->id, @bless_to_current);
+           if !any {$_->id == $group_option->id} @bless_to_current;
     }
 
     $vars->{'members_current'}     = \@members_current;
@@ -406,7 +407,7 @@ sub _do_add {
     my $add_items = Bugzilla::Group->new_from_list([$cgi->multi_param($field)]);
 
     foreach my $add (@$add_items) {
-        next if grep($_->id == $add->id, @$current);
+        next if any {$_->id == $add->id} @$current;
 
         $changes->{$field} ||= [];
         push(@{$changes->{$field}}, $add->name);

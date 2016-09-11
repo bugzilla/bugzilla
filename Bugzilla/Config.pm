@@ -343,13 +343,14 @@ sub write_param_file {
 sub read_params {
     state $read_only_fs = Bugzilla->localconfig->{read_only_fs};
     if ($read_only_fs) {
-        my $dbh = Bugzilla->dbh_main;
-        my %params = map { @$_ } @{$dbh->selectall_arrayref("SELECT param_key, param_val FROM params")};
-        return \%params;
+        my %params;
+        eval {
+            my $dbh = Bugzilla->dbh_main;
+            %params = map { @$_ } @{$dbh->selectall_arrayref("SELECT param_key, param_val FROM params")};
+        };
+        return \%params if keys %params;
     }
-    else {
-        return read_param_file();
-    }
+    return read_param_file();
 }
 
 sub read_param_file {

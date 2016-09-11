@@ -40,6 +40,7 @@ whose names start with _ or a re specifically noted as being private.
 =cut
 
 use Scalar::Util qw(blessed);
+use List::MoreUtils qw(any);
 use Storable qw(dclone);
 
 use Bugzilla::FlagType;
@@ -690,7 +691,7 @@ sub _check_requestee {
         # is cclist_accessible, the requestee is allowed.
         if (!$requestee->can_see_bug($self->bug_id)
             && (!$bug->cclist_accessible
-                || !grep($_->id == $requestee->id, @{ $bug->cc_users })
+                || !(any { $_->id == $requestee->id } @{ $bug->cc_users })
             && $requestee->id != $bug->assigned_to->id
             && (!$bug->qa_contact || $requestee->id != $bug->qa_contact->id)))
         {
@@ -778,9 +779,8 @@ sub _check_status {
     # - Make sure the user didn't request the flag unless it's requestable.
     #   If the flag existed and was requested before it became unrequestable,
     #   leave it as is.
-    if (!grep($status eq $_ , qw(X + - ?))
-        || ($status eq '?' && $self->status ne '?' && !$self->type->is_requestable))
-    {
+    my $valid_status = any { $status eq $_ } qw(X + - ?);
+    if (!$valid_status || ($status eq '?' && $self->status ne '?' && !$self->type->is_requestable)) {
         ThrowUserError('flag_status_invalid', { id     => $self->id,
                                                 status => $status });
     }
@@ -901,7 +901,7 @@ sub extract_flags_from_cgi {
 
     foreach my $flagtype_id (@flagtype_ids) {
         # Checks if there are unexpected flags for the product/component.
-        if (!scalar(grep { $_->id == $flagtype_id } @$flag_types)) {
+        if (!any { $_->id == $flagtype_id } @$flag_types) {
             $vars->{'message'} = 'unexpected_flag_types';
             last;
         }
@@ -998,7 +998,7 @@ sub multi_extract_flags_from_cgi {
 
     foreach my $flagtype_id (@flagtype_ids) {
         # Checks if there are unexpected flags for the product/component.
-        if (!scalar(grep { $_->id == $flagtype_id } @$flag_types)) {
+        if (!any { $_->id == $flagtype_id } @$flag_types) {
             $vars->{'message'} = 'unexpected_flag_types';
             last;
         }

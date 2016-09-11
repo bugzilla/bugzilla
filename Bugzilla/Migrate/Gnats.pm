@@ -21,7 +21,7 @@ use Email::Address;
 use Email::MIME;
 use File::Basename;
 use IO::File;
-use List::MoreUtils qw(firstidx);
+use List::MoreUtils qw(firstidx any);
 use List::Util qw(first);
 
 use constant REQUIRED_MODULES => [
@@ -310,7 +310,7 @@ sub _read_bugs {
     foreach my $directory (@directories) {
         next if !-d $directory;
         my $name = basename($directory);
-        next if grep($_ eq $name, SKIP_DIRECTORIES);
+        next if any {$_ eq $name} SKIP_DIRECTORIES;
         push(@bugs, @{ $self->_parse_project($directory) });
     }
     @bugs = sort { $a->{Number} <=> $b->{Number} } @bugs;
@@ -648,7 +648,7 @@ sub translate_value {
     my $original_value = $value;
     $options ||= {};
 
-    if (!ref($value) and grep($_ eq $field, $self->USER_FIELDS)) {
+    if (!ref($value) and any {$_ eq $field} $self->USER_FIELDS) {
         if ($value =~ /(\S+\@\S+)/) {
             $value = $1;
             $value =~ s/^<//;
@@ -684,7 +684,7 @@ sub translate_value {
     $value = $self->SUPER::translate_value(@args);
     return $value if ref $value;
     
-    if (grep($_ eq $field, $self->USER_FIELDS)) {
+    if (any {$_ eq $field} $self->USER_FIELDS) {
         my $from_value = $value;
         $value = $self->user_to_email($value);
         $args[1] = $value;

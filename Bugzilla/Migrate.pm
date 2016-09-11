@@ -30,6 +30,7 @@ use DateTime;
 use Fcntl qw(SEEK_SET);
 use File::Basename;
 use List::Util qw(first);
+use List::MoreUtils qw(any);
 # Bug 1270550 - Tie::Hash::NamedCapture must be loaded before Safe.
 use Tie::Hash::NamedCapture;
 use Safe;
@@ -389,7 +390,7 @@ sub _generate_description {
     
     my $description = "";
     foreach my $field (sort keys %$fields) {
-        next if grep($_ eq $field, $self->NON_COMMENT_FIELDS);
+        next if any {$_ eq $field} $self->NON_COMMENT_FIELDS;
         my $value = delete $fields->{$field};
         next if $value eq '';
         $description .= "$field: $value\n";
@@ -456,7 +457,7 @@ sub translate_value {
         return $self->map_value($field, $value);
     }
     
-    if (grep($_ eq $field, USER_FIELDS)) {
+    if (any {$_ eq $field } USER_FIELDS) {
         if (defined $self->map_value('user', $value)) {
             return $self->map_value('user', $value);
         }
@@ -725,7 +726,7 @@ sub insert_bugs {
             if (!defined $bug->{$field_name}) {
                 # If there's a default value for this, then just let create()
                 # pick it.
-                next if grep($_->is_default, @{ $field->legal_values });
+                next if any {$_->is_default} @{ $field->legal_values };
                 # Otherwise, pick the first valid value if this is a required
                 # field.
                 if ($field_name eq 'bug_status') {

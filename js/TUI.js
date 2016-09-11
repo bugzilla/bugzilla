@@ -22,8 +22,8 @@ var TUI_COOKIE_NAME  = 'TUI';
 var TUI_alternates   = {};
 var TUI              = {};
 
-/** 
- * Hides a particular class of elements if they are shown, 
+/**
+ * Hides a particular class of elements if they are shown,
  * or shows them if they are hidden. Then it stores whether that
  * class is now hidden or shown.
  *
@@ -80,6 +80,7 @@ function _TUI_store(aClass, state) {
 
 function _TUI_restore() {
     var tui_json = localStorage.getItem(TUI_COOKIE_NAME);
+    var tui_item;
     TUI = JSON.parse(tui_json);
     if (!TUI)
       TUI = {};

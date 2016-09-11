@@ -34,6 +34,7 @@ use File::Spec;
 use File::Slurp;
 use IO::File;
 use POSIX ();
+use List::MoreUtils qw(any);
 
 use parent qw(Exporter);
 our @EXPORT = qw(
@@ -993,7 +994,7 @@ sub _check_web_server_group {
 
         # If on unix, see if we need to print a warning about a webservergroup
         # that we can't chgrp to
-        if ($output && $< != 0 && !grep($_ eq $group_id, split(" ", $)))) {
+        if ($output && $< != 0 && !any {$_ eq $group_id} split(" ", $))) {
             print "\n\n" . get_text('install_webservergroup_not_in') . "\n\n";
         }
     }

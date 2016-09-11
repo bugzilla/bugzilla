@@ -686,6 +686,7 @@ sub _cleanup {
     my $smtp = $cache->{smtp};
     $smtp->disconnect if $smtp;
     clear_request_cache();
+    Bugzilla::Bug->CLEANUP();
 
     # These are both set by CGI.pm but need to be undone so that
     # Apache can actually shut down its children if it needs to.

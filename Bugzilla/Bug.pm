@@ -34,7 +34,7 @@ use Bugzilla::BugUserLastVisit;
 use List::MoreUtils qw(firstidx uniq part);
 use List::Util qw(min max first);
 use Storable qw(dclone);
-use Scalar::Util qw(blessed);
+use Scalar::Util qw(blessed weaken);
 
 use parent qw(Bugzilla::Object Exporter);
 @Bugzilla::Bug::EXPORT = qw(
@@ -42,6 +42,9 @@ use parent qw(Bugzilla::Object Exporter);
     LogActivityEntry
     editable_bug_fields
 );
+
+# This hash keeps a weak copy of every bug created.
+my %CLEANUP;
 
 #####################################################################
 # Constants
@@ -361,6 +364,9 @@ sub new {
         return $error_self;
     }
 
+    $CLEANUP{$self->id} = $self;
+    weaken($CLEANUP{$self->id});
+
     return $self;
 }
 
@@ -373,6 +379,18 @@ sub object_cache_key {
     my $key = $class->SUPER::object_cache_key(@_)
       || return;
     return $key . ',' . Bugzilla->user->id;
+}
+
+# This is called by Bugzilla::_cleanup() at the end of requests in a persistent environment
+# (such as mod_perl)
+sub CLEANUP {
+    foreach my $bug (values %CLEANUP) {
+        # $bug will be undef if there are no other references to it.
+        next unless $bug;
+        delete $bug->{depends_on_obj};
+        delete $bug->{blocks_obj};
+    }
+    %CLEANUP = ();
 }
 
 sub check {
@@ -3696,6 +3714,7 @@ sub comments {
         foreach my $comment (@{ $self->{'comments'} }) {
             $comment->{count} = $count++;
             $comment->{bug} = $self;
+            weaken($comment->{bug});
             # XXX - hack for MySQL. Convert [U+....] back into its Unicode
             # equivalent for characters above U+FFFF as MySQL older than 5.5.3
             # cannot store them, see Bugzilla::Comment::_check_thetext().

@@ -25,6 +25,7 @@ use parent qw(Exporter);
 
 use Bugzilla::Error;
 use Bugzilla::Util qw(trick_taint get_text);
+use List::MoreUtils qw(any);
 
 ###############################
 ###  Module Initialization  ###
@@ -259,7 +260,7 @@ sub legal_values {
 sub validate_value {
     my $self = shift;
 
-    if (grep(/^$_[0]$/, @{$self->legal_values()})) {
+    if (any { /^$_[0]$/ } @{$self->legal_values()}) {
         trick_taint($_[0]);
     }
     else {

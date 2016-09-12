@@ -7,11 +7,10 @@
 
 package Bugzilla::Metrics::Memcached;
 
-use 5.10.1;
 use strict;
 use warnings;
 
-use base 'Bugzilla::Memcached';
+use parent 'Bugzilla::Memcached';
 
 sub _get {
     my $self = shift;

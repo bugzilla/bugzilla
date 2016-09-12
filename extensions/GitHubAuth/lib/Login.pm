@@ -6,11 +6,8 @@
 # defined by the Mozilla Public License, v. 2.0.
 
 package Bugzilla::Extension::GitHubAuth::Login;
-
-use 5.10.1;
 use strict;
 use warnings;
-
 use base qw(Bugzilla::Auth::Login);
 use fields qw(github_failure);
 

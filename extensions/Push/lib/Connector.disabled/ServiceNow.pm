@@ -7,7 +7,6 @@
 
 package Bugzilla::Extension::Push::Connector::ServiceNow;
 
-use 5.10.1;
 use strict;
 use warnings;
 

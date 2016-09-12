@@ -31,9 +31,7 @@
 
 package Bugzilla::Config::PatchViewer;
 
-use 5.10.1;
 use strict;
-use warnings;
 
 use Bugzilla::Config::Common;
 

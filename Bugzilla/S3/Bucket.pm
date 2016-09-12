@@ -2,10 +2,8 @@ package Bugzilla::S3::Bucket;
 
 # Forked from Amazon::S3, which appears to be abandoned.
 
-use 5.10.1;
 use strict;
 use warnings;
-
 use Carp;
 use File::stat;
 use IO::File;

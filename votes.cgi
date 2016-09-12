@@ -1,4 +1,4 @@
-#!/usr/bin/perl -T
+#!/usr/bin/perl -wT
 # -*- Mode: perl; indent-tabs-mode: nil -*-
 #
 # The contents of this file are subject to the Mozilla Public
@@ -23,10 +23,8 @@
 # This script remains as a backwards-compatibility URL for before
 # the time that Voting was an extension.
 
-use 5.10.1;
 use strict;
-use warnings;
-use lib qw(. lib local/lib/perl5);
+use lib qw(. lib);
 use Bugzilla;
 use Bugzilla::Error;
 

@@ -9,9 +9,8 @@ package Bugzilla::User::APIKey;
 
 use 5.10.1;
 use strict;
-use warnings;
 
-use base qw(Bugzilla::Object);
+use parent qw(Bugzilla::Object);
 
 use Bugzilla::User;
 use Bugzilla::Util qw(generate_random_password trim remote_ip);

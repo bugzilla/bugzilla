@@ -6,12 +6,8 @@
 # defined by the Mozilla Public License, v. 2.0.
 
 package Bugzilla::MFA::Duo;
-
-use 5.10.1;
 use strict;
-use warnings;
-
-use base 'Bugzilla::MFA';
+use parent 'Bugzilla::MFA';
 
 use Bugzilla::DuoAPI;
 use Bugzilla::DuoWeb;

@@ -2,9 +2,7 @@ package Bugzilla::PatchReader::PatchInfoGrabber;
 
 use Bugzilla::PatchReader::FilterPatch;
 
-use 5.10.1;
 use strict;
-use warnings;
 
 @Bugzilla::PatchReader::PatchInfoGrabber::ISA = qw(Bugzilla::PatchReader::FilterPatch);
 

@@ -20,10 +20,7 @@
 #                 Gervase Markham <gerv@gerv.net>
 
 package Bugzilla::Extension::SecureMail;
-
-use 5.10.1;
 use strict;
-use warnings;
 
 use constant NAME => 'SecureMail';
 

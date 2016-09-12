@@ -1,31 +1,62 @@
-# This Source Code Form is subject to the terms of the Mozilla Public
-# License, v. 2.0. If a copy of the MPL was not distributed with this
-# file, You can obtain one at http://mozilla.org/MPL/2.0/.
+# -*- Mode: perl; indent-tabs-mode: nil -*-
 #
-# This Source Code Form is "Incompatible With Secondary Licenses", as
-# defined by the Mozilla Public License, v. 2.0.
+# The contents of this file are subject to the Mozilla Public
+# License Version 1.1 (the "License"); you may not use this file
+# except in compliance with the License. You may obtain a copy of
+# the License at http://www.mozilla.org/MPL/
+# 
+# Software distributed under the License is distributed on an "AS
+# IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
+# implied. See the License for the specific language governing
+# rights and limitations under the License.
+# 
+# The Original Code are the Bugzilla Tests.
+# 
+# The Initial Developer of the Original Code is Zach Lipton
+# Portions created by Zach Lipton are 
+# Copyright (C) 2002 Zach Lipton.  All
+# Rights Reserved.
+# 
+# Contributor(s): Zach Lipton <zach@zachlipton.com>
 
 
 #################
 #Bugzilla Test 6#
 ####Spelling#####
 
-use 5.10.1;
-use strict;
-use warnings;
-
-use lib qw(. lib local/lib/perl5 t);
+use lib 't';
 use Support::Files;
 
-# -1 because 006spellcheck.t must not be checked.
-use Test::More tests => scalar(@Support::Files::testitems)
-                        + scalar(@Support::Files::test_files) - 1;
+BEGIN { # yes the indenting is off, deal with it
+#add the words to check here:
+@evilwords = qw(
+anyways
+appearence
+arbitary
+cancelled
+critera
+databasa
+dependan
+existance
+existant
+paramater
+refered
+repsentation
+retreive
+suported
+varsion
+);
+
+$testcount = scalar(@Support::Files::testitems);
+}
+
+use Test::More tests => $testcount;
 
 # Capture the TESTOUT from Test::More or Test::Builder for printing errors.
 # This will handle verbosity for us automatically.
 my $fh;
 {
-    no warnings qw(unopened);  # Don't complain about non-existent filehandles
+    local $^W = 0;  # Don't complain about non-existent filehandles
     if (-e \*Test::More::TESTOUT) {
         $fh = \*Test::More::TESTOUT;
     } elsif (-e \*Test::Builder::TESTOUT) {
@@ -35,35 +66,14 @@ my $fh;
     }
 }
 
-my @testitems = (@Support::Files::testitems, @Support::Files::test_files);
+my @testitems = @Support::Files::testitems;
 
-#add the words to check here:
-my @evilwords = qw(
-    anyways
-    appearence
-    arbitary
-    cancelled
-    critera
-    databasa
-    dependan
-    existance
-    existant
-    paramater
-    refered
-    repsentation
-    retreive
-    suported
-    varsion
-);
-
+# at last, here we actually run the test...
 my $evilwordsregexp = join('|', @evilwords);
 
 foreach my $file (@testitems) {
     $file =~ s/\s.*$//; # nuke everything after the first space (#comment)
     next if (!$file); # skip null entries
-    # Do not try to validate this file as it obviously contains a list
-    # of wrongly spelled words.
-    next if ($file eq 't/006spellcheck.t');
 
     if (open (FILE, $file)) { # open the file for reading
 

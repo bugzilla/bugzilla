@@ -9,9 +9,8 @@ package Bugzilla::WebService::BugUserLastVisit;
 
 use 5.10.1;
 use strict;
-use warnings;
 
-use base qw(Bugzilla::WebService);
+use parent qw(Bugzilla::WebService);
 
 use Bugzilla::Bug;
 use Bugzilla::Error;

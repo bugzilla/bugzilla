@@ -1,13 +1,11 @@
 package Bugzilla::PatchReader::AddCVSContext;
 
-use 5.10.1;
-use strict;
-use warnings;
-
 use Bugzilla::PatchReader::FilterPatch;
 use Bugzilla::PatchReader::CVSClient;
 use Cwd;
 use File::Temp;
+
+use strict;
 
 @Bugzilla::PatchReader::AddCVSContext::ISA = qw(Bugzilla::PatchReader::FilterPatch);
 

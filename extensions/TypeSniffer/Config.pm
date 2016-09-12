@@ -20,10 +20,7 @@
 #   Gervase Markham <gerv@mozilla.org>
 
 package Bugzilla::Extension::TypeSniffer;
-
-use 5.10.1;
 use strict;
-use warnings;
 
 use constant NAME => 'TypeSniffer';
 

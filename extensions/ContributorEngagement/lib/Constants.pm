@@ -7,9 +7,7 @@
 
 package Bugzilla::Extension::ContributorEngagement::Constants;
 
-use 5.10.1;
 use strict;
-use warnings;
 
 use base qw(Exporter);
 

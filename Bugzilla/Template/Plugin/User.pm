@@ -22,9 +22,8 @@
 #
 
 package Bugzilla::Template::Plugin::User;
-use 5.10.1;
+
 use strict;
-use warnings;
 
 use base qw(Template::Plugin);
 

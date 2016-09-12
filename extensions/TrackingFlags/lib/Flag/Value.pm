@@ -9,7 +9,6 @@ package Bugzilla::Extension::TrackingFlags::Flag::Value;
 
 use base qw(Bugzilla::Object);
 
-use 5.10.1;
 use strict;
 use warnings;
 

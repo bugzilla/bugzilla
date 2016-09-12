@@ -9,9 +9,8 @@ package Bugzilla::User::Session;
 
 use 5.10.1;
 use strict;
-use warnings;
 
-use base qw(Bugzilla::Object);
+use parent qw(Bugzilla::Object);
 
 #####################################################################
 # Overriden Constants that are used as methods

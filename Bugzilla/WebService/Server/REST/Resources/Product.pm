@@ -9,7 +9,6 @@ package Bugzilla::WebService::Server::REST::Resources::Product;
 
 use 5.10.1;
 use strict;
-use warnings;
 
 use Bugzilla::WebService::Constants;
 use Bugzilla::WebService::Product;

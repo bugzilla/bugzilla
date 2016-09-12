@@ -11,8 +11,8 @@ use strict;
 use warnings;
 $| = 1;
 
-use FindBin qw($RealBin);
-use lib ("$RealBin/../../..", "$RealBin/../../../lib", "$RealBin/../../../local/lib/perl5");
+use FindBin qw($Bin);
+use lib "$Bin/../../..";
 
 use Bugzilla;
 BEGIN { Bugzilla->extensions() }

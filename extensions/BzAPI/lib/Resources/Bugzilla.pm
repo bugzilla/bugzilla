@@ -9,7 +9,6 @@ package Bugzilla::Extension::BzAPI::Resources::Bugzilla;
 
 use 5.10.1;
 use strict;
-use warnings;
 
 use Bugzilla;
 use Bugzilla::Constants;

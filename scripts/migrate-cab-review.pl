@@ -11,7 +11,7 @@ use strict;
 use warnings;
 
 use FindBin qw($RealBin);
-use lib ("$RealBin/..", "$RealBin/../lib", "$RealBin/../local/lib/perl5");
+use lib "$RealBin/..";
 
 use Bugzilla;
 use Bugzilla::Bug;

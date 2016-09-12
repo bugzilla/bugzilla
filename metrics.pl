@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/bin/perl -w
 
 # This Source Code Form is subject to the terms of the Mozilla Public
 # License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -7,7 +7,6 @@
 # This Source Code Form is "Incompatible With Secondary Licenses", as
 # defined by the Mozilla Public License, v. 2.0.
 
-use 5.10.1;
 use strict;
 use warnings;
 
@@ -15,8 +14,9 @@ BEGIN {
     delete $ENV{SERVER_SOFTWARE};
 }
 
-use FindBin qw($RealBin);
-use lib ("$RealBin/.", "$RealBin/lib", "$RealBin/local/lib/perl5");
+use FindBin qw($Bin);
+use lib $Bin;
+use lib "$Bin/lib";
 
 use Bugzilla;
 use Bugzilla::Constants;

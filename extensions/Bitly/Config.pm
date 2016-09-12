@@ -6,21 +6,32 @@
 # defined by the Mozilla Public License, v. 2.0.
 
 package Bugzilla::Extension::Bitly;
-
-use 5.10.1;
 use strict;
-use warnings;
+
+use Bugzilla::Install::Util qw(vers_cmp);
 
 use constant NAME => 'Bitly';
 
 sub REQUIRED_MODULES {
-    return [
-        {
-            package => 'LWP',
-            module  => 'LWP',
-            version => '5.835',
-        },
-    ];
+    my @required;
+    push @required, {
+        package => 'LWP',
+        module  => 'LWP',
+        version => 5,
+    };
+    # LWP 6 split https support into a separate package
+    if (Bugzilla::Install::Requirements::have_vers({
+        package => 'LWP',
+        module  => 'LWP',
+        version => 6,
+    })) {
+        push @required, {
+            package => 'LWP-Protocol-https',
+            module  => 'LWP::Protocol::https',
+            version => 0
+        };
+    }
+    return \@required;
 }
 
 use constant OPTIONAL_MODULES => [
@@ -30,7 +41,5 @@ use constant OPTIONAL_MODULES => [
         version => 0
     },
 ];
-
-use constant API_VERSION_MAP  => { '1_0' => '1_0' };
 
 __PACKAGE__->NAME;

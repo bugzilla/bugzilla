@@ -12,7 +12,6 @@ package Bugzilla::S3;
 # - default to secure (https) connections to AWS
 #
 
-use 5.10.1;
 use strict;
 use warnings;
 

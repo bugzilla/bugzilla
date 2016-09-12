@@ -82,8 +82,7 @@ Without this argument, changes are not actually committed to the database.
 use strict;
 use warnings;
 
-use FindBin qw($RealBin);
-use lib ("$RealBin/..", "$RealBin/../lib", "$RealBin/../local/lib/perl5");
+use lib '.';
 
 use Bugzilla;
 use Getopt::Long;

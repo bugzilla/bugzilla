@@ -9,7 +9,7 @@
 use strict;
 
 use FindBin qw($RealBin);
-use lib ("$RealBin/..", "$RealBin/../lib", "$RealBin/../local/lib/perl5");
+use lib "$RealBin/..", "$RealBin/../lib";
 
 use Bugzilla;
 use Bugzilla::Constants;

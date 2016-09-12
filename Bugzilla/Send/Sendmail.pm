@@ -6,9 +6,8 @@
 # defined by the Mozilla Public License, v. 2.0.
 
 package Bugzilla::Send::Sendmail;
-use 5.10.1;
+
 use strict;
-use warnings;
 
 use base qw(Email::Send::Sendmail);
 

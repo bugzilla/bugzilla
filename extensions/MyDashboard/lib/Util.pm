@@ -7,9 +7,7 @@
 
 package Bugzilla::Extension::MyDashboard::Util;
 
-use 5.10.1;
 use strict;
-use warnings;
 
 use Bugzilla::CGI;
 use Bugzilla::Search;

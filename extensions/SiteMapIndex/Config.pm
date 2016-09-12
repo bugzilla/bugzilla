@@ -21,10 +21,7 @@
 #   Dave Lawrence <dkl@mozilla.com>
 
 package Bugzilla::Extension::SiteMapIndex;
-
-use 5.10.1;
 use strict;
-use warnings;
 
 use constant NAME => 'SiteMapIndex';
 

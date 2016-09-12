@@ -7,7 +7,6 @@
 
 package Bugzilla::Extension::UserStory::Constants;
 
-use 5.10.1;
 use strict;
 use warnings;
 

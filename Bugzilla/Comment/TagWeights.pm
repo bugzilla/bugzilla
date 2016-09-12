@@ -9,9 +9,8 @@ package Bugzilla::Comment::TagWeights;
 
 use 5.10.1;
 use strict;
-use warnings;
 
-use base qw(Bugzilla::Object);
+use parent qw(Bugzilla::Object);
 
 use Bugzilla::Constants;
 

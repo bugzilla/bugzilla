@@ -7,7 +7,6 @@
 
 package Bugzilla::Extension::GitHubAuth::Client::Error;
 
-use 5.10.1;
 use strict;
 use warnings;
 

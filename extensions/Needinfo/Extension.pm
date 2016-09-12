@@ -6,9 +6,7 @@
 # defined by the Mozilla Public License, v. 2.0.
 package Bugzilla::Extension::Needinfo;
 
-use 5.10.1;
 use strict;
-use warnings;
 
 use base qw(Bugzilla::Extension);
 

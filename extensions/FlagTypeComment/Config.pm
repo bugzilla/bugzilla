@@ -19,10 +19,7 @@
 #   byron jones <glob@mozilla.com>
 
 package Bugzilla::Extension::FlagTypeComment;
-
-use 5.10.1;
 use strict;
-use warnings;
 
 use constant NAME => 'FlagTypeComment';
 

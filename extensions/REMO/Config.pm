@@ -21,10 +21,7 @@
 #   David Lawrence <dkl@mozilla.com>
 
 package Bugzilla::Extension::REMO;
-
-use 5.10.1;
 use strict;
-use warnings;
 
 use constant NAME => 'REMO';
 

@@ -157,7 +157,7 @@
          "prereqs" : {
             "runtime" : {
                "requires" : {
-                  "JSON::RPC" : "0",
+                  "JSON::RPC" : "0"
                }
             }
          }

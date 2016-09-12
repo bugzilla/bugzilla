@@ -552,7 +552,7 @@
       [% END %]
       <br>
     [% END %]
-    Test mail sent to [% user.email %].
+    Test mail sent to [% user.email FILTER html %].
 
   [% ELSIF message_tag == "parameters_updated" %]
     [% title = "Parameters Updated" %]

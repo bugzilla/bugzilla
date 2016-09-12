@@ -87,7 +87,6 @@ optional_features:
     description: 'JSON-RPC Interface'
     requires:
       JSON::RPC: '0'
-      Test::Taint: '1.06'
   markdown:
     description: 'Markdown syntax support for comments'
     requires:
@@ -164,7 +163,6 @@ optional_features:
     description: 'XML-RPC Interface'
     requires:
       SOAP::Lite: '0.712'
-      Test::Taint: '1.06'
       XMLRPC::Lite: '0.712'
 recommends:
   CPAN::Meta::Prereqs: '2.132830'

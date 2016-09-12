@@ -158,7 +158,6 @@
             "runtime" : {
                "requires" : {
                   "JSON::RPC" : "0",
-                  "Test::Taint" : "1.06"
                }
             }
          }
@@ -337,7 +336,6 @@
             "runtime" : {
                "requires" : {
                   "SOAP::Lite" : "0.712",
-                  "Test::Taint" : "1.06",
                   "XMLRPC::Lite" : "0.712"
                }
             }

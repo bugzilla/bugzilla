@@ -174,7 +174,6 @@ my %optional_features = (
                 requires => {
                     'XMLRPC::Lite' => '0.712',
                     'SOAP::Lite'   => '0.712',
-                    'Test::Taint'  => '1.06'
                 }
             }
         }
@@ -228,7 +227,7 @@ my %optional_features = (
         description => 'JSON-RPC Interface',
         prereqs     => {
             runtime =>
-                { requires => { 'JSON::RPC' => 0, 'Test::Taint' => '1.06' } }
+                { requires => { 'JSON::RPC' => 0 } }
         }
     },
     graphical_reports => {

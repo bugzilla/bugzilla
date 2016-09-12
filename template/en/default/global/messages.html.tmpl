@@ -544,6 +544,16 @@
       No changes made to milestone <em>[% milestone.name FILTER html %]</em>.
     [% END %]
 
+  [% ELSIF message_tag == "mta_param_tests_run" %]
+    [% title = "Parameters Updated And Test Email Sent" %]
+    [% IF param_changed.size > 0 %]
+      [% FOREACH param = param_changed %]
+        Changed <em>[% param FILTER html %]</em>.<br>
+      [% END %]
+      <br>
+    [% END %]
+    Test mail sent to [% user.email %].
+
   [% ELSIF message_tag == "parameters_updated" %]
     [% title = "Parameters Updated" %]
     [% IF param_changed.size > 0 %]

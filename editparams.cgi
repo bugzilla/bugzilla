@@ -147,6 +147,20 @@ if ($action eq 'save' && $current_module) {
     delete_token($token);
 }
 
+if ($cgi->param('save-and-test-mta-params') &&
+    $cgi->request_method() eq "POST")
+{
+    my $message;
+    my $mail_template = Bugzilla->template_inner($user->setting('lang'));
+    $mail_template->process('email/mta-test.txt.tmpl', undef, \$message);
+    require Bugzilla::Mailer;
+
+    # This will throw all sorts of useful errors if mail is not working
+    Bugzilla::Mailer::MessageToMTA($message);
+
+    $vars->{'message'} = 'mta_param_tests_run';
+}
+
 $vars->{'token'} = issue_session_token('edit_parameters');
 
 $template->process("admin/params/editparams.html.tmpl", $vars)

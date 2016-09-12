@@ -93,6 +93,9 @@
           <input type="hidden" name="action" value="save">
           <input type="hidden" name="token" value="[% token FILTER html %]">
           <input type="submit" id="save-params" value="Save Changes">
+          [% IF panel.name == "mta" %]
+            <input type="submit" id="save-and-test-mta-params" name="save-and-test-mta-params" value="Save Changes And Send Test Email">
+          [% END %]
         </form>
     [% END %]
   </div>

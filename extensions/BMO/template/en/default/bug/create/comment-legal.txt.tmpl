@@ -20,20 +20,11 @@
 [% USE Bugzilla %]
 [% cgi = Bugzilla.cgi %]
 
-Priority for your Team:
-[%+ cgi.param('teampriority') %]
+>> Business Unit
+[%+ cgi.param('business_unit') %]
 
-Timeframe for Completion:
-[%+ cgi.param('timeframe') %]
+>> Important Dates
+[%+ cgi.param('important_dates') %]
 
-Goal:
-[%+ cgi.param('goal') %]
-
-Business Objective:
-[%+ cgi.param('busobj') %]
-
-Other Party:
-[%+ cgi.param('otherparty') %]
-
-Description:
+>> Description
 [%+ cgi.param("comment") %]

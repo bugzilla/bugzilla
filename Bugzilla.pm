@@ -651,12 +651,10 @@ sub local_timezone {
              ||= DateTime::TimeZone->new(name => 'local');
 }
 
-my $request_cache = Bugzilla::Install::Util::_cache();
-
-sub request_cache { return $request_cache }
+use constant request_cache => Bugzilla::Install::Util::_cache();
 
 sub clear_request_cache {
-    %$request_cache = ();
+    %{ request_cache() } = ();
 }
 
 # This is a per-process cache.  Under mod_cgi it's identical to the

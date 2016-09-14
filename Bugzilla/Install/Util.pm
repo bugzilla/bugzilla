@@ -657,8 +657,7 @@ sub prevent_windows_dialog_boxes {
 
 # This is like request_cache, but it's used only by installation code
 # for checksetup.pl and things like that.
-my $_cache = {};
-sub _cache { return $_cache; }
+use constant _cache => {};
 
 ###############################
 # Copied from Bugzilla::Util #

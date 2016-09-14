@@ -211,18 +211,16 @@ _check_group('pr-private');
 # legal
 
 _check_product('Legal');
-_check_component('Legal', 'Canonical');
-_check_component('Legal', 'Copyright');
-_check_group('mozilla-employee-confidential');
+_check_component('Legal', 'Contract Request');
 
 $sel->open_ok("/$config->{bugzilla_installation}/enter_bug.cgi?product=Legal&format=legal");
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_is("Mozilla Corporation Legal Requests", "Open custom bug entry form - legal");
-$sel->select_ok("component", "value=Canonical", "Select request type");
+$sel->select_ok("component", "value=Contract Request", "Select request type");
+$sel->select_ok("business_unit", "value=Connected Devices", "Select business unit");
 $sel->type_ok("short_desc", "Bug created by Selenium", "Enter request summary");
 $sel->type_ok("cc", $config->{'unprivileged_user_login'}, "Enter cc address");
-$sel->type_ok("otherparty", "Other party", "Enter other party");
-$sel->type_ok("busobj", "Business objective", "Enter business objective");
+$sel->type_ok("important_dates", "Important dates", "Enter important dates");
 $sel->type_ok("comment", "--- Bug created by Selenium ---", "Enter request description");
 $sel->click_ok("commit", undef, "Submit bug data to post_bug.cgi");
 $sel->wait_for_page_to_load_ok(WAIT_TIME);

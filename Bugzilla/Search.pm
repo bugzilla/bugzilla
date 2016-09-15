@@ -163,6 +163,8 @@ use constant OPERATORS => {
     changedby      => \&_changedby,
     isempty        => \&_isempty,
     isnotempty     => \&_isnotempty,
+    isactive       => \&_isactive,
+    isnotactive    => \&_isactive,
 };
 
 # Some operators are really just standard SQL operators, and are
@@ -191,6 +193,8 @@ use constant OPERATOR_REVERSE => {
     greaterthaneq  => 'lessthan',
     isempty        => 'isnotempty',
     isnotempty     => 'isempty',
+    isactive       => 'isnotactive',
+    isnotactive    => 'isactive',
     # The following don't currently have reversals:
     # casesubstring, anyexact, allwords, allwordssubstr
 };
@@ -210,6 +214,8 @@ use constant NON_NUMERIC_OPERATORS => qw(
 use constant NO_VALUE_OPERATORS => qw(
     isempty
     isnotempty
+    isactive
+    isnotactive
 );
 
 use constant MULTI_SELECT_OVERRIDE => {
@@ -934,6 +940,16 @@ sub _multi_select_fields {
         by_name => 1,
         type    => [FIELD_TYPE_MULTI_SELECT, FIELD_TYPE_BUG_URLS]});
     return $self->{multi_select_fields};
+}
+
+# Select custom fields have an active field, so we need to know these fields
+# too. The type is important as we handle them differently.
+sub _select_fields {
+    my ($self) = @_;
+    $self->{select_fields} ||= Bugzilla->fields({
+        by_name => 1,
+        type    => [FIELD_TYPE_MULTI_SELECT, FIELD_TYPE_SINGLE_SELECT]});
+    return $self->{select_fields};
 }
 
 # $self->{params} contains values that could be undef, could be a string,
@@ -2478,7 +2494,7 @@ sub _user_nonchanged {
         # For negative operators, the system we're using here
         # only works properly if we reverse the operator and check IS NULL
         # in the WHERE.
-        my $is_negative = $operator =~ /^(?:no|isempty)/ ? 1 : 0;
+        my $is_negative = $operator ne 'notactive' && $operator =~ /^(?:no|isempty)/ ? 1 : 0;
         if ($is_negative) {
             $args->{operator} = $self->_reverse_operator($operator);
         }
@@ -2612,6 +2628,10 @@ sub _long_desc_nonchanged {
     if ($operator =~ /^is(not)?empty$/) {
         $args->{term} = $self->_multiselect_isempty($args, $operator eq 'isnotempty');
         return;
+    }
+    if ($operator =~ /^is(not)?active$/) {
+        # Comments can't be (in)active
+        $self->_invalid_combination($args);
     }
     my $dbh = Bugzilla->dbh;
 
@@ -2948,7 +2968,7 @@ sub _flagtypes_nonchanged {
     # If you search for "Flags" (does not contain) "approval+" we actually want
     # to return *bugs* that don't contain an approval+ flag.  Without rewriting
     # the negation we'll search for *flags* which don't contain approval+.
-    if ($operator =~ s/^not//) {
+    if ($operator ne 'notactive' && $operator =~ s/^not//) {
         $args->{operator} = $operator;
         $condition->operator($operator);
         $condition->negate(1);
@@ -3439,6 +3459,76 @@ sub _empty_value {
     return Bugzilla->dbh->quote(EMPTY_DATETIME) if $field_obj->type == FIELD_TYPE_DATETIME;
     return Bugzilla->dbh->quote(EMPTY_DATE) if $field_obj->type == FIELD_TYPE_DATE;
     return "''";
+}
+
+sub _isactive {
+    my ($self, $args) = @_;
+    my ($field, $chart_id, $operator, $joins, $bugs_table) =
+        @$args{qw(field chart_id operator joins bugs_table)};
+
+    my $value = $operator eq 'isnotactive' ? 0 : 1;
+
+    my @simple_fields = qw(bug_severity bug_status op_sys priority rep_platform
+        resolution version
+     );
+    my @user_fields = qw(attachments.submitter assigned_to assigned_to_realname
+        cc commenter reporter reporter_realname requestees.login_name
+        setters.login_name qa_contact qa_contact_realname
+    );
+
+    if ($field eq 'product' or $field eq 'component') {
+        $args->{term} = "${field}s.isactive = $value";
+    }
+    elsif (grep {$_ eq $field} @simple_fields) {
+        push @$joins, {
+            table => ($field eq 'version' ? 'versions' : $field),
+            as    => "${field}_$chart_id",
+            from  => $field,
+            to    => 'value',
+        };
+        $args->{term} = "${field}_$chart_id.isactive = $value";
+    }
+    elsif ($field eq 'flagtypes.name') {
+        $args->{term} = "flagtypes_$chart_id.is_active = $value";
+    }
+    elsif ($field eq 'bug_group') {
+        $args->{term} = "groups.isactive = $value";
+    }
+    elsif ($field eq 'keywords') {
+        $args->{term} = "keyworddefs.is_active = $value";
+    }
+    elsif ($field eq 'target_milestone') {
+        push @$joins, {
+            table => 'milestones',
+            as    => "milestones_$chart_id",
+            from  => 'target_milestone',
+            to    => 'value',
+        };
+        $args->{term} = qq{
+            (milestones_$chart_id.product_id = bugs.product_id AND
+             milestones_$chart_id.isactive = $value)
+        };
+    }
+    elsif (grep {$_ eq $field} @user_fields) {
+        my $as = "name_${field}_$chart_id";
+        # For fields with periods in their name.
+        $as =~ s/\./_/;
+        $args->{full_field} = "$as.disabled_text";
+        my $op = $value ? '=' : '!=';
+        $args->{term} = "$as.disabledtext $op ''";
+    }
+
+    elsif (my $field_obj = $self->_select_fields->{$field}) {
+        my $field_type = $field_obj->type;
+        $args->{term} = $field_type == FIELD_TYPE_MULTI_SELECT
+            ? 'value'
+            : "bugs.$field";
+        $args->{term} .= " IN (SELECT value FROM $field WHERE $field.isactive = $value)";
+    }
+    else {
+        # This field does not have an active value
+        $self->_invalid_combination($args);
+    }
 }
 
 ######################

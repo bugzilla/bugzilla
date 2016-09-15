@@ -212,6 +212,7 @@ _check_group('pr-private');
 
 _check_product('Legal');
 _check_component('Legal', 'Contract Request');
+_check_group('mozilla-employee-confidential'); 
 
 $sel->open_ok("/$config->{bugzilla_installation}/enter_bug.cgi?product=Legal&format=legal");
 $sel->wait_for_page_to_load_ok(WAIT_TIME);

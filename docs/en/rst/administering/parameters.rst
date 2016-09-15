@@ -239,10 +239,6 @@ attachment_base
     :param:`urlbase` or :param:`sslbase`. That is, a different domain name that
     resolves to this exact same Bugzilla installation.
 
-    Note that if you have set the :param:`cookiedomain` parameter, you should
-    set :param:`attachment_base` to use a domain that would not be matched by
-    :param:`cookiedomain`.
-
     For added security, you can insert ``%bugid%`` into the URL, which will be
     replaced with the ID of the current bug that the attachment is on, when you
     access an attachment. This will limit attachments to accessing only other
@@ -824,15 +820,6 @@ confirmuniqueusermatch
 
 Advanced
 ========
-
-cookiedomain
-    Defines the domain for Bugzilla cookies. This is typically left blank.
-    If there are multiple hostnames that point to the same webserver, which
-    require the same cookie, then this parameter can be utilized. For
-    example, If your website is at
-    ``https://bugzilla.example.com/``, setting this to
-    :paramval:`.example.com/` will also allow
-    ``attachments.example.com/`` to access Bugzilla cookies.
 
 inbound_proxies
     When inbound traffic to Bugzilla goes through a proxy, Bugzilla thinks that

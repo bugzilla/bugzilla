@@ -451,8 +451,7 @@ sub send_cookie {
     # Add the default path and the domain in.
     my $uri = URI->new(Bugzilla->params->{urlbase});
     $paramhash{'-path'} = $uri->path;
-    $paramhash{'-domain'} = Bugzilla->params->{'cookiedomain'}
-        if Bugzilla->params->{'cookiedomain'};
+    $paramhash{'-domain'} = $uri->host if $uri->host;
 
     push(@{$self->{'Bugzilla_cookie_list'}}, $self->cookie(%paramhash));
 }

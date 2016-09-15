@@ -41,13 +41,6 @@
 [% END %]
 
 [% param_descs = {
-  cookiedomain => 
-    "If your website is at 'www.foo.com', setting this to"
-    _ " '.foo.com' will also allow 'bar.foo.com' to access"
-    _ " Bugzilla cookies. This is useful if you have more than"
-    _ " one hostname pointing at the same web server, and you"
-    _ " want them to share the Bugzilla cookie.",
-
   inbound_proxies =>
     "When inbound traffic to Bugzilla goes through a proxy,"
     _ " Bugzilla thinks that the IP address of every single"

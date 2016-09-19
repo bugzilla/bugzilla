@@ -137,6 +137,7 @@ tie(%$cf_visible_in_products, "Tie::IxHash",
         "Firefox"             => [],
         "Hello (Loop)"        => [],
         "Cloud Services"      => [],
+        "Tech Evangelism"     => [],
         "Toolkit"             => [],
     },
     qr/^cf_has_regression_range$/ => {

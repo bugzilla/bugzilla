@@ -19,8 +19,18 @@ modules, including make(1) and a C compiler.
 For Developers
 --------------
 
-If you have the `cpanm <https://github.com/miyagawa/cpanminus#installation>`__ script in your $PATH,
-Bugzilla can be up and running in three commands.
+Debian/Ubuntu users: you probably need to run the following:
+
+.. code-block:: bash
+    sudo apt-get install git perl cpanminus build-essential libexpat-dev libssl-dev
+
+CentOS / Fedora users:
+
+.. code-block:: bash
+     sudo yum group install -y "Development tools"
+     sudo yum install -y perl-App-cpanminus
+
+After that, you should run the following command from a git clone of this repository:
 
 .. code-block:: bash
 

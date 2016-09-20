@@ -22,11 +22,13 @@ For Developers
 Debian/Ubuntu users: you probably need to run the following:
 
 .. code-block:: bash
+
     sudo apt-get install git perl cpanminus build-essential libexpat-dev libssl-dev
 
 CentOS / Fedora users:
 
 .. code-block:: bash
+
      sudo yum group install -y "Development tools"
      sudo yum install -y perl-App-cpanminus
 

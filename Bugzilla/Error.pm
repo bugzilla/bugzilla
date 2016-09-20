@@ -22,6 +22,7 @@ use Bugzilla::Hook;
 use Carp;
 use Data::Dumper;
 use Date::Format;
+use Scalar::Util qw(blessed);
 
 sub _throw_error {
     my ($name, $error, $vars) = @_;
@@ -68,7 +69,7 @@ sub _throw_error {
     # There are some tests that throw and catch a lot of errors,
     # and calling $template->process over and over for those errors
     # is too slow. So instead, we just "die" with a dump of the arguments.
-    if (Bugzilla->error_mode != ERROR_MODE_TEST) {
+    if (Bugzilla->error_mode != ERROR_MODE_TEST && !$Bugzilla::Template::is_processing) {
         $template->process($name, $vars, \$message)
           || ThrowTemplateError($template->error());
     }
@@ -77,6 +78,12 @@ sub _throw_error {
     # or extend the default behavior, or add their own error codes.
     Bugzilla::Hook::process('error_catch', { error => $error, vars => $vars,
                                              message => \$message });
+
+    if ($Bugzilla::Template::is_processing) {
+        $name =~ /^global\/(user|code)-error/;
+        my $type = $1 // 'unknown';
+        die Template::Exception->new("bugzilla.$type.$error", $vars);
+    }
 
     if (Bugzilla->error_mode == ERROR_MODE_WEBPAGE) {
         my $cgi = Bugzilla->cgi;
@@ -149,7 +156,7 @@ sub ThrowCodeError {
     # Don't show the error as coming from Bugzilla::Error, show it
     # as coming from the caller.
     local $Carp::CarpInternal{'Bugzilla::Error'} = 1;
-    $vars->{traceback} = Carp::longmess();
+    $vars->{traceback} //= Carp::longmess();
 
     _throw_error("global/code-error.html.tmpl", @_);
 }
@@ -160,6 +167,14 @@ sub ThrowTemplateError {
 
     # Make sure the transaction is rolled back (if supported).
     $dbh->bz_rollback_transaction() if $dbh->bz_in_transaction();
+
+    if (blessed($template_err) && $template_err->isa('Template::Exception')) {
+        my $type = $template_err->type;
+        if ($type =~ /^bugzilla\.(code|user)\.(.+)/) {
+            _throw_error("global/$1-error.html.tmpl", $2, $template_err->info);
+            return;
+        }
+    }
 
     my $vars = {};
     if (Bugzilla->error_mode == ERROR_MODE_DIE) {

@@ -468,12 +468,12 @@ sub count {
     my $dbh = Bugzilla->dbh;
     ($self->{'count'}) = $dbh->selectrow_array(
         "SELECT COUNT(*)
-           FROM longdescs 
-          WHERE bug_id = ? 
-                AND bug_when <= ?",
-        undef, $self->bug_id, $self->creation_ts);
+           FROM longdescs
+          WHERE bug_id = ?
+                AND comment_id < ?",
+        undef, $self->bug_id, $self->id);
 
-    return --$self->{'count'};
+    return $self->{'count'};
 }
 
 1;

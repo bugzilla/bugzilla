@@ -388,6 +388,7 @@ sub _translate_comment {
         is_private => $self->type('boolean', $comment->is_private),
         text       => $self->type('string', $comment->body_full),
         attachment_id => $self->type('int', $attach_id),
+        count      => $self->type('int', $comment->count),
     };
 
     # Don't load comment tags unless enabled

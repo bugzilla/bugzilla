@@ -357,26 +357,10 @@ WriteMakefile(
 );
 
 sub MY::postamble {
-    my $modules = join(' ',
-        qw(
-            CPAN::Meta
-            CPAN::Meta::Requirements
-            Parse::CPAN::Meta
-            Module::Metadata
-        )
-    );
     return <<MAKE;
-GEN_CPANFILE_ARGS = -A -U mod_perl -U oracle
+GEN_CPANFILE_ARGS = -D bmo
 cpanfile: MYMETA.json
 \t\$(PERLRUN) gen-cpanfile.pl \$(GEN_CPANFILE_ARGS)
-
-checksetup_lib: Makefile.PL
-\tcpanm -l .checksetup_lib $modules
-\t-rm -fr .checksetup_lib/man
-\t-rm -fr .checksetup_lib/lib/perl5/*/.meta
-\t-rm -fr .checksetup_lib/lib/perl5/Test
-\t-rm -fr .checksetup_lib/lib/perl5/ok.pm
-\t-find .checksetup_lib '(' -name '*.pod' -or -name .packlist ')' -print0 | xargs -0 rm -f
 
 META.json: Makefile.PL
 \tmake distmeta 2>&1 /dev/null; mv */META.json .

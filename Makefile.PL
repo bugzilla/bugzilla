@@ -47,6 +47,8 @@ END {
 # PREREQ_PM
 my %requires = (
     'CGI'                      => '3.51',
+    'CPAN::Meta::Prereqs'      => '2.132830',
+    'CPAN::Meta::Requirements' => '2.121',
     'DBI'                      => '1.614',
     'Date::Format'             => '2.23',
     'DateTime'                 => '0.75',
@@ -58,14 +60,13 @@ my %requires = (
     'JSON::XS'                 => '2.01',
     'List::MoreUtils'          => '0.22',
     'Math::Random::ISAAC'      => '1.0.1',
+    'Module::Metadata'         => '1.000033',
+    'Module::Runtime'          => 0,
+    'Moo'                      => 2,
+    'Parse::CPAN::Meta'        => '1.44',
     'Template'                 => '2.24',
     'URI'                      => '1.55',
     'version'                  => '0.87',
-    'Parse::CPAN::Meta'        => '1.44',
-    'CPAN::Meta::Prereqs'      => '2.132830',
-    'CPAN::Meta::Requirements' => '2.121',
-    'Module::Metadata'         => '1.000033',
-    'Module::Runtime'          => 0,
 );
 my %build_requires = (
     'ExtUtils::MakeMaker' => '6.57_07',

@@ -35,12 +35,18 @@
 [% inline_javascript = BLOCK %]
 $(function() {
   $('#nda_needed').on('change', function() {
-    if ($('#nda_needed').val() == 'Yes')
+    if ($('#nda_needed').val() == 'Yes') {
       $('#nda_needed_reason_row').show();
-      $('#nda_needed_reason').attr('disabled', false);
-    else
+    } else {
       $('#nda_needed_reason_row').hide();
-      $('#nda_needed_reason').attr('disabled', true);
+    }
+  });
+  $('#ndaForm').submit(function () {
+    if ($('#nda_needed').val() == 'Yes' && $('#nda_needed_reason').val() == '') {
+      alert('Please explain why confidential information needs to be shared at this stage.');
+      return false;
+    }
+    return true;
   });
 });
 [% END %]
@@ -93,7 +99,7 @@ $(function() {
         <strong>If yes, please explain.</strong>
       </label>
     </div>
-    <textarea required="true"  name="nda_needed_reason" id="nda_needed_reason" cols="80" rows="10"></textarea>
+    <textarea name="nda_needed_reason" id="nda_needed_reason" cols="80" rows="10"></textarea>
   </div>
 
   <div class="row">

@@ -1,0 +1,53 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% PROCESS global/header.html.tmpl
+  title = "Persona Deprecated"
+%]
+
+<h2>Persona Deprecated</h2>
+
+<p>
+  Beginning on October 25th, 2016, <a href="https://login.persona.org">Persona</a> is no longer a supported authentication method
+  for bugzilla.mozilla.org (BMO). The Mozilla supported Persona service will cease operations on November 30th, 2016 so therefore
+  BMO will not longer be able to use the service for authentication. You can go
+  <a href="https://wiki.mozilla.org/Identity/Persona_Shutdown_Guidelines_for_Reliers">here</a> for more information about Persona
+  and the reasons for shutting down service.
+</p>
+
+<p>
+  For users of Persona on BMO, there are two other methods for authentication that are supported and you will need to switch
+  over to one of them before October 25th, 2016.
+</p>
+
+<h3>Native Login</h3>
+
+<p>
+  BMO has always supported native authentication using a password securely stored in our database. If you have used Persona since
+  first creating your BMO account, you will probably not know this password. But you can reset it to something you do know by clicking
+  on 'Forgot Password' at the right-hand top of the page. Enter your email you used with Persona in the text field and click
+  'Reset Password'.
+</p>
+
+<p>
+  You will receive an email with a link you can use to reset your current password to something you can use from now on.
+  After you reset your password, simply enter your login and the password in the login fields at the top of any BMO page.
+</p>
+
+<h3>Github Login</h3>
+
+<p>
+  <a href="https://github.com">Github</a> is also a BMO supported method of authentication. To use Github, click 'Login' at the top
+  of any BMO page and then click on the 'Github' login image. You will need to have a Github account that has an email address the same
+  as the Persona email you were using, otherwise a different BMO account will be created. You will be able to choose the email address
+  you want to use for BMO if you have more than one configured in your Github profile. If none of the email addresses you have
+  configured in Github match what you were using for Persona, native login described above may be your best choice if you want to
+  retain your BMO data.
+</p>
+
+[% PROCESS global/footer.html.tmpl %]

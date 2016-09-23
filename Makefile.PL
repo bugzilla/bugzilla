@@ -267,6 +267,14 @@ my %optional_features = (
             }
         }
     },
+    linux_pid => {
+        description => 'Linux::PID for MozReview',
+        prereqs => {
+            runtime => {
+                requires => { 'Linux::Pid' => 0 },
+            },
+        },
+    },
     jobqueue => {
         description => 'Mail Queueing',
         prereqs     => {
@@ -315,6 +323,7 @@ my @bmo_features = grep {
           | auth_ldap
           | auth_radius
           | smtp_auth
+          | linux_pid
           | updates)
         $
     }mxs;

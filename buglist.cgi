@@ -458,15 +458,7 @@ my $format = $template->get_format("list/list", scalar $params->param('format'),
 #
 # Server push is compatible with Gecko-based browsers and Opera, but not with
 # MSIE, Lynx or Safari (bug 441496).
-
-if (Bugzilla->params->{disable_server_push}) {
-     
-    $serverpush = 0;
     
-}
-
-else{
-
 my $serverpush =
   $format->{'extension'} eq "html"
     && exists $ENV{'HTTP_USER_AGENT'}
@@ -475,7 +467,13 @@ my $serverpush =
           && $ENV{'HTTP_USER_AGENT'} !~ /(?:WebKit|Trident|KHTML)/
             && !defined($cgi->param('serverpush'))
               || $cgi->param('serverpush');
+
+if (Bugzilla->params->{disable_server_push}) {
+ 
+    $serverpush = 0;
 }
+
+
 
 
 # Generate a reasonable filename for the user agent to suggest to the user

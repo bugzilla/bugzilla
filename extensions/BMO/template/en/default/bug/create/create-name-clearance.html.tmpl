@@ -41,6 +41,13 @@ label.required:before {
 
 [% inline_javascript = BLOCK %]
 $(function() {
+  $('#nameForm').submit(function () {
+    var short_desc = $('#short_desc');
+    var name = $('#name_choice').val();
+    var business_unit = $('#business_unit').val();
+    short_desc.val('New Name Clearance Request for ' + encodeURIComponent(name) +
+                   ' for ' + encodeURIComponent(business_unit));
+  });
   $('#other_company_name').on('change', function() {
     if ($('#other_company_name').val() == 'Yes') {
       $('#other_companies_row').show();
@@ -143,6 +150,21 @@ $(function() {
 
   <div class="row">
     <div class="row_desc">
+      <label class="required" for="timeframe">
+        <strong>How soon do you need the results?</strong>
+      </label>
+    </div>
+    <select required="true" name="timeframe" id="timeframe">
+      <option value="">-- Select --</option>
+      <option value="2 days">2 days</option>
+      <option value="a week">a week</option>
+      <option value="2-3 weeks">2-3 weeks</option>
+      <option value="no rush">no rush</option>
+    </select>
+  </div>
+
+  <div class="row">
+    <div class="row_desc">
       <label class="required" for="other_company_name">
         <strong>Are other companies using the name?</strong>
       </label>
@@ -151,6 +173,7 @@ $(function() {
       <option value="">-- Select --</option>
       <option value="Yes">Yes</option>
       <option value="No">No</option>
+      <option value="Don't know">Don't know</option>
     </select>
   </div>
 
@@ -165,11 +188,11 @@ $(function() {
 
   <div class="row">
     <div class="row_desc">
-      <label class="required" for="extra_info">
+      <label for="extra_info">
         <strong>Anything else you want us to know?</strong>
       </label>
     </div>
-    <textarea required="true" name="extra_info" id="extra_info" cols="80" rows="10"></textarea>
+    <textarea name="extra_info" id="extra_info" cols="80" rows="10"></textarea>
   </div>
 
   <input type="submit" id="commit" value="Submit Request">

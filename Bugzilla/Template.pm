@@ -1094,19 +1094,6 @@ sub create {
 
             # These don't work as normal constants.
             DB_MODULE        => \&Bugzilla::Constants::DB_MODULE,
-            REQUIRED_MODULES => 
-                \&Bugzilla::Install::Requirements::REQUIRED_MODULES,
-            OPTIONAL_MODULES => sub {
-                my @optional = @{OPTIONAL_MODULES()};
-                foreach my $item (@optional) {
-                    my @features;
-                    foreach my $feat_id (@{ $item->{feature} }) {
-                        push(@features, install_string("feature_$feat_id"));
-                    }
-                    $item->{feature} = \@features;
-                }
-                return \@optional;
-            },
             'default_authorizer' => sub { return Bugzilla::Auth->new() },
 
             # It is almost always better to do mobile feature detection, client side in js.

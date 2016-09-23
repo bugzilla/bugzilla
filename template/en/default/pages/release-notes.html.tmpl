@@ -395,22 +395,6 @@
 
 [% INCLUDE db_req db='sqlite' %]
 
-<h3 id="v42_req_modules">Required Perl Modules</h3>
-
-[% INCLUDE req_table reqs = REQUIRED_MODULES
-                     new = ['Math-Random-ISAAC']
-                     updated = ['URI'] %]
-
-<h3 id="v42_req_optional_mod">Optional Perl Modules</h3>
-
-<p>The following perl modules, if installed, enable various
-  features of [% terms.Bugzilla %]:</p>
-
-[% INCLUDE req_table reqs = OPTIONAL_MODULES
-                     new  = ['Encode', 'Encode-Detect']
-                     updated = ['PatchReader', 'Apache-SizeLimit']
-                     include_feature = 1 %]
-
 <h3 id="v42_req_apache">Optional Apache Modules</h3>
 
 <p>If you are using Apache as your webserver, [% terms.Bugzilla %] can

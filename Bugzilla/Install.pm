@@ -92,6 +92,8 @@ sub SETTINGS {
     possible_duplicates => { options => ['on', 'off'], default => 'on' },
     # 2014-05-24 koosha.khajeh@gmail.com -- Bug 1014164
     use_markdown       => { options => ['on', 'off'], default => 'on' },
+    # 2016-09-26 fromu2valery@gmail.com -- Bug 1111338
+    disable_server_push       => { options => ['on', 'off'], default => 'off' },
     }
 };
 

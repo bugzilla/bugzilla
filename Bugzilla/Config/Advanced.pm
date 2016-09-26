@@ -30,12 +30,6 @@ use constant get_param_list => (
   },
 
   {
-    name => 'disable_server_push',
-    type => 'b',
-    default => 0
-  },
-
-  {
    name => 'strict_transport_security',
    type => 's',
    choices => ['off', 'this_domain_only', 'include_subdomains'],

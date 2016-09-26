@@ -468,13 +468,8 @@ my $serverpush =
             && !defined($cgi->param('serverpush'))
               || $cgi->param('serverpush');
 
-if (Bugzilla->params->{disable_server_push}) {
- 
-    $serverpush = 0;
-}
 
-
-
+Bugzilla->user->settings->{disable_server_push}->{value};
 
 # Generate a reasonable filename for the user agent to suggest to the user
 # when the user saves the bug list.  Uses the name of the remembered query

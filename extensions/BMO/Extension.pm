@@ -675,7 +675,7 @@ sub bug_format_comment {
         match => qr/(^|\s)r(\d{4,})\b/,
         replace => sub {
             my $args = shift;
-            my $match = $args->{matches}->[1];
+            my $match = html_quote($args->{matches}->[1]);
             return
                 $args->{matches}->[0] .
                 qq{<a href="https://viewvc.svn.mozilla.org/vc?view=rev&amp;revision=$match">r$match</a>};
@@ -690,8 +690,8 @@ sub bug_format_comment {
             my $args = shift;
             my $preamble = html_quote($args->{matches}->[0]);
             my $repo = html_quote($args->{matches}->[1]);
-            my $text = $args->{matches}->[2];
-            my $revision = $args->{matches}->[3];
+            my $text = html_quote($args->{matches}->[2]);
+            my $revision = html_quote($args->{matches}->[3]);
             $repo = 'mozilla/webtools-bmo-bugzilla' if $repo =~ /^webtools\/bmo\/bugzilla/;
             $repo = 'bugzilla/bugzilla' if $repo =~ /^bugzilla\/bugzilla\.git/;
             $repo = 'bugzilla/bugzilla.org' if $repo =~ /^www\/bugzilla\.org/;
@@ -707,8 +707,8 @@ sub bug_format_comment {
             my $args = shift;
             my $preamble = html_quote($args->{matches}->[0]);
             my $repo = html_quote($args->{matches}->[1]);
-            my $text = $args->{matches}->[2];
-            my $revision = $args->{matches}->[3];
+            my $text = html_quote($args->{matches}->[2]);
+            my $revision = html_quote($args->{matches}->[3]);
             return qq#$preamble<a href="https://github.com/$repo/commit/$revision">$text</a>#;
         }
     });
@@ -721,19 +721,19 @@ sub bug_format_comment {
             my $args  = shift;
             my $match = $args->{matches}->[0];
             my $uri   = URI->new($match);
+            my $text  = html_quote($match);
 
             # Only work on BMO and Bugzilla repos
-            my $repo = $uri->query_param_delete("p")  || '';
+            my $repo = html_quote($uri->query_param_delete("p")) || '';
             if ($repo !~ /(webtools\/bmo|bugzilla)\//) {
-                return qq#<a href="$match">$match</a>#;
+                return qq#<a href="$text">$text</a>#;
             }
 
-            my $text     = html_quote($match);
-            my $action   = $uri->query_param_delete("a")  || '';
-            my $file     = $uri->query_param_delete("f")  || '';
-            my $frag     = $uri->fragment                 || '';
-            my $from_rev = $uri->query_param_delete("h")  || '';
-            my $to_rev   = $uri->query_param_delete("hb") || '';
+            my $action   = html_quote($uri->query_param_delete("a"))  || '';
+            my $file     = html_quote($uri->query_param_delete("f"))  || '';
+            my $frag     = html_quote($uri->fragment)                 || '';
+            my $from_rev = html_quote($uri->query_param_delete("h"))  || '';
+            my $to_rev   = html_quote($uri->query_param_delete("hb")) || '';
 
             if ($frag) {
                $frag =~ tr/l/L/;

@@ -38,6 +38,7 @@ use constant DB_COLUMNS => qw(
     initialqacontact
     description
     isactive
+    triage_owner_id
 );
 
 use constant UPDATE_COLUMNS => qw(
@@ -46,6 +47,7 @@ use constant UPDATE_COLUMNS => qw(
     initialqacontact
     description
     isactive
+    triage_owner_id
 );
 
 use constant REQUIRED_FIELD_MAP => {
@@ -61,6 +63,7 @@ use constant VALIDATORS => {
     initial_cc       => \&_check_cc_list,
     name             => \&_check_name,
     isactive         => \&Bugzilla::Object::check_boolean,
+    triage_owner_id  => \&_check_triage_owner,
 };
 
 use constant VALIDATOR_DEPENDENCIES => {
@@ -242,6 +245,13 @@ sub _check_cc_list {
     return [keys %cc_ids];
 }
 
+sub _check_triage_owner {
+    my ($invocant, $triage_owner) = @_;
+    my $triage_owner_id;
+    $triage_owner_id = Bugzilla::User->check($triage_owner)->id if $triage_owner;
+    return $triage_owner_id;
+}
+
 ###############################
 ####       Methods         ####
 ###############################
@@ -317,6 +327,12 @@ sub set_cc_list {
     # Reset the list of CC user objects.
     delete $self->{initial_cc};
 }
+sub set_triage_owner {
+    my ($self, $triage_owner) = @_;
+    $self->set('triage_owner_id', $triage_owner);
+    # Reset the triage owner object
+    delete $self->{triage_owner};
+}
 
 sub bug_count {
     my $self = shift;
@@ -358,6 +374,17 @@ sub default_qa_contact {
         $self->{'default_qa_contact'} = new Bugzilla::User($params);
     }
     return $self->{'default_qa_contact'};
+}
+
+sub triage_owner {
+    my $self = shift;
+    if (!defined $self->{'triage_owner'}) {
+        my $params = $self->{'triage_owner_id'}
+                     ? { id => $self->{'triage_owner_id'}, cache => 1 }
+                     : $self->{'triage_owner_id'};
+        $self->{'triage_owner'} = Bugzilla::User->new($params);
+    }
+    return $self->{'triage_owner'};
 }
 
 sub flag_types {
@@ -454,6 +481,7 @@ Bugzilla::Component - Bugzilla product component class.
     my $default_assignee   = $component->default_assignee;
     my $default_qa_contact = $component->default_qa_contact;
     my $initial_cc         = $component->initial_cc;
+    my $triage_owner       = $component->triage_owner;
     my $product            = $component->product;
     my $bug_flag_types     = $component->flag_types->{'bug'};
     my $attach_flag_types  = $component->flag_types->{'attachment'};
@@ -465,6 +493,7 @@ Bugzilla::Component - Bugzilla product component class.
                                     product          => $product,
                                     initialowner     => $user_login1,
                                     initialqacontact => $user_login2,
+                                    triage_owner     => $user_login3,
                                     description      => $description});
 
     $component->set_name($new_name);
@@ -472,6 +501,7 @@ Bugzilla::Component - Bugzilla product component class.
     $component->set_default_assignee($new_login_name);
     $component->set_default_qa_contact($new_login_name);
     $component->set_cc_list(\@new_login_names);
+    $component->set_triage_owner($new_triage_owner);
     $component->update();
 
     $component->remove_from_db;
@@ -542,6 +572,15 @@ Component.pm represents a Product Component object.
 
  Returns:     An arrayref of L<Bugzilla::User> objects.
 
+=item C<triage_owner>
+
+ Description: Returns the user responsible for performing triage on
+              bugs for this component.
+
+ Params:      none
+
+ Returns:     A Bugzilla::User object.
+
 =item C<flag_types()>
 
  Description: Returns all bug and attachment flagtypes available for
@@ -605,6 +644,12 @@ Component.pm represents a Product Component object.
 
  Returns:     Nothing.
 
+=item C<set_triage_owner>
+
+ Description: Changes the triage owner of the component.
+
+ Params:      $new_triage_owner - login name of the new triage owner (string).
+
 =item C<update()>
 
  Description: Write changes made to the component into the DB.
@@ -644,6 +689,7 @@ Component.pm represents a Product Component object.
                                 or an empty string to clear it.
               initial_cc      - an arrayref of login names to add to the
                                 CC list by default.
+              triage_owner    - login name of the default triage owner
 
  Returns:     A Bugzilla::Component object.
 

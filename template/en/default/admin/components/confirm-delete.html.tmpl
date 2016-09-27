@@ -56,7 +56,10 @@ from '[% product.name FILTER html %]' product
   <td valign="top">Default QA contact:</td>
   <td valign="top">[% comp.default_qa_contact.login FILTER html %]</td>
 [% END %]
-  
+ </tr>
+<tr>
+  <td valign="top">Triage Owner:</td>
+  <td valign="top">[% comp.triage_owner.login FILTER html %]</td>
 </tr>
 <tr>
   <td valign="top">Component of Product:</td>

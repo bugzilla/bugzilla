@@ -616,6 +616,15 @@
         view_only = 1
     %]
 
+    [%# triage owner %]
+    [% INCLUDE bug_modal/field.html.tmpl
+        field = bug_fields.triage_owner
+        field_type = constants.FIELD_TYPE_USER
+        value = bug.component_obj.triage_owner
+        view_only = 1
+    %]
+
+
     [%# needinfo %]
     [% WRAPPER bug_modal/field.html.tmpl
         container = 1

@@ -865,7 +865,7 @@ $(function() {
             $('#top-save-btn').show();
             $('#resolve-as').hide();
             $('#bottom-status').show();
-	    $('#bottom-dup_id').focus();
+            $('#bottom-dup_id').focus();
         });
     $('.status-btn')
         .click(function(event) {

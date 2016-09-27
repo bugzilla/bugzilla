@@ -233,6 +233,13 @@
           <li>Default QA contact deleted</li>
         [% END %]
       [% END %]
+      [% IF changes.triage_owner_id.defined %]
+        [% IF comp.triage_owner.id %]
+          <li>Triage owner updated to '[% comp.triage_owner.login FILTER html %]'</li>
+        [% ELSE %]
+          <li>Triage owner deleted</li>
+        [% END %]
+      [% END %]
       [% IF changes.cc_list.defined %]
         [% IF comp.initial_cc.size %]
           [% cc_list = [] %]

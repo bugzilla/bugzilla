@@ -336,6 +336,9 @@ use constant OPERATOR_FIELD_OVERRIDE => {
         _non_changed => \&_bug_interest_ts,
         _default     => \&_invalid_operator,
     },
+    triage_owner => {
+        _non_changed => \&_triage_owner_nonchanged,
+    },
     # Custom Fields
     FIELD_TYPE_FREETEXT, { _non_changed => \&_nullable },
     FIELD_TYPE_BUG_ID,   { _non_changed => \&_nullable_int },
@@ -371,6 +374,9 @@ sub SPECIAL_PARSING {
 
         # BMO - Add ability to use pronoun for bug mentors field
         bug_mentor => \&_commenter_pronoun,
+
+        # BMO - add ability to use pronoun for triage owners
+        triage_owner => \&_triage_owner_pronoun,
     };
     foreach my $field (Bugzilla->active_custom_fields) {
         if ($field->type == FIELD_TYPE_DATETIME) {
@@ -447,6 +453,7 @@ use constant SPECIAL_ORDER => {
 use constant COLUMN_DEPENDS => {
     classification      => ['product'],
     percentage_complete => ['actual_time', 'remaining_time'],
+    triage_owner        => ['component'],
 };
 
 # This describes tables that must be joined when you want to display
@@ -514,6 +521,13 @@ sub COLUMN_JOINS {
                 from  => 'map_flags.type_id',
                 to    => 'id',
             },
+        },
+        'triage_owner' => {
+            table => 'profiles',
+            as    => 'map_triage_owner',
+            from  => 'map_component.triage_owner_id',
+            to    => 'userid',
+            join  => 'LEFT',
         },
         keywords => {
             table => 'keywords',
@@ -624,6 +638,13 @@ sub COLUMNS {
         bug_interest_ts => 'bug_interest.modification_time',
         assignee_last_login => 'assignee.last_seen_date',
     );
+
+    if ($user->id) {
+        $special_sql{triage_owner} = 'map_triage_owner.login_name';
+    }
+    else {
+        $special_sql{triage_owner} = 'map_triage_owner.realname';
+    }
 
     # Backward-compatibility for old field names. Goes new_name => old_name.
     # These are here and not in _translate_old_column because the rest of the
@@ -2444,6 +2465,22 @@ sub _commenter_pronoun {
     }
 }
 
+# XXX only works with %user% currently
+sub _triage_owner_pronoun {
+    my ($self, $args) = @_;
+    my $value = $args->{value};
+    my $user = $self->_user;
+    if ($value eq "%user%") {
+        if ($user->id) {
+            $args->{value} = $user->id;
+            $args->{quoted} = $args->{value};
+            $args->{value_is_id} = 1;
+        } else {
+            ThrowUserError('login_required_for_pronoun');
+        }
+    }
+}
+
 #####################################################################
 # Search Functions
 #####################################################################
@@ -2853,6 +2890,16 @@ sub _classification_nonchanged {
     my $term = $args->{term};
     $args->{term} = build_subselect("map_product.classification_id",
         "classifications.id", "classifications", $term);
+}
+
+sub _triage_owner_nonchanged {
+    my ($self, $args) = @_;
+    $self->_add_extra_column('triage_owner');
+    $args->{full_field} = $args->{value_is_id} ? 'profiles.userid' : 'profiles.login_name';
+    $self->_do_operator_function($args);
+    my $term = $args->{term};
+    $args->{term} = build_subselect('bugs.component_id', 'components.id',
+        'profiles JOIN components ON components.triage_owner_id = profiles.userid', $term);
 }
 
 sub _nullable {

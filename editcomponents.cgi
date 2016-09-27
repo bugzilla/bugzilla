@@ -107,12 +107,14 @@ if ($action eq 'new') {
     Bugzilla::User::match_field ({
         'initialowner'     => { 'type' => 'single' },
         'initialqacontact' => { 'type' => 'single' },
+        'triage_owner'     => { 'type' => 'single' },
         'initialcc'        => { 'type' => 'multi'  },
     });
 
     my $default_assignee   = trim($cgi->param('initialowner')     || '');
     my $default_qa_contact = trim($cgi->param('initialqacontact') || '');
     my $description        = trim($cgi->param('description')      || '');
+    my $triage_owner       = trim($cgi->param('triage_owner')     || '');
     my @initial_cc         = $cgi->param('initialcc');
     my $isactive           = $cgi->param('isactive');
 
@@ -123,6 +125,7 @@ if ($action eq 'new') {
         initialowner     => $default_assignee,
         initialqacontact => $default_qa_contact,
         initial_cc       => \@initial_cc,
+        triage_owner_id  => $triage_owner,
         # XXX We should not be creating series for products that we
         # didn't create series for.
         create_series    => 1,
@@ -209,6 +212,7 @@ if ($action eq 'update') {
     Bugzilla::User::match_field ({
         'initialowner'     => { 'type' => 'single' },
         'initialqacontact' => { 'type' => 'single' },
+        'triage_owner'     => { 'type' => 'single' },
         'initialcc'        => { 'type' => 'multi'  },
     });
 
@@ -216,6 +220,7 @@ if ($action eq 'update') {
     my $default_assignee      = trim($cgi->param('initialowner')     || '');
     my $default_qa_contact    = trim($cgi->param('initialqacontact') || '');
     my $description           = trim($cgi->param('description')      || '');
+    my $triage_owner          = trim($cgi->param('triage_owner')     || '');
     my @initial_cc            = $cgi->param('initialcc');
     my $isactive              = $cgi->param('isactive');
   
@@ -226,6 +231,7 @@ if ($action eq 'update') {
     $component->set_description($description);
     $component->set_default_assignee($default_assignee);
     $component->set_default_qa_contact($default_qa_contact);
+    $component->set_triage_owner($triage_owner);
     $component->set_cc_list(\@initial_cc);
     $component->set_is_active($isactive);
     my $changes = $component->update();

@@ -265,6 +265,7 @@ use constant DEFAULT_FIELDS => (
     {name => 'bug_interest_ts',       desc => 'Bug Interest', buglist => 1,
      type => FIELD_TYPE_DATETIME},
     {name => 'comment_tag',           desc => 'Comment Tag'},
+    {name => 'triage_owner',          desc => 'Triage Owner', buglist => 1},
 );
 
 ################

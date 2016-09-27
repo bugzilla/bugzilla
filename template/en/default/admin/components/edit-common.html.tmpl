@@ -66,6 +66,18 @@
   </tr>
 [% END %]
 <tr>
+  <td class="field_label"><label for="triage_owner">Triage Owner:</label></th>
+   <td>
+      [% INCLUDE global/userselect.html.tmpl
+         name    => "triage_owner"
+         id      => "triage_owner"
+         value   => comp.triage_owner.login
+         size    => 64
+         emptyok => 1
+       %]
+    </td>
+</tr>
+<tr>
   <th class="field_label"><label for="initialcc">Default CC List:</label></th>
   <td>
     [% INCLUDE global/userselect.html.tmpl

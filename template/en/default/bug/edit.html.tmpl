@@ -576,6 +576,18 @@
     </tr>
     [% END %]
 
+    <tr>
+      <th class="field_label">
+        <label for="triage_owner">
+        <a href="page.cgi?id=fields.html#triage_owner">
+        Triage&nbsp;Owner</a></label>:
+      </th>
+      <td>
+        [% INCLUDE global/user.html.tmpl who = bug.component_obj.triage_owner %]
+      </td>
+    </tr>
+
+
     [%# BMO - hook for adding mentors %]
     [% Hook.process("after_people", "bug/edit.html.tmpl") %]
 

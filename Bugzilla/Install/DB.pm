@@ -753,6 +753,10 @@ sub update_table_definitions {
 
     _migrate_preference_categories();
 
+    # 2016-09-01 dkl@mozilla.com - Bug 1268317
+    $dbh->bz_add_column('components', 'triage_owner_id',
+                        {TYPE => 'INT3'});
+
     ################################################################
     # New --TABLE-- changes should go *** A B O V E *** this point #
     ################################################################

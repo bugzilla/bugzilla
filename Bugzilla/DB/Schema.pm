@@ -1433,8 +1433,12 @@ use constant ABSTRACT_SCHEMA => {
                                                 COLUMN => 'userid',
                                                 DELETE => 'SET NULL'}},
             description      => {TYPE => 'MEDIUMTEXT', NOTNULL => 1},
-            isactive         => {TYPE => 'BOOLEAN', NOTNULL => 1, 
+            isactive         => {TYPE => 'BOOLEAN', NOTNULL => 1,
                                  DEFAULT => 'TRUE'},
+            triage_owner_id  => {TYPE => 'INT3',
+                                 REFERENCES => {TABLE  => 'profiles',
+                                                COLUMN => 'userid',
+                                                DELETE => 'SET NULL'}},
         ],
         INDEXES => [
             components_product_id_idx => {FIELDS => [qw(product_id name)],

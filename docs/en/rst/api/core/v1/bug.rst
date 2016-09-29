@@ -631,6 +631,7 @@ groups              array    An array of group names to put this bug into. You
                              "Default" for this product. (If you want to avoid
                              that, you should specify ``groups`` as an empty
                              array.)
+keywords            array    One or more keywords to set on this bug.
 qa_contact          string   If this installation has QA Contacts enabled, you
                              can set the QA Contact here if you don't want to
                              use the component's default QA Contact.

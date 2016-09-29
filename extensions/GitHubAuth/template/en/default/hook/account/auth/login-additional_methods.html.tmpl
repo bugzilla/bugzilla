@@ -7,14 +7,12 @@
   #%]
 [% USE Bugzilla %]
 [% IF Param('user_info_class').split(',').contains('GitHubAuth') %]
-  <p>
-    <form method="post" action="[% urlbase FILTER html %]github.cgi">
-      <input type="hidden" name="github_secret" value="[% Bugzilla.github_secret FILTER html %]">
-      <input type="hidden" name="target_uri" value="[% Bugzilla.cgi.target_uri FILTER html %]">
-      <input type="image" src="extensions/GitHubAuth/web/images/github_sign_in.png"
+  <form method="post" action="[% urlbase FILTER html %]github.cgi">
+    <input type="hidden" name="github_secret" value="[% Bugzilla.github_secret FILTER html %]">
+    <input type="hidden" name="target_uri" value="[% Bugzilla.cgi.target_uri FILTER html %]">
+    <input type="image" src="extensions/GitHubAuth/web/images/github_sign_in.png"
            alt="Sign in with GitHub"
            title="Sign in with GitHub"
            width="185" height="25">
-    </form>
-  </p>
+  </form>
 [% END %]

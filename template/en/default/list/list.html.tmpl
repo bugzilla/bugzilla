@@ -184,7 +184,11 @@
   </form>
   <hr>
 [% END %]
-
+<div class="bz_query_edit">
+<button type="button" id="edit_search"
+onclick="document.location='[% PROCESS edit_search_url FILTER js %]'">
+Edit Search</button>
+</div>
 [%############################################################################%]
 [%# Navigation Bar                                                           #%]
 [%############################################################################%]
@@ -264,7 +268,6 @@
               onclick="document.location='[% PROCESS edit_search_url FILTER js %]'">
           Edit Search</button>
     </div>
-
     [% IF searchtype == "saved" %]
       <div class="bz_query_forget">
         <button type="button" id="forget_search"

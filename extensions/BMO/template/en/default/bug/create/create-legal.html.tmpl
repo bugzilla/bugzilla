@@ -24,7 +24,7 @@
 [% inline_style = BLOCK %]
 .field_label {
   width: 170px;
-  padding-top: 10px;
+  margin-top: 10px;
 }
 label.required:before {
   content: "* ";
@@ -53,6 +53,17 @@ label.required:before {
 [% END %]
 
 [% PROCESS 'bug/create/user-message.html.tmpl' no_bug_guidelines = 1, no_guided_bug_link = 1 %]
+
+[%
+  hide_components = [
+    'Firefox Distribution or Other Partner Agreement',
+    'Independent Contractor Agreement',
+    'Name Clearance (Trademark Search)',
+    'NDA',
+    'Search',
+    'Vendor/Services'
+  ]
+%]
 
 <h2>Mozilla Legal</h2>
 
@@ -88,6 +99,7 @@ label.required:before {
         <option value="">Select One</option>
         [%- FOREACH c = product.components %]
           [% NEXT IF NOT c.is_active %]
+          [% NEXT IF hide_components.contains(c.name) %]
           <option value="[% c.name FILTER html %]"
             [% ' selected="selected"' IF c.name == "General" %]>
             [% c.name FILTER html -%]

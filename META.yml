@@ -10,7 +10,7 @@ build_requires:
 configure_requires:
   ExtUtils::MakeMaker: 6.57_07
 dynamic_config: 1
-generated_by: 'ExtUtils::MakeMaker version 7.22, CPAN::Meta::Converter version 2.143240'
+generated_by: 'ExtUtils::MakeMaker version 7.04, CPAN::Meta::Converter version 2.150005'
 license: unknown
 meta-spec:
   url: http://module-build.sourceforge.net/META-spec-v1.4.html
@@ -39,7 +39,7 @@ optional_features:
       Auth::GoogleAuth: '1.01'
       Cache::Memcached: '0.17'
       Chart::Lines: v2.4.10
-      DBD::mysql: '4.001'
+      DBD::mysql: '4.037'
       Daemon::Generic: '0'
       Email::MIME::Attachment::Stripper: '0'
       Email::Reply: '0'
@@ -112,6 +112,10 @@ optional_features:
     requires:
       JSON::RPC: '0'
       Test::Taint: '1.06'
+  linux_pid:
+    description: 'Linux::PID for MozReview'
+    requires:
+      Linux::Pid: '0'
   memcached:
     description: 'Memcached Support'
     requires:
@@ -134,7 +138,7 @@ optional_features:
   mysql:
     description: 'MySQL database support'
     requires:
-      DBD::mysql: '4.001'
+      DBD::mysql: '4.037'
   new_charts:
     description: 'New Charts'
     requires:
@@ -219,6 +223,7 @@ requires:
   Math::Random::ISAAC: v1.0.1
   Module::Metadata: '1.000033'
   Module::Runtime: '0'
+  Moo: '2'
   Parse::CPAN::Meta: '1.44'
   Regexp::Common: '0'
   Sys::Syslog: '0'
@@ -229,3 +234,4 @@ requires:
   perl: '5.010001'
   version: '0.87'
 version: '42'
+x_serialization_backend: 'CPAN::Meta::YAML version 0.016'

@@ -197,7 +197,7 @@ my %optional_features = (
     },
     mysql => {
         description => 'MySQL database support',
-        prereqs => { runtime => { requires => { 'DBD::mysql' => '4.001' } } }
+        prereqs => { runtime => { requires => { 'DBD::mysql' => '4.037' } } }
     },
     jsonrpc => {
         description => 'JSON-RPC Interface',

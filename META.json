@@ -4,7 +4,7 @@
       "Bugzilla Developers <developers@bugzilla.org>"
    ],
    "dynamic_config" : 1,
-   "generated_by" : "ExtUtils::MakeMaker version 7.22, CPAN::Meta::Converter version 2.143240",
+   "generated_by" : "ExtUtils::MakeMaker version 7.04, CPAN::Meta::Converter version 2.150005",
    "license" : [
       "unknown"
    ],
@@ -58,7 +58,7 @@
                   "Auth::GoogleAuth" : "1.01",
                   "Cache::Memcached" : "0.17",
                   "Chart::Lines" : "v2.4.10",
-                  "DBD::mysql" : "4.001",
+                  "DBD::mysql" : "4.037",
                   "Daemon::Generic" : "0",
                   "Email::MIME::Attachment::Stripper" : "0",
                   "Email::Reply" : "0",
@@ -189,6 +189,16 @@
             }
          }
       },
+      "linux_pid" : {
+         "description" : "Linux::PID for MozReview",
+         "prereqs" : {
+            "runtime" : {
+               "requires" : {
+                  "Linux::Pid" : "0"
+               }
+            }
+         }
+      },
       "memcached" : {
          "description" : "Memcached Support",
          "prereqs" : {
@@ -237,7 +247,7 @@
          "prereqs" : {
             "runtime" : {
                "requires" : {
-                  "DBD::mysql" : "4.001"
+                  "DBD::mysql" : "4.037"
                }
             }
          }
@@ -406,6 +416,7 @@
             "Math::Random::ISAAC" : "v1.0.1",
             "Module::Metadata" : "1.000033",
             "Module::Runtime" : "0",
+            "Moo" : "2",
             "Parse::CPAN::Meta" : "1.44",
             "Regexp::Common" : "0",
             "Sys::Syslog" : "0",
@@ -426,5 +437,6 @@
       }
    },
    "release_status" : "stable",
-   "version" : "42"
+   "version" : "42",
+   "x_serialization_backend" : "JSON::PP version 2.27203"
 }

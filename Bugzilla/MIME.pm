@@ -69,6 +69,8 @@ sub as_string {
     # We add this header to mark the mail as "auto-generated" and
     # thus to hopefully avoid auto replies.
     $self->header_set('Auto-Submitted', 'auto-generated');
+    # Exchange does not respect the Auto-Submitted, but uses this.
+    $self->header_set('X-Auto-Response-Suppress', 'All');
 
     # MIME-Version must be set otherwise some mailsystems ignore the charset
     $self->header_set('MIME-Version', '1.0') if !$self->header('MIME-Version');

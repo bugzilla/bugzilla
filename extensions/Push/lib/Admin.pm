@@ -103,6 +103,8 @@ sub admin_queues {
             || ThrowUserError('push_error', { error_message => 'Invalid message ID' });
 
         if ($input->{delete}) {
+            my $token = $input->{token};
+            check_hash_token($token, ['deleteMessage']);
             $message->remove_from_db();
             $vars->{message} = 'push_message_deleted';
 

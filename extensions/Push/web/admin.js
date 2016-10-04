@@ -35,3 +35,10 @@ function reset_to_defaults() {
     }
   }
 }
+
+$(function() {
+    $('#deleteMessage input[type=submit]')
+        .click(function(event) {
+            return confirm('Are you sure you want to delete this message forever (a long time)?');
+        });
+});

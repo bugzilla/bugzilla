@@ -14,6 +14,7 @@
 
 [% IF !message_obj %]
     <a href="?id=push_queues.html">Return</a>
+    [% INCLUDE global/footer.html.tmpl %]
     [% RETURN %]
 [% END %]
 
@@ -56,6 +57,24 @@
 [% END %]
 
 <tr>
+  <th class="report-header">Actions</th>
+  <td>
+    <form class="action-button" method="post" action="page.cgi" id="deleteMessage" enctype="multipart/form-data">
+      <input type="hidden" name="token" value="[% issue_hash_token(['deleteMessage']) FILTER html %]">
+      <input type="hidden" name="id" value="push_queues_view.html">
+      <input type="hidden" name="delete" value="1">
+      <input type="hidden" name="message" value="[% message_obj.id FILTER html %]">
+      <input type="hidden" name="connector" value="[% message_obj.connector FILTER html %]">
+      <input type="submit" value="Delete">
+    </form>
+    <form class="action-button" method="post" action="page.cgi" id="returnQueue" enctype="multipart/form-data">
+      <input type="hidden" name="id" value="push_queues.html">
+      <input type="submit" value="Return">
+    </form>
+  </td>
+</tr>
+
+<tr>
   <td colspan="2">
     [% IF json %]
       <pre>[% json FILTER html %]</pre>
@@ -64,17 +83,6 @@
     [% END %]
   </td>
 </tr>
-
-<tr class="report-header">
-  <th colspan="2">
-    <a href="?id=push_queues.html">Return</a> |
-    <a onclick="return confirm('Are you sure you want to delete this message forever (a long time)?')"
-       href="?id=push_queues_view.html&amp;delete=1
-       [%- %]&amp;message=[% message_obj.id FILTER uri %]
-       [%- %]&amp;connector=[% message_obj.connector FILTER uri %]">Delete</a>
-  </th>
-</tr>
-
 </table>
 
 [% INCLUDE global/footer.html.tmpl %]

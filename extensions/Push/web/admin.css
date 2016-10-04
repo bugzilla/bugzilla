@@ -69,3 +69,7 @@
     text-align: right !important;
 }
 
+.action-button {
+    display: inline;
+}
+

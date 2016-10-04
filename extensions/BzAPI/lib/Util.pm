@@ -35,7 +35,6 @@ our @EXPORT = qw(
     fix_comment
     fix_changeset
     fix_attachment
-    fix_group
     filter_wants_nocache
     filter
     fix_credentials
@@ -51,16 +50,16 @@ sub ref_urlbase {
 # convert certain fields within a bug object
 # from a simple scalar value to their respective objects
 sub fix_bug {
-    my ($data, $bug) = @_;
-    my $dbh    = Bugzilla->dbh;
-    my $params = Bugzilla->input_params;
-    my $rpc    = Bugzilla->request_cache->{bzapi_rpc};
-    my $method = Bugzilla->request_cache->{bzapi_rpc_method};
+    my ($data, $bug, $stash) = @_;
+    my $dbh    = $stash->{dbh}    //= Bugzilla->dbh;
+    my $params = $stash->{params} //= Bugzilla->input_params;
+    my $rpc    = $stash->{rpc}    //= Bugzilla->request_cache->{bzapi_rpc};
+    my $method = $stash->{method} //= Bugzilla->request_cache->{bzapi_rpc_method};
 
     $bug = ref $bug ? $bug : Bugzilla::Bug->check($bug || $data->{id});
 
     # Add REST API reference to the individual bug
-    if (filter_wants_nocache($params, 'ref')) {
+    if ($stash->{wants_ref} //= filter_wants_nocache($params, 'ref')) {
         $data->{'ref'} = ref_urlbase() . "/bug/" . $bug->id;
     }
 
@@ -92,10 +91,16 @@ sub fix_bug {
     }
 
     # Groups
-    if (filter_wants_nocache($params, 'groups')) {
+    if ($stash->{wants_groups} //= filter_wants_nocache($params, 'groups')) {
         my @new_groups;
         foreach my $group (@{ $data->{groups} }) {
-            push(@new_groups, fix_group($group));
+            if (my $object = Bugzilla::Group->new({ name => $group, cache => 1 })) {
+                $group = {
+                    id   => $rpc->type('int', $object->id),
+                    name => $rpc->type('string', $object->name),
+                };
+            }
+            push(@new_groups, $group);
         }
         $data->{groups} = \@new_groups;
     }
@@ -110,7 +115,7 @@ sub fix_bug {
     }
 
     # Attachment metadata is included by default but not data
-    if (filter_wants_nocache($params, 'attachments')) {
+    if ($stash->{wants_attachments} //= filter_wants_nocache($params, 'attachments')) {
         my $attachment_params = { ids => $bug->id };
         if (!filter_wants_nocache($params, 'data', 'extra', 'attachments')
             && !$params->{attachmentdata})
@@ -132,7 +137,7 @@ sub fix_bug {
     # Comments and history are not part of _default and have to be requested
 
     # Comments
-    if (filter_wants_nocache($params, 'comments', 'extra', 'comments')) {
+    if ($stash->{wants_comments} //= filter_wants_nocache($params, 'comments', 'extra', 'comments')) {
         my $comments = $rpc->comments({ ids => $bug->id });
         $comments = $comments->{bugs}->{$bug->id}->{comments};
         my @new_comments;
@@ -144,7 +149,7 @@ sub fix_bug {
     }
 
     # History
-    if (filter_wants_nocache($params, 'history', 'extra', 'history')) {
+    if ($stash->{wants_history} //= filter_wants_nocache($params, 'history', 'extra', 'history')) {
         my $history = $rpc->history({ ids => [ $bug->id ] });
         my @new_history;
         foreach my $changeset (@{ $history->{bugs}->[0]->{history} }) {
@@ -154,19 +159,24 @@ sub fix_bug {
     }
 
     # Add in all custom fields even if not set or visible on this bug
-    my $custom_fields = Bugzilla->fields({ custom => 1, obsolete => 0 });
-    foreach my $field (@$custom_fields) {
+    my $custom_fields = $stash->{custom_fields} //=
+        Bugzilla->fields({ custom => 1, obsolete => 0, by_name => 1 });
+    foreach my $field (values %$custom_fields) {
         my $name = $field->name;
-        next if !filter_wants_nocache($params, $name, ['default','custom']);
-        if ($field->type == FIELD_TYPE_BUG_ID) {
+        my $type = $field->type;
+        if (!filter_wants_nocache($params, $name, ['default','custom'])) {
+            delete $custom_fields->{$name};
+            next;
+        }
+        if ($type == FIELD_TYPE_BUG_ID) {
             $data->{$name} = $rpc->type('int', $bug->$name);
         }
-        elsif ($field->type == FIELD_TYPE_DATETIME
-               || $field->type == FIELD_TYPE_DATE)
+        elsif ($type == FIELD_TYPE_DATETIME
+               || $type == FIELD_TYPE_DATE)
         {
             $data->{$name} = $rpc->type('dateTime', $bug->$name);
         }
-        elsif ($field->type == FIELD_TYPE_MULTI_SELECT) {
+        elsif ($type == FIELD_TYPE_MULTI_SELECT) {
             # Bug.search, when include_fields=_all, returns array, otherwise return as comma delimited string :(
             if ($method eq 'Bug.search' && !grep($_ eq '_all', @{ $params->{include_fields} })) {
                 $data->{$name} = $rpc->type('string', join(', ', @{ $bug->$name }));
@@ -397,24 +407,6 @@ sub fix_flag {
     }
 
     return $data;
-}
-
-# convert certain attributes of a group object from scalar
-# values to related objects
-sub fix_group {
-    my ($group, $object) = @_;
-    my $rpc = Bugzilla->request_cache->{bzapi_rpc};
-
-    $object ||= Bugzilla::Group->new({ name => $group });
-
-    if ($object) {
-        $group = {
-            id   => $rpc->type('int', $object->id),
-            name => $rpc->type('string', $object->name),
-        };
-    }
-
-    return $group;
 }
 
 # Calls Bugzilla::WebService::Util::filter_wants but disables caching

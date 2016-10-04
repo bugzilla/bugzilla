@@ -642,9 +642,10 @@ sub search_bugs_response {
     my $bug_objs = $cache->{bzapi_search_bugs};
 
     my @fixed_bugs;
+    my $stash = {};
     foreach my $bug_data (@{$$result->{bugs}}) {
         my $bug_obj = shift @$bug_objs;
-        my $fixed = fix_bug($bug_data, $bug_obj);
+        my $fixed = fix_bug($bug_data, $bug_obj, $stash);
 
         # CC count and Dupe count
         if (filter_wants_nocache($params, 'cc_count')) {

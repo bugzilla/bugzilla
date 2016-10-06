@@ -43,7 +43,7 @@
 
   [% IF bug.cf_user_story != "" %]
     <div id="user_story_readonly" class="bz_comment">
-      <pre class="bz_comment_text">
+      <pre id="user-story" class="bz_comment_text">
         [%- bug.cf_user_story FILTER quoteUrls(bug) -%]
       </pre>
     </div>

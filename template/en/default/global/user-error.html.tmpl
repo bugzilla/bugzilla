@@ -900,6 +900,13 @@
     or you are not allowed to remove [% terms.bugs %] from this group in the
     '[% product FILTER html %]' product.
 
+  [% ELSIF error == "group_regexp_too_long" %]
+    [% title = "Group Regular Expression Too Long" %]
+    The text you entered in the regular expression
+    field is too long ([% text.length FILTER html %] characters,
+    above the maximum length allowed of
+    [%+ max_length FILTER none %] characters).
+
   [% ELSIF error == "group_restriction_not_allowed" %]
     [% title = "Group Restriction Not Allowed" %]
     You tried to restrict [% bug_id ? "$terms.bug $bug_id" : terms.abug FILTER html %]

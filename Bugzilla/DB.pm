@@ -1189,6 +1189,24 @@ sub bz_table_list_real {
     return @{$self->selectcol_arrayref($table_sth, { Columns => [3] })};
 }
 
+sub bz_column_length {
+    my ( $self, $table, $column ) = @_;
+    state %column_length;
+
+    if ( not exists $column_length{$table} ) {
+        my $csr = $self->column_info( undef, undef, $table, undef );
+        my $cols =
+          $csr->fetchall_arrayref( { COLUMN_NAME => 1, COLUMN_SIZE => 1 } );
+
+        foreach my $col (@$cols) {
+            $column_length{$table}{ $col->{COLUMN_NAME} } = $col->{COLUMN_SIZE}
+              // MAX_INT_32;
+        }
+    }
+
+    return $column_length{$table}{$column} // 0;
+}
+
 #####################################################################
 # Transaction Methods
 #####################################################################
@@ -2334,6 +2352,38 @@ needs to override this function.
 =item B<Returns>
 
 Last inserted ID (scalar)
+
+=back
+
+=back
+
+=over
+
+=item C<bz_column_length>
+
+=over
+
+=item B<Description>
+
+Returns the length of the specified column as specified by the database
+
+only really useful for text based strings.
+This implementation uses DBI's
+L<column_info|https://metacpan.org/pod/DBI#column_info>.
+
+=item B<Params>
+
+=over
+
+=item C<$table> - name of table (scalar)
+
+=item C<$column> - name of column type (scalar)
+
+=back
+
+=item B<Returns>
+
+The length of the field, 0 if it does not exist.
 
 =back
 

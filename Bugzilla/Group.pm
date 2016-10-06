@@ -482,6 +482,12 @@ sub _check_description {
 sub _check_user_regexp {
     my ($invocant, $regex) = @_;
     $regex = trim($regex) || '';
+
+    my $max_length = Bugzilla->dbh->bz_column_length( 'groups', 'userregexp' );
+    ThrowUserError( "group_regexp_too_long",
+        { text => $regex, max_length => $max_length } )
+      if length($regex) > $max_length;
+
     ThrowUserError("invalid_regexp") unless (eval {qr/$regex/});
     return $regex;
 }

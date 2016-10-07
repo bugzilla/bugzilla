@@ -23,6 +23,9 @@ use Text::CSV_XS;
 
 Bugzilla->usage_mode(USAGE_MODE_CMDLINE);
 
+my $auto_user = Bugzilla::User->check({ name => 'automation@bmo.tld' });
+Bugzilla->set_user($auto_user);
+
 my $dbh = Bugzilla->dbh;
 
 my $filename = shift;

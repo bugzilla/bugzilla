@@ -607,7 +607,7 @@ sub datetime_from {
         second => defined($time[0]) ? int($time[0]) : undef,
         # If a timezone was specified, use it. Otherwise, use the
         # local timezone.
-        time_zone => Bugzilla->local_timezone->offset_as_string($time[6]) 
+        time_zone => DateTime::TimeZone->offset_as_string($time[6])
                      || Bugzilla->local_timezone,
     );
 

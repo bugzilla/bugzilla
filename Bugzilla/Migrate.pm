@@ -417,7 +417,7 @@ sub parse_date {
     }
     my $tz;
     if ($time[6]) {
-        $tz = Bugzilla->local_timezone->offset_as_string($time[6]);
+        $tz = DateTime::TimeZone->local_timezone->offset_as_string($time[6]);
     }
     else {
         $tz = $self->config('timezone');

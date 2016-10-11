@@ -13,6 +13,7 @@ use warnings;
 
 use Bugzilla::Error;
 use Scalar::Util qw(blessed);
+use Bugzilla::Util qw(trick_taint);
 use URI::Escape;
 
 # memcached keys have a maximum length of 250 bytes
@@ -219,6 +220,7 @@ sub _config_prefix {
 sub _encode_key {
     my ($self, $key) = @_;
     $key = $self->_global_prefix . '.' . uri_escape_utf8($key);
+    trick_taint($key) if defined $key;
     return length($self->{namespace} . $key) > MAX_KEY_LENGTH
         ? undef
         : $key;

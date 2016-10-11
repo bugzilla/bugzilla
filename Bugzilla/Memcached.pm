@@ -12,6 +12,7 @@ use strict;
 use warnings;
 
 use Bugzilla::Error;
+use Bugzilla::Util qw(trick_taint);
 use Scalar::Util qw(blessed);
 use URI::Escape;
 use Encode;
@@ -246,7 +247,51 @@ sub _get {
 
     $key = $self->_encode_key($key)
         or return;
-    return $self->{memcached}->get($key);
+    my $value = $self->{memcached}->get($key);
+    return unless defined $value;
+
+    # detaint returned values
+    # hashes and arrays are detainted just one level deep
+    if (ref($value) eq 'HASH') {
+        _detaint_hashref($value);
+    }
+    elsif (ref($value) eq 'ARRAY') {
+        foreach my $value (@$value) {
+            next unless defined $value;
+            # arrays of hashes and arrays are common
+            if (ref($value) eq 'HASH') {
+                _detaint_hashref($value);
+            }
+            elsif (ref($value) eq 'ARRAY') {
+                _detaint_arrayref($value);
+            }
+            elsif (!ref($value)) {
+                trick_taint($value);
+            }
+        }
+    }
+    elsif (!ref($value)) {
+        trick_taint($value);
+    }
+    return $value;
+}
+
+sub _detaint_hashref {
+    my ($hashref) = @_;
+    foreach my $value (values %$hashref) {
+        if (defined($value) && !ref($value)) {
+            trick_taint($value);
+        }
+    }
+}
+
+sub _detaint_arrayref {
+    my ($arrayref) = @_;
+    foreach my $value (@$arrayref) {
+        if (defined($value) && !ref($value)) {
+            trick_taint($value);
+        }
+    }
 }
 
 sub _delete {

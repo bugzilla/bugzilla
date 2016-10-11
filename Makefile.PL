@@ -120,7 +120,7 @@ my %optional_features = (
     memcached => {
         description => 'Memcached Support',
         prereqs     => {
-            runtime => { requires => { 'Cache::Memcached' => '0.17' } }
+            runtime => { requires => { 'Cache::Memcached::Fast' => '0.17' } }
         }
     },
     auth_delegation => {

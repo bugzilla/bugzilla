@@ -37,7 +37,7 @@ optional_features:
     description: 'features that bmo needs'
     requires:
       Auth::GoogleAuth: '1.01'
-      Cache::Memcached: '0.17'
+      Cache::Memcached::Fast: '0.17'
       Chart::Lines: v2.4.10
       DBD::mysql: '4.037'
       Daemon::Generic: '0'
@@ -126,7 +126,7 @@ optional_features:
   memcached:
     description: 'Memcached Support'
     requires:
-      Cache::Memcached: '0.17'
+      Cache::Memcached::Fast: '0.17'
   mfa:
     description: 'Multi-Factor Authentication'
     requires:

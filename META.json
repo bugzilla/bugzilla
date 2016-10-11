@@ -56,7 +56,7 @@
             "runtime" : {
                "requires" : {
                   "Auth::GoogleAuth" : "1.01",
-                  "Cache::Memcached" : "0.17",
+                  "Cache::Memcached::Fast" : "0.17",
                   "Chart::Lines" : "v2.4.10",
                   "DBD::mysql" : "4.037",
                   "Daemon::Generic" : "0",
@@ -217,7 +217,7 @@
          "prereqs" : {
             "runtime" : {
                "requires" : {
-                  "Cache::Memcached" : "0.17"
+                  "Cache::Memcached::Fast" : "0.17"
                }
             }
          }

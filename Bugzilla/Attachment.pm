@@ -853,6 +853,7 @@ sub create {
                              (id, thedata) VALUES ($attachid, ?)");
 
     trick_taint($data);
+    utf8::encode($data);
     $sth->bind_param(1, $data, $dbh->BLOB_TYPE);
     $sth->execute();
 

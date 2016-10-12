@@ -478,6 +478,10 @@ limit             int       Limit the number of results returned. If the limit
                             set by the administrator, then the maximum limit will
                             be used instead. If you set the limit equal to zero,
                             then all matching results will be returned instead.
+longdescs.count   int       The number of comments a bug has. The bug's description 
+                            is the first comment. For example, to find bugs which someone
+                            has commented on after they have been filed, search on 
+                            ``longdescs.count`` *greater than* 1.
 offset            int       Used in conjunction with the ``limit`` argument,
                             ``offset`` defines the starting position for the
                             search. For example, given a search that would

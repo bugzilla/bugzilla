@@ -29,8 +29,8 @@ function replyToComment(id, real_id, replyto_header, text) {
 
     /* <textarea id="comment"> */
     var textarea = document.getElementById('comment');
-    if (!textarea.value.startsWith(replytext)) {
-        textarea.value = replytext+"\n"+textarea.value;
+    if (textarea.value != replytext) {
+        textarea.value += replytext;
     }
 
     textarea.focus();

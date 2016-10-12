@@ -59,14 +59,17 @@ $(function() {
     $('.prod_comp_search')
         .each(function() {
             var that = $(this);
+            var params = {
+                limit: (that.data('max_results') + 1)
+            };
+            if (BUGZILLA.api_token) {
+                params.Bugzilla_api_token = BUGZILLA.api_token;
+            }
             that.devbridgeAutocomplete({
                 serviceUrl: function(query) {
                     return 'rest/prod_comp_search/' + encodeURIComponent(query);
                 },
-                params: {
-                    Bugzilla_api_token: (BUGZILLA.api_token ? BUGZILLA.api_token : ''),
-                    limit: (that.data('max_results') + 1)
-                },
+                params: params,
                 deferRequestBy: 250,
                 minChars: 3,
                 maxHeight: 500,

@@ -40,6 +40,7 @@ use constant PUBLIC_METHODS => qw(
     offer_account_by_email
     update
     valid_login
+    whoami
 );
 
 use constant MAPPED_FIELDS => {
@@ -426,6 +427,16 @@ sub _login_to_hash {
         $item->{'token'} = $user->id . "-" . $user->{_login_token};
     }
     return $item;
+}
+
+sub whoami {
+    my ($self, $params) = @_;
+    my $user = Bugzilla->login(LOGIN_REQUIRED);
+    return filter $params, {
+        id        => $self->type('int', $user->id),
+        real_name => $self->type('string', $user->name),
+        name      => $self->type('email', $user->login),
+    };
 }
 
 1;
@@ -1126,6 +1137,61 @@ illegal to pass a group name you don't belong to.
 in Bugzilla B<4.4>.
 
 =item REST API call added in Bugzilla B<5.0>.
+
+=back
+
+=back
+
+=head2 whoami
+
+=over
+
+=item B<Description>
+
+Allows for validating a user's API key, token, or username and password.
+If sucessfully authenticated, it returns simple information about the
+logged in user.
+
+=item B<Params> (none)
+
+=item B<Returns>
+
+On success, a hash containing information about the logged in user.
+
+=over
+
+=item id
+
+C<int> The unique integer ID that Bugzilla uses to represent this user.
+Even if the user's login name changes, this will not change.
+
+=item real_name
+
+C<string> The actual name of the user. May be blank.
+
+=item name
+
+C<string> The login name of the user.
+
+=back
+
+=item B<Errors>
+
+=over
+
+=item 300 (Invalid Username or Password)
+
+The username does not exist, or the password is wrong.
+
+=item 301 (Account Disabled)
+
+The account has been disabled.  A reason may be specified with the
+error.
+
+=item 305 (New Password Required)
+
+The current password is correct, but the user is asked to change
+his password.
 
 =back
 

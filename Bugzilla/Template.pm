@@ -450,10 +450,12 @@ sub css_files {
         }
     }
 
-    # build unified
-    $by_type{unified_standard_skin} = _concatenate_css($by_type{standard},
-                                                       $by_type{skin});
-    $by_type{unified_custom} = _concatenate_css($by_type{custom});
+    # build concatenated
+    if (CONCATENATE_ASSETS) {
+        $by_type{concatenated_standard_skin} = _concatenate_css($by_type{standard},
+                                                        $by_type{skin});
+        $by_type{concatenated_custom} = _concatenate_css($by_type{custom});
+    }
 
     return \%by_type;
 }
@@ -535,7 +537,7 @@ sub _concatenate_css {
 
 sub _css_url_rewrite {
     my ($source, $url) = @_;
-    # rewrite relative urls as the unified stylesheet lives in a different
+    # rewrite relative urls as the concatenated stylesheet lives in a different
     # directory from the source
     $url =~ s/(^['"]|['"]$)//g;
     if (substr($url, 0, 1) eq '/' || substr($url, 0, 5) eq 'data:') {

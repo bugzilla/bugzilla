@@ -17,10 +17,9 @@ use autodie qw(:default);
 use Bugzilla::Constants;
 use Bugzilla::Hook;
 use Bugzilla::Install::Util qw(i_am_persistent);
-use Bugzilla::Util qw(trick_taint);
+use Bugzilla::Util qw(trick_taint read_text write_text);
 
 use JSON::XS;
-use File::Slurp;
 use File::Temp;
 use File::Basename;
 
@@ -301,7 +300,7 @@ sub write_params {
     my $param_file = bz_locations()->{'datadir'} . '/params.json';
 
     my $json_data = JSON::XS->new->canonical->pretty->encode($param_data);
-    write_file($param_file, { binmode => ':utf8', atomic => 1 }, \$json_data);
+    write_text($param_file, $json_data);
 
     # It's not common to edit parameters and loading
     # Bugzilla::Install::Filesystem is slow.
@@ -318,8 +317,7 @@ sub read_param_file {
     my $file = bz_locations()->{'datadir'} . '/params.json';
 
     if (-e $file) {
-        my $data;
-        read_file($file, binmode => ':utf8', buf_ref => \$data);
+        my $data = read_text($file);
         trick_taint($data);
 
         # If params.json has been manually edited and e.g. some quotes are

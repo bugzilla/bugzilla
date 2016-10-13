@@ -55,7 +55,6 @@ my %requires = (
     'Digest::SHA'         => 0,
     'Email::MIME'         => '1.904',
     'Email::Sender'       => '1.300011',
-    'File::Slurp'         => '9999.13',
     'HTTP::Request'       => 0,
     'HTTP::Response'      => 0,
     'JSON::XS'            => '2.01',

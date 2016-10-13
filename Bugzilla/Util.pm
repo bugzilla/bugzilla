@@ -1291,4 +1291,8 @@ if Bugzilla is currently using the shadowdb or not. Used like:
 
 =item wrap_cite
 
+=item read_text
+
+=item write_text
+
 =back

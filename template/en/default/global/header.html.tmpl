@@ -113,8 +113,8 @@
     [% END %]
 
     [% SET css_sets = css_files(style_urls, yui, yui_css) %]
-    [% IF constants.CONCATENATE_ASSETS %]
-      [% PROCESS format_css_link asset_url = css_sets.unified_standard_skin %]
+    [% IF css_sets.concatenated_standard_skin %]
+      [% PROCESS format_css_link asset_url = css_sets.concatenated_standard_skin %]
     [% ELSE %]
       [% FOREACH asset_url = css_sets.standard %]
         [% PROCESS format_css_link %]
@@ -130,14 +130,12 @@
       </style>
     [% END %]
 
-    [% IF css_sets.unified_custom %]
-      [% IF constants.CONCATENATE_ASSETS %]
-        [% PROCESS format_css_link asset_url = css_sets.unified_custom %]
-      [% ELSE %]
+    [% IF css_sets.concatenated_custom %]
+        [% PROCESS format_css_link asset_url = css_sets.concatenated_custom %]
+    [% ELSE %]
         [% FOREACH asset_url = css_sets.custom %]
           [% PROCESS format_css_link %]
         [% END %]
-      [% END %]
     [% END %]
 
     [% IF NOT no_yui %]

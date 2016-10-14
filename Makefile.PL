@@ -22,6 +22,13 @@ use constant BUGZILLA_VERSION => $ENV{BUGZILLA_VERSION} // 42;
 use File::Basename;
 use File::Spec;
 
+BEGIN {
+    if ($ENV{BZ_SILENT_MAKEFILE}) {
+        open STDOUT, '>>', File::Spec->devnull;
+        open STDERR, '>>', File::Spec->devnull;
+    }
+}
+
 # META.json and META.yml exist only for the benefit of older
 # installs where cpanm can't get the optional features out of Makefile.PL
 # Unfortunately having META.json and META.yml commited to the repo is weird

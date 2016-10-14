@@ -88,7 +88,17 @@ if (defined $switch{cpanm}) {
     exit 1 if $rv != 0;
 }
 
+$ENV{PERL_MM_USE_DEFAULT} = 1;
+$ENV{BZ_SILENT_MAKEFILE}  = 1;
+system($^X, "Makefile.PL");
+
 my $meta = load_cpan_meta();
+if (keys %{$meta->{optional_features}} < 1) {
+    warn "Your version of ExtUtils::MakeMaker is probably too old\n";
+    warn "Falling back to static (and wrong) META.json\n";
+    unlink('MYMETA.json');
+    $meta = load_cpan_meta();
+}
 my $requirements = check_cpan_requirements($meta, \@BUGZILLA_INC, !$silent);
 
 exit 1 unless $requirements->{ok};

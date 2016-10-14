@@ -152,7 +152,7 @@ sub print_response {
     my ($self, $response) = @_;
 
     # Access Control
-    my @allowed_headers = qw(accept content-type origin x-requested-with);
+    my @allowed_headers = qw(accept content-type origin user-agent x-requested-with);
     foreach my $header (keys %{ API_AUTH_HEADERS() }) {
         # We want to lowercase and replace _ with -
         my $translated_header = $header;

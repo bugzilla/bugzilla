@@ -647,7 +647,7 @@ pre.bz_comment_text, .uneditable_textarea, tbody.file pre {
 }
 
 .bz_comment_user_images img {
-    vertical-align: bottom;
+    vertical-align: middle;
 }
 
 .bz_comment_hilite pre {

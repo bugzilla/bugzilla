@@ -23,6 +23,13 @@ use Bugzilla::Constants qw(BUGZILLA_VERSION);
 use File::Basename;
 use File::Spec;
 
+BEGIN {
+    if ($ENV{BZ_SILENT_MAKEFILE}) {
+        open STDOUT, '>>', File::Spec->devnull;
+        open STDERR, '>>', File::Spec->devnull;
+    }
+}
+
 # META.json and META.yml exist only for the benefit of older
 # installs where cpanm can't get the optional features out of Makefile.PL
 # Unfortunately having META.json and META.yml commited to the repo is weird
@@ -369,7 +376,9 @@ cpanfile: MYMETA.json
 \t\$(PERLRUN) gen-cpanfile.pl \$(GEN_CPANFILE_ARGS)
 
 checksetup_lib: Makefile.PL
-\tcpanm -l .checksetup_lib CPAN::Meta Module::Metadata\@$all_features{'Module::Metadata'}
+\tcpanm -L .checksetup_lib --notest \\
+            CPAN::Meta JSON::PP CPAN::Meta::Requirements \\
+            Module::Metadata\@$all_features{'Module::Metadata'}
 \t-rm -fr .checksetup_lib/man
 \t-rm -fr .checksetup_lib/lib/perl5/*/.meta
 \t-rm -fr .checksetup_lib/lib/perl5/Test

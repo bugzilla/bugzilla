@@ -1476,6 +1476,10 @@ sub _bug_to_hash {
           = [ map { $self->_user_to_hash($_, $params, undef, 'mentors') } @{ $bug->mentors } ];
     }
 
+    if (filter_wants $params, 'comment_count') {
+        $item{'comment_count'} = $self->type('int', $bug->comment_count);
+    }
+
     return \%item;
 }
 

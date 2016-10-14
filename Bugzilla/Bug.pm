@@ -265,6 +265,7 @@ use constant FIELD_MAP => {
     is_cc_accessible => 'cclist_accessible',
     is_creator_accessible => 'reporter_accessible',
     last_change_time => 'delta_ts',
+    comment_count    => 'longdescs.count',
     platform         => 'rep_platform',
     severity         => 'bug_severity',
     status           => 'bug_status',
@@ -3659,6 +3660,17 @@ sub comments {
         @comments = grep { datetime_from($_->creation_ts) <= $to } @comments;
     }
     return \@comments;
+}
+
+sub comment_count {
+    my ($self) = @_;
+    return $self->{comment_count} if $self->{comment_count};
+    my $dbh = Bugzilla->dbh;
+    return $self->{comment_count} =
+        $dbh->selectrow_array('SELECT COUNT(longdescs.comment_id)
+                               FROM longdescs
+                               WHERE longdescs.bug_id = ?',
+                              undef, $self->id);
 }
 
 # This is needed by xt/search.t.

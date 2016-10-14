@@ -115,7 +115,8 @@ name              type   description
            "email": "namachi@netscape.com"
          },
          "cf_free_text": "",
-         "blocks": []
+         "blocks": [],
+         "comment_count": 12
        }
      ]
    }
@@ -185,6 +186,7 @@ is_creator_accessible  boolean   If ``true``, this bug can be accessed by the
                                  member of the groups the bug is restricted to.
 keywords               array     Each keyword that is on this bug.
 last_change_time       datetime  When the bug was last changed.
+comment_count          int       Number of comments associated with the bug.
 op_sys                 string    The name of the operating system that the bug
                                  was filed against.
 platform               string    The name of the platform (hardware) that the bug

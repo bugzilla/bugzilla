@@ -38,7 +38,7 @@ new users (-R) or create databases (-D).
 
 Next we will create a database for bugzilla to use
 
-:command:`createdb -U postgress -O bugs bugs`
+:command:`createdb -U postgres -O bugs bugs`
 
 This will create a database named `bugs` that is owned (-O) by the `bugs` user.
 

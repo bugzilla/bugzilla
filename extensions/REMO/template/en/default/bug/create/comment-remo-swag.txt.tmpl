@@ -16,6 +16,7 @@
   # Rights Reserved.
   #
   # Contributor(s): Gervase Markham <gerv@gerv.net>
+  #                 Sebastin Santy <sebastinssanty@gmail.com>
   #%]
 [%# INTERFACE:
   # This template has no interface.
@@ -36,8 +37,6 @@ Profile page: [% cgi.param('profilepage') %]
 Event name: [% cgi.param('eventname') %]
 Event page: [% cgi.param('eventpage') %]
 Estimated attendance: [% cgi.param('attendance') %]
-Event hosted by a Firefox Student Ambassador(s)?: [% cgi.param('ambassador_hosted') %]
-Main audience of the event are Firefox Student Ambassadors: [% cgi.param('ambassador_audience') %]
 
 Shipping details:
 
@@ -63,11 +62,8 @@ Stickers: [% IF cgi.param('stickers') %]Yes[% ELSE %]No[% END %]
 Buttons: [% IF cgi.param('buttons') %]Yes[% ELSE %]No[% END %]
 Lanyards: [% IF cgi.param('lanyards') %]Yes[% ELSE %]No[% END %]
 T-shirts: [% IF cgi.param('tshirts') %]Yes[% ELSE %]No[% END %]
-Roll-up banners: [% IF cgi.param('rollupbanners') %]Yes[% ELSE %]No[% END %]
-Horizontal banner: [% IF cgi.param('horizontalbanner') %]Yes[% ELSE %]No[% END %]
-Booth cloth: [% IF cgi.param('boothcloth') %]Yes[% ELSE %]No[% END %]
-Pens: [% IF cgi.param('pens') %]Yes[% ELSE %]No[% END %]
+Silicone Wristband: [% IF cgi.param('wristband') %]Yes[% ELSE %]No[% END %]
+Firefox Tattoos: [% IF cgi.param('tattoos') %]Yes[% ELSE %]No[% END %]
 Other: [% IF cgi.param('otherswag') %][% cgi.param('otherswag') %][% ELSE %]No[% END %]
 
 [%+ cgi.param("comment") IF cgi.param("comment") %]
-

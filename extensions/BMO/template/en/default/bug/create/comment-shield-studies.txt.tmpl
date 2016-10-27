@@ -1,0 +1,64 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% USE Bugzilla %]
+[% cgi = Bugzilla.cgi %]
+
+> What is your hypothesis?
+[%+ cgi.param('hypothesis') %]
+
+> Define the branches of your proposed study
+[%+ cgi.param('branches') %]
+
+> What is the main effect you are looking for?
+[%+ cgi.param('main_effect') %]
+
+> How will this effect be measured?
+[%+ cgi.param('effect_measured') %]
+
+> What is the sample size needed?
+[%+ cgi.param('sample_size') %]
+
+> If there is prior art or previous results?
+[%+ cgi.param('prior_art') %]
+
+> How do you intend to test your study prior to launch?
+[%+ cgi.param('test_method') %]
+
+> How long will your study run?
+[%+ cgi.param('study_length') %]
+
+> Targeted locales
+[%+ cgi.param('targetted_locales') %]
+
+> Sampling rates
+[%+ cgi.param('sampling_rates') %]
+
+> Channel(s)
+[%+ cgi.param('channels') %]
+
+> If you have extended Telemetry or custom instrumentation, why are you taking these additional measurements?
+[%+ cgi.param('additional_measurements') %]
+
+> Will your study require third-party data collection?
+[%+ cgi.param('third_party_data') %]
+
+> Please include a sample payload that your study will submit via Unified Telemetry.
+[%+ cgi.param('sample_payload') %]
+
+> Who is the owner of the data analysis for this study?
+[%+ cgi.param('data_owner') %]
+
+> Does your data analyst have an analysis plan?
+[%+ cgi.param('analysis_plan') %]
+
+> Pleasese include a link to the consent form.
+[%+ cgi.param('consent_form') %]
+
+> Please include a link to debrief survey.
+[%+ cgi.param('debrief_survey') %]

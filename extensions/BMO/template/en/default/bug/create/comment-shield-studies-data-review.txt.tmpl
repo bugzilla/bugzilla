@@ -1,0 +1,28 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% USE Bugzilla %]
+[% cgi = Bugzilla.cgi %]
+
+> If you have extended Telemetry or custom instrumentation, why are you taking these additional measurements?
+[%+ cgi.param('additional_measurements') %]
+
+> Will your study require third-party data collection?
+[%+ cgi.param('third_party_data') %]
+
+> Please include a sample payload that your study will submit via Unified Telemetry.
+[%+ cgi.param('sample_payload') %]
+
+> Who is the owner of the data analysis for this study?
+[%+ cgi.param('data_owner') %]
+
+> Does your data analyst have an analysis plan?
+[%+ cgi.param('analysis_plan') %]
+
+> How long will your study run?
+[%+ cgi.param('study_length') %]

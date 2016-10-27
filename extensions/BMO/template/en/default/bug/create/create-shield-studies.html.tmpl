@@ -1,0 +1,217 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% PROCESS global/variables.none.tmpl %]
+
+[% inline_css = BLOCK %]
+#shieldStudies .required:after {
+  content: " *";
+  color: red;
+}
+#shieldStudies h3 {
+  color: rgb(109, 117, 129);
+}
+#shieldStudies .field_label {
+  text-align: left;
+  font-weight: bold;
+  display: block;
+}
+#shieldStudies .field_desc {
+  word-wrap: normal;
+}
+#shieldStudies .form_section {
+  margin-bottom: 1em;
+  padding-left: 1em;
+}
+[% END %]
+
+[% PROCESS global/header.html.tmpl
+   title = "Shield Studies Form"
+   style = inline_css
+   javascript_urls = [ 'extensions/BMO/web/js/shield_studies.js' ]
+%]
+
+<h2>Shield Studies Form</h2>
+
+<p>
+  [ <span class="required_star">*</span> <span class="required_explanation">Required Field</span> ]
+</p>
+
+<form method="post" action="post_bug.cgi" id="shieldStudies" class="enter_bug_form" enctype="multipart/form-data">
+<input type="hidden" name="format" id="format" value="shield-studies">
+<input type="hidden" name="product" id="product" value="Shield">
+<input type="hidden" name="component" id="component" value="Shield Study">
+<input type="hidden" name="rep_platform" id="rep_platform" value="All">
+<input type="hidden" name="op_sys" id="op_sys" value="All">
+<input type="hidden" name="priority" id="priority" value="--">
+<input type="hidden" name="version" id="version" value="unspecified">
+<input type="hidden" name="comment" id="comment" value="">
+<input type="hidden" name="status_whiteboard" id="status_whiteboard" value="">
+<input type="hidden" name="short_desc" id="short_desc" value="">
+<input type="hidden" name="token" id="token" value="[% token FILTER html %]">
+
+<h3>Study Validation Review</h3>
+
+<div class="form_section">
+  <label for="hypothesis" class="field_label required">
+    What is your hypothesis?
+  </label>
+  <div class="field_desc">
+    What are you testing?
+  </div>
+  <input type="text" name="hypothesis" id="hypothesis" size="60" required="true">
+</div>
+
+<div class="form_section">
+  <label for="branches" class="field_label required">
+    Define the branches of your proposed study
+  </label>
+  <textarea name="branches" id="branches" rows="10" cols="60" required="true"></textarea>
+</div>
+
+<div class="form_section">
+  <label for="main_effect" class="field_label required">
+    What is the main effect you are looking for?
+  </label>
+  <input type="text" name="main_effect" id="main_effect" size="60" required="true">
+</div>
+
+<div class="form_section">
+  <label for="effect_measured" class="field_label required">
+    How will this effect be measured?
+  </label>
+  <div class="field_desc">
+    I.e., what is your instrumentation?
+  </div>
+  <input type="text" name="effect_measured" id="effect_measured" size="60" required="true">
+</div>
+
+<div class="form_section">
+  <label for="sample_size" class="field_label required">
+    What is the sample size needed?
+  </label>
+  <input type="text" name="sample_size" id="sample_size" size="60" required="true">
+</div>
+
+<div class="form_section">
+  <label for="prior_art" class="field_label">
+    If there is prior art or previous results?
+  </label>
+  <div class="field_desc">
+    I.e.,such as testpilot, usertesting.com, field research, etc. Please list it here.
+  </div>
+  <textarea name="prior_art" id="prior_art" rows="10" cols="60"></textarea>
+</div>
+
+<div class="form_section">
+  <label for="test_method" class="field_label required">
+    How do you intend to test your study prior to launch?
+  </label>
+  <div class="field_desc">
+    Moco wide, team only, etc.
+  </div>
+  <input type="text" name="test_method" id="test_method" size="60" required="true">
+</div>
+
+<div class="form_section">
+  <label for="study_length" class="field_label required">
+    How long will your study run?
+  </label>
+  <div class="field_desc">
+    Expected ship dates and field dates.
+  </div>
+  <input type="text" name="study_length" id="study_length" size="60" required="true">
+</div>
+
+<h3>Shipping Status</h3>
+
+<div class="form_section">
+  <label for="targetted_locales" class="field_label required">
+    Targeted locales
+  </label>
+  <input type="text" name="targetted_locales" id="targetted_locales" size="60" required="true">
+</div>
+
+<div class="form_section">
+  <label for="sampling_rates" class="field_label required">
+    Sampling rates
+  </label>
+  <input type="text" name="sampling_rates" id="sampling_rates" size="60" required="true">
+</div>
+
+<div class="form_section">
+  <label for="channels" class="field_label required">
+    Channel(s)
+  </label>
+  <input type="text" name="channels" id="channels" size="60" required="true">
+</div>
+
+<h3>Data Review</h3>
+
+<div class="form_section">
+  <label for="additional_measurements" class="field_label required">
+    If you have extended Telemetry or custom instrumentation, why are you taking these additional measurements?
+  </label>
+  <input type="text" name="additional_measurements" id="additional_measurements" size="60" required="true">
+</div>
+
+<div class="form_section">
+  <label for="third_party_data" class="field_label required">
+    Will your study require third-party data collection?
+  </label>
+  <div class="field_desc">
+    I.e., Google analytics, loggly, any Apache server logs, etc.
+  </div>
+  <input type="text" name="third_party_data" id="third_party_data" size="60" required="true">
+</div>
+
+<div class="form_section">
+  <label for="sample_payload" class="field_label required">
+    Please include a sample payload that your study will submit via Unified Telemetry.
+  </label>
+  <div class="field_desc">
+    This must reside in the /docs/metrics.md of your repository or some similar location (core to the add-on code).
+  </div>
+  <textarea name="sample_payload" id="sample_payload" rows="10" cols="60" required="true"></textarea>
+</div>
+
+<div class="form_section">
+  <label for="data_owner" class="field_label required">
+    Who is the owner of the data analysis for this study?
+  </label>
+  <input type="text" name="data_owner" id="data_owner" size="60" required="true">
+</div>
+
+<div class="form_section">
+  <label for="analysis_plan" class="field_label required">
+    Does your data analyst have an analysis plan?
+  </label>
+  <input type="text" name="analysis_plan" id="analysis_plan" size="60" required="true">
+</div>
+
+<h3>Legal Review</h3>
+
+<div class="form_section">
+  <label for="consent_form" class="field_label required">
+    Please include a link to the consent form.
+  </label>
+  <input type="text" name="consent_form" id="consent_form" size="60" required="true">
+</div>
+
+<div class="form_section">
+  <label for="debrief_survey" class="field_label required">
+    Please include a link to debrief survey.
+  </label>
+  <input type="text" name="debrief_survey" id="debrief_survey" size="60" required="true">
+</div>
+
+<input type="submit" id="commit" value="Submit Request">
+
+</form>
+
+[% PROCESS global/footer.html.tmpl %]

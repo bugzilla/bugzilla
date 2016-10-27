@@ -1,0 +1,16 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% USE Bugzilla %]
+[% cgi = Bugzilla.cgi %]a
+
+> Pleasese include a link to the consent form.
+[%+ cgi.param('consent_form') %]
+
+> Please include a link to debrief survey.
+[%+ cgi.param('debrief_survey') %]

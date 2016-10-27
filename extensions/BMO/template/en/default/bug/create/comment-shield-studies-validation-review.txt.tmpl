@@ -1,0 +1,34 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% USE Bugzilla %]
+[% cgi = Bugzilla.cgi %]
+
+> What is your hypothesis?
+[%+ cgi.param('hypothesis') %]
+
+> Define the branches of your proposed study
+[%+ cgi.param('branches') %]
+
+> What is the main effect you are looking for?
+[%+ cgi.param('main_effect') %]
+
+> How will this effect be measured?
+[%+ cgi.param('effect_measured') %]
+
+> What is the sample size needed?
+[%+ cgi.param('sample_size') %]
+
+> If there is prior art or previous results?
+[%+ cgi.param('prior_art') %]
+
+> How do you intend to test your study prior to launch?
+[%+ cgi.param('test_method') %]
+
+> How long will your study run?
+[%+ cgi.param('study_length') %]

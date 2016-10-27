@@ -1,0 +1,136 @@
+[%# The contents of this file are subject to the Mozilla Public
+  # License Version 1.1 (the "License"); you may not use this file
+  # except in compliance with the License. You may obtain a copy of
+  # the License at http://www.mozilla.org/MPL/
+  #
+  # Software distributed under the License is distributed on an "AS
+  # IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
+  # implied. See the License for the specific language governing
+  # rights and limitations under the License.
+  #
+  # The Original Code is the BMO Extension
+  #
+  # The Initial Developer of the Original Code is the Mozilla Foundation
+  # Portions created by the Initial Developers are Copyright (C) 2011 the
+  # Initial Developer. All Rights Reserved.
+  #
+  # Contributor(s):
+  #   Byron Jones <bjones@mozilla.com>
+  #%]
+
+[% PROCESS global/variables.none.tmpl %]
+
+[% INCLUDE global/header.html.tmpl
+  title = "Triage Owners"
+  javascript_urls = [ "js/util.js", "js/field.js", "js/productform.js",
+                      "extensions/BMO/web/js/triage_owners.js" ]
+  style_urls = [ "skins/standard/buglist.css",
+                 "extensions/BMO/web/styles/triage_reports.css" ]
+  generate_api_token = 1
+%]
+
+<noscript>
+<h2>Javascript is required to use this report.</h2>
+</noscript>
+
+[% PROCESS "global/field-descs.none.tmpl" %]
+
+<form id="triageOwners" name="triageOwners" action="page.cgi" method="GET">
+  <input type="hidden" name="id" value="triage_owners.html">
+  <input type="hidden" name="json_data" id="json_data" data-json_data="[% json_data FILTER html %]">
+
+  <h3>Show Triage Owners</h3>
+
+  <table id="triage_owners_form">
+  <tr>
+    <th>Product:</th>
+    <td>
+      <select name="product" id="product">
+        <option value="">__Any__</option>
+        [% FOREACH p = user.get_selectable_products %]
+          <option value="[% p.name FILTER html %]"
+            [% " selected" IF product == p.name %]>
+            [% p.name FILTER html %]
+          </option>
+        [% END %]
+      </select>
+    </td>
+  </tr>
+  <tr>
+    <th>Component:</th>
+    <td>
+      <select name="component" id="component" multiple size="5"></select>
+    </td>
+  </tr>
+  <tr>
+    <th>Owner:</th>
+    <td>
+      [% INCLUDE global/userselect.html.tmpl
+         id       = "owner"
+         name     = "owner"
+         value    = owner
+         size     = 40
+         classes  = ["bz_userfield"]
+         multiple = 5
+      %]
+    </td>
+  </tr>
+  <tr>
+    <td>&nbsp;</td>
+    <td>
+      <input type="submit" value="Generate Report">
+    </td>
+  </tr>
+  </table>
+</form>
+
+[% IF NOT product %]
+  <p>Displaying components from default product list.</p>
+[% END %]
+
+[% IF results.size > 0 %]
+  <p>
+    <small>Each triage owner links to a buglist of all open [% terms.bugs %], since 2016-06-01, without a pending needinfo, where the priority is '--'.</small>
+  </p>
+  [% current_product = "" %]
+  <table border="0" cellspacing="0" id="report" width="100%">
+    </tr>
+    [% FOREACH r = results %]
+      [% count = loop.count() %]
+      [% IF current_product != r.product %]
+        [% current_product = r.product %]
+        <tr class="product_header">
+          <th colspan="3">[% r.product FILTER html %]</th>
+        </tr>
+      [% END %]
+      <tr class="bz_bugitem [% count % 2 == 1 ? "bz_row_odd" : "bz_row_even" %]">
+        <td>
+          [% r.component FILTER html %]
+        </td>
+        <td>
+          [% IF r.owner.id %]
+            [% INCLUDE global/user.html.tmpl who = r.owner %]
+          [% ELSE %]
+            <em>None</em>
+          [% END %]
+        </td>
+        <td>
+          [% IF r.buglist_url %]
+            <a href="[% urlbase FILTER none %]buglist.cgi?product=[% r.product FILTER uri %]&component=[% r.component FILTER uri %]&[% r.buglist_url FILTER none %]">
+              [% r.bug_count FILTER html +%] [%+ terms.bugs %] found.
+            </a>
+          [% ELSE %]
+            None
+          [% END %]
+        </td>
+      </tr>
+    [% END %]
+  </table>
+  <p>
+    Found [% results.size %] component[% 's' IF results.size != 1 %]:
+  </p>
+[% ELSE %]
+  <p>No components found.</p>
+[% END %]
+
+[% INCLUDE global/footer.html.tmpl %]

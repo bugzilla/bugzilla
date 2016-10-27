@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this file,
+ * You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * This Source Code Form is "Incompatible With Secondary Licenses", as
+ * defined by the Mozilla Public License, v. 2.0. */
+
 .hidden {
   display: none;
 }
@@ -14,10 +21,23 @@
   background: #ccccff;
 }
 
-#report td {
+#report th, #report td {
   padding: 1px 10px 1px 10px;
 }
 
 #report-header {
   background: #dddddd;
+}
+
+tr.product_header {
+  background: #dddddd;
+}
+
+#triage_owners_form th {
+  text-align: right;
+  vertical-align: top;
+}
+
+#report th, #report td {
+    text-align: left;
 }

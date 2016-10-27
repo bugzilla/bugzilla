@@ -190,9 +190,14 @@ sub page_before_template {
         require Bugzilla::Extension::BMO::Reports::UserActivity;
         Bugzilla::Extension::BMO::Reports::UserActivity::report($vars);
 
-    } elsif ($page eq 'triage_reports.html') {
+    }
+    elsif ($page eq 'triage_reports.html') {
         require Bugzilla::Extension::BMO::Reports::Triage;
-        Bugzilla::Extension::BMO::Reports::Triage::report($vars);
+        Bugzilla::Extension::BMO::Reports::Triage::unconfirmed($vars);
+    }
+    elsif ($page eq 'triage_owners.html') {
+        require Bugzilla::Extension::BMO::Reports::Triage;
+        Bugzilla::Extension::BMO::Reports::Triage::owners($vars);
     }
     elsif ($page eq 'group_admins.html') {
         require Bugzilla::Extension::BMO::Reports::Groups;

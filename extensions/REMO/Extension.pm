@@ -184,11 +184,11 @@ sub _remo_form_payment {
 
 my %CSV_COLUMNS = (
     "Date Required"   => { pos =>  1, value => '%cf_due_date' },
-    "Requester"       => { pos =>  2, value => 'Konstantina Papadea' },
-    "Email 1"         => { pos =>  3, value => 'kpapadea@mozilla.com' },
+    "Requester"       => { pos =>  2, value => 'Rizki Kelimutu' },
+    "Email 1"         => { pos =>  3, value => 'rkelimutu@mozilla.com' },
     "Mozilla Space"   => { pos =>  4, value => 'Remote' },
-    "Team"            => { pos =>  5, value => 'Community Engagement' },
-    "Department Code" => { pos =>  6, value => '2300' },
+    "Team"            => { pos =>  5, value => 'Participation' },
+    "Department Code" => { pos =>  6, value => '1002' },
     "Purpose"         => { pos =>  7, value => 'Rep event: %eventpage' },
     "Item 1"          => { pos =>  8  },
     "Item 2"          => { pos =>  9  },

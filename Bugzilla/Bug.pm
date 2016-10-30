@@ -1445,7 +1445,7 @@ sub _check_alias {
             && (!ref $invocant || $other_bug->id != $invocant->id))
         {
             ThrowUserError("alias_in_use", { alias => $alias,
-                                             bug_id => $other_bug->id });
+                                             other_bug => $other_bug });
         }
     }
 

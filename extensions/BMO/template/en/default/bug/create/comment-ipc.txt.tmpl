@@ -21,12 +21,16 @@
 >> Insert your tagged link here.
 [%+ cgi.param("tagged_link") %]
 
+[% IF cgi.param('start_run') %]
 >> When would you like your snippet to start its run?
 [%+ cgi.param("start_run") %]
 
+[% END %]
+[% IF cgi.param('complete_run') %]
 >> When would you like your snippet to complete its run?
 [%+ cgi.param("complete_run") %]
 
+[% END %]
 >> Will you be able to provide the following assets for your snippet?
 [%+ cgi.param("snippet_assets").join(', ') %]
 

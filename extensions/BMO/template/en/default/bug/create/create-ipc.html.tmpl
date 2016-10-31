@@ -106,7 +106,7 @@ $(document).ready(function() {
   <form method="post" action="post_bug.cgi" id="ipcForm">
     <input type="hidden" id="short_desc" name="short_desc" value="New IPC Request">
     <input type="hidden" name="product" value="Marketing">
-    <input type="hidden" name="component" value="Email">
+    <input type="hidden" name="component" value="IPC">
     <input type="hidden" name="rep_platform" value="All">
     <input type="hidden" name="op_sys" value="Other">
     <input type="hidden" name="version" value="unspecified">
@@ -185,27 +185,29 @@ $(document).ready(function() {
 
     <div class="row">
       <div class="row_desc">
-        <label class="required" for="start_run">
+        <label for="start_run">
           <strong>When would you like your snippet to start its run?</strong>
         </label>
       </div>
-      <input required class="date_field" name="start_run" id="start_run">
+      <input class="date_field" name="start_run" id="start_run">
       <img class="date_field-img" id="start_run-img" src="extensions/BugModal/web/calendar.png" width="16" height="16">
     </div>
 
     <div class="row">
       <div class="row_desc">
-        <label class="required" for="complete_run">
+        <label for="complete_run">
           <strong>When would you like your snippet to complete its run?</strong>
         </label>
       </div>
-      <input required class="date_field" name="complete_run" id="complete_run">
+      <input class="date_field" name="complete_run" id="complete_run">
       <img class="date_field-img" id="complete_run-img" src="extensions/BugModal/web/calendar.png" width="16" height="16">
     </div>
 
     <div class="row">
       <div class="row_desc">
-        <strong>Will you be able to provide the following assets for your snippet? Check all that apply.</strong><br> Feel free to look at our existing icon library:  <a href="http://bit.ly/2aWTmqT">http://bit.ly/2aWTmqT</a>
+        <strong>Will you be able to provide the following assets for your snippet? Check all that apply.</strong><br>
+        Feel free to look at our existing icon library:
+        <a href="http://bit.ly/2efXaFo">http://bit.ly/2efXaFo</a>
       </div>
       <input type="checkbox" name="snippet_assets" id="copy" value="Copy">
       <label for="copy">Copy</label><br>

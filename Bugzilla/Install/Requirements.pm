@@ -101,6 +101,7 @@ use constant FEATURE_FILES => (
     markdown      => ['Bugzilla/Markdown.pm'],
     memcached     => ['Bugzilla/Memcache.pm'],
     auth_delegation => ['auth.cgi'],
+    s3            => ['Bugzilla/S3.pm', 'Bugzilla/S3/Bucket.pm', 'Bugzilla/Attachment/S3.pm']
 );
 
 sub load_cpan_meta {

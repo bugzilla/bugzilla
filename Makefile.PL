@@ -189,6 +189,18 @@ my %optional_features = (
         description => 'Oracle database support',
         prereqs => { runtime => { requires => { 'DBD::Oracle' => '1.19' } } }
     },
+    s3 => {
+        description => 'Amazon S3 Attachment Storage',
+        prereqs => {
+            runtime => {
+                requires => {
+                    'Class::Accessor::Fast' => 0,
+                    'XML::Simple' => 0,
+                    'URI::Escape' => 0,
+                }
+            }
+        }
+    },
     typesniffer => {
         prereqs => {
             runtime => {

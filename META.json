@@ -58,6 +58,7 @@
                   "Auth::GoogleAuth" : "1.01",
                   "Cache::Memcached::Fast" : "0.17",
                   "Chart::Lines" : "v2.4.10",
+                  "Class::Accessor::Fast" : "0",
                   "DBD::mysql" : "4.037",
                   "Daemon::Generic" : "0",
                   "Email::MIME::Attachment::Stripper" : "0",
@@ -86,6 +87,7 @@
                   "Test::Taint" : "1.06",
                   "TheSchwartz" : "1.10",
                   "Type::Tiny" : "1",
+                  "URI::Escape" : "0",
                   "XML::Simple" : "0",
                   "XML::Twig" : "0",
                   "XMLRPC::Lite" : "0.712"
@@ -324,6 +326,18 @@
                "requires" : {
                   "JSON::RPC" : "== 1.01",
                   "Test::Taint" : "1.06"
+               }
+            }
+         }
+      },
+      "s3" : {
+         "description" : "Amazon S3 Attachment Storage",
+         "prereqs" : {
+            "runtime" : {
+               "requires" : {
+                  "Class::Accessor::Fast" : "0",
+                  "URI::Escape" : "0",
+                  "XML::Simple" : "0"
                }
             }
          }

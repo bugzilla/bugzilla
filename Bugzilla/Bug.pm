@@ -2683,7 +2683,7 @@ sub set_dup_id {
                                  extra_data => $self->dup_id });
     }
 }
-sub set_estimated_time { $_[0]->set('estimated_time', $_[1]); }
+sub set_estimated_time { my $et = $_[1]; $et =~ s/,/./g; $_[0]->set('estimated_time', $et); }
 sub _set_everconfirmed { $_[0]->set('everconfirmed', $_[1]); }
 sub set_flags {
     my ($self, $flags, $new_flags) = @_;
@@ -2852,7 +2852,7 @@ sub reset_qa_contact {
     my $comp = $self->component_obj;
     $self->set_qa_contact($comp->default_qa_contact);
 }
-sub set_remaining_time { $_[0]->set('remaining_time', $_[1]); }
+sub set_remaining_time { my $rt = $_[1]; $rt =~ s/,/./g; $_[0]->set('remaining_time', $rt); }
 # Used only when closing a bug or moving between closed states.
 sub _zero_remaining_time { $_[0]->{'remaining_time'} = 0; }
 sub set_reporter_accessible { $_[0]->set('reporter_accessible', $_[1]); }

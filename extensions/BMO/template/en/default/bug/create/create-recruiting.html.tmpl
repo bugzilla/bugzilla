@@ -45,13 +45,13 @@ label.required:before {
 function jobDescToggle(what) {
   switch (what) {
   case 'text':
-    YAHOO.util.Dom.removeClass('jobDescText', 'bz_default_hidden');
-    YAHOO.util.Dom.addClass('jobDescFile', 'bz_default_hidden');
+    $('#jobDescText').show();
+    $('#jobDescFile').hide();
     break;
 
   case 'file':
-    YAHOO.util.Dom.addClass('jobDescText', 'bz_default_hidden');
-    YAHOO.util.Dom.removeClass('jobDescFile', 'bz_default_hidden');
+    $('#jobDescText').hide();
+    $('#jobDescFile').show();
     break;
   }
 }
@@ -103,10 +103,19 @@ function jobDescToggle(what) {
     <table>
       <tr>
         <th align="right" valign="top" width="170">
-          <label class="required" for="short_desc">Position Title:</label>
+          <label class="required" for="short_desc">Position Posting Title:</label>
         </th>
         <td>
           <input required name="short_desc" id="short_desc" size="60" value="[% short_desc FILTER html %]">
+        </td>
+      </tr>
+
+      <tr>
+        <th align="right" valign="top" width="170">
+          <label class="required" for="position_job_family_title">Position Job Family Title (Workday):</label>
+        </th>
+        <td>
+          <input required name="position_job_family_title" id="position_job_family_title" size="60">
         </td>
       </tr>
 
@@ -131,6 +140,24 @@ function jobDescToggle(what) {
         </th>
         <td>
           <input required name="hiring_manager_name" id="hiring_manager_name" size="60" >
+        </td>
+      </tr>
+
+      <tr>
+        <th align="right" valign="top">
+          <label class="required" for="hiring_manager_workday_title">Hiring Manager Workday Title:</label>
+        </th>
+        <td>
+          <input required name="hiring_manager_workday_title" id="hiring_manager_workday_title" size="60" >
+        </td>
+      </tr>
+
+      <tr>
+        <th align="right" valign="top">
+          <label class="required" for="director_authority">Director Authority:</label>
+        </th>
+        <td>
+          <input required name="director_authority" id="director_authority" size="60" >
         </td>
       </tr>
 
@@ -163,24 +190,27 @@ function jobDescToggle(what) {
 
       <tr>
         <th align="right">
-          <label class="required" for="reg_or_seasonal">Regular or Seasonal?</label>
+          <label class="required" for="employment_type">Employment Type</label>
         </th>
         <td>
-          <select required id="reg_or_seasonal" name="reg_or_seasonal">
+          <select required id="employment_type" name="employment_type">
             <option value="">Select...</option>
-            <option value="Regular">Regular</option>
-            <option value="Seasonal">Seasonal</option>
+            <option value="Full-time">Full-time</option>
+            <option value="Part-time">Part-time</option>
+            <option value="Intern">Intern</option>
+            <option value="Contract">Contract</option>
+            <option value="Temporary">Temporary</option>
+            <option value="Student Worker">Student Worker</option>
           </select>
         </td>
       </tr>
 
       <tr>
-        <th align="right">
-          <label class="required" for="desired_location">Desired Location</label>
+        <th align="right" valign="top">
+          <label class="required" for="desired_location">Desired Locations</label>
         </th>
         <td>
-          <select required id="desired_location" name="desired_location">
-            <option value="">Select...</option>
+          <select required id="desired_location" name="desired_location" multiple="5">
             <option value="any">Any Location</option>
             <option value="remote">Remote</option>
             <option value="europe">Europe</option>
@@ -202,11 +232,68 @@ function jobDescToggle(what) {
       </tr>
 
       <tr>
+        <th align="right">
+          <label class="required" for="job_level">Job Level</label></th>
+        <td>
+          <select required id="job_level" name="job_level">
+            <option value="">Select...</option>
+            <option value="P1">P1</option>
+            <option value="P2">P2</option>
+            <option value="P3 - Senior">P3 - Senior</option>
+            <option value="P4 - Staff">P4 - Staff</option>
+            <option value="P5 - Sr Staff">P5 - Sr Staff</option>
+            <option value="P6 - Principal">P6 - Principal</option>
+            <option value="P7 - Sr Principal">P7 - Sr Principal</option>
+            <option value="P8 - Fellow">P8 - Fellow</option>
+            <option value="M1">M1</option>
+            <option value="M2 - Supervisor">M2 - Supervisor</option>
+            <option value="M3 - Manager">M3 - Manager</option>
+            <option value="M4 - Sr Manager">M4 - Sr Manager</option>
+            <option value="M5 - Director">M5 - Director</option>
+            <option value="M6 - Sr Director">M6 - Sr Director</option>
+            <option value="E1 - VP">E1 - VP</option>
+            <option value="E2 - SVP/C-Level">E2 - SVP/C-Level</option>
+            <option value="E3 - CEO/President">E3 - CEO/President</option>
+            <option value="S1">S1</option>
+            <option value="S2">S2</option>
+            <option value="S3 - Senior">S3 - Senior</option>
+            <option value="S4 - Staff">S4 - Staff</option>
+            <option value="S5 - Sr Staff">S5 - Sr Staff</option>
+            <option value="Steering Committee Member">Steering Committee Member</option>
+            <option value="Seasonal">Seasonal</option>
+            <option value="Seasonal Hourly">Seasonal Hourly</option>
+            <option value="Intern">Intern</option>
+            <option value="Student Worker">Student Worker</option>
+            <option value="Mozilla Foundation">Mozilla Foundation</option>
+          </select>
+        </td>
+      </tr>
+
+      <tr>
         <th align="right" valign="top">
           <label class="required" for="comp_grade">Comp Grade:</label>
         </th>
         <td>
-          <input required name="comp_grade" id="comp_grade" size="60">
+          <select required name="comp_grade" id="comp_grade">
+            <option value="">Select...</option>
+            <option value="Grade C">Grade C</option>
+            <option value="Grade D">Grade D</option>
+            <option value="Grade E">Grade E</option>
+            <option value="Grade F">Grade F</option>
+            <option value="Grade G">Grade G</option>
+            <option value="Grade H">Grade H</option>
+            <option value="Grade I">Grade I</option>
+            <option value="Grade J">Grade J</option>
+            <option value="Grade K">Grade K</option>
+            <option value="Grade L">Grade L</option>
+            <option value="Grade M">Grade M</option>
+            <option value="Grade N">Grade N</option>
+            <option value="Grade O">Grade O</option>
+            <option value="Grade P">Grade P</option>
+            <option value="Grade Q">Grade Q</option>
+            <option value="Grade R">Grade R</option>
+            <option value="Grade S">Grade S</option>
+          </select>
         </td>
       </tr>
 
@@ -220,6 +307,17 @@ function jobDescToggle(what) {
             <option value="new">New</option>
             <option value="backfill">Backfill</option>
           </select>
+        </td>
+      </tr>
+
+      <tr>
+        <th align="right" valign="top">
+          <label class="required" for="backfill_name">
+            Name of Backfill
+          </label>
+        </th>
+        <td>
+          <input required name="backfill_name" id="backfill_name" size="60">
         </td>
       </tr>
 
@@ -241,7 +339,7 @@ function jobDescToggle(what) {
       <tr>
         <th align="right" valign="top">
           <label class="required" for="job_family">
-            Please include Job Family<br>(if you know what it is)
+            Please include Job Family<br>(if you don't know please consult your HRBP)
           </label>
         </th>
         <td>
@@ -272,7 +370,7 @@ function jobDescToggle(what) {
         </td>
       </tr>
 
-      <tr id="jobDescText" class="bz_default_hidden">
+      <tr id="jobDescText" style="display:none;">
         <th align="right" valign="top">
           <label for="attach_text">Job Description:</label>
         </th>

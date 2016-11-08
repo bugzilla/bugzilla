@@ -17,11 +17,20 @@
 [% USE Bugzilla %]
 [% cgi = Bugzilla.cgi %]
 
+Position Job Family Title:
+[%+ cgi.param('position_job_family_title') %]
+
 Cost Center:
 [%+ cgi.param('cost_center') %]
 
 Hiring Manager:
 [%+ cgi.param('hiring_manager_name') %]
+
+Hiring Manager Workday Title:
+[%+ cgi.param('hiring_manager_workday_title') %]
+
+Director Authority:
+[%+ cgi.param('director_authority') %]
 
 VP Authority:
 [%+ cgi.param('vp_authority') %]
@@ -29,17 +38,23 @@ VP Authority:
 HRBP:
 [%+ cgi.param('hrbp_name') %]
 
-Regular or Seasonal?
-[%+ cgi.param('reg_or_seasonal') %]
+Employment Type:
+[%+ cgi.param('employment_type') %]
 
-Desired Location:
-[%+ cgi.param("desired_location") %]
+Desired Locations:
+[%+ cgi.param("desired_location").join(', ') %]
+
+Job Level:
+[%+ cgi.param('job_level') %]
 
 Comp Grade:
 [%+ cgi.param("comp_grade") %]
 
 Is this new headcount or backfill?
 [%+ cgi.param("new_or_backfill") %]
+
+Name of Backfill:
+[%+ cgi.param('backfill_name') %]
 
 Are you hiring multiple of this position this year?
 [%+ cgi.param("multiple") %]

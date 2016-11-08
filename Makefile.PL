@@ -53,7 +53,7 @@ END {
 
 # PREREQ_PM
 my %requires = (
-    'CGI'                      => '3.51',
+    'CGI'                      => '== 3.51',
     'CPAN::Meta::Prereqs'      => '2.132830',
     'CPAN::Meta::Requirements' => '2.121',
     'DBI'                      => '1.614',
@@ -210,7 +210,7 @@ my %optional_features = (
         description => 'JSON-RPC Interface',
         prereqs     => {
             runtime =>
-                { requires => { 'JSON::RPC' => 0, 'Test::Taint' => '1.06' } }
+                { requires => { 'JSON::RPC' => '== 1.01', 'Test::Taint' => '1.06' } }
         }
     },
     graphical_reports => {
@@ -269,7 +269,7 @@ my %optional_features = (
             runtime => {
                 requires => {
                     'Test::Taint' => '1.06',
-                    'JSON::RPC' => 0,
+                    'JSON::RPC' => '== 1.01',
                 }
             }
         }

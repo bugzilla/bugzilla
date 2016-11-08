@@ -4,7 +4,7 @@
       "Bugzilla Developers <developers@bugzilla.org>"
    ],
    "dynamic_config" : 1,
-   "generated_by" : "ExtUtils::MakeMaker version 7.04, CPAN::Meta::Converter version 2.150005",
+   "generated_by" : "ExtUtils::MakeMaker version 7.22, CPAN::Meta::Converter version 2.150005",
    "license" : [
       "unknown"
    ],
@@ -74,7 +74,7 @@
                   "HTML::Parser" : "3.67",
                   "HTML::Scrubber" : "0",
                   "IO::Scalar" : "0",
-                  "JSON::RPC" : "0",
+                  "JSON::RPC" : "== 1.01",
                   "LWP::UserAgent" : "0",
                   "MIME::Parser" : "5.406",
                   "MooX::StrictConstructor" : "0.008",
@@ -196,7 +196,7 @@
          "prereqs" : {
             "runtime" : {
                "requires" : {
-                  "JSON::RPC" : "0",
+                  "JSON::RPC" : "== 1.01",
                   "Test::Taint" : "1.06"
                }
             }
@@ -322,7 +322,7 @@
          "prereqs" : {
             "runtime" : {
                "requires" : {
-                  "JSON::RPC" : "0",
+                  "JSON::RPC" : "== 1.01",
                   "Test::Taint" : "1.06"
                }
             }
@@ -399,7 +399,7 @@
             "Safe" : "2.30"
          },
          "requires" : {
-            "CGI" : "3.51",
+            "CGI" : "== 3.51",
             "CPAN::Meta::Prereqs" : "2.132830",
             "CPAN::Meta::Requirements" : "2.121",
             "Crypt::CBC" : "0",
@@ -451,5 +451,5 @@
    },
    "release_status" : "stable",
    "version" : "42",
-   "x_serialization_backend" : "JSON::PP version 2.27203"
+   "x_serialization_backend" : "JSON::PP version 2.27300"
 }

@@ -399,7 +399,7 @@
             "Safe" : "2.30"
          },
          "requires" : {
-            "CGI" : "== 3.51",
+            "CGI" : "<= 3.63",
             "CPAN::Meta::Prereqs" : "2.132830",
             "CPAN::Meta::Requirements" : "2.121",
             "Crypt::CBC" : "0",

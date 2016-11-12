@@ -112,7 +112,7 @@ sub _throw_error {
         }
 
         my $cgi = Bugzilla->cgi;
-        $cgi->close_standby_message('text/html', 'inline', 'error', 'html');
+        $cgi->close_standby_message('text/html', 'inline', 'error', 'html') unless $cgi->sent_headers;
         $template->process($name, $vars)
           || ThrowTemplateError($template->error());
         print $cgi->multipart_final() if $cgi->{_multipart_in_progress};
@@ -279,7 +279,7 @@ sub ThrowErrorPage {
         my $template = Bugzilla->template;
         my $vars = {};
         $vars->{message} = $message;
-        print $cgi->header();
+        print $cgi->header() unless $cgi->sent_headers();
         $template->process($template_name, $vars)
           || ThrowTemplateError($template->error());
         exit;

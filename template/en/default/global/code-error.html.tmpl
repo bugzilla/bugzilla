@@ -198,6 +198,10 @@
     [% title = "Field Type Not Specified" %]
     You must specify a type when creating a custom field.
 
+  [% ELSIF error == "headers_already_sent" %]
+    [% title = "Tried to send headers twice" %]
+    Somewhere inside [% terms.Bugzilla %], code attempted to sent HTTP headers more than once.
+
   [% ELSIF error == "illegal_content_type_method" %]
     Your form submission got corrupted somehow.  The <em>content
     method</em> field, which specifies how the content type gets determined,

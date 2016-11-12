@@ -653,10 +653,21 @@ our $is_processing = 0;
 
 sub process {
     my $self = shift;
+    my ($template, undef, $output) = @_;
+
+    if (!$output && Bugzilla->usage_mode == USAGE_MODE_BROWSER) {
+        # if $output is not passed, this will print.
+        my $cgi = Bugzilla->cgi;
+        unless ($cgi->sent_headers) {
+            warn "attempted to process $template before sending headers!";
+            print $cgi->header();
+        }
+    }
+
     # All of this current_langs stuff allows template_inner to correctly
     # determine what-language Template object it should instantiate.
     my $current_langs = Bugzilla->request_cache->{template_current_lang} ||= [];
-    unshift(@$current_langs, $self->context->{bz_language});
+    unshift @$current_langs, $self->context->{bz_language};
     local $is_processing = 1;
     my $retval = $self->SUPER::process(@_);
     shift @$current_langs;

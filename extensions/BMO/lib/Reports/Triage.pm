@@ -16,7 +16,7 @@ use Bugzilla::Constants;
 use Bugzilla::Error;
 use Bugzilla::Product;
 use Bugzilla::User;
-use Bugzilla::Util qw(detaint_natural trim);
+use Bugzilla::Util qw(detaint_natural trim url_quote);
 use Date::Parse;
 
 use JSON::XS;
@@ -310,7 +310,7 @@ sub owners {
         $data->{buglist_url} = 'priority=--&resolution=---&f1=creation_ts&o1=greaterthaneq&v1=2016-06-01'.
                                '&f2=flagtypes.name&o2=notequals&v2=needinfo%3F';
         if ($triage_owner) {
-            $data->{buglist_url} .= '&f3=triage_owner&o3=equals&v3=' . $triage_owner->login;
+            $data->{buglist_url} .= '&f3=triage_owner&o3=equals&v3=' . url_quote($triage_owner->login);
         }
         $bug_count_sth->execute($component_id);
         ($data->{bug_count}) = $bug_count_sth->fetchrow_array();

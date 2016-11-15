@@ -21,7 +21,6 @@ use Bugzilla::Search::Recent;
 
 use File::Basename;
 use URI;
-use Carp qw(cluck);
 
 BEGIN {
     if (ON_WINDOWS) {
@@ -307,6 +306,7 @@ sub check_etag {
     return 0;
 }
 
+# Overwrite to ensure nph doesn't get set, and unset HEADERS_ONCE
 sub multipart_init {
     my $self = shift;
 
@@ -330,7 +330,6 @@ sub multipart_init {
     # CGI.pm's header() sets nph according to a param or $CGI::NPH, which
     # is the desired behaviour.
 
-    $self->{_bz_multipart} = 1;
     return $self->header(
         %param,
     ) . "WARNING: YOUR BROWSER DOESN'T SUPPORT THIS SERVER-PUSH TECHNOLOGY." . $self->multipart_end;
@@ -385,12 +384,7 @@ sub header {
     my %headers;
     my $user = Bugzilla->user;
 
-    if ($self->{_bz_headers_sent} && !$self->{_bz_multipart}) {
-        # cluck for the warning log so we can see where this was called.
-        cluck "attempt to send headers after headers already sent!";
-        ThrowCodeError("headers_already_sent");
-    }
-
+    # If there's only one parameter, then it's a Content-Type.
     if (scalar(@_) == 1) {
         %headers = ('-type' => shift(@_));
     }
@@ -466,18 +460,9 @@ sub header {
     Bugzilla::Hook::process('cgi_headers',
         { cgi => $self, headers => \%headers }
     );
+    $self->{_header_done} = 1;
 
-    my $headers = $self->SUPER::header(%headers) || "";
-    if ($headers && Bugzilla->usage_mode != USAGE_MODE_XMLRPC) {
-        $self->{_bz_headers_sent} = 1;
-    }
-
-    return $headers;
-}
-
-sub sent_headers {
-    my ($self) = @_;
-    return $self->{_bz_headers_sent};
+    return $self->SUPER::header(%headers) || "";
 }
 
 sub param {

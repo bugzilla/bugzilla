@@ -768,23 +768,11 @@ sub _check_setter {
     # to the new flag status.
     my $status = $self->status;
 
-    # Make sure the user is authorized to modify flags, see bug 180879:
-    # - The flag exists and is unchanged.
-    # - The flag setter can unset flag.
-    # - Users in the request_group can clear pending requests
-    # - Users in the grant_group can set/cleari/request flags, including "+" and "-".
-    unless (($status eq $self->{_old_status})
-            || ($status eq 'X' && $setter->id == Bugzilla->user->id)
-            || (($status eq 'X' || $status eq '?')
-                && $setter->can_request_flag($self->type))
-            || $setter->can_unset_flag($self->type, $self->{_old_status})
-            || $setter->can_set_flag($self->type))
-    {
-        ThrowUserError('flag_update_denied',
-                        { name       => $self->type->name,
-                          status     => $status,
-                          old_status => $self->{_old_status} });
-    }
+    ThrowUserError('flag_update_denied',
+                   { name       => $self->type->name,
+                     status     => $status,
+                     old_status => $self->{_old_status} })
+        unless $setter->can_change_flag($self->type, $self->{_old_status} || 'X', $status);
 
     # If the request is being retargetted, we don't update
     # the setter, so that the setter gets the notification.

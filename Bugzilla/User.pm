@@ -1583,6 +1583,52 @@ sub check_can_admin_flagtype {
     return wantarray ? ($flagtype, $can_fully_edit) : $flagtype;
 }
 
+sub can_change_flag {
+    my ($self, $flag_type, $old_status, $new_status) = @_;
+
+    # "old_status:new_status" => [OR conditions
+    state $flag_transitions = {
+        'X:-' => ['grant_group'],
+        'X:+' => ['grant_group'],
+        'X:?' => ['request_group'],
+
+        '?:X' => ['request_group', 'is_setter'],
+        '?:-' => ['grant_group'],
+        '?:+' => ['grant_group'],
+
+        '+:X' => ['grant_group'],
+        '+:-' => ['grant_group'],
+        '+:?' => ['grant_group'],
+
+        '-:X' => ['grant_group'],
+        '-:+' => ['grant_group'],
+        '-:?' => ['grant_group'],
+    };
+
+    return 1 if $new_status eq $old_status;
+
+    my $action = "$old_status:$new_status";
+    my %bool = (
+        request_group => $self->can_request_flag($flag_type),
+        grant_group   => $self->can_set_flag($flag_type),
+        is_setter     => $self->id == Bugzilla->user->id,
+    );
+
+    my $cond = $flag_transitions->{$action};
+    if ($cond) {
+        if (any { $bool{ $_ } } @$cond) {
+            return 1;
+        }
+        else {
+            return 0;
+        }
+    }
+    else {
+        warn "unknown flag transition blocked: $action";
+        return 0;
+    }
+}
+
 sub can_request_flag {
     my ($self, $flag_type) = @_;
 

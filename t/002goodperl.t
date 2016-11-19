@@ -80,6 +80,7 @@ foreach my $file (@testitems) {
     my $found_use_perl = 0;
     my $found_use_strict = 0;
     my $found_use_warnings = 0;
+    my $found_modern_perl = 0;
 
     $file =~ s/\s.*$//; # nuke everything after the first space (#comment)
     next if (!$file); # skip null entries
@@ -88,9 +89,14 @@ foreach my $file (@testitems) {
         next;
     }
     while (my $file_line = <FILE>) {
+        $found_modern_perl = 1 if $file_line =~ m/^use\s*(?:Moo|Role::Tiny)/;
         $found_use_perl = 1 if $file_line =~ m/^\s*use 5.10.1/;
         $found_use_strict = 1 if $file_line =~ m/^\s*use strict/;
         $found_use_warnings = 1 if $file_line =~ m/^\s*use warnings/;
+        if ($found_modern_perl) {
+            $found_use_strict = 1;
+            $found_use_warnings = 1;
+        }
         last if ($found_use_perl && $found_use_strict && $found_use_warnings);
     }
     close (FILE);

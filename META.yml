@@ -10,7 +10,7 @@ build_requires:
 configure_requires:
   ExtUtils::MakeMaker: 6.57_07
 dynamic_config: 1
-generated_by: 'ExtUtils::MakeMaker version 7.22, CPAN::Meta::Converter version 2.150005'
+generated_by: 'ExtUtils::MakeMaker version 7.04, CPAN::Meta::Converter version 2.150010'
 license: unknown
 meta-spec:
   url: http://module-build.sourceforge.net/META-spec-v1.4.html
@@ -55,6 +55,7 @@ optional_features:
       GD::Text: '0'
       HTML::Parser: '3.67'
       HTML::Scrubber: '0'
+      IO::Async: '0'
       IO::Scalar: '0'
       JSON::RPC: '== 1.01'
       LWP::UserAgent: '0'
@@ -63,7 +64,9 @@ optional_features:
       Mozilla::CA: '0'
       Net::SFTP: '0'
       PatchReader: v0.9.6
+      Role::Tiny: '0'
       SOAP::Lite: '0.712'
+      Search::Elasticsearch: '0'
       Template::Plugin::GD::Image: '0'
       Test::Taint: '1.06'
       TheSchwartz: '1.10'
@@ -87,6 +90,14 @@ optional_features:
     requires:
       File::Copy::Recursive: '0'
       File::Which: '0'
+  elasticsearch:
+    description: 'Elasticsearch-powered searches'
+    recommends:
+      Term::ProgressBar: '0'
+    requires:
+      IO::Async: '0'
+      Role::Tiny: '0'
+      Search::Elasticsearch: '0'
   extension_bitly_optional:
     requires:
       Mozilla::CA: '0'
@@ -249,4 +260,4 @@ requires:
   perl: '5.010001'
   version: '0.87'
 version: '42'
-x_serialization_backend: 'CPAN::Meta::YAML version 0.018'
+x_serialization_backend: 'CPAN::Meta::YAML version 0.016'

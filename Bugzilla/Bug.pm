@@ -37,6 +37,7 @@ use Storable qw(dclone);
 use URI;
 use URI::QueryParam;
 use Scalar::Util qw(blessed weaken);
+use Role::Tiny::With;
 
 use base qw(Bugzilla::Object Exporter);
 @Bugzilla::Bug::EXPORT = qw(
@@ -296,6 +297,148 @@ use constant REQUIRED_FIELD_MAP => {
 # Groups are in a separate table, but must always be validated so that
 # mandatory groups get set on bugs.
 use constant EXTRA_REQUIRED_FIELDS => qw(creation_ts target_milestone cc qa_contact groups);
+
+with 'Bugzilla::Elastic::Role::Object';
+
+sub ES_TYPE {'bug'}
+
+sub _bz_field {
+    my ($field, $type, $analyzer, @fields) = @_;
+
+    return (
+        $field => {
+            type     => $type,
+            analyzer => $analyzer,
+            fields => {
+                raw => {
+                    type  => 'string',
+                    index => 'not_analyzed',
+                },
+                eq => {
+                    type => 'string',
+                    analyzer => 'bz_equals_analyzer',
+                },
+                @fields,
+            },
+        },
+    );
+}
+
+sub _bz_text_field {
+    my ($field) = @_;
+
+    return _bz_field($field, 'string', 'bz_text_analyzer');
+}
+
+sub _bz_substring_field {
+    my ($field, @rest) = @_;
+
+    return _bz_field($field, 'string', 'bz_substring_analyzer', @rest);
+}
+
+sub ES_PROPERTIES {
+    return {
+        priority          => { type => 'string', analyzer => 'keyword' },
+        bug_severity      => { type => 'string', analyzer => 'keyword' },
+        bug_status        => { type => 'string', analyzer => 'keyword' },
+        resolution        => { type => 'string', analyzer => 'keyword' },
+        keywords          => { type => 'string' },
+        status_whiteboard => { type => 'string', analyzer => 'whiteboard_shingle_tokens' },
+        delta_ts          => { type => 'string', index => 'not_analyzed' },
+        _bz_substring_field('product'),
+        _bz_substring_field('component'),
+        _bz_substring_field('classification'),
+        _bz_text_field('short_desc'),
+        _bz_substring_field('assigned_to'),
+    };
+}
+
+sub ES_OBJECTS_AT_ONCE { 4000 }
+
+sub ES_SELECT_UPDATED_SQL {
+    my ($class, $mtime) = @_;
+
+    my @fields = (
+        'keywords', 'short_desc', 'product', 'component',
+        'cf_crash_signature', 'alias', 'status_whiteboard',
+        'bug_status', 'resolution', 'priority', 'assigned_to'
+    );
+    my $fields = join(', ', ("?") x @fields);
+
+    my $sql = qq{
+        SELECT DISTINCT
+            bug_id
+        FROM
+            bugs_activity
+                JOIN
+            fielddefs ON fieldid = fielddefs.id
+        WHERE
+            bug_when > FROM_UNIXTIME(?)
+                AND fielddefs.name IN ($fields)
+        UNION SELECT DISTINCT
+            bug_id
+        FROM
+            audit_log
+                JOIN
+            bugs ON bugs.assigned_to = object_id
+        WHERE
+            class = 'Bugzilla::User'
+                AND at_time > FROM_UNIXTIME(?)
+        UNION SELECT DISTINCT
+            bug_id
+        FROM
+            audit_log
+                JOIN
+            bugs ON bugs.product_id = object_id
+        WHERE
+            class = 'Bugzilla::Product'
+                AND field = 'name'
+                AND at_time > FROM_UNIXTIME(?)
+        UNION SELECT DISTINCT
+            bug_id
+        FROM
+            audit_log
+                JOIN
+            bugs ON bugs.component_id = object_id
+        WHERE
+            class = 'Bugzilla::Component'
+                AND field = 'name'
+                AND at_time > FROM_UNIXTIME(?)
+        UNION SELECT DISTINCT
+            bug_id
+        FROM
+            audit_log
+                JOIN
+            products ON classification_id = object_id
+                JOIN
+            bugs ON product_id = products.id
+        WHERE
+            class = 'Bugzilla::Classification'
+                AND field = 'name'
+                AND at_time > FROM_UNIXTIME(?)
+    };
+    return ($sql, [$mtime, @fields, $mtime, $mtime, $mtime, $mtime]);
+}
+
+sub es_document {
+    my ($self) = @_;
+    return {
+        bug_id            => $self->id,
+        product           => $self->product_obj->name,
+        alias             => $self->alias,
+        keywords          => $self->keywords,
+        priority          => $self->priority,
+        bug_status        => $self->bug_status,
+        resolution        => $self->resolution,
+        component         => $self->component_obj->name,
+        classification    => $self->product_obj->classification->name,
+        status_whiteboard => $self->status_whiteboard,
+        short_desc        => $self->short_desc,
+        assigned_to       => $self->assigned_to->login,
+        delta_ts          => $self->delta_ts,
+        bug_severity      => $self->bug_severity,
+    };
+}
 
 #####################################################################
 
@@ -2384,7 +2527,6 @@ sub _set_global_validator {
     }
     $self->_check_field_is_mandatory($value, $field);
 }
-
 
 #################
 # "Set" Methods #

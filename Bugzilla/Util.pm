@@ -523,6 +523,9 @@ sub datetime_from {
     my ($date, $timezone) = @_;
 
     # In the database, this is the "0" date.
+    use Carp qw(cluck);
+    cluck("undefined date") unless defined $date;
+    return undef unless defined $date;
     return undef if $date =~ /^0000/;
 
     my @time;

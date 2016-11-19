@@ -313,6 +313,21 @@ my %optional_features = (
             }
         }
     },
+    elasticsearch => {
+        description => 'Elasticsearch-powered searches',
+        prereqs => {
+            runtime => {
+                recommends => {
+                    'Term::ProgressBar' => 0,
+                },
+                requires => {
+                    'Search::Elasticsearch' => 0,
+                    'IO::Async' => 0,
+                    'Role::Tiny' => 0,
+                },
+            }
+        },
+    },
 );
 
 for my $file ( glob("extensions/*/Config.pm") ) {

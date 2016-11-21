@@ -31,10 +31,10 @@ my $vars = {};
 # performance.
 my $dbh = Bugzilla->switch_to_shadow_db();
 
-our (%seen, %edgesdone, %bugtitles);
-our $bug_count = 0;
+my (%seen, %edgesdone, %bugtitles);
+my $bug_count = 0;
 
-# CreateImagemap: This sub grabs a local filename as a parameter, reads the 
+# $CreateImagemap: This sub grabs a local filename as a parameter, reads the 
 # dot-generated image map datafile residing in that file and turns it into
 # an HTML map element. THIS SUB IS ONLY USED FOR LOCAL DOT INSTALLATIONS.
 # The map datafile won't necessarily contain the bug summaries, so we'll
@@ -44,7 +44,8 @@ our $bug_count = 0;
 # The dot mapdata lines have the following format (\nsummary is optional):
 # rectangle (LEFTX,TOPY) (RIGHTX,BOTTOMY) URLBASE/show_bug.cgi?id=BUGNUM BUGNUM[\nSUMMARY]
 
-sub CreateImagemap {
+# force this to be lexical, so it can close over %bugtitles
+my $CreateImagemap = sub {
     my $mapfilename = shift;
     my $map = "<map name=\"imagemap\">\n";
     my $default = "";
@@ -77,9 +78,9 @@ sub CreateImagemap {
 
     $map .= "$default</map>";
     return $map;
-}
+};
 
-sub AddLink {
+my $AddLink = sub {
     my ($blocked, $dependson, $fh) = (@_);
     my $key = "$blocked,$dependson";
     if (!exists $edgesdone{$key}) {
@@ -89,7 +90,7 @@ sub AddLink {
         $seen{$blocked} = 1;
         $seen{$dependson} = 1;
     }
-}
+};
 
 ThrowCodeError("missing_bug_id") if !defined $cgi->param('id');
 
@@ -147,7 +148,7 @@ if ($display eq 'web') {
             if ($dependson != $id && !exists $seen{$dependson}) {
                 push @stack, $dependson;
             }
-            AddLink($blocked, $dependson, $fh);
+            $AddLink->($blocked, $dependson, $fh);
         }
     }
 }
@@ -158,7 +159,7 @@ else {
         my $blocker_ids = Bugzilla::Bug::EmitDependList('blocked', 'dependson', $id);
         foreach my $blocker_id (@$blocker_ids) {
             push(@blocker_stack, $blocker_id) unless $seen{$blocker_id};
-            AddLink($id, $blocker_id, $fh);
+            $AddLink->($id, $blocker_id, $fh);
         }
     }
     my @dependent_stack = @stack;
@@ -166,7 +167,7 @@ else {
         my $dep_bug_ids = Bugzilla::Bug::EmitDependList('dependson', 'blocked', $id);
         foreach my $dep_bug_id (@$dep_bug_ids) {
             push(@dependent_stack, $dep_bug_id) unless $seen{$dep_bug_id};
-            AddLink($dep_bug_id, $id, $fh);
+            $AddLink->($dep_bug_id, $id, $fh);
         }
     }
 }
@@ -220,7 +221,7 @@ foreach my $k (keys(%seen)) {
     }
 
     # Push the bug tooltip texts into a global hash so that 
-    # CreateImagemap sub (used with local dot installations) can
+    # $CreateImagemap sub (used with local dot installations) can
     # use them later on.
     $bugtitles{$k} = trim("$stat $resolution");
 
@@ -280,7 +281,7 @@ if ($webdotbase =~ /^https?:/) {
     $vars->{'image_url'} = $pngfilename;
 
     # Then, generate a imagemap datafile that contains the corner data
-    # for drawn bug objects. Pass it on to CreateImagemap that
+    # for drawn bug objects. Pass it on to $CreateImagemap that
     # turns this monster into html.
 
     my ($mapfh, $mapfilename) = File::Temp::tempfile("XXXXXXXXXX",
@@ -298,7 +299,7 @@ if ($webdotbase =~ /^https?:/) {
     close DOT;
     close $mapfh;
 
-    $vars->{'image_map'} = CreateImagemap($mapfilename);
+    $vars->{'image_map'} = $CreateImagemap->($mapfilename);
 }
 
 # Cleanup any old .dot files created from previous runs.

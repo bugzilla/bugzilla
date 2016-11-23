@@ -39,10 +39,10 @@
   color: rgb(102, 100, 88);
 }
 
-span.required:before {
+.required:before {
   content: "* ";
 }
 
-span.required:before, span.required_star {
+.required:before, .required_star {
   color: red;
 }

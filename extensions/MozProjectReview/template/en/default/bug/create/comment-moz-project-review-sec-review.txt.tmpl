@@ -9,12 +9,12 @@
 [% USE Bugzilla %]
 [% cgi = Bugzilla.cgi %]
 
-[% PROCESS "bug/create/comment-moz-project-review.txt.tmpl" %]
+[% PROCESS "bug/create/initial-questions-comment.txt.tmpl" %]
 
-Security Review Questions:
+>> Vendor Security Review Questions
 
-Affects Products: [% cgi.param('sec_affects_products') %]
-Review Due Date: [% cgi.param('sec_review_date') %]
-Review Invitees: [% cgi.param('sec_review_invitees') %]
+Review Invitees:
+[%+ cgi.param('sec_review_invitees') %]
+
 Extra Information:
 [%+ cgi.param('sec_review_extra') %]

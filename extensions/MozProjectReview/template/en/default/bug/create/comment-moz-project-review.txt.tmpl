@@ -9,25 +9,120 @@
 [% USE Bugzilla %]
 [% cgi = Bugzilla.cgi %]
 
-Initial Questions:
+[% PROCESS "bug/create/initial-questions-comment.txt.tmpl" %]
 
-Project/Feature Name: [% cgi.param('short_desc') %]
-Tracking [% terms.Bug %] ID:[% cgi.param('tracking_id') %]
-Description:
-[%+ cgi.param('description') %]
-Additional Information:
-[%+ cgi.param('additional') %]
-Key Initiative: [% cgi.param('key_initiative') == 'Other'
-                   ? cgi.param('key_initiative_other')
-                   : cgi.param('key_initiative') %]
-Release Date: [% cgi.param('release_date') %]
-Project Status: [% cgi.param('project_status') %]
-Mozilla Data: [% cgi.param('mozilla_data') %]
-Mozilla Related: [% cgi.param('mozilla_related') %]
-Separate Party: [% cgi.param('separate_party') %]
-[% IF cgi.param('separate_party') == 'Yes' %]
-Type of Relationship: [% cgi.param('relationship_type') %]
-Data Access: [% cgi.param('data_access') %]
-Privacy Policy: [% cgi.param('privacy_policy') %]
-Vendor Cost: [% cgi.param('vendor_cost') %]
+[% IF cgi.param('contract_type') == 'Engaging an individual (independent contractor, temp agency worker, incorporated)' %]
+>> Independent Contractor Questions
+
+Is this someone we've worked with before?
+[%+ cgi.param('independent_contractor_prev_work') %]
+
+[% IF cgi.param('independent_contractor_prev_work') == 'Yes' %]
+If yes, enter the [% terms.bug %] number for the previous work or note that this is a former employee:
+[%+ terms.Bug +%] [%+ cgi.param('independent_contractor_prev_work_bug') %]
+[% END %]
+
+Has this person incorporated (sole proprietorship or similar form)?
+[%+ cgi.param('independent_contractor_incorporated') %]
+
+Will the person be engaged through a staffing agency?
+[%+ cgi.param('independent_contractor_staff_agency') %]
+
+Does the person have other clients?
+[%+ cgi.param('independent_contractor_other_clients') %]
+
+Does the person provide services similar to a paid Mozilla employee?
+[%+ cgi.param('independent_contractor_dupe_services') %]
+
+[% IF cgi.param('independent_contractor_dupe_services') == 'Yes' %]
+If yes, is the person primarily being engaged due to a temporary increase in workload or as backfill for an employee on leave?
+[%+ cgi.param('independent_contractor_dupe_services_temp') %]
+[% END %]
+
+Will the person be managing his or her own time?
+[%+ cgi.param('independent_contractor_self_manage') %]
+
+Will the person be using his or her own equipment?
+[%+ cgi.param('independent_contractor_own_equipment') %]
+
+Will the person be regularly working at a Mozilla facility?
+[%+ cgi.param('independent_contractor_mozilla_facility') %]
+
+Will the person be supervising Mozilla employees?
+[%+ cgi.param('independent_contractor_supervising') %]
+[% END %]
+
+>> Contract Specific Questions
+
+Vendor/Contractor/Partner Name:
+[%+ cgi.param('other_party') %]
+
+[% IF cgi.param('contract_type') == 'Engaging a new vendor company'
+      || cgi.param('contract_type') == 'Engaging an individual (independent contractor, temp agency worker, incorporated)'
+      || cgi.param('contract_type') == 'Adding a new SOW with a vendor' %]
+>> SOW Details
+
+Vendor Address:
+[%+ cgi.param('sow_vendor_address') %]
+
+Vendor Email for Legal Notices:
+[%+ cgi.param('sow_vendor_email') %]
+
+Mozilla Contact:
+[%+ cgi.param('sow_vendor_mozcontact') %]
+
+Vendor Contact and Email Address:
+[%+ cgi.param('sow_vendor_contact') %]
+
+Vendor Services to be Provided:
+[%+ cgi.param('sow_vendor_services') %]
+
+Access to Mozilla Systems Required:
+[%+ cgi.param('sow_vendor_mozilla_systems') %]
+
+[% IF cgi.param('sow_vendow_mozilla_systems') == 'Yes' %]
+Mozilla Systems Access Explanation:
+[%+ cgi.param('sow_vendor_mozilla_systems_explain') %]
+[% END %]
+
+Vendor Onsite at Mozilla Location:
+[%+ cgi.param('sow_vendor_onsite') %]
+
+[% IF cgi.param('sow_vendor_onsite') == 'Yes' %]
+Where and When Vendor will be Onsite:
+[%+ cgi.param('sow_vendor_onsite_where') %]
+[% END %]
+
+Description of Deliverables:
+[%+ cgi.param('sow_vendor_deliverables') %]
+
+Start Date:
+[%+ cgi.param('sow_start_date') %]
+
+End Date:
+[%+ cgi.param('sow_end_date') %]
+
+Rate of Pay:
+[%+ cgi.param('sow_vendor_payment') %]
+
+Basis for Payment:
+[%+ cgi.param('sow_vendor_payment_basis') %]
+
+Cap on reimbursement expenses:
+[%+ cgi.param('sow_vendor_cap_expenses') %]
+
+Average/Maximum Hours:
+[%+ cgi.param('sow_vendor_hours') %]
+
+Payment Schedule:
+[%+ cgi.param('sow_vendor_payment_schedule') %]
+
+Total Not to Exceed Amount:
+[%+ cgi.param('sow_vendor_total_max') %]
+
+Any Special Terms:
+[%+ cgi.param('sow_vendor_special_terms') || 'None' %]
+
+Where will the services be provided?:
+[%+ cgi.param('vendor_services_where') %]
 [% END %]

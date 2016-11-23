@@ -699,15 +699,7 @@ sub prevent_windows_dialog_boxes {
 
 # This is like request_cache, but it's used only by installation code
 # for checksetup.pl and things like that.
-our $_cache = {};
-sub _cache {
-    # If the normal request_cache is available (which happens any time
-    # after the requirements phase) then we should use that.
-    if (eval { Bugzilla->request_cache; }) {
-        return Bugzilla->request_cache;
-    }
-    return $_cache;
-}
+use constant _cache => {};
 
 ###############################
 # Copied from Bugzilla::Util #

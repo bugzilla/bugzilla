@@ -9,47 +9,25 @@
 [% USE Bugzilla %]
 [% cgi = Bugzilla.cgi %]
 
->> What kind of relationships are you looking to develop?
-[%+ cgi.param("relationship_development") %]
+[%- MACRO cmt_field(name, content) BLOCK -%]
+>> [% content FILTER clean_text %]
+[%+ cgi.param(name) %]
 
->> What will you do with these relationships?
-[%+ cgi.param("relationship_goal") %]
+[% END %]
 
->> In this a new email program request?
-[%+ cgi.param("new_email_request") %]
-
-[% IF cgi.param("email_cadence") %]
->> Cadence of planned email engagement
-[%+ cgi.param("email_cadence") %]
-
-[% END -%]
-
->> What initiative does this support?
-[%+ cgi.param("support_initiative") %]
-
->> Do you currently have a way to solve for this?
-[%+ cgi.param("solution") %]
-
->> What are the pain points in the current process?
-[%+ cgi.param("pain_points") %]
-
->> What are the perceived benefits to changing the process?
-[%+ cgi.param("benefits") %]
-
->> How will success be measured?
-[%+ cgi.param("kpis") %]
-
->> What is the risk to not doing this?
-[%+ cgi.param("risk") %]
-
->> What does success look like?
-[%+ cgi.param("success_outcome") %]
-
->> How many people will need access to the CRM platform?
-[%+ cgi.param("access_amount") %]
-
->> How large is the data set?
-[%+ cgi.param("data_size") %]
-
->> When is this program needed?
-[%+ cgi.param("cf_due_date") %]
+[% cmt_field('mozilla_team_dept', 'Mozilla Team/Department') %]
+[% cmt_field('relationship_development', 'What kind of relationships are you looking to develop?') %]
+[% cmt_field('relationship_goal', 'How will you nurture these relationships?') %]
+[% IF cgi.param('new_program_request') == 'Yes' %]
+[% cmt_field('way_to_solve', 'Do you currently have a way to solve for this?') %]
+[% cmt_field('pain_points', 'What are the pain points in the current process?') %]
+[% cmt_field('perceived_benefits', 'What are the perceived benefits to changing the process?') %]
+[% cmt_field('data_size', 'How large is the data set?') %]
+[% cmt_field('how_many_train_people', 'How many people on your team need access or training?') %]
+[% END %]
+[% cmt_field('kpis', 'How will success be measured?') %]
+[% cmt_field('risk', 'What is the risk to not doing this?') %]
+[% cmt_field('timeline_for_launch', 'What\'s the timeline for launch?') %]
+[% IF cgi.param('other_info') %]
+[% cmt_field('other_info', 'Any other info we should know?') %]
+[% END %]

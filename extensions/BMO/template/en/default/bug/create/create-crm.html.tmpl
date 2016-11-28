@@ -46,33 +46,20 @@ p {
 
 [% inline_javascript = BLOCK %]
 $(document).ready(function() {
-  $('.date_field').datetimepicker({
-    format: 'Y-m-d',
-    datepicker: true,
-    timepicker: false,
-    scrollInput: false,
-    lazyInit: false,
-    closeOnDateSelect: true
-  });
-  $('.date_field-img')
-    .click(function(event) {
-      var id = $(event.target).attr('id').replace(/-img$/, '');
-      $('#' + id).datetimepicker('show');
-  });
   $('#crmForm').submit(function() {
     $('#short_desc').val($('#short_desc').val() + ': ' + $('#program_name').val());
   });
-  $('#new_email_request').on('change', function() {
-    if ($('#new_email_request').val() == 'Yes') {
-      $('#email_cadence_row').show();
-      $('input[name="email_cadence"]').each(function() {
+  $('#new_program_request').change(function() {
+    if ($('#new_program_request').val() == 'Yes') {
+      $('.new_program_request_row').show();
+      $('.new_program_request_row').find('textarea').each(function() {
         $(this).attr('required', true);
       });
     }
     else {
-      $('#email_cadence_row').hide();
-      $('input[name="email_cadence"]').each(function() {
-        $(this).removeProp('required');
+      $('.new_program_request_row').hide();
+      $('.new_program_request_row').find('textarea').each(function() {
+        $(this).removeAttr('required');
       });
     }
   });
@@ -92,18 +79,16 @@ $(document).ready(function() {
 
 <div id="heading">CRM/Email Marketing Requests</div>
 <div>
-  <p>
-    Mozilla has set goals to build our core, grow our influence, and prototype the future. To do so at scale, we need
-    to enable people to join up with Mozilla.  Making connections and cultivating relationships will be critical to
-    helping people know and understand our brands, programs and products, and take action with us.
-  </p>
-  <p>
-    Do you have <b>C</b>onsitutents, <b>C</b>ontributors, or <b>C</b>ustomers whose <b>R</b>elationships you want to
-    help nuture and <b>M</b>anage? Want some <b>CRM</b> or email software to help enable you to do exactly that?
-  </p>
-  <p>
-    Tell us more (all fields are required):
-  </p>
+  <p>Mozilla continues to build our core, grow our influence, and prototype the
+    future. Making connections and cultivating relationships is critical to helping
+    people know our brands, programs and products, and take action with us.</p>
+
+  <p>Do you have <strong>C</strong>onstituents, <strong>C</strong>ontributors, or
+    <strong>C</strong>ustomers whose <strong>R</strong>elationships you want to help
+    nurture and manage?</p>
+
+  <p>Tell us more and then join our weekly meeting for next steps (we’ll send you
+    the invite details once you submit the [% terms.bug %]):</p>
 
   <form method="post" action="post_bug.cgi" id="crmForm">
     <input type="hidden" id="short_desc" name="short_desc" value="New CRM/Email Marketing Request">
@@ -131,6 +116,15 @@ $(document).ready(function() {
 
     <div class="row">
       <div class="row_desc">
+        <label class="required" for="mozilla_team_dept">
+          <strong>Mozilla Team/Department</strong>
+        </label>
+      </div>
+      <input type="text" required name="mozilla_team_dept" id="mozilla_team_dept" size="80">
+    </div>
+
+    <div class="row">
+      <div class="row_desc">
         <label class="required" for="relationship_development">
           <strong>What kind of relationships are you looking to develop?</strong>
         </label>
@@ -141,96 +135,61 @@ $(document).ready(function() {
     <div class="row">
       <div class="row_desc">
         <label class="required" for="relationship_goal">
-          <strong>What will you do with these relationships?</strong>
+          <strong>How will you nurture these relationships?</strong>
         </label>
       </div>
-      <textarea required name="relationship_goal" id="relationship_goal" cols="80" rows="10"></textarea>
+      <textarea required name="relationship_goal"  id="relationship_goal" cols="80" rows="10"
+                placeholder="communication strategy, topics, example actions"></textarea>
     </div>
 
      <div class="row">
       <div class="row_desc">
-        <label class="required" for="new_email_request">
-          <strong>Is this a new email program request?</strong>
+        <label class="required" for="new_program_request">
+          <strong>Is this a new program request?</strong>
         </label>
       </div>
-      <select reuired name="new_email_request" id="new_email_request">
+      <select required name="new_program_request" id="new_program_request">
         <option value="">-- Select --</option>
         <option value="Yes">Yes</option>
         <option value="No">No</option>
       </select>
     </div>
 
-    <div class="row" id="email_cadence_row" style="display:none;">
-      <div class="row_desc">
-        <label class="required" for="email_cadence">
-          <strong>Cadence of planned email engagement</strong>
-        </label>
-      </div>
-      <input type="radio" name="email_cadence" id="cadence_one_time" value="One Time">
-      <label for="cadence_one_time">One Time</label><br>
-      <input type="radio" name="email_cadence" id="cadence_weekly" value="Weekly">
-      <label for="cadence_weekly">Weekly</label><br>
-      <input type="radio" name="email_cadence" id="cadence_monthly" value="Monthly">
-      <label for="cadence_monthly">Monthly</label><br>
-      <input type="radio" name="email_cadence" id="cadence_random" value="Random">
-      <label for="cadence_random">Random</label><br>
-    </div>
+    [% WRAPPER program_request_row
+       name        = "way_to_solve"
+       placeholder = "If so, what are the steps that you take in order to complete the task today?" %]
+    Do you currently have a way to solve for this?
+    [% END %]
 
-    <div class="row">
-      <div class="required row_desc">
-        <strong>What initiative does this support?</strong>
-      </div>
-      <input required type="radio" name="support_initiative" id="firefox_desktop_retention" value="Firefox desktop retention">
-      <label for="firefox_desktop_retention">Firefox desktop retention</label><br>
-      <input required type="radio" name="support_initiative" id="firefox_desktop_acquisition" value="Firefox desktop acquisition">
-      <label for="firefox_desktop_acquisition">Firefox desktop acquisition</label><br>
-      <input required type="radio" name="support_initiative" id="firefox_mobile_retention" value="Firefox mobile retention">
-      <label for="firefox_mobile_retention">Firefox mobile retention</label><br>
-      <input required type="radio" name="support_initiative" id="firefox_mobile_acquisition" value="Firefox mobile acquisition">
-      <label for="firefox_mobile_acquisition">Firefox mobile acquisition</label><br>
-      <input required type="radio" name="support_initiative" id="firefox_product_testing" value="Firefox product testing">
-      <label for="firefox_product_testing">Firefox product testing</label><br>
-      <input required type="radio" name="support_initiative" id="mozilla_mission_engagement" value="Mozilla mission engagement">
-      <label for="mozilla_mission_engagement">Mozilla mission engagement</label><br>
-      <input required type="radio" name="support_initiative" id="mozilla_community_cultivation" value="Mozilla community cultivation">
-      <label for="mozilla_community_cultivation">Mozilla community cultivation</label><br>
-    </div>
+    [% WRAPPER program_request_row
+       name = "pain_points" %]
+    What are the pain points in the current process?
+    [% END %]
 
-    <div class="row">
-      <div class="row_desc">
-        <label class="required" for="solution">
-          <strong>Do you currently have a way to solve for this?</strong><br>
-          If so, what are the steps that you take in order to complete the task today?
-        </label>
-      </div>
-      <textarea required  name="solution" id="solution" cols="80" rows="10"></textarea>
-    </div>
+    [% WRAPPER program_request_row
+       name = "perceived_benefits" %]
+    What are the perceived benefits to changing the process?
+    [% END %]
 
-    <div class="row">
-      <div class="row_desc">
-        <label class="required" for="pain_points">
-          <strong>What are the pain points in the current process?</strong>
-        </label>
-      </div>
-      <textarea required name="pain_points" id="pain_points" cols="80" rows="10"></textarea>
-     </div>
+    [% WRAPPER program_request_row
+       name        = "data_size"
+       placeholder = "# of contacts, fields, etc." %]
+    How large is the data set?
+    [% END %]
 
-    <div class="row">
-      <div class="row_desc">
-        <label class="required" for="benefits">
-          <strong>What are the perceived benefits to changing the process?</strong>
-        </label>
-      </div>
-      <textarea required name="benefits" id="benefits" cols="80" rows="10"></textarea>
-    </div>
+    [% WRAPPER program_request_row
+       name        = "how_many_train_people"
+       placeholder = "Who are they & what are their roles?" %]
+    How many people on your team need access or training?
+    [% END %]
 
     <div class="row">
       <div class="row_desc">
         <label class="required" for="kpis">
-          <strong>How will success be measured?</strong> (KPIs)
+          <strong>How will success be measured?</strong>
         </label>
       </div>
-      <textarea required name="kpis" id="kpis" cols="80" rows="10"></textarea>
+      <textarea required name="kpis" id="kpis" cols="80" rows="10" placeholder="KPIs"></textarea>
     </div>
 
     <div class="row">
@@ -244,58 +203,38 @@ $(document).ready(function() {
 
     <div class="row">
       <div class="row_desc">
-      <label class="required" for="success_outcome">
-        <strong>What does success look like?</strong> (Major milestones, KPI goals)
-      </label>
-      </div>
-      <textarea required name="success_outcome" id="success_outcome" cols="80" rows="10"></textarea>
-    </div>
-
-    <div class="row">
-      <div class="row_desc">
-        <label class="required" for="access_amount">
-          <strong>How many people will need access to the CRM platform?</strong><br>
-          Who are they & what are their roles?
+        <label class="required" for="timeline_for_launch">
+          <strong>What's the timeline for launch?</strong>
         </label>
       </div>
-      <textarea required name="access_amount" id="access_amount" cols="80" rows="10"></textarea>
-    </div>
-
-    <div class="row">
-      <div class="row_desc">
-        <label class="required" for="data_size">
-          <strong>How large is the data set?</strong> (# of contacts, fields, etc.)
-        </label>
-      </div>
-      <input required type="text" name="data_size" id="data_size" size="80">
+      <textarea required name="timeline_for_launch" id="timeline_for_launch" cols="80" rows="10"></textarea>
     </div>
 
     <div class="row">
       <div class="row_desc">
         <label class="required" for="cf_due_date">
-          <strong>When is this program needed?</strong>
+          <strong>Who should be cc’d on this [% terms.bug %] and kept informed of updates?</strong>
         </label>
       </div>
-      <input required class="date_field" name="cf_due_date" id="cf_due_date">
-      <img class="date_field-img" id="cf_due_date-img" src="extensions/BugModal/web/calendar.png" width="16" height="16">
+      [% INCLUDE global/userselect.html.tmpl
+         id       = "cc"
+         name     = "cc"
+         value    = cc
+         size     = 80
+         multiple = 5
+       %]
     </div>
 
     <div class="row">
       <div class="row_desc">
-        <label for="cc">
-          <strong>Points of Contact:</strong><br>
-          Who should be cc'ed on this [% terms.bug %] and kept informed of updates?
+        <label for="other_info">
+          <strong>Any other info we should know?</strong>
         </label>
       </div>
-      [% INCLUDE global/userselect.html.tmpl
-         id       => "cc"
-         name     => "cc"
-         value    => ""
-         size     => 80
-         classes  => ["bz_userfield"]
-         multiple => 5
-       %]
+      <textarea name="other_info" id="other_info" cols="80" rows="10"
+                placeholder="links to campaign or program briefs"></textarea>
     </div>
+
     <input type="submit" id="commit" value="Submit Request">
     <p>
       [ <span class="required_star">*</span> <span class="required_explanation">Required Field</span> ]
@@ -304,3 +243,15 @@ $(document).ready(function() {
 </div>
 
 [% PROCESS global/footer.html.tmpl %]
+
+[% BLOCK program_request_row %]
+  <div class="row new_program_request_row" style="display:none;">
+    <div class="row_desc">
+      <label for="[% name FILTER html %]" class="required">
+        <strong>[% content FILTER html %]</strong>
+      </label>
+    </div>
+    <textarea name="[% name FILTER html %]" id="[% name FILTER html %]"
+              cols="80" rows="10" placeholder="[% placeholder FILTER html %]"></textarea>
+  </div>
+[% END %]

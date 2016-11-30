@@ -12,7 +12,7 @@ use strict;
 use warnings;
 
 use Bugzilla::API::1_0::Constants qw(API_AUTH_HEADERS);
-use Bugzilla::API::1_0::Util qw(taint_data fix_credentials api_include_exclude);
+use Bugzilla::API::1_0::Util qw(taint_data fix_credentials api_include_exclude datetime_format_inbound);
 
 use Bugzilla::Constants;
 use Bugzilla::Error;
@@ -251,10 +251,10 @@ sub _params_check {
             my $value = $params->{$field};
             if (ref $value eq 'ARRAY') {
                 $params->{$field} =
-                    [ map { $self->datetime_format_inbound($_) } @$value ];
+                    [ map { datetime_format_inbound($_) } @$value ];
             }
             else {
-                $params->{$field} = $self->datetime_format_inbound($value);
+                $params->{$field} = datetime_format_inbound($value);
             }
         }
     }

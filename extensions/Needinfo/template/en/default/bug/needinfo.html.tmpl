@@ -122,11 +122,15 @@ $(function() {
   function existing_needinfo_changed(event) {
     var $target = $(event.target);
     var is_redirect = !$target.is(':checked') && $target.data('is-self');
-    $('#needinfo_from_label').text(is_redirect
-      ? 'Redirect my needinfo request to'
-      : 'Need more information from'
-    );
-    $('#needinfo_redirect').val(is_redirect ? '1' : '');
+    if (is_redirect) {
+      $('#needinfo_from_label').hide();
+      $('#needinfo_type').show();
+      $('#needinfo_type').val('redirect_to');
+    } else {
+      $('#needinfo_from_label').show();
+      $('#needinfo_type').hide();
+      $('#needinfo_type').val('needinfo_from');
+    }
   }
 
   function needinfo_role_changed() {
@@ -186,18 +190,16 @@ $(function() {
   [% IF needinfo_flags.size == 0 || needinfo_flagtype.is_multiplicable %]
     <tr>
       <td class="needinfo-cb-td">
-        <input
-          type="checkbox"
-          name="needinfo"
-          id="needinfo"
-          value="1"
-        >
+        <input type="checkbox" name="needinfo" id="needinfo" value="1">
       </td>
       <td>
-        <input type="hidden" name="needinfo_redirect" id="needinfo_redirect" value="">
         <label for="needinfo" id="needinfo_from_label">
           Need more information from
         </label>
+        <select name="needinfo_type" id="needinfo_type" style="display:none;">
+          <option value="needinfo_from" selected="true">Need more information from</option>
+          <option value="redirect_to">Redirect needinfo request to</option>
+        </select>
         <select name="needinfo_role" id="needinfo_role">
           <option value="other">other</option>
           [% IF NOT bug.reporter.needinfo_blocked %]

@@ -15,7 +15,8 @@
 
 <p>
   <b>[% reason FILTER html %]</b> requires verification.<br>
-  Please enter your verification code from your TOTP application:
+  Please enter your verification code from your TOTP application. If your device has been lost or stolen, you
+  may use one of your pregenerated recovery codes.
 </p>
 <div class="verify-totp">
   <form method="POST" action="[% postback.action FILTER none %]">

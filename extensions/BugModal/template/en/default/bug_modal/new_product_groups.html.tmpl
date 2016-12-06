@@ -15,34 +15,34 @@
   #%]
 
 [% PROCESS group_list
-    group_set = groups.invalid
-    label     = "Groups that are not valid for the '" _ product.name _ "' product:"
-    enabled   = 0
-    disabled  = 1
+    type     = "invalid"
+    label    = "Groups that are not valid for the '" _ product.name _ "' product:"
+    enabled  = 0
+    disabled = 1
 %]
 [% PROCESS group_list
-    group_set = groups.mandatory
-    label     = "Mandatory '" _ product.name _ "' groups:"
-    enabled   = 1
-    disabled  = 1
+    type     = "mandatory"
+    label    = "Mandatory '" _ product.name _ "' groups:"
+    enabled  = 1
+    disabled = 1
 %]
 [% PROCESS group_list
-    group_set = groups.optional
-    label     = "Optional '" _ product.name _ "' groups:"
-    enabled   = 1
-    disabled  = 0
+    type     = "optional"
+    label    = "Optional '" _ product.name _ "' groups:"
+    enabled  = 1
+    disabled = 0
 %]
 <input type="hidden" name="group_verified" value="1">
 
 [% BLOCK group_list %]
-  [% RETURN UNLESS group_set.size %]
+  [% RETURN UNLESS groups.$type.size %]
   [% FILTER collapse %]
     <div>
       <div>
         [% label FILTER html %]
       </div>
 
-      [% FOREACH g = group_set %]
+      [% FOREACH g = groups.$type %]
         <div>
           [% IF g.checked %]
             <input type="hidden" name="defined_groups" value="[% g.name FILTER html %]">
@@ -51,7 +51,8 @@
             id="group_[% g.id FILTER none %]"
             [%= IF enabled %]name="groups"[% END %]
             [%= "checked" IF g.checked %]
-            [%= "disabled" IF disabled %]>
+            [%= "disabled" IF disabled %]
+            [%= 'data-mandatory="1"' IF type == "mandatory" %]>
           <label for="group_[% g.id FILTER none %]" [%= IF disabled %]class="group-disabled"[% END %]>
             [% g.description FILTER html %]
           </label>

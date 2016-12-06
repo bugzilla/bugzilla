@@ -1173,11 +1173,15 @@ $(function() {
 
                     // update groups
                     var dirtyGroups = [];
+                    var any_groups_checked = 0;
                     $('#module-security').find('input[name=groups]').each(function() {
                         var that = $(this);
                         var defaultChecked = !!that.attr('checked');
                         if (defaultChecked !== that.is(':checked')) {
                             dirtyGroups.push({ name: that.val(), value: that.is(':checked') });
+                        }
+                        if (that.is(':checked')) {
+                            any_groups_checked = 1;
                         }
                     });
                     $('#module-security .module-content')
@@ -1186,6 +1190,16 @@ $(function() {
                     $.each(dirtyGroups, function() {
                         $('#module-security').find('input[value=' + this.name + ']').prop('checked', this.value);
                     });
+                    // clear any default groups if user was making bug public
+                    // unless the group is mandatory for the new product
+                    if (!any_groups_checked) {
+                        $('#module-security').find('input[name=groups]').each(function() {
+                            var that = $(this);
+                            if (!that.data('mandatory')) {
+                                that.prop('checked', false);
+                            }
+                        });
+                    }
                 },
                 function() {
                     $('#product-throbber').hide();

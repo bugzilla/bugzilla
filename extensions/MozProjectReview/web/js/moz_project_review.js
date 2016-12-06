@@ -120,7 +120,7 @@ $(function() {
         var do_sec_review = [
             'Engaging a new vendor company',
             'Adding a new SOW with a vendor',
-            'Extending an SOW or renewing a contract',
+            'Extending a SOW or renewing a contract',
             'Purchasing software',
             'Signing up for an online service',
             'Other'
@@ -242,7 +242,7 @@ $(function() {
                              $('#other_party').val());
 
         var component_map = {
-            "Engaging a new vendor company,": "Vendor/Services",
+            "Engaging a new vendor company": "Vendor/Services",
             "Adding a new SOW with a vendor": "Vendor/Services",
             "Extending a SOW or renewing a contract": "Vendor/Services",
             "Purchasing hardware": "Vendor/Services",

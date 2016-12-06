@@ -42,7 +42,7 @@ sub post_bug_after_creation {
         'Engaging a new vendor company',
         'Engaging an individual (independent contractor, temp agency worker, incorporated)',
         'Adding a new SOW with a vendor',
-        'Extending an SOW or renewing a contract',
+        'Extending a SOW or renewing a contract',
         'Purchasing software',
         'Signing up for an online service',
     );

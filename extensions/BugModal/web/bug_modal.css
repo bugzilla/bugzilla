@@ -676,7 +676,8 @@ td.flag-requestee {
     margin-top: 20px;
 }
 
-#add-comment-private {
+#add-comment-private,
+#bugzilla-etiquette {
     float: right;
 }
 

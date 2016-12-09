@@ -137,7 +137,7 @@
 %]
 
 [% IF user.id %]
-  <form name="changeform" id="changeform" method="post" action="process_bug.cgi">
+  <form name="changeform" id="changeform" method="post" action="process_bug.cgi"[% IF bug.groups_in.size %] autocomplete="nope"[% END %]>
   <input type="hidden" name="delta_ts" value="[% bug.delta_ts FILTER html %]">
   <input type="hidden" name="longdesclength" value="[% bug.comments.size FILTER html %]">
   <input type="hidden" name="id" id="bug_id" value="[% bug.bug_id FILTER html %]">

@@ -236,7 +236,7 @@ $(function() {
             return false;
         }
 
-        $('#short_desc').val('Contract for ' +
+        $('#short_desc').val('Legal Review: Contract for ' +
                              $('#contract_type').val() +
                              ' with ' +
                              $('#other_party').val());

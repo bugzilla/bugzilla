@@ -1331,13 +1331,13 @@ sub remove_from_db {
 #####################################################################
 
 sub send_changes {
-    my ($self, $changes, $vars) = @_;
-
+    my ($self, $changes) = @_;
+    my @results;
     my $user = Bugzilla->user;
 
-    my $old_qa  = $changes->{'qa_contact'}  
+    my $old_qa  = $changes->{'qa_contact'}
                   ? $changes->{'qa_contact'}->[0] : '';
-    my $old_own = $changes->{'assigned_to'} 
+    my $old_own = $changes->{'assigned_to'}
                   ? $changes->{'assigned_to'}->[0] : '';
     my $old_cc  = $changes->{cc}
                   ? $changes->{cc}->[0] : '';
@@ -1349,15 +1349,15 @@ sub send_changes {
         changer   => $user,
     );
 
-    my $recipient_count = _send_bugmail(
-        { id => $self->id, type => 'bug', forced => \%forced }, $vars);
+    push @results, _send_bugmail(
+        { id => $self->id, type => 'bug', forced => \%forced });
 
     # If the bug was marked as a duplicate, we need to notify users on the
     # other bug of any changes to that bug.
     my $new_dup_id = $changes->{'dup_id'} ? $changes->{'dup_id'}->[1] : undef;
     if ($new_dup_id) {
-        $recipient_count += _send_bugmail(
-            { forced => { changer => $user }, type => "dupe", id => $new_dup_id }, $vars);
+        push @results, _send_bugmail(
+            { forced => { changer => $user }, type => "dupe", id => $new_dup_id });
     }
 
     # If there were changes in dependencies, we need to notify those
@@ -1376,7 +1376,7 @@ sub send_changes {
 
             foreach my $id (@{ $self->blocked }) {
                 $params->{id} = $id;
-                $recipient_count += _send_bugmail($params, $vars);
+                push @results, _send_bugmail($params);
             }
         }
     }
@@ -1394,37 +1394,28 @@ sub send_changes {
     delete $changed_deps{''};
 
     foreach my $id (sort { $a <=> $b } (keys %changed_deps)) {
-        $recipient_count += _send_bugmail(
-            { forced => { changer => $user }, type => "dep", id => $id }, $vars);
+        push @results, _send_bugmail(
+            { forced => { changer => $user }, type => "dep", id => $id });
     }
 
     # Sending emails for the referenced bugs.
     foreach my $ref_bug_id (uniq @{ $self->{see_also_changes} || [] }) {
-        $recipient_count += _send_bugmail(
-            { forced => { changer => $user }, id => $ref_bug_id }, $vars);
+        push @results, _send_bugmail(
+            { forced => { changer => $user }, id => $ref_bug_id });
     }
 
-    return $recipient_count;
+    return \@results;
 }
 
 sub _send_bugmail {
-    my ($params, $vars) = @_;
+    my ($params) = @_;
 
     require Bugzilla::BugMail;
 
-    my $results =
+    my $sent_bugmail =
         Bugzilla::BugMail::Send($params->{'id'}, $params->{'forced'}, $params);
 
-    if (Bugzilla->usage_mode == USAGE_MODE_BROWSER) {
-        my $template = Bugzilla->template;
-        $vars->{$_} = $params->{$_} foreach keys %$params;
-        $vars->{'sent_bugmail'} = $results;
-        $template->process("bug/process/results.html.tmpl", $vars)
-            || ThrowTemplateError($template->error());
-        $vars->{'header_done'} = 1;
-    }
-
-    return scalar @{ $results->{sent} };
+    return { params => $params, sent_bugmail => $sent_bugmail };
 }
 
 #####################################################################
@@ -2778,10 +2769,11 @@ sub _set_product {
         if (%vars) {
             $vars{product} = $product;
             $vars{bug} = $self;
-            my $template = Bugzilla->template;
-            $template->process("bug/process/verify-new-product.html.tmpl",
-                \%vars) || ThrowTemplateError($template->error());
-            exit;
+            require Bugzilla::Error::Template;
+            die Bugzilla::Error::Template->new(
+                file => "bug/process/verify-new-product.html.tmpl",
+                vars => \%vars
+            );
         }
     }
     else {

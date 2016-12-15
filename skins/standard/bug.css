@@ -674,4 +674,8 @@ div#update_container {
    font-weight: bold;
 }
 
+.bz-comment {
+   resize: both;
+}
+
 /* attachment.cgi (end) */

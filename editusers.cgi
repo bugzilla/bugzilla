@@ -132,6 +132,8 @@ if ($action eq 'search') {
                 $expr = 'profiles.email';
             } elsif ($matchvalue eq 'realname') {
                 $expr = "profiles.realname";
+            } elsif ($matchvalue eq 'extern_id') {
+                $expr = "profiles.extern_id";
             } else {
                 $expr = "profiles.login_name";
             }

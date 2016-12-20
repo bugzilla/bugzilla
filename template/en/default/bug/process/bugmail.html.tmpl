@@ -24,13 +24,13 @@
   # sent_bugmail: The results of Bugzilla::BugMail::Send().
   #%]
 
-[% USE CGI %]
+[% USE Bugzilla %]
 [% PROCESS global/variables.none.tmpl %]
 
 [%# hide the recipient list by default from new users %]
 [% show_recipients =
      user.settings.post_bug_submit_action.value == 'nothing'
-     || CGI.cookie('show_bugmail_recipients')
+     || Bugzilla.cgi.cookie('show_bugmail_recipients')
      || !user.can_see_bug(mailing_bugid)
 %]
 [% recipient_count = sent_bugmail.sent.size %]

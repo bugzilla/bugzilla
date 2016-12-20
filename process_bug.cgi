@@ -27,6 +27,7 @@ use Bugzilla::Status;
 use Bugzilla::Token;
 use Bugzilla::Hook;
 
+use Scalar::Util qw(blessed);
 use List::MoreUtils qw(firstidx);
 use Storable qw(dclone);
 
@@ -111,8 +112,6 @@ my $user_match_fields = {
 Bugzilla::Hook::process('bug_user_match_fields', { fields => $user_match_fields });
 Bugzilla::User::match_field($user_match_fields);
 
-print $cgi->header() unless Bugzilla->usage_mode == USAGE_MODE_EMAIL;
-
 # Check for a mid-air collision. Currently this only works when updating
 # an individual bug.
 my $delta_ts = $cgi->param('delta_ts') || '';
@@ -158,6 +157,7 @@ if ($delta_ts) {
             $cgi->param('token', issue_hash_token([$first_bug->id, $first_bug->delta_ts]));
 
             # Warn the user about the mid-air collision and ask them what to do.
+            print $cgi->header() unless Bugzilla->usage_mode == USAGE_MODE_EMAIL;
             $template->process("bug/process/midair.html.tmpl", $vars)
                 || ThrowTemplateError($template->error());
             exit;
@@ -186,6 +186,9 @@ $vars->{'title_tag'} = "bug_processed";
 my $action;
 if (defined $cgi->param('id')) {
     $action = $user->setting('post_bug_submit_action');
+    if ($action ne 'nothing' && $action ne 'same_bug' && $action ne 'next_bug') {
+        ThrowCodeError("invalid_post_bug_submit_action");
+    }
 
     if ($action eq 'next_bug') {
         my $bug_list_obj = $user->recent_search_for($first_bug);
@@ -361,7 +364,21 @@ foreach my $b (@bug_objects) {
         push(@remove_groups, $g->name) if grep { $_ eq $g->name } @unchecked_groups;
     }
     local $set_all_fields{groups}->{remove} = \@remove_groups;
-    $b->set_all(\%set_all_fields);
+    my $ok = eval {
+        $b->set_all(\%set_all_fields);
+        1;
+    };
+    unless ($ok) {
+        my $error = $@;
+        if (blessed $error && $error->isa('Bugzilla::Error::Template')) {
+            print $cgi->header();
+            $template->process($error->file, $error->vars);
+            exit;
+        }
+        else {
+            die $error;
+        }
+    }
 }
 
 if (defined $cgi->param('id')) {
@@ -376,6 +393,7 @@ if (defined $cgi->param('id')) {
 ##############################
 # Do Actual Database Updates #
 ##############################
+my @all_sent_changes;
 foreach my $bug (@bug_objects) {
     my $changes = $bug->update();
 
@@ -389,50 +407,60 @@ foreach my $bug (@bug_objects) {
         }
     }
 
-    my $recipient_count = $bug->send_changes($changes, $vars);
+    push @all_sent_changes, $bug->send_changes($changes);
 }
 
 # Delete the session token used for the mass-change.
 delete_token($token) unless $cgi->param('id');
 
-if (Bugzilla->usage_mode == USAGE_MODE_EMAIL) {
-    # Do nothing.
-}
-elsif ($action eq 'next_bug' or $action eq 'same_bug') {
-    my $bug = $vars->{'bug'};
-    if ($bug and $user->can_see_bug($bug)) {
-        if ($action eq 'same_bug') {
-            # $bug->update() does not update the internal structure of
-            # the bug sufficiently to display the bug with the new values.
-            # (That is, if we just passed in the old Bug object, we'd get
-            # a lot of old values displayed.)
-            $bug = new Bugzilla::Bug($bug->id);
-            $vars->{'bug'} = $bug;
-        }
-        $vars->{'bugs'} = [$bug];
-        if ($action eq 'next_bug') {
-            $vars->{'nextbug'} = $bug->id;
-        }
+# BMO: add show_bug_format hook for experimental UI work
+my $format_params = {
+    format => scalar $cgi->param('format'),
+    ctype  => scalar $cgi->param('ctype'),
+};
+Bugzilla::Hook::process('show_bug_format', $format_params);
+my $format = $template->get_format("bug/show",
+                                    $format_params->{format},
+                                    $format_params->{ctype});
 
-        # BMO: add show_bug_format hook for experimental UI work
-        my $format_params = {
-            format => scalar $cgi->param('format'),
-            ctype  => scalar $cgi->param('ctype'),
-        };
-        Bugzilla::Hook::process('show_bug_format', $format_params);
-        my $format = $template->get_format("bug/show",
-                                           $format_params->{format},
-                                           $format_params->{ctype});
-        $template->process($format->{template}, $vars)
-          || ThrowTemplateError($template->error());
-        exit;
+if (Bugzilla->usage_mode != USAGE_MODE_EMAIL) {
+    print $cgi->header();
+
+    foreach my $sent_changes (@all_sent_changes) {
+        foreach my $sent_change (@$sent_changes) {
+            my $params       = $sent_change->{params};
+            my $sent_bugmail = $sent_change->{sent_bugmail};
+            $vars->{$_} = $params->{$_} foreach keys %$params;
+            $vars->{'sent_bugmail'} = $sent_bugmail;
+            $template->process("bug/process/results.html.tmpl", $vars)
+                || ThrowTemplateError($template->error());
+            $vars->{'header_done'} = 1;
+        }
     }
-} elsif ($action ne 'nothing') {
-    ThrowCodeError("invalid_post_bug_submit_action");
-}
 
-# End the response page.
-unless (Bugzilla->usage_mode == USAGE_MODE_EMAIL) {
+    if ($action eq 'next_bug' or $action eq 'same_bug') {
+        my $bug = $vars->{'bug'};
+        if ($bug and $user->can_see_bug($bug)) {
+            if ($action eq 'same_bug') {
+                # $bug->update() does not update the internal structure of
+                # the bug sufficiently to display the bug with the new values.
+                # (That is, if we just passed in the old Bug object, we'd get
+                # a lot of old values displayed.)
+                $bug = Bugzilla::Bug->new($bug->id);
+                $vars->{'bug'} = $bug;
+            }
+            $vars->{'bugs'} = [$bug];
+            if ($action eq 'next_bug') {
+                $vars->{'nextbug'} = $bug->id;
+            }
+
+            $template->process($format->{template}, $vars)
+                || ThrowTemplateError($template->error());
+            exit;
+        }
+    }
+
+    # End the response page.
     $template->process("bug/navigate.html.tmpl", $vars)
         || ThrowTemplateError($template->error());
     $template->process("global/footer.html.tmpl", $vars)

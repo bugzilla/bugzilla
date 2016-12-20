@@ -30,7 +30,6 @@ $sel->click_ok("link=Open a New Account");
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_is("Create a new Bugzilla account");
 $sel->type_ok("login", $valid_account);
-$sel->click_ok("agree", "Accept code of conduct");
 $sel->click_ok('//input[@value="Create Account"]');
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_is("Request for new user account '$valid_account' submitted");
@@ -45,7 +44,6 @@ $sel->click_ok("link=Open a New Account");
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_is("Create a new Bugzilla account");
 $sel->type_ok("login", $valid_account);
-$sel->click_ok("agree", "Accept code of conduct");
 $sel->click_ok('//input[@value="Create Account"]');
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_is("Too Soon For New Token");
@@ -59,7 +57,6 @@ foreach my $account (@accounts) {
     $sel->wait_for_page_to_load_ok(WAIT_TIME);
     $sel->title_is("Create a new Bugzilla account");
     $sel->type_ok("login", $account);
-    $sel->click_ok("agree", "Accept code of conduct");
     $sel->click_ok('//input[@value="Create Account"]');
     $sel->wait_for_page_to_load_ok(WAIT_TIME);
     $sel->title_is("Account Creation Restricted");
@@ -81,7 +78,6 @@ foreach my $account (@accounts) {
     $sel->wait_for_page_to_load_ok(WAIT_TIME);
     $sel->title_is("Create a new Bugzilla account");
     $sel->type_ok("login", $account);
-    $sel->click_ok("agree", "Accept code of conduct");
     $sel->click_ok('//input[@value="Create Account"]');
     ok($sel->get_alert() =~ /The e-mail address doesn't pass our syntax checking for a legal email address/,
         'Invalid email address detected');
@@ -96,7 +92,6 @@ foreach my $account (@accounts) {
     $sel->wait_for_page_to_load_ok(WAIT_TIME);
     $sel->title_is("Create a new Bugzilla account");
     $sel->type_ok("login", $account);
-    $sel->click_ok("agree", "Accept code of conduct");
     $sel->click_ok('//input[@value="Create Account"]');
     $sel->wait_for_page_to_load_ok(WAIT_TIME);
     $sel->title_is("Invalid Email Address");
@@ -109,7 +104,6 @@ $sel->click_ok("link=New Account");
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_is("Create a new Bugzilla account");
 $sel->type_ok("login", $config->{admin_user_login});
-$sel->click_ok("agree", "Accept code of conduct");
 $sel->click_ok('//input[@value="Create Account"]');
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_is("Account Already Exists");

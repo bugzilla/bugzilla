@@ -9,9 +9,8 @@
 use 5.10.1;
 use strict;
 use warnings;
+use lib qw(. lib local/lib/perl5);
 
-use FindBin '$RealBin';
-use lib "$RealBin/../..", "$RealBin/../../lib";
 
 use Bugzilla;
 use Bugzilla::Bug;

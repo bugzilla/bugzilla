@@ -1,0 +1,35 @@
+find . \
+         -not -name security_remove.pl  \
+         -not -name close_bugs_wontfix.pl \
+         -not -name fix-attachment-sizes.pl \
+         -not -name sanitizeme.pl \
+         -not -name nuke-bugs.pl \
+         -not -name fix_all_open_status_queries.pl \
+         -not -name addcustomfield.pl \
+         -not -name merge-users.pl \
+         -not -name migrate_whiteboard_keyword.pl \
+         -not -name syncflags.pl \
+         -not -name nagios_blocker_checker.pl \
+         -not -name 1298978.pl \
+         -not -name group-set-members.pl \
+         -not -name update-bug-groups.pl \
+         -not -name sendunsentbugmail.pl \
+         -not -name remove_idle_group_members.pl \
+         -not -name movebugs.pl \
+         -not -name syncmsandversions.pl \
+         -not -name move_flag_types.pl \
+         -not -name migrate-cab-review.pl \
+         -not -name migrate-attachments.pl \
+         -not -name triage_owners_csv.pl \
+         -not -name move_os.pl \
+         -not -name reassign_open_bugs.pl \
+         -not -name generate_bmo_data.pl \
+         -not -name user-prefs.pl \
+         -not -name clear-templates.pl \
+         -not -name fixperms.pl \
+         -not -name nagios_push_checker.pl \
+         -not -name clear-memcached.pl \
+         -not -name eject-users-from-groups.pl \
+         -not -name cpanfile_fixed_versions.pl \
+         -not -name convert_datetime.pl \
+         -not -name update-crash-signatures.pl

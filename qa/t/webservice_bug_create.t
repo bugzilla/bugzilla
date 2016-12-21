@@ -11,7 +11,7 @@
 
 use strict;
 use warnings;
-use lib qw(lib);
+use lib qw(lib ../../lib ../../local/lib/perl5);
 use Storable qw(dclone);
 use Test::More tests => 293;
 use QA::Util;

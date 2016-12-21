@@ -16,9 +16,11 @@
 # Contributor(s): Frédéric Buclin <LpSolit@gmail.com>
 #                 David Miller <justdave@mozilla.com>
 
+use 5.10.1;
 use strict;
-use FindBin qw($RealBin);
-use lib ("$RealBin/..", "$RealBin/../lib", "$RealBin/../local/lib/perl5");
+use warnings;
+use lib qw(. lib local/lib/perl5);
+
 
 use Bugzilla;
 use Bugzilla::Constants;

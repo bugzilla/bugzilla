@@ -16,10 +16,7 @@
 use 5.10.1;
 use strict;
 use warnings;
-
-# exit early if there's nothing to send
-use FindBin qw($RealBin);
-use lib ("$RealBin/.", "$RealBin/lib", "$RealBin/local/lib/perl5");
+use lib qw(. lib local/lib/perl5);
 
 BEGIN {
     delete $ENV{SERVER_SOFTWARE};

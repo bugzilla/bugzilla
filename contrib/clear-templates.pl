@@ -9,8 +9,7 @@
 
 use strict;
 use warnings;
-use FindBin;
-use lib "$FindBin::Bin/..", "$FindBin::Bin/../lib", "$FindBin::Bin/../local/lib/perl5";
+use lib qw(. lib local/lib/perl5);
 
 use Bugzilla;
 use Bugzilla::Constants;

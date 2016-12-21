@@ -15,7 +15,7 @@
 
 use strict;
 use warnings;
-use lib qw(lib);
+use lib qw(lib ../../lib ../../local/lib/perl5);
 use Test::More tests => 134;
 use QA::Util;
 my ($config, @clients) = get_rpc_clients();

@@ -7,11 +7,11 @@
 # This Source Code Form is "Incompatible With Secondary Licenses", as
 # defined by the Mozilla Public License, v. 2.0.
 
+use 5.10.1;
 use strict;
-use feature 'say';
+use warnings;
+use lib qw(. lib local/lib/perl5);
 
-use FindBin qw($RealBin);
-use lib ("$RealBin/..", "$RealBin/../lib", "$RealBin/../local/lib/perl5");
 
 use Bugzilla;
 use Bugzilla::Constants;

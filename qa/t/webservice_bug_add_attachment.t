@@ -7,7 +7,7 @@
 
 use strict;
 use warnings;
-use lib qw(lib);
+use lib qw(lib ../../lib ../../local/lib/perl5);
 use QA::Util;
 use MIME::Base64 qw(encode_base64 decode_base64);
 use Test::More tests => 187;

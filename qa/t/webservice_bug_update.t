@@ -7,7 +7,7 @@
 
 use strict;
 use warnings;
-use lib qw(lib);
+use lib qw(lib ../../lib ../../local/lib/perl5);
 use Data::Dumper;
 use QA::Util;
 use QA::Tests qw(PRIVATE_BUG_USER STANDARD_BUG_TESTS);

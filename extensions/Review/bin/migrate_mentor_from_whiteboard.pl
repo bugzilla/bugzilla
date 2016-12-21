@@ -12,8 +12,7 @@ use strict;
 use warnings;
 $| = 1;
 
-use FindBin qw($RealBin);
-use lib ("$RealBin/../../..", "$RealBin/../../../lib", "$RealBin/../../../local/lib/perl5");
+use lib qw(. lib local/lib/perl5);
 
 use Bugzilla;
 BEGIN { Bugzilla->extensions() }

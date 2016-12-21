@@ -9,8 +9,9 @@
 use 5.10.1;
 use strict;
 use warnings;
-
 use lib qw(. lib local/lib/perl5);
+
+
 
 use Bugzilla;
 use Bugzilla::Constants;

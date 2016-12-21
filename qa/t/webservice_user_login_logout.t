@@ -11,7 +11,7 @@
 
 use strict;
 use warnings;
-use lib qw(lib);
+use lib qw(lib ../../lib ../../local/lib/perl5);
 use Data::Dumper;
 use QA::Util;
 use Test::More tests => 119;

@@ -8,9 +8,7 @@
 use 5.10.1;
 use strict;
 use warnings;
-
-use FindBin qw($RealBin);
-use lib "$RealBin/lib", "$RealBin/../../lib", "$RealBin/../../local/lib/perl5";
+use lib qw(lib ../../lib ../../local/lib/perl5);
 
 use Test::More "no_plan";
 use QA::Util;

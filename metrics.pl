@@ -10,13 +10,9 @@
 use 5.10.1;
 use strict;
 use warnings;
+use lib qw(. lib local/lib/perl5);
 
-BEGIN {
-    delete $ENV{SERVER_SOFTWARE};
-}
-
-use FindBin qw($RealBin);
-use lib ("$RealBin/.", "$RealBin/lib", "$RealBin/local/lib/perl5");
+BEGIN { delete $ENV{SERVER_SOFTWARE}; }
 
 use Bugzilla;
 use Bugzilla::Constants;

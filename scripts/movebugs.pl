@@ -8,12 +8,12 @@
 # defined by the Mozilla Public License, v. 2.0.
 
 use strict;
+use warnings;
+use lib qw(. lib local/lib/perl5);
+
 
 use Cwd 'abs_path';
 use File::Basename;
-use FindBin;
-use FindBin qw($RealBin);
-use lib ("$RealBin/..", "$RealBin/../lib", "$RealBin/../local/lib/perl5");
 
 use Bugzilla;
 use Bugzilla::Constants;

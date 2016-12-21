@@ -9,9 +9,10 @@
 use 5.10.1;
 use strict;
 use warnings;
+use lib qw(. lib local/lib/perl5);
 
-use FindBin;
-use lib "$FindBin::Bin/..", "$FindBin::Bin/../lib", "$FindBin::Bin/../local/lib/perl5";
+
+
 
 use Bugzilla::Constants;
 use Bugzilla::Install::Requirements;

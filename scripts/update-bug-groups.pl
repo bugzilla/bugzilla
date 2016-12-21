@@ -9,10 +9,10 @@
 
 use strict;
 use warnings;
-$| = 1;
+use lib qw(. lib local/lib/perl5);
 
-use FindBin qw($RealBin);
-use lib ("$RealBin/..", "$RealBin/../lib", "$RealBin/../local/lib/perl5");
+
+$| = 1;
 
 use Bugzilla;
 use Bugzilla::CGI;

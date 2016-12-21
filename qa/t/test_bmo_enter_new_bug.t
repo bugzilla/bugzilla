@@ -14,7 +14,7 @@
 
 use strict;
 use warnings;
-use lib qw(lib);
+use lib qw(lib ../../lib ../../local/lib/perl5);
 
 use Test::More "no_plan";
 

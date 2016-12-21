@@ -285,6 +285,7 @@ $(function() {
         // update ui
         that.parent('.comment-tag').remove();
         renderTags(commentNo, tagsFromDom(container));
+        updateTagsMenu();
 
         // update bugzilla
         bugzilla_ajax(
@@ -296,6 +297,7 @@ $(function() {
             },
             function(data) {
                 renderTags(commentNo, data);
+                updateTagsMenu();
             },
             function(message) {
                 taggingError(commentNo, message);
@@ -438,6 +440,7 @@ $(function() {
                     },
                     function(data) {
                         renderTags(commentNo, data);
+                        updateTagsMenu();
                     },
                     function(message) {
                         taggingError(commentNo, message);

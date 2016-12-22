@@ -13,6 +13,7 @@ use warnings;
 
 use Bugzilla::Error;
 use Scalar::Util qw(blessed);
+use List::Util qw(sum);
 use Bugzilla::Util qw(trick_taint);
 use URI::Escape;
 use Encode;
@@ -20,6 +21,7 @@ use Sys::Syslog qw(:DEFAULT);
 
 # memcached keys have a maximum length of 250 bytes
 use constant MAX_KEY_LENGTH => 250;
+use constant RATE_LIMIT_PREFIX => "rate:";
 
 sub _new {
     my $invocant = shift;
@@ -155,6 +157,26 @@ sub clear {
         ThrowCodeError('params_required', { function => "Bugzilla::Memcached::clear",
                                             params   => [ 'key', 'table' ] });
     }
+}
+
+sub should_rate_limit {
+    my ($self, $name, $rate_max, $rate_seconds, $tries) = @_;
+    my $prefix    = RATE_LIMIT_PREFIX . $name . ':';
+    my $memcached = $self->{memcached};
+
+    $tries //= 3;
+
+    for (0 .. $tries) {
+        my $now = time;
+        my ($key, @keys) = map { $prefix . ( $now - $_ ) } 0 .. $rate_seconds;
+        $memcached->add($key, 0, $rate_seconds+1);
+        my $tokens = $memcached->get_multi(@keys);
+        my $cas    = $memcached->gets($key);
+        $tokens->{$key} = $cas->[1]++;
+        return 1 if sum(values %$tokens) >= $rate_max;
+        return 0 if $memcached->cas($key, @$cas, $rate_seconds+1);
+    }
+    return 1;
 }
 
 sub clear_all {

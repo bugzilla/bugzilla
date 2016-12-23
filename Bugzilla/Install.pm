@@ -307,6 +307,10 @@ sub create_admin {
     my $dbh      = Bugzilla->dbh;
     my $template = Bugzilla->template;
 
+    # We must ensure $/ is set to \r\n on windows.
+    # CGI.pm unsets.
+    local $/ = ON_WINDOWS ? "\x0d\x0a" : "\x0a";
+
     my $admin_group = new Bugzilla::Group({ name => 'admin' });
     my $admin_inheritors =
         Bugzilla::Group->flatten_group_membership($admin_group->id);

@@ -15,7 +15,6 @@ use parent qw(Exporter);
 
 # For bz_locations
 use File::Basename;
-use Memoize;
 
 @Bugzilla::Constants::EXPORT = qw(
     BUGZILLA_VERSION
@@ -641,9 +640,13 @@ use constant EMAIL_LIMIT_EXCEPTION  => "email_limit_exceeded\n";
 use constant JOB_QUEUE_VIEW_MAX_JOBS => 500;
 
 sub bz_locations {
-    # Force memoize() to re-compute data per project, to avoid
+    # Force $memoize to re-compute data per project, to avoid
     # sharing the same data across different installations.
-    return _bz_locations($ENV{'PROJECT'});
+    state $memoize = {};
+    my $project = $ENV{PROJECT};
+    my $key = $project // '__DEFAULT';
+
+    return $memoize->{$key} //= _bz_locations($project);
 }
 
 sub _bz_locations {
@@ -703,10 +706,6 @@ sub _bz_locations {
         'assetsdir'   => "$datadir/assets",
     };
 }
-
-# This makes us not re-compute all the bz_locations data every time it's
-# called.
-BEGIN { memoize('_bz_locations') };
 
 1;
 

@@ -71,7 +71,7 @@ function check_mini_login_fields( suffix ) {
 }
 
 function set_language( value ) {
-    $.cookie('LANG', value, {
+    Cookies.set('LANG', value, {
         expires: new Date('January 1, 2038'),
         path: BUGZILLA.param.cookie_path
     });

@@ -144,6 +144,7 @@
   <input type="hidden" name="format" value="modal">
   <input type="hidden" name="editing" id="editing" value="">
   <input type="hidden" name="token" value="[% issue_hash_token([bug.id, bug.delta_ts]) FILTER html %]">
+  <input type="hidden" name="addselfcc" id="addselfcc" value="">
 
   [% PROCESS bug_modal/navigate.html.tmpl %]
 [% END %]
@@ -1046,7 +1047,7 @@
   collapsed = 1
   subtitle = bug.groups_in.size ? bug.groups_in.pluck("description").join(", ") : "public"
   hide_on_view = bug.groups_in.size == 0
-  hide_on_edit = bug.groups.size == 0
+  hide_on_edit = bug.groups.size == 0 && !bug.product_obj.default_security_group
 %]
   [% INCLUDE bug_modal/groups.html.tmpl %]
 [% END %]

@@ -1119,6 +1119,11 @@ $(function() {
             $('#add-cc').focus();
         });
 
+    // Add user to cc list if they mark the bug as security sensitive
+    $('.restrict_sensitive')
+        .change(function(event) {
+            $('#addselfcc').val($('#addselfcc').val() == 0 ? 1 : 0);
+        });
 
     // product change --> load components, versions, milestones, groups
     $('#product').data('default', $('#product').val());

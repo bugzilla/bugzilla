@@ -1122,7 +1122,7 @@ $(function() {
     // Add user to cc list if they mark the bug as security sensitive
     $('.restrict_sensitive')
         .change(function(event) {
-            $('#addselfcc').val($('#addselfcc').val() == 0 ? 1 : 0);
+            $('#add-self-cc:not(:checked)').attr('checked', true);
         });
 
     // product change --> load components, versions, milestones, groups

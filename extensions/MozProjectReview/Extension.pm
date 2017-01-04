@@ -40,11 +40,11 @@ sub post_bug_after_creation {
     my $do_sec_review = 0;
     my @sec_review_needed = (
         'Engaging a new vendor company',
-        'Engaging an individual (independent contractor, temp agency worker, incorporated)',
         'Adding a new SOW with a vendor',
         'Extending a SOW or renewing a contract',
         'Purchasing software',
         'Signing up for an online service',
+        'Other'
     );
     if ((any { $_ eq $params->{contract_type} } @sec_review_needed)
         || $params->{mozilla_data} eq 'Yes') {
@@ -65,7 +65,7 @@ sub post_bug_after_creation {
 
     if ($do_sec_review) {
         $child_params->{'bug_data'} = {
-            short_desc   => 'RRA: ' . $bug->short_desc,
+            short_desc   => 'RRA: ' . $params->{contract_type} . ' with ' . $params->{other_party},
             product      => 'Enterprise Information Security',
             component    => 'Rapid Risk Analysis',
             bug_severity => 'normal',
@@ -81,7 +81,7 @@ sub post_bug_after_creation {
     }
 
     $child_params->{'bug_data'} = {
-        short_desc   => 'Finance Review: ' . $bug->short_desc,
+        short_desc   => 'Finance Review: ' . $params->{contract_type} . ' with ' . $params->{other_party},
         product      => 'Finance',
         component    => 'Purchase Request Form',
         bug_severity => 'normal',

@@ -144,7 +144,6 @@
   <input type="hidden" name="format" value="modal">
   <input type="hidden" name="editing" id="editing" value="">
   <input type="hidden" name="token" value="[% issue_hash_token([bug.id, bug.delta_ts]) FILTER html %]">
-  <input type="hidden" name="addselfcc" id="addselfcc" value="">
 
   [% PROCESS bug_modal/navigate.html.tmpl %]
 [% END %]

@@ -252,6 +252,7 @@ input[type="number"] {
 }
 
 #field-value-short_desc {
+    margin: 0;
     font-weight: bold;
     font-size: 120%;
 }

@@ -30,21 +30,21 @@
     </div>
   [% END %]
 
-  <ul id="comment-tabs">
-    <li id="comment-edit-tab" data-tab="comment-tab-add" data-focus="comment" class="current">
+  <ul id="comment-tabs" role="tablist">
+    <li id="comment-edit-tab" data-focus="comment" role="tab" tabindex="0" aria-controls="comment-edit-tabpanel" aria-selected="true">
       Add Comment
     </li>
     [%~ ~%]
-    <li id="comment-preview-tab" data-tab="comment-tab-preview" data-focus="">
+    <li id="comment-preview-tab" role="tab" tabindex="-1" aria-controls="comment-preview-tabpanel" aria-selected="false">
       Preview
       <img id="preview-throbber" src="extensions/BugModal/web/throbber.gif" width="16" height="11" style="display:none">
     </li>
   </ul>
 
-  <div id="comment-tab-add" class="comment-tab">
+  <div id="comment-edit-tabpanel" class="comment-tabpanel" role="tabpanel" aria-labelledby="comment-edit-tab">
     <textarea rows="5" cols="80" name="comment" id="comment"></textarea>
   </div>
-  <div id="comment-tab-preview" class="comment-tab" style="display:none">
+  <div id="comment-preview-tabpanel" class="comment-tabpanel" role="tabpanel" aria-labelledby="comment-preview-tab" style="display:none">
     <pre id="comment-preview" class="comment-text"></pre>
   </div>
 

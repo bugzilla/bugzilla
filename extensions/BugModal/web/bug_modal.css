@@ -725,7 +725,7 @@ h3.change-name {
     border-top-right-radius: 2px;
 }
 
-#comment-tabs li.current {
+#comment-tabs li[aria-selected="true"] {
     background: #fff;
     border-bottom: 1px solid #fff;
 }

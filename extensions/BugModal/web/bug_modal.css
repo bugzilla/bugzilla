@@ -575,6 +575,11 @@ td.flag-requestee {
     display: inline;
 }
 
+h3.change-name {
+    font-size: small;
+    font-weight: normal;
+}
+
 .comment-actions {
     white-space: nowrap;
     vertical-align: top;

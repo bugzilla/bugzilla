@@ -130,11 +130,11 @@
 
       <tr id="cr-[% comment.count FILTER none %]" [%= IF comment.collapsed %]style="display:none"[% END %]>
         <td colspan="2">
-          <div class="change-name">
+          <h3 class="change-name">
             <a href="show_bug.cgi?id=[% bug.bug_id FILTER none %]#c[% comment.count FILTER none %]">
               [% comment.count == 0 ? "Description" : "Comment " _ comment.count ~%]
             </a>
-          </div>
+          </h3>
           &bull;
           <div class="change-time">
             [% INCLUDE bug_modal/rel_time.html.tmpl ts=comment.creation_ts %]
@@ -202,9 +202,9 @@
       </tr>
       <tr id="ar-[% id FILTER none %]">
         <td colspan="2">
-          <div class="change-name">
+          <h3 class="change-name">
             <a href="show_bug.cgi?id=[% bug.bug_id FILTER none %]#[% id FILTER none %]">Updated</a>
-          </div>
+          </h3>
           &bull;
           <div class="change-time">
             [% INCLUDE bug_modal/rel_time.html.tmpl ts=action.when %]

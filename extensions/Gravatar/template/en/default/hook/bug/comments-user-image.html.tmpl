@@ -14,6 +14,6 @@
       <a href="user_profile?user_id=[% who.id FILTER uri %]">
     [% END %]
   [% END %]
-  <img align="middle" src="[% who.gravatar FILTER none %]" width="32" height="32" border="0">
+  <img alt="User image" align="middle" src="[% who.gravatar FILTER none %]" width="32" height="32" border="0">
   [% "</a>" IF who.last_activity_ts %]
 [% END %]

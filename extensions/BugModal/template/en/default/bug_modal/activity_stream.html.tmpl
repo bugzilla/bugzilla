@@ -332,7 +332,7 @@
             "$terms.bug $see_also.bug_id" FILTER bug_link(see_also.bug_id);
           ELSE;
             %]
-            <a href="[% see_also.url FILTER html %]" target="_blank">[% see_also.url FILTER html %]</a>
+            <a href="[% see_also.url FILTER html %]" target="_blank" rel="noreferrer">[% see_also.url FILTER html %]</a>
             [%
           END;
           ", " UNLESS loop.last;

@@ -146,7 +146,7 @@
       [% IF see_also.bug_id %]
         [%~%][% "$terms.bug $see_also.bug_id" FILTER bug_link(see_also.bug_id) FILTER js %]
       [% ELSE %]
-        [%~%]<a href="[% see_also.url FILTER html FILTER js %]" target="_blank">
+        [%~%]<a href="[% see_also.url FILTER html FILTER js %]" target="_blank" rel="noreferrer">
         [%~%][% see_also.url FILTER html FILTER js %]</a>
       [% END %]
       [%- ", " IF NOT loop.last %]

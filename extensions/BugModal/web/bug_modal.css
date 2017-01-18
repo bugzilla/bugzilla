@@ -696,6 +696,7 @@ h3.change-name {
     width: 100%;
     box-sizing: border-box !important;
     margin: 0 0 1em;
+    max-width: 1024px;
 }
 
 #comment-preview {

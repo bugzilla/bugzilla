@@ -31,6 +31,7 @@ use base qw(Bugzilla::Extension);
 
 use Bugzilla::Bug;
 use Bugzilla::BugMail;
+use Bugzilla::Config::Common qw(check_group);
 use Bugzilla::Constants;
 use Bugzilla::Error;
 use Bugzilla::Field;

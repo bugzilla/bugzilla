@@ -24,6 +24,8 @@
 [% unfiltered_title = "$terms.Bug List" %]
 [% IF searchname || defaultsavename %]
   [% unfiltered_title = unfiltered_title _ ": " _ (searchname OR defaultsavename) %]
+[% ELSIF quicksearch %]
+  [% unfiltered_title = unfiltered_title _ ": " _ quicksearch %]
 [% END %]
 [% title = unfiltered_title FILTER html %]
 

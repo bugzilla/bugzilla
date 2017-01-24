@@ -12,7 +12,7 @@
   # obsolete_attachments: array of obsolete attachment objects
   #%]
 
-<table class="layout-table" id="attachments">
+<table role="table" class="layout-table" id="attachments">
   [% FOREACH attachment IN bug.attachments %]
     [%
       NEXT IF attachment.isprivate && !(user.is_insider || attachment.attacher.id == user.id);

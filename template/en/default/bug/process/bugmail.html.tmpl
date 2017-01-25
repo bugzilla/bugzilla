@@ -35,20 +35,25 @@
 %]
 [% recipient_count = sent_bugmail.sent.size %]
 
-<script>
-function toggleBugmailRecipients(bug_id, show) {
-  if (show) {
-    YAHOO.util.Dom.removeClass('bugmail_summary_' + bug_id, 'bz_default_hidden');
-    YAHOO.util.Dom.addClass('bugmail_summary_' + bug_id + '_short', 'bz_default_hidden');
-  } else {
-    YAHOO.util.Dom.addClass('bugmail_summary_' + bug_id, 'bz_default_hidden');
-    YAHOO.util.Dom.removeClass('bugmail_summary_' + bug_id + '_short', 'bz_default_hidden');
+<script [% script_nonce FILTER none %]>
+  function toggleBugmailRecipients(bug_id, show) {
+    if (show) {
+      $("#bugmail_summary_" + bug_id).show();
+      $("#bugmail_summary_" + bug_id + "_short").hide();
+    } else {
+      $("#bugmail_summary_" + bug_id).hide();
+      $("#bugmail_summary_" + bug_id + "_short").show();
+    }
+    $.cookie('show_bugmail_recipients', (show ? 1 : 0), {
+        expires: new Date("January 12, 2025")
+    });
   }
-  YAHOO.util.Cookie.set('show_bugmail_recipients', (show ? 1 : 0), {
-    expires: new Date("January 12, 2025")
-  });
-  return false;
-}
+  $(function() {
+    $(".toggleBugmailRecipients").on("click", function (event) {
+      event.preventDefault();
+      toggleBugmailRecipients($(this).data('mailing-bugid'), $(this).data('mailing-show'));
+     });
+   });
 </script>
 
 <dl id="bugmail_summary_[% mailing_bugid FILTER none %]"
@@ -63,7 +68,8 @@ function toggleBugmailRecipients(bug_id, show) {
     [% ELSE %]
       no one
     [% END %]
-    (<a href="#" onclick="return toggleBugmailRecipients([% mailing_bugid FILTER none %], false)">hide</a>)
+    (<a href="#" class="toggleBugmailRecipients" data-mailing-bugid="[% mailing_bugid FILTER html %]"
+        data-mailing-show="false">hide</a>)
   [% ELSE %]
     (list of e-mails not available)
   [% END %]
@@ -74,7 +80,8 @@ function toggleBugmailRecipients(bug_id, show) {
      class="[% show_recipients ? "bz_default_hidden" : "" %]">
   [% IF recipient_count > 0 %]
     Email sent to [% recipient_count FILTER html %] recipient[% 's' UNLESS recipient_count == 1 %].
-    (<a href="#" onclick="return toggleBugmailRecipients([% mailing_bugid FILTER none %], true)">show</a>)
+    (<a href="#" class="toggleBugmailRecipients" data-mailing-bugid="[% mailing_bugid FILTER html %]"
+                                                 data-mailing-show="true">show</a>)
   [% ELSE %]
     No emails were sent.
   [% END %]

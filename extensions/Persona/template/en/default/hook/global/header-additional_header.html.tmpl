@@ -17,8 +17,8 @@
 [% USE Bugzilla %]
 [% cgi = Bugzilla.cgi %]
 
-<script defer src="[% Param('persona_includejs_url') %]" type="text/javascript"></script>
-<script type="text/javascript">
+<script [% script_nonce FILTER none %] defer src="[% Param('persona_includejs_url') %]" type="text/javascript"></script>
+<script [% script_nonce FILTER none %] type="text/javascript">
 
 function createHidden(name, value, form) {
   var field = document.createElement('input');
@@ -84,4 +84,7 @@ function persona_sign_in() {
   persona_ignore_login = false;
   navigator.id.request({ siteName: '[% terms.BugzillaTitle FILTER js %]' });
 }
+$(function() {
+    $('.persona_sign_in').on("click", persona_sign_in);
+});
 </script>

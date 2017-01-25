@@ -32,7 +32,7 @@
    style_urls = [ 'skins/standard/index.css' ]
 %]
 
-<script type="text/javascript">
+<script [% script_nonce FILTER none %] type="text/javascript">
 function checkQuicksearch( form ) {
   if (form.quicksearch.value == '') {
     alert('Please enter one or more search terms first.');
@@ -40,6 +40,11 @@ function checkQuicksearch( form ) {
   }
   return true;
 }
+$(function () {
+    $("#quicksearchForm").on("submit", function (event) {
+        return checkQuicksearch(this);
+    });
+});
 </script>
 
 <div id="page-index">
@@ -63,8 +68,7 @@ function checkQuicksearch( form ) {
              href="?GoAheadAndLogIn=1"><span>Log In</span></a>
            [% END %]
 
-        <form id="quicksearchForm" name="quicksearchForm" action="buglist.cgi"
-              onsubmit="return checkQuicksearch(this);">
+        <form id="quicksearchForm" name="quicksearchForm" action="buglist.cgi">
           <div>
             <input id="quicksearch_main" type="text" name="quicksearch"
               placeholder="Enter [% terms.abug %] number or some search terms"

@@ -33,12 +33,40 @@ BEGIN {
 
 use constant DEFAULT_CSP => (
     default_src => [ 'self' ],
-    script_src  => [ 'self', 'https://login.persona.org', 'unsafe-inline', 'unsafe-eval' ],
-    child_src   => [ 'self', 'https://login.persona.org' ],
+    script_src  => [ 'self', 'unsafe-inline', 'unsafe-eval' ],
+    child_src   => [ 'self', ],
     img_src     => [ 'self', 'https://secure.gravatar.com' ],
     style_src   => [ 'self', 'unsafe-inline' ],
-    disable     => 1,
+    object_src  => [ 'none' ],
+    form_action => [
+        'self',
+        # used in template/en/default/search/search-google.html.tmpl
+        'https://www.google.com/search'
+    ],
+    frame_ancestors => [ 'none' ],
+    disable         => 1,
 );
+
+# Because show_bug code lives in many different .cgi files,
+# we needed a centralized place to define the policy.
+# normally the policy would just live in one .cgi file.
+# Additionally, correct_urlbase() cannot be called at compile time, so this can't be a constant.
+sub SHOW_BUG_MODAL_CSP {
+    return (
+        script_src  => ['self', 'nonce', 'unsafe-inline', 'unsafe-eval' ],
+        object_src  => [correct_urlbase() . "extensions/BugModal/web/ZeroClipboard/ZeroClipboard.swf"],
+        connect_src => [
+            'self',
+            # This is from extensions/OrangeFactor/web/js/orange_factor.js
+            'https://brasstacks.mozilla.com/orangefactor/api/count',
+        ],
+        child_src   => [
+            'self',
+            # This is for the socorro lens addon and is to be removed by Bug 1332016
+            'https://ashughes1.github.io/bugzilla-socorro-lens/chart.htm'
+        ],
+    );
+}
 
 sub _init_bz_cgi_globals {
     my $invocant = shift;
@@ -143,9 +171,9 @@ sub content_security_policy {
     my ($self, %add_params) = @_;
     if (Bugzilla->has_feature('csp')) {
         require Bugzilla::CGI::ContentSecurityPolicy;
-        return $self->{Bugzilla_csp} if $self->{Bugzilla_csp};
-        my %params = DEFAULT_CSP;
-        if (%add_params) {
+        if (%add_params || !$self->{Bugzilla_csp}) {
+            my %params = DEFAULT_CSP;
+            delete $params{disable} if %add_params && !$add_params{disable};
             foreach my $key (keys %add_params) {
                 if (defined $add_params{$key}) {
                     $params{$key} = $add_params{$key};
@@ -154,8 +182,10 @@ sub content_security_policy {
                     delete $params{$key};
                 }
             }
+            $self->{Bugzilla_csp} = Bugzilla::CGI::ContentSecurityPolicy->new(%params);
         }
-        return $self->{Bugzilla_csp} = Bugzilla::CGI::ContentSecurityPolicy->new(%params);
+
+        return $self->{Bugzilla_csp};
     }
     return undef;
 }
@@ -455,7 +485,7 @@ sub header {
     $headers{'-x_content_type_options'} = 'nosniff';
 
     my $csp = $self->content_security_policy;
-    $csp->add_cgi_headers(\%headers) if defined $csp;
+    $csp->add_cgi_headers(\%headers) if defined $csp && !$csp->disable;
 
     Bugzilla::Hook::process('cgi_headers',
         { cgi => $self, headers => \%headers }

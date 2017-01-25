@@ -210,10 +210,13 @@ sub init_page {
 sub template {
     # BMO - use metrics subclass if required
     if (Bugzilla->metrics_enabled) {
-        return $_[0]->request_cache->{template} ||= Bugzilla::Metrics::Template->create();
+        $_[0]->request_cache->{template} ||= Bugzilla::Metrics::Template->create();
     } else {
-        return $_[0]->request_cache->{template} ||= Bugzilla::Template->create();
+        $_[0]->request_cache->{template} ||= Bugzilla::Template->create();
     }
+    $_[0]->request_cache->{template}->{_is_main} = 1;
+
+    return $_[0]->request_cache->{template};
 }
 
 sub template_inner {

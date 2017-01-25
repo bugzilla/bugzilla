@@ -16,6 +16,31 @@
 *                 
 */
 
+$(function () {
+  $('.show_mini_login_form').on("click", function (event) {
+    return show_mini_login_form($(this).data('qs-suffix'));
+  });
+  $('.hide_mini_login_form').on("click", function (event) {
+    return hide_mini_login_form($(this).data('qs-suffix'));
+  });
+  $('.show_forgot_form').on("click", function (event) {
+    return show_forgot_form($(this).data('qs-suffix'));
+  });
+  $('.hide_forgot_form').on("click", function (event) {
+    return hide_forgot_form($(this).data('qs-suffix'));
+  });
+  $('.check_mini_login_fields').on("click", function (event) {
+    return check_mini_login_fields($(this).data('qs-suffix'));
+  });
+  $('form .quicksearch_check_empty').on("submit", function (event) {
+      if (this.quicksearch.value == '') {
+        alert('Please enter one or more search terms first.');
+        return false;
+      }
+      return true;
+  });
+});
+
 function show_mini_login_form( suffix ) {
     $('#login_link' + suffix).addClass('bz_default_hidden');
     $('#mini_login' + suffix).removeClass('bz_default_hidden');
@@ -36,6 +61,7 @@ function show_forgot_form( suffix ) {
     $('#login_container' + suffix).addClass('bz_default_hidden');
     return false;
 }
+
 
 function hide_forgot_form( suffix ) {
     $('#forgot_link' + suffix).removeClass('bz_default_hidden');

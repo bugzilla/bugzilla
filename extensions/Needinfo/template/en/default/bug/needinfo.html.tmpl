@@ -39,7 +39,7 @@
   RETURN UNLESS needinfo_flagtype;
 %]
 
-<script>
+<script [% script_nonce FILTER none%]>
 [% IF needinfo_flags.size > 0 %]
 $(function() {
   [%# Displays NEEDINFO tag in bug header %]
@@ -139,12 +139,11 @@ $(function() {
     $('#needinfo').change();
   }
 
-  function needinfo_from_changed() {
-    $('#needinfo').prop('checked', $('#needinfo_from').val() !== '');
-  }
-
   $(function() {
     needinfo_init();
+    $(".needinfo_from_changed").on("change", function (event) {
+        $("#needinfo").prop("checked", $("#needinfo_from").val() !== '');
+    });
   });
 [% END %]
 </script>
@@ -227,7 +226,7 @@ $(function() {
               value       => ""
               size        => 30
               multiple    => 5
-              onchange    => "needinfo_from_changed()"
+              classes     => ["needinfo_from_changed"]
               field_title => "Enter one or more comma separated users to request more information from"
           %]
         </span>

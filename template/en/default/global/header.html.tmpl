@@ -181,15 +181,17 @@
       [% PROCESS format_js_link %]
     [% END %]
 
-    <script type="text/javascript">
+    <script [% script_nonce FILTER none %] type="text/javascript">
     <!--
         [% IF NOT no_yui %]
           YAHOO.namespace('bugzilla');
+          [% IF 0 %]
           YAHOO.util.Event.addListener = function (el, sType, fn, obj, overrideContext) {
               if ( ("onpagehide" in window || YAHOO.env.ua.gecko) && sType === "unload") { sType = "pagehide"; };
               var capture = ((sType == "focusin" || sType == "focusout") && !YAHOO.env.ua.ie) ? true : false;
               return this._addListener(el, this._getType(sType), fn, obj, overrideContext, capture);
           };
+          [% END %]
           if ( "onpagehide" in window || YAHOO.env.ua.gecko) {
               YAHOO.util.Event._simpleRemove(window, "unload",
                                              YAHOO.util.Event._unload);
@@ -277,8 +279,12 @@
 [%# Migration note: contents of the old Param 'bodyhtml' go in the body tag,
   # but set the onload attribute in the DEFAULT directive above.
   #%]
-
-  <body onload="[% onload %]"
+  [% IF onload %]
+  <script [% script_nonce FILTER none %]>
+  $(function() { [% onload %] });
+  </script>
+  [% END %]
+  <body
         class="[% urlbase.replace('^https?://','').replace('/$','').replace('[-~@:/.]+','-') FILTER css_class_quote %]
                skin-[% user.settings.skin.value FILTER css_class_quote %]
                [% FOREACH class = bodyclasses %]
@@ -445,5 +451,5 @@
 [% END %]
 
 [% BLOCK format_js_link %]
-  <script type="text/javascript" src="[% asset_url FILTER mtime FILTER html %]"></script>
+  <script [% script_nonce FILTER none %] type="text/javascript" src="[% asset_url FILTER mtime FILTER html %]"></script>
 [% END %]

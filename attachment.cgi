@@ -628,6 +628,14 @@ sub insert {
   my $recipients =  { 'changer' => $user, 'owner' => $owner };
   $vars->{'sent_bugmail'} = Bugzilla::BugMail::Send($bugid, $recipients);
 
+  # BMO: add show_bug_format hook for experimental UI work
+  my $show_bug_format = {};
+  Bugzilla::Hook::process('show_bug_format', $show_bug_format);
+
+  if ($show_bug_format->{format} eq 'modal') {
+      $cgi->content_security_policy(Bugzilla::CGI::SHOW_BUG_MODAL_CSP());
+  }
+
   print $cgi->header();
   # Generate and return the UI (HTML page) from the appropriate template.
   $template->process("attachment/created.html.tmpl", $vars)
@@ -784,6 +792,14 @@ sub update {
     $vars->{'sent_bugmail'} = 
         Bugzilla::BugMail::Send($bug->id, { 'changer' => $user });
 
+    # BMO: add show_bug_format hook for experimental UI work
+    my $show_bug_format = {};
+    Bugzilla::Hook::process('show_bug_format', $show_bug_format);
+
+    if ($show_bug_format->{format} eq 'modal') {
+        $cgi->content_security_policy(Bugzilla::CGI::SHOW_BUG_MODAL_CSP());
+    }
+
     print $cgi->header();
 
     # Generate and return the UI (HTML page) from the appropriate template.
@@ -795,8 +811,6 @@ sub update {
 sub delete_attachment {
     my $user = Bugzilla->login(LOGIN_REQUIRED);
     my $dbh = Bugzilla->dbh;
-
-    print $cgi->header();
 
     $user->in_group('admin')
       || ThrowUserError('auth_failure', {group  => 'admin',
@@ -853,6 +867,15 @@ sub delete_attachment {
         $vars->{'sent_bugmail'} =
             Bugzilla::BugMail::Send($bug->id, { 'changer' => $user });
 
+        # BMO: add show_bug_format hook for experimental UI work
+        my $show_bug_format = {};
+        Bugzilla::Hook::process('show_bug_format', $show_bug_format);
+
+        if ($show_bug_format->{format} eq 'modal') {
+            $cgi->content_security_policy(Bugzilla::CGI::SHOW_BUG_MODAL_CSP());
+        }
+
+        print $cgi->header();
         $template->process("attachment/updated.html.tmpl", $vars)
           || ThrowTemplateError($template->error());
     }
@@ -863,6 +886,7 @@ sub delete_attachment {
         $vars->{'a'} = $attachment;
         $vars->{'token'} = $token;
 
+        print $cgi->header();
         $template->process("attachment/confirm-delete.html.tmpl", $vars)
           || ThrowTemplateError($template->error());
     }

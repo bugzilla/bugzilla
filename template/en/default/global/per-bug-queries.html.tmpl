@@ -15,7 +15,7 @@
 
 [% IF user.id && user.settings.per_bug_queries.value == "on" %]
   <li id="links-special">
-    <script type="text/javascript">
+    <script [% script_nonce FILTER none %] type="text/javascript">
       <!--
       function update_text() {
         // 'lob' means list_of_bugs.
@@ -48,6 +48,10 @@
           old_lists.disabled = false;
         }
       }
+      $(function() {
+        $("#lob_action").on("change", update_text);
+        $("#lob_newqueryname").on("keyup", manage_old_lists);
+      });
       //-->
     </script>
 
@@ -58,7 +62,7 @@
         <input type="hidden" name="remtype" value="asnamed">
         <input type="hidden" name="list_of_bugs" value="1">
         <input type="hidden" name="token" value="[% issue_hash_token(['savedsearch']) FILTER html %]">
-        <select id="lob_action" name="action" onchange="update_text();">
+        <select id="lob_action" name="action" >
           <option value="add">Add</option>
           [% IF user.tags.size %]
             <option value="remove">Remove</option>
@@ -81,8 +85,7 @@
         <span id="lob_new_query_text">
           [% " or create and add the tag" IF user.tags.size %]
           <input class="txt" type="text" id="lob_newqueryname"
-                 size="20" maxlength="64" name="newqueryname"
-                 onkeyup="manage_old_lists();">
+                 size="20" maxlength="64" name="newqueryname">
         </span>
         <span id="lob_direction">to</span>
         [%+ terms.bugs %]

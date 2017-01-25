@@ -1000,6 +1000,11 @@ sub create {
             # Currenly active language
             'current_language' => sub { return Bugzilla->current_language; },
 
+            'script_nonce' => sub {
+                my $cgi = Bugzilla->cgi;
+                return $cgi->csp_nonce ? sprintf('nonce="%s"', $cgi->csp_nonce) : '';
+            },
+
             # If an sudo session is in progress, this is the user who
             # started the session.
             'sudoer' => sub { return Bugzilla->sudoer; },

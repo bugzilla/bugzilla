@@ -31,9 +31,7 @@
 <p>Type in one or more words (or pieces of words) to search for:</p>
 
 <form name="f" action="buglist.cgi" method="get"
-      onsubmit="if (this.quicksearch.value == '')
-                { alert('Please enter one or more search terms first.');
-                  return false; } return true;">
+      class='quicksearch_check_empty'>
   <input type="text" size="40" name="quicksearch">
   <input type="submit" value="Search" id="find">
 </form>

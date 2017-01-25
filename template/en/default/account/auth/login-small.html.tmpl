@@ -38,14 +38,15 @@
   [% END %]
   [% script_url = login_target _ connector _ "GoAheadAndLogIn=1" %]
   <a id="login_link[% qs_suffix %]" href="[% script_url FILTER html %]"
-     onclick="return show_mini_login_form('[% qs_suffix %]')">Log In</a>
+     class='show_mini_login_form' data-qs-suffix="[% qs_suffix FILTER html %]">Log In</a>
 
   [% Hook.process('additional_methods') %]
   
   <form action="[% login_target FILTER html %]" method="POST" 
         class="mini_login bz_default_hidden"
         id="mini_login[% qs_suffix FILTER html %]"
-        onsubmit="return check_mini_login_fields( '[% qs_suffix FILTER html %]' );"
+        class="check_mini_login_fields"
+        data-qs-suffix="[% qs_suffix FILTER html %]"
   >
     
     <input id="Bugzilla_login[% qs_suffix FILTER html %]" 
@@ -77,13 +78,14 @@
     <input type="submit" name="GoAheadAndLogIn" value="Log in"
             id="log_in[% qs_suffix %]">
     <a href="#" id="hide_mini_login[% qs_suffix FILTER html %]" 
-       onclick="return hide_mini_login_form('[% qs_suffix %]')">[x]</a>
+       class="hide_mini_login_form" data-qs-suffix="[% qs_suffix FILTER html %]">[x]</a>
   </form>
 </li>
 <li id="forgot_container[% qs_suffix %]">
   <span class="separator">| </span>
   <a id="forgot_link[% qs_suffix %]" href="[% script_url FILTER html %]#forgot"
-     onclick="return show_forgot_form('[% qs_suffix %]')">Forgot Password</a>
+     class='show_forgot_form'
+     data-qs-suffix="[% qs_suffix FILTER html %]">Forgot Password</a>
   <form action="token.cgi" method="post" id="forgot_form[% qs_suffix %]"
         class="mini_forgot bz_default_hidden">
     <label for="login[% qs_suffix FILTER html %]">Login:</label>
@@ -92,6 +94,6 @@
            type="submit">
     <input type="hidden" name="a" value="reqpw">
     <input type="hidden" id="token[% qs_suffix FILTER html %]" name="token" value="[% issue_hash_token(['reqpw']) FILTER html %]">
-    <a href="#" onclick="return hide_forgot_form('[% qs_suffix %]')">[x]</a>
+    <a href="#" class="hide_forgot_form" data-qs-suffix="[% qs_suffix FILTER html %]">[x]</a>
   </form>
 </li>

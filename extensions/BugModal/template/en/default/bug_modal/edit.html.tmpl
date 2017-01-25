@@ -1194,7 +1194,7 @@
 
 [%# === initialise module visibility === %]
 
-<script>
+<script [% script_nonce FILTER none %]>
   init_module_visibility();
 </script>
 

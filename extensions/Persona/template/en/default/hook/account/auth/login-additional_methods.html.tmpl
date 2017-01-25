@@ -1,7 +1,7 @@
 [% IF Param('user_info_class').split(',').contains('Persona')
       && Param('persona_includejs_url') %]
 <p>
-  <img src="extensions/Persona/web/images/persona_sign_in.png" width="185" height="25" onclick="persona_sign_in()">
+  <img src="extensions/Persona/web/images/persona_sign_in.png" width="185" height="25" class="persona_sign_in">
 </p>
 <p>
   <strong>Note:</strong> Persona authentication will be removed on October 25th, 2016 (<a href="page.cgi?id=persona_deprecated.html">more info</a>).

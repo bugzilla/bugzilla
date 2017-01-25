@@ -37,6 +37,7 @@ my @ALL_SRC = qw(
     default_src child_src  connect_src
     font_src    img_src    media_src
     object_src  script_src style_src
+    frame_ancestors form_action
 );
 
 has \@ALL_SRC     => ( is => 'ro', isa => $SOURCE_LIST, predicate => 1 );

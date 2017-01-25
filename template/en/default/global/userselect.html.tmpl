@@ -11,7 +11,6 @@
   # id: optional; field id
   # value: optional; default field value/selection
   # classes: optional; an array of classes to be added
-  # onchange: optional; onchange attribute value
   # disabled: optional; if true, the field is disabled
   # accesskey: optional, input only; accesskey attribute value
   # size: optional, input only; size attribute value
@@ -24,11 +23,12 @@
   # mandatory: optional; if true, the field cannot be empty.
   #%]
 
+[% THROW "onchange is not allowed" IF onchange %]
+
 [% IF Param("usemenuforusers") %]
 <select name="[% name FILTER html %]"
   [% IF id %] id="[% id FILTER html %]" [% END %]
   [% IF classes %] class="[% classes.join(' ') FILTER html %]" [% END %]
-  [% IF onchange %] onchange="[% onchange FILTER html %]" [% END %]
   [% IF disabled %] disabled="[% disabled FILTER html %]" [% END %]
   [% IF accesskey %] accesskey="[% accesskey FILTER html %]" [% END %]
   [% IF multiple %] multiple="multiple" size="[% multiple FILTER html %]" [% END %]
@@ -86,7 +86,6 @@
     name="[% name FILTER html %]"
     value="[% value FILTER html %]"
     [% IF classes %] class="[% classes.join(' ') FILTER html %]" [% END %]
-    [% IF onchange %] onchange="[% onchange FILTER html %]" [% END %]
     [% IF disabled %] disabled="[% disabled FILTER html %]" [% END %]
     [% IF accesskey %] accesskey="[% accesskey FILTER html %]" [% END %]
     [% IF field_title %] title="[% field_title FILTER html %]" [% END %]

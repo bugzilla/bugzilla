@@ -45,3 +45,9 @@ function show_usermenu(id, email, show_edit) {
     });
 }
 
+$(function() {
+  $('.show_usermenu').on("click", function (event) {
+    var $this = $(this);
+    return show_usermenu($this.data('user-id'), $this.data('user-email'), $this.data('show-edit'));
+  });
+});

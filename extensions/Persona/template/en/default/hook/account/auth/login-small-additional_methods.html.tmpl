@@ -1,6 +1,6 @@
 [% IF Param('user_info_class').split(',').contains('Persona')
       && Param('persona_includejs_url') %]
-<script type="text/javascript">
+<script [% script_nonce FILTER none %] type="text/javascript">
   YAHOO.util.Event.addListener('login_link[% qs_suffix FILTER js %]','click', function () {
       var login_link = YAHOO.util.Dom.get('persona_mini_login[% qs_suffix FILTER js %]');
       YAHOO.util.Dom.removeClass(login_link, 'bz_default_hidden');
@@ -12,6 +12,6 @@
 </script>
 <span id="persona_mini_login[% qs_suffix FILTER html %]" class="bz_default_hidden">
   <img src="extensions/Persona/web/images/sign_in.png" height="22" width="75" align="absmiddle"
-       title="Sign in with Persona" onclick="persona_sign_in()"> or
+       title="Sign in with Persona" class='persona_sign_in'> or
 </span>
 [% END %]

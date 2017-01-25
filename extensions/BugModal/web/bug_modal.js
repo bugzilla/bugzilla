@@ -1483,6 +1483,13 @@ function lb_close(event) {
     $('#lb_overlay, #lb_overlay2, #lb_close_btn, #lb_img, #lb_text').remove();
 }
 
+$(function() {
+    $("button.button-link").on("click", function (event) {
+        event.preventDefault();
+        window.location = $(this).data("href");
+    });
+});
+
 // extensions
 
 (function($) {

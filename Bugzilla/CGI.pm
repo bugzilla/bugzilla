@@ -52,9 +52,11 @@ use constant DEFAULT_CSP => (
 # normally the policy would just live in one .cgi file.
 # Additionally, correct_urlbase() cannot be called at compile time, so this can't be a constant.
 sub SHOW_BUG_MODAL_CSP {
-    return (
+    my ($bug_id) = @_;
+    my %policy = (
         script_src  => ['self', 'nonce', 'unsafe-inline', 'unsafe-eval' ],
         object_src  => [correct_urlbase() . "extensions/BugModal/web/ZeroClipboard/ZeroClipboard.swf"],
+        img_src     => [ 'self', 'https://secure.gravatar.com' ],
         connect_src => [
             'self',
             # This is from extensions/OrangeFactor/web/js/orange_factor.js
@@ -66,6 +68,13 @@ sub SHOW_BUG_MODAL_CSP {
             'https://ashughes1.github.io/bugzilla-socorro-lens/chart.htm'
         ],
     );
+    if (use_attachbase() && $bug_id) {
+        my $attach_base = Bugzilla->params->{'attachment_base'};
+        $attach_base =~ s/\%bugid\%/$bug_id/g;
+        push @{ $policy{img_src} }, $attach_base;
+    }
+
+    return %policy;
 }
 
 sub _init_bz_cgi_globals {

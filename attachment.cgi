@@ -633,7 +633,7 @@ sub insert {
   Bugzilla::Hook::process('show_bug_format', $show_bug_format);
 
   if ($show_bug_format->{format} eq 'modal') {
-      $cgi->content_security_policy(Bugzilla::CGI::SHOW_BUG_MODAL_CSP());
+      $cgi->content_security_policy(Bugzilla::CGI::SHOW_BUG_MODAL_CSP($bugid));
   }
 
   print $cgi->header();
@@ -797,7 +797,7 @@ sub update {
     Bugzilla::Hook::process('show_bug_format', $show_bug_format);
 
     if ($show_bug_format->{format} eq 'modal') {
-        $cgi->content_security_policy(Bugzilla::CGI::SHOW_BUG_MODAL_CSP());
+        $cgi->content_security_policy(Bugzilla::CGI::SHOW_BUG_MODAL_CSP($bug->id));
     }
 
     print $cgi->header();
@@ -872,7 +872,7 @@ sub delete_attachment {
         Bugzilla::Hook::process('show_bug_format', $show_bug_format);
 
         if ($show_bug_format->{format} eq 'modal') {
-            $cgi->content_security_policy(Bugzilla::CGI::SHOW_BUG_MODAL_CSP());
+            $cgi->content_security_policy(Bugzilla::CGI::SHOW_BUG_MODAL_CSP($bug->id));
         }
 
         print $cgi->header();

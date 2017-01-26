@@ -20,6 +20,7 @@ use Bugzilla::Keyword;
 use Bugzilla::Bug;
 use Bugzilla::Hook;
 use Bugzilla::CGI;
+use Bugzilla::Util qw(detaint_natural);
 
 my $cgi = Bugzilla->cgi;
 my $template = Bugzilla->template;
@@ -37,10 +38,6 @@ my $format = $template->get_format("bug/show",
                                    $format_params->{format},
                                    $format_params->{ctype});
 
-if ($format_params->{format} eq 'modal') {
-    $cgi->content_security_policy(Bugzilla::CGI::SHOW_BUG_MODAL_CSP());
-}
-
 # Editable, 'single' HTML bugs are treated slightly specially in a few places
 my $single = (!$format->{format} || $format->{format} ne 'multiple')
              && $format->{extension} eq 'html';
@@ -52,6 +49,13 @@ if (!$cgi->param('id') && $single) {
       ThrowTemplateError($template->error());
     exit;
 }
+
+if ($format_params->{format} eq 'modal') {
+    my $bug_id = $cgi->param('id');
+    detaint_natural($bug_id);
+    $cgi->content_security_policy(Bugzilla::CGI::SHOW_BUG_MODAL_CSP($bug_id));
+}
+
 
 my @bugs;
 my %marks;

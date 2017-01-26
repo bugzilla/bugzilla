@@ -265,7 +265,7 @@ $format = $template->get_format("bug/create/created",
 $cgi->delete('format');
 
 if ($user->setting('ui_experiments') eq 'on') {
-    Bugzilla->cgi->content_security_policy(Bugzilla::CGI::SHOW_BUG_MODAL_CSP());
+    Bugzilla->cgi->content_security_policy(Bugzilla::CGI::SHOW_BUG_MODAL_CSP($bug->id));
 }
 print $cgi->header();
 $template->process($format->{'template'}, $vars)

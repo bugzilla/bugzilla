@@ -64,11 +64,13 @@
     LAST;
   END;
 
-  # count set project/tracking flags
+  # count set project/tracking/blocking flags
   tracking_flags_has = 0;
   tracking_flags_set = 0;
   project_flags_has = 0;
   project_flags_set = 0;
+  blocking_flags_has = 0;
+  blocking_flags_set = 0;
   FOREACH flag IN tracking_flags;
     is_set = flag.bug_flag(bug.id).value != "---";
     IF flag.flag_type == "tracking";
@@ -81,6 +83,12 @@
       project_flags_has = 1;
       IF is_set;
         project_flags_set = 1;
+      END;
+    END;
+    IF flag.flag_type == 'blocking';
+      blocking_flags_has = 1;
+      IF is_set;
+        blocking_flags_set = 1;
       END;
     END;
   END;
@@ -704,7 +712,8 @@
     && bug.target_milestone == "---"
     && !has_bug_flags
     && !project_flags_set
-    && !tracking_flags_set;
+    && !tracking_flags_set
+    && !blocking_flags_set;
   sub = [];
   open_deps = bug.depends_on_obj.only("resolution", "").size;
   IF open_deps;
@@ -893,7 +902,7 @@
   %]
     [% WRAPPER fields_lhs %]
 
-      [% UNLESS tracking_flags_set || project_flags_set %]
+      [% UNLESS tracking_flags_set || project_flags_set || blocking_flags_set %]
         <p class="edit-hide">
           This [% terms.bug %] is not currently tracked.
         </p>
@@ -914,6 +923,19 @@
 
     [% END %]
     [% WRAPPER fields_rhs %]
+
+      [% IF blocking_flags_has %]
+        [%# blocking flags %]
+        [% WRAPPER bug_modal/field.html.tmpl
+            container = 1
+            label = "Blocking Flags"
+            hide_on_view = !blocking_flags_set
+        %]
+          [% INCLUDE bug_modal/tracking_flags.html.tmpl
+              type = "blocking"
+          %]
+        [% END %]
+      [% END %]
 
       [% IF project_flags_has %]
         [%# project flags %]

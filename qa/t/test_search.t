@@ -29,7 +29,7 @@ $sel->is_text_present_ok("Zarro Boogs found");
 # Display all available columns. Look for all bugs assigned to a user who doesn't exist.
 
 $sel->open_ok("/$config->{bugzilla_installation}/buglist.cgi?quicksearch=%40xx45ft&columnlist=all");
-$sel->title_is("Bug List");
+$sel->title_like(qr/^Bug List:/);
 $sel->is_text_present_ok("Zarro Boogs found");
 
 # Now some real tests.

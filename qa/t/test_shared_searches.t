@@ -25,7 +25,7 @@ set_parameters($sel, { "Group Security" => {"querysharegroup" => {type => "selec
 $sel->type_ok("quicksearch_top", ":TestProduct Selenium");
 $sel->click_ok("find_top");
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
-$sel->title_is("Bug List");
+$sel->title_like(qr/^Bug List:/);
 $sel->type_ok("save_newqueryname", "Shared Selenium buglist");
 $sel->click_ok("remember");
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
@@ -96,7 +96,7 @@ ok(!$sel->is_text_present("Shared Selenium buglist"), "Shared query no longer di
 $sel->type_ok("quicksearch_top", ":TestProduct sw:helpwanted");
 $sel->click_ok("find_top");
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
-$sel->title_is("Bug List");
+$sel->title_like(qr/^Bug List:/);
 $sel->type_ok("save_newqueryname", "helpwanted");
 $sel->click_ok("remember");
 $sel->wait_for_page_to_load_ok(WAIT_TIME);

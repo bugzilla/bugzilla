@@ -33,6 +33,8 @@
 [% title = "$terms.Bug List" %]
 [% IF searchname || defaultsavename %]
   [% title = title _ ": " _ (searchname OR defaultsavename) FILTER html %]
+[% ELSIF quicksearch %]
+  [% title = title _ ": " _ quicksearch FILTER html %]
 [% END %]
 
 [% qorder = order FILTER uri IF order %]

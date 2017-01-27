@@ -163,37 +163,19 @@ $(function() {
     // product/component info
     $('.spin-toggle, #product-latch, #component-latch')
         .click(function(event) {
-            spin_toggle(event);
-        }).keydown(function(event) {
-            // allow space or enter to toggle visibility
-            if (event.keyCode == 13 || event.keyCode == 32) {
-                spin_toggle(event);
+            event.preventDefault();
+            var latch = $($(event.target).data('latch'));
+            var el_for = $($(event.target).data('for'));
+
+            if (latch.data('expanded')) {
+                latch.data('expanded', false).html('&#9656;');
+                el_for.hide();
+            }
+            else {
+                latch.data('expanded', true).html('&#9662;');
+                el_for.show();
             }
         });
-
-    function spin_toggle(event) {
-        event.preventDefault();
-        var type  = $(event.target).data('for');
-        var latch = $('#' + type + '-latch');
-        var name  = $('#' + type + '-name');
-        var info  = $('#' + type + '-info');
-        var label = name.attr('aria-label');
-
-        if (latch.data('expanded')) {
-            label = label.replace(/^hide/, 'show');
-            latch.data('expanded', false).html('&#9656;');
-            name.attr('aria-expanded', false);
-            info.hide();
-        }
-        else {
-            label = label.replace(/^show/, 'hide');
-            latch.data('expanded', true).html('&#9662;');
-            name.attr('aria-expanded', true);
-            info.show();
-        }
-        name.attr('aria-label', label);
-        name.attr('title', label);
-    }
 
     // cc list
 
@@ -248,35 +230,22 @@ $(function() {
         $('#cc-summary').addClass('cc-loadable');
         $('#cc-latch, #cc-summary')
             .click(function(event) {
-                cc_toggle(event);
-            }).keydown(function(event) {
-                // allow space or enter to toggle visibility
-                if (event.keyCode == 13 || event.keyCode == 32) {
-                    cc_toggle(event);
+                event.preventDefault();
+                var latch = $('#cc-latch');
+
+                if (latch.data('expanded')) {
+                    latch.data('expanded', false).html('&#9656;');
+                    $('#cc-list').hide();
+                }
+                else {
+                    latch.data('expanded', true).html('&#9662;');
+                    $('#cc-list').show();
+                    if (!latch.data('fetched')) {
+                        ccListLoading();
+                        ccListUpdate();
+                    }
                 }
             });
-    }
-
-    function cc_toggle(event) {
-        event.preventDefault();
-        var latch = $('#cc-latch');
-        var label = latch.attr('aria-label');
-        if (latch.data('expanded')) {
-            label = label.replace(/^hide/, 'show');
-            latch.data('expanded', false).html('&#9656;');
-            $('#cc-list').hide();
-        }
-        else {
-            latch.data('expanded', true).html('&#9662;');
-            label = label.replace(/^show/, 'hide');
-            $('#cc-list').show();
-            if (!latch.data('fetched')) {
-                ccListLoading();
-                ccListUpdate();
-            }
-        }
-        latch.attr('aria-label', label);
-        $('#cc-summary').attr('aria-label', label);
     }
 
     // copy summary to clipboard

@@ -19,11 +19,6 @@
   title = "Set platform to reporter's: " _ hw_os.0 _ " / " _ hw_os.1;
 %]
 
-[% onclick = BLOCK %]
-      $('#rep_platform').val('[% hw_os.0 FILTER js FILTER html %]');
-      $('#op_sys').val('[% hw_os.1 FILTER js FILTER html %]');
-      $('#rep_hw_os').hide();
-[% END %]
 [%
   IF bug_modal;
     INCLUDE modal;
@@ -34,12 +29,20 @@
 
 [% BLOCK classic %]
   <span id="rep_hw_os">
-    (<a href="javascript:void(0)" title="[% title FILTER html %]" onclick="[% onclick FILTER none %]">from reporter</a>)
+    (<a href="javascript:void(0)" title="[% title FILTER html %]" id="rep_hw_os">from reporter</a>)
   </span>
 [% END %]
 
 [% BLOCK modal %]
-  <button id="rep_hw_os" type="button" class="minor" title="[% title FILTER html %]" onclick="[% onclick FILTER none %]">
+  <button id="rep_hw_os" type="button" class="minor" title="[% title FILTER html %]">
     From&nbsp;Reporter
   </button>
 [% END %]
+
+<script [% script_nonce FILTER none %] type="text/javascript">
+  $('#rep_hw_os').click(function() {
+    $('#rep_platform').val('[% hw_os.0 FILTER js FILTER html %]');
+    $('#op_sys').val('[% hw_os.1 FILTER js FILTER html %]');
+    $('#rep_hw_os').hide();
+  });
+</script>

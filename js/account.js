@@ -223,7 +223,7 @@ $(function() {
                 $('#mfa-password').focus();
                 $('#update').attr('disabled', false);
             })
-            .error(function(data) {
+            .fail(function(data) {
                 $('#mfa-totp-throbber').hide();
                 if (data.statusText === 'abort')
                     return;

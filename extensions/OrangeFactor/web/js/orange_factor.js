@@ -81,7 +81,7 @@ $(function() {
             .done(function(data) {
                 getOrangeCount(data);
             })
-            .error(function() {
+            .fail(function() {
                 $('#graph-count').hide();
                 $('#orange-graph').hide()
             });

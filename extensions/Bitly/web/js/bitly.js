@@ -26,7 +26,7 @@ $(function() {
                 urls[type] = data.url;
                 $('#bitly-url').val(urls[type]).select().focus();
             })
-            .error(function(data) {
+            .fail(function(data) {
                 $('#bitly-url').val(data.responseJSON.message);
             });
     }

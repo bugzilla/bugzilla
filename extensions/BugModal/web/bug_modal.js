@@ -1423,7 +1423,7 @@ function bugzilla_ajax(request, done_fn, error_fn) {
                 done_fn(data);
             }
         })
-        .error(function(data) {
+        .fail(function(data) {
             if (data.statusText === 'abort')
                 return;
             var message = data.responseJSON ? data.responseJSON.message : 'Unexpected Error'; // all errors are unexpected :)

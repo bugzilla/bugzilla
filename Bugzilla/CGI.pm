@@ -74,6 +74,12 @@ sub SHOW_BUG_MODAL_CSP {
         push @{ $policy{img_src} }, $attach_base;
     }
 
+    # MozReview API calls
+    my $mozreview_url = Bugzilla->params->{mozreview_base_url};
+    if ($mozreview_url) {
+        push @{ $policy{connect_src} },  $mozreview_url . 'api/extensions/mozreview.extension.MozReviewExtension/summary/';
+    }
+
     return %policy;
 }
 

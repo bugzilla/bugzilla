@@ -17,11 +17,12 @@
   #
   # Contributor(s): Gervase Markham <gerv@gerv.net>
   #                 Byron Jones <glob@mozilla.com>
+  #                 Emma Humphries <emma@mozilla.com>
   #%]
 
 [%# INTERFACE
   # none
-  # 
+  #
   # Param("maintainer") is used to display the maintainer's email.
   # Param("emailsuffix") is used to pre-fill the email field.
   #%]
@@ -40,11 +41,12 @@
 <script type="text/javascript">
 function onSubmit() {
   var email = document.getElementById('login').value;
+  var agreed = document.getElementById('etiquette').checked;
   if (email == '') {
     alert('You must enter your email address.');
     return false;
   }
-  var isValid = 
+  var isValid =
     email.match(/@/)
     && email.match(/@.+\./)
     && !email.match(/\.$/)
@@ -56,6 +58,13 @@ function onSubmit() {
       "email address.\n\nA legal address must contain exactly one '@', and " +
       "at least one '.' after the @.\n\nIt must also not contain any of " +
       "these special characters: \ ( ) & < > , ; : \" [ ], or any whitespace."
+    );
+    return false;
+  }
+  if (!agreed) {
+    alert(
+      "You must agree to follow [% terms.Bugzilla %] Etiquette, " +
+      "and the Mozilla Community Participation Guidelines."
     );
     return false;
   }
@@ -110,52 +119,68 @@ function onSubmit() {
   <h2 class="column-header">I want to help</h2>
 
   <div id="right-blurb">
-  <p>
-  Great!  There are three things to know and do:
-  </p>
-  <ol>
-  <li>
-    Please consider reading our
-    <a href="https://developer.mozilla.org/en/Bug_writing_guidelines" target="_blank">[% terms.bug %]-writing guidelines</a>.
-  </li>
-  <li>
-    [% terms.Bugzilla %] is a public place.  Your comments and other activities
-    on [% terms.bugs %] will generally be publicly visible, and your email address will be
-    accessible through public APIs and will be visible to all logged-in users
-    of [% terms.Bugzilla %]. Some people use an
-    <a href="http://email.about.com/od/freeemailreviews/tp/free_email.htm"
-    target="_blank">alternative email address</a> for this reason.
-    See Mozilla's <a href="https://www.mozilla.org/en-US/privacy/websites/"
-    target="_blank">Websites, Communications & Cookies Privacy Notice</a> for
-    more information on our privacy policies.
-  </li>
-  <li>
-    When using [% terms.Bugzilla %] to submit patches, comments, code, and any other content,
-    you agree to our policies on open source licensing and content submission.  See Mozilla’s
-    <a href="https://www.mozilla.org/en-US/about/legal/terms/mozilla/" target="_blank">Websites
-    and Communications Terms of Use</a> for more information.
-  </li>
-  <li>
-    Please give us an email address you want to use.  Once we confirm that it works,
-    you'll be asked to set a password and then you can start filing [% terms.bugs %] and helping fix them.
-  </li>
-  </ol>
+    <p>
+      Great!  There are a few things to know and do:
+    </p>
+    <ol>
+    <li>
+      Please read our
+      <a href="https://developer.mozilla.org/en/Bug_writing_guidelines" target="_blank">[% terms.Bug %] Writing Guidelines</a>.
+    </li>
+    <li>
+      [% terms.Bugzilla %] is a public place. Your comments and other activities
+      on [% terms.bugs %] will generally be publicly visible, and your email address will be
+      accessible through public APIs and will be visible to all logged-in users
+      of [% terms.Bugzilla %]. Some people use an
+      <a href="https://www.lifewire.com/top-free-email-services-1171481"
+      target="_blank">alternative email address</a> for this reason.
+      See Mozilla's <a href="https://www.mozilla.org/privacy/websites/"
+      target="_blank">Websites, Communications & Cookies Privacy Notice</a> for
+      more information on our privacy policies.
+    </li>
+    <li>
+      When using [% terms.Bugzilla %] to submit patches, comments, code, and any other content,
+      you agree to our policies on open source licensing and content submission. See Mozilla’s
+      <a href="https://www.mozilla.org/about/legal/terms/mozilla/" target="_blank">Websites
+      and Communications Terms of Use</a> for more information.
+    </li>
+    <li>
+      You understand that your conduct on this site is subject to both <a href="page.cgi?id=etiquette.html">[% terms.Bugzilla %] Etiquette</a>,
+      and the <a href="https://www.mozilla.org/about/governance/policies/participation/">Mozilla Community Participation Guidelines</a>.
+      By creating an account, you agree to abide by them.
+    </li>
+    <li>
+      Please give us an email address you want to use. Once we confirm that it works,
+      you'll be asked to set a password and then you can start filing [% terms.bugs %] and helping fix them.
+    </li>
+    </ol>
   </div>
 
   <h2 class="column-header">Create an account</h2>
 
   <form method="post" action="createaccount.cgi" onsubmit="return onSubmit()">
-  <table id="create-account-form">
-  <tr>
+    <table id="create-account-form">
+    <tr>
     <td class="label">Email Address:</td>
     <td>
-      <input size="35" id="login" name="login" placeholder="you@example.com">[% Param('emailsuffix') FILTER html %]</td>
+      <input size="35" id="login" name="login" placeholder="you@example.com">[% Param('emailsuffix') FILTER html %]
+    </td>
+    </tr>
+    <tr>
+    <td colspan="2">
+      I have read <a href="page.cgi?id=etiquette.html">[% terms.Bugzilla %] Etiquette</a>
+      and the <a href="https://www.mozilla.org/about/governance/policies/participation/">Mozilla Community Participation Guidelines</a>
+      and agree to abide by them.
+      <input type="checkbox" id="etiquette" value="agreed">
+    </td>
+    </tr>
+    <tr>
     <td>
       <input type="hidden" id="token" name="token" value="[% issue_hash_token(['create_account']) FILTER html %]">
       <input type="submit" value="Create Account">
-     </td>
-  </tr>
-  </table>
+    </td>
+    </tr>
+    </table>
   </form>
 
   [% Hook.process('additional_methods') %]
@@ -186,4 +211,3 @@ function onSubmit() {
   </td>
   </tr>
 [% END %]
-

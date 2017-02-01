@@ -18,133 +18,162 @@
   #
   # Contributor(s): Stefan Seifert <nine@detonation.org>
   #                 Gervase Markham <gerv@gerv.net>
+  #                 Emma Humphries <ech@emmah.net>
   #%]
 
 [% PROCESS global/header.html.tmpl
    title = "Bugzilla Etiquette"
    style = "li { margin: 5px } .heading { font-weight: bold }" %]
 
+<h1>Bugzilla Etiquette</h1>
+
 <p>
-  There's a number of <i lang="fr">faux pas</i> you can commit when using
-  [%+ terms.Bugzilla %]. At the very
-  least, these will make Mozilla contributors upset at you; if committed enough
-  times they will cause those contributors to demand the disabling of your
-  [%+ terms.Bugzilla %] account. So, ignore this advice at your peril.
+  It is our intention that [% terms.Bugzilla %] remain a useful tool for reporting
+  and commenting on [% terms.bugs %], feature requests, and tasks for the Mozilla community.
+  <i>No single contributor's work outweighs the importance of civility and professionalism
+  in the Mozilla community.</i>
 </p>
 
 <p>
-  <a href="https://www.mozilla.org/en-US/about/governance/policies/participation">
-    Please also read the Mozilla Community Participation Guidelines</a>
+  In order to keep [%+ terms.Bugzilla %] a useful, inclusive place we have
+  guidelines which, by using this site, you agree to follow.
+  In addition, your participation on this site is also subject to the
+  <a href="https://www.mozilla.org/about/governance/policies/participation">Mozilla Community Participation Guidelines</a>.
 </p>
 
 <p>
-  That said, Mozilla developers are generally a friendly bunch, and will be
-  friendly towards you as long as you follow these guidelines.
+  Violations of [% terms.Bugzilla %] Etiquette or the Mozilla Community Participation
+  Guidelines are grounds for curtailing your privileges on this site, or suspending
+  your account altogether.
 </p>
 
-<h3>1. Commenting</h3>
+<h2>Guidelines</h2>
 
-<p>
-  This is the most important section.
-</p>
+<h3>Commenting</h3>
 
 <ol>
   <li>
-  <span class="heading">No pointless comments</span>.
-  Unless you have something constructive and helpful to say, do not add a
-  comment to a [% terms.bug %]. In [% terms.bugs %] where there is a heated debate going on, you
-  should be even more
-  inclined not to add a comment. Unless you have something new to contribute,
-  then the [% terms.bug %] owner is aware of all the issues, and will make a judgement
-  as to what to do. If you agree the [% terms.bug %] should be fixed, vote for it.
-  Additional "I see this too" or "It works for me" comments are unnecessary
-  unless they are on a different platform or a significantly different build.
-  Constructive and helpful thoughts unrelated to the topic of the [% terms.bug %]
-  should go in the appropriate
-  <a href="http://www.mozilla.org/about/forums/">newsgroup</a>.
+    <span class="heading">No abusing people</span>.
+    Constant and intense critique is one of the reasons we build great products.
+    It's harder to fall into group-think if there is always a healthy amount of
+    dissent. We want to encourage vibrant debate inside of the Mozilla
+    community, we want you to disagree with us, and we want you to effectively
+    argue your case. However, we require that in the process, you criticize
+    <i>things</i>, not <i>people</i>. Examples of things include: interfaces,
+    algorithms, and schedules. Examples of people include: developers,
+    designers, and users. <b>Attacking or encouraging attacks on a person
+    may result in you being banned from [% terms.Bugzilla %]</b>.
   </li>
 
   <li>
-  <span class="heading">No obligation</span>.
-  "Open Source" is not the same as "the developers must do my bidding."
-  Everyone here wants to help, but no one else has any <i>obligation</i> to fix
-  the [% terms.bugs %] you want fixed. Therefore, you should not act as if you
-  expect someone to fix a [% terms.bug %] by a particular date or release.
-  Aggressive or repeated demands will not be received well and will almost
-  certainly diminish the impact and interest in your suggestions.
+    <span class="heading">No obligation</span>.
+    "Open Source" is not the same as "the developers must do my bidding."
+    Everyone here wants to help, but no one else has any <i>obligation</i> to fix
+    the [% terms.bugs %] you want fixed. Therefore, you should not act as if you
+    expect someone to fix a [% terms.bug %] by a particular date or release.
+    Aggressive or repeated demands will not be received well and will almost
+    certainly diminish the impact of and interest in your suggestions.
   </li>
 
   <li>
-  <span class="heading">No abusing people</span>.
-  Constant and intense critique is one of the reasons we build great products.
-  It's harder to fall into group-think if there is always a healthy amount of
-  dissent. We want to encourage vibrant debate inside of the Mozilla
-  community, we want you to disagree with us, and we want you to effectively
-  argue your case. However, we require that in the process, you attack
-  <i>things</i>, not <i>people</i>. Examples of things include: interfaces,
-  algorithms, and schedules. Examples of people include: developers,
-  designers and users. <b>Attacking a person may result in you being banned
-  from [% terms.Bugzilla %].</b>
+    <span class="heading">No spam</span>.
+    Posting comment spam will lead to the suspension of your account.
   </li>
 
   <li>
-  <span class="heading">No private email</span>.
-  Unless the [% terms.bug %] owner or another respected project contributor has asked you
-  to email them with specific information, please place all information
-  relating to [% terms.bugs %]
-  in the [% terms.bug %] itself. Do not send them by private email; no-one else can read
-  them if you do that, and they'll probably just get ignored. If a file
-  is too big for [% terms.Bugzilla %], add a comment giving the file size and contents
-  and ask what to do.
+    <span class="heading">No pointless comments</span>.
+    Limit comments on a [% terms.bug %] to information which will help with
+    resolving it. Unless requested, additional "I see this too" or "It works for me"
+    comments are unnecessary. Constructive conversations unrelated to the topic of
+    the [% terms.bug %] should go in the appropriate
+     <a href="https://www.mozilla.org/about/forums/">discussion forum</a>.
+  </li>
+
+  <li>
+    <span class="heading">No private email</span>.
+    Do not send comments on [% terms.bugs %] by private email to users;
+    no one else can read them if you do that, and they'll be missed and/or ignored.
+    If an attachment is too big for [% terms.Bugzilla %], add a comment
+    giving the file size and contents and ask what to do.
   </li>
 </ol>
 
-<h3>2. Changing Fields</h3>
+<h3>Changing Fields</h3>
 
 <ol>
   <li>
-  <span class="heading">No messing with other people's [% terms.bugs %]</span>.
-  Unless you are the [% terms.bug %] assignee, or have some say over the use of their
-  time, never change the Priority or Target Milestone fields. If in doubt,
-  do not change the fields of [% terms.bugs %] you do not own - add a comment
-  instead, suggesting the change.
+    <span class="heading">No messing with other people's [% terms.bugs %]</span>.
+    Unless you are the [% terms.bug %] assignee, or have some say over the use of their
+    time, never change the Priority or Target Milestone fields. If in doubt,
+    do not change the fields of [% terms.bugs %] you do not own — add a comment
+    instead, suggesting the change.
   </li>
 
   <li>
-  <span class="heading">No whining about decisions</span>.
-  If a respected project contributor has marked a [% terms.bug %] as INVALID, then it is
-  invalid. Someone filing another duplicate of it does not change this. Unless
-  you have further important evidence, do not post a comment arguing that an
-  INVALID or WONTFIX [% terms.bug %] should be reopened.
+    <span class="heading">No whining about decisions</span>.
+    If another project contributor has marked a [% terms.bug %] as INVALID, then it is
+    invalid. Filing another duplicate of it does not change this. Unless you have
+    further evidence to support reopening a [% terms.bug %], do not post a comment
+    arguing that a [% terms.bug %] resolved as INVALID or WONTFIX should be reopened.
   </li>
 
 </ol>
 
-<h3>3. Applicability</h3>
+<h2>Responding to Violations</h2>
 
-<ol>
+<p>
+  If you find a [% terms.Bugzilla %] user violating the [% terms.Bugzilla %] Etiquette
+  or the <a href="https://www.mozilla.org/about/governance/policies/participation/">Mozilla Community Participation Guidelines</a>
+  in comments on [% terms.bugs %], please <a href="https://wiki.mozilla.org/BMO/comment_tagging">tag the comments</a>
+  in question so that an administrator can review them.
+<p>
+
+<p>
+  If a comment is abusive or threatening use the tag <b><i>abuse</i></b>. An admin will
+  receive a notification shortly and be able to follow up. [% terms.Bugs %] with
+  comments marked, 'offtopic', 'spam', and 'advocacy' will also be reviewed.
+</p>
+
+<p>
+  If you think a comment may violate our policies, but your are not sure how to mark it,
+  tag the comment <b><i>admin</i></b> and a moderator will review it.
+</p>
+
+<p>
+  If a [% terms.bug %]'s short-description, whiteboard tags, attachments,
+  or user-created content other than comments that violate the
+  <a href="https://www.mozilla.org/about/governance/policies/participation/">Mozilla Community Participation Guidelines</a>
+  or [% terms.Bugzilla %] Etiquette, please describe the issue
+  in a comment and tag that comment <b><i>admin</i></b>.
+</p>
+
+<p>
+  If you cannot tag comments (which requires
+  <a href="page.cgi?id=get_permissions.html"><code>editbugs</code> privileges</a>,)
+  or if you need to contact a [% terms.Bugzilla %] community administrator urgently:
+</p>
+
+<ul>
   <li>
-  Some of these rules may not apply to you. If they do not, you will know
-  exactly which ones do not, and why they do not apply. If you are not
-  sure, then they definitely all apply to you.
+    Send email to <a href="mailto:bmo-mods@mozilla.com">bmo-mods@mozilla.com</a> with
+    the [% terms.bug %] number and a short description of the situation.
   </li>
-</ol>
+
+  <li>
+    If you have IRC you may also contact the on-duty staff member in the #bmo channel on irc.mozilla.org.
+    The on-duty staff member's IRC handle is in the channel's topic.
+  </li>
+</ul>
 
 <p>
-  If you see someone not following these rules, the first step is, as an exception
-  to guideline 1.4, to make them aware of this document by <em>private</em> mail.
-  Flaming people publically in [% terms.bugs %] violates guidelines 1.1 and 1.3. In the case of
-  persistent offending you should ping an administrator on Mozilla IRC in channel #bmo and ask them
-  to look into it.
+  If the content of a user's name field contains abusive or offensive content,
+  contact a moderator at
+  <a href="mailto:bmo-mods@mozilla.com">bmo-mods@mozilla.com</a>.
 </p>
 
-<p>
-  This entire document can be summed up in one sentence:
-  do unto others as you would have them do unto you.
-</p>
+<h2>See Also</h2>
 
 <p>
-  Other useful documents:
   <a href="page.cgi?id=bug-writing.html">The [% terms.Bug %] Writing Guidelines</a>.
 </p>
 

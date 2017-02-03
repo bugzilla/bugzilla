@@ -147,6 +147,8 @@ sub set_pidfile {
 # Clear the request cache at the start of each run.
 sub work_once {
     my $self = shift;
+    Bugzilla::Hook::process('request_cleanup');
+    Bugzilla::Bug->CLEANUP;
     Bugzilla->clear_request_cache();
     return $self->SUPER::work_once(@_);
 }

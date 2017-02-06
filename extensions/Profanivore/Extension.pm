@@ -161,7 +161,11 @@ sub _filter_html {
     foreach my $comment (@comments) {
         _filter_html_node($comment, \$dirty);
     }
-    return $dirty ? $tree->as_HTML : $html;
+    if ($dirty) {
+        $html = $tree->as_HTML;
+        $tree->delete;
+    }
+    return $html;
 }
 
 sub _filter_html_node {

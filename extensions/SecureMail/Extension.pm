@@ -646,6 +646,7 @@ sub _insert_subject {
         my $body = $tree->look_down(qw(_tag body));
         $body->unshift_content(['h1', "Subject: $subject"], ['br']);
         $part->body_str_set($tree->as_HTML);
+        $tree->delete;
     }
 }
 
@@ -696,6 +697,7 @@ sub _filter_bug_links {
         if ($updated) {
             $part->body_str_set($tree->as_HTML);
         }
+        $tree->delete;
     });
 }
 

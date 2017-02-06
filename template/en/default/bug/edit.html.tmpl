@@ -142,7 +142,7 @@
             <tr>
               <td colspan="2">
                 <span style="float:left">
-                  <a href="page.cgi?id=fields.html">What do these fields mean?</a>
+                  <a href="https://wiki.mozilla.org/BMO/UserGuide/BugFields">What do these fields mean?</a>
                 </span>
                 [% PROCESS commit_button id="_top"%]
               </td>
@@ -384,7 +384,7 @@
 [% BLOCK section_status %]
   <tr>
     <th class="field_label">
-      <a href="page.cgi?id=fields.html#status">Status</a>:
+      <a href="https://wiki.mozilla.org/BMO/UserGuide/BugFields#bug_status">Status</a>:
     </th>
     <td id="bz_field_status">
       <span id="static_bug_status">
@@ -443,7 +443,7 @@
     <tr>
       <th class="field_label">
         <label for="priority" accesskey="i">
-          <a href="page.cgi?id=fields.html#importance"><u>I</u>mportance</a></label>:
+          <a href="https://wiki.mozilla.org/BMO/UserGuide/BugFields#importance"><u>I</u>mportance</a></label>
       </th>
       <td>
        [% INCLUDE bug/field.html.tmpl
@@ -462,7 +462,7 @@
       <tr>
         <th class="field_label">
           <label for="target_milestone">
-            <a href="page.cgi?id=fields.html#target_milestone">
+            <a href="https://wiki.mozilla.org/BMO/UserGuide/BugFields#target_milestone">
             Target&nbsp;Milestone</a></label>:
         </th>
         [% PROCESS select selname = "target_milestone" %]
@@ -479,7 +479,7 @@
 
     <tr>
       <th class="field_label">
-        <a href="page.cgi?id=fields.html#assigned_to">Assigned To</a>:
+        <a href="https://wiki.mozilla.org/BMO/UserGuide/BugFields#assigned_to">Assigned To</a>:
       </th>
       <td>
         [% IF bug.check_can_change_field("assigned_to", 0, 1) %]
@@ -579,7 +579,7 @@
     <tr>
       <th class="field_label">
         <label for="triage_owner">
-        <a href="page.cgi?id=fields.html#triage_owner">
+        <a href="https://wiki.mozilla.org/BMO/UserGuide/BugFields#triage_owner">
         Triage&nbsp;Owner</a></label>:
       </th>
       <td>
@@ -1218,7 +1218,7 @@
                class="status" cellspacing="0" cellpadding="0">
           <tr>
             <th class="field_label">
-              <a href="page.cgi?id=fields.html#status">Status</a>:
+              <a href="https://wiki.mozilla.org/BMO/UserGuide/BugFields#bug_status">Status</a>:
             </th>
             <td>
               [% PROCESS bug/knob.html.tmpl %]

@@ -8,6 +8,10 @@
 
 [% RETURN IF NOT tracking_flags.size %]
 <td>
+  <div>
+    <a href="https://wiki.mozilla.org/BMO/UserGuide#Tracking_Flags" target="_blank">
+      What do these flags mean?</a>
+  </div>
   <table class="tracking_flags">
   [% FOREACH type = tracking_flag_types %]
     [% flag_list = [] %]

@@ -13,18 +13,8 @@
   <tr id="row_[% flag.name FILTER html %]">
     <td [% IF new_bug %]class="field_label"[% END %]>
       <label for="[% flag.name FILTER html %]">
-      [% IF new_bug %]
-        <a
-        [% IF help_html.${flag.name}.defined %]
-          title="[% help_html.${flag.name} FILTER txt FILTER collapse FILTER html %]"
-          class="field_help_link"
-        [% END %]
-          href="page.cgi?id=fields.html#[% flag.name FILTER uri %]">
-      [% END %]
-      [% flag.description FILTER html %]
-      [% IF new_bug %]
-        </a>
-      [% END %]:</label>
+        [% flag.description FILTER html %]:
+      </label>
     </td>
     <td>
       [% IF user.id %]

@@ -970,3 +970,7 @@ div.ui-tooltip {
     z-index: 100;
     opacity: 0;
 }
+
+#user-guide {
+    padding-top: 5px;
+}

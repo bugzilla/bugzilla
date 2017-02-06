@@ -203,6 +203,7 @@
         field_type = constants.FIELD_TYPE_FREETEXT
         hide_on_view = 1
         short_width = 1
+        help = "https://wiki.mozilla.org/BMO/UserGuide/BugFields#alias"
     %]
 
     [%# summary %]
@@ -210,6 +211,7 @@
         field = bug_fields.short_desc
         field_type = constants.FIELD_TYPE_FREETEXT
         hide_on_view = 1
+        help = "https://wiki.mozilla.org/BMO/UserGuide/BugFields#short_desc"
     %]
 
     [%# status summary %]
@@ -282,8 +284,8 @@
   [%# buttons %]
 
   <div id="mode-container">
-    [% IF user.id %]
-      <div>
+    <div>
+      [% IF user.id %]
         <button type="button" id="cancel-btn" class="minor" style="display:none">Cancel</button>
         <button type="button" id="mode-btn" class="major">
           <span id="mode-btn-readonly" title="Enable editing fields for [% terms.bug %] metadata">Edit [% terms.Bug %]</span>
@@ -293,8 +295,8 @@
           </span>
         </button>
         <button type="submit" id="commit-btn" class="save-btn major" style="display:none">Save Changes</button>
-      </div>
-    [% END %]
+      [% END %]
+    </div>
     <div class="button-row">
       [% IF bug.assigned_to.id == user.id || user.in_group("editbugs") %]
         <button type="button" id="copy-summary" class="minor"
@@ -319,7 +321,9 @@
         <hr>
         <menuitem id="action-history" label="History"></menuitem>
       </menu>
-
+    </div>
+    <div id="user-guide">
+      <a title="User guide for [% terms.Bugzilla %]" href="https://wiki.mozilla.org/BMO/UserGuide">Get help with this page</a>
     </div>
   </div>
 [% END %]
@@ -339,12 +343,14 @@
   [% WRAPPER fields_lhs %]
 
     [%# product %]
-    [% can_edit_product = bug.check_can_change_field("product", 0, 1) %]
+    [% can_edit_product   = bug.check_can_change_field("product", 0, 1) %]
+    [% filtered_product   = bug.product_obj.name FILTER uri %]
+    [% filtered_component = bug.component_obj.name FILTER uri %]
     [% WRAPPER bug_modal/field.html.tmpl
         field        = bug_fields.product
         field_type   = constants.FIELD_TYPE_SINGLE_SELECT
         hide_on_edit = can_edit_product
-        help         = "describecomponents.cgi"
+        help         = "describecomponents.cgi?product=$filtered_product"
     %]
       <span class="spin-latch" id="product-latch" data-latch="#product-latch" data-for="#product-info">&#9656;</span>
       <div class="spin-toggle" data-latch="#product-latch" data-for="#product-info">
@@ -355,12 +361,12 @@
       </div>
     [% END %]
     [% WRAPPER bug_modal/field.html.tmpl
-        field = bug_fields.product
-        field_type = constants.FIELD_TYPE_SINGLE_SELECT
-        hide_on_view = 1
-        hide_on_edit = !can_edit_product
+        field          = bug_fields.product
+        field_type     = constants.FIELD_TYPE_SINGLE_SELECT
+        hide_on_view   = 1
+        hide_on_edit   = !can_edit_product
         append_content = 1
-        help = "describecomponents.cgi"
+        help           = "describecomponents.cgi?product=$filtered_product"
     %]
       <span id="product-search-container">
         [% INCLUDE prodcompsearch/form.html.tmpl
@@ -380,9 +386,10 @@
 
     [%# component %]
     [% WRAPPER bug_modal/field.html.tmpl
-        field = bug_fields.component
+        field      = bug_fields.component
         field_type = constants.FIELD_TYPE_SINGLE_SELECT
-        help = "describecomponents.cgi"
+        help       = "describecomponents.cgi?product=$filtered_product&component=$filtered_component#$filtered_component"
+
     %]
       <span class="spin-latch" id="component-latch" data-latch="#component-latch" data-for="#component-info">&#9656;</span>
       <div class="spin-toggle" data-latch="#component-latch" data-for="#component-info">
@@ -401,6 +408,7 @@
         label = "Importance"
         container = 1
         hide_on_view = bug.priority == "--" && bug.bug_severity == "normal"
+        help = "https://wiki.mozilla.org/BMO/UserGuide/BugFields#priority"
     %]
       [% INCLUDE bug_modal/field.html.tmpl
           field = bug_fields.priority
@@ -429,10 +437,11 @@
     [%# status, resolution %]
     [% IF bug.assigned_to.id != user.id %]
       [% WRAPPER bug_modal/field.html.tmpl
-          name = "status-view"
-          container = 1
-          label = "Status"
+          name         = "status-view"
+          container    = 1
+          label        = "Status"
           hide_on_edit = 1
+          help         = "https://wiki.mozilla.org/BMO/UserGuide/BugStatuses"
       %]
         [% bug.bug_status FILTER html %]
         [%+ bug.resolution FILTER html IF bug.resolution %]
@@ -450,15 +459,17 @@
         field = bug_fields.creation_ts
         label = "Reported"
         view_only = 1
+        help = "https://wiki.mozilla.org/BMO/UserGuide/BugFields#creation_ts"
     %]
       [% INCLUDE bug_modal/rel_time.html.tmpl ts=bug.creation_ts %]
     [% END %]
 
     [%# last modified %]
     [% WRAPPER bug_modal/field.html.tmpl
-      field = bug_fields.delta_ts
-      label = "Modified"
-      view_only = 1
+        field = bug_fields.delta_ts
+        label = "Modified"
+        view_only = 1
+        help = "https://wiki.mozilla.org/BMO/UserGuide/BugFields#delta_ts"
     %]
       [% INCLUDE bug_modal/rel_time.html.tmpl ts=bug.delta_ts %]
     [% END %]
@@ -467,10 +478,11 @@
 
   [%# status/resolution knob %]
   [% WRAPPER bug_modal/field.html.tmpl
-      name = "status-edit"
-      container = 1
-      label = "Status"
+      name         = "status-edit"
+      container    = 1
+      label        = "Status"
       hide_on_view = bug.assigned_to.id != user.id
+      help         = "https://wiki.mozilla.org/BMO/UserGuide/BugStatuses"
   %]
     [% INCLUDE status_block %]
   [% END %]
@@ -542,6 +554,7 @@
         field = bug_fields.assigned_to
         field_type = constants.FIELD_TYPE_USER
         hide_on_edit = 1
+        help = "https://wiki.mozilla.org/BMO/UserGuide/BugFields#assigned_to"
     %]
       [% IF unassigned %]
         <i>Unassigned</i>
@@ -563,6 +576,7 @@
         }
         append_content = 1
         default = bug.component_obj.default_assignee.login
+        help = "https://wiki.mozilla.org/BMO/UserGuide/BugFields#assigned_to"
     %]
       <div class="set-default-container" style="display:none">
         <input type="checkbox" id="set-default-assignee" name="set_default_assignee" class="set-default"
@@ -579,6 +593,7 @@
         label = "Mentors"
         value = bug.mentors.pluck("login")
         hide_on_view = bug.mentors.size == 0
+        help = "https://wiki.mozilla.org/BMO/UserGuide/BugFields#bug_mentor"
     %]
       [%
         IF bug.mentors.size;
@@ -597,6 +612,7 @@
         field_type = constants.FIELD_TYPE_USER
         hide_on_view = bug.qa_contact == ""
         hide_on_edit = 1
+        help = "https://wiki.mozilla.org/BMO/UserGuide/BugFields#qa_contact"
     %]
       [% INCLUDE bug_modal/user.html.tmpl u=bug.qa_contact %]
     [% END %]
@@ -606,6 +622,7 @@
         hide_on_view = 1
         append_content = 1
         default = (bug.component_obj.default_qa_contact.id ? bug.component_obj.default_qa_contact.login : '')
+        help = "https://wiki.mozilla.org/BMO/UserGuide/BugFields#qa_contact"
     %]
       <div class="set-default-container" style="display:none">
         <input type="checkbox" id="set-default-qa-contact" name="set_default_qa_contact" class="set-default"
@@ -622,6 +639,7 @@
         field = bug_fields.reporter
         field_type = constants.FIELD_TYPE_USER
         view_only = 1
+        help = "https://wiki.mozilla.org/BMO/UserGuide/BugFields#reporter"
     %]
 
     [%# triage owner %]
@@ -630,8 +648,8 @@
         field_type = constants.FIELD_TYPE_USER
         value = bug.component_obj.triage_owner
         view_only = 1
+        help = "https://wiki.mozilla.org/BMO/UserGuide/BugFields#triage_owner"
     %]
-
 
     [%# needinfo %]
     [% WRAPPER bug_modal/field.html.tmpl
@@ -650,6 +668,7 @@
           container = 1
           label = "NeedInfo"
           hide_on_view = 1
+          help = "https://wiki.mozilla.org/BMO/UserGuide/BugFields#needinfo"
       %]
         <button type="button" id="needinfo-scroll" class="minor">Update</button>
       [% END %]
@@ -660,6 +679,7 @@
         container = 1
         label = "CC"
         hide_on_view = bug.cc.size == 0
+        help = "https://wiki.mozilla.org/BMO/UserGuide/BugFields#cc"
     %]
 
       [% IF user.id %]
@@ -742,6 +762,7 @@
     [% INCLUDE bug_modal/field.html.tmpl
         field = bug_fields.version
         field_type = constants.FIELD_TYPE_SINGLE_SELECT
+        help = "https://wiki.mozilla.org/BMO/UserGuide/BugFields#version"
     %]
 
     [%# milestone %]
@@ -749,6 +770,7 @@
         field = bug_fields.target_milestone
         field_type = constants.FIELD_TYPE_SINGLE_SELECT
         label = "Target"
+        help = "https://wiki.mozilla.org/BMO/UserGuide/BugFields#target_milestone"
     %]
 
     [%# platform, op-sys %]
@@ -757,6 +779,7 @@
         label = "Platform"
         hide_on_view = (bug.rep_platform == 'All' && bug.op_sys == 'All')
           || (bug.rep_platform == 'Unspecified' && bug.op_sys == 'Unspecified')
+        help = "https://wiki.mozilla.org/BMO/UserGuide/BugFields#rep_platform"
     %]
       [% INCLUDE bug_modal/field.html.tmpl
           field = bug_fields.rep_platform
@@ -844,6 +867,7 @@
         field_type = constants.FIELD_TYPE_BUG_LIST
         values = bug.depends_on_obj
         hide_on_view = bug.dependson.size == 0
+        help = "https://wiki.mozilla.org/BMO/UserGuide/BugFields#dependson"
     %]
 
     [%# blocks %]
@@ -852,6 +876,7 @@
         field_type = constants.FIELD_TYPE_BUG_LIST
         values = bug.blocks_obj
         hide_on_view = bug.blocked.size == 0
+        help = "https://wiki.mozilla.org/BMO/UserGuide/BugFields#blocks"
     %]
 
     [% IF bug.dependson.size + bug.blocked.size > 1 %]
@@ -873,6 +898,7 @@
           label = "Duplicates"
           values = bug.duplicates
           hide_on_edit = 1
+          help = "https://wiki.mozilla.org/BMO/UserGuide/BugFields#duplicates"
       %]
     [% END %]
 
@@ -911,9 +937,10 @@
       [% IF tracking_flags_has %]
         [%# tracking flags %]
         [% WRAPPER bug_modal/field.html.tmpl
-            container = 1
-            label = "Tracking Flags"
+            container    = 1
+            label        = "Tracking Flags"
             hide_on_view = !tracking_flags_set
+            help         = "https://wiki.mozilla.org/BMO/UserGuide#Tracking_Flags"
         %]
           [% INCLUDE bug_modal/tracking_flags.html.tmpl
               type = "tracking"
@@ -940,9 +967,10 @@
       [% IF project_flags_has %]
         [%# project flags %]
         [% WRAPPER bug_modal/field.html.tmpl
-            container = 1
-            label = "Project Flags"
+            container    = 1
+            label        = "Project Flags"
             hide_on_view = !project_flags_set
+            help         = "https://wiki.mozilla.org/BMO/UserGuide#Tracking_Flags"
         %]
           [% INCLUDE bug_modal/tracking_flags.html.tmpl
               type = "project"
@@ -991,6 +1019,7 @@
       [% WRAPPER bug_modal/field.html.tmpl
           container = 1
           label = "Votes"
+          help = "https://wiki.mozilla.org/BMO/UserGuide/BugFields#votes"
       %]
         [% bug.votes FILTER html %]
         vote[% "s" IF bug.votes != 1 %]
@@ -1032,6 +1061,7 @@
         field = bug_fields.bug_file_loc
         field_type = constants.FIELD_TYPE_FREETEXT
         hide_on_view = bug.bug_file_loc == ""
+        help = "https://wiki.mozilla.org/BMO/UserGuide/BugFields#bug_file_loc"
     %]
       [% INCLUDE bug_url_link %]
     [% END %]
@@ -1042,6 +1072,7 @@
         field_type = constants.FIELD_TYPE_BUG_URLS
         values = bug.see_also
         hide_on_view = bug.see_also.size == 0
+        help = "https://wiki.mozilla.org/BMO/UserGuide/BugFields#see_also"
     %]
 
     [% Hook.process('details_rhs') %]
@@ -1133,12 +1164,14 @@
          value        = estimated_time
          hide_on_view = 0
          short_width  = 1
+         help = "https://wiki.mozilla.org/BMO/UserGuide/BugFields#estimated_time"
       %]
       [% current_estimate = PROCESS formattimeunit time_unit = (bug.actual_time + bug.remaining_time) %]
       [% INCLUDE bug_modal/field.html.tmpl
          label = "Current Est"
          value = current_estimate
          view_only = 1
+         help = "https://wiki.mozilla.org/BMO/UserGuide/BugFields#current_estimate"
       %]
       [% hours_worked = PROCESS formattimeunit time_unit = bug.actual_time %]
       [% WRAPPER bug_modal/field.html.tmpl
@@ -1147,6 +1180,7 @@
          name        = "work_time"
          value       = '0.0'
          short_width = 1
+         help = "https://wiki.mozilla.org/BMO/UserGuide/BugFields#work_time"
       %]
         [% PROCESS formattimeunit time_unity = bug.actual_time %]
       [% END %]
@@ -1156,6 +1190,7 @@
          field_type  = constants.FIELD_TYPE_FREETEXT
          value       = hours_left
          short_width = 1
+         help = "https://wiki.mozilla.org/BMO/UserGuide/BugFields#remaining_time"
       %]
     [% END %]
 
@@ -1165,17 +1200,20 @@
          label     = "% Complete"
          value     = percentage_complete
          view_only = 1
+         help = "https://wiki.mozilla.org/BMO/UserGuide/BugFields#percentage_complete"
       %]
       [% time_gain = PROCESS formattimeunit  time_unit = bug.estimated_time - (bug.actual_time + bug.remaining_time) %]
       [% INCLUDE bug_modal/field.html.tmpl
          label = "Gain"
          value = time_gain
          view_only = 1
+         help = "https://wiki.mozilla.org/BMO/UserGuide/BugFields#gain"
       %]
       [% INCLUDE bug_modal/field.html.tmpl
          field      = bug_fields.deadline
          field_type = constants.FIELD_TYPE_DATE
          value      = bug.deadline
+         help = "https://wiki.mozilla.org/BMO/UserGuide/BugFields#deadline"
       %]
       <div>
         <a href="summarize_time.cgi?id=[% bug.bug_id FILTER none %]&amp;do_depends=1">

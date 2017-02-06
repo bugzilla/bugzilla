@@ -678,6 +678,13 @@ $(function() {
             window.location.replace($('#this-bug').val());
         });
 
+    // Open help page
+    $('#help-btn')
+        .click(function(event) {
+            event.preventDefault();
+            window.open("https://wiki.mozilla.org/BMO/UserGuide", "_blank");
+        });
+
     // needinfo in people section -> scroll to near-comment ui
     $('#needinfo-scroll')
         .click(function(event) {

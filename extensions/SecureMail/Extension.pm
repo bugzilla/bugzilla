@@ -644,7 +644,7 @@ sub _insert_subject {
     elsif ($content_type =~ /^text\/html/) {
         my $tree = HTML::Tree->new->parse_content($part->body_str);
         my $body = $tree->look_down(qw(_tag body));
-        $body->unshift_content(['h1', "Subject: $subject"], ['br']);
+        $body->unshift_content(['strong', "Subject: $subject"], ['br']);
         $part->body_str_set($tree->as_HTML);
         $tree->delete;
     }

@@ -51,13 +51,14 @@
   $(function() {
     $(".toggleBugmailRecipients").on("click", function (event) {
       event.preventDefault();
-      toggleBugmailRecipients($(this).data('mailing-bugid'), $(this).data('mailing-show'));
+      toggleBugmailRecipients($(event.target).data('mailing-bugid'),
+                              $(event.target).data('mailing-show'));
      });
    });
 </script>
 
 <dl id="bugmail_summary_[% mailing_bugid FILTER none %]"
-    class="[% show_recipients ? "" : "bz_default_hidden" %]">
+    [% IF !show_recipients %]style="display:none;"[% END %]>
   <dt>Email sent to:</dt>
   <dd>
   [% IF user.can_see_bug(mailing_bugid) %]
@@ -77,7 +78,7 @@
 </dl>
 
 <div id="bugmail_summary_[% mailing_bugid FILTER none %]_short"
-     class="[% show_recipients ? "bz_default_hidden" : "" %]">
+     [% IF show_recipients %]style="display:none;"[% END %]>
   [% IF recipient_count > 0 %]
     Email sent to [% recipient_count FILTER html %] recipient[% 's' UNLESS recipient_count == 1 %].
     (<a href="#" class="toggleBugmailRecipients" data-mailing-bugid="[% mailing_bugid FILTER html %]"

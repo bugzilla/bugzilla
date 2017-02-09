@@ -409,6 +409,7 @@
         container = 1
         hide_on_view = bug.priority == "--" && bug.bug_severity == "normal"
         help = "https://wiki.mozilla.org/BMO/UserGuide/BugFields#priority"
+        label_for = "priority"
     %]
       [% INCLUDE bug_modal/field.html.tmpl
           field = bug_fields.priority
@@ -442,6 +443,7 @@
           label        = "Status"
           hide_on_edit = 1
           help         = "https://wiki.mozilla.org/BMO/UserGuide/BugStatuses"
+          label_for    = "bug_status"
       %]
         [% bug.bug_status FILTER html %]
         [%+ bug.resolution FILTER html IF bug.resolution %]
@@ -780,6 +782,7 @@
         hide_on_view = (bug.rep_platform == 'All' && bug.op_sys == 'All')
           || (bug.rep_platform == 'Unspecified' && bug.op_sys == 'Unspecified')
         help = "https://wiki.mozilla.org/BMO/UserGuide/BugFields#rep_platform"
+        label_for = "rep_platform"
     %]
       [% INCLUDE bug_modal/field.html.tmpl
           field = bug_fields.rep_platform
@@ -1009,7 +1012,7 @@
     [% WRAPPER bug_modal/field.html.tmpl
         field = bug_fields.status_whiteboard
         field_type = constants.FIELD_TYPE_FREETEXT
-        help = "https://wiki.mozilla.org/BMO/Whiteboard"
+        help = "https://wiki.mozilla.org/BMO/UserGuide/Whiteboard"
     %]
       [% bug.status_whiteboard == "" ? "---" : bug.status_whiteboard FILTER html %]
     [% END %]

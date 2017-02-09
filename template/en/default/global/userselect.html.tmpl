@@ -21,6 +21,7 @@
   # field_title: optional, extra information to display as a tooltip
   # placeholder: optional, input only; placeholder attribute value
   # mandatory: optional; if true, the field cannot be empty.
+  # aria_labelledby: optiona; extra information to use for arai labels
   #%]
 
 [% THROW "onchange is not allowed" IF onchange %]
@@ -34,6 +35,7 @@
   [% IF multiple %] multiple="multiple" size="[% multiple FILTER html %]" [% END %]
   [% IF field_title %] title="[% field_title FILTER html %]" [% END %]
   [% IF mandatory %] required [% END %]
+  [% IF aria_labelledby %]aria-labelledby="[% aria_labelledby FILTER html %]"[% END %]
 >
   [% IF emptyok %]
     <option value=""></option>

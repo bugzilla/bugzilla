@@ -33,6 +33,7 @@
   #   class: (string) optional button class
   #   caption: (string) button caption
   #   hidden: (boolean) don't show the button (default: false)
+  # label_for: (string) optional label for identifier
   #%]
 
 [%
@@ -104,9 +105,21 @@ END;
     <div class="name
                 [%~ " edit-show" IF hide_on_view %]"
          [% IF hide_on_view %] style="display:none"[% END %]>
-      [%~ IF help.defined %]<a href="[% help FILTER none %]" class="help">[% END %]
+      [%~ IF help.defined %]
+        <a href="[% help FILTER none %]" id="[% name FILTER html %]-help-link" class="help">
+        [% aria_labelledby_id = "${name}-help-link" %]
+        [% aria_labelledby_html = BLOCK %]aria-labelledby="[% aria_labelledby_id FILTER html %]"[% END %]
+      [% END %]
+      [%~ IF label_for %]
+        <label for="[% label_for FILTER html %]">
+      [% END %]
       [%~ label _ ":" FILTER html IF label %]
-      [%~ IF help.defined %]</a>[% END ~%]
+      [%~ IF label_for %]
+        </label>
+      [% END ~%]
+      [%~ IF help.defined %]
+        </a>
+      [% END %]
     </div>
   [% END %]
 
@@ -177,7 +190,7 @@ END;
         [% CASE constants.FIELD_TYPE_SINGLE_SELECT %]
           [%# single value select %]
           <input type="hidden" id="[% name FILTER html %]-dirty">
-          <select name="[% name FILTER html %]" id="[% name FILTER html %]">
+          <select name="[% name FILTER html %]" id="[% name FILTER html %]" [% aria_labelledby_html FILTER none %]>
             [% IF values.defined %]
               [% FOREACH v IN values %]
                 [% NEXT IF NOT v.is_active AND NOT value.contains(v.name).size %]
@@ -195,7 +208,7 @@ END;
         [% CASE constants.FIELD_TYPE_MULTI_SELECT %]
           [%# multi value select %]
           <input type="hidden" id="[% name FILTER html %]-dirty">
-          <select name="[% name FILTER html %]" id="[% name FILTER html %]" multiple size="5">
+          <select name="[% name FILTER html %]" id="[% name FILTER html %]" multiple size="5" [% aria_labelledby_html FILTER none %]>
             [% IF values.defined %]
               [%# not implemented %]
             [% ELSE %]
@@ -207,8 +220,7 @@ END;
 
         [% CASE constants.FIELD_TYPE_FREETEXT %]
           [%# normal input field %]
-          <input name="[% name FILTER html %]" id="[% name FILTER html %]" value="[% value FILTER html %]">
-
+          <input name="[% name FILTER html %]" id="[% name FILTER html %]" value="[% value FILTER html %]" [% aria_labelledby_html FILTER none %]>
         [% CASE constants.FIELD_TYPE_USER %]
           [% IF action && !action.hidden %]
             <button class="field-button minor [%= action.class FILTER html IF action.class %]"
@@ -225,6 +237,7 @@ END;
               value = value.login
               classes = [ "bz_userfield" ]
               placeholder = default
+              aria_labelledby = aria_labelledby_id
             %]
           [% IF action && !action.hidden %]
             </div>
@@ -240,12 +253,13 @@ END;
               classes = [ "bz_userfield" ]
               placeholder = default
               multiple = 5
+              aria_labelledby = aria_labelledby_id
             %]
 
         [% CASE constants.FIELD_TYPE_KEYWORDS %]
           [%# keywords %]
           <input type="text" id="[% name FILTER html %]" name="[% name FILTER html %]"
-            value="[% value FILTER html %]">
+            value="[% value FILTER html %]" [% aria_labelledby_html FILTER none %]>
 
         [% CASE constants.FIELD_TYPE_BUG_URLS %]
           [%# see also %]
@@ -265,31 +279,31 @@ END;
               <span class="multiline-value" id="[% name FILTER html %]-view">[% value FILTER html FILTER html_line_break %]</span>
             [% END %]
             <textarea id="[% name FILTER html %]" name="[% name FILTER html %]"
-              rows="10" cols="10" style="display:none">[% value FILTER html %]</textarea>
+              rows="10" cols="10" style="display:none" [% aria_labelledby_html FILTER none %]>[% value FILTER html %]</textarea>
 
         [% CASE constants.FIELD_TYPE_DATETIME %]
           [%# datetime %]
           <input class="cf_datetime" name="[% name FILTER html %]" id="[% name FILTER html %]"
-            value="[% value FILTER html %]">
+            value="[% value FILTER html %]" [% aria_labelledby_html FILTER none %]>
           <img class="cf_datetime-img" id="[% name FILTER html %]-img"
             src="extensions/BugModal/web/calendar.png" width="16" height="16">
 
         [% CASE constants.FIELD_TYPE_DATE %]
           [%# date %]
           <input class="cf_date" name="[% name FILTER html %]" id="[% name FILTER html %]"
-            value="[% value FILTER html %]">
+            value="[% value FILTER html %]" [% aria_labelledby_html FILTER none %]>
           <img class="cf_date-img" id="[% name FILTER html %]-img"
             src="extensions/BugModal/web/calendar.png" width="16" height="16">
 
         [% CASE constants.FIELD_TYPE_INTEGER %]
           [%# integer %]
           <input type="number" name="[% name FILTER html %]" id="[% name FILTER html %]"
-            value="[% value FILTER html %]">
+            value="[% value FILTER html %]" [% aria_labelledby_html FILTER none %]>
 
         [% CASE constants.FIELD_TYPE_BUG_ID %]
           [%# bug id %]
           <input type="text" name="[% name FILTER html %]" id="[% name FILTER html %]"
-            value="[% value FILTER html %]">
+            value="[% value FILTER html %]" [% aria_labelledby_html FILTER none %]>
 
         [% CASE %]
           [%# error %]
@@ -339,6 +353,6 @@ END;
     [% END %]
   [% ELSE %]
     <input type="text" id="[% name FILTER html %]" name="[% name FILTER html %]"
-           value="[% values.pluck('id').join(", ") FILTER html %]">
+           value="[% values.pluck('id').join(", ") FILTER html %]" [% aria_labelledby_html FILTER none %]>
   [% END %]
 [% END %]

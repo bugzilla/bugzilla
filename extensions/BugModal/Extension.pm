@@ -35,15 +35,6 @@ use constant READABLE_BUG_STATUS_PRODUCTS => (
     'bugzilla.mozilla.org'
 );
 
-# force skin to mozilla
-sub settings_after_update {
-    my ($self, $args) = @_;
-    my $settings = Bugzilla->user->settings;
-    return unless $settings->{ui_experiments}->{value} eq 'on';
-    return if $settings->{skin}->{value} =~ /^Mozilla/;
-    $settings->{skin}->set('Mozilla');
-}
-
 sub show_bug_format {
     my ($self, $args) = @_;
     $args->{format} = _alternative_show_bug_format();
@@ -349,23 +340,6 @@ sub install_before_final_checks {
         default  => 'off',
         category => 'User Interface',
     });
-
-    # ensure the correct skin is being used
-    my $dbh = Bugzilla->dbh;
-    my $users = $dbh->selectcol_arrayref("
-        SELECT
-            ui.user_id
-        FROM
-            profile_setting ui
-            LEFT JOIN profile_setting skin ON skin.user_id = ui.user_id AND skin.setting_name = 'skin'
-        WHERE
-            ui.setting_name = 'ui_experiments'
-            AND ui.setting_value = 'on'
-            AND skin.setting_value NOT LIKE 'Mozilla%'
-    ");
-    foreach my $user_id (@$users) {
-        Bugzilla::User->new($user_id)->settings->{skin}->set('Mozilla');
-    }
 }
 
 __PACKAGE__->NAME;

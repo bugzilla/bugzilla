@@ -142,11 +142,15 @@ hr {
     padding-left: 10px;
 }
 
+#header .wrapper, #bugzilla-body, #footer {
+    max-width: 1200px;
+    min-width: 800px;
+}
+
 #header .wrapper {
     -moz-box-sizing: border-box;
     -webkit-box-sizing: border-box;
     margin: -1px auto 0px;
-    width: 99%;
 }
 
 #header .wrapper:after {
@@ -295,9 +299,8 @@ hr {
     background: none;
     border: none;
     color: #404040;
-    margin: 10px auto 15px;
+    margin:5px auto !important;
     padding: 0;
-    width: 99%;
 }
 
 #bugzilla-body th {
@@ -652,9 +655,7 @@ table.edit_form hr {
     border-top: 1px solid rgba(0, 0, 0, 0.1);
     border-radius: 0;
     color: #bbb;
-    width: auto;
-    margin-bottom: 1em;
-    margin-left: 6px;
+    margin: 1em auto;
 }
 
 #links-actions, #links-saved {

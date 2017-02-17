@@ -10,13 +10,16 @@ function slide_module(module, action, fast) {
     if (!module.attr('id'))
         return;
     var latch = module.find('.module-latch');
-    var spinner = $(latch.children('.module-spinner')[0]);
+    var spinner = module.find('.module-spinner');
     var content = $(module.children('.module-content')[0]);
     var duration = fast ? 0 : 200;
 
     function slide_done() {
         var is_visible = content.is(':visible');
-        spinner.html(is_visible ? '&#9662;' : '&#9656;');
+        spinner.attr({
+            'aria-expanded': is_visible,
+            'aria-label': is_visible ? latch.data('label-expanded') : latch.data('label-collapsed'),
+        });
         if (BUGZILLA.user.settings.remember_collapsed)
             localStorage.setItem(module.attr('id') + '.visibility', is_visible ? 'show' : 'hide');
     }
@@ -94,10 +97,17 @@ $(function() {
     }
 
     // expand/colapse module
-    $('.module-header')
+    $('.module-latch')
         .click(function(event) {
             event.preventDefault();
             slide_module($(this).parents('.module'));
+        })
+        .keydown(function(event) {
+            // expand/colapse module with the enter or space key
+            if (event.keyCode === 13 || event.keyCode === 32) {
+                event.preventDefault();
+                slide_module($(this).parents('.module'));
+            }
         });
 
     // toggle obsolete attachments

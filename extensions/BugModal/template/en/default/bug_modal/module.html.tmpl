@@ -21,7 +21,7 @@
   #   not be remembered between page loads
   #%]
 
-<div class="module
+<section class="module
     [%~ " edit-hide" IF hide_on_edit %]
     [%~ " edit-show" IF hide_on_view && !hide_on_edit %]"
     [% IF hide_on_view +%] style="display:none"[% END %]
@@ -29,12 +29,18 @@
     [%~ ' data-non-stick="1"' IF no_collapse_persist %]
 >
   [% IF title %]
-    <div class="module-header">
-      <div class="module-latch">
-        <div class="module-spinner">[% collapsed ? "&#9656;" : "&#9662;" %]</div>
-        <div class="module-title">[% title FILTER html %]</div>
+    <header id="module-[% title.replace FILTER id %]-header" class="module-header">
+      <div class="module-latch"
+           data-label-expanded="Collapse [% title FILTER html %] section"
+           data-label-collapsed="Expand [% title FILTER html %] section">
+        <div class="module-spinner" role="button" tabindex="0"
+             aria-controls="module-[% title.replace FILTER id %]-content"
+             aria-expanded="[% collapsed ? "false" : "true" %]"
+             aria-labeledby="module-[% title.replace FILTER id %]-title"
+             aria-describedby="module-[% title.replace FILTER id %]-subtitle"></div>
+        <h2 class="module-title" id="module-[% title.replace FILTER id %]-title">[% title FILTER html %]</h2>
         [% IF subtitle != "" && subtitle.size %]
-          <div class="module-subtitle">
+          <h3 class="module-subtitle" id="module-[% title.replace FILTER id %]-subtitle">
             ([% FOREACH st IN subtitle.list %]
               [% IF st.unfiltered.defined %]
                 [% st.unfiltered FILTER none %]
@@ -43,12 +49,15 @@
               [% END %]
               [% ", " UNLESS loop.last %]
             [% END %])
-          </div>
+          </h3>
         [% END %]
       </div>
-    </div>
+    </header>
   [% END %]
-  <div class="module-content" [% ' style="display:none"' IF collapsed %] >
+  <div class="module-content"
+      [%~ IF title %] id="module-[% title.replace FILTER id %]-content"[% END %]
+      [%~ ' style="display:none"' IF collapsed %]
+  >
     [% content FILTER none %]
   </div>
-</div>
+</section>

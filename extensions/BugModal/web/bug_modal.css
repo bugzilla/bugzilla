@@ -107,8 +107,6 @@ a.activity-ref {
 
 .module-header {
     background: #eee;
-    padding: 2px 5px;
-    cursor: pointer;
     -webkit-box-shadow: 1px 1px 5px rgba(0, 0, 0, 0.1);
     -moz-box-shadow: 1px 1px 5px rgba(0, 0, 0, 0.1);
     box-shadow: 1px 1px 5px rgba(0, 0, 0, 0.1);
@@ -119,9 +117,8 @@ a.activity-ref {
 }
 
 .module-latch {
-    display: table-cell;
-    padding-left: 5px;
-    padding-right: 5px;
+    padding: 2px 10px;
+    cursor: pointer;
 }
 
 .module-spinner {
@@ -130,11 +127,20 @@ a.activity-ref {
     width: 10px;
 }
 
+.module-spinner::before {
+    content: "\25BE";
+}
+
+.module-spinner[aria-expanded="false"]::before {
+    content: "\25B8";
+}
+
 .module-title {
     font-weight: bold;
 }
 
 .module-title, .module-subtitle {
+    font-size: 13px;
     display: table-cell;
     padding-left: 5px;
 }

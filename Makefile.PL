@@ -72,6 +72,7 @@ my %requires = (
     'Moo'                      => 2,
     'Parse::CPAN::Meta'        => '1.44',
     'Template'                 => '2.24',
+    'Text::CSV_XS'             => 0,
     'URI'                      => '1.55',
     'version'                  => '0.87',
 );

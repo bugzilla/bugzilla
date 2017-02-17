@@ -1275,12 +1275,7 @@
 
 [% IF user.id %]
   <div id="top-actions">
-    <button type="button" id="attachments-add-btn" class="minor">Attach File</button>
-    [% IF user.settings.comment_box_position.value == 'after_comments' %]
-      <button type="button" id="add-comment-btn" class="minor">Add Comment &darr;</button>
-    [% ELSE %]
-      <button type="button" id="bottom-btn" class="minor">Bottom &darr;</button>
-    [% END %]
+    <a href="attachment.cgi?bugid=[% bug.id FILTER uri %]&amp;action=enter" id="attachments-add-link">Attach File</a>
     [%+ Hook.process('top_actions') %]
     <button type="submit" class="save-btn major" id="top-save-btn" style="display:none">Save Changes</button>
   </div>

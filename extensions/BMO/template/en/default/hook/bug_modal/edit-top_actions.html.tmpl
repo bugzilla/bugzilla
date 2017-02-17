@@ -16,7 +16,6 @@
     END;
   END;
 %]
-<button type="button" class="minor button-link"
-  data-href="page.cgi?id=attachment_bounty_form.html&amp;bug_id=[% bug.id FILTER none %]">
+| <a href="page.cgi?id=attachment_bounty_form.html&amp;bug_id=[% bug.id FILTER none %]">
   [% has_bounty_attachment ? "Edit" : "Add" %] Bounty Tracking Attachment
-</button>
+</a>

@@ -804,13 +804,6 @@ $(function() {
             tracking_flag_change(event.target);
         });
 
-    // add attachments
-    $('#attachments-add-btn')
-        .click(function(event) {
-            event.preventDefault();
-            window.location.href = 'attachment.cgi?bugid=' + BUGZILLA.bug_id + '&action=enter';
-        });
-
     // take button
     $('.take-btn')
         .click(function(event) {

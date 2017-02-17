@@ -7,6 +7,11 @@
   #%]
 
 <div id="comment-actions">
+  [% IF user.settings.comment_box_position.value == 'after_comments' %]
+    <button type="button" id="add-comment-btn" class="minor">Add Comment &darr;</button>
+  [% ELSE %]
+    <button type="button" id="bottom-btn" class="minor">Bottom &darr;</button>
+  [% END %]
   <button type="button" id="comment-tags-btn" style="display:none" class="minor">Tags &#9662;</button>
   <button type="button" id="view-menu-btn" class="minor">View &#9662;</button>
 </div>

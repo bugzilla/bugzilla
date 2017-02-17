@@ -352,13 +352,17 @@
         hide_on_edit = can_edit_product
         help         = "describecomponents.cgi?product=$filtered_product"
     %]
-      <span class="spin-latch" id="product-latch" data-latch="#product-latch" data-for="#product-info">&#9656;</span>
-      <div class="spin-toggle" data-latch="#product-latch" data-for="#product-info">
-        [% bug.product FILTER html %]
-      </div>
-      <div id="product-info" style="display:none">
-        [% bug.product_obj.description FILTER html_light %]
-      </div>
+      <span aria-owns="product-name product-latch">
+        <span role="button" aria-label="show product information" aria-expanded="false" tabindex="0"
+              class="spin-latch" id="product-latch" data-latch="product" data-for="product">&#9656;</span>
+        <div title="show product information" tabindex="0" class="spin-toggle"
+             id="product-name" data-latch="product" data-for="product">
+          [% bug.product FILTER html %]
+        </div>
+        <div id="product-info" style="display:none">
+          [% bug.product_obj.description FILTER html_light %]
+        </div>
+      </span>
     [% END %]
     [% WRAPPER bug_modal/field.html.tmpl
         field          = bug_fields.product
@@ -391,16 +395,20 @@
         help       = "describecomponents.cgi?product=$filtered_product&component=$filtered_component#$filtered_component"
 
     %]
-      <span class="spin-latch" id="component-latch" data-latch="#component-latch" data-for="#component-info">&#9656;</span>
-      <div class="spin-toggle" data-latch="#component-latch" data-for="#component-info">
-        [% bug.component FILTER html %]
-      </div>
-      <div id="component-info" style="display:none">
-        <div>[% bug.component_obj.description FILTER html_light %]</div>
-        <a href="buglist.cgi?component=[% bug.component FILTER uri %]&amp;
-                [%~ %]product=[% bug.product FILTER uri %]&amp;
-                [%~ %]bug_status=__open__" target="_blank">Other [% terms.Bugs %]</a>
-      </div>
+      <span aria-owns="component-name component-latch">
+        <span role="button" aria-label="show component description" aria-expanded="false" tabindex="0"
+              class="spin-latch" id="component-latch" data-latch="component" data-for="component">&#9656;</span>
+        <div title="show component information" tabindex="0" class="spin-toggle" id="component-name"
+             data-latch="#component-latch" data-for="component">
+            [% bug.component FILTER html %]
+        </div>
+        <div id="component-info" style="display:none">
+          <div>[% bug.component_obj.description FILTER html_light %]</div>
+          <a href="buglist.cgi?component=[% bug.component FILTER uri %]&amp;
+                  [%~ %]product=[% bug.product FILTER uri %]&amp;
+                  [%~ %]bug_status=__open__" target="_blank">Other [% terms.Bugs %]</a>
+        </div>
+      </span>
     [% END %]
 
     [%# importance %]
@@ -697,18 +705,20 @@
       [% END %]
 
       [% IF bug.cc && bug.cc.size %]
-        [% IF user.id %]
-          <input type="hidden" name="removecc" id="removecc">
-          <span id="cc-latch">&#9656;</span>
-        [% END %]
-        <span id="cc-summary" data-count="[% bug.cc.size FILTER none %]">
-          [%
-            IF bug.cc.size == 1;
-              is_cced ? "Just you" : "1 person";
-            ELSE;
-              bug.cc.size _ " people";
-            END;
-          %]
+        <span aria-owns="cc-summary cc-latch">
+          [% IF user.id %]
+            <input type="hidden" name="removecc" id="removecc">
+            <span role="button" aria-label="show cc list" tabindex="0" id="cc-latch">&#9656;</span>
+          [% END %]
+          <span role="button" tabindex="0" id="cc-summary" data-count="[% bug.cc.size FILTER none %]">
+            [%
+              IF bug.cc.size == 1;
+                is_cced ? "Just you" : "1 person";
+              ELSE;
+                bug.cc.size _ " people";
+              END;
+            %]
+          </span>
         </span>
       [% ELSE %]
         <i>Nobody</i>

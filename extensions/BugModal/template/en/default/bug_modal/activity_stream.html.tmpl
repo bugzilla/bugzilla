@@ -7,7 +7,7 @@
   #%]
 
 <div id="comment-actions">
-  [% IF user.settings.comment_box_position.value == 'after_comments' %]
+  [% IF user.id && user.settings.comment_box_position.value == 'after_comments' %]
     <button type="button" id="add-comment-btn" class="minor">Add Comment &darr;</button>
   [% ELSE %]
     <button type="button" id="bottom-btn" class="minor">Bottom &darr;</button>

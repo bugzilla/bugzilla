@@ -1,0 +1,168 @@
+version: 0
+metadata:
+  name: "BMO CI Tests"
+  description: "A suite of tests to check the quality of the BMO codebase."
+  owner: "bugzilla-admin@mozilla.org"
+  source: "{{ event.head.repo.url }}"
+tasks:
+  - provisionerId: "{{ taskcluster.docker.provisionerId }}"
+    workerType: "{{ taskcluster.docker.workerType }}"
+    routes:
+      - "notify.email.bugzilla-admin@mozilla.org.on-failed"
+      - "notify.email.bugzilla-admin@mozilla.org.on-exception"
+      - "notify.irc-channel.#bteam.on-failed"
+      - "notify.irc-channel.#bteam.on-exception"
+      - "tc-treeherder.v2.mozilla-bteam/bmo-master.{{ event.head.sha }}"
+    extra:
+      github:
+        env: true
+        events:
+          - pull_request.opened
+          - pull_request.synchronize
+          - pull_request.reopened
+          - push
+      treeherder:
+        symbol: "San"
+        machine:
+          platform: "linux64"
+          build:
+            platform: "linux64"
+    payload:
+      maxRunTime: 3600
+      image: "mozillabteam/bmo-ci"
+      command:
+        - "runtests.sh"
+      env:
+        TEST_SUITE: "sanity"
+      artifacts:
+        public/runtests_log:
+          type: "file"
+          path: "/var/log/runtests.log"
+    metadata:
+      name: "Basic Sanity Tests"
+      description: "Basic Sanity Tests"
+      owner: "bugzilla-admin@mozilla.org"
+      source: "{{ event.head.repo.url }}"
+  - provisionerId: "{{ taskcluster.docker.provisionerId }}"
+    workerType: "{{ taskcluster.docker.workerType }}"
+    routes:
+      - "notify.email.bugzilla-admin@mozilla.org.on-failed"
+      - "notify.email.bugzilla-admin@mozilla.org.on-exception"
+      - "notify.irc-channel.#bteam.on-failed"
+      - "notify.irc-channel.#bteam.on-exception"
+      - "tc-treeherder.v2.mozilla-bteam/bmo-master.{{ event.head.sha }}"
+    extra:
+      github:
+        env: true
+        events:
+          - pull_request.opened
+          - pull_request.synchronize
+          - pull_request.reopened
+          - push
+      treeherder:
+        symbol: "Doc"
+        machine:
+          platform: "linux64"
+          build:
+            platform: "linux64"
+    payload:
+      maxRunTime: 3600
+      image: "mozillabteam/bmo-ci"
+      command:
+        - "runtests.sh"
+      env:
+        TEST_SUITE: "docs"
+      artifacts:
+        public/runtests_log:
+          type: "file"
+          path: "/var/log/runtests.log"
+    metadata:
+      name: "Documentation Build Test"
+      description: "Documentation Build Test"
+      owner: "bugzilla-admin@mozilla.org"
+      source: "{{ event.head.repo.url }}"
+  - provisionerId: "{{ taskcluster.docker.provisionerId }}"
+    workerType: "{{ taskcluster.docker.workerType }}"
+    routes:
+      - "notify.email.bugzilla-admin@mozilla.org.on-failed"
+      - "notify.email.bugzilla-admin@mozilla.org.on-exception"
+      - "notify.irc-channel.#bteam.on-failed"
+      - "notify.irc-channel.#bteam.on-exception"
+      - "tc-treeherder.v2.mozilla-bteam/bmo-master.{{ event.head.sha }}"
+    extra:
+      github:
+        env: true
+        events:
+          - pull_request.opened
+          - pull_request.synchronize
+          - pull_request.reopened
+          - push
+      treeherder:
+        symbol: "API"
+        machine:
+          platform: "linux64"
+          build:
+            platform: "linux64"
+    payload:
+      maxRunTime: 3600
+      image: "mozillabteam/bmo-ci"
+      command:
+        - "runtests.sh"
+      env:
+        TEST_SUITE: "webservices"
+      artifacts:
+        public/runtests_log:
+          type: "file"
+          path: "/var/log/runtests.log"
+        public/httpd_error_log:
+          type: "file"
+          path: "/var/log/httpd/error_log"
+    metadata:
+      name: "WebService API Tests"
+      description: "WebService API Tests"
+      owner: "bugzilla-admin@mozilla.org"
+      source: "{{ event.head.repo.url }}"
+  - provisionerId: "{{ taskcluster.docker.provisionerId }}"
+    workerType: "{{ taskcluster.docker.workerType }}"
+    routes:
+      - "notify.email.bugzilla-admin@mozilla.org.on-failed"
+      - "notify.email.bugzilla-admin@mozilla.org.on-exception"
+      - "notify.irc-channel.#bteam.on-failed"
+      - "notify.irc-channel.#bteam.on-exception"
+      - "tc-treeherder.v2.mozilla-bteam/bmo-master.{{ event.head.sha }}"
+    extra:
+      github:
+        env: true
+        events:
+          - pull_request.opened
+          - pull_request.synchronize
+          - pull_request.reopened
+          - push
+      treeherder:
+        symbol: "Sel"
+        machine:
+          platform: "linux64"
+          build:
+            platform: "linux64"
+    payload:
+      maxRunTime: 3600
+      image: "mozillabteam/bmo-ci"
+      command:
+        - "runtests.sh"
+      env:
+        TEST_SUITE: "selenium"
+      artifacts:
+        public/runtests_log:
+          type: "file"
+          path: "/var/log/runtests.log"
+        public/httpd_error_log:
+          type: "file"
+          path: "/var/log/httpd/error_log"
+        public/selenium_log":
+          type: "file"
+          path: "/selenium.log"
+    metadata:
+      name: "Selenium Tests"
+      description: "Selenium Tests"
+      owner: "bugzilla-admin@mozilla.org"
+      source: "{{ event.head.repo.url }}"

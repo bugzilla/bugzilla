@@ -377,13 +377,7 @@ $(function() {
             }
         });
 
-    // action button menu
-
-    $.contextMenu({
-        selector: '#action-menu-btn',
-        trigger: 'left',
-        items: $.contextMenu.fromMenu($('#action-menu'))
-    });
+    // action button actions
 
     // reset
     $('#action-reset')
@@ -1004,99 +998,6 @@ $(function() {
     $('#remaining_time').change(function() {
         // if the remaining time is changed manually, update BUGZILLA.remaining_time
         BUGZILLA.remaining_time = $('#remaining_time').val();
-    });
-
-    // new bug button
-    $.contextMenu({
-        selector: '#new-bug-btn',
-        trigger: 'left',
-        items: [
-            {
-                name: 'Create a new Bug',
-                callback: function() {
-                    window.open('enter_bug.cgi', '_blank');
-                }
-            },
-            {
-                name: '\u2026 in this product',
-                callback: function() {
-                    window.open('enter_bug.cgi?product=' + encodeURIComponent($('#product').val()), '_blank');
-                }
-            },
-            {
-                name: '\u2026 in this component',
-                callback: function() {
-                    window.open('enter_bug.cgi?' +
-                                'product=' + encodeURIComponent($('#product').val()) +
-                                '&component=' + encodeURIComponent($('#component').val()), '_blank');
-                }
-            },
-            {
-                name: '\u2026 that blocks this bug',
-                callback: function() {
-                    window.open('enter_bug.cgi?format=__default__' +
-                                '&product=' + encodeURIComponent($('#product').val()) +
-                                '&blocked=' + BUGZILLA.bug_id, '_blank');
-                }
-            },
-            {
-                name: '\u2026 that depends on this bug',
-                callback: function() {
-                    window.open('enter_bug.cgi?format=__default__' +
-                                '&product=' + encodeURIComponent($('#product').val()) +
-                                '&dependson=' + BUGZILLA.bug_id, '_blank');
-                }
-            },
-            {
-                name: '\u2026 as a clone of this bug',
-                callback: function() {
-                    window.open('enter_bug.cgi?format=__default__' +
-                                '&product=' + encodeURIComponent($('#product').val()) +
-                                '&cloned_bug_id=' + BUGZILLA.bug_id, '_blank');
-                }
-            },
-            {
-                name: '\u2026 as a clone, in a different product',
-                callback: function() {
-                    window.open('enter_bug.cgi?format=__default__' +
-                                '&cloned_bug_id=' + BUGZILLA.bug_id, '_blank');
-                }
-            },
-        ]
-    });
-
-    var format_items = [
-        {
-        name: 'For Printing',
-            callback: function() {
-                window.location.href = 'show_bug.cgi?format=multiple&id=' + BUGZILLA.bug_id;
-            }
-        },
-        {
-            name: 'XML',
-            callback: function() {
-                window.location.href = 'show_bug.cgi?ctype=xml&id=' + BUGZILLA.bug_id;
-            }
-        },
-        {
-            name: 'Legacy',
-            callback: function() {
-                window.location.href = 'show_bug.cgi?format=default&id=' + BUGZILLA.bug_id;
-            }
-        }
-    ];
-    if (!BUGZILLA.bug_secure) {
-        format_items.push({
-            name: 'JSON',
-            callback: function() {
-                window.location.href = 'rest/bug/' + BUGZILLA.bug_id;
-            }
-        });
-    }
-    $.contextMenu({
-        selector: '#format-btn',
-        trigger: 'left',
-        items: format_items
     });
 
     // "reset to default" checkboxes

@@ -189,6 +189,12 @@ $(function() {
             }
         });
 
+    $.contextMenu({
+        selector: '#view-menu-btn',
+        trigger: 'left',
+        items: $.contextMenu.fromMenu($('#view-menu'))
+    });
+
     function updateTagsMenu() {
         var tags = [];
         $('.comment-tags').each(function() {
@@ -212,24 +218,21 @@ $(function() {
         }
         btn.show();
 
-        // clear out old li items. Always leave the first one (Reset)
-        var $li = $('#comment-tags-menu li');
-        for (var i = 1, l = $li.length; i < l; i++) {
-            $li.eq(i).remove();
-        }
-
-        // add new li items
+        var menuItems = [
+            { name: 'Reset', tag: '' },
+            "--"
+        ];
         $.each(tagNames, function(key, value) {
-            $('#comment-tags-menu')
-                .append($('<li role="presentation">')
-                    .append($('<a role="menuitem" tabindex="-1" data-comment-tag="' + value + '">')
-                        .append(value + ' (' + tags[value] + ')')));
+            menuItems.push({ name: value + ' (' + tags[value] + ')', tag: value });
         });
 
-        $('a[data-comment-tag]').each(function() {
-            $(this).click(function() {
-                var $that = $(this);
-                var tag = $that.data('comment-tag');
+        $.contextMenu('destroy', '#comment-tags-btn');
+        $.contextMenu({
+            selector: '#comment-tags-btn',
+            trigger: 'left',
+            items: menuItems,
+            callback: function(key, opt) {
+                var tag = opt.commands[key].tag;
                 if (tag === '') {
                     $('.change-spinner:visible').each(function() {
                         toggleChange($(this), 'reset');
@@ -238,17 +241,17 @@ $(function() {
                 }
                 var firstComment = false;
                 $('.change-spinner:visible').each(function() {
-                    var $that = $(this);
-                    var commentTags = tagsFromDom($that.parents('.comment').find('.comment-tags'));
+                    var that = $(this);
+                    var commentTags = tagsFromDom(that.parents('.comment').find('.comment-tags'));
                     var hasTag = $.inArrayIn(tag, commentTags) >= 0;
-                    toggleChange($that, hasTag ? 'show' : 'hide');
+                    toggleChange(that, hasTag ? 'show' : 'hide');
                     if (hasTag && !firstComment) {
-                        firstComment = $that;
+                        firstComment = that;
                     }
                 });
                 if (firstComment)
                     $.scrollTo(firstComment);
-            });
+            }
         });
     }
 

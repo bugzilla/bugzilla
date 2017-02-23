@@ -453,8 +453,6 @@ my %set_params = (
                                  '&amp;field0-0-0=bug_status&amp;type0-0-0=notequals' .
                                  '&amp;value0-0-0=UNCONFIRMED&amp;field0-0-1=reporter' .
                                  '&amp;type0-0-1=equals&amp;value0-0-1=%userid%',
-    persona_verify_url        => 'https://verifier.login.persona.org/verify',
-    persona_includejs_url     => 'https://login.persona.org/include.js',
     quip_list_entry_control   => 'moderated',
     restrict_comments_group   => 'editbugs',
     restrict_comments_enable_group => 'can_restrict_comments',
@@ -468,7 +466,7 @@ my %set_params = (
     usebugaliases             => 1,
     useqacontact              => 1,
     use_mailer_queue          => 1,
-    user_info_class           => 'Persona,CGI',
+    user_info_class           => 'CGI',
 );
 
 my $params_modified;

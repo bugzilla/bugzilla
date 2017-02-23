@@ -23,7 +23,7 @@ use Bugzilla::WebService::Constants;
 use Bugzilla::Error;
 use Bugzilla::Util;
 
-use List::MoreUtils qw(none);
+use List::MoreUtils qw(none any);
 
 BEGIN {
     # Allow WebService methods to call XMLRPC::Lite's type method directly
@@ -160,7 +160,7 @@ sub deserialize {
     my $content_type = lc($ENV{'CONTENT_TYPE'});
     # Remove charset, etc, if provided
     $content_type =~ s/^([^;]+);.*/$1/;
-    if (!grep($_ eq $content_type, XMLRPC_CONTENT_TYPE_WHITELIST)) {
+    if (!any {$_ eq $content_type} XMLRPC_CONTENT_TYPE_WHITELIST) {
         ThrowUserError('xmlrpc_illegal_content_type',
                        { content_type => $ENV{'CONTENT_TYPE'} });
     }
@@ -196,7 +196,7 @@ sub decode_value {
     # Though the XML-RPC standard doesn't allow an empty <int>,
     # <double>,or <dateTime.iso8601>,  we do, and we just say
     # "that's undef".
-    if (grep($type eq $_, qw(int double dateTime))) {
+    if (any {$type eq $_} qw(int double dateTime)) {
         return undef if $value eq '';
     }
     

@@ -18,6 +18,7 @@ use strict;
 use warnings;
 
 use Bugzilla::Error;
+use List::MoreUtils qw(any);
 
 use parent qw(Bugzilla::DB::Schema);
 
@@ -123,7 +124,7 @@ sub _get_create_table_ddl {
     my($self, $table) = @_;
 
     my $charset = Bugzilla->dbh->bz_db_is_utf8 ? "CHARACTER SET utf8" : '';
-    my $type    = grep($_ eq $table, MYISAM_TABLES) ? 'MYISAM' : 'InnoDB';
+    my $type    = any { $_ eq $table } MYISAM_TABLES ? 'MYISAM' : 'InnoDB';
     return($self->SUPER::_get_create_table_ddl($table) 
            . " ENGINE = $type $charset");
 
@@ -279,7 +280,7 @@ sub column_info_to_column {
         # to break Schema's standard of not touching the live database
         # and check if the index called PRIMARY is on that field.
         my $pri_index = $dbh->bz_index_info_real($table, 'PRIMARY');
-        if ( $pri_index && grep($_ eq $col_name, @{$pri_index->{FIELDS}}) ) {
+        if ( $pri_index && any { $_ eq $col_name } @{$pri_index->{FIELDS}} ) {
             $column->{PRIMARYKEY} = 1;
         }
     }

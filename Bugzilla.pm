@@ -50,6 +50,7 @@ use Date::Parse;
 use Tie::Hash::NamedCapture;
 use Safe;
 use List::Util qw(first);
+use List::MoreUtils qw(any);
 
 #####################################################################
 # Constants
@@ -138,14 +139,14 @@ sub init_page {
     #
     # This code must go here. It cannot go anywhere in Bugzilla::CGI, because
     # it uses Template, and that causes various dependency loops.
-    if (!grep { $_ eq $script } SHUTDOWNHTML_EXEMPT
+    if (!any { $_ eq $script } SHUTDOWNHTML_EXEMPT
         and Bugzilla->params->{'shutdownhtml'})
     {
         # Allow non-cgi scripts to exit silently (without displaying any
         # message), if desired. At this point, no DBI call has been made
         # yet, and no error will be returned if the DB is inaccessible.
         if (!i_am_cgi()
-            && grep { $_ eq $script } SHUTDOWNHTML_EXIT_SILENTLY)
+            && any { $_ eq $script } SHUTDOWNHTML_EXIT_SILENTLY)
         {
             exit;
         }

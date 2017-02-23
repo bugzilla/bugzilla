@@ -20,6 +20,7 @@ use Bugzilla::FlagType;
 use Bugzilla::User;
 use Bugzilla::Product;
 use Bugzilla::Component;
+use List::MoreUtils qw(any);
 
 # Make sure the user is logged in.
 my $user = Bugzilla->login();
@@ -220,7 +221,7 @@ sub queue {
 
     # Filter results by flag types.
     my $form_type = $cgi->param('type');
-    if (defined $form_type && !grep($form_type eq $_, ("", "all"))) {
+    if (defined $form_type && !any { $form_type eq $_ } ("", "all")) {
         # Check if any matching types are for attachments.  If not, don't show
         # the attachment column in the report.
         my $has_attachment_type =

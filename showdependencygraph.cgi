@@ -21,6 +21,7 @@ use Bugzilla::Util;
 use Bugzilla::Error;
 use Bugzilla::Bug;
 use Bugzilla::Status;
+use List::MoreUtils qw(any);
 
 my $user = Bugzilla->login();
 
@@ -99,7 +100,7 @@ my @valid_rankdirs = ('LR', 'RL', 'TB', 'BT');
 
 my $rankdir = $cgi->param('rankdir') || 'TB';
 # Make sure the submitted 'rankdir' value is valid.
-if (!grep { $_ eq $rankdir } @valid_rankdirs) {
+if (!any { $_ eq $rankdir } @valid_rankdirs) {
     $rankdir = 'TB';
 }
 

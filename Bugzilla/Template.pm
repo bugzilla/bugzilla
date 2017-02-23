@@ -34,7 +34,7 @@ use File::Find;
 use File::Path qw(rmtree mkpath);
 use File::Spec;
 use IO::Dir;
-use List::MoreUtils qw(firstidx);
+use List::MoreUtils qw(firstidx any);
 use Scalar::Util qw(blessed);
 
 use parent qw(Template);
@@ -384,7 +384,7 @@ sub multiline_sprintf {
         # Get the first item of each part.
         my @line = map { shift @$_ } @parts;
         # If they're all undef, we're done.
-        last if !grep { defined $_ } @line;
+        last if !any { defined $_ } @line;
         # Make any single undef item into ''
         @line = map { defined $_ ? $_ : '' } @line;
         # And append a formatted line
@@ -603,9 +603,9 @@ sub yui_resolve_deps {
     foreach my $yui_name (@$yui) {
         my $deps = $yui_deps->{$yui_name} || [];
         foreach my $dep (reverse @$deps) {
-            push(@yui_resolved, $dep) if !grep { $_ eq $dep } @yui_resolved;
+            push(@yui_resolved, $dep) if !any { $_ eq $dep } @yui_resolved;
         }
-        push(@yui_resolved, $yui_name) if !grep { $_ eq $yui_name } @yui_resolved;
+        push(@yui_resolved, $yui_name) if !any { $_ eq $yui_name } @yui_resolved;
     }
     return \@yui_resolved;
 }
@@ -633,9 +633,9 @@ $Template::Stash::LIST_OPS->{ contains } =
   sub {
       my ($list, $item) = @_;
       if (ref $item && $item->isa('Bugzilla::Object')) {
-          return grep($_->id == $item->id, @$list);
+          return any {$_->id == $item->id} @$list;
       } else {
-          return grep($_ eq $item, @$list);
+          return any {$_ eq $item} @$list;
       }
   };
 
@@ -644,9 +644,9 @@ $Template::Stash::LIST_OPS->{ containsany } =
       my ($list, $items) = @_;
       foreach my $item (@$items) { 
           if (ref $item && $item->isa('Bugzilla::Object')) {
-              return 1 if grep($_->id == $item->id, @$list);
+              return 1 if any {$_->id == $item->id} @$list;
           } else {
-              return 1 if grep($_ eq $item, @$list);
+              return 1 if any {$_ eq $item} @$list;
           }
       }
       return 0;
@@ -1049,7 +1049,7 @@ sub create {
                     $docs_urlbase = "docs/en/html/";
                 }
                 else {
-                    if (!grep { $_ eq $lang } @rtd_translations) {
+                    if (!any { $_ eq $lang } @rtd_translations) {
                         $lang = "en";
                     }
 

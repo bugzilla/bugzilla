@@ -17,6 +17,7 @@ use Bugzilla::Constants;
 use Bugzilla::Util;
 use Bugzilla::Error;
 use Bugzilla::Config qw(:admin);
+use List::MoreUtils qw(any);
 
 ###############################
 ##### Module Initialization ###
@@ -181,7 +182,7 @@ sub check_members_are_visible {
     return if !Bugzilla->params->{'usevisibilitygroups'};
 
     my $group_id = $self->id;
-    my $is_visible = grep { $_ == $group_id } @{ $user->visible_groups_inherited };
+    my $is_visible = any { $_ == $group_id } @{ $user->visible_groups_inherited };
     if (!$is_visible) {
         ThrowUserError('group_not_visible', { group => $self });
     }
@@ -363,7 +364,7 @@ sub flatten_group_membership {
             if (!$groupidschecked{$member}) {
                 $groupidschecked{$member} = 1;
                 push @groupidstocheck, $member;
-                push @groups, $member unless grep $_ == $member, @groups;
+                push @groups, $member unless any { $_ == $member } @groups;
             }
         }
     }

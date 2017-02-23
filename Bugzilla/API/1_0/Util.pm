@@ -70,16 +70,16 @@ sub extract_flags {
         my $name = delete $flag->{name};
 
         if ($id) {
-            my $flag_obj = grep($id == $_->id, @$current_flags);
+            my $flag_obj = any { $id == $_->id } @$current_flags;
             $flag_obj || ThrowUserError('object_does_not_exist',
                                         { class => 'Bugzilla::Flag', id => $id });
         }
         elsif ($type_id) {
-            my $type_obj = grep($type_id == $_->id, @$flag_types);
+            my $type_obj = any { $type_id == $_->id } @$flag_types;
             $type_obj || ThrowUserError('object_does_not_exist',
                                         { class => 'Bugzilla::FlagType', id => $type_id });
             if (!$new) {
-                my @flag_matches = grep($type_id == $_->type->id, @$current_flags);
+                my @flag_matches = any { $type_id == $_->type->id } @$current_flags;
                 @flag_matches > 1 && ThrowUserError('flag_not_unique',
                                                      { value => $type_id });
                 if (!@flag_matches) {
@@ -196,7 +196,7 @@ sub filter_wants($$;$$) {
         # We want to include this if one of the sub keys is included
         my $key = $field . '.';
         my $len = length($key);
-        $wants = 1 if grep { substr($_, 0, $len) eq $key  } keys %include;
+        $wants = 1 if any { substr($_, 0, $len) eq $key  } keys %include;
     }
 
     return $cache->{$field} = $wants;

@@ -34,6 +34,7 @@ use Bugzilla::Error;
 use Bugzilla::DB::Schema::Mysql;
 
 use List::Util qw(max);
+use List::MoreUtils qw(any);
 use Text::ParseWords;
 
 # This is how many comments of MAX_COMMENT_LENGTH we expect on a single bug.
@@ -342,8 +343,8 @@ sub bz_setup_database {
     # We want to convert tables to InnoDB, but it's possible that they have 
     # fulltext indexes on them, and conversion will fail unless we remove
     # the indexes.
-    if (grep($_ eq 'bugs', @tables)
-        and !grep($_ eq 'bugs_fulltext', @tables))
+    if (any {$_ eq 'bugs'} @tables
+        and !any { $_ eq 'bugs_fulltext' } @tables)
     {
         if ($self->bz_index_info_real('bugs', 'short_desc')) {
             $self->bz_drop_index_raw('bugs', 'short_desc');
@@ -353,8 +354,8 @@ sub bz_setup_database {
             $sd_index_deleted = 1; # Used for later schema cleanup.
         }
     }
-    if (grep($_ eq 'longdescs', @tables)
-        and !grep($_ eq 'bugs_fulltext', @tables))
+    if (any { $_ eq 'longdescs' } @tables
+        and !any { $_ eq 'bugs_fulltext' } @tables)
     {
         if ($self->bz_index_info_real('longdescs', 'thetext')) {
             $self->bz_drop_index_raw('longdescs', 'thetext');
@@ -400,7 +401,7 @@ sub bz_setup_database {
     # has existed at least since Bugzilla 2.8, and probably earlier.
     # For fixing the inconsistent naming of Schema indexes,
     # we also check for one of those inconsistently-named indexes.
-    if (grep($_ eq 'bugs', @tables)
+    if ((any {$_ eq 'bugs'} @tables)
         && ($self->bz_index_info_real('bugs', 'assigned_to')
             || $self->bz_index_info_real('flags', 'flags_bidattid_idx')) )
     {
@@ -411,7 +412,7 @@ sub bz_setup_database {
         # a database without doing a DROP DATABASE first.
         # We just do the check here since this check is a reliable way
         # of telling that we are upgrading from a version pre-2.20.
-        if (grep($_ eq 'bz_schema', $self->bz_table_list_real())) {
+        if (any {$_ eq 'bz_schema'} $self->bz_table_list_real()) {
             die install_string('bz_schema_exists_before_220');
         }
 
@@ -472,7 +473,7 @@ sub bz_setup_database {
         # The series table is broken and needs to have one index
         # dropped before we begin the renaming, because it had a
         # useless index on it that would cause a naming conflict here.
-        if (grep($_ eq 'series', @tables)) {
+        if (any { $_ eq 'series'} @tables) {
             my $dropname;
             # This is what the bad index was called before Schema.
             if ($self->bz_index_info_real('series', 'creator_2')) {
@@ -486,7 +487,7 @@ sub bz_setup_database {
         }
 
         # The email_setting table also had the same problem.
-        if( grep($_ eq 'email_setting', @tables) 
+        if (any { $_ eq 'email_setting' } @tables
             && $self->bz_index_info_real('email_setting', 
                                          'email_settings_user_id_idx') ) 
         {

@@ -25,6 +25,7 @@ use Bugzilla::Version;
 use Bugzilla::Keyword;
 use Bugzilla::Field;
 use Bugzilla::Token;
+use List::MoreUtils qw(any);
 
 ###############
 # Subroutines #
@@ -114,7 +115,7 @@ sub PrefillForm {
     # search or from an old link on the web somewhere) then convert them
     # to the new "custom search" format so that the form is populated
     # properly.
-    my $any_boolean_charts = grep { /^field-?\d+/ } $buf->multi_param();
+    my $any_boolean_charts = any { /^field-?\d+/ } $buf->multi_param();
     if ($any_boolean_charts) {
         my $search = new Bugzilla::Search(params => scalar $buf->Vars);
         $search->boolean_charts_to_custom_search($buf);
@@ -125,7 +126,7 @@ sub PrefillForm {
 
     # Iterate over the URL parameters
     foreach my $name ($buf->multi_param()) {
-        next if grep { $_ eq $name } @skip;
+        next if any { $_ eq $name } @skip;
         $foundone = 1;
         my @values = $buf->multi_param($name);
 

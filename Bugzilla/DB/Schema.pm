@@ -27,7 +27,7 @@ use Bugzilla::Constants;
 use Carp qw(confess);
 use Digest::MD5 qw(md5_hex);
 use Hash::Util qw(lock_value unlock_hash lock_keys unlock_keys);
-use List::MoreUtils qw(firstidx natatime);
+use List::MoreUtils qw(firstidx natatime any);
 # Bug 1270550 - Tie::Hash::NamedCapture must be loaded before Safe.
 use Tie::Hash::NamedCapture;
 use Safe;
@@ -2682,7 +2682,7 @@ sub get_indexes_on_column_abstract {
                 $col_list = $indexes{$index_name};
             }
 
-            if(grep($_ eq $column, @$col_list)) {
+            if(any { $_ eq $column } @$col_list) {
                 $ret_hash{$index_name} = dclone($indexes{$index_name});
             }
         }

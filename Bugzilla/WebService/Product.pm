@@ -18,6 +18,7 @@ use Bugzilla::Error;
 use Bugzilla::Constants;
 use Bugzilla::WebService::Constants;
 use Bugzilla::WebService::Util qw(validate filter filter_wants translate params_to_objects);
+use List::MoreUtils qw(any);
 
 use constant READ_ONLY => qw(
     get
@@ -129,7 +130,7 @@ sub get {
         # avoid duplicates
         foreach my $product (grep { $names{lc $_->name} }
                                   @$products) {
-            next if grep { $_->id == $product->id }
+            next if any { $_->id == $product->id }
                          @requested_products;
             push @requested_products, $product;
         }

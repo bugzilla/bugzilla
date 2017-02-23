@@ -25,6 +25,7 @@ use parent qw(Bugzilla::Field::Choice Exporter);
 );
 
 use Bugzilla::Error;
+use List::MoreUtils qw(any);
 
 ################################
 #####   Initialization     #####
@@ -95,7 +96,7 @@ sub _check_value {
     my $invocant = shift;
     my $value = $invocant->SUPER::_check_value(@_);
 
-    if (grep { lc($value) eq lc($_) } SPECIAL_STATUS_WORKFLOW_ACTIONS) {
+    if (any { lc($value) eq lc($_) } SPECIAL_STATUS_WORKFLOW_ACTIONS) {
         ThrowUserError('fieldvalue_reserved_word',
                        { field => $invocant->field, value => $value });
     }
@@ -129,7 +130,7 @@ sub BUG_STATE_OPEN {
 # Tells you whether or not the argument is a valid "open" state.
 sub is_open_state {
     my ($state) = @_;
-    return (grep($_ eq $state, BUG_STATE_OPEN) ? 1 : 0);
+    return any { $_ eq $state } BUG_STATE_OPEN ? 1 : 0;
 }
 
 sub closed_bug_statuses {

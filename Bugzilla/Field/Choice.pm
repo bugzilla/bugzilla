@@ -20,6 +20,7 @@ use Bugzilla::Field;
 use Bugzilla::Util qw(trim detaint_natural);
 
 use Scalar::Util qw(blessed);
+use List::MoreUtils qw(any);
 
 ##################
 # Initialization #
@@ -134,7 +135,7 @@ sub create {
     my $class = shift;
     my ($params) = @_;
     foreach my $key (keys %$params) {
-        if (!grep {$_ eq $key} $class->_get_db_columns) {
+        if (!any {$_ eq $key} $class->_get_db_columns) {
             delete $params->{$key};
         }
     }

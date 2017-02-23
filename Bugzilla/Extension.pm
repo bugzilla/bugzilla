@@ -19,6 +19,7 @@ use Bugzilla::Install::Util qw(
 
 use File::Basename;
 use File::Spec;
+use List::MoreUtils qw(any);
 
 ####################
 # Subclass Methods #
@@ -118,7 +119,7 @@ sub load_all {
     foreach my $package (@$extra_packages) {
         # Don't load an "additional" extension if we already have an extension
         # loaded with that name.
-        next if grep($_ eq $package, @packages);
+        next if any { $_ eq $package } @packages;
         # Untaint the package name
         $package =~ /([\w:]+)/;
         $package = $1;

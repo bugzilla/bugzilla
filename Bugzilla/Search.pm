@@ -33,7 +33,7 @@ use Data::Dumper;
 use Date::Format;
 use Date::Parse;
 use Scalar::Util qw(blessed);
-use List::MoreUtils qw(all firstidx part uniq);
+use List::MoreUtils qw(all firstidx part uniq any);
 use POSIX qw(INT_MAX floor);
 use Storable qw(dclone);
 use Time::HiRes qw(gettimeofday tv_interval);
@@ -1542,19 +1542,19 @@ sub _special_parse_bug_status {
 
     # If the status contains __open__ or __closed__, translate those
     # into their equivalent lists of open and closed statuses.
-    if (grep { $_ eq '__open__' } @bug_status) {
+    if (any { $_ eq '__open__' } @bug_status) {
         my @open = grep { $_->is_open } @$legal_statuses;
         @open = map { $_->name } @open;
         push(@bug_status, @open);
     }
-    if (grep { $_ eq '__closed__' } @bug_status) {
+    if (any { $_ eq '__closed__' } @bug_status) {
         my @closed = grep { not $_->is_open } @$legal_statuses;
         @closed = map { $_->name } @closed;
         push(@bug_status, @closed);
     }
 
     @bug_status = uniq @bug_status;
-    my $all = grep { $_ eq "__all__" } @bug_status;
+    my $all = any { $_ eq "__all__" } @bug_status;
     # This will also handle removing __open__ and __closed__ for us
     # (__all__ too, which is why we check for it above, first).
     @bug_status = _valid_values(\@bug_status, $legal_statuses);
@@ -1692,7 +1692,7 @@ sub _valid_values {
         if (defined $extra_value and $item eq $extra_value) {
             push(@result, $item);
         }
-        elsif (grep { $_->name eq $item } @$valid) {
+        elsif (any { $_->name eq $item } @$valid) {
             push(@result, $item);
         }
     }
@@ -1773,7 +1773,7 @@ sub _boolean_charts {
                 my $operator = $params->{"type$identifier"};
                 my $value = $params->{"value$identifier"};
                 # no-value operators ignore the value, however a value needs to be set
-                $value = ' ' if $operator && grep { $_ eq $operator } NO_VALUE_OPERATORS;
+                $value = ' ' if $operator && any { $_ eq $operator } NO_VALUE_OPERATORS;
                 $or_clause->add($field, $operator, $value);
             }
             $and_clause->add($or_clause);
@@ -1821,7 +1821,7 @@ sub _custom_search {
         my $operator = $params->{"o$id"};
         my $value = $params->{"v$id"};
         # no-value operators ignore the value, however a value needs to be set
-        $value = ' ' if $operator && grep { $_ eq $operator } NO_VALUE_OPERATORS;
+        $value = ' ' if $operator && any { $_ eq $operator } NO_VALUE_OPERATORS;
         my $condition = condition($field, $operator, $value);
         $condition->negate($params->{"n$id"});
         $current_clause->add($condition);
@@ -1838,7 +1838,7 @@ sub _field_ids {
     my $params = $self->_params;
     my @param_list = keys %$params;
 
-    my @field_params = grep { /^f\d+$/a } @param_list;
+    my @field_params = any { /^f\d+$/a } @param_list;
     my @field_ids = map { /(\d+)/a; $1 } @field_params;
     @field_ids = sort { $a <=> $b } @field_ids;
     return @field_ids;
@@ -2077,13 +2077,13 @@ sub _quote_unless_numeric {
     }
     my ($field, $operator) = @$args{qw(field operator)};
     
-    my $numeric_operator = !grep { $_ eq $operator } NON_NUMERIC_OPERATORS;
+    my $numeric_operator = !any { $_ eq $operator } NON_NUMERIC_OPERATORS;
     my $numeric_field = $self->_chart_fields->{$field}->is_numeric;
     my $numeric_value = ($value =~ NUMBER_REGEX) ? 1 : 0;
     my $is_numeric = $numeric_operator && $numeric_field && $numeric_value;
 
     # These operators are really numeric operators with numeric fields.
-    $numeric_operator = grep { $_ eq $operator } keys %{ SIMPLE_OPERATORS() };
+    $numeric_operator = any { $_ eq $operator } keys %{ SIMPLE_OPERATORS() };
 
     if ($is_numeric) {
         my $quoted = $value;
@@ -3539,7 +3539,7 @@ sub _isactive {
 sub IsValidQueryType
 {
     my ($queryType) = @_;
-    if (grep { $_ eq $queryType } qw(specific advanced)) {
+    if (any { $_ eq $queryType } qw(specific advanced)) {
         return 1;
     }
     return 0;

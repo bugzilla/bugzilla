@@ -23,7 +23,7 @@ use Bugzilla::Hook;
 use Date::Parse;
 use Date::Format;
 use Scalar::Util qw(blessed);
-use List::MoreUtils qw(uniq);
+use List::MoreUtils qw(uniq any);
 use Storable qw(dclone);
 
 use constant BIT_DIRECT    => 1;
@@ -319,7 +319,7 @@ sub sendMail {
     foreach my $diff (@diffs) {
         my $add_diff = 0;
 
-        if (grep { $_ eq $diff->{field_name} } TIMETRACKING_FIELDS) {
+        if (any { $_ eq $diff->{field_name} } TIMETRACKING_FIELDS) {
             $add_diff = 1 if $user->is_timetracker;
         }
         elsif (!$diff->{isprivate} || $user->is_insider) {
@@ -354,7 +354,7 @@ sub sendMail {
 
     # Add attachments.created to changedfields if one or more
     # comments contain information about a new attachment
-    if (grep($_->type == CMT_ATTACHMENT_CREATED, @send_comments)) {
+    if (any { $_->type == CMT_ATTACHMENT_CREATED } @send_comments) {
         push(@changedfields, 'attachments.created');
     }
 

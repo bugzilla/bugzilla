@@ -20,6 +20,8 @@ use Bugzilla::Hook;
 use Bugzilla::Search::Recent;
 use Bugzilla::Install::Util qw(i_am_persistent);
 
+use List::MoreUtils qw(any);
+
 use File::Basename;
 
 use constant DEFAULT_CSP => (
@@ -72,7 +74,7 @@ sub new {
     if ($self->script_name && $self->path_info) {
         my @whitelist = ("rest.cgi");
         Bugzilla::Hook::process('path_info_whitelist', { whitelist => \@whitelist });
-        if (!grep($_ eq $script, @whitelist)) {
+        if (!any { $_ eq $script } @whitelist) {
             print $self->redirect($self->url(-path => 0, -query => 1));
         }
     }
@@ -148,7 +150,7 @@ sub canonicalise_query {
     my @parameters;
     foreach my $key (sort($self->multi_param())) {
         # Leave this key out if it's in the exclude list
-        next if grep { $_ eq $key } @exclude;
+        next if any { $_ eq $key } @exclude;
 
         # Remove the Boolean Charts for standard query.cgi fields
         # They are listed in the query URL already

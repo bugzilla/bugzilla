@@ -432,7 +432,7 @@ sub _set_groups {
         foreach my $group (@$current_groups) {
             if (! $user->can_bless($group->id)) {
                 push @$new_groups, $group
-                    unless grep { $_->id eq $group->id } @$new_groups;
+                    unless any { $_->id eq $group->id } @$new_groups;
             }
         }
     }
@@ -442,7 +442,7 @@ sub _set_groups {
         }
         foreach my $group (@{$changes->{add} // []}) {
             push @$new_groups, $group
-                unless grep { $_->id eq $group->id } @$new_groups;
+                unless any { $_->id eq $group->id } @$new_groups;
         }
     }
 
@@ -677,7 +677,7 @@ sub bugs_ignored {
 
 sub is_bug_ignored {
     my ($self, $bug_id) = @_;
-    return (grep {$_->{'id'} == $bug_id} @{$self->bugs_ignored}) ? 1 : 0;
+    return (any {$_->{'id'} == $bug_id} @{$self->bugs_ignored}) ? 1 : 0;
 }
 
 sub use_markdown {
@@ -704,7 +704,7 @@ sub recent_search_containing {
     my $searches = $self->recent_searches;
 
     foreach my $search (@$searches) {
-        return $search if grep($_ == $bug_id, @{ $search->bug_list });
+        return $search if any { $_ == $bug_id } @{ $search->bug_list };
     }
 
     return undef;
@@ -750,7 +750,7 @@ sub recent_search_for {
     if (my $list = $cgi->cookie('BUGLIST')) {
         # Also split on colons, which was used as a separator in old cookies.
         my @bug_ids = split(/[:-]/, $list);
-        if (grep { $_ == $bug->id } @bug_ids) {
+        if (any { $_ == $bug->id } @bug_ids) {
             my $search = Bugzilla::Search::Recent->new_from_cookie(\@bug_ids);
             return $search;
         }
@@ -1075,12 +1075,12 @@ sub bless_groups {
 sub in_group {
     my ($self, $group, $product_id) = @_;
     $group = $group->name if blessed $group;
-    if (scalar grep($_->name eq $group, @{ $self->groups })) {
+    if (any { $_->name eq $group } @{ $self->groups }) {
         return 1;
     }
     elsif ($product_id && detaint_natural($product_id)) {
         # Make sure $group exists on a per-product basis.
-        return 0 unless (grep {$_ eq $group} PER_PRODUCT_PRIVILEGES);
+        return 0 unless any {$_ eq $group} PER_PRODUCT_PRIVILEGES;
 
         $self->{"product_$product_id"} = {} unless exists $self->{"product_$product_id"};
         if (!defined $self->{"product_$product_id"}->{$group}) {
@@ -1104,7 +1104,7 @@ sub in_group {
 
 sub in_group_id {
     my ($self, $id) = @_;
-    return grep($_->id == $id, @{ $self->groups }) ? 1 : 0;
+    return any { $_->id == $id } @{ $self->groups } ? 1 : 0;
 }
 
 # This is a helper to get all groups which have an icon to be displayed
@@ -1118,7 +1118,7 @@ sub groups_with_icon {
 sub get_products_by_permission {
     my ($self, $group) = @_;
     # Make sure $group exists on a per-product basis.
-    return [] unless (grep {$_ eq $group} PER_PRODUCT_PRIVILEGES);
+    return [] unless (any {$_ eq $group} PER_PRODUCT_PRIVILEGES);
 
     my $product_ids = Bugzilla->dbh->selectcol_arrayref(
                           "SELECT DISTINCT product_id
@@ -1431,13 +1431,13 @@ sub can_enter_product {
     }
     # It could have no components...
     elsif (!@{$product->components}
-           || !grep { $_->is_active } @{$product->components})
+           || !any { $_->is_active } @{$product->components})
     {
         ThrowUserError('missing_component', { product => $product });
     }
     # It could have no versions...
     elsif (!@{$product->versions}
-           || !grep { $_->is_active } @{$product->versions})
+           || !any { $_->is_active } @{$product->versions})
     {
         ThrowUserError ('missing_version', { product => $product });
     }
@@ -1492,7 +1492,7 @@ sub get_enterable_products {
 sub can_access_product {
     my ($self, $product) = @_;
     my $product_name = blessed($product) ? $product->name : $product;
-    return scalar(grep {$_->name eq $product_name} @{$self->get_accessible_products});
+    return any {$_->name eq $product_name} @{$self->get_accessible_products};
 }
 
 sub get_accessible_products {
@@ -1568,7 +1568,7 @@ sub check_can_admin_flagtype {
         # exclusion list or not.
         my %product_ids;
         map { $product_ids{$_->id} = 1 } @$products;
-        $can_fully_edit = 0 if grep { !$product_ids{$_} } keys %$i;
+        $can_fully_edit = 0 if any { !$product_ids{$_} } keys %$i;
 
         unless ($e->{0}->{0}) {
             foreach my $product (@$products) {
@@ -1578,7 +1578,7 @@ sub check_can_admin_flagtype {
                 # Check whether it's explicitly included, or at least one of
                 # its components.
                 $can_admin = ($i->{0}->{0} || $i->{$id}->{0}
-                              || scalar(grep { !$e->{$id}->{$_} } keys %{$i->{$id}}));
+                              || any { !$e->{$id}->{$_} } keys %{$i->{$id}});
                 last if $can_admin;
             }
         }
@@ -2137,7 +2137,7 @@ sub wants_bug_mail {
         }
     }
 
-    if (grep { $_->type == CMT_ATTACHMENT_CREATED } @$comments) {
+    if (any { $_->type == CMT_ATTACHMENT_CREATED } @$comments) {
         $events{+EVT_ATTACHMENT} = 1;
     }
     elsif (defined($$comments[0])) {

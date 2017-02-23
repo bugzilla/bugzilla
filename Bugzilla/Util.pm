@@ -34,7 +34,7 @@ use Date::Parse;
 use Date::Format;
 use Digest;
 use Email::Address;
-use List::MoreUtils qw(none);
+use List::MoreUtils qw(none any);
 use Scalar::Util qw(tainted blessed);
 use Text::Wrap;
 use Encode qw(encode decode resolve_alias);
@@ -853,7 +853,7 @@ sub detect_encoding {
     # shiftjis, big5-eten, euc-kr, and euc-jp: (Encode::Detect
     # tends to accidentally mis-detect UTF-8 strings as being
     # these encodings.)
-    if ($encoding && grep($_ eq $encoding, UTF8_ACCIDENTAL)) {
+    if ($encoding && any {$_ eq $encoding} UTF8_ACCIDENTAL) {
         $encoding = undef;
         my $decoder = guess_encoding($data, UTF8_ACCIDENTAL);
         $encoding = $decoder->name if ref $decoder;

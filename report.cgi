@@ -21,14 +21,14 @@ use Bugzilla::Search;
 use Bugzilla::Report;
 use Bugzilla::Token;
 
-use List::MoreUtils qw(uniq);
+use List::MoreUtils qw(uniq any firstval);
 
 my $cgi = Bugzilla->cgi;
 my $template = Bugzilla->template;
 my $vars = {};
 
 # Go straight back to query.cgi if we are adding a boolean chart.
-if (grep(/^cmd-/, $cgi->multi_param())) {
+if (any { /^cmd-/ } $cgi->multi_param()) {
     my $params = $cgi->canonicalise_query("format", "ctype");
     my $location = "query.cgi?format=" . $cgi->param('query_format') . 
       ($params ? "&$params" : "");
@@ -56,7 +56,7 @@ elsif ($action eq 'add') {
     my $name = clean_text(scalar $cgi->param('name'));
     my $query = $cgi->param('query');
 
-    if (my ($report) = grep{ lc($_->name) eq lc($name) } @{$user->reports}) {
+    if (my ($report) = firstval { lc($_->name) eq lc($name) } @{$user->reports}) {
         $report->set_query($query);
         $report->update;
         $vars->{'message'} = "report_updated";
@@ -194,9 +194,9 @@ my @multi_selects = map { $_->name } @{Bugzilla->fields(
         type => [FIELD_TYPE_MULTI_SELECT, FIELD_TYPE_KEYWORDS]
     }
 )};
-my $col_ismultiselect = scalar grep {$col_field eq $_} @multi_selects;
-my $row_ismultiselect = scalar grep {$row_field eq $_} @multi_selects;
-my $tbl_ismultiselect = scalar grep {$tbl_field eq $_} @multi_selects;
+my $col_ismultiselect = any {$col_field eq $_} @multi_selects;
+my $row_ismultiselect = any {$row_field eq $_} @multi_selects;
+my $tbl_ismultiselect = any {$tbl_field eq $_} @multi_selects;
 
 
 foreach my $result (@$results) {

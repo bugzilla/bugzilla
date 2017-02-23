@@ -16,6 +16,7 @@ use Bugzilla::API::1_0::Util;
 
 use Bugzilla::Constants;
 use Bugzilla::Error;
+use List::MoreUtils qw(any);
 
 use Moo;
 
@@ -163,7 +164,7 @@ sub get {
         # Get the groups by name. Check will throw an error if a bad name is given
         foreach my $name (@{$params->{names}}) {
             # Skip if we got this from params->{id}
-            next if grep { $_->name eq $name } @$groups;
+            next if any { $_->name eq $name } @$groups;
 
             push @$groups, Bugzilla::Group->check({ name => $name });
         }

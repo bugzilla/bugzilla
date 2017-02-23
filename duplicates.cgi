@@ -19,6 +19,7 @@ use Bugzilla::Error;
 use Bugzilla::Bug;
 use Bugzilla::Field;
 use Bugzilla::Product;
+use List::MoreUtils qw(any);
 
 use constant DEFAULTS => {
     # We want to show bugs which:
@@ -114,7 +115,7 @@ my $changedsince = formvalue("changedsince");
 my $maxrows = formvalue("maxrows");
 my $openonly = formvalue("openonly");
 my $sortby = formvalue("sortby");
-if (!grep(lc($_) eq lc($sortby), qw(count delta id))) {
+if (!any { lc($_) eq lc($sortby) } qw(count delta id)) {
     Bugzilla::Field->check($sortby);
 }
 my $reverse = formvalue("reverse");
@@ -180,7 +181,7 @@ foreach my $id (keys %total_dups) {
         delete $total_dups{$id};
         next;
     }
-    if ($sortvisible and !grep($_->id == $id, @bugs)) {
+    if ($sortvisible and !any {$_->id == $id} @bugs) {
         delete $total_dups{$id};
     }
 }
@@ -205,15 +206,15 @@ foreach my $bug (@bugs) {
     next if ($openonly and !$bug->isopened);
     # If the bug has a status in @fully_exclude_status, we skip it,
     # no question.
-    next if grep($_ eq $bug->bug_status, @fully_exclude_status);
+    next if any {$_ eq $bug->bug_status} @fully_exclude_status;
     # If the bug has a status in @partly_exclude_status, we skip it...
-    if (grep($_ eq $bug->bug_status, @partly_exclude_status)) {
+    if (any {$_ eq $bug->bug_status} @partly_exclude_status) {
         # ...unless it has a resolution in @except_resolution.
-        next if !grep($_ eq $bug->resolution, @except_resolution);
+        next if !any {$_ eq $bug->resolution} @except_resolution;
     }
 
     if (scalar @query_products) {
-        next if !grep($_->id == $bug->product_id, @query_products);
+        next if !any {$_->id == $bug->product_id} @query_products;
     }
 
     # Note: maximum row count is dealt with later.

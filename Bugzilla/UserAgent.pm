@@ -15,7 +15,7 @@ use parent qw(Exporter);
 our @EXPORT = qw(detect_platform detect_op_sys);
 
 use Bugzilla::Field;
-use List::MoreUtils qw(natatime);
+use List::MoreUtils qw(natatime any);
 
 use constant DEFAULT_VALUE => 'Other';
 
@@ -187,8 +187,8 @@ sub detect_op_sys {
             push @detected, @$ra;
         }
     }
-    push(@detected, "Windows") if grep(/^Windows /, @detected);
-    push(@detected, "Mac OS") if grep(/^Mac /, @detected);
+    push(@detected, "Windows") if any { /^Windows / } @detected;
+    push(@detected, "Mac OS") if any { /^Mac / } @detected;
     return _pick_valid_field_value('op_sys', @detected);
 }
 

@@ -22,7 +22,7 @@ use Bugzilla::Flag;
 use Bugzilla::Status;
 use Bugzilla::Token;
 
-use List::MoreUtils qw(firstidx);
+use List::MoreUtils qw(firstidx any);
 use Storable qw(dclone);
 
 my $user = Bugzilla->login(LOGIN_REQUIRED);
@@ -337,7 +337,7 @@ foreach my $b (@bug_objects) {
     # In this case, we don't want remove_group() to complain.
     my @remove_groups;
     foreach my $g (@{$b->groups_in}) {
-        push(@remove_groups, $g->name) if grep { $_ eq $g->name } @unchecked_groups;
+        push(@remove_groups, $g->name) if any { $_ eq $g->name } @unchecked_groups;
     }
     local $set_all_fields{groups}->{remove} = \@remove_groups;
     $b->set_all(\%set_all_fields);

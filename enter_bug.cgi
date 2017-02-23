@@ -34,7 +34,7 @@ use Bugzilla::Field;
 use Bugzilla::Status;
 use Bugzilla::UserAgent;
 
-use List::MoreUtils qw(none);
+use List::MoreUtils qw(none any);
 
 my $user = Bugzilla->login(LOGIN_REQUIRED);
 
@@ -300,7 +300,7 @@ if ( ($cloned_bug_id) &&
 } elsif (formvalue('version')) {
     $default{'version'} = formvalue('version');
 } elsif (defined $version_cookie
-         and grep { $_->name eq $version_cookie } @{ $vars->{'version'} })
+         and any { $_->name eq $version_cookie } @{ $vars->{'version'} })
 {
     $default{'version'} = $version_cookie;
 } else {
@@ -334,7 +334,7 @@ $vars->{'bug_status'} = \@statuses;
 # to the first confirmed bug status on the list, if available.
 
 my $picked_status = formvalue('bug_status');
-if ($picked_status and grep($_->name eq $picked_status, @statuses)) {
+if ($picked_status and any {$_->name eq $picked_status} @statuses) {
     $default{'bug_status'} = formvalue('bug_status');
 } else {
     $default{'bug_status'} = Bugzilla::Bug->default_bug_status(@statuses);

@@ -14,6 +14,7 @@ use warnings;
 use Bugzilla::Error;
 use Bugzilla::Search::Condition qw(condition);
 use Bugzilla::Util qw(trick_taint);
+use List::MoreUtils qw(any);
 
 sub new {
     my ($class, $joiner) = @_;
@@ -41,7 +42,7 @@ sub joiner { return $_[0]->{joiner} }
 sub has_translated_conditions {
     my ($self) = @_;
     my $children = $self->children;
-    return 1 if grep { $_->isa('Bugzilla::Search::Condition')
+    return 1 if any { $_->isa('Bugzilla::Search::Condition')
                        && $_->translated } @$children;
     foreach my $child (@$children) {
         next if $child->isa('Bugzilla::Search::Condition');

@@ -16,7 +16,7 @@ use parent qw(Bugzilla::Search::Clause);
 use Bugzilla::Error;
 use Bugzilla::Search::Condition qw(condition);
 use Bugzilla::Util qw(trick_taint);
-use List::MoreUtils qw(uniq);
+use List::MoreUtils qw(uniq any);
 
 use constant UNSUPPORTED_FIELDS => qw(
     attach_data.thedata
@@ -66,7 +66,7 @@ sub add {
     }
 
     # Unsupported fields
-    if (grep { $_ eq $field } UNSUPPORTED_FIELDS ) {
+    if (any { $_ eq $field } UNSUPPORTED_FIELDS ) {
         # XXX - Hack till bug 916882 is fixed.
         my $operator = scalar(@args) == 3 ? $args[1] : $args[0]->{operator};
         ThrowUserError('search_grouped_field_invalid', { field => $field })

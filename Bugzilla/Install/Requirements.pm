@@ -21,6 +21,7 @@ use Bugzilla::Constants;
 use Bugzilla::Install::Util qw(install_string bin_loc success
                                extension_requirement_packages);
 use List::Util qw(max);
+use List::MoreUtils qw(firstval any);
 use Term::ANSIColor;
 use CPAN::Meta;
 use CPAN::Meta::Prereqs;
@@ -103,7 +104,7 @@ use constant FEATURE_FILES => (
 sub load_cpan_meta {
     my $dir = bz_locations()->{libpath};
     my @meta_json = map { File::Spec->catfile($dir, $_) } qw( MYMETA.json META.json );
-    my ($file) = grep { -f $_ } @meta_json;
+    my ($file) = firstval { -f $_ } @meta_json;
 
     if ($file) {
         open my $meta_fh, '<', $file or die "unable to open $file: $!";
@@ -239,7 +240,7 @@ sub check_webdotbase {
     if (-e "$webdotdir/.htaccess") {
         my $htaccess = new IO::File("$webdotdir/.htaccess", 'r')
             || die "$webdotdir/.htaccess: " . $!;
-        if (!grep(/ \\\.png\$/, $htaccess->getlines)) {
+        if (!any { / \\\.png\$/ } $htaccess->getlines) {
             print STDERR install_string('webdot_bad_htaccess',
                                         { dir => $webdotdir }), "\n";
         }

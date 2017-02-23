@@ -23,6 +23,7 @@ use Pod::Usage;
 use Bugzilla::Constants;
 use Bugzilla::JobQueue;
 use Bugzilla::Util qw(get_text);
+use List::MoreUtils qw(any);
 BEGIN { eval "use parent qw(Daemon::Generic)"; }
 
 our $VERSION = BUGZILLA_VERSION;
@@ -216,7 +217,7 @@ sub _do_work {
     $jq->set_verbose($self->{debug});
     $jq->set_pidfile($self->{gd_pidfile});
     while (my ($key, $module) = each %{ Bugzilla::JobQueue->job_map() }) {
-        next if @job_name and ! grep { $_ eq $key } @job_name;
+        next if @job_name and ! any { $_ eq $key } @job_name;
         eval "use $module";
         $jq->can_do($module);
     }

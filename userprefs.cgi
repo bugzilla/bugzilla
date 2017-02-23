@@ -23,6 +23,7 @@ use Bugzilla::User;
 use Bugzilla::User::APIKey;
 use Bugzilla::User::Setting qw(clear_settings_cache);
 use Bugzilla::Token;
+use List::MoreUtils qw(any);
 
 my $template = Bugzilla->template;
 local our $vars = {};
@@ -314,7 +315,7 @@ sub SaveEmail {
         my $insert_sth = $dbh->prepare('INSERT INTO watch (watched, watcher)'
                                      . ' VALUES (?, ?)');
         foreach my $add_me (keys(%new_watch_ids)) {
-            next if grep($_ == $add_me, @$old_watch_ids);
+            next if any {$_ == $add_me} @$old_watch_ids;
             $insert_sth->execute($add_me, $user->id);
         }
 
@@ -470,7 +471,7 @@ sub SaveSavedSearches {
         if ($group_id) {
             # Don't allow the user to share queries with groups they're not
             # allowed to.
-            next unless grep($_ eq $group_id, @{$user->queryshare_groups});
+            next unless any {$_ eq $group_id} @{$user->queryshare_groups};
 
             # $group_id is now definitely a valid ID of a group the
             # user can share queries with, so we can trick_taint.
@@ -524,7 +525,7 @@ sub DoApiKey {
 
     my $api_keys = Bugzilla::User::APIKey->match({ user_id => $user->id });
     $vars->{api_keys} = $api_keys;
-    $vars->{any_revoked} = grep { $_->revoked } @$api_keys;
+    $vars->{any_revoked} = any { $_->revoked } @$api_keys;
 }
 
 sub SaveApiKey {

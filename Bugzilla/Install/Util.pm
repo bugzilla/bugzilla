@@ -24,6 +24,7 @@ use POSIX qw(setlocale LC_CTYPE);
 use Scalar::Util qw(tainted);
 use Term::ANSIColor qw(colored);
 use PerlIO;
+use List::MoreUtils qw(any);
 use if ON_WINDOWS, 'Win32';
 use if ON_WINDOWS, 'Win32::API';
 
@@ -308,9 +309,6 @@ sub install_string {
         # key is listed in the *replacement* string, before doing
         # the replacement. This is mostly to protect programmers from
         # making mistakes.
-        if (grep($replacement =~ /##$key##/, @replace_keys)) {
-            die "Unsafe replacement for '$key' in '$string_id': '$replacement'";
-        }
         $string_template =~ s/\Q##$key##\E/$replacement/g;
     }
 
@@ -353,7 +351,7 @@ sub _wanted_to_actual_languages {
 
     # We always include English at the bottom if it's not there, even if
     # it wasn't selected by the user.
-    if (!grep($_ eq 'en', @actual)) {
+    if (!any {$_ eq 'en'} @actual) {
         push(@actual, 'en');
     }
 
@@ -579,7 +577,7 @@ sub set_output_encoding {
     # If we've already set an encoding layer on STDOUT, don't
     # add another one.
     my @stdout_layers = PerlIO::get_layers(STDOUT);
-    return if grep(/^encoding/, @stdout_layers);
+    return if any { /^encoding/ } @stdout_layers;
 
     my $encoding;
     if (ON_WINDOWS) {

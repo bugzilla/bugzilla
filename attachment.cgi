@@ -28,6 +28,7 @@ use Bugzilla::Token;
 use Encode qw(find_encoding);
 use URI::Escape qw(uri_escape_utf8);
 use Cwd qw(realpath);
+use List::MoreUtils qw(any firstval);
 
 # For most scripts we don't make $cgi and $template global variables. But
 # when preparing Bugzilla for mod_perl, this script used these
@@ -185,7 +186,7 @@ sub attachmentIsPublic {
 sub validateFormat {
   # receives a list of legal formats; first item is a default
   my $format = $cgi->param('format') || $_[0];
-  if (not grep($_ eq $format, @_)) {
+  if (not any {$_ eq $format} @_) {
      ThrowUserError("invalid_format", { format  => $format, formats => \@_ });
   }
 
@@ -480,7 +481,7 @@ sub enter {
     });
     $vars->{'flag_types'} = $flag_types;
     $vars->{'any_flags_requesteeble'} =
-        grep { $_->is_requestable && $_->is_requesteeble } @$flag_types;
+        any { $_->is_requestable && $_->is_requesteeble } @$flag_types;
     $vars->{'token'} = issue_session_token('create_attachment');
 
     print $cgi->header();
@@ -562,7 +563,7 @@ sub insert {
     if ($cgi->param('takebug') && $user->in_group('editbugs', $bug->product_id)) {
         # When taking a bug, we have to follow the workflow.
         my $bug_status = $cgi->param('bug_status') || '';
-        ($bug_status) = grep { $_->name eq $bug_status }
+        $bug_status = firstval { $_->name eq $bug_status }
                         @{ $bug->status->can_change_to };
 
         if ($bug_status && $bug_status->is_open

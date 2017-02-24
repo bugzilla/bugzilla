@@ -23,6 +23,8 @@ use Bugzilla::Config qw(:admin);
 use Bugzilla::User::Setting;
 use Bugzilla::Status;
 
+BEGIN { Bugzilla->extensions }
+
 my $dbh = Bugzilla->dbh;
 
 # set Bugzilla usage mode to USAGE_MODE_CMDLINE
@@ -157,6 +159,15 @@ my @users = (
         realname => 'Nobody; OK to take it and work on it',
         password => '*'
     },
+    map {
+        {
+            login => $_,
+            realname => (split(/@/, $_, 2))[0],
+            password => '*',
+        }
+    } map {
+        map { @$_ } values %$_
+    } values %Bugzilla::Extension::BMO::Data::group_auto_cc,
 );
 
 print "creating user accounts...\n";
@@ -373,6 +384,20 @@ my @groups = (
         name         => 'timetrackers',
         description  => 'Time Trackers',
         no_admin     => 1,
+        all_products => 0,
+        bug_group    => 0,
+    },
+    {
+        name         => 'partner-confidential',
+        description  => 'Restrict the visibility of this bug to the assignee, QA contact, and CC list only.',
+        no_admin     => 1,
+        all_products => 0,
+        bug_group    => 1,
+    },
+    {
+        name         => 'partner-confidential-visible',
+        description  => 'Members of this group will be able to use the partner-confidential group when filing bugs',
+        no_admin     => 0,
         all_products => 0,
         bug_group    => 0,
     },

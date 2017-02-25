@@ -12,10 +12,19 @@ use warnings;
 
 use File::Basename;
 use File::Spec;
+
 BEGIN {
     require lib;
-    my $dir = dirname(__FILE__);
-    lib->import($dir, File::Spec->catdir($dir, "lib"), File::Spec->catdir($dir, qw(local lib perl5)));
+    my $dir = File::Spec->rel2abs( dirname(__FILE__) );
+    lib->import(
+        $dir,
+        File::Spec->catdir( $dir, "lib" ),
+        File::Spec->catdir( $dir, qw(local lib perl5) )
+    );
+
+    # disable "use lib" from now on
+    no warnings qw(redefine);
+    *lib::import = sub { };
 }
 
 use Bugzilla::Constants ();
@@ -37,8 +46,9 @@ use constant STATIC => qw(
     skins
 );
 
-builder {
-    my $static_paths = join('|', STATIC);
+my $app = builder {
+    my $static_paths
+        = join( '|', sort { length $b <=> length $a || $a cmp $b } STATIC );
     enable 'Static',
         path => qr{^/($static_paths)/},
         root => Bugzilla::Constants::bz_locations->{cgi_path};
@@ -48,10 +58,13 @@ builder {
     my $map = Plack::App::URLMap->new;
 
     my @cgis = glob('*.cgi');
-    my $shutdown_app = Plack::App::WrapCGI->new(script => 'shutdown.cgi')->to_app;
+    my $shutdown_app
+        = Plack::App::WrapCGI->new( script => 'shutdown.cgi' )->to_app;
 
     foreach my $cgi_script (@cgis) {
-        my $app = eval { Plack::App::WrapCGI->new(script => $cgi_script)->to_app };
+        my $app
+            = eval { Plack::App::WrapCGI->new( script => $cgi_script )->to_app };
+
         # Some CGI scripts won't compile if not all optional Perl modules are
         # installed. That's expected.
         if ($@) {
@@ -61,15 +74,28 @@ builder {
 
         my $wrapper = sub {
             my $ret = Bugzilla::init_page();
-            my $res = ($ret eq '-1' && $cgi_script ne 'editparams.cgi') ? $shutdown_app->(@_) : $app->(@_);
+            my $res
+                = ( $ret eq '-1' && $cgi_script ne 'editparams.cgi' )
+                ? $shutdown_app->(@_)
+                : $app->(@_);
             Bugzilla::_cleanup();
             return $res;
         };
 
         my $base_name = basename($cgi_script);
-        $map->map('/' => $wrapper) if $cgi_script eq 'index.cgi';
-        $map->map('/rest' => $wrapper) if $cgi_script eq 'rest.cgi';
-        $map->map("/$base_name" => $wrapper);
+        $map->map( '/'     => $wrapper ) if $cgi_script eq 'index.cgi';
+        $map->map( '/rest' => $wrapper ) if $cgi_script eq 'rest.cgi';
+        $map->map( "/$base_name" => $wrapper );
     }
-    my $app = $map->to_app;
+    $map->to_app;
 };
+
+unless (caller) {
+    require Plack::Runner;
+    my $runner = Plack::Runner->new;
+    $runner->parse_options(@ARGV);
+    $runner->run($app);
+    exit 0;
+}
+
+return $app;

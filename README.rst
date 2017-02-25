@@ -53,7 +53,7 @@ Finally, a webserver can be started by the following:
 
 .. code-block:: bash
 
-    perl -Ilocal/lib/perl5 local/bin/plackup
+    perl app.psgi
 
 Navigate to http://localhost:5000/ and login with the username and password provided earlier to checksetup.
 Remember to set the urlbase on http://localhost:5000/editparams.cgi. "http://localhost:5000" will probably suffice.

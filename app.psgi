@@ -14,8 +14,11 @@ use File::Basename;
 use File::Spec;
 BEGIN {
     require lib;
-    my $dir = dirname(__FILE__);
+    my $dir = File::Spec->rel2abs(dirname(__FILE__));
     lib->import($dir, File::Spec->catdir($dir, "lib"), File::Spec->catdir($dir, qw(local lib perl5)));
+    # disable "use lib" from now on
+    no warnings qw(redefine);
+    *lib::import = sub  { };
 }
 
 use Bugzilla::Constants ();
@@ -37,8 +40,8 @@ use constant STATIC => qw(
     skins
 );
 
-builder {
-    my $static_paths = join('|', STATIC);
+my $app = builder {
+    my $static_paths  = join('|', sort { length $b <=> length $a || $a cmp $b } STATIC);
     enable 'Static',
         path => qr{^/($static_paths)/},
         root => Bugzilla::Constants::bz_locations->{cgi_path};
@@ -71,5 +74,15 @@ builder {
         $map->map('/rest' => $wrapper) if $cgi_script eq 'rest.cgi';
         $map->map("/$base_name" => $wrapper);
     }
-    my $app = $map->to_app;
+    $map->to_app;
 };
+
+unless (caller) {
+    require Plack::Runner;
+    my $runner = Plack::Runner->new;
+    $runner->parse_options(@ARGV);
+    $runner->run($app);
+    exit 0;
+}
+
+return $app;

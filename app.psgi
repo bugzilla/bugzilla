@@ -30,14 +30,15 @@ use Plack::App::WrapCGI;
 use Plack::Response;
 
 use constant STATIC => qw(
-    data/assets
-    data/webdot
-    docs
-    extensions/[^/]+/web
-    graphs
-    images
-    js
-    skins
+    data/assets/
+    data/webdot/
+    docs/
+    extensions/[^/]+/web/
+    graphs/
+    images/
+    js/
+    skins/
+    robots\.txt
 );
 
 $ENV{BZ_PLACK} = 'Plack/' . Plack->VERSION;
@@ -45,7 +46,7 @@ $ENV{BZ_PLACK} = 'Plack/' . Plack->VERSION;
 my $app = builder {
     my $static_paths  = join('|', sort { length $b <=> length $a || $a cmp $b } STATIC);
     enable 'Static',
-        path => qr{^/($static_paths)/},
+        path => qr{^/(?:$static_paths)},
         root => Bugzilla::Constants::bz_locations->{cgi_path};
 
     my $shutdown_app = Plack::App::WrapCGI->new(script => 'shutdown.cgi')->to_app;
@@ -84,6 +85,7 @@ my $app = builder {
         my $app = shift;
         return sub {
             my $env = shift;
+            warn "$env->{PATH_INFO} / $env->{SCRIPT_NAME}\n";
             $env->{PATH_INFO} = '/index.cgi' if $env->{PATH_INFO} eq '/';
             return $app->($env);
         };

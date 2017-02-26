@@ -350,38 +350,38 @@ sub _DoItalicsAndBold {
     $text =~ s{ ^\* (?=\S) (.+?) (?<=\S) \* }{<em>$1</em>}gsx;
 
     # <strong> must go first:
-    $text =~ s{ ( (?<=\W) __ (?=\S) (.+?[*_]*) (?<=\S) __ (?!\S) ) }
+    $text =~ s{ ( (?<=\s) __ (?=\S) (.+?[*_]*) (?<=\S) __ (?!\S) ) }
               {
                   my $result = _has_multiple_underscores($2) ? $1 : "<strong>$2</strong>";
                   $result;
               }gsxe;
 
 
-    $text =~ s{ (?<=\W) \*\* (?=\S) (.+?[*_]*) (?<=\S) \*\* }{<strong>$1</strong>}gsx;
+    $text =~ s{ (?<=\s) \*\* (?=\S) (.+?[*_]*) (?<=\S) \*\* }{<strong>$1</strong>}gsx;
 
-    $text =~ s{ ( (?<=\W) _ (?=\S) (.+?) (?<=\S) _ (?!\S) ) }
+    $text =~ s{ ( (?<=\s) _ (?=\S) (.+?) (?<=\S) _ (?!\S) ) }
               {
                   my $result = _has_multiple_underscores($2) ? $1 : "<em>$2</em>";
                   $result;
               }gsxe;
 
-    $text =~ s{ (?<=\W) \* (?=\S) (.+?) (?<=\S) \* }{<em>$1</em>}gsx;
+    $text =~ s{ (?<=\s) \* (?=\S) (.+?) (?<=\S) \* }{<em>$1</em>}gsx;
 
     # And now, a second pass to catch nested strong and emphasis special cases
-    $text =~ s{ ( (?<=\W) __ (?=\S) (.+?[*_]*) (?<=\S) __ (\S*) ) }
+    $text =~ s{ ( (?<=\s) __ (?=\S) (.+?[*_]*) (?<=\S) __ (\S*) ) }
               {
                   my $result = _has_multiple_underscores($3) ? $1 : "<strong>$2</strong>$3";
                   $result;
               }gsxe;
 
-    $text =~ s{ (?<=\W) \*\* (?=\S) (.+?[*_]*) (?<=\S) \*\* }{<strong>$1</strong>}gsx;
-    $text =~ s{ ( (?<=\W) _ (?=\S) (.+?) (?<=\S) _ (\S*) ) }
+    $text =~ s{ (?<=\s) \*\* (?=\S) (.+?[*_]*) (?<=\S) \*\* }{<strong>$1</strong>}gsx;
+    $text =~ s{ ( (?<=\s) _ (?=\S) (.+?) (?<=\S) _ (\S*) ) }
               {
                   my $result = _has_multiple_underscores($3) ? $1 : "<em>$2</em>$3";
                   $result;
               }gsxe;
 
-    $text =~ s{ (?<=\W) \* (?=\S) (.+?) (?<=\S) \* }{<em>$1</em>}gsx;
+    $text =~ s{ (?<=\s) \* (?=\S) (.+?) (?<=\S) \* }{<em>$1</em>}gsx;
 
     return $text;
 }

@@ -12,7 +12,8 @@ use strict;
 use warnings;
 
 use lib qw(. lib local/lib/perl5 t);
-use Test2::Bundle::Extended;
+use Test2::Tools::Mock;
+use Test::More;
 use Bugzilla::Util;
 BEGIN {
     my $terms = {
@@ -45,6 +46,8 @@ use Bugzilla::Bug;
 use Bugzilla::Comment;
 use Bugzilla::User;
 use Bugzilla::Markdown;
+use Bugzilla::Util;
+use File::Basename;
 
 Bugzilla->usage_mode(USAGE_MODE_TEST);
 Bugzilla->error_mode(ERROR_MODE_DIE);
@@ -71,19 +74,24 @@ my $comment = Bugzilla::Comment->new(already_wrapped => 0);
 
 Bugzilla->set_user($user);
 
-my $markdown_text = <<MARKDOWN;
-```
-this is a block
-> with an embedded blockquote
-```
-MARKDOWN
+my @testfiles = glob("t/markdown/*.md");
+
+plan(tests => scalar(@testfiles) + 1);
 
 my $markdown = Bugzilla::Markdown->new();
-
 ok($markdown, "got a new markdown object");
-my $markdown_html = $markdown->markdown($markdown_text, $bug, $comment);
-is("<pre><code>this is a block\n"
-    . "&gt; with an embedded blockquote</code></pre>\n",
-    $markdown_html, "code block with embedded block quote");
 
-done_testing;
+foreach my $testfile (@testfiles) {
+  my $data = read_text($testfile);
+
+  my ($markdown_text, $expected_html) = split(/---/, $data);
+  $markdown_text = trim($markdown_text);
+  $expected_html = trim($expected_html);
+
+  my $actual_html = $markdown->markdown($markdown_text, $bug, $comment);
+  $actual_html = trim($actual_html);
+
+  is($actual_html, $expected_html, basename($testfile));
+}
+
+done_testing();

@@ -16,7 +16,13 @@ use 5.14.0;
 use strict;
 use warnings;
 
-use lib qw(. lib local/lib/perl5);
+use File::Basename;
+use File::Spec;
+BEGIN {
+    require lib;
+    my $dir = File::Spec->rel2abs(dirname(__FILE__));
+    lib->import($dir, File::Spec->catdir($dir, "lib"), File::Spec->catdir($dir, qw(local lib perl5)));
+}
 
 use ExtUtils::MakeMaker 6.55;
 use Bugzilla::Constants qw(BUGZILLA_VERSION);
@@ -28,28 +34,6 @@ BEGIN {
         open STDOUT, '>>', File::Spec->devnull;
         open STDERR, '>>', File::Spec->devnull;
     }
-}
-
-# META.json and META.yml exist only for the benefit of older
-# installs where cpanm can't get the optional features out of Makefile.PL
-# Unfortunately having META.json and META.yml commited to the repo is weird
-# and MakeMaker always prefers their content to the internal data (unless CPAN::META
-# is not installed).
-# Since we (Bugzilla) require this cludge, we hide the files from MakeMaker.
-BEGIN {
-    warn "Hiding META.{json,yml} from MakeMaker...\n";
-    rename( 'META.json', 'META.json.hide' ) || unlink("META.json");
-    rename( 'META.yml',  'META.yml.hide' )  || unlink("META.yml");
-
-    if (!eval { ExtUtils::MakeMaker->VERSION('6.57_07') }) {
-        warn "WARNING: ExtUtils::MakeMaker should be at least 6.57_07 in order to support updating META.json files\n";
-    }
-}
-
-END {
-    warn "Unhiding META.{json,yml}...\n";
-    rename( 'META.json.hide', 'META.json' );
-    rename( 'META.yml.hide',  'META.yml' );
 }
 
 # PREREQ_PM
@@ -374,21 +358,5 @@ sub MY::postamble {
 GEN_CPANFILE_ARGS = -A -U mod_perl -U oracle
 cpanfile: MYMETA.json
 \t\$(PERLRUN) gen-cpanfile.pl \$(GEN_CPANFILE_ARGS)
-
-checksetup_lib: Makefile.PL
-\tcpanm -L .checksetup_lib --notest \\
-            CPAN::Meta JSON::PP CPAN::Meta::Requirements \\
-            Module::Metadata\@$all_features{'Module::Metadata'}
-\t-rm -fr .checksetup_lib/man
-\t-rm -fr .checksetup_lib/lib/perl5/*/.meta
-\t-rm -fr .checksetup_lib/lib/perl5/Test
-\t-rm -fr .checksetup_lib/lib/perl5/ok.pm
-\t-find .checksetup_lib '(' -name '*.pod' -or -name .packlist ')' -print0 | xargs -0 rm -f
-
-META.json: Makefile.PL
-\tmake distmeta 2>&1 /dev/null; mv */META.json .
-
-META.yml: Makefile.PL
-\tmake distmeta 2>&1 /dev/null; mv */META.yml .
 MAKE
 }

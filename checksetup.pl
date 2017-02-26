@@ -17,11 +17,13 @@ use strict;
 use warnings;
 
 use File::Basename;
-BEGIN { chdir dirname($0); }
-use lib qw(. lib local/lib/perl5 .checksetup_lib/lib/perl5);
-
-# the @INC which checksetup needs to operate against.
-our @BUGZILLA_INC = grep { !/checksetup_lib/ } @INC;
+use File::Spec;
+BEGIN {
+    require lib;
+    my $dir = File::Spec->rel2abs(dirname(__FILE__));
+    lib->import($dir, File::Spec->catdir($dir, "lib"), File::Spec->catdir($dir, qw(local lib perl5)));
+    chdir($dir);
+}
 
 use Getopt::Long qw(:config bundling);
 use Pod::Usage;
@@ -31,7 +33,7 @@ use Safe;
 
 use Bugzilla::Constants;
 use Bugzilla::Install::Requirements;
-use Bugzilla::Install::Util qw(install_string get_version_and_os 
+use Bugzilla::Install::Util qw(install_string get_version_and_os
                                init_console success);
 
 ######################################################################
@@ -55,7 +57,7 @@ GetOptions(\%switch, 'help|h|?',
 # Print the help message if that switch was selected.
 pod2usage({-verbose => 1, -exitval => 1}) if $switch{'help'};
 
-# Read in the "answers" file if it exists, for running in 
+# Read in the "answers" file if it exists, for running in
 # non-interactive mode.
 my $answers_file = $ARGV[0];
 my $silent = $answers_file && !$switch{'verbose'};
@@ -95,18 +97,20 @@ $ENV{PERL_MM_USE_DEFAULT} = 1;
 $ENV{BZ_SILENT_MAKEFILE}  = 1;
 system($^X, "Makefile.PL");
 
+if (! -f "MYMETA.json") {
+    die "Makefile.PL failed to generate a MYMETA.json file.",
+        "Try upgrading ExtUtils::MakeMaker";
+}
+
 my $meta = load_cpan_meta();
 if (keys %{$meta->{optional_features}} < 1) {
-    warn "Your version of ExtUtils::MakeMaker is probably too old\n";
-    warn "Falling back to static (and wrong) META.json\n";
-    unlink('MYMETA.json');
-    $meta = load_cpan_meta();
+    die "Your version of ExtUtils::MakeMaker is too old or broken\n";
 }
-my $requirements = check_cpan_requirements($meta, \@BUGZILLA_INC, !$silent);
+my $requirements = check_cpan_requirements($meta, [@INC], !$silent);
 
 exit 1 unless $requirements->{ok};
 
-check_all_cpan_features($meta, \@BUGZILLA_INC, !$silent);
+check_all_cpan_features($meta, [@INC], !$silent);
 
 exit 0 if $switch{'check-modules'};
 ###########################################################################
@@ -267,7 +271,7 @@ Bugzilla::Hook::process('install_before_final_checks', { silent => $silent });
 Bugzilla->memcached->clear_all();
 
 # Check if the default parameter for urlbase is still set, and if so, give
-# notification that they should go and visit editparams.cgi 
+# notification that they should go and visit editparams.cgi
 if (Bugzilla->params->{'urlbase'} eq '') {
     print "\n" . get_text('install_urlbase_default') . "\n"
         unless $silent;
@@ -314,7 +318,7 @@ interface.
 
 =item B<--reset-password>=user@domain.com
 
-Resets the specified user's password. checksetup.pl will prompt you to 
+Resets the specified user's password. checksetup.pl will prompt you to
 enter a new password for the user.
 
 =item B<--no-templates> (B<-t>)
@@ -459,7 +463,7 @@ from one version of Bugzilla to another.
 
 The code for this is in L<Bugzilla::Install::DB/update_table_definitions>.
 
-This includes creating the default Classification (using 
+This includes creating the default Classification (using
 L<Bugzilla::Install/create_default_classification>) and setting up all
 the foreign keys for all tables, using L<Bugzilla::DB/bz_setup_foreign_keys>.
 
@@ -528,7 +532,7 @@ The format of that file is as follows:
  $answer{'NO_PAUSE'} = 1
 
 C<NO_PAUSE> means "never stop and prompt the user to hit Enter to continue,
-just go ahead and do things, even if they are potentially dangerous." 
+just go ahead and do things, even if they are potentially dangerous."
 Don't set this to 1 unless you know what you are doing.
 
 =head1 SEE ALSO

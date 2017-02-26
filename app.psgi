@@ -27,6 +27,8 @@ BEGIN {
     *lib::import = sub { };
 }
 
+BEGIN { $ENV{BZ_PLACK} = 'Plack' }
+
 use Bugzilla::Constants ();
 
 use Plack;
@@ -45,8 +47,6 @@ use constant STATIC => qw(
     js
     skins
 );
-
-$ENV{BZ_PLACK} = 'Plack/' . Plack->VERSION;
 
 my $app = builder {
     my $static_paths

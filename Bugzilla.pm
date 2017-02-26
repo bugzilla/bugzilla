@@ -133,7 +133,7 @@ sub init_page {
     my $script = basename($0);
 
     # If Bugzilla is shut down, do not allow anything to run, just display a
-    # message to the user about the downtime and log out.  Scripts listed in 
+    # message to the user about the downtime and log out.  Scripts listed in
     # SHUTDOWNHTML_EXEMPT are exempt from this message.
     #
     # This code must go here. It cannot go anywhere in Bugzilla::CGI, because
@@ -221,7 +221,7 @@ sub extensions {
             my $extension = $package->new();
             if ($extension->enabled) {
                 push(@extensions, $extension);
-            }        
+            }
         }
         $cache->{extensions} = \@extensions;
     }
@@ -346,7 +346,7 @@ sub login {
     }
 
     my $authenticated_user = $authorizer->login($type);
-    
+
     # At this point, we now know if a real person is logged in.
     # We must now check to see if an sudo session is in progress.
     # For a session to be in progress, the following must be true:
@@ -521,7 +521,12 @@ sub usage_mode {
         return $class->request_cache->{usage_mode};
     }
     else {
-        return (i_am_cgi()? USAGE_MODE_BROWSER : USAGE_MODE_CMDLINE);
+        if ($ENV{BZ_PLACK} || $ENV{MOD_PERL}) {
+            return USAGE_MODE_BROWSER;
+        }
+        else {
+            return (i_am_cgi()? USAGE_MODE_BROWSER : USAGE_MODE_CMDLINE);
+        }
     }
 }
 
@@ -702,7 +707,7 @@ sub END {
 }
 
 # Also managed in mod_perl.pl and app.psgi.
-init_page() unless i_am_persistent();
+init_page() unless();
 
 1;
 
@@ -830,8 +835,8 @@ progress, returns the C<Bugzilla::User> object corresponding to the currently
 logged in user.
 
 =item C<sudo_request>
-This begins an sudo session for the current request.  It is meant to be 
-used when a session has just started.  For normal use, sudo access should 
+This begins an sudo session for the current request.  It is meant to be
+used when a session has just started.  For normal use, sudo access should
 normally be set at login time.
 
 =item C<login>
@@ -928,7 +933,7 @@ C<Bugzilla-E<gt>usage_mode> will return the current state of this flag.
 
 =item C<installation_mode>
 
-Determines whether or not installation should be silent. See 
+Determines whether or not installation should be silent. See
 L<Bugzilla::Constants> for the C<INSTALLATION_MODE> constants.
 
 =item C<installation_answers>

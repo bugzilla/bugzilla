@@ -352,6 +352,9 @@ sub verify_bugmail_recipients {
     my $wanted_sentto;
     my $err = 0;
 
+    my ($package, $filename, $line) = caller;
+    diag "verify_bugmail_recipients called from $filename line $line";
+
     # Verify sentto field
     my @email_sentto
         = sort split(/, /, $sel->get_text("//dt[text()='Email sent to:']/following-sibling::dd"));

@@ -72,7 +72,7 @@ $sel->value_is("addselfcc", "off");
 $sel->type_ok("quicksearch_top", "tag:sel-tmp");
 $sel->click_ok("find_top");
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
-$sel->title_is("Bug List");
+$sel->title_is("Bug List: tag:sel-tmp");
 $sel->type_ok("save_newqueryname", "sel-tmp");
 $sel->click_ok("remember");
 $sel->wait_for_page_to_load_ok(WAIT_TIME);

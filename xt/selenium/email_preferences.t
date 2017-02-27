@@ -353,28 +353,28 @@ sub verify_bugmail_recipients {
     my $err = 0;
 
     my ($package, $filename, $line) = caller;
-    diag "verify_bugmail_recipients called from $filename line $line";
+    my $prefix = "verify_bugmail_recipients:$line";
 
     # Verify sentto field
     my @email_sentto
         = sort split(/, /, $sel->get_text("//dt[text()='Email sent to:']/following-sibling::dd"));
     if ($rcpt_sentto == RCPT_BOTH) {
       $wanted_sentto = \@email_both;
-      is_deeply(\@email_sentto, $wanted_sentto, "Bugmail sent to both")
+      is_deeply(\@email_sentto, $wanted_sentto, "$prefix: Bugmail sent to both")
           or $err = 1;
     }
     elsif ($rcpt_sentto == RCPT_ADMIN) {
       $wanted_sentto = \@email_admin;
-      is_deeply(\@email_sentto, $wanted_sentto, "Bugmail sent to admin")
+      is_deeply(\@email_sentto, $wanted_sentto, "$prefix: Bugmail sent to admin")
           or $err = 1;
     }
     elsif ($rcpt_sentto == RCPT_NORMAL) {
       $wanted_sentto = \@email_normal;
-      is_deeply(\@email_sentto, $wanted_sentto, "Bugmail sent to normal user")
+      is_deeply(\@email_sentto, $wanted_sentto, "$prefix: Bugmail sent to normal user")
           or $err = 1;
     } else {
       $wanted_sentto = \@email_none;
-      is_deeply(\@email_sentto, $wanted_sentto, "Bugmail sent to no one")
+      is_deeply(\@email_sentto, $wanted_sentto, "$prefix: Bugmail sent to no one")
           or $err = 1;
     }
 

@@ -308,19 +308,32 @@
           [% is_cced ? "Stop Following" : "Follow" %]
         </button>
       [% END %]
-      <button type="button" id="action-menu-btn" class="minor">&#9662;</button>
-      <menu id="action-menu" type="context" style="display:none">
-        <menuitem id="action-reset" label="Reset Sections"></menuitem>
-        <menuitem id="action-expand-all" label="Expand All Sections"></menuitem>
-        <menuitem id="action-collapse-all" label="Collapse All Sections"></menuitem>
-        <hr>
-        [% IF user.id %]
-          <menuitem id="action-add-comment" label="Add Comment"></menuitem>
-        [% END %]
-        <menuitem id="action-last-comment" label="Last Comment"></menuitem>
-        <hr>
-        <menuitem id="action-history" label="History"></menuitem>
-      </menu>
+      <div class="dropdown">
+        <button type="button" id="action-menu-btn" aria-haspopup="true" aria-label="Actions Menu"
+          aria-expanded="false" aria-controls="action-menu" class="dropdown-button minor">&#9662;</button>
+        <ul class="dropdown-content" id="action-menu" role="menu" style="display:none;">
+          <li role="presentation">
+            <a id="action-reset" role="menuitem" tabindex="-1">Reset Sections</a>
+          </li>
+          <li role="presentation">
+            <a id="action-expand-all" role="menuitem" tabindex="-1">Expand All Sections</a>
+          </li>
+          <li class="dropdown-separator" role="presentation">
+            <a id="action-collapse-all" role="menuitem" tabindex="-1">Collapse All Sections</a>
+          </li>
+          [% IF user.id %]
+            <li role="presentation">
+              <a id="action-add-comment" role="menuitem" tabindex="-1">Add Comment</a>
+            </li>
+          [% END %]
+          <li class="dropdown-separator" role="presentation">
+            <a id="action-last-comment" role="menuitem" tabindex="-1">Last Comment</a>
+          </li>
+          <li role="presentation">
+            <a id="action-history" role="menuitem" tabindex="-1">History</a>
+          </li>
+        </ul>
+      </div>
     </div>
     <div id="user-guide">
       <a title="User guide for [% terms.Bugzilla %]" href="https://wiki.mozilla.org/BMO/UserGuide">Get help with this page</a>
@@ -1300,9 +1313,61 @@
 <div id="bottom-actions">
   <div id="bottom-right-actions">
     <button type="button" id="top-btn" class="minor">Top &uarr;</button>
-    <button type="button" id="format-btn" class="minor">Format &#9662;</button>
+    <div class="dropdown">
+      <button id="format-btn" aria-haspopup="true" aria-label="Format [% terms.Bug %] Menu"
+        aria-expanded="false" aria-controls="format-menu" class="dropdown-button minor">Format [% terms.Bug %] &#9652;</button>
+      <ul class="dropdown-content menu-up" id="format-menu" role="menu" style="display:none;">
+        <li role="presentation">
+          <a href="show_bug.cgi?format=multiple&amp;id=[% bug.id FILTER uri %]" role="menuitem" tabindex="-1">For Printing</a>
+        </li>
+        <li role="presentation">
+          <a href="show_bug.cgi?ctype=xml&amp;id=[% bug.id FILTER uri %]" role="menuitem" tabindex="-1">XML</a>
+        </li>
+        <li role="presentation">
+          <a href="show_bug.cgi?format=default&amp;id=[% bug.id FILTER uri %]" role="menuitem" tabindex="-1">Legacy</a>
+        </li>
+        [% IF bug.groups_in.size == 0 %]
+          <li role="presentation">
+            <a href="rest/bug/[% bug.id FILTER uri %]" role="menuitem" tabindex="-1">JSON</a>
+          </li>
+        [% END %]
+      </ul>
+    </div>
     [% IF user.id %]
-      <button type="button" id="new-bug-btn" class="minor">New/Clone [% terms.Bug %] &#9662;</button>
+      <div class="dropdown">
+        <button id="new-bug-btn" aria-haspopup="true" aria-label="New/Clone [% terms.Bug %] Menu"
+          aria-expanded="false" aria-controls="new-bug-menu" class="dropdown-button minor">New/Clone [% terms.Bug %] &#9652;</button>
+        <ul class="dropdown-content menu-up" id="new-bug-menu" role="menu" style="display:none;">
+          <li role="presentation">
+            <a href="enter_bug.cgi" role="menuitem" tabindex="-1" target="_blank">
+              Create a new [% terms.bug %]</a>
+          </li>
+          <li role="presentation">
+            <a href="enter_bug.cgi?product=[% bug.product FILTER uri %]"
+               role="menuitem" tabindex="-1" target="_blank">&#8230; in this product</a>
+          </li>
+          <li class="dropdown-separator" role="presentation">
+            <a href="enter_bug.cgi?product=[% bug.product FILTER uri %]&amp;component=[% bug.component FILTER uri %]"
+               role="menuitem" tabindex="-1" target="_blank">&#8230; in this component</a>
+          </li>
+          <li role="presentation">
+            <a href="enter_bug.cgi?format=__default__&amp;product=[% bug.product FILTER uri %]&amp;blocked=[% bug.id FILTER uri %]"
+               role="menuitem" tabindex="-1" target="_blank">&#8230; that blocks this [% terms.bug %]</a>
+          </li>
+          <li class="dropdown-separator" role="presentation">
+            <a href="enter_bug.cgi?format=__default__&amp;product=[% bug.product FILTER uri %]&amp;dependson=[% bug.id FILTER uri %]"
+               role="menuitem" tabindex="-1" target="_blank">&#8230; that depends on this [% terms.bug %]</a>
+          </li>
+          <li role="presentation">
+            <a href="enter_bug.cgi?format=__default__&amp;product=[% bug.product FILTER uri %]&amp;cloned_bug_id=[% bug.id FILTER uri %]"
+               role="menuitem" tabindex="-1" target="_blank">&#8230; as a clone of this [% terms.bug %]</a>
+          </li>
+          <li role="presentation">
+            <a href="enter_bug.cgi?format=__default__&amp;cloned_bug_id=[% terms.bug FILTER uri %]"
+               role="menuitem" tabindex="-1" target="_blank">&#8230; as a clone, in a different product</a>
+          </li>
+        </ul>
+      </div>
     [% END %]
   </div>
 </div>

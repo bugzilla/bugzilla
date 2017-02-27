@@ -9,8 +9,8 @@ build_requires:
   Test::WWW::Selenium: '0'
 configure_requires:
   ExtUtils::MakeMaker: 6.57_07
-dynamic_config: 1
-generated_by: 'ExtUtils::MakeMaker version 7.24, CPAN::Meta::Converter version 2.150005'
+dynamic_config: 0
+generated_by: 'ExtUtils::MakeMaker version 7.24, CPAN::Meta::Converter version 2.150010'
 license: unknown
 meta-spec:
   url: http://module-build.sourceforge.net/META-spec-v1.4.html
@@ -69,6 +69,7 @@ optional_features:
       Search::Elasticsearch: '0'
       Template::Plugin::GD::Image: '0'
       Test::Taint: '1.06'
+      Text::MultiMarkdown: '1.000034'
       TheSchwartz: '1.10'
       Type::Tiny: '1'
       URI::Escape: '0'
@@ -136,6 +137,10 @@ optional_features:
     description: 'Linux::PID for MozReview'
     requires:
       Linux::Pid: '0'
+  markdown:
+    description: 'Markdown syntax support for comments'
+    requires:
+      Text::MultiMarkdown: '1.000034'
   memcached:
     description: 'Memcached Support'
     requires:

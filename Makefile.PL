@@ -121,6 +121,12 @@ my %optional_features = (
             }
         }
     },
+    markdown => {
+        description => 'Markdown syntax support for comments',
+        prereqs     => {
+            runtime => { requires => { 'Text::MultiMarkdown' => '1.000034' } }
+        }
+    },
     pg => {
         prereqs => { runtime => { requires => { 'DBD::Pg' => 'v2.19.3' } } },
         description => 'Postgres database support'

@@ -17,9 +17,6 @@ tasks:
       github:
         env: true
         events:
-          - pull_request.opened
-          - pull_request.synchronize
-          - pull_request.reopened
           - push
       treeherder:
         symbol: "San"
@@ -55,9 +52,6 @@ tasks:
       github:
         env: true
         events:
-          - pull_request.opened
-          - pull_request.synchronize
-          - pull_request.reopened
           - push
       treeherder:
         symbol: "Doc"
@@ -93,9 +87,6 @@ tasks:
       github:
         env: true
         events:
-          - pull_request.opened
-          - pull_request.synchronize
-          - pull_request.reopened
           - push
       treeherder:
         symbol: "API"
@@ -134,9 +125,6 @@ tasks:
       github:
         env: true
         events:
-          - pull_request.opened
-          - pull_request.synchronize
-          - pull_request.reopened
           - push
       treeherder:
         symbol: "Sel"

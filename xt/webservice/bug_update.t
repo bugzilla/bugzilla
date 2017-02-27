@@ -336,7 +336,7 @@ sub invalid_values {
               error => 'aliases cannot be longer than',
               test  => 'alias cannot be too long' },
             { value => $second_bug->{alias},
-              error => 'has already taken the alias',
+              error => 'Please choose another alias or visit that bug and change its alias',
               test  => 'duplicate alias fails' },
             { value => 123456,
               error => 'at least one letter',

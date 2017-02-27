@@ -137,7 +137,7 @@ my $fields = {
             value       => 'MyyyyyyyyyyyyyyyyyyBugggggggggggggggggggggg'
         },
         existing => {
-            faultstring => 'already taken the alias',
+            faultstring => 'Please choose another alias or visit that bug and change its alias.',
             value       => 'public_bug'
         },
         numeric => {

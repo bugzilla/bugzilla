@@ -389,7 +389,7 @@ input[type="number"] {
 #bottom-actions {
     margin-top: 8px;
     margin-bottom: 50px;
-    max-width: 1024px;
+    max-width: 1200px;
 }
 
 #bottom-right-actions {
@@ -702,7 +702,7 @@ h3.change-name {
     width: 100%;
     box-sizing: border-box !important;
     margin: 0 0 1em;
-    max-width: 1024px;
+    max-width: 1200px;
 }
 
 #comment-preview {
@@ -812,15 +812,9 @@ h3.change-name {
 /* theme */
 
 #bugzilla-body {
-    margin: 5px !important;
-    max-width: 1024px !important;
-    min-width: 800px !important;
-    width: 100% !important;
-}
-
-#footer {
-    max-width: 1024px !important;
-    min-width: 800px !important;
+    max-width: 1200px;
+    min-width: 800px;
+    width: 100%;
 }
 
 .vcard {

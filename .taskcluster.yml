@@ -35,6 +35,9 @@ tasks:
         public/runtests_log:
           type: "file"
           path: "/var/log/runtests.log"
+      onExitStatus:
+        retry:
+          - 1
     metadata:
       name: "Basic Sanity Tests"
       description: "Basic Sanity Tests"
@@ -70,6 +73,9 @@ tasks:
         public/runtests_log:
           type: "file"
           path: "/var/log/runtests.log"
+      onExitStatus:
+        retry:
+          - 1
     metadata:
       name: "Documentation Build Test"
       description: "Documentation Build Test"
@@ -108,6 +114,9 @@ tasks:
         public/httpd_error_log:
           type: "file"
           path: "/var/log/httpd/error_log"
+      onExitStatus:
+        retry:
+          - 1
     metadata:
       name: "WebService API Tests"
       description: "WebService API Tests"
@@ -149,6 +158,9 @@ tasks:
         public/selenium_log":
           type: "file"
           path: "/selenium.log"
+      onExitStatus:
+        retry:
+          - 1
     metadata:
       name: "Selenium Tests"
       description: "Selenium Tests"

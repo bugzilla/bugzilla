@@ -41,7 +41,7 @@ END;
           width="[% gravatar_size FILTER none %]" height="[% gravatar_size FILTER none %]">
       [% END %]
       [% UNLESS gravatar_only %]
-        <a class="email [%= "disabled" UNLESS u.is_enabled %] [% "show_usermenu" IF user.id %]"
+        <a class="email [%= "disabled" UNLESS u.is_enabled %] [% " show_usermenu" IF user.id %]"
           [% IF user.id %]
             href="mailto:[% u.email FILTER html %]"
             data-user-email="[% u.email FILTER html %]"

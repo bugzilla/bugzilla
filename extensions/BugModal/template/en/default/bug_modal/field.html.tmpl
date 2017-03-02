@@ -102,9 +102,7 @@ END;
   [% IF hide_on_view %] style="display:none"[% END %]
 >
   [% IF label.defined && !no_label %]
-    <div class="name
-                [%~ " edit-show" IF hide_on_view %]"
-         [% IF hide_on_view %] style="display:none"[% END %]>
+    <div class="name">
       [%~ IF help.defined %]
         <a href="[% help FILTER none %]" id="[% name FILTER html %]-help-link" class="help">
         [% aria_labelledby_id = "${name}-help-link" %]

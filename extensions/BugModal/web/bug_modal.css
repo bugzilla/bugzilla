@@ -389,7 +389,9 @@ input[type="number"] {
 #bottom-actions {
     margin-top: 8px;
     margin-bottom: 50px;
-    max-width: 1200px;
+    min-width: 60em;
+    max-width: 72em;
+    width: 100%; 
 }
 
 #bottom-right-actions {
@@ -702,7 +704,9 @@ h3.change-name {
     width: 100%;
     box-sizing: border-box !important;
     margin: 0 0 1em;
-    max-width: 1200px;
+    min-width: 60em;
+    max-width: 72em;
+    width: 100%; 
 }
 
 #comment-preview {
@@ -812,8 +816,8 @@ h3.change-name {
 /* theme */
 
 #bugzilla-body {
-    max-width: 1200px;
-    min-width: 800px;
+    max-width: 72em;
+    min-width: 60em;
     width: 100%;
 }
 

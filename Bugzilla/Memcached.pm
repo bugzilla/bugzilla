@@ -27,13 +27,13 @@ sub _new {
     # always return an object to simplify calling code when memcached is
     # disabled.
     if (Bugzilla->feature('memcached')
-        && Bugzilla->params->{memcached_servers})
+        && Bugzilla->localconfig->{memcached_servers})
     {
         require Cache::Memcached::Fast;
-        $self->{namespace} = Bugzilla->params->{memcached_namespace} || '';
+        $self->{namespace} = Bugzilla->localconfig->{memcached_namespace} || '';
         $self->{memcached} =
             Cache::Memcached::Fast->new({
-                servers   => [ split(/[, ]+/, Bugzilla->params->{memcached_servers}) ],
+                servers   => [ split(/[, ]+/, Bugzilla->localconfig->{memcached_servers}) ],
                 namespace => $self->{namespace},
             });
     }

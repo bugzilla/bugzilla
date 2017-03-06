@@ -112,6 +112,17 @@ use constant LOCALCONFIG_VARS => (
         default => '',
     },
     {
+        name => 'db_shadow',
+        default => sub {
+            return {
+                db_name => migrate_data_param('shadowdb'),
+                db_host => migrate_data_param('shadowdbhost'),
+                db_port => migrate_data_param('shadowdbport'),
+                db_sock => migrate_data_param('shadowdbsock'),
+            }
+        }
+    },
+    {
         name    => 'index_html',
         default => 0,
     },
@@ -141,8 +152,29 @@ use constant LOCALCONFIG_VARS => (
         name    => 'apache_size_limit',
         default => 250000,
     },
+    {
+        name => 'inbound_proxies',
+        default => sub { migrate_data_param('inbound_proxies') // '' },
+    },
+    {
+        name => 'proxy_url',
+        default => sub { migrate_data_param('proxy_url') // '' },
+    },
+    {
+        name => 'memcached_servers',
+        default => sub { migrate_data_param('memcached_servers') // '' },
+    },
+    {
+        name => 'memcached_namespace',
+        default => sub { migrate_data_param('memcached_namespace') // 'bugzilla:' },
+    }
 );
 
+sub migrate_data_param {
+    my ($name) = @_;
+    state $params = Bugzilla::Config::read_param_file();
+    return $params->{$name};
+}
 
 sub read_localconfig {
     my ($include_deprecated) = @_;

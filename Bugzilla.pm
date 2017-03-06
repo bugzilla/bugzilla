@@ -556,7 +556,7 @@ sub switch_to_shadow_db {
     my $class = shift;
 
     if (!$class->request_cache->{dbh_shadow}) {
-        if ($class->params->{'shadowdb'}) {
+        if ($class->localconfig->{db_shadow}{db_name}) {
             $class->request_cache->{dbh_shadow} = Bugzilla::DB::connect_shadow();
         } else {
             $class->request_cache->{dbh_shadow} = $class->dbh_main;

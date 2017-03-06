@@ -92,11 +92,7 @@ sub SetParam {
     my $entry = $params{$name};
 
     # sanity check the value
-
-    # XXX - This runs the checks. Which would be good, except that
-    # check_shadowdb creates the database as a side effect, and so the
-    # checker fails the second time around...
-    if ($name ne 'shadowdb' && exists $entry->{'checker'}) {
+    if (exists $entry->{'checker'}) {
         my $err = $entry->{'checker'}->($value, $entry);
         die "Param $name is not valid: $err" unless $err eq '';
     }

@@ -578,7 +578,7 @@ sub url_is_attachment_base {
 
     # If we are behind a reverse proxy, we need to determine the original
     # URL, else the comparison with the attachment_base URL will fail.
-    if (Bugzilla->params->{'inbound_proxies'}) {
+    if (Bugzilla->localconfig->{'inbound_proxies'}) {
         # X-Forwarded-Proto is defined in RFC 7239.
         my $protocol = $ENV{HTTP_X_FORWARDED_PROTO} || $self->protocol;
         my $host = $self->virtual_host;

@@ -15,10 +15,10 @@ use Test::More qw(no_plan);
 use Bugzilla;
 use Bugzilla::Util qw(remote_ip);
 
-my $params = Bugzilla->params;
+my $localconfig = Bugzilla->localconfig;
 
 {
-    local $params->{inbound_proxies} = '10.0.0.1,10.0.0.2';
+    local $localconfig->{inbound_proxies} = '10.0.0.1,10.0.0.2';
     local $ENV{REMOTE_ADDR} = '10.0.0.2';
     local $ENV{HTTP_X_FORWARDED_FOR} = '10.42.42.42';
 
@@ -26,7 +26,7 @@ my $params = Bugzilla->params;
 }
 
 {
-    local $params->{inbound_proxies} = '10.0.0.1,10.0.0.2';
+    local $localconfig->{inbound_proxies} = '10.0.0.1,10.0.0.2';
     local $ENV{REMOTE_ADDR} = '10.0.0.1';
     local $ENV{HTTP_X_FORWARDED_FOR} = '10.42.42.42';
 
@@ -34,7 +34,7 @@ my $params = Bugzilla->params;
 }
 
 {
-    local $params->{inbound_proxies} = '10.0.0.1,10.0.0.2';
+    local $localconfig->{inbound_proxies} = '10.0.0.1,10.0.0.2';
     local $ENV{REMOTE_ADDR} = '10.0.0.3';
     local $ENV{HTTP_X_FORWARDED_FOR} = '10.42.42.42';
 
@@ -42,7 +42,7 @@ my $params = Bugzilla->params;
 }
 
 {
-    local $params->{inbound_proxies} = '*';
+    local $localconfig->{inbound_proxies} = '*';
     local $ENV{REMOTE_ADDR} = '10.0.0.3';
     local $ENV{HTTP_X_FORWARDED_FOR} = '10.42.42.42,1.4.9.2';
 
@@ -50,7 +50,7 @@ my $params = Bugzilla->params;
 }
 
 {
-    local $params->{inbound_proxies} = '';
+    local $localconfig->{inbound_proxies} = '';
     local $ENV{REMOTE_ADDR} = '10.9.8.7';
     local $ENV{HTTP_X_FORWARDED_FOR} = '10.42.42.42,1.4.9.2';
 
@@ -59,7 +59,7 @@ my $params = Bugzilla->params;
 
 
 {
-    local $params->{inbound_proxies} = '10.0.0.1,2600:cafe::cafe:ffff:bf42:4998';
+    local $localconfig->{inbound_proxies} = '10.0.0.1,2600:cafe::cafe:ffff:bf42:4998';
     local $ENV{REMOTE_ADDR} = '2600:cafe::cafe:ffff:bf42:4998';
     local $ENV{HTTP_X_FORWARDED_FOR} = '2600:cafe::cafe:ffff:bf42:BEEF';
 
@@ -67,7 +67,7 @@ my $params = Bugzilla->params;
 }
 
 {
-    local $params->{inbound_proxies} = '10.0.0.1,2600:cafe::cafe:ffff:bf42:4998';
+    local $localconfig->{inbound_proxies} = '10.0.0.1,2600:cafe::cafe:ffff:bf42:4998';
     local $ENV{REMOTE_ADDR} = '2600:cafe::cafe:ffff:bf42:DEAD';
     local $ENV{HTTP_X_FORWARDED_FOR} = '2600:cafe::cafe:ffff:bf42:BEEF';
 
@@ -76,7 +76,7 @@ my $params = Bugzilla->params;
 
 
 {
-    local $params->{inbound_proxies} = '*';
+    local $localconfig->{inbound_proxies} = '*';
     local $ENV{REMOTE_ADDR} = '2600:cafe::cafe:ffff:bf42:DEAD';
     local $ENV{HTTP_X_FORWARDED_FOR} = '';
 

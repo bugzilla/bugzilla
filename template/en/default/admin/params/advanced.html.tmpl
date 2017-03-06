@@ -41,23 +41,5 @@
 [% END %]
 
 [% param_descs = {
-  inbound_proxies =>
-    "When inbound traffic to Bugzilla goes through a proxy,"
-    _ " Bugzilla thinks that the IP address of every single"
-    _ " user is the IP address of the proxy. If you enter a comma-separated"
-    _ " list of IPs in this parameter, then Bugzilla will trust any"
-    _ " <code>X-Forwarded-For</code> header sent from those IPs,"
-    _ " and use the value of that header as the end user's IP address."
-    _ " If set to a *, $terms.Bugzilla will trust the first value in the "
-    _ " X-Forwarded-For header.",
-
-  proxy_url => 
-    "Bugzilla may have to access the web to get notifications about"
-    _ " new releases (see the <var>upgrade_notification</var> parameter)."
-    _ " If your Bugzilla server is behind a proxy, it may be"
-    _ " necessary to enter its URL if the web server cannot access the"
-    _ " HTTP_PROXY environment variable. If you have to authenticate,"
-    _ " use the <code>http://user:pass@proxy_url/</code> syntax.",
-
   strict_transport_security => sts_desc,
 } %]

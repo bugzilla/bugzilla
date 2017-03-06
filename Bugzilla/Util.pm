@@ -276,7 +276,7 @@ sub do_ssl_redirect_if_required {
     return if !Bugzilla->params->{'sslbase'};
 
     # If we're already running under SSL, never redirect.
-    if (Bugzilla->params->{'inbound_proxies'}
+    if (Bugzilla->localconfig->{'inbound_proxies'}
         && uc($ENV{HTTP_X_FORWARDED_PROTO} || '') eq 'HTTPS') {
         return;
     }
@@ -299,7 +299,7 @@ sub correct_urlbase {
         return $sslbase;
     }
     # Return what the user currently uses.
-    elsif (Bugzilla->params->{'inbound_proxies'}) {
+    elsif (Bugzilla->localconfig->{'inbound_proxies'}) {
         return (uc($ENV{HTTP_X_FORWARDED_PROTO} || '') eq 'HTTPS') ? $sslbase : $urlbase;
     }
     else {
@@ -310,7 +310,7 @@ sub correct_urlbase {
 # Returns the real remote address of the client,
 sub remote_ip {
     my $remote_ip       = $ENV{'REMOTE_ADDR'} || '127.0.0.1';
-    my @proxies         = split(/[\s,]+/, Bugzilla->params->{inbound_proxies});
+    my @proxies         = split(/[\s,]+/, Bugzilla->localconfig->{inbound_proxies});
     my @x_forwarded_for = split(/[\s,]+/, $ENV{HTTP_X_FORWARDED_FOR} // '');
 
     return $remote_ip unless @x_forwarded_for;

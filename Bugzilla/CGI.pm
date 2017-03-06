@@ -332,7 +332,10 @@ sub header {
         && !$self->cookie('Bugzilla_login_request_cookie'))
     {
         my %args;
-        $args{'-secure'} = 1 if Bugzilla->params->{ssl_redirect};
+        my $params = Bugzilla->params;
+        if ($params->{ssl_redirect} || $params->{urlbase} =~ /^https/i) {
+            $args{'-secure'} = 1;
+        }
 
         $self->send_cookie(-name => 'Bugzilla_login_request_cookie',
                            -value => generate_random_password(),

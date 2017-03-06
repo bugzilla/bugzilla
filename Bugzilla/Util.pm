@@ -272,6 +272,7 @@ sub i_am_webservice {
 # (doing so can mess up XML-RPC).
 sub do_ssl_redirect_if_required {
     return if !i_am_cgi();
+    return if Bugzilla->params->{urlbase} =~ /^https/i;
     return if !Bugzilla->params->{'ssl_redirect'};
     return if !Bugzilla->params->{'sslbase'};
 

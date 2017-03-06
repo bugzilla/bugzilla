@@ -17,11 +17,13 @@ use strict;
 use warnings;
 
 use File::Basename;
-BEGIN { chdir dirname($0); }
-use lib qw(. lib local/lib/perl5 .checksetup_lib/lib/perl5);
-
-# the @INC which checksetup needs to operate against.
-our @BUGZILLA_INC = grep { !/checksetup_lib/ } @INC;
+use File::Spec;
+BEGIN {
+    require lib;
+    my $dir = File::Spec->rel2abs(dirname(__FILE__));
+    lib->import($dir, File::Spec->catdir($dir, "lib"), File::Spec->catdir($dir, qw(local lib perl5)));
+    chdir($dir);
+}
 
 use Getopt::Long qw(:config bundling);
 use Pod::Usage;
@@ -95,18 +97,20 @@ $ENV{PERL_MM_USE_DEFAULT} = 1;
 $ENV{BZ_SILENT_MAKEFILE}  = 1;
 system($^X, "Makefile.PL");
 
+if (! -f "MYMETA.json") {
+    die "Makefile.PL failed to generate a MYMETA.json file.",
+        "Try upgrading ExtUtils::MakeMaker";
+}
+
 my $meta = load_cpan_meta();
 if (keys %{$meta->{optional_features}} < 1) {
-    warn "Your version of ExtUtils::MakeMaker is probably too old\n";
-    warn "Falling back to static (and wrong) META.json\n";
-    unlink('MYMETA.json');
-    $meta = load_cpan_meta();
+    die "Your version of ExtUtils::MakeMaker is too old or broken\n";
 }
-my $requirements = check_cpan_requirements($meta, \@BUGZILLA_INC, !$silent);
+my $requirements = check_cpan_requirements($meta, [@INC], !$silent);
 
 exit 1 unless $requirements->{ok};
 
-check_all_cpan_features($meta, \@BUGZILLA_INC, !$silent);
+check_all_cpan_features($meta, [@INC], !$silent);
 
 exit 0 if $switch{'check-modules'};
 ###########################################################################

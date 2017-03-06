@@ -102,10 +102,9 @@ use constant FEATURE_FILES => (
 
 sub load_cpan_meta {
     my $dir = bz_locations()->{libpath};
-    my @meta_json = map { File::Spec->catfile($dir, $_) } qw( MYMETA.json META.json );
-    my ($file) = grep { -f $_ } @meta_json;
+    my $file = File::Spec->catfile($dir, 'MYMETA.json');
 
-    if ($file) {
+    if (-f $file) {
         open my $meta_fh, '<', $file or die "unable to open $file: $!";
         my $str = do { local $/ = undef; scalar <$meta_fh> };
         # detaint
@@ -491,7 +490,7 @@ that must be enabled in order to compile that file.
 
 =item C<load_cpan_meta>
 
-Load MYMETA.json or META.json from the bugzilla directory, and a return a L<CPAN::Meta> object.
+Load MYMETA.json from the bugzilla directory, and a return a L<CPAN::Meta> object.
 
 =back
 

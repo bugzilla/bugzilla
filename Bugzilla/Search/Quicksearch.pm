@@ -350,6 +350,10 @@ sub _handle_status_and_resolution {
     my (%states, %resolutions);
     $bug_status_set = 1;
 
+    if ($word =~ s/^(ALL|OPEN)\+$/$1/) {
+        Bugzilla->cgi->param('limit' => 0);
+    }
+
     if ($word eq 'OPEN') {
         $states{$_} = 1 foreach BUG_STATE_OPEN;
     }
@@ -620,9 +624,12 @@ sub _matches_phrase {
 # Expand found prefixes to states or resolutions
 sub matchPrefixes {
     my ($hr_states, $hr_resolutions, $word, $ar_check_states) = @_;
-    return unless $word =~ /^[A-Z_]+(,[A-Z_]+)*$/;
+    return unless $word =~ /^[A-Z_]+(,[A-Z_]+)*\+?$/;
 
     my @ar_prefixes = split(/,/, $word);
+    if ($ar_prefixes[-1] =~ s/\+$//) {
+        Bugzilla->cgi->param(limit => 0);
+    }
     my $ar_check_resolutions = get_legal_field_values('resolution');
     my $foundMatch = 0;
 

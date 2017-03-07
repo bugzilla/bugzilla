@@ -297,7 +297,8 @@
         in that status will be searched. <strong><kbd>ALL</kbd></strong>
         is a special shortcut that means "all statuses".
         <strong><kbd>OPEN</kbd></strong> is a special shortcut that means
-        "all open statuses".
+        "all open statuses". Adding a '+' to the end of a status name will
+        set the result limit to 0.
       </td>
     </tr>
     <tr>
@@ -307,7 +308,9 @@
         resolution, or even an abbreviation of any resolution, and 
         [%+ terms.bugs %] with that resolution will be searched. For example,
         making <kbd>FIX</kbd> the first word of your search will find all
-        [%+ terms.bugs %] with a resolution of <kbd>FIXED</kbd> .
+        [%+ terms.bugs %] with a resolution of <kbd>FIXED</kbd>.
+        Adding a '+' to the end of a resolution name will set the result limit
+        to 0.
     </tr>
     <tr>
       <td class="field_name">[% field_descs.priority FILTER html %]</td>

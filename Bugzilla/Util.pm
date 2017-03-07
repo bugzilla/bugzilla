@@ -65,17 +65,20 @@ sub detaint_signed {
     return (defined($_[0]));
 }
 
+my %html_quote = (
+    q{&} => '&amp;',
+    q{<} => '&lt;',
+    q{>} => '&gt;',
+    q{"} => '&quot;',
+    q{@} => '&#64;', # Obscure '@'.
+);
+
 # Bug 120030: Override html filter to obscure the '@' in user
 #             visible strings.
 # Bug 319331: Handle BiDi disruptions.
 sub html_quote {
     my $var = shift;
-    $var =~ s/&/&amp;/g;
-    $var =~ s/</&lt;/g;
-    $var =~ s/>/&gt;/g;
-    $var =~ s/"/&quot;/g;
-    # Obscure '@'.
-    $var =~ s/\@/\&#64;/g;
+    $var =~ s/([&<>"@])/$html_quote{$1}/g;
 
     state $use_utf8 = Bugzilla->params->{'utf8'};
 

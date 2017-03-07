@@ -785,7 +785,7 @@ sub DoSessions {
     my $sessions    = Bugzilla::User::Session->match({ userid => $user->id, LIMIT => SESSION_MAX + 1 });
     my $info_getter = $user->authorizer && $user->authorizer->successful_info_getter();
 
-    if ($info_getter) {
+    if ($info_getter && $info_getter->can('cookie')) {
         foreach my $session (@$sessions) {
             $session->{current} = $info_getter->cookie eq $session->{cookie};
         }

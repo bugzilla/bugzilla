@@ -56,6 +56,7 @@ use constant SUB_CLASSES => qw(
     Bugzilla::BugUrl::Launchpad
     Bugzilla::BugUrl::Google
     Bugzilla::BugUrl::Chromium
+    Bugzilla::BugUrl::Edge
     Bugzilla::BugUrl::Debian
     Bugzilla::BugUrl::JIRA
     Bugzilla::BugUrl::Trac

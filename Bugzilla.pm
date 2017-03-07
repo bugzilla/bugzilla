@@ -23,6 +23,7 @@ BEGIN {
 use Bugzilla::Auth;
 use Bugzilla::Auth::Persist::Cookie;
 use Bugzilla::CGI;
+use Bugzilla::Elastic;
 use Bugzilla::Config;
 use Bugzilla::Constants;
 use Bugzilla::DB;
@@ -757,6 +758,11 @@ sub memcached {
     } else {
         return $_[0]->request_cache->{memcached} ||= Bugzilla::Memcached->_new();
     }
+}
+
+sub elastic {
+    my ($class) = @_;
+    $class->process_cache->{elastic} //= Bugzilla::Elastic->new();
 }
 
 # Private methods

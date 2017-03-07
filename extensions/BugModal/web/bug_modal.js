@@ -710,7 +710,7 @@ $(function() {
     $('#cancel-btn')
         .click(function(event) {
             event.preventDefault();
-            window.location.replace($('#this-bug').val());
+            window.location.replace($('#this-bug').attr('href'));
         });
 
     // Open help page

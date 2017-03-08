@@ -9,8 +9,8 @@ build_requires:
   Test::WWW::Selenium: '0'
 configure_requires:
   ExtUtils::MakeMaker: 6.57_07
-dynamic_config: 0
-generated_by: 'ExtUtils::MakeMaker version 7.24, CPAN::Meta::Converter version 2.150010'
+dynamic_config: 1
+generated_by: 'ExtUtils::MakeMaker version 7.22, CPAN::Meta::Converter version 2.150005'
 license: unknown
 meta-spec:
   url: http://module-build.sourceforge.net/META-spec-v1.4.html
@@ -261,6 +261,7 @@ requires:
   Template: '2.24'
   Text::CSV_XS: '0'
   Text::Diff: '0'
+  Throwable: '0'
   Tie::IxHash: '0'
   URI: '1.55'
   perl: '5.010001'

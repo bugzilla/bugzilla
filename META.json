@@ -3,8 +3,8 @@
    "author" : [
       "Bugzilla Developers <developers@bugzilla.org>"
    ],
-   "dynamic_config" : 0,
-   "generated_by" : "ExtUtils::MakeMaker version 7.24, CPAN::Meta::Converter version 2.150010",
+   "dynamic_config" : 1,
+   "generated_by" : "ExtUtils::MakeMaker version 7.22, CPAN::Meta::Converter version 2.150005",
    "license" : [
       "unknown"
    ],
@@ -479,6 +479,7 @@
             "Template" : "2.24",
             "Text::CSV_XS" : "0",
             "Text::Diff" : "0",
+            "Throwable" : "0",
             "Tie::IxHash" : "0",
             "URI" : "1.55",
             "perl" : "5.010001",
@@ -495,5 +496,5 @@
    },
    "release_status" : "stable",
    "version" : "42",
-   "x_serialization_backend" : "JSON::PP version 2.27400"
+   "x_serialization_backend" : "JSON::PP version 2.27300"
 }

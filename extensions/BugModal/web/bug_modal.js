@@ -449,6 +449,11 @@ $(function() {
             $.scrollTo($(this).attr('href').substr(1));
         });
 
+    // Update readable bug status
+    var rbs = $("#readable-bug-status");
+    var rbs_text = bugzillaReadableStatus.readable(rbs.data('readable-bug-status'));
+    rbs.text(rbs_text);
+    
     if (BUGZILLA.user.id === 0) return;
 
     //
@@ -775,9 +780,6 @@ $(function() {
             var other = $(that.attr('id') == 'dup_id' ? '#bottom-dup_id' : '#dup_id');
             other.val(that.val());
         });
-    var rbs = $("#readable-bug-status");
-    var rbs_text = bugzillaReadableStatus.readable(rbs.data('readable-bug-status'));
-    rbs.text(rbs_text);
 
     // add see-also button
     $('.bug-urls-btn')

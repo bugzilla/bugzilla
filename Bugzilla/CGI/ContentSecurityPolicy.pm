@@ -58,7 +58,7 @@ sub _has_directive {
 
 sub header_names {
     my ($self) = @_;
-    my @names = ('Content-Security-Policy', 'X-Content-Security-Policy', 'X-WebKit-CSP');
+    my @names = ('Content-Security-Policy');
     if ($self->report_only) {
         return map { $_ . '-Report-Only' } @names;
     }

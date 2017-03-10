@@ -243,7 +243,7 @@ sub template_before_process {
                 && $resolution ne 'DUPLICATE';
         }
 
-        # reporters can set it to anything, except INCOMPELTE
+        # reporters can set it to anything, except INCOMPLETE
         if ($perms->{isreporter}
             && !($perms->{canconfirm} || $perms->{canedit}))
         {

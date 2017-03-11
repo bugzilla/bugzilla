@@ -11,7 +11,6 @@
 ####GoodPerl#####
 
 use 5.14.0;
-use strict;
 use warnings;
 
 use lib qw(. lib local/lib/perl5 t);
@@ -88,13 +87,15 @@ foreach my $file (@testitems) {
         next;
     }
     while (my $file_line = <FILE>) {
-        $found_use_perl = 1 if $file_line =~ m/^\s*use 5\.14\.0/;
+        $found_use_perl = 1 if $file_line =~ m/^\s*use 5\.14\./;
         $found_use_strict = 1 if $file_line =~ m/^\s*use strict/;
         $found_use_warnings = 1 if $file_line =~ m/^\s*use warnings/;
         last if ($found_use_perl && $found_use_strict && $found_use_warnings);
     }
     close (FILE);
     if ($found_use_perl) {
+        # use 5.14.x implies use strict (spotted by @spoonyspork)
+        $found_use_strict = 1;
         ok(1,"$file requires Perl 5.14.0");
     } else {
         ok(0,"$file DOES NOT require Perl 5.14.0 --WARNING");
@@ -123,20 +124,20 @@ foreach my $file (@testitems) {
     }
     my $lineno = 0;
     my $error = 0;
-    
+
     while (!$error && (my $file_line = <FILE>)) {
         $lineno++;
         if ($file_line =~ /Throw.*Error\("(.*?)"/) {
             if ($1 =~ /\s/) {
-                ok(0,"$file has a Throw*Error call on line $lineno 
+                ok(0,"$file has a Throw*Error call on line $lineno
                       which doesn't use a tag --ERROR");
-                $error = 1;       
+                $error = 1;
             }
         }
     }
-    
+
     ok(1,"$file uses Throw*Error calls correctly") if !$error;
-    
+
     close(FILE);
 }
 

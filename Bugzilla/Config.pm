@@ -300,7 +300,7 @@ sub write_params {
     my $param_file = bz_locations()->{'datadir'} . '/params.json';
 
     my $json_data = JSON()->new->canonical->pretty->encode($param_data);
-    write_text($param_file, $json_data)
+    write_text($param_file, $json_data);
     # It's not common to edit parameters and loading
     # Bugzilla::Install::Filesystem is slow.
     require Bugzilla::Install::Filesystem;

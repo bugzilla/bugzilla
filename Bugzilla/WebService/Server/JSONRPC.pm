@@ -197,10 +197,10 @@ sub type {
     
     # This is the only type that does something special with undef.
     if ($type eq 'boolean') {
-        return $value ? JSON::true : JSON::false;
+        return $value ? JSON->true : JSON->false;
     }
     
-    return JSON::null if !defined $value;
+    return undef if !defined $value;
 
     my $retval = $value;
 

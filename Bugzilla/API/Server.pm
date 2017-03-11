@@ -151,7 +151,7 @@ sub return_error {
     if ($status_code && $message) {
         $self->{_return_error} = {
             status_code => $status_code,
-            error       => JSON::true,
+            error       => JSON->true,
             message     => $message
         };
         $self->{_return_error}->{code} = $error_code if $error_code;

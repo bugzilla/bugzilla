@@ -687,42 +687,11 @@ if ($format->{'extension'} eq 'html' && !defined $params->param('limit')) {
     $vars->{'default_limited'} = 1;
 }
 
-my $fallback_search = Bugzilla::Search->new(fields => [@selectcolumns],
-                                            params => scalar $params->Vars,
-                                            order  => [@order_columns],
-                                            sharer => $sharer_id);
-
-my $search;
-my $elastic = $cgi->param('elastic') // 1;
-if (defined $cgi->param('elastic')) {
-    $vars->{was_elastic} = 1;
-}
-if ($elastic) {
-    local $SIG{__DIE__} = undef;
-    local $SIG{__WARN__} = undef;
-    my $ok = eval {
-        my @args = ( params => scalar $params->Vars );
-        if ($searchstring) {
-            @args = (quicksearch => $searchstring);
-        }
-        if (defined $params->param('limit')) {
-            push @args, limit => scalar $params->param('limit');
-        }
-        $search = Bugzilla::Elastic::Search->new(
-            fields => [@selectcolumns],
-            order  => [@order_columns],
-            @args,
-        );
-        $search->es_query;
-        1;
-    };
-    if (!$ok) {
-        warn "fallback from elasticsearch: $@\n";
-        $search = $fallback_search;
-    }
-} else {
-    $search = $fallback_search;
-}
+# Generate the basic SQL query that will be used to generate the bug list.
+my $search = new Bugzilla::Search('fields' => \@selectcolumns, 
+                                  'params' => scalar $params->Vars,
+                                  'order'  => \@order_columns,
+                                  'sharer' => $sharer_id);
 
 $order = join(',', $search->order);
 
@@ -766,44 +735,25 @@ $::SIG{TERM} = 'DEFAULT';
 $::SIG{PIPE} = 'DEFAULT';
 
 # Execute the query.
-my ($data, $extra_data);
-do {
-    local $SIG{__DIE__} = undef;
-    local $SIG{__WARN__} = undef;
-    ($data, $extra_data) = eval { $search->data };
-};
-
-if ($elastic && not defined $data) {
-    warn "fallback from elasticsearch: $@\n";
-    $search = $fallback_search;
-    ($data, $extra_data) = $search->data;
-    $elastic = 0;
-}
-
-$fulltext = 1 if $elastic;
-
+my ($data, $extra_data) = $search->data;
 $vars->{'search_description'} = $search->search_description;
+
 if ($cgi->param('debug')
     && Bugzilla->params->{debug_group}
     && $user->in_group(Bugzilla->params->{debug_group})
 ) {
     $vars->{'debug'} = 1;
-    if ($search->isa('Bugzilla::Elastic::Search')) {
-        $vars->{query_time} = $search->query_time;
-    }
-    else {
-        $vars->{'queries'} = $extra_data;
-        my $query_time = 0;
-        $query_time += $_->{'time'} foreach @$extra_data;
-        $vars->{'query_time'} = $query_time;
-        # Explains are limited to admins because you could use them to figure
-        # out how many hidden bugs are in a particular product (by doing
-        # searches and looking at the number of rows the explain says it's
-        # examining).
-        if ($user->in_group('admin')) {
-            foreach my $query (@$extra_data) {
-                $query->{explain} = $dbh->bz_explain($query->{sql});
-            }
+    $vars->{'queries'} = $extra_data;
+    my $query_time = 0;
+    $query_time += $_->{'time'} foreach @$extra_data;
+    $vars->{'query_time'} = $query_time;
+    # Explains are limited to admins because you could use them to figure
+    # out how many hidden bugs are in a particular product (by doing
+    # searches and looking at the number of rows the explain says it's
+    # examining).
+    if ($user->in_group('admin')) {
+        foreach my $query (@$extra_data) {
+            $query->{explain} = $dbh->bz_explain($query->{sql});
         }
     }
 }
@@ -934,15 +884,6 @@ else { # remaining_time <= 0
 ################################################################################
 
 # Define the variables and functions that will be passed to the UI template.
-
-if ($vars->{elastic} = $search->isa('Bugzilla::Elastic::Search')) {
-    $vars->{elastic_query_time} = $search->query_time;
-}
-else {
-    my $query_time = 0;
-    $query_time += $_->{'time'} foreach @$extra_data;
-    $vars->{'query_time'} = $query_time;
-}
 
 $vars->{'bugs'} = \@bugs;
 $vars->{'buglist'} = \@bugidlist;

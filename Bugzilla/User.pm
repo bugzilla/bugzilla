@@ -128,7 +128,7 @@ with 'Bugzilla::Elastic::Role::Object';
 
 sub ES_TYPE { 'user' }
 
-sub ES_OBJECTS_AT_ONCE { 5000 }
+sub ES_OBJECTS_AT_ONCE { 2000 }
 
 sub ES_SELECT_UPDATED_SQL {
     my ($class, $mtime) = @_;
@@ -150,7 +150,7 @@ sub ES_SELECT_ALL_SQL {
     my $id = $class->ID_FIELD;
     my $table = $class->DB_TABLE;
 
-    return ("SELECT $id FROM $table WHERE $id > ? AND is_enabled AND NOT disabledtext ORDER BY $id", [$last_id // 0]);
+    return ("SELECT $id FROM $table WHERE $id > ? AND is_enabled ORDER BY $id", [$last_id // 0]);
 }
 
 sub ES_PROPERTIES {
@@ -175,6 +175,7 @@ sub ES_PROPERTIES {
 
 sub es_document {
     my ( $self, $timestamp ) = @_;
+    my $weight = eval { $self->last_activity_ts ? datetime_from($self->last_activity_ts)->epoch : 0 } // 0;
     my $doc = {
         login          => $self->login,
         name           => $self->name,
@@ -183,6 +184,7 @@ sub es_document {
             input => [ $self->login, $self->name ],
             output => $self->identity,
             payload => { name => $self->login, real_name => $self->name },
+            weight => $weight,
         },
     };
     if ($self->name && $self->name =~ /:(\w+)/) {
@@ -191,6 +193,7 @@ sub es_document {
             input => [ $ircnick ],
             output => $self->login,
             payload => { name => $self->login, real_name => $self->name, ircnick => $ircnick },
+            weight => $weight,
         };
     }
 

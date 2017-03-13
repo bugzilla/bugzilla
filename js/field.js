@@ -713,13 +713,15 @@ $(function() {
     }
 
     var options_user = {
-        serviceUrl: 'rest/elastic/suggest_users',
+        serviceUrl: 'rest/user',
         params: {
             Bugzilla_api_token: BUGZILLA.api_token,
+            include_fields: 'name,real_name',
+            limit: 100
         },
         paramName: 'match',
         deferRequestBy: 250,
-        minChars: 2,
+        minChars: 3,
         tabDisabled: true,
         autoSelectFirst: true,
         triggerSelectOnValidInput: false,

@@ -23,7 +23,7 @@ has 'mtime' => (
 has 'shadow_dbh' => ( is => 'lazy' );
 
 has 'debug_sql' => (
-    is      => 'ro',
+    is => 'ro',
     default => 0,
 );
 
@@ -40,23 +40,23 @@ sub create_index {
         index => $self->index_name,
         body => {
             settings => {
-                number_of_shards => 2,
+                number_of_shards => 1,
                 analysis => {
-                    filter => {
-                        asciifolding_original => { 
-                            type              => "asciifolding",
-                            preserve_original => \1,
-                        },
-                    },
                     analyzer => {
                         folding => {
+                            type      => 'standard',
                             tokenizer => 'standard',
-                            filter    => ['standard', 'lowercase', 'asciifolding_original'],
+                            filter    => [ 'lowercase', 'asciifolding' ]
                         },
                         bz_text_analyzer => {
                             type             => 'standard',
                             filter           => ['lowercase', 'stop'],
                             max_token_length => '20'
+                        },
+                        bz_substring_analyzer => {
+                            type      => 'custom',
+                            filter    => ['lowercase'],
+                            tokenizer => 'bz_ngram_tokenizer',
                         },
                         bz_equals_analyzer => {
                             type   => 'custom',
@@ -71,20 +71,25 @@ sub create_index {
                         whiteboard_shingle_words => {
                             type => 'custom',
                             tokenizer => 'whiteboard_words_pattern',
-                            filter => ['stop', 'shingle', 'lowercase']
+                            filter => ['stop', 'shingle']
                         },
                         whiteboard_tokens => {
                             type => 'custom',
                             tokenizer => 'whiteboard_tokens_pattern',
-                            filter => ['stop', 'lowercase']
+                            filter => ['stop']
                         },
                         whiteboard_shingle_tokens => {
                             type => 'custom',
                             tokenizer => 'whiteboard_tokens_pattern',
-                            filter => ['stop', 'shingle', 'lowercase']
+                            filter => ['stop', 'shingle']
                         }
                     },
                     tokenizer => {
+                        bz_ngram_tokenizer => {
+                            type => 'nGram',
+                            min_ngram => 2,
+                            max_ngram => 25,
+                        },
                         whiteboard_tokens_pattern => {
                             type => 'pattern',
                             pattern => '\\s*([,;]*\\[|\\][\\s\\[]*|[;,])\\s*'

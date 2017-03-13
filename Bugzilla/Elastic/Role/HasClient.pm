@@ -17,7 +17,7 @@ sub _build_client {
     my ($self) = @_;
 
     return Search::Elasticsearch->new(
-        nodes => [ split(/\s+/, Bugzilla->params->{elasticsearch_nodes}) ],
+        nodes => Bugzilla->params->{elasticsearch_nodes},
         cxn_pool => 'Sniff',
     );
 }

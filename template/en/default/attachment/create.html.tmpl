@@ -84,7 +84,7 @@ TUI_hide_default('attachment_text_field');
         <td>
           <em>If you want to assign this [% terms.bug %] to yourself,
               check the box below.</em><br>
-          <input type="checkbox" id="takebug" name="takebug" value="1">
+          <input type="checkbox" id="takebug" name="takebug" value="1" [% IF bug.assigned_to.login == "nobody@mozilla.org" || bug.assigned_to.login.search('.bugs$') %] checked [% END %]>
           <label for="takebug">take [% terms.bug %]</label>
           [% bug_statuses = [] %]
           [% FOREACH bug_status = bug.status.can_change_to %]

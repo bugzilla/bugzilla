@@ -158,7 +158,7 @@ $(function() {
           <input type="checkbox" id="needinfo_override_[% flag.id FILTER html %]"
             name="needinfo_override_[% flag.id FILTER html %]" value="1" class="needinfo-override"
             [% 'data-is-self="1"' IF flag.requestee %]
-            [% " checked" IF user.in_group("canconfirm") %]>
+            [% " checked" IF flag.requestee.id == user.id || user.in_group("canconfirm") %]>
         </td>
         <td>
           <label for="needinfo_override_[% flag.id FILTER html %]">

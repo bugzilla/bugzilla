@@ -4,22 +4,13 @@
 #
 # This Source Code Form is "Incompatible With Secondary Licenses", as
 # defined by the Mozilla Public License, v. 2.0.
-package Bugzilla::Elastic::Role::HasClient;
+package Bugzilla::Elastic::Role::Search;
 
 use 5.10.1;
-use Moo::Role;
-use Search::Elasticsearch;
+use strict;
+use warnings;
+use Role::Tiny;
 
-
-has 'client' => (is => 'lazy');
-
-sub _build_client {
-    my ($self) = @_;
-
-    return Search::Elasticsearch->new(
-        nodes => [ split(/\s+/, Bugzilla->params->{elasticsearch_nodes}) ],
-        cxn_pool => 'Sniff',
-    );
-}
+requires qw(data search_description invalid_order_columns order);
 
 1;

@@ -80,7 +80,7 @@ PerlChildInitHandler "sub { Bugzilla::RNG::srand(); srand(); }"
     AddHandler perl-script .cgi
     # No need to PerlModule these because they're already defined in mod_perl.pl
     PerlResponseHandler Bugzilla::ModPerl::ResponseHandler
-    PerlCleanupHandler  Apache2::SizeLimit Bugzilla::ModPerl::CleanupHandler
+    PerlCleanupHandler Bugzilla::ModPerl::CleanupHandler Apache2::SizeLimit
     PerlOptions +ParseHeaders
     Options +ExecCGI +FollowSymLinks
     AllowOverride Limit FileInfo Indexes
@@ -115,6 +115,11 @@ foreach my $file (glob "$cgi_path/*.cgi") {
     Bugzilla::Util::trick_taint($file);
     $rl->handler($file, $file);
 }
+
+# Some items might already be loaded into the request cache
+# best to make sure it starts out empty.
+# Because of bug 1347335 we also do this in init_page().
+Bugzilla::clear_request_cache();
 
 package Bugzilla::ModPerl::ResponseHandler;
 use strict;
@@ -160,11 +165,6 @@ sub handler {
     my $r = shift;
 
     Bugzilla::_cleanup();
-    # Sometimes mod_perl doesn't properly call DESTROY on all
-    # the objects in pnotes()
-    foreach my $key (keys %{$r->pnotes}) {
-        delete $r->pnotes->{$key};
-    }
 
     return Apache2::Const::OK;
 }

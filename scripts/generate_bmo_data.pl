@@ -491,7 +491,8 @@ my %set_params = (
     usebugaliases             => 1,
     useqacontact              => 1,
     use_mailer_queue          => 1,
-    user_info_class           => 'CGI',
+    user_info_class           => 'GitHubAuth,CGI',
+    user_verify_class         => 'GitHubAuth,DB',
 );
 
 my $params_modified;

@@ -29,7 +29,6 @@ use Bugzilla::WebService::Server::REST::Resources::Group;
 use Bugzilla::WebService::Server::REST::Resources::Product;
 use Bugzilla::WebService::Server::REST::Resources::User;
 use Bugzilla::WebService::Server::REST::Resources::BugUserLastVisit;
-use Bugzilla::WebService::Server::REST::Resources::Elastic;
 
 use List::MoreUtils qw(uniq);
 use Scalar::Util qw(blessed reftype);

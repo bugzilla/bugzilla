@@ -317,13 +317,5 @@
     [% ELSE %]
       [% bugs.size %] [%+ terms.bugs %] found.
     [% END %]
-    [% IF elastic %]
-      <br>
-      ElasticSearch took [% elastic_query_time FILTER html %] seconds.
-      <a href="buglist.cgi?[% urlquerypart FILTER html %]&amp;elastic=0">Try without ElasticSearch</a>
-    [% ELSIF was_elastic %]
-      <br>
-      Search took [% query_time FILTER html %] seconds.
-    [% END %]
   </span>
 [% END %]

@@ -290,7 +290,6 @@ sub WS_DISPATCH {
         'Product'        => 'Bugzilla::WebService::Product',
         'Group'          => 'Bugzilla::WebService::Group',
         'BugUserLastVisit' => 'Bugzilla::WebService::BugUserLastVisit',
-        'Elastic'        => 'Bugzilla::WebService::Elastic',
         %hook_dispatch
     };
     return $dispatch;

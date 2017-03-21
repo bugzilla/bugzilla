@@ -303,15 +303,19 @@ with 'Bugzilla::Elastic::Role::Object';
 sub ES_TYPE {'bug'}
 
 sub _bz_field {
-    my ($field, @fields) = @_;
+    my ($field, $type, $analyzer, @fields) = @_;
 
     return (
         $field => {
-            type     => 'string',
-            analyzer => 'bz_text_analyzer',
+            type     => $type,
+            analyzer => $analyzer,
             fields => {
+                raw => {
+                    type  => 'string',
+                    index => 'not_analyzed',
+                },
                 eq => {
-                    type     => 'string',
+                    type => 'string',
                     analyzer => 'bz_equals_analyzer',
                 },
                 @fields,
@@ -320,20 +324,32 @@ sub _bz_field {
     );
 }
 
+sub _bz_text_field {
+    my ($field) = @_;
+
+    return _bz_field($field, 'string', 'bz_text_analyzer');
+}
+
+sub _bz_substring_field {
+    my ($field, @rest) = @_;
+
+    return _bz_field($field, 'string', 'bz_substring_analyzer', @rest);
+}
+
 sub ES_PROPERTIES {
     return {
-        _bz_field('priority'),
-        _bz_field('bug_severity'),
-        _bz_field('bug_status'),
-        _bz_field('resolution'),
+        priority          => { type => 'string', analyzer => 'keyword' },
+        bug_severity      => { type => 'string', analyzer => 'keyword' },
+        bug_status        => { type => 'string', analyzer => 'keyword' },
+        resolution        => { type => 'string', analyzer => 'keyword' },
+        keywords          => { type => 'string' },
         status_whiteboard => { type => 'string', analyzer => 'whiteboard_shingle_tokens' },
         delta_ts          => { type => 'string', index => 'not_analyzed' },
-        _bz_field('product'),
-        _bz_field('component'),
-        _bz_field('classification'),
-        _bz_field('short_desc'),
-        _bz_field('assigned_to'),
-        _bz_field('reporter'),
+        _bz_substring_field('product'),
+        _bz_substring_field('component'),
+        _bz_substring_field('classification'),
+        _bz_text_field('short_desc'),
+        _bz_substring_field('assigned_to'),
     };
 }
 
@@ -410,7 +426,7 @@ sub es_document {
         bug_id            => $self->id,
         product           => $self->product_obj->name,
         alias             => $self->alias,
-        keywords          => [ map { $_->name } @{$self->keyword_objects} ],
+        keywords          => $self->keywords,
         priority          => $self->priority,
         bug_status        => $self->bug_status,
         resolution        => $self->resolution,
@@ -419,7 +435,6 @@ sub es_document {
         status_whiteboard => $self->status_whiteboard,
         short_desc        => $self->short_desc,
         assigned_to       => $self->assigned_to->login,
-        reporter          => $self->reporter->login,
         delta_ts          => $self->delta_ts,
         bug_severity      => $self->bug_severity,
     };

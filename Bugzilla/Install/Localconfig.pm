@@ -141,6 +141,10 @@ use constant LOCALCONFIG_VARS => (
         name    => 'apache_size_limit',
         default => 250000,
     },
+    {
+        name => 'feature_disable',
+        default => sub { {} },
+    },
 );
 
 

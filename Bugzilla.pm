@@ -272,6 +272,9 @@ sub has_feature {
     my $feature = eval { $meta->feature($feature_name) }
       or ThrowCodeError('invalid_feature', { feature => $feature_name });
 
+    if (Bugzilla->localconfig->{disable_feature}{$feature_name}) {
+        return $cache->{feature}{$feature_name} = 0;
+    }
     return $cache->{feature}{$feature_name} = check_cpan_feature($feature)->{ok};
 }
 

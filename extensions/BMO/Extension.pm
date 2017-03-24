@@ -1152,7 +1152,8 @@ sub _detect_attached_url {
     return unless defined $url;
     return if length($url) > 256;
     $url = trim($url);
-    return if $url =~ /\s/;
+    # ignore urls that contain unescaped characters outside of the range mentioned in RFC 3986 section 2
+    return if $url =~ m<[^A-Za-z0-9._~:/?#\[\]@!\$&'()*+,;=`.%-]>;
 
     foreach my $key (keys %autodetect_attach_urls) {
         if ($url =~ $autodetect_attach_urls{$key}->{regex}) {

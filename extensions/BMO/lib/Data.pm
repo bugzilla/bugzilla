@@ -26,6 +26,22 @@ our @EXPORT = qw( $cf_visible_in_products
 # Creating an attachment whose contents is a URL matching one of these regexes
 # will result in the user being redirected to that URL when viewing the
 # attachment.
+
+my $mozreview_url_re = qr{
+    # begins with mozreview hostname
+    ^
+    https?://reviewboard(?:-dev)?\.(?:allizom|mozilla)\.org
+
+    # followed by a review path
+    /r/\d+
+
+    # ends with optional suffix
+    (?: /
+      | /diff/\#index_header
+    )?
+    $
+}ix;
+
 our %autodetect_attach_urls = (
     github_pr => {
         title        => 'GitHub Pull Request',
@@ -35,7 +51,7 @@ our %autodetect_attach_urls = (
     },
     reviewboard => {
         title        => 'MozReview',
-        regex        => qr#^https?://reviewboard(?:-dev)?\.(?:allizom|mozilla)\.org/r/\d+/?#i,
+        regex        => $mozreview_url_re,
         content_type => 'text/x-review-board-request',
         can_review   => 1,
     },

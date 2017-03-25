@@ -1159,8 +1159,7 @@ sub create {
             DB_MODULE        => \&Bugzilla::Constants::DB_MODULE,
             REQUIRED_MODULES => sub {
                 my %required_modules;
-                my $cache = Bugzilla->request_cache;
-                my $meta = $cache->{cpan_meta} ||= Bugzilla::Install::Requirements::load_cpan_meta();
+                my $meta = Bugzilla->cpan_meta;
                 my $reqs = $meta->effective_prereqs->merged_requirements(['configure', 'runtime'], ['requires']);
                 foreach my $module (sort $reqs->required_modules) {
                     next if $module eq 'perl';
@@ -1170,8 +1169,7 @@ sub create {
             },
             OPTIONAL_MODULES => sub {
                 my %optional_modules;
-                my $cache = Bugzilla->request_cache;
-                my $meta = $cache->{cpan_meta} ||= Bugzilla::Install::Requirements::load_cpan_meta();
+                my $meta = Bugzilla->cpan_meta;
                 foreach my $feature ($meta->features) {
                     my $reqs = $feature->prereqs->merged_requirements(['configure', 'runtime'], ['requires']);
                     foreach my $module ($reqs->required_modules) {

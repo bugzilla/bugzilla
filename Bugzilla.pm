@@ -35,12 +35,12 @@ use Bugzilla::Field;
 use Bugzilla::Flag;
 use Bugzilla::Install::Localconfig qw(read_localconfig);
 use Bugzilla::Install::Util qw(init_console include_languages i_am_persistent);
-use Bugzilla::Install::Requirements qw(load_cpan_meta check_cpan_feature);
 use Bugzilla::Memcached;
 use Bugzilla::Template;
 use Bugzilla::Token;
 use Bugzilla::User;
 use Bugzilla::Util;
+use Bugzilla::CPAN;
 
 use File::Basename;
 use File::Spec::Functions;
@@ -50,6 +50,8 @@ use Date::Parse;
 use Tie::Hash::NamedCapture;
 use Safe;
 use List::Util qw(first);
+
+use parent qw(Bugzilla::CPAN);
 
 #####################################################################
 # Constants
@@ -240,39 +242,6 @@ sub api_server {
         ThrowUserError(@error_params) if $load_error->{type} eq 'user';
     }
     return $cache->{api_server};
-}
-
-sub feature {
-    my ($class, $feature_name) = @_;
-    return 0 unless CAN_HAS_FEATURE;
-    return 0 unless $class->has_feature($feature_name);
-
-    my $cache = $class->process_cache;
-    my $feature = $cache->{cpan_meta}->feature($feature_name);
-    # Bugzilla expects this will also load all the modules.. so we have to do that.
-    # Later we should put a deprecation warning here, and favor calling has_feature().
-
-    return 1 if $cache->{feature_loaded}{$feature_name};
-    my @modules = $feature->prereqs->merged_requirements->required_modules;
-    Module::Runtime::require_module($_) foreach @modules;
-    $cache->{feature_loaded}{$feature_name} = 1;
-    return 1;
-}
-
-sub has_feature {
-    my ($class, $feature_name) = @_;
-
-    return 0 unless CAN_HAS_FEATURE;
-
-    my $cache = $class->process_cache;
-    return $cache->{feature}->{$feature_name}
-        if exists $cache->{feature}->{$feature_name};
-
-    my $meta = $cache->{cpan_meta} //= load_cpan_meta();
-    my $feature = eval { $meta->feature($feature_name) }
-      or ThrowCodeError('invalid_feature', { feature => $feature_name });
-
-    return $cache->{feature}{$feature_name} = check_cpan_feature($feature)->{ok};
 }
 
 sub cgi {
@@ -988,15 +957,6 @@ The current L<Markdown|Bugzilla::Markdown> object, to be used for Markdown rende
 Returns a L<Bugzilla::JobQueue> that you can use for queueing jobs.
 Will throw an error if job queueing is not correctly configured on
 this Bugzilla installation.
-
-=item C<feature>
-
-Wrapper around C<has_feature()> that also loads all of required modules into the runtime.
-
-=item C<has_feature>
-
-Consults F<MYMETA.yml> for optional Bugzilla features and returns true if all the requirements
-are installed.
 
 =item C<api_server>
 

@@ -101,8 +101,9 @@ if (! -f "MYMETA.json") {
     die "Makefile.PL failed to generate a MYMETA.json file.",
         "Try upgrading ExtUtils::MakeMaker";
 }
+require Bugzilla::CPAN;
 
-my $meta = load_cpan_meta();
+my $meta = Bugzilla::CPAN->cpan_meta;
 if (keys %{$meta->{optional_features}} < 1) {
     die "Your version of ExtUtils::MakeMaker is too old or broken\n";
 }

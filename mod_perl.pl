@@ -93,6 +93,8 @@ $server->add_config([split("\n", $conf)]);
 # Pre-load all extensions
 $Bugzilla::extension_packages = Bugzilla::Extension->load_all();
 
+Bugzilla->preload_features();
+
 # Have ModPerl::RegistryLoader pre-compile all CGI scripts.
 my $rl = new ModPerl::RegistryLoader();
 # If we try to do this in "new" it fails because it looks for a

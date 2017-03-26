@@ -104,6 +104,16 @@ sub feature {
     return $FEATURE_LOADED{$feature_name} = 1;
 }
 
+sub preload_features {
+    my ($class) = @_;
+    return 0 unless _CAN_HAS_FEATURE;
+    my $meta = $class->cpan_meta;
+
+    foreach my $feature ($meta->features) {
+        $class->feature($feature->identifier);
+    }
+}
+
 1;
 
 __END__
@@ -140,3 +150,6 @@ are installed.
 
 Returns a L<CPAN::Meta> from the contents of MYMETA.json in the bugzilla directory.
 
+=head2 C<preload_features()>
+
+Attempts to load all features.

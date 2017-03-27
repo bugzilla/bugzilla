@@ -26,8 +26,6 @@ use Memoize;
 
     bz_locations
 
-    CAN_HAS_FEATURE
-
     CONCATENATE_ASSETS
 
     IS_NULL
@@ -220,17 +218,6 @@ use constant REST_DOC => "http://www.bugzilla.org/docs/tip/en/html/api/";
 # Location of the remote and local XML files to track new releases.
 use constant REMOTE_FILE => 'http://updates.bugzilla.org/bugzilla-update.xml';
 use constant LOCAL_FILE  => 'bugzilla-update.xml'; # Relative to datadir.
-
-use constant CAN_HAS_FEATURE => eval {
-    require CPAN::Meta::Prereqs;
-    require CPAN::Meta::Requirements;
-    require Module::Metadata;
-    require Module::Runtime;
-    CPAN::Meta::Prereqs->VERSION('2.132830');
-    CPAN::Meta::Requirements->VERSION('2.121');
-    Module::Metadata->VERSION('1.000019');
-    1;
-};
 
 # When true CSS and JavaScript assets will be concatanted and minified at
 # run-time, to reduce the number of requests required to render a page.

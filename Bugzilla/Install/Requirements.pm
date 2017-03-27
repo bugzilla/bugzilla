@@ -33,7 +33,6 @@ use autodie;
 our @EXPORT = qw(
     FEATURE_FILES
 
-    load_cpan_meta
     check_cpan_requirements
     check_cpan_feature
     check_all_cpan_features
@@ -104,25 +103,6 @@ use constant FEATURE_FILES => (
     s3            => ['Bugzilla/S3.pm', 'Bugzilla/S3/Bucket.pm', 'Bugzilla/Attachment/S3.pm']
 );
 
-sub load_cpan_meta {
-    my $dir = bz_locations()->{libpath};
-    my @meta_json = map { File::Spec->catfile($dir, $_) } qw( MYMETA.json META.json );
-    my ($file) = grep { -f $_ } @meta_json;
-
-    if ($file) {
-        open my $meta_fh, '<', $file or die "unable to open $file: $!";
-        my $str = do { local $/ = undef; scalar <$meta_fh> };
-        # detaint
-        $str =~ /^(.+)$/s; $str = $1;
-        close $meta_fh;
-
-        return CPAN::Meta->load_json_string($str);
-    }
-    else {
-        ThrowCodeError('cpan_meta_missing');
-    }
-}
-
 sub check_all_cpan_features {
     my ($meta, $dirs, $output) = @_;
     my %report;
@@ -163,7 +143,7 @@ sub check_cpan_requirements {
 sub _check_prereqs {
     my ($prereqs, $dirs, $output) = @_;
     $dirs //= \@INC;
-    my $reqs = $prereqs->merged_requirements(['configure', 'runtime'], ['requires']);
+    my $reqs = Bugzilla::CPAN->cpan_requirements($prereqs);
     my @found;
     my @missing;
 
@@ -484,11 +464,6 @@ Returns:     C<1> if the check was successful, C<0> otherwise.
 Returns a hashref where file names are the keys and the value is the feature
 that must be enabled in order to compile that file.
 
-=item C<load_cpan_meta>
-
-Load MYMETA.json or META.json from the bugzilla directory, and a return a L<CPAN::Meta> object.
-
 =back
 
 =back
-

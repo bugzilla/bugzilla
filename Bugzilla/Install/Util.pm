@@ -268,7 +268,7 @@ sub indicate_progress {
 sub feature_description {
     my ($feature_name) = @_;
     eval {
-        my $meta = _cache()->{cpan_meta} //= Bugzilla::Install::Requirements::load_cpan_meta();
+        my $meta = Bugzilla::CPAN->cpan_meta;
 
         return $meta->feature($feature_name)->description
     } or warn $@;

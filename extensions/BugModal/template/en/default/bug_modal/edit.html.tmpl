@@ -96,6 +96,7 @@
   # build firefox flags subtitle
   firefox_flags = [];
   firefox_fixed_versions = [];
+  scores = {firefox => 0, thunderbird => 0, seamonkey => 0};
   tracking_flags_title = "Firefox Tracking Flags";
   # project flags
   FOREACH row IN tracking_flags_table;
@@ -131,10 +132,17 @@
     END;
     firefox_flags.push(blurb);
     IF row.name.search("^thunderbird");
-      tracking_flags_title = "Thunderbird Tracking Flags";
+      scores.thunderbird = scores.thunderbird + 1;
     ELSIF row.name.search("^seamonkey");
-      tracking_flags_title = "SeaMonkey Tracking Flags";
+      scores.seamonkey = scores.seamonkey + 1;
+    ELSE;
+      scores.firefox = scores.firefox + 1;
     END;
+  END;
+  IF scores.thunderbird AND NOT scores.firefox;
+    tracking_flags_title = "Thunderbird Tracking Flags";
+  ELSIF scores.seamonkey AND NOT scores.firefox;
+    tracking_flags_title = "SeaMonkey Tracking Flags";
   END;
   firefox_fixed_version = firefox_fixed_versions.join(", ");
   IF firefox_flags.size;

@@ -1,0 +1,96 @@
+#!/bin/bash
+
+sudo apt update
+wget http://dev.mysql.com/get/mysql-apt-config_0.6.0-1_all.deb
+SUDO="sudo env DEBIAN_FRONTEND=noninteractive"
+$SUDO debconf-set-selections <<SELECTIONS
+mysql-apt-config mysql-apt-config/select-server select mysql-5.7
+mysql-apt-config mysql-apt-config/select-tools select
+mysql-apt-config mysql-apt-config/unsupported-platform select ubuntu trusty
+mysql-apt-config mysql-apt-config/repo-distro select ubuntu
+mysql-apt-config mysql-apt-config/select-product select Apply
+mysql-apt-config mysql-apt-config/enable-repo select mysql-5.7
+mysql-apt-config mysql-apt-config/repo-codename select trusty
+SELECTIONS
+$SUDO dpkg -i mysql-apt-config_0.6.0-1_all.deb
+$SUDO apt-get update
+$SUDO apt-get install -y --force-yes mysql-server
+$SUDO mysql_upgrade -u root --force
+$SUDO apt-get install -y libgd-dev cpanminus libapache2-mod-perl2
+$SUDO cpanm --installdeps --with-feature=bmo --notest .
+$SUDO cpanm Linux::Pid
+mysql-ctl restart
+perl checksetup.pl
+mysql -u root -e 'GRANT ALL on c9.* to '$C9_USER' IDENTIFIED BY "bugs"'
+perl scripts/update_localconfig.pl db_user $C9_USER
+perl scripts/update_localconfig.pl db_name c9
+perl scripts/update_localconfig.pl db_pass 'bugs'
+perl scripts/update_localconfig.pl webservergroup 'ubuntu'
+
+
+
+cat > ~/checksetup_answers.txt <<'ANSWERS'
+$answer{'ADMIN_EMAIL'}          = 'admin@mozilla.bugs';
+$answer{'ADMIN_OK'}             = 'Y';
+$answer{'ADMIN_PASSWORD'}       = 'bmo4c9rocks';
+$answer{'ADMIN_REALNAME'}       = 'BMO Admin';
+$answer{'NO_PAUSE'}             = 1;
+$answer{'apache_size_limit'}    = 700000;
+$answer{'bugzilla_version'}     = '1';
+$answer{'create_htaccess'}      = '';
+$answer{'diffpath'}             = '/usr/bin';
+$answer{'index_html'}           = 0;
+$answer{'interdiffbin'}         = '/usr/bin/interdiff';
+$answer{'password_complexity'}  = 'bmo';
+$answer{'user_info_class'}      = 'GitHubAuth,CGI';
+$answer{'user_verify_class'}    = 'GitHubAuth,DB';
+$answer{'memcached_namespace'}  = 'bmo:';
+$answer{'memcached_servers'}    = '';
+$answer{'use_mailer_queue'}     = 1;
+$answer{'useclassification'}    = 1;
+$answer{'usebugaliases'}        = 1;
+$answer{'upgrade_notification'} = 0;
+$answer{'usestatuswhiteboard'}  = 1;
+$answer{'usetargetmilestone'}   = 1;
+$answer{'webdotbase'}           = '/usr/bin/dot';
+$answer{'auth_delegation'}      = 1;
+$answer{'insidergroup'}         = 'admin';
+$answer{'defaultpriority'}      = '--';
+$answer{'defaultseverity'}      = 'normal';
+$answer{'maxattachmentsize'}    = 4095;
+$answer{'skin'} = 'Mozilla';
+ANSWERS
+sudo tee /etc/mysql/conf.d/max-packet.cnf <<CONF
+[mysqld]
+max_allowed_packet=10M
+CONF
+mysql-ctl restart
+perl checksetup.pl ~/checksetup_answers.txt
+perl scripts/update_params.pl urlbase "https://$C9_HOSTNAME/"
+perl scripts/generate_bmo_data.pl
+$SUDO service apache2 restart
+
+$SUDO tee /etc/apache2/sites-enabled/001-cloud9.conf > /dev/null  <<'CODE'
+PerlSwitches -wT
+PerlConfigRequire /home/ubuntu/workspace/mod_perl.pl
+
+<VirtualHost *:8080>
+    DocumentRoot /home/ubuntu/workspace
+    ServerName https://${C9_HOSTNAME}:443
+    KeepAlive off
+
+    LogLevel info
+
+    ErrorLog ${APACHE_LOG_DIR}/error.log
+    CustomLog ${APACHE_LOG_DIR}/access.log combined
+
+    <Directory /home/ubuntu/workspace>
+        Options Indexes FollowSymLinks ExecCGI
+        AllowOverride All
+        Require all granted
+    </Directory>
+</VirtualHost>
+
+ServerName https://${C9_HOSTNAME}
+# vim: syntax=apache ts=4 sw=4 sts=4 sr noet
+CODE

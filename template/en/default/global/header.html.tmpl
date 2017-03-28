@@ -38,6 +38,7 @@
   # generate_api_token: generate a token which can be used to make authenticated webservice calls
   # no_body: if true the body element will not be generated
   # allow_mobile: allow special CSS and viewport for detected mobile useragents
+  # use_login_page: display a link to the full login page, rather than an inline login.
   #%]
 
 [% IF message %]
@@ -116,11 +117,37 @@
   # value of title anyway.  To get around that problem we explicitly
   # set header's default value here only if it is undefined. %]
 [% IF !header.defined %][% header = title %][% END %]
+[%- js_BUGZILLA = {
+        param => {
+            cookiepath => Param('cookiepath'),
+            maxusermatches => Param('maxusermatches'),
+        },
+        constant => {
+            COMMENT_COLS => constants.COMMENT_COLS,
+        },
+        string => {
+            # Please keep these in alphabetical order.
 
+            attach_desc_required =>
+                'You must enter a Description for this attachment.',
+            component_required => 
+                "You must select a Component for this $terms.bug",
+            description_required => 
+                "You must enter a Description for this $terms.bug",
+            short_desc_required =>
+                "You must enter a Summary for this $terms.bug",
+            version_required =>
+                "You must select a Version for this $terms.bug"
+        }
+    };
+    IF generate_api_token;
+        js_BUGZILLA.api_token = get_api_token();
+    END; 
+%]
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
                       "http://www.w3.org/TR/html4/loose.dtd">
 <html lang="en">
-  <head>
+  <head data-bugzilla='[% json_encode(js_BUGZILLA) FILTER html %]'>
     [% Hook.process("start") %]
     <title>[% title %]</title>
 
@@ -181,65 +208,18 @@
       [% PROCESS format_js_link %]
     [% END %]
 
-    <script [% script_nonce FILTER none %] type="text/javascript">
-    <!--
+    [%# Make some Bugzilla information available to all scripts. 
+      # We don't import every parameter and constant because we
+      # don't want to add a lot of uncached JS to every page. 
+      # %]
+    
+    [% inline_javascript = BLOCK %]
         [% IF NOT no_yui %]
           YAHOO.namespace('bugzilla');
-          [% IF 0 %]
-          YAHOO.util.Event.addListener = function (el, sType, fn, obj, overrideContext) {
-              if ( ("onpagehide" in window || YAHOO.env.ua.gecko) && sType === "unload") { sType = "pagehide"; };
-              var capture = ((sType == "focusin" || sType == "focusout") && !YAHOO.env.ua.ie) ? true : false;
-              return this._addListener(el, this._getType(sType), fn, obj, overrideContext, capture);
-          };
-          [% END %]
           if ( "onpagehide" in window || YAHOO.env.ua.gecko) {
               YAHOO.util.Event._simpleRemove(window, "unload",
                                              YAHOO.util.Event._unload);
           }
-        [% END %]
-
-        [%# The language selector needs javascript to set its cookie,
-          # so it is hidden in HTML/CSS by the "bz_default_hidden" class.
-          # If the browser can run javascript, it will then "unhide"
-          # the language selector using the following code.
-          #%]
-        function unhide_language_selector() {
-            $('#lang_links_container').removeClass('bz_default_hidden');
-        } 
-        $(document).ready(unhide_language_selector);
-
-        [%# Make some Bugzilla information available to all scripts. 
-          # We don't import every parameter and constant because we
-          # don't want to add a lot of uncached JS to every page. 
-          #%]
-        var BUGZILLA = {
-            param: {
-                cookiepath: '[% Param('cookiepath') FILTER js %]',
-                maxusermatches: [% Param('maxusermatches') FILTER js %]
-            },
-            constant: {
-                COMMENT_COLS: [% constants.COMMENT_COLS FILTER js %]
-            },
-            string: {
-                [%# Please keep these in alphabetical order. %]
-
-                attach_desc_required:
-                    'You must enter a Description for this attachment.',
-                component_required:
-                    'You must select a Component for this [% terms.bug %].',
-                description_required:
-                    'You must enter a Description for this [% terms.bug %].',
-                short_desc_required:
-                    'You must enter a Summary for this [% terms.bug %].',
-                version_required:
-                    'You must select a Version for this [% terms.bug %].'
-            }
-            [% IF generate_api_token %]
-              , api_token: '[% get_api_token FILTER js FILTER html %]'
-            [% END %]
-        };
-
-        [% IF NOT no_yui %]
           [% FOREACH yui_name = yui %]
             [% FOREACH yui_template = yui_templates.$yui_name %]
               [% INCLUDE $yui_template %]
@@ -250,8 +230,12 @@
         [% IF javascript %]
           [% javascript %]
         [% END %]
-    // -->
-    </script>
+    [% END %]
+    [% IF inline_javascript.search("\\S") %]
+      <script [% script_nonce FILTER none %]>
+        [% inline_javascript FILTER none %]
+      </script>
+    [% END %]
 
     [% FOREACH asset_url = concatenate_js(javascript_urls) %]
       [% PROCESS format_js_link %]
@@ -347,14 +331,21 @@
               <li id="moz_new_account_container_top"><a href="createaccount.cgi">New&nbsp;Account</a></li>
             [% END %]
 
-            [%# Only display one login form when we're on a LOGIN_REQUIRED page. That
-              # way, we're guaranteed that the user will use the form that has 
-              # hidden_fields in it (the center form) instead of this one. Also, it's
-              # less confusing to have one form (as opposed to  three) when you're 
-              # required to log in.
-              #%]
-            [% IF user.authorizer.can_login && !Bugzilla.page_requires_login %]
-              [% PROCESS "account/auth/login-small.html.tmpl" qs_suffix = "_top" %]
+            [% IF use_login_page %]
+              <li>
+                <span class="separator">| </span>
+                <a href="[% urlbase %]login">Log In</a>
+              </li>
+            [% ELSE %]
+                [%# Only display one login form when we're on a LOGIN_REQUIRED page. That
+                # way, we're guaranteed that the user will use the form that has 
+                # hidden_fields in it (the center form) instead of this one. Also, it's
+                # less confusing to have one form (as opposed to  three) when you're 
+                # required to log in.
+                #%]
+                [% IF user.authorizer.can_login && !Bugzilla.page_requires_login %]
+                  [% PROCESS "account/auth/login-small.html.tmpl" qs_suffix = "_top" %]
+                [% END %]
             [% END %]
           </ul>
         [% END %]

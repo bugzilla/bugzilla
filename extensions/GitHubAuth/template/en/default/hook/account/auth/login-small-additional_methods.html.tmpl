@@ -8,21 +8,11 @@
 [% USE Bugzilla %]
 
 [% IF Param('user_info_class').split(',').contains('GitHubAuth') %]
-  <script [% script_nonce FILTER none %] type="text/javascript">
-   YAHOO.util.Event.addListener('login_link[% qs_suffix FILTER js %]','click', function () {
-     var login_link = YAHOO.util.Dom.get('github_mini_login[% qs_suffix FILTER js %]');
-     YAHOO.util.Dom.removeClass(login_link, 'bz_default_hidden');
-   });
-   YAHOO.util.Event.addListener('hide_mini_login[% qs_suffix FILTER js %]','click', function () {
-     var login_link = YAHOO.util.Dom.get('github_mini_login[% qs_suffix FILTER js %]');
-     YAHOO.util.Dom.addClass(login_link, 'bz_default_hidden');
-   });
-  </script>
   <span id="github_mini_login[% qs_suffix FILTER html %]" class="bz_default_hidden">
     <form method="post" action="[% urlbase FILTER html %]github.cgi">
       <input type="hidden" name="github_secret" value="[% Bugzilla.github_secret FILTER html %]">
       <input type="hidden" name="target_uri" value="[% Bugzilla.cgi.target_uri FILTER html %]">
-        <input type="image" src="extensions/GitHubAuth/web/images/sign_in.png" height="22" width="75" align="absmiddle"
+      <input type="image" src="extensions/GitHubAuth/web/images/sign_in.png" height="22" width="75" align="absmiddle"
              alt="Sign in with GitHub"
              title="Sign in with GitHub"> or
     </form>

@@ -30,22 +30,8 @@
    header = "Main Page" 
    header_addl_info = "version " _ (Bugzilla.params.bugzilla_version || constants.BUGZILLA_VERSION)
    style_urls = [ 'skins/standard/index.css' ]
+   no_yui = 1
 %]
-
-<script [% script_nonce FILTER none %] type="text/javascript">
-function checkQuicksearch( form ) {
-  if (form.quicksearch.value == '') {
-    alert('Please enter one or more search terms first.');
-    return false;
-  }
-  return true;
-}
-$(function () {
-    $("#quicksearchForm").on("submit", function (event) {
-        return checkQuicksearch(this);
-    });
-});
-</script>
 
 <div id="page-index">
   <table>

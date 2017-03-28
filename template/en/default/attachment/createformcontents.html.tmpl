@@ -28,7 +28,7 @@
     <a id="attachment_data_controller" href="javascript:TUI_toggle_class('attachment_text_field');
                                              javascript:TUI_toggle_class('attachment_data')"
     >paste text as attachment</a>).<br>
-    <input type="file" id="data" name="data" size="50" onchange="DataFieldHandler()">
+    <input type="file" id="data" name="data" size="50" >
   </td>
 </tr>
 <tr class="attachment_text_field">
@@ -55,13 +55,23 @@
   <td>
     <em>If the attachment is a patch, check the box below.</em><br>
     [% Hook.process("patch_notes") %]
-    <input type="checkbox" id="ispatch" name="ispatch" value="1"
-           onchange="setContentTypeDisabledState(this.form);">
+    <input type="checkbox" id="ispatch" name="ispatch" value="1">
     <label for="ispatch">patch</label><br><br>
     [%# Reset this whenever the page loads so that the JS state is up to date %]
-    <script type="text/javascript">
-      YAHOO.util.Event.onDOMReady(function() {
-          bz_fireEvent(document.getElementById('ispatch'), 'change');
+    <script type="text/javascript" [% csp_nonce FILTER none %]>
+      $(function() {
+        $("#file").on("change", function() {
+          DataFieldHandler();
+          // Fire event to keep take-bug in sync.
+          $("#ispatch").change();
+        });
+        $("#ispatch").on("change", function() {
+          setContentTypeDisabledState(this.form);
+          var takebug = $("#takebug");
+          if (takebug.is(":visible") && takebug.data("take-if-patch") && $("#ispatch").prop("checked")) {
+            $("#takebug").prop("checked", true);
+          }
+        }).change();
       });
     </script>
 

@@ -96,10 +96,10 @@ sub feature {
     return 0 unless _CAN_HAS_FEATURE;
     return 1 if $FEATURE_LOADED{$feature_name};
     return 0 unless $class->has_feature($feature_name);
- 
+
     my $meta = $class->cpan_meta;
     my $feature = $meta->feature($feature_name);
-    my @modules = $feature->prereqs->merged_requirements->required_modules;
+    my @modules = $feature->prereqs->merged_requirements(['runtime'], ['requires'])->required_modules;
     Module::Runtime::require_module($_) foreach @modules;
     return $FEATURE_LOADED{$feature_name} = 1;
 }
@@ -110,6 +110,7 @@ sub preload_features {
     my $meta = $class->cpan_meta;
 
     foreach my $feature ($meta->features) {
+        next if $feature->identifier eq 'mod_perl';
         $class->feature($feature->identifier);
     }
 }

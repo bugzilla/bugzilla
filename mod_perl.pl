@@ -38,6 +38,7 @@ use Apache2::ServerUtil;
 use Apache2::SizeLimit;
 use ModPerl::RegistryLoader ();
 use File::Basename ();
+use File::Find ();
 
 # This loads most of our modules.
 use Bugzilla ();
@@ -48,6 +49,7 @@ use Bugzilla::Extension ();
 use Bugzilla::Install::Requirements ();
 use Bugzilla::Util ();
 use Bugzilla::RNG ();
+use Bugzilla::ModPerl ();
 
 # Make warnings go to the virtual host's log and not the main
 # server log.
@@ -69,26 +71,8 @@ my $cgi_path = Bugzilla::Constants::bz_locations()->{'cgi_path'};
 
 # Set up the configuration for the web server
 my $server = Apache2::ServerUtil->server;
-my $conf = <<EOT;
-# Make sure each httpd child receives a different random seed (bug 476622).
-# Bugzilla::RNG has one srand that needs to be called for
-# every process, and Perl has another. (Various Perl modules still use
-# the built-in rand(), even though we never use it in Bugzilla itself,
-# so we need to srand() both of them.)
-PerlChildInitHandler "sub { Bugzilla::RNG::srand(); srand(); }"
-<Directory "$cgi_path">
-    AddHandler perl-script .cgi
-    # No need to PerlModule these because they're already defined in mod_perl.pl
-    PerlResponseHandler Bugzilla::ModPerl::ResponseHandler
-    PerlCleanupHandler Bugzilla::ModPerl::CleanupHandler Apache2::SizeLimit
-    PerlOptions +ParseHeaders
-    Options +ExecCGI +FollowSymLinks
-    AllowOverride Limit FileInfo Indexes
-    DirectoryIndex index.cgi index.html
-</Directory>
-EOT
-
-$server->add_config([split("\n", $conf)]);
+my $conf = Bugzilla::ModPerl->apache_config($cgi_path);
+$server->add_config([ grep { length $_ } split("\n", $conf)]);
 
 # Pre-load all extensions
 $Bugzilla::extension_packages = Bugzilla::Extension->load_all();

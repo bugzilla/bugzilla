@@ -45,6 +45,14 @@ sub _cf_shadow_bug_obj {
     return $self->{cf_shadow_bug_obj} ||= Bugzilla::Bug->new($self->cf_shadow_bug);
 }
 
+sub template_before_process_wants {
+    return {
+        'bug/edit.html.tmpl' => 1,
+        'bug/show.html.tmpl' => 1,
+        'bug/show-header.html.tmpl' => 1,
+    };
+}
+
 sub template_before_process {
     my ($self, $args) = @_;
     my $file = $args->{'file'};

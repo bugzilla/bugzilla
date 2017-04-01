@@ -41,6 +41,12 @@ sub install_update_db {
 # Templates #
 #############
 
+sub template_before_process_wants {
+    return {
+        map { $_ => 1 } FLAGTYPE_TEMPLATES,
+    }
+}
+
 sub template_before_process {
     my ($self, $args) = @_;
     return unless Bugzilla->user->id;

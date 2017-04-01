@@ -216,6 +216,13 @@ sub user_preferences {
     $$handled = 1;
 }
 
+sub template_before_process_wants {
+    return {
+        'email/bugmail.html.tmpl' => 1,
+        'email/bugmail.txt.tmpl'  => 1,
+    };
+}
+
 sub template_before_process {
     my ($self, $args) = @_;
     my $file = $args->{'file'};

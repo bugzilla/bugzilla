@@ -131,6 +131,12 @@ sub template_before_create {
     $constants->{REL_COMPONENT_WATCHER} = REL_COMPONENT_WATCHER;
 }
 
+sub template_before_process_wants {
+    return {
+        'admin/components/create.html.tmpl' => 1,
+    }
+}
+
 sub template_before_process {
     my ($self, $args) = @_;
     return unless $args->{file} eq 'admin/components/create.html.tmpl';

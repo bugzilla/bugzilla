@@ -46,6 +46,10 @@ sub install_filesystem {
 # Template Hooks #
 ##################
 
+sub template_before_process_wants {
+    return { 'config.json.tmpl' => 1 };
+}
+
 sub template_before_process {
     my ($self, $args) = @_;
     my $vars = $args->{'vars'};

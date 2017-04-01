@@ -69,6 +69,17 @@ sub page_before_template {
     }
 }
 
+sub template_before_process_wants {
+    return {
+        'bug/edit.html.tmpl'           => 1,
+        'email/bugmail.txt.tmpl'       => 1,
+        'email/bugmail.html.tmpl'      => 1,
+        'bug/show.xml.tmpl'            => 1,
+        'list/edit-multiple.html.tmpl' => 1,
+        'bug/create/create.html.tmpl'  => 1,
+    };
+}
+
 sub template_before_process {
     my ($self, $args) = @_;
     my $file = $args->{'file'};

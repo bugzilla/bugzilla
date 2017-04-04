@@ -156,7 +156,7 @@ sub log_in {
     my ($sel, $config, $user) = @_;
 
     $sel->open_ok("/$config->{bugzilla_installation}/login", undef, "Go to the home page");
-    $sel->title_is("Bugzilla Main Page");
+    $sel->title_is("Log in to Bugzilla");
     $sel->type_ok("Bugzilla_login", $config->{"${user}_user_login"}, "Enter $user login name");
     $sel->type_ok("Bugzilla_password", $config->{"${user}_user_passwd"}, "Enter $user password");
     $sel->click_ok("log_in", undef, "Submit credentials");

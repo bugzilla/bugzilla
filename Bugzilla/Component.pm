@@ -438,6 +438,8 @@ sub description { return $_[0]->{'description'}; }
 sub product_id  { return $_[0]->{'product_id'};  }
 sub is_active   { return $_[0]->{'isactive'};    }
 
+sub triage_owner_id { return $_[0]->{'triage_owner_id'} }
+
 ##############################################
 # Implement Bugzilla::Field::ChoiceInterface #
 ##############################################

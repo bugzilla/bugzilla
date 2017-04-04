@@ -134,6 +134,11 @@ sub bug_start_of_update {
             elsif ($needinfo_role eq 'user') {
                 $requestees{$user->login} = 1;
             }
+            elsif ($needinfo_role eq 'triage_owner') {
+                if ($bug->component_obj->triage_owner_id) {
+                    $requestees{$bug->component_obj->triage_owner->login} = 1;
+                }
+            }
             # Use user specified requestee
             elsif ($needinfo_role eq 'other' && $needinfo_from) {
                 my @needinfo_from_list = ref $needinfo_from

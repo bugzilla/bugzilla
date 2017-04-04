@@ -218,6 +218,9 @@ $(function() {
               [% available_mentors.size == 1 ? "mentor" : mentor.login FILTER html %]
             </option>
           [% END %]
+          [% IF bug.component_obj.triage_owner_id %]
+             <option value="triage_owner">triage owner</option>
+           [% END %]
         </select>
         <span id="needinfo_from_container">
           [% INCLUDE global/userselect.html.tmpl

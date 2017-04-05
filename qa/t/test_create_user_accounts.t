@@ -125,6 +125,8 @@ logout($sel);
 ok(!$sel->is_text_present("New Account"), "No link named 'New Account'");
 $sel->click_ok("link=Home");
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
+$sel->refresh;
+$sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_is("Bugzilla Main Page");
 ok(!$sel->is_text_present("Open a New Account"), "No link named 'Open a New Account'");
 $sel->open_ok("/$config->{bugzilla_installation}/createaccount.cgi");

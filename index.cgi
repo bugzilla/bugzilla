@@ -44,7 +44,11 @@ if ($cgi->param('logout')) {
 
 # our weak etag is based on the bugzilla version parameter (BMO customization) and the announcehtml
 # if either change, the cache will be considered invalid.
-my @etag_parts = (Bugzilla->params->{bugzilla_version}, Bugzilla->params->{announcehtml});
+my @etag_parts = (
+    Bugzilla->params->{bugzilla_version},
+    Bugzilla->params->{announcehtml},
+    Bugzilla->params->{createemailregexp},
+);
 my $weak_etag = q{W/"} . md5_hex(@etag_parts) . q{"};
 my $if_none_match = $cgi->http('If-None-Match');
 

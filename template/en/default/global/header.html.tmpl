@@ -328,12 +328,13 @@
           <ul class="login-links">
             [% IF Param('createemailregexp')
                   && user.authorizer.user_can_create_account %]
-              <li id="moz_new_account_container_top"><a href="createaccount.cgi">New&nbsp;Account</a></li>
+              <li id="moz_new_account_container_top"><a href="createaccount.cgi">New&nbsp;Account</a>
+                [% IF use_login_page %] <span class="separator">| </span> [% END %]
+              </li>
             [% END %]
 
             [% IF use_login_page %]
               <li>
-                <span class="separator">| </span>
                 <a href="[% urlbase %]login">Log In</a>
               </li>
             [% ELSE %]

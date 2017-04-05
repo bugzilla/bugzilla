@@ -335,7 +335,7 @@
 
             [% IF use_login_page %]
               <li>
-                <a href="[% urlbase %]login">Log In</a>
+                <a href="[% urlbase FILTER html %]login">Log In</a>
               </li>
             [% ELSE %]
                 [%# Only display one login form when we're on a LOGIN_REQUIRED page. That

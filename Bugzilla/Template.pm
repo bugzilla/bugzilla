@@ -681,6 +681,9 @@ sub create {
         INCLUDE_PATH => $opts{'include_path'} 
                         || _include_path($opts{'language'}),
 
+        # allow PERL/RAWPERL because doing so can boost performance
+        EVAL_PERL => 1,
+
         # Remove white-space before template directives (PRE_CHOMP) and at the
         # beginning and end of templates and template blocks (TRIM) for better
         # looking, more compact content.  Use the plus sign at the beginning

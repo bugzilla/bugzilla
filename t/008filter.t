@@ -164,7 +164,7 @@ sub directive_ok {
                                  BLOCK|USE|ELSE|NEXT|LAST|DEFAULT|FLUSH|
                                  ELSIF|SET|SWITCH|CASE|WHILE|RETURN|STOP|
                                  TRY|CATCH|FINAL|THROW|CLEAR|MACRO|FILTER|
-                                 CALL|WRAPPER)/x;
+                                 RAWPERL|PERL|CALL|WRAPPER)/x;
 
     # ? :
     if ($directive =~ /.+\?(.+):(.+)/) {

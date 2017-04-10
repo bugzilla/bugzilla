@@ -640,7 +640,7 @@ sub visibility_field {
     my $self = shift;
     if ($self->{visibility_field_id}) {
         $self->{visibility_field} ||= 
-            $self->new($self->{visibility_field_id});
+            $self->new({ id => $self->{visibility_field_id}, cache => 1 });
     }
     return $self->{visibility_field};
 }

@@ -3973,8 +3973,10 @@ sub groups {
     $sth->execute($self->{'bug_id'},
                   $self->{'product_id'});
 
-    while (my ($groupid, $name, $description, $ison, $ingroup, $isactive,
-            $membercontrol, $othercontrol) = $sth->fetchrow_array()) {
+    my $rows = $sth->fetchall_arrayref();
+    foreach my $row (@$rows) {
+        my ($groupid, $name, $description, $ison, $ingroup, $isactive,
+            $membercontrol, $othercontrol) = @$row;
 
         $membercontrol ||= 0;
 

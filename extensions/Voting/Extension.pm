@@ -221,11 +221,6 @@ sub template_before_create {
     $constants->{DEFAULT_VOTES_PER_BUG} = DEFAULT_VOTES_PER_BUG;
 }
 
-sub template_before_process_wants {
-    return {
-        'admin/users/confirm-delete.html.tmpl' => 1
-    }
-}
 
 sub template_before_process {
     my ($self, $args) = @_;

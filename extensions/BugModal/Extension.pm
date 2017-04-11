@@ -150,17 +150,6 @@ sub template_after_create {
     );
 }
 
-sub template_before_process_wants {
-    return {
-        'bug/process/header.html.tmpl' => 1,
-        'bug/create/created.html.tmpl' => 1,
-        'attachment/created.html.tmpl' => 1,
-        'attachment/updated.html.tmpl' => 1,
-        'bug_modal/edit.html.tmpl'     => 1,
-        'bug/show-modal.html.tmpl'     => 1,
-    };
-}
-
 sub template_before_process {
     my ($self, $args) = @_;
     my $file = $args->{file};

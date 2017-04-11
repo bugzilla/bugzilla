@@ -45,12 +45,6 @@ use POSIX;
 # Pages #
 #########
 
-sub template_before_process_wants {
-    return {
-        'global/header.html.tmpl' => 1,
-    }
-}
-
 sub template_before_process {
     my ($self, $args) = @_;
     my ($vars, $file) = @$args{qw(vars file)};

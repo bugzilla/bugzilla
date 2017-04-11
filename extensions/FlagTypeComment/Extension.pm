@@ -70,10 +70,6 @@ sub db_schema_abstract_schema {
 # Templates #
 #############
 
-sub template_before_process_wants {
-    return { map { $_ => 1 } FLAGTYPE_COMMENT_TEMPLATES };
-}
-
 sub template_before_process {
     my ($self, $args) = @_;
     my ($vars, $file) = @$args{qw(vars file)};

@@ -69,24 +69,13 @@ sub stash {
     # template object for Throw*Error).
     #
     # Checking Bugzilla::Hook::in prevents infinite recursion on this hook.
-
-    if (    $self->{bz_in_process}
-        and $name =~ /\./
-        and !grep( $_ eq $name, @$pre_process )
-        and !Bugzilla::Hook::in('template_before_process') )
+    if ($self->{bz_in_process} and $name =~ /\./
+        and !grep($_ eq $name, @$pre_process)
+        and !Bugzilla::Hook::in('template_before_process'))
     {
-        state $WANT = Bugzilla::Hook::collect_wants('template_before_process_wants');
-        if ( $WANT->{$name} ) {
-            my @extensions = grep { $WANT->{$name}{ blessed $_ } } @{ Bugzilla->extensions };
-            Bugzilla::Hook::process(
-                "template_before_process" => {
-                    vars    => $stash,
-                    context => $self,
-                    file    => $name
-                },
-                \@extensions
-            ) if @extensions;
-        }
+        Bugzilla::Hook::process("template_before_process",
+                                { vars => $stash, context => $self,
+                                  file => $name });
     }
 
     # This prevents other calls to stash() that might somehow happen

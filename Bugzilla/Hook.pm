@@ -11,48 +11,34 @@ use 5.10.1;
 use strict;
 use warnings;
 
-use Scalar::Util qw(blessed);
-
 sub process {
-    my ($name, $args, $extensions) = @_;
+    my ($name, $args) = @_;
 
-    $extensions //= Bugzilla->extensions;
-
-    my $hook_stack = Bugzilla->request_cache->{hook_stack} ||= [];
-    push @$hook_stack, $name;
-
-    foreach my $extension (@$extensions) {
-        if (my $hook = $extension->can($name)) {
-            $hook->($extension, $args);
-        }
-    }
-
-    pop @$hook_stack;
-}
-
-sub collect_wants {
-    my ($name) = @_;
-    my %result;
+    _entering($name);
 
     foreach my $extension (@{ Bugzilla->extensions }) {
-        my $hook = $extension->can($name);
-        if ($hook) {
-            my $wants = $hook->($extension);
-            foreach my $want (keys %$wants) {
-                if ($wants->{$want}) {
-                    $result{ $want }{ blessed $extension } = 1;
-                }
-            }
+        if ($extension->can($name)) {
+            $extension->$name($args);
         }
     }
 
-    return \%result;
+    _leaving($name);
 }
 
 sub in {
     my $hook_name = shift;
     my $currently_in = Bugzilla->request_cache->{hook_stack}->[-1] || '';
     return $hook_name eq $currently_in ? 1 : 0;
+}
+
+sub _entering {
+    my ($hook_name) = @_;
+    my $hook_stack = Bugzilla->request_cache->{hook_stack} ||= [];
+    push(@$hook_stack, $hook_name);
+}
+
+sub _leaving {
+    pop @{ Bugzilla->request_cache->{hook_stack} };
 }
 
 1;

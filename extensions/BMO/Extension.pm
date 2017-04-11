@@ -89,50 +89,6 @@ BEGIN {
     *Bugzilla::Attachment::fetch_github_pr_diff     = \&_attachment_fetch_github_pr_diff;
 }
 
-sub template_before_process_wants {
-    return {
-        'bug/create/create-user-engagement.html.tmpl'        => 1,
-        'bug/create/create-employee-incident.html.tmpl'      => 1,
-        'bug/create/create-fxos-mcts-waiver.html.tmpl'       => 1,
-        'bug/create/create-crm.html.tmpl'                    => 1,
-        'bug/create/create-presentation.html.tmpl'           => 1,
-        'bug/create/create-fxos-feature.html.tmpl'           => 1,
-        'bug/create/create-ipc.html.tmpl'                    => 1,
-        'bug/create/create-ipp.html.tmpl'                    => 1,
-        'bug/create/create-mobile-compat.html.tmpl'          => 1,
-        'bug/create/create-mozpr.html.tmpl'                  => 1,
-        'bug/create/create-third-party-apps.html.tmpl'       => 1,
-        'bug/create/create-itrequest.html.tmpl'              => 1,
-        'bug/create/create-fxos-betaprogram.html.tmpl'       => 1,
-        'bug/create/create-trademark.html.tmpl'              => 1,
-        'bug/create/create-dev-engagement-event.html.tmpl'   => 1,
-        'bug/create/create-name-clearance.html.tmpl'         => 1,
-        'list/list.microsummary.tmpl'                        => 1,
-        'bug/create/create-legal.html.tmpl'                  => 1,
-        'bug/create/create-creative.html.tmpl'               => 1,
-        'bug/create/create-swag.html.tmpl'                   => 1,
-        'bug/create/create-doc.html.tmpl'                    => 1,
-        'bug/create/create-web-bounty.html.tmpl'             => 1,
-        'bug/create/create-poweredby.html.tmpl'              => 1,
-        'bug/create/create-fsa-budget.html.tmpl'             => 1,
-        'bug/create/create-automative.html.tmpl'             => 1,
-        'bug/create/create-data-compliance.html.tmpl'        => 1,
-        'bug/create/create-finance.html.tmpl'                => 1,
-        'bug/create/create-nda.html.tmpl'                    => 1,
-        'bug/create/create-fxos-preload-app.html.tmpl'       => 1,
-        'bug/create/create-shield-studies.html.tmpl'         => 1,
-        'bug/create/create-mozlist.html.tmpl'                => 1,
-        'bug/create/create-recoverykey.html.tmpl'            => 1,
-        'bug/create/create-comm-newsletter.html.tmpl'        => 1,
-        'bug/create/create-recruiting.html.tmpl'             => 1,
-        'bug/create/create-intern.html.tmpl'                 => 1,
-        'bug/create/create-screen-share-whitelist.html.tmpl' => 1,
-        'bug/create/create-costume.html.tmpl'                => 1,
-        'bug/create/create-mdn.html.tmpl'                    => 1,
-        'bug/create/create-fxos-partner.html.tmpl'           => 1
-    };
-}
-
 sub template_before_process {
     my ($self, $args) = @_;
     my $file = $args->{'file'};

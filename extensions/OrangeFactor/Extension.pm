@@ -19,15 +19,6 @@ use Bugzilla::Attachment;
 
 our $VERSION = '1.0';
 
-sub template_before_process_wants {
-    return {
-        'bug/show-header.html.tmpl' => 1,
-        'bug/edit.html.tmpl' => 1,
-        'bug_modal/header.html.tmpl' => 1,
-        'bug_modal/edit.html.tmpl' => 1,
-    };
-}
-
 sub template_before_process {
     my ($self, $args) = @_;
     my $file = $args->{'file'};

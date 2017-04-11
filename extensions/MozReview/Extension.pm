@@ -42,16 +42,6 @@ BEGIN {
     }
 }
 
-sub template_before_process_wants {
-    return {
-        'bug/edit.html.tmpl'          => 1,
-        'bug_modal/header.html.tmpl'  => 1,
-        'bug_modal/edit.html.tmpl'    => 1,
-        'attachment/create.html.tmpl' => 1,
-        'bug/show-header.html.tmpl'   => 1
-    };
-}
-
 sub template_before_process {
     my ($self, $args) = @_;
     my $file = $args->{'file'};

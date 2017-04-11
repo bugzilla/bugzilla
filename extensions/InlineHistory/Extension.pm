@@ -36,12 +36,6 @@ sub template_before_create {
     };
 }
 
-sub template_before_process_wants {
-    return {
-        'bug/edit.html.tmpl' => 1,
-    }
-}
-
 sub template_before_process {
     my ($self, $args) = @_;
     my $file = $args->{'file'};

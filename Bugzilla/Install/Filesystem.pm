@@ -156,7 +156,7 @@ sub FILESYSTEM {
         'migrate.pl'      => { perms => OWNER_EXECUTE },
         'sentry.pl'       => { perms => WS_EXECUTE },
         'metrics.pl'      => { perms => WS_EXECUTE },
-        'Makefile.PL'     => { perms => OWNER_WRITE },
+        'Makefile.PL'     => { perms => OWNER_EXECUTE },
         'gen-cpanfile.pl' => { perms => OWNER_EXECUTE },
         'clean-bug-user-last-visit.pl' => { perms => WS_EXECUTE },
 

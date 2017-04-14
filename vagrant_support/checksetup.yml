@@ -9,7 +9,9 @@
   template:
     src: checksetup_answers.j2
     dest: /home/vagrant/checksetup_answers.txt
-    mode: 644
+    owner: vagrant
+    group: vagrant
+    mode: 0644
 
 - name: copy bmo config checker script
   copy:

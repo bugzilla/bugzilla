@@ -1,29 +1,23 @@
 #!/bin/bash
-# This Source Code Form is subject to the terms of the Mozilla Public
-# License, v. 2.0. If a copy of the MPL was not distributed with this
-# file, You can obtain one at http://mozilla.org/MPL/2.0/.
-#
-# This Source Code Form is "Incompatible With Secondary Licenses", as
-# defined by the Mozilla Public License, v. 2.0.
-#
-# bugzilla-queue This starts, stops, and restarts the Bugzilla jobqueue.pl
-# daemon, which manages sending queued mail and possibly
-# other queued tasks in the future.
+# 
+# bugzilla-push This starts, stops, and restarts the Bugzilla push
+#        daemon, which manages syncronising bugzilla.mozilla.org and
+#        third party bugzilla installs.
 #
 # chkconfig: 345 85 15
-# description: Bugzilla queue runner
+# description: Bugzilla push daemon
 #
 ### BEGIN INIT INFO
-# Provides: bugzilla-queue
+# Provides: bugzilla-push
 # Required-Start: $local_fs $syslog MTA mysqld
 # Required-Stop: $local_fs $syslog MTA mysqld
 # Default-Start: 3 5
 # Default-Stop: 0 1 2 6
-# Short-Description: Start and stop the Bugzilla queue runner.
-# Description: The Bugzilla queue runner (jobqueue.pl) sends any mail
-# that Bugzilla has queued to be sent in the background. If you
-# have enabled the use_mailer_queue parameter in Bugzilla, you
-# must run this daemon.
+# Short-Description: Start and stop the Bugzilla push daemon.
+# Description: The Bugzilla push daemon (bugzilla-pushd.pl)
+#
+#
+#
 ### END INIT INFO
 
 NAME=`basename $0`
@@ -33,7 +27,7 @@ NAME=`basename $0`
 #################
 
 # This should be the path to your Bugzilla
-BUGZILLA=/var/www/html/bugzilla
+BUGZILLA=/data/www/bugzilla.mozilla.org
 # Who owns the Bugzilla directory and files?
 USER=root
 
@@ -41,9 +35,9 @@ USER=root
 # specify it here.
 OPTIONS=""
 
-# You can also override the configuration by creating a
+# You can also override the configuration by creating a 
 # /etc/sysconfig/bugzilla-queue file so that you don't
-# have to edit this script.
+# have to edit this script. 
 if [ -r /etc/sysconfig/$NAME ]; then
   . /etc/sysconfig/$NAME
 fi
@@ -53,7 +47,7 @@ fi
 ##########
 
 RETVAL=0
-BIN=$BUGZILLA/jobqueue.pl
+BIN=$BUGZILLA/extensions/Push/bin/bugzilla-pushd.pl
 PIDFILE=/var/run/$NAME.pid
 
 # Source function library.
@@ -74,8 +68,7 @@ start ()
     echo -n "Starting $NAME: "
     touch $PIDFILE
     chown $USER $PIDFILE
-    daemon --user=$USER \
-        "cd $BUGZILLA && $BIN ${OPTIONS} -p '$PIDFILE' -n $NAME start > /dev/null"
+    daemon --user=$USER "cd $BUGZILLA && $BIN ${OPTIONS} -p '$PIDFILE' -n $NAME start > /dev/null"
     ret=$?
     [ $ret -eq "0" ] && touch /var/lock/subsys/$NAME
     echo
@@ -99,14 +92,18 @@ restart ()
 
 condrestart ()
 {
-    [ -e /var/lock/subsys/$NAME ] && restart || return 0
+     [ -e /var/lock/subsys/$NAME ] && restart || return 0
 }
 
+status ()
+{
+    cd $BUGZILLA && $BIN -p $PIDFILE -n $NAME check
+}
 
 case "$1" in
     start) start; RETVAL=$? ;;
     stop) stop; RETVAL=$? ;;
-    status) $BIN -p $PIDFILE -n $NAME check; RETVAL=$?;;
+    status) status; RETVAL=$?;;
     restart) restart; RETVAL=$? ;;
     condrestart) condrestart; RETVAL=$? ;;
     *) usage ; RETVAL=2 ;;

@@ -1,0 +1,21 @@
+- name: install job queue
+  command: /vagrant/jobqueue.pl install chdir=/vagrant creates=/etc/init.d/bugzilla-queue
+
+- name: configure jobqueue
+  copy:
+    dest: /etc/sysconfig/bugzilla-queue
+    mode: 0644
+    content: |
+      BUGZILLA=/vagrant
+      USER=vagrant
+
+- name: fix jobqueue perms
+  file:
+    path: /vagrant/jobqueue.pl
+    mode: 0750
+
+- name: enable jobqueue
+  service: name=bugzilla-queue enabled=yes
+
+- name: restart jobqueue
+  service: name=bugzilla-queue state=restarted

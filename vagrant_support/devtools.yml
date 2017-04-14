@@ -1,0 +1,4 @@
+---
+- name: copy bashrc
+  copy: src=bashrc dest=/home/vagrant/.bashrc mode=0644
+

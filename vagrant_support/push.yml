@@ -1,0 +1,15 @@
+- name: push daemon sysconfig
+  copy:
+    dest: /etc/sysconfig/bugzilla-push
+    mode: 0644
+    content: |
+      BUGZILLA=/vagrant
+      USER=vagrant
+
+- name: push daemon init file
+  template:
+    dest: /etc/init.d/bugzilla-push
+    src: bugzilla-push
+    owner: root
+    group: root
+    mode: 0755

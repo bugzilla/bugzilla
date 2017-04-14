@@ -1,0 +1,7 @@
+#!/bin/bash
+
+cd /vagrant
+rm localconfig data/params
+perl checksetup.pl /home/vagrant/checksetup_answers.txt
+perl checksetup.pl /home/vagrant/checksetup_answers.txt
+perl scripts/generate_bmo_data.pl 'vagrant@{{ WEB_HOSTNAME }}'

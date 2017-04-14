@@ -1,0 +1,21 @@
+PerlSwitches -wT
+PerlConfigRequire /vagrant/mod_perl.pl
+
+<IfModule mpm_prefork_module>
+    StartServers         2
+    MinSpareServers      2
+    MaxSpareServers      2
+    MaxClients           200
+    MaxRequestsPerChild  4500
+</IfModule>
+
+<VirtualHost *:80>
+    KeepAlive Off
+    DocumentRoot "/vagrant"
+    <Directory "/vagrant">
+        DirectoryIndex index.cgi
+        Options Indexes FollowSymLinks ExecCGI
+        AllowOverride All
+        Allow from all
+    </Directory>
+</VirtualHost>

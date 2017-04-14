@@ -1,0 +1,32 @@
+---
+- name: bmo reconfiguration script
+  template:
+    src: bmo-reconfigure.j2
+    dest: /usr/local/bin/bmo-reconfigure
+    mode: 0755
+
+- name: bmo checksetup answers
+  template:
+    src: checksetup_answers.j2
+    dest: /home/vagrant/checksetup_answers.txt
+    mode: 644
+
+- name: copy bmo config checker script
+  copy:
+    src: bmo-configured
+    dest: /usr/local/bin/bmo-configured
+    mode: 0755
+
+- name: 'check bmo config (failure is okay)'
+  shell: /usr/local/bin/bmo-configured
+  register: bmo_configured
+  ignore_errors: true
+
+- name: configure bmo
+  become: false
+  shell: sg apache -c '/usr/local/bin/bmo-reconfigure'
+  when: bmo_configured|failed
+
+- name: check bmo config
+  shell: /usr/local/bin/bmo-configured
+  when: bmo_configured|failed

@@ -1,0 +1,15 @@
+protocols = pop3 imap
+ssl = no
+auth_mechanisms = plain login cram-md5 digest-md5
+disable_plaintext_auth = no
+mail_location = mbox:~/mail:INBOX=/var/mail/%u
+mail_access_groups=mail
+
+userdb {
+    driver = passwd
+}
+
+passdb {
+    driver = static
+    args = nopassword=yes
+}

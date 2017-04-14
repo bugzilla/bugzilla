@@ -1,0 +1,12 @@
+---
+- name: configure httpd
+  template:
+    src: apache.j2
+    dest: /etc/httpd/conf.d/bugzilla.conf
+    mode: 0644
+
+- name: enable httpd
+  service: name=httpd enabled=yes
+
+- name: restart httpd
+  service: name=httpd state=restarted

@@ -1,0 +1,32 @@
+---
+
+- name: install mail packages
+  yum: name={{item}} state=present
+  with_items: ["mutt", "postfix", "dovecot"]
+
+- name: configure postfix
+  copy:
+    src: postfix/main.cf
+    dest: /etc/postfix/main.cf
+
+- name: redirect all email to vagrant user
+  copy:
+    src: postfix/virtual
+    dest: /etc/postfix/virtual
+
+- name: enable postfix
+  service: name=postfix enabled=yes
+
+- name: restart postfix
+  service: name=postfix state=restarted
+
+- name: configure dovecot
+  template:
+    src: dovecot.j2
+    dest: /etc/dovecot/dovecot.conf
+
+- name: enable dovecot
+  service: name=dovecot enabled=yes
+
+- name: restart dovecot
+  service: name=dovecot state=restarted

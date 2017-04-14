@@ -1,0 +1,176 @@
+---
+- hosts: all
+  become: true
+  tasks:
+    - include: timezone.yml
+    - name: install epel-release
+      yum: name=epel-release state=present
+
+    - name: install common packages
+      yum: name={{item}} state=present
+      with_items:
+        - libselinux-python
+        - policycoreutils-python
+        - python-urllib3
+        - python-pyasn1
+        - python2-ndg_httpsclient
+        - pyOpenSSL
+        - htop
+
+    - name: permissive selinux
+      selinux: state=permissive policy=targeted
+
+    - name: disable selinux on reboot
+      selinux: state=disabled
+
+    - name: 'add {{WEB_HOSTNAME}} to /etc/hosts'
+      lineinfile:
+        dest: /etc/hosts
+        regexp: '{{WEB_HOSTNAME}}'
+        line: '{{WEB_IP}} {{WEB_HOSTNAME}}'
+        owner: root
+        group: root
+        mode: 0644
+
+    - name: 'add {{DB_HOSTNAME}} to /etc/hosts'
+      lineinfile:
+        dest: /etc/hosts
+        regexp: '{{DB_HOSTNAME}}'
+        line: '{{DB_IP}} {{DB_HOSTNAME}}'
+        owner: root
+        group: root
+        mode: 0644
+
+- hosts: db
+  become: true
+  tasks:
+    - name: fetch ius-release.rpm
+      get_url:
+        url: https://moz-devservices-bmocartons.s3.amazonaws.com/third-party/ius-release.rpm
+        dest: /tmp/ius-release.rpm
+        mode: 0600
+
+    - name: fetch mysql rpm
+      get_url:
+        url: https://moz-devservices-bmocartons.s3.amazonaws.com/third-party/mysql-community-release-el6-5.noarch.rpm
+        dest: /tmp/mysql-community-release-el6-5.noarch.rpm
+        mode: 0600
+
+    - name: add some extra repos
+      yum: name={{item}} state=present
+      with_items:
+        - /tmp/ius-release.rpm
+        - /tmp/mysql-community-release-el6-5.noarch.rpm
+
+    - name: install mysql-server
+      yum: name=mysql-community-server state=present
+
+    - name: copy my.cnf
+      copy:
+        src: my.cnf
+        dest: /etc/my.cnf
+
+    - name: enable mysqld
+      service: name=mysqld enabled=yes
+
+    - name: restart mysqld
+      service: name=mysqld state=restarted
+
+    - name: 'check for bugs_bmo (failure is ok)'
+      shell: mysql -u root -e 'show databases' | grep bugs_bmo
+      register: bugs_bmo
+      ignore_errors: true
+
+    - name: create bugs_bmo
+      shell: |-
+        mysqladmin -u root create bugs_bmo
+        mysql -u root -e 'GRANT ALL ON bugs_bmo.* TO bugs@"{{WEB_IP}}" IDENTIFIED BY "bugs"'
+      when: bugs_bmo|failed
+
+- hosts: web
+  become: true
+  tasks:
+    - name: install web-specific packages
+      yum: name={{item}} state=present
+      with_items:
+        - autoconf
+        - automake
+        - binutils
+        - bison
+        - byacc
+        - elfutils
+        - flex
+        - gcc
+        - gcc-c++
+        - gd
+        - gd-devel
+        - gettext
+        - git
+        - libtool
+        - make
+        - mod_perl
+        - mod_perl-devel
+        - openssl
+        - openssl-devel
+        - patch
+        - patchutils
+        - perl
+        - perl-core
+        - pkgconfig
+        - rpm-build
+        - graphviz
+
+    - name: fetch cpanm
+      get_url:
+        url: http://cpanmin.us
+        dest: /usr/local/bin/cpanm
+        mode: '0755'
+    - name: install more recent Apache2::SizeLimit
+      cpanm: name=Apache2::SizeLimit executable=/usr/local/bin/cpanm
+
+    - name: 'check /opt/bmo (failure is ok)'
+      shell: test -d /opt/bmo && test -f /opt/bmo/local/lib/perl5/Plack.pm
+      register: opt_bmo
+      ignore_errors: true
+
+    - name: install vendor tarball
+      unarchive:
+        src: '{{VENDOR_BUNDLE_URL}}'
+        dest: /opt
+        remote_src: true
+      when: opt_bmo|failed
+
+    - name: check /opt/bmo
+      shell: test -d /opt/bmo && test -f /opt/bmo/local/lib/perl5/Plack.pm
+      when: opt_bmo|failed
+
+    - name: add local symlink
+      file: path=/vagrant/local src=/opt/bmo/local state=link force=true
+
+    - name: make bmo data dir
+      file: path=/data state=directory owner=vagrant group=apache mode=0775
+
+    - name: fix perms
+      file: path=/vagrant state=directory owner=vagrant group=apache recurse=yes
+
+    - name: add data symlink
+      file: path=/vagrant/data src=/data state=link force=true
+
+    - include: memcached.yml
+
+    - name: add vagrant to apache group
+      user: name=vagrant groups=apache append=yes
+
+    - name: bmo bundle refresher script
+      template:
+        src: bmo-refresh-bundle.j2
+        dest: /usr/local/bin/bmo-refresh-bundle
+        mode: 0755
+
+    - include: checksetup.yml
+    - include: cron.yml
+    - include: jobqueue.yml
+    - include: push.yml
+    - include: email.yml
+    - include: apache.yml
+    - include: devtools.yml

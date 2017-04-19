@@ -175,6 +175,12 @@ sub SETTINGS {
         default => 'off',
         category => 'API'
     },
+    {
+        name     => 'use_elasticsearch',
+        options  => ['on', 'off'],
+        default  => 'off',
+        category => 'Searching'
+    },
     ];
 };
 

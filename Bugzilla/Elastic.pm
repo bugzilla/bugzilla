@@ -16,6 +16,12 @@ with 'Bugzilla::Elastic::Role::HasIndexName';
 
 sub suggest_users {
     my ($self, $text) = @_;
+
+    unless (Bugzilla->params->{elasticsearch}) {
+        # optimization: faster than a regular method call.
+        goto &_suggest_users_fallback;
+    }
+
     my $field = 'suggest_user';
     if ($text =~ /^:(.+)$/) {
         $text = $1;
@@ -38,10 +44,15 @@ sub suggest_users {
     }
     else {
         warn "suggest_users error: $@";
-        my $users = Bugzilla::User::match($text, 25, 0);
-        return [ map { { real_name => $_->name, name => $_->login } } @$users];
+        # optimization: faster than a regular method call.
+        goto &_suggest_users_fallback;
     }
 }
 
+sub _suggest_users_fallback {
+    my ($self, $text) = @_;
+    my $users = Bugzilla::User::match($text, 25, 0);
+    return [ map { { real_name => $_->name, name => $_->login } } @$users];
+}
 
 1;

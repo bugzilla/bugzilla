@@ -692,11 +692,18 @@ my $fallback_search = Bugzilla::Search->new(fields => [@selectcolumns],
                                             order  => [@order_columns],
                                             sharer => $sharer_id);
 
+# Not-logged-in users get elasticsearch if possible
+my $elastic_default = !$user->id || $user->setting('use_elasticsearch') eq 'on';
+
 my $search;
-my $elastic = $cgi->param('elastic') // 1;
+my $elastic = $cgi->param('elastic') // $elastic_default;
 if (defined $cgi->param('elastic')) {
-    $vars->{was_elastic} = 1;
+    $vars->{was_elastic} = $elastic;
 }
+
+# If turned off in the admin section, it is always off.
+$elastic = 0 unless Bugzilla->params->{elasticsearch};
+
 if ($elastic) {
     local $SIG{__DIE__} = undef;
     local $SIG{__WARN__} = undef;

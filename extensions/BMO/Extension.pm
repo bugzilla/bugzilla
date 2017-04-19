@@ -57,6 +57,8 @@ use List::Util qw(first);
 use Scalar::Util qw(blessed);
 use Sys::Syslog qw(:DEFAULT);
 use Text::Balanced qw( extract_bracketed extract_multiple );
+use File::Slurp qw(read_file);
+use JSON::XS;
 
 use Bugzilla::Extension::BMO::Constants;
 use Bugzilla::Extension::BMO::FakeBug;
@@ -2522,7 +2524,41 @@ sub _check_default_product_security_group {
 sub install_filesystem {
     my ($self, $args) = @_;
     my $files = $args->{files};
+    my $create_files = $args->{create_files};
     my $extensions_dir = bz_locations()->{extensionsdir};
+    $create_files->{__lbheartbeat__} = {
+        perms    => Bugzilla::Install::Filesystem::WS_SERVE,
+        contents => 'This mission is too important for me to allow you to jeopardize it.',
+    };
+
+
+    # version.json needs to have a source attribute pointing to
+    # our repository. We already have this information in the (static)
+    # contribute.json file, so parse that in
+    my $json = JSON::XS->new->pretty->utf8->canonical();
+    my $contribute = eval { 
+        $json->decode(scalar read_file(bz_locations()->{cgi_path} . "/contribute.json"));
+    };
+    my $commit = `git rev-parse HEAD`;
+    chomp $commit;
+
+    if (!$contribute) {
+        die "Missing or invalid contribute.json file";
+    }
+
+    my $version_obj = {
+        source  => $contribute->{repository}{url},
+        version => BUGZILLA_VERSION,
+        commit  => $commit // "unknown",
+        build   => $ENV{BUGZILLA_CI_BUILD} // "unknown",
+    };
+
+    $create_files->{'version.json'} = {
+        overwrite => 1,
+        perms     => Bugzilla::Install::Filesystem::WS_SERVE,
+        contents  => $json->encode($version_obj),
+    };
+
     $files->{"$extensions_dir/BMO/bin/migrate-github-pull-requests.pl"} = {
         perms => Bugzilla::Install::Filesystem::OWNER_EXECUTE
     };

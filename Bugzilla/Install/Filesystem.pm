@@ -623,12 +623,12 @@ sub _create_files {
     # It's not necessary to sort these, but it does make the
     # output of checksetup.pl look a bit nicer.
     foreach my $file (sort keys %files) {
-        unless (-e $file) {
+        my $info = $files{$file};
+        if ($info->{overwrite} or not -f $file) {
             print "Creating $file...\n";
-            my $info = $files{$file};
-            my $fh = new IO::File($file, O_WRONLY | O_CREAT, $info->{perms})
-                || die $!;
-            print $fh $info->{contents} if $info->{contents};
+            my $fh = IO::File->new( $file, O_WRONLY | O_CREAT, $info->{perms} )
+                or die "unable to write $file: $!";
+            print $fh $info->{contents} if exists $info->{contents};
             $fh->close;
         }
     }

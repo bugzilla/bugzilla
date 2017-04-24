@@ -150,7 +150,7 @@
     - name: make bmo data dir
       file: path=/data state=directory owner=vagrant group=apache mode=0775
 
-    - name: fix perms
+    - name: fix owner of /vagrant
       file: path=/vagrant state=directory owner=vagrant group=apache recurse=yes
 
     - name: add data symlink

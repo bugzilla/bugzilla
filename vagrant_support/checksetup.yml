@@ -1,8 +1,14 @@
 ---
-- name: bmo reconfiguration script
+- name: bmo checksetup script
   template:
-    src: bmo-reconfigure.j2
-    dest: /usr/local/bin/bmo-reconfigure
+    src: bmo-checksetup.j2
+    dest: /usr/local/bin/bmo-checksetup
+    mode: 0755
+
+- name: bmo generate data script
+  template:
+    src: bmo-generate-data.j2
+    dest: /usr/local/bin/bmo-generate-data
     mode: 0755
 
 - name: bmo checksetup answers
@@ -13,22 +19,11 @@
     group: vagrant
     mode: 0644
 
-- name: copy bmo config checker script
-  copy:
-    src: bmo-configured
-    dest: /usr/local/bin/bmo-configured
-    mode: 0755
-
-- name: 'check bmo config (failure is okay)'
-  shell: /usr/local/bin/bmo-configured
-  register: bmo_configured
-  ignore_errors: true
-
-- name: configure bmo
+- name: run checksetup
   become: false
-  shell: sg apache -c '/usr/local/bin/bmo-reconfigure'
-  when: bmo_configured|failed
+  shell: sg apache -c '/usr/local/bin/bmo-checksetup'
 
-- name: check bmo config
-  shell: /usr/local/bin/bmo-configured
-  when: bmo_configured|failed
+- name: generate data
+  become: false
+  shell: sg apache -c '/usr/local/bin/bmo-generate-data'
+

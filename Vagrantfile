@@ -14,6 +14,19 @@ WEB_CPU      = ENV.fetch "BMO_WEB_CPU",  2
 VENDOR_BUNDLE_URL = ENV.fetch "BMO_BUNDLE_URL",
   'https://moz-devservices-bmocartons.s3.amazonaws.com/bmo/vendor.tar.gz'
 
+RSYNC_ARGS = [
+  '--verbose',
+  '--archive',
+  '--delete',
+  '-z',
+  '--copy-links',
+  '--exclude=local/',
+  '--exclude=data/',
+  '--exclude=template_cache/',
+  '--exclude=localconfig',
+  '--include=.git/'
+]
+
 # All Vagrant configuration is done below. The '2' in Vagrant.configure
 # configures the configuration version (we support older styles for
 # backwards compatibility). Please don't change it unless you know what
@@ -45,12 +58,7 @@ Vagrant.configure('2') do |config|
       guest: 22,
       auto_correct: true
 
-    db.vm.synced_folder '.', '/vagrant', type: 'rsync',
-      rsync__args: ['--verbose', '--archive', '--delete', '-z', '--copy-links',
-                    '--exclude=local/',
-                    '--exclude=data/',
-                    '--exclude=template_cache/',
-                    '--exclude=localconfig']
+    db.vm.synced_folder '.', '/vagrant', type: 'rsync', rsync__args: RSYNC_ARGS
     db.vm.provider 'parallels' do |prl, override|
       override.vm.box = 'parallels/centos-6.8'
     end
@@ -72,12 +80,7 @@ Vagrant.configure('2') do |config|
       auto_correct: true
 
 
-    web.vm.synced_folder '.', '/vagrant', type: 'rsync',
-      rsync__args: ['--verbose', '--archive', '--delete', '-z', '--copy-links',
-                    '--exclude=local/',
-                    '--exclude=data/',
-                    '--exclude=template_cache/',
-                    '--exclude=localconfig']
+    web.vm.synced_folder '.', '/vagrant', type: 'rsync', rsync__args: RSYNC_ARGS
 
     web.vm.provider 'virtualbox' do |v|
       v.memory = WEB_MEM

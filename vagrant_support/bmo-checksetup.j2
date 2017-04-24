@@ -1,0 +1,12 @@
+#!/bin/bash
+
+cd /vagrant
+
+if [[ ! -f ~/localconfig || ! -f /data/params ]]; then
+    perl checksetup.pl /home/vagrant/checksetup_answers.txt
+    perl checksetup.pl /home/vagrant/checksetup_answers.txt
+else
+    cp ~/localconfig /vagrant
+    perl checksetup.pl < /dev/null
+    cp /vagrant/localconfig ~/
+fi

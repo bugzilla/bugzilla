@@ -23,6 +23,8 @@
 /Bugzilla-*.*/
 /local
 .vagrant/
+version.json
+__lbheartbeat__
 
 /skins/contrib/Dusk/admin.css
 /skins/contrib/Dusk/bug.css

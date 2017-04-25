@@ -598,7 +598,7 @@ h3.change-name {
 
 .comment-text {
     white-space: pre-wrap;
-    font: 13px/1.2 "Droid Sans Mono",Menlo,Monaco,Consolas,monospace;
+    font: 13px/1.2 "Droid Sans Mono",Menlo,Monaco,"Fira Mono",monospace;
     background: #fff;
     color: #222;
     margin: 1px 0 0 0;

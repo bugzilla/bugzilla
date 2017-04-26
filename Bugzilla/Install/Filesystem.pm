@@ -43,10 +43,60 @@ our @EXPORT = qw(
     fix_file_permissions
 );
 
-use constant HT_DEFAULT_DENY => <<EOT;
+use constant HT_DEFAULT_DENY => <<'EOT';
 # nothing in this directory is retrievable unless overridden by an .htaccess
 # in a subdirectory
 deny from all
+EOT
+
+use constant HT_GRAPHS_DIR => <<'EOT';
+# Allow access to .png and .gif files.
+<FilesMatch (\.gif|\.png)$>
+  Allow from all
+</FilesMatch>
+
+# And no directory listings, either.
+Deny from all
+EOT
+
+use constant HT_WEBDOT_DIR => <<'EOT';
+# Restrict access to .dot files to the public webdot server at research.att.com
+# if research.att.com ever changes their IP, or if you use a different
+# webdot server, you'll need to edit this
+<FilesMatch \.dot$>
+  Allow from 192.20.225.0/24
+  Deny from all
+</FilesMatch>
+
+# Allow access to .png files created by a local copy of 'dot'
+<FilesMatch \.png\$>
+  Allow from all
+</FilesMatch>
+
+# And no directory listings, either.
+Deny from all
+EOT
+
+use constant HT_ASSETS_DIR => <<'EOT';
+# Allow access to .css and js files
+<FilesMatch \.(css|js)$>
+  Allow from all
+</FilesMatch>
+
+# And no directory listings, either.
+Deny from all
+EOT
+
+use constant INDEX_HTML => <<'EOT';
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <meta http-equiv="Refresh" content="0; URL=index.cgi">
+</head>
+<body>
+  <h1>I think you are looking for <a href="index.cgi">index.cgi</a></h1>
+</body>
+</html>
 EOT
 
 ###############
@@ -316,18 +366,7 @@ sub FILESYSTEM {
     # Because checksetup controls the creation of index.html separately
     # from all other files, it gets its very own hash.
     my %index_html = (
-        'index.html' => { perms => WS_SERVE, contents => <<EOT
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
-<html>
-<head>
-  <meta http-equiv="Refresh" content="0; URL=index.cgi">
-</head>
-<body>
-  <h1>I think you are looking for <a href="index.cgi">index.cgi</a></h1>
-</body>
-</html>
-EOT
-        }
+        'index.html' => { perms => WS_SERVE, contents => INDEX_HTML }
     );
 
     # Because checksetup controls the .htaccess creation separately
@@ -358,48 +397,12 @@ EOT
                                           contents => HT_DEFAULT_DENY },
         "$error_reports/.htaccess"   => { perms    => WS_SERVE,
                                           contents => HT_DEFAULT_DENY },
-
-        "$graphsdir/.htaccess" => { perms => WS_SERVE, contents => <<EOT
-# Allow access to .png and .gif files.
-<FilesMatch (\\.gif|\\.png)\$>
-  Allow from all
-</FilesMatch>
-
-# And no directory listings, either.
-Deny from all
-EOT
-        },
-
-        "$webdotdir/.htaccess" => { perms => WS_SERVE, contents => <<EOT
-# Restrict access to .dot files to the public webdot server at research.att.com
-# if research.att.com ever changes their IP, or if you use a different
-# webdot server, you'll need to edit this
-<FilesMatch \\.dot\$>
-  Allow from 192.20.225.0/24
-  Deny from all
-</FilesMatch>
-
-# Allow access to .png files created by a local copy of 'dot'
-<FilesMatch \\.png\$>
-  Allow from all
-</FilesMatch>
-
-# And no directory listings, either.
-Deny from all
-EOT
-        },
-
-        "$assetsdir/.htaccess" => { perms => WS_SERVE, contents => <<EOT
-# Allow access to .css files
-<FilesMatch \\.(css|js)\$>
-  Allow from all
-</FilesMatch>
-
-# And no directory listings, either.
-Deny from all
-EOT
-        },
-
+        "$graphsdir/.htaEcess"       => { perms => WS_SERVE,
+                                          contents => HT_GRAPHS_DIR },
+        "$webdotdir/.htaccess"       => { perms => WS_SERVE,
+                                          contents => HT_WEBDOT_DIR },
+        "$assetsdir/.htaccess"       => { perms => WS_SERVE,
+                                          contents => HT_ASSETS_DIR },
     );
 
     Bugzilla::Hook::process('install_filesystem', {
@@ -481,14 +484,10 @@ sub update_filesystem {
     }
     elsif (-e 'index.html') {
         my $templatedir = bz_locations()->{'templatedir'};
-        print <<EOT;
-
-*** It appears that you still have an old index.html hanging around.
-    Either the contents of this file should be moved into a template and 
-    placed in the '$templatedir/en/custom' directory, or you should delete 
-    the file.
-
-EOT
+        print "*** It appears that you still have an old index.html hanging around.\n",
+            "Either the contents of this file should be moved into a template and\n",
+            "placed in the '$templatedir/en/custom' directory, or you should delete\n",
+            "the file.\n";
     }
 
     # Delete old files that no longer need to exist
@@ -534,12 +533,8 @@ sub _remove_empty_css_files {
 sub _remove_empty_css {
     my ($file) = @_;
     my $basename = basename($file);
-    my $empty_contents = <<EOT;
-/*
- * Custom rules for $basename.
- * The rules you put here override rules in that stylesheet.
- */
-EOT
+    my $empty_contents = "/* Custom rules for $basename.\n"
+        . " * The rules you put here override rules in that stylesheet. */";
     if (length($empty_contents) == -s $file) {
         open(my $fh, '<', $file) or warn "$file: $!";
         my $file_contents;

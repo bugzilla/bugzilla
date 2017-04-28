@@ -82,8 +82,11 @@ sub has_feature {
     return $FEATURE{$feature_name} if exists $FEATURE{ $feature_name };
 
     my $meta = $class->cpan_meta;
-    my $feature = eval { $meta->feature($feature_name) }
-      or ThrowCodeError('invalid_feature', { feature => $feature_name });
+    my $feature = eval { $meta->feature($feature_name) };
+    unless ($feature) {
+        require Bugzilla::Error;
+        Bugzilla::Error::ThrowCodeError('invalid_feature', { feature => $feature_name });
+    }
 
     return $FEATURE{$feature_name} = check_cpan_feature($feature)->{ok};
 }

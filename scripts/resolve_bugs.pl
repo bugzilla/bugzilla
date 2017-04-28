@@ -17,17 +17,21 @@ use Bugzilla::Bug;
 use Bugzilla::Constants;
 use Bugzilla::Group;
 use Bugzilla::Search;
+use Getopt::Long;
 
-use constant QUERY => {
-    short_desc      => '[B2G]',
-    resolution      => '---',
-    short_desc_type => 'allwordssubstr',
-    product         => 'Mozilla Localizations'
-};
-
-use constant COMMENT => "We've stopped shipping Firefox OS for phones. Thus resolving this as WONTFIX.";
+my ($product, $comment);
+my $resolution = 'WONTFIX';
 
 Bugzilla->usage_mode(USAGE_MODE_CMDLINE);
+
+GetOptions(
+    'product|p=s'    => \$product,
+    'resolution|r=s' => \$resolution,
+    'comment|m=s'    => \$comment,
+);
+
+die "--product (-p) is required!\n" unless $product;
+die "--comment (-m) is required!\n" unless $comment;
 
 my $dbh = Bugzilla->dbh;
 
@@ -37,7 +41,10 @@ $auto_user->{groups} = [ Bugzilla::Group->get_all ];
 $auto_user->{bless_groups} = [ Bugzilla::Group->get_all ];
 Bugzilla->set_user($auto_user);
 
-my $search = new Bugzilla::Search(fields => ['bug_id'], params => QUERY);
+my $search = Bugzilla::Search->new(
+    fields => ['bug_id'],
+    params => { resolution => '---', product => $product },
+);
 my ($data) = $search->data;
 
 my $bug_count = @$data;
@@ -47,7 +54,7 @@ if ($bug_count == 0) {
 }
 
 print STDERR <<EOF;
-About to close $bug_count bugs as WONTFIX.
+About to resolve $bug_count bugs as $resolution
 
 Press <Ctrl-C> to stop or <Enter> to continue...
 EOF
@@ -60,11 +67,15 @@ foreach my $row (@$data) {
     my $bug_id = shift @$row;
     warn "Updating bug $bug_id\n";
     my $bug = Bugzilla::Bug->new($bug_id);
-    $bug->set_bug_status('RESOLVED', { resolution => 'WONTFIX' });
-    $bug->add_comment(COMMENT);
+    $bug->set_bug_status('RESOLVED', { resolution => $resolution });
+    $bug->add_comment($comment);
     $bug->update($timestamp);
     $dbh->do("UPDATE bugs SET lastdiffed = ? WHERE bug_id = ?",
              undef, $timestamp, $bug_id);
+    # make sure memory is cleaned up.
+    Bugzilla::Hook::process('request_cleanup');
+    Bugzilla::Bug->CLEANUP;
+    Bugzilla->clear_request_cache(except => [qw(user dbh dbh_main dbh_shadow memcached)]);
 }
 $dbh->bz_commit_transaction;
 

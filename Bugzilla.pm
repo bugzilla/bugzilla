@@ -710,7 +710,11 @@ sub audit {
 use constant request_cache => Bugzilla::Install::Util::_cache();
 
 sub clear_request_cache {
-    %{ request_cache() } = ();
+    my ($class, %option) = @_;
+    my $request_cache = request_cache();
+    my @except        = $option{except} ? @{ $option{except} } : ();
+
+    %{ $request_cache } = map { $_ => $request_cache->{$_} } @except;
 }
 
 # This is a per-process cache.  Under mod_cgi it's identical to the

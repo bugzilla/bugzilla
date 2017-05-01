@@ -43,8 +43,14 @@ ThrowUserError("auth_delegation_invalid_description")
   unless $description =~ /^[\w\s]{3,255}$/;
 
 my $callback_uri  = URI->new($callback);
+
+my $legal_protocol
+    = $ENV{BUGZILLA_UNSAFE_AUTH_DELEGATION}
+    ? qr/^https?$/i # http or https
+    : qr/^https$/i; # https only
+
 ThrowUserError('auth_delegation_illegal_protocol', { protocol => scalar $callback_uri->scheme })
-    unless $callback_uri->scheme eq 'https';
+    unless $callback_uri->scheme =~ $legal_protocol;
 my $callback_base = $callback_uri->clone;
 $callback_base->query(undef);
 

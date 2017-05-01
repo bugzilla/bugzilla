@@ -29,6 +29,7 @@ my $ok = eval {
     die "database not available"            unless $database_ok;
     die "memcached server(s) not available" unless $memcached_ok;
     die "mod_perl not configured?"          unless $ENV{MOD_PERL};
+    die "BUGZILLA_UNSAFE_AUTH_DELEGATION"   if $ENV{BUGZILLA_UNSAFE_AUTH_DELEGATION};
     1;
 };
 warn "heartbeat error: $@" if !$ok && $@;

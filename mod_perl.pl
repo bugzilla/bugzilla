@@ -79,9 +79,6 @@ $Bugzilla::extension_packages = Bugzilla::Extension->load_all();
 
 Bugzilla->preload_features();
 
-# Force instantiation of template so Bugzilla::Template::PreloadProvider can do its magic.
-Bugzilla->template;
-
 # Have ModPerl::RegistryLoader pre-compile all CGI scripts.
 my $rl = new ModPerl::RegistryLoader();
 # If we try to do this in "new" it fails because it looks for a

@@ -117,38 +117,42 @@
   # value of title anyway.  To get around that problem we explicitly
   # set header's default value here only if it is undefined. %]
 [% IF !header.defined %][% header = title %][% END %]
-[%- js_BUGZILLA = {
-        param => {
-            cookiepath => Param('cookiepath'),
-            maxusermatches => Param('maxusermatches'),
-        },
-        constant => {
-            COMMENT_COLS => constants.COMMENT_COLS,
-        },
-        string => {
-            # Please keep these in alphabetical order.
-
-            attach_desc_required =>
-                'You must enter a Description for this attachment.',
-            component_required => 
-                "You must select a Component for this $terms.bug",
-            description_required => 
-                "You must enter a Description for this $terms.bug",
-            short_desc_required =>
-                "You must enter a Summary for this $terms.bug",
-            version_required =>
-                "You must select a Version for this $terms.bug"
-        }
-    };
-    IF generate_api_token;
-        js_BUGZILLA.api_token = get_api_token();
-    END; 
-%]
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
                       "http://www.w3.org/TR/html4/loose.dtd">
 <html lang="en">
-  <head data-bugzilla='[% json_encode(js_BUGZILLA) FILTER html %]'>
+  <head>
+    [%- js_BUGZILLA = {
+            param => {
+                cookiepath => Param('cookiepath'),
+                maxusermatches => Param('maxusermatches'),
+            },
+            constant => {
+                COMMENT_COLS => constants.COMMENT_COLS,
+            },
+            string => {
+                # Please keep these in alphabetical order.
+                attach_desc_required =>
+                    'You must enter a Description for this attachment.',
+                component_required =>
+                    "You must select a Component for this $terms.bug",
+                description_required =>
+                    "You must enter a Description for this $terms.bug",
+                short_desc_required =>
+                    "You must enter a Summary for this $terms.bug",
+                version_required =>
+                    "You must select a Version for this $terms.bug"
+            }
+        };
+    %]
     [% Hook.process("start") %]
+    [%
+       IF generate_api_token;
+        js_BUGZILLA.api_token = get_api_token();
+       END;
+    %]
+
+    <meta name="bugzilla-global" content="dummy"
+        id="bugzilla-global" data-bugzilla="[% json_encode(js_BUGZILLA) FILTER html %]">
     <title>[% title %]</title>
 
     [% IF Param('utf8') %]

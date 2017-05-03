@@ -16,7 +16,7 @@
 *                 
 */
 
-var BUGZILLA = $('head').data('bugzilla');
+var BUGZILLA = $("#bugzilla-global").data("bugzilla");
 
 $(function () {
   $('body').addClass("platform-" + navigator.platform);

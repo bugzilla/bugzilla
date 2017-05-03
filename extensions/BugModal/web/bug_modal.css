@@ -598,13 +598,19 @@ h3.change-name {
 
 .comment-text {
     white-space: pre-wrap;
-    font: 13px/1.2 "Droid Sans Mono","Ubuntu Mono","Liberation Mono",Menlo,Monaco,"Fira Mono",monospace;
+    line-height: 1.2;
+    font-size: 13px;
+    font-family: "Droid Sans Mono",Menlo,Monaco,"Courier New",monospace;
     background: #fff;
     color: #222;
     margin: 1px 0 0 0;
     overflow: auto;
     padding: 8px;
     border-top: 1px solid #ddd;
+}
+
+body.platform-Win32 .comment-text, body.platform-Win64 .comment-text {
+    font-family: "Fira Mono", monospace;
 }
 
 .comment-text span.quote, .comment-text span.quote_wrapped {

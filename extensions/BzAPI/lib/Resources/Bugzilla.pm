@@ -59,6 +59,14 @@ sub get_configuration {
     my $user   = Bugzilla->user;
     my $params = Bugzilla->input_params;
 
+    my $can_cache = not exists $params->{product} and not exists $params->{flags};
+    my $cache_key = 'bzapi_get_configuration';
+
+    if ($can_cache) {
+        my $result = Bugzilla->memcached->get_config({key => $cache_key});
+        return $result if defined $result;
+    }
+
     # Get data from the shadow DB as they don't change very often.
     Bugzilla->switch_to_shadow_db;
 
@@ -120,11 +128,16 @@ sub get_configuration {
 
     my $json;
     Bugzilla->template->process('config.json.tmpl', $vars, \$json);
-    my $result = {};
     if ($json) {
-        $result = $self->json->decode($json);
+        my $result = $self->json->decode($json);
+        if ($can_cache) {
+            Bugzilla->memcached->set_config({key => $cache_key, data => $result});
+        }
+        return $result;
     }
-    return $result;
+    else {
+        return {};
+    }
 }
 
 sub get_empty {

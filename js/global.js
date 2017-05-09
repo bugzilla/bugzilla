@@ -87,6 +87,7 @@ function manage_old_lists() {
 function show_mini_login_form( suffix ) {
     $('#login_link' + suffix).addClass('bz_default_hidden');
     $('#mini_login' + suffix).removeClass('bz_default_hidden');
+    $('.mini_login' + suffix).removeClass('bz_default_hidden');
     $('#new_account_container' + suffix).addClass('bz_default_hidden');
     return false;
 }

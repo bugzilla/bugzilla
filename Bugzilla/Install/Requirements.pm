@@ -18,8 +18,7 @@ use strict;
 use warnings;
 
 use Bugzilla::Constants;
-use Bugzilla::Install::Util qw(install_string bin_loc success
-                               extension_requirement_packages);
+use Bugzilla::Install::Util qw(install_string bin_loc success);
 use List::Util qw(max);
 use Term::ANSIColor;
 use CPAN::Meta;

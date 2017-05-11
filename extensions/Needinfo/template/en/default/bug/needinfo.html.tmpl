@@ -95,20 +95,7 @@ $(function() {
     } else {
       $('#needinfo_from_container').addClass('bz_default_hidden');
       $('#needinfo_from').prop('disabled', true);
-      var identity = '';
-      if (role == 'reporter') {
-        identity = '[% bug.reporter.realname || bug.reporter.login FILTER js %]';
-      } else if (role == 'assigned_to') {
-        identity = '[% bug.assigned_to.realname || bug.assigned_to.login FILTER js %]';
-      } else if (role == 'qa_contact') {
-        identity = '[% bug.qa_contact.realname || bug.qa_contact.login FILTER js %]';
-      } else if (role == 'user') {
-        identity = '[% user.realname || user.login FILTER js %]';
-      [% FOREACH mentor = available_mentors %]
-        } else if (role == '[% mentor.login FILTER js %]') {
-          identity = '[% mentor.realname || mentor.login FILTER js +%] [%+ IF available_mentors.size > 1 %](mentor)[% END %]';
-      [% END %]
-      }
+      var identity = $("#needinfo_role :selected").data("identity");
       $('#needinfo_role_identity').text(identity);
     }
   }
@@ -202,24 +189,35 @@ $(function() {
         <select name="needinfo_role" id="needinfo_role">
           <option value="other">other</option>
           [% IF NOT bug.reporter.needinfo_blocked %]
-            <option value="reporter">reporter</option>
+            <option
+                data-identity="[% bug.reporter.name_or_login FILTER html %]"
+                value="reporter">reporter</option>
           [% END %]
           [% IF NOT bug.assigned_to.needinfo_blocked %]
-            <option value="assigned_to">assignee</option>
+            <option
+                data-identity="[% bug.assigned_to.name_or_login FILTER html %]"
+                value="assigned_to">assignee</option>
           [% END %]
           [% IF Param('useqacontact') && bug.qa_contact.login != "" && !bug.qa_contact.needinfo_blocked %]
-            <option value="qa_contact">qa contact</option>
+            <option
+                data-identity="[% bug.qa_contact.name_or_login FILTER html %]"
+                value="qa_contact">qa contact</option>
           [% END %]
           [% IF !is_redirect && NOT user.needinfo_blocked %]
-            <option value="user">myself</option>
+            <option
+                data-identity="[% user.name_or_login FILTER html %]"
+                value="user">myself</option>
           [% END %]
           [% FOREACH mentor = available_mentors %]
-            <option [% IF available_mentors.size > 1 %]title="mentor"[% END %] value="[% mentor.login FILTER html %]">
-              [% available_mentors.size == 1 ? "mentor" : mentor.login FILTER html %]
+            <option data-identity="[% mentor.name_or_login FILTER html %][% IF available_mentors.size > 1 %][% END %]"
+                value="[% mentor.login FILTER html %]">
+                [% available_mentors.size == 1 ? "mentor" : mentor.login FILTER html %][% " (mentor)" IF available_mentors.size > 1 %]
             </option>
           [% END %]
           [% IF bug.component_obj.triage_owner_id %]
-             <option value="triage_owner">triage owner</option>
+             <option
+                data-identity="[% bug.component_obj.triage_owner.name_or_login FILTER html %]"
+                value="triage_owner">triage owner</option>
            [% END %]
         </select>
         <span id="needinfo_from_container">

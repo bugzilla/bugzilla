@@ -50,6 +50,15 @@ sub apache_config {
         cgi_path       => $cgi_path,
     );
     $template->process(\*DATA, \%vars, \$conf);
+    my $apache_version = Apache2::ServerUtil::get_server_version();
+    if ($apache_version =~ m!Apache/(\d+)\.(\d+)\.(\d+)!) {
+        my ($major, $minor, $patch) = ($1, $2, $3);
+        if ($major > 2 || $major == 2 && $minor >= 4) {
+            $conf =~ s{^\s+deny\s+from\s+all.*$}{Require all denied}gmi;
+            $conf =~ s{^\s+allow\s+from\s+all.*$}{Require all granted}gmi;
+            $conf =~ s{^\s+allow\s+from\s+(\S+).*$}{Require host $1}gmi;
+        }
+    }
 
     return $conf;
 }

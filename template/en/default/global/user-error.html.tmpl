@@ -675,7 +675,7 @@
   [% ELSIF error == "fieldvalue_name_too_long" %]
     [% title = "Field Value Is Too Long" %]
     The value of a field is limited to 
-    [%+ constants.FIELD_VALUE_MAX_SIZE FILTER none %] characters. 
+    [%+ constants.MAX_FIELD_VALUE_SIZE FILTER none %] characters.
     '[% value FILTER html %]' is too long ([% value.length %] characters).
 
   [% ELSIF error == "fieldvalue_not_editable" %]

@@ -19,7 +19,7 @@ use Bugzilla::Group;
 use Bugzilla::Search;
 use Getopt::Long;
 
-my ($product, $comment);
+my ($product, $component, $comment);
 my $resolution = 'WONTFIX';
 
 Bugzilla->usage_mode(USAGE_MODE_CMDLINE);
@@ -27,6 +27,7 @@ Bugzilla->usage_mode(USAGE_MODE_CMDLINE);
 GetOptions(
     'product|p=s'    => \$product,
     'resolution|r=s' => \$resolution,
+    'component|c=s'  => \$component,
     'comment|m=s'    => \$comment,
 );
 
@@ -41,9 +42,12 @@ $auto_user->{groups} = [ Bugzilla::Group->get_all ];
 $auto_user->{bless_groups} = [ Bugzilla::Group->get_all ];
 Bugzilla->set_user($auto_user);
 
+my $query = { resolution => '---', product => $product };
+$query->{component} = $component if defined $component;
+
 my $search = Bugzilla::Search->new(
     fields => ['bug_id'],
-    params => { resolution => '---', product => $product },
+    params => $query,
 );
 my ($data) = $search->data;
 
@@ -60,12 +64,13 @@ Press <Ctrl-C> to stop or <Enter> to continue...
 EOF
 getc();
 
-my $timestamp = $dbh->selectrow_array('SELECT LOCALTIMESTAMP(0)');
-
-$dbh->bz_start_transaction;
 foreach my $row (@$data) {
     my $bug_id = shift @$row;
     warn "Updating bug $bug_id\n";
+
+    my $timestamp = $dbh->selectrow_array('SELECT LOCALTIMESTAMP(0)');
+
+    $dbh->bz_start_transaction;
     my $bug = Bugzilla::Bug->new($bug_id);
     $bug->set_bug_status('RESOLVED', { resolution => $resolution });
     $bug->add_comment($comment);
@@ -76,8 +81,9 @@ foreach my $row (@$data) {
     Bugzilla::Hook::process('request_cleanup');
     Bugzilla::Bug->CLEANUP;
     Bugzilla->clear_request_cache(except => [qw(user dbh dbh_main dbh_shadow memcached)]);
+
+    $dbh->bz_commit_transaction;
 }
-$dbh->bz_commit_transaction;
 
 Bugzilla->memcached->clear_all();
 

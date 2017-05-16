@@ -36,7 +36,7 @@ sub _new {
         $self->{memcached} = Cache::Memcached::Fast->new({
             servers   => [ split(/[, ]+/, $servers) ],
             namespace => $self->{namespace},
-            max_size => 1024 * 1024 * 2,
+            max_size  => 1024 * 1024 * 4,
         });
     }
     return bless($self, $class);

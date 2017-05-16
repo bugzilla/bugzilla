@@ -1,17 +1,20 @@
 - name: set cron mailto
   cron:
+    name: set cron mailto
     env: yes
     name: MAILTO
     value: vagrant@localhost
 
 - name: cron remove-idle-group-members
   cron:
+    name: cron remove-idle-group-members
     hour: 7
     minute: 0
     job: 'cd /vagrant; ./scripts/remove_idle_group_members.pl'
 
 - name: cron collectstats
   cron:
+    name: cron collectstats
     hour: 7
     minute: 0
     job: 'cd /vagrant; ./collectstats.pl'
@@ -19,12 +22,14 @@
 
 - name: cron whine
   cron:
+    name: cron whine
     user: apache
     minute: '*/15'
     job: 'cd /vagrant; ./whine.pl'
 
 - name: cron clean-bug-user-last-visit
   cron:
+    name: cron clean-bug-user-last-visit
     user: apache
     hour: 7
     minute: 0
@@ -32,6 +37,7 @@
 
 - name: request nagger
   cron:
+    name: request nagger
     user: apache
     hour: 7
     minute: 30
@@ -39,6 +45,7 @@
 
 - name: userprofile
   cron:
+    name: userprofile
     user: apache
     hour: 7
     minute: 30

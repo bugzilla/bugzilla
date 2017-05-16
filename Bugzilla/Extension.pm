@@ -13,47 +13,12 @@ use warnings;
 
 use Bugzilla::Constants;
 use Bugzilla::Error;
-use Bugzilla::Install::Util qw( extension_code_files );
+use Bugzilla::Install::Util qw(
+    extension_code_files extension_template_directory 
+    extension_package_directory extension_web_directory);
 
 use File::Basename;
 use File::Spec;
-use Taint::Util qw(untaint);
-
-BEGIN { push @INC, \&INC_HOOK }
-
-sub INC_HOOK {
-    my (undef, $fake_file) = @_;
-    state $bz_locations = bz_locations();
-    my ($vol, $dir, $file) = File::Spec->splitpath($fake_file);
-    my @dirs = grep { length $_ } File::Spec->splitdir($dir);
-
-    if (@dirs > 2 && $dirs[0] eq 'Bugzilla' && $dirs[1] eq 'Extension') {
-        my $extension = $dirs[2];
-        splice @dirs, 0, 3, File::Spec->splitdir($bz_locations->{extensionsdir}), $extension, "lib";
-        my $real_file = Cwd::realpath(File::Spec->catpath($vol, File::Spec->catdir(@dirs), $file));
-
-        my $first = 1;
-        untaint($real_file);
-        $INC{$fake_file} = $real_file;
-        open my $fh, '<', $real_file or die "invalid file: $real_file";
-        return sub {
-            no warnings;
-            if ( !$first ) {
-                return 0 if eof $fh;
-                $_ = readline $fh
-                    or return 0;
-                untaint($_);
-                return 1;
-            }
-            else {
-                $_ = qq{# line 0 "$real_file"\n};
-                $first = 0;
-                return 1;
-            }
-        };
-    }
-    return;
-};
 
 ####################
 # Subclass Methods #
@@ -94,10 +59,13 @@ sub load {
             }
             $package = "${class}::$name";
         }
+
+        __do_call($package, 'modify_inc', $config_file);
     }
 
     if ($map and defined $map->{$extension_file}) {
         $package = $map->{$extension_file};
+        $package->modify_inc($extension_file) if !$config_file;
     }
     else {
         my $name = require $extension_file;
@@ -106,6 +74,7 @@ sub load {
                            { extension => $extension_file, returned => $name });
         }
         $package = "${class}::$name";
+        $package->modify_inc($extension_file) if !$config_file;
     }
 
     $class->_validate_package($package, $extension_file);
@@ -138,16 +107,77 @@ sub _validate_package {
 
 sub load_all {
     my $class = shift;
-    state $EXTENSIONS = [];
-    return $EXTENSIONS if @$EXTENSIONS;
-
-    my ($file_sets) = extension_code_files();
+    my ($file_sets, $extra_packages) = extension_code_files();
+    my @packages;
     foreach my $file_set (@$file_sets) {
         my $package = $class->load(@$file_set);
-        push(@$EXTENSIONS, $package);
+        push(@packages, $package);
     }
 
-    return $EXTENSIONS;
+    # Extensions from data/extensions/additional
+    foreach my $package (@$extra_packages) {
+        # Don't load an "additional" extension if we already have an extension
+        # loaded with that name.
+        next if grep($_ eq $package, @packages);
+        # Untaint the package name
+        $package =~ /([\w:]+)/;
+        $package = $1;
+        eval("require $package") || die $@;
+        $package->_validate_package($package);
+        push(@packages, $package);
+    }
+
+    return \@packages;
+}
+
+# Modifies @INC so that extensions can use modules like
+# "use Bugzilla::Extension::Foo::Bar", when Bar.pm is in the lib/
+# directory of the extension.
+sub modify_inc {
+    my ($class, $file) = @_;
+
+    # Note that this package_dir call is necessary to set things up
+    # for my_inc, even if we didn't take its return value.
+    my $package_dir = __do_call($class, 'package_dir', $file);
+    # Don't modify @INC for extensions that are just files in the extensions/
+    # directory. We don't want Bugzilla's base lib/CGI.pm being loaded as 
+    # Bugzilla::Extension::Foo::CGI or any other confusing thing like that.
+    return if $package_dir eq bz_locations->{'extensionsdir'};
+    unshift(@INC, sub { __do_call($class, 'my_inc', @_) });
+}
+
+# This is what gets put into @INC by modify_inc.
+sub my_inc {
+    my ($class, undef, $file) = @_;
+    
+    # This avoids infinite recursion in case anything inside of this function
+    # does a "require". (I know for sure that File::Spec->case_tolerant does
+    # a "require" on Windows, for example.)
+    return if $file !~ /^Bugzilla/;
+
+    my $lib_dir = __do_call($class, 'lib_dir');
+    my @class_parts = split('::', $class);
+    my ($vol, $dir, $file_name) = File::Spec->splitpath($file);
+    my @dir_parts = File::Spec->splitdir($dir);
+    # File::Spec::Win32 (any maybe other OSes) add an empty directory at the
+    # end of @dir_parts.
+    @dir_parts = grep { $_ ne '' } @dir_parts;
+    # Validate that this is a sub-package of Bugzilla::Extension::Foo ($class).
+    for (my $i = 0; $i < scalar(@class_parts); $i++) {
+        return if !@dir_parts;
+        if (File::Spec->case_tolerant) {
+            return if lc($class_parts[$i]) ne lc($dir_parts[0]);
+        }
+        else {
+            return if $class_parts[$i] ne $dir_parts[0];
+        }
+        shift(@dir_parts);
+    }
+    # For Bugzilla::Extension::Foo::Bar, this would look something like
+    # extensions/Example/lib/Bar.pm
+    my $resolved_path = File::Spec->catfile($lib_dir, @dir_parts, $file_name);
+    open(my $fh, '<', $resolved_path);
+    return $fh;
 }
 
 ####################
@@ -156,21 +186,44 @@ sub load_all {
 
 use constant enabled => 1;
 
-sub package_dir  {
-    my ($class) = @_;
-    state $bz_locations = bz_locations();
-    my (undef, undef, $name) = split(/::/, $class);
-    return File::Spec->catdir($bz_locations->{extensionsdir}, $name);
+sub lib_dir {
+    my $invocant = shift;
+    my $package_dir = __do_call($invocant, 'package_dir');
+    # For extensions that are just files in the extensions/ directory,
+    # use the base lib/ dir as our "lib_dir". Note that Bugzilla never
+    # uses lib_dir in this case, though, because modify_inc is prevented
+    # from modifying @INC when we're just a file in the extensions/ directory.
+    # So this particular code block exists just to make lib_dir return
+    # something right in case an extension needs it for some odd reason.
+    if ($package_dir eq bz_locations()->{'extensionsdir'}) {
+        return bz_locations->{'ext_libpath'};
+    }
+    return File::Spec->catdir($package_dir, 'lib');
 }
 
-sub template_dir {
-    my ($class) = @_;
-    return File::Spec->catdir($class->package_dir, "template");
-}
+sub template_dir { return extension_template_directory(@_); }
+sub package_dir  { return extension_package_directory(@_);  }
+sub web_dir      { return extension_web_directory(@_);      }
 
-sub web_dir {
-    my ($class) = @_;
-    return File::Spec->catdir($class->package_dir, "web");
+######################
+# Helper Subroutines #
+######################
+
+# In order to not conflict with extensions' private subroutines, any helpers
+# here should start with a double underscore.
+
+# This is for methods that can optionally be overridden in Config.pm.
+# It falls back to the local implementation if $class cannot do
+# the method. This is necessary because Config.pm is not a subclass of
+# Bugzilla::Extension.
+sub __do_call {
+    my ($class, $method, @args) = @_;
+    if ($class->can($method)) {
+        return $class->$method(@args);
+    }
+    my $function_ref;
+    { no strict 'refs'; $function_ref = \&{$method}; }
+    return $function_ref->($class, @args);
 }
 
 1;

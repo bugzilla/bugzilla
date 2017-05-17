@@ -8,15 +8,14 @@
 
 [% PROCESS global/variables.none.tmpl %]
 
-[% javascript_urls = [ "js/yui3/yui/yui-min.js",
+[% javascript_urls = [ "js/yui3.js",
                        "js/util.js",
                        "js/field.js" ]
 %]
 
 [% IF current_tab_name == 'summary' %]
   [% javascript_urls.push("extensions/ProductDashboard/web/js/summary.js") %]
-  [% ELSIF current_tab_name == 'recents' %]
-  [% yui = [ "calendar" ] %]
+[% ELSIF current_tab_name == 'recents' %]
   [% javascript_urls.push("js/field.js") %]
   [% javascript_urls.push("js/util.js") %]
   [% javascript_urls.push("extensions/ProductDashboard/web/js/recents.js") %]
@@ -46,8 +45,8 @@
   title = "Product Dashboard: $filtered_product"
   generate_api_token = 1
   javascript = js
-  style_urls = [ "skins/standard/buglist.css",
-                 "js/yui/assets/skins/sam/paginator.css",
+  style_urls = [ "skins/yui3.css",
+                 "skins/standard/buglist.css",
                  "extensions/ProductDashboard/web/styles/productdashboard.css" ]
 %]
 

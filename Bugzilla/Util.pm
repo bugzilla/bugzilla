@@ -18,7 +18,7 @@ use base qw(Exporter);
                              css_class_quote html_light_quote
                              i_am_cgi i_am_webservice correct_urlbase remote_ip
                              validate_ip do_ssl_redirect_if_required use_attachbase
-                             diff_arrays on_main_db
+                             diff_arrays on_main_db css_url_rewrite
                              trim wrap_hard wrap_comment find_wrap_point
                              format_time validate_date validate_time datetime_from time_ago
                              file_mod_time is_7bit_clean
@@ -425,6 +425,12 @@ sub diff_arrays {
     # Ignore canceled items as well as empty strings.
     my @removed = grep { defined $_ && $_ ne '' } @old;
     return (\@removed, \@added);
+}
+
+sub css_url_rewrite {
+    my ($content, $callback) = @_;
+    $content =~ s{(?<!=)url\((["']?)([^\)]+?)\1\)}{$callback->($2)}eig;
+    return $content;
 }
 
 sub trim {

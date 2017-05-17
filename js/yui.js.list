@@ -1,0 +1,12 @@
+js/yui/yahoo-dom-event/yahoo-dom-event-min.js
+js/yui/cookie/cookie-min.js
+js/yui/connection/connection-min.js
+js/yui/json/json-min.js
+js/yui/selector/selector-min.js
+js/yui/element/element-min.js
+js/yui/container/container-min.js
+js/yui/calendar/calendar-min.js
+js/yui/history/history-min.js
+js/yui/button/button-min.js
+js/yui/datasource/datasource-min.js
+js/yui/datatable/datatable-min.js

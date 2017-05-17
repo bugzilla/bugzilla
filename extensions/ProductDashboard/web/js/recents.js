@@ -6,27 +6,29 @@
  * defined by the Mozilla Public License, v. 2.0. 
  */
 
-YUI({
-    base: 'js/yui3/',
-    combine: false
-}).use("datatable", "datatable-sort", function (Y) {
-    var column_defs = [
-        { key:"id", label:"ID", sortable:true, allowHTML: true, 
-          formatter: '<a href="show_bug.cgi?id={value}" target="_blank">{value}</a>' }, 
-        { key:"status", label:"Status", sortable:true },
-        { key:"version", label:"Version", sortable:true },
-        { key:"component", label:"Component", sortable:true },
-        { key:"severity", label:"Severity", sortable:true },
-        { key:"summary", label:"Summary", sortable:false },
-    ];
+$(function () {
+    YUI({
+        base: 'js/yui3/',
+        combine: false
+    }).use("datatable", "datatable-sort", function (Y) {
+        var column_defs = [
+            { key:"id", label:"ID", sortable:true, allowHTML: true, 
+            formatter: '<a href="show_bug.cgi?id={value}" target="_blank">{value}</a>' }, 
+            { key:"status", label:"Status", sortable:true },
+            { key:"version", label:"Version", sortable:true },
+            { key:"component", label:"Component", sortable:true },
+            { key:"severity", label:"Severity", sortable:true },
+            { key:"summary", label:"Summary", sortable:false },
+        ];
 
-    var recentlyOpenedDataTable = new Y.DataTable({
-        columns: column_defs,
-        data: PD.recents.opened
-    }).render('#recently_opened');
+        var recentlyOpenedDataTable = new Y.DataTable({
+            columns: column_defs,
+            data: PD.recents.opened
+        }).render('#recently_opened');
 
-    var recentlyClosedDataTable = new Y.DataTable({
-        columns: column_defs,
-        data: PD.recents.closed
-    }).render('#recently_closed');
+        var recentlyClosedDataTable = new Y.DataTable({
+            columns: column_defs,
+            data: PD.recents.closed
+        }).render('#recently_closed');
+    });
 });

@@ -20,14 +20,4 @@
 
 [% PROCESS "global/value-descs.none.tmpl" %]
 
-BUGZILLA.value_descs = {
-  [% FOREACH vd_field = value_descs.keys %]
-    [% vd_field FILTER js %]: {
-      [% FOREACH vd_value = value_descs.${vd_field}.keys %]
-        '[% vd_value FILTER js %]':
-        '[% value_descs.${vd_field}.${vd_value} FILTER js %]'
-        [%~ ',' UNLESS loop.last %]
-      [% END %]
-    }[% ',' UNLESS loop.last %]
-  [% END %]
-};
+BUGZILLA.value_descs = JSON.parse('[% json_encode(value_descs) FILTER js %]');

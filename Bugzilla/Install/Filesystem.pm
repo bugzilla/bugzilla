@@ -30,6 +30,8 @@ use File::Find;
 use File::Path;
 use File::Basename;
 use File::Copy qw(move);
+use File::Spec;
+use Cwd ();
 use File::Slurp;
 use IO::File;
 use POSIX ();
@@ -350,6 +352,36 @@ sub FILESYSTEM {
         "$skinsdir/contrib"     => DIR_WS_SERVE,
     );
 
+    my $yui_all_css = sub {
+        return join("\n",
+            map {
+                my $css = read_file($_);
+                _css_url_fix($css, $_, "skins/yui.css.list")
+            } read_file("skins/yui.css.list", { chomp => 1 })
+        );
+    };
+
+    my $yui_all_js = sub {
+        return join("\n",
+            map { scalar read_file($_) } read_file("js/yui.js.list", { chomp => 1 })
+        );
+    };
+
+    my $yui3_all_css = sub {
+        return join("\n",
+            map {
+                my $css = read_file($_);
+                _css_url_fix($css, $_, "skins/yui3.css.list")
+            } read_file("skins/yui3.css.list", { chomp => 1 })
+        );
+    };
+
+    my $yui3_all_js = sub {
+        return join("\n",
+            map { scalar read_file($_) } read_file("js/yui3.js.list", { chomp => 1 })
+        );
+    };
+
     # The name of each file, pointing at its default permissions and
     # default contents.
     my %create_files = (
@@ -361,6 +393,18 @@ sub FILESYSTEM {
         # or something else is not running as the webserver or root.
         "$datadir/mailer.testfile" => { perms    => CGI_WRITE,
                                         contents => '' },
+        "js/yui.js"               => { perms     => CGI_READ,
+                                       overwrite => 1,
+                                       contents  => $yui_all_js },
+        "skins/yui.css"           => { perms     => CGI_READ,
+                                       overwrite => 1,
+                                       contents  => $yui_all_css },
+        "js/yui3.js"              => { perms     => CGI_READ,
+                                       overwrite => 1,
+                                       contents  => $yui3_all_js },
+        "skins/yui3.css"          => { perms     => CGI_READ,
+                                       overwrite => 1,
+                                       contents  => $yui3_all_css },
     );
 
     # Because checksetup controls the creation of index.html separately
@@ -520,6 +564,31 @@ sub update_filesystem {
     _remove_dynamic_assets();
 }
 
+sub _css_url_fix {
+    my ($content, $from, $to) = @_;
+    my $from_dir = dirname(File::Spec->rel2abs($from, bz_locations()->{libpath}));
+    my $to_dir = dirname(File::Spec->rel2abs($to, bz_locations()->{libpath}));
+
+    return css_url_rewrite(
+        $content,
+        sub {
+            my ($url) = @_;
+            if ( $url =~ m{^(?:/|data:)} ) {
+                return sprintf 'url(%s)', $url;
+            }
+            else {
+                my $new_url = File::Spec->abs2rel(
+                    Cwd::realpath(
+                        File::Spec->rel2abs( $url, $from_dir )
+                    ),
+                    $to_dir
+                );
+                return sprintf "url(%s)", $new_url;
+            }
+        }
+    );
+}
+
 sub _remove_empty_css_files {
     my $skinsdir = bz_locations()->{'skinsdir'};
     foreach my $css_file (glob("$skinsdir/custom/*.css"),
@@ -623,7 +692,13 @@ sub _create_files {
             print "Creating $file...\n";
             my $fh = IO::File->new( $file, O_WRONLY | O_CREAT, $info->{perms} )
                 or die "unable to write $file: $!";
-            print $fh $info->{contents} if exists $info->{contents};
+            my $contents = $info->{contents};
+            if (defined $contents && ref($contents) eq 'CODE') {
+                print $fh $contents->();
+            }
+            elsif (defined $contents) {
+                print $fh $contents;
+            }
             $fh->close;
         }
     }

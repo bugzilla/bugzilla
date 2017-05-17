@@ -383,28 +383,23 @@ sub mtime_filter {
 
 # Set up the skin CSS cascade:
 #
-#  1. standard/global.css
-#  2. YUI CSS
+#  1. YUI CSS
+#  2. standard/global.css
 #  3. Standard Bugzilla stylesheet set
 #  4. Third-party "skin" stylesheet set, per user prefs
 #  5. Inline css passed to global/header.html.tmpl
 #  6. Custom Bugzilla stylesheet set
 
 sub css_files {
-    my ($style_urls, $yui, $yui_css) = @_;
+    my ($style_urls, $no_yui) = @_;
 
     # global.css belongs on every page
     my @requested_css = ( 'skins/standard/global.css', @$style_urls );
 
-    my @yui_required_css;
-    foreach my $yui_name (@$yui) {
-        next if !$yui_css->{$yui_name};
-        push(@yui_required_css, "js/yui/assets/skins/sam/$yui_name.css");
-    }
-    unshift(@requested_css, @yui_required_css);
-    
+    unshift @requested_css, "skins/yui.css" unless $no_yui;
+
     my @css_sets = map { _css_link_set($_) } @requested_css;
-    
+
     my %by_type = (standard => [], skin => [], custom => []);
     foreach my $set (@css_sets) {
         foreach my $key (keys %$set) {

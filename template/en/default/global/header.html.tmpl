@@ -50,37 +50,11 @@
   header_addl_info = ""
   onload = ""
   style_urls = []
-  yui = []
-  yui_css = {}
-  yui_deps = {}
   no_yui = 0
   jquery = []
   jquery_css = []
   generate_api_token = 0
 %]
-
-[% IF NOT no_yui %]
-  [% SET yui_css = {
-    calendar     => 1,
-    datatable    => 1,
-    button       => 1,
-  } %]
-
-  [%# Note: This is simple dependency resolution--you can't have dependencies
-    # that depend on each other. You have to specify all of a module's deps,
-    # if that module is going to be specified in "yui".
-    #%]
-  [% SET yui_deps = {
-    datatable    => ['json', 'connection', 'datasource', 'element'],
-  } %]
-
-  [%# When using certain YUI modules, we need to process certain
-    # extra JS templates.
-    #%]
-  [% SET yui_templates = {
-    datatable => ['global/value-descs.js.tmpl'],
-  } %]
-[% END %]
 
 [%# These are JS URLs that are *always* on the page and come before
   # every other JS URL.
@@ -91,8 +65,7 @@
 ] %]
 
 [% IF NOT no_yui %]
-  [% starting_js_urls.push("js/yui/yahoo-dom-event/yahoo-dom-event.js",
-                           "js/yui/cookie/cookie-min.js") %]
+  [% starting_js_urls.push("js/yui.js") %]
 [% END %]
 
 [% SET jq_css_urls = [
@@ -163,11 +136,7 @@
 
     [% PROCESS 'global/setting-descs.none.tmpl' %]
 
-    [% IF NOT no_yui %]
-      [% SET yui = yui_resolve_deps(yui, yui_deps) %]
-    [% END %]
-
-    [% SET css_sets = css_files(style_urls.unique, yui, yui_css) %]
+    [% SET css_sets = css_files(style_urls.unique, no_yui) %]
     [% IF constants.CONCATENATE_ASSETS %]
       [% PROCESS format_css_link asset_url = css_sets.unified_standard_skin %]
     [% ELSE %]
@@ -195,13 +164,6 @@
       [% END %]
     [% END %]
 
-    [% IF NOT no_yui %]
-      [%# YUI Scripts %]
-      [% FOREACH yui_name = yui %]
-        [% starting_js_urls.push("js/yui/$yui_name/${yui_name}-min.js") %]
-      [% END %]
-    [% END %]
-
     [%# jQuery Plugins %]
     [% FOREACH jq_name = jquery.unique %]
       [% starting_js_urls.push("js/jquery/plugins/$jq_name/${jq_name}-min.js") %]
@@ -212,11 +174,6 @@
       [% PROCESS format_js_link %]
     [% END %]
 
-    [%# Make some Bugzilla information available to all scripts. 
-      # We don't import every parameter and constant because we
-      # don't want to add a lot of uncached JS to every page. 
-      # %]
-    
     [% inline_javascript = BLOCK %]
         [% IF NOT no_yui %]
           YAHOO.namespace('bugzilla');
@@ -224,11 +181,7 @@
               YAHOO.util.Event._simpleRemove(window, "unload",
                                              YAHOO.util.Event._unload);
           }
-          [% FOREACH yui_name = yui %]
-            [% FOREACH yui_template = yui_templates.$yui_name %]
-              [% INCLUDE $yui_template %]
-            [% END %]
-          [% END %]
+          [% INCLUDE 'global/value-descs.js.tmpl' %]
         [% END %]
 
         [% IF javascript %]

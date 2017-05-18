@@ -59,6 +59,12 @@ Vagrant.configure('2') do |config|
       auto_correct: true
 
     db.vm.synced_folder '.', '/vagrant', type: 'rsync', rsync__args: RSYNC_ARGS
+
+    db.vm.provider "virtualbox" do |v|
+      v.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
+      v.customize ["modifyvm", :id, "--natdnsproxy1", "on"]
+    end
+
     db.vm.provider 'parallels' do |prl, override|
       override.vm.box = 'parallels/centos-6.8'
     end
@@ -85,6 +91,8 @@ Vagrant.configure('2') do |config|
     web.vm.provider 'virtualbox' do |v|
       v.memory = WEB_MEM
       v.cpus = WEB_CPU
+      v.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
+      v.customize ["modifyvm", :id, "--natdnsproxy1", "on"]
     end
 
     web.vm.provider 'parallels' do |prl, override|

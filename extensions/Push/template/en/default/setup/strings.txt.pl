@@ -5,6 +5,10 @@
 # This Source Code Form is "Incompatible With Secondary Licenses", as
 # defined by the Mozilla Public License, v. 2.0.
 
+use strict;
+use warnings;
+use 5.10.1;
+
 %strings = (
     feature_push_amqp => 'Push: AMQP Support',
     feature_push_stomp => 'Push: STOMP Support',

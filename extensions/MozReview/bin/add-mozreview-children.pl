@@ -13,6 +13,7 @@
 
 use strict;
 use warnings;
+use 5.10.1;
 
 use lib qw(. lib local/lib/perl5);
 
@@ -216,7 +217,7 @@ foreach my $bug_id (@$bug_ids) {
                     delete $tmp_parent_flags{$reviewer->id};
                 } else {
                     # No flag on the parent; this probably means the reviewer
-                    # cancelled the review, so don't set r?.
+                    # canceled the review, so don't set r?.
                     print "      No review flag for reviewer " . $reviewer->id . "\n";
                 }
             }

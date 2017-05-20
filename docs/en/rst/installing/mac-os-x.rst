@@ -80,7 +80,7 @@ Generally, the best way to install these is with :file:`cpanm`:
 
 If you want a more full-featured Bugzilla:
 
-:command:`cpanm --installdeps -l local --with-all-features --without-feature oracle --without-feature mysql --without-feature pg`
+:command:`cpanm --installdeps -l local --with-all-features --without-feature oracle --without-feature mysql --without-feature pg .`
 
 If you don't have :file:`cpanm` installed, you can
 `download it <http://cpanmin.us>`_  from cpanmin.us.

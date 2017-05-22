@@ -1,0 +1,22 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% IF error == "invalid_phabricator_uri" %]
+  [% title = "Invalid Phabricator URI" %]
+  You must provide a valid Phabricator URI.
+
+[% ELSIF error == "invalid_phabricator_api_key" %]
+  [% title = "Invalid Phabricator API Key" %]
+  You must provide a valid Phabricator API Key.
+
+[% ELSIF error == "invalid_phabricator_sync_groups" %]
+  [% title = "Invalid Phabricator Sync Groups" %]
+  You must provide a comma delimited list of security groups
+  to sync with Phabricator.
+
+[% END %]

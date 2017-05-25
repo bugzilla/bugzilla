@@ -168,7 +168,12 @@ my %optional_features = (
         prereqs => {
             runtime => {
                 requires =>
-                    { 'File::Which' => 0, 'File::Copy::Recursive' => 0 }
+                    {
+                        'File::Which'                  => 0,
+                        'File::Copy::Recursive'        => 0,
+                        'Pod::Simple::Search'          => 0,
+                        'Pod::POM::View::Restructured' => 0,
+                    }
             }
         },
         description => 'Documentation',

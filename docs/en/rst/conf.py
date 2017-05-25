@@ -381,9 +381,9 @@ todo_include_todos = True
 on_rtd = os.environ.get('READTHEDOCS', None) == 'True'
 
 if on_rtd:
-    base_api_url = 'https://www.bugzilla.org/docs/tip/en/html/integrating/api/'
+    base_api_url = 'https://www.bugzilla.org/docs/tip/en/html/integrating/internals/'
 else:
-    base_api_url = '../integrating/api/'
+    base_api_url = '../integrating/internals/'
 
 extlinks = {'bug': ('https://bugzilla.mozilla.org/show_bug.cgi?id=%s', 'bug  '),
             'api': (base_api_url + '%s', '')}
@@ -399,13 +399,17 @@ ext_dir = "../../../extensions"
 
 # Still, check just in case, so if it ever changes, we know
 if (os.path.isdir(ext_dir)):
-    # Clear out old extensions docs
+    # Clear out removed extensions docs
     for dir in os.listdir("extensions"):
         # A .gitignore file is required as git doesn't like empty directories
         if dir == ".gitignore":
             continue
 
-        shutil.rmtree(os.path.join("extensions", dir))
+        src = os.path.join(ext_dir, dir)
+
+        # extension dir missing, assume uninstalled
+        if not os.path.isdir(src):
+            shutil.rmtree(os.path.join("extensions", dir))
 
     # Copy in new copies
     for ext_name in os.listdir(ext_dir):
@@ -425,6 +429,10 @@ if (os.path.isdir(ext_dir)):
             continue
 
         dst = os.path.join("extensions", ext_name)
+
+        # remove old docs
+        if (os.path.isdir(dst)):
+            shutil.rmtree(dst)
 
         shutil.copytree(src, dst)
 else:

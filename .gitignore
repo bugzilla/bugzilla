@@ -4,6 +4,7 @@
 /template/en/custom
 /docs/en/rst/extensions/*
 /docs/en/rst/api/extensions/*
+/docs/en/rst/integrating/internals/*
 /docs/en/html
 /docs/en/txt
 /docs/en/pdf

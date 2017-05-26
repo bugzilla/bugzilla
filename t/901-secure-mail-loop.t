@@ -7,6 +7,7 @@
 use strict;
 use warnings;
 use 5.10.1;
+use lib qw( . lib local/lib/perl5 );
 use Test::More tests => 1;
 
 use Crypt::OpenPGP;
@@ -15,7 +16,7 @@ my $pubring = new Crypt::OpenPGP::KeyRing(Data => PUBLIC_KEY());
 my $pgp = new Crypt::OpenPGP(PubRing => $pubring);
 {
     local $SIG{ALRM} = sub { fail("stuck in a loop"); exit; };
-    alarm(5);
+    alarm(60);
     my $encrypted = $pgp->encrypt(
         Data       => "hello, world",
         Recipients => "@",

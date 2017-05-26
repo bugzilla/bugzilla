@@ -30,6 +30,7 @@ my $ok = eval {
     die "memcached server(s) not available" unless $memcached_ok;
     die "mod_perl not configured?"          unless $ENV{MOD_PERL};
     die "BUGZILLA_UNSAFE_AUTH_DELEGATION"   if $ENV{BUGZILLA_UNSAFE_AUTH_DELEGATION};
+    die "missing bmo feature dependencies"  unless Bugzilla->has_feature('bmo');
     1;
 };
 warn "heartbeat error: $@" if !$ok && $@;

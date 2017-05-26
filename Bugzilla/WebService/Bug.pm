@@ -360,14 +360,7 @@ sub render_comment {
     Bugzilla->switch_to_shadow_db();
     my $bug = $params->{id} ? Bugzilla::Bug->check($params->{id}) : undef;
 
-    my $tmpl = '[% text FILTER quoteUrls(bug) %]';
-    my $html;
-    my $template = Bugzilla->template;
-    $template->process(
-        \$tmpl,
-        { bug => $bug, text => $params->{text}},
-        \$html
-    );
+    my $html = Bugzilla::Template::quoteUrls($params->{text}, $bug);
 
     return { html => $html };
 }

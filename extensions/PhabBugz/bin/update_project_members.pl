@@ -61,7 +61,10 @@ foreach my $group (@$sync_groups) {
     }
 
     # Get the internal user ids for the bugzilla group members
-    my $phab_user_ids = get_phab_members_by_bmo_id(\@users);
+    my $phab_user_ids = [];
+    if (@users) {
+        $phab_user_ids = get_phab_members_by_bmo_id(\@users);
+    }
 
     # Set the project members to the exact list
     set_phab_project_members($project_id, $phab_user_ids);

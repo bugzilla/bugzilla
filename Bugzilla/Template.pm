@@ -971,6 +971,9 @@ sub create {
 
         PLUGIN_BASE => 'Bugzilla::Template::Plugin',
 
+        # We don't want this feature.
+        CONSTANT_NAMESPACE => '__const',
+
         # Default variables for all templates
         VARIABLES => {
             # Some of these are not really constants, and doing this messes up preloading.

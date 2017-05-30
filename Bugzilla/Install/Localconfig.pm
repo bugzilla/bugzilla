@@ -25,7 +25,7 @@ use Bugzilla::Util qw(generate_random_password wrap_hard);
 
 use Data::Dumper;
 use File::Basename qw(dirname);
-use English qw($EGID);
+use English qw($EUID $EGID);
 use List::Util qw(first);
 use Tie::Hash::NamedCapture;
 use Safe;
@@ -42,8 +42,13 @@ sub _sensible_group {
     return '' if ON_WINDOWS;
     my @groups     = qw( apache www-data _www );
     my $sensible_group = first { return getgrnam($_) } @groups;
+    my $effective_group = getgrgid($EGID);
 
-    return $sensible_group // getgrgid($EGID) // '';
+    if ($EUID == 0 || $EGID == 0) {
+        return $sensible_group // $effective_group // '';
+    } else {
+        return $effective_group // '';
+    }
 }
 
 use constant LOCALCONFIG_VARS => (

@@ -81,6 +81,13 @@ my $app = builder {
                 ? $shutdown_app->(@_)
                 : $app->(@_);
             Bugzilla::_cleanup();
+            if (ref $res && ref $res eq 'ARRAY') {
+                warn "res: $res->[0]";
+            }
+            else {
+                warn "wtf: $res";
+            }
+
             return $res;
         };
         $cgi_app{$base_name} = $wrapper;

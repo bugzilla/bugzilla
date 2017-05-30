@@ -306,7 +306,7 @@
     }
 
     ul.links li {
-        display: inline;
+        display: inline-block;
         white-space: nowrap;
     }
 /* link lists (end) */

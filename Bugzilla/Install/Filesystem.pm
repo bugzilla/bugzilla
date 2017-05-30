@@ -690,7 +690,7 @@ sub _create_files {
         my $info = $files{$file};
         if ($info->{overwrite} or not -f $file) {
             print "Creating $file...\n";
-            my $fh = IO::File->new( $file, O_WRONLY | O_CREAT, $info->{perms} )
+            my $fh = IO::File->new( $file, O_WRONLY | O_CREAT | O_TRUNC, $info->{perms} )
                 or die "unable to write $file: $!";
             my $contents = $info->{contents};
             if (defined $contents && ref($contents) eq 'CODE') {

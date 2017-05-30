@@ -114,9 +114,14 @@ YAHOO.bugzilla.dupTable = {
         if (this.dataSource == null) this.init_ds();
         data.options.initialLoad = false;
         var dt = new YAHOO.widget.DataTable(data.container, data.columns, 
-            this.dataSource, data.options); 
+            this.dataSource, data.options);
         YAHOO.util.Event.on(data.summary_field, 'keyup', this.doUpdateTable,
                             [dt, data.product_name]);
+		$(("#comment").on('keyup', function(e) {
+			if ( e.which == 13 && (e.ctrlKey || e.metakey) ){
+				$("#changeform").submit(); 
+			} 
+		});
     }
 };
 

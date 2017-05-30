@@ -458,7 +458,7 @@ my $format = $template->get_format("list/list", scalar $params->param('format'),
 #
 # Server push is compatible with Gecko-based browsers and Opera, but not with
 # MSIE, Lynx or Safari (bug 441496).
-
+    
 my $serverpush =
   $format->{'extension'} eq "html"
     && exists $ENV{'HTTP_USER_AGENT'}
@@ -468,7 +468,7 @@ my $serverpush =
             && !defined($cgi->param('serverpush'))
               || $cgi->param('serverpush');
 
-
+if(Bugzilla->user->settings->{disable_server_push}){$serverpush = 0;}
 # Generate a reasonable filename for the user agent to suggest to the user
 # when the user saves the bug list.  Uses the name of the remembered query
 # if available.  We have to do this now, even though we return HTTP headers

@@ -20,4 +20,17 @@ sub config_add_panels {
     $modules->{PhabBugz} = "Bugzilla::Extension::PhabBugz::Config";
 }
 
+sub auth_delegation_confirm {
+    my ($self, $args) = @_;
+    my $phab_callback_url = Bugzilla->params->{phabricator_auth_callback_url};
+    my $phab_app_id       = Bugzilla->params->{phabricator_app_id};
+
+    return unless $phab_callback_url;
+    return unless $phab_app_id;
+
+    if (index($args->{callback}, $phab_callback_url) == 0 && $args->{app_id} eq $phab_app_id) {
+        ${$args->{skip_confirmation}} = 1;
+    }
+}
+
 __PACKAGE__->NAME;

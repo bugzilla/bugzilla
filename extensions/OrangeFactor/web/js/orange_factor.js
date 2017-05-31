@@ -74,6 +74,9 @@ $(function() {
         var bugId = document.forms['changeform'].id.value;
         var request = {
             dataType: "json",
+            xhrFields: {
+                withCredentials: true
+            },
             url: "https://brasstacks.mozilla.com/orangefactor/api/count?" +
                  "bugid=" + encodeURIComponent(bugId) + "&tree=trunk"
         };
@@ -82,8 +85,7 @@ $(function() {
                 getOrangeCount(data);
             })
             .fail(function() {
-                $('#graph-count').hide();
-                $('#orange-graph').hide()
+                $('#orange-count').text('Please sign into OrangeFactor first');
             });
     }
 

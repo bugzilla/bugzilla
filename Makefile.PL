@@ -24,8 +24,7 @@ BEGIN {
     lib->import($dir, File::Spec->catdir($dir, "lib"), File::Spec->catdir($dir, qw(local lib perl5)));
 }
 
-use ExtUtils::MakeMaker 6.55;
-use constant BUGZILLA_VERSION => $ENV{BUGZILLA_VERSION} // 42;
+use ExtUtils::MakeMaker 7.24;
 use File::Basename;
 use File::Spec;
 
@@ -382,7 +381,7 @@ $optional_features{bmo} = {
 WriteMakefile(
     NAME             => 'Bugzilla',
     AUTHOR           => q{Bugzilla Developers <developers@bugzilla.org>},
-    VERSION          => BUGZILLA_VERSION,
+    VERSION_FROM     => 'Bugzilla.pm',
     ABSTRACT         => 'Bugzilla Bug Tracking System',
     LICENSE          => 'Mozilla_2_0',
     MIN_PERL_VERSION => '5.10.1',

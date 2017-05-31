@@ -208,7 +208,7 @@ use Memoize;
 sub BUGZILLA_VERSION {
     my $bugzilla_version = '4.2';
     eval { require Bugzilla } || return $bugzilla_version;
-    return Bugzilla->params->{bugzilla_version} || $bugzilla_version;
+    eval { Bugzilla->VERSION } || $bugzilla_version;
 }
 
 # A base link to the current REST Documentation. We place it here

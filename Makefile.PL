@@ -24,7 +24,7 @@ BEGIN {
     lib->import($dir, File::Spec->catdir($dir, "lib"), File::Spec->catdir($dir, qw(local lib perl5)));
 }
 
-use ExtUtils::MakeMaker 7.24;
+use ExtUtils::MakeMaker 7.22;
 use File::Basename;
 use File::Spec;
 
@@ -63,7 +63,7 @@ my %requires = (
     'Taint::Util'              => 0,
 );
 my %build_requires = (
-    'ExtUtils::MakeMaker' => '6.57_07',
+    'ExtUtils::MakeMaker' => '7.22',
 );
 my %test_requires = (
     'Test::More'         => 0,

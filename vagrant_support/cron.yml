@@ -1,6 +1,5 @@
 - name: set cron mailto
   cron:
-    name: set cron mailto
     env: yes
     name: MAILTO
     value: vagrant@localhost

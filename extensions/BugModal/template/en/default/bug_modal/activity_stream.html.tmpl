@@ -311,6 +311,8 @@
           <a href="#c[% change.comment.count FILTER none %]">
             Comment [% change.comment.count FILTER none %]</a> is private:
           [%+
+        ELSIF change.fieldname == 'reporter_accessible';
+          "";
         ELSE;
           field_descs.${change.fieldname} _ ": " FILTER html;
         END;
@@ -365,6 +367,13 @@
 
       CASE [ 'assigned_to', 'reporter', 'qa_contact', 'cc', 'flagtypes.name' ];
         value FILTER email;
+
+      CASE 'reporter_accessible';
+        IF value == 'true';
+          "Accessible to reporter";
+        ELSIF value == 'false';
+          "Not accessible to reporter";
+        END;
 
       CASE;
         IF change.fieldtype == constants.FIELD_TYPE_DATETIME;

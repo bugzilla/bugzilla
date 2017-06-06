@@ -27,6 +27,10 @@ Bugzilla->usage_mode(USAGE_MODE_CMDLINE);
 
 my ($phab_uri, $phab_api_key, $phab_sync_groups, $ua);
 
+if (!Bugzilla->params->{phabricator_enabled}) {
+    exit;
+}
+
 # Sanity checks
 unless ($phab_uri = Bugzilla->params->{phabricator_base_uri}) {
     ThrowUserError('invalid_phabricator_uri');

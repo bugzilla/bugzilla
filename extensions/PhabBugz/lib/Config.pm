@@ -20,6 +20,11 @@ sub get_param_list {
 
     my @params = (
         {
+            name    => 'phabricator_enabled',
+            type    => 'b',
+            default => 0
+        },
+        {
             name    => 'phabricator_base_uri',
             type    => 't',
             default => '',

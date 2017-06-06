@@ -22,9 +22,11 @@ sub config_add_panels {
 
 sub auth_delegation_confirm {
     my ($self, $args) = @_;
+    my $phab_enabled      = Bugzilla->params->{phabricator_enabled};
     my $phab_callback_url = Bugzilla->params->{phabricator_auth_callback_url};
     my $phab_app_id       = Bugzilla->params->{phabricator_app_id};
 
+    return unless $phab_enabled;
     return unless $phab_callback_url;
     return unless $phab_app_id;
 

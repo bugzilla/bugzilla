@@ -53,12 +53,15 @@
            name="Bugzilla_login"
            title="Login"
            placeholder="email address"
+           type="email"
+           required
     >
     <input class="bz_password"
            id="Bugzilla_password[% qs_suffix FILTER html %]" 
            name="Bugzilla_password"
            type="password"
            title="Password"
+           required
     >
     <input class="bz_password bz_default_hidden bz_mini_login_help" type="text" 
            id="Bugzilla_password_dummy[% qs_suffix %]" value="password"

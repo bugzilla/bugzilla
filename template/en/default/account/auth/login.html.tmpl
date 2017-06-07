@@ -47,13 +47,14 @@
     <div class="field-login">
       <label for="Bugzilla_login">Email Address:</label>
       <input id="Bugzilla_login" name="Bugzilla_login"
-             [%- ' type="email"' UNLESS Param('emailsuffix') %]>
+             [%- ' type="email"' UNLESS Param('emailsuffix') %]
+             required>
       [% Param('emailsuffix') FILTER html %]
     </div>
 
     <div class="field-password">
       <label for="Bugzilla_password">Password:</label>
-      <input type="password" id="Bugzilla_password" name="Bugzilla_password">
+      <input type="password" id="Bugzilla_password" name="Bugzilla_password" required>
     </div>
 
     [% IF Param('rememberlogin') == 'defaulton' || 

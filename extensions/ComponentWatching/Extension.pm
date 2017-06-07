@@ -127,7 +127,7 @@ sub install_update_db {
 sub template_before_create {
     my ($self, $args) = @_;
     my $config = $args->{config};
-    my $constants = $config->{CONSTANTS};
+    my $constants = $config->{VARIABLES}{constants};
     $constants->{REL_COMPONENT_WATCHER} = REL_COMPONENT_WATCHER;
 }
 

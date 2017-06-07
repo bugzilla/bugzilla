@@ -64,7 +64,7 @@ sub template_before_create {
     my ($self, $args) = @_;
     my $config = $args->{config};
 
-    my $constants = $config->{CONSTANTS};
+    my $constants = $config->{VARIABLES}{constants};
     $constants->{CMT_MOVED_TO} = CMT_MOVED_TO;
 
     my $vars = $config->{VARIABLES};

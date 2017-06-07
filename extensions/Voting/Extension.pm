@@ -215,7 +215,7 @@ sub bug_end_of_update {
 sub template_before_create {
     my ($self, $args) = @_;
     my $config = $args->{config};
-    my $constants = $config->{CONSTANTS};
+    my $constants = $config->{VARIABLES}{constants};
     $constants->{REL_VOTER} = REL_VOTER;
     $constants->{CMT_POPULAR_VOTES} = CMT_POPULAR_VOTES;
     $constants->{DEFAULT_VOTES_PER_BUG} = DEFAULT_VOTES_PER_BUG;

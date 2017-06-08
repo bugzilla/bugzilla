@@ -49,11 +49,14 @@ my %requires = (
     'Email::Send'              => '1.911',
     'File::Slurp'              => '9999.13',
     'JSON::XS'                 => '2.01',
+    'LWP::Protocol::connect'   => 0,
+    'LWP::UserAgent'           => '5.835',
     'List::MoreUtils'          => $^V > v5.10.1 ? '0.418' : '0.22',
     'Math::Random::ISAAC'      => '1.0.1',
     'Module::Metadata'         => '1.000033',
     'Module::Runtime'          => 0,
     'Moo'                      => 2,
+    'Mozilla::CA'              => 0,
     'Parse::CPAN::Meta'        => '1.44',
     'Template'                 => '2.24',
     'Text::CSV_XS'             => 0,
@@ -123,15 +126,11 @@ my %optional_features = (
             runtime => { requires => { 'Cache::Memcached::Fast' => '0.17' } }
         }
     },
-    auth_delegation => {
-        description => 'Auth Delegation',
-        prereqs => { runtime => { requires => { 'LWP::UserAgent' => 0 } } }
-    },
     updates => {
         description => 'Automatic Update Notifications',
         prereqs     => {
             runtime =>
-                { requires => { 'LWP::UserAgent' => 0, 'XML::Twig' => 0 } }
+                { requires => { 'XML::Twig' => 0 } }
         }
     },
     auth_radius => {

@@ -13,23 +13,8 @@ use warnings;
 
 use constant NAME => 'Bitly';
 
-sub REQUIRED_MODULES {
-    return [
-        {
-            package => 'LWP',
-            module  => 'LWP',
-            version => '5.835',
-        },
-    ];
-}
-
-use constant OPTIONAL_MODULES => [
-    {
-        package => 'Mozilla-CA',
-        module  => 'Mozilla::CA',
-        version => 0
-    },
-];
+use constant REQUIRED_MODULES => [];
+use constant OPTIONAL_MODULES => [];
 
 use constant API_VERSION_MAP  => { '1_0' => '1_0' };
 

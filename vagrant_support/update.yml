@@ -1,0 +1,23 @@
+---
+- hosts: web
+  become: true
+  tasks:
+
+    - name: add local symlink
+      file: path=/vagrant/local src=/opt/bmo/local state=link force=true
+
+    - name: make bmo data dir
+      file: path=/data state=directory owner=vagrant group=apache mode=0775
+
+    - name: fix owner of /vagrant
+      file: path=/vagrant state=directory owner=vagrant group=apache recurse=yes
+
+    - name: add data symlink
+      file: path=/vagrant/data src=/data state=link force=true
+
+    - include: checksetup.yml
+      vars:
+        LAZY: 1
+    - include: apache.yml
+      vars:
+        LAZY: 1

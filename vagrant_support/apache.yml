@@ -4,9 +4,11 @@
     src: apache.j2
     dest: /etc/httpd/conf.d/bugzilla.conf
     mode: 0644
+  when: LAZY == 0
 
 - name: enable httpd
   service: name=httpd enabled=yes
+  when: LAZY == 0
 
 - name: restart httpd
   service: name=httpd state=restarted

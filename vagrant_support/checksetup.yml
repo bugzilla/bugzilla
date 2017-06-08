@@ -4,12 +4,14 @@
     src: bmo-checksetup.j2
     dest: /usr/local/bin/bmo-checksetup
     mode: 0755
+  when: LAZY == 0
 
 - name: bmo generate data script
   template:
     src: bmo-generate-data.j2
     dest: /usr/local/bin/bmo-generate-data
     mode: 0755
+  when: LAZY == 0
 
 - name: bmo checksetup answers
   template:
@@ -18,10 +20,11 @@
     owner: vagrant
     group: vagrant
     mode: 0644
+  when: LAZY == 0
 
 - name: run checksetup
   become: false
-  shell: sg apache -c '/usr/local/bin/bmo-checksetup'
+  shell: sg apache -c '/usr/local/bin/bmo-checksetup --no-templates'
 
 - name: generate data
   become: false

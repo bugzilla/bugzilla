@@ -168,11 +168,15 @@
         mode: 0755
 
     - include: checksetup.yml
+      vars:
+        LAZY: 0
     - include: cron.yml
     - include: jobqueue.yml
     - include: push.yml
     - include: email.yml
     - include: apache.yml
+      vars:
+        LAZY: 0
     - include: devtools.yml
 
     - name: fix owner of /vagrant/template_cache

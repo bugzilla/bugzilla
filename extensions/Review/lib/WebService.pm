@@ -130,16 +130,34 @@ sub flag_activity {
 
     my $limit       = delete $params->{limit};
     my $offset      = delete $params->{offset};
+    my $after       = delete $params->{after};
+    my $before      = delete $params->{before};
     my $max_results = Bugzilla->params->{max_search_results};
 
     if (!$limit || $limit > $max_results) {
         $limit = $max_results;
     }
 
+    if ($after && $after =~ /^(\d{4}-\d{1,2}-\d{1,2})$/) {
+        $after = $1;
+    }
+    else {
+        my $now = DateTime->now;
+        $now->subtract(days => 30);
+        $after = $now->ymd('-');
+    }
+
+    if ($before && $before =~ /^(\d{4}-\d{1,2}-\d{1,2})$/) {
+        $before = $1;
+    }
+    else {
+        my $now = DateTime->now;
+        $before = $now->ymd('-');
+    }
+
     $match_criteria{LIMIT} = $limit;
     $match_criteria{OFFSET} = $offset if defined $offset;
-    # Hide data until Bug 1073364 is resolved.
-    $match_criteria{WHERE} = { 'flag_when > ?' => '2014-09-23 21:17:16' };
+    $match_criteria{WHERE} = { 'date(flag_when) BETWEEN ? AND ?' => [$after, $before] };
 
     # Throw error if no other parameters have been passed other than limit and offset
     if (!grep(!/^(LIMIT|OFFSET)$/, keys %match_criteria)) {

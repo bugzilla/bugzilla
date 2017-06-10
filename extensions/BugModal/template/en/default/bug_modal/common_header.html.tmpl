@@ -1,0 +1,84 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[%
+  PROCESS global/variables.none.tmpl;
+
+  title = title
+
+  generate_api_token = 1;
+
+  # these aren't always defined
+  UNLESS bodyclasses.defined;
+    bodyclasses = [];
+  END;
+  UNLESS javascript_urls.defined;
+    javascript_urls = [];
+  END;
+  UNLESS style_urls.defined;
+    style_urls = [];
+  END;
+  UNLESS jquery.defined;
+    jquery = [];
+  END;
+
+  # right now we need yui for tracking flags and needinfo extensions
+  no_yui = 0;
+
+  # add body classes for sec-groups, etc
+  bodyclasses.push("bug_modal");
+
+  # assets
+  javascript_urls.push(
+    "extensions/ProdCompSearch/web/js/prod_comp_search.js",
+    "extensions/BugModal/web/common_bug_modal.js",
+    "extensions/BugModal/web/comments.js",
+    "extensions/BugModal/web/dropdown.js",
+    "js/bugzilla-readable-status-min.js",
+    "js/field.js",
+    "js/comments.js",
+    "js/util.js"
+  );
+  jquery.push(
+    "datetimepicker",
+    "contextMenu",
+    "visibility"
+  );
+  style_urls.push(
+    "extensions/BugModal/web/common_bug_modal.css",
+    "extensions/BugModal/web/dropdown.css",
+    "skins/custom/bug_groups.css",
+    "js/jquery/plugins/datetimepicker/datetimepicker.css",
+    "js/jquery/plugins/contextMenu/contextMenu.css"
+  );
+%]
+
+[% javascript = BLOCK %]
+
+  [%# expose useful data to js %]
+
+  BUGZILLA.user = {
+    id: [% user.id FILTER none %],
+    login: '[% user.login FILTER js %]',
+    is_insider: [% user.is_insider ? "true" : "false" %],
+    is_timetracker: [% user.is_timetracker ? "true" : "false" %],
+    can_tag: [% user.can_tag_comments ? "true" : "false" %],
+    settings: {
+      quote_replies: '[% user.settings.quote_replies.value FILTER js %]',
+      zoom_textareas: [% user.settings.zoom_textareas.value == "on" ? "true" : "false" %],
+      remember_collapsed: [% user.settings.ui_remember_collapsed.value == "on" ? "true" : "false" %]
+    }
+  };
+
+  [% IF user.is_timetracker %]
+    BUGZILLA.remaining_time = [% bug.remaining_time FILTER js %]; // holds the original value
+  [% END %]
+  BUGZILLA.bug_secure = [% bug.groups_in.size ? 'true' : 'false' %];
+[% END %]
+
+[% Hook.process("end") %]

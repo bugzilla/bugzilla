@@ -5,16 +5,27 @@
 # This Source Code Form is "Incompatible With Secondary Licenses", as
 # defined by the Mozilla Public License, v. 2.0.%]
 
-[% PROCESS "global/field-descs.none.tmpl" %]
-
+[% PROCESS global/variables.none.tmpl %]
 [% title = BLOCK %]Enter [% terms.Bug %] [% END %]
-
-[% PROCESS global/header.html.tmpl
-  title = title
-  generate_api_token = 1
-  no_yui = 1
+[% PROCESS bug_modal/common_header.html.tmpl 
+title = title
 %]
-
+[% PROCESS global/header.html.tmpl %]
 <p>Coming Soon!</p>
+<p>This is a demonstration of a reusable comment component</p>
+[%
+    IF user.id;
+      INCLUDE bug_modal/common_new_comment.html.tmpl;
+    ELSE;
+      %]
+        <div id="new-comment-notice">
+          You need to <a href="new-bug&amp;GoAheadAndLogIn=1">log in</a>
+          before you can file a [% terms.bug %].
+        </div>
+      [%
+    END;
+  %]
+
+<div style="display: none" id="xhr-error"></div>
 
 [% PROCESS global/footer.html.tmpl %]

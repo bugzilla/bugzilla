@@ -59,7 +59,7 @@ sub get_configuration {
     my $user   = Bugzilla->user;
     my $params = Bugzilla->input_params;
 
-    my $can_cache = not exists $params->{product} and not exists $params->{flags};
+    my $can_cache = !exists $params->{product} && !exists $params->{flags};
     my $cache_key = 'bzapi_get_configuration';
 
     if ($can_cache) {

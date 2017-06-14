@@ -19,11 +19,6 @@ use constant REQUIRED_MODULES => [
         module  => 'JSON',
         version => 0,
     },
-    {
-        package => 'libwww-perl',
-        module  => 'LWP::UserAgent',
-        version => 0,
-    },
 ];
 
 use constant OPTIONAL_MODULES => [

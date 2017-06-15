@@ -325,7 +325,7 @@ sub install_before_final_checks {
     add_setting({
         name     => 'ui_experiments',
         options  => ['on', 'off'],
-        default  => 'off',
+        default  => 'on',
         category => 'User Interface'
     });
     add_setting({

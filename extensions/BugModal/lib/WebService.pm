@@ -84,20 +84,21 @@ sub rest_resources {
 
 sub products {
     my $user = Bugzilla->user;
-    return { products => _name($user->get_enterable_products) }
+    return { products => _name($user->get_enterable_products) };
 }
 
 sub components {
-    my ($self, $params) = @_;
-    if (!ref $params->{product_name}) {
-        untaint($params->{product_name});
+    my ( $self, $params ) = @_;
+    if ( !ref $params->{product_name} ) {
+        untaint( $params->{product_name} );
     }
     else {
-        ThrowCodeError('params_required',{ function => 'BugModal.components', params => ['product'] });
+        ThrowCodeError( 'params_required',
+            { function => 'BugModal.components', params => ['product'] } );
     }
-    my $product = Bugzilla::Product->check({ name => $params->{product_name}, cache => 1 });
-    $product = Bugzilla->user->can_enter_product($product, 1);
-    return { components => _name($product->components) }
+    my $product = Bugzilla::Product->check( { name => $params->{product_name}, cache => 1 } );
+    $product = Bugzilla->user->can_enter_product( $product, 1 );
+    return { components => _name( $product->components ) };
 }
 
 # everything we need for edit mode in a single call, returning just the fields

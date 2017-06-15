@@ -22,11 +22,31 @@ use Bugzilla::Milestone;
 use Bugzilla::Product;
 use Bugzilla::Version;
 use List::MoreUtils qw(any first_value);
+use Taint::Util qw(untaint);
 
 # these methods are much lighter than our public API calls
 
 sub rest_resources {
     return [
+        # return all the products accessible by the user.
+        # required by new-bug
+        qr{^/bug_modal/products}, {
+            GET => {
+                method => 'products'
+            },
+        },
+
+        # return all the components pertaining to the product.
+        # required by new-bug
+        qr{^/bug_modal/components}, {
+            GET => {
+                method => 'components',
+                params => sub {
+                    return { product_name => Bugzilla->input_params->{product} }
+                },
+            },
+        },
+
         # return all the lazy-loaded data; kept in sync with the UI's
         # requirements.
         qr{^/bug_modal/edit/(\d+)$}, {
@@ -60,6 +80,24 @@ sub rest_resources {
             },
         },
     ]
+}
+
+sub products {
+    my $user = Bugzilla->user;
+    return { products => _name($user->get_enterable_products) }
+}
+
+sub components {
+    my ($self, $params) = @_;
+    if (!ref $params->{product_name}) {
+        untaint($params->{product_name});
+    }
+    else {
+        ThrowCodeError('params_required',{ function => 'BugModal.components', params => ['product'] });
+    }
+    my $product = Bugzilla::Product->check({ name => $params->{product_name}, cache => 1 });
+    $product = Bugzilla->user->can_enter_product($product, 1);
+    return { components => _name($product->components) }
 }
 
 # everything we need for edit mode in a single call, returning just the fields

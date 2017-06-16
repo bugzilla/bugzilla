@@ -4811,4 +4811,10 @@ sub _multi_select_accessor {
     return $accessor;
 }
 
+
+sub has_attachment_with_mimetype {
+    my ($self, $type) = @_;
+    return any { $_->contenttype eq $type } @{ $self->attachments };
+}
+
 1;

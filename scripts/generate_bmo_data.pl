@@ -22,6 +22,7 @@ use Bugzilla::Keyword;
 use Bugzilla::Config qw(:admin);
 use Bugzilla::User::Setting;
 use Bugzilla::Status;
+use Getopt::Long qw( :config gnu_getopt );
 
 BEGIN { Bugzilla->extensions }
 
@@ -29,9 +30,6 @@ my $dbh = Bugzilla->dbh;
 
 # set Bugzilla usage mode to USAGE_MODE_CMDLINE
 Bugzilla->usage_mode(USAGE_MODE_CMDLINE);
-
-my $admin_email = shift || 'admin@mozilla.bugs';
-Bugzilla->set_user(Bugzilla::User->check({ name => $admin_email }));
 
 ##########################################################################
 #  Set Default User Preferences
@@ -64,6 +62,11 @@ my %user_prefs = (
     timezone               => 'local',
     zoom_textareas         => 'off',
 );
+
+GetOptions('user-pref=s%' => \%user_prefs);
+
+my $admin_email = shift || 'admin@mozilla.bugs';
+Bugzilla->set_user(Bugzilla::User->check({ name => $admin_email }));
 
 foreach my $pref (keys %user_prefs) {
     my $value = $user_prefs{$pref};

@@ -656,4 +656,13 @@ sub db_sanitize {
     $dbh->do("DELETE FROM push_options");
 }
 
+
+sub install_update_db {
+    my $dbh = Bugzilla->dbh;
+    $dbh->do("DELETE FROM push_options WHERE connector = ?", undef, "Aha");
+    $dbh->do("DELETE FROM push_log WHERE connector = ?", undef, "Aha");
+    $dbh->do("DELETE FROM push_backlog WHERE connector = ?", undef, "Aha");
+    $dbh->do("DELETE FROM push_backoff WHERE connector = ?", undef, "Aha");
+}
+
 __PACKAGE__->NAME;

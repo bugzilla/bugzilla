@@ -96,9 +96,10 @@ sub components {
         ThrowCodeError( 'params_required',
             { function => 'BugModal.components', params => ['product'] } );
     }
-    my $product = Bugzilla::Product->check( { name => $params->{product_name}, cache => 1 } );
-    $product = Bugzilla->user->can_enter_product( $product, 1 );
-    return { components => _name( $product->components ) };
+    my $product = Bugzilla::Product->check({ name => $params->{product_name}, cache => 1 });
+    $product = Bugzilla->user->can_enter_product($product, 1);
+    my @components = map { { name => $_->name, description => Bugzilla::Component->check({ product => $product, name => $_->name })->description} } @{ $product->components };
+    return { components => \@components }
 }
 
 # everything we need for edit mode in a single call, returning just the fields

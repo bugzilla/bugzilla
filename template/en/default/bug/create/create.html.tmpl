@@ -33,7 +33,7 @@
   generate_api_token = 1
   style_urls = [ 'skins/standard/attachment.css',
                  'skins/standard/enter_bug.css',
-                 'skins/custom/create_bug.css' ]
+                 'skins/standard/create_bug.css' ]
   javascript_urls = [ "js/attachment.js", "js/util.js",
                       "js/field.js", "js/TUI.js", "js/bug.js",
                       "js/create_bug.js" ]
@@ -154,8 +154,8 @@ function set_assign_to() {
         for (var i = 0; i < flag_rows.length; i++) {
             // Each flag table row should have one flag form select element
             // We get the flag type id from the id attribute of the select.
-            var flag_select = YAHOO.util.Dom.getElementsByClassName('flag_select', 
-                                                                    'select', 
+            var flag_select = YAHOO.util.Dom.getElementsByClassName('flag_select',
+                                                                    'select',
                                                                     flag_rows[i])[0];
             var type_id = flag_select.id.split('-')[1];
             var can_set = flag_select.options.length > 1 ? 1 : 0;
@@ -181,7 +181,7 @@ function set_assign_to() {
 
 var status_comment_required = new Array();
 [% FOREACH status = bug_status %]
-  status_comment_required['[% status.name FILTER js %]'] = 
+  status_comment_required['[% status.name FILTER js %]'] =
     [% status.comment_required_on_change_from() ? 'true' : 'false' %]
 [% END %]
 
@@ -218,7 +218,7 @@ TUI_hide_default('attachment_text_field');
              value="Hide Advanced Fields" onClick="toggleAdvancedFields()">
       [%# Show the link if the browser supports JS %]
       <script type="text/javascript">
-        YAHOO.util.Dom.removeClass('expert_fields_controller', 
+        YAHOO.util.Dom.removeClass('expert_fields_controller',
                                    'bz_default_hidden');
       </script>
     </td>
@@ -245,7 +245,7 @@ TUI_hide_default('attachment_text_field');
     [% INCLUDE "bug/field-label.html.tmpl"
       field = bug_fields.component editable = 1
       desc_url = component_desc_url
-    %]      
+    %]
     <td id="field_container_component">
       <select name="component" id="component" onchange="set_assign_to();"
               size="7" aria-required="true" class="required">
@@ -278,7 +278,7 @@ TUI_hide_default('attachment_text_field');
 
       <script type="text/javascript">
        <!--
-         [%+ INCLUDE "bug/field-events.js.tmpl" 
+         [%+ INCLUDE "bug/field-events.js.tmpl"
                      field = bug_fields.component, product = product %]
        //-->
        </script>
@@ -302,7 +302,7 @@ TUI_hide_default('attachment_text_field');
 
   <tr>
     [% INCLUDE "bug/field-label.html.tmpl"
-      field = bug_fields.version editable = 1 rowspan = 3 
+      field = bug_fields.version editable = 1 rowspan = 3
     %]
     <td rowspan="3">
       <select name="version" id="version" size="5">
@@ -316,7 +316,7 @@ TUI_hide_default('attachment_text_field');
     </td>
 
     [% INCLUDE bug/field.html.tmpl
-      bug = default, field = bug_fields.bug_severity, editable = 1, 
+      bug = default, field = bug_fields.bug_severity, editable = 1,
       value = default.bug_severity %]
   </tr>
 
@@ -372,7 +372,7 @@ TUI_hide_default('attachment_text_field');
 
     [% IF Param('letsubmitterchoosepriority') %]
       [% INCLUDE bug/field.html.tmpl
-        bug = default, field = bug_fields.priority, editable = 1, 
+        bug = default, field = bug_fields.priority, editable = 1,
         value = default.priority %]
     [% ELSE %]
       <td colspan="2">&nbsp;</td>
@@ -414,7 +414,7 @@ TUI_hide_default('attachment_text_field');
       [% END %]
       <noscript>(Leave blank to assign to component's default assignee)</noscript>
     </td>
-  
+
 [% IF Param("useqacontact") %]
     [% INCLUDE "bug/field-label.html.tmpl"
       field = bug_fields.qa_contact editable = 1
@@ -436,7 +436,7 @@ TUI_hide_default('attachment_text_field');
 
   <tr>
     [% INCLUDE "bug/field-label.html.tmpl"
-      field = bug_fields.cc editable = 1 
+      field = bug_fields.cc editable = 1
     %]
     <td>
       [% INCLUDE global/userselect.html.tmpl
@@ -493,10 +493,10 @@ TUI_hide_default('attachment_text_field');
       <td colspan="3">
         <div id="possible_duplicates"></div>
         <script type="text/javascript">
-          var dt_columns = [ 
+          var dt_columns = [
               { key: "id", label: "[% field_descs.bug_id FILTER js %]",
                 formatter: YAHOO.bugzilla.dupTable.formatBugLink },
-              { key: "summary", 
+              { key: "summary",
                 label: "[% field_descs.short_desc FILTER js %]",
                 formatter: "text" },
               { key: "status",
@@ -582,7 +582,7 @@ TUI_hide_default('attachment_text_field');
                    [% ' checked="checked"' IF comment_is_private %]
                    onClick="updateCommentTagControl(this, 'comment')">
             <label for="comment_is_private">
-              Make this attachment and [% terms.bug %] description private (visible only 
+              Make this attachment and [% terms.bug %] description private (visible only
               to members of the <strong>[% Param('insidergroup') FILTER html %]</strong> group)
             </label>
           [% END %]
@@ -664,8 +664,8 @@ TUI_hide_default('attachment_text_field');
   [% NEXT IF field.hidden %]
   [% SET value = ${field.name}.defined ? ${field.name} : "" %]
   <tr [% 'class="expert_fields"' IF !field.is_mandatory %]>
-    [% INCLUDE bug/field.html.tmpl 
-      bug = default, field = field, value = value, editable = 1, 
+    [% INCLUDE bug/field.html.tmpl
+      bug = default, field = field, value = value, editable = 1,
       value_span = 3 %]
   </tr>
 [% END %]
@@ -728,7 +728,7 @@ TUI_hide_default('attachment_text_field');
     <th>&nbsp;</th>
     <td colspan="3">
         <strong>
-          Only users in all of the selected groups can view this 
+          Only users in all of the selected groups can view this
           [%+ terms.bug %]:
         </strong>
       <br>
@@ -801,7 +801,7 @@ TUI_hide_default('attachment_text_field');
     field = field editable = 1
   %]
   <td>
-    <select name="[% field.name FILTER html %]" 
+    <select name="[% field.name FILTER html %]"
             id="[% field.name FILTER html %]">
     [%- FOREACH x = ${field.name} %]
       [% NEXT IF NOT x.is_active %]

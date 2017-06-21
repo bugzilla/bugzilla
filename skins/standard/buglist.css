@@ -84,12 +84,12 @@
 /* Align columns in the "change multiple bugs" form to the right. */
 table#form tr th { text-align: right; }
 
-table.bz_buglist td, table.bz_buglist th { 
+table.bz_buglist td, table.bz_buglist th {
 }
 
 /* we use a first-child class and not the pseudo-class because IE
  * doesn't support it :-( */
-tr.bz_secure td.first-child, a.bz_secure { 
+tr.bz_secure td.first-child, a.bz_secure {
   background-image: url("../../images/padlock.png");
   background-position: center left;
   background-repeat: no-repeat;
@@ -149,4 +149,44 @@ td.bz_total {
 
 table.requests th {
     text-align: left;
+}
+/* For the JS-sorting buglist. */
+
+th.sorttable_sorted,
+th.sorttable_sorted_reverse,
+th.sorted_0 {
+    background-color: #aaa;
+}
+
+th.sorted_1 {
+    background-color: #bbb;
+}
+
+th.sorted_2 {
+    background-color: #ccc;
+}
+
+th.sorted_3 {
+    background-color: #ddd;
+}
+
+th.sorted_4 {
+    background-color: #eee;
+}
+
+th.sorted_5 {
+    background-color: #fff;
+}
+
+.bz_short_desc_column a, .bz_short_short_desc_column a {
+    text-decoration: none;
+    color: inherit;
+}
+
+.bz_short_desc_column a:hover, .bz_short_short_desc_column a:hover {
+    text-decoration: underline;
+}
+
+#request_form #filtering th {
+    padding-left: 0.5em;
 }

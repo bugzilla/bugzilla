@@ -200,8 +200,8 @@
 
     [%# this puts the live bookmark up on firefox for the Atom feed %]
     [% IF atomlink %]
-       <link rel="alternate" 
-             type="application/atom+xml" title="Atom feed" 
+       <link rel="alternate"
+             type="application/atom+xml" title="Atom feed"
              href="[% atomlink FILTER html %]">
     [% END %]
 
@@ -296,9 +296,9 @@
               </li>
             [% ELSE %]
                 [%# Only display one login form when we're on a LOGIN_REQUIRED page. That
-                # way, we're guaranteed that the user will use the form that has 
+                # way, we're guaranteed that the user will use the form that has
                 # hidden_fields in it (the center form) instead of this one. Also, it's
-                # less confusing to have one form (as opposed to  three) when you're 
+                # less confusing to have one form (as opposed to  three) when you're
                 # required to log in.
                 #%]
                 [% IF user.authorizer.can_login && !Bugzilla.page_requires_login %]
@@ -310,7 +310,7 @@
       </td>
       <td id="moz_tab">
         <a href="https://www.mozilla.org/" title="Mozilla - Home of the Mozilla Project">
-          <img src="skins/contrib/Mozilla/tabzilla.png" border="0" height="42" width="154"></a>
+          <img src="images/tabzilla.png" border="0" height="42" width="154"></a>
       </td>
     </tr>
     </table>

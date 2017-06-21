@@ -15,13 +15,13 @@ body.bz_group_infrasec {
     background-color: #ffcc99;
 }
 
-body.bz_group_webtools-security, 
-body.bz_group_websites-security, 
+body.bz_group_webtools-security,
+body.bz_group_websites-security,
 body.bz_group_bugzilla-security {
     background-color: #ffeeee;
 }
 
-body.bz_group_client-services-security, 
+body.bz_group_client-services-security,
 body.bz_group_cloud-services-security {
     background-color: #ffff80;
 }

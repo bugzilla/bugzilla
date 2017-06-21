@@ -19,15 +19,15 @@
 [% END %]
 
 [%# Change the background/border for bugs/attachments in certain bug groups %]
-[% IF template.name == 'attachment/edit.html.tmpl' 
+[% IF template.name == 'attachment/edit.html.tmpl'
       || template.name == 'attachment/create.html.tmpl'
       || template.name == 'attachment/diff-header.html.tmpl' %]
-  [% style_urls.push("skins/custom/bug_groups.css") %]
+  [% style_urls.push("skins/standard/bug_groups.css") %]
 
   [% IF template.name == 'attachment/edit.html.tmpl'
         || template.name == 'attachment/diff-header.html.tmpl' %]
     [% IF bodyclasses == 'no_javascript' %]
-      [% bodyclasses = ['no_javascript'] %] 
+      [% bodyclasses = ['no_javascript'] %]
     [% END %]
     [% FOREACH group = attachment.bug.groups_in %]
       [% bodyclasses.push("bz_group_$group.name") %]

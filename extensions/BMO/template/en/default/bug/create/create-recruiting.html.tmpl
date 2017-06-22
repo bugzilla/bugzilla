@@ -75,12 +75,7 @@ function jobDescToggle(what) {
     Recruiting [% terms.Bugs %] are visible only to the Reporter, members of the People
     Team, and those on the CC list. Please do not add non-employees to the CC list.
     This form is to request a new open requisition only, and is not for
-    communication about existing open requisitions in Jobvite.
-  </p>
-
-  <p>
-    <strong>Do not put information about backfills or replacements directly into
-      this [% terms.bug %].</strong>
+    communication about existing open requisitions in Greenhouse.
   </p>
 
   <form method="post" action="post_bug.cgi" id="recruitingForm" enctype="multipart/form-data">
@@ -107,15 +102,6 @@ function jobDescToggle(what) {
         </th>
         <td>
           <input required name="short_desc" id="short_desc" size="60" value="[% short_desc FILTER html %]">
-        </td>
-      </tr>
-
-      <tr>
-        <th align="right" valign="top" width="170">
-          <label class="required" for="position_job_family_title">Position Job Family Title (Workday):</label>
-        </th>
-        <td>
-          <input required name="position_job_family_title" id="position_job_family_title" size="60">
         </td>
       </tr>
 
@@ -183,6 +169,7 @@ function jobDescToggle(what) {
             <option value="Tyler Haugen">Tyler Haugen</option>
             <option value="Josh Kruse">Josh Kruse</option>
             <option value="Matt Frassica">Matt Frassica</option>
+            <option value="Huma Shah">Huma Shah</option>
           </select>
         </td>
       </tr>

@@ -179,7 +179,7 @@ sub _build_source_dirs {
     my @dirs = grep { -d $_ } map {"$ext_dir/$_/web"} grep { !/^\.\.?$/ } readdir $ext_dir_handle;
     closedir $ext_dir_handle;
 
-    return [ "$base/skins", "$base/js", grep { -d $_ } @dirs ];
+    return [ "$base/images", "$base/skins", "$base/js", grep { -d $_ } @dirs ];
 }
 
 sub _build_state_file {

@@ -441,12 +441,20 @@ sub header {
         %headers = ('-type' => shift(@_));
     }
     else {
-        %headers = @_;
+        # we always want headers to be in lower case, to avoid
+        # for instance -Cache_Control vs. -cache_control.
+        my %tmp = @_;
+        foreach my $key (keys %tmp) {
+            my $lc_key = lc $key;
+            warn "duplicate header: $key" if exists $headers{$lc_key};
+            $headers{$lc_key} = $tmp{$key};
+        }
     }
 
     if ($self->{'_content_disp'}) {
         $headers{'-content_disposition'} = $self->{'_content_disp'};
     }
+    $headers{'-cache_control'} //= 'no-cache, no-store, must-revalidate';
 
     if (!$user->id && $user->authorizer->can_login
         && !$self->cookie('Bugzilla_login_request_cookie'))

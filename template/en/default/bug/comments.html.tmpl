@@ -22,8 +22,7 @@
 
 [% PROCESS bug/time.html.tmpl %]
 
-<script src="[% 'js/comments.js' FILTER mtime %]" type="text/javascript">
-</script>
+<script src="[% asset_file('js/comments.js') FILTER html %]" type="text/javascript"></script>
 
 <script type="text/javascript">
 <!--

@@ -57,9 +57,9 @@ Interdiff of #[% oldid %] and #[% newid %] for [% terms.bug %] #[% bugid %]
 [% ELSE %]
   <html>
   <head>
-  <link href="[% 'skins/standard/attachment.css' FILTER mtime %]" 
+  <link href="[% asset_file('skins/standard/attachment.css') FILTER html %]"
         rel="stylesheet" type="text/css">
-  <script src="[% 'js/attachment.js' FILTER mtime %]" 
+  <script src="[% asset_file('js/attachment.js') FILTER html %]" 
           type="text/javascript"></script>
   </head>
   <body onload="[% onload FILTER html %]">

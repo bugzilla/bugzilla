@@ -26,8 +26,6 @@ use Memoize;
 
     bz_locations
 
-    CONCATENATE_ASSETS
-
     IS_NULL
     NOT_NULL
 
@@ -218,11 +216,6 @@ use constant REST_DOC => "http://www.bugzilla.org/docs/tip/en/html/api/";
 # Location of the remote and local XML files to track new releases.
 use constant REMOTE_FILE => 'http://updates.bugzilla.org/bugzilla-update.xml';
 use constant LOCAL_FILE  => 'bugzilla-update.xml'; # Relative to datadir.
-
-# When true CSS and JavaScript assets will be concatanted and minified at
-# run-time, to reduce the number of requests required to render a page.
-# Setting this to a false value can help debugging.
-use constant CONCATENATE_ASSETS => 1;
 
 # These are unique values that are unlikely to match a string or a number,
 # to be used in criteria for match() functions and other things. They start
@@ -702,7 +695,7 @@ sub _bz_locations {
         # The script should really generate these graphs directly...
         'webdotdir'      => "$datadir/webdot",
         'extensionsdir'  => "$libpath/extensions",
-        'assetsdir'      => "$datadir/assets",
+        'assetsdir'      => "$libpath/assets",
         # error_reports store error/warnings destined for sentry
         'error_reports'  => "$libpath/error_reports",
     };

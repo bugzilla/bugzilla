@@ -76,8 +76,8 @@
     TUI_alternates['custom_search_advanced'] = "Show Advanced Features";
     TUI_hide_default('custom_search_advanced');
   </script>
-  <script type="text/javascript" src="[% 'js/custom-search.js' FILTER mtime %]"></script>
-  <script type="text/javascript" src="[% 'js/history.js/native.history.js' FILTER mtime %]"></script>
+  <script type="text/javascript" src="[% asset_file('js/custom-search.js') FILTER html %]"></script>
+  <script type="text/javascript" src="[% asset_file('js/history.js/native.history.js') FILTER html %]"></script>
   <script type="text/javascript">
     redirect_html4_browsers();
     [%# These are alternative labels for the AND and OR options in and_all_select %]

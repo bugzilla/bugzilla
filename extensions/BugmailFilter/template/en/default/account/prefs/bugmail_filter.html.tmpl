@@ -6,10 +6,10 @@
   # defined by the Mozilla Public License, v. 2.0.
   #%]
 
-<link href="[% "extensions/BugmailFilter/web/style/bugmail-filter.css" FILTER mtime %]"
+<link href="[% asset_file("extensions/BugmailFilter/web/style/bugmail-filter.css") FILTER html %]"
       rel="stylesheet" type="text/css">
 <script type="text/javascript"
-        src="[% "extensions/BugmailFilter/web/js/bugmail-filter.js" FILTER mtime %]"></script>
+        src="[% asset_file("extensions/BugmailFilter/web/js/bugmail-filter.js") FILTER html %]"></script>
 
 [% SET selectable_products = user.get_selectable_products %]
 [% SET dont_show_button = 1 %]
@@ -26,7 +26,7 @@ var cpts = new Array();
   [% n = n + 1 %]
 [% END %]
 </script>
-<script type="text/javascript" src="[% 'js/productform.js' FILTER mtime FILTER html %]">
+<script type="text/javascript" src="[% asset_file('js/productform.js') FILTER html %]">
 </script>
 
 <hr>

@@ -33,7 +33,7 @@
   <div class="pcs-header">
     [% input_label FILTER none %]&nbsp;
     <img id="[% id FILTER html %]-throbber"
-      src="extensions/ProdCompSearch/web/images/throbber.gif"
+      src="[% asset_file('extensions/ProdCompSearch/web/images/throbber.gif') FILTER html %]"
       style="display:none" width="16" height="11">
     <span class="pcs-message" id="[% id FILTER html %]-no_results" style="display:none">
       No components found

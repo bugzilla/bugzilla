@@ -36,6 +36,7 @@ use Bugzilla::Flag;
 use Bugzilla::Hook;
 use Bugzilla::Install::Localconfig qw(read_localconfig);
 use Bugzilla::Install::Util qw(init_console include_languages);
+use Bugzilla::Install::AssetManager;
 use Bugzilla::Memcached;
 use Bugzilla::Template;
 use Bugzilla::Token;
@@ -255,6 +256,11 @@ sub extensions {
         $cache->{extensions} = \@extensions;
     }
     return $cache->{extensions};
+}
+
+sub asset_manager {
+    state $asset_manager = Bugzilla::Install::AssetManager->new;
+    return $asset_manager;
 }
 
 sub cgi {

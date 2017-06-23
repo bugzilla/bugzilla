@@ -52,6 +52,7 @@ GetOptions(\%switch, 'help|h|?',
                      'no-templates|t', 'verbose|v|no-silent',
                      'cpanm:s', 'check-modules',
                      'make-admin=s', 'reset-password=s', 'version|V',
+                     'no-assets',
                      'no-permissions|p');
 
 # Print the help message if that switch was selected.
@@ -189,6 +190,11 @@ my %old_params = update_params();
 
 Bugzilla::Template::precompile_templates(!$silent)
     unless $switch{'no-templates'};
+
+unless ($switch{'no-assets'}) {
+    say "Compiling assets..." unless $silent;
+    Bugzilla->asset_manager->compile_all;
+}
 
 ###########################################################################
 # Set proper rights (--CHMOD--)

@@ -876,6 +876,21 @@ sub create {
             # Function for retrieving global parameters.
             'Param' => sub { return Bugzilla->params->{$_[0]}; },
 
+            'bugzilla_version' => sub {
+                my $version = Bugzilla->VERSION;
+                if (my @ver = $version =~ /^(\d{4})(\d{2})(\d{2})\.(\d+)$/s) {
+                    if ($ver[3] eq '1') {
+                        return join('.', @ver[0,1,2]);
+                    }
+                    else {
+                        return join('.', @ver);
+                    }
+                }
+                else {
+                    return $version;
+                }
+            },
+
             asset_file => sub {
                 return Bugzilla->asset_manager->asset_file($_[0]);
             },

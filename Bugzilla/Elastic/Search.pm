@@ -361,6 +361,13 @@ sub _operator_substring {
             }
         }
     }
+    elsif ($field eq 'status_whiteboard' && $value =~ /[\[\]]/) {
+        return {
+            match => {
+                $EQUALS_MAP{$field} // $field => $value,
+            }
+        };
+    }
     else {
         return {
             wildcard => {

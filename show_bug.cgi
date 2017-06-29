@@ -20,13 +20,17 @@ use Bugzilla::Keyword;
 use Bugzilla::Bug;
 use Bugzilla::Hook;
 use Bugzilla::CGI;
-use Bugzilla::Util qw(detaint_natural);
+use Bugzilla::Util qw(detaint_natural remote_ip);
 
 my $cgi = Bugzilla->cgi;
 my $template = Bugzilla->template;
 my $vars = {};
 
 my $user = Bugzilla->login();
+
+unless ($user->id) {
+    Bugzilla->check_rate_limit("show_bug", remote_ip());
+}
 
 # BMO: add show_bug_format for experimental UI work
 my $format_params = {

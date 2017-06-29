@@ -23,6 +23,13 @@
    desc = "Set up account policies"
 %]
 
+[% rate_limit_rules_desc = BLOCK %]
+This parameter is a json object. It has one or more valid keys, whose values are each of an array [MAX_RATE, SECONDS]. MAX_RATE is the maximum
+number of requests that can occur over SECONDS. The default is [75, 60] or 75 requests
+over 60 seconds. Valid keys are <code>get_b[%''%]ug</code> which covers JSONRPC, XMLRPC, REST and BZAPI single
+[% terms.bug %] access methods, and <code>show_b[%''%]ug</code> which controls show [% terms.bug %]
+[% END %]
+
 [% param_descs = {
   allowbugdeletion => "The pages to edit products and components can delete all " _
                       "associated $terms.bugs when you delete a product (or component). " _
@@ -41,6 +48,10 @@
 
   last_visit_keep_days => "This option controls how many days $terms.Bugzilla will " _
                           "remember when users visit specific ${terms.bugs}.",
+
+   rate_limit_active => "Allow some types of requests to be rate limited."
+
+   rate_limit_rules => rate_limit_rules_desc
 
    log_user_requests => "This option controls logging of authenticated requests in the user_request_log table"}
 %]

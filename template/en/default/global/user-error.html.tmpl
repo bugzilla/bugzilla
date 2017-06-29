@@ -1812,6 +1812,10 @@
     The token you submitted does not exist, has expired, or has
     been canceled.
 
+  [% ELSIF error == "rate_limit" %]
+    [% title = "Rate Limit Exceeded" %]
+    You have exceeded the rate limit.
+
   [% ELSIF error == "too_soon_for_new_token" %]
     [% title = "Too Soon For New Token" %]
     You have requested

@@ -22,7 +22,7 @@ use Bugzilla::WebService::Constants;
 use Bugzilla::WebService::Util qw(extract_flags filter filter_wants validate translate);
 use Bugzilla::Bug;
 use Bugzilla::BugMail;
-use Bugzilla::Util qw(trick_taint trim detaint_natural);
+use Bugzilla::Util qw(trick_taint trim detaint_natural remote_ip);
 use Bugzilla::Version;
 use Bugzilla::Milestone;
 use Bugzilla::Status;
@@ -398,6 +398,9 @@ sub _translate_comment {
 sub get {
     my ($self, $params) = validate(@_, 'ids');
 
+    unless (Bugzilla->user->id) {
+        Bugzilla->check_rate_limit("get_bug", remote_ip());
+    }
     Bugzilla->switch_to_shadow_db() unless Bugzilla->user->id;
 
     my $ids = $params->{ids};

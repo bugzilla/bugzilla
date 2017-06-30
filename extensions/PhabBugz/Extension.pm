@@ -35,4 +35,9 @@ sub auth_delegation_confirm {
     }
 }
 
+sub webservice {
+    my ($self,  $args) = @_;
+    $args->{dispatch}->{PhabBugz} = "Bugzilla::Extension::PhabBugz::WebService";
+}
+
 __PACKAGE__->NAME;

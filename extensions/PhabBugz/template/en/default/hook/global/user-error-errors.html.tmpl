@@ -18,5 +18,8 @@
   [% title = "Invalid Phabricator Sync Groups" %]
   You must provide a comma delimited list of security groups
   to sync with Phabricator.
+[% ELSIF error == "invalid_phabricator_revision_id" %]
+  [% title = "Invalid Phabricator Revision ID" %]
+  You must provide a valid Phabricator revision ID.
 
 [% END %]

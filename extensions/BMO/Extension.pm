@@ -1158,7 +1158,11 @@ sub _detect_attached_url {
     return if $url =~ m<[^A-Za-z0-9._~:/?#\[\]@!\$&'()*+,;=`.%-]>;
 
     foreach my $key (keys %autodetect_attach_urls) {
-        if ($url =~ $autodetect_attach_urls{$key}->{regex}) {
+        my $regex = $autodetect_attach_urls{$key}->{regex};
+        if (ref($regex) eq 'CODE') {
+            $regex = $regex->();
+        }
+        if ($url =~ $regex) {
             return $autodetect_attach_urls{$key};
         }
     }

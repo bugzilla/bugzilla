@@ -2532,15 +2532,16 @@ sub install_filesystem {
     my $extensions_dir = bz_locations()->{extensionsdir};
     $create_files->{__lbheartbeat__} = {
         perms     => Bugzilla::Install::Filesystem::WS_SERVE,
-        overwrite => 1,
+        overwrite => 1, # the original value for this was wrong, overwrite it
         contents  => 'httpd OK',
     };
+
 
     # version.json needs to have a source attribute pointing to
     # our repository. We already have this information in the (static)
     # contribute.json file, so parse that in
     my $json = JSON::XS->new->pretty->utf8->canonical();
-    my $contribute = eval {
+    my $contribute = eval { 
         $json->decode(scalar read_file(bz_locations()->{cgi_path} . "/contribute.json"));
     };
     my $commit = `git rev-parse HEAD`;

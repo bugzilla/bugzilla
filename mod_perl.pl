@@ -75,7 +75,7 @@ my $conf = Bugzilla::ModPerl->apache_config($cgi_path);
 $server->add_config([ grep { length $_ } split("\n", $conf)]);
 
 # Pre-load all extensions
-$Bugzilla::extension_packages = Bugzilla::Extension->load_all();
+Bugzilla::Extension->load_all();
 
 Bugzilla->preload_features();
 

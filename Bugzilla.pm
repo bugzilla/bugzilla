@@ -238,15 +238,11 @@ sub template_inner {
     return $cache->{"template_inner_$lang"} ||= Bugzilla::Template->create(language => $lang);
 }
 
-our $extension_packages;
 sub extensions {
     my ($class) = @_;
     my $cache = $class->request_cache;
     if (!$cache->{extensions}) {
-        # Under mod_perl, mod_perl.pl populates $extension_packages for us.
-        if (!$extension_packages) {
-            $extension_packages = Bugzilla::Extension->load_all();
-        }
+        my $extension_packages = Bugzilla::Extension->load_all();
         my @extensions;
         foreach my $package (@$extension_packages) {
             my $extension = $package->new();

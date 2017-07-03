@@ -31,7 +31,6 @@ use File::Path;
 use File::Basename;
 use File::Copy qw(move);
 use File::Spec;
-use File::stat;
 use Cwd ();
 use File::Slurp;
 use IO::File;
@@ -82,16 +81,12 @@ EOT
 
 use constant HT_ASSETS_DIR => <<'EOT';
 # Allow access to .css and js files
-<FilesMatch state\.json$>
-    Deny from all
+<FilesMatch \.(css|js)$>
+  Allow from all
 </FilesMatch>
 
-FileETag None
-Header set Cache-Control "public, immutable, max-age=31536000"
-Header set Content-Security-Policy "default-src 'none';"
-
 # And no directory listings, either.
-Options -Indexes
+Deny from all
 EOT
 
 use constant INDEX_HTML => <<'EOT';
@@ -349,7 +344,7 @@ sub FILESYSTEM {
         $attachdir              => DIR_CGI_WRITE,
         $graphsdir              => DIR_CGI_WRITE | DIR_ALSO_WS_SERVE,
         $webdotdir              => DIR_CGI_WRITE | DIR_ALSO_WS_SERVE,
-        $assetsdir              => DIR_WS_SERVE,
+        $assetsdir              => DIR_CGI_WRITE | DIR_ALSO_WS_SERVE,
         $template_cache         => DIR_CGI_WRITE,
         $error_reports          => DIR_CGI_WRITE,
         # Directories that contain content served directly by the web server.
@@ -451,13 +446,8 @@ sub FILESYSTEM {
         "$webdotdir/.htaccess"       => { perms => WS_SERVE,
                                           contents => HT_WEBDOT_DIR },
         "$assetsdir/.htaccess"       => { perms => WS_SERVE,
-                                          contents  => HT_ASSETS_DIR },
+                                          contents => HT_ASSETS_DIR },
     );
-    my $mtime = stat(__FILE__)->mtime;
-    foreach my $file (keys %htaccess) {
-        my $file_stat = stat($file);
-        $htaccess{$file}{overwrite} = $file_stat && $mtime > $file_stat->mtime;
-    }
 
     Bugzilla::Hook::process('install_filesystem', {
         files            => \%files,
@@ -571,6 +561,7 @@ sub update_filesystem {
 
     _remove_empty_css_files();
     _convert_single_file_skins();
+    _remove_dynamic_assets();
 }
 
 sub _css_url_fix {
@@ -633,6 +624,27 @@ sub _convert_single_file_skins {
         $dir_name =~ s/\.css$//;
         mkdir $dir_name or warn "$dir_name: $!";
         _rename_file($skin_file, "$dir_name/global.css");
+    }
+}
+
+# delete all automatically generated css/js files to force recreation at the
+# next request.
+sub _remove_dynamic_assets {
+    my @files = (
+        glob(bz_locations()->{assetsdir} . '/*.css'),
+        glob(bz_locations()->{assetsdir} . '/*.js'),
+    );
+    foreach my $file (@files) {
+        unlink($file);
+    }
+
+    # remove old skins/assets directory
+    my $old_path = bz_locations()->{skinsdir} . '/assets';
+    if (-d $old_path) {
+        foreach my $file (glob("$old_path/*.css")) {
+            unlink($file);
+        }
+        rmdir($old_path);
     }
 }
 

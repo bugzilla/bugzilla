@@ -52,7 +52,6 @@ GetOptions(\%switch, 'help|h|?',
                      'no-templates|t', 'verbose|v|no-silent',
                      'cpanm:s', 'check-modules',
                      'make-admin=s', 'reset-password=s', 'version|V',
-                     'no-assets',
                      'default-localconfig',
                      'no-database', 'no-permissions|p');
 
@@ -193,11 +192,6 @@ my %old_params = $switch{'no-database'} ? () : update_params();
 
 Bugzilla::Template::precompile_templates(!$silent)
     unless $switch{'no-templates'};
-
-unless ($switch{'no-assets'}) {
-    say "Compiling assets..." unless $silent;
-    Bugzilla->asset_manager->compile_all;
-}
 
 ###########################################################################
 # Set proper rights (--CHMOD--)

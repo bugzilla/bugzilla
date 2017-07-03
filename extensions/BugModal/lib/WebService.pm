@@ -38,9 +38,9 @@ sub rest_resources {
 
         # return all the components pertaining to the product.
         # required by new-bug
-        qr{^/bug_modal/product_info}, {
+        qr{^/bug_modal/components}, {
             GET => {
-                method => 'product_info',
+                method => 'components',
                 params => sub {
                     return { product_name => Bugzilla->input_params->{product} }
                 },
@@ -87,24 +87,19 @@ sub products {
     return { products => _name($user->get_enterable_products) };
 }
 
-sub product_info {
+sub components {
     my ( $self, $params ) = @_;
     if ( !ref $params->{product_name} ) {
         untaint( $params->{product_name} );
     }
     else {
-        ThrowCodeError( 'params_required', { function => 'BugModal.components', params => ['product'] } );
+        ThrowCodeError( 'params_required',
+            { function => 'BugModal.components', params => ['product'] } );
     }
-    my $product = Bugzilla::Product->check( { name => $params->{product_name}, cache => 1 } );
-    $product = Bugzilla->user->can_enter_product( $product, 1 );
-    my @components = map {
-        {
-            name        => $_->name,
-            description => $_->description,
-        }
-    } @{ $product->components };
-    my @versions = map { { name => $_->name } } grep { $_->is_active } @{ $product->versions };
-    return { components => \@components, versions => \@versions };
+    my $product = Bugzilla::Product->check({ name => $params->{product_name}, cache => 1 });
+    $product = Bugzilla->user->can_enter_product($product, 1);
+    my @components = map { { name => $_->name, description => Bugzilla::Component->check({ product => $product, name => $_->name })->description} } @{ $product->components };
+    return { components => \@components }
 }
 
 # everything we need for edit mode in a single call, returning just the fields

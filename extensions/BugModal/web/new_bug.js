@@ -1,89 +1,48 @@
-var comp_desc = {}
-
-function load_products(query, callback) {
+$(document).ready(function() {
     bugzilla_ajax(
             {
                 url: 'rest/bug_modal/products'
             },
             function(data) {
-                callback(data.products);
+                $('#product').empty()
+                $('#product').append($('<option>', { value: 'Select Product', text: 'Select Product' }));
+                // populate select menus
+                $.each(data.products, function(key, value) {
+                    $('#product').append($('<option>', { value: value.name, text: value.name }));
+                });
             },
-            function() {
-                callback();
-            }
+            function() {}
         );
-}
 
-$(document).ready(function() {
-    var product_sel = $("#product").selectize({
-        valueField: 'name',
-        labelField: 'name',
-        searchField: 'name',
-        options: [],
-        preload: true,
-        create: false,
-        load: load_products
-    });
-    var component_sel = $("#component").selectize({
-        valueField: 'name',
-        labelField: 'name',
-        searchField: 'name',
-        options: [],
-    });
+    $('#component').empty()
+    $('#component').append($('<option>', { value: 'Select Component', text: 'Select Component' }));
 
-    var version_sel = $("#version").selectize({
-        valueField: 'name',
-        labelField: 'name',
-        searchField: 'name',
-        options: [],
-    });
-
-    product_sel.on("change", function () {
+    $('#product')
+    .change(function(event) {
         $('#product-throbber').show();
         $('#component').attr('disabled', true);
+        $("#product option[value='Select Product']").remove();
         bugzilla_ajax(
-                {
-                    url: 'rest/bug_modal/product_info?product=' + encodeURIComponent($('#product').val())
-                },
-                function(data) {
-                    product_info = data;
-                    $('#product-throbber').hide();
-                    $('#component').attr('disabled', false);
-                    $('#comp_desc').text('Select a component to read its description.');
-                    var selectize = $("#component")[0].selectize;
-                    selectize.clear();
-                    selectize.clearOptions();
-                    selectize.load(function(callback) {
-                        callback(data.components)
-                    });
-
-                    for (var i in data.components)
-                        comp_desc[data.components[i]["name"]] = data.components[i]["description"];
-
-                    selectize = $("#version")[0].selectize;
-                    selectize.clear();
-                    selectize.clearOptions();
-                    selectize.load(function(callback) {
-                        callback(data.versions);
-                    });
-                },
-                function() {
-                    alert("Network issues. Please refresh the page and try again");
-                }
-            );     
+            {
+                url: 'rest/bug_modal/components?product=' + encodeURIComponent($('#product').val())
+            },
+            function(data) {
+                $('#product-throbber').hide();
+                $('#component').attr('disabled', false);
+                $('#component').empty();
+                $('#component').append($('<option>', { value: 'Select Component', text: 'Select Component' }));
+                $('#comp_desc').text('Select a component to read its description.');
+                $.each(data.components, function(key, value) {  
+                    $('#component').append('<option value=' + value.name + ' desc=' + value.description.split(' ').join('_') + '>' + value.name + '</option>');
+                });
+            },
+            function() {}
+        );
     });
-
-    component_sel.on("change", function () {
-        var selectize = $("#component")[0].selectize;
-        $('#comp_desc').text(comp_desc[selectize.getValue()]);
+    $('#component')
+    .change(function(event) {
+        $("#component option[value='Select Product']").remove();
+        $('#comp_desc').text($('#component').find(":selected").attr('desc').split('_').join(' '));
     });
-
-    $('.create-btn')
-        .click(function(event) {
-            event.preventDefault();
-            if (document.newbugform.checkValidity && !document.newbugform.checkValidity())
-                return;
-            this.form.submit()
-        });
     
 });

@@ -43,8 +43,27 @@ my $cgi = Bugzilla->cgi;
 my $template = Bugzilla->template;
 my $vars = {};
 
-print $cgi->header();
+if (lc($cgi->request_method) eq 'post') {
+     my $token = $cgi->param('token');
+     check_hash_token($token, ['new_bug']);
+     my $new_bug = Bugzilla::Bug->create({
+                short_desc   => $cgi->param('short_desc'),
+                product      => $cgi->param('product'),
+                component    => $cgi->param('component'),
+                bug_severity => 'normal',
+                groups       => [],
+                op_sys       => 'Unspecified',
+                rep_platform => 'Unspecified',
+                version      => join(' ', split('_', $cgi->param('version'))),
+                cc           => [],
+                comment      => $cgi->param('comment'),
+            });
+     delete_token($token);
+     print $cgi->redirect(correct_urlbase() . 'show_bug.cgi?id='.$new_bug->bug_id);
+} else {
+ print $cgi->header();
 $template->process("bug/new_bug.html.tmpl",
                     $vars)
-  or ThrowTemplateError($template->error());          
+  or ThrowTemplateError($template->error());
+}
 

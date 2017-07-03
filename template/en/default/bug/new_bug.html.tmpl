@@ -9,11 +9,17 @@
 [% title = BLOCK %]Enter [% terms.Bug %] [% END %]
 [% PROCESS bug_modal/common_header.html.tmpl 
     title = title
+    jquery = [ "selectize" ]
+    jquery_css = [ "js/jquery/plugins/selectize/selectize.default.css" ]
     javascript_urls = ['extensions/BugModal/web/new_bug.js']
 %]
 [% PROCESS global/header.html.tmpl %]
 <p>Coming Soon!</p>
 <p>This is a demonstration of a reusable comment component</p>
+
+<form name="newbugform" id="newbugform" method="post" action="new_bug.cgi">
+
+<input type="hidden" value="[% issue_hash_token(['new_bug']) FILTER html %]" name="token">
 
 [% WRAPPER bug_modal/module.html.tmpl
     title = ""
@@ -25,6 +31,7 @@
         field_type = constants.FIELD_TYPE_FREETEXT
         edit_only = 1
         editable = 1
+        required = 1
         help = "https://wiki.mozilla.org/BMO/UserGuide/BugFields#short_desc"
     %]
     
@@ -131,6 +138,27 @@
   [% END %]
 [% END %]
 
+[%# === tracking === %]
+
+[% WRAPPER bug_modal/module.html.tmpl
+  title = "Tracking"
+  subtitle = sub
+  collapsed = col
+%]
+  [% WRAPPER fields_lhs %]
+
+    [%# version %]
+    [% INCLUDE bug_modal/field.html.tmpl
+        field = bug_fields.version
+        field_type = constants.FIELD_TYPE_SINGLE_SELECT
+        help = "https://wiki.mozilla.org/BMO/UserGuide/BugFields#version"
+        edit_only = 1
+        editable = 1
+    %]
+    
+ [% END %]
+[% END %]
+
 [% BLOCK fields_lhs %]
   <div class="fields-lhs">[% content FILTER none %]</div>
 [% END %]
@@ -153,5 +181,6 @@
   %]
 
 <div style="display: none" id="xhr-error"></div>
-
+<button type="submit" id="commit-btn" class="create-btn major">Create New Bug</button>
+</form>
 [% PROCESS global/footer.html.tmpl %]

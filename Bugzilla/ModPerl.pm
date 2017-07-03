@@ -73,6 +73,14 @@ __DATA__
 # so we need to srand() both of them.)
 PerlChildInitHandler "sub { Bugzilla::RNG::srand(); srand(); }"
 
+# It is important to specify ErrorDocuments outside of all directories.
+# These used to be in .htaccess, but then things like "AllowEncodedSlashes no"
+# mean that urls containing %2f are unstyled.
+ErrorDocument 401 /errors/401.html
+ErrorDocument 403 /errors/403.html
+ErrorDocument 404 /errors/404.html
+ErrorDocument 500 /errors/500.html
+
 <Directory "[% cgi_path %]">
     AddHandler perl-script .cgi
     # No need to PerlModule these because they're already defined in mod_perl.pl

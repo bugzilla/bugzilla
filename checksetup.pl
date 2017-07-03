@@ -53,7 +53,8 @@ GetOptions(\%switch, 'help|h|?',
                      'cpanm:s', 'check-modules',
                      'make-admin=s', 'reset-password=s', 'version|V',
                      'no-assets',
-                     'no-permissions|p');
+                     'default-localconfig',
+                     'no-database', 'no-permissions|p');
 
 # Print the help message if that switch was selected.
 pod2usage({-verbose => 1, -exitval => 1}) if $switch{'help'};
@@ -150,7 +151,7 @@ Bugzilla->installation_answers($answers_file);
 ###########################################################################
 
 print "Reading " .  bz_locations()->{'localconfig'} . "...\n" unless $silent;
-update_localconfig({ output => !$silent });
+update_localconfig({ output => !$silent, use_defaults => $switch{'default-localconfig'} });
 my $lc_hash = Bugzilla->localconfig;
 
 ###########################################################################
@@ -161,17 +162,19 @@ my $lc_hash = Bugzilla->localconfig;
 # everything we need to create the DB. We have to create it early,
 # because some data required to populate data/params.json is stored in the DB.
 
-Bugzilla::DB::bz_check_requirements(!$silent);
-Bugzilla::DB::bz_create_database() if $lc_hash->{'db_check'};
+unless ($switch{'no-database'}) {
+    Bugzilla::DB::bz_check_requirements(!$silent);
+    Bugzilla::DB::bz_create_database() if $lc_hash->{'db_check'};
 
-# now get a handle to the database:
-my $dbh = Bugzilla->dbh;
-# Clear all keys from Memcached to ensure we see the correct schema.
-Bugzilla->memcached->clear_all();
-# Create the tables, and do any database-specific schema changes.
-$dbh->bz_setup_database();
-# Populate the tables that hold the values for the <select> fields.
-$dbh->bz_populate_enum_tables();
+    # now get a handle to the database:
+    my $dbh = Bugzilla->dbh;
+    # Clear all keys from Memcached to ensure we see the correct schema.
+    Bugzilla->memcached->clear_all();
+    # Create the tables, and do any database-specific schema changes.
+    $dbh->bz_setup_database();
+    # Populate the tables that hold the values for the <select> fields.
+    $dbh->bz_populate_enum_tables();
+}
 
 ###########################################################################
 # Check --DATA-- directory
@@ -182,7 +185,7 @@ create_htaccess() if $lc_hash->{'create_htaccess'};
 
 # Remove parameters from the params file that no longer exist in Bugzilla,
 # and set the defaults for new ones
-my %old_params = update_params();
+my %old_params = $switch{'no-database'} ? () : update_params();
 
 ###########################################################################
 # Pre-compile --TEMPLATE-- code
@@ -222,71 +225,73 @@ check_font_file(!$silent) if $lc_hash->{'font_file'};
 # Changes to the fielddefs --TABLE--
 ###########################################################################
 
-# Using Bugzilla::Field's create() or update() depends on the
-# fielddefs table having a modern definition. So, we have to make
-# these particular schema changes before we make any other schema changes.
-Bugzilla::Install::DB::update_fielddefs_definition();
+unless ($switch{'no-database'}) {
+    # Using Bugzilla::Field's create() or update() depends on the
+    # fielddefs table having a modern definition. So, we have to make
+    # these particular schema changes before we make any other schema changes.
+    Bugzilla::Install::DB::update_fielddefs_definition();
 
-Bugzilla::Field::populate_field_definitions();
+    Bugzilla::Field::populate_field_definitions();
 
-###########################################################################
-# Update the tables to the current definition --TABLE--
-###########################################################################
+    ###########################################################################
+    # Update the tables to the current definition --TABLE--
+    ###########################################################################
 
-Bugzilla::Install::DB::update_table_definitions(\%old_params);
-Bugzilla::Install::init_workflow();
+    Bugzilla::Install::DB::update_table_definitions(\%old_params);
+    Bugzilla::Install::init_workflow();
 
-###########################################################################
-# Bugzilla uses --GROUPS-- to assign various rights to its users.
-###########################################################################
+    ###########################################################################
+    # Bugzilla uses --GROUPS-- to assign various rights to its users.
+    ###########################################################################
 
-Bugzilla::Install::update_system_groups();
+    Bugzilla::Install::update_system_groups();
 
-# "Log In" as the fake superuser who can do everything.
-Bugzilla->set_user(Bugzilla::User->super_user);
+    # "Log In" as the fake superuser who can do everything.
+    Bugzilla->set_user(Bugzilla::User->super_user);
 
-###########################################################################
-# Create --SETTINGS-- users can adjust
-###########################################################################
+    ###########################################################################
+    # Create --SETTINGS-- users can adjust
+    ###########################################################################
 
-Bugzilla::Install::update_settings();
+    Bugzilla::Install::update_settings();
 
-###########################################################################
-# Create Administrator  --ADMIN--
-###########################################################################
+    ###########################################################################
+    # Create Administrator  --ADMIN--
+    ###########################################################################
 
-Bugzilla::Install::make_admin($switch{'make-admin'}) if $switch{'make-admin'};
-Bugzilla::Install::create_admin();
+    Bugzilla::Install::make_admin($switch{'make-admin'}) if $switch{'make-admin'};
+    Bugzilla::Install::create_admin();
 
-Bugzilla::Install::reset_password($switch{'reset-password'})
-    if $switch{'reset-password'};
+    Bugzilla::Install::reset_password($switch{'reset-password'})
+        if $switch{'reset-password'};
 
-###########################################################################
-# Create default Product
-###########################################################################
+    ###########################################################################
+    # Create default Product
+    ###########################################################################
 
-Bugzilla::Install::create_default_product();
+    Bugzilla::Install::create_default_product();
 
-Bugzilla::Hook::process('install_before_final_checks', { silent => $silent });
+    Bugzilla::Hook::process('install_before_final_checks', { silent => $silent });
 
-###########################################################################
-# Final checks
-###########################################################################
+    ###########################################################################
+    # Final checks
+    ###########################################################################
 
-# Clear all keys from Memcached
-Bugzilla->memcached->clear_all();
+    # Clear all keys from Memcached
+    Bugzilla->memcached->clear_all();
 
-# Reset the mod_perl pre-load list
-unlink(Bugzilla::Constants::bz_locations()->{datadir} . '/mod_perl_preload');
+    # Reset the mod_perl pre-load list
+    unlink(Bugzilla::Constants::bz_locations()->{datadir} . '/mod_perl_preload');
 
-# Check if the default parameter for urlbase is still set, and if so, give
-# notification that they should go and visit editparams.cgi 
-if (Bugzilla->params->{'urlbase'} eq '') {
-    print "\n" . get_text('install_urlbase_default') . "\n"
-        unless $silent;
-}
-if (!$silent) {
-    success(get_text('install_success'));
+    # Check if the default parameter for urlbase is still set, and if so, give
+    # notification that they should go and visit editparams.cgi 
+    if (Bugzilla->params->{'urlbase'} eq '') {
+        print "\n" . get_text('install_urlbase_default') . "\n"
+            unless $silent;
+    }
+    if (!$silent) {
+        success(get_text('install_success'));
+    }
 }
 
 __END__

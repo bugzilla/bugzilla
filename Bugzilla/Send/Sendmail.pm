@@ -25,7 +25,7 @@ sub send {
 
     return failure "Found $mailer but cannot execute it"
         unless -x $mailer;
-    
+
     local $SIG{'CHLD'} = 'DEFAULT';
 
     my $pipe = gensym;

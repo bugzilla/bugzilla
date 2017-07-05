@@ -36,7 +36,7 @@ sub install_update_db {
         return;
     }
 
-    print "Creating needinfo flag ... " . 
+    print "Creating needinfo flag ... " .
           "enable the Needinfo feature by editing the flag's properties.\n";
 
     # inclusions 0:0 maps to __ANY__ : __ANY__ in the UI,

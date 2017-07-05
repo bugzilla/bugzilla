@@ -128,7 +128,7 @@ use constant NUMBER_REGEX => qr/
         \.      # Followed possibly by some decimal places
         (?:\d*)
     )?
- 
+
     (?:         # Followed possibly by an exponent.
         [Ee]
         [+-]?
@@ -223,13 +223,13 @@ use constant MULTI_SELECT_OVERRIDE => {
     notsubstring   => \&_multiselect_negative,
     nowords        => \&_multiselect_negative,
     nowordssubstr  => \&_multiselect_negative,
-    
+
     allwords       => \&_multiselect_multiple,
     allwordssubstr => \&_multiselect_multiple,
     anyexact       => \&_multiselect_multiple,
     anywords       => \&_multiselect_multiple,
     anywordssubstr => \&_multiselect_multiple,
-    
+
     _non_changed    => \&_multiselect_nonchanged,
 };
 
@@ -254,12 +254,12 @@ use constant OPERATOR_FIELD_OVERRIDE => {
         _non_changed => \&_user_nonchanged,
     },
     'setters.login_name' => {
-        _non_changed => \&_user_nonchanged,    
+        _non_changed => \&_user_nonchanged,
     },
     qa_contact => {
         _non_changed => \&_user_nonchanged,
     },
-    
+
     # General Bug Fields
     alias        => { _non_changed => \&_nullable },
     # We check all attachment fields against this.
@@ -346,7 +346,7 @@ use constant OPERATOR_FIELD_OVERRIDE => {
     FIELD_TYPE_DATE,     { _non_changed => \&_nullable_date },
     FIELD_TYPE_TEXTAREA, { _non_changed => \&_nullable },
     FIELD_TYPE_MULTI_SELECT, MULTI_SELECT_OVERRIDE,
-    FIELD_TYPE_BUG_URLS,     MULTI_SELECT_OVERRIDE,    
+    FIELD_TYPE_BUG_URLS,     MULTI_SELECT_OVERRIDE,
 };
 
 # These are fields where special action is taken depending on the
@@ -568,7 +568,7 @@ sub COLUMN_JOINS {
     return $joins;
 };
 
-# This constant defines the columns that can be selected in a query 
+# This constant defines the columns that can be selected in a query
 # and/or displayed in a bug list.  Column records include the following
 # fields:
 #
@@ -578,7 +578,7 @@ sub COLUMN_JOINS {
 #          that returns the value of the column);
 #
 # 3. title: The title of the column as displayed to users.
-# 
+#
 # Note: There are a few hacks in the code that deviate from these definitions.
 #       In particular, the redundant short_desc column is removed when the
 #       client requests "all" columns.
@@ -625,14 +625,14 @@ sub COLUMNS {
                . " ELSE FLOOR(100 * (map_actual_time.total / $total_time))"
                 . " END)",
 
-        'flagtypes.name' => $dbh->sql_group_concat('DISTINCT ' 
+        'flagtypes.name' => $dbh->sql_group_concat('DISTINCT '
             . $dbh->sql_string_concat('map_flagtypes.name', 'map_flags.status')),
 
         'keywords' => $dbh->sql_group_concat('DISTINCT map_keyworddefs.name'),
 
         blocked => $dbh->sql_group_concat('DISTINCT map_blocked.blocked'),
         dependson => $dbh->sql_group_concat('DISTINCT map_dependson.dependson'),
-        
+
         'longdescs.count' => 'COUNT(DISTINCT map_longdescs_count.comment_id)',
         last_visit_ts => 'bug_user_last_visit.last_visit_ts',
         bug_interest_ts => 'bug_interest.modification_time',
@@ -649,7 +649,7 @@ sub COLUMNS {
     # Backward-compatibility for old field names. Goes new_name => old_name.
     # These are here and not in _translate_old_column because the rest of the
     # code actually still uses the old names, while the fielddefs table uses
-    # the new names (which is not the case for the fields handled by 
+    # the new names (which is not the case for the fields handled by
     # _translate_old_column).
     my %old_names = (
         creation_ts => 'opendate',
@@ -712,7 +712,7 @@ sub REPORT_COLUMNS {
     # There's no reason to support reporting on unique fields.
     # Also, some other fields don't make very good reporting axises,
     # or simply don't work with the current reporting system.
-    my @no_report_columns = 
+    my @no_report_columns =
         qw(bug_id alias short_short_desc opendate changeddate
            flagtypes.name keywords relevance);
 
@@ -754,11 +754,11 @@ use constant GROUP_BY_SKIP => qw(
 sub new {
     my $invocant = shift;
     my $class = ref($invocant) || $invocant;
-  
+
     my $self = { @_ };
     bless($self, $class);
     $self->{'user'} ||= Bugzilla->user;
-    
+
     # There are certain behaviors of the CGI "Vars" hash that we don't want.
     # In particular, if you put a single-value arrayref into it, later you
     # get back out a string, which breaks anyexact charts (because they
@@ -1166,7 +1166,7 @@ sub _validate_order_column {
 sub _special_order {
     my ($self) = @_;
     return $self->{special_order} if $self->{special_order};
-    
+
     my %special_order = %{ SPECIAL_ORDER() };
     my $select_fields = Bugzilla->fields({ type => FIELD_TYPE_SINGLE_SELECT });
     foreach my $field (@$select_fields) {
@@ -1200,7 +1200,7 @@ sub _translate_order_by_column {
     my ($self, $order_by_item) = @_;
 
     my ($field, $direction) = split_order_term($order_by_item);
-    
+
     $direction = '' if lc($direction) eq 'asc';
     my $special_order = $self->_special_order->{$field}->{order};
     # Standard fields have underscores in their SELECT alias instead
@@ -1221,18 +1221,18 @@ sub _sql_limit {
     my ($self) = @_;
     my $limit = $self->_params->{limit};
     my $offset = $self->_params->{offset};
-    
+
     my $max_results = Bugzilla->params->{'max_search_results'};
     if (!$self->{allow_unlimited} && (!$limit || $limit > $max_results)) {
         $limit = $max_results;
     }
-    
+
     if (defined($offset) && !$limit) {
         $limit = INT_MAX;
     }
     if (defined $limit) {
-        detaint_natural($limit) 
-            || ThrowCodeError('param_must_be_numeric', 
+        detaint_natural($limit)
+            || ThrowCodeError('param_must_be_numeric',
                               { function => 'Bugzilla::Search::new',
                                 param    => 'limit' });
         if (defined $offset) {
@@ -1296,7 +1296,7 @@ sub _combine_joins {
                   or die "Not all same-named joins have identical 'to': "
                          . Dumper($join, $others_like_me);
             }
-            
+
             # We don't need to call uniq here--translate_join will do that
             # for us.
             my @conditions = map { @{ $_->{extra} || [] } }
@@ -1306,7 +1306,7 @@ sub _combine_joins {
         }
         push(@result, $join);
     }
-    
+
     return @result;
 }
 
@@ -1365,7 +1365,7 @@ sub _standard_joins {
     if ($user->id) {
         $security_join->{extra} =
             ["NOT (" . $user->groups_in_sql('security_map.group_id') . ")"];
-            
+
         my $security_cc_join = {
             table => 'cc',
             as    => 'security_cc',
@@ -1373,7 +1373,7 @@ sub _standard_joins {
         };
         push(@joins, $security_cc_join);
     }
-    
+
     return @joins;
 }
 
@@ -1390,7 +1390,7 @@ sub _sql_from {
 # This takes a join data structure and turns it into actual JOIN SQL.
 sub _translate_join {
     my ($self, $join_info) = @_;
-    
+
     die "join with no table: " . Dumper($join_info) if !$join_info->{table};
     die "join with no 'as': " . Dumper($join_info) if !$join_info->{as};
 
@@ -1405,7 +1405,7 @@ sub _translate_join {
     my $join  = $join_info->{join}  || 'LEFT';
     my @extra = @{ $join_info->{extra} || [] };
     $name =~ s/\./_/g;
-    
+
     # If a term contains ORs, we need to put parens around the condition.
     # This is a pretty weak test, but it's actually OK to put parens
     # around too many things.
@@ -1439,7 +1439,7 @@ sub _standard_where {
     # until their group controls are set. So if a bug has a NULL creation_ts,
     # it shouldn't show up in searches at all.
     my @where = ('bugs.creation_ts IS NOT NULL');
-    
+
     my $security_term = 'security_map.group_id IS NULL';
 
     my $user = $self->_user;
@@ -1491,16 +1491,16 @@ sub _sql_group_by {
         push(@extra_group_by, $sql);
     }
 
-    # And all items from ORDER BY must be in the GROUP BY. The above loop 
+    # And all items from ORDER BY must be in the GROUP BY. The above loop
     # doesn't catch items that were put into the ORDER BY from SPECIAL_ORDER.
     foreach my $column ($self->_valid_order_columns) {
         my $special_order = $self->_special_order->{$column}->{order};
         next if !$special_order;
         push(@extra_group_by, @$special_order);
     }
-    
+
     @extra_group_by = uniq @extra_group_by;
-    
+
     # bug_id is the only field we actually group by.
     return ('bugs.bug_id', join(',', @extra_group_by));
 }
@@ -1524,13 +1524,13 @@ sub _skip_group_by {
 sub _convert_old_params {
     my ($self) = @_;
     my $params = $self->_params;
-    
+
     # bugidtype has different values in modern Search.pm.
     if (defined $params->{'bugidtype'}) {
         my $value = $params->{'bugidtype'};
         $params->{'bugidtype'} = $value eq 'exclude' ? 'nowords' : 'anyexact';
     }
-    
+
     foreach my $old_name (keys %{ FIELD_MAP() }) {
         if (defined $params->{$old_name}) {
             my $new_name = FIELD_MAP->{$old_name};
@@ -1558,7 +1558,7 @@ sub _parse_basic_fields {
     my ($self) = @_;
     my $params = $self->_params;
     my $chart_fields = $self->_chart_fields;
-    
+
     my $clause = new Bugzilla::Search::Clause();
     foreach my $field_name (keys %$chart_fields) {
         # CGI params shouldn't have periods in them, so we only accept
@@ -1634,7 +1634,7 @@ sub _special_parse_bug_status {
 sub _special_parse_chfield {
     my ($self) = @_;
     my $params = $self->_params;
-    
+
     my $date_from = trim(lc($params->{'chfieldfrom'} || ''));
     my $date_to = trim(lc($params->{'chfieldto'} || ''));
     $date_from = '' if $date_from eq 'now';
@@ -1691,7 +1691,7 @@ sub _special_parse_deadline {
     my ($self) = @_;
     return if !$self->_user->is_timetracker;
     my $params = $self->_params;
-    
+
     my $clause = new Bugzilla::Search::Clause();
     if (my $from = $params->{'deadlinefrom'}) {
         $clause->add('deadline', 'greaterthaneq', $from);
@@ -1699,16 +1699,16 @@ sub _special_parse_deadline {
     if (my $to = $params->{'deadlineto'}) {
         $clause->add('deadline', 'lessthaneq', $to);
     }
-    
+
     return $clause;
 }
 
 sub _special_parse_email {
     my ($self) = @_;
     my $params = $self->_params;
-    
+
     my @email_params = grep { $_ =~ /^email\d+$/ } keys %$params;
-    
+
     my $clause = new Bugzilla::Search::Clause();
     foreach my $param (@email_params) {
         $param =~ /(\d+)$/;
@@ -1727,10 +1727,10 @@ sub _special_parse_email {
         if ($params->{"emaillongdesc$id"}) {
             $or_clause->add("commenter", $type, $email);
         }
-        
+
         $clause->add($or_clause);
     }
-    
+
     return $clause;
 }
 
@@ -1768,7 +1768,7 @@ sub _valid_values {
 
 sub _charts_to_conditions {
     my ($self) = @_;
-    
+
     my $clause = $self->_charts;
     my @joins;
     $clause->walk_conditions(sub {
@@ -1781,7 +1781,7 @@ sub _charts_to_conditions {
 
 sub _charts {
     my ($self) = @_;
-    
+
     my $clause = $self->_params_to_data_structure();
     my $chart_id = 0;
     $clause->walk_conditions(sub { $self->_handle_chart($chart_id++, @_) });
@@ -1790,7 +1790,7 @@ sub _charts {
 
 sub _params_to_data_structure {
     my ($self) = @_;
-    
+
     # First we get the "special" charts, representing all the normal
     # fields on the search page. This may modify _params, so it needs to
     # happen first.
@@ -1798,7 +1798,7 @@ sub _params_to_data_structure {
 
     # Then we process the old Boolean Charts input format.
     $clause->add( $self->_boolean_charts );
-    
+
     # And then process the modern "custom search" format.
     $clause->add( $self->_custom_search );
 
@@ -1807,26 +1807,26 @@ sub _params_to_data_structure {
 
 sub _boolean_charts {
     my ($self) = @_;
-    
+
     my $params = $self->_params;
     my @param_list = keys %$params;
-    
+
     my @all_field_params = grep { /^field-?\d+/ } @param_list;
     my @chart_ids = map { /^field(-?\d+)/; $1 } @all_field_params;
     @chart_ids = sort { $a <=> $b } uniq @chart_ids;
-    
+
     my $clause = new Bugzilla::Search::Clause();
     foreach my $chart_id (@chart_ids) {
         my @all_and = grep { /^field$chart_id-\d+/ } @param_list;
         my @and_ids = map { /^field$chart_id-(\d+)/; $1 } @all_and;
         @and_ids = sort { $a <=> $b } uniq @and_ids;
-        
+
         my $and_clause = new Bugzilla::Search::Clause();
         foreach my $and_id (@and_ids) {
             my @all_or = grep { /^field$chart_id-$and_id-\d+/ } @param_list;
             my @or_ids = map { /^field$chart_id-$and_id-(\d+)/; $1 } @all_or;
             @or_ids = sort { $a <=> $b } uniq @or_ids;
-            
+
             my $or_clause = new Bugzilla::Search::Clause('OR');
             foreach my $or_id (@or_ids) {
                 my $identifier = "$chart_id-$and_id-$or_id";
@@ -1842,7 +1842,7 @@ sub _boolean_charts {
         }
         $clause->add($and_clause);
     }
-    
+
     return $clause;
 }
 
@@ -1874,7 +1874,7 @@ sub _custom_search {
                 if !$current_clause;
             next;
         }
-        
+
         my $operator = $params->{"o$id"};
         my $value = $params->{"v$id"};
         # no-value operators ignore the value, however a value needs to be set
@@ -1883,7 +1883,7 @@ sub _custom_search {
         $condition->negate($params->{"n$id"});
         $current_clause->add($condition);
     }
-    
+
     # We allow people to specify more OPs than CPs, so at the end of the
     # loop our top clause may be still in the stack instead of being
     # $current_clause.
@@ -1894,7 +1894,7 @@ sub _field_ids {
     my ($self) = @_;
     my $params = $self->_params;
     my @param_list = keys %$params;
-    
+
     my @field_params = grep { /^f\d+$/ } @param_list;
     my @field_ids = map { /(\d+)/; $1 } @field_params;
     @field_ids = sort { $a <=> $b } @field_ids;
@@ -1908,7 +1908,7 @@ sub _handle_chart {
     my ($field, $operator, $value) = $condition->fov;
     return if (!defined $field or !defined $operator or !defined $value);
     $field = FIELD_MAP->{$field} || $field;
-    
+
     my $string_value;
     if (ref $value eq 'ARRAY') {
         # Trim input and ignore blank values.
@@ -1921,11 +1921,11 @@ sub _handle_chart {
         return if $value eq '';
         $string_value = $value;
     }
-    
+
     $self->_chart_fields->{$field}
         or ThrowCodeError("invalid_field_name", { field => $field });
     trick_taint($field);
-    
+
     # This is the field as you'd reference it in a SQL statement.
     my $full_field = $field =~ /\./ ? $field : "bugs.$field";
 
@@ -1936,7 +1936,7 @@ sub _handle_chart {
     #
     # all_values is for search functions that do operate
     # on multiple values, like anyexact.
-    
+
     my %search_args = (
         chart_id     => $chart_id,
         sequence     => $chart_id,
@@ -1962,7 +1962,7 @@ sub _handle_chart {
 
     # All the things here that don't get pulled out of
     # %search_args are their original values before
-    # do_search_function modified them.   
+    # do_search_function modified them.
     $self->search_description({
         field => $field, type => $operator,
         value => $string_value, term => $search_args{term},
@@ -1985,7 +1985,7 @@ sub _handle_chart {
 sub do_search_function {
     my ($self, $args) = @_;
     my ($field, $operator) = @$args{qw(field operator)};
-    
+
     if (my $parse_func = SPECIAL_PARSING->{$field}) {
         $self->$parse_func($args);
         # Some parsing functions set $term, though most do not.
@@ -1993,7 +1993,7 @@ sub do_search_function {
         # parsing.
         return if $args->{term};
     }
-    
+
     my $operator_field_override = $self->_get_operator_field_override();
     my $override = $operator_field_override->{$field};
     # Attachment fields get special handling, if they don't have a specific
@@ -2006,7 +2006,7 @@ sub do_search_function {
         my $field_obj = $self->_chart_fields->{$field};
         $override = $operator_field_override->{$field_obj->type};
     }
-    
+
     if ($override) {
         my $search_func = $self->_pick_override_function($override, $operator);
         $self->$search_func($args) if $search_func;
@@ -2018,7 +2018,7 @@ sub do_search_function {
     if (!defined $args->{term}) {
         $self->_do_operator_function($args);
     }
-    
+
     if (!defined $args->{term}) {
         # This field and this type don't work together. Generally,
         # this should never be reached, because it should be handled
@@ -2074,12 +2074,12 @@ sub _get_operator_field_override {
     my $self = shift;
     my $cache = Bugzilla->request_cache;
 
-    return $cache->{operator_field_override} 
+    return $cache->{operator_field_override}
         if defined $cache->{operator_field_override};
 
     my %operator_field_override = %{ OPERATOR_FIELD_OVERRIDE() };
     Bugzilla::Hook::process('search_operator_field_override',
-                            { search => $self, 
+                            { search => $self,
                               operators => \%operator_field_override });
 
     $cache->{operator_field_override} = \%operator_field_override;
@@ -2115,7 +2115,7 @@ sub _quote_unless_numeric {
         $value = $args->{value};
     }
     my ($field, $operator) = @$args{qw(field operator)};
-    
+
     my $numeric_operator = !grep { $_ eq $operator } NON_NUMERIC_OPERATORS;
     my $numeric_field = $self->_chart_fields->{$field}->is_numeric;
     my $numeric_value = ($value =~ NUMBER_REGEX) ? 1 : 0;
@@ -2148,7 +2148,7 @@ sub _all_values {
     $split_on ||= qr/[\s,]+/;
     my $dbh = Bugzilla->dbh;
     my $all_values = $args->{all_values};
-    
+
     my @array;
     if (ref $all_values eq 'ARRAY') {
         @array = @$all_values;
@@ -2158,11 +2158,11 @@ sub _all_values {
         @array = map { trim($_) } @array;
         @array = grep { defined $_ and $_ ne '' } @array;
     }
-    
+
     if ($args->{field} eq 'resolution') {
         @array = map { $_ eq '---' ? '' : $_ } @array;
     }
-    
+
     return @array;
 }
 
@@ -2184,11 +2184,11 @@ sub _substring_terms {
 sub _word_terms {
     my ($self, $args) = @_;
     my $dbh = Bugzilla->dbh;
-    
+
     my @values = split(/[\s,]+/, $args->{value});
     @values = grep { defined $_ and $_ ne '' } @values;
     my @substring_terms = $self->_substring_terms($args);
-    
+
     my @terms;
     my $start = $dbh->WORD_START;
     my $end   = $dbh->WORD_END;
@@ -2206,7 +2206,7 @@ sub _word_terms {
         my $substring_term = shift @substring_terms;
         push(@terms, "$substring_term AND $regex_term");
     }
-    
+
     return @terms;
 }
 
@@ -2283,9 +2283,9 @@ sub SqlifyDate {
         elsif ($unit eq 'y') {
             if ($startof) {
                 return sprintf("%4d-01-01 00:00:00", $year+1900-$amount);
-            } 
+            }
             else {
-                return sprintf("%4d-%02d-%02d %02d:%02d:%02d", 
+                return sprintf("%4d-%02d-%02d %02d:%02d:%02d",
                                $year+1900-$amount, $month+1, $mday, $hour, $min, $sec);
             }
         }
@@ -2296,7 +2296,7 @@ sub SqlifyDate {
                 return sprintf("%4d-%02d-01 00:00:00", $year+1900, $month+1);
             }
             else {
-                return sprintf("%4d-%02d-%02d %02d:%02d:%02d", 
+                return sprintf("%4d-%02d-%02d %02d:%02d:%02d",
                                $year+1900, $month+1, $mday, $hour, $min, $sec);
             }
         }
@@ -2304,7 +2304,7 @@ sub SqlifyDate {
             # Special case for 'beginning of an hour'
             if ($startof) {
                 $fmt = "%Y-%m-%d %H:00:00";
-            } 
+            }
             $date -= 3600*$amount;
             return time2str($fmt, $date);
         }
@@ -2363,7 +2363,7 @@ sub _contact_exact_group {
         @$args{qw(value operator field chart_id joins)};
     my $dbh = Bugzilla->dbh;
     my $user = $self->_user;
-    
+
     # We already know $value will match this regexp, else we wouldn't be here.
     $value =~ /\%group\.([^%]+)%/;
     my $group_name = $1;
@@ -2416,7 +2416,7 @@ sub _cc_exact_group {
         @$args{qw(chart_id sequence joins operator value)};
     my $user = $self->_user;
     my $dbh = Bugzilla->dbh;
-    
+
     $value =~ m/%group\.([^%]+)%/;
     my $group = Bugzilla::Group->check({ name => $1, _error => 'invalid_group_name' });
     $group->check_members_are_visible();
@@ -2430,7 +2430,7 @@ sub _cc_exact_group {
         $chart_id = "CC$$sequence";
         $args->{sequence}++;
     }
-    
+
     my $cc_table = "cc_$chart_id";
     push(@$joins, { table => 'cc', as => $cc_table });
     my $group_table = "user_group_map_$chart_id";
@@ -2506,7 +2506,7 @@ sub _user_nonchanged {
         # Needed for setters.login_name and requestees.login_name.
         # Otherwise when we try to join "profiles" below, we'd get
         # something like "setters.login_name.login_name" in the "from".
-        $as =~ s/\./_/g;        
+        $as =~ s/\./_/g;
         # This helps implement the email1, email2, etc. parameters.
         if ($chart_id =~ /default/) {
             $as .= "_$sequence";
@@ -2541,7 +2541,7 @@ sub _user_nonchanged {
         push(@$joins, $join);
         $args->{full_field} = "$as.login_name";
     }
-    
+
     # We COALESCE fields that can be NULL, to make "not"-style operators
     # continue to work properly. For example, "qa_contact is not equal to bob"
     # should also show bugs where the qa_contact is NULL. With COALESCE,
@@ -2549,7 +2549,7 @@ sub _user_nonchanged {
     if ($is_nullable) {
         $args->{full_field} = "COALESCE($args->{full_field}, $null_alternate)";
     }
-    
+
     # For fields whose values are stored in other tables, negation (NOT)
     # only works properly if we put the condition into the JOIN instead
     # of the WHERE.
@@ -2557,7 +2557,7 @@ sub _user_nonchanged {
         # Using the last join works properly whether we're searching based
         # on userid or login_name.
         my $last_join = $joins->[-1];
-        
+
         # For negative operators, the system we're using here
         # only works properly if we reverse the operator and check IS NULL
         # in the WHERE.
@@ -2567,7 +2567,7 @@ sub _user_nonchanged {
         }
         $self->_do_operator_function($args);
         push(@{ $last_join->{extra} }, $args->{term});
-        
+
         # For login_name searches, we only want a single join.
         # So we create a subselect table out of our two joins. This makes
         # negation (NOT) work properly for values that are in other
@@ -2577,7 +2577,7 @@ sub _user_nonchanged {
             $last_join->{join} = 'INNER';
             my ($join_sql) = $self->_translate_join($last_join);
             my $first_join = $joins->[-1];
-            my $as = $first_join->{as};            
+            my $as = $first_join->{as};
             my $table = $first_join->{table};
             my $columns = "bug_id";
             $columns .= ",isprivate" if @{ $first_join->{extra} };
@@ -2591,7 +2591,7 @@ sub _user_nonchanged {
             $first_join->{as} = $new_as;
             $last_join = $first_join;
         }
-        
+
         # If we're joining the first table (we're using a pronoun and
         # searching by user id) then we need to check $other_table->{field}.
         my $check_field = $last_join->{as} . '.bug_id';
@@ -2608,7 +2608,7 @@ sub _user_nonchanged {
 sub _long_desc_changedby {
     my ($self, $args) = @_;
     my ($chart_id, $joins, $value) = @$args{qw(chart_id joins value)};
-    
+
     my $table = "longdescs_$chart_id";
     push(@$joins, { table => 'longdescs', as => $table });
     my $user_id = login_to_id($value, THROW_ERROR);
@@ -2620,7 +2620,7 @@ sub _long_desc_changedbefore_after {
     my ($chart_id, $operator, $value, $joins) =
         @$args{qw(chart_id operator value joins)};
     my $dbh = Bugzilla->dbh;
-    
+
     my $sql_operator = ($operator =~ /before/) ? '<=' : '>=';
     my $table = "longdescs_$chart_id";
     my $sql_date = $dbh->quote(SqlifyDate($value));
@@ -2700,7 +2700,7 @@ sub _content_matches {
     my $comments_col = "comments";
     $comments_col = "comments_noprivate" unless $self->_user->is_insider;
     push(@$joins, { table => 'bugs_fulltext', as => $table });
-    
+
     # Create search terms to add to the SELECT and WHERE clauses.
     my ($term1, $rterm1) =
         $dbh->sql_fulltext_search("$table.$comments_col", $value);
@@ -2715,10 +2715,10 @@ sub _content_matches {
         $term = "NOT($term)";
     }
     $args->{term} = $term;
-    
+
     # In order to sort by relevance (in case the user requests it),
     # we SELECT the relevance value so we can add it to the ORDER BY
-    # clause. Every time a new fulltext chart isadded, this adds more 
+    # clause. Every time a new fulltext chart isadded, this adds more
     # terms to the relevance sql.
     #
     # We build the relevance SQL by modifying the COLUMNS list directly,
@@ -2747,7 +2747,7 @@ sub _long_descs_count {
 sub _work_time_changedby {
     my ($self, $args) = @_;
     my ($chart_id, $joins, $value) = @$args{qw(chart_id joins value)};
-    
+
     my $table = "longdescs_$chart_id";
     push(@$joins, { table => 'longdescs', as => $table });
     my $user_id = login_to_id($value, THROW_ERROR);
@@ -2759,7 +2759,7 @@ sub _work_time_changedbefore_after {
     my ($chart_id, $operator, $value, $joins) =
         @$args{qw(chart_id operator value joins)};
     my $dbh = Bugzilla->dbh;
-    
+
     my $table = "longdescs_$chart_id";
     my $sql_operator = ($operator =~ /before/) ? '<=' : '>=';
     my $sql_date = $dbh->quote(SqlifyDate($value));
@@ -2770,7 +2770,7 @@ sub _work_time_changedbefore_after {
                   "$table.bug_when $sql_operator $sql_date"],
     };
     push(@$joins, $join);
-    
+
     $args->{term} = "$table.bug_when IS NOT NULL";
 }
 
@@ -2782,7 +2782,7 @@ sub _work_time {
 
 sub _percentage_complete {
     my ($self, $args) = @_;
-    
+
     $args->{full_field} = $self->COLUMNS->{percentage_complete}->{name};
 
     # We need actual_time in _select_columns, otherwise we can't use
@@ -2815,7 +2815,7 @@ sub _invalid_operator {
 sub _days_elapsed {
     my ($self, $args) = @_;
     my $dbh = Bugzilla->dbh;
-    
+
     $args->{full_field} = "(" . $dbh->sql_to_days('NOW()') . " - " .
                                 $dbh->sql_to_days('bugs.delta_ts') . ")";
 }
@@ -2837,7 +2837,7 @@ sub _assignee_last_login {
 
 sub _component_nonchanged {
     my ($self, $args) = @_;
-    
+
     $args->{full_field} = "components.name";
     $self->_do_operator_function($args);
     my $term = $args->{term};
@@ -2880,11 +2880,11 @@ sub _product_nonchanged {
 sub _classification_nonchanged {
     my ($self, $args) = @_;
     my $joins = $args->{joins};
-    
+
     # This joins the right tables for us.
     $self->_add_extra_column('product');
-    
-    # Generate the restriction condition    
+
+    # Generate the restriction condition
     $args->{full_field} = "classifications.name";
     $self->_do_operator_function($args);
     my $term = $args->{term};
@@ -2942,12 +2942,12 @@ sub _owner_idle_time_greater_less {
     my ($chart_id, $joins, $value, $operator) =
         @$args{qw(chart_id joins value operator)};
     my $dbh = Bugzilla->dbh;
-    
+
     my $table = "idle_$chart_id";
     my $quoted = $dbh->quote(SqlifyDate($value));
-    
+
     my $ld_table = "comment_$table";
-    my $act_table = "activity_$table";    
+    my $act_table = "activity_$table";
     my $comments_join = {
         table => 'longdescs',
         as    => $ld_table,
@@ -2962,9 +2962,9 @@ sub _owner_idle_time_greater_less {
         to    => 'who',
         extra => ["$act_table.bug_when > $quoted"]
     };
-    
+
     push(@$joins, $comments_join, $activity_join);
-    
+
     if ($operator =~ /greater/) {
         $args->{term} =
             "$ld_table.who IS NULL AND $act_table.who IS NULL";
@@ -2987,14 +2987,14 @@ sub _multiselect_multiple {
     my ($chart_id, $field, $operator, $value)
         = @$args{qw(chart_id field operator value)};
     my $dbh = Bugzilla->dbh;
-    
+
     # We want things like "cf_multi_select=two+words" to still be
     # considered a search for two separate words, unless we're using
     # anyexact. (_all_values would consider that to be one "word" with a
     # space in it, because it's not in the Boolean Charts).
     my @words = $operator eq 'anyexact' ? $self->_all_values($args)
                                         : split(/[\s,]+/, $value);
-    
+
     my @terms;
     foreach my $word (@words) {
         next if $word eq '';
@@ -3002,7 +3002,7 @@ sub _multiselect_multiple {
         $args->{quoted} = $dbh->quote($word);
         push(@terms, $self->_multiselect_term($args));
     }
-    
+
     # The spacing in the joins helps make the resulting SQL more readable.
     if ($operator =~ /^any/) {
         $args->{term} = join("\n        OR ", @terms);
@@ -3077,7 +3077,7 @@ sub _multiselect_table {
     my ($self, $args) = @_;
     my ($field, $chart_id) = @$args{qw(field chart_id)};
     my $dbh = Bugzilla->dbh;
-    
+
     if ($field eq 'keywords') {
         $args->{full_field} = 'keyworddefs.name';
         return "keywords INNER JOIN keyworddefs".
@@ -3261,7 +3261,7 @@ sub _casesubstring {
     my ($self, $args) = @_;
     my ($full_field, $quoted) = @$args{qw(full_field quoted)};
     my $dbh = Bugzilla->dbh;
-    
+
     $args->{term} = $dbh->sql_position($quoted, $full_field) . " > 0";
 }
 
@@ -3269,7 +3269,7 @@ sub _substring {
     my ($self, $args) = @_;
     my ($full_field, $quoted) = @$args{qw(full_field quoted)};
     my $dbh = Bugzilla->dbh;
-    
+
     # XXX This should probably be changed to just use LIKE
     $args->{term} = $dbh->sql_iposition($quoted, $full_field) . " > 0";
 }
@@ -3278,7 +3278,7 @@ sub _notsubstring {
     my ($self, $args) = @_;
     my ($full_field, $quoted) = @$args{qw(full_field quoted)};
     my $dbh = Bugzilla->dbh;
-    
+
     # XXX This should probably be changed to just use NOT LIKE
     $args->{term} = $dbh->sql_iposition($quoted, $full_field) . " = 0";
 }
@@ -3287,7 +3287,7 @@ sub _regexp {
     my ($self, $args) = @_;
     my ($full_field, $quoted) = @$args{qw(full_field quoted)};
     my $dbh = Bugzilla->dbh;
-    
+
     $args->{term} = $dbh->sql_regexp($full_field, $quoted);
 }
 
@@ -3295,7 +3295,7 @@ sub _notregexp {
     my ($self, $args) = @_;
     my ($full_field, $quoted) = @$args{qw(full_field quoted)};
     my $dbh = Bugzilla->dbh;
-    
+
     $args->{term} = $dbh->sql_not_regexp($full_field, $quoted);
 }
 
@@ -3303,10 +3303,10 @@ sub _anyexact {
     my ($self, $args) = @_;
     my ($field, $full_field) = @$args{qw(field full_field)};
     my $dbh = Bugzilla->dbh;
-    
+
     my @list = $self->_all_values($args, ',');
     @list = map { $self->_quote_unless_numeric($args, $_) } @list;
-    
+
     if (@list) {
         $args->{term} = $dbh->sql_in($full_field, \@list);
     }
@@ -3368,14 +3368,14 @@ sub _changedbefore_changedafter {
 
     my $field_object = $self->_chart_fields->{$field}
         || ThrowCodeError("invalid_field_name", { field => $field });
-    
+
     # Asking when creation_ts changed is just asking when the bug was created.
     if ($field_object->name eq 'creation_ts') {
         $args->{operator} =
             $operator eq 'changedbefore' ? 'lessthaneq' : 'greaterthaneq';
         return $self->_do_operator_function($args);
     }
-    
+
     my $sql_operator = ($operator =~ /before/) ? '<=' : '>=';
     my $field_id = $field_object->id;
     # Charts on changed* fields need to be field-specific. Otherwise,
@@ -3399,7 +3399,7 @@ sub _changedfrom_changedto {
     my ($self, $args) = @_;
     my ($chart_id, $joins, $field, $operator, $quoted) =
         @$args{qw(chart_id joins field operator quoted)};
-    
+
     my $column = ($operator =~ /from/) ? 'removed' : 'added';
     my $field_object = $self->_chart_fields->{$field}
         || ThrowCodeError("invalid_field_name", { field => $field });
@@ -3421,7 +3421,7 @@ sub _changedby {
     my ($self, $args) = @_;
     my ($chart_id, $joins, $field, $operator, $value) =
         @$args{qw(chart_id joins field operator value)};
-    
+
     my $field_object = $self->_chart_fields->{$field}
         || ThrowCodeError("invalid_field_name", { field => $field });
     my $field_id = $field_object->id;
@@ -3519,8 +3519,8 @@ sub _translate_old_column {
     elsif ($column =~ /map_(\w+?)s?\.(login_)?name/i) {
         return $1;
     }
-    
-    # If it doesn't match the regexps above, check to see if the old 
+
+    # If it doesn't match the regexps above, check to see if the old
     # SQL fragment matches the SQL of an existing column
     foreach my $key (%{ $self->COLUMNS }) {
         next unless exists $self->COLUMNS->{$key}->{name};

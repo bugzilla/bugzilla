@@ -22,7 +22,7 @@ use constant requires_persistence  => 1;
 use constant requires_verification => 1;
 use constant user_can_create_account => 0;
 use constant is_automatic => 0;
-use constant extern_id_used => 0; 
+use constant extern_id_used => 0;
 
 sub new {
     my ($class) = @_;
@@ -87,7 +87,7 @@ Returns:     Never Returns.
 
 =head1 INFO METHODS
 
-These are methods that describe the capabilities of this 
+These are methods that describe the capabilities of this
 C<Bugzilla::Auth::Login> object. These are all no-parameter
 methods that return either C<true> or C<false>.
 

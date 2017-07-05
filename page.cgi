@@ -70,14 +70,14 @@ if ($id) {
         Bugzilla->metrics->name("page.cgi $id");
     }
 
-    my %vars = ( 
+    my %vars = (
       quicksearch_field_names => \&quicksearch_field_names,
     );
-    Bugzilla::Hook::process('page_before_template', 
+    Bugzilla::Hook::process('page_before_template',
                             { page_id => $id, vars => \%vars });
 
     my $format = $template->get_format("pages/$1", undef, $2);
-    
+
     $cgi->param('id', $id);
 
     print $cgi->header($format->{'ctype'});

@@ -88,7 +88,7 @@ my $sth_schedules_by_event = $dbh->prepare(
 my $fromaddress = Bugzilla->params->{'mailfrom'};
 
 # get the current date and time
-my ($now_sec, $now_minute, $now_hour, $now_day, $now_month, $now_year, 
+my ($now_sec, $now_minute, $now_hour, $now_day, $now_month, $now_year,
     $now_weekday) = localtime;
 # Convert year to two digits
 $now_year = sprintf("%02d", $now_year % 100);
@@ -148,7 +148,7 @@ while (my ($schedule_id, $day, $time) = $sched_h->fetchrow_array) {
         # the target time is less than the current time
         else { # set it for the next applicable day
             $day = &get_next_date($day);
-            my $run_next = $dbh->sql_date_math('(' 
+            my $run_next = $dbh->sql_date_math('('
                 . $dbh->sql_date_math('CURRENT_DATE', '+', '?', 'DAY')
                 . ')', '+', '?', 'HOUR');
             $sth = $dbh->prepare("UPDATE whine_schedules " .
@@ -166,8 +166,8 @@ while (my ($schedule_id, $day, $time) = $sched_h->fetchrow_array) {
         # midnight
         my $target_time = ($time =~ /^\d+$/) ? $time : 0;
 
-       my $run_next = $dbh->sql_date_math('(' 
-            . $dbh->sql_date_math('CURRENT_DATE', '+', '?', 'DAY') 
+       my $run_next = $dbh->sql_date_math('('
+            . $dbh->sql_date_math('CURRENT_DATE', '+', '?', 'DAY')
             . ')', '+', '?', 'HOUR');
         $sth = $dbh->prepare("UPDATE whine_schedules " .
                                 "SET run_next = $run_next
@@ -187,7 +187,7 @@ $sched_h->finish();
 #   5. Return an event hashref
 #
 # The event hashref consists of:
-#   eventid - ID of the event 
+#   eventid - ID of the event
 #   author  - user object for the event's creator
 #   users   - array of user objects for recipients
 #   subject - Subject line for the email
@@ -592,7 +592,7 @@ sub reset_timer {
 
     if ($minute_offset > 0) {
         # Scheduling is done in terms of whole minutes.
-        
+
         my $next_run = $dbh->selectrow_array(
             'SELECT ' . $dbh->sql_date_math('NOW()', '+', '?', 'MINUTE'),
             undef, $minute_offset);

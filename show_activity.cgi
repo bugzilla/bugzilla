@@ -24,7 +24,7 @@ my $vars = {};
 # Begin Data/Security Validation
 ###############################################################################
 
-# Check whether or not the user is currently logged in. 
+# Check whether or not the user is currently logged in.
 Bugzilla->login();
 
 # Make sure the bug ID is a positive integer representing an existing

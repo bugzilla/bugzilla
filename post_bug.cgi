@@ -70,7 +70,7 @@ Bugzilla::User::match_field($user_match_fields);
 if (defined $cgi->param('maketemplate')) {
     $vars->{'url'} = $cgi->canonicalise_query('token');
     $vars->{'short_desc'} = $cgi->param('short_desc');
-    
+
     print $cgi->header();
     $template->process("bug/create/make-template.html.tmpl", $vars)
       || ThrowTemplateError($template->error());
@@ -208,7 +208,7 @@ if ($data_fh || $attach_text) {
         $attachment->set_flags($flags, $new_flags);
         $attachment->update($timestamp);
         my $comment = $bug->comments->[0];
-        $comment->set_all({ type => CMT_ATTACHMENT_CREATED, 
+        $comment->set_all({ type => CMT_ATTACHMENT_CREATED,
                             extra_data => $attachment->id });
         $comment->update();
     }

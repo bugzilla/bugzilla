@@ -105,7 +105,7 @@ if ($action eq 'new') {
     check_token_data($token, 'add_field_value');
 
     my $created_value = Bugzilla::Field::Choice->type($field)->create({
-        value   => scalar $cgi->param('value'), 
+        value   => scalar $cgi->param('value'),
         sortkey => scalar $cgi->param('sortkey'),
         is_open => scalar $cgi->param('is_open'),
         visibility_value_id => scalar $cgi->param('visibility_value_id'),

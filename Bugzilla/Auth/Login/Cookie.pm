@@ -112,9 +112,9 @@ sub get_login_info {
                 }
             }
 
-            # If we logged in successfully, then update the lastused 
+            # If we logged in successfully, then update the lastused
             # time on the login cookie
-            $dbh->do("UPDATE logincookies SET lastused = NOW() 
+            $dbh->do("UPDATE logincookies SET lastused = NOW()
                        WHERE cookie = ?", undef, $login_cookie);
             return { user_id => $user_id };
         }

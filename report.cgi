@@ -28,7 +28,7 @@ my $vars = {};
 # Go straight back to query.cgi if we are adding a boolean chart.
 if (grep(/^cmd-/, $cgi->param())) {
     my $params = $cgi->canonicalise_query("format", "ctype");
-    my $location = "query.cgi?format=" . $cgi->param('query_format') . 
+    my $location = "query.cgi?format=" . $cgi->param('query_format') .
       ($params ? "&$params" : "");
 
     print $cgi->redirect($location);
@@ -74,11 +74,11 @@ if (defined($height)) {
 
 my $formatparam = $cgi->param('format') || '';
 
-# These shenanigans are necessary to make sure that both vertical and 
+# These shenanigans are necessary to make sure that both vertical and
 # horizontal 1D tables convert to the correct dimension when you ask to
 # display them as some sort of chart.
 if ($formatparam eq "table") {
-    if ($col_field && !$row_field) {    
+    if ($col_field && !$row_field) {
         # 1D *tables* should be displayed vertically (with a row_field only)
         $row_field = $col_field;
         $col_field = '';
@@ -100,13 +100,13 @@ else {
 my $valid_columns = Bugzilla::Search::REPORT_COLUMNS;
 
 # Validate the values in the axis fields or throw an error.
-!$row_field 
+!$row_field
   || ($valid_columns->{$row_field} && trick_taint($row_field))
   || ThrowCodeError("report_axis_invalid", {fld => "x", val => $row_field});
-!$col_field 
+!$col_field
   || ($valid_columns->{$col_field} && trick_taint($col_field))
   || ThrowCodeError("report_axis_invalid", {fld => "y", val => $col_field});
-!$tbl_field 
+!$tbl_field
   || ($valid_columns->{$tbl_field} && trick_taint($tbl_field))
   || ThrowCodeError("report_axis_invalid", {fld => "z", val => $tbl_field});
 
@@ -115,7 +115,7 @@ my @axis_fields = grep { $_ } ($row_field, $col_field, $tbl_field);
 # Clone the params, so that Bugzilla::Search can modify them
 my $params = new Bugzilla::CGI($cgi);
 my $search = new Bugzilla::Search(
-    fields => \@axis_fields, 
+    fields => \@axis_fields,
     params => scalar $params->Vars,
     allow_unlimited => 1,
 );
@@ -126,7 +126,7 @@ $::SIG{PIPE} = 'DEFAULT';
 Bugzilla->switch_to_shadow_db();
 my ($results, $extra_data) = $search->data;
 
-# We have a hash of hashes for the data itself, and a hash to hold the 
+# We have a hash of hashes for the data itself, and a hash to hold the
 # row/col/table names.
 my %data;
 my %names;
@@ -150,7 +150,7 @@ foreach my $result (@$results) {
     $names{"col"}{$col}++;
     $names{"row"}{$row}++;
     $names{"tbl"}{$tbl}++;
-    
+
     $col_isnumeric &&= ($col =~ /^-?\d+(\.\d+)?$/o);
     $row_isnumeric &&= ($row =~ /^-?\d+(\.\d+)?$/o);
     $tbl_isnumeric &&= ($tbl =~ /^-?\d+(\.\d+)?$/o);
@@ -164,7 +164,7 @@ my @tbl_names = get_names($names{"tbl"}, $tbl_isnumeric, $tbl_field);
 # gathered everything into the hashes and made sure we know the size of the
 # data, we reformat it into an array of arrays of arrays of data.
 push(@tbl_names, "-total-") if (scalar(@tbl_names) > 1);
-    
+
 my @image_data;
 foreach my $tbl (@tbl_names) {
     my @tbl_data;
@@ -177,7 +177,7 @@ foreach my $tbl (@tbl_names) {
             if ($tbl ne "-total-") {
                 # This is a bit sneaky. We spend every loop except the last
                 # building up the -total- data, and then last time round,
-                # we process it as another tbl, and push() the total values 
+                # we process it as another tbl, and push() the total values
                 # into the image_data array.
                 $data{"-total-"}{$col}{$row} += $data{$tbl}{$col}{$row};
             }
@@ -185,7 +185,7 @@ foreach my $tbl (@tbl_names) {
 
         push(@tbl_data, \@col_data);
     }
-    
+
     unshift(@image_data, \@tbl_data);
 }
 
@@ -231,7 +231,7 @@ if ($action eq "wrap") {
     $vars->{'format'} = $formatparam;
     $formatparam = '';
 
-    # We need to keep track of the defined restrictions on each of the 
+    # We need to keep track of the defined restrictions on each of the
     # axes, because buglistbase, below, throws them away. Without this, we
     # get buglistlinks wrong if there is a restriction on an axis field.
     $vars->{'col_vals'} = get_field_restrictions($col_field);
@@ -243,9 +243,9 @@ if ($action eq "wrap") {
     $vars->{'buglistbase'} = $cgi->canonicalise_query(
                                  "x_axis_field", "y_axis_field", "z_axis_field",
                                "ctype", "format", "query_format", @axis_fields);
-    $vars->{'imagebase'}   = $cgi->canonicalise_query( 
+    $vars->{'imagebase'}   = $cgi->canonicalise_query(
                     $tbl_field, "action", "ctype", "format", "width", "height");
-    $vars->{'switchbase'}  = $cgi->canonicalise_query( 
+    $vars->{'switchbase'}  = $cgi->canonicalise_query(
                 "query_format", "action", "ctype", "format", "width", "height");
     $vars->{'data'} = \%data;
 }
@@ -299,18 +299,18 @@ sub get_names {
 
     # _realname fields aren't real Bugzilla::Field objects, but they are a
     # valid axis, so we don't vailidate them as Bugzilla::Field objects.
-    $field = Bugzilla::Field->check($field_name) 
+    $field = Bugzilla::Field->check($field_name)
         if ($field_name && $field_name !~ /_realname$/);
-    
+
     if ($field && $field->is_select) {
         foreach my $value (@{$field->legal_values}) {
             push(@sorted, $value->name) if $names->{$value->name};
         }
         unshift(@sorted, '---') if $field_name eq 'resolution';
         @sorted = uniq @sorted;
-    }  
+    }
     elsif ($isnumeric) {
-        # It's not a field we are preserving the order of, so sort it 
+        # It's not a field we are preserving the order of, so sort it
         # numerically...
         @sorted = sort { $a <=> $b } keys %$names;
     }
@@ -318,7 +318,7 @@ sub get_names {
         # ...or alphabetically, as appropriate.
         @sorted = sort keys %$names;
     }
-    
+
     return @sorted;
 }
 

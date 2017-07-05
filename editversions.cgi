@@ -143,7 +143,7 @@ if ($action eq 'del') {
 
 if ($action eq 'delete') {
     check_token_data($token, 'delete_version');
-    my $version = Bugzilla::Version->check({ product => $product, 
+    my $version = Bugzilla::Version->check({ product => $product,
                                              name    => $version_name });
     $version->remove_from_db;
     delete_token($token);

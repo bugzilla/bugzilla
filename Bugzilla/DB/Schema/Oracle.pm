@@ -38,7 +38,7 @@ sub _initialize {
     $self->{db_specific} = {
 
         BOOLEAN =>      'integer',
-        FALSE =>        '0', 
+        FALSE =>        '0',
         TRUE =>         '1',
 
         INT1 =>         'integer',
@@ -77,8 +77,8 @@ sub get_table_ddl {
     while (@fields) {
         my $field_name = shift @fields;
         my $field_info = shift @fields;
-        # Create triggers to deal with empty string. 
-        if ( $field_info->{TYPE} =~ /varchar|TEXT/i 
+        # Create triggers to deal with empty string.
+        if ( $field_info->{TYPE} =~ /varchar|TEXT/i
                 && $field_info->{NOTNULL} ) {
              push (@ddl, _get_notnull_trigger_ddl($table, $field_name));
         }
@@ -91,21 +91,21 @@ sub get_table_ddl {
 
 } #eosub--get_table_ddl
 
-# Extend superclass method to create Oracle Text indexes if index type 
+# Extend superclass method to create Oracle Text indexes if index type
 # is FULLTEXT from schema. Returns a "create index" SQL statement.
 sub _get_create_index_ddl {
 
     my ($self, $table_name, $index_name, $index_fields, $index_type) = @_;
     $index_name = "idx_" . $self->_hash_identifier($index_name);
     if ($index_type eq 'FULLTEXT') {
-        my $sql = "CREATE INDEX $index_name ON $table_name (" 
+        my $sql = "CREATE INDEX $index_name ON $table_name ("
                   . join(',',@$index_fields)
                   . ") INDEXTYPE IS CTXSYS.CONTEXT "
                   . " PARAMETERS('LEXER BZ_LEX SYNC(ON COMMIT)')" ;
         return $sql;
     }
 
-    return($self->SUPER::_get_create_index_ddl($table_name, $index_name, 
+    return($self->SUPER::_get_create_index_ddl($table_name, $index_name,
                                                $index_fields, $index_type));
 
 }
@@ -118,7 +118,7 @@ sub get_drop_index_ddl {
     return $self->SUPER::get_drop_index_ddl($table, $name);
 }
 
-# Oracle supports the use of FOREIGN KEY integrity constraints 
+# Oracle supports the use of FOREIGN KEY integrity constraints
 # to define the referential integrity actions, including:
 # - Update and delete No Action (default)
 # - Delete CASCADE
@@ -182,7 +182,7 @@ sub _get_fk_name {
     my $to_column = $references->{COLUMN};
     my $fk_name   = "${table}_${column}_${to_table}_${to_column}";
     $fk_name      = "fk_" . $self->_hash_identifier($fk_name);
-    
+
     return $fk_name;
 }
 
@@ -206,7 +206,7 @@ sub get_add_column_ddl {
     }
     else {
         @sql = $self->SUPER::get_add_column_ddl(@_);
-        # Create triggers to deal with empty string. 
+        # Create triggers to deal with empty string.
         if ($definition->{TYPE} =~ /varchar|TEXT/i && $definition->{NOTNULL}) {
             push(@sql, _get_notnull_trigger_ddl($table, $column));
         }
@@ -224,7 +224,7 @@ sub get_alter_column_ddl {
 
     # If the types have changed, we have to deal with that.
     if (uc(trim($old_def->{TYPE})) ne uc(trim($new_def->{TYPE}))) {
-        push(@statements, $self->_get_alter_type_sql($table, $column, 
+        push(@statements, $self->_get_alter_type_sql($table, $column,
                                                      $new_def, $old_def));
     }
 
@@ -244,8 +244,8 @@ sub get_alter_column_ddl {
                         . " DEFAULT NULL");
     }
     # If we went from no default to a default, or we changed the default.
-    elsif ( (defined $default && !defined $default_old) || 
-            ($default ne $default_old) ) 
+    elsif ( (defined $default && !defined $default_old) ||
+            ($default ne $default_old) )
     {
         push(@statements, "ALTER TABLE $table MODIFY $column "
                          . " DEFAULT $default");
@@ -256,8 +256,8 @@ sub get_alter_column_ddl {
         my $setdefault;
         # Handle any fields that were NULL before, if we have a default,
         $setdefault = $default if defined $default;
-        # But if we have a set_nulls_to, that overrides the DEFAULT 
-        # (although nobody would usually specify both a default and 
+        # But if we have a set_nulls_to, that overrides the DEFAULT
+        # (although nobody would usually specify both a default and
         # a set_nulls_to.)
         $setdefault = $set_nulls_to if defined $set_nulls_to;
         if (defined $setdefault) {
@@ -275,7 +275,7 @@ sub get_alter_column_ddl {
         push(@statements, "ALTER TABLE $table MODIFY $column"
                         . " NULL");
         push(@statements, "DROP TRIGGER ${table}_${column}")
-                           if $new_def->{TYPE} =~ /varchar|text/i 
+                           if $new_def->{TYPE} =~ /varchar|text/i
                              && $old_def->{TYPE} =~ /varchar|text/i;
     }
 
@@ -296,34 +296,34 @@ sub _get_alter_type_sql {
     my @statements;
 
     my $type = $new_def->{TYPE};
-    $type = $self->{db_specific}->{$type} 
+    $type = $self->{db_specific}->{$type}
         if exists $self->{db_specific}->{$type};
 
     if ($type =~ /serial/i && $old_def->{TYPE} !~ /serial/i) {
-        die("You cannot specify a DEFAULT on a SERIAL-type column.") 
+        die("You cannot specify a DEFAULT on a SERIAL-type column.")
             if $new_def->{DEFAULT};
     }
 
-    if ( ($old_def->{TYPE} =~ /LONGTEXT/i && $new_def->{TYPE} !~ /LONGTEXT/i) 
+    if ( ($old_def->{TYPE} =~ /LONGTEXT/i && $new_def->{TYPE} !~ /LONGTEXT/i)
          || ($old_def->{TYPE} !~ /LONGTEXT/i && $new_def->{TYPE} =~ /LONGTEXT/i)
        ) {
-        # LONG to VARCHAR or VARCHAR to LONG is not allowed in Oracle, 
+        # LONG to VARCHAR or VARCHAR to LONG is not allowed in Oracle,
         # just a way to work around.
         # Determine whether column_temp is already exist.
         my $dbh=Bugzilla->dbh;
         my $column_exist = $dbh->selectcol_arrayref(
-                          "SELECT CNAME FROM COL WHERE TNAME = UPPER(?) AND 
+                          "SELECT CNAME FROM COL WHERE TNAME = UPPER(?) AND
                              CNAME = UPPER(?)", undef,$table,$column . "_temp");
         if(!@$column_exist) {
-        push(@statements, 
-            "ALTER TABLE $table ADD ${column}_temp $type");  
+        push(@statements,
+            "ALTER TABLE $table ADD ${column}_temp $type");
         }
         push(@statements, "UPDATE $table SET ${column}_temp = $column");
         push(@statements, "COMMIT");
         push(@statements, "ALTER TABLE $table DROP COLUMN $column");
-        push(@statements, 
+        push(@statements,
             "ALTER TABLE $table RENAME COLUMN ${column}_temp TO $column");
-    } else {  
+    } else {
         push(@statements, "ALTER TABLE $table MODIFY $column $type");
     }
 
@@ -337,15 +337,15 @@ sub _get_alter_type_sql {
         push(@statements, "DROP SEQUENCE ${table}_${column}_SEQ");
         push(@statements, "DROP TRIGGER ${table}_${column}_TR");
     }
-    
+
     # If this column is changed to type TEXT/VARCHAR, we need to deal with
     # empty string.
-    if ( $old_def->{TYPE} !~ /varchar|text/i 
-            && $new_def->{TYPE} =~ /varchar|text/i 
+    if ( $old_def->{TYPE} !~ /varchar|text/i
+            && $new_def->{TYPE} =~ /varchar|text/i
             && $new_def->{NOTNULL} )
     {
              push (@statements, _get_notnull_trigger_ddl($table, $column));
-    } 
+    }
     # If this column is no longer TEXT/VARCHAR, we need to drop the trigger
     # that went along with it.
     if ( $old_def->{TYPE} =~ /varchar|text/i
@@ -353,7 +353,7 @@ sub _get_alter_type_sql {
             && $new_def->{TYPE} !~ /varchar|text/i )
     {
         push(@statements, "DROP TRIGGER ${table}_${column}");
-    } 
+    }
     return @statements;
 }
 
@@ -495,13 +495,13 @@ sub _get_create_trigger_ddl {
     return $serial_sql;
 }
 
-sub get_set_serial_sql { 
-    my ($self, $table, $column, $value) = @_; 
+sub get_set_serial_sql {
+    my ($self, $table, $column, $value) = @_;
     my @sql;
     my $seq_name = "${table}_${column}_SEQ";
     push(@sql, "DROP SEQUENCE ${seq_name}");
-    push(@sql, $self->_get_create_seq_ddl($table, $column, $value));       
+    push(@sql, $self->_get_create_seq_ddl($table, $column, $value));
     return @sql;
-} 
+}
 
 1;

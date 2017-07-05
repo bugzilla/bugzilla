@@ -62,35 +62,35 @@ sub bug_link_all {
 sub bug_link_open {
     my $product = shift;
 
-    return correct_urlbase() . 'buglist.cgi?product=' . url_quote($product->name) . 
+    return correct_urlbase() . 'buglist.cgi?product=' . url_quote($product->name) .
         "&bug_status=__open__";
 }
 
 sub bug_link_closed {
     my $product = shift;
 
-    return correct_urlbase() . 'buglist.cgi?product=' . url_quote($product->name) . 
+    return correct_urlbase() . 'buglist.cgi?product=' . url_quote($product->name) .
         "&bug_status=__closed__";
 }
 
 sub bug_milestone_link_total {
     my ($product, $milestone) = @_;
 
-    return correct_urlbase() . 'buglist.cgi?product=' . url_quote($product->name) . 
+    return correct_urlbase() . 'buglist.cgi?product=' . url_quote($product->name) .
         "&target_milestone=" . url_quote($milestone->name);
 }
 
 sub bug_milestone_link_open {
     my ($product, $milestone) = @_;
 
-    return correct_urlbase() . 'buglist.cgi?product=' . url_quote($product->name) . 
+    return correct_urlbase() . 'buglist.cgi?product=' . url_quote($product->name) .
         "&target_milestone=" . url_quote($milestone->name) . "&bug_status=__open__";
 }
 
 sub bug_milestone_link_closed {
     my ($product, $milestone) = @_;
 
-    return correct_urlbase() . 'buglist.cgi?product=' . url_quote($product->name) . 
+    return correct_urlbase() . 'buglist.cgi?product=' . url_quote($product->name) .
         "&target_milestone=" . url_quote($milestone->name) . "&bug_status=__closed__";
 }
 

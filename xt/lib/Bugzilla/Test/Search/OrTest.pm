@@ -80,7 +80,7 @@ sub invalid_field_operator_combination {
 }
 sub search_known_broken {
     my ($self) = @_;
-    return $self->_join_messages('search_known_broken');    
+    return $self->_join_messages('search_known_broken');
 }
 
 sub _join_messages {
@@ -111,7 +111,7 @@ sub contains_known_broken {
         or ( !$self->bug_is_contained($number)
              and $self->_bug_will_actually_be_contained($number) ) )
     {
-        my @messages = map { $_->contains_known_broken($number) } 
+        my @messages = map { $_->contains_known_broken($number) }
                            $self->field_tests;
         @messages = grep { $_ } @messages;
         # Sometimes, with things that break because of no_criteria, there won't

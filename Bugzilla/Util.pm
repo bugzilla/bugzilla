@@ -228,9 +228,9 @@ sub xml_quote {
     $var =~ s/>/\&gt;/g;
     $var =~ s/\"/\&quot;/g;
     $var =~ s/\'/\&apos;/g;
-    
+
     # the following nukes characters disallowed by the XML 1.0
-    # spec, Production 2.2. 1.0 declares that only the following 
+    # spec, Production 2.2. 1.0 declares that only the following
     # are valid:
     # (#x9 | #xA | #xD | [#x20-#xD7FF] | [#xE000-#xFFFD] | [#x10000-#x10FFFF])
     $var =~ s/([\x{0001}-\x{0008}]|
@@ -262,7 +262,7 @@ sub do_ssl_redirect_if_required {
     return if !Bugzilla->params->{'ssl_redirect'};
 
     my $sslbase = Bugzilla->params->{'sslbase'};
-    
+
     # If we're already running under SSL, never redirect.
     return if uc($ENV{HTTPS} || '') eq 'ON';
     # Never redirect if there isn't an sslbase.
@@ -496,7 +496,7 @@ sub wrap_hard {
     local $Text::Wrap::columns = $columns;
     local $Text::Wrap::unexpand = 0;
     local $Text::Wrap::huge = 'wrap';
-    
+
     my $wrapped = wrap('', '', $string);
     chomp($wrapped);
     return $wrapped;
@@ -508,7 +508,7 @@ sub format_time {
     # If $format is not set, try to guess the correct date format.
     if (!$format) {
         if (!ref $date
-            && $date =~ /^(\d{4})[-\.](\d{2})[-\.](\d{2}) (\d{2}):(\d{2})(:(\d{2}))?$/) 
+            && $date =~ /^(\d{4})[-\.](\d{2})[-\.](\d{2}) (\d{2}):(\d{2})(:(\d{2}))?$/)
         {
             my $sec = $7;
             if (defined $sec) {
@@ -572,7 +572,7 @@ sub datetime_from {
         second => defined($time[0]) ? int($time[0]) : undef,
         # If a timezone was specified, use it. Otherwise, use the
         # local timezone.
-        time_zone => Bugzilla->local_timezone->offset_as_string($time[6]) 
+        time_zone => Bugzilla->local_timezone->offset_as_string($time[6])
                      || Bugzilla->local_timezone,
     );
 
@@ -639,7 +639,7 @@ sub bz_crypt {
     }
 
     # We append the algorithm used to the string. This is good because then
-    # we can change the algorithm being used, in the future, without 
+    # we can change the algorithm being used, in the future, without
     # disrupting the validation of existing passwords. Also, this tells
     # us if a password is using the old "crypt" method of hashing passwords,
     # because the algorithm will be missing from the string.
@@ -661,7 +661,7 @@ sub bz_crypt {
         # tainted. See http://rt.perl.org/rt3/Public/Bug/Display.html?id=59998
         unless(tainted($password) || tainted($salt)) {
             untaint($crypted_password);
-        } 
+        }
     }
     else {
         my $hasher = Digest->new($algorithm);
@@ -717,7 +717,7 @@ sub validate_date {
     if ($ts) {
         $date2 = time2str("%Y-%m-%d", $ts);
 
-        $date =~ s/(\d+)-0*(\d+?)-0*(\d+?)/$1-$2-$3/; 
+        $date =~ s/(\d+)-0*(\d+?)-0*(\d+?)/$1-$2-$3/;
         $date2 =~ s/(\d+)-0*(\d+?)-0*(\d+?)/$1-$2-$3/;
     }
     my $ret = ($ts && $date eq $date2);
@@ -787,7 +787,7 @@ sub template_var {
     my %vars;
     # Note: If we suddenly start needing a lot of template_var variables,
     # they should move into their own template, not field-descs.
-    my $result = $template->process('global/field-descs.none.tmpl', 
+    my $result = $template->process('global/field-descs.none.tmpl',
                                     { vars => \%vars, in_template_var => 1 });
     # Bugzilla::Error can't be "use"d in Bugzilla::Util.
     if (!$result) {
@@ -847,8 +847,8 @@ sub detect_encoding {
     # Encode::Detect sometimes mis-detects various ISO encodings as iso-8859-8,
     # but Encode::Guess can usually tell which one it is.
     if ($encoding && $encoding eq 'iso-8859-8') {
-        my $decoded_as = _guess_iso($data, 'iso-8859-8', 
-            # These are ordered this way because it gives the most 
+        my $decoded_as = _guess_iso($data, 'iso-8859-8',
+            # These are ordered this way because it gives the most
             # accurate results.
             qw(iso-8859-7 iso-8859-2));
         $encoding = $decoded_as if $decoded_as;
@@ -1072,14 +1072,14 @@ otherwise.
 
 =item C<diff_arrays(\@old, \@new)>
 
- Description: Takes two arrayrefs, and will tell you what it takes to 
+ Description: Takes two arrayrefs, and will tell you what it takes to
               get from @old to @new.
  Params:      @old = array that you are changing from
               @new = array that you are changing to
- Returns:     A list of two arrayrefs. The first is a reference to an 
+ Returns:     A list of two arrayrefs. The first is a reference to an
               array containing items that were removed from @old. The
               second is a reference to an array containing items
-              that were added to @old. If both returned arrays are 
+              that were added to @old. If both returned arrays are
               empty, @old and @new contain the same values.
 
 =back
@@ -1126,7 +1126,7 @@ Disable utf8 on STDOUT (and display raw data instead).
 =item C<detect_encoding($str)>
 
 Guesses what encoding a given data is encoded in, returning the canonical name
-of the detected encoding (which may be different from the MIME charset 
+of the detected encoding (which may be different from the MIME charset
 specification).
 
 =item C<clean_text($str)>

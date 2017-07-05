@@ -62,7 +62,7 @@ else {
 # Check $webservergroup against the server's GID
 if ($sgid > 0) {
     if ($webservergroup eq "") {
-        print 
+        print
 "WARNING \$webservergroup is set to an empty string.
 That is a very insecure practice. Please refer to the
 Bugzilla documentation.\n";
@@ -71,10 +71,10 @@ Bugzilla documentation.\n";
         print "TEST-OK Webserver is running under group id in \$webservergroup.\n";
     }
     else {
-        print 
+        print
 "TEST-WARNING Webserver is running under group id not matching \$webservergroup.
 This if the tests below fail, this is probably the problem.
-Please refer to the web server configuration section of the Bugzilla guide. 
+Please refer to the web server configuration section of the Bugzilla guide.
 If you are using virtual hosts or suexec, this warning may not apply.\n";
     }
 }
@@ -91,7 +91,7 @@ my $url = $ARGV[0] . "/images/padlock.png";
 if (fetch($url)) {
     print "TEST-OK Got padlock picture.\n";
 } else {
-    print 
+    print
 "TEST-FAILED Fetch of images/padlock.png failed
 Your web server could not fetch $url.
 Check your web server configuration and try again.\n";
@@ -103,12 +103,12 @@ my $response = fetch($ARGV[0] . "/testagent.cgi");
 if ($response =~ /^OK (.*)$/) {
     print "TEST-OK Webserver is executing CGIs via $1.\n";
 } elsif ($response =~ /^#!/) {
-    print 
+    print
 "TEST-FAILED Webserver is fetching rather than executing CGI files.
 Check the AddHandler statement in your httpd.conf file.\n";
     exit(1);
 } else {
-    print "TEST-FAILED Webserver is not executing CGI files.\n"; 
+    print "TEST-FAILED Webserver is not executing CGI files.\n";
 }
 
 # Make sure that the web server is honoring .htaccess files
@@ -117,7 +117,7 @@ $localconfig =~ s~^\./~~;
 $url = $ARGV[0] . "/$localconfig";
 $response = fetch($url);
 if ($response) {
-    print 
+    print
 "TEST-FAILED Webserver is permitting fetch of $url.
 This is a serious security problem.
 Check your web server configuration.\n";
@@ -142,12 +142,12 @@ if ($@ eq '') {
         }
         else {
             my $gd = $GD::VERSION;
-    
+
             my $verstring = "GD version $gd, libgd version $gdlib";
-    
+
             $gdlib =~ s/^([^\.]+)\..*/$1/;
             $gd =~ s/^([^\.]+)\..*/$1/;
-    
+
             if ($gdlib == $gd) {
                 print "TEST-OK $verstring; Major versions match.\n";
             } else {

@@ -176,7 +176,7 @@ sub _check_value {
                        { function => 'add_see_also', param => '$value' });
     }
 
-    # We assume that the URL is an HTTP URL if there is no (something):// 
+    # We assume that the URL is an HTTP URL if there is no (something)://
     # in front.
     if (!$uri->scheme) {
         # This works better than setting $uri->scheme('http'), because

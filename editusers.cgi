@@ -120,7 +120,7 @@ if ($action eq 'search') {
             if ($matchvalue eq 'userid') {
                 if ($matchstr) {
                     my $stored_matchstr = $matchstr;
-                    detaint_natural($matchstr) 
+                    detaint_natural($matchstr)
                         || ThrowUserError('illegal_user_id', {userid => $stored_matchstr});
                 }
                 $expr = "profiles.userid";
@@ -233,7 +233,7 @@ if ($action eq 'search') {
 
     # Lock tables during the check+update session.
     $dbh->bz_start_transaction();
- 
+
     $editusers || $user->can_see_user($otherUser)
         || ThrowUserError('auth_failure', {reason => "not_visible",
                                            action => "modify",
@@ -367,7 +367,7 @@ if ($action eq 'search') {
     my $otherUser = check_user($otherUserID, $otherUserLogin);
     $otherUserID = $otherUser->id;
 
-    Bugzilla->params->{'allowuserdeletion'} 
+    Bugzilla->params->{'allowuserdeletion'}
         || ThrowUserError('users_deletion_disabled');
     $editusers || ThrowUserError('auth_failure', {group  => "editusers",
                                                   action => "delete",
@@ -664,8 +664,8 @@ if ($action eq 'search') {
     my $activity_userid = "profiles_activity.userid";
 
     if ($action eq 'admin_activity') {
-        $editusers || ThrowUserError("auth_failure", { group  => "editusers", 
-                                                       action => "admin_activity", 
+        $editusers || ThrowUserError("auth_failure", { group  => "editusers",
+                                                       action => "admin_activity",
                                                        object => "users" });
         ($activity_userid, $activity_who) = ($activity_who, $activity_userid);
     }
@@ -806,7 +806,7 @@ sub userDataToVars {
                   (CASE WHEN (groups.id IN ($grouplist)
                               AND COUNT(directmember.group_id) = 0
                               AND COUNT(regexpmember.group_id) = 0
-                             ) THEN 1 ELSE 0 END) 
+                             ) THEN 1 ELSE 0 END)
                       AS derivedmember,
                   COUNT(directbless.group_id) AS directbless
            FROM groups

@@ -83,7 +83,7 @@ sub create {
     my $params = $class->run_create_validators(@_);
     # Some fields do not exist in the DB as is.
     if (defined $params->{classification}) {
-        $params->{classification_id} = delete $params->{classification}; 
+        $params->{classification_id} = delete $params->{classification};
     }
     my $version = delete $params->{version};
     my $create_series = delete $params->{create_series};
@@ -99,7 +99,7 @@ sub create {
 
     # Add the new version and milestone into the DB as valid values.
     Bugzilla::Version->create({ value => $version, product => $product });
-    Bugzilla::Milestone->create({ value => $product->default_milestone, 
+    Bugzilla::Milestone->create({ value => $product->default_milestone,
                                   product => $product });
 
     # Create groups and series for the new product, if requested.
@@ -588,10 +588,10 @@ sub group_controls {
                               canedit, editcomponents, editbugs, canconfirm
                          FROM groups
                               LEFT JOIN group_control_map
-                              ON id = group_id 
+                              ON id = group_id
                 $where_or_and product_id = ?
                 $and_or_where isbuggroup = 1};
-        $self->{group_controls} = 
+        $self->{group_controls} =
             $dbh->selectall_hashref($query, 'id', undef, $self->id);
 
         # For each group ID listed above, create and store its group object.
@@ -639,7 +639,7 @@ sub groups_available {
            FROM group_control_map
                 INNER JOIN groups ON group_control_map.group_id = groups.id
           WHERE isbuggroup = 1 AND isactive = 1 AND product_id = ?
-                AND (othercontrol = $shown OR othercontrol = $default)", 
+                AND (othercontrol = $shown OR othercontrol = $default)",
         {Columns=>[1,2]}, $self->id) };
 
     # If the user is a member, then we use the membercontrol value.
@@ -669,7 +669,7 @@ sub groups_mandatory {
     # is Mandatory, the group is Mandatory for everybody, regardless of their
     # group membership.
     my $ids = Bugzilla->dbh->selectcol_arrayref(
-        "SELECT group_id 
+        "SELECT group_id
            FROM group_control_map
                 INNER JOIN groups ON group_control_map.group_id = groups.id
           WHERE product_id = ? AND isactive = 1
@@ -703,7 +703,7 @@ sub group_is_valid {
 sub groups_valid {
     my ($self) = @_;
     return $self->{groups_valid} if defined $self->{groups_valid};
-    
+
     # Note that we don't check OtherControl below, because there is no
     # valid NA/* combination.
     my $ids = Bugzilla->dbh->selectcol_arrayref(
@@ -738,7 +738,7 @@ sub milestones {
         my $ids = $dbh->selectcol_arrayref(q{
             SELECT id FROM milestones
              WHERE product_id = ?}, undef, $self->id);
- 
+
         $self->{milestones} = Bugzilla::Milestone->new_from_list($ids);
     }
     return $self->{milestones};
@@ -762,7 +762,7 @@ sub bug_ids {
     my $dbh = Bugzilla->dbh;
 
     if (!defined $self->{'bug_ids'}) {
-        $self->{'bug_ids'} = 
+        $self->{'bug_ids'} =
             $dbh->selectcol_arrayref(q{SELECT bug_id FROM bugs
                                        WHERE product_id = ?},
                                      undef, $self->id);
@@ -896,7 +896,7 @@ Product.pm represents a product object. It is an implementation
 of L<Bugzilla::Object>, and thus provides all methods that
 L<Bugzilla::Object> provides.
 
-The methods that are specific to C<Bugzilla::Product> are listed 
+The methods that are specific to C<Bugzilla::Product> are listed
 below.
 
 =head1 METHODS
@@ -922,13 +922,13 @@ below.
               is also returned. Moreover, bug groups which have no
               special settings for the product are also returned.
 
- Returns:     A hash with group id as key and hash containing 
+ Returns:     A hash with group id as key and hash containing
               a Bugzilla::Group object and the properties of group
               relative to the product.
 
 =item C<groups_available>
 
-Tells you what groups are set to Default or Shown for the 
+Tells you what groups are set to Default or Shown for the
 currently-logged-in user (taking into account both OtherControl and
 MemberControl). Returns an arrayref of L<Bugzilla::Group> objects with
 an extra hash keys set, C<is_default>, which is true if the group
@@ -1072,7 +1072,7 @@ than calling those accessors on every item in the array individually.
 If the 2nd argument passed to C<preload> is true, flag types for these
 products and their components are also preloaded.
 
-This function is not exported, so must be called like 
+This function is not exported, so must be called like
 C<Bugzilla::Product::preload($products)>.
 
 =back

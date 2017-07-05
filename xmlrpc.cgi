@@ -35,8 +35,8 @@ $XMLRPC::Constants::FAULT_SERVER = ERROR_UNKNOWN_FATAL;
 
 local @INC = (bz_locations()->{extensionsdir}, @INC);
 my $server = new Bugzilla::WebService::Server::XMLRPC;
-# We use a sub for on_action because that gets us the info about what 
-# class is being called. Note that this is a hack--this is technically 
+# We use a sub for on_action because that gets us the info about what
+# class is being called. Note that this is a hack--this is technically
 # for setting SOAPAction, which isn't used by XML-RPC.
 $server->on_action(sub { $server->handle_login(WS_DISPATCH, @_) })
        ->handle();

@@ -118,7 +118,7 @@ sub object_validators {
     my ($class, $validators) = @$args{qw(class validators)};
     if ($class->isa('Bugzilla::Comment')) {
         my $extra_data_validator = $validators->{extra_data};
-        $validators->{extra_data} = 
+        $validators->{extra_data} =
             sub { _check_comment_extra_data($extra_data_validator, @_) };
     }
     elsif ($class->isa('Bugzilla::Bug')) {
@@ -170,7 +170,7 @@ sub _move_bug {
     my $dbh = Bugzilla->dbh;
     my $template = Bugzilla->template;
 
-    _user_is_mover(Bugzilla->user) 
+    _user_is_mover(Bugzilla->user)
         or ThrowUserError("auth_failure", { action => 'move',
                                             object => 'bugs' });
 

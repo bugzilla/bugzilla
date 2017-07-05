@@ -101,7 +101,7 @@ of merchantability or fitness for a particular purpose.
 
 Files with different licenses or copyright holders:
 
-=over 
+=over
 
 =item F<lib/PatchReader/CVSClient.pm>
 

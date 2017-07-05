@@ -74,7 +74,7 @@ EOF
     SELECT COUNT(*)
       FROM attachments
      WHERE submitter_id = ?
-           AND (ispatch = 1 
+           AND (ispatch = 1
                 OR mimetype IN ('text/x-github-pull-request',
                                 'text/x-review-board-request',
                                 'text/x-phabricator-request'))

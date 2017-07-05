@@ -46,7 +46,7 @@ use constant CRYPT_SILENT => 64;
 # Don't require existing public/private keypairs.
 use constant CRYPT_VERIFYCONTEXT => 0xF0000000;
 
-# For some reason, BOOLEAN doesn't work properly as a return type with 
+# For some reason, BOOLEAN doesn't work properly as a return type with
 # Win32::API.
 use constant RTLGENRANDOM_PROTO => <<END;
 INT SystemFunction036(
@@ -150,7 +150,7 @@ sub _read_seed_from {
     my $buffer;
     $fh->read($buffer, SEED_SIZE);
     if (length($buffer) < SEED_SIZE) {
-        die "Could not read enough seed bytes from $from, got only " 
+        die "Could not read enough seed bytes from $from, got only "
             . length($buffer);
     }
     $fh->close;

@@ -28,7 +28,7 @@ use List::Util qw(max);
 sub new {
     my $invocant = shift;
     my $class = ref($invocant) || $invocant;
-  
+
     # Create a ref to an empty hash and bless it
     my $self = {};
     bless($self, $class);
@@ -36,7 +36,7 @@ sub new {
     if ($#_ == 0) {
         # Construct from a CGI object.
         $self->init($_[0]);
-    } 
+    }
     else {
         die("CGI object not passed in - invalid number of args \($#_\)($_)");
     }
@@ -48,20 +48,20 @@ sub init {
     my $self = shift;
     my $cgi = shift;
 
-    # The data structure is a list of lists (lines) of Series objects. 
+    # The data structure is a list of lists (lines) of Series objects.
     # There is a separate list for the labels.
     #
     # The URL encoding is:
     # line0=67&line0=73&line1=81&line2=67...
     # &label0=B+/+R+/+CONFIRMED&label1=...
-    # &select0=1&select3=1...    
+    # &select0=1&select3=1...
     # &cumulate=1&datefrom=2002-02-03&dateto=2002-04-04&ctype=html...
-    # &gt=1&labelgt=Grand+Total    
+    # &gt=1&labelgt=Grand+Total
     foreach my $param ($cgi->param()) {
         # Store all the lines
         if ($param =~ /^line(\d+)$/) {
             foreach my $series_id ($cgi->param($param)) {
-                detaint_natural($series_id) 
+                detaint_natural($series_id)
                                      || ThrowCodeError("invalid_series_id");
                 my $series = new Bugzilla::Series($series_id);
                 push(@{$self->{'lines'}[$1]}, $series) if $series;
@@ -71,30 +71,30 @@ sub init {
         # Store all the labels
         if ($param =~ /^label(\d+)$/) {
             $self->{'labels'}[$1] = $cgi->param($param);
-        }        
+        }
     }
-    
+
     # Store the miscellaneous metadata
     $self->{'cumulate'} = $cgi->param('cumulate') ? 1 : 0;
     $self->{'gt'}       = $cgi->param('gt') ? 1 : 0;
     $self->{'labelgt'}  = $cgi->param('labelgt');
     $self->{'datefrom'} = $cgi->param('datefrom');
     $self->{'dateto'}   = $cgi->param('dateto');
-    
+
     # If we are cumulating, a grand total makes no sense
     $self->{'gt'} = 0 if $self->{'cumulate'};
-    
+
     # Make sure the dates are ones we are able to interpret
     foreach my $date ('datefrom', 'dateto') {
         if ($self->{$date}) {
-            $self->{$date} = str2time($self->{$date}) 
+            $self->{$date} = str2time($self->{$date})
               || ThrowUserError("illegal_date", { date => $self->{$date}});
         }
     }
 
     # datefrom can't be after dateto
-    if ($self->{'datefrom'} && $self->{'dateto'} && 
-        $self->{'datefrom'} > $self->{'dateto'}) 
+    if ($self->{'datefrom'} && $self->{'dateto'} &&
+        $self->{'datefrom'} > $self->{'dateto'})
     {
           ThrowUserError('misarranged_dates', { 'datefrom' => scalar $cgi->param('datefrom'),
                                                 'dateto' => scalar $cgi->param('dateto') });
@@ -108,7 +108,7 @@ sub add {
 
     # Get the current size of the series; required for adding Grand Total later
     my $current_size = scalar($self->getSeriesIDs());
-    
+
     # Count the number of added series
     my $added = 0;
     # Create new Series and push them on to the list of lines.
@@ -122,11 +122,11 @@ sub add {
             $added++;
         }
     }
-    
+
     # If we are going from < 2 to >= 2 series, add the Grand Total line.
     if (!$self->{'gt'}) {
         if ($current_size < 2 &&
-            $current_size + $added >= 2) 
+            $current_size + $added >= 2)
         {
             $self->{'gt'} = 1;
         }
@@ -137,12 +137,12 @@ sub add {
 sub remove {
     my $self = shift;
     my @line_ids = @_;
-    
+
     foreach my $line_id (@line_ids) {
         if ($line_id == 65536) {
             # Magic value - delete Grand Total.
             $self->{'gt'} = 0;
-        } 
+        }
         else {
             delete($self->{'lines'}->[$line_id]);
             delete($self->{'labels'}->[$line_id]);
@@ -154,25 +154,25 @@ sub remove {
 sub sum {
     my $self = shift;
     my @line_ids = @_;
-    
+
     # We can't add the Grand Total to things.
     @line_ids = grep(!/^65536$/, @line_ids);
-        
+
     # We can't add less than two things.
     return if scalar(@line_ids) < 2;
-    
+
     my @series;
     my $label = "";
     my $biggestlength = 0;
-    
+
     # We rescue the Series objects of all the series involved in the sum.
     foreach my $line_id (@line_ids) {
         my @line = @{$self->{'lines'}->[$line_id]};
-        
+
         foreach my $series (@line) {
             push(@series, $series);
         }
-        
+
         # We keep the label that labels the line with the most series.
         if (scalar(@line) > $biggestlength) {
             $biggestlength = scalar(@line);
@@ -206,10 +206,10 @@ sub readData {
 
     # Work out the date boundaries for our data.
     my $dbh = Bugzilla->dbh;
-    
+
     # The date used is the one given if it's in a sensible range; otherwise,
     # it's the earliest or latest date in the database as appropriate.
-    my $datefrom = $dbh->selectrow_array("SELECT MIN(series_date) " . 
+    my $datefrom = $dbh->selectrow_array("SELECT MIN(series_date) " .
                                          "FROM series_data " .
                                          "WHERE series_id IN ($series_ids)");
     $datefrom = str2time($datefrom);
@@ -218,10 +218,10 @@ sub readData {
         $datefrom = $self->{'datefrom'};
     }
 
-    my $dateto = $dbh->selectrow_array("SELECT MAX(series_date) " . 
+    my $dateto = $dbh->selectrow_array("SELECT MAX(series_date) " .
                                        "FROM series_data " .
                                        "WHERE series_id IN ($series_ids)");
-    $dateto = str2time($dateto); 
+    $dateto = str2time($dateto);
 
     if ($self->{'dateto'} && $self->{'dateto'} < $dateto) {
         $dateto = $self->{'dateto'};
@@ -240,7 +240,7 @@ sub readData {
     if ($dateto) {
         $query .= " AND series_date <= ?";
     }
-    
+
     my $sth = $dbh->prepare($query);
 
     my $gt_index = $self->{'gt'} ? scalar(@{$self->{'lines'}}) : undef;
@@ -250,7 +250,7 @@ sub readData {
 
     my @datediff_total;
 
-    foreach my $line (@{$self->{'lines'}}) {        
+    foreach my $line (@{$self->{'lines'}}) {
         # Even if we end up with no data, we need an empty arrayref to prevent
         # errors in the PNG-generating code
         $data[$line_index] = [];
@@ -333,7 +333,7 @@ sub readData {
         } while ($self->{'y_max_value'} % (8*(10**($mask_length-1))) != 0);
     }
 
-        
+
     # Add the x-axis labels into the data structure
     my $date_progression = generateDateProgression($datefrom, $dateto);
     unshift(@data, $date_progression);
@@ -368,7 +368,7 @@ sub getVisibleSeries {
     my %cats;
 
     my $grouplist = Bugzilla->user->groups_as_string;
-    
+
     # Get all visible series
     my $dbh = Bugzilla->dbh;
     my $serieses = $dbh->selectall_arrayref("SELECT cc1.name, cc2.name, " .
@@ -420,7 +420,7 @@ sub dump {
 
     # Make sure we've read in our data
     my $data = $self->data;
-    
+
     require Data::Dumper;
     print "<pre>Bugzilla::Chart object:\n";
     print html_quote(Data::Dumper::Dumper($self));

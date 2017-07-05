@@ -73,13 +73,13 @@ sub get_param_list {
    default => 'admin',
    checker => \&check_group
   },
-  
+
   {
    name => 'usevisibilitygroups',
    type => 'b',
    default => 0
-  }, 
-  
+  },
+
   {
    name => 'strict_isolation',
    type => 'b',

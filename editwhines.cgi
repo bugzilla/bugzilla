@@ -95,7 +95,7 @@ if ($cgi->param('update')) {
                 my $schedules = Bugzilla::Whine::Schedule->match({ eventid => $eventid });
                 $sth = $dbh->prepare("DELETE FROM whine_schedules "
                     . "WHERE id=?");
-                foreach my $schedule (@$schedules) {                    
+                foreach my $schedule (@$schedules) {
                     $sth->execute($schedule->id);
                 }
 
@@ -340,7 +340,7 @@ for my $event_id (keys %{$events}) {
     # schedules
     my $schedules = Bugzilla::Whine::Schedule->match({ eventid => $event_id });
     foreach my $schedule (@$schedules) {
-        my $mailto_type = $schedule->mailto_is_group ? MAILTO_GROUP 
+        my $mailto_type = $schedule->mailto_is_group ? MAILTO_GROUP
                                                      : MAILTO_USER;
         my $mailto = '';
         if ($mailto_type == MAILTO_USER) {
@@ -363,7 +363,7 @@ for my $event_id (keys %{$events}) {
     # queries
     my $queries = Bugzilla::Whine::Query->match({ eventid => $event_id });
     for my $query (@$queries) {
-        push @{$events->{$event_id}->{'queries'}}, 
+        push @{$events->{$event_id}->{'queries'}},
              {
                  'name'          => $query->name,
                  'title'         => $query->title,

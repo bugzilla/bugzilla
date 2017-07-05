@@ -7,9 +7,9 @@
 
 # This module implements a series - a set of data to be plotted on a chart.
 #
-# This Series is in the database if and only if self->{'series_id'} is defined. 
-# Note that the series being in the database does not mean that the fields of 
-# this object are the same as the DB entries, as the object may have been 
+# This Series is in the database if and only if self->{'series_id'} is defined.
+# Note that the series being in the database does not mean that the fields of
+# this object are the same as the DB entries, as the object may have been
 # altered.
 
 package Bugzilla::Series;
@@ -29,14 +29,14 @@ use constant ID_FIELD => 'series_id';
 sub new {
     my $invocant = shift;
     my $class = ref($invocant) || $invocant;
-  
+
     # Create a ref to an empty hash and bless it
     my $self = {};
     bless($self, $class);
 
     my $arg_count = scalar(@_);
-    
-    # new() can return undef if you pass in a series_id and the user doesn't 
+
+    # new() can return undef if you pass in a series_id and the user doesn't
     # have sufficient permissions. If you create a new series in this way,
     # you need to check for an undef return, and act appropriately.
     my $retval = $self;
@@ -76,7 +76,7 @@ sub initFromDatabase {
     my $dbh = Bugzilla->dbh;
     my $user = Bugzilla->user;
 
-    detaint_natural($series_id) 
+    detaint_natural($series_id)
       || ThrowCodeError("invalid_series_id", { 'series_id' => $series_id });
 
     my $grouplist = $user->groups_as_string;
@@ -126,10 +126,10 @@ sub initFromCGI {
     $self->{'series_id'} = $cgi->param('series_id') || undef;
     if (defined($self->{'series_id'})) {
         detaint_natural($self->{'series_id'})
-          || ThrowCodeError("invalid_series_id", 
+          || ThrowCodeError("invalid_series_id",
                                { 'series_id' => $self->{'series_id'} });
     }
-    
+
     $self->{'category'} = $cgi->param('category')
       || $cgi->param('newcategory')
       || ThrowUserError("missing_category");
@@ -151,9 +151,9 @@ sub initFromCGI {
                                         "category", "subcategory", "name",
                                         "frequency", "public", "query_format");
     trick_taint($self->{'query'});
-                                        
+
     $self->{'public'} = $cgi->param('public') ? 1 : 0;
-    
+
     # Change 'admin' here and in series.html.tmpl, or remove the check
     # completely, if you want to change who can make series public.
     $self->{'public'} = 0 unless Bugzilla->user->in_group('admin');
@@ -169,13 +169,13 @@ sub writeToDatabase {
     my $subcategory_id = getCategoryID($self->{'subcategory'});
 
     my $exists;
-    if ($self->{'series_id'}) { 
-        $exists = 
+    if ($self->{'series_id'}) {
+        $exists =
             $dbh->selectrow_array("SELECT series_id FROM series
                                    WHERE series_id = $self->{'series_id'}");
     }
-    
-    # Is this already in the database?                              
+
+    # Is this already in the database?
     if ($exists) {
         # Update existing series
         my $dbh = Bugzilla->dbh;
@@ -184,13 +184,13 @@ sub writeToDatabase {
                  "name = ?, frequency = ?, is_public = ?  " .
                  "WHERE series_id = ?", undef,
                  $category_id, $subcategory_id, $self->{'name'},
-                 $self->{'frequency'}, $self->{'public'}, 
+                 $self->{'frequency'}, $self->{'public'},
                  $self->{'series_id'});
     }
     else {
         # Insert the new series into the series table
         $dbh->do("INSERT INTO series (creator, category, subcategory, " .
-                 "name, frequency, query, is_public) VALUES " . 
+                 "name, frequency, query, is_public) VALUES " .
                  "(?, ?, ?, ?, ?, ?, ?)", undef,
                  $self->{'creator_id'}, $category_id, $subcategory_id, $self->{'name'},
                  $self->{'frequency'}, $self->{'query'}, $self->{'public'});
@@ -201,7 +201,7 @@ sub writeToDatabase {
         $self->{'series_id'}
           || ThrowCodeError("missing_series_id", { 'series' => $self });
     }
-    
+
     $dbh->bz_commit_transaction();
 }
 
@@ -213,13 +213,13 @@ sub existsInDatabase {
 
     my $category_id = getCategoryID($self->{'category'});
     my $subcategory_id = getCategoryID($self->{'subcategory'});
-    
+
     trick_taint($self->{'name'});
     my $series_id = $dbh->selectrow_array("SELECT series_id " .
                               "FROM series WHERE category = $category_id " .
                               "AND subcategory = $subcategory_id AND name = " .
                               $dbh->quote($self->{'name'}));
-                              
+
     return($series_id);
 }
 

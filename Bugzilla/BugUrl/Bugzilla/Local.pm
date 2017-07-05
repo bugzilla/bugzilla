@@ -83,7 +83,7 @@ sub _check_value {
     if ($ref_bug->id == $self_bug_id) {
         ThrowUserError('see_also_self_reference');
     }
- 
+
     my $product = $ref_bug->product_obj;
     if (!Bugzilla->user->can_edit_product($product->id)) {
         ThrowUserError("product_edit_denied",

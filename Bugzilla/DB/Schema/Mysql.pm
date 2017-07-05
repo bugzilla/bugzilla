@@ -21,7 +21,7 @@ use Bugzilla::Error;
 
 use base qw(Bugzilla::DB::Schema);
 
-# This is for column_info_to_column, to know when a tinyint is a 
+# This is for column_info_to_column, to know when a tinyint is a
 # boolean and when it's really a tinyint. This only has to be accurate
 # up to and through 2.19.3, because that's the only time we need
 # column_info_to_column.
@@ -30,7 +30,7 @@ use base qw(Bugzilla::DB::Schema);
 # that should be interpreted as a BOOLEAN instead of as an INT1 when
 # reading in the Schema from the disk. The values are discarded; I just
 # used "1" for simplicity.
-# 
+#
 # THIS CONSTANT IS ONLY USED FOR UPGRADES FROM 2.18 OR EARLIER. DON'T
 # UPDATE IT TO MODERN COLUMN NAMES OR DEFINITIONS.
 use constant BOOLEAN_MAP => {
@@ -40,7 +40,7 @@ use constant BOOLEAN_MAP => {
     longdescs      => {isprivate => 1, already_wrapped => 1},
     attachments    => {ispatch => 1, isobsolete => 1, isprivate => 1},
     flags          => {is_active => 1},
-    flagtypes      => {is_active => 1, is_requestable => 1, 
+    flagtypes      => {is_active => 1, is_requestable => 1,
                        is_requesteeble => 1, is_multiplicable => 1},
     fielddefs      => {mailhead => 1, obsolete => 1},
     bug_status     => {isactive => 1},
@@ -88,7 +88,7 @@ sub _initialize {
     $self->{db_specific} = {
 
         BOOLEAN =>      'tinyint',
-        FALSE =>        '0', 
+        FALSE =>        '0',
         TRUE =>         '1',
 
         INT1 =>         'tinyint',
@@ -124,7 +124,7 @@ sub _get_create_table_ddl {
 
     my $charset = Bugzilla->dbh->bz_db_is_utf8 ? "CHARACTER SET utf8" : '';
     my $type    = grep($_ eq $table, MYISAM_TABLES) ? 'MYISAM' : 'InnoDB';
-    return($self->SUPER::_get_create_table_ddl($table) 
+    return($self->SUPER::_get_create_table_ddl($table)
            . " ENGINE = $type $charset");
 
 } #eosub--_get_create_table_ddl
@@ -150,7 +150,7 @@ sub get_create_database_sql {
     my ($self, $name) = @_;
     # We only create as utf8 if we have no params (meaning we're doing
     # a new installation) or if the utf8 param is on.
-    my $create_utf8 = Bugzilla->params->{'utf8'} 
+    my $create_utf8 = Bugzilla->params->{'utf8'}
                       || !defined Bugzilla->params->{'utf8'};
     my $charset = $create_utf8 ? "CHARACTER SET utf8" : '';
     return ("CREATE DATABASE $name $charset");
@@ -180,7 +180,7 @@ sub get_alter_column_ddl {
     delete $old_defaultless{DEFAULT};
     delete $new_defaultless{DEFAULT};
     if (!$self->columns_equal($old_def, $new_def)
-        && $self->columns_equal(\%new_defaultless, \%old_defaultless)) 
+        && $self->columns_equal(\%new_defaultless, \%old_defaultless))
     {
         if (!defined $new_def->{DEFAULT}) {
             push(@statements,
@@ -193,7 +193,7 @@ sub get_alter_column_ddl {
     }
     else {
         my $new_ddl = $self->get_type_ddl(\%new_def_copy);
-        push(@statements, "ALTER TABLE $table CHANGE COLUMN 
+        push(@statements, "ALTER TABLE $table CHANGE COLUMN
                        $column $column $new_ddl");
     }
 
@@ -213,7 +213,7 @@ sub get_drop_fk_sql {
 
     # MySQL requires, and will create, an index on any column with
     # an FK. It will name it after the fk, which we never do.
-    # So if there's an index named after the fk, we also have to delete it. 
+    # So if there's an index named after the fk, we also have to delete it.
     if ($dbh->bz_index_info_real($table, $fk_name)) {
         push(@sql, $self->get_drop_index_ddl($table, $fk_name));
     }
@@ -227,7 +227,7 @@ sub get_drop_index_ddl {
 }
 
 # A special function for MySQL, for renaming a lot of indexes.
-# Index renames is a hash, where the key is a string - the 
+# Index renames is a hash, where the key is a string - the
 # old names of the index, and the value is a hash - the index
 # definition that we're renaming to, with an extra key of "NAME"
 # that contains the new index name.
@@ -305,14 +305,14 @@ sub column_info_to_column {
         # be dropping it soon, or it's a custom end-user column, in which
         # case having a bogus default won't harm anything.
         my $schema_column = $self->get_column($table, $col_name);
-        unless ( (!$column_info->{COLUMN_DEF} 
+        unless ( (!$column_info->{COLUMN_DEF}
                   || $column_info->{COLUMN_DEF} eq '0000-00-00 00:00:00'
                   || $column_info->{COLUMN_DEF} eq '0.00')
-                && $schema_column 
+                && $schema_column
                 && !exists $schema_column->{DEFAULT}) {
-            
+
             my $default = $column_info->{COLUMN_DEF};
-            # Schema uses '0' for the defaults for decimal fields. 
+            # Schema uses '0' for the defaults for decimal fields.
             $default = 0 if $default =~ /^0\.0+$/;
             # If we're not a number, we're a string and need to be
             # quoted.
@@ -353,7 +353,7 @@ sub column_info_to_column {
             }
             elsif ($type eq 'SMALLINT') {
                 $type = 'SMALLSERIAL';
-            } 
+            }
             else {
                 $type = 'INTSERIAL';
             }
@@ -362,7 +362,7 @@ sub column_info_to_column {
 
     }
 
-    # For all other db-specific types, check if they exist in 
+    # For all other db-specific types, check if they exist in
     # REVERSE_MAPPING and use the type found there.
     if (exists REVERSE_MAPPING->{$type}) {
         $type = REVERSE_MAPPING->{$type};

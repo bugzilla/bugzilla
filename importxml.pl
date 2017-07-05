@@ -47,8 +47,8 @@ BEGIN {
 }
 
 use lib qw(. lib local/lib/perl5);
-# Data dumber is used for debugging, I got tired of copying it back in 
-# and then removing it. 
+# Data dumber is used for debugging, I got tired of copying it back in
+# and then removing it.
 #use Data::Dumper;
 
 
@@ -183,7 +183,7 @@ sub flag_handler {
             if ( !$requestee->can_see_bug($bugid) ) {
                 $err .= "Requestee is not a member of bug group\n";
                 $err .= "   Requesting from the wind\n";
-            }    
+            }
             else{
                 $requestee_id = $requestee->id;
             }
@@ -192,7 +192,7 @@ sub flag_handler {
             $err = "Invalid requestee $requestee_login on $type flag $name\n";
             $err .= "   Requesting from the wind.\n";
         }
-        
+
     }
     my $flag_types;
 
@@ -229,7 +229,7 @@ sub flag_handler {
 
     if ($ftype) {    # We found the flag in the list
         my $grant_group = $ftype->grant_group;
-        if (( $status eq '+' || $status eq '-' ) 
+        if (( $status eq '+' || $status eq '-' )
             && $grant_group && !$setter->in_group_id($grant_group->id)) {
             $err = "Setter $setter_login on $type flag $name ";
             $err .= "is not in the Grant Group\n";
@@ -252,8 +252,8 @@ sub flag_handler {
             return $err;
         }
 
-        $dbh->do("INSERT INTO flags 
-                 (type_id, status, bug_id, attach_id, creation_date, 
+        $dbh->do("INSERT INTO flags
+                 (type_id, status, bug_id, attach_id, creation_date,
                   setter_id, requestee_id)
                   VALUES (?, ?, ?, ?, ?, ?, ?)", undef,
             ($ftype->id, $status, $bugid, $attachid, $timestamp,
@@ -309,7 +309,7 @@ sub init() {
     Error( "invalid exporter: $exporter", "REOPEN", $exporter ) if ( !login_to_id($exporter) );
     Error( "no urlbase set", "REOPEN", $exporter ) unless ($urlbase);
 }
-    
+
 
 # Parse attachments.
 #
@@ -353,11 +353,11 @@ sub process_attachment() {
         elsif ($encoding =~ /filename/) {
             # read the attachment file
             Error("attach_path is required", undef) unless ($attach_path);
-            
+
             my $filename = $attach->field('data');
             # Remove any leading path data from the filename
             $filename =~ s/(.*\/|.*\\)//gs;
-            
+
             my $attach_filename = $attach_path . "/" . $filename;
             open(ATTACH_FH, "<", $attach_filename) or
                 Error("cannot open $attach_filename", undef);
@@ -429,12 +429,12 @@ sub process_bug {
     # This list contains all other bug fields that we want to process.
     # If it is not in this list it will not be included.
     my %all_fields;
-    foreach my $field ( 
+    foreach my $field (
         qw(long_desc attachment flag group), Bugzilla::Bug::fields() )
     {
         $all_fields{$field} = 1;
     }
-    
+
     my %bug_fields;
     my $err = "";
 
@@ -555,7 +555,7 @@ sub process_bug {
 
     # Alias
     if ( $bug_fields{'alias'} ) {
-        my ($alias) = $dbh->selectrow_array("SELECT COUNT(*) FROM bugs 
+        my ($alias) = $dbh->selectrow_array("SELECT COUNT(*) FROM bugs
                                                 WHERE alias = ?", undef,
                                                 $bug_fields{'alias'} );
         if ($alias) {
@@ -595,7 +595,7 @@ sub process_bug {
         $product = new Bugzilla::Product({ name => $default_product_name })
             or Error("an invalid default product was defined for the target"
                      . " DB. " . $params->{"maintainer"} . " needs to specify "
-                     . "--product when calling importxml.pl", "REOPEN", 
+                     . "--product when calling importxml.pl", "REOPEN",
                      $exporter);
     }
     my $component = new Bugzilla::Component({
@@ -609,9 +609,9 @@ sub process_bug {
         $component = new Bugzilla::Component({
            name => $default_component_name, product => $product });
         if (!$component) {
-            Error("an invalid default component was defined for the target" 
-                  . " DB. ".  $params->{"maintainer"} . " needs to specify " 
-                  . "--component when calling importxml.pl", "REOPEN", 
+            Error("an invalid default component was defined for the target"
+                  . " DB. ".  $params->{"maintainer"} . " needs to specify "
+                  . "--component when calling importxml.pl", "REOPEN",
                   $exporter);
         }
     }
@@ -837,17 +837,17 @@ sub process_bug {
     }
 
     # Status & Resolution
-    my $valid_res = check_field('resolution',  
-                                  scalar $bug_fields{'resolution'}, 
+    my $valid_res = check_field('resolution',
+                                  scalar $bug_fields{'resolution'},
                                   undef, ERR_LEVEL );
-    my $valid_status = check_field('bug_status',  
-                                  scalar $bug_fields{'bug_status'}, 
+    my $valid_status = check_field('bug_status',
+                                  scalar $bug_fields{'bug_status'},
                                   undef, ERR_LEVEL );
-    my $is_open = is_open_state($bug_fields{'bug_status'}); 
+    my $is_open = is_open_state($bug_fields{'bug_status'});
     my $status = $bug_fields{'bug_status'} || undef;
     my $resolution = $bug_fields{'resolution'} || undef;
-    
-    # Check everconfirmed 
+
+    # Check everconfirmed
     my $everconfirmed;
     if ($product->allows_unconfirmed) {
         $everconfirmed = $bug_fields{'everconfirmed'} || 0;
@@ -866,7 +866,7 @@ sub process_bug {
         $resolution = "INVALID";
         $err .= "This bug was marked DUPLICATE in the database ";
         $err .= "it was moved from.\n    Changing resolution to \"INVALID\"\n";
-    } 
+    }
 
     # If there is at least 1 initial bug status different from UNCO, use it,
     # else use the open bug status with the lowest sortkey (different from UNCO).
@@ -900,7 +900,7 @@ sub process_bug {
                     $resolution = undef;
                 }
                 if($changed_owner){
-                    if($everconfirmed){  
+                    if($everconfirmed){
                         $status = $initial_status;
                     }
                     else{
@@ -944,15 +944,15 @@ sub process_bug {
                    $err .= "   Setting resolution to INVALID\n";
                    $resolution = "INVALID";
                }
-            }   
+            }
         }
         else{ # $valid_status is false
-            if($everconfirmed){  
+            if($everconfirmed){
                 $status = $initial_status;
             }
             else{
                 $status = "UNCONFIRMED";
-            }        
+            }
             $err .= "Bug has invalid status, setting status to \"$status\".\n";
             $err .= "   Previous status was \"";
             $err .=  $bug_fields{'bug_status'} . "\".\n";
@@ -960,12 +960,12 @@ sub process_bug {
         }
     }
     else {
-        if($everconfirmed){  
+        if($everconfirmed){
             $status = $initial_status;
         }
         else{
             $status = "UNCONFIRMED";
-        }        
+        }
         $err .= "Bug has no status, setting status to \"$status\".\n";
         $err .= "   Previous status was unknown\n";
         $resolution = undef;
@@ -975,7 +975,7 @@ sub process_bug {
         push( @query,  "resolution" );
         push( @values, $resolution );
     }
-    
+
     # Bug status
     push( @query,  "bug_status" );
     push( @values, $status );
@@ -1089,7 +1089,7 @@ sub process_bug {
     if ( defined( $bug_fields{'keywords'} ) ) {
         my %keywordseen;
         my $key_sth = $dbh->prepare(
-            "INSERT INTO keywords 
+            "INSERT INTO keywords
                       (bug_id, keywordid) VALUES (?,?)"
         );
         foreach my $keyword ( split( /[\s,]+/, $bug_fields{'keywords'} )) {
@@ -1142,16 +1142,16 @@ sub process_bug {
 
         my $attacher_id = $att->{'attacher'} ? login_to_id($att->{'attacher'}) : undef;
 
-        $dbh->do("INSERT INTO attachments 
+        $dbh->do("INSERT INTO attachments
                  (bug_id, creation_ts, modification_time, filename, description,
-                 mimetype, ispatch, isprivate, isobsolete, submitter_id) 
+                 mimetype, ispatch, isprivate, isobsolete, submitter_id)
                  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
             undef, $id, $att->{'date'}, $att->{'date'}, $att->{'filename'},
             $att->{'desc'}, $att->{'ctype'}, $att->{'ispatch'},
             $att->{'isprivate'}, $att->{'isobsolete'}, $attacher_id || $exporterid);
         my $att_id   = $dbh->bz_last_key( 'attachments', 'attach_id' );
         my $att_data = $att->{'data'};
-        my $sth = $dbh->prepare("INSERT INTO attach_data (id, thedata) 
+        my $sth = $dbh->prepare("INSERT INTO attach_data (id, thedata)
                                  VALUES ($att_id, ?)" );
         trick_taint($att_data);
         $sth->bind_param( 1, $att_data, $dbh->BLOB_TYPE );
@@ -1203,7 +1203,7 @@ sub process_bug {
     Bugzilla::Bug->new($id)->_sync_fulltext( new_bug => 1);
 
     # Add this bug to each group of which its product is a member.
-    my $sth_group = $dbh->prepare("INSERT INTO bug_group_map (bug_id, group_id) 
+    my $sth_group = $dbh->prepare("INSERT INTO bug_group_map (bug_id, group_id)
                          VALUES (?, ?)");
     foreach my $group_id ( keys %{ $product->group_controls } ) {
         if ($product->group_controls->{$group_id}->{'membercontrol'} != CONTROLMAPNA
@@ -1273,7 +1273,7 @@ my $urlbase    = $root->{'att'}->{'urlbase'};
 # It is time to email the result of the import.
 my $log = join("\n\n", @logs);
 $log .=  "\n\nImported $bugtotal bug(s) from $urlbase,\n  sent by $exporter.\n";
-my $subject =  "$bugtotal Bug(s) successfully moved from $urlbase to " 
+my $subject =  "$bugtotal Bug(s) successfully moved from $urlbase to "
    . $params->{"urlbase"};
 my @to = ($exporter, $maintainer);
 MailMessage( $subject, $log, @to );
@@ -1328,15 +1328,15 @@ XML doesn't exist.
      First using the move function of bugzilla
      on another system will send mail to an alias provided by
      the administrator of the target installation (you). Set up an alias
-     similar to the one given below so this mail will be automatically 
+     similar to the one given below so this mail will be automatically
      run by this script and imported into your database.  Run 'newaliases'
      after adding this alias to your aliases file. Make sure your sendmail
-     installation is configured to allow mail aliases to execute code. 
+     installation is configured to allow mail aliases to execute code.
 
      bugzilla-import: "|/usr/bin/perl /opt/bugzilla/importxml.pl --mail"
 
-     Second it can be run from the command line with any xml file from 
-     STDIN that conforms to the bugzilla DTD. In this case you can pass 
+     Second it can be run from the command line with any xml file from
+     STDIN that conforms to the bugzilla DTD. In this case you can pass
      an argument to set whether you want to send the
      mail that will be sent to the exporter and maintainer normally.
 

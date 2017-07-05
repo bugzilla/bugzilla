@@ -52,8 +52,8 @@
 ],
 
 'flag/list.html.tmpl' => [
-  'flag.status', 
-  'type.id', 
+  'flag.status',
+  'type.id',
 ],
 
 'search/form.html.tmpl' => [
@@ -70,15 +70,15 @@
 ],
 
 'request/queue.html.tmpl' => [
-  'column_headers.$group_field', 
-  'column_headers.$column', 
-  'request.status', 
-  'request.bug_id', 
-  'request.attach_id', 
+  'column_headers.$group_field',
+  'column_headers.$column',
+  'request.status',
+  'request.bug_id',
+  'request.attach_id',
 ],
 
 'reports/keywords.html.tmpl' => [
-  'keyword.bug_count', 
+  'keyword.bug_count',
 ],
 
 'reports/report-table.csv.tmpl' => [
@@ -87,101 +87,101 @@
 ],
 
 'reports/report-table.html.tmpl' => [
-  '"&amp;$col_vals" IF col_vals', 
-  '"&amp;$row_vals" IF row_vals', 
-  'classes.$row_idx.$col_idx', 
-  'urlbase', 
-  'data.$tbl.$col.$row', 
+  '"&amp;$col_vals" IF col_vals',
+  '"&amp;$row_vals" IF row_vals',
+  'classes.$row_idx.$col_idx',
+  'urlbase',
+  'data.$tbl.$col.$row',
   'row_total',
   'col_totals.$col',
-  'grand_total', 
+  'grand_total',
 ],
 
 'reports/report.html.tmpl' => [
-  'width', 
-  'height', 
-  'imageurl', 
-  'formaturl', 
-  'other_format.name', 
-  'sizeurl', 
+  'width',
+  'height',
+  'imageurl',
+  'formaturl',
+  'other_format.name',
+  'sizeurl',
   'switchbase',
   'cumulate',
 ],
 
 'reports/chart.html.tmpl' => [
-  'width', 
-  'height', 
-  'imageurl', 
-  'sizeurl', 
-  'height + 100', 
-  'height - 100', 
-  'width + 100', 
-  'width - 100', 
+  'width',
+  'height',
+  'imageurl',
+  'sizeurl',
+  'height + 100',
+  'height - 100',
+  'width + 100',
+  'width - 100',
 ],
 
 'reports/series-common.html.tmpl' => [
-  'sel.name', 
-  '"onchange=\"$sel.onchange\"" IF sel.onchange', 
+  'sel.name',
+  '"onchange=\"$sel.onchange\"" IF sel.onchange',
 ],
 
 'reports/chart.csv.tmpl' => [
-  'data.$j.$i', 
+  'data.$j.$i',
   'colsepchar',
 ],
 
 'reports/create-chart.html.tmpl' => [
-  'series.series_id', 
+  'series.series_id',
   'newidx',
 ],
 
 'reports/edit-series.html.tmpl' => [
-  'default.series_id', 
+  'default.series_id',
 ],
 
 'list/edit-multiple.html.tmpl' => [
-  'group.id', 
+  'group.id',
   'menuname',
 ],
 
 'list/list.rdf.tmpl' => [
-  'template_version', 
-  'bug.bug_id', 
-  'column', 
+  'template_version',
+  'bug.bug_id',
+  'column',
 ],
 
 'list/table.html.tmpl' => [
   'tableheader',
-  'bug.bug_id', 
+  'bug.bug_id',
 ],
 
 'list/list.csv.tmpl' => [
-  'bug.bug_id', 
+  'bug.bug_id',
   'colsepchar',
 ],
 
 'list/list.js.tmpl' => [
-  'bug.bug_id', 
+  'bug.bug_id',
 ],
 
 'global/choose-product.html.tmpl' => [
   'target',
 ],
 
-# You are not permitted to add any values here. Everything in this file should 
+# You are not permitted to add any values here. Everything in this file should
 # be filtered unless there's an extremely good reason why not, in which case,
 # use the "none" dummy filter.
 'global/code-error.html.tmpl' => [
 ],
- 
+
 'global/header.html.tmpl' => [
-  'javascript', 
-  'style', 
+  'javascript',
+  'style',
   'onload',
   'title',
   '" &ndash; $header" IF header',
   'subheader',
-  'header_addl_info', 
-  'message', 
+  'header_addl_info',
+  'message',
 ],
 
 'global/messages.html.tmpl' => [
@@ -193,15 +193,15 @@
 ],
 
 'global/select-menu.html.tmpl' => [
-  'options', 
-  'size', 
+  'options',
+  'size',
 ],
 
 'global/tabs.html.tmpl' => [
-  'content', 
+  'content',
 ],
 
-# You are not permitted to add any values here. Everything in this file should 
+# You are not permitted to add any values here. Everything in this file should
 # be filtered unless there's an extremely good reason why not, in which case,
 # use the "none" dummy filter.
 'global/user-error.html.tmpl' => [
@@ -212,7 +212,7 @@
 ],
 
 'global/site-navigation.html.tmpl' => [
-  'bug.bug_id', 
+  'bug.bug_id',
 ],
 
 'bug/comments.html.tmpl' => [
@@ -223,27 +223,27 @@
 
 'bug/dependency-graph.html.tmpl' => [
   'image_map', # We need to continue to make sure this is safe in the CGI
-  'image_url', 
-  'map_url', 
-  'bug_id', 
+  'image_url',
+  'map_url',
+  'bug_id',
 ],
 
 'bug/dependency-tree.html.tmpl' => [
-  'bugid', 
-  'maxdepth', 
-  'hide_resolved', 
+  'bugid',
+  'maxdepth',
+  'hide_resolved',
   'ids.join(",")',
-  'maxdepth + 1', 
+  'maxdepth + 1',
   'maxdepth > 0 && maxdepth <= realdepth ? maxdepth : ""',
   'maxdepth == 1 ? 1
                        : ( maxdepth ? maxdepth - 1 : realdepth - 1 )',
 ],
 
 'bug/edit.html.tmpl' => [
-  'bug.remaining_time', 
-  'bug.delta_ts', 
-  'bug.bug_id', 
-  'group.bit', 
+  'bug.remaining_time',
+  'bug.delta_ts',
+  'bug.bug_id',
+  'group.bit',
   'selname',
   'inputname',
   '" colspan=\"$colspan\"" IF colspan',
@@ -253,7 +253,7 @@
 ],
 
 'bug/show-multiple.html.tmpl' => [
-  'attachment.id', 
+  'attachment.id',
   'flag.status',
 ],
 
@@ -262,9 +262,9 @@
 ],
 
 'bug/show.xml.tmpl' => [
-  'constants.BUGZILLA_VERSION', 
-  'a.id', 
-  'field', 
+  'constants.BUGZILLA_VERSION',
+  'a.id',
+  'field',
 ],
 
 'bug/summarize-time.html.tmpl' => [
@@ -281,12 +281,12 @@
 
 'bug/time.html.tmpl' => [
   "time_unit.replace('0\\Z', '')",
-  '(act / (act + rem)) * 100 
-       FILTER format("%d")', 
+  '(act / (act + rem)) * 100
+       FILTER format("%d")',
 ],
 
 'bug/process/results.html.tmpl' => [
-  'title.$type', 
+  'title.$type',
   '"$terms.Bug $id" FILTER bug_link(id)',
   '"$terms.bug $id" FILTER bug_link(id)',
 ],
@@ -298,16 +298,16 @@
 'bug/create/create-guided.html.tmpl' => [
   'tablecolour',
   'sel',
-  'productstring', 
+  'productstring',
 ],
 
 'bug/activity/table.html.tmpl' => [
-  'change.attachid', 
+  'change.attachid',
 ],
 
 'attachment/create.html.tmpl' => [
   'bug.bug_id',
-  'attachment.id', 
+  'attachment.id',
 ],
 
 'attachment/created.html.tmpl' => [
@@ -316,13 +316,13 @@
 ],
 
 'attachment/edit.html.tmpl' => [
-  'attachment.id', 
-  'attachment.bug_id', 
+  'attachment.id',
+  'attachment.bug_id',
   'editable_or_hide',
 ],
 
 'attachment/list.html.tmpl' => [
-  'attachment.id', 
+  'attachment.id',
   'flag.status',
   'bugid',
   'obsolete_attachments',
@@ -376,33 +376,33 @@
 ],
 
 'admin/params/common.html.tmpl' => [
-  'sortlist_separator', 
+  'sortlist_separator',
 ],
 
 'admin/products/groupcontrol/confirm-edit.html.tmpl' => [
-  'group.count', 
+  'group.count',
 ],
 
 'admin/products/groupcontrol/edit.html.tmpl' => [
   'group.id',
-  'constants.CONTROLMAPNA', 
+  'constants.CONTROLMAPNA',
   'constants.CONTROLMAPSHOWN',
   'constants.CONTROLMAPDEFAULT',
   'constants.CONTROLMAPMANDATORY',
 ],
 
 'admin/products/list.html.tmpl' => [
-  'classification_url_part', 
+  'classification_url_part',
 ],
 
 'admin/products/footer.html.tmpl' => [
-  'classification_url_part', 
-  'classification_text', 
+  'classification_url_part',
+  'classification_text',
 ],
 
 'admin/flag-type/confirm-delete.html.tmpl' => [
   'flag_type.flag_count',
-  'flag_type.id', 
+  'flag_type.id',
 ],
 
 'admin/flag-type/edit.html.tmpl' => [
@@ -410,7 +410,7 @@
 ],
 
 'admin/flag-type/list.html.tmpl' => [
-  'type.id', 
+  'type.id',
 ],
 
 

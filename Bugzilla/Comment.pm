@@ -303,7 +303,7 @@ sub attachment {
     return $self->{attachment};
 }
 
-sub author { 
+sub author {
     my $self = shift;
     return $self->{'author'}
         ||= new Bugzilla::User({ id => $self->{'who'}, cache => 1 });
@@ -315,7 +315,7 @@ sub body_full {
     my $template = Bugzilla->template_inner;
     my $body;
     if ($self->type) {
-        $template->process("bug/format_comment.txt.tmpl", 
+        $template->process("bug/format_comment.txt.tmpl",
                            { comment => $self, %$params }, \$body)
             || ThrowTemplateError($template->error());
         $body =~ s/^X//;
@@ -390,16 +390,16 @@ sub _check_extra_data {
         if (!defined $extra_data) {
             ThrowCodeError('comment_extra_data_required', { type => $type });
         }
-        elsif ($type == CMT_ATTACHMENT_CREATED 
-               or $type == CMT_ATTACHMENT_UPDATED) 
+        elsif ($type == CMT_ATTACHMENT_CREATED
+               or $type == CMT_ATTACHMENT_UPDATED)
         {
-             my $attachment = Bugzilla::Attachment->check({ 
+             my $attachment = Bugzilla::Attachment->check({
                  id => $extra_data });
              $extra_data = $attachment->id;
         }
         else {
             my $original = $extra_data;
-            detaint_natural($extra_data) 
+            detaint_natural($extra_data)
               or ThrowCodeError('comment_extra_data_not_numeric',
                                 { type => $type, extra_data => $original });
         }
@@ -440,7 +440,7 @@ sub _check_bug_id {
     # Make sure the user can comment
     my $privs;
     $bug->check_can_change_field('longdesc', 0, 1, \$privs)
-        || ThrowUserError('illegal_change', 
+        || ThrowUserError('illegal_change',
                           { field => 'longdesc', privs => $privs });
     return $bug;
 }
@@ -536,7 +536,7 @@ __END__
 
 =head1 NAME
 
-Bugzilla::Comment - A Comment for a given bug 
+Bugzilla::Comment - A Comment for a given bug
 
 =head1 SYNOPSIS
 
@@ -549,7 +549,7 @@ Bugzilla::Comment - A Comment for a given bug
 
 Bugzilla::Comment represents a comment attached to a bug.
 
-This implements all standard C<Bugzilla::Object> methods. See 
+This implements all standard C<Bugzilla::Object> methods. See
 L<Bugzilla::Object> for more details.
 
 =head2 Accessors

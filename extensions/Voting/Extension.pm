@@ -88,7 +88,7 @@ sub install_update_db {
 
     $dbh->bz_add_column('products', 'votesperuser',
         {TYPE => 'INT2', NOTNULL => 1, DEFAULT => 0});
-    $dbh->bz_add_column('products', 'maxvotesperbug', 
+    $dbh->bz_add_column('products', 'maxvotesperbug',
         {TYPE => 'INT2', NOTNULL => 1, DEFAULT => DEFAULT_VOTES_PER_BUG});
     $dbh->bz_add_column('products', 'votestoconfirm',
         {TYPE => 'INT2', NOTNULL => 1, DEFAULT => 0});
@@ -113,7 +113,7 @@ sub _bug_user_votes {
     my ($self) = @_;
     return $self->{'user_votes'} if exists $self->{'user_votes'};
     $self->{'user_votes'} = Bugzilla->dbh->selectrow_array(
-        "SELECT vote_count FROM votes WHERE bug_id = ? AND who = ?", 
+        "SELECT vote_count FROM votes WHERE bug_id = ? AND who = ?",
         undef, $self->id, Bugzilla->user->id);
     return $self->{'user_votes'};
 }
@@ -184,8 +184,8 @@ sub object_end_of_update {
     my ($self, $args) = @_;
     my ($object, $changes) = @$args{qw(object changes)};
     if ( $object->isa('Bugzilla::Product')
-         and ($changes->{maxvotesperbug} or $changes->{votesperuser} 
-              or $changes->{votestoconfirm}) ) 
+         and ($changes->{maxvotesperbug} or $changes->{votesperuser}
+              or $changes->{votestoconfirm}) )
     {
         _modify_bug_votes($object, $changes);
     }
@@ -420,11 +420,11 @@ sub _page_user {
     if ($canedit && $bug) {
         # Make sure there is an entry for this bug
         # in the vote table, just so that things display right.
-        my $has_votes = $dbh->selectrow_array('SELECT vote_count FROM votes 
+        my $has_votes = $dbh->selectrow_array('SELECT vote_count FROM votes
                                                WHERE bug_id = ? AND who = ?',
                                                undef, ($bug->id, $who->id));
         if (!$has_votes) {
-            $dbh->do('INSERT INTO votes (who, bug_id, vote_count) 
+            $dbh->do('INSERT INTO votes (who, bug_id, vote_count)
                       VALUES (?, ?, 0)', undef, ($who->id, $bug->id));
         }
     }
@@ -495,7 +495,7 @@ sub _update_votes {
     my $input = Bugzilla->input_params;
 
     # Build a list of bug IDs for which votes have been submitted.  Votes
-    # are submitted in form fields in which the field names are the bug 
+    # are submitted in form fields in which the field names are the bug
     # IDs and the field values are the number of votes.
 
     my @buglist = grep {/^\d+$/} keys %$input;
@@ -634,9 +634,9 @@ sub _update_votes {
     $vars->{'title_tag'} = 'change_votes';
     foreach my $bug_id (@updated_bugs) {
         $vars->{'id'} = $bug_id;
-        $vars->{'sent_bugmail'} = 
+        $vars->{'sent_bugmail'} =
             Bugzilla::BugMail::Send($bug_id, { 'changer' => $user });
-        
+
         $template->process("bug/process/results.html.tmpl", $vars)
           || ThrowTemplateError($template->error());
         # Set header_done to 1 only after the first bug.
@@ -714,7 +714,7 @@ sub _modify_bug_votes {
             foreach my $bug_id (@$bug_ids) {
                 # _remove_votes returns a list of messages to send
                 # in case some voters had too many votes.
-                push(@msgs, _remove_votes($bug_id, $who, 
+                push(@msgs, _remove_votes($bug_id, $who,
                                           'votes_too_many_per_user'));
                 my $name = user_id_to_login($who);
 
@@ -727,7 +727,7 @@ sub _modify_bug_votes {
 
     # 3. enough votes to confirm
     my $bug_list = $dbh->selectcol_arrayref(
-        'SELECT bug_id FROM bugs 
+        'SELECT bug_id FROM bugs
           WHERE product_id = ? AND bug_status = ? AND votes >= ?',
         undef, ($product->id, 'UNCONFIRMED', $product->{votestoconfirm}));
 

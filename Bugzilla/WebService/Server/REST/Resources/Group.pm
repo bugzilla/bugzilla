@@ -55,7 +55,7 @@ __END__
 
 =head1 NAME
 
-Bugzilla::Webservice::Server::REST::Resources::Group - The REST API for 
+Bugzilla::Webservice::Server::REST::Resources::Group - The REST API for
 creating, changing, and getting information about Groups.
 
 =head1 DESCRIPTION

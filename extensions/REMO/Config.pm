@@ -12,7 +12,7 @@
 #
 # The Original Code is the REMO Bugzilla Extension.
 #
-# The Initial Developer of the Original Code is Mozilla Foundation 
+# The Initial Developer of the Original Code is Mozilla Foundation
 # Portions created by the Initial Developer are Copyright (C) 2011 the
 # Initial Developer. All Rights Reserved.
 #

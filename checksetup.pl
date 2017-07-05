@@ -33,7 +33,7 @@ use Safe;
 
 use Bugzilla::Constants;
 use Bugzilla::Install::Requirements;
-use Bugzilla::Install::Util qw(install_string get_version_and_os 
+use Bugzilla::Install::Util qw(install_string get_version_and_os
                                init_console success);
 
 ######################################################################
@@ -58,7 +58,7 @@ GetOptions(\%switch, 'help|h|?',
 # Print the help message if that switch was selected.
 pod2usage({-verbose => 1, -exitval => 1}) if $switch{'help'};
 
-# Read in the "answers" file if it exists, for running in 
+# Read in the "answers" file if it exists, for running in
 # non-interactive mode.
 my $answers_file = $ARGV[0];
 my $silent = $answers_file && !$switch{'verbose'};
@@ -278,7 +278,7 @@ unless ($switch{'no-database'}) {
     unlink(Bugzilla::Constants::bz_locations()->{datadir} . '/mod_perl_preload');
 
     # Check if the default parameter for urlbase is still set, and if so, give
-    # notification that they should go and visit editparams.cgi 
+    # notification that they should go and visit editparams.cgi
     if (Bugzilla->params->{'urlbase'} eq '') {
         print "\n" . get_text('install_urlbase_default') . "\n"
             unless $silent;
@@ -325,7 +325,7 @@ interface.
 
 =item B<--reset-password>=user@domain.com
 
-Resets the specified user's password. checksetup.pl will prompt you to 
+Resets the specified user's password. checksetup.pl will prompt you to
 enter a new password for the user.
 
 =item B<--no-templates> (B<-t>)
@@ -461,7 +461,7 @@ from one version of Bugzilla to another.
 
 The code for this is in L<Bugzilla::Install::DB/update_table_definitions>.
 
-This includes creating the default Classification (using 
+This includes creating the default Classification (using
 L<Bugzilla::Install/create_default_classification>) and setting up all
 the foreign keys for all tables, using L<Bugzilla::DB/bz_setup_foreign_keys>.
 
@@ -529,7 +529,7 @@ The format of that file is as follows:
  $answer{'NO_PAUSE'} = 1
 
 C<NO_PAUSE> means "never stop and prompt the user to hit Enter to continue,
-just go ahead and do things, even if they are potentially dangerous." 
+just go ahead and do things, even if they are potentially dangerous."
 Don't set this to 1 unless you know what you are doing.
 
 =head1 SEE ALSO

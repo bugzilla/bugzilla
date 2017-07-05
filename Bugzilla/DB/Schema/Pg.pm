@@ -32,13 +32,13 @@ sub _initialize {
         if ($self->{schema}{$table}{INDEXES}) {
             foreach my $index (@{ $self->{schema}{$table}{INDEXES} }) {
                 if (ref($index) eq 'HASH') {
-                    delete($index->{TYPE}) if (exists $index->{TYPE} 
+                    delete($index->{TYPE}) if (exists $index->{TYPE}
                         && $index->{TYPE} eq 'FULLTEXT');
                 }
             }
             foreach my $index (@{ $self->{abstract_schema}{$table}{INDEXES} }) {
                 if (ref($index) eq 'HASH') {
-                    delete($index->{TYPE}) if (exists $index->{TYPE} 
+                    delete($index->{TYPE}) if (exists $index->{TYPE}
                         && $index->{TYPE} eq 'FULLTEXT');
                 }
             }
@@ -48,7 +48,7 @@ sub _initialize {
     $self->{db_specific} = {
 
         BOOLEAN =>      'smallint',
-        FALSE =>        '0', 
+        FALSE =>        '0',
         TRUE =>         '1',
 
         INT1 =>         'integer',
@@ -98,7 +98,7 @@ sub get_rename_column_ddl {
     my $def = $self->get_column_abstract($table, $old_name);
     if ($def->{TYPE} =~ /SERIAL/i) {
         # We have to rename the series also.
-        push(@sql, "ALTER SEQUENCE ${table}_${old_name}_seq 
+        push(@sql, "ALTER SEQUENCE ${table}_${old_name}_seq
                          RENAME TO ${table}_${new_name}_seq");
     }
     return @sql;
@@ -148,11 +148,11 @@ sub _get_alter_type_sql {
     my @statements;
 
     my $type = $new_def->{TYPE};
-    $type = $self->{db_specific}->{$type} 
+    $type = $self->{db_specific}->{$type}
         if exists $self->{db_specific}->{$type};
 
     if ($type =~ /serial/i && $old_def->{TYPE} !~ /serial/i) {
-        die("You cannot specify a DEFAULT on a SERIAL-type column.") 
+        die("You cannot specify a DEFAULT on a SERIAL-type column.")
             if $new_def->{DEFAULT};
     }
 
@@ -171,16 +171,16 @@ sub _get_alter_type_sql {
         push(@statements, "SELECT setval('${table}_${column}_seq',
                                          MAX($table.$column))
                              FROM $table");
-        push(@statements, "ALTER TABLE $table ALTER COLUMN $column 
+        push(@statements, "ALTER TABLE $table ALTER COLUMN $column
                            SET DEFAULT nextval('${table}_${column}_seq')");
     }
 
     # If this column is no longer SERIAL, we need to drop the sequence
     # that went along with it.
     if ($old_def->{TYPE} =~ /serial/i && $new_def->{TYPE} !~ /serial/i) {
-        push(@statements, "ALTER TABLE $table ALTER COLUMN $column 
+        push(@statements, "ALTER TABLE $table ALTER COLUMN $column
                            DROP DEFAULT");
-        push(@statements, "ALTER SEQUENCE ${table}_${column}_seq 
+        push(@statements, "ALTER SEQUENCE ${table}_${column}_seq
                            OWNED BY NONE");
         push(@statements, "DROP SEQUENCE ${table}_${column}_seq");
     }

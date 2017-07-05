@@ -179,7 +179,7 @@ sub get_project_phid {
     };
 
     my $result = request('project.search', $data);
-    return undef 
+    return undef
         unless (exists $result->{result}{data} && @{ $result->{result}{data} });
 
     return $result->{result}{data}[0]{phid};

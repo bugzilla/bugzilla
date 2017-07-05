@@ -324,7 +324,7 @@ L<Bugzilla::Memcached> provides an interface to a Memcached server/servers, with
 the ability to get, set, or clear entries from the cache.
 
 The stored value must be an unblessed hashref, unblessed array ref, or a
-scalar. 
+scalar.
 
 All values are stored in the Memcached systems using the prefix configured with
 the C<memcached_namespace> parameter, as well as an additional prefix managed

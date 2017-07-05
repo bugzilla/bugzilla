@@ -53,7 +53,7 @@ sub check_credentials {
 
     my $dn = $dn_result->shift_entry->dn;
 
-    # Check the password.   
+    # Check the password.
     my $pw_result = $self->ldap->bind($dn, password => $params->{password});
     return { failure => AUTH_LOGINFAILED } if $pw_result->code;
 
@@ -103,7 +103,7 @@ sub check_credentials {
 
         if (@emails > 1) {
             # Cycle through the adresses and check if they're Bugzilla logins.
-            # Use the first one that returns a valid id. 
+            # Use the first one that returns a valid id.
             foreach my $email (@emails) {
                 if ( login_to_id($email) ) {
                     $params->{bz_username} = $email;
@@ -129,7 +129,7 @@ sub _bz_search_params {
     $username = escape_filter_value($username);
     return (base   => Bugzilla->params->{"LDAPBaseDN"},
             scope  => "sub",
-            filter => '(&(' . Bugzilla->params->{"LDAPuidattribute"} 
+            filter => '(&(' . Bugzilla->params->{"LDAPuidattribute"}
                       . "=$username)"
                       . Bugzilla->params->{"LDAPfilter"} . ')');
 }
@@ -138,9 +138,9 @@ sub _bind_ldap_for_search {
     my ($self) = @_;
     my $bind_result;
     if (Bugzilla->params->{"LDAPbinddn"}) {
-        my ($LDAPbinddn,$LDAPbindpass) = 
+        my ($LDAPbinddn,$LDAPbindpass) =
             split(":",Bugzilla->params->{"LDAPbinddn"});
-        $bind_result = 
+        $bind_result =
             $self->ldap->bind($LDAPbinddn, password => $LDAPbindpass);
     }
     else {
@@ -153,7 +153,7 @@ sub _bind_ldap_for_search {
 # We can't just do this in new(), because we're not allowed to throw any
 # error from anywhere under Bugzilla::Auth::new -- otherwise we
 # could create a situation where the admin couldn't get to editparams
-# to fix his mistake. (Because Bugzilla->login always calls 
+# to fix his mistake. (Because Bugzilla->login always calls
 # Bugzilla::Auth->new, and almost every page calls Bugzilla->login.)
 sub ldap {
     my ($self) = @_;
@@ -166,7 +166,7 @@ sub ldap {
         $self->{ldap} = new Net::LDAP(trim($_));
         last if $self->{ldap};
     }
-    ThrowCodeError("ldap_connect_failed", { server => join(", ", @servers) }) 
+    ThrowCodeError("ldap_connect_failed", { server => join(", ", @servers) })
         unless $self->{ldap};
 
     # try to start TLS if needed

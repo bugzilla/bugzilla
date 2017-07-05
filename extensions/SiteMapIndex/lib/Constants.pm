@@ -38,11 +38,11 @@ our @EXPORT = qw(
 use constant SITEMAP_AGE => 12;
 
 # This is the largest number of entries that can be in a single sitemap file,
-# per the sitemaps.org standard. 
+# per the sitemaps.org standard.
 use constant SITEMAP_MAX => 50_000;
 
 # We only show bugs that are at least 12 hours old, because if somebody
-# files a bug that's a security bug but doesn't protect it, we want to give 
+# files a bug that's a security bug but doesn't protect it, we want to give
 # them time to fix that.
 use constant SITEMAP_DELAY => 12;
 

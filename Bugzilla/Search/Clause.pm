@@ -57,7 +57,7 @@ sub add {
         push(@$children, condition(@_));
         return;
     }
-    
+
     my ($child) = @_;
     return if !defined $child;
     $child->isa(__PACKAGE__) || $child->isa('Bugzilla::Search::Condition')

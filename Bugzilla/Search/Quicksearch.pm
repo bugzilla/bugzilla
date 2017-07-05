@@ -69,8 +69,8 @@ sub FIELD_MAP {
     return $cache->{quicksearch_fields} if $cache->{quicksearch_fields};
 
     # Get all the fields whose names don't contain periods. (Fields that
-    # contain periods are always handled in MAPPINGS.) 
-    my @db_fields = grep { $_->name !~ /\./ } 
+    # contain periods are always handled in MAPPINGS.)
+    my @db_fields = grep { $_->name !~ /\./ }
                          @{ Bugzilla->fields({ obsolete => 0 }) };
     my %full_map = (%{ MAPPINGS() }, map { $_->name => $_->name } @db_fields);
 
@@ -82,7 +82,7 @@ sub FIELD_MAP {
     # the mappings, and otherwise "stat" can't match "status".
     #
     # Also, don't allow searching the _accessible stuff via quicksearch
-    # (both because it's unnecessary and because otherwise 
+    # (both because it's unnecessary and because otherwise
     # "reporter_accessible" and "reporter" both match "rep".
     delete @full_map{qw(rep_platform bug_status bug_file_loc bug_group
                         bug_severity bug_status
@@ -503,7 +503,7 @@ sub _translate_field_name {
     }
 
     # Check if we match exactly one custom field, ignoring the cf_ on the
-    # custom fields (to allow people to type things like "build" for 
+    # custom fields (to allow people to type things like "build" for
     # "cf_build").
     my %cfless;
     foreach my $name (@field_names) {
@@ -534,7 +534,7 @@ sub _translate_field_name {
 sub _special_field_syntax {
     my ($word, $negate) = @_;
     return unless defined($word);
-    
+
     # P1-5 Syntax
     if ($word =~ m/^P(\d+)(?:-(\d+))?$/i) {
         my ($p_start, $p_end) = ($1, $2);
@@ -564,26 +564,26 @@ sub _special_field_syntax {
         addChart('priority', 'anyexact', $prios, $negate);
         return 1;
     }
-    return 0;    
+    return 0;
 }
 
 sub _default_quicksearch_word {
     my ($word, $negate) = @_;
     return unless defined($word);
-    
+
     if (!grep { lc($word) eq $_ } PRODUCT_EXCEPTIONS and length($word) > 2) {
         addChart('product', 'substring', $word, $negate);
     }
-    
+
     if (!grep { lc($word) eq $_ } COMPONENT_EXCEPTIONS and length($word) > 2) {
         addChart('component', 'substring', $word, $negate);
     }
-    
+
     my @legal_keywords = map($_->name, Bugzilla::Keyword->get_all);
     if (grep { lc($word) eq lc($_) } @legal_keywords) {
         addChart('keywords', 'substring', $word, $negate);
     }
-    
+
     addChart('alias', 'substring', $word, $negate);
     addChart('short_desc', 'substring', $word, $negate);
     addChart('status_whiteboard', 'substring', $word, $negate);

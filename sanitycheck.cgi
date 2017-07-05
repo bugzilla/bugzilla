@@ -235,7 +235,7 @@ if ($cgi->param('rescanallBugMail')) {
 
     my $list = $dbh->selectcol_arrayref(qq{
                                         SELECT bug_id
-                                          FROM bugs 
+                                          FROM bugs
                                          WHERE (lastdiffed IS NULL
                                                 OR lastdiffed < delta_ts)
                                            AND delta_ts < $time
@@ -574,7 +574,7 @@ CrossCheck('bug_status', 'id',
 ###########################################################################
 # Perform double field referential (cross) checks
 ###########################################################################
- 
+
 # This checks that a compound two-field foreign key has a valid primary key
 # value.  NULL references are acceptable and cause no problem.
 #
@@ -606,16 +606,16 @@ sub DoubleCrossCheck {
                {table => $refertable, field1 => $referfield1, field2 =>$referfield2});
 
         my $d_cross_check = $dbh->selectall_arrayref(qq{
-                        SELECT DISTINCT $refertable.$referfield1, 
+                        SELECT DISTINCT $refertable.$referfield1,
                                         $refertable.$referfield2 } .
                        ($keyname ? qq{, $refertable.$keyname } : q{}) .
                       qq{ FROM $refertable
                      LEFT JOIN $table
                             ON $refertable.$referfield1 = $table.$field1
-                           AND $refertable.$referfield2 = $table.$field2 
-                         WHERE $table.$field1 IS NULL 
-                           AND $table.$field2 IS NULL 
-                           AND $refertable.$referfield1 IS NOT NULL 
+                           AND $refertable.$referfield2 = $table.$field2
+                         WHERE $table.$field1 IS NULL
+                           AND $table.$field2 IS NULL
+                           AND $refertable.$referfield1 IS NOT NULL
                            AND $refertable.$referfield2 IS NOT NULL});
 
         foreach my $check (@$d_cross_check) {
@@ -640,7 +640,7 @@ DoubleCrossCheck("components", "product_id", "id",
 
 DoubleCrossCheck("versions", "product_id", "value",
                  ["bugs", "product_id", "version", "bug_id"]);
- 
+
 DoubleCrossCheck("milestones", "product_id", "value",
                  ["bugs", "product_id", "target_milestone", "bug_id"],
                  ["products", "id", "defaultmilestone", "name"]);
@@ -760,9 +760,9 @@ if (scalar(@invalid_flags)) {
 sub BugCheck {
     my ($middlesql, $errortext, $repairparam, $repairtext) = @_;
     my $dbh = Bugzilla->dbh;
- 
+
     my $badbugs = $dbh->selectcol_arrayref(qq{SELECT DISTINCT bugs.bug_id
-                                                FROM $middlesql 
+                                                FROM $middlesql
                                             ORDER BY bugs.bug_id});
 
     if (scalar(@$badbugs)) {
@@ -829,8 +829,8 @@ Status('bug_check_control_values');
 my $groups = join(", ", (CONTROLMAPNA, CONTROLMAPSHOWN, CONTROLMAPDEFAULT,
 CONTROLMAPMANDATORY));
 my $query = qq{
-     SELECT COUNT(product_id) 
-       FROM group_control_map 
+     SELECT COUNT(product_id)
+       FROM group_control_map
       WHERE membercontrol NOT IN( $groups )
          OR othercontrol NOT IN( $groups )
          OR ((membercontrol != othercontrol)
@@ -875,8 +875,8 @@ Status('unsent_bugmail_check');
 
 my $time = $dbh->sql_date_math('NOW()', '-', 30, 'MINUTE');
 my $badbugs = $dbh->selectcol_arrayref(qq{
-                    SELECT bug_id 
-                      FROM bugs 
+                    SELECT bug_id
+                      FROM bugs
                      WHERE (lastdiffed IS NULL OR lastdiffed < delta_ts)
                        AND delta_ts < $time
                   ORDER BY bug_id});

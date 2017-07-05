@@ -11,7 +11,7 @@
 # implied. See the License for the specific language governing
 # rights and limitations under the License.
 #
-# The Original Code is the Bugzilla Bug Tracking System. 
+# The Original Code is the Bugzilla Bug Tracking System.
 #
 # The Initial Developer of the Original Code is Mike Norton.
 # Portions created by the Initial Developer are Copyright (C) 2002

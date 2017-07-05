@@ -90,11 +90,11 @@ sub bug_check_can_change_field {
 
     my $user = Bugzilla->user;
 
-    # Disallow a bug from being reopened if currently closed unless user 
+    # Disallow a bug from being reopened if currently closed unless user
     # is in 'admin' group
     if ($field eq 'bug_status' && $bug->product_obj->name eq 'Example') {
-        if (!is_open_state($old_value) && is_open_state($new_value) 
-            && !$user->in_group('admin')) 
+        if (!is_open_state($old_value) && is_open_state($new_value)
+            && !$user->in_group('admin'))
         {
             push(@$priv_results, PRIVILEGES_REQUIRED_EMPOWERED);
             return;
@@ -102,18 +102,18 @@ sub bug_check_can_change_field {
     }
 
     # Disallow a bug's keywords from being edited unless user is the
-    # reporter of the bug 
-    if ($field eq 'keywords' && $bug->product_obj->name eq 'Example' 
-        && $user->login ne $bug->reporter->login) 
+    # reporter of the bug
+    if ($field eq 'keywords' && $bug->product_obj->name eq 'Example'
+        && $user->login ne $bug->reporter->login)
     {
         push(@$priv_results, PRIVILEGES_REQUIRED_REPORTER);
         return;
     }
 
-    # Allow updating of priority even if user cannot normally edit the bug 
+    # Allow updating of priority even if user cannot normally edit the bug
     # and they are in group 'engineering'
     if ($field eq 'priority' && $bug->product_obj->name eq 'Example'
-        && $user->in_group('engineering')) 
+        && $user->in_group('engineering'))
     {
         push(@$priv_results, PRIVILEGES_REQUIRED_NONE);
         return;
@@ -133,7 +133,7 @@ sub bug_end_of_create {
     # how to use this hook.
     my $bug = $args->{'bug'};
     my $timestamp = $args->{'timestamp'};
-    
+
     my $bug_id = $bug->id;
     # Uncomment this line to see a line in your webserver's error log whenever
     # you file a bug.
@@ -142,15 +142,15 @@ sub bug_end_of_create {
 
 sub bug_end_of_create_validators {
     my ($self, $args) = @_;
-    
+
     # This code doesn't actually *do* anything, it's just here to show you
     # how to use this hook.
     my $bug_params = $args->{'params'};
-    
+
     # Uncomment this line below to see a line in your webserver's error log
     # containing all validated bug field values every time you file a bug.
     # warn Dumper($bug_params);
-    
+
     # This would remove all ccs from the bug, preventing ANY ccs from being
     # added on bug creation.
     # $bug_params->{cc} = [];
@@ -161,7 +161,7 @@ sub bug_start_of_update {
 
     # This code doesn't actually *do* anything, it's just here to show you
     # how to use this hook.
-    my ($bug, $old_bug, $timestamp, $changes) = 
+    my ($bug, $old_bug, $timestamp, $changes) =
         @$args{qw(bug old_bug timestamp changes)};
 
     foreach my $field (keys %$changes) {
@@ -194,12 +194,12 @@ sub bug_start_of_update {
 
 sub bug_end_of_update {
     my ($self, $args) = @_;
-    
+
     # This code doesn't actually *do* anything, it's just here to show you
     # how to use this hook.
-    my ($bug, $old_bug, $timestamp, $changes) = 
+    my ($bug, $old_bug, $timestamp, $changes) =
         @$args{qw(bug old_bug timestamp changes)};
-    
+
     foreach my $field (keys %$changes) {
         my $used_to_be = $changes->{$field}->[0];
         my $now_it_is  = $changes->{$field}->[1];
@@ -218,7 +218,7 @@ sub bug_end_of_update {
             $status_message = "Bug closed!";
         }
     }
-    
+
     my $bug_id = $bug->id;
     my $num_changes = scalar keys %$changes;
     my $result = "There were $num_changes changes to fields on bug $bug_id"
@@ -237,13 +237,13 @@ sub bug_fields {
 
 sub bug_format_comment {
     my ($self, $args) = @_;
-    
+
     # This replaces every occurrence of the word "foo" with the word
     # "bar"
-    
+
     my $regexes = $args->{'regexes'};
     push(@$regexes, { match => qr/\bfoo\b/, replace => 'bar' });
-    
+
     # And this links every occurrence of the word "bar" to example.com,
     # but it won't affect "foo"s that have already been turned into "bar"
     # above (because each regex is run in order, and later regexes don't modify
@@ -258,8 +258,8 @@ sub bug_format_comment {
 # Used by bug_format_comment--see its code for an explanation.
 sub _replace_bar {
     my $args = shift;
-    # $match is the first parentheses match in the $bar_match regex 
-    # in bug-format_comment.pl. We get up to 10 regex matches as 
+    # $match is the first parentheses match in the $bar_match regex
+    # in bug-format_comment.pl. We get up to 10 regex matches as
     # arguments to this function.
     my $match = $args->{matches}->[0];
     # Remember, you have to HTML-escape any data that you are returning!
@@ -269,7 +269,7 @@ sub _replace_bar {
 
 sub buglist_columns {
     my ($self, $args) = @_;
-    
+
     my $columns = $args->{'columns'};
     $columns->{'example'} = { 'name' => 'bugs.delta_ts' , 'title' => 'Example' };
     $columns->{'product_desc'} = { 'name'  => 'prod_desc.description',
@@ -292,7 +292,7 @@ sub buglist_column_joins {
 
 sub search_operator_field_override {
     my ($self, $args) = @_;
-    
+
     my $operators = $args->{'operators'};
 
     my $original = $operators->{component}->{_non_changed};
@@ -316,7 +316,7 @@ sub bugmail_recipients {
     my $recipients = $args->{recipients};
     my $bug = $args->{bug};
 
-    my $user = 
+    my $user =
         new Bugzilla::User({ name => Bugzilla->params->{'maintainer'} });
 
     if ($bug->id == 1) {
@@ -339,16 +339,16 @@ sub bugmail_relationships {
 
 sub config_add_panels {
     my ($self, $args) = @_;
-    
+
     my $modules = $args->{panel_modules};
     $modules->{Example} = "Bugzilla::Extension::Example::Config";
 }
 
 sub config_modify_panels {
     my ($self, $args) = @_;
-    
+
     my $panels = $args->{panels};
-    
+
     # Add the "Example" auth methods.
     my $auth_params = $panels->{'auth'}->{params};
     my ($info_class)   = grep($_->{name} eq 'user_info_class', @$auth_params);
@@ -360,7 +360,7 @@ sub config_modify_panels {
     push(@$auth_params, { name => 'param_example',
                           type => 't',
                           default => 0,
-                          checker => \&check_numeric });    
+                          checker => \&check_numeric });
 }
 
 sub db_schema_abstract_schema {
@@ -426,7 +426,7 @@ sub email_in_after_parse {
 
 sub enter_bug_entrydefaultvars {
     my ($self, $args) = @_;
-    
+
     my $vars = $args->{vars};
     $vars->{'example'} = 1;
 }
@@ -458,7 +458,7 @@ sub error_catch {
 
 sub flag_end_of_update {
     my ($self, $args) = @_;
-    
+
     # This code doesn't actually *do* anything, it's just here to show you
     # how to use this hook.
     my $flag_params = $args;
@@ -470,7 +470,7 @@ sub flag_end_of_update {
         $granted++ if $new_flag =~ /\+$/;
         $denied++ if $new_flag =~ /-$/;
     }
-    my $bug_id = $object->isa('Bugzilla::Bug') ? $object->id 
+    my $bug_id = $object->isa('Bugzilla::Bug') ? $object->id
                                                : $object->bug_id;
     my $result = "$granted flags were granted and $denied flags were denied"
                  . " on bug $bug_id at $timestamp.";
@@ -517,7 +517,7 @@ sub group_end_of_update {
 
     my $group_id = $group->id;
     my $num_changes = scalar keys %$changes;
-    my $result = 
+    my $result =
         "There were $num_changes changes to fields on group $group_id.";
     # Uncomment this line to see $result in your webserver's error log whenever
     # you update a group.
@@ -527,7 +527,7 @@ sub group_end_of_update {
 sub install_before_final_checks {
     my ($self, $args) = @_;
     print "Install-before_final_checks hook\n" unless $args->{silent};
-    
+
     # Add a new user setting like this:
     #
     # add_setting({
@@ -535,8 +535,8 @@ sub install_before_final_checks {
     #     options  => ['pretty', 'full', 'small'], # options
     #     category => 'pretty'                     # default
     # });
-    # To add descriptions for the setting and choices, add extra values to 
-    # the hash defined in global/setting-descs.none.tmpl. Do this in a hook: 
+    # To add descriptions for the setting and choices, add extra values to
+    # the hash defined in global/setting-descs.none.tmpl. Do this in a hook:
     # hook/global/setting-descs-settings.none.tmpl .
 }
 
@@ -551,15 +551,15 @@ sub install_filesystem {
     # code as well as allow the webserver to server content from it.
     # my $data_path = bz_locations->{'datadir'} . "/" . __PACKAGE__->NAME;
     # $create_dirs->{$data_path} = Bugzilla::Install::Filesystem::DIR_CGI_WRITE;
-   
+
     # Update the permissions of any files and directories that currently reside
-    # in the extension's directory. 
+    # in the extension's directory.
     # $recurse_dirs->{$data_path} = {
     #     files => Bugzilla::Install::Filesystem::CGI_READ,
     #     dirs  => Bugzilla::Install::Filesystem::DIR_CGI_WRITE
     # };
-    
-    # Create a htaccess file that allows specific content to be served from the 
+
+    # Create a htaccess file that allows specific content to be served from the
     # extension's directory.
     # $htaccess->{"$data_path/.htaccess"} = {
     #     perms    => Bugzilla::Install::Filesystem::WS_SERVE,
@@ -576,19 +576,19 @@ sub install_update_db {
 
 sub install_update_db_fielddefs {
     my $dbh = Bugzilla->dbh;
-#    $dbh->bz_add_column('fielddefs', 'example_column', 
+#    $dbh->bz_add_column('fielddefs', 'example_column',
 #                        {TYPE => 'MEDIUMTEXT', NOTNULL => 1, DEFAULT => ''});
 }
 
 sub job_map {
     my ($self, $args) = @_;
-    
+
     my $job_map = $args->{job_map};
-    
+
     # This adds the named class (an instance of TheSchwartz::Worker) as a
     # handler for when a job is added with the name "some_task".
     $job_map->{'some_task'} = 'Bugzilla::Extension::Example::Job::SomeClass';
-    
+
     # Schedule a job like this:
     # my $queue = Bugzilla->job_queue();
     # $queue->insert('some_task', { some_parameter => $some_variable });
@@ -596,7 +596,7 @@ sub job_map {
 
 sub mailer_before_send {
     my ($self, $args) = @_;
-    
+
     my $email = $args->{email};
     # If you add a header to an email, it's best to start it with
     # 'X-Bugzilla-<Extension>' so that you don't conflict with
@@ -606,14 +606,14 @@ sub mailer_before_send {
 
 sub object_before_create {
     my ($self, $args) = @_;
-    
+
     my $class = $args->{'class'};
     my $object_params = $args->{'params'};
-    
+
     # Note that this is a made-up class, for this example.
     if ($class->isa('Bugzilla::ExampleObject')) {
         warn "About to create an ExampleObject!";
-        warn "Got the following parameters: " 
+        warn "Got the following parameters: "
              . join(', ', keys(%$object_params));
     }
 }
@@ -627,17 +627,17 @@ sub object_before_delete {
     if ($object->isa('Bugzilla::ExampleObject')) {
         my $id = $object->id;
         warn "An object with id $id is about to be deleted!";
-    } 
+    }
 }
 
 sub object_before_set {
     my ($self, $args) = @_;
-    
+
     my ($object, $field, $value) = @$args{qw(object field value)};
-    
+
     # Note that this is a made-up class, for this example.
     if ($object->isa('Bugzilla::ExampleObject')) {
-        warn "The field $field is changing from " . $object->{$field} 
+        warn "The field $field is changing from " . $object->{$field}
              . " to $value!";
     }
 }
@@ -653,7 +653,7 @@ sub object_columns {
 
 sub object_end_of_create {
     my ($self, $args) = @_;
-    
+
     my $class  = $args->{'class'};
     my $object = $args->{'object'};
 
@@ -662,16 +662,16 @@ sub object_end_of_create {
 
 sub object_end_of_create_validators {
     my ($self, $args) = @_;
-    
+
     my $class = $args->{'class'};
     my $object_params = $args->{'params'};
-    
+
     # Note that this is a made-up class, for this example.
     if ($class->isa('Bugzilla::ExampleObject')) {
         # Always set example_field to 1, even if the validators said otherwise.
         $object_params->{example_field} = 1;
     }
-    
+
 }
 
 sub object_end_of_set {
@@ -687,25 +687,25 @@ sub object_end_of_set {
 
 sub object_end_of_set_all {
     my ($self, $args) = @_;
-    
+
     my $object = $args->{'object'};
     my $object_params = $args->{'params'};
-    
+
     # Note that this is a made-up class, for this example.
     if ($object->isa('Bugzilla::ExampleObject')) {
         if ($object_params->{example_field} == 1) {
             $object->{example_field} = 1;
         }
     }
-    
+
 }
 
 sub object_end_of_update {
     my ($self, $args) = @_;
-    
-    my ($object, $old_object, $changes) = 
+
+    my ($object, $old_object, $changes) =
         @$args{qw(object old_object changes)};
-    
+
     # Note that this is a made-up class, for this example.
     if ($object->isa('Bugzilla::ExampleObject')) {
         if (defined $changes->{'name'}) {
@@ -767,9 +767,9 @@ sub _check_short_desc {
 
 sub page_before_template {
     my ($self, $args) = @_;
-    
+
     my ($vars, $page) = @$args{qw(vars page_id)};
-    
+
     # You can see this hook in action by loading page.cgi?id=example.html
     if ($page eq 'example.html') {
         $vars->{cgi_variables} = { Bugzilla->cgi->Vars };
@@ -784,14 +784,14 @@ sub path_info_whitelist {
 
 sub post_bug_after_creation {
     my ($self, $args) = @_;
-    
+
     my $vars = $args->{vars};
     $vars->{'example'} = 1;
 }
 
 sub product_confirm_delete {
     my ($self, $args) = @_;
-    
+
     my $vars = $args->{vars};
     $vars->{'example'} = 1;
 }
@@ -813,7 +813,7 @@ sub product_end_of_create {
     my $example_group = new Bugzilla::Group({ name => 'example_group' });
 
     if ($example_group) {
-        $product->set_group_controls($example_group, 
+        $product->set_group_controls($example_group,
                 { entry          => 1,
                   membercontrol  => CONTROLMAPMANDATORY,
                   othercontrol   => CONTROLMAPMANDATORY });
@@ -830,7 +830,7 @@ sub product_end_of_create {
 #        Bugzilla::Component->create(
 #            { name             => 'No Component',
 #              product          => $product,
-#              description      => 'Select this component if one does not ' . 
+#              description      => 'Select this component if one does not ' .
 #                                  'exist in the current list of components',
 #              initialowner     => $default_assignee });
     }
@@ -846,20 +846,20 @@ sub quicksearch_map {
 
 sub sanitycheck_check {
     my ($self, $args) = @_;
-    
+
     my $dbh = Bugzilla->dbh;
     my $sth;
-    
+
     my $status = $args->{'status'};
-    
+
     # Check that all users are Australian
     $status->('example_check_au_user');
-    
+
     $sth = $dbh->prepare("SELECT userid, login_name
                             FROM profiles
                            WHERE login_name NOT LIKE '%.au'");
     $sth->execute;
-    
+
     my $seen_nonau = 0;
     while (my ($userid, $login, $numgroups) = $sth->fetchrow_array) {
         $status->('example_check_au_user_alert',
@@ -867,32 +867,32 @@ sub sanitycheck_check {
                   'alert');
         $seen_nonau = 1;
     }
-    
+
     $status->('example_check_au_user_prompt') if $seen_nonau;
 }
 
 sub sanitycheck_repair {
     my ($self, $args) = @_;
-    
+
     my $cgi = Bugzilla->cgi;
     my $dbh = Bugzilla->dbh;
-    
+
     my $status = $args->{'status'};
-    
+
     if ($cgi->param('example_repair_au_user')) {
         $status->('example_repair_au_user_start');
-    
+
         #$dbh->do("UPDATE profiles
         #             SET login_name = CONCAT(login_name, '.au')
         #           WHERE login_name NOT LIKE '%.au'");
-    
+
         $status->('example_repair_au_user_end');
     }
 }
 
 sub template_before_create {
     my ($self, $args) = @_;
-    
+
     my $config = $args->{'config'};
     # This will be accessible as "example_global_variable" in every
     # template in Bugzilla. See Bugzilla/Template.pm's create() function
@@ -902,7 +902,7 @@ sub template_before_create {
 
 sub template_before_process {
     my ($self, $args) = @_;
-    
+
     my ($vars, $file, $context) = @$args{qw(vars file context)};
 
     if ($file eq 'bug/edit.html.tmpl') {

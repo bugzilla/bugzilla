@@ -16,8 +16,8 @@ use Bugzilla;
 use Bugzilla::BugMail;
 use Bugzilla::Constants;
 use Bugzilla::Error;
-use Bugzilla::Flag; 
-use Bugzilla::FlagType; 
+use Bugzilla::Flag;
+use Bugzilla::FlagType;
 use Bugzilla::User;
 use Bugzilla::Util;
 use Bugzilla::Bug;
@@ -87,34 +87,34 @@ elsif ($action eq "diff")
 {
     diff();
 }
-elsif ($action eq "viewall") 
-{ 
-    viewall(); 
+elsif ($action eq "viewall")
+{
+    viewall();
 }
-elsif ($action eq "enter") 
-{ 
+elsif ($action eq "enter")
+{
     Bugzilla->login(LOGIN_REQUIRED);
-    enter(); 
+    enter();
 }
 elsif ($action eq "insert")
 {
     Bugzilla->login(LOGIN_REQUIRED);
     insert();
 }
-elsif ($action eq "edit") 
-{ 
-    edit(); 
+elsif ($action eq "edit")
+{
+    edit();
 }
-elsif ($action eq "update") 
-{ 
+elsif ($action eq "update")
+{
     Bugzilla->login(LOGIN_REQUIRED);
     update();
 }
 elsif ($action eq "delete") {
     delete_attachment();
 }
-else 
-{ 
+else
+{
   ThrowUserError('unknown_action', {action => $action});
 }
 
@@ -148,7 +148,7 @@ sub validateID {
             ThrowTemplateError($template->error());
         exit;
     }
-    
+
     my $attach_id = $cgi->param($param);
 
     # Validate the specified attachment id. detaint kills $attach_id if
@@ -157,7 +157,7 @@ sub validateID {
     detaint_natural($attach_id)
         || ThrowUserError("invalid_attach_id",
                           { attach_id => scalar $cgi->param($param) });
-  
+
     # Make sure the attachment exists in the database.
     my $attachment = new Bugzilla::Attachment({ id => $attach_id, cache => 1 })
         || ThrowUserError("invalid_attach_id", { attach_id => $attach_id });
@@ -172,8 +172,8 @@ sub check_can_access {
 
     # Make sure the user is authorized to access this attachment's bug.
     Bugzilla::Bug->check({ id => $attachment->bug_id, cache => 1 });
-    if ($attachment->isprivate && $user->id != $attachment->attacher->id 
-        && !$user->is_insider) 
+    if ($attachment->isprivate && $user->id != $attachment->attacher->id
+        && !$user->is_insider)
     {
         ThrowUserError('auth_failure', {action => 'access',
                                         object => 'attachment',
@@ -288,7 +288,7 @@ sub get_attachment {
             # alternate host.
             Bugzilla->login();
             my $attachbase = Bugzilla->params->{'attachment_base'};
-            # Replace %bugid% by the ID of the bug the attachment 
+            # Replace %bugid% by the ID of the bug the attachment
             # belongs to, if present.
             $attachbase =~ s/\%bugid\%/$bug_id/;
             # To avoid leaking information we redirect using the attachment ID only
@@ -508,7 +508,7 @@ sub enter {
 
   my $flag_types = Bugzilla::FlagType::match({'target_type'  => 'attachment',
                                               'product_id'   => $bug->product_id,
-                                              'component_id' => $bug->component_id, 
+                                              'component_id' => $bug->component_id,
                                               'is_active'    => 1});
   $vars->{'flag_types'} = $flag_types;
   $vars->{'any_flags_requesteeble'} =
@@ -599,7 +599,7 @@ sub insert {
       ($bug_status) = grep {$_->name eq $bug_status} @{$bug->status->can_change_to};
 
       if ($bug_status && $bug_status->is_open
-          && ($bug_status->name ne 'UNCONFIRMED' 
+          && ($bug_status->name ne 'UNCONFIRMED'
               || $bug->product_obj->allows_unconfirmed))
       {
           $bug->set_bug_status($bug_status->name);
@@ -789,7 +789,7 @@ sub update {
     $vars->{'attachment'} = $attachment;
     $vars->{'bugs'} = [$bug];
     $vars->{'header_done'} = 1;
-    $vars->{'sent_bugmail'} = 
+    $vars->{'sent_bugmail'} =
         Bugzilla::BugMail::Send($bug->id, { 'changer' => $user });
 
     # BMO: add show_bug_format hook for experimental UI work

@@ -276,14 +276,14 @@ sub _read_products {
     my $file =  "$path/gnats-adm/categories";
     $self->debug("Reading categories from $file");
 
-    open(my $categories_fh, '<', $file) || die "$file: $!";    
+    open(my $categories_fh, '<', $file) || die "$file: $!";
     my @products;
     foreach my $line (<$categories_fh>) {
         $line = trim($line);
         next if $line =~ /^#/;
         my ($name, $description, $assigned_to, $cc) = split(':', $line, 4);
         my %product = ( name => $name, description => $description );
-        
+
         my @initial_cc = split(',', $cc);
         @initial_cc = @{ $self->translate_value('user', \@initial_cc) };
         $assigned_to = $self->translate_value('user', $assigned_to);
@@ -361,7 +361,7 @@ sub _get_gnats_field_data {
         # If this line starts a field name
         if ($line =~ FIELD_REGEX) {
             my ($new_field, $rest_of_line) = ($1, $2);
-            
+
             # If this is one of the last few PR fields, then make sure
             # that we're getting our fields in the right order.
             my $new_field_valid = 1;
@@ -369,12 +369,12 @@ sub _get_gnats_field_data {
             my $current_field_pos = firstidx { $_ eq $search_for }
                                              END_FIELD_ORDER;
             if ($current_field_pos > -1) {
-                my $new_field_pos = firstidx { $_ eq $new_field } 
+                my $new_field_pos = firstidx { $_ eq $new_field }
                                              END_FIELD_ORDER;
                 # We accept any field, as long as it's later than this one.
                 $new_field_valid = $new_field_pos > $current_field_pos ? 1 : 0;
             }
-            
+
             if ($new_field_valid) {
                 if ($current_field) {
                     $fields{$current_field} = _handle_lines(\@value_lines);
@@ -388,7 +388,7 @@ sub _get_gnats_field_data {
     }
     $fields{$current_field} = _handle_lines(\@value_lines);
     $fields{cc} = [$email->header('Cc')] if $email->header('Cc');
-    
+
     # If the Originator is invalid and we don't have a translation for it,
     # use the From header instead.
     my $originator = $self->translate_value('reporter', $fields{Originator},
@@ -462,12 +462,12 @@ sub translate_bug {
                           bug_when => $bug->{delta_ts} || $bug->{creation_ts} });
     }
     $bug->{comments} = \@comments;
-    
+
     $bug->{component} = $self->config('component_name');
     if (!$bug->{short_desc}) {
         $bug->{short_desc} = NO_SUBJECT;
     }
-    
+
     foreach my $attachment (@{ $bug->{attachments} || [] }) {
         $attachment->{submitter} = $bug->{reporter};
         $attachment->{creation_ts} = $bug->{creation_ts};
@@ -481,13 +481,13 @@ sub _parse_audit_trail {
     my ($self, $bug, $audit_trail) = @_;
     return [] if !trim($audit_trail);
     $self->debug(" Parsing audit trail...", 2);
-    
+
     if ($audit_trail !~ /^\S+-Changed-\S+:/ms) {
         # This is just a comment from the bug's creator.
         $self->debug("  Audit trail is just a comment.", 2);
         return ([], $audit_trail);
     }
-    
+
     my (@changes, %current_data, $current_column, $on_why);
     my $extra_comment = '';
     my $current_field;
@@ -565,7 +565,7 @@ sub _store_audit_change {
     my ($self, $changes, $old_field, $current_data) = @_;
 
     $current_data->{field} = $old_field;
-    $current_data->{removed} = 
+    $current_data->{removed} =
         $self->translate_value($old_field, $current_data->{removed});
     $current_data->{added} =
         $self->translate_value($old_field, $current_data->{added});
@@ -633,7 +633,7 @@ END
         $self->debug($attachment, 3);
         push(@attachments, $attachment);
     }
-    
+
     if (scalar(@attachments) ne $num_attachments) {
         warn "WARNING: Expected $num_attachments attachments but got "
              . scalar(@attachments) . "\n" ;
@@ -677,13 +677,13 @@ sub translate_value {
             $value =~ s/^.+?\b(\d[\w\.]+)\b.+$/$1/;
         }
     }
-    
+
     my @args = @_;
     $args[1] = $value;
-    
+
     $value = $self->SUPER::translate_value(@args);
     return $value if ref $value;
-    
+
     if (grep($_ eq $field, $self->USER_FIELDS)) {
         my $from_value = $value;
         $value = $self->user_to_email($value);
@@ -695,7 +695,7 @@ sub translate_value {
             $self->add_user($from_value, $value);
         }
     }
-    
+
     return $value;
 }
 

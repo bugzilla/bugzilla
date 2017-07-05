@@ -8,7 +8,7 @@
 package Bugzilla::Install::DB;
 
 # NOTE: This package may "use" any modules that it likes,
-# localconfig is available, and params are up to date. 
+# localconfig is available, and params are up to date.
 
 use 5.10.1;
 use strict;
@@ -116,7 +116,7 @@ sub update_fielddefs_definition {
         {TYPE => 'BOOLEAN', NOTNULL => 1, DEFAULT => 'FALSE'});
     $dbh->do('UPDATE fielddefs SET is_numeric = 1 WHERE type = '
              . FIELD_TYPE_BUG_ID);
-             
+
     Bugzilla::Hook::process('install_update_db_fielddefs');
 
     # Remember, this is not the function for adding general table changes.
@@ -131,14 +131,14 @@ sub update_fielddefs_definition {
 #
 # This function runs in historical order--from upgrades that older
 # installations need, to upgrades that newer installations need.
-# The order of items inside this function should only be changed if 
+# The order of items inside this function should only be changed if
 # absolutely necessary.
 #
 # The subroutines should have long, descriptive names, so that you
 # can easily see what is being done, just by reading this function.
 #
 # This function is mostly self-documenting. If you're curious about
-# what each of the added/removed columns does, you should see the schema 
+# what each of the added/removed columns does, you should see the schema
 # docs at:
 # http://www.ravenbrook.com/project/p4dti/tool/cgi/bugzilla-schema/
 #
@@ -152,7 +152,7 @@ sub update_table_definitions {
     _update_pre_checksetup_bugzillas();
 
     $dbh->bz_add_column('attachments', 'submitter_id',
-                        {TYPE => 'INT3', NOTNULL => 1}, 0); 
+                        {TYPE => 'INT3', NOTNULL => 1}, 0);
 
     $dbh->bz_rename_column('bugs_activity', 'when', 'bug_when');
 
@@ -172,7 +172,7 @@ sub update_table_definitions {
 
     _add_unique_login_name_index_to_profiles();
 
-    $dbh->bz_add_column('profiles', 'mybugslink', 
+    $dbh->bz_add_column('profiles', 'mybugslink',
                         {TYPE => 'BOOLEAN', NOTNULL => 1, DEFAULT => 'TRUE'});
 
     _update_component_user_fields_to_ids();
@@ -316,7 +316,7 @@ sub update_table_definitions {
 
     _add_longdescs_already_wrapped();
 
-    # Moved enum types to separate tables so we need change the old enum 
+    # Moved enum types to separate tables so we need change the old enum
     # types to standard varchars in the bugs table.
     $dbh->bz_alter_column('bugs', 'bug_status',
                           {TYPE => 'varchar(64)', NOTNULL => 1});
@@ -383,7 +383,7 @@ sub update_table_definitions {
 
     # 2005-03-27 initialqacontact should be NULL instead of 0, bug 287483
     if ($dbh->bz_column_info('components', 'initialqacontact')->{NOTNULL}) {
-        $dbh->bz_alter_column('components', 'initialqacontact', 
+        $dbh->bz_alter_column('components', 'initialqacontact',
                               {TYPE => 'INT3'});
     }
     $dbh->do("UPDATE components SET initialqacontact = NULL " .
@@ -440,7 +440,7 @@ sub update_table_definitions {
                           {TYPE => 'TINYTEXT', NOTNULL => 1, DEFAULT => "''"});
 
     _clean_control_characters_from_short_desc();
-    
+
     # 2005-12-07 altlst@sonic.net -- Bug 225221
     $dbh->bz_add_column('longdescs', 'comment_id',
         {TYPE => 'INTSERIAL', NOTNULL => 1, PRIMARYKEY => 1});
@@ -464,9 +464,9 @@ sub update_table_definitions {
     if ($dbh->bz_column_info('products', 'disallownew')){
         $dbh->bz_alter_column('products', 'disallownew',
                               {TYPE => 'BOOLEAN', NOTNULL => 1,  DEFAULT => 0});
-    
+
         if ($dbh->bz_column_info('products', 'votesperuser')) {
-            $dbh->bz_alter_column('products', 'votesperuser', 
+            $dbh->bz_alter_column('products', 'votesperuser',
                 {TYPE => 'INT2', NOTNULL => 1, DEFAULT => 0});
             $dbh->bz_alter_column('products', 'votestoconfirm',
                 {TYPE => 'INT2', NOTNULL => 1, DEFAULT => 0});
@@ -499,7 +499,7 @@ sub update_table_definitions {
 
     $dbh->bz_add_column('setting', 'subclass', {TYPE => 'varchar(32)'});
 
-    $dbh->bz_alter_column('longdescs', 'thetext', 
+    $dbh->bz_alter_column('longdescs', 'thetext',
         {TYPE => 'LONGTEXT', NOTNULL => 1}, '');
 
     # 2006-10-20 LpSolit@gmail.com - Bug 189627
@@ -515,7 +515,7 @@ sub update_table_definitions {
                         {TYPE => 'INT2', NOTNULL => 1, DEFAULT => '0'});
     $dbh->bz_add_column('longdescs', 'extra_data', {TYPE => 'varchar(255)'});
 
-    $dbh->bz_add_column('versions', 'id', 
+    $dbh->bz_add_column('versions', 'id',
         {TYPE => 'MEDIUMSERIAL', NOTNULL => 1, PRIMARYKEY => 1});
     $dbh->bz_add_column('milestones', 'id',
         {TYPE => 'MEDIUMSERIAL', NOTNULL => 1, PRIMARYKEY => 1});
@@ -531,7 +531,7 @@ sub update_table_definitions {
 
     # 2007-08-21 wurblzap@gmail.com - Bug 365378
     _make_lang_setting_dynamic();
-    
+
     # 2007-11-29 xiaoou.wu@oracle.com - Bug 153129
     _change_text_types();
 
@@ -569,10 +569,10 @@ sub update_table_definitions {
     # 2009-01-16 oreomike@gmail.com - Bug 302420
     $dbh->bz_add_column('whine_events', 'mailifnobugs',
         { TYPE => 'BOOLEAN', NOTNULL => 1, DEFAULT => 'FALSE'});
-        
+
     _convert_disallownew_to_isactive();
 
-    $dbh->bz_alter_column('bugs_activity', 'added', 
+    $dbh->bz_alter_column('bugs_activity', 'added',
         { TYPE => 'varchar(255)' });
     $dbh->bz_add_index('bugs_activity', 'bugs_activity_added_idx', ['added']);
 
@@ -599,7 +599,7 @@ sub update_table_definitions {
 
     # 2010-04-07 LpSolit@gmail.com - Bug 69621
     $dbh->bz_drop_column('bugs', 'keywords');
-    
+
     # 2010-05-07 ewong@pw-wspx.org - Bug 463945
     $dbh->bz_alter_column('group_control_map', 'membercontrol',
                           {TYPE => 'INT1', NOTNULL => 1, DEFAULT => CONTROLMAPNA});
@@ -608,7 +608,7 @@ sub update_table_definitions {
 
     # Add NOT NULL to some columns that need it, and DEFAULT to
     # attachments.ispatch.
-    $dbh->bz_alter_column('attachments', 'ispatch', 
+    $dbh->bz_alter_column('attachments', 'ispatch',
         { TYPE => 'BOOLEAN', NOTNULL => 1, DEFAULT => 'FALSE'});
     $dbh->bz_alter_column('keyworddefs', 'description',
                           { TYPE => 'MEDIUMTEXT', NOTNULL => 1 }, '');
@@ -661,16 +661,16 @@ sub update_table_definitions {
     }
 
     # 2012-06-06 dkl@mozilla.com - Bug 762288
-    $dbh->bz_alter_column('bugs_activity', 'removed', 
+    $dbh->bz_alter_column('bugs_activity', 'removed',
                           { TYPE => 'varchar(255)' });
     $dbh->bz_add_index('bugs_activity', 'bugs_activity_removed_idx', ['removed']);
 
     # 2012-06-13 dkl@mozilla.com - Bug 764457
-    $dbh->bz_add_column('bugs_activity', 'id', 
+    $dbh->bz_add_column('bugs_activity', 'id',
                         {TYPE => 'INTSERIAL', NOTNULL => 1, PRIMARYKEY => 1});
 
     # 2012-06-13 dkl@mozilla.com - Bug 764466
-    $dbh->bz_add_column('profiles_activity', 'id', 
+    $dbh->bz_add_column('profiles_activity', 'id',
                         {TYPE => 'MEDIUMSERIAL', NOTNULL => 1, PRIMARYKEY => 1});
 
     # 2012-07-24 dkl@mozilla.com - Bug 776972
@@ -763,7 +763,7 @@ sub update_table_definitions {
 
     Bugzilla::Hook::process('install_update_db');
 
-    # We do this here because otherwise the foreign key from 
+    # We do this here because otherwise the foreign key from
     # products.classification_id to classifications.id will fail
     # (because products.classification_id defaults to "1", so on upgraded
     # installations it's already been set before the first Classification
@@ -800,13 +800,13 @@ sub _update_pre_checksetup_bugzillas {
 
 sub _add_bug_vote_cache {
     my $dbh = Bugzilla->dbh;
-    # 1999-10-11 Restructured voting database to add a cached value in each 
-    # bug recording how many total votes that bug has.  While I'm at it, 
-    # I removed the unused "area" field from the bugs database.  It is 
-    # distressing to realize that the bugs table has reached the maximum 
-    # number of indices allowed by MySQL (16), which may make future 
+    # 1999-10-11 Restructured voting database to add a cached value in each
+    # bug recording how many total votes that bug has.  While I'm at it,
+    # I removed the unused "area" field from the bugs database.  It is
+    # distressing to realize that the bugs table has reached the maximum
+    # number of indices allowed by MySQL (16), which may make future
     # enhancements awkward.
-    # (P.S. All is not lost; it appears that the latest betas of MySQL 
+    # (P.S. All is not lost; it appears that the latest betas of MySQL
     # support a new table format which will allow 32 indices.)
 
     if ($dbh->bz_column_info('bugs', 'area')) {
@@ -850,15 +850,15 @@ sub _write_one_longdesc {
     $buffer = trim($buffer);
     return if !$buffer;
     $dbh->do("INSERT INTO longdescs (bug_id, who, bug_when, thetext)
-                   VALUES (?,?,?,?)", undef, $id, $who, 
+                   VALUES (?,?,?,?)", undef, $id, $who,
              time2str("%Y/%m/%d %H:%M:%S", $when), $buffer);
 }
 
 sub _populate_longdescs {
     my $dbh = Bugzilla->dbh;
-    # 2000-01-20 Added a new "longdescs" table, which is supposed to have 
-    # all the long descriptions in it, replacing the old long_desc field 
-    # in the bugs table. The below hideous code populates this new table 
+    # 2000-01-20 Added a new "longdescs" table, which is supposed to have
+    # all the long descriptions in it, replacing the old long_desc field
+    # in the bugs table. The below hideous code populates this new table
     # with things from the old field, with ugly parsing and heuristics.
 
     if ($dbh->bz_column_info('bugs', 'long_desc')) {
@@ -879,8 +879,8 @@ sub _populate_longdescs {
                                         long_desc FROM bugs ORDER BY bug_id");
         $sth->execute();
         my $count = 0;
-        while (my ($id, $createtime, $reporterid, $desc) = 
-                   $sth->fetchrow_array()) 
+        while (my ($id, $createtime, $reporterid, $desc) =
+                   $sth->fetchrow_array())
         {
             $count++;
             indicate_progress({ total => $total, current => $count });
@@ -890,16 +890,16 @@ sub _populate_longdescs {
             my $buffer = "";
             foreach my $line (split(/\n/, $desc)) {
                 $line =~ s/\s+$//g; # Trim trailing whitespace.
-                if ($line =~ /^------- Additional Comments From ([^\s]+)\s+(\d.+\d)\s+-------$/) 
+                if ($line =~ /^------- Additional Comments From ([^\s]+)\s+(\d.+\d)\s+-------$/)
                 {
                     my $name = $1;
                     my $date = str2time($2);
                     # Oy, what a hack.  The creation time is accurate to the
                     # second. But the long text only contains things accurate
-                    # to the And so, if someone makes a comment within a 
+                    # to the And so, if someone makes a comment within a
                     # minute of the original bug creation, then the comment can
                     # come *before* the bug creation.  So, we add 59 seconds to
-                    # the time of all comments, so that they are always 
+                    # the time of all comments, so that they are always
                     # considered to have happened at the *end* of the given
                     # minute, not the beginning.
                     $date += 59;
@@ -916,8 +916,8 @@ sub _populate_longdescs {
                             # This username doesn't exist.  Maybe someone
                             # renamed him or something.  Invent a new profile
                             # entry disabled, just to represent him.
-                            $dbh->do("INSERT INTO profiles (login_name, 
-                                      cryptpassword, disabledtext) 
+                            $dbh->do("INSERT INTO profiles (login_name,
+                                      cryptpassword, disabledtext)
                                       VALUES (?,?,?)", undef, $name, '*',
                                       "Account created only to maintain"
                                       . " database integrity");
@@ -955,7 +955,7 @@ sub _update_bugs_activity_field_to_fieldid {
 
         my $ids = $dbh->selectall_arrayref(
             'SELECT DISTINCT fielddefs.id, bugs_activity.field
-               FROM bugs_activity LEFT JOIN fielddefs 
+               FROM bugs_activity LEFT JOIN fielddefs
                     ON bugs_activity.field = fielddefs.name', {Slice=>{}});
 
         foreach my $item (@$ids) {
@@ -1062,8 +1062,8 @@ sub _update_component_user_fields_to_ids {
         my $sth = $dbh->prepare("SELECT program, value, initialqacontact
                                    FROM components");
         $sth->execute();
-        while (my ($program, $value, $initialqacontact) = 
-                   $sth->fetchrow_array()) 
+        while (my ($program, $value, $initialqacontact) =
+                   $sth->fetchrow_array())
         {
             my ($id) = $dbh->selectrow_array(
                 "SELECT userid FROM profiles WHERE login_name = ?",
@@ -1118,7 +1118,7 @@ sub _populate_milestones_table {
         }
 
         # Populate the milestone table with all existing values in the database
-        my $sth = $dbh->prepare("SELECT DISTINCT target_milestone, product 
+        my $sth = $dbh->prepare("SELECT DISTINCT target_milestone, product
                                    FROM bugs");
         $sth->execute();
 
@@ -1137,7 +1137,7 @@ sub _populate_milestones_table {
                   WHERE value = ? AND product = ?", undef, $value, $product);
 
             if (!$ms_exists) {
-                $dbh->do("INSERT INTO milestones(value, product, sortkey) 
+                $dbh->do("INSERT INTO milestones(value, product, sortkey)
                           VALUES (?,?,?)", undef, $value, $product, $sortkey);
             }
         }
@@ -1158,7 +1158,7 @@ sub _add_products_defaultmilestone {
         while (my ($product, $default_ms) = $sth->fetchrow_array()) {
             my $exists = $dbh->selectrow_array(
                 "SELECT value FROM milestones
-                  WHERE value = ? AND product = ?", 
+                  WHERE value = ? AND product = ?",
                 undef, $default_ms, $product);
             if (!$exists) {
                 $dbh->do("INSERT INTO milestones(value, product) " .
@@ -1186,8 +1186,8 @@ sub _populate_duplicates_table {
     my $dbh = Bugzilla->dbh;
     # 2000-07-15 Added duplicates table so Bugzilla tracks duplicates in a
     # better way than it used to. This code searches the comments to populate
-    # the table initially. It's executed if the table is empty; if it's 
-    # empty because there are no dupes (as opposed to having just created 
+    # the table initially. It's executed if the table is empty; if it's
+    # empty because there are no dupes (as opposed to having just created
     # the table) it won't have any effect anyway, so it doesn't matter.
     my ($dups_exist) = $dbh->selectrow_array(
         "SELECT DISTINCT 1 FROM duplicates");
@@ -1198,18 +1198,18 @@ sub _populate_duplicates_table {
 
         my $sth = $dbh->prepare(
              "SELECT longdescs.bug_id, thetext
-                FROM longdescs LEFT JOIN bugs 
+                FROM longdescs LEFT JOIN bugs
                      ON longdescs.bug_id = bugs.bug_id
-               WHERE (" . $dbh->sql_regexp("thetext", 
+               WHERE (" . $dbh->sql_regexp("thetext",
                           "'[.*.]{3} This bug has been marked as a duplicate"
-                          . " of [[:digit:]]+ [.*.]{3}'") 
+                          . " of [[:digit:]]+ [.*.]{3}'")
                   . ")
                      AND resolution = 'DUPLICATE'
             ORDER BY longdescs.bug_when");
         $sth->execute();
 
         my (%dupes, $key);
-        # Because of the way hashes work, this loop removes all but the 
+        # Because of the way hashes work, this loop removes all but the
         # last dupe resolution found for a given bug.
         while (my ($dupe, $dupe_of) = $sth->fetchrow_array()) {
             $dupes{$dupe} = $dupe_of;
@@ -1290,7 +1290,7 @@ sub _update_bugs_activity_to_only_record_changes {
         $sth->execute;
         my $i = 0;
         while (my ($bug_id, $who, $bug_when, $fieldid, $oldvalue, $newvalue)
-                   = $sth->fetchrow_array()) 
+                   = $sth->fetchrow_array())
         {
             $i++;
             indicate_progress({ total => $total, current => $i, every => 10 });
@@ -1335,10 +1335,10 @@ sub _update_bugs_activity_to_only_record_changes {
             }
             $added = $dbh->quote($added);
             $removed = $dbh->quote($removed);
-            $dbh->do("UPDATE bugs_activity 
+            $dbh->do("UPDATE bugs_activity
                          SET removed = $removed, added = $added
                        WHERE bug_id = $bug_id AND who = $who
-                             AND bug_when = '$bug_when' 
+                             AND bug_when = '$bug_when'
                              AND fieldid = $fieldid");
         }
         print "\n";
@@ -1438,8 +1438,8 @@ sub _use_ids_for_products_and_components {
         $dbh->bz_add_column("bugs", "product_id",
             {TYPE => 'INT2', NOTNULL => 1}, 0);
 
-        # The attachstatusdefs table was added in version 2.15, but 
-        # removed again in early 2.17.  If it exists now, we still need 
+        # The attachstatusdefs table was added in version 2.15, but
+        # removed again in early 2.17.  If it exists now, we still need
         # to perform this change with product_id because the code later on
         # which converts the attachment statuses to flags depends on it.
         # But we need to avoid this if the user is upgrading from 2.14
@@ -1482,8 +1482,8 @@ sub _use_ids_for_products_and_components {
         my %components;
         $sth = $dbh->prepare("SELECT id, value, product_id FROM components");
         $sth->execute;
-        while (my ($component_id, $component, $product_id) 
-            = $sth->fetchrow_array()) 
+        while (my ($component_id, $component, $product_id)
+            = $sth->fetchrow_array())
         {
             if (exists $components{$component}) {
                 if (exists $components{$component}{$product_id}) {
@@ -1573,7 +1573,7 @@ sub _convert_groups_system_from_groupset {
     #
     # This requires:
     # 1) define groups ids in group table
-    # 2) populate user_group_map with grants from old groupsets 
+    # 2) populate user_group_map with grants from old groupsets
     #    and blessgroupsets
     # 3) populate bug_group_map with data converted from old bug groupsets
     # 4) convert activity logs to use group names instead of numbers
@@ -1644,7 +1644,7 @@ sub _convert_groups_system_from_groupset {
                           VALUES ($bug_id, $gid)");
             }
         }
-        # Replace old activity log groupset records with lists of names 
+        # Replace old activity log groupset records with lists of names
         # of groups.
         $sth = $dbh->prepare("SELECT id FROM fielddefs
                                WHERE name = " . $dbh->quote('bug_group'));
@@ -1660,8 +1660,8 @@ sub _convert_groups_system_from_groupset {
             $sth = $dbh->prepare("SELECT bug_id, bug_when, who, added, removed
                                     FROM bugs_activity WHERE fieldid = $gsid");
             $sth->execute();
-            while (my ($bug_id, $bug_when, $who, $added, $removed) = 
-                       $sth->fetchrow_array) 
+            while (my ($bug_id, $bug_when, $who, $added, $removed) =
+                       $sth->fetchrow_array)
             {
                 $added ||= 0;
                 $removed ||= 0;
@@ -1683,9 +1683,9 @@ sub _convert_groups_system_from_groupset {
                 while (my ($n) = $sth2->fetchrow_array) {
                     push @logrem, $n;
                 }
-                # Get list of group bits added that correspond to 
+                # Get list of group bits added that correspond to
                 # missing groups.
-                $sth2 = $dbh->prepare("SELECT ($added & ~BIT_OR(bit)) 
+                $sth2 = $dbh->prepare("SELECT ($added & ~BIT_OR(bit))
                                          FROM groups");
                 $sth2->execute();
                 my ($miss) = $sth2->fetchrow_array;
@@ -1694,9 +1694,9 @@ sub _convert_groups_system_from_groupset {
                     print "\nWARNING - GROUPSET ACTIVITY ON BUG $bug_id",
                           " CONTAINS DELETED GROUPS\n";
                 }
-                # Get list of group bits deleted that correspond to 
+                # Get list of group bits deleted that correspond to
                 # missing groups.
-                $sth2 = $dbh->prepare("SELECT ($removed & ~BIT_OR(bit)) 
+                $sth2 = $dbh->prepare("SELECT ($removed & ~BIT_OR(bit))
                                          FROM groups");
                 $sth2->execute();
                 ($miss) = $sth2->fetchrow_array;
@@ -1724,8 +1724,8 @@ sub _convert_groups_system_from_groupset {
                    "FROM profiles_activity " .
                   "WHERE fieldid = $gsid");
             $sth->execute();
-            while (my ($uid, $uwhen, $uwho, $added, $removed) = 
-                       $sth->fetchrow_array) 
+            while (my ($uid, $uwhen, $uwho, $added, $removed) =
+                       $sth->fetchrow_array)
             {
                 $added ||= 0;
                 $removed ||= 0;
@@ -1779,8 +1779,8 @@ sub _convert_groups_system_from_groupset {
                  "FROM profiles " .
                 "WHERE (groupset | 65536) = 9223372036854775807");
         $sth->execute();
-        while ( my ($userid, $iscomplete, $login_name) 
-                    = $sth->fetchrow_array() ) 
+        while ( my ($userid, $iscomplete, $login_name)
+                    = $sth->fetchrow_array() )
         {
             # existing administrators are made members of group "admin"
             print "\nWARNING - $login_name IS AN ADMIN IN SPITE OF BUG",
@@ -1792,7 +1792,7 @@ sub _convert_groups_system_from_groupset {
         foreach my $admin_id (@admins) {
             $dbh->do("INSERT INTO user_group_map
                                   (user_id, group_id, isbless, grant_type)
-                           VALUES (?, ?, ?, ?)", 
+                           VALUES (?, ?, ?, ?)",
                       undef, $admin_id, $admin_gid, $_, GRANT_DIRECT)
                 foreach (0, 1);
         }
@@ -1801,7 +1801,7 @@ sub _convert_groups_system_from_groupset {
         $dbh->bz_drop_column('profiles','blessgroupset');
         $dbh->bz_drop_column('bugs','groupset');
         $dbh->bz_drop_column('groups','bit');
-        $dbh->do("DELETE FROM fielddefs WHERE name = " 
+        $dbh->do("DELETE FROM fielddefs WHERE name = "
             . $dbh->quote('groupset'));
     }
 }
@@ -1811,8 +1811,8 @@ sub _convert_attachment_statuses_to_flags {
 
     # September 2002 myk@mozilla.org bug 98801
     # Convert the attachment statuses tables into flags tables.
-    if ($dbh->bz_table_info("attachstatuses") 
-        && $dbh->bz_table_info("attachstatusdefs")) 
+    if ($dbh->bz_table_info("attachstatuses")
+        && $dbh->bz_table_info("attachstatusdefs"))
     {
         print "Converting attachment statuses to flags...\n";
 
@@ -1825,10 +1825,10 @@ sub _convert_attachment_statuses_to_flags {
 
         # Convert attachment status definitions to flag types.  If more than one
         # status has the same name and description, it is merged into a single
-        # status with multiple inclusion records.     
+        # status with multiple inclusion records.
 
         my $sth = $dbh->prepare(
-            "SELECT id, name, description, sortkey, product_id  
+            "SELECT id, name, description, sortkey, product_id
                FROM attachstatusdefs");
 
         # status definition IDs indexed by name/description
@@ -1842,17 +1842,17 @@ sub _convert_attachment_statuses_to_flags {
         my $def_id_map = {};
 
         $sth->execute();
-        while (my ($id, $name, $desc, $sortkey, $prod_id) = 
-                   $sth->fetchrow_array()) 
+        while (my ($id, $name, $desc, $sortkey, $prod_id) =
+                   $sth->fetchrow_array())
         {
             my $key = $name . $desc;
             if (!$def_ids->{$key}) {
                 $def_ids->{$key} = $id;
                 my $quoted_name = $dbh->quote($name);
                 my $quoted_desc = $dbh->quote($desc);
-                $dbh->do("INSERT INTO flagtypes (id, name, description, 
-                                                 sortkey, target_type) 
-                          VALUES ($id, $quoted_name, $quoted_desc, 
+                $dbh->do("INSERT INTO flagtypes (id, name, description,
+                                                 sortkey, target_type)
+                          VALUES ($id, $quoted_name, $quoted_desc,
                                   $sortkey,'a')");
             }
             $def_id_map->{$id} = $def_ids->{$key};
@@ -1861,12 +1861,12 @@ sub _convert_attachment_statuses_to_flags {
         }
 
         # Note: even though we've converted status definitions, we still
-        # can't drop the table because we need it to convert the statuses 
+        # can't drop the table because we need it to convert the statuses
         # themselves.
 
-        # Convert attachment statuses to flags.  To do this we select 
-        # the statuses from the status table and then, for each one, 
-        # figure out who set it and when they set it from the bugs 
+        # Convert attachment statuses to flags.  To do this we select
+        # the statuses from the status table and then, for each one,
+        # figure out who set it and when they set it from the bugs
         # activity table.
         my $id = 0;
         $sth = $dbh->prepare(
@@ -1884,8 +1884,8 @@ sub _convert_attachment_statuses_to_flags {
                                 ORDER BY bug_when DESC");
 
         $sth->execute();
-        while (my ($attach_id, $def_id, $status, $bug_id) = 
-                   $sth->fetchrow_array()) 
+        while (my ($attach_id, $def_id, $status, $bug_id) =
+                   $sth->fetchrow_array())
         {
             ++$id;
 
@@ -1901,8 +1901,8 @@ sub _convert_attachment_statuses_to_flags {
             $when = $when ? $dbh->quote($when) : "NOW()";
 
 
-            $dbh->do("INSERT INTO flags (id, type_id, status, bug_id, 
-                      attach_id, creation_date, modification_date, 
+            $dbh->do("INSERT INTO flags (id, type_id, status, bug_id,
+                      attach_id, creation_date, modification_date,
                       requestee_id, setter_id)
                       VALUES ($id, $def_id_map->{$def_id}, '+', $bug_id,
                               $attach_id, $when, $when, NULL, $who)");
@@ -1912,11 +1912,11 @@ sub _convert_attachment_statuses_to_flags {
         $dbh->bz_drop_table("attachstatuses");
         $dbh->bz_drop_table("attachstatusdefs");
 
-        # Convert activity records for attachment statuses into records 
+        # Convert activity records for attachment statuses into records
         # for flags.
-        $sth = $dbh->prepare("SELECT attach_id, who, bug_when, added, 
-                                     removed 
-                                FROM bugs_activity 
+        $sth = $dbh->prepare("SELECT attach_id, who, bug_when, added,
+                                     removed
+                                FROM bugs_activity
                                WHERE fieldid = $old_field_id");
         $sth->execute();
         while (my ($attach_id, $who, $when, $old_added, $old_removed) =
@@ -1957,7 +1957,7 @@ sub _remove_spaces_and_commas_from_flagtypes {
     $sth->execute();
 
     my %flagtypes;
-    my @badflagnames; 
+    my @badflagnames;
     # find broken flagtype names, and populate a hash table
     # to check for collisions.
     while (my ($name, $id) = $sth->fetchrow_array()) {
@@ -2016,12 +2016,12 @@ sub _setup_usebuggroups_backward_compatibility {
         # Initially populate group_control_map.
         # First, get all the existing products and their groups.
         my $sth = $dbh->prepare("SELECT groups.id, products.id, groups.name,
-                                        products.name 
+                                        products.name
                                   FROM groups, products
                                  WHERE isbuggroup != 0");
         $sth->execute();
         while (my ($groupid, $productid, $groupname, $productname)
-                = $sth->fetchrow_array()) 
+                = $sth->fetchrow_array())
         {
             if ($groupname eq $productname) {
                 # Product and group have same name.
@@ -2031,7 +2031,7 @@ sub _setup_usebuggroups_backward_compatibility {
                          ($groupid, $productid, CONTROLMAPDEFAULT, CONTROLMAPNA));
             } else {
                 # See if this group is a product group at all.
-                my $sth2 = $dbh->prepare("SELECT id FROM products 
+                my $sth2 = $dbh->prepare("SELECT id FROM products
                     WHERE name = " .$dbh->quote($groupname));
                 $sth2->execute();
                 my ($id) = $sth2->fetchrow_array();
@@ -2129,7 +2129,7 @@ sub _copy_old_charts_into_database {
 
             # The query for statuses is different to that for resolutions.
             $queries{$_} = ($query_prod . "bug_status=$_") foreach (@statuses);
-            $queries{$_} = ($query_prod . "resolution=$_") 
+            $queries{$_} = ($query_prod . "resolution=$_")
                 foreach (@resolutions);
 
             foreach my $field (@fields) {
@@ -2157,7 +2157,7 @@ sub _copy_old_charts_into_database {
             $product_file =~ s/\//-/gs;
             $product_file = "$datadir/mining/$product_file";
 
-            # There are many reasons that this might fail (e.g. no stats 
+            # There are many reasons that this might fail (e.g. no stats
             # for this product), so we don't worry if it does.
             my $in = new IO::File($product_file) or next;
 
@@ -2191,21 +2191,21 @@ sub _copy_old_charts_into_database {
 
             $in->close;
 
-            my $total_items = (scalar(@fields) + 1) 
+            my $total_items = (scalar(@fields) + 1)
                               * scalar(keys %{ $data{'NEW'} });
             my $count = 0;
             foreach my $field (@fields, $open_name) {
                 # Insert values into series_data: series_id, date, value
                 my %fielddata = %{$data{$field}};
                 foreach my $date (keys %fielddata) {
-                    # We need to delete in case the text file had duplicate 
+                    # We need to delete in case the text file had duplicate
                     # entries in it.
                     $deletesth->execute($seriesids{$field}, $date);
 
                     # We prepared this above
                     $seriesdatasth->execute($seriesids{$field},
                                             $date, $fielddata{$date} || 0);
-                    indicate_progress({ total => $total_items, 
+                    indicate_progress({ total => $total_items,
                                         current => ++$count, every => 100 });
                 }
             }
@@ -2268,7 +2268,7 @@ sub _add_group_group_map_grant_type {
         $dbh->bz_drop_index('group_group_map', 'group_group_map_member_id_idx');
         $dbh->bz_drop_column("group_group_map", "isbless");
         $dbh->bz_add_index('group_group_map', 'group_group_map_member_id_idx',
-            {TYPE => 'UNIQUE', 
+            {TYPE => 'UNIQUE',
              FIELDS => [qw(member_id grantor_id grant_type)]});
     }
 }
@@ -2438,17 +2438,17 @@ sub _migrate_email_prefs_to_new_table {
             foreach my $relationship (keys %relationships) {
                 foreach my $event (keys %events) {
                     my $key = "email$relationship$event";
-                    if (!exists($emailflags{$key}) 
-                        || $emailflags{$key} eq 'on') 
+                    if (!exists($emailflags{$key})
+                        || $emailflags{$key} eq 'on')
                     {
                         $sth2->execute($relationships{$relationship},
                                        $events{$event});
                     }
                 }
             }
-            # Note that in the old system, the value of "excludeself" is 
-            # assumed to be off if the preference does not exist in the 
-            # user's list, unlike other preferences whose value is 
+            # Note that in the old system, the value of "excludeself" is
+            # assumed to be off if the preference does not exist in the
+            # user's list, unlike other preferences whose value is
             # assumed to be on if they do not exist.
             #
             # This preference has changed from global to per-relationship.
@@ -2610,7 +2610,7 @@ sub _fix_attachments_submitter_id_idx {
     if ($dbh->bz_index_info('attachments', 'attachments_submitter_id_idx')
         && (scalar(@{$dbh->bz_index_info('attachments',
                                          'attachments_submitter_id_idx'
-                                        )->{FIELDS}}) < 2)) 
+                                        )->{FIELDS}}) < 2))
     {
         $dbh->bz_drop_index('attachments', 'attachments_submitter_id_idx');
     }
@@ -2662,7 +2662,7 @@ sub _fix_broken_all_closed_series {
             $dbh->prepare("SELECT series_id FROM series WHERE query IN (?, ?)");
         # Statement to find the series which has collected the most data.
         my $sth_data_collected =
-            $dbh->prepare('SELECT count(*) FROM series_data 
+            $dbh->prepare('SELECT count(*) FROM series_data
                             WHERE series_id = ?');
         # Statement to select a broken non-open bugs count data entry.
         my $sth_select_broken_nonopen_data =
@@ -2676,7 +2676,7 @@ sub _fix_broken_all_closed_series {
         my $sth_fix_broken_nonopen_data =
             $dbh->prepare('UPDATE series_data SET series_value = ?' .
                           ' WHERE series_id = ? AND series_date = ?');
-        # Statement to delete an unfixable broken non-open bugs count data 
+        # Statement to delete an unfixable broken non-open bugs count data
         # entry.
         my $sth_delete_broken_nonopen_data =
             $dbh->prepare('DELETE FROM series_data' .
@@ -2688,7 +2688,7 @@ sub _fix_broken_all_closed_series {
             if ($nonopen_bugs_query =~ /^$broken_series_indicator(.*)$/) {
                 my $prodcomp = $1;
 
-                # If there is more than one series for the corresponding 
+                # If there is more than one series for the corresponding
                 # open-bugs series, we pick the one with the most data,
                 # which should be the one which was generated on creation.
                 # It's a pity we can't do subselects.
@@ -2716,7 +2716,7 @@ sub _fix_broken_all_closed_series {
                     print " $broken_series_id...";
                     $sth_select_broken_nonopen_data->execute($broken_series_id);
                     while (my $rowref =
-                           $sth_select_broken_nonopen_data->fetchrow_arrayref) 
+                           $sth_select_broken_nonopen_data->fetchrow_arrayref)
                     {
                         my ($date, $broken_value) = @$rowref;
                         my ($openbugs_value) =
@@ -2740,20 +2740,20 @@ EOT
                         }
                     }
 
-                    # Fix the broken query so that it collects correct data 
+                    # Fix the broken query so that it collects correct data
                     # in the future.
                     $nonopen_bugs_query =~
                         s/^$broken_series_indicator/field0-0-0=resolution&type0-0-0=regexp&value0-0-0=./;
-                    $sth_repair->execute($nonopen_bugs_query, 
+                    $sth_repair->execute($nonopen_bugs_query,
                                          $broken_series_id);
                 }
                 else {
                     print <<EOT;
 
-WARNING - Series $broken_series_id was meant to collect non-open bug 
+WARNING - Series $broken_series_id was meant to collect non-open bug
 counts, but it has counted all bugs instead. It cannot be repaired
 automatically because no series that collected open bug counts was found.
-You'll probably want to delete or repair collected data for 
+You'll probably want to delete or repair collected data for
 series $broken_series_id manually
 
 Continuing repairs...
@@ -2765,7 +2765,7 @@ EOT
     } # if (@$broken_nonopen_series)
 }
 
-# This needs to happen at two times: when we upgrade from 2.16 (thus creating 
+# This needs to happen at two times: when we upgrade from 2.16 (thus creating
 # user_group_map), and when we kill derived gruops in the DB.
 sub _rederive_regex_groups {
     my $dbh = Bugzilla->dbh;
@@ -2775,7 +2775,7 @@ sub _rederive_regex_groups {
     return if !$regex_groups_exist;
 
     my $regex_derivations = $dbh->selectrow_array(
-        'SELECT 1 FROM user_group_map WHERE grant_type = ' . GRANT_REGEXP 
+        'SELECT 1 FROM user_group_map WHERE grant_type = ' . GRANT_REGEXP
         . ' ' . $dbh->sql_limit(1));
     return if $regex_derivations;
 
@@ -2783,7 +2783,7 @@ sub _rederive_regex_groups {
 
     # Re-evaluate all regexps, to keep them up-to-date.
     my $sth = $dbh->prepare(
-        "SELECT profiles.userid, profiles.login_name, groups.id, 
+        "SELECT profiles.userid, profiles.login_name, groups.id,
                 groups.userregexp, user_group_map.group_id
            FROM (profiles CROSS JOIN groups)
                 LEFT JOIN user_group_map
@@ -2798,12 +2798,12 @@ sub _rederive_regex_groups {
 
     my $sth_del = $dbh->prepare(
         "DELETE FROM user_group_map
-          WHERE user_id  = ? AND group_id = ? AND isbless = 0 
+          WHERE user_id  = ? AND group_id = ? AND isbless = 0
                 AND grant_type = " . GRANT_REGEXP);
 
     $sth->execute(GRANT_REGEXP);
-    while (my ($uid, $login, $gid, $rexp, $present) = 
-               $sth->fetchrow_array()) 
+    while (my ($uid, $login, $gid, $rexp, $present) =
+               $sth->fetchrow_array())
     {
         if ($login =~ m/$rexp/i) {
             $sth_add->execute($uid, $gid) unless $present;
@@ -3202,8 +3202,8 @@ sub _fix_attachment_modification_date {
 }
 
 sub _change_text_types {
-    my $dbh = Bugzilla->dbh; 
-    return if 
+    my $dbh = Bugzilla->dbh;
+    return if
         $dbh->bz_column_info('namedqueries', 'query')->{TYPE} eq 'LONGTEXT';
     _check_content_length('attachments', 'mimetype',    255, 'attach_id');
     _check_content_length('fielddefs',   'description', 255, 'id');
@@ -3229,13 +3229,13 @@ sub _change_text_types {
     $dbh->bz_alter_column('namedqueries', 'query',
         { TYPE => 'LONGTEXT', NOTNULL => 1 });
 
-} 
+}
 
 sub _check_content_length {
     my ($table_name, $field_name, $max_length, $id_field) = @_;
     my $dbh = Bugzilla->dbh;
     my %contents = @{ $dbh->selectcol_arrayref(
-        "SELECT $id_field, $field_name FROM $table_name 
+        "SELECT $id_field, $field_name FROM $table_name
           WHERE CHAR_LENGTH($field_name) > ?", {Columns=>[1,2]}, $max_length) };
 
     if (scalar keys %contents) {
@@ -3248,7 +3248,7 @@ sub _check_content_length {
             my $string = $contents{$id};
             # Don't dump the whole string--it could be 16MB.
             if (length($string) > 80) {
-                $string = substr($string, 0, 30) . "..." 
+                $string = substr($string, 0, 30) . "..."
                          . substr($string, -30) . "\n";
             }
             $error .= "$id: $string\n";
@@ -3261,14 +3261,14 @@ sub _add_foreign_keys_to_multiselects {
     my $dbh = Bugzilla->dbh;
 
     my $names = $dbh->selectcol_arrayref(
-        'SELECT name 
-           FROM fielddefs 
+        'SELECT name
+           FROM fielddefs
           WHERE type = ' . FIELD_TYPE_MULTI_SELECT);
 
     foreach my $name (@$names) {
-        $dbh->bz_add_fk("bug_$name", "bug_id", 
+        $dbh->bz_add_fk("bug_$name", "bug_id",
             {TABLE => 'bugs', COLUMN => 'bug_id', DELETE => 'CASCADE'});
-                                                
+
         $dbh->bz_add_fk("bug_$name", "value",
             {TABLE  => $name, COLUMN => 'value', DELETE => 'RESTRICT'});
     }
@@ -3303,7 +3303,7 @@ sub _populate_bugs_fulltext {
                 $command = "REPLACE";
             }
             else {
-                $dbh->do("DELETE FROM bugs_fulltext WHERE " 
+                $dbh->do("DELETE FROM bugs_fulltext WHERE "
                          . $dbh->sql_in('bug_id', $bug_ids));
             }
         }
@@ -3315,20 +3315,20 @@ sub _populate_bugs_fulltext {
         # As recommended by Monty Widenius for GNOME's upgrade.
         # mkanat and justdave concur it'll be helpful for bmo, too.
         $dbh->do('SET SESSION myisam_sort_buffer_size = 3221225472');
-        
+
         my $newline = $dbh->quote("\n");
         $dbh->do(
-         qq{$command INTO bugs_fulltext (bug_id, short_desc, comments, 
+         qq{$command INTO bugs_fulltext (bug_id, short_desc, comments,
                                          comments_noprivate)
                    SELECT bugs.bug_id, bugs.short_desc, }
                  . $dbh->sql_group_concat('longdescs.thetext', $newline, 0)
           . ', ' . $dbh->sql_group_concat('nopriv.thetext',    $newline, 0) .
-                 qq{ FROM bugs 
+                 qq{ FROM bugs
                           LEFT JOIN longdescs
                                  ON bugs.bug_id = longdescs.bug_id
                           LEFT JOIN longdescs AS nopriv
                                  ON longdescs.comment_id = nopriv.comment_id
-                                    AND nopriv.isprivate = 0 
+                                    AND nopriv.isprivate = 0
                      $where }
                  . $dbh->sql_group_by('bugs.bug_id', 'bugs.short_desc'));
     }
@@ -3345,7 +3345,7 @@ sub _fix_illegal_flag_modification_dates {
 
 sub _add_visiblity_value_to_value_tables {
     my $dbh = Bugzilla->dbh;
-    my @standard_fields = 
+    my @standard_fields =
         qw(bug_status resolution priority bug_severity op_sys rep_platform);
     my $custom_fields = $dbh->selectcol_arrayref(
         'SELECT name FROM fielddefs WHERE custom = 1 AND type IN(?,?)',
@@ -3371,13 +3371,13 @@ sub _add_extern_id_index {
 sub _convert_disallownew_to_isactive {
     my $dbh = Bugzilla->dbh;
     if ($dbh->bz_column_info('products', 'disallownew')){
-        $dbh->bz_add_column('products', 'isactive', 
+        $dbh->bz_add_column('products', 'isactive',
                             { TYPE => 'BOOLEAN', NOTNULL => 1, DEFAULT => 'TRUE'});
-        
+
         # isactive is the boolean reverse of disallownew.
         $dbh->do('UPDATE products SET isactive = 0 WHERE disallownew = 1');
         $dbh->do('UPDATE products SET isactive = 1 WHERE disallownew = 0');
-        
+
         $dbh->bz_drop_column('products','disallownew');
     }
 }
@@ -3408,7 +3408,7 @@ sub _fix_invalid_custom_field_names {
 sub _set_attachment_comment_type {
     my ($type, $string) = @_;
     my $dbh = Bugzilla->dbh;
-    # We check if there are any comments of this type already, first, 
+    # We check if there are any comments of this type already, first,
     # because this is faster than a full LIKE search on the comments,
     # and currently this will run every time we run checksetup.
     my $test = $dbh->selectrow_array(
@@ -3416,7 +3416,7 @@ sub _set_attachment_comment_type {
     return [] if $test;
     my %comments = @{ $dbh->selectcol_arrayref(
         "SELECT comment_id, thetext FROM longdescs
-          WHERE thetext LIKE '$string%'", 
+          WHERE thetext LIKE '$string%'",
         {Columns=>[1,2]}) };
     my @comment_ids = keys %comments;
     return [] if !scalar @comment_ids;
@@ -3454,7 +3454,7 @@ sub _set_attachment_comment_type {
         }
         $text = join("\n", @lines);
         $sth->execute($text, $type, $attachment_id, $id);
-        indicate_progress({ total => $total, current => $count, 
+        indicate_progress({ total => $total, current => $count,
                             every => 25 });
     }
     return \@comment_ids;
@@ -3484,7 +3484,7 @@ sub _add_allows_unconfirmed_to_product_table {
         $dbh->bz_add_column('products', 'allows_unconfirmed',
             { TYPE => 'BOOLEAN', NOTNULL => 1, DEFAULT => 'FALSE' });
         if ($dbh->bz_column_info('products', 'votestoconfirm')) {
-            $dbh->do('UPDATE products SET allows_unconfirmed = 1 
+            $dbh->do('UPDATE products SET allows_unconfirmed = 1
                        WHERE votestoconfirm > 0');
         }
     }
@@ -3535,17 +3535,17 @@ sub _add_isactive_to_product_fields {
 
     # If we add the isactive column all values should start off as active
     if (!$dbh->bz_column_info('components', 'isactive')) {
-        $dbh->bz_add_column('components', 'isactive', 
+        $dbh->bz_add_column('components', 'isactive',
             {TYPE => 'BOOLEAN', NOTNULL => 1, DEFAULT => 'TRUE'});
     }
-    
+
     if (!$dbh->bz_column_info('versions', 'isactive')) {
-        $dbh->bz_add_column('versions', 'isactive', 
+        $dbh->bz_add_column('versions', 'isactive',
             {TYPE => 'BOOLEAN', NOTNULL => 1, DEFAULT => 'TRUE'});
     }
 
     if (!$dbh->bz_column_info('milestones', 'isactive')) {
-        $dbh->bz_add_column('milestones', 'isactive', 
+        $dbh->bz_add_column('milestones', 'isactive',
             {TYPE => 'BOOLEAN', NOTNULL => 1, DEFAULT => 'TRUE'});
     }
 }
@@ -3703,7 +3703,7 @@ sub _populate_bug_see_also_class {
 
     my $update_sth =
         $dbh->prepare("UPDATE bug_see_also SET class = ? WHERE id = ?");
-    
+
     $dbh->bz_start_transaction();
     foreach my $see_also (@$result) {
         my ($id, $value) = @$see_also;
@@ -3718,7 +3718,7 @@ sub _migrate_disabledtext_boolean {
     if (!$dbh->bz_column_info('profiles', 'is_enabled')) {
         $dbh->bz_add_column("profiles", 'is_enabled',
                             {TYPE => 'BOOLEAN', NOTNULL => 1, DEFAULT => 'TRUE'});
-        $dbh->do("UPDATE profiles SET is_enabled = 0 
+        $dbh->do("UPDATE profiles SET is_enabled = 0
                   WHERE disabledtext != ''");
     }
 }
@@ -3756,12 +3756,12 @@ sub _on_delete_set_null_for_audit_log_userid {
 sub _fix_notnull_defaults {
     my $dbh = Bugzilla->dbh;
 
-    $dbh->bz_alter_column('bugs', 'bug_file_loc', 
-                          {TYPE => 'MEDIUMTEXT', NOTNULL => 1,  
+    $dbh->bz_alter_column('bugs', 'bug_file_loc',
+                          {TYPE => 'MEDIUMTEXT', NOTNULL => 1,
                            DEFAULT => "''"}, '');
 
-    my $custom_fields = Bugzilla::Field->match({ 
-        custom => 1, type => [ FIELD_TYPE_FREETEXT, FIELD_TYPE_TEXTAREA ] 
+    my $custom_fields = Bugzilla::Field->match({
+        custom => 1, type => [ FIELD_TYPE_FREETEXT, FIELD_TYPE_TEXTAREA ]
     });
 
     foreach my $field (@$custom_fields) {
@@ -3810,7 +3810,7 @@ sub _fix_dependencies_dupes {
         $dbh->bz_drop_index('dependencies', 'dependencies_blocked_idx');
         $dbh->bz_add_index('dependencies', 'dependencies_blocked_idx',
                            { FIELDS => [qw(blocked dependson)], TYPE => 'UNIQUE' });
-    }   
+    }
 }
 
 sub _fix_flagclusions_indexes {
@@ -3828,7 +3828,7 @@ sub _fix_flagclusions_indexes {
                 { Slice => {} });
             print "Removing duplicated entries from the '$table' table...\n" if @$dupes;
             foreach my $dupe (@$dupes) {
-                $dbh->do("DELETE FROM $table 
+                $dbh->do("DELETE FROM $table
                           WHERE type_id = ? AND product_id = ? AND component_id = ?",
                          undef, $dupe->{type_id}, $dupe->{product_id}, $dupe->{component_id});
                 $dbh->do("INSERT INTO $table (type_id, product_id, component_id) VALUES (?, ?, ?)",
@@ -3923,7 +3923,7 @@ Bugzilla::Install::DB - Fix up the database during installation.
 
 =head1 DESCRIPTION
 
-This module is used primarily by L<checksetup.pl> to modify the 
+This module is used primarily by L<checksetup.pl> to modify the
 database during upgrades.
 
 =head1 SUBROUTINES
@@ -3933,8 +3933,8 @@ database during upgrades.
 =item C<update_table_definitions()>
 
 Description: This is the primary code that updates table definitions
-             during upgrades. If you modify the schema in some 
-             way, you should add code to the end of this function to 
+             during upgrades. If you modify the schema in some
+             way, you should add code to the end of this function to
              make sure that your modifications happen over all installations.
 
 Params:      none

@@ -28,7 +28,7 @@ use warnings;
 
 use base qw(Exporter);
 our @EXPORT = qw(
-    generate_sitemap 
+    generate_sitemap
     bug_is_ok_to_index
 );
 
@@ -98,7 +98,7 @@ sub generate_sitemap {
         'SELECT bugs.bug_id, bugs.delta_ts
            FROM bugs
                 LEFT JOIN bug_group_map ON bugs.bug_id = bug_group_map.bug_id
-          WHERE bug_group_map.bug_id IS NULL AND creation_ts < ? 
+          WHERE bug_group_map.bug_id IS NULL AND creation_ts < ?
         ' . $dbh->sql_limit($num_bugs, '?'));
 
     my $filecount = 1;
@@ -122,7 +122,7 @@ sub generate_sitemap {
         push(@$filelist, _generate_sitemap_file($extension_name, $filecount, $products, $bugs));
 
         $filecount++;
-        $offset += $num_bugs; 
+        $offset += $num_bugs;
     }
 
     # Generate index file
@@ -131,7 +131,7 @@ sub generate_sitemap {
 
 sub _generate_sitemap_index {
     my ($extension_name, $filelist) = @_;
-   
+
     my $dbh = Bugzilla->dbh;
     my $timestamp = $dbh->selectrow_array(
         "SELECT " . $dbh->sql_date_format('NOW()', '%Y-%m-%d'));
@@ -181,7 +181,7 @@ END
     <changefreq>daily</changefreq>
     <priority>0.4</priority>
   </url>
-";   
+";
     }
 
     foreach my $bug (@$bugs) {
@@ -189,7 +189,7 @@ END
   <url>
     <loc>" . $bug_url . $bug->{bug_id} . "</loc>
     <lastmod>" . datetime_from($bug->{delta_ts}, 'UTC')->iso8601 . 'Z' . "</lastmod>
-  </url> 
+  </url>
 ";
     }
 
@@ -200,8 +200,8 @@ END
     # Write the compressed sitemap data to a file in the cgi root so that they can
     # be accessed by the search engines.
     my $filename = "sitemap$filecount.xml.gz";
-    gzip \$sitemap_xml => bz_locations->{'datadir'} . "/$extension_name/$filename" 
-        || die "gzip failed: $GzipError\n"; 
+    gzip \$sitemap_xml => bz_locations->{'datadir'} . "/$extension_name/$filename"
+        || die "gzip failed: $GzipError\n";
 
     return $filename;
 }

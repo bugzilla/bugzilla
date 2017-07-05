@@ -21,7 +21,7 @@ BEGIN { *esc = \&Pod::Simple::HTML::esc }
 # Note that if you leave out a category here, it will not be indexed
 # in the contents file, even though its HTML POD will still exist.
 use constant FILE_TRANSLATION => {
-    Files      => ['importxml', 'contrib', 'checksetup', 'email_in', 
+    Files      => ['importxml', 'contrib', 'checksetup', 'email_in',
                    'install-module', 'sanitycheck', 'jobqueue', 'migrate',
                    'collectstats'],
     Modules    => ['bugzilla'],
@@ -48,7 +48,7 @@ sub _write_contents_middle {
 
         my @downlines = sort {$a->[-1] cmp $b->[-1]} @category_data;
 
-        # And finally, actually print out the table for this category. 
+        # And finally, actually print out the table for this category.
         printf $Contents qq[<dt><a name="%s">%s</a></dt>\n<dd>\n],
                 esc($category), esc($category);
         print $Contents '<table class="pod_desc_table">' . "\n";
@@ -69,7 +69,7 @@ sub _write_contents_middle {
   <td>$description</td>
 </tr>
 END_HTML
-      
+
             print $Contents $html;
         }
         print $Contents "</table></dd>\n\n";
@@ -90,7 +90,7 @@ sub note_for_contents_file {
     my $full_title = $parser->get_title;
     $full_title =~ /^\S+\s+-+\s+(.+)/;
     my $description = $1;
-    
+
     $self->{bugzilla_desc} ||= {};
     $self->{bugzilla_desc}->{join('::', @$namelets)} = $description;
 

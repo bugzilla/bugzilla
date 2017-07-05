@@ -270,7 +270,7 @@ sub clean_search_url {
         {
             $self->delete($param);
         }
-        
+
         # Any "join" for custom search that's an AND can be removed, because
         # that's the default.
         if (($param =~ /^j\d+$/ || $param eq 'j_top')
@@ -321,7 +321,7 @@ sub clean_search_url {
 
     # "Reuse same sort as last time" is actually the default, so we don't
     # need it in the URL.
-    if ($self->param('order') 
+    if ($self->param('order')
         && $self->param('order') eq 'Reuse same sort as last time')
     {
         $self->delete('order');
@@ -329,7 +329,7 @@ sub clean_search_url {
 
     # list_id is added in buglist.cgi after calling clean_search_url,
     # and doesn't need to be saved in saved searches.
-    $self->delete('list_id'); 
+    $self->delete('list_id');
 
     # And now finally, if query_format is our only parameter, that
     # really means we have no parameters, so we should delete query_format.
@@ -390,7 +390,7 @@ sub multipart_init {
 # Have to add the cookies in.
 sub multipart_start {
     my $self = shift;
-    
+
     my %args = @_;
 
     # CGI.pm::multipart_start doesn't honour its own charset information, so
@@ -401,7 +401,7 @@ sub multipart_start {
         # and add the specified one
         $args{-type} .= '; charset=' . $self->charset();
     }
-        
+
     my $headers = $self->SUPER::multipart_start(%args);
     # Eliminate the one extra CRLF at the end.
     $headers =~ s/$CGI::CRLF$//;
@@ -477,10 +477,10 @@ sub header {
     # Add Strict-Transport-Security (STS) header if this response
     # is over SSL and the strict_transport_security param is turned on.
     if ($self->https && !$self->url_is_attachment_base
-        && Bugzilla->params->{'strict_transport_security'} ne 'off') 
+        && Bugzilla->params->{'strict_transport_security'} ne 'off')
     {
         my $sts_opts = 'max-age=' . MAX_STS_AGE;
-        if (Bugzilla->params->{'strict_transport_security'} 
+        if (Bugzilla->params->{'strict_transport_security'}
             eq 'include_subdomains')
         {
             $sts_opts .= '; includeSubDomains';
@@ -522,9 +522,9 @@ sub param {
 
     # When we are just requesting the value of a parameter...
     if (scalar(@_) == 1) {
-        my @result = $self->SUPER::param(@_); 
+        my @result = $self->SUPER::param(@_);
 
-        # Also look at the URL parameters, after we look at the POST 
+        # Also look at the URL parameters, after we look at the POST
         # parameters. This is to allow things like login-form submissions
         # with URL parameters in the form's "target" attribute.
         if (!scalar(@result)
@@ -546,8 +546,8 @@ sub param {
     # And for various other functions in CGI.pm, we need to correctly
     # return the URL parameters in addition to the POST parameters when
     # asked for the list of parameters.
-    elsif (!scalar(@_) && $self->request_method 
-           && $self->request_method eq 'POST') 
+    elsif (!scalar(@_) && $self->request_method
+           && $self->request_method eq 'POST')
     {
         my @post_params = $self->SUPER::param;
         my @url_params  = $self->url_param;
@@ -567,7 +567,7 @@ sub _fix_utf8 {
 
 sub should_set {
     my ($self, $param) = @_;
-    my $set = (defined $self->param($param) 
+    my $set = (defined $self->param($param)
                or defined $self->param("defined_$param"))
               ? 1 : 0;
     return $set;
@@ -661,7 +661,7 @@ sub redirect_search_url {
 
     $self->clean_search_url();
 
-    # Make sure we still have params still after cleaning otherwise we 
+    # Make sure we still have params still after cleaning otherwise we
     # do not want to store a list_id for an empty search.
     if ($user->id && $self->param) {
         # Insert a placeholder Bugzilla::Search::Recent, so that we know what
@@ -690,7 +690,7 @@ sub redirect_to_https {
     # in the WebService, and WebService clients usually handle this
     # correctly.
     $self->delete('POSTDATA');
-    my $url = $sslbase . $self->url('-path_info' => 1, '-query' => 1, 
+    my $url = $sslbase . $self->url('-path_info' => 1, '-query' => 1,
                                     '-relative' => 1);
 
     # XML-RPC clients (SOAP::Lite at least) require a 301 to redirect properly
@@ -753,7 +753,7 @@ sub set_dated_content_disp {
 # Vars TIEHASH Interface #
 ##########################
 
-# Fix the TIEHASH interface (scalar $cgi->Vars) to return and accept 
+# Fix the TIEHASH interface (scalar $cgi->Vars) to return and accept
 # arrayrefs.
 sub STORE {
     my $self = shift;
@@ -773,7 +773,7 @@ sub FETCH {
     return \@result;
 }
 
-# For the Vars TIEHASH interface: the normal CGI.pm DELETE doesn't return 
+# For the Vars TIEHASH interface: the normal CGI.pm DELETE doesn't return
 # the value deleted, but Perl's "delete" expects that value.
 sub DELETE {
     my ($self, $param) = @_;

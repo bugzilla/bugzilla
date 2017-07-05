@@ -53,7 +53,7 @@ if ($action eq "") {
 
     exit;
 }
-    
+
 
 if ($action eq 'add') {
     $vars->{'token'} = issue_session_token('add_keyword');

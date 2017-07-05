@@ -372,7 +372,7 @@ sub flag_types {
     my $vars = { target_type  => 'attachment',
                  product_id   => $self->bug->product_id,
                  component_id => $self->bug->component_id,
-                 attach_id    => $self->id, 
+                 attach_id    => $self->id,
                  active_or_has_flags => $self->bug_id };
 
     return $self->{flag_types} = Bugzilla::Flag->_flag_types($vars);
@@ -419,7 +419,7 @@ sub _check_bug {
 
     $bug = ref $invocant ? $invocant->bug : $bug;
 
-    $bug || ThrowCodeError('param_required', 
+    $bug || ThrowCodeError('param_required',
                            { function => "$invocant->create", param => 'bug' });
 
     ($user->can_see_bug($bug->id) && $user->can_edit_product($bug->product_id))
@@ -430,7 +430,7 @@ sub _check_bug {
 
 sub _check_content_type {
     my ($invocant, $content_type, undef, $params) = @_;
- 
+
     my $is_patch = ref($invocant) ? $invocant->ispatch : $params->{ispatch};
     $content_type = 'text/plain' if $is_patch;
     $content_type = clean_text($content_type);

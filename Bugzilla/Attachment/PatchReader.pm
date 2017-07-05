@@ -269,8 +269,8 @@ sub setup_patch_readers {
     }
 
     # Add in cvs context if we have the necessary info to do it
-    if ($context ne 'patch' && Bugzilla->localconfig->{cvsbin} 
-        && Bugzilla->params->{'cvsroot_get'}) 
+    if ($context ne 'patch' && Bugzilla->localconfig->{cvsbin}
+        && Bugzilla->params->{'cvsroot_get'})
     {
         require Bugzilla::PatchReader::AddCVSContext;
         # We need to set $cvsbin as global, because PatchReader::CVSClient
@@ -301,7 +301,7 @@ sub setup_template_patch_reader {
 
     $vars->{'collapsed'} = $cgi->param('collapsed');
     $vars->{'context'} = $context;
-    $vars->{'do_context'} = Bugzilla->localconfig->{cvsbin} 
+    $vars->{'do_context'} = Bugzilla->localconfig->{cvsbin}
                             && Bugzilla->params->{'cvsroot_get'} && !$vars->{'newid'};
 
     # Print everything out.

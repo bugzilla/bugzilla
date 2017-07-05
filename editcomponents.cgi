@@ -192,7 +192,7 @@ if ($action eq 'edit') {
         Bugzilla::Component->check({ product => $product, name => $comp_name });
     $vars->{'comp'} = $component;
 
-    $vars->{'initial_cc_names'} = 
+    $vars->{'initial_cc_names'} =
         join(', ', map($_->login, @{$component->initial_cc}));
 
     $vars->{'product'} = $product;
@@ -223,7 +223,7 @@ if ($action eq 'update') {
     my $triage_owner          = trim($cgi->param('triage_owner')     || '');
     my @initial_cc            = $cgi->param('initialcc');
     my $isactive              = $cgi->param('isactive');
-  
+
     my $component =
         Bugzilla::Component->check({ product => $product, name => $comp_old_name });
 

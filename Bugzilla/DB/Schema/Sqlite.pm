@@ -28,7 +28,7 @@ sub _initialize {
 
     $self->{db_specific} = {
         BOOLEAN =>      'integer',
-        FALSE =>        '0', 
+        FALSE =>        '0',
         TRUE =>         '1',
 
         INT1 =>         'integer',
@@ -79,15 +79,15 @@ sub _sqlite_table_lines {
 # This does most of the "heavy lifting" of the schema-altering functions.
 sub _sqlite_alter_schema {
     my ($self, $table, $create_table, $options) = @_;
-    
+
     # $create_table is sometimes an array in the form that _sqlite_table_lines
     # returns.
     if (ref $create_table) {
         $create_table = join(',', @$create_table) . "\n)";
     }
-    
+
     my $dbh = Bugzilla->dbh;
-    
+
     my $random = generate_random_password(5);
     my $rename_to = "${table}_$random";
 
@@ -104,12 +104,12 @@ sub _sqlite_alter_schema {
             @insert_cols = map { $_ eq $from ? $to : $_ } @insert_cols;
         }
     }
-    
+
     my $insert_str = join(',', @insert_cols);
     my $select_str = join(',', @select_cols);
     my $copy_sql = "INSERT INTO $table ($insert_str)"
                    . " SELECT $select_str FROM $rename_to";
-                   
+
     # We have to turn FKs off before doing this. Otherwise, when we rename
     # the table, all of the FKs in the other tables will be automatically
     # updated to point to the renamed table. Note that PRAGMA foreign_keys
@@ -127,7 +127,7 @@ sub _sqlite_alter_schema {
         "DROP TABLE $rename_to",
         'COMMIT TRANSACTION',
         'PRAGMA foreign_keys = ON',
-    );    
+    );
 }
 
 # For finding a particular column's definition in a CREATE TABLE statement.
@@ -173,7 +173,7 @@ sub _get_create_table_ddl {
 sub get_type_ddl {
     my $self = shift;
     my $def = dclone($_[0]);
-    
+
     my $ddl = $self->SUPER::get_type_ddl(@_);
     if ($def->{PRIMARYKEY} and $def->{TYPE} =~ /SERIAL/i) {
         $ddl =~ s/\bSERIAL\b/integer/;
@@ -193,7 +193,7 @@ sub get_alter_column_ddl {
     my $self = shift;
     my ($table, $column, $new_def, $set_nulls_to) = @_;
     my $dbh = Bugzilla->dbh;
-    
+
     my $table_sql = $self->_sqlite_create_table($table);
     my $new_ddl = $self->get_type_ddl($new_def);
     # When we do ADD COLUMN, columns can show up all on one line separated
@@ -237,7 +237,7 @@ sub get_add_column_ddl {
         return $self->_sqlite_alter_schema($table, $table_sql,
             { pre_sql => \@pre_sql, extra_column => $column });
     }
-    
+
     return $self->SUPER::get_add_column_ddl(@_);
 }
 
@@ -290,12 +290,12 @@ sub get_drop_fk_sql {
     my ($self, $table, $column, $references) = @_;
     my @clauses = $self->_sqlite_table_lines($table);
     my $fk_name = $self->_get_fk_name($table, $column, $references);
-    
+
     my $line_re = qr/^\s+CONSTRAINT $fk_name /s;
     grep { $line_re } @clauses
         or die "Can't find $fk_name: " . join(',', @clauses);
     @clauses = grep { $_ !~ $line_re } @clauses;
-    
+
     return $self->_sqlite_alter_schema($table, \@clauses);
 }
 

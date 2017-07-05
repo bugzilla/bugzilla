@@ -34,7 +34,7 @@ sub relationships {
     my $ref = RELATIONSHIPS;
     # Clone it so that we don't modify the constant;
     my %relationships = %$ref;
-    Bugzilla::Hook::process('bugmail_relationships', 
+    Bugzilla::Hook::process('bugmail_relationships',
                             { relationships => \%relationships });
     return %relationships;
 }
@@ -72,11 +72,11 @@ sub Send {
     if ($forced->{'owner'}) {
         push (@assignees, Bugzilla::User->check($forced->{'owner'}));
     }
-    
+
     if ($forced->{'qacontact'}) {
         push (@qa_contacts, Bugzilla::User->check($forced->{'qacontact'}));
     }
-    
+
     if ($forced->{'cc'}) {
         foreach my $cc (@{$forced->{'cc'}}) {
             push(@ccs, Bugzilla::User->check($cc));
@@ -135,21 +135,21 @@ sub Send {
     ###########################################################################
     # Start of email filtering code
     ###########################################################################
-    
+
     # A user_id => roles hash to keep track of people.
     my %recipients;
     my %watching;
-    
+
     # Now we work out all the people involved with this bug, and note all of
     # the relationships in a hash. The keys are userids, the values are an
     # array of role constants.
-    
+
     # CCs
     $recipients{$_->id}->{+REL_CC} = BIT_DIRECT foreach (@ccs);
-    
+
     # Reporter (there's only ever one)
     $recipients{$bug->reporter->id}->{+REL_REPORTER} = BIT_DIRECT;
-    
+
     # QA Contact
     if (Bugzilla->params->{'useqacontact'}) {
         foreach (@qa_contacts) {
@@ -161,7 +161,7 @@ sub Send {
     # Assignee
     $recipients{$_->id}->{+REL_ASSIGNEE} = BIT_DIRECT foreach (@assignees);
 
-    # The last relevant set of people are those who are being removed from 
+    # The last relevant set of people are those who are being removed from
     # their roles in this change. We get their names out of the diffs.
     foreach my $change (@diffs) {
         if ($change->{old}) {
@@ -189,7 +189,7 @@ sub Send {
     foreach my $user_id (keys %recipients) {
         $user_cache{$user_id} ||= new Bugzilla::User({ id => $user_id, cache => 1 });
     }
-    
+
     Bugzilla::Hook::process('bugmail_recipients',
                             { bug => $bug, recipients => \%recipients,
                               users => \%user_cache, diffs => \@diffs });
@@ -249,13 +249,13 @@ sub Send {
             # that role.
             foreach my $relationship (keys %{$recipients{$user_id}}) {
                 if ($user->wants_bug_mail($bug,
-                                          $relationship, 
+                                          $relationship,
                                           $start ? \@diffs : [],
                                           $comments,
                                           $params->{dep_only},
                                           $changer))
                 {
-                    $rels_which_want{$relationship} = 
+                    $rels_which_want{$relationship} =
                         $recipients{$user_id}->{$relationship};
                 }
             }

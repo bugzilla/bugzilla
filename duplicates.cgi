@@ -82,7 +82,7 @@ sub formvalue {
         return $cgi->param($name);
     }
     elsif (exists DEFAULTS->{$name}) {
-        return ref DEFAULTS->{$name} ? @{ DEFAULTS->{$name} } 
+        return ref DEFAULTS->{$name} ? @{ DEFAULTS->{$name} }
                                      : DEFAULTS->{$name};
     }
     return undef;
@@ -97,7 +97,7 @@ sub sort_duplicates {
         return $a->{'bug'}->$sort_by <=> $b->{'bug'}->$sort_by;
     }
     return $a->{'bug'}->$sort_by cmp $b->{'bug'}->$sort_by;
-    
+
 }
 
 ###############
@@ -148,7 +148,7 @@ detaint_natural($maxrows)
 
 my $origchangedsince = $changedsince;
 detaint_natural($changedsince)
-  || ThrowUserError("invalid_changedsince", 
+  || ThrowUserError("invalid_changedsince",
                     { changedsince => $origchangedsince });
 
 my %total_dups = @{$dbh->selectcol_arrayref(
@@ -165,9 +165,9 @@ add_indirect_dups(\%total_dups, \%dupe_relation);
 my $reso_field_id = get_field_id('resolution');
 my %since_dups = @{$dbh->selectcol_arrayref(
     "SELECT dupe_of, COUNT(dupe)
-       FROM duplicates INNER JOIN bugs_activity 
-                       ON bugs_activity.bug_id = duplicates.dupe 
-      WHERE added = 'DUPLICATE' AND fieldid = ? 
+       FROM duplicates INNER JOIN bugs_activity
+                       ON bugs_activity.bug_id = duplicates.dupe
+      WHERE added = 'DUPLICATE' AND fieldid = ?
             AND bug_when >= "
                 . $dbh->sql_date_math('LOCALTIMESTAMP(0)', '-', '?', 'DAY') .
  " GROUP BY dupe_of", {Columns=>[1,2]},

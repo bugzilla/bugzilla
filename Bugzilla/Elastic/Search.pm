@@ -140,7 +140,7 @@ sub _build_fields { return \@SUPPORTED_FIELDS }
 
 sub _build__order {
     my ($self) = @_;
-    
+
     my @order;
     foreach my $order (@{$self->_input_order}) {
         if ($order =~ /^(.+)\s+(asc|desc)$/i) {
@@ -180,7 +180,7 @@ sub _build_search_description {
 
 sub _describe {
     my ($thing) = @_;
-    
+
     state $class_to_func = {
         'Bugzilla::Search::Condition' => \&_describe_condition,
         'Bugzilla::Search::Clause'    => \&_describe_clause
@@ -411,7 +411,7 @@ BEGIN {
     with 'Throwable';
 
     has 'redirect_args' => (is => 'ro', required => 1);
-    
+
     package Bugzilla::Elastic::Search::UnsupportedField;
     use Moo;
     use overload q{""} => sub { "Unsupported field: ", $_[0]->field }, fallback => 1;
@@ -420,7 +420,7 @@ BEGIN {
 
     has 'field' => (is => 'ro', required => 1);
 
-    
+
     package Bugzilla::Elastic::Search::UnsupportedOperator;
     use Moo;
 

@@ -487,7 +487,7 @@ The id of the bugzilla user. A unique integer value.
 
 =item C<real_name> (string)
 
-The real name of the bugzilla user. 
+The real name of the bugzilla user.
 
 =item C<name> (string)
 

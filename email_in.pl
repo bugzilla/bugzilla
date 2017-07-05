@@ -63,7 +63,7 @@ sub parse_mail {
     my ($mail_text) = @_;
     debug_print('Parsing Email');
     $input_email = Email::MIME->new($mail_text);
-    
+
     my %fields = %{ $switch{'default'} || {} };
     Bugzilla::Hook::process('email_in_before_parse', { mail => $input_email,
                                                        fields => \%fields });
@@ -96,8 +96,8 @@ sub parse_mail {
     if ($body =~ /^\s*@/s) {
         my $current_field;
         while (my $line = shift @body_lines) {
-            # If the sig is starting, we want to keep this in the 
-            # @body_lines so that we don't keep the sig as part of the 
+            # If the sig is starting, we want to keep this in the
+            # @body_lines so that we don't keep the sig as part of the
             # comment down below.
             if ($line eq SIGNATURE_DELIMITER) {
                 unshift(@body_lines, $line);
@@ -176,7 +176,7 @@ sub post_bug {
 }
 
 sub process_bug {
-    my ($fields_in) = @_; 
+    my ($fields_in) = @_;
     my %fields = %$fields_in;
 
     my $bug_id = $fields{'bug_id'};
@@ -248,10 +248,10 @@ sub handle_attachments {
             data        => $data,
         });
         # If we added a comment, and our comment does not already have a type,
-        # and this is our first attachment, then we make the comment an 
+        # and this is our first attachment, then we make the comment an
         # "attachment created" comment.
         if ($comment and !$comment->type and !$update_comment) {
-            $comment->set_all({ type       => CMT_ATTACHMENT_CREATED, 
+            $comment->set_all({ type       => CMT_ATTACHMENT_CREATED,
                                 extra_data => $obj->id });
             $update_comment = 1;
         }
@@ -376,7 +376,7 @@ sub die_handler {
        $msg =~ s/^Compilation failed in require.+$//ms;
        $msg = html_strip($msg);
        my $from = Bugzilla->params->{'mailfrom'};
-       my $reply = reply(to => $input_email, from => $from, top_post => 1, 
+       my $reply = reply(to => $input_email, from => $from, top_post => 1,
                          body => "$msg\n");
        MessageToMTA($reply->as_string);
     }
@@ -484,7 +484,7 @@ The script expects to read an email with the following format:
 
  It can be multiple paragraphs.
 
- -- 
+ --
  This is a signature line, and will be removed automatically, It will not
  be included in the bug description.
 

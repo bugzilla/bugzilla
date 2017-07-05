@@ -33,7 +33,7 @@ sub get_login_info {
 
     return { failure => AUTH_NODATA } if !$env_email;
 
-    return { username => $env_email, extern_id => $env_id, 
+    return { username => $env_email, extern_id => $env_id,
              realname => $env_realname };
 }
 

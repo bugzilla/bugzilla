@@ -62,7 +62,7 @@ use constant LOCALCONFIG_VARS => (
     },
     {
         name    => 'db_host',
-        default => 'localhost',           
+        default => 'localhost',
     },
     {
         name    => 'db_name',
@@ -171,9 +171,9 @@ sub read_localconfig {
             # We can only get the glob itself. So we figure out its type this
             # way, by trying first a scalar, then an array, then a hash.
             #
-            # The interesting thing is that this converts all deprecated 
-            # array or hash vars into hashrefs or arrayrefs, but that's 
-            # fine since as I write this all modern localconfig vars are 
+            # The interesting thing is that this converts all deprecated
+            # array or hash vars into hashrefs or arrayrefs, but that's
+            # fine since as I write this all modern localconfig vars are
             # actually scalars.
             if (defined $$glob) {
                 $localconfig{$var} = $$glob;
@@ -231,7 +231,7 @@ sub update_localconfig {
         # a 256-character string for site_wide_secret.
         $value = undef if ($name eq 'site_wide_secret' and defined $value
                            and length($value) == 256);
-        
+
         if (!defined $value) {
             push(@new_vars, $name);
             $var->{default} = &{$var->{default}} if ref($var->{default}) eq 'CODE';
@@ -261,11 +261,11 @@ sub update_localconfig {
     # Move any custom or old variables into a separate file.
     if (scalar @old_vars) {
         my $filename_old = "$filename.old";
-        open(my $old_file, ">>:utf8", $filename_old) 
+        open(my $old_file, ">>:utf8", $filename_old)
             or die "$filename_old: $!";
         local $Data::Dumper::Purity = 1;
         foreach my $var (@old_vars) {
-            print $old_file Data::Dumper->Dump([$localconfig->{$var}], 
+            print $old_file Data::Dumper->Dump([$localconfig->{$var}],
                                                ["*$var"]) . "\n\n";
         }
         close $old_file;
@@ -362,11 +362,11 @@ Reads the localconfig file and returns all valid values in a hashref.
 
 =over
 
-=item C<$include_deprecated> 
+=item C<$include_deprecated>
 
 C<true> if you want the returned hashref to include *any* variable
-currently defined in localconfig, even if it doesn't exist in 
-C<LOCALCONFIG_VARS>. Generally this is is only for use 
+currently defined in localconfig, even if it doesn't exist in
+C<LOCALCONFIG_VARS>. Generally this is is only for use
 by L</update_localconfig>.
 
 =back

@@ -36,7 +36,7 @@ use constant BLOB_TYPE => { pg_type => DBD::Pg::PG_BYTEA };
 
 sub new {
     my ($class, $params) = @_;
-    my ($user, $pass, $host, $dbname, $port) = 
+    my ($user, $pass, $host, $dbname, $port) =
         @$params{qw(db_user db_pass db_host db_name db_port)};
 
     # The default database name for PostgreSQL. We have
@@ -55,7 +55,7 @@ sub new {
 
     my $attrs = { pg_enable_utf8 => Bugzilla->params->{'utf8'} };
 
-    my $self = $class->db_new({ dsn => $dsn, user => $user, 
+    my $self = $class->db_new({ dsn => $dsn, user => $user,
                                 pass => $pass, attrs => $attrs });
 
     # all class local variables stored in DBI derived class needs to have
@@ -118,7 +118,7 @@ sub sql_not_regexp {
 
     $self->bz_check_regexp($real_pattern) if !$nocheck;
 
-    return "${expr}::text !~* $pattern" 
+    return "${expr}::text !~* $pattern"
 }
 
 sub sql_limit {
@@ -145,7 +145,7 @@ sub sql_to_days {
 
 sub sql_date_format {
     my ($self, $date, $format) = @_;
-    
+
     $format = "%Y.%m.%d %H:%i:%s" if !$format;
 
     $format =~ s/\%Y/YYYY/g;
@@ -162,13 +162,13 @@ sub sql_date_format {
 
 sub sql_date_math {
     my ($self, $date, $operator, $interval, $units) = @_;
-    
+
     return "$date $operator $interval * INTERVAL '1 $units'";
 }
 
 sub sql_string_concat {
     my ($self, @params) = @_;
-    
+
     # Postgres 7.3 does not support concatenating of different types, so we
     # need to cast both parameters to text. Version 7.4 seems to handle this
     # properly, so when we stop support 7.3, this can be removed.
@@ -222,7 +222,7 @@ sub bz_setup_database {
                        SFUNC = array_append,
                        BASETYPE = anyelement,
                        STYPE = anyarray,
-                       INITCOND = '{}' 
+                       INITCOND = '{}'
                    )");
     }
 
@@ -246,12 +246,12 @@ END
     $self->bz_drop_index('longdescs', 'longdescs_thetext_idx');
     # Same for all the comments fields in the fulltext table.
     $self->bz_drop_index('bugs_fulltext', 'bugs_fulltext_comments_idx');
-    $self->bz_drop_index('bugs_fulltext', 
+    $self->bz_drop_index('bugs_fulltext',
                          'bugs_fulltext_comments_noprivate_idx');
 
     # PostgreSQL also wants an index for calling LOWER on
     # login_name, which we do with sql_istrcmp all over the place.
-    $self->bz_add_index('profiles', 'profiles_login_name_lower_idx', 
+    $self->bz_add_index('profiles', 'profiles_login_name_lower_idx',
         {FIELDS => ['LOWER(login_name)'], TYPE => 'UNIQUE'});
 
     # Now that Bugzilla::Object uses sql_istrcmp, other tables
@@ -328,7 +328,7 @@ sub _fix_case_differences {
     my $dbh = Bugzilla->dbh;
 
     my $duplicates = $dbh->selectcol_arrayref(
-          "SELECT DISTINCT LOWER($field) FROM $table 
+          "SELECT DISTINCT LOWER($field) FROM $table
         GROUP BY LOWER($field) HAVING COUNT(LOWER($field)) > 1");
 
     foreach my $name (@$duplicates) {
@@ -357,7 +357,7 @@ sub _fix_case_differences {
 # Custom Schema Information Functions
 #####################################################################
 
-# Pg includes the PostgreSQL system tables in table_list_real, so 
+# Pg includes the PostgreSQL system tables in table_list_real, so
 # we need to remove those.
 sub bz_table_list_real {
     my $self = shift;

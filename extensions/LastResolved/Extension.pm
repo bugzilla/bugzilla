@@ -43,7 +43,7 @@ sub _migrate_last_resolved {
     my $dbh = Bugzilla->dbh;
     my $field_id = get_field_id('bug_status');
     my $resolved_activity = $dbh->selectall_arrayref(
-        "SELECT bugs_activity.bug_id, bugs_activity.bug_when, bugs_activity.who 
+        "SELECT bugs_activity.bug_id, bugs_activity.bug_when, bugs_activity.who
            FROM bugs_activity
           WHERE bugs_activity.fieldid = ?
                 AND bugs_activity.added = 'RESOLVED'
@@ -107,8 +107,8 @@ sub buglist_columns {
     my ($self,  $args) = @_;
     my $columns = $args->{columns};
     $columns->{'cf_last_resolved'} = {
-         name  => 'bugs.cf_last_resolved', 
-         title => 'Last Resolved', 
+         name  => 'bugs.cf_last_resolved',
+         title => 'Last Resolved',
     };
 }
 

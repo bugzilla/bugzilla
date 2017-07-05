@@ -238,7 +238,7 @@ if ($action eq 'edit' || $action eq 'copy') {
         $vars->{'action'} = "insert";
         $vars->{'token'} = issue_session_token('add_flagtype');
     }
-    else { 
+    else {
         $vars->{'action'} = "update";
         $vars->{'token'} = issue_session_token('edit_flagtype');
     }

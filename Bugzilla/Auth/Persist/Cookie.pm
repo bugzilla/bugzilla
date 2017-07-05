@@ -34,7 +34,7 @@ sub persist_login {
 
     $dbh->bz_start_transaction();
 
-    my $login_cookie = 
+    my $login_cookie =
         Bugzilla::Token::GenerateUniqueToken('logincookies', 'cookie');
 
     my $ip_addr = remote_ip();
@@ -61,13 +61,13 @@ sub persist_login {
     if ( Bugzilla->params->{'rememberlogin'} eq 'on' ||
          (Bugzilla->params->{'rememberlogin'} ne 'off' &&
           $input_params->{'Bugzilla_remember'} &&
-          $input_params->{'Bugzilla_remember'} eq 'on') ) 
+          $input_params->{'Bugzilla_remember'} eq 'on') )
     {
         # Not a session cookie, so set an infinite expiry
         $cookieargs{'-expires'} = 'Fri, 01-Jan-2038 00:00:00 GMT';
     }
     if (Bugzilla->params->{'ssl_redirect'}) {
-        # Make these cookies only be sent to us by the browser during 
+        # Make these cookies only be sent to us by the browser during
         # HTTPS sessions, if we're using SSL.
         $cookieargs{'-secure'} = 1;
     }
@@ -89,7 +89,7 @@ sub persist_login {
         Bugzilla->audit(sprintf "successful login of %s from %s using \"%s\", authenticated by %s",
                         $user->login, $ip_addr, $cgi->user_agent // '', $auth_method);
     }
-    
+
     return $login_cookie;
 }
 

@@ -55,7 +55,7 @@ sub bug_count {
                                          WHERE value = ?", undef, $self->name);
     }
     else {
-        $count = $dbh->selectrow_array("SELECT COUNT(*) FROM bugs 
+        $count = $dbh->selectrow_array("SELECT COUNT(*) FROM bugs
                                          WHERE $fname = ?",
                                        undef, $self->name);
     }
@@ -69,7 +69,7 @@ sub field {
     my $cache = Bugzilla->request_cache;
     # This is just to make life easier for subclasses. Our auto-generated
     # subclasses from Bugzilla::Field::Choice->type() already have this set.
-    $cache->{"field_$class"} ||=  
+    $cache->{"field_$class"} ||=
         new Bugzilla::Field({ name => $class->FIELD_NAME });
     return $cache->{"field_$class"};
 }
@@ -134,7 +134,7 @@ sub controlled_values {
     my %controlled_values;
     require Bugzilla::Field::Choice;
     foreach my $field (@$fields) {
-        $controlled_values{$field->name} = 
+        $controlled_values{$field->name} =
             Bugzilla::Field::Choice->type($field)
             ->match({ visibility_value_id => $self->id });
     }
@@ -163,13 +163,13 @@ sub is_visible_on_bug {
 
     # Values with a visibility value are only shown if the visibility
     # value is set on the bug.
-    return $visibility_value->is_set_on_bug($bug); 
+    return $visibility_value->is_set_on_bug($bug);
 }
 
 sub is_set_on_bug {
     my ($self, $bug) = @_;
     my $field_name = $self->FIELD_NAME;
-    # This allows bug/create/create.html.tmpl to pass in a hashref that 
+    # This allows bug/create/create.html.tmpl to pass in a hashref that
     # looks like a bug object.
     my $value = blessed($bug) ? $bug->$field_name : $bug->{$field_name};
     $value = $value->name if blessed($value);
@@ -244,7 +244,7 @@ value is set in its field.
 
 Returns a hashref of arrayrefs. The hash keys are the names of fields,
 and the values are arrays of objects that implement
-C<Bugzilla::Field::ChoiceInterface>, representing values that this value 
+C<Bugzilla::Field::ChoiceInterface>, representing values that this value
 controls the visibility of, for that field.
 
 =item C<visibility_value>
@@ -255,7 +255,7 @@ value to appear in the UI.
 
 =item C<is_visible_on_bug>
 
-Returns C<1> if, according to the settings of C<is_active> and 
+Returns C<1> if, according to the settings of C<is_active> and
 C<visibility_value>, this value should be displayed as an option
 when viewing a bug. Returns C<0> otherwise.
 

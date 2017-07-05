@@ -176,7 +176,7 @@ sub IssuePasswordToken {
     my $too_soon = $dbh->selectrow_array(
         'SELECT 1 FROM tokens
           WHERE userid = ? AND tokentype = ?
-                AND issuedate > ' 
+                AND issuedate > '
                     . $dbh->sql_date_math('NOW()', '-', 10, 'MINUTE'),
         undef, ($user->id, 'password'));
 
@@ -196,7 +196,7 @@ sub IssuePasswordToken {
     $vars->{'timezone'} = $user->timezone;
 
     my $message = "";
-    $template->process("account/password/forgotten-password.txt.tmpl", 
+    $template->process("account/password/forgotten-password.txt.tmpl",
                                                                $vars, \$message)
       || ThrowTemplateError($template->error());
 
@@ -290,7 +290,7 @@ sub CleanTokenTable {
 }
 
 sub GenerateUniqueToken {
-    # Generates a unique random token.  Uses generate_random_password 
+    # Generates a unique random token.  Uses generate_random_password
     # for the tokens themselves and checks uniqueness by searching for
     # the token in the "tokens" table.  Gives up if it can't come up
     # with a token after about one hundred tries.
@@ -381,7 +381,7 @@ sub DeletePasswordTokens {
     }
 }
 
-# Returns an email change token if the user has one. 
+# Returns an email change token if the user has one.
 sub HasEmailChangeToken {
     my $userid = shift;
     my $dbh = Bugzilla->dbh;

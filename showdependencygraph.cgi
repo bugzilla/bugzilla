@@ -34,7 +34,7 @@ my $dbh = Bugzilla->switch_to_shadow_db();
 my (%seen, %edgesdone, %bugtitles);
 my $bug_count = 0;
 
-# $CreateImagemap: This sub grabs a local filename as a parameter, reads the 
+# $CreateImagemap: This sub grabs a local filename as a parameter, reads the
 # dot-generated image map datafile residing in that file and turns it into
 # an HTML map element. THIS SUB IS ONLY USED FOR LOCAL DOT INSTALLATIONS.
 # The map datafile won't necessarily contain the bug summaries, so we'll
@@ -220,12 +220,12 @@ foreach my $k (keys(%seen)) {
         print $fh "$k\n";
     }
 
-    # Push the bug tooltip texts into a global hash so that 
+    # Push the bug tooltip texts into a global hash so that
     # $CreateImagemap sub (used with local dot installations) can
     # use them later on.
     $bugtitles{$k} = trim("$stat $resolution");
 
-    # Show the bug summary in tooltips only if not shown on 
+    # Show the bug summary in tooltips only if not shown on
     # the graph and it is non-empty (the user can see the bug)
     if (!$cgi->param('showsummary') && $summary ne "") {
         $bugtitles{$k} .= " - $summary";
@@ -277,7 +277,7 @@ if ($webdotbase =~ /^https?:/) {
     # need to make that into a relative path.
     my $cgi_root = bz_locations()->{cgi_path};
     $pngfilename =~ s#^\Q$cgi_root\E/?##;
-    
+
     $vars->{'image_url'} = $pngfilename;
 
     # Then, generate a imagemap datafile that contains the corner data

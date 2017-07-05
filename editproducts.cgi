@@ -57,7 +57,7 @@ my $token = $cgi->param('token');
 # classifications enabled)
 #
 
-if (Bugzilla->params->{'useclassification'} 
+if (Bugzilla->params->{'useclassification'}
     && !$classification_name
     && !$product_name)
 {
@@ -197,9 +197,9 @@ if ($action eq 'del') {
     }
     $vars->{'product'} = $product;
     $vars->{'token'} = issue_session_token('delete_product');
-    
+
     Bugzilla::Hook::process('product_confirm_delete', { vars => $vars });
-    
+
     $template->process("admin/products/confirm-delete.html.tmpl", $vars)
         || ThrowTemplateError($template->error());
     exit;

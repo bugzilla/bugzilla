@@ -26,7 +26,7 @@ sub should_handle {
 
 sub _check_value {
     my ($class, $uri) = @_;
-    
+
     $uri = $class->SUPER::_check_value($uri);
 
     my $value = $uri->as_string;

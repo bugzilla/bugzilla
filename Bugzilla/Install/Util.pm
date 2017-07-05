@@ -160,7 +160,7 @@ sub install_string {
     my ($string_id, $vars) = @_;
     _cache()->{install_string_path} ||= template_include_path();
     my $path = _cache()->{install_string_path};
-    
+
     my $string_template;
     # Find the first template that defines this string.
     foreach my $dir (@$path) {
@@ -169,7 +169,7 @@ sub install_string {
             if !defined $string_template;
         last if defined $string_template;
     }
-    
+
     die "No language defines the string '$string_id'"
         if !defined $string_template;
 
@@ -284,7 +284,7 @@ sub include_languages {
 # Used by template_include_path
 sub _template_lang_directories {
     my ($languages, $templatedir) = @_;
-    
+
     my @add = qw(custom default);
     my $project = bz_locations->{'project'};
     unshift(@add, $project) if $project;
@@ -323,11 +323,11 @@ sub template_include_path {
     my ($params) = @_;
     my @used_languages = include_languages($params);
     # Now, we add template directories in the order they will be searched:
-    my $template_dirs = _template_base_directories(); 
+    my $template_dirs = _template_base_directories();
 
     my @include_path;
     foreach my $template_dir (@$template_dirs) {
-        my @lang_dirs = _template_lang_directories(\@used_languages, 
+        my @lang_dirs = _template_lang_directories(\@used_languages,
                                                    $template_dir);
         # Hooks get each set of extension directories separately.
         if ($params->{hook}) {
@@ -537,14 +537,14 @@ sub prevent_windows_dialog_boxes {
     # during checksetup (since loading DBD::Oracle during checksetup when
     # Oracle isn't installed causes a scary popup and pauses checksetup).
     #
-    # Win32::API ships with ActiveState by default, though there could 
+    # Win32::API ships with ActiveState by default, though there could
     # theoretically be a Windows installation without it, I suppose.
     if (ON_WINDOWS and eval { require Win32::API }) {
         # Call kernel32.SetErrorMode with arguments that mean:
         # "The system does not display the critical-error-handler message box.
         # Instead, the system sends the error to the calling process." and
         # "A child process inherits the error mode of its parent process."
-        my $SetErrorMode = Win32::API->new('kernel32', 'SetErrorMode', 
+        my $SetErrorMode = Win32::API->new('kernel32', 'SetErrorMode',
                                            'I', 'I');
         my $SEM_FAILCRITICALERRORS = 0x0001;
         my $SEM_NOGPFAULTERRORBOX  = 0x0002;
@@ -747,8 +747,8 @@ in their browser, usually), and extensions are sorted alphabetically.
 
 =item C<include_languages>
 
-Used by L<Bugzilla::Template> to determine the languages' list which 
-are compiled with the browser's I<Accept-Language> and the languages 
+Used by L<Bugzilla::Template> to determine the languages' list which
+are compiled with the browser's I<Accept-Language> and the languages
 of installed templates.
 
 =item C<vers_cmp>

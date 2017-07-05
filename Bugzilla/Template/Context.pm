@@ -53,7 +53,7 @@ sub stash {
     my $pre_process = $self->config->{PRE_PROCESS};
 
     # Checking bz_in_process tells us that we were indeed called as part of a
-    # Context::process, and not at some other point. 
+    # Context::process, and not at some other point.
     #
     # Checking $name makes sure that we're processing a file, and not just a
     # block, by checking that the name has a period in it. We don't allow
@@ -64,7 +64,7 @@ sub stash {
     # We also make sure that we don't run, ever, during the PRE_PROCESS
     # templates, because if somebody calls Throw*Error globally inside of
     # template_before_process, that causes an infinite recursion into
-    # the PRE_PROCESS templates (because Bugzilla, while inside 
+    # the PRE_PROCESS templates (because Bugzilla, while inside
     # global/intialize.none.tmpl, loads the template again to create the
     # template object for Throw*Error).
     #

@@ -69,7 +69,7 @@ sub create_or_update_user {
         # passed only a username, and that username doesn't exist already.
         if ($username && !$username_user_id && !$extern_user_id) {
             validate_email_syntax($username)
-              || return { failure => AUTH_ERROR, 
+              || return { failure => AUTH_ERROR,
                           error   => 'auth_invalid_email',
                           details => {addr => $username} };
             # Usually we'd call validate_password, but external authentication
@@ -79,8 +79,8 @@ sub create_or_update_user {
 
             # XXX Theoretically this could fail with an error, but the fix for
             # that is too involved to be done right now.
-            my $user = Bugzilla::User->create({ 
-                login_name    => $username, 
+            my $user = Bugzilla::User->create({
+                login_name    => $username,
                 cryptpassword => $password,
                 realname      => $real_name});
             $username_user_id = $user->id;
@@ -138,8 +138,8 @@ Bugzilla::Auth::Verify - An object that verifies usernames and passwords.
 
 =head1 DESCRIPTION
 
-Bugzilla::Auth::Verify provides the "Verifier" part of the Bugzilla 
-login process. (For details, see the "STRUCTURE" section of 
+Bugzilla::Auth::Verify provides the "Verifier" part of the Bugzilla
+login process. (For details, see the "STRUCTURE" section of
 L<Bugzilla::Auth>.)
 
 It is mostly an abstract class, requiring subclasses to implement
@@ -221,7 +221,7 @@ Returns:     Nothing.
 =head1 INFO METHODS
 
 These are methods that describe the capabilities of this object.
-These are all no-parameter methods that return either C<true> or 
+These are all no-parameter methods that return either C<true> or
 C<false>.
 
 =over 4

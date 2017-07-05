@@ -55,7 +55,7 @@ sub check_credentials {
         return { failure => AUTH_LOGINFAILED,
                  failure_count => scalar(@{ $user->account_ip_login_failures }),
                };
-    } 
+    }
 
     # Force the user to change their password if it does not meet the current
     # criteria. This should usually only happen if the criteria has changed.

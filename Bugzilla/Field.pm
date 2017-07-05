@@ -146,11 +146,11 @@ use constant UPDATE_COLUMNS => qw(
 use constant SQL_DEFINITIONS => {
     # Using commas because these are constants and they shouldn't
     # be auto-quoted by the "=>" operator.
-    FIELD_TYPE_FREETEXT,      { TYPE => 'varchar(255)', 
+    FIELD_TYPE_FREETEXT,      { TYPE => 'varchar(255)',
                                 NOTNULL => 1, DEFAULT => "''"},
     FIELD_TYPE_SINGLE_SELECT, { TYPE => 'varchar(64)', NOTNULL => 1,
                                 DEFAULT => "'---'" },
-    FIELD_TYPE_TEXTAREA,      { TYPE => 'MEDIUMTEXT', 
+    FIELD_TYPE_TEXTAREA,      { TYPE => 'MEDIUMTEXT',
                                 NOTNULL => 1, DEFAULT => "''"},
     FIELD_TYPE_DATETIME,      { TYPE => 'DATETIME'   },
     FIELD_TYPE_DATE,          { TYPE => 'DATE'       },
@@ -324,7 +324,7 @@ sub _check_name {
     ($name =~ $name_regex && $name ne "cf_")
          || ThrowUserError('field_invalid_name', { name => $name });
 
-    # If it's custom, prepend cf_ to the custom field name to distinguish 
+    # If it's custom, prepend cf_ to the custom field name to distinguish
     # it from standard fields.
     if ($name !~ /^cf_/ && $params->{custom}) {
         $name = 'cf_' . $name;
@@ -425,7 +425,7 @@ sub _check_reverse_desc {
     if ($type != FIELD_TYPE_BUG_ID) {
         return undef; # store NULL for non-reversible field types
     }
-    
+
     $reverse_desc = clean_text($reverse_desc);
     return $reverse_desc;
 }
@@ -524,7 +524,7 @@ sub obsolete { return $_[0]->{obsolete} }
 
 =item C<enter_bug>
 
-A boolean specifying whether or not this field should appear on 
+A boolean specifying whether or not this field should appear on
 enter_bug.cgi
 
 =back
@@ -565,9 +565,9 @@ objects.
 sub is_select {
     my ($invocant, $params) = @_;
     # This allows this method to be called by create() validators.
-    my $type = blessed($invocant) ? $invocant->type : $params->{type}; 
-    return ($type == FIELD_TYPE_SINGLE_SELECT 
-            || $type == FIELD_TYPE_MULTI_SELECT) ? 1 : 0 
+    my $type = blessed($invocant) ? $invocant->type : $params->{type};
+    return ($type == FIELD_TYPE_SINGLE_SELECT
+            || $type == FIELD_TYPE_MULTI_SELECT) ? 1 : 0
 }
 
 =over
@@ -639,7 +639,7 @@ Returns undef if there is no field that controls this field's visibility.
 sub visibility_field {
     my $self = shift;
     if ($self->{visibility_field_id}) {
-        $self->{visibility_field} ||= 
+        $self->{visibility_field} ||=
             $self->new({ id => $self->{visibility_field_id}, cache => 1 });
     }
     return $self->{visibility_field};
@@ -662,7 +662,7 @@ or undef if there is no C<visibility_field> set.
 sub visibility_values {
     my $self = shift;
     my $dbh = Bugzilla->dbh;
-    
+
     return [] if !$self->{visibility_field_id};
 
     if (!defined $self->{visibility_values}) {
@@ -693,7 +693,7 @@ field controls the visibility of.
 
 sub controls_visibility_of {
     my $self = shift;
-    $self->{controls_visibility_of} ||= 
+    $self->{controls_visibility_of} ||=
         Bugzilla::Field->match({ visibility_field_id => $self->id });
     return $self->{controls_visibility_of};
 }
@@ -775,7 +775,7 @@ dependency tree display, and similar functionality.
 
 =cut
 
-sub is_relationship  {     
+sub is_relationship  {
     my $self = shift;
     my $desc = $self->reverse_desc;
     if (defined $desc && $desc ne "") {
@@ -1276,7 +1276,7 @@ sub populate_field_definitions {
 
     # This field has to be created separately, or the above upgrade code
     # might not run properly.
-    Bugzilla::Field->create({ name => $new_field_name, 
+    Bugzilla::Field->create({ name => $new_field_name,
                               description => $field_description })
         unless new Bugzilla::Field({ name => $new_field_name });
 
@@ -1317,9 +1317,9 @@ sub check_field {
     my $dbh = Bugzilla->dbh;
 
     # If $legalsRef is undefined, we use the default valid values.
-    # Valid values for this check are all possible values. 
+    # Valid values for this check are all possible values.
     # Using get_legal_values would only return active values, but since
-    # some bugs may have inactive values set, we want to check them too. 
+    # some bugs may have inactive values set, we want to check them too.
     unless (defined $legalsRef) {
         $legalsRef = Bugzilla::Field->new({name => $name})->legal_values;
         my @values = map($_->name, @$legalsRef);

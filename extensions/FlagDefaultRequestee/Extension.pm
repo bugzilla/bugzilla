@@ -67,8 +67,8 @@ sub template_before_process {
         $vars->{flag_currently_requested} ||= {};
         foreach my $type (@$flag_types) {
             my $flags = Bugzilla::Flag->match({
-                type_id => $type->id, 
-                bug_id  => $bug->id, 
+                type_id => $type->id,
+                bug_id  => $bug->id,
                 status  => '?'
             });
             map { $vars->{flag_currently_requested}->{$_->id} = 1 } @$flags;

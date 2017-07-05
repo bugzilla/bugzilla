@@ -134,7 +134,7 @@ elsif ($action eq 'begin-sudo') {
         ThrowUserError('sudo_in_progress', { target => $user->login });
     }
 
-    # Did the user actually go trough the 'sudo-prepare' action?  Do some 
+    # Did the user actually go trough the 'sudo-prepare' action?  Do some
     # checks on the token the action should have left.
     my ($token_user, $token_timestamp, $token_data) = Bugzilla::Token::GetTokenData($token);
     unless (defined($token_user)
@@ -142,7 +142,7 @@ elsif ($action eq 'begin-sudo') {
             && ($token_user == $user->id)
             && ($token_data eq 'sudo_prepared'))
     {
-        ThrowUserError('sudo_preparation_required', 
+        ThrowUserError('sudo_preparation_required',
                        { target_login => $target_login, reason => $reason });
     }
     delete_token($cgi->param('token'));
@@ -210,7 +210,7 @@ elsif ($action eq 'end-sudo') {
     delete_token($token);
 
     # NOTE: If you want to log the end of an sudo session, so it here.
-    
+
     $vars->{'message'} = 'sudo_ended';
     $target = 'global/message.html.tmpl';
 }

@@ -50,7 +50,7 @@ sub should_set {
     # a checkbox.
     my ($field, $check_defined) = @_;
     my $cgi = Bugzilla->cgi;
-    if ( defined $cgi->param($field) 
+    if ( defined $cgi->param($field)
          || ($check_defined && defined $cgi->param("defined_$field")) )
     {
         return 1;
@@ -269,7 +269,7 @@ if (should_set('comment')) {
     };
 }
 if (should_set('see_also')) {
-    $set_all_fields{'see_also'}->{add} = 
+    $set_all_fields{'see_also'}->{add} =
         [split(/[\s,]+/, $cgi->param('see_also'))];
 }
 if (should_set('remove_see_also')) {
@@ -290,7 +290,7 @@ foreach my $dep_field (qw(dependson blocked)) {
 if (defined $cgi->param('newcc')
     or defined $cgi->param('addselfcc')
     or defined $cgi->param('removecc')
-    or defined $cgi->param('masscc')) 
+    or defined $cgi->param('masscc'))
 {
     my (@cc_add, @cc_remove);
     # If masscc is defined, then we came from buglist and need to either add or

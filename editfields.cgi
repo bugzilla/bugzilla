@@ -155,10 +155,10 @@ elsif ($action eq 'delete') {
     # Calling remove_from_db will check if field can be deleted.
     # If the field cannot be deleted, it will throw an error.
     $field->remove_from_db();
-    
+
     $vars->{'field'}   = $field;
     $vars->{'message'} = 'custom_field_deleted';
-    
+
     delete_token($token);
 
     $template->process('admin/custom_fields/list.html.tmpl', $vars)

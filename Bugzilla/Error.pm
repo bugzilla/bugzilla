@@ -102,7 +102,7 @@ sub _throw_error {
         my $type = $1 // 'unknown';
         die Template::Exception->new("bugzilla.$type.$error", $vars);
     }
-    
+
     if (Bugzilla->error_mode == ERROR_MODE_WEBPAGE) {
         if (sentry_should_notify($vars->{error})) {
             $vars->{maintainers_notified} = 1;

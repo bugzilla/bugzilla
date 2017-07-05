@@ -142,7 +142,7 @@ sub DIR_CGI_WRITE { _group() ? 0770 : 01777 };
 # scripts need to overwrite files created by other users.
 sub DIR_CGI_OVERWRITE { _group() ? 0770 : 0777 };
 
-# This can be combined (using "|") with other permissions for 
+# This can be combined (using "|") with other permissions for
 # directories that, in addition to their normal permissions (such
 # as DIR_CGI_WRITE) also have content served directly from them
 # (or their subdirectories) to the user, via the webserver.
@@ -151,7 +151,7 @@ sub DIR_ALSO_WS_SERVE { _suexec() ? 0001 : 0 };
 # This looks like a constant because it effectively is, but
 # it has to call other subroutines and read the current filesystem,
 # so it's defined as a sub. This is not exported, so it doesn't have
-# a perldoc. However, look at the various hashes defined inside this 
+# a perldoc. However, look at the various hashes defined inside this
 # function to understand what it returns. (There are comments throughout.)
 #
 # The rationale for the file permissions is that there is a group the
@@ -248,9 +248,9 @@ sub FILESYSTEM {
         docs => DIR_WS_SERVE,
     );
 
-    # This sets the permissions for each item inside each of these 
-    # directories, including the directory itself. 
-    # 'CVS' directories are special, though, and are never readable by 
+    # This sets the permissions for each item inside each of these
+    # directories, including the directory itself.
+    # 'CVS' directories are special, though, and are never readable by
     # the webserver.
     my %recurse_dirs = (
         # Writeable directories
@@ -385,7 +385,7 @@ sub FILESYSTEM {
     # The name of each file, pointing at its default permissions and
     # default contents.
     my %create_files = (
-        "$datadir/extensions/additional" => { perms    => CGI_READ, 
+        "$datadir/extensions/additional" => { perms    => CGI_READ,
                                               contents => '' },
         # We create this file so that it always has the right owner
         # and permissions. Otherwise, the webserver creates it as
@@ -483,7 +483,7 @@ sub update_filesystem {
     my $graphsdir = bz_locations->{'graphsdir'};
     my $assetsdir = bz_locations->{'assetsdir'};
     # If the graphs/ directory doesn't exist, we're upgrading from
-    # a version old enough that we need to update the $datadir/mining 
+    # a version old enough that we need to update the $datadir/mining
     # format.
     if (-d "$datadir/mining" && !-d $graphsdir) {
         _update_old_charts($datadir);
@@ -706,7 +706,7 @@ sub _create_files {
 
 # If you ran a REALLY old version of Bugzilla, your chart files are in the
 # wrong format. This code is a little messy, because it's very old, and
-# when moving it into this module, I couldn't test it so I left it almost 
+# when moving it into this module, I couldn't test it so I left it almost
 # completely alone.
 sub _update_old_charts {
     my ($datadir) = @_;
@@ -768,7 +768,7 @@ sub _update_old_charts {
                           " You may want to check your data files.\n";
                 }
 
-                print OUT join('|', 
+                print OUT join('|',
                     map { defined ($data{$_}) ? ($data{$_}) : "" } @out_fields),
                     "\n";
             }
@@ -779,7 +779,7 @@ sub _update_old_charts {
 
         close(IN);
         close(OUT);
-    } 
+    }
 }
 
 sub fix_dir_permissions {
@@ -845,7 +845,7 @@ sub fix_all_file_permissions {
         foreach my $filename (glob $file) {
             # Don't touch directories.
             next if -d $filename || !-e $filename;
-            _fix_perms($filename, $owner_id, $group_id, 
+            _fix_perms($filename, $owner_id, $group_id,
                        $files{$file}->{perms});
         }
     }
@@ -870,7 +870,7 @@ sub _fix_cvs_dirs {
     find({ no_chdir => 1, wanted => sub {
         my $name = $File::Find::name;
         if ($File::Find::dir =~ /\/CVS/ || $_ eq '.cvsignore'
-            || (-d $name && $_ =~ /CVS$/)) 
+            || (-d $name && $_ =~ /CVS$/))
         {
             my $perms = 0600;
             if (-d $name) {
@@ -888,11 +888,11 @@ sub _fix_perms {
     # The webserver should never try to chown files.
     if (Bugzilla->usage_mode == USAGE_MODE_CMDLINE) {
         chown $owner, $group, $name
-            or warn install_string('chown_failed', { path => $name, 
+            or warn install_string('chown_failed', { path => $name,
                                                      error => $! }) . "\n";
     }
     chmod $perms, $name
-        or warn install_string('chmod_failed', { path => $name, 
+        or warn install_string('chmod_failed', { path => $name,
                                                  error => $! }) . "\n";
 }
 
@@ -935,7 +935,7 @@ sub _check_web_server_group {
     # the webservergroup.
     elsif (!ON_WINDOWS && $group) {
         $group_id = getgrnam($group);
-        ThrowCodeError('invalid_webservergroup', { group => $group }) 
+        ThrowCodeError('invalid_webservergroup', { group => $group })
             unless defined $group_id;
 
         # If on unix, see if we need to print a warning about a webservergroup
@@ -959,7 +959,7 @@ Bugzilla::Install::Filesystem - Fix up the filesystem during
 
 =head1 DESCRIPTION
 
-This module is used primarily by L<checksetup.pl> to modify the 
+This module is used primarily by L<checksetup.pl> to modify the
 filesystem during installation, including creating the data/ directory.
 
 =head1 SUBROUTINES

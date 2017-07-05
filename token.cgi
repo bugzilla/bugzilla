@@ -159,7 +159,7 @@ if ($action eq 'reqpw') {
     verify_mfa_login($token);
 } elsif ($action eq 'mfa_p') {
     verify_mfa_password($token);
-} else { 
+} else {
     ThrowUserError('unknown_action', {action => $action});
 }
 
@@ -275,13 +275,13 @@ sub changeEmail {
     if(lc($cgi->param('email')) ne lc($old_email)) {
         ThrowUserError("email_confirmation_failed");
     }
-    # The new email address should be available as this was 
+    # The new email address should be available as this was
     # confirmed initially so cancel token if it is not still available
     if (! is_available_username($new_email,$old_email)) {
         $vars->{'email'} = $new_email; # Needed for Bugzilla::Token::Cancel's mail
         Bugzilla::Token::Cancel($token, "account_exists", $vars);
         ThrowUserError("account_exists", { email => $new_email } );
-    } 
+    }
 
     # Update the user's login name in the profiles table and delete the token
     # from the tokens table.
@@ -330,7 +330,7 @@ sub cancelChangeEmail {
         my $actualemail = $dbh->selectrow_array(
                             q{SELECT login_name FROM profiles
                               WHERE userid = ?}, undef, $userid);
-        
+
         # check to see if it has been altered
         if($actualemail ne $old_email) {
             # XXX - This is NOT safe - if A has change to B, another profile
@@ -348,8 +348,8 @@ sub cancelChangeEmail {
             $user->derive_regexp_groups;
 
             $vars->{'message'} = "email_change_canceled_reinstated";
-        } 
-    } 
+        }
+    }
     else {
         $vars->{'message'} = 'email_change_canceled'
      }
@@ -397,7 +397,7 @@ sub confirm_create_account {
     $cgi->delete('passwd1', 'passwd2');
 
     my $otheruser = Bugzilla::User->create({
-        login_name => $login_name, 
+        login_name => $login_name,
         realname   => scalar $cgi->param('realname'),
         cryptpassword => $password});
 

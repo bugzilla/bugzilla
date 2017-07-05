@@ -108,7 +108,7 @@ sub MessageToMTA {
     # *always* be the same for this Bugzilla, in every email,
     # even if the admin changes the "ssl_redirect" parameter some day.
     $email->header_set('X-Bugzilla-URL', Bugzilla->params->{'urlbase'});
-    
+
     # We add this header to mark the mail as "auto-generated" and
     # thus to hopefully avoid auto replies.
     $email->header_set('Auto-Submitted', 'auto-generated');
@@ -161,7 +161,7 @@ sub MessageToMTA {
         $hostname = $1;
         $from .= "\@$hostname" if $from !~ /@/;
         $email->header_set('From', $from);
-        
+
         # Sendmail adds a Date: header also, but others may not.
         if (!defined $email->header('Date')) {
             $email->header_set('Date', time2str("%a, %d %b %Y %T %z", time()));
@@ -178,11 +178,11 @@ sub MessageToMTA {
         push @args, Host  => Bugzilla->params->{"smtpserver"},
                     username => Bugzilla->params->{"smtp_username"},
                     password => Bugzilla->params->{"smtp_password"},
-                    Hello => $hostname, 
+                    Hello => $hostname,
                     Debug => Bugzilla->params->{'smtp_debug'};
     }
 
-    Bugzilla::Hook::process('mailer_before_send', 
+    Bugzilla::Hook::process('mailer_before_send',
                             { email => $email, mailer_args => \@args });
 
     # Allow for extensions to to drop the bugmail by clearing the 'to' header
@@ -221,7 +221,7 @@ sub MessageToMTA {
     else {
         # This is useful for both Sendmail and Qmail, so we put it out here.
         local $ENV{PATH} = SENDMAIL_PATH;
-        my $mailer = Email::Send->new({ mailer => $mailer_class, 
+        my $mailer = Email::Send->new({ mailer => $mailer_class,
                                         mailer_args => \@args });
         my $retval = $mailer->send($email);
         ThrowCodeError('mail_send_error', { msg => $retval, mail => $email })

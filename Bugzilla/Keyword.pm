@@ -54,7 +54,7 @@ sub bug_count {
     return $self->{'bug_count'} if defined $self->{'bug_count'};
     ($self->{'bug_count'}) =
       Bugzilla->dbh->selectrow_array(
-          'SELECT COUNT(*) FROM keywords WHERE keywordid = ?', 
+          'SELECT COUNT(*) FROM keywords WHERE keywordid = ?',
           undef, $self->id);
     return $self->{'bug_count'};
 }
@@ -75,7 +75,7 @@ sub get_all_with_bug_count {
     my $class = shift;
     my $dbh = Bugzilla->dbh;
     my $keywords =
-      $dbh->selectall_arrayref('SELECT ' 
+      $dbh->selectall_arrayref('SELECT '
                                       . join(', ', $class->_get_db_columns) . ',
                                        COUNT(keywords.bug_id) AS bug_count
                                   FROM keyworddefs
@@ -88,7 +88,7 @@ sub get_all_with_bug_count {
     if (!$keywords) {
         return [];
     }
-    
+
     foreach my $keyword (@$keywords) {
         bless($keyword, $class);
     }
@@ -153,7 +153,7 @@ Bugzilla::Keyword - A Keyword that can be added to a bug.
 
 Bugzilla::Keyword represents a keyword that can be added to a bug.
 
-This implements all standard C<Bugzilla::Object> methods. See 
+This implements all standard C<Bugzilla::Object> methods. See
 L<Bugzilla::Object> for more details.
 
 =head1 METHODS
@@ -164,7 +164,7 @@ implements.
 
 =over
 
-=item C<get_all_with_bug_count()> 
+=item C<get_all_with_bug_count()>
 
  Description: Returns all defined keywords. This is an efficient way
               to get the associated bug counts, as only one SQL query

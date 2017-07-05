@@ -237,8 +237,8 @@ sub check_webdotbase {
 
 sub check_user_verify_class {
     # doeditparams traverses the list of params, and for each one it checks,
-    # then updates. This means that if one param checker wants to look at 
-    # other params, it must be below that other one. So you can't have two 
+    # then updates. This means that if one param checker wants to look at
+    # other params, it must be below that other one. So you can't have two
     # params mutually dependent on each other.
     # This means that if someone clears the LDAP config params after setting
     # the login method as LDAP, we won't notice, but all logins will fail.
@@ -264,7 +264,7 @@ sub check_user_verify_class {
                 return "LDAP support is not available. Run checksetup.pl"
                        . " for more details";
             }
-            return "LDAP servername (LDAPserver) is missing" 
+            return "LDAP servername (LDAPserver) is missing"
                 if !$params->{"LDAPserver"};
             return "LDAPBaseDN is empty" if !$params->{"LDAPBaseDN"};
         }
@@ -277,7 +277,7 @@ sub check_mail_delivery_method {
     return $check if $check;
     my $mailer = shift;
     if ($mailer eq 'sendmail' and ON_WINDOWS) {
-        # look for sendmail.exe 
+        # look for sendmail.exe
         return "Failed to locate " . SENDMAIL_EXE
             unless -e SENDMAIL_EXE;
     }
@@ -404,7 +404,7 @@ sub check_comment_taggers_group {
 #       }
 #
 #      Here, 'b' is the default option, and 'a' and 'c' are other possible
-#      options, but only one at a time! 
+#      options, but only one at a time!
 #
 #      &check_multi should always be used as the param verification function
 #      for list (single and multiple) parameter types.
@@ -423,7 +423,7 @@ Bugzilla::Config::Common - Parameter checking functions
 
 =head1 DESCRIPTION
 
-All parameter checking functions are called with two parameters: the value to 
+All parameter checking functions are called with two parameters: the value to
 check, and a hash with the details of the param (type, default etc.) as defined
 in the relevant F<Bugzilla::Config::*> package.
 

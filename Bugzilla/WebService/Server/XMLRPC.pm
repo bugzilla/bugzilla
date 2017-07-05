@@ -175,23 +175,23 @@ sub decode_value {
     my $self = shift;
     my ($type) = @{ $_[0] };
     my $value = $self->SUPER::decode_value(@_);
-    
+
     # We only validate/convert certain types here.
     return $value if $type !~ /^(?:int|i4|boolean|double|dateTime\.iso8601)$/;
-    
+
     # Though the XML-RPC standard doesn't allow an empty <int>,
     # <double>,or <dateTime.iso8601>,  we do, and we just say
     # "that's undef".
     if (grep($type eq $_, qw(int double dateTime))) {
         return undef if $value eq '';
     }
-    
+
     my $validator = $self->_validation_subs->{$type};
     if (!$validator->($value)) {
         ThrowUserError('xmlrpc_invalid_value',
                        { type => $type, value => $value });
     }
-    
+
     # We convert dateTimes to a DB-friendly date format.
     if ($type eq 'dateTime.iso8601') {
         if ($value !~ /T.*[\-+Z]/i) {
@@ -211,7 +211,7 @@ sub _validation_subs {
     # The only place that XMLRPC::Lite stores any sort of validation
     # regex is in XMLRPC::Serializer. We want to re-use those regexes here.
     my $lookup = Bugzilla::XMLRPC::Serializer->new->typelookup;
-    
+
     # $lookup is a hash whose values are arrayrefs, and whose keys are the
     # names of types. The second item of each arrayref is a subroutine
     # that will do our validation for us.
@@ -222,7 +222,7 @@ sub _validation_subs {
     # XMLRPC::Serializer than their standard XML-RPC name.
     $validators{'dateTime.iso8601'} = $validators{'dateTime'};
     $validators{'i4'} = $validators{'int'};
-    
+
     $self->{_validation_subs} = \%validators;
     return \%validators;
 }
@@ -238,7 +238,7 @@ use Bugzilla::WebService::Util qw(taint_data);
 sub paramsin {
     my $self = shift;
     if (!$self->{bz_params_in}) {
-        my @params = $self->SUPER::paramsin(@_); 
+        my @params = $self->SUPER::paramsin(@_);
         if ($self->{_bz_do_taint}) {
             taint_data(@params);
         }
@@ -341,7 +341,7 @@ sub BEGIN {
                 return as_nil();
             }
             else {
-                my $super_method = "SUPER::$method"; 
+                my $super_method = "SUPER::$method";
                 return $self->$super_method($value);
             }
         }
@@ -415,7 +415,7 @@ is always considered to be C<undef>, no matter what it contains.
 Bugzilla does not use C<< <nil> >> values in returned data, because currently
 most clients do not support C<< <nil> >>. Instead, any fields with C<undef>
 values will be stripped from the response completely. Therefore
-B<the client must handle the fact that some expected fields may not be 
+B<the client must handle the fact that some expected fields may not be
 returned>.
 
 =begin private

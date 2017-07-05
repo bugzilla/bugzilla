@@ -7,8 +7,8 @@
 # defined by the Mozilla Public License, v. 2.0.
 
 
-# This is a script suitable for running once a day from a cron job.  It 
-# looks at all the bugs, and sends whiny mail to anyone who has a bug 
+# This is a script suitable for running once a day from a cron job.  It
+# looks at all the bugs, and sends whiny mail to anyone who has a bug
 # assigned to them that has status CONFIRMED, NEW, or REOPENED that has not
 # been touched for more than the number of days specified in the whinedays
 # param. (We have NEW and REOPENED in there to keep compatibility with old

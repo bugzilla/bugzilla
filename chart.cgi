@@ -135,7 +135,7 @@ elsif ($action eq "create") {
     assertCanCreate($cgi);
     my $token = $cgi->param('token');
     check_hash_token($token, ['create-series']);
-    
+
     my $series = new Bugzilla::Series($cgi);
 
     ThrowUserError("series_already_exists", {'series' => $series})
@@ -164,15 +164,15 @@ elsif ($action eq "alter") {
     # the return value is us or some other series we need to avoid stomping
     # on.
     my $id_of_series_in_db = $series->existsInDatabase();
-    if (defined($id_of_series_in_db) && 
-        $id_of_series_in_db != $series->{'series_id'}) 
+    if (defined($id_of_series_in_db) &&
+        $id_of_series_in_db != $series->{'series_id'})
     {
         ThrowUserError("series_already_exists", {'series' => $series});
     }
-    
+
     $series->writeToDatabase();
     $vars->{'changes_saved'} = 1;
-    
+
     edit($series);
 }
 elsif ($action eq "confirm-delete") {
@@ -237,7 +237,7 @@ sub getSelectedLines {
     return @ids;
 }
 
-# Check if the user is the owner of series_id or is an admin. 
+# Check if the user is the owner of series_id or is an admin.
 sub assertCanEdit {
     my $series_id = shift;
     my $user = Bugzilla->user;
@@ -322,10 +322,10 @@ sub plot {
 
 sub wrap {
     validateWidthAndHeight();
-    
+
     # We create a Chart object so we can validate the parameters
     my $chart = new Bugzilla::Chart($cgi);
-    
+
     $vars->{'time'} = localtime(time());
 
     $vars->{'imagebase'} = $cgi->canonicalise_query(

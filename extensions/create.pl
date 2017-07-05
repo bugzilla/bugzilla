@@ -30,12 +30,12 @@ if ($name !~ /^[A-Z]/) {
     ThrowUserError('extension_first_letter_caps', { name => $name });
 }
 
-my $extension_dir = "$base_dir/$name"; 
-mkpath($extension_dir) 
+my $extension_dir = "$base_dir/$name";
+mkpath($extension_dir)
   || die "$extension_dir already exists or cannot be created.\n";
 
 my $lcname = lc($name);
-foreach my $path (qw(lib web template/en/default/hook), 
+foreach my $path (qw(lib web template/en/default/hook),
                   "template/en/default/$lcname")
 {
     mkpath("$extension_dir/$path") || die "$extension_dir/$path: $!";

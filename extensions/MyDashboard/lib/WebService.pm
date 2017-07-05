@@ -176,5 +176,5 @@ This module contains API methods that are useful to user's of bugzilla.mozilla.o
 
 =head1 METHODS
 
-See L<Bugzilla::WebService> for a description of how parameters are passed, 
+See L<Bugzilla::WebService> for a description of how parameters are passed,
 and what B<STABLE>, B<UNSTABLE>, and B<EXPERIMENTAL> mean.

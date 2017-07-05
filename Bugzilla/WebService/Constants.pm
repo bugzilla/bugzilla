@@ -56,7 +56,7 @@ our @EXPORT = qw(
 # comment that it was retired. Also, if an error changes its name, you'll
 # have to fix it here.
 use constant WS_ERROR_CODE => {
-    # Generic errors (Bugzilla::Object and others) are 50-99.    
+    # Generic errors (Bugzilla::Object and others) are 50-99.
     object_not_specified        => 50,
     reassign_to_empty           => 50,
     param_required              => 50,
@@ -162,7 +162,7 @@ use constant WS_ERROR_CODE => {
     password_too_short    => 502,
     # Error 503 password_too_long no longer exists.
     invalid_username      => 504,
-    # This is from strict_isolation, but it also basically means 
+    # This is from strict_isolation, but it also basically means
     # "invalid user."
     invalid_user_group    => 504,
     user_access_by_id_denied    => 505,
@@ -200,7 +200,7 @@ use constant WS_ERROR_CODE => {
     # BugUserLastVisited errors
     user_not_involved => 1300,
 
-    # Errors thrown by the WebService itself. The ones that are negative 
+    # Errors thrown by the WebService itself. The ones that are negative
     # conform to http://xmlrpc-epi.sourceforge.net/specs/rfc.fault_codes.php
     xmlrpc_invalid_value => -32600,
     unknown_method       => -32601,

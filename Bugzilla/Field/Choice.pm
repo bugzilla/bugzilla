@@ -108,7 +108,7 @@ EOC
 # Constructors #
 ################
 
-# We just make new() enforce this, which should give developers 
+# We just make new() enforce this, which should give developers
 # the understanding that you can't use Bugzilla::Field::Choice
 # without calling type().
 sub new {
@@ -177,7 +177,7 @@ sub remove_from_db {
                        });
     }
     if ($self->is_static) {
-        ThrowUserError('fieldvalue_not_deletable', 
+        ThrowUserError('fieldvalue_not_deletable',
                        { field => $self->field, value => $self });
     }
     if ($self->bug_count) {
@@ -211,7 +211,7 @@ sub _check_isactive {
     if (!$value and ref $invocant) {
         if ($invocant->is_default) {
             my $field = $invocant->field;
-            ThrowUserError('fieldvalue_is_default', 
+            ThrowUserError('fieldvalue_is_default',
                            { value => $invocant, field => $field,
                              param_name => $invocant->DEFAULT_MAP->{$field->name}
                            });
@@ -232,8 +232,8 @@ sub _check_value {
     $value = trim($value);
 
     # Make sure people don't rename static values
-    if (blessed($invocant) && $value ne $invocant->name 
-        && $invocant->is_static) 
+    if (blessed($invocant) && $value ne $invocant->name
+        && $invocant->is_static)
     {
         ThrowUserError('fieldvalue_not_editable',
                        { field => $field, old_value => $invocant });
@@ -245,7 +245,7 @@ sub _check_value {
 
     my $exists = $invocant->type($field)->new({ name => $value });
     if ($exists && (!blessed($invocant) || $invocant->id != $exists->id)) {
-        ThrowUserError('fieldvalue_already_exists', 
+        ThrowUserError('fieldvalue_already_exists',
                        { field => $field, value => $exists });
     }
 
@@ -291,12 +291,12 @@ Bugzilla::Field::Choice - A legal value for a <select>-type field.
 
  my $choices = Bugzilla::Field::Choice->type($field)->new_from_list([1,2,3]);
  my $choices = Bugzilla::Field::Choice->type($field)->get_all();
- my $choices = Bugzilla::Field::Choice->type($field->match({ sortkey => 10 }); 
+ my $choices = Bugzilla::Field::Choice->type($field->match({ sortkey => 10 });
 
 =head1 DESCRIPTION
 
 This is an implementation of L<Bugzilla::Object>, but with a twist.
-You can't call any class methods (such as C<new>, C<create>, etc.) 
+You can't call any class methods (such as C<new>, C<create>, etc.)
 directly on C<Bugzilla::Field::Choice> itself. Instead, you have to
 call C<Bugzilla::Field::Choice-E<gt>type($field)> to get the class
 you're going to instantiate, and then you call the methods on that.

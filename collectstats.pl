@@ -302,7 +302,7 @@ sub regenerate_stats {
     my @values = ();
     if ($product ne '-All-') {
         $and_product = q{ AND products.name = ?};
-        $from_product = q{ INNER JOIN products 
+        $from_product = q{ INNER JOIN products
                           ON bugs.product_id = products.id};
         push (@values, $product);
     }
@@ -312,11 +312,11 @@ sub regenerate_stats {
     # If there were no bugs in the search, return early.
     my $query = q{SELECT } .
                 $dbh->sql_to_days('creation_ts') . q{ AS start_day, } .
-                $dbh->sql_to_days('current_date') . q{ AS end_day, } . 
-                $dbh->sql_to_days("'1970-01-01'") . 
-                 qq{ FROM bugs $from_product 
-                   WHERE } . $dbh->sql_to_days('creation_ts') . 
-                         qq{ IS NOT NULL $and_product 
+                $dbh->sql_to_days('current_date') . q{ AS end_day, } .
+                $dbh->sql_to_days("'1970-01-01'") .
+                 qq{ FROM bugs $from_product
+                   WHERE } . $dbh->sql_to_days('creation_ts') .
+                         qq{ IS NOT NULL $and_product
                 ORDER BY start_day } . $dbh->sql_limit(1);
     my ($start, $end, $base) = $dbh->selectrow_array($query, undef, @values);
 
@@ -345,12 +345,12 @@ FIN
 
             # Get a list of bugs that were created the previous day, and
             # add those bugs to the list of bugs for this product.
-            $query = qq{SELECT bug_id 
-                          FROM bugs $from_product 
-                         WHERE bugs.creation_ts < } . 
-                         $dbh->sql_from_days($day - 1) . 
-                         q{ AND bugs.creation_ts >= } . 
-                         $dbh->sql_from_days($day - 2) . 
+            $query = qq{SELECT bug_id
+                          FROM bugs $from_product
+                         WHERE bugs.creation_ts < } .
+                         $dbh->sql_from_days($day - 1) .
+                         q{ AND bugs.creation_ts >= } .
+                         $dbh->sql_from_days($day - 2) .
                         $and_product . q{ ORDER BY bug_id};
 
             my $bug_ids = $dbh->selectcol_arrayref($query, undef, @values);
@@ -401,7 +401,7 @@ FIN
 # at the beginning of the day.  If there were no status/resolution
 # changes on or after that day, the status was the same as it
 # is today (the "current" value).  Otherwise, the status was equal to the
-# first "previous value" entry in the bugs_activity table for that 
+# first "previous value" entry in the bugs_activity table for that
 # bug made on or after that day.
 sub _get_value {
     my ($removed, $current, $day, $bug) = @_;
@@ -456,10 +456,10 @@ sub CollectSeriesData {
     # that one too. Remember, these may be the same.
     my $dbh = Bugzilla->switch_to_main_db();
     my $shadow_dbh = Bugzilla->switch_to_shadow_db();
-    
+
     my $serieses = $dbh->selectall_hashref("SELECT series_id, query, creator " .
                       "FROM series " .
-                      "WHERE frequency != 0 AND " . 
+                      "WHERE frequency != 0 AND " .
                       "MOD(($days_since_epoch + series_id), frequency) = 0",
                       "series_id");
 
@@ -470,10 +470,10 @@ sub CollectSeriesData {
 
     # We delete from the table beforehand, to avoid SQL errors if people run
     # collectstats.pl twice on the same day.
-    my $deletesth = $dbh->prepare("DELETE FROM series_data 
+    my $deletesth = $dbh->prepare("DELETE FROM series_data
                                    WHERE series_id = ? AND series_date = " .
                                    $dbh->quote($today));
-                                     
+
     foreach my $series_id (keys %$serieses) {
         # We set up the user for Search.pm's permission checking - each series
         # runs with the permissions of its creator.

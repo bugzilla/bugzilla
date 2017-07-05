@@ -39,7 +39,7 @@ my $action = $cgi->param('action') || 'show_user';
 if ($action eq "show_bug") {
     $cgi->delete('action');
     $cgi->param('id', 'voting/bug.html');
-} 
+}
 elsif ($action eq "show_user" or $action eq 'vote') {
     $cgi->delete('action') unless $action eq 'vote';
     $cgi->param('id', 'voting/user.html');

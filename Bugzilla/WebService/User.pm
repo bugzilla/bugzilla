@@ -71,7 +71,7 @@ sub login {
         return $self->_login_to_hash($user);
     }
 
-    # Username and password params are required 
+    # Username and password params are required
     foreach my $param ("login", "password") {
         (defined $params->{$param} || defined $params->{'Bugzilla_' . $param})
             || ThrowCodeError('param_required', { param => $param });
@@ -116,7 +116,7 @@ sub create {
     my $self = shift;
     my ($params) = @_;
 
-    Bugzilla->user->in_group('editusers') 
+    Bugzilla->user->in_group('editusers')
         || ThrowUserError("auth_failure", { group  => "editusers",
                                             action => "add",
                                             object => "users"});
@@ -136,9 +136,9 @@ sub create {
 }
 
 
-# function to return user information by passing either user ids or 
+# function to return user information by passing either user ids or
 # login names or both together:
-# $call = $rpc->call( 'User.get', { ids => [1,2,3], 
+# $call = $rpc->call( 'User.get', { ids => [1,2,3],
 #         names => ['testusera@redhat.com', 'testuserb@redhat.com'] });
 sub get {
     my ($self, $params) = validate(@_, 'names', 'ids', 'match', 'group_ids', 'groups');
@@ -147,7 +147,7 @@ sub get {
 
     defined($params->{names}) || defined($params->{ids})
         || defined($params->{match})
-        || ThrowCodeError('params_required', 
+        || ThrowCodeError('params_required',
                { function => 'User.get', params => ['ids', 'names', 'match'] });
 
     my @user_objects;
@@ -157,7 +157,7 @@ sub get {
     # start filtering to remove duplicate user ids
     my %unique_users = map { $_->id => $_ } @user_objects;
     @user_objects = values %unique_users;
-      
+
     my @users;
 
     # If the user is not logged in: Return an error if they passed any user ids.
@@ -183,7 +183,7 @@ sub get {
     my $obj_by_ids;
     $obj_by_ids = Bugzilla::User->new_from_list($params->{ids}) if $params->{ids};
 
-    # obj_by_ids are only visible to the user if he can see 
+    # obj_by_ids are only visible to the user if he can see
     # the otheruser, for non visible otheruser throw an error
     foreach my $obj (@$obj_by_ids) {
         if (Bugzilla->user->can_see_user($obj)){
@@ -256,7 +256,7 @@ sub get {
         push(@users, $user_info);
     }
 
-    Bugzilla::Hook::process('webservice_user_get', 
+    Bugzilla::Hook::process('webservice_user_get',
         { webservice => $self, params => $params, users => \@users });
 
     return { users => \@users };
@@ -341,7 +341,7 @@ sub _filter_users_by_group {
 
     my $user = Bugzilla->user;
 
-    my @groups = map { Bugzilla::Group->check({ id => $_ }) } 
+    my @groups = map { Bugzilla::Group->check({ id => $_ }) }
                      @{ $group_ids || [] };
 
     if ($group_names) {
@@ -381,9 +381,9 @@ sub _filter_bless_groups {
 sub _group_to_hash {
     my ($self, $group) = @_;
     my $item = {
-        id          => $self->type('int', $group->id), 
-        name        => $self->type('string', $group->name), 
-        description => $self->type('string', $group->description), 
+        id          => $self->type('int', $group->id),
+        name        => $self->type('string', $group->name),
+        description => $self->type('string', $group->description),
     };
     return $item;
 }
@@ -873,7 +873,7 @@ The returned data format is the same as below.
 
 B<Note>: At least one of C<ids>, C<names>, or C<match> must be specified.
 
-B<Note>: Users will not be returned more than once, so even if a user 
+B<Note>: Users will not be returned more than once, so even if a user
 is matched by more than one argument, only one user will be returned.
 
 In addition to the parameters below, this method also accepts the
@@ -882,7 +882,7 @@ L<exclude_fields|Bugzilla::WebService/exclude_fields> arguments.
 
 =over
 
-=item C<ids> (array) 
+=item C<ids> (array)
 
 An array of integers, representing user ids.
 
@@ -940,7 +940,7 @@ the input string.
 
 =back
 
-=item B<Returns> 
+=item B<Returns>
 
 A hash containing one item, C<users>, that is an array of
 hashes. Each hash describes a user, and has the following items:
@@ -949,7 +949,7 @@ hashes. Each hash describes a user, and has the following items:
 
 =item id
 
-C<int> The unique integer ID that Bugzilla uses to represent this user. 
+C<int> The unique integer ID that Bugzilla uses to represent this user.
 Even if the user's login name changes, this will not change.
 
 =item real_name
@@ -962,12 +962,12 @@ C<string> The email address of the user.
 
 =item name
 
-C<string> The login name of the user. Note that in some situations this is 
+C<string> The login name of the user. Note that in some situations this is
 different than their email.
 
 =item can_login
 
-C<boolean> A boolean value to indicate if the user can login into bugzilla. 
+C<boolean> A boolean value to indicate if the user can login into bugzilla.
 
 =item email_enabled
 
@@ -977,7 +977,7 @@ to the user or not.
 =item login_denied_text
 
 C<string> A text field that holds the reason for disabling a user from logging
-into bugzilla, if empty then the user account is enabled. Otherwise it is 
+into bugzilla, if empty then the user account is enabled. Otherwise it is
 disabled/closed.
 
 =item groups
@@ -1024,14 +1024,14 @@ C<string> The CGI parameters for the saved search.
 
 =back
 
-B<Note>: The elements of the returned array (i.e. hashes) are ordered by the 
+B<Note>: The elements of the returned array (i.e. hashes) are ordered by the
 name of each saved search.
 
 =back
 
 B<Note>: If you are not logged in to Bugzilla when you call this function, you
 will only be returned the C<id>, C<name>, and C<real_name> items. If you are
-logged in and not in editusers group, you will only be returned the C<id>, C<name>, 
+logged in and not in editusers group, you will only be returned the C<id>, C<name>,
 C<real_name>, C<email>, and C<can_login> items. The groups returned are filtered
 based on your permission to bless each group.
 
@@ -1053,7 +1053,7 @@ wanted to get information about by user id.
 
 =item 505 (User Access By Id or User-Matching Denied)
 
-Logged-out users cannot use the "ids" or "match" arguments to this 
+Logged-out users cannot use the "ids" or "match" arguments to this
 function.
 
 =item 804 (Invalid Group Name)
@@ -1071,7 +1071,7 @@ exist or you do not belong to it.
 
 =item C<group_ids> and C<groups> were added in Bugzilla B<4.0>.
 
-=item C<include_disabled> added in Bugzilla B<4.0>. Default behavior 
+=item C<include_disabled> added in Bugzilla B<4.0>. Default behavior
 for C<match> has changed to only returning enabled accounts.
 
 =item C<groups> Added in Bugzilla B<4.4>.

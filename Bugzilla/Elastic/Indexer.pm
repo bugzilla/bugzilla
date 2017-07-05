@@ -43,7 +43,7 @@ sub create_index {
                 number_of_shards => 2,
                 analysis => {
                     filter => {
-                        asciifolding_original => { 
+                        asciifolding_original => {
                             type              => "asciifolding",
                             preserve_original => \1,
                         },

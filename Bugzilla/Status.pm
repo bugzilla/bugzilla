@@ -11,7 +11,7 @@ use 5.10.1;
 use strict;
 use warnings;
 
-# This subclasses Bugzilla::Field::Choice instead of implementing 
+# This subclasses Bugzilla::Field::Choice instead of implementing
 # ChoiceInterface, because a bug status literally is a special type
 # of Field::Choice, not just an object that happens to have the same
 # methods.
@@ -20,7 +20,7 @@ use base qw(Bugzilla::Field::Choice Exporter);
     BUG_STATE_OPEN
     SPECIAL_STATUS_WORKFLOW_ACTIONS
 
-    is_open_state 
+    is_open_state
     closed_bug_statuses
 );
 
@@ -87,7 +87,7 @@ sub is_open   { return $_[0]->{'is_open'};  }
 sub is_static {
     my $self = shift;
     if ($self->name eq 'UNCONFIRMED'
-        || $self->name eq Bugzilla->params->{'duplicate_or_move_bug_status'}) 
+        || $self->name eq Bugzilla->params->{'duplicate_or_move_bug_status'})
     {
         return 1;
     }
@@ -182,7 +182,7 @@ sub can_change_to {
 sub comment_required_on_change_from {
     my ($self, $old_status) = @_;
     my ($cond, $values) = $self->_status_condition($old_status);
-    
+
     my ($require_comment) = Bugzilla->dbh->selectrow_array(
         "SELECT require_comment FROM status_workflow
           WHERE $cond", undef, @$values);

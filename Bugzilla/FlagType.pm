@@ -648,8 +648,8 @@ sub count {
 =item C<sqlify_criteria($criteria, $tables)>
 
 Converts a hash of criteria into a list of SQL criteria.
-$criteria is a reference to the criteria (field => value), 
-$tables is a reference to an array of tables being accessed 
+$criteria is a reference to the criteria (field => value),
+$tables is a reference to an array of tables being accessed
 by the query.
 
 =back
@@ -684,9 +684,9 @@ sub sqlify_criteria {
         push(@criteria, "flagtypes.is_active = $is_active");
     }
     if (exists($criteria->{active_or_has_flags}) && $criteria->{active_or_has_flags} =~ /^\d+$/) {
-        push(@$tables, "LEFT JOIN flags AS f ON flagtypes.id = f.type_id " . 
+        push(@$tables, "LEFT JOIN flags AS f ON flagtypes.id = f.type_id " .
                        "AND f.bug_id = " . $criteria->{active_or_has_flags});
-        push(@criteria, "(flagtypes.is_active = 1 OR f.id IS NOT NULL)");    
+        push(@criteria, "(flagtypes.is_active = 1 OR f.id IS NOT NULL)");
     }
     if ($criteria->{product_id}) {
         my $product_id = $criteria->{product_id};
@@ -698,7 +698,7 @@ sub sqlify_criteria {
         # by flag type ID and target product/component.
         push(@$tables, "INNER JOIN flaginclusions AS i ON flagtypes.id = i.type_id");
         push(@criteria, "(i.product_id = $product_id OR i.product_id IS NULL)");
-        
+
         # Add exclusions to the query, which is more complicated.  First of all,
         # we do a LEFT JOIN so we don't miss flag types with no exclusions.
         # Then, as with inclusions, we join on flag type ID and target product/

@@ -7,7 +7,7 @@
 
 package Bugzilla::Install;
 
-# Functions in this this package can assume that the database 
+# Functions in this this package can assume that the database
 # has been set up, params are available, localconfig is
 # available, and any module can be used.
 #
@@ -314,7 +314,7 @@ sub update_system_groups {
             if ($inherited_by) {
                 foreach my $name (@$inherited_by) {
                     my $member = Bugzilla::Group->check($name);
-                    $dbh->do('INSERT INTO group_group_map (grantor_id, 
+                    $dbh->do('INSERT INTO group_group_map (grantor_id,
                                           member_id) VALUES (?,?)',
                              undef, $created->id, $member->id);
                 }
@@ -342,7 +342,7 @@ sub create_default_product {
 
     # And same for the default product/component.
     if (!$dbh->selectrow_array('SELECT 1 FROM products')) {
-        print get_text('install_default_product', 
+        print get_text('install_default_product',
                        { name => DEFAULT_PRODUCT->{name} }) . "\n";
 
         my $product = Bugzilla::Product->create(DEFAULT_PRODUCT);
@@ -388,12 +388,12 @@ sub create_admin {
     my $template = Bugzilla->template;
 
     my $admin_group = new Bugzilla::Group({ name => 'admin' });
-    my $admin_inheritors = 
+    my $admin_inheritors =
         Bugzilla::Group->flatten_group_membership($admin_group->id);
     my $admin_group_ids = join(',', @$admin_inheritors);
 
     my ($admin_count) = $dbh->selectrow_array(
-        "SELECT COUNT(*) FROM user_group_map 
+        "SELECT COUNT(*) FROM user_group_map
           WHERE group_id IN ($admin_group_ids)");
 
     return if $admin_count;
@@ -429,7 +429,7 @@ sub create_admin {
             get_text('install_admin_get_password'));
     }
 
-    my $admin = Bugzilla::User->create({ login_name    => $login, 
+    my $admin = Bugzilla::User->create({ login_name    => $login,
                                          realname      => $full_name,
                                          cryptpassword => $password });
     make_admin($admin);
@@ -439,7 +439,7 @@ sub make_admin {
     my ($user) = @_;
     my $dbh = Bugzilla->dbh;
 
-    $user = ref($user) ? $user 
+    $user = ref($user) ? $user
             : new Bugzilla::User(login_to_id($user, THROW_ERROR));
 
     my $group_insert = $dbh->prepare(
@@ -450,8 +450,8 @@ sub make_admin {
     my $admin_group = new Bugzilla::Group({ name => 'admin' });
     # These are run in an eval so that we can ignore the error of somebody
     # already being granted these things.
-    eval { 
-        $group_insert->execute($user->id, $admin_group->id, 0, GRANT_DIRECT); 
+    eval {
+        $group_insert->execute($user->id, $admin_group->id, 0, GRANT_DIRECT);
     };
     eval {
         $group_insert->execute($user->id, $admin_group->id, 1, GRANT_DIRECT);
@@ -460,8 +460,8 @@ sub make_admin {
     # Admins should also have editusers directly, even though they'll usually
     # inherit it. People could have changed their inheritance structure.
     my $editusers = new Bugzilla::Group({ name => 'editusers' });
-    eval { 
-        $group_insert->execute($user->id, $editusers->id, 0, GRANT_DIRECT); 
+    eval {
+        $group_insert->execute($user->id, $editusers->id, 0, GRANT_DIRECT);
     };
 
     # If there is no maintainer set, make this user the maintainer.

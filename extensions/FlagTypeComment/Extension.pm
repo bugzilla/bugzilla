@@ -10,7 +10,7 @@
 #
 # The Original Code is the FlagTypeComment Bugzilla Extension.
 #
-# The Initial Developer of the Original Code is Alex Keybl 
+# The Initial Developer of the Original Code is Alex Keybl
 # Portions created by the Initial Developer are Copyright (C) 2011 the
 # Initial Developer. All Rights Reserved.
 #
@@ -58,7 +58,7 @@ sub db_schema_abstract_schema {
             comment => {
                 TYPE => 'MEDIUMTEXT',
                 NOTNULL => 1
-            }, 
+            },
         ],
         INDEXES => [
             flagtype_comments_idx => ['type_id'],
@@ -104,7 +104,7 @@ sub _set_ftc_states {
         if ($id) {
             $db_result = $dbh->selectall_arrayref(
                 "SELECT type_id AS flagtype, on_status AS state, comment AS text
-                   FROM flagtype_comments 
+                   FROM flagtype_comments
                   WHERE type_id = ?",
                 { Slice => {} }, $id);
         }
@@ -124,16 +124,16 @@ sub _set_ftc_states {
             'product_id'   => $bug->product_id,
             'component_id' => $bug->component_id,
             'bug_id'       => $bug->id,
-            'active_or_has_flags' => $bug->id, 
+            'active_or_has_flags' => $bug->id,
         });
 
         my $types = join(',', map { $_->id } @$flag_types);
         my $states = "'" . join("','", FLAGTYPE_COMMENT_STATES) . "'";
         $db_result = $dbh->selectall_arrayref(
             "SELECT type_id AS flagtype, on_status AS state, comment AS text
-               FROM flagtype_comments 
-              WHERE type_id IN ($types) AND on_status IN ($states)", 
-            { Slice => {} }); 
+               FROM flagtype_comments
+              WHERE type_id IN ($types) AND on_status IN ($states)",
+            { Slice => {} });
     }
 
     foreach my $row (@$db_result) {

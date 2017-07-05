@@ -86,7 +86,7 @@ use constant WORD_END   => '($|[^[:alnum:]])';
 use constant INDEX_DROPS_REQUIRE_FK_DROPS => 1;
 
 #####################################################################
-# Overridden Superclass Methods 
+# Overridden Superclass Methods
 #####################################################################
 
 sub quote {
@@ -119,7 +119,7 @@ sub connect_shadow {
 
 sub connect_main {
     my $lc = Bugzilla->localconfig;
-    return _connect(Bugzilla->localconfig); 
+    return _connect(Bugzilla->localconfig);
 }
 
 sub _connect {
@@ -280,7 +280,7 @@ sub _get_no_db_connection {
         die "There was an error connecting to $sql_server:\n\n",
             "    $error\n\n", _bz_connect_error_reasons(), "\n";
     }
-    return $dbh;    
+    return $dbh;
 }
 
 # Just a helper because we have to re-use this text.
@@ -300,7 +300,7 @@ This might have several reasons:
   server configuration or the database access rights. Read the Bugzilla
   Guide in the doc directory. The section about database configuration
   should help.
-* Your password for the '$lc->{db_user}' user, specified in \$db_pass, is 
+* Your password for the '$lc->{db_user}' user, specified in \$db_pass, is
   incorrect, in '$lc_file'.
 * There is a subtle problem with Perl, DBI, or $server. Make
   sure all settings in '$lc_file' are correct. If all else fails, set
@@ -370,13 +370,13 @@ sub sql_group_by {
 
     my $expression = "GROUP BY $needed_columns";
     $expression .= ", " . $optional_columns if $optional_columns;
-    
+
     return $expression;
 }
 
 sub sql_string_concat {
     my ($self, @params) = @_;
-    
+
     return '(' . join(' || ', @params) . ')';
 }
 
@@ -449,7 +449,7 @@ sub bz_server_version {
 sub bz_last_key {
     my ($self, $table, $column) = @_;
 
-    return $self->last_insert_id(Bugzilla->localconfig->{db_name}, undef, 
+    return $self->last_insert_id(Bugzilla->localconfig->{db_name}, undef,
                                  $table, $column);
 }
 
@@ -458,8 +458,8 @@ sub bz_check_regexp {
 
     eval { $self->do("SELECT " . $self->sql_regexp($self->quote("a"), $pattern, 1)) };
 
-    $@ && ThrowUserError('illegal_regexp', 
-        { value => $pattern, dberror => $self->errstr }); 
+    $@ && ThrowUserError('illegal_regexp',
+        { value => $pattern, dberror => $self->errstr });
 }
 
 #####################################################################
@@ -472,7 +472,7 @@ sub bz_setup_database {
     # If we haven't ever stored a serialized schema,
     # set up the bz_schema table and store it.
     $self->_bz_init_schema_storage();
-   
+
     # We don't use bz_table_list here, because that uses _bz_real_schema.
     # We actually want the table list from the ABSTRACT_SCHEMA in
     # Bugzilla::DB::Schema.
@@ -493,7 +493,7 @@ sub bz_enum_initial_values {
 }
 
 sub bz_populate_enum_tables {
-    my ($self) = @_; 
+    my ($self) = @_;
 
     my $any_severities = $self->selectrow_array(
         'SELECT 1 FROM bug_severity ' . $self->sql_limit(1));
@@ -536,7 +536,7 @@ sub bz_setup_foreign_keys {
             # by enabling an extension pre-4.2, disabling it for
             # the 4.2 upgrade, and then re-enabling it later.
             unless ($fk && $fk->{created}) {
-                my $standard_def = 
+                my $standard_def =
                     $self->_bz_schema->get_column_abstract($table, $column);
                 if (exists $standard_def->{REFERENCES}) {
                     $fk = dclone($standard_def->{REFERENCES});
@@ -573,7 +573,7 @@ sub bz_add_column {
     # no DEFAULT statement, unless you have an init_value.
     # SERIAL types are an exception, though, because they can
     # auto-populate.
-    if ( $new_def->{NOTNULL} && !exists $new_def->{DEFAULT} 
+    if ( $new_def->{NOTNULL} && !exists $new_def->{DEFAULT}
          && !defined $init_value && $new_def->{TYPE} !~ /SERIAL/)
     {
         ThrowCodeError('column_not_null_without_default',
@@ -629,11 +629,11 @@ sub bz_add_fks {
         my $new_fk = $column_fks->{$column};
         $self->_check_references($table, $column, $new_fk);
         $add_these{$column} = $new_fk;
-        if (Bugzilla->usage_mode == USAGE_MODE_CMDLINE 
-            and !$options->{silently}) 
+        if (Bugzilla->usage_mode == USAGE_MODE_CMDLINE
+            and !$options->{silently})
         {
             print get_text('install_fk_add',
-                           { table => $table, column => $column, 
+                           { table => $table, column => $column,
                              fk    => $new_fk }), "\n";
         }
     }
@@ -659,15 +659,15 @@ sub bz_alter_column {
 
     if (!$self->_bz_schema->columns_equal($current_def, $new_def)) {
         # You can't change a column to be NOT NULL if you have no DEFAULT
-        # and no value for $set_nulls_to, if there are any NULL values 
+        # and no value for $set_nulls_to, if there are any NULL values
         # in that column.
-        if ($new_def->{NOTNULL} && 
+        if ($new_def->{NOTNULL} &&
             !exists $new_def->{DEFAULT} && !defined $set_nulls_to)
         {
             # Check for NULLs
             my $any_nulls = $self->selectrow_array(
                 "SELECT 1 FROM $table WHERE $name IS NULL");
-            ThrowCodeError('column_not_null_no_default_alter', 
+            ThrowCodeError('column_not_null_no_default_alter',
                            { name => "$table.$name" }) if ($any_nulls);
         }
         # Preserve foreign key definitions in the Schema object when altering
@@ -783,7 +783,7 @@ sub bz_add_table {
             $fields{$col}->{REFERENCES}->{created} =
                 $self->_bz_real_schema->FK_ON_CREATE;
         }
-        
+
         $self->_bz_real_schema->add_table($name, $table_def);
         $self->_bz_store_real_schema;
     }
@@ -798,8 +798,8 @@ sub bz_add_table {
 #              _bz_init_schema_storage. Used when you don't
 #              yet have a Schema object but you need to
 #              add a table, for some reason.
-# Params:      $name - The name of the table you're creating. 
-#                  The definition for the table is pulled from 
+# Params:      $name - The name of the table you're creating.
+#                  The definition for the table is pulled from
 #                  _bz_schema.
 # Returns:     nothing
 #
@@ -837,7 +837,7 @@ sub _bz_add_field_table {
 
 sub bz_add_field_tables {
     my ($self, $field) = @_;
-    
+
     $self->_bz_add_field_table($field->name,
                                $self->_bz_schema->FIELD_TABLE_SCHEMA, $field->type);
     if ($field->type == FIELD_TYPE_MULTI_SELECT) {
@@ -845,7 +845,7 @@ sub bz_add_field_tables {
         $self->_bz_add_field_table($ms_table,
             $self->_bz_schema->MULTI_SELECT_VALUE_TABLE);
 
-        $self->bz_add_fks($ms_table, 
+        $self->bz_add_fks($ms_table,
             { bug_id => {TABLE => 'bugs', COLUMN => 'bug_id',
                          DELETE => 'CASCADE'},
 
@@ -869,7 +869,7 @@ sub bz_drop_column {
     if ($current_def) {
         my @statements = $self->_bz_real_schema->get_drop_column_ddl(
             $table, $column);
-        print get_text('install_column_drop', 
+        print get_text('install_column_drop',
                        { table => $table, column => $column }) . "\n"
             if Bugzilla->usage_mode == USAGE_MODE_CMDLINE;
         foreach my $sql (@statements) {
@@ -891,7 +891,7 @@ sub bz_drop_fk {
         print get_text('install_fk_drop',
                        { table => $table, column => $column, fk => $fk_def })
             . "\n" if Bugzilla->usage_mode == USAGE_MODE_CMDLINE;
-        my @statements = 
+        my @statements =
             $self->_bz_real_schema->get_drop_fk_sql($table, $column, $fk_def);
         foreach my $sql (@statements) {
             # Because this is a deletion, we don't want to die hard if
@@ -918,7 +918,7 @@ sub bz_get_related_fks {
         my @columns = $self->bz_table_columns($check_table);
         foreach my $check_column (@columns) {
             my $fk = $self->bz_fk_info($check_table, $check_column);
-            if ($fk 
+            if ($fk
                 and (($fk->{TABLE} eq $table and $fk->{COLUMN} eq $column)
                      or ($check_column eq $column and $check_table eq $table)))
             {
@@ -954,7 +954,7 @@ sub bz_drop_index {
         }
         $self->bz_drop_index_raw($table, $name);
         $self->_bz_real_schema->delete_index($table, $name);
-        $self->_bz_store_real_schema;        
+        $self->_bz_store_real_schema;
     }
 }
 
@@ -964,7 +964,7 @@ sub bz_drop_index {
 #              Drops an index from the database
 #              without updating any Schema object. Generally
 #              should only be called by bz_drop_index.
-#              Used when either: (1) You don't yet have a Schema 
+#              Used when either: (1) You don't yet have a Schema
 #              object but you need to drop an index, for some reason.
 #              (2) You need to drop an index that somehow got into the
 #              database but doesn't exist in Schema.
@@ -1023,12 +1023,12 @@ sub bz_rename_column {
     if ($old_col_exists) {
         my $already_renamed = $self->bz_column_info($table, $new_name);
             ThrowCodeError('db_rename_conflict',
-                           { old => "$table.$old_name", 
+                           { old => "$table.$old_name",
                              new => "$table.$new_name" }) if $already_renamed;
         my @statements = $self->_bz_real_schema->get_rename_column_ddl(
             $table, $old_name, $new_name);
 
-        print get_text('install_column_rename', 
+        print get_text('install_column_rename',
                        { old => "$table.$old_name", new => "$table.$new_name" })
                . "\n" if Bugzilla->usage_mode == USAGE_MODE_CMDLINE;
 
@@ -1061,7 +1061,7 @@ sub bz_rename_table {
     }
 
     my @sql = $self->_bz_real_schema->get_rename_table_sql($old_name, $new_name);
-    print get_text('install_table_rename', 
+    print get_text('install_table_rename',
                    { old => $old_name, new => $new_name }) . "\n"
         if Bugzilla->usage_mode == USAGE_MODE_CMDLINE;
     $self->do($_) foreach @sql;
@@ -1207,7 +1207,7 @@ sub bz_start_transaction {
         # Different DBs have different defaults for their isolation
         # level, so we just set it here manually.
         if ($self->ISOLATION_LEVEL) {
-            $self->do('SET TRANSACTION ISOLATION LEVEL ' 
+            $self->do('SET TRANSACTION ISOLATION LEVEL '
                       . $self->ISOLATION_LEVEL);
         }
         $self->{private_bz_transaction_count} = 1;
@@ -1216,7 +1216,7 @@ sub bz_start_transaction {
 
 sub bz_commit_transaction {
     my ($self) = @_;
-    
+
     if ($self->{private_bz_transaction_count} > 1) {
         $self->{private_bz_transaction_count}--;
     } elsif ($self->bz_in_transaction) {
@@ -1246,7 +1246,7 @@ sub bz_rollback_transaction {
 
 sub db_new {
     my ($class, $params) = @_;
-    my ($dsn, $user, $pass, $override_attrs) = 
+    my ($dsn, $user, $pass, $override_attrs) =
         @$params{qw(dsn user pass attrs)};
 
     # set up default attributes used to connect to the database
@@ -1257,7 +1257,7 @@ sub db_new {
                        ShowErrorStatement => 1,
                        HandleError => \&_handle_error,
                        TaintIn => 1,
-                       FetchHashKeyName => 'NAME',  
+                       FetchHashKeyName => 'NAME',
                        # Note: NAME_lc causes crash on ActiveState Perl
                        # 5.8.4 (see Bug 253696)
                        # XXX - This will likely cause problems in DB
@@ -1276,7 +1276,7 @@ sub db_new {
         . "  Is your database installed and up and running?\n  Do you have"
         . " the correct username and password selected in localconfig?\n\n";
 
-    # RaiseError was only set to 0 so that we could catch the 
+    # RaiseError was only set to 0 so that we could catch the
     # above "die" condition.
     $self->{RaiseError} = 1;
 
@@ -1310,7 +1310,7 @@ sub _bz_init_schema_storage {
 
     my $table_size;
     eval {
-        $table_size = 
+        $table_size =
             $self->selectrow_array("SELECT COUNT(*) FROM bz_schema");
     };
 
@@ -1344,7 +1344,7 @@ sub _bz_init_schema_storage {
                 $self->_bz_schema->get_table_abstract('bz_schema'));
             $self->_bz_store_real_schema;
         }
-    } 
+    }
     # Sanity check
     elsif ($table_size > 1) {
         # We tell them to delete the newer one. Better to have checksetup
@@ -1420,7 +1420,7 @@ sub _bz_store_real_schema {
     my $update_schema = $self->{private_real_schema};
     my $store_me = $update_schema->serialize_abstract();
     my $schema_version = $update_schema->SCHEMA_VERSION;
-    my $sth = $self->prepare("UPDATE bz_schema 
+    my $sth = $self->prepare("UPDATE bz_schema
                                  SET schema_data = ?, version = ?");
     $sth->bind_param(1, $store_me, $self->BLOB_TYPE);
     $sth->bind_param(2, $schema_version);
@@ -1464,7 +1464,7 @@ sub _check_references {
     # We also can't use the words "table" or "foreign" because those are
     # reserved words.
     my $bad_values = $self->selectcol_arrayref(
-        "SELECT DISTINCT tabl.$column 
+        "SELECT DISTINCT tabl.$column
            FROM $table AS tabl LEFT JOIN $foreign_table AS forn
                 ON tabl.$column = forn.$foreign_column
           WHERE forn.$foreign_column IS NULL
@@ -1473,7 +1473,7 @@ sub _check_references {
     if (@$bad_values) {
         my $delete_action = $fk->{DELETE} || '';
         if ($delete_action eq 'CASCADE') {
-            $self->do("DELETE FROM $table WHERE $column IN (" 
+            $self->do("DELETE FROM $table WHERE $column IN ("
                       . join(',', ('?') x @$bad_values)  . ")",
                       undef, @$bad_values);
             if (Bugzilla->usage_mode == USAGE_MODE_CMDLINE) {
@@ -1492,7 +1492,7 @@ sub _check_references {
             if (Bugzilla->usage_mode == USAGE_MODE_CMDLINE) {
                 print "\n", get_text('install_fk_invalid_fixed',
                     { table => $table, column => $column,
-                      foreign_table => $foreign_table, 
+                      foreign_table => $foreign_table,
                       foreign_column => $foreign_column,
                       'values' => $bad_values, action => 'null' }), "\n";
             }
@@ -1567,12 +1567,12 @@ constants are required to be subroutines or "use constant" variables.
 
 =item C<BLOB_TYPE>
 
-The C<\%attr> argument that must be passed to bind_param in order to 
+The C<\%attr> argument that must be passed to bind_param in order to
 correctly escape a C<LONGBLOB> type.
 
 =item C<ISOLATION_LEVEL>
 
-The argument that this database should send to 
+The argument that this database should send to
 C<SET TRANSACTION ISOLATION LEVEL> when starting a transaction. If you
 override this in a subclass, the isolation level you choose should
 be as strict as or more strict than the default isolation level defined in
@@ -1604,9 +1604,9 @@ Function to connect to the main database, returning a new database handle.
 =over
 
 =item C<$no_db_name> (optional) - If true, connect to the database
-server, but don't connect to a specific database. This is only used 
-when creating a database. After you create the database, you should 
-re-create a new Bugzilla::DB object without using this parameter. 
+server, but don't connect to a specific database. This is only used
+when creating a database. After you create the database, you should
+re-create a new Bugzilla::DB object without using this parameter.
 
 =back
 
@@ -1639,18 +1639,18 @@ A new instance of the DB class
 
 =item B<Description>
 
-Checks to make sure that you have the correct DBD and database version 
-installed for the database that Bugzilla will be using. Prints a message 
+Checks to make sure that you have the correct DBD and database version
+installed for the database that Bugzilla will be using. Prints a message
 and exits if you don't pass the requirements.
 
-If C<$db_check> is false (from F<localconfig>), we won't check the 
+If C<$db_check> is false (from F<localconfig>), we won't check the
 database version.
 
 =item B<Params>
 
 =over
 
-=item C<$output> - C<true> if the function should display informational 
+=item C<$output> - C<true> if the function should display informational
 output about what it's doing, such as versions found.
 
 =back
@@ -1666,8 +1666,8 @@ output about what it's doing, such as versions found.
 
 =item B<Description>
 
-Creates an empty database with the name C<$db_name>, if that database 
-doesn't already exist. Prints an error message and exits if we can't 
+Creates an empty database with the name C<$db_name>, if that database
+doesn't already exist. Prints an error message and exits if we can't
 create the database.
 
 =item B<Params> (none)
@@ -1682,7 +1682,7 @@ create the database.
 
 =item B<Description>
 
-Internal function, creates and returns a new, connected instance of the 
+Internal function, creates and returns a new, connected instance of the
 correct DB class.  This routine C<die>s if no driver is specified.
 
 =item B<Params>
@@ -1713,13 +1713,13 @@ A new instance of the DB class
 
 =item C<_handle_error>
 
-Function passed to the DBI::connect call for error handling. It shortens the 
+Function passed to the DBI::connect call for error handling. It shortens the
 error for printing.
 
 =item C<import>
 
 Overrides the standard import method to check that derived class
-implements all required abstract methods. Also calls original implementation 
+implements all required abstract methods. Also calls original implementation
 in its super class.
 
 =back
@@ -1743,12 +1743,12 @@ formatted SQL command have prefix C<sql_>. All other methods have prefix C<bz_>.
 
 =item B<Description>
 
-Constructor.  Abstract method, should be overridden by database specific 
+Constructor.  Abstract method, should be overridden by database specific
 code.
 
 =item B<Params>
 
-=over 
+=over
 
 =item C<$user> - username used to log in to the database
 
@@ -1835,7 +1835,7 @@ Same as L</sql_regexp>.
 
 =item B<Returns>
 
-Formatted SQL for negative regular expression search (e.g. NOT REGEXP) 
+Formatted SQL for negative regular expression search (e.g. NOT REGEXP)
 (scalar)
 
 =back
@@ -1972,7 +1972,7 @@ or adding.
 
 C<integer> The time interval you're adding or subtracting (e.g. C<30>)
 
-=item C<$units> 
+=item C<$units>
 
 C<string> the units the interval is in (e.g. 'MINUTE')
 
@@ -2109,9 +2109,9 @@ that indicates the presence of a match, and the second value is a numeric
 expression that can be used for ranking.
 
 There is a ANSI SQL version of this method implemented using LIKE operator,
-but it's not a real full text search. DB specific modules should override 
-this, as this generic implementation will be always much slower. This 
-generic implementation returns 'relevance' as 0 for no match, or 1 for a 
+but it's not a real full text search. DB specific modules should override
+this, as this generic implementation will be always much slower. This
+generic implementation returns 'relevance' as 0 for no match, or 1 for a
 match.
 
 =item B<Params>
@@ -2146,8 +2146,8 @@ Returns SQL for a case-insensitive string comparison.
 
 =item C<$right> - What should be on the right-hand-side of the operation.
 
-=item C<$op> (optional) - What the operation is. Should be a  valid ANSI 
-SQL comparison operator, such as C<=>, C<E<lt>>, C<LIKE>, etc. Defaults 
+=item C<$op> (optional) - What the operation is. Should be a  valid ANSI
+SQL comparison operator, such as C<=>, C<E<lt>>, C<LIKE>, etc. Defaults
 to C<=> if not specified.
 
 =back
@@ -2172,7 +2172,7 @@ function, most of the time (this function uses sql_istring).
 
 =item B<Description>
 
-Returns SQL syntax "preparing" a string or text column for case-insensitive 
+Returns SQL syntax "preparing" a string or text column for case-insensitive
 comparison.
 
 =item B<Params>
@@ -2201,7 +2201,7 @@ will not be usually used unless it was created as LOWER(column).
 
 =item B<Description>
 
-Returns SQL syntax for the C<IN ()> operator. 
+Returns SQL syntax for the C<IN ()> operator.
 
 Only necessary where an C<IN> clause can have more than 1000 items.
 
@@ -2227,7 +2227,7 @@ Formatted SQL for the C<IN> operator.
 =head1 IMPLEMENTED METHODS
 
 These methods are implemented in Bugzilla::DB, and only need
-to be implemented in subclasses if you need to override them for 
+to be implemented in subclasses if you need to override them for
 database-compatibility reasons.
 
 =head2 General Information Methods
@@ -2281,8 +2281,8 @@ the database.
 
 =item B<Description>
 
-For an upgrade or an initial installation, populates the tables that hold 
-the legal values for the old "enum" fields: C<bug_severity>, 
+For an upgrade or an initial installation, populates the tables that hold
+the legal values for the old "enum" fields: C<bug_severity>,
 C<resolution>, etc. Prints out information if it inserts anything into the
 DB.
 
@@ -2311,8 +2311,8 @@ C<Bugzilla::DB::Schema::ABSTRACT_SCHEMA>.
 
 =item B<Description>
 
-Adds a new column to a table in the database. Prints out a brief statement 
-that it did so, to stdout. Note that you cannot add a NOT NULL column that 
+Adds a new column to a table in the database. Prints out a brief statement
+that it did so, to stdout. Note that you cannot add a NOT NULL column that
 has no default -- the database won't know what to set all the NULL
 values to.
 
@@ -2345,7 +2345,7 @@ to. Required if your column is NOT NULL and has no DEFAULT set.
 
 =item B<Description>
 
-Adds a new index to a table in the database. Prints out a brief statement 
+Adds a new index to a table in the database. Prints out a brief statement
 that it did so, to stdout. If the index already exists, we will do nothing.
 
 =item B<Params>
@@ -2356,7 +2356,7 @@ that it did so, to stdout. If the index already exists, we will do nothing.
 
 =item C<$name>  - A name for the new index.
 
-=item C<$definition> - An abstract index definition. Either a hashref 
+=item C<$definition> - An abstract index definition. Either a hashref
 or an arrayref.
 
 =back
@@ -2371,14 +2371,14 @@ or an arrayref.
 
 =item B<Description>
 
-Creates a new table in the database, based on the definition for that 
+Creates a new table in the database, based on the definition for that
 table in the abstract schema.
 
-Note that unlike the other 'add' functions, this does not take a 
+Note that unlike the other 'add' functions, this does not take a
 definition, but always creates the table as it exists in
 L<Bugzilla::DB::Schema/ABSTRACT_SCHEMA>.
 
-If a table with that name already exists, then this function returns 
+If a table with that name already exists, then this function returns
 silently.
 
 =item B<Params>
@@ -2399,7 +2399,7 @@ silently.
 
 =item B<Description>
 
-Removes an index from the database. Prints out a brief statement that it 
+Removes an index from the database. Prints out a brief statement that it
 did so, to stdout. If the index doesn't exist, we do nothing.
 
 =item B<Params>
@@ -2422,7 +2422,7 @@ did so, to stdout. If the index doesn't exist, we do nothing.
 
 =item B<Description>
 
-Drops a table from the database. If the table doesn't exist, we just 
+Drops a table from the database. If the table doesn't exist, we just
 return silently.
 
 =item B<Params>
@@ -2443,8 +2443,8 @@ return silently.
 
 =item B<Description>
 
-Changes the data type of a column in a table. Prints out the changes 
-being made to stdout. If the new type is the same as the old type, 
+Changes the data type of a column in a table. Prints out the changes
+being made to stdout. If the new type is the same as the old type,
 the function returns without changing anything.
 
 =item B<Params>
@@ -2455,12 +2455,12 @@ the function returns without changing anything.
 
 =item C<$name> - the name of the column you want to change
 
-=item C<\%new_def> - An abstract column definition for the new 
+=item C<\%new_def> - An abstract column definition for the new
 data type of the columm
 
 =item C<$set_nulls_to> (Optional) - If you are changing the column
-to be NOT NULL, you probably also want to set any existing NULL columns 
-to a particular value. Specify that value here. B<NOTE>: The value should 
+to be NOT NULL, you probably also want to set any existing NULL columns
+to a particular value. Specify that value here. B<NOTE>: The value should
 not already be SQL-quoted.
 
 =back
@@ -2475,8 +2475,8 @@ not already be SQL-quoted.
 
 =item B<Description>
 
-Removes a column from a database table. If the column doesn't exist, we 
-return without doing anything. If we do anything, we print a short 
+Removes a column from a database table. If the column doesn't exist, we
+return without doing anything. If we do anything, we print a short
 message to C<stdout> about the change.
 
 =item B<Params>
@@ -2499,15 +2499,15 @@ message to C<stdout> about the change.
 
 =item B<Description>
 
-Renames a column in a database table. If the C<$old_name> column 
-doesn't exist, we return without doing anything. If C<$old_name> 
+Renames a column in a database table. If the C<$old_name> column
+doesn't exist, we return without doing anything. If C<$old_name>
 and C<$new_name> both already exist in the table specified, we fail.
 
 =item B<Params>
 
 =over
 
-=item C<$table> - The name of the table containing the column 
+=item C<$table> - The name of the table containing the column
 that you want to rename
 
 =item C<$old_name> - The current name of the column that you want to rename
@@ -2528,7 +2528,7 @@ that you want to rename
 
 Renames a table in the database. Does nothing if the table doesn't exist.
 
-Throws an error if the old table exists and there is already a table 
+Throws an error if the old table exists and there is already a table
 with the new name.
 
 =item B<Params>
@@ -2550,7 +2550,7 @@ with the new name.
 =head2 Schema Information Methods
 
 These methods return information about the current Bugzilla database
-schema, as it currently exists on the disk. 
+schema, as it currently exists on the disk.
 
 Where a parameter says "Abstract index/column definition", it returns/takes
 information in the formats defined for indexes and columns for
@@ -2578,7 +2578,7 @@ Get abstract column definition.
 
 =item B<Returns>
 
-An abstract column definition for that column. If the table or column 
+An abstract column definition for that column. If the table or column
 does not exist, we return C<undef>.
 
 =back
@@ -2603,7 +2603,7 @@ Get abstract index definition.
 
 =item B<Returns>
 
-An abstract index definition for that index, always in hashref format. 
+An abstract index definition for that index, always in hashref format.
 The hashref will always contain the C<TYPE> element, but it will
 be an empty string if it's just a normal index.
 
@@ -2616,7 +2616,7 @@ If the index does not exist, we return C<undef>.
 
 =head2 Transaction Methods
 
-These methods deal with the starting and stopping of transactions 
+These methods deal with the starting and stopping of transactions
 in the database.
 
 =over
@@ -2646,7 +2646,7 @@ no parameters.
 
 =item C<bz_rollback_transaction>
 
-Ends a transaction, rolling back all changes. Returns nothing and takes 
+Ends a transaction, rolling back all changes. Returns nothing and takes
 no parameters.
 
 =back

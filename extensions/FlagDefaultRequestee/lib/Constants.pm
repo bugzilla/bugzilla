@@ -18,9 +18,9 @@ our @EXPORT = qw(
 );
 
 use constant FLAGTYPE_TEMPLATES => (
-    "attachment/edit.html.tmpl", 
-    "attachment/createformcontents.html.tmpl", 
-    "bug/edit.html.tmpl", 
+    "attachment/edit.html.tmpl",
+    "attachment/createformcontents.html.tmpl",
+    "bug/edit.html.tmpl",
     "bug/create/create.html.tmpl"
 );
 

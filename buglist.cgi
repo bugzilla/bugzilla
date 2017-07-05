@@ -58,7 +58,7 @@ if (defined($searchstring)) {
 }
 
 # If configured to not allow empty words, reject empty searches from the
-# Find a Specific Bug search form, including words being a single or 
+# Find a Specific Bug search form, including words being a single or
 # several consecutive whitespaces only.
 if (!Bugzilla->params->{'search_allow_no_criteria'}
     && defined($cgi->param('content')) && $cgi->param('content') =~ /^\s*$/)
@@ -108,7 +108,7 @@ my $format = $template->get_format("list/list", scalar $cgi->param('format'),
 # the bug list as HTML and they have not disabled it by adding &serverpush=0
 # to the URL.
 #
-# Server push is a Netscape 3+ hack incompatible with MSIE, Lynx, and others. 
+# Server push is a Netscape 3+ hack incompatible with MSIE, Lynx, and others.
 # Even Communicator 4.51 has bugs with it, especially during page reload.
 # http://www.browsercaps.org used as source of compatible browsers.
 # Safari (WebKit) does not support it, despite a UA that says otherwise (bug 188712)
@@ -116,8 +116,8 @@ my $format = $template->get_format("list/list", scalar $cgi->param('format'),
 #
 my $serverpush =
   $format->{'extension'} eq "html"
-    && exists $ENV{'HTTP_USER_AGENT'} 
-      && $ENV{'HTTP_USER_AGENT'} =~ /Mozilla.[3-9]/ 
+    && exists $ENV{'HTTP_USER_AGENT'}
+      && $ENV{'HTTP_USER_AGENT'} =~ /Mozilla.[3-9]/
         && (($ENV{'HTTP_USER_AGENT'} !~ /[Cc]ompatible/) || ($ENV{'HTTP_USER_AGENT'} =~ /MSIE 5.*Mac_PowerPC/))
           && $ENV{'HTTP_USER_AGENT'} !~ /(?:WebKit|Trident|KHTML)/
             && !$agent
@@ -210,14 +210,14 @@ sub LookupNamedQuery {
 #              will throw a UserError. Leading and trailing whitespace
 #              will be stripped from this value before it is inserted
 #              into the DB.
-# query - The query part of the buglist.cgi URL, unencoded. Must not be 
+# query - The query part of the buglist.cgi URL, unencoded. Must not be
 #         empty, or we will throw a UserError.
-# link_in_footer (optional) - 1 if the Named Query should be 
+# link_in_footer (optional) - 1 if the Named Query should be
 # displayed in the user's footer, 0 otherwise.
 #
 # All parameters are validated before passing them into the database.
 #
-# Returns: A boolean true value if the query existed in the database 
+# Returns: A boolean true value if the query existed in the database
 # before, and we updated it. A boolean false value otherwise.
 sub InsertNamedQuery {
     my ($query_name, $query, $link_in_footer) = @_;
@@ -244,7 +244,7 @@ sub InsertNamedQuery {
 sub LookupSeries {
     my ($series_id) = @_;
     detaint_natural($series_id) || ThrowCodeError("invalid_series_id");
-    
+
     my $dbh = Bugzilla->dbh;
     my $result = $dbh->selectrow_array("SELECT query FROM series " .
                                        "WHERE series_id = ?"
@@ -261,8 +261,8 @@ sub GetQuip {
     my $count = $dbh->selectrow_array("SELECT COUNT(quip)"
                                     . " FROM quips WHERE approved = 1");
     my $random = int(rand($count));
-    my $quip = 
-        $dbh->selectrow_array("SELECT quip FROM quips WHERE approved = 1 " . 
+    my $quip =
+        $dbh->selectrow_array("SELECT quip FROM quips WHERE approved = 1 " .
                               $dbh->sql_limit(1, $random));
     return $quip;
 }
@@ -304,13 +304,13 @@ my $sharer_id;
 
 # Backwards-compatibility - the old interface had cmdtype="runnamed" to run
 # a named command, and we can't break this because it's in bookmarks.
-if ($cmdtype eq "runnamed") {  
+if ($cmdtype eq "runnamed") {
     $cmdtype = "dorem";
     $remaction = "run";
 }
 
 # Now we're going to be running, so ensure that the params object is set up,
-# using ||= so that we only do so if someone hasn't overridden this 
+# using ||= so that we only do so if someone hasn't overridden this
 # earlier, for example by setting up a named query search.
 
 # This will be modified, so make a copy.
@@ -318,8 +318,8 @@ $params ||= new Bugzilla::CGI($cgi);
 
 # Generate a reasonable filename for the user agent to suggest to the user
 # when the user saves the bug list.  Uses the name of the remembered query
-# if available.  We have to do this now, even though we return HTTP headers 
-# at the end, because the fact that there is a remembered query gets 
+# if available.  We have to do this now, even though we return HTTP headers
+# at the end, because the fact that there is a remembered query gets
 # forgotten in the process of retrieving it.
 my $disp_prefix = "bugs";
 if (($cmdtype eq "dorem" && $remaction =~ /^run/) || ($format->{extension} ne 'html' && defined $cgi->param('namedcmd'))) {
@@ -327,7 +327,7 @@ if (($cmdtype eq "dorem" && $remaction =~ /^run/) || ($format->{extension} ne 'h
 }
 
 # Take appropriate action based on user's request.
-if ($cmdtype eq "dorem") {  
+if ($cmdtype eq "dorem") {
     if ($remaction eq "run") {
         my $query_id;
         ($buffer, $query_id, $sharer_id) =
@@ -355,13 +355,13 @@ if ($cmdtype eq "dorem") {
     elsif ($remaction eq "forget") {
         $user = Bugzilla->login(LOGIN_REQUIRED);
         # Copy the name into a variable, so that we can trick_taint it for
-        # the DB. We know it's safe, because we're using placeholders in 
+        # the DB. We know it's safe, because we're using placeholders in
         # the SQL, and the SQL is only a DELETE.
         my $qname = $cgi->param('namedcmd');
         trick_taint($qname);
 
         # Do not forget the saved search if it is being used in a whine
-        my $whines_in_use = 
+        my $whines_in_use =
             $dbh->selectcol_arrayref('SELECT DISTINCT whine_events.subject
                                                  FROM whine_events
                                            INNER JOIN whine_queries
@@ -373,7 +373,7 @@ if ($cmdtype eq "dorem") {
                                                       = ?
                                       ', undef, $user->id, $qname);
         if (scalar(@$whines_in_use)) {
-            ThrowUserError('saved_search_used_by_whines', 
+            ThrowUserError('saved_search_used_by_whines',
                            { subjects    => join(',', @$whines_in_use),
                              search_name => $qname                      }
             );
@@ -504,7 +504,7 @@ my $columns = Bugzilla::Search::COLUMNS;
 # Display Column Determination
 ################################################################################
 
-# Determine the columns that will be displayed in the bug list via the 
+# Determine the columns that will be displayed in the bug list via the
 # columnlist CGI parameter, the user's preferences, or the default.
 my @displaycolumns = ();
 if (defined $params->param('columnlist')) {
@@ -536,8 +536,8 @@ else {
     @displaycolumns = DEFAULT_COLUMN_LIST;
 }
 
-# Weed out columns that don't actually exist to prevent the user 
-# from hacking their column list cookie to grab data to which they 
+# Weed out columns that don't actually exist to prevent the user
+# from hacking their column list cookie to grab data to which they
 # should not have access.  Detaint the data along the way.
 @displaycolumns = grep($columns->{$_} && trick_taint($_), @displaycolumns);
 
@@ -596,7 +596,7 @@ foreach my $col (@displaycolumns) {
     push (@selectcolumns, $col) if !grep($_ eq $col, @selectcolumns);
 }
 
-# If the user is editing multiple bugs, we also make sure to select the 
+# If the user is editing multiple bugs, we also make sure to select the
 # status, because the values of that field determines what options the user
 # has for modifying the bugs.
 if ($dotweak) {
@@ -645,7 +645,7 @@ if ($format->{'extension'} eq 'atom') {
 if (!$order || $order =~ /^reuse/i) {
     if ($cgi->cookie('LASTORDER')) {
         $order = $cgi->cookie('LASTORDER');
-       
+
         # Cookies from early versions of Specific Search included this text,
         # which is now invalid.
         $order =~ s/ LIMIT 200//;
@@ -846,7 +846,7 @@ my $time_info = { 'estimated_time' => 0,
                   'time_present' => ($estimated_time || $remaining_time ||
                                      $actual_time || $percentage_complete),
                 };
-    
+
 my $bugowners = {};
 my $bugproducts = {};
 my $bugstatuses = {};
@@ -866,7 +866,7 @@ foreach my $row (@$data) {
 
     # Process certain values further (i.e. date format conversion).
     if ($bug->{'changeddate'}) {
-        $bug->{'changeddate'} =~ 
+        $bug->{'changeddate'} =~
             s/^(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})$/$1-$2-$3 $4:$5:$6/;
 
         $bug->{'changedtime'} = $bug->{'changeddate'}; # for iCalendar and Atom
@@ -910,7 +910,7 @@ if (@bugidlist) {
      "LEFT JOIN group_control_map " .
             "ON group_control_map.product_id = bugs.product_id " .
            "AND group_control_map.group_id = bug_group_map.group_id " .
-         "WHERE " . $dbh->sql_in('bugs.bug_id', \@bugidlist) . 
+         "WHERE " . $dbh->sql_in('bugs.bug_id', \@bugidlist) .
             $dbh->sql_group_by('bugs.bug_id'));
     $sth->execute();
     while (my ($bug_id, $min_membercontrol) = $sth->fetchrow_array()) {
@@ -932,9 +932,9 @@ my $sum = $time_info->{'actual_time'}+$time_info->{'remaining_time'};
 if ($sum > 0) {
     $time_info->{'percentage_complete'} = 100*$time_info->{'actual_time'}/$sum;
 }
-else { # remaining_time <= 0 
+else { # remaining_time <= 0
     $time_info->{'percentage_complete'} = 0
-}                             
+}
 
 ################################################################################
 # Template Variable Definition
@@ -1016,7 +1016,7 @@ elsif (my @product_input = $cgi->param('product')) {
         $one_product = new Bugzilla::Product({ name => $product_input[0] });
     }
 }
-# We only want the template to use it if the user can actually 
+# We only want the template to use it if the user can actually
 # enter bugs against it.
 if ($one_product && $user->can_enter_product($one_product)) {
     $vars->{'one_product'} = $one_product;
@@ -1030,7 +1030,7 @@ if ($dotweak && scalar @bugs) {
                                         object => 'multiple_bugs'});
     }
     $vars->{'dotweak'} = 1;
-  
+
     # issue_session_token needs to write to the master DB.
     Bugzilla->switch_to_main_db();
     $vars->{'token'} = issue_session_token('buglist_mass_change');
@@ -1058,12 +1058,12 @@ if ($dotweak && scalar @bugs) {
          INNER JOIN bug_status
                  ON bug_status.id = sw1.new_status
               WHERE bug_status.isactive = 1
-                AND NOT EXISTS 
+                AND NOT EXISTS
                    (SELECT * FROM status_workflow sw2
-                     WHERE sw2.old_status != sw1.new_status 
+                     WHERE sw2.old_status != sw1.new_status
                            AND '
                          . $dbh->sql_in('sw2.old_status', $bug_status_ids)
-                         . ' AND NOT EXISTS 
+                         . ' AND NOT EXISTS
                            (SELECT * FROM status_workflow sw3
                              WHERE sw3.new_status = sw1.new_status
                                    AND sw3.old_status = sw2.old_status))');
@@ -1082,7 +1082,7 @@ if ($dotweak && scalar @bugs) {
         $vars->{'versions'} = [map($_->name, grep($_->is_active, @{ $one_product->versions }))];
         $vars->{'components'} = [map($_->name, grep($_->is_active, @{ $one_product->components }))];
         if (Bugzilla->params->{'usetargetmilestone'}) {
-            $vars->{'targetmilestones'} = [map($_->name, grep($_->is_active,  
+            $vars->{'targetmilestones'} = [map($_->name, grep($_->is_active,
                                                @{ $one_product->milestones }))];
         }
     }
@@ -1092,7 +1092,7 @@ if ($dotweak && scalar @bugs) {
 # the "Remember search as" field.
 $vars->{'defaultsavename'} = $cgi->param('query_based_on');
 
-# If we did a quick search then redisplay the previously entered search 
+# If we did a quick search then redisplay the previously entered search
 # string in the text field.
 $vars->{'quicksearch'} = $searchstring;
 

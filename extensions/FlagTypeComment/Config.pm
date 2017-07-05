@@ -10,7 +10,7 @@
 #
 # The Original Code is the FlagTypeComment Bugzilla Extension.
 #
-# The Initial Developer of the Original Code is Alex Keybl 
+# The Initial Developer of the Original Code is Alex Keybl
 # Portions created by the Initial Developer are Copyright (C) 2011 the
 # Initial Developer. All Rights Reserved.
 #

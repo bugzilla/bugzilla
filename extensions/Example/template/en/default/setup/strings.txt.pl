@@ -14,7 +14,7 @@
 #
 # The Original Code is the Bugzilla Bug Tracking System.
 #
-# Contributor(s): 
+# Contributor(s):
 #   Max Kanat-Alexander <mkanat@bugzilla.org>
 
 %strings = (

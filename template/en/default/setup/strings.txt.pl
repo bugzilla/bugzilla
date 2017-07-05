@@ -54,7 +54,7 @@ Re-run checksetup.pl in interactive mode (without an 'answers' file)
 to continue.
 END
     cpanfile_created => "##file## created",
-    cpan_bugzilla_home => 
+    cpan_bugzilla_home =>
         "WARNING: Using the Bugzilla directory as the CPAN home.",
     db_enum_setup  => "Setting up choices for standard drop-down fields:",
     db_schema_init => "Initializing bz_schema...",
@@ -111,7 +111,7 @@ If you are using Apache as your web server, Bugzilla can create .htaccess
 files for you, which will keep this file (localconfig) and other
 confidential files from being read over the web.
 
-If this is set to 1, checksetup.pl will create .htaccess files if 
+If this is set to 1, checksetup.pl will create .htaccess files if
 they don't exist.
 
 If this is set to 0, checksetup.pl will not create .htaccess files.
@@ -203,11 +203,11 @@ If set to 0, checksetup.pl will set file permissions appropriately for
 a normal webserver environment.
 
 If set to 1, checksetup.pl will set file permissions so that Bugzilla
-works in a SuexecUserGroup environment. 
+works in a SuexecUserGroup environment.
 END
     localconfig_webservergroup => <<'END',
 The name of the group that your web server runs as. On Red Hat
-distributions, this is usually "apache". On Debian/Ubuntu, it is 
+distributions, this is usually "apache". On Debian/Ubuntu, it is
 usually "www-data".
 
 If you have use_suexec turned on below, then this is instead the name
@@ -238,7 +238,7 @@ EOT
     min_version_required => "Minimum version required: ",
 
 # Note: When translating these "modules" messages, don't change the formatting
-# if possible, because there is hardcoded formatting in 
+# if possible, because there is hardcoded formatting in
 # Bugzilla::Install::Requirements to match the box formatting.
     modules_message_apache => <<END,
 ***********************************************************************
@@ -355,7 +355,7 @@ WARNING: The directory '##template_cache##' could not be removed.
          deleted manually to conserve disk space.
 END
     template_removing_dir => "Removing existing compiled templates...",
-    update_cf_invalid_name => 
+    update_cf_invalid_name =>
         "Removing custom field '##field##', because it has an invalid name...",
     update_flags_bad_name => <<'END',
 "##flag##" is not a valid name for a flag. Rename it to not have any spaces
@@ -363,10 +363,10 @@ or commas.
 END
     update_nomail_bad => <<'END',
 WARNING: The following users were listed in ##data##/nomail, but do
-not have an account here. The unmatched entries have been moved to 
+not have an account here. The unmatched entries have been moved to
 ##data##/nomail.bad:
 END
-    update_summary_truncate_comment => 
+    update_summary_truncate_comment =>
         "The original value of the Summary field was longer than 255"
         . " characters, and so it was truncated during an upgrade."
         . " The original summary was:\n\n##summary##",

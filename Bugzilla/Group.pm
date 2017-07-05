@@ -146,13 +146,13 @@ sub flag_types {
 sub grant_direct {
     my ($self, $type) = @_;
     $self->{grant_direct} ||= {};
-    return $self->{grant_direct}->{$type} 
+    return $self->{grant_direct}->{$type}
         if defined $self->{grant_direct}->{$type};
     my $dbh = Bugzilla->dbh;
 
     my $ids = $dbh->selectcol_arrayref(
       "SELECT member_id FROM group_group_map
-        WHERE grantor_id = ? AND grant_type = $type", 
+        WHERE grantor_id = ? AND grant_type = $type",
       undef, $self->id) || [];
 
     $self->{grant_direct}->{$type} = $self->new_from_list($ids);
@@ -185,7 +185,7 @@ sub products {
         $self->id);
     my @ids = map { $_->{product_id} } @$product_data;
     require Bugzilla::Product;
-    my $products = Bugzilla::Product->new_from_list(\@ids); 
+    my $products = Bugzilla::Product->new_from_list(\@ids);
     my %data_map = map { $_->{product_id} => $_ } @$product_data;
     my @retval;
     foreach my $product (@$products) {
@@ -257,12 +257,12 @@ sub update {
     }
 
     # If we've changed this group to be active, fix any Mandatory groups.
-    $self->_enforce_mandatory if (exists $changes->{isactive} 
+    $self->_enforce_mandatory if (exists $changes->{isactive}
                                   && $changes->{isactive}->[1]);
 
     $self->_rederive_regexp() if exists $changes->{userregexp};
 
-    Bugzilla::Hook::process('group_end_of_update', 
+    Bugzilla::Hook::process('group_end_of_update',
                             { group => $self, changes => $changes });
     $dbh->bz_commit_transaction();
     Bugzilla->memcached->clear_config();
@@ -303,7 +303,7 @@ sub check_remove {
     if (scalar(@$bugs) && !$params->{'remove_from_bugs'}) {
         $cantdelete = 1;
     }
-    
+
     my $products = $self->products;
     if (scalar(@$products) && !$params->{'remove_from_products'}) {
         $cantdelete = 1;
@@ -399,7 +399,7 @@ sub flatten_group_membership {
     my @groupidstocheck = @groups;
     my %groupidschecked = ();
     $sth = $dbh->prepare("SELECT member_id FROM group_group_map
-                             WHERE grantor_id = ? 
+                             WHERE grantor_id = ?
                                AND grant_type = " . GROUP_MEMBERSHIP);
     while (my $node = shift @groupidstocheck) {
         $sth->execute($node);
@@ -653,7 +653,7 @@ A C<Bugzilla::Group> object on success, else an error is thrown.
 
 =item C<check_members_are_visible>
 
-Throws an error if this group is not visible (according to 
+Throws an error if this group is not visible (according to
 visibility groups) to the currently-logged-in user.
 
 =item C<check_remove>
@@ -712,7 +712,7 @@ group manually.
 
 =item C<flatten_group_membership>
 
-Accepts a list of groups and returns a list of all the groups whose members 
+Accepts a list of groups and returns a list of all the groups whose members
 inherit membership in any group on the list.  So, we can determine if a user
 is in any of the groups input to flatten_group_membership by querying the
 user_group_map for any user with DIRECT or REGEXP membership IN() the list

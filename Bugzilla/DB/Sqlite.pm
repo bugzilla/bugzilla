@@ -72,7 +72,7 @@ sub _sqlite_position_ci {
 sub new {
     my ($class, $params) = @_;
     my $db_name = $params->{db_name};
-    
+
     # Let people specify paths intead of data/ for the DB.
     if ($db_name and $db_name !~ m{[\\/]}) {
         # When the DB is first created, there's a chance that the
@@ -97,11 +97,11 @@ sub new {
         sqlite_unicode => Bugzilla->params->{'utf8'},
     };
 
-    my $self = $class->db_new({ dsn => $dsn, user => '', 
+    my $self = $class->db_new({ dsn => $dsn, user => '',
                                 pass => '', attrs => $attrs });
     # Needed by TheSchwartz
     $self->{private_bz_dsn} = $dsn;
-    
+
     my %pragmas = (
         # Make sure that the sqlite file doesn't grow without bound.
         auto_vacuum => 1,
@@ -120,11 +120,11 @@ sub new {
         # uncomment this line.
         #journal_mode => "'WAL'",
     );
-    
+
     while (my ($name, $value) = each %pragmas) {
         $self->do("PRAGMA $name = $value");
     }
-    
+
     $self->sqlite_create_collation('bugzilla', \&_sqlite_collate_ci);
     $self->sqlite_create_function('position', 2, \&_sqlite_position);
     $self->sqlite_create_function('iposition', 2, \&_sqlite_position_ci);

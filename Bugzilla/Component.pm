@@ -229,7 +229,7 @@ sub _check_initialqacontact {
 
 sub _check_product {
     my ($invocant, $product) = @_;
-    $product || ThrowCodeError('param_required', 
+    $product || ThrowCodeError('param_required',
                     { function => "$invocant->create", param => 'product' });
     return Bugzilla->user->check_can_admin_product($product->name);
 }
@@ -393,7 +393,7 @@ sub flag_types {
 
     if (!defined $self->{'flag_types'}) {
         my $flagtypes = Bugzilla::FlagType::match({ product_id   => $self->product_id,
-                                                    component_id => $self->id, 
+                                                    component_id => $self->id,
                                                     %$params });
 
         $self->{'flag_types'} = {};

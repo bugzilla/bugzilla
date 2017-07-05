@@ -107,11 +107,11 @@ sub page_before_template {
 
 sub bug_format_comment {
     my ($self, $args) = @_;
-    
+
     my $bug = $args->{'bug'};
     my $regexes = $args->{'regexes'};
     my $text = $args->{'text'};
-    
+
     # Add [review] link to the end of "Created attachment" comments
     #
     # We need to work around the way that the hook works, which is intended
@@ -124,7 +124,7 @@ sub bug_format_comment {
                                    replace => get_review_link("$2", "[review]") })) &&
                 (attachment_id_is_patch($2) ? "$1 __REVIEW__$2" : $1)
                ~egmx;
-    
+
     # And linkify "Review of attachment", this is less of a workaround since
     # there is no issue with overlap; note that there is an assumption that
     # there is only one match in the text we are linkifying, since they all
@@ -150,7 +150,7 @@ sub config_add_panels {
 
 sub mailer_before_send {
     my ($self, $args) = @_;
-    
+
     # Post-process bug mail to add review links to bug mail.
     # It would be nice to be able to hook in earlier in the
     # process when the email body is being formatted in the

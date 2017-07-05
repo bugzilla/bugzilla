@@ -130,7 +130,7 @@ if ($action eq 'new') {
 if ($action eq 'del') {
     my $milestone = Bugzilla::Milestone->check({ product => $product,
                                                  name    => $milestone_name });
-    
+
     $vars->{'milestone'} = $milestone;
     $vars->{'product'} = $product;
 

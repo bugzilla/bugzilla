@@ -68,11 +68,11 @@ Bugzilla::Whine::Query - A query object used by L<Bugzilla::Whine>.
 =head1 DESCRIPTION
 
 This module exists to represent a query for a L<Bugzilla::Whine::Event>.
-Each event, which are groups of schedules and queries based on how the 
+Each event, which are groups of schedules and queries based on how the
 user configured the event, may have zero or more queries associated
 with it. Additionally, the queries are selected from the user's saved
 searches, or L<Bugzilla::Search::Saved> object with a matching C<name>
-attribute for the user. 
+attribute for the user.
 
 This is an implementation of L<Bugzilla::Object>, and so has all the
 same methods available as L<Bugzilla::Object>, in addition to what is

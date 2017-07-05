@@ -44,8 +44,8 @@ sub new {
     my $dbh = Bugzilla->dbh;
 
     # Confirm that the $setting_name is properly formed;
-    # if not, throw a code error. 
-    # 
+    # if not, throw a code error.
+    #
     # NOTE: due to the way that setting names are used in templates,
     # they must conform to to the limitations set for HTML NAMEs and IDs.
     #
@@ -66,7 +66,7 @@ sub new {
                    ON setting.name = profile_setting.setting_name
                 WHERE name = ?
                   AND profile_setting.user_id = ?},
-             undef, 
+             undef,
              $setting_name, $user_id);
 
         # if not defined, then grab the default value
@@ -332,8 +332,8 @@ Bugzilla::User::Setting - Object for a user preference setting
 =head1 SYNOPSIS
 
 Setting.pm creates a setting object, which is a hash containing the user
-preference information for a single preference for a single user. These 
-are usually accessed through the "settings" object of a user, and not 
+preference information for a single preference for a single user. These
+are usually accessed through the "settings" object of a user, and not
 directly.
 
 =head1 DESCRIPTION
@@ -356,7 +356,7 @@ $settings->{$setting_name} = new Bugzilla::User::Setting(
 
 =item C<add_setting($name, \@values, $default_value, $subclass, $force_check, $category)>
 
-Description: Checks for the existence of a setting, and adds it 
+Description: Checks for the existence of a setting, and adds it
              to the database if it does not yet exist.
 
 Params:      C<$name> - string - the name of the new setting
@@ -376,7 +376,7 @@ Returns:     a pointer to a hash of settings
 
 =item C<get_all_settings($user_id)>
 
-Description: Provides the user's choices for each setting in the 
+Description: Provides the user's choices for each setting in the
              system; if the user has made no choice, uses the site
              default instead.
 Params:      C<$user_id> - integer - the user id.
@@ -441,17 +441,17 @@ Returns:     nothing
 
 =item C<reset_to_default>
 
-Description: If a user chooses to use the global default for a given 
-             setting, their saved entry is removed from the database via 
+Description: If a user chooses to use the global default for a given
+             setting, their saved entry is removed from the database via
              this subroutine.
 Params:      none
 Returns:     nothing
 
 =item C<set($value)>
 
-Description: If a user chooses to use their own value rather than the 
+Description: If a user chooses to use their own value rather than the
              global value for a given setting, OR changes their value for
-             a given setting, this subroutine is called to insert or 
+             a given setting, this subroutine is called to insert or
              update the database as appropriate.
 Params:      C<$value> - string - the new value for this setting for this user.
 Returns:     nothing

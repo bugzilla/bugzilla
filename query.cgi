@@ -55,7 +55,7 @@ my $userdefaultquery;
 if ($userid) {
     $userdefaultquery = $dbh->selectrow_array(
         "SELECT query FROM namedqueries " .
-         "WHERE userid = ? AND name = ?", 
+         "WHERE userid = ? AND name = ?",
          undef, ($userid, DEFAULT_QUERY_NAME));
 }
 
@@ -88,7 +88,7 @@ sub PrefillForm {
         next if grep { $_ eq $name } @skip;
         $foundone = 1;
         my @values = $buf->param($name);
-        
+
         # If the name is a single letter followed by numbers, it's part
         # of Custom Search. We store these as an array of hashes.
         if ($name =~ /^([[:lower:]])(\d+)$/) {
@@ -118,9 +118,9 @@ if (!PrefillForm($buffer)) {
     }
 }
 
-# if using groups for entry, then we don't want people to see products they 
+# if using groups for entry, then we don't want people to see products they
 # don't have access to. Remove them from the list.
-my @selectable_products = sort {lc($a->name) cmp lc($b->name)} 
+my @selectable_products = sort {lc($a->name) cmp lc($b->name)}
                                @{$user->get_selectable_products};
 Bugzilla::Product::preload(\@selectable_products);
 
@@ -259,8 +259,8 @@ if (defined($vars->{'format'}) && IsValidQueryType($vars->{'format'})) {
 # If we submit back to ourselves (for e.g. boolean charts), we need to
 # preserve format information; hence query_format taking priority over
 # format.
-my $format = $template->get_format("search/search", 
-                                   $vars->{'query_format'} || $vars->{'format'}, 
+my $format = $template->get_format("search/search",
+                                   $vars->{'query_format'} || $vars->{'format'},
                                    scalar $cgi->param('ctype'));
 
 print $cgi->header($format->{'ctype'});

@@ -10,8 +10,8 @@
 #
 # enter_bug.cgi
 # -------------
-# Displays bug entry form. Bug fields are specified through popup menus, 
-# drop-down lists, or text fields. Default for these values can be 
+# Displays bug entry form. Bug fields are specified through popup menus,
+# drop-down lists, or text fields. Default for these values can be
 # passed in as parameters to the cgi.
 #
 ##############################################################################
@@ -55,10 +55,10 @@ $vars->{'doc_section'} = 'using/filing.html';
 
 if (!$vars->{'disable_guided'}) {
     # Purpose: force guided format for newbies
-    $cgi->param(-name=>'format', -value=>'guided') 
+    $cgi->param(-name=>'format', -value=>'guided')
         if !$cgi->param('format') && !$user->in_group('canconfirm');
 
-    $cgi->delete('format') 
+    $cgi->delete('format')
         if ($cgi->param('format') && ($cgi->param('format') eq "__default__"));
 }
 
@@ -259,9 +259,9 @@ if ($cloned_bug_id) {
     } else {
         $vars->{'cc'}         = formvalue('cc');
     }
-    
+
     if ($cloned_bug->reporter->id != $user->id) {
-        $vars->{'cc'} = join (", ", $cloned_bug->reporter->login, $vars->{'cc'}); 
+        $vars->{'cc'} = join (", ", $cloned_bug->reporter->login, $vars->{'cc'});
     }
 
     foreach my $field (@enter_bug_fields) {
@@ -401,7 +401,7 @@ if ($picked_status and grep($_->name eq $picked_status, @statuses)) {
     $default{'bug_status'} = $statuses[0]->name;
 }
 else {
-    $default{'bug_status'} = ($statuses[0]->name ne 'UNCONFIRMED') 
+    $default{'bug_status'} = ($statuses[0]->name ne 'UNCONFIRMED')
                              ? $statuses[0]->name : $statuses[1]->name;
 }
 
@@ -419,10 +419,10 @@ Bugzilla::Hook::process('enter_bug_entrydefaultvars', { vars => $vars });
 $vars->{'default'} = \%default;
 
 my $format = $template->get_format("bug/create/create",
-                                   scalar $cgi->param('format'), 
+                                   scalar $cgi->param('format'),
                                    scalar $cgi->param('ctype'));
 
 print $cgi->header($format->{'ctype'});
 $template->process($format->{'template'}, $vars)
-  || ThrowTemplateError($template->error());          
+  || ThrowTemplateError($template->error());
 

@@ -57,7 +57,7 @@ use constant CONFIG_VARS => (
 #
 # If you are mapping to any custom fields in Bugzilla, you have to create
 # the custom fields using Bugzilla Administration interface before you run
-# migrate.pl. However, if they are drop down or multi-select fields, you 
+# migrate.pl. However, if they are drop down or multi-select fields, you
 # don't have to populate the list of values--migrate.pl will do that for you.
 # Some migrators create certain custom fields by default. If you see a
 # field name starting with "cf_" on the right side of this configuration
@@ -125,7 +125,7 @@ END
         default => 'local',
         desc => <<'END',
 # If migrate.pl comes across any dates without timezones, while doing the
-# migration, what timezone should we assume those dates are in? 
+# migration, what timezone should we assume those dates are in?
 # The best format for this variable is something like "America/Los Angeles".
 # However, time zone abbreviations (like PST, PDT, etc.) are also acceptable,
 # but will result in a less-accurate conversion of times and dates.
@@ -151,7 +151,7 @@ sub do_migration {
     if ($self->config('starting_bug_id')) {
         $dbh->bz_set_next_serial_value('bugs', 'bug_id',
                                        $self->config('starting_bug_id'));
-    }    
+    }
     $dbh->bz_start_transaction();
 
     # Read Other Database
@@ -159,11 +159,11 @@ sub do_migration {
     my $products = $self->products;
     my $bugs     = $self->bugs;
     $self->after_read();
-    
+
     $self->translate_all_bugs($bugs);
 
     Bugzilla->set_user(Bugzilla::User->super_user);
-    
+
     # Insert into Bugzilla
     $self->before_insert();
     $self->insert_users($users);
@@ -316,11 +316,11 @@ sub reset_serial_values {
         next if $field->is_abnormal;
         $reset{$field->name} = 'id';
     }
-    
+
     while (my ($table, $column) = each %reset) {
         $dbh->bz_set_next_serial_value($table, $column);
     }
-    
+
     $self->{serial_values_reset} = 1;
 }
 
@@ -356,22 +356,22 @@ sub translate_bug {
             $other_fields{$field} = $value;
         }
     }
-    
+
     if (defined $original_status and !defined $bug{resolution}
         and $self->map_value('bug_status_resolution', $original_status))
     {
         $bug{resolution} = $self->map_value('bug_status_resolution',
                                             $original_status);
     }
-    
+
     $bug{comment} = $self->_generate_description(\%bug, \%other_fields);
-    
+
     return wantarray ? (\%bug, \%other_fields) : \%bug;
 }
 
 sub _generate_description {
     my ($self, $bug, $fields) = @_;
-    
+
     my $description = "";
     foreach my $field (sort keys %$fields) {
         next if grep($_ eq $field, $self->NON_COMMENT_FIELDS);
@@ -418,7 +418,7 @@ sub parse_date {
         hour   => $time[2],
         minute => $time[1],
         second => int($time[0]),
-        time_zone => $tz, 
+        time_zone => $tz,
     });
     $dt->set_time_zone(Bugzilla->local_timezone);
     return $dt->iso8601;
@@ -426,21 +426,21 @@ sub parse_date {
 
 sub translate_value {
     my ($self, $field, $value) = @_;
-    
+
     if (!defined $value) {
         warn("Got undefined value for $field\n");
         $value = '';
     }
-    
+
     if (ref($value) eq 'ARRAY') {
         return [ map($self->translate_value($field, $_), @$value) ];
     }
 
-    
+
     if (defined $self->map_value($field, $value)) {
         return $self->map_value($field, $value);
     }
-    
+
     if (grep($_ eq $field, USER_FIELDS)) {
         if (defined $self->map_value('user', $value)) {
             return $self->map_value('user', $value);
@@ -458,7 +458,7 @@ sub translate_value {
         return undef if !$value;
         return $self->parse_date($value);
     }
-    
+
     return $value;
 }
 
@@ -571,14 +571,14 @@ sub insert_products {
     my ($self, $products) = @_;
     foreach my $product (@$products) {
         my $components = delete $product->{components};
-        
+
         my $created_prod = new Bugzilla::Product({ name => $product->{name} });
         if (!$created_prod) {
             $created_prod = Bugzilla::Product->create($product);
             print get_text('migrate_product_created',
                            { created => $created_prod }), "\n";
         }
-        
+
         foreach my $component (@$components) {
             next if new Bugzilla::Component({ product => $created_prod,
                                               name    => $component->{name} });
@@ -631,7 +631,7 @@ sub create_legal_values {
             $product_values{$bug->{product}}->{$field}->{$bug->{$field}} = 1;
         }
     }
-    
+
     foreach my $field (@select_fields) {
         next if $field->is_abnormal;
         my $name = $field->name;
@@ -642,7 +642,7 @@ sub create_legal_values {
                            { field => $field, value => $value }), "\n";
         }
     }
-    
+
     foreach my $product (keys %product_values) {
         my $prod_obj = Bugzilla::Product->check($product);
         foreach my $version (keys %{ $product_values{$product}->{version} }) {
@@ -664,10 +664,10 @@ sub create_legal_values {
             print get_text('migrate_value_created', { product => $prod_obj,
                                                       field   => $field,
                                                       value   => $created->name }), "\n";
-            
+
         }
     }
-    
+
 }
 
 sub insert_bugs {
@@ -726,9 +726,9 @@ sub insert_bugs {
                 }
             }
         }
-        
+
         my $product = Bugzilla::Product->check($bug->{product});
-        
+
         # If this isn't a legal starting status, or if the bug has a
         # resolution, then those will have to be set after creating the bug.
         # We make them into objects so that we can normalize their names.
@@ -743,7 +743,7 @@ sub insert_bugs {
             # accept. We're going to overwrite it immediately afterward.
             $bug->{bug_status} = $default_status;
         }
-        
+
         # If we're in dry-run mode, our custom fields haven't been created
         # yet, so we shouldn't try to set them on creation.
         if ($self->dry_run) {
@@ -751,7 +751,7 @@ sub insert_bugs {
                 delete $bug->{$field};
             }
         }
-        
+
         # File the bug as the reporter.
         my $super_user = Bugzilla->user;
         my $reporter = Bugzilla::User->check($bug->{reporter});
@@ -764,7 +764,7 @@ sub insert_bugs {
         Bugzilla->set_user($super_user);
 
         if (defined $bug->{creation_ts}) {
-            $dbh->do('UPDATE bugs SET creation_ts = ?, delta_ts = ? 
+            $dbh->do('UPDATE bugs SET creation_ts = ?, delta_ts = ?
                        WHERE bug_id = ?', undef, $bug->{creation_ts},
                      $bug->{creation_ts}, $created->id);
         }
@@ -786,7 +786,7 @@ sub insert_bugs {
             $dbh->do('UPDATE bugs SET resolution = ? WHERE bug_id = ?',
                      undef, $set_resolution->name, $created->id);
         }
-        
+
         $self->_insert_comments($created, $comments);
         $self->_insert_history($created, $history);
         $self->_insert_attachments($created, $attachments);
@@ -1011,7 +1011,7 @@ configuration parameter will be used as the timezone of the date.
 
 =head2 translate_bug
 
-(Note: Normally you don't have to call this yourself, as 
+(Note: Normally you don't have to call this yourself, as
 C<Bugzilla::Migrate> does it for you.)
 
 Uses the C<$translate_fields> and C<$translate_values> configuration variables
@@ -1044,7 +1044,7 @@ inserting into the database.
 
 =head2 translate_field
 
-(Note: Normally you don't need to use this, because L</translate_bug> 
+(Note: Normally you don't need to use this, because L</translate_bug>
 handles it for you.)
 
 Translates a field name in your bug-tracker to a field name in Bugzilla,
@@ -1121,7 +1121,7 @@ object of your subclass by L<Bugzilla::Migrate> itself.
 =head2 REQUIRED_MODULES
 
 Returns an arrayref of Perl modules that must be installed in order
-for your migrator to run, in the same format as 
+for your migrator to run, in the same format as
 L<Bugzilla::Install::Requirements/REQUIRED_MODULES>.
 
 =head2 CUSTOM_FIELDS

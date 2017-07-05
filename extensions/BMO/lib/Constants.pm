@@ -17,7 +17,7 @@ our @EXPORT = qw(
     DEV_ENGAGE_DISCUSS_NEEDINFO
 );
 
-# Maximum attachment size in lines that will be sent with a 
+# Maximum attachment size in lines that will be sent with a
 # requested attachment flag notification.
 use constant REQUEST_MAX_ATTACH_LINES => 1000;
 

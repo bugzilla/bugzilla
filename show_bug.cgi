@@ -110,7 +110,7 @@ $vars->{'bugids'} = join(", ", @bugids);
 
 # Work out which fields we are displaying (currently XML only.)
 # If no explicit list is defined, we show all fields. We then exclude any
-# on the exclusion list. This is so you can say e.g. "Everything except 
+# on the exclusion list. This is so you can say e.g. "Everything except
 # attachments" without listing almost all the fields.
 my @fieldlist = (Bugzilla::Bug->fields, 'flag', 'group', 'long_desc',
                  'attachment', 'attachmentdata', 'token');
@@ -129,7 +129,7 @@ foreach (@fieldlist) {
 }
 
 foreach ($cgi->param("excludefield")) {
-    $displayfields{$_} = undef;    
+    $displayfields{$_} = undef;
 }
 
 $vars->{'displayfields'} = \%displayfields;

@@ -91,7 +91,7 @@ if (defined $cgi->param('rememberedquery')) {
         @collist = DEFAULT_COLUMN_LIST;
     } else {
         if (defined $cgi->param("selected_columns")) {
-            @collist = grep { exists $columns->{$_} } 
+            @collist = grep { exists $columns->{$_} }
                             $cgi->param("selected_columns");
         }
         if (defined $cgi->param('splitheader')) {
@@ -124,7 +124,7 @@ if (defined $cgi->param('rememberedquery')) {
     $vars->{'message'} = "change_columns";
 
     if ($cgi->param('save_columns_for_search')
-        && defined $search && $search->user->id == Bugzilla->user->id) 
+        && defined $search && $search->user->id == Bugzilla->user->id)
     {
         my $params = new Bugzilla::CGI($search->url);
         $params->param('columnlist', join(",", @collist));
@@ -140,9 +140,9 @@ if (defined $cgi->param('rememberedquery')) {
     # If we're running on Microsoft IIS, $cgi->redirect discards
     # the Set-Cookie lines. In mod_perl, $cgi->redirect with cookies
     # causes the page to be rendered as text/plain.
-    # Workaround is to use the old-fashioned  redirection mechanism. 
+    # Workaround is to use the old-fashioned  redirection mechanism.
     # See bug 214466 and bug 376044 for details.
-    if ($ENV{'MOD_PERL'} 
+    if ($ENV{'MOD_PERL'}
         || $ENV{'SERVER_SOFTWARE'} =~ /Microsoft-IIS/
         || $ENV{'SERVER_SOFTWARE'} =~ /Sun ONE Web/)
     {
@@ -153,7 +153,7 @@ if (defined $cgi->param('rememberedquery')) {
       print $cgi->redirect($vars->{'redirect_url'});
       exit;
     }
-    
+
     $template->process("global/message.html.tmpl", $vars)
       || ThrowTemplateError($template->error());
     exit;

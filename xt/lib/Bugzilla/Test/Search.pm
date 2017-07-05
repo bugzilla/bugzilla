@@ -112,15 +112,15 @@ sub num_tests {
 
     # This @{ [] } thing is the only reasonable way to get a count out of a
     # constant array.
-    my $special_tests = scalar(@{ [SPECIAL_PARAM_TESTS, CUSTOM_SEARCH_TESTS] }) 
+    my $special_tests = scalar(@{ [SPECIAL_PARAM_TESTS, CUSTOM_SEARCH_TESTS] })
                         * TESTS_PER_RUN;
-    
+
     return $operator_field_tests + $sql_injection_tests + $special_tests;
 }
 
 sub _total_operator_tests {
     my ($self, $operators) = @_;
-    
+
     # Some operators have more than one test. Find those ones and add
     # them to the total operator tests
     my $extra_operator_tests;
@@ -131,13 +131,13 @@ sub _total_operator_tests {
         $extra_operator_tests += $extra_num;
     }
     return scalar(@$operators) + $extra_operator_tests;
-    
+
 }
 
 sub all_operators {
     my ($self) = @_;
     if (not $self->{all_operators}) {
-        
+
         my @operators;
         if (my $limit_operators = $self->option('operators')) {
             @operators = split(',', $limit_operators);
@@ -346,7 +346,7 @@ sub create_legal_value {
 sub _create_custom_fields {
     my ($self) = @_;
     return if !$self->option('add-custom-fields');
-    
+
     while (my ($type, $name) = each %{ CUSTOM_FIELDS() }) {
         my $exists = new Bugzilla::Field({ name => $name });
         next if $exists;
@@ -369,7 +369,7 @@ sub _create_custom_fields {
 sub _create_field_values {
     my ($self, $number, $for_create) = @_;
     my $dbh = Bugzilla->dbh;
-    
+
     Bugzilla->set_user($self->admin);
 
     my @selects = grep { $_->is_select } $self->all_fields;
@@ -414,7 +414,7 @@ sub _create_field_values {
         initialqacontact => create_user("$number-defaultqa")->login,
         initial_cc => [create_user("$number-initcc")->login],
         description => "Component $number" });
-    
+
     $values{'product'} = $product->name;
     $values{'component'} = $component->name;
     $values{'target_milestone'} = $milestone;
@@ -432,7 +432,7 @@ sub _create_field_values {
         $values{$field} = $value;
     }
     $values{'tag'} = ["$number-tag-" . random()];
-    
+
     my @date_fields = grep { $_->type == FIELD_TYPE_DATETIME } $self->all_fields;
     foreach my $field (@date_fields) {
         # We use 03 as the month because that differs from our creation_ts,
@@ -522,10 +522,10 @@ sub _create_flagtypes {
     my $name = "$number-flag-" . random();
     my $desc = "FlagType $number";
 
-    my %flagtypes; 
+    my %flagtypes;
     foreach my $target (qw(a b)) {
          $dbh->do("INSERT INTO flagtypes
-                  (name, description, target_type, is_requestable, 
+                  (name, description, target_type, is_requestable,
                    is_requesteeble, is_multiplicable, cc_list)
                    VALUES (?,?,?,1,1,1,'')",
                    undef, $name, $desc, $target);
@@ -591,34 +591,34 @@ sub _get_attach_values {
 sub _create_one_bug {
     my ($self, $number) = @_;
     my $dbh = Bugzilla->dbh;
-    
+
     # We need bug 6 to have a unique alias that is not a clone of bug 1's,
     # so we get the alias separately from the other parameters.
     my $alias = $self->bug_create_value($number, 'alias');
     my $update_alias = $self->bug_update_value($number, 'alias');
-    
+
     # Otherwise, make bug 6 a clone of bug 1.
     my $real_number = $number;
     $number = 1 if $number == 6;
-    
+
     my $reporter = $self->bug_create_value($number, 'reporter');
     Bugzilla->set_user(Bugzilla::User->check($reporter));
-    
+
     # We create the bug with one set of values, and then we change it
     # to have different values.
     my %params = %{ $self->_bug_create_values->{$number} };
     $params{alias} = $alias;
-    
+
     # There are some things in bug_create_values that shouldn't go into
     # create().
     delete @params{qw(attachment set_flags tag)};
-    
-    my ($status, $resolution, $see_also) = 
+
+    my ($status, $resolution, $see_also) =
         delete @params{qw(bug_status resolution see_also)};
     # All the bugs are created with everconfirmed = 0.
     $params{bug_status} = 'UNCONFIRMED';
     my $bug = Bugzilla::Bug->create(\%params);
-    
+
     # These are necessary for the changedfrom tests.
     my $extra_values = $self->_extra_bug_create_values->{$number};
     foreach my $field (qw(comments remaining_time percentage_complete
@@ -629,7 +629,7 @@ sub _create_one_bug {
     }
     $extra_values->{reporter_accessible} = $number == 1 ? 0 : 1;
     $extra_values->{cclist_accessible}   = $number == 1 ? 0 : 1;
-    
+
     if ($number == 5) {
         # Bypass Bugzilla::Bug--we don't want any changes in bugs_activity
         # for bug 5.
@@ -687,7 +687,7 @@ sub _create_one_bug {
             # last comment contains all of the important data, like work_time.
             $bug->add_comment("1-comment-" . random(100));
         }
-        
+
         my %update_params = %{ $self->_bug_update_values->{$number} };
         my %reverse_map = reverse %{ Bugzilla::Bug->FIELD_MAP };
         foreach my $db_name (keys %reverse_map) {
@@ -698,14 +698,14 @@ sub _create_one_bug {
                 $update_params{$update_name} = delete $update_params{$db_name};
             }
         }
-        
-        my ($new_status, $new_res) = 
+
+        my ($new_status, $new_res) =
             delete @update_params{qw(status resolution)};
         # Bypass the status workflow.
         $bug->{bug_status} = $new_status;
         $bug->{resolution} = $new_res;
         $bug->{everconfirmed} = 1 if $number == 1;
-        
+
         # add/remove/set fields.
         $update_params{keywords} = { set => $update_params{keywords} };
         $update_params{groups} = { add => $update_params{groups},
@@ -721,7 +721,7 @@ sub _create_one_bug {
         $update_params{cc} = { add => \@cc_add, remove => \@cc_remove };
         my $see_also_remove = $bug->see_also;
         my $see_also_add = [$update_params{see_also}];
-        $update_params{see_also} = { add => $see_also_add, 
+        $update_params{see_also} = { add => $see_also_add,
                                      remove => $see_also_remove };
         $update_params{comment} = { body => $update_params{comment} };
         $update_params{work_time} = $number;
@@ -740,7 +740,7 @@ sub _create_one_bug {
         $timestamp->set(second => $number);
         $bug->update($timestamp->ymd . ' ' . $timestamp->hms);
         $extra_values->{flags} = $bug->flags;
-        
+
         # It's not generally safe to do update() multiple times on
         # the same Bug object.
         $bug = new Bugzilla::Bug($bug->id);
@@ -752,16 +752,16 @@ sub _create_one_bug {
             $bug->set_comment_is_private({ $comment_id => 1 });
         }
         $bug->update($bug->delta_ts);
-        
+
         my $attach_create = $self->bug_create_value($number, 'attachment');
         my $attachment = Bugzilla::Attachment->create({
             bug => $bug,
             creation_ts => $creation_ts,
             %$attach_create });
         # Store for the changedfrom tests.
-        $extra_values->{attachments} = 
+        $extra_values->{attachments} =
             [new Bugzilla::Attachment($attachment->id)];
-        
+
         my $attach_update = $self->bug_update_value($number, 'attachment');
         $attachment->set_all($attach_update);
         # In order to keep the mimetype on the ispatch attachment,
@@ -771,11 +771,11 @@ sub _create_one_bug {
         $attachment->set_flags([], $attach_flags);
         $attachment->update($bug->delta_ts);
     }
-    
+
     # Values for changedfrom.
     $extra_values->{creation_ts} = $bug->creation_ts;
     $extra_values->{delta_ts}    = $bug->creation_ts;
-    
+
     return new Bugzilla::Bug($bug->id);
 }
 
@@ -880,7 +880,7 @@ sub run {
     local $SIG{__DIE__}  = \&Carp::confess;
 
     $dbh->bz_start_transaction();
-    
+
     # Some parameters need to be set in order for the tests to function
     # properly.
     my $everybody = $self->everybody;
@@ -894,7 +894,7 @@ sub run {
     local $params->{'insidergroup'} = $everybody->name;
 
     $self->_setup_bugs();
-    
+
     # Even though _setup_bugs set us as an admin, we want to be sure at
     # this point that we have an admin with refreshed group memberships.
     Bugzilla->set_user($self->admin);
@@ -935,7 +935,7 @@ sub _setup_bugs {
 sub _setup_dependencies {
     my ($self) = @_;
     my $dbh = Bugzilla->dbh;
-    
+
     # Set up depedency relationships between the bugs.
     # Bug 1 + 6 depend on bug 2 and block bug 3.
     my $bug2 = $self->bug(2);
@@ -952,7 +952,7 @@ sub _setup_dependencies {
         # searches still work right.
         my $set_delta = $dbh->prepare(
             'UPDATE bugs SET delta_ts = ? WHERE bug_id = ?');
-        foreach my $row ([$original_delta[0], $bug2->id], 
+        foreach my $row ([$original_delta[0], $bug2->id],
                          [$original_delta[1], $bug3->id])
         {
             $set_delta->execute(@$row);
@@ -982,9 +982,9 @@ sub _set_bug_id_fields {
 sub _protect_bug_6 {
     my ($self) = @_;
     my $dbh = Bugzilla->dbh;
-    
+
     Bugzilla->set_user($self->admin);
-    
+
     # Put bug6 in the nobody group.
     my $nobody = $self->nobody;
     # We pull it newly from the DB to be sure it's safe to call update()
@@ -992,9 +992,9 @@ sub _protect_bug_6 {
     my $bug6 = new Bugzilla::Bug($self->bug(6)->id);
     $bug6->add_group($nobody);
     $bug6->update($bug6->delta_ts);
-    
+
     # Remove the admin (and everybody else) from the $nobody group.
-    $dbh->do('DELETE FROM group_group_map 
+    $dbh->do('DELETE FROM group_group_map
                WHERE grantor_id = ? OR member_id = ?', undef,
              $nobody->id, $nobody->id);
 }

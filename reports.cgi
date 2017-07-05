@@ -41,7 +41,7 @@ Bugzilla->switch_to_shadow_db();
 
 if (!$product_name) {
     # Can we do bug charts?
-    (-d $dir && -d $graph_dir) 
+    (-d $dir && -d $graph_dir)
       || ThrowCodeError('chart_dir_nonexistent',
                         {dir => $dir, graph_dir => $graph_dir});
 
@@ -175,7 +175,7 @@ sub generate_chart {
         my $date = $line[0];
         my ($yy, $mm, $dd) = $date =~ /^\d{2}(\d{2})(\d{2})(\d{2})$/;
         push @{$data{DATE}}, "$mm/$dd/$yy";
-        
+
         for my $i (1 .. $#fields) {
             my $field = $fields[$i];
             if (! defined $line[$i] or $line[$i] eq '') {
@@ -189,7 +189,7 @@ sub generate_chart {
             }
         }
     }
-    
+
     shift @labels;
 
     close FILE;
@@ -221,7 +221,7 @@ sub generate_chart {
                       dataset4 => [0, 0, 0], # black
                      },
         );
-    
+
     $img->set (%settings);
     $img->png($image_file, [ @data{('DATE', @labels)} ]);
 }

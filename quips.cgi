@@ -38,7 +38,7 @@ if ($action eq "show") {
     my @quipids;
     foreach my $quipref (@$quipsref) {
         my ($quipid, $userid, $quip, $approved) = @$quipref;
-        $quips->{$quipid} = {'userid' => $userid, 'quip' => $quip, 
+        $quips->{$quipid} = {'userid' => $userid, 'quip' => $quip,
                              'approved' => $approved};
         push(@quipids, $quipid);
     }
@@ -62,7 +62,7 @@ if ($action eq "add") {
       ThrowUserError("no_new_quips");
 
     check_hash_token($token, ['create-quips']);
-    # Add the quip 
+    # Add the quip
     # Upstreaming: https://bugzilla.mozilla.org/show_bug.cgi?id=621879
     my $approved = (Bugzilla->params->{'quip_list_entry_control'} eq "open")
                    || $user->in_group('bz_quip_moderators') || 0;
@@ -85,7 +85,7 @@ if ($action eq 'approve') {
     check_hash_token($token, ['approve-quips']);
     # Read in the entire quip list
     my $quipsref = $dbh->selectall_arrayref("SELECT quipid, approved FROM quips");
-    
+
     my %quips;
     foreach my $quipref (@$quipsref) {
         my ($quipid, $approved) = @$quipref;
@@ -100,10 +100,10 @@ if ($action eq 'approve') {
         my $quip = $cgi->param("quipid_$quipid") ? 1 : 0;
         if(defined($cgi->param("defined_quipid_$quipid"))) {
             if($quips{$quipid} != $quip) {
-                if($quip) { 
-                    push(@approved, $quipid); 
-                } else { 
-                    push(@unapproved, $quipid); 
+                if($quip) {
+                    push(@approved, $quipid);
+                } else {
+                    push(@unapproved, $quipid);
                 }
             }
         }
@@ -122,7 +122,7 @@ if ($action eq "delete") {
                                          action => "delete",
                                          object => "quips"});
     my $quipid = $cgi->param("quipid");
-    ThrowCodeError("need_quipid") unless $quipid =~ /(\d+)/; 
+    ThrowCodeError("need_quipid") unless $quipid =~ /(\d+)/;
     $quipid = $1;
     check_hash_token($token, ['quips', $quipid]);
 

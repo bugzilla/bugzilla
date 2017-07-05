@@ -42,7 +42,7 @@ sub gd_preconfig {
     $self->{_run_command} = 'subprocess_worker';
     my $pidfile = $self->{gd_args}{pidfile};
     if (!$pidfile) {
-        $pidfile = bz_locations()->{datadir} . '/' . $self->{gd_progname} 
+        $pidfile = bz_locations()->{datadir} . '/' . $self->{gd_progname}
                    . ".pid";
     }
     return (pidfile => $pidfile);

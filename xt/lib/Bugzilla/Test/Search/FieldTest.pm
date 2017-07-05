@@ -87,7 +87,7 @@ sub name {
     my $field = $self->field;
     my $operator = $self->operator;
     my $value = $self->main_value;
-    
+
     my $name = "$field-$operator-$value";
     if (my $extra_name = $self->test->{extra_name}) {
         $name .= "-$extra_name";
@@ -100,20 +100,20 @@ sub name {
 sub test {
     my $self = shift;
     return $self->{test} if $self->{test};
-    
+
     my %test = %{ $self->{raw_test} };
-    
+
     # We have field name overrides...
     my $override = $test{override}->{$self->field};
     # And also field type overrides.
     if (!$override) {
         $override = $test{override}->{$self->field_object->type} || {};
     }
-    
+
     foreach my $key (%$override) {
         $test{$key} = $override->{$key};
     }
-    
+
     $self->{test} = \%test;
     return $self->{test};
 }
@@ -122,7 +122,7 @@ sub test {
 sub _field_values {
     my ($self) = @_;
     return $self->{field_values} if $self->{field_values};
-    
+
     my %field_values;
     foreach my $number (1..NUM_BUGS) {
         $field_values{$number} = $self->_field_values_for_bug($number);
@@ -264,7 +264,7 @@ sub search_known_broken {
     }
     return undef;
 }
-    
+
 # Returns a string if we haven't yet implemented the tests for this field,
 # but we plan to in the future.
 sub field_not_yet_implemented {
@@ -283,7 +283,7 @@ sub invalid_field_operator_combination {
     my ($self) = @_;
     my $field = $self->field;
     my $operator = $self->operator;
-    
+
     if ($field eq 'content' && $operator !~ /matches/) {
         return "content field does not support $operator";
     }
@@ -322,7 +322,7 @@ sub search_params {
         "type0-0-0"  => $self->operator,
         "value0-0-0"  => $self->translated_value,
     );
-    
+
     $self->{search_params} = \%params;
     return $self->{search_params};
 }
@@ -373,7 +373,7 @@ sub _field_values_for_bug {
         @values = $self->_values_for($number, 'groups_in', 'name');
     }
     elsif ($field eq 'keywords') {
-        @values = $self->_values_for($number, 'keyword_objects', 'name'); 
+        @values = $self->_values_for($number, 'keyword_objects', 'name');
     }
     elsif ($field eq 'content') {
         @values = $self->_values_for($number, 'short_desc');
@@ -407,7 +407,7 @@ sub _field_values_for_bug {
         @values = map { blessed($_) ? $_->login : $_ } @values;
         @values = grep { defined $_ } @values;
     }
-    
+
     return \@values;
 }
 
@@ -467,9 +467,9 @@ sub _translate_value {
 
 sub _translate_value_for_bug {
     my ($self, $number, $value) = @_;
-    
+
     my $bug = $self->bug($number);
-    
+
     my $bug_id = $bug->id;
     $value =~ s/<$number-id>/$bug_id/g;
     my $bug_delta = $bug->delta_ts;
@@ -482,10 +482,10 @@ sub _translate_value_for_bug {
         my $group = $bug_groups[0];
         $value =~ s/<$number-bug_group>/$group/g;
     }
-    
-    my @bug_values = $self->bug_values($number);    
+
+    my @bug_values = $self->bug_values($number);
     return $value if !@bug_values;
-    
+
     if ($self->operator =~ /substr/) {
         @bug_values = map { $self->_substr_value($_) } @bug_values;
     }
@@ -505,7 +505,7 @@ sub _translate_value_for_bug {
         $string_value = quotemeta($string_value);
     }
     $value =~ s/<$number>/$string_value/g;
-    
+
     return $value;
 }
 
@@ -538,11 +538,11 @@ sub _substr_value {
 
 sub run {
     my ($self) = @_;
-    
+
     my $invalid_combination = $self->invalid_field_operator_combination;
     my $field_not_implemented = $self->field_not_yet_implemented;
 
-    SKIP: {    
+    SKIP: {
         skip($invalid_combination, $self->num_tests) if $invalid_combination;
         TODO: {
             todo_skip ($field_not_implemented, $self->num_tests) if $field_not_implemented;
@@ -556,7 +556,7 @@ sub do_tests {
     my $name = $self->name;
 
     my $search_broken = $self->search_known_broken;
-    
+
     my $search = $self->_test_search_object_creation();
 
     my $sql;
@@ -564,7 +564,7 @@ sub do_tests {
         local $TODO = $search_broken if $search_broken;
         lives_ok { $sql = $search->_sql } "$name: generate SQL";
     }
-    
+
     my $results;
     SKIP: {
         skip "Can't run SQL without any SQL", 1 if !defined $sql;
@@ -607,12 +607,12 @@ sub _test_content {
 sub _test_content_for_bug {
     my ($self, $number, $results, $sql) = @_;
     my $name = $self->name;
-    
+
     my $contains_known_broken = $self->contains_known_broken($number);
-    
+
     my %result_ids = map { $_->[0] => 1 } @$results;
     my $bug_id = $self->bug($number)->id;
-    
+
     TODO: {
         local $TODO = $contains_known_broken if $contains_known_broken;
         if ($self->bug_is_contained($number)) {

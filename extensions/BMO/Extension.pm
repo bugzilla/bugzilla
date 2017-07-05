@@ -116,7 +116,7 @@ sub template_before_process {
         my @order_columns;
         foreach my $o (@orderstrings) {
             $o =~ s/bugs.//;
-            $o = $db_order_column_name_map{$o} if 
+            $o = $db_order_column_name_map{$o} if
                                grep($_ eq $o, keys(%db_order_column_name_map));
             next if (grep($_ eq $o, @order_columns));
             push(@order_columns, $o);
@@ -124,7 +124,7 @@ sub template_before_process {
 
         $vars->{'order_columns'} = \@order_columns;
 
-        # fields that have a custom sortkey. (So they are correctly sorted 
+        # fields that have a custom sortkey. (So they are correctly sorted
         # when using js)
         my @sortkey_fields = qw(bug_status resolution bug_severity priority
                                 rep_platform op_sys);
@@ -141,7 +141,7 @@ sub template_before_process {
         my $format = $1;
         if (!$vars->{'cloned_bug_id'}) {
             # Allow status whiteboard values to be bookmarked
-            $vars->{'status_whiteboard'} = 
+            $vars->{'status_whiteboard'} =
                                Bugzilla->cgi->param('status_whiteboard') || "";
         }
 
@@ -159,7 +159,7 @@ sub template_before_process {
 
 
     if ($file =~ /^list\/list/ || $file =~ /^bug\/create\/create[\.-]/) {
-        # hack to allow the bug entry templates to use check_can_change_field 
+        # hack to allow the bug entry templates to use check_can_change_field
         # to see if various field values should be available to the current user.
         $vars->{'default'} = Bugzilla::Extension::BMO::FakeBug->new($vars->{'default'} || {});
     }
@@ -238,7 +238,7 @@ sub page_before_template {
         # were changed for better performance and are now only loaded once.
         # I have not found an easy way to allow our hook template to check if
         # it is called from pages/fields.html.tmpl. So we set a value in request_cache
-        # that our hook template can see. 
+        # that our hook template can see.
         Bugzilla->request_cache->{'bmo_fields_page'} = 1;
     }
     elsif ($page eq 'query_database.html') {
@@ -423,7 +423,7 @@ sub active_custom_fields {
     my $component_name = blessed $component ? $component->name : $component;
 
     my @tmp_fields;
-    foreach my $field (@$$fields) { 
+    foreach my $field (@$$fields) {
         next if cf_hidden_in_product($field->name, $product_name, $component_name);
         push(@tmp_fields, $field);
     }
@@ -445,7 +445,7 @@ sub cf_hidden_in_product {
                     ? $product_name->name
                     : $product_name;
 
-    # Also in buglist.cgi, we pass in a list of components instead 
+    # Also in buglist.cgi, we pass in a list of components instead
     # of a single component name everywhere else.
     my $component_list = [];
     if ($component_name) {
@@ -482,7 +482,7 @@ sub cf_hidden_in_product {
                 }
 
                 # If product matches and at at least one component matches
-                # from component_list (if a matching component was required), 
+                # from component_list (if a matching component was required),
                 # we allow the field to be seen
                 if ($product eq $product_name && (!@$components || $found_component)) {
                     return 0;
@@ -495,7 +495,7 @@ sub cf_hidden_in_product {
     return 0;
 }
 
-# Purpose: CC certain email addresses on bugmail when a bug is added or 
+# Purpose: CC certain email addresses on bugmail when a bug is added or
 # removed from a particular group.
 sub bugmail_recipients {
     my ($self, $args) = @_;
@@ -529,9 +529,9 @@ sub bugmail_recipients {
 
 sub _cc_if_special_group {
     my ($group, $recipients) = @_;
-    
+
     return if !$group;
-    
+
     if (exists $group_change_notification{$group}) {
         foreach my $login (@{ $group_change_notification{$group} }) {
             my $id = login_to_id($login);
@@ -542,7 +542,7 @@ sub _cc_if_special_group {
 
 sub _check_trusted {
     my ($field, $trusted, $priv_results) = @_;
-    
+
     my $needed_group = $trusted->{'_default'} || "";
     foreach my $dfield (keys %$trusted) {
         if ($field =~ $dfield) {
@@ -551,7 +551,7 @@ sub _check_trusted {
     }
     if ($needed_group && !Bugzilla->user->in_group($needed_group)) {
         push (@$priv_results, PRIVILEGES_REQUIRED_EMPOWERED);
-    }              
+    }
 }
 
 sub _is_field_set {
@@ -616,7 +616,7 @@ sub bug_check_can_change_field {
         }
 
     } elsif ($user->in_group('canconfirm', $bug->{'product_id'})) {
-        # Canconfirm is really "cantriage"; users with canconfirm can also mark 
+        # Canconfirm is really "cantriage"; users with canconfirm can also mark
         # bugs as DUPLICATE, WORKSFORME, and INCOMPLETE.
         if ($field eq 'bug_status'
             && is_open_state($old_value)
@@ -638,9 +638,9 @@ sub bug_check_can_change_field {
 
     } elsif ($field eq 'bug_status') {
         # Disallow reopening of bugs which have been resolved for > 1 year
-        if (is_open_state($new_value) 
+        if (is_open_state($new_value)
             && !is_open_state($old_value)
-            && $bug->resolution eq 'FIXED') 
+            && $bug->resolution eq 'FIXED')
         {
             my $days_ago = DateTime->now(time_zone => Bugzilla->local_timezone);
             $days_ago->subtract(days => 365);
@@ -789,7 +789,7 @@ sub bug_format_comment {
 
     # link to hg.m.o
     # Note: for grouping in this regexp, always use non-capturing parentheses.
-    my $hgrepos = join('|', qw!(?:releases/)?comm-[\w.]+ 
+    my $hgrepos = join('|', qw!(?:releases/)?comm-[\w.]+
                                (?:releases/)?mozilla-[\w.]+
                                (?:releases/)?mobile-[\w.]+
                                tracemonkey
@@ -2541,7 +2541,7 @@ sub install_filesystem {
     # our repository. We already have this information in the (static)
     # contribute.json file, so parse that in
     my $json = JSON::XS->new->pretty->utf8->canonical();
-    my $contribute = eval { 
+    my $contribute = eval {
         $json->decode(scalar read_file(bz_locations()->{cgi_path} . "/contribute.json"));
     };
     my $commit = `git rev-parse HEAD`;

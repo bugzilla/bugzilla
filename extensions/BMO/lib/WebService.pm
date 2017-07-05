@@ -4,7 +4,7 @@
 # 1.1 (the "License"); you may not use this file except in compliance with the
 # License. You may obtain a copy of the License at http://www.mozilla.org/MPL/
 #
-# Software distributed under the License is distributed on an "AS IS" basis, 
+# Software distributed under the License is distributed on an "AS IS" basis,
 # WITHOUT WARRANTY OF ANY KIND,  either express or implied. See the License for
 # the specific language governing rights and limitations under the License.
 #
@@ -40,7 +40,7 @@ sub getBugsConfirmer {
     my ($self, $params) = validate(@_, 'names');
     my $dbh = Bugzilla->dbh;
 
-    defined($params->{names}) 
+    defined($params->{names})
         || ThrowCodeError('params_required',
                { function => 'BMO.getBugsConfirmer', params => ['names'] });
 
@@ -53,7 +53,7 @@ sub getBugsConfirmer {
 
     my $query = "SELECT DISTINCT bugs_activity.bug_id
                    FROM bugs_activity
-                        LEFT JOIN bug_group_map 
+                        LEFT JOIN bug_group_map
                         ON bugs_activity.bug_id = bug_group_map.bug_id
                   WHERE bugs_activity.fieldid = ?
                         AND bugs_activity.added = 'NEW'
@@ -75,7 +75,7 @@ sub getBugsVerifier {
     my ($self, $params) = validate(@_, 'names');
     my $dbh = Bugzilla->dbh;
 
-    defined($params->{names}) 
+    defined($params->{names})
         || ThrowCodeError('params_required',
                { function => 'BMO.getBugsVerifier', params => ['names'] });
 
@@ -88,7 +88,7 @@ sub getBugsVerifier {
 
     my $query = "SELECT DISTINCT bugs_activity.bug_id
                    FROM bugs_activity
-                        LEFT JOIN bug_group_map 
+                        LEFT JOIN bug_group_map
                         ON bugs_activity.bug_id = bug_group_map.bug_id
                   WHERE bugs_activity.fieldid = ?
                         AND bugs_activity.removed = 'RESOLVED'
@@ -120,7 +120,7 @@ This module contains API methods that are useful to user's of bugzilla.mozilla.o
 
 =head1 METHODS
 
-See L<Bugzilla::WebService> for a description of how parameters are passed, 
+See L<Bugzilla::WebService> for a description of how parameters are passed,
 and what B<STABLE>, B<UNSTABLE>, and B<EXPERIMENTAL> mean.
 
 =head2 getBugsConfirmer
@@ -131,7 +131,7 @@ B<UNSTABLE>
 
 =item B<Description>
 
-This method returns public bug ids that a given user has confirmed (changed from 
+This method returns public bug ids that a given user has confirmed (changed from
 C<UNCONFIRMED> to C<NEW>).
 
 =item B<Params>
@@ -140,7 +140,7 @@ You pass a field called C<names> that is a list of Bugzilla login names to find 
 
 =over
 
-=item C<names> (array) - An array of strings representing Bugzilla login names. 
+=item C<names> (array) - An array of strings representing Bugzilla login names.
 
 =back
 
@@ -169,7 +169,7 @@ B<UNSTABLE>
 =item B<Description>
 
 This method returns public bug ids that a given user has verified (changed from
-C<RESOLVED> to C<VERIFIED>). 
+C<RESOLVED> to C<VERIFIED>).
 
 =item B<Params>
 
@@ -177,7 +177,7 @@ You pass a field called C<names> that is a list of Bugzilla login names to find 
 
 =over
 
-=item C<names> (array) - An array of strings representing Bugzilla login names. 
+=item C<names> (array) - An array of strings representing Bugzilla login names.
 
 =back
 

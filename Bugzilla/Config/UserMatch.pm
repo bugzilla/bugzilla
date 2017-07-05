@@ -25,9 +25,9 @@ sub get_param_list {
   },
 
   {
-   name    => 'ajax_user_autocompletion', 
-   type    => 'b', 
-   default => '1', 
+   name    => 'ajax_user_autocompletion',
+   type    => 'b',
+   default => '1',
   },
 
   {

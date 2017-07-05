@@ -53,14 +53,14 @@ use base qw(Exporter);
 sub attachment_id_is_valid {
     my ($attach_id, $dont_validate_access) = @_;
 
-    # Validate the specified attachment id. 
+    # Validate the specified attachment id.
     detaint_natural($attach_id) || return 0;
 
     # Make sure the attachment exists in the database.
     my $attachment = new Bugzilla::Attachment({ id => $attach_id, cache => 1 })
       || return 0;
 
-    return $attachment 
+    return $attachment
         if ($dont_validate_access || attachment_is_visible($attachment));
 }
 
@@ -71,9 +71,9 @@ sub attachment_is_visible {
 
     $attachment->isa('Bugzilla::Attachment') || return 0;
 
-    return (Bugzilla->user->can_see_bug($attachment->bug->id) 
-            && (!$attachment->isprivate 
-                || Bugzilla->user->id == $attachment->attacher->id 
+    return (Bugzilla->user->can_see_bug($attachment->bug->id)
+            && (!$attachment->isprivate
+                || Bugzilla->user->id == $attachment->attacher->id
                 || Bugzilla->user->is_insider));
 }
 
@@ -107,7 +107,7 @@ sub get_review_link {
     my $attachment = attachment_id_is_valid($attach_id);
 
     if (attachment_id_is_patch($attach_id)) {
-        return "<a href='" . html_quote(get_review_url($attachment->bug, $attach_id)) . 
+        return "<a href='" . html_quote(get_review_url($attachment->bug, $attach_id)) .
                "'>$link_text</a>";
     }
     else {
@@ -122,7 +122,7 @@ sub munge_create_attachment {
         return ("$intro_text" .
                 " View: $view_link\015\012" .
                 " Review: " . get_review_url($bug, $attach_id, 1) . "\015\012");
-    } 
+    }
     else {
         return ("$intro_text --> ($view_link)");
     }
@@ -143,7 +143,7 @@ sub add_review_links_to_email {
     my $new_body = 0;
     my $bug;
 
-    if ($email->header('Subject') =~ /^\[Bug\s+(\d+)\]/ 
+    if ($email->header('Subject') =~ /^\[Bug\s+(\d+)\]/
         && Bugzilla->user->can_see_bug($1))
     {
         $bug = Bugzilla::Bug->new({ id => $1, cache => 1 });

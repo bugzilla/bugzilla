@@ -101,21 +101,21 @@ sub install_filesystem {
     my $recurse_dirs = $args->{'recurse_dirs'};
     my $htaccess     = $args->{'htaccess'};
 
-    # Create the sitemap directory to store the index and sitemap files 
+    # Create the sitemap directory to store the index and sitemap files
     my $sitemap_path = bz_locations->{'datadir'} . "/" . __PACKAGE__->NAME;
 
     $create_dirs->{$sitemap_path} = Bugzilla::Install::Filesystem::DIR_CGI_WRITE
                                     | Bugzilla::Install::Filesystem::DIR_ALSO_WS_SERVE;
 
-    $recurse_dirs->{$sitemap_path} = { 
+    $recurse_dirs->{$sitemap_path} = {
         files => Bugzilla::Install::Filesystem::CGI_WRITE
                  | Bugzilla::Install::Filesystem::DIR_ALSO_WS_SERVE,
-        dirs  => Bugzilla::Install::Filesystem::DIR_CGI_WRITE 
-                 | Bugzilla::Install::Filesystem::DIR_ALSO_WS_SERVE 
+        dirs  => Bugzilla::Install::Filesystem::DIR_CGI_WRITE
+                 | Bugzilla::Install::Filesystem::DIR_ALSO_WS_SERVE
     };
 
     # Create a htaccess file that allows the sitemap files to be served out
-    $htaccess->{"$sitemap_path/.htaccess"} = { 
+    $htaccess->{"$sitemap_path/.htaccess"} = {
         perms    => Bugzilla::Install::Filesystem::WS_SERVE,
         contents => <<EOT
 # Allow access to sitemap files created by the SiteMapIndex extension

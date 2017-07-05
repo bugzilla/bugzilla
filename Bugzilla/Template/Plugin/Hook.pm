@@ -14,7 +14,7 @@ use warnings;
 use base qw(Template::Plugin);
 
 use Bugzilla::Constants;
-use Bugzilla::Install::Util qw(template_include_path); 
+use Bugzilla::Install::Util qw(template_include_path);
 use Bugzilla::Util;
 use Bugzilla::Error;
 
@@ -50,7 +50,7 @@ sub process {
     # from the disk.
     my $cache = Bugzilla->request_cache->{template_plugin_hook_cache} ||= {};
     my $lang = $context->{bz_language} || '';
-    $cache->{"${lang}__$extension_template"} 
+    $cache->{"${lang}__$extension_template"}
         ||= $self->_get_hooks($extension_template);
 
     # process() accepts an arrayref of templates, so we just pass the whole
@@ -137,7 +137,7 @@ path, the template hook would be:
 
 =back
 
-=item B<Returns> 
+=item B<Returns>
 
 Output from processing template extension.
 

@@ -41,7 +41,7 @@ sub _load_params {
     }
     # This hook is also called in editparams.cgi. This call here is required
     # to make SetParam work.
-    Bugzilla::Hook::process('config_modify_panels', 
+    Bugzilla::Hook::process('config_modify_panels',
                             { panels => \%hook_panels });
 
     foreach my $panel (keys %hook_panels) {
@@ -63,7 +63,7 @@ sub param_panels {
         $param_panels->{$module} = "Bugzilla::Config::$module" unless $module eq 'Common';
     }
     # Now check for any hooked params
-    Bugzilla::Hook::process('config_add_panels', 
+    Bugzilla::Hook::process('config_add_panels',
                             { panel_modules => $param_panels });
     return $param_panels;
 }
@@ -120,8 +120,8 @@ sub update_params {
 
     # Change from old product groups to controls for group_control_map
     # 2002-10-14 bug 147275 bugreport@peshkin.net
-    if (exists $param->{'usebuggroups'} && 
-        !exists $param->{'makeproductgroups'}) 
+    if (exists $param->{'usebuggroups'} &&
+        !exists $param->{'makeproductgroups'})
     {
         $new_params{'makeproductgroups'} = $param->{'usebuggroups'};
     }
@@ -132,16 +132,16 @@ sub update_params {
     }
 
     # set verify method to whatever loginmethod was
-    if (exists $param->{'loginmethod'} 
-        && !exists $param->{'user_verify_class'}) 
+    if (exists $param->{'loginmethod'}
+        && !exists $param->{'user_verify_class'})
     {
         $new_params{'user_verify_class'} = $param->{'loginmethod'};
     }
 
     # Remove quip-display control from parameters
     # and give it to users via User Settings (Bug 41972)
-    if ( exists $param->{'enablequips'} 
-         && !exists $param->{'quip_list_entry_control'}) 
+    if ( exists $param->{'enablequips'}
+         && !exists $param->{'quip_list_entry_control'})
     {
         my $new_value;
         ($param->{'enablequips'} eq 'on')       && do {$new_value = 'open';};

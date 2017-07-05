@@ -78,9 +78,9 @@ sub DB_COLUMNS {
         attach_id
         requestee_id
         setter_id
-        status), 
+        status),
         $dbh->sql_date_format('creation_date', '%Y.%m.%d %H:%i:%s') .
-                              ' AS creation_date', 
+                              ' AS creation_date',
         $dbh->sql_date_format('modification_date', '%Y.%m.%d %H:%i:%s') .
                               ' AS modification_date';
 }
@@ -304,7 +304,7 @@ sub set_flag {
     # Make sure the user can change flags
     my $privs;
     $bug->check_can_change_field('flagtypes.name', 0, 1, \$privs)
-        || ThrowUserError('illegal_change', 
+        || ThrowUserError('illegal_change',
                           { field => 'flagtypes.name', privs => $privs });
 
     # Update (or delete) an existing flag.

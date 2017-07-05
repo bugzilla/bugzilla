@@ -33,10 +33,10 @@ my $template = Bugzilla->template;
 local our $vars = {};
 
 ###############################################################################
-# Each panel has two functions - panel Foo has a DoFoo, to get the data 
-# necessary for displaying the panel, and a SaveFoo, to save the panel's 
-# contents from the form data (if appropriate). 
-# SaveFoo may be called before DoFoo.    
+# Each panel has two functions - panel Foo has a DoFoo, to get the data
+# necessary for displaying the panel, and a SaveFoo, to save the panel's
+# contents from the form data (if appropriate).
+# SaveFoo may be called before DoFoo.
 ###############################################################################
 sub DoAccount {
     my $dbh = Bugzilla->dbh;
@@ -45,7 +45,7 @@ sub DoAccount {
     ($vars->{'realname'}) = $dbh->selectrow_array(
         "SELECT realname FROM profiles WHERE userid = ?", undef, $user->id);
 
-    if(Bugzilla->params->{'allowemailchange'} 
+    if(Bugzilla->params->{'allowemailchange'}
        && Bugzilla->user->authorizer->can_change_email) {
        # First delete old tokens.
        Bugzilla::Token::CleanTokenTable();
@@ -311,7 +311,7 @@ sub MfaSettings {
 sub DoEmail {
     my $dbh = Bugzilla->dbh;
     my $user = Bugzilla->user;
-    
+
     ###########################################################################
     # User watching
     ###########################################################################
@@ -374,7 +374,7 @@ sub SaveEmail {
                 }
             }
         }
-        
+
         # Negative events: a ticked box means "don't send me mail."
         foreach my $event (NEG_EVENTS) {
             my $is_set = $cgi->param("neg-email-$rel-$event");
@@ -443,7 +443,7 @@ sub SaveEmail {
             # Remove people who were removed.
             my $delete_sth = $dbh->prepare('DELETE FROM watch WHERE watched = ?'
                                          . ' AND watcher = ?');
-            
+
             my %remove_watch_ids;
             foreach my $username (@removed) {
                 my $watched_userid = login_to_id(trim($username), THROW_ERROR);
@@ -482,7 +482,7 @@ sub SaveEmail {
         $dbh->bz_start_transaction();
 
         if (scalar @$removed) {
-            $dbh->do('DELETE FROM email_bug_ignore WHERE user_id = ? AND ' . 
+            $dbh->do('DELETE FROM email_bug_ignore WHERE user_id = ? AND ' .
                      $dbh->sql_in('bug_id', $removed),
                      undef, $user->id);
         }
@@ -529,7 +529,7 @@ sub DoPermissions {
     }
 
     $vars->{'has_bits'} = \@has_bits;
-    $vars->{'set_bits'} = \@set_bits;    
+    $vars->{'set_bits'} = \@set_bits;
 }
 
 # No SavePermissions() because this panel has no changeable fields.
@@ -602,7 +602,7 @@ sub SaveSavedSearches {
                 $sth_insert_ngm->execute($q->id, $group_id);
             }
 
-            # If we're sharing our query with a group we can bless, we 
+            # If we're sharing our query with a group we can bless, we
             # have the ability to add link to our search to the footer of
             # direct group members automatically.
             if ($user->can_bless($group_id) && $cgi->param('force_' . $q->id)) {

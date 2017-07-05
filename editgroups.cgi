@@ -138,7 +138,7 @@ sub get_current_and_available {
 unless ($action) {
     my @groups = Bugzilla::Group->get_all;
     $vars->{'groups'} = \@groups;
-    
+
     print $cgi->header();
     $template->process("admin/groups/list.html.tmpl", $vars)
       || ThrowTemplateError($template->error());
@@ -179,7 +179,7 @@ if ($action eq 'add') {
     print $cgi->header();
     $template->process("admin/groups/create.html.tmpl", $vars)
       || ThrowTemplateError($template->error());
-    
+
     exit;
 }
 
@@ -244,7 +244,7 @@ if ($action eq 'del') {
     print $cgi->header();
     $template->process("admin/groups/delete.html.tmpl", $vars)
       || ThrowTemplateError($template->error());
-    
+
     exit;
 }
 
@@ -403,7 +403,7 @@ sub doGroupChanges {
                                            AND grantor_id = ?
                                            AND grant_type = ?');
 
-    # First item is the type, second is whether or not it's "reverse" 
+    # First item is the type, second is whether or not it's "reverse"
     # (granted_by) (see _do_add for more explanation).
     my %fields = (
         members       => [GROUP_MEMBERSHIP, 0],
@@ -414,7 +414,7 @@ sub doGroupChanges {
         visible_to_me => [GROUP_VISIBLE, 1]
     );
     while (my ($field, $data) = each %fields) {
-        _do_add($group, $changes, $sth_insert, "${field}_add", 
+        _do_add($group, $changes, $sth_insert, "${field}_add",
                 $data->[0], $data->[1]);
         _do_remove($group, $changes, $sth_delete, "${field}_remove",
                    $data->[0], $data->[1]);

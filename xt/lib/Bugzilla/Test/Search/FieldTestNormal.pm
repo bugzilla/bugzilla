@@ -78,28 +78,28 @@ sub search_params {
     if ($operator eq 'anyexact') {
         $value = [split ',', $value];
     }
-    
+
     if (my $ch_param = CH_OPERATOR->{$operator}) {
         if ($field eq 'creation_ts') {
             $field = '[Bug creation]';
         }
         return { chfield => $field, $ch_param => $value };
     }
-    
+
     if ($field eq 'delta_ts' and $operator eq 'greaterthaneq') {
         return { chfieldfrom => $value };
     }
     if ($field eq 'delta_ts' and $operator eq 'lessthaneq') {
         return { chfieldto => $value };
     }
-    
+
     if ($field eq 'deadline' and $operator eq 'greaterthaneq') {
         return { deadlinefrom => $value };
     }
     if ($field eq 'deadline' and $operator eq 'lessthaneq') {
         return { deadlineto => $value };
     }
-    
+
     if (grep { $_ eq $field } EMAIL_FIELDS) {
         $field = 'longdesc' if $field eq 'commenter';
         return {

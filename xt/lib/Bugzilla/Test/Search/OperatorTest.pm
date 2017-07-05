@@ -70,7 +70,7 @@ sub run {
             $normal_test->run();
             my $not_test = new Bugzilla::Test::Search::NotTest($field_test);
             $not_test->run();
-            
+
             next if !$self->search_test->option('long');
 
             # Run the OR tests. This tests every other operator (including

@@ -46,5 +46,5 @@ my $vars = {};
 print $cgi->header();
 $template->process("bug/new_bug.html.tmpl",
                     $vars)
-  or ThrowTemplateError($template->error());          
+  or ThrowTemplateError($template->error());
 

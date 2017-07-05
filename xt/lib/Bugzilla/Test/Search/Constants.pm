@@ -384,7 +384,7 @@ use constant CHANGED_FROM_TO_BROKEN_NOT => (
     "cc" => { contains => [1] },
     "estimated_time" => { contains => [1] },
     "flagtypes.name" => { contains => [1] },
-    "keywords" => { contains => [1] },    
+    "keywords" => { contains => [1] },
     FIELD_TYPE_MULTI_SELECT, { contains => [1] },
 );
 
@@ -655,7 +655,7 @@ use constant CHANGED_OVERRIDE => (
 #              on Bug 1. If we did an "anywordssubstr" search test, it would
 #              become a space-separated string of the first few characters
 #              of each CC's login name on Bug 1.
-#              
+#
 #        <#-id> - The bug id of the numbered bug.
 #        <#-reporter> - The login name of the numbered bug's reporter.
 #        <#-delta> - The delta_ts of the numbered bug.
@@ -723,7 +723,7 @@ use constant TESTS => {
         { contains => [2,3,4,5], value => '^1-', override => REGEX_OVERRIDE },
     ],
     lessthan => [
-        { contains => [1], value => 2, 
+        { contains => [1], value => 2,
           override => {
               # A lot of these contain bug 5 because an empty value is validly
               # less than the specified value.
@@ -823,11 +823,11 @@ use constant TESTS => {
         { contains => [2,3,4,5], value => '<1>' },
     ],
     anyexact => [
-        { contains => [1,2], value => '<1>, <2>', 
+        { contains => [1,2], value => '<1>, <2>',
           override => { ANY_OVERRIDE } },
     ],
     anywordssubstr => [
-        { contains => [1,2], value => '<1> <2>', 
+        { contains => [1,2], value => '<1> <2>',
           override => {
               ANY_OVERRIDE,
               percentage_complete => { contains => [1,2,3] },
@@ -849,7 +849,7 @@ use constant TESTS => {
               # bug 3 has the value "21" here, so matches "2,1"
               percentage_complete => { value => '<2>,<3>', contains => [3] },
               # 1 0 matches bug 1, which has both public and private comments.
-             'longdescs.isprivate' => { contains => [1] },              
+             'longdescs.isprivate' => { contains => [1] },
           }
         },
     ],
@@ -874,7 +874,7 @@ use constant TESTS => {
           override => {
               MULTI_BOOLEAN_OVERRIDE,
               dependson => { value => '<1> <3>', contains => [1,3] },
-              'longdescs.count' => { contains => [1,2,3,4] },              
+              'longdescs.count' => { contains => [1,2,3,4] },
           },
         },
     ],
@@ -914,7 +914,7 @@ use constant TESTS => {
     ],
     changedafter => [
         { contains => [2,3,4], value => '<2-delta>',
-          override => { 
+          override => {
               CHANGED_OVERRIDE,
               creation_ts => { contains => [3,4] },
               # We only change this for one bug, and it doesn't match.
@@ -1037,10 +1037,10 @@ use constant SPECIAL_PARAM_TESTS => (
       contains => [1,2,3,4] },
     { field => 'bug_status', operator => 'anyexact', value => '__all__',
       contains => [1,2,3,4,5] },
-    
+
     { field => 'resolution', operator => 'anyexact', value => '---',
       contains => [5] },
-    
+
     # email* query parameters.
     { field => 'assigned_to', operator => 'anyexact',
       value => '<1>, <2-reporter>', contains => [1,2],
@@ -1051,7 +1051,7 @@ use constant SPECIAL_PARAM_TESTS => (
           email2 => generate_random_password(100), emaillongdesc2 => 1,
       },
     },
-    
+
     # standard pronouns
     { field => 'assigned_to', operator => 'equals', value => '%assignee%',
       contains => [1,2,3,4,5] },

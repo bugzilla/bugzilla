@@ -25,7 +25,7 @@ use Bugzilla::Error;
 #
 
 sub date_adjust_down {
-   
+
     my ($year, $month, $day) = @_;
 
     if ($day == 0) {
@@ -48,7 +48,7 @@ sub date_adjust_down {
     }
 
     if (($month == 4 || $month == 6 || $month == 9 || $month == 11) &&
-        ($day == 31) ) 
+        ($day == 31) )
     {
         $day = 30;
     }
@@ -78,7 +78,7 @@ sub date_adjust_up {
     if (($month == 4 || $month == 6 || $month == 9 || $month == 11) &&
         ($day == 31) )
     {
-        $month += 1; 
+        $month += 1;
         $day    = 1;
     }
 
@@ -117,7 +117,7 @@ sub split_by_month {
     for (my $i=0; $i < $md; $i++) {
         # Start of interval is adjusted up: 31.2. -> 1.3.
         ($year_tmp, $month_tmp, $sd_tmp) = date_adjust_up($year, $month, $sd);
-        $sub_start = sprintf("%04d-%02d-%02d", $year_tmp, $month_tmp, $sd_tmp); 
+        $sub_start = sprintf("%04d-%02d-%02d", $year_tmp, $month_tmp, $sd_tmp);
         $month += 1;
         if ($month == 13) {
             $month = 1;
@@ -128,8 +128,8 @@ sub split_by_month {
         $sub_end = sprintf("%04d-%02d-%02d", $year_tmp, $month_tmp, $sd_tmp);
         push @months, [$sub_start, $sub_end];
     }
-    
-    # This section handles the last (unfinished) month. 
+
+    # This section handles the last (unfinished) month.
     $sub_end = sprintf("%04d-%02d-%02d", $ey + 1900, $em + 1, $ed);
     ($year_tmp, $month_tmp, $sd_tmp) = date_adjust_up($year, $month, $sd);
     $sub_start = sprintf("%04d-%02d-%02d", $year_tmp, $month_tmp, $sd_tmp);
@@ -147,7 +147,7 @@ sub sqlize_dates {
         trick_taint($start_date);
         $date_bits = " AND longdescs.bug_when > ?";
         push @date_values, $start_date;
-    } 
+    }
     if ($end_date) {
         # we need to add one day to end_date to catch stuff done today
         # do not forget to adjust date if it was the last day of month
@@ -155,7 +155,7 @@ sub sqlize_dates {
         ($ey, $em, $ed) = date_adjust_up($ey+1900, $em+1, $ed+1);
         $end_date = sprintf("%04d-%02d-%02d", $ey, $em, $ed);
 
-        $date_bits .= " AND longdescs.bug_when < ?"; 
+        $date_bits .= " AND longdescs.bug_when < ?";
         push @date_values, $end_date;
     }
     return ($date_bits, \@date_values);
@@ -290,7 +290,7 @@ if ($do_report) {
           || ThrowUserError('illegal_date', {date => $date, format => 'YYYY-MM-DD'});
     }
     # Swap dates in case the user put an end_date before the start_date
-    if ($start_date && $end_date && 
+    if ($start_date && $end_date &&
         str2time($start_date) > str2time($end_date)) {
         $vars->{'warn_swap_dates'} = 1;
         ($start_date, $end_date) = ($end_date, $start_date);
@@ -314,7 +314,7 @@ if ($do_report) {
         # Provide a default end date. Note that this differs in semantics
         # from the open-ended queries we use when start/end_date aren't
         # provided -- and clock skews will make this evident!
-        @parts = split_by_month($start_date, 
+        @parts = split_by_month($start_date,
                                 $end_date || format_time(scalar localtime(time()), '%Y-%m-%d'));
     } else {
         @parts = ([$start_date, $end_date]);

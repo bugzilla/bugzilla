@@ -137,7 +137,7 @@ sub can_change_password {
     my $verifier = $self->{_verifier}->{successful};
     $verifier  ||= $self->{_verifier};
     my $getter   = $self->{_info_getter}->{successful};
-    $getter      = $self->{_info_getter} 
+    $getter      = $self->{_info_getter}
         if (!$getter || $getter->isa('Bugzilla::Auth::Login::Cookie'));
     return $verifier->can_change_password &&
            $getter->user_can_create_account;
@@ -219,7 +219,7 @@ sub _handle_login_result {
         }
     }
     elsif ($fail_code == AUTH_NODATA) {
-        $self->{_info_getter}->fail_nodata($self) 
+        $self->{_info_getter}->fail_nodata($self)
             if $login_type == LOGIN_REQUIRED;
 
         # If we're not LOGIN_REQUIRED, we just return the default user.
@@ -230,9 +230,9 @@ sub _handle_login_result {
     # the password was just wrong. (This makes it harder for a cracker
     # to find account names by brute force)
     elsif ($fail_code == AUTH_LOGINFAILED or $fail_code == AUTH_NO_SUCH_USER) {
-        my $remaining_attempts = MAX_LOGIN_ATTEMPTS 
+        my $remaining_attempts = MAX_LOGIN_ATTEMPTS
                                  - ($result->{failure_count} || 0);
-        ThrowUserError("invalid_username_or_password", 
+        ThrowUserError("invalid_username_or_password",
                        { remaining => $remaining_attempts });
     }
     # The account may be disabled
@@ -247,18 +247,18 @@ sub _handle_login_result {
     elsif ($fail_code == AUTH_LOCKOUT) {
         my $attempts = $user->account_ip_login_failures;
 
-        # We want to know when the account will be unlocked. This is 
+        # We want to know when the account will be unlocked. This is
         # determined by the 5th-from-last login failure (or more/less than
         # 5th, if MAX_LOGIN_ATTEMPTS is not 5).
         my $determiner = $attempts->[scalar(@$attempts) - MAX_LOGIN_ATTEMPTS];
-        my $unlock_at = datetime_from($determiner->{login_time}, 
+        my $unlock_at = datetime_from($determiner->{login_time},
                                       Bugzilla->local_timezone);
         $unlock_at->add(minutes => LOGIN_LOCKOUT_INTERVAL);
 
         # If we were *just* locked out, notify the maintainer about the
         # lockout.
         if ($result->{just_locked_out}) {
-            # We're sending to the maintainer, who may be not a Bugzilla 
+            # We're sending to the maintainer, who may be not a Bugzilla
             # account, but just an email address. So we use the
             # installation's default language for sending the email.
             my $default_settings = Bugzilla::User::Setting::get_defaults();
@@ -289,7 +289,7 @@ sub _handle_login_result {
         }
 
         $unlock_at->set_time_zone($user->timezone);
-        ThrowUserError('account_locked', 
+        ThrowUserError('account_locked',
             { ip_addr => $determiner->{ip_addr}, unlock_at => $unlock_at });
     }
     # If we get here, then we've run out of options, which shouldn't happen.
@@ -314,11 +314,11 @@ Bugzilla::Auth - An object that authenticates the login credentials for
 Handles authentication for Bugzilla users.
 
 Authentication from Bugzilla involves two sets of modules. One set is
-used to obtain the username/password (from CGI, email, etc), and the 
-other set uses this data to authenticate against the datasource 
+used to obtain the username/password (from CGI, email, etc), and the
+other set uses this data to authenticate against the datasource
 (the Bugzilla DB, LDAP, PAM, etc.).
 
-Modules for obtaining the username/password are subclasses of 
+Modules for obtaining the username/password are subclasses of
 L<Bugzilla::Auth::Login>, and modules for authenticating are subclasses
 of L<Bugzilla::Auth::Verify>.
 
@@ -342,11 +342,11 @@ An error occurred when trying to use the login mechanism.
 
 The hashref will also contain an C<error> element, which is the name
 of an error from C<template/en/default/global/code-error.html> --
-the same type of error that would be thrown by 
+the same type of error that would be thrown by
 L<Bugzilla::Error::ThrowCodeError>.
 
 The hashref *may* contain an element called C<details>, which is a hashref
-that should be passed to L<Bugzilla::Error::ThrowCodeError> as the 
+that should be passed to L<Bugzilla::Error::ThrowCodeError> as the
 various fields to be used in the error message.
 
 =head2 C<AUTH_LOGINFAILED>
@@ -408,7 +408,7 @@ A login is always required to access this data.
 
 =head1 METHODS
 
-These are methods that can be called on a C<Bugzilla::Auth> object 
+These are methods that can be called on a C<Bugzilla::Auth> object
 itself.
 
 =head2 Login
@@ -495,7 +495,7 @@ a new authentication type. It describes the general structure of the
 Bugzilla::Auth family, and how the C<login> function works.
 
 A C<Bugzilla::Auth> object is essentially a collection of a few other
-objects: the "Info Getter," the "Verifier," and the "Persistence 
+objects: the "Info Getter," the "Verifier," and the "Persistence
 Mechanism."
 
 They are used inside the C<login> function in the following order:
@@ -509,7 +509,7 @@ information to uniquely identify a user, and passes that on down the line.
 even without a username and password.)
 
 Some Info Getters don't require any verification. For example, if we got
-the C<user_id> from a Cookie, we don't need to check the username and 
+the C<user_id> from a Cookie, we don't need to check the username and
 password.
 
 If an Info Getter returns only a C<user_id> and no username/password,
@@ -584,7 +584,7 @@ The real name of the user.
 
 =item C<extern_id>
 
-Some string that uniquely identifies the user in an external account 
+Some string that uniquely identifies the user in an external account
 source. If this C<extern_id> already exists in the database with
 a different username, the username will be *changed* to be the
 username specified in this C<$login_data>.
@@ -592,12 +592,12 @@ username specified in this C<$login_data>.
 That is, let's my extern_id is C<mkanat>. I already have an account
 in Bugzilla with the username of C<mkanat@foo.com>. But this time,
 when I log in, I have an extern_id of C<mkanat> and a C<username>
-of C<mkanat@bar.org>. So now, Bugzilla will automatically change my 
+of C<mkanat@bar.org>. So now, Bugzilla will automatically change my
 username to C<mkanat@bar.org> instead of C<mkanat@foo.com>.
 
 =item C<user>
 
-A L<Bugzilla::User> object representing the authenticated user. 
+A L<Bugzilla::User> object representing the authenticated user.
 Note that C<Bugzilla::Auth::login> may modify this object at various points.
 
 =back

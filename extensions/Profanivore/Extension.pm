@@ -45,7 +45,7 @@ sub bug_format_comment {
     # it tries to stop an arms race starting.)
     if ($comment &&
         !$comment->author->in_group('editbugs') &&
-        $comment->author->id != Bugzilla->user->id) 
+        $comment->author->id != Bugzilla->user->id)
     {
         push (@$regexes, {
             match => RE_profanity('-i'),
@@ -76,7 +76,7 @@ sub mailer_before_send {
         $author = new Bugzilla::User({ name => $author });
 
         if ($author &&
-            $author->id && 
+            $author->id &&
             !$author->in_group('editbugs'))
         {
             # Multipart emails

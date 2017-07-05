@@ -97,9 +97,9 @@ The 'version' of the internal schema structure. This version number
 is incremented every time the the fundamental structure of Schema
 internals changes.
 
-This is NOT changed every time a table or a column is added. This 
-number is incremented only if the internal structures of this 
-Schema would be incompatible with the internal structures of a 
+This is NOT changed every time a table or a column is added. This
+number is incremented only if the internal structures of this
+Schema would be incompatible with the internal structures of a
 previous Schema version.
 
 In general, unless you are messing around with serialization
@@ -118,9 +118,9 @@ Imagine that someday we decide that NOTNULL => 1 is bad, and we want
 to change it so that the schema instead uses NULL => 0.
 
 But we have a bunch of Bugzilla installations around the world with a
-serialized schema that has NOTNULL in it! When we deserialize that 
+serialized schema that has NOTNULL in it! When we deserialize that
 structure, it just WILL NOT WORK properly inside of our new Schema object.
-So, immediately after deserializing, we need to go through the hash 
+So, immediately after deserializing, we need to go through the hash
 and change all NOTNULLs to NULLs and so on.
 
 We know that we need to do that on deserializing because we know that
@@ -136,12 +136,12 @@ in which each key is the name of a table in the Bugzilla database.
 
 The value for each key is a hash reference containing the keys
 C<FIELDS> and C<INDEXES> which in turn point to array references
-containing information on the table's fields and indexes. 
+containing information on the table's fields and indexes.
 
 A field hash reference should must contain the key C<TYPE>. Optional field
-keys include C<PRIMARYKEY>, C<NOTNULL>, and C<DEFAULT>. 
+keys include C<PRIMARYKEY>, C<NOTNULL>, and C<DEFAULT>.
 
-The C<INDEXES> array reference contains index names and information 
+The C<INDEXES> array reference contains index names and information
 regarding the index. If the index name points to an array reference,
 then the index is a regular index and the array contains the indexed
 columns. If the index name points to a hash reference, then the hash
@@ -173,10 +173,10 @@ The column pointed at in that table.
 =item C<DELETE>
 
 What to do if the row in the parent table is deleted. Choices are
-C<RESTRICT>, C<CASCADE>, or C<SET NULL>. 
+C<RESTRICT>, C<CASCADE>, or C<SET NULL>.
 
-C<RESTRICT> means the deletion of the row in the parent table will 
-be forbidden by the database if there is a row in I<this> table that 
+C<RESTRICT> means the deletion of the row in the parent table will
+be forbidden by the database if there is a row in I<this> table that
 still refers to it. This is the default, if you don't specify
 C<DELETE>.
 
@@ -190,7 +190,7 @@ be set to C<NULL>. (That is, the column isn't C<NOT NULL>.)
 
 What to do if the value in the parent table is updated. You can set this
 to C<CASCADE> or C<RESTRICT>, which mean the same thing as they do for
-L</DELETE>. This variable defaults to C<CASCADE>, which means "also 
+L</DELETE>. This variable defaults to C<CASCADE>, which means "also
 update this column in this table."
 
 =back
@@ -238,7 +238,7 @@ use constant ABSTRACT_SCHEMA => {
             assigned_to         => {TYPE => 'INT3', NOTNULL => 1,
                                     REFERENCES => {TABLE  => 'profiles',
                                                    COLUMN => 'userid'}},
-            bug_file_loc        => {TYPE => 'MEDIUMTEXT', 
+            bug_file_loc        => {TYPE => 'MEDIUMTEXT',
                                     NOTNULL => 1, DEFAULT => "''"},
             bug_severity        => {TYPE => 'varchar(64)', NOTNULL => 1},
             bug_status          => {TYPE => 'varchar(64)', NOTNULL => 1},
@@ -325,8 +325,8 @@ use constant ABSTRACT_SCHEMA => {
 
     bugs_activity => {
         FIELDS => [
-            id        => {TYPE => 'INTSERIAL', NOTNULL => 1, 
-                          PRIMARYKEY => 1}, 
+            id        => {TYPE => 'INTSERIAL', NOTNULL => 1,
+                          PRIMARYKEY => 1},
             bug_id    => {TYPE => 'INT3', NOTNULL => 1,
                           REFERENCES    =>  {TABLE  =>  'bugs',
                                              COLUMN =>  'bug_id',
@@ -344,7 +344,7 @@ use constant ABSTRACT_SCHEMA => {
                                              COLUMN =>  'id'}},
             added     => {TYPE => 'varchar(255)'},
             removed   => {TYPE => 'varchar(255)'},
-            comment_id => {TYPE => 'INT4', 
+            comment_id => {TYPE => 'INT4',
                            REFERENCES => { TABLE  => 'longdescs',
                                            COLUMN => 'comment_id',
                                            DELETE => 'CASCADE'}},
@@ -355,7 +355,7 @@ use constant ABSTRACT_SCHEMA => {
             bugs_activity_bug_when_idx => ['bug_when'],
             bugs_activity_fieldid_idx => ['fieldid'],
             bugs_activity_added_idx   => ['added'],
-            bugs_activity_removed_idx => ['removed'], 
+            bugs_activity_removed_idx => ['removed'],
         ],
     },
 
@@ -543,7 +543,7 @@ use constant ABSTRACT_SCHEMA => {
             class  => {TYPE => 'varchar(255)', NOTNULL => 1, DEFAULT => "''"},
         ],
         INDEXES => [
-            bug_see_also_bug_id_idx => {FIELDS => [qw(bug_id value)], 
+            bug_see_also_bug_id_idx => {FIELDS => [qw(bug_id value)],
                                         TYPE   => 'UNIQUE'},
         ],
     },
@@ -742,7 +742,7 @@ use constant ABSTRACT_SCHEMA => {
                             DEFAULT => 'FALSE'},
             buglist     => {TYPE => 'BOOLEAN', NOTNULL => 1,
                             DEFAULT => 'FALSE'},
-            visibility_field_id => {TYPE => 'INT3', 
+            visibility_field_id => {TYPE => 'INT3',
                                     REFERENCES => {TABLE  => 'fielddefs',
                                                    COLUMN => 'id'}},
             value_field_id => {TYPE => 'INT3',
@@ -768,7 +768,7 @@ use constant ABSTRACT_SCHEMA => {
 
     field_visibility => {
         FIELDS => [
-            field_id => {TYPE => 'INT3', 
+            field_id => {TYPE => 'INT3',
                          REFERENCES => {TABLE  => 'fielddefs',
                                         COLUMN => 'id',
                                         DELETE => 'CASCADE'}},
@@ -794,7 +794,7 @@ use constant ABSTRACT_SCHEMA => {
                             REFERENCES => {TABLE  => 'products',
                                            COLUMN => 'id',
                                            DELETE => 'CASCADE'}},
-            isactive   =>  {TYPE => 'BOOLEAN', NOTNULL => 1, 
+            isactive   =>  {TYPE => 'BOOLEAN', NOTNULL => 1,
                             DEFAULT => 'TRUE'},
         ],
         INDEXES => [
@@ -805,7 +805,7 @@ use constant ABSTRACT_SCHEMA => {
 
     milestones => {
         FIELDS => [
-            id         => {TYPE => 'MEDIUMSERIAL', NOTNULL => 1, 
+            id         => {TYPE => 'MEDIUMSERIAL', NOTNULL => 1,
                            PRIMARYKEY => 1},
             product_id => {TYPE => 'INT2', NOTNULL => 1,
                            REFERENCES => {TABLE  => 'products',
@@ -814,7 +814,7 @@ use constant ABSTRACT_SCHEMA => {
             value      => {TYPE => 'varchar(20)', NOTNULL => 1},
             sortkey    => {TYPE => 'INT2', NOTNULL => 1,
                            DEFAULT => 0},
-            isactive   => {TYPE => 'BOOLEAN', NOTNULL => 1, 
+            isactive   => {TYPE => 'BOOLEAN', NOTNULL => 1,
                            DEFAULT => 'TRUE'},
         ],
         INDEXES => [
@@ -894,11 +894,11 @@ use constant ABSTRACT_SCHEMA => {
         FIELDS => [
             # On bug creation, there is no old value.
             old_status      => {TYPE => 'INT2',
-                                REFERENCES => {TABLE  => 'bug_status', 
+                                REFERENCES => {TABLE  => 'bug_status',
                                                COLUMN => 'id',
                                                DELETE => 'CASCADE'}},
             new_status      => {TYPE => 'INT2', NOTNULL => 1,
-                                REFERENCES => {TABLE  => 'bug_status', 
+                                REFERENCES => {TABLE  => 'bug_status',
                                                COLUMN => 'id',
                                                DELETE => 'CASCADE'}},
             require_comment => {TYPE => 'INT1', NOTNULL => 1, DEFAULT => 0},
@@ -948,9 +948,9 @@ use constant ABSTRACT_SCHEMA => {
     profile_search => {
         FIELDS => [
             id         => {TYPE => 'INTSERIAL', NOTNULL => 1, PRIMARYKEY => 1},
-            user_id    => {TYPE => 'INT3', NOTNULL => 1, 
-                           REFERENCES => {TABLE  => 'profiles', 
-                                          COLUMN => 'userid', 
+            user_id    => {TYPE => 'INT3', NOTNULL => 1,
+                           REFERENCES => {TABLE  => 'profiles',
+                                          COLUMN => 'userid',
                                           DELETE => 'CASCADE'}},
             bug_list   => {TYPE => 'MEDIUMTEXT', NOTNULL => 1},
             list_order => {TYPE => 'MEDIUMTEXT'},
@@ -962,10 +962,10 @@ use constant ABSTRACT_SCHEMA => {
 
     profiles_activity => {
         FIELDS => [
-            id            => {TYPE => 'MEDIUMSERIAL', NOTNULL => 1, 
-                              PRIMARYKEY => 1}, 
+            id            => {TYPE => 'MEDIUMSERIAL', NOTNULL => 1,
+                              PRIMARYKEY => 1},
             userid        => {TYPE => 'INT3', NOTNULL => 1,
-                              REFERENCES => {TABLE  => 'profiles', 
+                              REFERENCES => {TABLE  => 'profiles',
                                              COLUMN => 'userid',
                                              DELETE => 'CASCADE'}},
             who           => {TYPE => 'INT3', NOTNULL => 1,
@@ -1163,9 +1163,9 @@ use constant ABSTRACT_SCHEMA => {
             ip_addr    => {TYPE => 'varchar(40)', NOTNULL => 1},
         ],
         INDEXES => [
-            # We do lookups by every item in the table simultaneously, but 
+            # We do lookups by every item in the table simultaneously, but
             # having an index with all three items would be the same size as
-            # the table. So instead we have an index on just the smallest item, 
+            # the table. So instead we have an index on just the smallest item,
             # to speed lookups.
             login_failure_user_id_idx => ['user_id'],
         ],
@@ -1557,7 +1557,7 @@ use constant ABSTRACT_SCHEMA => {
             id           => {TYPE => 'MEDIUMSERIAL', PRIMARYKEY => 1,
                              NOTNULL => 1},
             owner_userid => {TYPE => 'INT3', NOTNULL => 1,
-                             REFERENCES => {TABLE  => 'profiles', 
+                             REFERENCES => {TABLE  => 'profiles',
                                             COLUMN => 'userid',
                                             DELETE => 'CASCADE'}},
             subject      => {TYPE => 'varchar(128)'},
@@ -1575,7 +1575,7 @@ use constant ABSTRACT_SCHEMA => {
             quipid   => {TYPE => 'MEDIUMSERIAL', NOTNULL => 1,
                          PRIMARYKEY => 1},
             userid   => {TYPE => 'INT3',
-                         REFERENCES => {TABLE  => 'profiles', 
+                         REFERENCES => {TABLE  => 'profiles',
                                         COLUMN => 'userid',
                                         DELETE => 'SET NULL'}},
             quip     => {TYPE => 'MEDIUMTEXT', NOTNULL => 1},
@@ -1600,7 +1600,7 @@ use constant ABSTRACT_SCHEMA => {
     setting => {
         FIELDS => [
             name          => {TYPE => 'varchar(32)', NOTNULL => 1,
-                              PRIMARYKEY => 1}, 
+                              PRIMARYKEY => 1},
             default_value => {TYPE => 'varchar(32)', NOTNULL => 1},
             is_enabled    => {TYPE => 'BOOLEAN', NOTNULL => 1,
                               DEFAULT => 'TRUE'},
@@ -1612,7 +1612,7 @@ use constant ABSTRACT_SCHEMA => {
     setting_value => {
         FIELDS => [
             name        => {TYPE => 'varchar(32)', NOTNULL => 1,
-                            REFERENCES => {TABLE  => 'setting', 
+                            REFERENCES => {TABLE  => 'setting',
                                            COLUMN => 'name',
                                            DELETE => 'CASCADE'}},
             value       => {TYPE => 'varchar(32)', NOTNULL => 1},
@@ -1668,7 +1668,7 @@ use constant ABSTRACT_SCHEMA => {
             funcname => {TYPE => 'varchar(255)', NOTNULL => 1},
         ],
         INDEXES => [
-            ts_funcmap_funcname_idx => {FIELDS => ['funcname'], 
+            ts_funcmap_funcname_idx => {FIELDS => ['funcname'],
                                           TYPE => 'UNIQUE'},
         ],
     },
@@ -1677,7 +1677,7 @@ use constant ABSTRACT_SCHEMA => {
         FIELDS => [
             # In a standard TheSchwartz schema, this is a BIGINT, but we
             # don't have those and I didn't want to add them just for this.
-            jobid         => {TYPE => 'INTSERIAL', PRIMARYKEY => 1, 
+            jobid         => {TYPE => 'INTSERIAL', PRIMARYKEY => 1,
                               NOTNULL => 1},
             funcid        => {TYPE => 'INT4', NOTNULL => 1},
             # In standard TheSchwartz, this is a MEDIUMBLOB.
@@ -1709,7 +1709,7 @@ use constant ABSTRACT_SCHEMA => {
             value   => {TYPE => 'LONGBLOB'},
         ],
         INDEXES => [
-            ts_note_jobid_idx => {FIELDS => [qw(jobid notekey)], 
+            ts_note_jobid_idx => {FIELDS => [qw(jobid notekey)],
                                     TYPE => 'UNIQUE'},
         ],
     },
@@ -1895,10 +1895,10 @@ sub _initialize {
               define the database-specific implementation of the all
               abstract data types), and then call the C<_adjust_schema>
               method.
- Parameters:  $abstract_schema (optional) - A reference to a hash. If 
+ Parameters:  $abstract_schema (optional) - A reference to a hash. If
                   provided, this hash will be used as the internal
                   representation of the abstract schema instead of our
-                  default abstract schema. This is intended for internal 
+                  default abstract schema. This is intended for internal
                   use only by deserialize_abstract.
  Returns:     the instance of the Schema class
 
@@ -1916,11 +1916,11 @@ sub _initialize {
         # tables. If we don't lock/unlock keys, lock_value complains.
         lock_keys(%$abstract_schema);
         foreach my $table (keys %{ABSTRACT_SCHEMA()}) {
-            lock_value(%$abstract_schema, $table) 
+            lock_value(%$abstract_schema, $table)
                 if exists $abstract_schema->{$table};
         }
         unlock_keys(%$abstract_schema);
-        Bugzilla::Hook::process('db_schema_abstract_schema', 
+        Bugzilla::Hook::process('db_schema_abstract_schema',
                                 { schema => $abstract_schema });
         unlock_hash(%$abstract_schema);
     }
@@ -1986,7 +1986,7 @@ sub get_type_ddl {
 =item B<Description>
 
 Public method to convert abstract (database-generic) field specifiers to
-database-specific data types suitable for use in a C<CREATE TABLE> or 
+database-specific data types suitable for use in a C<CREATE TABLE> or
 C<ALTER TABLE> SQL statment. If no database-specific field type has been
 defined for the given field type, then it will just return the same field type.
 
@@ -1995,14 +1995,14 @@ defined for the given field type, then it will just return the same field type.
 =over
 
 =item C<$def> - A reference to a hash of a field containing the following keys:
-C<TYPE> (required), C<NOTNULL> (optional), C<DEFAULT> (optional), 
+C<TYPE> (required), C<NOTNULL> (optional), C<DEFAULT> (optional),
 C<PRIMARYKEY> (optional), C<REFERENCES> (optional)
 
 =back
 
 =item B<Returns>
 
-A DDL string suitable for describing a field in a C<CREATE TABLE> or 
+A DDL string suitable for describing a field in a C<CREATE TABLE> or
 C<ALTER TABLE> SQL statement
 
 =back
@@ -2012,7 +2012,7 @@ C<ALTER TABLE> SQL statement
     my $self = shift;
     my $finfo = (@_ == 1 && ref($_[0]) eq 'HASH') ? $_[0] : { @_ };
     my $type = $finfo->{TYPE};
-    confess "A valid TYPE was not specified for this column (got " 
+    confess "A valid TYPE was not specified for this column (got "
             . Dumper($finfo) . ")" unless ($type);
 
     my $default = $finfo->{DEFAULT};
@@ -2059,7 +2059,7 @@ Protected method. Translates the C<REFERENCES> item of a column into SQL.
 
 =item B<Returns>
 
-SQL for to define the foreign key, or an empty string if C<$references> 
+SQL for to define the foreign key, or an empty string if C<$references>
 is undefined.
 
 =back
@@ -2085,7 +2085,7 @@ is undefined.
 # other reasons).
 sub _get_fk_name {
     my ($self, $table, $column, $references) = @_;
-    my $to_table  = $references->{TABLE}; 
+    my $to_table  = $references->{TABLE};
     my $to_column = $references->{COLUMN};
     my $name = "fk_${table}_${column}_${to_table}_${to_column}";
 
@@ -2133,7 +2133,7 @@ sub _column_fks_to_ddl {
     return @ddl;
 }
 
-sub get_drop_fk_sql { 
+sub get_drop_fk_sql {
     my ($self, $table, $column, $references) = @_;
     my $fk_name = $self->_get_fk_name($table, $column, $references);
 
@@ -2191,7 +2191,7 @@ sub get_table_list {
 =cut
 
     my $self = shift;
-    return sort keys %{$self->{schema}};   
+    return sort keys %{$self->{schema}};
 }
 
 sub get_table_columns {
@@ -2262,7 +2262,7 @@ sub get_table_ddl {
     while (@indexes) {
         my $index_name = shift(@indexes);
         my $index_info = shift(@indexes);
-        my $index_sql  = $self->get_add_index_ddl($table, $index_name, 
+        my $index_sql  = $self->get_add_index_ddl($table, $index_name,
                                                   $index_info);
         push(@ddl, $index_sql) if $index_sql;
     }
@@ -2303,12 +2303,12 @@ sub _get_create_table_ddl {
             push(@fk_lines, $fk_ddl);
         }
     }
-    
+
     my $sql = "CREATE TABLE $table (\n" . join(",\n", @col_lines, @fk_lines)
               . "\n)";
     return $sql
 
-} 
+}
 
 sub _get_create_index_ddl {
 
@@ -2345,7 +2345,7 @@ sub get_add_column_ddl {
               $column - The name of the column being added.
               \%definition - The new definition for the column,
                   in standard C<ABSTRACT_SCHEMA> format.
-              $init_value - (optional) An initial value to set 
+              $init_value - (optional) An initial value to set
                             the column to. Should already be SQL-quoted
                             if necessary.
  Returns:     An array of SQL statements.
@@ -2376,14 +2376,14 @@ sub get_add_index_ddl {
 
  Description: Gets SQL for creating an index.
               NOTE: Subclasses should not override this function. Instead,
-              if they need to specify a custom CREATE INDEX statement, 
+              if they need to specify a custom CREATE INDEX statement,
               they should override C<_get_create_index_ddl>
  Params:      $table - The name of the table the index will be on.
               $name  - The name of the new index.
-              $definition - An index definition. Either a hashref 
-                            with FIELDS and TYPE or an arrayref 
+              $definition - An index definition. Either a hashref
+                            with FIELDS and TYPE or an arrayref
                             containing a list of columns.
- Returns:     An array of SQL statements that will create the 
+ Returns:     An array of SQL statements that will create the
               requested index.
 
 =cut
@@ -2399,8 +2399,8 @@ sub get_add_index_ddl {
         $index_fields = $definition;
         $index_type = '';
     }
-    
-    return $self->_get_create_index_ddl($table, $name, $index_fields, 
+
+    return $self->_get_create_index_ddl($table, $name, $index_fields,
                                         $index_type);
 }
 
@@ -2433,7 +2433,7 @@ sub get_alter_column_ddl {
 
     # If the types have changed, we have to deal with that.
     if (uc(trim($old_def->{TYPE})) ne uc(trim($new_def->{TYPE}))) {
-        push(@statements, $self->_get_alter_type_sql($table, $column, 
+        push(@statements, $self->_get_alter_type_sql($table, $column,
                                                      $new_def, $old_def));
     }
 
@@ -2453,8 +2453,8 @@ sub get_alter_column_ddl {
                         . " DROP DEFAULT");
     }
     # If we went from no default to a default, or we changed the default.
-    elsif ( (defined $default && !defined $default_old) || 
-            ($default ne $default_old) ) 
+    elsif ( (defined $default && !defined $default_old) ||
+            ($default ne $default_old) )
     {
         push(@statements, "ALTER TABLE $table ALTER COLUMN $column "
                          . " SET DEFAULT $default");
@@ -2489,8 +2489,8 @@ sub get_alter_column_ddl {
 sub _set_nulls_sql {
     my ($self, $table, $column, $new_def, $set_nulls_to) = @_;
     my $default = $new_def->{DEFAULT};
-    # If we have a set_nulls_to, that overrides the DEFAULT 
-    # (although nobody would usually specify both a default and 
+    # If we have a set_nulls_to, that overrides the DEFAULT
+    # (although nobody would usually specify both a default and
     # a set_nulls_to.)
     $default = $set_nulls_to if defined $set_nulls_to;
     if (defined $default) {
@@ -2785,7 +2785,7 @@ sub delete_column {
 
     my $abstract_fields = $self->{abstract_schema}{$table}{FIELDS};
     my $name_position = firstidx { $_ eq $column } @$abstract_fields;
-    die "Attempted to delete nonexistent column ${table}.${column}" 
+    die "Attempted to delete nonexistent column ${table}.${column}"
         if $name_position == -1;
     # Delete the key/value pair from the array.
     splice(@$abstract_fields, $name_position, 2);
@@ -2826,7 +2826,7 @@ sub set_column {
               if you want to do that.
  Params:      $table - The name of the table that the column is on.
               $column - The name of the column.
-              \%new_def - The new definition for the column, in 
+              \%new_def - The new definition for the column, in
                   C<ABSTRACT_SCHEMA> format.
  Returns:     nothing
 
@@ -2872,7 +2872,7 @@ sub set_index {
               if you want to do that.
  Params:      $table      - The table the index is on.
               $name       - The name of the index.
-              $definition - A hashref or an arrayref. An index 
+              $definition - A hashref or an arrayref. An index
                             definition in C<ABSTRACT_SCHEMA> format.
  Returns:     nothing
 
@@ -2929,7 +2929,7 @@ sub delete_index {
 
     my $indexes = $self->{abstract_schema}{$table}{INDEXES};
     my $name_position = firstidx { $_ eq $name } @$indexes;
-    die "Attempted to delete nonexistent index $name on the $table table" 
+    die "Attempted to delete nonexistent index $name on the $table table"
         if $name_position == -1;
     # Delete the key/value pair from the array.
     splice(@$indexes, $name_position, 2);
@@ -2944,7 +2944,7 @@ sub columns_equal {
  Description: Tells you if two columns have entirely identical definitions.
               The TYPE field's value will be compared case-insensitive.
               However, all other fields will be case-sensitive.
- Params:      $col_one, $col_two - The columns to compare. Hash 
+ Params:      $col_one, $col_two - The columns to compare. Hash
                   references, in C<ABSTRACT_SCHEMA> format.
  Returns:     C<1> if the columns are identical, C<0> if they are not.
 
@@ -2987,23 +2987,23 @@ sub columns_equal {
               Do not attempt to manipulate this data directly,
               as the format may change at any time in the future.
               The only thing you should do with the returned value
-              is either store it somewhere (coupled with appropriate 
+              is either store it somewhere (coupled with appropriate
               SCHEMA_VERSION) or deserialize it.
 
 =cut
 
 sub serialize_abstract {
     my ($self) = @_;
-    
+
     # Make it ok to eval
     local $Data::Dumper::Purity = 1;
-    
+
     # Avoid cross-refs
     local $Data::Dumper::Deepcopy = 1;
-    
+
     # Always sort keys to allow textual compare
     local $Data::Dumper::Sortkeys = 1;
-    
+
     return Dumper($self->{abstract_schema});
 }
 
@@ -3015,8 +3015,8 @@ sub serialize_abstract {
               $version - A number. The "version"
                   of the Schema that did the serialization.
                   See the docs for C<SCHEMA_VERSION> for more details.
- Returns:     A Schema object. It will have the methods of (and work 
-              in the same fashion as) the current version of Schema. 
+ Returns:     A Schema object. It will have the methods of (and work
+              in the same fashion as) the current version of Schema.
               However, it will represent the serialized data instead of
               ABSTRACT_SCHEMA.
 
@@ -3040,7 +3040,7 @@ sub deserialize_abstract {
     if ($version < 3) {
         my $standard = $class->new()->{abstract_schema};
         foreach my $table_name (keys %$thawed_hash) {
-            my %standard_fields = 
+            my %standard_fields =
                 @{ $standard->{$table_name}->{FIELDS} || [] };
             my $table = $thawed_hash->{$table_name};
             my %fields = @{ $table->{FIELDS} || [] };
@@ -3116,7 +3116,7 @@ Integer values (-8,388,608 - 8,388,607 or 0 - 16,777,215 unsigned)
 
 =item C<INT4>
 
-Integer values (-2,147,483,648 - 2,147,483,647 or 0 - 4,294,967,295 
+Integer values (-2,147,483,648 - 2,147,483,647 or 0 - 4,294,967,295
 unsigned)
 
 =item C<SMALLSERIAL>
@@ -3150,11 +3150,11 @@ Variable length string of binary data up to 4M (2^32 - 1) bytes wide
 
 =item C<DATETIME>
 
-DATETIME support varies from database to database, however, it's generally 
+DATETIME support varies from database to database, however, it's generally
 safe to say that DATETIME entries support all date/time combinations greater
 than 1900-01-01 00:00:00.  Note that the format used is C<YYYY-MM-DD hh:mm:ss>
 to be safe, though it's possible that your database may not require
-leading zeros.  For greatest compatibility, however, please make sure dates 
+leading zeros.  For greatest compatibility, however, please make sure dates
 are formatted as above for queries to guarantee consistent results.
 
 =back

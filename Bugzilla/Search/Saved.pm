@@ -96,7 +96,7 @@ sub check {
     return $search if $search->user->id == $user->id;
 
     if (!$search->shared_with_group
-        or !$user->in_group($search->shared_with_group)) 
+        or !$user->in_group($search->shared_with_group))
     {
         ThrowUserError('missing_query', { name => $search->name,
                                           sharer_id => $search->user->id });
@@ -150,7 +150,7 @@ sub create {
     my $lif = delete $params->{link_in_footer};
     my $obj = $class->insert_create_data($params);
     if ($lif) {
-        $dbh->do('INSERT INTO namedqueries_link_in_footer 
+        $dbh->do('INSERT INTO namedqueries_link_in_footer
                   (user_id, namedquery_id) VALUES (?,?)',
                  undef, $params->{userid}, $obj->id);
     }
@@ -220,7 +220,7 @@ sub edit_link {
     my ($self) = @_;
     return $self->{edit_link} if defined $self->{edit_link};
     my $cgi = new Bugzilla::CGI($self->url);
-    if (!$cgi->param('query_type') 
+    if (!$cgi->param('query_type')
         || !IsValidQueryType($cgi->param('query_type')))
     {
         $cgi->param('query_type', 'advanced');
@@ -235,7 +235,7 @@ sub used_in_whine {
     ($self->{used_in_whine}) = Bugzilla->dbh->selectrow_array(
         'SELECT 1 FROM whine_events INNER JOIN whine_queries
                        ON whine_events.id = whine_queries.eventid
-          WHERE whine_events.owner_userid = ? AND query_name = ?', undef, 
+          WHERE whine_events.owner_userid = ? AND query_name = ?', undef,
           $self->{userid}, $self->name) || 0;
     return $self->{used_in_whine};
 }
@@ -247,7 +247,7 @@ sub link_in_footer {
     my $user_id = $user ? $user->id : Bugzilla->user->id;
     my $link_in_footer = Bugzilla->dbh->selectrow_array(
         'SELECT 1 FROM namedqueries_link_in_footer
-          WHERE namedquery_id = ? AND user_id = ?', 
+          WHERE namedquery_id = ? AND user_id = ?',
         undef, $self->id, $user_id) || 0;
     $self->{link_in_footer} = $link_in_footer if !$user;
     return $link_in_footer;
@@ -261,7 +261,7 @@ sub shared_with_group {
     my ($group_id) = Bugzilla->dbh->selectrow_array(
         'SELECT group_id FROM namedquery_group_map WHERE namedquery_id = ?',
         undef, $self->id);
-    $self->{shared_with_group} = $group_id ? new Bugzilla::Group($group_id) 
+    $self->{shared_with_group} = $group_id ? new Bugzilla::Group($group_id)
                                  : undef;
     return $self->{shared_with_group};
 }

@@ -80,7 +80,7 @@ else {
 my @open_status;
 my @closed_status;
 foreach my $status (@{$vars->{'status'}}) {
-    is_open_state($status) ? push(@open_status, $status) 
+    is_open_state($status) ? push(@open_status, $status)
                            : push(@closed_status, $status);
 }
 $vars->{'open_status'} = \@open_status;
@@ -103,7 +103,7 @@ sub display_data {
     my $cgi      = Bugzilla->cgi;
     my $template = Bugzilla->template;
 
-    # Determine how the user would like to receive the output; 
+    # Determine how the user would like to receive the output;
     # default is JavaScript.
     my $format = $template->get_format("config", scalar($cgi->param('format')),
                                        scalar($cgi->param('ctype')) || "js");

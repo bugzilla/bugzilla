@@ -5,7 +5,7 @@
 # This Source Code Form is "Incompatible With Secondary Licenses", as
 # defined by the Mozilla Public License, v. 2.0.
 
-# This is the base class for $self in WebService method calls. For the 
+# This is the base class for $self in WebService method calls. For the
 # actual RPC server, see Bugzilla::WebService::Server and its subclasses.
 package Bugzilla::WebService;
 
@@ -84,7 +84,7 @@ A string. May be null.
 
 =item C<email>
 
-A string representing an email address. This value, when returned, 
+A string representing an email address. This value, when returned,
 may be filtered based on if the user is logged in or not. May be null.
 
 =item C<dateTime>
@@ -223,15 +223,15 @@ Bugzilla B<5.0>.
 =head1 STABLE, EXPERIMENTAL, and UNSTABLE
 
 Methods are marked B<STABLE> if you can expect their parameters and
-return values not to change between versions of Bugzilla. You are 
+return values not to change between versions of Bugzilla. You are
 best off always using methods marked B<STABLE>. We may add parameters
 and additional items to the return values, but your old code will
 always continue to work with any new changes we make. If we ever break
 a B<STABLE> interface, we'll post a big notice in the Release Notes,
 and it will only happen during a major new release.
 
-Methods (or parts of methods) are marked B<EXPERIMENTAL> if 
-we I<believe> they will be stable, but there's a slight chance that 
+Methods (or parts of methods) are marked B<EXPERIMENTAL> if
+we I<believe> they will be stable, but there's a slight chance that
 small parts will change in the future.
 
 Certain parts of a method's description may be marked as B<UNSTABLE>,
@@ -285,7 +285,7 @@ where these parameters are used.
 
 Many WebService methods return an array of structs with various
 fields in the structs. (For example, L<Bugzilla::WebService::Bug/get>
-returns a list of C<bugs> that have fields like C<id>, C<summary>, 
+returns a list of C<bugs> that have fields like C<id>, C<summary>,
 C<creation_time>, etc.)
 
 These parameters allow you to limit what fields are present in
@@ -293,7 +293,7 @@ the structs, to possibly improve performance or save some bandwidth.
 
 =over
 
-=item C<include_fields> 
+=item C<include_fields>
 
 C<array> An array of strings, representing the (case-sensitive) names of
 fields in the return value. Only the fields specified in this hash will

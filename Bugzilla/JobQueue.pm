@@ -40,7 +40,7 @@ sub job_map {
         Bugzilla::Hook::process('job_map', { job_map => $job_map });
         Bugzilla->request_cache->{job_map} = $job_map;
     }
-    
+
     return Bugzilla->request_cache->{job_map};
 }
 
@@ -89,7 +89,7 @@ sub insert {
     # I don't see any way to do that in TheSchwartz.
     ThrowCodeError('jobqueue_insert_failed', { job => $job, errmsg => $@ })
         if !$retval;
- 
+
     return $retval;
 }
 

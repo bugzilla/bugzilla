@@ -32,11 +32,11 @@ use constant DB_COLUMNS => qw(
 );
 
 use constant UPDATE_COLUMNS => qw(
-    eventid 
-    run_day 
-    run_time 
-    run_next 
-    mailto 
+    eventid
+    run_day
+    run_time
+    run_next
+    mailto
     mailto_type
 );
 use constant NAME_FIELD => 'id';
@@ -64,7 +64,7 @@ sub mailto {
     return $self->{mailto_object};
 }
 
-sub mailto_users { 
+sub mailto_users {
     my $self = shift;
     return $self->{mailto_users} if exists $self->{mailto_users};
     my $object = $self->mailto;
@@ -146,8 +146,8 @@ L</mailto> is a group or user.
 
 =item C<mailto>
 
-This is either a L<Bugzilla::User> or L<Bugzilla::Group> object to represent 
-the user or group this scheduled event is set to be mailed to. 
+This is either a L<Bugzilla::User> or L<Bugzilla::Group> object to represent
+the user or group this scheduled event is set to be mailed to.
 
 =item C<mailto_users>
 

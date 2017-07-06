@@ -11,8 +11,6 @@ my %localconfig = (webservergroup => 'app');
 
 my %override = (
     'inbound_proxies'     => 1,
-    'memcached_namespace' => 1,
-    'memcached_servers'   => 1,
     'shadowdb'            => 1,
     'shadowdbhost'        => 1,
     'shadowdbport'        => 1,

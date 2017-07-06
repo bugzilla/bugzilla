@@ -76,6 +76,17 @@ sub _arrayref_of_fields {
     }
 }
 
+
+# Future maintainer: Maybe consider removing "changeddate" from the codebase entirely.
+# At some point, bugzilla tried to rename some fields
+# one of these is "delta_ts" to changeddate.
+# But the DB column stayed the same... and elasticsearch uses the db name
+# However search likes to use the "new" name.
+# for now we hack a fix in here.
+my %REMAP_NAME = (
+    changeddate => 'delta_ts',
+);
+
 sub data {
     my ($self) = @_;
     my $body = $self->es_query;
@@ -86,12 +97,11 @@ sub data {
             body => $body,
         );
     };
-    if (!$result) {
-        die $@;
-    }
+    die $@ unless $result;
     $self->_set_query_time($result->{took} / 1000);
+
+    my @fields = map { $REMAP_NAME{$_} // $_ } @{ $self->fields };
     my (@ids, %hits);
-    my $fields = $self->fields;
     foreach my $hit (@{ $result->{hits}{hits} }) {
         push @ids, $hit->{_id};
         my $source = $hit->{_source};
@@ -102,7 +112,7 @@ sub data {
         }
         trick_taint($hit->{_id});
         if ($source) {
-            $hits{$hit->{_id}} = [ @$source{@$fields} ];
+            $hits{$hit->{_id}} = [ @$source{@fields} ];
         }
         else {
            $hits{$hit->{_id}} = $hit->{_id};

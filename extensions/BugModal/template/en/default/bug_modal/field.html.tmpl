@@ -28,6 +28,7 @@
   #                 edit html instead of replacing it.  forces edit_only (default: false);
   # default: (string) default value (eg. used as a placeholder in user fields)
   # help: (string) optional url that describes the field (requires a label to be defined and visible)
+  # required: (boolean) if the field is required. (At present, only implemented for FIELD_TYPE_FREETEXT)
   # action: (hash) show a button to the right of the edit field (user fields only currently).  keys:
   #   id: (string) optional button id
   #   class: (string) optional button class
@@ -218,7 +219,7 @@ END;
 
         [% CASE constants.FIELD_TYPE_FREETEXT %]
           [%# normal input field %]
-          <input name="[% name FILTER html %]" id="[% name FILTER html %]" value="[% value FILTER html %]" [% aria_labelledby_html FILTER none %]>
+          <input name="[% name FILTER html %]" id="[% name FILTER html %]" value="[% value FILTER html %]" [% aria_labelledby_html FILTER none %] [% "required" IF required %]>
         [% CASE constants.FIELD_TYPE_USER %]
           [% IF action && !action.hidden %]
             <button class="field-button minor [%= action.class FILTER html IF action.class %]"

@@ -371,7 +371,7 @@ font_file
     TrueType font such as Unifont which supports all printable characters in
     the Basic Multilingual Plane. If you leave this parameter empty, a default
     font will be used, but its support is limited to English characters only
-    and so other characters will be displayed incorrectly. 
+    and so other characters will be displayed incorrectly.
 
 .. _param-group-security:
 
@@ -716,20 +716,6 @@ shadowdbsock
 
 shadowdb
     The database name of the shadow database.
-
-.. _admin-memcached:
-
-Memcached
-=========
-
-memcached_servers
-    If this option is set, Bugzilla will integrate with `Memcached
-    <http://www.memcached.org/>`_. Specify one or more servers, separated by
-    spaces, using hostname:port notation (for example:
-    :paramval:`127.0.0.1:11211`).
-
-memcached_namespace
-    Specify a string to prefix each key on Memcached.
 
 .. _admin-usermatching:
 

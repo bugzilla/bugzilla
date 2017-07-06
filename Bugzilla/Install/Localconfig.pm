@@ -43,6 +43,14 @@ sub _sensible_group {
     return scalar getgrgid($EGID);
 }
 
+sub _migrate_param {
+  my ($name, $fallback_value) = @_;
+
+  return sub {
+      return Bugzilla->params->{$name} // $fallback_value;
+  };
+}
+
 use constant LOCALCONFIG_VARS => (
     {
         name    => 'create_htaccess',
@@ -125,6 +133,14 @@ use constant LOCALCONFIG_VARS => (
     {
         name    => 'apache_size_limit',
         default => 600000,
+    },
+    {
+        name    => 'memcached_servers',
+        default =>  _migrate_param("memcached_servers", ""),
+    },
+    {
+        name    => 'memcached_namespace',
+        default => _migrate_param("memcached_namespace", "bugzilla:"),
     },
 );
 

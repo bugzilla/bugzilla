@@ -20,21 +20,23 @@
 %]
 
 <script type="text/javascript">
-  YUI({
-    base: 'js/yui3/',
-    combine: false,
-    groups: {
-      gallery: {
-        combine: false,
-        base: 'js/yui3/',
-        patterns: { 'gallery-': {} }
+  $(function () {
+    YUI({
+      base: 'js/yui3/',
+      combine: false,
+      groups: {
+        gallery: {
+          combine: false,
+          base: 'js/yui3/',
+          patterns: { 'gallery-': {} }
+        }
       }
-    }
-  }).use('bz-review-history', function(Y) {
-    Y.ReviewHistory.render('#history', '#history-loading');
-    var requestee = Y.one('#requestee');
+    }).use('bz-review-history', function(Y) {
+      Y.ReviewHistory.render('#history', '#history-loading');
+      var requestee = Y.one('#requestee');
 
-    Y.ReviewHistory.refresh('[% requestee.login FILTER js %]', '[% requestee.name FILTER html FILTER js %]');
+      Y.ReviewHistory.refresh('[% requestee.login FILTER js %]', '[% requestee.name FILTER html FILTER js %]');
+    });
   });
 </script>
 

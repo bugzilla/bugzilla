@@ -5,7 +5,7 @@
  * This Source Code Form is "Incompatible With Secondary Licenses", as
  * defined by the Mozilla Public License, v. 2.0. */
 
-(function () {
+$(function () {
     'use strict';
 
     YUI.add('bz-review-history', function (Y) {
@@ -390,4 +390,4 @@
             "gallery-datatable-row-expansion-bmo", "handlebars", "escape", "promise"
         ]
     });
-}());
+});

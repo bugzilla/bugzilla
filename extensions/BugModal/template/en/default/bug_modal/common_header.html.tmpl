@@ -74,11 +74,6 @@
       remember_collapsed: [% user.settings.ui_remember_collapsed.value == "on" ? "true" : "false" %]
     }
   };
-
-  [% IF user.is_timetracker %]
-    BUGZILLA.remaining_time = [% bug.remaining_time FILTER js %]; // holds the original value
-  [% END %]
-  BUGZILLA.bug_secure = [% bug.groups_in.size ? 'true' : 'false' %];
 [% END %]
 
 [% Hook.process("end") %]

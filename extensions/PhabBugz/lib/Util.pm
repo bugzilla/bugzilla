@@ -230,7 +230,8 @@ sub get_members_by_bmo_id {
 
     my @phab_ids;
     foreach my $user (@{ $result->{result} }) {
-        push(@phab_ids, $user->{phid});
+        push(@phab_ids, $user->{phid})
+          if ($user->{phid} && $user->{phid} =~ /^PHID-USER/);
     }
 
     return \@phab_ids;

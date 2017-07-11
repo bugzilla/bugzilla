@@ -822,38 +822,6 @@ body, td, th, input, select, option, optgroup, .text_input {
     font-family: "Fira Sans", "Open Sans", "Helvetica Neue", Arial, Helvetica, sans-serif;
 }
 
-/* security group colouring */
-/* these are also defined in skins/standard/bug_groups.css */
-
-body[class*=bz_group_] {
-    background-color: inherit;
-    background-image: url(../../images/noise.png), -moz-linear-gradient(#d7d7ff, #f0f0ff 400px);
-    background-image: url(../../images/noise.png), -webkit-linear-gradient(#d7d7ff, #f0f0ff 400px);
-    background-image: url(../../images/noise.png), linear-gradient(#d7d7ff, #f0f0ff 400px);
-}
-
-body[class*=core-security],
-body.bz_group_infrasec {
-    background-image: url(../../images/noise.png), -moz-linear-gradient(#ffe0b0, #fff4e3 400px);
-    background-image: url(../../images/noise.png), -webkit-linear-gradient(#ffe0b0, #fff4e3 400px);
-    background-image: url(../../images/noise.png), linear-gradient(#ffe0b0, #fff4e3 400px);
-}
-
-body.bz_group_webtools-security,
-body.bz_group_websites-security,
-body.bz_group_bugzilla-security {
-    background-image: url(../../images/noise.png), -moz-linear-gradient(#ffcccc, #fff0f0 400px);
-    background-image: url(../../images/noise.png), -webkit-linear-gradient(#ffcccc, #fff0f0 400px);
-    background-image: url(../../images/noise.png), linear-gradient(#ffcccc, #fff0f0 400px);
-}
-
-body.bz_group_client-services-security,
-body.bz_group_cloud-services-security {
-    background-image: url(../../images/noise.png), -moz-linear-gradient(#ffffa3, #ffffe3 400px);
-    background-image: url(../../images/noise.png), -webkit-linear-gradient(#ffffa3, #ffffe3 400px);
-    background-image: url(../../images/noise.png), linear-gradient(#ffffa3, #ffffe3 400px);
-}
-
 a, #header a, #header a:visited, #footer a, #footer a:visited {
     color: #0095dd;
 }

@@ -871,13 +871,8 @@ $(function() {
             $.scrollTo($('#comment'), function() { $('#comment').focus(); });
         });
 
-    // add comment --> enlarge on focus
-    if (BUGZILLA.user.settings.zoom_textareas) {
-        $('#comment')
-            .focus(function(event) {
-                $(event.target).attr('rows', 25);
-            });
-    }
+    // auto-enlarge comment area (up to its max-height)
+    autosize($('#comment'));
 
     // add comment --> private
     $('#add-comment-private-cb')

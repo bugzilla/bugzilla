@@ -1,0 +1,13 @@
+# top-most EditorConfig file
+root = true
+
+# 4 space indentation for .pl,.PL,.css,.js and .pm files
+[*.{pl,PL,css,js,pm}]
+indent_style = space
+indent_size = 4
+
+# 2 space indentation style for .tmpl files
+[.tmpl]
+indent_style = space
+indent_size = 2
+

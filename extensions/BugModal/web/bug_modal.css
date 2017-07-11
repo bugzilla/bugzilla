@@ -88,6 +88,10 @@ select[multiple], .text_input, .yui-ac-input, input {
     box-shadow: 0 0 2px 2px #f88;
 }
 
+input:invalid {
+    box-shadow: 0 0 2px 2px #f88 !important;
+}
+
 a.activity-ref {
     color: #000;
 }

@@ -102,7 +102,11 @@ $(function() {
 
   function new_needinfo_changed(event) {
     if ($('#needinfo').is(':checked') && $('#needinfo_role').val() === 'other') {
+      $('#needinfo_from').prop('required', true);
       $('#needinfo_from').focus().select();
+    }
+    else {
+      $('#needinfo_from').prop('required', false);
     }
   }
 

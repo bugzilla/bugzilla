@@ -49,6 +49,7 @@ my $indexer = Bugzilla::Elastic::Indexer->new(
 
 $indexer->create_index;
 
+my $run_time = time;
 my $loop = IO::Async::Loop->new;
 my $timer = IO::Async::Timer::Periodic->new(
     first_interval => 0,
@@ -56,25 +57,32 @@ my $timer = IO::Async::Timer::Periodic->new(
     reschedule     => 'skip',
 
     on_tick => sub {
+        printf "Running after %d seconds\n", time - $run_time;
         my $start_users = time;
         say "indexing users" if $verbose;
-        $indexer->bulk_load('Bugzilla::User');
-        print "    ", time - $start_users, " seconds\n" if $verbose > 1;
+        my $users = $indexer->bulk_load('Bugzilla::User');
+        bulk_load_stats($start_users, $users) if $verbose > 1;
 
-        say "indexing bugs" if $verbose;
         my $start_bugs = time;
-        $indexer->bulk_load('Bugzilla::Bug');
-        print "    ", time - $start_bugs, " seconds\n" if $verbose > 1;
+        say "indexing bugs" if $verbose;
+        my $bugs = $indexer->bulk_load('Bugzilla::Bug');
+        bulk_load_stats($start_bugs, $bugs) if $verbose > 1;
 
-        say "indexing comments" if $verbose;
         my $start_comments = time;
-        $indexer->bulk_load('Bugzilla::Comment');
-        print "    ", time - $start_comments, " seconds\n" if $verbose > 1;
+        say "indexing comments" if $verbose;
+        my $comments = $indexer->bulk_load('Bugzilla::Comment');
+        bulk_load_stats($start_comments, $comments) if $verbose > 1;
 
         $loop->stop if $once;
+        $run_time = time;
     },
 );
 
 $timer->start();
 $loop->add($timer);
 $loop->run;
+
+sub bulk_load_stats {
+    my ($start_time, $info) = @_;
+    printf "    %d seconds (%d new, %d update)\n", time - $start_time, $info->{new}, $info->{updated};
+}

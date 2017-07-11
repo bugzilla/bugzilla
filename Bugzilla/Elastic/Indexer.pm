@@ -181,6 +181,11 @@ sub bulk_load {
 
     $self->_bulk_load_ids($bulk, $class, $new_ids) if @$new_ids;
     $self->_bulk_load_ids($bulk, $class, $updated_ids) if @$updated_ids;
+
+    return {
+        new     => scalar @$new_ids,
+        updated => scalar @$updated_ids,
+    };
 }
 
 sub _select_all_ids {

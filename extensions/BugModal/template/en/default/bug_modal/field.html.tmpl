@@ -219,7 +219,7 @@ END;
 
         [% CASE constants.FIELD_TYPE_FREETEXT %]
           [%# normal input field %]
-          <input name="[% name FILTER html %]" id="[% name FILTER html %]" value="[% value FILTER html %]" [% aria_labelledby_html FILTER none %] [% "required" IF required %]>
+          <input name="[% name FILTER html %]" id="[% name FILTER html %]" value="[% value FILTER html %]" [% aria_labelledby_html FILTER none +%] [% " required" IF required %]>
         [% CASE constants.FIELD_TYPE_USER %]
           [% IF action && !action.hidden %]
             <button class="field-button minor [%= action.class FILTER html IF action.class %]"

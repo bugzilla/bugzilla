@@ -163,8 +163,7 @@ sub ES_PROPERTIES {
         },
         suggest_nick => {
             type            => 'completion',
-            analyzer        => 'simple',
-            search_analyzer => 'simple',
+            analyzer        => 'autocomplete',
             payloads        => \1,
         },
         login      => { type => 'string' },

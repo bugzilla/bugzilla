@@ -1,16 +1,3 @@
---block-brace-tightness=0
---brace-tightness=1
---continuation-indentation=2
---indent-columns=4
---line-up-parentheses
---maximum-line-length=120
---noblanks-before-blocks
---opening-brace-always-on-right
---opening-token-right
---paren-tightness=2
---square-bracket-tightness=2
---stack-closing-tokens
---stack-opening-tokens
---vertical-tightness-closing=2
---vertical-tightness=2
---want-break-after="."
+--perl-best-practices
+--brace-vertical-tightness=0 # always break after {
+--maximum-line-length=120    # max line length is 120

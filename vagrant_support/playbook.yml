@@ -41,6 +41,23 @@
         group: root
         mode: 0644
 
+    - name: copy ntp.conf
+      copy:
+        src: ntp.conf
+        dest: /etc/ntp.conf
+
+    - name: setup time server
+      service: name=ntpd enabled=yes
+
+    - name: stop time server to run ntpdate
+      service: name=ntpd state=stopped
+
+    - name: run ntpdate
+      shell: ntpdate pool.ntp.org
+
+    - name: start time server
+      service: name=ntpd state=started
+
 - hosts: db
   become: true
   tasks:

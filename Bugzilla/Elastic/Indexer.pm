@@ -184,6 +184,7 @@ sub bulk_load {
     my $new_ids     = $self->_select_all_ids($class, $last_id);
     my $updated_ids = $self->_select_updated_ids($class, $last_mtime);
 
+    $self->put_mapping($class);
     $self->_bulk_load_ids($bulk, $class, $new_ids) if @$new_ids;
     $self->_bulk_load_ids($bulk, $class, $updated_ids) if @$updated_ids;
 

@@ -36,6 +36,9 @@ use Bugzilla::Token;
 use Bugzilla::Field;
 use Bugzilla::Status;
 use Bugzilla::UserAgent;
+use Bugzilla::BugMail;
+
+use List::MoreUtils qw(uniq);
 
 my $user = Bugzilla->login(LOGIN_REQUIRED);
 
@@ -59,6 +62,27 @@ if (lc($cgi->request_method) eq 'post') {
                 comment      => scalar($cgi->param('comment')),
             });
      delete_token($token);
+
+     my $recipients = { changer => $user };
+     my $bug_sent = Bugzilla::BugMail::Send($new_bug->bug_id, $recipients);
+     $bug_sent->{type} = 'created';
+     $bug_sent->{id}   = $new_bug->bug_id;
+     my @all_mail_results = ($bug_sent);
+
+     foreach my $dep (@{$new_bug->dependson || []}, @{$new_bug->blocked || []}) {
+         my $dep_sent = Bugzilla::BugMail::Send($dep, $recipients);
+         $dep_sent->{type} = 'dep';
+         $dep_sent->{id}   = $dep;
+         push(@all_mail_results, $dep_sent);
+     }
+
+     # Sending emails for any referenced bugs.
+     foreach my $ref_bug_id (uniq @{ $new_bug->{see_also_changes} || [] }) {
+         my $ref_sent = Bugzilla::BugMail::Send($ref_bug_id, $recipients);
+         $ref_sent->{id} = $ref_bug_id;
+         push(@all_mail_results, $ref_sent);
+     }
+
      print $cgi->redirect(correct_urlbase() . 'show_bug.cgi?id='.$new_bug->bug_id);
 } else {
  print $cgi->header();

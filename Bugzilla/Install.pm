@@ -181,6 +181,12 @@ sub SETTINGS {
         default  => 'off',
         category => 'Searching'
     },
+    {
+        name     => 'autosize_comments',
+        options  => ['on', 'off'],
+        default  => 'on',
+        category => 'User Interface'
+    },
     ];
 };
 

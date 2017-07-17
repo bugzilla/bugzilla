@@ -107,7 +107,8 @@
     settings: {
       quote_replies: '[% user.settings.quote_replies.value FILTER js %]',
       zoom_textareas: [% user.settings.zoom_textareas.value == "on" ? "true" : "false" %],
-      remember_collapsed: [% user.settings.ui_remember_collapsed.value == "on" ? "true" : "false" %]
+      remember_collapsed: [% user.settings.ui_remember_collapsed.value == "on" ? "true" : "false" %],
+      autosize_comments: [% user.settings.autosize_comments.value == "on" ? "true" : "false" %]
     }
   };
   [% IF user.id %]

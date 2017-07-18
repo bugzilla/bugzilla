@@ -178,8 +178,6 @@
   'style',
   'onload',
   'title',
-  '" &ndash; $header" IF header',
-  'subheader',
   'header_addl_info',
   'message',
 ],

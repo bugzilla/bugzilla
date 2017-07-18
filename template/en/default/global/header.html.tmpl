@@ -238,7 +238,6 @@
 
 <div id="header">
 
-[% IF user.settings.skin.value == 'Mozilla' || user.settings.skin.value == 'Mozilla-OpenSans' %]
   <div class="wrapper">
     <table border="0" cellspacing="0" cellpadding="0" id="titles">
     <tr>
@@ -325,65 +324,14 @@
     [% PROCESS "global/common-links.html.tmpl" qs_suffix = "_top" %]
 
   </div>
-
-[% ELSE %]
-
-[% INCLUDE global/banner.html.tmpl %]
-
-<table border="0" cellspacing="0" cellpadding="0" id="titles">
-<tr>
-    <td id="title">
-      <p>[% terms.BugzillaTitle %]
-      [% Hook.process("message") %]
-      [% " &ndash; $header" IF header %]</p>
-    </td>
-
-  [% IF subheader %]
-    <td id="subtitle">
-      <p class="subheader">[% subheader %]</p>
-    </td>
-  [% END %]
-
-  [% IF header_addl_info %]
-    <td id="information">
-      <p class="header_addl_info">[% header_addl_info %]</p>
-    </td>
-  [% END %]
-</tr>
-</table>
-
-<table id="lang_links_container" cellpadding="0" cellspacing="0"
-       class="bz_default_hidden"><tr><td>
-[% IF Bugzilla.languages.size > 1 %]
-  <ul class="links">
-  [% FOREACH lang = Bugzilla.languages.sort %]
-    <li>[% IF NOT loop.first %]<span class="separator"> | </span>[% END %]
-    [% IF lang == current_language %]
-      <span class="lang_current">[% lang FILTER html FILTER upper %]</span>
-    [% ELSE %]
-      <a href="#" onclick="set_language('[% lang FILTER none %]');">
-       [%- lang FILTER html FILTER upper %]</a>
-    [% END %]
-    </li>
-  [% END %]
-  </ul>
-[% END %]
-</td></tr></table>
-
-[% PROCESS "global/common-links.html.tmpl" qs_suffix = "_top" %]
-
-[% END %]
-
 </div> [%# header %]
 
 <div id="bugzilla-body">
 
 [%# in most cases the "header" variable provides redundant information, however
   # there are exceptions where not displaying this text is problematic. %]
-[% IF (user.settings.skin.value == 'Mozilla' || user.settings.skin.value == 'Mozilla-OpenSans')
-      && template.name.match('^attachment/')
-      && !header.match('^Bug&nbsp;\d+$')
-%]
+[% IF template.name.match('^attachment/')
+      && !header.match('^Bug&nbsp;\d+$') %]
   <h2>[% header FILTER none %]</h2>
 [% END %]
 

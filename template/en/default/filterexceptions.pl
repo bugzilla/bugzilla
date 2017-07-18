@@ -178,7 +178,6 @@
   'style',
   'onload',
   'title',
-  'header_addl_info',
   'message',
 ],
 

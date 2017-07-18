@@ -30,9 +30,9 @@ sub rest_resources {
     return [
         # return all the products accessible by the user.
         # required by new-bug
-        qr{^/bug_modal/products}, {
+        qr{^/bug_modal/initial_field_values}, {
             GET => {
-                method => 'products'
+                method => 'initial_field_values'
             },
         },
 
@@ -82,9 +82,12 @@ sub rest_resources {
     ]
 }
 
-sub products {
+sub initial_field_values {
     my $user = Bugzilla->user;
-    return { products => _name($user->get_enterable_products) };
+    return {
+        products => _name($user->get_enterable_products),
+        keywords => _name([Bugzilla::Keyword->get_all()]),
+    };
 }
 
 sub product_info {
@@ -103,8 +106,10 @@ sub product_info {
             description => $_->description,
         }
     } @{ $product->components };
-    my @versions = map { { name => $_->name } } grep { $_->is_active } @{ $product->versions };
-    return { components => \@components, versions => \@versions };
+    return {
+        components => \@components,
+        versions   => _name($product->versions),
+    };
 }
 
 # everything we need for edit mode in a single call, returning just the fields

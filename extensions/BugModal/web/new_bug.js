@@ -1,20 +1,18 @@
+var initial = {}
 var comp_desc = {}
 
-function load_products(query, callback) {
+$(document).ready(function() {
     bugzilla_ajax(
             {
-                url: 'rest/bug_modal/products'
+                url: 'rest/bug_modal/initial_field_values'
             },
             function(data) {
-                callback(data.products);
+                initial = data
             },
             function() {
-                callback();
+                alert("Network issues. Please refresh the page and try again");
             }
         );
-}
-
-$(document).ready(function() {
     var product_sel = $("#product").selectize({
         valueField: 'name',
         labelField: 'name',
@@ -22,7 +20,9 @@ $(document).ready(function() {
         options: [],
         preload: true,
         create: false,
-        load: load_products
+        load: function(query, callback) {
+            callback(initial.products);
+        }
     });
     var component_sel = $("#component").selectize({
         valueField: 'name',
@@ -38,6 +38,19 @@ $(document).ready(function() {
         options: [],
     });
 
+    var keywords_sel = $("#keywords").selectize({
+        delimiter: ', ',
+        valueField: 'name',
+        labelField: 'name',
+        searchField: 'name',
+        options: [],
+        preload: true,
+        create: false,
+        load: function(query, callback) {
+            callback(initial.keywords);
+        }
+    });
+
     product_sel.on("change", function () {
         $('#product-throbber').show();
         $('#component').attr('disabled', true);
@@ -46,7 +59,6 @@ $(document).ready(function() {
                     url: 'rest/bug_modal/product_info?product=' + encodeURIComponent($('#product').val())
                 },
                 function(data) {
-                    product_info = data;
                     $('#product-throbber').hide();
                     $('#component').attr('disabled', false);
                     $('#comp_desc').text('Select a component to read its description.');

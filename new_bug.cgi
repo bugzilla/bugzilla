@@ -42,13 +42,14 @@ use List::MoreUtils qw(uniq);
 
 my $user = Bugzilla->login(LOGIN_REQUIRED);
 
-my $cgi = Bugzilla->cgi;
+my $cgi      = Bugzilla->cgi;
 my $template = Bugzilla->template;
-my $vars = {};
+my $vars     = {};
 
 if (lc($cgi->request_method) eq 'post') {
      my $token = $cgi->param('token');
      check_hash_token($token, ['new_bug']);
+     my @keywords = $cgi->param('keywords');
      my $new_bug = Bugzilla::Bug->create({
                 short_desc   => scalar($cgi->param('short_desc')),
                 product      => scalar($cgi->param('product')),
@@ -57,7 +58,8 @@ if (lc($cgi->request_method) eq 'post') {
                 groups       => [],
                 op_sys       => 'Unspecified',
                 rep_platform => 'Unspecified',
-                version      => join(' ', split('_', scalar($cgi->param('version')))),
+                version      => scalar( $cgi->param('version')),
+                keywords     => \@keywords,
                 cc           => [],
                 comment      => scalar($cgi->param('comment')),
             });

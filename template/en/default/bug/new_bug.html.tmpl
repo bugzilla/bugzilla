@@ -155,7 +155,14 @@
         edit_only = 1
         editable = 1
     %]
-    
+    [%# keywords %]
+    [% INCLUDE bug_modal/field.html.tmpl
+        field = bug_fields.keywords
+        field_type = constants.FIELD_TYPE_MULTI_SELECT
+        edit_only = 1
+        editable = 1
+        help = "describekeywords.cgi"
+    %]
  [% END %]
 [% END %]
 

@@ -12,6 +12,7 @@
     jquery = [ "selectize" ]
     jquery_css = [ "js/jquery/plugins/selectize/selectize.default.css" ]
     javascript_urls = ['extensions/BugModal/web/new_bug.js']
+    style_urls = ['extensions/BugModal/web/new_bug.css']
 %]
 [% PROCESS global/header.html.tmpl %]
 <p>Coming Soon!</p>
@@ -188,6 +189,6 @@
   %]
 
 <div style="display: none" id="xhr-error"></div>
-<button type="submit" id="commit-btn" class="create-btn major">Create New [% terms.Bug %]</button>
+<button type="submit" id="create-btn" class="create-btn major">Create New [% terms.Bug %]</button>
 </form>
 [% PROCESS global/footer.html.tmpl %]

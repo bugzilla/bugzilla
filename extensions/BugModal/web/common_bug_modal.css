@@ -696,9 +696,6 @@ body.platform-Win32 .comment-text, body.platform-Win64 .comment-text {
 }
 
 #add-comment-private,
-#bugzilla-etiquette {
-    float: right;
-}
 
 #comment {
     border: 1px solid #ccc;

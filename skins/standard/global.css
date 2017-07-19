@@ -546,7 +546,7 @@ div.user_match {
 
 .field_label {
     text-align: right;
-    vertical-align: top;
+    vertical-align: middle;
     font-weight: bold;
 }
 .field_help_link {
@@ -830,7 +830,7 @@ a:hover, #header a:hover, #footer a:hover {
     color: #00539f;
 }
 
-select[multiple], textarea, input[type=text], input[type=password],
+select, textarea, input[type=text], input[type=password],
 input[type=email], input[type=url], input[type=number], input:not([type]), .text_input, .yui-ac-input {
     -moz-box-sizing: border-box;
     -webkit-box-sizing: border-box;
@@ -839,16 +839,16 @@ input[type=email], input[type=url], input[type=number], input:not([type]), .text
     border-radius: .25em;
     box-shadow: inset 0 1px rgba(0, 0, 0, 0.1);
     background: white;
-    padding: 4px 3px 5px;
+    padding: 4px;
     color: #404040;
-    vertical-align: top;
+    vertical-align: middle;
 }
 
 select[multiple], .text_input, .yui-ac-input, input {
     font-size: 1em;
 }
 
-select[multiple]:focus, textarea:focus, .text-input:focus, -yui-ac-input:focus, input:focus {
+select:focus, textarea:focus, .text-input:focus, -yui-ac-input:focus, input:focus {
     border-color: #42a4e0;
     -webkit-box-shadow: 0 0 0 2px rgba(73,173,227,0.4);
     -moz-box-shadow: 0 0 0 2px rgba(73,173,227,0.4);
@@ -857,6 +857,40 @@ select[multiple]:focus, textarea:focus, .text-input:focus, -yui-ac-input:focus, 
 
 select, select[multiple] {
     font-size: 12px;
+}
+
+select:not([multiple]) {
+    -moz-appearance: none;
+    -webkit-appearance: none;
+    appearance: none;
+    min-width: 2em;
+    height: 26px;
+    padding-right: 18px;
+    background-image: url(material-icons/ic_unfold_more_18px.svg), linear-gradient(to bottom, #FFF, #EEE);
+    background-position: center right;
+    background-repeat: no-repeat;
+    background-size: 18px 18px, cover;
+    vertical-align: middle;
+}
+
+select:disabled:not([multiple]) {
+    opacity: .6;
+    cursor: not-allowed;
+}
+
+/* Hack to remove dotted outline on Firefox */
+select:-moz-focusring {
+    color: transparent;
+    text-shadow: 0 0 0 #000;
+}
+
+/* Remove the arrow icon on IE */
+select::-ms-expand {
+    display: none;
+}
+
+option {
+    padding: 2px 5px;
 }
 
 hr {
@@ -1547,10 +1581,6 @@ table.tabs {
 }
 
 /* search */
-
-#summary_field.search_field_row input {
-    padding-bottom: 6px;
-}
 
 body {
     margin: 0;

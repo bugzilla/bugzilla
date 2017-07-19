@@ -174,7 +174,7 @@ a.activity-ref {
 
 .module .field {
     margin-top: 4px;
-    vertical-align: top;
+    vertical-align: baseline;
     display: table;
     width: 100%;
 }
@@ -187,7 +187,7 @@ a.activity-ref {
     width: 100px;
     min-width: 100px;
     text-align: right;
-    vertical-align: top;
+    vertical-align: middle;
     padding-right: 10px;
     color: #666;
 }
@@ -279,7 +279,7 @@ input[type="number"] {
 #duplicate-container, #duplicate-actions, #assigned-container,
 #bottom-duplicate-container, #bottom-duplicate-actions {
     display: table-cell;
-    vertical-align: top;
+    vertical-align: middle;
     padding-left: 8px;
 }
 

@@ -27,20 +27,20 @@ our @EXPORT = qw(
     get_bug_role_phids
     get_members_by_bmo_id
     get_project_phid
-    get_revision_by_id
+    get_revisions_by_ids
     intersect
     make_revision_public
     request
     set_project_members
 );
 
-sub get_revision_by_id {
-    my $id = shift;
+sub get_revisions_by_ids {
+    my ($ids) = @_;
 
     my $data = {
         queryKey => 'all',
         constraints => {
-            ids => [ int($id) ]
+            ids => $ids
         }
     };
 
@@ -49,7 +49,7 @@ sub get_revision_by_id {
     ThrowUserError('invalid_phabricator_revision_id')
         unless (exists $result->{result}{data} && @{ $result->{result}{data} });
 
-    return $result->{result}{data}[0];
+    return @{$result->{result}{data}};
 }
 
 sub create_revision_attachment {

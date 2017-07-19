@@ -27,7 +27,7 @@ use Bugzilla::Extension::PhabBugz::Util qw(
     edit_revision_policy
     get_bug_role_phids
     get_project_phid
-    get_revision_by_id
+    get_revisions_by_ids
     intersect
     make_revision_public
     request
@@ -50,7 +50,8 @@ sub revision {
 
     # Obtain more information about the revision from Phabricator
     my $revision_id = $params->{revision};
-    my $revision = get_revision_by_id($revision_id);
+    my $revisions = get_revisions_by_ids([$revision_id]);
+    my $revision = $revisions->[0];
 
     my $revision_phid  = $revision->{phid};
     my $revision_title = $revision->{fields}{title} || 'Unknown Description';

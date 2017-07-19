@@ -715,6 +715,7 @@ body.platform-Win32 .comment-text, body.platform-Win64 .comment-text {
     margin: 0 0 1em;
     max-width: 1024px;
     max-height: 400px;
+    resize: vertical;
 }
 
 #comment-preview {

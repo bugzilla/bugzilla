@@ -20,6 +20,7 @@ use Bugzilla::User;
 use Bugzilla::FlagType;
 use Bugzilla::Series;
 
+use List::Util qw(first);
 use Scalar::Util qw(blessed);
 
 ###############################
@@ -405,6 +406,12 @@ sub flag_types {
     return $self->{'flag_types'};
 }
 
+sub find_first_flag_type {
+    my ($self, $target_type, $name) = @_;
+
+    return first { $_->name eq $name } @{ $self->flag_types->{$target_type} };
+}
+
 sub initial_cc {
     my $self = shift;
     my $dbh = Bugzilla->dbh;
@@ -608,6 +615,17 @@ Component.pm represents a Product Component object.
                           must be unique within the product.
 
  Returns:     Nothing.
+
+
+=item C<find_first_flag_type($target_type, $name).
+
+ Description: Find the first named bug or attachment flag with a given
+              name on this component.
+
+ Params:      $target_type - 'bug' or 'attachment'
+              $name        - the name of the flag
+
+ Returns:     a new Bugzilla::FlagType object or undef
 
 =item C<set_description($new_desc)>
 

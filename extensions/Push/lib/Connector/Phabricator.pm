@@ -37,25 +37,13 @@ sub should_send {
 
     return 0 unless Bugzilla->params->{phabricator_enabled};
 
-    if (!(  $message->routing_key
-            =~ /^(?:attachment|bug)\.modify:.*\bbug_group\b/
-        )
-        )
-    {
-        return 0;
-    }
+    return 0 unless $message->routing_key =~ /^(?:attachment|bug)\.modify:.*\bbug_group\b/;
 
     my $data = $message->payload_decoded;
     my $bug_data = $self->_get_bug_data($data) || return 0;
     my $bug = Bugzilla::Bug->new( { id => $bug_data->{id}, cache => 1 } );
-    my $has_phab_stub_attachment
-        = $bug->has_attachment_with_mimetype(PHAB_CONTENT_TYPE);
 
-    if ($has_phab_stub_attachment) {
-        return 1;
-    }
-
-    return 0;
+    return $bug->has_attachment_with_mimetype(PHAB_CONTENT_TYPE);
 }
 
 sub send {

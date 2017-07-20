@@ -80,8 +80,8 @@ use constant VALIDATOR_DEPENDENCIES => {
 
 with 'Bugzilla::Elastic::Role::ChildObject';
 
-use constant ES_TYPE        => 'comment';
-use constant ES_PARENT_TYPE => 'bug';
+use constant ES_TYPE         => 'comment';
+use constant ES_PARENT_CLASS => 'Bugzilla::Bug';
 
 sub ES_OBJECTS_AT_ONCE { 50 }
 

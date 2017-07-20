@@ -43,11 +43,9 @@ if ($progress_bar) {
 }
 
 my $indexer = Bugzilla::Elastic::Indexer->new(
-    $debug_sql ? ( debug_sql => 1 ) : (),
+    $debug_sql    ? ( debug_sql => 1 )                      : (),
     $progress_bar ? ( progress_bar => 'Term::ProgressBar' ) : (),
 );
-
-$indexer->create_index;
 
 my $run_time = time;
 my $loop = IO::Async::Loop->new;

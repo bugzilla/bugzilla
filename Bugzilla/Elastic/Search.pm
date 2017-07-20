@@ -31,7 +31,6 @@ has '_order'       => ( is => 'lazy', init_arg => undef );
 has 'invalid_order_columns' => ( is => 'lazy' );
 
 with 'Bugzilla::Elastic::Role::HasClient';
-with 'Bugzilla::Elastic::Role::HasIndexName';
 with 'Bugzilla::Elastic::Role::Search';
 
 my @SUPPORTED_FIELDS = qw(
@@ -92,9 +91,9 @@ sub data {
     my $body = $self->es_query;
     my $result = eval {
         $self->client->search(
-            index => $self->index_name,
-            type => 'bug',
-            body => $body,
+            index => Bugzilla::Bug->ES_INDEX,
+            type  => Bugzilla::Bug->ES_TYPE,
+            body  => $body,
         );
     };
     die $@ unless $result;

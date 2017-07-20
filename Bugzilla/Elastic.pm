@@ -12,7 +12,6 @@ use Bugzilla::Elastic::Search;
 use Bugzilla::Util qw(trick_taint);
 
 with 'Bugzilla::Elastic::Role::HasClient';
-with 'Bugzilla::Elastic::Role::HasIndexName';
 
 sub suggest_users {
     my ($self, $text) = @_;
@@ -30,7 +29,7 @@ sub suggest_users {
 
     my $result = eval {
         $self->client->suggest(
-            index => $self->index_name,
+            index => Bugzilla::User->ES_INDEX,
             body  => {
                 $field => {
                     text       => $text,

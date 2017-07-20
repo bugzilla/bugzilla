@@ -11,6 +11,10 @@ use Role::Tiny;
 
 with 'Bugzilla::Elastic::Role::Object';
 
-requires qw(ES_PARENT_TYPE es_parent_id);
+requires qw(ES_PARENT_CLASS es_parent_id);
+
+sub ES_PARENT_TYPE { $_[0]->ES_PARENT_CLASS->ES_TYPE }
+sub ES_INDEX       { $_[0]->ES_PARENT_CLASS->ES_INDEX }
+sub ES_SETTINGS    { $_[0]->ES_PARENT_CLASS->ES_SETTINGS }
 
 1;

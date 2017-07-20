@@ -11,10 +11,10 @@ use Moo;
 use List::MoreUtils qw(natatime);
 use Storable qw(dclone);
 use Scalar::Util qw(looks_like_number);
+use Time::HiRes;
 use namespace::clean;
 
 with 'Bugzilla::Elastic::Role::HasClient';
-with 'Bugzilla::Elastic::Role::HasIndexName';
 
 has 'shadow_dbh' => ( is => 'lazy' );
 
@@ -28,94 +28,34 @@ has 'progress_bar' => (
     predicate => 'has_progress_bar',
 );
 
-sub create_index {
-    my ($self) = @_;
-    my $indices = $self->client->indices;
 
-    $indices->create(
-        index => $self->index_name,
-        body => {
-            settings => {
-                number_of_shards => 2,
-                analysis => {
-                    filter => {
-                        asciifolding_original => {
-                            type              => "asciifolding",
-                            preserve_original => \1,
-                        },
-                    },
-                    analyzer => {
-                        autocomplete => {
-                            type      => 'custom',
-                            tokenizer => 'keyword',
-                            filter    => ['lowercase', 'asciifolding_original'],
-                        },
-                        folding => {
-                            tokenizer => 'standard',
-                            filter    => ['standard', 'lowercase', 'asciifolding_original'],
-                        },
-                        bz_text_analyzer => {
-                            type             => 'standard',
-                            filter           => ['lowercase', 'stop'],
-                            max_token_length => '20'
-                        },
-                        bz_equals_analyzer => {
-                            type   => 'custom',
-                            filter => ['lowercase'],
-                            tokenizer => 'keyword',
-                        },
-                        whiteboard_words => {
-                            type => 'custom',
-                            tokenizer => 'whiteboard_words_pattern',
-                            filter => ['stop']
-                        },
-                        whiteboard_shingle_words => {
-                            type => 'custom',
-                            tokenizer => 'whiteboard_words_pattern',
-                            filter => ['stop', 'shingle', 'lowercase']
-                        },
-                        whiteboard_tokens => {
-                            type => 'custom',
-                            tokenizer => 'whiteboard_tokens_pattern',
-                            filter => ['stop', 'lowercase']
-                        },
-                        whiteboard_shingle_tokens => {
-                            type => 'custom',
-                            tokenizer => 'whiteboard_tokens_pattern',
-                            filter => ['stop', 'shingle', 'lowercase']
-                        }
-                    },
-                    tokenizer => {
-                        whiteboard_tokens_pattern => {
-                            type => 'pattern',
-                            pattern => '\\s*([,;]*\\[|\\][\\s\\[]*|[;,])\\s*'
-                        },
-                        whiteboard_words_pattern => {
-                            type => 'pattern',
-                            pattern => '[\\[\\];,\\s]+'
-                        },
-                    },
-                },
-            },
-        }
-    ) unless $indices->exists(index => $self->index_name);
+sub _create_index {
+    my ($self, $class) = @_;
+    my $indices    = $self->client->indices;
+    my $index_name = $class->ES_INDEX;
+
+    unless ($indices->exists(index => $index_name)) {
+        $indices->create(
+            index => $index_name,
+            body  => { settings => $class->ES_SETTINGS },
+        );
+    }
 }
 
 sub _bulk_helper {
     my ($self, $class) = @_;
 
     return $self->client->bulk_helper(
-        index => $self->index_name,
+        index => $class->ES_INDEX,
         type  => $class->ES_TYPE,
     );
 }
-
 
 sub _find_largest {
     my ($self, $class, $field) = @_;
 
     my $result = $self->client->search(
-        index => $self->index_name,
+        index => $class->ES_INDEX,
         type  => $class->ES_TYPE,
         body  => {
             aggs => { $field => { extended_stats => { field => $field } } },
@@ -147,7 +87,7 @@ sub _find_largest_id {
     return $self->_find_largest($class, $class->ID_FIELD);
 }
 
-sub put_mapping {
+sub _put_mapping {
     my ($self, $class) = @_;
 
     my %body = ( properties => scalar $class->ES_PROPERTIES );
@@ -156,7 +96,7 @@ sub put_mapping {
     }
 
     $self->client->indices->put_mapping(
-        index => $self->index_name,
+        index => $class->ES_INDEX,
         type => $class->ES_TYPE,
         body => \%body,
     );
@@ -178,13 +118,15 @@ sub _debug_sql {
 sub bulk_load {
     my ( $self, $class ) = @_;
 
+    $self->_create_index($class);
+
     my $bulk        = $self->_bulk_helper($class);
     my $last_mtime  = $self->_find_largest_mtime($class);
     my $last_id     = $self->_find_largest_id($class);
     my $new_ids     = $self->_select_all_ids($class, $last_id);
     my $updated_ids = $self->_select_updated_ids($class, $last_mtime);
 
-    $self->put_mapping($class);
+    $self->_put_mapping($class);
     $self->_bulk_load_ids($bulk, $class, $new_ids) if @$new_ids;
     $self->_bulk_load_ids($bulk, $class, $updated_ids) if @$updated_ids;
 
@@ -213,7 +155,8 @@ sub _select_updated_ids {
 sub bulk_load_ids {
     my ($self, $class, $ids) = @_;
 
-    $self->put_mapping($class);
+    $self->_create_index($class);
+    $self->_put_mapping($class);
     $self->_bulk_load_ids($self->_bulk_helper($class), $class, $ids);
 }
 
@@ -238,7 +181,6 @@ sub _bulk_load_ids {
     }
 
     my $total = 0;
-    use Time::HiRes;
     my $start = time;
     while (my @ids = $iter->()) {
         if ($progress_bar) {

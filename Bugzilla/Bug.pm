@@ -302,6 +302,73 @@ with 'Bugzilla::Elastic::Role::Object';
 
 sub ES_TYPE {'bug'}
 
+sub ES_INDEX { Bugzilla->params->{elasticsearch_index} }
+
+sub ES_SETTINGS {
+    return {
+        number_of_shards => 2,
+        analysis         => {
+            filter => {
+                asciifolding_original => {
+                    type              => "asciifolding",
+                    preserve_original => \1,
+                },
+            },
+            analyzer => {
+                autocomplete => {
+                    type      => 'custom',
+                    tokenizer => 'keyword',
+                    filter    => [ 'lowercase', 'asciifolding_original' ],
+                },
+                folding => {
+                    tokenizer => 'standard',
+                    filter    => [ 'standard', 'lowercase', 'asciifolding_original' ],
+                },
+                bz_text_analyzer => {
+                    type             => 'standard',
+                    filter           => [ 'lowercase', 'stop' ],
+                    max_token_length => '20'
+                },
+                bz_equals_analyzer => {
+                    type      => 'custom',
+                    filter    => ['lowercase'],
+                    tokenizer => 'keyword',
+                },
+                whiteboard_words => {
+                    type      => 'custom',
+                    tokenizer => 'whiteboard_words_pattern',
+                    filter    => ['stop']
+                },
+                whiteboard_shingle_words => {
+                    type      => 'custom',
+                    tokenizer => 'whiteboard_words_pattern',
+                    filter    => [ 'stop', 'shingle', 'lowercase' ]
+                },
+                whiteboard_tokens => {
+                    type      => 'custom',
+                    tokenizer => 'whiteboard_tokens_pattern',
+                    filter    => [ 'stop', 'lowercase' ]
+                },
+                whiteboard_shingle_tokens => {
+                    type      => 'custom',
+                    tokenizer => 'whiteboard_tokens_pattern',
+                    filter    => [ 'stop', 'shingle', 'lowercase' ]
+                }
+            },
+            tokenizer => {
+                whiteboard_tokens_pattern => {
+                    type    => 'pattern',
+                    pattern => '\\s*([,;]*\\[|\\][\\s\\[]*|[;,])\\s*'
+                },
+                whiteboard_words_pattern => {
+                    type    => 'pattern',
+                    pattern => '[\\[\\];,\\s]+'
+                },
+            },
+        },
+    };
+}
+
 sub _bz_field {
     my ($field, @fields) = @_;
 

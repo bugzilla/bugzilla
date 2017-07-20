@@ -9,7 +9,7 @@ package Bugzilla::Elastic::Role::Object;
 use 5.10.1;
 use Role::Tiny;
 
-requires qw(ES_TYPE ES_PROPERTIES es_document);
+requires qw(ES_TYPE ES_INDEX ES_SETTINGS ES_PROPERTIES es_document);
 requires qw(ID_FIELD DB_TABLE);
 
 sub ES_OBJECTS_AT_ONCE { 100 }
@@ -44,5 +44,7 @@ around 'es_document' => sub {
 
     return $doc;
 };
+
+
 
 1;

@@ -126,6 +126,11 @@ use constant EXTRA_REQUIRED_FIELDS => qw(is_enabled);
 
 with 'Bugzilla::Elastic::Role::Object';
 
+sub ES_INDEX {
+    my ($class) = @_;
+    sprintf("%s_%s", Bugzilla->params->{elasticsearch_index}, $class->ES_TYPE);
+}
+
 sub ES_TYPE { 'user' }
 
 sub ES_OBJECTS_AT_ONCE { 5000 }
@@ -151,6 +156,31 @@ sub ES_SELECT_ALL_SQL {
     my $table = $class->DB_TABLE;
 
     return ("SELECT $id FROM $table WHERE $id > ? AND is_enabled AND NOT disabledtext ORDER BY $id", [$last_id // 0]);
+}
+
+sub ES_SETTINGS {
+    return {
+        number_of_shards => 2,
+        analysis         => {
+            filter => {
+                asciifolding_original => {
+                    type              => "asciifolding",
+                    preserve_original => \1,
+                },
+            },
+            analyzer => {
+                autocomplete => {
+                    type      => 'custom',
+                    tokenizer => 'keyword',
+                    filter    => [ 'lowercase', 'asciifolding_original' ],
+                },
+                folding => {
+                    tokenizer => 'standard',
+                    filter    => [ 'standard', 'lowercase', 'asciifolding_original' ],
+                },
+            }
+        }
+    };
 }
 
 sub ES_PROPERTIES {

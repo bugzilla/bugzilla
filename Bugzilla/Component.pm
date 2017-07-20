@@ -617,7 +617,7 @@ Component.pm represents a Product Component object.
  Returns:     Nothing.
 
 
-=item C<find_first_flag_type($target_type, $name).
+=item C<find_first_flag_type($target_type, $name)>
 
  Description: Find the first named bug or attachment flag with a given
               name on this component.

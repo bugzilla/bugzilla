@@ -50,8 +50,8 @@ sub revision {
 
     # Obtain more information about the revision from Phabricator
     my $revision_id = $params->{revision};
-    my $revisions = get_revisions_by_ids([$revision_id]);
-    my $revision = $revisions->[0];
+    my @revisions = get_revisions_by_ids([$revision_id]);
+    my $revision = $revisions[0];
 
     my $revision_phid  = $revision->{phid};
     my $revision_title = $revision->{fields}{title} || 'Unknown Description';

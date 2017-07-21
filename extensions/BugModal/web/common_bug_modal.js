@@ -871,9 +871,6 @@ $(function() {
             $.scrollTo($('#comment'), function() { $('#comment').focus(); });
         });
 
-    // auto-enlarge comment area (up to its max-height)
-    autosize($('#comment'));
-
     // add comment --> private
     $('#add-comment-private-cb')
         .click(function(event) {

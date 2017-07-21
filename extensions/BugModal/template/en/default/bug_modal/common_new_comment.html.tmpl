@@ -39,17 +39,19 @@
       Preview
       <img id="preview-throbber" src="extensions/BugModal/web/throbber.gif" width="16" height="11" style="display:none">
     </li>
+    <!-- <li id="comment-guide-tab" role="tab" tabindex="-2" aria-controls="comment-guide-tabpanel" aria-selected="false">
+      <a href="page.cgi?id=etiquette.html" target="_blank" tabindex="-1">
+      Comments Subject to Etiquette and Contributor Guidelines</a>
+    </li> -->
   </ul>
+<!--   <div id="bugzilla-etiquette">
+    
+  </div> -->
 
   <div id="comment-edit-tabpanel" class="comment-tabpanel" role="tabpanel" aria-labelledby="comment-edit-tab">
-    <textarea rows="5" cols="80" name="comment" id="comment" aria-labelledby="comment-edit-tab"></textarea>
+    <textarea rows="5" [%+ UNLESS disable_cols %] cols="80" [% END +%] name="comment" id="comment" aria-labelledby="comment-edit-tab"></textarea>
   </div>
   <div id="comment-preview-tabpanel" class="comment-tabpanel" role="tabpanel" aria-labelledby="comment-preview-tab" style="display:none">
     <pre id="comment-preview" class="comment-text"></pre>
-  </div>
-
-  <div id="bugzilla-etiquette">
-    <a href="page.cgi?id=etiquette.html" target="_blank" tabindex="-1">
-      Comments Subject to Etiquette and Contributor Guidelines</a>
   </div>
 </div>

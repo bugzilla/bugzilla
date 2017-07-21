@@ -692,7 +692,7 @@ body.platform-Win32 .comment-text, body.platform-Win64 .comment-text {
 /* add comment */
 
 #add-comment {
-    margin-top: 20px;
+    margin-top: 10px;
 }
 
 #add-comment-private,

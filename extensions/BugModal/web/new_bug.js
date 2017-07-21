@@ -16,6 +16,7 @@ $(document).ready(function() {
     var product_sel = $("#product").selectize({
         valueField: 'name',
         labelField: 'name',
+        placeholder: 'Product',
         searchField: 'name',
         options: [],
         preload: true,
@@ -27,6 +28,7 @@ $(document).ready(function() {
     var component_sel = $("#component").selectize({
         valueField: 'name',
         labelField: 'name',
+        placeholder: 'Component',
         searchField: 'name',
         options: [],
     });
@@ -34,6 +36,7 @@ $(document).ready(function() {
     var version_sel = $("#version").selectize({
         valueField: 'name',
         labelField: 'name',
+        placeholder: 'Version',
         searchField: 'name',
         options: [],
     });
@@ -42,6 +45,7 @@ $(document).ready(function() {
         delimiter: ', ',
         valueField: 'name',
         labelField: 'name',
+        placeholder: 'Keywords',
         searchField: 'name',
         options: [],
         preload: true,
@@ -93,9 +97,13 @@ $(document).ready(function() {
     $('.create-btn')
         .click(function(event) {
             event.preventDefault();
-            if (document.newbugform.checkValidity && !document.newbugform.checkValidity())
+            if (document.newbugform.checkValidity && !document.newbugform.checkValidity()) {
+                alert("Required fields are empty");
                 return;
-            this.form.submit()
+            }
+            else {
+                this.form.submit()
+            }
         });
     
 });

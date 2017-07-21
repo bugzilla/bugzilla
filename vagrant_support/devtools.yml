@@ -9,7 +9,18 @@
 - cpanm: name=File::Next notest=true locallib=/home/vagrant/perl executable=/usr/local/bin/cpanm
 - cpanm: name=Sys::SigAction notest=true locallib=/home/vagrant/perl executable=/usr/local/bin/cpanm
 - cpanm: name=Lexical::Persistence notest=true locallib=/home/vagrant/perl executable=/usr/local/bin/cpanm
+- cpanm: name=Data::Printer notest=true locallib=/home/vagrant/perl executable=/usr/local/bin/cpanm
+- cpanm: name=Devel::REPL::Plugin::ReadLineHistory::WithoutExpansion notest=true locallib=/home/vagrant/perl executable=/usr/local/bin/cpanm
+
+- name: fix ownership of repl stuff
+  file: path=/home/vagrant/perl owner=vagrant group=vagrant recurse=true
 
 - name: copy re.pl
   copy: src=re.pl dest=/usr/local/bin/re.pl mode=0755
+
+- name: mkdir .re.pl
+  file: path=/home/vagrant/.re.pl state=directory owner=vagrant group=vagrant mode=0775
+
+- name: copy .re.pl/repl.rc
+  copy: src=repl.rc dest=/home/vagrant/.re.pl/repl.rc mode=0644
 

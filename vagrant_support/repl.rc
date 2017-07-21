@@ -1,0 +1,28 @@
+#!perl
+# vim: set ft=perl:
+use Bugzilla;
+use Bugzilla::Constants;
+Bugzilla->usage_mode(USAGE_MODE_CMDLINE);
+Bugzilla->extensions;
+use DDP return_value => 'void', colored => 1;
+
+my @plugins = qw(
+    Colors
+    Timing
+    Completion
+    CompletionDriver::INC
+    CompletionDriver::LexEnv
+    CompletionDriver::Keywords
+    CompletionDriver::Methods
+    History
+    LexEnv
+    DDS
+    Packages
+    Commands
+    MultiLine::PPI
+    ReadLineHistory::WithoutExpansion
+    Peek
+);
+
+$_REPL->load_plugin($_) for @plugins;
+

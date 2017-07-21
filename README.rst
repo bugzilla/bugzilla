@@ -10,6 +10,7 @@ BMO is Mozilla's highly customized version of Bugzilla.
       1.1  Setup Vagrant VMs
       1.2  Making Changes and Seeing them
       1.3  Technical Details
+      1.4  Perl Shell (re.pl, repl)
     2  Docker Container
       2.1  Container Arguments
       2.2  Environmental Variables
@@ -94,6 +95,55 @@ configured to use memcached.
 
 The push connector is not currently configured, nor is the Pulse publisher.
 
+
+Perl Shell (re.pl, repl)
+------------------------
+
+Installed on the vagrant vm is also a program called re.pl.
+
+re.pl an interactive perl shell (somtimes called a REPL (short for Read-Eval-Print-Loop)).
+It loads Bugzilla.pm and you can call Bugzilla internal API methods from it, an example session is reproduced below:
+
+.. code-block:: plain
+
+   re.pl
+   $ my $product = Bugzilla::Product->new({name => "Firefox"});
+   Took 0.0262260437011719 seconds.
+
+   $Bugzilla_Product1 = Bugzilla::Product=HASH(0x7e3c950);
+
+   $ $product->name
+   Took 0.000483036041259766 seconds.
+
+   Firefox
+
+It supports tab completion for file names, method names and so on. For more information see `Devel::REPL`_.
+
+You can use the 'p' command (provided by `Data::Printer`_) to inspect variables as well.
+
+.. code-block:: plain
+
+  $ p @INC
+  [
+      [0]  ".",
+      [1]  "lib",
+      [2]  "local/lib/perl5/x86_64-linux-thread-multi",
+      [3]  "local/lib/perl5",
+      [4]  "/home/vagrant/perl/lib/perl5/x86_64-linux-thread-multi",
+      [5]  "/home/vagrant/perl/lib/perl5",
+      [6]  "/vagrant/local/lib/perl5/x86_64-linux-thread-multi",
+      [7]  "/vagrant/local/lib/perl5",
+      [8]  "/usr/local/lib64/perl5",
+      [9]  "/usr/local/share/perl5",
+      [10] "/usr/lib64/perl5/vendor_perl",
+      [11] "/usr/share/perl5/vendor_perl",
+      [12] "/usr/lib64/perl5",
+      [13] "/usr/share/perl5",
+      [14] sub { ... }
+  ]
+
+.. _`Devel::REPL`: https://metacpan.org/pod/Devel::REPL
+.. _`Data::Printer`: https://metacpan.org/pod/Data::Printer
 
 Docker Container
 ================

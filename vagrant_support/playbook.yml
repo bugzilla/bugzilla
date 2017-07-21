@@ -136,6 +136,8 @@
         - pkgconfig
         - rpm-build
         - graphviz
+        - ncurses-devel
+        - readline-devel
 
     - name: fetch cpanm
       get_url:

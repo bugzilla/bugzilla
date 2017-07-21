@@ -2,3 +2,14 @@
 - name: copy bashrc
   copy: src=bashrc dest=/home/vagrant/.bashrc mode=0644
 
+- cpanm: name=Devel::REPL notest=true locallib=/home/vagrant/perl executable=/usr/local/bin/cpanm
+- cpanm: name=Term::ReadLine::Gnu notest=true locallib=/home/vagrant/perl executable=/usr/local/bin/cpanm
+- cpanm: name=PPI notest=true locallib=/home/vagrant/perl executable=/usr/local/bin/cpanm
+- cpanm: name=Data::Dumper::Concise notest=true locallib=/home/vagrant/perl executable=/usr/local/bin/cpanm
+- cpanm: name=File::Next notest=true locallib=/home/vagrant/perl executable=/usr/local/bin/cpanm
+- cpanm: name=Sys::SigAction notest=true locallib=/home/vagrant/perl executable=/usr/local/bin/cpanm
+- cpanm: name=Lexical::Persistence notest=true locallib=/home/vagrant/perl executable=/usr/local/bin/cpanm
+
+- name: copy re.pl
+  copy: src=re.pl dest=/usr/local/bin/re.pl mode=0755
+

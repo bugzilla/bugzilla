@@ -57,12 +57,15 @@ if ($bug_count == 0) {
     exit 1;
 }
 
-print STDERR <<EOF;
+# if running from commmand line
+if (-t STDIN) {
+    print STDERR <<EOF;
 About to resolve $bug_count bugs as $resolution
 
 Press <Ctrl-C> to stop or <Enter> to continue...
 EOF
-getc();
+    getc();
+}
 
 foreach my $row (@$data) {
     my $bug_id = shift @$row;

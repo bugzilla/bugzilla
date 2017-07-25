@@ -7,7 +7,7 @@ indent_style = space
 indent_size = 4
 
 # 2 space indentation style for .tmpl files
-[.tmpl]
+[.{tmpl,yml}]
 indent_style = space
 indent_size = 2
 

@@ -31,7 +31,8 @@ foreach my $key (keys %ENV) {
 }
 
 write_localconfig(\%localconfig);
-system("perl", "checksetup.pl", "--no-templates", "--no-permissions", '--no-assets');
+sleep(10);
+system('perl', 'checksetup.pl', '--no-templates', '--no-permissions');
 
 my $cmd = shift @ARGV or die "usage: init.pl CMD";
 my $method = "run_$cmd";

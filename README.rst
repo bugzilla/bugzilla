@@ -4,6 +4,9 @@ BMO: bugzilla.mozilla.org
 
 BMO is Mozilla's highly customized version of Bugzilla.
 
+.. image:: https://circleci.com/gh/mozilla-bteam/bmo/tree/master.svg?style=svg
+    :target: https://circleci.com/gh/mozilla-bteam/bmo/tree/master
+
 .. contents::
 ..
     1  Using Vagrant (For Development)

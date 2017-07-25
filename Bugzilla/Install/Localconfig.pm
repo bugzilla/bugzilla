@@ -44,11 +44,16 @@ sub _sensible_group {
 }
 
 sub _migrate_param {
-  my ($name, $fallback_value) = @_;
+    my ( $name, $fallback_value ) = @_;
 
-  return sub {
-      return Bugzilla->params->{$name} // $fallback_value;
-  };
+    return sub {
+        if ( Bugzilla->can('params') ) {
+            return Bugzilla->params->{$name} // $fallback_value;
+        }
+        else {
+            return $fallback_value;
+        }
+    };
 }
 
 use constant LOCALCONFIG_VARS => (

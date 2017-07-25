@@ -2544,8 +2544,11 @@ sub install_filesystem {
     my $contribute = eval {
         $json->decode(scalar read_file(bz_locations()->{cgi_path} . "/contribute.json"));
     };
-    my $commit = `git rev-parse HEAD`;
-    chomp $commit;
+    my $commit = $ENV{CIRCLE_SHA1};
+    unless ($commit) {
+        $commit = `git rev-parse HEAD`;
+        chomp $commit;
+    }
 
     if (!$contribute) {
         die "Missing or invalid contribute.json file";
@@ -2555,7 +2558,7 @@ sub install_filesystem {
         source  => $contribute->{repository}{url},
         version => BUGZILLA_VERSION,
         commit  => $commit // "unknown",
-        build   => $ENV{BUGZILLA_CI_BUILD} // "unknown",
+        build   => $ENV{CIRCLE_BUILD_NUM} // "unknown",
     };
 
     $create_files->{'version.json'} = {

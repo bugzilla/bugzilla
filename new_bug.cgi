@@ -46,6 +46,11 @@ my $cgi      = Bugzilla->cgi;
 my $template = Bugzilla->template;
 my $vars     = {};
 
+unless ($user->in_group('new-bug-testers')) {
+    print $cgi->redirect(correct_urlbase());
+    exit;
+}
+
 if (lc($cgi->request_method) eq 'post') {
      my $token = $cgi->param('token');
      check_hash_token($token, ['new_bug']);

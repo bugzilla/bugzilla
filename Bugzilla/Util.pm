@@ -26,7 +26,7 @@ use base qw(Exporter);
                              validate_email_syntax clean_text
                              get_text template_var disable_utf8
                              enable_utf8 detect_encoding email_filter
-                             round);
+                             round extract_nicks);
 
 use Bugzilla::Constants;
 use Bugzilla::RNG qw(irand);
@@ -881,6 +881,28 @@ sub round {
             : ceil($_ - ROUND_HALF);
     } @_;
     return (wantarray) ? @res : $res[0];
+}
+
+sub extract_nicks {
+    my ($name) = @_;
+    return () unless defined $name;
+    my @nicks = (
+        $name =~ /
+            # This negative lookbehind lets us
+            # match colons that are not followed by numbers.
+            (?<!\d)
+            :
+            # try tp capture a "word", plus some symbols
+            # this covers most everything people use for ircnicks
+            # in bmo.
+            ([\p{IsAlnum}|._-]+)
+            # require a word terminator, which
+            # can be the end of the string or some punctuation.
+            \b
+        /mgx
+    );
+
+    return grep { defined $_ } @nicks;
 }
 
 1;

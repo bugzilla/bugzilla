@@ -215,7 +215,7 @@ sub es_document {
         },
     };
     my $name = $self->name;
-    my @nicks = defined($name) ? ( $name =~ /:(\w+)\b/mg ) : ();
+    my @nicks = extract_nicks($name);
 
     if (@nicks) {
         $doc->{suggest_nick} = {

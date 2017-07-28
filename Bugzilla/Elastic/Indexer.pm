@@ -194,7 +194,7 @@ sub _bulk_load_ids {
         my $objects = $class->new_from_list(\@ids);
         foreach my $object (@$objects) {
             my %doc = (
-                id     => $object->id,
+                id     => $object->es_id,
                 source => scalar $object->es_document($mtime),
             );
 

@@ -25,6 +25,11 @@ sub ES_SELECT_ALL_SQL {
 
 requires qw(ES_SELECT_UPDATED_SQL);
 
+sub es_id {
+    my ($self) = @_;
+    return join('_', $self->ES_TYPE, $self->id);
+}
+
 around 'ES_PROPERTIES' => sub {
     my $orig = shift;
     my $self = shift;
@@ -41,6 +46,7 @@ around 'es_document' => sub {
 
     $doc->{es_mtime} = $mtime;
     $doc->{$self->ID_FIELD} = $self->id;
+    $doc->{_id} = $self->es_id;
 
     return $doc;
 };

@@ -119,7 +119,7 @@ sub ES_SELECT_UPDATED_SQL {
 sub es_parent_id {
     my ($self) = @_;
 
-    return $self->bug_id,
+    return $self->ES_PARENT_CLASS->ES_TYPE . '_' . $self->bug_id,
 }
 
 sub es_document {

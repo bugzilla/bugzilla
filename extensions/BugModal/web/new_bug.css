@@ -10,6 +10,10 @@
     padding: 8px;
 }
 
+#reset {
+    padding: 1.5px 8px;
+}
+
 .new-bug-container {
     display: flex;
     display: -webkit-flex;
@@ -41,6 +45,7 @@
     flex: 6 1 30px;
     margin:5px;
 }
-input, label {
-    display: block; !important
+
+.file-container {
+    padding: 8px;
 }

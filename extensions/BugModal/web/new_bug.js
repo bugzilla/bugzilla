@@ -105,5 +105,21 @@ $(document).ready(function() {
                 this.form.submit()
             }
         });
+
+    $('#data').on("change", function () {
+        if (!$('#data').val()) {
+            return
+        } else {
+            document.getElementById('reset').style.display = "inline-block";
+            $("#description").prop('required',true);
+        }
+    });
+    $('#reset')
+        .click(function(event) {
+            event.preventDefault();
+            document.getElementById('data').value = "";
+            document.getElementById('reset').style.display = "none";
+            $("#description").prop('required',false);
+        });
     
 });

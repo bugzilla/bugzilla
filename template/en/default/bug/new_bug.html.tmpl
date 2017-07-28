@@ -18,7 +18,7 @@
 
 [% IF user.id %]
   <div style="display: none" id="xhr-error"></div>
-  <form name="newbugform" id="newbugform" method="post" action="new_bug.cgi">
+  <form name="newbugform" id="newbugform" method="post" action="new_bug.cgi" enctype="multipart/form-data">
     <input type="hidden" value="[% issue_hash_token(['new_bug']) FILTER html %]" name="token">
     <div class="new-bug-container">
       <div class="new-bug">
@@ -56,7 +56,15 @@
           [% INCLUDE bug_modal/common_new_comment.html.tmpl disable_cols=1 %]
           [% END %]
           [% WRAPPER bug_modal/module.html.tmpl title = "Attach a File" collapsed = 1 %]
-            <p>Coming Soon.</p>
+          <div class="file-container">
+            <input type="file" style="display: inline-block;" id="data" name="data" size="50" >
+            <button id="reset" style="display: none;">Reset</button>
+          </div>
+            <label for="description" style="display: inline-block;">Description:</label>
+            <input type="text" id="description" name="description" class="required"
+           size="60" maxlength="200" style="display: inline-block;">
+           <input type="radio" id="autodetect"
+       name="contenttypemethod" value="autodetect" checked="checked" style="display:none">
           [% END %]
           <button type="submit" id="create-btn" class="create-btn major">Submit</button>
         </div>

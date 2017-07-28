@@ -45,6 +45,8 @@ my $user = Bugzilla->login(LOGIN_REQUIRED);
 my $cgi      = Bugzilla->cgi;
 my $template = Bugzilla->template;
 my $vars     = {};
+my $dbh      = Bugzilla->dbh;
+
 
 unless ($user->in_group('new-bug-testers')) {
     print $cgi->redirect(correct_urlbase());
@@ -69,6 +71,34 @@ if (lc($cgi->request_method) eq 'post') {
                 comment      => scalar($cgi->param('comment')),
             });
      delete_token($token);
+
+     my $data_fh = $cgi->upload('data');
+
+     if ($data_fh) {
+         my $content_type = Bugzilla::Attachment::get_content_type();
+         my $attachment;
+
+         my $error_mode_cache = Bugzilla->error_mode;
+         Bugzilla->error_mode(ERROR_MODE_DIE);
+         my $timestamp = $dbh->selectrow_array(
+             'SELECT creation_ts FROM bugs WHERE bug_id = ?', undef, $new_bug->bug_id);
+         eval {
+             $attachment = Bugzilla::Attachment->create(
+                 {bug           => $new_bug,
+                  creation_ts   => $timestamp,
+                  data          => $data_fh,
+                  description   => scalar $cgi->param('description'),
+                  filename      => $data_fh,
+                  ispatch       => 0,
+                  isprivate     => 0,
+                  mimetype      => $content_type,
+                 });
+         };
+         Bugzilla->error_mode($error_mode_cache);
+         unless ($attachment) {
+            $vars->{'message'} = 'attachment_creation_failed';
+         }
+     }
 
      my $recipients = { changer => $user };
      my $bug_sent = Bugzilla::BugMail::Send($new_bug->bug_id, $recipients);

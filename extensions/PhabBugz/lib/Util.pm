@@ -135,8 +135,8 @@ sub make_revision_public {
     return request('differential.revision.edit', {
         transactions => [
             {
-                type  => "view",
-                value => "users"
+                type  => 'view',
+                value => 'public'
             }
         ],
         objectIdentifier => $revision_phid

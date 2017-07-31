@@ -17,6 +17,7 @@ use Bugzilla::Attachment;
 use Bugzilla::Bug;
 use Bugzilla::BugMail;
 use Bugzilla::Error;
+use Bugzilla::Extension::Push::Util qw(is_public);
 use Bugzilla::User;
 use Bugzilla::Util qw(correct_urlbase detaint_natural);
 use Bugzilla::WebService::Constants;
@@ -61,7 +62,7 @@ sub revision {
 
     # If bug is public then remove privacy policy
     my $result;
-    if (!@{ $bug->groups_in }) {
+    if (is_public($bug)) {
         $result = make_revision_public($revision_id);
     }
     # Else bug is private

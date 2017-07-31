@@ -20,6 +20,7 @@ use LWP::UserAgent;
 use base qw(Exporter);
 
 our @EXPORT = qw(
+    add_comment_to_revision
     create_revision_attachment
     create_private_revision_policy
     create_project
@@ -29,6 +30,7 @@ our @EXPORT = qw(
     get_project_phid
     get_revisions_by_ids
     intersect
+    make_revision_private
     make_revision_public
     request
     set_project_members
@@ -141,6 +143,23 @@ sub make_revision_public {
     });
 }
 
+sub make_revision_private {
+    my ($revision_phid) = @_;
+    return request('differential.revision.edit', {
+        transactions => [
+            {
+                type  => "view",
+                value => "admin"
+            },
+            {
+                type  => "edit",
+                value => "admin"
+            }
+        ],
+        objectIdentifier => $revision_phid
+    });
+}
+
 sub edit_revision_policy {
     my ($revision_phid, $policy_phid, $subscribers) = @_;
 
@@ -165,6 +184,21 @@ sub edit_revision_policy {
         });
     }
 
+    return request('differential.revision.edit', $data);
+}
+
+sub add_comment_to_revision {
+    my ($revision_phid, $comment) = @_;
+
+    my $data = {
+        transactions => [
+            {
+                type  => 'comment',
+                value => $comment
+            }
+        ],
+        objectIdentifier => $revision_phid
+    };
     return request('differential.revision.edit', $data);
 }
 

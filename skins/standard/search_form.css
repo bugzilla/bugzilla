@@ -28,7 +28,7 @@
 
 #bug_id_container { 
   display: inline-block;
-  vertical-align: top;
+  vertical-align: middle;
   padding-bottom: 1ex;
 }
 
@@ -92,6 +92,7 @@
 #summary_field.search_field_row select
 {
   display: inline;
+  padding-bottom: 0;
   vertical-align: middle;
 }
 

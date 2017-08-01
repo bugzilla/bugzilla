@@ -203,6 +203,7 @@ foreach my $k (keys(%seen)) {
         }
         $summary = wrap_comment($summary);
         $summary =~ s/([\\\"])/\\$1/g;
+        $summary =~ s/\n/\\n/g;
         push(@params, qq{label="$k\\n$summary"});
     }
 

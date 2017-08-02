@@ -26,6 +26,7 @@ use List::Util qw(any);
 
 use constant PHAB_CONTENT_TYPE       => 'text/x-phabricator-request';
 use constant PHAB_ATTACHMENT_PATTERN => qr/^phabricator-D(\d+)/;
+use constant PHAB_BMO_USER_EMAIL     => 'phab-bot@bmo.tld';
 
 sub options {
     return (
@@ -90,10 +91,13 @@ sub send {
             : 'One revision was' )
           . ' made private due to unknown Bugzilla groups.';
 
-        my $user =
-          Bugzilla->set_user(
-            Bugzilla::User->new( { name => 'conduit@mozilla.bugs' } ) );
+        my $user = Bugzilla::User->new( { name => PHAB_BMO_USER_EMAIL } );
+        $user->{groups} = [ Bugzilla::Group->get_all ];
+        $user->{bless_groups} = [ Bugzilla::Group->get_all ];
+        Bugzilla->set_user($user);
+
         $bug->add_comment( $bmo_error_message, { isprivate => 0 } );
+
         my $bug_changes = $bug->update();
         $bug->send_changes($bug_changes);
 
@@ -130,7 +134,7 @@ sub _get_attachment_revisions() {
     my @attachments = grep {
              $_->isobsolete == 0
           && $_->contenttype eq PHAB_CONTENT_TYPE
-          && $_->attacher->login ne 'phab-bot@bmo.tld'
+          && $_->attacher->login eq PHAB_BMO_USER_EMAIL
     } @{ $bug->attachments() };
 
     if (@attachments) {

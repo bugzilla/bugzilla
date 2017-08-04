@@ -16,7 +16,7 @@ use Bugzilla::Config::Common;
 our $sortkey = 400;
 
 sub get_param_list {
-    my $class = shift;
+    my $class      = shift;
     my @param_list = (
         {
             name    => 'allow_attachment_display',
@@ -43,7 +43,7 @@ sub get_param_list {
         {
             name    => 'attachment_storage',
             type    => 's',
-            choices => ['database', 'filesystem', 's3'],
+            choices => [ 'database', 'filesystem', 's3' ],
             default => 'database',
             checker => \&check_storage
         },
@@ -67,24 +67,25 @@ sub get_param_list {
 }
 
 sub check_params {
-    my ($class, $params) = @_;
+    my ( $class, $params ) = @_;
     return unless $params->{attachment_storage} eq 's3';
 
-    if ($params->{s3_bucket} eq ''
+    if (   $params->{s3_bucket} eq ''
         || $params->{aws_access_key_id} eq ''
-        || $params->{aws_secret_access_key} eq ''
-    ) {
-        return "You must set s3_bucket, aws_access_key_id, and aws_secret_access_key when attachment_storage is set to S3";
+        || $params->{aws_secret_access_key} eq '' )
+    {
+        return
+            "You must set s3_bucket, aws_access_key_id, and aws_secret_access_key when attachment_storage is set to S3";
     }
     return '';
 }
 
 sub check_storage {
-    my ($value, $param) = (@_);
-    my $check_multi = check_multi($value, $param);
+    my ( $value, $param ) = (@_);
+    my $check_multi = check_multi( $value, $param );
     return $check_multi if $check_multi;
 
-    if ($value eq 's3') {
+    if ( $value eq 's3' ) {
         return Bugzilla->feature('s3')
             ? ''
             : 'The perl modules required for S3 support are not installed';

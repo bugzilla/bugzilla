@@ -19,52 +19,53 @@ use Scalar::Util qw(looks_like_number);
 our $sortkey = 200;
 
 sub get_param_list {
-  my $class = shift;
-  my @param_list = (
-  {
-   name => 'allowbugdeletion',
-   type => 'b',
-   default => 0
-  },
+    my $class      = shift;
+    my @param_list = (
+        {
+            name    => 'allowbugdeletion',
+            type    => 'b',
+            default => 0
+        },
 
-  {
-   name => 'allowemailchange',
-   type => 'b',
-   default => 1
-  },
+        {
+            name    => 'allowemailchange',
+            type    => 'b',
+            default => 1
+        },
 
-  {
-   name => 'allowuserdeletion',
-   type => 'b',
-   default => 0
-  },
+        {
+            name    => 'allowuserdeletion',
+            type    => 'b',
+            default => 0
+        },
 
-  {
-   name => 'last_visit_keep_days',
-   type => 't',
-   default => 10,
-   checker => \&check_numeric
-  },
+        {
+            name    => 'last_visit_keep_days',
+            type    => 't',
+            default => 10,
+            checker => \&check_numeric
+        },
 
-  {
-    name => 'rate_limit_active',
-    type => 'b',
-    default => 1,
-  },
+        {
+            name    => 'rate_limit_active',
+            type    => 'b',
+            default => 1,
+        },
 
-  {
-    name => 'rate_limit_rules',
-    type => 'l',
-    default => '{"get_bug": [75, 60], "show_bug": [75, 60]}',
-    checker => \&check_rate_limit_rules,
-  },
+        {
+            name    => 'rate_limit_rules',
+            type    => 'l',
+            default => '{"get_bug": [75, 60], "show_bug": [75, 60]}',
+            checker => \&check_rate_limit_rules,
+        },
 
-  {
-    name => 'log_user_requests',
-    type => 'b',
-    default => 0,
-  });
-  return @param_list;
+        {
+            name    => 'log_user_requests',
+            type    => 'b',
+            default => 0,
+        }
+    );
+    return @param_list;
 }
 
 sub check_rate_limit_rules {

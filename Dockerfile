@@ -4,6 +4,7 @@ MAINTAINER Dylan Hardison <dylan@hardison.net>
 RUN apk --update add perl curl wget \
     make gcc g++ \
     perl-dev \
+    tzdata \
     libevent-dev \
     libc-dev \
     expat-dev \
@@ -24,6 +25,7 @@ RUN perl checksetup.pl --cpanm='all -oracle -auth_radius -auth_ldap'
 FROM alpine:3.6
 
 RUN apk --update --no-cache add \
+    tzdata \
     curl \
     wget \
     perl \

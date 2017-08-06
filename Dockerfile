@@ -19,9 +19,7 @@ COPY . /app
 
 WORKDIR /app
 
-RUN perl checksetup.pl --cpanm='default pg mysql'
-
-RUN cpanm -l Encode::Detect
+RUN perl checksetup.pl --cpanm='all -oracle -auth_radius -auth_ldap'
 
 FROM alpine:3.6
 

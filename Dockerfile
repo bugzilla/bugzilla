@@ -21,14 +21,20 @@ WORKDIR /app
 
 RUN perl checksetup.pl --cpanm='default pg mysql'
 
+RUN cpanm -l Encode::Detect
+
 FROM alpine:3.6
 
 RUN apk --update --no-cache add \
+    curl \
+    wget \
     perl \
+    make \
     libevent \
     expat \
     libressl \
     mariadb-libs \
+    postgresql-libs \
     ca-certificates
 
 WORKDIR /app

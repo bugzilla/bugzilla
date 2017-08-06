@@ -23,5 +23,13 @@ RUN perl checksetup.pl --cpanm='default pg mysql'
 
 FROM alpine:3.6
 
+RUN apk --update --no-cache add \
+    perl \
+    libevent \
+    expat \
+    libressl \
+    mariadb-libs \
+    ca-certificates
+
 WORKDIR /app
 COPY --from=builder /app /app

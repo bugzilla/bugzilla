@@ -5,6 +5,7 @@ jobs:
     docker:
       - image: docker:17.06.1-ce
     steps:
-      - setup_remote_docker
+      - setup_remote_docker:
+          version: 17.06.0-ce
       - checkout
       - run: docker build .

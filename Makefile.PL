@@ -97,7 +97,7 @@ my %optional_features = (
     detect_charset => {
         prereqs => {
             runtime =>
-                { requires => { 'Encode::Detect' => 0, Encode => '2.21' } }
+                { requires => { 'Encode::Detect' => 0, Encode => '2.87' } }
         },
         description => 'Automatic charset detection for text attachments'
     },

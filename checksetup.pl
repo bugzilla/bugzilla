@@ -90,7 +90,7 @@ if (defined $switch{cpanm}) {
     }
     print "cpanm @cpanm_args \".\"\n" if !$silent;
     my $rv = system('cpanm', @cpanm_args, '.');
-    exit 1 if $rv != 0;
+    exit(!!$rv);
 }
 
 $ENV{PERL_MM_USE_DEFAULT} = 1;

@@ -4,6 +4,7 @@ MAINTAINER Dylan Hardison <dylan@hardison.net>
 RUN apk --update add perl curl wget \
     make gcc g++ \
     perl-dev \
+    gd-dev \
     tzdata \
     libevent-dev \
     libc-dev \
@@ -26,6 +27,7 @@ FROM alpine:3.6
 
 RUN apk --update --no-cache add \
     tzdata \
+    gd \
     curl \
     wget \
     perl \

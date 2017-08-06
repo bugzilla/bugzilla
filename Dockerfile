@@ -21,7 +21,7 @@ COPY . /app
 
 WORKDIR /app
 
-RUN perl checksetup.pl --cpanm='all -oracle -auth_radius -auth_ldap'
+RUN perl checksetup.pl --cpanm='all -oracle -auth_radius -auth_ldap -mod_perl'
 
 FROM alpine:3.6
 

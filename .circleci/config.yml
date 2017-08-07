@@ -54,10 +54,14 @@ jobs:
           command: apk update && apk add git openssh-client
       - checkout
       - run: |
-          docker build -t $DOCKERHUB_REPO:latest .
-          if [[ -n "$DOCKER_USER" && -n "$DOCKER_PASS" ]]; then
-            docker login -u "$DOCKER_USER" -p "$DOCKER_PASS"
-            docker push $DOCKERHUB_REPO:latest
+          docker build -t bmo .
+          if [[ -n "$DOCKERHUB_REPO" && -n "$DOCKER_USER" && -n "$DOCKER_PASS" ]]; then
+            TAG="$CIRCLE_BRANCH"
+            if [[ $TAG == "master" ]]; then
+              docker tag bmo $DOCKERHUB_REPO:$TAG
+              docker login -u "$DOCKER_USER" -p "$DOCKER_PASS"
+              docker push $DOCKERHUB_REPO:latest
+            fi
           fi
 
   test_sanity:

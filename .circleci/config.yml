@@ -58,7 +58,7 @@ jobs:
           if [[ -n "$DOCKERHUB_REPO" && -n "$DOCKER_USER" && -n "$DOCKER_PASS" ]]; then
             TAG="$CIRCLE_BRANCH"
             if [[ $TAG == "master" ]]; then
-              docker tag bmo $DOCKERHUB_REPO:$TAG
+              docker tag bmo $DOCKERHUB_REPO:latest
               docker login -u "$DOCKER_USER" -p "$DOCKER_PASS"
               docker push $DOCKERHUB_REPO:latest
             fi

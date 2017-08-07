@@ -12,6 +12,16 @@
 use strict;
 use warnings;
 
+use File::Basename;
+use File::Spec;
+BEGIN {
+    require lib;
+    my $dir = File::Spec->rel2abs(
+        File::Spec->catdir(dirname(__FILE__), "..", "..")
+    );
+    lib->import($dir, File::Spec->catdir($dir, "lib"), File::Spec->catdir($dir, qw(local lib perl5)));
+}
+
 use Cwd;
 use File::Copy::Recursive qw(dircopy);
 
@@ -20,7 +30,7 @@ my $config;
 
 BEGIN {
     print "reading the config file...\n";
-    my $conf_file = "selenium_test.conf";
+    my $conf_file = $ENV{BZ_QA_CONF_FILE} // "selenium_test.conf";
     if (@ARGV) {
         $conf_file = shift @ARGV;
     }

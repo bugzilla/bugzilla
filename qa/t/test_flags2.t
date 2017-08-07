@@ -150,7 +150,7 @@ $sel->select_ok("flag_type-$flagtype1_id", "label=+");
 $sel->type_ok("short_desc", "The selenium flag should be kept on product change");
 $sel->type_ok("comment", "pom");
 $sel->click_ok('//input[@value="Add an attachment"]');
-$sel->type_ok("data", $config->{attachment_file});
+$sel->attach_file("data", $config->{attachment_file});
 $sel->type_ok("description", "small patch");
 $sel->value_is("ispatch", "on");
 ok(!$sel->is_element_present("flag_type-$aflagtype1_id"), "Flag type $aflagtype1_id not available in TestProduct");

@@ -4,13 +4,49 @@
 #
 
 version: 2
+
+test_docker: &test_docker
+  - image: mozillabteam/bmo-slim:20170803.1
+    user: app
+    environment:
+      PORT: 8000
+      BMO_db_user: bugs
+      BMO_db_host: 127.0.0.1
+      BMO_db_pass: bugs
+      BMO_db_name: bugs
+      BMO_memcached_servers: localhost:11211
+      BMO_memcached_namespace: "bugzilla:"
+      BZ_QA_CONF_FILE: /app/.circleci/selenium_test.conf
+      BZ_QA_ANSWERS_FILE:  /app/.circleci/checksetup_answers.txt
+  - image: mozillabteam/bmo-mysql:5.6
+    environment:
+      MYSQL_DATABASE: bugs
+      MYSQL_USER: bugs
+      MYSQL_PASSWORD: bugs
+      MYSQL_ALLOW_EMPTY_PASSWORD: 1
+  - image: selenium/standalone-firefox:2.53.1
+  - image: memcached:latest
+
+default_setup: &default_setup
+  run:
+    command: |
+      mv /opt/bmo/local /app/local
+      perl -MSys::Hostname -i -pE 's/<<HOSTNAME>>/hostname()/ges' $BZ_QA_CONF_FILE
+      perl -MSys::Hostname -i -pE 's/<<HOSTNAME>>/hostname()/ges' $BZ_QA_ANSWERS_FILE
+      perl checksetup.pl --no-database --default-localconfig
+      mkdir artifacts
+
+run_qa_httpd: &run_qa_httpd
+  run:
+    command: |
+      /app/scripts/entrypoint.pl qa_httpd &> artifacts/httpd.log
+    background: true
+
 jobs:
   build:
     working_directory: /app
     docker:
       - image: docker:17.06.1-ce
-        environment:
-          BMO_IMAGE_NAME: mozillabteam/bmo
     steps:
       - setup_remote_docker
       - run:
@@ -18,8 +54,68 @@ jobs:
           command: apk update && apk add git openssh-client
       - checkout
       - run: |
-          docker build -t $BMO_IMAGE_NAME:$CIRCLE_BRANCH .
+          docker build -t $DOCKERHUB_REPO:latest .
           if [[ -n "$DOCKER_USER" && -n "$DOCKER_PASS" ]]; then
             docker login -u "$DOCKER_USER" -p "$DOCKER_PASS"
-            docker push $BMO_IMAGE_NAME:$CIRCLE_BRANCH
+            docker push $DOCKERHUB_REPO:latest
           fi
+
+  test_sanity:
+    parallelism: 4
+    working_directory: /app
+    docker:
+      - image: mozillabteam/bmo-slim:20170803.1
+        user: app
+    steps:
+      - checkout
+      - *default_setup
+      - run:
+          name: run sanity tests
+          command: |
+            prove -qf $(circleci tests glob 't/*.t' | circleci tests split) | tee artifacts/$CIRCLE_JOB.txt
+      - store_artifacts:
+          path: /app/artifacts
+
+  test_webservices:
+    parallelism: 1
+    working_directory: /app
+    docker: *test_docker
+    steps:
+      - checkout
+      - *default_setup
+      - run: /app/scripts/entrypoint.pl load_test_data
+      - *run_qa_httpd
+      - run: /app/scripts/entrypoint.pl test_heartbeat
+      - run:
+          command: |
+            /app/scripts/entrypoint.pl test_webservices | tee artifacts/$CIRCLE_JOB.txt
+      - store_artifacts:
+          path: /app/artifacts
+
+  test_selenium:
+    parallelism: 1
+    working_directory: /app
+    docker: *test_docker
+    steps:
+      - checkout
+      - *default_setup
+      - run: /app/scripts/entrypoint.pl load_test_data
+      - *run_qa_httpd
+      - run:
+          command: |
+            /app/scripts/entrypoint.pl test_selenium | tee artifacts/$CIRCLE_JOB.txt
+      - store_artifacts:
+          path: /app/artifacts
+
+workflows:
+  version: 2
+  tests:
+    jobs:
+      - test_sanity
+      - test_webservices
+      - test_selenium
+      - build:
+          requires:
+            - test_sanity
+            - test_webservices
+            - test_selenium

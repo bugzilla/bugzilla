@@ -24,7 +24,7 @@ file_bug_in_product($sel, "TestProduct");
 my $bug_summary = "Security checks";
 $sel->type_ok("short_desc", $bug_summary);
 $sel->type_ok("comment", "This bug will be used to test security fixes.");
-$sel->type_ok("data", $config->{attachment_file});
+$sel->attach_file("data", $config->{attachment_file});
 $sel->type_ok("description", "simple patch, v1");
 my $bug1_id = create_bug($sel, $bug_summary);
 
@@ -54,7 +54,7 @@ $sel->title_like(qr/^$bug1_id /);
 # Alternate host for attachments; no cookie should be accessible.
 
 set_parameters($sel, { "Attachments" => {"attachment_base" => {type  => "text",
-                                                               value => "http://127.0.0.1/$urlbase/"}} });
+                                                               value => "$config->{browser_ip_url}/$urlbase/"}} });
 go_to_bug($sel, $bug1_id);
 $sel->click_ok("link=simple patch, v1");
 $sel->wait_for_page_to_load_ok(WAIT_TIME);

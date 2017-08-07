@@ -13,7 +13,11 @@ use strict;
 use Data::Dumper;
 use Test::More;
 use Test::WWW::Selenium;
+use MIME::Base64 qw(decode_base64);
+use Sys::Hostname qw(hostname);
+use Socket qw(inet_ntoa);
 use WWW::Selenium::Util qw(server_is_running);
+use URI;
 
 # Fixes wide character warnings
 BEGIN {
@@ -42,6 +46,7 @@ use base qw(Exporter);
     add_product
     open_advanced_search_page
     set_parameters
+    screenshot_page
 
     get_selenium
     get_rpc_clients
@@ -52,7 +57,7 @@ use base qw(Exporter);
 
 # How long we wait for pages to load.
 use constant WAIT_TIME => 60000;
-use constant CONF_FILE =>  "../config/selenium_test.conf";
+use constant CONF_FILE =>  $ENV{BZ_QA_CONF_FILE} // "../config/selenium_test.conf";
 use constant CHROME_MODE => 1;
 use constant NDASH => chr(0x2013);
 
@@ -92,6 +97,16 @@ sub get_config {
     my $conf_file = CONF_FILE;
     my $config = do($conf_file)
         or die "can't read configuration '$conf_file': $!$@";
+    my $uri = URI->new($config->{browser_url});
+    if (my $ip_packed = gethostbyname($uri->host)) {
+        my $ip = inet_ntoa($ip_packed);
+        $uri->host($ip);
+        $config->{browser_ip_url} = "$uri";
+    }
+    else {
+        die "unable to find ip for $config->{browser_url}\n";
+    }
+    return $config;
 }
 
 sub get_selenium {
@@ -148,7 +163,16 @@ sub get_rpc_clients {
 sub go_to_home {
     my ($sel, $config) = @_;
     $sel->open_ok("/$config->{bugzilla_installation}/", undef, "Go to the home page");
+    $sel->set_speed(500);
     $sel->title_is("Bugzilla Main Page");
+}
+
+sub screenshot_page {
+    my ($sel, $filename) = @_;
+    open my $fh, '>:raw', $filename or die "unable to write $filename: $!";
+    binmode $fh;
+    print $fh decode_base64($sel->capture_entire_page_screenshot_to_string());
+    close $fh;
 }
 
 # Go to the home/login page and log in.

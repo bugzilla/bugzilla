@@ -1,0 +1,11 @@
+$answer{'ADMIN_EMAIL'} = 'admin@mozilla.bugs';
+$answer{'ADMIN_OK'} = 'Y';
+$answer{'ADMIN_PASSWORD'} = 'password';
+$answer{'ADMIN_REALNAME'} = 'QA Admin';
+$answer{'NO_PAUSE'} = 1;
+$answer{'bugzilla_version'} = '1';
+$answer{'create_htaccess'} = '';
+$answer{'cvsbin'} = '/usr/bin/cvs';
+$answer{'diffpath'} = '/usr/bin';
+$answer{'interdiffbin'} = '/usr/bin/interdiff';
+$answer{'urlbase'} = 'http://<<HOSTNAME>>:8000/bmo/';

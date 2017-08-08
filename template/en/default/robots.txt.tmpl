@@ -16,5 +16,4 @@ Disallow: /show_bug.cgi*format=multiple*
 Allow: /describecomponents.cgi
 Allow: /describekeywords.cgi
 
-Allow: /data/SiteMapIndex/sitemap*.xml.gz
-Sitemap: http://bugzilla.mozilla.org/page.cgi?id=sitemap/sitemap.xml
+[% Hook.process("end") %]

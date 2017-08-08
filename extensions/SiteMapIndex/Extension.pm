@@ -90,9 +90,6 @@ sub install_before_final_checks {
     }
 
     return if (correct_urlbase() ne 'https://bugzilla.mozilla.org/');
-
-
-    $self->_fix_robots_txt();
 }
 
 sub install_filesystem {
@@ -127,38 +124,9 @@ EOT
     };
 }
 
-sub _fix_robots_txt {
-    my ($self) = @_;
-    my $cgi_path = bz_locations()->{'cgi_path'};
-    my $robots_file = "$cgi_path/robots.txt";
-    my $current_fh = new IO::File("$cgi_path/robots.txt", 'r');
-    if (!$current_fh) {
-        warn "$robots_file: $!";
-        return;
-    }
-
-    my $current_contents;
-    { local $/; $current_contents = <$current_fh> }
-    $current_fh->close();
-
-    return if $current_contents =~ /^Sitemap:/m;
-    my $backup_name = "$cgi_path/robots.txt.old";
-    print get_text('sitemap_fixing_robots', { current => $robots_file,
-                                              backup  => $backup_name }), "\n";
-    rename $robots_file, $backup_name or die "backup failed: $!";
-
-    my $new_fh = new IO::File($self->package_dir . '/robots.txt', 'r');
-    $new_fh || die "Could not open new robots.txt template file: $!";
-    my $new_contents;
-    { local $/; $new_contents = <$new_fh> }
-    $new_fh->close() || die "Could not close new robots.txt template file: $!";
-
-    my $sitemap_url = correct_urlbase() . SITEMAP_URL;
-    $new_contents =~ s/SITEMAP_URL/$sitemap_url/;
-    $new_fh = new IO::File("$cgi_path/robots.txt", 'w');
-    $new_fh || die "Could not open new robots.txt file: $!";
-    print $new_fh $new_contents;
-    $new_fh->close() || die "Could not close new robots.txt file: $!";
+sub before_robots_txt {
+    my ($self, $args) = @_;
+    $args->{vars}{SITEMAP_URL} = correct_urlbase() . SITEMAP_URL;
 }
 
 __PACKAGE__->NAME;

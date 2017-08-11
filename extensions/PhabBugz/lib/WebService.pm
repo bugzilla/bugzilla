@@ -16,6 +16,7 @@ use base qw(Bugzilla::WebService);
 use Bugzilla::Attachment;
 use Bugzilla::Bug;
 use Bugzilla::BugMail;
+use Bugzilla::Constants;
 use Bugzilla::Error;
 use Bugzilla::Extension::Push::Util qw(is_public);
 use Bugzilla::User;
@@ -34,7 +35,7 @@ use Bugzilla::Extension::PhabBugz::Util qw(
     request
 );
 
-use Data::Dumper;
+use MIME::Base64 qw(decode_base64);
 
 use constant PUBLIC_METHODS => qw(
     revision
@@ -43,11 +44,22 @@ use constant PUBLIC_METHODS => qw(
 sub revision {
     my ($self, $params) = @_;
 
+    # Phabricator only supports sending credentials via HTTP Basic Auth
+    # so we exploit that function to pass in an API key as the password
+    # of basic auth. BMO does not support basic auth but does support
+    # use of API keys.
+    my $http_auth = Bugzilla->cgi->http('Authorization');
+    $http_auth =~ s/^Basic\s+//;
+    $http_auth = decode_base64($http_auth);
+    my ($login, $api_key) = split(':', $http_auth);
+    $params->{'Bugzilla_login'} = $login;
+    $params->{'Bugzilla_api_key'} = $api_key;
+
+    my $user = Bugzilla->login(LOGIN_REQUIRED);
+
     unless (defined $params->{revision} && detaint_natural($params->{revision})) {
         ThrowCodeError('param_required', { param => 'revision' })
     }
-
-    my $user = Bugzilla->set_user(Bugzilla::User->new({ name => 'conduit@mozilla.bugs' }));
 
     # Obtain more information about the revision from Phabricator
     my $revision_id = $params->{revision};
@@ -65,7 +77,7 @@ sub revision {
     if (is_public($bug)) {
         $result = make_revision_public($revision_id);
     }
-    # Else bug is private
+    # else bug is private
     else {
         my $phab_sync_groups = Bugzilla->params->{phabricator_sync_groups}
             || ThrowUserError('invalid_phabricator_sync_groups');

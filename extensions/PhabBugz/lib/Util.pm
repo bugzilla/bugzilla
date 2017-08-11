@@ -12,9 +12,11 @@ use strict;
 use warnings;
 
 use Bugzilla::Error;
+use Bugzilla::Util qw(trim);
+use Bugzilla::Extension::PhabBugz::Constants;
 
-use Data::Dumper;
-use JSON qw(encode_json decode_json);
+use JSON::XS qw(encode_json decode_json);
+use List::Util qw(first);
 use LWP::UserAgent;
 
 use base qw(Exporter);
@@ -30,6 +32,7 @@ our @EXPORT = qw(
     get_project_phid
     get_revisions_by_ids
     intersect
+    is_attachment_phab_revision
     make_revision_private
     make_revision_public
     request
@@ -55,28 +58,47 @@ sub get_revisions_by_ids {
 }
 
 sub create_revision_attachment {
-    my ($bug, $revision_id, $revision_title) = @_;
+    my ( $bug, $revision_id, $revision_title ) = @_;
+
+    my $phab_base_uri = Bugzilla->params->{phabricator_base_uri};
+    ThrowUserError('invalid_phabricator_uri') unless $phab_base_uri;
+
+    my $revision_uri = $phab_base_uri . "D" . $revision_id;
+
+    # Check for previous attachment with same revision id.
+    # If one matches then return it instead. This is fine as
+    # BMO does not contain actual diff content.
+    my @review_attachments = grep { is_attachment_phab_revision($_) } @{ $bug->attachments };
+    my $review_attachment = first { trim($_->data) eq $revision_uri } @review_attachments;
+    return $review_attachment if defined $review_attachment;
+
+    # No attachment is present, so we can now create new one
+    my $is_shadow_db = Bugzilla->is_shadow_db;
+    Bugzilla->switch_to_main_db if $is_shadow_db;
 
     my $dbh = Bugzilla->dbh;
     $dbh->bz_start_transaction;
 
     my ($timestamp) = $dbh->selectrow_array("SELECT NOW()");
 
-    my $attachment = Bugzilla::Attachment->create({
-        bug           => $bug,
-        creation_ts   => $timestamp,
-        data          => 'http://phabricator.test/D' . $revision_id,
-        description   => $revision_title,
-        filename      => 'phabricator-D' . $revision_id . '-url.txt',
-        ispatch       => 0,
-        isprivate     => 0,
-        mimetype      => 'text/x-phabricator-request',
-    });
+    my $attachment = Bugzilla::Attachment->create(
+        {
+            bug         => $bug,
+            creation_ts => $timestamp,
+            data        => $revision_uri,
+            description => $revision_title,
+            filename    => 'phabricator-D' . $revision_id . '-url.txt',
+            ispatch     => 0,
+            isprivate   => 0,
+            mimetype    => PHAB_CONTENT_TYPE,
+        }
+    );
 
     $bug->update($timestamp);
     $attachment->update($timestamp);
 
     $dbh->bz_commit_transaction;
+    Bugzilla->switch_to_shadow_db if $is_shadow_db;
 
     return $attachment;
 }
@@ -92,7 +114,7 @@ sub get_bug_role_phids {
 
     my @bug_users = ( $bug->reporter );
     push(@bug_users, $bug->assigned_to)
-        if !$bug->assigned_to->email !~ /^nobody\@mozilla\.org$/;
+        if $bug->assigned_to->email !~ /^nobody\@mozilla\.org$/;
     push(@bug_users, $bug->qa_contact) if $bug->qa_contact;
     push(@bug_users, @{ $bug->cc_users }) if @{ $bug->cc_users };
 
@@ -271,12 +293,19 @@ sub get_members_by_bmo_id {
     return \@phab_ids;
 }
 
+sub is_attachment_phab_revision {
+    my ($attachment, $include_obsolete) = @_;
+    return ($attachment->contenttype eq PHAB_CONTENT_TYPE
+            && ($include_obsolete || !$attachment->isobsolete)
+            && $attachment->attacher->login eq 'phab-bot@bmo.tld') ? 1 : 0;
+}
+
 sub request {
     my ($method, $data) = @_;
     my $request_cache = Bugzilla->request_cache;
     my $params        = Bugzilla->params;
 
-    my $ua = $request_cache->{phabricato_ua};
+    my $ua = $request_cache->{phabricator_ua};
     unless ($ua) {
         $ua = $request_cache->{phabricator_ua} = LWP::UserAgent->new(timeout => 10);
         if ($params->{proxy_url}) {
@@ -285,10 +314,10 @@ sub request {
         $ua->default_header('Content-Type' => 'application/x-www-form-urlencoded');
     }
 
-    my $phab_api_key  = $params->{phabricator_api_key};
+    my $phab_api_key = $params->{phabricator_api_key};
+    ThrowUserError('invalid_phabricator_api_key') unless $phab_api_key;
     my $phab_base_uri = $params->{phabricator_base_uri};
     ThrowUserError('invalid_phabricator_uri') unless $phab_base_uri;
-    ThrowUserError('invalid_phabricator_api_key') unless $phab_api_key;
 
     my $full_uri = $phab_base_uri . '/api/' . $method;
 
@@ -297,13 +326,14 @@ sub request {
     my $response = $ua->post($full_uri, { params => encode_json($data) });
 
     ThrowCodeError('phabricator_api_error', { reason => $response->message })
-        if $response->is_error;
+      if $response->is_error;
 
-    my $result = decode_json($response->content);
-    if ($result->{error_code}) {
-        ThrowCodeError('phabricator_api_error',
-                       { code   => $result->{error_code},
-                         reason => $result->{error_info} });
+    my $result;
+    my $result_ok = eval { $result = decode_json( $response->content); 1 };
+    if ( !$result_ok ) {
+        ThrowCodeError(
+            'phabricator_api_error',
+            { reason => 'JSON decode failure' } );
     }
 
     return $result;

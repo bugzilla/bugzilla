@@ -121,5 +121,15 @@ $(document).ready(function() {
             document.getElementById('reset').style.display = "none";
             $("#description").prop('required',false);
         });
-    
+    $('#comment-edit-tab')
+        .click(function() {
+            $('#comment-preview-tab').css("background-color", "#fff");
+            $(this).css("background-color", "#eee");
+        });
+    $('#comment-preview-tab')
+        .click(function() {
+            $('#comment-edit-tab').css("background-color", "#fff");
+            $(this).css("background-color", "#eee");
+        });
+    $('#comment-edit-tab').click();
 });

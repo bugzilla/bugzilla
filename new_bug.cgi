@@ -57,12 +57,13 @@ if (lc($cgi->request_method) eq 'post') {
      my $token = $cgi->param('token');
      check_hash_token($token, ['new_bug']);
      my @keywords = $cgi->param('keywords');
+     my @groups = $cgi->param('groups');
      my $new_bug = Bugzilla::Bug->create({
                 short_desc   => scalar($cgi->param('short_desc')),
                 product      => scalar($cgi->param('product')),
                 component    => scalar($cgi->param('component')),
                 bug_severity => 'normal',
-                groups       => [],
+                groups       => \@groups,
                 op_sys       => 'Unspecified',
                 rep_platform => 'Unspecified',
                 version      => scalar( $cgi->param('version')),

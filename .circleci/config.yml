@@ -5,42 +5,49 @@
 
 version: 2
 
-test_docker: &test_docker
-  - image: mozillabteam/bmo-slim:20170803.1
+defaults:
+  bmo_slim_image: &bmo_slim_image
+    image: mozillabteam/bmo-slim:20170807.1
     user: app
-    environment:
-      PORT: 8000
-      BMO_db_user: bugs
-      BMO_db_host: 127.0.0.1
-      BMO_db_pass: bugs
-      BMO_db_name: bugs
-      BMO_memcached_servers: localhost:11211
-      BMO_memcached_namespace: "bugzilla:"
-      BZ_QA_CONF_FILE: /app/.circleci/selenium_test.conf
-      BZ_QA_ANSWERS_FILE:  /app/.circleci/checksetup_answers.txt
-  - image: mozillabteam/bmo-mysql:5.6
-    environment:
-      MYSQL_DATABASE: bugs
-      MYSQL_USER: bugs
-      MYSQL_PASSWORD: bugs
-      MYSQL_ALLOW_EMPTY_PASSWORD: 1
-  - image: selenium/standalone-firefox:2.53.1
-  - image: memcached:latest
 
-default_setup: &default_setup
-  run:
-    command: |
-      mv /opt/bmo/local /app/local
-      perl -MSys::Hostname -i -pE 's/<<HOSTNAME>>/hostname()/ges' $BZ_QA_CONF_FILE
-      perl -MSys::Hostname -i -pE 's/<<HOSTNAME>>/hostname()/ges' $BZ_QA_ANSWERS_FILE
-      perl checksetup.pl --no-database --default-localconfig
-      mkdir artifacts
+  mysql_image: &mysql_image
+    image: mozillabteam/bmo-mysql:5.6
 
-run_qa_httpd: &run_qa_httpd
-  run:
-    command: |
-      /app/scripts/entrypoint.pl qa_httpd &> artifacts/httpd.log
-    background: true
+  bmo_env: &bmo_env
+    PORT: 8000
+    BMO_db_user: bugs
+    BMO_db_host: 127.0.0.1
+    BMO_db_pass: bugs
+    BMO_db_name: bugs
+    BMO_memcached_servers: localhost:11211
+    BMO_memcached_namespace: "bugzilla:"
+
+  mysql_env: &mysql_env
+    MYSQL_DATABASE: bugs
+    MYSQL_USER: bugs
+    MYSQL_PASSWORD: bugs
+    MYSQL_ALLOW_EMPTY_PASSWORD: 1
+
+  docker_oldtests: &docker_oldtests
+    - <<: *bmo_slim_image
+      environment:
+        <<: *bmo_env
+        BZ_QA_CONF_FILE: /app/.circleci/selenium_test.conf
+        BZ_QA_ANSWERS_FILE:  /app/.circleci/checksetup_answers.legacy.txt
+        BZ_QA_LEGACY_MODE: 1
+    - <<: *mysql_image
+      environment: *mysql_env
+    - image: selenium/standalone-firefox:2.53.1
+    - image: memcached:latest
+
+  default_qa_setup: &default_qa_setup
+    run:
+      command: |
+        mv /opt/bmo/local /app/local
+        perl -MSys::Hostname -i -pE 's/<<HOSTNAME>>/hostname()/ges' $BZ_QA_CONF_FILE
+        perl -MSys::Hostname -i -pE 's/<<HOSTNAME>>/hostname()/ges' $BZ_QA_ANSWERS_FILE
+        perl checksetup.pl --no-database --default-localconfig
+        mkdir artifacts
 
 jobs:
   build:
@@ -68,11 +75,10 @@ jobs:
     parallelism: 4
     working_directory: /app
     docker:
-      - image: mozillabteam/bmo-slim:20170803.1
-        user: app
+      - *bmo_slim_image
     steps:
       - checkout
-      - *default_setup
+      - *default_qa_setup
       - run:
           name: run sanity tests
           command: |
@@ -83,15 +89,16 @@ jobs:
   test_webservices:
     parallelism: 1
     working_directory: /app
-    docker: *test_docker
+    docker: *docker_oldtests
     steps:
       - checkout
-      - *default_setup
-      - run: /app/scripts/entrypoint.pl load_test_data
-      - *run_qa_httpd
-      - run: /app/scripts/entrypoint.pl test_heartbeat
+      - *default_qa_setup
+      - run: |
+          rm -f /app/localconfig
+          /app/scripts/entrypoint.pl load_test_data
       - run:
           command: |
+            rm -f /app/localconfig
             /app/scripts/entrypoint.pl test_webservices | tee artifacts/$CIRCLE_JOB.txt
       - store_artifacts:
           path: /app/artifacts
@@ -99,14 +106,16 @@ jobs:
   test_selenium:
     parallelism: 1
     working_directory: /app
-    docker: *test_docker
+    docker: *docker_oldtests
     steps:
       - checkout
-      - *default_setup
-      - run: /app/scripts/entrypoint.pl load_test_data
-      - *run_qa_httpd
+      - *default_qa_setup
+      - run: |
+          rm -f /app/localconfig
+          /app/scripts/entrypoint.pl load_test_data --legacy
       - run:
           command: |
+            rm -f /app/localconfig
             /app/scripts/entrypoint.pl test_selenium | tee artifacts/$CIRCLE_JOB.txt
       - store_artifacts:
           path: /app/artifacts

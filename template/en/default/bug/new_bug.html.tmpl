@@ -75,7 +75,7 @@
             [% can_edit_product   = bug.check_can_change_field("product", 0, 1) %]
             [% filtered_product   = bug.product_obj.name FILTER uri %]
             [% filtered_component = bug.component_obj.name FILTER uri %]
-
+            <div id="product_wrap">
             [% WRAPPER bug_modal/field.html.tmpl
                 field        = bug_fields.product
                 field_type   = constants.FIELD_TYPE_SINGLE_SELECT
@@ -83,6 +83,7 @@
                 editable = 1
                 help         = "describecomponents.cgi?product=$filtered_product"
             %]
+            
               <span aria-owns="product-name product-latch">
                 <span role="button" aria-label="show product information" aria-expanded="false" tabindex="0"
                       class="spin-latch" id="product-latch" data-latch="product" data-for="product">&#9656;</span>
@@ -95,7 +96,7 @@
                 </div>
               </span>
             [% END %]
-
+            </div>
             [% WRAPPER bug_modal/field.html.tmpl
                 field          = bug_fields.product
                 field_type     = constants.FIELD_TYPE_SINGLE_SELECT

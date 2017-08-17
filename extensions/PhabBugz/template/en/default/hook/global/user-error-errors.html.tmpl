@@ -18,8 +18,22 @@
   [% title = "Invalid Phabricator Sync Groups" %]
   You must provide a comma delimited list of security groups
   to sync with Phabricator.
+
 [% ELSIF error == "invalid_phabricator_revision_id" %]
   [% title = "Invalid Phabricator Revision ID" %]
   You must provide a valid Phabricator revision ID.
+
+[% ELSIF error == "phabricator_not_enabled" %]
+  [% title = "Phabricator Support Not Enabled" %]
+  The Phabricator to Bugzilla library, PhabBugz,
+  is not enabled in Bugzilla.
+
+[% ELSIF error == "phabricator_invalid_request_params" %]
+  [% title = "Incomplete Information Provided by Phabricator" %]
+  The parameters 'user_id' and '[% terms.bug %]_id' must be provided.
+
+[% ELSIF error == "phabricator_unauthorized_user" %]
+  [% title = "Unauthorized User" %]
+  You do not have permission to use this endpoint.
 
 [% END %]

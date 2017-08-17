@@ -1,11 +1,13 @@
 $answer{'ADMIN_EMAIL'} = 'admin@mozilla.bugs';
 $answer{'ADMIN_OK'} = 'Y';
-$answer{'ADMIN_PASSWORD'} = 'password';
+$answer{'ADMIN_PASSWORD'} = 'passWord1234!';
 $answer{'ADMIN_REALNAME'} = 'QA Admin';
 $answer{'NO_PAUSE'} = 1;
 $answer{'bugzilla_version'} = '1';
 $answer{'create_htaccess'} = '1';
 $answer{'cvsbin'} = '/usr/bin/cvs';
+$answer{'password_complexity'} = 'bmo';
 $answer{'diffpath'} = '/usr/bin';
 $answer{'interdiffbin'} = '/usr/bin/interdiff';
 $answer{'urlbase'} = 'http://<<HOSTNAME>>:8000/';
+$answer{'mail_delivery_method'} = 'Test';

@@ -63,7 +63,8 @@ my %user_prefs = (
     zoom_textareas         => 'off',
 );
 
-GetOptions('user-pref=s%' => \%user_prefs);
+my %opt_param;
+GetOptions('user-pref=s%' => \%user_prefs, 'param=s' => \%opt_param);
 
 my $admin_email = shift || 'admin@mozilla.bugs';
 Bugzilla->set_user(Bugzilla::User->check({ name => $admin_email }));
@@ -496,6 +497,7 @@ my %set_params = (
     use_mailer_queue          => 1,
     user_info_class           => 'GitHubAuth,CGI',
     user_verify_class         => 'GitHubAuth,DB',
+    %opt_param,
 );
 
 my $params_modified;

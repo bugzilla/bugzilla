@@ -120,13 +120,48 @@ jobs:
       - store_artifacts:
           path: /app/artifacts
 
+  test_bmo:
+    parallelism: 4
+    working_directory: /app
+    docker:
+      - <<: *bmo_slim_image
+        environment:
+          <<: *bmo_env
+          BZ_QA_ANSWERS_FILE:  /app/.circleci/checksetup_answers.txt
+          TWD_HOST: localhost
+          TWD_PORT: 4444
+          TWD_BROWSER: firefox
+      - <<: *mysql_image
+        environment: *mysql_env
+      - image: memcached:latest
+      - image: selenium/standalone-firefox:2.53.1
+    steps:
+      - checkout
+      - run: |
+          mv /opt/bmo/local /app/local
+          perl checksetup.pl --no-database --default-localconfig
+          perl -MSys::Hostname -i -pE 's/<<HOSTNAME>>/hostname()/ges' $BZ_QA_ANSWERS_FILE
+          rm -f /app/localconfig
+          /app/scripts/entrypoint.pl load_test_data
+          mkdir artifacts
+      - run: |
+          BZ_BASE_URL="http://$(hostname):$PORT"
+          export BZ_BASE_URL
+          rm -f /app/localconfig
+          /app/scripts/entrypoint.pl test_bmo -q -f t/bmo/*.t
+
+
+
 workflows:
   version: 2
   tests:
     jobs:
+      - test_bmo
       - test_sanity
       - test_webservices
-      - test_selenium
+      - test_selenium:
+          requires:
+            - test_bmo
       - build:
           requires:
             - test_sanity

@@ -3,16 +3,18 @@ use 5.10.1;
 use strict;
 use warnings;
 use lib qw(/app /app/local/lib/perl5);
+
 use Bugzilla::Install::Localconfig ();
 use Bugzilla::Install::Util qw(install_string);
+use Bugzilla::Test::Util qw(create_user);
 use DBI;
 use Data::Dumper;
 use English qw($EUID);
 use File::Copy::Recursive qw(dircopy);
 use Getopt::Long qw(:config gnu_getopt);
 use LWP::Simple qw(get);
-use User::pwent;
 use POSIX qw(WEXITSTATUS setsid);
+use User::pwent;
 
 use IO::Async::Loop;
 use IO::Async::Process;
@@ -53,7 +55,7 @@ sub cmd_load_test_data {
         run( 'perl', 'generate_test_data.pl' );
     }
     else {
-        run( 'perl', 'scripts/generate_bmo_data.pl' );
+        run( 'perl', 'scripts/generate_bmo_data.pl', '--param' => 'use_mailer_queue=0' );
     }
 }
 
@@ -76,6 +78,8 @@ sub cmd_test_webservices {
     my $conf = require $ENV{BZ_QA_CONF_FILE};
 
     check_data_dir();
+    wait_for_db();
+
     my @httpd_cmd = ( '/usr/sbin/httpd', '-DFOREGROUND', '-f', '/app/httpd/httpd.conf' );
     if ($ENV{BZ_QA_LEGACY_MODE}) {
         copy_qa_extension();
@@ -98,6 +102,7 @@ sub cmd_test_selenium {
     my $conf = require $ENV{BZ_QA_CONF_FILE};
 
     check_data_dir();
+    wait_for_db();
     my @httpd_cmd = ( '/usr/sbin/httpd', '-DFOREGROUND', '-f', '/app/httpd/httpd.conf' );
     if ($ENV{BZ_QA_LEGACY_MODE}) {
         copy_qa_extension();
@@ -121,6 +126,16 @@ sub cmd_prove   { run( "prove", "-I/app", "-I/app/local/lib/perl5", @_ ); }
 sub cmd_version { run( 'cat',   '/app/version.json' ); }
 
 sub cmd_test_bmo {
+    check_data_dir();
+    wait_for_db();
+
+    $ENV{BZ_TEST_NEWBIE} = 'newbie@mozilla.example';
+    $ENV{BZ_TEST_NEWBIE_PASS} = 'captain.space.bagel.ROBOT!';
+    create_user($ENV{BZ_TEST_NEWBIE}, $ENV{BZ_TEST_NEWBIE_PASS}, realname => "Newbie User");
+
+    $ENV{BZ_TEST_NEWBIE2} = 'newbie2@mozilla.example';
+    $ENV{BZ_TEST_NEWBIE2_PASS} = 'captain.space.pants.time.lord';
+
     prove_with_httpd(
         httpd_url => $ENV{BZ_BASE_URL},
         httpd_cmd => [ '/usr/sbin/httpd', '-f', '/app/httpd/httpd.conf',  '-DFOREGROUND' ],
@@ -130,9 +145,6 @@ sub cmd_test_bmo {
 
 sub prove_with_httpd {
     my (%param) = @_;
-
-    check_data_dir();
-    wait_for_db();
 
     unless (-d "/app/logs") {
         mkdir("/app/logs") or die "unable to mkdir(/app/logs): $!\n";

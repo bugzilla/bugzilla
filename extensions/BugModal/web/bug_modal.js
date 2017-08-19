@@ -876,6 +876,7 @@ $(function() {
         });
 
     if (BUGZILLA.user.settings.autosize_comments) {
+        $('#comment').addClass('autosized-comment');
         autosize($('#comment'));
     } else if (BUGZILLA.user.settings.zoom_textareas) {
         // add comment --> enlarge on focus

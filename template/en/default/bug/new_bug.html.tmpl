@@ -122,6 +122,7 @@
             [% END %]
 
             [%# component %]
+            <div id="component_wrap" style="display:inline-block">
             [% WRAPPER bug_modal/field.html.tmpl
                 field      = bug_fields.component
                 field_type = constants.FIELD_TYPE_SINGLE_SELECT
@@ -144,6 +145,10 @@
                 </div>
               </span>
             [% END %]
+            </div>
+            <div id="comp_change">
+              <sup><a>Change</a></sup>
+            </div>
 
             [% INCLUDE bug_modal/field.html.tmpl
               field = bug_fields.version

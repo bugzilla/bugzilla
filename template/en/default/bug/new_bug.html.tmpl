@@ -16,175 +16,152 @@
 %]
 [% PROCESS global/header.html.tmpl %]
 
-[% IF user.id %]
-  <div style="display: none" id="xhr-error"></div>
-  <form name="newbugform" id="newbugform" method="post" action="new_bug.cgi" enctype="multipart/form-data">
-    <input type="hidden" value="[% issue_hash_token(['new_bug']) FILTER html %]" name="token">
-    <div class="new-bug-container">
-      <div class="new-bug">
-        <div class="new-bug-pad">
-        </div>
-        <div class="new-bug-title">
-          <h2>Create New [% terms.Bug %]</h2>
-          <p>
-            Before reporting a [% terms.bug %], make sure you've read our
-            <a href="https://developer.mozilla.org/en/Bug_writing_guidelines">
-            [% terms.bug %] writing guidelines</a> and double checked that your [% terms.bug %] hasn't already
-            been reported. Consult our list of <a href="https://bugzilla.mozilla.org/duplicates.cgi">
-            most frequently reported [% terms.bugs %]</a> and <a href="https://bugzilla.mozilla.org/query.cgi">
-            search through descriptions</a> of previously reported [% terms.bugs %].
-          </p>
-        </div>
-        <div class="new-bug-pad">
-        </div>
+<div style="display: none" id="xhr-error"></div>
+<form name="newbugform" id="newbugform" method="post" action="new_bug.cgi" enctype="multipart/form-data">
+  <input type="hidden" value="[% issue_hash_token(['new_bug']) FILTER html %]" name="token">
+  <div class="new-bug-container">
+    <div class="new-bug">
+      <div class="new-bug-pad">
       </div>
-      <div class="new-bug">
-        <div class="new-bug-pad">
-        </div>
-        <div class="new-bug-split-2">
-          [% WRAPPER bug_modal/module.html.tmpl title = "" %]
-          [%# summary %]
-          [% INCLUDE bug_modal/field.html.tmpl
-              field = bug_fields.short_desc
-              field_type = constants.FIELD_TYPE_FREETEXT
-              edit_only = 1
-              editable = 1
-              required = 1
-              help = "https://wiki.mozilla.org/BMO/UserGuide/BugFields#short_desc"
-          %]
-
-          [% INCLUDE bug_modal/common_new_comment.html.tmpl disable_cols=1 %]
-          <input name="groups" value="core-security" id="group_core-security" type="checkbox"> Many users could be harmed by this security problem: 
-          it should be kept hidden from the public until it is resolved <br>
-          [% END %]
-          [% WRAPPER bug_modal/module.html.tmpl title = "Attach a File" collapsed = 1 %]
-          <div class="file-container">
-            <input type="file" style="display: inline-block;" id="data" name="data" size="50" >
-            <button id="reset" style="display: none;">Reset</button>
-          </div>
-            <label for="description" style="display: inline-block;">Description:</label>
-            <input type="text" id="description" name="description" class="required"
-           size="60" maxlength="200" style="display: inline-block;">
-           <input type="radio" id="autodetect"
-       name="contenttypemethod" value="autodetect" checked="checked" style="display:none">
-          [% END %]
-          <button type="submit" id="create-btn" class="create-btn major">Submit</button>
-        </div>
-        <div class="new-bug-split-1">
-          [% WRAPPER bug_modal/module.html.tmpl title = "Status" %]
-            [% can_edit_product   = bug.check_can_change_field("product", 0, 1) %]
-            [% filtered_product   = bug.product_obj.name FILTER uri %]
-            [% filtered_component = bug.component_obj.name FILTER uri %]
-            <div id="product_wrap">
-            [% WRAPPER bug_modal/field.html.tmpl
-                field        = bug_fields.product
-                field_type   = constants.FIELD_TYPE_SINGLE_SELECT
-                edit_only = 1
-                editable = 1
-                help         = "describecomponents.cgi?product=$filtered_product"
-            %]
-            
-              <span aria-owns="product-name product-latch">
-                <span role="button" aria-label="show product information" aria-expanded="false" tabindex="0"
-                      class="spin-latch" id="product-latch" data-latch="product" data-for="product">&#9656;</span>
-                <div title="show product information" tabindex="0" class="spin-toggle"
-                    id="product-name" data-latch="product" data-for="product">
-                  [% bug.product FILTER html %]
-                </div>
-                <div id="product-info" style="display:none">
-                  [% bug.product_obj.description FILTER html_light %]
-                </div>
-              </span>
-            [% END %]
-            </div>
-            [% WRAPPER bug_modal/field.html.tmpl
-                field          = bug_fields.product
-                field_type     = constants.FIELD_TYPE_SINGLE_SELECT
-                hide_on_view   = 1
-                hide_on_edit   = !can_edit_product
-                append_content = 1
-                help           = "describecomponents.cgi?product=$filtered_product"
-            %]
-              <span id="product-search-container">
-                [% INCLUDE prodcompsearch/form.html.tmpl
-                    id            = "pcs"
-                    custom_select = 1
-                    hidden        = 1
-                    throbber      = "product-throbber"
-                %]
-                <button id="product-search" type="button" class="minor">Search</button>
-                <button id="product-search-cancel" type="button" class="minor" style="display:none">X</button>
-                <img id="product-throbber" src="extensions/BugModal/web/throbber.gif"
-                  width="16" height="11" style="display:none">
-                <img id="product-search-error" class="tt" src="extensions/BugModal/web/error.png"
-                  width="16" height="16" style="display:none">
-              </span>
-            [% END %]
-
-            [%# component %]
-            [% WRAPPER bug_modal/field.html.tmpl
-                field      = bug_fields.component
-                field_type = constants.FIELD_TYPE_SINGLE_SELECT
-                help       = "describecomponents.cgi?product=$filtered_product&component=$filtered_component#$filtered_component"
-                edit_only = 1
-                editable = 1
-            %]
-              <span aria-owns="component-name component-latch">
-                <span role="button" aria-label="show component description" aria-expanded="false" tabindex="0"
-                      class="spin-latch" id="component-latch" data-latch="component" data-for="component">&#9656;</span>
-                <div title="show component information" tabindex="0" class="spin-toggle" id="component-name"
-                    data-latch="#component-latch" data-for="component">
-                    [% bug.component FILTER html %]
-                </div>
-                <div id="component-info" style="display:none">
-                  <div>[% bug.component_obj.description FILTER html_light %]</div>
-                  <a href="buglist.cgi?component=[% bug.component FILTER uri %]&amp;
-                          [%~ %]product=[% bug.product FILTER uri %]&amp;
-                          [%~ %]bug_status=__open__" target="_blank">Other [% terms.Bugs %]</a>
-                </div>
-              </span>
-            [% END %]
-
-            [% INCLUDE bug_modal/field.html.tmpl
-              field = bug_fields.version
-              field_type = constants.FIELD_TYPE_SINGLE_SELECT
-              help = "https://wiki.mozilla.org/BMO/UserGuide/BugFields#version"
-              edit_only = 1
-              editable = 1
-            %]
-          [% END %]
-          [% WRAPPER bug_modal/module.html.tmpl title = "Tracking" %]
-            [%# keywords %]
-            [% INCLUDE bug_modal/field.html.tmpl
-                field = bug_fields.keywords
-                field_type = constants.FIELD_TYPE_MULTI_SELECT
-                edit_only = 1
-                editable = 1
-                help = "describekeywords.cgi"
-            %]
-
-            [% WRAPPER bug_modal/field.html.tmpl
-                field = bug_fields.status_whiteboard
-                field_type = constants.FIELD_TYPE_FREETEXT
-                help = "https://wiki.mozilla.org/BMO/UserGuide/Whiteboard"
-                edit_only = 1
-                editable = 1
-            %]
-              [% bug.status_whiteboard == "" ? "---" : bug.status_whiteboard FILTER html %]
-            [% END %]
-          [% END %]
-        </div>
-        <div class="new-bug-pad">
-        </div>
+      <div class="new-bug-title">
+        <h2>Create New [% terms.Bug %]</h2>
+        <p>
+          Before reporting a [% terms.bug %], make sure you've read our
+          <a href="https://developer.mozilla.org/en/Bug_writing_guidelines">
+          [% terms.bug %] writing guidelines</a> and double checked that your [% terms.bug %] hasn't already
+          been reported. Consult our list of <a href="https://bugzilla.mozilla.org/duplicates.cgi">
+          most frequently reported [% terms.bugs %]</a> and <a href="https://bugzilla.mozilla.org/query.cgi">
+          search through descriptions</a> of previously reported [% terms.bugs %].
+        </p>
+      </div>
+      <div class="new-bug-pad">
       </div>
     </div>
-  </form>
-[% ELSE %]
-  <div id="new-comment-notice">
-    You need to <a href="new-bug&amp;GoAheadAndLogIn=1">log in</a>
-    before you can file a [% terms.bug %].
+    <div class="new-bug">
+      <div class="new-bug-pad">
+      </div>
+      <div class="new-bug-split-2">
+        [% WRAPPER bug_modal/module.html.tmpl title = "" %]
+        [%# summary %]
+        [% INCLUDE bug_modal/field.html.tmpl
+            field = bug_fields.short_desc
+            field_type = constants.FIELD_TYPE_FREETEXT
+            edit_only = 1
+            editable = 1
+            required = 1
+            help = "https://wiki.mozilla.org/BMO/UserGuide/BugFields#short_desc"
+        %]
+
+        [% INCLUDE new_comment %]
+        <input name="groups" value="core-security" id="group_core-security" type="checkbox"> Many users could be harmed by this security problem:
+        it should be kept hidden from the public until it is resolved <br>
+        [% END %]
+        [% WRAPPER bug_modal/module.html.tmpl title = "Attach a File" collapsed = 1 %]
+        <div class="file-container">
+          <input type="file" style="display: inline-block;" id="data" name="data" size="50" >
+          <button id="reset" style="display: none;">Reset</button>
+        </div>
+          <label for="description" style="display: inline-block;">Description:</label>
+          <input type="text" id="description" name="description" class="required"
+         size="60" maxlength="200" style="display: inline-block;">
+         <input type="radio" id="autodetect"
+     name="contenttypemethod" value="autodetect" checked="checked" style="display:none">
+        [% END %]
+        <button type="submit" id="create-btn" class="create-btn major">Submit</button>
+      </div>
+      <div class="new-bug-split-1">
+        [% WRAPPER bug_modal/module.html.tmpl title = "Status" %]
+          [% can_edit_product   = bug.check_can_change_field("product", 0, 1) %]
+          [% filtered_product   = bug.product_obj.name FILTER uri %]
+          [% filtered_component = bug.component_obj.name FILTER uri %]
+          <div id="product_wrap">
+          [% WRAPPER bug_modal/field.html.tmpl
+              field        = bug_fields.product
+              field_type   = constants.FIELD_TYPE_SINGLE_SELECT
+              edit_only = 1
+              editable = 1
+              help         = "describecomponents.cgi?product=$filtered_product"
+          %]
+          
+            <span aria-owns="product-name product-latch">
+              <span role="button" aria-label="show product information" aria-expanded="false" tabindex="0"
+                    class="spin-latch" id="product-latch" data-latch="product" data-for="product">&#9656;</span>
+              <div title="show product information" tabindex="0" class="spin-toggle"
+                  id="product-name" data-latch="product" data-for="product">
+                [% bug.product FILTER html %]
+              </div>
+              <div id="product-info" style="display:none">
+                [% bug.product_obj.description FILTER html_light %]
+              </div>
+            </span>
+          [% END %]
+          </div>
+          [% INCLUDE bug_modal/field.html.tmpl
+              field          = bug_fields.product
+              field_type     = constants.FIELD_TYPE_SINGLE_SELECT
+              hide_on_view   = 1
+              hide_on_edit   = !can_edit_product
+              append_content = 1
+              help           = "describecomponents.cgi?product=$filtered_product" %]
+
+          [%# component %]
+          [% WRAPPER bug_modal/field.html.tmpl
+              field      = bug_fields.component
+              field_type = constants.FIELD_TYPE_SINGLE_SELECT
+              help       = "describecomponents.cgi?product=$filtered_product&component=$filtered_component#$filtered_component"
+              edit_only = 1
+              editable = 1
+          %]
+            <span aria-owns="component-name component-latch">
+              <span role="button" aria-label="show component description" aria-expanded="false" tabindex="0"
+                    class="spin-latch" id="component-latch" data-latch="component" data-for="component">&#9656;</span>
+              <div title="show component information" tabindex="0" class="spin-toggle" id="component-name"
+                  data-latch="#component-latch" data-for="component">
+                  [% bug.component FILTER html %]
+              </div>
+              <div id="component-info" style="display:none">
+                <div>[% bug.component_obj.description FILTER html_light %]</div>
+                <a href="buglist.cgi?component=[% bug.component FILTER uri %]&amp;
+                        [%~ %]product=[% bug.product FILTER uri %]&amp;
+                        [%~ %]bug_status=__open__" target="_blank">Other [% terms.Bugs %]</a>
+              </div>
+            </span>
+          [% END %]
+
+          [% INCLUDE bug_modal/field.html.tmpl
+            field = bug_fields.version
+            field_type = constants.FIELD_TYPE_SINGLE_SELECT
+            help = "https://wiki.mozilla.org/BMO/UserGuide/BugFields#version"
+            edit_only = 1
+            editable = 1
+          %]
+        [% END %]
+        [% WRAPPER bug_modal/module.html.tmpl title = "Tracking" %]
+          [%# keywords %]
+          [% INCLUDE bug_modal/field.html.tmpl
+              field = bug_fields.keywords
+              field_type = constants.FIELD_TYPE_MULTI_SELECT
+              edit_only = 1
+              editable = 1
+              help = "describekeywords.cgi"
+          %]
+
+          [% WRAPPER bug_modal/field.html.tmpl
+              field = bug_fields.status_whiteboard
+              field_type = constants.FIELD_TYPE_FREETEXT
+              help = "https://wiki.mozilla.org/BMO/UserGuide/Whiteboard"
+              edit_only = 1
+              editable = 1
+          %]
+            [% bug.status_whiteboard == "" ? "---" : bug.status_whiteboard FILTER html %]
+          [% END %]
+        [% END %]
+      </div>
+      <div class="new-bug-pad">
+      </div>
+    </div>
   </div>
-[% END %]
+</form>
 
 [% PROCESS global/footer.html.tmpl %]
 
@@ -194,4 +171,24 @@
 
 [% BLOCK fields_rhs %]
     <div class="fields-rhs">[% content FILTER none %]</div>
+[% END %]
+
+[% BLOCK new_comment %]
+<div id="add-comment">
+  <ul id="comment-tabs" role="tablist">
+    <li id="comment-edit-tab" data-focus="comment" role="tab" tabindex="0" aria-controls="comment-edit-tabpanel" aria-selected="true">
+      Description
+    </li>
+    <li id="comment-preview-tab" role="tab" tabindex="-1" aria-controls="comment-preview-tabpanel" aria-selected="false">
+      Preview
+      <img id="preview-throbber" src="extensions/BugModal/web/throbber.gif" width="16" height="11" style="display:none">
+    </li>
+  </ul>
+  <div id="comment-edit-tabpanel" class="comment-tabpanel" role="tabpanel" aria-labelledby="comment-edit-tab">
+    <textarea rows="5" name="comment" id="comment" aria-labelledby="comment-edit-tab"></textarea>
+  </div>
+  <div id="comment-preview-tabpanel" class="comment-tabpanel" role="tabpanel" aria-labelledby="comment-preview-tab" style="display:none">
+    <pre id="comment-preview" class="comment-text"></pre>
+  </div>
+</div>
 [% END %]

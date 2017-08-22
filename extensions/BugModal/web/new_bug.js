@@ -63,8 +63,8 @@ $(document).ready(function() {
                     options: [],
                     preload: true,
                     create: false,
-                    load: function(query, callback) {       
-                        callback(initial.products);       
+                    load: function(query, callback) {
+                        callback(initial.products);
                     }
                 });
             },

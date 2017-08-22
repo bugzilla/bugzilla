@@ -49,12 +49,3 @@
 .file-container {
     padding: 8px;
 }
-
-#comp_change {
-    float: right;
-    display: none;
-}
-
-#component_wrap {
-    display: inline-block;
-}

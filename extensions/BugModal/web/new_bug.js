@@ -13,32 +13,22 @@ var component_load = function(product) {
             $('#product-throbber').hide();
             $('#component').attr('disabled', false);
             $('#comp_desc').text('Select a component to read its description.');
-            var selectize = $("#version")[0].selectize;
-            selectize.clear();
-            selectize.clearOptions();
-            selectize.load(function(callback) {
-                callback(data.versions);
-            });
-
-            selectize = $("#component")[0].selectize;
+            var selectize = $("#component")[0].selectize;
             selectize.clear();
             selectize.clearOptions();
             selectize.load(function(callback) {
                 callback(data.components)
             });
-            selectize.enable();
-            $('#comp_change').css('display', 'none');
-
-            for (component in data.components) {
-                if (data.components[component].name.toLowerCase() === "untriaged" || data.components[component].name.toLowerCase() === "general") {
-                    selectize.setValue(data.components[component].name, false);
-                    selectize.disable();
-                    $('#comp_change').css('display', 'inline-block');
-                }
-            }
 
             for (var i in data.components)
                 comp_desc[data.components[i]["name"]] = data.components[i]["description"];
+
+            selectize = $("#version")[0].selectize;
+            selectize.clear();
+            selectize.clearOptions();
+            selectize.load(function(callback) {
+                callback(data.versions);
+            });
         },
         function() {
             alert("Network issues. Please refresh the page and try again");
@@ -115,12 +105,6 @@ $(document).ready(function() {
     $("#product").on("change", function () {
         component_load($("#product").val());
     });
-
-    $('#comp_change').on("click", function () {
-        selectize = $("#component")[0].selectize;
-        selectize.enable();
-        $('#comp_change').css('display', 'none');
-    })
 
     component_sel.on("change", function () {
         var selectize = $("#component")[0].selectize;

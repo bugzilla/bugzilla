@@ -29,7 +29,7 @@ use Bugzilla::Extension::PhabBugz::Util qw(
 
 Bugzilla->usage_mode(USAGE_MODE_CMDLINE);
 
-my ($phab_uri, $phab_api_key, $phab_sync_groups);
+my ($phab_uri, $phab_sync_groups);
 
 if (!Bugzilla->params->{phabricator_enabled}) {
     exit;
@@ -38,10 +38,6 @@ if (!Bugzilla->params->{phabricator_enabled}) {
 # Sanity checks
 unless ($phab_uri = Bugzilla->params->{phabricator_base_uri}) {
     ThrowUserError('invalid_phabricator_uri');
-}
-
-unless ($phab_api_key = Bugzilla->params->{phabricator_api_key}) {
-    ThrowUserError('invalid_phabricator_api_key');
 }
 
 unless ($phab_sync_groups = Bugzilla->params->{phabricator_sync_groups}) {

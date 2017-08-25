@@ -236,3 +236,103 @@ sub disable_email_delivery {
     # have to be in the profiles table
     $dbh->do("UPDATE flagtypes SET cc_list = NULL");
 }
+
+=head1 NAME
+
+sanitizeme.pl - remove sensitive information from a bugzilla database
+
+=head1 SYNOPSIS
+
+   perl scripts/sanitizeme.pl [options]
+
+=head1 DESCRIPTION
+
+The sanitizeme.pl script removes the following things from the BMO database. It
+is assumed that everything not removed here is sanitized. B<Sanitized> for the
+purposes of this document means "ready to deployed to the staging and
+development environments"
+
+=over 4
+
+=item 1
+
+user password hashes are cleared (unless --keep-passwords is given)
+
+=item 2
+
+User API keys, session tokens, and other data that can be used for authentication are removed.
+
+=item 3
+
+private products (products that aren't visible when you're not logged in, e.g. Legal or Marketing)
+
+=item 4
+
+security bugs (which are bugs that belong to a group)
+
+=item 5
+
+private attachments, or attachments on bugs that are security bugs
+
+=item 6
+
+All attachment *data* is removed. This means the /content/ of all attachments is deleted, but the name remains (except as mentioned above).
+
+=item 7
+
+request logs (last bug visit, user_request_log, audit log)
+
+=item 9
+
+Saved searches are removed.
+
+=item 10
+
+comments (insider group comments, and deleted comments)
+
+=back
+
+=head1 OPTIONS
+
+The following options influence the behavior of this script
+
+=head2 --execute
+
+When present, the script actually makes changes to the DB.
+Without this option, no changes will be made.
+
+=head2 --keep-attachments
+
+Disables removal of attachment content (unless --keep-attachments is given)
+
+=head2 --keep-passwords
+
+Disable resetting passwords (unless --keep-passwords is given)
+
+=head2 --keep-insider
+
+Disable removal of insider comments and attachments (unless --keep-insider is given)
+
+=head2 --keep-group-bugs
+
+Disable removal of the specified groups and associated bugs (unless --keep-group-bugs is given)
+
+=head2 --keep-groups
+
+Disable removal of group definitions (unless --keep-groups is given)
+
+=head2 --enable-email
+
+Do not disable email for all users
+
+=head2 --dry-run
+
+Do not update the database, just output what will be deleted
+
+=head2 --from-cron
+
+Quite mode - suppress non-warning/error output
+
+=head2 --trace
+
+Output sql statements

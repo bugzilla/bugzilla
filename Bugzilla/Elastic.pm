@@ -50,7 +50,7 @@ sub suggest_users {
 
 sub _suggest_users_fallback {
     my ($self, $text) = @_;
-    my $users = Bugzilla::User::match($text, 25, 0);
+    my $users = Bugzilla::User::match($text, 25, 1);
     return [ map { { real_name => $_->name, name => $_->login } } @$users];
 }
 

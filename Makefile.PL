@@ -37,6 +37,7 @@ BEGIN {
 
 # PREREQ_PM
 my %requires = (
+    'Algorithm::BloomFilter'   => 0,
     'CGI'                      => '<= 3.63',
     'CPAN::Meta::Prereqs'      => '2.132830',
     'CPAN::Meta::Requirements' => '2.121',

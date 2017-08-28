@@ -42,6 +42,7 @@ use Bugzilla::Token;
 use Bugzilla::User;
 use Bugzilla::Util;
 use Bugzilla::CPAN;
+use Bugzilla::Bloomfilter;
 
 use Bugzilla::Metrics::Collector;
 use Bugzilla::Metrics::Template;
@@ -765,7 +766,7 @@ sub elastic {
 }
 
 sub check_rate_limit {
-    my ($class, $name, $id) = @_;
+    my ($class, $name, $ip) = @_;
     my $params = Bugzilla->params;
     if ($params->{rate_limit_active}) {
         my $rules = decode_json($params->{rate_limit_rules});
@@ -774,9 +775,15 @@ sub check_rate_limit {
              warn "no rules for $name!";
              return 0;
         }
-        if (Bugzilla->memcached->should_rate_limit("$name:$id", @$limit)) {
-            Bugzilla->audit("[rate_limit] $id exceeds rate limit $name: " . join("/", @$limit));
-            ThrowUserError("rate_limit");
+        if (Bugzilla->memcached->should_rate_limit("$name:$ip", @$limit)) {
+            my $action = 'block';
+            my $filter = Bugzilla::Bloomfilter->lookup("rate_limit_whitelist");
+            if ($filter && $filter->test($ip)) {
+                $action = 'ignore';
+            }
+            my $limit = join("/", @$limit);
+            Bugzilla->audit("[rate_limit] action=$action, ip=$ip, limit=$limit");
+            ThrowUserError("rate_limit") if $action eq 'block';
         }
     }
 }

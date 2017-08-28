@@ -127,6 +127,41 @@ sub get_config {
     }
 }
 
+sub set_bloomfilter {
+    my ($self, $args) = @_;
+    return unless $self->{memcached};
+    if (exists $args->{name}) {
+        return $self->_set($self->_bloomfilter_prefix . '.' . $args->{name}, $args->{filter});
+    }
+    else {
+        ThrowCodeError('params_required', { function => "Bugzilla::Memcached::set_bloomfilter",
+                                            params   => [ 'name' ] });
+    }
+}
+
+sub get_bloomfilter {
+    my ($self, $args) = @_;
+    return unless $self->{memcached};
+    if (exists $args->{name}) {
+        return $self->_get($self->_bloomfilter_prefix . '.' . $args->{name});
+    }
+    else {
+        ThrowCodeError('params_required', { function => "Bugzilla::Memcached::set_bloomfilter",
+                                            params   => [ 'name' ] });
+    }
+}
+
+sub clear_bloomfilter {
+    my ($self, $args) = @_;
+    return unless $self->{memcached};
+    if ($args && exists $args->{name}) {
+        $self->_delete($self->_config_prefix . '.' . $args->{name});
+    }
+    else {
+        $self->_inc_prefix("bloomfilter");
+    }
+}
+
 sub clear {
     my ($self, $args) = @_;
     return unless $self->{memcached};
@@ -242,6 +277,10 @@ sub _global_prefix {
 
 sub _config_prefix {
     return $_[0]->_prefix("config");
+}
+
+sub _bloomfilter_prefix {
+    return $_[0]->_prefix("bloomfilter");
 }
 
 sub _encode_key {

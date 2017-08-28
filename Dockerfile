@@ -1,4 +1,4 @@
-FROM mozillabteam/bmo-slim:latest
+FROM mozillabteam/bmo-slim:20170824.1
 MAINTAINER Dylan William Hardison <dylan@mozilla.com>
 
 ENV BUNDLE=https://s3.amazonaws.com/moz-devservices-bmocartons/bmo/vendor.tar.gz

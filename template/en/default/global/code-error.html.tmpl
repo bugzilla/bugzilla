@@ -64,9 +64,9 @@
     <code>[% function FILTER html %]</code> function.
 
   [% ELSIF error == "bug_error" %]
-    Trying to retrieve [% terms.bug %] [%+ bug.bug_id FILTER html %] returned 
+    Trying to retrieve [% terms.bug %] [%+ bug.bug_id FILTER html %] returned
     the error [% bug.error FILTER html %].
-    
+
   [% ELSIF error == "chart_data_not_generated" %]
     [% admindocslinks = {'extraconfig.html' => 'Setting up Charting'} %]
     [% IF product %]
@@ -83,31 +83,31 @@
 
   [% ELSIF error == "chart_datafile_corrupt" %]
     The chart data file [% file FILTER html %] is corrupt.
-        
+
   [% ELSIF error == "chart_dir_nonexistent" %]
-    One of the directories <tt>[% dir FILTER html %]</tt> and 
+    One of the directories <tt>[% dir FILTER html %]</tt> and
     <tt>[% graph_dir FILTER html %]</tt> does not exist.
-  
+
   [% ELSIF error == "chart_file_open_fail" %]
     Unable to open the chart datafile <tt>[% filename FILTER html %]</tt>.
- 
+
   [% ELSIF error == "column_alter_nonexistent_fk" %]
-    You attempted to modify the foreign key for 
+    You attempted to modify the foreign key for
     [%+ table FILTER html %].[% column FILTER html %], but there is
     no foreign key on that column.
- 
+
   [% ELSIF error == "column_not_null_without_default" %]
     Failed adding the column [% name FILTER html %]:
     You cannot add a NOT NULL column with no default to an existing table
     unless you specify something for the <code>$init_value</code> argument.
 
   [% ELSIF error == "column_not_null_no_default_alter" %]
-    You cannot alter the [% name FILTER html %] column to be NOT NULL 
+    You cannot alter the [% name FILTER html %] column to be NOT NULL
     without specifying a default or something for $set_nulls_to, because
     there are NULL values currently in it.
 
   [% ELSIF error == "comment_extra_data_not_allowed" %]
-    You tried to set the <code>extra_data</code> field to 
+    You tried to set the <code>extra_data</code> field to
     '[% extra_data FILTER html %]' but comments of type [% type FILTER html %]
     do not accept an <code>extra_data</code> argument.
 
@@ -136,7 +136,7 @@
   [% ELSIF error == "cpan_meta_missing" %]
     MYMETA.json file is missing.
   [% ELSIF error == "env_no_email" %]
-    [% terms.Bugzilla %] did not receive an email address from the 
+    [% terms.Bugzilla %] did not receive an email address from the
     environment.
     [% IF Param("auth_env_email") %]
       This means that the '[% Param("auth_env_email") FILTER html %]'
@@ -153,7 +153,7 @@
     is disabled.
 
   [% ELSIF error == "extension_must_be_subclass" %]
-    <code>[% package FILTER html %]</code> from 
+    <code>[% package FILTER html %]</code> from
     <code>[% filename FILTER html %]</code> is not a subclass of
     <code>[% class FILTER html %]</code>.
 
@@ -166,7 +166,7 @@
     for details.
 
   [% ELSIF error == "extension_no_name" %]
-    We did not find a <code>NAME</code> method in 
+    We did not find a <code>NAME</code> method in
     <code>[% package FILTER html %]</code> (loaded from
     <code>[% filename FILTER html %]</code>). This means that
     the extension has one or more of the following problems:
@@ -214,7 +214,7 @@
   [% ELSIF error == "invalid_attach_id_to_obsolete" %]
      The attachment number of one of the attachments you wanted to obsolete,
      [%+ attach_id FILTER html %], is invalid.
-          
+
   [% ELSIF error == "invalid_customfield_type" %]
     [% title = "Invalid Field Type" %]
     The type <em>[% type FILTER html %]</em> is not a valid field type.
@@ -226,7 +226,7 @@
   [% ELSIF error == "invalid_feature" %]
     [% title = "Invalid Feature Name" %]
     [% feature FILTER html %] is not a valid feature name. See
-    <code>OPTIONAL_MODULES</code> in 
+    <code>OPTIONAL_MODULES</code> in
     <code>Bugzilla::Install::Requirements</code> for valid names.
 
   [% ELSIF error == "invalid_flag_association" %]
@@ -253,14 +253,14 @@
 
   [% ELSIF error == "mismatched_bug_ids_on_obsolete" %]
     Attachment [% attach_id FILTER html %] is attached to another [% terms.bug %],
-    but you tried to flag it as obsolete while creating a new attachment to 
+    but you tried to flag it as obsolete while creating a new attachment to
     [%+ terms.bug %] [%+ my_bug_id FILTER html %].
 
   [% ELSIF error == "feature_disabled" %]
     The [% install_string("feature_$feature") FILTER html %] feature is not
-    available in this [% terms.Bugzilla %]. 
+    available in this [% terms.Bugzilla %].
     [% IF user.in_group('admin') %]
-      If you would like to enable this feature, please run 
+      If you would like to enable this feature, please run
       <kbd>checksetup.pl</kbd> to see how to install the necessary
       requirements for this feature.
     [% END %]
@@ -274,7 +274,7 @@
     [% title = "Flag not Requestable from Specific Person" %]
     You can't ask a specific person for
     <em>[% type.name FILTER html %]</em>.
-  
+
   [% ELSIF error == "flag_type_inactive" %]
     [% title = "Inactive Flag Type" %]
     The flag type [% type FILTER html %] is inactive and cannot be used
@@ -283,7 +283,7 @@
   [% ELSIF error == "flag_type_target_type_invalid" %]
     The target type was neither <em>[% terms.bug %]</em> nor <em>attachment</em>
     but rather <em>[% target_type FILTER html %]</em>.
-  
+
   [% ELSIF error == "invalid_field_name" %]
     Can't use [% field FILTER html %] as a field name.
 
@@ -304,7 +304,7 @@
 
   [% ELSIF error == "jobqueue_insert_failed" %]
    [% title = "Job Queue Failure" %]
-    Inserting a <code>[% job FILTER html %]</code> job into the Job 
+    Inserting a <code>[% job FILTER html %]</code> job into the Job
     Queue failed with the following error: [% errmsg FILTER html %]
 
   [% ELSIF error == "jobqueue_no_job_mapping" %]
@@ -314,7 +314,7 @@
     perhaps by using the 'job_map' hook.
 
   [% ELSIF error == "ldap_bind_failed" %]
-    Failed to bind to the LDAP server. The error message was: 
+    Failed to bind to the LDAP server. The error message was:
     <code>[% errstr FILTER html %]</code>
 
   [% ELSIF error == "ldap_cannot_retrieve_attr" %]
@@ -327,8 +327,8 @@
     Could not start TLS with LDAP server: <code>[% error FILTER html %]</code>.
 
   [% ELSIF error == "ldap_search_error" %]
-    An error occurred while trying to search LDAP for 
-    &quot;[% username FILTER html %]&quot;: 
+    An error occurred while trying to search LDAP for
+    &quot;[% username FILTER html %]&quot;:
     [% IF errstr %]
       <code>[% errstr FILTER html %]</code>
     [% ELSE %]
@@ -345,13 +345,13 @@
 
   [% ELSIF error == "missing_bug_id" %]
     No [% terms.bug %] ID was given.
-    
+
   [% ELSIF error == "missing_series_id" %]
     Having inserted a series into the database, no series_id was returned for
-    it. Series: [% series.category FILTER html %] / 
-    [%+ series.subcategory FILTER html %] / 
+    it. Series: [% series.category FILTER html %] /
+    [%+ series.subcategory FILTER html %] /
     [%+ series.name FILTER html %].
-    
+
   [% ELSIF error == "need_quipid" %]
     A valid quipid is needed.
 
@@ -367,7 +367,7 @@
 
   [% ELSIF error == "param_must_be_numeric" %]
     [% title = "Invalid Parameter" %]
-    Invalid parameter <code>[% param FILTER html %]</code> passed to 
+    Invalid parameter <code>[% param FILTER html %]</code> passed to
     <code>[% function FILTER html %]</code>: It must be numeric.
 
   [% ELSIF error == "param_required" %]
@@ -400,7 +400,7 @@
     [% END %]
 
     from
-   
+
     [% IF caller %]
         <code>[%+ caller FILTER html %]</code>, which is
     [% END %]
@@ -413,7 +413,7 @@
     <code>[% errstr FILTER html %]</code>.
 
   [% ELSIF error == "report_axis_invalid" %]
-    <em>[% val FILTER html %]</em> is not a valid value for 
+    <em>[% val FILTER html %]</em> is not a valid value for
     [%+ IF    fld == "x" %]the horizontal axis
     [%+ ELSIF fld == "y" %]the vertical axis
     [%+ ELSIF fld == "z" %]the multiple tables/images
@@ -435,7 +435,7 @@
     '[% joiner FILTER html %]' is not a valid joiner for a search.
 
   [% ELSIF error == "setting_info_invalid" %]
-    To create a new setting, you must supply a setting name, a list of 
+    To create a new setting, you must supply a setting name, a list of
     value/sortindex pairs, and the default value.
 
   [% ELSIF error == "setting_name_invalid" %]
@@ -471,7 +471,7 @@
 
   [% ELSIF error == "undefined_field" %]
     Form field [% field FILTER html %] was not defined.
-    
+
   [% ELSIF error == "unknown_method" %]
     The requested method '[% method FILTER html %]' was not found.
 
@@ -520,7 +520,7 @@
 [% END %]
 
 [% UNLESS header_done %]
-  [% PROCESS global/header.html.tmpl %]
+  [% PROCESS global/header.html.tmpl no_index=1 %]
 [% END %]
 
 [% PROCESS global/docslinks.html.tmpl

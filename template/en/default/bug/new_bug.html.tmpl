@@ -156,8 +156,64 @@
             [% bug.status_whiteboard == "" ? "---" : bug.status_whiteboard FILTER html %]
           [% END %]
         [% END %]
-      </div>
-      <div class="new-bug-pad">
+
+          [% WRAPPER bug_modal/module.html.tmpl
+            title = "People"
+            collapsed = 1
+          %]
+            [%# people %]
+            [% INCLUDE bug_modal/field.html.tmpl
+                field = bug_fields.assigned_to
+                field_type = constants.FIELD_TYPE_USER
+                edit_only = 1
+                editable = 1
+                help = "https://wiki.mozilla.org/BMO/UserGuide/BugFields#assigned_to"
+            %]
+            [% INCLUDE bug_modal/field.html.tmpl
+                field = bug_fields.bug_mentor
+                field_type = constants.FIELD_TYPE_USERS
+                name = "bug_mentors"
+                label = "Mentors"
+                edit_only = 1
+                editable = 1
+                help = "https://wiki.mozilla.org/BMO/UserGuide/BugFields#bug_mentor"
+            %]
+            [% INCLUDE bug_modal/field.html.tmpl
+                field = bug_fields.cc
+                field_type = constants.FIELD_TYPE_USERS
+                name = "cc"
+                label = "CC"
+                edit_only = 1
+                editable = 1
+                help = "https://wiki.mozilla.org/BMO/UserGuide/BugFields#cc"
+            %]
+          [% END %]
+
+          [% WRAPPER bug_modal/module.html.tmpl
+            title = "Dependency Tree"
+            collapsed = 1
+          %]
+          [%# depends on %]
+          [% INCLUDE bug_modal/field.html.tmpl
+              field = bug_fields.dependson
+              field_type = constants.FIELD_TYPE_FREETEXT
+              edit_only = 1
+              editable = 1
+              help = "https://wiki.mozilla.org/BMO/UserGuide/BugFields#dependson"
+          %]
+
+          [%# blocks %]
+          [% INCLUDE bug_modal/field.html.tmpl
+              field = bug_fields.blocked
+              field_type = constants.FIELD_TYPE_FREETEXT
+              edit_only = 1
+              editable = 1
+              help = "https://wiki.mozilla.org/BMO/UserGuide/BugFields#blocks"
+          %]
+          [% END %]
+        </div>
+        <div class="new-bug-pad">
+        </div>
       </div>
     </div>
   </div>

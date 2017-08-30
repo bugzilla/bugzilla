@@ -25,6 +25,8 @@ my $user = Bugzilla->login(LOGIN_REQUIRED);
 my $template = Bugzilla->template;
 my $dbh = Bugzilla->dbh;
 
+ThrowUserError('reset_password_denied') unless $user->password_change_required;
+
 if ($cgi->param('do_save')) {
     my $token = $cgi->param('token');
     check_token_data($token, 'reset_password');

@@ -27,6 +27,7 @@ our @EXPORT = qw(
     create_private_revision_policy
     create_project
     edit_revision_policy
+    get_attachment_revisions
     get_bug_role_phids
     get_members_by_bmo_id
     get_project_phid
@@ -297,7 +298,32 @@ sub is_attachment_phab_revision {
     my ($attachment, $include_obsolete) = @_;
     return ($attachment->contenttype eq PHAB_CONTENT_TYPE
             && ($include_obsolete || !$attachment->isobsolete)
-            && $attachment->attacher->login eq 'phab-bot@bmo.tld') ? 1 : 0;
+            && $attachment->attacher->login eq PHAB_AUTOMATION_USER) ? 1 : 0;
+}
+
+sub get_attachment_revisions {
+    my ($self, $bug) = @_;
+
+    my @revisions;
+
+    my @attachments =
+      grep { is_attachment_phab_revision($_) } @{ $bug->attachments() };
+
+    if (@attachments) {
+        my @revision_ids;
+        foreach my $attachment (@attachments) {
+            my ($revision_id) =
+              ( $attachment->filename =~ PHAB_ATTACHMENT_PATTERN );
+            next if !$revision_id;
+            push( @revision_ids, int($revision_id) );
+        }
+
+        if (@revision_ids) {
+            @revisions = get_revisions_by_ids( \@revision_ids );
+        }
+    }
+
+    return @revisions;
 }
 
 sub request {

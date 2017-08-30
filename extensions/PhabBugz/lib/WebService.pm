@@ -32,16 +32,21 @@ use Bugzilla::Extension::PhabBugz::Util qw(
     get_project_phid
     get_revisions_by_ids
     intersect
+    is_attachment_phab_revision
     make_revision_public
     request
 );
 
+use List::Util qw(first);
+use List::MoreUtils qw(any);
 use MIME::Base64 qw(decode_base64);
 
 use constant PUBLIC_METHODS => qw(
+    check_user_permission_for_bug
+    obsolete_attachments
     revision
+    update_reviewer_statuses
 );
-
 
 sub revision {
     my ($self, $params) = @_;
@@ -58,6 +63,9 @@ sub revision {
     $params->{'Bugzilla_api_key'} = $api_key;
 
     my $user = Bugzilla->login(LOGIN_REQUIRED);
+
+    # Prechecks
+    _phabricator_precheck($user);
 
     unless (defined $params->{revision} && detaint_natural($params->{revision})) {
         ThrowCodeError('param_required', { param => 'revision' })
@@ -117,13 +125,8 @@ sub check_user_permission_for_bug {
 
     my $user = Bugzilla->login(LOGIN_REQUIRED);
 
-    # Ensure PhabBugz is on
-    ThrowUserError('phabricator_not_enabled')
-        unless Bugzilla->params->{phabricator_enabled};
-
-    # Validate that the requesting user's email matches phab-bot
-    ThrowUserError('phabricator_unauthorized_user')
-        unless $user->login eq PHAB_AUTOMATION_USER;
+    # Prechecks
+    _phabricator_precheck($user);
 
     # Validate that a bug id and user id are provided
     ThrowUserError('phabricator_invalid_request_params')
@@ -136,6 +139,134 @@ sub check_user_permission_for_bug {
     return {
         result => $target_user->can_see_bug($params->{bug_id})
     };
+}
+
+sub update_reviewer_statuses {
+    my ($self, $params) = @_;
+
+    my $user = Bugzilla->login(LOGIN_REQUIRED);
+
+    # Prechecks
+    _phabricator_precheck($user);
+
+    my $revision_id = $params->{revision_id};
+    unless (defined $revision_id && detaint_natural($revision_id)) {
+        ThrowCodeError('param_required', { param => 'revision_id' })
+    }
+
+    my $bug_id = $params->{bug_id};
+    unless (defined $bug_id && detaint_natural($bug_id)) {
+        ThrowCodeError('param_required', { param => 'bug_id' })
+    }
+
+    my $accepted_user_ids = $params->{accepted_users};
+    defined $accepted_user_ids
+      || ThrowCodeError('param_required', { param => 'accepted_users' });
+    $accepted_user_ids = [ split(':', $accepted_user_ids) ];
+
+    my $bug = Bugzilla::Bug->check($bug_id);
+
+    my @attachments =
+      grep { is_attachment_phab_revision($_) } @{ $bug->attachments() };
+
+    return { result => [] } if !@attachments;
+
+    my $dbh = Bugzilla->dbh;
+    my ($timestamp) = $dbh->selectrow_array("SELECT NOW()");
+
+    my @updated_attach_ids;
+    foreach my $attachment (@attachments) {
+        my ($curr_revision_id) = ($attachment->filename =~ PHAB_ATTACHMENT_PATTERN);
+        next if $revision_id != $curr_revision_id;
+
+        # Clear old flags if no longer accepted or a previous
+        # acceptor is not in the new list.
+        my (@old_flags, @new_flags, %accepted_done, $flag_type);
+        foreach my $flag (@{ $attachment->flags }) {
+            next if $flag->type->name ne 'review';
+            $flag_type = $flag->type;
+            unless (any { $flag->setter->id == $_ } @$accepted_user_ids) {
+                push(@old_flags, { id => $flag->id, status => 'X' });
+            }
+            else {
+                $accepted_done{$flag->setter->id}++; # so we do not set it again as new
+            }
+        }
+
+        $flag_type ||= first { $_->name eq 'review' } @{ $attachment->flag_types };
+
+        # Create new flags
+        foreach my $user_id (@$accepted_user_ids) {
+            next if $accepted_done{$user_id};
+            my $user = Bugzilla::User->check({ id => $user_id, cache => 1 });
+            push(@new_flags, { type_id => $flag_type->id, setter => $user, status => '+' });
+        }
+
+        $attachment->set_flags(\@old_flags, \@new_flags);
+        $attachment->update($timestamp);
+
+        push(@updated_attach_ids, $attachment->id);
+    }
+
+    Bugzilla::BugMail::Send($bug_id, { changer => $user }) if @updated_attach_ids;
+
+    return { result => \@updated_attach_ids };
+}
+
+sub obsolete_attachments {
+    my ($self, $params) = @_;
+
+    my $user = Bugzilla->login(LOGIN_REQUIRED);
+
+    # Prechecks
+    _phabricator_precheck($user);
+
+    my $revision_id = $params->{revision_id};
+    unless (defined $revision_id && detaint_natural($revision_id)) {
+        ThrowCodeError('param_required', { param => 'revision' })
+    }
+
+    my $bug_id= $params->{bug_id};
+    unless (defined $bug_id && detaint_natural($bug_id)) {
+        ThrowCodeError('param_required', { param => 'bug_id' })
+    }
+
+    my $bug = Bugzilla::Bug->check($bug_id);
+
+    my @attachments =
+      grep { is_attachment_phab_revision($_) } @{ $bug->attachments() };
+
+    return { result => [] } if !@attachments;
+
+    my $dbh = Bugzilla->dbh;
+    my ($timestamp) = $dbh->selectrow_array("SELECT NOW()");
+
+    my @updated_attach_ids;
+    foreach my $attachment (@attachments) {
+        my ($curr_revision_id) = ($attachment->filename =~ PHAB_ATTACHMENT_PATTERN);
+        next if $revision_id != $curr_revision_id;
+
+        $attachment->set_is_obsolete(1);
+        $attachment->update($timestamp);
+
+        push(@updated_attach_ids, $attachment->id);
+    }
+
+    Bugzilla::BugMail::Send($bug_id, { changer => $user }) if @updated_attach_ids;
+
+    return { result => \@updated_attach_ids };
+}
+
+sub _phabricator_precheck {
+    my ($user) = @_;
+
+    # Ensure PhabBugz is on
+    ThrowUserError('phabricator_not_enabled')
+        unless Bugzilla->params->{phabricator_enabled};
+
+    # Validate that the requesting user's email matches phab-bot
+    ThrowUserError('phabricator_unauthorized_user')
+        unless $user->login eq PHAB_AUTOMATION_USER;
 }
 
 sub rest_resources {
@@ -156,6 +287,18 @@ sub rest_resources {
                 params => sub {
                     return { bug_id => $_[0], user_id => $_[1] };
                 }
+            }
+        },
+        # Update reviewer statuses
+        qr{^/phabbugz/update_reviewer_statuses$}, {
+            PUT => {
+                method => 'update_reviewer_statuses',
+            }
+        },
+        # Obsolete attachments
+        qr{^/phabbugz/obsolete$}, {
+            PUT => {
+                method => 'obsolete_attachments',
             }
         }
     ];

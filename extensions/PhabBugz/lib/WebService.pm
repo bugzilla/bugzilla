@@ -231,10 +231,16 @@ sub obsolete_attachments {
         ThrowCodeError('param_required', { param => 'bug_id' })
     }
 
+    my $make_obsolete = $params->{make_obsolete};
+    unless (defined $make_obsolete) {
+        ThrowCodeError('param_required', { param => 'make_obsolete' })
+    }
+    $make_obsolete = $make_obsolete ? 1 : 0;
+
     my $bug = Bugzilla::Bug->check($bug_id);
 
     my @attachments =
-      grep { is_attachment_phab_revision($_) } @{ $bug->attachments() };
+      grep { is_attachment_phab_revision($_, 1) } @{ $bug->attachments() };
 
     return { result => [] } if !@attachments;
 
@@ -246,7 +252,7 @@ sub obsolete_attachments {
         my ($curr_revision_id) = ($attachment->filename =~ PHAB_ATTACHMENT_PATTERN);
         next if $revision_id != $curr_revision_id;
 
-        $attachment->set_is_obsolete(1);
+        $attachment->set_is_obsolete($make_obsolete);
         $attachment->update($timestamp);
 
         push(@updated_attach_ids, $attachment->id);

@@ -302,7 +302,7 @@ sub is_attachment_phab_revision {
 }
 
 sub get_attachment_revisions {
-    my ($self, $bug) = @_;
+    my $bug = shift;
 
     my @revisions;
 

@@ -2016,14 +2016,15 @@ Splinter.addPatchFile = function (file) {
     Dom.addClass(fileLabel, 'file-label');
     fileLabel.appendTo(fileDiv);
 
-    var fileCollapseLink = new Element(document.createElement('a'));
-    Dom.addClass(fileCollapseLink, 'file-label-collapse');
-    fileCollapseLink.appendChild(document.createTextNode('[-]'));
-    Dom.setAttribute(fileCollapseLink, 'href', 'javascript:void(0);')
-    Dom.setAttribute(fileCollapseLink, 'onclick', "Splinter.toggleCollapsed('" + 
-                                                  encodeURIComponent(file.filename) + "');");
-    Dom.setAttribute(fileCollapseLink, 'title', 'Click to expand or collapse this file table');
-    fileCollapseLink.appendTo(fileLabel);
+    var fileCollapseLink = document.createElement('a');
+    fileCollapseLink.classList.add('file-label-collapse');
+    fileCollapseLink.appendChild(document.createTextNode("[-]"));
+    fileCollapseLink.setAttribute('href', "javascript:void(0);");
+    fileCollapseLink.addEventListener("click", function() {
+        Splinter.toggleCollapsed(encodeURIComponent(file.filename));
+    });
+    fileCollapseLink.setAttribute("title", 'Click to expand or collapse this file table');
+    new Element(fileCollapseLink).appendTo(fileLabel);
 
     var fileLabelName = new Element(document.createElement('span'));
     Dom.addClass(fileLabelName, 'file-label-name');
@@ -2043,15 +2044,17 @@ Splinter.addPatchFile = function (file) {
                                                 'on the published review.');
         fileReviewed.appendTo(fileLabel);
 
-        var fileReviewedInput = new Element(document.createElement('input'));
-        Dom.setAttribute(fileReviewedInput, 'type', 'checkbox');
-        Dom.setAttribute(fileReviewedInput, 'id', 'file-review-checkbox-' + encodeURIComponent(file.filename));
-        Dom.setAttribute(fileReviewedInput, 'onchange', "Splinter.toggleFileReviewed('" +
-                                                        encodeURIComponent(file.filename) + "');");
+        var fileReviewedInput = document.createElement('input');
+        fileReviewedInput.setAttribute("type", "checkbox");
+        fileReviewedInput.setAttribute("id", 'file-review-checkbox-' + encodeURIComponent(file.filename));
+        fileReviewedInput.addEventListener("change", function() {
+            Splinter.toggleFileReviewed(encodeURIComponent(file.filename));
+        });
+
         if (file.fileReviewed) {
-            Dom.setAttribute(fileReviewedInput, 'checked', 'true');
+            fileReviewedInput.setAttribute("checked", 'true');
         }
-        fileReviewedInput.appendTo(fileReviewed);
+        new Element(fileReviewedInput).appendTo(fileReviewed);
 
         var fileReviewedLabel = new Element(document.createElement('label'));
         Dom.addClass(fileReviewedLabel, 'file-review-label')

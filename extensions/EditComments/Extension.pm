@@ -249,7 +249,7 @@ sub config_modify_panels {
     push @{ $args->{panels}->{groupsecurity}->{params} }, {
         name    => 'edit_comments_group',
         type    => 's',
-        choices => \&Bugzilla::Config::GroupSecurity::_get_all_group_names,
+        choices => \&get_all_group_names,
         default => 'admin',
         checker => \&check_group
     };

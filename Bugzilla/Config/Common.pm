@@ -30,6 +30,7 @@ use base qw(Exporter);
     check_bug_status check_smtp_auth check_theschwartz_available
     check_maxattachmentsize check_email
     check_comment_taggers_group
+    get_all_group_names
 );
 
 # Checking functions for the various values
@@ -343,6 +344,13 @@ sub check_comment_taggers_group {
         return "Comment tagging requires installation of the JSONRPC feature";
     }
     return check_group($group_name);
+}
+
+sub get_all_group_names {
+    return [
+        '',
+        map { $_->name } Bugzilla::Group->get_all,
+    ];
 }
 
 # OK, here are the parameter definitions themselves.

@@ -31,7 +31,7 @@ use base qw(Bugzilla::Extension);
 
 use Bugzilla::Bug;
 use Bugzilla::BugMail;
-use Bugzilla::Config::Common qw(check_group);
+use Bugzilla::Config::Common qw(check_group get_all_group_names);
 use Bugzilla::Constants;
 use Bugzilla::Error;
 use Bugzilla::Field;
@@ -2579,7 +2579,7 @@ sub config_modify_panels {
     push @{ $args->{panels}->{groupsecurity}->{params} }, {
         name    => 'delete_comments_group',
         type    => 's',
-        choices => \&Bugzilla::Config::GroupSecurity::_get_all_group_names,
+        choices => \&get_all_group_names,
         default => 'admin',
         checker => \&check_group
     };

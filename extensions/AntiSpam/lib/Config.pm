@@ -23,7 +23,7 @@ sub get_param_list {
         {
             name => 'antispam_spammer_exclude_group',
             type => 's',
-            choices => \&_get_all_group_names,
+            choices => \&get_all_group_names,
             default => 'canconfirm',
             checker => \&check_group
         },
@@ -77,12 +77,6 @@ sub get_param_list {
     );
 
     return @param_list;
-}
-
-sub _get_all_group_names {
-    my @group_names = map {$_->name} Bugzilla::Group->get_all;
-    unshift(@group_names, '');
-    return \@group_names;
 }
 
 1;

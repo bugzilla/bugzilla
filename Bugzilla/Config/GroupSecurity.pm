@@ -29,7 +29,7 @@ sub get_param_list {
         {
             name    => 'chartgroup',
             type    => 's',
-            choices => \&_get_all_group_names,
+            choices => \&get_all_group_names,
             default => 'editbugs',
             checker => \&check_group
         },
@@ -37,7 +37,7 @@ sub get_param_list {
         {
             name    => 'insidergroup',
             type    => 's',
-            choices => \&_get_all_group_names,
+            choices => \&get_all_group_names,
             default => '',
             checker => \&check_group
         },
@@ -45,7 +45,7 @@ sub get_param_list {
         {
             name    => 'timetrackinggroup',
             type    => 's',
-            choices => \&_get_all_group_names,
+            choices => \&get_all_group_names,
             default => 'editbugs',
             checker => \&check_group
         },
@@ -53,7 +53,7 @@ sub get_param_list {
         {
             name    => 'querysharegroup',
             type    => 's',
-            choices => \&_get_all_group_names,
+            choices => \&get_all_group_names,
             default => 'editbugs',
             checker => \&check_group
         },
@@ -61,7 +61,7 @@ sub get_param_list {
         {
             name    => 'comment_taggers_group',
             type    => 's',
-            choices => \&_get_all_group_names,
+            choices => \&get_all_group_names,
             default => 'editbugs',
             checker => \&check_comment_taggers_group
         },
@@ -69,7 +69,7 @@ sub get_param_list {
         {
             name    => 'debug_group',
             type    => 's',
-            choices => \&_get_all_group_names,
+            choices => \&get_all_group_names,
             default => 'admin',
             checker => \&check_group
         },
@@ -89,10 +89,6 @@ sub get_param_list {
     return @param_list;
 }
 
-sub _get_all_group_names {
-    my @group_names = map { $_->name } Bugzilla::Group->get_all;
-    unshift( @group_names, '' );
-    return \@group_names;
-}
+
 
 1;

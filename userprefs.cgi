@@ -655,7 +655,7 @@ sub SaveMFA {
     my $reason;
     if ($action eq 'enable') {
         $provider->enroll(Bugzilla->input_params);
-        $reason = 'Two-factor enrolment';
+        $reason = 'Two-factor enrollment';
     }
     elsif ($action eq 'recovery') {
         $reason = 'Recovery code generation';

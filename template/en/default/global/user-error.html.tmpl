@@ -1232,7 +1232,7 @@
   [% ELSIF error == "mfa_bad_code" %]
     Invalid verification code.
 
-  [% ELSIF error == "mfa_totp_bad_enrolment_code" %]
+  [% ELSIF error == "mfa_totp_bad_enrollment_code" %]
     Invalid verification code.<br>
     <br>
     The QR code has been deleted - please generate and scan a new code.
@@ -1401,7 +1401,7 @@
 
   [% ELSIF error == "reset_password_denied" %]
     [% title = "Reset Password Denied" %]
-    You cannot reset your password without administrative permission. 
+    You cannot reset your password without administrative permission.
 
   [% ELSIF error == "no_axes_defined" %]
     [% title = "No Axes Defined" %]

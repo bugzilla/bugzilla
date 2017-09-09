@@ -70,7 +70,7 @@ sub check {
     return if $self->_auth()->verify($code, 1);
 
     if ($params->{mfa_action} && $params->{mfa_action} eq 'enable') {
-        ThrowUserError('mfa_totp_bad_enrolment_code');
+        ThrowUserError('mfa_totp_bad_enrollment_code');
     }
     else {
         ThrowUserError('mfa_bad_code');

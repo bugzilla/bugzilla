@@ -19,6 +19,8 @@ use Carp ();
 # (and there might be side-effects, since this code is loaded very early in the httpd startup)
 use Template ();
 
+use Bugzilla::ModPerl::BlockIP;
+
 sub apache_config {
     my ($class, $cgi_path) = @_;
 
@@ -72,6 +74,7 @@ __DATA__
 # the built-in rand(), even though we never use it in Bugzilla itself,
 # so we need to srand() both of them.)
 PerlChildInitHandler "sub { Bugzilla::RNG::srand(); srand(); }"
+PerlAccessHandler Bugzilla::ModPerl::BlockIP
 
 # It is important to specify ErrorDocuments outside of all directories.
 # These used to be in .htaccess, but then things like "AllowEncodedSlashes no"

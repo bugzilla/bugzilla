@@ -164,6 +164,11 @@ sub update_reviewer_statuses {
       || ThrowCodeError('param_required', { param => 'accepted_users' });
     $accepted_user_ids = [ split(':', $accepted_user_ids) ];
 
+    my $denied_user_ids = $params->{denied_users};
+    defined $denied_user_ids
+      || ThrowCodeError('param_required', { param => 'denied_users' });
+    $denied_user_ids = [ split(':', $denied_user_ids) ];
+
     my $bug = Bugzilla::Bug->check($bug_id);
 
     my @attachments =
@@ -179,17 +184,16 @@ sub update_reviewer_statuses {
         my ($curr_revision_id) = ($attachment->filename =~ PHAB_ATTACHMENT_PATTERN);
         next if $revision_id != $curr_revision_id;
 
-        # Clear old flags if no longer accepted or a previous
-        # acceptor is not in the new list.
-        my (@old_flags, @new_flags, %accepted_done, $flag_type);
+        # Clear old flags if no longer accepted
+        my (@old_flags, @new_flags, %accepted_done, %denied_done, $flag_type);
         foreach my $flag (@{ $attachment->flags }) {
             next if $flag->type->name ne 'review';
             $flag_type = $flag->type;
-            unless (any { $flag->setter->id == $_ } @$accepted_user_ids) {
-                push(@old_flags, { id => $flag->id, status => 'X' });
+            if (any { $flag->setter->id == $_ } @$denied_user_ids) {
+                push(@old_flags, { id => $flag->id, setter => $flag->setter, status => 'X' });
             }
-            else {
-                $accepted_done{$flag->setter->id}++; # so we do not set it again as new
+            if (any { $flag->setter->id == $_ } @$accepted_user_ids) {
+                $accepted_done{$flag->setter->id}++;
             }
         }
 
@@ -202,8 +206,28 @@ sub update_reviewer_statuses {
             push(@new_flags, { type_id => $flag_type->id, setter => $user, status => '+' });
         }
 
+        # Also add comment to for attachment update showing the user's name
+        # that changed the revision.
+        my $comment;
+        foreach my $flag_data (@new_flags) {
+            $comment .= $flag_data->{setter}->name . " has approved the revision.\n";
+        }
+        foreach my $flag_data (@old_flags) {
+            $comment .= $flag_data->{setter}->name . " has requested changes to the revision.\n";
+        }
+
+        if ($comment) {
+            $comment .= "\n" . Bugzilla->params->{phabricator_base_uri} . "D" . $revision_id;
+            $bug->add_comment($comment, {
+                isprivate  => $attachment->isprivate,
+                type       => CMT_ATTACHMENT_UPDATED,
+                extra_data => $attachment->id
+            });
+        }
+
         $attachment->set_flags(\@old_flags, \@new_flags);
         $attachment->update($timestamp);
+        $bug->update($timestamp) if $comment;
 
         push(@updated_attach_ids, $attachment->id);
     }

@@ -214,7 +214,7 @@ sub Send {
     }
 
     # Global watcher
-    my @watchers = split(/[,\s]+/, Bugzilla->params->{'globalwatchers'});
+    my @watchers = split(/\s*,\s*/ms, Bugzilla->params->{'globalwatchers'});
     foreach (@watchers) {
         my $watcher_id = login_to_id($_);
         next unless $watcher_id;

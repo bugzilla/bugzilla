@@ -106,6 +106,11 @@ sub get_param_list {
             type    => 't',
             default => '',
         },
+        {
+            name    => 'silent_users',
+            type    => 't',
+            default => '',
+        },
     );
     return @param_list;
 }

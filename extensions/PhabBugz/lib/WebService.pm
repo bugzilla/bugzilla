@@ -218,6 +218,8 @@ sub update_reviewer_statuses {
 
         if ($comment) {
             $comment .= "\n" . Bugzilla->params->{phabricator_base_uri} . "D" . $revision_id;
+            # Add transaction_id as anchor if one present
+            $comment .= "#" . $params->{transaction_id} if $params->{transaction_id};
             $bug->add_comment($comment, {
                 isprivate  => $attachment->isprivate,
                 type       => CMT_ATTACHMENT_UPDATED,

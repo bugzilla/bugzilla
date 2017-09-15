@@ -38,7 +38,7 @@ $func->(@ARGV);
 sub cmd_httpd  {
     check_data_dir();
     wait_for_db();
-
+    run( '/usr/sbin/httpd', '-DFOREGROUND', '-f', '/app/httpd/httpd.conf' );
 }
 
 sub cmd_load_test_data {
@@ -249,7 +249,7 @@ sub wait_for_db {
         $dbh = DBI->connect(
             $dsn,
             $c->{db_user},
-            $c->{db_pass}, 
+            $c->{db_pass},
             { RaiseError => 0, PrintError => 0 }
         );
         last if $dbh;

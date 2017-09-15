@@ -905,6 +905,7 @@ sub extract_nicks {
     return grep { defined $_ } @nicks;
 }
 
+
 1;
 
 __END__

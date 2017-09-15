@@ -12,7 +12,7 @@ BEGIN { plan skip_all => "these tests only run in CI" unless $ENV{CI} && $ENV{CI
 use ok DRIVER;
 
 my $ADMIN_LOGIN  = $ENV{BZ_TEST_ADMIN} // 'admin@mozilla.bugs';
-my $ADMIN_PW_OLD = $ENV{BZ_TEST_ADMIN_PASS} // 'passWord1234!';
+my $ADMIN_PW_OLD = $ENV{BZ_TEST_ADMIN_PASS} // 'Te6Oovohch';
 my $ADMIN_PW_NEW = $ENV{BZ_TEST_ADMIN_NEWPASS} // 'she7Ka8t';
 
 my @require_env = qw(
@@ -33,7 +33,7 @@ eval {
 
     login_ok($sel, $ADMIN_LOGIN, $ADMIN_PW_OLD);
 
-    change_password($sel, $ADMIN_PW_OLD, 'newpassword', 'newpassword2');
+    change_password($sel, $ADMIN_PW_OLD, 'Ju9shiePhie6', 'zeeKuj0leib7');
     $sel->title_is("Passwords Don't Match");
     $sel->body_text_contains('The two passwords you entered did not match.');
 

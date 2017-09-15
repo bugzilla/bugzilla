@@ -12,6 +12,7 @@ use lib qw(lib ../../lib ../../local/lib/perl5);
 use Test::More "no_plan";
 
 use QA::Util;
+use constant PASSWORD => 'uChoopoh1che';
 
 my ($sel, $config) = get_selenium();
 
@@ -67,7 +68,7 @@ $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_is('Add user');
 $sel->type_ok('login', 'master@selenium.bugzilla.org');
 $sel->type_ok('name', 'master-user');
-$sel->type_ok('password', 'selenium', 'Enter password');
+$sel->type_ok('password', PASSWORD, 'Enter password');
 $sel->type_ok('disabledtext', 'Not for common usage');
 $sel->click_ok('add');
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
@@ -83,7 +84,7 @@ $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_is('Add user');
 $sel->type_ok('login', 'slave@selenium.bugzilla.org');
 $sel->type_ok('name', 'slave-user');
-$sel->type_ok('password', 'selenium', 'Enter password');
+$sel->type_ok('password', PASSWORD, 'Enter password');
 $sel->type_ok('disabledtext', 'Not for common usage');
 $sel->click_ok('add');
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
@@ -99,7 +100,7 @@ $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_is('Add user');
 $sel->type_ok('login', 'reg@selenium.bugzilla.org');
 $sel->type_ok('name', 'reg-user');
-$sel->type_ok('password', 'selenium', 'Enter password');
+$sel->type_ok('password', PASSWORD, 'Enter password');
 $sel->type_ok('disabledtext', 'Not for common usage');
 $sel->click_ok('add');
 $sel->wait_for_page_to_load_ok(WAIT_TIME);

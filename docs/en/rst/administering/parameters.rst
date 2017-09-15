@@ -179,14 +179,6 @@ emailsuffix
 createemailregexp
     This defines the (case-insensitive) regexp to use for email addresses that are permitted to self-register. The default (:paramval:`.*`) permits any account matching the emailregexp to be created. If this parameter is left blank, no users will be permitted to create their own accounts and all accounts will have to be created by an administrator.
 
-password_complexity
-    Set the complexity required for passwords. In all cases must the passwords be at least 6 characters long.
-
-    * :paramval:`no_constraints` - No complexity required.
-    * :paramval:`mixed_letters` - Passwords must contain at least one UPPER and one lower case letter.
-    * :paramval:`letters_numbers` - Passwords must contain at least one UPPER and one lower case letter and a number.
-    * :paramval:`letters_numbers_specialchars` - Passwords must contain at least one letter, a number and a special character.
-
 password_check_on_login
     If set, Bugzilla will check that the password meets the current complexity rules and minimum length requirements when the user logs into the Bugzilla web interface. If it doesn't, the user would not be able to log in, and will receive a message to reset their password.
 

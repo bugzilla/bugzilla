@@ -24,6 +24,70 @@
    desc = "Set up your authentication policies"
 %]
 
+[%  desc_passwdqc_min = BLOCK %]
+  [Int0, Int1, Int2, Int3, Int4]
+  <p>
+  The minimum allowed password lengths for different kinds of passwords
+  and passphrases. "undef" can be used to disallow passwords of a given
+  kind regardless of their length. Each subsequent number is required to
+  be no larger than the preceding one.
+
+  <p>
+  Int0 is used for passwords consisting of characters from one character
+  class only. The character classes are: digits, lower-case letters,
+  upper-case letters, and other characters. There is also a special
+  class for non-ASCII characters, which could not be classified, but are
+  assumed to be non-digits.
+  <p>
+  Int1 is used for passwords consisting of characters from two character
+  classes that do not meet the requirements for a passphrase.
+  <p>
+  Int2 is used for passphrases. Note that besides meeting this length
+  requirement, a passphrase must also consist of a sufficient number of
+  words (see the "passphrase_words" option below).
+  <p>
+  Int3 and Int4 are used for passwords consisting of characters from
+  three and four character classes, respectively.
+
+  <p>
+  When calculating the number of character classes, upper-case letters
+  used as the first character and digits used as the last character of a
+  password are not counted.
+
+  <p>
+  In addition to being sufficiently long, passwords are required to
+  contain enough different characters for the character classes and the
+  minimum length they have been checked against.
+[% END %]
+
+[%  desc_passwdqc_max = BLOCK %]
+  The maximum allowed password length. This can be used to prevent users
+  from setting passwords that may be too long for some system services.
+  It must be larger than 8.
+[% END %]
+
+[%  desc_passwdqc_passphrase_words = BLOCK %]
+  The number of words required for a passphrase, or 0 to disable the
+  support for user-chosen passphrases.
+[% END %]
+
+[%  desc_passwdqc_match_length = BLOCK %]
+  The length of common substring required to conclude that a password is
+  at least partially based on information found in a character string,
+  or 0 to disable the substring search. Note that the password will not
+  be rejected once a weak substring is found; it will instead be
+  subjected to the usual strength requirements with the weak substring
+  partially discounted.
+  <p>
+  The substring search is case-insensitive and is able to detect and
+  remove a common substring spelled backwards.
+[% END %]
+
+[%  desc_random_bits = BLOCK %]
+  The size of randomly-generated passphrases in bits (24 to 85).
+[% END %]
+
+
 [% param_descs = {
   auth_env_id => "Environment variable used by external authentication system " _
                  "to store a unique identifier for each user. Leave it blank " _
@@ -132,6 +196,12 @@
                        "to be created. If this parameter is left blank, no users " _
                        "will be permitted to create their own accounts and all accounts " _
                        "will have to be created by an administrator.",
+
+  passwdqc_min              => desc_passwdqc_min, 
+  passwdqc_max              => desc_passwdqc_max
+  passwdqc_passphrase_words => desc_passwdqc_passphrase_words,
+  passwdqc_match_length     => desc_passwdqc_match_length,
+  passwdqc_random_bits      => desc_random_bits,
 
   password_complexity =>
     "Set the complexity required for passwords. In all cases must the passwords " _

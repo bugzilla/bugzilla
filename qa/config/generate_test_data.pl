@@ -182,7 +182,8 @@ foreach my $username (@usernames) {
        }
 
         Bugzilla::User->create(
-            {   login_name    => $login,
+            {
+                login_name    => $login,
                 realname      => $realname,
                 cryptpassword => $password,
                 %extra_args,
@@ -498,7 +499,7 @@ foreach my $product (@products) {
 
             Bugzilla::User->create({
                 login_name    => $watch_user,
-                cryptpassword => generate_random_password(),
+                cryptpassword => Bugzilla->passwdqc->generate_password(),
                 disable_mail  => 1,
             });
 

@@ -413,7 +413,7 @@ sub _check_user {
     $sel->wait_for_page_to_load(WAIT_TIME);
     $sel->title_is('Add user');
     $sel->type_ok('login', $user);
-    $sel->type_ok('password', 'password');
+    $sel->type_ok('password', 'icohF1io2ohw');
     $sel->click_ok("add");
     $sel->wait_for_page_to_load(WAIT_TIME);
     $sel->is_text_present('regexp:The user account .* has been created successfully');

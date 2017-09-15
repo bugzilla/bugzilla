@@ -62,13 +62,15 @@ sub check_credentials {
     if (Bugzilla->usage_mode == USAGE_MODE_BROWSER &&
         Bugzilla->params->{password_check_on_login})
     {
-        my $check = validate_password_check($password);
-        if ($check) {
-            return {
-                failure => AUTH_ERROR,
-                user_error => $check,
-                details => { locked_user => $user }
-            }
+        my $pwqc = Bugzilla->passwdqc;
+        unless ($pwqc->validate_password($password)) {
+            my $reason = $pwqc->reason;
+            Bugzilla->audit(sprintf "%s logged in with a weak password (reason: %s)", $user->login, $reason);
+            $user->set_password_change_required(1);
+            $user->set_password_change_reason(
+                "You must change your password for the following reason: $reason"
+            );
+            $user->update();
         }
     }
 

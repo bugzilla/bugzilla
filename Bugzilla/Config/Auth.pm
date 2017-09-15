@@ -12,6 +12,8 @@ use strict;
 use warnings;
 
 use Bugzilla::Config::Common;
+use Types::Standard qw(Tuple Maybe);
+use Types::Common::Numeric qw(PositiveInt);
 
 our $sortkey = 300;
 
@@ -119,6 +121,42 @@ sub get_param_list {
             type    => 'b',
             default => '1'
         },
+
+        {
+            name    => 'passwdqc_min',
+            type    => 't',
+            default => 'undef, 24, 11, 8, 7',
+            checker => \&_check_passwdqc_min,
+        },
+
+        {
+            name    => 'passwdqc_max',
+            type    => 't',
+            default => '40',
+            checker => \&_check_passwdqc_max,
+        },
+
+        {
+            name    => 'passwdqc_passphrase_words',
+            type    => 't',
+            default => '3',
+            checker => \&check_numeric,
+        },
+
+        {
+            name    => 'passwdqc_match_length',
+            type    => 't',
+            default => '4',
+            checker => \&check_numeric,
+        },
+
+        {
+            name    => 'passwdqc_random_bits',
+            type    => 't',
+            default => '47',
+            checker => \&_check_passwdqc_random_bits,
+        },
+
         {
             name    => 'auth_delegation',
             type    => 'b',
@@ -147,6 +185,53 @@ sub get_param_list {
         },
     );
     return @param_list;
+}
+
+my $passwdqc_min = Tuple[
+    Maybe[PositiveInt],
+    Maybe[PositiveInt],
+    Maybe[PositiveInt],
+    Maybe[PositiveInt],
+    Maybe[PositiveInt],
+];
+
+sub _check_passwdqc_min {
+    my ($value) = @_;
+    my @values = map { $_ eq 'undef' ? undef : $_ } split( /\s*,\s*/, $value );
+
+    unless ( $passwdqc_min->check( \@values ) ) {
+        return "must be list of five values, that are either integers > 0 or undef";
+    }
+
+    my ( $max, $max_pos );
+    my $pos = 0;
+    foreach my $value (@values) {
+        if ( defined $max && defined $value ) {
+            if ( $value > $max ) {
+                return "Int$pos is larger than Int$max_pos ($max)";
+            }
+        }
+        elsif ( defined $value ) {
+            $max     = $value;
+            $max_pos = $pos;
+        }
+        $pos++;
+    }
+    return "";
+}
+
+sub _check_passwdqc_max {
+    my ($value) = @_;
+    return "must be a positive integer" unless PositiveInt->check($value);
+    return "must be greater than 8"     unless $value > 8;
+    return "";
+}
+
+sub _check_passwdqc_random_bits {
+    my ($value) = @_;
+    return "must be a positive integer" unless PositiveInt->check($value);
+    return "must be between 24 and 85 inclusive" unless $value >= 24 && $value <= 85;
+    return "";
 }
 
 1;

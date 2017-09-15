@@ -1,6 +1,6 @@
 $answer{'ADMIN_EMAIL'} = 'admin@mozilla.bugs';
 $answer{'ADMIN_OK'} = 'Y';
-$answer{'ADMIN_PASSWORD'} = 'password';
+$answer{'ADMIN_PASSWORD'} = 'Te6Oovohch';
 $answer{'ADMIN_REALNAME'} = 'QA Admin';
 $answer{'NO_PAUSE'} = 1;
 $answer{'bugzilla_version'} = '1';

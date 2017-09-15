@@ -16,7 +16,7 @@ use QA::Util;
 use Test::More tests => 75;
 my ($config, $xmlrpc, $jsonrpc, $jsonrpc_get) = get_rpc_clients();
 
-use constant NEW_PASSWORD => 'password';
+use constant NEW_PASSWORD => 'UiX1Shuuchid';
 use constant NEW_FULLNAME => 'WebService Created User';
 
 use constant PASSWORD_TOO_SHORT => 'a';
@@ -91,7 +91,7 @@ foreach my $rpc ($jsonrpc, $xmlrpc) {
         { user  => 'admin',
           args  => { email    => new_login(), full_name => NEW_FULLNAME,
                      password => PASSWORD_TOO_SHORT },
-          error => 'password must be at least',
+          error => 'The password does not meet our security requirements for the following reason: too short',
           test  => 'Password Too Short fails',
         },
         { user => 'admin',

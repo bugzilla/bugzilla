@@ -72,7 +72,7 @@ sub create_or_update_user {
               || return { failure => AUTH_ERROR,
                           error   => 'auth_invalid_email',
                           details => {addr => $username} };
-            # Usually we'd call validate_password, but external authentication
+            # external authentication
             # systems might follow different standards than ours. So in this
             # place here, we call trick_taint without checks.
             trick_taint($password);

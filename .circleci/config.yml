@@ -75,14 +75,16 @@ jobs:
     parallelism: 4
     working_directory: /app
     docker:
-      - *bmo_slim_image
+      - <<: *bmo_slim_image
+        environment: *bmo_env
     steps:
       - checkout
       - *default_qa_setup
       - run:
           name: run sanity tests
           command: |
-            prove -qf $(circleci tests glob 't/*.t' | circleci tests split) | tee artifacts/$CIRCLE_JOB.txt
+            rm /app/localconfig
+            /app/scripts/entrypoint.pl prove -qf $(circleci tests glob 't/*.t' | circleci tests split) | tee artifacts/$CIRCLE_JOB.txt
       - store_artifacts:
           path: /app/artifacts
 
@@ -156,14 +158,13 @@ workflows:
   version: 2
   tests:
     jobs:
-      - test_bmo
       - test_sanity
+      - test_bmo
       - test_webservices
-      - test_selenium:
-          requires:
-            - test_bmo
+      - test_selenium
       - build:
           requires:
             - test_sanity
             - test_webservices
             - test_selenium
+            - test_bmo

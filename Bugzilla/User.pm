@@ -80,6 +80,7 @@ sub DB_COLUMNS {
         'profiles.password_change_required',
         'profiles.password_change_reason',
         'profiles.mfa',
+        'profiles.mfa_required_date'
     ),
 }
 
@@ -112,6 +113,7 @@ sub UPDATE_COLUMNS {
         password_change_required
         password_change_reason
         mfa
+        mfa_required_date
     );
     push(@cols, 'cryptpassword') if exists $self->{cryptpassword};
     return @cols;
@@ -502,6 +504,11 @@ sub set_mfa {
     delete $self->{mfa_provider};
 }
 
+sub set_mfa_required_date {
+    my ($self, $value) = @_;
+    $self->set('mfa_required_date', $value);
+}
+
 sub set_groups {
     my $self = shift;
     $self->_set_groups(GROUP_MEMBERSHIP, @_);
@@ -670,6 +677,12 @@ sub authorizer {
 }
 
 sub mfa { $_[0]->{mfa} }
+
+sub mfa_required_date {
+    my $self = shift;
+    return $self->{mfa_required_date} ? datetime_from($self->{mfa_required_date}, @_) : undef;
+}
+
 sub mfa_provider {
     my ($self) = @_;
     my $mfa = $self->{mfa} || return undef;
@@ -677,6 +690,15 @@ sub mfa_provider {
     require Bugzilla::MFA;
     $self->{mfa_provider} = Bugzilla::MFA->new_from($self, $mfa);
     return $self->{mfa_provider};
+}
+
+
+sub in_mfa_group {
+    my $self = shift;
+    return $self->{in_mfa_group} if exists $self->{in_mfa_group};
+
+    my $mfa_group = Bugzilla->params->{mfa_group};
+    return $self->{in_mfa_group} = ($mfa_group && $self->in_group($mfa_group));
 }
 
 sub name_or_login {

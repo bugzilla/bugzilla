@@ -183,6 +183,21 @@ sub get_param_list {
             type    => 't',
             default => '',
         },
+
+        {
+            name => 'mfa_group',
+            type => 's',
+            choices => \&get_all_group_names,
+            default => '',
+            checker => \&check_group,
+        },
+
+        {
+            name => 'mfa_group_grace_period',
+            type => 't',
+            default => '7',
+            checker => \&check_numeric,
+        }
     );
     return @param_list;
 }

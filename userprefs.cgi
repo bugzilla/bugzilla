@@ -696,7 +696,7 @@ sub SaveMFAupdate {
 
         $user->set_mfa($mfa);
         $user->mfa_provider->enrolled();
-
+        Bugzilla->request_cache->{mfa_warning} = 0;
         my $settings = Bugzilla->user->settings;
         $settings->{api_key_only}->set('on');
         clear_settings_cache(Bugzilla->user->id);

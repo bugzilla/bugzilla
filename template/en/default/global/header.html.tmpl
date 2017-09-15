@@ -39,7 +39,7 @@
   # no_body: if true the body element will not be generated
   # allow_mobile: allow special CSS and viewport for detected mobile useragents
   # use_login_page: display a link to the full login page, rather than an inline login.
-  # no_index: Disable search engine from adding page into search index. 
+  # no_index: Disable search engine from adding page into search index.
   #%]
 
 [% IF message %]
@@ -234,6 +234,9 @@
   <body
         class="[% urlbase.replace('^https?://','').replace('/$','').replace('[-~@:/.]+','-') FILTER css_class_quote %]
                skin-[% user.settings.skin.value FILTER css_class_quote %]
+               [% IF Bugzilla.request_cache.mfa_warning %]
+                mfa-warning
+               [% END %]
                [% FOREACH class = bodyclasses %]
                  [% ' ' %][% class FILTER css_class_quote %]
                [% END %] yui-skin-sam">
@@ -252,6 +255,18 @@
       </td>
       <td>
         [% Hook.process("message") %]
+        [% IF Bugzilla.request_cache.mfa_warning
+              AND user.mfa_required_date
+              AND NOT Bugzilla.request_cache.on_mfa_page %]
+          <span id="mfa-warning">
+            Please <a href="userprefs.cgi?tab=mfa">enabled two-factor authentication</a>
+            [% IF Param('mfa_group_grace_period') %]
+              before <i>[% user.mfa_required_date FILTER time %]</i>.
+            [% ELSE %]
+              now.
+            [% END %]
+          </span>
+        [% END %]
       </td>
       <td id="moz_login">
         [% IF user.id %]

@@ -6,6 +6,8 @@
   # defined by the Mozilla Public License, v. 2.0.
   #%]
 
+[% SET MFA_HOWTO = "https://wiki.mozilla.org/BMO/UserGuide/Two-Factor_Authentication" %]
+
 [% IF NOT Bugzilla.feature('mfa') %]
   <input type="hidden" name="mfa_action" id="mfa-action" value="">
   <p>
@@ -126,9 +128,25 @@
     </div>
 
   [% ELSE %]
-    <p>
-      Two-factor authentication is currently <b>disabled</b>.
-    </p>
+    [% IF Bugzilla.request_cache.mfa_warning %]
+      <p class="mfa-warning-msg">
+        You <b>must</b> enable two-factor authentication
+        [% UNLESS Bugzilla.request_cache.mfa_grace_period_expired %]
+          before <i>[% Bugzilla.user.mfa_required_date FILTER time %]</i>.
+          After that date, you will be restricted to this page until 2FA is configured.
+        [% ELSE %]
+          before continuing to use [% terms.Bugzilla %].
+        [% END %]
+      </p>
+      <p>
+        <b>Need help setting ip 2FA?</b>
+        You may want to <a href="[% MFA_HOWTO FILTER html %]">read these comprensive instructions</a>.
+      </p>
+    [% ELSE %]
+      <p>
+        Two-factor authentication is currently <b>disabled</b>.
+      </p>
+    [% END %]
     <input type="hidden" name="mfa_action" id="mfa-action" value="enable">
     <input type="hidden" name="mfa" id="mfa">
 

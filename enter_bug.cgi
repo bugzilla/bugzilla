@@ -395,14 +395,14 @@ $vars->{'bug_status'} = \@statuses;
 # to the first confirmed bug status on the list, if available.
 
 my $picked_status = formvalue('bug_status');
-if ($picked_status and grep($_->name eq $picked_status, @statuses)) {
+if ( $picked_status and grep( $_->name eq $picked_status, @statuses ) ) {
     $default{'bug_status'} = formvalue('bug_status');
-} elsif (scalar @statuses == 1) {
+}
+elsif ( scalar @statuses == 1 ) {
     $default{'bug_status'} = $statuses[0]->name;
 }
 else {
-    $default{'bug_status'} = ($statuses[0]->name ne 'UNCONFIRMED')
-                             ? $statuses[0]->name : $statuses[1]->name;
+    $default{'bug_status'} = ( $statuses[0]->name ne 'UNCONFIRMED' ) ? $statuses[0]->name : $statuses[1]->name;
 }
 
 my @groups = $cgi->param('groups');

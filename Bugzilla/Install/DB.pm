@@ -746,6 +746,7 @@ sub update_table_definitions {
 
     $dbh->bz_add_column('profiles', 'mfa', { TYPE => 'varchar(8)', , DEFAULT => "''" });
 
+    $dbh->bz_add_column('profiles', 'mfa_required_date', { TYPE => 'DATETIME' });
     _migrate_group_owners();
 
     $dbh->bz_add_column('groups', 'idle_member_removal',

@@ -244,5 +244,13 @@
     "The 'secret key' for Duo 2FA. This value is provided by your " _
     "Duo Security administrator.",
 
+  mfa_group =>
+    "Members of this group must enable MFA. If the grace period is set, " _
+    "users will receive a warning on every page until end of the grace period. " _
+    "Users without MFA after the grace period (or when it is set to 0) will only " _
+    "be able to access the mfa tab of the user preferences page."
+
+  mfa_group_grace_period =>
+    "Number of days to warn user to turn on 2FA."
   },
 %]

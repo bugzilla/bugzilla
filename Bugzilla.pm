@@ -383,19 +383,47 @@ sub login {
     # At this point, we now know if a real person is logged in.
 
     # Check if a password reset is required
-    if ($authenticated_user->password_change_required) {
+    my $cgi = Bugzilla->cgi;
+    if ( $authenticated_user->password_change_required ) {
+
         # We cannot show the password reset UI for API calls, so treat those as
         # a disabled account.
-        if (i_am_webservice()) {
-            ThrowUserError("account_disabled", { disabled_reason => $authenticated_user->password_change_reason });
+        if ( i_am_webservice() ) {
+            ThrowUserError( "account_disabled", { disabled_reason => $authenticated_user->password_change_reason } );
         }
 
         # only allow the reset-password and token pages to handle requests
         # (tokens handles the 'forgot password' process)
         # otherwise redirect user to the reset-password page.
-        if ($ENV{SCRIPT_NAME} !~ m#/(?:reset_password|token)\.cgi$#) {
-            print Bugzilla->cgi->redirect('reset_password.cgi');
+        if ( $ENV{SCRIPT_NAME} !~ m#/(?:reset_password|token)\.cgi$# ) {
+            print $cgi->redirect('reset_password.cgi');
             exit;
+        }
+    }
+    elsif ( !i_am_webservice() && $authenticated_user->in_mfa_group && !$authenticated_user->mfa ) {
+
+        # decide if the user needs a warning or to be blocked.
+        my $date         = $authenticated_user->mfa_required_date('UTC');
+        my $grace_period = Bugzilla->params->{mfa_group_grace_period};
+        my $expired      = defined $date && $date < DateTime->now;
+        my $on_mfa_page  = $cgi->script_name eq '/userprefs.cgi' && $cgi->param('tab') eq 'mfa';
+
+        Bugzilla->request_cache->{mfa_warning} = 1;
+        Bugzilla->request_cache->{mfa_grace_period_expired} = $expired;
+        Bugzilla->request_cache->{on_mfa_page} = $on_mfa_page;
+
+        if ( $grace_period == 0 || $expired) {
+            if (!$on_mfa_page) {
+                print Bugzilla->cgi->redirect("userprefs.cgi?tab=mfa");
+                exit;
+            }
+        }
+        else {
+            my $dbh = Bugzilla->dbh_main;
+            my $date = $dbh->sql_date_math( 'NOW()', '+', '?', 'DAY' );
+            my ($mfa_required_date) = $dbh->selectrow_array( "SELECT $date", undef, $grace_period );
+            $authenticated_user->set_mfa_required_date($mfa_required_date);
+            $authenticated_user->update();
         }
     }
 

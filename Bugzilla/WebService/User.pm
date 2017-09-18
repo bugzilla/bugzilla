@@ -44,11 +44,13 @@ use constant PUBLIC_METHODS => qw(
 );
 
 use constant MAPPED_FIELDS => {
+    email => 'login',
     full_name => 'name',
     login_denied_text => 'disabledtext',
 };
 
 use constant MAPPED_RETURNS => {
+    login_name => 'email',
     realname => 'full_name',
     disabledtext => 'login_denied_text',
 };
@@ -66,7 +68,7 @@ sub login {
         return $self->_login_to_hash($user);
     }
 
-    # Login name and password params are required
+    # Username and password params are required 
     foreach my $param ("login", "password") {
         (defined $params->{$param} || defined $params->{'Bugzilla_' . $param})
             || ThrowCodeError('param_required', { param => $param });
@@ -102,11 +104,8 @@ sub offer_account_by_email {
     my $email = trim($params->{email})
         || ThrowCodeError('param_required', { param => 'email' });
 
-    my $login = Bugzilla->params->{use_email_as_login} ? $email : trim($params->{login});
-    $login or ThrowCodeError('param_required', { param => 'login' });
-
     Bugzilla->user->check_account_creation_enabled;
-    Bugzilla->user->check_and_send_account_creation_confirmation($login, $email);
+    Bugzilla->user->check_and_send_account_creation_confirmation($email);
     return undef;
 }
 
@@ -121,16 +120,11 @@ sub create {
 
     my $email = trim($params->{email})
         || ThrowCodeError('param_required', { param => 'email' });
-
-    my $login = Bugzilla->params->{use_email_as_login} ? $email : trim($params->{login});
-    $login or ThrowCodeError('param_required', { param => 'login' });
-
     my $realname = trim($params->{full_name});
     my $password = trim($params->{password}) || '*';
 
     my $user = Bugzilla::User->create({
-        login_name    => $login,
-        email         => $email,
+        login_name    => $email,
         realname      => $realname,
         cryptpassword => $password
     });
@@ -177,7 +171,7 @@ sub get {
         @users = map { filter $params, {
                      id        => $self->type('int', $_->id),
                      real_name => $self->type('string', $_->name),
-                     name      => $self->type('login', $_->login),
+                     name      => $self->type('email', $_->login),
                  } } @$in_group;
 
         return { users => \@users };
@@ -229,12 +223,12 @@ sub get {
         my $user_info = filter $params, {
             id        => $self->type('int', $user->id),
             real_name => $self->type('string', $user->name),
-            name      => $self->type('login', $user->login),
+            name      => $self->type('email', $user->login),
+            email     => $self->type('email', $user->email),
             can_login => $self->type('boolean', $user->is_enabled ? 1 : 0),
         };
 
         if (Bugzilla->user->in_group('editusers')) {
-            $user_info->{email}             = $self->type('email', $user->email),
             $user_info->{email_enabled}     = $self->type('boolean', $user->email_enabled);
             $user_info->{login_denied_text} = $self->type('string', $user->disabledtext);
         }
@@ -622,14 +616,9 @@ and real name.
 
 This is the recommended way to create a Bugzilla account.
 
-=item B<Params>
+=item B<Param>
 
 =over
-
-=item C<login> (string) - the login name for the new account.
-If the installation has the C<use_email_as_login> parameter switched on, then
-this parameter is ignored, and the value of the C<email> parameter will
-be used as the login name for the new account.
 
 =item C<email> (string) - the email to send the offer to.
 
@@ -681,12 +670,7 @@ are the same as below.
 
 =over
 
-=item C<login> (string) - the login name for the new account.
-If the installation has the C<use_email_as_login> parameter switched on, then
-this parameter is ignored, and the value of the C<email> parameter will
-be used as the login name for the new account.
-
-=item C<email> (string) - The email address for the new account's user.
+=item C<email> (string) - The email address for the new user.
 
 =item C<full_name> (string) B<Optional> - The user's full name. Will
 be set to empty if not specified.
@@ -702,7 +686,7 @@ resetting their password) or by the administrator.
 
 =item B<Returns>
 
-A hash containing one item, C<id>, the numeric id of the user account that was
+A hash containing one item, C<id>, the numeric id of the user that was
 created.
 
 =item B<Errors>
@@ -764,7 +748,7 @@ C<array> Contains ids of user to update.
 
 =item C<names>
 
-C<array> Contains login name of user to update.
+C<array> Contains email/login of user to update.
 
 =item C<full_name>
 
@@ -772,10 +756,8 @@ C<string> The new name of the user.
 
 =item C<email>
 
-C<string> The email address of the user. It may be required that this is the
-same as the login name. If you send different values in that case, the results
-are undefined.
-Note that you can only update one user at a time when changing the
+C<string> The email of the user. Note that email used to login to bugzilla.
+Also note that you can only update one user at a time when changing the 
 login name / email. (An error will be thrown if you try to update this field 
 for multiple users at once.)
 
@@ -996,7 +978,8 @@ C<string> The email address of the user.
 
 =item name
 
-C<string> The login name of the user.
+C<string> The login name of the user. Note that in some situations this is 
+different than their email.
 
 =item can_login
 
@@ -1082,7 +1065,7 @@ C<string> The CGI parameters for the saved report.
 B<Note>: If you are not logged in to Bugzilla when you call this function, you
 will only be returned the C<id>, C<name>, and C<real_name> items. If you are
 logged in and not in editusers group, you will only be returned the C<id>, C<name>, 
-C<real_name>, C<can_login>, and C<groups> items. The groups returned are
+C<real_name>, C<email>, C<can_login>, and C<groups> items. The groups returned are
 filtered based on your permission to bless each group.
 The C<saved_searches> and C<saved_reports> items are only returned if you are
 querying your own account, even if you are in the editusers group.

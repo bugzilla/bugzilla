@@ -40,6 +40,7 @@
       <td>
         <input id="Bugzilla_login" name="Bugzilla_login"
                [%- ' type="email"' UNLESS login_not_email %] autofocus required>
+        [% Param('emailsuffix') FILTER html %]
       </td>
     </tr>
 

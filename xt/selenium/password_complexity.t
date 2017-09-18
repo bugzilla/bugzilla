@@ -20,7 +20,8 @@ my ($sel, $config) = get_selenium();
 log_in($sel, $config, 'admin');
 
 set_parameters($sel, {"Administrative Policies" => {"allowuserdeletion-on" => undef},
-                      "User Authentication"     => {"createemailregexp" => {type => "text", value => '.*'}} });
+                      "User Authentication"     => {"createemailregexp" => {type => "text", value => '.*'},
+                                                    "emailsuffix" => {type => "text", value => ''}} });
 
 # Set the password complexity to MIXED LETTERS.
 # Password must contain at least one UPPER and one lowercase letter.
@@ -60,7 +61,7 @@ sub check_passwords {
     $sel->click_ok('link=add a new user');
     $sel->wait_for_page_to_load_ok(WAIT_TIME);
     $sel->title_is('Add user');
-    $sel->type_ok('email', $new_user);
+    $sel->type_ok('login', $new_user);
 
     foreach my $password (@$invalid_passwords) {
         $sel->type_ok('password', $password, 'Enter password');

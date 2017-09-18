@@ -122,22 +122,22 @@ sub requestChangePassword {
     my $token = $cgi->param('token');
     check_hash_token($token, ['reqpw']);
 
-    my $email = $cgi->param('email')
-      or ThrowUserError("email_needed_for_password_change");
+    my $login_name = $cgi->param('loginname')
+      or ThrowUserError("login_needed_for_password_change");
 
-    my $userid = email_to_id($email, 'throw_error_if_not_exist');
-    my $user = new Bugzilla::User($userid);
+    check_email_syntax($login_name);
+    my $user = new Bugzilla::User({ name => $login_name });
 
     # Make sure the user account is active.
-    if (!$user->is_enabled) {
+    if ($user && !$user->is_enabled) {
         ThrowUserError('account_disabled',
-                       {disabled_reason => get_text('account_disabled', {email => $email})});
+                       {disabled_reason => get_text('account_disabled', {account => $login_name})});
     }
 
-    Bugzilla::Token::IssuePasswordToken($user);
+    Bugzilla::Token::IssuePasswordToken($user) if $user;
 
     $vars->{'message'} = "password_change_request";
-    $vars->{'email'} = $email;
+    $vars->{'login_name'} = $login_name;
 
     print $cgi->header();
     $template->process("global/message.html.tmpl", $vars)
@@ -208,7 +208,7 @@ sub changeEmail {
     my ($old_email, $new_email) = split(/:/,$eventdata);
 
     $dbh->bz_start_transaction();
-
+    
     my $user = Bugzilla::User->check({ id => $userid });
     my $cgipassword  = $cgi->param('password');
 
@@ -218,14 +218,14 @@ sub changeEmail {
 
     # The new email address should be available as this was 
     # confirmed initially so cancel token if it is not still available
-    if (!is_available_email($new_email, $old_email)) {
+    if (! is_available_username($new_email,$old_email)) {
         $vars->{'email'} = $new_email; # Needed for Bugzilla::Token::Cancel's mail
         Bugzilla::Token::Cancel($token, "account_exists", $vars);
         ThrowUserError("account_exists", { email => $new_email } );
     } 
 
-    # Update the user's email address in the profiles table.
-    $user->set_email($new_email);
+    # Update the user's login name in the profiles table.
+    $user->set_login($new_email);
     $user->update({ keep_session => 1, keep_tokens => 1 });
     delete_token($token);
     $dbh->do(q{DELETE FROM tokens WHERE userid = ?
@@ -256,8 +256,8 @@ sub cancelChangeEmail {
         my $user = Bugzilla::User->check({ id => $userid });
 
         # check to see if it has been altered
-        if ($user->email ne $old_email) {
-            $user->set_email($old_email);
+        if ($user->login ne $old_email) {
+            $user->set_login($old_email);
             $user->update({ keep_tokens => 1 });
 
             $vars->{'message'} = "email_change_canceled_reinstated";
@@ -285,20 +285,13 @@ sub cancelChangeEmail {
 }
 
 sub request_create_account {
-    my ($date, $data, $token) = @_;
+    my ($date, $login_name, $token) = @_;
 
     Bugzilla->user->check_account_creation_enabled;
 
-    # Be careful! Some logins may contain ":" in them.
-    my ($email, $login) = split(':', $data, 2);
-    $vars = {
-      token => $token,
-      login => $login,
-      email => $email,
-      # Make sure nobody else chose this login meanwhile.
-      login_already_in_use => login_to_id($login) ? 1 : 0,
-      expiration_ts => ctime(str2time($date) + MAX_TOKEN_AGE * 86400)
-    };
+    $vars->{'token'} = $token;
+    $vars->{'email'} = $login_name . Bugzilla->params->{'emailsuffix'};
+    $vars->{'expiration_ts'} = ctime(str2time($date) + MAX_TOKEN_AGE * 86400);
 
     print $cgi->header();
     $template->process('account/email/confirm-new.html.tmpl', $vars)
@@ -306,7 +299,7 @@ sub request_create_account {
 }
 
 sub confirm_create_account {
-    my ($data, $token) = @_;
+    my ($login_name, $token) = @_;
 
     Bugzilla->user->check_account_creation_enabled;
 
@@ -315,13 +308,8 @@ sub confirm_create_account {
     # Make sure that these never show up anywhere in the UI.
     $cgi->delete('passwd1', 'passwd2');
 
-    # Be careful! Some logins may contain ":" in them.
-    my ($email, $login) = split(':', $data, 2);
-    $login = $cgi->param('login') if login_to_id($login);
-
     my $otheruser = Bugzilla::User->create({
-        login_name => $login,
-        email      => $email,
+        login_name => $login_name, 
         realname   => scalar $cgi->param('realname'),
         cryptpassword => $password});
 
@@ -344,11 +332,10 @@ sub confirm_create_account {
 }
 
 sub cancel_create_account {
-    my ($data, $token) = @_;
+    my ($login_name, $token) = @_;
 
     $vars->{'message'} = 'account_creation_canceled';
-    # Be careful! Some logins may contain ":" in them.
-    ($vars->{'email'}, $vars->{'login'}) = split(':', $data, 2);
+    $vars->{'account'} = $login_name;
     Bugzilla::Token::Cancel($token, $vars->{'message'});
 
     print $cgi->header();

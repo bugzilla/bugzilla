@@ -47,28 +47,28 @@ my $slt_bugs = $dbh->selectall_arrayref($query, undef, 'CONFIRMED', 'NEW',
                                                        'REOPENED');
 
 foreach my $bug (@$slt_bugs) {
-    my ($id, $desc, $login) = @$bug;
-    if (!defined $bugs{$login}) {
-        $bugs{$login} = [];
+    my ($id, $desc, $email) = @$bug;
+    if (!defined $bugs{$email}) {
+        $bugs{$email} = [];
     }
-    if (!defined $desc{$login}) {
-        $desc{$login} = [];
+    if (!defined $desc{$email}) {
+        $desc{$email} = [];
     }
-    push @{$bugs{$login}}, $id;
-    push @{$desc{$login}}, $desc;
+    push @{$bugs{$email}}, $id;
+    push @{$desc{$email}}, $desc;
 }
 
 
-foreach my $login (sort (keys %bugs)) {
-    my $user = new Bugzilla::User({name => $login});
+foreach my $email (sort (keys %bugs)) {
+    my $user = new Bugzilla::User({name => $email});
     next if $user->email_disabled;
 
-    my $vars = {'email' => $user->email};
+    my $vars = {'email' => $email};
 
     my @bugs = ();
-    foreach my $i (@{$bugs{$login}}) {
+    foreach my $i (@{$bugs{$email}}) {
         my $bug = {};
-        $bug->{'summary'} = shift(@{$desc{$login}});
+        $bug->{'summary'} = shift(@{$desc{$email}});
         $bug->{'id'} = $i;
         push @bugs, $bug;
     }
@@ -81,5 +81,5 @@ foreach my $login (sort (keys %bugs)) {
 
     MessageToMTA($msg);
 
-    say $user->email . "      " . join(" ", @{$bugs{$login}});
+    say "$email      " . join(" ", @{$bugs{$email}});
 }

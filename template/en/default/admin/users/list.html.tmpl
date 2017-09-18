@@ -27,44 +27,35 @@
 [% listselectionurlparams = INCLUDE listselectionurlparams %]
 
 [% columns =
-  [{name        => 'login_name'
-    heading     => 'Edit user...'
-    contentlink => 'editusers.cgi?action=edit&amp;userid=%%userid%%' _
-                   listselectionurlparams
-   },
-   {name        => 'email'
-    heading     => 'Email address'
-   },
-   {name        => 'realname'
-    heading     => 'Real name'
-   },
-   {name        => 'last_seen_date'
-    heading     => 'Last Login'
-   },
-   {name        => 'view_history_link',
-    heading     => 'Account History'
-    content     => 'View'
-    contentlink => 'editusers.cgi?action=activity' _
-                    '&amp;userid=%%userid%%' _
-                    listselectionurlparams
-   },
-   {name        => 'action_link',
-    heading     => 'Action'
-    content     => 'Delete'
-    contentlink => 'editusers.cgi?action=del' _
-                      '&amp;userid=%%userid%%' _
-                      listselectionurlparams
+  [{name               => 'login_name'
+    heading            => 'Edit user...'
+    contentlink        => 'editusers.cgi?action=edit&amp;userid=%%userid%%' _
+                          listselectionurlparams
+   }
+   {name               => 'realname'
+    heading            => 'Real name'
+   }
+   {name               => 'last_seen_date'
+    heading            => 'Last Login'
+   }
+   {heading            => 'Account History'
+    content            => 'View'
+    contentlink        => 'editusers.cgi?action=activity' _
+                                  '&amp;userid=%%userid%%' _
+                                  listselectionurlparams
    }
   ]
- %]
+%]
 
-[%# Eliminate inappropriate columns, starting at the end %]
-[% IF NOT (Param('allowuserdeletion') && editusers) %]
-  [% CALL columns.splice(5, 1) %]
-[% END %]
-
-[% IF Param('use_email_as_login') %]
-  [% CALL columns.splice(1, 1) %]
+[% IF Param('allowuserdeletion') && editusers %]
+  [% columns.push({heading     => 'Action'
+                   content     => 'Delete'
+                   contentlink => 'editusers.cgi?action=del' _
+                                  '&amp;userid=%%userid%%' _
+                                  listselectionurlparams
+                  }
+                 )
+  %]
 [% END %]
 
 [%# Disabled users are crossed out. Missing realnames are noticed in red. %]

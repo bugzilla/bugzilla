@@ -236,9 +236,7 @@ sub bz_run_tests {
 }
 
 sub bz_test_bug {
-    my ($self, $fields, $bug, $orig_expect, $t, $creation_time) = @_;
-
-    my $expect = dclone($orig_expect);
+    my ($self, $fields, $bug, $expect, $t, $creation_time) = @_;
 
     foreach my $field (sort @$fields) {
         # "description" is used by Bug.create but comments are not returned
@@ -255,12 +253,6 @@ sub bz_test_bug {
             next;
         }
 
-	foreach my $field (qw(assigned_to creator qa_contact)) {
-            if (!$t->{user}) {
-                $expect->{$field} = email_filter($expect->{$field});
-            }
-	}
-
         if ($field =~ /^is_/) {
             ok(defined $bug->{$field}, $self->TYPE . ": $field is not null");
             is($bug->{$field} ? 1 : 0, $expect->{$field} ? 1 : 0,
@@ -268,7 +260,6 @@ sub bz_test_bug {
         }
         elsif ($field eq 'cc') {
             foreach my $cc_item (@{ $expect->{cc} || [] }) {
-		$cc_item = email_filter($cc_item) if !$t->{user};
                 ok(grep($_ eq $cc_item, @{ $bug->{cc} }),
                    $self->TYPE . ": $field contains $cc_item");
             }

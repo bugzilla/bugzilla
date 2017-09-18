@@ -67,13 +67,13 @@ $sel->title_is('Search users');
 $sel->click_ok('link=add a new user');
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_is('Add user');
-$sel->type_ok('email', 'master@selenium.bugzilla.org');
+$sel->type_ok('login', 'master@selenium.bugzilla.org');
 $sel->type_ok('name', 'master-user');
 $sel->type_ok('password', 'selenium', 'Enter password');
 $sel->type_ok('disabledtext', 'Not for common usage');
 $sel->click_ok('add');
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
-$sel->title_is('Edit user master-user (master@selenium.bugzilla.org)');
+$sel->title_is('Edit user master-user <master@selenium.bugzilla.org>');
 $sel->check_ok("//input[\@name='group_$master_gid']");
 $sel->click_ok('update');
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
@@ -83,13 +83,13 @@ $sel->is_text_present_ok('The account has been added to the Master group');
 $sel->click_ok("link=add a new user");
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_is('Add user');
-$sel->type_ok('email', 'slave@selenium.bugzilla.org');
+$sel->type_ok('login', 'slave@selenium.bugzilla.org');
 $sel->type_ok('name', 'slave-user');
 $sel->type_ok('password', 'selenium', 'Enter password');
 $sel->type_ok('disabledtext', 'Not for common usage');
 $sel->click_ok('add');
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
-$sel->title_is('Edit user slave-user (slave@selenium.bugzilla.org)');
+$sel->title_is('Edit user slave-user <slave@selenium.bugzilla.org>');
 $sel->check_ok("//input[\@name='group_$slave_gid']");
 $sel->click_ok('update');
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
@@ -99,13 +99,13 @@ $sel->is_text_present_ok('The account has been added to the Slave group');
 $sel->click_ok("link=add a new user");
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_is('Add user');
-$sel->type_ok('email', 'reg@selenium.bugzilla.org');
+$sel->type_ok('login', 'reg@selenium.bugzilla.org');
 $sel->type_ok('name', 'reg-user');
 $sel->type_ok('password', 'selenium', 'Enter password');
 $sel->type_ok('disabledtext', 'Not for common usage');
 $sel->click_ok('add');
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
-$sel->title_is('Edit user reg-user (reg@selenium.bugzilla.org)');
+$sel->title_is('Edit user reg-user <reg@selenium.bugzilla.org>');
 
 # Disabled accounts are not listed by default.
 
@@ -216,7 +216,7 @@ sub cleanup_users {
 
         $sel->click_ok("link=$login");
         $sel->wait_for_page_to_load_ok(WAIT_TIME);
-        $sel->title_is("Edit user ${user}-user ($login)");
+        $sel->title_is("Edit user ${user}-user <$login>");
         $sel->click_ok("delete");
         $sel->wait_for_page_to_load_ok(WAIT_TIME);
         $sel->title_is("Confirm deletion of user $login");

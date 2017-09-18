@@ -61,7 +61,7 @@ $sel->type_ok("newcc", "$config->{unprivileged_user_login_truncated}*");
 $sel->click_ok("commit");
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_is("Confirm Match");
-$sel->is_text_present_ok("($config->{unprivileged_user_login})");
+$sel->is_text_present_ok("<$config->{unprivileged_user_login}>");
 $sel->go_back_ok();
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_like(qr/^$bug1_id/);
@@ -164,7 +164,7 @@ $sel->type_ok("newcc", $config->{tweakparams_user_login_truncated});
 $sel->click_ok("commit");
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_is("Confirm Match");
-$sel->is_text_present_ok("($config->{tweakparams_user_login})");
+$sel->is_text_present_ok("<$config->{tweakparams_user_login}>");
 
 # Now test user menus. It must NOT display users we are not allowed to see.
 

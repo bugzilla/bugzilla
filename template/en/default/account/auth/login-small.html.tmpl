@@ -65,8 +65,12 @@
     <form action="token.cgi" method="post" id="forgot_form[% qs_suffix %]"
           class="mini_forgot bz_default_hidden">
       <label for="login[% qs_suffix FILTER html %]">Login:</label>
-      <input name="email" size="20" id="login[% qs_suffix FILTER html %]" required
-             type="email" placeholder="Your Email Address">
+      <input name="loginname" size="20" id="login[% qs_suffix FILTER html %]" required
+        [% IF login_not_email %]
+          placeholder="Your Login"
+        [% ELSE %]
+          type="email" placeholder="Your Email Address"
+        [% END %]>
       <input id="forgot_button[% qs_suffix %]" value="Reset Password"
              type="submit">
       <input type="hidden" name="a" value="reqpw">

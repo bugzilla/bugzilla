@@ -35,7 +35,10 @@
 
   LDAPmailattribute => "The name of the attribute of a user in your " _
                        "directory that contains the email address, to be " _
-                       "used to send the user email.",
+                       "used as Bugzilla username. If this parameter " _
+                       "is empty, Bugzilla will use the LDAP username"_
+                       " as the Bugzilla username. You may also want" _
+                       " to set the \"emailsuffix\" parameter, in this case.",
 
   LDAPfilter => "LDAP filter to AND with the <var>LDAPuidattribute</var> for " _
                 "filtering the list of valid users." }

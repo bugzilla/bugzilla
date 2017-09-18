@@ -9,40 +9,26 @@
 [%# INTERFACE:
   # token: string. The token to be used in the user account creation.
   # email: email address of the user account.
-  # login: login of the user account.
   # expiration_ts: expiration date of the token.
   #%]
 
-[% title = BLOCK %]Create a new user account for '[% login FILTER html %]'[% END %]
-[% PROCESS "global/header.html.tmpl" title = title %]
+[% title = BLOCK %]Create a new user account for '[% email FILTER html %]'[% END %]
+[% PROCESS "global/header.html.tmpl"
+           title = title
+%]
 
 [% password_complexity = Param('password_complexity') %]
 
 <p>
   To create your account, you must enter a password in the form below.
-  Your real name is optional, but recommended.
+  Your email address and Real Name (if provided) will be shown with
+  changes you make.
 </p>
 
 <form id="confirm_account_form" method="post" action="token.cgi">
   <input type="hidden" name="t" value="[% token FILTER html %]">
   <input type="hidden" name="a" value="confirm_new_account">
   <table>
-    [% IF !Param('use_email_as_login') %]
-      <tr>
-        <th>Login:</th>
-        <td>
-          [% IF login_already_in_use %]
-            <input id="login" name="login" required value="[% login FILTER html %]">
-            <span class="warning">
-              The login '[% login FILTER html %]' has been taken by another
-              user since you requested your account. Please choose another login.
-            </span>
-          [% ELSE %]
-            [% login FILTER html %]
-          [% END %]
-        </td>
-      </tr>
-    [% END %]
     <tr>
       <th>Email Address:</th>
       <td>[% email FILTER html %]</td>

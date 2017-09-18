@@ -709,8 +709,9 @@ sub generate_random_password {
 }
 
 sub validate_email_syntax {
-    my ($email) = @_;
+    my ($addr) = @_;
     my $match = Bugzilla->params->{'emailregexp'};
+    my $email = $addr . Bugzilla->params->{'emailsuffix'};
     # This regexp follows RFC 2822 section 3.4.1.
     my $addr_spec = $Email::Address::addr_spec;
     # RFC 2822 section 2.1 specifies that email addresses must
@@ -718,7 +719,7 @@ sub validate_email_syntax {
     # Email::Address::addr_spec doesn't enforce this.
     # We set the max length to 127 to ensure addresses aren't truncated when
     # inserted into the tokens.eventdata field.
-    if ($email =~ /$match/
+    if ($addr =~ /$match/
         && $email !~ /\P{ASCII}/
         && $email =~ /^$addr_spec$/
         && length($email) <= 127)
@@ -731,10 +732,11 @@ sub validate_email_syntax {
 }
 
 sub check_email_syntax {
-    my ($email) = @_;
+    my ($addr) = @_;
 
     unless (validate_email_syntax(@_)) {
-        ThrowUserError('illegal_email_address', { email => $email });
+        my $email = $addr . Bugzilla->params->{'emailsuffix'};
+        ThrowUserError('illegal_email_address', { addr => $email });
     }
 }
 

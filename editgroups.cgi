@@ -303,7 +303,7 @@ if ($action eq 'remove_regexp') {
 
     my @deleted;
     foreach my $member (@$users) {
-        if ($regexp eq '' || $member->email =~ m/$regexp/i) {
+        if ($regexp eq '' || $member->login =~ m/$regexp/i) {
             $sth_delete->execute($member->id, $group->id);
             push(@deleted, $member);
         }

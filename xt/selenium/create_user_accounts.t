@@ -35,7 +35,7 @@ $sel->is_text_present_ok("Open a New Account");
 $sel->click_ok("link=Open a New Account");
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_is("Create a new Bugzilla account");
-$sel->type_ok("email", $valid_account);
+$sel->type_ok("login", $valid_account);
 $sel->click_ok("send");
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_is("Request for new user account '$valid_account' submitted");
@@ -49,7 +49,7 @@ $sel->is_text_present_ok("Open a New Account");
 $sel->click_ok("link=Open a New Account");
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_is("Create a new Bugzilla account");
-$sel->type_ok("email", $valid_account);
+$sel->type_ok("login", $valid_account);
 $sel->click_ok("send");
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_is("Too Soon For New Token");
@@ -62,7 +62,7 @@ foreach my $account (@accounts) {
     $sel->click_ok("link=New Account");
     $sel->wait_for_page_to_load_ok(WAIT_TIME);
     $sel->title_is("Create a new Bugzilla account");
-    $sel->type_ok("email", $account);
+    $sel->type_ok("login", $account);
     $sel->click_ok("send");
     $sel->wait_for_page_to_load_ok(WAIT_TIME);
     $sel->title_is("Account Creation Restricted");
@@ -85,7 +85,7 @@ foreach my $account (@accounts) {
         document.getElementById('account_creation_form').setAttribute('novalidate', 1);
     };
     $sel->run_script($script);
-    $sel->type_ok("email", $account);
+    $sel->type_ok("login", $account);
     $sel->click_ok("send");
     $sel->wait_for_page_to_load_ok(WAIT_TIME);
     $sel->title_is("Invalid Email Address");
@@ -97,12 +97,12 @@ foreach my $account (@accounts) {
 $sel->click_ok("link=New Account");
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_is("Create a new Bugzilla account");
-$sel->type_ok("email", $config->{admin_user_login});
+$sel->type_ok("login", $config->{admin_user_login});
 $sel->click_ok("send");
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_is("Account Already Exists");
 $error_msg = trim($sel->get_text("error_msg"));
-ok($error_msg eq "There is already an account with the email address $config->{admin_user_login}.", "Account already exists");
+ok($error_msg eq "There is already an account with the login name $config->{admin_user_login}.", "Account already exists");
 
 # Turn off user account creation.
 log_in($sel, $config, 'admin');

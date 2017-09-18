@@ -748,10 +748,6 @@ sub update_table_definitions {
     # 2015-12-16 LpSolit@gmail.com - Bug 1232578
     _sanitize_audit_log_table();
 
-    # 2016-04-27 wurblzap@gmail.com and gerv@gerv.net - Bug 218917
-    # Split login_name into login_name and email columns
-    _split_login_and_email($old_params);
-
     ################################################################
     # New --TABLE-- changes should go *** A B O V E *** this point #
     ################################################################
@@ -3960,29 +3956,6 @@ sub _sanitize_audit_log_table {
         }
     }
 }
-
-sub _split_login_and_email {
-    my ($old_params) = @_;
-    my $dbh = Bugzilla->dbh;
-
-    return if $dbh->bz_column_info('profiles', 'email');
-
-    $dbh->bz_add_column('profiles', 'email',
-                        {TYPE => 'varchar(255)', NOTNULL => 1}, '');
-    $dbh->do('UPDATE profiles SET email = login_name');
-
-    # This change obsoletes the 'emailsuffix' parameter. If it is in use,
-    # append it to all the values in the 'email' column.
-    my $suffix = $old_params->{'emailsuffix'};
-    if ($suffix) {
-        $dbh->do('UPDATE profiles SET email = ' . $dbh->sql_string_concat('email', '?'),
-                 undef, $suffix);
-    }
-
-    $dbh->bz_add_index('profiles', 'profiles_email_idx',
-                       {TYPE => 'UNIQUE', FIELDS => ['email']});
-}
-
 
 1;
 

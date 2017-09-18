@@ -58,7 +58,6 @@ $sel->select_ok("type", "label=Drop Down");
 $sel->type_ok("sortkey", $bug1_id);
 $sel->click_ok("enter_bug");
 $sel->value_is("enter_bug", "on");
-sleep(3);
 $sel->click_ok("new_bugmail");
 $sel->value_is("new_bugmail", "on");
 $sel->value_is("obsolete", "off");

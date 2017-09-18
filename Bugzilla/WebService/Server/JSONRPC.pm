@@ -222,11 +222,8 @@ sub type {
         utf8::encode($value) if utf8::is_utf8($value);
         $retval = encode_base64($value, '');
     }
-    elsif ($type eq 'login') {
-        $retval = Bugzilla->params->{'use_email_as_login'} ? email_filter($retval) : "$retval";
-    }
-    elsif ($type eq 'email') {
-        $retval = Bugzilla->user->in_group('editusers') ? "$retval" : '';
+    elsif ($type eq 'email' && Bugzilla->params->{'webservice_email_filter'}) {
+        $retval = email_filter($value);
     }
 
     return $retval;

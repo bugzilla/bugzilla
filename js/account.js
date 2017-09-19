@@ -287,7 +287,18 @@ $(function() {
         });
 
     if ($('#mfa-action').length) {
-        $('#update').attr('disabled', true);
+        if ($("#mfa-action").data('nopassword')) {
+            $('#update')
+                .attr('disabled', false)
+                .val("Reset Password")
+                .click(function(event) {
+                    event.preventDefault();
+                    $('#forgot-form').submit();
+                });
+        }
+        else {
+            $("#update").attr('disabled', true);
+        }
     }
 
     // api-key

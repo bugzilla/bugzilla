@@ -407,13 +407,14 @@ sub login {
         my $grace_period = Bugzilla->params->{mfa_group_grace_period};
         my $expired      = defined $date && $date < DateTime->now;
         my $on_mfa_page  = $cgi->script_name eq '/userprefs.cgi' && $cgi->param('tab') eq 'mfa';
+        my $on_token_page = $cgi->script_name eq '/token.cgi';
 
         Bugzilla->request_cache->{mfa_warning} = 1;
         Bugzilla->request_cache->{mfa_grace_period_expired} = $expired;
         Bugzilla->request_cache->{on_mfa_page} = $on_mfa_page;
 
         if ( $grace_period == 0 || $expired) {
-            if (!$on_mfa_page) {
+            if ( !( $on_mfa_page || $on_token_page ) ) {
                 print Bugzilla->cgi->redirect("userprefs.cgi?tab=mfa");
                 exit;
             }

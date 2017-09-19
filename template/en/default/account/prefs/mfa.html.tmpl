@@ -7,6 +7,13 @@
   #%]
 
 [% SET MFA_HOWTO = "https://wiki.mozilla.org/BMO/UserGuide/Two-Factor_Authentication" %]
+[% tab_footer = BLOCK %]
+  <form action="token.cgi" method="post" id="forgot-form">
+    <input type="hidden" name="loginname" value="[% user.login FILTER html %]">
+    <input type="hidden" name="a" value="reqpw">
+    <input type="hidden" name="token" value="[% issue_hash_token(['reqpw']) FILTER html %]">
+  </form>
+[% END %]
 
 [% IF NOT Bugzilla.feature('mfa') %]
   <input type="hidden" name="mfa_action" id="mfa-action" value="">
@@ -16,10 +23,19 @@
   [% RETURN %]
 [% END %]
 [% IF user.cryptpassword == '*' %]
-  <input type="hidden" name="mfa_action" id="mfa-action" value="">
+  <input type="hidden" name="mfa_action" id="mfa-action" value="" data-nopassword="true">
+  [% IF Bugzilla.request_cache.mfa_warning %]
+    <p>
+      Your account requires Two-Factor authentication to be configured before you can use [% terms.Bugzilla %]
+    </p>
+  [% END %]
   <p>
-    Two-factor Authentication is not available on your account because you are
-    using an external authentication provider.
+    Before you can enable two-factor authentication you must set a password on your account.
+    To do this on your account please click on "Reset Password";
+    this will email you instructions to start the password reset process.
+  </p>
+  <p>
+    As part of this transition you will no longer be able to use GitHub to log in to [% terms.Bugzilla %].
   </p>
   [% RETURN %]
 [% END %]

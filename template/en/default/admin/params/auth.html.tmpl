@@ -87,6 +87,10 @@
   The size of randomly-generated passphrases in bits (24 to 85).
 [% END %]
 
+[% desc_passwdqc_desc = BLOCK %]
+  This should be a short paragraph describing the password requirements in plain English.
+  Limited HTML allowed.
+[% END %]
 
 [% param_descs = {
   auth_env_id => "Environment variable used by external authentication system " _
@@ -197,11 +201,12 @@
                        "will be permitted to create their own accounts and all accounts " _
                        "will have to be created by an administrator.",
 
-  passwdqc_min              => desc_passwdqc_min, 
+  passwdqc_min              => desc_passwdqc_min,
   passwdqc_max              => desc_passwdqc_max
   passwdqc_passphrase_words => desc_passwdqc_passphrase_words,
   passwdqc_match_length     => desc_passwdqc_match_length,
   passwdqc_random_bits      => desc_random_bits,
+  passwdqc_desc             => desc_passwdqc_desc,
 
   password_complexity =>
     "Set the complexity required for passwords. In all cases must the passwords " _

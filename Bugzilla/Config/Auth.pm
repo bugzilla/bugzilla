@@ -158,6 +158,12 @@ sub get_param_list {
         },
 
         {
+            name => 'passwdqc_desc',
+            type => 'l',
+            default => 'The password must be complex.',
+        },
+
+        {
             name    => 'auth_delegation',
             type    => 'b',
             default => 0,

@@ -71,6 +71,12 @@
         </tr>
         [% IF user.authorizer.can_change_password %]
           <tr>
+          <td>&nbsp;</td>
+          <td>
+            [% Param('passwdqc_desc') FILTER html_light %]
+          </td>
+          </tr>
+          <tr>
             <th align="right">New password:</th>
             <td>
               <input type="password" name="new_password1" id="new_password1">

@@ -26,12 +26,13 @@
    javascript_urls = ['js/account.js']
    onload = "document.forms['confirm_account_form'].realname.focus();" %]
 
-[% password_complexity = Param('password_complexity') %]
-
 <p>
   To create your account, you must enter a password in the form below.
   Your email address and Real Name (if provided) will be shown with
   changes you make.
+</p>
+<p>
+  [% Param('passwdqc_desc') FILTER html_light %]
 </p>
 
 <form id="confirm_account_form" method="post" action="token.cgi">

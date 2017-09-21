@@ -12,7 +12,7 @@
   #%]
 
 [% IF regexp %]
-  [% title = "Confirm: Remove Explicit Members Using A Regular Expression?" %]
+  [% title = "Confirm: Remove Explicit Members in the Regular Expression?" %]
 [% ELSE %]
   [% title = "Confirm: Remove All Explicit Members?" %]
 [% END %]
@@ -24,10 +24,10 @@
 
 [% IF regexp %]
   <p>This option will remove all users from '[% group.name FILTER html %]'
-    whose email addresses match the regular expression:
+    whose login names match the regular expression:
     '[% regexp FILTER html %]'</p>
 [% ELSE %]
-  <p>This option will remove all explicitly-added users
+  <p>This option will remove all explicitly defined users
     from '[% group.name FILTER html %].'</p>
 [% END %]
   

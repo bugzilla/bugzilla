@@ -322,9 +322,9 @@ sub _component_to_hash {
         name        => as_string($component->name),
         description => as_string($component->description),
         default_assigned_to =>
-            as_login($component->default_assignee->login),
+            as_email($component->default_assignee->login),
         default_qa_contact =>
-            as_login($component->default_qa_contact ?
+            as_email($component->default_qa_contact ?
                      $component->default_qa_contact->login : ""),
         sort_key => 0, # sort_key is returned to match Bug.fields
         is_active => as_boolean($component->is_active),

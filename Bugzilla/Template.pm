@@ -1191,7 +1191,7 @@ sub create {
                 my $cache = Bugzilla->request_cache;
 
                 return $cache->{login_not_email} //=
-                  (!$params->{use_email_as_login}
+                  ($params->{emailsuffix}
                      || ($params->{user_verify_class} =~ /LDAP/ && $params->{LDAPmailattribute})
                      || ($params->{user_verify_class} =~ /RADIUS/ && $params->{RADIUS_email_suffix}))
                   ? 1 : 0;

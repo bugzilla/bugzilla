@@ -322,7 +322,7 @@ sub _rederive_regexp {
     my ($self) = @_;
 
     my $dbh = Bugzilla->dbh;
-    my $sth = $dbh->prepare("SELECT userid, email, group_id
+    my $sth = $dbh->prepare("SELECT userid, login_name, group_id
                                FROM profiles
                           LEFT JOIN user_group_map
                                  ON user_group_map.user_id = profiles.userid
@@ -337,8 +337,8 @@ sub _rederive_regexp {
                                  AND grant_type = ? and isbless = 0");
     $sth->execute($self->id, GRANT_REGEXP);
     my $regexp = $self->user_regexp;
-    while (my ($uid, $email, $present) = $sth->fetchrow_array) {
-        if ($regexp ne '' and $email =~ /$regexp/i) {
+    while (my ($uid, $login, $present) = $sth->fetchrow_array) {
+        if ($regexp ne '' and $login =~ /$regexp/i) {
             $sthadd->execute($uid, $self->id, GRANT_REGEXP) unless $present;
         } else {
             $sthdel->execute($uid, $self->id, GRANT_REGEXP) if $present;

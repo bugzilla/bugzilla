@@ -1631,14 +1631,10 @@ Params:
 
 =over
 
-=item C<email>
-
-The email address of the new account.
-
 =item C<login>
 
-The login of the new account. This will be the same as the email address if
-the "use_email_as_login" parameter is set, otherwise it may be different.
+The login of the new account. This is usually an email address, unless the
+C<emailsuffix> parameter is not empty.
 
 =back
 

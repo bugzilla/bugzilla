@@ -18,7 +18,6 @@ use lib "$RealBin/../../lib", "$RealBin/../../../local/lib/perl5";
 
 use autodie;
 use Data::Dumper;
-use Email::Address;
 use Test::More;
 
 use parent qw(Exporter);
@@ -26,7 +25,6 @@ use parent qw(Exporter);
     trim
     url_quote
     random_string
-    email_filter
 
     log_in
     logout
@@ -367,18 +365,6 @@ sub set_parameters {
         $sel->wait_for_page_to_load_ok(WAIT_TIME);
         $sel->title_is("Parameters Updated");
     }
-}
-
-sub email_filter {
-    my ($toencode) = @_;
-    my @emails = Email::Address->parse($toencode);
-    if (scalar @emails) {
-        my @hosts = map { quotemeta($_->host) } @emails;
-        my $hosts_re = join('|', @hosts);
-        $toencode =~ s/\@(?:$hosts_re)//g;
-        return $toencode;
-    }
-    return $toencode;
 }
 
 1;

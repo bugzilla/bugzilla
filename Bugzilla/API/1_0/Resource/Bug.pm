@@ -509,7 +509,7 @@ sub _translate_comment {
     my $comment_hash = {
         id            => as_int($comment->id),
         bug_id        => as_int($comment->bug_id),
-        creator       => as_login($comment->author->login),
+        creator       => as_email($comment->author->login),
         time          => as_datetime($comment->creation_ts),
         creation_time => as_datetime($comment->creation_ts),
         is_private    => as_boolean($comment->is_private),
@@ -1431,7 +1431,7 @@ sub _bug_to_hash {
         $item{alias} = as_string_array($bug->alias);
     }
     if (filter_wants $params, 'assigned_to') {
-        $item{'assigned_to'} = as_login($bug->assigned_to->login);
+        $item{'assigned_to'} = as_email($bug->assigned_to->login);
         $item{'assigned_to_detail'} = $self->_user_to_hash($bug->assigned_to, $params, undef, 'assigned_to');
     }
     if (filter_wants $params, 'blocks') {
@@ -1444,14 +1444,14 @@ sub _bug_to_hash {
         $item{component} = as_string($bug->component);
     }
     if (filter_wants $params, 'cc') {
-        $item{'cc'} = as_login_array($bug->cc);
+        $item{'cc'} = as_email_array($bug->cc);
         $item{'cc_detail'} = [ map { $self->_user_to_hash($_, $params, undef, 'cc') } @{ $bug->cc_users } ];
     }
     if (filter_wants $params, 'creation_time') {
         $item{'creation_time'} = as_datetime($bug->creation_ts);
     }
     if (filter_wants $params, 'creator') {
-        $item{'creator'} = as_login($bug->reporter->login);
+        $item{'creator'} = as_email($bug->reporter->login);
         $item{'creator_detail'} = $self->_user_to_hash($bug->reporter, $params, undef, 'creator');
     }
     if (filter_wants $params, 'depends_on') {
@@ -1477,7 +1477,7 @@ sub _bug_to_hash {
     }
     if (filter_wants $params, 'qa_contact') {
         my $qa_login = $bug->qa_contact ? $bug->qa_contact->login : '';
-        $item{'qa_contact'} = as_login($qa_login);
+        $item{'qa_contact'} = as_email($qa_login);
         if ($bug->qa_contact) {
             $item{'qa_contact_detail'} = $self->_user_to_hash($bug->qa_contact, $params, undef, 'qa_contact');
         }
@@ -1546,7 +1546,8 @@ sub _user_to_hash {
     my $item = filter $filters, {
         id        => as_int($user->id),
         real_name => as_string($user->name),
-        name      => as_login($user->login),
+        name      => as_email($user->login),
+        email     => as_email($user->email),
     }, $types, $prefix;
     return $item;
 }
@@ -1570,7 +1571,7 @@ sub _attachment_to_hash {
     # creator requires an extra lookup, so we only send them if
     # the filter wants them.
     if (filter_wants $filters, 'creator', $types, $prefix) {
-        $item->{'creator'} = as_login($attach->attacher->login);
+        $item->{'creator'} = as_email($attach->attacher->login);
     }
 
     if (filter_wants $filters, 'data', $types, $prefix) {
@@ -1602,7 +1603,7 @@ sub _flag_to_hash {
 
     foreach my $field (qw(setter requestee)) {
         my $field_id = $field . "_id";
-        $item->{$field} = as_login($flag->$field->login)
+        $item->{$field} = as_email($flag->$field->login)
             if $flag->$field_id;
     }
 
@@ -2670,6 +2671,10 @@ C<string> The 'real' name for this user, if any.
 =item C<name>
 
 C<string> The user's Bugzilla login.
+
+=item C<email>
+
+C<string> The user's email address. Currently this is the same value as the name.
 
 =back
 

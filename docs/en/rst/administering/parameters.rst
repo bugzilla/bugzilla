@@ -169,6 +169,12 @@ requirelogin
     If this option is set, all access to the system beyond the front page will
     require a login. No anonymous users will be permitted.
 
+webservice_email_filter
+    Filter email addresses returned by the WebService API depending on if the
+    user is logged in or not. This works similarly to how the web UI currently
+    filters email addresses. If requirelogin is enabled, then this parameter
+    has no effect as users must be logged in to use Bugzilla anyway.
+
 emailregexp
     Defines the regular expression used to validate email addresses used for
     login names. The default attempts to match fully qualified email addresses
@@ -179,6 +185,12 @@ emailregexp
 emailregexpdesc
     This description is shown to the user to explain which email addresses are
     allowed by the :param:`emailregexp` param.
+
+emailsuffix
+    This is a string to append to any email addresses when actually sending mail
+    to that address. It is useful if you have changed the :param:`emailregexp`
+    param to only allow local usernames, but you want the mail to be delivered
+    to username\@my.local.hostname.
 
 createemailregexp
     This defines the (case-insensitive) regexp to use for email addresses that
@@ -483,8 +495,9 @@ address. The LDAP authentication builds on top of this scheme, rather
 than replacing it. The initial log-in is done with a username and
 password for the LDAP directory. Bugzilla tries to bind to LDAP using
 those credentials and, if successful, tries to map this account to a
-Bugzilla account. An LDAP mail attribute must be defined.
-If an account for this address
+Bugzilla account. If an LDAP mail attribute is defined, the value of this
+attribute is used; otherwise, the :param:`emailsuffix` parameter is appended to
+the LDAP username to form a full email address. If an account for this address
 already exists in the Bugzilla installation, it will log in to that account.
 If no account for that email address exists, one is created at the time
 of login. (In this case, Bugzilla will attempt to use the "displayName"

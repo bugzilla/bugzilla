@@ -301,8 +301,8 @@ sub _check_cc_list {
 
     my @addresses = split(/[,\s]+/, $cc_list);
     my $addr_spec = $Email::Address::addr_spec;
-    # We do not call check_email_syntax() because these addresses are not
-    # required to match 'emailregexp'.
+    # We do not call check_email_syntax() because these addresses do not
+    # require to match 'emailregexp' and do not depend on 'emailsuffix'.
     foreach my $address (@addresses) {
         ($address !~ /\P{ASCII}/ && $address =~ /^$addr_spec$/)
           || ThrowUserError('illegal_email_address',

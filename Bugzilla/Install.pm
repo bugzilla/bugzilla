@@ -312,45 +312,31 @@ sub create_admin {
     local $/ = ON_WINDOWS ? "\x0d\x0a" : "\x0a";
 
     my $admin_group = new Bugzilla::Group({ name => 'admin' });
-    my $admin_inheritors =
+    my $admin_inheritors = 
         Bugzilla::Group->flatten_group_membership($admin_group->id);
     my $admin_group_ids = join(',', @$admin_inheritors);
 
     my ($admin_count) = $dbh->selectrow_array(
-        "SELECT COUNT(*) FROM user_group_map
+        "SELECT COUNT(*) FROM user_group_map 
           WHERE group_id IN ($admin_group_ids)");
 
     return if $admin_count;
 
     my %answer    = %{Bugzilla->installation_answers};
-    my $login     = $answer{'ADMIN_LOGIN'};
-    my $email     = $answer{'ADMIN_EMAIL'};
+    my $login     = $answer{'ADMIN_EMAIL'};
     my $password  = $answer{'ADMIN_PASSWORD'};
     my $full_name = $answer{'ADMIN_REALNAME'};
 
-    if (!($login || Bugzilla->params->{'use_email_as_login'})
-        || !$email
-        || !$password)
-    {
+    if (!$login || !$password || !$full_name) {
         say "\n" . get_text('install_admin_setup') . "\n";
-    }
-    if (not $email) {
-        print get_text('install_admin_get_email') . ' ';
-        $email = <STDIN>;
-        chomp $email if defined $email;
-    }
-    Bugzilla::User->check_email($email);
-    # Make sure the email address is used as login when required.
-    if (Bugzilla->params->{'use_email_as_login'}) {
-        $login = $email;
     }
 
     if (not $login) {
-        print get_text('install_admin_get_login') . ' ';
+        print get_text('install_admin_get_email') . ' ';
         $login = <STDIN>;
         chomp $login if defined $login;
     }
-    Bugzilla::User->check_login_name($login, undef, {email => $email});
+    Bugzilla::User->check_login_name($login);
 
     if (not defined $full_name) {
         print get_text('install_admin_get_name') . ' ';
@@ -363,8 +349,7 @@ sub create_admin {
             get_text('install_admin_get_password'));
     }
 
-    my $admin = Bugzilla::User->create({ login_name    => $login,
-                                         email         => $email,
+    my $admin = Bugzilla::User->create({ login_name    => $login, 
                                          realname      => $full_name,
                                          cryptpassword => $password });
     make_admin($admin);

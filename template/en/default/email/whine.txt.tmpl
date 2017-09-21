@@ -7,7 +7,7 @@
   #%]
 
 From: [% Param("mailfrom") %]
-To: [% email %]
+To: [% email %][% Param("emailsuffix") %]
 Subject: Your [% terms.Bugzilla %] [%+ terms.bug %] list needs attention.
 X-Bugzilla-Type: whine
 

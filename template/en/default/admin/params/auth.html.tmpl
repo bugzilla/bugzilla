@@ -93,15 +93,28 @@
                   "front page will require a login. No anonymous users will " _
                   "be permitted.",
 
+  webservice_email_filter =>
+    "Filter email addresses returned by the WebService API depending on " _
+    "if the user is logged in or not. This works similarly to how the " _
+    "web UI currently filters email addresses. If <var>requirelogin</var> " _
+    "is enabled, then this parameter has no effect as users must be logged " _
+    "in to use Bugzilla.",
+
   emailregexp =>
     "This defines the regular expression to use for legal email addresses. " _
     "The default tries to match fully qualified email addresses. " _
     "Use <kbd>.*</kbd> to accept any email address following the " _
     "<a href=\"http://tools.ietf.org/html/rfc2822#section-3.4.1\">RFC 2822</a> " _
-    "specification.",
+    "specification. Another popular value to put here is <kbd>^[^@]+$</kbd>, " _
+    "which means 'local usernames, no @ allowed.'",
 
   emailregexpdesc => "This description explains valid addresses that " _
                      "are allowed by the <var>emailregexp</var> param.",
+
+  emailsuffix => "This is a string to append to any email addresses when actually " _
+                 "sending mail to that address. It is useful if you have changed " _
+                 "the <var>emailregexp</var> param to only allow local usernames, " _
+                 "but you want the mail to be delivered to username@my.local.hostname.",
 
   createemailregexp => "This defines the (case-insensitive) regexp to use for email addresses that are " _
                        "permitted to self-register using a 'New Account' feature. The " _
@@ -109,13 +122,6 @@
                        "to be created. If this parameter is left blank, no users " _
                        "will be permitted to create their own accounts and all accounts " _
                        "will have to be created by an administrator.",
-
-  use_email_as_login => "If switched on, users will log in with the email " _
-                        "address of the account. If switched off, they will " _
-                        "log in with a separate identifier.<br>" _
-                        "<strong>Switching this from off to on results in " _
-                        "the destructive act of the login name for all users " _
-                        "being set to their email address!</strong>",
 
   password_complexity =>
     "Set the complexity required for passwords. In all cases must the passwords " _

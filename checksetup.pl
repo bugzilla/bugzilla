@@ -520,7 +520,6 @@ The format of that file is as follows:
 
  (Any localconfig variable or parameter can be specified as above.)
 
- $answer{'ADMIN_LOGIN'} = 'myadmin';
  $answer{'ADMIN_EMAIL'} = 'myadmin@mydomain.net';
  $answer{'ADMIN_PASSWORD'} = 'fooey';
  $answer{'ADMIN_REALNAME'} = 'Joel Peshkin';

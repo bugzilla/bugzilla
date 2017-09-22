@@ -752,6 +752,7 @@ sub update_table_definitions {
     # Split login_name into login_name and email columns
     _split_login_and_email($old_params);
 
+    _restore_login_emails();
     ################################################################
     # New --TABLE-- changes should go *** A B O V E *** this point #
     ################################################################
@@ -791,6 +792,29 @@ sub _update_pre_checksetup_bugzillas {
                         {TYPE => 'TINYTEXT'});
     $dbh->bz_add_column('components', 'description',
                         {TYPE => 'MEDIUMTEXT', NOTNULL => 1}, '');
+}
+
+sub _restore_login_emails {
+    my $dbh = Bugzilla->dbh;
+    my $params = Bugzilla->params;
+        
+    if ($params->{'use_email_as_login'} == 0) 
+    {
+        my $sth = $dbh->prepare("SELECT userid, login_name, email
+                                   FROM profiles ORDER BY userid");
+        $sth->execute();
+    
+        while (my ($userid, $login_name, $email) = 
+                   $sth->fetchrow_array())
+        {   
+            $dbh->do("UPDATE profiles SET login_name = ?
+                       WHERE userid =?", undef, $email, $userid);
+        }
+    } 
+
+    if (grep $_ eq "email", $dbh->bz_table_columns("profiles")) {
+        $dbh->bz_drop_column('profiles', 'email');
+    }
 }
 
 sub _add_bug_vote_cache {

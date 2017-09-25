@@ -17,14 +17,34 @@ use Bugzilla;
 use Bugzilla::Constants;
 use Bugzilla::Error;
 use Bugzilla::Token;
-use Bugzilla::Util qw( bz_crypt );
+use Bugzilla::Util qw( bz_crypt trim );
+use Data::Dumper;
 
-my $cgi = Bugzilla->cgi;
-my $user = Bugzilla->login(LOGIN_REQUIRED);
-my $template = Bugzilla->template;
-my $dbh = Bugzilla->dbh;
+my $cgi          = Bugzilla->cgi;
+my $user         = Bugzilla->login(LOGIN_REQUIRED);
+my $template     = Bugzilla->template;
+my $dbh          = Bugzilla->dbh;
+my $prev_url     = $cgi->param('prev_url');
+my $prev_url_sig = $cgi->param('prev_url_sig');
+my $sig_type     = 'prev_url:' . $user->id;
+my $prev_url_ok  = check_hash_sig($sig_type, $prev_url_sig, $prev_url );
 
-ThrowUserError('reset_password_denied') unless $user->password_change_required;
+unless ($prev_url_ok) {
+    open my $fh, '>', '/tmp/dump.pl' or die $!;
+    print $fh Dumper([$prev_url, $prev_url_sig]);
+    close $fh or die $!;
+}
+
+unless ($user->password_change_required) {
+    ThrowUserError(
+        'reset_password_denied',
+        {
+            prev_url_ok => $prev_url_ok,
+            prev_url    => $prev_url,
+        }
+    );
+
+}
 
 if ($cgi->param('do_save')) {
     my $token = $cgi->param('token');
@@ -64,14 +84,32 @@ if ($cgi->param('do_save')) {
 
     # done
     print $cgi->header();
-    $template->process('index.html.tmpl', { message => 'password_changed' })
-        || ThrowTemplateError($template->error());
+    $template->process(
+        'account/reset-password.html.tmpl',
+        {
+            message          => 'password_changed',
+            prev_url         => $prev_url,
+            prev_url_ok      => $prev_url_ok,
+            password_changed => 1
+        }
+    ) || ThrowTemplateError( $template->error() );
+
 }
 
 else {
     my $token = issue_session_token('reset_password');
 
     print $cgi->header();
-    $template->process('account/reset-password.html.tmpl', { token => $token })
-        || ThrowTemplateError($template->error());
+    $template->process(
+        'account/reset-password.html.tmpl',
+        {
+            token        => $token,
+            prev_url     => $prev_url,
+            prev_url_ok  => $prev_url_ok,
+            prev_url_sig => $prev_url_sig,
+            sig_type => $sig_type,
+        }
+    ) || ThrowTemplateError( $template->error() );
+
+
 }

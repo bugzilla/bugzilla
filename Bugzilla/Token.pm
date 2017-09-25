@@ -32,6 +32,7 @@ use base qw(Exporter);
                               issue_auth_delegation_token check_auth_delegation_token
                               check_token_data delete_token
                               issue_hash_token check_hash_token
+                              issue_hash_sig   check_hash_sig
                               set_token_extra_data get_token_extra_data);
 
 # 128 bits password:
@@ -219,6 +220,27 @@ sub issue_short_lived_session_token {
 
     $user //= Bugzilla->user;
     return _create_token($user->id ? $user->id : undef, 'session.short', $data);
+}
+
+sub issue_hash_sig {
+    my ($type, $data, $salt) = @_;
+    $data //= "";
+    $salt //= generate_random_password(16);
+
+    my $hmac = hmac_sha256_base64(
+        $salt,
+        $type,
+        $data,
+        Bugzilla->localconfig->{site_wide_secret}
+    );
+    return sprintf("%s|%s|%x", $salt, $hmac, length($data));
+}
+
+sub check_hash_sig {
+    my ($type, $sig, $data) = @_;
+    return 0 unless defined $sig && defined $data;
+    my ($salt, undef, $len) = split(/\|/, $sig, 3);
+    return length($data) == hex($len) && $sig eq issue_hash_sig($type, $data, $salt);
 }
 
 sub issue_hash_token {

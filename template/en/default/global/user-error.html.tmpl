@@ -1402,6 +1402,9 @@
   [% ELSIF error == "reset_password_denied" %]
     [% title = "Reset Password Denied" %]
     You cannot reset your password without administrative permission.
+    [% IF prev_url_ok %]
+      Continue to <a href="[% prev_url FILTER html %]">[% prev_url FILTER html %]</a>.
+    [% END %]
 
   [% ELSIF error == "no_axes_defined" %]
     [% title = "No Axes Defined" %]

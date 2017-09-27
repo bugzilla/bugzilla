@@ -1,0 +1,42 @@
+theme = freenode || core || certrec || certrule || performance || security
+severity = 1
+
+[-BuiltinFunctions::ProhibitUselessTopic]
+[-ControlStructures::ProhibitCascadingIfElse]
+[-ControlStructures::ProhibitPostfixControls]
+[-ControlStructures::ProhibitUnlessBlocks]
+[-Documentation::RequirePodLinksIncludeText]
+[-Documentation::RequirePodSections]
+[-ErrorHandling::RequireCarping]
+[-Modules::RequireVersionVar]
+[-References::ProhibitDoubleSigils]
+[-RegularExpressions::ProhibitComplexRegexes]
+[-RegularExpressions::RequireExtendedFormatting]
+[-Subroutines::ProhibitExcessComplexity]
+[-ValuesAndExpressions::ProhibitConstantPragma]
+[-ValuesAndExpressions::ProhibitEmptyQuotes]
+[-ValuesAndExpressions::ProhibitMagicNumbers]
+[-ValuesAndExpressions::ProhibitVersionStrings]
+[-Variables::ProhibitLocalVars]
+[-Variables::ProhibitPackageVars]
+
+# this policy is broken currently
+[-Freenode::PackageMatchesFilename]
+
+# This is not a good policy.
+# Non-explicit return is often easier to read.
+# think of javascript arrow functions.
+[-Subroutines::RequireFinalReturn]
+
+# I don't agree with this policy because
+# a bare return can actually cause more problems.
+[-Subroutines::ProhibitExplicitReturnUndef]
+
+[Variables::RequireLocalizedPunctuationVars]
+allow = @ARGV $ARGV %ENV %SIG
+
+[Variables::ProhibitPunctuationVars]
+allow = $@ $! $/ $^O $^V
+
+
+

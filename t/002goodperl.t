@@ -54,6 +54,8 @@ foreach my $file (@testitems) {
         } elsif ($ext eq "cgi") {
             # cgi files must be taint checked
             $flags = 'T';
+        } elsif ($ext eq 't') {
+            $flags = '';
         } else {
             ok(0, "$file has shebang but unknown extension");
             next;
@@ -129,20 +131,20 @@ foreach my $file (@testitems) {
     }
     my $lineno = 0;
     my $error = 0;
-    
+
     while (!$error && (my $file_line = <FILE>)) {
         $lineno++;
         if ($file_line =~ /Throw.*Error\("(.*?)"/) {
             if ($1 =~ /\s/) {
-                ok(0,"$file has a Throw*Error call on line $lineno 
+                ok(0,"$file has a Throw*Error call on line $lineno
                       which doesn't use a tag --ERROR");
-                $error = 1;       
+                $error = 1;
             }
         }
     }
-    
+
     ok(1,"$file uses Throw*Error calls correctly") if !$error;
-    
+
     close(FILE);
 }
 

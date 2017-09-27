@@ -1,5 +1,4 @@
-FROM mozillabteam/bmo-slim:20170824.1
-MAINTAINER Dylan William Hardison <dylan@mozilla.com>
+FROM mozillabteam/bmo-slim:20170927.1
 
 ENV BUNDLE=https://s3.amazonaws.com/moz-devservices-bmocartons/bmo/vendor.tar.gz
 ENV PORT=8000

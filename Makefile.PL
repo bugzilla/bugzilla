@@ -53,7 +53,7 @@ my %requires = (
     'JSON::XS'                 => '2.01',
     'LWP::Protocol::https'     => '6.07',
     'LWP::UserAgent'           => '6.26',
-    'List::MoreUtils'          => $^V > v5.10.1 ? '0.418' : '0.22',
+    'List::MoreUtils'          => '0.418',
     'Math::Random::ISAAC'      => '1.0.1',
     'Module::Metadata'         => '1.000033',
     'Module::Runtime'          => 0,
@@ -71,9 +71,12 @@ my %build_requires = (
     'ExtUtils::MakeMaker' => '7.22',
 );
 my %test_requires = (
-    'Test::More'         => 0,
-    'Pod::Coverage'      => 0,
-    'Test::WWW::Selenium' => 0,
+    'Test::More'                      => 0,
+    'Pod::Coverage'                   => 0,
+    'Test::WWW::Selenium'             => 0,
+    'Test::Selenium::Firefox'         => 0,
+    'Test::Perl::Critic::Progressive' => 0,
+    'Perl::Critic::Freenode'          => 0,
 );
 my %recommends = ( Safe => '2.30' );
 

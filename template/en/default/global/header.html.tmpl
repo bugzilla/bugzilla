@@ -259,7 +259,7 @@
               AND user.mfa_required_date
               AND NOT Bugzilla.request_cache.on_mfa_page %]
           <span id="mfa-warning">
-            Please <a href="userprefs.cgi?tab=mfa">enabled two-factor authentication</a>
+            Please <a href="userprefs.cgi?tab=mfa">enable two-factor authentication</a>
             [% IF Param('mfa_group_grace_period') %]
               before <i>[% user.mfa_required_date FILTER time %]</i>.
             [% ELSE %]

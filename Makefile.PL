@@ -84,6 +84,18 @@ if ( $^O eq 'MSWin32' ) {
     $requires{'DateTime::TimeZone::Local::Win32'} = '1.64';
 }
 
+# for some reason, we need these on ubuntu.
+if ($^O eq 'linux' && -f '/etc/debian_version') {
+    my @extra = qw(
+        Linux::Pid
+        Test::Pod::Coverage
+        Pod::Coverage::TrustPod
+        Test::CPAN::Meta
+        Test::Pod
+    );
+    $requires{$_} = 0 for @extra;
+}
+
 my %optional_features = (
     smtp_auth => {
         prereqs => { runtime => { requires => { 'Authen::SASL' => 0 } } },

@@ -185,15 +185,19 @@ sub update_reviewer_statuses {
         next if $revision_id != $curr_revision_id;
 
         # Clear old flags if no longer accepted
-        my (@old_flags, @new_flags, %accepted_done, %denied_done, $flag_type);
+        my (@denied_flags, @new_flags, @removed_flags, %accepted_done, $flag_type);
         foreach my $flag (@{ $attachment->flags }) {
             next if $flag->type->name ne 'review';
             $flag_type = $flag->type;
             if (any { $flag->setter->id == $_ } @$denied_user_ids) {
-                push(@old_flags, { id => $flag->id, setter => $flag->setter, status => 'X' });
+                push(@denied_flags, { id => $flag->id, setter => $flag->setter, status => 'X' });
             }
             if (any { $flag->setter->id == $_ } @$accepted_user_ids) {
                 $accepted_done{$flag->setter->id}++;
+            }
+            if ($flag->status eq '+'
+                && !any { $flag->setter->id == $_ } (@$accepted_user_ids, @$denied_user_ids)) {
+                push(@removed_flags, { id => $flag->id, setter => $flag->setter, status => 'X' });
             }
         }
 
@@ -212,8 +216,11 @@ sub update_reviewer_statuses {
         foreach my $flag_data (@new_flags) {
             $comment .= $flag_data->{setter}->name . " has approved the revision.\n";
         }
-        foreach my $flag_data (@old_flags) {
+        foreach my $flag_data (@denied_flags) {
             $comment .= $flag_data->{setter}->name . " has requested changes to the revision.\n";
+        }
+        foreach my $flag_data (@removed_flags) {
+            $comment .= $flag_data->{setter}->name . " has been removed from the revision.\n";
         }
 
         if ($comment) {
@@ -227,7 +234,7 @@ sub update_reviewer_statuses {
             });
         }
 
-        $attachment->set_flags(\@old_flags, \@new_flags);
+        $attachment->set_flags([ @denied_flags, @removed_flags ], \@new_flags);
         $attachment->update($timestamp);
         $bug->update($timestamp) if $comment;
 

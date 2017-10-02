@@ -73,16 +73,18 @@ jobs:
           command: apk update && apk add git openssh-client
       - checkout
       - run: docker build -t bmo .
-      - deploy: |
-          if [[ -n "$DOCKERHUB_REPO" && -n "$DOCKER_USER" && -n "$DOCKER_PASS" ]]; then
-              TAG="${CIRCLE_TAG:-$CIRCLE_BRANCH}"
-              if [[ $TAG == "master" ]]; then
-                TAG=latest
-              fi
-              docker tag bmo $DOCKERHUB_REPO:$TAG
-              docker login -u "$DOCKER_USER" -p "$DOCKER_PASS"
-              docker push $DOCKERHUB_REPO:$TAG
-          fi
+      - deploy:
+          command: |
+            docker build -t bmo .
+            if [[ -n "$DOCKERHUB_REPO" && -n "$DOCKER_USER" && -n "$DOCKER_PASS" ]]; then
+                TAG="${CIRCLE_TAG:-$CIRCLE_BRANCH}"
+                if [[ $TAG == "master" ]]; then
+                  TAG=latest
+                fi
+                docker tag bmo $DOCKERHUB_REPO:$TAG
+                docker login -u "$DOCKER_USER" -p "$DOCKER_PASS"
+                docker push $DOCKERHUB_REPO:$TAG
+            fi
 
   test_sanity:
     parallelism: 4

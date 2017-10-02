@@ -5,6 +5,17 @@
 
 version: 2
 
+standard_filters: &standard_filters
+  branches:
+    only:
+      - master
+      - development
+      - production
+  tags:
+    only:
+      - /release-[0-9]{6}\.[0-9]+/
+      - /test-[a-zA-Z0-9_-]+/
+
 defaults:
   bmo_slim_image: &bmo_slim_image
     image: mozillabteam/bmo-slim:20170927.1
@@ -159,28 +170,23 @@ workflows:
   version: 2
   main:
     jobs:
-      - test_sanity
+      - test_sanity:
+          filters: *standard_filters
       - test_bmo:
+          filters: *standard_filters
           requires:
             - test_sanity
       - test_webservices:
+          filters: *standard_filters
           requires:
             - test_sanity
       - test_selenium:
+          filters: *standard_filters
           requires:
             - test_sanity
       - build:
+          filters: *standard_filters
           requires:
             - test_sanity
             - test_bmo
             - test_webservices
-          filters:
-            branches:
-              only:
-                - master
-                - development
-                - production
-            tags:
-              only:
-                - /release-[0-9]{6}\.[0-9]+/
-                - /test-[a-zA-Z0-9_-]+/

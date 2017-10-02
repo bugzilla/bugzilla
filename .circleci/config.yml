@@ -60,15 +60,16 @@ jobs:
           name: install git and ssh
           command: apk update && apk add git openssh-client
       - checkout
-      - run: |
-          docker build -t bmo .
+      - run: docker build -t bmo .
+      - deploy: |
           if [[ -n "$DOCKERHUB_REPO" && -n "$DOCKER_USER" && -n "$DOCKER_PASS" ]]; then
-            TAG="$CIRCLE_BRANCH"
-            if [[ $TAG == "master" ]]; then
-              docker tag bmo $DOCKERHUB_REPO:latest
+              TAG="${CIRCLE_TAG:-$CIRCLE_BRANCH}"
+              if [[ $TAG == "master" ]]; then
+                TAG=latest
+              fi
+              docker tag bmo $DOCKERHUB_REPO:$TAG
               docker login -u "$DOCKER_USER" -p "$DOCKER_PASS"
-              docker push $DOCKERHUB_REPO:latest
-            fi
+              docker push $DOCKERHUB_REPO:$TAG
           fi
 
   test_sanity:
@@ -156,7 +157,7 @@ jobs:
 
 workflows:
   version: 2
-  tests:
+  main:
     jobs:
       - test_sanity
       - test_bmo
@@ -165,6 +166,13 @@ workflows:
       - build:
           requires:
             - test_sanity
-            - test_webservices
-            - test_selenium
-            - test_bmo
+          filters:
+            branches:
+              only:
+                - master
+                - development
+                - production
+            tags:
+              only:
+                - /release-[0-9]{6}\.[0-9]+/
+                - /test-[a-zA-Z0-9_-]+/

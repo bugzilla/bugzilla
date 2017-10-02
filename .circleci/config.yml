@@ -136,7 +136,7 @@ jobs:
           path: /app/artifacts
 
   test_bmo:
-    parallelism: 4
+    parallelism: 1
     working_directory: /app
     docker:
       - <<: *bmo_slim_image

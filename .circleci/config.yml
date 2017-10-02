@@ -5,12 +5,13 @@
 
 version: 2
 
-standard_filters: &standard_filters
+build_filters: &build_filters
   branches:
     only:
       - master
       - development
       - production
+      - /test-[a-zA-Z0-9_-]+/
   tags:
     only:
       - /release-[0-9]{6}\.[0-9]+/
@@ -170,22 +171,18 @@ workflows:
   version: 2
   main:
     jobs:
-      - test_sanity:
-          filters: *standard_filters
+      - test_sanity
       - test_bmo:
-          filters: *standard_filters
           requires:
             - test_sanity
       - test_webservices:
-          filters: *standard_filters
           requires:
             - test_sanity
       - test_selenium:
-          filters: *standard_filters
           requires:
             - test_sanity
       - build:
-          filters: *standard_filters
+          filters: *build_filters
           requires:
             - test_sanity
             - test_bmo

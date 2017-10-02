@@ -160,12 +160,20 @@ workflows:
   main:
     jobs:
       - test_sanity
-      - test_bmo
-      - test_webservices
-      - test_selenium
+      - test_bmo:
+          requires:
+            - test_sanity
+      - test_webservices:
+          requires:
+            - test_sanity
+      - test_selenium:
+          requires:
+            - test_sanity
       - build:
           requires:
             - test_sanity
+            - test_bmo
+            - test_webservices
           filters:
             branches:
               only:

@@ -5,15 +5,14 @@
 
 version: 2
 
-build_filters: &build_filters
+main_filters: &main_filters
   branches:
-    only:
-      - master
-      - development
-      - /build-[0-9]{6}\.[0-9]+/
+    ignore:
+      - /^(?:release|test)-20\d\d\d\d\d\d\.\d+/
+      - /\//
+      - production
   tags:
-    only:
-      - /release-[0-9]{6}\.[0-9]+/
+    only: /^(?:release|test)-20\d\d\d\d\d\d\.\d+/
 
 defaults:
   bmo_slim_image: &bmo_slim_image
@@ -171,18 +170,22 @@ workflows:
   version: 2
   main:
     jobs:
-      - test_sanity
+      - test_sanity:
+          filters: *main_filters
       - test_bmo:
+          filters: *main_filters
           requires:
             - test_sanity
       - test_webservices:
+          filters: *main_filters
           requires:
             - test_sanity
       - test_selenium:
+          filters: *main_filters
           requires:
             - test_sanity
       - build:
-          filters: *build_filters
+          filters: *main_filters
           requires:
             - test_sanity
             - test_bmo

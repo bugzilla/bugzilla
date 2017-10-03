@@ -10,12 +10,10 @@ build_filters: &build_filters
     only:
       - master
       - development
-      - production
-      - /test-[a-zA-Z0-9_-]+/
+      - /build-[0-9]{6}\.[0-9]+/
   tags:
     only:
       - /release-[0-9]{6}\.[0-9]+/
-      - /test-[a-zA-Z0-9_-]+/
 
 defaults:
   bmo_slim_image: &bmo_slim_image

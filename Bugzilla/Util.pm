@@ -126,6 +126,8 @@ sub write_text {
     binmode $tmp_fh, ':encoding(utf-8)';
     print $tmp_fh $content;
     close $tmp_fh;
+    # File::Temp tries for secure files, but File::Slurp used the umask.
+    chmod(0666 & ~umask, $tmp_filename);
     rename $tmp_filename, $filename;
 }
 

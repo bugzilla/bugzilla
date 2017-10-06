@@ -1,6 +1,11 @@
 FROM mozillabteam/bmo-slim:20170927.1
 
-ENV BUNDLE=https://s3.amazonaws.com/moz-devservices-bmocartons/bmo/vendor.tar.gz
+ENV HTTPD_StartServers=8
+ENV HTTPD_MinSpareServers=5
+ENV HTTPD_MaxSpareServers=20
+ENV HTTPD_ServerLimit=256
+ENV HTTPD_MaxClients=256
+ENV HTTPD_MaxRequestsPerChild=4000
 ENV PORT=8000
 
 WORKDIR /app

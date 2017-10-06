@@ -73,7 +73,7 @@ After editing files in the bmo directory, you will need to run
 
     vagrant rsync && vagrant provision --provision-with update
 
-to see the changes applied to your vagrant VM. If the above command fails 
+to see the changes applied to your vagrant VM. If the above command fails
 or db is changed, do a full provision:
 
 .. code-block:: bash
@@ -171,6 +171,7 @@ Environmental Variables
 PORT
   This must be a value >= 1024. The httpd will listen on this port for incoming
   plain-text HTTP connections.
+  Default: 8000
 
 BMO_db_driver
   What SQL database to use. Default is mysql. List of supported databases can be
@@ -194,7 +195,7 @@ BMO_site_wide_secret
   This secret key is used by your installation for the creation and
   validation of encrypted tokens. These tokens are used to implement
   security features in Bugzilla, to protect against certain types of attacks.
-  It's very important that this key is kept secret. 
+  It's very important that this key is kept secret.
 
 BMO_inbound_proxies
   This is a list of IP addresses that we expect proxies to come from.
@@ -206,7 +207,7 @@ BMO_memcached_namespace
 
 BMO_memcached_servers
   A list of memcached servers (ip addresses or host names). Can be empty.
- 
+
 BMO_shadowdb
   The database name of the read-only database.
 
@@ -219,6 +220,41 @@ BMO_shadowdbport
 BMO_apache_size_limit
   This is the max amount of unshared memory (in kb) that the apache process is
   allowed to use before Apache::SizeLimit kills it.
+
+HTTPD_StartServers
+  Sets the number of child server processes created on startup.
+  As the number of processes is dynamically controlled depending on the load,
+  there is usually little reason to adjust this parameter.
+  Default: 8
+
+HTTPD_MinSpareServers
+  Sets the desired minimum number of idle child server processes. An idle
+  process is one which is not handling a request. If there are fewer than
+  MinSpareServers idle, then the parent process creates new children at a
+  maximum rate of 1 per second.
+  Default: 5
+
+HTTPD_MaxSpareServers
+  Sets the desired maximum number of idle child server processes. An idle
+  process is one which is not handling a request. If there are more than
+  MaxSpareServers idle, then the parent process will kill off the excess
+  processes.
+  Default: 20
+
+HTTPD_MaxClients
+  Sets the maximum number of child processes that will be launched to serve requests.
+  Default: 256
+
+HTTPD_ServerLimit
+  Sets the maximum configured value for MaxClients for the lifetime of the
+  Apache process.
+  Default: 256
+
+HTTPD_MaxRequestsPerChild
+  Sets the limit on the number of requests that an individual child server
+  process will handle. After MaxRequestsPerChild requests, the child process
+  will die. If MaxRequestsPerChild is 0, then the process will never expire.
+  Default: 4000
 
 Persistent Data Volume
 ----------------------

@@ -21,7 +21,8 @@ use warnings;
 
 use Bugzilla::Constants;
 use Bugzilla::Error;
-use Bugzilla::Install::Localconfig;
+use Bugzilla::Install::Localconfig qw(ENV_KEYS);
+
 use Bugzilla::Install::Util qw(install_string);
 use Bugzilla::Util;
 use Bugzilla::Hook;
@@ -100,6 +101,14 @@ use constant INDEX_HTML => <<'EOT';
 </body>
 </html>
 EOT
+
+sub HTTPD_ENV_CONF {
+
+    return join( "\n",
+      "PerlPassEnv LOCALCONFIG_ENV",
+      map { "PerlPassEnv " . $_ } ENV_KEYS
+    ) . "\n";
+}
 
 ###############
 # Permissions #
@@ -407,6 +416,9 @@ sub FILESYSTEM {
         "robots.txt"              => { perms     => CGI_READ,
                                        overwrite => 1,
                                        contents  => \&robots_txt},
+        "httpd/env.conf"          => { perms     => CGI_READ,
+                                       overwrite => 1,
+                                       contents  => \&HTTPD_ENV_CONF },
     );
 
     # Because checksetup controls the creation of index.html separately

@@ -24,6 +24,7 @@ defaults:
 
   bmo_env: &bmo_env
     PORT: 8000
+    LOCALCONFIG_ENV: 1
     BMO_db_user: bugs
     BMO_db_host: 127.0.0.1
     BMO_db_pass: bugs
@@ -95,7 +96,6 @@ jobs:
       - run:
           name: run sanity tests
           command: |
-            rm /app/localconfig
             /app/scripts/entrypoint.pl prove -qf $(circleci tests glob 't/*.t' | circleci tests split) | tee artifacts/$CIRCLE_JOB.txt
       - store_artifacts:
           path: /app/artifacts
@@ -108,14 +108,14 @@ jobs:
       - checkout
       - *default_qa_setup
       - run: |
-          rm -f /app/localconfig
           /app/scripts/entrypoint.pl load_test_data
       - run:
           command: |
-            rm -f /app/localconfig
             /app/scripts/entrypoint.pl test_webservices | tee artifacts/$CIRCLE_JOB.txt
       - store_artifacts:
           path: /app/artifacts
+      - store_artifacts:
+          path: /app/logs
 
   test_selenium:
     parallelism: 1
@@ -125,14 +125,14 @@ jobs:
       - checkout
       - *default_qa_setup
       - run: |
-          rm -f /app/localconfig
           /app/scripts/entrypoint.pl load_test_data --legacy
       - run:
           command: |
-            rm -f /app/localconfig
             /app/scripts/entrypoint.pl test_selenium | tee artifacts/$CIRCLE_JOB.txt
       - store_artifacts:
           path: /app/artifacts
+      - store_artifacts:
+          path: /app/logs
 
   test_bmo:
     parallelism: 1
@@ -153,18 +153,16 @@ jobs:
       - checkout
       - run: |
           mv /opt/bmo/local /app/local
-          perl checksetup.pl --no-database --default-localconfig
+          perl checksetup.pl --no-database
           perl -MSys::Hostname -i -pE 's/<<HOSTNAME>>/hostname()/ges' $BZ_QA_ANSWERS_FILE
-          rm -f /app/localconfig
           /app/scripts/entrypoint.pl load_test_data
           mkdir artifacts
       - run: |
           BZ_BASE_URL="http://$(hostname):$PORT"
           export BZ_BASE_URL
-          rm -f /app/localconfig
           /app/scripts/entrypoint.pl test_bmo -q -f t/bmo/*.t
-
-
+      - store_artifacts:
+          path: /app/logs
 
 workflows:
   version: 2

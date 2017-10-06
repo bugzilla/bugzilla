@@ -149,8 +149,10 @@ Bugzilla->installation_answers($answers_file);
 # Check and update --LOCAL-- configuration
 ###########################################################################
 
-print "Reading " .  bz_locations()->{'localconfig'} . "...\n" unless $silent;
-update_localconfig({ output => !$silent, use_defaults => $switch{'default-localconfig'} });
+unless ($ENV{LOCALCONFIG_ENV}) {
+    print "Reading " .  bz_locations()->{'localconfig'} . "...\n" unless $silent;
+    update_localconfig({ output => !$silent, use_defaults => $switch{'default-localconfig'} });
+}
 my $lc_hash = Bugzilla->localconfig;
 
 ###########################################################################

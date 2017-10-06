@@ -76,6 +76,12 @@ my $server = Apache2::ServerUtil->server;
 my $conf = Bugzilla::ModPerl->apache_config($cgi_path);
 $server->add_config([ grep { length $_ } split("\n", $conf)]);
 
+# Pre-load localconfig. It might already be loaded, but we need to make sure.
+Bugzilla->localconfig;
+if ($ENV{LOCALCONFIG_ENV}) {
+    delete @ENV{ (Bugzilla::Install::Localconfig::ENV_KEYS) };
+}
+
 # Pre-load all extensions
 Bugzilla::Extension->load_all();
 

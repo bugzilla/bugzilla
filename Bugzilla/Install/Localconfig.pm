@@ -30,13 +30,19 @@ use List::Util qw(first);
 use Tie::Hash::NamedCapture;
 use Safe;
 use Term::ANSIColor;
+use Taint::Util qw(untaint);
 
 use parent qw(Exporter);
 
 our @EXPORT_OK = qw(
     read_localconfig
     update_localconfig
+    ENV_KEYS
 );
+
+# might want to change this for upstream
+use constant ENV_PREFIX     => 'BMO_';
+use constant PARAM_OVERRIDE => qw( inbound_proxies shadowdb shadowdbhost shadowdbport shadowdbsock );
 
 sub _sensible_group {
     return '' if ON_WINDOWS;
@@ -82,6 +88,7 @@ use constant LOCALCONFIG_VARS => (
         default => 'bugs',
     },
     {
+
         name    => 'db_user',
         default => 'bugs',
     },
@@ -149,7 +156,38 @@ use constant LOCALCONFIG_VARS => (
     },
 );
 
-sub read_localconfig {
+use constant ENV_KEYS => (
+    (map { ENV_PREFIX . $_->{name} } LOCALCONFIG_VARS),
+    (map { ENV_PREFIX . $_ } PARAM_OVERRIDE),
+);
+
+sub _read_localconfig_from_env {
+    my %localconfig;
+
+    foreach my $var ( LOCALCONFIG_VARS ) {
+        my $name = $var->{name};
+        my $key  = ENV_PREFIX . $name;
+        if ($name eq 'param_override') {
+            foreach my $override (PARAM_OVERRIDE) {
+                my $o_key = ENV_PREFIX . $override;
+                $localconfig{param_override}{$override} = $ENV{$o_key};
+                untaint($localconfig{param_override}{$override});
+            }
+        }
+        elsif (exists $ENV{$key}) {
+            $localconfig{$name} = $ENV{$key};
+            untaint($localconfig{$name});
+        }
+        else {
+            my $default = $var->{default};
+            $localconfig{$name} = ref($default) eq 'CODE' ? $default->() : $default;
+        }
+    }
+
+    return \%localconfig;
+}
+
+sub _read_localconfig_from_file {
     my ($include_deprecated) = @_;
     my $filename = bz_locations()->{'localconfig'};
 
@@ -211,6 +249,16 @@ sub read_localconfig {
     return \%localconfig;
 }
 
+sub read_localconfig {
+    my ($include_deprecated) = @_;
+
+    if ($ENV{LOCALCONFIG_ENV}) {
+        return _read_localconfig_from_env();
+    }
+    else {
+        return _read_localconfig_from_file($include_deprecated);
+    }
+}
 
 #
 # This is quite tricky. But fun!
@@ -238,6 +286,11 @@ sub read_localconfig {
 #
 sub update_localconfig {
     my ($params) = @_;
+
+    if ($ENV{LOCALCONFIG_ENV}) {
+        require Carp;
+        Carp::croak("update_localconfig() called with LOCALCONFIG_ENV enabled");
+    }
 
     my $output      = $params->{output} || 0;
     my $answer      = Bugzilla->installation_answers;
@@ -319,7 +372,7 @@ sub update_localconfig {
     }
 
     # Reset the cache for Bugzilla->localconfig so that it will be re-read
-    delete Bugzilla->request_cache->{localconfig};
+    delete Bugzilla->process_cache->{localconfig};
 
     return { old_vars => \@old_vars, new_vars => \@new_vars };
 }

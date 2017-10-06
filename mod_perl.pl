@@ -22,6 +22,8 @@ BEGIN {
     lib->import($dir, File::Spec->catdir($dir, "lib"), File::Spec->catdir($dir, qw(local lib perl5)));
 }
 
+use Bugzilla::ModPerl::StartupFix;
+
 use Bugzilla::Constants ();
 
 # If you have an Apache2::Status handler in your Apache configuration,

@@ -70,7 +70,12 @@ jobs:
           name: install git and ssh
           command: apk update && apk add git openssh-client
       - checkout
-      - run: docker build -t bmo .
+      - run: |
+          docker build \
+            --build-arg CI="$CI" \
+            --build-arg CIRCLE_SHA1="$CIRCLE_SHA1" \
+            --build-arg CIRCLE_BUILD_NUM="$CIRCLE_BUILD_NUM" \
+            -t bmo .
       - deploy:
           command: |
             docker build -t bmo .

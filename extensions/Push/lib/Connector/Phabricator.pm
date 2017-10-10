@@ -23,7 +23,8 @@ use Bugzilla::Extension::PhabBugz::Util qw(
   add_comment_to_revision create_private_revision_policy
   edit_revision_policy get_attachment_revisions get_bug_role_phids
   get_revisions_by_ids intersect is_attachment_phab_revision
-  make_revision_public make_revision_private set_revision_subscribers);
+  make_revision_public make_revision_private set_revision_subscribers
+  get_security_sync_groups add_security_sync_comments);
 use Bugzilla::Extension::Push::Constants;
 use Bugzilla::Extension::Push::Util qw(is_public);
 
@@ -65,22 +66,11 @@ sub send {
 
     my $is_public = is_public($bug);
 
-    my $phab_sync_groups = Bugzilla->params->{phabricator_sync_groups};
-    ThrowUserError('invalid_phabricator_sync_groups') unless $phab_sync_groups;
-
-    my $sync_group_names = [ split( '[,\s]+', $phab_sync_groups ) ];
-
-    my $bug_groups = $bug->groups_in;
-    my $bug_group_names = [ map { $_->name } @$bug_groups ];
-
-    my @set_groups = intersect( $bug_group_names, $sync_group_names );
+    my @set_groups = get_security_sync_groups($bug);
 
     my @revisions = get_attachment_revisions($bug);
 
-    if ( !$is_public && !@set_groups ) {
-        my $phab_error_message =
-          'Revision is being made private due to unknown Bugzilla groups.';
-
+    if (!$is_public && !@set_groups) {
         foreach my $revision (@revisions) {
             Bugzilla->audit(sprintf(
               'Making revision %s for bug %s private due to unkown Bugzilla groups: %s',
@@ -88,26 +78,10 @@ sub send {
               $bug->id,
               join(', ', @set_groups)
             ));
-            add_comment_to_revision( $revision->{phid}, $phab_error_message );
             make_revision_private( $revision->{phid} );
         }
 
-        my $num_revisions = 0 + @revisions;
-        my $bmo_error_message =
-          ( $num_revisions > 1
-            ? 'Multiple revisions were'
-            : 'One revision was' )
-          . ' made private due to unknown Bugzilla groups.';
-
-        my $user = Bugzilla::User->new( { name => PHAB_AUTOMATION_USER } );
-        $user->{groups} = [ Bugzilla::Group->get_all ];
-        $user->{bless_groups} = [ Bugzilla::Group->get_all ];
-        Bugzilla->set_user($user);
-
-        $bug->add_comment( $bmo_error_message, { isprivate => 0 } );
-
-        my $bug_changes = $bug->update();
-        $bug->send_changes($bug_changes);
+        add_security_sync_comments(\@revisions, $bug);
 
         return PUSH_RESULT_OK;
     }

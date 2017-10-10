@@ -25,6 +25,7 @@ use Bugzilla::WebService::Constants;
 
 use Bugzilla::Extension::PhabBugz::Constants;
 use Bugzilla::Extension::PhabBugz::Util qw(
+    add_security_sync_comments
     create_revision_attachment
     create_private_revision_policy
     edit_revision_policy
@@ -35,6 +36,7 @@ use Bugzilla::Extension::PhabBugz::Util qw(
     is_attachment_phab_revision
     make_revision_public
     request
+    get_security_sync_groups
 );
 
 use List::Util qw(first);
@@ -80,7 +82,7 @@ sub revision {
     my $revision_title = $revision->{fields}{title} || 'Unknown Description';
     my $bug_id         = $revision->{fields}{'bugzilla.bug-id'};
 
-    my $bug = Bugzilla::Bug->check($bug_id);
+    my $bug = Bugzilla::Bug->new($bug_id);
 
     # If bug is public then remove privacy policy
     my $result;
@@ -89,19 +91,12 @@ sub revision {
     }
     # else bug is private
     else {
-        my $phab_sync_groups = Bugzilla->params->{phabricator_sync_groups}
-            || ThrowUserError('invalid_phabricator_sync_groups');
-        my $sync_group_names = [ split('[,\s]+', $phab_sync_groups) ];
-
-        my $bug_groups = $bug->groups_in;
-        my $bug_group_names = [ map { $_->name } @$bug_groups ];
-
-        my @set_groups = intersect($bug_group_names, $sync_group_names);
+        my @set_groups = get_security_sync_groups($bug);
 
         # If bug privacy groups do not have any matching synchronized groups,
         # then leave revision private and it will have be dealt with manually.
         if (!@set_groups) {
-            ThrowUserError('invalid_phabricator_sync_groups');
+            add_security_sync_comments(\@revisions, $bug);
         }
 
         my $policy_phid = create_private_revision_policy($bug, \@set_groups);

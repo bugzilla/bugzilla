@@ -184,6 +184,10 @@ sub make_revision_public {
             {
                 type  => 'view',
                 value => 'public'
+            },
+            {
+                type  => 'edit',
+                value => 'users'
             }
         ],
         objectIdentifier => $revision_phid

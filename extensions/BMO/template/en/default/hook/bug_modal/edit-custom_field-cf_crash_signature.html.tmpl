@@ -13,26 +13,25 @@
     field_type = field.type
     hide_on_view = bug.${field.name} == "" || bug.${field.name} == "---";
 %]
-  [%
-    IF split_cf_crash_signature.size;
-      FOREACH sig IN split_cf_crash_signature;
-        "<div>";
-        IF sig.match('^\[\@\s*') && sig.match('\s*\]$');
-          sig = sig.replace('(^\[\@\s*|\s*\]$)', '');
-          %]
+  [% IF split_cf_crash_signature.size %]
+    [% FOREACH sig IN split_cf_crash_signature %]
+      <div>
+        [% IF sig.match('^\[\@\s*') && sig.match('\s*\]$') %]
+          [% sig = sig.replace('(^\[\@\s*|\s*\]$)', '') %]
           <a href="https://crash-stats.mozilla.com/signature/?signature=[% sig FILTER uri %]" target="_blank">
             [@ [% sig FILTER html %] ]
           </a>
-          [%
-        ELSE;
-          sig FILTER html;
-        END;
-        "</div>";
-      END;
-    ELSIF value;
-      %]
-      <span class="multiline-value">[% value FILTER html FILTER html_line_break %]</span>
-      [%
-    END
-  %]
+        [% ELSE %]
+          [% sig FILTER html %]
+        [% END %]
+      </div>
+    [% END %]
+    [%# socorro_lens_url() is defined in Bugzilla/Template.pm %]
+    [% SET lens_url = socorro_lens_url(split_cf_crash_signature) %]
+    [% IF lens_url %]
+      <iframe src='[% lens_url FILTER html %]' style='border:0; width:300px; height:200px; max-width:600px; max-height:300px; float:left;' id='chart' scrolling='no'></iframe>
+    [% END %]
+  [% ELSIF value %]
+    <span class="multiline-value">[% value FILTER html FILTER html_line_break %]</span>
+  [% END %]
 [% END %]

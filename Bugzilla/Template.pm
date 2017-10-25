@@ -900,7 +900,7 @@ sub create {
             html_light => \&Bugzilla::Util::html_light_quote,
 
             email => \&Bugzilla::Util::email_filter,
-            
+
             mtime => \&mtime_filter,
 
             # iCalendar contentline filter
@@ -1131,6 +1131,19 @@ sub create {
             # However, we need to set the meta[name=viewport] server-side or the behavior is
             # not as predictable. It is possible other parts of the frontend may use this feature too.
             'is_mobile_browser' => sub { return Bugzilla->cgi->user_agent =~ /Mobi/ },
+
+            'socorro_lens_url' => sub {
+                my ($sigs) = @_;
+
+                # strip [@ ] from sigs
+                my @sigs = map { /^\[\@\s*(.+?)\s*\]$/ } @$sigs;
+
+                return '' unless @sigs;
+                # use a URI object to encode the query string part.
+                my $uri = URI->new(correct_urlbase() . 'static/metricsgraphics/socorro-lens.html');
+                $uri->query_form('s' => join("\\", @sigs));
+                return $uri;
+            },
         },
     };
 

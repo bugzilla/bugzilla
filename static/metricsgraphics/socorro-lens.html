@@ -1,0 +1,240 @@
+<html lang="en">
+  <head>
+    <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+    <link href='css/google-OpenSans.css' rel='stylesheet' type='text/css'>
+    <link href='css/google-PTSerif.min.css' rel='stylesheet' type='text/css'>
+    <link href='css/font-awesome.min.css' rel='stylesheet' type='text/css'>
+    <link href='css/bootstrap.min.css' rel='stylesheet' type='text/css'>
+    <link href="css/metricsgraphics.css" rel="stylesheet" type="text/css" id="dark">
+    <script src="js/jquery.min.js"></script>
+    <script src="js/d3.min.js" charset="utf-8"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <script src='js/metricsgraphics.min.js'></script>
+
+    <style>
+      div.chart svg {
+        margin-left: -20px;
+        margin-top: -40px;
+      }
+    </style>
+  </head>
+
+  <body onload="loadGraph(window.location.search);">
+    <div style="width:300px; height:150px;" id='chart' class='chart'></div>
+    <div style="width:300px; height:35px; margin-top:-35px; text-align:center;" id='channel_div'>
+      <button name="zoom" id="zoom" title='Zoom In'>+</button>
+      <select name='channel' id='channel' title='Select which Firefox product channel'>
+        <option value='all' title='Show crashes for all channels'>all</option>
+        <option value='release' title='Show crashes on Release only'>release</option>
+        <option value='beta' title='Show crashes on Beta only'>beta</option>
+        <option value='nightly' title='Show crashes on Nightly only'>nightly</option>
+        <option value='esr' title='Show crashes on ESR only'>esr</option>
+      </select>
+      <select name='match' id='match' title='Select whether to match signatures exactly or similarly'>
+        <option value='exact' title='Match signatures exactly'>Exact Match</option>
+        <option value='like' title='Match signatures similarly' selected=selected>Like Match</option>
+      </select>
+    </div>
+    <div style="width:300px; height:75px; color:red; text-align:center; visibility:hidden;" id='warn'></div>
+    <script src='js/main.js'></script>
+    <script>
+      document.addEventListener('DOMContentLoaded', function () {
+        document.querySelector('select[name="channel"]').onchange = channelEventHandler;
+        document.querySelector('select[name="match"]').onchange = matchEventHandler;
+        document.querySelector('button[name="zoom"]').onclick = zoomEventHandler;
+      }, false);
+
+      function channelEventHandler(event) {
+        redraw(event.target.value);
+      }
+
+      function matchEventHandler(event) {
+        loadGraph(window.location.search, event.target.value);
+      }
+
+      function zoomEventHandler(event) {
+        var zoom_button = document.getElementById('zoom');
+        var container = window.parent.document.getElementById('chart');
+
+        if (event.target.textContent == '+') {
+          zoom_button.innerHTML = '-';
+          zoom_button.title = 'Zoom Out';
+          container.style.transform = 'scale(2,2)';
+        } else if (event.target.textContent == '-') {
+          zoom_button.innerHTML = '+';
+          zoom_button.title = 'Zoom In';
+          container.style.transform = 'scale(1,1)';
+        }
+      }
+
+      var items = [];
+      var end_date = convertDate(new Date((new Date()).valueOf() - 1000 * 60 * 60 * 24 * 1));
+      var start_date = convertDate(new Date((new Date()).valueOf() - 1000 * 60 * 60 * 24 * 180));
+      var globals = {
+        "url_base": "https://crash-stats.mozilla.com/search/?",
+        "url": [],
+        "mouseover": function (d) {
+          var next = new Date(d.date.valueOf() + 1 * 24 * 60 * 60 * 1000);
+          d3.select('svg .mg-active-datapoint').text();
+          $.each(globals.url, function (i) {
+            if (globals.url[i].indexOf("&date=>%3D") !== -1) {
+              globals.url[i] = globals.url[i].substring(0, globals.url[i].indexOf("&date=>%3D"));
+            }
+            globals.url[i] = globals.url[i] + "&date=>%3D" + convertDate(d.date) + "&date=%3C" + convertDate(next);
+            globals.url[i] = globals.url[i].replace("/?&signature", "/?signature");
+          });
+          document.getElementById('chart').title = "Click to show reports for " + convertDate(d.date);
+        }
+      };
+
+      function convertDate(d) {
+        var day = (d.getDate() < 10) ? '0' + d.getDate().toString() : d.getDate().toString();
+        var month = ((d.getMonth() + 1) < 10) ? '0' + (d.getMonth() + 1).toString() : (d.getMonth() + 1).toString();
+        var year = d.getFullYear().toString();
+        return year + '-' + month + '-' + day;
+      }
+
+      function getSignaturesFromURL(search, match) {
+        var index = search.indexOf("?s=");
+        search = search.substring(index + 3);
+        var signatures = [];
+        if (search.indexOf("\\") !== -1) {
+          signatures = search.split("\\");
+        } else if (search.indexOf("%5C") !== -1) {
+          signatures = search.split("%5C");
+        } else {
+          signatures = [search];
+        }
+        var result = [""];
+        var j = 0;
+        $.each(signatures, function (i) {
+          if (result[j].length > 500) result[++j] = "";
+          if (signatures[i] != "") {
+            if (match == "exact") {
+              result[j] = result[j] + "&signature=%3D" + signatures[i]
+            } else {
+              result[j] = result[j] + "&signature=~" + signatures[i]
+            }
+          }
+        });
+        return result;
+      }
+
+      function draw() {
+        var channel = document.querySelector('select[name="channel"]').selectedOptions[0].value;
+        items = MG.convert.date(items, 'date');
+        MG.data_graphic({
+          data: items,
+          width: 300,
+          height: 170,
+          target: document.getElementById('chart'),
+          x_accessor: 'date',
+          y_accessor: channel,
+          yax_count: 3,
+          chart_type: "line",
+          mouseover: globals.mouseover
+        });
+        if (globals.url.length > 1) {
+          var target = document.getElementById('warn');
+          target.style.visibility = "visible";
+          target.innerHTML = "Report will open " + globals.url.length + " tabs</p>";
+        }
+        var mouseouts = d3.selectAll('.mg-rollover-rect rect').on('mouseout');
+        d3.selectAll('.mg-rollover-rect rect').on('click', function (d) {
+          $.each(globals.url, function (i) {
+            window.open(globals.url[i], '_blank');
+          });
+        });
+      }
+
+      function redraw(channel) {
+        MG.data_graphic({
+          data: items,
+          width: 300,
+          height: 170,
+          target: document.getElementById('chart'),
+          x_accessor: 'date',
+          y_accessor: channel,
+          yax_count: 3,
+          chart_type: "line",
+          mouseover: globals.mouseover
+        });
+
+        if (globals.url.length > 1) {
+          var target = document.getElementById('warn');
+          target.style.visibility = "visible";
+          target.innerHTML = "[!] Report will open " + globals.url.length + " tabs due to signature length.</p>";
+        }
+
+        var mouseouts = d3.selectAll('.mg-rollover-rect rect').on('mouseout');
+        d3.selectAll('.mg-rollover-rect rect').on('click', function (d) {
+          $.each(globals.url, function (i) {
+            window.open(globals.url[i], '_blank');
+          });
+        });
+      }
+
+      function loadGraph(search, match) {
+        // Get all signatures from the Bugzilla page
+        var signatures = getSignaturesFromURL(search, match);
+        // Initialize chart data
+        items = [];
+        for (var i = 1; i < 181; i++) {
+          items.push({
+            "date": convertDate(new Date((new Date()).valueOf() - 1000 * 60 * 60 * 24 * i)),
+            "release": 0,
+            "beta": 0,
+            "nightly": 0,
+            "esr": 0,
+            "all": 0
+          });
+        }
+
+        // Process the Socorro data
+        if (items.length >= 180) {
+          var processed = [0, 0];
+          var processed_groups = 0;
+          $.each(signatures, function (i) {
+            var processed_data = 0;
+            // Set the report URL, this will be used to load the data report on click
+            if (!globals.url[i]) globals.url[i] = "";
+            globals.url[i] = globals.url_base + signatures[i];
+            // Iterate through the Socorro data and create the chart data object
+            var url = "https://crash-stats.mozilla.com/api/SuperSearch/?" + signatures[i] + "&date=%3E%3D" + start_date + "&date=%3C%3D" + end_date + "&_histogram.date=release_channel&_histogram_interval=1d&_results_number=0";
+            url = url.replace("/?&signature", "/?signature");
+            d3.json(url, function (data) {
+              if (data.total > 0) {
+                $.each(data, function (key, value) {
+                  if (key == "facets") {
+                    var histogram_date = value.histogram_date;
+                    processed[1] = processed[1] + (histogram_date.length - 1);
+                    $.each(histogram_date, function (key, value) {
+                      for (var j = 0; j < items.length; j++) {
+                        if (items[j].date == value.term.substring(0, 10)) {
+                          var channels = value.facets.release_channel;
+                          $.each(value.facets.release_channel, function (channel_index, channel_data) {
+                            if (Object.keys(items[j]).includes(channel_data.term)) {
+                              items[j][channel_data.term] += channel_data.count;
+                            }
+                          });
+
+                          items[j].all += value.count;
+                        }
+                      }
+                      processed_data = processed_data + 1;
+                      if (processed_data >= histogram_date.length) processed_groups = processed_groups + 1;
+                      if (processed_groups >= signatures.length) draw();
+                    });
+                  }
+                });
+              } else {
+                processed_groups += 1;
+                if (processed_groups >= signatures.length) draw();
+              }
+            });
+          });
+        }
+      }
+    </script>
+  </body>
+</html>

@@ -302,6 +302,8 @@ sub FILESYSTEM {
                                      dirs => DIR_WS_SERVE },
          js                    => { files => WS_SERVE,
                                      dirs => DIR_WS_SERVE },
+         static                => { files => WS_SERVE,
+                                     dirs => DIR_WS_SERVE },                                     
          $skinsdir             => { files => WS_SERVE,
                                      dirs => DIR_WS_SERVE },
          'docs/*/html'         => { files => WS_SERVE,

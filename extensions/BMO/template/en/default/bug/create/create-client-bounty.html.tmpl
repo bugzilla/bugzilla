@@ -1,0 +1,190 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% PROCESS global/variables.none.tmpl %]
+
+[% inline_style = BLOCK %]
+
+@media screen and (max-width: 800px) {
+  #header {
+    display: none;
+  }
+}
+
+#client_bounty_form input[type="text"],
+#client_bounty_form textarea {
+  width: 100%;
+}
+
+#client_bounty_form input[type="submit"] {
+  float: right;
+}
+
+#comment {
+  width: 100% !important;
+  display: block;
+  width: 100%;
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+}
+
+#bugzilla-body {
+    margin-left: auto;
+    margin-right: auto;
+    background-color: white;
+    max-width: 1024px;
+}
+
+#bugzilla-body h1 {
+  text-align: center;
+  padding-top: 2px;
+  padding-bottom: 0px;
+  margin-bottom: 0px;
+}
+
+#bugzilla-body .head_desc {
+  text-align: center;
+  margin-left: auto;
+  margin-right: auto;
+  margin-top: 0px;
+  padding-top: 0px;
+}
+
+#client_bounty_form {
+  padding: 10px;
+}
+
+#client_bounty_form .required:after {
+  content: " *";
+  color: red;
+}
+#client_bounty_form .field_label {
+  font-weight: bold;
+}
+#client_bounty_form .field_desc {
+  padding-bottom: 3px;
+}
+#client_bounty_form .field_desc,
+#client_bounty_form .head_desc {
+  word-wrap: normal;
+}
+#client_bounty_form .head_desc {
+  padding-top: 5px;
+  padding-bottom: 12px;
+}
+#client_bounty_form .form_section {
+  margin-bottom: 10px;
+}
+#useful-links {
+  display: none;
+}
+[% END %]
+
+[% inline_javascript = BLOCK %]
+function validateAndSubmit() {
+  var alert_text = '';
+  if (!isFilledOut('short_desc')) alert_text += 'Please enter a value for summary.\n';
+  if (!isFilledOut('comment')) alert_text += 'Please enter a value for comment.\n';
+  if (alert_text != '') {
+    alert(alert_text);
+    return false;
+  }
+  return true;
+}
+[% END %]
+
+[% PROCESS global/header.html.tmpl
+   title = "Client Bounty Form"
+   generate_api_token = 1
+   style = inline_style
+   javascript = inline_javascript
+   javascript_urls = [ 'extensions/BMO/web/js/form_validate.js',
+                       'extensions/BMO/web/js/attach-desc.js',
+                       'js/field.js', 'js/util.js' ]
+%]
+
+[% USE Bugzilla %]
+[% cgi = Bugzilla.cgi %]
+
+<h1>Client [% terms.Bug %] Bounty Form</h1>
+
+<form id="client_bounty_form" method="post" action="post_bug.cgi" enctype="multipart/form-data"
+      onSubmit="return validateAndSubmit();">
+  <input type="hidden" name="product" value="Firefox">
+  <input type="hidden" name="component" value="Security">
+  <input type="hidden" name="rep_platform" value="unspecified">
+  <input type="hidden" name="op_sys" value="unspecified">
+  <input type="hidden" name="version" value="unspecified">
+  <input type="hidden" name="bug_severity" id="bug_severity" value="normal">
+  <input type="hidden" name="priority" id="priority" value="--">
+  <input type="hidden" name="target_milestone" id="target_milestone" value="---">
+  <input type="hidden" name="status_whiteboard" id="status_whiteboard"
+         value="[reporter-external] [client-bounty-form] [verif?]">
+  <input type="hidden" name="bug_severity" id="bug_severity" value="normal">
+  <input type="hidden" name="groups" value="firefox-core-security">
+  <input type="hidden" name="flag_type-803" id="flag_type-803" value="?">
+  <input type="hidden" name="token" value="[% token FILTER html %]">
+
+<div class="head_desc">
+  <a href=" https://www.mozilla.org/en-US/security/client-bug-bounty/">
+    Details on Client Bounty Program
+  </a>
+</div>
+
+<p>
+  [ <span class="required_star">*</span> <span class="required_explanation">Required Field</span> ]
+</p>
+
+
+<div class="form_section">
+  <label for="short_desc" class="field_label required">Summary</label>
+  <div class="field_desc">
+    A short description of the issue being reported.
+  </div>
+  <input
+  required type="text" name="short_desc" id="short_desc" size="80">
+</div>
+
+<div class="form_section">
+  <label for="comment" class="field_label required">Description</label>
+  <div class="field_desc">
+    How was this issue discovered, include the steps, tools, Firefox version,
+    operating system version, or other information that will help reproduce and
+    diagnose the issue. A good primer on what to include can be found
+    <a href="https://developer.mozilla.org/en-US/docs/Mozilla/QA">here</a>.
+  </div>
+  <textarea required id="comment" name="comment" cols="80" rows="5"></textarea>
+</div>
+
+<div class="form_section">
+  <label for="bug_file_loc" class="field_label">URL</label>
+  <div class="field_desc">
+    The full URL (hostname/subpage) where the issue exists (if the URL is especially long
+    please just include it in the comments)
+  </div>
+  <input type="text" name="bug_file_loc" id="bug_file_loc" size="80">
+</div>
+
+<div class="form_section">
+  <label for="data" class="field_label">Attachment</label>
+  <div class="field_desc">
+    A file that can add context to the report, such as tool output or debug
+    information showing symbols and error conditions.
+  </div>
+  <input type="file" id="data" name="data" size="50">
+  <input type="hidden" name="contenttypemethod" value="autodetect" />
+  <input type="hidden" id="description" name="description">
+</div>
+
+<input type="submit" id="commit" value="Submit">
+<div style="clear: both;"></div>
+
+</form>
+
+[% PROCESS global/footer.html.tmpl %]

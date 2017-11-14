@@ -34,6 +34,11 @@ check_env() unless $cmd eq 'shell';
 
 $func->(@ARGV);
 
+sub cmd_demo {
+    cmd_load_test_data() unless -f "/app/data/params";
+    cmd_httpd();
+}
+
 sub cmd_httpd  {
     check_data_dir();
     wait_for_db();

@@ -29,7 +29,7 @@
     [%# socorro_lens_url() is defined in Bugzilla/Template.pm %]
     [% SET lens_url = socorro_lens_url(split_cf_crash_signature) %]
     [% IF lens_url %]
-      <iframe src='[% lens_url FILTER html %]' style='border:0; width:300px; height:200px; max-width:600px; max-height:300px; float:left;' id='chart' scrolling='no'></iframe>
+      <iframe src="[% lens_url FILTER html %]" style="border:0; width:300px; height:200px; max-width:600px; max-height:300px; float:left;" id="chart" scrolling="no"></iframe>
     [% END %]
   [% ELSIF value %]
     <span class="multiline-value">[% value FILTER html FILTER html_line_break %]</span>

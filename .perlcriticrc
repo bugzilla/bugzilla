@@ -1,6 +1,12 @@
 theme = freenode || core || certrec || certrule || performance || security
 severity = 1
 
+[-CodeLayout::RequireTidyCode]
+#perltidyrc = .perltidyrc
+[InputOutput::RequireCheckedSyscalls]
+functions = :builtins
+exclude_functions = print
+
 [-BuiltinFunctions::ProhibitUselessTopic]
 [-ControlStructures::ProhibitCascadingIfElse]
 [-ControlStructures::ProhibitPostfixControls]
@@ -19,6 +25,7 @@ severity = 1
 [-ValuesAndExpressions::ProhibitVersionStrings]
 [-Variables::ProhibitLocalVars]
 [-Variables::ProhibitPackageVars]
+[-ValuesAndExpressions::ProhibitNoisyQuotes]
 
 # this policy is broken currently
 [-Freenode::PackageMatchesFilename]

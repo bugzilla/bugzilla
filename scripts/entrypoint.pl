@@ -23,19 +23,41 @@ use IO::Async::Signal;
 
 use constant CI => $ENV{CI};
 
-my $cmd = shift @ARGV;
-my $func = __PACKAGE__->can("cmd_$cmd")
-    or die "unknown command: $cmd\n";
+my $cmd  = shift @ARGV;
 my $opts = __PACKAGE__->can("opt_$cmd") // sub { @ARGV };
+my $func = __PACKAGE__->can("cmd_$cmd") // sub {
+    check_data_dir();
+    wait_for_db();
+    run(@_);
+};
 
 fix_path();
 check_user();
-check_env() unless $cmd eq 'shell';
+check_env(qw(
+    LOCALCONFIG_ENV
+    BMO_db_host
+    BMO_db_name
+    BMO_db_user
+    BMO_db_pass
+    BMO_memcached_namespace
+    BMO_memcached_servers
+)) unless $cmd eq 'shell';
 
-$func->(@ARGV);
+$func->($opts->());
 
 sub cmd_demo {
-    cmd_load_test_data() unless -f "/app/data/params";
+    unless (-f '/app/data/params') {
+        cmd_load_test_data();
+        check_env(qw(
+            PHABRICATOR_LOGIN
+            PHABRICATOR_PASSWORD
+            PHABRICATOR_API_KEY
+            CONDUIT_LOGIN
+            CONDUIT_PASSWORD
+            CONDUIT_API_KEY
+        ));
+        run( 'perl', 'scripts/generate_conduit_data.pl' );
+    }
     cmd_httpd();
 }
 
@@ -300,15 +322,7 @@ sub check_data_dir {
 }
 
 sub check_env {
-    my @require_env = qw(
-        LOCALCONFIG_ENV
-        BMO_db_host
-        BMO_db_name
-        BMO_db_user
-        BMO_db_pass
-        BMO_memcached_namespace
-        BMO_memcached_servers
-    );
+    my (@require_env) = @_;
     my @missing_env = grep { not exists $ENV{$_} } @require_env;
     if (@missing_env) {
         die "Missing required environmental variables: ", join(", ", @missing_env), "\n";

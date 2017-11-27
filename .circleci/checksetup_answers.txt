@@ -9,5 +9,6 @@ $answer{'cvsbin'} = '/usr/bin/cvs';
 $answer{'password_complexity'} = 'bmo';
 $answer{'diffpath'} = '/usr/bin';
 $answer{'interdiffbin'} = '/usr/bin/interdiff';
-$answer{'urlbase'} = 'http://<<HOSTNAME>>:8000/';
+$answer{'urlbase'} = 'http://bmo.test/';
 $answer{'mail_delivery_method'} = 'Test';
+$answer{'auth_delegation'} = 1;

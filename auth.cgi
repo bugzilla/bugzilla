@@ -45,7 +45,7 @@ ThrowUserError("auth_delegation_invalid_description")
 my $callback_uri  = URI->new($callback);
 
 my $legal_protocol
-    = $ENV{BUGZILLA_UNSAFE_AUTH_DELEGATION}
+    = $ENV{ALLOW_UNSAFE_AUTH_DELEGATION}
     ? qr/^https?$/i # http or https
     : qr/^https$/i; # https only
 

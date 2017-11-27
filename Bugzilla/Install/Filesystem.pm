@@ -106,6 +106,7 @@ sub HTTPD_ENV_CONF {
 
     return join( "\n",
       "PerlPassEnv LOCALCONFIG_ENV",
+      "PerlPassEnv ALLOW_UNSAFE_AUTH_DELEGATION",
       map { "PerlPassEnv " . $_ } ENV_KEYS
     ) . "\n";
 }

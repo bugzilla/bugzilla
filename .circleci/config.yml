@@ -54,8 +54,8 @@ defaults:
     run:
       command: |
         mv /opt/bmo/local /app/local
-        perl -MSys::Hostname -i -pE 's/<<HOSTNAME>>/hostname()/ges' $BZ_QA_CONF_FILE
-        perl -MSys::Hostname -i -pE 's/<<HOSTNAME>>/hostname()/ges' $BZ_QA_ANSWERS_FILE
+        perl -MSys::Hostname -i -pE 's/bmo.test/hostname().":8000"/ges' $BZ_QA_CONF_FILE
+        perl -MSys::Hostname -i -pE 's/bmo.test/hostname().":8000"/ges' $BZ_QA_ANSWERS_FILE
         perl checksetup.pl --no-database --default-localconfig
         mkdir artifacts
 
@@ -159,7 +159,7 @@ jobs:
       - run: |
           mv /opt/bmo/local /app/local
           perl checksetup.pl --no-database
-          perl -MSys::Hostname -i -pE 's/<<HOSTNAME>>/hostname()/ges' $BZ_QA_ANSWERS_FILE
+          perl -MSys::Hostname -i -pE 's/bmo.test/hostname().":8000"/ges' $BZ_QA_ANSWERS_FILE
           /app/scripts/entrypoint.pl load_test_data
           mkdir artifacts
       - run: |

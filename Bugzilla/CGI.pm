@@ -34,9 +34,9 @@ BEGIN {
 sub DEFAULT_CSP {
     my %policy = (
         default_src => [ 'self' ],
-        script_src  => [ 'self', 'unsafe-inline', 'unsafe-eval' ],
+        script_src  => [ 'self', 'unsafe-inline', 'unsafe-eval', 'https://www.google-analytics.com' ],
         child_src   => [ 'self', ],
-        img_src     => [ 'self', 'https://secure.gravatar.com' ],
+        img_src     => [ 'self', 'https://secure.gravatar.com', 'https://www.google-analytics.com' ],
         style_src   => [ 'self', 'unsafe-inline' ],
         object_src  => [ 'none' ],
         form_action => [
@@ -61,9 +61,9 @@ sub DEFAULT_CSP {
 sub SHOW_BUG_MODAL_CSP {
     my ($bug_id) = @_;
     my %policy = (
-        script_src  => ['self', 'nonce', 'unsafe-inline', 'unsafe-eval' ],
+        script_src  => ['self', 'nonce', 'unsafe-inline', 'unsafe-eval', 'https://www.google-analytics.com' ],
         object_src  => [correct_urlbase() . "extensions/BugModal/web/ZeroClipboard/ZeroClipboard.swf"],
-        img_src     => [ 'self', 'https://secure.gravatar.com' ],
+        img_src     => [ 'self', 'https://secure.gravatar.com', 'https://www.google-analytics.com' ],
         connect_src => [
             'self',
             # This is from extensions/OrangeFactor/web/js/orange_factor.js

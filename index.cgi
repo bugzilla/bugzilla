@@ -64,7 +64,7 @@ if ($can_cache && $if_none_match && any { $_ eq $weak_etag } split(/,\s*/, $if_n
 }
 else {
     my $template = Bugzilla->template;
-    $cgi->content_security_policy(script_src  => ['self']);
+    $cgi->content_security_policy(script_src  => ['self', 'https://www.google-analytics.com']);
 
     # Return the appropriate HTTP response headers.
     print $cgi->header(

@@ -1,0 +1,24 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[%# Disable tracking of security group members as well as private bugs #%]
+[% RETURN IF !Bugzilla.params.google_analytics_tracking_id ||
+    user.in_group(Param('insidergroup')) || (bug.defined && bug.groups_in.size) %]
+
+<meta name="google-analytics" content="[% Bugzilla.params.google_analytics_tracking_id FILTER html %]" data-location="
+  [%~ urlbase FILTER html %][% template.name.replace('\.html\.tmpl$', '') FILTER html ~%]
+  " data-title="
+  [%~ IF template.name == 'pages/user_activity.html.tmpl' ~%]
+    User Activity Report
+  [%~ ELSIF template.name == 'pages/user_profile.html.tmpl' ~%]
+    User Profile
+  [%~ ELSE ~%]
+    [% title FILTER html | collapse %]
+  [%~ END ~%]">
+<script async src="https://www.google-analytics.com/analytics
+  [%~ "_debug" IF Bugzilla.params.google_analytics_debug ~%].js"></script>

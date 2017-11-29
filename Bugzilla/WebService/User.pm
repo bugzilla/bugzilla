@@ -418,18 +418,22 @@ sub mfa_enroll {
 
     my $user = Bugzilla->login(LOGIN_REQUIRED);
     $user->set_mfa($provider_name);
-    my $provider = $user->mfa_provider // die "Unknown MTA provider\n";
+    my $provider = $user->mfa_provider // die "Unknown MFA provider\n";
     return $provider->enroll_api();
 }
 
 sub whoami {
-    my ($self, $params) = @_;
+    my ( $self, $params ) = @_;
     my $user = Bugzilla->login(LOGIN_REQUIRED);
-    return filter $params, {
-        id        => $self->type('int', $user->id),
-        real_name => $self->type('string', $user->name),
-        name      => $self->type('email', $user->login),
-    };
+    return filter(
+        $params,
+        {
+            id         => $self->type( 'int',     $user->id ),
+            real_name  => $self->type( 'string',  $user->name ),
+            name       => $self->type( 'email',   $user->login ),
+            mfa_status => $self->type( 'boolean', !!$user->mfa ),
+        }
+    );
 }
 
 1;

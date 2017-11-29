@@ -173,7 +173,7 @@ PORT
   plain-text HTTP connections.
   Default: 8000
 
-ALLOW_UNSAFE_AUTH_DELEGATION
+BUGZILLA_UNSAFE_AUTH_DELEGATION
   This should never be set in production. It allows auth delegation over http.
 
 BMO_db_driver

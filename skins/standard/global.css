@@ -147,17 +147,60 @@
  * to both the header and footer.
  */
     #footer {
+        display: flex;
         clear: both;
-        margin-top: 1em;
-        width: 100%;
-        background: #edf2f2;
-        border-top: 1px solid #ddd;
-        border-bottom: 1px solid #ddd;
+        margin: 2em 0 0;
+        border-top: 1px solid rgba(0, 0, 0, 0.1);
+        padding: 2em;
+        color: #bbb;
+        background-color: #fff;
+        line-height: 1.5;
+    }
+
+    #footer .intro {
+        flex: none;
+        display: flex;
+        align-items: center;
+        width: 25%;
+        min-width: 20em;
+    }
+
+    #footer .org-links h1 {
+        margin: 0;
+        font-size: 1em;
+    }
+
+    #footer .org-links h1 a {
+        display: block;
+        width: 100px;
+        height: 30px;
+        background-image: url(../../images/moz-logo-bw-rgb.svg);
+        background-repeat: no-repeat;
+        background-size: contain;
+        text-indent: -9999px;
+    }
+
+    #footer .org-links ul {
+        display: flex;
+        margin: .5em 0 0;
+        padding: 0;
+    }
+
+    #footer .org-links li {
+        flex: none;
+    }
+
+    #footer .org-links li:not(:last-child) {
+        margin-right: 1.5em;
     }
 
     #footer #useful-links {
-        padding-left: 1ex;
-        padding-right: 1ex;
+        flex: auto;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        margin: 0;
+        padding: 0;
     }
 
     #footer ul {
@@ -177,6 +220,20 @@
 
     #footer .links {
         vertical-align: top;
+    }
+
+    #footer .links .quicksearch_form {
+        display: none;
+    }
+
+    #footer .form {
+        display: block;
+        margin-top: 1em;
+    }
+
+    #footer .form input {
+        padding: 1px 2px;
+        margin-top: 3px;
     }
 /* footer (end) */
 
@@ -517,7 +574,7 @@ div.user_match {
 
 /* Rules specific for printing */
 @media print {
-    #header, #footer, #privacy-policy {
+    #header, #footer {
         display: none;
     }
 
@@ -945,14 +1002,8 @@ body.mfa-warning #mfa-select button {
     font-size: 120%;
 }
 
-#moz_tab {
-    width: 100px;
-    vertical-align: top;
-}
-
 #moz_login {
     text-align: right;
-    padding-right: 2em;
     color: #404040;
 }
 
@@ -998,10 +1049,6 @@ body.mfa-warning #mfa-select button {
     background: url(search.png) 5px center no-repeat, linear-gradient(#fafafa, #fff);
     padding: .4em 1em .45em 26px;
     width: 200px;
-}
-
-#footer .links .quicksearch_form {
-    display: none;
 }
 
 #header .form a {
@@ -1416,28 +1463,8 @@ table.edit_form hr {
     padding: 2px 2px 2px 1px;
 }
 
-#footer {
-    background: #fff;
-    border: none;
-    border-top: 1px solid rgba(0, 0, 0, 0.1);
-    border-radius: 0;
-    color: #bbb;
-    width: auto;
-    margin-bottom: 1em;
-    margin-left: 6px;
-}
-
 #links-actions, #links-saved {
     margin-left: -10px;
-}
-
-#footer form input {
-    padding: 1px 2px;
-    margin-top: 3px;
-}
-
-#privacy-policy {
-    margin-bottom: 1em;
 }
 
 button, input[type=submit], input[type=button], #commit, #commit_top, #header .btn, #header input[type=submit] {
@@ -1570,7 +1597,7 @@ table.tabs {
 
 body {
     margin: 0;
-    padding: 15px 15px 2px 15px;
+    padding: 15px;
 }
 
 #header .btn, #header .txt {
@@ -1623,15 +1650,6 @@ a.controller {
     background-position: center left;
     background-repeat: no-repeat;
     padding-left: 18px;
-}
-
-#policy_links {
-    padding-right: 5px;
-    text-align: right;
-}
-
-#policy_links li {
-    display: inline;
 }
 
 .highlighted {

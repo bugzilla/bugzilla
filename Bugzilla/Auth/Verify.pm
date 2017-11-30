@@ -106,30 +106,30 @@ sub create_or_update_user {
         'Bugzilla::Auth::Verify::create_or_update_user'})
         unless $user_id;
 
-    my $user = new Bugzilla::User($user_id);
+    my $user = new Bugzilla::User({ id => $user_id, cache => 1 });
 
-    # Now that we have a valid User, we need to see if any data has to be updated.
-    my $changed = 0;
-
+    # Now that we have a valid User, we need to see if any data has to be
+    # updated.
+    my $user_updated = 0;
     if ($email && lc($user->email) ne lc($email)) {
         validate_email_syntax($email)
           || return { failure => AUTH_ERROR, error => 'auth_invalid_email',
                       details => {addr => $email} };
         $user->set_email($email);
-        $changed = 1;
+        $user_updated = 1;
     }
     if ($login && lc($user->login) ne lc($login)) {
         $user->set_login($login);
-        $changed = 1;
+        $user_updated = 1;
     }
     if ($real_name && $user->name ne $real_name) {
         # $real_name is more than likely tainted, but we only use it
         # in a placeholder and we never use it after this.
         trick_taint($real_name);
         $user->set_name($real_name);
-        $changed = 1;
+        $user_updated = 1;
     }
-    $user->update() if $changed;
+    $user->update() if $user_updated;
 
     return { user => $user };
 }

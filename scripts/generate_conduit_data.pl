@@ -149,13 +149,13 @@ write_params() if $params_modified;
 # Set Phabricator Push Connector Values
 ##########################################################################
 print "setting push connector options...\n";
-my ($phab_is_configured) = $dbh->selectrow_array("SELECT COUNT(*) FROM push_options WHERE connector = 'Phabricator'");
+my ($phab_is_configured) = $dbh->selectrow_array(q{SELECT COUNT(*) FROM push_options WHERE connector = 'Phabricator'});
 unless ($phab_is_configured) {
-    $dbh->do("INSERT INTO push_options (connector, option_name, option_value) VALUES ('global','enabled','Enabled')");
+    $dbh->do(q{INSERT INTO push_options (connector, option_name, option_value) VALUES ('global','enabled','Enabled')});
     $dbh->do(
-        "INSERT INTO push_options (connector, option_name, option_value) VALUES ('Phabricator','enabled','Enabled')");
+        q{INSERT INTO push_options (connector, option_name, option_value) VALUES ('Phabricator','enabled','Enabled')});
     $dbh->do(
-        "INSERT INTO push_options (connector, option_name, option_value) VALUES ('Phabricator','phabricator_url','http://phabricator.test')"
+        q{INSERT INTO push_options (connector, option_name, option_value) VALUES ('Phabricator','phabricator_url','http://phabricator.test')}
     );
 }
 

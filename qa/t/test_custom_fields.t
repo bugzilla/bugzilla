@@ -56,6 +56,7 @@ $sel->type_ok("sortkey", $bug1_id);
 $sel->click_ok("enter_bug");
 $sel->value_is("enter_bug", "on");
 $sel->click_ok("new_bugmail");
+sleep 5;
 $sel->value_is("new_bugmail", "on");
 $sel->value_is("obsolete", "off");
 $sel->click_ok("create");

@@ -327,7 +327,7 @@ sub get_members_by_bmo_id {
     my $result = get_phab_bmo_ids({ ids => [ map { $_->id } @$users ] });
 
     my @phab_ids;
-    foreach my $user (@{ $result->{result} }) {
+    foreach my $user (@$result) {
         push(@phab_ids, $user->{phid})
           if ($user->{phid} && $user->{phid} =~ /^PHID-USER/);
     }
@@ -341,7 +341,7 @@ sub get_members_by_phid {
     my $result = get_phab_bmo_ids({ phids => $phids });
 
     my @bmo_ids;
-    foreach my $user (@{ $result->{result} }) {
+    foreach my $user (@$result) {
         push(@bmo_ids, $user->{id})
           if ($user->{phid} && $user->{phid} =~ /^PHID-USER/);
     }

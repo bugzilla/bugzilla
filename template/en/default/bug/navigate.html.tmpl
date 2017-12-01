@@ -41,6 +41,8 @@
     [% Hook.process("links") %]
     <li>&nbsp;-&nbsp;<a href="#">Top of page </a></li>
   </ul>
+  [% PROCESS "bug/tagging.html.tmpl" %]
+  <hr>
 [% END %]
 
 [% SET my_search = user.recent_search_for(bug) %]

@@ -257,3 +257,19 @@ Remember Search As:
     You can give a search a name and remember it; a link will appear
     in your page footer giving you quick access to run it again later.
 
+Individual Bug Lists
+====================
+
+You can add and remove tags from individual bugs, which let you find and manage
+bugs more easily. Tags are per-user and so are only visible and editable by the
+user who created them. You can then run queries using tags as a criteria, either
+by using the Advanced Search form, or simply by typing "tag:my_tag_name" in the
+QuickSearch box at the top (or bottom) of the page. Tags can also be displayed
+in bug lists.
+
+This feature is useful when you want to keep track of several bugs, but for
+different reasons. Instead of adding yourself to the CC list of all these bugs
+and mixing all these reasons, you can now store these bugs in separate lists,
+e.g. “Keep in mind”, “Interesting bugs”, or “Triage”. One big advantage of this
+way to manage bugs is that you can easily add or remove tags from bugs one by
+one.

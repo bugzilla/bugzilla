@@ -24,7 +24,7 @@ XML-RPC
 =======
 
 Bugzilla has an `XML-RPC API
-<http://www.bugzilla.org/docs/tip/en/html/api/Bugzilla/WebService/Server/XMLRPC.html>`_.
+<https://www.bugzilla.org/docs/tip/en/html/api/Bugzilla/WebService/Server/XMLRPC.html>`_.
 This will receive no further updates and will be removed in a future version
 of Bugzilla.
 
@@ -34,7 +34,7 @@ JSON-RPC
 ========
 
 Bugzilla has a `JSON-RPC API
-<http://www.bugzilla.org/docs/tip/en/html/api/Bugzilla/WebService/Server/JSONRPC.html>`_.
+<https://www.bugzilla.org/docs/tip/en/html/api/Bugzilla/WebService/Server/JSONRPC.html>`_.
 This will receive no further updates and will be removed in a future version
 of Bugzilla.
 

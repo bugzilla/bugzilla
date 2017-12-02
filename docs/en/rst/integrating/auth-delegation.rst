@@ -14,7 +14,7 @@ The authentication process begins by directing the user to th the Bugzilla site'
 For the sake of this example, our application's URL is `http://app.example.org`
 and the Bugzilla site is `http://bugzilla.mozilla.org`.
 
-1. Provide a link or redirect the user to `http://bugzilla.mozilla.org/auth.cgi?callback=http://app.example.org/callback&description=app%description`
+1. Provide a link or redirect the user to `https://bugzilla.mozilla.org/auth.cgi?callback=http://app.example.org/callback&description=app%description`
 2. Assuming the user is agreeable, the following will happen:
   1. Bugzilla will issue a POST request to `http://app.example.org/callback`
      with a the request body data being a JSON object with keys `client_api_key` and `client_api_login`.

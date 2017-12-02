@@ -422,7 +422,7 @@ returned>.
 
 nil is implemented by XMLRPC::Lite, in XMLRPC::Deserializer::decode_value
 in the CPAN SVN since 14th Dec 2008
-L<http://rt.cpan.org/Public/Bug/Display.html?id=20569> and in Fedora's
+L<https://rt.cpan.org/Public/Bug/Display.html?id=20569> and in Fedora's
 perl-SOAP-Lite package in versions 0.68-1 and above.
 
 =end private

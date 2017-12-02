@@ -39,7 +39,7 @@ use constant CREATE_BUG => {
     'severity'     => 'normal',
     'qa_contact'   => 'canconfirm',
      version       => 'Another1',
-     url           => 'http://www.bugzilla.org/',
+     url           => 'https://www.bugzilla.org/',
      target_milestone => 'AnotherMS1',
 };
 

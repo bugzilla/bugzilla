@@ -92,7 +92,7 @@ How To Edit Templates
 .. note:: If you are making template changes that you intend on submitting 
    back for inclusion in standard Bugzilla, you should read the relevant
    sections of the
-   `Developers' Guide <http://www.bugzilla.org/docs/developer.html>`_.
+   `Developers' Guide <https://www.bugzilla.org/docs/developer.html>`_.
 
 Bugzilla uses a templating system called Template Toolkit. The syntax of the
 language is beyond the scope of this guide. It's reasonably easy to pick up by

@@ -527,7 +527,7 @@ JSON-RPC response.
 When calling the JSON-RPC WebService over GET, you can use the "JSONP"
 method of doing cross-domain requests, if you want to access the WebService
 directly on a web page from another site. JSONP is described at
-L<http://bob.pythonmac.org/archives/2005/12/05/remote-json-jsonp/>.
+L<https://bob.ippoli.to/archives/2005/12/05/remote-json-jsonp/>.
 
 To use JSONP with Bugzilla's JSON-RPC WebService, simply specify a
 C<callback> parameter to jsonrpc.cgi when using it via GET as described above.

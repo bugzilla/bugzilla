@@ -13,8 +13,8 @@ Bugzilla comments are plain text - so typing <U> will
 produce less-than, U, greater-than rather than underlined text.
 However, Bugzilla will automatically make hyperlinks out of certain
 sorts of text in comments. For example, the text
-``http://www.bugzilla.org`` will be turned into a link:
-`<http://www.bugzilla.org>`_.
+``https://www.bugzilla.org`` will be turned into a link:
+`<https://www.bugzilla.org>`_.
 Other strings which get linkified in the obvious manner are:
 
 + bug 12345

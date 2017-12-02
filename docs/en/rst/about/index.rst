@@ -10,7 +10,7 @@ that tracks millions of bugs and issues for thousands of organizations around
 the world.
 
 The most current version of this document can always be found on the
-`Bugzilla website <http://www.bugzilla.org/docs/>`_.
+`Bugzilla website <https://www.bugzilla.org/docs/>`_.
 
 .. _evaluating:
 
@@ -36,7 +36,7 @@ Google Group. Please
 first, and then ask your question there.
 
 If you need a guaranteed response, commercial support is
-`available <http://www.bugzilla.org/support/consulting.html>`_ for Bugzilla
+`available <https://www.bugzilla.org/support/consulting.html>`_ for Bugzilla
 from a number of people and organizations.
 
 .. _conventions:

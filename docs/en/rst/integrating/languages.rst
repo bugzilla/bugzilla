@@ -12,7 +12,7 @@ choice will override the ``Accept-Language`` header.
 
 Many language templates can be obtained from
 `the localization section of the Bugzilla website
-<http://www.bugzilla.org/download.html#localizations>`_. Instructions
+<https://www.bugzilla.org/download.html#localizations>`_. Instructions
 for submitting new languages are also available from that location. There's
 also a `list of localization teams
 <https://wiki.mozilla.org/Bugzilla:L10n:Localization_Teams>`_; you might

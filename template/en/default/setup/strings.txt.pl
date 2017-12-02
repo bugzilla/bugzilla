@@ -343,7 +343,7 @@ END
 
     <p>
       For more information on how to install Bugzilla, please
-      <a href="http://www.bugzilla.org/docs/">read the documentation</a>
+      <a href="https://www.bugzilla.org/docs/">read the documentation</a>
       available on the official Bugzilla website.
     </p>
   </body>

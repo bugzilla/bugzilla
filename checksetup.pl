@@ -500,7 +500,7 @@ format.
 
 If you'd like to know how to make changes to the datbase, see
 the information in the Bugzilla Developer's Guide, at:
-L<http://www.bugzilla.org/docs/developer.html#sql-schema>
+L<https://www.bugzilla.org/docs/developer.html#sql-schema>
 
 Also see L<Bugzilla::DB/"Schema Modification Methods"> and
 L<Bugzilla::DB/"Schema Information Methods">.

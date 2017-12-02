@@ -88,7 +88,7 @@ foreach my $rpc ($xmlrpc, $jsonrpc) {
         { user  => 'admin',
           args  => { name => random_string(20), description => DESCRIPTION,
                      user_regexp => '\@foo.com$', is_active => 1,
-                     icon_url => 'http://www.bugzilla.org/favicon.ico' },
+                     icon_url => 'https://www.bugzilla.org/favicon.ico' },
           test  => 'Passing all arguments works',
         },
     );

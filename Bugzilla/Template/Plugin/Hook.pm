@@ -149,4 +149,4 @@ Output from processing template extension.
 
 L<Template::Plugin>
 
-L<http://wiki.mozilla.org/Bugzilla:Writing_Extensions>
+L<https://bugzilla.readthedocs.io/en/latest/integrating/extensions.html>

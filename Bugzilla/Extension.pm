@@ -325,7 +325,7 @@ L<Bugzilla/input_params>.
 
 If you need a new hook for your extension and you want that hook to be
 added to Bugzilla itself, see our development process at
-L<http://wiki.mozilla.org/Bugzilla:Developers>.
+L<https://wiki.mozilla.org/Bugzilla:Developers>.
 
 In order for a new hook to be accepted into Bugzilla, it has to work,
 it must have documentation in L<Bugzilla::Hook>, and it must have example
@@ -618,7 +618,7 @@ return C<0> or some false value.
 If you've made an extension and you want to publish it, the first
 thing you'll want to do is package up your extension's code and
 then put a link to it in the appropriate section of
-L<http://wiki.mozilla.org/Bugzilla:Addons>.
+L<https://wiki.mozilla.org/Bugzilla:Addons>.
 
 =head2 Distributing on CPAN
 
@@ -628,7 +628,7 @@ distribute your Bugzilla Extension through CPAN.
 
 The details of making a standard CPAN module are too much to
 go into here, but a lot of it is covered in L<perlmodlib>
-and on L<http://www.cpan.org/> among other places.
+and on L<https://www.cpan.org/> among other places.
 
 When you distribute your extension via CPAN, your F<Extension.pm>
 should simply install itself as F<Bugzilla/Extension/Foo.pm>,
@@ -659,7 +659,7 @@ uses extensions.
 
 If you are an extension author and you'd like some assistance from other
 extension authors or the Bugzilla development team, you can use the
-normal support channels described at L<http://www.bugzilla.org/support/>.
+normal support channels described at L<https://www.bugzilla.org/support/>.
 
 =head1 ADDITIONAL CONSTANTS
 

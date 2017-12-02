@@ -79,7 +79,7 @@ Bugzilla::DB.
 
 If this is your first time looking at Schema.pm, especially if
 you are making changes to the database, please take a look at
-L<http://www.bugzilla.org/docs/developer.html#sql-schema> to learn
+L<https://www.bugzilla.org/docs/developer.html#sql-schema> to learn
 more about how this integrates into the rest of Bugzilla.
 
 =cut
@@ -3179,6 +3179,6 @@ database-specific basis:
 
 L<Bugzilla::DB>
 
-L<http://www.bugzilla.org/docs/developer.html#sql-schema>
+L<https://www.bugzilla.org/docs/developer.html#sql-schema>
 
 =cut

@@ -40,15 +40,15 @@
 }
 
 button.major {
-    font-size: 11px;
-    padding: 4px 8px;
+    font-size: inherit;
+    padding: 4px 12px;
 }
 
 button.minor {
     background-color: #eee;
     background-image: linear-gradient(#fcfcfc, #eee);
     color: #000;
-    font-size: 11px;
+    font-size: inherit;
     font-weight: 500;
     padding: 4px 8px;
     margin-bottom: 1px;

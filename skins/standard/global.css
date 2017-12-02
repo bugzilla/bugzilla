@@ -875,7 +875,7 @@ body {
     color: #404040;
 }
 
-body, td, th, input, select, option, optgroup, .text_input {
+body, td, th, input, select, option, optgroup, button, .text_input {
     font-family: "Fira Sans", "Open Sans", "Helvetica Neue", Arial, Helvetica, sans-serif;
 }
 

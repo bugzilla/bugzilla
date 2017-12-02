@@ -19,22 +19,22 @@ use Bugzilla;
 use Bugzilla::Error;
 
 my $is_enabled = grep { $_->NAME eq 'Voting' } @{ Bugzilla->extensions };
-$is_enabled || ThrowUserError('extension_disabled', { name => 'Voting' });
+$is_enabled || ThrowUserError( 'extension_disabled', { name => 'Voting' } );
 
 my $cgi = Bugzilla->cgi;
 my $action = $cgi->param('action') || 'show_user';
 
-if ($action eq "show_bug") {
+if ( $action eq "show_bug" ) {
     $cgi->delete('action');
-    $cgi->param('id', 'voting/bug.html');
-} 
-elsif ($action eq "show_user" or $action eq 'vote') {
+    $cgi->param( 'id', 'voting/bug.html' );
+}
+elsif ( $action eq "show_user" or $action eq 'vote' ) {
     $cgi->delete('action') unless $action eq 'vote';
-    $cgi->param('id', 'voting/user.html');
+    $cgi->param( 'id', 'voting/user.html' );
 }
 else {
-    ThrowUserError('unknown_action', {action => $action});
+    ThrowUserError( 'unknown_action', { action => $action } );
 }
 
-print $cgi->redirect('page.cgi?' . $cgi->query_string);
+print $cgi->redirect( 'page.cgi?' . $cgi->query_string );
 exit;

@@ -18,15 +18,16 @@ use parent qw(Bugzilla::BugUrl);
 ###############################
 
 sub should_handle {
-    my ($class, $uri) = @_;
+    my ( $class, $uri ) = @_;
 
     # Debian BTS URLs can look like various things:
     #   http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=1234
     #   http://bugs.debian.org/1234
-    return (lc($uri->authority) eq 'bugs.debian.org'
-            and (($uri->path =~ /bugreport\.cgi$/
-                  and $uri->query_param('bug') =~ m|^\d+$|)
-                 or $uri->path =~ m|^/\d+$|)) ? 1 : 0;
+    return (
+        lc( $uri->authority ) eq 'bugs.debian.org'
+            and ( ( $uri->path =~ /bugreport\.cgi$/ and $uri->query_param('bug') =~ m|^\d+$| )
+            or $uri->path =~ m|^/\d+$| )
+    ) ? 1 : 0;
 }
 
 sub _check_value {

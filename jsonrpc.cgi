@@ -16,15 +16,16 @@ use Bugzilla;
 use Bugzilla::Constants;
 use Bugzilla::Error;
 use Bugzilla::WebService::Constants;
+
 BEGIN {
-    if (!Bugzilla->feature('jsonrpc')) {
-        ThrowUserError('feature_disabled', { feature => 'jsonrpc' });
+    if ( !Bugzilla->feature('jsonrpc') ) {
+        ThrowUserError( 'feature_disabled', { feature => 'jsonrpc' } );
     }
 }
 use Bugzilla::WebService::Server::JSONRPC;
 
 Bugzilla->usage_mode(USAGE_MODE_JSON);
 
-local @INC = (bz_locations()->{extensionsdir}, @INC);
+local @INC = ( bz_locations()->{extensionsdir}, @INC );
 my $server = new Bugzilla::WebService::Server::JSONRPC;
 $server->dispatch(WS_DISPATCH)->handle();

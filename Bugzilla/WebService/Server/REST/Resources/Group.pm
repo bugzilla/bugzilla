@@ -16,20 +16,22 @@ use Bugzilla::WebService::Group;
 
 BEGIN {
     *Bugzilla::WebService::Group::rest_resources = \&_rest_resources;
-};
+}
 
 sub _rest_resources {
     my $rest_resources = [
-        qr{^/group$}, {
-            GET  => {
+        qr{^/group$},
+        {
+            GET => {
                 method => 'get'
             },
             POST => {
-                method => 'create',
+                method       => 'create',
                 success_code => STATUS_CREATED
             }
         },
-        qr{^/group/([^/]+)$}, {
+        qr{^/group/([^/]+)$},
+        {
             PUT => {
                 method => 'update',
                 params => sub {

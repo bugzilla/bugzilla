@@ -18,11 +18,11 @@ use parent qw(Bugzilla::BugUrl);
 ###############################
 
 sub should_handle {
-    my ($class, $uri) = @_;
+    my ( $class, $uri ) = @_;
 
     # MantisBT URLs look like the following ('bugs' directory is optional):
     #   http://www.mantisbt.org/bugs/view.php?id=1234
-    return ($uri->path_query =~ m|view\.php\?id=\d+$|) ? 1 : 0;
+    return ( $uri->path_query =~ m|view\.php\?id=\d+$| ) ? 1 : 0;
 }
 
 sub _check_value {

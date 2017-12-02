@@ -13,9 +13,10 @@ use warnings;
 
 use XMLRPC::Transport::HTTP;
 use Bugzilla::WebService::Server;
-if ($ENV{MOD_PERL}) {
+if ( $ENV{MOD_PERL} ) {
     our @ISA = qw(XMLRPC::Transport::HTTP::Apache Bugzilla::WebService::Server);
-} else {
+}
+else {
     our @ISA = qw(XMLRPC::Transport::HTTP::CGI Bugzilla::WebService::Server);
 }
 
@@ -28,16 +29,17 @@ use List::MoreUtils qw(none);
 BEGIN {
     # Allow WebService methods to call XMLRPC::Lite's type method directly
     *Bugzilla::WebService::type = sub {
-        my ($self, $type, $value) = @_;
-        if ($type eq 'dateTime') {
+        my ( $self, $type, $value ) = @_;
+        if ( $type eq 'dateTime' ) {
+
             # This is the XML-RPC implementation,  see the README in Bugzilla/WebService/.
             # Our "base" implementation is in Bugzilla::WebService::Server.
             $value = Bugzilla::WebService::Server->datetime_format_outbound($value);
             $value =~ s/-//g;
         }
-        elsif ($type eq 'email') {
+        elsif ( $type eq 'email' ) {
             $type = 'string';
-            if (Bugzilla->params->{'webservice_email_filter'}) {
+            if ( Bugzilla->params->{'webservice_email_filter'} ) {
                 $value = email_filter($value);
             }
         }
@@ -46,76 +48,77 @@ BEGIN {
 
     # Add support for ETags into XMLRPC WebServices
     *Bugzilla::WebService::bz_etag = sub {
-        return Bugzilla::WebService::Server->bz_etag($_[1]);
+        return Bugzilla::WebService::Server->bz_etag( $_[1] );
     };
 }
 
 sub initialize {
-    my $self = shift;
+    my $self   = shift;
     my %retval = $self->SUPER::initialize(@_);
-    $retval{'serializer'}   = Bugzilla::XMLRPC::Serializer->new;
-    $retval{'deserializer'} = Bugzilla::XMLRPC::Deserializer->new;
+    $retval{'serializer'}    = Bugzilla::XMLRPC::Serializer->new;
+    $retval{'deserializer'}  = Bugzilla::XMLRPC::Deserializer->new;
     $retval{'dispatch_with'} = WS_DISPATCH;
     return %retval;
 }
 
 sub make_response {
     my $self = shift;
-    my $cgi = Bugzilla->cgi;
+    my $cgi  = Bugzilla->cgi;
 
     # Fix various problems with IIS.
-    if ($ENV{'SERVER_SOFTWARE'} =~ /IIS/) {
+    if ( $ENV{'SERVER_SOFTWARE'} =~ /IIS/ ) {
         $ENV{CONTENT_LENGTH} = 0;
-        binmode(STDOUT, ':bytes');
+        binmode( STDOUT, ':bytes' );
     }
 
     $self->SUPER::make_response(@_);
 
     # XMLRPC::Transport::HTTP::CGI doesn't know about Bugzilla carrying around
     # its cookies in Bugzilla::CGI, so we need to copy them over.
-    foreach my $cookie (@{$cgi->{'Bugzilla_cookie_list'}}) {
-        $self->response->headers->push_header('Set-Cookie', $cookie);
+    foreach my $cookie ( @{ $cgi->{'Bugzilla_cookie_list'} } ) {
+        $self->response->headers->push_header( 'Set-Cookie', $cookie );
     }
 
     # Copy across security related headers from Bugzilla::CGI
-    foreach my $header (split(/[\r\n]+/, $cgi->header)) {
-        my ($name, $value) = $header =~ /^([^:]+): (.*)/;
-        if (!$self->response->headers->header($name)) {
-           $self->response->headers->header($name => $value);
+    foreach my $header ( split( /[\r\n]+/, $cgi->header ) ) {
+        my ( $name, $value ) = $header =~ /^([^:]+): (.*)/;
+        if ( !$self->response->headers->header($name) ) {
+            $self->response->headers->header( $name => $value );
         }
     }
 
     # ETag support
     my $etag = $self->bz_etag;
-    if (!$etag) {
+    if ( !$etag ) {
         my $data = $self->response->as_string;
         $etag = $self->bz_etag($data);
     }
 
-    if ($etag && $cgi->check_etag($etag)) {
-        $self->response->headers->push_header('ETag', $etag);
-        $self->response->headers->push_header('status', '304 Not Modified');
+    if ( $etag && $cgi->check_etag($etag) ) {
+        $self->response->headers->push_header( 'ETag',   $etag );
+        $self->response->headers->push_header( 'status', '304 Not Modified' );
     }
     elsif ($etag) {
-        $self->response->headers->push_header('ETag', $etag);
+        $self->response->headers->push_header( 'ETag', $etag );
     }
 }
 
 sub handle_login {
-    my ($self, $classes, $action, $uri, $method) = @_;
-    my $class = $classes->{$uri};
+    my ( $self, $classes, $action, $uri, $method ) = @_;
+    my $class       = $classes->{$uri};
     my $full_method = $uri . "." . $method;
+
     # Only allowed methods to be used from the module's whitelist
     my $file = $class;
     $file =~ s{::}{/}g;
     $file .= ".pm";
     require $file;
-    if (none { $_ eq $method } $class->PUBLIC_METHODS) {
-        ThrowCodeError('unknown_method', { method => $full_method });
+    if ( none { $_ eq $method } $class->PUBLIC_METHODS ) {
+        ThrowCodeError( 'unknown_method', { method => $full_method } );
     }
 
     $ENV{CONTENT_LENGTH} = 0 if $ENV{'SERVER_SOFTWARE'} =~ /IIS/;
-    $self->SUPER::handle_login($class, $method, $full_method);
+    $self->SUPER::handle_login( $class, $method, $full_method );
     return;
 }
 
@@ -141,10 +144,16 @@ use Scalar::Util qw(tainted);
 
 sub new {
     my $self = shift->SUPER::new(@_);
+
     # Initialise XML::Parser to not expand references to entities, to prevent DoS
     require XML::Parser;
-    my $parser = XML::Parser->new( NoExpand => 1, Handlers => { Default => sub {} } );
-    $self->{_parser}->parser($parser, $parser);
+    my $parser = XML::Parser->new(
+        NoExpand => 1,
+        Handlers => {
+            Default => sub { }
+        }
+    );
+    $self->{_parser}->parser( $parser, $parser );
     return $self;
 }
 
@@ -152,21 +161,22 @@ sub deserialize {
     my $self = shift;
 
     # Only allow certain content types to protect against CSRF attacks
-    my $content_type = lc($ENV{'CONTENT_TYPE'});
+    my $content_type = lc( $ENV{'CONTENT_TYPE'} );
+
     # Remove charset, etc, if provided
     $content_type =~ s/^([^;]+);.*/$1/;
-    if (!grep($_ eq $content_type, XMLRPC_CONTENT_TYPE_WHITELIST)) {
-        ThrowUserError('xmlrpc_illegal_content_type',
-                       { content_type => $ENV{'CONTENT_TYPE'} });
+    if ( !grep( $_ eq $content_type, XMLRPC_CONTENT_TYPE_WHITELIST ) ) {
+        ThrowUserError( 'xmlrpc_illegal_content_type', { content_type => $ENV{'CONTENT_TYPE'} } );
     }
 
     my ($xml) = @_;
     my $som = $self->SUPER::deserialize(@_);
-    if (tainted($xml)) {
+    if ( tainted($xml) ) {
         $som->{_bz_do_taint} = 1;
     }
     bless $som, 'Bugzilla::XMLRPC::SOM';
     my $params = $som->paramsin;
+
     # This allows positional parameters for Testopia.
     $params = {} if ref $params ne 'HASH';
 
@@ -181,32 +191,32 @@ sub deserialize {
 
 # Some method arguments need to be converted in some way, when they are input.
 sub decode_value {
-    my $self = shift;
+    my $self   = shift;
     my ($type) = @{ $_[0] };
-    my $value = $self->SUPER::decode_value(@_);
-    
+    my $value  = $self->SUPER::decode_value(@_);
+
     # We only validate/convert certain types here.
     return $value if $type !~ /^(?:int|i4|boolean|double|dateTime\.iso8601)$/;
-    
+
     # Though the XML-RPC standard doesn't allow an empty <int>,
     # <double>,or <dateTime.iso8601>,  we do, and we just say
     # "that's undef".
-    if (grep($type eq $_, qw(int double dateTime))) {
+    if ( grep( $type eq $_, qw(int double dateTime) ) ) {
         return undef if $value eq '';
     }
-    
+
     my $validator = $self->_validation_subs->{$type};
-    if (!$validator->($value)) {
-        ThrowUserError('xmlrpc_invalid_value',
-                       { type => $type, value => $value });
+    if ( !$validator->($value) ) {
+        ThrowUserError( 'xmlrpc_invalid_value', { type => $type, value => $value } );
     }
-    
+
     # We convert dateTimes to a DB-friendly date format.
-    if ($type eq 'dateTime.iso8601') {
-        if ($value !~ /T.*[\-+Z]/i) {
-           # The caller did not specify a timezone, so we assume UTC.
-           # pass 'Z' specifier to datetime_from to force it
-           $value = $value . 'Z';
+    if ( $type eq 'dateTime.iso8601' ) {
+        if ( $value !~ /T.*[\-+Z]/i ) {
+
+            # The caller did not specify a timezone, so we assume UTC.
+            # pass 'Z' specifier to datetime_from to force it
+            $value = $value . 'Z';
         }
         $value = Bugzilla::WebService::Server::XMLRPC->datetime_format_inbound($value);
     }
@@ -217,21 +227,24 @@ sub decode_value {
 sub _validation_subs {
     my $self = shift;
     return $self->{_validation_subs} if $self->{_validation_subs};
+
     # The only place that XMLRPC::Lite stores any sort of validation
     # regex is in XMLRPC::Serializer. We want to re-use those regexes here.
     my $lookup = Bugzilla::XMLRPC::Serializer->new->typelookup;
-    
+
     # $lookup is a hash whose values are arrayrefs, and whose keys are the
     # names of types. The second item of each arrayref is a subroutine
     # that will do our validation for us.
-    my %validators = map { $_ => $lookup->{$_}->[1] } (keys %$lookup);
+    my %validators = map { $_ => $lookup->{$_}->[1] } ( keys %$lookup );
+
     # Add a boolean validator
-    $validators{'boolean'} = sub {$_[0] =~ /^[01]$/};
+    $validators{'boolean'} = sub { $_[0] =~ /^[01]$/ };
+
     # Some types have multiple names, or have a different name in
     # XMLRPC::Serializer than their standard XML-RPC name.
     $validators{'dateTime.iso8601'} = $validators{'dateTime'};
-    $validators{'i4'} = $validators{'int'};
-    
+    $validators{'i4'}               = $validators{'int'};
+
     $self->{_validation_subs} = \%validators;
     return \%validators;
 }
@@ -250,9 +263,9 @@ use Bugzilla::WebService::Util qw(taint_data);
 
 sub paramsin {
     my $self = shift;
-    if (!$self->{bz_params_in}) {
-        my @params = $self->SUPER::paramsin(@_); 
-        if ($self->{_bz_do_taint}) {
+    if ( !$self->{bz_params_in} ) {
+        my @params = $self->SUPER::paramsin(@_);
+        if ( $self->{_bz_do_taint} ) {
             taint_data(@params);
         }
         $self->{bz_params_in} = \@params;
@@ -272,6 +285,7 @@ use strict;
 use warnings;
 
 use Scalar::Util qw(blessed reftype);
+
 # We can't use "use parent" because XMLRPC::Serializer doesn't return
 # a true value.
 use XMLRPC::Lite;
@@ -279,11 +293,12 @@ our @ISA = qw(XMLRPC::Serializer);
 
 sub new {
     my $class = shift;
-    my $self = $class->SUPER::new(@_);
+    my $self  = $class->SUPER::new(@_);
+
     # This fixes UTF-8.
-    $self->{'_typelookup'}->{'base64'} =
-        [10, sub { !utf8::is_utf8($_[0]) && $_[0] =~ /[^\x09\x0a\x0d\x20-\x7f]/},
-        'as_base64'];
+    $self->{'_typelookup'}->{'base64'}
+        = [ 10, sub { !utf8::is_utf8( $_[0] ) && $_[0] =~ /[^\x09\x0a\x0d\x20-\x7f]/ }, 'as_base64' ];
+
     # This makes arrays work right even though we're a subclass.
     # (See http://rt.cpan.org//Ticket/Display.html?id=34514)
     $self->{'_encodingStyle'} = '';
@@ -292,23 +307,24 @@ sub new {
 
 # Here the XMLRPC::Serializer is extended to use the XMLRPC nil extension.
 sub encode_object {
-    my $self = shift;
+    my $self    = shift;
     my @encoded = $self->SUPER::encode_object(@_);
 
     return $encoded[0]->[0] eq 'nil'
-        ? ['value', {}, [@encoded]]
+        ? [ 'value', {}, [@encoded] ]
         : @encoded;
 }
 
 # Removes undefined values so they do not produce invalid XMLRPC.
 sub envelope {
     my $self = shift;
-    my ($type, $method, $data) = @_;
+    my ( $type, $method, $data ) = @_;
+
     # If the type isn't a successful response we don't want to change the values.
-    if ($type eq 'response') {
+    if ( $type eq 'response' ) {
         _strip_undefs($data);
     }
-    return $self->SUPER::envelope($type, $method, $data);
+    return $self->SUPER::envelope( $type, $method, $data );
 }
 
 # In an XMLRPC response we have to handle hashes of arrays, hashes, scalars,
@@ -319,10 +335,10 @@ sub _strip_undefs {
     my ($initial) = @_;
     my $type = reftype($initial) or return;
 
-    if ($type eq "HASH") {
-        while (my ($key, $value) = each(%$initial)) {
+    if ( $type eq "HASH" ) {
+        while ( my ( $key, $value ) = each(%$initial) ) {
             if ( !defined $value
-                 || (blessed $value && $value->isa('XMLRPC::Data') && !defined $value->value) )
+                || ( blessed $value && $value->isa('XMLRPC::Data') && !defined $value->value ) )
             {
                 # If the value is undefined remove it from the hash.
                 delete $initial->{$key};
@@ -332,14 +348,14 @@ sub _strip_undefs {
             }
         }
     }
-    elsif ($type eq "ARRAY") {
-        for (my $count = 0; $count < scalar @{$initial}; $count++) {
+    elsif ( $type eq "ARRAY" ) {
+        for ( my $count = 0; $count < scalar @{$initial}; $count++ ) {
             my $value = $initial->[$count];
             if ( !defined $value
-                 || (blessed $value && $value->isa('XMLRPC::Data') && !defined $value->value) )
+                || ( blessed $value && $value->isa('XMLRPC::Data') && !defined $value->value ) )
             {
                 # If the value is undefined remove it from the array.
-                splice(@$initial, $count, 1);
+                splice( @$initial, $count, 1 );
                 $count--;
             }
             else {
@@ -354,20 +370,20 @@ sub BEGIN {
     for my $type (qw(double i4 int dateTime)) {
         my $method = 'as_' . $type;
         *$method = sub {
-            my ($self, $value) = @_;
-            if (!defined($value)) {
+            my ( $self, $value ) = @_;
+            if ( !defined($value) ) {
                 return as_nil();
             }
             else {
-                my $super_method = "SUPER::$method"; 
+                my $super_method = "SUPER::$method";
                 return $self->$super_method($value);
             }
-        }
+            }
     }
 }
 
 sub as_nil {
-    return ['nil', {}];
+    return [ 'nil', {} ];
 }
 
 1;

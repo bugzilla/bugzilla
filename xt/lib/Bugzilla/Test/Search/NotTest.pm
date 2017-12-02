@@ -20,8 +20,8 @@ use Bugzilla::Test::Search::Constants;
 # We just clone a FieldTest because that's the best for performance,
 # overall--that way we don't have to translate the value again.
 sub new {
-    my ($class, $field_test) = @_;
-    my $self = { %$field_test };
+    my ( $class, $field_test ) = @_;
+    my $self = {%$field_test};
     return bless $self, $class;
 }
 
@@ -39,6 +39,7 @@ sub name {
 sub bug_is_contained {
     my $self = shift;
     my ($number) = @_;
+
     # No search ever returns bug 6, because it's protected by security groups
     # that the searcher isn't a member of.
     return 0 if $number == 6;
@@ -48,7 +49,7 @@ sub bug_is_contained {
 # NOT tests have their own constant for tracking broken-ness.
 sub _known_broken {
     my ($self) = @_;
-    return $self->SUPER::_known_broken(BROKEN_NOT, 'skip pg check');
+    return $self->SUPER::_known_broken( BROKEN_NOT, 'skip pg check' );
 }
 
 sub search_params {

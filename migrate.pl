@@ -20,26 +20,26 @@ use Getopt::Long;
 use Pod::Usage;
 
 my %switch;
-GetOptions(\%switch, 'help|h|?', 'from=s', 'verbose|v+', 'dry-run');
+GetOptions( \%switch, 'help|h|?', 'from=s', 'verbose|v+', 'dry-run' );
 
 # Print the help message if that switch was selected or if --from
 # wasn't specified.
-if (!$switch{'from'} or $switch{'help'}) {
-    pod2usage({-exitval => 1});
+if ( !$switch{'from'} or $switch{'help'} ) {
+    pod2usage( { -exitval => 1 } );
 }
 
-my $migrator = Bugzilla::Migrate->load($switch{'from'});
-$migrator->verbose($switch{'verbose'});
-$migrator->dry_run($switch{'dry-run'});
+my $migrator = Bugzilla::Migrate->load( $switch{'from'} );
+$migrator->verbose( $switch{'verbose'} );
+$migrator->dry_run( $switch{'dry-run'} );
 $migrator->check_requirements();
 $migrator->do_migration();
 
 # Even if there's an error, we want to be sure that the serial values
 # get reset properly.
 END {
-    if ($migrator and $migrator->dry_run) {
+    if ( $migrator and $migrator->dry_run ) {
         my $dbh = Bugzilla->dbh;
-        if ($dbh->bz_in_transaction) {
+        if ( $dbh->bz_in_transaction ) {
             $dbh->bz_rollback_transaction();
         }
         $migrator->reset_serial_values();

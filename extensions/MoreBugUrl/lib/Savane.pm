@@ -18,8 +18,8 @@ use parent qw(Bugzilla::BugUrl);
 ###############################
 
 sub should_handle {
-    my ($class, $uri) = @_;
-    return ($uri->as_string =~ m|/bugs/(index\.php)?\?\d+$|) ? 1 : 0;
+    my ( $class, $uri ) = @_;
+    return ( $uri->as_string =~ m|/bugs/(index\.php)?\?\d+$| ) ? 1 : 0;
 }
 
 sub _check_value {

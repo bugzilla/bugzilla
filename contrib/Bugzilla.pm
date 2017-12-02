@@ -36,13 +36,13 @@ use warnings;
 #######################################################################
 
 use constant BZ_ROOT_DIR => '/usr/share/bugzilla/lib';
-use constant BZ_LIB_DIR => BZ_ROOT_DIR . '/lib';
+use constant BZ_LIB_DIR  => BZ_ROOT_DIR . '/lib';
 
 #######################################################################
 #   DO NOT EDIT THE CODE BELOW, UNLESS YOU KNOW WHAT YOU ARE DOING!!  #
 #######################################################################
 
-use lib (BZ_ROOT_DIR, BZ_LIB_DIR);
+use lib ( BZ_ROOT_DIR, BZ_LIB_DIR );
 
 # Now load the real Bugzilla.pm file.
 BEGIN { my $bugzilla = BZ_ROOT_DIR . '/Bugzilla.pm'; require $bugzilla; }

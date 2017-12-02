@@ -21,8 +21,9 @@ use Bugzilla::Util;
 # Constants #
 #############
 
-use constant DB_TABLE => 'profile_search';
+use constant DB_TABLE   => 'profile_search';
 use constant LIST_ORDER => 'id DESC';
+
 # Do not track buglists viewed by users.
 use constant AUDIT_CREATES => 0;
 use constant AUDIT_UPDATES => 0;
@@ -52,19 +53,18 @@ use constant USE_MEMCACHED => 0;
 
 sub create {
     my $class = shift;
-    my $dbh = Bugzilla->dbh;
+    my $dbh   = Bugzilla->dbh;
     $dbh->bz_start_transaction();
-    my $search = $class->SUPER::create(@_);
+    my $search  = $class->SUPER::create(@_);
     my $user_id = $search->user_id;
 
     # Enforce there only being SAVE_NUM_SEARCHES per user.
-    my @ids = @{ $dbh->selectcol_arrayref(
-        "SELECT id FROM profile_search WHERE user_id = ? ORDER BY id",
-        undef, $user_id) };
-    if (scalar(@ids) > SAVE_NUM_SEARCHES) {
-        splice(@ids, - SAVE_NUM_SEARCHES);
-        $dbh->do(
-            "DELETE FROM profile_search WHERE id IN (" . join(',', @ids) . ")");
+    my @ids
+        = @{ $dbh->selectcol_arrayref( "SELECT id FROM profile_search WHERE user_id = ? ORDER BY id", undef, $user_id )
+        };
+    if ( scalar(@ids) > SAVE_NUM_SEARCHES ) {
+        splice( @ids, - SAVE_NUM_SEARCHES );
+        $dbh->do( "DELETE FROM profile_search WHERE id IN (" . join( ',', @ids ) . ")" );
     }
     $dbh->bz_commit_transaction();
     return $search;
@@ -72,8 +72,12 @@ sub create {
 
 sub create_placeholder {
     my $class = shift;
-    return $class->create({ user_id  => Bugzilla->user->id,
-                            bug_list => '' });
+    return $class->create(
+        {
+            user_id  => Bugzilla->user->id,
+            bug_list => ''
+        }
+    );
 }
 
 ###############
@@ -81,17 +85,17 @@ sub create_placeholder {
 ###############
 
 sub check {
-    my $class = shift;
+    my $class  = shift;
     my $search = $class->SUPER::check(@_);
-    my $user = Bugzilla->user;
-    if ($search->user_id != $user->id) {
-        ThrowUserError('object_does_not_exist', { id => $search->id });
+    my $user   = Bugzilla->user;
+    if ( $search->user_id != $user->id ) {
+        ThrowUserError( 'object_does_not_exist', { id => $search->id } );
     }
     return $search;
 }
 
 sub check_quietly {
-    my $class = shift;
+    my $class      = shift;
     my $error_mode = Bugzilla->error_mode;
     Bugzilla->error_mode(ERROR_MODE_DIE);
     my $search = eval { $class->check(@_) };
@@ -100,12 +104,14 @@ sub check_quietly {
 }
 
 sub new_from_cookie {
-    my ($invocant, $bug_ids) = @_;
+    my ( $invocant, $bug_ids ) = @_;
     my $class = ref($invocant) || $invocant;
 
-    my $search = { id       => 'cookie',
-                   user_id  => Bugzilla->user->id,
-                   bug_list => join(',', @$bug_ids) };
+    my $search = {
+        id       => 'cookie',
+        user_id  => Bugzilla->user->id,
+        bug_list => join( ',', @$bug_ids )
+    };
 
     bless $search, $class;
     return $search;
@@ -115,7 +121,7 @@ sub new_from_cookie {
 # Simple Accessors #
 ####################
 
-sub bug_list   { return [split(',', $_[0]->{'bug_list'})]; }
+sub bug_list { return [ split( ',', $_[0]->{'bug_list'} ) ]; }
 sub list_order { return $_[0]->{'list_order'}; }
 sub user_id    { return $_[0]->{'user_id'}; }
 
@@ -123,28 +129,28 @@ sub user_id    { return $_[0]->{'user_id'}; }
 # Mutators #
 ############
 
-sub set_bug_list   { $_[0]->set('bug_list',   $_[1]); }
-sub set_list_order { $_[0]->set('list_order', $_[1]); }
+sub set_bug_list   { $_[0]->set( 'bug_list',   $_[1] ); }
+sub set_list_order { $_[0]->set( 'list_order', $_[1] ); }
 
 ##############
 # Validators #
 ##############
 
 sub _check_user_id {
-    my ($invocant, $id) = @_;
+    my ( $invocant, $id ) = @_;
     require Bugzilla::User;
-    return Bugzilla::User->check({ id => $id })->id;
+    return Bugzilla::User->check( { id => $id } )->id;
 }
 
 sub _check_bug_list {
-    my ($invocant, $list) = @_;
+    my ( $invocant, $list ) = @_;
 
-    my @bug_ids = ref($list) ? @$list : split(',', $list || '');
+    my @bug_ids = ref($list) ? @$list : split( ',', $list || '' );
     detaint_natural($_) foreach @bug_ids;
-    return join(',', @bug_ids);
+    return join( ',', @bug_ids );
 }
 
-sub _check_list_order { defined $_[1] ? trim($_[1]) : '' }
+sub _check_list_order { defined $_[1] ? trim( $_[1] ) : '' }
 
 1;
 

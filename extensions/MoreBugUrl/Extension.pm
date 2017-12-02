@@ -32,21 +32,22 @@ sub install_update_db {
     my $should_rename = $dbh->selectrow_array(
         q{SELECT 1 FROM bug_see_also
           WHERE class IN ('Bugzilla::BugUrl::Rietveld', 
-                          'Bugzilla::BugUrl::ReviewBoard')});
+                          'Bugzilla::BugUrl::ReviewBoard')}
+    );
 
     if ($should_rename) {
-        my $sth = $dbh->prepare('UPDATE bug_see_also SET class = ?
-                                 WHERE class = ?');
-        $sth->execute('Bugzilla::Extension::MoreBugUrl::ReviewBoard',
-                      'Bugzilla::BugUrl::ReviewBoard');
+        my $sth = $dbh->prepare(
+            'UPDATE bug_see_also SET class = ?
+                                 WHERE class = ?'
+        );
+        $sth->execute( 'Bugzilla::Extension::MoreBugUrl::ReviewBoard', 'Bugzilla::BugUrl::ReviewBoard' );
 
-        $sth->execute('Bugzilla::Extension::MoreBugUrl::Rietveld',
-                      'Bugzilla::BugUrl::Rietveld');
+        $sth->execute( 'Bugzilla::Extension::MoreBugUrl::Rietveld', 'Bugzilla::BugUrl::Rietveld' );
     }
 }
 
 sub bug_url_sub_classes {
-    my ($self, $args) = @_;
+    my ( $self, $args ) = @_;
     push @{ $args->{sub_classes} }, MORE_SUB_CLASSES;
 }
 

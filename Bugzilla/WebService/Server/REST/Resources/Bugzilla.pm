@@ -16,36 +16,42 @@ use Bugzilla::WebService::Bugzilla;
 
 BEGIN {
     *Bugzilla::WebService::Bugzilla::rest_resources = \&_rest_resources;
-};
+}
 
 sub _rest_resources {
     my $rest_resources = [
-        qr{^/version$}, {
-            GET  => {
+        qr{^/version$},
+        {
+            GET => {
                 method => 'version'
             }
         },
-        qr{^/extensions$}, {
+        qr{^/extensions$},
+        {
             GET => {
                 method => 'extensions'
             }
         },
-        qr{^/timezone$}, {
+        qr{^/timezone$},
+        {
             GET => {
                 method => 'timezone'
             }
         },
-        qr{^/time$}, {
+        qr{^/time$},
+        {
             GET => {
                 method => 'time'
             }
         },
-        qr{^/last_audit_time$}, {
+        qr{^/last_audit_time$},
+        {
             GET => {
                 method => 'last_audit_time'
             }
         },
-        qr{^/parameters$}, {
+        qr{^/parameters$},
+        {
             GET => {
                 method => 'parameters'
             }

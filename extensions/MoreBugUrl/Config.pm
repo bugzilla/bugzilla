@@ -13,10 +13,8 @@ use warnings;
 
 use constant NAME => 'MoreBugUrl';
 
-use constant REQUIRED_MODULES => [
-];
+use constant REQUIRED_MODULES => [];
 
-use constant OPTIONAL_MODULES => [
-];
+use constant OPTIONAL_MODULES => [];
 
 __PACKAGE__->NAME;

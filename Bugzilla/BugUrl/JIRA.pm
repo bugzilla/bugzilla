@@ -18,12 +18,12 @@ use parent qw(Bugzilla::BugUrl);
 ###############################
 
 sub should_handle {
-    my ($class, $uri) = @_;
+    my ( $class, $uri ) = @_;
 
     # JIRA URLs have only one basic form (but the jira is optional):
     #   https://issues.apache.org/jira/browse/KEY-1234
     #   http://issues.example.com/browse/KEY-1234
-    return ($uri->path =~ m|/browse/[A-Z][A-Z]+-\d+$|) ? 1 : 0;
+    return ( $uri->path =~ m|/browse/[A-Z][A-Z]+-\d+$| ) ? 1 : 0;
 }
 
 sub _check_value {
@@ -33,6 +33,7 @@ sub _check_value {
 
     # Make sure there are no query parameters.
     $uri->query(undef);
+
     # And remove any # part if there is one.
     $uri->fragment(undef);
 

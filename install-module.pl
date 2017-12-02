@@ -17,7 +17,7 @@ use warnings;
 use Cwd qw(abs_path cwd);
 use lib abs_path('.');
 use Bugzilla::Constants;
-use lib abs_path(bz_locations()->{ext_libpath});
+use lib abs_path( bz_locations()->{ext_libpath} );
 
 use Bugzilla::Install::CPAN;
 
@@ -32,12 +32,11 @@ use Pod::Usage;
 init_console();
 
 my @original_args = @ARGV;
-my $original_dir = cwd();
+my $original_dir  = cwd();
 our %switch;
-GetOptions(\%switch, 'all|a', 'upgrade-all|u', 'show-config|s', 'global|g',
-                     'shell', 'help|h');
+GetOptions( \%switch, 'all|a', 'upgrade-all|u', 'show-config|s', 'global|g', 'shell', 'help|h' );
 
-pod2usage({ -verbose => 1 }) if $switch{'help'};
+pod2usage( { -verbose => 1 } ) if $switch{'help'};
 
 if (ON_ACTIVESTATE) {
     print <<END;
@@ -48,42 +47,43 @@ END
     exit;
 }
 
-pod2usage({ -verbose => 0 }) if (!%switch && !@ARGV);
+pod2usage( { -verbose => 0 } ) if ( !%switch && !@ARGV );
 
-set_cpan_config($switch{'global'});
+set_cpan_config( $switch{'global'} );
 
-if ($switch{'show-config'}) {
+if ( $switch{'show-config'} ) {
     print Dumper($CPAN::Config);
     exit;
 }
 
-check_cpan_requirements($original_dir, \@original_args);
+check_cpan_requirements( $original_dir, \@original_args );
 
-if ($switch{'shell'}) {
+if ( $switch{'shell'} ) {
     CPAN::shell();
     exit;
 }
 
-if ($switch{'all'} || $switch{'upgrade-all'}) {
+if ( $switch{'all'} || $switch{'upgrade-all'} ) {
     my @modules;
-    if ($switch{'upgrade-all'}) {
-        @modules = (@{REQUIRED_MODULES()}, @{OPTIONAL_MODULES()});
-        push(@modules, DB_MODULE->{$_}->{dbd}) foreach (keys %{DB_MODULE()});
+    if ( $switch{'upgrade-all'} ) {
+        @modules = ( @{ REQUIRED_MODULES() }, @{ OPTIONAL_MODULES() } );
+        push( @modules, DB_MODULE->{$_}->{dbd} ) foreach ( keys %{ DB_MODULE() } );
     }
     else {
         # This is the only time we need a Bugzilla-related module, so
         # we require them down here. Otherwise this script can be run from
         # any directory, even outside of Bugzilla itself.
         my $reqs = check_requirements(0);
-        @modules = (@{$reqs->{missing}}, @{$reqs->{optional}});
+        @modules = ( @{ $reqs->{missing} }, @{ $reqs->{optional} } );
         my $dbs = DB_MODULE;
-        foreach my $db (keys %$dbs) {
-            push(@modules, $dbs->{$db}->{dbd})
-                if !have_vers($dbs->{$db}->{dbd}, 0);
+        foreach my $db ( keys %$dbs ) {
+            push( @modules, $dbs->{$db}->{dbd} )
+                if !have_vers( $dbs->{$db}->{dbd}, 0 );
         }
     }
     foreach my $module (@modules) {
         my $cpan_name = $module->{module};
+
         # --all shouldn't include mod_perl2, because it can have some complex
         # configuration, and really should be installed on its own.
         next if $cpan_name eq 'mod_perl2';

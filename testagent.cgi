@@ -15,5 +15,5 @@ use strict;
 use warnings;
 
 say "content-type:text/plain\n";
-say "OK " . ($::ENV{MOD_PERL} || "mod_cgi");
+say "OK " . ( $::ENV{MOD_PERL} || "mod_cgi" );
 exit;

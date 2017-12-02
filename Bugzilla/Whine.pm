@@ -39,14 +39,14 @@ use constant LIST_ORDER => 'id';
 ####################
 # Simple Accessors #
 ####################
-sub subject         { return $_[0]->{'subject'};      }
-sub body            { return $_[0]->{'body'};         }
+sub subject         { return $_[0]->{'subject'}; }
+sub body            { return $_[0]->{'body'}; }
 sub mail_if_no_bugs { return $_[0]->{'mailifnobugs'}; }
 
 sub user {
     my ($self) = @_;
     return $self->{user} if defined $self->{user};
-    $self->{user} = new Bugzilla::User($self->{'owner_userid'});
+    $self->{user} = new Bugzilla::User( $self->{'owner_userid'} );
     return $self->{user};
 }
 

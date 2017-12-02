@@ -19,6 +19,7 @@ use Scalar::Util qw(blessed);
 
 sub process {
     my $self = shift;
+
     # We don't want to run the template_before_process hook for
     # template hooks (but we do want it to run if a hook calls
     # PROCESS inside itself). The problem is that the {component}->{name} of
@@ -29,7 +30,7 @@ sub process {
     # because that's already part of the extension and they should be able
     # to modify their hook if they want (or just modify the variables in the
     # calling template).
-    if (not delete $self->{bz_in_hook}) {
+    if ( not delete $self->{bz_in_hook} ) {
         $self->{bz_in_process} = 1;
     }
     my $result = $self->SUPER::process(@_);
@@ -46,14 +47,14 @@ sub process {
 # in the PROCESS or INCLUDE directive haven't been set, and if we're
 # in an INCLUDE, the stash is not yet localized during process().
 sub stash {
-    my $self = shift;
+    my $self  = shift;
     my $stash = $self->SUPER::stash(@_);
 
-    my $name = $stash->{component}->{name};
+    my $name        = $stash->{component}->{name};
     my $pre_process = $self->config->{PRE_PROCESS};
 
     # Checking bz_in_process tells us that we were indeed called as part of a
-    # Context::process, and not at some other point. 
+    # Context::process, and not at some other point.
     #
     # Checking $name makes sure that we're processing a file, and not just a
     # block, by checking that the name has a period in it. We don't allow
@@ -64,18 +65,24 @@ sub stash {
     # We also make sure that we don't run, ever, during the PRE_PROCESS
     # templates, because if somebody calls Throw*Error globally inside of
     # template_before_process, that causes an infinite recursion into
-    # the PRE_PROCESS templates (because Bugzilla, while inside 
+    # the PRE_PROCESS templates (because Bugzilla, while inside
     # global/intialize.none.tmpl, loads the template again to create the
     # template object for Throw*Error).
     #
     # Checking Bugzilla::Hook::in prevents infinite recursion on this hook.
-    if ($self->{bz_in_process} and $name =~ /\./
-        and !grep($_ eq $name, @$pre_process)
-        and !Bugzilla::Hook::in('template_before_process'))
+    if (    $self->{bz_in_process}
+        and $name =~ /\./
+        and !grep( $_ eq $name, @$pre_process )
+        and !Bugzilla::Hook::in('template_before_process') )
     {
-        Bugzilla::Hook::process("template_before_process",
-                                { vars => $stash, context => $self,
-                                  file => $name });
+        Bugzilla::Hook::process(
+            "template_before_process",
+            {
+                vars    => $stash,
+                context => $self,
+                file    => $name
+            }
+        );
     }
 
     # This prevents other calls to stash() that might somehow happen
@@ -86,18 +93,19 @@ sub stash {
 }
 
 sub filter {
-    my ($self, $name, $args) = @_;
+    my ( $self, $name, $args ) = @_;
+
     # If we pass an alias for the filter name, the filter code is cached
     # instead of looking for it at each call.
     # If the filter has arguments, then we can't cache it.
-    $self->SUPER::filter($name, $args, $args ? undef : $name);
+    $self->SUPER::filter( $name, $args, $args ? undef : $name );
 }
 
 # We need a DESTROY sub for the same reason that Bugzilla::CGI does.
 sub DESTROY {
     my $self = shift;
     $self->SUPER::DESTROY(@_);
-};
+}
 
 1;
 

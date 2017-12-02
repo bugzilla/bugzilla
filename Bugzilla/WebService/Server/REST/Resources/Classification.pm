@@ -16,11 +16,12 @@ use Bugzilla::WebService::Classification;
 
 BEGIN {
     *Bugzilla::WebService::Classification::rest_resources = \&_rest_resources;
-};
+}
 
 sub _rest_resources {
     my $rest_resources = [
-        qr{^/classification/([^/]+)$}, {
+        qr{^/classification/([^/]+)$},
+        {
             GET => {
                 method => 'get',
                 params => sub {

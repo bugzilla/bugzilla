@@ -25,7 +25,7 @@ use Scalar::Util qw(blessed);
 
 use constant DEFAULT_SORTKEY => 0;
 
-use constant DB_TABLE => 'milestones';
+use constant DB_TABLE   => 'milestones';
 use constant NAME_FIELD => 'value';
 use constant LIST_ORDER => 'sortkey, value';
 
@@ -37,9 +37,7 @@ use constant DB_COLUMNS => qw(
     isactive
 );
 
-use constant REQUIRED_FIELD_MAP => {
-    product_id => 'product',
-};
+use constant REQUIRED_FIELD_MAP => { product_id => 'product', };
 
 use constant UPDATE_COLUMNS => qw(
     value
@@ -54,34 +52,40 @@ use constant VALIDATORS => {
     isactive => \&Bugzilla::Object::check_boolean,
 };
 
-use constant VALIDATOR_DEPENDENCIES => {
-    value => ['product'],
-};
+use constant VALIDATOR_DEPENDENCIES => { value => ['product'], };
 
 ################################
 
 sub new {
     my $class = shift;
     my $param = shift;
-    my $dbh = Bugzilla->dbh;
+    my $dbh   = Bugzilla->dbh;
 
     my $product;
-    if (ref $param and !defined $param->{id}) {
+    if ( ref $param and !defined $param->{id} ) {
         $product = $param->{product};
         my $name = $param->{name};
-        if (!defined $product) {
-            ThrowCodeError('bad_arg',
-                {argument => 'product',
-                 function => "${class}::new"});
+        if ( !defined $product ) {
+            ThrowCodeError(
+                'bad_arg',
+                {
+                    argument => 'product',
+                    function => "${class}::new"
+                }
+            );
         }
-        if (!defined $name) {
-            ThrowCodeError('bad_arg',
-                {argument => 'name',
-                 function => "${class}::new"});
+        if ( !defined $name ) {
+            ThrowCodeError(
+                'bad_arg',
+                {
+                    argument => 'name',
+                    function => "${class}::new"
+                }
+            );
         }
 
         my $condition = 'product_id = ? AND value = ?';
-        my @values = ($product->id, $name);
+        my @values = ( $product->id, $name );
         $param = { condition => $condition, values => \@values };
     }
 
@@ -90,8 +94,8 @@ sub new {
 }
 
 sub run_create_validators {
-    my $class = shift;
-    my $params = $class->SUPER::run_create_validators(@_);
+    my $class   = shift;
+    my $params  = $class->SUPER::run_create_validators(@_);
     my $product = delete $params->{product};
     $params->{product_id} = $product->id;
     return $params;
@@ -99,22 +103,27 @@ sub run_create_validators {
 
 sub update {
     my $self = shift;
-    my $dbh = Bugzilla->dbh;
+    my $dbh  = Bugzilla->dbh;
 
     $dbh->bz_start_transaction();
     my $changes = $self->SUPER::update(@_);
 
-    if (exists $changes->{value}) {
+    if ( exists $changes->{value} ) {
+
         # The milestone value is stored in the bugs table instead of its ID.
-        $dbh->do('UPDATE bugs SET target_milestone = ?
+        $dbh->do(
+            'UPDATE bugs SET target_milestone = ?
                   WHERE target_milestone = ? AND product_id = ?',
-                 undef, ($self->name, $changes->{value}->[0], $self->product_id));
+            undef, ( $self->name, $changes->{value}->[0], $self->product_id )
+        );
 
         # The default milestone also stores the value instead of the ID.
-        $dbh->do('UPDATE products SET defaultmilestone = ?
+        $dbh->do(
+            'UPDATE products SET defaultmilestone = ?
                   WHERE id = ? AND defaultmilestone = ?',
-                 undef, ($self->name, $self->product_id, $changes->{value}->[0]));
-        Bugzilla->memcached->clear({ table => 'products', id => $self->product_id });
+            undef, ( $self->name, $self->product_id, $changes->{value}->[0] )
+        );
+        Bugzilla->memcached->clear( { table => 'products', id => $self->product_id } );
     }
     $dbh->bz_commit_transaction();
     Bugzilla->memcached->clear_config();
@@ -124,36 +133,38 @@ sub update {
 
 sub remove_from_db {
     my $self = shift;
-    my $dbh = Bugzilla->dbh;
+    my $dbh  = Bugzilla->dbh;
 
     $dbh->bz_start_transaction();
 
     # The default milestone cannot be deleted.
-    if ($self->name eq $self->product->default_milestone) {
-        ThrowUserError('milestone_is_default', { milestone => $self });
+    if ( $self->name eq $self->product->default_milestone ) {
+        ThrowUserError( 'milestone_is_default', { milestone => $self } );
     }
 
-    if ($self->bug_count) {
+    if ( $self->bug_count ) {
+
         # We don't want to delete bugs when deleting a milestone.
         # Bugs concerned are reassigned to the default milestone.
-        my $bug_ids =
-          $dbh->selectcol_arrayref('SELECT bug_id FROM bugs
+        my $bug_ids = $dbh->selectcol_arrayref(
+            'SELECT bug_id FROM bugs
                                     WHERE product_id = ? AND target_milestone = ?',
-                                    undef, ($self->product->id, $self->name));
+            undef, ( $self->product->id, $self->name )
+        );
 
         my $timestamp = $dbh->selectrow_array('SELECT NOW()');
 
-        $dbh->do('UPDATE bugs SET target_milestone = ?, delta_ts = ?
-                   WHERE ' . $dbh->sql_in('bug_id', $bug_ids),
-                 undef, ($self->product->default_milestone, $timestamp));
+        $dbh->do(
+            'UPDATE bugs SET target_milestone = ?, delta_ts = ?
+                   WHERE ' . $dbh->sql_in( 'bug_id', $bug_ids ),
+            undef, ( $self->product->default_milestone, $timestamp )
+        );
 
         require Bugzilla::Bug;
         import Bugzilla::Bug qw(LogActivityEntry);
         foreach my $bug_id (@$bug_ids) {
-            LogActivityEntry($bug_id, 'target_milestone',
-                             $self->name,
-                             $self->product->default_milestone,
-                             Bugzilla->user->id, $timestamp);
+            LogActivityEntry( $bug_id, 'target_milestone', $self->name, $self->product->default_milestone,
+                Bugzilla->user->id, $timestamp );
         }
     }
     $self->SUPER::remove_from_db();
@@ -166,59 +177,65 @@ sub remove_from_db {
 ################################
 
 sub _check_value {
-    my ($invocant, $name, undef, $params) = @_;
+    my ( $invocant, $name, undef, $params ) = @_;
     my $product = blessed($invocant) ? $invocant->product : $params->{product};
 
     $name = trim($name);
     $name || ThrowUserError('milestone_blank_name');
-    if (length($name) > MAX_MILESTONE_SIZE) {
-        ThrowUserError('milestone_name_too_long', {name => $name});
+    if ( length($name) > MAX_MILESTONE_SIZE ) {
+        ThrowUserError( 'milestone_name_too_long', { name => $name } );
     }
 
-    my $milestone = new Bugzilla::Milestone({product => $product, name => $name});
-    if ($milestone && (!ref $invocant || $milestone->id != $invocant->id)) {
-        ThrowUserError('milestone_already_exists', { name    => $milestone->name,
-                                                     product => $product->name });
+    my $milestone = new Bugzilla::Milestone( { product => $product, name => $name } );
+    if ( $milestone && ( !ref $invocant || $milestone->id != $invocant->id ) ) {
+        ThrowUserError(
+            'milestone_already_exists',
+            {
+                name    => $milestone->name,
+                product => $product->name
+            }
+        );
     }
     return $name;
 }
 
 sub _check_sortkey {
-    my ($invocant, $sortkey) = @_;
+    my ( $invocant, $sortkey ) = @_;
 
     # Keep a copy in case detaint_signed() clears the sortkey
     my $stored_sortkey = $sortkey;
 
-    if (!detaint_signed($sortkey) || $sortkey < MIN_SMALLINT || $sortkey > MAX_SMALLINT) {
-        ThrowUserError('milestone_sortkey_invalid', {sortkey => $stored_sortkey});
+    if ( !detaint_signed($sortkey) || $sortkey < MIN_SMALLINT || $sortkey > MAX_SMALLINT ) {
+        ThrowUserError( 'milestone_sortkey_invalid', { sortkey => $stored_sortkey } );
     }
     return $sortkey;
 }
 
 sub _check_product {
-    my ($invocant, $product) = @_;
-    $product || ThrowCodeError('param_required',
-                    { function => "$invocant->create", param => "product" });
-    return Bugzilla->user->check_can_admin_product($product->name);
+    my ( $invocant, $product ) = @_;
+    $product || ThrowCodeError( 'param_required', { function => "$invocant->create", param => "product" } );
+    return Bugzilla->user->check_can_admin_product( $product->name );
 }
 
 ################################
 # Methods
 ################################
 
-sub set_name      { $_[0]->set('value', $_[1]);    }
-sub set_sortkey   { $_[0]->set('sortkey', $_[1]);  }
-sub set_is_active { $_[0]->set('isactive', $_[1]); }
+sub set_name      { $_[0]->set( 'value',    $_[1] ); }
+sub set_sortkey   { $_[0]->set( 'sortkey',  $_[1] ); }
+sub set_is_active { $_[0]->set( 'isactive', $_[1] ); }
 
 sub bug_count {
     my $self = shift;
-    my $dbh = Bugzilla->dbh;
+    my $dbh  = Bugzilla->dbh;
 
-    if (!defined $self->{'bug_count'}) {
-        $self->{'bug_count'} = $dbh->selectrow_array(q{
+    if ( !defined $self->{'bug_count'} ) {
+        $self->{'bug_count'} = $dbh->selectrow_array(
+            q{
             SELECT COUNT(*) FROM bugs
             WHERE product_id = ? AND target_milestone = ?},
-            undef, $self->product_id, $self->name) || 0;
+            undef, $self->product_id, $self->name
+        ) || 0;
     }
     return $self->{'bug_count'};
 }
@@ -227,16 +244,16 @@ sub bug_count {
 #####      Accessors      ######
 ################################
 
-sub name       { return $_[0]->{'value'};      }
+sub name       { return $_[0]->{'value'}; }
 sub product_id { return $_[0]->{'product_id'}; }
-sub sortkey    { return $_[0]->{'sortkey'};    }
-sub is_active  { return $_[0]->{'isactive'};   }
+sub sortkey    { return $_[0]->{'sortkey'}; }
+sub is_active  { return $_[0]->{'isactive'}; }
 
 sub product {
     my $self = shift;
 
     require Bugzilla::Product;
-    $self->{'product'} ||= new Bugzilla::Product($self->product_id);
+    $self->{'product'} ||= new Bugzilla::Product( $self->product_id );
     return $self->{'product'};
 }
 

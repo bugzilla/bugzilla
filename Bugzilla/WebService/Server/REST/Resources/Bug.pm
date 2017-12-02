@@ -16,25 +16,28 @@ use Bugzilla::WebService::Bug;
 
 BEGIN {
     *Bugzilla::WebService::Bug::rest_resources = \&_rest_resources;
-};
+}
 
 sub _rest_resources {
     my $rest_resources = [
-        qr{^/bug$}, {
-            GET  => {
+        qr{^/bug$},
+        {
+            GET => {
                 method => 'search',
             },
             POST => {
-                method => 'create',
+                method      => 'create',
                 status_code => STATUS_CREATED
             }
         },
-        qr{^/bug/$}, {
+        qr{^/bug/$},
+        {
             GET => {
                 method => 'get'
             }
         },
-        qr{^/bug/([^/]+)$}, {
+        qr{^/bug/([^/]+)$},
+        {
             GET => {
                 method => 'get',
                 params => sub {
@@ -48,8 +51,9 @@ sub _rest_resources {
                 }
             }
         },
-        qr{^/bug/([^/]+)/comment$}, {
-            GET  => {
+        qr{^/bug/([^/]+)/comment$},
+        {
+            GET => {
                 method => 'comments',
                 params => sub {
                     return { ids => [ $_[0] ] };
@@ -63,7 +67,8 @@ sub _rest_resources {
                 success_code => STATUS_CREATED
             }
         },
-        qr{^/bug/comment/([^/]+)$}, {
+        qr{^/bug/comment/([^/]+)$},
+        {
             GET => {
                 method => 'comments',
                 params => sub {
@@ -71,7 +76,8 @@ sub _rest_resources {
                 }
             }
         },
-        qr{^/bug/comment/tags/([^/]+)$}, {
+        qr{^/bug/comment/tags/([^/]+)$},
+        {
             GET => {
                 method => 'search_comment_tags',
                 params => sub {
@@ -79,7 +85,8 @@ sub _rest_resources {
                 },
             },
         },
-        qr{^/bug/comment/([^/]+)/tags$}, {
+        qr{^/bug/comment/([^/]+)/tags$},
+        {
             PUT => {
                 method => 'update_comment_tags',
                 params => sub {
@@ -87,7 +94,8 @@ sub _rest_resources {
                 },
             },
         },
-        qr{^/bug/([^/]+)/history$}, {
+        qr{^/bug/([^/]+)/history$},
+        {
             GET => {
                 method => 'history',
                 params => sub {
@@ -95,8 +103,9 @@ sub _rest_resources {
                 },
             }
         },
-        qr{^/bug/([^/]+)/attachment$}, {
-            GET  => {
+        qr{^/bug/([^/]+)/attachment$},
+        {
+            GET => {
                 method => 'attachments',
                 params => sub {
                     return { ids => [ $_[0] ] };
@@ -110,7 +119,8 @@ sub _rest_resources {
                 success_code => STATUS_CREATED
             }
         },
-        qr{^/bug/attachment/([^/]+)$}, {
+        qr{^/bug/attachment/([^/]+)$},
+        {
             GET => {
                 method => 'attachments',
                 params => sub {
@@ -124,12 +134,14 @@ sub _rest_resources {
                 }
             }
         },
-        qr{^/field/bug$}, {
+        qr{^/field/bug$},
+        {
             GET => {
                 method => 'fields',
             }
         },
-        qr{^/field/bug/([^/]+)$}, {
+        qr{^/field/bug/([^/]+)$},
+        {
             GET => {
                 method => 'fields',
                 params => sub {
@@ -140,7 +152,8 @@ sub _rest_resources {
                 }
             }
         },
-        qr{^/field/bug/([^/]+)/values$}, {
+        qr{^/field/bug/([^/]+)/values$},
+        {
             GET => {
                 method => 'legal_values',
                 params => sub {
@@ -148,12 +161,15 @@ sub _rest_resources {
                 }
             }
         },
-        qr{^/field/bug/([^/]+)/([^/]+)/values$}, {
+        qr{^/field/bug/([^/]+)/([^/]+)/values$},
+        {
             GET => {
                 method => 'legal_values',
                 params => sub {
-                    return { field      => $_[0],
-                             product_id => $_[1] };
+                    return {
+                        field      => $_[0],
+                        product_id => $_[1]
+                    };
                 }
             }
         },

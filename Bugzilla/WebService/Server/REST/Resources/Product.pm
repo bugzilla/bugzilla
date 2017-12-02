@@ -18,35 +18,40 @@ use Bugzilla::Error;
 
 BEGIN {
     *Bugzilla::WebService::Product::rest_resources = \&_rest_resources;
-};
+}
 
 sub _rest_resources {
     my $rest_resources = [
-        qr{^/product_accessible$}, {
+        qr{^/product_accessible$},
+        {
             GET => {
                 method => 'get_accessible_products'
             }
         },
-        qr{^/product_enterable$}, {
+        qr{^/product_enterable$},
+        {
             GET => {
                 method => 'get_enterable_products'
             }
         },
-        qr{^/product_selectable$}, {
+        qr{^/product_selectable$},
+        {
             GET => {
                 method => 'get_selectable_products'
             }
         },
-        qr{^/product$}, {
-            GET  => {
+        qr{^/product$},
+        {
+            GET => {
                 method => 'get'
             },
             POST => {
-                method => 'create',
+                method       => 'create',
                 success_code => STATUS_CREATED
             }
         },
-        qr{^/product/([^/]+)$}, {
+        qr{^/product/([^/]+)$},
+        {
             GET => {
                 method => 'get',
                 params => sub {

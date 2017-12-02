@@ -12,6 +12,7 @@ use warnings;
 
 use Cwd qw(abs_path);
 use File::Basename;
+
 BEGIN {
     # Untaint the abs_path.
     my ($a) = abs_path($0) =~ /^(.*)$/;

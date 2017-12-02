@@ -16,13 +16,12 @@ use parent qw(Pod::Simple::HTML);
 # Without this constant, HTMLBatch will throw undef warnings.
 use constant VERSION    => $Pod::Simple::HTML::VERSION;
 use constant CODE_CLASS => ' class="code"';
-use constant META_CT  => '<meta http-equiv="Content-Type" content="text/html;'
-                         . ' charset=UTF-8">';
-use constant DOCTYPE  => '<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01'
+use constant META_CT    => '<meta http-equiv="Content-Type" content="text/html;' . ' charset=UTF-8">';
+use constant DOCTYPE    => '<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01'
     . ' Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">';
 
 sub new {
-    my $self    = shift->SUPER::new(@_);
+    my $self = shift->SUPER::new(@_);
 
     my $doctype      = $self->DOCTYPE;
     my $content_type = $self->META_CT;
@@ -46,10 +45,10 @@ END_HTML
 
     # Fix some tags to have classes so that we can adjust them.
     my $code = CODE_CLASS;
-    $self->{'Tagmap'}->{'Verbatim'} = "\n<pre $code>";
+    $self->{'Tagmap'}->{'Verbatim'}          = "\n<pre $code>";
     $self->{'Tagmap'}->{'VerbatimFormatted'} = "\n<pre $code>";
-    $self->{'Tagmap'}->{'F'} = "<em $code>";
-    $self->{'Tagmap'}->{'C'} = "<code $code>";
+    $self->{'Tagmap'}->{'F'}                 = "<em $code>";
+    $self->{'Tagmap'}->{'C'}                 = "<code $code>";
 
     # Don't put head4 tags into the Table of Contents. We have this
     delete $Pod::Simple::HTML::ToIndex{'head4'};
@@ -61,7 +60,7 @@ END_HTML
 sub do_beginning {
     my $self = shift;
     $self->SUPER::do_beginning(@_);
-    print {$self->{'output_fh'}} "<h1>" . $self->get_short_title . "</h1>";
+    print { $self->{'output_fh'} } "<h1>" . $self->get_short_title . "</h1>";
     return 1;
 }
 

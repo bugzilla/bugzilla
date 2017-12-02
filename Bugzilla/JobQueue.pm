@@ -29,41 +29,44 @@ use constant JOB_MAP => {
 # Without a driver cache TheSchwartz opens a new database connection
 # for each email it sends.  This cached connection doesn't persist
 # across requests.
-use constant DRIVER_CACHE_TIME => 300; # 5 minutes
+use constant DRIVER_CACHE_TIME => 300;    # 5 minutes
 
 # To avoid memory leak/fragmentation, a worker process won't process more than
 # MAX_MESSAGES messages.
 use constant MAX_MESSAGES => 1000;
 
 sub job_map {
-    if (!defined(Bugzilla->request_cache->{job_map})) {
+    if ( !defined( Bugzilla->request_cache->{job_map} ) ) {
         my $job_map = JOB_MAP;
-        Bugzilla::Hook::process('job_map', { job_map => $job_map });
+        Bugzilla::Hook::process( 'job_map', { job_map => $job_map } );
         Bugzilla->request_cache->{job_map} = $job_map;
     }
-    
+
     return Bugzilla->request_cache->{job_map};
 }
 
 sub new {
     my $class = shift;
 
-    if (!Bugzilla->feature('jobqueue')) {
-        ThrowUserError('feature_disabled', { feature => 'jobqueue' });
+    if ( !Bugzilla->feature('jobqueue') ) {
+        ThrowUserError( 'feature_disabled', { feature => 'jobqueue' } );
     }
 
     my $lc = Bugzilla->localconfig;
+
     # We need to use the main DB as TheSchwartz module is going
     # to write to it.
     my $self = $class->SUPER::new(
-        databases => [{
-            dsn    => Bugzilla->dbh_main->{private_bz_dsn},
-            user   => $lc->{db_user},
-            pass   => $lc->{db_pass},
-            prefix => 'ts_',
-        }],
+        databases => [
+            {
+                dsn    => Bugzilla->dbh_main->{private_bz_dsn},
+                user   => $lc->{db_user},
+                pass   => $lc->{db_pass},
+                prefix => 'ts_',
+            }
+        ],
         driver_cache_expiration => DRIVER_CACHE_TIME,
-        prioritize => 1,
+        prioritize              => 1,
     );
 
     return $self;
@@ -71,7 +74,7 @@ sub new {
 
 # A way to get access to the underlying databases directly.
 sub bz_databases {
-    my $self = shift;
+    my $self   = shift;
     my @hashes = keys %{ $self->{databases} };
     return map { $self->driver_for($_) } @hashes;
 }
@@ -79,11 +82,11 @@ sub bz_databases {
 # inserts a job into the queue to be processed and returns immediately
 sub insert {
     my $self = shift;
-    my $job = shift;
+    my $job  = shift;
 
-    if (!ref($job)) {
+    if ( !ref($job) ) {
         my $mapped_job = Bugzilla::JobQueue->job_map()->{$job};
-        ThrowCodeError('jobqueue_no_job_mapping', { job => $job })
+        ThrowCodeError( 'jobqueue_no_job_mapping', { job => $job } )
             if !$mapped_job;
 
         $job = new TheSchwartz::Job(
@@ -92,13 +95,14 @@ sub insert {
             priority => $_[1] || 5
         );
     }
-    
+
     my $retval = $self->SUPER::insert($job);
+
     # XXX Need to get an error message here if insert fails, but
     # I don't see any way to do that in TheSchwartz.
-    ThrowCodeError('jobqueue_insert_failed', { job => $job, errmsg => $@ })
+    ThrowCodeError( 'jobqueue_insert_failed', { job => $job, errmsg => $@ } )
         if !$retval;
- 
+
     return $retval;
 }
 
@@ -111,25 +115,30 @@ sub subprocess_worker {
 
     while (1) {
         my $time = (time);
-        my @jobs = $self->list_jobs({
-            funcname      => $self->{all_abilities},
-            run_after     => $time,
-            grabbed_until => $time,
-            limit         => 1,
-        });
+        my @jobs = $self->list_jobs(
+            {
+                funcname      => $self->{all_abilities},
+                run_after     => $time,
+                grabbed_until => $time,
+                limit         => 1,
+            }
+        );
         if (@jobs) {
             $self->debug("Spawning queue worker process");
+
             # Run the worker as a daemon
             system $command;
+
             # And poll the PID to detect when the working has finished.
             # We do this instead of system() to allow for the INT signal to
             # interrup us and trigger kill_worker().
-            my $pid = read_file($self->{_worker_pidfile}, err_mode => 'quiet');
+            my $pid = read_file( $self->{_worker_pidfile}, err_mode => 'quiet' );
             if ($pid) {
-                sleep(3) while(kill(0, $pid));
+                sleep(3) while ( kill( 0, $pid ) );
             }
             $self->debug("Queue worker process completed");
-        } else {
+        }
+        else {
             $self->debug("No jobs found");
         }
         sleep(5);
@@ -138,9 +147,9 @@ sub subprocess_worker {
 
 sub kill_worker {
     my $self = Bugzilla->job_queue();
-    if ($self->{_worker_pidfile} && -e $self->{_worker_pidfile}) {
-        my $worker_pid = read_file($self->{_worker_pidfile});
-        if ($worker_pid && kill(0, $worker_pid)) {
+    if ( $self->{_worker_pidfile} && -e $self->{_worker_pidfile} ) {
+        my $worker_pid = read_file( $self->{_worker_pidfile} );
+        if ( $worker_pid && kill( 0, $worker_pid ) ) {
             $self->debug("Stopping worker process");
             system "$0 -f -p '" . $self->{_worker_pidfile} . "' stop";
         }
@@ -148,9 +157,8 @@ sub kill_worker {
 }
 
 sub set_pidfile {
-    my ($self, $pidfile) = @_;
-    $self->{_worker_pidfile} = bz_locations->{'datadir'} .
-                               '/worker-' . basename($pidfile);
+    my ( $self, $pidfile ) = @_;
+    $self->{_worker_pidfile} = bz_locations->{'datadir'} . '/worker-' . basename($pidfile);
 }
 
 # Clear the request cache at the start of each run.
@@ -163,9 +171,9 @@ sub work_once {
 # Never process more than MAX_MESSAGES in one batch, to avoid memory
 # leak/fragmentation issues.
 sub work_until_done {
-    my $self = shift;
+    my $self  = shift;
     my $count = 0;
-    while ($count++ < MAX_MESSAGES) {
+    while ( $count++ < MAX_MESSAGES ) {
         $self->work_once or last;
     }
 }

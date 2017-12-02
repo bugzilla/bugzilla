@@ -24,36 +24,32 @@ use constant PUBLIC_METHODS => qw(
 );
 
 sub update {
-    my ($self, $params) = validate(@_, 'ids');
+    my ( $self, $params ) = validate( @_, 'ids' );
     my $user = Bugzilla->user;
     my $dbh  = Bugzilla->dbh;
 
     $user->login(LOGIN_REQUIRED);
 
     my $ids = $params->{ids} // [];
-    ThrowCodeError('param_required', { param => 'ids' }) unless @$ids;
+    ThrowCodeError( 'param_required', { param => 'ids' } ) unless @$ids;
 
     # Cache permissions for bugs. This highly reduces the number of calls to the
     # DB.  visible_bugs() is only able to handle bug IDs, so we have to skip
     # aliases.
-    $user->visible_bugs([grep /^[0-9]+$/, @$ids]);
+    $user->visible_bugs( [ grep /^[0-9]+$/, @$ids ] );
 
     $dbh->bz_start_transaction();
     my @results;
     my $last_visit_ts = $dbh->selectrow_array('SELECT NOW()');
     foreach my $bug_id (@$ids) {
-        my $bug = Bugzilla::Bug->check({ id => $bug_id, cache => 1 });
+        my $bug = Bugzilla::Bug->check( { id => $bug_id, cache => 1 } );
 
-        ThrowUserError('user_not_involved', { bug_id => $bug->id })
+        ThrowUserError( 'user_not_involved', { bug_id => $bug->id } )
             unless $user->is_involved_in_bug($bug);
 
-        $bug->update_user_last_visit($user, $last_visit_ts);
+        $bug->update_user_last_visit( $user, $last_visit_ts );
 
-        push(
-            @results,
-            $self->_bug_user_last_visit_to_hash(
-                $bug->id, $last_visit_ts, $params
-            ));
+        push( @results, $self->_bug_user_last_visit_to_hash( $bug->id, $last_visit_ts, $params ) );
     }
     $dbh->bz_commit_transaction();
 
@@ -61,7 +57,7 @@ sub update {
 }
 
 sub get {
-    my ($self, $params) = validate(@_, 'ids');
+    my ( $self, $params ) = validate( @_, 'ids' );
     my $user = Bugzilla->user;
     my $ids  = $params->{ids};
 
@@ -69,30 +65,32 @@ sub get {
 
     my @last_visits;
     if ($ids) {
+
         # Cache permissions for bugs. This highly reduces the number of calls to
         # the DB.  visible_bugs() is only able to handle bug IDs, so we have to
         # skip aliases.
-        $user->visible_bugs([grep /^[0-9]+$/, @$ids]);
+        $user->visible_bugs( [ grep /^[0-9]+$/, @$ids ] );
 
-        my %last_visit  = map { $_->bug_id => $_->last_visit_ts } @{ $user->last_visited($ids) };
-        @last_visits = map { $self->_bug_user_last_visit_to_hash($_->id, $last_visit{$_}, $params) } @$ids;
+        my %last_visit = map { $_->bug_id => $_->last_visit_ts } @{ $user->last_visited($ids) };
+        @last_visits = map { $self->_bug_user_last_visit_to_hash( $_->id, $last_visit{$_}, $params ) } @$ids;
     }
     else {
-        @last_visits = map {
-            $self->_bug_user_last_visit_to_hash($_->bug_id, $_->last_visit_ts, $params)
-        } @{ $user->last_visited };
+        @last_visits = map { $self->_bug_user_last_visit_to_hash( $_->bug_id, $_->last_visit_ts, $params ) }
+            @{ $user->last_visited };
     }
 
     return \@last_visits;
 }
 
 sub _bug_user_last_visit_to_hash {
-    my ($self, $bug_id, $last_visit_ts, $params) = @_;
+    my ( $self, $bug_id, $last_visit_ts, $params ) = @_;
 
-    my %result = (id            => $self->type('int',      $bug_id),
-                  last_visit_ts => $self->type('dateTime', $last_visit_ts));
+    my %result = (
+        id            => $self->type( 'int',      $bug_id ),
+        last_visit_ts => $self->type( 'dateTime', $last_visit_ts )
+    );
 
-    return filter($params, \%result);
+    return filter( $params, \%result );
 }
 
 1;

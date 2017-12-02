@@ -18,8 +18,8 @@ use parent qw(Bugzilla::BugUrl);
 ###############################
 
 sub should_handle {
-    my ($class, $uri) = @_;
-    return ($uri->path =~ m|/r/\d+/?$|) ? 1 : 0;
+    my ( $class, $uri ) = @_;
+    return ( $uri->path =~ m|/r/\d+/?$| ) ? 1 : 0;
 }
 
 sub _check_value {
@@ -32,12 +32,13 @@ sub _check_value {
 
     # Make sure there are no query parameters.
     $uri->query(undef);
+
     # And remove any # part if there is one.
     $uri->fragment(undef);
 
     # make sure the trailing slash is present
-    if ($uri->path !~ m|/$|) {
-        $uri->path($uri->path . '/');
+    if ( $uri->path !~ m|/$| ) {
+        $uri->path( $uri->path . '/' );
     }
 
     return $uri;

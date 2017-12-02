@@ -15,12 +15,12 @@ use Bugzilla::BugMail;
 BEGIN { eval "use parent qw(Bugzilla::Job::Mailer)"; }
 
 sub work {
-    my ($class, $job) = @_;
+    my ( $class, $job ) = @_;
     my $success = eval {
-        Bugzilla::BugMail::dequeue($job->arg->{vars});
+        Bugzilla::BugMail::dequeue( $job->arg->{vars} );
         1;
     };
-    if (!$success) {
+    if ( !$success ) {
         $job->failed($@);
         undef $@;
     }

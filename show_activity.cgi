@@ -16,20 +16,20 @@ use Bugzilla;
 use Bugzilla::Error;
 use Bugzilla::Bug;
 
-my $cgi = Bugzilla->cgi;
+my $cgi      = Bugzilla->cgi;
 my $template = Bugzilla->template;
-my $vars = {};
+my $vars     = {};
 
 ###############################################################################
 # Begin Data/Security Validation
 ###############################################################################
 
-# Check whether or not the user is currently logged in. 
+# Check whether or not the user is currently logged in.
 Bugzilla->login();
 
 # Make sure the bug ID is a positive integer representing an existing
 # bug that the user is authorized to access.
-my $id = $cgi->param('id');
+my $id  = $cgi->param('id');
 my $bug = Bugzilla::Bug->check($id);
 
 ###############################################################################
@@ -40,11 +40,11 @@ my $bug = Bugzilla::Bug->check($id);
 # visible immediately due to replication lag.
 Bugzilla->switch_to_shadow_db;
 
-($vars->{'operations'}, $vars->{'incomplete_data'}) = $bug->get_activity(undef, undef, 1);
+( $vars->{'operations'}, $vars->{'incomplete_data'} ) = $bug->get_activity( undef, undef, 1 );
 
 $vars->{'bug'} = $bug;
 
 print $cgi->header();
 
-$template->process("bug/activity/show.html.tmpl", $vars)
-  || ThrowTemplateError($template->error());
+$template->process( "bug/activity/show.html.tmpl", $vars )
+    || ThrowTemplateError( $template->error() );

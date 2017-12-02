@@ -16,10 +16,11 @@ use Bugzilla::Search::Condition qw(condition);
 use Bugzilla::Util qw(trick_taint);
 
 sub new {
-    my ($class, $joiner) = @_;
-    if ($joiner and $joiner ne 'OR' and $joiner ne 'AND') {
-        ThrowCodeError('search_invalid_joiner', { joiner => $joiner });
+    my ( $class, $joiner ) = @_;
+    if ( $joiner and $joiner ne 'OR' and $joiner ne 'AND' ) {
+        ThrowCodeError( 'search_invalid_joiner', { joiner => $joiner } );
     }
+
     # This will go into SQL directly so needs to be untainted.
     trick_taint($joiner) if $joiner;
     bless { joiner => $joiner || 'AND' }, $class;
@@ -32,7 +33,8 @@ sub children {
 }
 
 sub update_search_args {
-    my ($self, $search_args) = @_;
+    my ( $self, $search_args ) = @_;
+
     # abstract
 }
 
@@ -41,8 +43,8 @@ sub joiner { return $_[0]->{joiner} }
 sub has_translated_conditions {
     my ($self) = @_;
     my $children = $self->children;
-    return 1 if grep { $_->isa('Bugzilla::Search::Condition')
-                       && $_->translated } @$children;
+    return 1
+        if grep { $_->isa('Bugzilla::Search::Condition') && $_->translated } @$children;
     foreach my $child (@$children) {
         next if $child->isa('Bugzilla::Search::Condition');
         return 1 if $child->has_translated_conditions;
@@ -51,33 +53,34 @@ sub has_translated_conditions {
 }
 
 sub add {
-    my $self = shift;
+    my $self     = shift;
     my $children = $self->children;
-    if (@_ == 3) {
-        push(@$children, condition(@_));
+    if ( @_ == 3 ) {
+        push( @$children, condition(@_) );
         return;
     }
-    
+
     my ($child) = @_;
     return if !defined $child;
-    $child->isa(__PACKAGE__) || $child->isa('Bugzilla::Search::Condition')
+    $child->isa(__PACKAGE__)
+        || $child->isa('Bugzilla::Search::Condition')
         || die 'child not the right type: ' . $child;
-    push(@{ $self->children }, $child);
+    push( @{ $self->children }, $child );
 }
 
 sub negate {
-    my ($self, $value) = @_;
-    if (@_ == 2) {
+    my ( $self, $value ) = @_;
+    if ( @_ == 2 ) {
         $self->{negate} = $value ? 1 : 0;
     }
     return $self->{negate};
 }
 
 sub walk_conditions {
-    my ($self, $callback) = @_;
-    foreach my $child (@{ $self->children }) {
-        if ($child->isa('Bugzilla::Search::Condition')) {
-            $callback->($self, $child);
+    my ( $self, $callback ) = @_;
+    foreach my $child ( @{ $self->children } ) {
+        if ( $child->isa('Bugzilla::Search::Condition') ) {
+            $callback->( $self, $child );
         }
         else {
             $child->walk_conditions($callback);
@@ -87,25 +90,26 @@ sub walk_conditions {
 
 sub as_string {
     my ($self) = @_;
-    if (!$self->{sql}) {
+    if ( !$self->{sql} ) {
         my @strings;
-        foreach my $child (@{ $self->children }) {
+        foreach my $child ( @{ $self->children } ) {
             next if $child->isa(__PACKAGE__) && !$child->has_translated_conditions;
-            next if $child->isa('Bugzilla::Search::Condition')
-                    && !$child->translated;
+            next
+                if $child->isa('Bugzilla::Search::Condition')
+                && !$child->translated;
 
             my $string = $child->as_string;
             next unless $string;
-            if ($self->joiner eq 'AND') {
+            if ( $self->joiner eq 'AND' ) {
                 $string = "( $string )" if $string =~ /OR/;
             }
             else {
                 $string = "( $string )" if $string =~ /AND/;
             }
-            push(@strings, $string);
+            push( @strings, $string );
         }
 
-        my $sql = join(' ' . $self->joiner . ' ', @strings);
+        my $sql = join( ' ' . $self->joiner . ' ', @strings );
         $sql = "NOT( $sql )" if $sql && $self->negate;
         $self->{sql} = $sql;
     }
@@ -117,17 +121,20 @@ sub as_string {
 sub as_params {
     my ($self) = @_;
     my @params;
-    foreach my $child (@{ $self->children }) {
-        if ($child->isa(__PACKAGE__)) {
-            my %open_paren = (f => 'OP', n => scalar $child->negate,
-                              j => $child->joiner);
-            push(@params, \%open_paren);
-            push(@params, $child->as_params);
-            my %close_paren =  (f => 'CP');
-            push(@params, \%close_paren);
+    foreach my $child ( @{ $self->children } ) {
+        if ( $child->isa(__PACKAGE__) ) {
+            my %open_paren = (
+                f => 'OP',
+                n => scalar $child->negate,
+                j => $child->joiner
+            );
+            push( @params, \%open_paren );
+            push( @params, $child->as_params );
+            my %close_paren = ( f => 'CP' );
+            push( @params, \%close_paren );
         }
         else {
-            push(@params, $child->as_params);
+            push( @params, $child->as_params );
         }
     }
     return @params;

@@ -1,0 +1,3 @@
+--perl-best-practices
+--brace-vertical-tightness=0 # always break after {
+--maximum-line-length=120    # max line length is 120

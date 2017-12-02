@@ -40,7 +40,6 @@
 [% title = title _ filtered_desc %]
 [% generate_api_token = 1 %]
 [% header = "$terms.Bug&nbsp;$bug.bug_id" %]
-[% header_addl_info = "Last modified: $filtered_timestamp" %]
 [% javascript_urls = [ "js/util.js", "js/field.js" ] %]
 [% javascript_urls.push("js/bug.js") IF user.id  %]
 [% javascript_urls.push('js/comment-tagging.js')

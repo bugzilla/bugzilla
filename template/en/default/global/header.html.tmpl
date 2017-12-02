@@ -26,7 +26,6 @@
   # title: string. Page title.
   # header: string. Main page header.
   # subheader: string. Page subheader.
-  # header_addl_info: string. Additional header information.
   # bodyclasses: array of extra CSS classes for the <body>
   # onload: string. JavaScript code to run when the page finishes loading.
   # javascript: string. Javascript to go in the header.
@@ -48,7 +47,6 @@
 
 [% DEFAULT
   subheader = ""
-  header_addl_info = ""
   onload = ""
   style_urls = []
   no_yui = 0
@@ -126,6 +124,7 @@
        END;
     %]
 
+    <meta name="generator" content="[% terms.Bugzilla _ " " _ constants.BUGZILLA_VERSION FILTER html %]">
     <meta name="bugzilla-global" content="dummy"
         id="bugzilla-global" data-bugzilla="[% json_encode(js_BUGZILLA) FILTER html %]">
     <title>[% title %]</title>
@@ -330,13 +329,6 @@
       </td>
     </tr>
     </table>
-
-    [%# display the version number on the index page %]
-    [% IF title == "$terms.Bugzilla Main Page" %]
-      <div id="bugzilla_version">
-        [% header_addl_info FILTER html %]
-      </div>
-    [% END %]
 
     [% PROCESS "global/common-links.html.tmpl" qs_suffix = "_top" %]
 

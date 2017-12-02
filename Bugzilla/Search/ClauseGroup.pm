@@ -30,62 +30,70 @@ use constant UNSUPPORTED_FIELDS => qw(
 
 sub new {
     my ($class) = @_;
-    my $self = bless({ joiner => 'AND' }, $class);
+    my $self = bless( { joiner => 'AND' }, $class );
+
     # Add a join back to the bugs table which will be used to group conditions
     # for this clause
-    my $condition = Bugzilla::Search::Condition->new({});
-    $condition->translated({
-        joins => [{
-            table => 'bugs',
-            as    => 'bugs_g0',
-            from  => 'bug_id',
-            to    => 'bug_id',
-            extra => [],
-        }],
-        term => '1 = 1',
-    });
+    my $condition = Bugzilla::Search::Condition->new( {} );
+    $condition->translated(
+        {
+            joins => [
+                {
+                    table => 'bugs',
+                    as    => 'bugs_g0',
+                    from  => 'bug_id',
+                    to    => 'bug_id',
+                    extra => [],
+                }
+            ],
+            term => '1 = 1',
+        }
+    );
     $self->SUPER::add($condition);
     $self->{group_condition} = $condition;
     return $self;
 }
 
 sub add {
-    my ($self, @args) = @_;
+    my ( $self, @args ) = @_;
     my $field = scalar(@args) == 3 ? $args[0] : $args[0]->{field};
 
     # We don't support nesting of conditions under this clause
-    if (scalar(@args) == 1 && !$args[0]->isa('Bugzilla::Search::Condition')) {
+    if ( scalar(@args) == 1 && !$args[0]->isa('Bugzilla::Search::Condition') ) {
         ThrowUserError('search_grouped_invalid_nesting');
     }
 
     # Ensure all conditions use the same field
-    if (!$self->{_field}) {
+    if ( !$self->{_field} ) {
         $self->{_field} = $field;
-    } elsif ($field ne $self->{_field}) {
+    }
+    elsif ( $field ne $self->{_field} ) {
         ThrowUserError('search_grouped_field_mismatch');
     }
 
     # Unsupported fields
-    if (grep { $_ eq $field } UNSUPPORTED_FIELDS ) {
+    if ( grep { $_ eq $field } UNSUPPORTED_FIELDS ) {
+
         # XXX - Hack till bug 916882 is fixed.
         my $operator = scalar(@args) == 3 ? $args[1] : $args[0]->{operator};
-        ThrowUserError('search_grouped_field_invalid', { field => $field })
-          unless (($field eq 'product' || $field eq 'component') && $operator =~ /^changed/);
+        ThrowUserError( 'search_grouped_field_invalid', { field => $field } )
+            unless ( ( $field eq 'product' || $field eq 'component' ) && $operator =~ /^changed/ );
     }
 
     $self->SUPER::add(@args);
 }
 
 sub update_search_args {
-    my ($self, $search_args) = @_;
+    my ( $self, $search_args ) = @_;
 
     # No need to change things if there's only one child condition
-    return unless scalar(@{ $self->children }) > 1;
+    return unless scalar( @{ $self->children } ) > 1;
 
     # we want all the terms to use the same join table
-    if (!exists $self->{_first_chart_id}) {
+    if ( !exists $self->{_first_chart_id} ) {
         $self->{_first_chart_id} = $search_args->{chart_id};
-    } else {
+    }
+    else {
         $search_args->{chart_id} = $self->{_first_chart_id};
     }
 
@@ -95,7 +103,7 @@ sub update_search_args {
     $search_args->{full_field} =~ s/^bugs\./bugs$suffix\./;
 
     $search_args->{table_suffix} = $suffix;
-    $search_args->{bugs_table} = "bugs$suffix";
+    $search_args->{bugs_table}   = "bugs$suffix";
 }
 
 1;

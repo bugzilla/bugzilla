@@ -23,8 +23,8 @@ foreach (@ARGV) {
         $verbose = 1;
     }
     else {
-        $onlytest = sprintf("%0.3d",$_);
+        $onlytest = sprintf( "%0.3d", $_ );
     }
 }
 
-runtests(glob("t/$onlytest*.t"));
+runtests( glob("t/$onlytest*.t") );

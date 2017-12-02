@@ -45,12 +45,10 @@ use constant PRODUCT_SPECIFIC_FIELDS => qw(version target_milestone component);
 use constant DATE_FIELDS => {
     comments => ['new_since'],
     history  => ['new_since'],
-    search   => ['last_change_time', 'creation_time'],
+    search   => [ 'last_change_time', 'creation_time' ],
 };
 
-use constant BASE64_FIELDS => {
-    add_attachment => ['data'],
-};
+use constant BASE64_FIELDS => { add_attachment => ['data'], };
 
 use constant READ_ONLY => qw(
     attachments
@@ -102,91 +100,89 @@ use constant ATTACHMENT_MAPPED_RETURNS => {
 ###########
 
 sub fields {
-    my ($self, $params) = validate(@_, 'ids', 'names');
+    my ( $self, $params ) = validate( @_, 'ids', 'names' );
 
     Bugzilla->switch_to_shadow_db();
 
     my @fields;
-    if (defined $params->{ids}) {
+    if ( defined $params->{ids} ) {
         my $ids = $params->{ids};
         foreach my $id (@$ids) {
-            my $loop_field = Bugzilla::Field->check({ id => $id });
-            push(@fields, $loop_field);
+            my $loop_field = Bugzilla::Field->check( { id => $id } );
+            push( @fields, $loop_field );
         }
     }
 
-    if (defined $params->{names}) {
+    if ( defined $params->{names} ) {
         my $names = $params->{names};
         foreach my $field_name (@$names) {
             my $loop_field = Bugzilla::Field->check($field_name);
+
             # Don't push in duplicate fields if we also asked for this field
             # in "ids".
-            if (!grep($_->id == $loop_field->id, @fields)) {
-                push(@fields, $loop_field);
+            if ( !grep( $_->id == $loop_field->id, @fields ) ) {
+                push( @fields, $loop_field );
             }
         }
     }
 
-    if (!defined $params->{ids} and !defined $params->{names}) {
-        @fields = @{ Bugzilla->fields({ obsolete => 0 }) };
+    if ( !defined $params->{ids} and !defined $params->{names} ) {
+        @fields = @{ Bugzilla->fields( { obsolete => 0 } ) };
     }
 
     my @fields_out;
     foreach my $field (@fields) {
-        my $visibility_field = $field->visibility_field
-                               ? $field->visibility_field->name : undef;
-        my $vis_values = $field->visibility_values;
-        my $value_field = $field->value_field
-                          ? $field->value_field->name : undef;
+        my $visibility_field = $field->visibility_field ? $field->visibility_field->name : undef;
+        my $vis_values       = $field->visibility_values;
+        my $value_field      = $field->value_field ? $field->value_field->name : undef;
 
-        my (@values, $has_values);
-        if ( ($field->is_select and $field->name ne 'product')
-             or grep($_ eq $field->name, PRODUCT_SPECIFIC_FIELDS)
-             or $field->name eq 'keywords')
+        my ( @values, $has_values );
+        if (   ( $field->is_select and $field->name ne 'product' )
+            or grep( $_ eq $field->name, PRODUCT_SPECIFIC_FIELDS )
+            or $field->name eq 'keywords' )
         {
-             $has_values = 1;
-             @values = @{ $self->_legal_field_values({ field => $field }) };
-        } 
+            $has_values = 1;
+            @values = @{ $self->_legal_field_values( { field => $field } ) };
+        }
 
-        if (grep($_ eq $field->name, PRODUCT_SPECIFIC_FIELDS)) {
-             $value_field = 'product';
+        if ( grep( $_ eq $field->name, PRODUCT_SPECIFIC_FIELDS ) ) {
+            $value_field = 'product';
         }
 
         my %field_data = (
-           id                => $self->type('int', $field->id),
-           type              => $self->type('int', $field->type),
-           is_custom         => $self->type('boolean', $field->custom),
-           name              => $self->type('string', $field->name),
-           display_name      => $self->type('string', $field->description),
-           is_mandatory      => $self->type('boolean', $field->is_mandatory),
-           is_on_bug_entry   => $self->type('boolean', $field->enter_bug),
-           visibility_field  => $self->type('string', $visibility_field),
-           visibility_values =>
-              [ map { $self->type('string', $_->name) } @$vis_values ],
+            id               => $self->type( 'int',     $field->id ),
+            type             => $self->type( 'int',     $field->type ),
+            is_custom        => $self->type( 'boolean', $field->custom ),
+            name             => $self->type( 'string',  $field->name ),
+            display_name     => $self->type( 'string',  $field->description ),
+            is_mandatory     => $self->type( 'boolean', $field->is_mandatory ),
+            is_on_bug_entry  => $self->type( 'boolean', $field->enter_bug ),
+            visibility_field => $self->type( 'string',  $visibility_field ),
+            visibility_values => [ map { $self->type( 'string', $_->name ) } @$vis_values ],
         );
         if ($has_values) {
-           $field_data{value_field} = $self->type('string', $value_field);
-           $field_data{values}      = \@values;
-        };
-        push(@fields_out, filter $params, \%field_data);
+            $field_data{value_field} = $self->type( 'string', $value_field );
+            $field_data{values} = \@values;
+        }
+        push( @fields_out, filter $params, \%field_data );
     }
 
     return { fields => \@fields_out };
 }
 
 sub _legal_field_values {
-    my ($self, $params) = @_;
-    my $field = $params->{field};
+    my ( $self, $params ) = @_;
+    my $field      = $params->{field};
     my $field_name = $field->name;
-    my $user = Bugzilla->user;
+    my $user       = Bugzilla->user;
 
     my @result;
-    if (grep($_ eq $field_name, PRODUCT_SPECIFIC_FIELDS)) {
+    if ( grep( $_ eq $field_name, PRODUCT_SPECIFIC_FIELDS ) ) {
         my @list;
-        if ($field_name eq 'version') {
+        if ( $field_name eq 'version' ) {
             @list = Bugzilla::Version->get_all;
         }
-        elsif ($field_name eq 'component') {
+        elsif ( $field_name eq 'component' ) {
             @list = Bugzilla::Component->get_all;
         }
         else {
@@ -194,76 +190,96 @@ sub _legal_field_values {
         }
 
         foreach my $value (@list) {
-            my $sortkey = $field_name eq 'target_milestone'
-                          ? $value->sortkey : 0;
+            my $sortkey = $field_name eq 'target_milestone' ? $value->sortkey : 0;
+
             # XXX This is very slow for large numbers of values.
             my $product_name = $value->product->name;
-            if ($user->can_see_product($product_name)) {
-                push(@result, {
-                    name     => $self->type('string', $value->name),
-                    sort_key => $self->type('int', $sortkey),
-                    sortkey  => $self->type('int', $sortkey), # deprecated
-                    visibility_values => [$self->type('string', $product_name)],
-                    is_active         => $self->type('boolean', $value->is_active),
-                });
+            if ( $user->can_see_product($product_name) ) {
+                push(
+                    @result,
+                    {
+                        name              => $self->type( 'string',   $value->name ),
+                        sort_key          => $self->type( 'int',      $sortkey ),
+                        sortkey           => $self->type( 'int',      $sortkey ),            # deprecated
+                        visibility_values => [ $self->type( 'string', $product_name ) ],
+                        is_active         => $self->type( 'boolean',  $value->is_active ),
+                    }
+                );
             }
         }
     }
 
-    elsif ($field_name eq 'bug_status') {
-        my @status_all = Bugzilla::Status->get_all;
-        my $initial_status = bless({ id => 0, name => '', is_open => 1, sortkey => 0,
-                                     can_change_to => Bugzilla::Status->can_change_to },
-                                   'Bugzilla::Status');
-        unshift(@status_all, $initial_status);
+    elsif ( $field_name eq 'bug_status' ) {
+        my @status_all     = Bugzilla::Status->get_all;
+        my $initial_status = bless(
+            {
+                id            => 0,
+                name          => '',
+                is_open       => 1,
+                sortkey       => 0,
+                can_change_to => Bugzilla::Status->can_change_to
+            },
+            'Bugzilla::Status'
+        );
+        unshift( @status_all, $initial_status );
 
         foreach my $status (@status_all) {
             my @can_change_to;
-            foreach my $change_to (@{ $status->can_change_to }) {
+            foreach my $change_to ( @{ $status->can_change_to } ) {
+
                 # There's no need to note that a status can transition
                 # to itself.
                 next if $change_to->id == $status->id;
                 my %change_to_hash = (
-                    name => $self->type('string', $change_to->name),
-                    comment_required => $self->type('boolean', 
-                        $change_to->comment_required_on_change_from($status)),
+                    name             => $self->type( 'string',  $change_to->name ),
+                    comment_required => $self->type( 'boolean', $change_to->comment_required_on_change_from($status) ),
                 );
-                push(@can_change_to, \%change_to_hash);
+                push( @can_change_to, \%change_to_hash );
             }
 
-            push (@result, {
-               name     => $self->type('string', $status->name),
-               is_open  => $self->type('boolean', $status->is_open),
-               sort_key => $self->type('int', $status->sortkey),
-               sortkey  => $self->type('int', $status->sortkey), # deprecated
-               can_change_to => \@can_change_to,
-               visibility_values => [],
-            });
+            push(
+                @result,
+                {
+                    name              => $self->type( 'string',  $status->name ),
+                    is_open           => $self->type( 'boolean', $status->is_open ),
+                    sort_key          => $self->type( 'int',     $status->sortkey ),
+                    sortkey           => $self->type( 'int',     $status->sortkey ),    # deprecated
+                    can_change_to     => \@can_change_to,
+                    visibility_values => [],
+                }
+            );
         }
     }
 
-    elsif ($field_name eq 'keywords') {
+    elsif ( $field_name eq 'keywords' ) {
         my @legal_keywords = Bugzilla::Keyword->get_all;
         foreach my $value (@legal_keywords) {
-            push (@result, {
-               name     => $self->type('string', $value->name),
-               description => $self->type('string', $value->description),
-            });
+            push(
+                @result,
+                {
+                    name        => $self->type( 'string', $value->name ),
+                    description => $self->type( 'string', $value->description ),
+                }
+            );
         }
     }
     else {
         my @values = Bugzilla::Field::Choice->type($field)->get_all();
         foreach my $value (@values) {
             my $vis_val = $value->visibility_value;
-            push(@result, {
-                name     => $self->type('string', $value->name),
-                sort_key => $self->type('int'   , $value->sortkey),
-                sortkey  => $self->type('int'   , $value->sortkey), # deprecated
-                visibility_values => [
-                    defined $vis_val ? $self->type('string', $vis_val->name) 
-                                     : ()
-                ],
-            });
+            push(
+                @result,
+                {
+                    name              => $self->type( 'string', $value->name ),
+                    sort_key          => $self->type( 'int',    $value->sortkey ),
+                    sortkey           => $self->type( 'int',    $value->sortkey ),    # deprecated
+                    visibility_values => [
+                        defined $vis_val
+                        ? $self->type( 'string', $vis_val->name )
+                        : ()
+                    ],
+                }
+            );
         }
     }
 
@@ -271,15 +287,19 @@ sub _legal_field_values {
 }
 
 sub comments {
-    my ($self, $params) = validate(@_, 'ids', 'comment_ids');
+    my ( $self, $params ) = validate( @_, 'ids', 'comment_ids' );
 
-    if (!(defined $params->{ids} || defined $params->{comment_ids})) {
-        ThrowCodeError('params_required',
-                       { function => 'Bug.comments',
-                         params   => ['ids', 'comment_ids'] });
+    if ( !( defined $params->{ids} || defined $params->{comment_ids} ) ) {
+        ThrowCodeError(
+            'params_required',
+            {
+                function => 'Bug.comments',
+                params   => [ 'ids', 'comment_ids' ]
+            }
+        );
     }
 
-    my $bug_ids = $params->{ids} || [];
+    my $bug_ids     = $params->{ids}         || [];
     my $comment_ids = $params->{comment_ids} || [];
 
     my $dbh  = Bugzilla->switch_to_shadow_db();
@@ -288,41 +308,45 @@ sub comments {
     my %bugs;
     foreach my $bug_id (@$bug_ids) {
         my $bug = Bugzilla::Bug->check($bug_id);
+
         # We want the API to always return comments in the same order.
-   
-        my $comments = $bug->comments({ order => 'oldest_to_newest',
-                                        after => $params->{new_since} });
+
+        my $comments = $bug->comments(
+            {
+                order => 'oldest_to_newest',
+                after => $params->{new_since}
+            }
+        );
         my @result;
         foreach my $comment (@$comments) {
             next if $comment->is_private && !$user->is_insider;
-            push(@result, $self->_translate_comment($comment, $params));
+            push( @result, $self->_translate_comment( $comment, $params ) );
         }
-        $bugs{$bug->id}{'comments'} = \@result;
+        $bugs{ $bug->id }{'comments'} = \@result;
     }
 
     my %comments;
-    if (scalar @$comment_ids) {
+    if ( scalar @$comment_ids ) {
         my @ids = map { trim($_) } @$comment_ids;
-        my $comment_data = Bugzilla::Comment->new_from_list(\@ids);
+        my $comment_data = Bugzilla::Comment->new_from_list( \@ids );
 
         # See if we were passed any invalid comment ids.
         my %got_ids = map { $_->id => 1 } @$comment_data;
         foreach my $comment_id (@ids) {
-            if (!$got_ids{$comment_id}) {
-                ThrowUserError('comment_id_invalid', { id => $comment_id });
+            if ( !$got_ids{$comment_id} ) {
+                ThrowUserError( 'comment_id_invalid', { id => $comment_id } );
             }
         }
- 
+
         # Now make sure that we can see all the associated bugs.
         my %got_bug_ids = map { $_->bug_id => 1 } @$comment_data;
-        Bugzilla::Bug->check($_) foreach (keys %got_bug_ids);
+        Bugzilla::Bug->check($_) foreach ( keys %got_bug_ids );
 
         foreach my $comment (@$comment_data) {
-            if ($comment->is_private && !$user->is_insider) {
-                ThrowUserError('comment_is_private', { id => $comment->id });
+            if ( $comment->is_private && !$user->is_insider ) {
+                ThrowUserError( 'comment_is_private', { id => $comment->id } );
             }
-            $comments{$comment->id} =
-                $self->_translate_comment($comment, $params);
+            $comments{ $comment->id } = $self->_translate_comment( $comment, $params );
         }
     }
 
@@ -330,83 +354,85 @@ sub comments {
 }
 
 sub render_comment {
-    my ($self, $params) = @_;
+    my ( $self, $params ) = @_;
 
-    unless (defined $params->{text}) {
-        ThrowCodeError('params_required',
-                       { function => 'Bug.render_comment',
-                         params   => ['text'] });
+    unless ( defined $params->{text} ) {
+        ThrowCodeError(
+            'params_required',
+            {
+                function => 'Bug.render_comment',
+                params   => ['text']
+            }
+        );
     }
 
     Bugzilla->switch_to_shadow_db();
-    my $bug = $params->{id} ? Bugzilla::Bug->check($params->{id}) : undef;
+    my $bug = $params->{id} ? Bugzilla::Bug->check( $params->{id} ) : undef;
 
     my $tmpl = '[% text FILTER quoteUrls(bug) %]';
     my $html;
     my $template = Bugzilla->template;
-    $template->process(
-        \$tmpl,
-        { bug => $bug, text => $params->{text}},
-        \$html
-    );
+    $template->process( \$tmpl, { bug => $bug, text => $params->{text} }, \$html );
 
     return { html => $html };
 }
 
 # Helper for Bug.comments
 sub _translate_comment {
-    my ($self, $comment, $filters, $types, $prefix) = @_;
-    my $attach_id = $comment->is_about_attachment ? $comment->extra_data
-                                                  : undef;
+    my ( $self, $comment, $filters, $types, $prefix ) = @_;
+    my $attach_id
+        = $comment->is_about_attachment
+        ? $comment->extra_data
+        : undef;
 
     my $comment_hash = {
-        id         => $self->type('int', $comment->id),
-        bug_id     => $self->type('int', $comment->bug_id),
-        creator    => $self->type('email', $comment->author->login),
-        time       => $self->type('dateTime', $comment->creation_ts),
-        creation_time => $self->type('dateTime', $comment->creation_ts),
-        is_private => $self->type('boolean', $comment->is_private),
-        text       => $self->type('string', $comment->body_full),
-        attachment_id => $self->type('int', $attach_id),
-        count      => $self->type('int', $comment->count),
+        id            => $self->type( 'int',      $comment->id ),
+        bug_id        => $self->type( 'int',      $comment->bug_id ),
+        creator       => $self->type( 'email',    $comment->author->login ),
+        time          => $self->type( 'dateTime', $comment->creation_ts ),
+        creation_time => $self->type( 'dateTime', $comment->creation_ts ),
+        is_private    => $self->type( 'boolean',  $comment->is_private ),
+        text          => $self->type( 'string',   $comment->body_full ),
+        attachment_id => $self->type( 'int',      $attach_id ),
+        count         => $self->type( 'int',      $comment->count ),
     };
 
     # Don't load comment tags unless enabled
-    if (Bugzilla->params->{'comment_taggers_group'}) {
-        $comment_hash->{tags} = [
-            map { $self->type('string', $_) }
-            @{ $comment->tags }
-        ];
+    if ( Bugzilla->params->{'comment_taggers_group'} ) {
+        $comment_hash->{tags} = [ map { $self->type( 'string', $_ ) } @{ $comment->tags } ];
     }
 
-    return filter($filters, $comment_hash, $types, $prefix);
+    return filter( $filters, $comment_hash, $types, $prefix );
 }
 
 sub get {
-    my ($self, $params) = validate(@_, 'ids');
+    my ( $self, $params ) = validate( @_, 'ids' );
 
     Bugzilla->switch_to_shadow_db() unless Bugzilla->user->id;
 
     my $ids = $params->{ids};
-    defined $ids || ThrowCodeError('param_required', { param => 'ids' });
+    defined $ids || ThrowCodeError( 'param_required', { param => 'ids' } );
 
-    my (@bugs, @faults, @hashes);
+    my ( @bugs, @faults, @hashes );
 
     # Cache permissions for bugs. This highly reduces the number of calls to the DB.
     # visible_bugs() is only able to handle bug IDs, so we have to skip aliases.
     my @int = grep { $_ =~ /^\d+$/ } @$ids;
-    Bugzilla->user->visible_bugs(\@int);
+    Bugzilla->user->visible_bugs( \@int );
 
     foreach my $bug_id (@$ids) {
         my $bug;
-        if ($params->{permissive}) {
+        if ( $params->{permissive} ) {
             eval { $bug = Bugzilla::Bug->check($bug_id); };
             if ($@) {
-                push(@faults, {id => $bug_id,
-                               faultString => $@->faultstring,
-                               faultCode => $@->faultcode,
-                              }
-                    );
+                push(
+                    @faults,
+                    {
+                        id          => $bug_id,
+                        faultString => $@->faultstring,
+                        faultCode   => $@->faultcode,
+                    }
+                );
                 undef $@;
                 next;
             }
@@ -414,30 +440,30 @@ sub get {
         else {
             $bug = Bugzilla::Bug->check($bug_id);
         }
-        push(@bugs, $bug);
-        push(@hashes, $self->_bug_to_hash($bug, $params));
+        push( @bugs, $bug );
+        push( @hashes, $self->_bug_to_hash( $bug, $params ) );
     }
 
     # Set the ETag before inserting the update tokens
     # since the tokens will always be unique even if
     # the data has not changed.
-    $self->bz_etag(\@hashes);
+    $self->bz_etag( \@hashes );
 
-    $self->_add_update_tokens($params, \@bugs, \@hashes);
+    $self->_add_update_tokens( $params, \@bugs, \@hashes );
 
     return { bugs => \@hashes, faults => \@faults };
 }
 
-# this is a function that gets bug activity for list of bug ids 
+# this is a function that gets bug activity for list of bug ids
 # it can be called as the following:
 # $call = $rpc->call( 'Bug.history', { ids => [1,2] });
 sub history {
-    my ($self, $params) = validate(@_, 'ids');
+    my ( $self, $params ) = validate( @_, 'ids' );
 
     Bugzilla->switch_to_shadow_db();
 
     my $ids = $params->{ids};
-    defined $ids || ThrowCodeError('param_required', { param => 'ids' });
+    defined $ids || ThrowCodeError( 'param_required', { param => 'ids' } );
 
     my %api_name = reverse %{ Bugzilla::Bug::FIELD_MAP() };
     $api_name{'bug_group'} = 'groups';
@@ -447,47 +473,47 @@ sub history {
         my %item;
         my $bug = Bugzilla::Bug->check($bug_id);
         $bug_id = $bug->id;
-        $item{id} = $self->type('int', $bug_id);
+        $item{id} = $self->type( 'int', $bug_id );
 
-        my ($activity) = $bug->get_activity(undef, $params->{new_since});
+        my ($activity) = $bug->get_activity( undef, $params->{new_since} );
 
         my @history;
         foreach my $changeset (@$activity) {
             my %bug_history;
-            $bug_history{when} = $self->type('dateTime', $changeset->{when});
-            $bug_history{who}  = $self->type('string', $changeset->{who});
+            $bug_history{when} = $self->type( 'dateTime', $changeset->{when} );
+            $bug_history{who}  = $self->type( 'string',   $changeset->{who} );
             $bug_history{changes} = [];
-            foreach my $change (@{ $changeset->{changes} }) {
-                my $api_field = $api_name{$change->{fieldname}} || $change->{fieldname};
+            foreach my $change ( @{ $changeset->{changes} } ) {
+                my $api_field = $api_name{ $change->{fieldname} } || $change->{fieldname};
                 my $attach_id = delete $change->{attachid};
                 if ($attach_id) {
-                    $change->{attachment_id} = $self->type('int', $attach_id);
+                    $change->{attachment_id} = $self->type( 'int', $attach_id );
                 }
-                $change->{removed} = $self->type('string', $change->{removed});
-                $change->{added}   = $self->type('string', $change->{added});
-                $change->{field_name} = $self->type('string', $api_field);
+                $change->{removed}    = $self->type( 'string', $change->{removed} );
+                $change->{added}      = $self->type( 'string', $change->{added} );
+                $change->{field_name} = $self->type( 'string', $api_field );
                 delete $change->{fieldname};
-                push (@{$bug_history{changes}}, $change);
+                push( @{ $bug_history{changes} }, $change );
             }
-            
-            push (@history, \%bug_history);
+
+            push( @history, \%bug_history );
         }
 
         $item{history} = \@history;
 
         # alias is returned in case users passes a mixture of ids and aliases
-        # then they get to know which bug activity relates to which value  
+        # then they get to know which bug activity relates to which value
         # they passed
-        $item{alias} = [ map { $self->type('string', $_) } @{ $bug->alias } ];
+        $item{alias} = [ map { $self->type( 'string', $_ ) } @{ $bug->alias } ];
 
-        push(@return, \%item);
+        push( @return, \%item );
     }
 
     return { bugs => \@return };
 }
 
 sub search {
-    my ($self, $params) = @_;
+    my ( $self, $params ) = @_;
     my $user = Bugzilla->user;
     my $dbh  = Bugzilla->dbh;
 
@@ -498,20 +524,19 @@ sub search {
     delete $match_params->{exclude_fields};
 
     # Determine whether this is a quicksearch query
-    if (exists $match_params->{quicksearch}) {
-        my $quicksearch = quicksearch($match_params->{'quicksearch'});
-        my $cgi = Bugzilla::CGI->new($quicksearch);
+    if ( exists $match_params->{quicksearch} ) {
+        my $quicksearch = quicksearch( $match_params->{'quicksearch'} );
+        my $cgi         = Bugzilla::CGI->new($quicksearch);
         $match_params = $cgi->Vars;
     }
 
-    if ( defined($match_params->{offset}) and !defined($match_params->{limit}) ) {
-        ThrowCodeError('param_required',
-                       { param => 'limit', function => 'Bug.search()' });
+    if ( defined( $match_params->{offset} ) and !defined( $match_params->{limit} ) ) {
+        ThrowCodeError( 'param_required', { param => 'limit', function => 'Bug.search()' } );
     }
 
     my $max_results = Bugzilla->params->{max_search_results};
-    unless (defined $match_params->{limit} && $match_params->{limit} == 0) {
-        if (!defined $match_params->{limit} || $match_params->{limit} > $max_results) {
+    unless ( defined $match_params->{limit} && $match_params->{limit} == 0 ) {
+        if ( !defined $match_params->{limit} || $match_params->{limit} > $max_results ) {
             $match_params->{limit} = $max_results;
         }
     }
@@ -525,17 +550,17 @@ sub search {
     my %options = ( fields => ['bug_id'] );
 
     # Find the highest custom field id
-    my @field_ids = grep(/^f(\d+)$/, keys %$match_params);
+    my @field_ids = grep( /^f(\d+)$/, keys %$match_params );
     my $last_field_id = @field_ids ? max @field_ids + 1 : 1;
 
     # Do special search types for certain fields.
-    if (my $change_when = delete $match_params->{'delta_ts'}) {
+    if ( my $change_when = delete $match_params->{'delta_ts'} ) {
         $match_params->{"f${last_field_id}"} = 'delta_ts';
         $match_params->{"o${last_field_id}"} = 'greaterthaneq';
         $match_params->{"v${last_field_id}"} = $change_when;
         $last_field_id++;
     }
-    if (my $creation_when = delete $match_params->{'creation_ts'}) {
+    if ( my $creation_when = delete $match_params->{'creation_ts'} ) {
         $match_params->{"f${last_field_id}"} = 'creation_ts';
         $match_params->{"o${last_field_id}"} = 'greaterthaneq';
         $match_params->{"v${last_field_id}"} = $creation_when;
@@ -544,11 +569,11 @@ sub search {
 
     # Some fields require a search type such as short desc, keywords, etc.
     foreach my $param (qw(short_desc longdesc status_whiteboard bug_file_loc)) {
-        if (defined $match_params->{$param} && !defined $match_params->{$param . '_type'}) {
-            $match_params->{$param . '_type'} = 'allwordssubstr';
+        if ( defined $match_params->{$param} && !defined $match_params->{ $param . '_type' } ) {
+            $match_params->{ $param . '_type' } = 'allwordssubstr';
         }
     }
-    if (defined $match_params->{'keywords'} && !defined $match_params->{'keywords_type'}) {
+    if ( defined $match_params->{'keywords'} && !defined $match_params->{'keywords_type'} ) {
         $match_params->{'keywords_type'} = 'allwords';
     }
 
@@ -559,81 +584,84 @@ sub search {
         my $value = delete $match_params->{$role};
         $match_params->{"f${last_field_id}"} = $role;
         $match_params->{"o${last_field_id}"} = "anywordssubstr";
-        $match_params->{"v${last_field_id}"} = ref $value ? join(" ", @{$value}) : $value;
+        $match_params->{"v${last_field_id}"} = ref $value ? join( " ", @{$value} ) : $value;
         $last_field_id++;
     }
 
     # If no other parameters have been passed other than limit and offset
     # then we throw error if system is configured to do so.
-    if (!grep(!/^(limit|offset)$/, keys %$match_params)
-        && !Bugzilla->params->{search_allow_no_criteria})
+    if (   !grep( !/^(limit|offset)$/, keys %$match_params )
+        && !Bugzilla->params->{search_allow_no_criteria} )
     {
         ThrowUserError('buglist_parameters_required');
     }
 
-    $options{order}  = [ split(/\s*,\s*/, delete $match_params->{order}) ] if $match_params->{order};
+    $options{order} = [ split( /\s*,\s*/, delete $match_params->{order} ) ] if $match_params->{order};
     $options{params} = $match_params;
 
     my $search = new Bugzilla::Search(%options);
     my ($data) = $search->data;
 
-    if (!scalar @$data) {
+    if ( !scalar @$data ) {
         return { bugs => [] };
     }
 
     # Search.pm won't return bugs that the user shouldn't see so no filtering is needed.
-    my @bug_ids = map { $_->[0] } @$data;
-    my %bug_objects = map { $_->id => $_ } @{ Bugzilla::Bug->new_from_list(\@bug_ids) };
-    my @bugs = map { $bug_objects{$_} } @bug_ids;
-    @bugs = map { $self->_bug_to_hash($_, $params) } @bugs;
+    my @bug_ids     = map { $_->[0] } @$data;
+    my %bug_objects = map { $_->id => $_ } @{ Bugzilla::Bug->new_from_list( \@bug_ids ) };
+    my @bugs        = map { $bug_objects{$_} } @bug_ids;
+    @bugs = map { $self->_bug_to_hash( $_, $params ) } @bugs;
 
     return { bugs => \@bugs };
 }
 
 sub possible_duplicates {
-    my ($self, $params) = validate(@_, 'products');
+    my ( $self, $params ) = validate( @_, 'products' );
     my $user = Bugzilla->user;
 
     Bugzilla->switch_to_shadow_db();
 
     # Undo the array-ification that validate() does, for "summary".
-    $params->{summary} || ThrowCodeError('param_required',
-        { function => 'Bug.possible_duplicates', param => 'summary' });
+    $params->{summary}
+        || ThrowCodeError( 'param_required', { function => 'Bug.possible_duplicates', param => 'summary' } );
 
     my @products;
-    foreach my $name (@{ $params->{'products'} || [] }) {
-        my $object = $user->can_enter_product($name, THROW_ERROR);
-        push(@products, $object);
+    foreach my $name ( @{ $params->{'products'} || [] } ) {
+        my $object = $user->can_enter_product( $name, THROW_ERROR );
+        push( @products, $object );
     }
 
     my $possible_dupes = Bugzilla::Bug->possible_duplicates(
-        { summary => $params->{summary}, products => \@products,
-          limit   => $params->{limit} });
-    my @hashes = map { $self->_bug_to_hash($_, $params) } @$possible_dupes;
-    $self->_add_update_tokens($params, $possible_dupes, \@hashes);
+        {
+            summary  => $params->{summary},
+            products => \@products,
+            limit    => $params->{limit}
+        }
+    );
+    my @hashes = map { $self->_bug_to_hash( $_, $params ) } @$possible_dupes;
+    $self->_add_update_tokens( $params, $possible_dupes, \@hashes );
     return { bugs => \@hashes };
 }
 
 sub update {
-    my ($self, $params) = validate(@_, 'ids');
+    my ( $self, $params ) = validate( @_, 'ids' );
 
     my $user = Bugzilla->login(LOGIN_REQUIRED);
-    my $dbh = Bugzilla->dbh;
+    my $dbh  = Bugzilla->dbh;
 
     # We skip certain fields because their set_ methods actually use
     # the external names instead of the internal names.
-    $params = Bugzilla::Bug::map_fields($params, 
-        { summary => 1, platform => 1, severity => 1, url => 1 });
+    $params = Bugzilla::Bug::map_fields( $params, { summary => 1, platform => 1, severity => 1, url => 1 } );
 
     my $ids = delete $params->{ids};
-    defined $ids || ThrowCodeError('param_required', { param => 'ids' });
+    defined $ids || ThrowCodeError( 'param_required', { param => 'ids' } );
 
     my @bugs = map { Bugzilla::Bug->check_for_edit($_) } @$ids;
 
     my %values = %$params;
     $values{other_bugs} = \@bugs;
 
-    if (exists $values{comment} and exists $values{comment}{comment}) {
+    if ( exists $values{comment} and exists $values{comment}{comment} ) {
         $values{comment}{body} = delete $values{comment}{comment};
     }
 
@@ -643,11 +671,11 @@ sub update {
     delete $values{dependencies};
 
     # For backwards compatibility, treat alias string or array as a set action
-    if (exists $values{alias}) {
-        if (not ref $values{alias}) {
+    if ( exists $values{alias} ) {
+        if ( not ref $values{alias} ) {
             $values{alias} = { set => [ $values{alias} ] };
         }
-        elsif (ref $values{alias} eq 'ARRAY') {
+        elsif ( ref $values{alias} eq 'ARRAY' ) {
             $values{alias} = { set => $values{alias} };
         }
     }
@@ -655,25 +683,26 @@ sub update {
     my $flags = delete $values{flags};
 
     foreach my $bug (@bugs) {
-        $bug->set_all(\%values);
+        $bug->set_all( \%values );
         if ($flags) {
-            my ($old_flags, $new_flags) = extract_flags($flags, $bug);
-            $bug->set_flags($old_flags, $new_flags);
+            my ( $old_flags, $new_flags ) = extract_flags( $flags, $bug );
+            $bug->set_flags( $old_flags, $new_flags );
         }
     }
 
     my %all_changes;
     $dbh->bz_start_transaction();
     foreach my $bug (@bugs) {
-        $all_changes{$bug->id} = $bug->update();
+        $all_changes{ $bug->id } = $bug->update();
     }
     $dbh->bz_commit_transaction();
 
     foreach my $bug (@bugs) {
-        $bug->send_changes($all_changes{$bug->id});
+        $bug->send_changes( $all_changes{ $bug->id } );
     }
 
     my %api_name = reverse %{ Bugzilla::Bug::FIELD_MAP() };
+
     # This doesn't normally belong in FIELD_MAP, but we do want to translate
     # "bug_group" back into "groups".
     $api_name{'bug_group'} = 'groups';
@@ -681,39 +710,40 @@ sub update {
     my @result;
     foreach my $bug (@bugs) {
         my %hash = (
-            id               => $self->type('int', $bug->id),
-            last_change_time => $self->type('dateTime', $bug->delta_ts),
+            id               => $self->type( 'int',      $bug->id ),
+            last_change_time => $self->type( 'dateTime', $bug->delta_ts ),
             changes          => {},
         );
 
         # alias is returned in case users pass a mixture of ids and aliases,
         # so that they can know which set of changes relates to which value
         # they passed.
-        $hash{alias} = [ map { $self->type('string', $_) } @{ $bug->alias } ];
+        $hash{alias} = [ map { $self->type( 'string', $_ ) } @{ $bug->alias } ];
 
-        my %changes = %{ $all_changes{$bug->id} };
-        foreach my $field (keys %changes) {
+        my %changes = %{ $all_changes{ $bug->id } };
+        foreach my $field ( keys %changes ) {
             my $change = $changes{$field};
             my $api_field = $api_name{$field} || $field;
+
             # We normalize undef to an empty string, so that the API
             # stays consistent for things like Deadline that can become
             # empty.
             $change->[0] = '' if !defined $change->[0];
             $change->[1] = '' if !defined $change->[1];
             $hash{changes}->{$api_field} = {
-                removed => $self->type('string', $change->[0]),
-                added   => $self->type('string', $change->[1]) 
+                removed => $self->type( 'string', $change->[0] ),
+                added   => $self->type( 'string', $change->[1] )
             };
         }
 
-        push(@result, \%hash);
+        push( @result, \%hash );
     }
 
     return { bugs => \@result };
 }
 
 sub create {
-    my ($self, $params) = @_;
+    my ( $self, $params ) = @_;
     my $dbh = Bugzilla->dbh;
 
     Bugzilla->login(LOGIN_REQUIRED);
@@ -730,80 +760,79 @@ sub create {
 
     # Set bug flags
     if ($flags) {
-        my ($flags, $new_flags) = extract_flags($flags, $bug);
-        $bug->set_flags($flags, $new_flags);
-        $bug->update($bug->creation_ts);
+        my ( $flags, $new_flags ) = extract_flags( $flags, $bug );
+        $bug->set_flags( $flags, $new_flags );
+        $bug->update( $bug->creation_ts );
     }
 
     $dbh->bz_commit_transaction();
 
     $bug->send_changes();
 
-    return { id => $self->type('int', $bug->bug_id) };
+    return { id => $self->type( 'int', $bug->bug_id ) };
 }
 
 sub legal_values {
-    my ($self, $params) = @_;
+    my ( $self, $params ) = @_;
 
     Bugzilla->switch_to_shadow_db();
 
-    defined $params->{field} 
-        or ThrowCodeError('param_required', { param => 'field' });
+    defined $params->{field}
+        or ThrowCodeError( 'param_required', { param => 'field' } );
 
-    my $field = Bugzilla::Bug::FIELD_MAP->{$params->{field}} 
-                || $params->{field};
+    my $field = Bugzilla::Bug::FIELD_MAP->{ $params->{field} }
+        || $params->{field};
 
-    my @global_selects =
-        @{ Bugzilla->fields({ is_select => 1, is_abnormal => 0 }) };
+    my @global_selects = @{ Bugzilla->fields( { is_select => 1, is_abnormal => 0 } ) };
 
     my $values;
-    if (grep($_->name eq $field, @global_selects)) {
+    if ( grep( $_->name eq $field, @global_selects ) ) {
+
         # The field is a valid one.
         trick_taint($field);
         $values = get_legal_field_values($field);
     }
-    elsif (grep($_ eq $field, PRODUCT_SPECIFIC_FIELDS)) {
+    elsif ( grep( $_ eq $field, PRODUCT_SPECIFIC_FIELDS ) ) {
         my $id = $params->{product_id};
-        defined $id || ThrowCodeError('param_required',
-            { function => 'Bug.legal_values', param => 'product_id' });
-        grep($_->id eq $id, @{Bugzilla->user->get_accessible_products})
-            || ThrowUserError('product_access_denied', { id => $id });
+        defined $id || ThrowCodeError( 'param_required', { function => 'Bug.legal_values', param => 'product_id' } );
+        grep( $_->id eq $id, @{ Bugzilla->user->get_accessible_products } )
+            || ThrowUserError( 'product_access_denied', { id => $id } );
 
         my $product = new Bugzilla::Product($id);
         my @objects;
-        if ($field eq 'version') {
-            @objects = @{$product->versions};
+        if ( $field eq 'version' ) {
+            @objects = @{ $product->versions };
         }
-        elsif ($field eq 'target_milestone') {
-            @objects = @{$product->milestones};
+        elsif ( $field eq 'target_milestone' ) {
+            @objects = @{ $product->milestones };
         }
-        elsif ($field eq 'component') {
-            @objects = @{$product->components};
+        elsif ( $field eq 'component' ) {
+            @objects = @{ $product->components };
         }
 
-        $values = [map { $_->name } @objects];
+        $values = [ map { $_->name } @objects ];
     }
     else {
-        ThrowCodeError('invalid_field_name', { field => $params->{field} });
+        ThrowCodeError( 'invalid_field_name', { field => $params->{field} } );
     }
 
     my @result;
     foreach my $val (@$values) {
-        push(@result, $self->type('string', $val));
+        push( @result, $self->type( 'string', $val ) );
     }
 
     return { values => \@result };
 }
 
 sub add_attachment {
-    my ($self, $params) = validate(@_, 'ids');
+    my ( $self, $params ) = validate( @_, 'ids' );
     my $dbh = Bugzilla->dbh;
 
     Bugzilla->login(LOGIN_REQUIRED);
     defined $params->{ids}
-        || ThrowCodeError('param_required', { param => 'ids' });
+        || ThrowCodeError( 'param_required', { param => 'ids' } );
     defined $params->{data}
-        || ThrowCodeError('param_required', { param => 'data' });
+        || ThrowCodeError( 'param_required', { param => 'data' } );
 
     my @bugs = map { Bugzilla::Bug->check_for_edit($_) } @{ $params->{ids} };
 
@@ -814,29 +843,35 @@ sub add_attachment {
     my $flags = delete $params->{flags};
 
     foreach my $bug (@bugs) {
-        my $attachment = Bugzilla::Attachment->create({
-            bug         => $bug,
-            creation_ts => $timestamp,
-            data        => $params->{data},
-            description => $params->{summary},
-            filename    => $params->{file_name},
-            mimetype    => $params->{content_type},
-            ispatch     => $params->{is_patch},
-            isprivate   => $params->{is_private},
-        });
+        my $attachment = Bugzilla::Attachment->create(
+            {
+                bug         => $bug,
+                creation_ts => $timestamp,
+                data        => $params->{data},
+                description => $params->{summary},
+                filename    => $params->{file_name},
+                mimetype    => $params->{content_type},
+                ispatch     => $params->{is_patch},
+                isprivate   => $params->{is_private},
+            }
+        );
 
         if ($flags) {
-            my ($old_flags, $new_flags) = extract_flags($flags, $bug, $attachment);
-            $attachment->set_flags($old_flags, $new_flags);
+            my ( $old_flags, $new_flags ) = extract_flags( $flags, $bug, $attachment );
+            $attachment->set_flags( $old_flags, $new_flags );
         }
 
         $attachment->update($timestamp);
         my $comment = $params->{comment} || '';
-        $attachment->bug->add_comment($comment, 
-            { isprivate  => $attachment->isprivate,
-              type       => CMT_ATTACHMENT_CREATED,
-              extra_data => $attachment->id });
-        push(@created, $attachment);
+        $attachment->bug->add_comment(
+            $comment,
+            {
+                isprivate  => $attachment->isprivate,
+                type       => CMT_ATTACHMENT_CREATED,
+                extra_data => $attachment->id
+            }
+        );
+        push( @created, $attachment );
     }
     $_->bug->update($timestamp) foreach @created;
     $dbh->bz_commit_transaction();
@@ -849,66 +884,68 @@ sub add_attachment {
 }
 
 sub update_attachment {
-    my ($self, $params) = validate(@_, 'ids');
+    my ( $self, $params ) = validate( @_, 'ids' );
 
     my $user = Bugzilla->login(LOGIN_REQUIRED);
-    my $dbh = Bugzilla->dbh;
+    my $dbh  = Bugzilla->dbh;
 
     my $ids = delete $params->{ids};
-    defined $ids || ThrowCodeError('param_required', { param => 'ids' });
+    defined $ids || ThrowCodeError( 'param_required', { param => 'ids' } );
 
     # Some fields cannot be sent to set_all
     foreach my $key (qw(login password token)) {
         delete $params->{$key};
     }
 
-    $params = translate($params, ATTACHMENT_MAPPED_SETTERS);
+    $params = translate( $params, ATTACHMENT_MAPPED_SETTERS );
 
     # Get all the attachments, after verifying that they exist and are editable
     my @attachments = ();
-    my %bugs = ();
+    my %bugs        = ();
     foreach my $id (@$ids) {
         my $attachment = Bugzilla::Attachment->new($id)
-          || ThrowUserError("invalid_attach_id", { attach_id => $id });
+            || ThrowUserError( "invalid_attach_id", { attach_id => $id } );
         my $bug = $attachment->bug;
         $attachment->_check_bug;
 
         push @attachments, $attachment;
-        $bugs{$bug->id} = $bug;
+        $bugs{ $bug->id } = $bug;
     }
 
-    my $flags = delete $params->{flags};
+    my $flags   = delete $params->{flags};
     my $comment = delete $params->{comment};
 
     # Update the values
     foreach my $attachment (@attachments) {
-        my ($update_flags, $new_flags) = $flags
-            ? extract_flags($flags, $attachment->bug, $attachment)
-            : ([], []);
-        if ($attachment->validate_can_edit) {
+        my ( $update_flags, $new_flags )
+            = $flags
+            ? extract_flags( $flags, $attachment->bug, $attachment )
+            : ( [], [] );
+        if ( $attachment->validate_can_edit ) {
             $attachment->set_all($params);
-            $attachment->set_flags($update_flags, $new_flags) if $flags;
+            $attachment->set_flags( $update_flags, $new_flags ) if $flags;
         }
-        elsif (scalar @$update_flags && !scalar(@$new_flags) && !scalar keys %$params) {
+        elsif ( scalar @$update_flags && !scalar(@$new_flags) && !scalar keys %$params ) {
+
             # Requestees can set flags targetted to them, even if they cannot
             # edit the attachment. Flag setters can edit their own flags too.
             my %flag_list = map { $_->{id} => $_ } @$update_flags;
-            my $flag_objs = Bugzilla::Flag->new_from_list([ keys %flag_list ]);
+            my $flag_objs = Bugzilla::Flag->new_from_list( [ keys %flag_list ] );
             my @editable_flags;
             foreach my $flag_obj (@$flag_objs) {
-                if ($flag_obj->setter_id == $user->id
-                    || ($flag_obj->requestee_id && $flag_obj->requestee_id == $user->id))
+                if ( $flag_obj->setter_id == $user->id
+                    || ( $flag_obj->requestee_id && $flag_obj->requestee_id == $user->id ) )
                 {
-                    push(@editable_flags, $flag_list{$flag_obj->id});
+                    push( @editable_flags, $flag_list{ $flag_obj->id } );
                 }
             }
-            if (!scalar @editable_flags) {
-                ThrowUserError("illegal_attachment_edit", { attach_id => $attachment->id });
+            if ( !scalar @editable_flags ) {
+                ThrowUserError( "illegal_attachment_edit", { attach_id => $attachment->id } );
             }
-            $attachment->set_flags(\@editable_flags, []);
+            $attachment->set_flags( \@editable_flags, [] );
         }
         else {
-            ThrowUserError("illegal_attachment_edit", { attach_id => $attachment->id });
+            ThrowUserError( "illegal_attachment_edit", { attach_id => $attachment->id } );
         }
     }
 
@@ -919,40 +956,44 @@ sub update_attachment {
     foreach my $attachment (@attachments) {
         my $changes = $attachment->update();
 
-        if ($comment = trim($comment)) {
-            $attachment->bug->add_comment($comment,
-                { isprivate  => $attachment->isprivate,
-                  type       => CMT_ATTACHMENT_UPDATED,
-                  extra_data => $attachment->id });
+        if ( $comment = trim($comment) ) {
+            $attachment->bug->add_comment(
+                $comment,
+                {
+                    isprivate  => $attachment->isprivate,
+                    type       => CMT_ATTACHMENT_UPDATED,
+                    extra_data => $attachment->id
+                }
+            );
         }
 
-        $changes = translate($changes, ATTACHMENT_MAPPED_RETURNS);
+        $changes = translate( $changes, ATTACHMENT_MAPPED_RETURNS );
 
         my %hash = (
-            id               => $self->type('int', $attachment->id),
-            last_change_time => $self->type('dateTime', $attachment->modification_time),
+            id               => $self->type( 'int',      $attachment->id ),
+            last_change_time => $self->type( 'dateTime', $attachment->modification_time ),
             changes          => {},
         );
 
-        foreach my $field (keys %$changes) {
+        foreach my $field ( keys %$changes ) {
             my $change = $changes->{$field};
 
             # We normalize undef to an empty string, so that the API
             # stays consistent for things like Deadline that can become
             # empty.
             $hash{changes}->{$field} = {
-                removed => $self->type('string', $change->[0] // ''),
-                added   => $self->type('string', $change->[1] // '')
+                removed => $self->type( 'string', $change->[0] // '' ),
+                added   => $self->type( 'string', $change->[1] // '' )
             };
         }
 
-        push(@result, \%hash);
+        push( @result, \%hash );
     }
 
     $dbh->bz_commit_transaction();
 
     # Email users about the change
-    foreach my $bug (values %bugs) {
+    foreach my $bug ( values %bugs ) {
         $bug->update();
         $bug->send_changes();
     }
@@ -962,53 +1003,59 @@ sub update_attachment {
 }
 
 sub add_comment {
-    my ($self, $params) = @_;
+    my ( $self, $params ) = @_;
 
     # The user must login in order add a comment
     my $user = Bugzilla->login(LOGIN_REQUIRED);
 
     # Check parameters
-    defined $params->{id} 
-        || ThrowCodeError('param_required', { param => 'id' }); 
-    my $comment = $params->{comment}; 
-    (defined $comment && trim($comment) ne '')
-        || ThrowCodeError('param_required', { param => 'comment' });
-    
-    my $bug = Bugzilla::Bug->check_for_edit($params->{id});
+    defined $params->{id}
+        || ThrowCodeError( 'param_required', { param => 'id' } );
+    my $comment = $params->{comment};
+    ( defined $comment && trim($comment) ne '' )
+        || ThrowCodeError( 'param_required', { param => 'comment' } );
 
-    # Backwards-compatibility for versions before 3.6    
-    if (defined $params->{private}) {
+    my $bug = Bugzilla::Bug->check_for_edit( $params->{id} );
+
+    # Backwards-compatibility for versions before 3.6
+    if ( defined $params->{private} ) {
         $params->{is_private} = delete $params->{private};
     }
+
     # Append comment
-    $bug->add_comment($comment, { isprivate => $params->{is_private},
-                                  work_time => $params->{work_time} });
+    $bug->add_comment(
+        $comment,
+        {
+            isprivate => $params->{is_private},
+            work_time => $params->{work_time}
+        }
+    );
     $bug->update();
 
     my $new_comment_id = $bug->{added_comments}[0]->id;
 
     # Send mail.
-    Bugzilla::BugMail::Send($bug->bug_id, { changer => $user });
+    Bugzilla::BugMail::Send( $bug->bug_id, { changer => $user } );
 
-    return { id => $self->type('int', $new_comment_id) };
+    return { id => $self->type( 'int', $new_comment_id ) };
 }
 
 sub update_see_also {
-    my ($self, $params) = @_;
+    my ( $self, $params ) = @_;
 
     my $user = Bugzilla->login(LOGIN_REQUIRED);
 
     # Check parameters
     $params->{ids}
-        || ThrowCodeError('param_required', { param => 'id' });
-    my ($add, $remove) = @$params{qw(add remove)};
-    ($add || $remove)
-        or ThrowCodeError('params_required', { params => ['add', 'remove'] });
+        || ThrowCodeError( 'param_required', { param => 'id' } );
+    my ( $add, $remove ) = @$params{qw(add remove)};
+    ( $add || $remove )
+        or ThrowCodeError( 'params_required', { params => [ 'add', 'remove' ] } );
 
     my @bugs;
-    foreach my $id (@{ $params->{ids} }) {
+    foreach my $id ( @{ $params->{ids} } ) {
         my $bug = Bugzilla::Bug->check_for_edit($id);
-        push(@bugs, $bug);
+        push( @bugs, $bug );
         if ($remove) {
             $bug->remove_see_also($_) foreach @$remove;
         }
@@ -1016,98 +1063,111 @@ sub update_see_also {
             $bug->add_see_also($_) foreach @$add;
         }
     }
-    
+
     my %changes;
     foreach my $bug (@bugs) {
         my $change = $bug->update();
-        if (my $see_also = $change->{see_also}) {
-            $changes{$bug->id}->{see_also} = {
-                removed => [split(', ', $see_also->[0])],
-                added   => [split(', ', $see_also->[1])],
+        if ( my $see_also = $change->{see_also} ) {
+            $changes{ $bug->id }->{see_also} = {
+                removed => [ split( ', ', $see_also->[0] ) ],
+                added   => [ split( ', ', $see_also->[1] ) ],
             };
         }
         else {
             # We still want a changes entry, for API consistency.
-            $changes{$bug->id}->{see_also} = { added => [], removed => [] };
+            $changes{ $bug->id }->{see_also} = { added => [], removed => [] };
         }
 
-        Bugzilla::BugMail::Send($bug->id, { changer => $user });
+        Bugzilla::BugMail::Send( $bug->id, { changer => $user } );
     }
 
     return { changes => \%changes };
 }
 
 sub attachments {
-    my ($self, $params) = validate(@_, 'ids', 'attachment_ids');
+    my ( $self, $params ) = validate( @_, 'ids', 'attachment_ids' );
 
     Bugzilla->switch_to_shadow_db() unless Bugzilla->user->id;
 
-    if (!(defined $params->{ids}
-          or defined $params->{attachment_ids}))
-    {
-        ThrowCodeError('param_required',
-                       { function => 'Bug.attachments', 
-                         params   => ['ids', 'attachment_ids'] });
+    if ( !( defined $params->{ids} or defined $params->{attachment_ids} ) ) {
+        ThrowCodeError(
+            'param_required',
+            {
+                function => 'Bug.attachments',
+                params   => [ 'ids', 'attachment_ids' ]
+            }
+        );
     }
 
-    my $ids = $params->{ids} || [];
+    my $ids        = $params->{ids}            || [];
     my $attach_ids = $params->{attachment_ids} || [];
 
     my %bugs;
     foreach my $bug_id (@$ids) {
         my $bug = Bugzilla::Bug->check($bug_id);
-        $bugs{$bug->id} = [];
-        foreach my $attach (@{$bug->attachments}) {
-            push @{$bugs{$bug->id}},
-                $self->_attachment_to_hash($attach, $params);
+        $bugs{ $bug->id } = [];
+        foreach my $attach ( @{ $bug->attachments } ) {
+            push @{ $bugs{ $bug->id } }, $self->_attachment_to_hash( $attach, $params );
         }
     }
 
     my %attachments;
-    foreach my $attach (@{Bugzilla::Attachment->new_from_list($attach_ids)}) {
-        Bugzilla::Bug->check($attach->bug_id);
-        if ($attach->isprivate && !Bugzilla->user->is_insider) {
-            ThrowUserError('auth_failure', {action    => 'access',
-                                            object    => 'attachment',
-                                            attach_id => $attach->id});
+    foreach my $attach ( @{ Bugzilla::Attachment->new_from_list($attach_ids) } ) {
+        Bugzilla::Bug->check( $attach->bug_id );
+        if ( $attach->isprivate && !Bugzilla->user->is_insider ) {
+            ThrowUserError(
+                'auth_failure',
+                {
+                    action    => 'access',
+                    object    => 'attachment',
+                    attach_id => $attach->id
+                }
+            );
         }
-        $attachments{$attach->id} =
-            $self->_attachment_to_hash($attach, $params);
+        $attachments{ $attach->id } = $self->_attachment_to_hash( $attach, $params );
     }
 
     return { bugs => \%bugs, attachments => \%attachments };
 }
 
 sub update_tags {
-    my ($self, $params) = @_;
+    my ( $self, $params ) = @_;
 
     Bugzilla->login(LOGIN_REQUIRED);
 
     my $ids  = $params->{ids};
     my $tags = $params->{tags};
 
-    ThrowCodeError('param_required',
-                   { function => 'Bug.update_tags', 
-                     param    => 'ids' }) if !defined $ids;
+    ThrowCodeError(
+        'param_required',
+        {
+            function => 'Bug.update_tags',
+            param    => 'ids'
+        }
+    ) if !defined $ids;
 
-    ThrowCodeError('param_required',
-                   { function => 'Bug.update_tags', 
-                     param    => 'tags' }) if !defined $tags;
+    ThrowCodeError(
+        'param_required',
+        {
+            function => 'Bug.update_tags',
+            param    => 'tags'
+        }
+    ) if !defined $tags;
 
     my %changes;
     foreach my $bug_id (@$ids) {
-        my $bug = Bugzilla::Bug->check($bug_id);
+        my $bug      = Bugzilla::Bug->check($bug_id);
         my @old_tags = @{ $bug->tags };
 
         $bug->remove_tag($_) foreach @{ $tags->{remove} || [] };
-        $bug->add_tag($_) foreach @{ $tags->{add} || [] };
+        $bug->add_tag($_)    foreach @{ $tags->{add}    || [] };
 
-        my ($removed, $added) = diff_arrays(\@old_tags, $bug->tags);
+        my ( $removed, $added ) = diff_arrays( \@old_tags, $bug->tags );
 
-        my @removed = map { $self->type('string', $_) } @$removed;
-        my @added   = map { $self->type('string', $_) } @$added;
+        my @removed = map { $self->type( 'string', $_ ) } @$removed;
+        my @added   = map { $self->type( 'string', $_ ) } @$added;
 
-        $changes{$bug->id}->{tags} = {
+        $changes{ $bug->id }->{tags} = {
             removed => \@removed,
             added   => \@added
         };
@@ -1117,39 +1177,50 @@ sub update_tags {
 }
 
 sub update_comment_tags {
-    my ($self, $params) = @_;
+    my ( $self, $params ) = @_;
 
     my $user = Bugzilla->login(LOGIN_REQUIRED);
     Bugzilla->params->{'comment_taggers_group'}
         || ThrowUserError("comment_tag_disabled");
     $user->can_tag_comments
-        || ThrowUserError("auth_failure",
-                          { group  => Bugzilla->params->{'comment_taggers_group'},
-                            action => "update",
-                            object => "comment_tags" });
+        || ThrowUserError(
+        "auth_failure",
+        {
+            group  => Bugzilla->params->{'comment_taggers_group'},
+            action => "update",
+            object => "comment_tags"
+        }
+        );
 
-    my $comment_id  = $params->{comment_id}
-        // ThrowCodeError('param_required',
-                          { function => 'Bug.update_comment_tags',
-                            param    => 'comment_id' });
+    my $comment_id = $params->{comment_id} // ThrowCodeError(
+        'param_required',
+        {
+            function => 'Bug.update_comment_tags',
+            param    => 'comment_id'
+        }
+    );
 
-    ThrowCodeError('param_integer_required', { function => 'Bug.update_comment_tags',
-                                               param => 'comment_id' })
-      unless $comment_id =~ /^[0-9]+$/;
+    ThrowCodeError(
+        'param_integer_required',
+        {
+            function => 'Bug.update_comment_tags',
+            param    => 'comment_id'
+        }
+    ) unless $comment_id =~ /^[0-9]+$/;
 
     my $comment = Bugzilla::Comment->new($comment_id)
         || return [];
     $comment->bug->check_is_visible();
-    if ($comment->is_private && !$user->is_insider) {
-        ThrowUserError('comment_is_private', { id => $comment_id });
+    if ( $comment->is_private && !$user->is_insider ) {
+        ThrowUserError( 'comment_is_private', { id => $comment_id } );
     }
 
     my $dbh = Bugzilla->dbh;
     $dbh->bz_start_transaction();
-    foreach my $tag (@{ $params->{add} || [] }) {
+    foreach my $tag ( @{ $params->{add} || [] } ) {
         $comment->add_tag($tag) if defined $tag;
     }
-    foreach my $tag (@{ $params->{remove} || [] }) {
+    foreach my $tag ( @{ $params->{remove} || [] } ) {
         $comment->remove_tag($tag) if defined $tag;
     }
     $comment->update();
@@ -1159,31 +1230,41 @@ sub update_comment_tags {
 }
 
 sub search_comment_tags {
-    my ($self, $params) = @_;
+    my ( $self, $params ) = @_;
 
     Bugzilla->login(LOGIN_REQUIRED);
     Bugzilla->params->{'comment_taggers_group'}
         || ThrowUserError("comment_tag_disabled");
     Bugzilla->user->can_tag_comments
-        || ThrowUserError("auth_failure", { group  => Bugzilla->params->{'comment_taggers_group'},
-                                            action => "search",
-                                            object => "comment_tags"});
+        || ThrowUserError(
+        "auth_failure",
+        {
+            group  => Bugzilla->params->{'comment_taggers_group'},
+            action => "search",
+            object => "comment_tags"
+        }
+        );
 
     my $query = $params->{query};
-    $query
-        // ThrowCodeError('param_required', { param => 'query' });
+    $query // ThrowCodeError( 'param_required', { param => 'query' } );
     my $limit = $params->{limit} || 7;
     detaint_natural($limit)
-        || ThrowCodeError('param_must_be_numeric', { param    => 'limit',
-                                                     function => 'Bug.search_comment_tags' });
+        || ThrowCodeError(
+        'param_must_be_numeric',
+        {
+            param    => 'limit',
+            function => 'Bug.search_comment_tags'
+        }
+        );
 
-
-    my $tags = Bugzilla::Comment::TagWeights->match({
-        WHERE => {
-            'tag LIKE ?' => "\%$query\%",
-        },
-        LIMIT => $limit,
-    });
+    my $tags = Bugzilla::Comment::TagWeights->match(
+        {
+            WHERE => {
+                'tag LIKE ?' => "\%$query\%",
+            },
+            LIMIT => $limit,
+        }
+    );
     return [ map { $_->tag } @$tags ];
 }
 
@@ -1197,103 +1278,102 @@ sub search_comment_tags {
 # return them directly.
 
 sub _bug_to_hash {
-    my ($self, $bug, $params) = @_;
+    my ( $self, $bug, $params ) = @_;
 
     # All the basic bug attributes are here, in alphabetical order.
     # A bug attribute is "basic" if it doesn't require an additional
     # database call to get the info.
-    my %item = %{ filter $params, {
-        # No need to format $bug->deadline specially, because Bugzilla::Bug
-        # already does it for us.
-        deadline         => $self->type('string', $bug->deadline),
-        id               => $self->type('int', $bug->bug_id),
-        is_confirmed     => $self->type('boolean', $bug->everconfirmed),
-        op_sys           => $self->type('string', $bug->op_sys),
-        platform         => $self->type('string', $bug->rep_platform),
-        priority         => $self->type('string', $bug->priority),
-        resolution       => $self->type('string', $bug->resolution),
-        severity         => $self->type('string', $bug->bug_severity),
-        status           => $self->type('string', $bug->bug_status),
-        summary          => $self->type('string', $bug->short_desc),
-        target_milestone => $self->type('string', $bug->target_milestone),
-        url              => $self->type('string', $bug->bug_file_loc),
-        version          => $self->type('string', $bug->version),
-        whiteboard       => $self->type('string', $bug->status_whiteboard),
-    } };
+    my %item = %{ filter $params,
+        {
+            # No need to format $bug->deadline specially, because Bugzilla::Bug
+            # already does it for us.
+            deadline         => $self->type( 'string',  $bug->deadline ),
+            id               => $self->type( 'int',     $bug->bug_id ),
+            is_confirmed     => $self->type( 'boolean', $bug->everconfirmed ),
+            op_sys           => $self->type( 'string',  $bug->op_sys ),
+            platform         => $self->type( 'string',  $bug->rep_platform ),
+            priority         => $self->type( 'string',  $bug->priority ),
+            resolution       => $self->type( 'string',  $bug->resolution ),
+            severity         => $self->type( 'string',  $bug->bug_severity ),
+            status           => $self->type( 'string',  $bug->bug_status ),
+            summary          => $self->type( 'string',  $bug->short_desc ),
+            target_milestone => $self->type( 'string',  $bug->target_milestone ),
+            url              => $self->type( 'string',  $bug->bug_file_loc ),
+            version          => $self->type( 'string',  $bug->version ),
+            whiteboard       => $self->type( 'string',  $bug->status_whiteboard ),
+        }
+    };
 
     # First we handle any fields that require extra work (such as date parsing
     # or SQL calls).
-    if (filter_wants $params, 'alias') {
-        $item{alias} = [ map { $self->type('string', $_) } @{ $bug->alias } ];
+    if ( filter_wants $params, 'alias' ) {
+        $item{alias} = [ map { $self->type( 'string', $_ ) } @{ $bug->alias } ];
     }
-    if (filter_wants $params, 'assigned_to') {
-        $item{'assigned_to'} = $self->type('email', $bug->assigned_to->login);
-        $item{'assigned_to_detail'} = $self->_user_to_hash($bug->assigned_to, $params, undef, 'assigned_to');
+    if ( filter_wants $params, 'assigned_to' ) {
+        $item{'assigned_to'} = $self->type( 'email', $bug->assigned_to->login );
+        $item{'assigned_to_detail'} = $self->_user_to_hash( $bug->assigned_to, $params, undef, 'assigned_to' );
     }
-    if (filter_wants $params, 'blocks') {
-        my @blocks = map { $self->type('int', $_) } @{ $bug->blocked };
+    if ( filter_wants $params, 'blocks' ) {
+        my @blocks = map { $self->type( 'int', $_ ) } @{ $bug->blocked };
         $item{'blocks'} = \@blocks;
     }
-    if (filter_wants $params, 'classification') {
-        $item{classification} = $self->type('string', $bug->classification);
+    if ( filter_wants $params, 'classification' ) {
+        $item{classification} = $self->type( 'string', $bug->classification );
     }
-    if (filter_wants $params, 'component') {
-        $item{component} = $self->type('string', $bug->component);
+    if ( filter_wants $params, 'component' ) {
+        $item{component} = $self->type( 'string', $bug->component );
     }
-    if (filter_wants $params, 'cc') {
-        my @cc = map { $self->type('email', $_) } @{ $bug->cc };
+    if ( filter_wants $params, 'cc' ) {
+        my @cc = map { $self->type( 'email', $_ ) } @{ $bug->cc };
         $item{'cc'} = \@cc;
-        $item{'cc_detail'} = [ map { $self->_user_to_hash($_, $params, undef, 'cc') } @{ $bug->cc_users } ];
+        $item{'cc_detail'} = [ map { $self->_user_to_hash( $_, $params, undef, 'cc' ) } @{ $bug->cc_users } ];
     }
-    if (filter_wants $params, 'creation_time') {
-        $item{'creation_time'} = $self->type('dateTime', $bug->creation_ts);
+    if ( filter_wants $params, 'creation_time' ) {
+        $item{'creation_time'} = $self->type( 'dateTime', $bug->creation_ts );
     }
-    if (filter_wants $params, 'creator') {
-        $item{'creator'} = $self->type('email', $bug->reporter->login);
-        $item{'creator_detail'} = $self->_user_to_hash($bug->reporter, $params, undef, 'creator');
+    if ( filter_wants $params, 'creator' ) {
+        $item{'creator'} = $self->type( 'email', $bug->reporter->login );
+        $item{'creator_detail'} = $self->_user_to_hash( $bug->reporter, $params, undef, 'creator' );
     }
-    if (filter_wants $params, 'depends_on') {
-        my @depends_on = map { $self->type('int', $_) } @{ $bug->dependson };
+    if ( filter_wants $params, 'depends_on' ) {
+        my @depends_on = map { $self->type( 'int', $_ ) } @{ $bug->dependson };
         $item{'depends_on'} = \@depends_on;
     }
-    if (filter_wants $params, 'dupe_of') {
-        $item{'dupe_of'} = $self->type('int', $bug->dup_id);
+    if ( filter_wants $params, 'dupe_of' ) {
+        $item{'dupe_of'} = $self->type( 'int', $bug->dup_id );
     }
-    if (filter_wants $params, 'groups') {
-        my @groups = map { $self->type('string', $_->name) }
-                     @{ $bug->groups_in };
+    if ( filter_wants $params, 'groups' ) {
+        my @groups = map { $self->type( 'string', $_->name ) } @{ $bug->groups_in };
         $item{'groups'} = \@groups;
     }
-    if (filter_wants $params, 'is_open') {
-        $item{'is_open'} = $self->type('boolean', $bug->status->is_open);
+    if ( filter_wants $params, 'is_open' ) {
+        $item{'is_open'} = $self->type( 'boolean', $bug->status->is_open );
     }
-    if (filter_wants $params, 'keywords') {
-        my @keywords = map { $self->type('string', $_->name) }
-                       @{ $bug->keyword_objects };
+    if ( filter_wants $params, 'keywords' ) {
+        my @keywords = map { $self->type( 'string', $_->name ) } @{ $bug->keyword_objects };
         $item{'keywords'} = \@keywords;
     }
-    if (filter_wants $params, 'last_change_time') {
-        $item{'last_change_time'} = $self->type('dateTime', $bug->delta_ts);
+    if ( filter_wants $params, 'last_change_time' ) {
+        $item{'last_change_time'} = $self->type( 'dateTime', $bug->delta_ts );
     }
-    if (filter_wants $params, 'product') {
-        $item{product} = $self->type('string', $bug->product);
+    if ( filter_wants $params, 'product' ) {
+        $item{product} = $self->type( 'string', $bug->product );
     }
-    if (filter_wants $params, 'qa_contact') {
+    if ( filter_wants $params, 'qa_contact' ) {
         my $qa_login = $bug->qa_contact ? $bug->qa_contact->login : '';
-        $item{'qa_contact'} = $self->type('email', $qa_login);
-        if ($bug->qa_contact) {
-            $item{'qa_contact_detail'} = $self->_user_to_hash($bug->qa_contact, $params, undef, 'qa_contact');
+        $item{'qa_contact'} = $self->type( 'email', $qa_login );
+        if ( $bug->qa_contact ) {
+            $item{'qa_contact_detail'} = $self->_user_to_hash( $bug->qa_contact, $params, undef, 'qa_contact' );
         }
     }
-    if (filter_wants $params, 'see_also') {
-        my @see_also = map { $self->type('string', $_->name) }
-                       @{ $bug->see_also };
+    if ( filter_wants $params, 'see_also' ) {
+        my @see_also = map { $self->type( 'string', $_->name ) } @{ $bug->see_also };
         $item{'see_also'} = \@see_also;
     }
-    if (filter_wants $params, 'flags') {
-        $item{'flags'} = [ map { $self->_flag_to_hash($_) } @{$bug->flags} ];
+    if ( filter_wants $params, 'flags' ) {
+        $item{'flags'} = [ map { $self->_flag_to_hash($_) } @{ $bug->flags } ];
     }
-    if (filter_wants $params, 'tags', 'extra') {
+    if ( filter_wants $params, 'tags', 'extra' ) {
         $item{'tags'} = $bug->tags;
     }
 
@@ -1301,112 +1381,116 @@ sub _bug_to_hash {
     my @custom_fields = Bugzilla->active_custom_fields;
     foreach my $field (@custom_fields) {
         my $name = $field->name;
-        next if !filter_wants($params, $name, ['default', 'custom']);
-        if ($field->type == FIELD_TYPE_BUG_ID) {
-            $item{$name} = $self->type('int', $bug->$name);
+        next if !filter_wants( $params, $name, [ 'default', 'custom' ] );
+        if ( $field->type == FIELD_TYPE_BUG_ID ) {
+            $item{$name} = $self->type( 'int', $bug->$name );
         }
         elsif ($field->type == FIELD_TYPE_DATETIME
-               || $field->type == FIELD_TYPE_DATE)
+            || $field->type == FIELD_TYPE_DATE )
         {
-            $item{$name} = $self->type('dateTime', $bug->$name);
+            $item{$name} = $self->type( 'dateTime', $bug->$name );
         }
-        elsif ($field->type == FIELD_TYPE_MULTI_SELECT) {
-            my @values = map { $self->type('string', $_) } @{ $bug->$name };
+        elsif ( $field->type == FIELD_TYPE_MULTI_SELECT ) {
+            my @values = map { $self->type( 'string', $_ ) } @{ $bug->$name };
             $item{$name} = \@values;
         }
         else {
-            $item{$name} = $self->type('string', $bug->$name);
+            $item{$name} = $self->type( 'string', $bug->$name );
         }
     }
 
     # Timetracking fields are only sent if the user can see them.
-    if (Bugzilla->user->is_timetracker) {
-        if (filter_wants $params, 'estimated_time') {
-            $item{'estimated_time'} = $self->type('double', $bug->estimated_time);
+    if ( Bugzilla->user->is_timetracker ) {
+        if ( filter_wants $params, 'estimated_time' ) {
+            $item{'estimated_time'} = $self->type( 'double', $bug->estimated_time );
         }
-        if (filter_wants $params, 'remaining_time') {
-            $item{'remaining_time'} = $self->type('double', $bug->remaining_time);
+        if ( filter_wants $params, 'remaining_time' ) {
+            $item{'remaining_time'} = $self->type( 'double', $bug->remaining_time );
         }
-        if (filter_wants $params, 'actual_time') {
-            $item{'actual_time'} = $self->type('double', $bug->actual_time);
+        if ( filter_wants $params, 'actual_time' ) {
+            $item{'actual_time'} = $self->type( 'double', $bug->actual_time );
         }
     }
 
     # The "accessible" bits go here because they have long names and it
     # makes the code look nicer to separate them out.
-    if (filter_wants $params, 'is_cc_accessible') {
-        $item{'is_cc_accessible'} = $self->type('boolean', $bug->cclist_accessible);
+    if ( filter_wants $params, 'is_cc_accessible' ) {
+        $item{'is_cc_accessible'} = $self->type( 'boolean', $bug->cclist_accessible );
     }
-    if (filter_wants $params, 'is_creator_accessible') {
-        $item{'is_creator_accessible'} = $self->type('boolean', $bug->reporter_accessible);
+    if ( filter_wants $params, 'is_creator_accessible' ) {
+        $item{'is_creator_accessible'} = $self->type( 'boolean', $bug->reporter_accessible );
     }
 
     return \%item;
 }
 
 sub _user_to_hash {
-    my ($self, $user, $filters, $types, $prefix) = @_;
-    my $item = filter $filters, {
-        id        => $self->type('int', $user->id),
-        real_name => $self->type('string', $user->name),
-        name      => $self->type('email', $user->login),
-        email     => $self->type('email', $user->email),
-    }, $types, $prefix;
+    my ( $self, $user, $filters, $types, $prefix ) = @_;
+    my $item = filter $filters,
+        {
+        id        => $self->type( 'int',    $user->id ),
+        real_name => $self->type( 'string', $user->name ),
+        name      => $self->type( 'email',  $user->login ),
+        email     => $self->type( 'email',  $user->email ),
+        },
+        $types, $prefix;
     return $item;
 }
 
 sub _attachment_to_hash {
-    my ($self, $attach, $filters, $types, $prefix) = @_;
+    my ( $self, $attach, $filters, $types, $prefix ) = @_;
 
-    my $item = filter $filters, {
-        creation_time    => $self->type('dateTime', $attach->attached),
-        last_change_time => $self->type('dateTime', $attach->modification_time),
-        id               => $self->type('int', $attach->id),
-        bug_id           => $self->type('int', $attach->bug_id),
-        file_name        => $self->type('string', $attach->filename),
-        summary          => $self->type('string', $attach->description),
-        content_type     => $self->type('string', $attach->contenttype),
-        is_private       => $self->type('int', $attach->isprivate),
-        is_obsolete      => $self->type('int', $attach->isobsolete),
-        is_patch         => $self->type('int', $attach->ispatch),
-    }, $types, $prefix;
+    my $item = filter $filters,
+        {
+        creation_time    => $self->type( 'dateTime', $attach->attached ),
+        last_change_time => $self->type( 'dateTime', $attach->modification_time ),
+        id               => $self->type( 'int',      $attach->id ),
+        bug_id           => $self->type( 'int',      $attach->bug_id ),
+        file_name        => $self->type( 'string',   $attach->filename ),
+        summary          => $self->type( 'string',   $attach->description ),
+        content_type     => $self->type( 'string',   $attach->contenttype ),
+        is_private       => $self->type( 'int',      $attach->isprivate ),
+        is_obsolete      => $self->type( 'int',      $attach->isobsolete ),
+        is_patch         => $self->type( 'int',      $attach->ispatch ),
+        },
+        $types, $prefix;
 
     # creator requires an extra lookup, so we only send them if
     # the filter wants them.
-    if (filter_wants $filters, 'creator', $types, $prefix) {
-        $item->{'creator'} = $self->type('email', $attach->attacher->login);
+    if ( filter_wants $filters, 'creator', $types, $prefix ) {
+        $item->{'creator'} = $self->type( 'email', $attach->attacher->login );
     }
 
-    if (filter_wants $filters, 'data', $types, $prefix) {
-        $item->{'data'} = $self->type('base64', $attach->data);
+    if ( filter_wants $filters, 'data', $types, $prefix ) {
+        $item->{'data'} = $self->type( 'base64', $attach->data );
     }
 
-    if (filter_wants $filters, 'size', $types, $prefix) {
-        $item->{'size'} = $self->type('int', $attach->datasize);
+    if ( filter_wants $filters, 'size', $types, $prefix ) {
+        $item->{'size'} = $self->type( 'int', $attach->datasize );
     }
 
-    if (filter_wants $filters, 'flags', $types, $prefix) {
-        $item->{'flags'} = [ map { $self->_flag_to_hash($_) } @{$attach->flags} ];
+    if ( filter_wants $filters, 'flags', $types, $prefix ) {
+        $item->{'flags'} = [ map { $self->_flag_to_hash($_) } @{ $attach->flags } ];
     }
 
     return $item;
 }
 
 sub _flag_to_hash {
-    my ($self, $flag) = @_;
+    my ( $self, $flag ) = @_;
 
     my $item = {
-        id                => $self->type('int', $flag->id),
-        name              => $self->type('string', $flag->name),
-        type_id           => $self->type('int', $flag->type_id),
-        creation_date     => $self->type('dateTime', $flag->creation_date), 
-        modification_date => $self->type('dateTime', $flag->modification_date), 
-        status            => $self->type('string', $flag->status)
+        id                => $self->type( 'int',      $flag->id ),
+        name              => $self->type( 'string',   $flag->name ),
+        type_id           => $self->type( 'int',      $flag->type_id ),
+        creation_date     => $self->type( 'dateTime', $flag->creation_date ),
+        modification_date => $self->type( 'dateTime', $flag->modification_date ),
+        status            => $self->type( 'string',   $flag->status )
     };
 
     foreach my $field (qw(setter requestee)) {
         my $field_id = $field . "_id";
-        $item->{$field} = $self->type('email', $flag->$field->login)
+        $item->{$field} = $self->type( 'email', $flag->$field->login )
             if $flag->$field_id;
     }
 
@@ -1414,14 +1498,14 @@ sub _flag_to_hash {
 }
 
 sub _add_update_tokens {
-    my ($self, $params, $bugs, $hashes) = @_;
+    my ( $self, $params, $bugs, $hashes ) = @_;
 
     return if !Bugzilla->user->id;
-    return if !filter_wants($params, 'update_token');
+    return if !filter_wants( $params, 'update_token' );
 
-    for(my $i = 0; $i < @$bugs; $i++) {
-        my $token = issue_hash_token([$bugs->[$i]->id, $bugs->[$i]->delta_ts]);
-        $hashes->[$i]->{'update_token'} = $self->type('string', $token);
+    for ( my $i = 0; $i < @$bugs; $i++ ) {
+        my $token = issue_hash_token( [ $bugs->[$i]->id, $bugs->[$i]->delta_ts ] );
+        $hashes->[$i]->{'update_token'} = $self->type( 'string', $token );
     }
 }
 

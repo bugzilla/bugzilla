@@ -12,12 +12,12 @@ use strict;
 use warnings;
 
 sub process {
-    my ($name, $args) = @_;
+    my ( $name, $args ) = @_;
 
     _entering($name);
 
-    foreach my $extension (@{ Bugzilla->extensions }) {
-        if ($extension->can($name)) {
+    foreach my $extension ( @{ Bugzilla->extensions } ) {
+        if ( $extension->can($name) ) {
             $extension->$name($args);
         }
     }
@@ -34,7 +34,7 @@ sub in {
 sub _entering {
     my ($hook_name) = @_;
     my $hook_stack = Bugzilla->request_cache->{hook_stack} ||= [];
-    push(@$hook_stack, $hook_name);
+    push( @$hook_stack, $hook_name );
 }
 
 sub _leaving {

@@ -24,66 +24,66 @@ sub usage {
     exit;
 }
 
-if (($#ARGV < 1) || ($#ARGV > 2)) {
+if ( ( $#ARGV < 1 ) || ( $#ARGV > 2 ) ) {
     usage();
 }
 
 # Get the arguments.
-my $bugnum = $ARGV[0];
+my $bugnum  = $ARGV[0];
 my $changer = $ARGV[1];
 
 # Validate the bug number.
-if (!($bugnum =~ /^(\d+)$/)) {
-  say STDERR "Bug number \"$bugnum\" not numeric.";
-  usage();
+if ( !( $bugnum =~ /^(\d+)$/ ) ) {
+    say STDERR "Bug number \"$bugnum\" not numeric.";
+    usage();
 }
 
 detaint_natural($bugnum);
 
-my ($id) = $dbh->selectrow_array("SELECT bug_id FROM bugs WHERE bug_id = ?", 
-                                 undef, $bugnum);
+my ($id) = $dbh->selectrow_array( "SELECT bug_id FROM bugs WHERE bug_id = ?", undef, $bugnum );
 
-if (!$id) {
-  say STDERR "Bug number $bugnum does not exist.";
-  usage();
+if ( !$id ) {
+    say STDERR "Bug number $bugnum does not exist.";
+    usage();
 }
 
 # Validate the changer address.
 my $match = Bugzilla->params->{'emailregexp'};
-if ($changer !~ /$match/) {
+if ( $changer !~ /$match/ ) {
     say STDERR "Changer \"$changer\" doesn't match email regular expression.";
     usage();
 }
-my $changer_user = new Bugzilla::User({ name => $changer });
+my $changer_user = new Bugzilla::User( { name => $changer } );
 unless ($changer_user) {
     say STDERR "\"$changer\" is not a valid user.";
     usage();
 }
 
 # Send the email.
-my $outputref = Bugzilla::BugMail::Send($bugnum, {'changer' => $changer_user });
+my $outputref = Bugzilla::BugMail::Send( $bugnum, { 'changer' => $changer_user } );
 
 # Report the results.
-my $sent = scalar(@{$outputref->{sent}});
+my $sent = scalar( @{ $outputref->{sent} } );
 
 if ($sent) {
     say "email sent to $sent recipients:";
-} else {
+}
+else {
     say "No email sent.";
 }
 
-foreach my $sent (@{$outputref->{sent}}) {
-  say "  $sent";
+foreach my $sent ( @{ $outputref->{sent} } ) {
+    say "  $sent";
 }
 
 # This document is copyright (C) 2004 Perforce Software, Inc.  All rights
 # reserved.
-# 
+#
 # Redistribution and use of this document in any form, with or without
 # modification, is permitted provided that redistributions of this
 # document retain the above copyright notice, this condition and the
 # following disclaimer.
-# 
+#
 # THIS DOCUMENT IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS
 # IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED
 # TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A

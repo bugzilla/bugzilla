@@ -18,26 +18,31 @@ use Bugzilla::Error;
 
 BEGIN {
     *Bugzilla::WebService::FlagType::rest_resources = \&_rest_resources;
-};
+}
 
 sub _rest_resources {
     my $rest_resources = [
-        qr{^/flag_type$}, {
+        qr{^/flag_type$},
+        {
             POST => {
-                method => 'create',
+                method       => 'create',
                 success_code => STATUS_CREATED
             }
         },
-        qr{^/flag_type/([^/]+)/([^/]+)$}, {
+        qr{^/flag_type/([^/]+)/([^/]+)$},
+        {
             GET => {
                 method => 'get',
                 params => sub {
-                    return { product   => $_[0],
-                             component => $_[1] };
+                    return {
+                        product   => $_[0],
+                        component => $_[1]
+                    };
                 }
             }
         },
-        qr{^/flag_type/([^/]+)$}, {
+        qr{^/flag_type/([^/]+)$},
+        {
             GET => {
                 method => 'get',
                 params => sub {

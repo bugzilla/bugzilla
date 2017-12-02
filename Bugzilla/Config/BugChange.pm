@@ -17,65 +17,67 @@ use Bugzilla::Status;
 our $sortkey = 500;
 
 sub get_param_list {
-  my $class = shift;
+    my $class = shift;
 
-  # Hardcoded bug statuses which existed before Bugzilla 3.1.
-  my @closed_bug_statuses = ('RESOLVED', 'VERIFIED', 'CLOSED');
+    # Hardcoded bug statuses which existed before Bugzilla 3.1.
+    my @closed_bug_statuses = ( 'RESOLVED', 'VERIFIED', 'CLOSED' );
 
-  # If we are upgrading from 3.0 or older, bug statuses are not customisable
-  # and bug_status.is_open is not yet defined (hence the eval), so we use
-  # the bug statuses above as they are still hardcoded.
-  eval {
-      my @current_closed_states = map {$_->name} closed_bug_statuses();
-      # If no closed state was found, use the default list above.
-      @closed_bug_statuses = @current_closed_states if scalar(@current_closed_states);
-  };
+    # If we are upgrading from 3.0 or older, bug statuses are not customisable
+    # and bug_status.is_open is not yet defined (hence the eval), so we use
+    # the bug statuses above as they are still hardcoded.
+    eval {
+        my @current_closed_states = map { $_->name } closed_bug_statuses();
 
-  my @param_list = (
-  {
-   name => 'duplicate_or_move_bug_status',
-   type => 's',
-   choices => \@closed_bug_statuses,
-   default => $closed_bug_statuses[0],
-   checker => \&check_bug_status
-  },
+        # If no closed state was found, use the default list above.
+        @closed_bug_statuses = @current_closed_states if scalar(@current_closed_states);
+    };
 
-  {
-   name => 'letsubmitterchoosepriority',
-   type => 'b',
-   default => 1
-  },
+    my @param_list = (
+        {
+            name    => 'duplicate_or_move_bug_status',
+            type    => 's',
+            choices => \@closed_bug_statuses,
+            default => $closed_bug_statuses[0],
+            checker => \&check_bug_status
+        },
 
-  {
-   name => 'letsubmitterchoosemilestone',
-   type => 'b',
-   default => 1
-  },
+        {
+            name    => 'letsubmitterchoosepriority',
+            type    => 'b',
+            default => 1
+        },
 
-  {
-   name => 'musthavemilestoneonaccept',
-   type => 'b',
-   default => 0
-  },
+        {
+            name    => 'letsubmitterchoosemilestone',
+            type    => 'b',
+            default => 1
+        },
 
-  {
-   name => 'commentonchange_resolution',
-   type => 'b',
-   default => 0
-  },
+        {
+            name    => 'musthavemilestoneonaccept',
+            type    => 'b',
+            default => 0
+        },
 
-  {
-   name => 'commentonduplicate',
-   type => 'b',
-   default => 0
-  },
+        {
+            name    => 'commentonchange_resolution',
+            type    => 'b',
+            default => 0
+        },
 
-  {
-   name    => 'noresolveonopenblockers',
-   type    => 'b',
-   default => 0,
-  } );
-  return @param_list;
+        {
+            name    => 'commentonduplicate',
+            type    => 'b',
+            default => 0
+        },
+
+        {
+            name    => 'noresolveonopenblockers',
+            type    => 'b',
+            default => 0,
+        }
+    );
+    return @param_list;
 }
 
 1;

@@ -19,7 +19,7 @@ use Bugzilla::Error;
 use Bugzilla::WebService::Constants;
 use Bugzilla::WebService::Util qw(translate params_to_objects validate);
 
-use constant PUBLIC_METHODS => qw(                                                                                                                                                                                                            
+use constant PUBLIC_METHODS => qw(
     create
 );
 
@@ -31,25 +31,30 @@ use constant MAPPED_FIELDS => {
 };
 
 sub create {
-    my ($self, $params) = @_;
+    my ( $self, $params ) = @_;
 
     my $user = Bugzilla->login(LOGIN_REQUIRED);
 
     $user->in_group('editcomponents')
         || scalar @{ $user->get_products_by_permission('editcomponents') }
-        || ThrowUserError('auth_failure', { group  => 'editcomponents',
-                                            action => 'edit',
-                                            object => 'components' });
+        || ThrowUserError(
+        'auth_failure',
+        {
+            group  => 'editcomponents',
+            action => 'edit',
+            object => 'components'
+        }
+        );
 
-    my $product = $user->check_can_admin_product($params->{product});
+    my $product = $user->check_can_admin_product( $params->{product} );
 
     # Translate the fields
-    my $values = translate($params, MAPPED_FIELDS);
+    my $values = translate( $params, MAPPED_FIELDS );
     $values->{product} = $product;
 
     # Create the component and return the newly created id.
     my $component = Bugzilla::Component->create($values);
-    return { id => $self->type('int', $component->id) };
+    return { id => $self->type( 'int', $component->id ) };
 }
 
 1;

@@ -57,6 +57,7 @@ use parent qw(Bugzilla::Object);
 use constant DB_TABLE   => 'attachments';
 use constant ID_FIELD   => 'attach_id';
 use constant LIST_ORDER => ID_FIELD;
+
 # Attachments are tracked in bugs_activity.
 use constant AUDIT_CREATES => 0;
 use constant AUDIT_UPDATES => 0;
@@ -75,9 +76,7 @@ use constant DB_COLUMNS => qw(
     submitter_id
 );
 
-use constant REQUIRED_FIELD_MAP => {
-    bug_id => 'bug',
-};
+use constant REQUIRED_FIELD_MAP => { bug_id => 'bug', };
 use constant EXTRA_REQUIRED_FIELDS => qw(data);
 
 use constant UPDATE_COLUMNS => qw(
@@ -90,12 +89,12 @@ use constant UPDATE_COLUMNS => qw(
 );
 
 use constant VALIDATORS => {
-    bug           => \&_check_bug,
-    description   => \&_check_description,
-    filename      => \&_check_filename,
-    ispatch       => \&Bugzilla::Object::check_boolean,
-    isprivate     => \&_check_is_private,
-    mimetype      => \&_check_content_type,
+    bug         => \&_check_bug,
+    description => \&_check_description,
+    filename    => \&_check_filename,
+    ispatch     => \&Bugzilla::Object::check_boolean,
+    isprivate   => \&_check_is_private,
+    mimetype    => \&_check_content_type,
 };
 
 use constant VALIDATOR_DEPENDENCIES => {
@@ -103,9 +102,7 @@ use constant VALIDATOR_DEPENDENCIES => {
     mimetype     => ['ispatch'],
 };
 
-use constant UPDATE_VALIDATORS => {
-    isobsolete => \&Bugzilla::Object::check_boolean,
-};
+use constant UPDATE_VALIDATORS => { isobsolete => \&Bugzilla::Object::check_boolean, };
 
 ###############################
 ####      Accessors      ######
@@ -141,7 +138,7 @@ the bug object to which the attachment is attached
 
 sub bug {
     require Bugzilla::Bug;
-    return $_[0]->{bug} //= Bugzilla::Bug->new({ id => $_[0]->bug_id, cache => 1 });
+    return $_[0]->{bug} //= Bugzilla::Bug->new( { id => $_[0]->bug_id, cache => 1 } );
 }
 
 =over
@@ -184,7 +181,7 @@ the user who attached the attachment
 
 sub attacher {
     return $_[0]->{attacher}
-      //= new Bugzilla::User({ id => $_[0]->{submitter_id}, cache => 1 });
+        //= new Bugzilla::User( { id => $_[0]->{submitter_id}, cache => 1 } );
 }
 
 =over
@@ -286,20 +283,20 @@ matches, because this will return a value even if it's matched by the generic
 
 sub is_viewable {
     my $contenttype = $_[0]->contenttype;
-    my $cgi = Bugzilla->cgi;
+    my $cgi         = Bugzilla->cgi;
 
     # We assume we can view all text and image types.
-    return 1 if ($contenttype =~ /^(text|image)\//);
+    return 1 if ( $contenttype =~ /^(text|image)\// );
 
     # Mozilla can view XUL. Note the trailing slash on the Gecko detection to
     # avoid sending XUL to Safari.
-    return 1 if (($contenttype =~ /^application\/vnd\.mozilla\./)
-                 && ($cgi->user_agent() =~ /Gecko\//));
+    return 1 if ( ( $contenttype =~ /^application\/vnd\.mozilla\./ )
+        && ( $cgi->user_agent() =~ /Gecko\// ) );
 
     # If it's not one of the above types, we check the Accept: header for any
     # types mentioned explicitly.
-    my $accept = join(",", $cgi->Accept());
-    return 1 if ($accept =~ /^(.*,)?\Q$contenttype\E(,.*)?$/);
+    my $accept = join( ",", $cgi->Accept() );
+    return 1 if ( $accept =~ /^(.*,)?\Q$contenttype\E(,.*)?$/ );
 
     return 0;
 }
@@ -319,16 +316,18 @@ sub data {
     return $self->{data} if exists $self->{data};
 
     # First try to get the attachment data from the database.
-    ($self->{data}) = Bugzilla->dbh->selectrow_array("SELECT thedata
+    ( $self->{data} ) = Bugzilla->dbh->selectrow_array(
+        "SELECT thedata
                                                       FROM attach_data
                                                       WHERE id = ?",
-                                                     undef,
-                                                     $self->id);
+        undef,
+        $self->id
+    );
 
     # If there's no attachment data in the database, the attachment is stored
     # in a local file, so retrieve it from there.
-    if (length($self->{data}) == 0) {
-        if (open(AH, '<', $self->_get_local_filename())) {
+    if ( length( $self->{data} ) == 0 ) {
+        if ( open( AH, '<', $self->_get_local_filename() ) ) {
             local $/;
             binmode AH;
             $self->{data} = <AH>;
@@ -362,21 +361,22 @@ sub datasize {
     return $self->{datasize} if defined $self->{datasize};
 
     # If we have already retrieved the data, return its size.
-    return length($self->{data}) if exists $self->{data};
+    return length( $self->{data} ) if exists $self->{data};
 
-    $self->{datasize} =
-        Bugzilla->dbh->selectrow_array("SELECT LENGTH(thedata)
+    $self->{datasize} = Bugzilla->dbh->selectrow_array(
+        "SELECT LENGTH(thedata)
                                         FROM attach_data
                                         WHERE id = ?",
-                                       undef, $self->id) || 0;
+        undef, $self->id
+    ) || 0;
 
     # If there's no attachment data in the database, either the attachment
     # is stored in a local file, and so retrieve its size from the file,
     # or the attachment has been deleted.
-    unless ($self->{datasize}) {
-        if (open(AH, '<', $self->_get_local_filename())) {
+    unless ( $self->{datasize} ) {
+        if ( open( AH, '<', $self->_get_local_filename() ) ) {
             binmode AH;
-            $self->{datasize} = (stat(AH))[7];
+            $self->{datasize} = ( stat(AH) )[7];
             close(AH);
         }
     }
@@ -386,7 +386,7 @@ sub datasize {
 
 sub _get_local_filename {
     my $self = shift;
-    my $hash = ($self->id % 100) + 100;
+    my $hash = ( $self->id % 100 ) + 100;
     $hash =~ s/.*(\d\d)$/group.$1/;
     return bz_locations()->{'attachdir'} . "/$hash/attachment." . $self->id;
 }
@@ -402,8 +402,9 @@ flags that have been set on the attachment
 =cut
 
 sub flags {
+
     # Don't cache it as it must be in sync with ->flag_types.
-    return $_[0]->{flags} = [map { @{$_->{flags}} } @{$_[0]->flag_types}];
+    return $_[0]->{flags} = [ map { @{ $_->{flags} } } @{ $_[0]->flag_types } ];
 }
 
 =over
@@ -421,10 +422,12 @@ sub flag_types {
     my $self = shift;
     return $self->{flag_types} if exists $self->{flag_types};
 
-    my $vars = { target_type  => 'attachment',
-                 product_id   => $self->bug->product_id,
-                 component_id => $self->bug->component_id,
-                 attach_id    => $self->id };
+    my $vars = {
+        target_type  => 'attachment',
+        product_id   => $self->bug->product_id,
+        component_id => $self->bug->component_id,
+        attach_id    => $self->id
+    };
 
     return $self->{flag_types} = Bugzilla::Flag->_flag_types($vars);
 }
@@ -433,65 +436,65 @@ sub flag_types {
 ####      Validators     ######
 ###############################
 
-sub set_content_type { $_[0]->set('mimetype', $_[1]); }
-sub set_description  { $_[0]->set('description', $_[1]); }
-sub set_filename     { $_[0]->set('filename', $_[1]); }
-sub set_is_patch     { $_[0]->set('ispatch', $_[1]); }
-sub set_is_private   { $_[0]->set('isprivate', $_[1]); }
+sub set_content_type { $_[0]->set( 'mimetype',    $_[1] ); }
+sub set_description  { $_[0]->set( 'description', $_[1] ); }
+sub set_filename     { $_[0]->set( 'filename',    $_[1] ); }
+sub set_is_patch     { $_[0]->set( 'ispatch',     $_[1] ); }
+sub set_is_private   { $_[0]->set( 'isprivate',   $_[1] ); }
 
-sub set_is_obsolete  {
-    my ($self, $obsolete) = @_;
+sub set_is_obsolete {
+    my ( $self, $obsolete ) = @_;
 
     my $old = $self->isobsolete;
-    $self->set('isobsolete', $obsolete);
+    $self->set( 'isobsolete', $obsolete );
     my $new = $self->isobsolete;
 
     # If the attachment is being marked as obsolete, cancel pending requests.
-    if ($new && $old != $new) {
-        my @requests = grep { $_->status eq '?' } @{$self->flags};
+    if ( $new && $old != $new ) {
+        my @requests = grep { $_->status eq '?' } @{ $self->flags };
         return unless scalar @requests;
 
         my %flag_ids = map { $_->id => 1 } @requests;
-        foreach my $flagtype (@{$self->flag_types}) {
-            @{$flagtype->{flags}} = grep { !$flag_ids{$_->id} } @{$flagtype->{flags}};
+        foreach my $flagtype ( @{ $self->flag_types } ) {
+            @{ $flagtype->{flags} } = grep { !$flag_ids{ $_->id } } @{ $flagtype->{flags} };
         }
     }
 }
 
 sub set_flags {
-    my ($self, $flags, $new_flags) = @_;
+    my ( $self, $flags, $new_flags ) = @_;
 
-    Bugzilla::Flag->set_flag($self, $_) foreach (@$flags, @$new_flags);
+    Bugzilla::Flag->set_flag( $self, $_ ) foreach ( @$flags, @$new_flags );
 }
 
 sub _check_bug {
-    my ($invocant, $bug) = @_;
+    my ( $invocant, $bug ) = @_;
     my $user = Bugzilla->user;
 
     $bug = ref $invocant ? $invocant->bug : $bug;
 
-    $bug || ThrowCodeError('param_required', 
-                           { function => "$invocant->create", param => 'bug' });
+    $bug || ThrowCodeError( 'param_required', { function => "$invocant->create", param => 'bug' } );
 
-    ($user->can_see_bug($bug->id) && $user->can_edit_product($bug->product_id))
-      || ThrowUserError("illegal_attachment_edit_bug", { bug_id => $bug->id });
+    ( $user->can_see_bug( $bug->id ) && $user->can_edit_product( $bug->product_id ) )
+        || ThrowUserError( "illegal_attachment_edit_bug", { bug_id => $bug->id } );
 
     return $bug;
 }
 
 sub _check_content_type {
-    my ($invocant, $content_type, undef, $params) = @_;
- 
+    my ( $invocant, $content_type, undef, $params ) = @_;
+
     my $is_patch = ref($invocant) ? $invocant->ispatch : $params->{ispatch};
     $content_type = 'text/plain' if $is_patch;
     $content_type = clean_text($content_type);
+
     # The subsets below cover all existing MIME types and charsets registered by IANA.
     # (MIME type: RFC 2045 section 5.1; charset: RFC 2278 section 3.3)
-    my $legal_types = join('|', LEGAL_CONTENT_TYPES);
-    if (!$content_type
-        || $content_type !~ /^($legal_types)\/[a-z0-9_\-\+\.]+(;\s*charset=[a-z0-9_\-\+]+)?$/i)
+    my $legal_types = join( '|', LEGAL_CONTENT_TYPES );
+    if (  !$content_type
+        || $content_type !~ /^($legal_types)\/[a-z0-9_\-\+\.]+(;\s*charset=[a-z0-9_\-\+]+)?$/i )
     {
-        ThrowUserError("invalid_content_type", { contenttype => $content_type });
+        ThrowUserError( "invalid_content_type", { contenttype => $content_type } );
     }
     trick_taint($content_type);
 
@@ -501,42 +504,44 @@ sub _check_content_type {
 
     # If we have autodetected application/octet-stream from the Content-Type
     # header, let's have a better go using a sniffer if available.
-    if (defined Bugzilla->input_params->{contenttypemethod}
+    if (   defined Bugzilla->input_params->{contenttypemethod}
         && Bugzilla->input_params->{contenttypemethod} eq 'autodetect'
         && $content_type eq 'application/octet-stream'
-        && Bugzilla->feature('typesniffer'))
+        && Bugzilla->feature('typesniffer') )
     {
         import File::MimeInfo::Magic qw(mimetype);
         require IO::Scalar;
 
         # data is either a filehandle, or the data itself.
         my $fh = $params->{data};
-        if (!ref($fh)) {
+        if ( !ref($fh) ) {
             $fh = new IO::Scalar \$fh;
         }
-        elsif (!$fh->isa('IO::Handle')) {
+        elsif ( !$fh->isa('IO::Handle') ) {
+
             # CGI.pm sends us an Fh that isn't actually an IO::Handle, but
             # has a method for getting an actual handle out of it.
             $fh = $fh->handle;
+
             # ->handle returns an literal IO::Handle, even though the
             # underlying object is a file. So we rebless it to be a proper
             # IO::File object so that we can call ->seek on it and so on.
             # Just in case CGI.pm fixes this some day, we check ->isa first.
-            if (!$fh->isa('IO::File')) {
+            if ( !$fh->isa('IO::File') ) {
                 bless $fh, 'IO::File';
             }
         }
 
         my $mimetype = mimetype($fh);
-        $fh->seek(0, 0);
+        $fh->seek( 0, 0 );
         $content_type = $mimetype if $mimetype;
     }
 
     # Make sure patches are viewable in the browser
-    if (!ref($invocant)
+    if (  !ref($invocant)
         && defined Bugzilla->input_params->{contenttypemethod}
         && Bugzilla->input_params->{contenttypemethod} eq 'autodetect'
-        && $content_type =~ m{text/x-(?:diff|patch)})
+        && $content_type =~ m{text/x-(?:diff|patch)} )
     {
         $params->{ispatch} = 1;
         $content_type = 'text/plain';
@@ -546,28 +551,34 @@ sub _check_content_type {
 }
 
 sub _check_data {
-    my ($invocant, $params) = @_;
+    my ( $invocant, $params ) = @_;
 
     my $data = $params->{data};
     $params->{filesize} = ref $data ? -s $data : length($data);
 
-    Bugzilla::Hook::process('attachment_process_data', { data       => \$data,
-                                                         attributes => $params });
+    Bugzilla::Hook::process(
+        'attachment_process_data',
+        {
+            data       => \$data,
+            attributes => $params
+        }
+    );
 
     $params->{filesize} || ThrowUserError('zero_length_file');
-    # Make sure the attachment does not exceed the maximum permitted size.
-    my $max_size = max(Bugzilla->params->{'maxlocalattachment'} * 1048576,
-                       Bugzilla->params->{'maxattachmentsize'} * 1024);
 
-    if ($params->{filesize} > $max_size) {
-        my $vars = { filesize => sprintf("%.0f", $params->{filesize}/1024) };
-        ThrowUserError('file_too_large', $vars);
+    # Make sure the attachment does not exceed the maximum permitted size.
+    my $max_size
+        = max( Bugzilla->params->{'maxlocalattachment'} * 1048576, Bugzilla->params->{'maxattachmentsize'} * 1024 );
+
+    if ( $params->{filesize} > $max_size ) {
+        my $vars = { filesize => sprintf( "%.0f", $params->{filesize} / 1024 ) };
+        ThrowUserError( 'file_too_large', $vars );
     }
     return $data;
 }
 
 sub _check_description {
-    my ($invocant, $description) = @_;
+    my ( $invocant, $description ) = @_;
 
     $description = trim($description);
     $description || ThrowUserError('missing_attachment_description');
@@ -575,11 +586,11 @@ sub _check_description {
 }
 
 sub _check_filename {
-    my ($invocant, $filename) = @_;
+    my ( $invocant, $filename ) = @_;
 
     $filename = clean_text($filename);
-    if (!$filename) {
-        if (ref $invocant) {
+    if ( !$filename ) {
+        if ( ref $invocant ) {
             ThrowUserError('filename_not_specified');
         }
         else {
@@ -594,23 +605,21 @@ sub _check_filename {
     # a big deal if it munges incorrectly occasionally.
     $filename =~ s/^.*[\/\\]//;
 
-    # Truncate the filename to MAX_ATTACH_FILENAME_LENGTH characters, counting 
+    # Truncate the filename to MAX_ATTACH_FILENAME_LENGTH characters, counting
     # from the end of the string to make sure we keep the filename extension.
-    $filename = substr($filename, 
-                       -&MAX_ATTACH_FILENAME_LENGTH, 
-                       MAX_ATTACH_FILENAME_LENGTH);
+    $filename = substr( $filename, -&MAX_ATTACH_FILENAME_LENGTH, MAX_ATTACH_FILENAME_LENGTH );
     trick_taint($filename);
 
     return $filename;
 }
 
 sub _check_is_private {
-    my ($invocant, $is_private) = @_;
+    my ( $invocant, $is_private ) = @_;
 
     $is_private = $is_private ? 1 : 0;
-    if (((!ref $invocant && $is_private)
-         || (ref $invocant && $invocant->isprivate != $is_private))
-        && !Bugzilla->user->is_insider) {
+    if ( ( ( !ref $invocant && $is_private ) || ( ref $invocant && $invocant->isprivate != $is_private ) )
+        && !Bugzilla->user->is_insider )
+    {
         ThrowUserError('user_not_insider');
     }
     return $is_private;
@@ -635,23 +644,25 @@ Returns:    a reference to an array of attachment objects.
 =cut
 
 sub get_attachments_by_bug {
-    my ($class, $bug, $vars) = @_;
+    my ( $class, $bug, $vars ) = @_;
     my $user = Bugzilla->user;
-    my $dbh = Bugzilla->dbh;
+    my $dbh  = Bugzilla->dbh;
 
     # By default, private attachments are not accessible, unless the user
     # is in the insider group or submitted the attachment.
     my $and_restriction = '';
-    my @values = ($bug->id);
+    my @values          = ( $bug->id );
 
-    unless ($user->is_insider) {
+    unless ( $user->is_insider ) {
         $and_restriction = 'AND (isprivate = 0 OR submitter_id = ?)';
-        push(@values, $user->id);
+        push( @values, $user->id );
     }
 
-    my $attach_ids = $dbh->selectcol_arrayref("SELECT attach_id FROM attachments
+    my $attach_ids = $dbh->selectcol_arrayref(
+        "SELECT attach_id FROM attachments
                                                WHERE bug_id = ? $and_restriction",
-                                               undef, @values);
+        undef, @values
+    );
 
     my $attachments = Bugzilla::Attachment->new_from_list($attach_ids);
     $_->{bug} = $bug foreach @$attachments;
@@ -660,41 +671,44 @@ sub get_attachments_by_bug {
     # themselves for each attachment listed here, we collect all the data at once and
     # populate $attachment->{flag_types} ourselves. We also load all attachers and
     # datasizes at once for the same reason.
-    if ($vars->{preload}) {
+    if ( $vars->{preload} ) {
+
         # Preload flag types and flags
-        my $vars = { target_type  => 'attachment',
-                     product_id   => $bug->product_id,
-                     component_id => $bug->component_id,
-                     attach_id    => $attach_ids };
+        my $vars = {
+            target_type  => 'attachment',
+            product_id   => $bug->product_id,
+            component_id => $bug->component_id,
+            attach_id    => $attach_ids
+        };
         my $flag_types = Bugzilla::Flag->_flag_types($vars);
 
         foreach my $attachment (@$attachments) {
             $attachment->{flag_types} = [];
             my $new_types = dclone($flag_types);
             foreach my $new_type (@$new_types) {
-                $new_type->{flags} = [ grep($_->attach_id == $attachment->id,
-                                            @{ $new_type->{flags} }) ];
-                push(@{ $attachment->{flag_types} }, $new_type);
+                $new_type->{flags} = [ grep( $_->attach_id == $attachment->id, @{ $new_type->{flags} } ) ];
+                push( @{ $attachment->{flag_types} }, $new_type );
             }
         }
 
         # Preload attachers.
         my %user_ids = map { $_->{submitter_id} => 1 } @$attachments;
-        my $users = Bugzilla::User->new_from_list([keys %user_ids]);
+        my $users = Bugzilla::User->new_from_list( [ keys %user_ids ] );
         my %user_map = map { $_->id => $_ } @$users;
         foreach my $attachment (@$attachments) {
-            $attachment->{attacher} = $user_map{$attachment->{submitter_id}};
+            $attachment->{attacher} = $user_map{ $attachment->{submitter_id} };
         }
 
         # Preload datasizes.
-        my $sizes =
-          $dbh->selectall_hashref('SELECT attach_id, LENGTH(thedata) AS datasize
+        my $sizes = $dbh->selectall_hashref(
+            'SELECT attach_id, LENGTH(thedata) AS datasize
                                    FROM attachments LEFT JOIN attach_data ON attach_id = id
                                    WHERE bug_id = ?',
-                                   'attach_id', undef, $bug->id);
+            'attach_id', undef, $bug->id
+        );
 
         # Force the size of attachments not in the DB to be recalculated.
-        $_->{datasize} = $sizes->{$_->id}->{datasize} || undef foreach @$attachments;
+        $_->{datasize} = $sizes->{ $_->id }->{datasize} || undef foreach @$attachments;
     }
 
     return $attachments;
@@ -717,12 +731,13 @@ Returns:     1 on success, 0 otherwise.
 
 sub validate_can_edit {
     my $attachment = shift;
-    my $user = Bugzilla->user;
+    my $user       = Bugzilla->user;
 
     # The submitter can edit their attachments.
-    return ($attachment->attacher->id == $user->id
-            || ((!$attachment->isprivate || $user->is_insider)
-                 && $user->in_group('editbugs', $attachment->bug->product_id))) ? 1 : 0;
+    return (
+        $attachment->attacher->id == $user->id || ( ( !$attachment->isprivate || $user->is_insider )
+            && $user->in_group( 'editbugs', $attachment->bug->product_id ) )
+    ) ? 1 : 0;
 }
 
 =item C<validate_obsolete($bug, $attach_ids)>
@@ -741,7 +756,7 @@ Returns:     The list of attachment objects to mark as obsolete.
 =cut
 
 sub validate_obsolete {
-    my ($class, $bug, $list) = @_;
+    my ( $class, $bug, $list ) = @_;
 
     # Make sure the attachment id is valid and the user has permissions to view
     # the bug to which it is attached. Make sure also that the user can view
@@ -752,24 +767,24 @@ sub validate_obsolete {
         $vars->{'attach_id'} = $attachid;
 
         detaint_natural($attachid)
-          || ThrowUserError('invalid_attach_id', $vars);
+            || ThrowUserError( 'invalid_attach_id', $vars );
 
         # Make sure the attachment exists in the database.
         my $attachment = new Bugzilla::Attachment($attachid)
-          || ThrowUserError('invalid_attach_id', $vars);
+            || ThrowUserError( 'invalid_attach_id', $vars );
 
         # Check that the user can view and edit this attachment.
         $attachment->validate_can_edit
-          || ThrowUserError('illegal_attachment_edit', { attach_id => $attachment->id });
+            || ThrowUserError( 'illegal_attachment_edit', { attach_id => $attachment->id } );
 
-        if ($attachment->bug_id != $bug->bug_id) {
+        if ( $attachment->bug_id != $bug->bug_id ) {
             $vars->{'my_bug_id'} = $bug->bug_id;
-            ThrowUserError('mismatched_bug_ids_on_obsolete', $vars);
+            ThrowUserError( 'mismatched_bug_ids_on_obsolete', $vars );
         }
 
         next if $attachment->isobsolete;
 
-        push(@obsolete_attachments, $attachment);
+        push( @obsolete_attachments, $attachment );
     }
     return @obsolete_attachments;
 }
@@ -807,7 +822,7 @@ Returns:    The new attachment object.
 
 sub create {
     my $class = shift;
-    my $dbh = Bugzilla->dbh;
+    my $dbh   = Bugzilla->dbh;
 
     $class->check_required_create_fields(@_);
     my $params = $class->run_create_validators(@_);
@@ -819,41 +834,45 @@ sub create {
     my $size = delete $params->{filesize};
 
     my $attachment = $class->insert_create_data($params);
-    my $attachid = $attachment->id;
+    my $attachid   = $attachment->id;
 
     # The file is too large to be stored in the DB, so we store it locally.
-    if ($size > Bugzilla->params->{'maxattachmentsize'} * 1024) {
+    if ( $size > Bugzilla->params->{'maxattachmentsize'} * 1024 ) {
         my $attachdir = bz_locations()->{'attachdir'};
-        my $hash = ($attachid % 100) + 100;
+        my $hash      = ( $attachid % 100 ) + 100;
         $hash =~ s/.*(\d\d)$/group.$1/;
         mkdir "$attachdir/$hash", 0770;
         chmod 0770, "$attachdir/$hash";
-        if (ref $data) {
-            copy($data, "$attachdir/$hash/attachment.$attachid");
+        if ( ref $data ) {
+            copy( $data, "$attachdir/$hash/attachment.$attachid" );
             close $data;
         }
         else {
-            open(AH, '>', "$attachdir/$hash/attachment.$attachid");
+            open( AH, '>', "$attachdir/$hash/attachment.$attachid" );
             binmode AH;
             print AH $data;
             close AH;
         }
-        $data = ''; # Will be stored in the DB.
+        $data = '';    # Will be stored in the DB.
     }
+
     # If we have a filehandle, we need its content to store it in the DB.
-    elsif (ref $data) {
+    elsif ( ref $data ) {
         local $/;
+
         # Store the content in a temp variable while we close the FH.
         my $tmp = <$data>;
         close $data;
         $data = $tmp;
     }
 
-    my $sth = $dbh->prepare("INSERT INTO attach_data
-                             (id, thedata) VALUES ($attachid, ?)");
+    my $sth = $dbh->prepare(
+        "INSERT INTO attach_data
+                             (id, thedata) VALUES ($attachid, ?)"
+    );
 
     trick_taint($data);
-    $sth->bind_param(1, $data, $dbh->BLOB_TYPE);
+    $sth->bind_param( 1, $data, $dbh->BLOB_TYPE );
     $sth->execute();
 
     $attachment->{bug} = $bug;
@@ -863,7 +882,7 @@ sub create {
 }
 
 sub run_create_validators {
-    my ($class, $params) = @_;
+    my ( $class, $params ) = @_;
 
     $params->{submitter_id} = Bugzilla->user->id || ThrowUserError('invalid_user');
 
@@ -879,36 +898,36 @@ sub run_create_validators {
 }
 
 sub update {
-    my $self = shift;
-    my $dbh = Bugzilla->dbh;
-    my $user = Bugzilla->user;
+    my $self      = shift;
+    my $dbh       = Bugzilla->dbh;
+    my $user      = Bugzilla->user;
     my $timestamp = shift || $dbh->selectrow_array('SELECT LOCALTIMESTAMP(0)');
 
-    my ($changes, $old_self) = $self->SUPER::update(@_);
+    my ( $changes, $old_self ) = $self->SUPER::update(@_);
 
-    my ($removed, $added) = Bugzilla::Flag->update_flags($self, $old_self, $timestamp);
-    if ($removed || $added) {
-        $changes->{'flagtypes.name'} = [$removed, $added];
+    my ( $removed, $added ) = Bugzilla::Flag->update_flags( $self, $old_self, $timestamp );
+    if ( $removed || $added ) {
+        $changes->{'flagtypes.name'} = [ $removed, $added ];
     }
 
     # Record changes in the activity table.
     require Bugzilla::Bug;
-    foreach my $field (keys %$changes) {
+    foreach my $field ( keys %$changes ) {
         my $change = $changes->{$field};
         $field = "attachments.$field" unless $field eq "flagtypes.name";
-        Bugzilla::Bug::LogActivityEntry($self->bug_id, $field, $change->[0],
-            $change->[1], $user->id, $timestamp, undef, $self->id);
+        Bugzilla::Bug::LogActivityEntry( $self->bug_id, $field, $change->[0],
+            $change->[1], $user->id, $timestamp, undef, $self->id );
     }
 
-    if (scalar(keys %$changes)) {
-        $dbh->do('UPDATE attachments SET modification_time = ? WHERE attach_id = ?',
-                 undef, ($timestamp, $self->id));
-        $dbh->do('UPDATE bugs SET delta_ts = ? WHERE bug_id = ?',
-                 undef, ($timestamp, $self->bug_id));
+    if ( scalar( keys %$changes ) ) {
+        $dbh->do( 'UPDATE attachments SET modification_time = ? WHERE attach_id = ?',
+            undef, ( $timestamp, $self->id ) );
+        $dbh->do( 'UPDATE bugs SET delta_ts = ? WHERE bug_id = ?', undef, ( $timestamp, $self->bug_id ) );
         $self->{modification_time} = $timestamp;
+
         # because we updated the attachments table after SUPER::update(), we
         # need to ensure the cache is flushed.
-        Bugzilla->memcached->clear({ table => 'attachments', id => $self->id });
+        Bugzilla->memcached->clear( { table => 'attachments', id => $self->id } );
     }
 
     return $changes;
@@ -930,28 +949,29 @@ Returns:    nothing
 
 sub remove_from_db {
     my $self = shift;
-    my $dbh = Bugzilla->dbh;
+    my $dbh  = Bugzilla->dbh;
 
     $dbh->bz_start_transaction();
-    my $flag_ids = $dbh->selectcol_arrayref(
-        'SELECT id FROM flags WHERE attach_id = ?', undef, $self->id);
-    $dbh->do('DELETE FROM flags WHERE ' . $dbh->sql_in('id', $flag_ids))
+    my $flag_ids = $dbh->selectcol_arrayref( 'SELECT id FROM flags WHERE attach_id = ?', undef, $self->id );
+    $dbh->do( 'DELETE FROM flags WHERE ' . $dbh->sql_in( 'id', $flag_ids ) )
         if @$flag_ids;
-    $dbh->do('DELETE FROM attach_data WHERE id = ?', undef, $self->id);
-    $dbh->do('UPDATE attachments SET mimetype = ?, ispatch = ?, isobsolete = ?
-              WHERE attach_id = ?', undef, ('text/plain', 0, 1, $self->id));
+    $dbh->do( 'DELETE FROM attach_data WHERE id = ?', undef, $self->id );
+    $dbh->do(
+        'UPDATE attachments SET mimetype = ?, ispatch = ?, isobsolete = ?
+              WHERE attach_id = ?', undef, ( 'text/plain', 0, 1, $self->id )
+    );
     $dbh->bz_commit_transaction();
 
     my $filename = $self->_get_local_filename;
-    if (-e $filename) {
+    if ( -e $filename ) {
         unlink $filename or warn "Couldn't unlink $filename: $!";
     }
 
     # As we don't call SUPER->remove_from_db we need to manually clear
     # memcached here.
-    Bugzilla->memcached->clear({ table => 'attachments', id => $self->id });
+    Bugzilla->memcached->clear( { table => 'attachments', id => $self->id } );
     foreach my $flag_id (@$flag_ids) {
-        Bugzilla->memcached->clear({ table => 'flags', id => $flag_id });
+        Bugzilla->memcached->clear( { table => 'flags', id => $flag_id } );
     }
 }
 
@@ -963,37 +983,38 @@ sub remove_from_db {
 sub get_content_type {
     my $cgi = Bugzilla->cgi;
 
-    return 'text/plain' if ($cgi->param('ispatch') || $cgi->param('attach_text'));
+    return 'text/plain' if ( $cgi->param('ispatch') || $cgi->param('attach_text') );
 
     my $content_type;
     my $method = $cgi->param('contenttypemethod') || '';
 
-    if ($method eq 'list') {
+    if ( $method eq 'list' ) {
+
         # The user selected a content type from the list, so use their
         # selection.
         $content_type = $cgi->param('contenttypeselection');
     }
-    elsif ($method eq 'manual') {
+    elsif ( $method eq 'manual' ) {
+
         # The user entered a content type manually, so use their entry.
         $content_type = $cgi->param('contenttypeentry');
     }
     else {
         defined $cgi->upload('data') || ThrowUserError('file_not_specified');
+
         # The user asked us to auto-detect the content type, so use the type
         # specified in the HTTP request headers.
-        $content_type =
-            $cgi->uploadInfo($cgi->param('data'))->{'Content-Type'};
+        $content_type = $cgi->uploadInfo( $cgi->param('data') )->{'Content-Type'};
         $content_type || ThrowUserError("missing_content_type");
 
         # Internet Explorer sends image/x-png for PNG images,
         # so convert that to image/png to match other browsers.
-        if ($content_type eq 'image/x-png') {
+        if ( $content_type eq 'image/x-png' ) {
             $content_type = 'image/png';
         }
     }
     return $content_type;
 }
-
 
 1;
 

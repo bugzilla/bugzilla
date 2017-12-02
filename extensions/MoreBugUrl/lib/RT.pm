@@ -18,13 +18,14 @@ use parent qw(Bugzilla::BugUrl);
 ###############################
 
 sub should_handle {
-    my ($class, $uri) = @_;
+    my ( $class, $uri ) = @_;
 
     # RT URLs can look like various things:
     #   http://example.com/rt/Ticket/Display.html?id=1234
     #   https://example.com/Public/Bug/Display.html?id=1234
-    return ($uri->path =~ m|/Display\.html$|
-            and $uri->query_param('id') =~ /^\d+$/) ? 1 : 0;
+    return ( $uri->path =~ m|/Display\.html$| and $uri->query_param('id') =~ /^\d+$/ )
+        ? 1
+        : 0;
 }
 
 sub _check_value {

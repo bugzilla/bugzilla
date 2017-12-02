@@ -18,12 +18,13 @@ use parent qw(Bugzilla::BugUrl);
 ###############################
 
 sub should_handle {
-    my ($class, $uri) = @_;
+    my ( $class, $uri ) = @_;
 
     # BitBucket issues have the form of
     # bitbucket.org/user/project/issue/1234
-    return (lc($uri->authority) eq "bitbucket.org"
-            && $uri->path =~ m|[^/]+/[^/]+/issue/\d+|i) ? 1 : 0;
+    return ( lc( $uri->authority ) eq "bitbucket.org" && $uri->path =~ m|[^/]+/[^/]+/issue/\d+|i )
+        ? 1
+        : 0;
 }
 
 sub _check_value {

@@ -38,8 +38,8 @@ use constant UPDATE_COLUMNS => qw(
 );
 
 use constant VALIDATORS => {
-    name    => \&_check_name,
-    query   => \&_check_query,
+    name  => \&_check_name,
+    query => \&_check_query,
 };
 
 ##############
@@ -47,18 +47,18 @@ use constant VALIDATORS => {
 ##############
 
 sub _check_name {
-    my ($invocant, $name) = @_;
+    my ( $invocant, $name ) = @_;
     $name = clean_text($name);
     $name || ThrowUserError("report_name_missing");
     $name !~ /[<>&]/ || ThrowUserError("illegal_query_name");
-    if (length($name) > MAX_LEN_QUERY_NAME) {
+    if ( length($name) > MAX_LEN_QUERY_NAME ) {
         ThrowUserError("query_name_too_long");
     }
     return $name;
 }
 
 sub _check_query {
-    my ($invocant, $query) = @_;
+    my ( $invocant, $query ) = @_;
     $query || ThrowUserError("buglist_parameters_required");
     my $cgi = new Bugzilla::CGI($query);
     $cgi->clean_search_url;
@@ -71,8 +71,8 @@ sub _check_query {
 
 sub query { return $_[0]->{'query'}; }
 
-sub set_name { $_[0]->set('name', $_[1]); }
-sub set_query { $_[0]->set('query', $_[1]); }
+sub set_name  { $_[0]->set( 'name',  $_[1] ); }
+sub set_query { $_[0]->set( 'query', $_[1] ); }
 
 ###########
 # Methods #
@@ -90,12 +90,13 @@ sub create {
 }
 
 sub check {
-    my $class = shift;
+    my $class  = shift;
     my $report = $class->SUPER::check(@_);
-    my $user = Bugzilla->user;
-    if ( grep($_->id eq $report->id, @{$user->reports})) {
+    my $user   = Bugzilla->user;
+    if ( grep( $_->id eq $report->id, @{ $user->reports } ) ) {
         return $report;
-    } else {
+    }
+    else {
         ThrowUserError('report_access_denied');
     }
 }

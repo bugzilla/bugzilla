@@ -32,12 +32,13 @@ use Bugzilla::Search::Quicksearch;
 sub quicksearch_field_names {
     my $fields = Bugzilla::Search::Quicksearch->FIELD_MAP;
     my %fields_reverse;
+
     # Put longer names before shorter names.
-    my @nicknames = sort { length($b) <=> length($a) } (keys %$fields);
+    my @nicknames = sort { length($b) <=> length($a) } ( keys %$fields );
     foreach my $nickname (@nicknames) {
         my $db_field = $fields->{$nickname};
         $fields_reverse{$db_field} ||= [];
-        push(@{ $fields_reverse{$db_field} }, $nickname);
+        push( @{ $fields_reverse{$db_field} }, $nickname );
     }
     return \%fields_reverse;
 }
@@ -48,37 +49,38 @@ sub quicksearch_field_names {
 
 Bugzilla->login();
 
-my $cgi = Bugzilla->cgi;
+my $cgi      = Bugzilla->cgi;
 my $template = Bugzilla->template;
 
 my $id = $cgi->param('id');
 if ($id) {
+
     # Be careful not to allow directory traversal.
-    if ($id =~ /\.\./) {
+    if ( $id =~ /\.\./ ) {
+
         # two dots in a row is bad
-        ThrowUserError("bad_page_cgi_id", { "page_id" => $id });
+        ThrowUserError( "bad_page_cgi_id", { "page_id" => $id } );
     }
+
     # Split into name and ctype.
     $id =~ /^([\w\-\/\.]+)\.(\w+)$/;
-    if (!$2) {
+    if ( !$2 ) {
+
         # if this regexp fails to match completely, something bad came in
-        ThrowUserError("bad_page_cgi_id", { "page_id" => $id });
+        ThrowUserError( "bad_page_cgi_id", { "page_id" => $id } );
     }
 
-    my %vars = ( 
-      quicksearch_field_names => \&quicksearch_field_names,
-    );
-    Bugzilla::Hook::process('page_before_template', 
-                            { page_id => $id, vars => \%vars });
+    my %vars = ( quicksearch_field_names => \&quicksearch_field_names, );
+    Bugzilla::Hook::process( 'page_before_template', { page_id => $id, vars => \%vars } );
 
-    my $format = $template->get_format("pages/$1", undef, $2);
-    
-    $cgi->param('id', $id);
+    my $format = $template->get_format( "pages/$1", undef, $2 );
 
-    print $cgi->header($format->{'ctype'});
+    $cgi->param( 'id', $id );
 
-    $template->process("$format->{'template'}", \%vars)
-      || ThrowTemplateError($template->error());
+    print $cgi->header( $format->{'ctype'} );
+
+    $template->process( "$format->{'template'}", \%vars )
+        || ThrowTemplateError( $template->error() );
 }
 else {
     ThrowUserError("no_page_specified");

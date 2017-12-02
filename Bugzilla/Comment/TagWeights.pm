@@ -34,7 +34,7 @@ use constant DB_TABLE   => 'longdescs_tags_weights';
 use constant ID_FIELD   => 'id';
 use constant NAME_FIELD => 'tag';
 use constant LIST_ORDER => 'weight DESC';
-use constant VALIDATORS => { };
+use constant VALIDATORS => {};
 
 # There's no gain to caching these objects
 use constant USE_MEMCACHED => 0;
@@ -42,7 +42,7 @@ use constant USE_MEMCACHED => 0;
 sub tag    { return $_[0]->{'tag'} }
 sub weight { return $_[0]->{'weight'} }
 
-sub set_weight { $_[0]->set('weight', $_[1]); }
+sub set_weight { $_[0]->set( 'weight', $_[1] ); }
 
 1;
 

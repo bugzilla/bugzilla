@@ -18,12 +18,12 @@ use parent qw(Bugzilla::BugUrl);
 ###############################
 
 sub should_handle {
-    my ($class, $uri) = @_;
+    my ( $class, $uri ) = @_;
 
     # Trac URLs can look like various things:
     #   http://dev.mutt.org/trac/ticket/1234
     #   http://trac.roundcube.net/ticket/1484130
-    return ($uri->path =~ m|/ticket/\d+$|) ? 1 : 0;
+    return ( $uri->path =~ m|/ticket/\d+$| ) ? 1 : 0;
 }
 
 sub _check_value {
@@ -33,6 +33,7 @@ sub _check_value {
 
     # Make sure there are no query parameters.
     $uri->query(undef);
+
     # And remove any # part if there is one.
     $uri->fragment(undef);
 

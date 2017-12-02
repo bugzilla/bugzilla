@@ -16,7 +16,7 @@ use parent qw(Template::Plugin);
 use Bugzilla;
 
 sub new {
-    my ($class, $context) = @_;
+    my ( $class, $context ) = @_;
 
     return bless {}, $class;
 }

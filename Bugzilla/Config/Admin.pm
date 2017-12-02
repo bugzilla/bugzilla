@@ -16,33 +16,34 @@ use Bugzilla::Config::Common;
 our $sortkey = 200;
 
 sub get_param_list {
-  my $class = shift;
-  my @param_list = (
-  {
-   name => 'allowbugdeletion',
-   type => 'b',
-   default => 0
-  },
+    my $class      = shift;
+    my @param_list = (
+        {
+            name    => 'allowbugdeletion',
+            type    => 'b',
+            default => 0
+        },
 
-  {
-   name => 'allowemailchange',
-   type => 'b',
-   default => 1
-  },
+        {
+            name    => 'allowemailchange',
+            type    => 'b',
+            default => 1
+        },
 
-  {
-   name => 'allowuserdeletion',
-   type => 'b',
-   default => 0
-  },
+        {
+            name    => 'allowuserdeletion',
+            type    => 'b',
+            default => 0
+        },
 
-  {
-   name => 'last_visit_keep_days',
-   type => 't',
-   default => 10,
-   checker => \&check_numeric
-  });
-  return @param_list;
+        {
+            name    => 'last_visit_keep_days',
+            type    => 't',
+            default => 10,
+            checker => \&check_numeric
+        }
+    );
+    return @param_list;
 }
 
 1;

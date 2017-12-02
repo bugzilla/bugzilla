@@ -26,8 +26,9 @@ use Scalar::Util qw(blessed);
 
 use constant DEFAULT_VERSION => 'unspecified';
 
-use constant DB_TABLE => 'versions';
+use constant DB_TABLE   => 'versions';
 use constant NAME_FIELD => 'value';
+
 # This is "id" because it has to be filled in and id is probably the fastest.
 # We do a custom sort in new_from_list below.
 use constant LIST_ORDER => 'id';
@@ -39,9 +40,7 @@ use constant DB_COLUMNS => qw(
     isactive
 );
 
-use constant REQUIRED_FIELD_MAP => {
-    product_id => 'product',
-};
+use constant REQUIRED_FIELD_MAP => { product_id => 'product', };
 
 use constant UPDATE_COLUMNS => qw(
     value
@@ -54,9 +53,7 @@ use constant VALIDATORS => {
     isactive => \&Bugzilla::Object::check_boolean,
 };
 
-use constant VALIDATOR_DEPENDENCIES => {
-    value => ['product'],
-};
+use constant VALIDATOR_DEPENDENCIES => { value => ['product'], };
 
 ################################
 # Methods
@@ -65,25 +62,33 @@ use constant VALIDATOR_DEPENDENCIES => {
 sub new {
     my $class = shift;
     my $param = shift;
-    my $dbh = Bugzilla->dbh;
+    my $dbh   = Bugzilla->dbh;
 
     my $product;
-    if (ref $param and !defined $param->{id}) {
+    if ( ref $param and !defined $param->{id} ) {
         $product = $param->{product};
         my $name = $param->{name};
-        if (!defined $product) {
-            ThrowCodeError('bad_arg',
-                {argument => 'product',
-                 function => "${class}::new"});
+        if ( !defined $product ) {
+            ThrowCodeError(
+                'bad_arg',
+                {
+                    argument => 'product',
+                    function => "${class}::new"
+                }
+            );
         }
-        if (!defined $name) {
-            ThrowCodeError('bad_arg',
-                {argument => 'name',
-                 function => "${class}::new"});
+        if ( !defined $name ) {
+            ThrowCodeError(
+                'bad_arg',
+                {
+                    argument => 'name',
+                    function => "${class}::new"
+                }
+            );
         }
 
         my $condition = 'product_id = ? AND value = ?';
-        my @values = ($product->id, $name);
+        my @values = ( $product->id, $name );
         $param = { condition => $condition, values => \@values };
     }
 
@@ -94,12 +99,12 @@ sub new {
 sub new_from_list {
     my $self = shift;
     my $list = $self->SUPER::new_from_list(@_);
-    return [sort { vers_cmp(lc($a->name), lc($b->name)) } @$list];
+    return [ sort { vers_cmp( lc( $a->name ), lc( $b->name ) ) } @$list ];
 }
 
 sub run_create_validators {
-    my $class  = shift;
-    my $params = $class->SUPER::run_create_validators(@_);
+    my $class   = shift;
+    my $params  = $class->SUPER::run_create_validators(@_);
     my $product = delete $params->{product};
     $params->{product_id} = $product->id;
     return $params;
@@ -107,28 +112,32 @@ sub run_create_validators {
 
 sub bug_count {
     my $self = shift;
-    my $dbh = Bugzilla->dbh;
+    my $dbh  = Bugzilla->dbh;
 
-    if (!defined $self->{'bug_count'}) {
-        $self->{'bug_count'} = $dbh->selectrow_array(qq{
+    if ( !defined $self->{'bug_count'} ) {
+        $self->{'bug_count'} = $dbh->selectrow_array(
+            qq{
             SELECT COUNT(*) FROM bugs
             WHERE product_id = ? AND version = ?}, undef,
-            ($self->product_id, $self->name)) || 0;
+            ( $self->product_id, $self->name )
+        ) || 0;
     }
     return $self->{'bug_count'};
 }
 
 sub update {
     my $self = shift;
-    my $dbh = Bugzilla->dbh;
+    my $dbh  = Bugzilla->dbh;
 
     $dbh->bz_start_transaction();
-    my ($changes, $old_self) = $self->SUPER::update(@_);
+    my ( $changes, $old_self ) = $self->SUPER::update(@_);
 
-    if (exists $changes->{value}) {
-        $dbh->do('UPDATE bugs SET version = ?
+    if ( exists $changes->{value} ) {
+        $dbh->do(
+            'UPDATE bugs SET version = ?
                   WHERE version = ? AND product_id = ?',
-                  undef, ($self->name, $old_self->name, $self->product_id));
+            undef, ( $self->name, $old_self->name, $self->product_id )
+        );
     }
     $dbh->bz_commit_transaction();
 
@@ -137,19 +146,19 @@ sub update {
 
 sub remove_from_db {
     my $self = shift;
-    my $dbh = Bugzilla->dbh;
+    my $dbh  = Bugzilla->dbh;
 
     $dbh->bz_start_transaction();
 
     # Products must have at least one version.
-    if (scalar(@{$self->product->versions}) == 1) {
-        ThrowUserError('version_is_last', { version => $self });
+    if ( scalar( @{ $self->product->versions } ) == 1 ) {
+        ThrowUserError( 'version_is_last', { version => $self } );
     }
 
     # The version cannot be removed if there are bugs
     # associated with it.
-    if ($self->bug_count) {
-        ThrowUserError("version_has_bugs", { nb => $self->bug_count });
+    if ( $self->bug_count ) {
+        ThrowUserError( "version_has_bugs", { nb => $self->bug_count } );
     }
     $self->SUPER::remove_from_db();
 
@@ -161,13 +170,13 @@ sub remove_from_db {
 ###############################
 
 sub product_id { return $_[0]->{'product_id'}; }
-sub is_active  { return $_[0]->{'isactive'};   }
+sub is_active  { return $_[0]->{'isactive'}; }
 
 sub product {
     my $self = shift;
 
     require Bugzilla::Product;
-    $self->{'product'} ||= new Bugzilla::Product($self->product_id);
+    $self->{'product'} ||= new Bugzilla::Product( $self->product_id );
     return $self->{'product'};
 }
 
@@ -175,31 +184,36 @@ sub product {
 # Validators
 ################################
 
-sub set_value    { $_[0]->set('value', $_[1]);    }
-sub set_isactive { $_[0]->set('isactive', $_[1]); }
+sub set_value    { $_[0]->set( 'value',    $_[1] ); }
+sub set_isactive { $_[0]->set( 'isactive', $_[1] ); }
 
 sub _check_value {
-    my ($invocant, $name, undef, $params) = @_;
+    my ( $invocant, $name, undef, $params ) = @_;
     my $product = blessed($invocant) ? $invocant->product : $params->{product};
 
     $name = trim($name);
     $name || ThrowUserError('version_blank_name');
+
     # Remove unprintable characters
     $name = clean_text($name);
 
-    my $version = new Bugzilla::Version({ product => $product, name => $name });
-    if ($version && (!ref $invocant || $version->id != $invocant->id)) {
-        ThrowUserError('version_already_exists', { name    => $version->name,
-                                                   product => $product->name });
+    my $version = new Bugzilla::Version( { product => $product, name => $name } );
+    if ( $version && ( !ref $invocant || $version->id != $invocant->id ) ) {
+        ThrowUserError(
+            'version_already_exists',
+            {
+                name    => $version->name,
+                product => $product->name
+            }
+        );
     }
     return $name;
 }
 
 sub _check_product {
-    my ($invocant, $product) = @_;
-    $product || ThrowCodeError('param_required',
-                    { function => "$invocant->create", param => 'product' });
-    return Bugzilla->user->check_can_admin_product($product->name);
+    my ( $invocant, $product ) = @_;
+    $product || ThrowCodeError( 'param_required', { function => "$invocant->create", param => 'product' } );
+    return Bugzilla->user->check_can_admin_product( $product->name );
 }
 
 ###############################
@@ -209,38 +223,46 @@ sub _check_product {
 # This is taken straight from Sort::Versions 1.5, which is not included
 # with perl by default.
 sub vers_cmp {
-    my ($a, $b) = @_;
+    my ( $a, $b ) = @_;
 
     # Remove leading zeroes - Bug 344661
     $a =~ s/^0*(\d.+)/$1/;
     $b =~ s/^0*(\d.+)/$1/;
 
-    my @A = ($a =~ /([-.]|\d+|[^-.\d]+)/g);
-    my @B = ($b =~ /([-.]|\d+|[^-.\d]+)/g);
+    my @A = ( $a =~ /([-.]|\d+|[^-.\d]+)/g );
+    my @B = ( $b =~ /([-.]|\d+|[^-.\d]+)/g );
 
-    my ($A, $B);
-    while (@A and @B) {
+    my ( $A, $B );
+    while ( @A and @B ) {
         $A = shift @A;
         $B = shift @B;
-        if ($A eq '-' and $B eq '-') {
+        if ( $A eq '-' and $B eq '-' ) {
             next;
-        } elsif ( $A eq '-' ) {
+        }
+        elsif ( $A eq '-' ) {
             return -1;
-        } elsif ( $B eq '-') {
+        }
+        elsif ( $B eq '-' ) {
             return 1;
-        } elsif ($A eq '.' and $B eq '.') {
+        }
+        elsif ( $A eq '.' and $B eq '.' ) {
             next;
-        } elsif ( $A eq '.' ) {
+        }
+        elsif ( $A eq '.' ) {
             return -1;
-        } elsif ( $B eq '.' ) {
+        }
+        elsif ( $B eq '.' ) {
             return 1;
-        } elsif ($A =~ /^\d+$/ and $B =~ /^\d+$/) {
-            if ($A =~ /^0/ || $B =~ /^0/) {
+        }
+        elsif ( $A =~ /^\d+$/ and $B =~ /^\d+$/ ) {
+            if ( $A =~ /^0/ || $B =~ /^0/ ) {
                 return $A cmp $B if $A cmp $B;
-            } else {
+            }
+            else {
                 return $A <=> $B if $A <=> $B;
             }
-        } else {
+        }
+        else {
             $A = uc $A;
             $B = uc $B;
             return $A cmp $B if $A cmp $B;

@@ -5,7 +5,6 @@
 # This Source Code Form is "Incompatible With Secondary Licenses", as
 # defined by the Mozilla Public License, v. 2.0.
 
-
 package Bugzilla::User::Setting::Skin;
 
 use 5.10.1;
@@ -26,15 +25,17 @@ sub legal_values {
     return $self->{'legal_values'} if defined $self->{'legal_values'};
 
     my $dirbase = bz_locations()->{'skinsdir'} . '/contrib';
+
     # Avoid modification of the list BUILTIN_SKIN_NAMES points to by copying the
     # list over instead of simply writing $legal_values = BUILTIN_SKIN_NAMES.
-    my @legal_values = @{(BUILTIN_SKIN_NAMES)};
+    my @legal_values = @{ (BUILTIN_SKIN_NAMES) };
 
-    foreach my $direntry (glob(catdir($dirbase, '*'))) {
-        if (-d $direntry) {
+    foreach my $direntry ( glob( catdir( $dirbase, '*' ) ) ) {
+        if ( -d $direntry ) {
             next if basename($direntry) =~ /^cvs$/i;
+
             # Stylesheet set found
-            push(@legal_values, basename($direntry));
+            push( @legal_values, basename($direntry) );
         }
     }
 

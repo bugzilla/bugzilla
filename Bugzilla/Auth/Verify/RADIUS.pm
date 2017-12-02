@@ -23,10 +23,10 @@ use constant admin_can_create_account => 0;
 use constant user_can_create_account  => 0;
 
 sub check_credentials {
-    my ($self, $params) = @_;
-    my $dbh = Bugzilla->dbh;
+    my ( $self, $params ) = @_;
+    my $dbh            = Bugzilla->dbh;
     my $address_suffix = Bugzilla->params->{'RADIUS_email_suffix'};
-    my $username = $params->{username};
+    my $username       = $params->{username};
 
     # If we're using RADIUS_email_suffix, we may need to cut it off from
     # the login name.
@@ -35,15 +35,18 @@ sub check_credentials {
     }
 
     # Create RADIUS object.
-    my $radius =
-        new Authen::Radius(Host   => Bugzilla->params->{'RADIUS_server'},
-                           Secret => Bugzilla->params->{'RADIUS_secret'})
-        || return { failure => AUTH_ERROR, error => 'radius_preparation_error',
-                    details => {errstr => Authen::Radius::strerror() } };
+    my $radius = new Authen::Radius(
+        Host   => Bugzilla->params->{'RADIUS_server'},
+        Secret => Bugzilla->params->{'RADIUS_secret'}
+        )
+        || return {
+        failure => AUTH_ERROR,
+        error   => 'radius_preparation_error',
+        details => { errstr => Authen::Radius::strerror() }
+        };
 
     # Check the password.
-    $radius->check_pwd($username, $params->{password},
-                       Bugzilla->params->{'RADIUS_NAS_IP'} || undef)
+    $radius->check_pwd( $username, $params->{password}, Bugzilla->params->{'RADIUS_NAS_IP'} || undef )
         || return { failure => AUTH_LOGINFAILED };
 
     # Build the user account's e-mail address.

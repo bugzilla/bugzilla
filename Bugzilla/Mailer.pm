@@ -28,17 +28,19 @@ use Email::Sender::Transport::SMTP::Persistent;
 use Bugzilla::Sender::Transport::Sendmail;
 
 sub generate_email {
-    my ($vars, $templates) = @_;
-    my ($lang, $email_format, $msg_text, $msg_html, $msg_header);
+    my ( $vars, $templates ) = @_;
+    my ( $lang, $email_format, $msg_text, $msg_html, $msg_header );
     state $use_utf8 = Bugzilla->params->{'utf8'};
 
-    if ($vars->{to_user}) {
-        $lang = $vars->{to_user}->setting('lang');
+    if ( $vars->{to_user} ) {
+        $lang         = $vars->{to_user}->setting('lang');
         $email_format = $vars->{to_user}->setting('email_format');
-    } else {
+    }
+    else {
         # If there are users in the CC list who don't have an account,
         # use the default language for email notifications.
         $lang = Bugzilla::User->new()->setting('lang');
+
         # However we cannot fall back to the default email_format, since
         # it may be HTML, and many of the includes used in the HTML
         # template require a valid user object. Instead we fall back to
@@ -48,10 +50,10 @@ sub generate_email {
 
     my $template = Bugzilla->template_inner($lang);
 
-    $template->process($templates->{header}, $vars, \$msg_header)
-        || ThrowTemplateError($template->error());
-    $template->process($templates->{text}, $vars, \$msg_text)
-        || ThrowTemplateError($template->error());
+    $template->process( $templates->{header}, $vars, \$msg_header )
+        || ThrowTemplateError( $template->error() );
+    $template->process( $templates->{text}, $vars, \$msg_text )
+        || ThrowTemplateError( $template->error() );
 
     my @parts = (
         Bugzilla::MIME->create(
@@ -63,41 +65,44 @@ sub generate_email {
             body_str => $msg_text,
         )
     );
-    if ($templates->{html} && $email_format eq 'html') {
-        $template->process($templates->{html}, $vars, \$msg_html)
-            || ThrowTemplateError($template->error());
-        push @parts, Bugzilla::MIME->create(
+    if ( $templates->{html} && $email_format eq 'html' ) {
+        $template->process( $templates->{html}, $vars, \$msg_html )
+            || ThrowTemplateError( $template->error() );
+        push @parts,
+            Bugzilla::MIME->create(
             attributes => {
                 content_type => 'text/html',
                 charset      => $use_utf8 ? 'UTF-8' : 'iso-8859-1',
                 encoding     => 'quoted-printable',
             },
             body_str => $msg_html,
-        );
+            );
     }
 
     my $email = Bugzilla::MIME->new($msg_header);
-    if (scalar(@parts) == 1) {
-        $email->content_type_set($parts[0]->content_type);
-    } else {
+    if ( scalar(@parts) == 1 ) {
+        $email->content_type_set( $parts[0]->content_type );
+    }
+    else {
         $email->content_type_set('multipart/alternative');
+
         # Some mail clients need same encoding for each part, even empty ones.
         $email->charset_set('UTF-8') if $use_utf8;
     }
-    $email->parts_set(\@parts);
+    $email->parts_set( \@parts );
     return $email;
 }
 
 sub MessageToMTA {
-    my ($msg, $send_now) = (@_);
+    my ( $msg, $send_now ) = (@_);
     my $method = Bugzilla->params->{'mail_delivery_method'};
     return if $method eq 'None';
 
-    if (Bugzilla->params->{'use_mailer_queue'}
-        && ! $send_now
-        && ! Bugzilla->dbh->bz_in_transaction()
-    ) {
-        Bugzilla->job_queue->insert('send_mail', { msg => $msg });
+    if (   Bugzilla->params->{'use_mailer_queue'}
+        && !$send_now
+        && !Bugzilla->dbh->bz_in_transaction() )
+    {
+        Bugzilla->job_queue->insert( 'send_mail', { msg => $msg } );
         return;
     }
 
@@ -109,13 +114,14 @@ sub MessageToMTA {
     # email immediately, in case the transaction is rolled back. Instead we
     # insert it into the mail_staging table, and bz_commit_transaction calls
     # send_staged_mail() after the transaction is committed.
-    if (! $send_now && $dbh->bz_in_transaction()) {
+    if ( !$send_now && $dbh->bz_in_transaction() ) {
+
         # The e-mail string may contain tainted values.
         my $string = $email->as_string;
         trick_taint($string);
 
         my $sth = $dbh->prepare("INSERT INTO mail_staging (message) VALUES (?)");
-        $sth->bind_param(1, $string, $dbh->BLOB_TYPE);
+        $sth->bind_param( 1, $string, $dbh->BLOB_TYPE );
         $sth->execute;
         return;
     }
@@ -124,9 +130,9 @@ sub MessageToMTA {
 
     my $hostname;
     my $transport;
-    if ($method eq "Sendmail") {
+    if ( $method eq "Sendmail" ) {
         if (ON_WINDOWS) {
-            $transport = Bugzilla::Sender::Transport::Sendmail->new({ sendmail => SENDMAIL_EXE });
+            $transport = Bugzilla::Sender::Transport::Sendmail->new( { sendmail => SENDMAIL_EXE } );
         }
         else {
             $transport = Bugzilla::Sender::Transport::Sendmail->new();
@@ -139,34 +145,37 @@ sub MessageToMTA {
         $urlbase =~ m|//([^:/]+)[:/]?|;
         $hostname = $1 || 'localhost';
         $from .= "\@$hostname" if $from !~ /@/;
-        $email->header_set('From', $from);
-        
+        $email->header_set( 'From', $from );
+
         # Sendmail adds a Date: header also, but others may not.
-        if (!defined $email->header('Date')) {
-            $email->header_set('Date', time2str("%a, %d %b %Y %T %z", time()));
+        if ( !defined $email->header('Date') ) {
+            $email->header_set( 'Date', time2str( "%a, %d %b %Y %T %z", time() ) );
         }
     }
 
-    if ($method eq "SMTP") {
-        my ($host, $port) = split(/:/, Bugzilla->params->{'smtpserver'}, 2);
-        $transport = Bugzilla->request_cache->{smtp} //=
-          Email::Sender::Transport::SMTP::Persistent->new({
-            host  => $host,
-            defined($port) ? (port => $port) : (),
-            sasl_username => Bugzilla->params->{'smtp_username'},
-            sasl_password => Bugzilla->params->{'smtp_password'},
-            helo => $hostname,
-            ssl => Bugzilla->params->{'smtp_ssl'},
-            debug => Bugzilla->params->{'smtp_debug'} });
+    if ( $method eq "SMTP" ) {
+        my ( $host, $port ) = split( /:/, Bugzilla->params->{'smtpserver'}, 2 );
+        $transport = Bugzilla->request_cache->{smtp} //= Email::Sender::Transport::SMTP::Persistent->new(
+            {
+                host => $host,
+                defined($port) ? ( port => $port ) : (),
+                sasl_username => Bugzilla->params->{'smtp_username'},
+                sasl_password => Bugzilla->params->{'smtp_password'},
+                helo          => $hostname,
+                ssl           => Bugzilla->params->{'smtp_ssl'},
+                debug         => Bugzilla->params->{'smtp_debug'}
+            }
+        );
     }
 
-    Bugzilla::Hook::process('mailer_before_send', { email => $email });
+    Bugzilla::Hook::process( 'mailer_before_send', { email => $email } );
 
     return if $email->header('to') eq '';
 
-    if ($method eq "Test") {
+    if ( $method eq "Test" ) {
         my $filename = bz_locations()->{'datadir'} . '/mailer.testfile';
         open TESTFILE, '>>', $filename;
+
         # From - <date> is required to be a valid mbox file.
         print TESTFILE "\n\nFrom - " . $email->header('Date') . "\n" . $email->as_string;
         close TESTFILE;
@@ -174,26 +183,26 @@ sub MessageToMTA {
     else {
         # This is useful for Sendmail, so we put it out here.
         local $ENV{PATH} = SENDMAIL_PATH;
-        eval { sendmail($email, { transport => $transport }) };
+        eval { sendmail( $email, { transport => $transport } ) };
         if ($@) {
-            ThrowCodeError('mail_send_error', { msg => $@->message, mail => $email });
+            ThrowCodeError( 'mail_send_error', { msg => $@->message, mail => $email } );
         }
     }
 }
 
 # Builds header suitable for use as a threading marker in email notifications
 sub build_thread_marker {
-    my ($bug_id, $user_id, $is_new) = @_;
+    my ( $bug_id, $user_id, $is_new ) = @_;
 
-    if (!defined $user_id) {
+    if ( !defined $user_id ) {
         $user_id = Bugzilla->user->id;
     }
 
     my $sitespec = '@' . Bugzilla->params->{'urlbase'};
-    $sitespec =~ s/:\/\//\./; # Make the protocol look like part of the domain
-    $sitespec =~ s/^([^:\/]+):(\d+)/$1/; # Remove a port number, to relocate
+    $sitespec =~ s/:\/\//\./;               # Make the protocol look like part of the domain
+    $sitespec =~ s/^([^:\/]+):(\d+)/$1/;    # Remove a port number, to relocate
     if ($2) {
-        $sitespec = "-$2$sitespec"; # Put the port number back in, before the '@'
+        $sitespec = "-$2$sitespec";         # Put the port number back in, before the '@'
     }
 
     my $threadingmarker;
@@ -202,9 +211,10 @@ sub build_thread_marker {
     }
     else {
         my $rand_bits = generate_random_password(10);
-        $threadingmarker = "Message-ID: <bug-$bug_id-$user_id-$rand_bits$sitespec>" .
-                           "\nIn-Reply-To: <bug-$bug_id-$user_id$sitespec>" .
-                           "\nReferences: <bug-$bug_id-$user_id$sitespec>";
+        $threadingmarker
+            = "Message-ID: <bug-$bug_id-$user_id-$rand_bits$sitespec>"
+            . "\nIn-Reply-To: <bug-$bug_id-$user_id$sitespec>"
+            . "\nReferences: <bug-$bug_id-$user_id$sitespec>";
     }
 
     return $threadingmarker;
@@ -214,10 +224,10 @@ sub send_staged_mail {
     my $dbh = Bugzilla->dbh;
 
     my $emails = $dbh->selectall_arrayref('SELECT id, message FROM mail_staging');
-    my $sth = $dbh->prepare('DELETE FROM mail_staging WHERE id = ?');
+    my $sth    = $dbh->prepare('DELETE FROM mail_staging WHERE id = ?');
 
     foreach my $email (@$emails) {
-        my ($id, $message) = @$email;
+        my ( $id, $message ) = @$email;
         MessageToMTA($message);
         $sth->execute($id);
     }

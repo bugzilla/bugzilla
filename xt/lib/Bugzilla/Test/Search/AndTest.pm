@@ -22,12 +22,12 @@ use constant type => 'AND';
 # In an AND test, bugs ARE supposed to be contained only if they are contained
 # by ALL tests.
 sub bug_is_contained {
-    my ($self, $number) = @_;
+    my ( $self, $number ) = @_;
     return all { $_->bug_is_contained($number) } $self->field_tests;
 }
 
 sub _bug_will_actually_be_contained {
-    my ($self, $number) = @_;
+    my ( $self, $number ) = @_;
     return all { $_->will_actually_contain_bug($number) } $self->field_tests;
 }
 

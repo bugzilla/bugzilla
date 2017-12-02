@@ -11,13 +11,13 @@ use 5.10.1;
 use strict;
 use warnings;
 
-use constant NAME => 'BmpConvert';
+use constant NAME             => 'BmpConvert';
 use constant REQUIRED_MODULES => [
-  {
-      package => 'PerlMagick',
-      module  => 'Image::Magick',
-      version => 0,
-  },
+    {
+        package => 'PerlMagick',
+        module  => 'Image::Magick',
+        version => 0,
+    },
 ];
 
 __PACKAGE__->NAME;

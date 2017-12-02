@@ -18,13 +18,14 @@ use Bugzilla::Error;
 
 BEGIN {
     *Bugzilla::WebService::Component::rest_resources = \&_rest_resources;
-};
+}
 
 sub _rest_resources {
     my $rest_resources = [
-        qr{^/component$}, {
+        qr{^/component$},
+        {
             POST => {
-                method => 'create',
+                method       => 'create',
                 success_code => STATUS_CREATED
             }
         },

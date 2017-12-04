@@ -17,10 +17,14 @@ use warnings;
 use lib qw(. lib local/lib/perl5 t);
 use Config;
 use Support::Files;
-use Test::More tests => scalar(@Support::Files::testitems)
-                        + scalar(@Support::Files::test_files);
+use Test::More;
+BEGIN {
+    if ($ENV{CI}) {
+        plan skip_all => 'Not running compile tests in CI.';
+        exit;
+    }
+    plan tests => @Support::Files::testitems + @Support::Files::test_files;
 
-BEGIN { 
     use_ok('Bugzilla::Constants');
     use_ok('Bugzilla::Install::Requirements');
     use_ok('Bugzilla');

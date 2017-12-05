@@ -30,11 +30,7 @@ my $SearchResult = Dict[
         authorPHID        => Str,
         dateCreated       => Int,
         dateModified      => Int,
-        diffPHID          => Str,
         policy            => Dict[ view => Str, edit => Str ],
-        repositoryPHID    => Maybe[Str],
-        status            => HashRef,
-        summary           => Str,
         "bugzilla.bug-id" => Int,
     ],
     attachments => Dict[

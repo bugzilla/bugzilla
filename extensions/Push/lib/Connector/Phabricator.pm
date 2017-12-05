@@ -22,8 +22,8 @@ use Bugzilla::Extension::PhabBugz::Constants;
 use Bugzilla::Extension::PhabBugz::Util qw(
   add_comment_to_revision create_private_revision_policy
   edit_revision_policy get_attachment_revisions get_bug_role_phids
-  get_revisions_by_ids intersect make_revision_public
-  make_revision_private set_revision_subscribers
+  get_revisions_by_ids intersect is_attachment_phab_revision
+  make_revision_public make_revision_private set_revision_subscribers
   get_security_sync_groups add_security_sync_comments);
 use Bugzilla::Extension::Push::Constants;
 use Bugzilla::Extension::Push::Util qw(is_public);

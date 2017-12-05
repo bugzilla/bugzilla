@@ -268,7 +268,7 @@ sub obsolete_attachments {
     my $bug = Bugzilla::Bug->check($bug_id);
 
     my @attachments =
-      grep { is_attachment_phab_revision($_) } @{ $bug->attachments() };
+      grep { is_attachment_phab_revision($_, 1) } @{ $bug->attachments() };
 
     return { result => [] } if !@attachments;
 

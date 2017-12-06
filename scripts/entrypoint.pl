@@ -49,12 +49,12 @@ sub cmd_demo {
     unless (-f '/app/data/params') {
         cmd_load_test_data();
         check_env(qw(
-            PHABRICATOR_LOGIN
-            PHABRICATOR_PASSWORD
-            PHABRICATOR_API_KEY
-            CONDUIT_LOGIN
-            CONDUIT_PASSWORD
-            CONDUIT_API_KEY
+            PHABRICATOR_BOT_LOGIN
+            PHABRICATOR_BOT_PASSWORD
+            PHABRICATOR_BOT_API_KEY
+            CONDUIT_USER_LOGIN
+            CONDUIT_USER_PASSWORD
+            CONDUIT_USER_API_KEY
         ));
         run( 'perl', 'scripts/generate_conduit_data.pl' );
     }

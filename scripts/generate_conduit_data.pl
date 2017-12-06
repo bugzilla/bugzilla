@@ -30,9 +30,9 @@ Bugzilla->set_user( Bugzilla::User->check( { name => $admin_email } ) );
 # Create Conduit Test User
 ##########################################################################
 
-my $conduit_login    = $ENV{CONDUIT_LOGIN}    || 'conduit@mozilla.bugs';
-my $conduit_password = $ENV{CONDUIT_PASSWORD} || 'password123456789!';
-my $conduit_api_key  = $ENV{CONDUIT_API_KEY}  || '';
+my $conduit_login    = $ENV{CONDUIT_USER_LOGIN}    || 'conduit@mozilla.bugs';
+my $conduit_password = $ENV{CONDUIT_USER_PASSWORD} || 'password123456789!';
+my $conduit_api_key  = $ENV{CONDUIT_USER_API_KEY}  || '';
 
 print "creating conduit user account...\n";
 if ( !Bugzilla::User->new( { name => $conduit_login } ) ) {
@@ -58,9 +58,9 @@ if ( !Bugzilla::User->new( { name => $conduit_login } ) ) {
 # Create Phabricator Automation Bot
 ##########################################################################
 
-my $phab_login    = $ENV{PHABRICATOR_LOGIN}    || 'phab-bot@bmo.tld';
-my $phab_password = $ENV{PHABRICATOR_PASSWORD} || 'password123456789!';
-my $phab_api_key  = $ENV{PHABRICATOR_API_KEY}  || '';
+my $phab_login    = $ENV{PHABRICATOR_BOT_LOGIN}    || 'phab-bot@bmo.tld';
+my $phab_password = $ENV{PHABRICATOR_BOT_PASSWORD} || 'password123456789!';
+my $phab_api_key  = $ENV{PHABRICATOR_BOT_API_KEY}  || '';
 
 print "creating phabricator automation account...\n";
 if ( !Bugzilla::User->new( { name => $phab_login } ) ) {
@@ -129,34 +129,49 @@ Bugzilla::Bug->create(
     }
 );
 
-##########################################################################
-# Set Parameters
-##########################################################################
-print "setting custom parameters...\n";
-my %set_params = ( password_check_on_login => 0, );
-
-my $params_modified;
-foreach my $param ( keys %set_params ) {
-    my $value = $set_params{$param};
-    next if !$value || Bugzilla->params->{$param} eq $value;
-    SetParam( $param, $value );
-    $params_modified = 1;
-}
-
-write_params() if $params_modified;
-
-##########################################################################
-# Set Phabricator Push Connector Values
-##########################################################################
-print "setting push connector options...\n";
-my ($phab_is_configured) = $dbh->selectrow_array(q{SELECT COUNT(*) FROM push_options WHERE connector = 'Phabricator'});
-unless ($phab_is_configured) {
-    $dbh->do(q{INSERT INTO push_options (connector, option_name, option_value) VALUES ('global','enabled','Enabled')});
-    $dbh->do(
-        q{INSERT INTO push_options (connector, option_name, option_value) VALUES ('Phabricator','enabled','Enabled')});
-    $dbh->do(
-        q{INSERT INTO push_options (connector, option_name, option_value) VALUES ('Phabricator','phabricator_url','http://phabricator.test')}
-    );
-}
+set_params(
+    password_check_on_login => 0,
+    phabricator_base_uri    => 'http://phabricator.test/',
+    phabricator_enabled     => 1,
+    phabricator_sync_groups => 'core-security',
+);
+set_push_connector_options();
 
 print "installation and configuration complete!\n";
+
+sub set_push_connector_options {
+    print "setting push connector options...\n";
+    my ($phab_is_configured) = $dbh->selectrow_array(q{SELECT COUNT(*) FROM push_options WHERE connector = 'Phabricator'});
+    unless ($phab_is_configured) {
+        $dbh->do(q{INSERT INTO push_options (connector, option_name, option_value) VALUES ('global','enabled','Enabled')});
+        $dbh->do(
+            q{INSERT INTO push_options (connector, option_name, option_value) VALUES ('Phabricator','enabled','Enabled')});
+        $dbh->do(
+            q{INSERT INTO push_options (connector, option_name, option_value) VALUES ('Phabricator','phabricator_url','http://phabricator.test')}
+        );
+    }
+}
+
+sub set_params {
+    my (%set_params) = @_;
+    print "setting custom parameters...\n";
+    if ($ENV{PHABRICATOR_API_KEY}) {
+        $set_params{phabricator_api_key} = $ENV{PHABRICATOR_API_KEY};
+    }
+
+    if ($ENV{PHABRICATOR_APP_ID} && $ENV{PHABRICATOR_AUTH_CALLBACK_URL}) {
+        $set_params{phabricator_app_id}            = $ENV{PHABRICATOR_APP_ID};
+        $set_params{phabricator_auth_callback_url} = $ENV{PHABRICATOR_AUTH_CALLBACK_URL};
+    }
+
+    my $params_modified;
+    foreach my $param ( keys %set_params ) {
+        my $value = $set_params{$param};
+        next if !$value || Bugzilla->params->{$param} eq $value;
+        SetParam( $param, $value );
+        $params_modified = 1;
+    }
+
+    write_params() if $params_modified;
+}
+

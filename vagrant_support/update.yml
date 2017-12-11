@@ -15,9 +15,9 @@
     - name: add data symlink
       file: path=/vagrant/data src=/data state=link force=true
 
-    - include: checksetup.yml
+    - include_tasks: checksetup.yml
       vars:
         LAZY: 1
-    - include: apache.yml
+    - include_tasks: apache.yml
       vars:
         LAZY: 1

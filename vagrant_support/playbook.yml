@@ -2,7 +2,7 @@
 - hosts: all
   become: true
   tasks:
-    - include: timezone.yml
+    - import_tasks: timezone.yml
     - name: install epel-release
       yum: name=epel-release state=present
 
@@ -175,7 +175,7 @@
     - name: add data symlink
       file: path=/vagrant/data src=/data state=link force=true
 
-    - include: memcached.yml
+    - import_tasks: memcached.yml
 
     - name: add vagrant to apache group
       user: name=vagrant groups=apache append=yes
@@ -186,17 +186,17 @@
         dest: /usr/local/bin/bmo-refresh-bundle
         mode: 0755
 
-    - include: checksetup.yml
+    - include_tasks: checksetup.yml
       vars:
         LAZY: 0
-    - include: cron.yml
-    - include: jobqueue.yml
-    - include: push.yml
-    - include: email.yml
-    - include: apache.yml
+    - import_tasks: cron.yml
+    - import_tasks: jobqueue.yml
+    - import_tasks: push.yml
+    - import_tasks: email.yml
+    - include_tasks: apache.yml
       vars:
         LAZY: 0
-    - include: devtools.yml
+    - import_tasks: devtools.yml
 
     - name: fix owner of /vagrant/template_cache
       file: path=/vagrant/template_cache state=directory owner=vagrant group=apache recurse=yes

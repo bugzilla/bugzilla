@@ -3,11 +3,10 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+use 5.10.1;
 use strict;
 use warnings;
 use lib qw(. lib local/lib/perl5);
-
-
 
 use Bugzilla;
 use Bugzilla::User;
@@ -270,6 +269,26 @@ my @products = (
             }
         ],
     },
+    {
+        classification   => 'Other',
+        product_name     => 'bugzilla.mozilla.org',
+        description      => 'For issues relating to the bugzilla.mozilla.org website, '
+                          . 'also known as <a href="https://wiki.mozilla.org/BMO">BMO</a>.',
+        versions         => ['Development/Staging', 'Production'],
+        milestones       => [ '---' ],
+        defaultmilestone => '---',
+        components       => [
+            {
+                name           => 'General',
+                description    => 'This is the component for issues specific to bugzilla.mozilla.org '
+                               .  'that do not belong in other components.',
+                initialowner   => 'nobody@mozilla.org',
+                initialqaowner => '',
+                initial_cc     => [],
+                watch_user     => 'general@bugzilla.bugs'
+            }
+        ],
+    },
 );
 
 my $default_op_sys_id
@@ -437,6 +456,46 @@ foreach my $group (@groups) {
         }
     }
 }
+
+my @fields = (
+    {
+        name         => 'cf_due_date',
+        description  => 'Due Date',
+        type         => FIELD_TYPE_DATE,
+        sortkey      => 949,
+        mailhead     => 0,
+        enter_bug    => 1,
+        obsolete     => 0,
+        custom       => 1,
+        buglist      => 1,
+        reverse_desc => "",
+        is_mandatory => 0,
+    }
+);
+
+say 'creating custom fields';
+foreach my $field (@fields) {
+    next if Bugzilla::Field->new({name => $field->{name}});
+    my $field_obj = Bugzilla::Field->create(
+        {
+            name                => $field->{name},
+            description         => $field->{description},
+            type                => $field->{type},
+            sortkey             => $field->{sortkey},
+            mailhead            => $field->{new_bugmail},
+            enter_bug           => $field->{enter_bug},
+            obsolete            => $field->{obsolete},
+            custom              => 1,
+            buglist             => 1,
+            visibility_field_id => $field->{visibility_field_id},
+            visibility_values   => $field->{visibility_values},
+            value_field_id      => $field->{value_field_id},
+            reverse_desc        => $field->{reverse_desc},
+            is_mandatory        => $field->{is_mandatory},
+        }
+    );
+}
+
 
 # Update default security group settings for new products
 my $default_security_group = Bugzilla::Group->new({ name => 'core-security' });

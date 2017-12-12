@@ -161,7 +161,7 @@ END;
 
           [% CASE constants.FIELD_TYPE_DATE %]
             [%# date %]
-            [% value FILTER time("%Y-%m-%d") %]
+            <time>[% value FILTER html %]</time>
 
           [% CASE constants.FIELD_TYPE_BUG_ID %]
             [%# bug id %]

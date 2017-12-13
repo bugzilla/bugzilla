@@ -33,19 +33,19 @@ $(function() {
                 if ($content.is(':visible')) {
                     e.preventDefault();
                     e.stopPropagation();
-                    var $li = $content.find('li');
+                    var $items = $content.find('[role="menuitem"]');
                     // if none focused select the first or last
-                    var $any_focused = $content.find('a:focus');
+                    var $any_focused = $items.filter(':focus');
                     if ($any_focused.length == 0) {
-                        var index = e.keyCode == 40 ? 0 : $li.length - 1;
-                        var $link = $li.eq(index).find('a');
+                        var index = e.keyCode == 40 ? 0 : $items.length - 1;
+                        var $link = $items.eq(index);
                         $link.addClass('active').focus();
                         return;
                     }
                     // otherwise move up or down the list based on arrow key pressed
                     var inc  = e.keyCode == 40 ? 1 : -1;
-                    var move = $content.find('a:focus').parent('li').index() + inc;
-                    var $link = $li.eq(move % $li.length).find('a');
+                    var move = $items.index($any_focused) + inc;
+                    var $link = $items.eq(move % $items.length);
                     $content.find('a').removeClass('active');
                     $link.addClass('active').focus();
                 }
@@ -78,6 +78,13 @@ $(function() {
     });
 
     function toggleDropDown(e, $button, $content, hide_only) {
+        // hide other expanded dropdown menu if any
+        var $expanded = $('.dropdown-button[aria-expanded="true"]');
+        if ($expanded.length && !$expanded.is($button)) {
+            $('#' + $expanded.attr('aria-controls')).hide();
+            $expanded.attr('aria-expanded', false);
+        }
+
         // clear all active links
         $content.find('a').removeClass('active');
         if ($content.is(':visible')) {

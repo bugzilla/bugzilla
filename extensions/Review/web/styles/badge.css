@@ -5,12 +5,16 @@
  * This Source Code Form is "Incompatible With Secondary Licenses", as
  * defined by the Mozilla Public License, v. 2.0. */
 
-#badge {
-    background-color: #c00;
-    font-size: small;
+#header .badge {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 16px;
+    padding: 4px;
+    min-width: 16px;
+    height: 16px;
+    font-size: 14px;
     font-weight: bold;
-    padding: 0 5px;
-    border-radius: 10px;
-    margin: 0 5px;
-    color: #fff !important;
+    color: #FFF !important;
+    background-color: #C00;
 }

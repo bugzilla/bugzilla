@@ -12,7 +12,7 @@
     || user.needinfo_request_count
 %]
 
-<a id="badge"
+<a id="header-flags" class="badge"
   href="request.cgi?action=queue&amp;requestee=[% user.login FILTER uri %]&amp;group=type"
   title="Flags requested of you:
     [%- " review (" _ user.review_request_count _ ")" IF user.review_request_count -%]

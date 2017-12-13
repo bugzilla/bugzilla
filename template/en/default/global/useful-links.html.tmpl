@@ -26,10 +26,6 @@
 [% PROCESS global/variables.none.tmpl %]
 
 <ul id="useful-links">
-  <li id="links-actions">
-      [% PROCESS "global/common-links.html.tmpl" qs_suffix = "_bottom" %]
-  </li>
-
   [%# Saved searches %]
     
   [% IF user.showmybugslink OR user.queries.size 

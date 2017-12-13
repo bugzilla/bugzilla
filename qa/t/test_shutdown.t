@@ -69,7 +69,7 @@ $sel->title_is("Parameters Updated");
 
 # Accessing index.cgi should work again now.
 
-$sel->click_ok("link=Home");
+$sel->click_ok('//*[@id="header-title"]//a');
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_is("Bugzilla Main Page");
 logout($sel);

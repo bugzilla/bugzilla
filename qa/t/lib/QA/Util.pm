@@ -203,7 +203,7 @@ sub file_bug_in_product {
     my $config = get_config();
 
     $classification ||= "Unclassified";
-    $sel->click_ok("link=New", undef, "Go create a new bug");
+    $sel->click_ok('//*[@class="link-file"]//a', undef, "Go create a new bug");
     $sel->wait_for_page_to_load(WAIT_TIME);
     my $title = $sel->get_title();
     if ($sel->is_text_present("Select Classification")) {
@@ -328,7 +328,7 @@ sub add_product {
 sub open_advanced_search_page {
     my $sel = shift;
 
-    $sel->click_ok("link=Search");
+    $sel->click_ok('//*[@class="link-search"]//a');
     $sel->wait_for_page_to_load(WAIT_TIME);
     my $title = $sel->get_title();
     if ($title eq "Simple Search") {

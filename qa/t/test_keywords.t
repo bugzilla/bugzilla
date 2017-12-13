@@ -128,7 +128,7 @@ $sel->wait_for_page_to_load(WAIT_TIME);
 $sel->title_is("Bug List");
 $sel->is_text_present_ok("2 bugs found");
 
-$sel->click_ok("link=Search");
+$sel->click_ok('//*[@class="link-search"]//a');
 $sel->wait_for_page_to_load(WAIT_TIME);
 $sel->title_is("Search for bugs");
 $sel->remove_all_selections("product");
@@ -140,7 +140,7 @@ $sel->wait_for_page_to_load(WAIT_TIME);
 $sel->title_is("Bug List");
 $sel->is_text_present_ok("One bug found");
 
-$sel->click_ok("link=Search");
+$sel->click_ok('//*[@class="link-search"]//a');
 $sel->wait_for_page_to_load(WAIT_TIME);
 $sel->title_is("Search for bugs");
 $sel->remove_all_selections("product");

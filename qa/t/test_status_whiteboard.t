@@ -71,7 +71,7 @@ $sel->is_text_present_ok("2 bugs found");
 set_parameters($sel, {'Bug Fields' => {'usestatuswhiteboard-off' => undef}});
 # Show detailed bug information panel on advanced search
 ok($sel->create_cookie('TUI=information_query=1'), 'Show detailed bug information');
-$sel->click_ok("link=Search");
+$sel->click_ok('//*[@class="link-search"]//a');
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_is("Search for bugs");
 ok(!$sel->is_text_present("Whiteboard:"), "Whiteboard label no longer displayed");

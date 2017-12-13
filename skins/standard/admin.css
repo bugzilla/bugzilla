@@ -324,6 +324,13 @@ input[disabled] {
     width: 70%;
 }
 
+body.mfa-warning #mfa-select button {
+    outline: none;
+    border-color: #FF5300;
+    border-width: 1px;
+    box-shadow: 2px 2px 15px #FF5300;
+}
+
 .flex {
     display: flex;
     flex-flow: row;

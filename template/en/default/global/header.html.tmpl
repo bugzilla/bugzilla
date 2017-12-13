@@ -19,6 +19,7 @@
   #                 Vaskin Kissoyan <vkissoyan@yahoo.com>
   #                 Vitaly Harisov <vitaly@rathedg.com>
   #                 Svetlana Harisova <light@rathedg.com>
+  #                 Kohei Yoshino <kohei.yoshino@gmail.com>
   #%]
 
 [%# INTERFACE:
@@ -90,8 +91,7 @@
   # value of title anyway.  To get around that problem we explicitly
   # set header's default value here only if it is undefined. %]
 [% IF !header.defined %][% header = title %][% END %]
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
-                      "http://www.w3.org/TR/html4/loose.dtd">
+<!DOCTYPE html>
 <html lang="en">
   <head>
     [%- js_BUGZILLA = {
@@ -124,6 +124,7 @@
        END;
     %]
 
+    <meta name="viewport" content="width=1024">
     <meta name="generator" content="[% terms.Bugzilla _ " " _ constants.BUGZILLA_VERSION FILTER html %]">
     <meta name="bugzilla-global" content="dummy"
         id="bugzilla-global" data-bugzilla="[% json_encode(js_BUGZILLA) FILTER html %]">
@@ -173,7 +174,7 @@
     [% FOREACH jq_name = jquery.unique %]
       [% starting_js_urls.push("js/jquery/plugins/$jq_name/${jq_name}-min.js") %]
     [% END %]
-    [% starting_js_urls.push('js/global.js') %]
+    [% starting_js_urls.push('js/global.js', 'js/dropdown.js') %]
 
     [% FOREACH asset_url = concatenate_js(starting_js_urls) %]
       [% PROCESS format_js_link %]
@@ -244,96 +245,148 @@
   # 'bannerhtml'
   #%]
 
-<div id="header">
-
-  <div class="wrapper">
-    <table border="0" cellspacing="0" cellpadding="0" id="titles">
-    <tr>
-      <td id="title">
-        <a href="./" title="Home">[% terms.BugzillaTitle %]</a>
-      </td>
-      <td>
-        [% Hook.process("message") %]
-        [% IF Bugzilla.request_cache.mfa_warning
-              AND user.mfa_required_date
-              AND NOT Bugzilla.request_cache.on_mfa_page %]
-          <span id="mfa-warning">
-            Please <a href="userprefs.cgi?tab=mfa">enable two-factor authentication</a>
-            [% IF Param('mfa_group_grace_period') %]
-              before <i>[% user.mfa_required_date FILTER time %]</i>.
-            [% ELSE %]
-              now.
-            [% END %]
-          </span>
-        [% END %]
-      </td>
-      <td id="moz_login">
+<header id="header" role="banner">
+  <div class="inner">
+    <h1 id="header-title" class="title"><a href="./" title="Go to home page">[% terms.BugzillaTitle %]</a></h1>
+    <form role="search" id="header-search" class="quicksearch quicksearch_check_empty" action="buglist.cgi">
+      <div class="searchbox-outer">
+        <input role="searchbox" id="quicksearch_top" name="quicksearch"
+               value="[% quicksearch FILTER html %]" placeholder="Search [% terms.Bugs %]"
+               title="Search [% terms.bugs %] by keywords">
+        <button type="submit" id="find_top" aria-label="Submit">
+          <span class="icon" aria-hidden="true"></span>
+        </button>
+      </div>
+    </form>
+    <nav id="header-nav">
+      <ul class="links">
+        <li class="link-browse">
+          <a href="describecomponents.cgi" title="Browse [% terms.bugs %] by component">
+            <span class="icon" aria-hidden="true"></span>
+            <span class="label">Browse</span>
+          </a>
+        </li>
+        <li class="link-search">
+          <a href="query.cgi?format=advanced" title="Search [% terms.bugs %] using various criteria">
+            <span class="icon" aria-hidden="true"></span>
+            <span class="label">Advanced Search</span>
+          </a>
+        </li>
         [% IF user.id %]
-          <ul class="links">
-            <li class="dropdown">
-              <span class="anchor">[% user.login FILTER html %]</span>
-              <ul>
-                [% IF user.showmybugslink %]
-                  [% filtered_username = user.login FILTER uri %]
-                  <li><a href="[% Param('mybugstemplate').replace('%userid%', filtered_username) %]">My [% terms.Bugs %]</a></li>
-                [% END %]
-                <li><a href="page.cgi?id=mydashboard.html">My Dashboard</a></li>
-                <li><a href="user_profile">My Profile</a></li>
-                <li><a href="page.cgi?id=user_activity.html&amp;action=run&amp;who=[% user.login FILTER uri %]">My Activity</a></li>
-                <li><a href="request.cgi?requester=[% user.login FILTER uri %]&amp;requestee=[% user.login FILTER uri %]&amp;do_union=1&amp;group=type&amp;action=queue">My Requests</a></li>
-                <li><a href="userprefs.cgi">Preferences</a></li>
-                [% IF user.in_group('tweakparams') || user.in_group('editusers') || user.can_bless
-                      || (Param('useclassification') && user.in_group('editclassifications'))
-                      || user.in_group('editcomponents') || user.in_group('admin') || user.in_group('creategroups')
-                      || user.in_group('editkeywords') || user.in_group('bz_canusewhines')
-                      || user.get_products_by_permission("editcomponents").size %]
-                  <li><a href="admin.cgi">Administration</a></li>
-                [% END %]
-                [% IF user.authorizer.can_logout %]
-                  <li><a href="index.cgi?logout=1">Log&nbsp;out</a></li>
-                [% END %]
-                [% IF sudoer %]
-                  <li>
-                    <a href="relogin.cgi?action=end-sudo">End sudo session impersonating [% user.login FILTER html %]</a>
-                  </li>
-                [% END %]
-              </ul>
-            </li>
-          </ul>
-        [% ELSE %]
-          <ul class="login-links">
-            [% IF Param('createemailregexp')
-                  && user.authorizer.user_can_create_account %]
-              <li id="moz_new_account_container_top"><a href="createaccount.cgi">New&nbsp;Account</a>
-                [% IF use_login_page %] <span class="separator">| </span> [% END %]
-              </li>
-            [% END %]
-
-            [% IF use_login_page %]
-              <li>
-                <a href="[% urlbase FILTER html %]login">Log In</a>
-              </li>
-            [% ELSE %]
-                [%# Only display one login form when we're on a LOGIN_REQUIRED page. That
-                # way, we're guaranteed that the user will use the form that has
-                # hidden_fields in it (the center form) instead of this one. Also, it's
-                # less confusing to have one form (as opposed to  three) when you're
-                # required to log in.
-                #%]
-                [% IF user.authorizer.can_login && !Bugzilla.page_requires_login %]
-                  [% PROCESS "account/auth/login-small.html.tmpl" qs_suffix = "_top" %]
-                [% END %]
-            [% END %]
-          </ul>
+          <li class="link-file">
+            <a href="enter_bug.cgi" title="File a new [% terms.bug %]">
+              <span class="icon" aria-hidden="true"></span>
+              <span class="label">New [% terms.Bug %]</span>
+            </a>
+          </li>
         [% END %]
-      </td>
-    </tr>
-    </table>
-
-    [% PROCESS "global/common-links.html.tmpl" qs_suffix = "_top" %]
-
+        [% Hook.process('action-links') %]
+      </ul>
+      <div class="dropdown">
+        <button type="button" id="header-tools-menu-button" class="dropdown-button minor" title="More tools…"
+                aria-label="More tools…" aria-expanded="false" aria-haspopup="true" aria-controls="header-tools-menu">
+          <span class="icon" aria-hidden="true"></span>
+        </button>
+        <ul class="dropdown-content" id="header-tools-menu" role="menu" style="display:none;">
+          [% IF user.showmybugslink %]
+            [% filtered_username = user.login FILTER uri %]
+            <li role="presentation">
+              <a href="[% Param('mybugstemplate').replace('%userid%', filtered_username) %]" role="menuitem" tabindex="-1">My [% terms.Bugs %]</a>
+            </li>
+          [% END %]
+          [% IF user.id %]
+            <li role="presentation">
+              <a href="request.cgi?requester=[% user.login FILTER uri %]&amp;requestee=[% user.login FILTER uri %]&amp;do_union=1&amp;group=type&amp;action=queue" role="menuitem" tabindex="-1">My Requests</a>
+            </li>
+          [% END %]
+          <li role="presentation">
+            <a href="report.cgi" role="menuitem" tabindex="-1">Reports</a>
+          </li>
+          [% IF user.in_group('tweakparams') || user.in_group('editusers') || user.can_bless
+                || (Param('useclassification') && user.in_group('editclassifications'))
+                || user.in_group('editcomponents') || user.in_group('admin') || user.in_group('creategroups')
+                || user.in_group('editkeywords') || user.in_group('bz_canusewhines')
+                || user.get_products_by_permission("editcomponents").size %]
+            <li role="presentation">
+              <a href="admin.cgi" role="menuitem" tabindex="-1">Administration</a>
+            </li>
+          [% END %]
+          [% IF Param('docs_urlbase') %]
+            <li role="separator" class="dropdown-separator"></li>
+            <li role="presentation">
+              <a href="[% docs_urlbase FILTER html %]" role="menuitem" tabindex="-1">Documentation</a>
+            </li>
+          [% END %]
+        </ul>
+      </div>
+    </nav>
+    [% Hook.process("badge") %]
+    [% IF user.id %]
+      <div id="header-account" class="dropdown">
+        <button type="button" id="header-account-menu-button" class="dropdown-button minor" title="Account"
+                aria-label="Account" aria-expanded="false" aria-haspopup="true" aria-controls="header-account-menu">
+          [% IF user.gravatar %]
+            <img src="[% user.gravatar FILTER html %]" width="32" height="32" alt="">
+          [% ELSE %]
+            <span class="icon" aria-hidden="true"></span>
+          [% END %]
+        </button>
+        <ul class="dropdown-content" id="header-account-menu" role="menu" style="display:none;">
+          <li role="presentation">
+            <div href="user_profile" class="account-label">
+              <div class="name">[% user.name FILTER html %]</div>
+              <div class="email">[% user.login FILTER html %]</div>
+            </div>
+          </li>
+          <li role="separator" class="dropdown-separator"></li>
+          <li role="presentation">
+            <a href="user_profile" role="menuitem" tabindex="-1">My Profile</a>
+          </li>
+          <li role="presentation">
+            <a href="page.cgi?id=user_activity.html&amp;action=run&amp;who=[% user.login FILTER uri %]" role="menuitem"
+               tabindex="-1">My Activity</a>
+          </li>
+          <li role="presentation">
+            <a href="userprefs.cgi" role="menuitem" tabindex="-1">Preferences</a>
+          </li>
+          [% IF user.authorizer.can_logout %]
+            <li role="separator" class="dropdown-separator"></li>
+            <li role="presentation">
+              <a href="index.cgi?logout=1" role="menuitem" tabindex="-1">Log out</a>
+            </li>
+          [% END %]
+          [% IF sudoer %]
+            <li role="presentation">
+              <a href="relogin.cgi?action=end-sudo" role="menuitem" tabindex="-1">End sudo session impersonating [% user.login FILTER html %]</a>
+            </li>
+          [% END %]
+        </ul>
+      </div>
+    [% ELSE %]
+      <ul id="header-login" class="links">
+        [% IF Param('createemailregexp') && user.authorizer.user_can_create_account %]
+          <li id="moz_new_account_container_top"><a href="createaccount.cgi">New Account</a></li>
+        [% END %]
+        [% IF user.authorizer.can_login %]
+          [% PROCESS "account/auth/login-small.html.tmpl" qs_suffix = "_top" %]
+        [% END %]
+      </ul>
+    [% END %]
   </div>
-</div> [%# header %]
+</header> [%# header %]
+
+[% IF Bugzilla.request_cache.mfa_warning
+      AND user.mfa_required_date
+      AND NOT Bugzilla.request_cache.on_mfa_page %]
+  <aside id="mfa-warning">
+    Please <a href="userprefs.cgi?tab=mfa">enable two-factor authentication</a>
+    [% IF Param('mfa_group_grace_period') %]
+      before <i>[% user.mfa_required_date FILTER time %]</i>.
+    [% ELSE %]
+      now.
+    [% END %]
+  </aside>
+[% END %]
 
 <div id="bugzilla-body">
 

@@ -68,7 +68,7 @@ ok($text =~ /OK, you have a new search named selenium_m0./, "New search named se
 
 set_parameters($sel, { "Bug Fields" => {"usetargetmilestone-off" => undef} });
 
-$sel->click_ok("link=Search");
+$sel->click_ok('//*[@class="link-search"]//a');
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_is("Search for bugs");
 ok(!$sel->is_text_present("Target Milestone:"), "The target milestone field is no longer displayed");

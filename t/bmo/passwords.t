@@ -198,7 +198,7 @@ sub click_and_type {
     my ($sel, $name, $text) = @_;
 
     eval {
-        my $el = $sel->find_element(qq{//input[\@name="$name"]}, 'xpath');
+        my $el = $sel->find_element(qq{//*[\@id="bugzilla-body"]//input[\@name="$name"]}, 'xpath');
         $el->click();
         $sel->send_keys_to_active_element($text);
         pass("found $name and typed $text");
@@ -244,7 +244,7 @@ sub login {
     $sel->title_is("Log in to Bugzilla");
     click_and_type($sel, 'Bugzilla_login', $login);
     click_and_type($sel, 'Bugzilla_password', $password);
-    submit($sel, '//input[@name="GoAheadAndLogIn"]');
+    submit($sel, '//*[@id="bugzilla-body"]//input[@name="GoAheadAndLogIn"]');
 }
 
 sub login_ok {

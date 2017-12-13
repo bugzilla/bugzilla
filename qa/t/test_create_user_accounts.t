@@ -37,7 +37,7 @@ $sel->title_is("Request for new user account '$valid_account' submitted");
 $sel->is_text_present_ok("A confirmation email has been sent");
 
 # Try creating the same account again. It's too soon.
-$sel->click_ok("link=Home");
+$sel->click_ok('//*[@id="header-title"]//a');
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_is("Bugzilla Main Page");
 $sel->is_text_present_ok("Open a New Account");
@@ -123,7 +123,7 @@ logout($sel);
 
 # Make sure that links pointing to createaccount.cgi are all deactivated.
 ok(!$sel->is_text_present("New Account"), "No link named 'New Account'");
-$sel->click_ok("link=Home");
+$sel->click_ok('//*[@id="header-title"]//a');
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->refresh;
 $sel->wait_for_page_to_load_ok(WAIT_TIME);

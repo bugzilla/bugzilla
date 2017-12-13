@@ -282,14 +282,14 @@ END;
 
         [% CASE constants.FIELD_TYPE_DATETIME %]
           [%# datetime %]
-          <input class="cf_datetime" name="[% name FILTER html %]" id="[% name FILTER html %]"
+          <input type="datetime-local" name="[% name FILTER html %]" id="[% name FILTER html %]"
             value="[% value FILTER html %]" [% aria_labelledby_html FILTER none %]>
           <img class="cf_datetime-img" id="[% name FILTER html %]-img"
             src="extensions/BugModal/web/calendar.png" width="16" height="16">
 
         [% CASE constants.FIELD_TYPE_DATE %]
           [%# date %]
-          <input class="cf_date" name="[% name FILTER html %]" id="[% name FILTER html %]"
+          <input type="date" name="[% name FILTER html %]" id="[% name FILTER html %]"
             value="[% value FILTER html %]" [% aria_labelledby_html FILTER none %]>
           <img class="cf_date-img" id="[% name FILTER html %]-img"
             src="extensions/BugModal/web/calendar.png" width="16" height="16">

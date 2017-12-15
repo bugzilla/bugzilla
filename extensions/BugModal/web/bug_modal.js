@@ -976,30 +976,7 @@ $(function() {
             $('#' + id + '-view').hide();
             $('#' + id).show().focus().select();
         });
-
-    // date/datetime pickers
-    $('.cf_datetime').datetimepicker({
-        format: 'Y-m-d G:i:s',
-        datepicker: true,
-        timepicker: true,
-        scrollInput: false,
-        lazyInit: false, // there's a bug which prevents img->show from working with lazy:true
-        closeOnDateSelect: true
-    });
-    $('.cf_date').datetimepicker({
-        format: 'Y-m-d',
-        datepicker: true,
-        timepicker: false,
-        scrollInput: false,
-        lazyInit: false,
-        closeOnDateSelect: true
-    });
-    $('.cf_datetime-img, .cf_date-img')
-        .click(function(event) {
-            var id = $(event.target).attr('id').replace(/-img$/, '');
-            $('#' + id).datetimepicker('show');
-        });
-
+        
     // timetracking
     $('#work_time').change(function() {
         // subtracts time spent from remaining time

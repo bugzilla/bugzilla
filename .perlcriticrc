@@ -5,7 +5,7 @@ severity = 1
 #perltidyrc = .perltidyrc
 [InputOutput::RequireCheckedSyscalls]
 functions = :builtins
-exclude_functions = print say binmode
+exclude_functions = print say sleep binmode
 
 [-BuiltinFunctions::ProhibitUselessTopic]
 [-ControlStructures::ProhibitCascadingIfElse]
@@ -17,15 +17,18 @@ exclude_functions = print say binmode
 [-Modules::RequireVersionVar]
 [-References::ProhibitDoubleSigils]
 [-RegularExpressions::ProhibitComplexRegexes]
+[-RegularExpressions::RequireDotMatchAnything]
+[-RegularExpressions::RequireLineBoundaryMatching]
 [-RegularExpressions::RequireExtendedFormatting]
 [-Subroutines::ProhibitExcessComplexity]
 [-ValuesAndExpressions::ProhibitConstantPragma]
 [-ValuesAndExpressions::ProhibitEmptyQuotes]
 [-ValuesAndExpressions::ProhibitMagicNumbers]
+[-ValuesAndExpressions::ProhibitNoisyQuotes]
+[-ValuesAndExpressions::ProhibitNoisyQuotes]
 [-ValuesAndExpressions::ProhibitVersionStrings]
 [-Variables::ProhibitLocalVars]
 [-Variables::ProhibitPackageVars]
-[-ValuesAndExpressions::ProhibitNoisyQuotes]
 
 # this policy is broken currently
 [-Freenode::PackageMatchesFilename]

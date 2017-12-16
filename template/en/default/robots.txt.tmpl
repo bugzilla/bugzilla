@@ -2,7 +2,7 @@ User-agent: *
 Disallow: /
 Crawl-delay: 30
 
-[% IF NOT urlbase.matches("bugzilla-dev") %]
+[% IF NOT Bugzilla.localconfig.urlbase.matches("bugzilla-dev") %]
 
 Allow: /$
 Allow: /index.cgi

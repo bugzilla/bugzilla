@@ -1532,8 +1532,8 @@ sub field_end_of_create {
 
     # Create an IT bug so Mozilla's DBAs so they can update the grants for metrics
 
-    if (Bugzilla->params->{'urlbase'} ne 'https://bugzilla.mozilla.org/'
-        && Bugzilla->params->{'urlbase'} ne 'https://bugzilla.allizom.org/')
+    if (Bugzilla->localconfig->{'urlbase'} ne 'https://bugzilla.mozilla.org/'
+        && Bugzilla->localconfig->{'urlbase'} ne 'https://bugzilla.allizom.org/')
     {
         return;
     }
@@ -2544,11 +2544,6 @@ sub install_filesystem {
     my $contribute = eval {
         $json->decode(scalar read_file(bz_locations()->{cgi_path} . "/contribute.json"));
     };
-    my $commit = $ENV{CIRCLE_SHA1};
-    unless ($commit) {
-        $commit = `git rev-parse HEAD`;
-        chomp $commit;
-    }
 
     if (!$contribute) {
         die "Missing or invalid contribute.json file";
@@ -2557,8 +2552,8 @@ sub install_filesystem {
     my $version_obj = {
         source  => $contribute->{repository}{url},
         version => BUGZILLA_VERSION,
-        commit  => $commit // "unknown",
-        build   => $ENV{CIRCLE_BUILD_NUM} // "unknown",
+        commit  => $ENV{CIRCLE_SHA1}      // 'unknown',
+        build   => $ENV{CIRCLE_BUILD_NUM} // 'unknown',
     };
 
     $create_files->{'version.json'} = {

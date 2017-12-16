@@ -57,12 +57,12 @@ sub DEFAULT_CSP {
 # Because show_bug code lives in many different .cgi files,
 # we needed a centralized place to define the policy.
 # normally the policy would just live in one .cgi file.
-# Additionally, correct_urlbase() cannot be called at compile time, so this can't be a constant.
+# Additionally, Bugzilla->localconfig->{urlbase} cannot be called at compile time, so this can't be a constant.
 sub SHOW_BUG_MODAL_CSP {
     my ($bug_id) = @_;
     my %policy = (
         script_src  => ['self', 'nonce', 'unsafe-inline', 'unsafe-eval', 'https://www.google-analytics.com' ],
-        object_src  => [correct_urlbase() . "extensions/BugModal/web/ZeroClipboard/ZeroClipboard.swf"],
+        object_src  => [Bugzilla->localconfig->{urlbase} . "extensions/BugModal/web/ZeroClipboard/ZeroClipboard.swf"],
         img_src     => [ 'self', 'https://secure.gravatar.com', 'https://www.google-analytics.com' ],
         connect_src => [
             'self',
@@ -76,7 +76,7 @@ sub SHOW_BUG_MODAL_CSP {
         ],
     );
     if (use_attachbase() && $bug_id) {
-        my $attach_base = Bugzilla->params->{'attachment_base'};
+        my $attach_base = Bugzilla->localconfig->{'attachment_base'};
         $attach_base =~ s/\%bugid\%/$bug_id/g;
         push @{ $policy{img_src} }, $attach_base;
     }
@@ -141,7 +141,7 @@ sub new {
     # Send appropriate charset
     $self->charset(Bugzilla->params->{'utf8'} ? 'UTF-8' : '');
 
-    # Redirect to urlbase/sslbase if we are not viewing an attachment.
+    # Redirect to urlbase if we are not viewing an attachment.
     if ($self->url_is_attachment_base and $script ne 'attachment.cgi') {
         $self->redirect_to_urlbase();
     }
@@ -177,7 +177,7 @@ sub new {
 sub target_uri {
     my ($self) = @_;
 
-    my $base = correct_urlbase();
+    my $base = Bugzilla->localconfig->{urlbase};
     if (my $request_uri = $self->request_uri) {
         my $base_uri = URI->new($base);
         $base_uri->path('');
@@ -594,11 +594,12 @@ sub send_cookie {
     }
 
     # Add the default path and the domain in.
-    $paramhash{'-path'} = Bugzilla->params->{'cookiepath'};
-    $paramhash{'-domain'} = Bugzilla->params->{'cookiedomain'}
-        if Bugzilla->params->{'cookiedomain'};
+    state $uri = URI->new( Bugzilla->localconfig->{urlbase} );
+    $paramhash{'-path'}   = $uri->path;
+    # we don't set the domain.
     $paramhash{'-secure'} = 1
-        if Bugzilla->params->{'ssl_redirect'};
+      if lc( $uri->scheme ) eq 'https';
+
 
     # Move the param list back into an array for the call to cookie().
     foreach (keys(%paramhash)) {
@@ -683,14 +684,15 @@ sub redirect_search_url {
 
 sub redirect_to_https {
     my $self = shift;
-    my $sslbase = Bugzilla->params->{'sslbase'};
+    my $urlbase = Bugzilla->localconfig->{'urlbase'};
+
     # If this is a POST, we don't want ?POSTDATA in the query string.
     # We expect the client to re-POST, which may be a violation of
     # the HTTP spec, but the only time we're expecting it often is
     # in the WebService, and WebService clients usually handle this
     # correctly.
     $self->delete('POSTDATA');
-    my $url = $sslbase . $self->url('-path_info' => 1, '-query' => 1,
+    my $url = $urlbase . $self->url('-path_info' => 1, '-query' => 1,
                                     '-relative' => 1);
 
     # XML-RPC clients (SOAP::Lite at least) require a 301 to redirect properly
@@ -707,14 +709,14 @@ sub redirect_to_https {
 sub redirect_to_urlbase {
     my $self = shift;
     my $path = $self->url('-path_info' => 1, '-query' => 1, '-relative' => 1);
-    print $self->redirect('-location' => correct_urlbase() . $path);
+    print $self->redirect('-location' => Bugzilla->localconfig->{urlbase} . $path);
     exit;
 }
 
 sub url_is_attachment_base {
     my ($self, $id) = @_;
     return 0 if !use_attachbase() or !i_am_cgi();
-    my $attach_base = Bugzilla->params->{'attachment_base'};
+    my $attach_base = Bugzilla->localconfig->{'attachment_base'};
     # If we're passed an id, we only want one specific attachment base
     # for a particular bug. If we're not passed an ID, we just want to
     # know if our current URL matches the attachment_base *pattern*.
@@ -859,9 +861,6 @@ effectively removing the cookie.
 As its only argument, it takes the name of the cookie to expire.
 
 =item C<redirect_to_https>
-
-This routine redirects the client to the https version of the page that
-they're looking at, using the C<sslbase> parameter for the redirection.
 
 Generally you should use L<Bugzilla::Util/do_ssl_redirect_if_required>
 instead of calling this directly.

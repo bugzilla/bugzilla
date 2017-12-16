@@ -43,7 +43,7 @@ my $vars = {};
 
 # redirect to enter_bug if no field is passed.
 unless ($cgi->param()) {
-    print $cgi->redirect(correct_urlbase() . 'enter_bug.cgi');
+    print $cgi->redirect(Bugzilla->localconfig->{urlbase} . 'enter_bug.cgi');
     exit;
 }
 

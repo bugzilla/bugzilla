@@ -18,7 +18,7 @@ use Bugzilla::Keyword;
 use Bugzilla::Product;
 use Bugzilla::Status;
 use Bugzilla::Field;
-use Bugzilla::Util qw(correct_urlbase);
+use Bugzilla::Util ();
 
 use Bugzilla::Extension::BzAPI::Constants;
 
@@ -143,7 +143,7 @@ sub get_configuration {
 sub get_empty {
     my ($self) = @_;
     return {
-        ref           => $self->type('string', correct_urlbase() . "bzapi/"),
+        ref           => $self->type('string', Bugzilla->localconfig->{urlbase} . "bzapi/"),
         documentation => $self->type('string', BZAPI_DOC),
         version       => $self->type('string', BUGZILLA_VERSION)
     };

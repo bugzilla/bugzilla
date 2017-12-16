@@ -18,7 +18,7 @@ use Bugzilla::Constants;
 use Bugzilla::Error;
 use Bugzilla::Search;
 use Bugzilla::Search::Quicksearch;
-use Bugzilla::Util 'correct_urlbase';
+use Bugzilla::Util ();
 use Bugzilla::WebService::Util 'validate';
 use JSON;
 use LWP::UserAgent;
@@ -47,7 +47,7 @@ sub _validate_uri {
     my $uri = URI->new($url);
     $uri->query(undef);
     $uri->fragment(undef);
-    if ($uri->as_string ne correct_urlbase() . 'buglist.cgi') {
+    if ($uri->as_string ne Bugzilla->localconfig->{urlbase} . 'buglist.cgi') {
         ThrowUserError('bitly_unsupported');
     }
 
@@ -82,7 +82,7 @@ sub list {
     my $data = $search->data;
 
     # form a bug_id only url, sanity check the length
-    $uri = URI->new(correct_urlbase() . 'buglist.cgi?bug_id=' . join(',', map { $_->[0] } @$data));
+    $uri = URI->new(Bugzilla->localconfig->{urlbase} . 'buglist.cgi?bug_id=' . join(',', map { $_->[0] } @$data));
     if (length($uri->as_string) > CGI_URI_LIMIT) {
         ThrowUserError('bitly_failure', { message => "Too many bugs returned by search" });
     }

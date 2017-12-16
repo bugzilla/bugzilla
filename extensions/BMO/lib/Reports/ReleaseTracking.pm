@@ -16,7 +16,7 @@ use Bugzilla::Error;
 use Bugzilla::Extension::BMO::Util;
 use Bugzilla::Field;
 use Bugzilla::FlagType;
-use Bugzilla::Util qw(correct_urlbase trick_taint validate_date);
+use Bugzilla::Util qw(trick_taint validate_date);
 use JSON qw(-convert_blessed_universally);
 use List::MoreUtils qw(uniq);
 
@@ -434,7 +434,7 @@ sub report {
         my $bugs = $dbh->selectcol_arrayref($query, undef, @params);
         push @$bugs, 0 unless @$bugs;
 
-        my $urlbase = correct_urlbase();
+        my $urlbase = Bugzilla->localconfig->{urlbase};
         my $cgi = Bugzilla->cgi;
         print $cgi->redirect(
             -url => "${urlbase}buglist.cgi?bug_id=" . join(',', @$bugs)

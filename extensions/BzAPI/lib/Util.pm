@@ -21,7 +21,7 @@ use Bugzilla::Bug;
 use Bugzilla::Constants;
 use Bugzilla::Extension::BzAPI::Constants;
 use Bugzilla::Token;
-use Bugzilla::Util qw(correct_urlbase email_filter);
+use Bugzilla::Util qw(email_filter);
 use Bugzilla::WebService::Util qw(filter_wants);
 
 use MIME::Base64;
@@ -44,7 +44,7 @@ our @EXPORT = qw(
 # Return an URL base appropriate for constructing a ref link
 # normally required by REST API calls.
 sub ref_urlbase {
-    return correct_urlbase() . "bzapi";
+    return Bugzilla->localconfig->{urlbase} . "bzapi";
 }
 
 # convert certain fields within a bug object

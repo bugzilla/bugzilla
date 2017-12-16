@@ -31,6 +31,13 @@ defaults:
     BMO_db_name: bugs
     BMO_memcached_servers: localhost:11211
     BMO_memcached_namespace: "bugzilla:"
+    BMO_urlbase: AUTOMATIC
+    HTTPD_StartServers: 1
+    HTTPD_MinSpareServers: 1
+    HTTPD_MaxSpareServers: 1
+    HTTPD_ServerLimit: 1
+    HTTPD_MaxClients: 1
+    HTTPD_MaxRequestsPerChild: 4000
 
   mysql_env: &mysql_env
     MYSQL_DATABASE: bugs
@@ -52,10 +59,10 @@ defaults:
 
   default_qa_setup: &default_qa_setup
     run:
+      name: default qa setup
       command: |
         mv /opt/bmo/local /app/local
-        perl -MSys::Hostname -i -pE 's/bmo.test/hostname().":8000"/ges' $BZ_QA_CONF_FILE
-        perl -MSys::Hostname -i -pE 's/bmo.test/hostname().":8000"/ges' $BZ_QA_ANSWERS_FILE
+        perl -MSys::Hostname -i -pE 's/bmo.test/hostname() . ":$ENV{PORT}"/ges' $BZ_QA_CONF_FILE
         perl checksetup.pl --no-database --default-localconfig
         mkdir artifacts
 
@@ -78,7 +85,6 @@ jobs:
             -t bmo .
       - deploy:
           command: |
-            docker build -t bmo .
             if [[ -n "$DOCKERHUB_REPO" && -n "$DOCKER_USER" && -n "$DOCKER_PASS" ]]; then
                 TAG="${CIRCLE_TAG:-$CIRCLE_BRANCH}"
                 if [[ $TAG == "master" ]]; then
@@ -159,13 +165,9 @@ jobs:
       - run: |
           mv /opt/bmo/local /app/local
           perl checksetup.pl --no-database
-          perl -MSys::Hostname -i -pE 's/bmo.test/hostname().":8000"/ges' $BZ_QA_ANSWERS_FILE
           /app/scripts/entrypoint.pl load_test_data
           mkdir artifacts
-      - run: |
-          BZ_BASE_URL="http://$(hostname):$PORT"
-          export BZ_BASE_URL
-          /app/scripts/entrypoint.pl test_bmo -q -f t/bmo/*.t
+      - run: /app/scripts/entrypoint.pl test_bmo -q -f t/bmo/*.t
       - store_artifacts:
           path: /app/logs
 

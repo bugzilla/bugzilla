@@ -32,7 +32,7 @@ use Bugzilla::Comment;
 use Bugzilla::Group;
 use Bugzilla::Object;
 use Bugzilla::User;
-use Bugzilla::Util qw(correct_urlbase trim trick_taint is_7bit_clean);
+use Bugzilla::Util qw(trim trick_taint is_7bit_clean);
 use Bugzilla::Error;
 use Bugzilla::Mailer;
 
@@ -568,7 +568,7 @@ sub _make_secure {
         my $message;
         my $email_type = $email->header('X-Bugzilla-Type');
         my $vars = {
-          'urlbase'    => correct_urlbase(),
+          'urlbase'    => Bugzilla->localconfig->{urlbase},
           'bug_id'     => $bug_id,
           'maintainer' => Bugzilla->params->{'maintainer'},
           'email_type' => $email_type
@@ -622,7 +622,7 @@ sub _pgp_encrypt {
         Data => $encrypted,
         Object => 'MESSAGE',
         Headers => {
-            Comment => correct_urlbase() . ($bug_id ? 'show_bug.cgi?id=' . $bug_id : ''),
+            Comment => Bugzilla->localconfig->{urlbase} . ($bug_id ? 'show_bug.cgi?id=' . $bug_id : ''),
         },
     );
     # until Crypt::OpenPGP makes the Version header optional we have to strip

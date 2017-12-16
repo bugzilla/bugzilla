@@ -241,7 +241,7 @@ sub send {
     $request->content(to_json($data));
     $request->authorization_basic($self->config->{service_now_user}, $self->config->{service_now_pass});
 
-    $self->{lwp} ||= LWP::UserAgent->new(agent => Bugzilla->params->{urlbase});
+    $self->{lwp} ||= LWP::UserAgent->new(agent => Bugzilla->localconfig->{urlbase});
     my $result = $self->{lwp}->request($request);
 
     # http level errors

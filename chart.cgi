@@ -215,7 +215,7 @@ elsif ($action eq "convert_search") {
         $url = $params->canonicalise_query('format', 'query_format');
         $url = '&amp;' . html_quote($url);
     }
-    print $cgi->redirect(-location => correct_urlbase() . "query.cgi?format=create-series$url");
+    print $cgi->redirect(-location => Bugzilla->localconfig->{urlbase} . "query.cgi?format=create-series$url");
 }
 else {
     ThrowUserError('unknown_action', {action => $action});

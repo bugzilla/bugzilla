@@ -67,17 +67,6 @@ Bugzilla->usage_mode(USAGE_MODE_CMDLINE);
 # Set Parameters
 ##########################################################################
 
-# Some parameters must be turned on to create bugs requiring them.
-# They are also expected to be turned on by some webservice_*.t scripts.
-my ($urlbase, $sslbase);
-$urlbase = $config->{browser_url} . '/' . $config->{bugzilla_installation};
-$urlbase .= '/' unless $urlbase =~ /\/$/;
-
-if ($urlbase =~ /^https/) {
-    $sslbase = $urlbase;
-    $urlbase =~ s/^https(.+)$/http$1/;
-}
-
 # Create missing priorities
 # BMO uses P1-P5 which is different from upstream
 my $field = Bugzilla::Field->new({ name => 'priority' });
@@ -98,8 +87,6 @@ foreach my $value (qw(PC)) {
 }
 
 my %set_params = (
-    urlbase => $urlbase,
-    sslbase => $sslbase,
     usebugaliases => 1,
     useqacontact  => 1,
     mail_delivery_method => 'Test',

@@ -16,7 +16,7 @@ use base qw(Bugzilla::Extension);
 use Bugzilla::User::Setting;
 use Bugzilla::Constants;
 use Bugzilla::Attachment;
-use Bugzilla::Util 'correct_urlbase';
+use Bugzilla::Util ();
 
 our $VERSION = '1.5';
 
@@ -132,7 +132,7 @@ sub template_before_process {
 
             # split see-also
             if ($change->{fieldname} eq 'see_also') {
-                my $url_base = correct_urlbase();
+                my $url_base = Bugzilla->localconfig->{urlbase};
                 foreach my $f (qw( added removed )) {
                     my @values;
                     foreach my $value (split(/, /, $change->{$f})) {

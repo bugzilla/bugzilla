@@ -176,6 +176,29 @@ PORT
 BUGZILLA_UNSAFE_AUTH_DELEGATION
   This should never be set in production. It allows auth delegation over http.
 
+BMO_urlbase
+  The public url for this instance. Note that if this begins with https://
+  abd BMO_inbound_proxies is set to '*' Bugzilla will believe the connection to it
+  is using SSL.
+
+BMO_attachment_base
+  This is the url for attachments.
+  When the allow_attachment_display parameter is on, it is possible for a
+  malicious attachment to steal your cookies or perform an attack on Bugzilla
+  using your credentials.
+
+  If you would like additional security on attachments to avoid this, set this
+  parameter to an alternate URL for your Bugzilla that is not the same as
+  urlbase or sslbase. That is, a different domain name that resolves to this
+  exact same Bugzilla installation.
+
+  For added security, you can insert %bugid% into the URL, which will be
+  replaced with the ID of the current bug that the attachment is on, when you
+  access an attachment. This will limit attachments to accessing only other
+  attachments on the same bug. Remember, though, that all those possible domain
+  names (such as 1234.your.domain.com) must point to this same Bugzilla
+  instance.
+
 BMO_db_driver
   What SQL database to use. Default is mysql. List of supported databases can be
   obtained by listing Bugzilla/DB directory - every module corresponds to one

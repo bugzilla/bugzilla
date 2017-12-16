@@ -191,9 +191,7 @@ sub quoteUrls {
     }
 
     # Provide tooltips for full bug links (Bug 74355)
-    my $urlbase_re = '(' . join('|',
-        map { qr/$_/ } grep($_, Bugzilla->params->{'urlbase'},
-                            Bugzilla->params->{'sslbase'})) . ')';
+    my $urlbase_re = quotemeta(Bugzilla->localconfig->{urlbase});
     $text =~ s~\b(${urlbase_re}\Qshow_bug.cgi?id=\E([0-9]+)(\#c([0-9]+))?)\b
               ~($things[$count++] = $bug_link_func->($3, $1, { comment_num => $5, user => $user })) &&
                ("\x{FDD2}" . ($count-1) . "\x{FDD3}")
@@ -1036,7 +1034,7 @@ sub create {
             'sudoer' => sub { return Bugzilla->sudoer; },
 
             # Allow templates to access the "corect" URLBase value
-            'urlbase' => sub { return Bugzilla::Util::correct_urlbase(); },
+            'urlbase' => sub { return Bugzilla->localconfig->{urlbase}; },
 
             # Allow templates to access docs url with users' preferred language
             'docs_urlbase' => sub {

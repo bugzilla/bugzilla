@@ -75,7 +75,7 @@ else {
 
     if ($user_id && $user->in_group('admin')) {
         # If 'urlbase' is not set, display the Welcome page.
-        unless (Bugzilla->params->{'urlbase'}) {
+        unless (Bugzilla->localconfig->{'urlbase'}) {
             $template->process('welcome-admin.html.tmpl')
                 or ThrowTemplateError($template->error());
             exit;

@@ -10,47 +10,6 @@ accessed via the menu on the left.
 
 .. _param-required-settings:
 
-Required Settings
-=================
-
-The core required parameters for any Bugzilla installation are set
-here. :param:`urlbase` is always required; the other parameters should be
-set, or it must be explicitly decided not to
-set them, before the new Bugzilla installation starts to be used.
-
-urlbase
-    Defines the fully qualified domain name and web
-    server path to this Bugzilla installation.
-    For example, if the Bugzilla query page is
-    :file:`http://www.foo.com/bugzilla/query.cgi`,
-    the :param:`urlbase` should be set
-    to :paramval:`http://www.foo.com/bugzilla/`.
-
-ssl_redirect
-    If enabled, Bugzilla will force HTTPS (SSL) connections, by
-    automatically redirecting any users who try to use a non-SSL
-    connection. Also, when this is enabled, Bugzilla will send out links
-    using :param:`sslbase` in emails instead of :param:`urlbase`.
-
-sslbase
-    Defines the fully qualified domain name and web
-    server path for HTTPS (SSL) connections to this Bugzilla installation.
-    For example, if the Bugzilla main page is
-    :file:`https://www.foo.com/bugzilla/index.cgi`,
-    the :param:`sslbase` should be set
-    to :paramval:`https://www.foo.com/bugzilla/`.
-
-cookiepath
-    Defines a path, relative to the web document root, that Bugzilla
-    cookies will be restricted to. For example, if the
-    :param:`urlbase` is set to
-    :file:`http://www.foo.com/bugzilla/`, the
-    :param:`cookiepath` should be set to
-    :paramval:`/bugzilla/`. Setting it to :paramval:`/` will allow all sites
-    served by this web server or virtual host to read Bugzilla cookies.
-
-.. _param-general:
-
 General
 =======
 
@@ -197,16 +156,7 @@ and whether to allow pointing to external files via a URI.
 allow_attachment_display
     If this option is on, users will be able to view attachments from their browser, if their browser supports the attachment's MIME type. If this option is off, users are forced to download attachments, even if the browser is able to display them.
 
-    If you do not trust your users (e.g. if your Bugzilla is public), you should either leave this option off, or configure and set the :param:`attachment_base` parameter (see below). Untrusted users may upload attachments that could be potentially damaging if viewed directly in the browser.
-
-attachment_base
-    When the :param:`allow_attachment_display` parameter is on, it is possible for a malicious attachment to steal your cookies or perform an attack on Bugzilla using your credentials.
-
-    If you would like additional security on attachments to avoid this, set this parameter to an alternate URL for your Bugzilla that is not the same as :param:`urlbase` or :param:`sslbase`. That is, a different domain name that resolves to this exact same Bugzilla installation.
-
-    Note that if you have set the :param:`cookiedomain` parameter, you should set :param:`attachment_base` to use a domain that would not be matched by :param:`cookiedomain`.
-
-    For added security, you can insert ``%bugid%`` into the URL, which will be replaced with the ID of the current bug that the attachment is on, when you access an attachment. This will limit attachments to accessing only other attachments on the same bug. Remember, though, that all those possible domain names (such as 1234.your.domain.com) must point to this same Bugzilla instance. To set this up you need to investigate wildcard DNS.
+    If you do not trust your users (e.g. if your Bugzilla is public), you should either leave this option off, or configure and set the attachment_base localconfig variable. Untrusted users may upload attachments that could be potentially damaging if viewed directly in the browser.
 
 allow_attachment_deletion
     If this option is on, administrators will be able to delete the contents
@@ -746,15 +696,6 @@ confirmuniqueusermatch
 
 Advanced
 ========
-
-cookiedomain
-    Defines the domain for Bugzilla cookies. This is typically left blank.
-    If there are multiple hostnames that point to the same webserver, which
-    require the same cookie, then this parameter can be utilized. For
-    example, If your website is at
-    ``https://bugzilla.example.com/``, setting this to
-    :paramval:`.example.com/` will also allow
-    ``attachments.example.com/`` to access Bugzilla cookies.
 
 inbound_proxies
     When inbound traffic to Bugzilla goes through a proxy, Bugzilla thinks that the IP address of the proxy is the IP address of every single user. If you enter a comma-separated list of IPs in this parameter, then Bugzilla will trust any ``X-Forwarded-For`` header sent from those IPs, and use the value of that header as the end user's IP address.

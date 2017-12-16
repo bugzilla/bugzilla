@@ -38,7 +38,7 @@ $user->in_group('tweakparams')
 
 my $action = trim($cgi->param('action') || '');
 my $token  = $cgi->param('token');
-my $current_panel = $cgi->param('section') || 'core';
+my $current_panel = $cgi->param('section') || 'general';
 $current_panel =~ /^([A-Za-z0-9_-]+)$/;
 $current_panel = $1;
 

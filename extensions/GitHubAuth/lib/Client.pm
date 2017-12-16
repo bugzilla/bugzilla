@@ -17,7 +17,7 @@ use URI::QueryParam;
 use Digest;
 
 use Bugzilla::Extension::GitHubAuth::Client::Error qw(ThrowUserError ThrowCodeError);
-use Bugzilla::Util qw(remote_ip correct_urlbase);
+use Bugzilla::Util qw(remote_ip);
 
 use constant DIGEST_HASH => 'SHA1';
 
@@ -39,7 +39,7 @@ sub new {
 sub login_uri {
     my ($class, $target_uri) = @_;
 
-    my $uri = URI->new(correct_urlbase() . "github.cgi");
+    my $uri = URI->new(Bugzilla->localconfig->{urlbase} . "github.cgi");
     $uri->query_form(target_uri => $target_uri);
     return $uri;
 }
@@ -52,7 +52,7 @@ sub authorize_uri {
         client_id    => Bugzilla->params->{github_client_id},
         scope        => 'user:email',
         state        => $state,
-        redirect_uri => correct_urlbase() . "github.cgi",
+        redirect_uri => Bugzilla->localconfig->{urlbase} . "github.cgi",
     );
 
     return $uri;

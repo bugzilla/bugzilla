@@ -121,7 +121,7 @@ if (lc($cgi->request_method) eq 'post') {
          push(@all_mail_results, $ref_sent);
      }
 
-     print $cgi->redirect(correct_urlbase() . 'show_bug.cgi?id='.$new_bug->bug_id);
+     print $cgi->redirect(Bugzilla->localconfig->{urlbase} . 'show_bug.cgi?id='.$new_bug->bug_id);
 } else {
  print $cgi->header();
 $template->process("bug/new_bug.html.tmpl",

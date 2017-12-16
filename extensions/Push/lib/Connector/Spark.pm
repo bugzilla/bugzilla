@@ -18,7 +18,7 @@ use Bugzilla::Extension::Push::Constants;
 use Bugzilla::Extension::Push::Util;
 use Bugzilla::Bug;
 use Bugzilla::Attachment;
-use Bugzilla::Util qw(correct_urlbase);
+use Bugzilla::Util ();
 
 use JSON qw(decode_json encode_json);
 use LWP::UserAgent;
@@ -108,7 +108,7 @@ sub send {
                 }
             }
         }
-        $text .= correct_urlbase() . "show_bug.cgi?id=" . $bug->id;
+        $text .= Bugzilla->localconfig->{urlbase} . "show_bug.cgi?id=" . $bug->id;
 
         my $room_id = $self->config->{spark_room_id};
         my $message_uri = $self->_spark_uri('messages');

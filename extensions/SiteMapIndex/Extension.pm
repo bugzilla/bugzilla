@@ -31,7 +31,7 @@ use base qw(Bugzilla::Extension);
 our $VERSION = '1.0';
 
 use Bugzilla::Constants qw(bz_locations ON_WINDOWS);
-use Bugzilla::Util qw(correct_urlbase get_text);
+use Bugzilla::Util qw(get_text);
 use Bugzilla::Install::Filesystem;
 
 use Bugzilla::Extension::SiteMapIndex::Constants;
@@ -80,7 +80,7 @@ sub page_before_template {
 
 sub install_before_final_checks {
     my ($self) = @_;
-    if (!correct_urlbase()) {
+    if (!Bugzilla->localconfig->{urlbase}) {
         print STDERR get_text('sitemap_no_urlbase'), "\n";
         return;
     }
@@ -89,7 +89,7 @@ sub install_before_final_checks {
         return;
     }
 
-    return if (correct_urlbase() ne 'https://bugzilla.mozilla.org/');
+    return if (Bugzilla->localconfig->{urlbase} ne 'https://bugzilla.mozilla.org/');
 }
 
 sub install_filesystem {
@@ -126,7 +126,7 @@ EOT
 
 sub before_robots_txt {
     my ($self, $args) = @_;
-    $args->{vars}{SITEMAP_URL} = correct_urlbase() . SITEMAP_URL;
+    $args->{vars}{SITEMAP_URL} = Bugzilla->localconfig->{urlbase} . SITEMAP_URL;
 }
 
 __PACKAGE__->NAME;

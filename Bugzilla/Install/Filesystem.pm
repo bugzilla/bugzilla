@@ -416,9 +416,6 @@ sub FILESYSTEM {
         "skins/yui3.css"          => { perms     => CGI_READ,
                                        overwrite => 1,
                                        contents  => $yui3_all_css },
-        "robots.txt"              => { perms     => CGI_READ,
-                                       overwrite => 1,
-                                       contents  => \&robots_txt},
         "httpd/env.conf"          => { perms     => CGI_READ,
                                        overwrite => 1,
                                        contents  => \&HTTPD_ENV_CONF },
@@ -967,15 +964,6 @@ sub _check_web_server_group {
     }
 
     return $group_id;
-}
-
-sub robots_txt {
-    my $output = '';
-    my %vars;
-    Bugzilla::Hook::process("before_robots_txt", { vars => \%vars });
-    Bugzilla->template->process("robots.txt.tmpl", \%vars, \$output)
-    or die Bugzilla->template->error;
-    return $output;
 }
 
 

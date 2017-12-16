@@ -17,7 +17,7 @@ use fields qw(github_failure);
 use Scalar::Util qw(blessed);
 
 use Bugzilla::Constants qw(AUTH_NODATA AUTH_ERROR USAGE_MODE_BROWSER);
-use Bugzilla::Util qw(trick_taint correct_urlbase generate_random_password);
+use Bugzilla::Util qw(trick_taint generate_random_password);
 use Bugzilla::Token qw(issue_short_lived_session_token set_token_extra_data);
 use List::MoreUtils qw(any);
 use Bugzilla::Extension::GitHubAuth::Client;
@@ -201,7 +201,7 @@ sub _mk_choose_email {
 
     return sub {
         my $email = shift;
-        my $uri = URI->new(correct_urlbase() . "github.cgi");
+        my $uri = URI->new(Bugzilla->localconfig->{urlbase} . "github.cgi");
         $uri->query_form( state => $state, email => $email );
         return $uri;
     };

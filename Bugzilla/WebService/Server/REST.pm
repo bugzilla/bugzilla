@@ -17,7 +17,7 @@ use Bugzilla;
 use Bugzilla::Constants;
 use Bugzilla::Error;
 use Bugzilla::Hook;
-use Bugzilla::Util qw(correct_urlbase html_quote disable_utf8 enable_utf8);
+use Bugzilla::Util qw(html_quote disable_utf8 enable_utf8);
 use Bugzilla::WebService::Constants;
 use Bugzilla::WebService::Util qw(taint_data fix_credentials);
 
@@ -94,7 +94,7 @@ sub handle {
     # also set up the correct handler method
     my $obj = {
         version => '1.1',
-        id      => correct_urlbase(),
+        id      => Bugzilla->localconfig->{urlbase},
         method  => $self->bz_method_name,
         params  => $params
     };

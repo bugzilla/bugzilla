@@ -104,10 +104,7 @@ sub MessageToMTA {
     # We add this header to uniquely identify all email that we
     # send as coming from this Bugzilla installation.
     #
-    # We don't use correct_urlbase, because we want this URL to
-    # *always* be the same for this Bugzilla, in every email,
-    # even if the admin changes the "ssl_redirect" parameter some day.
-    $email->header_set('X-Bugzilla-URL', Bugzilla->params->{'urlbase'});
+    $email->header_set('X-Bugzilla-URL', Bugzilla->localconfig->{urlbase});
 
     # We add this header to mark the mail as "auto-generated" and
     # thus to hopefully avoid auto replies.
@@ -156,7 +153,7 @@ sub MessageToMTA {
     else {
         # Sendmail will automatically append our hostname to the From
         # address, but other mailers won't.
-        my $urlbase = Bugzilla->params->{'urlbase'};
+        my $urlbase = Bugzilla->localconfig->{urlbase};
         $urlbase =~ m|//([^:/]+)[:/]?|;
         $hostname = $1;
         $from .= "\@$hostname" if $from !~ /@/;
@@ -248,7 +245,7 @@ sub build_thread_marker {
         $user_id = Bugzilla->user->id;
     }
 
-    my $sitespec = '@' . Bugzilla->params->{'urlbase'};
+    my $sitespec = '@' . Bugzilla->localconfig->{urlbase};
     $sitespec =~ s/:\/\//\./; # Make the protocol look like part of the domain
     $sitespec =~ s/^([^:\/]+):(\d+)/$1/; # Remove a port number, to relocate
     if ($2) {

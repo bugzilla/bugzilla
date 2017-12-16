@@ -52,6 +52,8 @@ RewriteRule ^__version__$ version.json [L]
 # heartbeat.cgi returns 200 if the DB and memcached are both working, and 500 otherwise.
 RewriteRule ^__heartbeat__$ heartbeat.cgi [L]
 
+RewriteRule ^robots\.txt$ robots.cgi [L]
+
 # New single page interface for filing bugs
 RewriteRule ^new[-_]bug$ new_bug.cgi [L,QSA]
 

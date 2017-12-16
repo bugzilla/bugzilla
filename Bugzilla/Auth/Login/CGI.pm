@@ -49,7 +49,7 @@ sub get_login_info {
     # Attachments are served from a separate host (ideally), and so
     # an evil attachment cannot abuse this check with a redirect.
     elsif (my $referer = $cgi->referer) {
-        my $urlbase = correct_urlbase();
+        my $urlbase = Bugzilla->localconfig->{urlbase};
         $valid = 1 if $referer =~ /^\Q$urlbase\E/;
     }
     # If the web browser doesn't accept cookies and the Referer header

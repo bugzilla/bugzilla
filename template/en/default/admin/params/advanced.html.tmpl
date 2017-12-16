@@ -19,7 +19,7 @@
   #                 Frédéric Buclin <LpSolit@gmail.com>
   #%]
 
-[% 
+[%
    title = "Advanced"
    desc = "Settings for advanced configurations."
 %]
@@ -29,7 +29,7 @@
   <a href="https://en.wikipedia.org/wiki/HTTP_Strict_Transport_Security">Strict-Transport-Security</a>
   header along with HTTP responses on SSL connections. This adds greater
   security to your SSL connections by forcing the browser to always
-  access your domain over SSL and never accept an invalid certificate. 
+  access your domain over SSL and never accept an invalid certificate.
   However, it should only be used if you have the <code>ssl_redirect</code>
   parameter turned on, [% terms.Bugzilla %] is the only thing running
   on its domain (i.e., your <code>urlbase</code> is something like
@@ -54,13 +54,6 @@
 [% END %]
 
 [% param_descs = {
-  cookiedomain => 
-    "If your website is at 'www.foo.com', setting this to"
-    _ " '.foo.com' will also allow 'bar.foo.com' to access"
-    _ " $terms.Bugzilla cookies. This is useful if you have more than"
-    _ " one hostname pointing at the same web server, and you"
-    _ " want them to share the $terms.Bugzilla cookie.",
-
   inbound_proxies =>
     "When inbound traffic to $terms.Bugzilla goes through a proxy,"
     _ " $terms.Bugzilla thinks that the IP address of every single"
@@ -71,7 +64,7 @@
     _ " If set to a *, $terms.Bugzilla will trust the first value in the "
     _ " X-Forwarded-For header.",
 
-  proxy_url => 
+  proxy_url =>
     "$terms.Bugzilla may have to access the web to get notifications about"
     _ " new releases (see the <tt>upgrade_notification</tt> parameter)."
     _ " If your $terms.Bugzilla server is behind a proxy, it may be"

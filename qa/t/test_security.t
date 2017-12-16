@@ -35,8 +35,7 @@ my $bug1_id = create_bug($sel, $bug_summary);
 
 # No alternate host for attachments; cookies will be accessible.
 
-set_parameters($sel, { "Attachments" => {"allow_attachment_display-on" => undef,
-                                         "reset-attachment_base" => undef} });
+set_parameters($sel, { "Attachments" => {"allow_attachment_display-on" => undef } });
 
 go_to_bug($sel, $bug1_id);
 $sel->click_ok("link=simple patch, v1");
@@ -51,24 +50,22 @@ $sel->go_back_ok();
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_like(qr/^$bug1_id /);
 
-# Alternate host for attachments; no cookie should be accessible.
+# # Alternate host for attachments; no cookie should be accessible.
 
-set_parameters($sel, { "Attachments" => {"attachment_base" => {type  => "text",
-                                                               value => "$config->{browser_ip_url}/$urlbase/"}} });
-go_to_bug($sel, $bug1_id);
-$sel->click_ok("link=simple patch, v1");
-$sel->wait_for_page_to_load_ok(WAIT_TIME);
-$sel->title_is("");
-@cookies = split(/[\s;]+/, $sel->get_cookie());
-$nb_cookies = scalar @cookies;
-ok(!$nb_cookies, "No cookies found");
-ok(!$sel->is_cookie_present("Bugzilla_login"), "Bugzilla_login not accessible");
-ok(!$sel->is_cookie_present("Bugzilla_logincookie"), "Bugzilla_logincookie not accessible");
-$sel->go_back_ok();
-$sel->wait_for_page_to_load_ok(WAIT_TIME);
-$sel->title_like(qr/^$bug1_id /);
-
-set_parameters($sel, { "Attachments" => {"reset-attachment_base" => undef} });
+# set_parameters($sel, { "Attachments" => {"attachment_base" => {type  => "text",
+#                                                                value => "$config->{browser_ip_url}/$urlbase/"}} });
+# go_to_bug($sel, $bug1_id);
+# $sel->click_ok("link=simple patch, v1");
+# $sel->wait_for_page_to_load_ok(WAIT_TIME);
+# $sel->title_is("");
+# @cookies = split(/[\s;]+/, $sel->get_cookie());
+# $nb_cookies = scalar @cookies;
+# ok(!$nb_cookies, "No cookies found");
+# ok(!$sel->is_cookie_present("Bugzilla_login"), "Bugzilla_login not accessible");
+# ok(!$sel->is_cookie_present("Bugzilla_logincookie"), "Bugzilla_logincookie not accessible");
+# $sel->go_back_ok();
+# $sel->wait_for_page_to_load_ok(WAIT_TIME);
+# $sel->title_like(qr/^$bug1_id /);
 
 #######################################################################
 # Security bug 472362.

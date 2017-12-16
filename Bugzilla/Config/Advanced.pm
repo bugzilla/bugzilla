@@ -17,12 +17,6 @@ our $sortkey = 1700;
 
 use constant get_param_list => (
     {
-        name    => 'cookiedomain',
-        type    => 't',
-        default => ''
-    },
-
-    {
         name    => 'inbound_proxies',
         type    => 't',
         default => '',

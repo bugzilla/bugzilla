@@ -23,7 +23,7 @@ use Bugzilla::Status;
 use base qw(Exporter);
 @Bugzilla::Config::Common::EXPORT = qw(
     check_multi check_numeric check_regexp check_url check_group
-    check_sslbase check_priority check_severity check_platform
+    check_priority check_severity check_platform
     check_opsys check_shadowdb check_urlbase check_webdotbase
     check_user_verify_class
     check_mail_delivery_method check_notification check_utf8
@@ -81,32 +81,6 @@ sub check_email {
     return "";
 }
 
-sub check_sslbase {
-    my $url = shift;
-    if ( $url ne '' ) {
-        if ( $url !~ m#^https://([^/]+).*/$# ) {
-            return "must be a legal URL, that starts with https and ends with a slash.";
-        }
-        my $host = $1;
-
-        # Fall back to port 443 if for some reason getservbyname() fails.
-        my $port = getservbyname( 'https', 'tcp' ) || 443;
-        if ( $host =~ /^(.+):(\d+)$/ ) {
-            $host = $1;
-            $port = $2;
-        }
-        local *SOCK;
-        my $proto = getprotobyname('tcp');
-        socket( SOCK, PF_INET, SOCK_STREAM, $proto );
-        my $iaddr = inet_aton($host) || return "The host $host cannot be resolved";
-        my $sin = sockaddr_in( $port, $iaddr );
-        if ( !connect( SOCK, $sin ) ) {
-            return "Failed to connect to $host:$port; unable to enable SSL";
-        }
-        close(SOCK);
-    }
-    return "";
-}
 
 sub check_utf8 {
     my $utf8 = shift;

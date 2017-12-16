@@ -58,9 +58,6 @@ $sel->type_ok("Bugzilla_login", $config->{admin_user_login}, "Enter admin login 
 $sel->type_ok("Bugzilla_password", $config->{admin_user_passwd}, "Enter admin password");
 $sel->click_ok("log_in");
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
-$sel->title_is("Configuration: Required Settings");
-$sel->click_ok("link=General");
-$sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_is("Configuration: General");
 $sel->type_ok("shutdownhtml", "");
 $sel->click_ok('//input[@type="submit" and @value="Save Changes"]', undef, "Save Changes");

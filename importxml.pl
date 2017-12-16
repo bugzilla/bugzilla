@@ -1214,7 +1214,7 @@ sub process_bug {
 
     $log .= "Bug ${urlbase}show_bug.cgi?id=$bug_fields{'bug_id'} ";
     $log .= "imported as bug $id.\n";
-    $log .= $params->{"urlbase"} . "show_bug.cgi?id=$id\n\n";
+    $log .= Bugziilla->localconfig->{"urlbase"} . "show_bug.cgi?id=$id\n\n";
     if ($err) {
         $log .= "The following problems were encountered while creating bug $id.\n";
         $log .= $err;
@@ -1274,7 +1274,7 @@ my $urlbase    = $root->{'att'}->{'urlbase'};
 my $log = join("\n\n", @logs);
 $log .=  "\n\nImported $bugtotal bug(s) from $urlbase,\n  sent by $exporter.\n";
 my $subject =  "$bugtotal Bug(s) successfully moved from $urlbase to "
-   . $params->{"urlbase"};
+   . Bugzilla->localconfig->{"urlbase"};
 my @to = ($exporter, $maintainer);
 MailMessage( $subject, $log, @to );
 

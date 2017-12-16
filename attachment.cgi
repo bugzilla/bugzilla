@@ -61,7 +61,7 @@ if (Bugzilla->params->{disable_bug_updates} && $cgi->request_method eq 'POST') {
         'Bug updates are currently disabled.');
 }
 
-# You must use the appropriate urlbase/sslbase param when doing anything
+# You must use the appropriate urlbase param when doing anything
 # but viewing an attachment, or a raw diff.
 if ($action ne 'view'
     && (($action !~ /^(?:interdiff|diff)$/) || $format ne 'raw'))
@@ -267,7 +267,7 @@ sub get_attachment {
                 }
                 unless ($userid && $valid_token) {
                     # Not a valid token.
-                    print $cgi->redirect('-location' => correct_urlbase() . $path);
+                    print $cgi->redirect('-location' => Bugzilla->localconfig->{urlbase} . $path);
                     exit;
                 }
                 # Change current user without creating cookies.
@@ -287,7 +287,7 @@ sub get_attachment {
             # make sure we were not going to request credentials on the
             # alternate host.
             Bugzilla->login();
-            my $attachbase = Bugzilla->params->{'attachment_base'};
+            my $attachbase = Bugzilla->localconfig->{'attachment_base'};
             # Replace %bugid% by the ID of the bug the attachment
             # belongs to, if present.
             $attachbase =~ s/\%bugid\%/$bug_id/;
@@ -377,7 +377,7 @@ sub view {
     Bugzilla::Hook::process('attachment_should_redirect_login', { do_redirect => \$do_redirect });
 
     if ($do_redirect) {
-        my $uri = URI->new(correct_urlbase() . 'attachment.cgi');
+        my $uri = URI->new(Bugzilla->localconfig->{urlbase} . 'attachment.cgi');
         $uri->query_param(id => $attachment->id);
         $uri->query_param(content_type => $contenttype) if $contenttype_override;
 

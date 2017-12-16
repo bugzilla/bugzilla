@@ -106,6 +106,24 @@ END
 The following variables are no longer used in ##localconfig##, and
 have been moved to ##old_file##: ##vars##
 END
+    localconfig_attachment_base => <<'END',
+When the runtime allow_attachment_display parameter is on, it is
+possible for a malicious attachment to steal your cookies or
+perform an attack using your credentials.
+
+If you would like additional security on attachments to avoid
+this, set this parameter to an alternate URL for your $terms.Bugzilla
+that is not the same as urlbase.
+That is, a different domain name that resolves to this exact
+same installation.
+
+For added security, you can insert %bugid% into the URL,
+which will be replaced with the ID of the current bug that
+the attachment is on, when you access an attachment. This will limit
+attachments to accessing only other attachments on the same
+bug. Remember, though, that all those possible domain names
+ must point to this same instance.
+END
     localconfig_create_htaccess => <<'END',
 If you are using Apache as your web server, Bugzilla can create .htaccess
 files for you, which will keep this file (localconfig) and other
@@ -180,7 +198,7 @@ here.
 END
     localconfig_memcached_servers => <<'END',
 If this option is set, Bugzilla will integrate with Memcached.
-Specify one or more servers, separated by spaces, using hostname:port 
+Specify one or more servers, separated by spaces, using hostname:port
 notation (for example: 127.0.0.1:11211).
 END
     localconfig_memcached_namespace => <<'END',
@@ -197,6 +215,9 @@ END
 This hash is used by BMO to override select data/params values on a per-webhead
 basis. Keys set to undef will default to the value in data/params.
 Only the keys listed below can be overridden.
+END
+    localconfig_urlbase => <<'END',
+The URL that is the common initial leading part of all URLs.
 END
     localconfig_use_suexec => <<'END',
 Set this to 1 if Bugzilla runs in an Apache SuexecUserGroup environment.

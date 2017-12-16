@@ -22,6 +22,5 @@ $answer{'db_user'}   = 'bugs';
 $answer{'diffpath'} = '/usr/bin';
 $answer{'index_html'} = 0;
 $answer{'interdiffbin'} = '/usr/bin/interdiff';
-$answer{'urlbase'} = 'http://localhost/bmo/';
 $answer{'use_suexec'} = '';
 $answer{'webservergroup'} = '%USER%';

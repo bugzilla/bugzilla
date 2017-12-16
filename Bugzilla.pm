@@ -401,7 +401,7 @@ sub login {
             my $self_url     = trim($cgi->self_url);
             my $sig_type     = 'prev_url:' . $authenticated_user->id;
             my $self_url_sig = issue_hash_sig($sig_type, $self_url);
-            my $redir_url    = URI->new( correct_urlbase() . "reset_password.cgi" );
+            my $redir_url    = URI->new( Bugzilla->localconfig->{urlbase} . "reset_password.cgi" );
             $redir_url->query_form(prev_url => $self_url, prev_url_sig => $self_url_sig);
             print $cgi->redirect($redir_url);
             exit;

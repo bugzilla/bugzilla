@@ -357,8 +357,8 @@ sub set_parameters {
     go_to_admin($sel);
     $sel->click_ok("link=Parameters", undef, "Go to the Config Parameters page");
     $sel->wait_for_page_to_load(WAIT_TIME);
-    $sel->title_is("Configuration: Required Settings");
-    my $last_section = "Required Settings";
+    $sel->title_is("Configuration: General");
+    my $last_section = "General";
 
     foreach my $section (keys %$params) {
         if ($section ne $last_section) {

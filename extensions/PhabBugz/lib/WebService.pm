@@ -20,7 +20,7 @@ use Bugzilla::Constants;
 use Bugzilla::Error;
 use Bugzilla::Extension::Push::Util qw(is_public);
 use Bugzilla::User;
-use Bugzilla::Util qw(correct_urlbase detaint_natural);
+use Bugzilla::Util qw(detaint_natural);
 use Bugzilla::WebService::Constants;
 
 use Bugzilla::Extension::PhabBugz::Constants;
@@ -111,7 +111,7 @@ sub revision {
     return {
         result          => $result,
         attachment_id   => $attachment->id,
-        attachment_link => correct_urlbase() . "attachment.cgi?id=" . $attachment->id
+        attachment_link => Bugzilla->localconfig->{urlbase} . "attachment.cgi?id=" . $attachment->id
     };
 }
 

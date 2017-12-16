@@ -155,6 +155,14 @@ unless ($ENV{LOCALCONFIG_ENV}) {
 }
 my $lc_hash = Bugzilla->localconfig;
 
+unless ($switch{'no-database'}) {
+    die "urlbase is not set\n" unless $lc_hash->{urlbase};
+    die "urlbase must end with slash\n" unless $lc_hash->{urlbase} =~ m{/$}ms;
+    if ($lc_hash->{attachment_base}) {
+        die "attachment_base must end with slash\n" unless $lc_hash->{attachment_base} =~ m{/$}ms;
+    }
+}
+
 ###########################################################################
 # Check --DATABASE-- setup
 ###########################################################################
@@ -279,12 +287,6 @@ unless ($switch{'no-database'}) {
     # Reset the mod_perl pre-load list
     unlink(Bugzilla::Constants::bz_locations()->{datadir} . '/mod_perl_preload');
 
-    # Check if the default parameter for urlbase is still set, and if so, give
-    # notification that they should go and visit editparams.cgi
-    if (Bugzilla->params->{'urlbase'} eq '') {
-        print "\n" . get_text('install_urlbase_default') . "\n"
-            unless $silent;
-    }
     if (!$silent) {
         success(get_text('install_success'));
     }

@@ -43,7 +43,7 @@ sub get_login_info {
     $cgi->delete('token');
     check_hash_token($token, ['login']);
 
-    my $urlbase = new URI(correct_urlbase());
+    my $urlbase = new URI(Bugzilla->localconfig->{urlbase});
     my $audience = $urlbase->scheme . "://" . $urlbase->host_port;
 
     my $ua = new LWP::UserAgent( timeout => 10 );

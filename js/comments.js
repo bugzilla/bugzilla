@@ -178,23 +178,3 @@ function getText(element) {
     }
     return text;
 }
-
-/**
- * If the URL contains a comment ID like #c10, scroll down the page to show the
- * entire comment below the fixed global header.
- */
-function scroll_comment_into_view() {
-    if (location.hash.match(/^#c\d+$/)) {
-        var $header = document.querySelector('#header');
-        var $comment = document.querySelector(location.hash);
-
-        if ($comment) {
-            window.setTimeout(function() {
-                window.scrollTo(0, $comment.offsetTop - $header.offsetHeight - 20);
-            }, 100);
-        }
-    }
-}
-
-window.addEventListener('load', scroll_comment_into_view, { once: true });
-window.addEventListener('hashchange', scroll_comment_into_view);

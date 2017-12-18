@@ -190,3 +190,24 @@ $().ready(function() {
         $('.bz_autocomplete').attr('autocomplete', 'off');
     });
 });
+
+/**
+ * If the URL contains a hash like #c10, scroll down the page to show the
+ * element below the fixed global header. This workaround is required for
+ * comments on show_bug.cgi, components on describecomponents.cgi, etc.
+ */
+const scroll_element_into_view = () => {
+    if (location.hash) {
+        const $header = document.querySelector('#header');
+        const $comment = document.querySelector(location.hash);
+
+        if ($comment) {
+            window.setTimeout(() => {
+                window.scrollTo(0, $comment.offsetTop - $header.offsetHeight - 20);
+            }, 100);
+        }
+    }
+}
+
+window.addEventListener('load', scroll_element_into_view, { once: true });
+window.addEventListener('hashchange', scroll_element_into_view);

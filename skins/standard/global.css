@@ -39,6 +39,7 @@
         font-family: sans-serif;
         color: #000;
         background: #fff url("global/body-back.gif") repeat-x;
+        scroll-behavior: smooth;
     }
     body, td, th, input {
         font-family: Verdana, sans-serif;

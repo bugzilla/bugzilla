@@ -45,6 +45,7 @@ use constant CONFIG => {
         mail_send_error
         template_error
         token_generation_error
+        param_must_be_numeric
     )],
 
     # any error/warning messages matching these regex's will not be logged or

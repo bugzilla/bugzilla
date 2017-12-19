@@ -59,7 +59,7 @@
       </th>
       <th>
         Show in
-        Footer
+        Search Bar
       </th>
       [% may_share = user.in_group(Param('querysharegroup')) && queryshare_groups.size %]
       [% IF may_share %]
@@ -137,7 +137,7 @@
                      %]class="bz_default_hidden"[% END %]>
                 <input type="checkbox" id="force_[% q.id FILTER html %]"
                        name="force_[% q.id FILTER html %]" value="1">
-                <label for="force_[% q.id FILTER html %]">Add to footer</label>
+                <label for="force_[% q.id FILTER html %]">Add to Search Bar</label>
               </span>
             [% END %]
             [% IF q.shared_with_users %]
@@ -151,8 +151,8 @@
     [% END %]
   </table>
 [% IF user.can_bless %]
-  <p>Note that for every search that has the "Add to footer" selected, a
-     link to the shared search is added to the footer of every user that is
+  <p>Note that for every search that has the "Add to Search Bar" selected, a
+     link to the shared search is added to the Search Bar of every user that is
      a direct member of the group at the time you click Submit Changes.</p>
 [% END %]
 </blockquote>
@@ -179,7 +179,7 @@
       </th>
       <th>
         Show in
-        Footer
+        Search Bar
       </th>
     </tr>
     [% FOREACH q = user.queries_available %]

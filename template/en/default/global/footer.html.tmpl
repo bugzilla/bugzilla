@@ -19,28 +19,7 @@
   #                 Svetlana Harisova <light@rathedg.com>
   #%]
 
-[%# INTERFACE:
-  # This template has no interface. However, you must fulfill the interface to
-  # global/useful-links.html.tmpl.
-  #%]
-
-</div>
-
-[%# Migration note: below this point, this file corresponds to the old Param
-  # 'footerhtml'
-  #%]
-
-<div id="footer">
-  <div class="intro">[% Hook.process('intro') %]</div>
-
-[%# Migration note: the old param 'blurbhtml' goes here %]
-
-[%# Migration note: useful-links.html.tmpl corresponds to %commandmenu% %]
-
-           [% PROCESS "global/useful-links.html.tmpl" %]
-
-  <div class="outro">[% Hook.process('outro') %]</div>
-</div>
+</div> [%# bugzilla-body %]
 
 [% Hook.process("end") %]
 

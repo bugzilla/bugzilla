@@ -34,7 +34,7 @@ my $text = trim($sel->get_text("message"));
 ok($text =~ /OK, you have a new search named Shared Selenium buglist./, "New search named 'Shared Selenium buglist' has been created");
 
 # Retrieve the newly created saved search's internal ID and make sure it's displayed
-# in the footer by default.
+# in the Search Bar by default.
 
 $sel->click_ok("link=Preferences");
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
@@ -47,10 +47,10 @@ $ssname =~ /(?:link_in_footer_(\d+))/;
 my $saved_search1_id = $1;
 $sel->is_checked_ok("link_in_footer_$saved_search1_id");
 
-# As an admin, the "Add to footer" checkbox must be displayed, but unchecked by default.
+# As an admin, the "Add to Search Bar" checkbox must be displayed, but unchecked by default.
 
 $sel->select_ok("share_$saved_search1_id", "label=canconfirm");
-ok(!$sel->is_checked("force_$saved_search1_id"), "Shared search not displayed in other users' footer by default");
+ok(!$sel->is_checked("force_$saved_search1_id"), "Shared search not displayed in other users' Search Bar by default");
 $sel->click_ok("force_$saved_search1_id");
 $sel->click_ok("update");
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
@@ -58,9 +58,10 @@ $sel->title_is("User Preferences");
 logout($sel);
 
 # Log in as the "canconfirm" user. The search shared by the admin must appear
-# in the footer.
+# in the Search Bar.
 
 log_in($sel, $config, 'canconfirm');
+$sel->click_ok("quicksearch_top");
 $sel->is_text_present_ok("Shared Selenium buglist");
 $sel->click_ok("link=Shared Selenium buglist");
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
@@ -78,7 +79,7 @@ $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_is("User Preferences");
 $sel->is_text_present_ok($config->{admin_user_login});
 
-# Remove the shared search from your footer.
+# Remove the shared search from your Search Bar.
 
 $sel->is_checked_ok("link_in_footer_$saved_search1_id");
 $sel->click_ok("link_in_footer_$saved_search1_id");
@@ -89,7 +90,8 @@ $sel->title_is("User Preferences");
 $sel->click_ok("link=Permissions");
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_is("User Preferences");
-ok(!$sel->is_text_present("Shared Selenium buglist"), "Shared query no longer displayed in the footer");
+$sel->click_ok("quicksearch_top");
+ok(!$sel->is_text_present("Shared Selenium buglist"), "Shared query no longer displayed in the Search Bar");
 
 # Create your own saved search, and share it with the canconfirm group.
 
@@ -113,7 +115,7 @@ $sel->title_is("User Preferences");
 $ssname = $sel->get_attribute('//input[@type="checkbox" and @alt="helpwanted"]@name');
 $ssname =~ /(?:link_in_footer_(\d+))/;
 my $saved_search2_id = $1;
-# Our own saved searches are displayed in the footer by default.
+# Our own saved searches are displayed in the Search Bar by default.
 $sel->is_checked_ok("link_in_footer_$saved_search2_id");
 $sel->select_ok("share_$saved_search2_id", "label=canconfirm");
 $sel->click_ok("update");
@@ -123,9 +125,10 @@ logout($sel);
 
 # Log in as admin again. The other user is not a blesser for the 'canconfirm'
 # group, and so his shared search must not be displayed by default. But it
-# must still be available and can be added to the footer, if desired.
+# must still be available and can be added to the Search Bar, if desired.
 
 log_in($sel, $config, 'admin');
+$sel->click_ok("quicksearch_top");
 ok(!$sel->is_text_present("helpwanted"), "No 'helpwanted' shared search displayed");
 $sel->click_ok("link=Preferences");
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
@@ -133,6 +136,7 @@ $sel->title_is("User Preferences");
 $sel->click_ok("link=Saved Searches");
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_is("User Preferences");
+$sel->click_ok("quicksearch_top");
 $sel->is_text_present_ok("helpwanted");
 $sel->is_text_present_ok($config->{canconfirm_user_login});
 
@@ -141,7 +145,7 @@ $sel->click_ok("link_in_footer_$saved_search2_id");
 $sel->click_ok("update");
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_is("User Preferences");
-# This query is now available from the footer.
+# This query is now available from the Search Bar.
 $sel->click_ok("link=helpwanted");
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_is("Bug List: helpwanted");
@@ -167,13 +171,15 @@ logout($sel);
 # user as he doesn't belong to the 'canconfirm' group.
 
 log_in($sel, $config, 'QA_Selenium_TEST');
-ok(!$sel->is_text_present("helpwanted"), "The 'helpwanted' query is not displayed in the footer");
+$sel->click_ok("quicksearch_top");
+ok(!$sel->is_text_present("helpwanted"), "The 'helpwanted' query is not displayed in the Search Bar");
 $sel->click_ok("link=Preferences");
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_is("User Preferences");
 $sel->click_ok("link=Saved Searches");
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_is("User Preferences");
+$sel->click_ok("quicksearch_top");
 ok(!$sel->is_text_present("helpwanted"), "The 'helpwanted' query is not shared with this user");
 logout($sel);
 
@@ -186,6 +192,7 @@ $sel->title_is("User Preferences");
 $sel->click_ok("link=Saved Searches");
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_is("User Preferences");
+$sel->click_ok("quicksearch_top");
 ok(!$sel->is_text_present("Shared Selenium buglist"), "The 'Shared Selenium buglist' is no longer available");
 $sel->click_ok('//a[contains(@href,"buglist.cgi?cmdtype=dorem&remaction=forget&namedcmd=helpwanted")]',
                undef, "Deleting the 'helpwanted' search");

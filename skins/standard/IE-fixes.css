@@ -26,25 +26,6 @@ form#Create #comp_desc {
     margin: .5em 1em;
 }
 
-#footer #useful-links li {
-    padding-bottom: 0.8ex;
-}
-
-#footer .label {
-    display: block;
-    float: left;
-    width: 8.2em;
-    padding-bottom: 0.1ex;
-}
-
-#footer #links-actions .label {
-    padding-top: 0.35em;
-}
-
-#footer .links {
-    display: inline;
-}
-
 #bug_id_container, .search_field_grid, 
 .search_email_fields, ul.bug_changes li { 
     zoom: 1;

@@ -30,31 +30,63 @@ $(function() {
         if (e.keyCode == 38 || e.keyCode == 40) {
             $('.dropdown-content').each(function() {
                 var $content = $(this);
+                var content_id = $content.attr('id');
+                var $controller = content_id ? $('[aria-controls="' + content_id + '"]') : $();
                 if ($content.is(':visible')) {
                     e.preventDefault();
                     e.stopPropagation();
-                    var $items = $content.find('[role="menuitem"]');
-                    // if none focused select the first or last
-                    var $any_focused = $items.filter(':focus');
-                    if ($any_focused.length == 0) {
+                    var $items = $content.find('[role="menuitem"], [role="option"]');
+                    // if none active select the first or last
+                    var $link = $items.filter('.active');
+                    if ($link.length == 0) {
                         var index = e.keyCode == 40 ? 0 : $items.length - 1;
-                        var $link = $items.eq(index);
-                        $link.addClass('active').focus();
-                        return;
+                        $link = $items.eq(index);
+                    } else {
+                        // otherwise move up or down the list based on arrow key pressed
+                        var move = $items.index($link) + (e.keyCode == 40 ? 1 : -1);
+
+                        // remove active state first
+                        if ($link.length) {
+                            $link.removeClass('active');
+
+                            if ($link.attr('id') === content_id + '-active-item') {
+                                $link.removeAttr('id');
+                            }
+                        }
+
+                        // get the new active element
+                        $link = $items.eq(move % $items.length);
                     }
-                    // otherwise move up or down the list based on arrow key pressed
-                    var inc  = e.keyCode == 40 ? 1 : -1;
-                    var move = $items.index($any_focused) + inc;
-                    var $link = $items.eq(move % $items.length);
-                    $content.find('a').removeClass('active');
-                    $link.addClass('active').focus();
+
+                    $link.addClass('active');
+
+                    if (content_id && !$link.attr('id')) {
+                        $link.attr('id', content_id + '-active-item');
+                    }
+
+                    if ($link.attr('id')) {
+                        $controller.attr('aria-activedescendant', $link.attr('id'));
+                    }
+
+                    // move focus when the dropdown's controller is not search box
+                    if (!$controller.eq('input')) {
+                        $link.focus();
+                    }
                 }
             });
         }
 
-        // enter clicks on a link
+        // navigate to an active link or click on it
+        // note that `trigger('click')` doesn't always work
         if (e.keyCode == 13) {
-            $('.dropdown-content:visible a.active').trigger('click');
+            var $link = $('.dropdown-content:visible a.active');
+            if ($link.length) {
+                if ($link.attr('href')) {
+                    location.href = $link.attr('href');
+                } else {
+                    $link.trigger('click');
+                }
+            }
         }
     });
 
@@ -70,8 +102,18 @@ $(function() {
         $button.click(function(e) {
             toggleDropDown(e, $button, $content);
         }).keydown(function(e) {
-            // allow enter to toggle menu
             if (e.keyCode == 13) {
+                if ($button.eq('input') && !$button.val()) {
+                    // prevent the form being submitted if the search bar is empty
+                    e.preventDefault();
+                    // navigate to an active link if any
+                    var $link = $content.find('a.active');
+                    if ($link.length) {
+                        location.href = $link.attr('href');
+                    }
+                }
+
+                // allow enter to toggle menu
                 toggleDropDown(e, $button, $content);
             }
         });
@@ -85,8 +127,19 @@ $(function() {
             $expanded.attr('aria-expanded', false);
         }
 
+        // don't expand the dropdown if there's no item
+        var $items = $content.find('[role="menuitem"], [role="option"]');
+        if (!$items.length) {
+            return;
+        }
+
         // clear all active links
         $content.find('a').removeClass('active');
+        var content_id = $content.attr('id');
+        if (content_id) {
+            $('[aria-controls="' + content_id + '"]').removeAttr('aria-activedescendant');
+            $content.find('#' + content_id + '-active-item').removeAttr('id');
+        }
         if ($content.is(':visible')) {
             $content.hide();
             $button.attr('aria-expanded', false);

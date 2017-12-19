@@ -50,7 +50,7 @@ $sel->click_ok("link=SavedSearchTEST1");
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_is("Bug List: SavedSearchTEST1");
 
-# Remove the saved search from the page footer. It should no longer be displayed there.
+# Remove the saved search from the Search Bar. It should no longer be displayed there.
 
 $sel->click_ok("link=Preferences");
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
@@ -76,8 +76,8 @@ $sel->type_ok("short_desc", "bilboa");
 $sel->click_ok("Search");
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_is("Bug List");
-# As we said, this saved search should no longer be displayed in the page footer.
-ok(!$sel->is_text_present("SavedSearchTEST1"), "SavedSearchTEST1 is not present in the page footer");
+# As we said, this saved search should no longer be displayed in the Search Bar.
+ok(!$sel->is_text_present("SavedSearchTEST1"), "SavedSearchTEST1 is not present in the Search Bar");
 $sel->type_ok("save_newqueryname", "SavedSearchTEST1");
 $sel->click_ok("remember");
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
@@ -86,7 +86,7 @@ $text = trim($sel->get_text("message"));
 ok($text =~ /Your search named SavedSearchTEST1 has been updated./, "Saved searche SavedSearchTEST1 has been updated.");
 
 # Make sure our new criteria has been saved (let's edit the saved search).
-# As the saved search is no longer displayed in the footer, we have to go
+# As the saved search is no longer displayed in the Search Bar, we have to go
 # to the "Preferences" page to edit it.
 
 $sel->click_ok("link=Preferences");

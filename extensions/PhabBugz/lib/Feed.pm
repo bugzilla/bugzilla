@@ -76,7 +76,7 @@ sub feed_query {
     foreach my $story_data (@$transactions) {
         my $skip = 0;
         my $story_id    = $story_data->{id};
-        my $story_phid  = $story_data->{storyPHID};
+        my $story_phid  = $story_data->{phid};
         my $author_phid = $story_data->{authorPHID};
         my $object_phid = $story_data->{objectPHID};
         my $story_text  = $story_data->{text};
@@ -296,25 +296,13 @@ sub feed_transactions {
     my $data = { view => 'text' };
     $data->{after} = $after if $after;
     my $result = request('feed.query_id', $data);
-
-    # Stupid Conduit. If the feed results are empty it returns
-    # an empty list ([]). If there is data it returns it in a
-    # hash ({}) so we have adjust to be consistent.
-    my $stories = ref $result->{result}{data} eq 'HASH'
-                  ? $result->{result}{data}
-                  : {};
-
-    # PHP array retain key order but Perl does not. So we will
-    # loop over the data and place the stories into a list instead
-    # of a hash. We will then sort the list by id.
-    my @story_list;
-    foreach my $story_phid (keys %$stories) {
-        my $story_data = $stories->{$story_phid};
-        $story_data->{storyPHID} = $story_phid;
-        push(@story_list, $story_data);
+    unless (ref $result->{result}{data} eq 'ARRAY'
+            && @{ $result->{result}{data} })
+    {
+        return [];
     }
-
-    return [ sort { $a->{id} <=> $b->{id} } @story_list ];
+    # Guarantee that the data is in ascending ID order
+    return [ sort { $a->{id} <=> $b->{id} } @{ $result->{result}{data} } ];
 }
 
 1;

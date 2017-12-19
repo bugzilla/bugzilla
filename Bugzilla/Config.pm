@@ -203,39 +203,7 @@ sub update_params {
 
     $param->{'utf8'} = 1 if $new_install;
 
-    # --- REMOVE OLD PARAMS ---
-
     my %oldparams;
-    # Remove any old params
-    foreach my $item (keys %$param) {
-        if (!exists $params{$item}) {
-            $oldparams{$item} = delete $param->{$item};
-        }
-    }
-
-    # Write any old parameters to old-params.txt
-    my $datadir = bz_locations()->{'datadir'};
-    my $old_param_file = "$datadir/old-params.txt";
-    if (scalar(keys %oldparams)) {
-        my $op_file = new IO::File($old_param_file, '>>', 0600)
-          || die "Couldn't create $old_param_file: $!";
-
-        print "The following parameters are no longer used in Bugzilla,",
-              " and so have been\nmoved from your parameters file into",
-              " $old_param_file:\n";
-
-        local $Data::Dumper::Terse  = 1;
-        local $Data::Dumper::Indent = 0;
-
-        my $comma = "";
-        foreach my $item (keys %oldparams) {
-            print $op_file "\n\n$item:\n" . Data::Dumper->Dump([$oldparams{$item}]) . "\n";
-            print "${comma}$item";
-            $comma = ", ";
-        }
-        print "\n";
-        $op_file->close;
-    }
 
     if (ON_WINDOWS && !-e SENDMAIL_EXE
         && $param->{'mail_delivery_method'} eq 'Sendmail')

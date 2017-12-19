@@ -277,7 +277,9 @@ sub write_params {
     my ($fh, $tmpname) = File::Temp::tempfile('params.XXXXX',
                                               DIR => $datadir );
 
-    print $fh (Data::Dumper->Dump([$param_data], ['*param']))
+    my %params = %$param_data;
+    $params{urlbase} = Bugzilla->localconfig->{urlbase};
+    print $fh (Data::Dumper->Dump([\%params], ['*param']))
       || die "Can't write param file: $!";
 
     close $fh;

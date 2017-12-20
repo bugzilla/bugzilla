@@ -22,7 +22,7 @@
 
 [% PROCESS bug/time.html.tmpl %]
 
-<script src="[% 'js/comments.js' FILTER mtime %]" type="text/javascript">
+<script src="[% 'js/comments.js' FILTER version %]" type="text/javascript">
 </script>
 
 <script type="text/javascript">
@@ -43,7 +43,7 @@
       [% IF user.is_insider %]
         if (document.getElementById('isprivate_' + real_id).checked) {
             document.getElementById('newcommentprivacy').checked = 'checked';
-            updateCommentTagControl(document.getElementById('newcommentprivacy'), 'comment'); 
+            updateCommentTagControl(document.getElementById('newcommentprivacy'), 'comment');
         }
       [% END %]
 
@@ -111,7 +111,7 @@
 
 [% Hook.process("comment_banner") %]
 
-<!-- This auto-sizes the comments and positions the collapse/expand links 
+<!-- This auto-sizes the comments and positions the collapse/expand links
      to the right. -->
 <table class="bz_comment_table" cellpadding="0" cellspacing="0"><tr>
 <td>
@@ -120,13 +120,13 @@
   [% IF count >= start_at %]
     [% PROCESS a_comment %]
   [% END %]
-  
+
   [% count = count + increment %]
 [% END %]
 
 [%# Note: this template is used in multiple places; if you use this hook,
   # make sure you are aware of this fact.
-  #%]  
+  #%]
 [% Hook.process("aftercomments") %]
 
 </td>
@@ -217,7 +217,7 @@
         [% END %]
 
         <span role="heading" aria-level="2" class="bz_comment_number">
-          <a 
+          <a
              href="show_bug.cgi?id=[% bug.bug_id %]#c[% comment.count %]">
             [%- comment_label FILTER html %]</a>
         </span>
@@ -260,7 +260,7 @@
       [% IF user.is_timetracker &&
             (comment.work_time > 0 || comment.work_time < 0) %]
          <br>
-         Additional hours worked: 
+         Additional hours worked:
          [% PROCESS formattimeunit time_unit=comment.work_time %]
       [% END %]
 

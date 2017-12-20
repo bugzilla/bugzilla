@@ -142,15 +142,11 @@
     [% PROCESS 'global/setting-descs.none.tmpl' %]
 
     [% SET css_sets = css_files(style_urls.unique, no_yui) %]
-    [% IF constants.CONCATENATE_ASSETS %]
-      [% PROCESS format_css_link asset_url = css_sets.unified_standard_skin %]
-    [% ELSE %]
-      [% FOREACH asset_url = css_sets.standard %]
-        [% PROCESS format_css_link %]
-      [% END %]
-      [% FOREACH asset_url = css_sets.skin %]
-        [% PROCESS format_css_link %]
-      [% END %]
+    [% FOREACH asset_url = css_sets.standard %]
+      [% PROCESS format_css_link %]
+    [% END %]
+    [% FOREACH asset_url = css_sets.skin %]
+      [% PROCESS format_css_link %]
     [% END %]
 
     [% IF style %]
@@ -159,14 +155,8 @@
       </style>
     [% END %]
 
-    [% IF css_sets.unified_custom %]
-      [% IF constants.CONCATENATE_ASSETS %]
-        [% PROCESS format_css_link asset_url = css_sets.unified_custom %]
-      [% ELSE %]
-        [% FOREACH asset_url = css_sets.custom %]
-          [% PROCESS format_css_link %]
-        [% END %]
-      [% END %]
+    [% FOREACH asset_url = css_sets.custom %]
+      [% PROCESS format_css_link %]
     [% END %]
 
     [%# jQuery Plugins %]
@@ -175,7 +165,7 @@
     [% END %]
     [% starting_js_urls.push('js/global.js', 'js/dropdown.js') %]
 
-    [% FOREACH asset_url = concatenate_js(starting_js_urls) %]
+    [% FOREACH asset_url = starting_js_urls %]
       [% PROCESS format_js_link %]
     [% END %]
 
@@ -199,7 +189,7 @@
       </script>
     [% END %]
 
-    [% FOREACH asset_url = concatenate_js(javascript_urls) %]
+    [% FOREACH asset_url = javascript_urls %]
       [% PROCESS format_js_link %]
     [% END %]
 
@@ -405,8 +395,10 @@
 
 [% BLOCK format_css_link %]
   <link href="[% asset_url FILTER html %]" rel="stylesheet" type="text/css">
+  [% "\n" %]
 [% END %]
 
 [% BLOCK format_js_link %]
-  <script [% script_nonce FILTER none %] type="text/javascript" src="[% asset_url FILTER mtime FILTER html %]"></script>
+  <script [% script_nonce FILTER none %] type="text/javascript" src="[% asset_url FILTER version FILTER html %]"></script>
+  [% "\n" %]
 [% END %]

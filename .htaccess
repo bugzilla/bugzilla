@@ -2,27 +2,6 @@
 <FilesMatch (\.pm|\.pl|\.tmpl|\.swf|localconfig.*|cpanfile)$>
   deny from all
 </FilesMatch>
-<IfModule mod_expires.c>
-<IfModule mod_headers.c>
-<IfModule mod_env.c>
-  <FilesMatch (\.js|\.css)$>
-    ExpiresActive On
-    # According to RFC 2616, "1 year in the future" means "never expire".
-    # We change the name of the file's URL whenever its modification date
-    # changes, so browsers can cache any individual JS or CSS URL forever.
-    # However, since all JS and CSS URLs involve a ? in them (for the changing
-    # name) we have to explicitly set an Expires header or browsers won't
-    # *ever* cache them.
-    ExpiresDefault "now plus 1 years"
-    Header append Cache-Control "public"
-  </FilesMatch>
-
-  # This lets Bugzilla know that we are properly sending Cache-Control
-  # and Expires headers for CSS and JS files.
-  SetEnv BZ_CACHE_CONTROL 1
-</IfModule>
-</IfModule>
-</IfModule>
 
 # Allow ZeroClipboard for access to the clipboard
 <Files "ZeroClipboard.swf">
@@ -31,6 +10,7 @@
 
 AddType image/x-icon .ico
 AddType application/font-woff .woff
+AddType application/font-woff2 .woff2
 
 Redirect permanent /queryhelp.cgi https://bugzilla.mozilla.org/query.cgi?format=advanced&help=1
 Redirect permanent /bug_status.html https://bugzilla.mozilla.org/page.cgi?id=fields.html
@@ -51,6 +31,9 @@ RewriteRule ^__version__$ version.json [L]
 # Unlike lbheartbeat, this endpoint is called less frequently (every five minutes or so)
 # heartbeat.cgi returns 200 if the DB and memcached are both working, and 500 otherwise.
 RewriteRule ^__heartbeat__$ heartbeat.cgi [L]
+
+RewriteRule ^static/v\d{4}\d{2}\d{2}\.\d+/(.+\.(?:js|css|woff2?|png|jpe?g|gif|ico|svg)) $1 [NC,E=IMMUTABLE:1,L]
+Header set Cache-Control "public, max-age=31536000" env=REDIRECT_IMMUTABLE
 
 RewriteRule ^robots\.txt$ robots.cgi [L]
 

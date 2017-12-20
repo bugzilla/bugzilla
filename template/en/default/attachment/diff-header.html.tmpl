@@ -41,9 +41,9 @@ Interdiff of #[% oldid %] and #[% newid %] for [% terms.bug %] #[% bugid %]
     [% IF attachid %]
       Attachment #[% attachid %]: [% description FILTER html %]
     [% ELSE %]
-      Diff Between 
+      Diff Between
        #[% oldid %]: <a href="[% PROCESS diffurl id=oldid %]">[% old_desc FILTER html %]</a>
-      and 
+      and
        #[% newid %]: <a href="[% PROCESS diffurl id=newid %]">[% new_desc FILTER html %]</a>
     [% END %]
     for <a href="show_bug.cgi?id=[% bugid %]">[% terms.bug %] #[% bugid %]</a>
@@ -57,14 +57,14 @@ Interdiff of #[% oldid %] and #[% newid %] for [% terms.bug %] #[% bugid %]
 [% ELSE %]
   <html>
   <head>
-  <link href="[% 'skins/standard/attachment.css' FILTER mtime %]" 
+  <link href="[% 'skins/standard/attachment.css' FILTER version %]"
         rel="stylesheet" type="text/css">
-  <script src="[% 'js/attachment.js' FILTER mtime %]" 
+  <script src="[% 'js/attachment.js' FILTER version %]"
           type="text/javascript"></script>
   </head>
   <body onload="[% onload FILTER html %]">
 [% END %]
-  
+
 [%# If we have attachid, we are in diff, otherwise we're in interdiff %]
 [% IF attachid %]
   [%# HEADER %]
@@ -100,12 +100,12 @@ Interdiff of #[% oldid %] and #[% newid %] for [% terms.bug %] #[% bugid %]
     |
   [% END %]
 [% END %]
-  
+
 [%# Collapse / Expand %]
 <a href="#"
    onmouseover="lastStatus = window.status; window.status='Collapse All'; return true"
    onmouseout="window.status = lastStatus; return true"
-   onclick="return collapse_all()">Collapse All</a> | 
+   onclick="return collapse_all()">Collapse All</a> |
 <a href="#"
    onmouseover="lastStatus = window.status; window.status='Expand All'; return true"
    onmouseout="window.status = lastStatus; return true"
@@ -115,14 +115,14 @@ Interdiff of #[% oldid %] and #[% newid %] for [% terms.bug %] #[% bugid %]
   [%# only happens for normal viewing, not interdiff %]
   | <span style='font-weight: bold'>Context:</span>
   [% IF context == "patch" %]
-    (<strong>Patch</strong> / 
+    (<strong>Patch</strong> /
   [% ELSE %]
-    (<a href="[% PROCESS diffurl id=attachid %]&amp;headers=[% headers FILTER uri %]">Patch</a> / 
+    (<a href="[% PROCESS diffurl id=attachid %]&amp;headers=[% headers FILTER uri %]">Patch</a> /
   [% END %]
   [% IF context == "file" %]
     <strong>File</strong> /
   [% ELSE %]
-    <a href="[% PROCESS diffurl id=attachid %]&amp;headers=[% headers FILTER uri %]&amp;context=file">File</a> / 
+    <a href="[% PROCESS diffurl id=attachid %]&amp;headers=[% headers FILTER uri %]&amp;context=file">File</a> /
   [% END %]
 
   [% IF context == "patch" || context == "file" %]
@@ -150,7 +150,7 @@ Interdiff of #[% oldid %] and #[% newid %] for [% terms.bug %] #[% bugid %]
 [% ELSE %]
     <br><br>
 [% END %]
- 
+
 [%# Restore Stuff %]
 <form name="checkboxform" action="attachment.cgi">
 <input type="checkbox" name="restore_indicator" style="display: none">

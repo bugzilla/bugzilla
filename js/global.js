@@ -204,7 +204,7 @@ const scroll_element_into_view = () => {
         if ($comment) {
             window.setTimeout(() => {
                 window.scrollTo(0, $comment.offsetTop - $header.offsetHeight - 20);
-            }, 100);
+            }, 250);
         }
     }
 }

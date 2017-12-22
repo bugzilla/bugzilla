@@ -22,7 +22,7 @@ find(
             if (/\.css$/) {
                 my $css_file = $File::Find::name;
                 my $content = read_file($_);
-                while ($content =~ m{url\(["']?([^\)"']+)['"]?\)}g) {
+                while ($content =~ m{url\(["']?([^\?\)"']+)(?:\?.+)?['"]?\)}g) {
                     my $file = $1;
                     my $file_rel_root = File::Spec->abs2rel(realpath(File::Spec->rel2abs($file)), $root);
 

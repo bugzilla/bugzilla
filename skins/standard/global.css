@@ -993,7 +993,8 @@ input.required, select.required, span.required_explanation {
 @font-face{
     font-family: 'Fira Sans';
     src: local('Fira Sans'), local('FiraSans'),
-         url('fira/FiraSans-Regular.woff') format('woff');
+         url('fonts/FiraSans-Regular.woff2?v=4.203') format('woff2'),
+         url('fonts/FiraSans-Regular.woff?v=4.203') format('woff');
     font-weight: 400;
     font-style: normal;
 }
@@ -1001,7 +1002,8 @@ input.required, select.required, span.required_explanation {
 @font-face{
     font-family: 'Fira Sans';
     src: local('Fira Sans Italic'), local('FiraSansItalic'),
-         url('fira/FiraSans-Italic.woff') format('woff');
+         url('fonts/FiraSans-Italic.woff2?v=4.203') format('woff2'),
+         url('fonts/FiraSans-Italic.woff?v=4.203') format('woff');
     font-weight: 400;
     font-style: italic;
 }
@@ -1009,7 +1011,8 @@ input.required, select.required, span.required_explanation {
 @font-face{
     font-family: 'Fira Sans';
     src: local('Fira Sans SemiBold'), local('FiraSansSemiBold'),
-         url('fira/FiraSans-SemiBold.woff') format('woff');
+         url('fonts/FiraSans-SemiBold.woff2?v=4.203') format('woff2'),
+         url('fonts/FiraSans-SemiBold.woff?v=4.203') format('woff');
     font-weight: 600;
     font-style: normal;
 }
@@ -1017,7 +1020,8 @@ input.required, select.required, span.required_explanation {
 @font-face{
     font-family: 'Fira Sans';
     src: local('Fira Sans SemiBold Italic'), local('FiraSansSemiBoldItalic'),
-         url('fira/FiraSans-SemiBoldItalic.woff') format('woff');
+         url('fonts/FiraSans-SemiBoldItalic.woff2?v=4.203') format('woff2'),
+         url('fonts/FiraSans-SemiBoldItalic.woff?v=4.203') format('woff');
     font-weight: 600;
     font-style: italic;
 }
@@ -1025,7 +1029,8 @@ input.required, select.required, span.required_explanation {
 @font-face{
     font-family: 'Fira Sans';
     src: local('Fira Sans Bold'), local('FiraSansBold'),
-         url('fira/FiraSans-Bold.woff') format('woff');
+         url('fonts/FiraSans-Bold.woff2?v=4.203') format('woff2'),
+         url('fonts/FiraSans-Bold.woff?v=4.203') format('woff');
     font-weight: 700;
     font-style: normal;
 }
@@ -1033,7 +1038,8 @@ input.required, select.required, span.required_explanation {
 @font-face{
     font-family: 'Fira Sans';
     src: local('Fira Sans Bold Italic'), local('FiraSansBoldItalic'),
-         url('fira/FiraSans-BoldItalic.woff') format('woff');
+         url('fonts/FiraSans-BoldItalic.woff2?v=4.203') format('woff2'),
+         url('fonts/FiraSans-BoldItalic.woff?v=4.203') format('woff');
     font-weight: 700;
     font-style: italic;
 }
@@ -1041,7 +1047,8 @@ input.required, select.required, span.required_explanation {
 @font-face{
     font-family: 'Fira Mono';
     src: local('Fira Mono'), local('FiraMono'),
-         url('fira/FiraMono-Regular.woff') format('woff');
+         url('fonts/FiraMono-Regular.woff2?v=3.202') format('woff2'),
+         url('fonts/FiraMono-Regular.woff?v=3.202') format('woff');
     font-weight: 400;
     font-style: normal;
 }
@@ -1049,7 +1056,8 @@ input.required, select.required, span.required_explanation {
 @font-face{
     font-family: 'Fira Mono';
     src: local('Fira Mono Bold'), local('FiraMonoBold'),
-         url('fira/FiraMono-Bold.woff') format('woff');
+         url('fonts/FiraMono-Bold.woff2?v=3.202') format('woff2'),
+         url('fonts/FiraMono-Bold.woff?v=3.202') format('woff');
     font-weight: 600;
     font-style: normal;
 }

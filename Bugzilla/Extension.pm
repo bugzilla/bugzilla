@@ -46,7 +46,7 @@ sub INC_HOOK {
                 return 1;
             }
             else {
-                $_ = qq{# line 0 "$real_file"\n};
+                $_ = qq{# line 1 "$real_file"\n};
                 $first = 0;
                 return 1;
             }

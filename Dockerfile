@@ -1,4 +1,4 @@
-FROM mozillabteam/bmo-slim:20170927.1
+FROM mozillabteam/bmo-slim:20171222.1
 
 ARG CI
 ARG CIRCLE_SHA1

@@ -24,6 +24,14 @@ BEGIN {
 
 use Bugzilla::ModPerl::StartupFix;
 
+use constant USE_NYTPROF => !! $ENV{USE_NYTPROF};
+BEGIN {
+    if (USE_NYTPROF) {
+        $ENV{NYTPROF} = "savesrc=0:start=no:addpid=1";
+    }
+}
+use if USE_NYTPROF, 'Devel::NYTProf::Apache';
+
 use Bugzilla::Constants ();
 
 # If you have an Apache2::Status handler in your Apache configuration,
@@ -122,7 +130,7 @@ package Bugzilla::ModPerl::ResponseHandler;
 use strict;
 use base qw(ModPerl::Registry);
 use Bugzilla;
-use Bugzilla::Constants qw(USAGE_MODE_REST);
+use Bugzilla::Constants qw(USAGE_MODE_REST bz_locations);
 use Time::HiRes;
 
 sub handler : method {
@@ -140,9 +148,20 @@ sub handler : method {
     local *lib::import = sub {};
     use warnings;
 
+    if (Bugzilla::ModPerl::USE_NYTPROF) {
+        state $count = {};
+        my $script = File::Basename::basename($ENV{SCRIPT_FILENAME});
+        $script =~ s/\.cgi$//;
+        my $file = bz_locations()->{datadir} . "/nytprof.$script." . ++$count->{$$};
+        DB::enable_profile($file);
+    }
     Bugzilla::init_page();
     my $start = Time::HiRes::time();
     my $result = $class->SUPER::handler(@_);
+    if (Bugzilla::ModPerl::USE_NYTPROF) {
+        DB::disable_profile();
+        DB::finish_profile();
+    }
     warn "[request_time] ", Bugzilla->cgi->request_uri, " took ", Time::HiRes::time() - $start, " seconds to execute";
 
     # When returning data from the REST api we must only return 200 or 304,

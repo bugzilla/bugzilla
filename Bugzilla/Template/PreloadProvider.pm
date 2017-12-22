@@ -43,6 +43,7 @@ sub _init {
                 }
                 trick_taint($name);
                 my $data = {
+                    path => $name,
                     name => $key,
                     text => do {
                         open my $fh, '<:utf8', $name or die "cannot open $name";

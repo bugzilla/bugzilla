@@ -1316,7 +1316,9 @@ sub bless_groups {
 sub in_group {
     my ($self, $group, $product_id) = @_;
     $group = $group->name if blessed $group;
-    if (scalar grep($_->name eq $group, @{ $self->groups })) {
+    $self->{in_group} //= { map { $_->name  => $_ } @{ $self->groups } };
+
+    if ($self->{in_group}{$group}) {
         return 1;
     }
     elsif ($product_id && detaint_natural($product_id)) {

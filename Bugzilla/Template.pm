@@ -529,6 +529,9 @@ sub process {
     my $current_langs = Bugzilla->request_cache->{template_current_lang} ||= [];
     unshift(@$current_langs, $self->context->{bz_language});
     local $is_processing = 1;
+    local $SIG{__DIE__};
+    delete $SIG{__DIE__};
+    warn "WARNING: CGI::Carp makes templates slow" if $INC{"CGI/Carp.pm"};
     my $retval = $self->SUPER::process(@_);
     shift @$current_langs;
     return $retval;

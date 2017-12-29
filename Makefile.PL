@@ -67,6 +67,10 @@ my %requires = (
     'version'                  => '0.87',
     'Taint::Util'              => 0,
     'Devel::NYTProf'           => 0,
+    'Class::XSAccessor'        => '1.18',
+    'HTML::Escape'             => '1.10',
+    'URI::Escape::XS'          => '0.14',
+    'Sereal'                   => '4.004',
 );
 my %build_requires = (
     'ExtUtils::MakeMaker' => '7.22',

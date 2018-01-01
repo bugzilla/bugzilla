@@ -18,6 +18,8 @@ use Bugzilla::User;
 use Getopt::Long;
 
 Bugzilla->usage_mode(USAGE_MODE_CMDLINE);
+Bugzilla->error_mode(ERROR_MODE_DIE);
+use Try::Tiny; # bmo ships with this nowadays
 
 my $config = {
     # filter by assignee, product or component
@@ -116,83 +118,100 @@ use constant NAGIOS_WARNING     => 1;
 use constant NAGIOS_CRITICAL    => 2;
 use constant NAGIOS_NAMES       => [qw( OK WARNING CRITICAL )];
 
-my $dbh = Bugzilla->switch_to_shadow_db;
-my $any_severity = $config->{severity} eq 'any';
-my ($where, @values);
-
-if ($config->{assignee}) {
-    $where = 'bugs.assigned_to = ?';
-    push @values, Bugzilla::User->check({ name => $config->{assignee} })->id;
-
-} elsif ($config->{component}) {
-    $where = 'bugs.product_id = ? AND bugs.component_id = ? AND bugs.assigned_to = ?';
-    my $product = Bugzilla::Product->check({ name => $config->{product} });
-    push @values, $product->id;
-    push @values, Bugzilla::Component->check({ product => $product, name => $config->{component} })->id;
-    push @values, Bugzilla::User->check({ name => $config->{unassigned} })->id;
-
-} else {
-    $where = 'bugs.product_id = ? AND bugs.assigned_to = ?';
-    push @values, Bugzilla::Product->check({ name => $config->{product} })->id;
-    push @values, Bugzilla::User->check({ name => $config->{unassigned} })->id;
-}
-
-if (!$any_severity) {
-    $where .= ' AND bug_severity IN (' .
-        join(',', map { $dbh->quote($_) } split(/,/, $config->{severity})) . ')';
-}
-
-my $sql = <<EOF;
-    SELECT bug_id, bug_severity, UNIX_TIMESTAMP(bugs.creation_ts) AS ts
-      FROM bugs
-     WHERE $where
-           AND COALESCE(resolution, '') = ''
-EOF
-
-my $bugs = {
-    'major'     => [],
-    'critical'  => [],
-    'blocker'   => [],
-    'any'       => [],
-};
 my $current_state = NAGIOS_OK;
-my $current_time = time;
+try {
+    my $dbh = Bugzilla->switch_to_shadow_db;
+    my $any_severity = $config->{severity} eq 'any';
+    my ($where, @values);
 
-foreach my $bug (@{ $dbh->selectall_arrayref($sql, { Slice => {} }, @values) }) {
-    my $severity = $any_severity ? 'any' : $bug->{bug_severity};
-    my $age = ($current_time - $bug->{ts}) / 3600;
+    if ($config->{assignee}) {
+        $where = 'bugs.assigned_to = ?';
+        push @values, Bugzilla::User->check({ name => $config->{assignee} })->id;
 
-    if ($age > $config->{"${severity}_alarm"}) {
-        $current_state = NAGIOS_CRITICAL;
-        push @{$bugs->{$severity}}, $bug->{bug_id};
+    } elsif ($config->{component}) {
+        $where = 'bugs.product_id = ? AND bugs.component_id = ? AND bugs.assigned_to = ?';
+        my $product = Bugzilla::Product->check({ name => $config->{product} });
+        push @values, $product->id;
+        push @values, Bugzilla::Component->check({ product => $product, name => $config->{component} })->id;
+        push @values, Bugzilla::User->check({ name => $config->{unassigned} })->id;
 
-    } elsif ($age > $config->{"${severity}_warn"}) {
-        if ($current_state < NAGIOS_WARNING) {
-            $current_state = NAGIOS_WARNING;
-        }
-        push @{$bugs->{$severity}}, $bug->{bug_id};
-
-    }
-}
-
-print "bugs " . NAGIOS_NAMES->[$current_state] . ": ";
-if ($current_state == NAGIOS_OK) {
-    if ($config->{severity} eq 'any') {
-        print "No unassigned bugs found.";
     } else {
-        print "No $config->{severity} bugs found."
+        $where = 'bugs.product_id = ? AND bugs.assigned_to = ?';
+        push @values, Bugzilla::Product->check({ name => $config->{product} })->id;
+        push @values, Bugzilla::User->check({ name => $config->{unassigned} })->id;
     }
-}
-foreach my $severity (qw( blocker critical major any )) {
-    my $list = $bugs->{$severity};
-    if (@$list) {
-        printf
-            "%s %s %s found https://bugzil.la/" . join(',', @$list) . " ",
-            scalar(@$list),
-            ($any_severity ? 'unassigned' : $severity),
-            (scalar(@$list) == 1 ? 'bug' : 'bugs');
+
+    if (!$any_severity) {
+        $where .= ' AND bug_severity IN (' .
+            join(',', map { $dbh->quote($_) } split(/,/, $config->{severity})) . ')';
     }
-}
-print "\n";
+
+    my $sql = <<"    EOF";
+        SELECT bug_id, bug_severity, UNIX_TIMESTAMP(bugs.creation_ts) AS ts
+          FROM bugs
+         WHERE $where
+               AND COALESCE(resolution, '') = ''
+    EOF
+
+    my $bugs = {
+        'major'     => [],
+        'critical'  => [],
+        'blocker'   => [],
+        'any'       => [],
+    };
+    my $current_time = time;
+
+    foreach my $bug (@{ $dbh->selectall_arrayref($sql, { Slice => {} }, @values) }) {
+        my $severity = $any_severity ? 'any' : $bug->{bug_severity};
+        my $age = ($current_time - $bug->{ts}) / 3600;
+
+        if ($age > $config->{"${severity}_alarm"}) {
+            $current_state = NAGIOS_CRITICAL;
+            push @{$bugs->{$severity}}, $bug->{bug_id};
+
+        } elsif ($age > $config->{"${severity}_warn"}) {
+            if ($current_state < NAGIOS_WARNING) {
+                $current_state = NAGIOS_WARNING;
+            }
+            push @{$bugs->{$severity}}, $bug->{bug_id};
+
+        }
+    }
+
+    print "bugs " . NAGIOS_NAMES->[$current_state] . ": ";
+    if ($current_state == NAGIOS_OK) {
+        if ($config->{severity} eq 'any') {
+            print "No unassigned bugs found.";
+        } else {
+            print "No $config->{severity} bugs found."
+        }
+    }
+    foreach my $severity (qw( blocker critical major any )) {
+        my $list = $bugs->{$severity};
+        if (@$list) {
+            printf
+                "%s %s %s found https://bugzil.la/" . join(',', @$list) . " ",
+                scalar(@$list),
+                ($any_severity ? 'unassigned' : $severity),
+                (scalar(@$list) == 1 ? 'bug' : 'bugs');
+        }
+    }
+    print "\n";
+} catch {
+    # Anything that trips an error, we're calling nagios-critical
+    $current_state = NAGIOS_CRITICAL;
+    #
+    # Templates often have linebreaks ; nagios really prefers a status
+    # to be on one line.  Here we strip out breaks, and try to make sure
+    # there's spacing in place when we crunch those lines together.
+    s#\s?\r?\n# #g;
+    #
+    # Now, just print the status we got out.
+    # Keep in mind, depending on when 'try' blew out, we may have
+    # already printed SOMETHING.  Can't help that without a much more
+    # thorough fix.  Our majority case here is a blowout from BZ
+    # where a Product/Component went away, ala bug 1326233.
+    print "$_\n";
+};
 
 exit $current_state;

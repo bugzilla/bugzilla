@@ -192,6 +192,18 @@ $().ready(function() {
 });
 
 /**
+ * Check if Gravatar images on the page are successfully loaded, and if blocked
+ * (by any content blocker), replace them with the default/fallback image.
+ */
+const detect_blocked_gravatars = () => {
+    document.querySelectorAll('img[src^="https://secure.gravatar.com/avatar/"]').forEach($img => {
+        if (!$img.complete || !$img.naturalHeight) {
+            $img.src = 'extensions/Gravatar/web/default.jpg';
+        }
+    });
+}
+
+/**
  * If the URL contains a hash like #c10, scroll down the page to show the
  * element below the fixed global header. This workaround is required for
  * comments on show_bug.cgi, components on describecomponents.cgi, etc.
@@ -209,5 +221,6 @@ const scroll_element_into_view = () => {
     }
 }
 
+window.addEventListener('load', detect_blocked_gravatars, { once: true });
 window.addEventListener('load', scroll_element_into_view, { once: true });
 window.addEventListener('hashchange', scroll_element_into_view);

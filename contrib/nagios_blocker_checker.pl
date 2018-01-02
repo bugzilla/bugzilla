@@ -15,6 +15,7 @@ use Bugzilla;
 use Bugzilla::Constants;
 use Bugzilla::Product;
 use Bugzilla::User;
+use Bugzilla::Sentry;
 use Getopt::Long;
 
 Bugzilla->usage_mode(USAGE_MODE_CMDLINE);
@@ -38,6 +39,12 @@ my $config = {
     blocker_warn    => 0,
     any_alarm       => 24,
     any_warn        => 20,
+    # time in seconds before terminating this script
+    # 300 chosen as it is longer than the default NRPE timeout
+    # (meaning you should never need to tweak it upward) and
+    # shorter than what you are likely to do checking bugs
+    # (meaning you won't pile up too many instances before they die)
+    max_runtime     => 300,
 };
 
 my $usage = <<EOF;
@@ -79,6 +86,12 @@ TIMING
   --any_alarm <hours> (default: $config->{any_alarm})
   --any_warn  <hours> (default: $config->{any_warn})
 
+NAGIOS SELF-TERMINATION
+
+  In case of a hung process, this script self-terminates.  You can adjust:
+
+  --max_runtime <seconds> (default: $config->{max_runtime})
+
 EXAMPLES
 
   nagios_blocker_checker.pl --assignee server-ops\@mozilla-org.bugs
@@ -101,6 +114,7 @@ die($usage) unless GetOptions(
     'blocker_warn=i'    => \$config->{blocker_warn},
     'any_alarm=i'       => \$config->{any_alarm},
     'any_warn=i'        => \$config->{any_warn},
+    'max_runtime=i'     => \$config->{max_runtime},
     'help|?'            => \$config->{help},
 );
 $config->{assignee} = $ARGV[0] if !$config->{assignee} && @ARGV;
@@ -120,6 +134,16 @@ use constant NAGIOS_NAMES       => [qw( OK WARNING CRITICAL )];
 
 my $current_state = NAGIOS_OK;
 try {
+    # Per bug 1330293, the checker script can get confused/hung up
+    # if the DB rotates out from under it.  Since a long-running
+    # nagios check does no good, we terminate if we stick around too long.
+    local $SIG{ALRM} = sub {
+        my $message = "$0 ran for longer than ".$config->{max_runtime}." seconds and was auto-terminated.";
+        sentry_handle_error('error', $message);
+        die "$message\n";
+    };
+    alarm($config->{max_runtime});
+
     my $dbh = Bugzilla->switch_to_shadow_db;
     my $any_severity = $config->{severity} eq 'any';
     my ($where, @values);
@@ -197,6 +221,7 @@ try {
         }
     }
     print "\n";
+    alarm(0);
 } catch {
     # Anything that trips an error, we're calling nagios-critical
     $current_state = NAGIOS_CRITICAL;

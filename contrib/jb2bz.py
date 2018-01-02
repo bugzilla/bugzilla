@@ -219,6 +219,7 @@ def process_jitterbug(filename):
     try:
         cursor.execute( "INSERT INTO bugs SET " \
                         "bug_id=%s," \
+                        "priority='---'," \
                         "bug_severity='normal',"  \
                         "bug_status=%s," \
                         "creation_ts=%s,"  \

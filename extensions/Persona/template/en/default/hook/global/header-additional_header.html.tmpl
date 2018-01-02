@@ -17,8 +17,8 @@
 [% USE Bugzilla %]
 [% cgi = Bugzilla.cgi %]
 
-<script [% script_nonce FILTER none %] defer src="[% Param('persona_includejs_url') %]" type="text/javascript"></script>
-<script [% script_nonce FILTER none %] type="text/javascript">
+<script [% script_nonce FILTER none %] defer src="[% Param('persona_includejs_url') %]"></script>
+<script [% script_nonce FILTER none %]>
 
 function createHidden(name, value, form) {
   var field = document.createElement('input');

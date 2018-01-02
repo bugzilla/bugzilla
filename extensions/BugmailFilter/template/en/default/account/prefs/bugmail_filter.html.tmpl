@@ -8,7 +8,7 @@
 
 <link href="[% "extensions/BugmailFilter/web/style/bugmail-filter.css" FILTER version %]"
       rel="stylesheet" type="text/css">
-<script type="text/javascript"
+<script
         src="[% "extensions/BugmailFilter/web/js/bugmail-filter.js" FILTER version %]"></script>
 
 [% SET selectable_products = user.get_selectable_products %]
@@ -26,7 +26,7 @@ var cpts = new Array();
   [% n = n + 1 %]
 [% END %]
 </script>
-<script type="text/javascript" src="[% 'js/productform.js' FILTER version FILTER html %]">
+<script src="[% 'js/productform.js' FILTER version FILTER html %]">
 </script>
 
 <hr>

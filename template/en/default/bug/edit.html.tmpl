@@ -49,7 +49,7 @@
     </div>
   [% END %]
   [% IF user.id %]
-    <script type="text/javascript">
+    <script>
       YAHOO.bugzilla.commentTagging.init([% user.can_tag_comments ? 'true' : 'false' %]);
       YAHOO.bugzilla.commentTagging.min_len = [% constants.MIN_COMMENT_TAG_LENGTH FILTER js %];
       YAHOO.bugzilla.commentTagging.max_len = [% constants.MAX_COMMENT_TAG_LENGTH FILTER js %];
@@ -64,7 +64,7 @@
   [% END %]
 [% END %]
 
-<script type="text/javascript">
+<script>
 <!--
 [% IF user.is_timetracker %]
   var fRemainingTime = [% bug.remaining_time %]; // holds the original value
@@ -300,7 +300,7 @@
       </table>
     </div>
   </div>
-  <script type="text/javascript">
+  <script>
     hideAliasAndSummary('[% bug.short_desc FILTER js %]', '[% bug.alias FILTER js %]');
   </script>
 [% END %]
@@ -505,7 +505,7 @@
             <input type="checkbox" id="set_default_assignee" name="set_default_assignee" value="1">
             <label id="set_default_assignee_label" for="set_default_assignee">Reset Assignee to default</label>
           </div>
-          <script type="text/javascript">
+          <script>
            hideEditableField('bz_assignee_edit_container', 
                              'bz_assignee_input', 
                              'bz_assignee_edit_action', 
@@ -555,7 +555,7 @@
             <input type="checkbox" id="set_default_qa_contact" name="set_default_qa_contact" value="1">
             <label for="set_default_qa_contact" id="set_default_qa_contact_label">Reset QA Contact to default</label>
           </div>
-          <script type="text/javascript">
+          <script>
             hideEditableField('bz_qa_contact_edit_container', 
                               'bz_qa_contact_input', 
                               'bz_qa_contact_edit_action', 
@@ -591,7 +591,7 @@
     [%# BMO - hook for adding mentors %]
     [% Hook.process("after_people", "bug/edit.html.tmpl") %]
 
-    <script type="text/javascript">
+    <script>
       assignToDefaultOnChange(['product', 'component'],
         '[% bug.component_obj.default_assignee.login FILTER js %]',
         '[% bug.component_obj.default_qa_contact.login FILTER js %]');
@@ -638,7 +638,7 @@
         [% END %]
       </span>
       [% IF bug.check_can_change_field("bug_file_loc", 0, 1) %]
-        <script type="text/javascript">
+        <script>
           hideEditableField('bz_url_edit_container', 
                             'bz_url_input_area', 
                             'bz_url_edit_action', 
@@ -911,7 +911,7 @@
           [% END %]
         </div>
         [% IF user.id || bug.cc.size %]
-          <script type="text/javascript">
+          <script>
             hideEditableField( 'cc_edit_area_showhide_container', 
                                'cc_edit_area', 
                                'cc_edit_area_showhide', 
@@ -998,7 +998,7 @@
             [% IF !bug_flags_set %]<em>None yet set</em>[% END %]
             (<a href="#" id="bz_flags_more_action">[% IF !bug_flags_set %]set[% ELSE %]more[% END %] flags</a>)
           </span>
-          <script type="text/javascript">
+          <script>
             YAHOO.util.Dom.removeClass('bz_flags_more_container', 'bz_default_hidden');
             var table = YAHOO.util.Dom.get("flags");
             var rows = YAHOO.util.Dom.getElementsByClassName('bz_flag_type', 'tbody', table);
@@ -1085,7 +1085,7 @@
             class="edit_me bz_default_hidden">
         (<a href="#" id="[% field.name FILTER html %]_edit_action">edit</a>)
       </span>
-      <script type="text/javascript">
+      <script>
         hideEditableField('[% field.name FILTER js %]_edit_container', 
                           '[% field.name FILTER js %]_input_area', 
                           '[% field.name FILTER js %]_edit_action', 
@@ -1248,7 +1248,7 @@
 
 [% BLOCK summon_comment_box %]
 <div id="comment_top_hat">
-  <script type="text/javascript">
+  <script>
     function summonCommentBox() {
         var commentbox = document.getElementById('add_comment');
         document.getElementById('comment_top_hat').appendChild(commentbox);

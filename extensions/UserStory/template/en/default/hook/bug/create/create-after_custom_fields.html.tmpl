@@ -17,7 +17,7 @@
     <td colspan="3">
       <div id="user_story_header">
           <span id="user_story_edit">
-            (<a href="javascript:void(0)" id="user_story_edit_action" >edit</a>)
+            (<a href="javascript:void(0)" id="user_story_edit_action">edit</a>)
           </span>
       </div>
       <div id="user_story_edit_container" class="bz_default_hidden">
@@ -32,7 +32,7 @@
             defaultcontent = user_story_default
         %]
       </div>
-      <script type="text/javascript">
+      <script>
         var user_story_exclude_components = [];
         [% FOREACH c = default.user_story_visible.1 %]
           user_story_exclude_components.push('[% c FILTER js %]');

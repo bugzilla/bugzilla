@@ -20,7 +20,7 @@
         <input type="hidden" name="list_of_bugs" value="1">
         <input type="hidden" name="bug_ids" value="[% bug.id FILTER none %]">
         <input type="hidden" name="token" value="[% issue_hash_token(['savedsearch']) FILTER html %]">
-        <select id="lob_action" name="action" >
+        <select id="lob_action" name="action">
           <option value="add">Add</option>
           [% IF user.tags.size %]
             <option value="remove">Remove</option>

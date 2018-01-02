@@ -28,7 +28,7 @@
 <input type="hidden" name="dontchange" value="[% dontchange FILTER html %]">
 <input type="hidden" name="token" value="[% token FILTER html %]">
 
-<script type="text/javascript">
+<script>
   function SetCheckboxes(value) {
       var elements = document.forms.changeform.getElementsByTagName('input'),
           numelements = elements.length,
@@ -309,7 +309,7 @@
 [% IF user.is_insider %]
   <input type="checkbox" name="comment_is_private" value="1"
          id="newcommentprivacy"
-         onClick="updateCommentTagControl(this, form)"/>
+         onClick="updateCommentTagControl(this, form)">
    <label for="newcommentprivacy">
      Make comment private (visible only to members of the
      <strong>[% Param('insidergroup') FILTER html %]</strong> group)
@@ -328,7 +328,7 @@
 
 [% IF groups.size > 0 %]
 
-  <script type="text/javascript">
+  <script>
     function turn_off(myself, id) {
         var other_checkbox = document.getElementById(id);
         if (myself.checked && other_checkbox) {
@@ -443,7 +443,7 @@
   </select>
   </span>
 
-  <script type="text/javascript">
+  <script>
   var close_status_array = new Array("[% closed_status_array.join('", "') FILTER none %]");
     YAHOO.util.Event.addListener('bug_status', "change", showHideStatusItems, '[% "is_duplicate" IF bug.dup_id %]');
     YAHOO.util.Event.onDOMReady( showHideStatusItems );

@@ -32,7 +32,7 @@
 %]
 
 [%# set initial editability of fields such as Reverse Relationship Description %]
-<script type="text/javascript">
+<script>
 YAHOO.util.Event.onDOMReady(function() {onChangeType(document.getElementById('type'))});
 </script>
 
@@ -108,7 +108,7 @@ YAHOO.util.Event.onDOMReady(function() {onChangeType(document.getElementById('ty
       </th>
       <td>
         <input type="text" id="reverse_desc" name="reverse_desc" value="" size="40" disabled="disabled">
-        <br/>
+        <br>
         Use this label for the list of [% terms.bugs %] that link to
         [%+ terms.abug %] with this 
         [%+ field_types.${constants.FIELD_TYPE_BUG_ID} FILTER html %]

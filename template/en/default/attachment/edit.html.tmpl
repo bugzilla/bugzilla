@@ -219,7 +219,7 @@
                   <a href="attachment.cgi?id=[% attachment.id %]">View the attachment on a separate page</a>.</b>
                 </iframe>
               [% END %]
-              <script type="text/javascript">
+              <script>
                 <!--
                 var patchviewerinstalled = 0;
                 var attachment_id = [% attachment.id %];
@@ -261,7 +261,7 @@
       </div>
       <div id="attachment_comments_and_flags">
         [% IF user.id %]
-          <div id="smallCommentFrame" >
+          <div id="smallCommentFrame">
             <label for="comment">Comment (on the [% terms.bug %]):</label>
             [% classNames = 'block' %]
             [% classNames = "$classes bz_private" IF attachment.isprivate %]
@@ -328,7 +328,7 @@
   [% END %]
 </div>
 [% IF can_edit %]
-  <script type="text/javascript">
+  <script>
     <!--
       YAHOO.util.Dom.removeClass( document.body, "no_javascript" );
       toggle_attachment_details_visibility( );

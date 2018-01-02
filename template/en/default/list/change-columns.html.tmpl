@@ -123,7 +123,7 @@
   [% IF saved_search %]
     <p>
       <input type="hidden" name="saved_search"
-             value="[% saved_search.id FILTER html%]" >
+             value="[% saved_search.id FILTER html%]">
       <input type="hidden" name="token"
              value="[% issue_hash_token([saved_search.id, saved_search.name]) FILTER html %]">
       <input type="checkbox" id="save_columns_for_search" checked="checked" 

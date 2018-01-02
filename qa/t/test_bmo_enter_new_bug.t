@@ -289,7 +289,7 @@ sub _check_component {
     $sel->wait_for_page_to_load_ok(WAIT_TIME);
     $sel->title_is("Edit components for which product?");
 
-    $sel->click_ok("//div[\@id='bugzilla-body']//a[normalize-space(text())='$product']");
+    $sel->click_ok("//*[\@id='bugzilla-body']//a[normalize-space(text())='$product']");
     $sel->wait_for_page_to_load_ok(WAIT_TIME);
     $sel->title_is("Select component of product '$product'");
 
@@ -311,7 +311,7 @@ sub _check_component {
     $sel->click_ok("link=components");
     $sel->wait_for_page_to_load_ok(WAIT_TIME);
     $sel->title_is("Edit components for which product?");
-    $sel->click_ok("//div[\@id='bugzilla-body']//a[normalize-space(text())='$product']");
+    $sel->click_ok("//*[\@id='bugzilla-body']//a[normalize-space(text())='$product']");
     $sel->wait_for_page_to_load_ok(WAIT_TIME);
     $sel->title_is("Select component of product '$product'");
     $sel->click_ok("link=Add");
@@ -372,7 +372,7 @@ sub _check_version {
     $sel->click_ok("link=versions");
     $sel->wait_for_page_to_load(WAIT_TIME);
     $sel->title_is("Edit versions for which product?");
-    $sel->click_ok("//div[\@id='bugzilla-body']//a[normalize-space(text())='$product']");
+    $sel->click_ok("//*[\@id='bugzilla-body']//a[normalize-space(text())='$product']");
     $sel->wait_for_page_to_load(WAIT_TIME);
 
     my $text = trim($sel->get_text("bugzilla-body"));

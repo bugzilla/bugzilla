@@ -32,7 +32,7 @@ Please use the <a href="enter_bug.cgi?format=__default__">advanced [% terms.bug 
 <div id="loading" class="hidden">
 Please wait...
 </div>
-<script type="text/javascript">
+<script>
 YAHOO.util.Dom.removeClass('loading', 'hidden');
 </script>
 
@@ -50,7 +50,7 @@ YAHOO.util.Dom.removeClass('loading', 'hidden');
   <a id="advanced_link" href="enter_bug.cgi?format=__default__">Switch to the advanced [% terms.bug %] entry form</a>
 </div>
 
-<script type="text/javascript">
+<script>
 YAHOO.util.Dom.addClass('loading', 'hidden');
 guided.init({ webdev: [% webdev ? "true" : "false" %] });
 guided.currentUser = '[% user.login FILTER js %]';
@@ -69,7 +69,7 @@ dupes.setLabels(
   }
 );
 </script>
-<script type="text/javascript" src="page.cgi?id=guided_products.js[% "&amp;format_forced=1" IF format_forced %]"></script>
+<script src="page.cgi?id=guided_products.js[% "&amp;format_forced=1" IF format_forced %]"></script>
 [% PROCESS global/footer.html.tmpl %]
 
 [%############################################################################%]
@@ -170,7 +170,7 @@ Other Mozilla products which aren't listed here
       onclick="product.select('[% name FILTER js %]')"
       [% END %]>
       <span class="product-item">
-      <img src="extensions/BMO/web/producticons/[% icon FILTER uri %]" class="product-icon" >
+      <img src="extensions/BMO/web/producticons/[% icon FILTER uri %]" class="product-icon">
       <a href="javascript:void(0)">[% caption FILTER html %]</a>
       <p>
         [% IF content %]
@@ -236,9 +236,8 @@ Other Mozilla products which aren't listed here
   <tr>
     <td>
       <div class="exit_img">
-        <a href="https://support.mozilla.org/"
-        ><img src="extensions/GuidedBugEntry/web/images/support.png" width="32" height="32"
-        ></a>
+        <a href="https://support.mozilla.org/">
+        <img src="extensions/GuidedBugEntry/web/images/support.png" width="32" height="32"></a>
       </div>
     </td>
     <td class="exit_text">
@@ -249,9 +248,9 @@ Other Mozilla products which aren't listed here
   <tr>
     <td>
       <div class="exit_img">
-        <a href="https://input.mozilla.org/feedback/"
-        ><img src="extensions/GuidedBugEntry/web/images/input.png" width="32" height="32"
-        ></a>
+        <a href="https://input.mozilla.org/feedback/">
+        <img src="extensions/GuidedBugEntry/web/images/input.png" width="32" height="32">
+        </a>
       </div>
     </td>
     <td class="exit_text">

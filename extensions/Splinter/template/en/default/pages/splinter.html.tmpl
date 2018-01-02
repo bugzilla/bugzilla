@@ -37,7 +37,7 @@
 
 [% can_edit = 0 %]
 
-<script type="text/javascript">
+<script>
   Splinter.configBase = '[% Bugzilla.splinter_review_base FILTER js %]';
   Splinter.configBugUrl = '[% urlbase FILTER js %]';
   Splinter.configHaveExtension = true;
@@ -151,8 +151,8 @@
 
 <div id="enterBug" style="display: none;">
   [% terms.Bug %] to review:
-  <input id="enterBugInput" />
-  <input id="enterBugGo" type="button" value="Go" />
+  <input id="enterBugInput">
+  <input id="enterBugGo" type="button" value="Go">
   <div id="chooseReview" style="display: none;">
     Drafts and published reviews:
     <div id="chooseReviewTable"></div>
@@ -248,8 +248,8 @@
         <span id="attachmentStatusSpan">Patch Status:
           <select id="attachmentStatus"> </select>
         </span>
-        <input id="publishButton" type="button" value="Publish" />
-        <input id="cancelButton" type="button" value="Cancel" />
+        <input id="publishButton" type="button" value="Publish">
+        <input id="cancelButton" type="button" value="Cancel">
       </div>
       <div class="clear"></div>
     </div>

@@ -39,7 +39,7 @@
   </button>
 [% END %]
 
-<script [% script_nonce FILTER none %] type="text/javascript">
+<script [% script_nonce FILTER none %]>
   $('#rep_hw_os').click(function() {
     $('#rep_platform').val('[% hw_os.0 FILTER js FILTER html %]');
     $('#op_sys').val('[% hw_os.1 FILTER js FILTER html %]');

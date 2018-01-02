@@ -130,11 +130,11 @@
     <title>[% title %]</title>
 
     [% IF Param('utf8') %]
-      <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+      <meta charset="UTF-8">
     [% END %]
 
     [% IF no_index %]
-      <meta name="robots" content="noindex" />
+      <meta name="robots" content="noindex">
     [% END %]
 
     [% PROCESS "global/site-navigation.html.tmpl" %]
@@ -150,7 +150,7 @@
     [% END %]
 
     [% IF style %]
-      <style type="text/css">
+      <style>
         [% style %]
       </style>
     [% END %]
@@ -376,7 +376,7 @@
   </aside>
 [% END %]
 
-<div id="bugzilla-body">
+<main id="bugzilla-body">
 
 [%# in most cases the "header" variable provides redundant information, however
   # there are exceptions where not displaying this text is problematic. %]
@@ -399,6 +399,6 @@
 [% END %]
 
 [% BLOCK format_js_link %]
-  <script [% script_nonce FILTER none %] type="text/javascript" src="[% asset_url FILTER version FILTER html %]"></script>
+  <script [% script_nonce FILTER none %] src="[% asset_url FILTER version FILTER html %]"></script>
   [% "\n" %]
 [% END %]

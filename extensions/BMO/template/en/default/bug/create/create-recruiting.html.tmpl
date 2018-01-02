@@ -90,7 +90,7 @@ function jobDescToggle(what) {
     <input type="hidden" name="created-format" value="recruiting">
     <input type="hidden" name="token" value="[% token FILTER html %]">
     <input type="hidden" id="description" name="description" value="Job Description">
-    <input type="hidden" name="contenttypemethod" value="autodetect" />
+    <input type="hidden" name="contenttypemethod" value="autodetect">
     [% IF user.in_group('canconfirm') %]
       <input type="hidden" name="bug_status" value="NEW">
     [% END %]
@@ -125,7 +125,7 @@ function jobDescToggle(what) {
           <label class="required" for="hiring_manager_name">Hiring Manager Name:</label>
         </th>
         <td>
-          <input required name="hiring_manager_name" id="hiring_manager_name" size="60" >
+          <input required name="hiring_manager_name" id="hiring_manager_name" size="60">
         </td>
       </tr>
 
@@ -134,7 +134,7 @@ function jobDescToggle(what) {
           <label class="required" for="hiring_manager_workday_title">Hiring Manager Workday Title:</label>
         </th>
         <td>
-          <input required name="hiring_manager_workday_title" id="hiring_manager_workday_title" size="60" >
+          <input required name="hiring_manager_workday_title" id="hiring_manager_workday_title" size="60">
         </td>
       </tr>
 
@@ -143,7 +143,7 @@ function jobDescToggle(what) {
           <label class="required" for="director_authority">Director Authority:</label>
         </th>
         <td>
-          <input required name="director_authority" id="director_authority" size="60" >
+          <input required name="director_authority" id="director_authority" size="60">
         </td>
       </tr>
 

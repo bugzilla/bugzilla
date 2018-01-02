@@ -125,19 +125,19 @@ $(document).ready(function() {
     <input type="hidden" name="created-format" value="intern">
     <input type="hidden" name="token" value="[% token FILTER html %]">
     <input type="hidden" id="description" name="description" value="Job Description">
-    <input type="hidden" name="contenttypemethod" value="autodetect" />
+    <input type="hidden" name="contenttypemethod" value="autodetect">
     [% IF user.in_group('canconfirm') %]
       <input type="hidden" name="bug_status" value="NEW">
     [% END %]
 
     <div class="row">
       <label class="required" for="hiring_manager_name">Hiring Manager Name</label>
-      <input required name="hiring_manager_name" id="hiring_manager_name" size="60" >
+      <input required name="hiring_manager_name" id="hiring_manager_name" size="60">
     </div>
 
     <div class="row">
       <label class="required" for="team_name">Team</label>
-      <input required name="team_name" id="team_name" size="60" >
+      <input required name="team_name" id="team_name" size="60">
     </div>
 
     <div class="row">
@@ -258,8 +258,7 @@ $(document).ready(function() {
       </label>
       <textarea required name="job_description"
                 id="job_description" cols="80"  rows="10"
-                placeholder="Please add link to Mana or copy and paste a JD. (if you are looking for multiple types interns please include a job description for each)"
-      ></textarea>
+                placeholder="Please add link to Mana or copy and paste a JD. (if you are looking for multiple types interns please include a job description for each)"></textarea>
     </div>
 
     <div class="row">

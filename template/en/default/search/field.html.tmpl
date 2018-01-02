@@ -62,7 +62,7 @@
            [% IF onchange %] onchange="[% onchange FILTER html %]"[% END %]
            value="[% value FILTER html %]"
            data-values="[% field.name FILTER html %]">
-    <script type="text/javascript">
+    <script>
       if (typeof BUGZILLA.autocomplete_values === 'undefined')
         BUGZILLA.autocomplete_values = [];
       BUGZILLA.autocomplete_values['[% field.name FILTER js %]'] = [
@@ -99,7 +99,7 @@
     <small>(YYYY-MM-DD or relative dates)</small>
     
     <span id="con_calendar_[% field.name FILTER html %]to"></span>
-    <script type="text/javascript">
+    <script>
       createCalendar('[% field.name FILTER js %]');
       createCalendar('[% field.name FILTER js %]to');
     </script>

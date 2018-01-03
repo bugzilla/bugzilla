@@ -74,7 +74,6 @@ sub feed_query {
 
     # Process each story
     foreach my $story_data (@$transactions) {
-        my $skip = 0;
         my $story_id    = $story_data->{id};
         my $story_phid  = $story_data->{phid};
         my $author_phid = $story_data->{authorPHID};
@@ -89,30 +88,41 @@ sub feed_query {
 
         # Only interested in changes to revisions for now.
         if ($object_phid !~ /^PHID-DREV/) {
-            $self->logger->debug("SKIP: Not a revision change");
-            $skip = 1;
+            $self->logger->debug("SKIPPING: Not a revision change");
+            $self->save_feed_last_id($story_id);
+            next;
         }
 
         # Skip changes done by phab-bot user
         my $phab_users = get_phab_bmo_ids({ phids => [$author_phid] });
-        if (!$skip && @$phab_users) {
+        if (@$phab_users) {
             my $user = Bugzilla::User->new({ id => $phab_users->[0]->{id}, cache => 1 });
-            $skip = 1 if $user->login eq PHAB_AUTOMATION_USER;
+            if ($user->login eq PHAB_AUTOMATION_USER) {
+                $self->logger->debug("SKIPPING: Change made by phabricator user");
+                $self->save_feed_last_id($story_id);
+                next;
+            }
         }
 
-        if (!$skip) {
-            my $revision = Bugzilla::Extension::PhabBugz::Revision->new({ phids => [$object_phid] });
-            $self->process_revision_change($revision, $story_text);
-        }
-        else {
-            $self->logger->info('SKIPPING');
+        my $revision = Bugzilla::Extension::PhabBugz::Revision->new({ phids => [$object_phid] });
+
+        if (!$revision->bug_id) {
+            $self->logger->debug("SKIPPING: No bug associated with revision");
+            $self->save_feed_last_id($story_id);
+            next;
         }
 
-        # Store the largest last key so we can start from there in the next session
-        $self->logger->debug("UPDATING FEED_LAST_ID: $story_id");
-        $dbh->do("REPLACE INTO phabbugz (name, value) VALUES ('feed_last_id', ?)",
-                 undef, $story_id);
+        $self->process_revision_change($revision, $story_text);
+        $self->save_feed_last_id($story_id);
     }
+}
+
+sub save_feed_last_id {
+    my ($self, $story_id) = @_;
+    # Store the largest last key so we can start from there in the next session
+    $self->logger->debug("UPDATING FEED_LAST_ID: $story_id");
+    Bugzilla->dbh->do("REPLACE INTO phabbugz (name, value) VALUES ('feed_last_id', ?)",
+                      undef, $story_id);
 }
 
 sub process_revision_change {

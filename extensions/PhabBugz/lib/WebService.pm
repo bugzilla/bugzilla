@@ -75,8 +75,8 @@ sub revision {
 
     # Obtain more information about the revision from Phabricator
     my $revision_id = $params->{revision};
-    my @revisions = get_revisions_by_ids([$revision_id]);
-    my $revision = $revisions[0];
+    my $revisions = get_revisions_by_ids([$revision_id]);
+    my $revision = $revisions->[0];
 
     my $revision_phid  = $revision->{phid};
     my $revision_title = $revision->{fields}{title} || 'Unknown Description';
@@ -96,7 +96,7 @@ sub revision {
         # If bug privacy groups do not have any matching synchronized groups,
         # then leave revision private and it will have be dealt with manually.
         if (!@set_groups) {
-            add_security_sync_comments(\@revisions, $bug);
+            add_security_sync_comments($revisions, $bug);
         }
 
         my $policy_phid = create_private_revision_policy($bug, \@set_groups);

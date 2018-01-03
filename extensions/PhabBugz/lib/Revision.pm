@@ -20,6 +20,13 @@ use Bugzilla::Extension::PhabBugz::Util qw(
 );
 
 use Types::Standard -all;
+use Type::Utils;
+
+my $EmptyStr = declare "EmptyStr",
+    as Str,
+    where { length($_) == 0 },
+    inline_as { $_[0]->parent->inline_check($_) . " && length($_) == 0" },
+    message { "String is not empty" };
 
 my $SearchResult = Dict[
     id     => Int,
@@ -35,7 +42,7 @@ my $SearchResult = Dict[
         repositoryPHID    => Maybe[Str],
         status            => HashRef,
         summary           => Str,
-        "bugzilla.bug-id" => Int,
+        "bugzilla.bug-id" => Int | $EmptyStr,
     ],
     attachments => Dict[
         reviewers => Dict[
@@ -49,8 +56,8 @@ my $SearchResult = Dict[
             ],
         ],
         subscribers => Dict[
-            subscriberPHIDs => ArrayRef[Str],
-            subscriberCount => Int,
+            subscriberPHIDs    => ArrayRef[Str],
+            subscriberCount    => Int,
             viewerIsSubscribed => Bool,
         ],
         projects => Dict[ projectPHIDs => ArrayRef[Str] ],
@@ -87,7 +94,7 @@ sub _load {
 
     my $result = request('differential.revision.search', $data);
     if (exists $result->{result}{data} && @{ $result->{result}{data} }) {
-        return $result->{result}->{data}->[0];
+        $result = $result->{result}->{data}->[0];
     }
 
     return $result;

@@ -317,7 +317,7 @@ sub github_secret {
     my $cache = $class->request_cache;
     my $cgi   = $class->cgi;
 
-    $cache->{github_secret} //= $cgi->cookie('github_secret') // generate_random_password(16);
+    $cache->{github_secret} //= $cgi->cookie('github_secret') // generate_random_password(256);
 
     return $cache->{github_secret};
 }
@@ -853,7 +853,7 @@ sub check_rate_limit {
                 $action = 'ignore';
             }
             my $limit = join("/", @$limit);
-            Bugzilla->audit("[rate_limit] action=$action, ip=$ip, limit=$limit");
+            Bugzilla->audit("[rate_limit] action=$action, ip=$ip, limit=$limit, name=$name");
             ThrowUserError("rate_limit") if $action eq 'block';
         }
     }

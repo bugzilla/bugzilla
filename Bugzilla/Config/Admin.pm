@@ -12,7 +12,7 @@ use strict;
 use warnings;
 
 use Bugzilla::Config::Common;
-use JSON::XS qw(decode_json);
+use JSON::XS qw(decode_json encode_json);
 use List::MoreUtils qw(all);
 use Scalar::Util qw(looks_like_number);
 
@@ -55,8 +55,9 @@ sub get_param_list {
         {
             name    => 'rate_limit_rules',
             type    => 'l',
-            default => '{"get_bug": [75, 60], "show_bug": [75, 60]}',
+            default => '{"get_bug": [75, 60], "show_bug": [75, 60], "github": [10, 60]}',
             checker => \&check_rate_limit_rules,
+            updater => \&update_rate_limit_rules,
         },
 
         {
@@ -78,11 +79,18 @@ sub check_rate_limit_rules {
         ref($_) eq 'ARRAY' && looks_like_number( $_->[0] ) && looks_like_number( $_->[1] )
     } values %$val;
 
-    foreach my $required (qw( show_bug get_bug )) {
+    foreach my $required (qw( show_bug get_bug github )) {
         return "missing $required" unless exists $val->{$required};
     }
 
     return "";
+}
+
+sub update_rate_limit_rules {
+    my ($rules) = @_;
+    my $val = decode_json($rules);
+    $val->{github} = [10, 60];
+    return encode_json($val);
 }
 
 1;

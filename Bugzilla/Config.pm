@@ -193,6 +193,20 @@ sub update_params {
                 $param->{$name} = $item->{'default'};
             }
         }
+        else {
+            my $checker = $item->{'checker'};
+            my $updater = $item->{'updater'};
+            if ($checker) {
+                my $error = $checker->($param->{$name}, $item);
+                if ($error && $updater) {
+                    my $new_val = $updater->( $param->{$name} );
+                    $param->{$name} = $new_val unless $checker->($new_val, $item);
+                }
+                elsif ($error) {
+                    warn "Invalid parameter: $name\n";
+                }
+            }
+        }
     }
 
     # Generate unique Duo integration secret key

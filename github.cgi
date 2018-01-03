@@ -13,7 +13,7 @@ use warnings;
 use lib qw(. lib local/lib/perl5);
 
 use Bugzilla;
-use Bugzilla::Util ();
+use Bugzilla::Util qw(remote_ip);
 use Bugzilla::Error;
 use Bugzilla::Constants;
 use Bugzilla::Token qw( issue_short_lived_session_token
@@ -37,8 +37,10 @@ if (lc($cgi->request_method) eq 'post') {
     my $github_secret  = $cgi->param('github_secret') or ThrowCodeError("github_invalid_request", { reason => 'invalid secret' });
     my $github_secret2 = Bugzilla->github_secret      or ThrowCodeError("github_invalid_request", { reason => 'invalid secret' });
 
-    ThrowCodeError("github_invalid_request", { reason => 'invalid secret' })
-      unless $github_secret eq $github_secret2;
+    if ($github_secret ne $github_secret2) {
+        Bugzilla->check_rate_limit('github', remote_ip());
+        ThrowCodeError("github_invalid_request", { reason => 'invalid secret' });
+    }
 
     ThrowCodeError("github_invalid_target", { target_uri => $target_uri })
       unless $target_uri =~ /^\Q$urlbase\E/;
@@ -71,13 +73,18 @@ elsif (lc($cgi->request_method) eq 'get') {
         exit;
     }
 
-    ThrowCodeError("github_invalid_request", { reason => 'invalid state param' })
-      unless $state_param eq $state_cookie;
+    my $invalid_request = $state_param ne $state_cookie;
 
-    my $state_data = get_token_extra_data($state_param);
-    ThrowCodeError("github_invalid_request", { reason => 'invalid state param' } )
-      unless $state_data && $state_data->{type};
+    my $state_data;
+    unless ($invalid_request) {
+        $state_data = get_token_extra_data($state_param);
+        $invalid_request = !( $state_data && $state_data->{type} && $state_data->{type} =~ /^github_(?:login|email)$/  );
+    }
 
+    if ($invalid_request) {
+        Bugzilla->check_rate_limit('github', remote_ip());
+        ThrowCodeError("github_invalid_request", { reason => 'invalid state param' } )
+    }
 
     $cgi->remove_cookie('github_state');
     delete_token($state_param);
@@ -89,9 +96,6 @@ elsif (lc($cgi->request_method) eq 'get') {
     elsif ($state_data->{type} eq 'github_email') {
         Bugzilla->request_cache->{github_action} = 'email';
         Bugzilla->request_cache->{github_emails} = $state_data->{emails};
-    }
-    else {
-        ThrowCodeError("github_invalid_request", { reason => "invalid state param" })
     }
     my $user = Bugzilla->login(LOGIN_REQUIRED);
 

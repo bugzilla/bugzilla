@@ -234,6 +234,7 @@
   # 'bannerhtml'
   #%]
 
+<div id="wrapper">
 <header id="header" role="banner">
   <div class="inner">
     <h1 id="header-title" class="title"><a href="./" title="Go to home page">[% terms.Bugzilla %]</a></h1>
@@ -376,7 +377,8 @@
   </aside>
 [% END %]
 
-<main id="bugzilla-body">
+<main id="bugzilla-body" tabindex="-1">
+<div id="main-inner">
 
 [%# in most cases the "header" variable provides redundant information, however
   # there are exceptions where not displaying this text is problematic. %]

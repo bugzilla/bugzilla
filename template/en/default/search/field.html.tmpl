@@ -43,6 +43,7 @@
     %]    
     <input name="[% field.name FILTER html %]" 
            id="[% field.name FILTER html %]" size="40"
+           [% IF autofocus %] autofocus[% END %]
            [% IF onchange %] onchange="[% onchange FILTER html %]"[% END %]
            value="[% value FILTER html %]">              
   [% CASE constants.FIELD_TYPE_KEYWORDS %]

@@ -826,10 +826,10 @@ body.platform-Win32 .comment-text, body.platform-Win64 .comment-text {
 
 /* theme */
 
-#bugzilla-body {
+#main-inner {
+    margin: 15px auto;
     max-width: 1024px;
     min-width: 800px;
-    width: 100%;
 }
 
 .vcard {

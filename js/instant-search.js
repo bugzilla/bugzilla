@@ -15,7 +15,6 @@ Event.onDOMReady(function() {
   } else {
     YAHOO.bugzilla.instantSearch.reset();
   }
-  Dom.get('content').focus();
 });
 
 YAHOO.bugzilla.instantSearch = {

@@ -36,10 +36,13 @@
 
 /* global (begin) */
     body {
+        position: absolute;
+        margin: 0;
+        width: 100%;
+        height: 100%;
         font-family: sans-serif;
         color: #000;
         background: #fff url("global/body-back.gif") repeat-x;
-        scroll-behavior: smooth;
     }
     body, td, th, input {
         font-family: Verdana, sans-serif;
@@ -51,23 +54,23 @@
     }
 /* global (end) */
 
+/* wrapper (begin) */
+    #wrapper {
+        display: flex;
+        flex-direction: column;
+        position: absolute;
+        width: 100%;
+        height: 100%;
+    }
+/* wrapper (end) */
+
 /* header (begin) */
     #header {
-        position: absolute;
-        top: 0;
-        left: 0;
-        z-index: 1000;
-        width: 100%;
+        flex: none;
         border-bottom: 1px solid rgba(0, 0, 0, 0.2);
         box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
         color: #555;
         background-color: #FFF;
-    }
-
-    @media only screen and (min-device-width: 1024px) {
-        #header {
-            position: fixed; /* Make the header fixed on desktop */
-        }
     }
 
     #header a,
@@ -398,6 +401,7 @@
         position: absolute;
         top: 48px;
         right: 0;
+        z-index: 100;
         display: flex;
         align-items: center;
         padding: 8px;
@@ -1127,6 +1131,7 @@ hr {
 }
 
 #mfa-warning {
+    flex: none;
     margin: 0 -15px;
     padding: 10px 15px;
     color: #FFF;
@@ -1134,10 +1139,17 @@ hr {
 }
 
 #bugzilla-body {
-    background: none;
-    border: none;
-    color: #404040;
-    margin: 15px auto 0;
+    flex: auto;
+    position: relative;
+    outline: none;
+    padding: 0 15px;
+    overflow-x: hidden;
+    overflow-y: scroll;
+    scroll-behavior: smooth;
+}
+
+#main-inner {
+    margin: 15px 0;
 }
 
 #bugzilla-body th {
@@ -1623,11 +1635,6 @@ table.tabs {
 
 #summary_field.search_field_row input {
     padding-bottom: 6px;
-}
-
-body {
-    margin: 0;
-    padding: 50px 15px 15px;
 }
 
 #header .btn, #header .txt {

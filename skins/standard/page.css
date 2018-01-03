@@ -20,11 +20,8 @@
 /* This CSS is used by various informational pages in the
    template/en/default/pages/ directory. */
 
-#bugzilla-body {
-    padding: 0 1em;
-}
-
-#bugzilla-body > * {
+#main-inner {
+    margin: 15px auto;
     /* People have an easier time reading narrower columns of text. */
     max-width: 45em;
 }

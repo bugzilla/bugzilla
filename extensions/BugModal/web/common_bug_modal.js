@@ -141,7 +141,7 @@ $(function() {
     $('#top-btn')
         .click(function(event) {
             event.preventDefault();
-            $.scrollTo($('body'));
+            $.scrollTo($('#main-inner'));
         });
 
     // bottom btn
@@ -1348,31 +1348,26 @@ $(function() {
             return -1;
         },
 
-        // Bring an element into view, leaving space for the outline.
-        // If passed a string, it will be treated as an id - the page will scroll
-        // unanimated and the url will be added to the browser's history.
-        // If passed an element, an smooth scroll will take place and no entry
-        // will be added to the history.
+        // Bring an element into view, leaving space for the outline. If passed
+        // a string, it will be treated as an id - the page will scroll and the
+        // url will be added to the browser's history. If passed an element, no
+        // entry will be added to the history.
         scrollTo: function(target, complete) {
+            let $target;
+
             if (typeof target === 'string') {
-                var el = $('#' + target);
+                $target = $('#' + target);
                 window.location.hash = target;
-                var $html = $('html');
-                if (Math.abs($html.scrollTop() - el.offset().top) <= 1) {
-                    $html.scrollTop($html.scrollTop() - 10);
-                }
-                $html.scrollLeft(0);
+            } else {
+                $target = target;
             }
-            else {
-                var offset = target.offset();
-                $('html')
-                    .animate({
-                            scrollTop: offset.top - 20,
-                            scrollLeft: 0
-                        },
-                        200,
-                        complete
-                    );
+
+            if ($target.length) {
+                $('main').scrollTop(Math.round($target.position().top) - 20);
+            }
+
+            if (complete) {
+                complete();
             }
         }
 

@@ -141,11 +141,8 @@ TUI_hide_default('information_query');
          value = default.short_desc.0
          type_selected = default.short_desc_type.0 
          accesskey = "s"
+         autofocus = 1
          %]
-      <script> <!--
-          document.forms[queryform].short_desc.focus(); 
-      // -->
-      </script>
 
       [% IF button_name %]
         <input type="submit" id="[% button_name FILTER css_class_quote %]_top"

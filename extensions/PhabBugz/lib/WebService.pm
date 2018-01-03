@@ -183,7 +183,7 @@ sub update_reviewer_statuses {
         my (@denied_flags, @new_flags, @removed_flags, %accepted_done, $flag_type);
         foreach my $flag (@{ $attachment->flags }) {
             next if $flag->type->name ne 'review';
-            $flag_type = $flag->type;
+            $flag_type = $flag->type if $flag->type->is_active;
             if (any { $flag->setter->id == $_ } @$denied_user_ids) {
                 push(@denied_flags, { id => $flag->id, setter => $flag->setter, status => 'X' });
             }
@@ -196,7 +196,7 @@ sub update_reviewer_statuses {
             }
         }
 
-        $flag_type ||= first { $_->name eq 'review' } @{ $attachment->flag_types };
+        $flag_type ||= first { $_->name eq 'review' && $_->is_active } @{ $attachment->flag_types };
 
         # Create new flags
         foreach my $user_id (@$accepted_user_ids) {

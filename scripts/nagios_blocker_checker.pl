@@ -17,6 +17,7 @@ use Bugzilla::Product;
 use Bugzilla::User;
 use Bugzilla::Sentry;
 use Getopt::Long;
+use English qw(-no_match_vars);
 
 Bugzilla->usage_mode(USAGE_MODE_CMDLINE);
 Bugzilla->error_mode(ERROR_MODE_DIE);
@@ -47,7 +48,7 @@ my $config = {
     max_runtime     => 300,
 };
 
-my $usage = <<EOF;
+my $usage = <<"EOF";
 FILTERS
 
   the filter determines which bugs to check, either by assignee, product or the
@@ -101,7 +102,7 @@ EXAMPLES
     --severity any --any_warn 24 --any_alarm 24
 EOF
 
-die($usage) unless GetOptions(
+GetOptions(
     'assignee=s'        => \$config->{assignee},
     'product=s'         => \$config->{product},
     'component=s'       => \$config->{component},
@@ -116,7 +117,8 @@ die($usage) unless GetOptions(
     'any_warn=i'        => \$config->{any_warn},
     'max_runtime=i'     => \$config->{max_runtime},
     'help|?'            => \$config->{help},
-);
+) or die $usage;
+
 $config->{assignee} = $ARGV[0] if !$config->{assignee} && @ARGV;
 die $usage if
     $config->{help}
@@ -138,7 +140,7 @@ try {
     # if the DB rotates out from under it.  Since a long-running
     # nagios check does no good, we terminate if we stick around too long.
     local $SIG{ALRM} = sub {
-        my $message = "$0 ran for longer than ".$config->{max_runtime}." seconds and was auto-terminated.";
+        my $message = "$PROGRAM_NAME ran for longer than $config->{max_runtime} seconds and was auto-terminated.";
         sentry_handle_error('error', $message);
         die "$message\n";
     };
@@ -166,16 +168,15 @@ try {
     }
 
     if (!$any_severity) {
-        $where .= ' AND bug_severity IN (' .
-            join(',', map { $dbh->quote($_) } split(/,/, $config->{severity})) . ')';
+        $where .= ' AND bug_severity IN (' . join',', map { $dbh->quote($_) } split(/,/, $config->{severity}) . ')';
     }
 
-    my $sql = <<"    EOF";
+    my $sql = <<"EOF";
         SELECT bug_id, bug_severity, UNIX_TIMESTAMP(bugs.creation_ts) AS ts
           FROM bugs
          WHERE $where
                AND COALESCE(resolution, '') = ''
-    EOF
+EOF
 
     my $bugs = {
         'major'     => [],
@@ -202,10 +203,10 @@ try {
         }
     }
 
-    print "bugs " . NAGIOS_NAMES->[$current_state] . ": ";
+    print 'bugs ' . NAGIOS_NAMES->[$current_state] . ': ';
     if ($current_state == NAGIOS_OK) {
         if ($config->{severity} eq 'any') {
-            print "No unassigned bugs found.";
+            print 'No unassigned bugs found.';
         } else {
             print "No $config->{severity} bugs found."
         }
@@ -214,14 +215,14 @@ try {
         my $list = $bugs->{$severity};
         if (@$list) {
             printf
-                "%s %s %s found https://bugzil.la/" . join(',', @$list) . " ",
+                '%s %s %s found https://bugzil.la/' . join(',', @$list) . ' ',
                 scalar(@$list),
                 ($any_severity ? 'unassigned' : $severity),
                 (scalar(@$list) == 1 ? 'bug' : 'bugs');
         }
     }
     print "\n";
-    alarm(0);
+    alarm 0;
 } catch {
     # Anything that trips an error, we're calling nagios-critical
     $current_state = NAGIOS_CRITICAL;
@@ -229,7 +230,7 @@ try {
     # Templates often have linebreaks ; nagios really prefers a status
     # to be on one line.  Here we strip out breaks, and try to make sure
     # there's spacing in place when we crunch those lines together.
-    s#\s?\r?\n# #g;
+    s/\s?\r?\n/ /g;
     #
     # Now, just print the status we got out.
     # Keep in mind, depending on when 'try' blew out, we may have

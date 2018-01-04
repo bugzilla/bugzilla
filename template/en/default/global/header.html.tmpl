@@ -94,6 +94,10 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
+    [% IF Param('utf8') %]
+      <meta charset="UTF-8">
+    [% END %]
+
     [%- js_BUGZILLA = {
             param => {
                 maxusermatches => Param('maxusermatches'),
@@ -128,10 +132,6 @@
     <meta name="bugzilla-global" content="dummy"
         id="bugzilla-global" data-bugzilla="[% json_encode(js_BUGZILLA) FILTER html %]">
     <title>[% title %]</title>
-
-    [% IF Param('utf8') %]
-      <meta charset="UTF-8">
-    [% END %]
 
     [% IF no_index %]
       <meta name="robots" content="noindex">

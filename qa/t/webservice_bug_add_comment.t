@@ -48,7 +48,7 @@ my @tests = (
     },
     { user  => 'unprivileged',
       args  => { id => INVALID_BUG_ID, comment => TEST_COMMENT },
-      error => "not a valid bug number",
+      error => "It does not seem like bug number",
       test  => 'Passing invalid bug id returns error "Invalid Bug ID"',
     },
     { user  => 'unprivileged',

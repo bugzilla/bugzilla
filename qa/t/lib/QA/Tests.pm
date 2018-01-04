@@ -65,7 +65,7 @@ sub bug_tests {
       test => 'Logged-out user can access a public bug.',
     },
     { args  => { ids => [INVALID_BUG_ID] },
-      error => "not a valid bug number",
+      error => "It does not seem like bug number",
       test  => 'Passing invalid bug id returns error "Invalid Bug ID"',
     },
     { args  => { ids => [undef] },

@@ -522,7 +522,7 @@ sub invalid_values {
 
         see_also => [
             { value => { add => [random_string(20)] },
-              error => 'is not a valid bug number nor an alias',
+              error => 'It does not seem like bug number nor an alias to a bug.',
               test  => 'random string fails in see_also' },
             { value => { add => ['http://landfill.bugzilla.org/'] },
               error => 'See Also URLs should point to one of',

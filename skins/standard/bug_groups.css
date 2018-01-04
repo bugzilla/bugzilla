@@ -30,7 +30,6 @@ body[class*=core-security] {
 }
 
 body[class*=bz_group_] {
-    background-color: inherit;
     background-image: url(../../images/noise.png), -moz-linear-gradient(#d7d7ff, #f0f0ff 400px);
     background-image: url(../../images/noise.png), -webkit-linear-gradient(#d7d7ff, #f0f0ff 400px);
     background-image: url(../../images/noise.png), linear-gradient(#d7d7ff, #f0f0ff 400px);

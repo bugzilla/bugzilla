@@ -31,7 +31,6 @@ use File::Path;
 use File::Basename;
 use File::Copy qw(move);
 use File::Spec;
-use File::Slurp;
 use IO::File;
 use POSIX ();
 
@@ -536,7 +535,7 @@ sub update_filesystem {
 
     # Remove old assets htaccess file to force recreation with correct values.
     if (-e "$assetsdir/.htaccess") {
-        if (read_file("$assetsdir/.htaccess") =~ /<FilesMatch \\\.css\$>/) {
+        if (read_text("$assetsdir/.htaccess") =~ /<FilesMatch \\\.css\$>/) {
             unlink("$assetsdir/.htaccess");
         }
     }

@@ -85,7 +85,6 @@ Install the following mandatory modules with:
 * URI
 * List-MoreUtils
 * Math-Random-ISAAC
-* File-Slurp
 * JSON-XS
 * Win32
 * Win32-API

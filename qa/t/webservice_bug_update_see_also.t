@@ -34,7 +34,7 @@ push(@tests, (
 
     { user  => 'admin',
       args  => { ids => ['public_bug'], add => ['asdfasdfasdf'] },
-      error => 'asdf',
+      error => 'ASDF',
       test  => 'Admin cannot add an invalid URL',
     },
     { user => 'admin',

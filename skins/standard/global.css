@@ -1143,8 +1143,7 @@ hr {
     position: relative;
     outline: none;
     padding: 0 15px;
-    overflow-x: hidden;
-    overflow-y: scroll;
+    overflow: auto;
     scroll-behavior: smooth;
 }
 

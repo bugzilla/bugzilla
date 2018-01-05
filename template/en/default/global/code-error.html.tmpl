@@ -520,7 +520,7 @@
 [% END %]
 
 [% UNLESS header_done %]
-  [% PROCESS global/header.html.tmpl no_index=1 %]
+  [% PROCESS global/header.html.tmpl robots = 'noindex' %]
 [% END %]
 
 [% PROCESS global/docslinks.html.tmpl

@@ -84,7 +84,7 @@ sub feed_query {
         $self->logger->debug("STORY PHID: $story_phid");
         $self->logger->debug("AUTHOR PHID: $author_phid");
         $self->logger->debug("OBJECT PHID: $object_phid");
-        $self->logger->debug("STORY TEXT: $story_text");
+        $self->logger->info("STORY TEXT: $story_text");
 
         # Only interested in changes to revisions for now.
         if ($object_phid !~ /^PHID-DREV/) {
@@ -107,7 +107,17 @@ sub feed_query {
         my $revision = Bugzilla::Extension::PhabBugz::Revision->new({ phids => [$object_phid] });
 
         if (!$revision->bug_id) {
-            $self->logger->debug("SKIPPING: No bug associated with revision");
+            if ($story_text =~ /\s+created\s+D\d+/) {
+                # If new revision and bug id was omitted, make revision public
+                $self->logger->debug("No bug associated with new revision. Marking public.");
+                $revision->set_policy('view', 'public');
+                $revision->set_policy('edit', 'users');
+                $revision->update();
+                $self->logger->info("SUCCESS");
+            }
+            else {
+                $self->logger->debug("SKIPPING: No bug associated with revision change");
+            }
             $self->save_feed_last_id($story_id);
             next;
         }

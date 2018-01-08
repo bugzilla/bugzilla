@@ -311,6 +311,94 @@
         background-color: transparent;
     }
 
+    #header .dropdown-panel {
+        padding: 0 !important;
+        width: 400px;
+        max-width: none !important;
+    }
+
+    #header .dropdown-panel header {
+        border-bottom: 1px solid #CCC;
+    }
+
+    #header .dropdown-panel h2 {
+        margin: 0;
+        padding: 8px 12px;
+        font-size: 14px;
+        line-height: 100%;
+        font-weight: normal;
+    }
+
+    #header .dropdown-panel ul {
+        overflow-y: auto;
+        margin: 0;
+        padding: 0;
+        max-height: 480px;
+        list-style-type: none;
+    }
+
+    #header .dropdown-panel li:not(:last-child) {
+        border-bottom: 1px solid #CCC;
+    }
+
+    #header .dropdown-panel li a {
+        padding: 12px !important;
+    }
+
+    #header .dropdown-panel li a:hover {
+        background-color: rgba(0, 0, 0, .05) !important;
+    }
+
+    #header .dropdown-panel li a * {
+        pointer-events: none;
+    }
+
+    #header .dropdown-panel .notifications img {
+        float: left;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+    }
+
+    #header .dropdown-panel .notifications img ~ * {
+        display: block;
+        margin-left: 52px;
+    }
+
+    #header .dropdown-panel .notifications label {
+        overflow: hidden;
+        max-height: 40px;
+    }
+
+    #header .dropdown-panel .notifications strong {
+        font-weight: 600;
+    }
+
+    #header .dropdown-panel .notifications time {
+        font-size: 12px;
+        color: #999;
+    }
+
+    #header .dropdown-panel .loading,
+    #header .dropdown-panel .empty {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 240px;
+        line-height: 150%;
+        text-align: center;
+    }
+
+    #header .dropdown-panel footer {
+        border-top: 1px solid #CCC;
+        text-align: center;
+    }
+
+    #header .dropdown-panel footer a {
+        padding: 8px 16px !important;
+        line-height: 100% !important;
+    }
+
     #header-search h2 {
         position: absolute;
         left: -99999px;

@@ -6,18 +6,35 @@
   # defined by the Mozilla Public License, v. 2.0.
   #%]
 
-[% RETURN UNLESS
-    user.review_request_count
-    || user.feedback_request_count
-    || user.needinfo_request_count
-%]
-
-<a id="header-flags" class="badge"
-  href="request.cgi?action=queue&amp;requestee=[% user.login FILTER uri %]&amp;group=type"
-  title="Flags requested of you:
-    [%- " review (" _ user.review_request_count _ ")" IF user.review_request_count -%]
-    [%- " feedback (" _ user.feedback_request_count _ ")" IF user.feedback_request_count -%]
-    [%- " needinfo (" _ user.needinfo_request_count _ ")" IF user.needinfo_request_count -%]
-">
-  [%- user.review_request_count + user.feedback_request_count + user.needinfo_request_count ~%]
-</a>
+[% IF user.id %]
+  [% request_count = user.review_request_count + user.feedback_request_count + user.needinfo_request_count %]
+  <div id="header-requests" class="dropdown">
+    <button type="button" id="header-requests-menu-button" class="dropdown-button minor"
+            title="Requests for you[%- IF request_count -%]:
+              [%- " review (" _ user.review_request_count _ ")" IF user.review_request_count -%]
+              [%- " feedback (" _ user.feedback_request_count _ ")" IF user.feedback_request_count -%]
+              [%- " needinfo (" _ user.needinfo_request_count _ ")" IF user.needinfo_request_count -%][%- END -%]"
+            aria-label="Requests for you" aria-expanded="false" aria-haspopup="true" aria-controls="header-requests-menu">
+      [%- IF request_count -%]
+        <span class="badge">[% request_count FILTER html %]</span>
+      [%- ELSE -%]
+        <span class="icon" aria-hidden="true"></span>
+      [%- END -%]
+    </button>
+    <section class="dropdown-content dropdown-panel left" id="header-requests-menu" role="menu" style="display:none;">
+      <header>
+        <h2>Requests</h2>
+      </header>
+      [%- IF request_count -%]
+        <div class="loading">Loading…</div>
+        <ul class="notifications" role="none" hidden></ul>
+      [%- ELSE -%]
+        <div class="empty">You’re all caught up!</div>
+      [%- END -%]
+      <footer>
+        <div><a href="request.cgi?action=queue&amp;requestee=[% user.login FILTER uri %]&amp;group=requestee"
+                role="menuitem" tabindex="-1">See All</a></div>
+      </footer>
+    </section>
+  </div>
+[% END %]

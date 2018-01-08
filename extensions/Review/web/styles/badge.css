@@ -5,7 +5,32 @@
  * This Source Code Form is "Incompatible With Secondary Licenses", as
  * defined by the Mozilla Public License, v. 2.0. */
 
-#header .badge {
+#header-requests {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 0 4px !important;
+    width: 32px;
+    height: 32px;
+}
+
+#header-requests-menu-button .icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    background: #BBB;
+    color: #FFF;
+    border-radius: 50%;
+}
+
+#header-requests-menu-button .icon::before {
+    font-size: 16px;
+    content: '\E7F4';
+}
+
+#header-requests-menu-button .badge {
     display: flex;
     align-items: center;
     justify-content: center;

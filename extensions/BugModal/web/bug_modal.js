@@ -700,7 +700,7 @@ $(function() {
     $('#needinfo-scroll')
         .click(function(event) {
             event.preventDefault();
-            $.scrollTo($('#needinfo_role'), function() { $('#needinfo_role').focus(); });
+            $.scrollTo($('#needinfo_container'), function() { $('#needinfo_role').focus(); });
         });
 
     // knob
@@ -830,13 +830,15 @@ $(function() {
             // remove embedded links to attachment details
             reply_text = reply_text.replace(/(attachment\s+\d+)(\s+\[[^\[\n]+\])+/gi, '$1');
 
-            if ($('#comment').val() != reply_text) {
-                $('#comment').val($('#comment').val() + reply_text);
-            }
-            if (BUGZILLA.user.settings.autosize_comments) {
-                autosize.update($('#comment'));
-            }
             $.scrollTo($('#comment'), function() {
+                if ($('#comment').val() != reply_text) {
+                    $('#comment').val($('#comment').val() + reply_text);
+                }
+
+                if (BUGZILLA.user.settings.autosize_comments) {
+                    autosize.update($('#comment'));
+                }
+
                 $('#comment').focus();
             });
         });
@@ -942,7 +944,7 @@ $(function() {
             $('#' + id + '-view').hide();
             $('#' + id).show().focus().select();
         });
-        
+
     // timetracking
     $('#work_time').change(function() {
         // subtracts time spent from remaining time
@@ -1429,18 +1431,15 @@ $(function() {
             let $target;
 
             if (typeof target === 'string') {
-                $target = $('#' + target);
+                $target = document.getElementById(target);
                 window.location.hash = target;
             } else {
-                $target = target;
+                // Use raw DOM node instead of jQuery
+                $target = target.get(0);
             }
 
-            if ($target.length) {
-                $('main').scrollTop(Math.round($target.position().top) - 20);
-            }
-
-            if (complete) {
-                complete();
+            if ($target) {
+                scroll_element_into_view($target, complete);
             }
         }
 

@@ -71,6 +71,9 @@
         box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
         color: #555;
         background-color: #FFF;
+        -moz-user-select: none;
+        -webkit-user-select: none;
+        user-select: none;
     }
 
     #header a,
@@ -121,6 +124,7 @@
         font-family: 'Material Icons';
         vertical-align: middle;
         color: #777;
+        pointer-events: none;
     }
 
     #header .title {
@@ -165,19 +169,18 @@
         height: 32px;
     }
 
-    #header .searchbox-outer button {
+    #header .searchbox-outer .icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
         position: absolute;
         top: 4px;
         left: 4px;
-        border: 0;
-        padding: 0;
         width: 24px;
         height: 24px;
-        background: transparent;
-        box-shadow: none;
     }
 
-    #header .searchbox-outer button .icon::before {
+    #header .searchbox-outer .icon::before {
         content: '\E8B6';
     }
 
@@ -240,10 +243,12 @@
 
     #header .dropdown-button {
         display: block;
+        border-radius: 0; /* Override Safari's default */
         padding: 0;
         color: inherit;
         background: transparent;
         box-shadow: none;
+        transition: none;
     }
 
     #header .dropdown-content {
@@ -279,12 +284,12 @@
 
     #header .dropdown-content.right::before,
     #header .dropdown-content.right::after {
-        left: 10px;
+        left: 11px;
     }
 
     #header .dropdown-content.left::before,
     #header .dropdown-content.left::after {
-        right: 10px;
+        right: 11px;
     }
 
     #header .dropdown-content::before {
@@ -323,16 +328,36 @@
         max-height: 400px;
     }
 
-    #header-search-dropdown h3 {
+    #header-search-dropdown header {
+        display: flex;
         position: sticky;
         top: -4px;
         left: 0;
-        margin: -4px 8px 0;
+        margin: -4px 12px 0;
         padding: 8px 0 4px;
         color: #999;
         background: #FFF;
         font-size: 12px;
+    }
+
+    #header-search-dropdown header h3 {
+        flex: auto;
+        margin: 0;
+        font-size: inherit;
+        line-height: 1.5;
         font-weight: normal;
+    }
+
+    #header-search-dropdown header a {
+        flex: none;
+        padding: 0 !important;
+        font-size: inherit;
+    }
+
+    #header-search-dropdown.dropdown-content header a:hover,
+    #header-search-dropdown.dropdown-content header a:focus,
+    #header-search-dropdown.dropdown-content header a.active {
+        background-color: transparent !important;
     }
 
     #header-search-dropdown ul {
@@ -350,7 +375,7 @@
     #header-tools-menu-button {
         width: 32px;
         height: 32px;
-        border-radius: 4px;
+        border-radius: 4px !important;
     }
 
     #header-tools-menu-button .icon {

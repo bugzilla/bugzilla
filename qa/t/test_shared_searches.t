@@ -23,7 +23,7 @@ set_parameters($sel, { "Group Security" => {"querysharegroup" => {type => "selec
 # Create new saved search and call it 'Shared Selenium buglist'.
 
 $sel->type_ok("quicksearch_top", ":TestProduct Selenium");
-$sel->click_ok("find_top");
+$sel->submit("header-search");
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_like(qr/^Bug List:/);
 $sel->type_ok("save_newqueryname", "Shared Selenium buglist");
@@ -96,7 +96,7 @@ ok(!$sel->is_text_present("Shared Selenium buglist"), "Shared query no longer di
 # Create your own saved search, and share it with the canconfirm group.
 
 $sel->type_ok("quicksearch_top", ":TestProduct sw:helpwanted");
-$sel->click_ok("find_top");
+$sel->submit("header-search");
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_like(qr/^Bug List:/);
 $sel->type_ok("save_newqueryname", "helpwanted");

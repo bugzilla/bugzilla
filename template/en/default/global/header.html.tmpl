@@ -242,13 +242,11 @@
       <section class="searchbox-outer dropdown" role="combobox" aria-expanded="false" aria-haspopup="listbox"
                aria-owns="header-search-dropdown">
         <h2>Quick Search</h2>
+        <span class="icon" aria-hidden="true"></span>
         <input role="searchbox" id="quicksearch_top" class="dropdown-button" name="quicksearch" autocomplete="off"
                value="[% quicksearch FILTER html %]" placeholder="Search [% terms.Bugs %]"
                title="Enter a [% terms.bug %] number or some search terms" aria-controls="header-search-dropdown"
                aria-label="Quick Search">
-        <button type="submit" id="find_top" aria-label="Submit">
-          <span class="icon" aria-hidden="true"></span>
-        </button>
         [% PROCESS "global/header-search-dropdown.html.tmpl" %]
       </section>
     </form>

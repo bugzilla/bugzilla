@@ -266,7 +266,7 @@ sub go_to_bug {
     my ($sel, $bug_id) = @_;
 
     $sel->type_ok("quicksearch_top", $bug_id);
-    $sel->click_ok("find_top", undef, "Go to bug $bug_id");
+    $sel->submit("header-search");
     $sel->wait_for_page_to_load_ok(WAIT_TIME);
     my $bug_title = $sel->get_title();
     utf8::encode($bug_title) if utf8::is_utf8($bug_title);

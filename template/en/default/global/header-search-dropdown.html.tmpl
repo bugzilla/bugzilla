@@ -26,7 +26,10 @@
   <div id="header-search-dropdown-wrapper">
     [% IF user.showmybugslink OR user.queries.size OR user.queries_subscribed.size %]
       <section id="header-search-dropdown-saved">
-        <h3>Saved Searches</h3>
+        <header>
+          <h3>Saved Searches</h3>
+          <a href="userprefs.cgi?tab=saved-searches">Edit</a>
+        </header>
         <ul role="none">
           [% IF user.showmybugslink %][% filtered_username = user.login FILTER uri %]
             <li role="none"><a role="option" href="[% Param('mybugstemplate').replace('%userid%', filtered_username) %]">

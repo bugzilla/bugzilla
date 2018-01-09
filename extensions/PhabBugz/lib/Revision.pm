@@ -22,12 +22,6 @@ use Bugzilla::Extension::PhabBugz::Util qw(
 use Types::Standard -all;
 use Type::Utils;
 
-my $EmptyStr = declare "EmptyStr",
-    as Str,
-    where { length($_) == 0 },
-    inline_as { $_[0]->parent->inline_check($_) . " && length($_) == 0" },
-    message { "String is not empty" };
-
 my $SearchResult = Dict[
     id     => Int,
     type   => Str,
@@ -42,7 +36,7 @@ my $SearchResult = Dict[
         repositoryPHID    => Maybe[Str],
         status            => HashRef,
         summary           => Str,
-        "bugzilla.bug-id" => Int | $EmptyStr,
+        "bugzilla.bug-id" => Str
     ],
     attachments => Dict[
         reviewers => Dict[
@@ -96,6 +90,10 @@ sub _load {
     if (exists $result->{result}{data} && @{ $result->{result}{data} }) {
         $result = $result->{result}->{data}->[0];
     }
+
+    # Some values in Phabricator for bug ids may have been saved
+    # white whitespace so we remove any here just in case.
+    $result->{fields}->{'bugzilla.bug-id'} = trim($result->{fields}->{'bugzilla.bug-id'});
 
     return $result;
 }

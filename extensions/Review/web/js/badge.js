@@ -76,8 +76,8 @@ Bugzilla.Review.Badge = class Badge {
         // Show up to 20 newest requests
         requests.slice(0, 20).forEach(req => {
             const $li = document.createElement('li');
-            const [, name, email] = req.requester.match(/^(.*)\s<(.*)>$/);
-            const pretty_name = name.replace(/([\[\(<‹].*?[›>\)\]]|\:[\w\-]+|\s+\-\s+.*)/g, '').trim();
+            const [, name, email] = req.requester.match(/^(?:(.*)\s<)?(.+?)>?$/);
+            const pretty_name = name ? name.replace(/([\[\(<‹].*?[›>\)\]]|\:[\w\-]+|\s+\-\s+.*)/g, '').trim() : email;
             const link = req.attach_id && req.dup_count === 1
                 ? `attachment.cgi?id=${req.attach_id}&amp;action=edit` : `show_bug.cgi?id=${req.bug_id}`;
 

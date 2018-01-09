@@ -95,5 +95,5 @@ the size of all attachments in your current bug-tracker.
 
 You may also need to increase the number of file handles a process is allowed
 to hold open (as the migrator will create a file handle for each attachment
-in your database). On Linux and simliar systems, you can do this as root
+in your database). On Linux and similar systems, you can do this as root
 by typing C<ulimit -n 65535> before running your script.

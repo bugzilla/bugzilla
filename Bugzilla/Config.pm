@@ -35,7 +35,7 @@ use File::Basename;
   );
 Exporter::export_ok_tags('admin');
 
-# new installs get these set of defaults (unless overriden by the answers file)
+# new installs get these set of defaults (unless overridden by the answers file)
 my %NEW_INSTALL_DEFAULT = (
     or_groups          => 1,
     use_email_as_login => 0,

@@ -73,7 +73,7 @@ sub new {
     my ($class, $params) = @_;
     my $db_name = $params->{db_name};
     
-    # Let people specify paths intead of data/ for the DB.
+    # Let people specify paths instead of data/ for the DB.
     if ($db_name and $db_name !~ m{[\\/]}) {
         # When the DB is first created, there's a chance that the
         # data directory doesn't exist at all, because the Install::Filesystem

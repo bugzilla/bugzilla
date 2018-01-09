@@ -389,7 +389,7 @@ Get information about valid flag types that can be set for bugs and attachments.
 
 =item B<REST>
 
-You have several options for retreiving information about flag types. The first
+You have several options for retrieving information about flag types. The first
 part is the request method and the rest is the related path needed.
 
 To get information about all flag types for a product:

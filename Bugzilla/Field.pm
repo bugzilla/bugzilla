@@ -987,7 +987,7 @@ sub remove_from_db {
 
     my $type = $self->type;
 
-    # the values for multi-select are stored in a seperate table
+    # the values for multi-select are stored in a separate table
     if ($type != FIELD_TYPE_MULTI_SELECT) {
         $dbh->bz_drop_column('bugs', $name);
     }

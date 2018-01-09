@@ -758,7 +758,7 @@ Note that items accessible via this object are demand-loaded when requested.
 
 For something to be added to this object, it should either be able to benefit
 from persistence when run under mod_perl (such as the a C<template> object),
-or should be something which is globally required by a large ammount of code
+or should be something which is globally required by a large amount of code
 (such as the current C<user> object).
 
 =head1 METHODS

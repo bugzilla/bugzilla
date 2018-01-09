@@ -29,7 +29,7 @@ use constant OPTIONAL_MODULES => [
     },
 ];
 
-# The map determines which verion of
+# The map determines which version of
 # the Core API an extension's API modules
 # were written to work with.
 use constant API_VERSION_MAP => {

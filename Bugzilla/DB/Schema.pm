@@ -1971,7 +1971,7 @@ sub get_type_ddl {
 
 Public method to convert abstract (database-generic) field specifiers to
 database-specific data types suitable for use in a C<CREATE TABLE> or 
-C<ALTER TABLE> SQL statment. If no database-specific field type has been
+C<ALTER TABLE> SQL statement. If no database-specific field type has been
 defined for the given field type, then it will just return the same field type.
 
 =item B<Parameters>

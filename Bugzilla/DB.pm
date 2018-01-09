@@ -1868,7 +1868,7 @@ Formatted SQL for negative regular expression search (e.g. NOT REGEXP)
 =item B<Description>
 
 Returns SQL syntax for limiting results to some number of rows
-with optional offset if not starting from the begining.
+with optional offset if not starting from the beginning.
 
 Abstract method, should be overridden by database specific code.
 
@@ -2012,7 +2012,7 @@ Formatted SQL for adding or subtracting a date and some amount of time (scalar)
 =item B<Description>
 
 Outputs proper SQL syntax determining position of a substring
-(fragment) withing a string (text). Note: if the substring or
+(fragment) within a string (text). Note: if the substring or
 text are string constants, they must be properly quoted (e.g. "'pattern'").
 
 It searches for the string in a case-sensitive manner. If you want to do
@@ -2101,7 +2101,7 @@ This is a case insensitive search.
 
 =item B<Returns>
 
-Formated sql to return results from columns that do not contain the fragment
+Formatted sql to return results from columns that do not contain the fragment
 
 =back
 
@@ -2190,7 +2190,7 @@ specified text on a given column.
 
 If one value is returned, it is a numeric expression that indicates
 a match with a positive value and a non-match with zero. In this case,
-the DB must support casting numeric expresions to booleans.
+the DB must support casting numeric expressions to booleans.
 
 If two values are returned, then the first value is a boolean expression
 that indicates the presence of a match, and the second value is a numeric
@@ -2762,7 +2762,7 @@ Returns nothing and takes no parameters.
 
 =item C<bz_commit_transaction>
 
-Ends a transaction, commiting all changes. Returns nothing and takes
+Ends a transaction, committing all changes. Returns nothing and takes
 no parameters.
 
 =item C<bz_rollback_transaction>

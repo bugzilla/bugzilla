@@ -479,7 +479,7 @@ sub redirect_search_url {
     # If there is no parameter, there is nothing to do.
     return unless $self->param;
 
-    # If we're retreiving an old list, we never need to redirect or
+    # If we're retrieving an old list, we never need to redirect or
     # do anything related to Bugzilla::Search::Recent.
     return if $self->param('regetlastlist');
 
@@ -650,7 +650,7 @@ Bugzilla::CGI - CGI handling for Bugzilla
 
 This package inherits from the standard CGI module, to provide additional
 Bugzilla-specific functionality. In general, see L<the CGI.pm docs|CGI> for
-documention.
+documentation.
 
 =head1 CHANGES FROM L<CGI.PM|CGI>
 

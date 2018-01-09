@@ -281,7 +281,7 @@ sub _check_version {
         return DEFAULT_API_VERSION;
     }
 
-    # If we using an extension API, we need to determing which version of
+    # If we using an extension API, we need to determining which version of
     # the Core API it was written for.
     if (lc($namespace) ne 'core') {
         my $core_api_version;

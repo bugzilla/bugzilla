@@ -178,7 +178,7 @@ ok(!grep($_ =~ /$config->{canconfirm_user_login}/, @cc), "$config->{canconfirm_u
 ok(grep($_ =~ /$config->{admin_user_login}/, @cc), "$config->{admin_user_login} is visible");
 ok(grep($_ =~ /$config->{tweakparams_user_login}/, @cc), "$config->{tweakparams_user_login} is visible");
 
-# Reset paramters.
+# Reset parameters.
 
 set_parameters($sel, { "User Matching"  => {"usemenuforusers-off" => undef,
                                             "maxusermatches"      => {type => 'text', value => '0'},

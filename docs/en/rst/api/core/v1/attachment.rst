@@ -94,7 +94,7 @@ creator           string    The login name of the user that created the
                             attachment.
 flags             array     Array of objects, each containing the information
                             about the flag currently set for each attachment.
-                            Each flag object contains items descibed in the
+                            Each flag object contains items described in the
                             Flag object below.
 ================  ========  =====================================================
 

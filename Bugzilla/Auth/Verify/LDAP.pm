@@ -102,7 +102,7 @@ sub check_credentials {
         $params->{email} = $emails[0];
 
         if (@emails > 1) {
-            # Cycle through the adresses and check if they're Bugzilla logins.
+            # Cycle through the addresses and check if they're Bugzilla logins.
             # Use the first one that returns a valid id. 
             foreach my $email (@emails) {
                 if ( email_to_id($email) ) {

@@ -1149,7 +1149,7 @@ in Bugzilla B<4.4>.
 =item B<Description>
 
 Allows for validating a user's API key, token, or username and password.
-If sucessfully authenticated, it returns simple information about the
+If successfully authenticated, it returns simple information about the
 logged in user.
 
 =item B<Params> (none)

@@ -54,7 +54,7 @@ sub new {
     # and there is no default DB.
     $dbname ||= Bugzilla->localconfig->{db_name};
 
-    # Set the language enviroment
+    # Set the language environment
     $ENV{'NLS_LANG'} = '.AL32UTF8';
 
     # construct the DSN from the parameters we got

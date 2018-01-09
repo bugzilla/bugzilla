@@ -17,7 +17,7 @@ use Bugzilla::User;
 use Bugzilla::Util qw(generate_random_password trim);
 
 #####################################################################
-# Overriden Constants that are used as methods
+# Overridden Constants that are used as methods
 #####################################################################
 
 use constant DB_TABLE       => 'user_api_keys';

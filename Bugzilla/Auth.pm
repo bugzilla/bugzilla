@@ -153,7 +153,7 @@ sub _handle_login_result {
 
     if (!$fail_code) {
         # We don't persist logins over GET requests in the WebService,
-        # because the persistance information can't be re-used again.
+        # because the persistence information can't be re-used again.
         # (See Bugzilla::WebService::Server::JSONRPC for more info.)
         if ($self->{_info_getter}->{successful}->requires_persistence
             and !Bugzilla->request_cache->{auth_no_automatic_login}) 

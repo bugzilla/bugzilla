@@ -33,7 +33,7 @@ ok(scalar(@ext_names), scalar(@ext_names) . ' extension(s) found: ' . join(', ',
 ok($extensions->{QA}, 'The QA extension is enabled, with version ' . $extensions->{QA}->{version});
 
 my $timezone = $rest->call('timezone')->{timezone};
-ok($timezone, "GET /rest/timezone retuns $timezone");
+ok($timezone, "GET /rest/timezone returns $timezone");
 
 my $time = $rest->call('time');
 foreach my $type (qw(db_time web_time)) {

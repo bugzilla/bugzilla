@@ -2766,7 +2766,7 @@ containing the user's recent searches.
 =item C<recent_search_containing(bug_id)>
 
 Returns a L<Bugzilla::Search::Recent> object that contains the most recent
-search by the user for the specified bug id. Retuns undef if no match is found.
+search by the user for the specified bug id. Returns undef if no match is found.
 
 =item C<recent_search_for(bug)>
 

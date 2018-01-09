@@ -431,7 +431,7 @@ sub _template_base_directories {
     # that Bugzilla templates are localized.
     #
     # We use extension_requirement_packages instead of Bugzilla->extensions
-    # because this fucntion is called during the requirements phase of 
+    # because this function is called during the requirements phase of 
     # installation (so Bugzilla->extensions isn't available).
     my $extensions = extension_requirement_packages();
     my @template_dirs;

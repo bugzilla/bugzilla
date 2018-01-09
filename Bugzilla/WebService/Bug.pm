@@ -958,7 +958,7 @@ sub update_attachment {
             $attachment->set_flags($update_flags, $new_flags) if $flags;
         }
         elsif (scalar @$update_flags && !scalar(@$new_flags) && !scalar keys %$params) {
-            # Requestees can set flags targetted to them, even if they cannot
+            # Requestees can set flags targeted to them, even if they cannot
             # edit the attachment. Flag setters can edit their own flags too.
             my %flag_list = map { $_->{id} => $_ } @$update_flags;
             my $flag_objs = Bugzilla::Flag->new_from_list([ keys %flag_list ]);
@@ -1546,7 +1546,7 @@ for each field.
 
 =item B<REST>
 
-You have several options for retreiving information about fields. The first
+You have several options for retrieving information about fields. The first
 part is the request method and the rest is the related path needed.
 
 To get information about all fields:
@@ -4194,7 +4194,7 @@ the default for the product, when you move a bug to a new product.
 You may also wish to add or remove groups, as which groups are
 valid on a bug depends on the product. Groups that are not valid
 in the new product will be automatically removed, and groups which
-are mandatory in the new product will be automaticaly added, but no
+are mandatory in the new product will be automatically added, but no
 other automatic group changes will be done.
 
 Note that users can only move a bug into a product if they would
@@ -4694,7 +4694,7 @@ GET /rest/bug/comment/tags/<query>
 
 =item C<query>
 
-B<Required> C<string> Only tags containg this substring will be returned.
+B<Required> C<string> Only tags containing this substring will be returned.
 
 =item C<limit>
 

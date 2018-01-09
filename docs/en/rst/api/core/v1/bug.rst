@@ -915,7 +915,7 @@ product                string   The name of the product that the bug is in. If
                                 valid on a bug depends on the product. Groups
                                 that are not valid in the new product will be
                                 automatically removed, and groups which are
-                                mandatory in the new product will be automaticaly
+                                mandatory in the new product will be automatically
                                 added, but no other automatic group changes will
                                 be done.
 

@@ -32,7 +32,7 @@ BEGIN {
 
 # META.json and META.yml exist only for the benefit of older
 # installs where cpanm can't get the optional features out of Makefile.PL
-# Unfortunately having META.json and META.yml commited to the repo is weird
+# Unfortunately having META.json and META.yml committed to the repo is weird
 # and MakeMaker always prefers their content to the internal data (unless CPAN::META
 # is not installed).
 # Since we (Bugzilla) require this cludge, we hide the files from MakeMaker.

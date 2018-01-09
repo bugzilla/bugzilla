@@ -1757,7 +1757,7 @@ they have been obtained from the URL or body of the request.
 =head2 webservice_rest_request
 
 This hook allows for altering any of the parameters provided by the client
-after authentication has occured. You are able to change things like renaming
+after authentication has occurred. You are able to change things like renaming
 of keys, removing values, or adding additional information.
 
 Params:

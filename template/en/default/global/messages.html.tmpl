@@ -326,7 +326,7 @@
 
   [% ELSIF message_tag == "flag_creation_failed" %]
     [% title = "Flag Creation Failure" %]
-    An error occured while validating flags:
+    An error occurred while validating flags:
     [%+ flag_creation_error FILTER none %]
 
   [% ELSIF message_tag == "get_field_desc" %]
@@ -520,7 +520,7 @@
     [% title = "Milestone Deleted" %]
     The milestone <em>[% milestone.name FILTER html %]</em> has been deleted.
     [% IF milestone.bug_count %]
-      [%+ terms.Bugs %] targetted to this milestone have been retargetted to
+      [%+ terms.Bugs %] targeted to this milestone have been retargetted to
       the default milestone <em>[% product.default_milestone FILTER html %]</em>.
     [% END %]
 

@@ -168,7 +168,8 @@ try {
     }
 
     if (!$any_severity) {
-        $where .= ' AND bug_severity IN (' . join',', map { $dbh->quote($_) } split(/,/, $config->{severity}) . ')';
+        my $severities = join ',', map { $dbh->quote($_) } split(/,/, $config->{severity});
+        $where .= " AND bug_severity IN ($severities)";
     }
 
     my $sql = <<"EOF";

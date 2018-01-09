@@ -37,6 +37,7 @@
 /* global (begin) */
     body {
         position: absolute;
+        overflow: hidden;
         margin: 0;
         width: 100%;
         height: 100%;
@@ -67,6 +68,7 @@
 /* header (begin) */
     #header {
         flex: none;
+        overflow: auto;
         border-bottom: 1px solid rgba(0, 0, 0, 0.2);
         box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
         color: #555;
@@ -1194,7 +1196,6 @@ input.required, select.required, span.required_explanation {
 }
 
 body {
-    min-height: 400px;
     background: #f6f4ec;
     background-image: url(../../images/noise.png);
     background-image: url(../../images/noise.png), -moz-linear-gradient(#d7d3c8, #f6f4ec 400px);

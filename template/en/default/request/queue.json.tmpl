@@ -8,7 +8,7 @@
 [% RAWPERL %]
 my @display_columns = (
     "requester", "requestee",      "type",    "status",  "bug_id", "bug_summary",
-    "attach_id", "attach_summary", "ispatch", "created", "category"
+    "attach_id", "attach_summary", "ispatch", "created", "category", "restricted"
 );
 my $requests    = $stash->get('requests');
 my $time_filter = $context->filter('time', [ '%Y-%m-%dT%H:%M:%SZ', 'UTC' ]);
@@ -28,7 +28,7 @@ foreach my $request (@$requests) {
         elsif ( $column =~ /_id$/ ) {
             $val = $request->{$column} ? 0 + $request->{$column} : undef;
         }
-        elsif ( $column =~ /^is/ ) {
+        elsif ( $column =~ /^is/ or $column eq 'restricted' ) {
             $val = $request->{$column} ? \1 : \0;
         }
         else {

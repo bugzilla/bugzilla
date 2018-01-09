@@ -82,14 +82,16 @@ Bugzilla.Review.Badge = class Badge {
                 ? `attachment.cgi?id=${req.attach_id}&amp;action=edit` : `show_bug.cgi?id=${req.bug_id}`;
 
             $li.setAttribute('role', 'none');
-            $li.innerHTML = `<a href="${link}" role="menuitem" tabindex="-1" data-type="${req.type}">
-                <img src="https://secure.gravatar.com/avatar/${md5(email)}?d=mm&amp;size=64" alt="">
-                <label><strong>${pretty_name.htmlEncode()}</strong> asked for your
-                ${(req.type === 'needinfo' ? 'info' : req.type)} ${(req.attach_id ? 'on' : '')}
-                ${(req.attach_id && req.ispatch ? (req.dup_count > 1 ? `${req.dup_count} patches` : 'a patch') : '')}
-                ${(req.attach_id && !req.ispatch ? (req.dup_count > 1 ? `${req.dup_count} files` : 'a file') : '')}
-                in <strong>Bug ${req.bug_id} &ndash; ${req.bug_summary.htmlEncode()}</strong>.</label>
-                <time datetime="${req.created}">${timeAgo(new Date(req.created))}</time></a>`;
+            $li.innerHTML = `<a href="${link}" role="menuitem" tabindex="-1" `
+                + `class="${(req.restricted ? 'secure' : '')}" data-type="${req.type}">`
+                + `<img src="https://secure.gravatar.com/avatar/${md5(email)}?d=mm&amp;size=64" alt="">`
+                + `<label><strong>${pretty_name.htmlEncode()}</strong> asked for your `
+                + (req.type === 'needinfo' ? 'info' : req.type) + (req.attach_id ? ' on ' : '')
+                + (req.attach_id && req.ispatch ? (req.dup_count > 1 ? `${req.dup_count} patches` : 'a patch') : '')
+                + (req.attach_id && !req.ispatch ? (req.dup_count > 1 ? `${req.dup_count} files` : 'a file') : '')
+                + ' in ' + (req.restricted ? '<span class="icon" aria-label="secure"></span>&nbsp;' : '')
+                + `<strong>Bug ${req.bug_id} &ndash; ${req.bug_summary.htmlEncode()}</strong>.</label>`
+                + `<time datetime="${req.created}">${timeAgo(new Date(req.created))}</time></a>`;
             $fragment.appendChild($li);
         });
 

@@ -353,6 +353,10 @@
         pointer-events: none;
     }
 
+    #header .dropdown-panel .notifications a {
+        overflow: hidden;
+    }
+
     #header .dropdown-panel .notifications img {
         float: left;
         border-radius: 50%;
@@ -377,6 +381,16 @@
     #header .dropdown-panel .notifications time {
         font-size: 12px;
         color: #999;
+    }
+
+    #header .dropdown-panel .notifications .secure .icon {
+        display: inline;
+        font-size: 16px;
+        vertical-align: text-bottom;
+    }
+
+    #header .dropdown-panel .notifications .secure .icon::before {
+        content: '\E88D';
     }
 
     #header .dropdown-panel .loading,

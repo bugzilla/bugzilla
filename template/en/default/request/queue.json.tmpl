@@ -38,5 +38,9 @@ foreach my $request (@$requests) {
     }
     push @results, \%item;
 }
-$output .= JSON::XS::encode_json( \@results );
+{
+    use feature 'state';
+    state $json = JSON::XS->new->utf8->ascii;
+    $output .= $json->encode( \@results );
+}
 [% END %]

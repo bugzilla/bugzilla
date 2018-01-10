@@ -52,7 +52,7 @@
      || user.in_group(bug.product_obj.default_security_group)
      || (user.id != bug.reporter.id && !user.in_group('editbugs')) %]
     <div>
-      <input type="checkbox" name="groups"I class="restrict_sensitive"
+      <input type="checkbox" name="groups" class="restrict_sensitive"
              value="[% bug.product_obj.default_security_group FILTER none %]"
              id="group_[% bug.product_obj.default_security_group_obj.id FILTER html %]">
       <label for="group_[% bug.product_obj.default_security_group_obj.id FILTER html %]"

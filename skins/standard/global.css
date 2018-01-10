@@ -37,7 +37,6 @@
 /* global (begin) */
     body {
         position: absolute;
-        overflow: hidden;
         margin: 0;
         width: 100%;
         height: 100%;
@@ -60,15 +59,22 @@
         display: flex;
         flex-direction: column;
         position: absolute;
-        width: 100%;
-        height: 100%;
     }
 /* wrapper (end) */
+
+/* fixed global header (begin) */
+    @media screen and (min-width: 1024px) {
+        #wrapper {
+            overflow: hidden;
+            width: 100%;
+            height: 100%;
+        }
+    }
+/* fixed global header (end) */
 
 /* header (begin) */
     #header {
         flex: none;
-        overflow: auto;
         border-bottom: 1px solid rgba(0, 0, 0, 0.2);
         box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
         color: #555;
@@ -1271,7 +1277,9 @@ hr {
     position: relative;
     outline: none;
     padding: 0 15px;
-    overflow: auto;
+    overflow-x: auto;
+    overflow-y: scroll;
+    -webkit-overflow-scrolling: touch; /* Enable lazy scrolling on iOS */
     scroll-behavior: smooth;
 }
 

@@ -989,3 +989,27 @@ div.ui-tooltip {
 #user-guide {
     padding-top: 5px;
 }
+
+
+/* even narrower displays */
+@media screen and (max-width: 900px) {
+    #wrapper {
+        position: initial !important;
+    }
+
+    #header .inner {
+        width: auto !important;
+    }
+
+    .module .fields-lhs, .module .fields-rhs {
+        min-width: 380px;
+    }
+
+    #main-inner {
+        min-width: auto;
+    }
+    .spin-latch {
+        display: none;
+    }
+}
+/* end even narrower displays */

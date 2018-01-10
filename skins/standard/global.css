@@ -63,7 +63,7 @@
 /* wrapper (end) */
 
 /* fixed global header (begin) */
-    @media screen and (min-width: 1024px) {
+    @media screen and (min-width: 800px) {
         #wrapper {
             overflow: hidden;
             width: 100%;
@@ -571,6 +571,27 @@
         content: '\E5CD';
     }
 /* header (end) */
+
+/* narrower global header (begin) */
+    @media screen and (max-width: 1024px) {
+        #header .inner {
+            width: 800px;
+        }
+
+        #header-nav .links a {
+            padding: 0;
+            width: 32px;
+            justify-content: center;
+            text-align: center;
+        }
+
+        #header-nav .links a .label {
+            overflow: hidden;
+            width: 0;
+            height: 0;
+        }
+    }
+/* narrower global header (end) */
 
 /* link lists (begin) */
     ul.links {

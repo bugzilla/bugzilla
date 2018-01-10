@@ -9,6 +9,10 @@ $(function() {
     'use strict';
 
     $(window).click(function(e) {
+        // Do not handle non-primary click.
+        if (e.button != 0) {
+            return;
+        }
         // clicking dropdown button opens or closes the dropdown content
         if (!$(e.target).hasClass('dropdown-button')) {
             $('.dropdown-button').each(function() {
@@ -100,6 +104,10 @@ $(function() {
         var $button  = $div.find('.dropdown-button');
         var $content = $div.find('.dropdown-content');
         $button.click(function(e) {
+            // Do not handle non-primary click.
+            if (e.button != 0) {
+                return;
+            }
             toggleDropDown(e, $button, $content);
         }).keydown(function(e) {
             if (e.keyCode == 13) {

@@ -69,6 +69,13 @@
             width: 100%;
             height: 100%;
         }
+
+        #bugzilla-body {
+            overflow-x: auto;
+            overflow-y: scroll;
+            -webkit-overflow-scrolling: touch; /* Enable momentum scrolling on iOS */
+            scroll-behavior: smooth;
+        }
     }
 /* fixed global header (end) */
 
@@ -1277,10 +1284,6 @@ hr {
     position: relative;
     outline: none;
     padding: 0 15px;
-    overflow-x: auto;
-    overflow-y: scroll;
-    -webkit-overflow-scrolling: touch; /* Enable lazy scrolling on iOS */
-    scroll-behavior: smooth;
 }
 
 #main-inner {

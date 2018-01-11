@@ -36,7 +36,7 @@ my $SearchResult = Dict[
         repositoryPHID    => Maybe[Str],
         status            => HashRef,
         summary           => Str,
-        "bugzilla.bug-id" => Str
+        "bugzilla.bug-id" => Maybe[Str]
     ],
     attachments => Dict[
         reviewers => Dict[
@@ -93,7 +93,10 @@ sub _load {
 
     # Some values in Phabricator for bug ids may have been saved
     # white whitespace so we remove any here just in case.
-    $result->{fields}->{'bugzilla.bug-id'} = trim($result->{fields}->{'bugzilla.bug-id'});
+    $result->{fields}->{'bugzilla.bug-id'}
+        = $result->{fields}->{'bugzilla.bug-id'}
+          ? trim($result->{fields}->{'bugzilla.bug-id'})
+          : "";
 
     return $result;
 }

@@ -513,6 +513,16 @@ sub header {
     );
     $self->{_header_done} = 1;
 
+    my @fonts = (
+        "skins/standard/fonts/FiraMono-Regular.woff2?v=3.202",
+        "skins/standard/fonts/FiraSans-Bold.woff2?v=4.203",
+        "skins/standard/fonts/FiraSans-Italic.woff2?v=4.203",
+        "skins/standard/fonts/FiraSans-Regular.woff2?v=4.203",
+        "skins/standard/fonts/FiraSans-SemiBold.woff2?v=4.203",
+        "skins/standard/fonts/MaterialIcons-Regular.woff2",
+    );
+    $headers{'-link'} = join(", ", map { sprintf('</static/v%s/%s>; rel="preload"; as="font"', Bugzilla->VERSION, $_) } @fonts);
+
     return $self->SUPER::header(%headers) || "";
 }
 

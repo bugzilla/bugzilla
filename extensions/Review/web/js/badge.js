@@ -84,7 +84,7 @@ Bugzilla.Review.Badge = class Badge {
             $li.setAttribute('role', 'none');
             $li.innerHTML = `<a href="${link}" role="menuitem" tabindex="-1" `
                 + `class="${(req.restricted ? 'secure' : '')}" data-type="${req.type}">`
-                + `<img src="https://secure.gravatar.com/avatar/${md5(email)}?d=mm&amp;size=64" alt="">`
+                + `<img src="https://secure.gravatar.com/avatar/${md5(email.toLowerCase())}?d=mm&amp;size=64" alt="">`
                 + `<label><strong>${pretty_name.htmlEncode()}</strong> asked for your `
                 + (req.type === 'needinfo' ? 'info' : req.type) + (req.attach_id ? ' on ' : '')
                 + (req.attach_id && req.ispatch ? (req.dup_count > 1 ? `${req.dup_count} patches` : 'a patch') : '')

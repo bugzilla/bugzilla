@@ -229,7 +229,7 @@
         no_label = 1
         hide_on_edit = 1
     %]
-      <b>
+      <b class="bz_status_[% bug.bug_status FILTER html %]">
         [% bug.bug_status FILTER html %]
         [%+ bug.resolution FILTER html IF bug.resolution %]
       </b>

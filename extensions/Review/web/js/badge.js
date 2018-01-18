@@ -26,12 +26,14 @@ Bugzilla.Review.Badge = class Badge {
      * @returns {Badge} New Badge instance.
      */
     constructor() {
+        this.initialized = false;
         this.$button = document.querySelector('#header-requests-menu-button');
         this.$panel = document.querySelector('#header-requests .dropdown-panel');
         this.$loading = document.querySelector('#header-requests .dropdown-panel .loading');
 
         if (this.$loading) {
-            this.$button.addEventListener('click', () => this.init(), { once: true });
+            this.$button.addEventListener('mouseover', () => this.init(), { once: true });
+            this.$button.addEventListener('focus', () => this.init(), { once: true });
         }
     }
 
@@ -39,6 +41,12 @@ Bugzilla.Review.Badge = class Badge {
      * Initialize the Reviews dropdown menu.
      */
     async init() {
+        if (this.initialized) {
+            return;
+        }
+
+        this.initialized = true;
+
         const url = this.$panel.querySelector('footer a').href + '&ctype=json';
         const response = await fetch(url, { credentials: 'same-origin' });
         const _requests = response.ok ? await response.json() : [];

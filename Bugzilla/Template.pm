@@ -683,6 +683,18 @@ sub create {
                 return $var;
             },
 
+            # Insert `<wbr>` HTML tags to camel and snake case words in the
+            # given string so a long bug summary, for example, will be wrapped
+            # in a preferred manner rather than overflowing or expanding the
+            # parent element. Examples:
+            # * `test<wbr>_switch<wbr>_window<wbr>_content<wbr>.py`
+            # * `Test<wbr>Switch<wbr>To<wbr>Window<wbr>Content`
+            wbr => sub {
+                my ($var) = @_;
+                $var =~ s/([a-z])([A-Z\._])/$1<wbr>$2/g;
+                return $var;
+            },
+
             xml => \&Bugzilla::Util::xml_quote ,
 
             # This filter is similar to url_quote but used a \ instead of a %

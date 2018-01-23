@@ -230,7 +230,7 @@
                                         col_abbrev.ellipsis) FILTER html %]
       [% ELSIF column == 'short_desc' || column == "short_short_desc" %]
         <a href="show_bug.cgi?id=[% bug.bug_id FILTER html %]">
-          [%- bug.$column.truncate(col_abbrev.maxlength, col_abbrev.ellipsis) FILTER html -%]
+          [%- bug.$column.truncate(col_abbrev.maxlength, col_abbrev.ellipsis) FILTER html FILTER wbr -%]
         </a>
       [% ELSIF bug_fields.$column.type == constants.FIELD_TYPE_BUG_ID %]
         <a href="show_bug.cgi?id=[% bug.$column FILTER html %]">

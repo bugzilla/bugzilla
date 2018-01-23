@@ -35,7 +35,7 @@ my $opts = __PACKAGE__->can("opt_$cmd") // sub { @ARGV };
 my $func = __PACKAGE__->can("cmd_$cmd") // sub {
     check_data_dir();
     wait_for_db();
-    run(@_);
+    run($cmd, @_);
 };
 
 fix_path();

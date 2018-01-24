@@ -47,7 +47,7 @@ Bugzilla.Review.Badge = class Badge {
 
         this.initialized = true;
 
-        const url = this.$panel.querySelector('footer a').href + '&ctype=json';
+        const url = this.$panel.querySelector('footer a').href.replace(/type$/, 'requestee') + '&ctype=json';
         const response = await fetch(url, { credentials: 'same-origin' });
         const _requests = response.ok ? await response.json() : [];
 

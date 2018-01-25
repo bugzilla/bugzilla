@@ -192,47 +192,13 @@ $().ready(function() {
 });
 
 /**
- * Emulate the `scrollend` event on an HTML element that will be fired once a
- * certain amount of scroll is complete.
- * @param {Element} $target - An element to be observed.
- */
-const emulate_scrollend_event = $target => {
-    if ('onscrollend' in $target) {
-        return;
-    }
-
-    let timer;
-
-    $target.addEventListener('scroll', () => {
-        window.requestAnimationFrame(() => {
-            window.clearTimeout(timer);
-            timer = window.setTimeout(() => $target.dispatchEvent(new UIEvent('scrollend')), 100);
-        });
-    });
-
-    $target.onscrollend = null;
-}
-
-/**
  * Focus the main content when the page is loaded and there is no autofocus
  * element, so the user can immediately scroll down the page using keyboard.
- * Also, remember the scroll position on `<main>` so it can be restored when
- * `location.hash` is changed.
- * @see adjust_scroll_onload
  */
 const focus_main_content = () => {
-    const $main = document.querySelector('main');
-
     if (!document.querySelector('[autofocus]')) {
-        $main.focus();
+        document.querySelector('main').focus();
     }
-
-    emulate_scrollend_event($main);
-
-    $main.addEventListener('scrollend', () => {
-        history.replaceState(Object.assign(history.state || {}, { main_scroll_top: $main.scrollTop }),
-            document.title, location.href);
-    });
 }
 
 /**
@@ -249,9 +215,7 @@ const detect_blocked_gravatars = () => {
 
 /**
  * If the current URL contains a hash like `#c10`, adjust the scroll position to
- * make some room above the focused element. Or, restore the scroll position on
- * `<main>` if remembered.
- * @see focus_main_content
+ * make some room above the focused element.
  */
 const adjust_scroll_onload = () => {
     if (location.hash) {
@@ -259,12 +223,6 @@ const adjust_scroll_onload = () => {
 
         if ($target) {
             window.setTimeout(() => scroll_element_into_view($target), 50);
-        }
-    } else if (history.state) {
-        const main_scroll_top = history.state.main_scroll_top;
-
-        if (typeof main_scroll_top === "number") {
-            document.querySelector('main').scrollTop = main_scroll_top;
         }
     }
 }
@@ -293,8 +251,21 @@ const scroll_element_into_view = ($target, complete) => {
     }
 
     if (typeof complete === 'function') {
-        emulate_scrollend_event($element);
-        $element.addEventListener('scrollend', () => complete(), true);
+        const callback = () => {
+            $element.removeEventListener('scroll', listener);
+            complete();
+        };
+
+        // Emulate the `scrollend` event
+        const listener = () => {
+            window.clearTimeout(timer);
+            timer = window.setTimeout(callback, 100);
+        };
+
+        // Make sure the callback is always fired even if no scroll happened
+        let timer = window.setTimeout(callback, 100);
+
+        $element.addEventListener('scroll', listener);
     }
 
     $element.scrollTop = top - 20;

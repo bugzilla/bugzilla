@@ -1654,6 +1654,7 @@ use constant ABSTRACT_SCHEMA => {
         ],
         INDEXES => [
             email_rates_idx => [qw(recipient message_ts)],
+            email_rates_message_ts_idx => ['message_ts'],
         ],
     },
 

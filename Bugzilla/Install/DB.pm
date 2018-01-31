@@ -218,6 +218,10 @@ sub update_table_definitions {
         $dbh->bz_add_column('profiles', 'emailflags', {TYPE => 'MEDIUMTEXT'});
     }
 
+    if (!$dbh->bz_index_info('email_rates', 'email_rates_message_ts_idx')) {
+        $dbh->bz_add_index( 'email_rates', 'email_rates_message_ts_idx', ['message_ts'] );
+    }
+
     $dbh->bz_add_column('groups', 'isactive',
                         {TYPE => 'BOOLEAN', NOTNULL => 1, DEFAULT => 'TRUE'});
 

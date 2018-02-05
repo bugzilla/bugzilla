@@ -2553,7 +2553,7 @@ sub install_filesystem {
         source  => $contribute->{repository}{url},
         version => BUGZILLA_VERSION,
         commit  => $ENV{CIRCLE_SHA1}      // 'unknown',
-        build   => $ENV{CIRCLE_BUILD_NUM} // 'unknown',
+        build   => $ENV{CIRCLE_BUILD_URL} // 'unknown',
     };
 
     $create_files->{'version.json'} = {

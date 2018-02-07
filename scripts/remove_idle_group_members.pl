@@ -31,16 +31,20 @@ my $dbh = Bugzilla->dbh;
 # Record any changes as made by the automation user
 my $auto_user = Bugzilla::User->check({ name => 'automation@bmo.tld' });
 
+# This ignores things that end with "bugs" or ".tld", just like
+# Bugzilla/BugMail.pm sub Send()
 my $expired = $dbh->selectall_arrayref(
-    "SELECT DISTINCT profiles.userid AS user_id,
+    q{SELECT DISTINCT profiles.userid AS user_id,
             groups.id AS group_id
        FROM profiles JOIN user_group_map ON profiles.userid = user_group_map.user_id
             JOIN groups ON user_group_map.group_id = groups.id
       WHERE user_group_map.grant_type = ?
+            AND profiles.login_name NOT LIKE '%bugs'
+            AND profiles.login_name NOT LIKE '%.tld'
             AND groups.idle_member_removal > 0
             AND (profiles.last_seen_date IS NULL
                  OR TO_DAYS(LOCALTIMESTAMP(0)) - TO_DAYS(profiles.last_seen_date) > groups.idle_member_removal)
-      ORDER BY profiles.login_name",
+      ORDER BY profiles.login_name},
     { Slice => {} }, GRANT_DIRECT
 );
 

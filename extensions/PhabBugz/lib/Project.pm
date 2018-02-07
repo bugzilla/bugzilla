@@ -18,37 +18,36 @@ use Bugzilla::Extension::PhabBugz::Util qw(
     get_phab_bmo_ids
 );
 
-#########################
-#    Initialization     #
-#########################
+use Types::Standard -all;
+use Type::Utils;
 
-sub new {
-    my ($class, $params) = @_;
-    my $self = $params ? _load($params) : {};
-    bless($self, $class);
-    return $self;
-}
-
-sub _load {
-    my ($params) = @_;
-
-    my $data = {
-        queryKey    => 'all',
-        attachments => {
-            projects    => 1,
-            reviewers   => 1,
-            subscribers => 1
-        },
-        constraints => $params
-    };
-
-    my $result = request('project.search', $data);
-    if (exists $result->{result}{data} && @{ $result->{result}{data} }) {
-        return $result->{result}->{data}->[0];
-    }
-
-    return $result;
-}
+my $SearchResult = Dict[
+    id     => Int,
+    type   => Str,
+    phid   => Str,
+    fields => Dict[
+        name         => Str,
+        slug         => Str,
+        depth        => Int,
+        milestone    => Maybe[Str],
+        parent       => Maybe[Str],
+        icon         => Dict[ key => Str, name => Str, icon => Str ],
+        color        => Dict[ key => Str, name => Str ],
+        dateCreated  => Int,
+        dateModified => Int,
+        policy       => Dict[ view => Str, edit => Str, join => Str ],
+        description  => Maybe[Str]
+    ],
+    attachments => Dict[
+        members => Dict[
+            members => ArrayRef[
+                Dict[
+                    phid => Str
+                ],
+            ],
+        ],
+    ],
+];
 
 # {
 #   "data": [
@@ -90,12 +89,6 @@ sub _load {
 #               "phid": "PHID-USER-uif2miph2poiehjeqn5q"
 #             }
 #           ]
-#         },
-#         "ancestors": {
-#           "ancestors": []
-#         },
-#         "watchers": {
-#           "watchers": []
 #         }
 #       }
 #     }
@@ -113,6 +106,36 @@ sub _load {
 #     "order": null
 #   }
 # }
+
+#########################
+#    Initialization     #
+#########################
+
+sub new {
+    my ($class, $params) = @_;
+    my $self = $params ? _load($params) : {};
+    $SearchResult->assert_valid($self);
+    return bless($self, $class);
+}
+
+sub _load {
+    my ($params) = @_;
+
+    my $data = {
+        queryKey    => 'all',
+        attachments => {
+            members => 1
+        },
+        constraints => $params
+    };
+
+    my $result = request('project.search', $data);
+    if (exists $result->{result}{data} && @{ $result->{result}{data} }) {
+        return $result->{result}->{data}->[0];
+    }
+
+    return $result;
+}
 
 #########################
 #     Modification      #

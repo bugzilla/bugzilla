@@ -1,0 +1,57 @@
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
+
+version: '2'
+
+services:
+  bmo-web.vm:
+    build: &bmo_build
+      context: .
+      dockerfile: Dockerfile
+    command: dev_httpd
+    volumes:
+      - bmo-data-dir:/app/data
+    tmpfs:
+      - /tmp
+      - /run
+    environment: &bmo_env
+      - LOCALCONFIG_ENV=1
+      - BUGZILLA_UNSAFE_AUTH_DELEGATION=1
+      - PORT=80
+      - BMO_db_host=bmo-db.vm
+      - BMO_db_name=bugs
+      - BMO_db_user=bugs
+      - BMO_db_pass=bugs
+      - BMO_urlbase=http://bmo-web.vm/
+      - BMO_memcached_namespace=bugzilla
+      - BMO_memcached_servers=memcached:11211
+      - 'BMO_inbound_proxies=*'
+      - BZ_ANSWERS_FILE=/app/docker_support/checksetup_answers.txt
+    depends_on:
+      - bmo-db.vm
+      - memcached
+
+  bmo-db.vm:
+    image: mozillabteam/bmo-mysql:5.6
+    volumes:
+      - bmo-mysql-db:/var/lib/mysql
+    logging:
+      driver: "none"
+    environment:
+      - MYSQL_DATABASE=bugs
+      - MYSQL_USER=bugs
+      - MYSQL_PASSWORD=bugs
+      - MYSQL_ALLOW_EMPTY_PASSWORD=1
+
+  memcached:
+    image: memcached:latest
+
+  tinyproxy:
+    image: mozillabteam/tinyproxy
+    ports:
+      - "1091:1090"
+
+volumes:
+  bmo-mysql-db:
+  bmo-data-dir:

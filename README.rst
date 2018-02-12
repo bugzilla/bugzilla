@@ -14,16 +14,14 @@ BMO is Mozilla's highly customized version of Bugzilla.
       1.2  Making Changes and Seeing them
       1.3  Technical Details
       1.4  Perl Shell (re.pl, repl)
-    2  Docker Container
-      2.1  Container Arguments
-      2.2  Environmental Variables
-      2.3  Persistent Data Volume
-
-If you are looking to run Bugzilla, you should see
-https://github.com/bugzilla/bugzilla.
+    2  Using Docker Compose (For Development)
+    3  Docker Container
+      3.1  Container Arguments
+      3.2  Environmental Variables
+      3.3  Persistent Data Volume
 
 If you want to contribute to BMO, you can fork this repo and get a local copy
-of BMO running in a few minutes using Vagrant.
+of BMO running in a few minutes using Vagrant or Docker.
 
 Using Vagrant (For Development)
 ===============================
@@ -147,6 +145,31 @@ You can use the 'p' command (provided by `Data::Printer`_) to inspect variables 
 
 .. _`Devel::REPL`: https://metacpan.org/pod/Devel::REPL
 .. _`Data::Printer`: https://metacpan.org/pod/Data::Printer
+
+
+Using Docker (For Development)
+==============================
+
+While not yet as featureful or complete as the vagrant setup, this repository now contains a
+docker-compose file that will create a local bugzilla for testing.
+
+To use docker-compose, ensure you have the latest Docker install for your environemnt
+(Linux, Windows, or Mac OS).
+
+.. code-block:: bash
+
+    docker-compose up --build
+
+
+Then, you must configure your browser to use http://localhost:1091 as an HTTP proxy.
+For setting a proxy in Firefox, see `Firefox Connection Settings`_.
+The procecure should be similar for other browsers.
+
+.. _`Firefox Connection Settings`: https://support.mozilla.org/en-US/kb/connection-settings-firefox
+
+After that, you should be able to visit http://bmo-web.vm/ from your browser.
+You can login as vagrant@bmo-web.vm with the password "vagrant01!" (without
+quotes).
 
 Docker Container
 ================

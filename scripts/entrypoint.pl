@@ -78,6 +78,10 @@ sub cmd_httpd  {
     check_data_dir();
     wait_for_db();
     check_httpd_env();
+    httpd();
+}
+
+sub httpd {
     my @httpd_args = (
         '-DFOREGROUND',
         '-f' => '/app/httpd/httpd.conf',
@@ -89,6 +93,16 @@ sub cmd_httpd  {
         unshift @httpd_args, '-DHTTPS';
     }
     run( '/usr/sbin/httpd', @httpd_args );
+}
+
+sub cmd_dev_httpd {
+    wait_for_db();
+    my $have_params = -f "/app/data/params";
+    run( 'perl', 'checksetup.pl', '--no-template', $ENV{BZ_ANSWERS_FILE} );
+    if ( not $have_params ) {
+        run( 'perl', 'scripts/generate_bmo_data.pl', '--param' => 'use_mailer_queue=0', 'vagrant@bmo-web.vm' );
+    }
+    httpd();
 }
 
 sub cmd_load_test_data {

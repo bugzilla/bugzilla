@@ -125,7 +125,7 @@
           <option value="[% dontchange FILTER html %]">[% dontchange FILTER html %]</option>
         [% END %]
         [% IF !flag || (can_edit_flag && user.can_request_flag(type)) || flag.setter_id == user.id %]
-          <option value="X" label="X"></option>
+          <option value="X" label=" "></option>
         [% END %]
         [% IF type.is_active && can_edit_flag %]
           [% IF (type.is_requestable && user.can_request_flag(type)) || (flag && flag.status == "?") %]

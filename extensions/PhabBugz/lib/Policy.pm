@@ -83,9 +83,8 @@ sub new_from_query {
     my ($class, $params) = @_;
     my $result = request('policy.query', $params);
     if (exists $result->{result}{data} && @{ $result->{result}{data} }) {
-        return $result->{result}->{data}->[0];
+        return $class->new($result->{result}->{data}->[0]);
     }
-    return $class->new($result);
 }
 
 sub create {
@@ -105,7 +104,7 @@ sub create {
     if (@$project_names) {
         my $project_phids = [];
         foreach my $project_name (@$project_names) {
-            my $project = Bugzilla::Extension::PhabBugz::Project->new({ name => $project_name });
+            my $project = Bugzilla::Extension::PhabBugz::Project->new_from_query({ name => $project_name });
             push @$project_phids, $project->phid if $project;
         }
 
@@ -134,7 +133,7 @@ sub _build_rule_projects {
     return [
         map  { $_->name }
         grep { $_ }
-        map  { Bugzilla::Extension::PhabBugz::Project->new( { phids => [$_] } ) }
+        map  { Bugzilla::Extension::PhabBugz::Project->new_from_query( { phids => [$_] } ) }
         @{ $rule->{value} }
     ];
 }

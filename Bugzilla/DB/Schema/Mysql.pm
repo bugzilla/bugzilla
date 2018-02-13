@@ -103,9 +103,12 @@ sub _initialize {
         TINYTEXT =>     'tinytext',
         MEDIUMTEXT =>   'mediumtext',
         LONGTEXT =>     'mediumtext',
+        TEXT     =>     'text',
 
         LONGBLOB =>     'longblob',
 
+
+        NATIVE_DATETIME => 'datetime',
         DATETIME =>     'timestamp',
         DATE     =>     'date',
     };

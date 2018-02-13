@@ -146,7 +146,7 @@ sub update_params {
             if -e "$old_file.js" && !-e "$old_file.json";
 
         # Read the new data/params.json file.
-        $param = read_param_file();
+        $param = read_params();
     }
 
     my %new_params;
@@ -295,6 +295,37 @@ sub update_params {
 }
 
 sub write_params {
+    my ($params) = @_;
+    $params //= Bugzilla->params;
+
+    state $read_only_fs = Bugzilla->localconfig->{read_only_fs};
+    if ($read_only_fs) {
+        my $dbh = Bugzilla->dbh_main;
+        $dbh->bz_start_transaction();
+        local $SIG{__DIE__} = undef;
+        my $ok = eval {
+            $dbh->do("DELETE FROM params");
+            my $sth = $dbh->prepare("INSERT INTO params (param_key, param_val) VALUES (?, ?)");
+            trick_taint($params->{$_}) if defined $params->{$_};
+            $sth->execute($_, $params->{$_}) foreach keys %$params;
+            $dbh->bz_commit_transaction();
+            1;
+        };
+        if (not $ok) {
+            $dbh->bz_rollback_transaction;
+            die "Failed to write params to database: $@";
+        }
+    }
+    else {
+        _write_param_file($params);
+    }
+
+    # And now we have to reset the params cache so that Bugzilla will re-read
+    # them.
+    delete Bugzilla->request_cache->{params};
+}
+
+sub _write_param_file {
     my ($param_data) = @_;
     $param_data ||= Bugzilla->params;
     my $param_file = bz_locations()->{'datadir'} . '/params.json';
@@ -306,13 +337,23 @@ sub write_params {
     # Bugzilla::Install::Filesystem is slow.
     require Bugzilla::Install::Filesystem;
     Bugzilla::Install::Filesystem::fix_file_permissions($param_file);
-
-    # And now we have to reset the params cache so that Bugzilla will re-read
-    # them.
-    delete Bugzilla->request_cache->{params};
 }
 
-sub read_param_file {
+
+sub read_params {
+    state $read_only_fs = Bugzilla->localconfig->{read_only_fs};
+    if ($read_only_fs) {
+        my %params;
+        eval {
+            my $dbh = Bugzilla->dbh_main;
+            %params = map { @$_ } @{$dbh->selectall_arrayref("SELECT param_key, param_val FROM params")};
+        };
+        return \%params if keys %params;
+    }
+    return _read_param_file();
+}
+
+sub _read_param_file {
     my $params;
     my $file = bz_locations()->{'datadir'} . '/params.json';
 
@@ -412,7 +453,7 @@ Params:      C<$params> (optional) - A hashref to write to the disk
 
 Returns:     nothing
 
-=item C<read_param_file()>
+=item C<read_params()>
 
 Description: Most callers should never need this. This is used
              by C<Bugzilla-E<gt>params> to directly read C<$datadir/params.json>

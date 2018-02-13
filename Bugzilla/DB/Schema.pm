@@ -1800,6 +1800,17 @@ use constant ABSTRACT_SCHEMA => {
             user_api_keys_user_id_app_id_idx  => ['user_id', 'app_id'],
         ],
     },
+
+    params => {
+        FIELDS => [
+            id => {TYPE => 'INTSERIAL', NOTNULL => 1, PRIMARYKEY => 1},
+            param_key => {TYPE => 'varchar(255)', NOTNULL => 1},
+            param_val => {TYPE => 'text', NOTNULL => 1},
+        ],
+        INDEXES => [
+            params_param_key_idx => {FIELDS => ['param_key'], TYPE => 'UNIQUE'},
+        ],
+    },
 };
 
 # Foreign Keys are added in Bugzilla::DB::bz_add_field_tables

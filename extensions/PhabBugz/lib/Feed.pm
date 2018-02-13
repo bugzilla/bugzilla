@@ -124,7 +124,7 @@ sub process_revision_change {
     my ($self, $revision_phid, $story_text) = @_;
 
     # Load the revision from Phabricator
-    my $revision = Bugzilla::Extension::PhabBugz::Revision->new({ phids => [ $revision_phid ] });
+    my $revision = Bugzilla::Extension::PhabBugz::Revision->new_from_query({ phids => [ $revision_phid ] });
 
     # NO BUG ID
 

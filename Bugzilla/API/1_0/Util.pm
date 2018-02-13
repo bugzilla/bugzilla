@@ -17,7 +17,7 @@ use Bugzilla::Flag;
 use Bugzilla::FlagType;
 use Bugzilla::Util qw(datetime_from email_filter);
 
-use JSON;
+use JSON::MaybeXS;
 use MIME::Base64 qw(decode_base64 encode_base64);
 use Storable qw(dclone);
 use Test::Taint ();
@@ -361,10 +361,10 @@ sub datetime_format_outbound {
 
 # simple types
 
-sub as_boolean  { $_[0] ? JSON::true : JSON::false }
-sub as_double   { defined $_[0] ? $_[0] + 0.0 : JSON::null }
-sub as_int      { defined $_[0] ? int($_[0])  : JSON::null }
-sub as_string   { defined $_[0] ? $_[0] . ''  : JSON::null }
+sub as_boolean  { $_[0] ? JSON->true : JSON->false }
+sub as_double   { defined $_[0] ? $_[0] + 0.0 : undef }
+sub as_int      { defined $_[0] ? int($_[0])  : undef }
+sub as_string   { defined $_[0] ? $_[0] . ''  : undef }
 
 # array types
 
@@ -378,17 +378,17 @@ sub as_string_array { [ map { as_string($_) }       @{ $_[0] // [] } ] }
 sub as_datetime {
     return defined $_[0]
         ? datetime_from($_[0], 'UTC')->iso8601() . 'Z'
-        : JSON::null;
+        : undef;
 }
 
 sub as_login    {
     defined $_[0]
         ? ( Bugzilla->params->{use_email_as_login} ? email_filter($_[0]) : $_[0] . '' )
-        : JSON::null;
+        : undef;
 }
 
 sub as_email    {
-    defined($_[0]) && Bugzilla->user->in_group('editusers') ? $_[0] . '' : JSON::null;
+    defined($_[0]) && Bugzilla->user->in_group('editusers') ? $_[0] . '' : undef;
 }
 
 sub as_base64   {
@@ -486,29 +486,29 @@ Returns a base64 encoded value based on the parameter passed in.
 
 =head2 as_boolean
 
-If a true value is passed as a parameter, the method will return a JSON::true.
-If not returns JSON::false.
+If a true value is passed as a parameter, the method will return a JSON->true.
+If not returns JSON->false.
 
 =head2 as_datetime
 
 Formats an internal datetime value into a 'UTC' string suitable for returning to
-the client. If parameter is undefined, returns JSON::null.
+the client. If parameter is undefined, returns undef.
 
 =head2 as_double
 
 Takes a number value passed as a parameter, and adds 0.0 to it converting to a
-double value. If parameter is undefined, returns JSON::null.
+double value. If parameter is undefined, returns undef.
 
 =head2 as_email
 
 Takes an email address as a parameter. If the user is in the editusers group,
 it returns the email address, unchanged. If the parameter is undefined or the
-user is not in the editusers group, it returns JSON::null.
+user is not in the editusers group, it returns undef.
 
 =head2 as_int
 
 Takes a string or number passed as a parameter and converts it to an integer
-value. If parameter is undefined, returns JSON::null.
+value. If parameter is undefined, returns undef.
 
 =head2 as_int_array
 
@@ -520,7 +520,7 @@ returns an array reference with the converted values.
 Takes a login name as a parameter. If C<use_email_as_login> is enabled and the
 user is logged out, it returns the local part of the email address (the part
 before '@'). Else it returns the full login name. If parameter is undefined,
-returns JSON::null.
+returns undef.
 
 =head2 as_login_array
 
@@ -535,7 +535,7 @@ by calling '$object->name' for each value.
 =head2 as_string
 
 Returns whatever parameter is passed in unchanged, unless undefined, then it
-returns JSON::null.
+returns undef.
 
 =head2 as_string_array
 

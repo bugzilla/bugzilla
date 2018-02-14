@@ -21,6 +21,12 @@ BEGIN {
 use Bugzilla;
 BEGIN { Bugzilla->extensions };
 
-use JSON::XS;
+use JSON::MaybeXS;
 
-print JSON::XS->new->canonical->utf8->ascii->encode(Bugzilla->localconfig);
+my $json = JSON::MaybeXS->new(
+    canonical => 1,
+    utf8      => 1,
+    ascii     => 1,
+);
+
+print $json->encode(Bugzilla->localconfig);

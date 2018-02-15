@@ -36,7 +36,7 @@ Doing this on OSX can be accomplished with homebrew:
 
 .. code-block:: bash
 
-    brew install vagrant
+    brew cask install vagrant
 
 For Ubuntu 16.04, download the vagrant .dpkg directly from
 https://vagrantup.com.  The one that ships with Ubuntu is too old.

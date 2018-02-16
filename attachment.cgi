@@ -35,6 +35,7 @@ use Encode::MIME::Header; # Required to alter Encode::Encoding{'MIME-Q'}.
 local our $cgi = Bugzilla->cgi;
 local our $template = Bugzilla->template;
 local our $vars = {};
+local $Bugzilla::CGI::ALLOW_UNSAFE_RESPONSE = 1;
 
 # All calls to this script should contain an "action" variable whose
 # value determines what the user wants to do.  The code below checks

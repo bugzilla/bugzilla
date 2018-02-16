@@ -41,6 +41,7 @@ use File::Basename qw(basename);
 local our $cgi = Bugzilla->cgi;
 local our $template = Bugzilla->template;
 local our $vars = {};
+local $Bugzilla::CGI::ALLOW_UNSAFE_RESPONSE = 1;
 
 ################################################################################
 # Main Body Execution

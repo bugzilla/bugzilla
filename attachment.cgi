@@ -40,6 +40,7 @@ use Encode::MIME::Header; # Required to alter Encode::Encoding{'MIME-Q'}.
 local our $cgi = Bugzilla->cgi;
 local our $template = Bugzilla->template;
 local our $vars = {};
+local $Bugzilla::CGI::ALLOW_UNSAFE_RESPONSE = 1;
 
 ################################################################################
 # Main Body Execution

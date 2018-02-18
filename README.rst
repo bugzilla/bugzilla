@@ -154,7 +154,8 @@ While not yet as featureful or complete as the vagrant setup, this repository no
 docker-compose file that will create a local bugzilla for testing.
 
 To use docker-compose, ensure you have the latest Docker install for your environemnt
-(Linux, Windows, or Mac OS).
+(Linux, Windows, or Mac OS). If you are using Ubuntu, then you can read the next section
+to ensure that you have the correct docker setup.
 
 .. code-block:: bash
 
@@ -170,6 +171,32 @@ The procecure should be similar for other browsers.
 After that, you should be able to visit http://bmo-web.vm/ from your browser.
 You can login as vagrant@bmo-web.vm with the password "vagrant01!" (without
 quotes).
+
+Ensuring your Docker setup on Ubuntu 16.04
+==========================================
+
+On Ubuntu, Docker can be installed using apt-get. After installing, you need to do run these
+commands to ensure that it has installed fine:
+
+.. code-block:: bash
+
+    sudo groupadd docker # add a new group called "docker"
+    sudo gpasswd -a <your username> docker # add yourself to "docker" group
+
+Log in & log out of your system, so that changes in the above commands will  & do this:
+
+.. code-block:: bash
+
+    sudo service docker restart
+    docker run hello-world
+
+If the output of last command looks like this. then congrats you have installed
+docker successfully:
+
+.. code-block:: bash
+
+    Hello from Docker!
+    This message shows that your installation appears to be working correctly.
 
 Docker Container
 ================

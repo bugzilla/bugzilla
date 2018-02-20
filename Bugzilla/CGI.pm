@@ -491,6 +491,11 @@ sub _prevent_unsafe_response {
     }
 }
 
+sub should_block_referrer {
+    my ($self) = @_;
+    return length($self->self_url) > 8000;
+}
+
 # Override header so we can add the cookies in
 sub header {
     my $self = shift;
@@ -570,15 +575,20 @@ sub header {
     # the MIME type away from the declared Content-Type.
     $headers{'-x_content_type_options'} = 'nosniff';
 
-    my $csp = $self->content_security_policy;
-    $csp->add_cgi_headers(\%headers) if defined $csp && !$csp->disable;
-
     Bugzilla::Hook::process('cgi_headers',
         { cgi => $self, headers => \%headers }
     );
     $self->{_header_done} = 1;
 
     if (Bugzilla->usage_mode == USAGE_MODE_BROWSER) {
+        if ($self->should_block_referrer) {
+            $headers{'-referrer_policy'} = 'origin';
+        }
+        my $csp = $self->content_security_policy;
+        if (defined $csp && !$csp->disable) {
+            $csp->add_cgi_headers(\%headers)
+        }
+
         my @fonts = (
             "skins/standard/fonts/FiraMono-Regular.woff2?v=3.202",
             "skins/standard/fonts/FiraSans-Bold.woff2?v=4.203",

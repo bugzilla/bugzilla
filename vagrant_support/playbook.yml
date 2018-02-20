@@ -16,6 +16,7 @@
         - python2-ndg_httpsclient
         - pyOpenSSL
         - htop
+        - ntp
 
     - name: permissive selinux
       selinux: state=permissive policy=targeted

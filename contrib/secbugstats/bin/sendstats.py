@@ -293,15 +293,4 @@ if img:
     msgImage.add_header("Content-ID", "<image1>")
     msgRoot.attach(msgImage)
 
-# if console is chosen, print only to the console
-if "--console" in sys.argv:
-    print "\n", msgRoot.as_string()
-# print out only HTML body
-elif "--html" in sys.argv:
-    print "\n", body
-# send out the mail
-else:
-    s = smtplib.SMTP(SMTP_HOST, SMTP_PORT)
-    # s = smtplib.SMTP_SSL(SMTP_HOST, SMTP_PORT)
-    # s.login(LDAP_USER, LDAP_PASS)
-    s.sendmail(EMAIL_FROM, EMAIL_TO, msgRoot.as_string())
+print msgRoot.as_string()

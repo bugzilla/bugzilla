@@ -54,5 +54,5 @@ echo "[end graph.py]"
 
 # # Email the report
 echo "[sendstats.py `date +%Y-%m-%d\ %T`]"
-$SCRIPTS_DIR/sendstats.py
+$SCRIPTS_DIR/sendstats.py | perl scripts/sendmail.pl
 echo "[end sendstats.py]"

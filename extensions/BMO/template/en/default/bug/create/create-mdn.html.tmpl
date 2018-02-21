@@ -167,7 +167,7 @@ strong.required:before {
 [% END %]
 
 [% PROCESS global/header.html.tmpl
-   title = "Mozilla Developer Network Feedback"
+   title = "MDN Web Docs Feedback"
    style = inline_style
    javascript = inline_javascript
    javascript_urls = [ 'extensions/BMO/web/js/form_validate.js' ]
@@ -176,12 +176,12 @@ strong.required:before {
 <iframe id="yui-history-iframe" src="extensions/BMO/web/yui-history-iframe.txt"></iframe>
 <input id="yui-history-field" type="hidden">
 
-<h1>Mozilla Developer Network Feedback</h1>
+<h1>MDN Web Docs Feedback</h1>
 
 <form method="post" action="post_bug.cgi" enctype="multipart/form-data"
       onSubmit="return mdn.validateAndSubmit();">
   <input type="hidden" name="format" value="mdn">
-  <input type="hidden" name="product" value="Mozilla Developer Network">
+  <input type="hidden" name="product" value="developer.mozilla.org">
   <input type="hidden" name="rep_platform" value="All">
   <input type="hidden" name="op_sys" value="Other">
   <input type="hidden" name="version" value="unspecified">
@@ -214,7 +214,7 @@ strong.required:before {
         different specific [% terms.bug %] forms for…<br>
         <ul>
           <li>
-            <a href="https://bugzilla.mozilla.org/enter_bug.cgi?product=Mozilla%20Developer%20Network#h=detail%7Cbug">
+            <a href="https://bugzilla.mozilla.org/enter_bug.cgi?product=developer.mozilla.org#h=detail%7Cbug">
               Reporting a software [% terms.bug %] in MDN</a>
           </li>
           <li>

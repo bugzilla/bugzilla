@@ -166,7 +166,7 @@ function toggleGoalOther() {
     <span>Calendar</span>
   </button>
   <div id="con_calendar_timing_date"></div>
-  <script>
+  <script [% script_nonce FILTER none %]>
     createCalendar('timing_date')
   </script>
 </div>

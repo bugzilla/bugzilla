@@ -29,7 +29,16 @@
 [% PROCESS "reports/series-common.html.tmpl"
    newtext = "New (name below)" 
  %]
-  
+
+<script [% script_nonce FILTER none %]>
+  document.addEventListener("DOMContentLoaded", function (event) {
+    if (document.chartform) {
+      document.chartform.category.addEventListener("change", (event) => catSelected());
+      document.chartform.subcategory.addEventListener("change", (event) => checkNewState());
+    }
+  });
+</script>
+
 <table cellpadding="2" cellspacing="2" border="0"
        style="text-align: left; margin-left: 20px">
   <tbody>
@@ -42,19 +51,17 @@
     </tr>
     <tr>
       [% PROCESS series_select sel = { name => 'category',
-                                       size => 5,
-                                       onchange => "catSelected()" } %]
+                                       size => 5 } %]
         <td>
           <noscript>
             <input type="submit" name="action-edit" value="Update --&gt;"
                    id="action-edit">
           </noscript>
         </td>
-        
-      [% PROCESS series_select sel = { name => 'subcategory', 
-                                       size => 5,
-                                       onchange => "checkNewState()" } %]
-        
+
+      [% PROCESS series_select sel = { name => 'subcategory',
+                                       size => 5 } %]
+
       <td valign="top" name="name">
         <input type="text" name="name" maxlength="64" 
                value="[% default.name.0 FILTER html %]" size="25">

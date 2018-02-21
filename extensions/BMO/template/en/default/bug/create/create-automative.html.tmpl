@@ -182,7 +182,7 @@ function validateAndSubmit() {
       <span>Calendar</span>
     </button>
     <div id="con_calendar_prototype_date"></div>
-    <script>
+    <script [% script_nonce FILTER none %]>
       createCalendar('prototype_date')
     </script>
   </div>
@@ -200,7 +200,7 @@ function validateAndSubmit() {
       <span>Calendar</span>
     </button>
     <div id="con_calendar_production_date"></div>
-    <script>
+    <script [% script_nonce FILTER none %]>
       createCalendar('production_date')
     </script>
   </div>

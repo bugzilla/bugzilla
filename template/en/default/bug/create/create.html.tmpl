@@ -40,7 +40,7 @@
   onload = "init();"
 %]
 
-<script>
+<script [% script_nonce FILTER none %]>
 <!--
 
 function init() {
@@ -217,7 +217,7 @@ TUI_hide_default('attachment_text_field');
       <input type="button" id="expert_fields_controller"
              value="Hide Advanced Fields" onClick="toggleAdvancedFields()">
       [%# Show the link if the browser supports JS %]
-      <script>
+      <script [% script_nonce FILTER none %]>
         YAHOO.util.Dom.removeClass('expert_fields_controller',
                                    'bz_default_hidden');
       </script>
@@ -276,7 +276,7 @@ TUI_hide_default('attachment_text_field');
         [%- END %]
       </select>
 
-      <script>
+      <script [% script_nonce FILTER none %]>
        <!--
          [%+ INCLUDE "bug/field-events.js.tmpl"
                      field = bug_fields.component, product = product %]
@@ -492,7 +492,7 @@ TUI_hide_default('attachment_text_field');
       <th>Possible<br>Duplicates:</th>
       <td colspan="3">
         <div id="possible_duplicates"></div>
-        <script>
+        <script [% script_nonce FILTER none %]>
           var dt_columns = [
               { key: "id", label: "[% field_descs.bug_id FILTER js %]",
                 formatter: YAHOO.bugzilla.dupTable.formatBugLink },

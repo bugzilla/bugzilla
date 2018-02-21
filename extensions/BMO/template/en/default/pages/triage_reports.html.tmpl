@@ -137,7 +137,7 @@ Show UNCONFIRMED [% terms.bugs %] with:
 </table>
 
 </form>
-<script>
+<script [% script_nonce FILTER none %]>
   createCalendar('last_is');
 </script>
 

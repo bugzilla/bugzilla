@@ -35,7 +35,7 @@
     [% attachment_data FILTER html %]
   </pre>
   [% IF user.id %]
-    <script>
+    <script [% script_nonce FILTER none %]>
     <!--
       var patchviewerinstalled = 0;
       document.write('<button type="button" id="editButton" onclick="editAsComment(patchviewerinstalled);">Edit Attachment As Comment<\/button>');

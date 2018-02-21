@@ -7,7 +7,7 @@
   #%]
 
 [% IF attachment.bug.product_obj.reviewer_required %]
-<script>
+<script [% script_nonce FILTER none %]>
 $(function() {
   REVIEW.init_mandatory();
 });

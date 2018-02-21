@@ -21,7 +21,7 @@
   #%]
 
 [% IF ftc_flags.keys.size %]
-  <script>
+  <script [% script_nonce FILTER none %]>
   YAHOO.util.Event.onDOMReady(function() {
     var selects = YAHOO.util.Dom.getElementsByClassName('flag_select');
     for (var i = 0; i < selects.length; i++) {

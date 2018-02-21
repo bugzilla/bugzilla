@@ -32,7 +32,7 @@
             defaultcontent = user_story_default
         %]
       </div>
-      <script>
+      <script [% script_nonce FILTER none %]>
         var user_story_exclude_components = [];
         [% FOREACH c = default.user_story_visible.1 %]
           user_story_exclude_components.push('[% c FILTER js %]');

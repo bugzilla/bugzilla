@@ -21,7 +21,7 @@
    style_urls = ['skins/standard/admin.css']
 %]
 
-<script>
+<script [% script_nonce FILTER none %]>
 <!--
   function toggle_cell(cell) {
     if (cell.checked)

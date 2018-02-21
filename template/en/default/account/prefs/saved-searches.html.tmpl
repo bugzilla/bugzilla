@@ -25,7 +25,7 @@
   #%]
 
 [% IF user.can_bless %]
-  <script><!--
+  <script [% script_nonce FILTER none %]><!--
     function update_checkbox(group) {
       var bless_groups = [[% bless_group_ids.join(",") FILTER js %]];
       var checkbox = document.getElementById(group.name.replace(/share_(\d+)/, "force_$1"));

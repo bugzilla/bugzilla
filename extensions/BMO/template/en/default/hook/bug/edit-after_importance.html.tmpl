@@ -7,7 +7,7 @@
   #%]
 
 [%# Display product and component descriptions after their respective fields %]
-<script>
+<script [% script_nonce FILTER none %]>
   var Event = YAHOO.util.Event;
   var Dom = YAHOO.util.Dom;
   Event.onDOMReady(function() {

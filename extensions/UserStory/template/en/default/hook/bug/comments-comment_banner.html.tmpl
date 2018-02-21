@@ -11,7 +11,7 @@
 [% can_edit_story = bug.check_can_change_field('cf_user_story', 0, 1) %]
 
 <div class="user_story">
-  <script>
+  <script [% script_nonce FILTER none %]>
     function userStoryComment() {
         var commenttext = "(Commenting on User Story)\n";
         var text_elem = document.getElementById('user_story');
@@ -61,7 +61,7 @@
                 cols    = constants.COMMENT_COLS
                 defaultcontent = bug.cf_user_story %]
     </div>
-    <script>
+    <script [% script_nonce FILTER none %]>
       YAHOO.util.Event.addListener('user_story_edit_action', 'click', function() {
         YAHOO.util.Dom.addClass('user_story_edit', 'bz_default_hidden');
         YAHOO.util.Dom.addClass('user_story_readonly', 'bz_default_hidden');

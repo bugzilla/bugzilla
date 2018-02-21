@@ -23,7 +23,7 @@
 
 [% PROCESS "global/field-descs.none.tmpl" %]
 
-<script>
+<script [% script_nonce FILTER none %]>
 
 var first_load = true;         [%# is this the first time we load the page? %]
 var last_sel = new Array();    [%# caches last selection %]
@@ -394,7 +394,7 @@ TUI_hide_default('information_query');
                          onclick="showCalendar('chfieldto')"><span>Calendar</span></button>
           <div id="con_calendar_chfieldto"></div>
     (YYYY-MM-DD or relative dates)
-    <script>
+    <script [% script_nonce FILTER none %]>
       createCalendar('chfieldfrom');
       createCalendar('chfieldto');
     </script>

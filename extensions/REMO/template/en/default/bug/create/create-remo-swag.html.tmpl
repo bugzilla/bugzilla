@@ -27,7 +27,7 @@
 <p>These requests will only be visible to the person who submitted the request,
 any persons designated in the CC line, and authorized members of the Mozilla Rep team.</p>
 
-<script>
+<script [% script_nonce FILTER none %]>
 function trySubmit() {
   var eventname = document.getElementById('eventname').value;
   var shortdesc = 'Swag Request - ' + eventname;

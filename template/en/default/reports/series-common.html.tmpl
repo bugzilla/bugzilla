@@ -29,7 +29,7 @@
 [% subcategory = category.${default.category} %]
 [% name = subcategory.${default.subcategory} %]
 
-<script>
+<script [% script_nonce FILTER none %]>
 [%# This structure holds details of the series the user can select from. %]
 var series = {
 [% FOREACH c = category.keys.sort %]

@@ -84,7 +84,7 @@ $(function() {
   [% END %]
 </form>
 
-<script>
+<script [% script_nonce FILTER none %]>
   Duo.init({
     'host': '[% Param('duo_host') FILTER js %]',
     'sig_request': '[% sig_request FILTER js %]',

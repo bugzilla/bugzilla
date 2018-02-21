@@ -34,10 +34,10 @@ my $REFERRER_KEYWORD = enum [qw(
 
 my @ALL_BOOL = qw( sandbox upgrade_insecure_requests );
 my @ALL_SRC = qw(
-    default_src child_src  connect_src
+    default_src worker_src  connect_src
     font_src    img_src    media_src
     object_src  script_src style_src
-    frame_ancestors form_action
+    frame_src frame_ancestors form_action
 );
 
 has \@ALL_SRC     => ( is => 'ro', isa => $SOURCE_LIST, predicate => 1 );

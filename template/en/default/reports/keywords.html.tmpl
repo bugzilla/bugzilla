@@ -34,7 +34,7 @@
   title = "$terms.Bugzilla Keyword Descriptions"
 %]
 
-<script>
+<script [% script_nonce FILTER none %]>
  $(document).ready(function () {
      var show_inactive_keywords = [% show_inactive_keywords ? "true" : "false" FILTER none %],
          link = $("#keywords_show_hide"),

@@ -31,7 +31,7 @@
   style_urls = ['skins/standard/buglist.css']
 %]
 
-<script>
+<script [% script_nonce FILTER none %]>
   var useclassification = false; // No classification level in use
   var first_load = true; // Is this the first time we load the page?
   var last_sel = []; // Caches last selection

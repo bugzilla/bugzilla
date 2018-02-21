@@ -56,7 +56,7 @@
   <input type="hidden" name="action" value="create">
   <input type="hidden" name="token" value="[% issue_hash_token(['create-series']) FILTER html %]">
 
-<script>
+<script [% script_nonce FILTER none %]>
   document.chartform.category[0].selected = true;
   catSelected();
   checkNewState();

@@ -23,7 +23,7 @@
 }
 </style>
 
-<script>
+<script [% script_nonce FILTER none %]>
 var Dom = YAHOO.util.Dom;
 var useclassification = false;
 var first_load = true;
@@ -47,7 +47,7 @@ var watch_users = new Array();
 <script src="[% 'js/productform.js' FILTER version FILTER html %]">
 </script>
 
-<script>
+<script [% script_nonce FILTER none %]>
 function onSelectProduct() {
   var component = Dom.get('component');
   selectProduct(Dom.get('product'), component);

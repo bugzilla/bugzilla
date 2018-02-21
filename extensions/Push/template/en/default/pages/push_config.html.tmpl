@@ -12,7 +12,7 @@
   style_urls = [ 'extensions/Push/web/admin.css' ]
 %]
 
-<script>
+<script [% script_nonce FILTER none %]>
 var push_defaults = new Array();
 [% FOREACH option = push.config.options %]
   [% IF option.name != 'enabled' && option.default != '' %]
@@ -127,7 +127,7 @@ var push_defaults = new Array();
     </tr>
   [% END %]
   [% IF name != 'global' %]
-    <script>
+    <script [% script_nonce FILTER none %]>
       var is_enabled = document.getElementById('[% name FILTER js %]_enabled').value == 'Enabled';
       toggle_options(is_enabled, '[% name FILTER js %]');
     </script>

@@ -37,7 +37,7 @@
 
 [% can_edit = 0 %]
 
-<script>
+<script [% script_nonce FILTER none %]>
   Splinter.configBase = '[% Bugzilla.splinter_review_base FILTER js %]';
   Splinter.configBugUrl = '[% urlbase FILTER js %]';
   Splinter.configHaveExtension = true;
@@ -229,7 +229,7 @@
                                              any_flags_requesteeble = any_flags_requesteeble
             %]
           [% END %]
-          <script>
+          <script [% script_nonce FILTER none %]>
             [% FOREACH flag_type = flag_types %]
               [% NEXT UNLESS flag_type.is_active %]
               Event.addListener('flag_type-[% flag_type.id FILTER js %]', 'change',

@@ -36,7 +36,7 @@
          %]
         <br>
       </div>
-      <script>
+      <script [% script_nonce FILTER none %]>
         hideEditableField('bz_bug_mentors_edit_container',
                           'bz_bug_mentors_input',
                           'bz_bug_mentors_edit_action',

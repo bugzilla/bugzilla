@@ -140,7 +140,7 @@
         [% END %]
         </tbody>
       </table>
-      <script><!--
+      <script [% script_nonce FILTER none %]><!--
         var numelements = document.forms.editform.elements.length;
         function SetCheckboxes(value) {
           var item;

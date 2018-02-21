@@ -7,7 +7,7 @@
   #%]
 
 [% IF flag_default_requestees.keys.size %]
-  <script>
+  <script [% script_nonce FILTER none %]>
   var currently_requested = new Array();
   var default_requestees = new Array();
   [% FOREACH id = flag_currently_requested.keys %]

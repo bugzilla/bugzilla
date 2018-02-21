@@ -70,7 +70,7 @@
     with_buttons = 1
     condition = { f => 'noop' }
     cond_num = cond_num + 1 %]
-  <script>
+  <script [% script_nonce FILTER none %]>
     TUI_alternates['custom_search_query'] = '&#9658;';
     TUI_hide_default('custom_search_query');
     TUI_alternates['custom_search_advanced'] = "Show Advanced Features";
@@ -78,7 +78,7 @@
   </script>
   <script src="[% 'js/custom-search.js' FILTER version %]"></script>
   <script src="[% 'js/history.js/native.history.js' FILTER version %]"></script>
-  <script>
+  <script [% script_nonce FILTER none %]>
     redirect_html4_browsers();
     [%# These are alternative labels for the AND and OR options in and_all_select %]
     var cs_and_label = 'Match ALL of the following:';

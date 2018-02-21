@@ -45,7 +45,7 @@
             id = field.name name = field.name minrows = 4 maxrows = 8
             cols = 60 defaultcontent = value %]
       </div>
-      <script>
+      <script [% script_nonce FILTER none %]>
         hideEditableField('[% field.name FILTER js %]_edit_container',
                           '[% field.name FILTER js %]_input',
                           '[% field.name FILTER js %]_edit_action',

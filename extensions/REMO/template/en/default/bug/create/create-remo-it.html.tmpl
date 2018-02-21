@@ -17,7 +17,7 @@
 [% USE Bugzilla %]
 [% mandatory = '<span class="mandatory" title="Required">*</span>' %]
 
-<script>
+<script [% script_nonce FILTER none %]>
 var Dom = YAHOO.util.Dom;
 
 function mandatory(elements) {

@@ -41,7 +41,7 @@
   filter some or all notifications.
 </p>
 
-<script>
+<script [% script_nonce FILTER none %]>
 <!--
 function SetCheckboxes(setting) {
   for (var count = 0; count < document.userprefsform.elements.length; count++) {

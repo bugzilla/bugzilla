@@ -111,7 +111,7 @@
           </tr>
         </table>
 
-        <script>
+        <script [% script_nonce FILTER none %]>
             bz_toggleClass("input_[% param.name FILTER html %]", "bz_default_hidden");
             bz_toggleClass("table_[% param.name FILTER html %]", "bz_default_hidden");
         </script>

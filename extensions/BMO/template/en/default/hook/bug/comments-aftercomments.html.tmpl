@@ -11,7 +11,7 @@
   [% collapse_caption = 'Collapse TinderboxPushlog Comments' %]
   [% show_caption     = 'Show TinderboxPushlog Comments' %]
   [% hide_caption     = 'Hide TinderboxPushlog Comments' %]
-  <script>
+  <script [% script_nonce FILTER none %]>
     YAHOO.util.Event.onDOMReady(function () {
         var ul = document.getElementsByClassName('bz_collapse_expand_comments');
         if (ul.length == 0)

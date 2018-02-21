@@ -19,7 +19,7 @@
             'js/field.js' ]
 %]
 
-<script>
+<script [% script_nonce FILTER none %]>
   $(function () {
     YUI({
       base: 'js/yui3/',

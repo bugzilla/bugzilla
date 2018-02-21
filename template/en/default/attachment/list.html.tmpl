@@ -19,7 +19,7 @@
   #                 Frédéric Buclin <LpSolit@gmail.com>
   #%]
 
-<script>
+<script [% script_nonce FILTER none %]>
 <!--
 function toggle_display(link) {
     var table = document.getElementById("attachment_table");

@@ -46,7 +46,7 @@ var queryform = "reportform"
   [% terms.bugs %] using the rest of the form.
 </p>
 
-<script><!--
+<script [% script_nonce FILTER none %]><!--
   [%# The Y-axis fields are not used for pie charts %]
   function chartTypeChanged() {
     // format[2] is the pie chart radio button

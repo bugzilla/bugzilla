@@ -25,7 +25,7 @@
 <script src="[% 'js/comments.js' FILTER version %]">
 </script>
 
-<script>
+<script [% script_nonce FILTER none %]>
 <!--
   /* Adds the reply text to the 'comment' textarea */
   function replyToComment(id, real_id, name) {
@@ -191,13 +191,13 @@
             [% IF comment.collapsed %]
               </span>
             [% END %]
-            <script>
+            <script [% script_nonce FILTER none %]>
               addCollapseLink([% comment.count %], [% comment.collapsed FILTER js %], 'Toggle comment display');
             </script>
           </span>
         [% ELSIF comment.collapsed %]
           <span class="bz_comment_actions">
-            <script>
+            <script [% script_nonce FILTER none %]>
               addCollapseLink([% comment.count %], [% comment.collapsed FILTER js %], 'Toggle comment display');
             </script>
           </span>
@@ -270,7 +270,7 @@
                    [% " bz_default_hidden" UNLESS comment.tags.size %]">
           <span id="ct_[% comment.count %]">
             [% IF comment.tags.size %]
-              <script>
+              <script [% script_nonce FILTER none %]>
                 YAHOO.bugzilla.commentTagging.showTags([% comment.id FILTER none %],
                   [% comment.count FILTER none %], [
                 [% FOREACH tag = comment.tags %]

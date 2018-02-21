@@ -29,7 +29,7 @@ var selected_components = [
   style_urls = [ 'extensions/TrackingFlags/web/styles/admin.css' ]
 %]
 
-<script>
+<script [% script_nonce FILTER none %]>
   var groups_str = "[% groups || '[]' FILTER js %]";
   var groups = $.parseJSON(groups_str);
   var flag_values_str = "[% values || '[]' FILTER js %]";

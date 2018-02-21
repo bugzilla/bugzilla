@@ -34,8 +34,9 @@ BEGIN {
 sub DEFAULT_CSP {
     my %policy = (
         default_src => [ 'self' ],
-        script_src  => [ 'self', 'unsafe-inline', 'unsafe-eval', 'https://www.google-analytics.com' ],
-        child_src   => [ 'self', ],
+        script_src  => [ 'self', 'nonce', 'unsafe-inline', 'https://www.google-analytics.com' ],
+        frame_src   => [ 'none', ],
+        worker_src  => [ 'none', ],
         img_src     => [ 'self', 'https://secure.gravatar.com', 'https://www.google-analytics.com' ],
         style_src   => [ 'self', 'unsafe-inline' ],
         object_src  => [ 'none' ],
@@ -45,7 +46,7 @@ sub DEFAULT_CSP {
             'https://www.google.com/search'
         ],
         frame_ancestors => [ 'none' ],
-        disable         => 1,
+        report_only     => 1,
     );
     if (Bugzilla->params->{github_client_id} && !Bugzilla->user->id) {
         push @{$policy{form_action}}, 'https://github.com/login/oauth/authorize', 'https://github.com/login';
@@ -68,11 +69,8 @@ sub SHOW_BUG_MODAL_CSP {
             # This is from extensions/OrangeFactor/web/js/orange_factor.js
             'https://brasstacks.mozilla.com/orangefactor/api/count',
         ],
-        child_src   => [
-            'self',
-            # This is for the socorro lens addon and is to be removed by Bug 1332016
-            'https://ashughes1.github.io/bugzilla-socorro-lens/chart.htm'
-        ],
+        frame_src   => [ 'none', ],
+        worker_src  => [ 'none', ],
     );
     if (use_attachbase() && $bug_id) {
         my $attach_base = Bugzilla->localconfig->{'attachment_base'};
@@ -194,7 +192,7 @@ sub content_security_policy {
         require Bugzilla::CGI::ContentSecurityPolicy;
         if (%add_params || !$self->{Bugzilla_csp}) {
             my %params = DEFAULT_CSP;
-            delete $params{disable} if %add_params && !$add_params{disable};
+            delete $params{report_only} if %add_params && !$add_params{report_only};
             foreach my $key (keys %add_params) {
                 if (defined $add_params{$key}) {
                     $params{$key} = $add_params{$key};

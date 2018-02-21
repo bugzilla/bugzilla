@@ -33,7 +33,7 @@
   donames = 1 
 %]
 
-<script>
+<script [% script_nonce FILTER none %]>
 [%# This function takes necessary action on selection of a subcategory %]
 function subcatSelected() {
   var cat = document.chartform.category.value;
@@ -55,6 +55,15 @@ function subcatSelected() {
   
   checkNewState();
 }
+document.addEventListener("DOMContentLoaded", function(event) {
+  document.chartform.category.addEventListener("change", function (event) {
+    catSelected();
+    return subcatSelected();
+  });
+  document.chartform.subcategory.addEventListener("change", function (event) {
+    return subcatSelected();
+  });
+});
 </script>
   
 [% gttext = "Grand Total" %]
@@ -79,23 +88,20 @@ function subcatSelected() {
         </th>
       </tr>
       <tr>
-      
-        [% PROCESS series_select sel = { name => 'category', 
-                                         size => 5,
-                                         onchange = "catSelected();
-                                                     subcatSelected();" } %]
-                                   
+
+        [% PROCESS series_select sel = { name => 'category',
+                                         size => 5 } %]
+
         <td>
           <noscript>
             <input type="submit" name="action-assemble" value="Update --&gt;"
                    id="action-assemble">
           </noscript>
         </td>
-        
-        [% PROCESS series_select sel = { name => 'subcategory', 
-                                         size => 5,
-                                         onchange = "subcatSelected()" } %]
-                                   
+
+        [% PROCESS series_select sel = { name => 'subcategory',
+                                         size => 5 } %]
+
         <td>
           <noscript>
             <input type="submit" name="action-assemble" value="Update --&gt;"

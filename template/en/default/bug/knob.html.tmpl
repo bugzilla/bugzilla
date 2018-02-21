@@ -70,7 +70,7 @@
   [% END %]
 </div>
 
-<script>
+<script [% script_nonce FILTER none %]>
   var close_status_array = [
     [% FOREACH status = bug.choices.bug_status %]
       [% NEXT IF status.is_open %]

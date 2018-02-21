@@ -40,7 +40,7 @@
   [% END %]
 [% END %]
 
-<script>
+<script [% script_nonce FILTER none %]>
   var tracking_flags_str = "[% tracking_flags_json FILTER js %]";
   var TrackingFlags = $.parseJSON(tracking_flags_str);
   hide_tracking_flags();

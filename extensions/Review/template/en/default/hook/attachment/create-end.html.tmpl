@@ -10,7 +10,7 @@
   [% bug = attachment.bug %]
 [% END %]
 
-<script>
+<script [% script_nonce FILTER none %]>
   $(function() {
     [% IF bug.product_obj.reviewer_required %]
       REVIEW.init_mandatory();

@@ -74,7 +74,7 @@
 
       <div id="con_calendar_[% field.name FILTER html %]"></div>
 
-      <script>
+      <script [% script_nonce FILTER none %]>
         createCalendar('[% field.name FILTER js %]')
       </script>
     [% CASE constants.FIELD_TYPE_BUG_ID %]
@@ -91,7 +91,7 @@
         <span id="[% field.name FILTER html %]_edit_container" class="edit_me bz_default_hidden">
           (<a href="#" id="[% field.name FILTER html %]_edit_action">edit</a>)
         </span>
-        <script>
+        <script [% script_nonce FILTER none %]>
         hideEditableField('[% field.name FILTER js %]_edit_container',
                           '[% field.name FILTER js %]_input_area',
                           '[% field.name FILTER js %]_edit_action',
@@ -175,7 +175,7 @@
           <input type="hidden" name="defined_[% field.name FILTER html %]">
         [% END %]
 
-        <script>
+        <script [% script_nonce FILTER none %]>
         <!--
           initHidingOptionsForIE('[% field.name FILTER js %]');
           [%+ INCLUDE "bug/field-events.js.tmpl"
@@ -197,7 +197,7 @@
             id = field.name name = field.name minrows = 4 maxrows = 8
             cols = 60 defaultcontent = value mandatory = field.is_mandatory %]
        </div>
-       <script>
+       <script [% script_nonce FILTER none %]>
          hideEditableField('[% field.name FILTER js %]_edit_container',
                            '[% field.name FILTER js %]_input',
                            '[% field.name FILTER js %]_edit_action',
@@ -230,7 +230,7 @@
                   [% IF !bug.id %]value="[% value FILTER html %]"[% END %]>
          </div>
          [% IF bug.id %]
-           <script>
+           <script [% script_nonce FILTER none %]>
              setupEditLink('[% field.name FILTER js %]');
            </script>
          [% END %]
@@ -241,7 +241,7 @@
               name="[% field.name FILTER html %]"
               data-values="[% field.name FILTER html %]"
               value="[% value FILTER html %]">
-       <script>
+       <script [% script_nonce FILTER none %]>
           if (typeof BUGZILLA.autocomplete_values === 'undefined')
             BUGZILLA.autocomplete_values = [];
           BUGZILLA.autocomplete_values['[% field.name FILTER js %]'] = [

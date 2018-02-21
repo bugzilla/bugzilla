@@ -51,6 +51,7 @@ local our $cgi = Bugzilla->cgi;
 local our $template = Bugzilla->template;
 local our $vars = {};
 my $dbh = Bugzilla->dbh;
+$cgi->content_security_policy(report_only => 0);
 
 my $user = Bugzilla->login(LOGIN_REQUIRED);
 

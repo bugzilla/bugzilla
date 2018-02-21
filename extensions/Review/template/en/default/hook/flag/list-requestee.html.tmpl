@@ -12,6 +12,6 @@
   &nbsp;&nbsp;<a href="#" id="[% fid FILTER none %]_suggestions_link">suggested reviewers &#9662;</a>
 </span>
 
-<script>
+<script [% script_nonce FILTER none %]>
   REVIEW.init_review_flag('[% fid FILTER none %]', '[% flag_name FILTER none %]');
 </script>

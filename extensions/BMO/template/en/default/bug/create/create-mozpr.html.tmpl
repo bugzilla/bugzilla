@@ -327,7 +327,7 @@ function validate_form() {
     <span>Calendar</span>
   </button>
   <div id="con_calendar_start_date"></div>
-  <script>
+  <script [% script_nonce FILTER none %]>
     createCalendar('start_date')
   </script>
 </div>
@@ -341,7 +341,7 @@ function validate_form() {
     <span>Calendar</span>
   </button>
   <div id="con_calendar_announce_date"></div>
-  <script>
+  <script [% script_nonce FILTER none %]>
     createCalendar('announce_date')
   </script>
 </div>
@@ -355,7 +355,7 @@ function validate_form() {
     <span>Calendar</span>
   </button>
   <div id="con_calendar_cf_due_date"></div>
-  <script>
+  <script [% script_nonce FILTER none %]>
     createCalendar('cf_due_date')
   </script>
 </div>

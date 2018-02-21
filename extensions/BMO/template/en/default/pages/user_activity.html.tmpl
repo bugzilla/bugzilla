@@ -83,7 +83,7 @@
 [% END %]
 </form>
 
-<script>
+<script [% script_nonce FILTER none %]>
   createCalendar('from');
   createCalendar('to');
 </script>

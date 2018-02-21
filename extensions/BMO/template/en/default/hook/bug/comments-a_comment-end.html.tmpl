@@ -10,7 +10,7 @@
       && (comment.author.login_name == 'tbplbot@gmail.com' || comment.author.login_name == 'orangefactor@bots.tld')
 %]
   [% has_tbpl_comment = 1 %]
-  <script>
+  <script [% script_nonce FILTER none %]>
     var id = [% count FILTER none %];
     tbpl_comment_ids.push(id);
     collapse_comment(

@@ -19,7 +19,7 @@
   [% default.product = [ 'Firefox' ] %]
 [% END %]
 
-<script>
+<script [% script_nonce FILTER none %]>
 YAHOO.bugzilla.instantSearch.setLabels( {
   id: "[% field_descs.bug_id FILTER js %]",
   summary: "[% field_descs.short_desc FILTER js %]",

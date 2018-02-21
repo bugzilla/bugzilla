@@ -45,7 +45,7 @@
     [% END %]
   [% END %]
 </td></tr></thead><tbody class="[% collapsed ? 'file_collapse' : 'file' %]">
-<script>
+<script [% script_nonce FILTER none %]>
 incremental_restore()
 </script>
 

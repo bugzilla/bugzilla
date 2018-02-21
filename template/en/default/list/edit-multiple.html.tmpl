@@ -28,7 +28,7 @@
 <input type="hidden" name="dontchange" value="[% dontchange FILTER html %]">
 <input type="hidden" name="token" value="[% token FILTER html %]">
 
-<script>
+<script [% script_nonce FILTER none %]>
   function SetCheckboxes(value) {
       var elements = document.forms.changeform.getElementsByTagName('input'),
           numelements = elements.length,
@@ -328,7 +328,7 @@
 
 [% IF groups.size > 0 %]
 
-  <script>
+  <script [% script_nonce FILTER none %]>
     function turn_off(myself, id) {
         var other_checkbox = document.getElementById(id);
         if (myself.checked && other_checkbox) {
@@ -443,7 +443,7 @@
   </select>
   </span>
 
-  <script>
+  <script [% script_nonce FILTER none %]>
   var close_status_array = new Array("[% closed_status_array.join('", "') FILTER none %]");
     YAHOO.util.Event.addListener('bug_status', "change", showHideStatusItems, '[% "is_duplicate" IF bug.dup_id %]');
     YAHOO.util.Event.onDOMReady( showHideStatusItems );

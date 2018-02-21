@@ -810,7 +810,7 @@ function showGear() {
   We do this to help protect the personal identifying information in this [% terms.bugs %].
 </p>
 
-<script>
+<script [% script_nonce FILTER none %]>
   initFields();
   onPurposeChange();
   onAddGearChange();

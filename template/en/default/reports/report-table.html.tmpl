@@ -46,7 +46,7 @@
   [% urlbase = BLOCK %][% urlbase %]&amp;[% tbl_field FILTER uri %]=[% tbl FILTER uri %][% END %]
 [% END %]
 
-<script>
+<script [% script_nonce FILTER none %]>
 function bz_encode (str, decode) {
   // First decode HTML entities, if requested.
   if (decode)

@@ -16,7 +16,7 @@
    style = ".mandatory{color:red;font-size:80%;}"
 %]
 
-<script>
+<script [% script_nonce FILTER none %]>
 <!--
     function trySubmit() {
         var alert_text = "";

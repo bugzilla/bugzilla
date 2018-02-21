@@ -32,7 +32,7 @@ Please use the <a href="enter_bug.cgi?format=__default__">advanced [% terms.bug 
 <div id="loading" class="hidden">
 Please wait...
 </div>
-<script>
+<script [% script_nonce FILTER none %]>
 YAHOO.util.Dom.removeClass('loading', 'hidden');
 </script>
 
@@ -50,7 +50,7 @@ YAHOO.util.Dom.removeClass('loading', 'hidden');
   <a id="advanced_link" href="enter_bug.cgi?format=__default__">Switch to the advanced [% terms.bug %] entry form</a>
 </div>
 
-<script>
+<script [% script_nonce FILTER none %]>
 YAHOO.util.Dom.addClass('loading', 'hidden');
 guided.init({ webdev: [% webdev ? "true" : "false" %] });
 guided.currentUser = '[% user.login FILTER js %]';

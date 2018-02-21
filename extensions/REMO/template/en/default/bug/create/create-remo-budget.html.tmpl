@@ -23,7 +23,7 @@
 any persons designated in the CC line, and authorized members of the Mozilla
 Rep team.</p>
 
-<script>
+<script [% script_nonce FILTER none %]>
 function trySubmit() {
   var firstname = document.getElementById('firstname').value;
   var lastname = document.getElementById('lastname').value;
@@ -135,7 +135,7 @@ function validateAndSubmit() {
       <span>Calendar</span>
     </button>
     <div id="con_calendar_cf_due_date"></div>
-    <script>
+    <script [% script_nonce FILTER none %]>
       createCalendar('cf_due_date')
     </script>
   </td>

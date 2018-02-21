@@ -28,7 +28,7 @@
   END;
 %]
 
-<script>
+<script [% script_nonce FILTER none %]>
   $(function() {
     var tracking_flag_components_str = "[% tracking_flag_components FILTER js %]";
     var tracking_flag_components = $.parseJSON(tracking_flag_components_str);

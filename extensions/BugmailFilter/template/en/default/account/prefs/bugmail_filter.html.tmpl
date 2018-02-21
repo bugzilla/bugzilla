@@ -14,7 +14,7 @@
 [% SET selectable_products = user.get_selectable_products %]
 [% SET dont_show_button = 1 %]
 
-<script>
+<script [% script_nonce FILTER none %]>
 var useclassification = false;
 var first_load = true;
 var last_sel = [];

@@ -18,7 +18,7 @@
 <h1>JavaScript is required to use this report.</h1>
 </noscript>
 
-<script>
+<script [% script_nonce FILTER none %]>
 var flags_data = $.parseJSON("[% flags_json FILTER js %]");
 var products_data = $.parseJSON("[% products_json FILTER js %]");
 var fields_data = $.parseJSON("[% fields_json FILTER js %]");

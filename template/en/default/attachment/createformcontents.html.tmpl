@@ -21,13 +21,22 @@
   #                 Marc Schumann <wurblzap@gmail.com>
   #%]
 
+<script [% script_nonce FILTER none %]>
+  document.addEventListener("DOMContentLoaded", function (event) {
+    document.querySelector("#attachment_data_controller").addEventListener(
+      "click", function (event) {
+        TUI_toggle_class('attachment_text_field');
+        TUI_toggle_class('attachment_data');
+      });
+  });
+</script>
+
 <tr class="attachment_data">
   <th><label for="data">File</label>:</th>
   <td>
     <em>Enter the path to the file on your computer</em> (or
-    <a id="attachment_data_controller" href="javascript:TUI_toggle_class('attachment_text_field');
-                                             javascript:TUI_toggle_class('attachment_data')"
-    >paste text as attachment</a>).<br>
+    <a id="attachment_data_controller">
+    paste text as attachment</a>).<br>
     <input type="file" id="data" name="data" size="50">
   </td>
 </tr>
@@ -58,7 +67,7 @@
     <input type="checkbox" id="ispatch" name="ispatch" value="1">
     <label for="ispatch">patch</label><br><br>
     [%# Reset this whenever the page loads so that the JS state is up to date %]
-    <script [% csp_nonce FILTER none %]>
+    <script [% script_nonce FILTER none %]>
       $(function() {
         $("#file").on("change", function() {
           DataFieldHandler();

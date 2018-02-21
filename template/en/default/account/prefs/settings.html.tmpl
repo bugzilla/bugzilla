@@ -80,7 +80,7 @@
   </table>
 [% END %]
 
-<script>
+<script [% script_nonce FILTER none %]>
 $().ready(function() {
   var id = document.location.hash.substring(1) + '_row';
   $('#' + id).addClass('highlighted');

@@ -219,7 +219,7 @@
                   <a href="attachment.cgi?id=[% attachment.id %]">View the attachment on a separate page</a>.</b>
                 </iframe>
               [% END %]
-              <script>
+              <script [% script_nonce FILTER none %]>
                 <!--
                 var patchviewerinstalled = 0;
                 var attachment_id = [% attachment.id %];
@@ -328,7 +328,7 @@
   [% END %]
 </div>
 [% IF can_edit %]
-  <script>
+  <script [% script_nonce FILTER none %]>
     <!--
       YAHOO.util.Dom.removeClass( document.body, "no_javascript" );
       toggle_attachment_details_visibility( );

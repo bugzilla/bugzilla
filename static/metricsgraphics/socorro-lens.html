@@ -37,7 +37,7 @@
     </div>
     <div style="width:300px; height:75px; color:red; text-align:center; visibility:hidden;" id='warn'></div>
     <script src='js/main.js'></script>
-    <script>
+    <script [% script_nonce FILTER none %]>
       document.addEventListener('DOMContentLoaded', function () {
         document.querySelector('select[name="channel"]').onchange = channelEventHandler;
         document.querySelector('select[name="match"]').onchange = matchEventHandler;

@@ -41,7 +41,7 @@
 [% tablecolour = "#FFFFCC" %]
 
 [%# This script displays the descriptions for selected components. %]
-<script>
+<script [% script_nonce FILTER none %]>
 var descriptions = [
 [% FOREACH c = product.components %]
   '[% c.description FILTER js %]',
@@ -181,7 +181,7 @@ function PutDescription() {
           <td valign="top" width="100%">
               <div id="description" style="color: green; margin-left: 10px;
                                            height: 5em; overflow: auto;">
-                <script>
+                <script [% script_nonce FILTER none %]>
                   if ((document.getElementById) && (document.body.innerHTML)) {
                     document.write("\
                     Select a component to see its description here.");

@@ -27,7 +27,7 @@
   </td>
 </tr>
 
-<script>
+<script [% script_nonce FILTER none %]>
 function sanitise_name(name) {
   return name.toLowerCase()
              .replace(/[^a-z0-9_]/g, '-')

@@ -9,7 +9,7 @@
 [% PROCESS bug/needinfo.html.tmpl
    bug => attachment.bug
 %]
-<script>
+<script [% script_nonce FILTER none %]>
   document.getElementById('editButton').addEventListener('click', function() {
     document.getElementById('attachment_view_window')
       .appendChild(document.getElementById('needinfo_container'));

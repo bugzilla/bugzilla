@@ -10,6 +10,6 @@
 
 [%# Needed for collapsing TinderboxPushlog comments %]
 [% has_tbpl_comment = 0 %]
-<script>
+<script [% script_nonce FILTER none %]>
   var tbpl_comment_ids = new Array();
 </script>

@@ -35,7 +35,7 @@
 <input type="submit" value="Commit Changes" id="commit_btn" class="bz_default_hidden">
 </form>
 
-<script>
+<script [% script_nonce FILTER none %]>
   var table_data_str = "[% table_data FILTER js %]";
   var table_data = $.parseJSON(table_data_str);
   var editTable = new EditTable('edit_table', table_data);

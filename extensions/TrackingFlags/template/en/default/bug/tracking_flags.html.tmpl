@@ -32,7 +32,7 @@
               [% value.name FILTER html %]</option>
           [% END %]
         </select>
-        <script>
+        <script [% script_nonce FILTER none %]>
           initHidingOptionsForIE('[% flag.name FILTER js %]');
         </script>
         [% IF !new_bug && user.id %]
@@ -47,7 +47,7 @@
   </tr>
 [% END %]
 
-<script>
+<script [% script_nonce FILTER none %]>
   var tracking_flags_str = "[% tracking_flags_json FILTER js %]";
   TrackingFlags = $.parseJSON(tracking_flags_str);
 </script>

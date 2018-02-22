@@ -257,7 +257,7 @@ our %create_bug_formats = (
         'format'  => 'data-compliance',
         'include' => 'everyone',
     },
-    'Mozilla Developer Network' => {
+    'developer.mozilla.org' => {
         'format'  => 'mdn',
         'include' => 'everyone',
     },

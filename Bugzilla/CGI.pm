@@ -69,7 +69,7 @@ sub SHOW_BUG_MODAL_CSP {
             # This is from extensions/OrangeFactor/web/js/orange_factor.js
             'https://brasstacks.mozilla.com/orangefactor/api/count',
         ],
-        frame_src   => [ 'none', ],
+        frame_src   => [ 'self', ],
         worker_src  => [ 'none', ],
     );
     if (use_attachbase() && $bug_id) {

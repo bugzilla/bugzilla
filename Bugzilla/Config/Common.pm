@@ -24,7 +24,7 @@ use parent qw(Exporter);
 @Bugzilla::Config::Common::EXPORT =
     qw(check_multi check_numeric check_regexp check_group
        check_sslbase check_priority check_severity check_platform
-       check_opsys check_shadowdb check_urlbase check_user_verify_class
+       check_opsys check_urlbase check_user_verify_class
        check_ip check_mail_delivery_method check_notification
        check_bug_status check_smtp_auth check_theschwartz_available
        check_maxattachmentsize check_email check_smtp_ssl
@@ -191,23 +191,6 @@ sub check_group {
     return "";
 }
 
-sub check_shadowdb {
-    my ($value) = (@_);
-    $value = trim($value);
-    if ($value eq "") {
-        return "";
-    }
-
-    if (!Bugzilla->params->{'shadowdbhost'}) {
-        return "You need to specify a host when using a shadow database";
-    }
-
-    # Can't test existence of this because ConnectToDatabase uses the param,
-    # but we can't set this before testing....
-    # This can really only be fixed after we can use the DBI more openly
-    return "";
-}
-
 sub check_urlbase {
     my ($url) = (@_);
     if ($url && $url !~ m:^http.*/$:) {
@@ -218,8 +201,8 @@ sub check_urlbase {
 
 sub check_user_verify_class {
     # doeditparams traverses the list of params, and for each one it checks,
-    # then updates. This means that if one param checker wants to look at 
-    # other params, it must be below that other one. So you can't have two 
+    # then updates. This means that if one param checker wants to look at
+    # other params, it must be below that other one. So you can't have two
     # params mutually dependent on each other.
     # This means that if someone clears the LDAP config params after setting
     # the login method as LDAP, we won't notice, but all logins will fail.
@@ -245,7 +228,7 @@ sub check_user_verify_class {
                 return "LDAP support is not available. Run checksetup.pl"
                        . " for more details";
             }
-            return "LDAP servername (LDAPserver) is missing" 
+            return "LDAP servername (LDAPserver) is missing"
                 if !$params->{"LDAPserver"};
             return "LDAPBaseDN is empty" if !$params->{"LDAPBaseDN"};
         }
@@ -515,8 +498,6 @@ changed, insert all missing transitions to the new bug status.
 =item check_bug_status
 
 =item check_resolution
-
-=item check_shadowdb
 
 =item check_smtp_server
 

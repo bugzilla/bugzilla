@@ -183,6 +183,11 @@ END
 Full path to the private key corresponding to the client SSL certificate.
 The file must not be password-protected and must be readable by web server user.
 END
+    localconfig_db_shadow => <<'END',
+This is optional hack to increase database performance. If you have a read-only database
+that is faster to connect to (such as a db slave) you can list its connection details
+here. Note you cannot change the db_driver.
+END
     localconfig_diffpath => <<'END',
 For the "Difference Between Two Patches" feature to work, we need to know
 what directory the "diff" bin is in. (You only need to set this if you
@@ -196,6 +201,14 @@ Unifont (http://unifoundry.com/unifont.html), which supports all printable
 characters in the Basic Multilingual Plane. If you leave this parameter empty,
 a default font will be used, but its support is limited to English characters
 only and so other characters will be displayed incorrectly.
+END
+    localconfig_inbound_proxies => <<'END',
+When inbound traffic to Bugzilla goes through a proxy,
+Bugzilla thinks that the IP address of every single user is the IP address of the proxy.
+If you enter a comma-separated list of IPs in this parameter, then Bugzilla will trust any
+X-Forwarded-For header sent from those IPs, and use the value of that header as the end
+user's IP address.
+If set to a *, Bugzilla will trust the first value in the X-Forwarded-For header.
 END
     localconfig_index_html => <<'END',
 Most web servers will allow you to use index.cgi as a directory
@@ -211,6 +224,18 @@ END
 If you want to use the "Difference Between Two Patches" feature of the
 Patch Viewer, please specify the full path to the "interdiff" executable
 here.
+END
+    localconfig_memcached_namespace => <<'END',
+Specify a string to prefix to each key on Memcached.
+END
+    localconfig_memcached_servers => <<'END',
+If this option is set, Bugzilla will integrate with Memcached.
+Specify one or more servers, separated by spaces, using hostname:port
+notation (for example: 127.0.0.1:11211).
+END
+    localconfig_proxy_url => <<'END',
+If your Bugzilla server is behind a proxy, it may be necessary to enter its URL
+If you have to authenticate use http://user:pass@proxy_url/ syntax
 END
     localconfig_site_wide_secret => <<'END',
 This secret key is used by your installation for the creation and

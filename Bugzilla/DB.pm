@@ -98,24 +98,23 @@ sub quote {
 #####################################################################
 
 sub connect_shadow {
-    my $params = Bugzilla->params;
-    die "Tried to connect to non-existent shadowdb" 
-        unless $params->{'shadowdb'};
+    my $localconfig = Bugzilla->localconfig;
+    die "Tried to connect to non-existent shadowdb"
+        unless $localconfig->{db_shadow}{db_name};
 
     # Instead of just passing in a new hashref, we locally modify the
     # values of "localconfig", because some drivers access it while
     # connecting.
-    my %connect_params = %{ Bugzilla->localconfig };
-    $connect_params{db_host} = $params->{'shadowdbhost'};
-    $connect_params{db_name} = $params->{'shadowdb'};
-    $connect_params{db_port} = $params->{'shadowdbport'};
-    $connect_params{db_sock} = $params->{'shadowdbsock'};
+    my %connect_params = %{ $localconfig };
+    for my $key (qw(db_host db_name db_port db_sock)) {
+       $connect_params{$key} = $localconfig->{db_shadow}{$key};
+    }
 
     return _connect(\%connect_params);
 }
 
 sub connect_main {
-    return _connect(Bugzilla->localconfig); 
+    return _connect(Bugzilla->localconfig);
 }
 
 sub _connect {

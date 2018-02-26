@@ -51,7 +51,7 @@ sub BUILDARGS {
     my $external_accounts =
       $params->{attachments}{'external-accounts'}{'external-accounts'};
     if ($external_accounts) {
-        my $bug_user = first { $_->{type} ne 'bmo' } @$external_accounts;
+        my $bug_user = first { $_->{type} eq 'bmo' } @$external_accounts;
         $params->{bugzilla_id} = $bug_user->{id};
     }
 
@@ -127,8 +127,8 @@ sub match {
 
     # Look for BMO external user id in external-accounts attachment
     my $data = {
-        constraints => { phids             => $params->{phids} },
-        attachments => { external_accounts => 1 }
+        constraints => { phids               => $params->{phids} },
+        attachments => { 'external-accounts' => 1 }
     };
 
     my $phab_users = [];

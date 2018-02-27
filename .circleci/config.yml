@@ -86,13 +86,17 @@ jobs:
       - deploy:
           command: |
             if [[ -n "$DOCKERHUB_REPO" && -n "$DOCKER_USER" && -n "$DOCKER_PASS" ]]; then
-                TAG="${CIRCLE_TAG:-$CIRCLE_BRANCH}"
-                if [[ $TAG == "master" ]]; then
+                TAG=""
+                if [[ -n "$CIRCLE_TAG" ]]; then
+                  TAG="$CIRCLE_TAG"
+                elif [[ "$CIRCLE_BRANCH" == "master" ]]; then
                   TAG=latest
                 fi
-                docker tag bmo $DOCKERHUB_REPO:$TAG
-                docker login -u "$DOCKER_USER" -p "$DOCKER_PASS"
-                docker push $DOCKERHUB_REPO:$TAG
+                if [[ -n "$TAG" ]]; then
+                  docker tag bmo "$DOCKERHUB_REPO:$TAG"
+                  docker login -u "$DOCKER_USER" -p "$DOCKER_PASS"
+                  docker push "$DOCKERHUB_REPO:$TAG"
+                fi
             fi
 
   test_sanity:

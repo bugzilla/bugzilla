@@ -1,0 +1,31 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[%# INTERFACE:
+  # email: email address the complaint pertains to
+  # user: Bugzilla::User object associated with email (may be undef)
+  # reason: Reason for complaint
+  # notification: notification from SES (JSON)
+  #%]
+
+[% PROCESS global/variables.none.tmpl %]
+
+From: [% Param('mailfrom') %]
+To: [% Param('maintainer') %]
+Subject: [% terms.Bugzilla %]: SES Complaint: [% email %]: [% reason %]
+X-Bugzilla-Type: admin
+
+SES Complaint received for [% email %]: [% reason %]
+
+[% IF user %]
+[% urlbase %]/editusers.cgi?action=edit&userid=[% user.id %]
+[% ELSE %]
+Failed to find corresponding user in Bugzilla.
+[% END %]
+
+[%+ notification %]

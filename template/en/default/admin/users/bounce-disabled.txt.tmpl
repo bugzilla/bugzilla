@@ -1,0 +1,19 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[%# INTERFACE:
+  # mta: mail server reporting error
+  # reason: Reason for bounce (diagnostic code)
+  #%]
+
+[% PROCESS global/variables.none.tmpl %]
+
+Your [% terms.Bugzilla %] account has been disabled due to issues delivering
+emails to your address.<br>
+<br>
+Your mail server ([% mta FILTER html %]) said: [% reason FILTER html %]<br>

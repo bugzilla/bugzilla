@@ -97,6 +97,16 @@ ErrorDocument 500 /errors/500.html
     [% root_htaccess.contents FILTER indent %]
 </Directory>
 
+# AWS SES endpoint for handling mail bounces/complaints
+<Location "/ses">
+    PerlSetEnv AUTH_VAR_NAME ses_username
+    PerlSetEnv AUTH_VAR_PASS ses_password
+    PerlAuthenHandler Bugzilla::ModPerl::BasicAuth
+    AuthName SES
+    AuthType Basic
+    require valid-user
+</Location>
+
 # directory rules for all the other places we have .htaccess files
 [% FOREACH htaccess IN htaccess_files %]
 # from [% htaccess.file %]

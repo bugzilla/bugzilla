@@ -163,7 +163,15 @@ use constant LOCALCONFIG_VARS => (
     {
         name    => 'attachment_base',
         default => _migrate_param( "attachment_base", '' ),
-    }
+    },
+    {
+        name    => 'ses_username',
+        default => '',
+    },
+    {
+        name    => 'ses_password',
+        default => '',
+    },
 );
 
 

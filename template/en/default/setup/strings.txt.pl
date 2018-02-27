@@ -188,6 +188,9 @@ For the "Difference Between Two Patches" feature to work, we need to know
 what directory the "diff" bin is in. (You only need to set this if you
 are using that feature of the Patch Viewer.)
 END
+    localconfig_disable_feature => <<EOT,
+Optional features are enabled as long as all their required modules are installed. This variable can cause Bugzilla to ignore features, even if modules are detected. For a list of feature names, consult Makefile.PL
+EOT
     localconfig_font_file => <<'END',
 You can specify the full path to a TrueType or OpenType font file, which will
 be used to display text (labels, legends, ...) in charts and graphical reports.

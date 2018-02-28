@@ -9,6 +9,7 @@ package Bugzilla::Extension::PhabBugz::Revision;
 
 use 5.10.1;
 use Moo;
+
 use Scalar::Util qw(blessed);
 use Types::Standard -all;
 use Type::Utils;
@@ -249,6 +250,20 @@ sub update {
         }
     }
 
+    if ($self->{add_projects}) {
+        push(@{ $data->{transactions} }, {
+            type => 'projects.add',
+            value => $self->{add_projects}
+        });
+    }
+
+    if ($self->{remove_projects}) {
+        push(@{ $data->{transactions} }, {
+            type => 'projects.remove',
+            value => $self->{remove_projects}
+        });
+    }
+
     my $result = request( 'differential.revision.edit', $data );
 
     return $result;
@@ -388,6 +403,22 @@ sub set_policy {
     my ( $self, $name, $policy ) = @_;
     $self->{set_policy} ||= {};
     $self->{set_policy}->{$name} = $policy;
+}
+
+sub add_project {
+    my ( $self, $project ) = @_;
+    $self->{add_projects} ||= [];
+    my $project_phid = blessed $project ? $project->phid : $project;
+    return undef unless $project_phid;
+    push @{ $self->{add_projects} }, $project_phid;
+}
+
+sub remove_project {
+    my ( $self, $project ) = @_;
+    $self->{remove_projects} ||= [];
+    my $project_phid = blessed $project ? $project->phid : $project;
+    return undef unless $project_phid;
+    push @{ $self->{remove_projects} }, $project_phid;
 }
 
 1;

@@ -23,11 +23,11 @@ use Bugzilla::Extension::PhabBugz::Revision;
 use Bugzilla::Extension::PhabBugz::User;
 use Bugzilla::Extension::PhabBugz::Util qw(
     add_security_sync_comments
-    create_private_revision_policy
     create_revision_attachment
     edit_revision_policy
     get_bug_role_phids
     get_phab_bmo_ids
+    get_project_phid
     get_security_sync_groups
     is_attachment_phab_revision
     make_revision_public
@@ -183,6 +183,8 @@ sub process_revision_change {
         $self->logger->debug('Bug is public so setting view/edit public');
         $revision->set_policy('view', 'public');
         $revision->set_policy('edit', 'users');
+        my $secure_project_phid = get_project_phid('secure-revision');
+        $revision->remove_project($secure_project_phid);
     }
     # else bug is private.
     else {
@@ -224,6 +226,9 @@ sub process_revision_change {
                 $revision->set_policy('view', $new_policy->phid);
                 $revision->set_policy('edit', $new_policy->phid);
             }
+
+            my $secure_project_phid = get_project_phid('secure-revision');
+            $revision->add_project($secure_project_phid);
 
             my $subscribers = get_bug_role_phids($bug);
             $revision->set_subscribers($subscribers);

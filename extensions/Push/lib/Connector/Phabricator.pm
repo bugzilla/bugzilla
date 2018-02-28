@@ -20,11 +20,19 @@ use Bugzilla::User;
 
 use Bugzilla::Extension::PhabBugz::Constants;
 use Bugzilla::Extension::PhabBugz::Util qw(
-  add_comment_to_revision create_private_revision_policy
-  edit_revision_policy get_attachment_revisions get_bug_role_phids
-  intersect make_revision_public
-  make_revision_private set_revision_subscribers
-  get_security_sync_groups add_security_sync_comments);
+  add_comment_to_revision
+  add_security_sync_comments
+  create_private_revision_policy
+  edit_revision_policy
+  get_attachment_revisions
+  get_bug_role_phids
+  get_project_phid
+  get_security_sync_groups
+  intersect
+  make_revision_public
+  make_revision_private
+  set_revision_subscribers
+);
 use Bugzilla::Extension::Push::Constants;
 use Bugzilla::Extension::Push::Util qw(is_public);
 
@@ -96,8 +104,13 @@ sub send {
         $subscribers = get_bug_role_phids($bug);
     }
 
+    my $secure_project_phid = get_project_phid('secure-revision');
+
     foreach my $revision (@revisions) {
         my $revision_phid = $revision->{phid};
+
+        my $rev_obj = Bugzilla::Extension::PhabBugz::Revision->new_from_query({ phids => [ $revision_phid ] });
+        my $revision_updated;
 
         if ( $is_public && $group_change ) {
             Bugzilla->audit(sprintf(
@@ -106,6 +119,8 @@ sub send {
               $bug->id
             ));
             make_revision_public($revision_phid);
+            $rev_obj->remove_project($secure_project_phid);
+            $revision_updated = 1;
         }
         elsif ( !$is_public && $group_change ) {
             Bugzilla->audit(sprintf(
@@ -115,6 +130,8 @@ sub send {
             ));
             my $policy_phid = create_private_revision_policy( $bug, \@set_groups );
             edit_revision_policy( $revision_phid, $policy_phid, $subscribers );
+            $rev_obj->add_project($secure_project_phid);
+            $revision_updated = 1;
         }
         elsif ( !$is_public && !$group_change ) {
             Bugzilla->audit(sprintf(
@@ -124,6 +141,7 @@ sub send {
             ));
             set_revision_subscribers( $revision_phid, $subscribers );
         }
+        $rev_obj->update() if $revision_updated;
     }
 
     return PUSH_RESULT_OK;

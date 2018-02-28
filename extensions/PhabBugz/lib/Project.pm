@@ -232,6 +232,20 @@ sub update {
         }
     }
 
+    if ($self->{add_projects}) {
+        push(@{ $data->{transactions} }, {
+            type => 'projects.add',
+            value => $self->{add_projects}
+        });
+    }
+
+    if ($self->{remove_projects}) {
+        push(@{ $data->{transactions} }, {
+            type => 'projects.remove',
+            value => $self->{remove_projects}
+        });
+    }
+
     my $result = request( 'project.edit', $data );
 
     return $result;

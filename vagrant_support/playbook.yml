@@ -9,14 +9,22 @@
     - name: install common packages
       yum: name={{item}} state=present
       with_items:
-        - libselinux-python
-        - policycoreutils-python
-        - python-urllib3
-        - python-pyasn1
-        - python2-ndg_httpsclient
-        - pyOpenSSL
         - htop
+        - libselinux-python
         - ntp
+        - policycoreutils-python
+        - pyOpenSSL
+        - python-pyasn1
+        - python-sphinx10
+        - python-urllib3
+        - python2-ndg_httpsclient
+
+    - name: link sphinx
+      command: ln -s /usr/bin/sphinx-1.0-{{ item }} /usr/bin/sphinx-{{ item }} creates=/usr/bin/sphinx-{{ item }}
+      with_items:
+        - autogen
+        - build
+        - quickstart
 
     - name: permissive selinux
       selinux: state=permissive policy=targeted

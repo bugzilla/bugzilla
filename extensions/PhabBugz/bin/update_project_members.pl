@@ -65,10 +65,10 @@ foreach my $group (@$sync_groups) {
         });
     }
 
-    my @group_members = get_group_members($group);
-
-    $project->set_members(\@group_members);
-    $project->update();
+    if (my @group_members = get_group_members($group)) {
+        $project->set_members(\@group_members);
+        $project->update();
+    }
 }
 
 sub get_group_members {

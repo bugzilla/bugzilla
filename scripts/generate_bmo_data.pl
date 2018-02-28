@@ -162,6 +162,11 @@ my @users = (
         realname => 'Nobody; OK to take it and work on it',
         password => '*'
     },
+    {
+        login    => 'automation@bmo.tld',
+        realname => 'BMO Automation',
+        password => '*'
+    },
     map {
         {
             login => $_,

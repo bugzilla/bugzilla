@@ -174,14 +174,14 @@
       <button type="button" id="mfa-select-totp">Time-based One-Time Password (TOTP)</button><br>
       <blockquote>
         Requires a smartphone and a TOTP app (such as
-        <a href="https://support.google.com/accounts/answer/1066447" target="_blank">Google Authenticator</a>
-        or <a href="https://freeotp.github.io/" target="_blank">Red Hat FreeOTP</a>),
+        <a href="https://support.google.com/accounts/answer/1066447" target="_blank" rel="noopener noreferrer">Google Authenticator</a>
+        or <a href="https://freeotp.github.io/" target="_blank" rel="noopener noreferrer">Red Hat FreeOTP</a>),
       </blockquote>
 
       [% IF Param("duo_host") && user.in_group("mozilla-employee-confidential") %]
         <button type="button" id="mfa-select-duo">Duo Security</button><br>
         <blockquote>
-          Requires a <a href="https://mana.mozilla.org/wiki/display/SD/DuoSecurity" target="_blank">Duo Security</a>
+          Requires a <a href="https://mana.mozilla.org/wiki/display/SD/DuoSecurity" target="_blank" rel="noopener noreferrer">Duo Security</a>
           account (recommended for Mozilla employees).
         </blockquote>
       [% END %]
@@ -226,18 +226,18 @@
         Example TOTP Applications:<br>
         <ul>
           <li>Android and iOS:
-            <a href="https://support.google.com/accounts/answer/1066447" target="_blank">Google Authenticator</a>,
-            <a href="https://freeotp.github.io/" target="_blank">Red Hat FreeOTP</a>
+            <a href="https://support.google.com/accounts/answer/1066447" target="_blank" rel="noopener noreferrer">Google Authenticator</a>,
+            <a href="https://freeotp.github.io/" target="_blank" rel="noopener noreferrer">Red Hat FreeOTP</a>
           </li>
           <li>Firefox OS:
-            <a href="https://marketplace.firefox.com/app/firekey/" target="_blank">Firekey</a>
+            <a href="https://marketplace.firefox.com/app/firekey/" target="_blank" rel="noopener noreferrer">Firekey</a>
           </li>
           <li>Windows Phone:
             <a href="http://www.windowsphone.com/en-us/store/app/authenticator/021dd79f-0598-e011-986b-78e7d1fa76f8"
-                target="_blank">Authenticator</a>
+                target="_blank rel="noopener noreferrer"">Authenticator</a>
           </li>
         </ul>
-        <a href="https://en.wikipedia.org/wiki/Time-based_One-time_Password_Algorithm#Client_implementations" target="_blank">
+        <a href="https://en.wikipedia.org/wiki/Time-based_One-time_Password_Algorithm#Client_implementations" target="_blank" rel="noopener noreferrer">
           Other clients
         </a>
         <button type="button" class="mfa-totp-popup-close">Close</button>
@@ -258,7 +258,7 @@
           <img src="images/duo.png" id="duo-logo" width="32" height="32">
           Verification with Duo Security will be performed before your account is updated.<br>
 
-          You must be <a href="https://mana.mozilla.org/wiki/display/SD/DuoSecurity" target="_blank">
+          You must be <a href="https://mana.mozilla.org/wiki/display/SD/DuoSecurity" target="_blank" rel="noopener noreferrer">
           enrolled with Duo Security via login.mozilla.com</a> before you can use Duo 2FA.
         </p>
 

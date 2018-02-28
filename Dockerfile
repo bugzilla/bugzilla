@@ -1,5 +1,6 @@
 FROM mozillabteam/bmo-slim:20171228.1
 
+
 ARG CI
 ARG CIRCLE_SHA1
 ARG CIRCLE_BUILD_URL

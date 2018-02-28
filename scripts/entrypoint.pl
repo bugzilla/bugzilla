@@ -105,6 +105,12 @@ sub cmd_dev_httpd {
     httpd();
 }
 
+sub cmd_checksetup {
+    check_data_dir();
+    wait_for_db();
+    run( 'perl', 'checksetup.pl', '--no-template', '--no-permissions' );
+}
+
 sub cmd_load_test_data {
     wait_for_db();
 

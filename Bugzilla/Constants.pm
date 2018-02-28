@@ -659,18 +659,21 @@ sub _bz_locations {
     $libpath =~ /(.*)/;
     $libpath = $1;
 
-    my ($localconfig, $datadir);
+    my ($localconfig, $datadir, $confdir);
     if ($project && $project =~ /^(\w+)$/) {
         $project = $1;
         $localconfig = "localconfig.$project";
         $datadir = "data/$project";
+        $confdir = "conf/$project";
     } else {
         $project = undef;
         $localconfig = "localconfig";
         $datadir = "data";
+        $confdir = "conf";
     }
 
     $datadir = "$libpath/$datadir";
+    $confdir = "$libpath/$confdir";
     # We have to return absolute paths for mod_perl.
     # That means that if you modify these paths, they must be absolute paths.
     return {
@@ -698,6 +701,7 @@ sub _bz_locations {
         'assetsdir'      => "$datadir/assets",
         # error_reports store error/warnings destined for sentry
         'error_reports'  => "$libpath/error_reports",
+        'confdir'        => $confdir,
     };
 }
 

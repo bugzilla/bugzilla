@@ -26,6 +26,7 @@ defaults:
     PORT: 8000
     LOGGING_PORT: 5880
     LOCALCONFIG_ENV: 1
+    LOG4PERL_CONFIG_FILE: log4perl-test.conf
     BMO_db_user: bugs
     BMO_db_host: 127.0.0.1
     BMO_db_pass: bugs
@@ -108,7 +109,10 @@ jobs:
         environment: *bmo_env
     steps:
       - checkout
-      - *default_qa_setup
+      - run: |
+          mv /opt/bmo/local /app/local
+          mkdir artifacts
+      - run: perl Makefile.PL
       - run:
           name: run sanity tests
           command: |

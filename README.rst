@@ -342,7 +342,13 @@ USE_NYTPROF
 NYTPROF_DIR
   Alternative location to store profiles from the above option.
 
+LOG4PERL_CONFIG_FILE
+  Filename of `Log::Log4perl`_ config file.
+  It defaults to log4perl-syslog.conf.
+  If the file is given as a relative path, it will belative to the /app/conf/ directory.
+
 .. _`Devel::NYTProf`: https://metacpan.org/pod/Devel::NYTProf
+.. _`Log::Log4perl`: https://metacpan.org/pod/Log::Log4perl
 
 Persistent Data Volume
 ----------------------

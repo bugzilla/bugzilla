@@ -11,6 +11,8 @@ use 5.10.1;
 use strict;
 use warnings;
 
+use Bugzilla::Logging;
+
 # We want any compile errors to get to the browser, if possible.
 BEGIN {
     # This makes sure we're in a CGI.
@@ -95,6 +97,10 @@ sub init_page {
     }
     elsif (Bugzilla->params->{'utf8'}) {
         binmode STDOUT, ':utf8';
+    }
+
+    if (i_am_cgi()) {
+        Log::Log4perl::MDC->put(remote_ip => remote_ip());
     }
 
     if (${^TAINT}) {
@@ -379,6 +385,10 @@ sub login {
     }
 
     my $authenticated_user = $authorizer->login($type);
+
+    if (i_am_cgi()) {
+        Log::Log4perl::MDC->put(user_id => $authenticated_user->id);
+    }
 
     # At this point, we now know if a real person is logged in.
 
@@ -770,9 +780,8 @@ sub local_timezone {
 # Send messages to syslog for the auditing systems (eg. mozdef) to pick up.
 sub audit {
     my ($class, $message) = @_;
-    openlog('apache', 'cons,pid', 'local4');
-    syslog('notice', '[audit] ' . encode_utf8($message));
-    closelog();
+    state $logger = Log::Log4perl->get_logger("audit");
+    $logger->notice(encode_utf8($message));
 }
 
 # This creates the request cache for non-mod_perl installations.
@@ -887,6 +896,8 @@ sub _cleanup {
     foreach my $signal (qw(TERM PIPE)) {
         $SIG{$signal} = 'DEFAULT' if $SIG{$signal} && $SIG{$signal} eq 'IGNORE';
     }
+
+    Log::Log4perl::MDC->remove();
 }
 
 sub END {

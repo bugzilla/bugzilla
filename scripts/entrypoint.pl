@@ -8,6 +8,11 @@ use autodie qw(:all);
 use Bugzilla::Install::Localconfig ();
 use Bugzilla::Install::Util qw(install_string);
 use Bugzilla::Test::Util qw(create_user);
+use Bugzilla::DaemonControl qw(
+    run_cereal_and_httpd
+    assert_httpd assert_database assert_selenium
+    on_finish on_exception
+);
 
 use DBI;
 use Data::Dumper;
@@ -78,31 +83,24 @@ sub cmd_httpd  {
     check_data_dir();
     wait_for_db();
     check_httpd_env();
-    httpd();
-}
 
-sub httpd {
-    my @httpd_args = (
-        '-DFOREGROUND',
-        '-f' => '/app/httpd/httpd.conf',
-    );
-
-    # If we're behind a proxy and the urlbase says https, we must be using https.
-    # * basically means "I trust the load balancer" anyway.
-    if ($ENV{BMO_inbound_proxies} eq '*' && $ENV{BMO_urlbase} =~ /^https/) {
-        unshift @httpd_args, '-DHTTPS';
-    }
-    run( '/usr/sbin/httpd', @httpd_args );
+    my $httpd_exit_f = run_cereal_and_httpd();
+    assert_httpd()->get();
+    exit $httpd_exit_f->get();
 }
 
 sub cmd_dev_httpd {
-    wait_for_db();
     my $have_params = -f "/app/data/params";
+    assert_database->get();
+
     run( 'perl', 'checksetup.pl', '--no-template', $ENV{BZ_ANSWERS_FILE} );
     if ( not $have_params ) {
         run( 'perl', 'scripts/generate_bmo_data.pl', '--param' => 'use_mailer_queue=0', 'vagrant@bmo-web.vm' );
     }
-    httpd();
+
+    my $httpd_exit_f = run_cereal_and_httpd('-DACCESS_LOGS');
+    assert_httpd()->get;
+    exit $httpd_exit_f->get;
 }
 
 sub cmd_checksetup {
@@ -129,36 +127,15 @@ sub cmd_load_test_data {
     }
 }
 
-sub cmd_test_heartbeat {
-    my ($url) = @_;
-    die "test_heartbeat requires a url!\n" unless $url;
-
-    wait_for_httpd($url);
-    my $heartbeat = get("$url/__heartbeat__");
-    if ($heartbeat && $heartbeat =~ /Bugzilla OK/) {
-        exit 0;
-    }
-    else {
-        exit 1;
-    }
-}
-
 sub cmd_test_webservices {
-
     my $conf = require $ENV{BZ_QA_CONF_FILE};
 
     check_data_dir();
-    wait_for_db();
-
-    my @httpd_cmd = ( '/usr/sbin/httpd', '-DFOREGROUND', '-f', '/app/httpd/httpd.conf' );
-    if ($ENV{BZ_QA_LEGACY_MODE}) {
-        copy_qa_extension();
-        push @httpd_cmd, '-DHTTPD_IN_SUBDIR';
-    }
-
-    prove_with_httpd(
+    copy_qa_extension();
+    assert_database()->get;
+    my $httpd_exit_f = run_cereal_and_httpd('-DHTTPD_IN_SUBDIR', '-DACCESS_LOGS');
+    my $prove_exit_f = run_prove(
         httpd_url => $conf->{browser_url},
-        httpd_cmd => \@httpd_cmd,
         prove_cmd => [
             'prove', '-qf', '-I/app',
             '-I/app/local/lib/perl5',
@@ -166,29 +143,28 @@ sub cmd_test_webservices {
         ],
         prove_dir => '/app/qa/t',
     );
+    exit Future->wait_any($prove_exit_f, $httpd_exit_f)->get;
 }
 
 sub cmd_test_selenium {
     my $conf = require $ENV{BZ_QA_CONF_FILE};
 
     check_data_dir();
-    wait_for_db();
-    my @httpd_cmd = ( '/usr/sbin/httpd', '-DFOREGROUND', '-f', '/app/httpd/httpd.conf' );
-    if ($ENV{BZ_QA_LEGACY_MODE}) {
-        copy_qa_extension();
-        push @httpd_cmd, '-DHTTPD_IN_SUBDIR';
-    }
+    copy_qa_extension();
 
-    prove_with_httpd(
+    assert_database()->get;
+    assert_selenium()->get;
+    my $httpd_exit_f = run_cereal_and_httpd('-DHTTPD_IN_SUBDIR');
+    my $prove_exit_f = run_prove(
         httpd_url => $conf->{browser_url},
-        httpd_cmd => \@httpd_cmd,
+        prove_dir => '/app/qa/t',
         prove_cmd => [
             'prove', '-qf', '-Ilib', '-I/app',
             '-I/app/local/lib/perl5',
             sub { glob 'test_*.t' }
         ],
-        prove_dir => '/app/qa/t',
     );
+    exit Future->wait_any($prove_exit_f, $httpd_exit_f)->get;
 }
 
 sub cmd_shell   { run( 'bash',  '-l' ); }
@@ -201,110 +177,60 @@ sub cmd_version { run( 'cat',   '/app/version.json' ); }
 sub cmd_test_bmo {
     my (@prove_args) = @_;
     check_data_dir();
-    wait_for_db();
 
-    $ENV{BZ_TEST_NEWBIE} = 'newbie@mozilla.example';
+    assert_database()->get;
+    assert_selenium()->get;
+    $ENV{BZ_TEST_NEWBIE}      = 'newbie@mozilla.example';
     $ENV{BZ_TEST_NEWBIE_PASS} = 'captain.space.bagel.ROBOT!';
     create_user($ENV{BZ_TEST_NEWBIE}, $ENV{BZ_TEST_NEWBIE_PASS}, realname => 'Newbie User');
 
-    $ENV{BZ_TEST_NEWBIE2} = 'newbie2@mozilla.example';
+    $ENV{BZ_TEST_NEWBIE2}      = 'newbie2@mozilla.example';
     $ENV{BZ_TEST_NEWBIE2_PASS} = 'captain.space.pants.time.lord';
 
-    prove_with_httpd(
-        httpd_url => $ENV{BZ_BASE_URL},
-        httpd_cmd => [ '/usr/sbin/httpd', '-f', '/app/httpd/httpd.conf',  '-DFOREGROUND' ],
-        prove_cmd => [ 'prove', '-I/app', '-I/app/local/lib/perl5', @prove_args ],
+    my $httpd_exit_f = run_cereal_and_httpd('-DACCESS_LOGS');
+    my $prove_exit_f = run_prove(
+        httpd_url  => $ENV{BZ_BASE_URL},
+        prove_cmd  => [ 'prove', '-I/app', '-I/app/local/lib/perl5', @prove_args ],
     );
+
+    exit Future->wait_any($prove_exit_f, $httpd_exit_f)->get;
 }
 
-sub prove_with_httpd {
+sub run_prove {
     my (%param) = @_;
 
     check_httpd_env();
 
-    unless (-d '/app/logs') {
-        mkdir '/app/logs' or die "unable to mkdir(/app/logs): $!\n";
-    }
-
-    my $httpd_cmd = $param{httpd_cmd};
-    my $prove_cmd = $param{prove_cmd};
-
-    my $loop = IO::Async::Loop->new;
-
-    my $httpd_exit_f = $loop->new_future;
-    say 'starting httpd';
-    my $httpd = IO::Async::Process->new(
-        code => sub {
-            setsid();
-            exec @$httpd_cmd;
-        },
-        setup => [
-             stdout => ['open', '>', '/app/logs/access.log'],
-             stderr => ['open', '>', '/app/logs/error.log'],
-        ],
-        on_finish => on_finish($httpd_exit_f),
-        on_exception => on_exception('httpd', $httpd_exit_f),
-    );
-    $loop->add($httpd);
-    wait_for_httpd( $httpd, $param{httpd_url} );
-
-    warn "httpd started, starting prove\n";
-
-    my $prove_exit_f = $loop->new_future;
-    my $prove = IO::Async::Process->new(
-        code => sub {
-            chdir $param{prove_dir} if $param{prove_dir};
-            my @cmd = (map { ref $_ eq 'CODE' ? $_->() : $_ } @$prove_cmd);
-            warn "run @cmd\n";
-            exec @cmd;
-        },
-        on_finish    => on_finish($prove_exit_f),
-        on_exception => on_exception('prove', $prove_exit_f),
-    );
-    $loop->add($prove);
-
-    my $prove_exit = $prove_exit_f->get();
-    if ($httpd->is_running) {
-        $httpd->kill('TERM');
-        my $httpd_exit = $httpd_exit_f->get();
-        warn "httpd exit code: $httpd_exit\n" if $httpd_exit != 0;
-    }
-
-    exit $prove_exit;
-}
-
-sub wait_for_httpd {
-    my ($process, $url) = @_;
-    my $loop = IO::Async::Loop->new;
-    my $is_running_f = $loop->new_future;
-    my $ticks = 0;
-    my $run_checker = IO::Async::Timer::Periodic->new(
-        first_interval => 0,
-        interval       => 1,
-        reschedule     => 'hard',
-        on_tick        => sub {
-            my ($timer) = @_;
-            if ( $process->is_running ) {
-                my $resp = get("$url/__lbheartbeat__");
-                if ($resp && $resp =~ /^httpd OK/) {
-                    $timer->stop;
-                    $is_running_f->done($resp);
-                }
-                say "httpd doesn't seem to be up at $url. waiting...";
-            }
-            elsif ( $process->is_exited ) {
-                $timer->stop;
-                $is_running_f->fail('httpd process exited early');
-            }
-            elsif ( $ticks++ > 60 ) {
-                $timer->stop;
-                $is_running_f->fail("is_running_future() timeout after $ticks seconds");
-            }
-            $timer->stop if $ticks++ > 60;
-        },
-    );
-    $loop->add($run_checker->start);
-    return $is_running_f->get();
+    my $prove_cmd    = $param{prove_cmd};
+    my $prove_dir    = $param{prove_dir};
+    assert_httpd()->then(sub {
+        my $loop = IO::Async::Loop->new;
+        $loop->connect(
+            socktype => 'stream',
+            host     => 'localhost',
+            service  => 5880,
+        )->then(sub {
+            my $socket       = shift;
+            my $prove_exit_f = $loop->new_future;
+            my $prove        = IO::Async::Process->new(
+                code => sub {
+                    chdir $prove_dir if $prove_dir;
+                    my @cmd = (map { ref $_ eq 'CODE' ? $_->() : $_ } @$prove_cmd);
+                    warn "run @cmd\n";
+                    exec @cmd;
+                },
+                setup => [
+                    stdin  => ['close'],
+                    stdout => [ 'dup', $socket ],
+                ],
+                on_finish    => on_finish($prove_exit_f),
+                on_exception => on_exception('prove', $prove_exit_f),
+            );
+            $prove_exit_f->on_cancel(sub { $prove->kill('TERM') });
+            $loop->add($prove);
+            return $prove_exit_f;
+        });
+    });
 }
 
 sub copy_qa_extension {
@@ -313,52 +239,7 @@ sub copy_qa_extension {
 }
 
 sub wait_for_db {
-    my $c = Bugzilla::Install::Localconfig::read_localconfig();
-    for my $var (qw(db_name db_host db_user db_pass)) {
-        die "$var is not set!" unless $c->{$var};
-    }
-
-    my $dsn = "dbi:mysql:database=$c->{db_name};host=$c->{db_host}";
-    my $dbh;
-    foreach (1..12) {
-        say 'checking database...' if $_ > 1;
-        $dbh = DBI->connect(
-            $dsn,
-            $c->{db_user},
-            $c->{db_pass},
-            { RaiseError => 0, PrintError => 0 }
-        );
-        last if $dbh;
-        say "database $dsn not available, waiting...";
-        sleep 10;
-    }
-    die "unable to connect to $dsn as $c->{db_user}\n" unless $dbh;
-}
-
-sub on_exception {
-    my ($name, $f) = @_;
-    return sub {
-        my ( $self, $exception, $errno, $exitcode ) = @_;
-
-        if ( length $exception ) {
-            $f->fail("$name died with the exception $exception " . "(errno was $errno)\n");
-        }
-        elsif ( ( my $status = WEXITSTATUS($exitcode) ) == 255 ) {
-            $f->fail("$name failed to exec() - $errno\n");
-        }
-        else {
-            $f->fail("$name exited with exit status $status\n");
-        }
-    };
-}
-
-sub on_finish {
-    my ($f) = @_;
-    return sub {
-        my ($self, $exitcode) = @_;
-        say "exit code: $exitcode";
-        $f->done(WEXITSTATUS($exitcode));
-    };
+    assert_database()->get;
 }
 
 sub check_user {

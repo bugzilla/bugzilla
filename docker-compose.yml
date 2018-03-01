@@ -27,7 +27,7 @@ services:
       - BMO_memcached_namespace=bugzilla
       - BMO_memcached_servers=memcached:11211
       - 'BMO_inbound_proxies=*'
-      - BZ_ANSWERS_FILE=/app/docker_support/checksetup_answers.txt
+      - BZ_ANSWERS_FILE=/app/conf/checksetup_answers.txt
     depends_on:
       - bmo-db.vm
       - memcached

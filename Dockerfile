@@ -1,4 +1,4 @@
-FROM mozillabteam/bmo-slim:20171228.1
+FROM mozillabteam/bmo-slim:20180225.1
 
 
 ARG CI

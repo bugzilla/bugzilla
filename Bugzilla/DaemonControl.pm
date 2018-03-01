@@ -79,15 +79,18 @@ sub cereal {
         );
         $loop->add($protocol);
     };
+    my @signals = (
+        catch_signal('TERM', 0),
+        catch_signal('INT', 0 ),
+        catch_signal('KILL', 0 ),
+    );
     $loop->listen(
         host      => '127.0.0.1',
         service   => $ENV{LOGGING_PORT},
         socktype  => 'stream',
         on_stream => $on_stream,
     )->get;
-    kill 'USR1', getppid();
-
-    exit catch_signal('TERM', 0)->get;
+    exit Future->wait_any(@signals)->get;
 }
 
 sub run_cereal {
@@ -99,9 +102,7 @@ sub run_cereal {
         on_exception => on_exception( "cereal", $exit_f ),
     );
     $exit_f->on_cancel( sub { $cereal->kill('TERM') } );
-    my $signal_f = catch_signal('USR1');
     $loop->add($cereal);
-    $signal_f->get;
 
     return $exit_f;
 }
@@ -135,11 +136,16 @@ sub run_cereal_and_httpd {
         push @httpd_args, '-DHTTPS';
     }
     push @httpd_args, '-DNETCAT_LOGS';
-    my $cereal_exit_f = run_cereal();
     my $signal_f      = catch_signal("TERM", 0);
-    my $httpd_exit_f  = run_httpd(@httpd_args);
+    my $cereal_exit_f = run_cereal();
 
-    return Future->wait_any($cereal_exit_f, $httpd_exit_f, $signal_f);
+    return assert_cereal()->then(
+        sub {
+            my $httpd_exit_f  = run_httpd(@httpd_args);
+
+            return Future->wait_any($cereal_exit_f, $httpd_exit_f, $signal_f);
+        }
+    );
 }
 
 sub assert_httpd {
@@ -159,10 +165,25 @@ sub assert_httpd {
     return Future->wait_any($repeat, $timeout);
 }
 
+
 sub assert_selenium {
     my ($host, $port) = @_;
     $host //= 'localhost';
     $port //= 4444;
+
+    return assert_connect($host, $port, "assert_selenium");
+}
+
+sub assert_cereal {
+    return assert_connect(
+        'localhost',
+        $ENV{LOGGING_PORT} // 5880,
+        "assert_cereal"
+    );
+}
+
+sub assert_connect {
+    my ($host, $port, $name) = @_;
     my $loop = IO::Async::Loop->new;
     my $repeat = repeat {
         $loop->delay_future(after => 1)->then(
@@ -172,7 +193,7 @@ sub assert_selenium {
             },
         );
     } until => sub { shift->get };
-    my $timeout = $loop->timeout_future(after => 60)->else_fail("assert_selenium timeout");
+    my $timeout = $loop->timeout_future(after => 60)->else_fail("$name timeout");
     return Future->wait_any($repeat, $timeout);
 }
 
@@ -200,7 +221,7 @@ sub assert_database {
     } until => sub { defined shift->get };
 
     my $timeout = $loop->timeout_future( after => 20 )->else_fail("assert_database timeout");
-    my $any_f = Future->needs_any( $repeat, $timeout );
+    my $any_f = Future->wait_any( $repeat, $timeout );
     return $any_f->transform(
         done => sub { return },
         fail => sub { "unable to connect to $dsn as $lc->{db_user}" },

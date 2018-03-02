@@ -10,6 +10,7 @@ use 5.10.1;
 use strict;
 use warnings;
 
+use Bugzilla::Logging;
 use Bugzilla::Constants qw(bz_locations);
 use Cwd qw(realpath);
 use English qw(-no_match_vars $PROGRAM_NAME);
@@ -131,16 +132,19 @@ sub run_httpd {
 sub run_cereal_and_httpd {
     my @httpd_args = @_;
 
-    my $lc = Bugzilla::Install::Localconfig::read_localconfig();
-    if ( ($lc->{inbound_proxies} // '') eq '*' && $lc->{urlbase} =~ /^https/) {
-        push @httpd_args, '-DHTTPS';
-    }
     push @httpd_args, '-DNETCAT_LOGS';
     my $signal_f      = catch_signal("TERM", 0);
     my $cereal_exit_f = run_cereal();
 
     return assert_cereal()->then(
         sub {
+            my $lc = Bugzilla::Install::Localconfig::read_localconfig();
+            if ( ($lc->{inbound_proxies} // '') eq '*' && $lc->{urlbase} =~ /^https/) {
+                push @httpd_args, '-DHTTPS';
+            }
+            elsif (not $lc->{urlbase} =~ /^https/) {
+                WARN("HTTPS urlbase but inbound_proxies is not '*'");
+            }
             my $httpd_exit_f  = run_httpd(@httpd_args);
 
             return Future->wait_any($cereal_exit_f, $httpd_exit_f, $signal_f);

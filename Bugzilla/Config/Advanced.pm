@@ -18,13 +18,6 @@ our $sortkey = 1700;
 
 use constant get_param_list => (
     {
-        name    => 'inbound_proxies',
-        type    => 't',
-        default => '',
-        checker => \&check_inbound_proxies
-    },
-
-    {
         name    => 'proxy_url',
         type    => 't',
         default => ''
@@ -81,16 +74,5 @@ use constant get_param_list => (
         default => '1210000000'                   # 14 days
     },
 );
-
-sub check_inbound_proxies {
-    my $inbound_proxies = shift;
-
-    return "" if $inbound_proxies eq "*";
-    my @proxies = split( /[\s,]+/, $inbound_proxies );
-    foreach my $proxy (@proxies) {
-        validate_ip($proxy) || return "$proxy is not a valid IPv4 or IPv6 address";
-    }
-    return "";
-}
 
 1;

@@ -181,6 +181,11 @@ For the "Difference Between Two Patches" feature to work, we need to know
 what directory the "diff" bin is in. (You only need to set this if you
 are using that feature of the Patch Viewer.)
 END
+    localconfig_inbound_proxies => <<'END',
+This is a list of IP addresses that we expect proxies to come from.
+This can be '*' if only the load balancer can connect.
+Setting this to '*' means that we can trust the X-Forwarded-For header.
+END
     localconfig_index_html => <<'END',
 Most web servers will allow you to use index.cgi as a directory
 index, and many come preconfigured that way, but if yours doesn't

@@ -270,7 +270,7 @@ sub do_ssl_redirect_if_required {
 # Returns the real remote address of the client,
 sub remote_ip {
     my $remote_ip       = $ENV{'REMOTE_ADDR'} || '127.0.0.1';
-    my @proxies         = split(/[\s,]+/, Bugzilla->get_param_with_override('inbound_proxies'));
+    my @proxies         = split(/[\s,]+/, Bugzilla->localconfig->{inbound_proxies});
     my @x_forwarded_for = split(/[\s,]+/, $ENV{HTTP_X_FORWARDED_FOR} // '');
 
     return $remote_ip unless @x_forwarded_for;

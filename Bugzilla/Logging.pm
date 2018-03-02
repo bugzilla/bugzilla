@@ -14,12 +14,101 @@ use Log::Log4perl;
 use Log::Log4perl::MDC;
 use File::Spec::Functions qw(rel2abs);
 use Bugzilla::Constants qw(bz_locations);
+use English qw(-no_match_vars $PROGRAM_NAME);
 
 BEGIN {
-    my $file = $ENV{LOG4PERL_CONFIG_FILE} // "log4perl-syslog.conf";
+    my $file = $ENV{LOG4PERL_CONFIG_FILE} // 'log4perl-syslog.conf';
     Log::Log4perl::Logger::create_custom_level('NOTICE', 'WARN', 5, 2);
     Log::Log4perl->init(rel2abs($file, bz_locations->{confdir}));
-    Log::Log4perl->get_logger(__PACKAGE__)->debug("logging enabled in $0");
+    Log::Log4perl->get_logger(__PACKAGE__)->trace("logging enabled in $PROGRAM_NAME");
+}
+
+# this is copied from Log::Log4perl's :easy handling,
+# except we also export NOTICE.
+sub import {
+    my $caller_pkg = caller;
+
+    return 1 if $Log::Log4perl::IMPORT_CALLED{$caller_pkg}++;
+
+    # Define default logger object in caller's package
+    my $logger = Log::Log4perl->get_logger("$caller_pkg");
+
+    # Define DEBUG, INFO, etc. routines in caller's package
+    for (qw(TRACE DEBUG INFO NOTICE WARN ERROR FATAL ALWAYS)) {
+        my $level = $_;
+        $level = 'OFF' if $level eq 'ALWAYS';
+        my $lclevel = lc $_;
+        Log::Log4perl::easy_closure_create(
+            $caller_pkg,
+            $_,
+            sub {
+                Log::Log4perl::Logger::init_warn()
+                  unless $Log::Log4perl::Logger::INITIALIZED or $Log::Log4perl::Logger::NON_INIT_WARNED;
+                $logger->{$level}->( $logger, @_, $level );
+            },
+            $logger
+        );
+    }
+
+    # Define LOGCROAK, LOGCLUCK, etc. routines in caller's package
+    for (qw(LOGCROAK LOGCLUCK LOGCARP LOGCONFESS)) {
+        my $method = 'Log::Log4perl::Logger::' . lc $_;
+
+        Log::Log4perl::easy_closure_create(
+            $caller_pkg,
+            $_,
+            sub {
+                unshift @_, $logger;
+                goto &$method;
+            },
+            $logger
+        );
+    }
+
+    # Define LOGDIE, LOGWARN
+    Log::Log4perl::easy_closure_create(
+        $caller_pkg,
+        'LOGDIE',
+        sub {
+            Log::Log4perl::Logger::init_warn()
+              unless $Log::Log4perl::Logger::INITIALIZED or $Log::Log4perl::Logger::NON_INIT_WARNED;
+            $logger->{FATAL}->( $logger, @_, 'FATAL' );
+            $Log::Log4perl::LOGDIE_MESSAGE_ON_STDERR
+              ? CORE::die( Log::Log4perl::Logger::callerline( join '', @_ ) )
+              : exit $Log::Log4perl::LOGEXIT_CODE;
+        },
+        $logger
+    );
+
+    Log::Log4perl::easy_closure_create(
+        $caller_pkg,
+        'LOGEXIT',
+        sub {
+            Log::Log4perl::Logger::init_warn()
+              unless $Log::Log4perl::Logger::INITIALIZED or $Log::Log4perl::Logger::NON_INIT_WARNED;
+            $logger->{FATAL}->( $logger, @_, 'FATAL' );
+            exit $Log::Log4perl::LOGEXIT_CODE;
+        },
+        $logger
+    );
+
+    Log::Log4perl::easy_closure_create(
+        $caller_pkg,
+        'LOGWARN',
+        sub {
+            Log::Log4perl::Logger::init_warn()
+              unless $Log::Log4perl::Logger::INITIALIZED or $Log::Log4perl::Logger::NON_INIT_WARNED;
+            $logger->{WARN}->( $logger, @_, 'WARN' );
+            CORE::warn( Log::Log4perl::Logger::callerline( join '', @_ ) )
+              if $Log::Log4perl::LOGDIE_MESSAGE_ON_STDERR;
+        },
+        $logger
+    );
+}
+
+sub is_interactive {
+    state $is_tty = -t STDOUT || -t STDIN;
+    return $is_tty || $ENV{"Bugzilla.pm"} && Bugzilla->usage_mode == Bugzilla::Constants::USAGE_MODE_CMDLINE;
 }
 
 1;

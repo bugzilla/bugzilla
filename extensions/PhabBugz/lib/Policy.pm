@@ -117,7 +117,10 @@ sub create {
         };
     }
     else {
-        push @{ $data->{policy} }, { action => 'allow', value  => 'admin' };
+        my $secure_revision = Bugzilla::Extension::PhabBugz::Project->new_from_query({
+            name => 'secure-revision'
+        });
+        push @{ $data->{policy} }, { action => 'allow', value  => $secure_revision->phid };
     }
 
     my $result = request('policy.create', $data);

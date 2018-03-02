@@ -93,9 +93,9 @@ sub BUILDARGS {
 #         "dateCreated": 1500403964,
 #         "dateModified": 1505248862,
 #         "policy": {
-#           "view": "admin",
-#           "edit": "admin",
-#           "join": "admin"
+#           "view": "secure-revision",
+#           "edit": "secure-revision",
+#           "join": "secure-revision"
 #         },
 #         "description": "BMO Security Group for core-security"
 #       },
@@ -138,9 +138,9 @@ sub create {
     $name || ThrowCodeError( 'param_required', { param => 'name' } );
 
     my $description = $params->{description} || 'Need description';
-    my $view_policy = $params->{view_policy} || 'admin';
-    my $edit_policy = $params->{edit_policy} || 'admin';
-    my $join_policy = $params->{join_policy} || 'admin';
+    my $view_policy = $params->{view_policy};
+    my $edit_policy = $params->{edit_policy};
+    my $join_policy = $params->{join_policy};
 
     my $data = {
         transactions => [

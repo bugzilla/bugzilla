@@ -167,10 +167,13 @@ sub create_private_revision_policy {
         );
     }
     else {
+        my $secure_revision = Bugzilla::Extension::PhabBugz::Project->new_from_query({
+            name => 'secure-revision'
+        });
         push(@{ $data->{policy} },
             {
                 action => 'allow',
-                value  => 'admin',
+                value  => $secure_revision->phid,
             }
         );
     }
@@ -198,15 +201,20 @@ sub make_revision_public {
 
 sub make_revision_private {
     my ($revision_phid) = @_;
+
+    my $secure_revision = Bugzilla::Extension::PhabBugz::Project->new_from_query({
+        name => 'secure-revision'
+    });
+
     return request('differential.revision.edit', {
         transactions => [
             {
                 type  => "view",
-                value => "admin"
+                value => $secure_revision->phid
             },
             {
                 type  => "edit",
-                value => "admin"
+                value => $secure_revision->phid
             }
         ],
         objectIdentifier => $revision_phid
@@ -298,15 +306,19 @@ sub get_project_phid {
 sub create_project {
     my ($project, $description, $members) = @_;
 
+    my $secure_revision = Bugzilla::Extension::PhabBugz::Project->new_from_query({
+        name => 'secure-revision'
+    });
+
     my $data = {
         transactions => [
-            { type => 'name',  value => $project           },
-            { type => 'description', value => $description },
-            { type => 'edit',  value => 'admin'            },
-            { type => 'join',  value => 'admin'            },
-            { type => 'view',  value => 'admin'            },
-            { type => 'icon',  value => 'group'            },
-            { type => 'color', value => 'red'              }
+            { type => 'name',  value => $project               },
+            { type => 'description', value => $description     },
+            { type => 'edit',  value => $secure_revision->phid }.
+            { type => 'join',  value => $secure_revision->phid },
+            { type => 'view',  value => $secure_revision->phid },
+            { type => 'icon',  value => 'group'                },
+            { type => 'color', value => 'red'                  }
         ]
     };
 

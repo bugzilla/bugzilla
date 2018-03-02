@@ -59,9 +59,15 @@ foreach my $group (@$sync_groups) {
         name => $phab_project_name
     });
     if (!$project) {
+        my $secure_revision = Bugzilla::Extension::PhabBugz::Project->new_from_query({
+            name => 'secure-revision'
+        });
         $project = Bugzilla::Extension::PhabBugz::Project->create({
             name        => $phab_project_name,
-            description => 'BMO Security Group for ' . $group->name
+            description => 'BMO Security Group for ' . $group->name,
+            view_policy => $secure_revision->phid,
+            edit_policy => $secure_revision->phid,
+            join_policy => $secure_revision->phid
         });
     }
 

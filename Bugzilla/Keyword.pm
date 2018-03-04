@@ -47,6 +47,13 @@ use constant UPDATE_COLUMNS => qw(
 ####      Accessors      ######
 ###############################
 
+use Class::XSAccessor {
+    accessors => {
+        id   => __PACKAGE__->ID_FIELD,
+        name => __PACKAGE__->NAME_FIELD,
+    },
+};
+
 sub description       { return $_[0]->{'description'}; }
 
 sub bug_count {

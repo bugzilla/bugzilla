@@ -45,6 +45,13 @@ use constant LIST_ORDER => 'id';
 ####################
 # Simple Accessors #
 ####################
+use Class::XSAccessor {
+    accessors => {
+        id   => __PACKAGE__->ID_FIELD,
+        name => __PACKAGE__->NAME_FIELD,
+    },
+};
+
 sub eventid         { return $_[0]->{'eventid'};     }
 sub run_day         { return $_[0]->{'run_day'};     }
 sub run_time        { return $_[0]->{'run_time'};    }

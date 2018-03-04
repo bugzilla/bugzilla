@@ -47,6 +47,13 @@ use constant LIST_ORDER => 'next_attempt_ts';
 # accessors
 #
 
+use Class::XSAccessor {
+    accessors => {
+        id   => __PACKAGE__->ID_FIELD,
+        name => __PACKAGE__->NAME_FIELD,
+    },
+};
+
 sub connector       { return $_[0]->{'connector'};       }
 sub next_attempt_ts { return $_[0]->{'next_attempt_ts'}; }
 sub attempts        { return $_[0]->{'attempts'};        }

@@ -86,7 +86,15 @@ sub DB_COLUMNS {
 
 use constant NAME_FIELD => 'login_name';
 use constant ID_FIELD   => 'userid';
+use constant REAL_NAME_FIELD => 'realname';
 use constant LIST_ORDER => NAME_FIELD;
+
+use Class::XSAccessor {
+    accessors => {
+        id   => __PACKAGE__->ID_FIELD,
+        name => __PACKAGE__->REAL_NAME_FIELD,
+    },
+};
 
 use constant VALIDATORS => {
     cryptpassword            => \&_check_password,
@@ -640,7 +648,6 @@ sub update_last_seen_date {
 ################################################################################
 
 # Accessors for user attributes
-sub name  { $_[0]->{realname};   }
 sub login { $_[0]->{login_name}; }
 sub extern_id { $_[0]->{extern_id}; }
 sub email { $_[0]->login . Bugzilla->params->{'emailsuffix'}; }

@@ -74,6 +74,13 @@ use constant SUB_CLASSES => qw(
 ####      Accessors      ######
 ###############################
 
+use Class::XSAccessor {
+    accessors => {
+        name => __PACKAGE__->NAME_FIELD,
+        id   => __PACKAGE__->ID_FIELD,
+    },
+};
+
 sub class  { return $_[0]->{class}  }
 sub bug_id { return $_[0]->{bug_id} }
 

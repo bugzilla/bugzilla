@@ -39,7 +39,18 @@ use constant VALIDATORS => { };
 # There's no gain to caching these objects
 use constant USE_MEMCACHED => 0;
 
-sub tag    { return $_[0]->{'tag'} }
+###############################
+####      Accessors      ######
+###############################
+
+use Class::XSAccessor {
+    accessors => {
+        id   => __PACKAGE__->ID_FIELD,
+        tag  => __PACKAGE__->NAME_FIELD,
+        name => __PACKAGE__->NAME_FIELD,
+    },
+};
+
 sub weight { return $_[0]->{'weight'} }
 
 sub set_weight { $_[0]->set('weight', $_[1]); }

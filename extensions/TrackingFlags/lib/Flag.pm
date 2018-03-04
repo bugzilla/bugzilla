@@ -376,8 +376,16 @@ sub set_is_active   { $_[0]->set('is_active', $_[1]);   }
 ####      Accessors        ####
 ###############################
 
+use constant ID_FIELD   => 'field_id';
+
+use Class::XSAccessor {
+    accessors => {
+        id   => __PACKAGE__->ID_FIELD,
+        name => __PACKAGE__->NAME_FIELD,
+    },
+};
+
 sub flag_id     { return $_[0]->{'id'};          }
-sub name        { return $_[0]->{'name'};        }
 sub description { return $_[0]->{'description'}; }
 sub flag_type   { return $_[0]->{'type'};        }
 sub sortkey     { return $_[0]->{'sortkey'};     }
@@ -460,7 +468,6 @@ sub activity_count {
 # Here we return 'field_id' instead of the real
 # id as we want other Bugzilla code to treat this
 # as a Bugzilla::Field object in certain places.
-sub id                     { return $_[0]->{'field_id'};  }
 sub type                   { return FIELD_TYPE_EXTENSION; }
 sub legal_values           { return $_[0]->values;        }
 sub custom                 { return 1;     }

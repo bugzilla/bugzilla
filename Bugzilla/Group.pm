@@ -71,6 +71,13 @@ use constant GROUP_PARAMS => qw(chartgroup insidergroup timetrackinggroup
 ####      Accessors      ######
 ###############################
 
+use Class::XSAccessor {
+    accessors => {
+        id   => __PACKAGE__->ID_FIELD,
+        name => __PACKAGE__->NAME_FIELD,
+    },
+};
+
 sub description  { return $_[0]->{'description'};  }
 sub is_bug_group { return $_[0]->{'isbuggroup'};   }
 sub user_regexp  { return $_[0]->{'userregexp'};   }

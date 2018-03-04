@@ -61,6 +61,12 @@ sub create_from_transient {
 #
 # accessors
 #
+use Class::XSAccessor {
+    accessors => {
+        id   => __PACKAGE__->ID_FIELD,
+        name => __PACKAGE__->NAME_FIELD,
+    },
+};
 
 sub push_ts     { return $_[0]->{'push_ts'};     }
 sub payload     { return $_[0]->{'payload'};     }

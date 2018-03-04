@@ -30,11 +30,17 @@ use constant { AUDIT_CREATES => 0,
                AUDIT_REMOVES => 0,
                USE_MEMCACHED => 0 };
 
+use Class::XSAccessor {
+    accessors => {
+        name => __PACKAGE__->NAME_FIELD,
+        id   => __PACKAGE__->ID_FIELD,
+    },
+};
+
 #####################################################################
 # Provide accessors for our columns
 #####################################################################
 
-sub id            { return $_[0]->{id}            }
 sub bug_id        { return $_[0]->{bug_id}        }
 sub user_id       { return $_[0]->{user_id}       }
 sub last_visit_ts { return $_[0]->{last_visit_ts} }

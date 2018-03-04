@@ -54,7 +54,15 @@ my %CLEANUP;
 
 use constant DB_TABLE   => 'bugs';
 use constant ID_FIELD   => 'bug_id';
+
 use constant NAME_FIELD => 'alias';
+use Class::XSAccessor {
+    accessors => {
+        id   => __PACKAGE__->ID_FIELD,
+        name => __PACKAGE__->NAME_FIELD,
+    },
+};
+
 use constant LIST_ORDER => ID_FIELD;
 # Bugs have their own auditing table, bugs_activity.
 use constant AUDIT_CREATES => 0;

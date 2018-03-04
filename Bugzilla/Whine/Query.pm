@@ -33,15 +33,22 @@ use constant DB_COLUMNS => qw(
 
 use constant NAME_FIELD => 'id';
 use constant LIST_ORDER => 'sortkey';
+use constant QUERY_NAME_FIELD   => 'query_name';
 
 ####################
 # Simple Accessors #
 ####################
+use Class::XSAccessor {
+    accessors => {
+        id   => __PACKAGE__->ID_FIELD,
+        name => __PACKAGE__->QUERY_NAME_FIELD,
+    },
+};
+
 sub eventid           { return $_[0]->{'eventid'};       }
 sub sortkey           { return $_[0]->{'sortkey'};       }
 sub one_email_per_bug { return $_[0]->{'onemailperbug'}; }
 sub title             { return $_[0]->{'title'};         }
-sub name              { return $_[0]->{'query_name'};    }
 
 
 1;

@@ -79,6 +79,13 @@ sub create_from_message {
 # accessors
 #
 
+use Class::XSAccessor {
+    accessors => {
+        id   => __PACKAGE__->ID_FIELD,
+        name => __PACKAGE__->NAME_FIELD,
+    },
+};
+
 sub message_id  { return $_[0]->{'message_id'}   }
 sub push_ts     { return $_[0]->{'push_ts'};     }
 sub payload     { return $_[0]->{'payload'};     }

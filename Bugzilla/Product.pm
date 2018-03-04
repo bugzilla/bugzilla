@@ -831,6 +831,13 @@ sub classification {
 ####      Accessors      ######
 ###############################
 
+use Class::XSAccessor {
+    accessors => {
+        id   => __PACKAGE__->ID_FIELD,
+        name => __PACKAGE__->NAME_FIELD,
+    },
+};
+
 sub allows_unconfirmed { return $_[0]->{'allows_unconfirmed'}; }
 sub description       { return $_[0]->{'description'};       }
 sub is_active         { return $_[0]->{'isactive'};       }

@@ -372,7 +372,7 @@ sub multipart_init {
     delete $param{'-boundary'};
     $self->{'separator'} = "\r\n--$boundary\r\n";
     $self->{'final_separator'} = "\r\n--$boundary--\r\n";
-    $param{'-type'} = SERVER_PUSH($boundary);
+    $param{'-type'} = CGI::SERVER_PUSH($boundary);
 
     # Note: CGI.pm::multipart_init up to v3.04 explicitly set nph to 0
     # CGI.pm::multipart_init v3.05 explicitly sets nph to 1

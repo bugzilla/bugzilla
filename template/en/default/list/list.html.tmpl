@@ -208,20 +208,22 @@
       </td>
       
       <td>&nbsp;</td>
-      
-      <td valign="middle" class="bz_query_links">
-        [%# Links to more things users can do with this bug list. %]
-        [% Hook.process("links") %]
+    [% END %]
 
-        <a href="buglist.cgi?
-        [% urlquerypart FILTER html %]&amp;ctype=csv&amp;human=1
-          [%~ IF searchname %]&amp;namedcmd=[% searchname FILTER uri %][% END %]">CSV</a> |
-        <a href="buglist.cgi?
-        [% urlquerypart FILTER html %]&amp;title=
-        [%- title FILTER uri %]&amp;ctype=atom">Feed</a> |
-        <a href="buglist.cgi?
-        [% urlquerypart FILTER html %]&amp;ctype=ics">iCalendar</a>
+    <td valign="middle" class="bz_query_links">
+      [%# Links to more things users can do with this bug list. %]
+      [% Hook.process("links") %]
 
+      <a href="buglist.cgi?
+      [% urlquerypart FILTER html %]&amp;ctype=csv&amp;human=1
+        [%~ IF searchname %]&amp;namedcmd=[% searchname FILTER uri %][% END %]">CSV</a> |
+      <a href="buglist.cgi?
+      [% urlquerypart FILTER html %]&amp;title=
+      [%- title FILTER uri %]&amp;ctype=atom">Feed</a> |
+      <a href="buglist.cgi?
+      [% urlquerypart FILTER html %]&amp;ctype=ics">iCalendar</a>
+
+      [% IF bugs.size > 0 %]
         <br>
         <a href="colchange.cgi?
         [% urlquerypart FILTER html %]&amp;query_based_on=
@@ -232,9 +234,9 @@
             [%- "&order=$qorder" FILTER html IF order %]&amp;tweak=1"
             >Change&nbsp;Several&nbsp;[% terms.Bugs %]&nbsp;at&nbsp;Once</a>
         [% END %]
-      </td>
-    [% END %]
-    
+      [% END %]
+    </td>
+
     <td valign="middle" class="bz_query_edit">
       <a href="[% PROCESS edit_search_url %]">Edit&nbsp;Search</a>
     </td>

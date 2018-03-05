@@ -70,8 +70,8 @@ Bugzilla.Review.Badge = class Badge {
 
         // Sort requests from new to old, then group reviews/feedbacks asked by the same person in the same bug
         _requests.reverse().forEach(_req => {
-            const dup_index = requests.findIndex(req => req.requester === _req.requester
-                && req.bug_id === _req.bug_id && req.type === _req.type && req.attach_id && _req.attach_id);
+            const dup_index = requests.findIndex(req => req.requester === _req.requester && req.type === _req.type
+                && req.bug_id === _req.bug_id && req.attach_mimetype === _req.attach_mimetype);
 
             if (dup_index > -1) {
                 requests[dup_index].dup_count++;
@@ -86,17 +86,14 @@ Bugzilla.Review.Badge = class Badge {
             const $li = document.createElement('li');
             const [, name, email] = req.requester.match(/^(?:(.*)\s<)?(.+?)>?$/);
             const pretty_name = name ? name.replace(/([\[\(<‹].*?[›>\)\]]|\:[\w\-]+|\s+\-\s+.*)/g, '').trim() : email;
-            const link = req.attach_id && req.dup_count === 1
-                ? `attachment.cgi?id=${req.attach_id}&amp;action=edit` : `show_bug.cgi?id=${req.bug_id}`;
+            const [link, attach_label] = this.get_link(req);
 
             $li.setAttribute('role', 'none');
-            $li.innerHTML = `<a href="${link}" role="menuitem" tabindex="-1" `
+            $li.innerHTML = `<a href="${link.htmlEncode()}" role="menuitem" tabindex="-1" `
                 + `class="${(req.restricted ? 'secure' : '')}" data-type="${req.type}">`
                 + `<img src="https://secure.gravatar.com/avatar/${md5(email.toLowerCase())}?d=mm&amp;size=64" alt="">`
                 + `<label><strong>${pretty_name.htmlEncode()}</strong> asked for your `
-                + (req.type === 'needinfo' ? 'info' : req.type) + (req.attach_id ? ' on ' : '')
-                + (req.attach_id && req.ispatch ? (req.dup_count > 1 ? `${req.dup_count} patches` : 'a patch') : '')
-                + (req.attach_id && !req.ispatch ? (req.dup_count > 1 ? `${req.dup_count} files` : 'a file') : '')
+                + (req.type === 'needinfo' ? 'info' : req.type) + (attach_label ? ` on ${attach_label}` : '')
                 + ' in ' + (req.restricted ? '<span class="icon" aria-label="secure"></span>&nbsp;' : '')
                 + `<strong>Bug ${req.bug_id} &ndash; ${req.bug_summary.htmlEncode()}</strong>.</label>`
                 + `<time datetime="${req.created}">${timeAgo(new Date(req.created))}</time></a>`;
@@ -106,6 +103,36 @@ Bugzilla.Review.Badge = class Badge {
         this.$loading.remove();
         $ul.appendChild($fragment);
         $ul.hidden = false;
+    }
+
+    /**
+     * Get the link to a request as well as the label of any attachment. It could be the direct link to the attachment
+     * unless multiple requests are grouped.
+     * @param {Object} req - A request object.
+     * @returns {Array<String>} The result including the link and attachment label.
+     */
+    get_link(req) {
+        const dup = req.dup_count > 1;
+        const splinter_base = BUGZILLA.param.splinter_base;
+        const x_types = ['github-pull-request', 'review-board-request', 'phabricator-request', 'google-doc'];
+        const is_patch = req.attach_ispatch;
+        const [is_ghpr, is_rbr, is_phr, is_gdoc] = x_types.map(type => req.attach_mimetype === `text/x-${type}`);
+        const is_redirect = is_ghpr || is_rbr || is_phr || is_gdoc;
+        const is_file = req.attach_id && !is_patch && !is_redirect;
+
+        const link = (is_patch && !dup && splinter_base)
+            ? `${splinter_base}&bug=${req.bug_id}&attachment=${req.attach_id}`
+            : (is_redirect && !dup) ? `attachment.cgi?id=${req.attach_id}` // external redirect
+                : ((is_patch || is_file) && !dup) ? `attachment.cgi?id=${req.attach_id}&action=edit`
+                    : `show_bug.cgi?id=${req.bug_id}`;
+
+        const attach_label = (is_patch || is_rbr || is_phr) ? (dup ? `${req.dup_count} patches` : 'a patch')
+            : is_ghpr ? (dup ? `${req.dup_count} pull requests` : 'a pull request')
+                : is_gdoc ? (dup ? `${req.dup_count} Google Docs` : 'a Google Doc')
+                    : is_file ? (dup ? `${req.dup_count} files` : 'a file')
+                        : undefined;
+
+        return [link, attach_label];
     }
 }
 

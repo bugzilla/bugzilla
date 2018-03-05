@@ -6,10 +6,9 @@
   # defined by the Mozilla Public License, v. 2.0. #%]
 
 [% RAWPERL %]
-my @display_columns = (
-    "requester", "requestee",      "type",    "status",  "bug_id", "bug_summary",
-    "attach_id", "attach_summary", "ispatch", "created", "category", "restricted"
-);
+my @display_columns = ('requester', 'requestee', 'type', 'created', 'category',
+                       'restricted', 'bug_id', 'bug_summary', 'attach_id',
+                       'attach_summary', 'attach_mimetype', 'attach_ispatch');
 my $requests    = $stash->get('requests');
 my $time_filter = $context->filter('time', [ '%Y-%m-%dT%H:%M:%SZ', 'UTC' ]);
 my $mail_filter = $context->filter('email');
@@ -28,7 +27,7 @@ foreach my $request (@$requests) {
         elsif ( $column =~ /_id$/ ) {
             $val = $request->{$column} ? 0 + $request->{$column} : undef;
         }
-        elsif ( $column =~ /^is/ or $column eq 'restricted' ) {
+        elsif ( $column =~ /^(restricted|attach_ispatch)$/ ) {
             $val = $request->{$column} ? \1 : \0;
         }
         else {

@@ -68,11 +68,12 @@
   %]
 </div>
 
-<h2>or choose from the following selections</h2>
+<section id="product-list">
+  <h2>or choose from the following selections</h2>
 
 [% IF NOT ((cgi.param("full")) OR (user.settings.product_chooser.value == 'full_product_chooser')) %]
 
-  <table align="center" border="0" width="600" cellpadding="5" cellspacing="0">
+  <div class="tile">
     [% INCLUDE easyproduct
       name="Core"
       icon="component.png"
@@ -109,21 +110,19 @@
       name="Data Platform and Tools"
       icon="sync.png"
     %]
-    <tr>
-      <td><a href="[% target FILTER uri %]?full=1
-                [%- IF cloned_bug_id %]&amp;cloned_bug_id=[% cloned_bug_id FILTER uri %][% END -%]
-                [%- IF classification %]&amp;classification=[% classification FILTER uri %][% END -%]
-                [%- IF format %]&amp;format=[% format FILTER uri %][% END %]">
-                <img src="extensions/BMO/web/producticons/other.png" height="64" width="64" border="0"></a></td>
-      <td><h2 align="left" style="margin-bottom: 0px;"><a href="[% target FILTER uri %]?full=1
-                [%- IF cloned_bug_id %]&amp;cloned_bug_id=[% cloned_bug_id FILTER uri %][% END -%]
-                [%- IF classification %]&amp;classification=[% classification FILTER uri %][% END -%]
-                [%- IF format %]&amp;format=[% format FILTER uri %][% END %]">
-                Other Products</a></h2>
-          <p style="margin-top: 0px;">Other Mozilla products which aren't listed here</p>
-      </td>
-    </tr>
-  </table>
+    <section class="product other">
+      <h3>
+        <a href="[% target FILTER uri %]?full=1
+            [%- IF cloned_bug_id %]&amp;cloned_bug_id=[% cloned_bug_id FILTER uri %][% END -%]
+            [%- IF classification %]&amp;classification=[% classification FILTER uri %][% END -%]
+            [%- IF format %]&amp;format=[% format FILTER uri %][% END %]">
+          <img src="extensions/BMO/web/producticons/other.png" height="64" width="64" alt="">
+          <span>Other Products</span>
+        </a>
+      </h3>
+      <p>Other Mozilla products which aren't listed here</p>
+    </section>
+  </div>
 
 [% ELSE %]
 
@@ -171,15 +170,14 @@
   [% END %]
 [% END %]
 
-<br>
+</section>
 </div>
 
 <div id="guided">
-  <a id="guided_img" href="enter_bug.cgi?format=guided"><img
-   src="extensions/BMO/web/images/guided.png" width="16" height="16" border="0" align="absmiddle"></a>
-  <a id="guided_link" href="enter_bug.cgi?format=guided"
-   >Switch to the [% terms.Bugzilla %] Helper</a>
-  | <a href="page.cgi?id=custom_forms.html">Custom [% terms.bug %] entry forms</a>
+  <a href="enter_bug.cgi?format=guided">
+    <img src="extensions/BMO/web/images/guided.png" width="16" height="16">
+    Switch to the [% terms.Bugzilla %] Helper</a> |
+  <a href="page.cgi?id=custom_forms.html">Custom [% terms.bug %] entry forms</a>
 </div>
 
 [% PROCESS global/footer.html.tmpl %]
@@ -192,20 +190,19 @@
   [% FOREACH c = classifications %]
     [% FOREACH p = c.products %]
       [% IF p.name == name %]
-        <tr>
-          <td><a href="[% target FILTER uri %]?product=[% p.name FILTER uri %]
-                  [%- IF cloned_bug_id %]&amp;cloned_bug_id=[% cloned_bug_id FILTER uri %][% END -%]
-                  [%- IF format %]&amp;format=[% format FILTER uri %][% END %]">
-              <img src="extensions/BMO/web/producticons/[% icon FILTER uri %]" height="64" width="64" border="0"></a></td>
-          <td><h2 align="left" style="margin-bottom: 0px"><a href="[% target FILTER uri %]?product=[% p.name FILTER uri %]
-                  [%- IF cloned_bug_id %]&amp;cloned_bug_id=[% cloned_bug_id FILTER uri %][% END -%]
-                  [%- IF format %]&amp;format=[% format FILTER uri %][% END %]">
-              [% caption || name FILTER html FILTER no_break %]</a>:</h2>
-              [% IF p.description %]
-                <p style="margin-top: 0px;">[% p.description FILTER html_light %]</p>
-              [% END %]
-          </td>
-        </tr>
+        <section class="product major">
+          <h3>
+            <a href="[% target FILTER uri %]?product=[% p.name FILTER uri %]
+                [%- IF cloned_bug_id %]&amp;cloned_bug_id=[% cloned_bug_id FILTER uri %][% END -%]
+                [%- IF format %]&amp;format=[% format FILTER uri %][% END %]">
+              <img src="extensions/BMO/web/producticons/[% icon FILTER uri %]" height="64" width="64" alt="">
+              <span>[% caption || name FILTER html %]</span>
+            </a>
+          </h3>
+          [% IF p.description %]
+            <p>[% p.description FILTER html_light %]</p>
+          [% END %]
+        </section>
       [% LAST %]
       [% END %]
     [% END %]

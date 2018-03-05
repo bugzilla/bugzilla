@@ -6,11 +6,81 @@
  * defined by the Mozilla Public License, v. 2.0. */
 
 #choose_product h2,
-#choose_product p {
-    text-align: center;
+#choose_product p,
+#guided {
+  text-align: center;
 }
 
 #choose_product td h2,
 #choose_product td p {
-    text-align: left;
+  text-align: left;
+}
+
+#product-list {
+  margin: 32px 0;
+}
+
+#product-list .tile {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  margin: 0 auto;
+}
+
+#product-list .tile .product {
+  overflow: hidden;
+  box-sizing: border-box;
+  margin: 16px 0;
+  padding: 0 16px 0 80px;
+}
+
+#product-list .tile .product h3 {
+  margin: 0;
+  font-size: 150%;
+}
+
+#product-list .tile .product img {
+  float: left;
+  margin: 0 0 0 -80px;
+}
+
+#product-list .tile .product p {
+  margin: 4px 0 0;
+  line-height: 1.5;
+  text-align: left;
+}
+
+#guided img {
+  vertical-align: text-bottom;
+}
+
+@media screen and (min-width: 1024px) {
+  #product-list .tile {
+    width: 960px;
+  }
+
+  #product-list .tile .product {
+    width: 50%;
+  }
+}
+
+@media screen and (min-width: 768px) and (max-width: 1023px) {
+  #product-list .tile {
+    width: 720px;
+  }
+
+  #product-list .tile .product {
+    width: 50%;
+  }
+}
+
+@media screen and (max-width: 767px) {
+  #product-list .tile {
+    width: auto;
+    max-width: 480px;
+  }
+
+  #product-list .tile .product {
+    width: 100%;
+  }
 }

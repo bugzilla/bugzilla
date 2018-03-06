@@ -15,7 +15,7 @@ use Moo;
 
 use Bugzilla::Constants;
 use Bugzilla::Search;
-use Bugzilla::Util qw(diff_arrays);
+use Bugzilla::Util qw(diff_arrays with_writable_database with_readonly_database);
 
 use Bugzilla::Extension::PhabBugz::Constants;
 use Bugzilla::Extension::PhabBugz::Policy;
@@ -105,7 +105,9 @@ sub feed_query {
             }
         }
 
-        $self->process_revision_change($object_phid, $story_text);
+        with_writable_database {
+            $self->process_revision_change($object_phid, $story_text);
+        };
         $self->save_last_id($story_id, 'feed');
     }
 
@@ -131,7 +133,9 @@ sub feed_query {
         $self->logger->debug("USER REALNAME: $user_realname");
         $self->logger->debug("OBJECT PHID: $object_phid");
 
-        $self->process_new_user($user_data);
+        with_readonly_database {
+            $self->process_new_user($user_data);
+        };
         $self->save_last_id($user_id, 'user');
     }
 }
@@ -170,10 +174,6 @@ sub process_revision_change {
 
     # Pre setup before making changes
     my $old_user = set_phab_user();
-    my $is_shadow_db = Bugzilla->is_shadow_db;                                                                                                                                                                      Bugzilla->switch_to_main_db if $is_shadow_db;
-    my $dbh = Bugzilla->dbh;
-    $dbh->bz_start_transaction;
-
     my $bug = Bugzilla::Bug->new({ id => $revision->bug_id, cache => 1 });
 
     # REVISION SECURITY POLICY
@@ -360,9 +360,6 @@ sub process_revision_change {
         Bugzilla::BugMail::Send($bug_id, { changer => Bugzilla->user });
     }
 
-    $dbh->bz_commit_transaction;
-    Bugzilla->switch_to_shadow_db if $is_shadow_db;
-
     Bugzilla->set_user($old_user);
 
     $self->logger->info('SUCCESS: Revision D' . $revision->id . ' processed');
@@ -383,8 +380,6 @@ sub process_new_user {
 
     # Pre setup before querying DB
     my $old_user = set_phab_user();
-
-    Bugzilla->switch_to_shadow_db();
 
     my $params = {
         f3  => 'OP',

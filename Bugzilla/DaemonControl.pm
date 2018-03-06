@@ -49,7 +49,10 @@ sub catch_signal {
     my $signal   = IO::Async::Signal->new(
         name       => $name,
         on_receipt => sub {
+            my ($self) = @_;
+            my $l = IO::Async::Loop->new;
             $signal_f->done(@done);
+            $l->remove($self);
         }
     );
     $signal_f->on_cancel(

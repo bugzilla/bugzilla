@@ -10,15 +10,15 @@ use 5.10.1;
 use strict;
 use warnings;
 
-use Cwd qw(abs_path);
 use File::Basename;
+use File::Spec;
 BEGIN {
-    # Untaint the abs_path.
-    my ($a) = abs_path($0) =~ /^(.*)$/;
-    chdir dirname($a);
+    require lib;
+    my $dir = File::Spec->rel2abs(dirname(__FILE__));
+    lib->import($dir, File::Spec->catdir($dir, 'lib'), File::Spec->catdir($dir, qw(local lib perl5)));
+    chdir $dir or die "chdir $dir failed: $!";
 }
 
-use lib qw(. lib local/lib/perl5);
 use Bugzilla;
 use Bugzilla::JobQueue::Runner;
 

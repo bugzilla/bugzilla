@@ -16,6 +16,10 @@ use File::Spec::Functions qw(rel2abs);
 use Bugzilla::Constants qw(bz_locations);
 use English qw(-no_match_vars $PROGRAM_NAME);
 
+sub is_interactive {
+    return exists $ENV{'SERVER_SOFTWARE'} ? 1 : 0;
+}
+
 BEGIN {
     my $file = $ENV{LOG4PERL_CONFIG_FILE} // 'log4perl-syslog.conf';
     Log::Log4perl::Logger::create_custom_level('NOTICE', 'WARN', 5, 2);
@@ -104,11 +108,6 @@ sub import {
         },
         $logger
     );
-}
-
-sub is_interactive {
-    state $is_tty = -t STDOUT || -t STDIN;
-    return $is_tty || $ENV{"Bugzilla.pm"} && Bugzilla->usage_mode == Bugzilla::Constants::USAGE_MODE_CMDLINE;
 }
 
 1;

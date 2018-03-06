@@ -113,13 +113,6 @@ use constant UPDATE_VALIDATORS => {
 ####      Accessors      ######
 ###############################
 
-use Class::XSAccessor {
-    accessors => {
-        id   => __PACKAGE__->ID_FIELD,
-        name => __PACKAGE__->NAME_FIELD,
-    },
-};
-
 =pod
 
 =head2 Instance Properties

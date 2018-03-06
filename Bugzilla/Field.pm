@@ -432,17 +432,6 @@ sub _check_reverse_desc {
 
 sub _check_is_mandatory { return $_[1] ? 1 : 0; }
 
-###############################
-####      Accessors      ######
-###############################
-
-use Class::XSAccessor {
-    accessors => {
-        id   => __PACKAGE__->ID_FIELD,
-        name => __PACKAGE__->NAME_FIELD,
-    },
-};
-
 =pod
 
 =head2 Instance Properties

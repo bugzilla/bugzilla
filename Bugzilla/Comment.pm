@@ -228,13 +228,6 @@ sub preload {
 ####      Accessors      ######
 ###############################
 
-use Class::XSAccessor {
-    accessors => {
-        id   => __PACKAGE__->ID_FIELD,
-        name => __PACKAGE__->NAME_FIELD,
-    },
-};
-
 sub already_wrapped { return $_[0]->{'already_wrapped'}; }
 sub body        { return $_[0]->{'thetext'};   }
 sub bug_id      { return $_[0]->{'bug_id'};    }

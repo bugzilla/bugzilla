@@ -35,7 +35,6 @@ use constant DB_COLUMNS => qw(
 );
 
 use constant LIST_ORDER => 'sortkey';
-use constant NAME_FIELD => 'value';
 
 use constant UPDATE_COLUMNS => qw(
     setter_group_id
@@ -112,13 +111,6 @@ sub set_comment         { $_[0]->set('comment', $_[1]);         }
 ####      Accessors        ####
 ###############################
 
-use Class::XSAccessor {
-    accessors => {
-        id   => __PACKAGE__->ID_FIELD,
-        name => __PACKAGE__->NAME_FIELD,
-    },
-};
-
 sub tracking_flag_id { return $_[0]->{'tracking_flag_id'}; }
 sub setter_group_id  { return $_[0]->{'setter_group_id'};  }
 sub value            { return $_[0]->{'value'};            }
@@ -148,6 +140,7 @@ sub setter_group {
 ## Compatibility with Bugzilla::Field ##
 ########################################
 
+sub name              { return $_[0]->{'value'}; }
 sub is_visible_on_bug { return 1;                }
 
 1;

@@ -39,14 +39,7 @@ use constant { AUDIT_CREATES => 0,
                USE_MEMCACHED => 0 };
 
 # Accessors
-
-use Class::XSAccessor {
-    accessors => {
-        id   => __PACKAGE__->ID_FIELD,
-        name => __PACKAGE__->NAME_FIELD,
-    },
-};
-
+sub id              { return $_[0]->{id}              }
 sub userid          { return $_[0]->{userid}          }
 sub cookie          { return $_[0]->{cookie}          }
 sub lastused        { return $_[0]->{lastused}        }

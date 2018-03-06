@@ -28,7 +28,6 @@ use constant DEFAULT_VERSION => 'unspecified';
 
 use constant DB_TABLE => 'versions';
 use constant NAME_FIELD => 'value';
-
 # This is "id" because it has to be filled in and id is probably the fastest.
 # We do a custom sort in new_from_list below.
 use constant LIST_ORDER => 'id';
@@ -147,13 +146,6 @@ sub remove_from_db {
 ###############################
 #####     Accessors        ####
 ###############################
-
-use Class::XSAccessor {
-    accessors => {
-        id   => __PACKAGE__->ID_FIELD,
-        name => __PACKAGE__->NAME_FIELD,
-    },
-};
 
 sub product_id { return $_[0]->{'product_id'}; }
 sub is_active  { return $_[0]->{'isactive'};   }

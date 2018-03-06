@@ -119,16 +119,6 @@ sub new {
     $class->SUPER::new(@_);
 }
 
-###############################
-####      Accessors      ######
-###############################
-
-use Class::XSAccessor {
-    accessors => {
-        id   => __PACKAGE__->ID_FIELD,
-        name => __PACKAGE__->NAME_FIELD,
-    },
-};
 #########################
 # Database Manipulation #
 #########################

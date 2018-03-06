@@ -104,12 +104,6 @@ use constant UPDATE_VALIDATORS => {
 ####      Accessors      ######
 ###############################
 
-use Class::XSAccessor {
-    accessors => {
-        id   => __PACKAGE__->ID_FIELD,
-    },
-};
-
 =head2 METHODS
 
 =over
@@ -146,6 +140,7 @@ Returns the timestamp when the flag was last modified.
 
 =cut
 
+sub id           { return $_[0]->{'id'};           }
 sub name         { return $_[0]->type->name;       }
 sub type_id      { return $_[0]->{'type_id'};      }
 sub bug_id       { return $_[0]->{'bug_id'};       }

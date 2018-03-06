@@ -210,13 +210,6 @@ sub update {
 ####      Accessors      ######
 ###############################
 
-use Class::XSAccessor {
-    accessors => {
-        id   => __PACKAGE__->ID_FIELD,
-        name => __PACKAGE__->NAME_FIELD,
-    },
-};
-
 =head2 METHODS
 
 =over
@@ -269,6 +262,8 @@ Returns the sortkey of the flagtype.
 
 =cut
 
+sub id               { return $_[0]->{'id'};               }
+sub name             { return $_[0]->{'name'};             }
 sub description      { return $_[0]->{'description'};      }
 sub cc_list          { return $_[0]->{'cc_list'};          }
 sub target_type      { return $_[0]->{'target_type'} eq 'b' ? 'bug' : 'attachment'; }

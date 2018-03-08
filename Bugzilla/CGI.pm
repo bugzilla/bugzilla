@@ -14,6 +14,7 @@ use warnings;
 use CGI;
 use base qw(CGI);
 
+use Bugzilla::CGI::ContentSecurityPolicy;
 use Bugzilla::Constants;
 use Bugzilla::Error;
 use Bugzilla::Util;
@@ -188,36 +189,28 @@ sub target_uri {
 
 sub content_security_policy {
     my ($self, %add_params) = @_;
-    if (Bugzilla->has_feature('csp')) {
-        require Bugzilla::CGI::ContentSecurityPolicy;
-        if (%add_params || !$self->{Bugzilla_csp}) {
-            my %params = DEFAULT_CSP;
-            delete $params{report_only} if %add_params && !$add_params{report_only};
-            foreach my $key (keys %add_params) {
-                if (defined $add_params{$key}) {
-                    $params{$key} = $add_params{$key};
-                }
-                else {
-                    delete $params{$key};
-                }
+    if (%add_params || !$self->{Bugzilla_csp}) {
+        my %params = DEFAULT_CSP;
+        delete $params{report_only} if %add_params && !$add_params{report_only};
+        foreach my $key (keys %add_params) {
+            if (defined $add_params{$key}) {
+                $params{$key} = $add_params{$key};
             }
-            $self->{Bugzilla_csp} = Bugzilla::CGI::ContentSecurityPolicy->new(%params);
+            else {
+                delete $params{$key};
+            }
         }
-
-        return $self->{Bugzilla_csp};
+        $self->{Bugzilla_csp} = Bugzilla::CGI::ContentSecurityPolicy->new(%params);
     }
-    return undef;
+
+    return $self->{Bugzilla_csp};
 }
 
 sub csp_nonce {
     my ($self) = @_;
 
-    if (Bugzilla->has_feature('csp')) {
-        my $csp = $self->content_security_policy;
-        return $csp->nonce if $csp->has_nonce;
-    }
-
-    return '';
+    my $csp = $self->content_security_policy;
+    return $csp->has_nonce ? $csp->nonce : '';
 }
 
 # We want this sorted plus the ability to exclude certain params

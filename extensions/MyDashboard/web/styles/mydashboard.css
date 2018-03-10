@@ -82,5 +82,6 @@
 }
 
 #saved_searches_container li {
-    margin: 5px 0;
+    margin: 5px;
+    display: inline;
 }

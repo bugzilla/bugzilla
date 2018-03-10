@@ -39,6 +39,8 @@ our %EXPORT_TAGS = (
     utils => [qw(catch_signal on_exception on_finish)],
 );
 
+use constant CEREAL_BIN    => realpath(catfile( bz_locations->{cgi_path}, 'scripts', 'cereal.pl'));
+
 use constant HTTPD_BIN     => '/usr/sbin/httpd';
 use constant HTTPD_CONFIG  => realpath(catfile( bz_locations->{confdir}, 'httpd.conf' ));
 
@@ -67,41 +69,11 @@ sub catch_signal {
     return $signal_f;
 }
 
-sub cereal {
-    local $PROGRAM_NAME = "cereal";
-    $ENV{LOGGING_PORT} //= 5880;
-
-    my $loop = IO::Async::Loop->new;
-    my $on_stream = sub {
-        my ($stream) = @_;
-        my $protocol = IO::Async::Protocol::LineStream->new(
-            transport    => $stream,
-            on_read_line => sub {
-                my ( $self, $line ) = @_;
-                say $line;
-            },
-        );
-        $loop->add($protocol);
-    };
-    my @signals = (
-        catch_signal('TERM', 0),
-        catch_signal('INT', 0 ),
-        catch_signal('KILL', 0 ),
-    );
-    $loop->listen(
-        host      => '127.0.0.1',
-        service   => $ENV{LOGGING_PORT},
-        socktype  => 'stream',
-        on_stream => $on_stream,
-    )->get;
-    exit Future->wait_any(@signals)->get;
-}
-
 sub run_cereal {
     my $loop   = IO::Async::Loop->new;
     my $exit_f = $loop->new_future;
     my $cereal = IO::Async::Process->new(
-        code         => \&cereal,
+        command      => [CEREAL_BIN],
         on_finish    => on_finish($exit_f),
         on_exception => on_exception( "cereal", $exit_f ),
     );

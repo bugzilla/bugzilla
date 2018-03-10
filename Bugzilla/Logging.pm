@@ -17,7 +17,7 @@ use Bugzilla::Constants qw(bz_locations);
 use English qw(-no_match_vars $PROGRAM_NAME);
 
 sub is_interactive {
-    return exists $ENV{'SERVER_SOFTWARE'} ? 1 : 0;
+    return not exists $ENV{SERVER_SOFTWARE}
 }
 
 BEGIN {

@@ -1,4 +1,4 @@
-[% IF column == 'attachment' && request.ispatch %]
+[% IF column == 'attachment' && request.attach_ispatch %]
   &nbsp;
   <a href="[% Bugzilla.splinter_review_url(request.bug_id, request.attach_id) FILTER none %]">[review]</a>
 [% END %]

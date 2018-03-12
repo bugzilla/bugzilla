@@ -3,9 +3,27 @@ severity = 1
 
 [-CodeLayout::RequireTidyCode]
 #perltidyrc = .perltidyrc
+#severity = 2
+
 [InputOutput::RequireCheckedSyscalls]
+severity = 2
 functions = :builtins
 exclude_functions = print say sleep binmode
+
+[ValuesAndExpressions::ProhibitInterpolationOfLiterals]
+severity = 2
+
+[Freenode::EmptyReturn]
+severity = 2
+
+[CodeLayout::RequireTrailingCommas]
+severity = 2
+
+[CodeLayout::ProhibitParensWithBuiltins]
+severity = 2
+
+[RegularExpressions::ProhibitUnusualDelimiters]
+severity = 2
 
 [-BuiltinFunctions::ProhibitUselessTopic]
 [-ControlStructures::ProhibitCascadingIfElse]
@@ -46,7 +64,7 @@ exclude_functions = print say sleep binmode
 
 # _build_* are allowed
 [Subroutines::ProhibitUnusedPrivateSubroutines]
- private_name_regex = _(?!_|build_)\w+
+private_name_regex = _(?!_|build_)\w+
 
 # I don't agree with this policy because
 # a bare return can actually cause more problems.

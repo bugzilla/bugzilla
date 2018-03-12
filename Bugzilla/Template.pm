@@ -572,7 +572,9 @@ sub create {
         ABSOLUTE => 1,
         RELATIVE => $ENV{MOD_PERL} ? 0 : 1,
 
-        COMPILE_DIR => bz_locations()->{'template_cache'},
+        # Only use an on-disk template cache if we're running as the web
+        # server.  This ensures the permissions of the cache remain correct.
+        COMPILE_DIR => is_webserver_group() ? bz_locations()->{'template_cache'} : undef,
 
         # Don't check for a template update until 1 hour has passed since the
         # last check.

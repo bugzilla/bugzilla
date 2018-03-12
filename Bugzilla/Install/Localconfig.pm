@@ -43,7 +43,7 @@ our @EXPORT_OK = qw(
 
 # might want to change this for upstream
 use constant ENV_PREFIX     => 'BMO_';
-use constant PARAM_OVERRIDE => qw( shadowdb shadowdbhost shadowdbport shadowdbsock );
+use constant PARAM_OVERRIDE => qw( use_mailer_queue mail_delivery_method shadowdb shadowdbhost shadowdbport shadowdbsock );
 
 sub _sensible_group {
     return '' if ON_WINDOWS;
@@ -135,12 +135,12 @@ use constant LOCALCONFIG_VARS => (
     {
         name    => 'param_override',
         default => {
-            memcached_servers   => undef,
-            memcached_namespace => undef,
-            shadowdb            => undef,
-            shadowdbhost        => undef,
-            shadowdbport        => undef,
-            shadowdbsock        => undef,
+            use_mailer_queue     => undef,
+            mail_delivery_method => undef,
+            shadowdb             => undef,
+            shadowdbhost         => undef,
+            shadowdbport         => undef,
+            shadowdbsock         => undef,
         },
     },
     {

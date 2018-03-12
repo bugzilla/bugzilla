@@ -297,6 +297,15 @@ BMO_apache_size_limit
   This is the max amount of unshared memory (in kb) that the apache process is
   allowed to use before Apache::SizeLimit kills it.
 
+BMO_mail_delivery_method
+  Usually configured on the MTA section of admin interface, but may be set here for testing purposes.
+  Valid values are None, Test, Sendmail, or SMTP.
+  If set to Test, email will be appended to the /app/data/mailer.test file.
+
+BMO_use_mailer_queue
+  Usually configured on the MTA section of the admin interface, you may change this here for testing purposes.
+  Should be 1 or 0. If 1, the job queue will be used. For testing, only set to 0 if the BMO_mail_delivery_method is None or Test.
+
 HTTPD_StartServers
   Sets the number of child server processes created on startup.
   As the number of processes is dynamically controlled depending on the load,

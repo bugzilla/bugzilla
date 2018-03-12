@@ -37,10 +37,10 @@ use Bugzilla::Version qw(vers_cmp);
 
 sub MessageToMTA {
     my ($msg, $send_now) = (@_);
-    my $method = Bugzilla->params->{'mail_delivery_method'};
+    my $method = Bugzilla->get_param_with_override('mail_delivery_method');
     return if $method eq 'None';
 
-    if (Bugzilla->params->{'use_mailer_queue'} and !$send_now) {
+    if (Bugzilla->get_param_with_override('use_mailer_queue') and !$send_now) {
         Bugzilla->job_queue->insert('send_mail', { msg => $msg });
         return;
     }
@@ -66,7 +66,7 @@ sub MessageToMTA {
     }
 
     # Ensure that we are not sending emails too quickly to recipients.
-    if (Bugzilla->params->{use_mailer_queue}
+    if (Bugzilla->get_param_with_override('use_mailer_queue')
         && (EMAIL_LIMIT_PER_MINUTE || EMAIL_LIMIT_PER_HOUR))
     {
         $dbh->do(
@@ -226,7 +226,7 @@ sub MessageToMTA {
     }
 
     # insert into email_rates
-    if (Bugzilla->params->{use_mailer_queue}
+    if (Bugzilla->get_param_with_override('use_mailer_queue')
         && (EMAIL_LIMIT_PER_MINUTE || EMAIL_LIMIT_PER_HOUR))
     {
         $dbh->do(

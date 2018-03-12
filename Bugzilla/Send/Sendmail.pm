@@ -37,7 +37,7 @@ sub send {
     unless (close $pipe) {
         return failure "error when closing pipe to $mailer: $!" if $!;
         my ($error_message, $is_transient) = _map_exitcode($? >> 8);
-        if (Bugzilla->params->{'use_mailer_queue'}) {
+        if (Bugzilla->get_param_with_override('use_mailer_queue')) {
             # Return success for errors which are fatal so Bugzilla knows to
             # remove them from the queue
             if ($is_transient) {

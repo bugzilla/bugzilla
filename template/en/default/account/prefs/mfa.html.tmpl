@@ -91,7 +91,7 @@
       [% END %]
     </p>
 
-    [% IF user.mfa && user.in_group("mozilla-employee-confidential") %]
+    [% IF user.mfa  %]
       <p class="mfa-disable-blurb">
         You will need to disable your two-factor authentication in order to change to a different method.
         There will be a small amount of time when your account will not be as secure, so you may use the
@@ -178,7 +178,7 @@
         or <a href="https://freeotp.github.io/" target="_blank" rel="noopener noreferrer">Red Hat FreeOTP</a>),
       </blockquote>
 
-      [% IF Param("duo_host") && user.in_group("mozilla-employee-confidential") %]
+      [% IF Param("duo_host")  %]
         <button type="button" id="mfa-select-duo">Duo Security</button><br>
         <blockquote>
           Requires a <a href="https://mana.mozilla.org/wiki/display/SD/DuoSecurity" target="_blank" rel="noopener noreferrer">Duo Security</a>
@@ -245,7 +245,7 @@
 
     </div>
 
-    [% IF Param("duo_host") && user.in_group("mozilla-employee-confidential") %]
+    [% IF Param("duo_host") %]
       [%# enable - duo %]
       <div id="mfa-enable-duo" style="display:none">
 

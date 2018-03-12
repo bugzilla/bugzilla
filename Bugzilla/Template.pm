@@ -284,7 +284,8 @@ sub get_attachment_link {
 
         $link_text =~ s/ \[details\]$//;
         $link_text =~ s/ \[diff\]$//;
-        my $linkval = "attachment.cgi?id=$attachid";
+        state $urlbase = Bugzilla->localconfig->{urlbase};
+        my $linkval = "${urlbase}attachment.cgi?id=$attachid";
 
         # If the attachment is a patch and patch_viewer feature is
         # enabled, add link to the diff.

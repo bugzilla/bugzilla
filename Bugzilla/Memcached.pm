@@ -16,7 +16,7 @@ use Log::Log4perl qw(:easy);
 use Bugzilla::Error;
 use Scalar::Util qw(blessed);
 use List::Util qw(sum);
-use Bugzilla::Util qw(trick_taint);
+use Bugzilla::Util qw(trick_taint trim);
 use URI::Escape;
 use Encode;
 use Sys::Syslog qw(:DEFAULT);
@@ -37,7 +37,7 @@ sub _new {
         $self->{namespace} = Bugzilla->localconfig->{memcached_namespace};
         TRACE("connecting servers: $servers, namespace: $self->{namespace}");
         $self->{memcached} = Cache::Memcached::Fast->new({
-            servers   => [ split(/[, ]+/, $servers) ],
+            servers   => [ _parse_memcached_server_list($servers) ],
             namespace => $self->{namespace},
             max_size  => 1024 * 1024 * 4,
         });
@@ -46,6 +46,13 @@ sub _new {
         TRACE("memcached feature is not enabled");
     }
     return bless($self, $class);
+}
+
+sub _parse_memcached_server_list {
+    my ($server_list) = @_;
+    my @servers = split(/[, ]+/, trim($server_list));
+
+    return map { /:[0-9]+$/s ? $_ : "$_:11211" } @servers;
 }
 
 sub enabled {

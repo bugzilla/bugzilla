@@ -117,7 +117,7 @@ sub run_cereal_and_httpd {
             if ( ($lc->{inbound_proxies} // '') eq '*' && $lc->{urlbase} =~ /^https/) {
                 push @httpd_args, '-DHTTPS';
             }
-            elsif (not $lc->{urlbase} =~ /^https/) {
+            elsif ($lc->{urlbase} =~ /^https/) {
                 WARN("HTTPS urlbase but inbound_proxies is not '*'");
             }
             my $httpd_exit_f  = run_httpd(@httpd_args);

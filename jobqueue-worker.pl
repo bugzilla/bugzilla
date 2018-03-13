@@ -24,8 +24,9 @@ BEGIN {
 use Bugzilla::JobQueue::Worker;
 use Bugzilla::JobQueue;
 use Bugzilla;
-use English qw(-no_match_vars $PROGRAM_NAME);
+use English qw(-no_match_vars $PROGRAM_NAME $OSNAME);
 use Getopt::Long qw(:config gnu_getopt);
+use if $OSNAME eq 'linux', 'Linux::Pdeathsig', 'set_pdeathsig';
 
 BEGIN { Bugzilla->extensions }
 my $name = basename(__FILE__);
@@ -37,4 +38,10 @@ if ($name) {
     $PROGRAM_NAME = $name;
     ## use critic
 }
+
+if ($OSNAME eq 'linux') {
+    # get SIGTEMR (15) when parent exits.
+    set_pdeathsig(15);
+}
+
 Bugzilla::JobQueue::Worker->run('work');

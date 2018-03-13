@@ -22,6 +22,7 @@ BEGIN {
 use ExtUtils::MakeMaker 7.22;
 use File::Basename;
 use File::Spec;
+use English qw(-no_match_vars $OSNAME);
 
 BEGIN {
     if ( $ENV{BZ_SILENT_MAKEFILE} ) {
@@ -88,21 +89,25 @@ my %test_requires = (
 my %recommends = ( Safe => '2.30' );
 
 # Windows requires some additional modules.
-if ( $^O eq 'MSWin32' ) {
+if ( $OSNAME eq 'MSWin32' ) {
     $requires{'Win32'}                            = '0.35';
     $requires{'Win32::API'}                       = '0.55';
     $requires{'DateTime::TimeZone::Local::Win32'} = '1.64';
 }
 
-# for some reason, we need these on ubuntu.
-if ( $^O eq 'linux' && -f '/etc/debian_version' ) {
-    my @extra = qw(
+if ( $OSNAME eq 'linux' ) {
+    # This isn't strictly needed, but it is nice to have.
+    # we use it to make sure jobqueue-workers exit when their parent exits.
+    my @extra = qw(Linux::Pdeathsig);
+
+    # for some reason, we need these on ubuntu.
+    push @extra, qw(
         Linux::Pid
         Test::Pod::Coverage
         Pod::Coverage::TrustPod
         Test::CPAN::Meta
         Test::Pod
-    );
+    ) if -f '/etc/debian_version';
     $requires{$_} = 0 for @extra;
 }
 

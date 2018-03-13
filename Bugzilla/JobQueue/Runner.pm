@@ -28,6 +28,7 @@ use File::Basename;
 use File::Copy;
 use File::Spec::Functions qw(catfile);
 use Future;
+use Future::Utils qw(fmap_void);
 use IO::Async::Loop;
 use IO::Async::Process;
 use IO::Async::Signal;
@@ -94,6 +95,7 @@ sub gd_more_opt {
     return (
         'pidfile=s' => \$self->{gd_args}{pidfile},
         'n=s'       => \$self->{gd_args}{progname},
+        'jobs|j=i'  => \$self->{gd_args}{jobs},
     );
 }
 
@@ -206,13 +208,18 @@ sub gd_quit_event     { FATAL('gd_quit_event() should never be called') }
 sub gd_reconfig_event { FATAL('gd_reconfig_event() should never be called') }
 
 sub gd_run {
-    my $self = shift;
+    my $self      = shift;
+    my $jobs      = $self->{gd_args}{jobs} // 1;
+    my $signal_f  = $self->{_signal_future};
+    my $workers_f = fmap_void { $self->run_worker("work") }
+        concurrent => $jobs,
+        generate   => sub { !$signal_f->is_ready };
 
     # This is so the process shows up in (h)top in a useful way.
     local $PROGRAM_NAME = "$self->{gd_progname} [supervisor]";
-    my $code = $self->run_worker('work')->get;
+    Future->wait_any($signal_f, $workers_f)->get;
     unlink $self->{gd_pidfile};
-    exit $code;
+    exit 0;
 }
 
 # This executes the script "jobqueue-worker.pl"

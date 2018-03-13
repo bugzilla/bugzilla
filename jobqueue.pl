@@ -40,6 +40,8 @@ jobqueue.pl - Runs jobs in the background for Bugzilla.
              process id. Defaults to F<data/jobqueue.pl.pid>.
    -n name   What should this process call itself in the system log?
              Defaults to the full path you used to invoke the script.
+   -j jobs   How many child processes should be run?
+             Defaults to 1.
 
    COMMANDS:
    start     Starts a new jobqueue daemon if there isn't one running already

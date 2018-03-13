@@ -33,6 +33,20 @@ services:
       - bmo-db.vm
       - memcached
 
+  bmo-jobqueue.vm:
+    build: *bmo_build
+    command: jobqueue
+    volumes:
+      - bmo-data-dir:/app/data
+    tmpfs:
+      - /tmp
+      - /run
+    environment: *bmo_env
+    restart: always
+    depends_on:
+      - bmo-db.vm
+      - memcached
+
   bmo-db.vm:
     image: mozillabteam/bmo-mysql:5.6
     volumes:

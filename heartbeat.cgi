@@ -13,6 +13,7 @@ use warnings;
 use lib qw(. lib local/lib/perl5);
 
 use Bugzilla;
+use Bugzilla::Logging;
 use Bugzilla::Constants;
 use Bugzilla::Error;
 use Bugzilla::Update;
@@ -32,7 +33,7 @@ my $ok = eval {
     die "missing bmo feature dependencies"  unless Bugzilla->has_feature('bmo');
     1;
 };
-warn "heartbeat error: $@" if !$ok && $@;
+FATAL("heartbeat error: $@") if !$ok && $@;
 
 my $cgi = Bugzilla->cgi;
 print $cgi->header(-type => 'text/plain', -status => $ok ? '200 OK' : '500 Internal Server Error');

@@ -11,6 +11,7 @@ use 5.10.1;
 use strict;
 use warnings;
 
+use Bugzilla::Logging;
 use Bugzilla::Constants;
 use Bugzilla::Error;
 use Bugzilla::Install::Util qw(install_string);
@@ -95,6 +96,14 @@ sub insert {
     return $retval;
 }
 
+sub debug {
+    my ($self, @args) = @_;
+    my $caller_pkg = caller;
+    local $Log::Log4perl::caller_depth = $Log::Log4perl::caller_depth + 1;
+    my $logger = Log::Log4perl->get_logger($caller_pkg);
+    $logger->debug(@args);
+}
+
 sub work {
     my ($self, $delay) = @_;
     $delay ||= 5;
@@ -105,6 +114,7 @@ sub work {
         reschedule     => 'drift',
         on_tick        => sub { $self->work_once }
     );
+    DEBUG("working every $delay seconds");
     $loop->add($timer);
     $timer->start;
     Future->wait_any(map { catch_signal($_) } qw( INT TERM HUP ))->get;

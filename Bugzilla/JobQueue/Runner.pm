@@ -16,6 +16,7 @@ use strict;
 use warnings;
 use autodie qw(open close unlink system);
 
+use Bugzilla::Logging;
 use Bugzilla::Constants;
 use Bugzilla::DaemonControl qw(:utils);
 use Bugzilla::JobQueue::Worker;

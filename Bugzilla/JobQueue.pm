@@ -14,6 +14,10 @@ use warnings;
 use Bugzilla::Constants;
 use Bugzilla::Error;
 use Bugzilla::Install::Util qw(install_string);
+use Bugzilla::DaemonControl qw(catch_signal);
+use IO::Async::Timer::Periodic;
+use IO::Async::Loop;
+use Future;
 use base qw(TheSchwartz);
 
 # This maps job names for Bugzilla::JobQueue to the appropriate modules.
@@ -89,6 +93,23 @@ sub insert {
         if !$retval;
 
     return $retval;
+}
+
+sub work {
+    my ($self, $delay) = @_;
+    $delay ||= 5;
+    my $loop  = IO::Async::Loop->new;
+    my $timer = IO::Async::Timer::Periodic->new(
+        first_interval => 0,
+        interval       => $delay,
+        reschedule     => 'drift',
+        on_tick        => sub { $self->work_once }
+    );
+    $loop->add($timer);
+    $timer->start;
+    Future->wait_any(map { catch_signal($_) } qw( INT TERM HUP ))->get;
+    $timer->stop;
+    $loop->remove($timer);
 }
 
 # Clear the request cache at the start of each run.

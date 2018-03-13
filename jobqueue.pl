@@ -10,12 +10,13 @@ use 5.10.1;
 use strict;
 use warnings;
 
-use File::Basename;
-use File::Spec;
+use File::Basename qw(dirname);
+use File::Spec::Functions qw(catdir rel2abs);
+
 BEGIN {
     require lib;
-    my $dir = File::Spec->rel2abs(dirname(__FILE__));
-    lib->import($dir, File::Spec->catdir($dir, 'lib'), File::Spec->catdir($dir, qw(local lib perl5)));
+    my $dir = rel2abs( dirname(__FILE__) );
+    lib->import( $dir, catdir( $dir, 'lib' ), catdir( $dir, qw(local lib perl5) ) );
     chdir $dir or die "chdir $dir failed: $!";
 }
 

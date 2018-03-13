@@ -225,6 +225,7 @@ sub FILESYSTEM {
         'metrics.pl'      => { perms => WS_EXECUTE },
         'Makefile.PL'     => { perms => OWNER_EXECUTE },
         'gen-cpanfile.pl' => { perms => OWNER_EXECUTE },
+        'jobqueue-worker.pl' => { perms => OWNER_EXECUTE },
         'clean-bug-user-last-visit.pl' => { perms => WS_EXECUTE },
 
         'Bugzilla.pm'    => { perms => CGI_READ },

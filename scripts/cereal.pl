@@ -22,8 +22,11 @@ use Bugzilla::DaemonControl qw(catch_signal);
 use Future;
 use IO::Async::Loop;
 use IO::Async::Protocol::LineStream;
+use IO::Handle;
 
 $ENV{LOGGING_PORT} //= 5880;
+
+STDOUT->autoflush(1);
 
 my $loop = IO::Async::Loop->new;
 my $on_stream = sub {

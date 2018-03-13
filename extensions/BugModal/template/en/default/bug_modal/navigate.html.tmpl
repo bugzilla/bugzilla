@@ -29,14 +29,14 @@
     [% INCLUDE nav_link text="Next &#10097;" bug_id="" %]
   [% END %]
   [% INCLUDE nav_link text="Last &#10097;&#10097;" bug_id=last_bug_list.last %]
-  <a id="search-nav-reget" href="buglist.cgi?regetlastlist=[% my_search.id FILTER uri %]">Last search results</a>
+  <a id="search-nav-reget" href="buglist.cgi?regetlastlist=[% search.id FILTER uri %]">Last search results</a>
 </div>
 
 [% BLOCK nav_link %]
   [% IF bug_id == "" %]
     <span class="search-nav-disabled">[% text FILTER none %]</span>
   [% ELSE %]
-    <a class="search-nav-link" href="show_bug.cgi?id=[% bug_id FILTER uri %]&amp;list_id=[% my_search.id FILTER uri %]">
+    <a class="search-nav-link" href="show_bug.cgi?id=[% bug_id FILTER uri %]&amp;list_id=[% search.id FILTER uri %]">
       [%~ text FILTER none ~%]
     </a>
   [% END %]

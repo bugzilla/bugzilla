@@ -281,7 +281,7 @@ sub _inc_prefix {
     delete Bugzilla->request_cache->{"memcached_prefix_$name"};
 
     # BMO - log that we've wiped the cache
-    INFO("$name cache cleared");
+    TRACE("$name cache cleared");
 }
 
 sub _global_prefix {

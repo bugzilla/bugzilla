@@ -95,19 +95,13 @@ if ( $OSNAME eq 'MSWin32' ) {
     $requires{'DateTime::TimeZone::Local::Win32'} = '1.64';
 }
 
-if ( $OSNAME eq 'linux' ) {
-    # This isn't strictly needed, but it is nice to have.
-    # we use it to make sure jobqueue-workers exit when their parent exits.
-    my @extra = qw(Linux::Pdeathsig);
-
-    # for some reason, we need these on ubuntu.
-    push @extra, qw(
-        Linux::Pid
+if ( $OSNAME eq 'linux' && -f '/etc/debian_version' ) {
+    my @extra = qw(
         Test::Pod::Coverage
         Pod::Coverage::TrustPod
         Test::CPAN::Meta
         Test::Pod
-    ) if -f '/etc/debian_version';
+    );
     $requires{$_} = 0 for @extra;
 }
 
@@ -315,6 +309,22 @@ my %optional_features = (
             },
         },
     },
+    linux_smaps => {
+        description => 'Linux::Smaps for limiting memory usage',
+        prereqs => {
+            runtime => {
+                requires => { 'Linux::Smaps' => '0' },
+            }
+        },
+    },
+    linux_pdeath => {
+        description => 'Linux::Pdeathsig for a good parent/child relationships',
+        prereqs => {
+            runtime => {
+                requires => { 'Linux::Pdeathsig' => 0 },
+            },
+        },
+    },
     jobqueue => {
         description => 'Mail Queueing',
         prereqs     => {
@@ -362,21 +372,7 @@ for my $file ( glob 'extensions/*/Config.pm' ) {
 }
 
 # BMO Customization
-my @bmo_features = grep {
-    !m{
-        ^
-        (?: pg
-          | oracle
-          | mod_perl
-          | sqlite
-          | auth_ldap
-          | auth_radius
-          | smtp_auth
-          | linux_pid
-          | updates)
-        $
-    }mxs;
-} keys %optional_features;
+my @bmo_features = grep { is_bmo_feature($_) } keys %optional_features;
 
 $optional_features{bmo} = {
     description => 'features that bmo needs',
@@ -427,3 +423,19 @@ META.yml: Makefile.PL
 MAKE
 }
 
+sub is_bmo_feature {
+    local $_ = shift;
+    return 1 if $OSNAME eq 'linux' && /^linux/;
+    return !m{
+        ^
+        (?: pg
+          | oracle
+          | mod_perl
+          | sqlite
+          | auth_ldap
+          | auth_radius
+          | smtp_auth
+          | updates)
+        $
+    }mxs;
+}

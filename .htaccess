@@ -76,7 +76,7 @@ RewriteRule ^form[\.:]third[\.\-:]party$ enter_bug.cgi?product=Marketing&format=
 RewriteRule ^form[\.:]fsa[\.:]budget$ enter_bug.cgi?product=FSA&format=fsa-budget [QSA]
 RewriteRule ^form[\.:]triage[\.\-]request$ page.cgi?id=triage_request.html [QSA]
 RewriteRule ^form[\.:](crm|CRM)$ enter_bug.cgi?product=Marketing&format=crm [QSA]
-RewriteRule ^form[\.:](ipc|IPC)$ enter_bug.cgi?product=Marketing&format=ipc [QSA]
+RewriteRule ^form[\.:](ipc|IPC)$ https://airtable.com/shrcMqgbj1H9gXRlp [R,L]
 RewriteRule ^form[\.:]nda$ enter_bug.cgi?product=Legal&format=nda [QSA]
 RewriteRule ^form[\.:]name[\.:]clearance$ enter_bug.cgi?product=Legal&format=name-clearance [QSA]
 RewriteRule ^form[\.:]shield[\.:]studies$ enter_bug.cgi?product=Shield&format=shield-studies [QSA]

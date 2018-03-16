@@ -1074,6 +1074,8 @@ our %_templates_to_precompile;
 sub precompile_templates {
     my ($output) = @_;
 
+    return unless is_webserver_group();
+
     # Remove the compiled templates.
     my $cache_dir = bz_locations()->{'template_cache'};
     my $datadir = bz_locations()->{'datadir'};

@@ -365,7 +365,7 @@
           ", " UNLESS loop.last;
         END;
 
-      CASE [ 'assigned_to', 'reporter', 'qa_contact', 'cc', 'flagtypes.name' ];
+      CASE [ 'assigned_to', 'reporter', 'qa_contact', 'cc', 'bug_mentor', 'flagtypes.name' ];
         value FILTER email;
 
       CASE 'reporter_accessible';

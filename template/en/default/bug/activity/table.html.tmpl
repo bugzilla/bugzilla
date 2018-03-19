@@ -107,6 +107,7 @@
                change.fieldname == 'reporter' ||
                change.fieldname == 'qa_contact' ||
                change.fieldname == 'cc' ||
+               change.fieldname == 'bug_mentor' ||
                change.fieldname == 'flagtypes.name' %]
         [% display_value(change.fieldname, change_type) FILTER email FILTER html %]
       [% ELSE %]

@@ -42,7 +42,7 @@
 </p>
 
 <div id="login" class="login-form">
-  <form name="login" action="[% target FILTER html %]" method="POST"
+  <form name="login" action="[% urlbase %][% target FILTER uri FILTER html %]" method="POST"
         [%- IF Bugzilla.cgi.param("data") %] enctype="multipart/form-data"[% END %]>
     <div class="field-login">
       <label for="Bugzilla_login">Email Address:</label>

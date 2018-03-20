@@ -324,7 +324,7 @@ sub _get {
 
     my $enc_key = $self->_encode_key($key)
         or return;
-    my $val = $self->{memcached}->get($key);
+    my $val = $self->{memcached}->get($enc_key);
     TRACE("get $enc_key: " . (defined $val ? "HIT" : "MISS"));
     return $val;
 }

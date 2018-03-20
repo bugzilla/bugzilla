@@ -13,7 +13,6 @@ use warnings;
 
 use Bugzilla::Constants;
 use Bugzilla::Extension::PhabBugz::Feed;
-use Bugzilla::Extension::PhabBugz::Logger;
 
 use Carp qw(confess);
 use Daemon::Generic;
@@ -89,11 +88,9 @@ sub gd_setup_signals {
 
 sub gd_run {
     my $self = shift;
-    $::SIG{__DIE__} = \&Carp::confess if $self->{debug};
+    $SIG{__DIE__} = \&Carp::confess if $self->{debug};
     my $phabbugz = Bugzilla::Extension::PhabBugz::Feed->new();
     $phabbugz->is_daemon(1);
-    $phabbugz->logger(
-        Bugzilla::Extension::PhabBugz::Logger->new(debugging => $self->{debug}));
     $phabbugz->start();
 }
 

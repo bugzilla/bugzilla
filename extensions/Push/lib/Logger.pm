@@ -8,53 +8,43 @@
 package Bugzilla::Extension::Push::Logger;
 
 use 5.10.1;
-use strict;
-use warnings;
+use Moo;
 
+use Bugzilla::Logging;
+use Log::Log4perl;
 use Bugzilla::Extension::Push::Constants;
 use Bugzilla::Extension::Push::LogEntry;
 
-sub new {
-    my ($class) = @_;
-    my $self = {};
-    bless($self, $class);
-    return $self;
+# If Log4perl then finds that it's being called from a registered wrapper, it
+# will automatically step up to the next call frame.
+Log::Log4perl->wrapper_register(__PACKAGE__);
+
+sub info {
+    my ($this, $message) = @_;
+    INFO($message);
 }
 
-sub info  { shift->_log_it('INFO', @_) }
-sub error { shift->_log_it('ERROR', @_) }
-sub debug { shift->_log_it('DEBUG', @_) }
-
-sub debugging {
-    my ($self) = @_;
-    return $self->{debug};
+sub error {
+    my ($this, $message) = @_;
+    ERROR($message);
 }
 
-sub _log_it {
-    require Apache2::Log;
-    my ($self, $method, $message) = @_;
-    return if $method eq 'DEBUG' && !$self->debugging;
-    chomp $message;
-    if ($ENV{MOD_PERL}) {
-        Apache2::ServerRec::warn("Push $method: $message");
-    } elsif ($ENV{SCRIPT_FILENAME}) {
-        print STDERR "Push $method: $message\n";
-    } else {
-        print STDERR '[' . localtime(time) ."] $method: $message\n";
-    }
+sub debug {
+    my ($this, $message) = @_;
+    DEBUG($message);
 }
 
 sub result {
     my ($self, $connector, $message, $result, $data) = @_;
     $data ||= '';
 
-    $self->info(sprintf(
-        "%s: Message #%s: %s %s",
+    my $log_msg = sprintf
+        '%s: Message #%s: %s %s',
         $connector->name,
         $message->message_id,
         push_result_to_string($result),
-        $data
-    ));
+        $data;
+    $self->info($log_msg);
 
     Bugzilla::Extension::Push::LogEntry->create({
         message_id   => $message->message_id,
@@ -67,5 +57,7 @@ sub result {
         data         => $data,
     });
 }
+
+sub _build_logger { Log::Log4perl->get_logger(__PACKAGE__); }
 
 1;

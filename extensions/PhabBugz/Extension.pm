@@ -15,7 +15,6 @@ use parent qw(Bugzilla::Extension);
 
 use Bugzilla::Constants;
 use Bugzilla::Extension::PhabBugz::Feed;
-use Bugzilla::Extension::PhabBugz::Logger;
 
 our $VERSION = '0.01';
 

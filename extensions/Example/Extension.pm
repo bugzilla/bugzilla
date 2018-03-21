@@ -920,6 +920,19 @@ sub template_before_create {
     $config->{VARIABLES}->{example_global_variable} = sub { return 'value' };
 }
 
+sub template_after_create {
+    my ( $self, $args ) = @_;
+    my $context = $args->{template}->context;
+
+    # define a pluck method on template toolkit lists.
+    $context->define_vmethod(
+        list => pluck => sub {
+            my ( $list, $field ) = @_;
+            return [ map { $_->$field } @$list ];
+        }
+    );
+}
+
 sub template_before_process {
     my ($self, $args) = @_;
     

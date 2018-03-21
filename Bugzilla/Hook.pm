@@ -1479,6 +1479,21 @@ look at the code for C<create> in L<Bugzilla::Template>.)
 
 =back
 
+=head2 template_after_create
+
+This hook allows you to manipulate the Template object before it is used.
+You can use this to define new vmethods or filters in extensions.
+
+Params:
+
+=over
+
+=item C<template>
+
+This is the L<Bugzilla::Template> object.
+
+=back
+
 =head2 template_before_process
 
 This hook is called any time Bugzilla processes a template file, including

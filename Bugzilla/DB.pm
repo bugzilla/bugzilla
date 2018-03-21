@@ -111,8 +111,13 @@ sub connect_shadow {
     my $connect_params = dclone(Bugzilla->localconfig);
     $connect_params->{db_host} = Bugzilla->get_param_with_override('shadowdbhost');
     $connect_params->{db_name} = Bugzilla->get_param_with_override('shadowdb');
-    $connect_params->{db_port} = Bugzilla->get_param_with_override('shadowport');
-    $connect_params->{db_sock} = Bugzilla->get_param_with_override('shadowsock');
+    $connect_params->{db_port} = Bugzilla->get_param_with_override('shadowdbport');
+    $connect_params->{db_sock} = Bugzilla->get_param_with_override('shadowdbsock');
+
+    if ( Bugzilla->localconfig->{'shadowdb_user'} && Bugzilla->localconfig->{'shadowdb_pass'} ) {
+        $connect_params->{db_user} = Bugzilla->localconfig->{'shadowdb_user'};
+        $connect_params->{db_pass} = Bugzilla->localconfig->{'shadowdb_pass'};
+    }
 
     return _connect($connect_params);
 }

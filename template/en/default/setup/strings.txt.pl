@@ -269,6 +269,12 @@ END
 This is the max amount of unshared memory the apache process is allowed to use
 before Apache::SizeLimit kills it. This is only applicable when run under mod_perl.
 EOT
+    localconfig_shadowdb_user => <<EOT,
+The username used to authenticate to the shadow db. 
+EOT
+    localconfig_shadowdb_pass => <<EOT,
+The password used to authenticate to the shadow db.
+EOT
     max_allowed_packet => <<EOT,
 WARNING: You need to set the max_allowed_packet parameter in your MySQL
 configuration to at least ##needed##. Currently it is set to ##current##.

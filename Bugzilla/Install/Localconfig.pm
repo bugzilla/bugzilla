@@ -175,6 +175,14 @@ use constant LOCALCONFIG_VARS => (
         name => 'inbound_proxies',
         default => _migrate_param( 'inbound_proxies', '' ),
     },
+    {
+        name => 'shadowdb_user',
+        default => '',
+    },
+    {
+        name => 'shadowdb_pass',
+        default => '',
+    }
 );
 
 

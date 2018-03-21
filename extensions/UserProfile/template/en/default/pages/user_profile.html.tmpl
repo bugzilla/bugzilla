@@ -27,7 +27,7 @@
     <td>&nbsp;</td>
     <th>Search</th>
     <td colspan="2">
-      <form action="[% urlbase %]user_profile">
+      <form action="[% urlbase FILTER html %]user_profile">
         [% INCLUDE global/userselect.html.tmpl
           id => "login"
           name => "login"

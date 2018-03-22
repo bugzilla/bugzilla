@@ -20,6 +20,7 @@ use Carp ();
 use Template ();
 
 use Bugzilla::ModPerl::BlockIP;
+use Bugzilla::ModPerl::Hostage;
 
 sub apache_config {
     my ($class, $cgi_path) = @_;
@@ -74,6 +75,7 @@ __DATA__
 # the built-in rand(), even though we never use it in Bugzilla itself,
 # so we need to srand() both of them.)
 PerlChildInitHandler "sub { Bugzilla::RNG::srand(); srand(); }"
+PerlInitHandler Bugzilla::ModPerl::Hostage
 PerlAccessHandler Bugzilla::ModPerl::BlockIP
 
 # It is important to specify ErrorDocuments outside of all directories.
@@ -83,6 +85,12 @@ ErrorDocument 401 /errors/401.html
 ErrorDocument 403 /errors/403.html
 ErrorDocument 404 /errors/404.html
 ErrorDocument 500 /errors/500.html
+
+<Location /helper>
+    SetHandler perl-script
+    PerlResponseHandler Plack::Handler::Apache2
+    PerlSetVar psgi_app [% cgi_path %]/helper.psgi
+</Location>
 
 <Directory "[% cgi_path %]">
     AddHandler perl-script .cgi

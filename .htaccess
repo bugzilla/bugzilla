@@ -27,6 +27,8 @@ RewriteRule ^__version__$ version.json [L]
 # heartbeat.cgi returns 200 if the DB and memcached are both working, and 500 otherwise.
 RewriteRule ^__heartbeat__$ heartbeat.cgi [L]
 
+RewriteRule ^(\d+|quicksearch\.html|bugwritinghelp\.html)$ /helper/$1 [L]
+
 RewriteRule ^static/v\d{4}\d{2}\d{2}\.\d+/(.+\.(?:js|css|woff2?|png|jpe?g|gif|ico|svg))$ $1 [NC,E=IMMUTABLE:1,L]
 Header set Cache-Control "public, max-age=31536000" env=REDIRECT_IMMUTABLE
 

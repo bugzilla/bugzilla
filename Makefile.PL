@@ -271,6 +271,7 @@ my %optional_features = (
                 requires => {
                     'mod_perl2'          => '1.999022',
                     'Apache2::SizeLimit' => '0.96',
+                    'Plack::Handler::Apache2' => 0,
                 }
             }
         }

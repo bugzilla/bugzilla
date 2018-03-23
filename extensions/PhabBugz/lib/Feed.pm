@@ -229,10 +229,12 @@ sub process_revision_change {
 
             my $secure_project_phid = get_project_phid('secure-revision');
             $revision->add_project($secure_project_phid);
-
-            my $subscribers = get_bug_role_phids($bug);
-            $revision->set_subscribers($subscribers);
         }
+
+        # Subscriber list of the private revision should always match
+        # the bug roles such as assignee, qa contact, and cc members.
+        my $subscribers = get_bug_role_phids($bug);
+        $revision->set_subscribers($subscribers);
     }
 
     my ($timestamp) = Bugzilla->dbh->selectrow_array("SELECT NOW()");

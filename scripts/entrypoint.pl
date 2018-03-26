@@ -91,9 +91,10 @@ sub cmd_httpd  {
 }
 
 sub cmd_jobqueue {
+    my (@args) = @_;
     check_data_dir();
     wait_for_db();
-    exit run_cereal_and_jobqueue()->get;
+    exit run_cereal_and_jobqueue(@args)->get;
 }
 
 sub cmd_dev_httpd {

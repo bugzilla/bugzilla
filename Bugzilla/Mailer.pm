@@ -252,15 +252,14 @@ sub build_thread_marker {
         $sitespec = "-$2$sitespec"; # Put the port number back in, before the '@'
     }
 
-    my $threadingmarker;
+    my $threadingmarker = "References: <bug-$bug_id-$user_id$sitespec>";
     if ($is_new) {
-        $threadingmarker = "Message-ID: <bug-$bug_id-$user_id$sitespec>";
+        $threadingmarker .= "\nMessage-ID: <bug-$bug_id-$user_id$sitespec>";
     }
     else {
         my $rand_bits = generate_random_password(10);
-        $threadingmarker = "Message-ID: <bug-$bug_id-$user_id-$rand_bits$sitespec>" .
-                           "\nIn-Reply-To: <bug-$bug_id-$user_id$sitespec>" .
-                           "\nReferences: <bug-$bug_id-$user_id$sitespec>";
+        $threadingmarker .= "\nMessage-ID: <bug-$bug_id-$user_id-$rand_bits$sitespec>" .
+                            "\nIn-Reply-To: <bug-$bug_id-$user_id$sitespec>";
     }
 
     return $threadingmarker;

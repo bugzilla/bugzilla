@@ -101,7 +101,7 @@ sub debug {
     my $caller_pkg = caller;
     local $Log::Log4perl::caller_depth = $Log::Log4perl::caller_depth + 1;
     my $logger = Log::Log4perl->get_logger($caller_pkg);
-    $logger->debug(@args);
+    $logger->info(@args);
 }
 
 sub work {

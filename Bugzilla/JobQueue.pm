@@ -106,7 +106,7 @@ sub debug {
 
 sub work {
     my ($self, $delay) = @_;
-    $delay ||= 5;
+    $delay ||= 1;
     my $loop  = IO::Async::Loop->new;
     my $timer = IO::Async::Timer::Periodic->new(
         first_interval => 0,

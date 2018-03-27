@@ -18,6 +18,7 @@ use Bugzilla::Util;
 use Bugzilla::Token;
 
 use List::Util qw(first);
+use List::MoreUtils qw(any);
 
 sub new {
     my ($class) = @_;
@@ -31,18 +32,14 @@ sub persist_login {
     my $cgi = Bugzilla->cgi;
     my $input_params = Bugzilla->input_params;
 
-    my $ip_addr;
-    if ($input_params->{'Bugzilla_restrictlogin'}) {
-        $ip_addr = remote_ip();
-        # The IP address is valid, at least for comparing with itself in a
-        # subsequent login
-        trick_taint($ip_addr);
-    }
-
     $dbh->bz_start_transaction();
 
-    my $login_cookie = 
+    my $login_cookie =
         Bugzilla::Token::GenerateUniqueToken('logincookies', 'cookie');
+
+    my $ip_addr = remote_ip();
+    trick_taint($ip_addr);
+    my $restrict = $input_params->{Bugzilla_restrictlogin} ? 1 : 0;
 
     $dbh->do("INSERT INTO logincookies (cookie, userid, ipaddr, lastused)
               VALUES (?, ?, ?, NOW())",
@@ -56,10 +53,6 @@ sub persist_login {
 
     $dbh->bz_commit_transaction();
 
-    # We do not want WebServices to generate login cookies.
-    # All we need is the login token for User.login.
-    return $login_cookie if i_am_webservice();
-
     # Prevent JavaScript from accessing login cookies.
     my %cookieargs = ('-httponly' => 1);
 
@@ -68,23 +61,29 @@ sub persist_login {
     if ( Bugzilla->params->{'rememberlogin'} eq 'on' ||
          (Bugzilla->params->{'rememberlogin'} ne 'off' &&
           $input_params->{'Bugzilla_remember'} &&
-          $input_params->{'Bugzilla_remember'} eq 'on') ) 
+          $input_params->{'Bugzilla_remember'} eq 'on') )
     {
         # Not a session cookie, so set an infinite expiry
         $cookieargs{'-expires'} = 'Fri, 01-Jan-2038 00:00:00 GMT';
     }
     if (Bugzilla->params->{'ssl_redirect'}) {
-        # Make these cookies only be sent to us by the browser during 
+        # Make these cookies only be sent to us by the browser during
         # HTTPS sessions, if we're using SSL.
         $cookieargs{'-secure'} = 1;
     }
 
+    $cgi->remove_cookie('github_secret');
+    $cgi->remove_cookie('Bugzilla_login_request_cookie');
     $cgi->send_cookie(-name => 'Bugzilla_login',
                       -value => $user->id,
                       %cookieargs);
     $cgi->send_cookie(-name => 'Bugzilla_logincookie',
                       -value => $login_cookie,
                       %cookieargs);
+
+    my $securemail_groups = Bugzilla->can('securemail_groups') ? Bugzilla->securemail_groups : [ 'admin' ];
+
+    return $login_cookie;
 }
 
 sub logout {
@@ -112,8 +111,8 @@ sub logout {
     if ($cookie) {
         push(@login_cookies, $cookie->value);
     }
-    elsif ($cookie = $cgi->cookie('Bugzilla_logincookie')) {
-        push(@login_cookies, $cookie);
+    else {
+        push(@login_cookies, $cgi->cookie("Bugzilla_logincookie"));
     }
 
     # If we are a webservice using a token instead of cookie

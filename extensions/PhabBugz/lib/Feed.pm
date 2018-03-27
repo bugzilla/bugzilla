@@ -239,7 +239,7 @@ sub process_revision_change {
 
     my ($timestamp) = Bugzilla->dbh->selectrow_array("SELECT NOW()");
 
-    my $attachment = create_revision_attachment($bug, $revision->id, $revision->title, $timestamp);
+    my $attachment = create_revision_attachment($bug, $revision, $timestamp);
 
     # ATTACHMENT OBSOLETES
 

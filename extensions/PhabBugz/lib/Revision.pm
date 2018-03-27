@@ -29,6 +29,7 @@ use Bugzilla::Extension::PhabBugz::Util qw(
 has id               => ( is => 'ro',   isa => Int );
 has phid             => ( is => 'ro',   isa => Str );
 has title            => ( is => 'ro',   isa => Str );
+has summary          => ( is => 'ro',   isa => Str );
 has status           => ( is => 'ro',   isa => Str );
 has creation_ts      => ( is => 'ro',   isa => Str );
 has modification_ts  => ( is => 'ro',   isa => Str );
@@ -93,6 +94,7 @@ sub BUILDARGS {
     my ( $class, $params ) = @_;
 
     $params->{title}           = $params->{fields}->{title};
+    $params->{summary}         = $params->{fields}->{summary};
     $params->{status}          = $params->{fields}->{status}->{value};
     $params->{creation_ts}     = $params->{fields}->{dateCreated};
     $params->{modification_ts} = $params->{fields}->{dateModified};

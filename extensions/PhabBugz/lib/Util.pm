@@ -77,12 +77,12 @@ sub _get_revisions {
 }
 
 sub create_revision_attachment {
-    my ( $bug, $revision_id, $revision_title, $timestamp ) = @_;
+    my ( $bug, $revision, $timestamp ) = @_;
 
     my $phab_base_uri = Bugzilla->params->{phabricator_base_uri};
     ThrowUserError('invalid_phabricator_uri') unless $phab_base_uri;
 
-    my $revision_uri = $phab_base_uri . "D" . $revision_id;
+    my $revision_uri = $phab_base_uri . "D" . $revision->id;
 
     # Check for previous attachment with same revision id.
     # If one matches then return it instead. This is fine as
@@ -102,8 +102,8 @@ sub create_revision_attachment {
             bug         => $bug,
             creation_ts => $timestamp,
             data        => $revision_uri,
-            description => $revision_title,
-            filename    => 'phabricator-D' . $revision_id . '-url.txt',
+            description => $revision->title,
+            filename    => 'phabricator-D' . $revision->id . '-url.txt',
             ispatch     => 0,
             isprivate   => 0,
             mimetype    => PHAB_CONTENT_TYPE,
@@ -111,8 +111,8 @@ sub create_revision_attachment {
     );
 
     # Insert a comment about the new attachment into the database.
-    $bug->add_comment('', { type => CMT_ATTACHMENT_CREATED,
-                            extra_data => $attachment->id });
+    $bug->add_comment($revision->summary, { type       => CMT_ATTACHMENT_CREATED,
+                                            extra_data => $attachment->id });
 
     return $attachment;
 }

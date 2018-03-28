@@ -89,9 +89,6 @@ jobs:
             git fetch --tags
             if git tag | fgrep -q "$tag"; then
               echo "tag $tag exists!"
-              if [[ $CIRCLE_BRANCH == "master" ]]; then
-                exit 1
-              fi
             else
               echo "tag $tag does not exist"
               echo yes > build_info/publish.txt

@@ -50,6 +50,7 @@ my %requires = (
     'File::Slurp'              => '9999.13',
     'Future'                   => '0.34',
     'HTML::Escape'             => '1.10',
+    'IPC::System::Simple'      => 0,
     'IO::Async'                => '0.71',
     'JSON::MaybeXS'            => '1.003008',
     'JSON::XS'                 => '2.01',

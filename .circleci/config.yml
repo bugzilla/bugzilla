@@ -11,8 +11,6 @@ main_filters: &main_filters
       - /^(?:release|test)-20\d\d\d\d\d\d\.\d+/
       - /\//
       - production
-  tags:
-    only: /^(?:release|test)-20\d\d\d\d\d\d\.\d+/
 
 defaults:
   bmo_slim_image: &bmo_slim_image
@@ -69,6 +67,41 @@ defaults:
         mkdir artifacts
 
 jobs:
+  build_info:
+    parallelism: 1
+    working_directory: /app
+    docker:
+      - <<: *bmo_slim_image
+        environment:
+          <<: *bmo_env
+    steps:
+      - checkout
+      - run:
+          name: build push data
+          command: |
+            mv /opt/bmo/local /app/local
+            perl checksetup.pl --no-database --no-templates --no-permissions
+            perl scripts/build-bmo-push-data.pl
+      - run:
+          name: only publish if tag exists
+          command: |
+            tag="$(cat build_info/tag.txt)"
+            git fetch --tags
+            if git tag | fgrep -q "$tag"; then
+              echo "tag $tag exists!"
+              if [[ $CIRCLE_BRANCH == "master" ]]; then
+                exit 1
+              fi
+            else
+              echo "tag $tag does not exist"
+              echo yes > build_info/publish.txt
+            fi
+      - persist_to_workspace:
+          root: /app/build_info
+          paths: ["*.txt"]
+      - store_artifacts:
+          path: /app/build_info
+
   build:
     working_directory: /app
     docker:
@@ -85,24 +118,30 @@ jobs:
             --build-arg CIRCLE_SHA1="$CIRCLE_SHA1" \
             --build-arg CIRCLE_BUILD_URL="$CIRCLE_BUILD_URL" \
             -t bmo .
+      - attach_workspace:
+          at: /app/build_info
+      - run: "docker run --name bmo --entrypoint true bmo"
+      - run: "docker cp bmo:/app/version.json build_info/version.json"
+      - store_artifacts:
+          path: /app/build_info
       - deploy:
           command: |
-            if [[ -n "$DOCKERHUB_REPO" && -n "$DOCKER_USER" && -n "$DOCKER_PASS" ]]; then
-                TAG=""
-                if [[ -n "$CIRCLE_TAG" ]]; then
-                  TAG="$CIRCLE_TAG"
-                elif [[ "$CIRCLE_BRANCH" == "master" ]]; then
-                  TAG=latest
-                fi
-                if [[ -n "$TAG" ]]; then
-                  docker tag bmo "$DOCKERHUB_REPO:$TAG"
-                  docker login -u "$DOCKER_USER" -p "$DOCKER_PASS"
-                  docker push "$DOCKERHUB_REPO:$TAG"
-                fi
-            fi
+            TAG="$(cat /app/build_info/tag.txt)"
+            [[ "$CIRCLE_BRANCH" == "master"  && -n "$TAG" ]] || exit 0
+            [[ -n "$DOCKERHUB_REPO" && -n "$DOCKER_USER" && -n "$DOCKER_PASS" ]] || exit 0
+            [[ -n "$GITHUB_PERSONAL_TOKEN" ]] || exit 0
+            [[ -f build_info/publish.txt ]] || exit 0
+            git config credential.helper cache
+            git config user.email "$GITHUB_EMAIL"
+            git config user.name "$GITHUB_NAME"
+            git tag $TAG
+            git push https://${GITHUB_PERSONAL_TOKEN}:x-oauth-basic@github.com/$GITHUB_REPO.git $TAG
+            docker tag bmo "$DOCKERHUB_REPO:$TAG"
+            docker login -u "$DOCKER_USER" -p "$DOCKER_PASS"
+            docker push "$DOCKERHUB_REPO:$TAG"
 
   test_sanity:
-    parallelism: 4
+    parallelism: 2
     working_directory: /app
     docker:
       - <<: *bmo_slim_image
@@ -178,23 +217,29 @@ workflows:
   version: 2
   main:
     jobs:
-      - test_sanity:
+      - build_info:
           filters: *main_filters
-      - test_bmo:
-          filters: *main_filters
-          requires:
-            - test_sanity
-      - test_webservices:
-          filters: *main_filters
-          requires:
-            - test_sanity
-      - test_selenium:
-          filters: *main_filters
-          requires:
-            - test_sanity
       - build:
           filters: *main_filters
           requires:
+            - build_info
             - test_sanity
             - test_bmo
             - test_webservices
+            - test_selenium
+      - test_sanity:
+          filters: *main_filters
+          requires:
+            - build_info
+      - test_bmo:
+          filters: *main_filters
+          requires:
+            - build_info
+      - test_webservices:
+          filters: *main_filters
+          requires:
+            - build_info
+      - test_selenium:
+          filters: *main_filters
+          requires:
+            - build_info

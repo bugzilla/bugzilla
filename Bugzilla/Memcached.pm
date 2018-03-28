@@ -36,11 +36,25 @@ sub _new {
     if (Bugzilla->feature('memcached') && $servers) {
         $self->{namespace} = Bugzilla->localconfig->{memcached_namespace};
         TRACE("connecting servers: $servers, namespace: $self->{namespace}");
-        $self->{memcached} = Cache::Memcached::Fast->new({
-            servers   => [ _parse_memcached_server_list($servers) ],
-            namespace => $self->{namespace},
-            max_size  => 1024 * 1024 * 4,
-        });
+        $self->{memcached} = Cache::Memcached::Fast->new(
+            {
+                servers         => [ _parse_memcached_server_list($servers) ],
+                namespace       => $self->{namespace},
+                max_size        => 1024 * 1024 * 4,
+                max_failures    => 1,
+                failure_timeout => 60,
+                io_timeout      => 0.2,
+                connect_timeout => 0.2,
+            }
+        );
+        my $versions = $self->{memcached}->server_versions;
+        if (keys %$versions) {
+            # this is needed to ensure forked processes don't start out with a connected memcached socket.
+            $self->{memcached}->disconnect_all;
+        }
+        else {
+            WARN("No memcached servers");
+        }
     }
     else {
         TRACE("memcached feature is not enabled");

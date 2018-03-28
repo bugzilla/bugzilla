@@ -211,7 +211,7 @@ sub gd_run {
     my $self      = shift;
     my $jobs      = $self->{gd_args}{jobs} // 1;
     my $signal_f  = $self->{_signal_future};
-    my $workers_f = fmap_void { $self->run_worker("work") }
+    my $workers_f = fmap_void { $self->run_worker() }
         concurrent => $jobs,
         generate   => sub { !$signal_f->is_ready };
 
@@ -225,10 +225,10 @@ sub gd_run {
 # This executes the script "jobqueue-worker.pl"
 # $EXECUTABLE_NAME is the name of the perl interpreter.
 sub run_worker {
-    my ( $self, $fn ) = @_;
+    my ( $self ) = @_;
 
     my $script = catfile( bz_locations->{cgi_path}, 'jobqueue-worker.pl' );
-    my @command = ( $EXECUTABLE_NAME, $script, '--function' => $fn );
+    my @command = ( $EXECUTABLE_NAME, $script);
     if ( $self->{gd_args}{progname} ) {
         push @command, '--name' => "$self->{gd_args}{progname} [worker]";
     }

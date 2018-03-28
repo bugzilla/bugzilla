@@ -15,6 +15,15 @@ This code requires a recent version of Andy Dustman's MySQLdb interface,
     http://sourceforge.net/projects/mysql-python
 
 Share and enjoy.
+
+All servers must use UTC or GMT as their timezone for this script to function properly.
+
+The following items should be configured prior to importing:
+
+a) The assignee variable
+b) Any email address mappings desired in the get_real_address function
+c) The resolution variable
+d) The reporter variable
 """
 
 import email, mimetypes, email.utils
@@ -27,6 +36,11 @@ if not mimetypes.types_map.has_key('.doc'):
 
 if not mimetypes.encodings_map.has_key('.bz2'):
     mimetypes.encodings_map['.bz2'] = "bzip2"
+
+if not mimetypes.types_map.has_key('.log'):
+    mimetypes.types_map['.log'] = "text/plain"
+
+mimetypes.types_map['.dif'] = "text/plain"
 
 bug_status='CONFIRMED'
 component="default"
@@ -78,6 +92,7 @@ def process_notes_file(current, fname):
 
         new_note['text']  = notes.read()
         new_note['timestamp'] = time.gmtime(s[stat.ST_MTIME])
+        new_note['from'] = reporter
 
         notes.close()
 
@@ -99,13 +114,23 @@ def process_reply_file(current, fname):
             if part.get_filename() is None:
                 if part.get_content_type() == "text/plain":
                     new_note['timestamp'] = time.gmtime(email.utils.mktime_tz(email.utils.parsedate_tz(msg['Date'])))
-                    new_note['text'] = "%s\n%s" % (msg['From'], part.get_payload())
+                    new_note['text'] = part.get_payload()
+                    if msg['From'] is not None:
+                        new_note['from'] = msg['From']
+                    else:
+                        print "Error: Missing from address"
+                        sys.exit(1)
                     current["notes"].append(new_note)
             else:
-                maybe_add_attachment(part, current)
+                maybe_add_attachment(part, current, msg['From'], msg['Date'])
     else:
-        new_note['text'] = "%s\n%s" % (msg['From'], msg.get_payload())
+        new_note['text'] = msg.get_payload()
         new_note['timestamp'] = time.gmtime(email.utils.mktime_tz(email.utils.parsedate_tz(msg['Date'])))
+        if msg['From'] is not None:
+            new_note['from'] = msg['From']
+        else:
+            print "Error: Missing from address"
+            sys.exit(1)
         current["notes"].append(new_note)
 
 def add_notes(current):
@@ -118,7 +143,7 @@ def add_notes(current):
     for f in glob.glob("%d.followup.*" % current['number']):
         process_reply_file(current, f)
 
-def maybe_add_attachment(submsg, current):
+def maybe_add_attachment(submsg, current, fromaddr, date):
     """Adds the attachment to the current record"""
     attachment_filename = submsg.get_filename()
     if attachment_filename is None:
@@ -136,7 +161,7 @@ def maybe_add_attachment(submsg, current):
         return
 
     if mtype == 'application/pkcs7-signature':
-         return
+        return
 
     if mtype == 'application/pgp-signature':
         return
@@ -144,12 +169,20 @@ def maybe_add_attachment(submsg, current):
     if mtype == 'message/rfc822':
         return
 
+    if mtype == 'application/ms-tnef':
+        return
+
+    if mtype == 'text/x-vcard':
+        return
+
     try:
         data = submsg.get_payload(decode=True)
     except:
         return
 
-    current['attachments'].append( ( attachment_filename, mtype, data ) )
+    timestamp = time.gmtime(email.utils.mktime_tz(email.utils.parsedate_tz(date)))
+    print "Added attachment %s with type %s" % (attachment_filename, mtype, )
+    current['attachments'].append( ( attachment_filename, mtype, data, timestamp, fromaddr ) )
 
 def process_text_plain(msg, current):
     current['description'] = msg.get_payload()
@@ -159,7 +192,58 @@ def process_multi_part(msg, current):
         if part.get_filename() is None:
             process_text_plain(part, current)
         else:
-            maybe_add_attachment(part, current)
+            maybe_add_attachment(part, current, msg['From'], msg['Date'])
+
+"""
+  Jitterbugs allows people to submit bugs under any number of email addresses.
+  This function allows mapping those addresses into a single BZ instance address.
+"""
+def get_real_address(addr):
+    if addr == 'user2@example.com':
+        addr = 'user1@example.com'
+
+    return addr
+
+def add_user(eaddr):
+    addr = get_real_address(email.utils.parseaddr(eaddr)[1].lower())
+
+    try:
+        mdb = MySQLdb.connect(db='bugs',user='bugs',host='localhost',passwd='passw0rd')
+        cursor = mdb.cursor()
+        cursor.execute("INSERT INTO profiles SET " \
+                       "login_name='%s'," \
+                       "disabledtext=''" \
+                        % addr )
+
+        cursor.execute("COMMIT")
+        cursor.close()
+        mdb.close()
+
+    except MySQLdb.IntegrityError, e:
+        errorcode = e[0]
+        if errorcode == 1062: # duplicate
+            cursor.close()
+            mdb.close()
+            return
+        else:
+            raise
+
+def get_userid_from_email(eaddr):
+    addr = get_real_address(email.utils.parseaddr(eaddr)[1].lower())
+
+    try:
+                mdb = MySQLdb.connect(db='bugs',user='bugs',host='localhost',passwd='passw0rd')
+                cursor = mdb.cursor()
+
+                cursor.execute("select userid from profiles where login_name='%s'" % addr )
+                uid = cursor.fetchone()
+                cursor.close()
+                mdb.close()
+                return uid
+
+    except MySQLdb.ProgrammingError, e:
+                print "Error: %d: %s" % (e.args[0],e.args[1])
+                sys.exit(1)
 
 def process_jitterbug(filename):
     current = {}
@@ -187,6 +271,13 @@ def process_jitterbug(filename):
         current['short-description'] = msg['Subject']
     else:
         current['short-description'] = "Unknown"
+        print('Setting short description to Unknown')
+
+    if msg['From'] is not None:
+        current['from'] = msg['From']
+    else:
+        print "Error: Missing from address"
+        sys.exit(1)
 
     msgtype = msg.get_content_maintype()
     if msgtype == 'text':
@@ -214,10 +305,10 @@ def process_jitterbug(filename):
     # reporter
     # component
     # resolution
+    # assignee
 
-    # change this to the user_id of the Bugzilla user who is blessed with the
-    # imported defects
-    reporter=6
+    # change this to the numeric userid of the user who should be the default assignee
+    assignee=4
 
     # the resolution will need to be set manually
     resolution=""
@@ -225,7 +316,10 @@ def process_jitterbug(filename):
     db = MySQLdb.connect(db='bugs',user='root',host='localhost',passwd='password')
     cursor = db.cursor()
 
+    add_user(current['from'])
+
     try:
+        uid = get_userid_from_email(current['from'])
         cursor.execute( "INSERT INTO bugs SET " \
                         "bug_id=%s," \
                         "priority='---'," \
@@ -248,8 +342,8 @@ def process_jitterbug(filename):
                           time.strftime("%Y-%m-%d %H:%M:%S", current['date-reported'][:9]),
                           current['short-description'],
                           product,
-                          reporter,
-                          reporter,
+                          assignee,
+                          uid,
                           version,
                           component,
                           resolution] )
@@ -261,21 +355,35 @@ def process_jitterbug(filename):
                         "bug_when=%s," \
                         "thetext=%s",
                         [ current['number'],
-                          reporter,
+                          get_userid_from_email(current['from']),
                           time.strftime("%Y-%m-%d %H:%M:%S", current['date-reported'][:9]),
                           current['description'] ] )
 
+        current['fulltext'] = current['description']
+
         # Add whatever notes are associated with this defect
         for n in current['notes']:
+                            add_user(n['from'])
                             cursor.execute( "INSERT INTO longdescs SET " \
                             "bug_id=%s," \
                             "who=%s," \
                             "bug_when=%s," \
                             "thetext=%s",
                             [current['number'],
-                             reporter,
+                             get_userid_from_email(n['from']),
                              time.strftime("%Y-%m-%d %H:%M:%S", n['timestamp'][:9]),
                              n['text']])
+                            current['fulltext'] += n['text']
+
+        cursor.execute( "INSERT INTO bugs_fulltext SET " \
+        "bug_id=%s," \
+        "short_desc=%s," \
+        "comments=%s," \
+        "comments_noprivate=%s",
+        [current['number'],
+        current['short-description'],
+        current['fulltext'],
+        current['fulltext'] ] )
 
         # add attachments associated with this defect
         for a in current['attachments']:
@@ -283,8 +391,8 @@ def process_jitterbug(filename):
                             "bug_id=%s, creation_ts=%s, description=%s, mimetype=%s," \
                             "filename=%s, submitter_id=%s",
                             [ current['number'],
-                              time.strftime("%Y-%m-%d %H:%M:%S", current['date-reported'][:9]),
-                              a[0], a[1], a[0], reporter ])
+                              time.strftime("%Y-%m-%d %H:%M:%S", a[3][:9]),
+                              a[0], a[1], a[0], get_userid_from_email(a[4]) ])
             cursor.execute( "INSERT INTO attach_data SET " \
                             "id=LAST_INSERT_ID(), thedata=%s",
                             [ a[2] ])
@@ -321,8 +429,12 @@ attachments, and similar noise.
 
 
 def main():
-    global bug_status, component, version, product
+    global bug_status, component, version, product, reporter
     opts, args = getopt.getopt(sys.argv[1:], "hs:c:v:")
+    # Change this to the email address of the Bugzilla user who should be marked
+    # as reporting notes
+    reporter=""
+
 
     for o,a in opts:
         if o == "-s":

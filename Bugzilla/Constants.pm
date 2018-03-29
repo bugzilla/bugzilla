@@ -19,7 +19,6 @@ use Memoize;
 
 @Bugzilla::Constants::EXPORT = qw(
     BUGZILLA_VERSION
-    REST_DOC
 
     REMOTE_FILE
     LOCAL_FILE
@@ -208,10 +207,6 @@ sub BUGZILLA_VERSION {
     eval { require Bugzilla } || return $bugzilla_version;
     eval { Bugzilla->VERSION } || $bugzilla_version;
 }
-
-# A base link to the current REST Documentation. We place it here
-# as it will need to be updated to whatever the current release is.
-use constant REST_DOC => "https://bugzilla.readthedocs.io/en/latest/api/";
 
 # Location of the remote and local XML files to track new releases.
 use constant REMOTE_FILE => 'http://updates.bugzilla.org/bugzilla-update.xml';

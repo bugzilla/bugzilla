@@ -132,7 +132,8 @@ sub response {
     if (exists $json_data->{error}) {
         $result = $json_data->{error};
         $result->{error} = $self->type('boolean', 1);
-        $result->{documentation} = REST_DOC;
+
+        $result->{documentation} = Bugzilla->params->{docs_urlbase} . "api/";
         delete $result->{'name'}; # Remove JSONRPCError
     }
     elsif (exists $json_data->{result}) {

@@ -26,7 +26,7 @@ use Cwd qw(abs_path);
 use English qw(-no_match_vars $PROGRAM_NAME $EXECUTABLE_NAME);
 use File::Basename;
 use File::Copy;
-use File::Spec::Functions qw(catfile);
+use File::Spec::Functions qw(catfile tmpdir);
 use Future;
 use Future::Utils qw(fmap_void);
 use IO::Async::Loop;
@@ -52,7 +52,7 @@ sub gd_preconfig {
 
     my $pidfile = $self->{gd_args}{pidfile};
     if ( !$pidfile ) {
-        $pidfile = bz_locations()->{datadir} . '/' . $self->{gd_progname} . '.pid';
+        $pidfile = catfile(tmpdir(),  $self->{gd_progname} . '.pid');
     }
     return ( pidfile => $pidfile );
 }

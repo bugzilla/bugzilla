@@ -8,6 +8,11 @@
 
 [% USE Bugzilla %]
 <meta property="og:type" content="website">
-<meta property="og:image" content="[% urlbase FILTER none %]extensions/OpenGraph/web/moz-social-bw-rgb-1200x1200.png">
 <meta property="og:title" content="[% title FILTER none %]">
 <meta property="og:url" content="[% Bugzilla.cgi.self_url FILTER html %]">
+[% IF bug %]
+<meta property="og:description"
+      content="[% bug.bug_status FILTER html %] ([% bug.assigned_to.login FILTER email FILTER html %]) in [% bug.product FILTER html %] - [% bug.component FILTER html %]. Last updated [% bug.delta_ts FILTER time('%Y-%m-%d') %].">
+[% ELSE %]
+<meta property="og:image" content="[% urlbase FILTER none %]extensions/OpenGraph/web/moz-social-bw-rgb-1200x1200.png">
+[% END %]

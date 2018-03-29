@@ -293,6 +293,8 @@ sub process_revision_change {
     $phab_users = get_phab_bmo_ids({ phids => \@denied_phids });
     @denied_user_ids = map { $_->{id} } @$phab_users;
 
+    my %reviewers_hash =  map { $_->name => 1 } @{ $revision->reviewers };
+
     foreach my $attachment (@attachments) {
         my ($attach_revision_id) = ($attachment->filename =~ PHAB_ATTACHMENT_PATTERN);
         next if $revision->id != $attach_revision_id;
@@ -333,7 +335,11 @@ sub process_revision_change {
             $comment .= $flag_data->{setter}->name . " has requested changes to the revision.\n";
         }
         foreach my $flag_data (@removed_flags) {
-            $comment .= $flag_data->{setter}->name . " has been removed from the revision.\n";
+            if ( exists $reviewers_hash{$flag_data->{setter}->name} ) {
+                $comment .= "Flag set by " . $flag_data->{setter}->name . " is no longer active.\n";
+            } else {
+                $comment .= $flag_data->{setter}->name . " has been removed from the revision.\n";
+            }
         }
 
         if ($comment) {

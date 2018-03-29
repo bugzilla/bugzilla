@@ -2,3 +2,4 @@
 
 cd /vagrant
 perl scripts/generate_bmo_data.pl 'vagrant@{{ WEB_HOSTNAME }}'
+perl scripts/update_params.pl 'mail_delivery_method' 'Sendmail'

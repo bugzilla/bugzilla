@@ -38,15 +38,14 @@ sub _in_eval {
 
 sub _throw_error {
     my ($name, $error, $vars) = @_;
-    my $dbh = Bugzilla->dbh;
     $vars ||= {};
-
     $vars->{error} = $error;
 
     # Make sure any transaction is rolled back (if supported).
     # If we are within an eval(), do not roll back transactions as we are
     # eval'uating some test on purpose.
-    $dbh->bz_rollback_transaction() if ($dbh->bz_in_transaction() && !_in_eval());
+    my $dbh = eval { Bugzilla->dbh };
+    $dbh->bz_rollback_transaction() if ($dbh && $dbh->bz_in_transaction() && !_in_eval());
 
     my $datadir = bz_locations()->{'datadir'};
     # If a writable $datadir/errorlog exists, log error details there.
@@ -191,10 +190,9 @@ sub ThrowCodeError {
 
 sub ThrowTemplateError {
     my ($template_err) = @_;
-    my $dbh = Bugzilla->dbh;
-
+    my $dbh = eval { Bugzilla->dbh };
     # Make sure the transaction is rolled back (if supported).
-    $dbh->bz_rollback_transaction() if $dbh->bz_in_transaction();
+    $dbh->bz_rollback_transaction() if $dbh && $dbh->bz_in_transaction();
 
     if (blessed($template_err) && $template_err->isa('Template::Exception')) {
         my $type = $template_err->type;

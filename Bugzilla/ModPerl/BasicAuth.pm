@@ -25,18 +25,22 @@ use warnings;
 # AUTH_VAR_NAME and AUTH_VAR_PASS are the names of variables defined in
 # `localconfig` which hold the authentication credentials.
 
-use Apache2::Const -compile => qw(OK HTTP_UNAUTHORIZED);
+use Apache2::Const -compile => qw(OK HTTP_UNAUTHORIZED); ## no critic (Freenode::ModPerl)
+use Bugzilla::Logging;
 use Bugzilla ();
 
 sub handler {
     my $r = shift;
     my ($status, $password) = $r->get_basic_auth_pw;
-    return $status if $status != Apache2::Const::OK;
+    if ($status != Apache2::Const::OK) {
+        WARN("Got non-OK status: $status when trying to get password");
+        return $status
+    }
 
     my $auth_var_name = $ENV{AUTH_VAR_NAME};
     my $auth_var_pass = $ENV{AUTH_VAR_PASS};
     unless ($auth_var_name && $auth_var_pass) {
-        warn "AUTH_VAR_NAME and AUTH_VAR_PASS environmental vars not set\n";
+        ERROR('AUTH_VAR_NAME and AUTH_VAR_PASS environmental vars not set');
         $r->note_basic_auth_failure;
         return Apache2::Const::HTTP_UNAUTHORIZED;
     }
@@ -44,13 +48,14 @@ sub handler {
     my $auth_user = Bugzilla->localconfig->{$auth_var_name};
     my $auth_pass = Bugzilla->localconfig->{$auth_var_pass};
     unless ($auth_user && $auth_pass) {
-        warn "$auth_var_name and $auth_var_pass not configured\n";
+        ERROR("$auth_var_name and $auth_var_pass not configured");
         $r->note_basic_auth_failure;
         return Apache2::Const::HTTP_UNAUTHORIZED;
     }
 
     unless ($r->user eq $auth_user && $password eq $auth_pass) {
         $r->note_basic_auth_failure;
+        WARN('username and password do not match');
         return Apache2::Const::HTTP_UNAUTHORIZED;
     }
 

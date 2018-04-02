@@ -101,7 +101,12 @@ sub debug {
     my $caller_pkg = caller;
     local $Log::Log4perl::caller_depth = $Log::Log4perl::caller_depth + 1;
     my $logger = Log::Log4perl->get_logger($caller_pkg);
-    $logger->info(@args);
+    if ($args[0] && $args[0] eq "TheSchwartz::work_once found no jobs") {
+        $logger->trace(@args);
+    }
+    else {
+        $logger->info(@args);
+    }
 }
 
 sub work {

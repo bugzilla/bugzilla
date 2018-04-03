@@ -150,10 +150,12 @@ YAHOO.bugzilla.instantSearch = {
           product: YAHOO.bugzilla.instantSearch.getProduct(),
           summary: query,
           limit: 20,
-          include_fields: [ "id", "summary", "status", "resolution", "component" ],
-          Bugzilla_api_token : (BUGZILLA.api_token ? BUGZILLA.api_token : '')
+          include_fields: [ "id", "summary", "status", "resolution", "component" ]
         }
       };
+      if (BUGZILLA.api_token) {
+        jsonObject.params.Bugzilla_api_token = BUGZILLA.api_token;
+      }
 
       YAHOO.bugzilla.instantSearch.dataTable.getDataSource().sendRequest(
         YAHOO.lang.JSON.stringify(jsonObject), 

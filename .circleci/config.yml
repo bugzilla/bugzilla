@@ -5,13 +5,6 @@
 
 version: 2
 
-main_filters: &main_filters
-  branches:
-    ignore:
-      - /^(?:release|test)-20\d\d\d\d\d\d\.\d+/
-      - /\//
-      - production
-
 defaults:
   bmo_slim_image: &bmo_slim_image
     image: mozillabteam/bmo-slim:20180330.1
@@ -19,6 +12,18 @@ defaults:
 
   mysql_image: &mysql_image
     image: mozillabteam/bmo-mysql:5.6
+
+  store_log: &store_log
+    store_artifacts:
+      path: /app/bugzilla.log
+      destination: bugzilla.log
+
+  main_filters: &main_filters
+    branches:
+      ignore:
+        - /^(?:release|test)-20\d\d\d\d\d\d\.\d+/
+        - /\//
+        - production
 
   bmo_env: &bmo_env
     PORT: 8000
@@ -81,6 +86,8 @@ jobs:
           name: build push data
           command: |
             mv /opt/bmo/local /app/local
+            perl Makefile.PL
+            perl -I/app -I/app/local/lib/perl5 -MBugzilla -e 1
             perl checksetup.pl --no-database --no-templates --no-permissions
             perl scripts/build-bmo-push-data.pl
       - run:
@@ -115,6 +122,7 @@ jobs:
           paths: ["*.txt"]
       - store_artifacts:
           path: /app/build_info
+      - *store_log
 
   build:
     working_directory: /app
@@ -138,6 +146,7 @@ jobs:
       - run: "docker cp bmo:/app/version.json build_info/version.json"
       - store_artifacts:
           path: /app/build_info
+      - *store_log
       - deploy:
           command: |
             TAG="$(cat /app/build_info/tag.txt)"
@@ -158,7 +167,7 @@ jobs:
             docker push "$DOCKERHUB_REPO:latest"
 
   test_sanity:
-    parallelism: 2
+    parallelism: 1
     working_directory: /app
     docker:
       - <<: *bmo_slim_image
@@ -181,6 +190,7 @@ jobs:
             /app/scripts/entrypoint.pl prove -qf $(circleci tests glob 't/*.t' | circleci tests split) | tee artifacts/$CIRCLE_JOB.txt
       - store_artifacts:
           path: /app/artifacts
+      - *store_log
 
   test_webservices:
     parallelism: 1
@@ -199,6 +209,7 @@ jobs:
           /app/scripts/entrypoint.pl test_webservices | tee artifacts/$CIRCLE_JOB.txt
       - store_artifacts:
           path: /app/artifacts
+      - *store_log
 
   test_selenium:
     parallelism: 1
@@ -217,6 +228,7 @@ jobs:
           /app/scripts/entrypoint.pl test_selenium | tee artifacts/$CIRCLE_JOB.txt
       - store_artifacts:
           path: /app/artifacts
+      - *store_log
 
   test_bmo:
     parallelism: 1
@@ -246,6 +258,7 @@ jobs:
       - run: |
           [[ -f build_info/only_version_changed.txt ]] && exit 0
           /app/scripts/entrypoint.pl test_bmo -q -f t/bmo/*.t
+      - *store_log
 
 workflows:
   version: 2

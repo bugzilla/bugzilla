@@ -1,0 +1,72 @@
+#!/usr/bin/perl
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
+#
+# This Source Code Form is "Incompatible With Secondary Licenses", as
+# defined by the Mozilla Public License, v. 2.0.
+
+use 5.10.1;
+use strict;
+use warnings;
+use Mojolicious::Lite;
+use Digest::SHA qw(sha256_hex);
+
+my $BUGZILLA_URL = $ENV{AUTH_TEST_BUGZILLA_URL} // 'http://bmo-web.vm/auth.cgi';
+my $APP_DESC     = $ENV{AUTH_TEST_APP_DESC} // 'AuthTest';
+my %SECRETS;
+
+get '/' => sub {
+    my $c = shift;
+    my $callback_url = $c->url_for->to_abs->path('/callback');
+    my $app_id       = sha256_hex($callback_url, $APP_DESC);
+    $c->render(
+        template     => 'index',
+        app_id       => $app_id,
+        callback_url => $callback_url,
+        bugzilla_url => $BUGZILLA_URL,
+        app_desc     => $APP_DESC,
+    );
+};
+
+post '/callback' => sub {
+    my $c = shift;
+    %SECRETS = %{ $c->req->json };
+    $c->render( json => { result => 'SECRETS' } );
+};
+
+get '/callback' => sub {
+    my $c         = shift;
+    my $store_key = $c->param('callback_result');
+    $c->render( template => 'callback', %SECRETS );
+};
+
+app->start;
+__DATA__
+
+@@ index.html.ep
+% layout 'default';
+% title 'Configure';
+
+<p>Test auth delegation. <code>$app_id = <%= $app_id %></code></p>
+
+<form method="get" action="<%= $bugzilla_url %>">
+  <input type="hidden" name="callback" value="<%= $callback_url %>">
+  <input type="hidden" name="description" value="<%= $app_desc %>">
+  <input type="submit" value="Login">
+  </div>
+</form>
+
+@@ callback.html.ep
+% layout 'default';
+% title 'Login Result';
+
+<div><b>Login</b> <%= $client_api_login %> </div>
+<div><b>API Key</b> <%= $client_api_key %></div>
+
+@@ layouts/default.html.ep
+<!DOCTYPE html>
+<html>
+  <head><title><%= title %></title></head>
+  <body><%= content %></body>
+</html>

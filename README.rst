@@ -80,6 +80,22 @@ or db is changed, do a full provision:
 
     vagrant rsync && vagrant provision
 
+Testing Auth delegation
+-----------------------
+
+For testing auth-delegation there is included an `scripts/auth-test-app`
+script that runs a webserver and implements the auth delegation protocol.
+
+Provided you have `Mojolicious`_ installed:
+
+.. code-block:: bash
+  perl auth-test-app daemon
+
+Then just browse to `localhost:3000`_ to test creating API keys.
+
+.. _`Mojolicious`: https://metacpan.org/pod/Mojolicious
+.. _`localhost:3000`: http://localhost:3000
+
 Technical Details
 -----------------
 

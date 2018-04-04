@@ -51,7 +51,7 @@
   [% available_columns.$column_desc = column %]
 [% END %]
 
-<form name="changecolumns" action="colchange.cgi" onsubmit="change_submit();">
+<form name="changecolumns" action="colchange.cgi" onsubmit="change_submit();" data-no-csrf>
   <input type="hidden" name="rememberedquery" value="[% buffer FILTER html %]">
     <table>
       <tr>

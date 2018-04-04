@@ -60,7 +60,7 @@
 
 <h3 id="params">Change Parameters</h3>
 
-<form method="get" action="duplicates.cgi">
+<form method="get" action="duplicates.cgi" data-no-csrf>
   <input type="hidden" name="sortby" value="[% sortby FILTER html %]">
   <input type="hidden" name="reverse" value="[% reverse FILTER html %]">
   <input type="hidden" name="bug_id" value="[% bug_ids_string FILTER html %]">
@@ -127,7 +127,7 @@
   <input type="submit" id="change" value="Change">
 </form>
 
-<form method="post" action="buglist.cgi">
+<form method="post" action="buglist.cgi" data-no-csrf>
   <input type="hidden" name="bug_id" value="[% bug_ids_string FILTER html %]">
   Or just give this to me as a <input type="submit" id="list" 
                                       value="[% terms.bug %] list">.

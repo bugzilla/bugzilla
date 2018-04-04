@@ -53,7 +53,7 @@
              href="?GoAheadAndLogIn=1"><span>Log In</span></a>
            [% END %]
 
-        <form id="quicksearchForm" name="quicksearchForm" action="buglist.cgi">
+        <form id="quicksearchForm" name="quicksearchForm" action="buglist.cgi" data-no-csrf>
           <div>
             <input id="quicksearch_main" type="text" name="quicksearch" autofocus
               placeholder="Enter [% terms.abug %] number or some search terms"

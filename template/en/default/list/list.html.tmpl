@@ -175,14 +175,14 @@
   <tr>
     [% IF bugs.size > 0 %]
       <td valign="middle" class="bz_query_buttons">
-        <form method="post" action="show_bug.cgi">
+        <form method="post" action="show_bug.cgi" data-no-csrf>
           [% FOREACH id = buglist %]
             <input type="hidden" name="id" value="[% id FILTER html %]">
           [% END %]
           <input type="hidden" name="format" value="multiple">
           <input type="submit" id="long_format" value="Long Format">
         </form>
-        <form method="post" action="show_bug.cgi">
+        <form method="post" action="show_bug.cgi" data-no-csrf>
             <input type="hidden" name="ctype" value="xml">
           [% FOREACH id = buglist %]
             <input type="hidden" name="id" value="[% id FILTER html %]">
@@ -192,7 +192,7 @@
         </form>
 
         [% IF user.is_timetracker %]
-          <form method="post" action="summarize_time.cgi">
+          <form method="post" action="summarize_time.cgi" data-no-csrf>
             <input type="hidden" name="id" value="[% buglist_joined FILTER html %]">
             <input type="submit" id="timesummary" value="Time Summary">
           </form>

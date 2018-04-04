@@ -24,7 +24,7 @@
    title = "Search by $terms.bug number"
  %]
 
-<form method="get" action="show_bug.cgi">
+<form method="get" action="show_bug.cgi" data-no-csrf>
   <p>
     You may find a single [% terms.bug %] by entering its [% terms.bug %] id here:
     <input name="id" size="6">

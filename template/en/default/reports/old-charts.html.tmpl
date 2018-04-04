@@ -32,7 +32,7 @@
     <img src="[% url_image FILTER html %]">
     <br clear="both">
   [% ELSE %]
-    <form id="choose_product" method="get" action="reports.cgi">
+    <form id="choose_product" method="get" action="reports.cgi" data-no-csrf>
       <table border="1" cellpadding="5" cellspacing="2">
         <tr>
           <th>Product:</th>

@@ -49,6 +49,11 @@ sub _rest_resources {
             GET => {
                 method => 'parameters'
             }
+        },
+        qr{^/jobqueue_status$}, {
+            GET => {
+                method => 'jobqueue_status'
+            }
         }
     ];
     return $rest_resources;

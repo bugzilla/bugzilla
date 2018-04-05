@@ -313,6 +313,10 @@
     to the <code>JOB_MAP</code> constant in <code>Bugzilla::JobQueue</code>,
     perhaps by using the 'job_map' hook.
 
+  [% ELSIF error == "jobqueue_status_error" %]
+    An error occurred while checking the job queue status. Try again at a
+    later time.  
+
   [% ELSIF error == "ldap_bind_failed" %]
     Failed to bind to the LDAP server. The error message was:
     <code>[% errstr FILTER html %]</code>

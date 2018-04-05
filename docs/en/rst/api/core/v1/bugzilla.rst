@@ -300,3 +300,32 @@ name             type    description
 ===============  ======  ====================================================
 last_audit_time  string  The maximum of the at_time from the audit_log.
 ===============  ======  ====================================================
+
+Job Queue Status
+----------------
+
+Reports the status of the job queue.
+
+**Request**
+
+.. code-block:: text
+
+   GET /rest/jobqueue_status
+
+This method requires an authenticated user. 
+
+**Response**
+
+.. code-block:: js
+
+   {
+     "total": 12,
+     "errors": 0
+   }
+
+===============  =======  ====================================================
+name             type     description
+===============  =======  ====================================================
+total            integer  The total number of jobs in the job queue.
+errors           integer  The number of errors produced by jobs in the queue.
+===============  =======  ====================================================

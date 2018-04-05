@@ -199,6 +199,9 @@ use constant WS_ERROR_CODE => {
     # BugUserLastVisited errors
     user_not_involved => 1300,
 
+    # Job queue errors 1400-1500
+    jobqueue_status_error => 1400,
+
     # Errors thrown by the WebService itself. The ones that are negative
     # conform to http://xmlrpc-epi.sourceforge.net/specs/rfc.fault_codes.php
     xmlrpc_invalid_value => -32600,

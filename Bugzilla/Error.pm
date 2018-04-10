@@ -169,7 +169,7 @@ sub ThrowUserError {
 
 sub ThrowCodeError {
     my ($error, $vars) = @_;
-    my $logfunc = _make_logfunc('User');
+    my $logfunc = _make_logfunc('Code');
     _add_vars_to_logging_fields($vars);
 
     _throw_error( 'global/code-error.html.tmpl', $error, $vars, $logfunc );

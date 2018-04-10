@@ -50,6 +50,15 @@
         group: root
         mode: 0644
 
+    - name: 'add LOG4PERL_CONFIG_FILE'
+      lineinfile:
+        dest: /etc/environment
+        regexp: 'LOG4PERL_CONFIG_FILE='
+        line: 'LOG4PERL_CONFIG_FILE=log4perl-vagrant.conf'
+        owner: root
+        group: root
+        mode: 0644
+
     - name: copy ntp.conf
       copy:
         src: ntp.conf

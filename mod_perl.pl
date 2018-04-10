@@ -80,7 +80,7 @@ Bugzilla::CGI->compile(qw(:cgi :push));
 # sharing with the other httpd processes.
 my $limit = Bugzilla->localconfig->{apache_size_limit};
 if ($OSNAME eq 'linux' && ! eval { require Linux::Smaps }) {
-    warn "SizeLimit requires Linux::Smaps on linux. size limit set to 800MB";
+    WARN('SizeLimit requires Linux::Smaps on linux. size limit set to 800MB');
     $limit = 800_000;
 }
 Apache2::SizeLimit->set_max_unshared_size($limit);
@@ -167,13 +167,11 @@ sub handler : method {
         DB::enable_profile($file);
     }
     Bugzilla::init_page();
-    my $start = Time::HiRes::time();
     my $result = $class->SUPER::handler(@_);
     if (Bugzilla::ModPerl::USE_NYTPROF) {
         DB::disable_profile();
         DB::finish_profile();
     }
-    warn "[request_time] ", Bugzilla->cgi->request_uri, " took ", Time::HiRes::time() - $start, " seconds to execute";
 
     # When returning data from the REST api we must only return 200 or 304,
     # which tells Apache not to append its error html documents to the

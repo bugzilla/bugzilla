@@ -12,12 +12,17 @@ use warnings;
 
 use Log::Log4perl qw(:easy);
 use Log::Log4perl::MDC;
-use File::Spec::Functions qw(rel2abs);
+use File::Spec::Functions qw(rel2abs catfile);
 use Bugzilla::Constants qw(bz_locations);
 use English qw(-no_match_vars $PROGRAM_NAME);
+use Taint::Util qw(untaint);
 
-sub is_interactive {
-    return not exists $ENV{SERVER_SOFTWARE}
+sub logfile {
+    my ($class, $name) = @_;
+
+    my $file = rel2abs(catfile(bz_locations->{logsdir}, $name));
+    untaint($file);
+    return $file;
 }
 
 sub fields {

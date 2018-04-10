@@ -56,7 +56,6 @@ use Encode;
 use File::Basename;
 use File::Spec::Functions;
 use Safe;
-use Sys::Syslog qw(:DEFAULT);
 use JSON::XS qw(decode_json);
 
 use parent qw(Bugzilla::CPAN);

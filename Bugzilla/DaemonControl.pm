@@ -81,7 +81,13 @@ sub run_cereal {
         on_exception => on_exception( 'cereal', $exit_f ),
     );
     $exit_f->on_cancel( sub { $cereal->kill('TERM') } );
+    $exit_f->on_ready(
+        sub {
+            delete $ENV{LOG4PERL_STDERR_DISABLE};
+        }
+    );
     $loop->add($cereal);
+    $ENV{LOG4PERL_STDERR_DISABLE} = 1;
 
     return $exit_f;
 }

@@ -377,6 +377,13 @@ LOG4PERL_CONFIG_FILE
 .. _`Devel::NYTProf`: https://metacpan.org/pod/Devel::NYTProf
 .. _`Log::Log4perl`: https://metacpan.org/pod/Log::Log4perl
 
+LOG4PERL_STDERR_DISABLE
+  Boolean. By default log messages are logged as plain text to `STDERR`.
+  Setting this to a true value disables this behavior.
+
+  Note: For programs that run using the `cereal` log aggregator, this environemnt
+  variable will be ignored.
+
 Persistent Data Volume
 ----------------------
 

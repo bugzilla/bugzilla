@@ -1087,3 +1087,119 @@ This method can throw all the same errors as :ref:`rest_single_bug`, plus:
   You did not specify a valid for the "file_name" argument.
 * 604 (Summary Required)
   You did not specify a value for the "summary" argument.
+
+.. _rest_possible_duplicates:
+
+Possible Duplicates
+-------------------
+
+Gets a list of possible duplicate bugs.
+
+**Request**
+
+To search by similar bug.
+
+.. code-block:: text
+
+   GET /rest/bug/possible_duplicates?id=1234567
+
+To search by a similar bug summary directly.
+
+.. code-block:: text
+
+   GET /rest/bug/possible_duplicates?summary=Similar+Bug+Summary
+
+=======  ======  ================================================================
+name     type      description
+=======  ======  ================================================================
+id       int     The id of a bug to find duplicates of.
+summary  string  A summary to search for duplicates of, only used if no bug id is
+                 given.
+product  string  A product group to limit the search in.
+limit    int     Limit the number of results returned. If the limit
+                 is more than zero and higher than the maximum limit
+                 set by the administrator, then the maximum limit will
+                 be used instead. If you set the limit equal to zero,
+                 then all matching results will be returned instead.
+=======  ======  ================================================================
+
+**Response**
+
+.. code-block:: js
+
+   {
+     "bugs": [
+       {
+         "alias": [],
+         "history": [
+           {
+             "when": "2014-09-23T19:12:17Z",
+             "who": "user@bugzilla.org",
+             "changes": [
+               {
+                 "added": "P1",
+                 "field_name": "priority",
+                 "removed": "P2"
+               },
+               {
+                 "removed": "blocker",
+                 "field_name": "severity",
+                 "added": "critical"
+               }
+             ]
+           },
+           {
+             "when": "2014-09-28T21:03:47Z",
+             "who": "user@bugzilla.org",
+             "changes": [
+               {
+                 "added": "blocker?",
+                 "removed": "",
+                 "field_name": "flagtypes.name"
+               }
+             ]
+           }
+         ],
+         "id": 35
+       }
+     ]
+   }
+
+``bugs`` (array) Bug objects each containing the following items. If a bug id was
+used to query this endpoint, that bug will not be in the list returned.
+
+=======  =====  =================================================================
+name     type   description
+=======  =====  =================================================================
+id       int    The numeric ID of the bug.
+alias    array  The unique aliases of this bug. An empty array will be returned
+                if this bug has no aliases.
+history  array  An array of History objects.
+=======  =====  =================================================================
+
+History object:
+
+=======  ========  ==============================================================
+name     type      description
+=======  ========  ==============================================================
+when     datetime  The date the bug activity/change happened.
+who      string    The login name of the user who performed the bug change.
+changes  array     An array of Change objects which contain all the changes that
+                   happened to the bug at this time (as specified by ``when``).
+=======  ========  ==============================================================
+
+Change object:
+
+=============  ======  ==========================================================
+name           type    description
+=============  ======  ==========================================================
+field_name     string  The name of the bug field that has changed.
+removed        string  The previous value of the bug field which has been
+                       deleted by the change.
+added          string  The new value of the bug field which has been added
+                       by the change.
+attachment_id  int     The ID of the attachment that was changed.
+                       This only appears if the change was to an attachment,
+                       otherwise ``attachment_id`` will not be present in this
+                       object.
+=============  ======  ==========================================================

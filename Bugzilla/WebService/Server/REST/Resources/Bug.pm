@@ -34,6 +34,11 @@ sub _rest_resources {
                 method => 'get'
             }
         },
+        qr{^/bug/possible_duplicates$}, {
+            GET => {
+                method => 'possible_duplicates'
+            }
+        },
         qr{^/bug/([^/]+)$}, {
             GET => {
                 method => 'get',

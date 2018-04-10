@@ -35,6 +35,8 @@ use Bugzilla::Search::Quicksearch;
 use List::Util qw(max);
 use List::MoreUtils qw(uniq);
 use Storable qw(dclone);
+use Types::Standard -all;
+use Type::Utils;
 
 #############
 # Constants #
@@ -656,9 +658,30 @@ sub possible_duplicates {
 
     Bugzilla->switch_to_shadow_db();
 
-    # Undo the array-ification that validate() does, for "summary".
-    $params->{summary} || ThrowCodeError('param_required',
-        { function => 'Bug.possible_duplicates', param => 'summary' });
+    state $params_type = Dict [
+        id                 => Optional [Int],
+        product            => Optional [ ArrayRef [Str] ],
+        limit              => Optional [Int],
+        summary            => Optional [Str],
+        include_fields     => Optional [ ArrayRef [Str] ],
+        Bugzilla_api_token => Optional [Str]
+    ];
+    
+    ThrowCodeError( 'param_invalid', { function => 'Bug.possible_duplicates', param => 'A param' } )
+        if !$params_type->check($params);
+
+    my $summary;
+    if ($params->{id}) {
+        my $bug = Bugzilla::Bug->check({ id => $params->{id}, cache => 1 });
+        $summary = $bug->short_desc;
+    } 
+    elsif ($params->{summary}) {
+        $summary = $params->{summary};
+    } 
+    else {
+        ThrowCodeError('param_required',
+        { function => 'Bug.possible_duplicates', param => 'id or summary' });
+    }
 
     my @products;
     foreach my $name (@{ $params->{'product'} || [] }) {
@@ -667,8 +690,18 @@ sub possible_duplicates {
     }
 
     my $possible_dupes = Bugzilla::Bug->possible_duplicates(
-        { summary => $params->{summary}, products => \@products,
-          limit   => $params->{limit} });
+        {
+            summary  => $summary,
+            products => \@products,
+            limit    => $params->{limit}
+        }
+    );
+
+    # If a bug id was used, remove the bug with the same id from the list.
+    if ($params->{id}) {
+        @$possible_dupes = grep { $_->id != $params->{id} } @$possible_dupes;
+    }
+    
     my @hashes = map { $self->_bug_to_hash($_, $params) } @$possible_dupes;
     $self->_add_update_tokens($params, $possible_dupes, \@hashes);
     return { bugs => \@hashes };

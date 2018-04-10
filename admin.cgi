@@ -25,6 +25,7 @@ print $cgi->header();
 $user->in_group('admin')
   || $user->in_group('tweakparams')
   || $user->in_group('editusers')
+  || $user->in_group('disableusers')
   || $user->can_bless
   || (Bugzilla->params->{'useclassification'} && $user->in_group('editclassifications'))
   || $user->in_group('editcomponents')

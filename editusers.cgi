@@ -26,15 +26,18 @@ use Bugzilla::Token;
 
 my $user = Bugzilla->login(LOGIN_REQUIRED);
 
-my $cgi       = Bugzilla->cgi;
-my $template  = Bugzilla->template;
-my $dbh       = Bugzilla->dbh;
-my $userid    = $user->id;
-my $editusers = $user->in_group('editusers');
+my $cgi          = Bugzilla->cgi;
+my $template     = Bugzilla->template;
+my $dbh          = Bugzilla->dbh;
+my $userid       = $user->id;
+my $editusers    = $user->in_group('editusers');
+my $disableusers = $user->in_group('disableusers');
+
 local our $vars     = {};
 
 # Reject access if there is no sense in continuing.
 $editusers
+    || $disableusers
     || $user->can_bless()
     || ThrowUserError("auth_failure", {group  => "editusers",
                                        reason => "cant_bless",
@@ -51,6 +54,7 @@ my $token          = $cgi->param('token');
 
 # Prefill template vars with data used in all or nearly all templates
 $vars->{'editusers'} = $editusers;
+$vars->{'disableusers'} = $disableusers;
 mirrorListSelectionValues();
 
 Bugzilla::Hook::process('admin_editusers_action',
@@ -234,7 +238,7 @@ if ($action eq 'search') {
     # Lock tables during the check+update session.
     $dbh->bz_start_transaction();
 
-    $editusers || $user->can_see_user($otherUser)
+    $editusers || $disableusers || $user->can_see_user($otherUser)
         || ThrowUserError('auth_failure', {reason => "not_visible",
                                            action => "modify",
                                            object => "user"});
@@ -246,11 +250,8 @@ if ($action eq 'search') {
     my $changes = {};
     if ($editusers) {
         $otherUser->set_login($cgi->param('login'));
-        $otherUser->set_name($cgi->param('name'));
         $otherUser->set_password($cgi->param('password'))
             if $cgi->param('password');
-        $otherUser->set_disabledtext($cgi->param('disabledtext'));
-        $otherUser->set_disable_mail($cgi->param('disable_mail'));
         $otherUser->set_extern_id($cgi->param('extern_id'))
             if defined($cgi->param('extern_id'));
         $otherUser->set_password_change_required($cgi->param('password_change_required'));
@@ -262,8 +263,15 @@ if ($action eq 'search') {
         if ($user->in_group('bz_can_disable_mfa') && $otherUser->mfa && $cgi->param('mfa') eq '') {
             $otherUser->set_mfa('');
         }
-        $changes = $otherUser->update();
     }
+
+    if ($editusers || $disableusers) {
+        $otherUser->set_name($cgi->param('name'));
+        $otherUser->set_disabledtext($cgi->param('disabledtext'));
+        $otherUser->set_disable_mail($cgi->param('disable_mail'));
+    }
+
+    $changes = $otherUser->update();
 
     # Update group settings.
     my $sth_add_mapping = $dbh->prepare(
@@ -850,7 +858,9 @@ sub edit_processing {
     my $user = Bugzilla->user;
     my $template = Bugzilla->template;
 
-    $user->in_group('editusers') || $user->can_see_user($otherUser)
+    $user->in_group('editusers')
+        || $user->in_group('disableusers')
+        || $user->can_see_user($otherUser)
         || ThrowUserError('auth_failure', {reason => "not_visible",
                                            action => "modify",
                                            object => "user"});

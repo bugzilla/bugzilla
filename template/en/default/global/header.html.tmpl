@@ -294,7 +294,7 @@
           <li role="presentation">
             <a href="report.cgi" role="menuitem" tabindex="-1">Reports</a>
           </li>
-          [% IF user.in_group('tweakparams') || user.in_group('editusers') || user.can_bless
+          [% IF user.in_group('tweakparams') || user.in_group('editusers') || user.can_bless || user.in_group('disableusers')
                 || (Param('useclassification') && user.in_group('editclassifications'))
                 || user.in_group('editcomponents') || user.in_group('admin') || user.in_group('creategroups')
                 || user.in_group('editkeywords') || user.in_group('bz_canusewhines')

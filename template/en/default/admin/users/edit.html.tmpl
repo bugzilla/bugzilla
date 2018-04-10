@@ -68,9 +68,10 @@ $(function() {
 <form method="post" action="editusers.cgi">
 <table class="main">
   [% PROCESS admin/users/userdata.html.tmpl
-    editform  = 1
-    editusers = editusers
-    otheruser = otheruser
+    editform     = 1
+    editusers    = editusers
+    disableusers = disableusers
+    otheruser    = otheruser
   %]
   [% IF groups.size %]
     <tr>
@@ -125,43 +126,46 @@ $(function() {
     </tr>
   [% END %]
 
-  <tr>
-    <th>Product responsibilities:</th>
-    <td>
-      [% IF otheruser.product_responsibilities.size %]
-        [% PROCESS admin/users/responsibilities.html.tmpl otheruser = otheruser %]
-      [% ELSE %]
-        <em>none</em>
-      [% END %]
-    </td>
-  </tr>
-
-  [% IF otheruser.groups_owned.size %]
+  [% IF editusers %]
     <tr>
-      <th>Groups Owned:</th>
+      <th>Product responsibilities:</th>
       <td>
-        [% can_edit_groups = user.in_group('creategroups') %]
-        [% FOREACH group = otheruser.groups_owned %]
-          [% IF can_edit_groups %]
-            <a href="[% urlbase FILTER none %]editgroups.cgi?action=changeform&amp;group=[% group.id FILTER none %]">
+        [% IF otheruser.product_responsibilities.size %]
+          [% PROCESS admin/users/responsibilities.html.tmpl otheruser = otheruser %]
+        [% ELSE %]
+          <em>none</em>
+        [% END %]
+      </td>
+    </tr>
+
+    [% IF otheruser.groups_owned.size %]
+      <tr>
+        <th>Groups Owned:</th>
+        <td>
+          [% can_edit_groups = user.in_group('creategroups') %]
+          [% FOREACH group = otheruser.groups_owned %]
+            [% IF can_edit_groups %]
+              <a href="[% urlbase FILTER none %]editgroups.cgi?action=changeform&amp;group=[% group.id FILTER none %]">
+            [% END %]
+            [% group.name FILTER html %]
+            [% '</a>' IF can_edit_groups %]<br>
           [% END %]
-          [% group.name FILTER html %]
-          [% '</a>' IF can_edit_groups %]<br>
+        </td>
+      </tr>
+    [% END %]
+
+    <tr>
+      <th>Last Login:</th>
+      <td>
+        [% IF otheruser.last_seen_date %]
+          [% otheruser.last_seen_date FILTER html %]
+        [% ELSE %]
+          <em>never</em>
         [% END %]
       </td>
     </tr>
   [% END %]
 
-  <tr>
-    <th>Last Login:</th>
-    <td>
-      [% IF otheruser.last_seen_date %]
-        [% otheruser.last_seen_date FILTER html %]
-      [% ELSE %]
-        <em>never</em>
-      [% END %]
-    </td>
-  </tr>
 </table>
 
 <p>
@@ -171,11 +175,10 @@ $(function() {
   <input type="hidden" name="token" value="[% token FILTER html %]">
   [% INCLUDE listselectionhiddenfields %]
 
-  [% IF editusers %], [% ELSE %] or [% END %]
-  <a href="editusers.cgi?action=activity&amp;userid=[% otheruser.id %]"
+  [% IF editusers %]
+    , <a href="editusers.cgi?action=activity&amp;userid=[% otheruser.id %]"
      title="View Account History for '
      [%- otheruser.login FILTER html %]'">View Account History</a>
-  [% IF editusers %]
     or <a href="editusers.cgi?action=admin_activity&amp;userid=[% otheruser.id %]"
           title="View Account History for '
           [%- otheruser.login FILTER html %]'">View Admin History</a>

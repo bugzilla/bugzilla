@@ -46,7 +46,7 @@ END;
             href="mailto:[% u.email FILTER html %]"
             data-user-email="[% u.email FILTER html %]"
             data-user-id="[% u.id FILTER html %]"
-            data-show-edit="[% user.in_group('editusers') || user.bless_groups.size > 0 ? 1 : 0 %]"
+            data-show-edit="[% user.in_group('editusers') || user.in_group('disableusers') || user.bless_groups.size > 0 ? 1 : 0 %]"
             title="[% u.identity FILTER html %]"
           [% ELSE %]
             href="user_profile?user_id=[% u.id FILTER none %]"

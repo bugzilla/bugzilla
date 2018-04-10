@@ -45,23 +45,24 @@
    {name               => 'last_seen_date'
     heading            => 'Last Login'
    }
-   {heading            => 'Account History'
-    content            => 'View'
-    contentlink        => 'editusers.cgi?action=activity' _
-                                  '&amp;userid=%%userid%%' _
-                                  listselectionurlparams
-   }
   ]
 %]
 
 [% IF editusers %]
   [% columns.push({
+    heading            => 'Account History'
+    content            => 'View'
+    contentlink        => 'editusers.cgi?action=activity' _
+                                  '&amp;userid=%%userid%%' _
+                                  listselectionurlparams
+   }
+   {
      heading     => 'Admin History'
      content     => 'View'
      contentlink => 'editusers.cgi?action=admin_activity' _
                             '&amp;userid=%%userid%%' _
                             listselectionurlparams
-   })  
+   })
   %]
 [% END %]
 

@@ -56,7 +56,7 @@
         You can also automate this check by running <tt>sanitycheck.pl</tt> from a cron job.
         A notification will be sent per email to the specified user if errors are detected.</dd>
 
-        [% class = (user.in_group('editusers') || user.can_bless) ? "" : "forbidden" %]
+        [% class = (user.in_group('editusers') || user.in_group('disableusers') || user.can_bless) ? "" : "forbidden" %]
         <dt id="users" class="[% class %]"><a href="editusers.cgi">Users</a></dt>
         <dd class="[% class %]">Create new user accounts or edit existing ones. You can
         also add and remove users from groups (also known as "user privileges").</dd>

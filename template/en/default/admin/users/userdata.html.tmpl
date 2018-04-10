@@ -54,7 +54,7 @@
 <tr>
   <th><label for="name">Real name:</label></th>
   <td>
-    [% IF editusers %]
+    [% IF editusers || disableusers %]
       <input size="64" maxlength="255" name="name"
              autocomplete="off"
              id="name" value="[% otheruser.name FILTER html %]">
@@ -94,7 +94,9 @@
       [% END %]
     </td>
   </tr>
+[% END %]
 
+[% IF editusers || disableusers %]
   <tr>
     <th><label for="disable_mail">[% terms.Bug %]mail Disabled:</label></th>
     <td>
@@ -122,30 +124,31 @@
       explain why.)
     </td>
   </tr>
-  [% IF editform %]
-    <tr>
-      <th><label for="mfa">Two-factor Auth:</label></th>
-      <td>
-        [% IF user.in_group('bz_can_disable_mfa') %]
-          [% IF otheruser.mfa %]
-            <select name="mfa" value="mfa">
-              <option value="">Disable</option>
-              [% SWITCH otheruser.mfa %]
-                [% CASE "TOTP" %]
-                  <option value="TOTP" selected>Enabled - TOTP</option>
-                [% CASE "Duo" %]
-                  <option value="Duo" selected>Enabled - Duo Security</option>
-              [% END %]
-            </select>
-          [% ELSE %]
-            Disabled
-          [% END %]
+[% END %]
+
+[% IF editform && editusers %]
+  <tr>
+    <th><label for="mfa">Two-factor Auth:</label></th>
+    <td>
+      [% IF user.in_group('bz_can_disable_mfa') %]
+        [% IF otheruser.mfa %]
+          <select name="mfa" value="mfa">
+            <option value="">Disable</option>
+            [% SWITCH otheruser.mfa %]
+              [% CASE "TOTP" %]
+                <option value="TOTP" selected>Enabled - TOTP</option>
+              [% CASE "Duo" %]
+                <option value="Duo" selected>Enabled - Duo Security</option>
+            [% END %]
+          </select>
         [% ELSE %]
-          [% otheruser.mfa ? "Enabled - " _ otheruser.mfa : "Disabled" FILTER html %]
+          Disabled
         [% END %]
-      </td>
-    </tr>
-  [% END %]
+      [% ELSE %]
+        [% otheruser.mfa ? "Enabled - " _ otheruser.mfa : "Disabled" FILTER html %]
+      [% END %]
+    </td>
+  </tr>
 [% END %]
 
 [% Hook.process('end') %]

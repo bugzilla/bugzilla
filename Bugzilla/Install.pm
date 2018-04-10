@@ -204,6 +204,10 @@ use constant SYSTEM_GROUPS => (
         description => 'Can edit or disable users'
     },
     {
+        name        => 'disableusers',
+        description => 'Can disable users'
+    },
+    {
         name        => 'creategroups',
         description => 'Can create and destroy groups'
     },

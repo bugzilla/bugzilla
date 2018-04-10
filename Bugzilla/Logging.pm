@@ -10,7 +10,7 @@ use 5.10.1;
 use strict;
 use warnings;
 
-use Log::Log4perl;
+use Log::Log4perl qw(:easy);
 use Log::Log4perl::MDC;
 use File::Spec::Functions qw(rel2abs);
 use Bugzilla::Constants qw(bz_locations);
@@ -20,11 +20,15 @@ sub is_interactive {
     return not exists $ENV{SERVER_SOFTWARE}
 }
 
+sub fields {
+    return Log::Log4perl::MDC->get_context->{fields} //= {};
+}
+
 BEGIN {
     my $file = $ENV{LOG4PERL_CONFIG_FILE} // 'log4perl-syslog.conf';
     Log::Log4perl::Logger::create_custom_level('NOTICE', 'WARN', 5, 2);
     Log::Log4perl->init(rel2abs($file, bz_locations->{confdir}));
-    Log::Log4perl->get_logger(__PACKAGE__)->trace("logging enabled in $PROGRAM_NAME");
+    TRACE("logging enabled in $PROGRAM_NAME");
 }
 
 # this is copied from Log::Log4perl's :easy handling,

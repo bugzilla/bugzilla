@@ -38,12 +38,6 @@ use constant get_param_list => (
     },
 
     {
-        name    => 'sentry_uri',
-        type    => 't',
-        default => '',
-    },
-
-    {
         name    => 'metrics_enabled',
         type    => 'b',
         default => 0

@@ -532,9 +532,6 @@
    admindocslinks = admindocslinks
 %]
 
-[%# return the generated error_message for sentry %]
-[% processed.error_message = error_message %]
-
 <p>
   [% terms.Bugzilla %] has suffered an internal error:
 </p>
@@ -542,13 +539,6 @@
 <p class="throw_error">
   [% error_message FILTER none %]
 </p>
-
-[% IF maintainers_notified %]
-<p>
-  The [% terms.Bugzilla %] maintainers have been notified of this error
-  [#[% uid FILTER html %]].
-</p>
-[% END %]
 
 [% IF variables %]
   <pre>

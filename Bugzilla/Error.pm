@@ -13,9 +13,10 @@ use warnings;
 
 use base qw(Exporter);
 
-@Bugzilla::Error::EXPORT = qw(ThrowCodeError ThrowTemplateError ThrowUserError ThrowErrorPage);
+## no critic (Modules::ProhibitAutomaticExportation)
+our @EXPORT = qw( ThrowCodeError ThrowTemplateError ThrowUserError ThrowErrorPage);
+## use critic
 
-use Bugzilla::Sentry;
 use Bugzilla::Constants;
 use Bugzilla::WebService::Constants;
 use Bugzilla::Util;
@@ -37,7 +38,7 @@ sub _in_eval {
 }
 
 sub _throw_error {
-    my ($name, $error, $vars) = @_;
+    my ($name, $error, $vars, $logfunc) = @_;
     $vars ||= {};
     $vars->{error} = $error;
 
@@ -46,38 +47,6 @@ sub _throw_error {
     # eval'uating some test on purpose.
     my $dbh = eval { Bugzilla->dbh };
     $dbh->bz_rollback_transaction() if ($dbh && $dbh->bz_in_transaction() && !_in_eval());
-
-    my $datadir = bz_locations()->{'datadir'};
-    # If a writable $datadir/errorlog exists, log error details there.
-    if (-w "$datadir/errorlog") {
-        require Data::Dumper;
-        my $mesg = "";
-        for (1..75) { $mesg .= "-"; };
-        $mesg .= "\n[$$] " . time2str("%D %H:%M:%S ", time());
-        $mesg .= "$name $error ";
-        $mesg .= remote_ip();
-        $mesg .= Bugzilla->user->login;
-        $mesg .= (' actually ' . Bugzilla->sudoer->login) if Bugzilla->sudoer;
-        $mesg .= "\n";
-        my %params = Bugzilla->cgi->Vars;
-        $Data::Dumper::Useqq = 1;
-        for my $param (sort keys %params) {
-            my $val = $params{$param};
-            # obscure passwords
-            $val = "*****" if $param =~ /password/i;
-            # limit line length
-            $val =~ s/^(.{512}).*$/$1\[CHOP\]/;
-            $mesg .= "[$$] " . Data::Dumper->Dump([$val],["param($param)"]);
-        }
-        for my $var (sort keys %ENV) {
-            my $val = $ENV{$var};
-            $val = "*****" if $val =~ /password|http_pass/i;
-            $mesg .= "[$$] " . Data::Dumper->Dump([$val],["env($var)"]);
-        }
-        open(ERRORLOGFID, ">>", "$datadir/errorlog");
-        print ERRORLOGFID "$mesg\n";
-        close ERRORLOGFID;
-    }
 
     my $template = Bugzilla->template;
     my $message;
@@ -97,34 +66,24 @@ sub _throw_error {
                                              message => \$message });
 
     if ($Bugzilla::Template::is_processing) {
-        $name =~ /^global\/(user|code)-error/;
-        my $type = $1 // 'unknown';
+        my ($type) = $name =~ /^global\/(user|code)-error/;
+        $type //= 'unknown';
         die Template::Exception->new("bugzilla.$type.$error", $vars);
     }
 
     if (Bugzilla->error_mode == ERROR_MODE_WEBPAGE) {
-        if (sentry_should_notify($vars->{error})) {
-            $vars->{maintainers_notified} = 1;
-            $vars->{processed} = {};
-        } else {
-            $vars->{maintainers_notified} = 0;
-        }
-
         my $cgi = Bugzilla->cgi;
         $cgi->close_standby_message('text/html', 'inline', 'error', 'html');
         $template->process($name, $vars)
           || ThrowTemplateError($template->error());
         print $cgi->multipart_final() if $cgi->{_multipart_in_progress};
-
-        if ($vars->{maintainers_notified}) {
-            sentry_handle_error($vars->{error}, $vars->{processed}->{error_message});
-        }
+        $logfunc->("webpage error: $error");
     }
     elsif (Bugzilla->error_mode == ERROR_MODE_TEST) {
         die Dumper($vars);
     }
     elsif (Bugzilla->error_mode == ERROR_MODE_DIE) {
-        die("$message\n");
+        die "$message\n";
     }
     elsif (Bugzilla->error_mode == ERROR_MODE_DIE_SOAP_FAULT
            || Bugzilla->error_mode == ERROR_MODE_JSON_RPC
@@ -141,6 +100,7 @@ sub _throw_error {
         }
 
         if (Bugzilla->error_mode == ERROR_MODE_DIE_SOAP_FAULT) {
+            $logfunc->("XMLRPC error: $error ($code)");
             die SOAP::Fault->faultcode($code)->faultstring($message);
         }
         else {
@@ -150,6 +110,11 @@ sub _throw_error {
             if (Bugzilla->error_mode == ERROR_MODE_REST) {
                 my %status_code_map = %{ REST_STATUS_CODE_MAP() };
                 $status_code = $status_code_map{$code} || $status_code_map{'_default'};
+                $logfunc->("REST error: $error (HTTP $status_code, internal code $code)");
+            }
+            else {
+                my $fake_code = 100000 + $code;
+                $logfunc->("JSONRPC error: $error ($fake_code)");
             }
             # Technically JSON-RPC isn't allowed to have error numbers
             # higher than 999, but we do this to avoid conflicts with
@@ -170,22 +135,44 @@ sub _throw_error {
 
     exit;
 }
+
+sub _add_vars_to_logging_fields {
+    my ($vars) = @_;
+
+    foreach my $key (keys %$vars) {
+        Bugzilla::Logging->fields->{"var_$key"} = $vars->{$key};
+    }
+}
+
+sub _make_logfunc {
+    my ($type) = @_;
+    my $logger = Log::Log4perl->get_logger("Bugzilla.Error.$type");
+    return sub {
+        local $Log::Log4perl::caller_depth = $Log::Log4perl::caller_depth + 3;
+        if ($type eq 'User') {
+            $logger->warn(@_);
+        }
+        else {
+            $logger->error(@_);
+        }
+    };
+}
+
+
 sub ThrowUserError {
-    _throw_error("global/user-error.html.tmpl", @_);
+    my ($error, $vars) = @_;
+    my $logfunc = _make_logfunc('User');
+    _add_vars_to_logging_fields($vars);
+
+    _throw_error( 'global/user-error.html.tmpl', $error, $vars, $logfunc);
 }
 
 sub ThrowCodeError {
-    my (undef, $vars) = @_;
+    my ($error, $vars) = @_;
+    my $logfunc = _make_logfunc('User');
+    _add_vars_to_logging_fields($vars);
 
-    # Don't show function arguments, in case they contain
-    # confidential data.
-    local $Carp::MaxArgNums = -1;
-    # Don't show the error as coming from Bugzilla::Error, show it
-    # as coming from the caller.
-    local $Carp::CarpInternal{'Bugzilla::Error'} = 1;
-    $vars->{traceback} //= Carp::longmess();
-
-    _throw_error("global/code-error.html.tmpl", @_);
+    _throw_error( 'global/code-error.html.tmpl', $error, $vars, $logfunc );
 }
 
 sub ThrowTemplateError {
@@ -211,10 +198,12 @@ sub ThrowTemplateError {
     # we never want to display this to the user
     exit if $template_err =~ /\bModPerl::Util::exit\b/;
 
+    state $logger = Log::Log4perl->get_logger('Bugzilla.Error.Template');
+    $logger->error($template_err);
+
     $vars->{'template_error_msg'} = $template_err;
     $vars->{'error'} = "template_error";
 
-    sentry_handle_error('error', $template_err);
     $vars->{'template_error_msg'} =~ s/ at \S+ line \d+\.\s*$//;
 
     my $template = Bugzilla->template;

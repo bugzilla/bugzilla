@@ -100,7 +100,7 @@ sub init_page {
     }
 
     if (i_am_cgi()) {
-        Log::Log4perl::MDC->put(remote_ip => remote_ip());
+        Bugzilla::Logging->fields->{remote_ip} = remote_ip();
     }
 
     if (${^TAINT}) {
@@ -386,8 +386,8 @@ sub login {
 
     my $authenticated_user = $authorizer->login($type);
 
-    if (i_am_cgi()) {
-        Log::Log4perl::MDC->put(user_id => $authenticated_user->id);
+    if (i_am_cgi() && $authenticated_user->id) {
+        Bugzilla::Logging->fields->{user_id} = $authenticated_user->id;
     }
 
     # At this point, we now know if a real person is logged in.

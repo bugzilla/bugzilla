@@ -694,8 +694,6 @@ sub _bz_locations {
         'webdotdir'      => "$datadir/webdot",
         'extensionsdir'  => "$libpath/extensions",
         'assetsdir'      => "$datadir/assets",
-        # error_reports store error/warnings destined for sentry
-        'error_reports'  => "$libpath/error_reports",
         'confdir'        => $confdir,
     };
 }

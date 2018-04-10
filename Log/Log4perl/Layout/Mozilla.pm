@@ -52,6 +52,7 @@ sub render {
     );
 
     my $mdc = Log::Log4perl::MDC->get_context;
+    my $fields = $mdc->{fields} // {};
     my %out = (
         EnvVersion => LOGGING_FORMAT_VERSION,
         Hostname   => $HOSTNAME,
@@ -60,12 +61,12 @@ sub render {
         Severity   => $Log::Log4perl::Level::SYSLOG{$priority},
         Timestamp  => time() * 1e9,
         Type       => $category,
-        Fields     => { msg => $msg, %$mdc },
+        Fields     => { msg => $msg, %$fields },
     );
 
     my $json_text = $JSON->encode(\%out) . "\n";
     if (length($json_text) > $self->max_json_length) {
-        my $scary_msg = sprintf( "DANGER! LOG MESSAGE TOO BIG %d > %d", length($json_text), $self->max_json_length );
+        my $scary_msg = sprintf 'DANGER! LOG MESSAGE TOO BIG %d > %d', length($json_text), $self->max_json_length;
         $out{Fields}   = { remote_ip => $mdc->{remote_ip}, msg => $scary_msg };
         $out{Severity} = 1; # alert
         $json_text     = $JSON->encode(\%out) . "\n";

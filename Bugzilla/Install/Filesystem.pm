@@ -186,7 +186,6 @@ sub FILESYSTEM {
     my $template_cache = bz_locations()->{'template_cache'};
     my $graphsdir      = bz_locations()->{'graphsdir'};
     my $assetsdir      = bz_locations()->{'assetsdir'};
-    my $error_reports  = bz_locations()->{'error_reports'};
 
     # We want to set the permissions the same for all localconfig files
     # across all PROJECTs, so we do something special with $localconfig,
@@ -221,7 +220,6 @@ sub FILESYSTEM {
         'runtests.pl'     => { perms => OWNER_EXECUTE },
         'jobqueue.pl'     => { perms => OWNER_EXECUTE },
         'migrate.pl'      => { perms => OWNER_EXECUTE },
-        'sentry.pl'       => { perms => WS_EXECUTE },
         'metrics.pl'      => { perms => WS_EXECUTE },
         'Makefile.PL'     => { perms => OWNER_EXECUTE },
         'gen-cpanfile.pl' => { perms => OWNER_EXECUTE },
@@ -271,8 +269,6 @@ sub FILESYSTEM {
         # Writeable directories
          $template_cache    => { files => CGI_READ,
                                   dirs => DIR_CGI_OVERWRITE },
-         $error_reports     => { files => CGI_READ,
-                                  dirs => DIR_CGI_WRITE },
          $attachdir         => { files => CGI_WRITE,
                                   dirs => DIR_CGI_WRITE },
          $webdotdir         => { files => WS_SERVE,
@@ -365,7 +361,6 @@ sub FILESYSTEM {
         $webdotdir              => DIR_CGI_WRITE | DIR_ALSO_WS_SERVE,
         $assetsdir              => DIR_CGI_WRITE | DIR_ALSO_WS_SERVE,
         $template_cache         => DIR_CGI_WRITE,
-        $error_reports          => DIR_CGI_WRITE,
         # Directories that contain content served directly by the web server.
         "$skinsdir/custom"      => DIR_WS_SERVE,
         "$skinsdir/contrib"     => DIR_WS_SERVE,
@@ -465,8 +460,6 @@ sub FILESYSTEM {
         "$confdir/.htaccess"         => { perms    => WS_SERVE,
                                           contents => HT_DEFAULT_DENY },
         "$datadir/.htaccess"         => { perms    => WS_SERVE,
-                                          contents => HT_DEFAULT_DENY },
-        "$error_reports/.htaccess"   => { perms    => WS_SERVE,
                                           contents => HT_DEFAULT_DENY },
         "$graphsdir/.htaccess"       => { perms => WS_SERVE,
                                           contents => HT_GRAPHS_DIR },

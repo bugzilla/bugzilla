@@ -12,10 +12,10 @@ use warnings;
 use lib qw(. lib local/lib/perl5);
 
 use Bugzilla;
+use Bugzilla::Logging;
 use Bugzilla::Constants;
 use Bugzilla::Product;
 use Bugzilla::User;
-use Bugzilla::Sentry;
 use Getopt::Long;
 use English qw(-no_match_vars);
 
@@ -141,7 +141,7 @@ try {
     # nagios check does no good, we terminate if we stick around too long.
     local $SIG{ALRM} = sub {
         my $message = "$PROGRAM_NAME ran for longer than $config->{max_runtime} seconds and was auto-terminated.";
-        sentry_handle_error('error', $message);
+        FATAL($message);
         die "$message\n";
     };
     alarm($config->{max_runtime});

@@ -13,7 +13,8 @@ use warnings;
 
 use Bugzilla::Constants;
 use Algorithm::BloomFilter;
-use File::Temp qw(tempfile);
+use File::Slurper qw(write_binary read_binary read_lines);
+use File::Spec::Functions qw(catfile);
 
 sub _new_bloom_filter {
     my ($n) = @_;
@@ -24,44 +25,37 @@ sub _new_bloom_filter {
 }
 
 sub _filename {
-    my ($name) = @_;
+    my ($name, $type) = @_;
 
     my $datadir = bz_locations->{datadir};
-    return sprintf("%s/%s.bloom", $datadir, $name);
+
+    return catfile($datadir, "$name.$type");
 }
 
 sub populate {
-    my ($class, $name, $items) = @_;
+    my ($class, $name) = @_;
     my $memcached = Bugzilla->memcached;
+    my @items     = read_lines(_filename($name, 'list'));
+    my $filter    = _new_bloom_filter(@items + 0);
 
-    my $filter = _new_bloom_filter(@$items + 0);
-    foreach my $item (@$items) {
-        $filter->add($item);
-    }
-
-    my ($fh, $filename) = tempfile( "${name}XXXXXX", DIR => bz_locations->{datadir}, UNLINK => 0);
-    binmode $fh, ':bytes';
-    print $fh $filter->serialize;
-    close $fh;
-    rename($filename, _filename($name)) or die "failed to rename $filename: $!";
+    $filter->add($_) foreach @items;
+    write_binary(_filename($name, 'bloom'), $filter->serialize);
     $memcached->clear_bloomfilter({name => $name});
 }
 
 sub lookup {
     my ($class, $name) = @_;
     my $memcached   = Bugzilla->memcached;
-    my $filename    = _filename($name);
+    my $filename    = _filename($name, 'bloom');
     my $filter_data = $memcached->get_bloomfilter( { name => $name } );
 
     if (!$filter_data && -f $filename) {
-        open my $fh, '<:bytes', $filename;
-        local $/ = undef;
-        $filter_data = <$fh>;
-        close $fh;
+        $filter_data = read_binary($filename);
         $memcached->set_bloomfilter({ name => $name, filter => $filter_data });
     }
 
-    return Algorithm::BloomFilter->deserialize($filter_data);
+    return Algorithm::BloomFilter->deserialize($filter_data) if $filter_data;
+    return undef;
 }
 
 1;

@@ -48,6 +48,7 @@ my %requires = (
     'Email::MIME'              => '1.904',
     'Email::Send'              => '1.911',
     'File::Slurp'              => '9999.13',
+    'File::Slurper'            => '0.012',
     'Future'                   => '0.34',
     'HTML::Escape'             => '1.10',
     'IPC::System::Simple'      => 0,

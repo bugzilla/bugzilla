@@ -12,8 +12,9 @@ use strict;
 use warnings;
 
 use base qw(Exporter);
-@Bugzilla::Mailer::EXPORT = qw(MessageToMTA build_thread_marker);
+our @EXPORT = qw(MessageToMTA build_thread_marker); ## no critic (Modules::ProhibitAutomaticExportation)
 
+use Bugzilla::Logging;
 use Bugzilla::Constants;
 use Bugzilla::Error;
 use Bugzilla::Hook;
@@ -25,6 +26,8 @@ use Encode qw(encode);
 use Encode::MIME::Header;
 use Email::Address;
 use Email::MIME;
+use Try::Tiny;
+
 # Return::Value 1.666002 pollutes the error log with warnings about this
 # deprecated module. We have to set NO_CLUCK = 1 before loading Email::Send
 # to disable these warnings.
@@ -62,7 +65,7 @@ sub MessageToMTA {
             $msg =~ s/(?:\015+)?\012/\015\012/msg;
         }
 
-        $email = new Email::MIME($msg);
+        $email = Email::MIME->new($msg);
     }
 
     # Ensure that we are not sending emails too quickly to recipients.
@@ -181,6 +184,20 @@ sub MessageToMTA {
 
     Bugzilla::Hook::process('mailer_before_send',
                             { email => $email, mailer_args => \@args });
+
+    try {
+        my $to         = $email->header('to') or die 'Unable to find "To:" address';
+        my @recipients = Email::Address->parse($to);
+        die qq{Unable to parse "To:" address - $to} unless @recipients;
+        die qq{Did not expect more than one "To:" address in $to} if @recipients > 1;
+        my $badhosts = Bugzilla::Bloomfilter->lookup("badhosts") or die "No badhosts bloomfilter";
+        if ($badhosts->test($recipients[0]->host)) {
+            WARN("Attempted to send email to address in badhosts: $to");
+            $email->header_set(to => '');
+        }
+    } catch {
+        ERROR($_);
+    };
 
     # Allow for extensions to to drop the bugmail by clearing the 'to' header
     return if $email->header('to') eq '';

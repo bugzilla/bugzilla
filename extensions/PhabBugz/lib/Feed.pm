@@ -9,9 +9,12 @@ package Bugzilla::Extension::PhabBugz::Feed;
 
 use 5.10.1;
 
+use IO::Async::Timer::Periodic;
+use IO::Async::Loop;
 use List::Util qw(first);
 use List::MoreUtils qw(any);
 use Moo;
+use Try::Tiny;
 
 use Bugzilla::Logging;
 use Bugzilla::Constants;
@@ -40,22 +43,49 @@ has 'is_daemon' => ( is => 'rw', default => 0 );
 
 sub start {
     my ($self) = @_;
-    while (1) {
-        my $ok = eval {
-            if (Bugzilla->params->{phabricator_enabled}) {
+
+    # Query for new revisions or changes
+    my $feed_timer = IO::Async::Timer::Periodic->new(
+        first_interval => 0,
+        interval       => PHAB_FEED_POLL_SECONDS,
+        reschedule     => 'drift',
+        on_tick        => sub { 
+            try{
                 $self->feed_query();
-                Bugzilla->_cleanup();
             }
-            1;
-        };
-        ERROR( $@ // "unknown exception" ) unless $ok;
-        sleep(PHAB_POLL_SECONDS);
-    }
+            catch {
+                FATAL($_);
+            };
+            Bugzilla->_cleanup();
+        },
+    );
+
+    # Query for new users
+    my $user_timer = IO::Async::Timer::Periodic->new(
+        first_interval => 0,
+        interval       => PHAB_USER_POLL_SECONDS,
+        reschedule     => 'drift',
+        on_tick        => sub { 
+            try{
+                $self->user_query();
+            }
+            catch {
+                FATAL($_);
+            };
+            Bugzilla->_cleanup();
+        },
+    );
+
+    my $loop = IO::Async::Loop->new;
+    $loop->add($feed_timer);
+    $loop->add($user_timer);
+    $feed_timer->start;
+    $user_timer->start;
+    $loop->run;
 }
 
 sub feed_query {
     my ($self) = @_;
-    my $dbh = Bugzilla->dbh;
 
     # Ensure Phabricator syncing is enabled
     if (!Bugzilla->params->{phabricator_enabled}) {
@@ -110,10 +140,20 @@ sub feed_query {
         };
         $self->save_last_id($story_id, 'feed');
     }
+}
+
+sub user_query {
+    my ( $self ) = @_;
+
+    # Ensure Phabricator syncing is enabled
+    if (!Bugzilla->params->{phabricator_enabled}) {
+        INFO("PHABRICATOR SYNC DISABLED");
+        return;
+    }
 
     # PROCESS NEW USERS
 
-    INFO("FEED: Fetching new users");
+    INFO("USERS: Fetching new users");
 
     my $user_last_id = $self->get_last_id('user');
 

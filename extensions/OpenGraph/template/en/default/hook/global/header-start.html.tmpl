@@ -13,6 +13,9 @@
 [% IF bug %]
 <meta property="og:description"
       content="[% bug.bug_status FILTER html %] ([% bug.assigned_to.login FILTER email FILTER html %]) in [% bug.product FILTER html %] - [% bug.component FILTER html %]. Last updated [% bug.delta_ts FILTER time('%Y-%m-%d') %].">
-[% ELSE %]
-<meta property="og:image" content="[% urlbase FILTER none %]extensions/OpenGraph/web/moz-social-bw-rgb-1200x1200.png">
+[% ELSIF error_message %]
+<meta property="og:description" content="[% error_message FILTER txt %]">
+[% END %]
+[% IF og_image %]
+<meta property="og:image" content="[% urlbase FILTER none %][% og_image FILTER html %]">
 [% END %]

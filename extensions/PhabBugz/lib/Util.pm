@@ -297,7 +297,14 @@ sub get_project_phid {
         return undef
             unless (exists $result->{result}{data} && @{ $result->{result}{data} });
 
-        $project_phid = $result->{result}{data}[0]{phid};
+        # If name is used as a query param, we need to loop through and look
+        # for exact match as Conduit will tokenize the name instead of doing
+        # exact string match :(
+        foreach my $item ( @{ $result->{result}{data} } ) {
+            next if $item->{fields}{name} ne $project;
+            $project_phid = $item->{phid};
+        }
+
         $memcache->set_config({ key => "phab_project_phid_" . $project, data => $project_phid });
     }
     return $project_phid;

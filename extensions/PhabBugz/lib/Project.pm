@@ -47,7 +47,18 @@ sub new_from_query {
 
     my $result = request( 'project.search', $data );
     if ( exists $result->{result}{data} && @{ $result->{result}{data} } ) {
-        return $class->new( $result->{result}{data}[0] );
+        # If name is used as a query param, we need to loop through and look
+        # for exact match as Conduit will tokenize the name instead of doing
+        # exact string match :( If name is not used, then return first one.
+        if ( exists $params->{name} ) {
+            foreach my $item ( @{ $result->{result}{data} } ) {
+                next if $item->{fields}{name} ne $params->{name};
+                return $class->new($item);
+            }
+        }
+        else {
+            return $class->new( $result->{result}{data}[0] );
+        }
     }
 }
 

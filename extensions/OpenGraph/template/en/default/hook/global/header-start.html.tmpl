@@ -14,7 +14,7 @@
 <meta property="og:description"
       content="[% bug.bug_status FILTER html %] ([% bug.assigned_to.login FILTER email FILTER html %]) in [% bug.product FILTER html %] - [% bug.component FILTER html %]. Last updated [% bug.delta_ts FILTER time('%Y-%m-%d') %].">
 [% ELSIF error_message %]
-<meta property="og:description" content="[% error_message FILTER txt %]">
+<meta property="og:description" content="[% error_message FILTER txt FILTER html %]">
 [% END %]
 [% IF og_image %]
 <meta property="og:image" content="[% urlbase FILTER none %][% og_image FILTER html %]">

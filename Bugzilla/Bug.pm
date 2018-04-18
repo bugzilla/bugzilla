@@ -821,12 +821,9 @@ sub create {
                                                    timestamp => $timestamp,
                                                  });
 
-    $dbh->bz_commit_transaction();
-
-    # Because MySQL doesn't support transactions on the fulltext table,
-    # we do this after we've committed the transaction. That way we're
-    # sure we're inserting a good Bug ID.
     $bug->_sync_fulltext( new_bug => 1 );
+
+    $dbh->bz_commit_transaction();
 
     return $bug;
 }
@@ -1173,16 +1170,12 @@ sub update {
         delete $user->{bugs_ignored} if $bug_ignored_changed;
     }
 
-    $dbh->bz_commit_transaction();
-
-    # The only problem with this here is that update() is often called
-    # in the middle of a transaction, and if that transaction is rolled
-    # back, this change will *not* be rolled back. As we expect rollbacks
-    # to be extremely rare, that is OK for us.
     $self->_sync_fulltext(
         update_short_desc => $changes->{short_desc},
         update_comments   => $self->{added_comments} || $self->{comment_isprivate}
     );
+
+    $dbh->bz_commit_transaction();
 
     # Remove obsolete internal variables.
     delete $self->{'_old_assigned_to'};

@@ -96,6 +96,54 @@ $(function() {
         $('#editing').val('');
     }
 
+    function saveBugComment(text) {
+        if (text.length < 1) return clearSavedBugComment();
+        if (text.length >  65535) return;
+        let key = `bug-modal-saved-comment-${BUGZILLA.bug_id}`;
+        let value = {
+            text: text,
+            savedAt: Date.now()
+        };
+        localStorage.setItem(key, JSON.stringify(value));
+    }
+
+    function clearSavedBugComment() {
+        let key = `bug-modal-saved-comment-${BUGZILLA.bug_id}`;
+        localStorage.removeItem(key);
+    }
+
+    function restoreSavedBugComment() {
+        expireSavedComments();
+        let key = `bug-modal-saved-comment-${BUGZILLA.bug_id}`;
+        let value = JSON.parse(localStorage.getItem(key));
+        if (value){
+            let commentBox = document.querySelector("textarea#comment");
+            commentBox.value = value['text'];
+            if (BUGZILLA.user.settings.autosize_comments) {
+                autosize.update(commentBox);
+            }
+        }
+    }
+
+    function expireSavedComments() {
+        const AGE_THRESHOLD = 7 * 24 * 60 * 60 * 1000; // 7 days in milliseconds.
+        let expiredKeys = [];
+        for (let i = 0; i < localStorage.length; i++) {
+            let key = localStorage.key(i);
+            if (key.match(/^bug-modal-saved-comment-/)) {
+                let value = JSON.parse(localStorage.getItem(key));
+                let savedAt = value['savedAt'] || 0;
+                let age = Date.now() - savedAt;
+                if (age < 0 || age > AGE_THRESHOLD) {
+                    expiredKeys.push(key);
+                }
+            }
+        }
+        expiredKeys.forEach((key) => {
+            localStorage.removeItem(key);
+        });
+    }
+
     // expand/colapse module
     $('.module-latch')
         .click(function(event) {
@@ -586,6 +634,8 @@ $(function() {
                     .toArray()
                     .join(' ')
             );
+
+            clearSavedBugComment();
         })
         .attr('disabled', false);
 
@@ -1272,9 +1322,18 @@ $(function() {
             }
         });
 
+    // Save comments in progress
+    $('#comment')
+        .on('input', function(event) {
+            saveBugComment(event.target.value);
+        });
+
     // finally switch to edit mode if we navigate back to a page that was editing
     $(window).on('pageshow', restoreEditMode);
+    $(window).on('pageshow', restoreSavedBugComment);
+    $(window).on('focus', restoreSavedBugComment);
     restoreEditMode();
+    restoreSavedBugComment();
 });
 
 function confirmUnsafeURL(url) {

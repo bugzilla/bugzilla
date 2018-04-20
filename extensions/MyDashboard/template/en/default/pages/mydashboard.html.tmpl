@@ -105,6 +105,7 @@
       <div id="query_container">
         <div class="query_heading"></div>
         <div class="query_description"></div>
+        <span id="query_loading" class="items_found">Loading...</span>
         <span id="query_count_refresh" class="bz_default_hidden">
           <span class="items_found" id="query_bugs_found">0 [% terms.bugs %] found</span>
           | <a class="refresh"     href="javascript:void(0);" id="query_refresh">Refresh</a>
@@ -126,29 +127,28 @@
         %]
       </div>
 
-      <div id="requestee_container"> 
-        <div class="query_heading">
-          Flags Requested of You
+      [% BLOCK requests_table %]
+        <div id="[% name FILTER html %]_container" class="requests">
+            <div class="query_heading">[% title FILTER html %]</div>
+            <span id="[% name FILTER html %]_loading" class="items_found">Loading...</span>
+            <span id="[% name FILTER html %]_count_refresh" class="bz_default_hidden">
+            <span class="items_found" id="[% name FILTER html %]_flags_found">0 reviews found</span>
+            | <a class="refresh" href="javascript:void(0);" id="[% name FILTER html %]_refresh">Refresh</a>
+            | <a class="buglist" href="javascript:void(0);" id="[% name FILTER html %]_buglist">Buglist</a>
+            </span>
+            <div id="[% name FILTER html %]_table"></div>
         </div>
-        <span id="requestee_count_refresh" class="bz_default_hidden">
-          <span class="items_found" id="requestee_flags_found">0 flags found</span>
-          | <a class="refresh" href="javascript:void(0);" id="requestee_refresh">Refresh</a>
-          | <a class="buglist" href="javascript:void(0);" id="requestee_buglist">Buglist</a>
-        </span>
-        <div id="requestee_table"></div>
-      </div>
+      [% END %]
 
-      <div id="requester_container">
-        <div class="query_heading">
-          Flags You Have Requested
-        </div>
-        <span id="requester_count_refresh" class="bz_default_hidden">
-          <span class="items_found" id="requester_flags_found">0 flags found</span>
-          | <a class="refresh" href="javascript:void(0);" id="requester_refresh">Refresh</a>
-          | <a class="buglist" href="javascript:void(0);" id="requester_buglist">Buglist</a>
-        </span>
-        <div id="requester_table"></div>
-      </div>
+      [% ## no-008filter
+        # requires PhabBugz extension
+        IF Param('phabricator_enabled');
+            PROCESS requests_table name='reviews' title='Reviews Requested of You';
+        END;
+
+        PROCESS requests_table name='requestee' title='Flags Requested of You';
+        PROCESS requests_table name='requester' title='Flags You Have Requested';
+      %]
     </div>
     <div style="clear:both;"></div>
     [% IF user.showmybugslink OR user.queries.size OR user.queries_subscribed.size %]

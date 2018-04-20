@@ -21,20 +21,22 @@ use Bugzilla::Extension::PhabBugz::Constants;
 use JSON::XS qw(encode_json decode_json);
 use List::Util qw(first);
 use LWP::UserAgent;
+use Taint::Util qw(untaint);
 
 use base qw(Exporter);
 
-our @EXPORT = qw(
+our @EXPORT_OK = qw(
     add_comment_to_revision
     add_security_sync_comments
-    create_revision_attachment
     create_private_revision_policy
     create_project
+    create_revision_attachment
     edit_revision_policy
     get_attachment_revisions
     get_bug_role_phids
     get_members_by_bmo_id
     get_members_by_phid
+    get_needs_review
     get_phab_bmo_ids
     get_project_phid
     get_revisions_by_ids
@@ -490,7 +492,12 @@ sub request {
       if $response->is_error;
 
     my $result;
-    my $result_ok = eval { $result = decode_json( $response->content); 1 };
+    my $result_ok = eval {
+        my $content = $response->content;
+        untaint($content);
+        $result = decode_json( $content );
+        1;
+    };
     if (!$result_ok || $result->{error_code}) {
         ThrowCodeError('phabricator_api_error',
             { reason => 'JSON decode failure' }) if !$result_ok;
@@ -546,6 +553,43 @@ sub add_security_sync_comments {
     $bug->add_comment( $bmo_error_message, { isprivate => 0 } );
 
     Bugzilla->set_user($old_user);
+}
+
+sub get_needs_review {
+    my ($user) = @_;
+    $user //= Bugzilla->user;
+    return unless $user->id;
+
+    my $ids = get_members_by_bmo_id([$user]);
+    return [] unless @$ids;
+    my $phid_user = $ids->[0];
+
+    my $diffs = request(
+        'differential.revision.search',
+        {
+            attachments => {
+                reviewers => 1,
+            },
+            constraints => {
+                reviewerPHIDs => [$phid_user],
+                statuses      => [qw( needs-review )],
+            },
+            order       => 'newest',
+        }
+    );
+    ThrowCodeError('phabricator_api_error', { reason => 'Malformed Response' })
+        unless exists $diffs->{result}{data};
+
+    # extract this reviewer's status from 'attachments'
+    my @result;
+    foreach my $diff (@{ $diffs->{result}{data} }) {
+        my $attachments = delete $diff->{attachments};
+        my $reviewers   = $attachments->{reviewers}{reviewers};
+        my $review      = first { $_->{reviewerPHID} eq $phid_user } @$reviewers;
+        $diff->{fields}{review_status} = $review->{status};
+        push @result, $diff;
+    }
+    return \@result;
 }
 
 1;

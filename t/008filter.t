@@ -147,6 +147,9 @@ sub directive_ok {
     $directive =~ s/^\s*//;
     $directive =~ s/\s*$//;
 
+    # Ignore blocks explicitly marked as ok
+    return 1 if $directive =~ /\b## no-008filter\b/;
+
     # Empty directives are ok; they are usually line break helpers
     return 1 if $directive eq '';
 

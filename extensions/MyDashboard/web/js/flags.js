@@ -16,15 +16,18 @@ $(function () {
         // Common
         var counter = 0;
         var dataSource = {
+            reviews: null,
             requestee: null,
             requester: null
         };
         var dataTable = {
+            reviews: null,
             requestee: null,
             requester: null
         };
+        var hasReviews = !!document.getElementById('reviews_container');
 
-        var updateFlagTable = function(type) {
+        var updateRequestsTable = function(type) {
             if (!type) return;
 
             counter = counter + 1;
@@ -32,32 +35,40 @@ $(function () {
             var callback = {
                 success: function(e) {
                     if (e.response) {
+                        Y.one('#' + type + '_loading').addClass('bz_default_hidden');
                         Y.one('#' + type + '_count_refresh').removeClass('bz_default_hidden');
                         Y.one("#" + type + "_flags_found").setHTML(
-                            e.response.results.length + ' flags found');
+                            e.response.results.length +
+                            ' request' + (e.response.results.length == 1 ? '' : 's') +
+                            ' found');
                         dataTable[type].set('data', e.response.results);
                     }
                 },
                 failure: function(o) {
-                    if (o.error) {
-                        alert("Failed to load flag list from Bugzilla:\n\n" + o.error.message);
+                    Y.one('#' + type + '_loading').addClass('bz_default_hidden');
+                    Y.one('#' + type + '_count_refresh').removeClass('bz_default_hidden');
+                    if (o.error && o.error.message) {
+                        alert("Failed to load requests:\n\n" + o.error.message);
                     } else {
-                        alert("Failed to load flag list from Bugzilla.");
+                        alert("Failed to load requests.");
                     }
                 }
             };
 
+            var method = type === 'reviews' ? 'PhabBugz.needs_review' : 'MyDashboard.run_flag_query';
             var json_object = {
                 version: "1.1",
-                method:  "MyDashboard.run_flag_query",
+                method:  method,
                 id:      counter,
-                params:  { type : type,
-                        Bugzilla_api_token : (BUGZILLA.api_token ? BUGZILLA.api_token : '')
+                params:  {
+                    type : type,
+                    Bugzilla_api_token : (BUGZILLA.api_token ? BUGZILLA.api_token : '')
                 }
             };
 
             var stringified = Y.JSON.stringify(json_object);
 
+            Y.one('#' + type + '_loading').removeClass('bz_default_hidden');
             Y.one('#' + type + '_count_refresh').addClass('bz_default_hidden');
 
             dataTable[type].set('data', []);
@@ -86,14 +97,17 @@ $(function () {
         };
 
         var bugLinkFormatter = function(o) {
+            if (!o.data.bug_id) {
+                return '-';
+            }
             var bug_closed = "";
             if (o.data.bug_status == 'RESOLVED' || o.data.bug_status == 'VERIFIED') {
                 bug_closed = "bz_closed";
             }
-            return '<a href="show_bug.cgi?id=' + encodeURIComponent(o.value) +
+            return '<a href="show_bug.cgi?id=' + encodeURIComponent(o.data.bug_id) +
                 '" target="_blank" ' + 'title="' + Y.Escape.html(o.data.bug_status) + ' - ' +
-                Y.Escape.html(o.data.bug_summary) + '" class="' + Y.Escape.html(bug_closed) +
-                '">' + o.value + '</a>';
+                Y.Escape.html(o.data.bug_summary) + '" class="' + bug_closed +
+                '">' + o.data.bug_id + '</a>';
         };
 
         var updatedFormatter = function(o) {
@@ -124,6 +138,85 @@ $(function () {
             }
         };
 
+        var phabAuthorFormatter = function(o) {
+            return '<span title="' + Y.Escape.html(o.data.author_email) + '">' +
+                Y.Escape.html(o.data.author_name) + '</span>';
+        };
+
+        var phabRowFormatter = function(o) {
+            var row = o.cell.ancestor();
+
+            // space in the 'flags' tables is tight
+            // render requests as two rows - diff title on first row, columns
+            // on second
+
+            row.insert(
+                '<tr class="' + row.getAttribute('class') + '">' +
+                '<td class="yui3-datatable-cell" colspan="4">' +
+                '<a href="' + o.data.url + '" target="_blank">' +
+                Y.Escape.html('D' + o.data.id + ' - ' + o.data.title) +
+                '</a></td></tr>',
+                'before');
+
+            o.cell.set('text', o.data.status == 'added' ? 'pending' : o.data.status);
+
+            return false;
+        };
+
+        // Reviews
+        if (hasReviews) {
+            dataSource.reviews = new Y.DataSource.IO({ source: 'jsonrpc.cgi' });
+            dataSource.reviews.on('error', function(e) {
+                console.log(e);
+                try {
+                    var response = Y.JSON.parse(e.data.responseText);
+                    if (response.error)
+                        e.error.message = response.error.message;
+                } catch(ex) {
+                    // ignore
+                }
+            });
+            dataTable.reviews = new Y.DataTable({
+                columns: [
+                    { key: 'author_email', label: 'Requester', sortable: true,
+                        formattter: phabAuthorFormatter, allowHTML: true },
+                    { key: 'id', label: 'Status', sortable: true,
+                        nodeFormatter: phabRowFormatter, allowHTML: true },
+                    { key: 'bug_id', label: 'Bug', sortable: true,
+                        formatter: bugLinkFormatter, allowHTML: true },
+                    { key: 'updated', label: 'Updated', sortable: true,
+                        formatter: updatedFormatter, allowHTML: true }
+                ],
+                strings: {
+                    emptyMessage: 'No review requests.',
+                }
+            });
+
+            dataTable.reviews.plug(Y.Plugin.DataTableSort);
+
+            dataTable.reviews.plug(Y.Plugin.DataTableDataSource, {
+                datasource: dataSource.reviews
+            });
+
+            dataSource.reviews.plug(Y.Plugin.DataSourceJSONSchema, {
+                schema: {
+                    resultListLocator: 'result.result',
+                    resultFields: [ 'author_email', 'author_name', 'bug_id',
+                        'bug_status', 'bug_summary', 'id', 'status', 'title',
+                        'updated', 'updated_fancy', 'url' ]
+                }
+            });
+
+            dataTable.reviews.render("#reviews_table");
+
+            Y.one('#reviews_refresh').on('click', function(e) {
+                updateRequestsTable('reviews');
+            });
+            Y.one('#reviews_buglist').on('click', function(e) {
+                loadBugList('reviews');
+            });
+        }
+
         // Requestee
         dataSource.requestee = new Y.DataSource.IO({ source: 'jsonrpc.cgi' });
         dataSource.requestee.on('error', function(e) {
@@ -146,7 +239,7 @@ $(function () {
                 formatter: updatedFormatter, allowHTML: true }
             ],
             strings: {
-                emptyMessage: 'No flag data found.',
+                emptyMessage: 'No flags requested of you.',
             }
         });
 
@@ -167,7 +260,7 @@ $(function () {
         dataTable.requestee.render("#requestee_table");
 
         Y.one('#requestee_refresh').on('click', function(e) {
-            updateFlagTable('requestee');
+            updateRequestsTable('requestee');
         });
         Y.one('#requestee_buglist').on('click', function(e) {
             loadBugList('requestee');
@@ -196,7 +289,7 @@ $(function () {
                 formatter: updatedFormatter, allowHTML: true }
             ],
             strings: {
-                emptyMessage: 'No flag data found.',
+                emptyMessage: 'No requested flags found.',
             }
         });
 
@@ -214,19 +307,24 @@ $(function () {
             }
         });
 
-        // Initial load
-        Y.on("contentready", function (e) {
-            updateFlagTable("requestee");
-        }, "#requestee_table");
-        Y.on("contentready", function (e) {
-            updateFlagTable("requester");
-        }, "#requester_table");
-
         Y.one('#requester_refresh').on('click', function(e) {
-            updateFlagTable('requester');
+            updateRequestsTable('requester');
         });
         Y.one('#requester_buglist').on('click', function(e) {
             loadBugList('requester');
         });
+
+        // Initial load
+        if (hasReviews) {
+            Y.on("contentready", function (e) {
+                updateRequestsTable('reviews');
+            }, "#reviews_table");
+        }
+        Y.on("contentready", function (e) {
+            updateRequestsTable("requestee");
+        }, "#requestee_table");
+        Y.on("contentready", function (e) {
+            updateRequestsTable("requester");
+        }, "#requester_table");
     });
 });

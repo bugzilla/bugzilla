@@ -18,10 +18,13 @@
     white-space: nowrap;
 }
 
+#mydashboard .requests {
+    margin-bottom: 2em;
+}
+
 .query_heading {
     font-size: 18px;
     font-weight: 600;
-    margin: 5px 0;
     color: rgb(72, 72, 72);
 }
 

@@ -128,7 +128,7 @@ sub send {
               $revision->{id},
               $bug->id
             ));
-            my $policy_phid = create_private_revision_policy( $bug, \@set_groups );
+            my $policy_phid = create_private_revision_policy( \@set_groups );
             edit_revision_policy( $revision_phid, $policy_phid, $subscribers );
             $rev_obj->add_project($secure_project_phid);
             $revision_updated = 1;

@@ -136,7 +136,7 @@ sub get_bug_role_phids {
 }
 
 sub create_private_revision_policy {
-    my ($bug, $groups) = @_;
+    my ( $groups ) = @_;
 
     my $data = {
         objectType => 'DREV',
@@ -144,7 +144,11 @@ sub create_private_revision_policy {
         policy     => [
             {
                 action => 'allow',
-                rule   => 'PhabricatorSubscriptionsSubscribersPolicyRule',
+                rule   => 'PhabricatorSubscriptionsSubscribersPolicyRule'
+            },
+            {
+                action => 'allow',
+                rule   => 'PhabricatorDifferentialReviewersPolicyRule'
             }
         ]
     };
@@ -197,24 +201,25 @@ sub make_revision_public {
         ],
         objectIdentifier => $revision_phid
     });
+
 }
 
 sub make_revision_private {
     my ($revision_phid) = @_;
 
-    my $secure_revision = Bugzilla::Extension::PhabBugz::Project->new_from_query({
-        name => 'secure-revision'
-    });
+    # When creating a private policy with no args it
+    # creates one with the secure-revision project.
+    my $private_policy = create_private_revision_policy();
 
     return request('differential.revision.edit', {
         transactions => [
             {
                 type  => "view",
-                value => $secure_revision->phid
+                value => $private_policy->phid
             },
             {
                 type  => "edit",
-                value => $secure_revision->phid
+                value => $private_policy->phid
             }
         ],
         objectIdentifier => $revision_phid

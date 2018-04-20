@@ -97,6 +97,10 @@ sub create {
             {
                 action => 'allow',
                 rule   => 'PhabricatorSubscriptionsSubscribersPolicyRule',
+            },
+            {
+                action => 'allow',
+                rule   => 'PhabricatorDifferentialReviewersPolicyRule'
             }
         ]
     };

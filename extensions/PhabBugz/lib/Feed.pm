@@ -28,7 +28,6 @@ use Bugzilla::Extension::PhabBugz::User;
 use Bugzilla::Extension::PhabBugz::Util qw(
     add_security_sync_comments
     create_revision_attachment
-    edit_revision_policy
     get_bug_role_phids
     get_phab_bmo_ids
     get_project_phid
@@ -253,7 +252,7 @@ sub process_revision_change {
                 my ($added, $removed) = diff_arrays($current_projects, \@set_projects);
                 if (@$added || @$removed) {
                     DEBUG('Project groups do not match. Need new custom policy');
-                    $current_policy= undef;
+                    $current_policy = undef;
                 }
                 else {
                     DEBUG('Project groups match. Leaving current policy as-is');

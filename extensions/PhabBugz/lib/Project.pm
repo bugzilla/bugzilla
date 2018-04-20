@@ -168,7 +168,7 @@ sub create {
     my $result = request( 'project.edit', $data );
 
     return $class->new_from_query(
-        { phids => $result->{result}{object}{phid} } );
+        { phids => [ $result->{result}{object}{phid} ] } );
 }
 
 sub update {

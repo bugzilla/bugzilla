@@ -11,6 +11,7 @@ use 5.10.1;
 use strict;
 use warnings;
 
+use Bugzilla::Logging;
 use Bugzilla::Extension::Push::BacklogMessage;
 use Bugzilla::Extension::Push::Config;
 use Bugzilla::Extension::Push::Connectors;
@@ -107,7 +108,7 @@ sub push {
 
             # if the connector is backlogged, push to the backlog queue
             if ($is_backlogged) {
-                $logger->debug("backlogged");
+                INFO('connector is backlogged');
                 my $backlog = Bugzilla::Extension::Push::BacklogMessage->create_from_message($message, $connector);
             }
         }

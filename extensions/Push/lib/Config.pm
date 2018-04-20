@@ -11,7 +11,7 @@ use 5.10.1;
 use strict;
 use warnings;
 
-use Bugzilla;
+use Bugzilla::Logging;
 use Bugzilla::Constants;
 use Bugzilla::Extension::Push::Option;
 use Crypt::CBC;
@@ -52,7 +52,6 @@ sub option {
 sub load {
     my ($self) = @_;
     my $config = {};
-    my $logger = Bugzilla->push_ext->logger;
 
     # prime $config with defaults
     foreach my $rh ($self->options) {
@@ -81,7 +80,7 @@ sub load {
     # done, update self
     foreach my $name (keys %$config) {
         my $value = $self->option($name)->{type} eq 'password' ? '********' : $config->{$name};
-        $logger->debug(sprintf("%s: set %s=%s\n", $self->{_name}, $name, $value || ''));
+        TRACE( sprintf "%s: set %s=%s\n", $self->{_name}, $name, $value || '' );
         $self->{$name} = $config->{$name};
     }
 }

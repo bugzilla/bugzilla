@@ -19,6 +19,7 @@ use constant AUDIT_REMOVES => 0;
 use constant USE_MEMCACHED => 0;
 
 use Bugzilla;
+use Bugzilla::Logging;
 use Bugzilla::Util;
 
 #
@@ -67,9 +68,7 @@ sub reset {
     my ($self) = @_;
     $self->{next_attempt_ts} = Bugzilla->dbh->selectrow_array('SELECT NOW()');
     $self->{attempts} = 0;
-    Bugzilla->push_ext->logger->debug(
-        sprintf("resetting backoff for %s", $self->connector)
-    );
+    INFO( sprintf 'resetting backoff for %s', $self->connector );
 }
 
 sub inc {
@@ -82,8 +81,8 @@ sub inc {
 
     $self->{next_attempt_ts} = $date;
     $self->{attempts} = $attempts;
-    Bugzilla->push_ext->logger->debug(
-        sprintf("setting next attempt for %s to %s (attempt %s)", $self->connector, $date, $attempts)
+    INFO(
+        sprintf 'setting next attempt for %s to %s (attempt %s)', $self->connector, $date, $attempts
     );
 }
 

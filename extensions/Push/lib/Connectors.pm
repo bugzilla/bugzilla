@@ -11,10 +11,12 @@ use 5.10.1;
 use strict;
 use warnings;
 
+use Bugzilla::Logging;
 use Bugzilla::Extension::Push::Util;
 use Bugzilla::Constants;
 use Bugzilla::Util qw(trick_taint);
 use File::Basename;
+use Try::Tiny;
 
 sub new {
     my ($class) = @_;
@@ -25,16 +27,15 @@ sub new {
     $self->{objects} = {};
     $self->{path} = bz_locations->{'extensionsdir'} . '/Push/lib/Connector';
 
-    my $logger = Bugzilla->push_ext->logger;
     foreach my $file (glob($self->{path} . '/*.pm')) {
         my $name = basename($file);
         $name =~ s/\.pm$//;
         next if $name eq 'Base';
         if (length($name) > 32) {
-            $logger->info("Ignoring connector '$name': Name longer than 32 characters");
+            WARN("Ignoring connector '$name': Name longer than 32 characters");
         }
         push @{$self->{names}}, $name;
-        $logger->debug("Found connector '$name'");
+        TRACE("Found connector '$name'");
     }
 
     return $self;
@@ -44,7 +45,6 @@ sub _load {
     my ($self) = @_;
     return if scalar keys %{$self->{objects}};
 
-    my $logger = Bugzilla->push_ext->logger;
     foreach my $name (@{$self->{names}}) {
         next if exists $self->{objects}->{$name};
         my $file = $self->{path} . "/$name.pm";
@@ -52,34 +52,30 @@ sub _load {
         require $file;
         my $package = "Bugzilla::Extension::Push::Connector::$name";
 
-        $logger->debug("Loading connector '$name'");
+        TRACE("Loading connector '$name'");
         my $old_error_mode = Bugzilla->error_mode;
         Bugzilla->error_mode(ERROR_MODE_DIE);
-        eval {
+        try {
             my $connector = $package->new();
             $connector->load_config();
             $self->{objects}->{$name} = $connector;
+        } catch {
+            ERROR("Connector '$name' failed to load: " . clean_error($_));
         };
-        if ($@) {
-            $logger->error("Connector '$name' failed to load: " . clean_error($@));
-        }
         Bugzilla->error_mode($old_error_mode);
     }
 }
 
 sub stop {
     my ($self) = @_;
-    my $logger = Bugzilla->push_ext->logger;
     foreach my $connector ($self->list) {
         next unless $connector->enabled;
-        $logger->debug("Stopping '" . $connector->name . "'");
-        eval {
+        TRACE("Stopping '" . $connector->name . "'");
+        try {
             $connector->stop();
+        } catch {
+            ERROR("Connector '" . $connector->name . "' failed to stop: " . clean_error($_));
         };
-        if ($@) {
-            $logger->error("Connector '" . $connector->name . "' failed to stop: " . clean_error($@));
-            $logger->debug("Connector '" . $connector->name . "' failed to stop: $@");
-        }
     }
 }
 

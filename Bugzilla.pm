@@ -81,6 +81,11 @@ use constant SHUTDOWNHTML_EXIT_SILENTLY => qw(
 # should search engines attempt to index the page again?
 use constant SHUTDOWNHTML_RETRY_AFTER => 3600;
 
+# This is identical to Install::Util::_cache so that things loaded
+# into Install::Util::_cache during installation can be read out
+# of request_cache later in installation.
+use constant request_cache => Bugzilla::Install::Util::_cache();
+
 #####################################################################
 # Global Code
 #####################################################################
@@ -226,26 +231,25 @@ sub init_page {
 sub template {
     # BMO - use metrics subclass if required
     if (Bugzilla->metrics_enabled) {
-        $_[0]->request_cache->{template} ||= Bugzilla::Metrics::Template->create();
+        request_cache->{template} ||= Bugzilla::Metrics::Template->create();
     } else {
-        $_[0]->request_cache->{template} ||= Bugzilla::Template->create();
+        request_cache->{template} ||= Bugzilla::Template->create();
     }
-    $_[0]->request_cache->{template}->{_is_main} = 1;
+    request_cache->{template}->{_is_main} = 1;
 
-    return $_[0]->request_cache->{template};
+    return request_cache->{template};
 }
 
 sub template_inner {
-    my ($class, $lang) = @_;
-    my $cache = $class->request_cache;
+    my (undef, $lang) = @_;
+    my $cache = request_cache;
     my $current_lang = $cache->{template_current_lang}->[0];
     $lang ||= $current_lang || '';
     return $cache->{"template_inner_$lang"} ||= Bugzilla::Template->create(language => $lang);
 }
 
 sub extensions {
-    my ($class) = @_;
-    my $cache = $class->request_cache;
+    my $cache = request_cache;
     if (!$cache->{extensions}) {
         my $extension_packages = Bugzilla::Extension->load_all();
         my @extensions;
@@ -261,12 +265,12 @@ sub extensions {
 }
 
 sub cgi {
-    return $_[0]->request_cache->{cgi} ||= new Bugzilla::CGI();
+    return request_cache->{cgi} ||= new Bugzilla::CGI();
 }
 
 sub input_params {
     my ($class, $params) = @_;
-    my $cache = $class->request_cache;
+    my $cache = request_cache;
     # This is how the WebService and other places set input_params.
     if (defined $params) {
         $cache->{input_params} = $params;
@@ -285,7 +289,7 @@ sub localconfig {
 }
 
 sub params {
-    return $_[0]->request_cache->{params} ||= Bugzilla::Config::read_param_file();
+    return request_cache->{params} ||= Bugzilla::Config::read_param_file();
 }
 
 sub get_param_with_override {
@@ -294,32 +298,32 @@ sub get_param_with_override {
 }
 
 sub user {
-    return $_[0]->request_cache->{user} ||= new Bugzilla::User;
+    return request_cache->{user} ||= new Bugzilla::User;
 }
 
 sub set_user {
-    my ($class, $user) = @_;
-    $class->request_cache->{user} = $user;
+    my (undef, $user) = @_;
+    request_cache->{user} = $user;
 }
 
 sub sudoer {
-    return $_[0]->request_cache->{sudoer};
+    return request_cache->{sudoer};
 }
 
 sub sudo_request {
-    my ($class, $new_user, $new_sudoer) = @_;
-    $class->request_cache->{user}   = $new_user;
-    $class->request_cache->{sudoer} = $new_sudoer;
+    my (undef, $new_user, $new_sudoer) = @_;
+    request_cache->{user}   = $new_user;
+    request_cache->{sudoer} = $new_sudoer;
     # NOTE: If you want to log the start of an sudo session, do it here.
 }
 
 sub page_requires_login {
-    return $_[0]->request_cache->{page_requires_login};
+    return request_cache->{page_requires_login};
 }
 
 sub github_secret {
     my ($class) = @_;
-    my $cache = $class->request_cache;
+    my $cache = request_cache;
     my $cgi   = $class->cgi;
 
     $cache->{github_secret} //= $cgi->cookie('github_secret') // generate_random_password(256);
@@ -331,7 +335,7 @@ sub passwdqc {
     my ($class) = @_;
     require Data::Password::passwdqc;
 
-    my $cache  = $class->request_cache;
+    my $cache  = request_cache;
     my $params = $class->params;
 
     return $cache->{passwdqc} if $cache->{passwdqc};
@@ -380,7 +384,7 @@ sub login {
     # Allow templates to know that we're in a page that always requires
     # login.
     if ($type == LOGIN_REQUIRED) {
-        $class->request_cache->{page_requires_login} = 1;
+        request_cache->{page_requires_login} = 1;
     }
 
     my $authenticated_user = $authorizer->login($type);
@@ -469,7 +473,7 @@ sub login {
             && !$sudo_target->in_group('bz_sudo_protect'))
         {
             $class->set_user($sudo_target);
-            $class->request_cache->{sudoer} = $authenticated_user;
+            request_cache->{sudoer} = $authenticated_user;
             # And make sure that both users have the same Auth object,
             # since we never call Auth::login for the sudo target.
             $sudo_target->set_authorizer($authenticated_user->authorizer);
@@ -524,24 +528,25 @@ sub logout_user_by_id {
 # hack that invalidates credentials for a single request
 sub logout_request {
     my $class = shift;
-    delete $class->request_cache->{user};
-    delete $class->request_cache->{sudoer};
+    delete request_cache->{user};
+    delete request_cache->{sudoer};
     # We can't delete from $cgi->cookie, so logincookie data will remain
     # there. Don't rely on it: use Bugzilla->user->login instead!
 }
 
 sub job_queue {
     require Bugzilla::JobQueue;
-    return $_[0]->request_cache->{job_queue} ||= Bugzilla::JobQueue->new();
+    return request_cache->{job_queue} ||= Bugzilla::JobQueue->new();
 }
 
 sub dbh {
+    my ($class) = @_;
     # If we're not connected, then we must want the main db
-    return $_[0]->request_cache->{dbh} ||= $_[0]->dbh_main;
+    return request_cache->{dbh} ||= $class->dbh_main;
 }
 
 sub dbh_main {
-    return $_[0]->request_cache->{dbh_main} ||= Bugzilla::DB::connect_main();
+    return request_cache->{dbh_main} ||= Bugzilla::DB::connect_main();
 }
 
 sub languages {
@@ -549,25 +554,25 @@ sub languages {
 }
 
 sub current_language {
-    return $_[0]->request_cache->{current_language} ||= (include_languages())[0];
+    return request_cache->{current_language} ||= (include_languages())[0];
 }
 
 sub error_mode {
-    my ($class, $newval) = @_;
+    my (undef, $newval) = @_;
     if (defined $newval) {
-        $class->request_cache->{error_mode} = $newval;
+        request_cache->{error_mode} = $newval;
     }
-    return $class->request_cache->{error_mode}
+    return request_cache->{error_mode}
         || (i_am_cgi() ? ERROR_MODE_WEBPAGE : ERROR_MODE_DIE);
 }
 
 # This is used only by Bugzilla::Error to throw errors.
 sub _json_server {
-    my ($class, $newval) = @_;
+    my (undef, $newval) = @_;
     if (defined $newval) {
-        $class->request_cache->{_json_server} = $newval;
+        request_cache->{_json_server} = $newval;
     }
-    return $class->request_cache->{_json_server};
+    return request_cache->{_json_server};
 }
 
 sub usage_mode {
@@ -598,21 +603,21 @@ sub usage_mode {
             ThrowCodeError('usage_mode_invalid',
                            {'invalid_usage_mode', $newval});
         }
-        $class->request_cache->{usage_mode} = $newval;
+        request_cache->{usage_mode} = $newval;
     }
-    return $class->request_cache->{usage_mode}
+    return request_cache->{usage_mode}
         || (i_am_cgi()? USAGE_MODE_BROWSER : USAGE_MODE_CMDLINE);
 }
 
 sub installation_mode {
-    my ($class, $newval) = @_;
-    ($class->request_cache->{installation_mode} = $newval) if defined $newval;
-    return $class->request_cache->{installation_mode}
+    my (undef, $newval) = @_;
+    (request_cache->{installation_mode} = $newval) if defined $newval;
+    return request_cache->{installation_mode}
         || INSTALLATION_MODE_INTERACTIVE;
 }
 
 sub installation_answers {
-    my ($class, $filename) = @_;
+    my (undef, $filename) = @_;
     if ($filename) {
         my $s = new Safe;
         $s->rdo($filename);
@@ -621,23 +626,23 @@ sub installation_answers {
         die "Error evaluating $filename: $@" if $@;
 
         # Now read the param back out from the sandbox
-        $class->request_cache->{installation_answers} = $s->varglob('answer');
+        request_cache->{installation_answers} = $s->varglob('answer');
     }
-    return $class->request_cache->{installation_answers} || {};
+    return request_cache->{installation_answers} || {};
 }
 
 sub switch_to_shadow_db {
     my $class = shift;
 
-    if (!$class->request_cache->{dbh_shadow}) {
+    if (!request_cache->{dbh_shadow}) {
         if ($class->get_param_with_override('shadowdb')) {
-            $class->request_cache->{dbh_shadow} = Bugzilla::DB::connect_shadow();
+            request_cache->{dbh_shadow} = Bugzilla::DB::connect_shadow();
         } else {
-            $class->request_cache->{dbh_shadow} = $class->dbh_main;
+            request_cache->{dbh_shadow} = $class->dbh_main;
         }
     }
 
-    $class->request_cache->{dbh} = $class->request_cache->{dbh_shadow};
+    request_cache->{dbh} = request_cache->{dbh_shadow};
     # we have to return $class->dbh instead of {dbh} as
     # {dbh_shadow} may be undefined if no shadow DB is used
     # and no connection to the main DB has been established yet.
@@ -647,7 +652,7 @@ sub switch_to_shadow_db {
 sub switch_to_main_db {
     my $class = shift;
 
-    $class->request_cache->{dbh} = $class->dbh_main;
+    request_cache->{dbh} = $class->dbh_main;
     return $class->dbh_main;
 }
 
@@ -681,7 +686,7 @@ sub log_user_request {
     }
 
     eval {
-        local $class->request_cache->{dbh};
+        local request_cache->{dbh};
         $class->switch_to_main_db();
         $class->dbh->do("INSERT INTO user_request_log
                          (user_id, ip_address, user_agent, request_url,
@@ -693,13 +698,13 @@ sub log_user_request {
 
 sub is_shadow_db {
     my $class = shift;
-    return $class->request_cache->{dbh} != $class->dbh_main;
+    return request_cache->{dbh} != $class->dbh_main;
 }
 
 sub fields {
-    my ($class, $criteria) = @_;
+    my (undef, $criteria) = @_;
     $criteria ||= {};
-    my $cache = $class->request_cache;
+    my $cache = request_cache;
 
     # We create an advanced cache for fields by type, so that we
     # can avoid going back to the database for every fields() call.
@@ -746,29 +751,28 @@ sub fields {
 }
 
 sub active_custom_fields {
-    my ($class, $params) = @_;
+    my (undef, $params) = @_;
     my $cache_id = 'active_custom_fields';
     if ($params) {
         $cache_id .= ($params->{product} ? '_p' . $params->{product}->id : '') .
                      ($params->{component} ? '_c' . $params->{component}->id : '');
         $cache_id .= ':noext' if $params->{skip_extensions};
     }
-    if (!exists $class->request_cache->{$cache_id}) {
+    if (!exists request_cache->{$cache_id}) {
         my $fields = Bugzilla::Field->match({ custom => 1, obsolete => 0, skip_extensions => 1 });
         Bugzilla::Hook::process('active_custom_fields',
                                 { fields => \$fields, params => $params });
-        $class->request_cache->{$cache_id} = $fields;
+        request_cache->{$cache_id} = $fields;
     }
-    return @{$class->request_cache->{$cache_id}};
+    return @{request_cache->{$cache_id}};
 }
 
 sub has_flags {
-    my $class = shift;
 
-    if (!defined $class->request_cache->{has_flags}) {
-        $class->request_cache->{has_flags} = Bugzilla::Flag->any_exist;
+    if (!defined request_cache->{has_flags}) {
+        request_cache->{has_flags} = Bugzilla::Flag->any_exist;
     }
-    return $class->request_cache->{has_flags};
+    return request_cache->{has_flags};
 }
 
 sub local_timezone {
@@ -778,19 +782,13 @@ sub local_timezone {
 
 # Send messages to syslog for the auditing systems (eg. mozdef) to pick up.
 sub audit {
-    my ($class, $message) = @_;
+    my (undef, $message) = @_;
     state $logger = Log::Log4perl->get_logger("audit");
     $logger->notice(encode_utf8($message));
 }
 
-# This creates the request cache for non-mod_perl installations.
-# This is identical to Install::Util::_cache so that things loaded
-# into Install::Util::_cache during installation can be read out
-# of request_cache later in installation.
-use constant request_cache => Bugzilla::Install::Util::_cache();
-
 sub clear_request_cache {
-    my ($class, %option) = @_;
+    my (undef, %option) = @_;
     my $request_cache = request_cache();
     my @except        = $option{except} ? @{ $option{except} } : ();
 
@@ -811,21 +809,21 @@ sub process_cache {
 sub metrics_enabled {
     if (defined $_[1]) {
         if (!$_[1]
-            && $_[0]->request_cache->{metrics_enabled}
-            && $_[0]->request_cache->{metrics})
+            && request_cache->{metrics_enabled}
+            && request_cache->{metrics})
         {
-            $_[0]->request_cache->{metrics}->cancel();
-            delete $_[0]->request_cache->{metrics};
+            request_cache->{metrics}->cancel();
+            delete request_cache->{metrics};
         }
-        $_[0]->request_cache->{metrics_enabled} = $_[1];
+        request_cache->{metrics_enabled} = $_[1];
     }
     else {
-        return $_[0]->request_cache->{metrics_enabled};
+        return request_cache->{metrics_enabled};
     }
 }
 
 sub metrics {
-    return $_[0]->request_cache->{metrics} ||= Bugzilla::Metrics::Collector->new($_[1]);
+    return request_cache->{metrics} ||= Bugzilla::Metrics::Collector->new($_[1]);
 }
 
 # This is a memcached wrapper, which provides cross-process and cross-system
@@ -833,9 +831,9 @@ sub metrics {
 sub memcached {
     # BMO - use metrics subclass if required
     if (Bugzilla->metrics_enabled) {
-        return $_[0]->request_cache->{memcached} ||= Bugzilla::Metrics::Memcached->_new();
+        return request_cache->{memcached} ||= Bugzilla::Metrics::Memcached->_new();
     } else {
-        return $_[0]->request_cache->{memcached} ||= Bugzilla::Memcached->_new();
+        return request_cache->{memcached} ||= Bugzilla::Memcached->_new();
     }
 }
 

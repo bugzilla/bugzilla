@@ -687,6 +687,8 @@ sub send_cookie {
     $paramhash{'-secure'} = 1
       if lc( $uri->scheme ) eq 'https';
 
+    $paramhash{'-samesite'} = 'Lax';
+
     push(@{$self->{'Bugzilla_cookie_list'}}, $self->cookie(%paramhash));
 }
 

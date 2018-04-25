@@ -34,7 +34,7 @@ BEGIN {
 # PREREQ_PM
 my %requires = (
     'Algorithm::BloomFilter'   => '0.02',
-    'CGI'                      => '3.51',
+    'CGI'                      => '4.31',
     'CPAN::Meta::Prereqs'      => '2.132830',
     'CPAN::Meta::Requirements' => '2.121',
     'Class::XSAccessor'        => '1.18',

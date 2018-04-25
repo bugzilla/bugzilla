@@ -626,6 +626,11 @@ body.platform-Win32 .comment-text, body.platform-Win64 .comment-text {
     width: 99% !important;
 }
 
+.comment-text.bz_private {
+    color: darkred;
+    border: 1px dashed darkred;
+}
+
 .comment-tags {
     padding: 0 8px 2px 8px !important;
 }

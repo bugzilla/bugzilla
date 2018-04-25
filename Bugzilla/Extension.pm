@@ -35,7 +35,11 @@ sub INC_HOOK {
         my $first = 1;
         untaint($real_file);
         $INC{$fake_file} = $real_file;
-        open my $fh, '<', $real_file or die "invalid file: $real_file";
+        my $found = open my $fh, '<', $real_file;
+        unless ($found) {
+            require Carp;
+            Carp::croak "Can't locate $fake_file while looking for $real_file in \@INC (\@INC contains: @INC)";
+        }
         return sub {
             no warnings;
             if ( !$first ) {

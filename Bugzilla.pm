@@ -870,6 +870,8 @@ sub check_rate_limit {
 # Per-process cleanup. Note that this is a plain subroutine, not a method,
 # so we don't have $class available.
 sub _cleanup {
+    return if $^C;
+
     # BMO - finalise and report on metrics
     if (Bugzilla->metrics_enabled) {
         Bugzilla->metrics->finish();

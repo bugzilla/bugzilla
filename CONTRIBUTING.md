@@ -12,7 +12,7 @@ feedback for changes that would be required. All contributions should follow
 this format, even those from core contributors.
 
 Should you wish to work on an issue, please claim it first by commenting on
-the GitHub issue that you want to work on it. This is to prevent duplicated
+the bug that you want to work on it. This is to prevent duplicated
 efforts from contributors on the same issue.
 
 Head over to [BugsAhoy!](https://www.joshmatthews.net/bugsahoy/?bugzilla=1)

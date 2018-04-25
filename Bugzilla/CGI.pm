@@ -590,6 +590,9 @@ sub header {
             "skins/standard/fonts/MaterialIcons-Regular.woff2",
         );
         $headers{'-link'} = join(", ", map { sprintf('</static/v%s/%s>; rel="preload"; as="font"', Bugzilla->VERSION, $_) } @fonts);
+        if (Bugzilla->params->{google_analytics_tracking_id}) {
+            $headers{'-link'} .= ', <https://www.google-analytics.com>; rel="preconnect"; crossorigin';
+        }
     }
 
     return $self->SUPER::header(%headers) || "";

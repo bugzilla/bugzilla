@@ -216,9 +216,3 @@
         LAZY: 0
     - import_tasks: devtools.yml
 
-    - name: fix owner of /vagrant/template_cache
-      file: path=/vagrant/template_cache state=directory owner=vagrant group=apache recurse=yes
-
-    - name: fix owner of /data
-      file: path=/data state=directory owner=vagrant group=apache recurse=yes
-

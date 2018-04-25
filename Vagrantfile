@@ -22,6 +22,7 @@ RSYNC_ARGS = [
   '--copy-links',
   '--exclude=local/',
   '--exclude=data/',
+  '--exclude=logs/',
   '--exclude=template_cache/',
   '--exclude=localconfig',
   '--include=.git/'

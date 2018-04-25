@@ -10,5 +10,11 @@
   service: name=httpd enabled=yes
   when: LAZY == 0
 
+- name: ensure bugzilla.log has right permissions
+  file: path=/vagrant/logs/bugzilla.log state=touch owner=vagrant group=apache mode=0660
+
+- name: ensure bugzilla-json.log has right permissions
+  file: path=/vagrant/logs/bugzilla-json.log state=touch owner=vagrant group=apache mode=0660
+
 - name: restart httpd
   service: name=httpd state=restarted

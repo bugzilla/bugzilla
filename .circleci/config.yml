@@ -180,7 +180,10 @@ jobs:
           [[ -f build_info/only_version_changed.txt ]] && exit 0
           mv /opt/bmo/local /app/local
           mkdir artifacts
-      - run: perl -I/app -I/app/local/lib/perl5 -c -E 'use Bugzilla; BEGIN { Bugzilla->extensions }'
+      - name: test code
+        run: |
+          [[ -f build_info/only_version_changed.txt ]] && exit 0
+          perl -I/app -I/app/local/lib/perl5 -c -E 'use Bugzilla; BEGIN { Bugzilla->extensions }'
       - run: |
           [[ -f build_info/only_version_changed.txt ]] && exit 0   
           perl Makefile.PL

@@ -272,6 +272,13 @@ sub process_revision_change {
 
     # Load the revision from Phabricator
     my $revision = Bugzilla::Extension::PhabBugz::Revision->new_from_query({ phids => [ $revision_phid ] });
+    
+    my $secure_revision =
+      Bugzilla::Extension::PhabBugz::Project->new_from_query(
+        {
+          name => 'secure-revision'
+        }
+      );
 
     # NO BUG ID
 
@@ -281,6 +288,7 @@ sub process_revision_change {
             INFO("No bug associated with new revision. Marking public.");
             $revision->set_policy('view', 'public');
             $revision->set_policy('edit', 'users');
+            $revision->remove_project($secure_revision->phid);
             $revision->update();
             INFO("SUCCESS");
             return;
@@ -310,8 +318,7 @@ sub process_revision_change {
         INFO('Bug is public so setting view/edit public');
         $revision->set_policy('view', 'public');
         $revision->set_policy('edit', 'users');
-        my $secure_project_phid = get_project_phid('secure-revision');
-        $revision->remove_project($secure_project_phid);
+        $revision->remove_project($secure_revision->phid);
     }
     # else bug is private.
     else {
@@ -355,8 +362,7 @@ sub process_revision_change {
                 $revision->set_policy('edit', $new_policy->phid);
             }
 
-            my $secure_project_phid = get_project_phid('secure-revision');
-            $revision->add_project($secure_project_phid);
+            $revision->add_project($secure_revision->phid);
         }
 
         # Subscriber list of the private revision should always match

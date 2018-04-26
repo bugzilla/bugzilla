@@ -16,8 +16,9 @@ use List::MoreUtils qw(any);
 use Moo;
 use Try::Tiny;
 
-use Bugzilla::Logging;
 use Bugzilla::Constants;
+use Bugzilla::Field;
+use Bugzilla::Logging;
 use Bugzilla::Search;
 use Bugzilla::Util qw(diff_arrays with_writable_database with_readonly_database);
 
@@ -104,7 +105,7 @@ sub start {
 sub feed_query {
     my ($self) = @_;
 
-    Bugzilla::Logging->fields->{type} = 'FEED';
+    local Bugzilla::Logging->fields->{type} = 'FEED';
 
     # Ensure Phabricator syncing is enabled
     if (!Bugzilla->params->{phabricator_enabled}) {
@@ -164,7 +165,7 @@ sub feed_query {
 sub user_query {
     my ( $self ) = @_;
 
-    Bugzilla::Logging->fields->{type} = 'USERS';
+    local Bugzilla::Logging->fields->{type} = 'USERS';
 
     # Ensure Phabricator syncing is enabled
     if (!Bugzilla->params->{phabricator_enabled}) {
@@ -204,21 +205,17 @@ sub user_query {
 sub group_query {
     my ($self) = @_;
 
+    local Bugzilla::Logging->fields->{type} = 'GROUPS';
+
     # Ensure Phabricator syncing is enabled
     if ( !Bugzilla->params->{phabricator_enabled} ) {
         WARN("PHABRICATOR SYNC DISABLED");
         return;
     }
 
-    my $phab_sync_groups = Bugzilla->params->{phabricator_sync_groups};
-    if ( !$phab_sync_groups ) {
-        WARN('A comma delimited list of security groups was not provided.');
-        return;
-    }
-
     # PROCESS SECURITY GROUPS
 
-    INFO("GROUPS: Updating group memberships");
+    INFO("Updating group memberships");
 
     # Loop through each group and perform the following:
     #
@@ -228,8 +225,7 @@ sub group_query {
     # 4. Set project members to exact list
     # 5. Profit
 
-    my $sync_groups = Bugzilla::Group->match(
-        { name => [ split( '[,\s]+', $phab_sync_groups ) ] } );
+    my $sync_groups = Bugzilla::Group->match( { isactive => 1, isbuggroup => 1 } );
 
     foreach my $group (@$sync_groups) {
 

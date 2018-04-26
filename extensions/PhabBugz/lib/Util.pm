@@ -162,7 +162,7 @@ sub create_private_revision_policy {
             push(@$project_phids, $phid) if $phid;
         }
 
-        ThrowUserError('invalid_phabricator_sync_groups') unless @$project_phids;
+        ThrowUserError('invalid_phabricator_projects') unless @$project_phids;
 
         push(@{ $data->{policy} },
             {
@@ -512,9 +512,8 @@ sub request {
 sub get_security_sync_groups {
     my $bug = shift;
 
-    my $phab_sync_groups = Bugzilla->params->{phabricator_sync_groups}
-        || ThrowUserError('invalid_phabricator_sync_groups');
-    my $sync_group_names = [ split('[,\s]+', $phab_sync_groups) ];
+    my $sync_groups = Bugzilla::Group->match( { isactive => 1, isbuggroup => 1 } );
+    my $sync_group_names = [ map { $_->name } @$sync_groups ]; 
 
     my $bug_groups = $bug->groups_in;
     my $bug_group_names = [ map { $_->name } @$bug_groups ];

@@ -14,10 +14,9 @@
   [% title = "Invalid Phabricator API Key" %]
   You must provide a valid Phabricator API Key.
 
-[% ELSIF error == "invalid_phabricator_sync_groups" %]
-  [% title = "Invalid Phabricator Sync Groups" %]
-  You must provide a comma delimited list of security groups
-  to sync with Phabricator.
+[% ELSIF error == "invalid_phabricator_projects" %]
+  [% title = "Invalid Phabricator Projects" %]
+  One or more Phabricator projects selected are invalid.
 
 [% ELSIF error == "invalid_phabricator_revision_id" %]
   [% title = "Invalid Phabricator Revision ID" %]

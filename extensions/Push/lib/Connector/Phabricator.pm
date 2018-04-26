@@ -28,7 +28,6 @@ use Bugzilla::Extension::PhabBugz::Util qw(
   get_bug_role_phids
   get_project_phid
   get_security_sync_groups
-  intersect
   make_revision_public
   make_revision_private
   set_revision_subscribers

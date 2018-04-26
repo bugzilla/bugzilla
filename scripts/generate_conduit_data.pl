@@ -133,7 +133,6 @@ set_params(
     password_check_on_login => 0,
     phabricator_base_uri    => 'http://phabricator.test/',
     phabricator_enabled     => 1,
-    phabricator_sync_groups => 'core-security',
 );
 set_push_connector_options();
 

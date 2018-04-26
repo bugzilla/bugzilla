@@ -35,7 +35,6 @@ use Bugzilla::Extension::PhabBugz::Util qw(
     get_project_phid
     get_revisions_by_ids
     get_security_sync_groups
-    intersect
     is_attachment_phab_revision
     make_revision_public
     request

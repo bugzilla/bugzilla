@@ -31,11 +31,6 @@ sub get_param_list {
             checker => \&check_urlbase
         },
         {
-            name    => 'phabricator_sync_groups',
-            type    => 't',
-            default => '',
-        },
-        {
             name => 'phabricator_api_key',
             type => 't',
             default => '',

@@ -112,7 +112,7 @@ sub create {
             push @$project_phids, $project->phid if $project;
         }
 
-        ThrowUserError('invalid_phabricator_sync_groups') unless @$project_phids;
+        ThrowUserError('invalid_phabricator_projects') unless @$project_phids;
 
         push @{ $data->{policy} }, {
             action => 'allow',

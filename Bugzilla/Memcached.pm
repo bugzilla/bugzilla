@@ -30,11 +30,13 @@ sub _new {
         && Bugzilla->params->{memcached_servers})
     {
         require Cache::Memcached::Fast;
+        require Sereal;
         $self->{namespace} = Bugzilla->params->{memcached_namespace} || '';
         $self->{memcached} =
             Cache::Memcached::Fast->new({
-                servers   => [ split(/[, ]+/, Bugzilla->params->{memcached_servers}) ],
-                namespace => $self->{namespace},
+                servers           => [ split(/[, ]+/, Bugzilla->params->{memcached_servers}) ],
+                namespace         => $self->{namespace},
+                serialize_methods => { \&Sereal::encode_sereal, \&Sereal::decode_sereal },
             });
     }
     return bless($self, $class);

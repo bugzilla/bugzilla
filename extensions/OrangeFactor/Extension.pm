@@ -17,6 +17,8 @@ use Bugzilla::User::Setting;
 use Bugzilla::Constants;
 use Bugzilla::Attachment;
 
+use DateTime;
+
 our $VERSION = '1.0';
 
 sub template_before_process {
@@ -38,6 +40,8 @@ sub template_before_process {
     my $bug = exists $vars->{'bugs'} ? $vars->{'bugs'}[0] : $vars->{'bug'};
     if ($bug && grep($_->name eq 'intermittent-failure', @{ $bug->keyword_objects })) {
         $vars->{'orange_factor'} = 1;
+        $vars->{'date_start'} = ( DateTime->now() - DateTime::Duration->new( days => 7 ) )->ymd();
+        $vars->{'date_end'} = DateTime->now->ymd();
     }
 }
 

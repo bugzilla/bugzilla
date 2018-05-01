@@ -42,6 +42,11 @@ sub DEFAULT_CSP {
         img_src     => [ 'self', 'https://secure.gravatar.com', 'https://www.google-analytics.com' ],
         style_src   => [ 'self', 'unsafe-inline' ],
         object_src  => [ 'none' ],
+        connect_src => [
+            'self',
+            # This is from extensions/OrangeFactor/web/js/orange_factor.js
+            'https://treeherder.mozilla.org/api/failurecount/',
+        ],
         form_action => [
             'self',
             # used in template/en/default/search/search-google.html.tmpl
@@ -69,7 +74,7 @@ sub SHOW_BUG_MODAL_CSP {
         connect_src => [
             'self',
             # This is from extensions/OrangeFactor/web/js/orange_factor.js
-            'https://brasstacks.mozilla.com/orangefactor/api/count',
+            'https://treeherder.mozilla.org/api/failurecount/',
         ],
         frame_src   => [ 'self', ],
         worker_src  => [ 'none', ],

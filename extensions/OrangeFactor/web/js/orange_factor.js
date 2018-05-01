@@ -8,21 +8,17 @@
 
 $(function() {
     'use strict';
-    var dayMs = 24 * 60 * 60 * 1000;
-    var limit = 7;
 
     function getOrangeCount(data) {
-        data = data.oranges;
-        var total = 0,
-            days = [],
-            date = getCurrentDateMs() - limit * dayMs;
-        for(var i = 0; i < limit; i++) {
-            var iso = dateString(new Date(date));
-            var count = data[iso] ? data[iso].orangecount : 0;
-            days.push(count);
-            total += count;
-            date += dayMs;
-        }
+        let days = [];
+        let total = 0;
+
+        data.forEach(entry => {
+            let failureCount = entry["failure_count"];
+            days.push(failureCount);
+            total += failureCount;
+        });
+
         displayGraph(days);
         displayCount(total);
     }
@@ -53,39 +49,26 @@ $(function() {
         $('#orange-count').text(count + ' failures on trunk in the past week');
     }
 
-    function dateString(date) {
-        function norm(part) {
-            return JSON.stringify(part).length == 2 ? part : '0' + part;
-        }
-        return date.getFullYear()
-            + "-" + norm(date.getMonth() + 1)
-            + "-" + norm(date.getDate());
-    }
-
-    function getCurrentDateMs() {
-        var d = new Date;
-        return d.getTime();
-    };
-
     function orangify() {
-        $('#orange-count')
-            .text('Loading...')
-            .show();
-        var bugId = document.forms['changeform'].id.value;
-        var request = {
+        let $orangeCount = $('#orange-count');
+        let queryParams = $.param({
+            bug: $orangeCount.data('bug-id'),
+            startday: $orangeCount.data('date-start'),
+            endday: $orangeCount.data('date-end'),
+            tree: 'trunk'
+        });
+        let request = {
             dataType: "json",
-            xhrFields: {
-                withCredentials: true
-            },
-            url: "https://brasstacks.mozilla.com/orangefactor/api/count?" +
-                 "bugid=" + encodeURIComponent(bugId) + "&tree=trunk"
+            url: `https://treeherder.mozilla.org/api/failurecount/?${queryParams}`
         };
+
+        $orangeCount.text('Loading...').show();
         $.ajax(request)
             .done(function(data) {
                 getOrangeCount(data);
             })
             .fail(function() {
-                $('#orange-count').text('Please sign into OrangeFactor first');
+                $orangeCount.text('Unable to load OrangeFactor at this time.');
             });
     }
 

@@ -16,10 +16,15 @@
   %]
     [% IF cgi.user_agent.match('(?i)gecko') %]
       <canvas id="orange-graph" style="display:none;"></canvas>
-      <span id="orange-count" style="display:none;"></span>
+      <span id="orange-count"
+            style="display:none;"
+            data-date-start="[% date_start FILTER html %]"
+            data-date-end="[% date_end FILTER html %]"
+            data-bug-id="[% bug.bug_id FILTER html %]">
+      </span>
     [% END %]
     <span id="orange-link">
-      (<a href="https://brasstacks.mozilla.com/orangefactor/?display=Bug&bugid=[% bug.bug_id FILTER uri %]"
+      (<a href="https://treeherder.mozilla.org/intermittent-failures.html#/bugdetails?startday=[% date_start FILTER uri %]&endday=[% date_end FILTER uri %]&tree=trunk&bug=[% bug.bug_id FILTER uri %]"
           title="Click to load Orange Factor page for this [% terms.bug %]">link</a>)
     </span>
   [% END %]

@@ -1,0 +1,34 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% PROCESS global/variables.none.tmpl %]
+
+From: [% Param('mailfrom') %]
+To: phabricator-admin@mozilla.com
+Subject: Possible Phabricator Username Squatter Alert
+Date: [% date %]
+X-Bugzilla-Type: squatter-alert
+
+Possible username squatter:
+
+Phabricator Account
+
+login: [% phab_user_login %]
+realname: [% phab_user_realname %]
+
+Bugzilla Account Matching Phabricator Account
+
+user id: [% bugzilla_userid %]
+login: [% bugzilla_login %]
+realname: [% bugzilla_realname %]
+
+Possible Bugzilla Account Squatting On
+
+user id: [% squat_userid %]
+login: [% squat_login %]
+realname: [% squat_realname %]

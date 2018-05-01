@@ -17,10 +17,11 @@ use Moo;
 use Try::Tiny;
 
 use Bugzilla::Constants;
-use Bugzilla::Field;
+use Bugzilla::Error;
 use Bugzilla::Logging;
+use Bugzilla::Mailer;
 use Bugzilla::Search;
-use Bugzilla::Util qw(diff_arrays with_writable_database with_readonly_database);
+use Bugzilla::Util qw(diff_arrays format_time with_writable_database with_readonly_database);
 
 use Bugzilla::Extension::PhabBugz::Constants;
 use Bugzilla::Extension::PhabBugz::Policy;
@@ -520,6 +521,55 @@ sub process_new_user {
     # Pre setup before querying DB
     my $old_user = set_phab_user();
 
+    # CHECK AND WARN FOR POSSIBLE USERNAME SQUATTING
+    INFO("Checking for username squatters");
+    my $dbh     = Bugzilla->dbh;
+    my $regexp  = $dbh->quote( ":?:" . quotemeta($phab_user->name) . "[[:>:]]" );
+    my $results = $dbh->selectall_arrayref( "
+        SELECT userid, login_name, realname
+          FROM profiles
+         WHERE userid != ? AND " . $dbh->sql_regexp( 'realname', $regexp ),
+        { Slice => {} },
+        $bug_user->id );
+    if (@$results) {
+        # The email client will display the Date: header in the desired timezone,
+        # so we can always use UTC here.
+        my $timestamp = Bugzilla->dbh->selectrow_array('SELECT LOCALTIMESTAMP(0)');
+        $timestamp = format_time($timestamp, '%a, %d %b %Y %T %z', 'UTC');
+
+        foreach my $row (@$results) {
+            WARN(
+                'Possible username squatter: ',
+                'phab user login: ' . $phab_user->name,
+                ' phab user realname: ' . $phab_user->realname,
+                ' bugzilla user id: ' . $row->{userid},
+                ' bugzilla login: ' . $row->{login_name},
+                ' bugzilla realname: ' . $row->{realname}
+            );
+
+            my $vars = {
+                date               => $timestamp,
+                phab_user_login    => $phab_user->name,
+                phab_user_realname => $phab_user->realname,
+                bugzilla_userid    => $phab_user->bugzilla_user->id,
+                bugzilla_login     => $phab_user->bugzilla_user->login,
+                bugzilla_realname  => $phab_user->bugzilla_user->name,
+                squat_userid       => $row->{userid},
+                squat_login        => $row->{login_name},
+                squat_realname     => $row->{realname}
+            };
+
+            my $message;
+            my $template = Bugzilla->template;
+            $template->process("admin/email/squatter-alert.txt.tmpl", $vars, \$message)
+                || ThrowTemplateError($template->error());
+
+            MessageToMTA($message);
+        }
+    }
+
+    # ADD SUBSCRIBERS TO REVSISIONS FOR CURRENT PRIVATE BUGS
+
     my $params = {
         f3  => 'OP',
         j3  => 'OR',
@@ -563,6 +613,8 @@ sub process_new_user {
     # the first value of each row should be the bug id
     my @bug_ids = map { shift @$_ } @$data;
 
+    INFO("Updating subscriber values for old private bugs");
+
     foreach my $bug_id (@bug_ids) {
         INFO("Processing bug $bug_id");
 
@@ -573,6 +625,7 @@ sub process_new_user {
 
         foreach my $attachment (@attachments) {
             my ($revision_id) = ($attachment->filename =~ PHAB_ATTACHMENT_PATTERN);
+
             INFO("Processing revision D$revision_id");
 
             my $revision = Bugzilla::Extension::PhabBugz::Revision->new_from_query(

@@ -157,11 +157,19 @@
         - ncurses-devel
         - readline-devel
 
+    - name: fetch tct
+      unarchive:
+        src: https://github.com/dylanwh/tocotrienol/releases/download/1.0.6/tct-centos6.tar.xz
+        dest: /usr/local/bin
+        remote_src: yes
+        mode: '0755'
+
     - name: fetch cpanm
       get_url:
         url: http://cpanmin.us
         dest: /usr/local/bin/cpanm
         mode: '0755'
+
     - name: install more recent Apache2::SizeLimit
       cpanm: name=Apache2::SizeLimit executable=/usr/local/bin/cpanm
 

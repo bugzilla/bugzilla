@@ -211,6 +211,7 @@ sub _read_localconfig_from_env {
         else {
             my $default = $var->{default};
             $localconfig{$name} = ref($default) eq 'CODE' ? $default->() : $default;
+            untaint($localconfig{$name});
         }
     }
 

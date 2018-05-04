@@ -101,7 +101,7 @@
     [% IF Bugzilla.cgi.should_block_referrer %]
       <meta name="referrer" content="origin">
     [% ELSE %]
-      <meta name="referrer" content="origin-when-crossorigin">
+      <meta name="referrer" content="origin-when-cross-origin">
     [% END %]
 
     [%- js_BUGZILLA = {

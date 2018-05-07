@@ -27,6 +27,7 @@ use warnings;
 
 use base qw(Bugzilla::Extension);
 
+use Bugzilla::Logging;
 use Bugzilla::Attachment;
 use Bugzilla::Comment;
 use Bugzilla::Group;
@@ -35,6 +36,7 @@ use Bugzilla::User;
 use Bugzilla::Util qw(trim trick_taint is_7bit_clean);
 use Bugzilla::Error;
 use Bugzilla::Mailer;
+use Bugzilla::Extension::SecureMail::TCT;
 
 use Crypt::OpenPGP::Armour;
 use Crypt::OpenPGP::KeyRing;
@@ -125,9 +127,12 @@ sub object_validators {
 
             if ($value =~ /PUBLIC KEY/) {
                 # PGP keys must be ASCII-armoured.
-                if (!Crypt::OpenPGP::Armour->unarmour($value)) {
-                    ThrowUserError('securemail_invalid_key',
-                                   { errstr => Crypt::OpenPGP::Armour->errstr });
+                my $tct = Bugzilla::Extension::SecureMail::TCT->new(
+                    public_key => $value,
+                    command    => Bugzilla->localconfig->{tct_bin},
+                );
+                unless ($tct->is_valid->get) {
+                    ThrowUserError( 'securemail_invalid_key', { errstr => 'key is invalid or expired' } );
                 }
             }
             elsif ($value =~ /BEGIN CERTIFICATE/) {
@@ -468,8 +473,10 @@ sub _make_secure {
         # PGP Encryption #
         ##################
 
-        my $pubring = new Crypt::OpenPGP::KeyRing(Data => $key);
-        my $pgp = new Crypt::OpenPGP(PubRing => $pubring);
+        my $tct = Bugzilla::Extension::SecureMail::TCT->new(
+            public_key => $key,
+            command    => Bugzilla->localconfig->{tct_bin},
+        );
 
         if (scalar $email->parts > 1) {
             my $old_boundary = $email->{ct}{attributes}{boundary};
@@ -508,7 +515,7 @@ sub _make_secure {
                         disposition  => 'inline',
                         encoding     => '7bit',
                     },
-                    body => _pgp_encrypt($pgp, $to_encrypt, $bug_id)
+                    body => _tct_encrypt($tct, $to_encrypt, $bug_id)
                 ),
             );
             $email->parts_set(\@new_parts);
@@ -525,7 +532,7 @@ sub _make_secure {
             if ($sanitise_subject) {
                 _insert_subject($email, $subject);
             }
-            $email->body_set(_pgp_encrypt($pgp, $email->body, $bug_id));
+            $email->body_set(_tct_encrypt($tct, $email->body, $bug_id));
         }
     }
 
@@ -601,33 +608,21 @@ sub _make_secure {
     }
 }
 
-sub _pgp_encrypt {
-    my ($pgp, $text, $bug_id) = @_;
-    # "@" matches every key in the public key ring, which is fine,
-    # because there's only one key in our keyring.
-    #
-    # We use the CAST5 cipher because the Rijndael (AES) module doesn't
-    # like us for some reason I don't have time to debug fully.
-    # ("key must be an untainted string scalar")
-    my $encrypted = $pgp->encrypt(
-        Data       => $text,
-        Recipients => "@",
-        Cipher     => 'CAST5',
-        Armour     => 0
-    );
-    if (!defined $encrypted) {
-        return 'Error during Encryption: ' . $pgp->errstr;
+sub _tct_encrypt {
+    my ($tct, $text, $bug_id) = @_;
+
+    my $comment = Bugzilla->localconfig->{urlbase} . ( $bug_id ? 'show_bug.cgi?id=' . $bug_id : '' );
+    my $encrypted;
+    my $ok = eval { $encrypted = $tct->encrypt( $text, $comment )->get; 1 };
+    if (!$ok) {
+        WARN("Error: $@");
+        $encrypted = "$comment\nOpenPGP Encryption failed. Check if your key is expired.";
     }
-    $encrypted = Crypt::OpenPGP::Armour->armour(
-        Data => $encrypted,
-        Object => 'MESSAGE',
-        Headers => {
-            Comment => Bugzilla->localconfig->{urlbase} . ($bug_id ? 'show_bug.cgi?id=' . $bug_id : ''),
-        },
-    );
-    # until Crypt::OpenPGP makes the Version header optional we have to strip
-    # it out manually (bug 1181406).
-    $encrypted =~ s/\nVersion:[^\n]+//;
+    elsif (!$encrypted) {
+        WARN('message empty!');
+        $encrypted = "$comment\nOpenPGP Encryption failed for unknown reason.";
+    }
+
     return $encrypted;
 }
 

@@ -7,7 +7,7 @@ version: 2
 
 defaults:
   bmo_slim_image: &bmo_slim_image
-    image: mozillabteam/bmo-slim:20180410.1
+    image: mozillabteam/bmo-slim:20180503.1
     user: app
 
   mysql_image: &mysql_image
@@ -184,7 +184,7 @@ jobs:
           [[ -f build_info/only_version_changed.txt ]] && exit 0
           perl -I/app -I/app/local/lib/perl5 -c -E 'use Bugzilla; BEGIN { Bugzilla->extensions }'
       - run: |
-          [[ -f build_info/only_version_changed.txt ]] && exit 0   
+          [[ -f build_info/only_version_changed.txt ]] && exit 0
           perl Makefile.PL
       - run:
           name: run sanity tests

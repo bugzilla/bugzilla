@@ -126,6 +126,10 @@ use constant LOCALCONFIG_VARS => (
         default => sub { dirname( bin_loc('diff') ) },
     },
     {
+        name => 'tct_bin',
+        default => sub { bin_loc('tct') },
+    },
+    {
         name => 'site_wide_secret',
 
         # 64 characters is roughly the equivalent of a 384-bit key, which

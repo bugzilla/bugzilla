@@ -430,19 +430,22 @@ sub process_revision_change {
         my ($attach_revision_id) = ($attachment->filename =~ PHAB_ATTACHMENT_PATTERN);
         next if $revision->id != $attach_revision_id;
 
-        # Clear old flags if no longer accepted
+        # Clear old accepted review flags if no longer accepted
         my (@denied_flags, @new_flags, @removed_flags, %accepted_done, $flag_type);
         foreach my $flag (@{ $attachment->flags }) {
             next if $flag->type->name ne 'review';
             $flag_type = $flag->type if $flag->type->is_active;
+            next if $flag->status ne '+';
             if (any { $flag->setter->id == $_ } @denied_user_ids) {
+                INFO('Denying review flag set by ' . $flag->setter->name);
                 push(@denied_flags, { id => $flag->id, setter => $flag->setter, status => 'X' });
             }
             if (any { $flag->setter->id == $_ } @accepted_user_ids) {
+                INFO('Skipping as review+ already set by ' . $flag->setter->name);
                 $accepted_done{$flag->setter->id}++;
             }
-            if ($flag->status eq '+'
-                && !any { $flag->setter->id == $_ } (@accepted_user_ids, @denied_user_ids)) {
+            if (!any { $flag->setter->id == $_ } (@accepted_user_ids, @denied_user_ids)) {
+                INFO('Clearing review+ flag set by ' . $flag->setter->name);
                 push(@removed_flags, { id => $flag->id, setter => $flag->setter, status => 'X' });
             }
         }
@@ -453,6 +456,7 @@ sub process_revision_change {
         foreach my $user_id (@accepted_user_ids) {
             next if $accepted_done{$user_id};
             my $user = Bugzilla::User->check({ id => $user_id, cache => 1 });
+            INFO('Setting new review+ flag for ' . $user->name);
             push(@new_flags, { type_id => $flag_type->id, setter => $user, status => '+' });
         }
 

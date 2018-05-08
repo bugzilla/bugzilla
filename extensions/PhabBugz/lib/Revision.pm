@@ -17,10 +17,8 @@ use Type::Utils;
 use Bugzilla::Bug;
 use Bugzilla::Error;
 use Bugzilla::Util qw(trim);
-use Bugzilla::Extension::PhabBugz::Util qw(
-  get_phab_bmo_ids
-  request
-);
+use Bugzilla::Extension::PhabBugz::User;
+use Bugzilla::Extension::PhabBugz::Util qw(request);
 
 #########################
 #    Initialization     #
@@ -284,12 +282,13 @@ sub _build_bug {
 sub _build_author {
     my ($self) = @_;
     return $self->{author} if $self->{author};
-    my $users = get_phab_bmo_ids( { phids => [ $self->author_phid ] } );
-    if (@$users) {
-        $self->{author} =
-          new Bugzilla::User( { id => $users->[0]->{id}, cache => 1 } );
-        $self->{author}->{phab_phid} = $self->author_phid;
-        return $self->{author};
+    my $phab_user = Bugzilla::Extension::PhabBugz::User->new_from_query(
+      {
+        phids => [ $self->author_phid ]
+      }
+    );
+    if ($phab_user) {
+        return $self->{author} = $phab_user->bugzilla_user;
     }
 }
 
@@ -306,22 +305,22 @@ sub _build_reviewers {
 
     return [] unless @phids;
 
-    my $users = get_phab_bmo_ids( { phids => \@phids } );
+    my $users = Bugzilla::Extension::PhabBugz::User->match(
+      {
+        phids => \@phids
+      }
+    );
 
-    my @reviewers;
     foreach my $user (@$users) {
-        my $reviewer = Bugzilla::User->new( { id => $user->{id}, cache => 1 } );
-        $reviewer->{phab_phid} = $user->{phid};
         foreach my $reviewer_data ( @{ $self->reviewers_raw } ) {
-            if ( $reviewer_data->{reviewerPHID} eq $user->{phid} ) {
-                $reviewer->{phab_review_status} = $reviewer_data->{status};
+            if ( $reviewer_data->{reviewerPHID} eq $user->phid ) {
+                $user->{phab_review_status} = $reviewer_data->{status};
                 last;
             }
         }
-        push @reviewers, $reviewer;
     }
 
-    return \@reviewers;
+    return $self->{reviewers} = $users;
 }
 
 sub _build_subscribers {
@@ -335,19 +334,13 @@ sub _build_subscribers {
         push @phids, $phid;
     }
 
-    my $users = get_phab_bmo_ids( { phids => \@phids } );
+    my $users = Bugzilla::Extension::PhabBugz::User->math(
+      {
+        phids => \@phids
+      }
+    );
 
-    return [] unless @phids;
-
-    my @subscribers;
-    foreach my $user (@$users) {
-        my $subscriber =
-          Bugzilla::User->new( { id => $user->{id}, cache => 1 } );
-        $subscriber->{phab_phid} = $user->{phid};
-        push @subscribers, $subscriber;
-    }
-
-    return \@subscribers;
+    return $self->{subscribers} = $users;
 }
 
 #########################
@@ -364,27 +357,27 @@ sub add_comment {
 sub add_reviewer {
     my ( $self, $reviewer ) = @_;
     $self->{add_reviewers} ||= [];
-    my $reviewer_phid = blessed $reviewer ? $reviewer->phab_phid : $reviewer;
+    my $reviewer_phid = blessed $reviewer ? $reviewer->phid : $reviewer;
     push @{ $self->{add_reviewers} }, $reviewer_phid;
 }
 
 sub remove_reviewer {
     my ( $self, $reviewer ) = @_;
     $self->{remove_reviewers} ||= [];
-    my $reviewer_phid = blessed $reviewer ? $reviewer->phab_phid : $reviewer;
+    my $reviewer_phid = blessed $reviewer ? $reviewer->phid : $reviewer;
     push @{ $self->{remove_reviewers} }, $reviewer_phid;
 }
 
 sub set_reviewers {
     my ( $self, $reviewers ) = @_;
-    $self->{set_reviewers} = [ map { $_->phab_phid } @$reviewers ];
+    $self->{set_reviewers} = [ map { $_->phid } @$reviewers ];
 }
 
 sub add_subscriber {
     my ( $self, $subscriber ) = @_;
     $self->{add_subscribers} ||= [];
     my $subscriber_phid =
-      blessed $subscriber ? $subscriber->phab_phid : $subscriber;
+      blessed $subscriber ? $subscriber->phid : $subscriber;
     push @{ $self->{add_subscribers} }, $subscriber_phid;
 }
 
@@ -392,7 +385,7 @@ sub remove_subscriber {
     my ( $self, $subscriber ) = @_;
     $self->{remove_subscribers} ||= [];
     my $subscriber_phid =
-      blessed $subscriber ? $subscriber->phab_phid : $subscriber;
+      blessed $subscriber ? $subscriber->phid : $subscriber;
     push @{ $self->{remove_subscribers} }, $subscriber_phid;
 }
 

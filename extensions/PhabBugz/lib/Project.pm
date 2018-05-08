@@ -9,15 +9,14 @@ package Bugzilla::Extension::PhabBugz::Project;
 
 use 5.10.1;
 use Moo;
+use Scalar::Util qw(blessed);
 use Types::Standard -all;
 use Type::Utils;
 
 use Bugzilla::Error;
 use Bugzilla::Util qw(trim);
-use Bugzilla::Extension::PhabBugz::Util qw(
-  request
-  get_phab_bmo_ids
-);
+use Bugzilla::Extension::PhabBugz::User;
+use Bugzilla::Extension::PhabBugz::Util qw(request);
 
 #########################
 #    Initialization     #
@@ -281,20 +280,20 @@ sub set_description {
 sub add_member {
     my ( $self, $member ) = @_;
     $self->{add_members} ||= [];
-    my $member_phid = blessed $member ? $member->phab_phid : $member;
+    my $member_phid = blessed $member ? $member->phid : $member;
     push( @{ $self->{add_members} }, $member_phid );
 }
 
 sub remove_member {
     my ( $self, $member ) = @_;
     $self->{remove_members} ||= [];
-    my $member_phid = blessed $member ? $member->phab_phid : $member;
+    my $member_phid = blessed $member ? $member->phid : $member;
     push( @{ $self->{remove_members} }, $member_phid );
 }
 
 sub set_members {
     my ( $self, $members ) = @_;
-    $self->{set_members} = [ map { $_->phab_phid } @$members ];
+    $self->{set_members} = [ map { blessed $_ ? $_->phid : $_ } @$members ];
 }
 
 sub set_policy {
@@ -318,16 +317,13 @@ sub _build_members {
 
     return [] if !@phids;
 
-    my $users = get_phab_bmo_ids( { phids => \@phids } );
+    my $users = Bugzilla::Extension::PhabBugz::User->match(
+      {
+        phids => \@phids
+      }
+    );
 
-    my @members;
-    foreach my $user (@$users) {
-        my $member = Bugzilla::User->new( { id => $user->{id}, cache => 1 } );
-        $member->{phab_phid} = $user->{phid};
-        push( @members, $member );
-    }
-
-    return \@members;
+    return [ map { $_->bugzilla_user } @$users ];
 }
 
 1;

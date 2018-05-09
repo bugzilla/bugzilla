@@ -31,6 +31,7 @@ use Bugzilla::Extension::PhabBugz::Util qw(
     add_security_sync_comments
     create_revision_attachment
     get_bug_role_phids
+    get_phab_bmo_ids
     get_project_phid
     get_security_sync_groups
     is_attachment_phab_revision
@@ -145,14 +146,10 @@ sub feed_query {
         }
 
         # Skip changes done by phab-bot user
-        my $phab_user = Bugzilla::Extension::PhabBugz::User->new_from_query(
-          {
-            phids => [ $author_phid ]
-          }
-        );
-
-        if ($phab_user && $phab_user->bugzilla_id) {
-            if ($phab_user->bugzilla_user->login eq PHAB_AUTOMATION_USER) {
+        my $phab_users = get_phab_bmo_ids({ phids => [$author_phid] });
+        if (@$phab_users) {
+            my $user = Bugzilla::User->new({ id => $phab_users->[0]->{id}, cache => 1 });
+            if ($user->login eq PHAB_AUTOMATION_USER) {
                 INFO("SKIPPING: Change made by phabricator user");
                 $self->save_last_id($story_id, 'feed');
                 next;
@@ -259,10 +256,11 @@ sub group_query {
             );
         }
 
-        INFO("Setting group members for " . $project->name);
-        my @group_members = get_group_members($group);
-        $project->set_members( \@group_members );
-        $project->update();
+        if ( my @group_members = get_group_members($group) ) {
+            INFO("Setting group members for " . $project->name);
+            $project->set_members( \@group_members );
+            $project->update();
+        }
     }
 }
 
@@ -416,28 +414,15 @@ sub process_revision_change {
     my (@accepted_phids, @denied_phids, @accepted_user_ids, @denied_user_ids);
     unless ($revision->status eq 'changes-planned' || $revision->status eq 'needs-review') {
         foreach my $reviewer (@{ $revision->reviewers }) {
-            push(@accepted_phids, $reviewer->phid) if $reviewer->{phab_review_status} eq 'accepted';
-            push(@denied_phids, $reviewer->phid) if $reviewer->{phab_review_status} eq 'rejected';
+            push(@accepted_phids, $reviewer->phab_phid) if $reviewer->phab_review_status eq 'accepted';
+            push(@denied_phids, $reviewer->phab_phid) if $reviewer->phab_review_status eq 'rejected';
         }
     }
 
-    if ( @accepted_phids ) {
-        my $phab_users = Bugzilla::Extension::PhabBugz::User->match(
-          {
-            phids => \@accepted_phids
-          }
-        );
-        @accepted_user_ids = map { $_->bugzilla_user->id } @$phab_users;
-    }
-
-    if ( @denied_phids ) {
-        my $phab_users = Bugzilla::Extension::PhabBugz::User->match(
-          {
-            phids => \@denied_phids
-          }
-        );
-        @denied_user_ids = map { $_->bugzilla_user->id } @$phab_users;
-    }
+    my $phab_users = get_phab_bmo_ids({ phids => \@accepted_phids });
+    @accepted_user_ids = map { $_->{id} } @$phab_users;
+    $phab_users = get_phab_bmo_ids({ phids => \@denied_phids });
+    @denied_user_ids = map { $_->{id} } @$phab_users;
 
     my %reviewers_hash =  map { $_->name => 1 } @{ $revision->reviewers };
 
@@ -727,28 +712,24 @@ sub save_last_id {
 
 sub get_group_members {
     my ($group) = @_;
-
     my $group_obj =
       ref $group ? $group : Bugzilla::Group->check( { name => $group, cache => 1 } );
     my $members_all = $group_obj->members_complete();
-
-    my @userids;
+    my %users;
     foreach my $name ( keys %$members_all ) {
         foreach my $user ( @{ $members_all->{$name} } ) {
-            push @userids, $user->id;
+            $users{ $user->id } = $user;
         }
     }
 
-    return if !@userids;
-    
     # Look up the phab ids for these users
-    my $phab_users = Bugzilla::Extension::PhabBugz::User->match(
-      {
-        ids => \@userids
-      }
-    );
+    my $phab_users = get_phab_bmo_ids( { ids => [ keys %users ] } );
+    foreach my $phab_user ( @{$phab_users} ) {
+        $users{ $phab_user->{id} }->{phab_phid} = $phab_user->{phid};
+    }
 
-    return map { $_->phid } @$phab_users;
+    # We only need users who have accounts in phabricator
+    return grep { $_->phab_phid } values %users;
 }
 
 1;

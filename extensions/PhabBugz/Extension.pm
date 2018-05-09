@@ -18,6 +18,11 @@ use Bugzilla::Extension::PhabBugz::Feed;
 
 our $VERSION = '0.01';
 
+BEGIN {
+    *Bugzilla::User::phab_phid = sub { return $_[0]->{phab_phid}; };
+    *Bugzilla::User::phab_review_status = sub { return $_[0]->{phab_review_status}; };
+}
+
 sub config_add_panels {
     my ($self, $args) = @_;
     my $modules = $args->{panel_modules};
@@ -80,7 +85,7 @@ sub install_filesystem {
     my $files = $args->{'files'};
 
     my $extensionsdir = bz_locations()->{'extensionsdir'};
-    my $scriptname = $extensionsdir . "/PhabBugz/bin/phabbugz_feed.pl";
+    my $scriptname = $extensionsdir . "/PhabBugz/bin/phabbugzd.pl";
 
     $files->{$scriptname} = {
         perms => Bugzilla::Install::Filesystem::WS_EXECUTE

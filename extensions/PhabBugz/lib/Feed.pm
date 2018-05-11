@@ -18,6 +18,7 @@ use Try::Tiny;
 
 use Bugzilla::Constants;
 use Bugzilla::Error;
+use Bugzilla::Field;
 use Bugzilla::Logging;
 use Bugzilla::Mailer;
 use Bugzilla::Search;
@@ -221,49 +222,71 @@ sub group_query {
 
     INFO("Updating group memberships");
 
+    # Pre setup before making changes
+    my $old_user = set_phab_user();
+
     # Loop through each group and perform the following:
     #
     # 1. Load flattened list of group members
     # 2. Check to see if Phab project exists for 'bmo-<group_name>'
     # 3. Create if does not exist with locked down policy.
-    # 4. Set project members to exact list
+    # 4. Set project members to exact list including phab-bot user
     # 5. Profit
 
     my $sync_groups = Bugzilla::Group->match( { isactive => 1, isbuggroup => 1 } );
 
-    foreach my $group (@$sync_groups) {
+    # Load phab-bot Phabricator user to add as a member of each project group later
+    my $phab_ids = get_phab_bmo_ids( { ids => [ Bugzilla->user->id ] } );
+    my $phab_user = Bugzilla::User->new( { id => $phab_ids->[0]->{id}, cache => 1 } );
+    $phab_user->{phab_phid} = $phab_ids->[0]->{phid};
 
+    # secure-revision project that will be used for bmo group projects
+    my $secure_revision =
+      Bugzilla::Extension::PhabBugz::Project->new_from_query(
+        {
+          name => 'secure-revision'
+        }
+    );
+
+    foreach my $group (@$sync_groups) {
         # Create group project if one does not yet exist
         my $phab_project_name = 'bmo-' . $group->name;
-        my $project = Bugzilla::Extension::PhabBugz::Project->new_from_query(
+        my $project =
+          Bugzilla::Extension::PhabBugz::Project->new_from_query(
             {
-                name => $phab_project_name
+              name => $phab_project_name
             }
         );
+
         if ( !$project ) {
-            INFO("Project $project not found. Creating.");
-            my $secure_revision =
-              Bugzilla::Extension::PhabBugz::Project->new_from_query(
-                {
-                    name => 'secure-revision'
-                }
-              );
+            INFO("Project $phab_project_name not found. Creating.");
             $project = Bugzilla::Extension::PhabBugz::Project->create(
-                {
-                    name        => $phab_project_name,
-                    description => 'BMO Security Group for ' . $group->name,
-                    view_policy => $secure_revision->phid,
-                    edit_policy => $secure_revision->phid,
-                    join_policy => $secure_revision->phid
-                }
+              {
+                name        => $phab_project_name,
+                description => 'BMO Security Group for ' . $group->name,
+                view_policy => $secure_revision->phid,
+                edit_policy => $secure_revision->phid,
+                join_policy => $secure_revision->phid
+              }
             );
         }
+        else {
+            # Make sure that the group project permissions are set properly
+            INFO("Updating permissions on $phab_project_name");
+            $project->set_policy( 'view', $secure_revision->phid );
+            $project->set_policy( 'edit', $secure_revision->phid );
+            $project->set_policy( 'join', $secure_revision->phid );
+        }
 
+        # Make sure phab-bot also a member of the new project group so that it can
+        # make policy changes to the private revisions
         INFO("Setting group members for " . $project->name);
-        my @group_members = get_group_members($group);
-        $project->set_members( \@group_members );
+        my @group_members = $self->get_group_members( $group );
+        $project->set_members( [ ($phab_user, @group_members) ] );
         $project->update();
     }
+
+    Bugzilla->set_user($old_user);
 }
 
 sub process_revision_change {
@@ -724,7 +747,7 @@ sub save_last_id {
 }
 
 sub get_group_members {
-    my ($group) = @_;
+    my ( $self, $group ) = @_;
 
     my $group_obj =
       ref $group ? $group : Bugzilla::Group->check( { name => $group, cache => 1 } );

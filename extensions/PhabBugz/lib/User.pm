@@ -116,14 +116,14 @@ sub match {
     my ( $class, $params ) = @_;
 
     # BMO id search takes precedence if bugzilla_ids is used.
-    my $bugzilla_ids = delete $params->{bugzilla_ids};
+    my $bugzilla_ids = delete $params->{ids};
     if ($bugzilla_ids) {
         my $bugzilla_data =
           $class->get_phab_bugzilla_ids( { ids => $bugzilla_ids } );
         $params->{phids} = [ map { $_->{phid} } @$bugzilla_data ];
     }
 
-    return [] if !$params->{phids};
+    return [] if !@{ $params->{phids} };
 
     # Look for BMO external user id in external-accounts attachment
     my $data = {
@@ -177,6 +177,7 @@ sub get_phab_bugzilla_ids {
 
         # Store new values in memcache for later retrieval
         foreach my $user ( @{ $result->{result} } ) {
+            next if !$user->{phid};
             $memcache->set(
                 {
                     key   => "phab_user_bugzilla_id_" . $user->{id},

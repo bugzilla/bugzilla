@@ -33,8 +33,11 @@ BEGIN {
 
 # PREREQ_PM
 my %requires = (
+    'Alien::libcmark_gfm'      => 0,
     'Algorithm::BloomFilter'   => '0.02',
     'CGI'                      => '4.31',
+    'CGI::Compile'             => 0,
+    'CGI::Emulate::PSGI'       => 0,
     'CPAN::Meta::Prereqs'      => '2.132830',
     'CPAN::Meta::Requirements' => '2.121',
     'Class::XSAccessor'        => '1.18',
@@ -47,6 +50,7 @@ my %requires = (
     'Digest::SHA'              => '5.47',
     'Email::MIME'              => '1.904',
     'Email::Send'              => '1.911',
+    'FFI::Platypus'            => 0,
     'File::Slurp'              => '9999.13',
     'File::Slurper'            => '0.012',
     'Future'                   => '0.34',
@@ -63,6 +67,7 @@ my %requires = (
     'Math::Random::ISAAC'      => '1.0.1',
     'Module::Metadata'         => '1.000033',
     'Module::Runtime'          => '0.014',
+    'Mojolicious'              => '7.71',
     'Moo'                      => '2.002004',
     'MooX::StrictConstructor'  => '0.008',
     'Mozilla::CA'              => '20160104',
@@ -108,6 +113,16 @@ if ( $OSNAME eq 'linux' && -f '/etc/debian_version' ) {
 }
 
 my %optional_features = (
+    argon2 => {
+        description => 'Support hashing passwords with Argon2',
+        prereqs => {
+            runtime => {
+                requires => {
+                    'Crypt::Argon2' => '0.004',
+                },
+            },
+        },
+    },
     smtp_auth => {
         description => 'SMTP Authentication',
         prereqs     => { runtime => { requires => { 'Authen::SASL' => 0 } } },

@@ -104,57 +104,40 @@ sub handle_notification {
 
 sub process_bounce {
     my ($notification) = @_;
-    my $type = $notification->{bounce}->{bounceType};
 
-    if ( $type eq 'Transient' ) {
+    # disable each account that is bouncing
+    foreach my $recipient ( @{ $notification->{bounce}->{bouncedRecipients} } ) {
+        my $address = $recipient->{emailAddress};
+        my $reason = sprintf '(%s) %s', $recipient->{action} // 'error', $recipient->{diagnosticCode} // 'unknown';
 
-        # just log transient bounces
-        foreach my $recipient ( @{ $notification->{bounce}->{bouncedRecipients} } ) {
-            my $address = $recipient->{emailAddress};
-            Bugzilla->audit("transient bounce for <$address>");
-        }
-    }
+        my $user = Bugzilla::User->new( { name => $address, cache => 1 } );
+        if ($user) {
 
-    elsif ( $type eq 'Permanent' ) {
-
-        # disable each account that is permanently bouncing
-        foreach my $recipient ( @{ $notification->{bounce}->{bouncedRecipients} } ) {
-            my $address = $recipient->{emailAddress};
-            my $reason = sprintf '(%s) %s', $recipient->{action} // 'error', $recipient->{diagnosticCode} // 'unknown';
-
-            my $user = Bugzilla::User->new( { name => $address, cache => 1 } );
-            if ($user) {
-
-                # never auto-disable admin accounts
-                if ( $user->in_group('admin') ) {
-                    Bugzilla->audit("ignoring permanent bounce for admin <$address>: $reason");
-                }
-
-                else {
-                    my $template = Bugzilla->template_inner();
-                    my $vars     = {
-                        mta => $notification->{bounce}->{reportingMTA} // 'unknown',
-                        reason => $reason,
-                    };
-                    my $disable_text;
-                    $template->process( 'admin/users/bounce-disabled.txt.tmpl', $vars, \$disable_text )
-                        || die $template->error();
-
-                    $user->set_disabledtext($disable_text);
-                    $user->set_disable_mail(1);
-                    $user->update();
-                    Bugzilla->audit( "permanent bounce for <$address> disabled userid-" . $user->id . ": $reason" );
-                }
+            # never auto-disable admin accounts
+            if ( $user->in_group('admin') ) {
+                Bugzilla->audit("ignoring bounce for admin <$address>: $reason");
             }
 
             else {
-                Bugzilla->audit("permanent bounce for <$address> has no user: $reason");
+                my $template = Bugzilla->template_inner();
+                my $vars     = {
+                    mta => $notification->{bounce}->{reportingMTA} // 'unknown',
+                    reason => $reason,
+                };
+                my $disable_text;
+                $template->process( 'admin/users/bounce-disabled.txt.tmpl', $vars, \$disable_text )
+                    || die $template->error();
+
+                $user->set_disabledtext($disable_text);
+                $user->set_disable_mail(1);
+                $user->update();
+                Bugzilla->audit( "bounce for <$address> disabled userid-" . $user->id . ": $reason" );
             }
         }
-    }
 
-    else {
-        WARN("Unsupported bounce type: $type\n");
+        else {
+            Bugzilla->audit("bounce for <$address> has no user: $reason");
+        }
     }
 
     respond( 200 => 'OK' );

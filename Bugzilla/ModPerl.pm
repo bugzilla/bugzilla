@@ -86,12 +86,6 @@ ErrorDocument 403 /errors/403.html
 ErrorDocument 404 /errors/404.html
 ErrorDocument 500 /errors/500.html
 
-<Location /helper>
-    SetHandler perl-script
-    PerlResponseHandler Plack::Handler::Apache2
-    PerlSetVar psgi_app [% cgi_path %]/helper.psgi
-</Location>
-
 <Directory "[% cgi_path %]">
     AddHandler perl-script .cgi
     # No need to PerlModule these because they're already defined in mod_perl.pl

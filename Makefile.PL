@@ -443,7 +443,7 @@ MAKE
 
 sub is_bmo_feature {
     local $_ = shift;
-    return 1 if $OSNAME eq 'linux' && /^linux/;
+    return $OSNAME eq 'linux' if /^linux/;
     return !m{
         ^
         (?: pg

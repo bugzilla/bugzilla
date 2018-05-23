@@ -9,8 +9,17 @@
 use 5.10.1;
 use strict;
 use warnings;
-use lib qw(. lib local/lib/perl5);
 
+use File::Basename qw(dirname);
+use File::Spec::Functions qw(catfile catdir rel2abs);
+use Cwd qw(realpath);
+BEGIN {
+    require lib;
+    my $dir = rel2abs(catdir(dirname(__FILE__), '..'));
+    lib->import($dir, catdir($dir, 'lib'), catdir($dir, qw(local lib perl5)));
+}
+
+use autodie;
 use Bugzilla;
 use Bugzilla::Constants;
 use List::MoreUtils qw(any);
@@ -130,7 +139,8 @@ my $dbh = Bugzilla->dbh;
 # run sanitiseme.pl
 
 print "running sanitizeme.pl\n";
-system "'$RealBin/sanitizeme.pl' --execute";
+my $sanitizeme = catfile(realpath(dirname(__FILE__)), 'sanitizeme.pl');
+system $sanitizeme, '--execute';
 
 if ($dbh->selectrow_array("SELECT COUNT(*) FROM bug_group_map")) {
     die "sanitization failed\n";

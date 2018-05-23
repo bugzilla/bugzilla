@@ -11,6 +11,7 @@ use 5.10.1;
 use strict;
 use warnings;
 
+use Bugzilla::Logging;
 use XMLRPC::Transport::HTTP;
 use Bugzilla::WebService::Server;
 if ($ENV{MOD_PERL}) {
@@ -32,8 +33,15 @@ BEGIN {
         if ($type eq 'dateTime') {
             # This is the XML-RPC implementation,  see the README in Bugzilla/WebService/.
             # Our "base" implementation is in Bugzilla::WebService::Server.
-            $value = Bugzilla::WebService::Server->datetime_format_outbound($value);
-            $value =~ s/-//g;
+            if (defined $value) {
+                $value = Bugzilla::WebService::Server->datetime_format_outbound($value);
+                $value =~ s/-//g;
+            }
+            else {
+                my ($pkg, $file, $line) = caller;
+                my $class = ref $self;
+                ERROR("$class->type($type, undef) called from $pkg ($file line $line)");
+            }
         }
         elsif ($type eq 'email') {
             $type = 'string';

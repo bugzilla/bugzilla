@@ -22,6 +22,10 @@
   [% title = "Invalid Phabricator Revision ID" %]
   You must provide a valid Phabricator revision ID.
 
+[% ELSIF error == "invalid_phabricator_build_target" %]
+  [% title = "Invalid Phabricator Build Target" %]
+  You must provide a valid Phabricator Build Target PHID.
+
 [% ELSIF error == "phabricator_not_enabled" %]
   [% title = "Phabricator Support Not Enabled" %]
   The Phabricator to Bugzilla library, PhabBugz,

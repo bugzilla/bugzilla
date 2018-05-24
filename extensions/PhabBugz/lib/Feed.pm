@@ -14,6 +14,7 @@ use IO::Async::Loop;
 use List::Util qw(first);
 use List::MoreUtils qw(any);
 use Moo;
+use Scalar::Util qw(blessed);
 use Try::Tiny;
 
 use Bugzilla::Constants;
@@ -165,6 +166,51 @@ sub feed_query {
         };
         $self->save_last_id($story_id, 'feed');
     }
+
+    # Process any build targets as well.
+    my $dbh = Bugzilla->dbh;
+
+    INFO("Checking for revisions in draft mode");
+    my $build_targets = $dbh->selectall_arrayref(
+        "SELECT name, value FROM phabbugz WHERE name LIKE 'build_target_%'",
+        { Slice => {} }
+    );
+
+    my $delete_build_target = $dbh->prepare(
+        "DELETE FROM phabbugz WHERE name = ? AND VALUE = ?"
+    );
+
+    foreach my $target (@$build_targets) {
+        my ($revision_id) = ($target->{name} =~ /^build_target_(\d+)$/);
+        my $build_target  = $target->{value};
+
+        # FIXME: Remove debugging
+        use Data::Dumper; print STDERR Dumper $target;
+
+        next unless $revision_id && $build_target;
+
+        INFO("Processing revision $revision_id with build target $build_target");
+
+        my $revision =
+          Bugzilla::Extension::PhabBugz::Revision->new_from_query(
+            { 
+              ids => [ int($revision_id) ]
+            }
+        );
+
+        with_writable_database {
+            $self->process_revision_change($revision);
+        };
+
+        # Set the build target to a passing status to
+        # allow the revision to exit draft state
+        request( 'harbormaster.sendmessage', {
+            buildTargetPHID => $build_target,
+            type            => 'pass'
+        } );
+
+        $delete_build_target->execute($target->{name}, $target->{value});
+     }
 }
 
 sub user_query {
@@ -297,7 +343,10 @@ sub process_revision_change {
     my ($self, $revision_phid, $story_text) = @_;
 
     # Load the revision from Phabricator
-    my $revision = Bugzilla::Extension::PhabBugz::Revision->new_from_query({ phids => [ $revision_phid ] });
+    my $revision =
+        blessed $revision_phid
+        ? $revision_phid
+        : Bugzilla::Extension::PhabBugz::Revision->new_from_query({ phids => [ $revision_phid ] });
     
     my $secure_revision =
       Bugzilla::Extension::PhabBugz::Project->new_from_query(

@@ -184,9 +184,6 @@ sub feed_query {
         my ($revision_id) = ($target->{name} =~ /^build_target_(\d+)$/);
         my $build_target  = $target->{value};
 
-        # FIXME: Remove debugging
-        use Data::Dumper; print STDERR Dumper $target;
-
         next unless $revision_id && $build_target;
 
         INFO("Processing revision $revision_id with build target $build_target");

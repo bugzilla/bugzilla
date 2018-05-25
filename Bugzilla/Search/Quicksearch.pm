@@ -469,6 +469,11 @@ sub _handle_field_names {
                         $value = $2;
                         $value =~ s/\\(["'])/$1/g;
                     }
+                    # If the value is a pair of matching quotes, the person wanted the empty string
+                    elsif ($value =~ /^(["'])\1$/ || $translated eq 'resolution' && $value eq '---') {
+                        $value = "";
+                        $operator = "isempty";
+                    }
                     addChart($translated, $operator, $value, $negate);
                 }
             }
@@ -658,6 +663,9 @@ sub negateComparisonType {
 
     if ($comparisonType eq 'anywords') {
         return 'nowords';
+    }
+    elsif ($comparisonType eq 'isempty') {
+        return 'isnotempty';
     }
     return "not$comparisonType";
 }

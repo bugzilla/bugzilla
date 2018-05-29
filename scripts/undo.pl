@@ -114,10 +114,10 @@ sub undo {
             my $del_comments = $dbh->prepare('DELETE FROM longdescs WHERE comment_id = ?');
             my $del_activity = $dbh->prepare('DELETE FROM bugs_activity WHERE id = ?');
             foreach my $comment (@{ $action->{remove_comments}}) {
-                $del_comments->execute($comment->{id}) or die "failed to delete comment $c->{id}";
+                $del_comments->execute($comment->{id}) or die "failed to delete comment $comment->{id}";
             }
             foreach my $activity (@{ $action->{remove_activities}}) {
-                $del_activity->execute($activity->{id}) or die "failed to delete comment $a->{id}";
+                $del_activity->execute($activity->{id}) or die "failed to delete comment $activity->{id}";
             }
             tag_for_recount_from_bug($bug_id);
             $dbh->bz_commit_transaction;

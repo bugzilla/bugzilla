@@ -65,7 +65,7 @@ sub undo {
     }
 
     my $dbh = Bugzilla->dbh;
-    my @bug_ids = sort { $b <=> $a } keys %action;
+    my @bug_ids = reverse sort { $a <=> $b } keys %action;
     say 'Found ', 0 + @bug_ids, ' bugs';
     foreach my $bug_id (@bug_ids) {
         $dbh->bz_start_transaction;
@@ -113,11 +113,11 @@ sub undo {
                 $previous_last_ts, $previous_last_ts, $bug_id );
             my $del_comments = $dbh->prepare('DELETE FROM longdescs WHERE comment_id = ?');
             my $del_activity = $dbh->prepare('DELETE FROM bugs_activity WHERE id = ?');
-            foreach my $c (@{ $action->{remove_comments}}) {
-                $del_comments->execute($c->{id}) or die "failed to delete comment $c->{id}";
+            foreach my $comment (@{ $action->{remove_comments}}) {
+                $del_comments->execute($comment->{id}) or die "failed to delete comment $c->{id}";
             }
-            foreach my $a (@{ $action->{remove_activities}}) {
-                $del_activity->execute($a->{id}) or die "failed to delete comment $a->{id}";
+            foreach my $activity (@{ $action->{remove_activities}}) {
+                $del_activity->execute($activity->{id}) or die "failed to delete comment $a->{id}";
             }
             tag_for_recount_from_bug($bug_id);
             $dbh->bz_commit_transaction;

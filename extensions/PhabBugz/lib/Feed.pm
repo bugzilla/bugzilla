@@ -196,7 +196,7 @@ sub feed_query {
         );
 
         with_writable_database {
-            $self->process_revision_change($revision);
+            $self->process_revision_change($revision, " created D" . $revision->id);
         };
 
         # Set the build target to a passing status to

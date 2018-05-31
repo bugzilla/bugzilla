@@ -15,23 +15,18 @@ use base 'Bugzilla::Extension::Push::Connector::Base';
 
 use Bugzilla::Bug;
 use Bugzilla::Constants;
-use Bugzilla::Error;
-use Bugzilla::User;
 
 use Bugzilla::Extension::PhabBugz::Constants;
+use Bugzilla::Extension::PhabBugz::Policy;
+use Bugzilla::Extension::PhabBugz::Project;
+use Bugzilla::Extension::PhabBugz::Revision;
 use Bugzilla::Extension::PhabBugz::Util qw(
-  add_comment_to_revision
   add_security_sync_comments
-  create_private_revision_policy
-  edit_revision_policy
   get_attachment_revisions
   get_bug_role_phids
-  get_project_phid
   get_security_sync_groups
-  make_revision_public
-  make_revision_private
-  set_revision_subscribers
 );
+
 use Bugzilla::Extension::Push::Constants;
 use Bugzilla::Extension::Push::Util qw(is_public);
 
@@ -75,72 +70,64 @@ sub send {
 
     my @set_groups = get_security_sync_groups($bug);
 
-    my @revisions = get_attachment_revisions($bug);
-
-    if (!$is_public && !@set_groups) {
-        foreach my $revision (@revisions) {
-            Bugzilla->audit(sprintf(
-              'Making revision %s for bug %s private due to unkown Bugzilla groups: %s',
-              $revision->{id},
-              $bug->id,
-              join(', ', @set_groups)
-            ));
-            make_revision_private( $revision->{phid} );
-        }
-
-        add_security_sync_comments(\@revisions, $bug);
-
-        return PUSH_RESULT_OK;
-    }
+    my $revisions = get_attachment_revisions($bug);
 
     my $group_change =
       ($message->routing_key =~ /^(?:attachment|bug)\.modify:.*\bbug_group\b/)
       ? 1
       : 0;
 
-    my $subscribers;
-    if ( !$is_public ) {
-        $subscribers = get_bug_role_phids($bug);
-    }
-
-    my $secure_project_phid = get_project_phid('secure-revision');
-
-    foreach my $revision (@revisions) {
-        my $revision_phid = $revision->{phid};
-
-        my $rev_obj = Bugzilla::Extension::PhabBugz::Revision->new_from_query({ phids => [ $revision_phid ] });
-        my $revision_updated;
+    foreach my $revision (@$revisions) {
+        my $secure_revision = Bugzilla::Extension::PhabBugz::Project->new_from_query({
+            name => 'secure-revision'
+        });
 
         if ( $is_public && $group_change ) {
             Bugzilla->audit(sprintf(
               'Making revision %s public for bug %s',
-              $revision->{id},
+              $revision->id,
               $bug->id
             ));
-            make_revision_public($revision_phid);
-            $rev_obj->remove_project($secure_project_phid);
-            $revision_updated = 1;
+            $revision->set_policy('view', 'public');
+            $revision->set_policy('edit', 'users');
+            $revision->remove_project($secure_revision->phid);
+        }
+        elsif ( !$is_public && !@set_groups ) {
+            Bugzilla->audit(sprintf(
+              'Making revision %s for bug %s private due to unkown Bugzilla groups: %s',
+              $revision->id,
+              $bug->id,
+              join(', ', @set_groups)
+            ));
+            $revision->set_policy('view', $secure_revision->phid);
+            $revision->set_policy('edit', $secure_revision->phid);
+            $revision->add_project($secure_revision->phid);
+            add_security_sync_comments([$revision], $bug);
         }
         elsif ( !$is_public && $group_change ) {
             Bugzilla->audit(sprintf(
               'Giving revision %s a custom policy for bug %s',
-              $revision->{id},
+              $revision->id,
               $bug->id
             ));
-            my $policy_phid = create_private_revision_policy( \@set_groups );
-            edit_revision_policy( $revision_phid, $policy_phid, $subscribers );
-            $rev_obj->add_project($secure_project_phid);
-            $revision_updated = 1;
+            my @set_projects = map { "bmo-" . $_ } @set_groups;
+            my $new_policy = Bugzilla::Extension::PhabBugz::Policy->create(\@set_projects);
+            $revision->set_policy('view', $new_policy->phid);
+            $revision->set_policy('edit', $new_policy->phid);
+            $revision->add_project($secure_revision->phid);
         }
-        elsif ( !$is_public && !$group_change ) {
-            Bugzilla->audit(sprintf(
-              'Updating subscribers for %s for bug %s',
-              $revision->{id},
-              $bug->id
-            ));
-            set_revision_subscribers( $revision_phid, $subscribers );
-        }
-        $rev_obj->update() if $revision_updated;
+
+        # Subscriber list of the private revision should always match
+        # the bug roles such as assignee, qa contact, and cc members.
+        Bugzilla->audit(sprintf(
+          'Updating subscribers for %s for bug %s',
+          $revision->id,
+          $bug->id
+        ));
+        my $subscribers = get_bug_role_phids($bug);
+        $revision->set_subscribers($subscribers) if $subscribers;
+
+        $revision->update();
     }
 
     return PUSH_RESULT_OK;

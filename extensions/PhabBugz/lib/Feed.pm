@@ -33,10 +33,8 @@ use Bugzilla::Extension::PhabBugz::Util qw(
     add_security_sync_comments
     create_revision_attachment
     get_bug_role_phids
-    get_project_phid
     get_security_sync_groups
     is_attachment_phab_revision
-    make_revision_public
     request
     set_phab_user
 );
@@ -117,7 +115,7 @@ sub feed_query {
 
     # PROCESS NEW FEED TRANSACTIONS
 
-    INFO("Fetching new transactions");
+    INFO("Fetching new stories");
 
     my $story_last_id = $self->get_last_id('feed');
 
@@ -265,9 +263,6 @@ sub group_query {
 
     INFO("Updating group memberships");
 
-    # Pre setup before making changes
-    my $old_user = set_phab_user();
-
     # Loop through each group and perform the following:
     #
     # 1. Load flattened list of group members
@@ -332,8 +327,6 @@ sub group_query {
         $project->set_members( [ ($phab_user, @group_members) ] );
         $project->update();
     }
-
-    Bugzilla->set_user($old_user);
 }
 
 sub process_revision_change {
@@ -384,6 +377,10 @@ sub process_revision_change {
     my $bug = Bugzilla::Bug->new({ id => $revision->bug_id, cache => 1 });
 
     # REVISION SECURITY POLICY
+
+    my $secure_revision = Bugzilla::Extension::PhabBugz::Project->new_from_query({
+        name => 'secure-revision'
+    });
 
     # If bug is public then remove privacy policy
     if (!@{ $bug->groups_in }) {

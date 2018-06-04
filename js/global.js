@@ -219,7 +219,7 @@ const detect_blocked_gravatars = () => {
  */
 const adjust_scroll_onload = () => {
     if (location.hash) {
-        const $target = document.querySelector(location.hash);
+        const $target = document.querySelector(CSS.escape(location.hash));
 
         if ($target) {
             window.setTimeout(() => scroll_element_into_view($target), 50);

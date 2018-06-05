@@ -129,7 +129,7 @@
 
       [% BLOCK requests_table %]
         <div id="[% name FILTER html %]_container" class="requests">
-            <div class="query_heading">[% title FILTER html %]</div>
+            <div class="query_heading">[% title FILTER html_light %]</div>
             <span id="[% name FILTER html %]_loading" class="items_found">Loading...</span>
             <span id="[% name FILTER html %]_count_refresh" class="bz_default_hidden">
             <span class="items_found" id="[% name FILTER html %]_flags_found">0 reviews found</span>
@@ -143,7 +143,8 @@
       [% ## no-008filter
         # requires PhabBugz extension
         IF Param('phabricator_enabled');
-            PROCESS requests_table name='reviews' title='Reviews Requested of You';
+            title = '<a href="' _ Param('phabricator_base_uri') _ '">Phabricator</a> Reviews Requested of You';
+            PROCESS requests_table name='reviews' title=title;
         END;
 
         PROCESS requests_table name='requestee' title='Flags Requested of You';

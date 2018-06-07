@@ -188,7 +188,7 @@ sub feed_query {
 
         my $revision =
           Bugzilla::Extension::PhabBugz::Revision->new_from_query(
-            { 
+            {
               ids => [ int($revision_id) ]
             }
         );
@@ -337,7 +337,7 @@ sub process_revision_change {
         blessed $revision_phid
         ? $revision_phid
         : Bugzilla::Extension::PhabBugz::Revision->new_from_query({ phids => [ $revision_phid ] });
-    
+
     my $secure_revision =
       Bugzilla::Extension::PhabBugz::Project->new_from_query(
         {
@@ -377,10 +377,6 @@ sub process_revision_change {
     my $bug = Bugzilla::Bug->new({ id => $revision->bug_id, cache => 1 });
 
     # REVISION SECURITY POLICY
-
-    my $secure_revision = Bugzilla::Extension::PhabBugz::Project->new_from_query({
-        name => 'secure-revision'
-    });
 
     # If bug is public then remove privacy policy
     if (!@{ $bug->groups_in }) {
@@ -808,7 +804,7 @@ sub get_group_members {
     }
 
     return if !@userids;
-    
+
     # Look up the phab ids for these users
     my $phab_users = Bugzilla::Extension::PhabBugz::User->match(
       {

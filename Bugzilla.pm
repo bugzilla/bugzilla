@@ -38,6 +38,8 @@ use Bugzilla::Flag;
 use Bugzilla::Hook;
 use Bugzilla::Install::Localconfig qw(read_localconfig);
 use Bugzilla::Install::Util qw(init_console include_languages);
+use Bugzilla::Markdown::GFM;
+use Bugzilla::Markdown::GFM::Parser;
 use Bugzilla::Memcached;
 use Bugzilla::Template;
 use Bugzilla::Token;
@@ -865,6 +867,11 @@ sub check_rate_limit {
     }
 }
 
+sub markdown_parser {
+    return request_cache->{markdown_parser}
+        ||= Bugzilla::Markdown::GFM::Parser->new( {extensions => [qw( autolink tagfilter table strikethrough)] } );
+}
+
 # Private methods
 
 # Per-process cleanup. Note that this is a plain subroutine, not a method,
@@ -1189,6 +1196,11 @@ of features, see C<OPTIONAL_MODULES> in C<Bugzilla::Install::Requirements>.
 =item C<audit>
 
 Feeds the provided message into our centralised auditing system.
+
+=item C<markdown_parser>
+
+Returns a L<Bugzilla::Markdown::GFM::Parser> with the default extensions
+loaded (autolink, tagfilter, table, and strikethrough).
 
 =back
 

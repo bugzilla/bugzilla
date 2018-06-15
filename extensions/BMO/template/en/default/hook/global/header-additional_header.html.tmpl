@@ -21,7 +21,7 @@
 
 <link rel="shortcut icon" href="extensions/BMO/web/images/favicon.ico">
 [% IF bug %]
-<link id="shorturl" rev="canonical" href="https://bugzil.la/[% bug.bug_id FILTER uri %]">
+<link id="shorturl" rel="canonical" href="[% Bugzilla.localconfig.canonical_urlbase FILTER none %]bug/[% bug.bug_id FILTER uri %]">
 [% END %]
 
 [%# *** Bug List Navigation *** %]

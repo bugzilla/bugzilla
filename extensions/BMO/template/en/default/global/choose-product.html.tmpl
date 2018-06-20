@@ -173,12 +173,14 @@
 </section>
 </div>
 
+[% IF NOT is_describe %]
 <div id="guided">
   <a href="enter_bug.cgi?format=guided">
     <img src="extensions/BMO/web/images/guided.png" width="16" height="16">
     Switch to the [% terms.Bugzilla %] Helper</a> |
   <a href="page.cgi?id=custom_forms.html">Custom [% terms.bug %] entry forms</a>
 </div>
+[% END %]
 
 [% PROCESS global/footer.html.tmpl %]
 

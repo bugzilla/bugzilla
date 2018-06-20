@@ -767,6 +767,13 @@ sub update_table_definitions {
     $dbh->bz_add_column('components', 'triage_owner_id',
                         {TYPE => 'INT3'});
 
+    $dbh->bz_add_column('profiles', 'nickname',
+                        {TYPE => 'varchar(255)', NOTNULL => 1, DEFAULT => "''"});
+    $dbh->bz_add_index('profiles', 'profiles_nickname_idx', [qw(nickname)]);
+
+    $dbh->bz_add_index('profiles', 'profiles_realname_ft_idx',
+                       {TYPE => 'FULLTEXT', FIELDS => ['realname']});
+
     ################################################################
     # New --TABLE-- changes should go *** A B O V E *** this point #
     ################################################################

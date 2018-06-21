@@ -38,6 +38,14 @@ table#attachment_flags td {
     font-size: small;
 }
 
+#data-error {
+    margin: 4px 0 0;
+}
+
+#data-error:empty {
+    margin: 0;
+}
+
 /* Rules used to view patches in diff mode. */
 
 .file_head {

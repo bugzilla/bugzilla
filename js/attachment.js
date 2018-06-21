@@ -93,6 +93,21 @@ function DataFieldHandler() {
             }
         }
     }
+
+    // Check the current file size (in KB)
+    const file_size = field_data.files[0].size / 1024;
+    const max_size = BUGZILLA.param.maxattachmentsize;
+    const invalid = file_size > max_size;
+    const message = invalid ? `This file (<strong>${(file_size / 1024).toFixed(1)} MB</strong>) is larger than the ` +
+      `maximum allowed size (<strong>${(max_size / 1024).toFixed(1)} MB</strong>).<br>Please consider uploading it ` +
+      `to an online file storage and sharing the link in a bug comment instead.` : '';
+    const message_short = invalid ? 'File too large' : '';
+    const $error = document.querySelector('#data-error');
+
+    // Show an error message if the file is too large
+    $error.innerHTML = message;
+    field_data.setCustomValidity(message_short);
+    field_data.setAttribute('aria-invalid', invalid);
 }
 
 function clearAttachmentFields() {

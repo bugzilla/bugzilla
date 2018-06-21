@@ -37,7 +37,8 @@
     <em>Enter the path to the file on your computer</em> (or
     <a id="attachment_data_controller">
     paste text as attachment</a>).<br>
-    <input type="file" id="data" name="data" size="50">
+    <input type="file" id="data" name="data" size="50" aria-errormessage="data-error" aria-invalid="false">
+    <div id="data-error" class="warning" aria-live="assertive"><div>
   </td>
 </tr>
 <tr class="attachment_text_field">
@@ -69,7 +70,7 @@
     [%# Reset this whenever the page loads so that the JS state is up to date %]
     <script [% script_nonce FILTER none %]>
       $(function() {
-        $("#file").on("change", function() {
+        $("#data").on("change", function() {
           DataFieldHandler();
           // Fire event to keep take-bug in sync.
           $("#ispatch").change();

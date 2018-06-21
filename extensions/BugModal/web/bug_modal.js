@@ -357,7 +357,9 @@ $(function() {
                     // execCommand("copy") only works on selected text
                     $('#clip-container').show();
                     $('#clip').val(clipboardSummary()).select();
-                    document.execCommand("copy");
+                    $('#floating-message-text')
+                        .text(document.execCommand("copy") ? 'Bug summary copied!' : 'Couldn’t copy bug summary');
+                    $('#floating-message').fadeIn(250).delay(2500).fadeOut();
                     $('#clip-container').hide();
                 });
         }

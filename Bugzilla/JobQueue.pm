@@ -59,7 +59,7 @@ sub new {
     # to write to it.
     my $self = $class->SUPER::new(
         databases => [{
-            dsn    => Bugzilla->dbh_main->{private_bz_dsn},
+            dsn    => Bugzilla->dbh_main->dsn,
             user   => $lc->{db_user},
             pass   => $lc->{db_pass},
             prefix => 'ts_',

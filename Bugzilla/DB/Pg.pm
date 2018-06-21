@@ -22,19 +22,18 @@ For interface details see L<Bugzilla::DB> and L<DBI>.
 package Bugzilla::DB::Pg;
 
 use 5.10.1;
-use strict;
-use warnings;
+use Moo;
 
 use Bugzilla::Error;
 use Bugzilla::Version;
 use DBD::Pg;
 
 # This module extends the DB interface via inheritance
-use base qw(Bugzilla::DB);
+extends qw(Bugzilla::DB);
 
 use constant BLOB_TYPE => { pg_type => DBD::Pg::PG_BYTEA };
 
-sub new {
+sub BUILDARGS {
     my ($class, $params) = @_;
     my ($user, $pass, $host, $dbname, $port) =
         @$params{qw(db_user db_pass db_host db_name db_port)};
@@ -55,18 +54,7 @@ sub new {
 
     my $attrs = { pg_enable_utf8 => Bugzilla->params->{'utf8'} };
 
-    my $self = $class->db_new({ dsn => $dsn, user => $user,
-                                pass => $pass, attrs => $attrs });
-
-    # all class local variables stored in DBI derived class needs to have
-    # a prefix 'private_'. See DBI documentation.
-    $self->{private_bz_tables_locked} = "";
-    # Needed by TheSchwartz
-    $self->{private_bz_dsn} = $dsn;
-
-    bless ($self, $class);
-
-    return $self;
+    return { dsn => $dsn, user => $user, pass => $pass, attrs => $attrs }
 }
 
 # if last_insert_id is supported on PostgreSQL by lowest DBI/DBD version

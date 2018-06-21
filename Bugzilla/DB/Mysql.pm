@@ -22,10 +22,9 @@ For interface details see L<Bugzilla::DB> and L<DBI>.
 package Bugzilla::DB::Mysql;
 
 use 5.10.1;
-use strict;
-use warnings;
+use Moo;
 
-use base qw(Bugzilla::DB);
+extends qw(Bugzilla::DB);
 
 use Bugzilla::Constants;
 use Bugzilla::Install::Util qw(install_string);
@@ -43,7 +42,7 @@ use constant MAX_COMMENTS => 50;
 
 use constant FULLTEXT_OR => '|';
 
-sub new {
+sub BUILDARGS {
     my ($class, $params) = @_;
     my ($user, $pass, $host, $dbname, $port, $sock) =
         @$params{qw(db_user db_pass db_host db_name db_port db_sock)};
@@ -55,28 +54,20 @@ sub new {
 
     my %attrs = (
         mysql_enable_utf8 => Bugzilla->params->{'utf8'},
-        # Needs to be explicitly specified for command-line processes.
-        mysql_auto_reconnect => 1,
     );
 
-    my $self = $class->db_new({ dsn => $dsn, user => $user,
-                                pass => $pass, attrs => \%attrs });
+    return { dsn => $dsn, user => $user, pass => $pass, attrs => \%attrs };
+}
+
+sub on_dbi_connected {
+    my ($class, $dbh) = @_;
 
     # This makes sure that if the tables are encoded as UTF-8, we
     # return their data correctly.
-    $self->do("SET NAMES utf8") if Bugzilla->params->{'utf8'};
-
-    # all class local variables stored in DBI derived class needs to have
-    # a prefix 'private_'. See DBI documentation.
-    $self->{private_bz_tables_locked} = "";
-
-    # Needed by TheSchwartz
-    $self->{private_bz_dsn} = $dsn;
-
-    bless ($self, $class);
+    $dbh->do("SET NAMES utf8") if Bugzilla->params->{'utf8'};
 
     # Bug 321645 - disable MySQL strict mode, if set
-    my ($var, $sql_mode) = $self->selectrow_array(
+    my ($var, $sql_mode) = $dbh->selectrow_array(
         "SHOW VARIABLES LIKE 'sql\\_mode'");
 
     if ($sql_mode) {
@@ -88,15 +79,13 @@ sub new {
                             split(/,/, $sql_mode));
 
         if ($sql_mode ne $new_sql_mode) {
-            $self->do("SET SESSION sql_mode = ?", undef, $new_sql_mode);
+            $dbh->do("SET SESSION sql_mode = ?", undef, $new_sql_mode);
         }
     }
 
     # Allow large GROUP_CONCATs (largely for inserting comments
     # into bugs_fulltext).
-    $self->do('SET SESSION group_concat_max_len = 128000000');
-
-    return $self;
+    $dbh->do('SET SESSION group_concat_max_len = 128000000');
 }
 
 # when last_insert_id() is supported on MySQL by lowest DBI/DBD version

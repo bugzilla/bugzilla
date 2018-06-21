@@ -42,6 +42,7 @@ my %requires = (
     'CPAN::Meta::Requirements' => '2.121',
     'Class::XSAccessor'        => '1.18',
     'DBI'                      => '1.614',
+    'DBIx::Connector'          => 0,
     'Data::Password::passwdqc' => '0.08',
     'Date::Format'             => '2.23',
     'DateTime'                 => '0.75',

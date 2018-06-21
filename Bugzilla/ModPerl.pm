@@ -74,7 +74,7 @@ __DATA__
 # every process, and Perl has another. (Various Perl modules still use
 # the built-in rand(), even though we never use it in Bugzilla itself,
 # so we need to srand() both of them.)
-PerlChildInitHandler "sub { Bugzilla::RNG::srand(); srand(); }"
+PerlChildInitHandler "sub { Bugzilla::RNG::srand(); srand(); eval { Bugzilla->dbh->ping } }"
 PerlInitHandler Bugzilla::ModPerl::Hostage
 PerlAccessHandler Bugzilla::ModPerl::BlockIP
 

@@ -893,7 +893,6 @@ sub _cleanup {
     foreach my $dbh ($main, $shadow) {
         next if !$dbh;
         $dbh->bz_rollback_transaction() if $dbh->bz_in_transaction;
-        $dbh->disconnect;
     }
     clear_request_cache();
 

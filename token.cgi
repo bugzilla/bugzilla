@@ -23,7 +23,7 @@ use Date::Format;
 use Date::Parse;
 use JSON qw( decode_json );
 
-my $dbh = Bugzilla->dbh;
+local our $dbh = Bugzilla->dbh;
 local our $cgi = Bugzilla->cgi;
 local our $template = Bugzilla->template;
 local our $vars = {};

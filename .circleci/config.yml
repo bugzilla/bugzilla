@@ -7,7 +7,7 @@ version: 2
 
 defaults:
   bmo_slim_image: &bmo_slim_image
-    image: mozillabteam/bmo-slim:20180518.1
+    image: mozillabteam/bmo-slim:20180523.1
     user: app
 
   mysql_image: &mysql_image

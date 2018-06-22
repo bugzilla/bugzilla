@@ -116,7 +116,7 @@ sub create {
 
         push @{ $data->{policy} }, {
             action => 'allow',
-            rule   => 'PhabricatorProjectsPolicyRule',
+            rule   => 'PhabricatorProjectsAllPolicyRule',
             value  => $project_phids,
         };
     }
@@ -135,7 +135,7 @@ sub _build_rule_projects {
     my ($self) = @_;
 
     return [] unless $self->rules;
-    my $rule = first { $_->{rule} eq 'PhabricatorProjectsPolicyRule'} @{ $self->rules };
+    my $rule = first { $_->{rule} =~ /PhabricatorProjects(?:All)?PolicyRule/ } @{ $self->rules };
     return [] unless $rule;
     return [
         map  { $_->name }

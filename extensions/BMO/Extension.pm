@@ -1212,7 +1212,7 @@ sub _attachment_fetch_github_pr_diff {
         warn "Github fetch error: $pr_diff, " . $response->status_line;
         return "Error retrieving Github pull request diff for " . $self->data;
     }
-    return $response->content;
+    return $response->decoded_content;
 }
 
 # redirect automatically to github urls

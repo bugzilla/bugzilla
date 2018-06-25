@@ -17,6 +17,7 @@ use Type::Utils;
 use Bugzilla::Bug;
 use Bugzilla::Error;
 use Bugzilla::Util qw(trim);
+use Bugzilla::Extension::PhabBugz::Project;
 use Bugzilla::Extension::PhabBugz::User;
 use Bugzilla::Extension::PhabBugz::Util qw(request);
 
@@ -35,12 +36,12 @@ has author_phid      => ( is => 'ro',   isa => Str );
 has bug_id           => ( is => 'ro',   isa => Str );
 has view_policy      => ( is => 'ro',   isa => Str );
 has edit_policy      => ( is => 'ro',   isa => Str );
-has projects_raw     => ( is => 'ro',   isa => ArrayRef [Str] );
 has subscriber_count => ( is => 'ro',   isa => Int );
 has bug              => ( is => 'lazy', isa => Object );
 has author           => ( is => 'lazy', isa => Object );
 has reviewers        => ( is => 'lazy', isa => ArrayRef [Object] );
 has subscribers      => ( is => 'lazy', isa => ArrayRef [Object] );
+has projects         => ( is => 'lazy', isa => ArrayRef [Object] );
 has reviewers_raw => (
     is  => 'ro',
     isa => ArrayRef [
@@ -58,6 +59,12 @@ has subscribers_raw => (
         subscriberPHIDs => ArrayRef [Str],
         subscriberCount => Int,
         viewerIsSubscribed => Bool,
+    ]
+);
+has projects_raw => (
+    is => 'ro',
+    isa => Dict [
+        projectPHIDs => ArrayRef [Str]
     ]
 );
 
@@ -91,18 +98,18 @@ sub new_from_query {
 sub BUILDARGS {
     my ( $class, $params ) = @_;
 
-    $params->{title}           = $params->{fields}->{title};
-    $params->{summary}         = $params->{fields}->{summary};
-    $params->{status}          = $params->{fields}->{status}->{value};
-    $params->{creation_ts}     = $params->{fields}->{dateCreated};
-    $params->{modification_ts} = $params->{fields}->{dateModified};
-    $params->{author_phid}     = $params->{fields}->{authorPHID};
-    $params->{bug_id}          = $params->{fields}->{'bugzilla.bug-id'};
-    $params->{view_policy}     = $params->{fields}->{policy}->{view};
-    $params->{edit_policy}     = $params->{fields}->{policy}->{edit};
-    $params->{reviewers_raw} = $params->{attachments}->{reviewers}->{reviewers};
-    $params->{subscribers_raw} = $params->{attachments}->{subscribers};
-    $params->{projects}        = $params->{attachments}->{projects};
+    $params->{title}            = $params->{fields}->{title};
+    $params->{summary}          = $params->{fields}->{summary};
+    $params->{status}           = $params->{fields}->{status}->{value};
+    $params->{creation_ts}      = $params->{fields}->{dateCreated};
+    $params->{modification_ts}  = $params->{fields}->{dateModified};
+    $params->{author_phid}      = $params->{fields}->{authorPHID};
+    $params->{bug_id}           = $params->{fields}->{'bugzilla.bug-id'};
+    $params->{view_policy}      = $params->{fields}->{policy}->{view};
+    $params->{edit_policy}      = $params->{fields}->{policy}->{edit};
+    $params->{reviewers_raw}    = $params->{attachments}->{reviewers}->{reviewers};
+    $params->{subscribers_raw}  = $params->{attachments}->{subscribers};
+    $params->{projects_raw}     = $params->{attachments}->{projects};
     $params->{subscriber_count} =
       $params->{attachments}->{subscribers}->{subscriberCount};
 
@@ -343,6 +350,24 @@ sub _build_subscribers {
     return $self->{subscribers} = $users;
 }
 
+sub _build_projects {
+    my ($self) = @_;
+
+    return $self->{projects} if $self->{projects};
+    return [] unless $self->projects_raw->{projectPHIDs};
+
+    my @projects;
+    foreach my $phid ( @{ $self->projects_raw->{projectPHIDs} } ) {
+        push @projects, Bugzilla::Extension::PhabBugz::Project->new_from_query(
+          {
+            phids => [ $phid ]
+          }
+        );
+    }
+
+    return $self->{projects} = \@projects;
+}
+
 #########################
 #       Mutators        #
 #########################
@@ -414,6 +439,59 @@ sub remove_project {
     my $project_phid = blessed $project ? $project->phid : $project;
     return undef unless $project_phid;
     push @{ $self->{remove_projects} }, $project_phid;
+}
+
+sub make_private {
+    my ( $self, $project_names ) = @_;
+
+    my $secure_revision_project =
+      Bugzilla::Extension::PhabBugz::Project->new_from_query(
+        {
+          name => 'secure-revision'
+        }
+      );
+
+    my @set_projects;
+    foreach my $name (@$project_names) {
+        my $set_project =
+          Bugzilla::Extension::PhabBugz::Project->new_from_query(
+            {
+                name => $name
+            }
+            );
+        push @set_projects, $set_project;
+    }
+
+    my $new_policy = Bugzilla::Extension::PhabBugz::Policy->create(\@set_projects);
+    $self->set_policy('view', $new_policy->phid);
+    $self->set_policy('edit', $new_policy->phid);
+
+    foreach my $project ($secure_revision_project, @set_projects) {
+        $self->add_project($project->phid);
+    }
+
+    return $self;
+}
+
+sub make_public {
+    my ( $self ) = @_;
+
+    my $edit_bugs = 
+        Bugzilla::Extension::PhabBugz::Project->new_from_query(
+        {
+          name => 'bmo-editbugs-team'
+        }
+      );
+
+    $self->set_policy('view', 'public');
+    $self->set_policy('edit', ($edit_bugs ? $edit_bugs->phid : 'users'));
+
+    my @current_group_projects = grep { $_->name =~ /^(bmo-.*|secure-revision)$/ } @{ $self->projects };
+    foreach my $project (@current_group_projects) {
+        $self->remove_project($project->phid);
+    }
+
+    return $self;
 }
 
 1;

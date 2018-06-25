@@ -67,6 +67,11 @@ use constant UPDATE_COLUMNS => qw(
 use constant GROUP_PARAMS => qw(chartgroup insidergroup timetrackinggroup
                                 querysharegroup);
 
+
+sub DYNAMIC_COLUMNS {
+    return Bugzilla->usage_mode == USAGE_MODE_CMDLINE;
+}
+
 ###############################
 ####      Accessors      ######
 ###############################

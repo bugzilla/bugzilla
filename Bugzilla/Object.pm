@@ -44,6 +44,9 @@ use constant USE_MEMCACHED => 1;
 # values, keywords, products, classifications, priorities, severities, etc.
 use constant IS_CONFIG => 0;
 
+# When DYNAMIC_COLUMNS is true, _get_db_columns() will use the information schema.
+use constant DYNAMIC_COLUMNS => 0;
+
 # This allows the JSON-RPC interface to return Bugzilla::Object instances
 # as though they were hashes. In the future, this may be modified to return
 # less information.
@@ -888,13 +891,19 @@ sub _get_db_columns {
     my $cache = Bugzilla->request_cache;
     my $cache_key = "object_${class}_db_columns";
     return @{ $cache->{$cache_key} } if $cache->{$cache_key};
-    # Currently you can only add new columns using object_columns, not
-    # remove or modify existing columns, because removing columns would
-    # almost certainly cause Bugzilla to function improperly.
-    my @add_columns;
-    Bugzilla::Hook::process('object_columns',
-                            { class => $class, columns => \@add_columns });
-    my @columns = ($invocant->DB_COLUMNS, @add_columns);
+    my @columns;
+    if ($class->DYNAMIC_COLUMNS) {
+        @columns = Bugzilla->dbh->bz_table_columns_real($class->DB_TABLE);
+    }
+    else {
+        # Currently you can only add new columns using object_columns, not
+        # remove or modify existing columns, because removing columns would
+        # almost certainly cause Bugzilla to function improperly.
+        my @add_columns;
+        Bugzilla::Hook::process('object_columns',
+                                { class => $class, columns => \@add_columns });
+        @columns = ($invocant->DB_COLUMNS, @add_columns);
+    }
     $cache->{$cache_key} = \@columns;
     return @{ $cache->{$cache_key} };
 }

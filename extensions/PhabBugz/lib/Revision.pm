@@ -288,7 +288,7 @@ sub _build_author {
       }
     );
     if ($phab_user) {
-        return $self->{author} = $phab_user->bugzilla_user;
+        return $self->{author} = $phab_user;
     }
 }
 

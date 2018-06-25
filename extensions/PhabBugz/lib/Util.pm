@@ -22,6 +22,7 @@ use JSON::XS qw(encode_json decode_json);
 use List::Util qw(first);
 use LWP::UserAgent;
 use Taint::Util qw(untaint);
+use Try::Tiny;
 
 use base qw(Exporter);
 
@@ -39,7 +40,7 @@ our @EXPORT = qw(
 );
 
 sub create_revision_attachment {
-    my ( $bug, $revision, $timestamp ) = @_;
+    my ( $bug, $revision, $timestamp, $submitter ) = @_;
 
     my $phab_base_uri = Bugzilla->params->{phabricator_base_uri};
     ThrowUserError('invalid_phabricator_uri') unless $phab_base_uri;
@@ -59,22 +60,38 @@ sub create_revision_attachment {
         ($timestamp) = Bugzilla->dbh->selectrow_array("SELECT NOW()");
     }
 
-    my $attachment = Bugzilla::Attachment->create(
-        {
-            bug         => $bug,
-            creation_ts => $timestamp,
-            data        => $revision_uri,
-            description => $revision->title,
-            filename    => 'phabricator-D' . $revision->id . '-url.txt',
-            ispatch     => 0,
-            isprivate   => 0,
-            mimetype    => PHAB_CONTENT_TYPE,
+    # If submitter, then switch to that user when creating attachment
+    my ($old_user, $attachment);
+    try {
+        if ($submitter) {
+            $old_user = Bugzilla->user;
+            $submitter->{groups} = [ Bugzilla::Group->get_all ]; # We need to always be able to add attachment
+            Bugzilla->set_user($submitter);
         }
-    );
 
-    # Insert a comment about the new attachment into the database.
-    $bug->add_comment($revision->summary, { type       => CMT_ATTACHMENT_CREATED,
-                                            extra_data => $attachment->id });
+        $attachment = Bugzilla::Attachment->create(
+            {
+                bug         => $bug,
+                creation_ts => $timestamp,
+                data        => $revision_uri,
+                description => $revision->title,
+                filename    => 'phabricator-D' . $revision->id . '-url.txt',
+                ispatch     => 0,
+                isprivate   => 0,
+                mimetype    => PHAB_CONTENT_TYPE,
+            }
+        );
+
+        # Insert a comment about the new attachment into the database.
+        $bug->add_comment($revision->summary, { type       => CMT_ATTACHMENT_CREATED,
+                                                extra_data => $attachment->id });
+    }
+    catch {
+        die $_;
+    }
+    finally {
+        Bugzilla->set_user($old_user) if $old_user;
+    };
 
     return $attachment;
 }
@@ -106,8 +123,7 @@ sub get_bug_role_phids {
 
 sub is_attachment_phab_revision {
     my ($attachment) = @_;
-    return ($attachment->contenttype eq PHAB_CONTENT_TYPE
-            && $attachment->attacher->login eq PHAB_AUTOMATION_USER) ? 1 : 0;
+    return $attachment->contenttype eq PHAB_CONTENT_TYPE;
 }
 
 sub get_attachment_revisions {

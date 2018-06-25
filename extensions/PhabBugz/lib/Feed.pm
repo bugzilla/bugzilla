@@ -445,8 +445,10 @@ sub process_revision_change {
 
     my ($timestamp) = Bugzilla->dbh->selectrow_array("SELECT NOW()");
 
-    my $attachment = create_revision_attachment($bug, $revision, $timestamp);
-
+    INFO('Checking for revision attachment');
+    my $attachment = create_revision_attachment($bug, $revision, $timestamp, $revision->author->bugzilla_user);
+    INFO('Attachment ' . $attachment->id . ' created or already exists.');
+    
     # ATTACHMENT OBSOLETES
 
     # fixup attachments on current bug
@@ -641,9 +643,9 @@ sub process_new_user {
                 date               => $timestamp,
                 phab_user_login    => $phab_user->name,
                 phab_user_realname => $phab_user->realname,
-                bugzilla_userid    => $phab_user->bugzilla_user->id,
-                bugzilla_login     => $phab_user->bugzilla_user->login,
-                bugzilla_realname  => $phab_user->bugzilla_user->name,
+                bugzilla_userid    => $bug_user->id,
+                bugzilla_login     => $bug_user->login,
+                bugzilla_realname  => $bug_user->name,
                 squat_userid       => $row->{userid},
                 squat_login        => $row->{login_name},
                 squat_realname     => $row->{realname}

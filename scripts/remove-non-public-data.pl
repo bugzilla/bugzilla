@@ -174,7 +174,7 @@ foreach my $table (@tables) {
     else {
         print "dropping $table\n";
         drop_referencing($table);
-        $dbh->do("DROP TABLE $table");
+        $dbh->do("DROP TABLE IF EXISTS $table");
     }
 }
 

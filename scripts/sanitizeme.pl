@@ -26,7 +26,6 @@ use strict;
 use warnings;
 use lib qw(. lib local/lib/perl5);
 
-
 use Bugzilla;
 use Bugzilla::Bug;
 use Bugzilla::Constants;

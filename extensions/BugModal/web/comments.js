@@ -355,6 +355,8 @@ $(function() {
 
     $('#ctag-add')
         .devbridgeAutocomplete({
+            appendTo: $('#main-inner'),
+            forceFixPosition: true,
             serviceUrl: function(query) {
                 return 'rest/bug/comment/tags/' + encodeURIComponent(query);
             },

@@ -509,6 +509,8 @@ $(function() {
                     keywords = data.keywords;
                     $('#keywords')
                         .devbridgeAutocomplete({
+                            appendTo: $('#main-inner'),
+                            forceFixPosition: true,
                             lookup: function(query, done) {
                                 query = query.toLowerCase();
                                 var matchStart =

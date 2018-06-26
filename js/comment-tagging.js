@@ -35,6 +35,8 @@ YAHOO.bugzilla.commentTagging = {
         if (!can_edit) return;
 
         $('#bz_ctag_add').devbridgeAutocomplete({
+            appendTo: $('#main-inner'),
+            forceFixPosition: true,
             serviceUrl: function(query) {
                 return 'rest/bug/comment/tags/' + encodeURIComponent(query);
             },

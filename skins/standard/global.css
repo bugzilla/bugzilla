@@ -1308,6 +1308,7 @@ hr {
 }
 
 #main-inner {
+    position: relative;
     margin: 15px 0;
 }
 

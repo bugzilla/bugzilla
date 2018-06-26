@@ -713,6 +713,8 @@ $(function() {
     }
 
     var options_user = {
+        appendTo: $('#main-inner'),
+        forceFixPosition: true,
         serviceUrl: 'rest/elastic/suggest_users',
         params: {
             Bugzilla_api_token: BUGZILLA.api_token,
@@ -792,6 +794,8 @@ $(function() {
         .each(function() {
             var that = $(this);
             that.devbridgeAutocomplete({
+                appendTo: $('#main-inner'),
+                forceFixPosition: true,
                 lookup: function(query, done) {
                     var values = BUGZILLA.autocomplete_values[that.data('values')];
                     query = query.toLowerCase();

@@ -66,6 +66,8 @@ $(function() {
                 params.Bugzilla_api_token = BUGZILLA.api_token;
             }
             that.devbridgeAutocomplete({
+                appendTo: $('#main-inner'),
+                forceFixPosition: true,
                 serviceUrl: function(query) {
                     return 'rest/prod_comp_search/' + encodeURIComponent(query);
                 },

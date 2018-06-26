@@ -164,10 +164,6 @@ use constant LOCALCONFIG_VARS => (
         default => _migrate_param( "urlbase", "" ),
     },
     {
-        name    => 'canonical_urlbase',
-        default => '',
-    },
-    {
         name    => 'attachment_base',
         default => _migrate_param( "attachment_base", '' ),
     },
@@ -290,16 +286,13 @@ sub _read_localconfig_from_file {
 
 sub read_localconfig {
     my ($include_deprecated) = @_;
-    my $lc;
+
     if ($ENV{LOCALCONFIG_ENV}) {
-        $lc = _read_localconfig_from_env();
+        return _read_localconfig_from_env();
     }
     else {
-        $lc = _read_localconfig_from_file($include_deprecated);
+        return _read_localconfig_from_file($include_deprecated);
     }
-    $lc->{canonical_urlbase} //= $lc->{urlbase};
-
-    return $lc;
 }
 
 #

@@ -1435,18 +1435,14 @@ function show_new_changes_indicator() {
 
 // fix url after bug creation/update
 if (history && history.replaceState) {
-    let bug_id    = BUGZILLA.bug_id;
-    let bug_alias = BUGZILLA.bug_alias;
-    let bug_slug  = bug_alias || bug_id;
-    let url       = new URL(document.location.href);
-    if (!url.pathname.match(/^bug\/[0-9]+/)) {
-        url.searchParams.delete("id");
-        let new_url = url.search ? `/bug/${bug_slug}${url.search}` : `/bug/${bug_slug}`;
-        if (url.hash) {
-            new_url += url.hash;
-        }
-        history.replaceState(null, BUGZILLA.bug_title, new_url);
+    var href = document.location.href;
+    if (!href.match(/show_bug\.cgi/)) {
+        history.replaceState(null, BUGZILLA.bug_title, 'show_bug.cgi?id=' + BUGZILLA.bug_id);
         document.title = BUGZILLA.bug_title;
+    }
+    if (href.match(/show_bug\.cgi\?.*list_id=/)) {
+        href = href.replace(/[\?&]+list_id=(\d+|cookie)/, '');
+        history.replaceState(null, BUGZILLA.bug_title, href);
     }
 }
 

@@ -231,10 +231,6 @@ END
     localconfig_urlbase => <<'END',
 The URL that is the common initial leading part of all URLs.
 END
-    localconfig_canonical_urlbase => <<'END',
-The URL that is the canonical initial leading part of all URLs.
-This will be the production url for a dev site, for instance.
-END
     localconfig_use_suexec => <<'END',
 Set this to 1 if Bugzilla runs in an Apache SuexecUserGroup environment.
 

@@ -89,7 +89,6 @@
   [%# expose useful data to js %]
   BUGZILLA.bug_id = [% bug.id FILTER none %];
   BUGZILLA.bug_title = '[% unfiltered_title FILTER js %]';
-  BUGZILLA.bug_alias = '[% bug.alias FILTER js %]';
   BUGZILLA.user = {
     id: [% user.id FILTER none %],
     login: '[% user.login FILTER js %]',

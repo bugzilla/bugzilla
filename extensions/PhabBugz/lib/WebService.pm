@@ -116,7 +116,6 @@ sub needs_review {
     foreach my $review (@$reviews) {
         my $review_flat = {
             id     => $review->{id},
-            status => $review->{fields}{review_status},
             title  => $review->{fields}{title},
             url    => Bugzilla->params->{phabricator_base_uri} . 'D' . $review->{id},
         };

@@ -180,8 +180,6 @@ $(function () {
                 columns: [
                     { key: 'author_email', label: 'Requester', sortable: true,
                         formattter: phabAuthorFormatter, allowHTML: true },
-                    { key: 'id', label: 'Status', sortable: true,
-                        nodeFormatter: phabRowFormatter, allowHTML: true },
                     { key: 'bug_id', label: 'Bug', sortable: true,
                         formatter: bugLinkFormatter, allowHTML: true },
                     { key: 'updated', label: 'Updated', sortable: true,

@@ -94,7 +94,7 @@ sub _user_is_active {
     my ($self) = @_;
 
     # never consider .bugs or .tld addresses as inactive.
-    return 1 if $self->login =~ /bugs$/ || $self->login =~ /\.tld$/;
+    return 1 if $self->login =~ /\.(?:bugs|tld)$/;
     return 1 unless Bugzilla->params->{max_reviewer_last_seen};
     return 0 if !defined($self->last_seen_date);
 

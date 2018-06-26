@@ -190,9 +190,14 @@ sub MessageToMTA {
         my @recipients = Email::Address->parse($to);
         die qq{Unable to parse "To:" address - $to\n} unless @recipients;
         die qq{Did not expect more than one "To:" address in $to\n} if @recipients > 1;
-        my $badhosts = Bugzilla::Bloomfilter->lookup("badhosts") or die "No badhosts bloomfilter\n";
-        if ($badhosts->test($recipients[0]->host)) {
+        my $recipient = $recipients[0];
+        my $badhosts  = Bugzilla::Bloomfilter->lookup("badhosts");
+        if ($badhosts && $badhosts->test($recipient->host)) {
             WARN("Attempted to send email to address in badhosts: $to");
+            $email->header_set(to => '');
+        }
+        elsif ($recipient->host =~ /\.(?:bugs|tld)$/) {
+            WARN("Attempted to send email to fake address: $to");
             $email->header_set(to => '');
         }
     } catch {

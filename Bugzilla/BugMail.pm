@@ -277,7 +277,7 @@ sub Send {
             # BMO: never send emails to bugs or .tld addresses.  this check needs to
             # happen after the bugmail_recipients hook.
             if ($user->email_enabled && $dep_ok &&
-                ($user->login !~ /bugs$/) && ($user->login !~ /\.tld$/))
+                ($user->login !~ /\.(?:bugs|tld)$/))
             {
                 # Don't show summaries for bugs the user can't access, and
                 # provide a hook for extensions such as SecureMail to filter

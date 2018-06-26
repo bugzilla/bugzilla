@@ -83,12 +83,7 @@
 
   [%# update last-visited %]
   [% IF user.id && user.is_involved_in_bug(bug) %]
-    $(function() {
-      bugzilla_ajax({
-          url: 'rest/bug_user_last_visit/[% bug.id FILTER none %]',
-          type: 'POST'
-      });
-    });
+    document.addEventListener('DOMContentLoaded', () => show_new_changes_indicator(), { once: true });
   [% END %]
 
   [%# expose useful data to js %]
@@ -101,6 +96,7 @@
     is_insider: [% user.is_insider ? "true" : "false" %],
     is_timetracker: [% user.is_timetracker ? "true" : "false" %],
     can_tag: [% user.can_tag_comments ? "true" : "false" %],
+    timezone: '[% user.timezone.name FILTER js %]',
     settings: {
       quote_replies: '[% user.settings.quote_replies.value FILTER js %]',
       zoom_textareas: [% user.settings.zoom_textareas.value == "on" ? "true" : "false" %],

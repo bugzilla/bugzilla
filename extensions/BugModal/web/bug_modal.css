@@ -153,6 +153,12 @@ a.activity-ref {
     font-weight: normal;
     padding-right: 5px;
     color: #666;
+    opacity: 1;
+    transition: all .2s;
+}
+
+.module-spinner[aria-expanded="true"] ~ .module-subtitle {
+    opacity: 0;
 }
 
 .module .fields-lhs {

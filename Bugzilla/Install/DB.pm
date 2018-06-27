@@ -710,6 +710,11 @@ sub update_table_definitions {
     # 2014-07-27 LpSolit@gmail.com - Bug 1044561
     _fix_user_api_keys_indexes();
 
+
+    # 2018-06-14 dylan@mozilla.com - Bug 1468818
+    $dbh->bz_add_column('longdescs', 'is_markdown',
+                        {TYPE => 'BOOLEAN', NOTNULL => 1, DEFAULT => 'FALSE'});
+
     # 2014-10-?? dkl@mozilla.com - Bug 1062940
     $dbh->bz_alter_column('bugs', 'alias', { TYPE => 'varchar(40)' });
 
@@ -768,8 +773,6 @@ sub update_table_definitions {
 
     $dbh->bz_add_index('profiles', 'profiles_realname_ft_idx',
                        {TYPE => 'FULLTEXT', FIELDS => ['realname']});
-
-    $dbh->bz_drop_column('longdescs', 'is_markdown');
 
     ################################################################
     # New --TABLE-- changes should go *** A B O V E *** this point #

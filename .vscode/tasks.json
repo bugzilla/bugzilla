@@ -1,0 +1,45 @@
+{
+  // See https://go.microsoft.com/fwlink/?LinkId=733558
+  // for the documentation about the tasks.json format
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Vagrant: Start Local Server",
+      "type": "shell",
+      "command": "vagrant up",
+      "group": "none",
+      "problemMatcher": []
+    },
+    {
+      "label": "Vagrant: Suspend Local Server",
+      "type": "shell",
+      "command": "vagrant suspend",
+      "group": "none",
+      "problemMatcher": []
+    },
+    {
+      "label": "Vagrant: Update Local Server",
+      "type": "shell",
+      "command": "vagrant rsync && vagrant provision --provision-with update",
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Vagrant: Force Update Local Server",
+      "type": "shell",
+      "command": "vagrant rsync && vagrant provision",
+      "group": "build",
+      "problemMatcher": []
+    },
+    {
+      "label": "Vagrant: Update Perl Dependencies",
+      "type": "shell",
+      "command": "vagrant ssh web -c bmo-refresh-bundle",
+      "group": "none",
+      "problemMatcher": []
+    }
+  ]
+}

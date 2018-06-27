@@ -80,6 +80,12 @@ or db is changed, do a full provision:
 
     vagrant rsync && vagrant provision
 
+If you are using Visual Studio Code, these tasks are available from the editor's
+`Tasks menu`_. The update command can be run by simply hitting `Ctrl+Shift+B` on
+Windows/Linux or `Command+Shift+B` on macOS.
+
+.. _`Tasks menu`: https://code.visualstudio.com/docs/editor/tasks
+
 Testing Auth delegation
 -----------------------
 

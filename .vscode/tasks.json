@@ -20,7 +20,7 @@
     {
       "label": "Vagrant: Update Local Server",
       "type": "shell",
-      "command": "vagrant rsync && vagrant provision --provision-with update",
+      "command": "bash -c 'vagrant rsync && vagrant provision --provision-with update'",
       "group": {
         "kind": "build",
         "isDefault": true
@@ -30,7 +30,7 @@
     {
       "label": "Vagrant: Force Update Local Server",
       "type": "shell",
-      "command": "vagrant rsync && vagrant provision",
+      "command": "bash -c 'vagrant rsync && vagrant provision'",
       "group": "build",
       "problemMatcher": []
     },

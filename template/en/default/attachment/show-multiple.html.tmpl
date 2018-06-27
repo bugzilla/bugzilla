@@ -35,7 +35,7 @@
 %]
 [% IF hide_obsolete %]
   <div id="hidden_obsolete_message">
-    Obsolete attachments are hidden. To view all attachments (including obsolete) 
+    Obsolete attachments are hidden. To view all attachments (including obsolete)
     <a href="attachment.cgi?bugid=[% bug.id FILTER html %]&amp;action=viewall">click here</a>.
   </div>
 [% END %]
@@ -106,7 +106,7 @@
     [% END %]
   [% ELSE %]
     <p><b>
-      Attachment cannot be viewed because its MIME type is not text/*, image/*, or application/vnd.mozilla.*.
+      Attachment cannot be viewed because its MIME type is not text/*, image/*, or application/pdf.
       <a href="attachment.cgi?id=[% a.id %]">Download the attachment instead</a>.
     </b></p>
   [% END %]

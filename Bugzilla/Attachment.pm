@@ -297,10 +297,8 @@ sub is_viewable {
     # We assume we can view all text and image types.
     return 1 if ($contenttype =~ /^(text|image)\//);
 
-    # Mozilla can view XUL. Note the trailing slash on the Gecko detection to
-    # avoid sending XUL to Safari.
-    return 1 if (($contenttype =~ /^application\/vnd\.mozilla\./)
-                 && ($cgi->user_agent() =~ /Gecko\//));
+    # Modern browsers support PDF as well.
+    return 1 if ($contenttype eq 'application/pdf');
 
     # If it's not one of the above types, we check the Accept: header for any
     # types mentioned explicitly.

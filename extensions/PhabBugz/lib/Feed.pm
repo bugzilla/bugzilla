@@ -477,7 +477,7 @@ sub process_revision_change {
             phids => \@accepted_phids
           }
         );
-        @accepted_user_ids = map { $_->bugzilla_user->id } @$phab_users;
+        @accepted_user_ids = map { $_->bugzilla_user->id } grep { defined $_->bugzilla_user } @$phab_users;
     }
 
     if ( @denied_phids ) {
@@ -486,7 +486,7 @@ sub process_revision_change {
             phids => \@denied_phids
           }
         );
-        @denied_user_ids = map { $_->bugzilla_user->id } @$phab_users;
+        @denied_user_ids = map { $_->bugzilla_user->id } grep { defined $_->bugzilla_user } @$phab_users;
     }
 
     my %reviewers_hash =  map { $_->name => 1 } @{ $revision->reviewers };

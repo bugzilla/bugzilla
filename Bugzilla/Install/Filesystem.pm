@@ -225,7 +225,6 @@ sub FILESYSTEM {
         'runtests.pl'     => { perms => OWNER_EXECUTE },
         'jobqueue.pl'     => { perms => OWNER_EXECUTE },
         'migrate.pl'      => { perms => OWNER_EXECUTE },
-        'metrics.pl'      => { perms => WS_EXECUTE },
         'Makefile.PL'     => { perms => OWNER_EXECUTE },
         'gen-cpanfile.pl' => { perms => OWNER_EXECUTE },
         'jobqueue-worker.pl' => { perms => OWNER_EXECUTE },

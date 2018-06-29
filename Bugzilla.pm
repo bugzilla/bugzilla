@@ -48,10 +48,6 @@ use Bugzilla::Util;
 use Bugzilla::CPAN;
 use Bugzilla::Bloomfilter;
 
-use Bugzilla::Metrics::Collector;
-use Bugzilla::Metrics::Template;
-use Bugzilla::Metrics::Memcached;
-
 use Date::Parse;
 use DateTime::TimeZone;
 use Encode;
@@ -139,30 +135,6 @@ sub init_page {
 
     my $script = basename($0);
 
-    # BMO - init metrics collection if required
-    if (i_am_cgi() && $script eq 'show_bug.cgi') {
-        # we need to measure loading the params, so default to on
-        Bugzilla->metrics_enabled(1);
-        Bugzilla->metrics($script);
-        # we can now hit params to check if we really should be enabled.
-        # note - we can't use anything which uses templates or the database, as
-        # that would initialise those modules with metrics enabled.
-        if (!Bugzilla->params->{metrics_enabled}) {
-            Bugzilla->metrics_enabled(0);
-        }
-        else {
-            # to avoid generating massive amounts of data, we're only interested in
-            # a small subset of users
-            my $user_id = Bugzilla->cgi->cookie('Bugzilla_login');
-            if (!$user_id
-                || !grep { $user_id == $_ }
-                    split(/\s*,\s*/, Bugzilla->params->{metrics_user_ids}))
-            {
-                Bugzilla->metrics_enabled(0);
-            }
-        }
-    }
-
     # Because of attachment_base, attachment.cgi handles this itself.
     if ($script ne 'attachment.cgi') {
         do_ssl_redirect_if_required();
@@ -231,12 +203,7 @@ sub init_page {
 #####################################################################
 
 sub template {
-    # BMO - use metrics subclass if required
-    if (Bugzilla->metrics_enabled) {
-        request_cache->{template} ||= Bugzilla::Metrics::Template->create();
-    } else {
-        request_cache->{template} ||= Bugzilla::Template->create();
-    }
+    request_cache->{template} ||= Bugzilla::Template->create();
     request_cache->{template}->{_is_main} = 1;
 
     return request_cache->{template};
@@ -806,37 +773,10 @@ sub process_cache {
     return $_process_cache;
 }
 
-# BMO - Instrumentation
-
-sub metrics_enabled {
-    if (defined $_[1]) {
-        if (!$_[1]
-            && request_cache->{metrics_enabled}
-            && request_cache->{metrics})
-        {
-            request_cache->{metrics}->cancel();
-            delete request_cache->{metrics};
-        }
-        request_cache->{metrics_enabled} = $_[1];
-    }
-    else {
-        return request_cache->{metrics_enabled};
-    }
-}
-
-sub metrics {
-    return request_cache->{metrics} ||= Bugzilla::Metrics::Collector->new($_[1]);
-}
-
 # This is a memcached wrapper, which provides cross-process and cross-system
 # caching.
 sub memcached {
-    # BMO - use metrics subclass if required
-    if (Bugzilla->metrics_enabled) {
-        return request_cache->{memcached} ||= Bugzilla::Metrics::Memcached->_new();
-    } else {
-        return request_cache->{memcached} ||= Bugzilla::Memcached->_new();
-    }
+    return request_cache->{memcached} ||= Bugzilla::Memcached->_new();
 }
 
 sub elastic {
@@ -881,11 +821,6 @@ sub markdown_parser {
 # so we don't have $class available.
 sub _cleanup {
     return if $^C;
-
-    # BMO - finalise and report on metrics
-    if (Bugzilla->metrics_enabled) {
-        Bugzilla->metrics->finish();
-    }
 
     # BMO - allow "end of request" processing
     Bugzilla::Hook::process('request_cleanup');

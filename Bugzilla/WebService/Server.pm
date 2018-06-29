@@ -23,11 +23,6 @@ sub handle_login {
     # Throw error if the supplied class does not exist or the method is private
     ThrowCodeError('unknown_method', {method => $full_method}) if (!$class or $method =~ /^_/);
 
-    # BMO - use the class and method as the name, instead of the cgi filename
-    if (Bugzilla->metrics_enabled) {
-        Bugzilla->metrics->name("$class $method");
-    }
-
     # We never want to create a new session unless the user is calling the
     # login method.  Setting dont_persist_session makes
     # Bugzilla::Auth::_handle_login_result() skip calling persist_login().

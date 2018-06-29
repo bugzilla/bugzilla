@@ -476,15 +476,8 @@ sub make_private {
 sub make_public {
     my ( $self ) = @_;
 
-    my $edit_bugs = 
-        Bugzilla::Extension::PhabBugz::Project->new_from_query(
-        {
-          name => 'bmo-editbugs-team'
-        }
-      );
-
     $self->set_policy('view', 'public');
-    $self->set_policy('edit', ($edit_bugs ? $edit_bugs->phid : 'users'));
+    $self->set_policy('edit', 'users');
 
     my @current_group_projects = grep { $_->name =~ /^(bmo-.*|secure-revision)$/ } @{ $self->projects };
     foreach my $project (@current_group_projects) {

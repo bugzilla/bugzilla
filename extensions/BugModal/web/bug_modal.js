@@ -1423,7 +1423,7 @@ function show_new_changes_indicator() {
                     observer.unobserve($separator);
                     $link.remove();
                 }
-            }), { root: $separator.offsetParent });
+            }), { root: document.querySelector('#bugzilla-body') });
 
             observer.observe($separator);
         }

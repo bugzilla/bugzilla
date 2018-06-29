@@ -34,19 +34,17 @@ sub _new {
     # disabled.
     my $servers = Bugzilla->localconfig->{memcached_servers};
     if (Bugzilla->feature('memcached') && $servers) {
-        require Sereal;
         $self->{namespace} = Bugzilla->localconfig->{memcached_namespace};
         TRACE("connecting servers: $servers, namespace: $self->{namespace}");
         $self->{memcached} = Cache::Memcached::Fast->new(
             {
-                servers           => [ _parse_memcached_server_list($servers) ],
-                namespace         => $self->{namespace},
-                serialize_methods => { \&Sereal::Encoder::encode_sereal, \&Sereal::Decoder::decode_sereal },
-                max_size          => 1024 * 1024 * 4,
-                max_failures      => 1,
-                failure_timeout   => 60,
-                io_timeout        => 0.2,
-                connect_timeout   => 0.2,
+                servers         => [ _parse_memcached_server_list($servers) ],
+                namespace       => $self->{namespace},
+                max_size        => 1024 * 1024 * 4,
+                max_failures    => 1,
+                failure_timeout => 60,
+                io_timeout      => 0.2,
+                connect_timeout => 0.2,
             }
         );
         my $versions = $self->{memcached}->server_versions;

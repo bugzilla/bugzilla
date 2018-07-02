@@ -227,11 +227,12 @@ sub should_rate_limit {
     my $prefix    = RATE_LIMIT_PREFIX . $name . ':';
     my $memcached = $self->{memcached};
 
+    return 0 unless $name;
     return 0 unless $memcached;
 
     $tries //= 3;
 
-    for (0 .. $tries) {
+    for my $try (0 .. $tries) {
         my $now = time;
         my ($key, @keys) = map { $prefix . ( $now - $_ ) } 0 .. $rate_seconds;
         $memcached->add($key, 0, $rate_seconds+1);
@@ -240,8 +241,9 @@ sub should_rate_limit {
         $tokens->{$key} = $cas->[1]++;
         return 1 if sum(values %$tokens) >= $rate_max;
         return 0 if $memcached->cas($key, @$cas, $rate_seconds+1);
+        WARN("retry for $prefix (try $try of $tries)");
     }
-    return 1;
+    return 0;
 }
 
 sub clear_all {

@@ -322,9 +322,10 @@ sub group_query {
 
         # Make sure phab-bot also a member of the new project group so that it can
         # make policy changes to the private revisions
-        INFO("Setting group members for " . $project->name);
-        my @group_members = $self->get_group_members( $group );
-        $project->set_members( [ ($phab_user, @group_members) ] );
+        INFO("Setting project members for " . $project->name);
+        my $set_members = $self->get_group_members( $group );
+        push @$set_members, $phab_user unless grep $_->phid eq $phab_user->phid, @$set_members;
+        $project->set_members( $set_members );
         $project->update();
     }
 }
@@ -780,25 +781,24 @@ sub get_group_members {
 
     my $group_obj =
       ref $group ? $group : Bugzilla::Group->check( { name => $group, cache => 1 } );
-    my $members_all = $group_obj->members_complete();
 
-    my @userids;
-    foreach my $name ( keys %$members_all ) {
-        foreach my $user ( @{ $members_all->{$name} } ) {
-            push @userids, $user->id;
-        }
-    }
+    my $flat_list = join(',',
+      @{ Bugzilla::Group->flatten_group_membership( $group_obj->id ) } );
 
-    return if !@userids;
+    my $user_query = "
+      SELECT DISTINCT profiles.userid
+        FROM profiles, user_group_map AS ugm
+       WHERE ugm.user_id = profiles.userid
+             AND ugm.isbless = 0
+             AND ugm.group_id IN($flat_list)";
+    my $user_ids = Bugzilla->dbh->selectcol_arrayref($user_query);
 
-    # Look up the phab ids for these users
-    my $phab_users = Bugzilla::Extension::PhabBugz::User->match(
+    # Return matching users in Phabricator
+    return Bugzilla::Extension::PhabBugz::User->match(
       {
-        ids => \@userids
+        ids => $user_ids
       }
     );
-
-    return map { $_->phid } @$phab_users;
 }
 
 1;

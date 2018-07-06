@@ -14,24 +14,34 @@ This code requires a recent version of Andy Dustman's MySQLdb interface,
 
     http://sourceforge.net/projects/mysql-python
 
+or mysqlclient package (a fork which adds Python 3 support).
+
 Share and enjoy.
 """
 
-import email, mimetypes, email.utils
-import sys, re, glob, os, stat, time
-import MySQLdb, getopt
+import email
+import mimetypes
+import email.utils
+import sys
+import re
+import glob
+import os
+import stat
+import time
+import MySQLdb
+import getopt
 
 # mimetypes doesn't include everything we might encounter, yet.
-if not mimetypes.types_map.has_key('.doc'):
+if not '.doc' in mimetypes.types_map:
     mimetypes.types_map['.doc'] = 'application/msword'
 
-if not mimetypes.encodings_map.has_key('.bz2'):
+if not '.bz2' in mimetypes.encodings_map:
     mimetypes.encodings_map['.bz2'] = "bzip2"
 
-bug_status='CONFIRMED'
-component="default"
-version="unspecified"
-product="" # this is required, the rest of these are defaulted as above
+bug_status = 'CONFIRMED'
+component = "default"
+version = "unspecified"
+product = ""  # this is required, the rest of these are defaulted as above
 
 """
 Each bug in JitterBug is stored as a text file named by the bug number.
@@ -70,6 +80,7 @@ or
 <product-name>-<version>
 """
 
+
 def process_notes_file(current, fname):
     try:
         new_note = {}
@@ -80,11 +91,11 @@ def process_notes_file(current, fname):
         new_note['timestamp'] = time.gmtime(s[stat.ST_MTIME])
 
         notes.close()
-
         current['notes'].append(new_note)
 
     except IOError:
         pass
+
 
 def process_reply_file(current, fname):
     new_note = {}
@@ -108,6 +119,7 @@ def process_reply_file(current, fname):
         new_note['timestamp'] = time.gmtime(email.utils.mktime_tz(email.utils.parsedate_tz(msg['Date'])))
         current["notes"].append(new_note)
 
+
 def add_notes(current):
     """Add any notes that have been recorded for the current bug."""
     process_notes_file(current, "%d.notes" % current['number'])
@@ -118,16 +130,17 @@ def add_notes(current):
     for f in glob.glob("%d.followup.*" % current['number']):
         process_reply_file(current, f)
 
+
 def maybe_add_attachment(submsg, current):
     """Adds the attachment to the current record"""
     attachment_filename = submsg.get_filename()
     if attachment_filename is None:
         return
 
-    if (submsg.get_content_type() == 'application/octet-stream'):
+    if submsg.get_content_type() == 'application/octet-stream':
         # try get a more specific content-type for this attachment
         mtype, encoding = mimetypes.guess_type(attachment_filename)
-        if mtype == None:
+        if mtype is None:
             mtype = submsg.get_content_type()
     else:
         mtype = submsg.get_content_type()
@@ -136,7 +149,7 @@ def maybe_add_attachment(submsg, current):
         return
 
     if mtype == 'application/pkcs7-signature':
-         return
+        return
 
     if mtype == 'application/pgp-signature':
         return
@@ -151,8 +164,10 @@ def maybe_add_attachment(submsg, current):
 
     current['attachments'].append( ( attachment_filename, mtype, data ) )
 
+
 def process_text_plain(msg, current):
     current['description'] = msg.get_payload()
+
 
 def process_multi_part(msg, current):
     for part in msg.walk():
@@ -161,8 +176,9 @@ def process_multi_part(msg, current):
         else:
             maybe_add_attachment(part, current)
 
+
 def process_jitterbug(filename):
-    current = {}
+    current = dict()
     current['number'] = int(filename)
     current['notes'] = []
     current['attachments'] = []
@@ -170,7 +186,7 @@ def process_jitterbug(filename):
     current['date-reported'] = ()
     current['short-description'] = ''
 
-    print "Processing: %d" % current['number']
+    print("Processing: %d" % current['number'])
 
     mfile = open(filename, "r")
     create_date = os.fstat(mfile.fileno())
@@ -178,12 +194,12 @@ def process_jitterbug(filename):
 
     current['date-reported'] = time.gmtime(email.utils.mktime_tz(email.utils.parsedate_tz(msg['Date'])))
     if current['date-reported'] is None:
-       current['date-reported'] = time.gmtime(create_date[stat.ST_MTIME])
+        current['date-reported'] = time.gmtime(create_date[stat.ST_MTIME])
 
     if current['date-reported'][0] < 1900:
-       current['date-reported'] = time.gmtime(create_date[stat.ST_MTIME])
+        current['date-reported'] = time.gmtime(create_date[stat.ST_MTIME])
 
-    if msg.has_key('Subject') is not False:
+    if 'Subject' in msg:
         current['short-description'] = msg['Subject']
     else:
         current['short-description'] = "Unknown"
@@ -195,7 +211,7 @@ def process_jitterbug(filename):
         process_multi_part(msg, current)
     else:
         # Huh? This should never happen.
-        print "Unknown content-type: %s" % msgtype
+        print("Unknown content-type: %s" % msgtype)
         sys.exit(1)
 
     add_notes(current)
@@ -217,12 +233,12 @@ def process_jitterbug(filename):
 
     # change this to the user_id of the Bugzilla user who is blessed with the
     # imported defects
-    reporter=6
+    reporter = 6
 
     # the resolution will need to be set manually
-    resolution=""
+    resolution = ""
 
-    db = MySQLdb.connect(db='bugs',user='root',host='localhost',passwd='password')
+    db = MySQLdb.connect(db='bugs', user='root', host='localhost', passwd='password')
     cursor = db.cursor()
 
     try:
@@ -289,9 +305,9 @@ def process_jitterbug(filename):
                             "id=LAST_INSERT_ID(), thedata=%s",
                             [ a[2] ])
 
-    except MySQLdb.IntegrityError, message:
-        errorcode = message[0]
-        if errorcode == 1062: # duplicate
+    except MySQLdb.IntegrityError as message:
+        errorcode = message.args[0]
+        if errorcode == 1062:  # duplicate
             return
         else:
             raise
@@ -300,8 +316,9 @@ def process_jitterbug(filename):
     cursor.close()
     db.close()
 
+
 def usage():
-    print """Usage: jb2bz.py [OPTIONS] Product
+    print("""Usage: jb2bz.py [OPTIONS] Product
 
 Where OPTIONS are one or more of the following:
 
@@ -316,7 +333,7 @@ Product is the Product to assign these defects to.
 
 All of the JitterBugs in the current directory are imported, including replies, notes,
 attachments, and similar noise.
-"""
+""")
     sys.exit(1)
 
 
@@ -324,9 +341,9 @@ def main():
     global bug_status, component, version, product
     opts, args = getopt.getopt(sys.argv[1:], "hs:c:v:")
 
-    for o,a in opts:
+    for o, a in opts:
         if o == "-s":
-            if a in ('UNCONFIRMED','CONFIRMED','IN_PROGRESS','RESOLVED','VERIFIED'):
+            if a in ('UNCONFIRMED', 'CONFIRMED', 'IN_PROGRESS', 'RESOLVED', 'VERIFIED'):
                 bug_status = a
         elif o == '-c':
             component = a

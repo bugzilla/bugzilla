@@ -230,9 +230,9 @@ sub should_rate_limit {
     return 0 unless $name;
     return 0 unless $memcached;
 
-    $tries //= 3;
+    $tries //= 4;
 
-    for my $try (0 .. $tries) {
+    for my $try (1 .. $tries) {
         my $now = time;
         my ($key, @keys) = map { $prefix . ( $now - $_ ) } 0 .. $rate_seconds;
         $memcached->add($key, 0, $rate_seconds+1);

@@ -174,7 +174,7 @@ sub MessageToMTA {
     else {
         # This is useful for Sendmail, so we put it out here.
         local $ENV{PATH} = SENDMAIL_PATH;
-        eval { sendmail($email, { transport => $transport }) };
+        eval { sendmail($email, { from => Bugzilla->params->{"mailfrom"}, transport => $transport }) };
         if ($@) {
             ThrowCodeError('mail_send_error', { msg => $@->message, mail => $email });
         }

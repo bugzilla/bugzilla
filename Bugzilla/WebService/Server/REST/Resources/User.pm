@@ -20,6 +20,11 @@ BEGIN {
 
 sub _rest_resources {
     my $rest_resources = [
+        qr{^/user/suggest$}, {
+            GET => {
+                method => 'suggest',
+            },
+        },
         qr{^/valid_login$}, {
             GET => {
                 method => 'valid_login'

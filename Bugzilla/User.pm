@@ -80,7 +80,8 @@ sub DB_COLUMNS {
         'profiles.password_change_required',
         'profiles.password_change_reason',
         'profiles.mfa',
-        'profiles.mfa_required_date'
+        'profiles.mfa_required_date',
+        'profiles.nickname'
     ),
 }
 
@@ -94,6 +95,7 @@ use constant VALIDATORS => {
     disabledtext             => \&_check_disabledtext,
     login_name               => \&check_login_name_for_creation,
     realname                 => \&_check_realname,
+    nickname                 => \&_check_realname,
     extern_id                => \&_check_extern_id,
     is_enabled               => \&_check_is_enabled,
     password_change_required => \&Bugzilla::Object::check_boolean,
@@ -114,6 +116,7 @@ sub UPDATE_COLUMNS {
         password_change_reason
         mfa
         mfa_required_date
+        nickname
     );
     push(@cols, 'cryptpassword') if exists $self->{cryptpassword};
     return @cols;
@@ -478,10 +481,25 @@ sub set_login {
     delete $self->{nick};
 }
 
+sub _generate_nickname {
+    my ($name, $login) = @_;
+    my ($nick) = extract_nicks($name);
+    if (!$nick) {
+        $nick = "";
+    }
+    return $nick;
+}
+
 sub set_name {
     my ($self, $name) = @_;
     $self->set('realname', $name);
     delete $self->{identity};
+    $self->set('nickname', _generate_nickname($name, $self->login));
+}
+
+sub set_nick {
+    my ($self, $nick) = @_;
+    $self->set('nickname', $nick);
 }
 
 sub set_password {
@@ -726,12 +744,8 @@ sub nick {
     my $self = shift;
 
     return "" unless $self->id;
-
-    if (!defined $self->{nick}) {
-        $self->{nick} = (split(/@/, $self->login, 2))[0];
-    }
-
-    return $self->{nick};
+    return $self->{nickname} if $self->{nickname};
+    return $self->{nick} //= (split(/@/, $self->login, 2))[0];
 }
 
 sub queries {
@@ -2514,13 +2528,12 @@ sub get_userlist {
 }
 
 sub create {
-    my $invocant = shift;
-    my $class = ref($invocant) || $invocant;
+    my ($class, $params) = @_;
     my $dbh = Bugzilla->dbh;
 
     $dbh->bz_start_transaction();
-
-    my $user = $class->SUPER::create(@_);
+    $params->{nickname} = _generate_nickname($params->{realname}, $params->{login_name});
+    my $user = $class->SUPER::create($params);
 
     # Turn on all email for the new user
     require Bugzilla::BugMail;

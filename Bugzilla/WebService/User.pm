@@ -24,6 +24,7 @@ use Bugzilla::WebService::Util qw(filter filter_wants validate
 use Bugzilla::Hook;
 
 use List::Util qw(first);
+use Taint::Util qw(untaint);
 
 # Don't need auth to login
 use constant LOGIN_EXEMPT => {
@@ -33,6 +34,7 @@ use constant LOGIN_EXEMPT => {
 
 use constant READ_ONLY => qw(
     get
+    suggest
 );
 
 use constant PUBLIC_METHODS => qw(
@@ -135,6 +137,66 @@ sub create {
     return { id => $self->type('int', $user->id) };
 }
 
+sub suggest {
+    my ($self, $params) = @_;
+
+    Bugzilla->switch_to_shadow_db();
+
+    ThrowCodeError('params_required', { function => 'User.suggest', params => ['match'] })
+      unless defined $params->{match};
+
+    ThrowUserError('user_access_by_match_denied')
+      unless Bugzilla->user->id;
+
+    untaint($params->{match});
+    my $s = $params->{match};
+    trim($s);
+    return { users => [] } if length($s) < 3;
+
+    my $dbh = Bugzilla->dbh;
+    my @select = ('realname AS real_name', 'login_name AS name');
+    my $order  = 'last_seen_date DESC';
+    my $where;
+    state $have_mysql = $dbh->isa('Bugzilla::DB::Mysql');
+
+    if ($s =~ /^[:@](.+)$/s) {
+        $where = $dbh->sql_prefix_match(nickname => $1);
+    }
+    elsif ($s =~ /@/) {
+        $where = $dbh->sql_prefix_match(login_name => $s);
+    }
+    else {
+        if ($have_mysql && ( $s =~ /[[:space:]]/ || $s =~ /[^[:ascii:]]/ ) ) {
+            my $match = sprintf 'MATCH(realname) AGAINST (%s) ', $dbh->quote($s);
+            push @select, "$match AS relevance";
+            $order = 'relevance DESC';
+            $where = $match;
+        }
+        elsif ($have_mysql && $s =~ /^[[:upper:]]/) {
+            my $match = sprintf 'MATCH(realname) AGAINST (%s) ', $dbh->quote($s);
+            $where = join ' OR ',
+                $match,
+                $dbh->sql_prefix_match( nickname => $s ),
+                $dbh->sql_prefix_match( login_name => $s );
+        }
+        else {
+            $where = join ' OR ', $dbh->sql_prefix_match( nickname => $s ), $dbh->sql_prefix_match( login_name => $s );
+        }
+    }
+    $where = "($where) AND is_enabled = 1";
+
+    my $sql = 'SELECT ' . join(', ', @select) . " FROM profiles WHERE $where ORDER BY $order LIMIT 25";
+    my $results = $dbh->selectall_arrayref($sql, { Slice => {} });
+
+    my @users = map {
+        {
+            real_name => $self->type(string => $_->{real_name}),
+            name      => $self->type(email  => $_->{name}),
+        }
+    } @$results;
+
+    return { users => \@users };
+}
 
 # function to return user information by passing either user ids or
 # login names or both together:

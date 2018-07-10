@@ -773,6 +773,7 @@ sub update_table_definitions {
 
     $dbh->bz_add_index('profiles', 'profiles_realname_ft_idx',
                        {TYPE => 'FULLTEXT', FIELDS => ['realname']});
+    _migrate_nicknames();
 
     ################################################################
     # New --TABLE-- changes should go *** A B O V E *** this point #
@@ -3909,6 +3910,17 @@ sub _migrate_group_owners {
     $dbh->bz_add_column('groups', 'owner_user_id', {TYPE => 'INT3'});
     my $nobody = Bugzilla::User->check('nobody@mozilla.org');
     $dbh->do('UPDATE groups SET owner_user_id = ?', undef, $nobody->id);
+}
+
+sub _migrate_nicknames {
+    my $dbh = Bugzilla->dbh;
+    my $sth = $dbh->prepare('SELECT userid FROM profiles WHERE realname LIKE "%:%" AND is_enabled = 1 AND NOT nickname');
+    $sth->execute();
+    while (my ($user_id) = $sth->fetchrow_array) {
+        my $user = Bugzilla::User->new($user_id);
+        $user->set_name($user->name);
+        $user->update();
+    }
 }
 
 sub _migrate_preference_categories {

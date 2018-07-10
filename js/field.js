@@ -715,7 +715,7 @@ $(function() {
     var options_user = {
         appendTo: $('#main-inner'),
         forceFixPosition: true,
-        serviceUrl: 'rest/elastic/suggest_users',
+        serviceUrl: 'rest/user/suggest',
         params: {
             Bugzilla_api_token: BUGZILLA.api_token,
         },

@@ -155,7 +155,7 @@ foreach my $view (sort @{ $dbh->selectcol_arrayref("SHOW FULL TABLES IN $db_name
 
 # drop tables/columns
 
-my @tables = map { lc } sort @{ $dbh->selectcol_arrayref("SHOW TABLES") };
+my @tables = sort @{ $dbh->selectcol_arrayref("SHOW TABLES") };
 foreach my $table (@tables) {
     if (exists $whitelist{$table}) {
         my @drop_columns;

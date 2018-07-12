@@ -22,7 +22,7 @@ BEGIN {
     }
 }
 
-our $VERSION = '20180703.1';
+our $VERSION = '20180712.1';
 
 use Bugzilla::Auth;
 use Bugzilla::Auth::Persist::Cookie;

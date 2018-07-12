@@ -12,3 +12,4 @@ $answer{'interdiffbin'} = '/usr/bin/interdiff';
 $answer{'urlbase'} = 'http://bmo.test/';
 $answer{'mail_delivery_method'} = 'Test';
 $answer{'auth_delegation'} = 1;
+$answer{'utf8'} = 'utf8mb4';

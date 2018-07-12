@@ -8,3 +8,4 @@ $answer{'create_htaccess'} = '';
 $answer{'cvsbin'} = '/usr/bin/cvs';
 $answer{'diffpath'} = '/usr/bin';
 $answer{'interdiffbin'} = '/usr/bin/interdiff';
+$answer{'utf8'} = 'utf8mb4';

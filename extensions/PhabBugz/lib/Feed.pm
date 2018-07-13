@@ -12,7 +12,7 @@ use 5.10.1;
 use IO::Async::Timer::Periodic;
 use IO::Async::Loop;
 use List::Util qw(first);
-use List::MoreUtils qw(any);
+use List::MoreUtils qw(any uniq);
 use Moo;
 use Scalar::Util qw(blessed);
 use Try::Tiny;
@@ -323,10 +323,19 @@ sub group_query {
         # Make sure phab-bot also a member of the new project group so that it can
         # make policy changes to the private revisions
         INFO("Setting project members for " . $project->name);
-        my $set_members = $self->get_group_members( $group );
-        push @$set_members, $phab_user unless grep $_->phid eq $phab_user->phid, @$set_members;
-        $project->set_members( $set_members );
-        $project->update();
+        my $set_members          = $self->get_group_members( $group );
+        my @set_member_phids     = uniq map { $_->phid } (@$set_members, $phab_user);
+        my @current_member_phids = uniq map { $_->phid } @{ $project->members };
+        my ($added, $removed)    = diff_arrays(\@set_member_phids, \@current_member_phids);
+
+        INFO('Adding members: ' . join( ',', @$added ));
+        $project->add_member( $_ ) foreach @$added;
+        INFO('Removing members: ' . join( ',', @$removed ));
+        $project->remove_member( $_  ) foreach @$removed;
+
+        my $result = $project->update();
+        local Bugzilla::Logging->fields->{api_result} = $result;
+        INFO("Project " . $project->name . " updated");
     }
 }
 

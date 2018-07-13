@@ -307,7 +307,7 @@ sub set_policy {
 ############
 
 sub _build_members {
-    my ($self) = @_;
+    my ( $self ) = @_;
     return [] unless $self->members_raw;
 
     my @phids;
@@ -317,13 +317,11 @@ sub _build_members {
 
     return [] if !@phids;
 
-    my $users = Bugzilla::Extension::PhabBugz::User->match(
+    return Bugzilla::Extension::PhabBugz::User->match(
       {
         phids => \@phids
       }
     );
-
-    return [ map { $_->bugzilla_user } @$users ];
 }
 
 1;

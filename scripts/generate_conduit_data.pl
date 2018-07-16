@@ -27,19 +27,19 @@ my $admin_email = shift || 'admin@mozilla.bugs';
 Bugzilla->set_user( Bugzilla::User->check( { name => $admin_email } ) );
 
 ##########################################################################
-# Create Conduit Test User
+# Create Conduit Test Users
 ##########################################################################
 
 my $conduit_login    = $ENV{CONDUIT_USER_LOGIN}    || 'conduit@mozilla.bugs';
 my $conduit_password = $ENV{CONDUIT_USER_PASSWORD} || 'password123456789!';
 my $conduit_api_key  = $ENV{CONDUIT_USER_API_KEY}  || '';
 
-print "creating conduit user account...\n";
+print "creating conduit developer user account...\n";
 if ( !Bugzilla::User->new( { name => $conduit_login } ) ) {
     my $new_user = Bugzilla::User->create(
         {
             login_name    => $conduit_login,
-            realname      => 'Conduit Test User',
+            realname      => 'Conduit Developer',
             cryptpassword => $conduit_password
         },
     );
@@ -48,12 +48,38 @@ if ( !Bugzilla::User->new( { name => $conduit_login } ) ) {
         Bugzilla::User::APIKey->create_special(
             {
                 user_id     => $new_user->id,
-                description => 'API key for Conduit User',
+                description => 'API key for Conduit Developer',
                 api_key     => $conduit_api_key
             }
         );
     }
 }
+
+my $conduit_reviewer_login    = $ENV{CONDUIT_REVIEWER_USER_LOGIN}    || 'conduit-reviewer@mozilla.bugs';
+my $conduit_reviewer_password = $ENV{CONDUIT_REVIEWER_USER_PASSWORD} || 'password123456789!';
+my $conduit_reviewer_api_key  = $ENV{CONDUIT_REVIEWER_USER_API_KEY}  || '';
+
+print "creating conduit reviewer user account...\n";
+if ( !Bugzilla::User->new( { name => $conduit_reviewer_login } ) ) {
+    my $new_user = Bugzilla::User->create(
+        {
+            login_name    => $conduit_reviewer_login,
+            realname      => 'Conduit Reviewer',
+            cryptpassword => $conduit_reviewer_password
+        },
+    );
+
+    if ($conduit_reviewer_api_key) {
+        Bugzilla::User::APIKey->create_special(
+            {
+                user_id     => $new_user->id,
+                description => 'API key for Conduit Reviewer',
+                api_key     => $conduit_reviewer_api_key
+            }
+        );
+    }
+}
+
 ##########################################################################
 # Create Phabricator Automation Bot
 ##########################################################################
@@ -88,6 +114,7 @@ if ( !Bugzilla::User->new( { name => $phab_login } ) ) {
 my @users_groups = (
     { user => 'conduit@mozilla.bugs', group => 'editbugs' },
     { user => 'conduit@mozilla.bugs', group => 'core-security' },
+    { user => 'conduit-reviewer@mozilla.bugs', group => 'editbugs' },
     { user => 'phab-bot@bmo.tld',     group => 'editbugs' },
     { user => 'phab-bot@bmo.tld',     group => 'core-security' },
 );

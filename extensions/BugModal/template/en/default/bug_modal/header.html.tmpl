@@ -8,6 +8,7 @@
 
 [%
   PROCESS global/variables.none.tmpl;
+  USE Bugzilla;
 
   # <title>
   IF bugs.defined;
@@ -89,6 +90,8 @@
   [%# expose useful data to js %]
   BUGZILLA.bug_id = [% bug.id FILTER none %];
   BUGZILLA.bug_title = '[% unfiltered_title FILTER js %]';
+  BUGZILLA.bug_summary = '[% bug.short_desc FILTER js %]';
+  BUGZILLA.bug_url = '[% Bugzilla.cgi.self_url FILTER js %]';
   BUGZILLA.user = {
     id: [% user.id FILTER none %],
     login: '[% user.login FILTER js %]',

@@ -339,10 +339,6 @@ $(function() {
 
     // copy summary to clipboard
 
-    function clipboardSummary() {
-        return 'Bug ' + BUGZILLA.bug_id + ' - ' + $('#field-value-short_desc').text();
-    }
-
     if ($('#copy-summary').length) {
         var hasExecCopy = false;
         try {
@@ -352,11 +348,24 @@ $(function() {
         }
 
         if (hasExecCopy) {
+            const url = BUGZILLA.bug_url;
+            const text = `Bug ${BUGZILLA.bug_id} - ${BUGZILLA.bug_summary}`;
+            const html = `<a href="${url}">${text}</a>`;
+
+            document.addEventListener('copy', event => {
+                if (event.target.nodeType === 1 && event.target.matches('#clip')) {
+                    event.clipboardData.setData('text/uri-list', url);
+                    event.clipboardData.setData('text/plain', text);
+                    event.clipboardData.setData('text/html', html);
+                    event.preventDefault();
+                }
+            });
+
             $('#copy-summary')
                 .click(function() {
                     // execCommand("copy") only works on selected text
                     $('#clip-container').show();
-                    $('#clip').val(clipboardSummary()).select();
+                    $('#clip').val(text).select();
                     $('#floating-message-text')
                         .text(document.execCommand("copy") ? 'Bug summary copied!' : 'Couldn’t copy bug summary');
                     $('#floating-message').fadeIn(250).delay(2500).fadeOut();
@@ -375,27 +384,6 @@ $(function() {
                 return;
             event.preventDefault();
             lb_show(this);
-        });
-
-    // when copying the bug id and summary, reformat to remove \n and alias
-    $(document).on(
-        'copy', function(event) {
-            var selection = document.getSelection().toString().trim();
-            var match = selection.match(/^(Bug \d+)\s*\n(.+)$/) ||
-                selection.match(/^(Bug \d+)\s+\([^\)]+\)\s*\n(.+)$/);
-            if (match) {
-                var content = match[1] + ' - ' + match[2].trim();
-                if (event.originalEvent.clipboardData) {
-                    event.originalEvent.clipboardData.setData('text/plain', content);
-                }
-                else if (window.clipboardData) {
-                    window.clipboardData.setData('Text', content);
-                }
-                else {
-                    return;
-                }
-                event.preventDefault();
-            }
         });
 
     // action button actions

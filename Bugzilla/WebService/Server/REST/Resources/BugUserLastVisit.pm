@@ -32,6 +32,15 @@ sub _rest_resources {
                 },
             },
         },
+        # no bug-id
+        qr{^/bug_user_last_visit$}, {
+            GET => {
+                method => 'get',
+            },
+            POST => {
+                method => 'update',
+            },
+        },
     ];
 }
 

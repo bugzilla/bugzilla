@@ -82,7 +82,7 @@ To return more than one specific bug timestamps:
 
    GET /rest/bug_user_last_visit/123?ids=234&ids=456
 
-To return just the most recent 20 timestamps:
+To return all the timestamps stored during the retention period:
 
 .. code-block:: text
 

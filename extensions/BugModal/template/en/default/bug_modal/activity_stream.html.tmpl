@@ -383,7 +383,7 @@
           value FILTER bug_list_link;
 
         ELSE;
-          value FILTER truncate(256, '&hellip;') FILTER html;
+          value FILTER truncate(256, '…') FILTER html;
 
         END;
     END;

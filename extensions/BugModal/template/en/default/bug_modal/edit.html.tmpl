@@ -1023,7 +1023,7 @@
 [%
   sub = [];
   IF bug.status_whiteboard != "";
-    sub.push("Whiteboard: " _ bug.status_whiteboard.truncate(256, '&hellip;'));
+    sub.push("Whiteboard: " _ bug.status_whiteboard.truncate(256, '…'));
   END;
   IF bug.cf_crash_signature != "";
     sub.push("crash signature");

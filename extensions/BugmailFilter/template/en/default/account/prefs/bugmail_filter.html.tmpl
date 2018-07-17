@@ -221,7 +221,7 @@ var cpts = new Array();
     [% FOREACH flag = type.flags %]
       [% IF flag_count > 10 && loop.count == 10 %]
         <span id="show_all">
-          &hellip;
+          …
           (<a href="#" onclick="showAllFlags(); return false">show all</a>)
         </span>
         <span id="all_flags" class="bz_default_hidden">

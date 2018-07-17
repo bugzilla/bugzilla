@@ -16,6 +16,7 @@ package Bugzilla::PatchReader::Raw;
 use 5.10.1;
 use strict;
 use warnings;
+no warnings 'utf8';
 
 use Bugzilla::PatchReader::Base;
 

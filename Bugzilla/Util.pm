@@ -105,6 +105,7 @@ my %html_quote = (
 # Bug 319331: Handle BiDi disruptions.
 sub html_quote {
     my $var = shift;
+    no warnings 'utf8';
     $var =~ s/([&<>"@])/$html_quote{$1}/g;
 
     state $use_utf8 = Bugzilla->params->{'utf8'};

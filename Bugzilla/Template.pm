@@ -624,6 +624,7 @@ sub create {
             # and newlines/carriage returns escaped for use in JS strings.
             js => sub {
                 my ($var) = @_;
+                no warnings 'utf8';
                 $var =~ s/([\\\'\"\/])/\\$1/g;
                 $var =~ s/\n/\\n/g;
                 $var =~ s/\r/\\r/g;
@@ -639,6 +640,7 @@ sub create {
             # for details.
             json => sub {
                 my ($var) = @_;
+                no warnings 'utf8';
                 $var =~ s/([\\\"\/])/\\$1/g;
                 $var =~ s/\n/\\n/g;
                 $var =~ s/\r/\\r/g;

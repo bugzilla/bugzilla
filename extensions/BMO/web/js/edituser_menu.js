@@ -10,7 +10,7 @@ function show_usermenu(id, email, show_edit) {
         {
             name: "Profile",
             callback: function () {
-                var href = "user_profile?login=" + encodeURIComponent(email);
+                var href = "user_profile?user_id=" + id;
                 window.open(href, "_blank");
             }
         },

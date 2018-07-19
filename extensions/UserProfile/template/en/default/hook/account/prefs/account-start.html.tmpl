@@ -6,6 +6,6 @@
   # defined by the Mozilla Public License, v. 2.0.
   #%]
 
-<a href="user_profile?login=[% user.login FILTER uri %]">
+<a href="user_profile?user_id=[% user.id FILTER none %]">
   [% terms.Bugzilla %] User Profile
 </a><br><hr>

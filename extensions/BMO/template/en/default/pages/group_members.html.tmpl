@@ -82,7 +82,7 @@
                       <a href="editusers.cgi?action=edit&amp;userid=[% member.id FILTER none %]"
                         target="_blank">
                     [% ELSE %]
-                      <a href="user_profile?login=[% member.login FILTER uri %]"
+                      <a href="user_profile?user_id=[% member.id FILTER none %]"
                         target="_blank">
                     [% END %]
                       <span [% 'class="bz_inactive"' UNLESS member.is_enabled %]>

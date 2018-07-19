@@ -326,14 +326,14 @@
         </button>
         <ul class="dropdown-content left" id="header-account-menu" role="menu" style="display:none;">
           <li role="presentation">
-            <div href="user_profile" class="account-label">
+            <div class="account-label">
               <div class="name">[% user.name FILTER html %]</div>
               <div class="email">[% user.login FILTER html %]</div>
             </div>
           </li>
           <li role="separator"></li>
           <li role="presentation">
-            <a href="user_profile" role="menuitem" tabindex="-1">My Profile</a>
+            <a href="user_profile?user_id=[% user.id FILTER none %]" role="menuitem" tabindex="-1">My Profile</a>
           </li>
           <li role="presentation">
             <a href="page.cgi?id=user_activity.html&amp;action=run&amp;who=[% user.login FILTER uri %]" role="menuitem"

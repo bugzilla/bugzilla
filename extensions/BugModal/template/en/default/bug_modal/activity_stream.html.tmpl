@@ -146,7 +146,7 @@
             [% END %]
             <button type="button" class="reply-btn minor"
               data-reply-id="[% comment.count FILTER none %]"
-              data-reply-name="[% comment.author.name || comment.author.moz_nick FILTER html %]"
+              data-reply-name="[% comment.author.name || comment.author.nick FILTER html %]"
               >Reply</button>
           [% END %]
           <button type="button" class="change-spinner minor" id="cs-[% comment.count FILTER none %]">-</button>
@@ -184,9 +184,9 @@
       <tr>
         <td class="comment-collapse-reason"
             [% IF user.setting("ui_use_absolute_time") == "on" %]
-            title="[% comment.author.moz_nick FILTER html %] [[% comment.creation_ts FILTER time("%Y-%m-%d %H:%M %Z") FILTER html %]]">
+            title="[% comment.author.nick FILTER html %] [[% comment.creation_ts FILTER time("%Y-%m-%d %H:%M %Z") FILTER html %]]">
             [% ELSE %]
-            title="[% comment.author.moz_nick FILTER html %] [[% comment.creation_ts FILTER time_duration FILTER html %]]">
+            title="[% comment.author.nick FILTER html %] [[% comment.creation_ts FILTER time_duration FILTER html %]]">
             [% END %]
             Comment hidden ([% comment.collapsed_reason FILTER html %])
         </td>

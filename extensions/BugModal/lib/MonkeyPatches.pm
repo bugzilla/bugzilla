@@ -40,31 +40,6 @@ sub active_attachments {
 
 1;
 
-package Bugzilla::User;
-
-use 5.10.1;
-use strict;
-use warnings;
-
-sub moz_nick {
-    my ($self) = @_;
-    if (!exists $self->{moz_nick}) {
-        if ($self->name =~ /:?:(\S+?)\b/) {
-            $self->{moz_nick} = $1;
-        }
-        elsif ($self->name) {
-            $self->{moz_nick} = $self->name;
-        }
-        else {
-            $self->login =~ /^([^\@]+)\@/;
-            $self->{moz_nick} = $1;
-        }
-    }
-    return $self->{moz_nick};
-}
-
-1;
-
 package Bugzilla::Attachment;
 
 use 5.10.1;

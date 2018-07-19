@@ -565,8 +565,8 @@
 
 [%
   sub = [];
-  sub.push("Reporter: " _ bug.reporter.moz_nick);
-  sub.push(unassigned ? "Unassigned" : "Assigned: " _ bug.assigned_to.moz_nick);
+  sub.push("Reporter: " _ bug.reporter.nick);
+  sub.push(unassigned ? "Unassigned" : "Assigned: " _ bug.assigned_to.nick);
   IF bug.mentors.size;
     sub.push("Mentored");
   END;

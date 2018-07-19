@@ -30,9 +30,9 @@ END;
 
     [% IF simple %]
       [% IF user.id %]
-        <span class="fn" title="[% u.identity FILTER html %]">[% u.moz_nick FILTER html %]</span>
+        <span class="fn" title="[% u.identity FILTER html %]">[% u.nick FILTER html %]</span>
       [% ELSE %]
-        <span class="fn">[% u.moz_nick FILTER html %]</span>
+        <span class="fn">[% u.nick FILTER html %]</span>
       [% END %]
 
     [% ELSE %]
@@ -52,7 +52,7 @@ END;
             href="user_profile?user_id=[% u.id FILTER none %]"
           [% END %]
           >
-          <span class="[% user.id ? 'fn' : 'fna' %]">[% nick_only ? u.moz_nick : (u.name || u.nick) FILTER html %]</span>
+          <span class="[% user.id ? 'fn' : 'fna' %]">[% nick_only ? u.nick : (u.name || u.nick) FILTER html %]</span>
           [%~~%]
         </a>
       [% END %]

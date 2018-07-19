@@ -56,6 +56,8 @@
               The login is now [% otheruser.login FILTER html %].
             [% ELSIF field == 'realname' %]
               The real name has been updated.
+            [% ELSIF field == 'nickname' %]
+              The nickname is now [% otheruser.nick FILTER html %].
             [% ELSIF field == 'cryptpassword' %]
               A new password has been set.
             [% ELSIF field == 'disabledtext' %]

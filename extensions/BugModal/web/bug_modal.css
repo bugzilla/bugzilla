@@ -44,26 +44,6 @@ button.major {
     padding: 4px 12px;
 }
 
-button.minor {
-    background-color: #eee;
-    background-image: linear-gradient(#fcfcfc, #eee);
-    color: #000;
-    font-size: inherit;
-    font-weight: 500;
-    padding: 4px 8px;
-    margin-bottom: 1px;
-    text-shadow: none;
-    -web-kit-box-shadow: 0 1px 0 0 rgba(0,0,0,0.1), inset 0 -1px 0 0 rgba(0,0,0,0.1);
-    -moz-box-shadow: 0 1px 0 0 rgba(0,0,0,0.1), inset 0 -1px 0 0 rgba(0,0,0,0.1);
-    box-shadow: 0 1px 0 0 rgba(0,0,0,0.1), inset 0 -1px 0 0 rgba(0,0,0,0.1), inset 0 0 1px 0 rgba(0,0,0,0.1);
-}
-
-button.minor:hover {
-    -webkit-box-shadow: 0 1px 0 0 rgba(0,0,0,0.2), inset 0 -1px 0 0 rgba(0,0,0,0.3), inset 0 12px 24px 2px #ddd;
-    -moz-box-shadow: 0 1px 0 0 rgba(0,0,0,0.2), inset 0 -1px 0 0 rgba(0,0,0,0.3), inset 0 12px 24px 2px #ddd;
-    box-shadow: 0 1px 0 0 rgba(0,0,0,0.1), inset 0 -1px 0 0 rgba(0,0,0,0.1), inset 0 12px 24px 2px #ddd;
-}
-
 select[multiple], .text_input, .yui-ac-input, input {
     font-size: 12px !important;
 }
@@ -327,16 +307,6 @@ input[type="number"] {
 #new-comment-notice {
     padding: 20px 8px;
     margin-bottom: 50px;
-}
-
-#product-info, #component-info {
-    color: #484;
-    white-space: normal;
-}
-
-#product-latch, #component-latch {
-    padding-right: 0;
-    cursor: pointer;
 }
 
 #cc-latch {
@@ -966,6 +936,28 @@ div.ui-tooltip {
     position: fixed;
     top: 8px;
     right: 8px;
+}
+
+/* product/component popup */
+
+.name-info-popup {
+  width: 320px;
+}
+
+.name-info-popup header {
+  margin: 8px 16px;
+}
+
+.name-info-popup header .title {
+  margin: 0 0 4px;
+  font-size: 16px;
+}
+
+.name-info-popup header .description {
+  font-size: 12px;
+  line-height: 150%;
+  white-space: normal;
+  color: #666;
 }
 
 /* product search */

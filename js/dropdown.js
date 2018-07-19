@@ -16,7 +16,7 @@ $(function() {
         // clicking dropdown button opens or closes the dropdown content
         if (!$(e.target).hasClass('dropdown-button')) {
             $('.dropdown-button').each(function() {
-                toggleDropDown(e, $(this), $('#' + $(this).attr('aria-controls')), 1);
+                toggleDropDown(e, $(this), $('#' + $(this).attr('aria-controls')), false, true);
             });
         }
     }).keydown(function(e) {
@@ -25,7 +25,7 @@ $(function() {
             $('.dropdown-button').each(function() {
                 var $button = $(this);
                 if ($button.siblings('.dropdown-content').is(':visible')) {
-                    toggleDropDown(e, $button, $('#' + $button.attr('aria-controls')), 1);
+                    toggleDropDown(e, $button, $('#' + $button.attr('aria-controls')), false, true);
                     $button.focus();
                 }
             });
@@ -83,7 +83,7 @@ $(function() {
         // navigate to an active link or click on it
         // note that `trigger('click')` doesn't always work
         if (e.keyCode == 13) {
-            var $link = $('.dropdown-content:visible a.active');
+            var $link = $('.dropdown-content:visible .active');
             if ($link.length) {
                 if ($link.attr('href')) {
                     location.href = $link.attr('href');
@@ -105,7 +105,7 @@ $(function() {
         var $content = $div.find('.dropdown-content');
         $button.click(function(e) {
             // Do not handle non-primary click.
-            if (e.button != 0) {
+            if (e.button != 0 || $content.hasClass('hover-display')) {
                 return;
             }
             toggleDropDown(e, $button, $content);
@@ -115,9 +115,13 @@ $(function() {
                     // prevent the form being submitted if the search bar is empty
                     e.preventDefault();
                     // navigate to an active link if any
-                    var $link = $content.find('a.active');
+                    var $link = $content.find('.active');
                     if ($link.length) {
-                        location.href = $link.attr('href');
+                        if ($link.attr('href')) {
+                            location.href = $link.attr('href');
+                        } else {
+                            $link.trigger('click');
+                        }
                     }
                 }
 
@@ -125,9 +129,49 @@ $(function() {
                 toggleDropDown(e, $button, $content);
             }
         });
+
+        if ($content.hasClass('hover-display')) {
+            const $_button = $button.get(0);
+            const $_content = $content.get(0);
+            let timer;
+
+            const button_handler = event => {
+                event.preventDefault();
+                event.stopPropagation();
+                window.clearTimeout(timer);
+
+                if (event.type === 'mouseleave' && $_content.matches('.hovered')) {
+                    return;
+                }
+
+                timer = window.setTimeout(() => {
+                    toggleDropDown(event, $button, $content, event.type === 'mouseenter', event.type === 'mouseleave');
+                }, 250);
+            };
+
+            const content_handler = event => {
+                event.preventDefault();
+                event.stopPropagation();
+                window.clearTimeout(timer);
+
+                $_content.classList.toggle('hovered', event.type === 'mouseenter');
+
+                if (event.type === 'mouseleave') {
+                    timer = window.setTimeout(() => {
+                        toggleDropDown(event, $button, $content, false, true);
+                    }, 250);
+                }
+            };
+
+            // Use raw `addEventListener` as jQuery actually listens `mouseover` and `mouseout`
+            $_button.addEventListener('mouseenter', event => button_handler(event));
+            $_button.addEventListener('mouseleave', event => button_handler(event));
+            $_content.addEventListener('mouseenter', event => content_handler(event));
+            $_content.addEventListener('mouseleave', event => content_handler(event));
+        }
     });
 
-    function toggleDropDown(e, $button, $content, hide_only) {
+    function toggleDropDown(e, $button, $content, show_only, hide_only) {
         // hide other expanded dropdown menu if any
         var $expanded = $('.dropdown-button[aria-expanded="true"]');
         if ($expanded.length && !$expanded.is($button)) {
@@ -148,13 +192,12 @@ $(function() {
             $('[aria-controls="' + content_id + '"]').removeAttr('aria-activedescendant');
             $content.find('#' + content_id + '-active-item').removeAttr('id');
         }
-        if ($content.is(':visible')) {
-            $content.hide();
-            $button.attr('aria-expanded', false);
-        }
         // if not using Escape or clicking outside the dropdown div, then we are hiding
-        else if (!hide_only) {
-            $content.show();
+        if ($content.is(':visible') || hide_only) {
+            $content.fadeOut('fast');
+            $button.attr('aria-expanded', false);
+        } else if (!$content.is(':visible') || show_only) {
+            $content.fadeIn('fast');
             $button.attr('aria-expanded', true);
         }
     }

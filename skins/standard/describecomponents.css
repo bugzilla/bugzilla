@@ -1,0 +1,97 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this file,
+ * You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * This Source Code Form is "Incompatible With Secondary Licenses", as
+ * defined by the Mozilla Public License, v. 2.0. */
+
+.product {
+  margin: 40px auto;
+  max-width: 960px;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.product > header,
+.product .instructions {
+  margin: 0 auto;
+  max-width: 800px;
+  text-align: center;
+}
+
+.product h1 {
+  margin: 0;
+  font-size: 48px;
+  font-weight: normal;
+}
+
+.product > header p {
+  font-size: 16px;
+}
+
+.product .instructions p {
+  font-size: 14px;
+  font-style: italic;
+}
+
+.component {
+  display: flex;
+  align-items: center;
+  margin: 8px 0;
+  border: 1px solid #CCC;
+  border-radius: 4px;
+  padding: 16px;
+  background-color: #FFF;
+  box-shadow: 0 0 4px #CCC;
+}
+
+.component.highlight {
+  margin: 0;
+  padding: 1em 0;
+  background-color: lightgreen;
+}
+
+.component header {
+  flex: none;
+  margin-right: 16px;
+  width: 240px;
+}
+
+.component h2 {
+  margin: 0;
+  font-size: 24px;
+  font-weight: normal;
+}
+
+.component div {
+  flex: auto;
+}
+
+.component p {
+  margin: 0;
+  font-size: 16px;
+}
+
+.component ul {
+  display: flex;
+  margin: 8px 0 0;
+  border-top: 1px solid #DDD;
+  padding: 8px 0 0;
+  list-style: none;
+  font-size: 14px;
+  color: #999;
+}
+
+.component li {
+  margin: 0 16px 0 0;
+  padding: 0;
+}
+
+.component footer {
+  flex: none;
+  margin-left: 16px;
+}
+
+.component footer:empty {
+  display: none;
+}

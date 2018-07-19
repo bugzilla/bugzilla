@@ -1434,46 +1434,6 @@ if (history && history.replaceState) {
     }
 }
 
-// ajax wrapper, to simplify error handling and auth
-function bugzilla_ajax(request, done_fn, error_fn) {
-    $('#xhr-error').hide('');
-    $('#xhr-error').html('');
-    request.url += (request.url.match('\\?') ? '&' : '?') +
-        'Bugzilla_api_token=' + encodeURIComponent(BUGZILLA.api_token);
-    if (request.type != 'GET') {
-        request.contentType = 'application/json';
-        request.processData = false;
-        if (request.data && request.data.constructor === Object) {
-            request.data = JSON.stringify(request.data);
-        }
-    }
-    return $.ajax(request)
-        .done(function(data) {
-            if (data.error) {
-                if (!request.hideError) {
-                    $('#xhr-error').html(data.message);
-                    $('#xhr-error').show('fast');
-                }
-                if (error_fn)
-                    error_fn(data.message);
-            }
-            else if (done_fn) {
-                done_fn(data);
-            }
-        })
-        .fail(function(data) {
-            if (data.statusText === 'abort')
-                return;
-            var message = data.responseJSON ? data.responseJSON.message : 'Unexpected Error'; // all errors are unexpected :)
-            if (!request.hideError) {
-                $('#xhr-error').html(message);
-                $('#xhr-error').show('fast');
-            }
-            if (error_fn)
-                error_fn(message);
-        });
-}
-
 // lightbox
 
 function lb_show(el) {

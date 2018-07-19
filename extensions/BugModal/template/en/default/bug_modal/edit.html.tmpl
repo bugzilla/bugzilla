@@ -320,24 +320,26 @@
       <div class="dropdown">
         <button type="button" id="action-menu-btn" aria-haspopup="true" aria-label="Actions Menu"
           aria-expanded="false" aria-controls="action-menu" class="dropdown-button minor">&#9662;</button>
-        <ul class="dropdown-content" id="action-menu" role="menu" style="display:none;">
+        <ul class="dropdown-content left" id="action-menu" role="menu" style="display:none;">
           <li role="presentation">
             <a id="action-reset" role="menuitem" tabindex="-1">Reset Sections</a>
           </li>
           <li role="presentation">
             <a id="action-expand-all" role="menuitem" tabindex="-1">Expand All Sections</a>
           </li>
-          <li class="dropdown-separator" role="presentation">
+          <li role="presentation">
             <a id="action-collapse-all" role="menuitem" tabindex="-1">Collapse All Sections</a>
           </li>
+          <li role="separator"></li>
           [% IF user.id %]
             <li role="presentation">
               <a id="action-add-comment" role="menuitem" tabindex="-1">Add Comment</a>
             </li>
           [% END %]
-          <li class="dropdown-separator" role="presentation">
+          <li role="presentation">
             <a id="action-last-comment" role="menuitem" tabindex="-1">Last Comment</a>
           </li>
+          <li role="separator"></li>
           <li role="presentation">
             <a id="action-history" role="menuitem" tabindex="-1">History</a>
           </li>
@@ -374,17 +376,29 @@
         hide_on_edit = can_edit_product
         help         = "describecomponents.cgi?product=$filtered_product"
     %]
-      <span aria-owns="product-name product-latch">
-        <span role="button" aria-label="show product information" aria-expanded="false" tabindex="0"
-              class="spin-latch" id="product-latch" data-latch="product" data-for="product">&#9656;</span>
-        <div title="show product information" tabindex="0" class="spin-toggle"
-             id="product-name" data-latch="product" data-for="product">
+      <div class="name-info-outer dropdown">
+        <span id="product-name" class="dropdown-button" tabindex="0" role="button"
+             aria-haspopup="menu" aria-controls="product-info">
           [% bug.product FILTER html %]
-        </div>
-        <div id="product-info" style="display:none">
-          [% bug.product_obj.description FILTER html_light %]
-        </div>
-      </span>
+          <span class="icon" aria-hidden="true">&#x25BE;</span>
+        </span>
+        <aside id="product-info" class="name-info-popup dropdown-content right hover-display" hidden role="menu"
+               aria-label="Product description and actions">
+          <header>
+            <div class="title">[%~ bug.product FILTER html ~%]</div>
+            <div class="description">[% bug.product_obj.description FILTER html_light %]</div>
+          </header>
+          <li role="separator"></li>
+          <div class="actions">
+            <div><a href="buglist.cgi?product=[% bug.product FILTER uri %]&amp;bug_status=__open__"
+                    target="_blank" role="menuitem" tabindex="-1">See Other [% terms.Bugs %]</a></div>
+            <div><button disabled type="button" class="minor component-watching" role="menuitem" tabindex="-1"
+                         data-product="[% bug.product FILTER html %]"
+                         data-label-watch="Watch This Product" data-label-unwatch="Unwatch This Product"
+                         data-source="BugModal">Watch This Product</button></div>
+          </div>
+        </aside>
+      </div>
     [% END %]
     [% WRAPPER bug_modal/field.html.tmpl
         field          = bug_fields.product
@@ -417,20 +431,30 @@
         help       = "describecomponents.cgi?product=$filtered_product&component=$filtered_component#$filtered_component"
 
     %]
-      <span aria-owns="component-name component-latch">
-        <span role="button" aria-label="show component description" aria-expanded="false" tabindex="0"
-              class="spin-latch" id="component-latch" data-latch="component" data-for="component">&#9656;</span>
-        <div title="show component information" tabindex="0" class="spin-toggle" id="component-name"
-             data-latch="#component-latch" data-for="component">
-            [% bug.component FILTER html %]
-        </div>
-        <div id="component-info" style="display:none">
-          <div>[% bug.component_obj.description FILTER html_light %]</div>
-          <a href="buglist.cgi?component=[% bug.component FILTER uri %]&amp;
-                  [%~ %]product=[% bug.product FILTER uri %]&amp;
-                  [%~ %]bug_status=__open__" target="_blank">Other [% terms.Bugs %]</a>
-        </div>
-      </span>
+      <div class="name-info-outer dropdown">
+        <span id="component-name" class="dropdown-button" tabindex="0" role="button"
+             aria-haspopup="menu" aria-controls="component-info">
+          [% bug.component FILTER html %]
+          <span class="icon" aria-hidden="true">&#x25BE;</span>
+        </span>
+        <aside id="component-info" class="name-info-popup dropdown-content right hover-display" hidden role="menu"
+               aria-label="Component description and actions">
+          <header>
+            <div class="title">[%~ bug.product _ " :: " _ bug.component FILTER html ~%]</div>
+            <div class="description">[% bug.component_obj.description FILTER html_light %]</div>
+          </header>
+          <li role="separator"></li>
+          <div class="actions">
+            <div><a href="buglist.cgi?product=[% bug.product FILTER uri %]&amp;
+                          [%~ %]component=[% bug.component FILTER uri %]&amp;bug_status=__open__"
+                    target="_blank" role="menuitem" tabindex="-1">See Other [% terms.Bugs %]</a></div>
+            <div><button disabled type="button" class="minor component-watching" role="menuitem" tabindex="-1"
+                         data-product="[% bug.product FILTER html %]" data-component="[% bug.component FILTER html %]"
+                         data-label-watch="Watch This Component" data-label-unwatch="Unwatch This Component"
+                         data-source="BugModal">Watch This Component</button></div>
+          </div>
+        </aside>
+      </div>
     [% END %]
 
     [%# importance %]
@@ -1325,7 +1349,7 @@
     <div class="dropdown">
       <button type="button" id="format-btn" aria-haspopup="true" aria-label="Format [% terms.Bug %] Menu"
         aria-expanded="false" aria-controls="format-menu" class="dropdown-button minor">Format [% terms.Bug %] &#9652;</button>
-      <ul class="dropdown-content menu-up" id="format-menu" role="menu" style="display:none;">
+      <ul class="dropdown-content left menu-up" id="format-menu" role="menu" style="display:none;">
         <li role="presentation">
           <a href="show_bug.cgi?format=multiple&amp;id=[% bug.id FILTER uri %]" role="menuitem" tabindex="-1">For Printing</a>
         </li>
@@ -1346,7 +1370,7 @@
       <div class="dropdown">
         <button type="button" id="new-bug-btn" aria-haspopup="true" aria-label="New/Clone [% terms.Bug %] Menu"
           aria-expanded="false" aria-controls="new-bug-menu" class="dropdown-button minor">New/Clone [% terms.Bug %] &#9652;</button>
-        <ul class="dropdown-content menu-up" id="new-bug-menu" role="menu" style="display:none;">
+        <ul class="dropdown-content left menu-up" id="new-bug-menu" role="menu" style="display:none;">
           <li role="presentation">
             <a href="enter_bug.cgi" role="menuitem" tabindex="-1" target="_blank">
               Create a new [% terms.bug %]</a>
@@ -1355,18 +1379,20 @@
             <a href="enter_bug.cgi?product=[% bug.product FILTER uri %]"
                role="menuitem" tabindex="-1" target="_blank">&#8230; in this product</a>
           </li>
-          <li class="dropdown-separator" role="presentation">
+          <li role="presentation">
             <a href="enter_bug.cgi?product=[% bug.product FILTER uri %]&amp;component=[% bug.component FILTER uri %]"
                role="menuitem" tabindex="-1" target="_blank">&#8230; in this component</a>
           </li>
+          <li role="separator"></li>
           <li role="presentation">
             <a href="enter_bug.cgi?format=__default__&amp;product=[% bug.product FILTER uri %]&amp;blocked=[% bug.id FILTER uri %]"
                role="menuitem" tabindex="-1" target="_blank">&#8230; that blocks this [% terms.bug %]</a>
           </li>
-          <li class="dropdown-separator" role="presentation">
+          <li role="presentation">
             <a href="enter_bug.cgi?format=__default__&amp;product=[% bug.product FILTER uri %]&amp;dependson=[% bug.id FILTER uri %]"
                role="menuitem" tabindex="-1" target="_blank">&#8230; that depends on this [% terms.bug %]</a>
           </li>
+          <li role="separator"></li>
           <li role="presentation">
             <a href="enter_bug.cgi?format=__default__&amp;product=[% bug.product FILTER uri %]&amp;cloned_bug_id=[% bug.id FILTER uri %]"
                role="menuitem" tabindex="-1" target="_blank">&#8230; as a clone of this [% terms.bug %]</a>

@@ -28,7 +28,6 @@
 [% PROCESS global/header.html.tmpl
   title = "Reporting and Charting Kitchen"
   doc_section = "reporting.html"
-  style_urls = ['skins/standard/reports.css']
 %]
 
 <p>
@@ -70,14 +69,14 @@
   <ul>
     [% IF feature_enabled('old_charts') %]
       <li id="old_charts">
-        <strong><a href="reports.cgi">Old Charts</a></strong> - 
+        <strong><a href="reports.cgi">Old Charts</a></strong> -
         plot the status and/or resolution of [% terms.bugs %] against
         time, for each product in your database.
       </li>
     [% END %]
     [% IF feature_enabled('new_charts') AND user.in_group(Param("chartgroup")) %]
       <li id="new_charts">
-        <strong><a href="chart.cgi">New Charts</a></strong> - 
+        <strong><a href="chart.cgi">New Charts</a></strong> -
         plot any arbitrary search against time. Far more powerful.
       </li>
     [% END %]

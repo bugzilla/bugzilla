@@ -305,7 +305,7 @@
             </li>
           [% END %]
           [% IF Param('docs_urlbase') %]
-            <li role="separator" class="dropdown-separator"></li>
+            <li role="separator"></li>
             <li role="presentation">
               <a href="[% docs_urlbase FILTER html %]" role="menuitem" tabindex="-1">Documentation</a>
             </li>
@@ -331,7 +331,7 @@
               <div class="email">[% user.login FILTER html %]</div>
             </div>
           </li>
-          <li role="separator" class="dropdown-separator"></li>
+          <li role="separator"></li>
           <li role="presentation">
             <a href="user_profile" role="menuitem" tabindex="-1">My Profile</a>
           </li>
@@ -343,7 +343,7 @@
             <a href="userprefs.cgi" role="menuitem" tabindex="-1">Preferences</a>
           </li>
           [% IF user.authorizer.can_logout %]
-            <li role="separator" class="dropdown-separator"></li>
+            <li role="separator"></li>
             <li role="presentation">
               <a href="index.cgi?logout=1" role="menuitem" tabindex="-1">Log out</a>
             </li>

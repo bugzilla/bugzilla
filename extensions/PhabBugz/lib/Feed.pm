@@ -433,9 +433,9 @@ sub process_revision_change {
     my ($timestamp) = Bugzilla->dbh->selectrow_array("SELECT NOW()");
 
     INFO('Checking for revision attachment');
-    my $attachment = create_revision_attachment($bug, $revision, $timestamp, $revision->author->bugzilla_user);
-    INFO('Attachment ' . $attachment->id . ' created or already exists.');
-    
+    my $rev_attachment = create_revision_attachment($bug, $revision, $timestamp, $revision->author->bugzilla_user);
+    INFO('Attachment ' . $rev_attachment->id . ' created or already exists.');
+
     # ATTACHMENT OBSOLETES
 
     # fixup attachments on current bug
@@ -576,7 +576,7 @@ sub process_revision_change {
     # Email changes for this revisions bug and also for any other
     # bugs that previously had these revision attachments
     foreach my $bug_id ($revision->bug_id, keys %other_bugs) {
-        Bugzilla::BugMail::Send($bug_id, { changer => Bugzilla->user });
+        Bugzilla::BugMail::Send($bug_id, { changer => $rev_attachment->attacher });
     }
 
     Bugzilla->set_user($old_user);

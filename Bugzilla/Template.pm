@@ -565,13 +565,8 @@ sub create {
         PRE_CHOMP => 1,
         TRIM => 1,
 
-        # Bugzilla::Template::Plugin::Hook uses the absolute (in mod_perl)
-        # or relative (in mod_cgi) paths of hook files to explicitly compile
-        # a specific file. Also, these paths may be absolute at any time
-        # if a packager has modified bz_locations() to contain absolute
-        # paths.
         ABSOLUTE => 1,
-        RELATIVE => $ENV{MOD_PERL} ? 0 : 1,
+        RELATIVE => 0,
 
         # Only use an on-disk template cache if we're running as the web
         # server.  This ensures the permissions of the cache remain correct.
@@ -584,7 +579,7 @@ sub create {
         # Initialize templates (f.e. by loading plugins like Hook).
         PRE_PROCESS => ["global/initialize.none.tmpl"],
 
-        ENCODING => Bugzilla->params->{'utf8'} ? 'UTF-8' : undef,
+        ENCODING => 'UTF-8',
 
         # Functions for processing text within templates in various ways.
         # IMPORTANT!  When adding a filter here that does not override a
@@ -1042,7 +1037,7 @@ sub create {
 
     # under mod_perl, use a provider (template loader) that preloads all templates into memory
     my $provider_class
-        = $ENV{MOD_PERL}
+        = $opts{preload}
         ? 'Bugzilla::Template::PreloadProvider'
         : 'Template::Provider';
 

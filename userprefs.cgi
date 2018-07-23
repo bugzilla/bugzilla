@@ -29,7 +29,7 @@ use DateTime;
 
 use constant SESSION_MAX => 20;
 
-my $template = Bugzilla->template;
+local our $template = Bugzilla->template;
 local our $vars = {};
 
 ###############################################################################

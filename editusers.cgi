@@ -24,7 +24,7 @@ use Bugzilla::Field;
 use Bugzilla::Group;
 use Bugzilla::Token;
 
-my $user = Bugzilla->login(LOGIN_REQUIRED);
+local our $user = Bugzilla->login(LOGIN_REQUIRED);
 
 my $cgi          = Bugzilla->cgi;
 my $template     = Bugzilla->template;

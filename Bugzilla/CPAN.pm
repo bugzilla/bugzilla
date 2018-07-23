@@ -103,7 +103,7 @@ sub feature {
     my $meta = $class->cpan_meta;
     my $feature = $meta->feature($feature_name);
     my @modules = $feature->prereqs->merged_requirements(['runtime'], ['requires'])->required_modules;
-    Module::Runtime::require_module($_) foreach @modules;
+    Module::Runtime::require_module($_) foreach grep { !/^Test::Taint$/ } @modules;
     return $FEATURE_LOADED{$feature_name} = 1;
 }
 

@@ -62,7 +62,8 @@ local Bugzilla->params->{phabricator_base_uri} = 'http://fake.fabricator.tld';
 
 my $Bugzilla = mock 'Bugzilla' => (
     override => [
-        'dbh' => sub { mock() },
+        'dbh'  => sub { mock() },
+        'user' => sub { Bugzilla::User->new({ name => 'phab-bot@bmo.tld' }) },
     ],
 );
 
@@ -168,9 +169,53 @@ do {
             'post' => sub {
                 my ($self, $url, $params) = @_;
                 if ($url =~ /differential\.revision\.search/) {
-                    my $data = decode_json($params->{params});
-                    my $content = '{"error_info":null,"error_code":null,"result":{"cursor":{"after":null,"order":null,"limit":100,"before":null},"query":{"queryKey":"all"},"maps":{},"data":[]}}';
-                    return mock { is_error => 0, content => $content};
+                    my $content = <<JSON;
+{
+    "error_info": null,
+    "error_code": null,
+    "result": {
+        "data": [
+            {
+                "id": 9999,
+                "type": "DREV",
+                "phid": "PHID-DREV-uozm3ggfp7e7uoqegmc3",
+                "fields": {
+                    "title": "Added .arcconfig",
+                    "summary": "Added .arcconfig",
+                    "authorPHID": "PHID-USER-4wigy3sh5fc5t74vapwm",
+                    "dateCreated": 1507666113,
+                    "dateModified": 1508514027,
+                    "policy": {
+                        "view": "public",
+                        "edit": "admin"
+                    },
+                    "bugzilla.bug-id": "23",
+                    "status": {
+                        "value": "needs-review",
+                        "name": "Needs Review",
+                        "closed": false,
+                        "color.ansi": "magenta"
+                    }
+                },
+                "attachments": {
+                    "reviewers": {
+                        "reviewers": []
+                    },
+                    "subscribers": {
+                        "subscriberPHIDs": [],
+                        "subscriberCount": 0,
+                        "viewerIsSubscribed": true
+                    },
+                    "projects": {
+                        "projectPHIDs": []
+                    }
+                }
+            }
+        ]
+    }
+}
+JSON
+                    return mock { is_error => 0, content => $content };
                 }
                 else {
                     return mock { is_error => 1, message => "bad request" };
@@ -183,13 +228,14 @@ do {
         attachments => [
             mock {
                 contenttype => 'text/x-phabricator-request',
-                filename => 'phabricator-D9999',
+                filename => 'phabricator-D9999-url.txt',
             },
         ]
     };
     my $revisions = get_attachment_revisions($bug);
     is(ref($revisions), 'ARRAY', 'it is an array ref');
     isa_ok($revisions->[0], 'Bugzilla::Extension::PhabBugz::Revision');
+    is($revisions->[0]->bug_id, 23, 'Bugzila ID is 23');
     ok( try { $revisions->[0]->update }, 'update revision');
 
 };

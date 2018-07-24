@@ -146,9 +146,10 @@ sub get_attachment_revisions {
 
     my @revisions;
     foreach my $revision_id (@revision_ids) {
-        push @revisions, Bugzilla::Extension::PhabBugz::Revision->new_from_query({
+        my $revision = Bugzilla::Extension::PhabBugz::Revision->new_from_query({
             ids => [ $revision_id ]
         });
+        push @revisions, $revision if $revision;
     }
 
     return \@revisions;

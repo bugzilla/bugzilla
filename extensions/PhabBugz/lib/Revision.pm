@@ -93,6 +93,8 @@ sub new_from_query {
           : "";
         return $class->new($result);
     }
+
+    return undef;
 }
 
 sub BUILDARGS {

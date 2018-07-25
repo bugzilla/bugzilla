@@ -26,7 +26,7 @@ has id              => ( is => 'ro', isa => Int );
 has phid            => ( is => 'ro', isa => Str );
 has type            => ( is => 'ro', isa => Str );
 has name            => ( is => 'ro', isa => Str );
-has description     => ( is => 'ro', isa => Str );
+has description     => ( is => 'ro', isa => Maybe[Str] );
 has creation_ts     => ( is => 'ro', isa => Str );
 has modification_ts => ( is => 'ro', isa => Str );
 has view_policy     => ( is => 'ro', isa => Str );

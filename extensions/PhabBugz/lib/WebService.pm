@@ -14,6 +14,7 @@ use warnings;
 use base qw(Bugzilla::WebService);
 
 use Bugzilla::Constants;
+use Bugzilla::Error;
 use Bugzilla::User;
 use Bugzilla::Util qw(detaint_natural datetime_from time_ago trick_taint);
 use Bugzilla::WebService::Constants;

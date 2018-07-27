@@ -131,14 +131,18 @@ sub match {
         attachments => { 'external-accounts' => 1 }
     };
 
+    # We can only fetch 100 users at a time so we need to do this in lumps
     my $phab_users = [];
-    my $result = request( 'user.search', $data );
-
-    if ( exists $result->{result}{data} && @{ $result->{result}{data} } ) {
-        foreach my $user ( @{ $result->{result}{data} } ) {
-            push @$phab_users, $class->new($user);
+    my $result;
+    do {
+        $result = request( 'user.search', $data );
+        if ( exists $result->{result}{data} && @{ $result->{result}{data} } ) {
+            foreach my $user ( @{ $result->{result}{data} } ) {
+                push @$phab_users, $class->new($user);
+            }
         }
-    }
+        $data->{after} = $result->{cursor}->{after};
+    } while ($result->{cursor}->{after});
 
     return $phab_users;
 }

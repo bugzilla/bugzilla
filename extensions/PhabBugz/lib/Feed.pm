@@ -322,20 +322,27 @@ sub group_query {
 
         # Make sure phab-bot also a member of the new project group so that it can
         # make policy changes to the private revisions
-        INFO("Setting project members for " . $project->name);
-        my $set_members          = $self->get_group_members( $group );
-        my @set_member_phids     = uniq map { $_->phid } (@$set_members, $phab_user);
+        INFO( "Checking project members for " . $project->name );
+        my $set_members          = $self->get_group_members($group);
+        my @set_member_phids     = uniq map { $_->phid } ( @$set_members, $phab_user );
         my @current_member_phids = uniq map { $_->phid } @{ $project->members };
-        my ($added, $removed)    = diff_arrays(\@set_member_phids, \@current_member_phids);
+        my ( $removed, $added )  = diff_arrays( \@current_member_phids, \@set_member_phids );
 
-        INFO('Adding members: ' . join( ',', @$added ));
-        $project->add_member( $_ ) foreach @$added;
-        INFO('Removing members: ' . join( ',', @$removed ));
-        $project->remove_member( $_  ) foreach @$removed;
+        if (@$added) {
+            INFO( 'Adding project members: ' . join( ',', @$added ) );
+            $project->add_member($_) foreach @$added;
+        }
 
-        my $result = $project->update();
-        local Bugzilla::Logging->fields->{api_result} = $result;
-        INFO("Project " . $project->name . " updated");
+        if (@$removed) {
+            INFO( 'Removing project members: ' . join( ',', @$removed ) );
+            $project->remove_member($_) foreach @$removed;
+        }
+
+        if (@$added || @$removed) {
+            my $result = $project->update();
+            local Bugzilla::Logging->fields->{api_result} = $result;
+            INFO( "Project " . $project->name . " updated" );
+        }
     }
 }
 

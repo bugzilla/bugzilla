@@ -39,11 +39,13 @@ sub DEFAULT_CSP {
         script_src  => [ 'self', 'nonce', 'unsafe-inline', 'https://www.google-analytics.com' ],
         frame_src   => [ 'none', ],
         worker_src  => [ 'none', ],
-        img_src     => [ 'self', 'https://secure.gravatar.com', 'https://www.google-analytics.com' ],
+        img_src     => [ 'self', 'https://secure.gravatar.com' ],
         style_src   => [ 'self', 'unsafe-inline' ],
         object_src  => [ 'none' ],
         connect_src => [
             'self',
+            # This is for extensions/GoogleAnalytics using beacon or XHR
+            'https://www.google-analytics.com',
             # This is from extensions/OrangeFactor/web/js/orange_factor.js
             'https://treeherder.mozilla.org/api/failurecount/',
         ],
@@ -70,9 +72,11 @@ sub SHOW_BUG_MODAL_CSP {
     my ($bug_id) = @_;
     my %policy = (
         script_src  => ['self', 'nonce', 'unsafe-inline', 'unsafe-eval', 'https://www.google-analytics.com' ],
-        img_src     => [ 'self', 'https://secure.gravatar.com', 'https://www.google-analytics.com' ],
+        img_src     => [ 'self', 'https://secure.gravatar.com' ],
         connect_src => [
             'self',
+            # This is for extensions/GoogleAnalytics using beacon or XHR
+            'https://www.google-analytics.com',
             # This is from extensions/OrangeFactor/web/js/orange_factor.js
             'https://treeherder.mozilla.org/api/failurecount/',
         ],

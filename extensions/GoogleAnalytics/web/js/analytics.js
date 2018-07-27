@@ -15,6 +15,7 @@ $(function() {
     ga('set', 'anonymizeIp', true);
     ga('set', 'location', meta.data('location'));
     ga('set', 'title', meta.data('title'));
+    ga('set', 'transport', 'beacon');
     // Track page view
     ga('send', 'pageview');
   }

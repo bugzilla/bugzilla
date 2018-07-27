@@ -30,34 +30,46 @@ use List::MoreUtils qw(any);
 use MIME::Base64 qw(decode_base64);
 
 use constant READ_ONLY => qw(
+    check_user_enter_bug_permission
     check_user_permission_for_bug
     needs_review
 );
 
 use constant PUBLIC_METHODS => qw(
+    check_user_enter_bug_permission
     check_user_permission_for_bug
     needs_review
     set_build_target
 );
+
+sub _check_phabricator {
+    # Ensure PhabBugz is on
+    ThrowUserError('phabricator_not_enabled')
+        unless Bugzilla->params->{phabricator_enabled};
+}
+
+sub _validate_phab_user {
+    my ($self, $user) = @_;
+
+    $self->_check_phabricator();
+
+    # Validate that the requesting user's email matches phab-bot
+    ThrowUserError('phabricator_unauthorized_user')
+        unless $user->login eq PHAB_AUTOMATION_USER;
+}
 
 sub check_user_permission_for_bug {
     my ($self, $params) = @_;
 
     my $user = Bugzilla->login(LOGIN_REQUIRED);
 
-    # Ensure PhabBugz is on
-    ThrowUserError('phabricator_not_enabled')
-        unless Bugzilla->params->{phabricator_enabled};
-
-    # Validate that the requesting user's email matches phab-bot
-    ThrowUserError('phabricator_unauthorized_user')
-        unless $user->login eq PHAB_AUTOMATION_USER;
+    $self->_validate_phab_user($user);
 
     # Validate that a bug id and user id are provided
     ThrowUserError('phabricator_invalid_request_params')
         unless ($params->{bug_id} && $params->{user_id});
 
-    # Validate that the user and bug exist
+    # Validate that the user exists
     my $target_user = Bugzilla::User->check({ id => $params->{user_id}, cache => 1 });
 
     # Send back an object which says { "result": 1|0 }
@@ -66,10 +78,32 @@ sub check_user_permission_for_bug {
     };
 }
 
+sub check_user_enter_bug_permission {
+    my ($self, $params) = @_;
+
+    my $user = Bugzilla->login(LOGIN_REQUIRED);
+
+    $self->_validate_phab_user($user);
+
+    # Validate that a product name and user id are provided
+    ThrowUserError('phabricator_invalid_request_params')
+        unless ($params->{product} && $params->{user_id});
+
+    # Validate that the user exists
+    my $target_user = Bugzilla::User->check({ id => $params->{user_id}, cache => 1 });
+
+    # Send back an object with the attribute "result" set to 1 if the user
+    # can enter bugs into the given product, or 0 if not.
+    return {
+        result => $target_user->can_enter_product($params->{product}) ? 1 : 0
+    };
+}
+
 sub needs_review {
     my ($self, $params) = @_;
-    ThrowUserError('phabricator_not_enabled')
-        unless Bugzilla->params->{phabricator_enabled};
+
+    $self->_check_phabricator();
+
     my $user = Bugzilla->login(LOGIN_REQUIRED);
     my $dbh  = Bugzilla->dbh;
 
@@ -170,13 +204,7 @@ sub set_build_target {
 
     my $user = Bugzilla->login(LOGIN_REQUIRED);
 
-    # Ensure PhabBugz is on
-    ThrowUserError('phabricator_not_enabled')
-      unless Bugzilla->params->{phabricator_enabled};
-    
-    # Validate that the requesting user's email matches phab-bot
-    ThrowUserError('phabricator_unauthorized_user')
-      unless $user->login eq PHAB_AUTOMATION_USER;
+    $self->_validate_phab_user($user);
 
     my $revision_id  = $params->{revision_id};
     my $build_target = $params->{build_target};
@@ -205,13 +233,13 @@ sub rest_resources {
             POST => {
                 method => 'set_build_target',
                 params => sub {
-                    return { 
+                    return {
                         revision_id  => $_[0],
                         build_target => $_[1]
                     };
                 }
             }
-        },        
+        },
         # Bug permission checks
         qr{^/phabbugz/check_bug/(\d+)/(\d+)$}, {
             GET => {
@@ -220,6 +248,14 @@ sub rest_resources {
                     return { bug_id => $_[0], user_id => $_[1] };
                 }
             }
+        },
+        qr{^/phabbugz/check_enter_bug/([^/]+)/(\d+)$}, {
+            GET => {
+                method => 'check_user_enter_bug_permission',
+                params => sub {
+                    return { product => $_[0], user_id => $_[1] };
+                },
+            },
         },
         # Review requests
         qw{^/phabbugz/needs_review$}, {

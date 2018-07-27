@@ -154,7 +154,7 @@ sub suggest {
     return { users => [] } if length($s) < 3;
 
     my $dbh = Bugzilla->dbh;
-    my @select = ('realname AS real_name', 'login_name AS name');
+    my @select = ('userid AS id', 'realname AS real_name', 'login_name AS name');
     my $order  = 'last_seen_date DESC';
     my $where;
     state $have_mysql = $dbh->isa('Bugzilla::DB::Mysql');
@@ -190,10 +190,14 @@ sub suggest {
 
     my @users = map {
         {
+            id        => $self->type(int    => $_->{id}),
             real_name => $self->type(string => $_->{real_name}),
             name      => $self->type(email  => $_->{name}),
         }
     } @$results;
+
+    Bugzilla::Hook::process('webservice_user_suggest',
+        { webservice => $self, params => $params, users => \@users });
 
     return { users => \@users };
 }

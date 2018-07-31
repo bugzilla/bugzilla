@@ -26,6 +26,7 @@ use constant PLATFORMS_MAP => (
     qr/\(.*[ix0-9]86 (?:on |\()x86_64.*\)/ => ["IA32", "x86", "PC"],
     qr/\(.*amd64.*\)/ => ["AMD64", "x86_64", "PC"],
     qr/\(.*x86_64.*\)/ => ["AMD64", "x86_64", "PC"],
+    qr/\(.*Intel Mac OS X.*\)/ => ["x86_64"],
     # Intel IA64
     qr/\(.*IA64.*\)/ => ["IA64", "PC"],
     # Intel x86

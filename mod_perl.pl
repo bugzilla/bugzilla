@@ -67,6 +67,9 @@ use Bugzilla::Install::Requirements ();
 use Bugzilla::Util ();
 use Bugzilla::RNG ();
 use Bugzilla::ModPerl ();
+use Mojo::Loader qw(find_modules);
+use Module::Runtime qw(require_module);
+use Bugzilla::WebService::Server::REST;
 
 # Make warnings go to the virtual host's log and not the main
 # server log.
@@ -102,6 +105,10 @@ if ($ENV{LOCALCONFIG_ENV}) {
 Bugzilla::Extension->load_all();
 
 Bugzilla->preload_features();
+
+require_module($_) for find_modules('Bugzilla::User::Setting');
+
+Bugzilla::WebService::Server::REST->preload;
 
 # Force instantiation of template so Bugzilla::Template::PreloadProvider can do its magic.
 Bugzilla->preload_templates;

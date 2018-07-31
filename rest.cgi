@@ -24,6 +24,7 @@ BEGIN {
     }
 }
 use Bugzilla::WebService::Server::REST;
+
 Bugzilla->usage_mode(USAGE_MODE_REST);
 local @INC = (bz_locations()->{extensionsdir}, @INC);
 my $server = new Bugzilla::WebService::Server::REST;

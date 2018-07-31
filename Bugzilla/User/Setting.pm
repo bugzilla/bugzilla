@@ -13,8 +13,6 @@ use strict;
 use warnings;
 
 use base qw(Exporter);
-
-
 # Module stuff
 @Bugzilla::User::Setting::EXPORT = qw(
     get_all_settings
@@ -25,6 +23,7 @@ use base qw(Exporter);
 
 use Bugzilla::Error;
 use Bugzilla::Util qw(trick_taint get_text);
+use Module::Runtime qw(require_module);
 
 ###############################
 ###  Module Initialization  ###
@@ -104,9 +103,8 @@ sub new {
         $self->{'category'}      = shift;
     }
     if ($subclass) {
-        eval('require ' . $class . '::' . $subclass);
-        $@ && ThrowCodeError('setting_subclass_invalid',
-                             {'subclass' => $subclass});
+        eval { require_module( $class . '::' . $subclass ) }
+            || ThrowCodeError( 'setting_subclass_invalid', { 'subclass' => $subclass } );
         $class = $class . '::' . $subclass;
     }
     bless($self, $class);

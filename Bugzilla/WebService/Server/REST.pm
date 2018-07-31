@@ -34,6 +34,7 @@ use Bugzilla::WebService::Server::REST::Resources::Elastic;
 use List::MoreUtils qw(uniq);
 use Scalar::Util qw(blessed reftype);
 use MIME::Base64 qw(decode_base64);
+use Module::Runtime qw(require_module);
 
 ###########################
 # Public Method Overrides #
@@ -392,6 +393,10 @@ sub _retrieve_json_params {
     return $params;
 }
 
+sub preload {
+    require_module($_) for values %{ WS_DISPATCH() };
+}
+
 sub _find_resource {
     my ($self, $path) = @_;
 
@@ -399,13 +404,12 @@ sub _find_resource {
     # $module->rest_resources to get the resources array ref.
     my $resources = {};
     foreach my $module (values %{ $self->{dispatch_path} }) {
-        eval("require $module") || die $@;
         next if !$module->can('rest_resources');
         $resources->{$module} = $module->rest_resources;
     }
 
     Bugzilla::Hook::process('webservice_rest_resources',
-                            { rpc => $self, resources => $resources });
+                            { rpc => $self, resources => $resources }) if Bugzilla::request_cache->{bzapi};
 
     # Use the resources hash from each module loaded earlier to determine
     # which handler to use based on a regex match of the CGI path.

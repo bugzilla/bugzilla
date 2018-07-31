@@ -1923,8 +1923,13 @@ a.controller {
 }
 
 .dropdown-panel .notifications label {
+  display: -webkit-box;
   overflow: hidden;
   max-height: 40px;
+  white-space: normal;
+  text-overflow: ellipsis;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
 }
 
 .dropdown-panel .notifications strong {

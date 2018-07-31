@@ -19,6 +19,8 @@ Disallow: /show_bug.cgi*format=multiple*
 Allow: /describecomponents.cgi
 Allow: /describekeywords.cgi
 
+[% FILTER remove('#.*') %]
 [% Hook.process("end") %]
+[% END %]
 
 [% END %]

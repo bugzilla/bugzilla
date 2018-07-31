@@ -22,7 +22,12 @@ Bugzilla.ComponentWatching = class ComponentWatching {
   constructor() {
     this.buttons = document.querySelectorAll('button.component-watching');
 
-    this.init();
+    // Check if the user is logged in and the API key is available. If not, remove the Watch buttons.
+    if (BUGZILLA.api_token) {
+      this.init();
+    } else {
+      this.buttons.forEach($button => $button.remove());
+    }
   }
 
   /**

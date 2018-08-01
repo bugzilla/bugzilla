@@ -11,6 +11,7 @@
   # field_type: (const) constants.FIELD_TYPE_*
   # no_label: (boolean) don't output label
   # label: (string) field label text (default: field_descs.${$field.name}
+  # aria_label: (string) invisible aria-label attribute
   # view_only: (boolean) don't allow editing (default: determined from bug.check_can_change_field)
   # edit_only: (boolean) always render the edit ui
   # container: (boolean) output just a label and the content (eg. for multiple fields next to one label)
@@ -34,7 +35,6 @@
   #   class: (string) optional button class
   #   caption: (string) button caption
   #   hidden: (boolean) don't show the button (default: false)
-  # label_for: (string) optional label for identifier
   #%]
 
 [%
@@ -109,17 +109,15 @@ END;
         [% aria_labelledby_id = "${name}-help-link" %]
         [% aria_labelledby_html = BLOCK %]aria-labelledby="[% aria_labelledby_id FILTER html %]"[% END %]
       [% END %]
-      [%~ IF label_for %]
-        <label for="[% label_for FILTER html %]">
-      [% END %]
       [%~ label _ ":" FILTER html IF label %]
-      [%~ IF label_for %]
-        </label>
-      [% END ~%]
       [%~ IF help.defined %]
         </a>
       [% END %]
     </div>
+  [% END %]
+
+  [% IF aria_label.defined %]
+    [% aria_labelledby_html = BLOCK %]aria-label="[% aria_label FILTER html %]"[% END %]
   [% END %]
 
   [%# read-only html %]

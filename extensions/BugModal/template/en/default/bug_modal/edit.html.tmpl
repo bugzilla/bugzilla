@@ -463,17 +463,18 @@
         container = 1
         hide_on_view = bug.priority == "--" && bug.bug_severity == "normal"
         help = "https://wiki.mozilla.org/BMO/UserGuide/BugFields#priority"
-        label_for = "priority"
     %]
       [% INCLUDE bug_modal/field.html.tmpl
           field = bug_fields.priority
           field_type = constants.FIELD_TYPE_SINGLE_SELECT
+          aria_label = bug_fields.priority.description
           no_indent = 1
           inline = 1
       %]
       [% INCLUDE bug_modal/field.html.tmpl
           field = bug_fields.bug_severity
           field_type = constants.FIELD_TYPE_SINGLE_SELECT
+          aria_label = bug_fields.bug_severity.description
           inline = 1
       %]
       [% UNLESS cf_hidden_in_product('cf_rank', bug.product, bug.component, bug) %]
@@ -497,7 +498,6 @@
           label        = "Status"
           hide_on_edit = 1
           help         = "https://wiki.mozilla.org/BMO/UserGuide/BugStatuses"
-          label_for    = "bug_status"
       %]
         [% bug.bug_status FILTER html %]
         [%+ bug.resolution FILTER html IF bug.resolution %]
@@ -549,6 +549,7 @@
       prefix = prefix
       field  = bug_fields.bug_status
       field_type = constants.FIELD_TYPE_SINGLE_SELECT
+      aria_label = bug_fields.bug_status.description
       editable = bug.choices.bug_status.size > 1
       values = bug.choices.bug_status
       inline = 1
@@ -559,6 +560,7 @@
       prefix = prefix
       field  = bug_fields.resolution
       field_type = constants.FIELD_TYPE_SINGLE_SELECT
+      aria_label = bug_fields.resolution.description
       editable = bug.choices.resolution.size > (bug.resolution == "" ? 0 : 1)
       values = bug.choices.resolution
       inline = 1
@@ -838,17 +840,18 @@
         hide_on_view = (bug.rep_platform == 'All' && bug.op_sys == 'All')
           || (bug.rep_platform == 'Unspecified' && bug.op_sys == 'Unspecified')
         help = "https://wiki.mozilla.org/BMO/UserGuide/BugFields#rep_platform"
-        label_for = "rep_platform"
     %]
       [% INCLUDE bug_modal/field.html.tmpl
           field = bug_fields.rep_platform
           field_type = constants.FIELD_TYPE_SINGLE_SELECT
+          aria_label = bug_fields.rep_platform.description
           inline = 1
           no_indent = 1
       %]
       [% INCLUDE bug_modal/field.html.tmpl
           field = bug_fields.op_sys
           field_type = constants.FIELD_TYPE_SINGLE_SELECT
+          aria_label = bug_fields.op_sys.description
           inline = 1
       %]
       [% WRAPPER bug_modal/field.html.tmpl

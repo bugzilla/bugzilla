@@ -362,6 +362,22 @@ my %optional_features = (
             },
         },
     },
+    sentry => {
+        description => 'Sentry Support',
+        prereqs => {
+            runtime => {
+                requires => { 'Log::Log4perl::Appender::Raven' => '0.006' },
+            },
+        },
+    },
+    datadog => {
+        description => 'Data Dog support',
+        prereqs => {
+            runtime => {
+                requires => { 'DataDog::DogStatsd' => '0.05' },
+            },
+        },
+    },
 );
 
 for my $file ( glob 'extensions/*/Config.pm' ) {

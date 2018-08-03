@@ -267,15 +267,27 @@ sub get_needs_review {
             },
             constraints => {
                 reviewerPHIDs => [$phab_user->phid],
-                statuses      => [qw( needs-review )],
+                statuses      => ["open()"],
             },
-            order       => 'newest',
+            order => 'newest',
         }
     );
     ThrowCodeError('phabricator_api_error', { reason => 'Malformed Response' })
         unless exists $diffs->{result}{data};
 
-    return $diffs->{result}{data};
+    my @revisions;
+    foreach my $revision ( @{ $diffs->{result}{data} } ) {
+        foreach my $reviewer ( @{ $revision->{attachments}->{reviewers}->{reviewers} } ) {
+            if (   $reviewer->{reviewerPHID} eq $phab_user->phid
+                && $reviewer->{status} =~ /^(?:added|blocking)$/ )
+            {
+                push @revisions, $revision;
+                last;
+            }
+        }
+    }
+
+    return \@revisions;
 }
 
 1;

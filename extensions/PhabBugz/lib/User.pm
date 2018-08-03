@@ -135,9 +135,9 @@ sub match {
     my $phab_users = [];
     my $result;
     do {
-        $result = request( 'user.search', $data );
-        if ( exists $result->{result}{data} && @{ $result->{result}{data} } ) {
-            foreach my $user ( @{ $result->{result}{data} } ) {
+        $result = request( 'user.search', $data )->{result};
+        if ( exists $result->{data} && @{ $result->{data} } ) {
+            foreach my $user ( @{ $result->{data} } ) {
                 push @$phab_users, $class->new($user);
             }
         }

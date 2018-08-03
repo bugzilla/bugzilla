@@ -144,6 +144,8 @@
 [% PROCESS num_results %]
 
 [% IF bugs.size == 0 %]
+  <p>We couldn't find any [% terms.bugs %] matching your search terms. 
+  You could try searching with fewer or different terms.</p>
   <ul class="zero_result_links">
     <li>[% PROCESS enter_bug_link %]</li>
     [% IF one_product.defined %]

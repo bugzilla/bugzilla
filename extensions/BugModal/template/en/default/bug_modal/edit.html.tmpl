@@ -391,7 +391,9 @@
           <li role="separator"></li>
           <div class="actions">
             <div><a href="buglist.cgi?product=[% bug.product FILTER uri %]&amp;bug_status=__open__"
-                    target="_blank" role="menuitem" tabindex="-1">See Other [% terms.Bugs %]</a></div>
+                    target="_blank" role="menuitem" tabindex="-1">See All [% terms.Bugs %] in This Product</a></div>
+            <div><a href="enter_bug.cgi?product=[% bug.product FILTER uri %]"
+                    target="_blank" role="menuitem" tabindex="-1">File New [% terms.Bug %] in This Product</a></div>
             <div><button disabled type="button" class="minor component-watching" role="menuitem" tabindex="-1"
                          data-product="[% bug.product FILTER html %]"
                          data-label-watch="Watch This Product" data-label-unwatch="Unwatch This Product"
@@ -447,7 +449,10 @@
           <div class="actions">
             <div><a href="buglist.cgi?product=[% bug.product FILTER uri %]&amp;
                           [%~ %]component=[% bug.component FILTER uri %]&amp;bug_status=__open__"
-                    target="_blank" role="menuitem" tabindex="-1">See Other [% terms.Bugs %]</a></div>
+                    target="_blank" role="menuitem" tabindex="-1">See All [% terms.Bugs %] in This Component</a></div>
+            <div><a href="enter_bug.cgi?product=[% bug.product FILTER uri %]&amp;
+                          [%~ %]component=[% bug.component FILTER uri %]"
+                    target="_blank" role="menuitem" tabindex="-1">File New [% terms.Bug %] in This Component</a></div>
             <div><button disabled type="button" class="minor component-watching" role="menuitem" tabindex="-1"
                          data-product="[% bug.product FILTER html %]" data-component="[% bug.component FILTER html %]"
                          data-label-watch="Watch This Component" data-label-unwatch="Unwatch This Component"

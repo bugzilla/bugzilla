@@ -52,7 +52,7 @@ sub update {
         push(
             @results,
             $self->_bug_user_last_visit_to_hash(
-                $bug, $last_visit_ts, $params
+                $bug_id, $last_visit_ts, $params
             ));
     }
     $dbh->bz_commit_transaction();

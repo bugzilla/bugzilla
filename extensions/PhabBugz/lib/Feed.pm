@@ -542,37 +542,55 @@ sub process_revision_change {
             push(@new_flags, { type_id => $flag_type->id, setter => $user, status => '+' });
         }
 
-        # Also add comment to for attachment update showing the user's name
-        # that changed the revision.
-        my $comment;
+        # Process each flag change by updating the flag and adding a comment
         foreach my $flag_data (@new_flags) {
-            $comment .= $flag_data->{setter}->name . " has approved the revision.\n";
+            my $comment = $flag_data->{setter}->name . " has approved the revision.";
+            $self->add_flag_comment(
+                {
+                    bug        => $bug,
+                    attachment => $attachment,
+                    comment    => $comment,
+                    user       => $flag_data->{setter},
+                    old_flags  => [],
+                    new_flags  => [$flag_data],
+                    timestamp  => $timestamp
+                }
+            );
         }
         foreach my $flag_data (@denied_flags) {
-            $comment .= $flag_data->{setter}->name . " has requested changes to the revision.\n";
+            my $comment = $flag_data->{setter}->name . " has requested changes to the revision.\n";
+            $self->add_flag_comment(
+                {
+                    bug        => $bug,
+                    attachment => $attachment,
+                    comment    => $comment,
+                    user       => $flag_data->{setter},
+                    old_flags  => [$flag_data],
+                    new_flags  => [],
+                    timestamp  => $timestamp
+                }
+            );
         }
         foreach my $flag_data (@removed_flags) {
-            if ( exists $reviewers_hash{$flag_data->{setter}->name} ) {
-                $comment .= "Flag set by " . $flag_data->{setter}->name . " is no longer active.\n";
-            } else {
-                $comment .= $flag_data->{setter}->name . " has been removed from the revision.\n";
+            my $comment;
+            if ( exists $reviewers_hash{ $flag_data->{setter}->name } ) {
+                $comment = "Flag set by " . $flag_data->{setter}->name . " is no longer active.\n";
             }
+            else {
+                $comment = $flag_data->{setter}->name . " has been removed from the revision.\n";
+            }
+            $self->add_flag_comment(
+                {
+                    bug        => $bug,
+                    attachment => $attachment,
+                    comment    => $comment,
+                    user       => $flag_data->{setter},
+                    old_flags  => [$flag_data],
+                    new_flags  => [],
+                    timestamp  => $timestamp
+                }
+            );
         }
-
-        if ($comment) {
-            $comment .= "\n" . Bugzilla->params->{phabricator_base_uri} . "D" . $revision->id;
-            INFO("Flag comment: $comment");
-            # Add transaction_id as anchor if one present
-            # $comment .= "#" . $params->{transaction_id} if $params->{transaction_id};
-            $bug->add_comment($comment, {
-                isprivate  => $attachment->isprivate,
-                type       => CMT_ATTACHMENT_UPDATED,
-                extra_data => $attachment->id
-            });
-        }
-
-        $attachment->set_flags([ @denied_flags, @removed_flags ], \@new_flags);
-        $attachment->update($timestamp);
     }
 
     # FINISH UP
@@ -815,6 +833,33 @@ sub get_group_members {
         ids => $user_ids
       }
     );
+}
+
+sub add_flag_comment {
+    my ( $self, $params ) = @_;
+    my ( $bug, $attachment, $comment, $user, $old_flags, $new_flags, $timestamp )
+        = @$params{qw(bug attachment comment user old_flags new_flags timestamp)};
+
+    my $old_user;
+    if ($user) {
+        $old_user = Bugzilla->user;
+        Bugzilla->set_user($user);
+    }
+
+    INFO("Flag comment: $comment");
+    $bug->add_comment(
+        $comment,
+        {
+            isprivate  => $attachment->isprivate,
+            type       => CMT_ATTACHMENT_UPDATED,
+            extra_data => $attachment->id
+        }
+    );
+
+    $attachment->set_flags( $old_flags, $new_flags );
+    $attachment->update($timestamp);
+
+    Bugzilla->set_user($old_user) if $old_user;
 }
 
 1;

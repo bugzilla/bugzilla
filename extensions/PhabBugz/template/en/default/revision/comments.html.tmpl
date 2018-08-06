@@ -1,0 +1,14 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% IF message == "invalid_bug_id" %]
+Revision is being kept private due to invalid [% terms.bug %] ID
+or author does not have access to the [% terms.bug %]. Either remove
+the [% terms.bug %] ID, automatically making the revision public, or
+enter the correct [% terms.bug %] ID for this revision.
+[% END %]

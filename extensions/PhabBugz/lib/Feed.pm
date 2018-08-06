@@ -30,10 +30,8 @@ use Bugzilla::Extension::PhabBugz::Policy;
 use Bugzilla::Extension::PhabBugz::Revision;
 use Bugzilla::Extension::PhabBugz::User;
 use Bugzilla::Extension::PhabBugz::Util qw(
-    add_security_sync_comments
     create_revision_attachment
     get_bug_role_phids
-    get_security_sync_groups
     is_attachment_phab_revision
     request
     set_phab_user
@@ -371,7 +369,7 @@ sub process_revision_change {
             return;
         }
     }
-
+    
     my $log_message = sprintf(
         "REVISION CHANGE FOUND: D%d: %s | bug: %d | %s",
         $revision->id,
@@ -384,6 +382,26 @@ sub process_revision_change {
     my $old_user = set_phab_user();
     my $bug = Bugzilla::Bug->new({ id => $revision->bug_id, cache => 1 });
 
+    # Check to make sure bug id is valid and author can see it
+    if ($bug->{error}
+        ||!$revision->author->bugzilla_user->can_see_bug($revision->bug_id))
+    {
+        if ($story_text =~ /\s+created\s+D\d+/) {
+            INFO('Invalid bug ID or author does not have access to the bug. ' .
+                 'Waiting til next revision update to notify author.');
+            return;
+        }
+
+        INFO('Invalid bug ID or author does not have access to the bug');
+        my $phab_error_message = "";
+        Bugzilla->template->process('revision/comments.html.tmpl',
+                                    { message => 'invalid_bug_id' },
+                                    \$phab_error_message);
+        $revision->add_comment($phab_error_message);
+        $revision->update();
+        return;
+    }
+
     # REVISION SECURITY POLICY
 
     # If bug is public then remove privacy policy
@@ -393,48 +411,38 @@ sub process_revision_change {
     }
     # else bug is private.
     else {
-        my @set_groups = get_security_sync_groups($bug);
-
-        # If bug privacy groups do not have any matching synchronized groups,
-        # then leave revision private and it will have be dealt with manually.
-        if (!@set_groups) {
-            INFO('No matching groups. Adding comments to bug and revision');
-            add_security_sync_comments([$revision], $bug);
-        }
-        # Otherwise, we create a new custom policy containing the project
+        # Here we create a new custom policy containing the project
         # groups that are mapped to bugzilla groups.
-        else {
-            my $set_project_names = [ map { "bmo-" . $_ } @set_groups ];
+        my $set_project_names = [ map { "bmo-" . $_ } @{ $bug->groups_in } ];
 
-            # If current policy projects matches what we want to set, then
-            # we leave the current policy alone.
-            my $current_policy;
-            if ($revision->view_policy =~ /^PHID-PLCY/) {
-                INFO("Loading current policy: " . $revision->view_policy);
-                $current_policy
-                    = Bugzilla::Extension::PhabBugz::Policy->new_from_query({ phids => [ $revision->view_policy ]});
-                my $current_project_names = [ map { $_->name } @{ $current_policy->rule_projects } ];
-                INFO("Current policy projects: " . join(", ", @$current_project_names));
-                my ($added, $removed) = diff_arrays($current_project_names, $set_project_names);
-                if (@$added || @$removed) {
-                    INFO('Project groups do not match. Need new custom policy');
-                    $current_policy = undef;
-                }
-                else {
-                    INFO('Project groups match. Leaving current policy as-is');
-                }
+        # If current policy projects matches what we want to set, then
+        # we leave the current policy alone.
+        my $current_policy;
+        if ($revision->view_policy =~ /^PHID-PLCY/) {
+            INFO("Loading current policy: " . $revision->view_policy);
+            $current_policy
+                = Bugzilla::Extension::PhabBugz::Policy->new_from_query({ phids => [ $revision->view_policy ]});
+            my $current_project_names = [ map { $_->name } @{ $current_policy->rule_projects } ];
+            INFO("Current policy projects: " . join(", ", @$current_project_names));
+            my ($added, $removed) = diff_arrays($current_project_names, $set_project_names);
+            if (@$added || @$removed) {
+                INFO('Project groups do not match. Need new custom policy');
+                $current_policy = undef;
             }
-
-            if (!$current_policy) {
-                INFO("Creating new custom policy: " . join(", ", @$set_project_names));
-                $revision->make_private($set_project_names);
+            else {
+                INFO('Project groups match. Leaving current policy as-is');
             }
-
-            # Subscriber list of the private revision should always match
-            # the bug roles such as assignee, qa contact, and cc members.
-            my $subscribers = get_bug_role_phids($bug);
-            $revision->set_subscribers($subscribers);
         }
+
+        if (!$current_policy) {
+            INFO("Creating new custom policy: " . join(", ", @$set_project_names));
+            $revision->make_private($set_project_names);
+        }
+
+        # Subscriber list of the private revision should always match
+        # the bug roles such as assignee, qa contact, and cc members.
+        my $subscribers = get_bug_role_phids($bug);
+        $revision->set_subscribers($subscribers);
     }
 
     my ($timestamp) = Bugzilla->dbh->selectrow_array("SELECT NOW()");

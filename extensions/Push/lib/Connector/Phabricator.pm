@@ -21,10 +21,8 @@ use Bugzilla::Extension::PhabBugz::Policy;
 use Bugzilla::Extension::PhabBugz::Project;
 use Bugzilla::Extension::PhabBugz::Revision;
 use Bugzilla::Extension::PhabBugz::Util qw(
-  add_security_sync_comments
   get_attachment_revisions
   get_bug_role_phids
-  get_security_sync_groups
 );
 
 use Bugzilla::Extension::Push::Constants;
@@ -68,8 +66,6 @@ sub send {
 
     my $is_public = is_public($bug);
 
-    my @set_groups = get_security_sync_groups($bug);
-
     my $revisions = get_attachment_revisions($bug);
 
     my $group_change =
@@ -86,24 +82,14 @@ sub send {
             ));
             $revision->make_public();
         }
-        elsif ( !$is_public && !@set_groups ) {
-            Bugzilla->audit(sprintf(
-              'Making revision %s for bug %s private due to unkown Bugzilla groups: %s',
-              $revision->id,
-              $bug->id,
-              join(', ', @set_groups)
-            ));
-            $revision->make_private(['secure-revision']);
-            add_security_sync_comments([$revision], $bug);
-        }
         elsif ( !$is_public && $group_change ) {
             Bugzilla->audit(sprintf(
               'Giving revision %s a custom policy for bug %s',
               $revision->id,
               $bug->id
             ));
-            my @set_project_names = map { "bmo-" . $_ } @set_groups;
-            $revision->make_private(\@set_project_names);
+            my $set_project_names = [ map { "bmo-" . $_->name } @{ $bug->groups_in } ];
+            $revision->make_private($set_project_names);
         }
 
         # Subscriber list of the private revision should always match

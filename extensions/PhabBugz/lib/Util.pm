@@ -27,12 +27,10 @@ use Try::Tiny;
 use base qw(Exporter);
 
 our @EXPORT = qw(
-    add_security_sync_comments
     create_revision_attachment
     get_attachment_revisions
     get_bug_role_phids
     get_needs_review
-    get_security_sync_groups
     intersect
     is_attachment_phab_revision
     request
@@ -201,49 +199,12 @@ sub request {
     return $result;
 }
 
-sub get_security_sync_groups {
-    my $bug = shift;
-
-    my $sync_groups = Bugzilla::Group->match( { isactive => 1, isbuggroup => 1 } );
-    my $sync_group_names = [ map { $_->name } @$sync_groups ]; 
-
-    my $bug_groups = $bug->groups_in;
-    my $bug_group_names = [ map { $_->name } @$bug_groups ];
-
-    my @set_groups = intersect($bug_group_names, $sync_group_names);
-
-    return @set_groups;
-}
-
 sub set_phab_user {
     my $old_user = Bugzilla->user;
     my $user = Bugzilla::User->new( { name => PHAB_AUTOMATION_USER } );
     $user->{groups} = [ Bugzilla::Group->get_all ];
     Bugzilla->set_user($user);
     return $old_user;
-}
-
-sub add_security_sync_comments {
-    my ($revisions, $bug) = @_;
-
-    my $phab_error_message = 'Revision is being made private due to unknown Bugzilla groups.';
-
-    foreach my $revision (@$revisions) {
-        $revision->add_comment($phab_error_message);
-    }
-
-    my $num_revisions = scalar @$revisions;
-    my $bmo_error_message =
-    ( $num_revisions > 1
-    ? $num_revisions.' revisions were'
-    : 'One revision was' )
-    . ' made private due to unknown Bugzilla groups.';
-
-    my $old_user = set_phab_user();
-
-    $bug->add_comment( $bmo_error_message, { isprivate => 0 } );
-
-    Bugzilla->set_user($old_user);
 }
 
 sub get_needs_review {

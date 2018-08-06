@@ -222,6 +222,7 @@
           [% IF extra_class %]
             <span class="user-role">([% extra_class.ucfirst FILTER none %])</span>
           [% END %]
+          [% Hook.process('user', 'bug/changes.html.tmpl') %]
         </td>
         <td class="comment-actions">
           <button type="button" class="change-spinner minor" id="as-[% id FILTER none %]">-</button>

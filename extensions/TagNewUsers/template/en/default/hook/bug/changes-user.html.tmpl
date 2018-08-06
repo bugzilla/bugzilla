@@ -1,0 +1,20 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% RETURN UNLESS user.in_group('canconfirm') %]
+[% IF action.who.is_new %]
+<span class="new_user" title="
+[%- action.who.comment_count FILTER html %] comment[% "s" IF action.who.comment_count != 1 -%]
+, created [%
+IF action.who.creation_age == 0 %]today[%
+ELSIF action.who.creation_age > 365 %]more than a year ago[%
+ELSE %][% action.who.creation_age FILTER html %] day[% "s" IF action.who.creation_age != 1 %] ago[% END %]."
+  >
+(New to [% terms.Bugzilla %])
+</span>
+[% END %]

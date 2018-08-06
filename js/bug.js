@@ -17,7 +17,7 @@
  * Contributor(s): Max Kanat-Alexander <mkanat@bugzilla.org>
  */
 
-/* This library assumes that the needed YUI libraries have been loaded 
+/* This library assumes that the needed YUI libraries have been loaded
    already. */
 
 YAHOO.bugzilla.dupTable = {
@@ -47,7 +47,7 @@ YAHOO.bugzilla.dupTable = {
             success: dataTable.onDataReturnInitializeTable,
             failure: dataTable.onDataReturnInitializeTable,
             scope:   dataTable,
-            argument: dataTable.getState() 
+            argument: dataTable.getState()
         };
         dataTable.showTableMessage(dataTable.get("MSG_LOADING"),
                                    YAHOO.widget.DataTable.CLASS_LOADING);
@@ -63,6 +63,10 @@ YAHOO.bugzilla.dupTable = {
     // if the table shows at the exact same time as the button is clicked,
     // the click on the button won't register.)
     doUpdateTable: function(e, args) {
+        if (e.isComposing) {
+          return;
+        }
+
         var dt = args[0];
         var product_name = args[1];
         var summary = YAHOO.util.Event.getTarget(e);
@@ -72,14 +76,14 @@ YAHOO.bugzilla.dupTable = {
             600);
     },
     formatBugLink: function(el, oRecord, oColumn, oData) {
-        el.innerHTML = '<a href="show_bug.cgi?id=' + oData + '">' 
+        el.innerHTML = '<a href="show_bug.cgi?id=' + oData + '">'
                        + oData + '</a>';
     },
     formatStatus: function(el, oRecord, oColumn, oData) {
         var resolution = oRecord.getData('resolution');
         var bug_status = display_value('bug_status', oData);
         if (resolution) {
-            el.innerHTML = bug_status + ' ' 
+            el.innerHTML = bug_status + ' '
                            + display_value('resolution', resolution);
         }
         else {
@@ -87,7 +91,7 @@ YAHOO.bugzilla.dupTable = {
         }
     },
     formatCcButton: function(el, oRecord, oColumn, oData) {
-        var url = 'process_bug.cgi?id=' + oRecord.getData('id') 
+        var url = 'process_bug.cgi?id=' + oRecord.getData('id')
                   + '&addselfcc=1&token=' + escape(oData);
         var button = document.createElement('a');
         button.setAttribute('href',  url);
@@ -107,7 +111,7 @@ YAHOO.bugzilla.dupTable = {
         };
         // DataSource can't understand a JSON-RPC error response, so
         // we have to modify the result data if we get one.
-        new_ds.doBeforeParseData = 
+        new_ds.doBeforeParseData =
             function(oRequest, oFullResponse, oCallback) {
                 if (oFullResponse.error) {
                     oFullResponse.result = {};
@@ -124,9 +128,9 @@ YAHOO.bugzilla.dupTable = {
     init: function(data) {
         if (this.dataSource == null) this.init_ds();
         data.options.initialLoad = false;
-        var dt = new YAHOO.widget.DataTable(data.container, data.columns, 
-            this.dataSource, data.options); 
-        YAHOO.util.Event.on(data.summary_field, 'keyup', this.doUpdateTable,
+        var dt = new YAHOO.widget.DataTable(data.container, data.columns,
+            this.dataSource, data.options);
+        YAHOO.util.Event.on(data.summary_field, 'input', this.doUpdateTable,
                             [dt, data.product_name]);
     }
 };

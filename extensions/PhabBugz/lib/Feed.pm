@@ -413,7 +413,7 @@ sub process_revision_change {
     else {
         # Here we create a new custom policy containing the project
         # groups that are mapped to bugzilla groups.
-        my $set_project_names = [ map { "bmo-" . $_ } @{ $bug->groups_in } ];
+        my $set_project_names = [ map { "bmo-" . $_->name } @{ $bug->groups_in } ];
 
         # If current policy projects matches what we want to set, then
         # we leave the current policy alone.

@@ -15,11 +15,12 @@
   *                 Erik Stambaugh <erik@dasbistro.com>
   *                 Marc Schumann <wurblzap@gmail.com>
   *                 Guy Pyrzak <guy.pyrzak@gmail.com>
+  *                 Kohei Yoshino <kohei.yoshino@gmail.com>
   */
 
 table.attachment_entry th {
     text-align: right;
-    vertical-align: baseline;
+    vertical-align: top;
     white-space: nowrap;
 }
 
@@ -36,14 +37,6 @@ table#attachment_flags td {
     text-align: left;
     vertical-align: baseline;
     font-size: small;
-}
-
-#data-error {
-    margin: 4px 0 0;
-}
-
-#data-error:empty {
-    margin: 0;
 }
 
 /* Rules used to view patches in diff mode. */
@@ -173,7 +166,7 @@ table.attachment_info td {
 }
 
 #attachment_info.edit #attachment_information_read_only {
-    display: none;  
+    display: none;
 }
 
 #attachment_info.edit #attachment_view_window {
@@ -187,14 +180,14 @@ table.attachment_info td {
 
 #attachment_info.edit #attachment_information_edit input.text,
 #attachment_info.edit #attachment_information_edit textarea {
-    width: 90%; 
+    width: 90%;
 }
 
 #attachment_isobsolete {
     padding-right: 1em;
 }
 
-#attachment_information_edit { 
+#attachment_information_edit {
     float: left;
 }
 
@@ -207,13 +200,13 @@ textarea.bz_private {
 }
 
 #update {
-    clear: both; 
-    display: block;  
+    clear: both;
+    display: block;
 }
 
 div#update_container {
-    clear: both; 
-    padding: 1.5em 0; 
+    clear: both;
+    padding: 1.5em 0;
 }
 
 #attachment_flags {
@@ -226,7 +219,7 @@ div#update_container {
 }
 
 #editFrame, #viewDiffFrame, #viewFrame {
-    height: 400px; 
+    height: 400px;
     width: 95%;
     margin-left: 2%;
     overflow: auto;
@@ -247,12 +240,283 @@ div#update_container {
 }
 
 #hidden_obsolete_message {
-   text-align: left; 
-   width: 75%; 
-   margin: 0  auto; 
+   text-align: left;
+   width: 75%;
+   margin: 0  auto;
    font-weight: bold
 }
 
-#description {
-    resize: vertical;
+/**
+ * AttachmentForm
+ */
+
+#att-selector [hidden] {
+  display: none;
+}
+
+#att-selector label[role="button"] {
+  border-bottom: 1px solid #277AC1;
+  color: #277AC1;
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+#att-selector .icon::before {
+  line-height: 100%;
+  font-family: FontAwesome;
+  font-style: normal;
+}
+
+#att-dropbox {
+  box-sizing: border-box;
+  border: 1px solid #999;
+  border-radius: 4px;
+  margin: 4px;
+  width: 560px;
+  background-color: #FFF;
+  -moz-user-select: none;
+  -webkit-user-select: none;
+  user-select: none;
+  transition: all .2s;
+}
+
+#att-dropbox.invalid {
+  border-color: #F33;
+  background-color: #FEE;
+  box-shadow: 0 0 4px #F33;
+}
+
+#att-dropbox.dragover {
+  border-color: #277AC1;
+  background-color: #DCE9F5;
+  box-shadow: 0 0 4px #277AC1;
+}
+
+#att-dropbox.invalid header,
+#att-dropbox.invalid #att-textarea,
+#att-dropbox.dragover header,
+#att-dropbox.dragover #att-textarea {
+  background-color: transparent;
+}
+
+#att-dropbox header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-bottom: 1px solid #C0C0C0;
+  border-radius: 4px 4px 0 0;
+  padding: 8px;
+  font-size: 14px;
+  font-style: italic;
+  background-color: #F3F3F3;
+  pointer-events: none;
+  transition: all .2s;
+}
+
+#att-dropbox header .icon {
+  display: inline-block;
+  margin: 2px 8px 0 0;
+  color: #999;
+  transition: all .2s;
+}
+
+#att-dropbox.invalid header .icon {
+  color: #F33;
+}
+
+#att-dropbox.dragover header .icon {
+  color: #277AC1;
+}
+
+#att-dropbox .icon::before {
+  font-size: 24px;
+  content: "\F0EE";
+}
+
+#att-dropbox > div {
+  position: relative;
+  min-height: 160px;
+}
+
+#att-data {
+  display: none;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  z-index: -1;
+  outline: 0;
+  border: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  box-shadow: none;
+  resize: none;
+}
+
+#att-data:invalid {
+  display: block; /* To display the validation message */
+}
+
+#att-textarea {
+  margin: 0;
+  border: 0;
+  border-radius: 0 0 4px 4px;
+  padding: 8px;
+  width: 100%;
+  height: 160px;
+  min-height: 160px;
+  font: 13px/1.2 "Droid Sans Mono", Menlo, Monaco, "Courier New", Courier, monospace;
+  white-space: pre;
+  resize: vertical;
+  transition: all .2s;
+}
+
+#att-preview {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  border-radius: 0 0 4px 4px;
+  padding: 8px;
+  pointer-events: none;
+}
+
+#att-preview figure {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  top: 0;
+  right: 0;
+  overflow: hidden;
+  margin: 0;
+  width: 100%;
+  height: 100%;
+  background-color: #EEE;
+}
+
+#att-preview [itemprop="name"] {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  top: 0;
+  right: 0;
+  overflow: hidden;
+  box-sizing: border-box;
+  padding: 40px;
+  width: 100%;
+  height: 100%;
+  font-size: 14px;
+  text-align: center;
+  text-shadow: 0 0 4px #000;
+  color: #FFF;
+  background-image: linear-gradient(to bottom, transparent, rgba(0, 0, 0, .4));
+}
+
+#att-preview [itemprop="text"] {
+  position: absolute;
+  top: 0;
+  right: 0;
+  overflow: hidden;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 8px;
+  width: 100%;
+  height: 100%;
+  font: 13px/1.2 "Droid Sans Mono", Menlo, Monaco, "Courier New", Courier, monospace;
+  color: #333;
+}
+
+#att-preview [itemprop="image"] {
+  max-width: 100%;
+}
+
+#att-preview [itemprop="text"]:empty,
+#att-preview [itemprop="text"]:not(:empty) ~ .icon,
+#att-preview [itemprop="image"][src=""],
+#att-preview [itemprop="image"]:not([src=""]) ~ .icon {
+  display: none;
+}
+
+#att-preview [itemprop="image"] ~ .icon::before {
+  font-size: 100px;
+  color: #999;
+  content: "\F15B";
+}
+
+#att-preview [itemprop="encodingFormat"][content="application/pdf"] ~ .icon::before {
+  content: "\F1C1";
+}
+
+#att-preview [itemprop="encodingFormat"][content="application/msword"] ~ .icon::before,
+#att-preview [itemprop="encodingFormat"][content*="wordprocessingml"] ~ .icon::before {
+  content: "\F1C2";
+}
+
+#att-preview [itemprop="encodingFormat"][content="application/vnd.ms-excel"] ~ .icon::before,
+#att-preview [itemprop="encodingFormat"][content*="spreadsheetml"] ~ .icon::before {
+  content: "\F1C3";
+}
+
+#att-preview [itemprop="encodingFormat"][content="application/vnd.ms-powerpoint"] ~ .icon::before,
+#att-preview [itemprop="encodingFormat"][content*="presentationml"] ~ .icon::before {
+  content: "\F1C4";
+}
+
+#att-preview [itemprop="encodingFormat"][content^="image/"] ~ .icon::before {
+  content: "\F1C5";
+}
+
+#att-preview [itemprop="encodingFormat"][content="application/zip"] ~ .icon::before,
+#att-preview [itemprop="encodingFormat"][content="application/x-bzip2"] ~ .icon::before,
+#att-preview [itemprop="encodingFormat"][content="application/x-gtar"] ~ .icon::before,
+#att-preview [itemprop="encodingFormat"][content="application/x-rar-compressed"] ~ .icon::before {
+  content: "\F1C6";
+}
+
+#att-preview [itemprop="encodingFormat"][content^="audio/"] ~ .icon::before {
+  content: "\F1C7";
+}
+
+#att-preview [itemprop="encodingFormat"][content^="video/"] ~ .icon::before {
+  content: "\F1C8";
+}
+
+#att-preview [itemprop="encodingFormat"][content^="text/"] ~ .icon::before {
+  content: "\F15C";
+}
+
+#att-remove-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  padding: 4px;
+  pointer-events: auto;
+}
+
+#att-remove-button .icon::before {
+  font-size: 16px;
+  color: #666;
+  content: "\F057";
+}
+
+#att-error-message {
+  box-sizing: border-box;
+  margin: 8px 4px 0;
+  padding: 0 8px;
+  width: 560px;
+  text-align: center;
+  font-style: italic;
+}
+
+#att-error-message:empty {
+  margin: 0;
 }

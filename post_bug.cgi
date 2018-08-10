@@ -29,6 +29,7 @@ use Bugzilla::Token;
 use Bugzilla::Flag;
 
 use List::MoreUtils qw(uniq);
+use MIME::Base64 qw(decode_base64);
 
 my $user = Bugzilla->login(LOGIN_REQUIRED);
 
@@ -174,13 +175,30 @@ if (defined $cgi->param('version')) {
 # Add an attachment if requested.
 my $data_fh = $cgi->upload('data');
 my $attach_text = $cgi->param('attach_text');
+my $data_base64 = $cgi->param('data_base64');
 
-if ($data_fh || $attach_text) {
+if ($data_fh || $attach_text || $data_base64) {
     $cgi->param('isprivate', $cgi->param('comment_is_private'));
 
     # Must be called before create() as it may alter $cgi->param('ispatch').
     my $content_type = Bugzilla::Attachment::get_content_type();
     my $attachment;
+    my $data;
+    my $filename;
+
+    if ($attach_text) {
+        # Convert to unix line-endings if pasting a patch
+        if (scalar($cgi->param('ispatch'))) {
+            $attach_text =~ s/[\012\015]{1,2}/\012/g;
+        }
+        $data = $attach_text;
+        $filename = "file_$id.txt";
+    } elsif ($data_base64) {
+        $data = decode_base64($data_base64);
+        $filename = $cgi->param('filename') || "file_$id";
+    } else {
+        $data = $filename = $data_fh;
+    }
 
     # If the attachment cannot be successfully added to the bug,
     # we notify the user, but we don't interrupt the bug creation process.
@@ -190,9 +208,9 @@ if ($data_fh || $attach_text) {
         $attachment = Bugzilla::Attachment->create(
             {bug           => $bug,
              creation_ts   => $timestamp,
-             data          => $attach_text || $data_fh,
+             data          => $data,
              description   => scalar $cgi->param('description'),
-             filename      => $attach_text ? "file_$id.txt" : $data_fh,
+             filename      => $filename,
              ispatch       => scalar $cgi->param('ispatch'),
              isprivate     => scalar $cgi->param('isprivate'),
              mimetype      => $content_type,

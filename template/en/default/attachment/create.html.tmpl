@@ -39,18 +39,10 @@
   doc_section = "attachments.html"
 %]
 
-<script [% script_nonce FILTER none %]>
-<!--
-TUI_hide_default('attachment_text_field');
--->
-</script>
-
 [%# BMO hook for displaying MozReview message %]
 [% Hook.process('before_form') %]
 
-<form name="entryform" method="post" action="attachment.cgi"
-      enctype="multipart/form-data"
-      onsubmit="return validateAttachmentForm(this)">
+<form name="entryform" method="post" action="attachment.cgi" enctype="multipart/form-data">
   <input type="hidden" name="bugid" value="[% bug.bug_id %]">
   <input type="hidden" name="action" value="insert">
   <input type="hidden" name="token" value="[% token FILTER html %]">
@@ -90,7 +82,7 @@ TUI_hide_default('attachment_text_field');
           <label for="takebug">take [% terms.bug %]</label>
           [% bug_statuses = [] %]
           [% FOREACH bug_status = bug.status.can_change_to %]
-            [% NEXT IF bug_status.name == "UNCONFIRMED" 
+            [% NEXT IF bug_status.name == "UNCONFIRMED"
                        && !bug.product_obj.allows_unconfirmed %]
             [% bug_statuses.push(bug_status) IF bug_status.is_open %]
           [% END %]

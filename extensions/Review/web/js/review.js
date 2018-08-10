@@ -10,9 +10,6 @@ var REVIEW = {
     target: false,
     fields: [],
     use_error_for: false,
-    ispatch_override: false,
-    description_override: false,
-    ignore_patch_event: true,
 
     init_review_flag: function(fid, flag_name) {
         var idx = this.fields.push({ 'fid': fid, 'flag_name': flag_name, 'component': '' }) - 1;
@@ -39,49 +36,12 @@ var REVIEW = {
         $('#component').on('change', REVIEW.component_change);
         BUGZILLA.string['reviewer_required'] = 'A reviewer is required.';
         this.use_error_for = true;
-        this.init_create_attachment();
-    },
-
-    init_create_attachment: function() {
-        $('#data').on('change', REVIEW.attachment_change);
-        $('#description').on('change', REVIEW.description_change);
-        $('#ispatch').on('change', REVIEW.ispatch_change);
     },
 
     component_change: function() {
         for (var i = 0; i < REVIEW.fields.length; i++) {
             REVIEW.flag_change({ data: i });
         }
-    },
-
-    attachment_change: function() {
-        var filename = $('#data').val().split('/').pop().split('\\').pop();
-        var description = $('#description').first();
-        if (description.val() == '' || !REVIEW.description_override) {
-            description.val(filename);
-        }
-        if (!REVIEW.ispatch_override) {
-            $('#ispatch').prop('checked',
-                REVIEW.endsWith(filename, '.diff') || REVIEW.endsWith(filename, '.patch'));
-        }
-        setContentTypeDisabledState(this.form);
-        description.select();
-        description.focus();
-    },
-
-    description_change: function() {
-        REVIEW.description_override = true;
-    },
-
-    ispatch_change: function() {
-        // the attachment template triggers this change event onload
-        // as we only want to set ispatch_override when the user clicks on the
-        // checkbox, we ignore this first event
-        if (REVIEW.ignore_patch_event) {
-            REVIEW.ignore_patch_event = false;
-            return;
-        }
-        REVIEW.ispatch_override = true;
     },
 
     flag_change: function(e) {
@@ -167,8 +127,8 @@ var REVIEW = {
     },
 
     check_mandatory: function(e) {
-        if ($('#data').length && !$('#data').val()
-            && $('#attach_text').length && !$('#attach_text').val())
+        if ($('#file').length && !$('#file').val()
+            && $('#att-textarea').length && !$('#att-textarea').val())
         {
             return;
         }

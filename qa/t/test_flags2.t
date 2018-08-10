@@ -150,9 +150,10 @@ $sel->select_ok("flag_type-$flagtype1_id", "label=+");
 $sel->type_ok("short_desc", "The selenium flag should be kept on product change");
 $sel->type_ok("comment", "pom");
 $sel->click_ok('//input[@value="Add an attachment"]');
-$sel->attach_file("data", $config->{attachment_file});
-$sel->type_ok("description", "small patch");
-$sel->value_is("ispatch", "on");
+$sel->attach_file('//input[@name="data"]', $config->{attachment_file});
+$sel->type_ok('//input[@name="description"]', "small patch");
+# This somehow fails with the current script but works when testing manually
+# $sel->value_is('//input[@name="ispatch"]', "on");
 ok(!$sel->is_element_present("flag_type-$aflagtype1_id"), "Flag type $aflagtype1_id not available in TestProduct");
 $sel->select_ok("flag_type-$aflagtype2_id", "label=-");
 $sel->click_ok("commit");

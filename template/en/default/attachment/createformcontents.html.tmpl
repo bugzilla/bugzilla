@@ -19,45 +19,47 @@
   #                 Joel Peshkin <bugreport@peshkin.net>
   #                 Erik Stambaugh <erik@dasbistro.com>
   #                 Marc Schumann <wurblzap@gmail.com>
+  #                 Kohei Yoshino <kohei.yoshino@gmail.com>
   #%]
 
-<script [% script_nonce FILTER none %]>
-  document.addEventListener("DOMContentLoaded", function (event) {
-    document.querySelector("#attachment_data_controller").addEventListener(
-      "click", function (event) {
-        TUI_toggle_class('attachment_text_field');
-        TUI_toggle_class('attachment_data');
-      });
-  });
-</script>
-
-<tr class="attachment_data">
-  <th><label for="data">File</label>:</th>
+<tr id="att-selector">
+  <th class="required"><label for="att-file">File</label>:</th>
   <td>
-    <em>Enter the path to the file on your computer</em> (or
-    <a id="attachment_data_controller">
-    paste text as attachment</a>).<br>
-    <input type="file" id="data" name="data" size="50" aria-errormessage="data-error" aria-invalid="false">
-    <div id="data-error" class="warning" aria-live="assertive"><div>
-  </td>
-</tr>
-<tr class="attachment_text_field">
-  <th><label for="attach_text">File</label>:</th>
-  <td>
-    <em>Paste the text to be added as an attachment</em> (or
-    <a id="attachment_text_field_controller" href="javascript:TUI_toggle_class('attachment_text_field');
-                                                   javascript:TUI_toggle_class('attachment_data')"
-    >attach a file</a>).<br>
-    <textarea id="attach_text" name="attach_text" cols="80" rows="15"
-              onkeyup="TextFieldHandler()" onblur="TextFieldHandler()"></textarea>
+    <input hidden id="att-file" type="file" name="data" size="50">
+    <input id="att-filename" type="hidden" name="filename">
+    <section id="att-dropbox">
+      <header>
+        <span class="icon" aria-hidden="true"></span>
+        <span><label id="att-browse-label" tabindex="0" role="button">Browse a file</label>,
+          drag &amp; drop it, or paste text/link/image below.</span>
+      </header>
+      <div>
+        <textarea hidden id="att-data" name="data_base64"
+                  aria-errormessage="data-error" aria-invalid="false"></textarea>
+        <textarea id="att-textarea" name="attach_text" cols="80" rows="10"
+                  aria-label="Paste the text, link or image to be added as an attachment"></textarea>
+        <div hidden id="att-preview">
+          <figure role="img" aria-labelledby="att-preview-name" itemscope itemtype="http://schema.org/MediaObject">
+            <meta itemprop="encodingFormat">
+            <pre itemprop="text"></pre>
+            <img src="" alt="" itemprop="image">
+            <figcaption id="att-preview-name" itemprop="name"></figcaption>
+            <span class="icon" aria-hidden="true"></span>
+          </figure>
+          <span id="att-remove-button" tabindex="0" role="button" aria-label="Remove attachment">
+            <span class="icon" aria-hidden="true"></span>
+          </span>
+        </div>
+      </div>
+    </section>
+    <div id="att-error-message" class="warning" aria-live="assertive"></div>
   </td>
 </tr>
 <tr>
-  <th class="required"><label for="description">Description</label>:</th>
+  <th class="required"><label for="att-description">Description</label>:</th>
   <td>
     <em>Describe the attachment briefly.</em><br>
-    <input type="text" id="description" name="description" class="required"
-           size="60" maxlength="200">
+    <input id="att-description" class="required" type="text" name="description" size="60" maxlength="200">
   </td>
 </tr>
 <tr[% ' class="expert_fields"' UNLESS bug.id %]>
@@ -65,43 +67,21 @@
   <td>
     <em>If the attachment is a patch, check the box below.</em><br>
     [% Hook.process("patch_notes") %]
-    <input type="checkbox" id="ispatch" name="ispatch" value="1">
-    <label for="ispatch">patch</label><br><br>
-    [%# Reset this whenever the page loads so that the JS state is up to date %]
-    <script [% script_nonce FILTER none %]>
-      $(function() {
-        $("#data").on("change", function() {
-          DataFieldHandler();
-          // Fire event to keep take-bug in sync.
-          $("#ispatch").change();
-        });
-        $("#ispatch").on("change", function() {
-          setContentTypeDisabledState(this.form);
-          var takebug = $("#takebug");
-          if (takebug.is(":visible") && takebug.data("take-if-patch") && $("#ispatch").prop("checked")) {
-            $("#takebug").prop("checked", true);
-          }
-        }).change();
-      });
-    </script>
-
-    <em>Otherwise, choose a method for determining the content type.</em><br>
-    <input type="radio" id="autodetect"
-           name="contenttypemethod" value="autodetect" checked="checked">
-      <label for="autodetect">auto-detect</label><br>
-    <input type="radio" id="list"
-           name="contenttypemethod" value="list">
-      <label for="list">select from list</label>:
-      <select name="contenttypeselection" id="contenttypeselection"
-              onchange="this.form.contenttypemethod[1].checked = true;">
-        [% PROCESS content_types %]
-      </select><br>
-    <input type="radio" id="manual"
-                 name="contenttypemethod" value="manual">
-      <label for="manual">enter manually</label>:
-      <input type="text" name="contenttypeentry" id="contenttypeentry"
-             size="30" maxlength="200"
-             onchange="if (this.value) this.form.contenttypemethod[2].checked = true;">
+    <input id="att-ispatch" type="checkbox" name="ispatch">
+    <label for="att-ispatch">patch</label><br><br>
+    <div id="att-type-outer">
+      <em>Otherwise, choose a method for determining the content type.</em>
+      <div>
+        <input id="att-type-list" type="radio" name="contenttypemethod" value="list" checked>
+        <label for="att-type-list">select from list</label>:
+        <select id="att-type-select" name="contenttypeselection">[% PROCESS content_types %]</select>
+      </div>
+      <div>
+      <input id="att-type-manual" type="radio" name="contenttypemethod" value="manual">
+        <label for="att-type-manual">enter manually</label>:
+        <input id="att-type-input" type="text" name="contenttypeentry" size="30" maxlength="200">
+      </div>
+    </div>
   </td>
 </tr>
 <tr[% ' class="expert_fields"' UNLESS bug.id %]>

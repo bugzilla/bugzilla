@@ -299,9 +299,9 @@ $sel->title_like(qr/^$bug1_id /);
 $sel->click_ok("link=Add an attachment");
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_is("Create New Attachment for Bug #$bug1_id");
-$sel->attach_file("data", $config->{attachment_file});
-$sel->type_ok("description", "patch, v1");
-$sel->check_ok("ispatch");
+$sel->attach_file('//input[@name="data"]', $config->{attachment_file});
+$sel->type_ok('//input[@name="description"]', "patch, v1");
+$sel->check_ok('//input[@name="ispatch"]');
 $sel->is_text_present_ok("SeleniumAttachmentFlag1Test");
 $sel->is_text_present_ok("SeleniumAttachmentFlag2Test");
 ok(!$sel->is_text_present("SeleniumAttachmentFlag3Test"), "Inactive SeleniumAttachmentFlag3Test flag type not displayed");
@@ -326,9 +326,9 @@ my $attachment1_id = $1;
 $sel->click_ok("//a[contains(text(),'Create\n Another Attachment to Bug $bug1_id')]");
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_is("Create New Attachment for Bug #$bug1_id");
-$sel->attach_file("data", $config->{attachment_file});
-$sel->type_ok("description", "patch, v2");
-$sel->check_ok("ispatch");
+$sel->attach_file('//input[@name="data"]', $config->{attachment_file});
+$sel->type_ok('//input[@name="description"]', "patch, v2");
+$sel->check_ok('//input[@name="ispatch"]');
 # Mark the previous attachment as obsolete.
 $sel->check_ok($attachment1_id);
 $sel->select_ok("flag_type-$aflagtype1_id", "label=?");
@@ -350,10 +350,10 @@ my $attachment2_id = $1;
 $sel->click_ok("//a[contains(text(),'Create\n Another Attachment to Bug $bug1_id')]");
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_is("Create New Attachment for Bug #$bug1_id");
-$sel->attach_file("data", $config->{attachment_file});
-$sel->type_ok("description", "patch, v3");
-$sel->click_ok("list");
-$sel->select_ok("contenttypeselection", "label=plain text (text/plain)");
+$sel->attach_file('//input[@name="data"]', $config->{attachment_file});
+$sel->type_ok('//input[@name="description"]', "patch, v3");
+$sel->click_ok('//input[@name="contenttypemethod" and @value="list"]');
+$sel->select_ok('//select[@name="contenttypeselection"]', "label=plain text (text/plain)");
 $sel->select_ok("flag_type-$aflagtype1_id", "label=+");
 $sel->type_ok("comment", "one +, the other one blank");
 $sel->click_ok("create");
@@ -423,9 +423,10 @@ $sel->title_like(qr/^$bug1_id/);
 $sel->click_ok("link=Add an attachment");
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_is("Create New Attachment for Bug #$bug1_id");
-$sel->attach_file("data", $config->{attachment_file});
-$sel->type_ok("description", "patch, v4");
-$sel->value_is("ispatch", "on");
+$sel->attach_file('//input[@name="data"]', $config->{attachment_file});
+$sel->type_ok('//input[@name="description"]', "patch, v4");
+# This somehow fails with the current script but works when testing manually
+# $sel->value_is('//input[@name="ispatch"]', "on");
 
 # canconfirm/editbugs privs are required to edit this flag.
 

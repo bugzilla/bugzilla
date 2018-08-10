@@ -33,6 +33,7 @@ use URI;
 use URI::QueryParam;
 use URI::Escape qw(uri_escape_utf8);
 use File::Basename qw(basename);
+use MIME::Base64 qw(decode_base64);
 
 # For most scripts we don't make $cgi and $template global variables. But
 # when preparing Bugzilla for mod_perl, this script used these
@@ -552,20 +553,30 @@ sub insert {
     # Get the filehandle of the attachment.
     my $data_fh = $cgi->upload('data');
     my $attach_text = $cgi->param('attach_text');
+    my $data_base64 = $cgi->param('data_base64');
+    my $data;
+    my $filename;
 
     if ($attach_text) {
         # Convert to unix line-endings if pasting a patch
         if (scalar($cgi->param('ispatch'))) {
             $attach_text =~ s/[\012\015]{1,2}/\012/g;
         }
+        $data = $attach_text;
+        $filename = "file_$bugid.txt";
+    } elsif ($data_base64) {
+        $data = decode_base64($data_base64);
+        $filename = $cgi->param('filename') || "file_$bugid";
+    } else {
+        $data = $filename = $data_fh;
     }
 
     my $attachment = Bugzilla::Attachment->create(
         {bug           => $bug,
          creation_ts   => $timestamp,
-         data          => $attach_text || $data_fh,
+         data          => $data,
          description   => scalar $cgi->param('description'),
-         filename      => $attach_text ? "file_$bugid.txt" : $data_fh,
+         filename      => $filename,
          ispatch       => scalar $cgi->param('ispatch'),
          isprivate     => scalar $cgi->param('isprivate'),
          mimetype      => $content_type,

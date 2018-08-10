@@ -380,7 +380,7 @@ sub process_revision_change {
 
     # Pre setup before making changes
     my $old_user = set_phab_user();
-    my $bug = Bugzilla::Bug->new({ id => $revision->bug_id, cache => 1 });
+    my $bug = $revision->bug;
 
     # Check to make sure bug id is valid and author can see it
     if ($bug->{error}
@@ -714,7 +714,7 @@ sub process_new_user {
         # that are connected to revisions
         f11 => 'attachments.filename',
         o11 => 'regexp',
-        v11 => '^phabricator-D[[:digit:]]+-url[[.period.]]txt$',
+        v11 => '^phabricator-D[[:digit:]]+-url.txt$',
     };
 
     my $search = Bugzilla::Search->new( fields => [ 'bug_id' ],

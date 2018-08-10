@@ -355,7 +355,7 @@ sub db_schema_abstract_schema {
             },
         ],
         INDEXES => [
-            nag_watch_idx => {
+            nag_setting_idx => {
                 FIELDS => [ 'user_id', 'setting_name' ],
                 TYPE => 'UNIQUE',
             },

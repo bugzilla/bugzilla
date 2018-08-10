@@ -251,28 +251,11 @@ sub write_params {
     my ($param_data) = @_;
     $param_data ||= Bugzilla->params;
 
-    my $datadir    = bz_locations()->{'datadir'};
-    my $param_file = "$datadir/params";
-
     local $Data::Dumper::Sortkeys = 1;
-
-    my ($fh, $tmpname) = File::Temp::tempfile('params.XXXXX',
-                                              DIR => $datadir );
 
     my %params = %$param_data;
     $params{urlbase} = Bugzilla->localconfig->{urlbase};
-    print $fh (Data::Dumper->Dump([\%params], ['*param']))
-      || die "Can't write param file: $!";
-
-    close $fh;
-
-    rename $tmpname, $param_file
-      or die "Can't rename $tmpname to $param_file: $!";
-
-    # It's not common to edit parameters and loading
-    # Bugzilla::Install::Filesystem is slow.
-    require Bugzilla::Install::Filesystem;
-    Bugzilla::Install::Filesystem::fix_file_permissions($param_file);
+    __PACKAGE__->_write_file( Data::Dumper->Dump([\%params], ['*param']) );
 
     # And now we have to reset the params cache so that Bugzilla will re-read
     # them.
@@ -309,6 +292,24 @@ sub read_param_file {
            . ' You probably need to run checksetup.pl.',
     }
     return \%params;
+}
+
+sub _write_file {
+    my ($class, $str) = @_;
+    my $datadir    = bz_locations()->{'datadir'};
+    my $param_file = "$datadir/params";
+    my ($fh, $tmpname) = File::Temp::tempfile('params.XXXXX',
+                                              DIR => $datadir );
+    print $fh $str || die "Can't write param file: $!";
+    close $fh || die "Can't close param file: $!";
+
+    rename $tmpname, $param_file
+      or die "Can't rename $tmpname to $param_file: $!";
+
+    # It's not common to edit parameters and loading
+    # Bugzilla::Install::Filesystem is slow.
+    require Bugzilla::Install::Filesystem;
+    Bugzilla::Install::Filesystem::fix_file_permissions($param_file);
 }
 
 1;

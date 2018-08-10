@@ -7,15 +7,13 @@
 # defined by the Mozilla Public License, v. 2.0.
 use strict;
 use warnings;
-use lib qw( . lib );
+use lib qw( . lib local/lib/perl5 );
 
 use Test::More;
 use Bugzilla;
-use Bugzilla::Extension;
+BEGIN { Bugzilla->extensions }
 
-my $class = Bugzilla::Extension->load('extensions/BMO/Extension.pm',
-                                      'extensions/BMO/Config.pm');
-
+my $class = 'Bugzilla::Extension::BMO';
 my $parse  = $class->can('parse_bounty_attachment_description');
 my $format = $class->can('format_bounty_attachment_description');
 

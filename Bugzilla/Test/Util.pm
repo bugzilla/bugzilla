@@ -24,7 +24,7 @@ sub create_user {
         cryptpassword => $password,
         disabledtext  => "",
         disable_mail  => 0,
-        extern_id     => 0,
+        extern_id     => undef,
         %extra,
     });
 }

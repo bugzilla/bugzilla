@@ -85,6 +85,9 @@ sub init_page {
     # request cache are very annoying (see bug 1347335)
     # and this is not an expensive operation.
     clear_request_cache();
+    if ($0 =~ /\.t/) {
+        return;
+    }
     if (Bugzilla->usage_mode == USAGE_MODE_CMDLINE) {
         init_console();
     }

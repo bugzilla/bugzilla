@@ -263,7 +263,7 @@ div#update_container {
 
 #att-selector .icon::before {
   line-height: 100%;
-  font-family: FontAwesome;
+  font-family: "Material Icons";
   font-style: normal;
 }
 
@@ -328,9 +328,9 @@ div#update_container {
   color: #277AC1;
 }
 
-#att-dropbox .icon::before {
+#att-dropbox header .icon::before {
   font-size: 24px;
-  content: "\F0EE";
+  content: "\E2C3";
 }
 
 #att-dropbox > div {
@@ -446,49 +446,7 @@ div#update_container {
 #att-preview [itemprop="image"] ~ .icon::before {
   font-size: 100px;
   color: #999;
-  content: "\F15B";
-}
-
-#att-preview [itemprop="encodingFormat"][content="application/pdf"] ~ .icon::before {
-  content: "\F1C1";
-}
-
-#att-preview [itemprop="encodingFormat"][content="application/msword"] ~ .icon::before,
-#att-preview [itemprop="encodingFormat"][content*="wordprocessingml"] ~ .icon::before {
-  content: "\F1C2";
-}
-
-#att-preview [itemprop="encodingFormat"][content="application/vnd.ms-excel"] ~ .icon::before,
-#att-preview [itemprop="encodingFormat"][content*="spreadsheetml"] ~ .icon::before {
-  content: "\F1C3";
-}
-
-#att-preview [itemprop="encodingFormat"][content="application/vnd.ms-powerpoint"] ~ .icon::before,
-#att-preview [itemprop="encodingFormat"][content*="presentationml"] ~ .icon::before {
-  content: "\F1C4";
-}
-
-#att-preview [itemprop="encodingFormat"][content^="image/"] ~ .icon::before {
-  content: "\F1C5";
-}
-
-#att-preview [itemprop="encodingFormat"][content="application/zip"] ~ .icon::before,
-#att-preview [itemprop="encodingFormat"][content="application/x-bzip2"] ~ .icon::before,
-#att-preview [itemprop="encodingFormat"][content="application/x-gtar"] ~ .icon::before,
-#att-preview [itemprop="encodingFormat"][content="application/x-rar-compressed"] ~ .icon::before {
-  content: "\F1C6";
-}
-
-#att-preview [itemprop="encodingFormat"][content^="audio/"] ~ .icon::before {
-  content: "\F1C7";
-}
-
-#att-preview [itemprop="encodingFormat"][content^="video/"] ~ .icon::before {
-  content: "\F1C8";
-}
-
-#att-preview [itemprop="encodingFormat"][content^="text/"] ~ .icon::before {
-  content: "\F15C";
+  content: "\E24D";
 }
 
 #att-remove-button {
@@ -505,7 +463,7 @@ div#update_container {
 #att-remove-button .icon::before {
   font-size: 16px;
   color: #666;
-  content: "\F057";
+  content: "\E5C9";
 }
 
 #att-error-message {

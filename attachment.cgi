@@ -600,6 +600,7 @@ sub insert {
     my $comment = $cgi->param('comment');
     $comment = '' unless defined $comment;
     $bug->add_comment($comment, { isprivate => $attachment->isprivate,
+                                  is_markdown => 1,
                                   type => CMT_ATTACHMENT_CREATED,
                                   extra_data => $attachment->id });
 
@@ -745,6 +746,7 @@ sub update {
     my $comment = $cgi->param('comment');
     if (defined $comment && trim($comment) ne '') {
         $bug->add_comment($comment, { isprivate => $attachment->isprivate,
+                                      is_markdown => 1,
                                       type => CMT_ATTACHMENT_UPDATED,
                                       extra_data => $attachment->id });
     }

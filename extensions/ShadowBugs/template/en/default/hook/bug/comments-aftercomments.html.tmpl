@@ -64,7 +64,7 @@
     </div>
 
 <pre class="bz_comment_text">
-  [%- comment_text FILTER quoteUrls(public_bug, comment) -%]
+  [%- comment_text FILTER renderComment(public_bug, comment) -%]
 </pre>
     </div>
 [% END %]

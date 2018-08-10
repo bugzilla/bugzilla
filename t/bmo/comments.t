@@ -61,7 +61,7 @@ my $bug_2 = Bugzilla::Bug->create(
 
 my $bug_2_id = $bug_2->id;
 
-Bugzilla::Template::quoteUrls(
+Bugzilla::Template::renderComment(
     $bug_2->comments->[0]->body, undef, undef, undef,
     sub {
         my $bug_id = $_[0];

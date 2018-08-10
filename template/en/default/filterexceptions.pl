@@ -34,7 +34,7 @@
 #                                   [% foo.push() %]
 # TT loop variables               - [% loop.count %]
 # Already-filtered stuff          - [% wibble FILTER html %]
-#   where the filter is one of html|csv|js|quoteUrls|time|uri|xml|none
+#   where the filter is one of html|csv|js|renderComment|time|uri|xml|none
 
 %::safe = (
 

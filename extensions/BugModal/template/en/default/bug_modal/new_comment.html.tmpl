@@ -45,12 +45,19 @@
     <textarea rows="5" cols="80" name="comment" id="comment" aria-labelledby="comment-edit-tab"></textarea>
   </div>
   <div id="comment-preview-tabpanel" class="comment-tabpanel" role="tabpanel" aria-labelledby="comment-preview-tab" style="display:none">
-    <pre id="comment-preview" class="comment-text"></pre>
+    <div id="comment-preview" class="comment-text"></div>
   </div>
 
-  <div id="bugzilla-etiquette">
-    <a href="page.cgi?id=etiquette.html" target="_blank" tabindex="-1">
-      Comments Subject to Etiquette and Contributor Guidelines</a>
+  <div id="add-comment-tips">
+    <div id="comment-markdown-tip">
+      <img src="extensions/BMO/web/images/notice.png" width="16" height="16">
+      <a href="https://guides.github.com/features/mastering-markdown/" target="_blank">Markdown styling now supported</a>
+    </div>
+
+    <div id="bugzilla-etiquette">
+      <a href="page.cgi?id=etiquette.html" target="_blank" tabindex="-1">
+        Comments Subject to Etiquette and Contributor Guidelines</a>
+    </div>
   </div>
 
   <div id="after-comment-commit-button">

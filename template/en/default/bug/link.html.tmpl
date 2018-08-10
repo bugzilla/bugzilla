@@ -56,7 +56,8 @@
 
 <a class="bz_bug_link 
           bz_status_[% bug.bug_status FILTER css_class_quote %] 
-          [% ' bz_closed' IF !bug.isopened %]"
+          [% ' bz_closed' IF !bug.isopened %]
+          [% ' bz_private_link' IF !user.can_see_bug(bug) %]"
    title="[% link_title FILTER collapse FILTER html %]"
    href="[% urlbase FILTER html IF full_url %]show_bug.cgi?id=
          [%~ bug.id FILTER uri %][% anchor FILTER html %]">

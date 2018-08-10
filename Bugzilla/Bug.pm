@@ -732,7 +732,7 @@ sub _preload_referenced_bugs {
         }
         else {
             # bugs referenced in comments
-            Bugzilla::Template::quoteUrls($comment->body, undef, undef, undef,
+            Bugzilla::Template::renderComment($comment->body, undef, undef, 1,
                 sub {
                     my $bug_id = $_[0];
                     push @referenced_bug_ids, $bug_id
@@ -999,6 +999,7 @@ sub create {
 
     # We now have a bug id so we can fill this out
     $creation_comment->{'bug_id'} = $bug->id;
+    $creation_comment->{'is_markdown'} = 1;
 
     # Insert the comment. We always insert a comment on bug creation,
     # but sometimes it's blank.
@@ -2662,7 +2663,8 @@ sub set_all {
         # there are lots of things that want to check if we added a comment.
         $self->add_comment($params->{'comment'}->{'body'},
             { isprivate => $params->{'comment'}->{'is_private'},
-              work_time => $params->{'work_time'} });
+              work_time => $params->{'work_time'},
+              is_markdown => 1 });
     }
 
     if (defined $params->{comment_tags} && Bugzilla->user->can_tag_comments()) {
@@ -3143,7 +3145,7 @@ sub remove_cc {
     @$cc_users = grep { $_->id != $user->id } @$cc_users;
 }
 
-# $bug->add_comment("comment", {isprivate => 1, work_time => 10.5,
+# $bug->add_comment("comment", {isprivate => 1, work_time => 10.5, is_markdown => 1,
 #                               type => CMT_NORMAL, extra_data => $data});
 sub add_comment {
     my ($self, $comment, $params) = @_;

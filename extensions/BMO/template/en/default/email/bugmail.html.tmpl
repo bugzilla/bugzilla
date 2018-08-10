@@ -50,7 +50,12 @@
               at [% comment.creation_ts FILTER time(undef, to_user.timezone) %]
             </b>
           [% END %]
-          <pre class="comment" style="font-size: initial">[% comment.body_full({ wrap => 1 }) FILTER quoteUrls(bug, comment) %]</pre>
+          [% IF comment.is_markdown %]
+            [% comment_tag = 'div' %]
+          [% ELSE %]
+            [% comment_tag = 'pre' %]
+          [% END %]
+          <[% comment_tag FILTER none %] class="comment" style="font-size: initial">[% comment.body_full({ wrap => 1 }) FILTER renderComment(bug, comment) %]</[% comment_tag FILTER none %]>
         </div>
       [% END %]
     </div>

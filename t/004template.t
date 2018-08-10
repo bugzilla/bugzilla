@@ -76,7 +76,7 @@ foreach my $include_path (@include_paths) {
             url_quote => sub { return $_ } ,
             css_class_quote => sub { return $_ } ,
             xml       => sub { return $_ } ,
-            quoteUrls => sub { return $_ } ,
+            renderComment => sub { return $_ } ,
             bug_link => [ sub { return sub { return $_; } }, 1] ,
             csv       => sub { return $_ } ,
             unitconvert => sub { return $_ },

@@ -283,15 +283,22 @@
         </div>
       [% END %]
 
-[%# Don't indent the <pre> block, since then the spaces are displayed in the
-  # generated HTML
+
+[% IF comment.is_markdown %]
+  [% comment_tag = 'div' %]
+[% ELSE %]
+  [% comment_tag = 'pre' %]
+[% END %]
+
+[%# Don't indent incaase it's a <pre> block, since then the spaces are 
+  # displayed in the generated HTML
   #%]
-<pre class="bz_comment_text[% " collapsed" IF comment.collapsed %]"
+<[% comment_tag FILTER none %] class="bz_comment_text[% " collapsed" IF comment.collapsed %]"
   [% IF mode == "edit" || comment.collapsed %]
     id="comment_text_[% comment.count FILTER none %]"
   [% END %]>
-  [%- comment_text FILTER quoteUrls(bug, comment) -%]
-</pre>
+  [%- comment_text FILTER renderComment(bug, comment) -%]
+</[% comment_tag FILTER none %]>
     [% Hook.process('a_comment-end', 'bug/comments.html.tmpl') %]
     </div>
 [% END %]

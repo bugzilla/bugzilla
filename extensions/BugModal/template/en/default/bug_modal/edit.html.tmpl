@@ -202,7 +202,7 @@
         no_label = 1
         hide_on_edit = 1
     %]
-      <h1 id="field-value-short_desc">[% bug.short_desc FILTER renderComment(bug, undef, 1) FILTER wbr %]</h1>
+      <h1 id="field-value-short_desc">[% bug.short_desc FILTER quoteUrls(bug) FILTER wbr %]</h1>
     [% END %]
 
     [%# alias %]
@@ -1191,7 +1191,7 @@
         [% END %]
       </div>
     [% END %]
-    <div id="user-story" class="comment-text">[% bug.cf_user_story FILTER renderComment(bug, undef) %]</div>
+    <pre id="user-story">[% bug.cf_user_story FILTER quoteUrls(bug) %]</pre>
     [% IF user.id %]
       <textarea id="cf_user_story" name="cf_user_story" style="display:none" rows="10" cols="80">
         [%~ bug.cf_user_story FILTER html ~%]

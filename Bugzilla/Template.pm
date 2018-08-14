@@ -130,20 +130,17 @@ sub get_format {
     };
 }
 
-# This routine renderComment contains inspirations from the HTML::FromText CPAN
+# This routine quoteUrls contains inspirations from the HTML::FromText CPAN
 # module by Gareth Rees <garethr@cre.canon.co.uk>.  It has been heavily hacked,
 # all that is really recognizable from the original is bits of the regular
 # expressions.
 # This has been rewritten to be faster, mainly by substituting 'as we go'.
 # If you want to modify this routine, read the comments carefully
-# Renamed from 'quoteUrls' to 'renderComment' after markdown support was added.
 
-sub renderComment {
-    my ($text, $bug, $comment, $skip_markdown, $bug_link_func) = @_;
+sub quoteUrls {
+    my ($text, $bug, $comment, $user, $bug_link_func) = @_;
     return $text unless $text;
-    my $anon_user = Bugzilla::User->new;
-    # We choose to render markdown by default, unless the comment explicitly isn't.
-    $skip_markdown ||= $comment && !$comment->is_markdown;
+    $user ||= Bugzilla->user;
     $bug_link_func ||= \&get_bug_link;
 
     # We use /g for speed, but uris can have other things inside them
@@ -176,7 +173,7 @@ sub renderComment {
     my @hook_regexes;
     Bugzilla::Hook::process('bug_format_comment',
         { text => \$text, bug => $bug, regexes => \@hook_regexes,
-          comment => $comment, user => undef });
+          comment => $comment, user => $user });
 
     foreach my $re (@hook_regexes) {
         my ($match, $replace) = @$re{qw(match replace)};
@@ -196,47 +193,37 @@ sub renderComment {
     # Provide tooltips for full bug links (Bug 74355)
     my $urlbase_re = '(' . quotemeta(Bugzilla->localconfig->{urlbase}) . ')';
     $text =~ s~\b(${urlbase_re}\Qshow_bug.cgi?id=\E([0-9]+)(\#c([0-9]+))?)\b
-              ~($things[$count++] = $bug_link_func->($3, $1, { comment_num => $5, user => $anon_user })) &&
+              ~($things[$count++] = $bug_link_func->($3, $1, { comment_num => $5, user => $user })) &&
                ("\x{FDD2}" . ($count-1) . "\x{FDD3}")
               ~egox;
 
-
-    if ($skip_markdown) {
-        # non-mailto protocols
-        my $safe_protocols = SAFE_URL_REGEXP();
-        $text =~ s~\b($safe_protocols)
+    # non-mailto protocols
+    my $safe_protocols = SAFE_URL_REGEXP();
+    $text =~ s~\b($safe_protocols)
               ~($tmp = html_quote($1)) &&
                ($things[$count++] = "<a rel=\"nofollow\" href=\"$tmp\">$tmp</a>") &&
                ("\x{FDD2}" . ($count-1) . "\x{FDD3}")
               ~egox;
 
-        # We have to quote now, otherwise the html itself is escaped
-        # THIS MEANS THAT A LITERAL ", <, >, ' MUST BE ESCAPED FOR A MATCH
-        $text = html_quote($text);
+    # We have to quote now, otherwise the html itself is escaped
+    # THIS MEANS THAT A LITERAL ", <, >, ' MUST BE ESCAPED FOR A MATCH
 
-        # Color quoted text
-        $text =~ s~^(&gt;.+)$~<span class="quote">$1</span >~mg;
-        $text =~ s~</span >\n<span class="quote">~\n~g;
+    $text = html_quote($text);
 
-        # mailto:
-        # Use |<nothing> so that $1 is defined regardless
-        # &#64; is the encoded '@' character.
-        $text =~ s~\b(mailto:|)?([\w\.\-\+\=]+&\#64;[\w\-]+(?:\.[\w\-]+)+)\b
-                 ~<a href=\"mailto:$2\">$1$2</a>~igx;
-    }
-    else {
-        # We intentionally disable all html tags. Users should use markdown syntax.
-        # This prevents things like inline styles on anchor tags, which otherwise would be valid.
-        $text =~ s/([<])/&lt;/g;
+    # Color quoted text
+    $text =~ s~^(&gt;.+)$~<span class="quote">$1</span >~mg;
+    $text =~ s~</span >\n<span class="quote">~\n~g;
 
-        # As a preference, we opt into all new line breaks being rendered as a new line.
-        $text =~ s/(\r?\n)/  $1/g;
-    }
+    # mailto:
+    # Use |<nothing> so that $1 is defined regardless
+    # &#64; is the encoded '@' character.
+    $text =~ s~\b(mailto:|)?([\w\.\-\+\=]+&\#64;[\w\-]+(?:\.[\w\-]+)+)\b
+              ~<a href=\"mailto:$2\">$1$2</a>~igx;
 
     # attachment links
     # BMO: don't make diff view the default for patches (Bug 652332)
     $text =~ s~\b(attachment$s*\#?$s*(\d+)(?:$s+\[diff\])?(?:\s+\[details\])?)
-              ~($things[$count++] = get_attachment_link($2, $1, $anon_user)) &&
+              ~($things[$count++] = get_attachment_link($2, $1, $user)) &&
                ("\x{FDD2}" . ($count-1) . "\x{FDD3}")
               ~egmxi;
 
@@ -253,7 +240,7 @@ sub renderComment {
     $text =~ s~\b($bug_re(?:$s*,?$s*$comment_re)?|$comment_re)
               ~ # We have several choices. $1 here is the link, and $2-4 are set
                 # depending on which part matched
-               (defined($2) ? $bug_link_func->($2, $1, { comment_num => $3, user => $anon_user }) :
+               (defined($2) ? $bug_link_func->($2, $1, { comment_num => $3, user => $user }) :
                               "<a href=\"$current_bugurl#c$4\">$1</a>")
               ~egx;
 
@@ -262,7 +249,7 @@ sub renderComment {
     $text =~ s~(?<=^\*\*\*\ This\ bug\ has\ been\ marked\ as\ a\ duplicate\ of\ )
                (\d+)
                (?=\ \*\*\*\Z)
-              ~$bug_link_func->($1, $1, { user => $anon_user })
+              ~$bug_link_func->($1, $1, { user => $user })
               ~egmx;
 
     # Now remove the encoding hacks in reverse order
@@ -270,12 +257,7 @@ sub renderComment {
         $text =~ s/\x{FDD2}($i)\x{FDD3}/$things[$i]/eg;
     }
 
-    if ($skip_markdown) {
-        return $text;
-    }
-    else {
-        return Bugzilla->markdown_parser->render_html($text);
-    }
+    return $text;
 }
 
 # Creates a link to an attachment, including its title.
@@ -289,17 +271,11 @@ sub get_attachment_link {
     if ($attachment) {
         my $title = "";
         my $className = "";
-        my $linkClass = "";
-
         if ($user->can_see_bug($attachment->bug_id)
             && (!$attachment->isprivate || $user->is_insider))
         {
             $title = $attachment->description;
         }
-        else{
-            $linkClass = "bz_private_link";
-        }
-
         if ($attachment->isobsolete) {
             $className = "bz_obsolete";
         }
@@ -320,7 +296,7 @@ sub get_attachment_link {
 
         # Whitespace matters here because these links are in <pre> tags.
         return qq|<span class="$className">|
-               . qq|<a href="${linkval}" class="$linkClass" name="attach_${attachid}" title="$title">$link_text</a>|
+               . qq|<a href="${linkval}" name="attach_${attachid}" title="$title">$link_text</a>|
                . qq| <a href="${linkval}&amp;action=edit" title="$title">[details]</a>|
                . qq|${patchlink}|
                . qq|</span>|;
@@ -730,11 +706,11 @@ sub create {
             # Removes control characters and trims extra whitespace.
             clean_text => \&Bugzilla::Util::clean_text ,
 
-            renderComment => [ sub {
-                               my ($context, $bug, $comment, $skip_markdown) = @_;
+            quoteUrls => [ sub {
+                               my ($context, $bug, $comment, $user) = @_;
                                return sub {
                                    my $text = shift;
-                                   return renderComment($text, $bug, $comment, $skip_markdown);
+                                   return quoteUrls($text, $bug, $comment, $user);
                                };
                            },
                            1

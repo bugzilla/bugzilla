@@ -266,7 +266,6 @@ if (should_set('comment')) {
     $set_all_fields{comment} = {
         body       => scalar $cgi->param('comment'),
         is_private => scalar $cgi->param('comment_is_private'),
-        is_markdown => 1,
     };
 }
 if (should_set('see_also')) {

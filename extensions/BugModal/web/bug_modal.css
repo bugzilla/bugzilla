@@ -296,6 +296,7 @@ input[type="number"] {
 
 #user-story {
     margin: 0;
+    white-space: pre-wrap;
     min-height: 2em;
 }
 
@@ -629,8 +630,7 @@ body.platform-Win32 .comment-text, body.platform-Win64 .comment-text {
     font-family: "Fira Mono", monospace;
 }
 
-.comment-text span.quote, .comment-text span.quote_wrapped,
-div.comment-text pre {
+.comment-text span.quote, .comment-text span.quote_wrapped {
     background: #eee !important;
     color: #444 !important;
     display: block !important;
@@ -642,40 +642,6 @@ div.comment-text pre {
 .comment-text.bz_private {
     color: darkred;
     border: 1px dashed darkred;
-}
-
-/* Markdown comments */
-div.comment-text {
-    white-space: normal;
-    padding: 0 8px 0 8px;
-    font-family: inherit !important;
-}
-
-div.comment-text code {
-    color: #444;
-    background-color: #eee;
-    font-size: 13px;
-    font-family: "Fira Mono","Droid Sans Mono",Menlo,Monaco,"Courier New",monospace;
-}
-
-div.comment-text table {
-    border-collapse: collapse;
-}
-
-div.comment-text th, div.comment-text td {
-    padding: 5px 10px;
-    border: 1px solid #ccc;
-}
-
-div.comment-text hr {
-    display: block !important;
-}
-
-div.comment-text blockquote {
-    background: #fcfcfc;
-    border-left: 5px solid #ccc;
-    margin: 1.5em 10px;
-    padding: 0.5em 10px;
 }
 
 .comment-tags {
@@ -751,14 +717,9 @@ div.comment-text blockquote {
     margin-top: 20px;
 }
 
-#add-comment-private {
+#add-comment-private,
+#bugzilla-etiquette {
     float: right;
-}
-
-#add-comment-tips {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 1em;
 }
 
 #comment {
@@ -769,7 +730,7 @@ div.comment-text blockquote {
     clear: both;
     width: 100%;
     box-sizing: border-box !important;
-    margin: 0 0 0.5em;
+    margin: 0 0 1em;
     max-width: 1024px;
 }
 

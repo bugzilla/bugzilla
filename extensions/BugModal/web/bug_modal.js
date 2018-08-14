@@ -858,54 +858,31 @@ $(function() {
 
             var prefix = "(In reply to " + comment_author + " from comment #" + comment_id + ")\n";
             var reply_text = "";
-
-            var quoteMarkdown = function($comment) {
-                const uid = $comment.data('uniqueid');
-                bugzilla_ajax(
-                    {
-                        url: `rest/bug/comment/${uid}`,
-                    },
-                    (data) => {
-                        const quoted = data['comments'][uid]['text'].replace(/\n/g, "\n > ");
-                        reply_text = `${prefix}\n > ${quoted}`;
-                        populateNewComment();
-                    }
-                );
-            }
-
-            var populateNewComment = function() {
-                // quoting a private comment, check the 'private' cb
-                $('#add-comment-private-cb').prop('checked',
-                    $('#add-comment-private-cb:checked').length || $('#is-private-' + comment_id + ':checked').length);
-
-                // remove embedded links to attachment details
-                reply_text = reply_text.replace(/(attachment\s+\d+)(\s+\[[^\[\n]+\])+/gi, '$1');
-
-                $.scrollTo($('#comment'), function() {
-                    if ($('#comment').val() != reply_text) {
-                        $('#comment').val($('#comment').val() + reply_text);
-                    }
-
-                    if (BUGZILLA.user.settings.autosize_comments) {
-                        autosize.update($('#comment'));
-                    }
-
-                    $('#comment').trigger('input').focus();
-                });
-            }
-
             if (BUGZILLA.user.settings.quote_replies == 'quoted_reply') {
-                var $comment = $('#ct-' + comment_id);
-                if ($comment.attr('data-ismarkdown')) {
-                    quoteMarkdown($comment);
-                } else {
-                    reply_text = prefix + wrapReplyText($comment.text());
-                    populateNewComment();
-                }
+                var text = $('#ct-' + comment_id).text();
+                reply_text = prefix + wrapReplyText(text);
             } else if (BUGZILLA.user.settings.quote_replies == 'simply_reply') {
                 reply_text = prefix;
-                populateNewComment();
             }
+
+            // quoting a private comment, check the 'private' cb
+            $('#add-comment-private-cb').prop('checked',
+                $('#add-comment-private-cb:checked').length || $('#is-private-' + comment_id + ':checked').length);
+
+            // remove embedded links to attachment details
+            reply_text = reply_text.replace(/(attachment\s+\d+)(\s+\[[^\[\n]+\])+/gi, '$1');
+
+            $.scrollTo($('#comment'), function() {
+                if ($('#comment').val() != reply_text) {
+                    $('#comment').val($('#comment').val() + reply_text);
+                }
+
+                if (BUGZILLA.user.settings.autosize_comments) {
+                    autosize.update($('#comment'));
+                }
+
+                $('#comment').focus();
+            });
         });
 
     if (BUGZILLA.user.settings.autosize_comments) {
@@ -1343,163 +1320,12 @@ $(function() {
             saveBugComment(event.target.value);
         });
 
-    function smartLinkPreviews() {
-        const filterUnique = (value, index, array) => value && array.indexOf(value) === index;
-        const reduceListToMap = (all, one) => { all[one['id']] = one; return all; };
-
-        const getResourceId = anchor => {
-            if (['/bug/', '/attachment/'].some((path) => anchor.pathname.startsWith(path))) {
-                return anchor.pathname.split('/')[2];
-            } else {
-                return (new URL(anchor.href)).searchParams.get("id");
-            }
-        };
-
-        const findLinkElements = pathnames => {
-            return (
-                Array
-                .from(document.querySelectorAll('.comment-text a'))
-                .filter(anchor => {
-                    return (
-                        `${anchor.origin}/` === BUGZILLA.constant.URL_BASE &&
-                        pathnames.some((p) => anchor.pathname.startsWith(p)) &&
-                        /^\d+$/.test(getResourceId(anchor))
-                    )
-                })
-                .filter(anchor =>
-                    // Get only links created by markdown or private links.
-                    !anchor.hasAttribute('title') || anchor.classList.contains('bz_private_link')
-                )
-                .map(anchor => {
-                    return {
-                        id: getResourceId(anchor),
-                        element: anchor
-                    }
-                })
-            )
-        };
-
-        const enhanceBugLinks = () => {
-            let bugLinks = findLinkElements(['/show_bug.cgi', '/bug/']);
-            let bugIds = bugLinks.map((bug) => parseInt(bug['id'])).filter(filterUnique).join(',');
-            let params = $.param({
-                Bugzilla_api_token: BUGZILLA.api_token,
-                id: bugIds,
-                include_fields: 'id,summary,status,resolution,is_open'
-            });
-
-            if(!bugIds) return;
-
-            fetch(`/rest/bug?${params}`)
-            .then(response => {
-                if(response.ok){
-                    return response.json();
-                }
-                throw new Error(`/rest/bug?ids=${bugIds} response not ok`);
-            })
-            .then(responseJson => {
-                return responseJson.bugs.reduce(reduceListToMap, {});
-            })
-            .then(bugs => {
-                bugLinks.forEach(bugLink => {
-                    let bug = bugs[bugLink['id']];
-                    if(!bug) return;
-
-                    bugLink.element.setAttribute(
-                        "title", `${bug.status} ${bug.resolution} - ${bug.summary}`
-                    );
-                    bugLink.element.classList.add('bz_bug_link');
-                    bugLink.element.classList.add(`bz_status_${bug.status}`);
-                    if(!bug.is_open) {
-                        bugLink.element.classList.add('bz_closed');
-                    }
-                    $(bugLink.element).tooltip({
-                        position: { my: "left top+8", at: "left bottom", collision: "flipfit" },
-                        show: { effect: 'none' },
-                        hide: { effect: 'none' }
-                    });
-                });
-            })
-            .catch(e => console.log(e));
-        };
-
-        const enhanceAttachmentLinks = () => {
-            let attachmentLinks = findLinkElements(['/attachment.cgi']);
-            let attachmentIds = (
-                attachmentLinks.map(attachment => parseInt(attachment['id'])).filter(filterUnique)
-            );
-            let params = $.param({
-                Bugzilla_api_token: BUGZILLA.api_token,
-                include_fields: 'id,description,is_obsolete'
-            });
-
-            if(!attachmentIds) return;
-
-            // Fetch all attachments for this bug only. This endpoint filters out
-            // attachments the user can't see for us (e.g. ones marked private).
-            // This one request will likely retrieve most of the attachments we need.
-            fetch(`/rest/bug/${BUGZILLA.bug_id}/attachment?${params}`)
-            .then(response => {
-                if(response.ok){
-                    return response.json();
-                }
-                throw Error(`/rest/bug/${BUGZILLA.bug_id}/attachment response not ok`);
-            })
-            .then(responseJson => {
-                return responseJson['bugs'][BUGZILLA.bug_id] || [];
-            })
-            .then(attachments => {
-                // The BMO rest API that lets us batch request attachment ids unfortunatley
-                // fails the whole batch if the user is unable to view any of the attachments.
-                // So, we query each attachment id individually and group them as a promsie.
-                let missingAttachments = (
-                    attachmentIds
-                    .filter(id => !attachments.map(attachment => attachment.id).includes(id))
-                    .map(attachmentId => {
-                        return (
-                            fetch(`/rest/bug/attachment/${attachmentId}?${params}`)
-                            .then((response) => {
-                                // It's ok if the request failed.
-                                return response.json();
-                            })
-                            .then(responseJson => {
-                                // May be undefined.
-                                return responseJson['attachments'][attachmentId];
-                            })
-                        );
-                    })
-                );
-                return Promise.all(attachments.concat(missingAttachments));
-            })
-            .then(attachments => {
-                // Remove undefined attachments and convert from list to dictonary mapped by id. 
-                return attachments.filter(filterUnique).reduce(reduceListToMap, {});
-            })
-            .then(attachments => {
-                // Now we have all attachment data the user is able to see.
-                attachmentLinks.forEach(attachmentLink => {
-                    let attachment = attachments[attachmentLink.id];
-                    if(!attachment) return;
-
-                    attachmentLink.element.setAttribute("title",  attachment.description);
-                    if(attachment.is_obsolete){
-                        attachmentLink.element.classList.add('bz_obsolete');
-                    }
-                });
-            })
-            .catch(e => console.log(e));
-        };
-        enhanceBugLinks();
-        enhanceAttachmentLinks();
-    }
-
     // finally switch to edit mode if we navigate back to a page that was editing
     $(window).on('pageshow', restoreEditMode);
     $(window).on('pageshow', restoreSavedBugComment);
     $(window).on('focus', restoreSavedBugComment);
     restoreEditMode();
     restoreSavedBugComment();
-    smartLinkPreviews();
 });
 
 function confirmUnsafeURL(url) {

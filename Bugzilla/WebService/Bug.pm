@@ -362,7 +362,7 @@ sub render_comment {
     Bugzilla->switch_to_shadow_db();
     my $bug = $params->{id} ? Bugzilla::Bug->check($params->{id}) : undef;
 
-    my $html = Bugzilla::Template::renderComment($params->{text}, $bug);
+    my $html = Bugzilla::Template::quoteUrls($params->{text}, $bug);
 
     return { html => $html };
 }
@@ -381,7 +381,6 @@ sub _translate_comment {
         time       => $self->type('dateTime', $comment->creation_ts),
         creation_time => $self->type('dateTime', $comment->creation_ts),
         is_private => $self->type('boolean', $comment->is_private),
-        is_markdown => $self->type('boolean', $comment->is_markdown),
         text       => $self->type('string', $comment->body_full),
         attachment_id => $self->type('int', $attach_id),
         count      => $self->type('int', $comment->count),
@@ -1113,11 +1112,9 @@ sub add_comment {
     if (defined $params->{private}) {
         $params->{is_private} = delete $params->{private};
     }
-
     # Append comment
     $bug->add_comment($comment, { isprivate => $params->{is_private},
-                                  work_time => $params->{work_time},
-                                  is_markdown => 1 });
+                                  work_time => $params->{work_time} });
 
     # Add comment tags
     $bug->set_all({ comment_tags => $params->{comment_tags} })

@@ -780,6 +780,27 @@ sub memcached {
     return request_cache->{memcached} ||= Bugzilla::Memcached->_new();
 }
 
+# Connector to the Datadog metrics collection daemon.
+sub datadog {
+    my ($class, $namespace) = @_;
+    my $host      = $class->localconfig->{datadog_host};
+    my $port      = $class->localconfig->{datadog_port};
+
+    $namespace //= '';
+
+    if ($class->has_feature('datadog') && $host) {
+        require DataDog::DogStatsd;
+        return request_cache->{datadog}{$namespace} //= DataDog::DogStatsd->new(
+            host      => $host,
+            port      => $port,
+            namespace => $namespace ? "$namespace." : '',
+        );
+    }
+    else {
+        return undef;
+    }
+}
+
 sub elastic {
     my ($class) = @_;
     $class->process_cache->{elastic} //= Bugzilla::Elastic->new();

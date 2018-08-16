@@ -186,7 +186,15 @@ use constant LOCALCONFIG_VARS => (
     {
         name => 'shadowdb_pass',
         default => '',
-    }
+    },
+    {
+        name => 'datadog_host',
+        default => '',
+    },
+    {
+        name => 'datadog_port',
+        default => 8125,
+    },
 );
 
 

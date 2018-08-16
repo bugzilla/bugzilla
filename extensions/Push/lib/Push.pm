@@ -8,8 +8,7 @@
 package Bugzilla::Extension::Push::Push;
 
 use 5.10.1;
-use strict;
-use warnings;
+use Moo;
 
 use Bugzilla::Logging;
 use Bugzilla::Extension::Push::BacklogMessage;
@@ -23,22 +22,12 @@ use Bugzilla::Extension::Push::Option;
 use Bugzilla::Extension::Push::Queue;
 use Bugzilla::Extension::Push::Util;
 use DateTime;
+use Try::Tiny;
 
-sub new {
-    my ($class) = @_;
-    my $self = {};
-    bless($self, $class);
-    $self->{is_daemon} = 0;
-    return $self;
-}
-
-sub is_daemon {
-    my ($self, $value) = @_;
-    if (defined $value) {
-        $self->{is_daemon} = $value ? 1 : 0;
-    }
-    return $self->{is_daemon};
-}
+has 'is_daemon' => (
+    is      => 'rw',
+    default => 0,
+);
 
 sub start {
     my ($self) = @_;
@@ -50,12 +39,49 @@ sub start {
         $connector->backlog->reset_backoff();
     }
 
-    while(1) {
-        if ($self->_dbh_check()) {
-            $self->_reload();
-            $self->push();
+    my $pushd_loop = IO::Async::Loop->new;
+    my $main_timer = IO::Async::Timer::Periodic->new(
+        first_interval => 0,
+        interval       => POLL_INTERVAL_SECONDS,
+        reschedule     => 'drift',
+        on_tick        => sub {
+            if ( $self->_dbh_check() ) {
+                $self->_reload();
+                try {
+                    $self->push();
+                }
+                catch {
+                    FATAL($_);
+                };
+            }
+        },
+    );
+    if ( Bugzilla->datadog ) {
+        my $dog_timer = IO::Async::Timer::Periodic->new(
+            interval   => 120,
+            reschedule => 'drift',
+            on_tick    => sub { $self->heartbeat },
+        );
+        $pushd_loop->add($dog_timer);
+        $dog_timer->start;
+    }
+
+    $pushd_loop->add($main_timer);
+    $main_timer->start;
+    $pushd_loop->run;
+}
+
+sub heartbeat {
+    my ($self) = @_;
+    my $dd = Bugzilla->datadog('bugzilla.pushd');
+
+    $dd->gauge('scheduled_jobs', Bugzilla->dbh->selectrow_array('SELECT COUNT(*) FROM push'));
+
+    foreach my $connector ($self->connectors->list) {
+        if ($connector->enabled) {
+            my $lcname = lc $connector->name;
+            $dd->gauge("${lcname}.backlog", Bugzilla->dbh->selectrow_array('SELECT COUNT(*) FROM push_backlog WHERE connector = ?', undef, $connector->name));
         }
-        sleep(POLL_INTERVAL_SECONDS);
     }
 }
 

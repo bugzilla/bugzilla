@@ -223,15 +223,22 @@ JSON
             },
         ],
     );
-    my $bug = mock {
-        bug_id => 23,
+    my $Attachment = mock 'Bugzilla::Attachment' => (
+        add_constructor => [ fake_new => 'hash' ],
+    );
+    my $Bug = mock 'Bugzilla::Bug' => (
+        add_constructor => [ fake_new => 'hash' ],
+    );
+    my $bug = Bugzilla::Bug->fake_new(
+        bug_id      => 23,
         attachments => [
-            mock {
-                contenttype => 'text/x-phabricator-request',
+            Bugzilla::Attachment->fake_new(
+                mimetype => 'text/x-phabricator-request',
                 filename => 'phabricator-D9999-url.txt',
-            },
+            ),
         ]
-    };
+    );
+
     my $revisions = get_attachment_revisions($bug);
     is(ref($revisions), 'ARRAY', 'it is an array ref');
     isa_ok($revisions->[0], 'Bugzilla::Extension::PhabBugz::Revision');

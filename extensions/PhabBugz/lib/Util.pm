@@ -15,14 +15,19 @@ use Bugzilla::Bug;
 use Bugzilla::Constants;
 use Bugzilla::Error;
 use Bugzilla::User;
+use Bugzilla::Types qw(:types);
 use Bugzilla::Util qw(trim);
 use Bugzilla::Extension::PhabBugz::Constants;
+use Bugzilla::Extension::PhabBugz::Types qw(:types);
 
 use JSON::XS qw(encode_json decode_json);
 use List::Util qw(first);
 use LWP::UserAgent;
 use Taint::Util qw(untaint);
 use Try::Tiny;
+use Type::Params qw( compile );
+use Type::Utils;
+use Types::Standard qw( :types );
 
 use base qw(Exporter);
 
@@ -38,7 +43,8 @@ our @EXPORT = qw(
 );
 
 sub create_revision_attachment {
-    my ( $bug, $revision, $timestamp, $submitter ) = @_;
+    state $check = compile(Bug, Revision, Str, User);
+    my ( $bug, $revision, $timestamp, $submitter ) = $check->(@_);
 
     my $phab_base_uri = Bugzilla->params->{phabricator_base_uri};
     ThrowUserError('invalid_phabricator_uri') unless $phab_base_uri;
@@ -101,7 +107,8 @@ sub intersect {
 }
 
 sub get_bug_role_phids {
-    my ($bug) = @_;
+    state $check = compile(Bug);
+    my ($bug) = $check->(@_);
 
     my @bug_users = ( $bug->reporter );
     push(@bug_users, $bug->assigned_to)
@@ -120,12 +127,14 @@ sub get_bug_role_phids {
 }
 
 sub is_attachment_phab_revision {
-    my ($attachment) = @_;
+    state $check = compile(Attachment);
+    my ($attachment) = $check->(@_);
     return $attachment->contenttype eq PHAB_CONTENT_TYPE;
 }
 
 sub get_attachment_revisions {
-    my $bug = shift;
+    state $check = compile(Bug);
+    my ($bug) = $check->(@_);
 
     my @attachments =
       grep { is_attachment_phab_revision($_) } @{ $bug->attachments() };
@@ -154,7 +163,8 @@ sub get_attachment_revisions {
 }
 
 sub request {
-    my ($method, $data) = @_;
+    state $check = compile(Str, HashRef);
+    my ($method, $data) = $check->(@_);
     my $request_cache = Bugzilla->request_cache;
     my $params        = Bugzilla->params;
 

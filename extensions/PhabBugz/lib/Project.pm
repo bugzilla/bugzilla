@@ -12,10 +12,12 @@ use Moo;
 use Scalar::Util qw(blessed);
 use Types::Standard -all;
 use Type::Utils;
+use Type::Params qw( compile );
 
 use Bugzilla::Error;
 use Bugzilla::Util qw(trim);
 use Bugzilla::Extension::PhabBugz::User;
+use Bugzilla::Extension::PhabBugz::Types qw(:types);
 use Bugzilla::Extension::PhabBugz::Util qw(request);
 
 #########################
@@ -33,7 +35,9 @@ has view_policy     => ( is => 'ro', isa => Str );
 has edit_policy     => ( is => 'ro', isa => Str );
 has join_policy     => ( is => 'ro', isa => Str );
 has members_raw     => ( is => 'ro', isa => ArrayRef [ Dict [ phid => Str ] ] );
-has members => ( is => 'lazy', isa => ArrayRef [Object] );
+has members         => ( is => 'lazy', isa => ArrayRef[PhabUser] );
+
+my $Invocant = class_type { class => __PACKAGE__ };
 
 sub new_from_query {
     my ( $class, $params ) = @_;
@@ -142,12 +146,20 @@ sub BUILDARGS {
 #########################
 
 sub create {
-    my ( $class, $params ) = @_;
+    state $check = compile(
+        $Invocant | ClassName,
+        Dict[
+            name => Str,
+            description => Str,
+            view_policy => Str,
+            edit_policy => Str,
+            join_policy => Str,
+        ]
+    );
+    my ( $class, $params ) = $check->(@_);
 
-    my $name = trim( $params->{name} );
-    $name || ThrowCodeError( 'param_required', { param => 'name' } );
-
-    my $description = $params->{description} || 'Need description';
+    my $name        = trim($params->{name});
+    my $description = $params->{description};
     my $view_policy = $params->{view_policy};
     my $edit_policy = $params->{edit_policy};
     my $join_policy = $params->{join_policy};
@@ -325,4 +337,3 @@ sub _build_members {
 }
 
 1;
-

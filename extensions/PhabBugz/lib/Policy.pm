@@ -13,11 +13,13 @@ use Moo;
 use Bugzilla::Error;
 use Bugzilla::Extension::PhabBugz::Util qw(request);
 use Bugzilla::Extension::PhabBugz::Project;
+use Bugzilla::Extension::PhabBugz::Types qw(:types);
 
 use List::Util qw(first);
 
 use Types::Standard -all;
 use Type::Utils;
+use Type::Params qw( compile );
 
 has 'phid'      => ( is => 'ro', isa => Str );
 has 'type'      => ( is => 'ro', isa => Str );
@@ -41,7 +43,7 @@ has 'rules' => (
 
 has 'rule_projects' => (
     is => 'lazy',
-    isa => ArrayRef[Object],
+    isa => ArrayRef[Project],
 );
 
 # {
@@ -79,8 +81,11 @@ has 'rule_projects' => (
 #   }
 # }
 
+my $Invocant = class_type { class => __PACKAGE__ };
+
 sub new_from_query {
-    my ($class, $params) = @_;
+    state $check = compile($Invocant | ClassName, Dict[phids => ArrayRef[Str]]);
+    my ($class, $params) = $check->(@_);
     my $result = request('policy.query', $params);
     if (exists $result->{result}{data} && @{ $result->{result}{data} }) {
         return $class->new($result->{result}->{data}->[0]);
@@ -88,7 +93,8 @@ sub new_from_query {
 }
 
 sub create {
-    my ($class, $projects) = @_;
+    state $check = compile($Invocant | ClassName, ArrayRef[Project]);
+    my ($class, $projects) = $check->(@_);
 
     my $data = {
         objectType => 'DREV',

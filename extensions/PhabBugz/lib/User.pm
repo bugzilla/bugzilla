@@ -11,12 +11,13 @@ use 5.10.1;
 use Moo;
 
 use Bugzilla::User;
-
+use Bugzilla::Types qw(:types);
 use Bugzilla::Extension::PhabBugz::Util qw(request);
 
 use List::Util qw(first);
 use Types::Standard -all;
 use Type::Utils;
+use Type::Params qw(compile);
 
 #########################
 #    Initialization     #
@@ -33,7 +34,9 @@ has 'roles'           => ( is => 'ro', isa => ArrayRef [Str] );
 has 'view_policy'     => ( is => 'ro', isa => Str );
 has 'edit_policy'     => ( is => 'ro', isa => Str );
 has 'bugzilla_id'     => ( is => 'ro', isa => Maybe [Int] );
-has 'bugzilla_user'   => ( is => 'lazy' );
+has 'bugzilla_user'   => ( is => 'lazy', isa => Maybe [User] );
+
+my $Invocant = class_type { class => __PACKAGE__ };
 
 sub BUILDARGS {
     my ( $class, $params ) = @_;
@@ -113,7 +116,8 @@ sub new_from_query {
 }
 
 sub match {
-    my ( $class, $params ) = @_;
+    state $check = compile( $Invocant | ClassName, Dict[ ids => ArrayRef[Int] ] | Dict[ phids => ArrayRef[Str] ] );
+    my ( $class, $params ) = $check->(@_);
 
     # BMO id search takes precedence if bugzilla_ids is used.
     my $bugzilla_ids = delete $params->{ids};
@@ -158,7 +162,8 @@ sub _build_bugzilla_user {
 }
 
 sub get_phab_bugzilla_ids {
-    my ( $class, $params ) = @_;
+    state $check = compile($Invocant | ClassName, Dict[ids => ArrayRef[Int]]);
+    my ( $class, $params ) = $check->(@_);
 
     my $memcache = Bugzilla->memcached;
 

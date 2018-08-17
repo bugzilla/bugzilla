@@ -15,10 +15,12 @@ use Types::Standard -all;
 use Type::Utils;
 
 use Bugzilla::Bug;
+use Bugzilla::Types qw(JSONBool);
 use Bugzilla::Error;
 use Bugzilla::Util qw(trim);
 use Bugzilla::Extension::PhabBugz::Project;
 use Bugzilla::Extension::PhabBugz::User;
+use Bugzilla::Extension::PhabBugz::Types qw(:types);
 use Bugzilla::Extension::PhabBugz::Util qw(request);
 
 #########################
@@ -39,16 +41,16 @@ has edit_policy      => ( is => 'ro',   isa => Str );
 has subscriber_count => ( is => 'ro',   isa => Int );
 has bug              => ( is => 'lazy', isa => Object );
 has author           => ( is => 'lazy', isa => Object );
-has reviewers        => ( is => 'lazy', isa => ArrayRef [Object] );
-has subscribers      => ( is => 'lazy', isa => ArrayRef [Object] );
-has projects         => ( is => 'lazy', isa => ArrayRef [Object] );
+has reviewers        => ( is => 'lazy', isa => ArrayRef [PhabUser] );
+has subscribers      => ( is => 'lazy', isa => ArrayRef [PhabUser] );
+has projects         => ( is => 'lazy', isa => ArrayRef [Project] );
 has reviewers_raw => (
     is  => 'ro',
     isa => ArrayRef [
         Dict [
             reviewerPHID => Str,
             status       => Str,
-            isBlocking   => Bool,
+            isBlocking   => Bool | JSONBool,
             actorPHID    => Maybe [Str],
         ],
     ]
@@ -58,7 +60,7 @@ has subscribers_raw => (
     isa => Dict [
         subscriberPHIDs => ArrayRef [Str],
         subscriberCount => Int,
-        viewerIsSubscribed => Bool,
+        viewerIsSubscribed => Bool | JSONBool,
     ]
 );
 has projects_raw => (

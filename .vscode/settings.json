@@ -1,0 +1,11 @@
+{
+    "files.insertFinalNewline": true,
+    "files.eol": "\n",
+    "files.trimTrailingWhitespace": true,
+    "files.associations": {
+        "*.tmpl": "tt",
+        "*.css": "css",
+        "*.cgi": "perl"
+    },
+    "gitlens.blame.ignoreWhitespace": true
+}

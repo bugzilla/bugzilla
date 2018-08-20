@@ -1,6 +1,10 @@
 # top-most EditorConfig file
 root = true
 
+[*]
+end_of_line = lf
+insert_final_newline = true
+
 # 4 space indentation for Perl files
 [*.{pl,PL,pm,cgi}]
 indent_style = space

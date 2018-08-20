@@ -385,8 +385,8 @@ sub process_revision_change {
         $story_text);
     INFO($log_message);
 
-    # Pre setup before making changes
-    my $old_user = set_phab_user();
+    # change to the phabricator user, which returns a guard that restores the previous user.
+    my $restore_prev_user = set_phab_user();
     my $bug = $revision->bug;
 
     # Check to make sure bug id is valid and author can see it
@@ -619,8 +619,6 @@ sub process_revision_change {
         Bugzilla::BugMail::Send($bug_id, { changer => $rev_attachment->attacher });
     }
 
-    Bugzilla->set_user($old_user);
-
     INFO('SUCCESS: Revision D' . $revision->id . ' processed');
 }
 
@@ -639,7 +637,7 @@ sub process_new_user {
     my $bug_user  = $phab_user->bugzilla_user;
 
     # Pre setup before querying DB
-    my $old_user = set_phab_user();
+    my $restore_prev_user = set_phab_user();
 
     # CHECK AND WARN FOR POSSIBLE USERNAME SQUATTING
     INFO("Checking for username squatters");
@@ -758,8 +756,6 @@ sub process_new_user {
         }
     }
 
-    Bugzilla->set_user($old_user);
-
     INFO('SUCCESS: User ' . $phab_user->id . ' processed');
 }
 
@@ -868,11 +864,8 @@ sub add_flag_comment {
     my ( $bug, $attachment, $comment, $user, $old_flags, $new_flags, $timestamp )
         = @$params{qw(bug attachment comment user old_flags new_flags timestamp)};
 
-    my $old_user;
-    if ($user) {
-        $old_user = Bugzilla->user;
-        Bugzilla->set_user($user);
-    }
+    # when this function returns, Bugzilla->user will return to its previous value.
+    my $restore_prev_user = Bugzilla->set_user($user, scope_guard => 1);
 
     INFO("Flag comment: $comment");
     $bug->add_comment(
@@ -886,8 +879,6 @@ sub add_flag_comment {
 
     $attachment->set_flags( $old_flags, $new_flags );
     $attachment->update($timestamp);
-
-    Bugzilla->set_user($old_user) if $old_user;
 }
 
 1;

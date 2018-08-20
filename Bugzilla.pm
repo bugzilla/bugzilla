@@ -46,6 +46,7 @@ use File::Basename;
 use File::Spec::Functions;
 use Safe;
 use JSON::XS qw(decode_json);
+use Scope::Guard;
 
 use parent qw(Bugzilla::CPAN);
 
@@ -275,8 +276,20 @@ sub user {
 }
 
 sub set_user {
-    my (undef, $user) = @_;
-    request_cache->{user} = $user;
+    my (undef, $new_user, %option) = @_;
+
+    if ($option{scope_guard}) {
+        my $old_user = request_cache->{user};
+        request_cache->{user} = $new_user;
+        return Scope::Guard->new(
+            sub {
+                request_cache->{user} = $old_user;
+            }
+        )
+    }
+    else {
+        request_cache->{user} = $new_user;
+    }
 }
 
 sub sudoer {

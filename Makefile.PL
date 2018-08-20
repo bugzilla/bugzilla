@@ -74,6 +74,7 @@ my %requires = (
     'Mozilla::CA'              => '20160104',
     'Parse::CPAN::Meta'        => '1.44',
     'Role::Tiny'               => '2.000003',
+    'Scope::Guard'             => '0.21',
     'Sereal'                   => '4.004',
     'Taint::Util'              => '0.08',
     'Template'                 => '2.24',

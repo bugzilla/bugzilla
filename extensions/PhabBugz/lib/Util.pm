@@ -65,37 +65,26 @@ sub create_revision_attachment {
     }
 
     # If submitter, then switch to that user when creating attachment
-    my ($old_user, $attachment);
-    try {
-        if ($submitter) {
-            $old_user = Bugzilla->user;
-            $submitter->{groups} = [ Bugzilla::Group->get_all ]; # We need to always be able to add attachment
-            Bugzilla->set_user($submitter);
+    local $submitter->{groups} = [ Bugzilla::Group->get_all ]; # We need to always be able to add attachment
+    my $restore_prev_user = Bugzilla->set_user($submitter, scope_guard => 1);
+
+    my $attachment = Bugzilla::Attachment->create(
+        {
+            bug         => $bug,
+            creation_ts => $timestamp,
+            data        => $revision_uri,
+            description => $revision->title,
+            filename    => 'phabricator-D' . $revision->id . '-url.txt',
+            ispatch     => 0,
+            isprivate   => 0,
+            mimetype    => PHAB_CONTENT_TYPE,
         }
+    );
 
-        $attachment = Bugzilla::Attachment->create(
-            {
-                bug         => $bug,
-                creation_ts => $timestamp,
-                data        => $revision_uri,
-                description => $revision->title,
-                filename    => 'phabricator-D' . $revision->id . '-url.txt',
-                ispatch     => 0,
-                isprivate   => 0,
-                mimetype    => PHAB_CONTENT_TYPE,
-            }
-        );
+    # Insert a comment about the new attachment into the database.
+    $bug->add_comment($revision->summary, { type       => CMT_ATTACHMENT_CREATED,
+                                            extra_data => $attachment->id });
 
-        # Insert a comment about the new attachment into the database.
-        $bug->add_comment($revision->summary, { type       => CMT_ATTACHMENT_CREATED,
-                                                extra_data => $attachment->id });
-    }
-    catch {
-        die $_;
-    }
-    finally {
-        Bugzilla->set_user($old_user) if $old_user;
-    };
 
     return $attachment;
 }
@@ -210,11 +199,10 @@ sub request {
 }
 
 sub set_phab_user {
-    my $old_user = Bugzilla->user;
     my $user = Bugzilla::User->new( { name => PHAB_AUTOMATION_USER } );
     $user->{groups} = [ Bugzilla::Group->get_all ];
-    Bugzilla->set_user($user);
-    return $old_user;
+
+    return Bugzilla->set_user($user, scope_guard => 1);
 }
 
 sub get_needs_review {

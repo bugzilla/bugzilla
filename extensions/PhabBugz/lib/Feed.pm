@@ -497,31 +497,15 @@ sub process_revision_change {
 
     # REVIEWER STATUSES
 
-    my (@accepted_phids, @denied_phids, @accepted_user_ids, @denied_user_ids);
-    foreach my $reviewer (@{ $revision->reviewers }) {
-        push(@accepted_phids, $reviewer->phid) if $reviewer->{phab_review_status} eq 'accepted';
-        push(@denied_phids, $reviewer->phid) if $reviewer->{phab_review_status} eq 'rejected';
+    my (@accepted, @denied);
+    foreach my $review (@{ $revision->reviews }) {
+        push @accepted, $review->{user} if $review->{status} eq 'accepted';
+        push @denied,   $review->{user} if $review->{status} eq 'rejected';
     }
 
-    if ( @accepted_phids ) {
-        my $phab_users = Bugzilla::Extension::PhabBugz::User->match(
-          {
-            phids => \@accepted_phids
-          }
-        );
-        @accepted_user_ids = map { $_->bugzilla_user->id } grep { defined $_->bugzilla_user } @$phab_users;
-    }
-
-    if ( @denied_phids ) {
-        my $phab_users = Bugzilla::Extension::PhabBugz::User->match(
-          {
-            phids => \@denied_phids
-          }
-        );
-        @denied_user_ids = map { $_->bugzilla_user->id } grep { defined $_->bugzilla_user } @$phab_users;
-    }
-
-    my %reviewers_hash =  map { $_->name => 1 } @{ $revision->reviewers };
+    my @accepted_user_ids = map { $_->bugzilla_user->id } grep { defined $_->bugzilla_user } @accepted;
+    my @denied_user_ids   = map { $_->bugzilla_user->id } grep { defined $_->bugzilla_user } @denied;
+    my %reviewers_hash    = map { $_->{user}->name => 1 } @{ $revision->reviews };
 
     foreach my $attachment (@attachments) {
         my ($attach_revision_id) = ($attachment->filename =~ PHAB_ATTACHMENT_PATTERN);

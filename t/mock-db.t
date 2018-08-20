@@ -32,4 +32,14 @@ catch {
     fail('create a user');
 };
 
+try {
+    my $rob = create_user('rob@pants.gov', '*');
+    Bugzilla::User->check({id => $rob->id});
+    pass('rob@pants.gov checks out');
+}
+catch {
+    diag $_;
+    fail('rob@pants.gov fails');
+};
+
 done_testing;

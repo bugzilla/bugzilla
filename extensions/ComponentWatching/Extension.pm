@@ -411,7 +411,7 @@ sub bugmail_recipients {
                INNER JOIN components ON components.product_id = component_watch.product_id
          WHERE component_prefix IS NOT NULL
                AND (component_watch.product_id = ? OR component_watch.product_id = ?)
-               AND components.name LIKE CONCAT(component_prefix, '%')
+               AND components.name LIKE @{[$dbh->sql_string_concat('component_prefix', q{'%'})]}
                AND (components.id = ? OR components.id = ?)
     ");
     $sth->execute(

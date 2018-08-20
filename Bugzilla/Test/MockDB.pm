@@ -17,7 +17,10 @@ use Bugzilla::Test::MockLocalconfig (
 );
 use Bugzilla;
 BEGIN { Bugzilla->extensions };
-use Bugzilla::Test::MockParams;
+use Bugzilla::Test::MockParams (
+    emailsuffix => '',
+    emailregexp => '.+',
+);
 
 sub import {
     require Bugzilla::Install;
@@ -43,6 +46,74 @@ sub import {
         Bugzilla->set_user(Bugzilla::User->super_user);
 
         Bugzilla::Install::update_settings();
+
+        my $dbh = Bugzilla->dbh;
+        if ( !$dbh->selectrow_array("SELECT 1 FROM priority WHERE value = 'P1'") ) {
+            $dbh->do("DELETE FROM priority");
+            my $count = 100;
+            foreach my $priority (map { "P$_" } 1..5) {
+                $dbh->do( "INSERT INTO priority (value, sortkey) VALUES (?, ?)", undef, ( $priority, $count + 100 ) );
+            }
+        }
+        my @flagtypes = (
+            {
+                name             => 'review',
+                desc             => 'The patch has passed review by a module owner or peer.',
+                is_requestable   => 1,
+                is_requesteeble  => 1,
+                is_multiplicable => 1,
+                grant_group      => '',
+                target_type      => 'a',
+                cc_list          => '',
+                inclusions       => ['']
+            },
+            {
+                name             => 'feedback',
+                desc             => 'A particular person\'s input is requested for a patch, ' .
+                                    'but that input does not amount to an official review.',
+                is_requestable   => 1,
+                is_requesteeble  => 1,
+                is_multiplicable => 1,
+                grant_group      => '',
+                target_type      => 'a',
+                cc_list          => '',
+                inclusions       => ['']
+            }
+        );
+
+        foreach my $flag (@flagtypes) {
+            next if Bugzilla::FlagType->new({ name => $flag->{name} });
+            my $grant_group_id = $flag->{grant_group}
+                                ? Bugzilla::Group->new({ name => $flag->{grant_group} })->id
+                                : undef;
+            my $request_group_id = $flag->{request_group}
+                                ? Bugzilla::Group->new({ name => $flag->{request_group} })->id
+                                : undef;
+
+            $dbh->do('INSERT INTO flagtypes (name, description, cc_list, target_type, is_requestable,
+                                            is_requesteeble, is_multiplicable, grant_group_id, request_group_id)
+                                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+                    undef, ($flag->{name}, $flag->{desc}, $flag->{cc_list}, $flag->{target_type},
+                            $flag->{is_requestable}, $flag->{is_requesteeble}, $flag->{is_multiplicable},
+                            $grant_group_id, $request_group_id));
+
+            my $type_id = $dbh->bz_last_key('flagtypes', 'id');
+
+            foreach my $inclusion (@{$flag->{inclusions}}) {
+                my ($product, $component) = split(':', $inclusion);
+                my ($prod_id, $comp_id);
+                if ($product) {
+                    my $prod_obj = Bugzilla::Product->new({ name => $product });
+                    $prod_id = $prod_obj->id;
+                    if ($component) {
+                        $comp_id = Bugzilla::Component->new({ name => $component, product => $prod_obj})->id;
+                    }
+                }
+                $dbh->do('INSERT INTO flaginclusions (type_id, product_id, component_id)
+                        VALUES (?, ?, ?)',
+                        undef, ($type_id, $prod_id, $comp_id));
+            }
+        }
     };
 }
 

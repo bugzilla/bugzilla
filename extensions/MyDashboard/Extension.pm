@@ -106,7 +106,7 @@ sub _component_watcher_ids {
                   WHERE product_id = ?
                     AND (component_id = ?
                          OR component_id IS NULL
-                         OR ? LIKE CONCAT(component_prefix, '%'))";
+                         OR ? LIKE @{[$dbh->sql_string_concat('component_prefix', q{'%'})]})";
 
     $self->{watcher_ids} ||= $dbh->selectcol_arrayref($query, undef,
         $self->product_id, $self->id, $self->name);

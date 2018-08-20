@@ -85,6 +85,7 @@ sub create_revision_attachment {
     $bug->add_comment($revision->summary, { type       => CMT_ATTACHMENT_CREATED,
                                             extra_data => $attachment->id });
 
+    delete $bug->{attachments};
 
     return $attachment;
 }

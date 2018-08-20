@@ -54,8 +54,10 @@ sub start {
         interval       => PHAB_FEED_POLL_SECONDS,
         reschedule     => 'drift',
         on_tick        => sub {
-            try{
-                $self->feed_query();
+            try {
+                with_writable_database {
+                    $self->feed_query();
+                };
             }
             catch {
                 FATAL($_);
@@ -70,8 +72,10 @@ sub start {
         interval       => PHAB_USER_POLL_SECONDS,
         reschedule     => 'drift',
         on_tick        => sub {
-            try{
-                $self->user_query();
+            try {
+                with_writable_database {
+                    $self->user_query();
+                };
             }
             catch {
                 FATAL($_);
@@ -86,8 +90,10 @@ sub start {
         interval       => PHAB_GROUP_POLL_SECONDS,
         reschedule     => 'drift',
         on_tick        => sub {
-            try{
-                $self->group_query();
+            try {
+                with_writable_database {
+                    $self->group_query();
+                };
             }
             catch {
                 FATAL($_);
@@ -149,23 +155,30 @@ sub feed_query {
         }
 
         # Skip changes done by phab-bot user
-        my $phab_user = Bugzilla::Extension::PhabBugz::User->new_from_query(
-          {
-            phids => [ $author_phid ]
-          }
+        # If changer does not exist in bugzilla database
+        # we use the phab-bot account as the changer
+        my $author = Bugzilla::Extension::PhabBugz::User->new_from_query(
+          { phids => [ $author_phid  ] }
         );
 
-        if ($phab_user && $phab_user->bugzilla_id) {
-            if ($phab_user->bugzilla_user->login eq PHAB_AUTOMATION_USER) {
+        if ($author && $author->bugzilla_id) {
+            if ($author->bugzilla_user->login eq PHAB_AUTOMATION_USER) {
                 INFO("SKIPPING: Change made by phabricator user");
                 $self->save_last_id($story_id, 'feed');
                 next;
             }
         }
-
-        with_writable_database {
-            $self->process_revision_change($object_phid, $story_text);
-        };
+        else {
+            my $phab_user = Bugzilla::User->new( { name => PHAB_AUTOMATION_USER } );
+            $author = Bugzilla::Extension::PhabBugz::User->new_from_query(
+                {
+                    ids => [ $phab_user->id ]
+                }
+            );
+        }
+        # Load the revision from Phabricator
+        my $revision = Bugzilla::Extension::PhabBugz::Revision->new_from_query({ phids => [ $object_phid ] });
+        $self->process_revision_change($revision, $author, $story_text);
         $self->save_last_id($story_id, 'feed');
     }
 
@@ -197,9 +210,7 @@ sub feed_query {
             }
         );
 
-        with_writable_database {
-            $self->process_revision_change($revision, " created D" . $revision->id);
-        };
+        $self->process_revision_change( $revision, $revision->author, " created D" . $revision->id );
 
         # Set the build target to a passing status to
         # allow the revision to exit draft state
@@ -351,16 +362,10 @@ sub group_query {
 }
 
 sub process_revision_change {
-    my ($self, $revision_phid, $story_text) = @_;
-
-    # Load the revision from Phabricator
-    my $revision =
-        blessed $revision_phid
-        ? $revision_phid
-        : Bugzilla::Extension::PhabBugz::Revision->new_from_query({ phids => [ $revision_phid ] });
+    state $check = compile($Invocant, Revision, LinkedPhabUser, Str);
+    my ($self, $revision, $changer, $story_text) = $check->(@_);
 
     # NO BUG ID
-
     if (!$revision->bug_id) {
         if ($story_text =~ /\s+created\s+D\d+/) {
             # If new revision and bug id was omitted, make revision public
@@ -378,10 +383,11 @@ sub process_revision_change {
 
 
     my $log_message = sprintf(
-        "REVISION CHANGE FOUND: D%d: %s | bug: %d | %s",
+        "REVISION CHANGE FOUND: D%d: %s | bug: %d | %s | %s",
         $revision->id,
         $revision->title,
         $revision->bug_id,
+        $changer->name,
         $story_text);
     INFO($log_message);
 
@@ -533,6 +539,8 @@ sub process_revision_change {
 
         $flag_type ||= first { $_->name eq 'review' && $_->is_active } @{ $attachment->flag_types };
 
+        die "Unable to find review flag!" unless $flag_type;
+
         # Create new flags
         foreach my $user_id (@accepted_user_ids) {
             next if $accepted_done{$user_id};
@@ -600,7 +608,7 @@ sub process_revision_change {
     # Email changes for this revisions bug and also for any other
     # bugs that previously had these revision attachments
     foreach my $bug_id ($revision->bug_id, keys %other_bugs) {
-        Bugzilla::BugMail::Send($bug_id, { changer => $rev_attachment->attacher });
+        Bugzilla::BugMail::Send($bug_id, { changer => $changer->bugzilla_user });
     }
 
     INFO('SUCCESS: Revision D' . $revision->id . ' processed');

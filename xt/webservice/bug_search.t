@@ -24,7 +24,7 @@ use Test::More;
 use Data::Dumper;
 
 my ($config, @clients) = get_rpc_clients();
-plan tests => $config->{test_extensions} ? 531 : 522;
+plan tests => $config->{test_extensions} ? 565 : 556;
 
 my ($public_bug, $private_bug) = $clients[0]->bz_create_test_bugs('private');
 
@@ -207,5 +207,44 @@ sub post_success {
 
 foreach my $rpc (@clients) {
     $rpc->bz_run_tests(tests => \@tests,
+                       method => 'Bug.search', post_success => \&post_success);
+}
+
+my ($public_bug2, $public_bug3) = $clients[0]->bz_create_test_bugs();
+
+my $depends_tests = [
+    { user => 'editbugs',
+      args => { ids => [ $public_bug2->{id} ], depends_on => { add => [ $public_bug3->{id}, $public_bug->{id} ] } },
+      test => 'Add depends to second bug' },
+    { user => 'editbugs',
+      args => { ids => [ $public_bug3->{id} ], depends_on => { add => [ $public_bug->{id} ] } },
+      test => 'Add depends to third bug' },
+];
+$clients[0]->bz_run_tests(tests => $depends_tests, method => 'Bug.update');
+
+my @more_tests;
+push(@more_tests, (
+    # Should return both extra bugs.
+    { args  => { f1 => 'dependson', o1 => 'equals', v1 => $public_bug->{id} },
+      test  => "Can search by depends",
+      bugs  => 2, exactly => 1,
+    },
+    # This should still return public_bug2 only, since it depends on a bug that is bug3 and a bug which isn't.
+    { args  => { f1 => 'dependson', o1 => 'equals', v1 => $public_bug3->{id},
+                 f2 => 'dependson', o2 => 'notequals', v2 => $public_bug3->{id} },
+      test  => "Can search correctly by not depends",
+      bugs  => 1, exactly => 1,
+    },
+    # This should return nothing, since no dependency of any bug can be both equal and unequal to the same thing.
+    { args  => { f1 => 'dependson', o1 => 'equals', v1 => $public_bug3->{id},
+                 f2 => 'dependson', o2 => 'notequals', v2 => $public_bug3->{id},
+                 j_top => 'AND_G' },
+      test  => "Contradicting depends searches return nothing.",
+      bugs  => 0, exactly => 1,
+    },
+));
+
+foreach my $rpc (@clients) {
+    $rpc->bz_run_tests(tests => \@more_tests,
                        method => 'Bug.search', post_success => \&post_success);
 }

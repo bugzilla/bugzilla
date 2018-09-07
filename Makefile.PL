@@ -323,7 +323,7 @@ my %optional_features = (
         }
     },
     linux_pid => {
-        description => 'Linux::PID for MozReview',
+        description => 'Linux::PID',
         prereqs     => {
             runtime => {
                 requires => { 'Linux::Pid' => 0 },

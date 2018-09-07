@@ -27,21 +27,6 @@ our @EXPORT = qw( $cf_visible_in_products
 # will result in the user being redirected to that URL when viewing the
 # attachment.
 
-my $mozreview_url_re = qr{
-    # begins with mozreview hostname
-    ^
-    https?://reviewboard(?:-dev)?\.(?:allizom|mozilla)\.org
-
-    # followed by a review path
-    /r/\d+
-
-    # ends with optional suffix
-    (?: /
-      | /diff/\#index_header
-    )?
-    $
-}ix;
-
 sub phabricator_url_re {
     my $phab_uri = Bugzilla->params->{phabricator_base_uri} || 'https://example.com';
     return qr/^\Q${phab_uri}\ED\d+$/i;
@@ -52,12 +37,6 @@ our %autodetect_attach_urls = (
         title        => 'GitHub Pull Request',
         regex        => qr#^https://github\.com/[^/]+/[^/]+/pull/\d+/?$#i,
         content_type => 'text/x-github-pull-request',
-        can_review   => 1,
-    },
-    reviewboard => {
-        title        => 'MozReview',
-        regex        => $mozreview_url_re,
-        content_type => 'text/x-review-board-request',
         can_review   => 1,
     },
     Phabricator => {

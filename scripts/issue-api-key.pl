@@ -33,10 +33,6 @@ my $params = {
     api_key     => $given_api_key,
 };
 
-if ($description && $description eq 'mozreview') {
-    $params->{app_id} = Bugzilla->params->{mozreview_app_id} // '';
-}
-
 if ($given_api_key) {
     $api_key = Bugzilla::User::APIKey->create_special($params);
 } else {

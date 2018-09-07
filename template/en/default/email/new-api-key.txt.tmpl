@@ -26,10 +26,7 @@ or update the key at the following URL:
 
 [%+ urlbase %]userprefs.cgi?tab=apikey
 
-[% IF new_key.app_id == Param('mozreview_app_id') %]
-This API key was automatically created by MozReview. If you did not recently log in to
-MozReview, please disable the key at the above URL, and change your password immediately.
-[% ELSIF new_key.app_id == Param('phabricator_app_id') %]
+[% IF new_key.app_id == Param('phabricator_app_id') %]
 This API key was automatically created by Mozilla's Phabricator instance. If you did not recently
 log in to Phabricator, please disable the key at the above URL, and change your password immediately.
 [% ELSE %]

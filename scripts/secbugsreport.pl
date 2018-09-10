@@ -62,7 +62,8 @@ my $email = Email::MIME->create(
     header_str => [
         From    => Bugzilla->params->{'mailfrom'},
         To      => Bugzilla->params->{report_secbugs_emails},
-        Subject => "Security Bugs Report for $report_week"
+        Subject => "Security Bugs Report for $report_week",
+        'X-Bugzilla-Type' => 'admin'
     ],
     attributes => {
         content_type => 'text/html',

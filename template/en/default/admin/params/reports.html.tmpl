@@ -1,0 +1,20 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+[%
+   title = "Reports"
+   desc = "Configure reporting parameters"
+%]
+
+[% param_descs = {
+    report_secbugs_active => "Enable or disable the security $terms.bugs report feature."
+    report_secbugs_emails =>
+      "Comma delimited list of the email addresses that the security $terms.bugs report will be sent to.",
+    report_secbugs_products =>
+      "JSON array of the products the security $terms.bugs report will report on. e.g [\"Prod1\", \"Prod2\"]",
+  }
+%]

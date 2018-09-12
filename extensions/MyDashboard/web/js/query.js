@@ -14,7 +14,7 @@ if (typeof(MyDashboard) == 'undefined') {
 $(function() {
     YUI({
         base: 'js/yui3/',
-        combine: false, 
+        combine: false,
         groups: {
             gallery: {
                 combine: false,

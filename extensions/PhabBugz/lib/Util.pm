@@ -35,7 +35,6 @@ our @EXPORT = qw(
     create_revision_attachment
     get_attachment_revisions
     get_bug_role_phids
-    get_needs_review
     intersect
     is_attachment_phab_revision
     request
@@ -204,50 +203,6 @@ sub set_phab_user {
     $user->{groups} = [ Bugzilla::Group->get_all ];
 
     return Bugzilla->set_user($user, scope_guard => 1);
-}
-
-sub get_needs_review {
-    my ($user) = @_;
-    $user //= Bugzilla->user;
-    return unless $user->id;
-
-    my $phab_user = Bugzilla::Extension::PhabBugz::User->new_from_query(
-      {
-        ids => [ $user->id ]
-      }
-    );
-
-    return [] unless $phab_user;
-
-    my $diffs = request(
-        'differential.revision.search',
-        {
-            attachments => {
-                reviewers => 1,
-            },
-            constraints => {
-                reviewerPHIDs => [$phab_user->phid],
-                statuses      => ["open()"],
-            },
-            order => 'newest',
-        }
-    );
-    ThrowCodeError('phabricator_api_error', { reason => 'Malformed Response' })
-        unless exists $diffs->{result}{data};
-
-    my @revisions;
-    foreach my $revision ( @{ $diffs->{result}{data} } ) {
-        foreach my $reviewer ( @{ $revision->{attachments}->{reviewers}->{reviewers} } ) {
-            if (   $reviewer->{reviewerPHID} eq $phab_user->phid
-                && $reviewer->{status} =~ /^(?:added|blocking)$/ )
-            {
-                push @revisions, $revision;
-                last;
-            }
-        }
-    }
-
-    return \@revisions;
 }
 
 1;

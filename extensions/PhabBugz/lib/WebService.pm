@@ -16,29 +16,23 @@ use base qw(Bugzilla::WebService);
 use Bugzilla::Constants;
 use Bugzilla::Error;
 use Bugzilla::User;
-use Bugzilla::Util qw(detaint_natural datetime_from time_ago trick_taint);
+use Bugzilla::Util qw(detaint_natural trick_taint);
 use Bugzilla::WebService::Constants;
 
 use Bugzilla::Extension::PhabBugz::Constants;
-use Bugzilla::Extension::PhabBugz::Util qw(
-    get_needs_review
-);
 
-use DateTime ();
-use List::Util qw(first uniq);
+use List::Util qw(first);
 use List::MoreUtils qw(any);
 use MIME::Base64 qw(decode_base64);
 
 use constant READ_ONLY => qw(
     check_user_enter_bug_permission
     check_user_permission_for_bug
-    needs_review
 );
 
 use constant PUBLIC_METHODS => qw(
     check_user_enter_bug_permission
     check_user_permission_for_bug
-    needs_review
     set_build_target
 );
 
@@ -97,95 +91,6 @@ sub check_user_enter_bug_permission {
     return {
         result => $target_user->can_enter_product($params->{product}) ? 1 : 0
     };
-}
-
-sub needs_review {
-    my ($self, $params) = @_;
-
-    $self->_check_phabricator();
-
-    my $user = Bugzilla->login(LOGIN_REQUIRED);
-    my $dbh  = Bugzilla->dbh;
-
-    my $reviews = get_needs_review();
-
-    my $authors = Bugzilla::Extension::PhabBugz::User->match({
-        phids => [
-            uniq
-            grep { defined }
-            map { $_->{fields}{authorPHID} }
-            @$reviews
-        ]
-    });
-
-    my %author_phab_to_id = map { $_->phid => $_->bugzilla_user->id } @$authors;
-    my %author_id_to_user = map { $_->bugzilla_user->id => $_->bugzilla_user } @$authors;
-
-    # bug data
-    my $visible_bugs = $user->visible_bugs([
-        uniq
-        grep { $_ }
-        map { $_->{fields}{'bugzilla.bug-id'} }
-        @$reviews
-    ]);
-
-    # get all bug statuses and summaries in a single query to avoid creation of
-    # many bug objects
-    my %bugs;
-    if (@$visible_bugs) {
-        #<<<
-        my $bug_rows =$dbh->selectall_arrayref(
-            'SELECT bug_id, bug_status, short_desc ' .
-            '  FROM bugs ' .
-            ' WHERE bug_id IN (' . join(',', ('?') x @$visible_bugs) . ')',
-            { Slice => {} },
-            @$visible_bugs
-        );
-        #>>>
-        %bugs = map { $_->{bug_id} => $_ } @$bug_rows;
-    }
-
-    # build result
-    my $datetime_now = DateTime->now(time_zone => $user->timezone);
-    my @result;
-    foreach my $review (@$reviews) {
-        my $review_flat = {
-            id     => $review->{id},
-            title  => $review->{fields}{title},
-            url    => Bugzilla->params->{phabricator_base_uri} . 'D' . $review->{id},
-        };
-
-        # show date in user's timezone
-        my $datetime = DateTime->from_epoch(
-            epoch     => $review->{fields}{dateModified},
-            time_zone => 'UTC'
-        );
-        $datetime->set_time_zone($user->timezone);
-        $review_flat->{updated}       = $datetime->strftime('%Y-%m-%d %T %Z');
-        $review_flat->{updated_fancy} = time_ago($datetime, $datetime_now);
-
-        # review requester
-        if (my $author = $author_id_to_user{$author_phab_to_id{ $review->{fields}{authorPHID} }}) {
-            $review_flat->{author_name}  = $author->name;
-            $review_flat->{author_email} = $author->email;
-        }
-        else {
-            $review_flat->{author_name}  = 'anonymous';
-            $review_flat->{author_email} = 'anonymous';
-        }
-
-        # referenced bug
-        if (my $bug_id = $review->{fields}{'bugzilla.bug-id'}) {
-            my $bug = $bugs{$bug_id};
-            $review_flat->{bug_id}      = $bug_id;
-            $review_flat->{bug_status}  = $bug->{bug_status};
-            $review_flat->{bug_summary} = $bug->{short_desc};
-        }
-
-        push @result, $review_flat;
-    }
-
-    return { result => \@result };
 }
 
 sub set_build_target {
@@ -257,12 +162,6 @@ sub rest_resources {
                 },
             },
         },
-        # Review requests
-        qw{^/phabbugz/needs_review$}, {
-            GET => {
-                method => 'needs_review',
-            },
-        }
     ];
 }
 

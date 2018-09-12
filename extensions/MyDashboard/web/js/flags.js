@@ -16,18 +16,15 @@ $(function () {
         // Common
         var counter = 0;
         var dataSource = {
-            reviews: null,
             requestee: null,
             requester: null
         };
         var dataTable = {
-            reviews: null,
             requestee: null,
             requester: null
         };
-        var hasReviews = !!document.getElementById('reviews_container');
 
-        var updateRequestsTable = function(type) {
+        var updateFlagTable = function(type) {
             if (!type) return;
 
             counter = counter + 1;
@@ -50,15 +47,14 @@ $(function () {
                     if (o.error && o.error.message) {
                         alert("Failed to load requests:\n\n" + o.error.message);
                     } else {
-                        alert("Failed to load requests.");
+                        alert("Failed to load requests");
                     }
                 }
             };
 
-            var method = type === 'reviews' ? 'PhabBugz.needs_review' : 'MyDashboard.run_flag_query';
             var json_object = {
                 version: "1.1",
-                method:  method,
+                method:  "MyDashboard.run_flag_query",
                 id:      counter,
                 params:  {
                     type : type,
@@ -138,84 +134,6 @@ $(function () {
             }
         };
 
-        var phabAuthorFormatter = function(o) {
-            return '<span title="' + Y.Escape.html(o.data.author_email) + '">' +
-                Y.Escape.html(o.data.author_name) + '</span>';
-        };
-
-        var phabRowFormatter = function(o) {
-            var row = o.cell.ancestor();
-
-            // space in the 'flags' tables is tight
-            // render requests as two rows - diff title on first row, columns
-            // on second
-
-            row.insert(
-                '<tr class="' + row.getAttribute('class') + '">' +
-                '<td class="yui3-datatable-cell" colspan="4">' +
-                '<a href="' + o.data.url + '" target="_blank">' +
-                Y.Escape.html(o.data.title) + '</a></td></tr>',
-                'after');
-
-            o.cell.setHTML('<a href="' + o.data.url + '">D' + o.data.id + '</a>');
-
-            return false;
-        };
-
-        // Reviews
-        if (hasReviews) {
-            dataSource.reviews = new Y.DataSource.IO({ source: 'jsonrpc.cgi' });
-            dataSource.reviews.on('error', function(e) {
-                console.log(e);
-                try {
-                    var response = Y.JSON.parse(e.data.responseText);
-                    if (response.error)
-                        e.error.message = response.error.message;
-                } catch(ex) {
-                    // ignore
-                }
-            });
-            dataTable.reviews = new Y.DataTable({
-                columns: [
-                    { key: 'author_email', label: 'Requester', sortable: true,
-                        formatter: phabAuthorFormatter, allowHTML: true },
-                    { key: 'id', label: 'Revision', sortable: true,
-                        nodeFormatter: phabRowFormatter, allowHTML: true },
-                    { key: 'bug_id', label: 'Bug', sortable: true,
-                        formatter: bugLinkFormatter, allowHTML: true },
-                    { key: 'updated', label: 'Updated', sortable: true,
-                        formatter: updatedFormatter, allowHTML: true }
-                ],
-                strings: {
-                    emptyMessage: 'No review requests.',
-                }
-            });
-
-            dataTable.reviews.plug(Y.Plugin.DataTableSort);
-
-            dataTable.reviews.plug(Y.Plugin.DataTableDataSource, {
-                datasource: dataSource.reviews
-            });
-
-            dataSource.reviews.plug(Y.Plugin.DataSourceJSONSchema, {
-                schema: {
-                    resultListLocator: 'result.result',
-                    resultFields: [ 'author_email', 'author_name', 'bug_id',
-                        'bug_status', 'bug_summary', 'id', 'status', 'title',
-                        'updated', 'updated_fancy', 'url' ]
-                }
-            });
-
-            dataTable.reviews.render("#reviews_table");
-
-            Y.one('#reviews_refresh').on('click', function(e) {
-                updateRequestsTable('reviews');
-            });
-            Y.one('#reviews_buglist').on('click', function(e) {
-                loadBugList('reviews');
-            });
-        }
-
         // Requestee
         dataSource.requestee = new Y.DataSource.IO({ source: 'jsonrpc.cgi' });
         dataSource.requestee.on('error', function(e) {
@@ -259,7 +177,7 @@ $(function () {
         dataTable.requestee.render("#requestee_table");
 
         Y.one('#requestee_refresh').on('click', function(e) {
-            updateRequestsTable('requestee');
+            updateFlagTable('requestee');
         });
         Y.one('#requestee_buglist').on('click', function(e) {
             loadBugList('requestee');
@@ -307,23 +225,18 @@ $(function () {
         });
 
         Y.one('#requester_refresh').on('click', function(e) {
-            updateRequestsTable('requester');
+            updateFlagTable('requester');
         });
         Y.one('#requester_buglist').on('click', function(e) {
             loadBugList('requester');
         });
 
         // Initial load
-        if (hasReviews) {
-            Y.on("contentready", function (e) {
-                updateRequestsTable('reviews');
-            }, "#reviews_table");
-        }
         Y.on("contentready", function (e) {
-            updateRequestsTable("requestee");
+            updateFlagTable("requestee");
         }, "#requestee_table");
         Y.on("contentready", function (e) {
-            updateRequestsTable("requester");
+            updateFlagTable("requester");
         }, "#requester_table");
     });
 });

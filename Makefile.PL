@@ -72,6 +72,7 @@ my %requires = (
     'Moo'                      => '2.002004',
     'MooX::StrictConstructor'  => '0.008',
     'Mozilla::CA'              => '20160104',
+    'Package::Stash'           => '0.37',
     'Parse::CPAN::Meta'        => '1.44',
     'Role::Tiny'               => '2.000003',
     'Scope::Guard'             => '0.21',

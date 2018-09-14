@@ -8,19 +8,18 @@
 package Bugzilla::Report::SecurityRisk;
 
 use 5.10.1;
+use Moo;
+use MooX::StrictConstructor;
 
-use Bugzilla;
 use Bugzilla::Error;
 use Bugzilla::Status qw(is_open_state);
 use Bugzilla::Util qw(datetime_from);
-
+use Bugzilla;
 use DateTime;
 use List::Util qw(any first sum);
-use Moo;
-use MooX::StrictConstructor;
 use POSIX qw(ceil);
-use Types::Standard qw(Num Int Bool Str HashRef ArrayRef CodeRef Map Dict Enum);
 use Type::Utils;
+use Types::Standard qw(Num Int Bool Str HashRef ArrayRef CodeRef Map Dict Enum);
 
 my $DateTime = class_type { class => 'DateTime' };
 
@@ -202,7 +201,7 @@ sub _build_results {
         # We rewind events while there are still events existing which occured after the start
         # of the report week. The bugs will reflect a snapshot of how they were at the start of the week.
         # $self->events is ordered reverse chronologically, so the end of the array is the earliest event.
-        while ( $e < scalar @{ $self->events }
+        while ( $e < @{ $self->events }
             && ( @{ $self->events }[$e] )->{bug_when} > $report_date )
         {
             my $event = @{ $self->events }[$e];
@@ -222,10 +221,7 @@ sub _build_results {
                 }
                 if ( $event->{removed} ) {
                     # If a target sec keyword was removed, add the first one back.
-                    my $removed_sec = first {
-                        $event->{removed} =~ /\b\Q$_\E\b/
-                    }
-                    @{ $self->sec_keywords };
+                    my $removed_sec = first { $event->{removed} =~ /\b\Q$_\E\b/ } @{ $self->sec_keywords };
                     $bug->{sec_level} = $removed_sec if ($removed_sec);
                 }
             }
@@ -243,15 +239,15 @@ sub _build_results {
         # Report!
         my $date_snapshot = $report_date->clone();
         my @bugs_snapshot = values %$bugs;
-        unshift @results,
-            {
+        my $result = {
             date                => $date_snapshot,
             bugs_by_product     => $self->_bugs_by_product( $date_snapshot, @bugs_snapshot ),
             bugs_by_sec_keyword => $self->_bugs_by_sec_keyword( $date_snapshot, @bugs_snapshot ),
-            };
+        };
+        push @results, $result;
     }
 
-    return \@results;
+    return [reverse @results];
 }
 
 sub _bugs_by_product {

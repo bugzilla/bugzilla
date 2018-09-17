@@ -448,7 +448,7 @@ $(function() {
     $('#action-history')
         .click(function(event) {
             event.preventDefault();
-            document.location.href = 'show_activity.cgi?id=' + BUGZILLA.bug_id;
+            window.open(`show_activity.cgi?id=${BUGZILLA.bug_id}`, '_blank');
         });
 
     // use scrollTo for in-page activity links

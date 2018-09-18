@@ -13,7 +13,7 @@ use warnings;
 
 use Bugzilla::Logging;
 
-our $VERSION = '20180910.1';
+our $VERSION = '20180918.1';
 
 use Bugzilla::Auth;
 use Bugzilla::Auth::Persist::Cookie;

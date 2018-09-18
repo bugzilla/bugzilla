@@ -6,8 +6,8 @@
     mode: 0644
   when: LAZY == 0
 
-- name: enable httpd
-  service: name=httpd enabled=yes
+- name: disable httpd
+  service: name=httpd enabled=no
   when: LAZY == 0
 
 - name: ensure bugzilla.log has right permissions
@@ -16,5 +16,5 @@
 - name: ensure bugzilla-json.log has right permissions
   file: path=/vagrant/logs/bugzilla-json.log state=touch owner=vagrant group=apache mode=0660
 
-- name: restart httpd
-  service: name=httpd state=restarted
+- name: stop httpd
+  service: name=httpd state=stopped

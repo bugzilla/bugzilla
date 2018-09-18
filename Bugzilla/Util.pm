@@ -29,7 +29,7 @@ use base qw(Exporter);
                              get_text template_var disable_utf8
                              enable_utf8 detect_encoding email_filter
                              round extract_nicks);
-
+use Bugzilla::Logging;
 use Bugzilla::Constants;
 use Bugzilla::RNG qw(irand);
 
@@ -317,6 +317,7 @@ sub do_ssl_redirect_if_required {
 
     # If we're already running under SSL, never redirect.
     return if $ENV{HTTPS} && $ENV{HTTPS} eq 'on';
+    DEBUG("Redirect to HTTPS because \$ENV{HTTPS}=$ENV{HTTPS}");
     Bugzilla->cgi->redirect_to_https();
 }
 

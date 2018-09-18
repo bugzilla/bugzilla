@@ -5,6 +5,8 @@ severity = 1
 #perltidyrc = .perltidyrc
 #severity = 2
 
+[-CodeLayout::ProhibitParensWithBuiltins]
+
 [InputOutput::RequireCheckedSyscalls]
 severity = 2
 functions = :builtins

@@ -117,7 +117,7 @@ sub new {
 
     # Under mod_perl, CGI's global variables get reset on each request,
     # so we need to set them up again every time.
-    $class->_init_bz_cgi_globals() if $ENV{MOD_PERL};
+    $class->_init_bz_cgi_globals();
 
     my $self = $class->SUPER::new(@args);
 
@@ -135,6 +135,7 @@ sub new {
             # apache collapses // to / in $ENV{PATH_INFO} but not in $self->path_info.
             # url() requires the full path in ENV in order to generate the correct url.
             $ENV{PATH_INFO} = $path;
+            DEBUG("redirecting because we see PATH_INFO and don't like it");
             print $self->redirect($self->url(-path => 0, -query => 1));
             exit;
         }
@@ -145,6 +146,7 @@ sub new {
 
     # Redirect to urlbase if we are not viewing an attachment.
     if ($self->url_is_attachment_base and $script ne 'attachment.cgi') {
+        DEBUG("Redirecting to urlbase because the url is in the attachment base and not attachment.cgi");
         $self->redirect_to_urlbase();
     }
 
@@ -475,11 +477,6 @@ sub _prevent_unsafe_response {
             print $self->SUPER::header(-type => 'text/html',  -status => '403 Forbidden');
             if ($content_type ne 'text/html') {
                 print "Untrusted Referer Header\n";
-                if ($ENV{MOD_PERL}) {
-                    my $r = $self->r;
-                    $r->rflush;
-                    $r->status(200);
-                }
             }
             exit;
         }
@@ -597,8 +594,25 @@ sub header {
             $headers{'-link'} .= ', <https://www.google-analytics.com>; rel="preconnect"; crossorigin';
         }
     }
-
-    return $self->SUPER::header(%headers) || "";
+    my $headers = $self->SUPER::header(%headers) || '';
+    if ($self->server_software eq 'Bugzilla::Quantum::CGI') {
+        my $c = $Bugzilla::Quantum::CGI::C;
+        $c->res->headers->parse($headers);
+        my $status = $c->res->headers->status;
+        if ($status && $status =~ /^([0-9]+)/) {
+            $c->res->code($1);
+        }
+        elsif ($c->res->headers->location) {
+            $c->res->code(302);
+        }
+        else {
+            $c->res->code(200);
+        }
+        return '';
+    }
+    else {
+        LOGDIE("Bugzilla::CGI->header() should only be called from inside Bugzilla::Quantum::CGI!");
+    }
 }
 
 sub param {
@@ -715,6 +729,7 @@ sub redirect {
     return $self->SUPER::redirect(@_);
 }
 
+use Bugzilla::Logging;
 # This helps implement Bugzilla::Search::Recent, and also shortens search
 # URLs that get POSTed to buglist.cgi.
 sub redirect_search_url {
@@ -763,6 +778,7 @@ sub redirect_search_url {
     # are only redirected if they're under the CGI_URI_LIMIT though.
     my $self_url = $self->self_url();
     if ($self->request_method() ne 'POST' or length($self_url) < CGI_URI_LIMIT) {
+        DEBUG("Redirecting search url");
         print $self->redirect(-url => $self_url);
         exit;
     }
@@ -784,10 +800,8 @@ sub redirect_to_https {
     # XML-RPC clients (SOAP::Lite at least) require a 301 to redirect properly
     # and do not work with 302. Our redirect really is permanent anyhow, so
     # it doesn't hurt to make it a 301.
+    DEBUG("Redirecting to https");
     print $self->redirect(-location => $url, -status => 301);
-
-    # When using XML-RPC with mod_perl, we need the headers sent immediately.
-    $self->r->rflush if $ENV{MOD_PERL};
     exit;
 }
 

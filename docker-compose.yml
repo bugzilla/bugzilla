@@ -19,6 +19,7 @@ services:
       - LOCALCONFIG_ENV=1
       - LOG4PERL_CONFIG_FILE=log4perl-docker.conf
       - BUGZILLA_UNSAFE_AUTH_DELEGATION=1
+      - HTTP_BACKEND=simple
       - PORT=80
       - BMO_db_host=bmo-db.vm
       - BMO_db_name=bugs

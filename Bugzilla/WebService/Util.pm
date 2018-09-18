@@ -23,7 +23,7 @@ use base qw(Exporter);
 
 # We have to "require", not "use" this, because otherwise it tries to
 # use features of Test::More during import().
-require Test::Taint;
+require Test::Taint if ${^TAINT};
 
 our @EXPORT_OK = qw(
     extract_flags
@@ -193,8 +193,10 @@ sub taint_data {
     # Though this is a private function, it hasn't changed since 2004 and
     # should be safe to use, and prevents us from having to write it ourselves
     # or require another module to do it.
-    Test::Taint::_deeply_traverse(\&_delete_bad_keys, \@params);
-    Test::Taint::taint_deeply(\@params);
+    if (${^TAINT}) {
+        Test::Taint::_deeply_traverse(\&_delete_bad_keys, \@params);
+        Test::Taint::taint_deeply(\@params);
+    }
 }
 
 sub _delete_bad_keys {

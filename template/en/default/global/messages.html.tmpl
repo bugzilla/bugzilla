@@ -140,7 +140,7 @@
 
   [% ELSIF message_tag == "buglist_updated_named_query" %]
     [% title = "Search updated" %]
-    Your search named <code><a 
+    Your search named <code><a
      href="buglist.cgi?cmdtype=runnamed&amp;namedcmd=[% queryname FILTER uri %]"
     >[% queryname FILTER html %]</a></code> has been updated.
 
@@ -298,22 +298,22 @@
   [% ELSIF message_tag == "email_change_canceled_reinstated" %]
     [% title = "Cancel Request to Change Email Address" %]
     The request to change the email address for the
-    account [%+ old_email FILTER html %] to 
+    account [%+ old_email FILTER html %] to
     [%+ new_email FILTER html %] has been canceled.
     Your old account settings have been reinstated.
 
   [% ELSIF message_tag == "extension_created" %]
     An extension named [% name FILTER html %] has been created
-    in [% path FILTER html %]. Make sure you change "YOUR NAME" and 
+    in [% path FILTER html %]. Make sure you change "YOUR NAME" and
     "YOUR EMAIL ADDRESS" in the code to your name and your email address.
 
   [% ELSIF message_tag == "field_value_created" %]
     [% title = "New Field Value Created" %]
-    The value <em>[% value.name FILTER html %]</em> has been added as a 
+    The value <em>[% value.name FILTER html %]</em> has been added as a
     valid choice for the <em>[% field.description FILTER html %]</em>
     (<em>[% field.name FILTER html %]</em>) field.
     [% IF field.name == "bug_status" %]
-      You should now visit the <a href="editworkflow.cgi">status workflow 
+      You should now visit the <a href="editworkflow.cgi">status workflow
       page</a> to include your new [% terms.bug %] status.
     [% END %]
 
@@ -331,7 +331,7 @@
       (<em>[% field.name FILTER html %]</em>) field has been changed:
       <ul>
         [% IF changes.value %]
-          <li>Field value updated to 
+          <li>Field value updated to
             <em>[% changes.value.1 FILTER html %]</em>.
             [% IF value.is_default %]
               (Note that this value is the default for this field. All
@@ -340,16 +340,16 @@
           </li>
         [% END %]
         [% IF changes.sortkey %]
-          <li>Sortkey updated to 
+          <li>Sortkey updated to
             <em>[% changes.sortkey.1 FILTER html %]</em>.</li>
         [% END %]
         [% IF changes.visibility_value_id %]
           [% IF value.visibility_value.defined %]
-            <li>It only appears when 
+            <li>It only appears when
               [%+ value.field.value_field.description FILTER html %] is set to
               '[%+ value.visibility_value.name FILTER html %]'.</li>
           [% ELSE %]
-            <li>It now always appears, no matter what 
+            <li>It now always appears, no matter what
               [%+ value.field.value_field.description FILTER html %] is set to.
             </li>
           [% END %]
@@ -535,7 +535,7 @@
     Reading users...
 
   [% ELSIF message_tag == "migrate_translating_bugs" %]
-    Converting [% terms.bug %] values to be appropriate for 
+    Converting [% terms.bug %] values to be appropriate for
     [%+ terms.Bugzilla %]...
 
   [% ELSIF message_tag == "migrate_user_created" %]
@@ -593,12 +593,6 @@
     [% ELSE %]
       No changes made.
     [% END %]
-
-    [% IF shutdown_is_active == 1 %]
-      <hr>
-      [% terms.Bugzilla %] has now been shut down. To re-enable the system,
-      clear the <em>shutdownhtml</em> field.
-    [% END%]
 
   [% ELSIF message_tag == "password_change_canceled" %]
     [% title = "Cancel Request to Change Password" %]
@@ -731,7 +725,7 @@
 
   [% ELSIF message_tag == "install_fk_invalid" %]
     ERROR: There are invalid values for the [% column FILTER html %] column in the [% table FILTER html %]
-    table. (These values do not exist in the [% foreign_table FILTER html %] table, in the 
+    table. (These values do not exist in the [% foreign_table FILTER html %] table, in the
     [%+ foreign_column FILTER html %] column.)
 
     Before continuing with checksetup, you will need to fix these values,
@@ -789,8 +783,8 @@
     to be editable by both you and the web server must be world writable, and
     other files (including the localconfig file which stores your database
     password) must be world readable. This means that _anyone_ who can obtain
-    local access to this machine can do whatever they want to your 
-    [%+ terms.Bugzilla %] installation, and is probably also able to run 
+    local access to this machine can do whatever they want to your
+    [%+ terms.Bugzilla %] installation, and is probably also able to run
     arbitrary Perl code as the user that the web server runs as.
 
     You really, really, really need to change this setting.
@@ -798,10 +792,10 @@
 
   [% ELSIF message_tag == "install_webservergroup_not_in" %]
     Warning: you have entered a value for the "webservergroup" parameter in
-    localconfig, but you are not either a) running this script as [% constants.ROOT_USER FILTER html %]; 
-    or b) a member of this group. This can cause permissions problems and 
+    localconfig, but you are not either a) running this script as [% constants.ROOT_USER FILTER html %];
+    or b) a member of this group. This can cause permissions problems and
     decreased security.  If you experience problems running [% terms.Bugzilla %]
-    scripts, log in as [% constants.ROOT_USER FILTER html %] and re-run this script, become a 
+    scripts, log in as [% constants.ROOT_USER FILTER html %] and re-run this script, become a
     member of the group, or remove the value of the "webservergroup" parameter.
 
   [% ELSIF message_tag == "install_webservergroup_windows" %]
@@ -836,7 +830,7 @@
     products you can choose from.
 
   [% ELSIF message_tag == "remaining_time_zeroed" %]
-    The [% field_descs.remaining_time FILTER html %] field has been 
+    The [% field_descs.remaining_time FILTER html %] field has been
     set to zero automatically as part of closing this [% terms.bug %]
     or moving it from one closed state to another.
 
@@ -856,21 +850,21 @@
 
   [% ELSIF message_tag == "sudo_started" %]
     [% title = "Sudo session started" %]
-      The sudo session has been started.  For the next 6 hours, or until you 
-      end the session, everything you do you do as the user you are 
+      The sudo session has been started.  For the next 6 hours, or until you
+      end the session, everything you do you do as the user you are
       impersonating ([% target FILTER html %]).
-  
+
   [% ELSIF message_tag == "sudo_ended" %]
     [% title = "Sudo session complete" %]
-      The sudo session has been ended.  From this point forward, everything you 
+      The sudo session has been ended.  From this point forward, everything you
       do you do as yourself.
 
   [% ELSIF message_tag == "series_created" %]
     [% title = "Series Created" %]
       The series <em>[% series.category FILTER html %] /
-      [%+ series.subcategory FILTER html %] / 
+      [%+ series.subcategory FILTER html %] /
       [%+ series.name FILTER html %]</em>
-      has been created. Note that you may need to wait up to 
+      has been created. Note that you may need to wait up to
       [%+ series.frequency * 2 %] days before there will be enough data for a
       chart of this series to be produced.
 
@@ -880,14 +874,6 @@
       [%+ series.subcategory FILTER html %] /
       [%+ series.name FILTER html %]</em>
       has been deleted.
-
-  [% ELSIF message_tag == "shutdown" %]
-    [% title = "$terms.Bugzilla is Down" %]
-    [% Param("shutdownhtml") %]
-    [% IF userid %]
-      <p>For security reasons, you have been logged out automatically.
-      The cookie that was remembering your login is now gone.
-    [% END %]
 
   [% ELSIF message_tag == "tag_updated" %]
     [% title = "Tag Updated" %]
@@ -908,7 +894,7 @@
     Some flags could not be set. Please check your changes.
 
   [% ELSIF message_tag == "user_match_failed" %]
-    You entered a username that did not match any known 
+    You entered a username that did not match any known
     [% terms.Bugzilla %] users, so we have instead left
     the [% match_field FILTER html %] field blank.
 

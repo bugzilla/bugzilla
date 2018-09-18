@@ -53,6 +53,9 @@ sub render {
 
     my $mdc = Log::Log4perl::MDC->get_context;
     my $fields = $mdc->{fields} // {};
+    if ($mdc->{request_id}) {
+        $fields->{request_id} = $mdc->{request_id}
+    }
     my %out = (
         EnvVersion => LOGGING_FORMAT_VERSION,
         Hostname   => $HOSTNAME,

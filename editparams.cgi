@@ -137,9 +137,6 @@ if ($action eq 'save' && $current_module) {
             }
             push(@changes, $name);
             SetParam($name, $value);
-            if (($name eq "shutdownhtml") && ($value ne "")) {
-                $vars->{'shutdown_is_active'} = 1;
-            }
             if ($name eq 'duplicate_or_move_bug_status') {
                 Bugzilla::Status::add_missing_bug_status_transitions($value);
             }

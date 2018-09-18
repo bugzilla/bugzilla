@@ -41,6 +41,8 @@ my $vars = {};
 my $user = Bugzilla->login();
 
 $cgi->redirect_search_url();
+use Bugzilla::Logging;
+DEBUG("After the redirect.");
 
 my $buffer = $cgi->query_string();
 if (length($buffer) == 0) {
@@ -102,27 +104,6 @@ my $agent = ($cgi->http('X-Moz') && $cgi->http('X-Moz') =~ /\bmicrosummary\b/);
 # otherwise validates the user's choice against the list of available formats.
 my $format = $template->get_format("list/list", scalar $cgi->param('format'),
                                    scalar $cgi->param('ctype'));
-
-# Use server push to display a "Please wait..." message for the user while
-# executing their query if their browser supports it and they are viewing
-# the bug list as HTML and they have not disabled it by adding &serverpush=0
-# to the URL.
-#
-# Server push is a Netscape 3+ hack incompatible with MSIE, Lynx, and others.
-# Even Communicator 4.51 has bugs with it, especially during page reload.
-# http://www.browsercaps.org used as source of compatible browsers.
-# Safari (WebKit) does not support it, despite a UA that says otherwise (bug 188712)
-# MSIE 5+ supports it on Mac (but not on Windows) (bug 190370)
-#
-my $serverpush =
-  $format->{'extension'} eq "html"
-    && exists $ENV{'HTTP_USER_AGENT'}
-      && $ENV{'HTTP_USER_AGENT'} =~ /Mozilla.[3-9]/
-        && (($ENV{'HTTP_USER_AGENT'} !~ /[Cc]ompatible/) || ($ENV{'HTTP_USER_AGENT'} =~ /MSIE 5.*Mac_PowerPC/))
-          && $ENV{'HTTP_USER_AGENT'} !~ /(?:WebKit|Trident|KHTML)/
-            && !$agent
-              && !defined($cgi->param('serverpush'))
-                || $cgi->param('serverpush');
 
 my $order = $cgi->param('order') || "";
 
@@ -744,24 +725,6 @@ $params->delete('limit') if $vars->{'default_limited'};
 
 # Time to use server push to display an interim message to the user until
 # the query completes and we can display the bug list.
-if ($serverpush) {
-    print $cgi->multipart_init();
-    print $cgi->multipart_start(-type => 'text/html');
-
-    # Generate and return the UI (HTML page) from the appropriate template.
-    $template->process("list/server-push.html.tmpl", $vars)
-      || ThrowTemplateError($template->error());
-
-    # Under mod_perl, flush stdout so that the page actually shows up.
-    if ($ENV{MOD_PERL}) {
-        require Apache2::RequestUtil;
-        Apache2::RequestUtil->request->rflush();
-    }
-
-    # Don't do multipart_end() until we're ready to display the replacement
-    # page, otherwise any errors that happen before then (like SQL errors)
-    # will result in a blank page being shown to the user instead of the error.
-}
 
 # Connect to the shadow database if this installation is using one to improve
 # query performance.
@@ -1141,10 +1104,3 @@ $cgi->close_standby_message($contenttype, $disposition, $disp_prefix, $format->{
 # Generate and return the UI (HTML page) from the appropriate template.
 $template->process($format->{'template'}, $vars)
   || ThrowTemplateError($template->error());
-
-
-################################################################################
-# Script Conclusion
-################################################################################
-
-print $cgi->multipart_final() if $serverpush;

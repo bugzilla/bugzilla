@@ -170,9 +170,6 @@
         dest: /usr/local/bin/cpanm
         mode: '0755'
 
-    - name: install more recent Apache2::SizeLimit
-      cpanm: name=Apache2::SizeLimit executable=/usr/local/bin/cpanm
-
     - name: 'check /opt/bmo (failure is ok)'
       shell: test -d /opt/bmo && test -f /opt/bmo/local/lib/perl5/Plack.pm
       register: opt_bmo
@@ -220,6 +217,9 @@
     - import_tasks: push.yml
     - import_tasks: email.yml
     - include_tasks: apache.yml
+      vars:
+        LAZY: 0
+    - include_tasks: hypnotoad.yml
       vars:
         LAZY: 0
     - import_tasks: devtools.yml

@@ -838,7 +838,7 @@ sub check_rate_limit {
             my $limit = join("/", @$limit);
             Bugzilla->audit("[rate_limit] action=$action, ip=$ip, limit=$limit, name=$name");
             if ($action eq 'block') {
-                Bugzilla::ModPerl::BlockIP->block_ip($ip);
+                $Bugzilla::Quantum::CGI::C->block_ip($ip);
                 ThrowUserError("rate_limit");
             }
         }
@@ -854,6 +854,7 @@ sub markdown_parser {
 
 # Per-process cleanup. Note that this is a plain subroutine, not a method,
 # so we don't have $class available.
+*cleanup = \&_cleanup;
 sub _cleanup {
     return if $^C;
 

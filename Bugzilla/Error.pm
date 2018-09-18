@@ -31,7 +31,7 @@ use Scalar::Util qw(blessed);
 sub _in_eval {
     my $in_eval = 0;
     for (my $stack = 1; my $sub = (caller($stack))[3]; $stack++) {
-        last if $sub =~ /^ModPerl/;
+        last if $sub =~ /^Bugzilla::Quantum::CGI::try/;
         $in_eval = 1 if $sub =~ /^\(eval\)/;
     }
     return $in_eval;
@@ -196,7 +196,7 @@ sub ThrowTemplateError {
 
     # mod_perl overrides exit to call die with this string
     # we never want to display this to the user
-    exit if $template_err =~ /\bModPerl::Util::exit\b/;
+    die $template_err if ref($template_err) eq 'ARRAY' && $template_err->[0] eq "EXIT\n";
 
     state $logger = Log::Log4perl->get_logger('Bugzilla.Error.Template');
     $logger->error($template_err);

@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+package Bugzilla::Quantum::SES;
 # This Source Code Form is subject to the terms of the Mozilla Public
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
@@ -7,12 +7,8 @@
 # defined by the Mozilla Public License, v. 2.0.
 
 use 5.10.1;
-use strict;
-use warnings;
+use Mojo::Base qw( Mojolicious::Controller );
 
-use lib qw(.. ../lib ../local/lib/perl5);
-
-use Bugzilla ();
 use Bugzilla::Constants qw(ERROR_MODE_DIE);
 use Bugzilla::Logging;
 use Bugzilla::Mailer qw(MessageToMTA);
@@ -22,51 +18,62 @@ use JSON::MaybeXS qw(decode_json);
 use LWP::UserAgent ();
 use Try::Tiny qw(catch try);
 
-Bugzilla->error_mode(ERROR_MODE_DIE);
-try {
-    main();
-}
-catch {
-    FATAL("Fatal error: $_");
-    respond( 500 => 'Internal Server Error' );
-};
+use Types::Standard qw( :all );
+use Type::Utils;
+use Type::Params qw( compile );
+
+my $Invocant = class_type { class => __PACKAGE__ };
 
 sub main {
-    my $message = decode_json_wrapper( Bugzilla->cgi->param('POSTDATA') ) // return;
-    my $message_type = $ENV{HTTP_X_AMZ_SNS_MESSAGE_TYPE} // '(missing)';
+    my ($self) = @_;
+    try {
+        $self->_main;
+    }
+    catch {
+        FATAL("Error in SES Handler: ", $_);
+        $self->_respond( 400 => 'Bad Request' );
+    };
+}
+
+sub _main {
+    my ($self) = @_;
+    Bugzilla->error_mode(ERROR_MODE_DIE);
+    my $message = $self->_decode_json_wrapper( $self->req->body ) // return;
+    my $message_type = $self->req->headers->header('X-Amz-SNS-Message-Type') // '(missing)';
 
     if ( $message_type eq 'SubscriptionConfirmation' ) {
-        confirm_subscription($message);
+        $self->_confirm_subscription($message);
     }
 
     elsif ( $message_type eq 'Notification' ) {
-        my $notification = decode_json_wrapper( $message->{Message} ) // return;
+        my $notification = $self->_decode_json_wrapper( $message->{Message} ) // return;
         unless (
             # https://docs.aws.amazon.com/ses/latest/DeveloperGuide/event-publishing-retrieving-sns-contents.html
-            handle_notification( $notification, 'eventType' )
+            $self->_handle_notification( $notification, 'eventType' )
 
             # https://docs.aws.amazon.com/ses/latest/DeveloperGuide/notification-contents.html
-            || handle_notification( $notification, 'notificationType' )
+            || $self->_handle_notification( $notification, 'notificationType' )
             )
         {
             WARN('Failed to find notification type');
-            respond( 400 => 'Bad Request' );
+            $self->_respond( 400 => 'Bad Request' );
         }
     }
 
     else {
         WARN("Unsupported message-type: $message_type");
-        respond( 200 => 'OK' );
+        $self->_respond( 200 => 'OK' );
     }
 }
 
-sub confirm_subscription {
-    my ($message) = @_;
+sub _confirm_subscription {
+    state $check = compile($Invocant, Dict[SubscribeURL => Str, slurpy Any]);
+    my ($self, $message) = $check->(@_);
 
     my $subscribe_url = $message->{SubscribeURL};
     if ( !$subscribe_url ) {
         WARN('Bad SubscriptionConfirmation request: missing SubscribeURL');
-        respond( 400 => 'Bad Request' );
+        $self->_respond( 400 => 'Bad Request' );
         return;
     }
 
@@ -74,15 +81,24 @@ sub confirm_subscription {
     my $res = $ua->get( $message->{SubscribeURL} );
     if ( !$res->is_success ) {
         WARN( 'Bad response from SubscribeURL: ' . $res->status_line );
-        respond( 400 => 'Bad Request' );
+        $self->_respond( 400 => 'Bad Request' );
         return;
     }
 
-    respond( 200 => 'OK' );
+    $self->_respond( 200 => 'OK' );
 }
 
-sub handle_notification {
-    my ( $notification, $type_field ) = @_;
+my $NotificationType = Enum [qw( Bounce Complaint )];
+my $TypeField        = Enum [qw(eventType notificationType)];
+my $Notification = Dict [
+    eventType        => Optional [$NotificationType],
+    notificationType => Optional [$NotificationType],
+    slurpy Any,
+];
+
+sub _handle_notification {
+    state $check = compile($Invocant, $Notification, $TypeField );
+    my ( $self, $notification, $type_field ) = $check->(@_);
 
     if ( !exists $notification->{$type_field} ) {
         return 0;
@@ -90,20 +106,40 @@ sub handle_notification {
     my $type = $notification->{$type_field};
 
     if ( $type eq 'Bounce' ) {
-        process_bounce($notification);
+        $self->_process_bounce($notification);
     }
     elsif ( $type eq 'Complaint' ) {
-        process_complaint($notification);
+        $self->_process_complaint($notification);
     }
     else {
         WARN("Unsupported notification-type: $type");
-        respond( 200 => 'OK' );
+        $self->_respond( 200 => 'OK' );
     }
     return 1;
 }
 
-sub process_bounce {
-    my ($notification) = @_;
+my $BouncedRecipients = ArrayRef[
+    Dict[
+       emailAddress   => Str,
+       action         => Str,
+       diagnosticCode => Str,
+       slurpy Any,
+    ],
+];
+my $BounceNotification = Dict [
+    bounce => Dict [
+        bouncedRecipients => $BouncedRecipients,
+        reportingMTA      => Str,
+        bounceSubType     => Str,
+        bounceType        => Str,
+        slurpy Any,
+    ],
+    slurpy Any,
+];
+
+sub _process_bounce {
+    state $check = compile($Invocant, $BounceNotification);
+    my ($self, $notification) = $check->(@_);
 
     # disable each account that is bouncing
     foreach my $recipient ( @{ $notification->{bounce}->{bouncedRecipients} } ) {
@@ -140,13 +176,22 @@ sub process_bounce {
         }
     }
 
-    respond( 200 => 'OK' );
+    $self->_respond( 200 => 'OK' );
 }
 
-sub process_complaint {
+my $ComplainedRecipients = ArrayRef[Dict[ emailAddress => Str, slurpy Any ]];
+my $ComplaintNotification = Dict[
+    complaint => Dict [
+        complainedRecipients => $ComplainedRecipients,
+        complaintFeedbackType => Str,
+        slurpy Any,
+    ],
+    slurpy Any,
+];
 
-    # email notification to bugzilla admin
-    my ($notification) = @_;
+sub _process_complaint {
+    state $check = compile($Invocant, $ComplaintNotification);
+    my ($self, $notification) = $check->(@_);
     my $template       = Bugzilla->template_inner();
     my $json           = JSON::MaybeXS->new(
         pretty    => 1,
@@ -170,31 +215,24 @@ sub process_complaint {
         MessageToMTA($message);
     }
 
-    respond( 200 => 'OK' );
+    $self->_respond( 200 => 'OK' );
 }
 
-sub respond {
-    my ( $code, $message ) = @_;
-    print Bugzilla->cgi->header( -status => "$code $message" );
-
-    # apache will generate non-200 response pages for us
-    say html_quote($message) if $code == 200;
+sub _respond {
+    my ( $self, $code, $message ) = @_;
+    $self->render(text => "$message\n", status => $code);
 }
 
-sub decode_json_wrapper {
-    my ($json) = @_;
+sub _decode_json_wrapper {
+    state $check = compile($Invocant, Str);
+    my ($self, $json) = $check->(@_);
     my $result;
-    if ( !defined $json ) {
-        WARN( 'Missing JSON from ' . remote_ip() );
-        respond( 400 => 'Bad Request' );
-        return undef;
-    }
     my $ok = try {
         $result = decode_json($json);
     }
     catch {
-        WARN( 'Malformed JSON from ' . remote_ip() );
-        respond( 400 => 'Bad Request' );
+        WARN( 'Malformed JSON from ' . $self->tx->remote_address );
+        $self->_respond( 400 => 'Bad Request' );
         return undef;
     };
     return $ok ? $result : undef;
@@ -212,3 +250,5 @@ sub ua {
     }
     return $ua;
 }
+
+1;

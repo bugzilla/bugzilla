@@ -32,10 +32,10 @@ if ($sel->is_text_present("My bugs from QA_Selenium")) {
 # Just in case the test failed before completion previously, reset the CANEDIT bit.
 go_to_admin($sel);
 $sel->click_ok("link=Groups");
-$sel->wait_for_page_to_load_ok(WAIT_TIME);
+check_page_load($sel, WAIT_TIME, q{http://HOSTNAME:8000/bmo/editgroups.cgi});
 $sel->title_is("Edit Groups");
 $sel->click_ok("link=Master");
-$sel->wait_for_page_to_load_ok(WAIT_TIME);
+check_page_load($sel, WAIT_TIME, q{http://HOSTNAME:8000/bmo/editgroups.cgi?action=changeform&group=26});
 $sel->title_is("Change Group: Master");
 my $group_url = $sel->get_location();
 $group_url =~ /group=(\d+)$/;
@@ -52,7 +52,7 @@ $sel->select_ok("bug_severity", "label=critical");
 $sel->type_ok("short_desc", "Test bug editing");
 $sel->type_ok("comment", "ploc");
 $sel->click_ok("commit");
-$sel->wait_for_page_to_load_ok(WAIT_TIME);
+check_page_load($sel, WAIT_TIME, qq{http://HOSTNAME:8000/bmo/show_bug.cgi?id=__BUG_ID__});
 my $bug1_id = $sel->get_value('//input[@name="id" and @type="hidden"]');
 $sel->is_text_present_ok('has been added to the database', "Bug $bug1_id created");
 
@@ -67,28 +67,28 @@ $sel->type_ok("status_whiteboard", "[Selenium was here]");
 $sel->type_ok("comment", "new comment from me :)");
 $sel->select_ok("bug_status", "label=RESOLVED");
 $sel->click_ok("commit");
-$sel->wait_for_page_to_load_ok(WAIT_TIME);
+check_page_load($sel, WAIT_TIME, qq{http://HOSTNAME:8000/bmo/show_bug.cgi?id=$bug1_id});
 $sel->is_text_present_ok("Changes submitted for bug $bug1_id");
 
 # Now move the bug into another product, which has a mandatory group.
 
 $sel->click_ok("link=bug $bug1_id");
-$sel->wait_for_page_to_load_ok(WAIT_TIME);
+check_page_load($sel, WAIT_TIME, qq{http://HOSTNAME:8000/bmo/show_bug.cgi?id=$bug1_id});
 $sel->title_like(qr/^$bug1_id /);
 $sel->select_ok("product", "label=QA-Selenium-TEST");
 $sel->type_ok("comment", "moving to QA-Selenium-TEST");
 $sel->click_ok("commit");
-$sel->wait_for_page_to_load_ok(WAIT_TIME);
+check_page_load($sel, WAIT_TIME, q{http://HOSTNAME:8000/bmo/process_bug.cgi});
 $sel->title_is("Verify New Product Details...");
 $sel->select_ok("component", "label=QA-Selenium-TEST");
 $sel->is_element_present_ok('//input[@type="checkbox" and @name="groups" and @value="QA-Selenium-TEST"]');
 ok(!$sel->is_editable('//input[@type="checkbox" and @name="groups" and @value="QA-Selenium-TEST"]'), "QA-Selenium-TEST group not editable");
 $sel->is_checked_ok('//input[@type="checkbox" and @name="groups" and @value="QA-Selenium-TEST"]', "QA-Selenium-TEST group is selected");
 $sel->click_ok("change_product");
-$sel->wait_for_page_to_load_ok(WAIT_TIME);
+check_page_load($sel, WAIT_TIME, qq{http://HOSTNAME:8000/bmo/show_bug.cgi?id=$bug1_id});
 $sel->is_text_present_ok("Changes submitted for bug $bug1_id");
 $sel->click_ok("link=bug $bug1_id");
-$sel->wait_for_page_to_load_ok(WAIT_TIME);
+check_page_load($sel, WAIT_TIME, qq{http://HOSTNAME:8000/bmo/show_bug.cgi?id=$bug1_id});
 $sel->title_like(qr/^$bug1_id /);
 $sel->select_ok("bug_severity", "label=normal");
 $sel->select_ok("priority", "label=High");
@@ -101,14 +101,14 @@ $sel->type_ok("comment", "Unchecking the reporter_accessible checkbox");
 $sel->click_ok("reporter_accessible");
 $sel->select_ok("bug_status", "label=VERIFIED");
 $sel->click_ok("commit");
-$sel->wait_for_page_to_load_ok(WAIT_TIME);
+check_page_load($sel, WAIT_TIME, qq{http://HOSTNAME:8000/bmo/show_bug.cgi?id=$bug1_id});
 $sel->is_text_present_ok("Changes submitted for bug $bug1_id");
 $sel->click_ok("link=bug $bug1_id");
-$sel->wait_for_page_to_load_ok(WAIT_TIME);
+check_page_load($sel, WAIT_TIME, qq{http://HOSTNAME:8000/bmo/show_bug.cgi?id=$bug1_id});
 $sel->title_like(qr/^$bug1_id /);
 $sel->type_ok("comment", "I am the reporter, but I can see the bug anyway as I belong to the mandatory group");
 $sel->click_ok("commit");
-$sel->wait_for_page_to_load_ok(WAIT_TIME);
+check_page_load($sel, WAIT_TIME, qq{http://HOSTNAME:8000/bmo/show_bug.cgi?id=$bug1_id});
 $sel->is_text_present_ok("Changes submitted for bug $bug1_id");
 logout($sel);
 
@@ -125,16 +125,16 @@ $sel->click_ok("bz_assignee_edit_action");
 $sel->type_ok("assigned_to", $config->{admin_user_login});
 $sel->type_ok("comment", "I have editbugs privs. Taking!");
 $sel->click_ok("commit");
-$sel->wait_for_page_to_load_ok(WAIT_TIME);
+check_page_load($sel, WAIT_TIME, qq{http://HOSTNAME:8000/bmo/show_bug.cgi?id=$bug1_id});
 $sel->is_text_present_ok("Changes submitted for bug $bug1_id");
 
 $sel->click_ok("link=bug $bug1_id");
-$sel->wait_for_page_to_load_ok(WAIT_TIME);
+check_page_load($sel, WAIT_TIME, qq{http://HOSTNAME:8000/bmo/show_bug.cgi?id=$bug1_id});
 $sel->title_like(qr/^$bug1_id /);
 $sel->click_ok("cc_edit_area_showhide");
 $sel->type_ok("newcc", $config->{unprivileged_user_login});
 $sel->click_ok("commit");
-$sel->wait_for_page_to_load_ok(WAIT_TIME);
+check_page_load($sel, WAIT_TIME, qq{http://HOSTNAME:8000/bmo/show_bug.cgi?id=$bug1_id});
 $sel->is_text_present_ok("Changes submitted for bug $bug1_id");
 logout($sel);
 
@@ -153,7 +153,7 @@ go_to_bug($sel, $bug1_id);
 $sel->click_ok("cclist_accessible");
 $sel->type_ok("comment", "I am allowed to turn off cclist_accessible despite not being in the mandatory group");
 $sel->click_ok("commit");
-$sel->wait_for_page_to_load_ok(WAIT_TIME);
+check_page_load($sel, WAIT_TIME, qq{http://HOSTNAME:8000/bmo/show_bug.cgi?id=$bug1_id});
 $sel->is_text_present_ok("Changes submitted for bug $bug1_id");
 logout($sel);
 
@@ -162,7 +162,7 @@ logout($sel);
 log_in($sel, $config, 'unprivileged');
 $sel->type_ok("quicksearch_top", $bug1_id);
 $sel->submit("header-search");
-$sel->wait_for_page_to_load_ok(WAIT_TIME);
+check_page_load($sel, WAIT_TIME, qq{http://HOSTNAME:8000/bmo/show_bug.cgi?id=$bug1_id});
 $sel->title_is("Access Denied");
 $sel->is_text_present_ok("You are not authorized to access bug $bug1_id");
 logout($sel);
@@ -178,7 +178,7 @@ $sel->click_ok("set_default_assignee");
 $sel->uncheck_ok("set_default_assignee");
 $sel->type_ok("comment", "-> Moving back to Testproduct.");
 $sel->click_ok("commit");
-$sel->wait_for_page_to_load_ok(WAIT_TIME);
+check_page_load($sel, WAIT_TIME, q{http://HOSTNAME:8000/bmo/process_bug.cgi});
 $sel->title_is("Verify New Product Details...");
 $sel->select_ok("component", "label=TestComponent");
 $sel->is_text_present_ok("These groups are not legal for the 'TestProduct' product or you are not allowed to restrict bugs to these groups");
@@ -189,15 +189,15 @@ $sel->is_element_present_ok('//input[@type="checkbox" and @name="groups" and @va
 $sel->is_editable_ok('//input[@type="checkbox" and @name="groups" and @value="Master"]', "Master group is editable");
 ok(!$sel->is_checked('//input[@type="checkbox" and @name="groups" and @value="Master"]'), "Master group not selected by default");
 $sel->click_ok("change_product");
-$sel->wait_for_page_to_load_ok(WAIT_TIME);
+check_page_load($sel, WAIT_TIME, qq{http://HOSTNAME:8000/bmo/show_bug.cgi?id=$bug1_id});
 $sel->is_text_present_ok("Changes submitted for bug $bug1_id");
 $sel->click_ok("link=bug $bug1_id");
-$sel->wait_for_page_to_load_ok(WAIT_TIME);
+check_page_load($sel, WAIT_TIME, qq{http://HOSTNAME:8000/bmo/show_bug.cgi?id=$bug1_id});
 $sel->title_like(qr/^$bug1_id /);
 $sel->click_ok("cclist_accessible");
 $sel->type_ok("comment", "I am allowed to turn off cclist_accessible despite not being in the mandatory group");
 $sel->click_ok("commit");
-$sel->wait_for_page_to_load_ok(WAIT_TIME);
+check_page_load($sel, WAIT_TIME, qq{http://HOSTNAME:8000/bmo/show_bug.cgi?id=$bug1_id});
 $sel->is_text_present_ok("Changes submitted for bug $bug1_id");
 logout($sel);
 
@@ -216,7 +216,7 @@ $sel->click_ok("cc_edit_area_showhide");
 $sel->add_selection_ok("cc", "label=" . $config->{admin_user_login});
 $sel->click_ok("removecc");
 $sel->click_ok("commit");
-$sel->wait_for_page_to_load_ok(WAIT_TIME);
+check_page_load($sel, WAIT_TIME, qq{http://HOSTNAME:8000/bmo/show_bug.cgi?id=$bug1_id});
 $sel->is_text_present_ok("Changes submitted for bug $bug1_id");
 logout($sel);
 
@@ -225,11 +225,11 @@ logout($sel);
 log_in($sel, $config, 'admin');
 edit_product($sel, "TestProduct");
 $sel->click_ok("link=Edit Group Access Controls:");
-$sel->wait_for_page_to_load_ok(WAIT_TIME);
+check_page_load($sel, WAIT_TIME, q{http://HOSTNAME:8000/bmo/editproducts.cgi?action=editgroupcontrols&product=TestProduct});
 $sel->title_is("Edit Group Controls for TestProduct");
 $sel->check_ok("canedit_$master_gid");
 $sel->click_ok("submit");
-$sel->wait_for_page_to_load_ok(WAIT_TIME);
+check_page_load($sel, WAIT_TIME, q{http://HOSTNAME:8000/bmo/editproducts.cgi});
 $sel->title_is("Update group access controls for TestProduct");
 
 # The user is in the master group, so he can comment.
@@ -237,7 +237,7 @@ $sel->title_is("Update group access controls for TestProduct");
 go_to_bug($sel, $bug1_id);
 $sel->type_ok("comment", "Do nothing except adding a comment...");
 $sel->click_ok("commit");
-$sel->wait_for_page_to_load_ok(WAIT_TIME);
+check_page_load($sel, WAIT_TIME, qq{http://HOSTNAME:8000/bmo/show_bug.cgi?id=$bug1_id});
 $sel->is_text_present_ok("Changes submitted for bug $bug1_id");
 logout($sel);
 
@@ -247,7 +247,7 @@ log_in($sel, $config, 'QA_Selenium_TEST');
 go_to_bug($sel, $bug1_id);
 $sel->type_ok("comment", "Just a comment too...");
 $sel->click_ok("commit");
-$sel->wait_for_page_to_load_ok(WAIT_TIME);
+check_page_load($sel, WAIT_TIME, q{http://HOSTNAME:8000/bmo/process_bug.cgi});
 $sel->title_is("Product Edit Access Denied");
 $sel->is_text_present_ok("You are not permitted to edit bugs in product TestProduct.");
 logout($sel);
@@ -256,10 +256,12 @@ logout($sel);
 
 log_in($sel, $config, 'admin');
 open_advanced_search_page($sel);
+screenshot_page($sel, '/app/artifacts/line259.png');
 $sel->remove_all_selections_ok("product");
 $sel->add_selection_ok("product", "TestProduct");
 $sel->remove_all_selections_ok("bug_status");
 $sel->remove_all_selections_ok("resolution");
+screenshot_page($sel, '/app/artifacts/line264.png');
 $sel->is_checked_ok("emailassigned_to1");
 $sel->select_ok("emailtype1", "label=is");
 $sel->type_ok("email1", $config->{admin_user_login});
@@ -268,21 +270,22 @@ $sel->check_ok("emailqa_contact2");
 $sel->check_ok("emailcc2");
 $sel->select_ok("emailtype2", "label=is");
 $sel->type_ok("email2", $config->{QA_Selenium_TEST_user_login});
+screenshot_page($sel, '/app/artifacts/line271.png');
 $sel->click_ok("Search");
-$sel->wait_for_page_to_load_ok(WAIT_TIME);
+check_page_load($sel, WAIT_TIME, q{http://HOSTNAME:8000/bmo/buglist.cgi?emailreporter2=1&emailtype2=exact&order=Importance&list_id=15&emailtype1=exact&emailcc2=1&query_format=advanced&emailassigned_to1=1&emailqa_contact2=1&email2=QA-Selenium-TEST%40mozilla.test&email1=admin%40mozilla.test&emailassigned_to2=1&product=TestProduct});
 $sel->title_is("Bug List");
-
+screenshot_page($sel, '/app/artifacts/line275.png');
 $sel->is_text_present_ok("One bug found.");
 $sel->type_ok("save_newqueryname", "My bugs from QA_Selenium");
 $sel->click_ok("remember");
-$sel->wait_for_page_to_load_ok(WAIT_TIME);
+check_page_load($sel, WAIT_TIME, q{http://HOSTNAME:8000/bmo/buglist.cgi?newquery=email1%3Dadmin%2540mozilla.test%26email2%3DQA-Selenium-TEST%2540mozilla.test%26emailassigned_to1%3D1%26emailassigned_to2%3D1%26emailcc2%3D1%26emailqa_contact2%3D1%26emailreporter2%3D1%26emailtype1%3Dexact%26emailtype2%3Dexact%26list_id%3D15%26product%3DTestProduct%26query_format%3Dadvanced%26order%3Dpriority%252Cbug_severity&cmdtype=doit&remtype=asnamed&token=1531926552-dc69995d79c786af046436ec6717000b&newqueryname=My%20bugs%20from%20QA_Selenium&list_id=16});
 $sel->title_is("Search created");
 $sel->is_text_present_ok("OK, you have a new search named My bugs from QA_Selenium.");
 $sel->click_ok("link=My bugs from QA_Selenium");
-$sel->wait_for_page_to_load_ok(WAIT_TIME);
+check_page_load($sel, WAIT_TIME, q{http://HOSTNAME:8000/bmo/buglist.cgi?cmdtype=runnamed&namedcmd=My%20bugs%20from%20QA_Selenium&list_id=17});
 $sel->title_is("Bug List: My bugs from QA_Selenium");
 $sel->click_ok("long_format");
-$sel->wait_for_page_to_load_ok(WAIT_TIME);
+check_page_load($sel, WAIT_TIME, q{http://HOSTNAME:8000/bmo/show_bug.cgi});
 $sel->title_is("Full Text Bug Listing");
 $sel->is_text_present_ok("Bug $bug1_id");
 $sel->is_text_present_ok("Status: CONFIRMED");
@@ -303,25 +306,25 @@ $sel->type_ok("short_desc", "New bug from me");
 # We turned on the CANEDIT bit for TestProduct.
 $sel->type_ok("comment", "I can enter a new bug, but not edit it, right?");
 $sel->click_ok("commit");
-$sel->wait_for_page_to_load_ok(WAIT_TIME);
+check_page_load($sel, WAIT_TIME, qq{http://HOSTNAME:8000/bmo/show_bug.cgi?id=__BUG_ID__});
 my $bug2_id = $sel->get_value('//input[@name="id" and @type="hidden"]');
 $sel->is_text_present_ok('has been added to the database', "Bug $bug2_id created");
 
 # Clicking the "Back" button and resubmitting the form again should trigger a suspicous action error.
 
 $sel->go_back_ok();
-$sel->wait_for_page_to_load_ok(WAIT_TIME);
+check_page_load($sel, WAIT_TIME, q{http://HOSTNAME:8000/bmo/enter_bug.cgi?product=TestProduct&format=__default__});
 $sel->title_is("Enter Bug: TestProduct");
 $sel->click_ok("commit");
-$sel->wait_for_page_to_load_ok(WAIT_TIME);
+check_page_load($sel, WAIT_TIME, q{http://HOSTNAME:8000/bmo/post_bug.cgi});
 $sel->title_is("Suspicious Action");
 $sel->is_text_present_ok("you have no valid token for the create_bug action");
 $sel->click_ok('//input[@value="Confirm Changes"]');
-$sel->wait_for_page_to_load_ok(WAIT_TIME);
+check_page_load($sel, WAIT_TIME, q{http://HOSTNAME:8000/bmo/show_bug.cgi?id=15});
 $sel->is_text_present_ok('has been added to the database', 'Bug created');
 $sel->type_ok("comment", "New comment not allowed");
 $sel->click_ok("commit");
-$sel->wait_for_page_to_load_ok(WAIT_TIME);
+check_page_load($sel, WAIT_TIME, q{http://HOSTNAME:8000/bmo/process_bug.cgi});
 $sel->title_is("Product Edit Access Denied");
 $sel->is_text_present_ok("You are not permitted to edit bugs in product TestProduct.");
 logout($sel);
@@ -334,42 +337,46 @@ $sel->click_ok("bz_assignee_edit_action");
 $sel->type_ok("assigned_to", $config->{admin_user_login});
 $sel->type_ok("comment", "Taking!");
 $sel->click_ok("commit");
-$sel->wait_for_page_to_load_ok(WAIT_TIME);
+check_page_load($sel, WAIT_TIME, qq{http://HOSTNAME:8000/bmo/show_bug.cgi?id=$bug2_id});
 $sel->is_text_present_ok("Changes submitted for bug $bug2_id");
 
 # Test mass-change.
 
 $sel->click_ok("link=My bugs from QA_Selenium");
-$sel->wait_for_page_to_load_ok(WAIT_TIME);
+screenshot_page($sel, '/app/artifacts/line344.png');
+check_page_load($sel, WAIT_TIME, q{http://HOSTNAME:8000/bmo/buglist.cgi?cmdtype=runnamed&namedcmd=My%20bugs%20from%20QA_Selenium&list_id=19});
+screenshot_page($sel, '/app/artifacts/line346.png');
 $sel->title_is("Bug List: My bugs from QA_Selenium");
+screenshot_page($sel, '/app/artifacts/line348.png');
 $sel->is_text_present_ok("2 bugs found");
+screenshot_page($sel, '/app/artifacts/line350.png');
 $sel->click_ok("link=Change Several Bugs at Once");
-$sel->wait_for_page_to_load_ok(WAIT_TIME);
+check_page_load($sel, WAIT_TIME, q{http://HOSTNAME:8000/bmo/buglist.cgi?email1=admin%40mozilla.test&email2=QA-Selenium-TEST%40mozilla.test&emailassigned_to1=1&emailassigned_to2=1&emailcc2=1&emailqa_contact2=1&emailreporter2=1&emailtype1=exact&emailtype2=exact&product=TestProduct&query_format=advanced&order=priority%2Cbug_severity&tweak=1&list_id=20});
 $sel->title_is("Bug List");
 $sel->click_ok("check_all");
 $sel->type_ok("comment", 'Mass change"');
 $sel->select_ok("bug_status", "label=RESOLVED");
 $sel->select_ok("resolution", "label=WORKSFORME");
 $sel->click_ok("commit");
-$sel->wait_for_page_to_load_ok(WAIT_TIME);
+check_page_load($sel, WAIT_TIME, q{http://HOSTNAME:8000/bmo/process_bug.cgi});
 $sel->title_is("Bugs processed");
 
 $sel->click_ok("link=bug $bug1_id");
-$sel->wait_for_page_to_load_ok(WAIT_TIME);
+check_page_load($sel, WAIT_TIME, qq{http://HOSTNAME:8000/bmo/show_bug.cgi?id=$bug1_id});
 $sel->title_like(qr/$bug1_id /);
 $sel->selected_label_is("resolution", "WORKSFORME");
 $sel->select_ok("resolution", "label=INVALID");
 $sel->click_ok("commit");
-$sel->wait_for_page_to_load_ok(WAIT_TIME);
+check_page_load($sel, WAIT_TIME, qq{http://HOSTNAME:8000/bmo/show_bug.cgi?id=$bug1_id});
 $sel->is_text_present_ok("Changes submitted for bug $bug1_id");
 
 $sel->click_ok("link=bug $bug1_id");
-$sel->wait_for_page_to_load_ok(WAIT_TIME);
+check_page_load($sel, WAIT_TIME, qq{http://HOSTNAME:8000/bmo/show_bug.cgi?id=$bug1_id});
 $sel->title_like(qr/$bug1_id /);
 $sel->selected_label_is("resolution", "INVALID");
 
 $sel->click_ok("link=History");
-$sel->wait_for_page_to_load_ok(WAIT_TIME);
+check_page_load($sel, WAIT_TIME, qq{http://HOSTNAME:8000/bmo/show_activity.cgi?id=$bug1_id});
 $sel->title_is("Changes made to bug $bug1_id");
 $sel->is_text_present_ok("URL foo.cgi?action=bar");
 $sel->is_text_present_ok("Severity critical blocker");
@@ -431,10 +438,10 @@ foreach my $params (["no_token_single_bug", ""], ["invalid_token_single_bug", "&
     $sel->title_is("Suspicious Action");
     $sel->is_text_present_ok($token ? "an invalid token" : "web browser directly");
     $sel->click_ok("confirm");
-    $sel->wait_for_page_to_load_ok(WAIT_TIME);
+    check_page_load($sel, WAIT_TIME, qq{http://HOSTNAME:8000/bmo/show_bug.cgi?id=$bug1_id});
     $sel->is_text_present_ok("Changes submitted for bug $bug1_id");
     $sel->click_ok("link=bug $bug1_id");
-    $sel->wait_for_page_to_load_ok(WAIT_TIME);
+    check_page_load($sel, WAIT_TIME, qq{http://HOSTNAME:8000/bmo/show_bug.cgi?id=$bug1_id});
     $sel->title_like(qr/^$bug1_id /);
     $sel->is_text_present_ok($comment);
 }
@@ -446,16 +453,16 @@ foreach my $params (["no_token_mass_change", ""], ["invalid_token_mass_change", 
     $sel->title_is("Suspicious Action");
     $sel->is_text_present_ok("no valid token for the buglist_mass_change action");
     $sel->click_ok("confirm");
-    $sel->wait_for_page_to_load_ok(WAIT_TIME);
+    check_page_load($sel, WAIT_TIME, q{http://HOSTNAME:8000/bmo/process_bug.cgi});
     $sel->title_is("Bugs processed");
     foreach my $bug_id ($bug1_id, $bug2_id) {
         $sel->click_ok("link=bug $bug_id");
-        $sel->wait_for_page_to_load_ok(WAIT_TIME);
+        check_page_load($sel, WAIT_TIME, qq{http://HOSTNAME:8000/bmo/show_bug.cgi?id=$bug_id});
         $sel->title_like(qr/^$bug_id /);
         $sel->is_text_present_ok($comment);
         next if $bug_id == $bug2_id;
         $sel->go_back_ok();
-        $sel->wait_for_page_to_load_ok(WAIT_TIME);
+        check_page_load($sel, WAIT_TIME, q{http://HOSTNAME:8000/bmo/process_bug.cgi});
         $sel->title_is("Bugs processed");
     }
 }
@@ -463,26 +470,26 @@ foreach my $params (["no_token_mass_change", ""], ["invalid_token_mass_change", 
 # Now move these bugs out of our radar.
 
 $sel->click_ok("link=My bugs from QA_Selenium");
-$sel->wait_for_page_to_load_ok(WAIT_TIME);
+check_page_load($sel, WAIT_TIME, q{http://HOSTNAME:8000/bmo/buglist.cgi?cmdtype=runnamed&namedcmd=My%20bugs%20from%20QA_Selenium&list_id=21});
 $sel->title_is("Bug List: My bugs from QA_Selenium");
 $sel->is_text_present_ok("2 bugs found");
 $sel->click_ok("link=Change Several Bugs at Once");
-$sel->wait_for_page_to_load_ok(WAIT_TIME);
+check_page_load($sel, WAIT_TIME, q{http://HOSTNAME:8000/bmo/buglist.cgi?email1=admin%40mozilla.test&email2=QA-Selenium-TEST%40mozilla.test&emailassigned_to1=1&emailassigned_to2=1&emailcc2=1&emailqa_contact2=1&emailreporter2=1&emailtype1=exact&emailtype2=exact&product=TestProduct&query_format=advanced&order=priority%2Cbug_severity&tweak=1&list_id=22});
 $sel->title_is("Bug List");
 $sel->click_ok("check_all");
 $sel->type_ok("comment", "Reassigning to the reporter");
 $sel->type_ok("assigned_to", $config->{QA_Selenium_TEST_user_login});
 $sel->click_ok("commit");
-$sel->wait_for_page_to_load_ok(WAIT_TIME);
+check_page_load($sel, WAIT_TIME, q{http://HOSTNAME:8000/bmo/process_bug.cgi});
 $sel->title_is("Bugs processed");
 
 # Now delete the saved search.
 
 $sel->click_ok("link=My bugs from QA_Selenium");
-$sel->wait_for_page_to_load_ok(WAIT_TIME);
+check_page_load($sel, WAIT_TIME, q{http://HOSTNAME:8000/bmo/buglist.cgi?cmdtype=runnamed&namedcmd=My%20bugs%20from%20QA_Selenium&list_id=23});
 $sel->title_is("Bug List: My bugs from QA_Selenium");
 $sel->click_ok("link=Forget Search 'My bugs from QA_Selenium'");
-$sel->wait_for_page_to_load_ok(WAIT_TIME);
+check_page_load($sel, WAIT_TIME, q{http://HOSTNAME:8000/bmo/buglist.cgi?cmdtype=dorem&remaction=forget&namedcmd=My%20bugs%20from%20QA_Selenium&token=1531926582-f228fa8ebc2f2b3970f2a791e54534ec&list_id=24});
 $sel->title_is("Search is gone");
 $sel->is_text_present_ok("OK, the My bugs from QA_Selenium search is gone");
 
@@ -495,10 +502,10 @@ sub clear_canedit_on_testproduct {
 
     edit_product($sel, "TestProduct");
     $sel->click_ok("link=Edit Group Access Controls:");
-    $sel->wait_for_page_to_load_ok(WAIT_TIME);
+check_page_load($sel, WAIT_TIME, q{http://HOSTNAME:8000/bmo/editproducts.cgi?action=editgroupcontrols&product=TestProduct});
     $sel->title_is("Edit Group Controls for TestProduct");
     $sel->uncheck_ok("canedit_$master_gid");
     $sel->click_ok("submit");
-    $sel->wait_for_page_to_load_ok(WAIT_TIME);
+check_page_load($sel, WAIT_TIME, q{http://HOSTNAME:8000/bmo/editproducts.cgi});
     $sel->title_is("Update group access controls for TestProduct");
 }

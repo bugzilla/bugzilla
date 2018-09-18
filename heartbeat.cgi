@@ -29,7 +29,6 @@ my $ok = eval {
 
     die "database not available"            unless $database_ok;
     die "memcached server(s) not available" unless $memcached_ok;
-    die "mod_perl not configured?"          unless $ENV{MOD_PERL};
     if ($dbh->isa('Bugzilla::DB::Mysql') && Bugzilla->params->{utf8} eq 'utf8mb4') {
         my $mysql_var = $dbh->selectall_hashref(q{SHOW VARIABLES LIKE 'character_set%'}, 'Variable_name');
         foreach my $name (qw( character_set_client character_set_connection character_set_database )) {
@@ -46,10 +45,3 @@ FATAL("heartbeat error: $@") if !$ok && $@;
 my $cgi = Bugzilla->cgi;
 print $cgi->header(-type => 'text/plain', -status => $ok ? '200 OK' : '500 Internal Server Error');
 print $ok ? "Bugzilla OK\n" : "Bugzilla NOT OK\n";
-
-if ($ENV{MOD_PERL}) {
-    my $r = $cgi->r;
-    # doing this supresses the error document, but does not change the http response code.
-    $r->rflush;
-    $r->status(200);
-}

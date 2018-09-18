@@ -25,6 +25,8 @@ use Sys::Syslog qw(:DEFAULT);
 use constant MAX_KEY_LENGTH => 250;
 use constant RATE_LIMIT_PREFIX => "rate:";
 
+*new = \&_new;
+
 sub _new {
     my $invocant = shift;
     my $class = ref($invocant) || $invocant;

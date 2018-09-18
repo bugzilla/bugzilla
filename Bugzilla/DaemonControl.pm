@@ -23,7 +23,8 @@ use IO::Async::Protocol::LineStream;
 use IO::Async::Signal;
 use IO::Socket;
 use LWP::Simple qw(get);
-use POSIX qw(setsid WEXITSTATUS);
+use JSON::MaybeXS qw(encode_json);
+use POSIX qw(WEXITSTATUS);
 
 use base qw(Exporter);
 
@@ -43,8 +44,14 @@ our %EXPORT_TAGS = (
 my $BUGZILLA_DIR  = bz_locations->{cgi_path};
 my $JOBQUEUE_BIN  = catfile( $BUGZILLA_DIR, 'jobqueue.pl' );
 my $CEREAL_BIN    = catfile( $BUGZILLA_DIR, 'scripts', 'cereal.pl' );
-my $HTTPD_BIN     = '/usr/sbin/httpd';
-my $HTTPD_CONFIG  = catfile( bz_locations->{confdir}, 'httpd.conf' );
+my $BUGZILLA_BIN  = catfile( $BUGZILLA_DIR, 'bugzilla.pl' );
+my $HYPNOTOAD_BIN = catfile( $BUGZILLA_DIR, 'local', 'bin', 'hypnotoad' );
+my @PERL5LIB      = ( $BUGZILLA_DIR, catdir($BUGZILLA_DIR, 'lib'), catdir($BUGZILLA_DIR, 'local', 'lib', 'perl5') );
+
+my %HTTP_BACKENDS = (
+    hypnotoad => [ $HYPNOTOAD_BIN, $BUGZILLA_BIN, '-f' ],
+    simple    => [ $BUGZILLA_BIN, 'daemon' ],
+);
 
 sub catch_signal {
     my ($name, @done)   = @_;
@@ -98,13 +105,12 @@ sub run_httpd {
     my $exit_f = $loop->new_future;
     my $httpd  = IO::Async::Process->new(
         code => sub {
-
-            # we have to setsid() to make a new process group
-            # or else apache will kill its parent.
-            setsid();
-            my @command = ( $HTTPD_BIN, '-DFOREGROUND', '-f' => $HTTPD_CONFIG, @args );
-            exec @command
-              or die "failed to exec $command[0] $!";
+            $ENV{BUGZILLA_HTTPD_ARGS} = encode_json(\@args);
+            $ENV{PERL5LIB} = join(':', @PERL5LIB);
+            my $backend = $ENV{HTTP_BACKEND} // 'hypnotoad';
+            my $command = $HTTP_BACKENDS{ $backend };
+            exec @$command
+              or die "failed to exec $command->[0] $!";
         },
         on_finish    => on_finish($exit_f),
         on_exception => on_exception( 'httpd', $exit_f ),

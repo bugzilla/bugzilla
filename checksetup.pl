@@ -135,7 +135,7 @@ require Bugzilla::Install::Localconfig;
 import Bugzilla::Install::Localconfig qw(update_localconfig);
 
 require Bugzilla::Install::Filesystem;
-import Bugzilla::Install::Filesystem qw(update_filesystem create_htaccess
+import Bugzilla::Install::Filesystem qw(update_filesystem
                                         fix_all_file_permissions);
 require Bugzilla::Install::DB;
 require Bugzilla::DB;
@@ -201,7 +201,6 @@ unless ($switch{'no-database'}) {
 ###########################################################################
 
 update_filesystem({ index_html => $lc_hash->{'index_html'} });
-create_htaccess() if $lc_hash->{'create_htaccess'};
 
 # Remove parameters from the params file that no longer exist in Bugzilla,
 # and set the defaults for new ones

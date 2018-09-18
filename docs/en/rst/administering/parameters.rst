@@ -28,12 +28,6 @@ utf8
     .. note:: If you turn this parameter from :paramval:`off` to :paramval:`on`,
               you must re-run :file:`checksetup.pl` immediately afterward.
 
-shutdownhtml
-    If there is any text in this field, this Bugzilla installation will
-    be completely disabled and this text will appear instead of all
-    Bugzilla pages for all users, including Admins. Used in the event
-    of site maintenance or outage situations.
-
 announcehtml
     Any text in this field will be displayed at the top of every HTML
     page in this Bugzilla installation. The text is not wrapped in any

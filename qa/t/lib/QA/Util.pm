@@ -18,6 +18,7 @@ use Sys::Hostname qw(hostname);
 use Socket qw(inet_ntoa);
 use WWW::Selenium::Util qw(server_is_running);
 use URI;
+use URI::QueryParam;
 
 # Fixes wide character warnings
 BEGIN {
@@ -50,6 +51,7 @@ use base qw(Exporter);
 
     get_selenium
     get_rpc_clients
+    check_page_load
 
     WAIT_TIME
     CHROME_MODE
@@ -394,6 +396,32 @@ sub set_parameters {
         $sel->wait_for_page_to_load_ok(WAIT_TIME);
         $sel->title_is("Parameters Updated");
     }
+}
+
+my @ANY_KEYS = qw( t token );
+
+sub check_page_load {
+    my ($sel, $wait, $expected) = @_;
+    my $expected_uri = URI->new($expected);
+    $sel->wait_for_page_to_load_ok($wait);
+    my $uri = URI->new($sel->get_location);
+
+    foreach my $u ($expected_uri, $uri) {
+        $u->host('HOSTNAME');
+        foreach my $any_key (@ANY_KEYS) {
+            if ($u->query_param($any_key)) {
+                $u->query_param($any_key => '__ANYTHING__');
+            }
+        }
+    }
+
+    if ($expected_uri->query_param('id')) {
+        if ($expected_uri->query_param('id') eq '__BUG_ID__') {
+            $uri->query_param('id' => '__BUG_ID__');
+        }
+    }
+    my ($pkg, $file, $line) = caller;
+    is($uri, $expected_uri, "checking location on $file line $line");
 }
 
 1;

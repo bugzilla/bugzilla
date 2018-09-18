@@ -14,11 +14,7 @@ use warnings;
 use Bugzilla::Logging;
 use XMLRPC::Transport::HTTP;
 use Bugzilla::WebService::Server;
-if ($ENV{MOD_PERL}) {
-    our @ISA = qw(XMLRPC::Transport::HTTP::Apache Bugzilla::WebService::Server);
-} else {
-    our @ISA = qw(XMLRPC::Transport::HTTP::CGI Bugzilla::WebService::Server);
-}
+our @ISA = qw(XMLRPC::Transport::HTTP::CGI Bugzilla::WebService::Server);
 
 use Bugzilla::WebService::Constants;
 use Bugzilla::Error;

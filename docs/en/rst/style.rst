@@ -65,7 +65,7 @@ Other block types:
    aware of.
 
 .. todo:: This is some documentation-related task that still needs doing.
-   
+
 Use both of the above block types sparingly. Consider putting the information
 in the main text, omitting it, or (if long) placing it in a subsidiary file.
 
@@ -102,9 +102,6 @@ Inline Directives
 
 * A command to type in the shell:
   :command:`command --arguments`
-
-* A parameter name:
-  :param:`shutdownhtml`
 
 * A parameter value:
   :paramval:`DB`

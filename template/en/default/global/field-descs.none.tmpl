@@ -162,13 +162,11 @@ if ( $stash->get("in_template_var") ) {
     #   database. If you want to override this for your language
     #   or your installation, just use a hook. %]
     my $bug_fields = $stash->get("bug_fields");
-    unless ( Bugzilla->params->{shutdownhtml} ) {
-        foreach my $bz_field ( values %$bug_fields ) {
-            $vars->{field_descs}{$bz_field->name} //= $bz_field->description;
-        }
-
-        $context->process("bug/field-help.none.tmpl");
+    foreach my $bz_field ( values %$bug_fields ) {
+        $vars->{field_descs}{$bz_field->name} //= $bz_field->description;
     }
+
+    $context->process("bug/field-help.none.tmpl");
 }
 [% END %]
 

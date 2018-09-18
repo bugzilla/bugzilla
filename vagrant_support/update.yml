@@ -21,3 +21,6 @@
     - include_tasks: apache.yml
       vars:
         LAZY: 1
+    - include_tasks: hypnotoad.yml
+      vars:
+        LAZY: 1

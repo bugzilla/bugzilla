@@ -12,6 +12,7 @@ use 5.10.1;
 use strict;
 use warnings;
 
+use Bugzilla::Logging;
 use Bugzilla::Template::PreloadProvider;
 use Bugzilla::Bug;
 use Bugzilla::Constants;

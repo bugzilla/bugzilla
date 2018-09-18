@@ -333,41 +333,6 @@ BMO_use_mailer_queue
   Usually configured on the MTA section of the admin interface, you may change this here for testing purposes.
   Should be 1 or 0. If 1, the job queue will be used. For testing, only set to 0 if the BMO_mail_delivery_method is None or Test.
 
-HTTPD_StartServers
-  Sets the number of child server processes created on startup.
-  As the number of processes is dynamically controlled depending on the load,
-  there is usually little reason to adjust this parameter.
-  Default: 8
-
-HTTPD_MinSpareServers
-  Sets the desired minimum number of idle child server processes. An idle
-  process is one which is not handling a request. If there are fewer than
-  MinSpareServers idle, then the parent process creates new children at a
-  maximum rate of 1 per second.
-  Default: 5
-
-HTTPD_MaxSpareServers
-  Sets the desired maximum number of idle child server processes. An idle
-  process is one which is not handling a request. If there are more than
-  MaxSpareServers idle, then the parent process will kill off the excess
-  processes.
-  Default: 20
-
-HTTPD_MaxClients
-  Sets the maximum number of child processes that will be launched to serve requests.
-  Default: 256
-
-HTTPD_ServerLimit
-  Sets the maximum configured value for MaxClients for the lifetime of the
-  Apache process.
-  Default: 256
-
-HTTPD_MaxRequestsPerChild
-  Sets the limit on the number of requests that an individual child server
-  process will handle. After MaxRequestsPerChild requests, the child process
-  will die. If MaxRequestsPerChild is 0, then the process will never expire.
-  Default: 4000
-
 USE_NYTPROF
   Write `Devel::NYTProf`_ profiles out for each requests.
   These will be named /app/data/nytprof.$host.$script.$n.$pid, where $host is

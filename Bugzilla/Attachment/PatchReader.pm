@@ -116,18 +116,9 @@ sub process_interdiff {
     $ENV{'PATH'} = $lc->{diffpath};
 
     my ($pid, $interdiff_stdout, $interdiff_stderr);
-    if ($ENV{MOD_PERL}) {
-        require Apache2::RequestUtil;
-        require Apache2::SubProcess;
-        my $request = Apache2::RequestUtil->request;
-        (undef, $interdiff_stdout, $interdiff_stderr) = $request->spawn_proc_prog(
-            $lc->{interdiffbin}, [$old_filename, $new_filename]
-        );
-    } else {
-        $interdiff_stderr = gensym;
-        my $pid = open3(gensym, $interdiff_stdout, $interdiff_stderr,
-                        $lc->{interdiffbin}, $old_filename, $new_filename);
-    }
+    $interdiff_stderr = gensym;
+    $pid = open3(gensym, $interdiff_stdout, $interdiff_stderr,
+                    $lc->{interdiffbin}, $old_filename, $new_filename);
     binmode $interdiff_stdout;
 
     # Check for errors

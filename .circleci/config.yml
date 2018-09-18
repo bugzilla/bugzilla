@@ -7,7 +7,7 @@ version: 2
 
 defaults:
   bmo_slim_image: &bmo_slim_image
-    image: mozillabteam/bmo-slim:20180801.2
+    image: mozillabteam/bmo-slim:20180809.1
     user: app
 
   mysql_image: &mysql_image
@@ -37,12 +37,6 @@ defaults:
     BMO_memcached_servers: localhost:11211
     BMO_memcached_namespace: "bugzilla:"
     BMO_urlbase: AUTOMATIC
-    HTTPD_StartServers: 1
-    HTTPD_MinSpareServers: 1
-    HTTPD_MaxSpareServers: 1
-    HTTPD_ServerLimit: 1
-    HTTPD_MaxClients: 1
-    HTTPD_MaxRequestsPerChild: 4000
 
   mysql_env: &mysql_env
     MYSQL_DATABASE: bugs

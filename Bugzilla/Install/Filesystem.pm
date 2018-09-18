@@ -41,55 +41,10 @@ use English qw(-no_match_vars $OSNAME);
 use base qw(Exporter);
 our @EXPORT = qw(
     update_filesystem
-    create_htaccess
     fix_all_file_permissions
     fix_dir_permissions
     fix_file_permissions
 );
-
-use constant HT_DEFAULT_DENY => <<'EOT';
-# nothing in this directory is retrievable unless overridden by an .htaccess
-# in a subdirectory
-deny from all
-EOT
-
-use constant HT_GRAPHS_DIR => <<'EOT';
-# Allow access to .png and .gif files.
-<FilesMatch (\.gif|\.png)$>
-  Allow from all
-</FilesMatch>
-
-# And no directory listings, either.
-Deny from all
-EOT
-
-use constant HT_WEBDOT_DIR => <<'EOT';
-# Restrict access to .dot files to the public webdot server at research.att.com
-# if research.att.com ever changes their IP, or if you use a different
-# webdot server, you'll need to edit this
-<FilesMatch \.dot$>
-  Allow from 192.20.225.0/24
-  Deny from all
-</FilesMatch>
-
-# Allow access to .png files created by a local copy of 'dot'
-<FilesMatch \.png\$>
-  Allow from all
-</FilesMatch>
-
-# And no directory listings, either.
-Deny from all
-EOT
-
-use constant HT_ASSETS_DIR => <<'EOT';
-# Allow access to .css and js files
-<FilesMatch \.(css|js)$>
-  Allow from all
-</FilesMatch>
-
-# And no directory listings, either.
-Deny from all
-EOT
 
 use constant INDEX_HTML => <<'EOT';
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
@@ -111,11 +66,6 @@ use constant HTTPD_ENV => qw(
     USE_NYTPROF
     NYTPROF_DIR
 );
-
-sub HTTPD_ENV_CONF {
-    my @env = (ENV_KEYS, HTTPD_ENV);
-    return join( "\n", map { "PerlPassEnv " . $_ } @env ) . "\n";
-}
 
 ###############
 # Permissions #
@@ -230,13 +180,13 @@ sub FILESYSTEM {
         'jobqueue-worker.pl' => { perms => OWNER_EXECUTE },
         'clean-bug-user-last-visit.pl' => { perms => WS_EXECUTE },
 
+        'bugzilla.pl'    => { perms => OWNER_EXECUTE },
         'Bugzilla.pm'    => { perms => CGI_READ },
         "$localconfig*"  => { perms => CGI_READ },
         'META.*'         => { perms => CGI_READ },
         'MYMETA.*'       => { perms => CGI_READ },
         'bugzilla.dtd'   => { perms => WS_SERVE },
         'mod_perl.pl'    => { perms => WS_SERVE },
-        '.htaccess'      => { perms => WS_SERVE },
         'cvs-update.log' => { perms => WS_SERVE },
         'scripts/sendunsentbugmail.pl' => { perms => WS_EXECUTE },
         'docs/bugzilla.ent'    => { perms => OWNER_WRITE },
@@ -427,9 +377,6 @@ sub FILESYSTEM {
         "skins/yui3.css"          => { perms     => CGI_READ,
                                        overwrite => 1,
                                        contents  => $yui3_all_css },
-        "$confdir/env.conf"       => { perms     => CGI_READ,
-                                       overwrite => 1,
-                                       contents  => \&HTTPD_ENV_CONF },
     );
 
     # Because checksetup controls the creation of index.html separately
@@ -438,54 +385,15 @@ sub FILESYSTEM {
         'index.html' => { perms => WS_SERVE, contents => INDEX_HTML }
     );
 
-    # Because checksetup controls the .htaccess creation separately
-    # by a localconfig variable, these go in a separate variable from
-    # %create_files.
-    #
-    # Note that these get WS_SERVE as their permission
-    # because they're *read* by the webserver, even though they're not
-    # actually, themselves, served.
-    my %htaccess = (
-        "$attachdir/.htaccess"       => { perms    => WS_SERVE,
-                                          contents => HT_DEFAULT_DENY },
-        "$libdir/Bugzilla/.htaccess" => { perms    => WS_SERVE,
-                                          contents => HT_DEFAULT_DENY },
-        "$extlib/.htaccess"          => { perms    => WS_SERVE,
-                                          contents => HT_DEFAULT_DENY },
-        "$templatedir/.htaccess"     => { perms    => WS_SERVE,
-                                          contents => HT_DEFAULT_DENY },
-        'contrib/.htaccess'          => { perms    => WS_SERVE,
-                                          contents => HT_DEFAULT_DENY },
-        'scripts/.htaccess'          => { perms    => WS_SERVE,
-                                          contents => HT_DEFAULT_DENY },
-        't/.htaccess'                => { perms    => WS_SERVE,
-                                          contents => HT_DEFAULT_DENY },
-        'xt/.htaccess'               => { perms    => WS_SERVE,
-                                          contents => HT_DEFAULT_DENY },
-        '.circleci/.htaccess'        => { perms    => WS_SERVE,
-                                          contents => HT_DEFAULT_DENY },
-        "$confdir/.htaccess"         => { perms    => WS_SERVE,
-                                          contents => HT_DEFAULT_DENY },
-        "$datadir/.htaccess"         => { perms    => WS_SERVE,
-                                          contents => HT_DEFAULT_DENY },
-        "$graphsdir/.htaccess"       => { perms => WS_SERVE,
-                                          contents => HT_GRAPHS_DIR },
-        "$webdotdir/.htaccess"       => { perms => WS_SERVE,
-                                          contents => HT_WEBDOT_DIR },
-        "$assetsdir/.htaccess"       => { perms => WS_SERVE,
-                                          contents => HT_ASSETS_DIR },
-    );
-
     Bugzilla::Hook::process('install_filesystem', {
         files            => \%files,
         create_dirs      => \%create_dirs,
         non_recurse_dirs => \%non_recurse_dirs,
         recurse_dirs     => \%recurse_dirs,
         create_files     => \%create_files,
-        htaccess         => \%htaccess,
     });
 
-    my %all_files = (%create_files, %htaccess, %index_html, %files);
+    my %all_files = (%create_files, %index_html, %files);
     my %all_dirs  = (%create_dirs, %non_recurse_dirs);
 
     return {
@@ -494,7 +402,6 @@ sub FILESYSTEM {
         all_dirs     => \%all_dirs,
 
         create_files => \%create_files,
-        htaccess     => \%htaccess,
         index_html   => \%index_html,
         all_files    => \%all_files,
     };
@@ -540,13 +447,6 @@ sub update_filesystem {
     my $oldparamsfile = "old_params.txt";
     if (-e $oldparamsfile) {
         _rename_file($oldparamsfile, "$datadir/$oldparamsfile");
-    }
-
-    # Remove old assets htaccess file to force recreation with correct values.
-    if (-e "$assetsdir/.htaccess") {
-        if (read_file("$assetsdir/.htaccess") =~ /<FilesMatch \\\.css\$>/) {
-            unlink("$assetsdir/.htaccess");
-        }
     }
 
     _create_files(%files);
@@ -650,27 +550,6 @@ sub _convert_single_file_skins {
         $dir_name =~ s/\.css$//;
         mkdir $dir_name or warn "$dir_name: $!";
         _rename_file($skin_file, "$dir_name/global.css");
-    }
-}
-
-sub create_htaccess {
-    _create_files(%{FILESYSTEM()->{htaccess}});
-
-    # Repair old .htaccess files
-
-    my $webdot_dir = bz_locations()->{'webdotdir'};
-    # The public webdot IP address changed.
-    my $webdot = new IO::File("$webdot_dir/.htaccess", 'r')
-        || die "$webdot_dir/.htaccess: $!";
-    my $webdot_data;
-    { local $/; $webdot_data = <$webdot>; }
-    $webdot->close;
-    if ($webdot_data =~ /192\.20\.225\.10/) {
-        print "Repairing $webdot_dir/.htaccess...\n";
-        $webdot_data =~ s/192\.20\.225\.10/192.20.225.0\/24/g;
-        $webdot = new IO::File("$webdot_dir/.htaccess", 'w') || die $!;
-        print $webdot $webdot_data;
-        $webdot->close;
     }
 }
 
@@ -981,16 +860,6 @@ Description: Creates all the directories and files that Bugzilla
 
 Params:      C<index_html> - Whether or not we should create
                the F<index.html> file.
-
-Returns:     nothing
-
-=item C<create_htaccess()>
-
-Description: Creates all of the .htaccess files for Apache,
-             in the various Bugzilla directories. Also updates
-             the .htaccess files if they need updating.
-
-Params:      none
 
 Returns:     nothing
 

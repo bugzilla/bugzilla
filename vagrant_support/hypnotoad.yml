@@ -1,0 +1,27 @@
+- name: grant perl ability to listen to privledged ports
+  command: setcap 'cap_net_bind_service=+ep' /usr/bin/perl
+
+- name: hypnotoad daemon sysconfig
+  copy:
+    dest: /etc/sysconfig/hypnotoad
+    mode: 0644
+    content: |
+      BUGZILLA=/vagrant
+      USER=vagrant
+      MOJO_MODE=development
+
+- name: hypnotoad daemon init file
+  template:
+    dest: /etc/init.d/hypnotoad
+    src: hypnotoad
+    owner: root
+    group: root
+    mode: 0755
+
+- name: enable hypnotoad
+  service: name=hypnotoad enabled=yes
+  when: LAZY == 0
+
+- name: restart hypnotoad
+  service: name=hypnotoad state=restarted
+

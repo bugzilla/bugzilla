@@ -83,7 +83,6 @@ sub cmd_demo {
 sub cmd_httpd  {
     check_data_dir();
     wait_for_db();
-    check_httpd_env();
 
     my $httpd_exit_f = run_cereal_and_httpd();
     assert_httpd()->get();
@@ -156,6 +155,7 @@ sub cmd_test_webservices {
 
 sub cmd_test_selenium {
     my $conf = require $ENV{BZ_QA_CONF_FILE};
+    $ENV{HTTP_BACKEND} = 'simple';
 
     check_data_dir();
     copy_qa_extension();
@@ -206,8 +206,6 @@ sub cmd_test_bmo {
 
 sub run_prove {
     my (%param) = @_;
-
-    check_httpd_env();
 
     my $prove_cmd    = $param{prove_cmd};
     my $prove_dir    = $param{prove_dir};
@@ -267,16 +265,6 @@ sub check_env {
     if (@missing_env) {
         die 'Missing required environmental variables: ', join(', ', @missing_env), "\n";
     }
-}
-sub check_httpd_env {
-    check_env(qw(
-        HTTPD_StartServers
-        HTTPD_MinSpareServers
-        HTTPD_MaxSpareServers
-        HTTPD_ServerLimit
-        HTTPD_MaxClients
-        HTTPD_MaxRequestsPerChild
-    ))
 }
 
 sub fix_path {

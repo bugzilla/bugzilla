@@ -69,9 +69,9 @@ $FFI->attach(cmark_markdown_to_html => ['opaque', 'int', 'markdown_options_t'] =
 );
 
 # This has to happen after something from the main lib is loaded
-$FFI->attach('core_extensions_ensure_registered' => [] => 'void');
+$FFI->attach('cmark_gfm_core_extensions_ensure_registered' => [] => 'void');
 
-core_extensions_ensure_registered();
+cmark_gfm_core_extensions_ensure_registered();
 
 Bugzilla::Markdown::GFM::SyntaxExtension->SETUP($FFI);
 Bugzilla::Markdown::GFM::SyntaxExtensionList->SETUP($FFI);

@@ -33,7 +33,7 @@ BEGIN {
 
 # PREREQ_PM
 my %requires = (
-    'Alien::libcmark_gfm'      => 0,
+    'Alien::libcmark_gfm'      => '3',
     'Algorithm::BloomFilter'   => '0.02',
     'CGI'                      => '4.31',
     'CGI::Compile'             => 0,

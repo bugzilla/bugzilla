@@ -9,7 +9,7 @@ use strict;
 use warnings;
 use lib qw( . lib local/lib/perl5 );
 use Bugzilla;
-use Test::More;
+use Test2::V0;
 
 my $parser = Bugzilla->markdown_parser;
 
@@ -61,7 +61,9 @@ my $table_html = <<'HTML';
 <tr>
 <td>val1</td>
 <td align="center">val2</td>
-</tr></tbody></table>
+</tr>
+</tbody>
+</table>
 HTML
 
 is(

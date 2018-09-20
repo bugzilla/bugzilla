@@ -636,6 +636,11 @@ sub process_new_user {
         foreach my $attachment (@attachments) {
             my ($revision_id) = ($attachment->filename =~ PHAB_ATTACHMENT_PATTERN);
 
+            if (!$revision_id) {
+                WARN("Skipping " . $attachment->filename . " on bug $bug_id. Filename should be fixed.");
+                next;
+            }
+
             INFO("Processing revision D$revision_id");
 
             my $revision = Bugzilla::Extension::PhabBugz::Revision->new_from_query(

@@ -49,7 +49,7 @@ modifications, and the method you plan to use to upgrade Bugzilla.
 
 #. You can use the hooks built into many of the templates to add or modify
    the UI from an :ref:`extension <extensions>`. Hooks generally don't go away
-   and have a stable interface. 
+   and have a stable interface.
 
 The third method is the best if there are hooks in the appropriate places
 and the change you want to do is possible using hooks. It's not very easy
@@ -89,7 +89,7 @@ can't if you fork the file into the :file:`custom` directory.
 How To Edit Templates
 =====================
 
-.. note:: If you are making template changes that you intend on submitting 
+.. note:: If you are making template changes that you intend on submitting
    back for inclusion in standard Bugzilla, you should read the relevant
    sections of the
    `Developers' Guide <https://www.bugzilla.org/docs/developer.html>`_.
@@ -111,7 +111,7 @@ to cross-site scripting attacks.
 
 You should run :command:`./checksetup.pl` after editing any templates. Failure
 to do so may mean either that your changes are not picked up, or that the
-permissions on the edited files are wrong so the webserver can't read them. 
+permissions on the edited files are wrong so the webserver can't read them.
 
 .. _template-formats:
 
@@ -232,11 +232,11 @@ customizing for your installation.
     and have their values appear formatted in the initial comment.
 
     An example of this is the `guided bug submission form
-    <http://landfill.bugzilla.org/bugzilla-tip/enter_bug.cgi?product=WorldControl;format=guided>`_.
+    <https://bugzilla-dev.allizom.org/enter_bug.cgi?product=Firefox&format=guided>`_.
     The code for this comes with the Bugzilla distribution as an example for
     you to copy. It can be found in the files
     :file:`create-guided.html.tmpl` and :file:`comment-guided.html.tmpl`.
-        
+
     A hidden field that indicates the format should be added inside
     the form in order to make the template functional. Its value should
     be the suffix of the template filename. For example, if the file

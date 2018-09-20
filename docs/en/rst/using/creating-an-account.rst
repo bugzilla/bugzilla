@@ -6,8 +6,8 @@ Creating an Account
 If you want to use a particular installation of Bugzilla, first you need to
 create an account. Ask the administrator responsible for your installation
 for the URL you should use to access it. If you're test-driving Bugzilla,
-you can use one of the installations on
-`Landfill <http://landfill.bugzilla.org/>`_.
+you can use one of the installations on `Mozilla’s Bugzilla (BMO) test server
+<https://bugzilla-dev.allizom.org/>`_.
 
 The process of creating an account is similar to many other websites.
 

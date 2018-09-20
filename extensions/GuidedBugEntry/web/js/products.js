@@ -122,12 +122,12 @@ var products = {
 
   "Bugzilla": {
     support:
-      'Please use <a href="https://landfill.bugzilla.org/">Bugzilla Landfill</a> to file "test bugs".'
+      'Please use <a href="https://bugzilla-dev.allizom.org/">our test server</a> to file "test bugs".'
   },
 
   "bugzilla.mozilla.org": {
     related: [ "Bugzilla" ],
     support:
-      'Please use <a href="https://landfill.bugzilla.org/">Bugzilla Landfill</a> to file "test bugs".'
+      'Please use <a href="https://bugzilla-dev.allizom.org/">our test server</a> to file "test bugs".'
   }
 };

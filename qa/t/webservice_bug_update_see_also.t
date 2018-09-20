@@ -17,7 +17,7 @@ use QA::Tests qw(PRIVATE_BUG_USER STANDARD_BUG_TESTS);
 use Test::More tests => 117;
 my ($config, $xmlrpc, $jsonrpc, $jsonrpc_get) = get_rpc_clients();
 
-my $bug_url = 'http://landfill.bugzilla.org/bugzilla-tip/show_bug.cgi?id=100';
+my $bug_url = 'https://bugzilla-dev.allizom.org/show_bug.cgi?id=100';
 
 # update_see_also doesn't support logged-out users.
 my @tests = grep { $_->{user} } @{ STANDARD_BUG_TESTS() };

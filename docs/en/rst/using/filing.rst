@@ -7,18 +7,17 @@ Reporting a New Bug
 ===================
 
 Years of bug writing experience has been distilled for your
-reading pleasure into the
-`Bug Writing Guidelines <http://landfill.bugzilla.org/bugzilla-tip/page.cgi?id=bug-writing.html>`_.
+reading pleasure into the `Bug report writing guidelines
+<https://developer.mozilla.org/docs/Mozilla/QA/Bug_writing_guidelines>`_.
 While some of the advice is Mozilla-specific, the basic principles of
 reporting Reproducible, Specific bugs and isolating the Product you are
 using, the Version of the Product, the Component which failed, the Hardware
 Platform, and Operating System you were using at the time of the failure go a
 long way toward ensuring accurate, responsible fixes for the bug that bit you.
 
-.. note:: If you want to file a test bug to see how Bugzilla works,
-   you can do it on one of our test installations on
-   `Landfill <http://landfill.bugzilla.org/>`_. Please don't do it on anyone's
-   production Bugzilla installation.
+.. note:: If you want to file a test bug to see how Bugzilla works, you can do
+   so on `Mozilla’s Bugzilla (BMO) test server <https://bugzilla-dev.allizom.org/>`_.
+   Please don’t do it on any production Bugzilla installation.
 
 The procedure for filing a bug is as follows:
 
@@ -46,7 +45,7 @@ The procedure for filing a bug is as follows:
    developers easier, and the probability that they consider your bug in
    a reasonable timeframe will be much higher.
 
-   .. note:: Try to make sure that everything in the Summary is also in the 
+   .. note:: Try to make sure that everything in the Summary is also in the
       Description. Summaries are often updated and this will ensure your original
       information is easily accessible.
 

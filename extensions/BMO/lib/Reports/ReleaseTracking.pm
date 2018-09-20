@@ -421,16 +421,6 @@ sub report {
 
         $query .= join("\nAND ", @where);
 
-        if ($input->{debug}) {
-            print "Content-Type: text/plain\n\n";
-            $query =~ s/\?/\000/g;
-            foreach my $param (@params) {
-                $query =~ s/\000/'$param'/;
-            }
-            print "$query\n";
-            exit;
-        }
-
         my $bugs = $dbh->selectcol_arrayref($query, undef, @params);
         push @$bugs, 0 unless @$bugs;
 

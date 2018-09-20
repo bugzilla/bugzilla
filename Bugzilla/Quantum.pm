@@ -63,6 +63,10 @@ sub startup {
     $r->any('/')->to('CGI#index_cgi');
     $r->any('/bug/<id:num>')->to('CGI#show_bug_cgi');
     $r->any('/<id:num>')->to('CGI#show_bug_cgi');
+    $r->get('/testagent.cgi' => sub {
+        my $c = shift;
+        $c->render(text => "OK Mojolicious");
+    });
 
     $r->any('/rest')->to('CGI#rest_cgi');
     $r->any('/rest.cgi/*PATH_INFO')->to( 'CGI#rest_cgi' => { PATH_INFO => '' } );

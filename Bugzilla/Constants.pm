@@ -210,7 +210,7 @@ sub BUGZILLA_VERSION {
 }
 
 # Location of the remote and local XML files to track new releases.
-use constant REMOTE_FILE => 'http://updates.bugzilla.org/bugzilla-update.xml';
+use constant REMOTE_FILE => 'https://updates.bugzilla.org/bugzilla-update.xml';
 use constant LOCAL_FILE  => 'bugzilla-update.xml'; # Relative to datadir.
 
 # These are unique values that are unlikely to match a string or a number,

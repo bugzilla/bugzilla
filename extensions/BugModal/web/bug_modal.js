@@ -1323,7 +1323,6 @@ $(function() {
     // finally switch to edit mode if we navigate back to a page that was editing
     $(window).on('pageshow', restoreEditMode);
     $(window).on('pageshow', restoreSavedBugComment);
-    $(window).on('focus', restoreSavedBugComment);
     restoreEditMode();
     restoreSavedBugComment();
 });

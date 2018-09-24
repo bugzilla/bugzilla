@@ -75,6 +75,7 @@ if (!$tgtprodid) {
     exit(1);
 }
 
+# Normal flags such as bug flags and attachment flags
 $dbh->do("INSERT INTO flaginclusions(component_id, type_id, product_id)
                SELECT fi1.component_id, fi1.type_id, ? FROM flaginclusions fi1
             LEFT JOIN flaginclusions fi2
@@ -82,6 +83,17 @@ $dbh->do("INSERT INTO flaginclusions(component_id, type_id, product_id)
                       AND fi2.product_id = ?
                 WHERE fi1.product_id = ?
                       AND fi2.type_id IS NULL",
+        undef,
+        $tgtprodid, $tgtprodid, $srcprodid);
+
+# Tracking type flags
+$dbh->do("INSERT INTO tracking_flags_visibility (tracking_flag_id, product_id, component_id)
+               SELECT tf1.tracking_flag_id, ?, tf1.component_id FROM tracking_flags_visibility tf1
+            LEFT JOIN tracking_flags_visibility tf2
+                      ON tf1.tracking_flag_id = tf2.tracking_flag_id
+                      AND tf2.product_id = ?
+                WHERE tf1.product_id = ?
+                      AND tf2.tracking_flag_id IS NULL",
         undef,
         $tgtprodid, $tgtprodid, $srcprodid);
 

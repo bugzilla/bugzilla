@@ -107,6 +107,10 @@
     [% END %]
 
     [%- js_BUGZILLA = {
+            user => {
+                # TODO: Move all properties form bug_modal/header.html.tmpl
+                login => user.login,
+            },
             param => {
                 maxattachmentsize => Param('maxattachmentsize'),
                 maxusermatches => Param('maxusermatches'),

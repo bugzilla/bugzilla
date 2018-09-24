@@ -36,7 +36,10 @@
     "extensions/BMO/web/styles/choose_product.css",
     "extensions/ProdCompSearch/web/styles/prod_comp_search.css",
   ];
-  javascript_urls = [ "extensions/ProdCompSearch/web/js/prod_comp_search.js" ];
+  javascript_urls = [
+    "extensions/BMO/web/js/new-bug-frequent-comp.js",
+    "extensions/ProdCompSearch/web/js/prod_comp_search.js",
+  ];
 
   cgi = Bugzilla.cgi;
   classification = cgi.param('classification');
@@ -67,6 +70,13 @@
      auto_focus       = 1
   %]
 </div>
+
+[% IF NOT is_describe %]
+<section id="frequent-components" hidden>
+  <h2>Choose from your most-used components</h2>
+  <div class="results"></div>
+</section>
+[% END %]
 
 <section id="product-list">
   <h2>or choose from the following selections</h2>

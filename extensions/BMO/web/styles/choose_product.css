@@ -16,6 +16,22 @@
   text-align: left;
 }
 
+#frequent-components ul {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin: 8px auto;
+  padding: 0;
+  list-style-type: none;
+  white-space: nowrap;
+}
+
+#frequent-components li {
+  flex: none;
+  margin: 8px 16px;
+  padding: 0;
+}
+
 #product-list {
   margin: 32px 0;
 }
@@ -55,6 +71,7 @@
 }
 
 @media screen and (min-width: 1024px) {
+  #frequent-components ul,
   #product-list .tile {
     width: 960px;
   }
@@ -65,6 +82,7 @@
 }
 
 @media screen and (min-width: 768px) and (max-width: 1023px) {
+  #frequent-components ul,
   #product-list .tile {
     width: 720px;
   }
@@ -75,6 +93,7 @@
 }
 
 @media screen and (max-width: 767px) {
+  #frequent-components ul,
   #product-list .tile {
     width: auto;
     max-width: 480px;

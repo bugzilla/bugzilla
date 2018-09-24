@@ -26,7 +26,7 @@
 [% filtered_desc = blocked_tree.$bugid.short_desc FILTER html %]
 [% PROCESS global/header.html.tmpl
    title           = "Dependency tree for $terms.Bug $bugid"
-   header          = "Dependency tree for 
+   header          = "Dependency tree for
                       <a href=\"show_bug.cgi?id=$bugid\">$terms.Bug $bugid</a>"
    javascript_urls = ["js/expanding-tree.js"]
    style_urls      = ["skins/standard/dependency-tree.css"]
@@ -35,10 +35,10 @@
 %]
 
 [% PROCESS depthControlToolbar %]
-  
+
 [% INCLUDE tree_section ids=dependson_ids type=1 %]
- 
-[% INCLUDE tree_section ids=blocked_ids type=2 %] 
+
+[% INCLUDE tree_section ids=blocked_ids type=2 %]
 
 [% PROCESS depthControlToolbar %]
 
@@ -58,18 +58,18 @@
   [% global.seen = {} %]
   [%# Display the tree of bugs that this bug depends on. %]
   <h3>
-    <a href="show_bug.cgi?id=[% bugid %]">[% terms.Bug %] [%+ bugid %]</a> 
+    <a href="show_bug.cgi?id=[% bugid %]">[% terms.Bug %] [%+ bugid %]</a>
     [% IF type == 1 %]
         [% tree_name = "dependson_tree" %]
         [% IF ids.size %]
-            depends on 
+            depends on
         [% ELSE %]
             does not depend on any [% 'open ' IF hide_resolved %][% terms.bugs %].
         [% END %]
     [% ELSIF type == 2 %]
         [% tree_name = "blocked_tree" %]
-        [% IF ids.size %] 
-            blocks 
+        [% IF ids.size %]
+            blocks
         [% ELSE %]
             does not block any [% 'open ' IF hide_resolved %][% terms.bugs %].
         [% END %]
@@ -78,7 +78,7 @@
         [%+ (ids.size == 1) ? "one" : ids.size %]
         [%+ IF hide_resolved %]open[% END %]
         [%+ (ids.size == 1) ? terms.bug : terms.bugs %]:
-    [% END %] 
+    [% END %]
   </h3>
   [% IF ids.size %]
     [%# 27 chars is the length of buglist.cgi?tweak=&bug_id=" %]
@@ -117,8 +117,8 @@
   [% bug = tree.$bugid %]
   <li>
     [%- INCLUDE bullet bugid=bugid tree=tree -%]
-    <span class="summ[% "_deep" IF tree.dependencies.$bugid.size %]" 
-          id="[% bugid FILTER html %]" 
+    <span class="summ[% "_deep" IF tree.dependencies.$bugid.size %]"
+          id="[% bugid FILTER html %]"
           [% IF global.seen.$bugid %]
             onMouseover="duplicatedover('[% bugid FILTER html %]')"
             onMouseout="duplicatedout('[% bugid FILTER html %]')"
@@ -143,9 +143,9 @@
 [% BLOCK bullet %]
   [% IF tree.dependencies.$bugid.size && ! global.seen.$bugid %]
     [% extra_class = " b_open" %]
-    [% extra_args = 'onclick="return doToggle(this, event)"' %] 
+    [% extra_args = 'onclick="return doToggle(this, event)"' %]
   [% END %]
-  <a id="b[% bugid %]" 
+  <a id="b[% bugid %]"
      class="b [%+ extra_class FILTER none %]"
      title="Click to expand or contract this portion of the tree. Hold down the Ctrl key while clicking to expand or contract all subtrees."
      [% extra_args FILTER none %]>&nbsp;&nbsp;</a>
@@ -209,7 +209,7 @@
          style="display: inline; margin: 0px;">
      [%# set to one form %]
      <input type="submit" id="change_maxdepth"
-       value="&nbsp;1&nbsp;" 
+       value="&nbsp;1&nbsp;"
        [% "disabled" IF realdepth < 2 || maxdepth == 1 %]>
      <input name="id" type="hidden" value="[% bugid %]">
      <input name="maxdepth" type="hidden" value="1">
@@ -260,7 +260,7 @@
        <input name="maxdepth" type="hidden" value="[% maxdepth + 1 %]">
      [% END %]
      <input name="hide_resolved" type="hidden" value="[% hide_resolved %]">
-     <input type="submit" id="increase_depth" value="&nbsp;&gt;&nbsp;" 
+     <input type="submit" id="increase_depth" value="&nbsp;&gt;&nbsp;"
         [% "disabled" IF realdepth < 2 || !maxdepth || maxdepth >= realdepth %]>
    </form>
    </td>

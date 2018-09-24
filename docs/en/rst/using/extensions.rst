@@ -14,5 +14,5 @@ last time you compiled the documentation):
 .. toctree::
    :maxdepth: 1
    :glob:
-   
+
    ../extensions/*/index-user

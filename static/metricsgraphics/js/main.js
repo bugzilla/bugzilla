@@ -46,7 +46,7 @@ var theme = 'dark';
                 });
             });
         })
-        
+
         $('a.pill').on('click', function(event) {
             event.preventDefault();
             $('a.pill').removeClass('active');
@@ -119,8 +119,8 @@ var theme = 'dark';
 
             return false;
         });
-        
-       
+
+
 
         $('#accessible-css').on('click', function () {
             $('.head ul li a.pill').removeClass('active');

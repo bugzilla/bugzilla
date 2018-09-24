@@ -68,7 +68,7 @@ incremental_restore()
       <a href="[% bonsai_prefix %]#[% section.old_start %]">
     [% END %]
     [% IF section.old_lines > 1 %]
-      &nbsp;Lines&nbsp;[% section.old_start %]-[% section.old_start + 
+      &nbsp;Lines&nbsp;[% section.old_start %]-[% section.old_start +
                                              section.old_lines - 1 %]
     [% ELSE %]
       Line&nbsp;[% section.old_start %]
@@ -77,7 +77,7 @@ incremental_restore()
       </a>
     [% END %]
     &nbsp;&nbsp;[% section.func_info FILTER html IF section.func_info %]
-  [% END %] 
+  [% END %]
     </th><th>
   <a href="#[% file.filename FILTER html %]_sec[% section_num %]">Link&nbsp;Here</a>&nbsp;
     </th></tr></table>

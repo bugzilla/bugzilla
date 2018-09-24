@@ -19,7 +19,7 @@
  *                 Reed Loden <reed@reedloden.com>
  */
 
-/* This library assumes that the needed YUI libraries have been loaded 
+/* This library assumes that the needed YUI libraries have been loaded
    already. */
 
 var bz_no_validate_enter_bug = false;
@@ -97,7 +97,7 @@ function _errorFor(field, name) {
 }
 
 function createCalendar(name) {
-    var cal = new YAHOO.widget.Calendar('calendar_' + name, 
+    var cal = new YAHOO.widget.Calendar('calendar_' + name,
                                         'con_calendar_' + name);
     YAHOO.bugzilla['calendar_' + name] = cal;
     var field = document.getElementById(name);
@@ -129,7 +129,7 @@ function showCalendar(field_name) {
     };
 
     // If somebody clicks outside the calendar, hide it.
-    YAHOO.util.Event.addListener(document.body, 'click', 
+    YAHOO.util.Event.addListener(document.body, 'click',
                                  calendar.bz_myBodyCloser, calendar, true);
 
     // Make Esc close the calendar.
@@ -152,14 +152,14 @@ function hideCalendar(field_name) {
     YAHOO.util.Event.removeListener(document.body, 'keydown', cal.bz_escCal);
 }
 
-/* This is the selectEvent for our Calendar objects on our custom 
+/* This is the selectEvent for our Calendar objects on our custom
  * DateTime fields.
  */
 function setFieldFromCalendar(type, args, date_field) {
     var dates = args[0];
     var setDate = dates[0];
 
-    // We can't just write the date straight into the field, because there 
+    // We can't just write the date straight into the field, because there
     // might already be a time there.
     var timeRe = /\b(\d{1,2}):(\d\d)(?::(\d\d))?/;
     var currentTime = timeRe.exec(date_field.value);
@@ -195,8 +195,8 @@ function setFieldFromCalendar(type, args, date_field) {
     hideCalendar(date_field.id);
 }
 
-/* Sets the calendar based on the current field value. 
- */ 
+/* Sets the calendar based on the current field value.
+ */
 function updateCalendarFromField(date_field) {
     var dateRe = /(\d\d\d\d)-(\d\d?)-(\d\d?)/;
     var pieces = dateRe.exec(date_field.value);
@@ -205,7 +205,7 @@ function updateCalendarFromField(date_field) {
         cal.select(new Date(pieces[1], pieces[2] - 1, pieces[3]));
         var selectedArray = cal.getSelectedDates();
         var selected = selectedArray[0];
-        cal.cfg.setProperty("pagedate", (selected.getMonth() + 1) + '/' 
+        cal.cfg.setProperty("pagedate", (selected.getMonth() + 1) + '/'
                                         + selected.getFullYear());
         cal.render();
     }
@@ -242,7 +242,7 @@ function hideEditableField( container, input, action, field_id, original_value, 
  */
 function showEditableField (e, ContainerInputArray) {
     var inputs = new Array();
-    var inputArea = YAHOO.util.Dom.get(ContainerInputArray[1]);    
+    var inputArea = YAHOO.util.Dom.get(ContainerInputArray[1]);
     if ( ! inputArea ){
         YAHOO.util.Event.preventDefault(e);
         return;
@@ -292,10 +292,10 @@ function showEditableField (e, ContainerInputArray) {
  * var ContainerInputArray: An array containing the (edit) and text area and the input being displayed
  * var ContainerInputArray[0]: the container that will be hidden usually shows the (edit) text
  * var ContainerInputArray[1]: the input area and label that will be displayed
- * var ContainerInputArray[2]: the field that is on the page, might get changed by browser autocomplete 
+ * var ContainerInputArray[2]: the field that is on the page, might get changed by browser autocomplete
  * var ContainerInputArray[3]: the original value from the page loading.
  *
- */  
+ */
 function checkForChangedFieldValues(e, ContainerInputArray ) {
     var el = document.getElementById(ContainerInputArray[2]);
     var unhide = false;
@@ -327,7 +327,7 @@ function checkForChangedFieldValues(e, ContainerInputArray ) {
 function hideAliasAndSummary(short_desc_value, alias_value) {
     // check the short desc field
     hideEditableField( 'summary_alias_container','summary_alias_input',
-                       'editme_action','short_desc', short_desc_value);  
+                       'editme_action','short_desc', short_desc_value);
     // check that the alias hasn't changed
     var bz_alias_check_array = new Array('summary_alias_container',
                                      'summary_alias_input', 'alias', alias_value);
@@ -369,9 +369,9 @@ function initDefaultCheckbox(field_id){
                                   new Array( 'bz_' + field_id + '_edit_container',
                                              'bz_' + field_id + '_input',
                                              'set_default_' + field_id ,'1'));
-    
+
     YAHOO.util.Event.addListener( window, 'load', boldOnChange,
-                                 'set_default_' + field_id ); 
+                                 'set_default_' + field_id );
 }
 
 function showHideStatusItems(e, dupArrayInfo) {
@@ -398,11 +398,11 @@ function showHideStatusItems(e, dupArrayInfo) {
 
 
         if ( (el.value == dupArrayInfo[1] && dupArrayInfo[0] == "is_duplicate")
-             || bz_isValueInArray(close_status_array, el.value) ) 
+             || bz_isValueInArray(close_status_array, el.value) )
         {
-            YAHOO.util.Dom.removeClass('resolution_settings', 
+            YAHOO.util.Dom.removeClass('resolution_settings',
                                        'bz_default_hidden');
-            YAHOO.util.Dom.removeClass('resolution_settings_warning', 
+            YAHOO.util.Dom.removeClass('resolution_settings_warning',
                                        'bz_default_hidden');
 
             // Remove the blank option we inserted.
@@ -425,7 +425,7 @@ function showDuplicateItem(e) {
     if (resolution) {
         if (resolution.value == 'DUPLICATE' && bz_isValueInArray( close_status_array, bug_status.value) ) {
             // hide resolution show duplicate
-            YAHOO.util.Dom.removeClass('duplicate_settings', 
+            YAHOO.util.Dom.removeClass('duplicate_settings',
                                        'bz_default_hidden');
             YAHOO.util.Dom.addClass('dup_id_discoverable', 'bz_default_hidden');
             // check to make sure the field is visible or IE throws errors
@@ -436,7 +436,7 @@ function showDuplicateItem(e) {
         }
         else {
             YAHOO.util.Dom.addClass('duplicate_settings', 'bz_default_hidden');
-            YAHOO.util.Dom.removeClass('dup_id_discoverable', 
+            YAHOO.util.Dom.removeClass('dup_id_discoverable',
                                        'bz_default_hidden');
             dup_id.blur();
         }
@@ -493,7 +493,7 @@ function updateCommentTagControl(checkbox, field) {
 function setClassification() {
     var classification = document.getElementById('classification');
     var product = document.getElementById('product');
-    var selected_product = product.value; 
+    var selected_product = product.value;
     var select_classification = all_classifications[selected_product];
     classification.value = select_classification;
     bz_fireEvent(classification, 'change');
@@ -513,15 +513,15 @@ function showFieldWhen(controlled_id, controller_id, values) {
 }
 
 /**
- * Called by showFieldWhen when a field's visibility controller 
- * changes values. 
+ * Called by showFieldWhen when a field's visibility controller
+ * changes values.
  */
 function handleVisControllerValueChange(e, args) {
     var controlled_id = args[0];
     var controller = args[1];
     var values = args[2];
 
-    var label_container = 
+    var label_container =
         document.getElementById('field_label_' + controlled_id);
     var field_container =
         document.getElementById('field_container_' + controlled_id);
@@ -543,11 +543,11 @@ function handleVisControllerValueChange(e, args) {
     }
 }
 
-function showValueWhen(controlled_field_id, controlled_value_ids, 
+function showValueWhen(controlled_field_id, controlled_value_ids,
                        controller_field_id, controller_value_id)
 {
     var controller_field = document.getElementById(controller_field_id);
-    // Note that we don't get an object for the controlled field here, 
+    // Note that we don't get an object for the controlled field here,
     // because it might not yet exist in the DOM. We just pass along its id.
     YAHOO.util.Event.addListener(controller_field, 'change',
         handleValControllerChange, [controlled_field_id, controlled_value_ids,

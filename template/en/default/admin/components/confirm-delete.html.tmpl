@@ -49,7 +49,7 @@ from '[% product.name FILTER html %]' product
 <tr>
   <td valign="top">Default assignee:</td>
   <td valign="top">[% comp.default_assignee.login FILTER html %]</td>
-  
+
 [% IF Param('useqacontact') %]
 </tr>
 <tr>
@@ -103,23 +103,23 @@ from '[% product.name FILTER html %]' product
 </table>
 
 <h2>Confirmation</h2>
-  
+
 [% IF comp.bug_count %]
 
   [% IF !Param("allowbugdeletion") %]
   <p>
     Sorry, there
 
-    [% IF comp.bug_count > 1 %] 
-      are [% comp.bug_count %] [%+ terms.bugs %] 
+    [% IF comp.bug_count > 1 %]
+      are [% comp.bug_count %] [%+ terms.bugs %]
     [% ELSE %]
-      is [% comp.bug_count %] [%+ terms.bug %] 
+      is [% comp.bug_count %] [%+ terms.bug %]
     [% END %]
 
-    outstanding for this component.  You must reassign 
+    outstanding for this component.  You must reassign
 
     [% IF comp.bug_count > 1 %]
-       those [% terms.bugs %] 
+       those [% terms.bugs %]
     [% ELSE %]
        that [% terms.bug %]
     [% END %]
@@ -130,8 +130,8 @@ from '[% product.name FILTER html %]' product
 
     <table border="0" cellpadding="20" width="70%" bgcolor="red"><tr><td>
 
-      There [% IF comp.bug_count > 1 %] 
-        are [% comp.bug_count %] [%+ terms.bugs %] 
+      There [% IF comp.bug_count > 1 %]
+        are [% comp.bug_count %] [%+ terms.bugs %]
       [% ELSE %]
         is 1 [% terms.bug %]
       [% END %]
@@ -147,7 +147,7 @@ from '[% product.name FILTER html %]' product
 [% IF comp.bug_count == 0 || Param('allowbugdeletion') %]
 
   <p>Do you really want to delete this component?</p>
-  
+
   <form method="post" action="editcomponents.cgi">
   <input type="submit" id="delete" value="Yes, delete">
   <input type="hidden" name="action" value="delete">
@@ -160,4 +160,4 @@ from '[% product.name FILTER html %]' product
 
 [% PROCESS admin/components/footer.html.tmpl %]
 
-[% PROCESS global/footer.html.tmpl %] 
+[% PROCESS global/footer.html.tmpl %]

@@ -43,7 +43,7 @@
 <p>Your saved searches are as follows:</p>
 
 <blockquote>
-  <table border="1" cellpadding="3">  
+  <table border="1" cellpadding="3">
     <tr>
       <th>
         Search
@@ -82,7 +82,7 @@
         &nbsp;
       </td>
       <td align="center">
-        <input type="checkbox" 
+        <input type="checkbox"
                name="showmybugslink"
                value="1"
                [% " checked" IF user.showmybugslink %]>
@@ -114,7 +114,7 @@
           [% END %]
         </td>
         <td align="center">
-          <input type="checkbox" 
+          <input type="checkbox"
                  name="link_in_footer_[% q.id FILTER html %]"
                  value="1"
                  alt="[% q.name FILTER html %]"
@@ -127,7 +127,7 @@
               <option value="">Don't share</option>
               [% FOREACH group = queryshare_groups %]
                 <option value="[% group.id %]"
-                        [% ' selected="selected"' 
+                        [% ' selected="selected"'
                            IF q.shared_with_group.id == group.id %]
                 >[% group.name FILTER html %]</option>
               [% END %]
@@ -160,7 +160,7 @@
 [% IF user.queries_available.size %]
   <p>You may use these searches saved and shared by others:</p>
 
-  <table border="1" cellpadding="3">  
+  <table border="1" cellpadding="3">
     <tr>
       <th>
         Search
@@ -197,7 +197,7 @@
                    [% q.name FILTER uri %]">Edit</a>
         </td>
         <td align="center">
-          <input type="checkbox" 
+          <input type="checkbox"
                  name="link_in_footer_[% q.id FILTER html %]"
                  value="1"
                  alt="[% q.name FILTER html %]"

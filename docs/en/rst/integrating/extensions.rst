@@ -49,7 +49,7 @@ To add new fields to a bug, you need to do the following:
 
     my $field = new Bugzilla::Field({ name => $name });
     return if $field;
- 
+
     $field = Bugzilla::Field->create({
         name        => $name,
         description => $description,
@@ -67,12 +67,12 @@ To add new fields to a bug, you need to do the following:
 
   .. code-block:: perl
 
-    BEGIN { 
-       *Bugzilla::Bug::is_foopy = \&_bug_is_foopy; 
+    BEGIN {
+       *Bugzilla::Bug::is_foopy = \&_bug_is_foopy;
     }
- 
+
     ...
- 
+
     sub _bug_is_foopy {
         return $_[0]->{'is_foopy'};
     }

@@ -15,7 +15,7 @@
   # Copyright (C) 1998 Netscape Communications Corporation. All
   # Rights Reserved.
   #
-  # Contributor(s): 
+  # Contributor(s):
   #   Gervase Markham <gerv@gerv.net>
   #   Max Kanat-Alexander <mkanat@bugzilla.org>
   #%]
@@ -54,7 +54,7 @@
 
 [% SET base_args = [] %]
 [% FOREACH param = ['maxrows', 'openonly', 'format', 'sortvisible',
-                    'changedsince', 'product'] 
+                    'changedsince', 'product']
 %]
   [% NEXT IF NOT ${param}.defined %]
   [% FOREACH value = ${param} %]
@@ -74,7 +74,7 @@
       <tr>
         [% FOREACH column = columns %]
           [% IF column.name == sortby %]
-            [%# We add this to the column object so it doesn't affect future 
+            [%# We add this to the column object so it doesn't affect future
               # iterations of the loop.
               #%]
             [% column.reverse_sort = reverse ? 0 : 1 %]
@@ -112,7 +112,7 @@
             [%- display_value('op_sys', bug.op_sys) FILTER html %]
           </td>
           <td class="target_milestone">
-            [% display_value('target_milestone', 
+            [% display_value('target_milestone',
                              bug.target_milestone) FILTER html %]
           </td>
           <td class="short_desc">[% bug.short_desc FILTER html %]</td>

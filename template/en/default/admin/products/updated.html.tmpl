@@ -32,7 +32,7 @@
   [% END %]
 [% END %]
 
-[% title = BLOCK %]Updating Product '[% product.name FILTER html %]' 
+[% title = BLOCK %]Updating Product '[% product.name FILTER html %]'
                    [% classification_text FILTER none %][% END %]
 [% PROCESS global/header.html.tmpl
   title = title
@@ -63,7 +63,7 @@
   [% IF product.is_active %]
     open for
   [% ELSE %]
-    closed to 
+    closed to
   [% END %]
   new [% terms.bugs %].
   </p>
@@ -79,15 +79,15 @@
 [% IF changes.allows_unconfirmed.defined %]
   <p>
   [% IF product.allows_unconfirmed %]
-    The product now allows the 
+    The product now allows the
     [%+ display_value('bug_status', 'UNCONFIRMED') FILTER html %] status.
   [% ELSE %]
-    The product no longer allows the 
+    The product no longer allows the
     [%+ display_value('bug_status', 'UNCONFIRMED') FILTER html %] status.
-    Note that any 
+    Note that any
     <a href="buglist.cgi?product=
-            [%- product.name FILTER uri %]&amp;bug_status=UNCONFIRMED"> 
-    [%- terms.bugs %] that currently have the 
+            [%- product.name FILTER uri %]&amp;bug_status=UNCONFIRMED">
+    [%- terms.bugs %] that currently have the
     [%+ display_value('bug_status', 'UNCONFIRMED') FILTER html %] status</a>
     will remain in that status until they are edited.
   [% END %]

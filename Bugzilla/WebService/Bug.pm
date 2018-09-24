@@ -666,7 +666,7 @@ sub possible_duplicates {
         include_fields     => Optional [ ArrayRef [Str] ],
         Bugzilla_api_token => Optional [Str]
     ];
-    
+
     ThrowCodeError( 'param_invalid', { function => 'Bug.possible_duplicates', param => 'A param' } )
         if !$params_type->check($params);
 
@@ -674,10 +674,10 @@ sub possible_duplicates {
     if ($params->{id}) {
         my $bug = Bugzilla::Bug->check({ id => $params->{id}, cache => 1 });
         $summary = $bug->short_desc;
-    } 
+    }
     elsif ($params->{summary}) {
         $summary = $params->{summary};
-    } 
+    }
     else {
         ThrowCodeError('param_required',
         { function => 'Bug.possible_duplicates', param => 'id or summary' });
@@ -701,7 +701,7 @@ sub possible_duplicates {
     if ($params->{id}) {
         @$possible_dupes = grep { $_->id != $params->{id} } @$possible_dupes;
     }
-    
+
     my @hashes = map { $self->_bug_to_hash($_, $params) } @$possible_dupes;
     $self->_add_update_tokens($params, $possible_dupes, \@hashes);
     return { bugs => \@hashes };

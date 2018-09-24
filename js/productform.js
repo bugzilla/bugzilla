@@ -2,19 +2,19 @@
  * License Version 1.1 (the "License"); you may not use this file
  * except in compliance with the License. You may obtain a copy of
  * the License at http://www.mozilla.org/MPL/
- * 
+ *
  * Software distributed under the License is distributed on an "AS
  * IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
  * implied. See the License for the specific language governing
  * rights and limitations under the License.
- * 
+ *
  * The Original Code is the Bugzilla Bug Tracking System.
- * 
+ *
  * The Initial Developer of the Original Code is Netscape Communications
  * Corporation. Portions created by Netscape are
  * Copyright (C) 1998 Netscape Communications Corporation. All
  * Rights Reserved.
- * 
+ *
  * Contributor(s): Christian Reis <kiko@async.com.br>
  */
 
@@ -52,7 +52,7 @@ function selectClassification(classfield, product, component, version, milestone
         first_load = false;
         return;
     }
-    
+
     // Don't reset first_load as done in selectProduct. That's because we
     // want selectProduct to handle the first_load attribute.
 
@@ -69,7 +69,7 @@ function selectClassification(classfield, product, component, version, milestone
     if (!findall) {
         // Save sel for the next invocation of selectClassification().
         var tmp = sel;
-    
+
         // This is an optimization: if we have just added classifications to an
         // existing selection, no need to clear the form elements and add
         // everything again; just merge the new ones with the existing

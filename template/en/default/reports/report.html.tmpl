@@ -17,14 +17,14 @@
   #
   # Contributor(s): Gervase Markham <gerv@gerv.net>
   #%]
-  
+
 [%# INTERFACE:
   # col_field: string. Name of the field being plotted as columns.
   # row_field: string. Name of the field being plotted as rows.
   # tbl_field: string. Name of the field being plotted as tables.
   # tbl_names: array. List of values for the field being plotted as tables.
   # time: integer. Seconds since the epoch.
-  # data: <depends on format>. Data to plot. 
+  # data: <depends on format>. Data to plot.
   # format: string. Format of the individual reports.
   # width: integer. For image charts, height of the image.
   # height: integer. For image charts, width of the image.
@@ -34,7 +34,7 @@
   #%]
 
 [% DEFAULT width = 600
-           height = 350 
+           height = 350
 %]
 
 [% IF min_width AND width < min_width %]
@@ -54,7 +54,7 @@
 [% switchbase     = switchbase FILTER html %]
 
 [% title = BLOCK %]
-  Report: 
+  Report:
   [% IF tbl_field %]
     [% tbl_field_disp FILTER html %]
   [% END %]
@@ -68,7 +68,7 @@
 
 [% time = time FILTER time('%Y-%m-%d %H:%M:%S') FILTER html %]
 
-[% PROCESS global/header.html.tmpl 
+[% PROCESS global/header.html.tmpl
   style = "
     .t1     { background-color: #ffffff } /* white       */
     .t2     { background-color: #dfefff } /* light blue  */
@@ -86,7 +86,7 @@
 
 <div align="center">
 
-  [% FOREACH tbl = tbl_names %]    
+  [% FOREACH tbl = tbl_names %]
     [% IF tbl == "-total-" %]
       [% tbl_disp = "Total" %]
     [% ELSE %]
@@ -99,7 +99,7 @@
       [% IF tbl %]
         <h2>[% tbl_disp FILTER email FILTER html %]</h2>
       [% END %]
-      
+
       [% imageurl = BLOCK %]report.cgi?[% imagebase FILTER html %]&amp;format=
         [% format FILTER uri %]&amp;ctype=png&amp;action=plot&amp;
         [% IF tbl_field %]
@@ -112,14 +112,14 @@
               [% END %]
             [% END %]
           [% END %]
-        [% END %]width=[% width %]&amp;height=[% height %]      
+        [% END %]width=[% width %]&amp;height=[% height %]
       [% END %]
-      
+
       <img alt="Graphical report results" src="[% imageurl %]"
         width="[% width %]" height="[% height %]">
     [% END %]
     <br>
-  [% END %]  
+  [% END %]
 
   <table>
     <tr>
@@ -129,7 +129,7 @@
                        { name => "line",  description => "Line" },
                        { name => "table", description => "Table" } ] %]
 
-        [% formaturl = "report.cgi?$switchbase&amp;width=$width" _ 
+        [% formaturl = "report.cgi?$switchbase&amp;width=$width" _
                        "&amp;height=$height&amp;action=wrap" %]
         [% FOREACH other_format = formats %]
           [% NEXT IF other_format.name == "pie" AND row_field AND col_field %]
@@ -137,11 +137,11 @@
             <a href="[% formaturl %]&amp;format=[% other_format.name %]">
           [% END %]
           [% other_format.description FILTER html %]
-          [% "</a>" UNLESS other_format.name == format %] | 
+          [% "</a>" UNLESS other_format.name == format %] |
         [% END %]
-        <a href="[% formaturl %]&amp;ctype=csv&amp;format=table">CSV</a> 
+        <a href="[% formaturl %]&amp;ctype=csv&amp;format=table">CSV</a>
       </td>
-      
+
       [% IF format != "table" %]
         <td>
           &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
@@ -154,7 +154,7 @@
           <a href="[% sizeurl %]&amp;width=[% width %]&amp;height=
                    [% height + 100 %]">Taller</a><br>
           <a href="[% sizeurl %]&amp;width=[% width - 100 %]&amp;height=
-                   [% height %]">Thinner</a> * 
+                   [% height %]">Thinner</a> *
           <a href="[% sizeurl %]&amp;width=[% width + 100 %]&amp;height=
                    [% height %]">Fatter</a>&nbsp;&nbsp;&nbsp;&nbsp;<br>
           <a href="[% sizeurl %]&amp;width=[% width %]&amp;height=
@@ -166,7 +166,7 @@
 
   <p>
     [% IF format == "table" %]
-      <a href="query.cgi?[% switchbase %]&amp;format=report-table">Edit 
+      <a href="query.cgi?[% switchbase %]&amp;format=report-table">Edit
       this report</a>
     [% ELSE %]
       <a href="query.cgi?[% switchbase %]&amp;chart_format=
@@ -175,7 +175,7 @@
       </a>
     [% END %]
   </p>
- 
+
 </div>
 
 [% PROCESS global/footer.html.tmpl %]

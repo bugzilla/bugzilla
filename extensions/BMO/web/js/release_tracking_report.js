@@ -41,7 +41,7 @@ function onProductChange() {
                 '<input type="checkbox" id="field_' + field.id + '_cb" ' +
                         'onClick="onFieldToggle(this,' + field.id + ')">' +
               '</td>' +
-              '<td class="disabled" id="field_' + field.id + '_td">' + 
+              '<td class="disabled" id="field_' + field.id + '_td">' +
                 '<label for="field_' + field.id + '_cb">' +
                 field.desc.htmlEncode() + ':</label>' +
               '</td>' +

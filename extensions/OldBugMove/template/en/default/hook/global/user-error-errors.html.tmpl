@@ -23,7 +23,7 @@
     delete the [%+ display_value("resolution", "MOVED") FILTER html %]
     resolution.
 [% ELSIF error == "oldbugmove_no_manual_move" %]
-    You cannot set the resolution of [% terms.abug %] to 
+    You cannot set the resolution of [% terms.abug %] to
     [%+ display_value("resolution", "MOVED") FILTER html %] without
     moving the [% terms.bug %].
 [% END %]

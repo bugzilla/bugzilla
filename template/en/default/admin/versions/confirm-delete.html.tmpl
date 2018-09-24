@@ -67,16 +67,16 @@
 [% IF version.bug_count %]
   <p>
   Sorry, there
-  [% IF version.bug_count > 1 %] 
-    are [% version.bug_count FILTER none %] [%+ terms.bugs %] 
+  [% IF version.bug_count > 1 %]
+    are [% version.bug_count FILTER none %] [%+ terms.bugs %]
   [% ELSE %]
-    is [% version.bug_count FILTER none %] [%+ terms.bug %] 
+    is [% version.bug_count FILTER none %] [%+ terms.bug %]
   [% END %]
 
-  outstanding for this version. You must move 
+  outstanding for this version. You must move
 
   [% IF version.bug_count > 1 %]
-     those [% terms.bugs %] 
+     those [% terms.bugs %]
   [% ELSE %]
      that [% terms.bug %]
   [% END %]
@@ -85,7 +85,7 @@
 [% ELSE %]
 
   <p>Do you really want to delete this version?</p>
-  
+
   <form method="post" action="editversions.cgi">
     <input type="submit" id="delete" value="Yes, delete">
     <input type="hidden" name="action" value="delete">
@@ -98,4 +98,4 @@
 
 [% PROCESS admin/versions/footer.html.tmpl %]
 
-[% PROCESS global/footer.html.tmpl %] 
+[% PROCESS global/footer.html.tmpl %]

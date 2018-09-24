@@ -36,7 +36,7 @@
 [% END %]
 
 [% IF value.defined && !no_edit_link %]
-  Edit value <a 
+  Edit value <a
   title="Edit value '[% value.name FILTER html %]' for the '
          [%- field.name FILTER html %]' field"
   href="editvalues.cgi?action=edit&amp;field=
@@ -46,7 +46,7 @@
 [% END %]
 
 [% UNLESS no_edit_other_link %]
-  Edit other values for the <a 
+  Edit other values for the <a
   href="editvalues.cgi?field=
         [%- field.name FILTER uri %]">'[% field.description FILTER html %]'</a> field.
 

@@ -56,7 +56,7 @@
     <tr>
       <th align="right" valign="top">
         <a href="[% target %]?product=[% p.name FILTER uri -%]
-              [%- IF cloned_bug_id %]&amp;cloned_bug_id=[% cloned_bug_id FILTER uri %][% END -%] 
+              [%- IF cloned_bug_id %]&amp;cloned_bug_id=[% cloned_bug_id FILTER uri %][% END -%]
               [%- IF format %]&amp;format=[% format FILTER uri %][% END %]">
         [% p.name FILTER html FILTER no_break %]</a>:&nbsp;
       </th>

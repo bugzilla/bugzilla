@@ -14,12 +14,12 @@
   # University Foundation. Portions created by the Initial Developer are
   # Copyright (C) 2008 the Initial Developer. All Rights Reserved.
   #
-  # Contributor(s): 
+  # Contributor(s):
   #   Max Kanat-Alexander <mkanat@bugzilla.org>
   #%]
 
 [% PROCESS "global/field-descs.none.tmpl" %]
-  
+
 <select name="[% name FILTER html %]" title="Search type"
         class="[% class FILTER css_class_quote %]">
   [% FOREACH type = types %]

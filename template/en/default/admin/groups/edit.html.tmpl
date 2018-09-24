@@ -26,7 +26,7 @@
   # group - A Bugzilla::Group representing the group being edited.
   # *_current - Arrays of Bugzilla::Group objects that show the current
   #             values for this group, as far as grants.
-  # *_available - Arrays of Bugzilla::Group objects that show the current 
+  # *_available - Arrays of Bugzilla::Group objects that show the current
   #               available values for each grant.
   #%]
 
@@ -58,7 +58,7 @@
       <th>Group:</th>
       <td>
         [% IF group.is_bug_group %]
-          <input type="text" name="name" size="60" 
+          <input type="text" name="name" size="60"
                  value="[% group.name FILTER html %]">
         [% ELSE %]
           [% group.name FILTER html %]
@@ -70,7 +70,7 @@
       <th>Description:</th>
       <td>
         [% IF group.is_bug_group %]
-          <input type="text" name="desc" size="70" 
+          <input type="text" name="desc" size="70"
                  value="[% group.description FILTER html %]">
         [% ELSE %]
           [% group.description FILTER html %]
@@ -81,7 +81,7 @@
     <tr>
       <th>User Regexp:</th>
       <td>
-        <input type="text" name="regexp" size="40" 
+        <input type="text" name="regexp" size="40"
                value="[% group.user_regexp FILTER html %]">
       </td>
     </tr>
@@ -126,7 +126,7 @@
       <tr>
         <th>Use For [% terms.Bugs %]:</th>
         <td>
-          <input type="checkbox" name="isactive" 
+          <input type="checkbox" name="isactive"
                  value="1" [% 'checked="checked"' IF group.is_active %]>
         </td>
       </tr>
@@ -139,10 +139,10 @@
   <table class="grant_table">
     <tr>
       <th class="one">Groups That Are a Member of This Group<br>
-        (&quot;Users in <var>X</var> are automatically in  
+        (&quot;Users in <var>X</var> are automatically in
          [%+ group.name FILTER html %]&quot;)</th>
       <th>Groups That This Group Is a Member Of<br>
-        (&quot;If you are in [% group.name FILTER html %], you are 
+        (&quot;If you are in [% group.name FILTER html %], you are
          automatically also in...&quot;)</th>
     </tr>
     <tr>
@@ -151,7 +151,7 @@
                    items_available = members_available
                      items_current = members_current %]
       </td>
-  
+
       <td>[% PROCESS select_pair name = "member_of" size = 10
                      items_available = member_of_available
                        items_current = member_of_current %]</td>
@@ -162,7 +162,7 @@
     <tr>
       <th class="one">
         Groups That Can Grant Membership in This Group<br>
-        (&quot;Users in <var>X</var> can add other users to 
+        (&quot;Users in <var>X</var> can add other users to
          [%+ group.name FILTER html %]&quot;)
 
       </th>
@@ -212,11 +212,11 @@
   <input type="submit" id="update-group" value="Update Group">
   <input type="hidden" name="token" value="[% token FILTER html %]">
 </form>
-  
+
 <h4>Mass Remove</h4>
 
 <p>You can use this form to do mass-removal of users from groups.
-  This is often very useful if you upgraded from [% terms.Bugzilla %] 
+  This is often very useful if you upgraded from [% terms.Bugzilla %]
   2.16.</p>
 
 <table><tr><td>
@@ -227,7 +227,7 @@
     <input type="text" size="20" name="regexp">
     <input type="submit" id="remove-membership" value="Remove Memberships">
 
-    <p>If you leave the field blank, all explicit memberships in 
+    <p>If you leave the field blank, all explicit memberships in
       this group will be removed.</p>
 
     <input type="hidden" name="action" value="confirm_remove">
@@ -235,10 +235,10 @@
   </fieldset>
 </form>
 </td></tr></table>
- 
+
 <p>Back to the <a href="editgroups.cgi">group list</a>.</p>
 
-[% PROCESS global/footer.html.tmpl %] 
+[% PROCESS global/footer.html.tmpl %]
 
 [% BLOCK select_pair %]
   <table class="select_pair">

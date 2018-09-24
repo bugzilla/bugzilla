@@ -106,10 +106,10 @@ function validateAndSubmit() {
     <td colspan="3">
       <div id="possible_duplicates"></div>
       <script>
-        var dt_columns = [ 
+        var dt_columns = [
           { key: "id", label: "[% field_descs.bug_id FILTER js %]",
             formatter: YAHOO.bugzilla.dupTable.formatBugLink },
-          { key: "summary", 
+          { key: "summary",
             label: "[% field_descs.short_desc FILTER js %]",
             formatter: "text" },
           { key: "status",

@@ -1,9 +1,9 @@
 .bz_alias_short_desc_container {
-    margin: 8px 0; 
-    padding: 0.3em; 
-    background-color: rgb(208, 208, 208); 
+    margin: 8px 0;
+    padding: 0.3em;
+    background-color: rgb(208, 208, 208);
     border-radius: 0.5em;
-    font-size: 125%; 
+    font-size: 125%;
     font-weight: bold;
 }
 
@@ -30,7 +30,7 @@ table#flags {
 }
 
 .related_actions {
-    font-size: 0.85em; 
+    font-size: 0.85em;
     float: right;
     list-style-type: none;
     white-space: nowrap;
@@ -86,7 +86,7 @@ table#flags {
     text-align: center;
 }
 
-.bz_time_tracking_table th, 
+.bz_time_tracking_table th,
 .bz_time_tracking_table td {
     padding: 4px;
 }
@@ -98,11 +98,11 @@ table#flags {
     width: 7em;
 }
 
-#summary tr td { 
+#summary tr td {
     vertical-align:top;
 }
 
-#status { 
+#status {
     margin-bottom: 3ex;
 }
 

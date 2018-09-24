@@ -20,7 +20,7 @@
 
 [% PROCESS global/variables.none.tmpl %]
 
-[% PROCESS global/header.html.tmpl 
+[% PROCESS global/header.html.tmpl
   title = "Simple Search"
   style_urls = [ "skins/standard/search_form.css" ]
 %]
@@ -28,7 +28,7 @@
 [% WRAPPER search/tabs.html.tmpl %]
 
 <p>
-Find a specific [% terms.bug %] by entering words that describe it.  
+Find a specific [% terms.bug %] by entering words that describe it.
 [% terms.Bugzilla %] will search [% terms.bug %] descriptions and comments
 for those words and return a list of matching [% terms.bugs %] sorted
 by relevance.
@@ -54,7 +54,7 @@ for "crash secure SSL flash".
                         { name = 'closed', label = "Closed" },
                         { name = 'all', label = "All" } ] %]
         [% FOREACH status = statuses %]
-            <option value="__[% status.name %]__" 
+            <option value="__[% status.name %]__"
                   [% " selected" IF default.bug_status.0 == "__${status.name}__" %]>
             [% status.label FILTER html %]
           </option>
@@ -114,7 +114,7 @@ for "crash secure SSL flash".
   <tr>
     <td></td>
     <td>
-    
+
       [% IF Param('search_allow_no_criteria') %]
         <input type="submit" id="search" value="Search">
       [% ELSE %]

@@ -18,7 +18,7 @@
   [% title = title _ "($filtered_alias) " %]
 [% END %]
 [% title = title _ filtered_desc %]
-[% javascript = javascript _ 
+[% javascript = javascript _
                 "document.title = document.title.replace(/^" _ terms.Bug _ " /, '');"
 %]
 [% js_bug_id = bug.bug_id FILTER js %]

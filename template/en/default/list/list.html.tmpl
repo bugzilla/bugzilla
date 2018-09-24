@@ -49,7 +49,7 @@
   title = title
   generate_api_token = dotweak
   style = style
-  atomlink = "buglist.cgi?$urlquerypart&title=$url_filtered_title&ctype=atom" 
+  atomlink = "buglist.cgi?$urlquerypart&title=$url_filtered_title&ctype=atom"
   javascript_urls = [ "js/util.js", "js/field.js" ]
   style_urls = [ "skins/standard/buglist.css" ]
   doc_section = "query.html#list"
@@ -90,8 +90,8 @@
 [% END %]
 
 [% SET shown_types = [
-  'notequals', 'regexp', 'notregexp', 'lessthan', 'lessthaneq', 
-  'greaterthan', 'greaterthaneq', 'changedbefore', 'changedafter', 
+  'notequals', 'regexp', 'notregexp', 'lessthan', 'lessthaneq',
+  'greaterthan', 'greaterthaneq', 'changedbefore', 'changedafter',
   'changedfrom', 'changedto', 'changedby', 'notsubstring', 'nowords',
   'nowordssubstr', 'notmatches', 'isempty', 'isnotempty'
 ] %]
@@ -144,7 +144,7 @@
 [% PROCESS num_results %]
 
 [% IF bugs.size == 0 %]
-  <p>We couldn't find any [% terms.bugs %] matching your search terms. 
+  <p>We couldn't find any [% terms.bugs %] matching your search terms.
   You could try searching with fewer or different terms.</p>
   <ul class="zero_result_links">
     <li>[% PROCESS enter_bug_link %]</li>
@@ -208,7 +208,7 @@
           [% END %]
         [% END %]
       </td>
-      
+
       <td>&nbsp;</td>
     [% END %]
 
@@ -242,7 +242,7 @@
     <td valign="middle" class="bz_query_edit">
       <a href="[% PROCESS edit_search_url %]">Edit&nbsp;Search</a>
     </td>
-      
+
     [% IF searchtype == "saved" %]
       <td valign="middle" nowrap="nowrap" class="bz_query_forget">
         |
@@ -253,20 +253,20 @@
       </td>
     [% ELSE %]
       <td>&nbsp;</td>
-      
+
       <td valign="middle" class="bz_query_remember">
         <form method="get" action="buglist.cgi">
-          <input type="submit" id="remember" value="Remember search"> as 
-          <input type="hidden" name="newquery" 
+          <input type="submit" id="remember" value="Remember search"> as
+          <input type="hidden" name="newquery"
                  value="[% urlquerypart FILTER html %][% "&order=$qorder" FILTER html IF order %]">
           <input type="hidden" name="cmdtype" value="doit">
           <input type="hidden" name="remtype" value="asnamed">
           <input type="hidden" name="token" value="[% issue_hash_token(['savedsearch']) FILTER html %]">
           <input type="text" id="save_newqueryname" name="newqueryname" size="20"
-                 title="New query name" value="[% defaultsavename FILTER html %]"> 
-        </form> 
+                 title="New query name" value="[% defaultsavename FILTER html %]">
+        </form>
       </td>
-    [% END %]  
+    [% END %]
   </tr>
 </table>
 

@@ -14,10 +14,10 @@
   #%]
 
 [%# INTERFACE:
-  # products: array of Bugzilla::Product objects 
+  # products: array of Bugzilla::Product objects
   #
   # classification: Bugzilla::Classification object; If classifications
-  #                         are enabled, then this is 
+  #                         are enabled, then this is
   #                         the currently selected classification
   # showbugcounts: boolean; true if bug counts should be included in the table
   #%]
@@ -28,7 +28,7 @@
   [% classification_url_part = BLOCK %]&amp;classification=
     [%- classification.name FILTER uri %]
   [%- END %]
-  [% classification_title = BLOCK %] 
+  [% classification_title = BLOCK %]
     in classification '[% classification.name FILTER html %]'
   [% END %]
 [% END %]
@@ -38,17 +38,17 @@
 %]
 
 [% columns = [
-     { 
+     {
        name => "name"
        heading => "Edit product..."
        contentlink => 'editproducts.cgi?action=edit&amp;product=%%name%%'
      },
-     { 
+     {
        name => "description"
        heading => "Description"
        allow_html_content => 1
      },
-     { 
+     {
        name => "is_active"
        heading => "Open For New $terms.Bugs"
        yesno_field => 1

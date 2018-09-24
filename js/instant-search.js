@@ -57,7 +57,7 @@ YAHOO.bugzilla.instantSearch = {
     };
     // DataSource can't understand a JSON-RPC error response, so
     // we have to modify the result data if we get one.
-    dataSource.doBeforeParseData = 
+    dataSource.doBeforeParseData =
       function(oRequest, oFullResponse, oCallback) {
         if (oFullResponse.error) {
           oFullResponse.result = {};
@@ -67,17 +67,17 @@ YAHOO.bugzilla.instantSearch = {
         }
         return oFullResponse;
       };
-    dataSource.subscribe('dataErrorEvent', 
+    dataSource.subscribe('dataErrorEvent',
       function() {
         YAHOO.bugzilla.instantSearch.currentSearchQuery = '';
       }
     );
 
     this.dataTable = new YAHOO.widget.DataTable(
-      'results', 
-      this.dataTableColumns, 
-      dataSource, 
-      { 
+      'results',
+      this.dataTableColumns,
+      dataSource,
+      {
         initialLoad: false,
         MSG_EMPTY: 'No matching bugs found.',
         MSG_ERROR: 'An error occurred while searching for bugs, please try again.'
@@ -138,7 +138,7 @@ YAHOO.bugzilla.instantSearch = {
 
       YAHOO.bugzilla.instantSearch.dataTable.showTableMessage(
         'Searching...&nbsp;&nbsp;&nbsp;' +
-        '<img src="extensions/GuidedBugEntry/web/images/throbber.gif"' + 
+        '<img src="extensions/GuidedBugEntry/web/images/throbber.gif"' +
         ' width="16" height="11">',
         YAHOO.widget.DataTable.CLASS_LOADING
       );
@@ -158,12 +158,12 @@ YAHOO.bugzilla.instantSearch = {
       }
 
       YAHOO.bugzilla.instantSearch.dataTable.getDataSource().sendRequest(
-        YAHOO.lang.JSON.stringify(jsonObject), 
+        YAHOO.lang.JSON.stringify(jsonObject),
         {
           success: YAHOO.bugzilla.instantSearch.onSearchResults,
           failure: YAHOO.bugzilla.instantSearch.onSearchResults,
           scope: YAHOO.bugzilla.instantSearch.dataTable,
-          argument: YAHOO.bugzilla.instantSearch.dataTable.getState() 
+          argument: YAHOO.bugzilla.instantSearch.dataTable.getState()
         }
       );
 

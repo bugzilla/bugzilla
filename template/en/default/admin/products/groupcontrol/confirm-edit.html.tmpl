@@ -27,7 +27,7 @@
 [% PROCESS global/header.html.tmpl title = title %]
 [% FOREACH group = mandatory_groups %]
 <P>
-group '[% group.name FILTER html %]' impacts [% group.count %] 
+group '[% group.name FILTER html %]' impacts [% group.count %]
 [%+ terms.bugs %] for
 which the group is newly mandatory and will be added.
 [% END %]

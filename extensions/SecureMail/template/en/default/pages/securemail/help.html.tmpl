@@ -24,8 +24,8 @@
   title = "SecureMail Help"
 %]
 
-[% terms.Bugzilla %] considers certain groups as "secure". If a [% terms.bug %] is in one of those groups, [% terms.Bugzilla %] will not send unencrypted 
-email about it. To receive encrypted email rather than just a "something changed" placeholder, you must provide either 
+[% terms.Bugzilla %] considers certain groups as "secure". If a [% terms.bug %] is in one of those groups, [% terms.Bugzilla %] will not send unencrypted
+email about it. To receive encrypted email rather than just a "something changed" placeholder, you must provide either
 a S/MIME or a GPG/PGP key on the <a href="[% urlbase FILTER none %]userprefs.cgi?tab=securemail">SecureMail preferences tab</a>.<br>
 <br>
 In addition, if you have uploaded a S/MIME or GPG/PGP key using the <a href="[% urlbase FILTER none %]userprefs.cgi?tab=securemail">
@@ -36,9 +36,9 @@ be required to decrypt it to view the reset instructions.
 
 <b>S/MIME Keys must be in PEM format - i.e. Base64-encoded text, with the first line containing BEGIN CERTIFICATE.</b></p>
 
-<p>S/MIME certificates can be obtained from a number of providers. 
-Once you have it, export it from your browser as a .p12 file and import it into your mail client. 
-You'll need to provide a password when you export - pick a strong one, 
+<p>S/MIME certificates can be obtained from a number of providers.
+Once you have it, export it from your browser as a .p12 file and import it into your mail client.
+You'll need to provide a password when you export - pick a strong one,
 and then back up the .p12 file somewhere safe.</p>
 
 <p>Import on Thunderbird as follows:</p>
@@ -81,7 +81,7 @@ Then, you need to convert it to a .pem file. Here are two possible ways to do th
 
 <p>
 Open the .pem file in a text editor. You can recognise the public key because
-it starts "BEGIN CERTIFICATE" and ends "END CERTIFICATE" and 
+it starts "BEGIN CERTIFICATE" and ends "END CERTIFICATE" and
 has an appropriate friendly name (e.g. "StartCom Free Certificate Member's StartCom Ltd. ID").</p>
 
 <p>Paste the contents of the .pem file into the SecureMail text field in [% terms.Bugzilla %].</p>
@@ -117,7 +117,7 @@ You’ll have to answer several questions:</p>
 
 <p><code>gpg --armor --output pubkey.txt --export 'Your Name'</code></p>
 
-<p>Paste the contents of pubkey.txt into the SecureMail text field in [% terms.Bugzilla %]. 
+<p>Paste the contents of pubkey.txt into the SecureMail text field in [% terms.Bugzilla %].
 
 <li>Configure your email client to use your associated private key to decrypt the encrypted emails. For Thunderbird, you need the <a href="https://addons.mozilla.org/en-us/thunderbird/addon/enigmail/">Enigmail</a> extension.</p>
 </ol>

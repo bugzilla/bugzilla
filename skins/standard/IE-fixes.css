@@ -26,8 +26,8 @@ form#Create #comp_desc {
     margin: .5em 1em;
 }
 
-#bug_id_container, .search_field_grid, 
-.search_email_fields, ul.bug_changes li { 
+#bug_id_container, .search_field_grid,
+.search_email_fields, ul.bug_changes li {
     zoom: 1;
     display: inline;
 }

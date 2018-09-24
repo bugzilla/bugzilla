@@ -63,11 +63,11 @@ cc =>
   "Users who may not have a direct role to play on this $terms.bug, but who
    are interested in its progress.",
 
-classification => 
+classification =>
   "$terms.Bugs are categorised into Classifications, Products and"
-  _ " Components. classifications is the top-level categorisation.",   
+  _ " Components. classifications is the top-level categorisation.",
 
-component => 
+component =>
   "Components are second-level categories; each belongs to a"
   _ " particular Product. Select a Product to narrow down this list.",
 
@@ -123,10 +123,10 @@ qa_contact =>
 
 remaining_time =>
   "The number of hours of work left on this $terms.bug, calculated by
-   subtracting the $vars.field_descs.work_time from the 
+   subtracting the $vars.field_descs.work_time from the
    ${vars.field_descs.estimated_time}.",
 
-rep_platform => 
+rep_platform =>
   "The hardware platform the $terms.bug was observed on.",
 
 reporter =>
@@ -144,7 +144,7 @@ see_also =>
 
    <p>You should normally use this field to refer to $terms.bugs in
      <em>other</em> installations. For $terms.bugs in this
-     installation, it is better to use the $vars.field_descs.dependson and 
+     installation, it is better to use the $vars.field_descs.dependson and
      $vars.field_descs.blocked fields.</p>",
 
 short_desc =>
@@ -217,7 +217,7 @@ email1 =>
 [% END %]
 
 [% IF Param('useclassification') %]
-  [% vars.help_html.product = vars.help_html.product 
+  [% vars.help_html.product = vars.help_html.product
       _ " Select a Classification to narrow down this list." %]
 [% END %]
 
@@ -229,14 +229,14 @@ email1 =>
     [% field_type_desc = BLOCK -%]
       [% field_types.$field_type FILTER html %]
     [%- END %]
-    [% vars.help_html.${help_field} = 
+    [% vars.help_html.${help_field} =
       "A custom $field_type_desc field in this installation"
       _ " of ${terms.Bugzilla}." %]
   [% END %]
 
   [%# Add help for the search types, for query.cgi. %]
   [% type_desc = BLOCK %]
-    The type of [% vars.field_descs.${help_field} FILTER html %] search you 
+    The type of [% vars.field_descs.${help_field} FILTER html %] search you
     would like.
   [% END %]
   [% SET type_name = help_field _ '_type' %]

@@ -87,7 +87,7 @@ sub time {
 
 sub jobqueue_status {
     my ( $self, $params ) = @_;
-    
+
     Bugzilla->login(LOGIN_REQUIRED);
 
     my $dbh = Bugzilla->dbh;
@@ -98,7 +98,7 @@ sub jobqueue_status {
                 (SELECT COUNT(*)
                     FROM ts_error
                     WHERE ts_error.jobid = j.jobid
-                ) 
+                )
             , 0) AS errors
         FROM ts_job j
             INNER JOIN ts_funcmap f

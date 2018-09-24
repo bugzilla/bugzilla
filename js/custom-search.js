@@ -11,10 +11,10 @@
  * The Original Code is the Bugzilla Bug Tracking System.
  *
  * The Initial Developer of the Original Code is BugzillaSource, Inc.
- * Portions created by the Initial Developer are Copyright (C) 2011 
+ * Portions created by the Initial Developer are Copyright (C) 2011
  * the Initial Developer. All Rights Reserved.
  *
- * Contributor(s): 
+ * Contributor(s):
  *   Max Kanat-Alexander <mkanat@bugzilla.org>
  */
 
@@ -39,9 +39,9 @@ function custom_search_not_changed(id) {
 function custom_search_new_row() {
     var row = document.getElementById('custom_search_last_row');
     var clone = row.cloneNode(true);
-    
+
     _cs_fix_row_ids(clone);
-   
+
     // We only want one copy of the buttons, in the new row. So the old
     // ones get deleted.
     var op_button = document.getElementById('op_button');
@@ -124,7 +124,7 @@ function custom_search_open_paren() {
 
 function custom_search_close_paren() {
     var new_row = custom_search_new_row();
-    
+
     // We need to up the new row's id by one more, because we're going
     // to insert a "CP" before it.
     var id = _cs_fix_row_ids(new_row);
@@ -138,7 +138,7 @@ function custom_search_close_paren() {
     paren_row.id = null;
     paren_row.innerHTML = ')<input type="hidden" name="f' + (id - 1)
                         + '" id="f' + (id - 1) + '" value="CP">';
-  
+
     new_row.parentNode.insertBefore(paren_row, new_row);
 
     if (new_margin == 0) {

@@ -21,7 +21,7 @@
 [% PROCESS global/variables.none.tmpl %]
 
 [% title = BLOCK %]
-  Edit Value '[% value.name FILTER html %]' for the 
+  Edit Value '[% value.name FILTER html %]' for the
   '[% field.description FILTER html %]' ([% field.name FILTER html %]) field
 [% END %]
 [% PROCESS global/header.html.tmpl
@@ -49,7 +49,7 @@
     </tr>
     <tr>
       <th align="right"><label for="sortkey">Sortkey:</label></th>
-      <td><input id="sortkey" size="6" maxlength="6" name="sortkey" 
+      <td><input id="sortkey" size="6" maxlength="6" name="sortkey"
                  value="[%- value.sortkey FILTER html %]"></td>
     </tr>
     [% IF field.name == "bug_status" %]
@@ -71,7 +71,7 @@
             [% FOREACH field_value = field.value_field.legal_values %]
               [% NEXT IF field_value.name == '' %]
               <option value="[% field_value.id FILTER none %]"
-               [% ' selected="selected"' 
+               [% ' selected="selected"'
                   IF field_value.id == value.visibility_value.id %]>
                 [% IF field.value_field.name == 'component' %]
                   [% field_value.product.name FILTER html %]:
@@ -86,7 +86,7 @@
     [% END %]
     <tr>
       <th align="right"><label for="is_active">Enabled for [% terms.bugs %]:</label></th>
-      <td><input id="is_active" name="is_active" type="checkbox" value="1" 
+      <td><input id="is_active" name="is_active" type="checkbox" value="1"
            [%+ 'checked="checked"' IF value.is_active %]
            [%+ 'disabled="disabled"' IF value.is_default OR value.is_static %]>
            [% IF value.is_default %]

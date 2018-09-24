@@ -27,9 +27,9 @@
 
 <bugzilla version="[% constants.BUGZILLA_VERSION %]"
           urlbase="[% urlbase FILTER xml %]"
-          [%# Note that the maintainer's email is not filtered, 
+          [%# Note that the maintainer's email is not filtered,
             # intentionally. Even logged-out users should be able
-            # to see that, since it will be in error messages anyway. 
+            # to see that, since it will be in error messages anyway.
           %]
           maintainer="[% Param('maintainer') FILTER xml %]"
 [% IF user.id %]
@@ -83,7 +83,7 @@
           </long_desc>
         [% END %]
       [% END %]
-      
+
       [% IF displayfields.attachment %]
         [% FOREACH a = bug.attachments %]
           [% NEXT IF a.isprivate && !user.is_insider %]
@@ -112,7 +112,7 @@
           </attachment>
         [% END %]
       [% END %]
-      
+
       [% Hook.process("bug_end") %]
 
     </bug>
@@ -151,7 +151,7 @@
 
 [% BLOCK section_flags %]
   [% RETURN UNLESS displayfields.flag %]
-  
+
   [% FOREACH flag = obj.flags %]
     <flag name="[% flag.type.name FILTER xml %]"
           id="[% flag.id FILTER xml %]"

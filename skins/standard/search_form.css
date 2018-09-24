@@ -14,7 +14,7 @@
   * Portions created by the Initial Developer are Copyright (C) 2010 the
   * Initial Developer. All Rights Reserved.
   *
-  * Contributor(s): 
+  * Contributor(s):
   *           Guy Pyrzak <guy.pyrzak@gmail.com>
   */
 
@@ -26,7 +26,7 @@
   white-space: nowrap;
 }
 
-#bug_id_container { 
+#bug_id_container {
   display: inline-block;
   vertical-align: middle;
   padding-bottom: 1ex;
@@ -36,7 +36,7 @@
   width: 9em;
 }
 
-.container_date_from, 
+.container_date_from,
 .container_date_to {
   width: 14em;
   padding-bottom: 1ex;
@@ -59,15 +59,15 @@
   display: inline-block;
 }
 
-.search_field_grid .field_help_link, 
-.history_query .field_help_link 
+.search_field_grid .field_help_link,
+.history_query .field_help_link
 {
   display: block;
   text-align: left;
 }
 
 #chart .section_help {
-  font-size: 0.8em; 
+  font-size: 0.8em;
   font-weight: normal
 }
 
@@ -88,7 +88,7 @@
   display: block;
 }
 
-#summary_field.search_field_row input, 
+#summary_field.search_field_row input,
 #summary_field.search_field_row select
 {
   display: inline;
@@ -164,13 +164,13 @@ div.bz_section_title {
 }
 
 div.bz_section_title a {
-  font-weight: bold;    
+  font-weight: bold;
 }
 
 div.bz_section_title span {
   font-size: 0.75em;
-  margin-left: 1em;    
-}  
+  margin-left: 1em;
+}
 
 #summary_field label {
   font-weight: bold;
@@ -184,9 +184,9 @@ div.bz_section_title span {
   margin-top: 2em;
 }
 
-.hide_people_filter #people_filter_section, 
-.hide_history_filter #history_filter_section, 
-.hide_detailed_information #detailed_information_section 
+.hide_people_filter #people_filter_section,
+.hide_history_filter #history_filter_section,
+.hide_detailed_information #detailed_information_section
 {
   display: none;
 }

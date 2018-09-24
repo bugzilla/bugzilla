@@ -28,7 +28,7 @@
   # tbl_field: string. Name of the field being plotted as tables.
   # col_names: array. List of values for the field being plotted as columns.
   # row_names: array. List of values for the field being plotted as rows.
-  # data: <depends on format>. Data to plot. Only data.$tbl is accessed. 
+  # data: <depends on format>. Data to plot. Only data.$tbl is accessed.
   # tbl: Name of a hash in data which is the table to be plotted.
   #%]
 
@@ -145,7 +145,7 @@ YAHOO.util.Event.addListener(window, "load", function() {
     ]
   };
   this.myDataTable = new YAHOO.widget.DataTable("tabular_report_container_
-                         [% tbl FILTER js %]", myColumnDefs, this.myDataSource, 
+                         [% tbl FILTER js %]", myColumnDefs, this.myDataSource,
                          {formatRow: totalRowFormatter});
 });
 </script>
@@ -184,7 +184,7 @@ YAHOO.util.Event.addListener(window, "load", function() {
       [% FOREACH col = col_names %]
         [% col_totals.$col = 0 %]
         [% NEXT IF col == "" %]
-        
+
         [% col_idx = 1 - col_idx %]
         <th class="[% classes.$row_idx.$col_idx %]">
           [% PROCESS value_display value = col field = col_field %]
@@ -199,7 +199,7 @@ YAHOO.util.Event.addListener(window, "load", function() {
   <tbody>
   [% FOREACH row = row_names %]
     [% row_total = 0 %]
-    
+
     [% row_idx = 1 - row_idx %]
     <tr>
       <td class="[% classes.$row_idx.$col_idx %]" align="right">
@@ -209,7 +209,7 @@ YAHOO.util.Event.addListener(window, "load", function() {
         [% row_total = row_total + data.$tbl.$col.$row %]
         [% NEXT IF col == "" %]
         [% col_totals.$col = (col_totals.$col || 0) + data.$tbl.$col.$row %]
-        
+
         [% col_idx = 1 - col_idx %]
         <td class="[% classes.$row_idx.$col_idx %]" align="center">
           [% IF data.$tbl.$col.$row AND data.$tbl.$col.$row > 0 %]
@@ -221,7 +221,7 @@ YAHOO.util.Event.addListener(window, "load", function() {
             .
           [% END %]
         </td>
-      [% END %] 
+      [% END %]
       <td class="ttotal" align="right">
         <a href="[% urlbase %]&amp;
           [% row_field FILTER uri %]=[% row FILTER uri %]
@@ -238,7 +238,7 @@ YAHOO.util.Event.addListener(window, "load", function() {
       </td>
       [% FOREACH col = col_names %]
         [% NEXT IF col == "" %]
-      
+
         <td class="ttotal" align="center">
           <a href="[% urlbase %]&amp;
             [% col_field FILTER uri %]=[% col FILTER uri %]
@@ -257,7 +257,7 @@ YAHOO.util.Event.addListener(window, "load", function() {
   </tbody>
 </table>
 </div>
-      
+
     </td>
   </tr>
 </table>
@@ -270,4 +270,4 @@ YAHOO.util.Event.addListener(window, "load", function() {
     [% disp_value = value FILTER email %]
   [% END %]
   [% disp_value FILTER html FILTER replace('^ $','&nbsp;') %]
-[% END %] 
+[% END %]

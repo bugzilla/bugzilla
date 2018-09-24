@@ -312,7 +312,7 @@ Reports the status of the job queue.
 
    GET /rest/jobqueue_status
 
-This method requires an authenticated user. 
+This method requires an authenticated user.
 
 **Response**
 

@@ -79,9 +79,9 @@ You have the following choices:
 <ul>
   <li>
     <form method="post" action="process_bug.cgi">
-      <input type="hidden" name="delta_ts" 
+      <input type="hidden" name="delta_ts"
              value="[% bug.delta_ts FILTER html %]">
-      [% PROCESS "global/hidden-fields.html.tmpl" 
+      [% PROCESS "global/hidden-fields.html.tmpl"
           exclude="^Bugzilla_login|Bugzilla_password|delta_ts$" %]
       <input type="submit" id="process" value="Submit my changes anyway">
         This will cause all of the above changes to be overwritten

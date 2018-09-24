@@ -48,7 +48,7 @@ foreach my $include_path (@include_paths) {
         my $file = File::Spec->catfile($include_path, $path);
         $file =~ s/\s.*$//; # nuke everything after the first space
         $file =~ s|\\|/|g if ON_WINDOWS;  # convert \ to / in path if on windows
-        $test_templates{$file} = () 
+        $test_templates{$file} = ()
             if $file =~ m#global/(code|user)-error(?:-errors)?\.html\.tmpl#;
 
         # Make sure the extension is not disabled
@@ -77,14 +77,14 @@ foreach my $file (keys %test_templates) {
         Register(\%test_templates, $file, "could not open file --WARNING");
         next;
     }
-    
+
     my $lineno=0;
     while (my $line = <TMPL>) {
         $lineno++;
         if ($line =~ /\[%\s[A-Z]+\s*error\s*==\s*"(.+)"\s*%\]/) {
             my $errtag = $1;
             if ($errtag =~ /\s/) {
-                Register(\%test_templates, $file, 
+                Register(\%test_templates, $file,
                 "has an error definition \"$errtag\" at line $lineno with "
                 . "space(s) embedded --ERROR");
             }
@@ -125,7 +125,7 @@ foreach my $file (keys %test_modules) {
             push @{$Errors{$errtype}{$errtag}{used_in}{$file}}, $lineno;
         }
     }
-    
+
     close(TMPL);
 }
 
@@ -148,7 +148,7 @@ foreach my $errtype (keys %Errors) {
             if (scalar @langs) {
                 UsedIn($errtype, $errtag, join(', ',@langs));
             }
-            
+
             # Now check for tag usage in all DEFINED languages
             foreach my $lang (keys %{$Errors{$errtype}{$errtag}{defined_in}}) {
                 if (!defined $Errors{$errtype}{$errtag}{used_in}) {
@@ -162,7 +162,7 @@ foreach my $errtype (keys %Errors) {
 # And make sure that everything defined in WS_ERROR_CODE
 # is actually a valid error.
 foreach my $err_name (keys %{WS_ERROR_CODE()}) {
-    if (!defined $Errors{'code'}{$err_name} 
+    if (!defined $Errors{'code'}{$err_name}
         && !defined $Errors{'user'}{$err_name})
     {
         Register(\%test_modules, 'WS_ERROR_CODE',
@@ -218,18 +218,18 @@ sub UsedIn {
     my ($errtype, $errtag, $lang) = @_;
     $lang = $lang || "any";
     foreach my $file (keys %{$Errors{$errtype}{$errtag}{used_in}}) {
-        Register(\%test_modules, $file, 
-            "$errtype error tag '$errtag' is used at line(s) (" 
-            . join (',', @{$Errors{$errtype}{$errtag}{used_in}{$file}}) 
+        Register(\%test_modules, $file,
+            "$errtype error tag '$errtag' is used at line(s) ("
+            . join (',', @{$Errors{$errtype}{$errtag}{used_in}{$file}})
             . ") but not defined for language(s): $lang");
     }
 }
 sub DefinedIn {
     my ($errtype, $errtag, $lang) = @_;
     foreach my $file (keys %{$Errors{$errtype}{$errtag}{defined_in}{$lang}}) {
-        Register(\%test_templates, $file, 
+        Register(\%test_templates, $file,
             "$errtype error tag '$errtag' is defined at line(s) ("
-            . join (',', @{$Errors{$errtype}{$errtag}{defined_in}{$lang}{$file}}) 
+            . join (',', @{$Errors{$errtype}{$errtag}{defined_in}{$lang}{$file}})
             . ") but is not used anywhere", 1);
     }
 }

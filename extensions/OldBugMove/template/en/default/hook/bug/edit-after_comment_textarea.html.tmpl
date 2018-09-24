@@ -21,7 +21,7 @@
 [% IF oldbugmove_user_is_mover(user) AND bug.resolution != 'MOVED' %]
   <p>
     <input type="submit" id="oldbugmove" name="oldbugmove"
-           value="Move [% terms.Bug FILTER html %] to 
+           value="Move [% terms.Bug FILTER html %] to
                   [%= Param('move-to-url') FILTER html %]">
   </p>
 [% END %]

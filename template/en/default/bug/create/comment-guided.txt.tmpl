@@ -24,7 +24,7 @@
   # enter_bug.cgi) can be access via Bugzilla.cgi.param. It can be used to
   # pull out various custom fields and format an initial Description entry
   # from them.
-  #%]  
+  #%]
 [% USE Bugzilla %]
 [% cgi = Bugzilla.cgi %]
 User-Agent:       [%+ cgi.user_agent() %]
@@ -42,12 +42,12 @@ Steps to Reproduce:
 [% END %]
 
 [% IF cgi.param("actual_results") %]
-Actual Results:  
+Actual Results:
 [%+ cgi.param("actual_results") %]
 [% END %]
 
 [% IF cgi.param("expected_results") %]
-Expected Results:  
+Expected Results:
 [%+ cgi.param("expected_results") %]
 [% END %]
 

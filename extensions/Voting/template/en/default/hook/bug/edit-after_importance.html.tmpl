@@ -14,7 +14,7 @@
   # Portions created by the Initial Developer are Copyright (C) 2010
   # the Initial Developer. All Rights Reserved.
   #
-  # Contributor(s): 
+  # Contributor(s):
   #   Max Kanat-Alexander <mkanat@bugzilla.org>
   #%]
 [% IF bug.product_obj.votesperuser %]
@@ -23,7 +23,7 @@
       with
       <a href="page.cgi?id=voting/bug.html&amp;bug_id=
                [%- bug.id FILTER uri %]">
-        [%- bug.votes FILTER html %] 
+        [%- bug.votes FILTER html %]
         [% IF bug.votes == 1 %]
             vote
         [% ELSE %]

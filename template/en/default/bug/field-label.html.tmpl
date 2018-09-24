@@ -37,7 +37,7 @@
     <label for="[% field.name FILTER html %]"[% IF accesskey %] accesskey="[% accesskey FILTER html %]"[% END %]>
   [% END %]
 
-  <a 
+  <a
     [% IF help_html.${field.name}.defined %]
       title="[% help_html.${field.name} FILTER txt FILTER collapse FILTER html %]"
       class="field_help_link"

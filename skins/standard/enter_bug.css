@@ -62,7 +62,7 @@
 
 /* The Possible Duplicates table on enter_bug. */
 #possible_duplicates th {
-    text-align: center; 
+    text-align: center;
     background: none;
     border-collapse: collapse;
 }

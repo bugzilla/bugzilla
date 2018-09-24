@@ -136,7 +136,7 @@
       </td>
     [% END %]
   </tr>
-  
+
   <tr>
     <th><label for="bug_status">Status:</label></th>
     <td colspan="3">[% PROCESS status_section %]</td>
@@ -150,7 +150,7 @@
                value="[% dontchange FILTER html %]"
                size="6">
       </td>
-      [% PROCESS bug/field.html.tmpl 
+      [% PROCESS bug/field.html.tmpl
           field = bug_fields.deadline, value = dontchange
           editable = 1, allow_dont_change = 1 %]
     </tr>
@@ -274,7 +274,7 @@
         <b>Status Whiteboard:</b>
       </td>
       <td colspan="7">
-        <input name="status_whiteboard" 
+        <input name="status_whiteboard"
                value="[% dontchange FILTER html %]" size="60">
       </td>
     </tr>
@@ -348,14 +348,14 @@
     [% FOREACH group = groups %]
     <tr>
       <td align="center">
-        <input type="checkbox" name="defined_groups" 
+        <input type="checkbox" name="defined_groups"
                id="defined_group_[% group.id %]"
                value="[% group.name FILTER html %]"
                onchange="turn_off(this, 'group_[% group.id %]')">
       </td>
       [% IF group.is_active %]
         <td align="center">
-          <input type="checkbox" name="groups" 
+          <input type="checkbox" name="groups"
                  id="group_[% group.id FILTER html %]"
                  value="[% group.name FILTER html %]"
                  onchange="turn_off(this, 'defined_group_[% group.id %]')">
@@ -410,10 +410,10 @@
   [% all_open_bugs = !current_bug_statuses.containsany(closedstates) %]
   [% all_closed_bugs = !current_bug_statuses.containsany(openstates) %]
   [% closed_status_array = [] %]
-  
-  <select name="bug_status" id="bug_status"> 
+
+  <select name="bug_status" id="bug_status">
     <option value="[% dontchange FILTER html %]" selected="selected">[% dontchange FILTER html %]</option>
-  
+
     [% FOREACH bug_status = new_bug_statuses %]
       <option value="[% bug_status.name FILTER html %]">
         [% display_value("bug_status", bug_status.name) FILTER html %]
@@ -423,14 +423,14 @@
         [% closed_status_array.push( filtered_status ) %]
       [% END %]
     [% END %]
-  
+
   [%# If all the bugs being changed are closed, allow the user to change their resolution. %]
   [% IF all_closed_bugs %]
     [% filtered_status = dontchange FILTER js %]
     [% closed_status_array.push( filtered_status ) %]
   [% END %]
   </select>
-  
+
   <span id="resolution_settings">
   <select id="resolution" name="resolution">
       <option value="[% dontchange FILTER html %]" selected >[% dontchange FILTER html %]</option>

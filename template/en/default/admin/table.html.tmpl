@@ -21,8 +21,8 @@
 
 [%# INTERFACE:
   #
-  # columns: 
-  #   array of hashes representing the columns in the table. 
+  # columns:
+  #   array of hashes representing the columns in the table.
   #   Each hash contains data for a single column. Hash keys:
   #     name: Name of the field in the data param
   #     heading: The text to print at the header cell
@@ -30,11 +30,11 @@
   #                  Expressions of format %%xxx%% are replaced with value
   #                  with the key xxx in data hash of the current row.
   #     content: If specified, the content of this variable is used
-  #              instead of the data pulled from the current row. 
+  #              instead of the data pulled from the current row.
   #              NOTE: This value is only partially HTML filtered!
-  #     content_use_field: If defined and true, then each value in the 
+  #     content_use_field: If defined and true, then each value in the
   #                        column corresponds with a key in the
-  #                        field_descs field, and that value from the 
+  #                        field_descs field, and that value from the
   #                        field_descs hash will be used instead of "content."
   #                        See fieldvalues/select-field for an example of use.
   #                        This content WILL be HTML-filtered in this case.
@@ -69,7 +69,7 @@
   #   against. The second hash then again points to another hash. Within this
   #   third hash (3), the keys represent values to match against. The item
   #   contains a fourth hash (4) specifying overridden values.
-  #   
+  #
   #   Each column value mentioned in the 'columns' documentation above
   #   can be overwritten (apart from name and heading). To override a
   #   table-cell value 'xxx', specify a new 'xxx' value, and specify a
@@ -123,7 +123,7 @@
 
           [%# Are there any specific overrides for this column? %]
           [% FOREACH match_field = overrides.${c.name}.keys %]
-     
+
               [% override = overrides.${c.name}.${match_field}.${row.$match_field} %]
               [% NEXT UNLESS override %]
 
@@ -153,7 +153,7 @@
           [% END %]
           <a href="[% link_uri %]">
         [% END %]
-        
+
         [% IF content_use_field && field_descs.exists(row.${c.name}) %]
            [% colname = row.${c.name} %]
            [% field_descs.${colname} FILTER html %]
@@ -174,11 +174,11 @@
             [% END %]
           [% END %]
         [% END %]
-        
+
         [% IF contentlink %]
           </a>
         [% END %]
-         
+
       </td>
     [% END %]
   </tr>

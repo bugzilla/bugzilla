@@ -54,8 +54,8 @@
   [% anchor = "#c$comment_num" %]
 [% END %]
 
-<a class="bz_bug_link 
-          bz_status_[% bug.bug_status FILTER css_class_quote %] 
+<a class="bz_bug_link
+          bz_status_[% bug.bug_status FILTER css_class_quote %]
           [% ' bz_closed' IF !bug.isopened %]"
    title="[% link_title FILTER collapse FILTER html %]"
    href="[% urlbase FILTER html IF full_url %]show_bug.cgi?id=

@@ -62,8 +62,8 @@
     <div id="attachment_attributes">
       <div id="attachment_information_read_only" class="[% "bz_private" IF attachment.isprivate %]">
         <div class="title">
-          [% "[patch]" IF attachment.ispatch%] 
-          <span class="[% "bz_obsolete" IF attachment.isobsolete %]" title="[% "obsolete" IF attachment.isobsolete %]">              
+          [% "[patch]" IF attachment.ispatch%]
+          <span class="[% "bz_obsolete" IF attachment.isobsolete %]" title="[% "obsolete" IF attachment.isobsolete %]">
             [% attachment.description FILTER html %]
           </span>
           [% IF can_edit %]
@@ -96,28 +96,28 @@
             wrap           = 'soft'
             classes        = 'block' _ editable_or_hide
             defaultcontent = attachment.description
-          %]          
+          %]
         </div>
 
           <div id="attachment_filename">
             <label for="filename">Filename:</label>
             <input type="text" size="20"  class="text block[% editable_or_hide %]"
                    id="filename" name="filename"
-                   value="[% attachment.filename FILTER html %]">     
+                   value="[% attachment.filename FILTER html %]">
           </div>
 
           <div id="attachment_mimetype">
             <label for="contenttypeentry">MIME Type:</label>
             <input type="text" size="20" class="text block[% editable_or_hide %]"
                    id="contenttypeentry" name="contenttypeentry"
-                   value="[% attachment.contenttype FILTER html %]">                   
+                   value="[% attachment.contenttype FILTER html %]">
           </div>
-          
+
           <div id="attachment_creator">
             <span class="label">Creator:</span>
             [%+ INCLUDE global/user.html.tmpl who = attachment.attacher %]
           </div>
-          
+
           <div id="attachment_size">
             <span class="label">Size:</span>
             [% IF attachment.datasize %]
@@ -136,7 +136,7 @@
         <div class="readonly">
           <div class="checkboxes">
             <div id="attachment_isobsolete">
-              <input type="checkbox" id="isobsolete" name="isobsolete" value="1"                     
+              <input type="checkbox" id="isobsolete" name="isobsolete" value="1"
                      [%+ 'checked="checked"' IF attachment.isobsolete %]>
                 <label for="isobsolete">obsolete</label>
             </div>
@@ -156,7 +156,7 @@
               </div>
             [% END %]
           </div>
-        </div>                    
+        </div>
       </div>
 
       <div id="attachment_view_window">
@@ -249,8 +249,8 @@
         [% ELSE %]
           <div id="noview">
             <p><b>
-              Attachment is not viewable in your browser because its MIME type 
-              ([% attachment.contenttype FILTER html %]) is not one that your browser is 
+              Attachment is not viewable in your browser because its MIME type
+              ([% attachment.contenttype FILTER html %]) is not one that your browser is
               able to display.
             </b></p>
             <p><b>
@@ -285,12 +285,12 @@
 
         [% Hook.process('form_before_submit') %]
 
-        [% IF user.id %]       
+        [% IF user.id %]
           <div id="update_container">
             <input type="submit" value="Submit" id="update">
           </div>
-        [% END %]        
-      </div>        
+        [% END %]
+      </div>
     </div>
   </div>
 </form>

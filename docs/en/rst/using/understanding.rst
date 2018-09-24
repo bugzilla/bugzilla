@@ -26,7 +26,7 @@ installation of Bugzilla.
 
 *Product and Component*:
    Bugs are divided up by Product and Component, with a Product
-   having one or more Components in it. 
+   having one or more Components in it.
 
 *Version:*
    The "Version" field usually contains the numbers or names of released

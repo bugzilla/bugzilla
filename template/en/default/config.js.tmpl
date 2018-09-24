@@ -75,7 +75,7 @@ var [% cf.name FILTER js %] = [ [% FOREACH x = cf.legal_values %]'[% x.name FILT
 
 
 // A list of all products and their components, versions, and target milestones:
-  
+
 var component = new Object();
 var version = new Object();
 var target_milestone = new Object();
@@ -89,7 +89,7 @@ var target_milestone = new Object();
 // Product and Component Exceptions
 // ================================
 //
-// A blacklist for some commonly used words or word fragments 
+// A blacklist for some commonly used words or word fragments
 // that occur in a product or component name but should *not*
 // trigger product/component search in QuickSearch.
 
@@ -112,7 +112,7 @@ var component_exceptions = new Array(
 [% PROCESS "global/field-descs.none.tmpl" %]
 var field = [
 [% FOREACH x = field %]
-  { name:        '[% x.name FILTER js %]', 
+  { name:        '[% x.name FILTER js %]',
     description: '[% (field_descs.${x.name} OR x.description) FILTER js %]',
     [%-# These values are meaningful for custom fields only. %]
     [% IF x.custom %]

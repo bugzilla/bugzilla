@@ -75,9 +75,9 @@ foreach my $file (@testitems) {
                 last;
             }
         }
-            
+
         close (FILE);
-            
+
         if ($found_word) {
             ok(0,"$file: found SPELLING ERROR $found_word --WARNING");
         } else {
@@ -86,6 +86,6 @@ foreach my $file (@testitems) {
     } else {
         ok(0,"could not open $file for spellcheck --WARNING");
     }
-} 
+}
 
 exit 0;

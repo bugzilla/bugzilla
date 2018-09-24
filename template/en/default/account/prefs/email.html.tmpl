@@ -78,7 +78,7 @@ document.write('<input type="button" value="Disable All Bugmail" onclick="SetChe
     <td width="150"></td>
     <td>
       [% prefname = "email-$constants.REL_ANY-$constants.EVT_FLAG_REQUESTED" %]
-      <input type="checkbox" name="[% prefname %]" id="[% prefname %]" 
+      <input type="checkbox" name="[% prefname %]" id="[% prefname %]"
         value="1"
         [% " checked"
            IF user.mail_settings.${constants.REL_ANY}.${constants.EVT_FLAG_REQUESTED} %]>
@@ -90,7 +90,7 @@ document.write('<input type="button" value="Disable All Bugmail" onclick="SetChe
     <td width="150"></td>
     <td>
       [% prefname = "email-$constants.REL_ANY-$constants.EVT_REQUESTED_FLAG" %]
-      <input type="checkbox" name="[% prefname %]" id="[% prefname %]" 
+      <input type="checkbox" name="[% prefname %]" id="[% prefname %]"
         value="1"
         [% " checked"
            IF user.mail_settings.${constants.REL_ANY}.${constants.EVT_REQUESTED_FLAG} %]>
@@ -159,7 +159,7 @@ document.write('<input type="button" value="Disable All Bugmail" onclick="SetChe
 ] %]
 
 [% IF Param('useqacontact') %]
-  [% relationships.push({ id = constants.REL_QA, 
+  [% relationships.push({ id = constants.REL_QA,
                           description = "QA Contact" }) %]
 [% END %]
 
@@ -188,18 +188,18 @@ document.write('<input type="button" value="Disable All Bugmail" onclick="SetChe
       </th>
     [% END %]
   </tr>
-  
-  [% FOREACH event = events %]  
+
+  [% FOREACH event = events %]
     [% count = loop.count() %]
     <tr class="bz_row_[% count % 2 == 1 ? "odd" : "even" %]">
       [% FOREACH relationship = relationships %]
         <td align="center">
-          <input type="checkbox" 
+          <input type="checkbox"
             name="email-[% relationship.id %]-[% event.id %]"
             value="1"
             [%# The combinations don't always make sense; disable a couple %]
-            [% IF event.id == constants.EVT_ADDED_REMOVED AND 
-                  no_added_removed.contains(relationship.id) 
+            [% IF event.id == constants.EVT_ADDED_REMOVED AND
+                  no_added_removed.contains(relationship.id)
             %]
                disabled
             [% ELSIF user.mail_settings.${relationship.id}.${event.id} %]
@@ -212,9 +212,9 @@ document.write('<input type="button" value="Disable All Bugmail" onclick="SetChe
       </td>
     </tr>
   [% END %]
-  
+
   <tr>
-    <td colspan="[% num_columns FILTER html %]" 
+    <td colspan="[% num_columns FILTER html %]"
         align="center" width="50%">
       &nbsp;
     </td>
@@ -223,12 +223,12 @@ document.write('<input type="button" value="Disable All Bugmail" onclick="SetChe
     </td>
   </tr>
 
-  [% FOREACH event = neg_events %]  
+  [% FOREACH event = neg_events %]
     [% count = loop.count() %]
     <tr class="bz_row_[% count % 2 == 1 ? "odd" : "even" %]">
       [% FOREACH relationship = relationships %]
         <td align="center">
-          <input type="checkbox" 
+          <input type="checkbox"
             name="neg-email-[% relationship.id %]-[% event.id %]"
             value="1"
             [% " checked" IF NOT user.mail_settings.${relationship.id}.${event.id} %]>
@@ -239,16 +239,16 @@ document.write('<input type="button" value="Disable All Bugmail" onclick="SetChe
       </td>
     </tr>
   [% END %]
-  
+
 </table>
 
 <hr>
 <b>User Watching</b>
 
 <p>
-If you watch a user, it is as if you are standing in their shoes for the 
+If you watch a user, it is as if you are standing in their shoes for the
 purposes of getting email. Email is sent or not according to <u>your</u>
-preferences for <u>their</u> relationship to the [% terms.bug %] 
+preferences for <u>their</u> relationship to the [% terms.bug %]
 (e.g. Assignee).
 </p>
 
@@ -277,7 +277,7 @@ You are currently not watching any users.
      size => 60
      multiple => 5
   %]
-</p>            
+</p>
 
 <p id="watching_you">Users watching you:<br>
   [% IF watchers.size %]
@@ -294,7 +294,7 @@ You are currently not watching any users.
 <p>
   You can specify a list of [% terms.bugs %] from which you never want to get
   any email notification of any kind by adding their ID(s) as a comma-separated
-  list. Removing [% terms.abug %] by selecting it from the current ignored list 
+  list. Removing [% terms.abug %] by selecting it from the current ignored list
   will re-enable email notifications for the [% terms.bug %].
 </p>
 [% IF user.bugs_ignored.size %]
@@ -324,5 +324,5 @@ You are currently not watching any users.
 [% END %]
 
 <p>Add [% terms.bugs %]:<br>
-  <input type="text" id="add_ignored_bugs" 
+  <input type="text" id="add_ignored_bugs"
          name="add_ignored_bugs" size="60"></p>

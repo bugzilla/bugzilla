@@ -26,10 +26,10 @@
   #   type_selected: used by the free text to indicate which type of text
   #                  search was selected for a particular field
   #%]
-  
+
 [% SWITCH field.type %]
   [% CASE [ constants.FIELD_TYPE_FREETEXT,
-            constants.FIELD_TYPE_TEXTAREA, 
+            constants.FIELD_TYPE_TEXTAREA,
             constants.FIELD_TYPE_UNKNOWN ] %]
     [% INCLUDE "bug/field-label.html.tmpl"
       field = field
@@ -38,14 +38,14 @@
     %]
     [% INCLUDE "search/type-select.html.tmpl"
        name = field.name _ "_type",
-       types = types, 
+       types = types,
        selected = type_selected
-    %]    
-    <input name="[% field.name FILTER html %]" 
+    %]
+    <input name="[% field.name FILTER html %]"
            id="[% field.name FILTER html %]" size="40"
            [% IF autofocus %] autofocus[% END %]
            [% IF onchange %] onchange="[% onchange FILTER html %]"[% END %]
-           value="[% value FILTER html %]">              
+           value="[% value FILTER html %]">
   [% CASE constants.FIELD_TYPE_KEYWORDS %]
     [% INCLUDE "bug/field-label.html.tmpl"
       field = field
@@ -54,7 +54,7 @@
     %]
     [% INCLUDE "search/type-select.html.tmpl"
        name = field.name _ "_type",
-       types = types, 
+       types = types,
        selected = type_selected
     %]
     <input name="[% field.name FILTER html %]"
@@ -77,20 +77,20 @@
       tag_name = "span"
       editable = 1
     %]
-    from <input name="[% field.name FILTER html %]from" 
-                id="[% field.name FILTER html %]" 
+    from <input name="[% field.name FILTER html %]from"
+                id="[% field.name FILTER html %]"
                 size="10" maxlength="10"
-                value="[% value.0 FILTER html %]" 
+                value="[% value.0 FILTER html %]"
                 onchange="updateCalendarFromField(this);[% onchange FILTER html %]">
          <button type="button" class="calendar_button"
                         id="button_calendar_[% field.name FILTER html %]"
                         onclick="showCalendar('[% field.name FILTER js %]')">
            <span>Calendar</span>
          </button>
-         <span id="con_calendar_[% field.name FILTER html %]"></span>               
-    to <input name="[% field.name FILTER html %]to" 
+         <span id="con_calendar_[% field.name FILTER html %]"></span>
+    to <input name="[% field.name FILTER html %]to"
               id="[% field.name FILTER html %]to" size="10" maxlength="10"
-              value="[% value.1 FILTER html %]" 
+              value="[% value.1 FILTER html %]"
               onchange="updateCalendarFromField(this);[% onchange FILTER html %]">
        <button type="button" class="calendar_button"
                       id="button_calendar_[% field.name FILTER html %]to"
@@ -98,22 +98,22 @@
          <span>Calendar</span>
        </button>
     <small>(YYYY-MM-DD or relative dates)</small>
-    
+
     <span id="con_calendar_[% field.name FILTER html %]to"></span>
     <script [% script_nonce FILTER none %]>
       createCalendar('[% field.name FILTER js %]');
       createCalendar('[% field.name FILTER js %]to');
     </script>
-  [% CASE [ constants.FIELD_TYPE_SINGLE_SELECT, 
+  [% CASE [ constants.FIELD_TYPE_SINGLE_SELECT,
             constants.FIELD_TYPE_MULTI_SELECT ] %]
-    <div id="container_[% field.name FILTER html %]" class="search_field_grid">      
+    <div id="container_[% field.name FILTER html %]" class="search_field_grid">
       [% INCLUDE "bug/field-label.html.tmpl"
         field = field
         editable = 1
         tag_name = "span"
       %]
-      <select name="[% field.name FILTER html%]" 
-              id="[% field.name FILTER html %]" 
+      <select name="[% field.name FILTER html%]"
+              id="[% field.name FILTER html %]"
         [% IF onchange %] onchange="[% onchange FILTER html %]"[% END %]
         multiple="multiple" size="9">
         [% legal_values = ${field.name} %]
@@ -122,7 +122,7 @@
         [% END %]
         [% FOREACH current_value = legal_values %]
           [% IF current_value.id %]
-            [%# current_value is a hash instead of a value which 
+            [%# current_value is a hash instead of a value which
                 only applies for Resolution really, everywhere else current_value
                 is just the value %]
             [% v = current_value.name OR '---' -%]

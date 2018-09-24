@@ -3,7 +3,7 @@ Languages
 
 Bugzilla's templates can be localized, although it's a `big job
 <https://wiki.mozilla.org/Bugzilla:L10n:Guide>`_. If you have
-a localized set of templates for your version of Bugzilla, Bugzilla can 
+a localized set of templates for your version of Bugzilla, Bugzilla can
 support multiple languages at once. In that case, Bugzilla honours the user's
 ``Accept-Language`` HTTP header when deciding which language to serve. If
 multiple languages are installed, a menu will display in the header allowing

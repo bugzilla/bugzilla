@@ -20,9 +20,9 @@
 
 [% PROCESS global/variables.none.tmpl %]
 [% SET title = "$terms.Bugzilla 4.2 Release Notes" %]
-[% INCLUDE global/header.html.tmpl 
+[% INCLUDE global/header.html.tmpl
   title = title
-  style_urls = ['skins/standard/page.css'] 
+  style_urls = ['skins/standard/page.css']
 %]
 
 <h1>[% title FILTER html %]</h1>
@@ -515,9 +515,9 @@
     dependencies is now much faster.</li>
   <li><strong>Attachments:</strong> The encoding of text files can be automatically
     detected when uploading them as attachments.</li>
-  <li><strong>Attachments:</strong> Clickjacking could possibly occur in an attachment 
-    Details page if a user attached a specially formatted HTML file. To fix this 
-    potential problem, the Details page always displays the HTML source instead and 
+  <li><strong>Attachments:</strong> Clickjacking could possibly occur in an attachment
+    Details page if a user attached a specially formatted HTML file. To fix this
+    potential problem, the Details page always displays the HTML source instead and
     users can see rendered page by clicking on View.</li>
   <li><strong>Flags:</strong> Changing the requestee of a flag no longer changes
     the requester.</li>
@@ -683,7 +683,7 @@
   <li><a href="#v40_feat">New Features and Improvements</a></li>
   <li><a href="#v40_issues">Outstanding Issues</a></li>
   <li><a href="#v40_upgrading">Notes On Upgrading From a Previous Version</a></li>
-  <li><a href="#v40_code_changes">Code Changes Which May Affect 
+  <li><a href="#v40_code_changes">Code Changes Which May Affect
     Customizations and Extensions</a></li>
   <li><a href="#v40_previous">Release Notes for Previous Versions</a></li>
 </ul>
@@ -708,7 +708,7 @@
 
 <p>If you're upgrading, make sure to read <a href="#v40_upgrading">Notes
   On Upgrading From a Previous Version</a>. If you are upgrading from a release
-  before 3.6, make sure to read the release notes for all the 
+  before 3.6, make sure to read the release notes for all the
   <a href="#v40_previous">previous versions</a> in between your version
   and this one, <strong>particularly the Upgrading section of each
   version's release notes</strong>.</p>
@@ -778,7 +778,7 @@
     <p>(<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=646578">[% terms.Bug %] 646578</a>)</p></li>
   <li>The "Remember values as bookmarkable template" button on the
     [%+ terms.bug %] entry page will now work even when some required fields
-    are empty. 
+    are empty.
     (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=640719">[% terms.Bug %] 640719</a>)</li>
   <li>Email notifications about dependencies and flags had the wrong
     timestamp.
@@ -787,7 +787,7 @@
   <li>You can now select "UTC" as a valid timezone in General Preferences.
     (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=646209">[% terms.Bug %] 646209</a>)</li>
   <li>Automatic duplicate detection now works on PostgreSQL (although
-    it is not as high-quality as on other DB platforms). 
+    it is not as high-quality as on other DB platforms).
     (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=634144">[% terms.Bug %] 634144</a>)</li>
    <li>Autcomplete for users now works even if you are using the
      "emailsuffix" option.
@@ -797,7 +797,7 @@
      (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=644285">[% terms.Bug %] 644285</a>)</li>
     <li>The "Show Votes" page now works, for installations using the Voting
       extension.
-      (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=652381">[% terms.Bug %] 652381</a>)</li> 
+      (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=652381">[% terms.Bug %] 652381</a>)</li>
 </ul>
 
 <h2 id="v40_req">Minimum Requirements</h2>
@@ -1183,7 +1183,7 @@
   another domain, inside of a web browser, thanks to support for
   <a href="https://bob.ippoli.to/archives/2005/12/05/remote-json-jsonp/">JSONP</a>.
   This will allow for web "mash-ups" to use [% terms.Bugzilla %] data.
-  When using JSONP, you may only call functions that <em>get</em> data, 
+  When using JSONP, you may only call functions that <em>get</em> data,
   you may not call functions that <em>change</em> data.</p>
 
 <p>For more details, see the
@@ -1222,7 +1222,7 @@
 
 <h3 id="v40_feat_js_css_update">Users Get New CSS and Javascript
   Automatically</h3>
-  
+
 <p>In past versions of [% terms.Bugzilla %], if you changed
   [%+ terms.Bugzilla %]'s CSS or Javascript files, then every user of
   [%+ terms.Bugzilla %] would have to clear their cache in order to get
@@ -1245,8 +1245,8 @@
 <h3 id="v40_feat_apache_config">New Apache Configuration</h3>
 
 <p>If you run [% terms.Bugzilla %] under Apache (as most people do),
-  you most likely require a <strong>new Apache configuration</strong> 
-  for this version of [% terms.Bugzilla %]. See the 
+  you most likely require a <strong>new Apache configuration</strong>
+  for this version of [% terms.Bugzilla %]. See the
   <a href="#v40_upgrading">Notes On Upgrading From a Previous Version</a>
   section for details.</p>
 
@@ -1280,7 +1280,7 @@
   <li><strong>[% terms.Bugs %]:</strong> The box to "Add [% terms.Bug %] URLs"
     in the See Also field is now hidden behind an "(add)" link that you
     have to click to see the box.</li>
-  
+
   <li><strong>Searches:</strong> You can now properly search for field values
     that have commas in their name, when using the Advanced Search form.</li>
   <li><strong>Searches:</strong> The "URL" field can now be shown as a column
@@ -1306,7 +1306,7 @@
   <li><strong>Searches:</strong> When using the Boolean Charts (now called
     "Custom Search"), you can search for values "greater than or equal to"
     or "less than or equal to" some value.</li>
-  
+
   <li><strong>Flags:</strong> If you hover your mouse over the name of
     a flag setter when viewing [% terms.abug %], you can see that
     flag setter's full name and complete username.</li>
@@ -1317,7 +1317,7 @@
     that are restricted to certain groups now properly have the "padlock"
     icon shown next to them to indicate that they may contain confidential
     information.</li>
-  
+
   <li>When using the Reports interface, you can now choose many more fields
     as the X, Y, or Z axis of a report, including custom fields.</li>
   <li>[% terms.Bugzilla %] now prevents
@@ -1420,14 +1420,14 @@
     <a href="https://developer.mozilla.org/docs/Web/HTTP/Headers/X-Frame-Options"><code>X-Frame-Options: SAMEORIGIN</code></a> header
     with every page request in order to prevent "clickjacking" attacks. Note
     that this prevents other domains from displaying [% terms.Bugzilla %]
-    in an HTML frame.</li> 
+    in an HTML frame.</li>
 </ul>
 
 <h4 id="v40_feat_ws_changes">WebService Changes</h4>
 
 <ul>
   <li>You can now call some JSON-RPC methods using HTTP GET, in addition to
-    using HTTP POST. See the 
+    using HTTP POST. See the
     <a href="[% docs_urlbase FILTER html %]api/Bugzilla/WebService/Server/JSONRPC.html#Connecting_via_GET">JSON-RPC
     documentation</a> for details.</li>
   <li>You can now update existing [% terms.bugs %] using the
@@ -1483,15 +1483,15 @@
     [%- terms.Bug %] 423439</a>: Tabs in comments will be converted
     to four spaces, due to a b<!-- -->ug in Perl as of Perl 5.8.8.</li>
   <li><a href="https://bugzilla.mozilla.org/show_bug.cgi?id=89822">
-    [%- terms.Bug %] 89822</a>: When changing multiple [% terms.bugs %] at 
+    [%- terms.Bug %] 89822</a>: When changing multiple [% terms.bugs %] at
     the same time, there is no "mid-air collision" protection.</li>
   <li><a href="https://bugzilla.mozilla.org/show_bug.cgi?id=276230">
-    [%- terms.Bug %] 276230</a>: The support for restricting access to 
-    particular Categories of New Charts is not complete. You should treat 
+    [%- terms.Bug %] 276230</a>: The support for restricting access to
+    particular Categories of New Charts is not complete. You should treat
     the 'chartgroup' Param as the only access mechanism available.<br>
-    However, charts migrated from Old Charts will be restricted to 
+    However, charts migrated from Old Charts will be restricted to
     the groups that are marked MANDATORY for the corresponding Product.
-    There is currently no way to change this restriction, and the 
+    There is currently no way to change this restriction, and the
     groupings will not be updated if the group configuration
     for the Product changes.</li>
 </ul>
@@ -1504,7 +1504,7 @@
 
 <p>If you run [% terms.Bugzilla %] under mod_cgi (this is the most common
   configuration, involving a &lt;Directory&gt; block in your Apache config
-  file), you will need to update the configuration of Apache for 
+  file), you will need to update the configuration of Apache for
   [%+ terms.Bugzilla %]. In particular, this line in the [% terms.Bugzilla %]
   <kbd>&lt;Directory&gt;</kbd> block:</p>
 
@@ -1513,7 +1513,7 @@
 <p>needs to become:</p>
 
 <blockquote><code>AllowOverride Limit FileInfo Indexes</code></blockquote>
- 
+
 <p>For full details on how to configure Apache for [% terms.Bugzilla %],
   see the
   <a href="[% docs_urlbase FILTER html %]configuration.html#http-apache">Configuration</a>
@@ -1524,7 +1524,7 @@
 <p>If your [% terms.Bugzilla %] runs under mod_perl, the required Apache
   configuration is now simpler. The line that used to look like:</p>
 
-<blockquote><code>PerlSwitches -w -T -I/var/www/html/bugzilla 
+<blockquote><code>PerlSwitches -w -T -I/var/www/html/bugzilla
     -I/var/www/html/bugzilla/lib</code></blockquote>
 
 <p>Now should be only:</p>
@@ -1631,7 +1631,7 @@
        [% '</span>' IF db_new %]
        </li>
     <li><strong>perl module:</strong>
-      [%+ m.dbd.module FILTER html %] 
+      [%+ m.dbd.module FILTER html %]
       [% '<span class="req_new">' IF dbd_new %]v[% m.dbd.version FILTER html %]
       [% '</span>' IF dbd_new %]</li>
   </ul>
@@ -1649,8 +1649,8 @@
     [% FOREACH req = reqs %]
       <tr>
         <td [% ' class="req_new"' IF new.contains(req.package) %]>
-          [%- req.module FILTER html %]</td> 
-        <td [% ' class="req_new"' IF updated.contains(req.package) 
+          [%- req.module FILTER html %]</td>
+        <td [% ' class="req_new"' IF updated.contains(req.package)
                                      OR new.contains(req.package) %]>
           [%- IF req.version == 0 %]
             (Any)
@@ -1658,7 +1658,7 @@
             [%- req.version FILTER html %]
           [% END %]
         </td>
-        [% IF include_feature %] 
+        [% IF include_feature %]
           <td>[% req.feature.join(', ') FILTER html %]</td>
         [% END %]
       </tr>

@@ -10,7 +10,7 @@
   #
   # The Original Code is the Bugzilla Bug Tracking System.
   #
-  # Contributor(s): André Batosti <batosti@async.com.br> 
+  # Contributor(s): André Batosti <batosti@async.com.br>
   #
   #%]
 
@@ -37,7 +37,7 @@
 
 [% IF changes._group_controls.now_mandatory.size %]
   [% FOREACH g = changes._group_controls.now_mandatory %]
-    Adding [% terms.bugs %] to group '[% g.name FILTER html %]' which is 
+    Adding [% terms.bugs %] to group '[% g.name FILTER html %]' which is
     mandatory for this product<p>
     [% g.bug_count FILTER html %] [%+ terms.bugs %] added<p>
   [% END %]

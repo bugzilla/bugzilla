@@ -48,23 +48,23 @@
      exclude = '^' _ exclude_items.join('|') _ '$' %]
 
 <input type="hidden" name="confirm_product_change" value="1">
-    
+
 [%# Verify the version, component, and target milestone fields. %]
 <h3>Verify Version, Component
-  [%- ", Target Milestone" 
+  [%- ", Target Milestone"
       IF Param("usetargetmilestone")
          && bug.check_can_change_field('target_milestone', 0, 1) %]</h3>
 
 <p>
-[% IF Param("usetargetmilestone") 
-   && bug.check_can_change_field('target_milestone', 0, 1) 
+[% IF Param("usetargetmilestone")
+   && bug.check_can_change_field('target_milestone', 0, 1)
 %]
-  You are moving the [% terms.bug %](s) to the product 
+  You are moving the [% terms.bug %](s) to the product
   <b>[% product.name FILTER html %]</b>,
   and the version, component, and/or target milestone fields are no longer
   correct.  Please set the correct version, component, and target milestone now:
 [% ELSE %]
-  You are moving the [% terms.bug %](s) to the product 
+  You are moving the [% terms.bug %](s) to the product
   <b>[% product.name FILTER html %]</b>,
   and the version and component fields are no longer correct.
   Please set the correct version and component now:
@@ -80,7 +80,7 @@
       [% ELSE %]
         [% SET default_version = defaults.version %]
       [% END %]
-      [% PROCESS "global/select-menu.html.tmpl" 
+      [% PROCESS "global/select-menu.html.tmpl"
                  name="version"
                  options=versions
                  default=default_version
@@ -99,8 +99,8 @@
                  default=default_component
                  size=10 %]
     </td>
-    [% IF Param("usetargetmilestone") 
-          && bug.check_can_change_field('target_milestone', 0, 1) 
+    [% IF Param("usetargetmilestone")
+          && bug.check_can_change_field('target_milestone', 0, 1)
     %]
       <td>
         <b>Target Milestone:</b><br>
@@ -117,7 +117,7 @@
 
 [% IF verify_bug_groups %]
   <h3>Verify [% terms.Bug %] Group</h3>
-  
+
   [% IF old_groups.size %]
     <p>These groups are not legal for the '[% product.name FILTER html %]'
     product or you are not allowed to restrict [% terms.bugs %] to these groups.<br>

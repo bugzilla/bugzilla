@@ -26,7 +26,7 @@
 [% IF !target %]
  [% target = "index.cgi" %]
 [% END %]
-  
+
 [% PROCESS global/variables.none.tmpl %]
 
 [% PROCESS global/header.html.tmpl
@@ -57,7 +57,7 @@
       <input type="password" id="Bugzilla_password" name="Bugzilla_password" required>
     </div>
 
-    [% IF Param('rememberlogin') == 'defaulton' || 
+    [% IF Param('rememberlogin') == 'defaulton' ||
        Param('rememberlogin') == 'defaultoff' %]
       <div class="field-remember">
         <input type="checkbox" id="Bugzilla_remember" name="Bugzilla_remember" value="on"

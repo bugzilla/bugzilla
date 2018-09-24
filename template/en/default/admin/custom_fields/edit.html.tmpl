@@ -92,7 +92,7 @@
                  value="[% field.reverse_desc FILTER html %]">
           <br>
           Use this label for the list of [% terms.bugs %] that link to
-          [%+ terms.abug %] with this 
+          [%+ terms.abug %] with this
           [%+ field_types.${constants.FIELD_TYPE_BUG_ID} FILTER html %] field.
           For example, if the description is "Is a duplicate of",
           the reverse description would be "Duplicates of this [% terms.bug %]".
@@ -111,7 +111,7 @@
           [% FOREACH sel_field = Bugzilla.fields({ is_select => 1 }) %]
             [% NEXT IF sel_field.id == field.id %]
             <option value="[% sel_field.id FILTER html %]"
-             [% ' selected="selected"' 
+             [% ' selected="selected"'
                 IF sel_field.id == field.visibility_field.id %]>
               [% sel_field.description FILTER html %]
               ([% sel_field.name FILTER html %])
@@ -121,7 +121,7 @@
         <label for="visibility_values">
           <strong>is set to any of:</strong>
         </label>
-        <select multiple="multiple" size="5" name="visibility_values" 
+        <select multiple="multiple" size="5" name="visibility_values"
                 id="visibility_values" class="field_value">
           [% FOREACH value = field.visibility_field.legal_values %]
             <option value="[% value.id FILTER html %]"
@@ -131,7 +131,7 @@
               [% END %]
               [%+ display_value(field.visibility_field.name, value.name) FILTER html %]
             </option>
-          [% END %]   
+          [% END %]
         </select>
       </td>
     </tr>
@@ -156,7 +156,7 @@
             [% FOREACH sel_field = Bugzilla.fields({ is_select => 1 }) %]
               [% NEXT IF sel_field.id == field.id %]
               <option value="[% sel_field.id FILTER html %]"
-               [% ' selected="selected"' 
+               [% ' selected="selected"'
                   IF sel_field.id == field.value_field.id %]>
                 [% sel_field.description FILTER html %]
                 ([% sel_field.name FILTER html %])

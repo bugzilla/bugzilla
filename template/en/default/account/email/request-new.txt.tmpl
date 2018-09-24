@@ -29,7 +29,7 @@ X-Bugzilla-Type: admin
 [%+ terms.Bugzilla %] has received a request to create a user account
 using your email address ([% email %]).
 
-To continue creating an account using this email address, visit the 
+To continue creating an account using this email address, visit the
 following link by [% expiration_ts FILTER time("%B %e, %Y at %H:%M %Z") %]:
 
 [%+ urlbase %]token.cgi?t=[% token FILTER uri %]&a=request_new_account

@@ -339,7 +339,7 @@ var inline_history = {
           && flagItem[3] == flagName + flagValue
           && flagItem[4] == setterIdentity
         ) {
-          flagLabel.innerHTML = 
+          flagLabel.innerHTML =
             '<a href="#' + flagItem[5] + '">' + flagName + '</a>';
           break;
         }

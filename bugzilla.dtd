@@ -5,12 +5,12 @@
           maintainer CDATA #REQUIRED
           exporter CDATA #IMPLIED
 >
-<!ELEMENT bug (bug_id, (alias?, creation_ts, short_desc, delta_ts, reporter_accessible, 
-    cclist_accessible, classification_id, classification, product, component, 
-    version, rep_platform, op_sys, bug_status, resolution?, dup_id?, see_also*, 
-    bug_file_loc?, status_whiteboard?, keywords*, priority, bug_severity, 
-    target_milestone?, dependson*, blocked*, everconfirmed, reporter, assigned_to, 
-    cc*, (estimated_time, remaining_time, actual_time, deadline?)?, qa_contact?, 
+<!ELEMENT bug (bug_id, (alias?, creation_ts, short_desc, delta_ts, reporter_accessible,
+    cclist_accessible, classification_id, classification, product, component,
+    version, rep_platform, op_sys, bug_status, resolution?, dup_id?, see_also*,
+    bug_file_loc?, status_whiteboard?, keywords*, priority, bug_severity,
+    target_milestone?, dependson*, blocked*, everconfirmed, reporter, assigned_to,
+    cc*, (estimated_time, remaining_time, actual_time, deadline?)?, qa_contact?,
     votes?, token?, group*, flag*, long_desc*, attachment*)?)>
 <!ATTLIST bug
           error (NotFound | NotPermitted | InvalidBugId) #IMPLIED
@@ -29,7 +29,7 @@
 <!ELEMENT version (#PCDATA)>
 <!ELEMENT rep_platform (#PCDATA)>
 <!ELEMENT assigned_to (#PCDATA)>
-<!ATTLIST assigned_to 
+<!ATTLIST assigned_to
           name CDATA #REQUIRED
 >
 <!ELEMENT delta_ts (#PCDATA)>
@@ -100,7 +100,7 @@
 <!ATTLIST flag
           name CDATA #REQUIRED
           id CDATA #REQUIRED
-          type_id CDATA #REQUIRED 
+          type_id CDATA #REQUIRED
           status CDATA #REQUIRED
           setter CDATA #REQUIRED
           requestee CDATA #IMPLIED

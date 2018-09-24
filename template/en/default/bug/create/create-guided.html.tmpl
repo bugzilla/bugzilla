@@ -62,7 +62,7 @@ function PutDescription() {
 <h3 id="step1">Step 1 of 3 - has your [% terms.bug %] already been reported?</h3>
 
 <p>
-  <font color="red">Please don't skip this step - half of all 
+  <font color="red">Please don't skip this step - half of all
   [% terms.bugs %] filed are
   reported already.</font>
     Check the two lists of frequently-reported [% terms.bugs %]:
@@ -79,7 +79,7 @@ function PutDescription() {
 
 <p>
     <a href="duplicates.cgi?[% productstring %]&amp;format=simple" target="somebugs">All-time Top 20</a> (loaded initially) |
-    <a href="duplicates.cgi?[% productstring %]&amp;format=simple&amp;sortby=delta&amp;reverse=1&amp;maxrows=100&amp;changedsince=14" target="somebugs">Hot in the last two weeks</a>  
+    <a href="duplicates.cgi?[% productstring %]&amp;format=simple&amp;sortby=delta&amp;reverse=1&amp;maxrows=100&amp;changedsince=14" target="somebugs">Hot in the last two weeks</a>
 </p>
 
 <iframe name="somebugs" id="somebugs"
@@ -100,8 +100,8 @@ function PutDescription() {
     <input type="hidden" name="order" value="relevance desc">
     <input type="hidden" name="bug_status" value="__all__">
     <input type="hidden" name="product" value="[% product.name FILTER html %]">
-    [% IF product.name == "Firefox" OR 
-          product.name == "Thunderbird" OR 
+    [% IF product.name == "Firefox" OR
+          product.name == "Thunderbird" OR
           product.name == "SeaMonkey" OR
           product.name == "Camino" %]
       <input type="hidden" name="product" value="Core">
@@ -130,7 +130,7 @@ function PutDescription() {
 <h3 id="step2">Step 2 of 3 - give information</h3>
 
 <p>
-  If you've tried a few searches and your [% terms.bug %] really isn't in 
+  If you've tried a few searches and your [% terms.bug %] really isn't in
   there, tell us all about it.
 </p>
 
@@ -191,7 +191,7 @@ function PutDescription() {
           </td>
         </tr>
       </table>
-      
+
       <p>
         The area where the problem occurs.
         To pick the right component, you could use the same one as
@@ -232,7 +232,7 @@ function PutDescription() {
     [% matches = cgi.user_agent('Gecko/(\d+)') %]
     [% buildid = cgi.user_agent() IF matches %]
   [% END %]
-  
+
   [%# Accept URL parameter build ID for non-browser products %]
   [% IF cgi.param("buildid") %]
     [% buildid = cgi.param("buildid") %]
@@ -245,11 +245,11 @@ function PutDescription() {
     <td valign="top">
       <input type="text" size="80" name="buildid" value="[% buildid FILTER html %]">
       <p>
-        This should identify the exact version of the product you were using.  
-        If the above field is blank or you know it is incorrect, copy the 
-        user agent text from the product's Help | Troubleshooting Information menu 
-        (for browsers this will begin with "Mozilla/5.0..."). 
-        If the product won't start, instead paste the complete URL you downloaded 
+        This should identify the exact version of the product you were using.
+        If the above field is blank or you know it is incorrect, copy the
+        user agent text from the product's Help | Troubleshooting Information menu
+        (for browsers this will begin with "Mozilla/5.0...").
+        If the product won't start, instead paste the complete URL you downloaded
         it from.
       </p>
     </td>
@@ -275,7 +275,7 @@ function PutDescription() {
       <b>Summary</b>
     </td>
     <td valign="top">
-      <input type="text" size="80" name="short_desc" id="short_desc" 
+      <input type="text" size="80" name="short_desc" id="short_desc"
              maxlength="255" spellcheck="true">
       <p>
         A sentence which summarises the problem.
@@ -317,7 +317,7 @@ function PutDescription() {
         <tt>
           <font color="#009900">Good example</font>: After a crash which
           happened when I was sorting in the Bookmark Manager,<br> all of my
-          top-level bookmark folders beginning with the letters Q to Z are 
+          top-level bookmark folders beginning with the letters Q to Z are
           no longer present.
         </tt>
       </p>
@@ -423,7 +423,7 @@ function PutDescription() {
       </p>
     </td>
   </tr>
-  
+
   <tr>
     <td valign="top" align="right">
       <b>Severity</b>
@@ -452,7 +452,7 @@ function PutDescription() {
         </option>
       </select>
       <p>
-        Say how serious the problem is, or if your [% terms.bug %] is a 
+        Say how serious the problem is, or if your [% terms.bug %] is a
         request for a new feature.
       </p>
     </td>
@@ -474,12 +474,12 @@ function PutDescription() {
 
 <p>
   That's it! Thanks very much. You'll be notified by email about any
-  progress that is made on fixing your [% terms.bug %]. 
+  progress that is made on fixing your [% terms.bug %].
 
-<p>  
+<p>
   Please be warned
-  that we get a lot of [% terms.bug %] reports filed - it may take quite a 
-  while to get around to yours. You can help the process by making sure your 
+  that we get a lot of [% terms.bug %] reports filed - it may take quite a
+  while to get around to yours. You can help the process by making sure your
   [%+ terms.bug %] is
   complete and easy to understand, and by quickly replying to any questions
   which may arrive by email.

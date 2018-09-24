@@ -1,6 +1,6 @@
 function toggleAdvancedFields() {
   TUI_toggle_class('expert_fields');
-  var elements = YAHOO.util.Dom.getElementsByClassName('expert_fields');   
+  var elements = YAHOO.util.Dom.getElementsByClassName('expert_fields');
   if (YAHOO.util.Dom.hasClass(elements[0], TUI_HIDDEN_CLASS)) {
     handleWantsBugFlags(false);
   }
@@ -47,7 +47,7 @@ YAHOO.util.Event.onDOMReady(function() {
   }
 
   // force field widths
-  
+
   var width = document.getElementById('short_desc').clientWidth + 'px';
   var el;
 

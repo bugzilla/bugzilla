@@ -121,7 +121,7 @@ function bz_getFullWidth(fromObj)
 /**
  * Causes a block to appear directly underneath another block,
  * overlaying anything below it.
- * 
+ *
  * @param item   The block that you want to move.
  * @param parent The block that it goes on top of.
  * @return nothing
@@ -272,7 +272,7 @@ function bz_preselectedOptions(aSelect) {
 
 /**
  * Tells you whether or not a particular value is selected in a select,
- * whether it's a multi-select or a single-select. The check is 
+ * whether it's a multi-select or a single-select. The check is
  * case-sensitive.
  *
  * @param aSelect        The select you're checking.
@@ -306,9 +306,9 @@ function bz_optionIndex(aSelect, aValue) {
 
 /**
  * Used to fire an event programmatically.
- * 
+ *
  * @param anElement      The element you want to fire the event of.
- * @param anEvent        The name of the event you want to fire, 
+ * @param anEvent        The name of the event you want to fire,
  *                       without the word "on" in front of it.
  */
 function bz_fireEvent(anElement, anEvent) {

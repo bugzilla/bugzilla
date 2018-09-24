@@ -18,7 +18,7 @@ use Support::Files;
 use Test::More tests => 17;
 use DateTime;
 
-BEGIN { 
+BEGIN {
     use_ok('Bugzilla');
     use_ok('Bugzilla::Util');
 }
@@ -53,13 +53,13 @@ is(format_time("2002.11.24 00:05:56", "%Y-%m-%d %R %Z"), "2002-11-24 00:05 $tz",
 my %email_strings = (
     'somebody@somewhere.com' => 'somebody',
     'Somebody <somebody@somewhere.com>' => 'Somebody <somebody>',
-    'One Person <one@person.com>, Two Person <two@person.com>' 
+    'One Person <one@person.com>, Two Person <two@person.com>'
         => 'One Person <one>, Two Person <two>',
     'This string contains somebody@somewhere.com and also this@that.com'
         => 'This string contains somebody and also this',
 );
 foreach my $input (keys %email_strings) {
-    is(Bugzilla::Util::email_filter($input), $email_strings{$input}, 
+    is(Bugzilla::Util::email_filter($input), $email_strings{$input},
        "email_filter('$input')");
 }
 

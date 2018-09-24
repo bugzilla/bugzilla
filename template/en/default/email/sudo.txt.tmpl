@@ -27,7 +27,7 @@ Subject: [[% terms.Bugzilla %]] Your account [% user.login -%]
  is being impersonated
 X-Bugzilla-Type: admin
 
-    [%+ sudoer.identity %] has used the 'sudo' feature to access 
+    [%+ sudoer.identity %] has used the 'sudo' feature to access
 [%+ terms.Bugzilla %] using your account.
 
 [% IF reason %]
@@ -38,6 +38,6 @@ X-Bugzilla-Type: admin
     [%+ sudoer.identity %] did not provide a reason for doing this.
 [% END %]
 
-    If you feel that this action was inappropriate, please contact 
-[%+ Param("maintainer") %].  For more information on this feature, 
+    If you feel that this action was inappropriate, please contact
+[%+ Param("maintainer") %].  For more information on this feature,
 visit <[% urlbase %]page.cgi?id=sudo.html>.

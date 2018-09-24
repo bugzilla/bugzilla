@@ -22,7 +22,7 @@
 
 [% INCLUDE global/header.html.tmpl
    title  = "$terms.Bugzilla QuickSearch",
-   style_urls = ['skins/standard/page.css']         
+   style_urls = ['skins/standard/page.css']
    onload = 'document.forms[\'f\'].quicksearch.focus()'
  %]
 
@@ -48,18 +48,18 @@
 <h2 id="basics">The Basics</h2>
 
 <ul class="qs_help">
-  <li>If you just put a word or series of words in the search box, 
-    [%+ terms.Bugzilla %] will search the 
+  <li>If you just put a word or series of words in the search box,
+    [%+ terms.Bugzilla %] will search the
     [%+ field_descs.product FILTER html %],
-    [%+ field_descs.component FILTER html %], 
+    [%+ field_descs.component FILTER html %],
     [%+ IF use_keywords %][%+ field_descs.keywords FILTER html %],[% END %]
     [%+ IF Param('usebugaliases') %][% field_descs.alias FILTER html %],[% END %]
-    [%+ field_descs.short_desc FILTER html %], 
+    [%+ field_descs.short_desc FILTER html %],
     [%+ IF Param('usestatuswhiteboard') %][% field_descs.status_whiteboard FILTER html %],[% END %]
     and [% field_descs.longdesc FILTER html %] fields for your word or words.</li>
 
   <li>Typing just a <strong>number</strong> in the search box will take
-    you directly to the [% terms.bug %] with that ID. 
+    you directly to the [% terms.bug %] with that ID.
     [% IF Param('usebugaliases') %]
       Also, just typing the <strong>alias</strong> of [% terms.abug %]
       will take you to that [% terms.bug %].
@@ -67,7 +67,7 @@
   </li>
 
   <li>Adding more terms <strong>narrows down</strong> the search, it does not
-     expand it. (In other words, [% terms.Bugzilla %] searches for 
+     expand it. (In other words, [% terms.Bugzilla %] searches for
      [%+ terms.bugs %] that match <em>all</em> your criteria, not
      [%+ terms.bugs %] that match <em>any</em> of your criteria.)</li>
 
@@ -88,7 +88,7 @@
     see the <a href="#shortcuts">Advanced Shortcuts</a> section.</li>
 
   <li>If you want to search <strong>specific fields</strong>, you do it like
-    <kbd>field:value</kbd>, where <kbd>field</kbd> is one of the 
+    <kbd>field:value</kbd>, where <kbd>field</kbd> is one of the
     <a href="#fields">field names</a> lower down in this
     document and <kbd>value</kbd> is the value you want to search for
     in that field. If you put commas in the <kbd>value</kbd>, then it is
@@ -137,9 +137,9 @@
   <p>For custom fields, they can be used and abbreviated
     based on the part of their name <em>after</em> the <kbd>cf_</kbd>
     if you'd like, in addition to their standard name starting with
-    <kbd>cf_</kbd>. So for example, 
+    <kbd>cf_</kbd>. So for example,
     <kbd>[% first_field.name FILTER html %]</kbd> can be
-    referred to as 
+    referred to as
     <kbd>[% first_field.name.replace('^cf_') FILTER html %]</kbd>,
     also. However, if this causes a conflict between the standard
     [%+ terms.Bugzilla %] field names and the custom field names, the
@@ -188,7 +188,7 @@
     <kbd>"NOT field:value"</kbd>.</li>
 
   <li>You can use <strong>AND</strong>, <strong>NOT</strong>,
-    and <strong>OR</strong> in searches. 
+    and <strong>OR</strong> in searches.
 
     You can also use <kbd>-</kbd> to mean "NOT", and <kbd>|</kbd> to mean "OR".
     There is no special character for "AND", because by default any search
@@ -197,7 +197,7 @@
     <ul>
       <li>
         <strong>NOT</strong>:<br>
-        Use <kbd><strong>-</strong><em>summary:foo</em></kbd> to exclude 
+        Use <kbd><strong>-</strong><em>summary:foo</em></kbd> to exclude
         [%+ terms.bugs %] with <kbd>foo</kbd> in the summary.<br>
         <kbd><em>NOT summary:foo</em></kbd> would have the same effect.
       </li>
@@ -224,7 +224,7 @@
     <p>OR has higher precedence than AND; AND is the top level operation.
       For example:</p>
     <p>Searching for <em><kbd>url|location bar|field -focus</kbd></em> means
-      (<kbd>url</kbd> OR <kbd>location</kbd>) AND (<kbd>bar</kbd> OR 
+      (<kbd>url</kbd> OR <kbd>location</kbd>) AND (<kbd>bar</kbd> OR
       <kbd>field</kbd>) AND (NOT <kbd>focus</kbd>)</p>
   </li>
 
@@ -305,7 +305,7 @@
       <td class="field_name">[% field_descs.resolution FILTER html %]</td>
       <td class="field_nickname">
         Make the <strong>first word</strong> of your search the name of any
-        resolution, or even an abbreviation of any resolution, and 
+        resolution, or even an abbreviation of any resolution, and
         [%+ terms.bugs %] with that resolution will be searched. For example,
         making <kbd>FIX</kbd> the first word of your search will find all
         [%+ terms.bugs %] with a resolution of <kbd>FIXED</kbd>.
@@ -315,7 +315,7 @@
     <tr>
       <td class="field_name">[% field_descs.priority FILTER html %]</td>
       <td class="field_nickname">"<strong>P1</strong>" (as a word anywhere in
-        the search) means "find [% terms.bugs %] with the highest priority. 
+        the search) means "find [% terms.bugs %] with the highest priority.
         "P2" means the second-highest priority, and so on.
         <p>Searching for "<strong>P1-3</strong>" will find [% terms.bugs %] in
         any of the three highest priorities, and so on.</p>

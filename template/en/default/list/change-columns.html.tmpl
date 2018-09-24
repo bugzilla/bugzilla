@@ -61,9 +61,9 @@
       </tr>
       <tr>
         <td>
-          <select name="available_columns" id="available_columns" 
+          <select name="available_columns" id="available_columns"
                   size="15" multiple="multiple" onchange="updateView();"
-                  class="bz_default_hidden"> 
+                  class="bz_default_hidden">
           </select>
         </td>
         <td>
@@ -76,7 +76,7 @@
                   onclick="move_deselect()">&larr;</button>
         </td>
         <td>
-          <select name="selected_columns" id="selected_columns" 
+          <select name="selected_columns" id="selected_columns"
                   size="15" multiple="multiple" onchange="updateView();">
             [% FOREACH column = collist %]
                 <option value="[% column FILTER html %]" selected="selected">
@@ -126,9 +126,9 @@
              value="[% saved_search.id FILTER html%]">
       <input type="hidden" name="token"
              value="[% issue_hash_token([saved_search.id, saved_search.name]) FILTER html %]">
-      <input type="checkbox" id="save_columns_for_search" checked="checked" 
+      <input type="checkbox" id="save_columns_for_search" checked="checked"
              name="save_columns_for_search" value="1">
-      <label for="save_columns_for_search">Save this column list only 
+      <label for="save_columns_for_search">Save this column list only
         for search '[% saved_search.name FILTER html %]'</label>
     </p>
   [% ELSE %]
@@ -140,7 +140,7 @@
     <input type="submit" id="change" value="Change Columns">
   </p>
 
-  <input type="submit" id="resetit" name="resetit" 
+  <input type="submit" id="resetit" name="resetit"
          value="Reset to [% terms.Bugzilla %] default">
 </form>
 

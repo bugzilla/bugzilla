@@ -1,5 +1,5 @@
 #!/bin/bash
-# 
+#
 # bugzilla-push This starts, stops, and restarts the Bugzilla push
 #        daemon, which manages syncronising bugzilla.mozilla.org and
 #        third party bugzilla installs.
@@ -35,9 +35,9 @@ USER=root
 # specify it here.
 OPTIONS=""
 
-# You can also override the configuration by creating a 
+# You can also override the configuration by creating a
 # /etc/sysconfig/bugzilla-queue file so that you don't
-# have to edit this script. 
+# have to edit this script.
 if [ -r /etc/sysconfig/$NAME ]; then
   . /etc/sysconfig/$NAME
 fi

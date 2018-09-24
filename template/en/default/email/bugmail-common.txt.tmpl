@@ -16,7 +16,7 @@
   #
   # Contributor(s): Guy Pyrzak <guy.pyrzak@gmail.com>
   #%]
-  
+
 [% PROCESS "global/field-descs.none.tmpl" %]
 
 [% field_label = field_descs.${change.field_name} %]
@@ -35,4 +35,3 @@
 [% IF change.field_name == 'longdescs.isprivate' %]
   [% field_label = field_label.replace('^(Comment )?', "Comment #${change.num} ") %]
 [% END %]
-  

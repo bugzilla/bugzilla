@@ -34,7 +34,7 @@
   [% FOREACH cl = classifications %]
     <tr>
       <td valign="top"><a href="editclassifications.cgi?action=edit&amp;classification=[% cl.name FILTER uri %]"><b>[% cl.name FILTER html %]</b></a></td>
-      <td valign="top"> 
+      <td valign="top">
       [% IF cl.description %]
         [% cl.description FILTER html_light %]
       [% ELSE %]
@@ -63,4 +63,4 @@
   </tr>
 </table>
 
-[% PROCESS global/footer.html.tmpl %] 
+[% PROCESS global/footer.html.tmpl %]

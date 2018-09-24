@@ -23,7 +23,7 @@
 [%# Initialization                                                           #%]
 [%############################################################################%]
 
-[%# Don't display the table or do any processing if there are no bugs 
+[%# Don't display the table or do any processing if there are no bugs
   # to display %]
 [% RETURN IF !bugs.size %]
 
@@ -43,34 +43,34 @@
 [% field_descs.qa_contact_realname  = field_descs.qa_contact  %]
 
 [%# Setting maxlength => 0 means no limit. We set it for performance reasons. %]
-[% abbrev = 
+[% abbrev =
   {
-    "bug_severity"         => { maxlength => 3 , title => "Sev" } , 
-    "priority"             => { maxlength => 7 , title => "Pri" } , 
-    "rep_platform"         => { maxlength => 3 , title => "Plt" } , 
-    "bug_status"           => { maxlength => 4 } , 
-    "assigned_to"          => { maxlength => 30 , ellipsis => "..." } , 
-    "assigned_to_realname" => { maxlength => 20 , ellipsis => "..." } , 
-    "reporter"             => { maxlength => 30 , ellipsis => "..." } , 
-    "reporter_realname"    => { maxlength => 20 , ellipsis => "..." } , 
-    "qa_contact"           => { maxlength => 30 , ellipsis => "..." , title => "QAContact" } , 
-    "qa_contact_realname"  => { maxlength => 20 , ellipsis => "..." , title => "QAContact" } , 
-    "resolution"        => { maxlength => 4 } , 
+    "bug_severity"         => { maxlength => 3 , title => "Sev" } ,
+    "priority"             => { maxlength => 7 , title => "Pri" } ,
+    "rep_platform"         => { maxlength => 3 , title => "Plt" } ,
+    "bug_status"           => { maxlength => 4 } ,
+    "assigned_to"          => { maxlength => 30 , ellipsis => "..." } ,
+    "assigned_to_realname" => { maxlength => 20 , ellipsis => "..." } ,
+    "reporter"             => { maxlength => 30 , ellipsis => "..." } ,
+    "reporter_realname"    => { maxlength => 20 , ellipsis => "..." } ,
+    "qa_contact"           => { maxlength => 30 , ellipsis => "..." , title => "QAContact" } ,
+    "qa_contact_realname"  => { maxlength => 20 , ellipsis => "..." , title => "QAContact" } ,
+    "resolution"        => { maxlength => 4 } ,
     "short_desc"        => { maxlength => 0, wrap => 1 } ,
     "short_short_desc"  => { maxlength => 60 , ellipsis => "..." , wrap => 1 } ,
-    "status_whiteboard" => { maxlength => 0, title => "Whiteboard" , wrap => 1 } , 
+    "status_whiteboard" => { maxlength => 0, title => "Whiteboard" , wrap => 1 } ,
     "keywords"          => { maxlength => 0, wrap => 1 } ,
     "dependson"         => { maxlength => 0, wrap => 1 } ,
     "blocked"           => { maxlength => 0, wrap => 1 } ,
     "flagtypes.name"    => { maxlength => 0, wrap => 1 } ,
-    "component"         => { maxlength => 8 , title => "Comp" } , 
-    "product"           => { maxlength => 8 } , 
-    "version"           => { maxlength => 5 , title => "Vers" } , 
-    "op_sys"            => { maxlength => 4 } , 
-    "bug_file_loc"      => { maxlength => 30 } , 
-    "target_milestone"  => { maxlength => 0, title => "TargetM" } , 
+    "component"         => { maxlength => 8 , title => "Comp" } ,
+    "product"           => { maxlength => 8 } ,
+    "version"           => { maxlength => 5 , title => "Vers" } ,
+    "op_sys"            => { maxlength => 4 } ,
+    "bug_file_loc"      => { maxlength => 30 } ,
+    "target_milestone"  => { maxlength => 0, title => "TargetM" } ,
     "longdescs.count"   => { maxlength => 0, title => "# Comments" },
-    "percentage_complete" => { maxlength => 0, format_value => "%d %%" } , 
+    "percentage_complete" => { maxlength => 0, format_value => "%d %%" } ,
   }
 %]
 
@@ -84,7 +84,7 @@
 
 [% tableheader = BLOCK %]
   <table class="bz_buglist sortable" cellspacing="0" cellpadding="4" width="100%">
-    <thead> 
+    <thead>
     <tr class="bz_buglist_header bz_first_buglist_header">
       [% IF dotweak %]
       <th class="sorttable_nosort">&nbsp;</th>
@@ -217,16 +217,16 @@
       [% IF col_abbrev.maxlength %]
         <span title="[%- display_value(column, bug.$column) FILTER html %]">
       [% END %]
-      [% IF col_abbrev.format_value %] 
-        [%- bug.$column FILTER format(col_abbrev.format_value) FILTER html -%] 
+      [% IF col_abbrev.format_value %]
+        [%- bug.$column FILTER format(col_abbrev.format_value) FILTER html -%]
       [% ELSIF column == 'actual_time' ||
                column == 'remaining_time' ||
                column == 'estimated_time' %]
-        [% PROCESS formattimeunit time_unit=bug.$column %] 
+        [% PROCESS formattimeunit time_unit=bug.$column %]
       [%# Display the login name of the user if their real name is empty. %]
       [% ELSIF column.match('_realname$') && bug.$column == '' %]
         [% SET login_column = column.remove('_realname$') %]
-        [% bug.${login_column}.truncate(col_abbrev.maxlength, 
+        [% bug.${login_column}.truncate(col_abbrev.maxlength,
                                         col_abbrev.ellipsis) FILTER html %]
       [% ELSIF column == 'short_desc' || column == "short_short_desc" %]
         <a href="show_bug.cgi?id=[% bug.bug_id FILTER html %]">

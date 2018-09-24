@@ -20,14 +20,14 @@
 
 [%# INTERFACE:
   # default: hash. Defaults for category, subcategory, name etc.
-  # button_name: string. What the button will say. 
+  # button_name: string. What the button will say.
   # category: hash (keyed by category) of hashes (keyed by subcategory) of
   #           hashes (keyed by name), with value being the series_id of the
   #           series. Contains details of all series the user can see.
   #%]
 
 [% PROCESS "reports/series-common.html.tmpl"
-   newtext = "New (name below)" 
+   newtext = "New (name below)"
  %]
 
 <script [% script_nonce FILTER none %]>
@@ -63,7 +63,7 @@
                                        size => 5 } %]
 
       <td valign="top" name="name">
-        <input type="text" name="name" maxlength="64" 
+        <input type="text" name="name" maxlength="64"
                value="[% default.name.0 FILTER html %]" size="25">
       </td>
 
@@ -74,24 +74,24 @@
         <span style="font-weight: bold;">&nbsp;day(s)</span><br>
         [%# Change 'admin' here and in Series.pm, or remove the check
             completely, if you want to change who can make series public. %]
-        [% IF user.in_group('admin') %]      
+        [% IF user.in_group('admin') %]
           <input type="checkbox" name="public"
                  [%+ "checked='checked'" IF default.public.0 %]>
           <span style="font-weight: bold;">Visible to all<br>
-          (within group restrictions)</span> 
+          (within group restrictions)</span>
         [% END %]
       </td>
     </tr>
 
     <tr>
       <td>
-        <input type="text" style="width: 100%" name="newcategory" 
+        <input type="text" style="width: 100%" name="newcategory"
                maxlength="64" value="[% default.newcategory.0 FILTER html %]">
       </td>
         <td></td>
       <td>
         <input type="text" style="width: 100%" name="newsubcategory"
-               maxlength="64" 
+               maxlength="64"
                value="[% default.newsubcategory.0 FILTER html %]">
       </td>
       <td></td>

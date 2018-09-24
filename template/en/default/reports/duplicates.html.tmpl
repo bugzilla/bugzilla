@@ -34,7 +34,7 @@
 
 [% IF product.size %]
   [% title = BLOCK %]
-    Most Frequently Reported [% terms.Bugs %] for 
+    Most Frequently Reported [% terms.Bugs %] for
     [%+ product.join(', ') FILTER html %]
   [% END %]
 [% ELSE %]
@@ -95,7 +95,7 @@
     <tr>
       <td><label for="maxrows">Max rows:</label></td>
       <td>
-        <input size="4" name="maxrows" id="maxrows" 
+        <input size="4" name="maxrows" id="maxrows"
                value="[% maxrows FILTER html %]">
       </td>
     </tr>
@@ -129,7 +129,7 @@
 
 <form method="post" action="buglist.cgi" data-no-csrf>
   <input type="hidden" name="bug_id" value="[% bug_ids_string FILTER html %]">
-  Or just give this to me as a <input type="submit" id="list" 
+  Or just give this to me as a <input type="submit" id="list"
                                       value="[% terms.bug %] list">.
   (Note: the order may not be the same.)
 </form>
@@ -141,7 +141,7 @@
 </h3>
 
 <p>
-  The Most Frequent [% terms.Bugs %] page lists the known open 
+  The Most Frequent [% terms.Bugs %] page lists the known open
   [%+ terms.bugs %] which are reported most frequently,
   counting the number of direct and indirect duplicates of [% terms.bugs %].
   This information is provided in order to assist in minimizing
@@ -170,7 +170,7 @@
       that has already been filed.</li>
     <li>If you find your [% terms.bug %] in [% terms.Bugzilla %],
       feel free to comment with any new or additional data you may have.</li>
-    <li>If you cannot find your problem already documented in 
+    <li>If you cannot find your problem already documented in
       [%+ terms.Bugzilla %],
       <a href="enter_bug.cgi">file a new [% terms.bug %]</a>.</li>
   </ul>

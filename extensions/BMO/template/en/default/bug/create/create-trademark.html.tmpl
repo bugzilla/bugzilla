@@ -1,36 +1,36 @@
-[%# 1.0@bugzilla.org %]                                                       
-[%# The contents of this file are subject to the Mozilla Public               
-  # License Version 1.1 (the "License"); you may not use this file            
-  # except in compliance with the License. You may obtain a copy of           
-  # the License at http://www.mozilla.org/MPL/                                
-  #                                                                           
-  # Software distributed under the License is distributed on an "AS           
-  # IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or                
-  # implied. See the License for the specific language governing              
-  # rights and limitations under the License.                                 
-  #                                                                           
-  # The Original Code is the Bugzilla Bug Tracking System.                    
-  #                                                                           
-  # The Initial Developer of the Original Code is Netscape Communications     
-  # Corporation. Portions created by Netscape are                             
-  # Copyright (C) 1998 Netscape Communications Corporation. All               
-  # Rights Reserved.                                                          
-  #                                                                           
-  # Contributor(s): Gervase Markham <gerv@gerv.net>                       
+[%# 1.0@bugzilla.org %]
+[%# The contents of this file are subject to the Mozilla Public
+  # License Version 1.1 (the "License"); you may not use this file
+  # except in compliance with the License. You may obtain a copy of
+  # the License at http://www.mozilla.org/MPL/
+  #
+  # Software distributed under the License is distributed on an "AS
+  # IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
+  # implied. See the License for the specific language governing
+  # rights and limitations under the License.
+  #
+  # The Original Code is the Bugzilla Bug Tracking System.
+  #
+  # The Initial Developer of the Original Code is Netscape Communications
+  # Corporation. Portions created by Netscape are
+  # Copyright (C) 1998 Netscape Communications Corporation. All
+  # Rights Reserved.
+  #
+  # Contributor(s): Gervase Markham <gerv@gerv.net>
   #                 Ville Skyttä <ville.skytta@iki.fi>
   #                 John Hoogstrate <hoogstrate@zeelandnet.nl>
-  #%]                                                                         
-                                                                              
-[% PROCESS global/variables.none.tmpl %]                                      
-                                                                              
-[% PROCESS global/header.html.tmpl                                            
-   title = "Trademark Usage Requests"                                   
+  #%]
+
+[% PROCESS global/variables.none.tmpl %]
+
+[% PROCESS global/header.html.tmpl
+   title = "Trademark Usage Requests"
 %]
-                                                                            
-[% USE Bugzilla %]                                                            
+
+[% USE Bugzilla %]
 
 <p>
-  If, after reading 
+  If, after reading
   <a href="https://www.mozilla.org/foundation/trademarks/">the trademark policy
   documents</a>, you know you need permission to use a certain trademark, this
   is the place to be.
@@ -39,7 +39,7 @@
 <p><strong>Please use this form for trademark requests only!</strong></p>
 
 <form method="post" action="post_bug.cgi" id="tmRequestForm">
-        
+
         <input type="hidden" name="product" value="Marketing">
         <input type="hidden" name="component" value="Trademark Permissions">
         <input type="hidden" name="bug_severity" value="enhancement">
@@ -79,9 +79,9 @@
         <input type="submit" id="commit" value="Submit Request">
 </form>
 
-<p>Thanks for contacting us. 
+<p>Thanks for contacting us.
    You will be notified by email of any progress made in resolving your
    request.
 </p>
 
-[% PROCESS global/footer.html.tmpl %]                   
+[% PROCESS global/footer.html.tmpl %]

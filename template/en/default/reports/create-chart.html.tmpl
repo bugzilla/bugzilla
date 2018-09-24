@@ -25,12 +25,12 @@
   #           series. Contains details of all series the user can see.
   #%]
 
-[% PROCESS global/header.html.tmpl 
+[% PROCESS global/header.html.tmpl
   title = "Create Chart"
 %]
 
-[% PROCESS "reports/series-common.html.tmpl" 
-  donames = 1 
+[% PROCESS "reports/series-common.html.tmpl"
+  donames = 1
 %]
 
 <script [% script_nonce FILTER none %]>
@@ -39,7 +39,7 @@ function subcatSelected() {
   var cat = document.chartform.category.value;
   var subcat = document.chartform.subcategory.value;
   var names = series[cat][subcat];
-  
+
   var namewidget = document.chartform.name;
 
   namewidget.options.length = 0;
@@ -52,7 +52,7 @@ function subcatSelected() {
 
   namewidget.disabled = false;
   namewidget.options[0].selected = true;
-  
+
   checkNewState();
 }
 document.addEventListener("DOMContentLoaded", function(event) {
@@ -65,11 +65,11 @@ document.addEventListener("DOMContentLoaded", function(event) {
   });
 });
 </script>
-  
+
 [% gttext = "Grand Total" %]
 
-<form method="get" action="chart.cgi" name="chartform">  
-  
+<form method="get" action="chart.cgi" name="chartform">
+
   <table cellpadding="2" cellspacing="2" border="0">
     [% IF NOT category OR category.size == 0 %]
       <tr>
@@ -108,7 +108,7 @@ document.addEventListener("DOMContentLoaded", function(event) {
                    id="action-assemble2">
           </noscript>
         </td>
-        
+
         [% PROCESS series_select sel = { name => 'name',
                                          size => 5,
                                          multiple => 1,
@@ -116,7 +116,7 @@ document.addEventListener("DOMContentLoaded", function(event) {
                                          # not its name.
                                          value_in_hash => 1 } %]
 
-        <td align="center" valign="middle"> 
+        <td align="center" valign="middle">
           <input type="submit" name="action-add" value="Add To List"
                  id="action-add"><br>
         </td>
@@ -135,15 +135,15 @@ document.addEventListener("DOMContentLoaded", function(event) {
         <th>Data Set</th>
         <th></th>
       </tr>
-      
+
       [%# The external loop has two counters; one which keeps track of where we
         #  are in the old labels array, and one which keeps track of the new
         #  indexes for the form elements. They are different if chart.lines has
-        #  empty slots in it. 
+        #  empty slots in it.
         #%]
       [% labelidx = 0 %]
       [% newidx = 0 %]
-      
+
       [% FOREACH line = chart.lines %]
         [% IF NOT line %]
           [%# chart.lines has an empty slot, so chart.labels will too. We
@@ -152,7 +152,7 @@ document.addEventListener("DOMContentLoaded", function(event) {
           [% labelidx = labelidx + 1 %]
           [% NEXT %]
         [% END %]
-        
+
         [% FOREACH series = line %]
           <tr>
             [% IF loop.first %]
@@ -161,7 +161,7 @@ document.addEventListener("DOMContentLoaded", function(event) {
               </td>
               <td rowspan="[% line.size %]">
                 <input type="text" size="20" name="label[% newidx %]"
-                       value="[% (chart.labels.$labelidx OR series.name) 
+                       value="[% (chart.labels.$labelidx OR series.name)
                                                                FILTER html %]">
               </td>
             [% END %]
@@ -171,10 +171,10 @@ document.addEventListener("DOMContentLoaded", function(event) {
             </td>
 
             <td>
-              [% series.category FILTER html %] / 
+              [% series.category FILTER html %] /
               [%+ series.subcategory FILTER html %] /
               [%+ series.name FILTER html %]
-              <input type="hidden" name="line[% newidx %]" 
+              <input type="hidden" name="line[% newidx %]"
                      value="[% series.series_id %]">
             </td>
 
@@ -190,7 +190,7 @@ document.addEventListener("DOMContentLoaded", function(event) {
                 [% series.subcategory FILTER uri %]%20/%20
                 [% series.name FILTER uri -%]&amp;series_id=
                 [% series.series_id %]&amp;remaction=runseries">Run Search</a>
-            </td>        
+            </td>
           </tr>
         [% END %]
         [% labelidx = labelidx + 1 %]
@@ -220,7 +220,7 @@ document.addEventListener("DOMContentLoaded", function(event) {
 
       <tr>
         <td valign="bottom" style="text-align: center;">
-          <input type="submit" name="action-sum" value="Sum" 
+          <input type="submit" name="action-sum" value="Sum"
                  style="width: 5em;" id="action-sum"><br>
           <input type="submit" name="action-remove" value="Remove"
                  style="width: 5em;" id="action-remove">
@@ -250,7 +250,7 @@ document.addEventListener("DOMContentLoaded", function(event) {
     </table>
   [% ELSE %]
   <p><i>None</i></p>
-  [% END %]  
+  [% END %]
 </form>
 
 [% IF user.in_group('editbugs') %]
@@ -271,7 +271,7 @@ document.addEventListener("DOMContentLoaded", function(event) {
     </select>
     <input id="submit_create" type="submit" value="Create a new data set">
   </form>
-[% END %]                 
+[% END %]
 
 [% PROCESS global/footer.html.tmpl %]
 

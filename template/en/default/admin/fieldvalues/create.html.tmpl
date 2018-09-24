@@ -17,7 +17,7 @@
 [%# INTERFACE:
   # field: object; the field the value is being created for
   #%]
-  
+
 [% title = BLOCK %]
   Add Value for the '[% field.description FILTER html %]' ([% field.name FILTER html %]) field
 [% END %]
@@ -26,7 +26,7 @@
 %]
 
 <p>
-  This page allows you to add a new value for the 
+  This page allows you to add a new value for the
   '[% field.description FILTER html %]' field.
 </p>
 
@@ -47,7 +47,7 @@
       <tr>
         <th align="right"><label for="is_open">Status Type:</label></th>
         <td>
-          <input type="radio" id="open_status" name="is_open" value="1" 
+          <input type="radio" id="open_status" name="is_open" value="1"
                  checked="checked">
           <label for="open_status">Open</label><br>
           <input type="radio" id="closed_status" name="is_open" value="0">
@@ -65,7 +65,7 @@
     [% IF field.value_field %]
       <tr>
         <th align="right">
-          <label for="visibility_value_id">Only appears when 
+          <label for="visibility_value_id">Only appears when
            [%+ field.value_field.description FILTER html %] is set to:
           </label>
         </th>

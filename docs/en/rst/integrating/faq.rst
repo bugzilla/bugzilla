@@ -18,10 +18,10 @@ How do I...
 ...use a word other than 'bug' to describe bugs?
   :ref:`Edit or override <templates>` the appropriate values in the template
   :file:`template/en/default/global/variables.none.tmpl`.
-  
+
 ...call the system something other than 'Bugzilla'?
   :ref:`Edit or override <templates>` the appropriate value in the template
   :file:`template/en/default/global/variables.none.tmpl`.
-  
+
 ...alter who can change what field when?
   See :ref:`who-can-change-what`.

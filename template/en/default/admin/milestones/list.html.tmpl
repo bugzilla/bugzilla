@@ -45,12 +45,12 @@
 
 
 [% columns = [
-     { 
+     {
        name => "name"
        heading => "Edit milestone..."
        contentlink => edit_contentlink
      },
-     { 
+     {
        name => "sortkey"
        heading => "Sortkey"
      },
@@ -88,8 +88,8 @@
      content => "(Default milestone)"
      override_contentlink => 1
      contentlink => undef
-   } 
-%] 
+   }
+%]
 
 [% Hook.process('before_table') %]
 

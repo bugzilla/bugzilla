@@ -20,13 +20,13 @@
 
 [% USE Bugzilla %]
 [% IF Bugzilla.request_cache.bmo_fields_page %]
-  [% 
+  [%
     vars.help_html.priority =
       "This field describes the importance and order in which $terms.abug
        should be fixed compared to other ${terms.bugs}. This field is utilized
        by the programmers/engineers to prioritize their work to be done where
        P1 is considered the highest and P5 is the lowest."
-      
+
     vars.help_html.bug_severity =
       "This field describes the impact of ${terms.abug}.
        <table>
@@ -60,9 +60,9 @@
           <th>enhancement</th>
           <td>Request for enhancement</td>
       </table>"
-  
-    vars.help_html.rep_platform = 
-      "This is the hardware platform against which the $terms.bug was reported. 
+
+    vars.help_html.rep_platform =
+      "This is the hardware platform against which the $terms.bug was reported.
        Legal platforms include:
        <ul>
          <li>All (happens on all platforms; cross-platform ${terms.bug})</li>
@@ -71,10 +71,10 @@
        </ul>
        <b>Note:</b> When searching, selecting the option
        <em>All</em> does not
-       select $terms.bugs assigned against any platform. It merely selects 
-       $terms.bugs that are marked as occurring on all platforms, i.e. are 
+       select $terms.bugs assigned against any platform. It merely selects
+       $terms.bugs that are marked as occurring on all platforms, i.e. are
        designated <em>All</em>.",
-  
+
     vars.help_html.op_sys =
       "This is the operating system against which the $terms.bug was
        reported. Legal operating systems include:
@@ -86,10 +86,10 @@
        </ul>
        Sometimes the operating system implies the platform, but not
        always. For example, Linux can run on x86_64, ARM, and others.",
-  
+
     vars.help_html.assigned_to =
       "This is the person in charge of resolving the ${terms.bug}. Every time
-       this field changes, the status changes to 
+       this field changes, the status changes to
        <b>NEW</b> to make it
        easy to see which new $terms.bugs have appeared on a person's list.</p>",
   %]

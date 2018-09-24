@@ -7,7 +7,7 @@
 
 [% PROCESS global/variables.none.tmpl %]
 [% title = BLOCK %]Enter [% terms.Bug %] [% END %]
-[% PROCESS bug_modal/common_header.html.tmpl 
+[% PROCESS bug_modal/common_header.html.tmpl
     title = title
     jquery = [ "selectize" ]
     jquery_css = [ "js/jquery/plugins/selectize/selectize.bootstrap3.css" ]
@@ -82,7 +82,7 @@
               editable = 1
               help         = "describecomponents.cgi?product=$filtered_product"
           %]
-          
+
             <span aria-owns="product-name product-latch">
               <span role="button" aria-label="show product information" aria-expanded="false" tabindex="0"
                     class="spin-latch" id="product-latch" data-latch="product" data-for="product">&#9656;</span>

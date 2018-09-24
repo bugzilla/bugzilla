@@ -23,7 +23,7 @@
   # product: object; Bugzilla::Product object representing the product to
   #               which the component belongs.
   #%]
-  
+
 [% title = BLOCK %]Add component to the [% product.name FILTER html %] product[% END %]
 [% PROCESS global/header.html.tmpl
   javascript_urls = [ "js/field.js" ]
@@ -35,7 +35,7 @@
   <table border="0" cellpadding="4" cellspacing="0">
 
     [% PROCESS "admin/components/edit-common.html.tmpl" %]
-    
+
   </table>
   <hr>
   <input type="submit" id="create" value="Add">

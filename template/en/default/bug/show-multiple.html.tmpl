@@ -63,7 +63,7 @@
 
 [% BLOCK bug_display %]
   <h1>
-    [% terms.Bug %] 
+    [% terms.Bug %]
     <a href="show_bug.cgi?id=[% bug.bug_id FILTER html %]">[% bug.bug_id FILTER html %]</a>
     [% IF Param("usebugaliases") AND bug.alias AND NOT bug.error %]
       (<a href="show_bug.cgi?id=[% bug.alias FILTER uri %]">
@@ -245,7 +245,7 @@
               </td>
               <td>
                 [% PROCESS formattimeunit
-                     time_unit=bug.estimated_time - 
+                     time_unit=bug.estimated_time -
                                (bug.actual_time + bug.remaining_time) %]
               </td>
             </tr>
@@ -299,9 +299,9 @@
       </tr>
     [% END %]
   [% END %]
-  
+
   [% Hook.process("last_row", "bug/show-multiple.html.tmpl") %]
-   
+
   </table>
 
 
@@ -357,7 +357,7 @@
         [% FOREACH c = bug.cc %]
           [% c FILTER email FILTER html %][% ", " IF not loop.last() %]
         [% END %]
-    [% ELSIF name == "reporter" || name == "assigned_to" 
+    [% ELSIF name == "reporter" || name == "assigned_to"
              || name == "qa_contact" %]
       <th class="rightcell">[% field_descs.${name} FILTER html %]:</th>
       <td>[% bug.${name}.identity FILTER email FILTER html %]</td>

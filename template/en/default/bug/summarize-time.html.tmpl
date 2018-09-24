@@ -27,10 +27,10 @@
     [% header = title %]
 [% END %]
 
-[% PROCESS global/header.html.tmpl 
-    title = title 
+[% PROCESS global/header.html.tmpl
+    title = title
     generate_api_token = 1
-    header = header 
+    header = header
     style_urls = ["skins/standard/summarize-time.css"]
     doc_section = "timetracking.html"
     javascript_urls = [ "js/util.js", "js/field.js" ]
@@ -100,7 +100,7 @@
         [% END %]
 
     [% additional = "$global.owner_count.size developers @
-                     $global.bug_count.size $terms.bugs" %] 
+                     $global.bug_count.size $terms.bugs" %]
     [% INCLUDE section_total colspan=3 additional=additional %]
     </table>
 [% END %]
@@ -161,7 +161,7 @@
         [% subtotal = subtotal + work_time %]
         [% login_name = owner.login_name %]
         [% global.owner_count.$login_name = 1 %]
-        [% IF detailed %] 
+        [% IF detailed %]
             [% cid = cid + 1 %]
             <tr class="owner_header[% 2 FILTER none IF cid % 2 %]">
                 <td>&nbsp;</td>
@@ -279,8 +279,8 @@
 <table>
 <tr>
 <td align="right">
-  <b><label accesskey="s" 
-             for="start_date">Period <u>s</u>tarting</label></b>: 
+  <b><label accesskey="s"
+             for="start_date">Period <u>s</u>tarting</label></b>:
 </td><td colspan="3">
   <input type="text" id="start_date" name="start_date" size="11" autofocus
          align="right" value="[% start_date FILTER html %]" maxlength="10"
@@ -291,7 +291,7 @@
   </button>
   <div id="con_calendar_start_date"></div>
   &nbsp;
-  <b>and <label accesskey="e" for="end_date"><u>e</u>nding</label></b>: 
+  <b>and <label accesskey="e" for="end_date"><u>e</u>nding</label></b>:
   <input type="text" name="end_date" size="11" id="end_date"
          align="right" value ="[% end_date FILTER html %]" maxlength="10"
          onchange="updateCalendarFromField(this)">
@@ -312,11 +312,11 @@
 </td><td colspan="2">
   <input type="radio" name="group_by" id="number" value="number" [%+
     'checked="checked"' IF group_by == "number"
-  %]><label 
+  %]><label
   for="number" accesskey="n">[% terms.Bug %] <u>N</u>umber</label>
   <input type="radio" name="group_by" id="owner" value="owner" [%+
     'checked="checked"' IF group_by == "owner"
-  %]><label 
+  %]><label
   for="owner" accesskey="d"><u>D</u>eveloper</label>
 </td><td colspan="2">
   <label for="ctype"><b>Format</b></label>: <select name="ctype" id="ctype">

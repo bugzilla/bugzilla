@@ -31,9 +31,9 @@
   #   allow_dont_change: display the --do_not_change-- option for select fields.
   #   value_span: A colspan for the table cell containing
   #               the field value.
-  #   no_tds: boolean; if true, don't display the label <th> or the 
+  #   no_tds: boolean; if true, don't display the label <th> or the
   #           wrapping <td> for the field.
-  #   bug (optional): The current Bugzilla::Bug being displayed, or a hash 
+  #   bug (optional): The current Bugzilla::Bug being displayed, or a hash
   #                   with default field values being displayed on a page.
   #%]
 
@@ -45,7 +45,7 @@
 [% IF NOT no_tds %]
   [% PROCESS "bug/field-label.html.tmpl" %]
   <td class="field_value [% ' bz_hidden_field' IF hidden %]"
-      id="field_container_[% field.name FILTER html %]" 
+      id="field_container_[% field.name FILTER html %]"
       [% " colspan=\"$value_span\"" FILTER none IF value_span %]>
 [% END %]
 [% Hook.process('start_field_column') %]
@@ -85,7 +85,7 @@
 
         </span>
 
-        [% IF value %]  
+        [% IF value %]
           [% value FILTER bug_link(value, use_alias => 1) FILTER none %]
         [% END %]
         <span id="[% field.name FILTER html %]_edit_container" class="edit_me bz_default_hidden">
@@ -98,11 +98,11 @@
                           '[% field.name FILTER js %]',
                           "[% value FILTER js %]");
         </script>
-    [% CASE [ constants.FIELD_TYPE_SINGLE_SELECT 
+    [% CASE [ constants.FIELD_TYPE_SINGLE_SELECT
               constants.FIELD_TYPE_MULTI_SELECT ] %]
         <input type="hidden" id="[% field.name FILTER html %]_dirty">
-        <select id="[% field.name FILTER html %]" 
-                name="[% field.name FILTER html %]" 
+        <select id="[% field.name FILTER html %]"
+                name="[% field.name FILTER html %]"
                 [% IF field.type == constants.FIELD_TYPE_MULTI_SELECT %]
                     [% SET field_size = 5 %]
                     [% IF field.legal_values.size < 5 %]
@@ -125,7 +125,7 @@
           [% END %]
           [% FOREACH legal_value = legal_values %]
             [% NEXT IF NOT legal_value.is_active AND NOT value.contains(legal_value.name).size %]
-          
+
             [%# Purpose: hide field values from those who can't change them %]
             [% IF field.name.match("^cf_blocking_") OR
                   field.name.match("^cf_status_") OR
@@ -135,7 +135,7 @@
               [% NEXT UNLESS bug.check_can_change_field(field.name, '---', legal_value.name) OR
                              value.contains(legal_value.name).size %]
             [% END %]
-            
+
             [% IF field.name == "resolution" &&
                legal_value.name != bug.resolution %]
               [% r = legal_value.name %]
@@ -149,7 +149,7 @@
               [% END %]
               [% NEXT IF r == "EXPIRED" %]
             [% END %]
-          
+
             <option value="[% legal_value.name FILTER html %]"
                     id="v[% legal_value.id FILTER html %]_
                         [%- field.name FILTER html %]"
@@ -257,10 +257,10 @@
     [% CASE constants.FIELD_TYPE_TEXTAREA %]
       <div class="uneditable_textarea">[% value FILTER html %]</div>
     [% CASE constants.FIELD_TYPE_BUG_ID %]
-      [% IF value %]  
+      [% IF value %]
           [% value FILTER bug_link(value, use_alias => 1) FILTER none %]
       [% END %]
-    [% CASE [ constants.FIELD_TYPE_SINGLE_SELECT 
+    [% CASE [ constants.FIELD_TYPE_SINGLE_SELECT
               constants.FIELD_TYPE_MULTI_SELECT ] %]
       [% FOREACH val = value %]
         [% display_value(field.name, val) FILTER html %]

@@ -9,9 +9,9 @@
 #Bugzilla Test 9#
 ####bugwords#####
 
-# Bugzilla has a mechanism for taking various words, including "bug", "bugs", 
+# Bugzilla has a mechanism for taking various words, including "bug", "bugs",
 # and "a bug" and automatically replacing them in the templates with the local
-# terminology. It does this by using the 'terms' hash, so "bug" becomes 
+# terminology. It does this by using the 'terms' hash, so "bug" becomes
 # "[% terms.bug %]". This test makes sure the relevant words aren't used
 # bare.
 
@@ -27,7 +27,7 @@ use Bugzilla::Util;
 
 use File::Spec;
 
-use Test::More tests => ($Support::Templates::num_actual_files); 
+use Test::More tests => ($Support::Templates::num_actual_files);
 
 # Find all the templates
 my @testitems;
@@ -38,10 +38,10 @@ for my $path (@Support::Templates::include_paths) {
 
 foreach my $file (@testitems) {
     my @errors;
-    
+
     # Read the entire file into a string
     local $/;
-    open (FILE, "<$file") || die "Can't open $file: $!\n";    
+    open (FILE, "<$file") || die "Can't open $file: $!\n";
     my $slurp = <FILE>;
     close (FILE);
 
@@ -53,7 +53,7 @@ foreach my $file (@testitems) {
 
         my @lineno = ($` =~ m/\n/gs);
         my $lineno = scalar(@lineno) + 1;
-    
+
         # "a bug", "bug", "bugs"
         if (grep /(a?[\s>]bugs?[\s.:;,<])/i, $text) {
             # Exclude variable assignment.
@@ -63,14 +63,14 @@ foreach my $file (@testitems) {
             }
         }
     }
-        
+
     if (scalar(@errors)) {
       ok(0, "$file contains invalid bare words (e.g. 'bug') --WARNING");
-      
+
       foreach my $error (@errors) {
         print "$error->[0]: $error->[1]\n";
       }
-    } 
+    }
     else {
       ok(1, "$file has no invalid barewords");
     }

@@ -71,12 +71,12 @@
 
   [% IF group.bugs.size %]
     <p><b>[% group.bugs.size FILTER html %] [%+ terms.bug %] reports are
-     visible only to this group. You cannot delete this group while any 
+     visible only to this group. You cannot delete this group while any
      [%+ terms.bugs %] are using it.</b>
 
     <br><a href="buglist.cgi?field0-0-0=bug_group&amp;type0-0-0=equals&amp;value0-0-0=
                  [%- group.name FILTER uri %]">Show me
-    which [% terms.bugs %]</a> - 
+    which [% terms.bugs %]</a> -
     <label><input type="checkbox" name="removebugs">Remove
     all [% terms.bugs %] from this group restriction for me.</label></p>
 
@@ -113,7 +113,7 @@
         [% SET hidden = 0 %]
         [% IF data.controls.othercontrol == constants.CONTROLMAPMANDATORY
               AND data.controls.membercontrol == constants.CONTROLMAPMANDATORY
-              AND data.controls.entry 
+              AND data.controls.entry
         %]
           [% SET hidden = 1 %]
         [% END %]
@@ -133,14 +133,14 @@
     <p><label><input type="checkbox" name="unbind">Delete this group anyway,
       and remove these controls.</label></p>
   [% END %]
-  
+
   [% IF group.flag_types.size %]
     <p><b>This group restricts who can make changes to flags of certain types.
     You cannot delete this group while there are flag types using it.</b>
 
     <br><a href="editflagtypes.cgi?action=list&amp;group=
                  [%- group.id FILTER uri %]">Show
-    me which types</a> - 
+    me which types</a> -
     <label><input type="checkbox" name="removeflags">Remove all
     flag types from this group for me.</label></p>
   [% END %]
@@ -167,7 +167,7 @@
   <h2>Confirmation</h2>
 
   <p>Do you really want to delete this group?</p>
-  [% IF group.users.size || group.bugs.size || group.products.size 
+  [% IF group.users.size || group.bugs.size || group.products.size
         || group.flags.size
   %]
     <p><b>You must check all of the above boxes or correct the
@@ -184,4 +184,4 @@
 
 Go back to the <a href="editgroups.cgi">group list</a>.
 
-[% PROCESS global/footer.html.tmpl %] 
+[% PROCESS global/footer.html.tmpl %]

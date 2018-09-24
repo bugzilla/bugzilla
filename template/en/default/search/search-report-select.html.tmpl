@@ -30,12 +30,12 @@
 
   <select name="[% name FILTER html %]">
     <option value="">&lt;none&gt;</option>
-    
+
     [% FOREACH field = report_columns.keys.sort %]
       [% NEXT IF field == "classification" AND !Param('useclassification') %]
       [% NEXT IF field == "target_milestone" AND !Param('usetargetmilestone') %]
       [% NEXT IF field == "qa_contact" AND !Param('useqacontact') %]
-      <option value="[% field FILTER html %]" 
+      <option value="[% field FILTER html %]"
         [% " selected" IF default.$name.0 == field %]>
         [% field_descs.$field || field FILTER html %]</option>
     [% END %]

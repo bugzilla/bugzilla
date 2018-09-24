@@ -2,19 +2,19 @@
  * License Version 1.1 (the "License"); you may not use this file
  * except in compliance with the License. You may obtain a copy of
  * the License at http://www.mozilla.org/MPL/
- * 
+ *
  * Software distributed under the License is distributed on an "AS
  * IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
  * implied. See the License for the specific language governing
  * rights and limitations under the License.
- * 
+ *
  * The Original Code is the Bugzilla Bug Tracking System.
- * 
+ *
  * The Initial Developer of the Original Code is Netscape Communications
  * Corporation. Portions created by Netscape are
  * Copyright (C) 1998 Netscape Communications Corporation. All
  * Rights Reserved.
- * 
+ *
  * Contributor(s): Dennis Melentyev <dennis.melentyev@infopulse.com.ua>
  *                 Max Kanat-Alexander <mkanat@bugzilla.org>
  */
@@ -22,7 +22,7 @@
 /* This file provides JavaScript functions to be included when one wishes
  * to show/hide certain UI elements, and have the state of them being
  * shown/hidden stored in a cookie.
- * 
+ *
  * TUI stands for Tweak UI.
  *
  * Requires js/util.js and the YUI Dom and Cookie libraries.
@@ -35,8 +35,8 @@ var TUI_COOKIE_NAME  = 'TUI';
 
 var TUI_alternates = new Array();
 
-/** 
- * Hides a particular class of elements if they are shown, 
+/**
+ * Hides a particular class of elements if they are shown,
  * or shows them if they are hidden. Then it stores whether that
  * class is now hidden or shown.
  *
@@ -55,7 +55,7 @@ function TUI_toggle_class(className) {
 /**
  * Specifies that a certain class of items should be hidden by default,
  * if the user doesn't have a TUI cookie.
- * 
+ *
  * @param className   The class to hide by default.
  */
 function TUI_hide_default(className) {

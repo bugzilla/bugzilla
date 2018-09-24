@@ -161,9 +161,9 @@ to some group are shown by default.
     <tr>
       <th></th>
       <td>
-        <label><input type="radio" name="do_union" value="0" 
+        <label><input type="radio" name="do_union" value="0"
             [% 'checked="checked"' IF !cgi.param('do_union') %]>AND *</label>
-        <label><input type="radio" name="do_union" value="1" 
+        <label><input type="radio" name="do_union" value="1"
             [% 'checked="checked"' IF cgi.param('do_union') %]>OR *</label>
       </td>
       <td colspan="3"></td>
@@ -171,7 +171,7 @@ to some group are shown by default.
     </tr>
   </table>
 
-  <p>(* The logical conjunction/disjunction between the requester 
+  <p>(* The logical conjunction/disjunction between the requester
           and the requestee)</p>
 </form>
 
@@ -229,7 +229,7 @@ to some group are shown by default.
 [% BLOCK start_new_table %]
   [% buglist = {} %]
 
-  <h3>[% column_headers.$group_field %]: 
+  <h3>[% column_headers.$group_field %]:
     [%+ (request.$group_field || "None") FILTER email FILTER html %]</h3>
   <table class="requests" cellspacing="0" cellpadding="4" border="1">
     <tr>

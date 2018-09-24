@@ -30,10 +30,10 @@
 
 [% FILTER null;
   x_label_skip = (30 * chart.data.0.size / width);
-  
+
   graph.set(x_label           => x_label,
             y_label           => y_label,
-            y_tick_number     => 8, 
+            y_tick_number     => 8,
             y_max_value       => chart.y_max_value,
             x_label_position  => 0.5,
             x_labels_vertical => 1,
@@ -42,10 +42,10 @@
             line_width        => 2,
             dclrs             => ["lred", "lgreen", "lblue", "lyellow",
                                   "lpurple", "lorange", "black", "green",
-                                  "blue", "dpink", "lbrown", "gray", 
+                                  "blue", "dpink", "lbrown", "gray",
                                   "red", "dpurple", "gold", "marine"]);
-   
-  # Workaround for the fact that set_legend won't take chart.labels directly, 
+
+  # Workaround for the fact that set_legend won't take chart.labels directly,
   # because chart.labels is an array reference rather than an array.
   graph.set_legend(chart.labels.0, chart.labels.1, chart.labels.2,
                    chart.labels.3, chart.labels.4, chart.labels.5,
@@ -53,7 +53,7 @@
                    chart.labels.9, chart.labels.10, chart.labels.11,
                    chart.labels.12, chart.labels.13, chart.labels.14,
                    chart.labels.15);
-                      
+
   graph.plot(chart.data).png | stdout(1);
   END;
 -%]

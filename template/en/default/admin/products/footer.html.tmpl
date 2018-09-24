@@ -17,7 +17,7 @@
   # product: Bugzilla::Product Object; the product
   #
   # classification: Bugzilla::Classification object ; If classifications
-  #                         are enabled, then this is the currently 
+  #                         are enabled, then this is the currently
   #                         selected classification
   #
   # no_XXX_link: boolean; if defined, then don't show the corresponding
@@ -35,7 +35,7 @@
   [% classification_url_part_start = BLOCK %]classification=
      [%- classification.name FILTER uri %]
   [% END %]
-  [% classification_text = BLOCK %] 
+  [% classification_text = BLOCK %]
     of classification '[% classification.name FILTER html %]'
   [% END %]
 [% END %]
@@ -58,8 +58,8 @@
 [% END %]
 
 [% IF product && !no_edit_product_link %]
-  Edit product <a 
-  title="Edit Product '[% product.name FILTER html %]' 
+  Edit product <a
+  title="Edit Product '[% product.name FILTER html %]'
          [%- classification_text %]"
   href="editproducts.cgi?action=edit&amp;product=[% product.name FILTER uri %]">
         '[% product.name FILTER html %]'</a>.
@@ -68,7 +68,7 @@
 
 [%# Edit other products (in a classification if specified): %]
 [% UNLESS no_edit_other_products_link %]
-  Edit <a 
+  Edit <a
   href="editproducts.cgi?
         [%- classification_url_part_start FILTER none %]">other products
           [% classification_text %]</a>.

@@ -34,7 +34,7 @@ use Role::Tiny::With;
 
 use base qw(Bugzilla::Object Exporter);
 @Bugzilla::User::EXPORT = qw(is_available_username
-    login_to_id user_id_to_login 
+    login_to_id user_id_to_login
     USER_MATCH_MULTIPLE USER_MATCH_FAILED USER_MATCH_SUCCESS
     MATCH_SKIP_CONFIRM
 );

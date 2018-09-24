@@ -11,7 +11,7 @@ are a couple more which are part of
 `bugzilla.mozilla.org <http://git.mozilla.org/?p=webtools/bmo/bugzilla.git>`_.
 However, in each
 case you may need to check that the skin supports the version of Bugzilla
-you have. 
+you have.
 
 To create a new custom skin, make a directory that contains all the same CSS
 file names as :file:`skins/standard/`, and put your directory in

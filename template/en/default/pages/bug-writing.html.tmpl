@@ -29,7 +29,7 @@
 
 [% INCLUDE global/header.html.tmpl title = "$terms.Bug Writing Guidelines" %]
 
-  <p>Effective [% terms.bug %] reports are the most likely to be fixed. 
+  <p>Effective [% terms.bug %] reports are the most likely to be fixed.
   These guidelines explain how to write such reports.
 
 <h3>Principles</h3>
@@ -38,7 +38,7 @@
     <li>Be precise</li>
     <li>Be clear - explain it so others can reproduce the [% terms.bug %]</li>
     <li>One [% terms.bug %] per report</li>
-    <li>No [% terms.bug %] is too trivial to report - 
+    <li>No [% terms.bug %] is too trivial to report -
     small [% terms.bugs %] may hide big [% terms.bugs %]</li>
     <li>Clearly separate fact from speculation</li>
   </ul>
@@ -50,48 +50,48 @@
   software, to see whether it has already been fixed.
   </li>
 
-  <li><a href="query.cgi?format=specific">Search</a> 
+  <li><a href="query.cgi?format=specific">Search</a>
   [% terms.Bugzilla %], to see whether your [% terms.bug %] has
   already been reported.</li>
 </ol>
 
 <h3>Reporting a New [% terms.Bug %]</h3>
 
-<p>If you have reproduced the [% terms.bug %] in a recent build and 
+<p>If you have reproduced the [% terms.bug %] in a recent build and
 no-one else appears to have reported it, then:</p>
 
 <ol>
- <li>Choose 
+ <li>Choose
  "<a href="enter_bug.cgi">Enter a new [% terms.bug %]</a>"</li>
  <li>Select the product in which you've found the [% terms.bug %]</li>
  <li>Fill out the form. Here is some help understanding it:</li>
 </ol>
 
   <blockquote>
-    <p><b>Component:</b> In which sub-part of the software does it 
+    <p><b>Component:</b> In which sub-part of the software does it
           exist?<br>
     This field is required.
-    Click the word "Component" to see a description of each 
+    Click the word "Component" to see a description of each
     component. If none seems appropriate, look for a "General" component.</p>
 
-    <p><b>OS:</b> On which operating system (OS) did you find 
+    <p><b>OS:</b> On which operating system (OS) did you find
           it?
     (e.g. Linux, Windows XP, Mac OS X.)<br>
-    If you know the [% terms.bug %] happens on more than one type of 
-    operating system, choose <em>[% display_value("op_sys", "All") FILTER html %]</em>. 
+    If you know the [% terms.bug %] happens on more than one type of
+    operating system, choose <em>[% display_value("op_sys", "All") FILTER html %]</em>.
     If your OS isn't listed, choose <em>[% display_value("op_sys", "Other") FILTER html %]</em>.</p>
 
-    <p><b>Summary:</b> How would you describe the [% terms.bug %], in 
+    <p><b>Summary:</b> How would you describe the [% terms.bug %], in
     approximately 60 or fewer characters?<br>
      A good summary should <b>quickly and uniquely identify [% terms.abug %]
     report</b>. It should explain the problem, not your suggested solution.<br>
     <ul>
-     <li>Good: "<tt>Cancelling a File Copy dialog crashes 
+     <li>Good: "<tt>Cancelling a File Copy dialog crashes
      File Manager</tt>"</li>
      <li>Bad: "<tt>Software crashes</tt>"</li>
      <li>Bad: "<tt>Browser should work with my web site</tt>"</li>
     </ul>
-    
+
     <b>Description:</b>
     The details of your problem report, including:</p>
 
@@ -110,12 +110,12 @@ Drag-selecting any page crashes Mac builds in the NSGetFactory function.
 
       <blockquote>
 <pre>
-1) View any web page. (I used the default sample page, 
+1) View any web page. (I used the default sample page,
 resource:/res/samples/test0.html)
 
-2) Drag-select the page. (Specifically, while holding down 
-the mouse button, drag the mouse pointer downwards from any 
-point in the browser's content region to the bottom of the 
+2) Drag-select the page. (Specifically, while holding down
+the mouse button, drag the mouse pointer downwards from any
+point in the browser's content region to the bottom of the
 browser's content region.)
 </pre>
       </blockquote>
@@ -134,7 +134,7 @@ The application crashed.
 
       <blockquote>
 <pre>
-The window should scroll downwards. Scrolled content should be selected. 
+The window should scroll downwards. Scrolled content should be selected.
 (Or, at least, the application should not crash.)
 </pre>
       </blockquote>
@@ -148,8 +148,8 @@ Build 2006-08-10 on Mac OS 10.4.3
 </pre>
       </blockquote>
 
-      <p><b>Additional Builds and Platforms:</b> Whether or not 
-      the [% terms.bug %] takes place on other platforms (or browsers, 
+      <p><b>Additional Builds and Platforms:</b> Whether or not
+      the [% terms.bug %] takes place on other platforms (or browsers,
       if applicable).</p>
 
       <blockquote>
@@ -167,13 +167,13 @@ Doesn't Occur On Build 2006-08-10 on Windows XP Home (Service Pack 2)
 
         <li><b>Mac OS X:</b> Attach the "Crash Reporter" log that appears
         upon crash.
-        Only include the section directly below the crashing thread, usually 
+        Only include the section directly below the crashing thread, usually
         titled "Thread 0 Crashed". Please do not paste the entire log!</li>
       </ul>
     </blockquote>
 
   <p>Double-check your report for errors and omissions, then press "Commit".
-  Your [% terms.bug %] report will now be in 
+  Your [% terms.bug %] report will now be in
   the [% terms.Bugzilla %] database.<br>
   </p>
 </blockquote>

@@ -16,7 +16,7 @@
 [%# INTERFACE:
   # values: array of hashes having the following properties:
   #   - name: string; The value.
-  #   - sortkey: number; The sortkey used to order the value when 
+  #   - sortkey: number; The sortkey used to order the value when
   #              displayed to the user in a list.
   #
   # field: object; the field we are editing values for.
@@ -41,12 +41,12 @@
 
 
 [% columns = [
-     { 
+     {
        name => "name"
        heading => "Edit field value..."
        contentlink => edit_contentlink
      },
-     { 
+     {
        name => "sortkey"
        heading => "Sortkey"
      },

@@ -20,7 +20,7 @@
   #%]
 
 [% title = BLOCK %]
-  Delete Value '[% value.name FILTER html %]' from the 
+  Delete Value '[% value.name FILTER html %]' from the
   '[% field.description FILTER html %]' ([% field.name FILTER html %]) field
 [% END %]
 
@@ -63,11 +63,11 @@
 
 [% IF value.is_default || value.bug_count || (value_count == 1)
       || value.controls_visibility_of_fields.size
-      || value.controlled_values_array.size 
+      || value.controlled_values_array.size
 %]
 
   <p>Sorry, but the '[% value.name FILTER html %]' value cannot be deleted
-    from the '[% field.description FILTER html %]' field for the following 
+    from the '[% field.description FILTER html %]' field for the following
     reason(s):</p>
 
   <ul class="warningmessages">
@@ -85,7 +85,7 @@
     [% IF value.bug_count %]
       <li>
         [% IF value.bug_count > 1 %]
-          There are [% value.bug_count FILTER html %] [%+ terms.bugs %] 
+          There are [% value.bug_count FILTER html %] [%+ terms.bugs %]
           with this field value.
         [% ELSE %]
           There is 1 [% terms.bug %] with this field value.
@@ -97,7 +97,7 @@
              href="buglist.cgi?[% field.name FILTER uri %]=
                    [%- value.name FILTER uri %]">
             [% IF value.bug_count > 1 %]
-              those [% terms.bugs %] 
+              those [% terms.bugs %]
             [% ELSE %]
               that [% terms.bug %]
             [% END %]
@@ -117,7 +117,7 @@
         [% FOREACH field = value.controls_visibility_of_fields %]
           <a href="editfields.cgi?action=edit&name=
                    [%- field.name FILTER uri %]">
-            [%- field.description FILTER html %] 
+            [%- field.description FILTER html %]
             ([% field.name FILTER html %])</a><br>
         [% END %]
       </li>
@@ -158,4 +158,4 @@
   no_edit_link = 1
  +%]
 
-[% PROCESS global/footer.html.tmpl %] 
+[% PROCESS global/footer.html.tmpl %]

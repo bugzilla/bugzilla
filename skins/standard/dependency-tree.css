@@ -17,7 +17,7 @@
   * Rights Reserved.
   *
   * Contributor(s): Christian Reis <kiko@async.com.br>
-  *                 André Batosti <batosti@async.com.br>
+  *                 AndrÃ© Batosti <batosti@async.com.br>
   */
 
 ul.tree {
@@ -31,19 +31,19 @@ ul.tree ul {
     display: block;
 }
 
-ul.tree li { 
+ul.tree li {
     /* see http://www.kryogenix.org/code/browser/aqlists/ for idea */
-    padding-top: 3px; 
-    text-indent: -1.2em; 
-    padding-left: 0.5em; 
+    padding-top: 3px;
+    text-indent: -1.2em;
+    padding-left: 0.5em;
     padding-bottom: 3px;
     list-style-type: none;
     background: url("dependency-tree/bug-item.png") no-repeat;
 }
 
 ul.tree li a.b {
-    padding-left: 30px; 
-    margin-right: -14px; 
+    padding-left: 30px;
+    margin-right: -14px;
     text-decoration: none;
 }
 
@@ -64,7 +64,7 @@ ul.tree a.tree_link img {
 .summ_info {
     /* change to inline if you would like to see the full bug details
      * displayed in the list */
-    display: none; 
+    display: none;
     font-size: 75%;
 }
 

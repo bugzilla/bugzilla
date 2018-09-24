@@ -30,28 +30,28 @@
     var queryform = "chartform";
 [% END %]
 
-[% PROCESS global/header.html.tmpl 
+[% PROCESS global/header.html.tmpl
   title = "Create New Data Set"
   generate_api_token = 1
   onload = "doOnSelectProduct(0);"
-  javascript = js_data 
+  javascript = js_data
   javascript_urls = [ "js/util.js", "js/productform.js", "js/TUI.js", "js/field.js" ]
   style_urls = [ "skins/standard/search_form.css" ]
   doc_section = "reporting.html#charts-new-series"
 %]
 
 <form method="get" action="chart.cgi" name="chartform">
-  
+
 [% PROCESS search/form.html.tmpl %]
 
 <p>
   <input type="submit" id="action-search" name="action-search" value="Run Search">
   to see which [% terms.bugs %] would be included in this data set.
 </p>
-    
+
 <h3>Data Set Parameters</h3>
-      
-[% PROCESS reports/series.html.tmpl 
+
+[% PROCESS reports/series.html.tmpl
    button_name = "Create Data Set" %]
   <input type="hidden" name="action" value="create">
   <input type="hidden" name="token" value="[% issue_hash_token(['create-series']) FILTER html %]">
@@ -61,7 +61,7 @@
   catSelected();
   checkNewState();
 </script>
-      
+
 <hr>
 
 [% PROCESS "search/boolean-charts.html.tmpl" %]

@@ -10,7 +10,7 @@ report that is emailed to interested parties.
 
 A good starting place to read this code is the gather.sh shell script.  This
 script is the driver for the remaining collection and processing scripts which
-populate the reports and charts.  
+populate the reports and charts.
 
 - Collection scripts are run once per week as a cron job
 - API results

@@ -27,7 +27,7 @@
 [% USE Bugzilla %]
 [% PROCESS global/header.html.tmpl
    title = "$terms.Bugzilla Main Page"
-   header = "Main Page" 
+   header = "Main Page"
    style_urls = [ 'skins/standard/index.css' ]
    no_yui = 1
    og_image = "extensions/OpenGraph/web/moz-social-bw-rgb-1200x1200.png"
@@ -41,7 +41,7 @@
         <div class="intro">[% Hook.process('intro') %]</div>
         <a id="enter_bug" class="bz_common_actions"
            href="enter_bug.cgi"><span>File [% terms.aBug %]</span></a>
-        <a id="query" class="bz_common_actions" 
+        <a id="query" class="bz_common_actions"
            href="query.cgi"><span>Search</span></a>
         <a id="account" class="bz_common_actions"
            [% IF user.id %]

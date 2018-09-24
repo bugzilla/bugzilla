@@ -49,7 +49,7 @@ var tms = new Array();
     [%- FOREACH item = user.get_selectable_products(c.id) -%]
       [%- IF item.components.size -%]
         [%- sep FILTER js %]'[% item.name FILTER js %]'
-        [%- sep = ',' -%] 
+        [%- sep = ',' -%]
       [%- END -%]
     [%- END -%] ];
   [% nclass = nclass+1 %]
@@ -76,7 +76,7 @@ var tms = new Array();
 [% END %]
 
 /*
- * doOnSelectProduct determines which selection should get updated 
+ * doOnSelectProduct determines which selection should get updated
  *
  * - selectmode = 0  - init
  *   selectmode = 1  - classification selected
@@ -87,7 +87,7 @@ var tms = new Array();
  */
 function doOnSelectProduct(selectmode) {
     var f = document.forms[queryform];
-    var milestone = (typeof(f.target_milestone) == "undefined" ? 
+    var milestone = (typeof(f.target_milestone) == "undefined" ?
                                                null : f.target_milestone);
     if (selectmode == 0) {
         // If there is no classification selected, give us a chance to fill
@@ -106,7 +106,7 @@ function doOnSelectProduct(selectmode) {
 
 // Hide the Advanced Fields by default, unless the user has a cookie
 // that specifies otherwise.
-// &#9656; and &#9662; are both utf8 escaped characters for right 
+// &#9656; and &#9662; are both utf8 escaped characters for right
 //    and down facing arrows respectivly.
 TUI_alternates['history_query'] = '&#9658;';
 TUI_alternates['people_query'] = '&#9658;';
@@ -139,7 +139,7 @@ TUI_hide_default('information_query');
          field = bug_fields.short_desc
          types = query_types
          value = default.short_desc.0
-         type_selected = default.short_desc_type.0 
+         type_selected = default.short_desc_type.0
          accesskey = "s"
          autofocus = 1
          %]
@@ -151,38 +151,38 @@ TUI_hide_default('information_query');
   </div>
 
 [%# *** Classification Product Component *** %]
-  
+
 [% Hook.process('before_selects_top') %]
 [% IF Param('useclassification') %]
       [% fake_classfication = { name => bug_fields.classification.name,
                                 type => constants.FIELD_TYPE_SINGLE_SELECT } %]
-      [% INCLUDE "search/field.html.tmpl" 
+      [% INCLUDE "search/field.html.tmpl"
             field => fake_classfication
             accesskey => "c"
-            onchange => "doOnSelectProduct(1);" 
+            onchange => "doOnSelectProduct(1);"
             value => default.classification
-      %]          
+      %]
 [% END %]
 
-[% INCLUDE "search/field.html.tmpl" 
+[% INCLUDE "search/field.html.tmpl"
       field => bug_fields.product
       accesskey => "p"
-      onchange => "doOnSelectProduct(2);" 
+      onchange => "doOnSelectProduct(2);"
       value => default.product
 %]
-[% INCLUDE "search/field.html.tmpl" 
+[% INCLUDE "search/field.html.tmpl"
       field => bug_fields.component
       accesskey => "m"
       value => default.component
 %]
-[% INCLUDE "search/field.html.tmpl" 
+[% INCLUDE "search/field.html.tmpl"
       field => bug_fields.bug_status
       accesskey => "a"
       value => default.bug_status
 %]
-[% INCLUDE "search/field.html.tmpl" 
+[% INCLUDE "search/field.html.tmpl"
       field => bug_fields.resolution
-      accesskey => "r" 
+      accesskey => "r"
       value => default.resolution
 %]
 
@@ -193,14 +193,14 @@ TUI_hide_default('information_query');
   <a href="javascript:TUI_toggle_class('information_query')">
     Detailed [% terms.Bug %] Information
   </a>
-  <span class="section_help">Narrow results by the following fields: 
-    [%+ field_descs.longdesc FILTER html %]s, [%+ field_descs.bug_file_loc FILTER html %], 
+  <span class="section_help">Narrow results by the following fields:
+    [%+ field_descs.longdesc FILTER html %]s, [%+ field_descs.bug_file_loc FILTER html %],
     [% IF Param('usestatuswhiteboard') %] [%+ field_descs.status_whiteboard FILTER html %], [%+ END %]
     [% IF use_keywords %] [%+ field_descs.keywords FILTER html %], [%+ END %]
     [% IF user.is_timetracker %] [%+ field_descs.deadline FILTER html %], [%+ END %]
-    [% terms.Bug %] Numbers, [%+ field_descs.version FILTER html %], 
+    [% terms.Bug %] Numbers, [%+ field_descs.version FILTER html %],
     [% IF Param('usetargetmilestone') %] [%+ field_descs.target_milestone FILTER html %], [%+ END %]
-    [% field_descs.bug_severity FILTER html %], [%+ field_descs.priority FILTER html %], [%+ field_descs.rep_platform FILTER html %], 
+    [% field_descs.bug_severity FILTER html %], [%+ field_descs.priority FILTER html %], [%+ field_descs.rep_platform FILTER html %],
     [%+ field_descs.op_sys FILTER html %]
   </span>
 </div>
@@ -210,22 +210,22 @@ TUI_hide_default('information_query');
     { field => bug_fields.longdesc, accesskey => 'c' },
     { field => bug_fields.bug_file_loc, accesskey => 'u' },
     { field => bug_fields.status_whiteboard, accesskey => 'w' },
-    { field => bug_fields.keywords, accesskey => 'k', 
-      qtypes => ['allwords', 'anywords', 'nowords', 'regexp', 'notregexp'] }   
+    { field => bug_fields.keywords, accesskey => 'k',
+      qtypes => ['allwords', 'anywords', 'nowords', 'regexp', 'notregexp'] }
   ] %]
   [% Hook.process('before_freetext_fields') %]
-  
+
   [%# loop through a bunch of free text fields and print out their text stuff %]
   [% FOREACH field_container = freetext_fields %]
-    [% NEXT IF field_container.field.name == 'status_whiteboard' 
-               AND NOT Param('usestatuswhiteboard') 
+    [% NEXT IF field_container.field.name == 'status_whiteboard'
+               AND NOT Param('usestatuswhiteboard')
     %]
-    [% NEXT IF field_container.field.name == 'keywords' 
+    [% NEXT IF field_container.field.name == 'keywords'
                AND NOT use_keywords
     %]
     <div class="search_field_row">
       [% type = field_container.field.name _ "_type" %]
-      [% INCLUDE "search/field.html.tmpl" 
+      [% INCLUDE "search/field.html.tmpl"
           field => field_container.field
           types => field_container.qtypes || query_types
           accesskey => field_container.accesskey
@@ -238,8 +238,8 @@ TUI_hide_default('information_query');
   [%# Deadline %]
   [% IF user.is_timetracker %]
     <div class="search_field_row">
-        [% INCLUDE "search/field.html.tmpl" 
-                    field = bug_fields.deadline 
+        [% INCLUDE "search/field.html.tmpl"
+                    field = bug_fields.deadline
                     accesskey = "l"
                     value = [ default.deadlinefrom.0, default.deadlineto.0  ]
         %]
@@ -253,7 +253,7 @@ TUI_hide_default('information_query');
            value="[% default.bug_id.0 FILTER html %]" size="20">
            <div class="field_help">(comma-separated list)</div>
     </div>
-    should be 
+    should be
     <select name="bug_id_type" id="bug_id_type">
       <option value="anyexact"[% " selected" IF default.bug_id_type.0 == "anyexact" %]>only included in</option>
       <option value="nowords"[% " selected" IF default.bug_id_type.0 == "nowords" %]>excluded from</option>
@@ -261,44 +261,44 @@ TUI_hide_default('information_query');
   </div>
 
   [% Hook.process('after_freetext_fields') %]
-  
+
   [%# *** Status Resolution Severity Priority Hardware OS *** %]
   <div>
     [% Hook.process('before_selects_bottom') %]
     [% fake_version_field = { name => bug_fields.version.name,
                               type => constants.FIELD_TYPE_SINGLE_SELECT }%]
-    [% INCLUDE "search/field.html.tmpl" 
+    [% INCLUDE "search/field.html.tmpl"
           field => fake_version_field
           value => default.version
-    %]                              
+    %]
     [% IF Param('usetargetmilestone') %]
-        [% fake_target_milestone_field = { name => bug_fields.target_milestone.name , 
+        [% fake_target_milestone_field = { name => bug_fields.target_milestone.name ,
                                            type => constants.FIELD_TYPE_SINGLE_SELECT } %]
-        [% INCLUDE "search/field.html.tmpl" 
+        [% INCLUDE "search/field.html.tmpl"
               field => fake_target_milestone_field
               value => default.target_milestone
         %]
     [% END %]
-    [% INCLUDE "search/field.html.tmpl" 
+    [% INCLUDE "search/field.html.tmpl"
           field => bug_fields.bug_severity
-          accesskey=> "v" 
+          accesskey=> "v"
           value => default.bug_severity
     %]
-    [% INCLUDE "search/field.html.tmpl" 
+    [% INCLUDE "search/field.html.tmpl"
          field => bug_fields.priority
          accesskey => "i"
          value => default.priority
-    %]    
-    [% INCLUDE "search/field.html.tmpl" 
-        field => bug_fields.rep_platform 
+    %]
+    [% INCLUDE "search/field.html.tmpl"
+        field => bug_fields.rep_platform
         accesskey =>"h"
         value => default.rep_platform
-    %]               
-    [% INCLUDE "search/field.html.tmpl" 
-        field => bug_fields.op_sys 
+    %]
+    [% INCLUDE "search/field.html.tmpl"
+        field => bug_fields.op_sys
         accesskey =>"o"
         value => default.op_sys
-    %]               
+    %]
     [% Hook.process('after_selects_bottom') %]
   </div>
 </div>
@@ -318,14 +318,14 @@ TUI_hide_default('information_query');
       [% PROCESS role_types field = { count => n, name => "emailassigned_to",
                   label=> "the ${terms.Bug} ${field_descs.assigned_to}" } %]
       [% PROCESS role_types field = { count => n, name => "emailreporter",
-                  label=> "the ${field_descs.reporter}" } %]    
+                  label=> "the ${field_descs.reporter}" } %]
       [% IF Param('useqacontact') %]
-          [% PROCESS role_types field = { count => n, name => "emailqa_contact", 
+          [% PROCESS role_types field = { count => n, name => "emailqa_contact",
                   label=> "the ${field_descs.qa_contact}" } %]
       [% END %]
-      [% PROCESS role_types field = { count => n, name => "emailcc", 
+      [% PROCESS role_types field = { count => n, name => "emailcc",
                   label=> "a ${field_descs.cc} list member" } %]
-      [% PROCESS role_types field = { count => n, name => "emaillongdesc", 
+      [% PROCESS role_types field = { count => n, name => "emaillongdesc",
                   label=> " a ${field_descs.commenter}" } %]
       [% PROCESS role_types field = { count => n, name => "emailbug_mentor",
                                       label => " a ${field_descs.bug_mentor}" } %]
@@ -379,15 +379,15 @@ TUI_hide_default('information_query');
   </li>
   <li>
     <label for="chfieldfrom">between:</label>
-    <input name="chfieldfrom" id="chfieldfrom" size="10" 
-           value="[% default.chfieldfrom.0 FILTER html %]" onchange="updateCalendarFromField(this)"> 
+    <input name="chfieldfrom" id="chfieldfrom" size="10"
+           value="[% default.chfieldfrom.0 FILTER html %]" onchange="updateCalendarFromField(this)">
            <button type="button" class="calendar_button"
                           id="button_calendar_chfieldfrom"
                           onclick="showCalendar('chfieldfrom')"><span>Calendar</span></button>
-           and 
+           and
            <div id="con_calendar_chfieldfrom"></div>
-          <input name="chfieldto" size="10" id="chfieldto" 
-                 value="[% default.chfieldto.0 || "Now" FILTER html %]" 
+          <input name="chfieldto" size="10" id="chfieldto"
+                 value="[% default.chfieldto.0 || "Now" FILTER html %]"
                  onchange="updateCalendarFromField(this)">
           <button type="button" class="calendar_button"
                          id="button_calendar_chfieldto"
@@ -398,7 +398,7 @@ TUI_hide_default('information_query');
       createCalendar('chfieldfrom');
       createCalendar('chfieldto');
     </script>
-  </li>    
+  </li>
 </ul>
 
 [%############################################################################%]

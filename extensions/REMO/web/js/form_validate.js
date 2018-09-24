@@ -1,7 +1,7 @@
 /**
  * Some Form Validation and Interaction
  **/
-//Makes sure that there is an '@' in the address with a '.' 
+//Makes sure that there is an '@' in the address with a '.'
 //somewhere after it (and at least one character in between them
 
 function isValidEmail(email) {

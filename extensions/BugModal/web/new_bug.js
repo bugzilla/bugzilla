@@ -33,7 +33,7 @@ var component_load = function(product) {
         function() {
             alert("Network issues. Please refresh the page and try again");
         }
-    );  
+    );
 }
 
 $(document).ready(function() {
@@ -101,7 +101,7 @@ $(document).ready(function() {
             callback(initial.keywords);
         }
     });
-    
+
     $("#product").on("change", function () {
         component_load($("#product").val());
     });

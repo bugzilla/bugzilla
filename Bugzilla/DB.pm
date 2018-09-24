@@ -12,13 +12,13 @@ use Moo;
 
 use DBI;
 use DBIx::Connector;
-our %Connector;
 
 has 'connector' => (
     is      => 'lazy',
     handles => [ qw( dbh ) ],
 );
 
+use Bugzilla::Logging;
 use Bugzilla::Constants;
 use Bugzilla::Install::Requirements;
 use Bugzilla::Install::Util qw(install_string);
@@ -31,7 +31,9 @@ use Bugzilla::DB::Schema;
 use Bugzilla::Version;
 
 use List::Util qw(max);
+use Scalar::Util qw(weaken);
 use Storable qw(dclone);
+use English qw(-no_match_vars);
 
 has [qw(dsn user pass attrs)] => (
     is       => 'ro',
@@ -44,7 +46,7 @@ has [qw(dsn user pass attrs)] => (
 # time we need a DBI handle to ensure the connection is alive.
 {
     my @DBI_METHODS = qw(
-        begin_work column_info commit disconnect do errstr get_info last_insert_id ping prepare
+        begin_work column_info commit do errstr get_info last_insert_id ping prepare
         primary_key quote_identifier rollback selectall_arrayref selectall_hashref
         selectcol_arrayref selectrow_array selectrow_arrayref selectrow_hashref table_info
     );
@@ -130,6 +132,12 @@ sub quote {
 #####################################################################
 
 sub connect_shadow {
+    state $shadow_dbh;
+    if ($shadow_dbh && $shadow_dbh->bz_in_transaction) {
+        FATAL("Somehow in a transaction at connection time");
+        $shadow_dbh->bz_rollback_transaction();
+    }
+    return $shadow_dbh if $shadow_dbh;
     my $params = Bugzilla->params;
     die "Tried to connect to non-existent shadowdb"
         unless Bugzilla->get_param_with_override('shadowdb');
@@ -147,13 +155,16 @@ sub connect_shadow {
         $connect_params->{db_user} = Bugzilla->localconfig->{'shadowdb_user'};
         $connect_params->{db_pass} = Bugzilla->localconfig->{'shadowdb_pass'};
     }
-
-    return _connect($connect_params);
+    return $shadow_dbh = _connect($connect_params);
 }
 
 sub connect_main {
-    my $lc = Bugzilla->localconfig;
-    return _connect(Bugzilla->localconfig);
+    state $main_dbh = _connect(Bugzilla->localconfig);
+    if ($main_dbh->bz_in_transaction) {
+        FATAL("Somehow in a transaction at connection time");
+        $main_dbh->bz_rollback_transaction();
+    }
+    return $main_dbh;
 }
 
 sub _connect {
@@ -293,7 +304,6 @@ sub _get_no_db_connection {
     my $dbh;
     my %connect_params = %{ Bugzilla->localconfig };
     $connect_params{db_name} = '';
-    local %Connector = ();
     my $conn_success = eval {
         $dbh = _connect(\%connect_params);
     };
@@ -1304,13 +1314,18 @@ sub _build_connector {
         }
     }
     my $class = ref $self;
-    if ($class->can('on_dbi_connected')) {
-        $attributes->{Callbacks} = {
-            connected => sub { $class->on_dbi_connected(@_); return },
-        }
-    }
+    weaken($self);
+    $attributes->{Callbacks} = {
+        connected => sub {
+            my ($dbh, $dsn) = @_;
+            INFO("$PROGRAM_NAME connected mysql $dsn");
+            ThrowCodeError('not_in_transaction') if $self && $self->bz_in_transaction;
+            $class->on_dbi_connected(@_) if $class->can('on_dbi_connected');
+            return
+        },
+    };
 
-    return $Connector{"$user.$dsn"} //= DBIx::Connector->new($dsn, $user, $pass, $attributes);
+    return DBIx::Connector->new($dsn, $user, $pass, $attributes);
 }
 
 #####################################################################

@@ -391,7 +391,7 @@
           <li role="separator"></li>
           <div class="actions">
             <div><a href="buglist.cgi?product=[% bug.product FILTER uri %]&amp;bug_status=__open__"
-                    target="_blank" role="menuitem" tabindex="-1">See All [% terms.Bugs %] in This Product</a></div>
+                    target="_blank" role="menuitem" tabindex="-1">See Open [% terms.Bugs %] in This Product</a></div>
             <div><a href="enter_bug.cgi?product=[% bug.product FILTER uri %]"
                     target="_blank" role="menuitem" tabindex="-1">File New [% terms.Bug %] in This Product</a></div>
             <div><button disabled type="button" class="minor component-watching" role="menuitem" tabindex="-1"
@@ -449,7 +449,7 @@
           <div class="actions">
             <div><a href="buglist.cgi?product=[% bug.product FILTER uri %]&amp;
                           [%~ %]component=[% bug.component FILTER uri %]&amp;bug_status=__open__"
-                    target="_blank" role="menuitem" tabindex="-1">See All [% terms.Bugs %] in This Component</a></div>
+                    target="_blank" role="menuitem" tabindex="-1">See Open [% terms.Bugs %] in This Component</a></div>
             <div><a href="enter_bug.cgi?product=[% bug.product FILTER uri %]&amp;
                           [%~ %]component=[% bug.component FILTER uri %]"
                     target="_blank" role="menuitem" tabindex="-1">File New [% terms.Bug %] in This Component</a></div>

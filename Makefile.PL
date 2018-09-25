@@ -92,13 +92,14 @@ my %requires = (
 
 my %build_requires = ( 'ExtUtils::MakeMaker' => '7.22', );
 my %test_requires = (
-    'Test::More'                      => 0,
-    'Pod::Coverage'                   => 0,
-    'Test::WWW::Selenium'             => 0,
-    'Test::Selenium::Firefox'         => 0,
-    'Test::Perl::Critic::Progressive' => 0,
-    'Perl::Critic::Freenode'          => 0,
     'Capture::Tiny'                   => 0,
+    'DBD::SQLite'                     => '1.29',
+    'Perl::Critic::Freenode'          => 0,
+    'Pod::Coverage'                   => 0,
+    'Test::More'                      => 0,
+    'Test::Perl::Critic::Progressive' => 0,
+    'Test::Selenium::Firefox'         => 0,
+    'Test::WWW::Selenium'             => 0,
 );
 my %recommends = ( Safe => '2.30',);
 

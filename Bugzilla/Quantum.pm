@@ -34,7 +34,7 @@ sub startup {
 
     DEBUG('Starting up');
     $self->plugin('Bugzilla::Quantum::Plugin::Glue');
-    $self->plugin('Bugzilla::Quantum::Plugin::Hostage');
+    $self->plugin('Bugzilla::Quantum::Plugin::Hostage') unless $ENV{BUGZILLA_DISABLE_HOSTAGE};
     $self->plugin('Bugzilla::Quantum::Plugin::BlockIP');
     $self->plugin('Bugzilla::Quantum::Plugin::BasicAuth');
 

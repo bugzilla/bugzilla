@@ -12,9 +12,10 @@ use strict;
 use warnings;
 
 use base qw(Exporter);
-our @EXPORT = qw(create_user);
+our @EXPORT = qw(create_user issue_api_key);
 
 use Bugzilla::User;
+use Bugzilla::User::APIKey;
 
 sub create_user {
     my ($login, $password, %extra) = @_;
@@ -27,6 +28,23 @@ sub create_user {
         extern_id     => undef,
         %extra,
     });
+}
+
+sub issue_api_key {
+    my ($login, $given_api_key) = @_;
+    my $user = Bugzilla::User->check({ name => $login });
+
+    my $params = {
+        user_id     => $user->id,
+        description => 'Bugzilla::Test::Util::issue_api_key',
+        api_key     => $given_api_key,
+    };
+
+    if ($given_api_key) {
+        return Bugzilla::User::APIKey->create_special($params);
+    } else {
+        return Bugzilla::User::APIKey->create($params);
+    }
 }
 
 1;

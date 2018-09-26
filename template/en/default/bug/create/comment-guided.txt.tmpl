@@ -28,7 +28,6 @@
 [% USE Bugzilla %]
 [% cgi = Bugzilla.cgi %]
 User-Agent:       [%+ cgi.user_agent() %]
-Build Identifier: [%+ cgi.param("buildid") %]
 
 [%+ cgi.param("comment") IF cgi.param("comment") %]
 

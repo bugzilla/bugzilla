@@ -614,9 +614,6 @@ var bugForm = {
   onInit: function() {
     var user_agent = navigator.userAgent;
     Dom.get('user_agent').value = navigator.userAgent;
-    if (navigator.buildID && navigator.buildID != navigator.userAgent) {
-      Dom.get('build_id').value = navigator.buildID;
-    }
     Event.addListener(Dom.get('short_desc'), 'blur', function() {
       Dom.get('dupes_summary').value = Dom.get('short_desc').value;
       guided.setAdvancedLink();

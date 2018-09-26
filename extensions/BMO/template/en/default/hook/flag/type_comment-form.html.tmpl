@@ -1,0 +1,202 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+<template class="approval-request" data-flags="approval‑mozilla‑beta approval‑mozilla‑release">
+  <fieldset>
+    <legend>Beta/Release Uplift Approval Request</legend>
+    <table>
+      <tr>
+        <th id="_ar_beta_i1_label">Feature/[% terms.Bug %] causing the regression</th>
+        <td><input type="text" placeholder="[% terms.Bug %] ID" aria-labelledby="_ar_beta_i1_label" data-type="b[% %]ug"></td>
+      </tr>
+      <tr>
+        <th id="_ar_beta_i2_label">User impact if declined</th>
+        <td><textarea aria-labelledby="_ar_beta_i2_label"></textarea></td>
+      </tr>
+      <tr>
+        <th id="_ar_beta_i3_label">Is this code covered by automated tests?</th>
+        <td>
+          <div role="radiogroup" class="buttons toggle" aria-labelledby="_ar_beta_i3_label">
+            <div class="item"><input id="_ar_beta_i3_r1" type="radio" name="_ar_beta_i3_radio" value="Yes"><label for="_ar_beta_i3_r1">Yes</label></div>
+            <div class="item"><input id="_ar_beta_i3_r2" type="radio" name="_ar_beta_i3_radio" value="No"><label for="_ar_beta_i3_r2">No</label></div>
+            <div class="item"><input id="_ar_beta_i3_r3" type="radio" name="_ar_beta_i3_radio" value="Dunno"><label for="_ar_beta_i3_r3">Dunno</label></div>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <th id="_ar_beta_i4_label">Has the fix been verified in Nightly?</th>
+        <td>
+          <div role="radiogroup" class="buttons toggle" aria-labelledby="_ar_beta_i4_label">
+            <div class="item"><input id="_ar_beta_i4_r1" type="radio" name="_ar_beta_i4_radio" value="Yes"><label for="_ar_beta_i4_r1">Yes</label></div>
+            <div class="item"><input id="_ar_beta_i4_r2" type="radio" name="_ar_beta_i4_radio" value="No"><label for="_ar_beta_i4_r2">No</label></div>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <th id="_ar_beta_i5_label">Needs manual test from QE?</th>
+        <td>
+          <div role="radiogroup" class="buttons toggle" aria-labelledby="_ar_beta_i5_label">
+            <div class="item"><input id="_ar_beta_i5_r1" type="radio" name="_ar_beta_i5_radio" value="Yes"><label for="_ar_beta_i5_r1">Yes</label></div>
+            <div class="item"><input id="_ar_beta_i5_r2" type="radio" name="_ar_beta_i5_radio" value="No"><label for="_ar_beta_i5_r2">No</label></div>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <th id="_ar_beta_i6_label">If yes, steps to reproduce</th>
+        <td><textarea aria-labelledby="_ar_beta_i6_label"></textarea></td>
+      </tr>
+      <tr>
+        <th id="_ar_beta_i7_label">List of other uplifts needed</th>
+        <td><input type="text" placeholder="[% terms.Bug %] IDs" aria-labelledby="_ar_beta_i7_label" data-type="b[% %]ugs"></td>
+      </tr>
+      <tr>
+        <th id="_ar_beta_i8_label">Risk to taking this patch</th>
+        <td>
+          <div role="radiogroup" class="buttons toggle" aria-labelledby="_ar_beta_i8_label">
+            <div class="item"><input id="_ar_beta_i8_r1" type="radio" name="_ar_beta_i8_radio" value="Low"><label for="_ar_beta_i8_r1">Low</label></div>
+            <div class="item"><input id="_ar_beta_i8_r2" type="radio" name="_ar_beta_i8_radio" value="Medium"><label for="_ar_beta_i8_r2">Medium</label></div>
+            <div class="item"><input id="_ar_beta_i8_r3" type="radio" name="_ar_beta_i8_radio" value="High"><label for="_ar_beta_i8_r3">High</label></div>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <th id="_ar_beta_i9_label">Why is the change risky/not risky?<br>(and alternatives if risky)</th>
+        <td><textarea aria-labelledby="_ar_beta_i9_label"></textarea></td>
+      </tr>
+      <tr>
+        <th id="_ar_beta_i10_label">String changes made/needed</th>
+        <td><input type="text" class="long" aria-labelledby="_ar_beta_i10_label"></td>
+      </tr>
+    </table>
+  </fieldset>
+</template>
+
+<template class="approval-request" data-flags="approval‑mozilla‑esr*">
+  <fieldset>
+    <legend>ESR Uplift Approval Request</legend>
+    <table>
+      <tr>
+        <th id="_ar_esr_i1_label">If this is not a sec:{high,crit} [% terms.bug %], please state case for ESR consideration</th>
+        <td><textarea aria-labelledby="_ar_esr_i1_label"></textarea></td>
+      </tr>
+      <tr>
+        <th id="_ar_esr_i2_label">User impact if declined</th>
+        <td><textarea aria-labelledby="_ar_esr_i2_label"></textarea></td>
+      </tr>
+      <tr>
+        <th id="_ar_esr_i3_label">Fix Landed on Version</th>
+        <td><input type="text" aria-labelledby="_ar_esr_i3_label"></td>
+      </tr>
+      <tr>
+        <th id="_ar_esr_i4_label">Risk to taking this patch</th>
+        <td>
+          <div role="radiogroup" class="buttons toggle" aria-labelledby="_ar_esr_i4_label">
+            <div class="item"><input id="_ar_esr_i4_r1" type="radio" name="_ar_esr_i4_radio" value="Low"><label for="_ar_esr_i4_r1">Low</label></div>
+            <div class="item"><input id="_ar_esr_i4_r2" type="radio" name="_ar_esr_i4_radio" value="Medium"><label for="_ar_esr_i4_r2">Medium</label></div>
+            <div class="item"><input id="_ar_esr_i4_r3" type="radio" name="_ar_esr_i4_radio" value="High"><label for="_ar_esr_i4_r3">High</label></div>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <th id="_ar_esr_i5_label">Why is the change risky/not risky?<br>(and alternatives if risky)</th>
+        <td><textarea aria-labelledby="_ar_esr_i5_label"></textarea></td>
+      </tr>
+      <tr>
+        <th id="_ar_esr_i6_label">String or UUID changes made by this patch</th>
+        <td><input type="text" class="long" aria-labelledby="_ar_esr_i6_label"></td>
+      </tr>
+    </table>
+    <p>See <a href="https://wiki.mozilla.org/Release_Management/ESR_Landing_Process" target="_blank">ESR Landing Process</a> for more info.</p>
+  </fieldset>
+</template>
+
+<template class="approval-request" data-flags="approval‑mozilla‑geckoview*">
+  <fieldset>
+    <legend>GeckoView Uplift Approval Request</legend>
+    <table>
+      <tr>
+        <th id="_ar_gkv_i1_label">If this is not a sec:{high,crit} [% terms.bug %], please state case for consideration</th>
+        <td><textarea aria-labelledby="_ar_gkv_i1_label"></textarea></td>
+      </tr>
+      <tr>
+        <th id="_ar_gkv_i2_label">User impact if declined</th>
+        <td><textarea aria-labelledby="_ar_gkv_i2_label"></textarea></td>
+      </tr>
+      <tr>
+        <th id="_ar_gkv_i3_label">Fix Landed on Version</th>
+        <td><input type="text" aria-labelledby="_ar_gkv_i3_label"></td>
+      </tr>
+      <tr>
+        <th id="_ar_gkv_i4_label">Risk to taking this patch</th>
+        <td>
+          <div role="radiogroup" class="buttons toggle" aria-labelledby="_ar_gkv_i4_label">
+            <div class="item"><input id="_ar_gkv_i4_r1" type="radio" name="_ar_gkv_i4_radio" value="Low"><label for="_ar_gkv_i4_r1">Low</label></div>
+            <div class="item"><input id="_ar_gkv_i4_r2" type="radio" name="_ar_gkv_i4_radio" value="Medium"><label for="_ar_gkv_i4_r2">Medium</label></div>
+            <div class="item"><input id="_ar_gkv_i4_r3" type="radio" name="_ar_gkv_i4_radio" value="High"><label for="_ar_gkv_i4_r3">High</label></div>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <th id="_ar_gkv_i5_label">Why is the change risky/not risky?<br>(and alternatives if risky)</th>
+        <td><textarea aria-labelledby="_ar_gkv_i5_label"></textarea></td>
+      </tr>
+      <tr>
+        <th id="_ar_gkv_i6_label">String or UUID changes made by this patch</th>
+        <td><input type="text" class="long" aria-labelledby="_ar_gkv_i6_label"></td>
+      </tr>
+    </table>
+    <p>See <a href="https://wiki.mozilla.org/Release_Management/Uplift_rules" target="_blank">Patch uplifting rules</a> for more info.</p>
+  </fieldset>
+</template>
+
+<template class="approval-request" data-flags="sec‑approval">
+  <fieldset>
+    <legend>Security Approval Request</legend>
+    <table>
+      <tr>
+        <th id="_ar_sec_i1_label">How easily could an exploit be constructed based on the patch?</th>
+        <td><textarea aria-labelledby="_ar_sec_i1_label"></textarea></td>
+      </tr>
+      <tr>
+        <th id="_ar_sec_i2_label">Do comments in the patch, the check-in comment, or tests included in the patch paint a bulls-eye on the security problem?</th>
+        <td>
+          <div role="radiogroup" class="buttons toggle" aria-labelledby="_ar_sec_i2_label">
+            <div class="item"><input id="_ar_sec_i2_r1" type="radio" name="_ar_sec_i2_radio" value="Yes"><label for="_ar_sec_i2_r1">Yes</label></div>
+            <div class="item"><input id="_ar_sec_i2_r2" type="radio" name="_ar_sec_i2_radio" value="No"><label for="_ar_sec_i2_r2">No</label></div>
+            <div class="item"><input id="_ar_sec_i2_r3" type="radio" name="_ar_sec_i2_radio" value="Dunno"><label for="_ar_sec_i2_r3">Dunno</label></div>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <th id="_ar_sec_i3_label">Which older supported branches are affected by this flaw?</th>
+        <td><input type="text" aria-labelledby="_ar_sec_i3_label"></td>
+      </tr>
+      <tr>
+        <th id="_ar_sec_i4_label">If not all supported branches, which [% terms.bug %] introduced the flaw?</th>
+        <td><input type="text" placeholder="[% terms.Bug %] ID" aria-labelledby="_ar_sec_i4_label" data-type="b[% %]ug"></td>
+      </tr>
+      <tr>
+        <th id="_ar_sec_i5_label">Do you have backports for the affected branches?</th>
+        <td>
+          <div role="radiogroup" class="buttons toggle" aria-labelledby="_ar_sec_i5_label">
+            <div class="item"><input id="_ar_sec_i5_r1" type="radio" name="_ar_sec_i5_radio" value="Yes"><label for="_ar_sec_i5_r1">Yes</label></div>
+            <div class="item"><input id="_ar_sec_i5_r2" type="radio" name="_ar_sec_i5_radio" value="No"><label for="_ar_sec_i5_r2">No</label></div>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <th id="_ar_sec_i6_label">If not, how different, hard to create, and risky will they be?</th>
+        <td><textarea aria-labelledby="_ar_sec_i6_label"></textarea></td>
+      </tr>
+      <tr>
+        <th id="_ar_sec_i7_label">How likely is this patch to cause regressions; how much testing does it need?</th>
+        <td><textarea aria-labelledby="_ar_sec_i7_label"></textarea></td>
+      </tr>
+    </table>
+  </fieldset>
+</template>

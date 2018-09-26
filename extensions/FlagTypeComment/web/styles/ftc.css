@@ -1,0 +1,58 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this file,
+ * You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * This Source Code Form is "Incompatible With Secondary Licenses", as
+ * defined by the Mozilla Public License, v. 2.0. */
+
+fieldset.approval-request {
+  margin: 1em 0;
+}
+
+fieldset.approval-request legend {
+  font-weight: bold;
+}
+
+fieldset.approval-request th {
+  padding: .4em;
+  width: 20em;
+  line-height: 1.25;
+  font-weight: normal;
+  text-align: right;
+  vertical-align: top;
+  white-space: normal !important;
+}
+
+fieldset.approval-request td {
+  vertical-align: middle;
+}
+
+fieldset.approval-request label {
+  font-weight: normal !important;
+}
+
+fieldset.approval-request input[type="text"] {
+  width: 10em;
+}
+
+fieldset.approval-request input.long[type="text"] {
+  width: 40em;
+}
+
+fieldset.approval-request textarea {
+  width: 40em;
+  min-height: 5em;
+  font-size: inherit;
+  line-height: inherit;
+  font-family: inherit;
+  resize: vertical;
+}
+
+fieldset.approval-request div {
+  padding: 0 !important;
+}
+
+fieldset.approval-request table ~ p:last-child {
+  margin: .4em;
+  text-align: right;
+}

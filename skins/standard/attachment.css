@@ -133,10 +133,6 @@ table.attachment_info td {
     display: block;
 }
 
-#smallCommentFrame, #attachment_flags {
-    float: left;
-}
-
 #smallCommentFrame {
     margin-right: 1.5em;
 }

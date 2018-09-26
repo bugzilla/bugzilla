@@ -131,6 +131,7 @@
                 title="[% type.description FILTER html %]"
                 onchange="toggleRequesteeField(this);"
                 class="flag_select flag_type-[% type.id %]"
+                data-id="[% type.id %]" data-name="[% type.name FILTER html FILTER no_break %]"
                 [% IF !can_edit_flag %] disabled="disabled"[% END %]>
         [%# Only display statuses the user is allowed to set. %]
         [% IF !flag

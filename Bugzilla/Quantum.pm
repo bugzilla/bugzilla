@@ -38,6 +38,34 @@ sub startup {
     $self->plugin('Bugzilla::Quantum::Plugin::BlockIP');
     $self->plugin('Bugzilla::Quantum::Plugin::BasicAuth');
 
+    # hypnotoad is weird and doesn't look for MOJO_LISTEN itself.
+    $self->config(
+        hypnotoad => {
+            proxy              => $ENV{MOJO_REVERSE_PROXY}      // 1,
+            heartbeat_interval => $ENV{MOJO_HEARTBEAT_INTERVAL} // 10,
+            heartbeat_timeout  => $ENV{MOJO_HEARTBEAT_TIMEOUT}  // 120,
+            inactivity_timeout => $ENV{MOJO_INACTIVITY_TIMEOUT} // 120,
+            workers            => $ENV{MOJO_WORKERS}            // 15,
+            clients            => $ENV{MOJO_CLIENTS}            // 10,
+            spare              => $ENV{MOJO_SPARE}              // 5,
+            listen             => [ $ENV{MOJO_LISTEN}           // 'http://*:3000' ],
+        },
+    );
+
+    # Make sure each httpd child receives a different random seed (bug 476622).
+    # Bugzilla::RNG has one srand that needs to be called for
+    # every process, and Perl has another. (Various Perl modules still use
+    # the built-in rand(), even though we never use it in Bugzilla itself,
+    # so we need to srand() both of them.)
+    # Also, ping the dbh to force a reconnection.
+    Mojo::IOLoop->next_tick(
+        sub {
+            Bugzilla::RNG::srand();
+            srand();
+            try { Bugzilla->dbh->ping };
+        }
+    );
+
     Bugzilla::Extension->load_all();
     if ( $self->mode ne 'development' ) {
         Bugzilla->preload_features();

@@ -31,28 +31,6 @@ sub register {
         }
     }
 
-    # hypnotoad is weird and doesn't look for MOJO_LISTEN itself.
-    $app->config(
-        hypnotoad => {
-            proxy => 1,
-            listen => [ $ENV{MOJO_LISTEN} ],
-        },
-    );
-
-    # Make sure each httpd child receives a different random seed (bug 476622).
-    # Bugzilla::RNG has one srand that needs to be called for
-    # every process, and Perl has another. (Various Perl modules still use
-    # the built-in rand(), even though we never use it in Bugzilla itself,
-    # so we need to srand() both of them.)
-    # Also, ping the dbh to force a reconnection.
-    Mojo::IOLoop->next_tick(
-        sub {
-            Bugzilla::RNG::srand();
-            srand();
-            try { Bugzilla->dbh->ping };
-        }
-    );
-
     $app->hook(
         before_dispatch => sub {
             my ($c) = @_;

@@ -94,6 +94,7 @@ sub register {
               or die $template->error;
         }
     );
+    $app->renderer->default_handler('bugzilla');
 
     $app->log( MojoX::Log::Log4perl::Tiny->new( logger => Log::Log4perl->get_logger( ref $app ) ) );
 }

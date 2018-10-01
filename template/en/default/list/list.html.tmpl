@@ -30,11 +30,11 @@
 
 [% PROCESS "global/field-descs.none.tmpl" %]
 
-[% title = "$terms.Bug List" %]
-[% IF searchname || defaultsavename %]
-  [% title = title _ ": " _ (searchname OR defaultsavename) FILTER html %]
-[% ELSIF quicksearch %]
-  [% title = title _ ": " _ quicksearch FILTER html %]
+[% DEFAULT title = "$terms.Bug List" %]
+[% IF searchname || defaultsavename || quicksearch %]
+  [% title = title _ ": " _ (searchname || defaultsavename || quicksearch) FILTER html %]
+[% ELSE %]
+  [% title = title FILTER html %]
 [% END %]
 
 [% qorder = order FILTER uri IF order %]

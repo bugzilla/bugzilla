@@ -590,9 +590,6 @@ if ($format->{'extension'} eq 'ics') {
 }
 
 if ($format->{'extension'} eq 'atom') {
-    # The title of the Atom feed will be the same one as for the bug list.
-    $vars->{'title'} = $cgi->param('title');
-
     # This is the list of fields that are needed by the Atom filter.
     my @required_atom_columns = (
       'short_desc',
@@ -1059,6 +1056,10 @@ $vars->{'defaultsavename'} = $cgi->param('query_based_on');
 # If we did a quick search then redisplay the previously entered search
 # string in the text field.
 $vars->{'quicksearch'} = $searchstring;
+
+# Allow to custimize the title of HTML page and Atom feed. Also allow to pass
+# the title from HTML page to Atom feed through a link.
+$vars->{'title'} = $cgi->param('title');
 
 ################################################################################
 # HTTP Header Generation

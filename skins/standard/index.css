@@ -50,34 +50,6 @@
         font-weight: bold;
     }
 
-    .bz_common_actions {
-        text-align: center;
-    }
-    .bz_common_actions ul {
-        list-style-type: none;
-        padding: 0;
-    }
-    .bz_common_actions ul li {
-        display: inline;
-        vertical-align: top;
-    }
-    .bz_common_actions ul li a {
-        display: inline-block;
-        height: 170px;
-        width: 145px;
-        margin: 0 2ex 2em 0;
-    }
-    .bz_common_actions ul li a span {
-        position: relative;
-        top: 90%;
-        font-weight: bold;
-    }
-    .bz_common_actions a,
-    .bz_common_actions a:visited,
-    .bz_common_actions a:hover {
-        text-decoration: none;
-    }
-
     #quicksearchForm
     {
         clear: both;
@@ -110,6 +82,76 @@
         padding: 0;
     }
 
+    #tiles {
+      display: flex;
+      margin: 32px 0;
+      padding: 0;
+      list-style-type: none;
+    }
+
+    #tiles li {
+      flex: none;
+      margin: 0;
+      padding: 0;
+    }
+
+    #tiles a {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      border-radius: 8px;
+      width: 160px;
+      height: 160px;
+    }
+
+    #tiles a:hover,
+    #tiles a:focus,
+    #tiles a:active {
+      background-color: rgba(0, 0, 0, .05);
+      text-decoration: none;
+    }
+
+    #tiles span {
+      display: block;
+    }
+
+    #tiles .icon {
+      width: 120px;
+      height: 120px;
+      font-size: 120px;
+      line-height: 120px;
+      font-family: "Material Icons";
+      color: #777;
+    }
+
+    #tile-docs .icon::before {
+      content: "\E887";
+    }
+
+    #tile-search .icon::before {
+      content: "\E8A0";
+    }
+
+    #tile-new-bug .icon::before {
+      content: "\E89C";
+    }
+
+    #tile-prefs .icon::before {
+      content: "\E8B8";
+    }
+
+    #tile-new-account .icon::before,
+    #tile-login .icon::before {
+      content: "\E853";
+    }
+
+    #tiles .label {
+      margin-top: 4px;
+      font-size: 14px;
+      color: #555;
+    }
+
     ul.additional_links
     {
         list-style: none;
@@ -135,49 +177,5 @@
     {
         color: #ccc;
     }
+
 /* index page (end) */
-
-
-    #enter_bug
-    {
-        background: url(../../images/bugzilla-papericon.png) no-repeat;
-    }
-    #query
-    {
-        background: url(../../images/bugzilla-magnifier.png) no-repeat;
-    }
-    #account
-    {
-        background: url(../../images/bugzilla-person-alternate.png) no-repeat;
-        margin-right: 0;
-    }
-    #docs
-    {
-        background: url(../../images/bugzilla-questionmark2.png) no-repeat !important;
-    }
-
-    #page-index .intro { display: inline; }
-
-    #docs { background: url(../standard/index/help.png) no-repeat; }
-
-    .bz_common_actions
-    {
-        display: block;
-        height: 170px;
-        width: 145px;
-        float: left;
-        margin: 0 2ex 2em 0;
-        text-align: center;
-    }
-    .bz_common_actions span
-    {
-        position: relative;
-        top: 95%;
-        font-weight: bold;
-    }
-    .bz_common_actions,
-    .bz_common_actions:visited,
-    .bz_common_actions:hover
-    {
-        text-decoration: none;
-    }

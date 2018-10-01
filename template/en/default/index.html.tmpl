@@ -39,21 +39,50 @@
       <td>
         <h1 id="welcome"> Welcome to [% terms.Bugzilla %]</h1>
         <div class="intro">[% Hook.process('intro') %]</div>
-        <a id="enter_bug" class="bz_common_actions"
-           href="enter_bug.cgi"><span>File [% terms.aBug %]</span></a>
-        <a id="query" class="bz_common_actions"
-           href="query.cgi"><span>Search</span></a>
-        <a id="account" class="bz_common_actions"
-           [% IF user.id %]
-             href="userprefs.cgi"><span>User Preferences</span></a>
-           [% ELSIF Param('createemailregexp')
-                    && user.authorizer.user_can_create_account
-            %]
-             href="createaccount.cgi"><span>Open a New Account</span></a>
-           [% ELSE %]
-             href="?GoAheadAndLogIn=1"><span>Log In</span></a>
-           [% END %]
-
+        <ul id="tiles">
+          [% IF Param('docs_urlbase') %]
+          <li id="tile-docs">
+            <a href="[% docs_urlbase FILTER html %]">
+              <span class="icon" aria-hidden="true"></span>
+              <span class="label">Documentation</span>
+            </a>
+          </li>
+          [% END %]
+          <li id="tile-search">
+            <a href="query.cgi">
+              <span class="icon" aria-hidden="true"></span>
+              <span class="label">Advanced Search</span>
+            </a>
+          </li>
+          <li id="tile-new-bug">
+            <a href="enter_bug.cgi">
+              <span class="icon" aria-hidden="true"></span>
+              <span class="label">New [% terms.Bug %]</span>
+            </a>
+          </li>
+          [% IF user.id %]
+          <li id="tile-prefs">
+            <a href="userprefs.cgi">
+              <span class="icon" aria-hidden="true"></span>
+              <span class="label">Preferences</span>
+            </a>
+          </li>
+          [% ELSIF Param('createemailregexp') && user.authorizer.user_can_create_account %]
+          <li id="tile-new-account">
+            <a href="createaccount.cgi">
+              <span class="icon" aria-hidden="true"></span>
+              <span class="label">New Account</span>
+            </a>
+          </li>
+          [% ELSE %]
+          <li id="tile-login">
+            <a href="?GoAheadAndLogIn=1">
+              <span class="icon" aria-hidden="true"></span>
+              <span class="label">Log In</span>
+            </a>
+          </li>
+          [% END %]
+        </ul>
         <form id="quicksearchForm" name="quicksearchForm" action="buglist.cgi" data-no-csrf>
           <div>
             <input id="quicksearch_main" type="text" name="quicksearch" autofocus

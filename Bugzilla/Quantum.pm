@@ -62,7 +62,7 @@ sub startup {
         sub {
             Bugzilla::RNG::srand();
             srand();
-            try { Bugzilla->dbh->ping };
+            eval { Bugzilla->dbh->ping };
         }
     );
 

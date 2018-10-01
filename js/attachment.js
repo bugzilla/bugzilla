@@ -412,12 +412,17 @@ Bugzilla.AttachmentForm = class AttachmentForm {
    * `<input type="file">`.
    */
   process_file(file, transferred = true) {
-    // Check for patches which should have the `text/plain` MIME type
+    // Detect patches that should have the `text/plain` MIME type
     const is_patch = !!file.name.match(/\.(?:diff|patch)$/) || !!file.type.match(/^text\/x-(?:diff|patch)$/);
-    // Check for text files which may have no MIME type or `application/*` MIME type
-    const is_text = !!file.name.match(/\.(?:cpp|es|h|js|json|markdown|md|rs|rst|sh|toml|ts|tsx|xml|yaml|yml)$/);
-    // Reassign the MIME type
-    const type = is_patch || (is_text && !file.type) ? 'text/plain' : (file.type || 'application/octet-stream');
+    // Detect Markdown files that should have `text/plain` instead of `text/markdown` due to Firefox Bug 1421032
+    const is_markdown = !!file.name.match(/\.(?:md|mkdn?|mdown|markdown)$/);
+    // Detect common source files that may have no MIME type or `application/*` MIME type
+    const is_source = !!file.name.match(/\.(?:cpp|es|h|js|json|rs|rst|sh|toml|ts|tsx|xml|yaml|yml)$/);
+    // Detect any plaintext file
+    const is_text = file.type.startsWith('text/') || is_patch || is_markdown || is_source;
+    // Reassign the MIME type: use `text/plain` for most text files and `application/octet-stream` as a fallback
+    const type = (is_patch || is_markdown || (is_source && !file.type)) ?
+      'text/plain' : (file.type || 'application/octet-stream');
 
     if (this.check_file_size(file.size)) {
       this.$data.required = transferred;
@@ -435,7 +440,7 @@ Bugzilla.AttachmentForm = class AttachmentForm {
     }
 
     this.update_validation();
-    this.show_preview(file, file.type.startsWith('text/') || is_patch || is_text);
+    this.show_preview(file, is_text);
     this.update_text();
     this.update_content_type(type);
     this.update_ispatch(is_patch);

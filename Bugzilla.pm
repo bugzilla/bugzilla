@@ -54,23 +54,6 @@ use parent qw(Bugzilla::CPAN);
 # Constants
 #####################################################################
 
-# Scripts that are not stopped by shutdownhtml being in effect.
-use constant SHUTDOWNHTML_EXEMPT => qw(
-    editparams.cgi
-    checksetup.pl
-    migrate.pl
-    recode.pl
-);
-
-# Non-cgi scripts that should silently exit.
-use constant SHUTDOWNHTML_EXIT_SILENTLY => qw(
-    whine.pl
-);
-
-# shutdownhtml pages are sent as an HTTP 503. After how many seconds
-# should search engines attempt to index the page again?
-use constant SHUTDOWNHTML_RETRY_AFTER => 3600;
-
 # This is identical to Install::Util::_cache so that things loaded
 # into Install::Util::_cache during installation can be read out
 # of request_cache later in installation.
@@ -86,9 +69,6 @@ sub init_page {
     # request cache are very annoying (see bug 1347335)
     # and this is not an expensive operation.
     clear_request_cache();
-    if ($0 =~ /\.t/) {
-        return;
-    }
     if (Bugzilla->usage_mode == USAGE_MODE_CMDLINE) {
         init_console();
     }
@@ -100,96 +80,17 @@ sub init_page {
         Bugzilla::Logging->fields->{remote_ip} = remote_ip();
     }
 
-    if (${^TAINT}) {
-        # Some environment variables are not taint safe
-        delete @::ENV{'PATH', 'IFS', 'CDPATH', 'ENV', 'BASH_ENV'};
-        # Some modules throw undefined errors (notably File::Spec::Win32) if
-        # PATH is undefined.
-        $ENV{'PATH'} = '';
-    }
-
     # Because this function is run live from perl "use" commands of
     # other scripts, we're skipping the rest of this function if we get here
     # during a perl syntax check (perl -c, like we do during the
     # 001compile.t test).
     return if $^C;
 
-    # IIS prints out warnings to the webpage, so ignore them, or log them
-    # to a file if the file exists.
-    if ($ENV{SERVER_SOFTWARE} && $ENV{SERVER_SOFTWARE} =~ /microsoft-iis/i) {
-        $SIG{__WARN__} = sub {
-            my ($msg) = @_;
-            my $datadir = bz_locations()->{'datadir'};
-            if (-w "$datadir/errorlog") {
-                my $warning_log = new IO::File(">>$datadir/errorlog");
-                print $warning_log $msg;
-                $warning_log->close();
-            }
-        };
-    }
-
     my $script = basename($0);
 
     # Because of attachment_base, attachment.cgi handles this itself.
     if ($script ne 'attachment.cgi') {
         do_ssl_redirect_if_required();
-    }
-
-    # If Bugzilla is shut down, do not allow anything to run, just display a
-    # message to the user about the downtime and log out.  Scripts listed in
-    # SHUTDOWNHTML_EXEMPT are exempt from this message.
-    #
-    # This code must go here. It cannot go anywhere in Bugzilla::CGI, because
-    # it uses Template, and that causes various dependency loops.
-    if (Bugzilla->params->{"shutdownhtml"}
-        && !grep { $_ eq $script } SHUTDOWNHTML_EXEMPT)
-    {
-        # Allow non-cgi scripts to exit silently (without displaying any
-        # message), if desired. At this point, no DBI call has been made
-        # yet, and no error will be returned if the DB is inaccessible.
-        if (!i_am_cgi()
-            && grep { $_ eq $script } SHUTDOWNHTML_EXIT_SILENTLY)
-        {
-            exit;
-        }
-
-        # For security reasons, log out users when Bugzilla is down.
-        # Bugzilla->login() is required to catch the logincookie, if any.
-        my $user;
-        eval { $user = Bugzilla->login(LOGIN_OPTIONAL); };
-        if ($@) {
-            # The DB is not accessible. Use the default user object.
-            $user = Bugzilla->user;
-            $user->{settings} = {};
-        }
-        my $userid = $user->id;
-        Bugzilla->logout();
-
-        my $template = Bugzilla->template;
-        my $vars = {};
-        $vars->{'message'} = 'shutdown';
-        $vars->{'userid'} = $userid;
-        # Generate and return a message about the downtime, appropriately
-        # for if we're a command-line script or a CGI script.
-        my $extension;
-        if (i_am_cgi() && (!Bugzilla->cgi->param('ctype')
-                           || Bugzilla->cgi->param('ctype') eq 'html')) {
-            $extension = 'html';
-        }
-        else {
-            $extension = 'txt';
-        }
-        if (i_am_cgi()) {
-            # Set the HTTP status to 503 when Bugzilla is down to avoid pages
-            # being indexed by search engines.
-            print Bugzilla->cgi->header(-status => 503,
-                -retry_after => SHUTDOWNHTML_RETRY_AFTER);
-        }
-        my $t_output;
-        $template->process("global/message.$extension.tmpl", $vars, \$t_output)
-            || ThrowTemplateError($template->error);
-        print $t_output . "\n";
-        exit;
     }
 }
 
@@ -870,21 +771,15 @@ sub _cleanup {
     }
     clear_request_cache();
 
-    # These are both set by CGI.pm but need to be undone so that
-    # Apache can actually shut down its children if it needs to.
-    foreach my $signal (qw(TERM PIPE)) {
-        $SIG{$signal} = 'DEFAULT' if $SIG{$signal} && $SIG{$signal} eq 'IGNORE';
-    }
-
     Log::Log4perl::MDC->remove();
 }
 
-sub END {
-    # Bugzilla.pm cannot compile in mod_perl.pl if this runs.
-    _cleanup() unless $ENV{MOD_PERL};
-}
+our ($caller_package, $caller_file) = caller;
+init_page() if $caller_package eq 'main' && $caller_package !~ /^Test/ && $caller_file =~ /\.t$/;
 
-init_page() if !$ENV{MOD_PERL};
+END {
+    cleanup() if $caller_package eq 'main';
+}
 
 1;
 

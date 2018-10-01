@@ -58,16 +58,20 @@ sub load_one {
         local *STDIN;    ## no critic (local)
         open STDIN, '<', $stdin->path or die "STDIN @{[$stdin->path]}: $!" if -s $stdin->path;
         tie *STDOUT, 'Bugzilla::Quantum::Stdout', controller => $c;    ## no critic (tie)
+
+        # the finally block calls cleanup.
+        $c->stash->{cleanup_guard}->dismiss;
         try {
             Bugzilla->init_page();
             $inner->();
         }
         catch {
-            die $_ unless ref $_ eq 'ARRAY' && $_->[0] eq "EXIT\n";
+            die $_ unless _is_exit($_);
         }
         finally {
+            my $error = shift;
             untie *STDOUT;
-            $c->finish;
+            $c->finish if !$error || _is_exit($error);
             Bugzilla->cleanup;
             CGI::initialize_globals();
         };
@@ -155,6 +159,11 @@ sub _file_to_method {
     $name =~ s/\./_/s;
     $name =~ s/\W+/_/gs;
     return $name;
+}
+
+sub _is_exit {
+    my ($error) = @_;
+    return ref $error eq 'ARRAY' && $error->[0] eq "EXIT\n";
 }
 
 1;

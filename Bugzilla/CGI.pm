@@ -97,12 +97,6 @@ sub _init_bz_cgi_globals {
     # We need to disable output buffering - see bug 179174
     $| = 1;
 
-    # Ignore SIGTERM and SIGPIPE - this prevents DB corruption. If the user closes
-    # their browser window while a script is running, the web server sends these
-    # signals, and we don't want to die half way through a write.
-    $SIG{TERM} = 'IGNORE';
-    $SIG{PIPE} = 'IGNORE';
-
     # We don't precompile any functions here, that's done specially in
     # mod_perl code.
     $invocant->_setup_symbols(qw(:no_xhtml :oldstyle_urls :private_tempfiles

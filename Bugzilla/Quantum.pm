@@ -10,6 +10,8 @@ use Mojo::Base 'Mojolicious';
 
 # Needed for its exit() overload, must happen early in execution.
 use CGI::Compile;
+use utf8;
+use Encode;
 
 use Bugzilla          ();
 use Bugzilla::BugMail ();
@@ -26,6 +28,7 @@ use Module::Runtime qw( require_module );
 use Bugzilla::Util ();
 use Cwd qw(realpath);
 use MojoX::Log::Log4perl::Tiny;
+use Bugzilla::WebService::Server::REST;
 
 has 'static' => sub { Bugzilla::Quantum::Static->new };
 
@@ -36,7 +39,7 @@ sub startup {
     $self->plugin('Bugzilla::Quantum::Plugin::Glue');
     $self->plugin('Bugzilla::Quantum::Plugin::Hostage') unless $ENV{BUGZILLA_DISABLE_HOSTAGE};
     $self->plugin('Bugzilla::Quantum::Plugin::BlockIP');
-    $self->plugin('Bugzilla::Quantum::Plugin::BasicAuth');
+    $self->plugin('Bugzilla::Quantum::Plugin::Helpers');
 
     # hypnotoad is weird and doesn't look for MOJO_LISTEN itself.
     $self->config(
@@ -81,12 +84,19 @@ sub startup {
             }
         );
     }
+    Bugzilla::WebService::Server::REST->preload;
+
+    $self->setup_routes;
+
+    Bugzilla::Hook::process( 'app_startup', { app => $self } );
+}
+
+sub setup_routes {
+    my ($self) = @_;
 
     my $r = $self->routes;
     Bugzilla::Quantum::CGI->load_all($r);
     Bugzilla::Quantum::CGI->load_one( 'bzapi_cgi', 'extensions/BzAPI/bin/rest.cgi' );
-
-    Bugzilla::WebService::Server::REST->preload;
 
     $r->any('/')->to('CGI#index_cgi');
     $r->any('/bug/<id:num>')->to('CGI#show_bug_cgi');
@@ -102,36 +112,18 @@ sub startup {
     $r->any('/extensions/BzAPI/bin/rest.cgi/*PATH_INFO')->to('CGI#bzapi_cgi');
     $r->any('/bzapi/*PATH_INFO')->to('CGI#bzapi_cgi');
 
-    $r->get(
-        '/__lbheartbeat__' => sub {
-            my $c = shift;
-            $c->reply->file( $c->app->home->child('__lbheartbeat__') );
-        },
-    );
+    $r->static_file('/__lbheartbeat__');
+    $r->static_file('/__version__' => { file => 'version.json', content_type => 'application/json' });
+    $r->static_file('/version.json', { content_type => 'application/json' });
 
-    $r->get(
-        '/__version__' => sub {
-            my $c = shift;
-            $c->reply->file( $c->app->home->child('version.json') );
-        },
-    );
-
-    $r->get(
-        '/version.json' => sub {
-            my $c = shift;
-            $c->reply->file( $c->app->home->child('version.json') );
-        },
-    );
+    $r->page('/review', 'splinter.html');
+    $r->page('/user_profile', 'user_profile.html');
+    $r->page('/userprofile', 'user_profile.html');
+    $r->page('/request_defer', 'request_defer.html');
 
     $r->get('/__heartbeat__')->to('CGI#heartbeat_cgi');
     $r->get('/robots.txt')->to('CGI#robots_cgi');
-
-    $r->any('/review')->to( 'CGI#page_cgi' => { 'id' => 'splinter.html' } );
-    $r->any('/user_profile')->to( 'CGI#page_cgi' => { 'id' => 'user_profile.html' } );
-    $r->any('/userprofile')->to( 'CGI#page_cgi' => { 'id' => 'user_profile.html' } );
-    $r->any('/request_defer')->to( 'CGI#page_cgi' => { 'id' => 'request_defer.html' } );
     $r->any('/login')->to( 'CGI#index_cgi' => { 'GoAheadAndLogIn' => '1' } );
-
     $r->any( '/:new_bug' => [ new_bug => qr{new[-_]bug} ] )->to('CGI#new_bug_cgi');
 
     my $ses_auth = $r->under(
@@ -143,8 +135,6 @@ sub startup {
         }
     );
     $ses_auth->any('/index.cgi')->to('SES#main');
-
-    Bugzilla::Hook::process( 'app_startup', { app => $self } );
 }
 
 1;

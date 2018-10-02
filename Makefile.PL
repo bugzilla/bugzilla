@@ -95,6 +95,7 @@ my %test_requires = (
     'Capture::Tiny'                   => 0,
     'DBD::SQLite'                     => '1.29',
     'Perl::Critic::Freenode'          => 0,
+    'Perl::Tidy'                      => '20180220',
     'Pod::Coverage'                   => 0,
     'Test::More'                      => 0,
     'Test::Perl::Critic::Progressive' => 0,

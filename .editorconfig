@@ -5,10 +5,10 @@ root = true
 end_of_line = lf
 insert_final_newline = true
 
-# 4 space indentation for Perl files
-[*.{pl,PL,pm,cgi}]
+# 2 space indentation for Perl files
+[*.{pl,PL,pm,cgi,t}]
 indent_style = space
-indent_size = 4
+indent_size = 2
 
 # 2 space indentation for HTML, CSS, JavaScript and YAML files
 [.{html,tmpl,css,js,yml}]

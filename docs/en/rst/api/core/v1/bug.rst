@@ -102,6 +102,7 @@ name              type   description
          "is_creator_accessible": true,
          "whiteboard": "",
          "dupe_of": null,
+         "duplicates": [],
          "target_milestone": "---",
          "cf_mulitple_select": [],
          "component": "SaltSprinkler",
@@ -163,6 +164,8 @@ depends_on             array     The IDs of bugs that this bug "depends on".
 dupe_of                int       The bug ID of the bug that this bug is a
                                  duplicate of. If this bug isn't a duplicate of
                                  any bug, this will be null.
+duplicates             array     The ids of bugs that are marked as duplicate of
+                                 this bug.
 estimated_time         double    The number of hours that it was estimated that
                                  this bug would take. If you are not in the
                                  time-tracking group, this field will not be

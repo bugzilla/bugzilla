@@ -1029,7 +1029,7 @@ sub create {
 
                 return '' unless @sigs;
                 # use a URI object to encode the query string part.
-                my $uri = URI->new(Bugzilla->localconfig->{urlbase} . 'static/metricsgraphics/socorro-lens.html');
+                my $uri = URI->new(Bugzilla->localconfig->{urlbase} . 'metricsgraphics/socorro-lens.html');
                 $uri->query_form('s' => join("\\", @sigs));
                 return $uri;
             },

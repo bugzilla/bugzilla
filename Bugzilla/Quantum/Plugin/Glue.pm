@@ -13,7 +13,10 @@ use Try::Tiny;
 use Bugzilla::Constants;
 use Bugzilla::Logging;
 use Bugzilla::RNG ();
-use JSON::MaybeXS qw(decode_json);
+use Bugzilla::Util qw(with_writable_database);
+use Mojo::Util qw(secure_compare);
+use Mojo::JSON qw(decode_json);
+use Scalar::Util qw(blessed);
 use Scope::Guard;
 
 sub register {
@@ -44,34 +47,110 @@ sub register {
             }
             Log::Log4perl::MDC->put( request_id => $c->req->request_id );
             $c->stash->{cleanup_guard} = Scope::Guard->new( \&Bugzilla::cleanup );
+            Bugzilla->usage_mode(USAGE_MODE_MOJO);
         }
     );
-
 
     $app->secrets( [ Bugzilla->localconfig->{side_wide_secret} ] );
 
     $app->renderer->add_handler(
         'bugzilla' => sub {
             my ( $renderer, $c, $output, $options ) = @_;
-            my $vars = delete $c->stash->{vars};
 
+            my %params;
             # Helpers
-            my %helper;
-            foreach my $method ( grep {m/^\w+\z/} keys %{ $renderer->helpers } ) {
-                my $sub = $renderer->helpers->{$method};
-                $helper{$method} = sub { $c->$sub(@_) };
+            foreach my $method (grep { m/^\w+\z/ } keys %{$renderer->helpers}) {
+                    my $sub = $renderer->helpers->{$method};
+                    $params{$method} = sub { $c->$sub(@_) };
             }
-            $vars->{helper} = \%helper;
+            # Stash values
+            $params{$_} = $c->stash->{$_} for grep { m/^\w+\z/ } keys %{$c->stash};
 
-            # The controller
-            $vars->{c} = $c;
-            my $name = $options->{template};
-            unless ( $name =~ /\./ ) {
-                $name = sprintf '%s.%s.tmpl', $options->{template}, $options->{format};
-            }
+            $params{self} = $params{c} = $c;
+
+            my $name = sprintf '%s.%s.tmpl', $options->{template}, $options->{format};
             my $template = Bugzilla->template;
-            $template->process( $name, $vars, $output )
-              or die $template->error;
+            $template->process( $name, \%params, $output )
+                or die $template->error;
+        }
+    );
+    $app->helper(
+        'bugzilla.login_redirect_if_required' => sub {
+            my ( $c, $type ) = @_;
+
+            if ( $type == LOGIN_REQUIRED ) {
+                $c->redirect_to('/login');
+                return undef;
+            }
+            else {
+                return Bugzilla->user;
+            }
+        }
+    );
+    $app->helper(
+        'bugzilla.login' => sub {
+            my ( $c, $type ) = @_;
+            $type //= LOGIN_NORMAL;
+
+            return Bugzilla->user if Bugzilla->user->id;
+
+            $type = LOGIN_REQUIRED if $c->param('GoAheadAndLogIn') || Bugzilla->params->{requirelogin};
+
+            # Allow templates to know that we're in a page that always requires
+            # login.
+            if ( $type == LOGIN_REQUIRED ) {
+                Bugzilla->request_cache->{page_requires_login} = 1;
+            }
+
+            my $login_cookie = $c->cookie("Bugzilla_logincookie");
+            my $user_id      = $c->cookie("Bugzilla_login");
+            my $ip_addr      = $c->tx->remote_address;
+
+            return $c->bugzilla->login_redirect_if_required($type) unless ( $login_cookie && $user_id );
+
+            my $db_cookie = Bugzilla->dbh->selectrow_array(
+                q{
+                    SELECT cookie
+                      FROM logincookies
+                     WHERE cookie = ?
+                           AND userid = ?
+                           AND (restrict_ipaddr = 0 OR ipaddr = ?)
+                },
+                undef,
+                ( $login_cookie, $user_id, $ip_addr )
+            );
+
+            if ( defined $db_cookie && secure_compare( $login_cookie, $db_cookie ) ) {
+                my $user = Bugzilla::User->check( { id => $user_id, cache => 1 } );
+
+                # If we logged in successfully, then update the lastused
+                # time on the login cookie
+                with_writable_database {
+                    Bugzilla->dbh->do( q{ UPDATE logincookies SET lastused = NOW() WHERE cookie = ? },
+                        undef, $login_cookie );
+                };
+                Bugzilla->set_user($user);
+                return $user;
+            }
+            else {
+                return $c->bugzilla->login_redirect_if_required($type);
+            }
+        }
+    );
+    $app->helper(
+        'bugzilla.error_page' => sub {
+            my ( $c, $error ) = @_;
+            if ( blessed $error && $error->isa('Bugzilla::Error::Base') ) {
+                $c->render(
+                    handler  => 'bugzilla',
+                    template => $error->template,
+                    error    => $error->message,
+                    %{ $error->vars }
+                );
+            }
+            else {
+                $c->reply->exception($error);
+            }
         }
     );
 

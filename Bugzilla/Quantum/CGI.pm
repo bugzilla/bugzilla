@@ -19,7 +19,7 @@ use File::Spec::Functions qw(catfile);
 use File::Slurper qw(read_text);
 use English qw(-no_match_vars);
 use Bugzilla::Quantum::Stdout;
-use Bugzilla::Constants qw(bz_locations);
+use Bugzilla::Constants qw(bz_locations USAGE_MODE_BROWSER);
 
 our $C;
 my %SEEN;
@@ -61,6 +61,7 @@ sub load_one {
 
         # the finally block calls cleanup.
         $c->stash->{cleanup_guard}->dismiss;
+        Bugzilla->usage_mode(USAGE_MODE_BROWSER);
         try {
             Bugzilla->init_page();
             $inner->();

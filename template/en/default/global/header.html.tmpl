@@ -346,12 +346,10 @@
           <li role="presentation">
             <a href="userprefs.cgi" role="menuitem" tabindex="-1">Preferences</a>
           </li>
-          [% IF user.authorizer.can_logout %]
-            <li role="separator"></li>
-            <li role="presentation">
-              <a href="index.cgi?logout=1" role="menuitem" tabindex="-1">Log out</a>
-            </li>
-          [% END %]
+          <li role="separator"></li>
+          <li role="presentation">
+            <a href="index.cgi?logout=1" role="menuitem" tabindex="-1">Log out</a>
+          </li>
           [% IF sudoer %]
             <li role="presentation">
               <a href="relogin.cgi?action=end-sudo" role="menuitem" tabindex="-1">End sudo session impersonating [% user.login FILTER html %]</a>

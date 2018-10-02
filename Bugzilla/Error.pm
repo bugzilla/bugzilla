@@ -20,6 +20,8 @@ our @EXPORT = qw( ThrowCodeError ThrowTemplateError ThrowUserError ThrowErrorPag
 use Bugzilla::Constants;
 use Bugzilla::WebService::Constants;
 use Bugzilla::Util;
+use Bugzilla::Error::User;
+use Bugzilla::Error::Code;
 
 use Carp;
 use Data::Dumper;
@@ -40,7 +42,6 @@ sub _in_eval {
 sub _throw_error {
     my ($name, $error, $vars, $logfunc) = @_;
     $vars ||= {};
-    $vars->{error} = $error;
 
     # Make sure any transaction is rolled back (if supported).
     # If we are within an eval(), do not roll back transactions as we are
@@ -48,6 +49,15 @@ sub _throw_error {
     my $dbh = eval { Bugzilla->dbh };
     $dbh->bz_rollback_transaction() if ($dbh && $dbh->bz_in_transaction() && !_in_eval());
 
+    if (Bugzilla->error_mode == ERROR_MODE_MOJO) {
+        my ($type) = $name =~ /^global\/(user|code)-error/;
+        my $class = $type ? 'Bugzilla::Error::' . ucfirst($type) : 'Mojo::Exception';
+        my $e     = $class->new($error)->trace(2);
+        $e->vars($vars) if $e->can('vars');
+        CORE::die $e->inspect;
+    }
+
+    $vars->{error} = $error;
     my $template = Bugzilla->template;
     my $message;
 

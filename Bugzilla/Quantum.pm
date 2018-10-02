@@ -22,6 +22,7 @@ use Bugzilla::Install::Requirements ();
 use Bugzilla::Logging;
 use Bugzilla::Quantum::CGI;
 use Bugzilla::Quantum::SES;
+use Bugzilla::Quantum::Home;
 use Bugzilla::Quantum::Static;
 use Mojo::Loader qw( find_modules );
 use Module::Runtime qw( require_module );
@@ -98,6 +99,7 @@ sub setup_routes {
     Bugzilla::Quantum::CGI->load_all($r);
     Bugzilla::Quantum::CGI->load_one( 'bzapi_cgi', 'extensions/BzAPI/bin/rest.cgi' );
 
+    $r->get('/home')->to('Home#index');
     $r->any('/')->to('CGI#index_cgi');
     $r->any('/bug/<id:num>')->to('CGI#show_bug_cgi');
     $r->any('/<id:num>')->to('CGI#show_bug_cgi');

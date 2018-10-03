@@ -29,8 +29,6 @@ use Bugzilla::Flag;
 use Bugzilla::Hook;
 use Bugzilla::Install::Localconfig qw(read_localconfig);
 use Bugzilla::Install::Util qw(init_console include_languages);
-use Bugzilla::Markdown::GFM;
-use Bugzilla::Markdown::GFM::Parser;
 use Bugzilla::Memcached;
 use Bugzilla::Template;
 use Bugzilla::Token;
@@ -750,6 +748,8 @@ sub check_rate_limit {
 }
 
 sub markdown_parser {
+    require Bugzilla::Markdown::GFM;
+    require Bugzilla::Markdown::GFM::Parser;
     return request_cache->{markdown_parser}
         ||= Bugzilla::Markdown::GFM::Parser->new( {extensions => [qw( autolink tagfilter table strikethrough)] } );
 }

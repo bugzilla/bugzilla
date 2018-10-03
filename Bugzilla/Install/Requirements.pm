@@ -96,7 +96,6 @@ use constant FEATURE_FILES => (
     patch_viewer  => ['Bugzilla/Attachment/PatchReader.pm'],
     updates       => ['Bugzilla/Update.pm'],
     mfa           => ['Bugzilla/MFA/*.pm'],
-    markdown      => ['Bugzilla/Markdown.pm'],
     memcached     => ['Bugzilla/Memcache.pm'],
     s3            => ['Bugzilla/S3.pm', 'Bugzilla/S3/Bucket.pm', 'Bugzilla/Attachment/S3.pm']
 );

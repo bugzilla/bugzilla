@@ -33,7 +33,6 @@ BEGIN {
 
 # PREREQ_PM
 my %requires = (
-    'Alien::libcmark_gfm'      => '3',
     'Algorithm::BloomFilter'   => '0.02',
     'CGI'                      => '4.31',
     'CGI::Compile'             => 0,
@@ -122,6 +121,14 @@ if ( $OSNAME eq 'linux' && -f '/etc/debian_version' ) {
 }
 
 my %optional_features = (
+    alien_cmark => {
+        description => 'Support GitHub-flavored markdown',
+        prereqs => {
+            runtime => {
+                requires => { 'Alien::libcmark_gfm'      => '3' },
+            },
+        },
+    },
     argon2 => {
         description => 'Support hashing passwords with Argon2',
         prereqs => {

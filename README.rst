@@ -247,6 +247,46 @@ PORT
   plain-text HTTP connections.
   Default: 8000
 
+MOJO_REVERSE_PROXY
+  This tells the backend that it is behind a proxy.
+  Default: 1
+
+MOJO_HEARTBEAT_INTERVAL
+  How often (in seconds) will the manager process send a heartbeat to the workers.
+  Default: 10
+
+MOJO_HEARTBEAT_TIMEOUT
+  Maximum amount of time in seconds before a worker without a heartbeat will be stopped gracefully
+  Default: 120
+
+MOJO_INACTIVITY_TIMEOUT
+  Maximum amount of time in seconds a connection can be inactive before getting closed.
+  Default: 120
+
+MOJO_WORKERS
+  Number of worker processes. A good rule of thumb is two worker processes per
+  CPU core for applications that perform mostly non-blocking operations,
+  blocking operations often require more and benefit from decreasing
+  concurrency with "MOJO_CLIENTS" (often as low as 1). Note that during zero
+  downtime software upgrades there will be twice as many workers active for a
+  short amount of time.
+  Default: 1
+
+MOJO_SPARE
+  Temporarily spawn up to this number of additional workers if there is a
+  need. This allows for new workers to be started while old ones are still
+  shutting down gracefully, drastically reducing the performance cost of
+  worker restarts.
+  Default: 1
+
+MOJO_CLIENTS
+  Maximum number of accepted connections each worker process is allowed to
+  handle concurrently, before stopping to accept new incoming connections. Note
+  that high concurrency works best with applications that perform mostly
+  non-blocking operations, to optimize for blocking operations you can decrease
+  this value and increase "MOJO_WORKERS" instead for better performance.
+  Default: 10
+
 BUGZILLA_UNSAFE_AUTH_DELEGATION
   This should never be set in production. It allows auth delegation over http.
 

@@ -112,6 +112,7 @@ sub setup_routes {
     $r->any('/rest.cgi/*PATH_INFO')->to( 'CGI#rest_cgi' => { PATH_INFO => '' } );
     $r->any('/rest/*PATH_INFO')->to( 'CGI#rest_cgi' => { PATH_INFO => '' } );
     $r->any('/extensions/BzAPI/bin/rest.cgi/*PATH_INFO')->to('CGI#bzapi_cgi');
+    $r->any('/latest/*PATH_INFO')->to('CGI#bzapi_cgi');
     $r->any('/bzapi/*PATH_INFO')->to('CGI#bzapi_cgi');
 
     $r->static_file('/__lbheartbeat__');

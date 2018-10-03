@@ -13,14 +13,16 @@ use Try::Tiny;
 use Bugzilla::Constants;
 
 sub index {
-    my ($c) = @_;
-    $c->bugzilla->login(LOGIN_REQUIRED) or return;
-    try {
-        ThrowUserError('invalid_username', { login => 'batman' }) if $c->param('error');
-        $c->render(handler => 'bugzilla', template => 'index');
-    } catch {
-        $c->bugzilla->error_page($_);
-    };
+  my ($c) = @_;
+  $c->bugzilla->login(LOGIN_REQUIRED) or return;
+  try {
+    ThrowUserError('invalid_username', {login => 'batman'})
+      if $c->param('error');
+    $c->render(handler => 'bugzilla', template => 'index');
+  }
+  catch {
+    $c->bugzilla->error_page($_);
+  };
 }
 
 1;

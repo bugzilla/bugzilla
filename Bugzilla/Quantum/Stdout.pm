@@ -13,48 +13,42 @@ use Bugzilla::Logging;
 use Encode;
 use English qw(-no_match_vars);
 
-has 'controller' => (
-    is       => 'ro',
-    required => 1,
-);
+has 'controller' => (is => 'ro', required => 1,);
 
-has '_encoding' => (
-    is      => 'rw',
-    default => '',
-);
+has '_encoding' => (is => 'rw', default => '',);
 
 sub TIEHANDLE {    ## no critic (unpack)
-    my $class = shift;
+  my $class = shift;
 
-    return $class->new(@_);
+  return $class->new(@_);
 }
 
 sub PRINTF {       ## no critic (unpack)
-    my $self = shift;
-    $self->PRINT( sprintf @_ );
+  my $self = shift;
+  $self->PRINT(sprintf @_);
 }
 
 sub PRINT {        ## no critic (unpack)
-    my $self  = shift;
-    my $c     = $self->controller;
-    my $bytes = join '', @_;
-    return unless $bytes;
-    if ( $self->_encoding ) {
-        $bytes = encode( $self->_encoding, $bytes );
-    }
-    $c->write($bytes . ( $OUTPUT_RECORD_SEPARATOR // '' ) );
+  my $self  = shift;
+  my $c     = $self->controller;
+  my $bytes = join '', @_;
+  return unless $bytes;
+  if ($self->_encoding) {
+    $bytes = encode($self->_encoding, $bytes);
+  }
+  $c->write($bytes . ($OUTPUT_RECORD_SEPARATOR // ''));
 }
 
 sub BINMODE {
-    my ( $self, $mode ) = @_;
-    if ($mode) {
-        if ( $mode eq ':bytes' or $mode eq ':raw' ) {
-            $self->_encoding('');
-        }
-        elsif ( $mode eq ':utf8' ) {
-            $self->_encoding('utf8');
-        }
+  my ($self, $mode) = @_;
+  if ($mode) {
+    if ($mode eq ':bytes' or $mode eq ':raw') {
+      $self->_encoding('');
     }
+    elsif ($mode eq ':utf8') {
+      $self->_encoding('utf8');
+    }
+  }
 }
 
 1;

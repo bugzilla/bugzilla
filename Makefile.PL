@@ -142,6 +142,12 @@ my %optional_features = (
             runtime => { requires => { 'Encode::Detect' => 0, Encode => '2.21' } }
         },
     },
+    chart_clicker => {
+        description => 'Support nice-looking charts',
+        prereqs => {
+            runtime => { requires => { 'Chart::Clicker' => 0 } },
+        },
+    },
     new_charts => {
         description => 'New Charts',
         prereqs     => {

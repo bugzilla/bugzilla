@@ -142,6 +142,7 @@ type        string  The group of products to return. Valid values are
                ]
              },
              "default_qa_contact": "",
+             "triage_owner": "",
              "description": "This is a test component."
            }
          ],
@@ -215,6 +216,9 @@ default_assigned_to  string   The login name of the user to whom new bugs
 default_qa_contact   string   The login name of the user who will be set as
                               the QA Contact for new bugs by default. Empty
                               string if the QA contact is not defined.
+triage_owner         string   The login name of the user who is named as the
+                              Triage Owner of the component. Empty string if the
+                              Triage Owner is not defined.
 sort_key             int      Components, when displayed in a list, are sorted
                               first by this integer and then secondly by their
                               name.

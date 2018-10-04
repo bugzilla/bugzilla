@@ -215,6 +215,8 @@ sub _component_to_hash {
             $self->type('email', $component->default_assignee->login),
         default_qa_contact =>
             $self->type('email', $component->default_qa_contact->login),
+        triage_owner =>
+            $self->type('email', $component->triage_owner->login),
         sort_key =>  # sort_key is returned to match Bug.fields
             0,
         is_active =>
@@ -547,6 +549,11 @@ default.
 
 C<string> The login name of the user who will be set as the QA Contact for
 new bugs by default.
+
+=item C<triage_owner>
+
+C<string> The login name of the user who is named as the Triage Owner of the
+component.
 
 =item C<sort_key>
 

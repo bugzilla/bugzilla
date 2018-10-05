@@ -27,11 +27,11 @@ use Bugzilla::Attachment::PatchReader;
 use Bugzilla::Token;
 use Bugzilla::Keyword;
 use Bugzilla::Hook;
+use Mojo::Util qw(url_escape);
 
 use Encode qw(encode find_encoding from_to);
 use URI;
 use URI::QueryParam;
-use URI::Escape qw(uri_escape_utf8);
 use File::Basename qw(basename);
 use MIME::Base64 qw(decode_base64);
 
@@ -405,24 +405,10 @@ sub view {
       if Bugzilla->user->id;
 
     my $disposition = Bugzilla->params->{'allow_attachment_display'} ? 'inline' : 'attachment';
+    my $filename_star = qq{UTF-8''} . url_escape( encode('UTF-8', $filename) );
 
-    my $ascii_filename = $filename;
-    utf8::encode($ascii_filename);
-    from_to($ascii_filename, 'UTF-8', 'ascii');
-    $ascii_filename =~ s/(["\\])/\\$1/g;
-    my $qfilename = qq{"$filename"};
-    my $ufilename = qq{UTF-8''} . uri_escape_utf8($filename);
-
-    my $filenames = "filename=$qfilename";
-    if ($ascii_filename ne $filename) {
-        $filenames .= "; filename*=$ufilename";
-    }
-
-    # IE8 and older do not support RFC 6266. So for these old browsers
-    # we still pass the old 'filename' attribute. Modern browsers will
-    # automatically pick the new 'filename*' attribute.
     print $cgi->header(-type=> $contenttype,
-                       -content_disposition=> "$disposition; $filenames",
+                       -content_disposition=> "$disposition; filename*=$filename_star",
                        -content_length => $attachment->datasize);
     disable_utf8();
     print $attachment->data;

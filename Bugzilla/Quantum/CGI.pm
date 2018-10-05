@@ -91,6 +91,8 @@ sub _ENV {
     = $req->content->is_multipart ? $req->body_size : $headers->content_length;
   my %env_headers = (HTTP_COOKIE => '', HTTP_REFERER => '');
 
+  $headers->content_type('application/x-www-form-urlencoded; charset=utf-8')
+    unless $headers->content_type;
   for my $name (@{$headers->names}) {
     my $key = uc "http_$name";
     $key =~ s/\W/_/g;

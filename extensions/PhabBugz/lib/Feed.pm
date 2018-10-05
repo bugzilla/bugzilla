@@ -220,6 +220,11 @@ sub feed_query {
 
         $delete_build_target->execute($target->{name}, $target->{value});
      }
+
+    if (Bugzilla->datadog) {
+      my $dd = Bugzilla->datadog();
+      $dd->increment('bugzilla.phabbugz.feed_query_count');
+    }
 }
 
 sub user_query {
@@ -259,6 +264,11 @@ sub user_query {
             $self->process_new_user($user_data);
         };
         $self->save_last_id($user_id, 'user');
+    }
+
+    if (Bugzilla->datadog) {
+      my $dd = Bugzilla->datadog();
+      $dd->increment('bugzilla.phabbugz.user_query_count');
     }
 }
 
@@ -357,6 +367,11 @@ sub group_query {
             local Bugzilla::Logging->fields->{api_result} = $result;
             INFO( "Project " . $project->name . " updated" );
         }
+    }
+
+    if (Bugzilla->datadog) {
+      my $dd = Bugzilla->datadog();
+      $dd->increment('bugzilla.phabbugz.group_query_count');
     }
 }
 

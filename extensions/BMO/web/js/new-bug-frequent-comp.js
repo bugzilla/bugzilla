@@ -36,15 +36,27 @@ Bugzilla.NewBugFrequentComp = class NewBugFrequentComp {
     this.$results.setAttribute('aria-busy', 'true');
     this.$container.hidden = false;
 
+    // Get the current params that may contain `cloned_bug_id` and `format`
+    const current_params = new URLSearchParams(location.search);
+
     try {
-      const results = await this.fetch();
+      const links = (await this.fetch()).map(({ product, component }) => {
+        const params = new URLSearchParams(current_params);
+
+        params.append('product', product);
+        params.append('component', component);
+
+        return {
+          href: `/enter_bug.cgi?${params.toString()}`,
+          text: `${product} :: ${component}`,
+        };
+      });
 
       this.$message.remove();
       this.$results.insertAdjacentHTML('beforeend',
-        `<ul>${results.map(({ product, component }) => (
-          `<li><a href="/enter_bug.cgi?product=${encodeURIComponent(product)}&amp;component=` +
-          `${encodeURIComponent(component)}">${product.htmlEncode()} :: ${component.htmlEncode()}</a></li>`
-        )).join('')}</ul>`
+        `<ul>${links.map(({ href, text }) =>
+          `<li><a href="${href.htmlEncode()}">${text.htmlEncode()}</a></li>`
+        ).join('')}</ul>`
       );
     } catch (error) {
       this.$message.textContent = error.message || 'Your frequent components could not be retrieved.';

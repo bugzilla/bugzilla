@@ -16,6 +16,7 @@ use base qw(Bugzilla::Object);
 use Bugzilla::Util;
 use Bugzilla::Error;
 use Bugzilla::Constants;
+use Module::Runtime qw(require_module);
 
 use URI::QueryParam;
 
@@ -113,7 +114,7 @@ sub _do_list_select {
     my $objects = $class->SUPER::_do_list_select(@_);
 
     foreach my $object (@$objects) {
-        eval "use " . $object->class; die $@ if $@;
+        require_module($object->class);
         bless $object, $object->class;
     }
 
@@ -133,8 +134,7 @@ sub class_for {
 
     my $uri = URI->new($value);
     foreach my $subclass ($class->SUB_CLASSES) {
-        eval "use $subclass";
-        die $@ if $@;
+        require_module($subclass);
         return wantarray ? ($subclass, $uri) : $subclass
             if $subclass->should_handle($uri);
     }
@@ -145,7 +145,7 @@ sub class_for {
 
 sub _check_class {
     my ($class, $subclass) = @_;
-    eval "use $subclass"; die $@ if $@;
+    require_module($subclass);
     return $subclass;
 }
 

@@ -28,6 +28,8 @@ use Carp qw(confess);
 use Digest::MD5 qw(md5_hex);
 use Hash::Util qw(lock_value unlock_hash lock_keys unlock_keys);
 use List::MoreUtils qw(firstidx natatime);
+use Try::Tiny;
+use Module::Runtime qw(require_module);
 use Safe;
 # Historical, needed for SCHEMA_VERSION = '1.00'
 use Storable qw(dclone freeze thaw);
@@ -1876,9 +1878,12 @@ sub new {
     if ($driver) {
         (my $subclass = $driver) =~ s/^(\S)/\U$1/;
         $class .= '::' . $subclass;
-        eval "require $class;";
-        die "The $class class could not be found ($subclass " .
-            "not supported?): $@" if ($@);
+        try {
+            require_module($class);
+        }
+        catch {
+            die "The $class class could not be found ($subclass not supported?): $_";
+        };
     }
     die "$class is an abstract base class. Instantiate a subclass instead."
       if ($class eq __PACKAGE__);

@@ -21,6 +21,7 @@ use Bugzilla::Util qw(trick_taint datetime_from);
 use Bugzilla::Constants;
 use Bugzilla::Install::Filesystem;
 use Bugzilla::WebService::Constants;
+use Module::Runtime qw(require_module);
 
 use File::Basename;
 
@@ -270,8 +271,7 @@ sub _preload_handlers {
         foreach my $module (_resource_modules()) {
             my $resource_class = "Bugzilla::Extension::BzAPI::Resources::$module";
             trick_taint($resource_class);
-            eval("require $resource_class");
-            warn $@ if $@;
+            eval { require_module($resource_class) };
             next if ($@ || !$resource_class->can('rest_handlers'));
             my $handlers = $resource_class->rest_handlers;
             next if (ref $handlers ne 'ARRAY' || scalar @$handlers % 2 != 0);

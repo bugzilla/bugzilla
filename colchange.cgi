@@ -20,6 +20,7 @@ use Bugzilla::Search::Saved;
 use Bugzilla::Error;
 use Bugzilla::User;
 use Bugzilla::Token;
+use Module::Runtime qw(require_module);
 
 use Storable qw(dclone);
 
@@ -58,7 +59,7 @@ foreach my $param (keys %{ COLUMN_PARAMS() }) {
 }
 
 foreach my $class (keys %{ COLUMN_CLASSES() }) {
-    eval("use $class; 1;") || die $@;
+    require_module($class);
     my $column = COLUMN_CLASSES->{$class};
     delete $columns->{$column} if !$class->any_exist;
 }

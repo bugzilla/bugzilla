@@ -16,6 +16,7 @@ use Bugzilla::Constants;
 use Bugzilla::Hook;
 use Data::Dumper;
 use File::Temp;
+use Module::Runtime qw(require_module);
 
 # Don't export localvars by default - people should have to explicitly
 # ask for it, as a (probably futile) attempt to stop code using it
@@ -35,7 +36,7 @@ sub _load_params {
     my %hook_panels;
     foreach my $panel (keys %$panels) {
         my $module = $panels->{$panel};
-        eval("require $module") || die $@;
+        require_module($module);
         my @new_param_list = $module->get_param_list();
         $hook_panels{lc($panel)} = { params => \@new_param_list };
     }

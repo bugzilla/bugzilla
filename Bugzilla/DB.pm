@@ -34,6 +34,7 @@ use List::Util qw(max);
 use Scalar::Util qw(weaken);
 use Storable qw(dclone);
 use English qw(-no_match_vars);
+use Module::Runtime qw(require_module);
 
 has [qw(dsn user pass attrs)] => (
     is       => 'ro',
@@ -174,7 +175,7 @@ sub _connect {
     my $pkg_module = DB_MODULE->{lc($driver)}->{db};
 
     # do the actual import
-    eval ("require $pkg_module")
+    eval { require_module($pkg_module) }
         || die ("'$driver' is not a valid choice for \$db_driver in "
                 . " localconfig: " . $@);
 

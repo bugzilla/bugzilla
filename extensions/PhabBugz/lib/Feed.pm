@@ -11,6 +11,7 @@ use 5.10.1;
 
 use IO::Async::Timer::Periodic;
 use IO::Async::Loop;
+use IO::Async::Signal;
 use List::Util qw(first);
 use List::MoreUtils qw(any uniq);
 use Moo;
@@ -47,6 +48,13 @@ my $Invocant = class_type { class => __PACKAGE__ };
 sub start {
     my ($self) = @_;
 
+    my $sig_alarm =  IO::Async::Signal->new(
+        name => 'ALRM',
+        on_receipt => sub {
+            FATAL("Timeout reached");
+            exit;
+        },
+    );
     # Query for new revisions or changes
     my $feed_timer = IO::Async::Timer::Periodic->new(
         first_interval => 0,
@@ -55,13 +63,17 @@ sub start {
         on_tick        => sub {
             try {
                 with_writable_database {
+                    alarm(PHAB_TIMEOUT);
                     $self->feed_query();
                 };
             }
             catch {
                 FATAL($_);
+            }
+            finally {
+                alarm(0);
+                Bugzilla->_cleanup();
             };
-            Bugzilla->_cleanup();
         },
     );
 
@@ -73,13 +85,17 @@ sub start {
         on_tick        => sub {
             try {
                 with_writable_database {
+                    alarm(PHAB_TIMEOUT);
                     $self->user_query();
                 };
             }
             catch {
                 FATAL($_);
+            }
+            finally {
+                alarm(0);
+                Bugzilla->_cleanup();
             };
-            Bugzilla->_cleanup();
         },
     );
 
@@ -91,13 +107,18 @@ sub start {
         on_tick        => sub {
             try {
                 with_writable_database {
+                    alarm(PHAB_TIMEOUT);
                     $self->group_query();
                 };
             }
             catch {
                 FATAL($_);
+            }
+            finally {
+                alarm(0);
+                Bugzilla->_cleanup();
             };
-            Bugzilla->_cleanup();
+
         },
     );
 
@@ -105,6 +126,7 @@ sub start {
     $loop->add($feed_timer);
     $loop->add($user_timer);
     $loop->add($group_timer);
+    $loop->add($sig_alarm);
     $feed_timer->start;
     $user_timer->start;
     $group_timer->start;

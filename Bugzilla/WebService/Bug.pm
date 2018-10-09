@@ -1462,7 +1462,8 @@ sub _bug_to_hash {
         elsif ($field->type == FIELD_TYPE_DATETIME
                || $field->type == FIELD_TYPE_DATE)
         {
-            $item{$name} = $self->type('dateTime', $bug->$name);
+            my $value = $bug->$name;
+            $item{$name} = defined($value) ? $self->type('dateTime', $value) : undef;
         }
         elsif ($field->type == FIELD_TYPE_MULTI_SELECT) {
             my @values = map { $self->type('string', $_) } @{ $bug->$name };

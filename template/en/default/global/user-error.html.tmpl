@@ -1037,6 +1037,10 @@
     [% title = "Invalid Authentication Method" %]
     API key authentication is required.
 
+  [% ELSIF error == "invalid_params" %]
+    [% title = "Invalid Params" %]
+    API method received invalid params: [% type_error FILTER html %]
+
   [% ELSIF error == "bug_id_does_not_exist" %]
     [% title = BLOCK %]Invalid [% terms.Bug %] ID[% END %]
     [% terms.Bug %] [%= bug_id FILTER html %] does not exist.

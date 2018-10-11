@@ -12,7 +12,7 @@ use lib qw( . lib local/lib/perl5 );
 BEGIN { $ENV{LOG4PERL_CONFIG_FILE} = 'log4perl-t.conf' }
 use Bugzilla::Test::MockDB;
 use Bugzilla::Test::MockParams;
-use Bugzilla::Test::Util qw(create_user);
+use Bugzilla::Test::Util qw(create_user mock_useragent_tx);
 use Test::More;
 use Test2::Tools::Mock;
 use Try::Tiny;
@@ -31,7 +31,7 @@ Bugzilla->error_mode(ERROR_MODE_TEST);
 
 my $phab_bot = create_user(PHAB_AUTOMATION_USER, '*');
 
-my $UserAgent = mock 'LWP::UserAgent' => ();
+my $UserAgent = mock 'Mojo::UserAgent' => ();
 
 {
     SetParam('phabricator_enabled', 0);
@@ -54,9 +54,9 @@ my $UserAgent = mock 'LWP::UserAgent' => ();
 }
 
 my @bad_response = (
-    ['http error', mock({ is_error => 1, message => 'some http error' }) ],
-    ['invalid json', mock({ is_error => 0, content => '<xml>foo</xml>' })],
-    ['json containing error code', mock({ is_error => 0, content => encode_json({error_code => 1234 }) })],
+    ['http error', mock_useragent_tx("doesn't matter", sub { $_->code(500) }) ],
+    ['invalid json', mock_useragent_tx('<xml>foo</xml>') ],
+    ['json containing error code', mock_useragent_tx(encode_json({error_code => 1234 }))],
 );
 
 SetParam(phabricator_enabled => 1);
@@ -67,7 +67,7 @@ foreach my $bad_response (@bad_response) {
     my $feed = Bugzilla::Extension::PhabBugz::Feed->new;
     $UserAgent->override(
         post => sub {
-            my ( $self, $url, $params ) = @_;
+            my ( $self, $url, undef, $params ) = @_;
             return $bad_response->[1];
         }
     );

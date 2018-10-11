@@ -17,6 +17,7 @@ use Test::More;
 use Test2::Tools::Mock;
 use Data::Dumper;
 use JSON::MaybeXS;
+use Bugzilla::Test::Util qw(mock_useragent_tx);
 use Carp;
 use Try::Tiny;
 
@@ -98,13 +99,13 @@ my $feed = Bugzilla::Extension::PhabBugz::Feed->new;
 
 # Same members in both
 do {
-    my $UserAgent = mock 'LWP::UserAgent' => (
+    my $UserAgent = mock 'Mojo::UserAgent' => (
         override => [
             'post' => sub {
-                my ($self, $url, $params) = @_;
+                my ($self, $url, undef, $params) = @_;
                 my $data = decode_json($params->{params});
                 is_deeply($data->{transactions}, [], 'no-op');
-                return mock({is_error => 0, content => '{}'});
+                return mock_useragent_tx('{}');
             },
         ],
     );
@@ -119,14 +120,14 @@ do {
 
 # Project has members not in group
 do {
-    my $UserAgent = mock 'LWP::UserAgent' => (
+    my $UserAgent = mock 'Mojo::UserAgent' => (
         override => [
             'post' => sub {
-                my ($self, $url, $params) = @_;
+                my ($self, $url, undef, $params) = @_;
                 my $data = decode_json($params->{params});
                 my $expected = [ { type => 'members.remove', value => ['foo'] } ];
                 is_deeply($data->{transactions}, $expected, 'remove foo');
-                return mock({is_error => 0, content => '{}'});
+                return mock_useragent_tx('{}');
             },
         ]
     );
@@ -139,14 +140,14 @@ do {
 
 # Group has members not in project
 do {
-    my $UserAgent = mock 'LWP::UserAgent' => (
+    my $UserAgent = mock 'Mojo::UserAgent' => (
         override => [
             'post' => sub {
-                my ($self, $url, $params) = @_;
+                my ($self, $url, undef, $params) = @_;
                 my $data = decode_json($params->{params});
                 my $expected = [ { type => 'members.add', value => ['foo'] } ];
                 is_deeply($data->{transactions}, $expected, 'add foo');
-                return mock({is_error => 0, content => '{}'});
+                return mock_useragent_tx('{}');
             },
         ]
     );
@@ -164,10 +165,10 @@ do {
             'update' => sub { 1 },
         ],
     );
-    my $UserAgent = mock 'LWP::UserAgent' => (
+    my $UserAgent = mock 'Mojo::UserAgent' => (
         override => [
             'post' => sub {
-                my ($self, $url, $params) = @_;
+                my ($self, $url, undef, $params) = @_;
                 if ($url =~ /differential\.revision\.search/) {
                     my $content = <<JSON;
 {
@@ -215,10 +216,10 @@ do {
     }
 }
 JSON
-                    return mock { is_error => 0, content => $content };
+                    return mock_useragent_tx($content);
                 }
                 else {
-                    return mock { is_error => 1, message => "bad request" };
+                    return mock_useragent_tx("bad request");
                 }
             },
         ],

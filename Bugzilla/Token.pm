@@ -20,7 +20,6 @@ use Bugzilla::User;
 use Date::Format;
 use Date::Parse;
 use File::Basename;
-use Digest::MD5 qw(md5_hex);
 use Digest::SHA qw(hmac_sha256_base64);
 use Encode;
 use JSON qw(encode_json decode_json);
@@ -254,15 +253,15 @@ sub issue_hash_token {
     my $user_id = Bugzilla->user->id || remote_ip();
 
     # The concatenated string is of the form
-    # token creation time + site-wide secret + user ID (either ID or remote IP) + data
-    my @args = ($time, Bugzilla->localconfig->{'site_wide_secret'}, $user_id, @$data);
+    # token creation time + user ID (either ID or remote IP) + data
+    my @args = ($time, $user_id, @$data);
 
     my $token = join('*', @args);
-    # Wide characters cause md5_hex() to die.
-    if (Bugzilla->params->{'utf8'}) {
-        utf8::encode($token) if utf8::is_utf8($token);
-    }
-    $token = md5_hex($token);
+    # $token needs to be a byte string.
+    utf8::encode($token);
+    $token = hmac_sha256_base64($token, Bugzilla->localconfig->{'site_wide_secret'});
+    $token =~ s/\+/-/g;
+    $token =~ s/\//_/g;
 
     # Prepend the token creation time, unencrypted, so that the token
     # lifetime can be validated.

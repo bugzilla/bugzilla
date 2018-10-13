@@ -29,12 +29,10 @@ utf8
               you must re-run :file:`checksetup.pl` immediately afterward.
 
 announcehtml
-    Any text in this field will be displayed at the top of every HTML
-    page in this Bugzilla installation. The text is not wrapped in any
-    tags. For best results, wrap the text in a ``<div>``
-    tag. Any style attributes from the CSS can be applied. For example,
-    to make the text green inside of a red box, add ``id=message``
-    to the ``<div>`` tag.
+    Any text in this field will be displayed at the top of every HTML page in
+    this Bugzilla installation. The text is not wrapped in any tags. For best
+    results, wrap the text in a ``<p>`` tag. Any style attributes from the CSS
+    can be applied. ``<p class="warning">`` makes the text red.
 
 upgrade_notification
     Enable or disable a notification on the homepage of this Bugzilla

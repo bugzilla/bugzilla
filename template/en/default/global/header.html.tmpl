@@ -245,6 +245,40 @@
   #%]
 
 <div id="wrapper">
+
+<aside id="message-container" role="complementary">
+  <noscript>
+    <div class="noscript">
+      <div class="inner">
+        <p>Please enable JavaScript in your browser to use all the features on this site.</p>
+      </div>
+    </div>
+  </noscript>
+  [% IF Bugzilla.request_cache.mfa_warning
+        AND user.mfa_required_date
+        AND NOT Bugzilla.request_cache.on_mfa_page %]
+    <div class="warning">
+      <div class="inner">
+        <p>
+          Please <a href="userprefs.cgi?tab=mfa">enable two-factor authentication</a>
+          [% IF Param('mfa_group_grace_period') %]
+            before <i>[% user.mfa_required_date FILTER time %]</i>.
+          [% ELSE %]
+            now.
+          [% END %]
+        </p>
+      </div>
+    </div>
+  [% END %]
+  [% IF Param('announcehtml') %]
+    <div class="announcement">
+      <div class="inner">
+        [% Param('announcehtml') FILTER none %]
+      </div>
+    </div>
+  [% END %]
+</aside>
+
 <header id="header" role="banner">
   <div class="inner">
     <h1 id="header-title" class="title"><a href="./" title="Go to home page">[% terms.Bugzilla %]</a></h1>
@@ -370,19 +404,6 @@
   </div>
 </header> [%# header %]
 
-[% IF Bugzilla.request_cache.mfa_warning
-      AND user.mfa_required_date
-      AND NOT Bugzilla.request_cache.on_mfa_page %]
-  <aside id="mfa-warning">
-    Please <a href="userprefs.cgi?tab=mfa">enable two-factor authentication</a>
-    [% IF Param('mfa_group_grace_period') %]
-      before <i>[% user.mfa_required_date FILTER time %]</i>.
-    [% ELSE %]
-      now.
-    [% END %]
-  </aside>
-[% END %]
-
 <main id="bugzilla-body" tabindex="-1">
 <div id="main-inner">
 
@@ -391,10 +412,6 @@
 [% IF template.name.match('^attachment/')
       && !header.match('^Bug&nbsp;\d+$') %]
   <h2>[% header FILTER none %]</h2>
-[% END %]
-
-[% IF Param('announcehtml') %]
-[% Param('announcehtml') FILTER none %]
 [% END %]
 
 [% IF message %]

@@ -79,6 +79,52 @@
     }
 /* fixed global header (end) */
 
+/* global message (begin) */
+    #message-container {
+        text-align: center;
+        line-height: 1.5;
+    }
+
+    #message-container .inner {
+        box-sizing: border-box;
+        margin: 0 auto;
+        padding: 8px;
+        width: 1024px;
+    }
+
+    #message-container p {
+        margin: 0;
+    }
+
+    #message-container .noscript {
+        color: #EEE;
+        background-color: #333;
+    }
+
+    #message-container .warning {
+        color: #EEE;
+        background-color: #C00;
+    }
+
+    #message-container .announcement {
+        border-bottom: 1px solid rgba(0, 0, 0, 0.2);
+        color: #555;
+        background-color: lightyellow;
+    }
+
+    #message-container .announcement p.warning {
+        color: red;
+    }
+
+    /* Reset legacy style */
+    #message-container .announcement #message {
+        margin: 0;
+        border: 0;
+        padding: 0;
+        color: #555;
+    }
+/* global message (end) */
+
 /* header (begin) */
     #header {
         flex: none;
@@ -404,6 +450,7 @@
 
 /* narrower global header (begin) */
     @media screen and (max-width: 1024px) {
+        #message-container .inner,
         #header .inner {
             width: 800px;
         }
@@ -1181,14 +1228,6 @@ hr {
 
 #changeform hr {
     display: none;
-}
-
-#mfa-warning {
-    flex: none;
-    margin: 0 -15px;
-    padding: 10px 15px;
-    color: #FFF;
-    background-color: #FF5300;
 }
 
 #bugzilla-body {

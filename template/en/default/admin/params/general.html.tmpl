@@ -49,16 +49,12 @@
     _ " afterward.</p>",
 
   announcehtml =>
-    "If this field is non-empty, then $terms.Bugzilla will"
-    _ " display whatever is in this field at the top of every"
-    _ " HTML page. The HTML you put in this field is not wrapped or"
-    _ " enclosed in anything. You might want to wrap it inside a"
-    _ "<tt>&lt;div&gt;</tt>. Give the div <em>id=\"message\"</em> to get"
-    _ " green text inside a red box, or <em>class=\"bz_private\"</em> for"
-    _ " dark red on a red background.  Anything defined in "
-    _ " <tt>skins/standard/global.css</tt>"
-    _ " will work.  To get centered text, use <em>style=\"text-align: "
-    _  " center;\"</em>.",
+    "If this field is non-empty, then $terms.Bugzilla will display whatever is"
+    _ " in this field at the top of every HTML page. The HTML you put in this"
+    _ " field is not wrapped or enclosed in anything. You might want to wrap it"
+    _ " inside a <code>&lt;p&gt;</code> tag. Give it"
+    _ " <code>class=\"warning\"</code> to make the text red. Anything defined"
+    _ " in <code>skins/standard/global.css</code> will work.",
 
   upgrade_notification =>
     "$terms.Bugzilla can inform you when a new release is available."

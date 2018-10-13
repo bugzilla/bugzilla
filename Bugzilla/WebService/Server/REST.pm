@@ -165,6 +165,7 @@ sub response {
 
         my $template = Bugzilla->template;
         $content = "";
+        $result->encode if blessed $result;
         $template->process("rest.html.tmpl", { result => $result }, \$content)
             || ThrowTemplateError($template->error());
 

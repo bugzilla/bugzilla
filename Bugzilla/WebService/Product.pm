@@ -64,6 +64,7 @@ sub get_accessible_products {
 }
 
 # Get a list of actual products, based on list of ids or names
+our %FLAG_CACHE;
 sub get {
     my ($self, $params) = validate(@_, 'ids', 'names', 'type');
     my $user = Bugzilla->user;
@@ -136,6 +137,7 @@ sub get {
     }
 
     # Now create a result entry for each.
+    local %FLAG_CACHE = ();
     my @products = map { $self->_product_to_hash($params, $_) }
                        @requested_products;
     return { products => \@products };
@@ -229,11 +231,11 @@ sub _component_to_hash {
         $field_data->{flag_types} = {
             bug =>
                 [map {
-                    $self->_flag_type_to_hash($_)
+                    $FLAG_CACHE{ $_->id } //= $self->_flag_type_to_hash($_)
                 } @{$component->flag_types->{'bug'}}],
             attachment =>
                 [map {
-                    $self->_flag_type_to_hash($_)
+                    $FLAG_CACHE{ $_->id } //= $self->_flag_type_to_hash($_)
                 } @{$component->flag_types->{'attachment'}}],
         };
     }
@@ -242,8 +244,8 @@ sub _component_to_hash {
 }
 
 sub _flag_type_to_hash {
-    my ($self, $flag_type, $params) = @_;
-    return filter $params, {
+    my ($self, $flag_type) = @_;
+    return {
         id =>
             $self->type('int', $flag_type->id),
         name =>
@@ -266,7 +268,7 @@ sub _flag_type_to_hash {
             $self->type('int', $flag_type->grant_group_id),
         request_group =>
             $self->type('int', $flag_type->request_group_id),
-    }, undef, 'flag_types';
+    };
 }
 
 sub _version_to_hash {

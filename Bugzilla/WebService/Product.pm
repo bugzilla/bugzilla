@@ -68,6 +68,8 @@ sub get {
     my ($self, $params) = validate(@_, 'ids', 'names', 'type');
     my $user = Bugzilla->user;
 
+    Bugzilla->request_cache->{bz_etag_disable} = 1;
+
     defined $params->{ids} || defined $params->{names} || defined $params->{type}
         || ThrowCodeError("params_required", { function => "Product.get",
                                                params => ['ids', 'names', 'type'] });

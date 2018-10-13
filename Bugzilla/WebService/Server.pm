@@ -81,7 +81,11 @@ sub datetime_format_outbound {
 sub bz_etag {
     my ($self, $data) = @_;
     my $cache = Bugzilla->request_cache;
-    if (defined $data) {
+
+    if (Bugzilla->request_cache->{bz_etag_disable}) {
+      return undef;
+    }
+    elsif (defined $data) {
         # Serialize the data if passed a reference
         local $Storable::canonical = 1;
         $data = freeze($data) if ref $data;

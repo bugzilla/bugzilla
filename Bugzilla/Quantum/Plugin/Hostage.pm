@@ -3,6 +3,10 @@ use 5.10.1;
 use Mojo::Base 'Mojolicious::Plugin';
 use Bugzilla::Logging;
 
+my %HEALTH_CHECK_UA = (
+  "GoogleHC/1.0" => 1,
+);
+
 sub _attachment_root {
   my ($base) = @_;
   return undef unless $base;
@@ -40,9 +44,15 @@ sub _before_routes {
   my $req   = $c->req;
   my $url   = $req->url->to_abs;
 
-  return if $stash->{'mojo.static'};
-
   my $hostname = $url->host;
+
+  my $ua = $req->headers->user_agent;
+  if ($ua && $HEALTH_CHECK_UA{ $ua }) {
+    $c->render(text => "Hello, $ua, I am healthy.", status => 200);
+    return;
+  }
+
+  return if $stash->{'mojo.static'};
   return if $hostname eq $urlbase_host;
 
   my $path = $url->path;

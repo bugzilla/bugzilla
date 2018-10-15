@@ -31,9 +31,7 @@ use Bugzilla::Util;
 
 use HTTP::Message;
 use MIME::Base64 qw(decode_base64 encode_base64);
-use Scalar::Util qw(blessed);
 use List::MoreUtils qw(none);
-use Bugzilla::WebService::JSON;
 
 #####################################
 # Public JSON::RPC Method Overrides #
@@ -50,7 +48,7 @@ sub new {
 
 sub create_json_coder {
     my $self = shift;
-    my $json = Bugzilla::WebService::JSON->new;
+    my $json = $self->SUPER::create_json_coder(@_);
     $json->allow_blessed(1);
     $json->convert_blessed(1);
     $json->allow_nonref(1);
@@ -85,9 +83,6 @@ sub response {
     # Implement JSONP.
     if (my $callback = $self->_bz_callback) {
         my $content = $response->content;
-        if (blessed $content) {
-          $content = $content->encode;
-        }
         # Prepend the JSONP response with /**/ in order to protect
         # against possible encoding attacks (e.g., affecting Flash).
         $response->content("/**/$callback($content)");
@@ -115,12 +110,7 @@ sub response {
     else {
         push(@header_args, "-ETag", $etag) if $etag;
         print $cgi->header(-status => $response->code, @header_args);
-        my $content = $response->content;
-        if (blessed $content) {
-          $content = $content->encode;
-          utf8::encode($content);
-        }
-        print $content;
+        print $response->content;
     }
 }
 
